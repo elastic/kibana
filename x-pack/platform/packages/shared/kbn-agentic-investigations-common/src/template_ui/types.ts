@@ -32,6 +32,8 @@ export interface AssigneesSlotRenderProps {
    * reflects the server-confirmed state without waiting for the 5 s poll.
    */
   refetchConversation?: () => Promise<void>;
+  /** Size of the button icon. */
+  buttonIconSize?: 'xs' | 's';
 }
 
 /**

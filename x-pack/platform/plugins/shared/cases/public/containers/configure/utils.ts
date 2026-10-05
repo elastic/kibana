@@ -25,6 +25,7 @@ export const initialConfiguration: CasesConfigurationUI = {
   owner: '',
   observableTypes: [],
   extractObservables: false,
+  workflowTags: [],
 };
 
 export const getConfigurationByOwner = ({
@@ -34,7 +35,7 @@ export const getConfigurationByOwner = ({
   configurations: CasesConfigurationUI[] | null;
   owner: string | undefined;
 }): CasesConfigurationUI => {
-  if (!configurations || !owner) {
+  if (!owner) {
     return initialConfiguration;
   }
 
@@ -44,5 +45,5 @@ export const getConfigurationByOwner = ({
     owner,
     extractObservables: ownerDefault,
   };
-  return configurations.find((element) => element.owner === owner) ?? fallback;
+  return configurations?.find((element) => element.owner === owner) ?? fallback;
 };

@@ -18,15 +18,6 @@ import {
   createMockWorkflowExecutionDto,
 } from '../../../shared/test_utils';
 
-const mockUrlState = {
-  shouldAutoResume: false,
-  clearResumeParam: jest.fn(),
-};
-
-jest.mock('../../../hooks/use_workflow_url_state', () => ({
-  useWorkflowUrlState: () => mockUrlState,
-}));
-
 jest.mock('../../../hooks/navigation/use_navigate_to_execution', () => ({
   useNavigateToExecution: ({
     workflowId,
@@ -59,15 +50,27 @@ const mockWaitingStepResume = {
 };
 
 jest.mock('../model/use_waiting_step_resume', () => ({
+  ...jest.requireActual('../model/use_waiting_step_resume'),
   useWaitingStepResume: () => mockWaitingStepResume,
 }));
 
 jest.mock('./resume_execution_button', () => ({
-  ResumeExecutionButton: (props: { autoOpen?: boolean; waitingStepExecutionId?: string }) => (
+  ResumeExecutionButton: (props: {
+    autoOpen?: boolean;
+    waitingStepExecutionId?: string;
+    executionId?: string;
+    approvalLabels?: { approveLabel?: string };
+    resumeSchema?: { properties?: Record<string, unknown> };
+  }) => (
     <div
       data-test-subj="resume-execution-button"
       data-auto-open={String(Boolean(props.autoOpen))}
       data-waiting-step={props.waitingStepExecutionId ?? ''}
+      data-execution-id={props.executionId ?? ''}
+      data-approve-label={props.approvalLabels?.approveLabel ?? ''}
+      data-schema-fields={
+        props.resumeSchema?.properties ? Object.keys(props.resumeSchema.properties).join(',') : ''
+      }
     />
   ),
 }));
@@ -161,7 +164,6 @@ describe('WorkflowExecutionFlyout resume', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUrlState.shouldAutoResume = false;
     mockWaitingStepResume.waitingStepExecutionId = undefined;
     mockWaitingStepResume.waitingStepStartedAt = undefined;
     mockWaitingStepResume.resumeMessage = undefined;
@@ -180,9 +182,10 @@ describe('WorkflowExecutionFlyout resume', () => {
     });
   });
 
-  const renderFlyout = () =>
+  // The flyout reads `?resume=true` and the selected step from the URL.
+  const renderFlyout = (search = '') =>
     render(<WorkflowExecutionFlyout executionId="exec-1" onClose={jest.fn()} />, {
-      wrapper: getTestProvider({ services }),
+      wrapper: getTestProvider({ services, initialEntries: [`/${search}`] }),
     });
 
   it('does not show resume when the run is not waiting for input', () => {
@@ -196,9 +199,7 @@ describe('WorkflowExecutionFlyout resume', () => {
   });
 
   it('does not show resume from ?resume=true until the waiting step is ready', () => {
-    mockUrlState.shouldAutoResume = true;
-
-    renderFlyout();
+    renderFlyout('?resume=true');
 
     expect(screen.queryByTestId('resume-execution-button')).not.toBeInTheDocument();
   });
@@ -207,9 +208,7 @@ describe('WorkflowExecutionFlyout resume', () => {
     mockWaitingStepResume.waitingStepExecutionId = 'step-wait';
     mockWaitingStepResume.waitingStepStartedAt = '2024-01-01T00:00:00Z';
     mockWaitingStepResume.resumeMessage = 'Approve this';
-    mockUrlState.shouldAutoResume = true;
-
-    renderFlyout();
+    renderFlyout('?resume=true');
 
     const resumeButtons = screen.getAllByTestId('resume-execution-button');
     expect(resumeButtons).toHaveLength(1);
@@ -335,5 +334,93 @@ describe('WorkflowExecutionFlyout child workflow steps', () => {
       'href',
       '/app/workflows/flyout-test-child?executionId=child-exec-1'
     );
+  });
+
+  it('resumes a waiting child step against the child run', () => {
+    mockWaitingStepResume.waitingStepExecutionId = undefined;
+    mockChildExecutions.set('parent-execute', {
+      ...childExecution,
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      stepExecutions: [
+        createMockStepExecutionDto({
+          id: 'child-lookup',
+          stepId: 'hitl',
+          stepType: 'waitForApproval',
+          status: ExecutionStatus.WAITING_FOR_INPUT,
+          workflowRunId: 'child-exec-1',
+          workflowId: 'flyout-test-child',
+        }),
+      ],
+    });
+    mockPollingResult.workflowExecution = createMockWorkflowExecutionDto({
+      id: 'parent-exec',
+      workflowId: 'flyout-test-parent',
+      status: ExecutionStatus.WAITING_FOR_CHILD,
+      stepExecutions: parentExecution.stepExecutions,
+    });
+    mockUseStepExecution.mockReturnValue({
+      data: {
+        id: 'child-lookup',
+        stepId: 'hitl',
+        stepType: 'waitForApproval',
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        input: { message: 'Approve the child', approveLabel: 'Approve' },
+      },
+      isLoading: false,
+    });
+
+    renderFlyout();
+    fireEvent.click(screen.getByTestId('select-child-step'));
+
+    const resumeButton = screen.getByTestId('resume-execution-button');
+    expect(resumeButton).toHaveAttribute('data-execution-id', 'child-exec-1');
+    expect(resumeButton).toHaveAttribute('data-waiting-step', 'child-lookup');
+    expect(resumeButton).toHaveAttribute('data-approve-label', 'Approve');
+  });
+
+  it('resumes a waiting child waitForInput step with that step schema', () => {
+    mockWaitingStepResume.waitingStepExecutionId = undefined;
+    mockWaitingStepResume.resumeSchema = undefined;
+    mockChildExecutions.set('parent-execute', {
+      ...childExecution,
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      stepExecutions: [
+        createMockStepExecutionDto({
+          id: 'child-lookup',
+          stepId: 'ask',
+          stepType: 'waitForInput',
+          status: ExecutionStatus.WAITING_FOR_INPUT,
+          workflowRunId: 'child-exec-1',
+          workflowId: 'flyout-test-child',
+        }),
+      ],
+    });
+    mockPollingResult.workflowExecution = createMockWorkflowExecutionDto({
+      id: 'parent-exec',
+      workflowId: 'flyout-test-parent',
+      status: ExecutionStatus.WAITING_FOR_CHILD,
+      stepExecutions: parentExecution.stepExecutions,
+    });
+    mockUseStepExecution.mockReturnValue({
+      data: {
+        id: 'child-lookup',
+        stepId: 'ask',
+        stepType: 'waitForInput',
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        input: {
+          message: 'Provide a reason',
+          schema: { type: 'object', properties: { reason: { type: 'string' } } },
+        },
+      },
+      isLoading: false,
+    });
+
+    renderFlyout();
+    fireEvent.click(screen.getByTestId('select-child-step'));
+
+    const resumeButton = screen.getByTestId('resume-execution-button');
+    expect(resumeButton).toHaveAttribute('data-execution-id', 'child-exec-1');
+    expect(resumeButton).toHaveAttribute('data-approve-label', '');
+    expect(resumeButton).toHaveAttribute('data-schema-fields', 'reason');
   });
 });

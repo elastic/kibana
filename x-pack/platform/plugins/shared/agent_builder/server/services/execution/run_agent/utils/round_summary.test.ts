@@ -117,6 +117,31 @@ describe('buildInterruptedRound', () => {
     });
   });
 
+  it('records the input tokens of the last LLM call from the latest state', () => {
+    const tracker = new RunTracker({ graphName: 'g' });
+    tracker.seed({ steps: [] });
+    tracker.observeGraphEvent(
+      createRootStateChunkEvent('g', {
+        steps: [],
+        toolRenderState: {},
+        pendingToolCallIds: [],
+        lastCallUsage: { inputTokens: 77 },
+      })
+    );
+
+    const { summary } = buildInterruptedRound({
+      tracker,
+      startTime,
+      endTime,
+      modelProvider: modelProvider([
+        { connectorId: 'main', model: 'gpt', tokens: { prompt: 10, completion: 5 } },
+      ]),
+      mainConnectorId: 'main',
+    });
+
+    expect(summary.model_usage).toMatchObject({ input_tokens: 10, last_call_input_tokens: 77 });
+  });
+
   it('falls back to the seeded steps when the stream failed before any state was streamed', () => {
     const { tracker } = freshTracker([relevantSkills, carriedTodos]);
 

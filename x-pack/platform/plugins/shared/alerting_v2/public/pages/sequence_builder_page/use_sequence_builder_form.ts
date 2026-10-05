@@ -31,10 +31,10 @@ const getDefaultFormValues = (): FormValues => ({
   metadata: { name: DEFAULT_SEQUENCE_RULE_NAME, enabled: true, description: '', tags: [] },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'standalone', breach: { query: '' }, recovery: { query: '' } },
-  recoveryStrategy: undefined,
+  query: { base: '', breach: { segment: '' } },
+  recovery: undefined,
   grouping: undefined,
-  noDataStrategy: 'none',
+  noData: { strategy: 'ignore' },
   stateTransition: undefined,
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
@@ -81,19 +81,17 @@ export const useSequenceBuilderState = () => {
         const merged: FormValues = {
           ...formValues,
           kind: 'alert',
-          query: {
-            format: 'standalone',
-            breach: { query: queryData.breachQuery },
-            ...(queryData.recoveryQuery ? { recovery: { query: queryData.recoveryQuery } } : {}),
-          },
+          query: { base: queryData.breachQuery, breach: { segment: '' } },
           grouping:
             queryData.groupingFields.length > 0 ? { fields: queryData.groupingFields } : undefined,
           schedule: {
             ...formValues.schedule,
             lookback: queryData.lookbackString,
           },
-          noDataStrategy: 'none',
-          recoveryStrategy: undefined,
+          noData: { strategy: 'ignore' },
+          recovery: queryData.recoveryQuery
+            ? { strategy: 'query', query: queryData.recoveryQuery }
+            : undefined,
         };
 
         const payload = composeFormToCreateRequest(merged, 'sequence');

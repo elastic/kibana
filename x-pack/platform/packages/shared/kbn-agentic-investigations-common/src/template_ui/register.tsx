@@ -56,6 +56,11 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    */
   renderEscalationModal?: import('./slots').FooterSlotProps['onOpenEscalation'];
   /**
+   * Wraps the footer's "Open escalation" button, so the caller can hide it once it learns at
+   * render time (for example from a privileges request) that the user may not escalate.
+   */
+  wrapEscalationButton?: import('./slots').FooterSlotProps['wrapEscalationButton'];
+  /**
    * When provided, the overview tab renders a "Proposed actions" section with this as its
    * content. Supplied by the caller because listing and deciding a conversation's proposals
    * needs Kibana HTTP hooks unavailable in this package.
@@ -92,6 +97,7 @@ export const registerAgenticInvestigationTemplateUI = ({
   name,
   icon,
   renderEscalationModal,
+  wrapEscalationButton,
   renderProposedActions,
   renderAssignees,
   renderStatus,
@@ -135,10 +141,11 @@ export const registerAgenticInvestigationTemplateUI = ({
             </Suspense>
           );
         },
-        footer: function InvestigationFlyoutFooter({ conversation }) {
+        footer: function InvestigationFlyoutFooter({ conversation, isOpenedFromChat }) {
           return (
             <Suspense fallback={null}>
               <LazyFooterSlot
+                isOpenedFromChat={isOpenedFromChat}
                 conversation={conversation}
                 // Full screen rather than the sidebar: the chat is the investigation's own record,
                 // so it gets the whole page instead of a panel beside the flyout that opened it.
@@ -150,6 +157,7 @@ export const registerAgenticInvestigationTemplateUI = ({
                   })
                 }
                 onOpenEscalation={renderEscalationModal}
+                wrapEscalationButton={wrapEscalationButton}
                 onCloseInvestigation={renderCloseInvestigationModal}
               />
             </Suspense>

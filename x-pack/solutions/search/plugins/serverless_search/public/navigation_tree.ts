@@ -12,7 +12,6 @@ import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
 import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { i18n } from '@kbn/i18n';
-import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 
 function isEditingFromDashboard(
@@ -188,11 +187,7 @@ export function createNavigationTree({
             }),
           },
           {
-            children: [
-              { link: 'searchSynonyms:synonyms' },
-              { link: 'searchQueryRules' },
-              { link: 'searchPlayground' },
-            ],
+            children: [{ link: 'searchSynonyms:synonyms' }, { link: 'searchQueryRules' }],
             id: 'search_relevance',
             title: i18n.translate('xpack.serverlessSearch.nav.ingest.relevance.title', {
               defaultMessage: 'Relevance',
@@ -267,7 +262,6 @@ export function createNavigationTree({
               },
             ],
           },
-          ...getAlertingV2ManagementNavPanel(core),
           {
             id: 'settings_alerts',
             title: ALERTS_AND_INSIGHTS_TITLE,

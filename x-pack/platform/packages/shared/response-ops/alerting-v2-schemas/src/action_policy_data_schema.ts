@@ -12,11 +12,11 @@ import {
   ACTION_POLICY_MAX_DESTINATIONS,
   FIND_DEFAULT_PER_PAGE,
   FIND_MAX_RESULT_WINDOW,
-  VERSION_MAX_LENGTH,
   ID_MAX_LENGTH,
   MAX_DESCRIPTION_LENGTH,
   MAX_FIELD_NAME_LENGTH,
   MAX_GROUPING_FIELDS,
+  MAX_KQL_LENGTH,
   MAX_NAME_LENGTH,
   MAX_PER_PAGE,
 } from './constants';
@@ -53,12 +53,12 @@ export const actionPolicyDestinationSchema = z
 
 export const groupingModeSchema = z
   .union([
-    z.literal('per_episode').describe('one notification per alert episode lifecycle (default).'),
-    z.literal('all').describe('a single notification for all matching episodes.'),
+    z.literal('per_alert').describe('one notification per alert lifecycle (default).'),
+    z.literal('all').describe('a single notification for all matching alerts.'),
     z.literal('per_field').describe('group by specified `groupBy` fields.'),
   ])
   .describe(
-    'The grouping mode: per_episode groups by episode lifecycle, all sends a single notification for all alerts, per_field groups by the specified fields.'
+    'The grouping mode: per_alert groups by alert lifecycle, all sends a single notification for all alerts, per_field groups by the specified fields.'
   )
   .meta({ id: 'alerting_action_policy_grouping_mode' });
 
@@ -68,7 +68,7 @@ export const throttleStrategySchema = z
   .union([
     z
       .literal('on_status_change')
-      .describe('notify only on episode status transitions (default for `per_episode`).'),
+      .describe('notify only on alert status transitions (default for `per_alert`).'),
     z.literal('per_status_interval').describe('notify on transitions and at regular intervals.'),
     z
       .literal('time_interval')
@@ -93,7 +93,7 @@ const throttleSchema = z
   .strict()
   .meta({ id: 'alerting_action_policy_throttle' });
 
-export const PER_EPISODE_STRATEGIES = new Set<string>([
+export const PER_ALERT_STRATEGIES = new Set<string>([
   'on_status_change',
   'per_status_interval',
   'every_time',
@@ -132,11 +132,11 @@ const validateStrategyInterval = (payload: ValidationPayload) => {
 
 const validateGroupingModeAndStrategy = (payload: ValidationPayload) => {
   const { value: data, issues } = payload;
-  const mode = data.grouping_mode ?? 'per_episode';
+  const mode = data.grouping_mode ?? 'per_alert';
   const strategy = data.throttle?.strategy;
   if (!strategy) return;
 
-  const allowed = mode === 'per_episode' ? PER_EPISODE_STRATEGIES : AGGREGATE_STRATEGIES;
+  const allowed = mode === 'per_alert' ? PER_ALERT_STRATEGIES : AGGREGATE_STRATEGIES;
   if (!allowed.has(strategy)) {
     issues.push({
       code: 'custom',
@@ -217,6 +217,29 @@ export const createActionPolicyDataSchema = createActionPolicyDataBaseSchema
 export type CreateActionPolicyData = z.infer<typeof createActionPolicyDataSchema>;
 export type CreateActionPolicyDataInput = z.input<typeof createActionPolicyDataSchema>;
 
+/**
+ * Request body schema for `PUT /api/alerting/v2/action_policies/{id}`. Adds
+ * an optional `enabled` on top of the create-action-policy data. Left as a
+ * plain optional (no schema-level default) because the meaning of "omitted"
+ * differs by outcome: on create it defaults to `true`, on replace it
+ * preserves the existing stored value — both handled in application code,
+ * not here.
+ */
+export const putActionPolicyDataSchema = createActionPolicyDataBaseSchema
+  .extend({
+    enabled: z
+      .boolean()
+      .optional()
+      .describe(
+        'Whether the action policy is enabled. On create, defaults to `true` when omitted. On replace, omitting this field preserves the existing enabled state; otherwise it becomes the new stored value.'
+      ),
+  })
+  .check(validateGroupingModeAndStrategy)
+  .meta({ id: 'alerting_put_action_policy' });
+
+export type PutActionPolicyData = z.infer<typeof putActionPolicyDataSchema>;
+export type PutActionPolicyDataInput = z.input<typeof putActionPolicyDataSchema>;
+
 export const updateActionPolicyDataSchema = z
   .object({
     name: actionPolicyNameSchema.optional(),
@@ -255,23 +278,10 @@ export const updateActionPolicyDataSchema = z
       return;
     }
     validateGroupingModeAndStrategy(payload);
-  });
-
-export type UpdateActionPolicyData = z.infer<typeof updateActionPolicyDataSchema>;
-
-export const updateActionPolicyBodySchema = updateActionPolicyDataSchema
-  .extend({
-    version: z
-      .string()
-      .min(1)
-      .max(VERSION_MAX_LENGTH)
-      .describe(
-        'The current version of the action policy, used for optimistic concurrency control.'
-      ),
   })
   .meta({ id: 'alerting_update_action_policy' });
 
-export type UpdateActionPolicyBody = z.infer<typeof updateActionPolicyBodySchema>;
+export type UpdateActionPolicyData = z.infer<typeof updateActionPolicyDataSchema>;
 
 /** Sort field for the find action policies (list) API. */
 export const findActionPoliciesSortFieldSchema = z
@@ -288,17 +298,19 @@ export const findActionPoliciesRequestSchema = z
     per_page: queryIntSchema({ min: 1, max: MAX_PER_PAGE })
       .optional()
       .describe('The number of action policies to return per page. Defaults to 20.'),
+    filter: z
+      .string()
+      .max(MAX_KQL_LENGTH)
+      .optional()
+      .describe(
+        'A KQL filter to apply to the action policies. Supported fields: id, name, description, enabled.'
+      ),
     search: z
       .string()
       .min(1)
       .max(256)
       .optional()
       .describe('A text string to search across action policy fields.'),
-    enabled: z
-      .enum(['true', 'false'])
-      .transform((v) => v === 'true')
-      .optional()
-      .describe('Filter by enabled status. Accepts the strings true or false.'),
     sort_field: findActionPoliciesSortFieldSchema
       .optional()
       .describe('The field to sort action policies by.'),

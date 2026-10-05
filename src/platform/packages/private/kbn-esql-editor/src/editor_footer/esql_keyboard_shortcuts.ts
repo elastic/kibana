@@ -32,12 +32,6 @@ export const esqlKeyboardShortcuts: Array<{ keys: readonly string[]; label: stri
     }),
   },
   {
-    keys: [COMMAND_KEY, 'K'],
-    label: i18n.translate('esqlEditor.query.openVisorKeyboardShortcutsLabel', {
-      defaultMessage: 'Open quick search',
-    }),
-  },
-  {
     keys: [COMMAND_KEY, 'I'],
     label: i18n.translate('esqlEditor.query.prettifyKeyboardShortcutsLabel', {
       defaultMessage: 'Prettify query',
