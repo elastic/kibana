@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutPage } from '@kbn/scout';
+import { KibanaCodeEditorWrapper, type ScoutPage } from '@kbn/scout';
 
 export class DataViewDetailPage {
   readonly container;
@@ -27,7 +27,10 @@ export class DataViewDetailPage {
   readonly fieldEditorAdvancedToggle;
   readonly currentTimeField;
 
+  private readonly codeEditor: KibanaCodeEditorWrapper;
+
   constructor(private readonly page: ScoutPage) {
+    this.codeEditor = new KibanaCodeEditorWrapper(page);
     this.container = page.testSubj.locator('editIndexPattern');
     this.editButton = page.testSubj.locator('editIndexPatternButton');
     this.fieldsTab = page.testSubj.locator('tab-indexedFields');
@@ -164,13 +167,7 @@ export class DataViewDetailPage {
     await valueRow.locator('[data-test-subj="toggle"]').click();
     const scriptFieldRow = this.page.testSubj.locator('scriptFieldRow');
     await scriptFieldRow.waitFor({ state: 'visible' });
-    // Focus the Monaco editor and type via keyboard events (fill() on textarea.inputarea is partial)
-    const monacoEditor = scriptFieldRow.locator('.monaco-editor');
-    await monacoEditor.waitFor({ state: 'visible' });
-    await monacoEditor.click();
-    await this.page.keyboard.press('ControlOrMeta+a');
-    await this.page.keyboard.type(script);
-    await this.page.keyboard.press('Escape');
+    await this.codeEditor.setCodeEditorValueByTestSubj('scriptFieldRow', script);
     await this.fieldEditorSaveButton.click();
     await this.fieldEditorFlyout.waitFor({ state: 'hidden' });
   }
