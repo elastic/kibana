@@ -256,6 +256,34 @@ describe('createRemoteHostRunCommandStepDefinition', () => {
       });
     });
 
+    it('keeps the job and polls again when the SSH host is unreachable', async () => {
+      mockedExecScript.mockResolvedValue({
+        stdout: '',
+        stderr: 'Connection reset by peer',
+        code: 255,
+      });
+
+      const context = createContext({
+        state: { jobId: 'job-1', stdoutOffset: 4, stderrOffset: 2 },
+      });
+      const result = await definition.poll(context);
+
+      expect(result).toEqual({
+        state: { jobId: 'job-1', stdoutOffset: 4, stderrOffset: 2 },
+      });
+      expect(context.logger.warn).toHaveBeenCalledWith(
+        'SSH host is unreachable (Connection reset by peer). The remote command is still running; polling will continue.'
+      );
+    });
+
+    it('still fails when the status script exits with a non-SSH error', async () => {
+      mockedExecScript.mockResolvedValue({ stdout: '', stderr: 'nope', code: 1 });
+
+      await expect(definition.poll(createContext({ state: runningState }))).rejects.toThrow(
+        'Failed to poll remote command: nope'
+      );
+    });
+
     it('throws RemoteProcessLost when the PID is gone and no exit code was recorded', async () => {
       mockedExecScript.mockResolvedValue({
         stdout: statusJson({

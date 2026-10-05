@@ -15,6 +15,7 @@ import {
   parseJobStatus,
   parseScriptOutput,
   pollJob,
+  RemoteHostUnreachableError,
   startJob,
   wrapUserScript,
 } from './remote_host_job';
@@ -342,6 +343,21 @@ describe('pollJob', () => {
     await expect(
       pollJob(ctx, { jobId: 'job-1', stdoutOffset: 0, stderrOffset: 0 })
     ).rejects.toThrow('Failed to poll remote command: nope');
+  });
+
+  it('throws RemoteHostUnreachableError when SSH itself fails', async () => {
+    mockedExecScript.mockResolvedValue({
+      stdout: '',
+      stderr: 'Connection timed out',
+      code: 255,
+    });
+
+    await expect(
+      pollJob(ctx, { jobId: 'job-1', stdoutOffset: 0, stderrOffset: 0 })
+    ).rejects.toBeInstanceOf(RemoteHostUnreachableError);
+    await expect(
+      pollJob(ctx, { jobId: 'job-1', stdoutOffset: 0, stderrOffset: 0 })
+    ).rejects.toThrow('Connection timed out');
   });
 });
 

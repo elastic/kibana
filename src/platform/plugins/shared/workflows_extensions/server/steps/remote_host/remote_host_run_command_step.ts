@@ -12,7 +12,13 @@ import { ExecutionError } from '@kbn/workflows/server';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorCallContext } from './execute_in_connector';
 import type { RemoteHostJobStatus } from './remote_host_job';
-import { killJob, parseScriptOutput, pollJob, startJob } from './remote_host_job';
+import {
+  killJob,
+  parseScriptOutput,
+  pollJob,
+  RemoteHostUnreachableError,
+  startJob,
+} from './remote_host_job';
 import { remoteHostRunCommandStepCommonDefinition } from '../../../common/steps/remote_host';
 import { createPollServerStepDefinition } from '../../step_registry/types';
 
@@ -138,15 +144,33 @@ export const createRemoteHostRunCommandStepDefinition = ({ getActionsStart }: De
         throw new Error('Invalid state for polling remote command execution');
       }
 
-      const result = await pollJob(
-        toConnectorContext(config['connector-id'], context, getActionsStart),
-        {
-          jobId: state.jobId,
-          stdoutOffset: state.stdoutOffset,
-          stderrOffset: state.stderrOffset,
-        },
-        context.maxStepSizeBytes ?? 0
-      );
+      let result: RemoteHostJobStatus;
+      try {
+        result = await pollJob(
+          toConnectorContext(config['connector-id'], context, getActionsStart),
+          {
+            jobId: state.jobId,
+            stdoutOffset: state.stdoutOffset,
+            stderrOffset: state.stderrOffset,
+          },
+          context.maxStepSizeBytes ?? 0
+        );
+      } catch (error) {
+        if (context.abortSignal.aborted || !(error instanceof RemoteHostUnreachableError)) {
+          throw error;
+        }
+
+        context.logger.warn(
+          `SSH host is unreachable (${error.message}). The remote command is still running; polling will continue.`
+        );
+        return {
+          state: {
+            jobId: state.jobId,
+            stdoutOffset: state.stdoutOffset,
+            stderrOffset: state.stderrOffset,
+          },
+        };
+      }
 
       if (result.status === 'running') {
         logCommandStreams(context.logger, result);

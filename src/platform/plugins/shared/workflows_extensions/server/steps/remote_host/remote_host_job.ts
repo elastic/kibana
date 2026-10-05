@@ -13,6 +13,16 @@ import { execScript, uploadFile } from './execute_in_connector';
 
 const REMOTE_HOST_JOB_ROOT = '/tmp/wf_remote_host';
 
+/** OpenSSH exits 255 when the client fails. The status script does not. */
+const SSH_CLIENT_FAILURE_CODE = 255;
+
+export class RemoteHostUnreachableError extends Error {
+  constructor(detail: string) {
+    super(detail);
+    this.name = 'RemoteHostUnreachableError';
+  }
+}
+
 interface RemoteHostJobState {
   jobId: string;
   stdoutOffset: number;
@@ -317,6 +327,9 @@ export async function pollJob(
     ctx,
     buildStatusScript(workdir, stdoutOffset, stderrOffset, outputLimit)
   );
+  if (code === SSH_CLIENT_FAILURE_CODE) {
+    throw new RemoteHostUnreachableError(stderr || 'SSH connection failed');
+  }
   if (code !== 0) {
     throw new Error(`Failed to poll remote command: ${stderr}`);
   }
