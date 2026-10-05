@@ -32,11 +32,26 @@ describe('ActionPoliciesApi', () => {
   });
 
   describe('listActionPolicies', () => {
-    it('sends a GET request to the internal list path', async () => {
-      await api.listActionPolicies({ page: 2, search: 'cpu' });
+    it('sends the filter and search query params to the internal list path', async () => {
+      await api.listActionPolicies({ page: 2, filter: 'enabled: true', search: 'cpu' });
 
       expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/action_policies', {
-        query: expect.objectContaining({ page: 2, search: 'cpu' }),
+        query: {
+          page: 2,
+          per_page: undefined,
+          filter: 'enabled: true',
+          search: 'cpu',
+          sort_field: undefined,
+          sort_order: undefined,
+        },
+      });
+    });
+
+    it('omits empty filter and search values', async () => {
+      await api.listActionPolicies({ filter: '', search: '' });
+
+      expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/action_policies', {
+        query: expect.objectContaining({ filter: undefined, search: undefined }),
       });
     });
   });

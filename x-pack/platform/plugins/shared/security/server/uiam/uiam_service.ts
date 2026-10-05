@@ -57,6 +57,8 @@ interface CreateServiceAccountRequestBody {
   organization_id: string;
   /** A descriptive name for the service account. */
   name: string;
+  /** Free text of 1 to 1,000 characters. UIAM refuses an empty string. */
+  description?: string;
   /** Type of the project the account belongs to. */
   project_type: UiamProjectType;
   /** ID of the project the account belongs to. */
