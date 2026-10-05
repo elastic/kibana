@@ -31,7 +31,7 @@ const getEditRulesPromptContent = (applyChartRules: boolean): string =>
 const getSchemaSectionsPromptContent = (chartType: SupportedChartType, shownIn: string): string =>
   [
     'SCHEMA SECTIONS:',
-    `Copy the shape of any setting that ${shownIn} show. Other settings live in these top-level config sections, and \`field: a|b\` lists the values a field accepts:`,
+    `Copy the shape of any setting that ${shownIn} show. Other settings live in these top-level config sections. \`field: a|b\` lists the values a field accepts, \`*\` marks a required field, and \`one of: (…) | (…)\` lists alternative shapes whose fields cannot be mixed:`,
     getSchemaSectionIndex(chartType),
     `Call \`${LOAD_SCHEMA_SECTIONS_TOOL_NAME}\` only when the request needs a setting whose shape you cannot see in ${shownIn} or in this list. Call it once with every section it needs, then write the configuration. You cannot call it a second time. Never invent a field or value. When the configuration cannot express part of the request, apply the closest supported setting.`,
   ].join('\n');

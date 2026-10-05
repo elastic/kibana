@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mapValues, omitBy, pick, uniq } from 'lodash';
+import { mapValues, omitBy, partition, pick, uniq } from 'lodash';
 import { z } from '@kbn/zod';
 import { xyConfigSchemaESQL } from '@kbn/lens-embeddable-utils';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -111,6 +111,40 @@ const getFields = (node: unknown, defs: JsonNode, seen = new Set<unknown>()): Js
   ].reduce(mergeFields, {});
 };
 
+/** Names of the fields a schema node requires. A union requires the fields every variant requires. */
+const getRequiredFields = (node: unknown, defs: JsonNode): Set<string> => {
+  const resolved = resolveRef(node, defs);
+  if (!isJsonNode(resolved)) {
+    return new Set();
+  }
+  if (resolved.items) {
+    return getRequiredFields(resolved.items, defs);
+  }
+  const ownRequired = Array.isArray(resolved.required)
+    ? resolved.required.filter((name): name is string => typeof name === 'string')
+    : [];
+  const partsRequired = getSubschemas(resolved, ['allOf']).flatMap((part) => [
+    ...getRequiredFields(part, defs),
+  ]);
+  const variantsRequired = getSubschemas(resolved, UNION_KEYS).map((variant) =>
+    getRequiredFields(variant, defs)
+  );
+  const [firstVariantRequired = new Set<string>()] = variantsRequired;
+  const unionRequired = [...firstVariantRequired].filter((name) =>
+    variantsRequired.every((required) => required.has(name))
+  );
+  return new Set([...ownRequired, ...partsRequired, ...unionRequired]);
+};
+
+/** Fields of a schema node, with `*` marking the names of required ones. */
+const getLabeledFields = (node: unknown, defs: JsonNode): Array<[string, unknown]> => {
+  const required = getRequiredFields(node, defs);
+  return Object.entries(getFields(node, defs)).map(([name, field]) => [
+    required.has(name) ? `${name}*` : name,
+    field,
+  ]);
+};
+
 /** Allowed values of an enum-like node: an enum, a constant, a union of them, or an array of them. */
 const getEnumValues = (node: unknown, defs: JsonNode): unknown[] => {
   const resolved = resolveRef(node, defs);
@@ -145,7 +179,7 @@ const describeField = (name: string, node: unknown, defs: JsonNode, maxValues = 
 
 /** Describes a section field, listing its own fields one level down when it has any. */
 const describeSectionField = (name: string, node: unknown, defs: JsonNode): string => {
-  const subfields = Object.entries(getFields(node, defs)).map(([subname, subnode]) =>
+  const subfields = getLabeledFields(node, defs).map(([subname, subnode]) =>
     describeField(subname, subnode, defs, MAX_NESTED_ENUM_VALUES)
   );
   return subfields.length > 0
@@ -153,10 +187,55 @@ const describeSectionField = (name: string, node: unknown, defs: JsonNode): stri
     : describeField(name, node, defs);
 };
 
+/**
+ * Union variants of a section, or of its array items, when they hold different fields.
+ * Merging them would hide which field belongs to which variant.
+ */
+const getDistinctVariants = (section: unknown, defs: JsonNode): unknown[] => {
+  const resolved = resolveRef(section, defs);
+  const node = isJsonNode(resolved) ? resolveRef(resolved.items ?? resolved, defs) : undefined;
+  if (!isJsonNode(node)) {
+    return [];
+  }
+  const variants = getSubschemas(node, UNION_KEYS);
+  const fieldSets = variants.map((variant) => Object.keys(getFields(variant, defs)).sort().join());
+  return variants.length > 1 && fieldSets.every(Boolean) && new Set(fieldSets).size > 1
+    ? variants
+    : [];
+};
+
+/**
+ * Lists the fields every variant shares once, then the fields of each variant. Fixed-value
+ * fields (e.g. `type: primary`) name a variant, so they come first in it.
+ */
+const describeVariants = (variants: readonly unknown[], defs: JsonNode): string => {
+  const variantFields = variants.map((variant) => {
+    const [fixedFields, otherFields] = partition(
+      getLabeledFields(variant, defs),
+      ([, node]) => getEnumValues(node, defs).length === 1
+    );
+    return [...fixedFields, ...otherFields].map(([name, node]) =>
+      describeSectionField(name, node, defs)
+    );
+  });
+  const [firstFields] = variantFields;
+  const sharedFields = firstFields.filter((field) =>
+    variantFields.every((fields) => fields.includes(field))
+  );
+  const variantDescriptions = variantFields.map(
+    (fields) => `(${fields.filter((field) => !sharedFields.includes(field)).join(', ')})`
+  );
+  return [...sharedFields, `one of: ${variantDescriptions.join(' | ')}`].join(', ');
+};
+
 // Listing enum values lets the model write fields like `layers[].type` or
 // `styling.values.mode` without loading the section or guessing the values.
 const describeSection = (section: unknown, defs: JsonNode): string => {
-  const fields = Object.entries(getFields(section, defs)).map(([name, node]) =>
+  const variants = getDistinctVariants(section, defs);
+  if (variants.length > 0) {
+    return describeVariants(variants, defs);
+  }
+  const fields = getLabeledFields(section, defs).map(([name, node]) =>
     describeSectionField(name, node, defs)
   );
   if (fields.length > 0) {

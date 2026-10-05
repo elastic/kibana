@@ -47,7 +47,7 @@ describe('Lens schema sections', () => {
 
   it('lists the values of enum fields so the model does not load a section to learn them', () => {
     expect(getSchemaSectionIndex(SupportedChartType.XY)).toContain(
-      'type: area|area_percentage|area_stacked|bar|bar_horizontal|bar_horizontal_stacked|bar_horizontal_percentage|bar_percentage|bar_stacked|line'
+      'type*: area|area_percentage|area_stacked|bar|bar_horizontal|bar_horizontal_stacked|bar_horizontal_percentage|bar_percentage|bar_stacked|line'
     );
     expect(getSchemaSectionIndex(SupportedChartType.Pie)).toContain('donut_hole: none|s|m|l');
   });
@@ -59,11 +59,56 @@ describe('Lens schema sections', () => {
     expect(getSchemaSectionIndex(SupportedChartType.XY)).toContain('scale: linear|log|sqrt');
   });
 
-  it('keeps the values of every union variant for a shared field', () => {
-    const index = getSchemaSectionIndex(SupportedChartType.XY);
+  it('marks required fields', () => {
+    const index = getSchemaSectionIndex(SupportedChartType.Metric);
 
-    expect(index).toContain('placement: outside|inside');
-    expect(index).toMatch(/position: top\|bottom\|left\|right\|/);
+    expect(index).toContain('- metrics: column*, label, format (type*, decimals');
+    expect(index).toContain('breakdown_by: column*, label,');
+  });
+
+  describe('union sections', () => {
+    const getVariants = (chartType: SupportedChartType, section: string) => {
+      const line = getSchemaSectionIndex(chartType)
+        .split('\n')
+        .find((indexLine) => indexLine.startsWith(`- ${section}: `));
+      const [sharedFields = '', variants = ''] = line?.split('one of: ') ?? [];
+      return { sharedFields, variants: variants.split(' | ') };
+    };
+
+    it('lists the fields of each variant separately', () => {
+      const {
+        variants: [primary, secondary],
+      } = getVariants(SupportedChartType.Metric, 'metrics');
+
+      expect(primary).toMatch(/^\(type\*: primary, /);
+      expect(primary).toContain('background_chart');
+      expect(primary).not.toContain('compare');
+      expect(secondary).toMatch(/^\(type\*: secondary, /);
+      expect(secondary).toContain('compare');
+      expect(secondary).not.toContain('background_chart');
+    });
+
+    it('lists the fields every variant shares once', () => {
+      const { sharedFields, variants } = getVariants(SupportedChartType.XY, 'legend');
+
+      expect(sharedFields).toContain('statistics: min|max|avg');
+      expect(variants).toEqual([
+        expect.stringMatching(/^\(placement: outside, .*position: top\|bottom\)$/),
+        expect.stringMatching(/^\(placement: outside, .*position: left\|right, size: /),
+        expect.stringMatching(/^\(placement\*: inside, .*position: top_left\|/),
+      ]);
+      variants.forEach((variant) => expect(variant).not.toContain('statistics'));
+    });
+
+    it('marks a field required only in the variants that require it', () => {
+      const { variants } = getVariants(SupportedChartType.XY, 'legend');
+
+      expect(variants.map((variant) => variant.match(/^\((placement\*?): /)?.[1])).toEqual([
+        'placement',
+        'placement',
+        'placement*',
+      ]);
+    });
   });
 
   it('limits xy layers to ES|QL data layers that the model writes without a data source', () => {
