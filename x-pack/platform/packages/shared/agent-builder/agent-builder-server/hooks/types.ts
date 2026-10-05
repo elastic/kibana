@@ -10,8 +10,8 @@ import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-common';
 import type {
   AgentConfiguration,
   ChatEvent,
-  ChatEventType,
   ConversationRound,
+  MessageChunkEvent,
   PreExecutionWorkflowStepData,
 } from '@kbn/agent-builder-common';
 import type { ProcessedRoundInput } from '../processed_input';
@@ -65,17 +65,13 @@ export interface AfterExecutionHookContext extends AgentHookContextBase {
 }
 
 /**
- * Chat event types an `afterChatEvent` hook can subscribe to. Message chunks are excluded: they
- * arrive once per token, and awaiting hooks on each one would slow down streaming.
- */
-export type HookableChatEventType = Exclude<ChatEvent['type'], ChatEventType.messageChunk>;
-
-/**
  * Context of an `afterChatEvent` hook. `event` is the copy delivered to clients and written to the
- * execution document; the stored conversation never sees changes made to it.
+ * execution document; the stored conversation never sees changes made to it. Message chunks never
+ * go through hooks: they arrive once per token, and awaiting hooks on each one would slow down
+ * streaming.
  */
 export interface AfterChatEventHookContext extends AgentHookContextBase {
-  event: Extract<ChatEvent, { type: HookableChatEventType }>;
+  event: Exclude<ChatEvent, MessageChunkEvent>;
   /**
    * The conversation execution the event belongs to, including the round's origin in
    * `agentParams.origin`. `status`, `events` and `eventCount` are a snapshot from when the run
@@ -129,32 +125,19 @@ type NonBlockingHookHandler<E extends HookLifecycle = HookLifecycle> = (
   context: HookContext<E>
 ) => void | Promise<void>;
 
-/**
- * Registration options specific to a lifecycle.
- */
-type HookLifecycleOptions<E extends HookLifecycle> = E extends HookLifecycle.afterChatEvent
-  ? {
-      /**
-       * Chat event types this hook runs on. Only events of these types wait for hooks; every other
-       * event goes through without delay.
-       */
-      eventTypes: HookableChatEventType[];
-    }
-  : unknown;
-
-type BlockingHookRegistrationEntry<E extends HookLifecycle> = {
+interface BlockingHookRegistrationEntry<E extends HookLifecycle> {
   mode: HookExecutionMode.blocking;
   handler: BlockingHookHandler<E>;
   /**
    * Optional timeout in milliseconds for this hook. If exceeded, execution fails.
    */
   timeout?: number;
-} & HookLifecycleOptions<E>;
+}
 
-type NonBlockingHookRegistrationEntry<E extends HookLifecycle> = {
+interface NonBlockingHookRegistrationEntry<E extends HookLifecycle> {
   mode: HookExecutionMode.nonBlocking;
   handler: NonBlockingHookHandler<E>;
-} & HookLifecycleOptions<E>;
+}
 
 type HookRegistrationEntry<E extends HookLifecycle> =
   | BlockingHookRegistrationEntry<E>
@@ -200,10 +183,6 @@ export interface HooksServiceStart {
    * Returns the context as updated by blocking hooks.
    */
   run: <E extends HookLifecycle>(lifecycle: E, context: HookContext<E>) => Promise<HookContext<E>>;
-  /**
-   * Whether any `afterChatEvent` hook runs on chat events of the given type.
-   */
-  handles: (lifecycle: HookLifecycle.afterChatEvent, eventType: ChatEvent['type']) => boolean;
 }
 
 export interface AgentBuilderHooks {

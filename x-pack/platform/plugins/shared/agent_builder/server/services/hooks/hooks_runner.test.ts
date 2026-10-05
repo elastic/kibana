@@ -593,7 +593,6 @@ describe('createHooksRunner', () => {
       ({
         id: 'chat-event',
         mode: HookExecutionMode.blocking,
-        eventTypes: [ChatEventType.messageComplete],
         handler: () => {},
         ...overrides,
       } as HookRegistration<HookLifecycle>);
@@ -602,26 +601,6 @@ describe('createHooksRunner', () => {
       context.event.type === ChatEventType.messageComplete
         ? context.event.data.message_content
         : undefined;
-
-    it('only runs hooks whose event types include the event type', async () => {
-      const matching = jest.fn();
-      const other = jest.fn();
-      const { run } = createRunner({
-        getHooksForLifecycle: () => [
-          chatEventHook({ id: 'matching', handler: matching }),
-          chatEventHook({
-            id: 'other',
-            eventTypes: [ChatEventType.roundComplete],
-            handler: other,
-          }),
-        ],
-      });
-
-      await run(HookLifecycle.afterChatEvent, chatEventContext);
-
-      expect(matching).toHaveBeenCalledTimes(1);
-      expect(other).not.toHaveBeenCalled();
-    });
 
     it('chains blocking hooks in reverse priority order', async () => {
       const { run } = createRunner({
@@ -675,16 +654,6 @@ describe('createHooksRunner', () => {
       } finally {
         jest.useRealTimers();
       }
-    });
-
-    it('reports whether any hook handles an event type', () => {
-      const { handles } = createRunner({
-        getHooksForLifecycle: (lifecycle) =>
-          lifecycle === HookLifecycle.afterChatEvent ? [chatEventHook({})] : [],
-      });
-
-      expect(handles(HookLifecycle.afterChatEvent, ChatEventType.messageComplete)).toBe(true);
-      expect(handles(HookLifecycle.afterChatEvent, ChatEventType.roundComplete)).toBe(false);
     });
   });
 });

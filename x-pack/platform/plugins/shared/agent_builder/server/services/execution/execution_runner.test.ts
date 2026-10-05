@@ -589,9 +589,6 @@ describe('handleAgentExecution', () => {
       const projection = {
         slack: { text: 'projected', blocks: [{ type: 'markdown' as const, text: 'projected' }] },
       };
-      hooks.handles.mockImplementation(
-        (_lifecycle, eventType) => eventType === ChatEventType.roundComplete
-      );
       hooks.run.mockImplementation(async (_lifecycle, context) => {
         const chatEventContext = context as AfterChatEventHookContext;
         return { ...chatEventContext, event: { ...chatEventContext.event, projection } };
@@ -620,7 +617,6 @@ describe('handleAgentExecution', () => {
         },
       });
       const { hooks } = deps as { hooks: ReturnType<typeof createHooksServiceStartMock> };
-      hooks.handles.mockReturnValue(true);
 
       await runExecution({ deps });
 

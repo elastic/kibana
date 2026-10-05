@@ -108,7 +108,6 @@ export type {
   AfterToolCallHookContext,
   AfterExecutionHookContext,
   AfterChatEventHookContext,
-  HookableChatEventType,
 } from './hooks/types';
 export { HookLifecycle, HookExecutionMode } from './hooks/types';
 export {

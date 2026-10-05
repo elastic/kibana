@@ -204,7 +204,7 @@ A **conversation round** is one turn in the chat: the user sends a message and t
 | 2 | `beforeToolCall` | Runner | Before each tool invocation | `toolParams` |
 | 3 | `afterToolCall` | Runner | After each tool returns | `toolReturn` (tool result) |
 | 4 | (steps 2–3 repeat as the agent loops: model → tools → model → …) | | | |
-| – | `afterChatEvent` | Execution | Before each chat event of a subscribed type is delivered to clients | `event` |
+| – | `afterChatEvent` | Execution | Before each chat event, except message chunks, is delivered to clients | `event` |
 
 Example: register hooks for every lifecycle event in a single call. `priority` apply to all entries; each lifecycle entry has `mode` and `handler`:
 
@@ -285,8 +285,8 @@ After hooks run in reverse order:
 
 `afterChatEvent` hooks run on the chat events of a round before they reach clients (sync, streaming and callback delivery) and the execution document. A hook can return a replacement for the whole event, for example to add the Slack payload of the reply under `event.projection.slack`. The context carries the event's `execution`, whose `agentParams.origin` lets a hook act only on rounds from an external system like Slack.
 
-* Each entry must declare the event types it runs on, in `eventTypes`. Any chat event type can be subscribed except `message_chunk`, which arrives once per token.
-* Only events of subscribed types wait for hooks; every other event goes through without delay. Event order is always kept, so events queue behind one whose hooks are running. Keep these hooks fast: blocking hooks time out after 10 seconds unless they set `timeout`.
+* Hooks run on every chat event except `message_chunk`, which arrives once per token. A hook decides in its handler which events it acts on, and returns nothing for the rest.
+* Event order is always kept, so events queue behind one whose hooks are running. Keep these hooks fast, and check the event before doing any work: blocking hooks time out after 10 seconds unless they set `timeout`.
 * A failing or timed-out hook is logged and its event goes through unchanged. It never fails the round.
 * Changes reach clients and the execution document, but never the stored conversation.
 
@@ -296,9 +296,11 @@ agentBuilder.hooks.register({
   hooks: {
     [HookLifecycle.afterChatEvent]: {
       mode: HookExecutionMode.blocking,
-      eventTypes: [ChatEventType.roundComplete],
       handler: ({ event, execution }) => {
-        if (execution.agentParams.origin?.type !== ConversationOriginType.Slack) {
+        if (
+          !isRoundCompleteEvent(event) ||
+          execution.agentParams.origin?.type !== ConversationOriginType.Slack
+        ) {
           return;
         }
 

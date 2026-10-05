@@ -6,18 +6,9 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import {
-  createHooksExecutionError,
-  createRequestAbortedError,
-  type ChatEvent,
-} from '@kbn/agent-builder-common';
+import { createHooksExecutionError, createRequestAbortedError } from '@kbn/agent-builder-common';
 import { withTimeout } from '@kbn/std';
-import type {
-  AfterChatEventHookContext,
-  HookContext,
-  HookRegistration,
-  HooksServiceStart,
-} from '@kbn/agent-builder-server';
+import type { HookContext, HookRegistration, HooksServiceStart } from '@kbn/agent-builder-server';
 import {
   applyHookResultByLifecycle,
   HookExecutionMode,
@@ -46,16 +37,11 @@ const AFTER_EVENTS: HookLifecycle[] = [
   HookLifecycle.afterChatEvent,
 ];
 
-type AfterChatEventHookRegistration = HookRegistration<HookLifecycle.afterChatEvent>;
-
-const runsOnEventType = (hook: object, eventType: ChatEvent['type']): boolean =>
-  (hook as AfterChatEventHookRegistration).eventTypes.some((type) => type === eventType);
-
 const isAfterEvent = (event: HookLifecycle): boolean => AFTER_EVENTS.includes(event);
 
 const normalizeHookError = <E extends HookLifecycle>(
   hookLifecycle: E,
-  hook: { id: string; mode: HookExecutionMode },
+  hook: Pick<HookRegistration<E>, 'id' | 'mode'>,
   err: unknown
 ) => {
   if (isHooksExecutionError(err) || isWorkflowAbortedError(err) || isWorkflowExecutionError(err)) {
@@ -80,15 +66,10 @@ function getRelevantHooks<E extends HookLifecycle>(
   getHooksForLifecycle: CreateHooksRunnerDeps['getHooksForLifecycle'],
   lifecycle: E,
   mode: HookExecutionMode,
-  context: HookContext<E>
+  _context: HookContext<E>
 ): Array<HookRegistration<E>> {
   const hooks = getHooksForLifecycle(lifecycle) as Array<HookRegistration<E>>;
-  const filtered = hooks.filter(
-    (h) =>
-      h.mode === mode &&
-      (lifecycle !== HookLifecycle.afterChatEvent ||
-        runsOnEventType(h, (context as AfterChatEventHookContext).event.type))
-  );
+  const filtered = hooks.filter((h) => h.mode === mode);
   const sorted = orderBy(filtered, [(h) => h.priority ?? 0], ['desc']);
   return isAfterEvent(lifecycle) ? sorted.reverse() : sorted;
 }
@@ -172,8 +153,5 @@ export function createHooksRunner(deps: CreateHooksRunnerDeps): HooksServiceStar
     return updated;
   };
 
-  const handles: HooksServiceStart['handles'] = (lifecycle, eventType) =>
-    getHooksForLifecycle(lifecycle).some((hook) => runsOnEventType(hook, eventType));
-
-  return { run, handles };
+  return { run };
 }

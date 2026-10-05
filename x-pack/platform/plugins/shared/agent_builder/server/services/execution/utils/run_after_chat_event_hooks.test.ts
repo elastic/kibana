@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { lastValueFrom, of, toArray } from 'rxjs';
+import { concat, lastValueFrom, of, tap, throwError, toArray } from 'rxjs';
 import {
   ChatEventType,
   ConversationOriginType,
@@ -45,9 +45,6 @@ const execution = {
 
 const setup = ({ abortController = new AbortController() } = {}) => {
   const hooks = createHooksServiceStartMock();
-  hooks.handles.mockImplementation(
-    (_lifecycle, eventType) => eventType === ChatEventType.roundComplete
-  );
   const logger = loggingSystemMock.createLogger();
 
   const run = (events: ChatEvent[]) =>
@@ -68,18 +65,17 @@ const setup = ({ abortController = new AbortController() } = {}) => {
 };
 
 describe('runAfterChatEventHooks', () => {
-  it('lets event types no hook handles through without running hooks', async () => {
+  it('lets message chunks through without running hooks', async () => {
     const { hooks, run } = setup();
 
-    const events = await run([executionStartedEvent, messageChunkEvent]);
+    const events = await run([messageChunkEvent]);
 
-    expect(events).toEqual([executionStartedEvent, messageChunkEvent]);
+    expect(events).toEqual([messageChunkEvent]);
     expect(hooks.run).not.toHaveBeenCalled();
   });
 
-  it('runs hooks on execution lifecycle events when a hook handles them', async () => {
+  it('runs hooks on execution lifecycle events', async () => {
     const { hooks, run } = setup();
-    hooks.handles.mockReturnValue(true);
 
     await run([executionStartedEvent]);
 
@@ -120,6 +116,33 @@ describe('runAfterChatEventHooks', () => {
     const events = await run([roundCompleteEvent, messageChunkEvent]);
 
     expect(events).toEqual([projectedEvent, messageChunkEvent]);
+  });
+
+  it('emits events awaiting hooks before a source error', async () => {
+    const { hooks, logger, abortController } = setup();
+    hooks.run.mockImplementation(
+      (_lifecycle, context) => new Promise((resolve) => setTimeout(() => resolve(context), 10))
+    );
+    const seen: ChatEvent[] = [];
+
+    const result = lastValueFrom(
+      concat(
+        of(roundCompleteEvent),
+        throwError(() => new Error('stream failed'))
+      ).pipe(
+        runAfterChatEventHooks({
+          hooks,
+          request: { headers: {} } as never,
+          abortSignal: abortController.signal,
+          execution,
+          logger,
+        }),
+        tap((event) => seen.push(event))
+      )
+    );
+
+    await expect(result).rejects.toThrow('stream failed');
+    expect(seen).toEqual([roundCompleteEvent]);
   });
 
   it('emits the original event and logs a warning when hooks fail', async () => {

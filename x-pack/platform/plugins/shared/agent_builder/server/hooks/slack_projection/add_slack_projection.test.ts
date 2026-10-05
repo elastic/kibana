@@ -82,7 +82,7 @@ describe('addSlackProjection', () => {
 });
 
 describe('registerSlackProjectionHook', () => {
-  it('registers a blocking afterChatEvent hook on round_complete events', () => {
+  it('registers a blocking afterChatEvent hook', () => {
     const register = jest.fn();
 
     registerSlackProjectionHook({ hooks: { register } } as never);
@@ -92,7 +92,6 @@ describe('registerSlackProjectionHook', () => {
       hooks: {
         [HookLifecycle.afterChatEvent]: {
           mode: HookExecutionMode.blocking,
-          eventTypes: [ChatEventType.roundComplete],
           handler: addSlackProjection,
         },
       },

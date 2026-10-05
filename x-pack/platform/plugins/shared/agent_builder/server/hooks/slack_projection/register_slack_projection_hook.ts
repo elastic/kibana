@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ChatEventType } from '@kbn/agent-builder-common';
 import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-server';
 import type { InternalSetupServices } from '../../services';
 import { addSlackProjection } from './add_slack_projection';
@@ -20,7 +19,6 @@ export const registerSlackProjectionHook = (serviceSetups: InternalSetupServices
     hooks: {
       [HookLifecycle.afterChatEvent]: {
         mode: HookExecutionMode.blocking,
-        eventTypes: [ChatEventType.roundComplete],
         handler: addSlackProjection,
       },
     },
