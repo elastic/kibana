@@ -108,6 +108,25 @@ import { useDataSourceBrowser } from './resource_browser/use_data_source_browser
 import { useSourcesBadge } from './resource_browser/use_resource_browser_badge';
 
 const BREAKPOINT_WIDTH = 540;
+const HISTORY_LIST_SELECTOR =
+  '[data-test-subj="ESQLEditor-queryHistory"], [data-test-subj="ESQLEditor-starredQueries"]';
+
+const getHistoryResizeLimits = (target: EventTarget | null) => {
+  const panel =
+    target instanceof HTMLElement
+      ? target.closest('[data-test-subj="ESQLEditor-history-panel-slide"]')
+      : null;
+  const contentHeight = panel?.querySelector<HTMLElement>(HISTORY_LIST_SELECTOR)?.scrollHeight;
+  const maxHeight = Math.min(
+    contentHeight && contentHeight > 0 ? contentHeight : RESIZABLE_CONTAINER_MAX_HEIGHT,
+    RESIZABLE_CONTAINER_MAX_HEIGHT
+  );
+
+  return {
+    minHeight: Math.min(RESIZABLE_CONTAINER_MIN_HEIGHT, maxHeight),
+    maxHeight,
+  };
+};
 
 export interface ESQLEditorFocusApi {
   focus: () => void;
@@ -244,18 +263,6 @@ const ESQLEditorInternal = function ESQLEditor({
   const [resizableContainerHeight, setResizableContainerHeight] = useRestorableState(
     'resizableContainerHeight',
     RESIZABLE_CONTAINER_INITIAL_HEIGHT
-  );
-  const [historyContentHeight, setHistoryContentHeight] = useState<number>();
-  const onHistoryContentHeightChange = useCallback(
-    (nextContentHeight: number) => {
-      const contentHeight = Math.ceil(nextContentHeight);
-      if (contentHeight <= 0) {
-        return;
-      }
-      setHistoryContentHeight((current) => (current === contentHeight ? current : contentHeight));
-      setResizableContainerHeight((current) => Math.min(current, contentHeight));
-    },
-    [setResizableContainerHeight]
   );
   const [measuredEditorWidth, setMeasuredEditorWidth] = useState(0);
 
@@ -456,102 +463,44 @@ const ESQLEditorInternal = function ESQLEditor({
     [theme.euiTheme, editorHeight, editorIsInline, hasOutline]
   );
 
-  const onMouseDownResize = useCallback<typeof onMouseDownResizeHandler>(
-    (
-      mouseDownEvent,
-      firstPanelHeight,
-      setFirstPanelHeight,
-      secondPanelHeight,
-      setSecondPanelHeight,
-      limits
-    ) => {
-      onMouseDownResizeHandler(
-        mouseDownEvent,
-        firstPanelHeight,
-        setFirstPanelHeight,
-        secondPanelHeight,
-        setSecondPanelHeight,
-        limits
-      );
-    },
-    []
-  );
-
-  const onKeyDownResize = useCallback<typeof onKeyDownResizeHandler>(
-    (
-      keyDownEvent,
-      firstPanelHeight,
-      setFirstPanelHeight,
-      secondPanelHeight,
-      setSecondPanelHeight,
-      limits
-    ) => {
-      onKeyDownResizeHandler(
-        keyDownEvent,
-        firstPanelHeight,
-        setFirstPanelHeight,
-        secondPanelHeight,
-        setSecondPanelHeight,
-        limits
-      );
-    },
-    []
-  );
-
   const resizableContainerButton = useMemo(() => {
     return (
       <ResizableButton
         onMouseDownResizeHandler={(mouseDownEvent) =>
-          onMouseDownResize(mouseDownEvent, editorHeight, setEditorHeight, undefined, undefined)
+          onMouseDownResizeHandler(mouseDownEvent, editorHeight, setEditorHeight)
         }
         onKeyDownResizeHandler={(keyDownEvent) =>
-          onKeyDownResize(keyDownEvent, editorHeight, setEditorHeight, undefined, undefined)
+          onKeyDownResizeHandler(keyDownEvent, editorHeight, setEditorHeight)
         }
       />
     );
-  }, [onMouseDownResize, editorHeight, onKeyDownResize, setEditorHeight]);
+  }, [editorHeight, setEditorHeight]);
 
   const historyResizeButton = useMemo(() => {
-    const contentMax =
-      historyContentHeight === undefined
-        ? RESIZABLE_CONTAINER_MAX_HEIGHT
-        : Math.min(historyContentHeight, RESIZABLE_CONTAINER_MAX_HEIGHT);
-    const limits = {
-      minHeight: Math.min(RESIZABLE_CONTAINER_MIN_HEIGHT, contentMax),
-      maxHeight: contentMax,
-    };
     return (
       <ResizableButton
         dataTestSubj="ESQLEditor-history-resize"
-        onMouseDownResizeHandler={(mouseDownEvent) =>
-          onMouseDownResize(
-            mouseDownEvent,
-            resizableContainerHeight,
+        onMouseDownResizeHandler={(event) => {
+          const limits = getHistoryResizeLimits(event.currentTarget);
+          onMouseDownResizeHandler(
+            event,
+            Math.min(resizableContainerHeight, limits.maxHeight),
             setResizableContainerHeight,
-            undefined,
-            undefined,
             limits
-          )
-        }
-        onKeyDownResizeHandler={(keyDownEvent) =>
-          onKeyDownResize(
-            keyDownEvent,
-            resizableContainerHeight,
+          );
+        }}
+        onKeyDownResizeHandler={(event) => {
+          const limits = getHistoryResizeLimits(event.currentTarget);
+          onKeyDownResizeHandler(
+            event,
+            Math.min(resizableContainerHeight, limits.maxHeight),
             setResizableContainerHeight,
-            undefined,
-            undefined,
             limits
-          )
-        }
+          );
+        }}
       />
     );
-  }, [
-    onKeyDownResize,
-    historyContentHeight,
-    onMouseDownResize,
-    resizableContainerHeight,
-    setResizableContainerHeight,
-  ]);
+  }, [resizableContainerHeight, setResizableContainerHeight]);
 
   const {
     esqlFieldsCache,
@@ -1072,13 +1021,7 @@ const ESQLEditorInternal = function ESQLEditor({
         setIsLanguageComponentOpen={setIsLanguageComponentOpen}
         measuredContainerWidth={measuredEditorWidth}
         resizableContainerButton={resizableContainerButton}
-        historyResizeButton={
-          historyContentHeight !== undefined &&
-          historyContentHeight > RESIZABLE_CONTAINER_MIN_HEIGHT
-            ? historyResizeButton
-            : undefined
-        }
-        onHistoryContentHeightChange={onHistoryContentHeightChange}
+        historyResizeButton={historyResizeButton}
         resizableContainerHeight={resizableContainerHeight}
         displayDocumentationAsFlyout={displayDocumentationAsFlyout}
         dataErrorsControl={dataErrorsControl}

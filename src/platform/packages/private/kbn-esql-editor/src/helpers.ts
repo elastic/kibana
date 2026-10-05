@@ -15,11 +15,7 @@ import { monaco, type MonacoMessage } from '@kbn/code-editor';
 import { uniqBy, type MapCache } from 'lodash';
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import {
-  EDITOR_MAX_HEIGHT,
-  EDITOR_MIN_HEIGHT,
-  RESIZABLE_CONTAINER_INITIAL_HEIGHT,
-} from './esql_editor.styles';
+import { EDITOR_MAX_HEIGHT, EDITOR_MIN_HEIGHT } from './esql_editor.styles';
 
 const KEYCODE_ARROW_UP = 38;
 const KEYCODE_ARROW_DOWN = 40;
@@ -220,8 +216,6 @@ export const onMouseDownResizeHandler = (
   mouseDownEvent: React.MouseEvent<HTMLButtonElement, MouseEvent> | React.TouchEvent,
   height: number,
   setHeight: (height: number) => void,
-  secondPanelHeight?: number,
-  setSecondPanelHeight?: (height: number) => void,
   limits?: { minHeight: number; maxHeight: number }
 ) => {
   function isMouseEvent(e: React.TouchEvent | React.MouseEvent): e is React.MouseEvent {
@@ -236,17 +230,8 @@ export const onMouseDownResizeHandler = (
     : mouseDownEvent?.touches[0].pageY;
 
   function onMouseMove(mouseMoveEvent: MouseEvent) {
-    const h = startSize - startPosition + mouseMoveEvent.pageY;
-    const firstPanelHeightValidated = Math.min(Math.max(h, minHeight), maxHeightLimit);
-    setHeight(firstPanelHeightValidated);
-    if (setSecondPanelHeight && secondPanelHeight) {
-      const maxHeight = height + secondPanelHeight;
-      const secondPanelHeightValidated = Math.min(
-        Math.max(maxHeight - firstPanelHeightValidated, RESIZABLE_CONTAINER_INITIAL_HEIGHT),
-        maxHeight
-      );
-      setSecondPanelHeight?.(secondPanelHeightValidated);
-    }
+    const nextHeight = startSize - startPosition + mouseMoveEvent.pageY;
+    setHeight(Math.min(Math.max(nextHeight, minHeight), maxHeightLimit));
   }
   function onMouseUp() {
     document.body.removeEventListener('mousemove', onMouseMove);
@@ -261,26 +246,13 @@ export const onKeyDownResizeHandler = (
   keyDownEvent: React.KeyboardEvent,
   height: number,
   setHeight: (height: number) => void,
-  secondPanelHeight?: number,
-  setSecondPanelHeight?: (height: number) => void,
   limits?: { minHeight: number; maxHeight: number }
 ) => {
   const minHeight = limits?.minHeight ?? EDITOR_MIN_HEIGHT;
   const maxHeightLimit = limits?.maxHeight ?? EDITOR_MAX_HEIGHT;
-  let h = height;
   if (keyDownEvent.keyCode === KEYCODE_ARROW_UP || keyDownEvent.keyCode === KEYCODE_ARROW_DOWN) {
     const step = keyDownEvent.keyCode === KEYCODE_ARROW_UP ? -10 : 10;
-    h = h + step;
-    const firstPanelHeightValidated = Math.min(Math.max(h, minHeight), maxHeightLimit);
-    setHeight(firstPanelHeightValidated);
-    if (setSecondPanelHeight && secondPanelHeight) {
-      const maxHeight = height + secondPanelHeight;
-      const secondPanelHeightValidated = Math.min(
-        Math.max(maxHeight - firstPanelHeightValidated, RESIZABLE_CONTAINER_INITIAL_HEIGHT),
-        maxHeight
-      );
-      setSecondPanelHeight?.(secondPanelHeightValidated);
-    }
+    setHeight(Math.min(Math.max(height + step, minHeight), maxHeightLimit));
   }
 };
 

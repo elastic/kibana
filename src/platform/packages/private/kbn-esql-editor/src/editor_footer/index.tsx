@@ -46,7 +46,6 @@ interface EditorFooterProps {
   resizableContainerButton?: JSX.Element;
   historyResizeButton?: JSX.Element;
   resizableContainerHeight: number;
-  onHistoryContentHeightChange?: (contentHeight: number) => void;
   editorIsInline?: boolean;
   isSpaceReduced?: boolean;
   displayDocumentationAsFlyout?: boolean;
@@ -70,7 +69,6 @@ export const EditorFooter = memo(function EditorFooter({
   resizableContainerButton,
   historyResizeButton,
   resizableContainerHeight,
-  onHistoryContentHeightChange,
   isHistoryOpen,
   setIsHistoryOpen,
   isLanguageComponentOpen,
@@ -193,7 +191,6 @@ export const EditorFooter = memo(function EditorFooter({
           height={resizableContainerHeight}
           isSpaceReduced={isSpaceReduced}
           starredQueriesService={starredQueriesService}
-          onContentHeightChange={onHistoryContentHeightChange}
         />
         {historyResizeButton}
       </HistoryPanelSlide>

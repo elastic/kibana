@@ -16,7 +16,6 @@ describe('HistoryPanelSlide', () => {
 
   afterEach(() => {
     window.matchMedia = originalMatchMedia;
-    jest.useRealTimers();
   });
 
   it('does not render the panel while recent queries are hidden', () => {
@@ -75,7 +74,6 @@ describe('HistoryPanelSlide', () => {
   });
 
   it('keeps the panel mounted until the slide-out finishes', () => {
-    jest.useFakeTimers();
     const { rerender } = render(
       <HistoryPanelSlide isOpen>
         <div>Recent queries</div>
@@ -88,14 +86,14 @@ describe('HistoryPanelSlide', () => {
       </HistoryPanelSlide>
     );
 
+    const panel = screen.getByTestId('ESQLEditor-history-panel-slide');
     expect(screen.getByText('Recent queries')).toBeInTheDocument();
-    expect(screen.getByTestId('ESQLEditor-history-panel-slide')).toHaveAttribute(
-      'data-expanded',
-      'false'
-    );
+    expect(panel).toHaveAttribute('data-expanded', 'false');
 
     act(() => {
-      jest.advanceTimersByTime(1000);
+      const event = new Event('transitionend', { bubbles: true });
+      Object.defineProperty(event, 'propertyName', { value: 'grid-template-rows' });
+      panel.dispatchEvent(event);
     });
 
     expect(screen.queryByText('Recent queries')).not.toBeInTheDocument();
