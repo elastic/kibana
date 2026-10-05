@@ -157,6 +157,28 @@ export const esc = (s: string) =>
 
 export const toList = (items: readonly string[]) => items.map(esc).join(', ');
 
+/** Raw identity fields that EUIDs are built from. */
+const IDENTITY_SOURCE_FIELDS = [
+  ...new Set(ALLOWED_ENTITY_TYPES.flatMap((t) => getEuidSourceFields(t).identitySourceFields)),
+];
+
+const stringValuesOf = (value: unknown): string[] =>
+  [value].flat().filter((v): v is string => typeof v === 'string' && v !== '');
+
+/**
+ * Pushable prefilter: `field IN (…)` over the identity values of `rows`.
+ * It matches a superset of the documents whose derived EUID is one of the rows' ids, so it
+ * can run before the EUID evaluation, which casts fields with `TO_STRING` and can't be
+ * pushed down. Must be its own top-level `WHERE` to reach Lucene.
+ */
+export const buildIdentityPrefilter = (rows: readonly Row[]): string | undefined => {
+  const parts = IDENTITY_SOURCE_FIELDS.flatMap((field) => {
+    const values = [...new Set(rows.flatMap((row) => stringValuesOf(row[field])))];
+    return values.length ? [`${field} IN (${toList(values)})`] : [];
+  });
+  return parts.length ? parts.join(' OR ') : undefined;
+};
+
 const quoteField = (f: string) => (/[@\s]/.test(f) ? `\`${f}\`` : f);
 
 export const buildKeepClause = (

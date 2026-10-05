@@ -6,6 +6,7 @@
  */
 
 import {
+  buildIdentityPrefilter,
   entityIdsOf,
   getEntityId,
   getNumber,
@@ -23,10 +24,14 @@ import type { QueryArgs, RunContext, Row, ColumnDescriptor } from '../common';
 const SET_UNMAPPED_NULLIFY = 'SET unmapped_fields="nullify";';
 const ANOMALY_BASE_FILTER = `result_type == "record" AND is_interim == false`;
 
-/** Final anomaly records in the time range, one row per record with its derived `entity.id`. */
-const buildAnomalyEntityRows = ({ timeRange }: QueryArgs): string[] => [
+/**
+ * Final anomaly records in the time range, one row per record with its derived `entity.id`.
+ * `identityPrefilter` narrows the records before the EUID evaluation, which can't push down.
+ */
+const buildAnomalyEntityRows = ({ timeRange }: QueryArgs, identityPrefilter?: string): string[] => [
   `FROM ${ML_ANOMALY_INDICES}`,
   `| WHERE ${ANOMALY_BASE_FILTER} AND \`@timestamp\` >= "${lookbackCutoff(timeRange)}"`,
+  ...(identityPrefilter ? [`| WHERE ${identityPrefilter}`] : []),
   ...buildEuidStages(),
 ];
 
@@ -47,11 +52,11 @@ const buildAnomalyCountQueries = (args: QueryArgs) =>
 
 // ── enrichment ────────────────────────────────────────────────────────────────
 
-const buildAnomalyCountEnrichQuery = (args: QueryArgs, entityIds: string[]): string =>
+const buildAnomalyCountEnrichQuery = (args: QueryArgs, pageRows: Row[]): string =>
   [
     SET_UNMAPPED_NULLIFY,
-    ...buildAnomalyEntityRows(args),
-    `| WHERE \`entity.id\` IN (${toList(entityIds)})`,
+    ...buildAnomalyEntityRows(args, buildIdentityPrefilter(pageRows)),
+    `| WHERE \`entity.id\` IN (${toList(entityIdsOf(pageRows))})`,
     `| STATS ${ANOMALY_COUNT_FIELD} = COUNT(*) BY \`entity.id\``,
   ].join('\n');
 
@@ -63,10 +68,9 @@ const enrichAnomalyCount = async (
 ): Promise<void> => {
   if (skip.has(ANOMALY_COUNT_FIELD)) return;
 
-  const entityIds = entityIdsOf(pageRows);
-  if (!entityIds.length) return;
+  if (!entityIdsOf(pageRows).length) return;
 
-  const rows = await nullOnFailure(runQuery(buildAnomalyCountEnrichQuery(args, entityIds)));
+  const rows = await nullOnFailure(runQuery(buildAnomalyCountEnrichQuery(args, pageRows)));
   if (!rows) return;
 
   const byId = new Map(rows.map((r) => [getEntityId(r), getNumber(r, ANOMALY_COUNT_FIELD)]));

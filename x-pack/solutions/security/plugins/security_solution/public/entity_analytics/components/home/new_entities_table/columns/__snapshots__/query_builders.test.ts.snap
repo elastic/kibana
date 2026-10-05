@@ -78,6 +78,7 @@ Array [
   "SET unmapped_fields=\\"nullify\\";
 FROM .ml-anomalies-*
 | WHERE result_type == \\"record\\" AND is_interim == false AND \`@timestamp\` >= \\"2026-09-27T12:00:00.000Z\\"
+| WHERE user.name IN (\\"alice\\", \\"bob\\") OR host.id IN (\\"h-1\\") OR user.email IN (\\"bob@corp.com\\") OR host.name IN (\\"web-1\\", \\"web-2\\") OR service.name IN (\\"payments\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),

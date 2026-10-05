@@ -5,11 +5,9 @@
  * 2.0.
  */
 
+import { getEuidEsqlFilterBasedOnDocument } from '@kbn/entity-store/common/domain/euid';
 import {
-  getEuidEsqlFilterBasedOnDocument,
-  getEuidSourceFields,
-} from '@kbn/entity-store/common/domain/euid';
-import {
+  buildIdentityPrefilter,
   entityIdsOf,
   getEntityId,
   ALERT_COUNT_FIELD,
@@ -37,31 +35,10 @@ const SEVERITY_COUNT_FIELDS = {
 
 const ALERT_COUNT_FIELDS = [ALERT_COUNT_FIELD, ...Object.values(SEVERITY_COUNT_FIELDS)] as const;
 
-/** Raw identity fields that every per-row EUID clause matches with `==`. */
-const IDENTITY_SOURCE_FIELDS = [
-  ...new Set(ALLOWED_ENTITY_TYPES.flatMap((t) => getEuidSourceFields(t).identitySourceFields)),
-];
-
 const isAllowedEntityType = (type: unknown): type is (typeof ALLOWED_ENTITY_TYPES)[number] =>
   typeof type === 'string' && (ALLOWED_ENTITY_TYPES as readonly string[]).includes(type);
 
-const stringValuesOf = (value: unknown): string[] =>
-  [value].flat().filter((v): v is string => typeof v === 'string' && v !== '');
-
 // ── unstamped alert filters ───────────────────────────────────────────────────
-
-/**
- * Pushable prefilter: `field IN (…)` over the identity values of `rows`.
- * It matches a superset of the rows' EUID clauses. The clauses cast fields with
- * `TO_STRING`, so ES|QL cannot push them down and scans every unstamped alert.
- */
-const buildIdentityPrefilter = (rows: Row[]): string | undefined => {
-  const parts = IDENTITY_SOURCE_FIELDS.flatMap((field) => {
-    const values = [...new Set(rows.flatMap((row) => stringValuesOf(row[field])))];
-    return values.length ? [`${field} IN (${toList(values)})`] : [];
-  });
-  return parts.length ? parts.join(' OR ') : undefined;
-};
 
 interface UnstampedIdentityFilters {
   unstampedIdentityClause: string;
