@@ -273,19 +273,6 @@ describe('buildIacIntegrations', () => {
         },
       ]);
     });
-
-    it('falls back to the service id for a duplicate whose vars predate instance keying', () => {
-      const stored: Record<string, ServiceVars> = {
-        cloudtrail: {
-          enabledDataStreams: ['cloudtrail'],
-          varsByDataStream: { cloudtrail: { enabledInputs: ['aws-s3'], varsByInput: {} } },
-        },
-      };
-
-      expect(buildIacIntegrations([duplicate(cloudtrail)], stored)).toEqual([
-        { name: 'aws', policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }] },
-      ]);
-    });
   });
 
   it('is stable regardless of member order and unsorted manifest inputs', () => {

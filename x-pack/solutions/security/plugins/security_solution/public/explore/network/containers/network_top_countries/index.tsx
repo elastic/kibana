@@ -25,8 +25,17 @@ import { NetworkQueries } from '../../../../../common/search_strategy';
 import type { InspectResponse } from '../../../../types';
 import * as i18n from './translations';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 
 export const ID = 'networkTopCountriesQuery';
+
+const NETWORK_TOP_COUNTRIES_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_NETWORK_PAGE,
+  'network_top_countries'
+);
 
 export interface NetworkTopCountriesArgs {
   id: string;
@@ -105,6 +114,7 @@ export const useNetworkTopCountries = ({
     },
     errorMessage: i18n.FAIL_NETWORK_TOP_COUNTRIES,
     abort: skip,
+    executionContext: NETWORK_TOP_COUNTRIES_CONTEXT,
   });
 
   const networkTopCountriesResponse = useMemo(
