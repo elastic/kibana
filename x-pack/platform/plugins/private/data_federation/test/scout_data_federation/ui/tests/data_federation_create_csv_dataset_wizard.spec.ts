@@ -12,6 +12,21 @@ import type { ScoutPage } from '@kbn/scout';
 import { getDataSetByIdApiPath, getDataSourceByIdApiPath } from '../fixtures/api_paths';
 import { test, CUSTOM_ROLES } from '../fixtures';
 
+interface DatasetMappingProperty {
+  type: string;
+  path?: string;
+  format?: string;
+}
+
+interface GetDataSetResponse {
+  datasets: Array<{
+    mappings?: {
+      dynamic?: string;
+      properties: Record<string, DatasetMappingProperty>;
+    };
+  }>;
+}
+
 const S3_ACCESS_KEY = 'AKIAIOSFODNN7EXAMPLE';
 const S3_SECRET_KEY = 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY';
 
@@ -434,6 +449,24 @@ test.describe(
         const row = pageObjects.dataFederation.getDataSetRow(createdDataSetName);
         await expect(row).toBeVisible();
         await expect(row).toContainText(resource);
+      });
+
+      await test.step('the saved dataset has the declared mappings', async () => {
+        const { data } = await kbnClient.request<GetDataSetResponse>({
+          method: 'GET',
+          path: getDataSetByIdApiPath(createdDataSetName),
+        });
+        const [savedDataSet] = data.datasets;
+
+        const expectedProperties = mappingFields.reduce<Record<string, DatasetMappingProperty>>(
+          (acc, { name, ...property }) => ({ ...acc, [name]: property }),
+          { '@timestamp': timestamp }
+        );
+
+        expect(savedDataSet.mappings).toStrictEqual({
+          dynamic: 'false',
+          properties: expectedProperties,
+        });
       });
     });
   }
