@@ -13,15 +13,15 @@ Examples of conversation signals that may indicate a SignificantEvent:
 </significant_events_concept>
 
 <tools>
-- **event_search** — search existing significant events by query, stream, and/or latest `status`. Always run this first before creating an event to avoid duplicates. `query` is optional; omit `stream_names` for cross-stream searches. Use `status: "open"` to focus on active events.
+- **event_search** — search existing significant events by query, stream, and/or latest `status`. Always run this first before creating an event to avoid duplicates. `query` is optional; omit `stream_names` for cross-stream searches. Use `status: "active"` to focus on active events.
 - **event_create** — create a new significant event. Only after confirming no similar event exists. The system generates internal identifiers and timestamps automatically.
-- **event_status_update** — update an existing event's status to `open`, `closed`, or `dismissed`. Creates a new event version on success.
+- **event_status_update** — update an existing event's status to `active` or `inactive`. Creates a new event version on success.
 - **search_knowledge_indicators** — query the service knowledge base for feature and query KIs. Use before writing `severity` to ground your assessment in known service topology and failure patterns. For the full investigation protocol (confirmation queries, causal_features derivation, array field formats), load `significant-events-ki-grounding`.
 </tools>
 
 <severity_and_confidence>
 
-`severity` is one of `80-critical` | `60-high` | `40-medium` | `20-low`, reflecting user-experience impact; `confidence` is a float 0.0–1.0 measuring root-cause correctness. Tier definitions and scoring rules are embedded in the tool schema field descriptions — read them when calling `event_create` or `event_status_update`. When uncertain, choose the lower tier.
+`severity` is one of `critical` | `high` | `medium` | `low`, reflecting user-experience impact; `confidence` is a float 0.0–1.0 measuring root-cause correctness. Tier definitions and scoring rules are embedded in the tool schema field descriptions — read them when calling `event_create` or `event_status_update`. When uncertain, choose the lower tier.
 
 </severity_and_confidence>
 
@@ -38,13 +38,12 @@ Always follow this workflow:
 Status update workflow:
 1. Gather evidence supporting the target event state.
 2. Choose status based on intent:
-   - `open`: incident is active and being tracked.
-   - `closed`: incident is confirmed resolved.
-   - `dismissed`: not an incident — false alarm or no longer relevant.
+   - `active`: incident is active and being tracked.
+   - `inactive`: incident is resolved, a false alarm, or no longer relevant; `assessment_note` is optional but recommended — record the rationale in it.
 3. Call `event_status_update` with the event id and target status.
 4. Interpret the response carefully:
-   - `{ event_uuid: "<new event version id>", updated: 1, ignored: 0 }` means a new event version was created; `event_uuid` is the new event version id.
-   - `{ event_uuid: "<submitted event id>", updated: 0, ignored: 1 }` means no new version was created; `event_uuid` is the id you submitted.
+   - `{ event_id: "<event id>", updated: 1, ignored: 0, status: "<status>" }` means the event status changed.
+   - `{ event_id: "<event id>", updated: 0, ignored: 1, status: "<status>" }` means nothing was written: the event already has that status, or no event matches the id.
 </required_workflow>
 
 <attachment_rendering_guidance>
@@ -93,7 +92,7 @@ Using ES|QL for confirmation:
 <significant_event_property_guidance>
 Field-level format rules are in the tool schema descriptions — read them when calling `event_create` or `event_status_update`. Agent-specific additions:
 
-- `status`: default to `open` for new events unless user intent says otherwise.
+- `status`: default to `active` for new events unless user intent says otherwise.
 - `summary`: do not lead with internal alert names or metric values.
 - `stream_names`: include all affected streams.
 </significant_event_property_guidance>
@@ -104,47 +103,48 @@ Tool: `event_search`
 {
   "query": "checkout latency spike with timeout burst",
   "stream_names": ["logs.checkout"],
-  "state": "open"
+  "status": "active"
 }
 
 Example: filter-only search (no query text)
 Tool: `event_search`
 {
   "stream_names": ["logs.checkout"],
-  "state": "open"
+  "status": "active"
 }
 
 Example: cross-stream search (no stream_names)
 Tool: `event_search`
 {
   "query": "timeout burst",
-  "state": "open"
+  "status": "active"
 }
 
 Example: create a new significant event
 Tool: `event_create`
 {
-  "status": "open",
-  "severity": "60-high",
+  "status": "active",
+  "severity": "high",
   "title": "Checkout service — connection pool: timeouts",
   "summary": "Checkout service: requests failing with connection timeout. Users cannot complete purchases; payment-gateway is exposed. ~150 errors/min since 14:22 UTC, no sign of recovery. Immediately scale checkout connection pool.",
   "stream_names": ["logs.checkout", "logs.payment"],
   "confidence": 0.78
 }
 
-Example: update an existing significant event status
+Example: update an existing significant event status (`assessment_note` is optional)
 Tool: `event_status_update`
 {
-  "event_uuid": "9c4d04a1-86fe-45c2-b1dd-00891a8ba9f1",
-  "status": "closed"
+  "event_id": "checkout-latency",
+  "status": "inactive",
+  "assessment_note": "The connection-pool configuration was restored and latency returned to baseline."
 }
 
 Example response when the status changes:
 {
-  "event_uuid": "c1a2f799-0778-42fb-8d2d-e38e13e2e819",
+  "event_id": "checkout-latency",
   "updated": 1,
   "ignored": 0,
-  "status": "closed"
+  "status": "inactive"
 }
 
 Example: render a newly created significant event attachment

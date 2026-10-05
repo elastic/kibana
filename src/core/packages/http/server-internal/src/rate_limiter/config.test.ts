@@ -10,9 +10,9 @@
 import { rateLimiterConfigSchema } from './config';
 
 describe('rateLimiterConfigSchema', () => {
-  it('defaults to enabled with medium term and elu 0.8', () => {
+  it('defaults to disabled with medium term and elu 0.8', () => {
     expect(rateLimiterConfigSchema.validate({})).toEqual({
-      enabled: true,
+      enabled: false,
       elu: 0.8,
       term: 'medium',
     });

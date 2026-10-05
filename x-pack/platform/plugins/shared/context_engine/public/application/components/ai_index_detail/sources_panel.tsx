@@ -20,6 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
+import { useCanReadConnectors } from '../../hooks/use_can_read_connectors';
 import { useDataConnectors } from '../../hooks/use_data_connectors';
 import { useSourcesEditor } from '../../hooks/use_sources_editor';
 import { toSourceType } from '../../utils/sources';
@@ -46,8 +47,9 @@ export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: Sources
     () => sources.some((source) => source.type === 'connector'),
     [sources]
   );
+  const canReadConnectors = useCanReadConnectors();
   const { connectorNameById, connectorActionTypeById } = useDataConnectors({
-    enabled: hasConnectorSources && !isEditingActive,
+    enabled: hasConnectorSources && !isEditingActive && canReadConnectors,
   });
 
   const isSaving = editing?.isSaving ?? false;
