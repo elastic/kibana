@@ -99,8 +99,16 @@ export class EntityDefinitionRegistry {
   }
 
   /**
-   * Closes code registration. Called when plugin setup has finished. Definitions managed by
-   * integrations or users will arrive later through storage, not through `register`.
+   * Closes code registration. Called when plugin setup has finished.
+   *
+   * Kibana already orders setup correctly: a plugin that depends on the entity store sets up after
+   * it and before any plugin starts, so a well-formed plugin never hits this. The guard catches a
+   * plugin that keeps the setup contract and calls `register` later, from `start`, a request
+   * handler or a task. Such a definition would exist only on the node that made the call, so it is
+   * logged and ignored rather than accepted or thrown.
+   *
+   * Definitions managed by integrations or users will arrive later through storage, not through
+   * `register`, so this does not close the registry in general.
    */
   public closeSetupRegistration(): void {
     this.setupClosed = true;
