@@ -98,3 +98,33 @@ export const waitForExecution = async (
   }
   return execution;
 };
+
+/**
+ * Waits for the run an event-driven workflow started for the rule with this id: a workflow can run
+ * for other rules created in the meantime, so a run is matched by the id it recorded.
+ */
+export const waitForExecutionForRule = async (
+  apiClient: ApiClient,
+  headers: Record<string, string>,
+  workflowId: string,
+  ruleId: string,
+  timeoutMs: number = POLL_TIMEOUT_MS
+): Promise<WorkflowExecutionDto> => {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() <= deadline) {
+    const list = await apiClient.get(`/api/workflows/workflow/${workflowId}/executions`, {
+      headers,
+      responseType: 'json',
+    });
+    expect(list).toHaveStatusCode(200);
+    const { results } = list.body as { results: Array<{ id: string }> };
+    for (const { id } of results) {
+      const execution = await waitForExecution(apiClient, headers, id, timeoutMs);
+      if (JSON.stringify(execution.stepExecutions).includes(ruleId)) {
+        return execution;
+      }
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+  throw new Error(`No run of workflow ${workflowId} was started for rule ${ruleId}`);
+};

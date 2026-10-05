@@ -7,5 +7,11 @@
 
 export { apiTest, tags } from '@kbn/scout-security';
 export * as testData from './constants';
-export { createWorkflow, deleteWorkflow, runWorkflow, waitForExecution } from './helpers';
+export {
+  createWorkflow,
+  deleteWorkflow,
+  runWorkflow,
+  waitForExecution,
+  waitForExecutionForRule,
+} from './helpers';
 export type { ApiClient } from './helpers';
