@@ -191,29 +191,27 @@ telemetry.labels.serverless: security
 # Fleet specific configuration
 xpack.fleet.internal.registry.capabilities: ['security']
 xpack.fleet.internal.registry.excludePackages: [
-    # Oblt integrations
-    'apm',
-    'synthetics',
-    'synthetics_dashboards',
+  # Oblt integrations
+  'apm',
+  'synthetics',
+  'synthetics_dashboards',
 
-    # Deprecated security integrations
-    'bluecoat',
-    'cisco',
-    'cyberark',
-    'cylance',
-    'f5',
-    'fortinet_forticlient',
-    'juniper_junos',
-    'juniper_netscreen',
-    'microsoft',
-    'netscout',
-    'radware',
-    'symantec',
-    'tomcat',
+  # Deprecated security integrations
+  'bluecoat',
+  'cisco',
+  'cyberark',
+  'cylance',
+  'f5',
+  'fortinet_forticlient',
+  'juniper_junos',
+  'juniper_netscreen',
+  'microsoft',
+  'netscout',
+  'radware',
+  'symantec',
+  'tomcat',
+]
 
-    # Unsupported in serverless
-    'cloud_defend',
-  ]
 # fleet_server package installed to publish agent metrics
 xpack.fleet.packages:
   - name: fleet_server
