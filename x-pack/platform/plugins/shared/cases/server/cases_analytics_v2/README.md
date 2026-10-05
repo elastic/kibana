@@ -716,9 +716,10 @@ cases_analytics_v2/
 ├── constants.ts       index name + administrator route URLs
 │
 ├── ensure_indices/
-│   ├── case.ts            idempotent bootstrap for .cases (lookup-mode)
-│   ├── activity.ts        idempotent bootstrap + additive mapping sync for .cases-activity (fact table)
-│   └── attachments.ts     idempotent bootstrap for .cases-attachments (fact table)
+│   ├── ensure_index.ts    shared idempotent bootstrap + additive mapping sync
+│   ├── case.ts            .cases (lookup-mode)
+│   ├── activity.ts        .cases-activity (fact table)
+│   └── attachments.ts     .cases-attachments (fact table)
 │
 ├── mappings/
 │   ├── case.ts                             CASE_INDEX_MAPPING (dynamic: strict)
