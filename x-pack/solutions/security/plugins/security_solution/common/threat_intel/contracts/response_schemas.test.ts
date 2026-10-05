@@ -14,6 +14,7 @@
 import {
   assessRelevanceBodySchema,
   assessRelevanceResponseSchema,
+  attributeAlertsEvidenceBodySchema,
   classifySeverityResponseSchema,
   createThreatReportResponseSchema,
   enrichReportCoreResponseSchema,
@@ -23,6 +24,7 @@ import {
   findThreatReportsResponseSchema,
   getThreatReportResponseSchema,
   listSourcesResponseSchema,
+  persistReportFieldsBodySchema,
   readinessResponseSchema,
   updateSourceResponseSchema,
 } from '.';
@@ -248,5 +250,55 @@ describe('threat intel response schemas', () => {
 
   it('returns the validated update_source success payload', () => {
     expect(updateSourceResponseSchema.validate(updateSourcePayload)).toEqual(updateSourcePayload);
+  });
+
+  describe('index validators', () => {
+    it('rejects a persist_report_fields index outside .kibana-threat-reports', () => {
+      expect(() =>
+        persistReportFieldsBodySchema.validate({
+          index: '.kibana',
+          id: 'default:abc',
+          doc: {},
+        })
+      ).toThrow(/must target \.kibana-threat-reports/);
+    });
+
+    it('accepts a persist_report_fields index targeting .kibana-threat-reports', () => {
+      expect(() =>
+        persistReportFieldsBodySchema.validate({
+          index: '.kibana-threat-reports',
+          id: 'default:abc',
+          doc: {},
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects an attribute_alerts_evidence index outside .kibana-threat-reports', () => {
+      expect(() =>
+        attributeAlertsEvidenceBodySchema.validate({
+          index: '.alerts-security.alerts-default',
+          id: 'default:abc',
+          window: '7d',
+          computedAt: '2026-09-18T00:00:00.000Z',
+          iocMatchHits: 1,
+          techniqueOverlapHits: 1,
+          alertHitsTotal: 2,
+        })
+      ).toThrow(/must target \.kibana-threat-reports/);
+    });
+
+    it('accepts an attribute_alerts_evidence index targeting .kibana-threat-reports', () => {
+      expect(() =>
+        attributeAlertsEvidenceBodySchema.validate({
+          index: '.kibana-threat-reports',
+          id: 'default:abc',
+          window: '7d',
+          computedAt: '2026-09-18T00:00:00.000Z',
+          iocMatchHits: 1,
+          techniqueOverlapHits: 1,
+          alertHitsTotal: 2,
+        })
+      ).not.toThrow();
+    });
   });
 });
