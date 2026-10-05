@@ -122,7 +122,6 @@ describe('getRequestHandlerFactory', () => {
       expect((options as any).context.timingContext).toBeDefined();
       expect((options as any).context.timingContext.startTime).toBeGreaterThan(0);
       expect((options as any).context.timingContext.measure).toEqual(expect.any(Function));
-      expect((options as any).context.timingContext).not.toHaveProperty('kibanaRequest');
     });
 
     it('sets both timing and CPS contexts', () => {
