@@ -391,7 +391,7 @@ export class GraphPage {
     await this.contentList.searchFor(title);
     await rowLink.waitFor({ state: 'visible' });
     await this.contentList.selectAllAndDelete();
-    await rowLink.waitFor({ state: 'hidden' });
+    await rowLink.waitFor({ state: 'hidden', timeout: LISTING_TIMEOUT });
   }
 
   private workspaceListingLink(title: string): Locator {
