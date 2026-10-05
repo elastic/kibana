@@ -52,9 +52,9 @@ export const ApprovalContentFooter = memo<ApprovalContentFooterProps>(
         ))}
         {primaryAction && (
           <EuiButton
-            fill
+            fill={primaryAction.fill ?? true}
             size="s"
-            color={primaryAction.color ?? defaultButtonColor}
+            color={primaryAction.color}
             iconType={primaryAction.iconType ?? 'play'}
             isDisabled={primaryAction.isDisabled}
             isLoading={primaryAction.isLoading}

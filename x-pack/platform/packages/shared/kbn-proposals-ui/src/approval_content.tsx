@@ -176,6 +176,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
         ? {
             label: APPROVAL_MODAL_TRANSLATIONS.dismiss,
             color: 'danger',
+            fill: false,
             iconType: 'cross',
             onClick: declineConfirmAction,
             isDisabled: isDeclineDisabled || primaryAction?.isDisabled,
