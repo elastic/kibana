@@ -292,7 +292,10 @@ describe('GoogleThreatIntelligenceConnector', () => {
       expect(SearchCollectionsInputSchema.safeParse({ filter: 'a'.repeat(2001) }).success).toBe(
         false
       );
-      expect(AdvancedSearchInputSchema.safeParse({ query: 'a'.repeat(2001) }).success).toBe(false);
+      expect(AdvancedSearchInputSchema.safeParse({ query: 'a'.repeat(10_000) }).success).toBe(true);
+      expect(AdvancedSearchInputSchema.safeParse({ query: 'a'.repeat(10_001) }).success).toBe(
+        false
+      );
       expect(
         GetReportMitreAttackTechniquesInputSchema.safeParse({ reportId: 'campaign--123' }).success
       ).toBe(false);
@@ -500,8 +503,13 @@ describe('GoogleThreatIntelligenceConnector', () => {
         true
       );
       expect(GetUrlReportInputSchema.safeParse({ url: 'not-a-url' }).success).toBe(false);
+      const prefix = 'https://example.com/';
       expect(
-        GetUrlReportInputSchema.safeParse({ url: `https://example.com/${'a'.repeat(2048)}` })
+        GetUrlReportInputSchema.safeParse({ url: `${prefix}${'a'.repeat(8192 - prefix.length)}` })
+          .success
+      ).toBe(true);
+      expect(
+        GetUrlReportInputSchema.safeParse({ url: `https://example.com/${'a'.repeat(8192)}` })
           .success
       ).toBe(false);
     });
@@ -962,6 +970,20 @@ describe('GoogleThreatIntelligenceConnector', () => {
           url: 'https://example.com/',
         })
       ).rejects.toThrow('GTI API error (400): Invalid URL');
+    });
+  });
+
+  describe.each(['getUrlReport', 'scanUrl'] as const)('%s url length', (action) => {
+    const prefix = 'https://example.com/';
+    it.each([
+      [8192, true],
+      [8193, false],
+    ])('%d characters valid=%s', (length, expected) => {
+      expect(
+        GoogleThreatIntelligenceConnector.actions[action].input.safeParse({
+          url: `${prefix}${'a'.repeat(length - prefix.length)}`,
+        }).success
+      ).toBe(expected);
     });
   });
 });

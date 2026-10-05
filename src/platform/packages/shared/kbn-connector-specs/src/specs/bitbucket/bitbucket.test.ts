@@ -384,6 +384,13 @@ describe('Bitbucket', () => {
       ).toThrow();
     });
 
+    it('caps pageSize at the 50 that the pullrequests endpoint accepts', () => {
+      expect(() => parse('listPullRequests', { repoSlug: 'my-repo', pageSize: 50 })).not.toThrow();
+      expect(() => parse('listPullRequests', { repoSlug: 'my-repo', pageSize: 51 })).toThrow();
+      expect(() => parse('listRepositories', { pageSize: 100 })).not.toThrow();
+      expect(() => parse('listRepositories', { pageSize: 101 })).toThrow();
+    });
+
     it('keeps the OPEN default when only a query is given', async () => {
       mockClient.get.mockResolvedValue({ data: { values: [] } });
       await Bitbucket.actions.listPullRequests.handler(

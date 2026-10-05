@@ -451,6 +451,15 @@ describe('Okta', () => {
         },
       });
     });
+
+    it.each([
+      ['ten 40-character keywords', Array(10).fill('k'.repeat(40)).join(' '), true],
+      ['surrounding and repeated whitespace', '  alpha   beta\tgamma  ', true],
+      ['eleven keywords', Array(11).fill('k').join(' '), false],
+      ['a 41-character keyword', 'k'.repeat(41), false],
+    ])('bounds the q keyword filter: %s', (_label, q, valid) => {
+      expect(Okta.actions.getLogs.input.safeParse({ q }).success).toBe(valid);
+    });
   });
 
   describe('test handler', () => {

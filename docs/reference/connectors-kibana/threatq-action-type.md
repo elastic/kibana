@@ -114,7 +114,7 @@ Search criteria and filters use ThreatQ's structured query format. Optional `fie
 }
 ```
 
-Each query object accepts at most 20,000 characters, 50 entries per object or array, and five nested collection levels beneath its keys. Individual strings accept at most 2,000 characters.
+Each query object accepts at most 20,000 characters, 50 entries per object or array, and five nested collection levels beneath its keys. Individual strings accept at most 10,000 characters.
 
 Pass `with` as an array of relationship names. The connector sends a comma-separated parameter. Relationship names depend on the object definitions and ThreatQ version. For example, an adversary can use `description`; some instances expose `descriptions`, `ttp`, and `attack_pattern`. Confirm the names supported by your instance. Report detail requests use the singular `report` endpoint. Use the search endpoint name supported by your instance. `objectType` and `relatedType` accept custom endpoint names with lowercase letters, digits, and underscores.
 

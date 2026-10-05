@@ -22,9 +22,11 @@ const IpAddressSchema = z.union([z.ipv4().max(15), z.ipv6().max(45)]);
 
 const MaxAgeInDaysSchema = z.coerce.number().int().min(1).max(365);
 
-const MAX_BLACKLIST_LIMIT = 10_000;
+// The highest subscription tier's blacklist hard limit; lower tiers are truncated by AbuseIPDB without error.
+const MAX_BLACKLIST_LIMIT = 500_000;
 const MAX_REPORT_CATEGORIES = 30;
-const MAX_COMMENT_LENGTH = 1024;
+// AbuseIPDB truncates report comments beyond 1024 bytes.
+const MAX_COMMENT_BYTES = 1024;
 
 export const AbuseIPDBConnector: ConnectorSpec = {
   metadata: {
@@ -94,9 +96,14 @@ export const AbuseIPDBConnector: ConnectorSpec = {
           comment: z
             .string()
             .min(1)
-            .max(MAX_COMMENT_LENGTH)
+            .max(MAX_COMMENT_BYTES)
+            .refine((value) => Buffer.byteLength(value, 'utf8') <= MAX_COMMENT_BYTES, {
+              message: `Comment must not exceed ${MAX_COMMENT_BYTES} bytes (UTF-8).`,
+            })
             .optional()
-            .describe('Optional comment describing the observed abuse (max 1024 characters).'),
+            .describe(
+              `Optional comment describing the observed abuse (max ${MAX_COMMENT_BYTES} bytes UTF-8).`
+            ),
         })
       ),
       handler: async (ctx, input: { ip: string; categories: number[]; comment?: string }) => {
