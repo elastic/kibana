@@ -54,7 +54,7 @@ responses:
               error: "Bad Request"
               message: "[request body.message]: value has length [0] but it must have a minimum length of [1]."
   404:
-    description: "Not Found — the `conversation_id` does not exist, the `agent_id` does not name an agent the caller can use, or the `agentBuilder:experimentalFeatures` advanced setting is disabled. An unusable agent is reported as a missing conversation, matching the `conversationNotFound` shape of the conversation APIs, so callers cannot probe for hidden agents."
+    description: "Not Found: the conversation or agent was not found. Possible causes are a `conversation_id` that does not exist, an `agent_id` that the caller cannot use, or a disabled `agentBuilder:experimentalFeatures` advanced setting. If the caller cannot use the agent, the error says that the conversation was not found. This prevents callers from discovering hidden agents."
     content:
       application/json:
         examples:
