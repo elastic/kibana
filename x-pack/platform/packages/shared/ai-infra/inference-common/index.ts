@@ -70,6 +70,7 @@ export {
   type NamedEntityRecognitionRule,
   DEFAULT_BUILTIN_REGEX_RULES,
   refreshBuiltInAnonymizationRules,
+  isAnonymizationMaskingEnabled,
   type AnonymizationEntity,
   type Anonymization,
   type Deanonymization,

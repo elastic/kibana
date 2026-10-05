@@ -24,3 +24,4 @@ export type {
 
 export { DEFAULT_BUILTIN_REGEX_RULES } from './default_builtin_regex_rules';
 export { refreshBuiltInAnonymizationRules } from './refresh_builtin_rules';
+export { isAnonymizationMaskingEnabled } from './is_masking_enabled';
