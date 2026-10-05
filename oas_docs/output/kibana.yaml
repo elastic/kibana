@@ -133912,6 +133912,120 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/synthetics/monitors/_bulk_create:
+    post:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/monitors/_bulk_create</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create up to 1000 monitors in one request. Every monitor is validated before any monitor is persisted. The API creates the Saved Objects and synchronizes Fleet once for the batch.
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges. If a monitor is shared to additional spaces, you must also have create privileges in each of those spaces.
+        This is a versioned public API (`elastic-api-version: 2023-10-31`).
+      operationId: post-synthetic-monitors-bulk-create
+      requestBody:
+        content:
+          application/json:
+            examples:
+              bulkCreateRequestExample1:
+                summary: Two HTTP monitors
+                value: |-
+                  {
+                    "monitors": [
+                      {
+                        "type": "http",
+                        "name": "Storefront",
+                        "url": "https://example.com",
+                        "locations": ["united_kingdom"]
+                      },
+                      {
+                        "type": "http",
+                        "name": "Documentation",
+                        "url": "https://docs.example.com",
+                        "locations": ["united_kingdom"]
+                      }
+                    ]
+                  }
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                monitors:
+                  description: A non-empty list of monitor configurations, up to 1000 monitors.
+                  items:
+                    discriminator:
+                      propertyName: type
+                    oneOf:
+                      - $ref: '#/components/schemas/Synthetics_browserMonitorFields'
+                      - $ref: '#/components/schemas/Synthetics_httpMonitorFields'
+                      - $ref: '#/components/schemas/Synthetics_icmpMonitorFields'
+                      - $ref: '#/components/schemas/Synthetics_tcpMonitorFields'
+                      - $ref: '#/components/schemas/Synthetics_apiMonitorFields'
+                  maxItems: 1000
+                  minItems: 1
+                  type: array
+              required:
+                - monitors
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                bulkCreateResponseExample1:
+                  value: |-
+                    {
+                      "result": [
+                        {
+                          "id": "monitor1-id",
+                          "created": true
+                        },
+                        {
+                          "id": "monitor2-id",
+                          "created": true
+                        }
+                      ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    description: Optional service-level errors from the bulk sync.
+                    items:
+                      description: A service-level error from the bulk sync.
+                    type: array
+                  result:
+                    items:
+                      type: object
+                      properties:
+                        created:
+                          description: Whether the monitor Saved Object was created.
+                          type: boolean
+                        error:
+                          description: Present when `created` is `false`.
+                          type: string
+                        id:
+                          description: The config ID of the created monitor.
+                          type: string
+                      required:
+                        - id
+                        - created
+                    type: array
+                required:
+                  - result
+          description: |
+            A successful response. `created: false` indicates an individual Saved Object creation or Fleet synchronization failure; see `error`. Batch-level Fleet synchronization errors are returned in `errors`.
+        '400':
+          description: |
+            Bad request. Returned when the batch is empty or too large, a monitor configuration is invalid, or two monitors use the same name.
+      summary: Bulk create monitors
+      tags:
+        - synthetics
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/synthetics/monitors/_bulk_delete:
     post:
       description: |
@@ -205351,6 +205465,42 @@ components:
           $ref: '#/components/schemas/SLOs_time_window'
       title: Update SLO request
       type: object
+    Synthetics_apiMonitorFields:
+      allOf:
+        - $ref: '#/components/schemas/Synthetics_commonMonitorFields'
+        - additionalProperties: true
+          type: object
+          properties:
+            certificate_error_spki_allowlist:
+              default: []
+              description: PEM certificates whose public keys (SPKI) are allowlisted so the API request context bypasses certificate errors for matching presented certificates. This does not add a CA to the trust store.
+              items:
+                type: string
+              type: array
+            ignore_https_errors:
+              default: false
+              description: Ignore HTTPS errors.
+              type: boolean
+            inline_script:
+              description: The inline API Journey script.
+              type: string
+            playwright_options:
+              description: Playwright API request context options.
+              type: object
+            synthetics_args:
+              description: Synthetics agent CLI arguments.
+              items:
+                type: string
+              type: array
+            type:
+              description: The monitor type.
+              enum:
+                - api
+              type: string
+          required:
+            - inline_script
+            - type
+      title: API Journey monitor fields
     Synthetics_browserMonitorFields:
       allOf:
         - $ref: '#/components/schemas/Synthetics_commonMonitorFields'
