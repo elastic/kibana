@@ -131,14 +131,16 @@ export const ApprovalContent = memo<ApprovalContentProps>(
 
     const actorName = currentActorName ?? APPROVAL_MODAL_TRANSLATIONS.currentActorFallback;
     const isExpired = isProposalExpired(proposal);
-    const decision = getProposalDecision(proposal);
+    const isReplaced = proposal.supersededBy !== undefined || proposal.status === 'superseded';
+    const displayMode = isReplaced ? 'view' : mode;
+    const decision = isReplaced ? undefined : getProposalDecision(proposal);
     const tone = getProposalTone(proposal);
 
     const primaryAction: ApprovalAction | undefined = onApprove
       ? {
           label: APPROVAL_MODAL_TRANSLATIONS.approve,
           onClick: onApprove,
-          isDisabled: isExpired || readOnly,
+          isDisabled: isReplaced || isExpired || readOnly,
           'data-test-subj': dataTestSubj ? `${dataTestSubj}-confirm` : undefined,
         }
       : undefined;
@@ -170,7 +172,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const isDeclineDisabled = dismissReason === 'other' && rationale.trim() === '';
 
     const resolvedPrimaryAction: ApprovalAction | undefined =
-      mode === 'declining'
+      displayMode === 'declining'
         ? {
             label: APPROVAL_MODAL_TRANSLATIONS.dismiss,
             color: 'danger',
@@ -182,7 +184,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
         : primaryAction;
 
     const resolvedSecondaryActions: ApprovalAction[] | undefined =
-      mode === 'declining'
+      displayMode === 'declining'
         ? [
             {
               label: APPROVAL_MODAL_TRANSLATIONS.cancelDecline,
@@ -200,7 +202,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
                     color: 'text' as const,
                     iconType: 'cross' as const,
                     onClick: startDeclining,
-                    isDisabled: primaryAction?.isDisabled,
+                    isDisabled: isReplaced || primaryAction?.isDisabled,
                     'data-test-subj': dataTestSubj ? `${dataTestSubj}-dismiss` : undefined,
                   },
                 ]
@@ -218,19 +220,23 @@ export const ApprovalContent = memo<ApprovalContentProps>(
       }
     }, []);
 
-    const approvalPhase: ApprovalPhase = decision ? decision.status : isSubmitting ?? 'pending';
+    const approvalPhase: ApprovalPhase = isReplaced
+      ? 'pending'
+      : decision
+      ? decision.status
+      : isSubmitting ?? 'pending';
 
     const badge = getApprovalOutcomeBadge(approvalPhase);
-    const banner = getApprovalOutcomeBanner(approvalPhase);
+    const banner = isReplaced ? undefined : getApprovalOutcomeBanner(approvalPhase);
     const bannerSuffix = decision?.reason ?? banner?.hint;
     const isSettledOrTransient = approvalPhase !== 'pending';
 
     const headerCaption = decision?.actorName ? (
       <ApprovalActorTime actorName={decision.actorName} at={decision.decidedAt} />
-    ) : isSubmitting && since ? (
+    ) : !isReplaced && isSubmitting && since ? (
       <ApprovalActorTime actorName={actorName} at={since} live />
     ) : (
-      getProposalCaption(proposal, { includeRiskDetails: true })
+      getProposalCaption(proposal, { includeRiskDetails: !isReplaced })
     );
 
     const defaultButtonColor: EuiButtonColor = tone === 'danger' ? 'danger' : 'primary';
@@ -243,19 +249,20 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     // "Declining", and the footer with Cancel/Decline is gone too (via `isSettledOrTransient`) —
     // showing the form alongside a banner that says the decision is already in flight would be
     // confusing.
-    const showDeclineForm = mode === 'declining' && isSubmitting !== 'declining';
+    const showDeclineForm = displayMode === 'declining' && isSubmitting !== 'declining';
 
     return (
       <>
         <ApprovalContentHeader
           badge={badge}
+          showStatusBadge={!isReplaced}
           caption={headerCaption}
           title={proposal.title}
           titleId={titleId ?? generatedTitleId}
         />
 
         <ApprovalContentBody
-          mode={mode}
+          mode={displayMode}
           comment={proposal.comment}
           banner={banner}
           bannerSuffix={bannerSuffix}
@@ -263,19 +270,21 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           data-test-subj={dataTestSubj}
         />
 
-        {mode === 'view' && alwaysAllow && (
+        {displayMode === 'view' && alwaysAllow && (
           <AlwaysAllowCheckbox
             option={alwaysAllow}
             data-test-subj={dataTestSubj ? `${dataTestSubj}-always-allow` : undefined}
           />
         )}
 
-        <ApprovalStatusCallouts
-          isPending={approvalPhase === 'pending'}
-          previousExecutionError={proposal.previousExecutionError}
-          isExpired={isExpired}
-          data-test-subj={dataTestSubj}
-        />
+        {!isReplaced && (
+          <ApprovalStatusCallouts
+            isPending={approvalPhase === 'pending'}
+            previousExecutionError={proposal.previousExecutionError}
+            isExpired={isExpired}
+            data-test-subj={dataTestSubj}
+          />
+        )}
 
         {showDeclineForm && (
           <DeclineReasonForm
