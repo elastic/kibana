@@ -22,6 +22,8 @@ import {
 } from './audit_config_sets';
 import {
   findDuplicateClassNames,
+  REVIEWED_PAGE_OBJECTS,
+  withoutReviewedPageObjects,
   findAllScoutFiles,
   formatAuditReportForSlack,
   extractPageObjectKeys,
@@ -178,6 +180,8 @@ describe('findScoutTestFiles', () => {
     expect(files).toEqual(
       [
         'src/platform/plugins/shared/fake_plugin_a/test/scout/ui/fixtures/page_objects/fake_solution_page.ts',
+        'src/platform/plugins/shared/fake_plugin_a/test/scout/ui/fixtures/page_objects/overview_tab.ts',
+        'src/platform/plugins/shared/fake_plugin_b/test/scout/ui/fixtures/page_objects/overview_tab.ts',
         'src/platform/plugins/shared/fake_plugin_a/test/scout/ui/fixtures/page_objects/spec_using_property.ts',
         'src/platform/plugins/shared/fake_plugin_b/test/scout/ui/spec_using_destructure.ts',
         'x-pack/solutions/fake/packages/kbn-scout-fake/src/playwright/page_objects/uses_core.ts',
@@ -230,6 +234,30 @@ describe('findDuplicateClassNames', () => {
     expect(duplicates).toEqual([
       { className: 'FakeSolutionPage', modules: ['@kbn/scout-fake', 'fake-plugin-a'] },
     ]);
+  });
+
+  it('does not report classes that only share a name', () => {
+    // `OverviewTab` exists in fake_plugin_a and fake_plugin_b with different members.
+    const duplicates = findDuplicateClassNames(FAKE_REPO_ROOT, findAllScoutFiles(FAKE_REPO_ROOT));
+    expect(duplicates.map((d) => d.className)).not.toContain('OverviewTab');
+  });
+});
+
+describe('reviewed page objects', () => {
+  it('are dropped from the census', () => {
+    const census = [
+      { key: 'listingTable', fileCount: 1, modules: ['a'] },
+      { key: 'dashboard', fileCount: 3, modules: ['a', 'b'] },
+    ];
+    expect(withoutReviewedPageObjects(census, { listingTable: 'reviewed' })).toEqual([
+      { key: 'dashboard', fileCount: 3, modules: ['a', 'b'] },
+    ]);
+  });
+
+  it('only lists keys that exist in the core page objects index', () => {
+    const indexPath = Path.resolve(__dirname, '../playwright/page_objects/index.ts');
+    const keys = extractPageObjectKeysOrThrow(Fs.readFileSync(indexPath, 'utf8'), indexPath);
+    Object.keys(REVIEWED_PAGE_OBJECTS).forEach((key) => expect(keys).toContain(key));
   });
 });
 
