@@ -125,10 +125,10 @@ describe('useInvestigationSections', () => {
     ]);
     expect(result.current.sections.map(({ id }) => id)).toEqual([
       'in-progress',
-      '80-critical',
-      '60-high',
-      '40-medium',
-      '20-low',
+      'critical',
+      'high',
+      'medium',
+      'low',
       'not-rated',
     ]);
   });
@@ -138,10 +138,10 @@ describe('useInvestigationSections', () => {
 
     await waitFor(() =>
       expect(result.current.severityCounts).toEqual({
-        '80-critical': 3,
-        '60-high': 1,
-        '40-medium': 0,
-        '20-low': 2,
+        critical: 3,
+        high: 1,
+        medium: 0,
+        low: 2,
       })
     );
     expect(httpGet).toHaveBeenCalledWith(

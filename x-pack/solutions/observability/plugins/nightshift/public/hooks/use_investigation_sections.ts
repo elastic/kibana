@@ -13,7 +13,6 @@ import type {
   InvestigationSummary,
 } from '@kbn/agentic-investigations-plugin/common';
 import {
-  SEVERITY_TIER_TO_INVESTIGATION_SEVERITY,
   SHARED_INVESTIGATIONS_API_VERSION,
   SHARED_INVESTIGATIONS_SEVERITY_COUNTS_URL,
 } from '../common/shared_investigations_api';
@@ -58,14 +57,14 @@ const toInvestigationIds = (investigations: InvestigationSummary[]): Set<string>
 
 const tierSection = (severity: Severity) => ({
   inProgress: false,
-  severities: [SEVERITY_TIER_TO_INVESTIGATION_SEVERITY[severity]],
+  severities: [severity],
 });
 
 const toSeverityCounts = (counts: InvestigationSeverityCounts | undefined): SeverityCounts => ({
-  '80-critical': counts?.critical ?? 0,
-  '60-high': counts?.high ?? 0,
-  '40-medium': counts?.medium ?? 0,
-  '20-low': counts?.low ?? 0,
+  critical: counts?.critical ?? 0,
+  high: counts?.high ?? 0,
+  medium: counts?.medium ?? 0,
+  low: counts?.low ?? 0,
 });
 
 const toSectionState = ({
@@ -95,10 +94,10 @@ export const useInvestigationSections = ({
   // Every item in the in-progress section is being worked on by construction.
   const hasActiveInvestigations = inProgress.total > 0;
 
-  const critical = useFetchInvestigations({ ...tierSection('80-critical'), query });
-  const high = useFetchInvestigations({ ...tierSection('60-high'), query });
-  const medium = useFetchInvestigations({ ...tierSection('40-medium'), query });
-  const low = useFetchInvestigations({ ...tierSection('20-low'), query });
+  const critical = useFetchInvestigations({ ...tierSection('critical'), query });
+  const high = useFetchInvestigations({ ...tierSection('high'), query });
+  const medium = useFetchInvestigations({ ...tierSection('medium'), query });
+  const low = useFetchInvestigations({ ...tierSection('low'), query });
   const notRated = useFetchInvestigations({ inProgress: false, severities: ['none'], query });
 
   // The tiles count the same investigations as the severity sections.
@@ -174,10 +173,10 @@ export const useInvestigationSections = ({
   const sections = useMemo(
     () => [
       toSectionState({ id: 'in-progress', queryResult: inProgress }),
-      toSectionState({ id: '80-critical', queryResult: critical }),
-      toSectionState({ id: '60-high', queryResult: high }),
-      toSectionState({ id: '40-medium', queryResult: medium }),
-      toSectionState({ id: '20-low', queryResult: low }),
+      toSectionState({ id: 'critical', queryResult: critical }),
+      toSectionState({ id: 'high', queryResult: high }),
+      toSectionState({ id: 'medium', queryResult: medium }),
+      toSectionState({ id: 'low', queryResult: low }),
       toSectionState({ id: 'not-rated', queryResult: notRated }),
     ],
     [inProgress, critical, high, medium, low, notRated]
