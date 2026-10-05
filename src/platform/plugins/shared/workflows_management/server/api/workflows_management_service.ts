@@ -457,7 +457,7 @@ export class WorkflowsService {
     return this.crudService.updateWorkflow(id, workflow, spaceId, request);
   }
 
-  public async rotatePage(id: string, spaceId: string, request: KibanaRequest): Promise<number> {
+  public async rotatePage(id: string, spaceId: string, request: KibanaRequest): Promise<string> {
     await this.ensureInitialized();
     return this.crudService.rotatePage(id, spaceId, request);
   }
@@ -500,6 +500,14 @@ export class WorkflowsService {
   }> {
     await this.ensureInitialized();
     return this.crudService.disableAllWorkflows(spaceId, request);
+  }
+
+  public async getWorkflowByPageKey(
+    pageKey: string,
+    spaceId: string
+  ): Promise<WorkflowDetailDto | null> {
+    await this.ensureInitialized();
+    return this.searchService.getWorkflowByPageKey(pageKey, spaceId);
   }
 
   public async getWorkflowsSubscribedToTrigger(

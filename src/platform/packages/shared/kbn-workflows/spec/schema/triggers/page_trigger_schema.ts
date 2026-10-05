@@ -42,8 +42,8 @@ export const isPageTrigger = (trigger: { type?: string }): trigger is PageTrigge
 export const MULTIPLE_PAGE_TRIGGERS_ERROR = 'A workflow can define at most one page trigger';
 
 /**
- * A workflow has at most one page: its URL is keyed by the workflow id, so a second
- * page trigger would have no address of its own.
+ * A workflow has at most one page: the workflow document holds a single page key, so a
+ * second page trigger would have no address of its own.
  */
 export const hasAtMostOnePageTrigger = (triggers: readonly unknown[]): boolean =>
   triggers.filter(

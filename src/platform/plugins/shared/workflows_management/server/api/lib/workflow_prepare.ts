@@ -23,6 +23,7 @@ import { validateWorkflowYaml } from '../../../common/lib/validate_workflow_yaml
 import { updateWorkflowYamlFields } from '../../../common/lib/yaml';
 import { INITIAL_WORKFLOW_VERSION } from '../../lib/workflow_version';
 import type { WorkflowProperties } from '../../storage/workflow_storage';
+import { withPageKey } from '../pages/page_key';
 
 /** Persist-time warning for ignored kibana YAML `fetcher` settings. */
 export const logIgnoredKibanaFetcherOnPersist = (params: {
@@ -162,7 +163,7 @@ export const prepareWorkflowDocumentFromYaml = (params: {
     workflowId: id,
   });
 
-  const workflowData: WorkflowProperties = {
+  const workflowData: WorkflowProperties = withPageKey({
     name: workflowToCreate.name,
     description: workflowToCreate.description,
     enabled: workflowToCreate.enabled,
@@ -183,7 +184,7 @@ export const prepareWorkflowDocumentFromYaml = (params: {
     version: INITIAL_WORKFLOW_VERSION,
     created_at: now.toISOString(),
     updated_at: now.toISOString(),
-  };
+  });
 
   return { id, workflowData, definition: workflowToCreate.definition };
 };
