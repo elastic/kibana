@@ -37,7 +37,7 @@ responses:
               - tool_id: "reindex-logs"
                 message: "Agent running in non-interactive mode, user input not available - execution was declined"
   400:
-    description: "Bad Request — the `message` is empty or too long, the `conversation_id` is not a UUID, or the body carries a key this endpoint does not accept (for example `connector_id` or `attachments`)."
+    description: "Bad Request: the request body is not valid. Possible causes are an empty or too long `message`, a `conversation_id` that is not a UUID, or an unsupported property such as `connector_id` or `attachments`."
     content:
       application/json:
         examples:
