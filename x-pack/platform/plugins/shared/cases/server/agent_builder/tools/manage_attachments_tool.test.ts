@@ -34,7 +34,10 @@ const buildToolContext = (attachments = buildMockAttachments()): ToolHandlerCont
 const buildRegistry = (
   entries: Array<{ id: string; schema?: z.ZodType }>
 ): UnifiedAttachmentTypeRegistry =>
-  ({ list: () => entries } as unknown as UnifiedAttachmentTypeRegistry);
+  ({
+    list: () => entries,
+    has: (id: string) => entries.some((entry) => entry.id === id),
+  } as unknown as UnifiedAttachmentTypeRegistry);
 
 const commentSchema = z.object({
   type: z.literal('comment'),
@@ -146,6 +149,78 @@ describe('manageAttachmentsTool', () => {
     expect(attachments.add).toHaveBeenCalledTimes(1);
     const { results } = result as unknown as { results: Array<{ data: Record<string, unknown> }> };
     expect(results[0].data.attachment_ids).toEqual(['att-1']);
+  });
+});
+
+describe('manageAttachmentsTool attach_conversation', () => {
+  const CONVERSATION_TYPE = 'agentBuilder.conversation';
+  const conversationSchema = z.object({
+    type: z.literal(CONVERSATION_TYPE),
+    owner: z.string(),
+    attachmentId: z.string(),
+  });
+  const theCase = { id: 'case-1', title: 'Test Case', owner: 'securitySolution' };
+
+  let casesClient: CasesClientMock;
+
+  beforeEach(() => {
+    casesClient = createCasesClientMock();
+    casesClient.cases.get.mockResolvedValue(theCase as never);
+    casesClient.attachments.bulkCreate.mockResolvedValue(theCase as never);
+  });
+
+  const buildTool = (
+    registry = buildRegistry([{ id: CONVERSATION_TYPE, schema: conversationSchema }])
+  ) => manageAttachmentsTool(jest.fn().mockResolvedValue(casesClient), registry, true);
+
+  const contextWithConversation = (conversationId?: string): ToolHandlerContext =>
+    ({
+      ...buildToolContext(),
+      runContext: { stack: [{ type: 'agent', agentId: 'agent-1', conversationId }] },
+    } as unknown as ToolHandlerContext);
+
+  it('attaches the current conversation from the run context', async () => {
+    await buildTool().handler(
+      { mode: 'attach_conversation', case_id: 'case-1' } as never,
+      contextWithConversation('conv-1')
+    );
+
+    expect(casesClient.attachments.bulkCreate).toHaveBeenCalledWith({
+      caseId: 'case-1',
+      attachments: [{ type: CONVERSATION_TYPE, attachmentId: 'conv-1', owner: 'securitySolution' }],
+    });
+  });
+
+  it('prefers an explicit conversation_id over the run context', async () => {
+    await buildTool().handler(
+      { mode: 'attach_conversation', case_id: 'case-1', conversation_id: 'conv-2' } as never,
+      contextWithConversation('conv-1')
+    );
+
+    expect(casesClient.attachments.bulkCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attachments: [expect.objectContaining({ attachmentId: 'conv-2' })],
+      })
+    );
+  });
+
+  it('throws when no conversation id can be determined', async () => {
+    await expect(
+      buildTool().handler(
+        { mode: 'attach_conversation', case_id: 'case-1' } as never,
+        contextWithConversation(undefined)
+      )
+    ).rejects.toThrow(/Provide conversation_id/);
+    expect(casesClient.attachments.bulkCreate).not.toHaveBeenCalled();
+  });
+
+  it('throws when the conversation attachment type is not registered', async () => {
+    await expect(
+      buildTool(buildRegistry([{ id: 'comment', schema: commentSchema }])).handler(
+        { mode: 'attach_conversation', case_id: 'case-1' } as never,
+        contextWithConversation('conv-1')
+      )
+    ).rejects.toThrow(/not available/);
   });
 });
 

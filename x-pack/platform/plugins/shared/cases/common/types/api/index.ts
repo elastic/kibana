@@ -30,6 +30,7 @@ export * as statsApiV1 from './stats/v1';
 export * as caseApiV1 from './case/v1';
 export * as externalServiceApiV1 from './external_service/v1';
 export * as userApiV1 from './user/v1';
+export * as agentBuilderApiV1 from './agent_builder/v1';
 export * as connectorApiV1 from './connector/v1';
 export * as attachmentApiV1 from './attachment/v1';
 export * as metricsApiV1 from './metrics/v1';

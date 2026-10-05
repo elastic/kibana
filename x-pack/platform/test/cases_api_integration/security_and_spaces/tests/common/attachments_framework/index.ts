@@ -35,5 +35,6 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
 
     // Reference saved-object types that only exist as unified attachments
     loadTestFile(require.resolve('./saved_object_attachments'));
+    loadTestFile(require.resolve('./conversation'));
   });
 };

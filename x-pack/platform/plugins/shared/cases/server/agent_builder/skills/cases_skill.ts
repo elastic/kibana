@@ -86,7 +86,7 @@ You have full read **and write** access to Elastic cases across Security, Observ
     }\` | Retrieves all comments, alerts, and events for a case |
 | \`${
       platformCoreCasesTools.manageAttachments
-    }\` | \`add_comment\`, \`add_alerts\`, \`add_events\`, \`add_attachments\` |
+    }\` | \`add_comment\`, \`add_alerts\`, \`add_events\`, \`add_attachments\`, \`attach_conversation\` (keeps the current chat on the case) |
 | \`${platformCoreCasesTools.observables}\` | \`add\`, \`update\`, \`delete\` (IOCs) |${
       isTemplatesEnabled ? FIND_TEMPLATES_ROW : ''
     }${isTemplatesEnabled ? FIND_TEMPLATES_SECTION : ''}${

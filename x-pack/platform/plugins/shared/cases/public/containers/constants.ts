@@ -53,6 +53,8 @@ export const casesQueriesKeys = {
   caseUsers: (id: string) => [...casesQueriesKeys.case(id), 'users'],
   conversationAccess: (conversationId: string) =>
     [...casesQueriesKeys.userActions, 'conversation-access', conversationId] as const,
+  conversationsAccess: (conversationIds: string[]) =>
+    [...casesQueriesKeys.userActions, 'conversations-access', conversationIds] as const,
   caseUserActions: (id: string, params: unknown) =>
     [...casesQueriesKeys.case(id), ...casesQueriesKeys.userActions, params] as const,
   caseUserActionsStats: (id: string) => [
