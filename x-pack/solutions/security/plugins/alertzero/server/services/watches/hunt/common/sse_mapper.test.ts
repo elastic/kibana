@@ -438,6 +438,11 @@ describe('buildSseData', () => {
     expect(huntResultOf(secondEntry).tier2?.behaviors.map((b) => b.technique_id)).toEqual([
       'T1552.001',
     ]);
+
+    // Each technique-scoped entry names the technique it corroborates, so packaging can
+    // tell a real per-technique confirmation apart from the report-scoped fallback.
+    expect(entry.data.corroborated_technique_id).toBe('T1078.004');
+    expect(secondEntry.data.corroborated_technique_id).toBe('T1552.001');
   });
 
   it('returns a single report-scoped entry when Tier 2 produced no behaviors', async () => {
@@ -682,6 +687,10 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
     expect(entries[0].data.evidence_against).toEqual([
       'Tier 2 executed 2 proposed technique(s) with no required-index rows: T1078.004, T1552.001.',
     ]);
+    // Neither proposed technique was corroborated, so this report-scoped entry must not
+    // claim either one by name -- packaging relies on this to avoid crediting a technique
+    // that was merely listed for report-wide context.
+    expect(entries[0].data.corroborated_technique_id).toBeUndefined();
     expect(significantSecurityEventAttachmentDataSchema.safeParse(entries[0].data).success).toBe(
       true
     );
@@ -764,6 +773,7 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
     expect(entries[0].data.evidence_for).toContain(
       'Tier 1 matched 1 event(s) for this report in the hunt window, at least one in a required index; 1 are referenced here (see hunt_result.tier1.per_index for the required/optional split).'
     );
+    expect(entries[0].data.corroborated_technique_id).toBe('T1552.001');
   });
 
   it('does not let an optional-index hit attributed to a technique promote it', async () => {

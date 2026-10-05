@@ -8,25 +8,25 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import { OBSERVABILITY_ALERTING_HOST } from '../observability_alerting_host';
 import { RuleCanvasContent } from './rule_canvas_content';
 
 const mockUpsertRule = jest.fn().mockImplementation(async (id: string) => ({ id }));
 const mockCreateRule = jest.fn().mockResolvedValue({ id: 'generated-rule-id' });
-const mockNavigateToUrl = jest.fn();
+const mockRulesNavigateSync = jest.fn();
 const mockAddSuccess = jest.fn();
-const mockPrepend = (path: string) => `/base${path}`;
 const mockUseQueryClient = jest.requireActual('@kbn/react-query').useQueryClient;
 let capturedSummaryRule: Record<string, unknown> = {};
+
+jest.mock('../../application/bind_locators_to_host', () => ({
+  getAlertingV2Locators: () => ({
+    rulesLocators: { navigateSync: (...args: unknown[]) => mockRulesNavigateSync(...args) },
+  }),
+}));
 
 jest.mock('@kbn/core-di-browser', () => ({
   CoreStart: (key: string) => key,
   useService: (token: unknown) => {
-    if (token === 'application') {
-      return { navigateToUrl: mockNavigateToUrl };
-    }
-    if (token === 'http') {
-      return { basePath: { prepend: mockPrepend } };
-    }
     if (token === 'notifications') {
       return { toasts: { addSuccess: mockAddSuccess } };
     }
@@ -233,14 +233,17 @@ describe('RuleCanvasContent', () => {
       expect(mockAddSuccess).toHaveBeenCalled();
     });
 
-    it('View in Rules handler navigates to the rule detail page', () => {
+    it('View in Rules handler navigates with the observability host', () => {
       const { registerActionButtons } = renderCanvas({ origin: 'rule-123' });
 
       const buttons = getLastRegisteredButtons(registerActionButtons);
       const viewButton = buttons.find((b) => b.label === 'View in Rules')!;
       viewButton.handler();
 
-      expect(mockNavigateToUrl).toHaveBeenCalledWith(expect.stringContaining('rule-123'));
+      expect(mockRulesNavigateSync).toHaveBeenCalledWith({
+        ruleId: 'rule-123',
+        host: OBSERVABILITY_ALERTING_HOST.rules,
+      });
     });
   });
 
