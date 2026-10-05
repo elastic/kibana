@@ -19,7 +19,7 @@ requestBody:
             conversation_id: "696ccd6d-4bff-4b26-a62e-522ccf2dcd16"
 responses:
   200:
-    description: "Indicates a successful response"
+    description: "The agent answered. The response contains the answer and the ID of the conversation that stores the exchange."
     content:
       application/json:
         examples:
