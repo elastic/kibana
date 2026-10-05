@@ -24,6 +24,14 @@ import { useAlertZeroDocumentationLink } from '../../hooks/use_alertzero_documen
  */
 const CHROME_SCROLLED_ROUTES = ['/watches'];
 
+/**
+ * Routes that need the same `overflow: visible` (for a sticky element) but keep the app heading.
+ * Matched exactly: `/` is the landing page, which every other route's path also starts with. The
+ * app root can also report an empty pathname.
+ * The landing page pins the onboarding intro's Continue footer.
+ */
+const CHROME_SCROLLED_EXACT_ROUTES = ['', '/'];
+
 const matchesRoute = (pathname: string, prefixes: string[]) =>
   prefixes.some((prefix) => pathname.startsWith(prefix));
 
@@ -41,7 +49,8 @@ export const AppChromeLayout: React.FC<AppChromeLayoutProps> = ({ children }) =>
   const { pathname } = useLocation();
 
   const isWatchesShell = matchesRoute(pathname, CHROME_SCROLLED_ROUTES);
-  const overflow = isWatchesShell ? 'visible' : 'auto';
+  const isChromeScrolled = isWatchesShell || CHROME_SCROLLED_EXACT_ROUTES.includes(pathname);
+  const overflow = isChromeScrolled ? 'visible' : 'auto';
   const hideAppHeading = isWatchesShell;
 
   return (

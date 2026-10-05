@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   RESPONSE_ACTION_AGENT_TYPE,
   RESPONSE_ACTION_API_COMMANDS_NAMES,
+  RESPONSE_ACTION_STATUS,
   RESPONSE_ACTION_TYPE,
 } from '../service/response_actions/constants';
 import { createHapiReadableStreamMock } from '../../../server/endpoint/services/actions/mocks';
@@ -98,6 +99,16 @@ describe('actions schemas', () => {
         }).not.toThrow();
       });
 
+      it('should not accept a list of more than the allowed number of `types`', () => {
+        const overLimit = [...RESPONSE_ACTION_TYPE, RESPONSE_ACTION_TYPE[0]];
+
+        expect(() => {
+          EndpointActionListRequestSchema.query.validate({ types: overLimit });
+        }).toThrow(
+          `array size is [${overLimit.length}], but cannot be greater than [${RESPONSE_ACTION_TYPE.length}]`
+        );
+      });
+
       it('should not accept an empty list for `types`', () => {
         expect(() => {
           EndpointActionListRequestSchema.query.validate({
@@ -183,6 +194,16 @@ describe('actions schemas', () => {
             agentTypes: RESPONSE_ACTION_AGENT_TYPE,
           });
         }).not.toThrow();
+      });
+
+      it('should not accept a list of more than the allowed number of agentTypes', () => {
+        const overLimit = [...RESPONSE_ACTION_AGENT_TYPE, RESPONSE_ACTION_AGENT_TYPE[0]];
+
+        expect(() => {
+          EndpointActionListRequestSchema.query.validate({ agentTypes: overLimit });
+        }).toThrow(
+          `array size is [${overLimit.length}], but cannot be greater than [${RESPONSE_ACTION_AGENT_TYPE.length}]`
+        );
       });
 
       it('should not accept empty agentTypes list', () => {
@@ -381,6 +402,26 @@ describe('actions schemas', () => {
             statuses: ['failed', 'pending', 'successful'],
           });
         }).not.toThrow();
+      });
+
+      it('should work with all allowed `statuses` in a list', () => {
+        expect(() => {
+          EndpointActionListRequestSchema.query.validate({
+            startDate: 'now-1d',
+            endDate: 'now',
+            statuses: RESPONSE_ACTION_STATUS,
+          });
+        }).not.toThrow();
+      });
+
+      it('should not work with a list of more than the allowed number of `statuses`', () => {
+        const overLimit = [...RESPONSE_ACTION_STATUS, RESPONSE_ACTION_STATUS[0]];
+
+        expect(() => {
+          EndpointActionListRequestSchema.query.validate({ statuses: overLimit });
+        }).toThrow(
+          `array size is [${overLimit.length}], but cannot be greater than [${RESPONSE_ACTION_STATUS.length}]`
+        );
       });
 
       it('should not work with empty list for `statuses` filter', () => {

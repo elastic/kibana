@@ -15,9 +15,11 @@ import type {
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { AttackDiscoveryMarkdownFormatter } from '../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
 import {
+  ATTACK_DISCOVERY_VERDICT_INLINE_CONTENT_TEST_ID,
   ATTACK_DISCOVERY_VERDICT_INLINE_RATIONALE_TEST_ID,
   ATTACK_DISCOVERY_VERDICT_INLINE_SCOPE_ID,
   ATTACK_DISCOVERY_VERDICT_INLINE_SUMMARY_TEST_ID,
+  ATTACK_DISCOVERY_VERDICT_INLINE_TITLE_TEST_ID,
   AttackDiscoveryVerdictInlineContent,
   createAttackDiscoveryVerdictAttachmentDefinition,
   getVerdictLabel,
@@ -123,6 +125,16 @@ describe('createAttackDiscoveryVerdictAttachmentDefinition', () => {
     ).toBe(expected);
   });
 
+  // Its only label would be the generic title, which the header already shows.
+  it.each([
+    ['an unknown', 'something_else'],
+    ['a missing', undefined],
+  ])('omits the header badge for %s verdict', (_, verdict) => {
+    expect(
+      definition.getHeader?.({ attachment: makeAttachment({ verdict }) }).badges
+    ).toBeUndefined();
+  });
+
   it('names the analysis in the header subtitle', () => {
     expect(definition.getHeader?.({ attachment: makeAttachment({}) }).subtitle).toBe(
       'False positive / true positive analysis'
@@ -181,6 +193,21 @@ describe('AttackDiscoveryVerdictInlineContent', () => {
       expect(mockFormatter.mock.calls[0][0].markdown).toBe(defaultData.summary_markdown);
     });
 
+    it('renders the title, verdict badge, and subtitle above the summary', () => {
+      const title = screen.getByTestId(ATTACK_DISCOVERY_VERDICT_INLINE_TITLE_TEST_ID);
+      const summary = screen.getByTestId(ATTACK_DISCOVERY_VERDICT_INLINE_SUMMARY_TEST_ID);
+
+      expect(title).toHaveTextContent('Analysis verdict');
+      expect(title).toHaveTextContent('True positive');
+      expect(title).toHaveTextContent('False positive / true positive analysis');
+      expect(title.compareDocumentPosition(summary)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+
+    // The verdict is the badge, so the title must not repeat it.
+    it('shows the verdict label exactly once', () => {
+      expect(screen.getAllByText('True positive')).toHaveLength(1);
+    });
+
     it('renders the rationale markdown when the analysis produced one', () => {
       expect(mockFormatter.mock.calls[1][0].markdown).toBe(defaultData.rationale_markdown);
     });
@@ -193,7 +220,8 @@ describe('AttackDiscoveryVerdictInlineContent', () => {
     });
 
     // Distinct from the discovery attachment's scope, so a field-pill flyout opened
-    // from the verdict does not collide with one opened from the evidence.
+    // from the verdict would not collide with one opened from the evidence, once
+    // field-pill actions are re-enabled in Agent Builder.
     it.each([
       ['summary', 0],
       ['rationale', 1],
@@ -206,8 +234,42 @@ describe('AttackDiscoveryVerdictInlineContent', () => {
     it.each([
       ['summary', 0],
       ['rationale', 1],
-    ])('keeps field pills enabled on the %s formatter', (_, index) => {
-      expect(mockFormatter.mock.calls[index][0].disableActions).toBe(false);
+    ])('disables field pill actions on the %s formatter', (_, index) => {
+      expect(mockFormatter.mock.calls[index][0].disableActions).toBe(true);
+    });
+
+    it.each([
+      ['summary', 0],
+      ['rationale', 1],
+    ])('wraps field pill values on the %s formatter', (_, index) => {
+      expect(mockFormatter.mock.calls[index][0].wrapFieldValues).toBe(true);
+    });
+
+    it('lets the content shrink and wrap inside the card', () => {
+      const content = screen.getByTestId(ATTACK_DISCOVERY_VERDICT_INLINE_CONTENT_TEST_ID);
+
+      expect(content).toHaveStyleRule('min-width', '0');
+      expect(content).toHaveStyleRule('overflow-wrap', 'anywhere');
+    });
+  });
+
+  describe('title row', () => {
+    it.each(VERDICT_LABELS.filter(([verdict]) => verdict !== 'true_positive'))(
+      'renders the generic title and a "%s" verdict badge as "%s"',
+      (verdict, badgeLabel) => {
+        renderInline({ summary_markdown: defaultData.summary_markdown, verdict });
+
+        const title = screen.getByTestId(ATTACK_DISCOVERY_VERDICT_INLINE_TITLE_TEST_ID);
+
+        expect(title).toHaveTextContent('Analysis verdict');
+        expect(title).toHaveTextContent(badgeLabel);
+      }
+    );
+
+    it('renders the generic title once, with no badge, for an unknown verdict', () => {
+      renderInline({ summary_markdown: defaultData.summary_markdown, verdict: 'something_else' });
+
+      expect(screen.getAllByText('Analysis verdict')).toHaveLength(1);
     });
   });
 

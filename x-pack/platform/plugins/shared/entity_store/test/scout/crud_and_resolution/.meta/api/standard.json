@@ -1,5 +1,5 @@
 {
-  "sha1": "6c21581445b38e539f074219adbb90747781ae24",
+  "sha1": "7add42eb4baaf54f122b19edc56aebba08d00399",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -752,8 +752,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/history_snapshot.spec.ts",
-        "line": 59,
+        "line": 63,
         "column": 38
+      }
+    },
+    {
+      "id": "19c1c7c5e6ccaf3-cfa314913d63e61",
+      "title": "Entity Store History Snapshot history snapshot: deletes indices older than retention using the date in the index name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/history_snapshot.spec.ts",
+        "line": 215,
+        "column": 7
       }
     },
     {
