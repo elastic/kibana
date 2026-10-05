@@ -56,6 +56,11 @@ export const HUNT_COORDINATOR_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_coordinato
  * Runs the two-tier hunt pipeline (Tier 1 + optional Tier 2) for a single report.
  * The coordinator does NOT write feedback — `completed_successfully` on the result
  * tells the caller whether the managed-workflow feedback step should proceed.
+ *
+ * A blocked scope answers 200 with `status: 'blocked'` rather than an error status,
+ * deliberately differing from the standalone `hunt_for_threat` route's 409: this route
+ * chains Tier 1 into Tier 2, so a caller already reads the status field either way, and
+ * `hunt_for_threat` has no such chain to read one from. See elastic/security-team#19741.
  */
 export const registerHuntCoordinatorRoute = ({
   router,
@@ -131,6 +136,9 @@ export const registerHuntCoordinatorRoute = ({
             logger,
           });
 
+          // The Worker fan-out supplies a run id so one sweep's children share it,
+          // which is what the packaging barrier and conclusion dedupe key off. Only
+          // mint one when the caller has no sweep to tie the run to.
           const result = await huntCoordinator({ esClient, reportsEsClient }, model, logger, {
             report_id,
             spaceId,
