@@ -9,7 +9,12 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-common';
 import type {
   AgentConfiguration,
+  ChatEvent,
+  ChatEventType,
   ConversationRound,
+  ConversationRoundOrigin,
+  ExecutionStartedEvent,
+  ExecutionTerminalEvent,
   PreExecutionWorkflowStepData,
 } from '@kbn/agent-builder-common';
 import type { ProcessedRoundInput } from '../processed_input';
@@ -61,11 +66,36 @@ export interface AfterExecutionHookContext extends AgentHookContextBase {
   agentConfiguration: AgentConfiguration;
 }
 
+/**
+ * Chat events `afterChatEvent` hooks can run on. Execution lifecycle events are conversation
+ * timeline events, which are persisted, so they never go through hooks.
+ */
+export type HookableChatEvent = Exclude<ChatEvent, ExecutionStartedEvent | ExecutionTerminalEvent>;
+
+/**
+ * Chat event types an `afterChatEvent` hook can subscribe to. Message chunks are excluded: they
+ * arrive hundreds of times per reply, and awaiting each one would stall streaming.
+ */
+export type HookableChatEventType = Exclude<HookableChatEvent['type'], ChatEventType.messageChunk>;
+
+/**
+ * Context of an `afterChatEvent` hook. `event` is the copy delivered to clients and written to the
+ * execution document; the stored conversation never sees changes made to it.
+ */
+export interface AfterChatEventHookContext extends AgentHookContextBase {
+  event: HookableChatEvent;
+  /** Origin of the round's input, for example Slack. Absent for rounds sent from Kibana. */
+  origin?: ConversationRoundOrigin;
+  conversationId: string;
+  executionId: string;
+}
+
 export interface HookContextByLifecycle {
   [HookLifecycle.beforeAgent]: BeforeAgentHookContext;
   [HookLifecycle.beforeToolCall]: BeforeToolCallHookContext;
   [HookLifecycle.afterToolCall]: AfterToolCallHookContext;
   [HookLifecycle.afterExecution]: AfterExecutionHookContext;
+  [HookLifecycle.afterChatEvent]: AfterChatEventHookContext;
 }
 
 export type HookContext<E extends HookLifecycle = HookLifecycle> = HookContextByLifecycle[E];
@@ -85,6 +115,9 @@ export interface HookHandlerResultByLifecycle {
     toolReturn?: RunToolReturn;
   };
   [HookLifecycle.afterExecution]: Record<string, never>;
+  [HookLifecycle.afterChatEvent]: {
+    event?: HookableChatEvent;
+  };
 }
 
 export type HookHandlerResult<E extends HookLifecycle = HookLifecycle> =
@@ -102,19 +135,32 @@ type NonBlockingHookHandler<E extends HookLifecycle = HookLifecycle> = (
   context: HookContext<E>
 ) => void | Promise<void>;
 
-interface BlockingHookRegistrationEntry<E extends HookLifecycle> {
+/**
+ * Registration options specific to a lifecycle.
+ */
+type HookLifecycleOptions<E extends HookLifecycle> = E extends HookLifecycle.afterChatEvent
+  ? {
+      /**
+       * Chat event types this hook runs on. Only events of these types wait for hooks; every other
+       * event goes through without delay.
+       */
+      eventTypes: HookableChatEventType[];
+    }
+  : unknown;
+
+type BlockingHookRegistrationEntry<E extends HookLifecycle> = {
   mode: HookExecutionMode.blocking;
   handler: BlockingHookHandler<E>;
   /**
    * Optional timeout in milliseconds for this hook. If exceeded, execution fails.
    */
   timeout?: number;
-}
+} & HookLifecycleOptions<E>;
 
-interface NonBlockingHookRegistrationEntry<E extends HookLifecycle> {
+type NonBlockingHookRegistrationEntry<E extends HookLifecycle> = {
   mode: HookExecutionMode.nonBlocking;
   handler: NonBlockingHookHandler<E>;
-}
+} & HookLifecycleOptions<E>;
 
 type HookRegistrationEntry<E extends HookLifecycle> =
   | BlockingHookRegistrationEntry<E>
@@ -160,6 +206,10 @@ export interface HooksServiceStart {
    * Returns the context as updated by blocking hooks.
    */
   run: <E extends HookLifecycle>(lifecycle: E, context: HookContext<E>) => Promise<HookContext<E>>;
+  /**
+   * Whether any `afterChatEvent` hook runs on chat events of the given type.
+   */
+  handles: (lifecycle: HookLifecycle.afterChatEvent, eventType: ChatEvent['type']) => boolean;
 }
 
 export interface AgentBuilderHooks {

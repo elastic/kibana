@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { ChatEventType, type MessageCompleteEvent } from '@kbn/agent-builder-common';
 import {
   applyBeforeAgentResult,
   applyBeforeToolCallResult,
   applyAfterToolCallResult,
+  applyAfterChatEventResult,
 } from './apply_result';
 import type {
   BeforeAgentHookContext,
   BeforeToolCallHookContext,
   AfterToolCallHookContext,
+  AfterChatEventHookContext,
 } from './types';
 import type { RunToolReturn } from '../runner/runner';
 import type { ToolHandlerContext } from '../tools/handler';
@@ -109,6 +112,38 @@ describe('apply_result', () => {
       expect(result).not.toBe(baseContext);
       expect(result.toolReturn).toEqual(newReturn);
       expect(result.toolId).toBe(baseContext.toolId);
+    });
+  });
+
+  describe('applyAfterChatEventResult', () => {
+    const event: MessageCompleteEvent = {
+      type: ChatEventType.messageComplete,
+      data: { message_id: 'message-1', message_content: 'original' },
+    };
+    const baseContext: AfterChatEventHookContext = {
+      request: createMockRequest(),
+      conversationId: 'conversation-1',
+      executionId: 'execution-1',
+      event,
+    };
+
+    it('returns context unchanged when result is undefined', () => {
+      expect(applyAfterChatEventResult(baseContext, undefined)).toBe(baseContext);
+    });
+
+    it('returns context unchanged when result object has no event', () => {
+      expect(applyAfterChatEventResult(baseContext, {})).toBe(baseContext);
+    });
+
+    it('returns new context with event when result has event', () => {
+      const newEvent: MessageCompleteEvent = {
+        ...event,
+        data: { ...event.data, message_content: 'overridden' },
+      };
+      const result = applyAfterChatEventResult(baseContext, { event: newEvent });
+      expect(result).not.toBe(baseContext);
+      expect(result.event).toBe(newEvent);
+      expect(result.executionId).toBe(baseContext.executionId);
     });
   });
 });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ChatEventType } from '@kbn/agent-builder-common';
 import type { HookRegistration, HooksServiceSetup } from '@kbn/agent-builder-server';
 import { HookLifecycle } from '@kbn/agent-builder-server';
 
@@ -13,6 +14,21 @@ type HookRegistrationsBundle = Parameters<HooksServiceSetup['register']>[0];
 export function buildHookRegistrationId(bundleId: string, lifecycle: HookLifecycle): string {
   return `${bundleId}-${lifecycle}`;
 }
+
+/**
+ * Rejects `afterChatEvent` entries that subscribe to no event type, or to message chunks.
+ */
+const validateAfterChatEventEntry = (lifeCycleId: string, eventTypes: unknown): void => {
+  if (!Array.isArray(eventTypes) || eventTypes.length === 0) {
+    throw new Error(`Hook with id "${lifeCycleId}" must declare at least one event type.`);
+  }
+
+  if (eventTypes.includes(ChatEventType.messageChunk)) {
+    throw new Error(
+      `Hook with id "${lifeCycleId}" cannot run on "${ChatEventType.messageChunk}" events.`
+    );
+  }
+};
 
 export interface HookRegistry {
   register(bundle: HookRegistrationsBundle): void;
@@ -40,6 +56,9 @@ export function createHookRegistry(): HookRegistry {
           throw new Error(
             `Hook with id "${lifeCycleId}" is already registered for event "${lifeCycle}".`
           );
+        }
+        if (lifecycleKey === HookLifecycle.afterChatEvent) {
+          validateAfterChatEventEntry(lifeCycleId, (entry as { eventTypes?: unknown }).eventTypes);
         }
 
         hooksLifecycleEntries.push({

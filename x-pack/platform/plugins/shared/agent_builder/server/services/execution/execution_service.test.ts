@@ -91,6 +91,7 @@ const mockTaskManagerEnsureScheduled = jest.fn();
 
 import { createAgentExecutionService } from './execution_service';
 import { ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS } from './constants';
+import { createHooksServiceStartMock } from '../../test_utils/runner';
 
 describe('AgentExecutionService', () => {
   const logger = loggerMock.create();
@@ -159,6 +160,7 @@ describe('AgentExecutionService', () => {
     savedObjects,
     meteringService,
     searchInferenceEndpoints,
+    hooks: createHooksServiceStartMock(),
   });
 
   beforeEach(() => {

@@ -28,7 +28,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { RunAgentFn } from '@kbn/agent-builder-server';
+import type { HooksServiceStart, RunAgentFn } from '@kbn/agent-builder-server';
 import type { ChatEvent, ConverseInput, ConversationRoundAuthor } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
@@ -74,7 +74,7 @@ import {
   type ConversationWithOperation,
 } from './utils';
 import { reportRoundTelemetry } from './utils/report_round_telemetry';
-import { applyOriginAdapters } from './origin_adapters';
+import { runAfterChatEventHooks } from './utils/run_after_chat_event_hooks';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
 import { getCurrentSpaceId } from '../../utils/spaces';
@@ -100,6 +100,7 @@ export interface AgentExecutionDeps {
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
+  hooks: HooksServiceStart;
 }
 
 export const setUserAttributes = (
@@ -202,8 +203,15 @@ const handleConversationExecution = async ({
     throw createInternalError('Execution is missing required conversation parameters');
   }
 
-  const { logger, runAgent, trackingService, analyticsService, meteringService, agentService } =
-    deps;
+  const {
+    logger,
+    runAgent,
+    trackingService,
+    analyticsService,
+    meteringService,
+    agentService,
+    hooks,
+  } = deps;
 
   const conversationClient = await deps.conversationService.getScopedClientAsUser({
     request,
@@ -399,7 +407,16 @@ const handleConversationExecution = async ({
           // Must stay below the telemetry tap: `resume_execution` carries the unmerged per-execution
           // round that telemetry needs, and is only stripped so it doesn't reach the client.
           map(stripResumeExecution),
-          applyOriginAdapters({ origin: roundOrigin, logger }),
+          runAfterChatEventHooks({
+            hooks,
+            request,
+            abortSignal,
+            agentId,
+            conversationId: conversation.id,
+            executionId: execution.executionId,
+            origin: roundOrigin,
+            logger,
+          }),
           convertErrors({
             agentId,
             logger,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ChatEventType } from '@kbn/agent-builder-common';
 import { createHookRegistry, buildHookRegistrationId } from './hooks_registry';
 import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-server';
 
@@ -96,5 +97,38 @@ describe('createHookRegistry', () => {
 
     expect(registry.getHooksForLifecycle(HookLifecycle.beforeAgent)).toHaveLength(1);
     expect(registry.getHooksForLifecycle(HookLifecycle.afterToolCall)).toHaveLength(1);
+  });
+
+  describe('afterChatEvent', () => {
+    const registerAfterChatEvent = (eventTypes: unknown) =>
+      createHookRegistry().register({
+        id: 'chat-event',
+        hooks: {
+          [HookLifecycle.afterChatEvent]: {
+            mode: HookExecutionMode.blocking,
+            handler: () => {},
+            eventTypes: eventTypes as never,
+          },
+        },
+      });
+
+    it('registers a hook with event types', () => {
+      expect(() => registerAfterChatEvent([ChatEventType.roundComplete])).not.toThrow();
+    });
+
+    it('throws when no event type is declared', () => {
+      expect(() => registerAfterChatEvent([])).toThrow(
+        'Hook with id "chat-event-afterChatEvent" must declare at least one event type.'
+      );
+      expect(() => registerAfterChatEvent(undefined)).toThrow(
+        'Hook with id "chat-event-afterChatEvent" must declare at least one event type.'
+      );
+    });
+
+    it('throws when subscribing to message chunks', () => {
+      expect(() =>
+        registerAfterChatEvent([ChatEventType.roundComplete, ChatEventType.messageChunk])
+      ).toThrow('Hook with id "chat-event-afterChatEvent" cannot run on "message_chunk" events.');
+    });
   });
 });

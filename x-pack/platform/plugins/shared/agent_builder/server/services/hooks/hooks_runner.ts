@@ -6,9 +6,18 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { createHooksExecutionError, createRequestAbortedError } from '@kbn/agent-builder-common';
+import {
+  createHooksExecutionError,
+  createRequestAbortedError,
+  type ChatEvent,
+} from '@kbn/agent-builder-common';
 import { withTimeout } from '@kbn/std';
-import type { HookContext, HookRegistration, HooksServiceStart } from '@kbn/agent-builder-server';
+import type {
+  AfterChatEventHookContext,
+  HookContext,
+  HookRegistration,
+  HooksServiceStart,
+} from '@kbn/agent-builder-server';
 import {
   applyHookResultByLifecycle,
   HookExecutionMode,
@@ -24,14 +33,29 @@ import { orderBy } from 'lodash';
 /** Default maximum execution time for a hook when timeout is not configured (5 minutes). */
 const DEFAULT_HOOK_TIMEOUT_MS = 2 * 60 * 1000; // 2 minutes
 
+/**
+ * Default maximum execution time for an `afterChatEvent` hook. Events queue behind an event whose
+ * hooks are running, so these hooks must be fast.
+ */
+const AFTER_CHAT_EVENT_HOOK_TIMEOUT_MS = 10 * 1000;
+
 /** After hooks run in reverse order so they nest like LangChain (last before = first after). */
-const AFTER_EVENTS: HookLifecycle[] = [HookLifecycle.afterToolCall, HookLifecycle.afterExecution];
+const AFTER_EVENTS: HookLifecycle[] = [
+  HookLifecycle.afterToolCall,
+  HookLifecycle.afterExecution,
+  HookLifecycle.afterChatEvent,
+];
+
+type AfterChatEventHookRegistration = HookRegistration<HookLifecycle.afterChatEvent>;
+
+const runsOnEventType = (hook: object, eventType: ChatEvent['type']): boolean =>
+  (hook as AfterChatEventHookRegistration).eventTypes.some((type) => type === eventType);
 
 const isAfterEvent = (event: HookLifecycle): boolean => AFTER_EVENTS.includes(event);
 
 const normalizeHookError = <E extends HookLifecycle>(
   hookLifecycle: E,
-  hook: Pick<HookRegistration<E>, 'id' | 'mode'>,
+  hook: { id: string; mode: HookExecutionMode },
   err: unknown
 ) => {
   if (isHooksExecutionError(err) || isWorkflowAbortedError(err) || isWorkflowExecutionError(err)) {
@@ -56,10 +80,15 @@ function getRelevantHooks<E extends HookLifecycle>(
   getHooksForLifecycle: CreateHooksRunnerDeps['getHooksForLifecycle'],
   lifecycle: E,
   mode: HookExecutionMode,
-  _context: HookContext<E>
+  context: HookContext<E>
 ): Array<HookRegistration<E>> {
   const hooks = getHooksForLifecycle(lifecycle) as Array<HookRegistration<E>>;
-  const filtered = hooks.filter((h) => h.mode === mode);
+  const filtered = hooks.filter(
+    (h) =>
+      h.mode === mode &&
+      (lifecycle !== HookLifecycle.afterChatEvent ||
+        runsOnEventType(h, (context as AfterChatEventHookContext).event.type))
+  );
   const sorted = orderBy(filtered, [(h) => h.priority ?? 0], ['desc']);
   return isAfterEvent(lifecycle) ? sorted.reverse() : sorted;
 }
@@ -92,10 +121,14 @@ export function createHooksRunner(deps: CreateHooksRunnerDeps): HooksServiceStar
       }
 
       try {
+        const defaultTimeoutMs =
+          lifecycle === HookLifecycle.afterChatEvent
+            ? AFTER_CHAT_EVENT_HOOK_TIMEOUT_MS
+            : DEFAULT_HOOK_TIMEOUT_MS;
         const timeoutMs =
           hook.mode === HookExecutionMode.blocking && 'timeout' in hook
-            ? hook.timeout ?? DEFAULT_HOOK_TIMEOUT_MS
-            : DEFAULT_HOOK_TIMEOUT_MS;
+            ? hook.timeout ?? defaultTimeoutMs
+            : defaultTimeoutMs;
         const timed = await withTimeout({
           promise: (async () => hook.handler(currentContext))(),
           timeoutMs,
@@ -139,5 +172,8 @@ export function createHooksRunner(deps: CreateHooksRunnerDeps): HooksServiceStar
     return updated;
   };
 
-  return { run };
+  const handles: HooksServiceStart['handles'] = (lifecycle, eventType) =>
+    getHooksForLifecycle(lifecycle).some((hook) => runsOnEventType(hook, eventType));
+
+  return { run, handles };
 }

@@ -274,6 +274,7 @@ export class ServiceManager {
       analyticsService,
       meteringService: this.services.metering,
       searchInferenceEndpoints,
+      hooks,
       callbackDeliveryService: this.services.callbackDelivery,
     });
 
@@ -293,6 +294,7 @@ export class ServiceManager {
       analyticsService,
       meteringService: this.services.metering,
       searchInferenceEndpoints,
+      hooks,
     });
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });

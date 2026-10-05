@@ -7,8 +7,10 @@
 
 import {
   AgentBuilderErrorCode,
+  ChatEventType,
   isHooksExecutionError,
   ToolResultType,
+  type MessageCompleteEvent,
 } from '@kbn/agent-builder-common';
 import { createWorkflowExecutionError } from '@kbn/agent-builder-common/base/errors';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -19,6 +21,7 @@ import type {
   BeforeAgentHookContext,
   BeforeToolCallHookContext,
   AfterToolCallHookContext,
+  AfterChatEventHookContext,
   HookContext,
   HookRegistration,
 } from '@kbn/agent-builder-server';
@@ -556,5 +559,133 @@ describe('createHooksRunner', () => {
 
     await run(HookLifecycle.beforeAgent, contextWithSignal);
     expect(receivedSignal).toBe(controller.signal);
+  });
+
+  describe('afterChatEvent', () => {
+    const messageCompleteEvent: MessageCompleteEvent = {
+      type: ChatEventType.messageComplete,
+      data: { message_id: 'message-1', message_content: 'original' },
+    };
+    const chatEventContext: AfterChatEventHookContext = {
+      request: {} as AfterChatEventHookContext['request'],
+      conversationId: 'conversation-1',
+      executionId: 'execution-1',
+      event: messageCompleteEvent,
+    };
+
+    const appendToMessage =
+      (suffix: string) =>
+      ({ event }: AfterChatEventHookContext) => {
+        if (event.type !== ChatEventType.messageComplete) {
+          return;
+        }
+
+        return {
+          event: {
+            ...event,
+            data: { ...event.data, message_content: `${event.data.message_content} ${suffix}` },
+          },
+        };
+      };
+
+    const chatEventHook = (
+      overrides: Partial<HookRegistration<HookLifecycle.afterChatEvent>>
+    ): HookRegistration<HookLifecycle> =>
+      ({
+        id: 'chat-event',
+        mode: HookExecutionMode.blocking,
+        eventTypes: [ChatEventType.messageComplete],
+        handler: () => {},
+        ...overrides,
+      } as HookRegistration<HookLifecycle>);
+
+    const messageContent = (context: AfterChatEventHookContext) =>
+      context.event.type === ChatEventType.messageComplete
+        ? context.event.data.message_content
+        : undefined;
+
+    it('only runs hooks whose event types include the event type', async () => {
+      const matching = jest.fn();
+      const other = jest.fn();
+      const { run } = createRunner({
+        getHooksForLifecycle: () => [
+          chatEventHook({ id: 'matching', handler: matching }),
+          chatEventHook({
+            id: 'other',
+            eventTypes: [ChatEventType.roundComplete],
+            handler: other,
+          }),
+        ],
+      });
+
+      await run(HookLifecycle.afterChatEvent, chatEventContext);
+
+      expect(matching).toHaveBeenCalledTimes(1);
+      expect(other).not.toHaveBeenCalled();
+    });
+
+    it('chains blocking hooks in reverse priority order', async () => {
+      const { run } = createRunner({
+        getHooksForLifecycle: () => [
+          chatEventHook({ id: 'high', priority: 10, handler: appendToMessage('high') }),
+          chatEventHook({ id: 'low', priority: 1, handler: appendToMessage('low') }),
+        ],
+      });
+
+      const result = await run(HookLifecycle.afterChatEvent, chatEventContext);
+
+      expect(messageContent(result)).toBe('original low high');
+    });
+
+    it('passes the final event to non-blocking hooks', async () => {
+      const nonBlocking = jest.fn();
+      const { run } = createRunner({
+        getHooksForLifecycle: () => [
+          chatEventHook({ id: 'blocking', handler: appendToMessage('changed') }),
+          chatEventHook({
+            id: 'non-blocking',
+            mode: HookExecutionMode.nonBlocking,
+            handler: nonBlocking,
+          }),
+        ],
+      });
+
+      await run(HookLifecycle.afterChatEvent, chatEventContext);
+      await flushEventLoop();
+
+      expect(messageContent(nonBlocking.mock.calls[0][0])).toBe('original changed');
+    });
+
+    it('times out blocking hooks after 10 seconds by default', async () => {
+      jest.useFakeTimers();
+
+      try {
+        const { run } = createRunner({
+          getHooksForLifecycle: () => [
+            chatEventHook({ id: 'slow', handler: () => new Promise<void>(() => {}) }),
+          ],
+        });
+
+        const result = run(HookLifecycle.afterChatEvent, chatEventContext);
+        jest.advanceTimersByTime(10_000);
+
+        await expect(result).rejects.toMatchObject({
+          code: AgentBuilderErrorCode.hookExecutionError,
+          message: expect.stringContaining('timed out after 10000ms'),
+        });
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('reports whether any hook handles an event type', () => {
+      const { handles } = createRunner({
+        getHooksForLifecycle: (lifecycle) =>
+          lifecycle === HookLifecycle.afterChatEvent ? [chatEventHook({})] : [],
+      });
+
+      expect(handles(HookLifecycle.afterChatEvent, ChatEventType.messageComplete)).toBe(true);
+      expect(handles(HookLifecycle.afterChatEvent, ChatEventType.roundComplete)).toBe(false);
+    });
   });
 });

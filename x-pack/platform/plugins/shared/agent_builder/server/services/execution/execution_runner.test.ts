@@ -44,6 +44,8 @@ import {
   createRound,
 } from '../../test_utils';
 import { pausedAndResumedRoundTimeline } from '../../test_utils/timeline';
+import { createHooksServiceStartMock } from '../../test_utils/runner';
+import { HookLifecycle, type AfterChatEventHookContext } from '@kbn/agent-builder-server';
 import { loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
 import { executeAgent$, generateTitle, resolveServices } from './utils';
 import type { Span } from '@opentelemetry/api';
@@ -147,6 +149,7 @@ const createDeps = ({
     savedObjects: {
       getScopedClient: jest.fn().mockReturnValue({}),
     },
+    hooks: createHooksServiceStartMock(),
   } as never);
 
 /**
@@ -386,6 +389,7 @@ describe('handleAgentExecution', () => {
         meteringService: {
           reportExecution,
         },
+        hooks: createHooksServiceStartMock(),
         conversationService: {
           getScopedClientAsUser: jest.fn().mockResolvedValue(conversationClient),
         },
@@ -574,40 +578,55 @@ describe('handleAgentExecution', () => {
       expect(executeAgentMock).toHaveBeenCalledWith(expect.objectContaining({ origin }));
     });
 
-    it('adds the Slack output to round_complete for a Slack round without persisting it', async () => {
+    it('runs afterChatEvent hooks with the round origin and emits the event they return', async () => {
       const { conversationClient, deps } = setup({
         roundCompleteEvent: {
           type: ChatEventType.roundComplete,
           data: { round: createRound({}) },
         },
       });
+      const { hooks } = deps as { hooks: ReturnType<typeof createHooksServiceStartMock> };
+      const projection = {
+        slack: { text: 'projected', blocks: [{ type: 'markdown' as const, text: 'projected' }] },
+      };
+      hooks.handles.mockImplementation(
+        (_lifecycle, eventType) => eventType === ChatEventType.roundComplete
+      );
+      hooks.run.mockImplementation(async (_lifecycle, context) => {
+        const chatEventContext = context as AfterChatEventHookContext;
+        return { ...chatEventContext, event: { ...chatEventContext.event, projection } };
+      });
 
       const events = await runExecution({ deps, executionOrigin: origin });
 
-      const roundComplete = events.find(isRoundCompleteEvent);
-      expect(roundComplete?.projection).toEqual({
-        slack: {
-          text: 'assistant response',
-          blocks: [{ type: 'markdown', text: 'assistant response' }],
-        },
-      });
-
+      expect(hooks.run).toHaveBeenCalledWith(
+        HookLifecycle.afterChatEvent,
+        expect.objectContaining({
+          origin: { type: ConversationOriginType.Slack },
+          conversationId: 'conversation-from-origin',
+          executionId: 'execution-1',
+        })
+      );
+      expect(events.find(isRoundCompleteEvent)?.projection).toEqual(projection);
       expect(JSON.stringify(conversationClient.update.mock.calls)).not.toContain('projection');
     });
 
-    it('does not add a projection to a round without origin in a conversation with one', async () => {
+    it('passes no origin to afterChatEvent hooks for a round without one', async () => {
       const { deps } = setup({
         roundCompleteEvent: {
           type: ChatEventType.roundComplete,
           data: { round: createRound({}) },
         },
       });
+      const { hooks } = deps as { hooks: ReturnType<typeof createHooksServiceStartMock> };
+      hooks.handles.mockReturnValue(true);
 
-      const events = await runExecution({ deps });
+      await runExecution({ deps });
 
-      const roundComplete = events.find(isRoundCompleteEvent);
-      expect(roundComplete).toBeDefined();
-      expect(roundComplete).not.toHaveProperty('projection');
+      expect(hooks.run).toHaveBeenCalledWith(
+        HookLifecycle.afterChatEvent,
+        expect.objectContaining({ origin: undefined })
+      );
     });
   });
 

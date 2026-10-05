@@ -12,6 +12,7 @@ import {
   type BeforeToolCallHookContext,
   type AfterToolCallHookContext,
   type AfterExecutionHookContext,
+  type AfterChatEventHookContext,
   type HookHandlerResult,
 } from './types';
 
@@ -63,6 +64,14 @@ export function applyAfterExecutionResult(
   return context;
 }
 
+export function applyAfterChatEventResult(
+  context: AfterChatEventHookContext,
+  result: void | HookHandlerResult<HookLifecycle.afterChatEvent>
+): AfterChatEventHookContext {
+  if (!isResultObject(result) || result.event === undefined) return context;
+  return { ...context, event: result.event };
+}
+
 /**
  * Map of each hook lifecycle to its corresponding apply-result function.
  */
@@ -78,4 +87,5 @@ export const applyHookResultByLifecycle: ApplyHookResultByLifecycle = {
   [HookLifecycle.beforeToolCall]: applyBeforeToolCallResult,
   [HookLifecycle.afterToolCall]: applyAfterToolCallResult,
   [HookLifecycle.afterExecution]: applyAfterExecutionResult,
+  [HookLifecycle.afterChatEvent]: applyAfterChatEventResult,
 };
