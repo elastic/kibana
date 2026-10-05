@@ -68,12 +68,65 @@ async function createToolIfMissing({
     });
     log.info(`[persona-matrix] created tool '${body.id}'`);
   } catch (error) {
+    const errText = `${(error as Error)?.message ?? ""} ${(error as { body?: unknown })?.body ? JSON.stringify((error as { body: unknown }).body) : ""}`;
     const status = (error as { status?: number })?.status;
-    if (status === 409) {
+    if (status === 409 || errText.includes("already exists")) {
       log.info(`[persona-matrix] tool '${body.id}' already exists, reusing`);
       return;
     }
     throw error;
+  }
+}
+
+const AGENT_TOOLS_PATH = '/api/agent_builder/agents/elastic-ai-agent';
+
+/**
+ * Attach the persona-matrix tools (and parity shims) to the default agent so the
+ * converse runtime actually offers them to the model. Tools that exist as space
+ * objects but are not in the agent's `configuration.tools` are invisible to the
+ * agent (observed as "denied permission" in model answers).
+ */
+async function attachToolsToDefaultAgent({
+  kbnClient,
+  log,
+  toolIds,
+}: SeedToolsOptions & { toolIds: string[] }): Promise<void> {
+  try {
+    const agent = (await kbnClient.request({
+      method: 'GET',
+      path: AGENT_TOOLS_PATH,
+      headers: AGENT_BUILDER_TOOLS_HEADERS,
+    })) as unknown as {
+      name?: string;
+      description?: string;
+      access_control?: { access_mode: string };
+      configuration?: { tools?: Array<{ tool_ids?: string[] }> } & Record<string, unknown>;
+    };
+    const existing = agent?.configuration?.tools as Array<Record<string, unknown>> | undefined;
+    const currentIds = new Set(existing?.flatMap((s) => s.tool_ids ?? []) ?? []);
+    const merged = [...(existing ?? [])];
+    if (currentIds.size === 0) {
+      merged.push({ tool_ids: [...toolIds] });
+    } else {
+      const missing = toolIds.filter((id) => !currentIds.has(id));
+      if (missing.length > 0) {
+        merged[0] = { tool_ids: [...currentIds, ...missing] };
+      }
+    }
+    await kbnClient.request({
+      method: 'PUT',
+      path: AGENT_TOOLS_PATH,
+      headers: AGENT_BUILDER_TOOLS_HEADERS,
+      body: {
+        name: agent?.name ?? 'Elastic AI Agent',
+        description: agent?.description ?? '',
+        access_control: agent?.access_control ?? { access_mode: 'public' },
+        configuration: { ...agent?.configuration, tools: merged },
+      },
+    });
+    log.info(`[persona-matrix] attached tools to default agent: ${toolIds.join(', ')}`);
+  } catch (error) {
+    log.warning(`[persona-matrix] failed to attach tools to default agent: ${error}`);
   }
 }
 
@@ -118,6 +171,11 @@ export async function seedPersonaMatrixTools({
   });
 
   if (!parity) {
+    await attachToolsToDefaultAgent({
+      kbnClient,
+      log,
+      toolIds: [...PERSONA_MATRIX_TOOL_IDS],
+    });
     return;
   }
 
@@ -188,6 +246,14 @@ export async function seedPersonaMatrixTools({
       },
     },
   });
+
+  await attachToolsToDefaultAgent({
+    kbnClient,
+    log,
+    toolIds: parity
+      ? [...PERSONA_MATRIX_TOOL_IDS, ...PERSONA_MATRIX_PARITY_TOOL_IDS]
+      : [...PERSONA_MATRIX_TOOL_IDS],
+  });
 }
 
 export async function cleanupPersonaMatrixTools({
@@ -198,7 +264,7 @@ export async function cleanupPersonaMatrixTools({
     await kbnClient
       .request({
         method: 'DELETE',
-        path: `/api/agent_builder/tools/${encodeURIComponent(id)}`,
+        path: `/api/agent_builder/tools/${encodeURIComponent(id)}?force=true`,
         headers: AGENT_BUILDER_TOOLS_HEADERS,
       })
       .catch((error) => {
