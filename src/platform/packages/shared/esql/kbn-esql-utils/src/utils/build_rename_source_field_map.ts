@@ -106,9 +106,8 @@ function resolveOneField(
   return current;
 }
 
-function buildContext(query: string): RenameResolutionContext {
-  const { root } = Parser.parse(query);
-  const commandSummaries: CommandWithSummary[] = root.commands.map((cmd) => ({
+function buildContext(commands: readonly ESQLAstCommand[], query: string): RenameResolutionContext {
+  const commandSummaries: CommandWithSummary[] = commands.map((cmd) => ({
     cmd,
     summary: getSummaryPerCommand(query, cmd),
   }));
@@ -154,14 +153,7 @@ function buildContext(query: string): RenameResolutionContext {
   };
 }
 
-/**
- * Pre-computes the rename source field resolution for every rename target in a single parse pass.
- * Use this when resolving multiple columns for the same query (e.g. a full column list from an
- * ES response). Only columns that actually resolve to a different source field are present in the
- * returned map; callers should fall back to the column name for absent entries.
- */
-export function buildRenameSourceFieldMap(query: string): Map<string, string> {
-  const context = buildContext(query);
+function renameMapFromContext(context: RenameResolutionContext): Map<string, string> {
   const map = new Map<string, string>();
   for (const name of context.renameOutputNames) {
     const resolved = resolveOneField(name, context);
@@ -170,4 +162,23 @@ export function buildRenameSourceFieldMap(query: string): Map<string, string> {
     }
   }
   return map;
+}
+
+/** Builds the rename map from commands that have already been parsed. */
+export function buildRenameSourceFieldMapFromCommands(
+  commands: readonly ESQLAstCommand[],
+  query: string
+): Map<string, string> {
+  return renameMapFromContext(buildContext(commands, query));
+}
+
+/**
+ * Pre-computes the rename source field resolution for every rename target in a single parse pass.
+ * Use this when resolving multiple columns for the same query (e.g. a full column list from an
+ * ES response). Only columns that actually resolve to a different source field are present in the
+ * returned map; callers should fall back to the column name for absent entries.
+ */
+export function buildRenameSourceFieldMap(query: string): Map<string, string> {
+  const { root } = Parser.parse(query);
+  return buildRenameSourceFieldMapFromCommands(root.commands, query);
 }
