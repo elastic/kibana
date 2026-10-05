@@ -180,19 +180,21 @@ export const Ips = ({ ips, onIpClick }: IpsProps) => {
 
   return (
     <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center" wrap={false}>
-      <EuiFlexItem grow={false}>
-        <EuiText
-          data-test-subj={GRAPH_IPS_TEXT_ID}
-          size="xs"
-          color="subdued"
-          css={css`
-            font-weight: medium;
-            ${xxsFontSize};
-          `}
-        >
-          {ipAddressLabel}
-        </EuiText>
-      </EuiFlexItem>
+      {isMultiple && (
+        <EuiFlexItem grow={false}>
+          <EuiText
+            data-test-subj={GRAPH_IPS_TEXT_ID}
+            size="xs"
+            color="subdued"
+            css={css`
+              font-weight: medium;
+              ${xxsFontSize};
+            `}
+          >
+            {ipAddressLabel}
+          </EuiText>
+        </EuiFlexItem>
+      )}
       {ipValue && <EuiFlexItem grow={false}>{ipValue}</EuiFlexItem>}
       {counter && <EuiFlexItem grow={false}>{counter}</EuiFlexItem>}
     </EuiFlexGroup>

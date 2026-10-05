@@ -66,9 +66,10 @@ export const ENTITY_CARD_HEADER_HEIGHT = 60;
 
 /**
  * The width of a node label in the graph, in pixels.
+ * 220px = 200px baseline + ~20px to compensate for the badge (icon + gap) on the left.
  * Must be a multiple of `GRID_SIZE * 2`.
  */
-export const NODE_LABEL_WIDTH = 200;
+export const NODE_LABEL_WIDTH = 220;
 
 /**
  * The width of the identity label rendered below an entity node, in pixels.

@@ -156,9 +156,10 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
               align-items: center;
               justify-content: center;
               width: 100%;
-              gap: ${euiTheme.size.xs};
+              gap: 4px;
             `}
           >
+            <LabelNodeBadges analysis={analysis} onEventClick={eventClickHandler} />
             <EuiText
               color={textColor}
               css={css`
@@ -176,7 +177,6 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
                 text={text}
               />
             </EuiText>
-            <LabelNodeBadges analysis={analysis} onEventClick={eventClickHandler} />
           </div>
         </LabelShape>
         {showStackedShape(numEvents + numAlerts) && (

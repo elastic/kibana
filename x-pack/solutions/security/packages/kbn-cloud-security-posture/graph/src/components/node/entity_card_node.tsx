@@ -81,6 +81,9 @@ const formatCriticalityLevel = (value: string): string => {
 const formatSourceName = (value: string): string =>
   value.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
+/** Shared corner radius (px) used for the card, icon box, and stacked ghost cards. */
+const NODE_BORDER_RADIUS = 12;
+
 /**
  * Outer wrapper — owns the border, border-radius, and selection shadow for both
  * the header row and the optional metadata panel below it.
@@ -96,7 +99,7 @@ const EntityCardWrapper = styled.div<{
   background: ${({ euiTheme }) => euiTheme.colors.backgroundBasePlain};
   border: ${({ euiTheme }) =>
     `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`};
-  border-radius: ${({ euiTheme }) => euiTheme.border.radius.medium};
+  border-radius: ${NODE_BORDER_RADIUS}px;
   overflow: hidden;
   transition: border-color 0.2s ease, border-style 0.2s ease;
 
@@ -132,7 +135,7 @@ const EntityCardHeader = ({ children }: { children: React.ReactNode }) => (
     responsive={false}
     css={css`
       height: ${ENTITY_CARD_HEADER_HEIGHT}px;
-      padding: 0 8px;
+      padding: 0 12px;
       gap: 8px;
       flex-wrap: nowrap;
     `}
@@ -207,9 +210,9 @@ const getRiskScoreColors = (
 /**
 /**
  * Contained colored icon box — inset with padding so it doesn't span
- * the full card height. Rounded corners match the card radius.
+ * the full card height.
  */
-const IconBox = styled.div<{ bgColor: string; euiTheme: EuiThemeComputed }>`
+const IconBox = styled.div<{ bgColor: string }>`
   position: relative;
   width: ${ICON_BOX_SIZE}px;
   min-width: ${ICON_BOX_SIZE}px;
@@ -218,7 +221,7 @@ const IconBox = styled.div<{ bgColor: string; euiTheme: EuiThemeComputed }>`
   align-items: center;
   justify-content: center;
   background: ${({ bgColor }) => bgColor};
-  border-radius: ${({ euiTheme }) => euiTheme.border.radius.medium};
+  border-radius: ${NODE_BORDER_RADIUS}px;
   flex-shrink: 0;
 `;
 
@@ -282,7 +285,7 @@ const CountBadge = ({
 const MetadataItem = styled.div<{ euiTheme: EuiThemeComputed }>`
   display: flex;
   flex-direction: column;
-  padding: ${({ euiTheme }) => euiTheme.size.m} ${({ euiTheme }) => euiTheme.size.s};
+  padding: ${({ euiTheme }) => euiTheme.size.m};
   gap: ${({ euiTheme }) => euiTheme.size.xxs};
   /* Prevent grid items from overflowing their 1fr column — required for
      text truncation inside flex children to work. */
@@ -313,7 +316,7 @@ const StackedCard = styled.div<{
   background: ${({ bgColor }) => bgColor};
   border: ${({ euiTheme }) =>
     `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`};
-  border-radius: ${({ euiTheme }) => euiTheme.border.radius.medium};
+  border-radius: ${NODE_BORDER_RADIUS}px;
   transform: scale(${({ scale }) => scale});
   transform-origin: center bottom;
   z-index: -1;
@@ -726,7 +729,7 @@ const EntityCardHeaderContent: React.FC<EntityCardHeaderContentProps> = ({
   euiTheme,
 }) => (
   <>
-    <IconBox bgColor={iconBgColor} euiTheme={euiTheme}>
+    <IconBox bgColor={iconBgColor}>
       {icon && (
         <EuiIcon
           type={getSpanIcon(icon) ?? icon}

@@ -33,7 +33,8 @@ describe('Ips', () => {
     const testIp = '192.168.1.1';
     render(<Ips ips={[testIp]} />);
 
-    expect(screen.getByTestId(GRAPH_IPS_TEXT_ID)).toHaveTextContent('IP address:');
+    // Label is hidden when there is only one IP
+    expect(screen.queryByTestId(GRAPH_IPS_TEXT_ID)).not.toBeInTheDocument();
     expect(screen.getByTestId(GRAPH_IPS_VALUE_ID)).toHaveTextContent(testIp);
     expect(screen.queryByTestId(GRAPH_IPS_BUTTON_ID)).not.toBeInTheDocument();
     expect(screen.queryByTestId(GRAPH_IPS_PLUS_COUNT_ID)).not.toBeInTheDocument();
@@ -44,7 +45,8 @@ describe('Ips', () => {
     const testIps = ['192.168.1.1'];
     render(<Ips ips={testIps} onIpClick={mockOnIpClick} />);
 
-    expect(screen.getByTestId(GRAPH_IPS_TEXT_ID)).toHaveTextContent('IP address:');
+    // Label is hidden when there is only one IP
+    expect(screen.queryByTestId(GRAPH_IPS_TEXT_ID)).not.toBeInTheDocument();
     expect(screen.getByTestId(GRAPH_IPS_BUTTON_ID)).toHaveTextContent(testIps[0]);
     expect(screen.queryByTestId(GRAPH_IPS_PLUS_COUNT_ID)).not.toBeInTheDocument();
     expect(screen.queryByTestId(GRAPH_IPS_PLUS_COUNT_BUTTON_ID)).not.toBeInTheDocument();

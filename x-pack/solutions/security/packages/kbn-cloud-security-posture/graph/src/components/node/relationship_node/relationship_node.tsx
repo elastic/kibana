@@ -52,10 +52,13 @@ export const RelationshipNode = memo<NodeProps>((props: NodeProps) => {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: ${euiTheme.size.xs};
+            gap: 4px;
             width: 100%;
           `}
         >
+          <RoundedBadge data-test-subj={GRAPH_RELATIONSHIP_NODE_ICON_BADGE_ID}>
+            <EuiIcon type="cluster" size="s" aria-hidden />
+          </RoundedBadge>
           <EuiText
             color={textColor}
             css={css`
@@ -72,9 +75,6 @@ export const RelationshipNode = memo<NodeProps>((props: NodeProps) => {
               text={text}
             />
           </EuiText>
-          <RoundedBadge data-test-subj={GRAPH_RELATIONSHIP_NODE_ICON_BADGE_ID}>
-            <EuiIcon type="cluster" size="s" aria-hidden />
-          </RoundedBadge>
         </div>
       </LabelShape>
       <Handle

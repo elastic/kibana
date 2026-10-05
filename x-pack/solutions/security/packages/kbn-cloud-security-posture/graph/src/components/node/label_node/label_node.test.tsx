@@ -103,7 +103,8 @@ describe('LabelNode', () => {
       </ReactFlow>
     );
 
-    expect(screen.queryByTestId(GRAPH_IPS_TEXT_ID)).toBeInTheDocument();
+    // Label is hidden for a single IP — only the value itself is shown
+    expect(screen.queryByTestId(GRAPH_IPS_TEXT_ID)).not.toBeInTheDocument();
     expect(screen.queryByTestId(GRAPH_FLAGS_BADGE_ID)).not.toBeInTheDocument();
   });
 
@@ -140,7 +141,8 @@ describe('LabelNode', () => {
       </ReactFlow>
     );
 
-    expect(screen.queryByTestId(GRAPH_IPS_TEXT_ID)).toBeInTheDocument();
+    // Label is hidden for a single IP — only the value itself is shown
+    expect(screen.queryByTestId(GRAPH_IPS_TEXT_ID)).not.toBeInTheDocument();
     expect(screen.queryByTestId(GRAPH_FLAGS_BADGE_ID)).toBeInTheDocument();
   });
 
