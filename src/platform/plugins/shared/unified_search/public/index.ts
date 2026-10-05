@@ -24,7 +24,6 @@ export type { DataViewPickerProps } from './dataview_picker';
 export type { ApplyGlobalFilterActionContext } from './actions/apply_filter_action/apply_filter_action';
 
 export { SearchBar } from './search_bar';
-export { esqlApproximationStorage } from './query_string_input/esql_approximation_storage';
 export { createSearchBar } from './search_bar/create_search_bar';
 export { FilterItem, FilterItems } from './filter_bar';
 export { FilterBadgeGroup } from './filter_badge';

@@ -124,3 +124,4 @@ export { injectWhereClauseAfterSourceCommand } from './utils/inject_where_after_
 export * from './utils/callbacks';
 
 export { ensureApproximationLicense } from './utils/ensure_approximation_license';
+export { esqlApproximationStorage } from './utils/esql_approximation_storage';

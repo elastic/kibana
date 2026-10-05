@@ -24,9 +24,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ensureApproximationLicense } from '@kbn/esql-utils';
+import { ensureApproximationLicense, esqlApproximationStorage } from '@kbn/esql-utils';
 import type { IUnifiedSearchPluginServices } from '../types';
-import { esqlApproximationStorage } from './esql_approximation_storage';
 
 const POPOVER_WIDTH = 320;
 

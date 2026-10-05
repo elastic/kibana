@@ -25,7 +25,7 @@ import {
   isOfAggregateQueryType,
 } from '@kbn/es-query';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
-import { esqlApproximationStorage } from '@kbn/unified-search-plugin/public';
+import { esqlApproximationStorage } from '@kbn/esql-utils';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   useDiscoverCustomization,
