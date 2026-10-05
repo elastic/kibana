@@ -230,6 +230,7 @@ apiTest.describe(
           create: false,
           status_message_ts: '1712345679.000200',
           event_id: 'EvSCOUT1',
+          execution_id: 'exec-scout-1',
         });
         expect(recorded.body).toStrictEqual({
           investigation_id: id,
@@ -237,11 +238,26 @@ apiTest.describe(
           status_message_ts: '1712345679.000200',
         });
 
-        // The connector delivers at least once, so the same event comes back as a duplicate.
+        // A retry within the execution that recorded the event is not a duplicate.
+        const retried = await findOrCreateSlackThread(apiClient, cookieHeader, {
+          ...thread,
+          create: false,
+          event_id: 'EvSCOUT1',
+          execution_id: 'exec-scout-1',
+        });
+        expect(retried.body).toStrictEqual({
+          investigation_id: id,
+          title,
+          status_message_ts: '1712345679.000200',
+        });
+
+        // The connector delivers at least once, so the same event in another execution comes back
+        // as a duplicate.
         const redelivered = await findOrCreateSlackThread(apiClient, cookieHeader, {
           ...thread,
           create: false,
           event_id: 'EvSCOUT1',
+          execution_id: 'exec-scout-2',
         });
         expect(redelivered.body).toStrictEqual({
           investigation_id: id,
@@ -268,7 +284,7 @@ apiTest.describe(
               channel: thread.channel,
               thread_ts: thread.thread_ts,
               status_message_ts: '1712345679.000200',
-              seen_event_ids: ['EvSCOUT1'],
+              seen_events: [{ event_id: 'EvSCOUT1', execution_id: 'exec-scout-1' }],
             },
           }),
         ]);

@@ -4,8 +4,7 @@ description: >
   Keeps one Nightshift investigation per Slack thread. Every human reply in a thread that already
   has an investigation re-runs it in the same conversation. The thread has one status
   message: the first run posts it, and every run edits it with the findings or the failure. A
-  later run leaves it showing the previous findings until its own are ready, and leaves it as it
-  was if another run owns the investigation.
+  later run leaves it showing the previous findings until its own are ready.
 enabled: true
 settings:
   # Longer than the investigation's own timeout, since this run waits for it.
@@ -128,13 +127,38 @@ steps:
         on-failure:
           continue: true
 
-      # The investigation keeps no run status, so this run's own investigate step decides success.
+      # A run whose investigation failed did not act on the event, so it gives the event back and a
+      # redelivery is handled.
+      - name: release_event
+        type: kibana.request
+        if: '${{ steps.investigate.error != null }}'
+        with:
+          method: POST
+          path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/_slack_thread'
+          headers:
+            x-elastic-internal-origin: 'kibana'
+          body:
+            workspace: '${{ event.workspace }}'
+            channel: '{{ event.channel }}'
+            thread_ts: '{{ event.threadId | default: event.messageId }}'
+            create: false
+            event_id: '${{ event.correlationKey }}'
+            execution_id: '{{ execution.id }}'
+            release_event: true
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+            strategy: exponential
+          continue: true
+
+      # The investigation keeps no run status, so this run's own investigate step decides whether
+      # the thread gets the findings or the failure.
       - name: set_result
         type: data.set
         with:
           # This run's own message on the first run, the recorded one on every later run.
           status_message_ts: '${{ steps.post_started.output.ts | default: steps.find_investigation.output.status_message_ts }}'
-          report: "{% if steps.investigate.error == null and steps.get_investigation.output.status == 'completed' %}findings{% elsif steps.get_investigation.output.status == 'failed' %}failure{% elsif steps.investigate.error != null and steps.get_investigation.output.status == 'pending' %}failure{% else %}none{% endif %}"
           # Slack edits take at most 4,000 characters of text.
           result_text: |
             {% if steps.investigate.error == null %}{% if steps.get_investigation.output.title and steps.get_investigation.output.title_pending != true %}*{{ steps.get_investigation.output.title }}*
@@ -145,7 +169,7 @@ steps:
 
       - name: update_result
         type: slack2.updateMessage
-        if: "${{ variables.report != 'none' and variables.status_message_ts != null }}"
+        if: '${{ variables.status_message_ts != null }}'
         connector-id: '{{ event.connectorId }}'
         with:
           channel: '{{ event.channel }}'
@@ -163,7 +187,7 @@ steps:
       # deleted it, so the result goes in a new message that later runs edit instead.
       - name: post_result
         type: slack2.sendMessage
-        if: "${{ variables.report != 'none' and steps.update_result.output.ts == null }}"
+        if: '${{ steps.update_result.output.ts == null }}'
         connector-id: '{{ event.connectorId }}'
         with:
           channel: '{{ event.channel }}'
