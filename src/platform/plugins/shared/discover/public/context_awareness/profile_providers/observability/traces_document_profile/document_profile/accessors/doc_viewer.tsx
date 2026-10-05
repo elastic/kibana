@@ -9,11 +9,11 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { hasGenAiData } from '@kbn/genai-common';
 import {
   GenAiTabImpression,
   GenAiTechnicalPreviewBadge,
   GENAI_EBT_CLICK_ACTIONS,
-  hasGenAiData,
 } from '@kbn/apm-ui-shared';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import {

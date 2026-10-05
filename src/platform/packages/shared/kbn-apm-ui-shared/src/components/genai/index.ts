@@ -9,12 +9,6 @@
 
 export { GenAiTab } from './genai_tab';
 export { GenAiTechnicalPreviewBadge } from './technical_preview_badge';
-export {
-  hasGenAiData,
-  getGenAiFields,
-  type GenAiFields,
-  type GenAiMessage,
-} from '@kbn/genai-common';
 export { getFieldFromSource } from './get_field_from_source';
 export { GENAI_EBT_CLICK_ACTIONS } from './ebt_constants';
 export {

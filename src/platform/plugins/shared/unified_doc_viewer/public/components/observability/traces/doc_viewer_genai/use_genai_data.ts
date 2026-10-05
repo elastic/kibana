@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GEN_AI_LONG_MESSAGE_FIELDS } from '@kbn/genai-common';
 import {
-  getFieldFromSource,
+  GEN_AI_LONG_MESSAGE_FIELDS,
   getGenAiFields,
   hasGenAiData,
   type GenAiFields,
-} from '@kbn/apm-ui-shared';
+} from '@kbn/genai-common';
+import { getFieldFromSource } from '@kbn/apm-ui-shared';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { castArray } from 'lodash';
