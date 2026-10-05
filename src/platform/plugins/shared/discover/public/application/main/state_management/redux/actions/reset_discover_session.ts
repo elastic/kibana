@@ -17,7 +17,11 @@ import {
   fromSavedObjectTabToSearchSource,
   fromSavedObjectTabToTabState,
 } from '../tab_mapping_utils';
-import { createInternalStateAsyncThunk } from '../utils';
+import {
+  createInternalStateAsyncThunk,
+  extractEsqlVariables,
+  parseControlGroupJson,
+} from '../utils';
 import { setDataSource, setDataView } from './tab_state_data_view';
 import { updateTabs } from './tabs';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
@@ -66,9 +70,13 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
 
           if (isOfAggregateQueryType(query) && query.esql.trim() !== '') {
             const previousSource = tabRuntimeState.currentDataSource$.getValue();
+            // Same variables and time range the tab is restored with, as in initializeSingleTab.
+            const esqlVariables = extractEsqlVariables(parseControlGroupJson(tab.controlGroupJson));
             const { esqlSource, dataView: esqlDataView } = await resolveEsqlSource({
               esql: query.esql,
               services,
+              esqlVariables: esqlVariables.length ? esqlVariables : undefined,
+              timeRange: tab.timeRestore ? tab.timeRange : existingTab?.globalState.timeRange,
               previousSourceId: previousSource?.kind === 'esql' ? previousSource.id : undefined,
             });
             dataView = esqlDataView;

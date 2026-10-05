@@ -37,7 +37,6 @@ import {
   savedSearchMockWithESQL,
 } from '../../../__mocks__/saved_search';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
-import { createMockDataViewsService } from '@kbn/data-source/src/__mocks__/data_views_service.mock';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { waitFor } from '@testing-library/react';
@@ -1938,11 +1937,8 @@ describe('Discover state', () => {
 
     test('loadSavedSearch with ES|QL, data view index is not overwritten by URL ', async () => {
       const url = "/#?_a=(dataSource:(dataViewId:'the-data-view-id',type:dataView))&_g=()";
-      const testServices = createDiscoverServicesMock();
-      testServices.dataViews.create = createMockDataViewsService().create;
       const { state, customizationService } = await getState(url, {
         savedSearch: savedSearchMockWithESQL,
-        services: testServices,
       });
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({

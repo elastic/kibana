@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewSource } from '@kbn/data-source';
+import { DataViewSource, EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
 import { getRepresentativeQuery } from '@kbn/lens-common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
@@ -815,6 +815,34 @@ describe('LensVisService attributes', () => {
       isPlainRecord: true,
     });
     expect(lensVis.visContext?.attributes.title).toBe(currentSuggestionMock.title);
+  });
+
+  it('fingerprints an ES|QL chart with its data view, not with the per-query source id', async () => {
+    const esqlSource = await EsqlSource.create({
+      query: queryEsql.esql,
+      resultColumns: [],
+      timeFieldName: '@timestamp',
+    });
+    const dataViews = {
+      create: jest.fn(async ({ id }: { id: string }) => ({ ...dataViewWithAtTimefieldMock, id })),
+      clearInstanceCache: jest.fn(),
+    } as unknown as Parameters<typeof registerEsqlSourceInDataViewsCache>[0];
+    const chartDataView = await registerEsqlSourceInDataViewsCache(dataViews, esqlSource);
+
+    const { visContext } = await getLensVisMock({
+      filters: [],
+      query: queryEsql,
+      dataView: dataViewWithAtTimefieldMock,
+      dataSource: esqlSource,
+      timeInterval,
+      breakdownField: undefined,
+      columns: [],
+      isPlainRecord: true,
+      allSuggestions: [],
+    });
+
+    expect(chartDataView.id).not.toBe(esqlSource.id);
+    expect(visContext?.requestData.dataViewId).toBe(chartDataView.id);
   });
 
   it('should reuse an unchanged ES|QL histogram whose query is stored only in Lens layers', async () => {

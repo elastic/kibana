@@ -225,9 +225,11 @@ export class EsqlSource implements DataSourceBase {
       resultColumns,
     });
 
-    // Failed source_info (`info === null`) is not a legitimate empty schema —
-    // skip the cache so a later create can retry discovery.
-    if (!shouldResolveSchema || discoveredSchema !== null) {
+    // Only cache a known schema: given columns or a successful lookup. A failed lookup
+    // (`info === null`) or a create without `http` or columns is retried by a later create.
+    const isSchemaKnown =
+      args.resultColumns !== undefined || (shouldResolveSchema && discoveredSchema !== null);
+    if (isSchemaKnown) {
       EsqlSource.instanceCache.set(instanceKey, instance);
     }
     return instance;
@@ -284,7 +286,7 @@ export class EsqlSource implements DataSourceBase {
   /**
    * Fields of the queried dataset, which is what filters and KQL apply to: the columns of the
    * source command alone (`FROM x | STATS ...` → `FROM x`), resolved once per dataset.
-   * Without `http`, only an already resolved schema is returned.
+   * Without `http`, only an already resolved schema is returned; otherwise no fields.
    */
   public async getFilterableFields(http?: HttpStart): Promise<readonly Column[]> {
     const sourceQuery = getSourceCommandQueryFromESQLQuery(this.query);

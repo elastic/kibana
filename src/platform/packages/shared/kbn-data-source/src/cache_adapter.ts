@@ -18,7 +18,8 @@ import type { EsqlSource } from './sources/esql_source';
 
 const esqlDataViewsById = new Map<string, DataView>();
 
-/** LIMIT 0 reports no aggregatability; these ES types have no doc values, so no value suggestions. */
+// LIMIT 0 reports no aggregatability. Heuristic for KQL value suggestions (_terms_enum / terms agg):
+// analyzed text types can't be suggested, `unsupported` types are unknown. Exact only with field caps.
 const NON_AGGREGATABLE_ES_TYPES: ReadonlySet<string> = new Set([
   'text',
   'match_only_text',

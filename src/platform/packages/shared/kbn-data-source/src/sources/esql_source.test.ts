@@ -675,6 +675,18 @@ describe('EsqlSource', () => {
       expect(http.post).toHaveBeenCalledTimes(1);
     });
 
+    it('resolves the schema with http after an earlier call without http', async () => {
+      const http = createSchemaHttp({ 'FROM later-*': ['host'] });
+      const source = await EsqlSource.create({
+        query: 'FROM later-* | STATS c = COUNT(*) BY host',
+        resultColumns: [],
+        timeFieldName: '@timestamp',
+      });
+
+      expect(await source.getFilterableFields()).toEqual([]);
+      expect(names(await source.getFilterableFields(http))).toEqual(['host']);
+    });
+
     it('falls back to the result columns when the query has no FROM or TS command', async () => {
       const source = await EsqlSource.create({
         query: 'ROW a = 1',

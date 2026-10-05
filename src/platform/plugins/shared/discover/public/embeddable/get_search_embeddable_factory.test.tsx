@@ -26,7 +26,6 @@ import type { EmbeddableApiRegistration } from '@kbn/embeddable-plugin/public/re
 import { createProfileStateRegistry, METRICS_STATE_DEF } from '../../common/context_awareness';
 import { createDataViewDataSource } from '../../common/data_sources';
 import type { SearchEmbeddableState } from '../../common/embeddable/types';
-import { createMockDataViewsService } from '@kbn/data-source/src/__mocks__/data_views_service.mock';
 import { discoverServiceMock } from '../__mocks__/services';
 import { getSearchEmbeddableFactory } from './get_search_embeddable_factory';
 import { deserializeState } from './utils/serialization_utils';
@@ -463,7 +462,6 @@ describe('saved search embeddable', () => {
       discoverServiceMock.data.search.searchSource.create = jest
         .fn()
         .mockResolvedValueOnce(esqlSearchSource);
-      discoverServiceMock.dataViews.create = createMockDataViewsService().create;
 
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
@@ -493,7 +491,6 @@ describe('saved search embeddable', () => {
         .mockResolvedValueOnce(esqlSearchSource)
         .mockResolvedValueOnce(createSearchSourceMock({}, undefined, search));
       discoverServiceMock.data.search.searchSource.create = createSearchSource;
-      discoverServiceMock.dataViews.create = createMockDataViewsService().create;
 
       await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
