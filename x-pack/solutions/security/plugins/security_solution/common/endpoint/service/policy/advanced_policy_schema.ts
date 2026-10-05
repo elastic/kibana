@@ -1082,7 +1082,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.memory_protection.enable_shared_dirty_scan',
       {
         defaultMessage:
-          "Also scan anonymous executable memory regions that are not reported as dirty but have resident or compressed pages, instead of scanning only dirty regions. Scans more memory regions because of the loosened restrictions, mostly JIT-generated code. Applies to macOS 27 and later. Default: true.",
+          'Also scan anonymous executable memory regions that are not reported as dirty but have resident or compressed pages, instead of scanning only dirty regions. Scans more memory regions because of the loosened restrictions, mostly JIT-generated code. Applies to macOS 27 and later. Default: true.',
       }
     ),
   },
