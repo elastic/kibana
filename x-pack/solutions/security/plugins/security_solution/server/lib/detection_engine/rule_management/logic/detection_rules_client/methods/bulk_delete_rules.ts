@@ -6,6 +6,7 @@
  */
 
 import { chunk } from 'lodash';
+import { RulesNotFoundError } from '@kbn/alerting-plugin/server';
 import type { RulesClient, BulkOperationError } from '@kbn/alerting-plugin/server';
 import type { BulkDeleteActionSkipResult } from '@kbn/alerting-plugin/common';
 import type { SecurityRuleChangeTracking } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
@@ -48,14 +49,8 @@ export const bulkDeleteRules = async ({
         changeTracking: { metadata: { bulkCount: ruleIds.length, ...changeTracking?.metadata } },
       });
     } catch (error) {
-      // When every rule in the chunk is already gone, alerting throws
-      // Boom.badRequest('No rules found for bulk delete'). Treat the
-      // entire chunk as skipped.
-      if (
-        error.isBoom &&
-        error.output?.statusCode === 400 &&
-        error.message?.includes('No rules found')
-      ) {
+      if (error instanceof RulesNotFoundError) {
+        // Every rule in the chunk is already gone — treat as skipped.
         for (const id of idsChunk) {
           allSkipped.push({
             id,
@@ -64,6 +59,8 @@ export const bulkDeleteRules = async ({
           });
         }
       } else {
+        // RulesNotVisibleError (rules exist but hidden by auth) and all
+        // other errors are surfaced to the caller.
         throw error;
       }
     }

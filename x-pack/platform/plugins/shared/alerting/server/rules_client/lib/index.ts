@@ -16,6 +16,8 @@ export { updateMetaAttributes } from './update_meta_attributes';
 export * from './get_alert_from_raw';
 export { getAuthorizationFilter } from './get_authorization_filter';
 export { checkAuthorizationAndGetTotal } from './check_authorization_and_get_total';
+export { RulesNotFoundError } from './rules_not_found_error';
+export { RulesNotVisibleError } from './rules_not_visible_error';
 export { scheduleTask, bulkScheduleTask, buildTaskInstance } from './schedule_task';
 export { createNewAPIKeySet } from './create_new_api_key_set';
 export { untrackRuleAlerts } from './untrack_rule_alerts';

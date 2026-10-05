@@ -6,6 +6,7 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { RulesNotFoundError, RulesNotVisibleError } from '@kbn/alerting-plugin/server';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import type { GapFillStatus } from '@kbn/alerting-plugin/common/constants/gap_status';
 import { MAX_RULES_WITH_GAPS_TO_FETCH } from '../../../../../../../common/constants';
@@ -59,7 +60,8 @@ export const fetchRulesByQueryOrIds = async ({
     } catch (error) {
       // When there is an authorization error or it doesn't resolve any rule,
       // bulkGetRules will not return a partial object but throw an error instead.
-      const isRuleNotFound = error.message === 'No rules found for bulk get';
+      const isRuleNotFound =
+        error instanceof RulesNotFoundError || error instanceof RulesNotVisibleError;
       return {
         results: [],
         errors: ids.map((id) => ({

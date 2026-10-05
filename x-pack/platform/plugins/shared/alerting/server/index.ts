@@ -48,6 +48,7 @@ export type {
   RuleQueryInspectorTimeRange,
 } from './rule_query_inspector/types';
 export type { RulesClientCreateOptions } from './rules_client_factory';
+export { RulesNotFoundError, RulesNotVisibleError } from './rules_client/lib';
 export type {
   FindResult,
   BulkEditOperation,
