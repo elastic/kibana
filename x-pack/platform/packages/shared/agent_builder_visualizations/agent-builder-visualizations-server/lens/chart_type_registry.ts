@@ -83,9 +83,10 @@ const noPanelTitleRule = (reason: string): string =>
  * 1. Add its value to the `SupportedChartType` enum in agent-builder-common
  * 2. Ensure the ESQL schema is exported from kbn-lens-embeddable-utils
  * 3. Add one entry here with the schema import and LLM guidance
+ * 4. Add at least one example to `config_examples.ts` that follows the rules above
  *
- * TypeScript enforces exhaustiveness via the `ChartTypeRegistry` interface —
- * a missing entry is a compile error.
+ * TypeScript enforces exhaustiveness via the `ChartTypeRegistry` interface and
+ * the examples record — a missing entry in either is a compile error.
  */
 export const chartTypeRegistry: ChartTypeRegistry = {
   [SupportedChartType.Metric]: {
