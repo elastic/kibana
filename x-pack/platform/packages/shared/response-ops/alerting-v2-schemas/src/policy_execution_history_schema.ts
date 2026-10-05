@@ -121,12 +121,12 @@ export const namedRefSchema = z.object({
 const MAX_WORKFLOWS_PER_ITEM = 100;
 // Cap for the embedded `rules` array in each item. A broad Action Policy can
 // emit one event referencing thousands of rules; the response only carries a
-// bounded sample and clients rely on `total_rule_count` for the true count.
+// bounded sample and clients rely on `rule_count` for the true count.
 export const MAX_EMBEDDED_RULES_PER_ITEM = 20;
-// Cap for the embedded `episodes` array in each item.
-export const MAX_EMBEDDED_EPISODES_PER_ITEM = 50;
+// Cap for the embedded `alerts` array in each item.
+export const MAX_EMBEDDED_ALERTS_PER_ITEM = 50;
 
-const episodeRefSchema = z.object({ id: z.string() });
+const alertRefSchema = z.object({ id: z.string() });
 
 export const policyExecutionHistoryItemSchema = z
   .object({
@@ -135,23 +135,22 @@ export const policyExecutionHistoryItemSchema = z
     outcome: policyExecutionOutcomeSchema,
     alert_count: z.number(),
     alerts: z
-      .array(episodeRefSchema)
-      .max(MAX_EMBEDDED_EPISODES_PER_ITEM)
-      .optional()
+      .array(alertRefSchema)
+      .max(MAX_EMBEDDED_ALERTS_PER_ITEM)
       .describe(
-        'Alert ids referenced by this event, bounded to MAX_EMBEDDED_EPISODES_PER_ITEM. Use `alert_count` for the true total.'
+        `Alert ids referenced by this event, bounded to ${MAX_EMBEDDED_ALERTS_PER_ITEM}. Empty when the event references no alerts. Use \`alert_count\` for the true total.`
       ),
     action_group_count: z.number(),
     rules: z
       .array(namedRefSchema)
       .max(MAX_EMBEDDED_RULES_PER_ITEM)
       .describe(
-        'Rules referenced by this event, bounded to MAX_EMBEDDED_RULES_PER_ITEM. When a search or rule filter narrows the match, this array is intersected with the matched subset server-side. Use `total_rule_count` for the full count.'
+        `Rules referenced by this event, bounded to ${MAX_EMBEDDED_RULES_PER_ITEM}. When a search or rule filter narrows the match, this array is intersected with the matched subset server-side. Use \`rule_count\` for the full count.`
       ),
-    total_rule_count: z
+    rule_count: z
       .number()
       .describe(
-        'Total number of rules referenced by this event after search / rule-filter narrowing. May exceed `rules.length` when the embedded array is truncated to the cap.'
+        'Number of rules referenced by this event after search / rule-filter narrowing. Unlike `total` on a list response this is an exact count, and it may exceed `rules.length` when the embedded array is truncated to the cap.'
       ),
     workflows: z.array(namedRefSchema).max(MAX_WORKFLOWS_PER_ITEM),
     failure_reason: dispatchFailureReasonSchema.optional(),

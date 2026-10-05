@@ -14,6 +14,7 @@ import {
   EXECUTION_HISTORY_MAX_RULE_ID_FILTER,
 } from './constants';
 import {
+  MAX_EMBEDDED_ALERTS_PER_ITEM,
   MAX_EMBEDDED_RULES_PER_ITEM,
   dispatchFailureReasonSchema,
   listPolicyExecutionHistoryRequestSchema,
@@ -29,9 +30,10 @@ const validItem = {
   policy: { id: 'policy-1', name: 'My policy' },
   outcome: 'success' as const,
   alert_count: 2,
+  alerts: [{ id: 'alert-1' }, { id: 'alert-2' }],
   action_group_count: 1,
   rules: [{ id: 'rule-1', name: 'Rule 1' }],
-  total_rule_count: 1,
+  rule_count: 1,
   workflows: [{ id: 'workflow-1', name: 'Workflow 1' }],
   error: null,
 };
@@ -512,6 +514,29 @@ describe('policy_execution_history_schema', () => {
       expect(policyExecutionHistoryItemSchema.safeParse({ ...validItem, rules }).success).toBe(
         false
       );
+    });
+
+    it(`accepts an alerts array at the embedded cap (${MAX_EMBEDDED_ALERTS_PER_ITEM})`, () => {
+      const alerts = Array.from({ length: MAX_EMBEDDED_ALERTS_PER_ITEM }, (_, i) => ({
+        id: `alert-${i}`,
+      }));
+      expect(policyExecutionHistoryItemSchema.safeParse({ ...validItem, alerts }).success).toBe(
+        true
+      );
+    });
+
+    it(`rejects an alerts array above the embedded cap (${MAX_EMBEDDED_ALERTS_PER_ITEM})`, () => {
+      const alerts = Array.from({ length: MAX_EMBEDDED_ALERTS_PER_ITEM + 1 }, (_, i) => ({
+        id: `alert-${i}`,
+      }));
+      expect(policyExecutionHistoryItemSchema.safeParse({ ...validItem, alerts }).success).toBe(
+        false
+      );
+    });
+
+    it('rejects a missing alerts key (absence is encoded as an empty array)', () => {
+      const { alerts: _omit, ...rest } = validItem;
+      expect(policyExecutionHistoryItemSchema.safeParse(rest).success).toBe(false);
     });
 
     it('rejects rows missing a required field', () => {
