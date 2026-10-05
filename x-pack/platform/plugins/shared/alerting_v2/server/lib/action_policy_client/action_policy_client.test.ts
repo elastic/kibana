@@ -27,8 +27,6 @@ import { createMockLicenseService } from '../services/license_service/license_se
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import { ActionPolicyClient } from './action_policy_client';
 
-const serialize = (value: unknown) => JSON.parse(JSON.stringify(value));
-
 describe('ActionPolicyClient', () => {
   let client: ActionPolicyClient;
   let actionPolicySavedObjectService: ActionPolicySavedObjectService;
@@ -386,10 +384,10 @@ describe('ActionPolicyClient', () => {
         'policy-id-get-1',
         undefined
       );
-      expect(serialize(res)).not.toHaveProperty('matcher');
-      expect(serialize(res)).not.toHaveProperty('group_by');
-      expect(serialize(res)).not.toHaveProperty('throttle');
-      expect(serialize(res)).not.toHaveProperty('snoozed_until');
+      expect(res.matcher).toBeUndefined();
+      expect(res.group_by).toBeUndefined();
+      expect(res.throttle).toBeUndefined();
+      expect(res.snoozed_until).toBeUndefined();
     });
 
     it('throws 404 when action policy is not found', async () => {
@@ -649,10 +647,10 @@ describe('ActionPolicyClient', () => {
       const res = await client.findActionPolicies();
 
       expect(res.items).toHaveLength(1);
-      expect(serialize(res.items[0])).not.toHaveProperty('matcher');
-      expect(serialize(res.items[0])).not.toHaveProperty('group_by');
-      expect(serialize(res.items[0])).not.toHaveProperty('throttle');
-      expect(serialize(res.items[0])).not.toHaveProperty('snoozed_until');
+      expect(res.items[0].matcher).toBeUndefined();
+      expect(res.items[0].group_by).toBeUndefined();
+      expect(res.items[0].throttle).toBeUndefined();
+      expect(res.items[0].snoozed_until).toBeUndefined();
     });
 
     it('uses default pagination when no params provided', async () => {
@@ -894,10 +892,10 @@ describe('ActionPolicyClient', () => {
         }),
         { version: 'WzEsMV0=' }
       );
-      expect(serialize(res)).not.toHaveProperty('matcher');
-      expect(serialize(res)).not.toHaveProperty('group_by');
-      expect(serialize(res)).not.toHaveProperty('throttle');
-      expect(serialize(res)).not.toHaveProperty('snoozed_until');
+      expect(res.matcher).toBeUndefined();
+      expect(res.group_by).toBeUndefined();
+      expect(res.throttle).toBeUndefined();
+      expect(res.snoozed_until).toBeUndefined();
     });
 
     it('nulls throttle.interval when transitioning to an intervalless strategy', async () => {

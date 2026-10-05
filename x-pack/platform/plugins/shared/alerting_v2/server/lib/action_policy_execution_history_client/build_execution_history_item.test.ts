@@ -249,10 +249,11 @@ describe('buildExecutionHistoryItem', () => {
     });
 
     const historyItem = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS);
-    const serialized = JSON.parse(JSON.stringify(historyItem));
-    expect(serialized.policy).not.toHaveProperty('name');
-    expect(serialized.rules[0]).not.toHaveProperty('name');
-    expect(serialized.workflows[0]).not.toHaveProperty('name');
+
+    expect(historyItem).not.toBeNull();
+    expect(historyItem?.policy).toEqual({ id: 'policy-1' });
+    expect(historyItem?.rules).toEqual([{ id: 'rule-a' }]);
+    expect(historyItem?.workflows).toEqual([{ id: 'wf-1' }]);
   });
 
   it('projects the stored event action onto the API outcome', () => {

@@ -56,7 +56,6 @@ const toApiThrottle = (
   return { strategy: normalized.strategy, interval: normalized.interval ?? undefined };
 };
 
-/** Policies written before the API dropped `null` can still hold `tags: null` / `expression: null`. */
 const toApiMatcher = (
   matcher: ActionPolicySavedObjectAttributes['matcher']
 ): ActionPolicyResponse['matcher'] => {

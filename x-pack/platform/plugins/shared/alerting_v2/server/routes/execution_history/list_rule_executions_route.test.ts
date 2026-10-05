@@ -90,9 +90,9 @@ describe('toListRuleExecutionsResponse', () => {
       perPage: 10,
     }).items;
 
-    expect(JSON.parse(JSON.stringify(mapped))).not.toHaveProperty('reason');
-    expect(JSON.parse(JSON.stringify(mapped))).not.toHaveProperty('error');
-    expect(JSON.parse(JSON.stringify(mapped.rule))).not.toHaveProperty('version');
+    expect(mapped.reason).toBeUndefined();
+    expect(mapped.error).toBeUndefined();
+    expect(mapped.rule.version).toBeUndefined();
   });
 
   it('returns an empty items array untouched', () => {
