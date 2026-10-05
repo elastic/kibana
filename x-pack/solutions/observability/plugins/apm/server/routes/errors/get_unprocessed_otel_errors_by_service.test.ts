@@ -104,6 +104,9 @@ describe('getUnprocessedOtelErrorsByService', () => {
 
     expect(result.maxCountExceeded).toBe(true);
     expect(result.unprocessedOtelErrors).toHaveLength(5);
+    // Verify ES actually receives the bounded fetch size (maxRows + 1 over-fetch sentinel)
+    const [searchArg] = (logsClient.search as jest.Mock).mock.calls[0];
+    expect(searchArg.size).toBe(6);
   });
 
   it('passes serviceName as a term filter via the query', async () => {
@@ -119,12 +122,21 @@ describe('getUnprocessedOtelErrorsByService', () => {
   });
 
   it('applies kuery as an additional filter when provided', async () => {
-    const logsClient = makeLogsClient([]);
-    await getUnprocessedOtelErrorsByService({ logsClient, ...BASE_ARGS, kuery: 'span.id : "abc"' });
+    // Run two calls: one baseline (empty kuery) and one with a KQL expression.
+    // Comparing filter-clause counts proves the kuery is actually forwarded to ES
+    // rather than relying on a fixed lower bound that the baseline already exceeds.
+    const baselineClient = makeLogsClient([]);
+    await getUnprocessedOtelErrorsByService({ logsClient: baselineClient, ...BASE_ARGS });
+    const [baselineSearch] = (baselineClient.search as jest.Mock).mock.calls[0];
+    const baselineFilterCount = baselineSearch.query.bool.filter.length;
 
-    const [searchQuery] = (logsClient.search as jest.Mock).mock.calls[0];
-    // kqlQuery adds a bool wrapper; just assert the overall filter array has more than the baseline
-    const filterClauses = searchQuery.query.bool.filter;
-    expect(filterClauses.length).toBeGreaterThan(2); // range + serviceName at minimum
+    const kueryClient = makeLogsClient([]);
+    await getUnprocessedOtelErrorsByService({
+      logsClient: kueryClient,
+      ...BASE_ARGS,
+      kuery: 'span.id : "abc"',
+    });
+    const [kuerySearch] = (kueryClient.search as jest.Mock).mock.calls[0];
+    expect(kuerySearch.query.bool.filter.length).toBeGreaterThan(baselineFilterCount);
   });
 });
