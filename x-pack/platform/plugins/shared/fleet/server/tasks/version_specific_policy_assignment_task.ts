@@ -866,10 +866,11 @@ export class VersionSpecificPolicyAssignmentTask {
         // if any agents remain on the variant, skip deletion so the next sweep run can retry.
         // Re-check with the same fetcher used above. Unlike `getAgentsByKuery` it adds no
         // `NOT status:unenrolled` filter on the runtime `status` field, which Elasticsearch rejects
-        // when `search.allow_expensive_queries` is false.
+        // when `search.allow_expensive_queries` is false. Exclude unenrolled agents with the stored
+        // `active:true` field instead, so leftover unenrolled agents cannot block variant cleanup.
         let remaining = 0;
         const remainingFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
-          kuery: variantAgentsKuery,
+          kuery: `(${variantAgentsKuery}) and active:true`,
           perPage: AGENTS_BATCHSIZE,
           showInactive: true,
         });
