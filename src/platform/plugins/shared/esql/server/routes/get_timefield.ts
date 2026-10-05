@@ -7,17 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { schema } from '@kbn/config-schema';
-import type { ElasticsearchClient, IRouter, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  IKibanaResponse,
+  IRouter,
+  KibanaRequest,
+  KibanaResponseFactory,
+  PluginInitializerContext,
+  RequestHandlerContext,
+} from '@kbn/core/server';
 import type { EsqlQueryResponse, FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { Logger } from '@kbn/logging';
+import type { Logger, LoggerFactory } from '@kbn/logging';
 import {
   getIndexPatternFromESQLQuery,
   getProjectRoutingFromEsqlQuery,
   parseTimeFieldFromESQLQuery,
 } from '@kbn/esql-utils';
 import { Parser, isSubQuery } from '@elastic/esql';
-import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
+import { TIMEFIELD_ROUTE, ESQL_CACHEABLE_GET_MAX_QUERY_LENGTH } from '@kbn/esql-types';
 import { EsqlService } from '@kbn/esql-server-utils';
+import { respondWithSwrCache } from '@kbn/http-swr-cache';
 import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
 
 const ES_TIMESTAMP_FIELD_NAME = '@timestamp';
@@ -222,6 +231,71 @@ const resolveTimeField = async (
   }
 };
 
+const security = {
+  authz: {
+    enabled: false,
+    reason: 'This route delegates authorization to the scoped ES client',
+  },
+} as const;
+
+// Shared by the POST and GET routes, which differ only in where the params come from and
+// whether the response is HTTP-cacheable.
+const handleTimeFieldRequest = async ({
+  context,
+  request,
+  response,
+  logger,
+  query,
+  projectRouting,
+  cacheable,
+}: {
+  context: RequestHandlerContext;
+  request: KibanaRequest;
+  response: KibanaResponseFactory;
+  logger: LoggerFactory;
+  query: string;
+  projectRouting?: string;
+  cacheable: boolean;
+}): Promise<IKibanaResponse> => {
+  if (getMaxNestingDepth(query) > MAX_NESTING_DEPTH) {
+    return response.badRequest({
+      body: 'Query nesting depth exceeds the maximum allowed limit',
+    });
+  }
+
+  const core = await context.core;
+  const client = core.elasticsearch.client.asCurrentUser;
+
+  let body: { timeField: string | undefined };
+  try {
+    body = await resolveTimeField(client, query, logger.get(), projectRouting);
+    esqlRouteRequestCounter.add(1, {
+      route: 'timefield',
+      outcome: 'success',
+      'http.response.status_code': 200,
+    });
+  } catch (error) {
+    esqlRouteRequestCounter.add(1, {
+      route: 'timefield',
+      outcome: 'failure',
+      'http.response.status_code': getErrorStatusCode(error),
+    });
+    throw error;
+  }
+
+  if (!cacheable) {
+    return response.ok({ body });
+  }
+  // A missing time field may be added by a mapping change soon, so don't cache it.
+  return respondWithSwrCache({
+    context,
+    request,
+    response,
+    body,
+    cacheable: Boolean(body.timeField),
+  });
+};
+
 export const registerGetTimeFieldRoute = (
   router: IRouter,
   { logger }: PluginInitializerContext
@@ -229,12 +303,7 @@ export const registerGetTimeFieldRoute = (
   router.post(
     {
       path: TIMEFIELD_ROUTE,
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route delegates authorization to the scoped ES client',
-        },
-      },
+      security,
       validate: {
         body: schema.object({
           query: schema.string({ maxLength: 1000000 }),
@@ -242,34 +311,39 @@ export const registerGetTimeFieldRoute = (
         }),
       },
     },
-    async (requestHandlerContext, request, response) => {
-      const { query, projectRouting } = request.body;
+    (context, request, response) =>
+      handleTimeFieldRequest({
+        context,
+        request,
+        response,
+        logger,
+        ...request.body,
+        cacheable: false,
+      })
+  );
 
-      if (getMaxNestingDepth(query) > MAX_NESTING_DEPTH) {
-        return response.badRequest({
-          body: 'Query nesting depth exceeds the maximum allowed limit',
-        });
-      }
-
-      const core = await requestHandlerContext.core;
-      const client = core.elasticsearch.client.asCurrentUser;
-
-      try {
-        const body = await resolveTimeField(client, query, logger.get(), projectRouting);
-        esqlRouteRequestCounter.add(1, {
-          route: 'timefield',
-          outcome: 'success',
-          'http.response.status_code': 200,
-        });
-        return response.ok({ body });
-      } catch (error) {
-        esqlRouteRequestCounter.add(1, {
-          route: 'timefield',
-          outcome: 'failure',
-          'http.response.status_code': getErrorStatusCode(error),
-        });
-        throw error;
-      }
-    }
+  // Cacheable variant for queries short enough to fit in a URL, see ESQL_CACHEABLE_GET_MAX_QUERY_LENGTH.
+  router.get(
+    {
+      path: TIMEFIELD_ROUTE,
+      security,
+      validate: {
+        query: schema.object({
+          query: schema.string({ maxLength: ESQL_CACHEABLE_GET_MAX_QUERY_LENGTH }),
+          projectRouting: schema.maybe(
+            schema.string({ maxLength: ESQL_CACHEABLE_GET_MAX_QUERY_LENGTH })
+          ),
+        }),
+      },
+    },
+    (context, request, response) =>
+      handleTimeFieldRequest({
+        context,
+        request,
+        response,
+        logger,
+        ...request.query,
+        cacheable: true,
+      })
   );
 };

@@ -11,6 +11,7 @@ import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { JOIN_INDICES_AUTOCOMPLETE_ROUTE } from '@kbn/esql-types';
 import { EsqlService } from '@kbn/esql-server-utils';
+import { respondWithSwrCache } from '@kbn/http-swr-cache';
 
 export const registerGetJoinIndicesRoute = (
   router: IRouter,
@@ -44,7 +45,10 @@ export const registerGetJoinIndicesRoute = (
           projectRouting
         );
 
-        return response.ok({
+        return respondWithSwrCache({
+          context: requestHandlerContext,
+          request,
+          response,
           body: result,
         });
       } catch (error) {

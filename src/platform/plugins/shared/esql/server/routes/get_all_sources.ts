@@ -13,6 +13,7 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { isRequestAbortedError } from '@kbn/es-errors';
 import { SOURCES_AUTOCOMPLETE_ROUTE } from '@kbn/esql-types';
 import { EsqlService } from '@kbn/esql-server-utils';
+import { respondWithSwrCache } from '@kbn/http-swr-cache';
 
 export const registerGetSourcesRoute = (router: IRouter, { logger }: PluginInitializerContext) => {
   router.get(
@@ -50,7 +51,10 @@ export const registerGetSourcesRoute = (router: IRouter, { logger }: PluginIniti
         });
         const result = await service.getAllIndices(scope, projectRouting, signal);
 
-        return response.ok({
+        return respondWithSwrCache({
+          context: requestHandlerContext,
+          request,
+          response,
           body: result,
         });
       } catch (error) {

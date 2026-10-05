@@ -1581,6 +1581,8 @@
       "@kbn/home-sample-data-tab/*": ["./src/platform/packages/shared/home/sample_data_tab/*"],
       "@kbn/home-sample-data-types": ["./src/platform/packages/shared/home/sample_data_types"],
       "@kbn/home-sample-data-types/*": ["./src/platform/packages/shared/home/sample_data_types/*"],
+      "@kbn/http-swr-cache": ["./src/platform/packages/shared/kbn-http-swr-cache"],
+      "@kbn/http-swr-cache/*": ["./src/platform/packages/shared/kbn-http-swr-cache/*"],
       "@kbn/human-readable-id": ["./src/platform/packages/shared/kbn-human-readable-id"],
       "@kbn/human-readable-id/*": ["./src/platform/packages/shared/kbn-human-readable-id/*"],
       "@kbn/i18n": ["./src/platform/packages/shared/kbn-i18n"],

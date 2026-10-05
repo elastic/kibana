@@ -9,6 +9,7 @@
 import type { HttpStart } from '@kbn/core/public';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 import { LRUCache } from 'lru-cache';
+import { fitsInCacheableGetRequest } from './fits_in_cacheable_get_request';
 import { parseTimeFieldFromESQLQuery } from './query_parsing_helpers';
 import { getIndexPatternFromESQLQuery } from './get_index_pattern_from_query';
 import { getProjectRoutingFromEsqlQuery } from './set_instructions_helpers';
@@ -57,8 +58,10 @@ export async function getESQLTimeField({
   if (!http) {
     return undefined;
   }
-  const pendingRequest = http
-    .post(TIMEFIELD_ROUTE, { body: JSON.stringify({ query, projectRouting }) })
+  const request = fitsInCacheableGetRequest({ query, projectRouting })
+    ? http.get(TIMEFIELD_ROUTE, { query: { query, projectRouting } })
+    : http.post(TIMEFIELD_ROUTE, { body: JSON.stringify({ query, projectRouting }) });
+  const pendingRequest = request
     .then((response) => (response as { timeField?: string } | undefined)?.timeField)
     .catch((error) => {
       // eslint-disable-next-line no-console

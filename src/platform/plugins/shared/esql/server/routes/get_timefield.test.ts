@@ -37,11 +37,15 @@ const {
 const { Parser } = jest.requireMock('@elastic/esql');
 const { EsqlService } = jest.requireMock('@kbn/esql-server-utils');
 
-function buildMocks() {
-  const handler = jest.fn();
+function buildMocks({ cacheMaxAge }: { cacheMaxAge?: number } = {}) {
+  const postHandler = jest.fn();
+  const getHandler = jest.fn();
   const router = {
     post: jest.fn((_, h) => {
-      handler.mockImplementation(h);
+      postHandler.mockImplementation(h);
+    }),
+    get: jest.fn((_, h) => {
+      getHandler.mockImplementation(h);
     }),
   };
 
@@ -51,20 +55,25 @@ function buildMocks() {
       esql: { query: jest.fn().mockResolvedValue({ columns: [] }) },
     },
   };
+  const uiSettingsClient = { get: jest.fn().mockResolvedValue(cacheMaxAge) };
   const core = {
     elasticsearch: { client: esClient },
+    uiSettings: { client: uiSettingsClient },
   };
   const requestHandlerContext = { core: Promise.resolve(core) };
   const response = {
     ok: jest.fn((r) => ({ status: 200, ...r })),
     badRequest: jest.fn((r) => ({ status: 400, ...r })),
     customError: jest.fn((r) => ({ status: r?.statusCode ?? 500, ...r })),
+    notModified: jest.fn((r) => ({ status: 304, ...r })),
   };
   const context = { logger: { get: () => ({ error: jest.fn() }) } };
 
   return {
     router: router as unknown as IRouter,
-    handler,
+    // kept as `handler` for the existing POST-only tests below
+    handler: postHandler,
+    getHandler,
     requestHandlerContext,
     response,
     context: context as unknown as PluginInitializerContext,
@@ -78,6 +87,15 @@ describe('registerGetTimeFieldRoute', () => {
     const { router, context } = buildMocks();
     registerGetTimeFieldRoute(router, context);
     expect(router.post).toHaveBeenCalledWith(
+      expect.objectContaining({ path: TIMEFIELD_ROUTE }),
+      expect.any(Function)
+    );
+  });
+
+  it('also registers a GET handler at the same path', () => {
+    const { router, context } = buildMocks();
+    registerGetTimeFieldRoute(router, context);
+    expect(router.get).toHaveBeenCalledWith(
       expect.objectContaining({ path: TIMEFIELD_ROUTE }),
       expect.any(Function)
     );
@@ -208,6 +226,130 @@ describe('registerGetTimeFieldRoute', () => {
       expect(response.badRequest).toHaveBeenCalled();
       expect(parseTimeFieldFromESQLQuery).not.toHaveBeenCalled();
       expect(Parser.parse).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('GET variant (caching)', () => {
+    it('reads query params instead of a body', async () => {
+      const { router, getHandler, requestHandlerContext, response, context } = buildMocks();
+      registerGetTimeFieldRoute(router, context);
+
+      await getHandler(
+        requestHandlerContext,
+        { query: { query: 'FROM logs-*' }, headers: {} },
+        response
+      );
+
+      expect(response.ok).toHaveBeenCalledWith(
+        expect.objectContaining({ body: expect.any(String) })
+      );
+    });
+
+    it('sets cache-control with stale-while-revalidate and an etag when a timeField is found', async () => {
+      const { router, getHandler, requestHandlerContext, response, context } = buildMocks({
+        cacheMaxAge: undefined,
+      });
+      parseTimeFieldFromESQLQuery.mockReturnValueOnce('@timestamp');
+      registerGetTimeFieldRoute(router, context);
+
+      await getHandler(
+        requestHandlerContext,
+        { query: { query: 'FROM logs-* | WHERE @timestamp >= ?_tstart' }, headers: {} },
+        response
+      );
+
+      expect(response.ok).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: JSON.stringify({ timeField: '@timestamp' }),
+          headers: expect.objectContaining({
+            etag: expect.any(String),
+            'cache-control': expect.stringMatching(
+              /^private, max-age=5, stale-while-revalidate=\d+$/
+            ),
+          }),
+        })
+      );
+    });
+
+    it('honors the data_views:cache_max_age advanced setting when set', async () => {
+      const { router, getHandler, requestHandlerContext, response, context } = buildMocks({
+        cacheMaxAge: 30,
+      });
+      parseTimeFieldFromESQLQuery.mockReturnValueOnce('@timestamp');
+      registerGetTimeFieldRoute(router, context);
+
+      await getHandler(
+        requestHandlerContext,
+        { query: { query: 'FROM logs-* | WHERE @timestamp >= ?_tstart' }, headers: {} },
+        response
+      );
+
+      expect(response.ok).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            'cache-control': expect.stringMatching(
+              /^private, max-age=30, stale-while-revalidate=\d+$/
+            ),
+          }),
+        })
+      );
+    });
+
+    it('sets cache-control: private, no-cache when no timeField is found', async () => {
+      const { router, getHandler, requestHandlerContext, response, context } = buildMocks();
+      registerGetTimeFieldRoute(router, context);
+
+      await getHandler(
+        requestHandlerContext,
+        { query: { query: 'FROM logs-*' }, headers: {} },
+        response
+      );
+
+      expect(response.ok).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: expect.objectContaining({ 'cache-control': 'private, no-cache' }),
+        })
+      );
+    });
+
+    it('returns 304 when if-none-match matches the computed etag', async () => {
+      const { router, getHandler, requestHandlerContext, response, context } = buildMocks();
+      parseTimeFieldFromESQLQuery.mockReturnValueOnce('@timestamp');
+      registerGetTimeFieldRoute(router, context);
+
+      const firstCall = await getHandler(
+        requestHandlerContext,
+        { query: { query: 'FROM logs-* | WHERE @timestamp >= ?_tstart' }, headers: {} },
+        response
+      );
+      const etag = firstCall.headers.etag;
+
+      parseTimeFieldFromESQLQuery.mockReturnValueOnce('@timestamp');
+      await getHandler(
+        requestHandlerContext,
+        {
+          query: { query: 'FROM logs-* | WHERE @timestamp >= ?_tstart' },
+          headers: { 'if-none-match': etag },
+        },
+        response
+      );
+
+      expect(response.notModified).toHaveBeenCalledWith(
+        expect.objectContaining({ headers: expect.objectContaining({ etag }) })
+      );
+    });
+
+    it('still enforces the nesting-depth guard on the GET path', async () => {
+      const { router, getHandler, requestHandlerContext, response, context } = buildMocks();
+      registerGetTimeFieldRoute(router, context);
+
+      const depth = 51;
+      const query = 'FROM a | WHERE ' + '('.repeat(depth) + '1' + ')'.repeat(depth);
+      await getHandler(requestHandlerContext, { query: { query }, headers: {} }, response);
+
+      expect(response.badRequest).toHaveBeenCalledWith(
+        expect.objectContaining({ body: expect.stringContaining('nesting depth') })
+      );
     });
   });
 });

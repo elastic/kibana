@@ -10,8 +10,8 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import type { UiSettingsParams } from '@kbn/core/server';
+import { DEFAULT_SWR_CACHE_MAX_AGE_SECONDS } from '@kbn/http-swr-cache';
 import { DATA_VIEWS_FIELDS_EXCLUDED_TIERS } from '../common/constants';
-import { DEFAULT_FIELD_CACHE_FRESHNESS } from './constants';
 
 export const dataTiersUiSettingsConfig: Record<string, UiSettingsParams> = {
   [DATA_VIEWS_FIELDS_EXCLUDED_TIERS]: {
@@ -33,7 +33,7 @@ export const cacheMaxAge = {
     name: i18n.translate('dataViews.advancedSettings.cacheMaxAgeTitle', {
       defaultMessage: 'Field cache max age (in seconds)',
     }),
-    value: DEFAULT_FIELD_CACHE_FRESHNESS,
+    value: DEFAULT_SWR_CACHE_MAX_AGE_SECONDS,
     description: i18n.translate('dataViews.advancedSettings.cacheMaxAgeText', {
       defaultMessage:
         'Sets how long data view fields API requests are cached in seconds. A value of 0 turns off caching. Modifying this value may not take immediate effect, users need to clear browser cache or wait until the current cache expires. To see immediate changes, try a hard reload of Kibana.',

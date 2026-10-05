@@ -96,11 +96,6 @@ export const INITIAL_REST_VERSION = '2023-10-31';
 export const INITIAL_REST_VERSION_INTERNAL = '1';
 
 /**
- * Default field caps cache max-age in seconds
- */
-export const DEFAULT_FIELD_CACHE_FRESHNESS = 5;
-
-/**
  * Operation summaries (short, <45 chars, used in OAS summary)
  */
 export const CREATE_DATA_VIEW_SUMMARY = 'Create a data view';

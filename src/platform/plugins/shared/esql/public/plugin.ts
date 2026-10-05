@@ -33,6 +33,7 @@ import { ACTION_CREATE_ESQL_CONTROL, ACTION_UPDATE_ESQL_QUERY } from './triggers
 import { setKibanaServices } from './kibana_services';
 import { EsqlVariablesService } from './variables_service';
 import { EnricherService } from './enricher_service';
+import { registerUserHashInterceptor } from './user_hash_interceptor';
 
 interface EsqlPluginSetupDependencies {
   uiActions: UiActionsSetup;
@@ -92,6 +93,7 @@ export class EsqlPlugin implements Plugin<EsqlPluginSetup, EsqlPluginStart> {
   public setup(core: CoreSetup, { uiActions }: EsqlPluginSetupDependencies): EsqlPluginSetup {
     registerESQLEditorAnalyticsEvents(core.analytics);
     registerIndexEditorAnalyticsEvents(core.analytics);
+    registerUserHashInterceptor(core);
 
     return {
       registerSourceEnricher: (enricher) => {

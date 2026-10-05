@@ -488,28 +488,30 @@ describe('EsqlSource', () => {
   });
 
   describe('create with http', () => {
-    const postedPaths = (http: HttpStart) =>
-      (http.post as jest.Mock).mock.calls.map((call) => call[0] as string);
+    // Short requests use cacheable GET, long ones POST; track both.
+    const requestedPaths = (http: HttpStart) => [
+      ...(http.post as jest.Mock).mock.calls.map((call) => call[0] as string),
+      ...(http.get as jest.Mock).mock.calls.map((call) => call[0] as string),
+    ];
 
     const createHttp = (overrides?: {
       sourceInfo?: { columns: Array<{ name: string; esType: string }> };
       timeField?: string;
       sourceInfoError?: Error;
     }): HttpStart => {
-      return {
-        post: jest.fn(async (path: string) => {
-          if (path === SOURCE_INFO_ROUTE) {
-            if (overrides?.sourceInfoError) {
-              throw overrides.sourceInfoError;
-            }
-            return overrides?.sourceInfo ?? { columns: [] };
+      const respond = async (path: string) => {
+        if (path === SOURCE_INFO_ROUTE) {
+          if (overrides?.sourceInfoError) {
+            throw overrides.sourceInfoError;
           }
-          if (path === TIMEFIELD_ROUTE) {
-            return { timeField: overrides?.timeField };
-          }
-          throw new Error(`unexpected path ${path}`);
-        }),
-      } as unknown as HttpStart;
+          return overrides?.sourceInfo ?? { columns: [] };
+        }
+        if (path === TIMEFIELD_ROUTE) {
+          return { timeField: overrides?.timeField };
+        }
+        throw new Error(`unexpected path ${path}`);
+      };
+      return { post: jest.fn(respond), get: jest.fn(respond) } as unknown as HttpStart;
     };
 
     it('resolves time field and LIMIT 0 schema in parallel', async () => {
@@ -528,7 +530,7 @@ describe('EsqlSource', () => {
         http,
       });
 
-      expect(postedPaths(http).sort()).toEqual([SOURCE_INFO_ROUTE, TIMEFIELD_ROUTE].sort());
+      expect(requestedPaths(http).sort()).toEqual([SOURCE_INFO_ROUTE, TIMEFIELD_ROUTE].sort());
       expect(source.timeFieldName).toBe('@timestamp');
       expect(source.getColumns()).toEqual([
         { name: 'message', type: 'string', esType: 'keyword', source: 'index' },
@@ -566,8 +568,8 @@ describe('EsqlSource', () => {
         resultColumns: [makeColumn('message', 'string', 'keyword')],
       });
 
-      expect(postedPaths(http)).not.toContain(SOURCE_INFO_ROUTE);
-      expect(postedPaths(http)).not.toContain(TIMEFIELD_ROUTE);
+      expect(requestedPaths(http)).not.toContain(SOURCE_INFO_ROUTE);
+      expect(requestedPaths(http)).not.toContain(TIMEFIELD_ROUTE);
       expect(source.getColumns()).toEqual([
         { name: 'message', type: 'string', esType: 'keyword', source: 'index' },
       ]);
@@ -626,8 +628,8 @@ describe('EsqlSource', () => {
       const second = await EsqlSource.create({ query, http });
 
       expect(second).toBe(first);
-      expect(postedPaths(http).filter((path) => path === SOURCE_INFO_ROUTE)).toHaveLength(1);
-      expect(postedPaths(http).filter((path) => path === TIMEFIELD_ROUTE)).toHaveLength(1);
+      expect(requestedPaths(http).filter((path) => path === SOURCE_INFO_ROUTE)).toHaveLength(1);
+      expect(requestedPaths(http).filter((path) => path === TIMEFIELD_ROUTE)).toHaveLength(1);
     });
   });
 });
