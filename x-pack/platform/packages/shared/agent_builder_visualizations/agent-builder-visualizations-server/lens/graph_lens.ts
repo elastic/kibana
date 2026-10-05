@@ -42,6 +42,38 @@ const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
 const REPAIR_INSTRUCTIONS =
   'Return the complete corrected response in the same minified JSON format ("authoring_note" and "config"). Change only what is needed to fix the error.';
 
+/**
+ * Adds the schema of each failing section to the first repair message that needs it,
+ * skipping sections the model already loaded through the tool.
+ */
+const addFailingSchemaContext = ({
+  chartType,
+  validated,
+  loadedSchemaSections,
+}: {
+  chartType: SupportedChartType;
+  validated: readonly ValidateConfigAction[];
+  loadedSchemaSections: readonly string[];
+}): Array<ValidateConfigAction & { repairContext?: string }> => {
+  const shownSections = new Set(loadedSchemaSections);
+  return validated.map((action) => {
+    const newSections = (action.failingSchemaSections ?? []).filter(
+      (section) => !shownSections.has(section)
+    );
+    if (newSections.length === 0) {
+      return action;
+    }
+    newSections.forEach((section) => shownSections.add(section));
+    return {
+      ...action,
+      repairContext: `Schema of the failing config sections:\n\`\`\`json\n${renderSchemaSections(
+        chartType,
+        newSections
+      )}\n\`\`\``,
+    };
+  });
+};
+
 const parseConfigAuthoringResponse = (
   responseText: string
 ): { config: Record<string, unknown>; authoringNote?: string } => {
@@ -292,7 +324,11 @@ export const createVisualizationGraph = async (
       ...state.schemaSectionMessages,
       ...formatRepairMessages({
         authored: state.actions.filter(isGenerateConfigAction),
-        validated: state.actions.filter(isValidateConfigAction),
+        validated: addFailingSchemaContext({
+          chartType: state.chartType,
+          validated: state.actions.filter(isValidateConfigAction),
+          loadedSchemaSections: state.loadedSchemaSections,
+        }),
         instructions: REPAIR_INSTRUCTIONS,
       }),
     ];
@@ -408,23 +444,13 @@ export const createVisualizationGraph = async (
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.warn(`Configuration validation failed: ${errorMessage}`);
 
-      // Show the schema of the failing sections the model has not loaded yet.
-      const failingSections = getFailingSchemaSections(state.chartType, error).filter(
-        (section) => !state.loadedSchemaSections.includes(section)
-      );
+      const failingSchemaSections = getFailingSchemaSections(state.chartType, error);
       action = {
         type: 'validate_config',
         success: false,
         attempt,
         error: errorMessage,
-        ...(failingSections.length > 0
-          ? {
-              repairContext: `Schema of the failing config sections:\n\`\`\`json\n${renderSchemaSections(
-                state.chartType,
-                failingSections
-              )}\n\`\`\``,
-            }
-          : {}),
+        ...(failingSchemaSections.length > 0 ? { failingSchemaSections } : {}),
       };
     }
 

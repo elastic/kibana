@@ -35,8 +35,8 @@ export interface ValidateConfigAction {
   authoringNote?: string;
   attempt: number;
   error?: string;
-  /** Schema of the sections the validation error points at, shown on the retry. */
-  repairContext?: string;
+  /** Schema sections the validation error points at, shown on the retry. */
+  failingSchemaSections?: string[];
 }
 
 export type Action = GenerateEsqlAction | GenerateConfigAction | ValidateConfigAction;

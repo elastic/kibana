@@ -555,6 +555,45 @@ describe('createVisualizationGraph', () => {
         ),
       ]);
     });
+
+    it('shows the schema of a section that fails twice only once', async () => {
+      const model = createMockModel();
+      const { chatModel } = await model.getDefaultModel();
+      mockSchemaParse
+        .mockImplementationOnce(() => {
+          throw new Error('metrics: Invalid input');
+        })
+        .mockImplementationOnce(() => {
+          throw new Error('metrics: Invalid input');
+        });
+      mockedGetFailingSchemaSections
+        .mockReturnValueOnce(['metrics'])
+        .mockReturnValueOnce(['metrics']);
+
+      await runGraph(model);
+
+      expect(chatModel.invoke).toHaveBeenCalledTimes(3);
+      const [, , [lastRetryPrompt]] = chatModel.invoke.mock.calls;
+      expect(JSON.stringify(lastRetryPrompt).match(/schema of metrics/g)).toHaveLength(1);
+    });
+
+    it('does not repeat the schema of a section the model loaded through the tool', async () => {
+      const model = createMockModel();
+      const { chatModel } = await model.getDefaultModel();
+      chatModel.invoke.mockResolvedValueOnce(toolCallResponse);
+      mockSchemaParse.mockImplementationOnce(() => {
+        throw new Error('legend: Invalid input');
+      });
+      mockedGetFailingSchemaSections.mockReturnValueOnce(['legend']);
+
+      await runGraph(model);
+
+      const [, , [retryPrompt]] = chatModel.invoke.mock.calls;
+      expect(retryPrompt[retryPrompt.length - 1]).toEqual([
+        'human',
+        expect.not.stringContaining('Schema of the failing config sections'),
+      ]);
+    });
   });
 
   describe('retries', () => {
