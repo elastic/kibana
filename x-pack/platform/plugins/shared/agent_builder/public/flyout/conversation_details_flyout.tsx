@@ -268,14 +268,17 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
   const { conversation, isLoading } = useConversation();
   const { conversationTemplatesService } = useAgentBuilderServices();
 
-  const trailingActions = useMemo(() => {
+  const { trailingActions, size } = useMemo(() => {
     if (!conversation?.template_id) {
-      return undefined;
+      return { trailingActions: undefined, size: undefined };
     }
-    const definition = conversationTemplatesService.getTemplateUIDefinition(
+    const detailsFlyout = conversationTemplatesService.getTemplateUIDefinition(
       conversation.template_id
-    );
-    return definition?.detailsFlyout?.trailingActions?.({ conversation });
+    )?.detailsFlyout;
+    return {
+      trailingActions: detailsFlyout?.trailingActions?.({ conversation }),
+      size: detailsFlyout?.size,
+    };
   }, [conversation, conversationTemplatesService]);
 
   return (
@@ -285,7 +288,7 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
       historyKey={CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY}
       flyoutMenuDisplayMode="always"
       flyoutMenuProps={{ title: FLYOUT_TITLE, trailingActions }}
-      size="s"
+      size={size ?? 's'}
       type="push"
       paddingSize="m"
       css={flyoutMenuRowStyles}

@@ -16,7 +16,7 @@ import {
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Investigation } from '../../types';
-import { AttachmentSummarySection } from '../attachment_summary';
+import { AttachmentSummarySection, TRAILING_SUMMARY_ATTACHMENT_TYPES } from '../attachment_summary';
 import { DetailsBlock } from './detail_block';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 import { OVERVIEW_SECTION_LABELS } from './overview_translations';
@@ -138,6 +138,13 @@ export const OverviewTab = memo<OverviewTabProps>(
             <DetailsBlock title={OVERVIEW_SECTION_LABELS.trace}>{trace}</DetailsBlock>
           </EuiFlexItem>
         )}
+
+        {/* References to what guided the investigation (for example decision trees) come last. */}
+        <AttachmentSummarySection
+          attachments={attachments}
+          attachmentsService={attachmentsService}
+          attachmentTypes={TRAILING_SUMMARY_ATTACHMENT_TYPES}
+        />
       </EuiFlexGroup>
     );
   }

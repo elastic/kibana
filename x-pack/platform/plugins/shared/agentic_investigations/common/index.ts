@@ -180,6 +180,13 @@ export type {
 
 export { isInvestigationTitlePending } from './investigations/title';
 
+/**
+ * Width of an investigation's details flyout, in pixels: wider than `s` for the overview's charts,
+ * narrower than `m` so its analysis artifacts have room in the nested flyout beside it. Solutions
+ * that open an investigation with `openConversationDetails` pass it as `size`.
+ */
+export const INVESTIGATION_DETAILS_FLYOUT_WIDTH = 640;
+
 // Query API shapes. Types only, like subjects and hypotheses: the schemas stay in the entity
 // barrel so the page load bundle does not carry them.
 export type {

@@ -25,7 +25,12 @@ describe('openConversationDetailsFlyout', () => {
     const open = ({
       onClose,
       trailingActions,
-    }: { onClose?: () => void; trailingActions?: EuiFlyoutMenuAction[] } = {}) =>
+      size,
+    }: {
+      onClose?: () => void;
+      trailingActions?: EuiFlyoutMenuAction[];
+      size?: 's' | 'm';
+    } = {}) =>
       openConversationDetailsFlyout({
         core,
         conversationsService: { get: jest.fn() } as unknown as ConversationsService,
@@ -33,6 +38,7 @@ describe('openConversationDetailsFlyout', () => {
         conversationId: 'conversation',
         onClose,
         trailingActions,
+        size,
       });
 
     return { core, close, open, closeFlyout: () => resolveClosed() };
@@ -52,6 +58,17 @@ describe('openConversationDetailsFlyout', () => {
         type: 'push',
       })
     );
+  });
+
+  it('is small unless the caller asks for a wider flyout', async () => {
+    const { core, open } = setup();
+
+    await open();
+    await open({ size: 'm' });
+
+    const [[, small], [, wide]] = core.overlays.openSystemFlyout.mock.calls;
+    expect(small?.size).toBe('s');
+    expect(wide?.size).toBe('m');
   });
 
   it('renders the caller menu actions in the flyout menu bar', async () => {

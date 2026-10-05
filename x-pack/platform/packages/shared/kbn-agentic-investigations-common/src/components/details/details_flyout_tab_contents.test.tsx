@@ -78,6 +78,33 @@ describe('OverviewTab', () => {
     expect(screen.getByText('Session cookie replayed')).toBeInTheDocument();
   });
 
+  it('lists decision trees in a summary at the very bottom', () => {
+    const decisionTree: VersionedAttachment = {
+      ...attachment,
+      id: 'tree-1',
+      type: 'nightshift.decision_tree',
+    };
+    render(
+      <OverviewTab
+        investigation={investigation}
+        attachments={[attachment, decisionTree]}
+        attachmentsService={attachmentsService}
+        proposedActionsContent={<span>proposal</span>}
+        sections={{ conclusion: 'A bad deploy.', trace: <span>hypotheses</span> }}
+      />
+    );
+
+    const headings = screen.getAllByRole('heading').map(({ textContent }) => textContent);
+    expect(headings).toEqual([
+      "What's happened",
+      'Attachment summary',
+      'Conclusion',
+      'Proposed actions',
+      'Hypotheses',
+      'Attachment summary',
+    ]);
+  });
+
   it('omits the attachment summary when nothing is attached', () => {
     renderTab({ attachments: [] });
 

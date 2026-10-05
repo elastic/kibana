@@ -16,7 +16,11 @@ import {
   type LiveStateSlotRenderProps,
   type TitleSlotRenderProps,
 } from '@kbn/agentic-investigations-common';
-import { INVESTIGATION_TEMPLATE_ID, isInvestigationTitlePending } from '../../../../common';
+import {
+  INVESTIGATION_DETAILS_FLYOUT_WIDTH,
+  INVESTIGATION_TEMPLATE_ID,
+  isInvestigationTitlePending,
+} from '../../../../common';
 import { EscalationModalBoundary } from '../../shared/escalation_modal/escalation_modal_boundary';
 import { ProposedActionsBoundary } from '../../shared/proposed_actions/proposed_actions_boundary';
 import { getSharedInvestigationsQueryClient } from '../../../shared_query_client';
@@ -182,6 +186,7 @@ export const investigationTemplate: TemplateDefinition = {
       templateId,
       name: INVESTIGATION_TEMPLATE_NAME,
       icon: 'magnifyExclamation',
+      detailsFlyoutSize: INVESTIGATION_DETAILS_FLYOUT_WIDTH,
       renderAssignees,
       // The toggle itself disables when the user may not change the status.
       renderStatus,

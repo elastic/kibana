@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { INVESTIGATION_DETAILS_FLYOUT_WIDTH } from '@kbn/agentic-investigations-plugin/common';
 import React, { useCallback } from 'react';
 import {
   EuiButtonEmpty,
@@ -46,7 +47,10 @@ export function EventInvestigation({
 
   const openDetails = useCallback(() => {
     if (conversationId) {
-      void agentBuilder?.openConversationDetails({ conversationId });
+      void agentBuilder?.openConversationDetails({
+        conversationId,
+        size: INVESTIGATION_DETAILS_FLYOUT_WIDTH,
+      });
     }
   }, [agentBuilder, conversationId]);
 

@@ -165,6 +165,8 @@ export interface OpenConversationDetailsOptions {
   onClose?: () => void;
   /** Icon buttons rendered in the flyout menu bar, before the close button (e.g. copy link). */
   trailingActions?: EuiFlyoutMenuAction[];
+  /** Flyout width: `s` (default), `m`, or a width in pixels, for content such as charts. */
+  size?: 's' | 'm' | number;
 }
 
 /**

@@ -72,6 +72,7 @@ export {
   type AttachmentSummaryRowProps,
   selectSummaryAttachments,
   SUMMARY_ATTACHMENT_TYPES,
+  TRAILING_SUMMARY_ATTACHMENT_TYPES,
   type SummaryAttachmentType,
 } from './src/components/attachment_summary';
 

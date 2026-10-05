@@ -54,6 +54,8 @@ export const getInvestigationTabIds = (templateId: string): readonly string[] =>
 
 export interface RegisterAgenticInvestigationTemplateUIOptions {
   conversationTemplates: ConversationTemplateServiceStartContract;
+  /** Width of the in-chat details flyout: `s` (Agent Builder's default), `m`, or pixels. */
+  detailsFlyoutSize?: 's' | 'm' | number;
   /** Solution-owned conversation template id. Agent Builder throws if it is already registered. */
   templateId: string;
   /** Localized template display name, shown in Agent Builder's title badge. */
@@ -135,6 +137,7 @@ export const registerAgenticInvestigationTemplateUI = ({
   renderLiveState,
   renderTitle,
   briefCard,
+  detailsFlyoutSize,
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
   const [overviewTabId] = getInvestigationTabIds(templateId);
 
@@ -162,6 +165,7 @@ export const registerAgenticInvestigationTemplateUI = ({
       tabs: [overviewTabId],
       ...(briefCard && { briefCard }),
       detailsFlyout: {
+        ...(detailsFlyoutSize !== undefined && { size: detailsFlyoutSize }),
         header: function InvestigationFlyoutHeader({ conversation, refetchConversation }) {
           return (
             // Agent Builder points the flyout's `aria-labelledby` at the header, so it must not

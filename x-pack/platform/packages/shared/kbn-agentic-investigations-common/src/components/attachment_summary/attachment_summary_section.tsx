@@ -11,7 +11,7 @@ import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments'
 import { DetailsBlock } from '../details/detail_block';
 import { AttachmentSummaryList } from './attachment_summary_list';
 import { selectSummaryAttachments } from './select_summary_attachments';
-import { SUMMARY_ATTACHMENT_TYPES } from './summary_attachment_types';
+import { SUMMARY_ATTACHMENT_TYPES, type SummaryAttachmentType } from './summary_attachment_types';
 import { ATTACHMENT_SUMMARY_TITLE } from './translations';
 
 export interface AttachmentSummarySectionProps {
@@ -19,6 +19,8 @@ export interface AttachmentSummarySectionProps {
   attachments: VersionedAttachment[] | undefined;
   attachmentsService: AttachmentServiceStartContract;
   title?: string;
+  /** The kinds this summary lists, in order. Defaults to {@link SUMMARY_ATTACHMENT_TYPES}. */
+  attachmentTypes?: readonly SummaryAttachmentType[];
 }
 
 /**
@@ -26,10 +28,15 @@ export interface AttachmentSummarySectionProps {
  * attachment matches a category, so an empty summary never takes up space in the flyout.
  */
 export const AttachmentSummarySection = memo<AttachmentSummarySectionProps>(
-  ({ attachments, attachmentsService, title = ATTACHMENT_SUMMARY_TITLE }) => {
+  ({
+    attachments,
+    attachmentsService,
+    title = ATTACHMENT_SUMMARY_TITLE,
+    attachmentTypes = SUMMARY_ATTACHMENT_TYPES,
+  }) => {
     const summaryAttachments = useMemo(
-      () => selectSummaryAttachments(attachments, SUMMARY_ATTACHMENT_TYPES),
-      [attachments]
+      () => selectSummaryAttachments(attachments, attachmentTypes),
+      [attachments, attachmentTypes]
     );
 
     const renderableAttachments = useMemo(

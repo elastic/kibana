@@ -25,6 +25,7 @@ export interface OpenConversationDetailsFlyoutOptions {
   conversationId: string;
   onClose?: () => void;
   trailingActions?: EuiFlyoutMenuAction[];
+  size?: 's' | 'm' | number;
 }
 
 export const openConversationDetailsFlyout = async ({
@@ -34,6 +35,7 @@ export const openConversationDetailsFlyout = async ({
   conversationId,
   onClose,
   trailingActions,
+  size = 's',
 }: OpenConversationDetailsFlyoutOptions): Promise<() => void> => {
   const titleId = generateTitleId();
   const queryClient = new QueryClient();
@@ -51,7 +53,7 @@ export const openConversationDetailsFlyout = async ({
       session: 'start',
       historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
       title: FLYOUT_TITLE,
-      size: 's',
+      size,
       flyoutMenuDisplayMode: 'always',
       flyoutMenuProps: { trailingActions },
       type: 'push',

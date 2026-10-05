@@ -20,5 +20,12 @@ export const SUMMARY_ATTACHMENT_TYPES: readonly SummaryAttachmentType[] = [
   { types: ['security.attack_discovery'] },
   { types: ['security.entity'] },
   { types: ['security.rule'] },
+];
+
+/**
+ * Kinds listed in a second summary at the bottom of the overview: references to what guided the
+ * investigation, rather than what it is about.
+ */
+export const TRAILING_SUMMARY_ATTACHMENT_TYPES: readonly SummaryAttachmentType[] = [
   { types: ['nightshift.decision_tree'] },
 ];

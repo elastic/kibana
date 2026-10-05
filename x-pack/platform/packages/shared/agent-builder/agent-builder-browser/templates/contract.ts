@@ -91,6 +91,11 @@ export interface ConversationTemplateUIDefinition {
     trailingActions?: (
       props: Pick<ConversationTemplateDetailsFlyoutRenderProps, 'conversation'>
     ) => EuiFlyoutMenuAction[];
+    /**
+     * Width of the in-chat flyout: `s` (default), `m`, or a width in pixels. Flyouts opened with
+     * `openConversationDetails` take their width from its `size` option instead.
+     */
+    size?: 's' | 'm' | number;
   };
 }
 

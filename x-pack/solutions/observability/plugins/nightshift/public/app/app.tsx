@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { INVESTIGATION_DETAILS_FLYOUT_WIDTH } from '@kbn/agentic-investigations-plugin/common';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -155,6 +156,7 @@ export function NightshiftApp(): React.ReactElement {
       .openConversationDetails({
         conversationId: selectedInvestigationId,
         trailingActions: [shareInvestigationAction],
+        size: INVESTIGATION_DETAILS_FLYOUT_WIDTH,
         // Closed by the user, not replaced by another selection or unmounted.
         onClose: () => {
           if (!isCancelled) {

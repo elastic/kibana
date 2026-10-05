@@ -17,4 +17,8 @@ export {
 } from './attachment_summary_group';
 export { AttachmentSummaryRow, type AttachmentSummaryRowProps } from './attachment_summary_row';
 export { selectSummaryAttachments } from './select_summary_attachments';
-export { SUMMARY_ATTACHMENT_TYPES, type SummaryAttachmentType } from './summary_attachment_types';
+export {
+  SUMMARY_ATTACHMENT_TYPES,
+  TRAILING_SUMMARY_ATTACHMENT_TYPES,
+  type SummaryAttachmentType,
+} from './summary_attachment_types';
