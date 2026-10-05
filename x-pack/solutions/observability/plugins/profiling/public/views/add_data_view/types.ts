@@ -20,8 +20,8 @@ export interface AddDataStep {
   content: string | React.ReactNode;
 }
 
-export interface AddDataTab {
-  key: string;
+export interface AddDataTab<TKey extends string = string> {
+  key: TKey;
   title: string;
   steps?: AddDataStep[];
   subTabs?: AddDataTab[];

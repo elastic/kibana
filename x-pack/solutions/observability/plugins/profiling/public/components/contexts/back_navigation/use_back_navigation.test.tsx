@@ -11,6 +11,7 @@ import { act, renderHook } from '@testing-library/react';
 import { MemoryRouter, useHistory } from 'react-router-dom';
 import type { AppHeaderBack } from '@kbn/app-header';
 import type { ProfilingStatus } from '@kbn/profiling-utils';
+import { ProfilingSchema } from '@kbn/profiling-utils';
 import { AsyncStatus } from '../../../hooks/use_async';
 import type { ProfilingDependencies } from '../profiling_dependencies/profiling_dependencies_context';
 import { ProfilingDependenciesContextProvider } from '../profiling_dependencies/profiling_dependencies_context';
@@ -190,6 +191,19 @@ describe('useBackNavigation', () => {
 
       act(() => result.current.history.push('/settings'));
 
+      expect(result.current.back).toEqual(pluginRootTarget);
+    });
+
+    it.each(Object.values(ProfilingSchema))('keeps the %s schema of the current URL', (schema) => {
+      const { result } = renderBackNavigation({ initialEntry: `/settings?schema=${schema}` });
+      expect(result.current.back).toEqual({
+        ...pluginRootTarget,
+        href: `/base/app/profiling?schema=${schema}`,
+      });
+    });
+
+    it('does not keep an unknown schema', () => {
+      const { result } = renderBackNavigation({ initialEntry: '/settings?schema=semconv' });
       expect(result.current.back).toEqual(pluginRootTarget);
     });
 

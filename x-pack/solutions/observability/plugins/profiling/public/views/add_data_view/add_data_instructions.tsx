@@ -64,7 +64,7 @@ export function AddDataInstructions() {
   const stackVersion = data?.stackVersion;
   const majorVersion = stackVersion ? major(stackVersion).toString() : undefined;
 
-  const tabs: AddDataTab[] = useMemo(
+  const tabs: Array<AddDataTab<AddDataTabs>> = useMemo(
     () => [
       {
         key: AddDataTabs.Kubernetes,

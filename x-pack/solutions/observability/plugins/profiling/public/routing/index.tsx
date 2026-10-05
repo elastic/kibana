@@ -13,6 +13,7 @@ import {
   TopNFunctionSortField,
   topNFunctionSortFieldRt,
   TopNType,
+  profilingSchemaRt,
 } from '@kbn/profiling-utils';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
@@ -49,6 +50,13 @@ const routes = {
         <Outlet />
       </RouteBreadcrumb>
     ),
+    // Registered for every page so the selected schema is kept while navigating, even through
+    // pages where it has no effect. Optional, since pages resolve a default when it is missing.
+    params: t.partial({
+      query: t.partial({
+        schema: profilingSchemaRt,
+      }),
+    }),
     children: {
       '/settings': {
         element: (
