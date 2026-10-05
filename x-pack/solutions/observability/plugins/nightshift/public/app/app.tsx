@@ -216,7 +216,6 @@ export function NightshiftApp(): React.ReactElement {
       gutterSize="none"
       responsive={false}
       css={css`
-        background: ${euiTheme.colors.backgroundBaseSubdued};
         box-sizing: border-box;
         margin-top: ${euiTheme.size.l};
         padding-bottom: calc(${euiTheme.size.xxl} * 1.5);

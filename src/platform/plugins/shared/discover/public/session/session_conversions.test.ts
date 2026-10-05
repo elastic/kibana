@@ -92,13 +92,10 @@ const esqlApiTab: Required<DiscoverSessionApiEsqlTab> = {
   data_source: { type: 'esql', query: 'FROM logs-* | WHERE status == 500' },
   hide_chart: false,
   hide_table: true,
-  hide_aggregated_preview: true,
   row_height: 2,
   header_row_height: 'auto',
   rows_per_page: 25,
-  sample_size: 500,
   breakdown_field: 'service.name',
-  chart_interval: 'h',
   time_range: { from: 'now-24h', to: 'now' },
   refresh_interval: { pause: false, value: 30_000 },
   density: DataGridDensity.COMPACT,
@@ -567,6 +564,7 @@ describe('Discover session conversion and UI preparation', () => {
     const session = assignSessionDataViewIds(fromDiscoverSessionApiResponse(response), []);
     const inlineTab = session.tabs[1];
     inlineTab.isTextBasedQuery = true;
+    inlineTab.hideAggregatedPreview = false;
     inlineTab.serializedSearchSource.filter = [
       {
         meta: { index: 'runtime-inline-id', type: FILTERS.PHRASE, key: 'service.name' },
@@ -590,25 +588,32 @@ describe('Discover session conversion and UI preparation', () => {
         data_view_id: 'runtime-inline-id',
       },
     ]);
+    expect(apiTab).toHaveProperty('hide_aggregated_preview', false);
     expect(session).toStrictEqual(beforeSave);
   });
 
-  it('converts ES|QL without approximation when the text-based flag is incorrectly false', () => {
-    const session = fromDiscoverSessionApiResponse(response);
-    const esqlTab = session.tabs[2];
-    esqlTab.isTextBasedQuery = false;
-    const beforeSave = cloneDeep(session);
+  it.each([true, false])(
+    'preserves ES|QL approximation %s when the text-based flag is incorrectly false',
+    (esqlApproximation) => {
+      const session = fromDiscoverSessionApiResponse(response);
+      const esqlTab = session.tabs[2];
+      esqlTab.isTextBasedQuery = false;
+      esqlTab.esqlApproximation = esqlApproximation;
+      esqlTab.hideAggregatedPreview = true;
+      const beforeSave = cloneDeep(session);
 
-    const apiTab = toDiscoverSessionApiData(session).tabs[2];
+      const apiTab = toDiscoverSessionApiData(session).tabs[2];
 
-    expect(apiTab.data_source).toStrictEqual({
-      type: 'esql',
-      query: 'FROM logs-* | WHERE status == 500',
-    });
-    expect(apiTab).not.toHaveProperty('filters');
-    expect(apiTab).not.toHaveProperty('esql_approximation');
-    expect(session).toStrictEqual(beforeSave);
-  });
+      expect(apiTab.data_source).toStrictEqual({
+        type: 'esql',
+        query: 'FROM logs-* | WHERE status == 500',
+      });
+      expect(apiTab).not.toHaveProperty('filters');
+      expect(apiTab).toHaveProperty('esql_approximation', esqlApproximation);
+      expect(apiTab).not.toHaveProperty('hide_aggregated_preview');
+      expect(session).toStrictEqual(beforeSave);
+    }
+  );
 
   it('round-trips pinned conditions as app filters without changing the local pin', () => {
     const session = fromDiscoverSessionApiResponse(response);
@@ -719,6 +724,31 @@ describe('Discover session conversion and UI preparation', () => {
       aliasTargetId: 'other-session',
       aliasPurpose: 'savedObjectImport',
     });
+  });
+
+  it('replaces an unsupported Classic chart interval with auto before saving', () => {
+    const session = fromDiscoverSessionApiResponse(response);
+    session.tabs[0].chartInterval = '5m';
+
+    const data = toDiscoverSessionApiData(session);
+
+    expect(data.tabs[0]).toHaveProperty('chart_interval', 'auto');
+    expect(discoverSessionInternalDataSchema.safeParse(data).success).toBe(true);
+    expect(session.tabs[0].chartInterval).toBe('5m');
+  });
+
+  it('omits the fields that ES|QL tabs do not use before saving', () => {
+    const session = fromDiscoverSessionApiResponse(response);
+    session.tabs[2].sampleSize = 500;
+    session.tabs[2].hideAggregatedPreview = true;
+    session.tabs[2].chartInterval = 'auto';
+
+    const data = toDiscoverSessionApiData(session);
+
+    expect(data.tabs[2]).not.toHaveProperty('sample_size');
+    expect(data.tabs[2]).not.toHaveProperty('hide_aggregated_preview');
+    expect(data.tabs[2]).not.toHaveProperty('chart_interval');
+    expect(discoverSessionInternalDataSchema.safeParse(data).success).toBe(true);
   });
 
   it('normalizes the legacy ES|QL control type and camelCase config before saving', () => {
@@ -883,7 +913,6 @@ describe('chart state from API responses', () => {
         ...esqlTab,
         vis_context: visContext,
         breakdown_field: 'host.name',
-        chart_interval: 'h',
       })
     ).toStrictEqual({
       suggestionType: visContext.suggestion_type,
