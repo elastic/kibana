@@ -1622,8 +1622,10 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         ])
       );
 
-      // rule-002 must produce exactly one fire (np-1 only). A second fire
-      // here would mean the tag-scoped matcher matched on rule tags.
+      /*
+       * rule-002 must produce exactly one fire (np-1 only). A second fire
+       * here would mean the tag-scoped matcher matched on rule tags.
+       */
       const rule002Fires = await expectStableCount(apiServices, 1, {
         ruleId: 'rule-002',
         actionTypes: ['fire'],
