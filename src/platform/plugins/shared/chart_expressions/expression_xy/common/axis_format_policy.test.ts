@@ -406,6 +406,37 @@ describe('axis format policy', () => {
     expect(policy.formatter).toEqual({ id: 'percent' });
   });
 
+  it('preserves an explicit percent formatter in percentage mode', () => {
+    const [policy] = resolveAxisFormatPolicies([
+      dataLayer({
+        layerId: 'percentage',
+        columns: [column('ratio', { id: 'percent', params: { pattern: '0.0000%' } })],
+        row: { ratio: 0.0001 },
+        accessors: ['ratio'],
+        isPercentage: true,
+      }),
+    ]);
+
+    expect(policy.formatter).toEqual({ id: 'percent', params: { pattern: '0.0000%' } });
+  });
+
+  it('uses the first series percent formatter when both series are percent', () => {
+    const [policy] = resolveAxisFormatPolicies([
+      dataLayer({
+        layerId: 'percentage',
+        columns: [
+          column('first', { id: 'percent', params: { pattern: '0.0%' } }),
+          column('second', { id: 'percent', params: { pattern: '0.0000%' } }),
+        ],
+        row: { first: 0.5, second: 0.5 },
+        accessors: ['first', 'second'],
+        isPercentage: true,
+      }),
+    ]);
+
+    expect(policy.formatter).toEqual({ id: 'percent', params: { pattern: '0.0%' } });
+  });
+
   it('normalizes duration values before retaining percentage presentation', () => {
     const layer = dataLayer({
       layerId: 'percentage',

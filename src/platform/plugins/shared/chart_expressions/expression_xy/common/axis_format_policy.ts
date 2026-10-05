@@ -153,10 +153,13 @@ const getDataDescriptors = (
         hasDurationFormat(sourceFormat) && !getDurationSemantics(sourceFormat)
           ? DEFAULT_FORMAT
           : sourceFormat;
+      // Percentage mode renders with a default percent formatter but keep an existing one if exists.
+      const fieldFormat =
+        layer.isPercentage && groupingFormat.id !== 'percent' ? PERCENT_FORMAT : groupingFormat;
       return {
         layerId: layer.layerId,
         accessor,
-        fieldFormat: layer.isPercentage ? PERCENT_FORMAT : groupingFormat,
+        fieldFormat,
         sourceFormat,
         ...getRequestedAxis(layer, accessor, yAxisConfigs),
       };
