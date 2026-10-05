@@ -35,6 +35,7 @@ const createWorker = (overrides: Partial<Worker> = {}): Worker => ({
   lastRun: null,
   state: 'paused',
   settingsRevision: 1,
+  workflowId: null,
   settings: {
     workerId: TRIAGE,
     autonomy: 'manual',
@@ -89,7 +90,7 @@ describe('useUpdateWorker', () => {
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
       </KibanaContextProvider>
     );
-    return { queryClient, ...renderHook(() => useUpdateWorker(), { wrapper }) };
+    return { queryClient, services, ...renderHook(() => useUpdateWorker(), { wrapper }) };
   };
 
   const scheduledWorker = createWorker({
@@ -153,6 +154,48 @@ describe('useUpdateWorker', () => {
     await waitFor(() =>
       expect(queryClient.getQueryData(queryKeys.workers.list())).toEqual({ workers: [persisted] })
     );
+  });
+
+  it('warns when enabling skipped rules the caller cannot edit', async () => {
+    const patch = jest.fn().mockResolvedValue({ worker: createWorker(), skippedRuleCount: 2 });
+    const { result, services } = renderUpdateWorker(createWorker(), patch);
+
+    await act(async () => {
+      result.current.mutate({ workerId: TRIAGE, patch: { enabled: true } });
+    });
+
+    await waitFor(() => expect(services.notifications.toasts.addWarning).toHaveBeenCalledTimes(1));
+    expect(services.notifications.toasts.addWarning).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Some rules were not attached to the worker' })
+    );
+  });
+
+  it('warns when disabling left rules the caller cannot edit attached', async () => {
+    const patch = jest
+      .fn()
+      .mockResolvedValue({ worker: createWorker({ enabled: false }), skippedRuleCount: 2 });
+    const { result, services } = renderUpdateWorker(createWorker(), patch);
+
+    await act(async () => {
+      result.current.mutate({ workerId: TRIAGE, patch: { enabled: false } });
+    });
+
+    await waitFor(() => expect(services.notifications.toasts.addWarning).toHaveBeenCalledTimes(1));
+    expect(services.notifications.toasts.addWarning).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Some rules still have the worker attached' })
+    );
+  });
+
+  it('does not warn when no rules were skipped', async () => {
+    const patch = jest.fn().mockResolvedValue({ worker: createWorker() });
+    const { result, services } = renderUpdateWorker(createWorker(), patch);
+
+    await act(async () => {
+      result.current.mutate({ workerId: TRIAGE, patch: { enabled: true } });
+    });
+
+    await waitFor(() => expect(patch).toHaveBeenCalledTimes(1));
+    expect(services.notifications.toasts.addWarning).not.toHaveBeenCalled();
   });
 
   it('does not roll back a previously saved Worker when a later PATCH fails', async () => {

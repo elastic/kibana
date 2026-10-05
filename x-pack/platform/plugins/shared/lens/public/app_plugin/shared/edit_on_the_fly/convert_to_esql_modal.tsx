@@ -7,11 +7,7 @@
 import type { ReactNode } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import type {
-  EuiBasicTableColumn,
-  EuiConfirmModalProps,
-  EuiTableSelectionType,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiConfirmModalProps } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiButtonIcon,
@@ -20,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiScreenReaderOnly,
   EuiSpacer,
@@ -27,11 +24,14 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 import { esql } from '@elastic/esql';
 
+import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
+import { getFailureTooltip } from '@kbn/lens-common';
+
 import { layerTypes } from '../../..';
+
 import type { ConvertibleLayer, LayerType } from './esql_conversion_types';
 
 const typeLabels: Record<LayerType, (count: number) => string> = {
@@ -61,11 +61,6 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
   onConfirm: () => void;
 }> = ({ layers, onCancel, onConfirm }) => {
   const { euiTheme } = useEuiTheme();
-
-  const [selectedItems, setSelectedItems] = useState<ConvertibleLayer[]>([]);
-  const onSelectionChange = useCallback((items: ConvertibleLayer[]) => {
-    setSelectedItems(items);
-  }, []);
 
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
@@ -105,12 +100,55 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
         name: 'Layer',
         width: `${parseInt(euiTheme.size.xl, 10) * 5}px`,
         truncateText: true,
+        render: (name: string, layer: ConvertibleLayer) => {
+          if (layer.isConvertibleToEsql || layer.type !== layerTypes.DATA) {
+            return name;
+          }
+          return (
+            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+              <EuiFlexItem grow={false}>{name}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  type="warning"
+                  color="warning"
+                  content={getFailureTooltip(layer.failureReason)}
+                  iconProps={{
+                    'aria-label': getFailureTooltip(layer.failureReason),
+                    'data-test-subj': `lnsEsqlConversionFailureReason-${layer.id}`,
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        },
       },
       {
         field: 'type',
-        name: 'Typology',
+        name: i18n.translate('xpack.lens.config.layerTypeColumnLabel', {
+          defaultMessage: 'Type',
+        }),
         truncateText: true,
         render: (type: LayerType) => typeLabels[type](1),
+      },
+      {
+        name: i18n.translate('xpack.lens.config.conversionResultColumnLabel', {
+          defaultMessage: 'Result',
+        }),
+        render: (layer: ConvertibleLayer) => {
+          if (layer.type !== layerTypes.DATA) {
+            return i18n.translate('xpack.lens.config.layerWillRemainUnchangedLabel', {
+              defaultMessage: 'Will remain unchanged',
+            });
+          }
+
+          return layer.isConvertibleToEsql
+            ? i18n.translate('xpack.lens.config.layerWillBeConvertedLabel', {
+                defaultMessage: 'Will be converted',
+              })
+            : i18n.translate('xpack.lens.config.layerCannotBeConvertedLabel', {
+                defaultMessage: 'Cannot be converted',
+              });
+        },
       },
       {
         align: 'right',
@@ -126,6 +164,10 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
           </EuiScreenReaderOnly>
         ),
         render: (layer: ConvertibleLayer) => {
+          if (!layer.isConvertibleToEsql) {
+            return null;
+          }
+
           const isExpanded = Boolean(itemIdToExpandedRowMap[layer.id]);
 
           return (
@@ -153,7 +195,6 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
                       })
                 }
                 iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
-                disabled={!layer.isConvertibleToEsql}
               />
             </EuiToolTip>
           );
@@ -163,51 +204,21 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
     [euiTheme.size.l, euiTheme.size.xl, euiTheme.size.xxl, itemIdToExpandedRowMap, toggleDetails]
   );
 
-  const selection: EuiTableSelectionType<ConvertibleLayer> = {
-    selectable: (layer: ConvertibleLayer) => {
-      return layer.type === layerTypes.DATA && layer.isConvertibleToEsql;
-    },
-    selectableMessage: (selectable: boolean, layer: ConvertibleLayer) => {
-      if (selectable) {
-        return i18n.translate('xpack.lens.config.selectLayerAriaLabel', {
-          defaultMessage: 'Select {layerName} for conversion to query mode',
-          values: {
-            layerName: layer.name,
-          },
-        });
-      }
-
-      if (layer.type === layerTypes.DATA) {
-        return i18n.translate('xpack.lens.config.layerNameCannotBeSwitchedAriaLabel', {
-          defaultMessage: '{layerName} cannot be switched to query mode',
-          values: {
-            layerName: layer.name,
-          },
-        });
-      } else {
-        return i18n.translate('xpack.lens.config.layerTypesCannotBeSwitchedAriaLabel', {
-          defaultMessage: '{layerTypes} cannot be switched to query mode',
-          values: {
-            layerTypes: typeLabels[layer.type](2),
-          },
-        });
-      }
-    },
-    onSelectionChange,
-    initialSelected: [],
-  };
-
+  const dataLayers = layers.filter((layer) => layer.type === layerTypes.DATA);
+  // Conversion is chart-level because Lens does not support mixing form-based and ES|QL data
+  // layers. The table summarizes the outcome instead of offering selections that cannot be
+  // honored: every data layer must convert, while annotation and reference-line layers remain
+  // in their existing datasource.
   const isConfirmButtonEnabled =
-    (layers.length === 1 && layers[0].isConvertibleToEsql) ||
-    (layers.length > 1 && selectedItems.length > 0);
+    dataLayers.length > 0 && dataLayers.every((layer) => layer.isConvertibleToEsql);
 
   return (
     <EuiConfirmModal
       aria-label={i18n.translate('xpack.lens.config.switchToQueryModeAriaLabel', {
-        defaultMessage: 'Switch to query mode',
+        defaultMessage: 'Convert visualization to ES|QL',
       })}
       title={i18n.translate('xpack.lens.config.switchToQueryModeTitle', {
-        defaultMessage: 'Switch to query mode',
+        defaultMessage: 'Convert visualization to ES|QL',
       })}
       onCancel={onCancel}
       cancelButtonText={i18n.translate('xpack.lens.config.cancelButtonTextButtonLabel', {
@@ -215,14 +226,15 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
       })}
       onConfirm={onConfirm}
       confirmButtonText={i18n.translate('xpack.lens.config.switchToQueryModeButtonLabel', {
-        defaultMessage: 'Switch to query mode',
+        defaultMessage: 'Convert to ES|QL',
       })}
       confirmButtonDisabled={!isConfirmButtonEnabled}
       data-test-subj="lnsConvertToEsqlModal"
     >
       <p>
         {i18n.translate('xpack.lens.config.queryModeDescription', {
-          defaultMessage: 'Query mode enables advanced data analysis with ES|QL.',
+          defaultMessage:
+            'All data layers in this visualization will be converted to ES|QL. Annotation and reference line layers will remain unchanged.',
         })}{' '}
         {/* TODO: Add link to docs */}
         <EuiLink href="" target="_blank" external={false}>
@@ -235,7 +247,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
       <KbnWarningCallout
         size="s"
         title={i18n.translate('xpack.lens.config.queryModeWarningDescription', {
-          defaultMessage: `Once you save the chart after switching to query mode, you can't switch back.`,
+          defaultMessage: `Once you save the chart after converting to ES|QL, you can't switch back.`,
         })}
       />
 
@@ -244,14 +256,13 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
       {layers.length > 1 ? (
         <EuiBasicTable
           tableCaption={i18n.translate('xpack.lens.config.layersTableCaption', {
-            defaultMessage: 'Layers available for conversion to query mode',
+            defaultMessage: 'Layer conversion summary',
           })}
           responsiveBreakpoint={false}
           items={layers}
           itemId="id"
           columns={columns}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-          selection={selection}
         />
       ) : layers.length === 1 && layers[0].isConvertibleToEsql ? (
         <EuiFlexGroup direction="column" gutterSize="s">

@@ -212,7 +212,7 @@
     "src/platform/packages/shared/kbn-router-to-openapispec/openapi-types.d.ts": "'openapi-types.d.ts' should be snake_case"
   },
   "@elastic/kibana-discover": {
-    "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/Readme.md": "'Readme.md' should be snake_case"
+    "src/platform/packages/shared/esql/kbn-esql-utils/src/utils/callbacks/Readme.md": "'Readme.md' should be snake_case"
   },
   "@elastic/kibana-management": {
     "src/platform/packages/shared/kbn-management/autoops_promotion_callout": "'autoops_promotion_callout' should be kebab-case",

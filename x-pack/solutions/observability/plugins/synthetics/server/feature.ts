@@ -164,7 +164,7 @@ export const syntheticsFeature = {
     all: {
       app: ['uptime', 'kibana', 'synthetics'],
       catalogue: ['uptime'],
-      api: ['uptime-read', 'uptime-write', 'lists-all', 'rac'],
+      api: ['uptime-read', 'uptime-write', 'lists-all', 'rac', 'bulkGetUserProfiles'],
       savedObject: {
         all: [
           syntheticsSettingsObjectType,
@@ -197,7 +197,7 @@ export const syntheticsFeature = {
     read: {
       app: ['uptime', 'kibana', 'synthetics'],
       catalogue: ['uptime'],
-      api: ['uptime-read', 'lists-read', 'rac'],
+      api: ['uptime-read', 'lists-read', 'rac', 'bulkGetUserProfiles'],
       savedObject: {
         all: [],
         read: [

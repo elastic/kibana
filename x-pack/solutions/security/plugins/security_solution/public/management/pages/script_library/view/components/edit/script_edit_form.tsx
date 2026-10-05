@@ -455,6 +455,7 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
             data-test-subj={getTestId('file-picker-row')}
           >
             <EuiFilePicker
+              aria-label={SCRIPT_LIBRARY_LABELS.flyout.body.edit.filePickerPrompt.label}
               data-test-subj={getTestId('file-picker')}
               isInvalid={hasFileError && hasFileBeenChanged}
               id={filePickerUUID}

@@ -125,6 +125,11 @@ export interface SetupPlugins {
   discoverShared: DiscoverSharedPublicStart;
   esql?: EsqlPluginSetup;
   workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
+  /**
+   * Optional. When present, `enabled` is the AlertZero soft-enable switch
+   * (`xpack.alertzero.enabled`). Threat-intel supply gates on this.
+   */
+  alertzero?: { enabled: boolean };
 }
 
 /**

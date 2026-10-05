@@ -146,6 +146,7 @@ const mockLibs = {
   ],
   configuration: createMockStaticConfiguration({}),
   metricsRules: {},
+  isPodSchemaSelectorEnabled: jest.fn().mockResolvedValue(false),
   basePath: {
     publicBaseUrl: 'http://localhost:5601',
     prepend: (path: string) => path,

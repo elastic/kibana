@@ -6,23 +6,16 @@
  */
 
 export { apiTest } from '@kbn/scout';
-export { COMMON_HEADERS, PROPOSALS_MANAGE_ROLE, PROPOSALS_READ_ONLY_ROLE } from './constants';
-export {
-  cleanupProposalFixtures,
-  seedProposal,
-  getProposal,
-  reviseProposal,
-  dismissProposal,
-  spaceUrl,
-  trackProposal,
-} from './helpers';
-export type { SeedProposalOptions } from './helpers';
 export {
   INTERNAL_HEADERS,
   PUBLIC_HEADERS,
   LIST_ESCALATIONS_PATH,
   CREATE_ESCALATION_PATH,
   ESCALATION_BY_ID_PATH,
+  ESCALATION_LINK_PATH,
+  ESCALATION_ASSIGNEES_PATH,
+  INVESTIGATIONS_INTERNAL_PATH,
+  INVESTIGATION_ASSIGNEES_PATH,
   AB_CONVERSATIONS_PATH,
   AB_CONVERSATION_BY_ID_PATH,
 } from './constants';

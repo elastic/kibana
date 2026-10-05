@@ -1,0 +1,7 @@
+prs:
+- https://github.com/elastic/kibana/pull/291588
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+title: Add read endpoints (GET and find) to the unified attachments API

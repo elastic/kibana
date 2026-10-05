@@ -18,18 +18,24 @@ import {
   MAX_SUMMARY_LENGTH,
   MAX_SYMPTOM_HYPOTHESIS_LENGTH,
 } from '@kbn/significant-events-schema';
+import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import { eventsWriteItemSchema } from './tool';
-import type { EventClient } from '../../../lib/significant_events/events';
+import type {
+  EventClient,
+  SignificantEventsReadClient,
+} from '../../../lib/significant_events/events';
+import { toRuleEvent } from '../../../lib/significant_events/events/to_rule_event';
 
 const TS_EARLIER = '2024-01-01T00:00:00.000Z';
 
 const baseInput: EventsWriteInput = {
-  status: 'open',
+  status: 'active',
   stream_names: ['logs.checkout'],
   title: 'Checkout latency',
   symptom_hypothesis: 'Checkout requests are delayed because the payment dependency is timing out.',
   summary: 'P99 latency breached SLO',
-  severity: '60-high',
+  severity: 'high',
   confidence: 0.82,
   assessment_note: 'Verified via execute_esql',
   signals: [],
@@ -49,10 +55,9 @@ const makeStoredEvent = (
 ): SignificantEvent =>
   ({
     '@timestamp': TS_EARLIER,
-    event_uuid: `${eventId}-uuid`,
     event_id: eventId,
-    status: 'open',
-    severity: '60-high',
+    status: 'active',
+    severity: 'high',
     stream_names: ['logs.checkout'],
     signals: [],
     title: 'Test event',
@@ -63,20 +68,50 @@ const makeStoredEvent = (
   } as SignificantEvent);
 
 /**
- * Returns a typed eventClient mock with default no-op implementations.
- * Override individual methods by passing a partial mock.
+ * Returns a typed eventSearchClient mock (SignificantEventsReadClient) with default no-op
+ * implementations. Override individual methods by passing a partial mock.
+ */
+const makeEventSearchClient = (
+  overrides: Partial<jest.Mocked<SignificantEventsReadClient>> = {}
+): jest.Mocked<SignificantEventsReadClient> => ({
+  findLatestPaginated: jest.fn(),
+  findLatestByCurrentStatePaginated: jest.fn(),
+  findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+  findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
+  findLatestByEventId: jest.fn(),
+  ...overrides,
+});
+
+/**
+ * Returns a typed eventClient mock. Extends makeEventSearchClient with EventClient-specific
+ * methods. Override individual methods by passing a partial mock.
  */
 const makeEventClient = (
   overrides: Partial<jest.Mocked<EventClient>> = {}
 ): jest.Mocked<EventClient> =>
   ({
-    findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+    ...makeEventSearchClient(),
     findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
-    findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
     bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
     emitTrigger: jest.fn(),
     ...overrides,
   } as jest.Mocked<EventClient>);
+
+const makeAlertEventsClient = (
+  overrides: Partial<jest.Mocked<AlertEventsClientApi>> = {}
+): jest.Mocked<AlertEventsClientApi> =>
+  ({
+    createAlertEvent: jest.fn().mockResolvedValue(undefined),
+    ...overrides,
+  } as jest.Mocked<AlertEventsClientApi>);
+
+const makeLogger = (): jest.Mocked<Logger> =>
+  ({
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+  } as unknown as jest.Mocked<Logger>);
 
 describe('eventsWriteHandler', () => {
   it('writes a new event', async () => {
@@ -94,8 +129,7 @@ describe('eventsWriteHandler', () => {
     expect(result.written).toBe(true);
     if (result.written) {
       expect(result.event_id).toBe('checkout__latency-abc12345');
-      expect(result.status).toBe('open');
-      expect(typeof result.event_uuid).toBe('string');
+      expect(result.status).toBe('active');
     }
   });
 
@@ -138,10 +172,9 @@ describe('eventsWriteHandler', () => {
     }
   });
 
-  it('sets previous_event_uuid from the latest event in the stored lineage', async () => {
+  it('does not persist a legacy version identifier', async () => {
     const stored = makeStoredEvent('checkout__latency-abc12345', {
-      event_uuid: 'latest-id',
-      status: 'closed',
+      status: 'inactive',
     });
     const eventClient = makeEventClient({
       findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
@@ -149,11 +182,11 @@ describe('eventsWriteHandler', () => {
 
     const result = await eventsWriteHandler({
       eventClient,
-      input: { ...baseInput, event_id: 'checkout__latency-abc12345', status: 'open' },
+      input: { ...baseInput, event_id: 'checkout__latency-abc12345', status: 'active' },
     });
 
     expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
-    expect(eventClient.bulkCreate.mock.calls[0][0][0].previous_event_uuid).toBe('latest-id');
+    expect(eventClient.bulkCreate.mock.calls[0][0][0]).not.toHaveProperty('previous_event_uuid');
     expect(result.written).toBe(true);
   });
 
@@ -171,7 +204,7 @@ describe('eventsWriteHandler', () => {
     });
   });
 
-  // status: 'closed' on the stored event ensures severity+status differ from the input ('open'),
+  // An inactive stored event ensures severity+status differ from the active input,
   // so the no-op guard does not fire and a write reaches bulkCreate in both cases.
   it.each([
     [
@@ -183,8 +216,7 @@ describe('eventsWriteHandler', () => {
     ['leaves investigations undefined when absent', undefined],
   ])('%s on re-open continuation', async (_, storedInvestigations) => {
     const stored = makeStoredEvent('checkout__latency-abc12345', {
-      event_uuid: 'latest-id',
-      status: 'closed',
+      status: 'inactive',
       investigations: storedInvestigations,
     });
     const eventClient = makeEventClient({
@@ -210,7 +242,7 @@ describe('eventsWriteHandler', () => {
 
       const result = await eventsWriteHandler({
         eventClient,
-        input: { ...baseInput, event_id: 'checkout-stable', status: 'open', severity: '60-high' },
+        input: { ...baseInput, event_id: 'checkout-stable', status: 'active', severity: 'high' },
       });
 
       expect(result.written).toBe(false);
@@ -262,8 +294,8 @@ describe('eventsWriteHandler', () => {
         input: {
           ...baseInput,
           event_id: 'checkout-stable',
-          status: 'open',
-          severity: '60-high',
+          status: 'active',
+          severity: 'high',
           signals: [ruleTwo],
         },
       });
@@ -302,8 +334,8 @@ describe('eventsWriteHandler', () => {
         input: {
           ...baseInput,
           event_id: 'checkout-stable',
-          status: 'open',
-          severity: '60-high',
+          status: 'active',
+          severity: 'high',
           signals: [ruleOne],
         },
       });
@@ -336,7 +368,7 @@ describe('eventsWriteBulkHandler', () => {
       eventClient,
       inputs: [
         { ...baseInput, event_id: 'event-1' },
-        { ...baseInput, event_id: 'event-2', status: 'closed' },
+        { ...baseInput, event_id: 'event-2', status: 'inactive' },
       ],
     });
 
@@ -379,7 +411,7 @@ describe('eventsWriteBulkHandler', () => {
     expect(results[1]).toEqual({
       index: 1,
       event_id: 'event-2',
-      status: 'open',
+      status: 'active',
       written: false,
       reason: 'bulk_error',
       error: { type: 'mapper_parsing_exception', reason: 'bad field', status: 400 },
@@ -496,7 +528,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
 
   const makeDedupInput = (overrides: Partial<EventsWriteInput> = {}): EventsWriteInput => ({
     ...baseInput,
-    status: 'open',
+    status: 'active',
     stream_names: ['logs.checkout'],
     signals: [makeDetectionSignal()],
     ...overrides,
@@ -811,8 +843,8 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
 
 describe('eventsWriteBulkHandler — continuation status', () => {
   it.each<[string, SignificantEvent['status']]>([
-    ['open', 'open'],
-    ['closed', 'closed'],
+    ['active', 'active'],
+    ['inactive', 'inactive'],
   ])('persists %s status from discovery through to the bulk payload', async (_, status) => {
     const eventId = `checkout-${status}`;
     const stored = makeStoredEvent(eventId, { status, severity: undefined });
@@ -839,7 +871,7 @@ describe('eventsWriteBulkHandler — continuation status', () => {
 
     const results = await eventsWriteBulkHandler({
       eventClient,
-      inputs: [{ ...baseInput, event_id: 'checkout-stable', status: 'open', severity: '60-high' }],
+      inputs: [{ ...baseInput, event_id: 'checkout-stable', status: 'active', severity: 'high' }],
     });
 
     expect(results[0]).toMatchObject({
@@ -854,12 +886,12 @@ describe('eventsWriteBulkHandler — continuation status', () => {
   });
 
   it.each<[string, Partial<EventsWriteInput>, SignificantEvent['status']]>([
+    ['severity escalates (high → critical)', { status: 'active', severity: 'critical' }, 'active'],
     [
-      'severity escalates (60-high → 80-critical)',
-      { status: 'open', severity: '80-critical' },
-      'open',
+      'status transitions (active → inactive)',
+      { status: 'inactive', severity: 'high' },
+      'inactive',
     ],
-    ['status transitions (open → closed)', { status: 'closed', severity: '60-high' }, 'closed'],
   ])(
     'write-through: writes when %s (no-op does not fire)',
     async (_, inputOverrides, expectedStatus) => {
@@ -903,7 +935,7 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
   });
   const makeInvestigatedEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent =>
     makeStoredEvent('investigated-event', {
-      severity: '40-medium',
+      severity: 'medium',
       signals: [makeDetectionSignal('rule-1')],
       investigations: [completedInvestigation],
       ...overrides,
@@ -923,7 +955,7 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
         {
           ...baseInput,
           event_id: stored.event_id,
-          severity: '80-critical',
+          severity: 'critical',
           signals: [makeDetectionSignal('rule-1')],
         },
       ],
@@ -946,13 +978,13 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
         {
           ...baseInput,
           event_id: stored.event_id,
-          severity: '80-critical',
+          severity: 'critical',
           signals: [makeDetectionSignal('rule-2', 'inconclusive')],
         },
       ],
     });
 
-    expect(eventClient.bulkCreate.mock.calls[0][0][0].severity).toBe('40-medium');
+    expect(eventClient.bulkCreate.mock.calls[0][0][0].severity).toBe('medium');
   });
 
   it('accepts severity from a new confirmed rule', async () => {
@@ -968,18 +1000,18 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
         {
           ...baseInput,
           event_id: stored.event_id,
-          severity: '80-critical',
+          severity: 'critical',
           signals: [makeDetectionSignal('rule-2')],
         },
       ],
     });
 
-    expect(eventClient.bulkCreate.mock.calls[0][0][0].severity).toBe('80-critical');
+    expect(eventClient.bulkCreate.mock.calls[0][0][0].severity).toBe('critical');
   });
 
   it.each([
-    ['resolution', makeInvestigatedEvent(), 'closed' as const],
-    ['reopen', makeInvestigatedEvent({ status: 'closed' }), 'open' as const],
+    ['resolution', makeInvestigatedEvent(), 'inactive' as const],
+    ['reactivate', makeInvestigatedEvent({ status: 'inactive' }), 'active' as const],
   ])('accepts severity on %s', async (_, stored, status) => {
     const eventClient = makeEventClient({
       findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
@@ -993,14 +1025,14 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
           ...baseInput,
           event_id: stored.event_id,
           status,
-          severity: '20-low',
+          severity: 'low',
           signals: [makeDetectionSignal('rule-1')],
         },
       ],
     });
 
     expect(eventClient.bulkCreate.mock.calls[0][0][0]).toEqual(
-      expect.objectContaining({ status, severity: '20-low' })
+      expect.objectContaining({ status, severity: 'low' })
     );
   });
 });
@@ -1075,10 +1107,10 @@ describe('eventsWriteBulkHandler — narrative hijack guard', () => {
     overrides: Partial<EventsWriteInput> = {}
   ): EventsWriteInput => ({
     ...baseInput,
-    // Use a severity that differs from makeStoredEvent's '60-high' default so the no-op guard
+    // Use a severity that differs from makeStoredEvent's 'high' default so the no-op guard
     // (shouldSkipAsNoOp) does not suppress writes in tests that are verifying the gate, not the
     // no-op. Tests specifically exercising the no-op interaction override this via `overrides`.
-    severity: '80-critical',
+    severity: 'critical',
     event_id: eventId,
     signals: [makeDetectionSignal('rule-eis-auth')],
     causal_features: [],
@@ -1166,5 +1198,263 @@ describe('eventsWriteBulkHandler — narrative hijack guard', () => {
     expect(writtenDoc.symptom_hypothesis).toBe(
       'Both auth route and SageMaker provider return >=400.'
     );
+  });
+});
+
+describe('eventsWriteBulkHandler — eventSearchClient (flag-aware read path)', () => {
+  it('uses canonical eventClient for dedup and eventSearchClient for prior-doc reads while eventClient supplies legacy lineage', async () => {
+    const eventSearchClient = makeEventSearchClient();
+    const eventClient = makeEventClient();
+
+    await eventsWriteBulkHandler({
+      eventClient,
+      eventSearchClient,
+      inputs: [{ ...baseInput }, { ...baseInput, event_id: 'existing-event-id' }],
+    });
+
+    // When flag ON, canonical is the sole dedup source — rule-events scan is skipped to avoid
+    // stale-active entries from fire-and-forget lag suppressing valid new writes.
+    expect(eventSearchClient.findLatestActive).not.toHaveBeenCalled();
+    expect(eventClient.findLatestActive).toHaveBeenCalled();
+    // fetchPriorDocsByEventId still uses eventSearchClient (client) for current-state reads.
+    expect(eventSearchClient.findByEventId).toHaveBeenCalledWith('existing-event-id');
+    // eventClient supplies the latest investigation state.
+    expect(eventClient.findByEventId).toHaveBeenCalledWith('existing-event-id');
+  });
+
+  it('suppresses write when .rule-events returns no hits but canonical client finds a matching active event', async () => {
+    const activeEvent = makeStoredEvent('checkout__latency-active');
+    // .rule-events lags — no hits from the read store; canonical has the active event
+    const eventSearchClient = makeEventSearchClient();
+    const eventClient = makeEventClient({
+      // canonical write store has the active event
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [activeEvent] }),
+    });
+
+    const results = await eventsWriteBulkHandler({
+      eventClient,
+      eventSearchClient,
+      // no event_id → dedup candidate
+      inputs: [{ ...baseInput }],
+    });
+
+    expect(results[0]).toMatchObject({
+      written: false,
+      skipped: true,
+      reason: 'existing_active_event',
+    });
+    expect(eventClient.bulkCreate).not.toHaveBeenCalled();
+  });
+
+  it('uses eventClient investigations when eventSearchClient has stale investigations (dual-write lag)', async () => {
+    const eventId = 'event-with-investigations';
+    const staleInvestigation = { workflow_execution_id: 'wf-old', started_at: TS_EARLIER };
+    const freshInvestigation = { workflow_execution_id: 'wf-new', started_at: TS_EARLIER };
+    const eventSearchClient = makeEventSearchClient({
+      findByEventId: jest.fn().mockResolvedValue({
+        // eventSearchClient (RuleEventsClient) missed the dual-write for wf-new
+        hits: [
+          makeStoredEvent(eventId, {
+            event_id: 'group-hash',
+            investigations: [staleInvestigation],
+          }),
+        ],
+      }),
+    });
+    const eventClient = makeEventClient({
+      findByEventId: jest.fn().mockResolvedValue({
+        hits: [
+          makeStoredEvent(eventId, {
+            event_id: 'real-uuid',
+            investigations: [staleInvestigation, freshInvestigation],
+          }),
+        ],
+      }),
+    });
+
+    await eventsWriteBulkHandler({
+      eventClient,
+      eventSearchClient,
+      inputs: [{ ...baseInput, event_id: eventId, severity: 'critical' }],
+    });
+
+    const written = eventClient.bulkCreate.mock.calls[0][0][0] as SignificantEvent;
+    expect(written.investigations).toHaveLength(2);
+    expect(written.investigations).toEqual(
+      expect.arrayContaining([expect.objectContaining({ workflow_execution_id: 'wf-new' })])
+    );
+  });
+
+  it('falls back to eventClient for reads when eventSearchClient is omitted', async () => {
+    const eventClient = makeEventClient({
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+      findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
+    });
+
+    await eventsWriteBulkHandler({
+      eventClient,
+      inputs: [{ ...baseInput }, { ...baseInput, event_id: 'existing-event-id' }],
+    });
+
+    expect(eventClient.findLatestActive).toHaveBeenCalled();
+    expect(eventClient.findByEventId).toHaveBeenCalledWith('existing-event-id');
+  });
+
+  it('still writes when eventSearchClient.findLatestActive rejects (dedup fallback to canonical)', async () => {
+    const eventSearchClient = makeEventSearchClient({
+      // .rule-events read store is unavailable
+      findLatestActive: jest.fn().mockRejectedValue(new Error('read-store outage')),
+    });
+    const eventClient = makeEventClient({
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+    });
+
+    const results = await eventsWriteBulkHandler({
+      eventClient,
+      eventSearchClient,
+      // no event_id → dedup candidate; must not be blocked by the read-store failure
+      inputs: [{ ...baseInput }],
+    });
+
+    expect(results[0]).toMatchObject({ written: true });
+    expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
+  });
+
+  it('still writes when eventSearchClient.findByEventId rejects (continuation fallback to canonical)', async () => {
+    const eventId = 'checkout__latency-continuation';
+    const eventSearchClient = makeEventSearchClient({
+      // .rule-events lookup for the existing event_id fails
+      findByEventId: jest.fn().mockRejectedValue(new Error('read-store outage')),
+    });
+    const eventClient = makeEventClient({
+      findByEventId: jest.fn().mockResolvedValue({
+        // predecessor has lower severity so the write is not skipped as a no-op
+        hits: [makeStoredEvent(eventId, { severity: 'medium' })],
+      }),
+    });
+
+    const results = await eventsWriteBulkHandler({
+      eventClient,
+      eventSearchClient,
+      // severity escalation from medium → high (baseInput) prevents no-op skip
+      inputs: [{ ...baseInput, event_id: eventId }],
+    });
+
+    expect(results[0]).toMatchObject({ written: true });
+    expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
+    const written = eventClient.bulkCreate.mock.calls[0][0][0] as SignificantEvent;
+    expect(written.event_id).toBe(eventId);
+  });
+});
+
+describe('eventsWriteBulkHandler — dual-write to .rule-events (Writer 1)', () => {
+  it('calls createAlertEvent once per successfully written document', async () => {
+    const eventClient = makeEventClient();
+    const alertEventsClient = makeAlertEventsClient();
+    const logger = makeLogger();
+
+    await eventsWriteBulkHandler({
+      eventClient,
+      inputs: [
+        { ...baseInput, event_id: 'event-a' },
+        { ...baseInput, event_id: 'event-b' },
+      ],
+      alertEventsClient,
+      logger,
+    });
+
+    expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(2);
+  });
+
+  it('calls createAlertEvent with the in-memory pre-write document (toRuleEvent output), not the bulkCreate response', async () => {
+    const eventClient = makeEventClient();
+    const alertEventsClient = makeAlertEventsClient();
+    const logger = makeLogger();
+
+    await eventsWriteBulkHandler({
+      eventClient,
+      inputs: [{ ...baseInput, event_id: 'checkout__latency-abc12345' }],
+      alertEventsClient,
+      logger,
+    });
+
+    expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
+    const [calledWith] = alertEventsClient.createAlertEvent.mock.calls[0];
+
+    // The argument should be the toRuleEvent output of the in-memory document:
+    // it has fingerprint = event_id (stable series key) and alert_status mapped from status.
+    expect(calledWith).toMatchObject({
+      fingerprint: 'checkout__latency-abc12345',
+      alert_status: 'active',
+    });
+    // Verify it matches the toRuleEvent output exactly — not a bulkCreate response shape
+    // (which would not have fingerprint/alert_status at the top level).
+    const writtenDoc = eventClient.bulkCreate.mock.calls[0][0][0] as SignificantEvent;
+    expect(calledWith).toEqual(toRuleEvent(writtenDoc));
+  });
+
+  it('does not call createAlertEvent for errored items in the bulk response', async () => {
+    const errorBulkCreate = async (documents: object[]) => ({
+      errors: true,
+      items: documents.map((_, i) =>
+        i === 0
+          ? { create: { status: 409, error: { type: 'conflict', reason: 'version conflict' } } }
+          : { create: { status: 201, result: 'created' } }
+      ),
+    });
+    const eventClient = makeEventClient({
+      bulkCreate: jest.fn().mockImplementation(errorBulkCreate),
+    });
+    const alertEventsClient = makeAlertEventsClient();
+
+    await eventsWriteBulkHandler({
+      eventClient,
+      inputs: [
+        { ...baseInput, event_id: 'event-a' },
+        { ...baseInput, event_id: 'event-b' },
+      ],
+      alertEventsClient,
+      logger: makeLogger(),
+    });
+
+    // Only the successful item should trigger createAlertEvent
+    expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it('waits for and logs a rejected createAlertEvent without failing the significant event write', async () => {
+    const eventClient = makeEventClient();
+    let rejectAlertEvent: ((reason?: unknown) => void) | undefined;
+    const alertEventsClient = makeAlertEventsClient();
+    alertEventsClient.createAlertEvent.mockImplementation(
+      () =>
+        new Promise((_, reject) => {
+          rejectAlertEvent = reject;
+        })
+    );
+    const logger = makeLogger();
+
+    const handlerPromise = eventsWriteBulkHandler({
+      eventClient,
+      inputs: [{ ...baseInput, event_id: 'checkout__latency-abc12345' }],
+      alertEventsClient,
+      logger,
+    });
+
+    let settled = false;
+    void handlerPromise.then(() => {
+      settled = true;
+    });
+    await new Promise(setImmediate);
+    expect(settled).toBe(false);
+
+    if (rejectAlertEvent === undefined) {
+      throw new Error('createAlertEvent did not start');
+    }
+    rejectAlertEvent(new Error('rule-events unavailable'));
+    const results = await handlerPromise;
+
+    // Old-stream write succeeds despite .rule-events failure.
+    expect(results[0].written).toBe(true);
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('rule-events unavailable'));
   });
 });

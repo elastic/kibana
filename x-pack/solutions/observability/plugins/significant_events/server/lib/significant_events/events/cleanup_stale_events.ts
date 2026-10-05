@@ -8,6 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import type { SignificantEventResponse } from '@kbn/significant-events-schema';
 import pLimit from 'p-limit';
+import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import type { IRulesManagementClient } from '../../knowledge_indicators/knowledge_indicator_client/rules/rules_management_client';
 import type { EventClient } from './event_client';
 import { updateSignificantEventStatus } from './update_event_status';
@@ -18,7 +20,7 @@ const EVENT_STATUS_UPDATE_CONCURRENCY = 10;
 export const STALE_EVENT_ASSESSMENT_NOTE = i18n.translate(
   'xpack.significantEvents.staleEventCleanup.assessmentNoteDescription',
   {
-    defaultMessage: 'Automatically closed because none of its backing rules exist.',
+    defaultMessage: 'Automatically marked inactive because none of its backing rules exist.',
   }
 );
 
@@ -37,7 +39,7 @@ const getBackingRuleIds = (event: SignificantEventResponse): string[] => [
   ),
 ];
 
-const iterateOpenEventBatches = async function* ({
+const iterateActiveEventBatches = async function* ({
   eventClient,
   ruleUuids,
 }: {
@@ -48,7 +50,7 @@ const iterateOpenEventBatches = async function* ({
 
   while (true) {
     const result = await eventClient.findLatestByCurrentStateBatch({
-      status: ['open'],
+      status: ['active'],
       ruleUuids,
       afterEventId,
       batchSize: EVENTS_BATCH_SIZE,
@@ -76,10 +78,15 @@ export const cleanupStaleEvents = async ({
   eventClient,
   rulesClient,
   candidateRuleIds,
+  alertEventsClient,
+  logger,
 }: {
   eventClient: EventClient;
   rulesClient: IRulesManagementClient;
   candidateRuleIds?: string[];
+  /** Optional — callers must attempt to pass in production; omitted only when client is unavailable. */
+  alertEventsClient?: AlertEventsClientApi;
+  logger?: Logger;
 }): Promise<CleanupStaleEventsResult> => {
   const uniqueCandidateRuleIds = candidateRuleIds
     ? [...new Set(candidateRuleIds)].filter(Boolean)
@@ -94,7 +101,7 @@ export const cleanupStaleEvents = async ({
   let skipped = 0;
   const updateLimit = pLimit(EVENT_STATUS_UPDATE_CONCURRENCY);
 
-  for await (const events of iterateOpenEventBatches({
+  for await (const events of iterateActiveEventBatches({
     eventClient,
     ruleUuids: uniqueCandidateRuleIds,
   })) {
@@ -111,7 +118,7 @@ export const cleanupStaleEvents = async ({
       continue;
     }
 
-    // Resolve a batch before writing it so a lookup failure cannot close events from that batch.
+    // Resolve a batch before writing it so a lookup failure cannot mark events from that batch inactive.
     const existingRuleIds = new Set(await rulesClient.findExistingRuleIds(allRuleIds));
     const staleEvents = eventsWithRuleIds.filter(
       ({ ruleIds }) => ruleIds.length > 0 && ruleIds.every((ruleId) => !existingRuleIds.has(ruleId))
@@ -121,9 +128,11 @@ export const cleanupStaleEvents = async ({
         updateLimit(() =>
           updateSignificantEventStatus({
             eventClient,
-            eventUuid: event.event_uuid,
-            status: 'closed',
+            eventId: event.event_id,
+            status: 'inactive',
             assessmentNote: STALE_EVENT_ASSESSMENT_NOTE,
+            alertEventsClient,
+            logger,
           })
         )
       )

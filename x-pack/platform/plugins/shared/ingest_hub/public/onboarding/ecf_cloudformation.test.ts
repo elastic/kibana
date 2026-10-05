@@ -10,6 +10,7 @@ import {
   buildEcfUnifiedCloudFormationUrl,
   buildEcfOtelCloudFormationUrl,
   buildEcfCrowdstrikeCloudFormationUrl,
+  ensureOtlpPort,
   ECF_UNIFIED_TEMPLATE_FILE,
   ECF_OTEL_TEMPLATE_FILE,
   ECF_CROWDSTRIKE_TEMPLATE_FILE,
@@ -20,7 +21,7 @@ import {
 import {
   buildEcfTemplateUrl,
   ECF_FALLBACK_TEMPLATE_VERSION,
-} from '../../common/ecf_template_version';
+} from '../../common/providers/aws/ecf_template_version';
 import type {
   ServiceInstance,
   ServiceVars,
@@ -67,9 +68,9 @@ describe('getEcfServiceConfigs()', () => {
         enabledDataStreams: ['waf'],
         varsByDataStream: {
           waf: {
-            enabledInputs: ['aws-cloudwatch'],
+            enabledInputs: ['aws-s3'],
             varsByInput: {
-              'aws-cloudwatch': { log_group_arn: 'arn:aws:logs:us-east-1:123:log-group:waf' },
+              'aws-s3': { bucket_arn: 'arn:aws:s3:::waf-bucket' },
             },
           },
         },
@@ -82,8 +83,29 @@ describe('getEcfServiceConfigs()', () => {
     expect(vpcConfig?.logGroupArns).toEqual([]);
 
     const wafConfig = result.find((c) => c.serviceId === 'waf');
-    expect(wafConfig?.logGroupArns).toEqual(['arn:aws:logs:us-east-1:123:log-group:waf']);
-    expect(wafConfig?.bucketArns).toEqual([]);
+    expect(wafConfig?.bucketArns).toEqual(['arn:aws:s3:::waf-bucket']);
+    expect(wafConfig?.logGroupArns).toEqual([]);
+  });
+
+  it('never routes a WAF CloudWatch log group through ECF (agent-based only)', () => {
+    const serviceVars: Record<string, ServiceVars> = {
+      waf: {
+        enabledDataStreams: ['waf'],
+        varsByDataStream: {
+          waf: {
+            enabledInputs: ['aws-s3', 'aws-cloudwatch'],
+            varsByInput: {
+              'aws-s3': { bucket_arn: 'arn:aws:s3:::waf-bucket' },
+              'aws-cloudwatch': { log_group_arn: 'arn:aws:logs:us-east-1:123:log-group:waf' },
+            },
+          },
+        },
+      },
+    };
+    const [wafConfig] = getEcfServiceConfigs([inst('waf')], serviceVars);
+
+    expect(wafConfig.bucketArns).toEqual(['arn:aws:s3:::waf-bucket']);
+    expect(wafConfig.logGroupArns).toEqual([]);
   });
 
   it('collects ARNs from duplicate instances into a single config entry', () => {
@@ -393,15 +415,15 @@ describe('buildEcfOtelCloudFormationUrl()', () => {
     expect(url).toContain('stackName=my-otel-stack');
   });
 
-  it('uses S3SourceBuckets (not S3Buckets) for bucket ARNs', () => {
+  it('uses S3Buckets for bucket ARNs', () => {
     const url = buildEcfOtelCloudFormationUrl({
       ecfConfigs: otelConfigs,
       region: 'us-east-1',
       version: TEST_VERSION,
     });
     const hash = decodeURIComponent(url.split('#')[1]);
-    expect(hash).toContain('param_S3SourceBuckets=');
-    expect(hash).not.toContain('param_S3Buckets=');
+    expect(hash).toContain('param_S3Buckets=');
+    expect(hash).not.toContain('param_S3SourceBuckets=');
   });
 
   it('builds the comma-separated LogTypes param from service configs', () => {
@@ -422,6 +444,81 @@ describe('buildEcfOtelCloudFormationUrl()', () => {
       otlpEndpoint: 'https://otlp.example.com',
     });
     expect(url).not.toContain('APIKey');
+  });
+
+  it('appends :443 to https OTLPEndpoint when port is missing', () => {
+    const url = buildEcfOtelCloudFormationUrl({
+      ecfConfigs: otelConfigs,
+      region: 'us-east-1',
+      version: TEST_VERSION,
+      otlpEndpoint: 'https://otlp.example.com',
+    });
+    const hash = decodeURIComponent(url.split('#')[1]);
+    expect(hash).toContain('param_OTLPEndpoint=https://otlp.example.com:443');
+  });
+
+  it('does not modify OTLPEndpoint when port is already present', () => {
+    const url = buildEcfOtelCloudFormationUrl({
+      ecfConfigs: otelConfigs,
+      region: 'us-east-1',
+      version: TEST_VERSION,
+      otlpEndpoint: 'https://otlp.example.com:4317',
+    });
+    const hash = decodeURIComponent(url.split('#')[1]);
+    expect(hash).toContain('param_OTLPEndpoint=https://otlp.example.com:4317');
+  });
+});
+
+// ── ensureOtlpPort ────────────────────────────────────────────────────────────
+
+describe('ensureOtlpPort()', () => {
+  it('appends 443 to https URL without port', () => {
+    expect(ensureOtlpPort('https://ingest.example.com')).toBe('https://ingest.example.com:443');
+  });
+
+  it('appends 80 to http URL without port', () => {
+    expect(ensureOtlpPort('http://ingest.example.com')).toBe('http://ingest.example.com:80');
+  });
+
+  it('preserves existing port', () => {
+    expect(ensureOtlpPort('https://ingest.example.com:4317')).toBe(
+      'https://ingest.example.com:4317'
+    );
+  });
+
+  it('does not double-append when the explicit port equals the scheme default', () => {
+    expect(ensureOtlpPort('https://ingest.example.com:443')).toBe('https://ingest.example.com:443');
+    expect(ensureOtlpPort('http://ingest.example.com:80')).toBe('http://ingest.example.com:80');
+  });
+
+  it('preserves path and query when appending port', () => {
+    expect(ensureOtlpPort('https://ingest.example.com/v1/logs')).toBe(
+      'https://ingest.example.com:443/v1/logs'
+    );
+  });
+
+  it('preserves hostname casing when appending port', () => {
+    expect(ensureOtlpPort('https://INGEST.EXAMPLE.COM')).toBe('https://INGEST.EXAMPLE.COM:443');
+  });
+
+  it('preserves existing port for uppercase scheme', () => {
+    expect(ensureOtlpPort('HTTPS://ingest.example.com:4317')).toBe(
+      'HTTPS://ingest.example.com:4317'
+    );
+  });
+
+  it('preserves existing port for IPv6 bracketed host', () => {
+    expect(ensureOtlpPort('https://[::1]:4317')).toBe('https://[::1]:4317');
+  });
+
+  it('appends port when query immediately follows host (no path slash)', () => {
+    expect(ensureOtlpPort('https://ingest.example.com?token=abc')).toBe(
+      'https://ingest.example.com:443?token=abc'
+    );
+  });
+
+  it('returns the original string unchanged when URL is invalid', () => {
+    expect(ensureOtlpPort('not-a-url')).toBe('not-a-url');
   });
 });
 

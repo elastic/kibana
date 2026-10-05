@@ -51,6 +51,41 @@ describe('loadInboundConnector', () => {
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
   });
 
+  it('keeps events enabled without inventing a saved-object identity', async () => {
+    const result = await loadInboundConnector({
+      connectorId: 'elastic-apps-slack',
+      connectorTypeId: '.slack2',
+      spaceId: 'default',
+      unsecuredSavedObjectsClient,
+      inMemoryConnectors: [
+        {
+          id: 'elastic-apps-slack',
+          actionTypeId: '.slack2',
+          name: 'Slack (Elastic app)',
+          config: { authType: 'relay' },
+          secrets: {},
+          isMissingSecrets: false,
+          isPreconfigured: true,
+          isSystemAction: false,
+          isDeprecated: false,
+          isConnectorTypeDeprecated: false,
+          isDynamic: true,
+          isInboundEventsEnabled: true,
+        },
+      ],
+      logger,
+    });
+
+    expect(result).toEqual({
+      connectorId: 'elastic-apps-slack',
+      connectorTypeId: '.slack2',
+      spaceId: 'default',
+      config: { authType: 'relay' },
+      hasPreconfiguredInboundEvents: true,
+    });
+    expect(result).not.toHaveProperty('hasInboundEventIdentity');
+  });
+
   it('returns undefined when in-memory type does not match', async () => {
     const result = await loadInboundConnector({
       connectorId: 'mem-1',
@@ -106,6 +141,37 @@ describe('loadInboundConnector', () => {
       spaceId: 'space-a',
       config: { other: 'kept' },
     });
+  });
+
+  it('keeps hasInboundEventIdentity when the saved object has it', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValue({
+      id: 'so-1',
+      type: ACTION_SAVED_OBJECT_TYPE,
+      references: [],
+      attributes: {
+        actionTypeId: '.myConnector',
+        name: 'SO',
+        isMissingSecrets: false,
+        config: {},
+        secrets: {},
+        hasInboundEventIdentity: true,
+      },
+    });
+
+    const result = await loadInboundConnector({
+      connectorId: 'so-1',
+      connectorTypeId: '.myConnector',
+      spaceId: 'default',
+      unsecuredSavedObjectsClient,
+      inMemoryConnectors: [],
+      logger,
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        hasInboundEventIdentity: true,
+      })
+    );
   });
 
   it('returns undefined when the saved object cannot be loaded', async () => {
