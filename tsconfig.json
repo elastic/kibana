@@ -1,19 +1,14 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
-    "noEmit": true,
-    "allowImportingTsExtensions": true
+    "outDir": "target/types"
   },
   "include": [
     "kibana.d.ts",
     "package.json",
-    "oxlint.config.mts",
-    ".oxlint/**/*.mts",
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/babel-preset",
   ],
   "exclude": [
     "target/**/*",

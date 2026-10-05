@@ -1,7 +1,7 @@
 # @kbn/lint-cli
 
 CLI that wraps [oxlint](https://oxc.rs/docs/guide/usage/linter.html) for use within the Kibana repo.
-Rules are loaded from `oxlint.config.mts` at the repo root, which composes the rule sets in `.oxlint/`.
+Rules are loaded from `oxlint.config.mjs` at the repo root, which re-exports the typed config in `.oxlint/index.mts`.
 
 ## Usage
 
