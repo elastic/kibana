@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-// Tests the rule creation MITRE ATT&CK threat picker against the managed MITRE source,
-// which is the default (xpack.mitreAttack.managedSourceEnabled defaults to true).
+// Tests the rule creation MITRE ATT&CK threat picker against the managed MITRE source.
 // Synthetic entities at version 99.0 are seeded by global.setup.ts so the managed API
 // returns only the fixture set, making assertions independent of real MITRE artifact
 // version bumps.
+// This suite lives under scout_managed_mitre so it gets a dedicated Kibana: the seeded
+// entities must not share a server with other suites because server-side MITRE lookups
+// are cached per process.
 
-import { spaceTest, tags } from '@kbn/scout-security';
+import { spaceTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
+import { LOCAL_MANAGED_MITRE_TAGS } from '../fixtures/tags';
 import {
   SEEDED_TACTIC_ALPHA,
   SEEDED_TACTIC_BETA,
@@ -28,7 +31,7 @@ const DEFINE_QUERY = 'host.name: *';
 
 spaceTest.describe(
   'Rule creation MITRE picker — managed MITRE source',
-  { tag: tags.stateful.classic },
+  { tag: LOCAL_MANAGED_MITRE_TAGS },
   () => {
     // Clean up any rule left by a previous run before each test so a failed
     // run of one test cannot bleed into the next, then log in. The seeded

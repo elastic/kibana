@@ -3445,6 +3445,7 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/plugins/security_solution/test/scout/workflows/api/tests/create_rule_step.spec.ts @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/test/scout/workflows/api/tests/patch_rule_step.spec.ts @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/test/scout_managed_mitre @elastic/security-detection-engineering
 
 /x-pack/solutions/security/plugins/security_solution/scripts/openapi @elastic/security-detection-engineering
 
