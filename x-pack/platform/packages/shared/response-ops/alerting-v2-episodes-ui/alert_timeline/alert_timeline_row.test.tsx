@@ -148,7 +148,7 @@ describe('AlertTimelineRow', () => {
       />
     );
 
-    expect(screen.getByText('Episode ID')).toBeInTheDocument();
+    expect(screen.getByText('Alert ID')).toBeInTheDocument();
     expect(screen.getByText('episode-id')).toBeInTheDocument();
   });
 

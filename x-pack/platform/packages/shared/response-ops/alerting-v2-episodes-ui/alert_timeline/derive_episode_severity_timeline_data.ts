@@ -21,6 +21,18 @@ export interface EpisodeSeverityTimelineSegment {
   eventData: Record<string, unknown> | null;
 }
 
+export interface EpisodeSeverityTimelineTransition {
+  severity: EpisodeSeverity;
+  timestampMs: number;
+  timestamp: string;
+  eventData: Record<string, unknown> | null;
+}
+
+export interface EpisodeSeverityTimelineData {
+  segments: EpisodeSeverityTimelineSegment[];
+  transitions: EpisodeSeverityTimelineTransition[];
+}
+
 interface ParsedSeverityEvent {
   timestampMs: number;
   severity?: EpisodeSeverity;
@@ -28,11 +40,11 @@ interface ParsedSeverityEvent {
   eventData: Record<string, unknown> | null;
 }
 
-/** Derives contiguous severity spans using every episode event as a time boundary. */
+/** Derives contiguous severity spans and preserves each severity transition. */
 export const deriveEpisodeSeverityTimelineData = (
   eventRows: EpisodeEventRow[],
   windowEndMs: number
-): EpisodeSeverityTimelineSegment[] => {
+): EpisodeSeverityTimelineData => {
   const events: ParsedSeverityEvent[] = eventRows
     .map((row) => {
       const timestampMs = Date.parse(row['@timestamp']);
@@ -49,7 +61,17 @@ export const deriveEpisodeSeverityTimelineData = (
     .sort((left, right) => left.timestampMs - right.timestampMs);
 
   const segments: EpisodeSeverityTimelineSegment[] = [];
+  const transitions: EpisodeSeverityTimelineTransition[] = [];
   events.forEach((event, index) => {
+    if (event.severity && event.severity !== events[index - 1]?.severity) {
+      transitions.push({
+        severity: event.severity,
+        timestampMs: event.timestampMs,
+        timestamp: event.timestamp,
+        eventData: event.eventData,
+      });
+    }
+
     const x1Ms = events[index + 1]?.timestampMs ?? windowEndMs;
     if (!event.severity || x1Ms <= event.timestampMs) {
       return;
@@ -70,5 +92,5 @@ export const deriveEpisodeSeverityTimelineData = (
     });
   });
 
-  return segments;
+  return { segments, transitions };
 };

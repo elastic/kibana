@@ -39,6 +39,7 @@ describe('deriveEpisodeAlertTimelineData', () => {
         x0Ms: Date.parse('2025-01-01T00:00:00.000Z'),
         x1Ms: Date.parse('2025-01-01T00:05:00.000Z'),
         trueStartMs: Date.parse('2025-01-01T00:00:00.000Z'),
+        isOngoing: false,
       },
       {
         episodeId: 'episode-1',
@@ -46,6 +47,7 @@ describe('deriveEpisodeAlertTimelineData', () => {
         x0Ms: Date.parse('2025-01-01T00:05:00.000Z'),
         x1Ms: Date.parse('2025-01-01T00:10:00.000Z'),
         trueStartMs: Date.parse('2025-01-01T00:05:00.000Z'),
+        isOngoing: true,
       },
     ]);
   });
@@ -61,6 +63,12 @@ describe('deriveEpisodeAlertTimelineData', () => {
 
     expect(result?.windowEndMs).toBe(Date.parse('2025-01-01T00:07:00.000Z'));
     expect(result?.row.segments).toHaveLength(1);
+    expect(result?.row.segments[0]).toEqual(
+      expect.objectContaining({
+        status: ALERT_EPISODE_STATUS.ACTIVE,
+        isOngoing: false,
+      })
+    );
     expect(result?.row.transitions.at(-1)).toEqual({
       episodeId: 'episode-1',
       status: ALERT_EPISODE_STATUS.INACTIVE,

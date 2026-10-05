@@ -28,7 +28,7 @@ describe('deriveEpisodeSeverityTimelineData', () => {
           event('2024-01-01T00:00:02.000Z', 'high'),
         ],
         Date.parse('2024-01-01T00:00:03.000Z')
-      )
+      ).segments
     ).toEqual([
       {
         severity: EpisodeSeverity.Low,
@@ -56,7 +56,7 @@ describe('deriveEpisodeSeverityTimelineData', () => {
           event('2024-01-01T00:00:02.000Z', 'medium'),
         ],
         Date.parse('2024-01-01T00:00:03.000Z')
-      )
+      ).segments
     ).toEqual([
       {
         severity: EpisodeSeverity.Medium,
@@ -80,7 +80,7 @@ describe('deriveEpisodeSeverityTimelineData', () => {
       deriveEpisodeSeverityTimelineData(
         [event('invalid', 'critical'), event('2024-01-01T00:00:03.000Z', 'critical')],
         Date.parse('2024-01-01T00:00:03.000Z')
-      )
+      ).segments
     ).toEqual([]);
   });
 
@@ -89,12 +89,37 @@ describe('deriveEpisodeSeverityTimelineData', () => {
       deriveEpisodeSeverityTimelineData(
         [event('2024-01-01T00:00:00.000Z', 'high', '{"host":"server-1"}')],
         Date.parse('2024-01-01T00:00:01.000Z')
-      )
+      ).transitions
     ).toEqual([
       expect.objectContaining({
         timestamp: '2024-01-01T00:00:00.000Z',
         eventData: { host: 'server-1' },
       }),
+    ]);
+  });
+
+  it('retains a terminal severity transition without creating a zero-width span', () => {
+    const terminalTimestamp = '2024-01-01T00:00:01.000Z';
+    const result = deriveEpisodeSeverityTimelineData(
+      [
+        event('2024-01-01T00:00:00.000Z', 'high'),
+        event(terminalTimestamp, 'low', '{"recovered":true}'),
+      ],
+      Date.parse(terminalTimestamp)
+    );
+
+    expect(result.segments).toHaveLength(1);
+    expect(result.transitions).toEqual([
+      expect.objectContaining({
+        severity: EpisodeSeverity.High,
+        timestampMs: Date.parse('2024-01-01T00:00:00.000Z'),
+      }),
+      {
+        severity: EpisodeSeverity.Low,
+        timestampMs: Date.parse(terminalTimestamp),
+        timestamp: terminalTimestamp,
+        eventData: { recovered: true },
+      },
     ]);
   });
 });

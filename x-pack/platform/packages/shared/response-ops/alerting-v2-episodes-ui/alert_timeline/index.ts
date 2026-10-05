@@ -22,7 +22,11 @@ export { applyEpisodeStarts, makeEpisodeStartKey } from './apply_episode_starts'
 export { deriveEpisodeAlertTimelineData } from './derive_episode_alert_timeline_data';
 export type { EpisodeAlertTimelineData } from './derive_episode_alert_timeline_data';
 export { deriveEpisodeSeverityTimelineData } from './derive_episode_severity_timeline_data';
-export type { EpisodeSeverityTimelineSegment } from './derive_episode_severity_timeline_data';
+export type {
+  EpisodeSeverityTimelineData,
+  EpisodeSeverityTimelineSegment,
+  EpisodeSeverityTimelineTransition,
+} from './derive_episode_severity_timeline_data';
 export { EpisodeSeverityTimelineRow } from './episode_severity_timeline_row';
 export { AlertTimelineRow } from './alert_timeline_row';
 export type { AlertTimelineRowProps } from './alert_timeline_row';

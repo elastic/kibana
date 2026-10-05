@@ -112,6 +112,7 @@ export const deriveAlertTimelineDataFromEvents = (
             x0Ms: event.timestampMs,
             x1Ms: next.timestampMs,
             trueStartMs: event.timestampMs,
+            isOngoing: false,
           });
         } else if (!next && isOpenStatus(event.status)) {
           if (windowEndMs > event.timestampMs) {
@@ -121,6 +122,7 @@ export const deriveAlertTimelineDataFromEvents = (
               x0Ms: event.timestampMs,
               x1Ms: windowEndMs,
               trueStartMs: event.timestampMs,
+              isOngoing: true,
             });
           }
           hasOpenEpisode = true;

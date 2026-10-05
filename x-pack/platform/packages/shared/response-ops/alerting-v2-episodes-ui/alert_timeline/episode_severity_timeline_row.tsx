@@ -20,7 +20,10 @@ import type { ElementClickListener, Theme, XYChartElementEvent } from '@elastic/
 import { EuiHealth, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { EpisodeSeverityTimelineSegment } from './derive_episode_severity_timeline_data';
+import type {
+  EpisodeSeverityTimelineSegment,
+  EpisodeSeverityTimelineTransition,
+} from './derive_episode_severity_timeline_data';
 import { formatTimestamp } from './alert_timeline_format';
 import {
   getEpisodeSeverityColor,
@@ -38,8 +41,8 @@ const CHART_HORIZONTAL_PADDING_PX =
 interface SeverityTransitionDatum {
   x: number;
   y: number;
-  severity: EpisodeSeverityTimelineSegment['severity'];
-  segment: EpisodeSeverityTimelineSegment;
+  severity: EpisodeSeverityTimelineTransition['severity'];
+  transition: EpisodeSeverityTimelineTransition;
 }
 
 interface SeveritySegmentDetails extends EpisodeSeverityTimelineSegment {
@@ -48,16 +51,18 @@ interface SeveritySegmentDetails extends EpisodeSeverityTimelineSegment {
 
 export interface EpisodeSeverityTimelineRowProps {
   segments: EpisodeSeverityTimelineSegment[];
+  transitions: EpisodeSeverityTimelineTransition[];
   windowStartMs: number;
   windowEndMs: number;
   height: number;
   baseTheme: Theme;
   timeZone?: string;
-  onTransitionClick?: (segment: EpisodeSeverityTimelineSegment) => void;
+  onTransitionClick?: (transition: EpisodeSeverityTimelineTransition) => void;
 }
 
 export const EpisodeSeverityTimelineRow = ({
   segments,
+  transitions,
   windowStartMs,
   windowEndMs,
   height,
@@ -71,10 +76,10 @@ export const EpisodeSeverityTimelineRow = ({
       const transition = elements
         .filter((element): element is XYChartElementEvent => Array.isArray(element))
         .map(([geometry]) => geometry.datum as SeverityTransitionDatum | undefined)
-        .find((datum) => datum?.segment != null);
+        .find((datum) => datum?.transition != null);
 
       if (transition) {
-        onTransitionClick?.(transition.segment);
+        onTransitionClick?.(transition.transition);
       }
     },
     [onTransitionClick]
@@ -109,7 +114,7 @@ export const EpisodeSeverityTimelineRow = ({
           header="none"
           body={({ items }) => {
             const transition = items?.[0]?.datum as SeverityTransitionDatum | undefined;
-            if (!transition?.segment) {
+            if (!transition?.transition) {
               return null;
             }
 
@@ -185,18 +190,18 @@ export const EpisodeSeverityTimelineRow = ({
             point: { visible: 'never' },
           }}
         />
-        {segments.length > 0 && (
+        {transitions.length > 0 && (
           <LineSeries
             id="episode-severity-timeline-dots"
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor="x"
             yAccessors={['y']}
-            data={segments.map<SeverityTransitionDatum>((segment) => ({
-              x: segment.x0Ms,
+            data={transitions.map<SeverityTransitionDatum>((transition) => ({
+              x: transition.timestampMs,
               y: 0.5,
-              severity: segment.severity,
-              segment,
+              severity: transition.severity,
+              transition,
             }))}
             hideInLegend
             lineSeriesStyle={{

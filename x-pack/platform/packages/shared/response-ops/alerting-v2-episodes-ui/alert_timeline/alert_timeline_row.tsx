@@ -60,6 +60,7 @@ interface SegmentDetails {
   x0Ms: number;
   x1Ms: number;
   trueStartMs: number;
+  isOngoing?: boolean;
 }
 
 interface TransitionDatum {
@@ -287,6 +288,7 @@ export const AlertTimelineRow: React.FC<AlertTimelineRowProps> = ({
                   x0Ms: s.x0Ms,
                   x1Ms: s.x1Ms,
                   trueStartMs: s.trueStartMs,
+                  isOngoing: s.isOngoing,
                 } as unknown as string,
               }))}
               style={{ fill, strokeWidth: 0, opacity: 1 }}
@@ -297,6 +299,7 @@ export const AlertTimelineRow: React.FC<AlertTimelineRowProps> = ({
                   x1Ms: d.x1Ms,
                   status: d.status,
                   windowEndMs,
+                  isOngoing: d.isOngoing,
                 });
                 const listItems = [
                   {

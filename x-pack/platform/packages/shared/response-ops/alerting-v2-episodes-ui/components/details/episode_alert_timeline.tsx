@@ -17,7 +17,7 @@ import {
   deriveEpisodeSeverityTimelineData,
   EpisodeSeverityTimelineRow,
   formatTimestamp,
-  type EpisodeSeverityTimelineSegment,
+  type EpisodeSeverityTimelineTransition,
 } from '../../alert_timeline';
 import { getEpisodeSeverityLabel } from '../severity/severity_utils';
 import { SeverityHeatmapDetailPanel } from './severity_heatmap_detail_panel';
@@ -41,16 +41,18 @@ export const AlertEpisodeAlertTimeline = ({
   const { services } = useKibana<AlertEpisodeAlertTimelineServices>();
   const { euiTheme } = useEuiTheme();
   const [selectedSeverityTransition, setSelectedSeverityTransition] =
-    useState<EpisodeSeverityTimelineSegment | null>(null);
+    useState<EpisodeSeverityTimelineTransition | null>(null);
   const baseTheme = services.charts.theme.useChartsBaseTheme();
   const timeZone = services.uiSettings.get<string>('dateFormat:tz', 'Browser');
   const timelineData = useMemo(
     () => deriveEpisodeAlertTimelineData(eventRows, Date.now()),
     [eventRows]
   );
-  const severitySegments = useMemo(
+  const severityTimelineData = useMemo(
     () =>
-      timelineData ? deriveEpisodeSeverityTimelineData(eventRows, timelineData.windowEndMs) : [],
+      timelineData
+        ? deriveEpisodeSeverityTimelineData(eventRows, timelineData.windowEndMs)
+        : { segments: [], transitions: [] },
     [eventRows, timelineData]
   );
 
@@ -73,14 +75,15 @@ export const AlertEpisodeAlertTimeline = ({
             <EuiText size="xs">{i18n.ALERT_TIMELINE_LIFECYCLE_LANE_LABEL}</EuiText>
           )}
           customRows={
-            severitySegments.length > 0
+            severityTimelineData.transitions.length > 0
               ? [
                   {
                     id: 'severity',
                     label: <EuiText size="xs">{i18n.ALERT_TIMELINE_SEVERITY_LANE_LABEL}</EuiText>,
                     render: (rowProps) => (
                       <EpisodeSeverityTimelineRow
-                        segments={severitySegments}
+                        segments={severityTimelineData.segments}
+                        transitions={severityTimelineData.transitions}
                         onTransitionClick={setSelectedSeverityTransition}
                         {...rowProps}
                       />
@@ -102,7 +105,7 @@ export const AlertEpisodeAlertTimeline = ({
           <EuiSpacer size="s" />
           <SeverityHeatmapDetailPanel
             severityLabel={getEpisodeSeverityLabel(selectedSeverityTransition.severity)}
-            timestamp={formatTimestamp(selectedSeverityTransition.x0Ms, timeZone)}
+            timestamp={formatTimestamp(selectedSeverityTransition.timestampMs, timeZone)}
             eventData={selectedSeverityTransition.eventData}
             euiTheme={euiTheme}
             onClose={() => setSelectedSeverityTransition(null)}

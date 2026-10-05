@@ -34,6 +34,8 @@ export interface AlertTimelineSegment {
    * its real start.
    */
   trueStartMs: number;
+  /** Explicit tail state when the source can distinguish a closed boundary from the visible window edge. */
+  isOngoing?: boolean;
 }
 
 /** A point marker inside a lane at a status-change timestamp. */

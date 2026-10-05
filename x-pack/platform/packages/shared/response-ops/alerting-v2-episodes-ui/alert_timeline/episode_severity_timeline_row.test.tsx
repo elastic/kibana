@@ -26,7 +26,7 @@ jest.mock('@elastic/charts', () => ({
 }));
 
 describe('EpisodeSeverityTimelineRow', () => {
-  it('draws hollow transition dots at the start of each severity span', () => {
+  it('draws hollow transition dots independently of severity spans', () => {
     render(
       <EpisodeSeverityTimelineRow
         segments={[
@@ -45,6 +45,26 @@ describe('EpisodeSeverityTimelineRow', () => {
             eventData: { count: 2 },
           },
         ]}
+        transitions={[
+          {
+            severity: EpisodeSeverity.Low,
+            timestampMs: 1_000,
+            timestamp: '1970-01-01T00:00:01.000Z',
+            eventData: { count: 1 },
+          },
+          {
+            severity: EpisodeSeverity.High,
+            timestampMs: 2_000,
+            timestamp: '1970-01-01T00:00:02.000Z',
+            eventData: { count: 2 },
+          },
+          {
+            severity: EpisodeSeverity.Critical,
+            timestampMs: 3_000,
+            timestamp: '1970-01-01T00:00:03.000Z',
+            eventData: { count: 3 },
+          },
+        ]}
         windowStartMs={1_000}
         windowEndMs={3_000}
         height={44}
@@ -60,10 +80,9 @@ describe('EpisodeSeverityTimelineRow', () => {
             x: 1_000,
             y: 0.5,
             severity: EpisodeSeverity.Low,
-            segment: {
+            transition: {
               severity: EpisodeSeverity.Low,
-              x0Ms: 1_000,
-              x1Ms: 2_000,
+              timestampMs: 1_000,
               timestamp: '1970-01-01T00:00:01.000Z',
               eventData: { count: 1 },
             },
@@ -72,12 +91,22 @@ describe('EpisodeSeverityTimelineRow', () => {
             x: 2_000,
             y: 0.5,
             severity: EpisodeSeverity.High,
-            segment: {
+            transition: {
               severity: EpisodeSeverity.High,
-              x0Ms: 2_000,
-              x1Ms: 3_000,
+              timestampMs: 2_000,
               timestamp: '1970-01-01T00:00:02.000Z',
               eventData: { count: 2 },
+            },
+          },
+          {
+            x: 3_000,
+            y: 0.5,
+            severity: EpisodeSeverity.Critical,
+            transition: {
+              severity: EpisodeSeverity.Critical,
+              timestampMs: 3_000,
+              timestamp: '1970-01-01T00:00:03.000Z',
+              eventData: { count: 3 },
             },
           },
         ],
@@ -110,17 +139,17 @@ describe('EpisodeSeverityTimelineRow', () => {
 
   it('reports the selected event when a transition dot is clicked', () => {
     const onTransitionClick = jest.fn();
-    const segment = {
+    const transition = {
       severity: EpisodeSeverity.Critical,
-      x0Ms: 1_000,
-      x1Ms: 2_000,
+      timestampMs: 1_000,
       timestamp: '1970-01-01T00:00:01.000Z',
       eventData: { host: 'server-1' },
     };
 
     render(
       <EpisodeSeverityTimelineRow
-        segments={[segment]}
+        segments={[]}
+        transitions={[transition]}
         windowStartMs={1_000}
         windowEndMs={2_000}
         height={44}
@@ -134,15 +163,15 @@ describe('EpisodeSeverityTimelineRow', () => {
       [
         {
           datum: {
-            x: segment.x0Ms,
+            x: transition.timestampMs,
             y: 0.5,
-            severity: segment.severity,
-            segment,
+            severity: transition.severity,
+            transition,
           },
         },
       ],
     ] as never);
 
-    expect(onTransitionClick).toHaveBeenCalledWith(segment);
+    expect(onTransitionClick).toHaveBeenCalledWith(transition);
   });
 });
