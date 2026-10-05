@@ -217,7 +217,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
 
       <EuiSpacer size="l" />
 
-      {workersData?.canModifyWorkers === false ? (
+      {canModifyWorkers === false ? (
         <>
           <EuiCallOut
             announceOnMount
