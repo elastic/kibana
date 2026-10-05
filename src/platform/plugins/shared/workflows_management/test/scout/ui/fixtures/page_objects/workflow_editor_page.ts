@@ -139,7 +139,6 @@ export class WorkflowEditorPage {
   /**
    * Switch to the graph view by clicking the bottom bar toggle.
    * Waits for the graph canvas to become visible.
-   * Requires the `workflows:experimentalFeatures` UI setting to be true.
    */
   async switchToGraphView(): Promise<void> {
     await this.page.testSubj.click('workflowEditorViewToggle-graph');
