@@ -348,23 +348,23 @@ export const EmailParamsFields = ({
       {isTestMode ? (
         <>
           <EuiSpacer size="m" />
-        <KbnInfoCallout
-          announceOnMount
-          data-test-subj="emailTestModeFixedMessageCallout"
-          title={i18n.translate(
-            'xpack.stackConnectors.components.email.testModeFixedMessageTitle',
-            { defaultMessage: 'Fixed test message' }
-          )}
-          text={
-            <p>
-              <FormattedMessage
-                id="xpack.stackConnectors.components.email.testModeFixedMessageDescription"
-                defaultMessage="Testing this connector always sends the fixed subject and message: {testMessage}"
-                values={{ testMessage: <strong>{TEST_MESSAGE}</strong> }}
-              />
-            </p>
-          }
-        />
+          <KbnInfoCallout
+            announceOnMount
+            data-test-subj="emailTestModeFixedMessageCallout"
+            title={i18n.translate(
+              'xpack.stackConnectors.components.email.testModeFixedMessageTitle',
+              { defaultMessage: 'Fixed test message' }
+            )}
+            text={
+              <p>
+                <FormattedMessage
+                  id="xpack.stackConnectors.components.email.testModeFixedMessageDescription"
+                  defaultMessage="Testing this connector always sends the fixed subject and message: {testMessage}"
+                  values={{ testMessage: <strong>{TEST_MESSAGE}</strong> }}
+                />
+              </p>
+            }
+          />
         </>
       ) : (
         <>
