@@ -68,7 +68,7 @@ export const bulkDeleteFileAttachments = async (
       operation: Operations.deleteComment,
     });
 
-    await Promise.all([
+    const [, deletedAttachmentIds] = await Promise.all([
       deleteFiles(
         fileEntities.map((entity) => entity.id),
         fileService
@@ -89,7 +89,11 @@ export const bulkDeleteFileAttachments = async (
       user,
     });
 
-    emitAttachmentsDeletedEvents(clientArgs, caseId, fileAttachments);
+    emitAttachmentsDeletedEvents(
+      clientArgs,
+      caseId,
+      fileAttachments.filter(({ id }) => deletedAttachmentIds.includes(id))
+    );
   } catch (error) {
     throw createCaseError({
       message: `Failed to delete file attachments for case: ${caseId}: ${error}`,

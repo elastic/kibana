@@ -21,6 +21,9 @@ describe('delete', () => {
       clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
         new Map()
       );
+      clientArgs.services.attachmentService.bulkDelete.mockImplementation(
+        async ({ savedObjectIds }) => savedObjectIds
+      );
     });
 
     it('refreshes when deleting', async () => {
@@ -72,6 +75,14 @@ describe('delete', () => {
         await expect(
           deleteComment({ caseID: 'mock-id-1', savedObjectId: 'mock-comment-1' }, clientArgs)
         ).rejects.toThrow();
+
+        expect(clientArgs.casesEventBus.emitAttachmentsDeleted).not.toHaveBeenCalled();
+      });
+
+      it('does not emit the event when the attachment was not confirmed deleted', async () => {
+        clientArgs.services.attachmentService.bulkDelete.mockResolvedValue([]);
+
+        await deleteComment({ caseID: 'mock-id-1', savedObjectId: 'mock-comment-1' }, clientArgs);
 
         expect(clientArgs.casesEventBus.emitAttachmentsDeleted).not.toHaveBeenCalled();
       });
@@ -160,6 +171,9 @@ describe('delete', () => {
       clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
         new Map()
       );
+      clientArgs.services.attachmentService.bulkDelete.mockImplementation(
+        async ({ savedObjectIds }) => savedObjectIds
+      );
 
       clientArgs.services.caseService.getAllCaseComments.mockResolvedValue(
         getAllCaseCommentsResponse
@@ -217,6 +231,32 @@ describe('delete', () => {
         await expect(deleteAll({ caseID: 'mock-id-1' }, clientArgs)).rejects.toThrow();
 
         expect(clientArgs.casesEventBus.emitAttachmentsDeleted).not.toHaveBeenCalled();
+      });
+
+      it('only emits the event for the attachments confirmed deleted', async () => {
+        clientArgs.services.attachmentService.bulkDelete.mockResolvedValue([
+          'mock-comment-1',
+          'mock-comment-4',
+        ]);
+
+        await deleteAll({ caseID: 'mock-id-1' }, clientArgs);
+
+        const { emitAttachmentsDeleted } = clientArgs.casesEventBus;
+        expect(emitAttachmentsDeleted).toHaveBeenCalledTimes(2);
+        expect(emitAttachmentsDeleted).toHaveBeenCalledWith(clientArgs.request, {
+          caseId: 'mock-id-1',
+          attachmentIds: ['mock-comment-1'],
+          attachmentType: 'user',
+          owner: 'securitySolution',
+        });
+        expect(emitAttachmentsDeleted).toHaveBeenCalledWith(clientArgs.request, {
+          caseId: 'mock-id-1',
+          attachmentIds: ['mock-comment-4'],
+          attachmentType: 'alert',
+          owner: 'securitySolution',
+          alertIds: ['test-id'],
+          alertIndices: ['test-index'],
+        });
       });
     });
 

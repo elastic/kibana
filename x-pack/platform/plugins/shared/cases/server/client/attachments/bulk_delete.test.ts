@@ -71,6 +71,31 @@ describe('bulk_delete', () => {
       );
     });
 
+    it('only emits the event for the file attachments confirmed deleted', async () => {
+      clientArgs.services.attachmentService.getter.getFileAttachments.mockResolvedValue([
+        fileAttachment,
+        { ...fileAttachment, id: 'file-attachment-2' },
+      ]);
+      clientArgs.services.attachmentService.bulkDelete.mockResolvedValueOnce(['file-attachment-2']);
+
+      await bulkDeleteFileAttachments(
+        { caseId: 'mock-id-1', fileIds: ['file-1', 'file-2'] },
+        clientArgs,
+        casesClient
+      );
+
+      expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledTimes(1);
+      expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledWith(
+        clientArgs.request,
+        {
+          caseId: 'mock-id-1',
+          attachmentIds: ['file-attachment-2'],
+          attachmentType: 'externalReference',
+          owner: 'securitySolution',
+        }
+      );
+    });
+
     it('does not emit the event when no file attachments were found', async () => {
       clientArgs.services.attachmentService.getter.getFileAttachments.mockResolvedValue([]);
 

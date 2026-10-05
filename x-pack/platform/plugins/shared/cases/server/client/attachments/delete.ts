@@ -51,10 +51,12 @@ export async function deleteAll(
       })),
     });
 
-    await attachmentService.bulkDelete({
-      savedObjectIds: comments.saved_objects.map((so) => so.id),
-      refresh: true,
-    });
+    const deletedIds = new Set(
+      await attachmentService.bulkDelete({
+        savedObjectIds: comments.saved_objects.map((so) => so.id),
+        refresh: true,
+      })
+    );
 
     await updateCaseAttachmentStats({
       caseService: clientArgs.services.caseService,
@@ -78,7 +80,11 @@ export async function deleteAll(
 
     await handleAlerts({ alertsService, attachments, caseId: caseID });
 
-    emitAttachmentsDeletedEvents(clientArgs, caseID, comments.saved_objects);
+    emitAttachmentsDeletedEvents(
+      clientArgs,
+      caseID,
+      comments.saved_objects.filter(({ id }) => deletedIds.has(id))
+    );
   } catch (error) {
     throw createCaseError({
       message: `Failed to delete all comments case id: ${caseID}: ${error}`,
@@ -124,7 +130,7 @@ export async function deleteComment(
       throw Boom.notFound(`This comment ${savedObjectId} does not exist in ${id}.`);
     }
 
-    await attachmentService.bulkDelete({
+    const deletedIds = await attachmentService.bulkDelete({
       savedObjectIds: [savedObjectId],
       refresh: true,
     });
@@ -156,7 +162,9 @@ export async function deleteComment(
 
     await handleAlerts({ alertsService, attachments: [attachment.attributes], caseId: id });
 
-    emitAttachmentsDeletedEvents(clientArgs, id, [attachment]);
+    if (deletedIds.includes(savedObjectId)) {
+      emitAttachmentsDeletedEvents(clientArgs, id, [attachment]);
+    }
   } catch (error) {
     throw createCaseError({
       message: `Failed to delete comment: ${caseID} comment id: ${savedObjectId}: ${error}`,
