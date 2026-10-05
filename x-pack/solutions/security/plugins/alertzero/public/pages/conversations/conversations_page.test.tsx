@@ -53,15 +53,46 @@ jest.mock('@kbn/proposals-plugin/public', () => ({
 }));
 // Only the profile lookup and the assignee-picker's own hooks are stubbed here — two separate
 // jest.mock calls for the same module would silently replace one another rather than merge.
-jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
-  ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
-  useCurrentUserProfile: jest.fn(() => ({ data: null })),
-  useAssignInvestigation: jest.fn(),
-  useUserProfiles: jest.fn(),
-  useSuggestUserProfiles: jest.fn(),
-  useSetInvestigationStatus: jest.fn(),
-  useInvestigationClosePreview: jest.fn(),
-}));
+jest.mock('@kbn/agentic-investigations-plugin/public', () => {
+  const mockUseSetInvestigationStatus = jest.fn();
+  return {
+    ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
+    useCurrentUserProfile: jest.fn(() => ({ data: null })),
+    useAssignInvestigation: jest.fn(),
+    useUserProfiles: jest.fn(),
+    useSuggestUserProfiles: jest.fn(),
+    useSetInvestigationStatus: mockUseSetInvestigationStatus,
+    useInvestigationClosePreview: jest.fn(),
+    // Stub the lazy close-investigation modal so lazy-loading and provider complexity don't
+    // affect unit tests. The stub renders a minimal dialog and calls the mocked status hook
+    // so the mutation assertions still hold.
+    // eslint-disable-next-line react/display-name
+    LazyConnectedCloseInvestigationModal: ({
+      investigation,
+      onClose,
+    }: {
+      investigation: { conversationId?: string; id?: string };
+      onClose: () => void;
+    }) => {
+      const { mutate } = mockUseSetInvestigationStatus();
+      return (
+        <div role="dialog" aria-label="Close this investigation?">
+          <button
+            onClick={() =>
+              mutate({
+                investigationId: investigation.conversationId ?? investigation.id,
+                body: { status: 'closed', dismiss_reason: undefined, rationale: undefined },
+              })
+            }
+          >
+            Close investigation
+          </button>
+          <button onClick={onClose}>Cancel</button>
+        </div>
+      );
+    },
+  };
+});
 jest.mock('@kbn/agentic-investigations-common', () => {
   const actual = jest.requireActual('@kbn/agentic-investigations-common');
   return {
@@ -97,39 +128,6 @@ jest.mock('../../hooks/use_proposal_charts_summary');
 jest.mock('../../components/proposals_trend_chart', () => ({
   ProposalsTrendChartRow: () => null,
 }));
-// Stub the lazy close-investigation modal so lazy-loading and provider complexity don't
-// affect unit tests. The stub renders a minimal dialog and calls the mocked status hook
-// so the mutation assertions still hold.
-jest.mock('../../components/connected_status/connected_close_investigation_modal', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const agenticInvestigationsPublic = require('@kbn/agentic-investigations-plugin/public');
-  // eslint-disable-next-line react/display-name
-  const ConnectedCloseInvestigationModal = ({
-    investigation,
-    onClose,
-  }: {
-    investigation: { conversationId?: string; id?: string };
-    onClose: () => void;
-  }) => {
-    const { mutate } = agenticInvestigationsPublic.useSetInvestigationStatus();
-    return (
-      <div role="dialog" aria-label="Close this investigation?">
-        <button
-          onClick={() =>
-            mutate({
-              investigationId: investigation.conversationId ?? investigation.id,
-              body: { status: 'closed', dismiss_reason: undefined, rationale: undefined },
-            })
-          }
-        >
-          Close investigation
-        </button>
-        <button onClick={onClose}>Cancel</button>
-      </div>
-    );
-  };
-  return { ConnectedCloseInvestigationModal };
-});
 
 const mockUseProposalsByCategory = useProposalsByCategory as jest.Mock;
 const mockUseProposalsByCategoryCount = useProposalsByCategoryCount as jest.Mock;
