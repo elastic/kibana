@@ -6,7 +6,12 @@
  */
 
 import { schema, type TypeOf } from '@kbn/config-schema';
-import { MAX_URL_LENGTH, SEVERITY_LEVELS, THREAT_CATEGORIES } from '../constants';
+import {
+  MAX_URL_LENGTH,
+  SEVERITY_LEVELS,
+  THREAT_CATEGORIES,
+  THREAT_REPORTS_INDEX,
+} from '../constants';
 
 const stringOrStringArray = (maxLength: number, maxSize: number) =>
   schema.maybe(
@@ -55,6 +60,120 @@ export const createThreatReportResponseSchema = schema.object({
 });
 
 export type CreateThreatReportResponse = TypeOf<typeof createThreatReportResponseSchema>;
+
+// ── attribute_alerts_evidence ───────────────────────────────────────────────
+
+/**
+ * Concrete index, not the alias/pattern: the Update API rejects wildcards, and the caller
+ * (`attribute_alerts_to_reports.yaml`) already has the concrete `_index` from its own search hit.
+ */
+export const attributeAlertsEvidenceBodySchema = schema.object({
+  index: schema.string({
+    minLength: 1,
+    maxLength: 256,
+    validate: (value) =>
+      value.startsWith(THREAT_REPORTS_INDEX) ? undefined : `must target ${THREAT_REPORTS_INDEX}`,
+  }),
+  id: schema.string({ minLength: 1, maxLength: 512 }),
+  window: schema.string({ minLength: 1, maxLength: 32 }),
+  computedAt: schema.string({ minLength: 1, maxLength: 64 }),
+  iocMatchHits: schema.number({ min: 0 }),
+  techniqueOverlapHits: schema.number({ min: 0 }),
+  alertHitsTotal: schema.number({ min: 0 }),
+});
+
+export const attributeAlertsEvidenceResponseSchema = schema.object({
+  acknowledged: schema.boolean(),
+});
+
+export type AttributeAlertsEvidenceResponse = TypeOf<typeof attributeAlertsEvidenceResponseSchema>;
+
+// Matches the other threat_intel routes' cap even though this body is small and bounded;
+// none of them size-tune this value to their own payload either.
+export const ATTRIBUTE_ALERTS_EVIDENCE_MAX_BODY_BYTES = CREATE_THREAT_REPORT_MAX_BODY_BYTES;
+
+// ── persist_report_fields ────────────────────────────────────────────────────
+
+// Matches create_threat_report's cap: LLM-derived `doc` payloads (iocs, behaviors, artifacts)
+// can be large, and Kibana's default body cap is 1 MiB.
+export const PERSIST_REPORT_FIELDS_MAX_BODY_BYTES = CREATE_THREAT_REPORT_MAX_BODY_BYTES;
+
+const enrichmentSectionSchema = schema.object({}, { unknowns: 'allow' });
+
+/**
+ * Enrichment payloads are partly LLM-shaped (arrays of IOCs, behaviors, artifacts, free-form
+ * model ids), so the *inside* of each section stays open and Elasticsearch's `dynamic: 'strict'`
+ * mapping remains the check on it.
+ *
+ * The set of sections does not stay open. `doc` is merged into the stored report by
+ * `esClient.update`, and that is a merge-patch running as the internal user, so any key reachable
+ * here is a key the caller can overwrite on a report in *any* space: `space_id` would re-home the
+ * report, and because a merge-patch replaces arrays wholesale, `evidence: []` would erase every
+ * space's hunt and alert-attribution evidence in a single call. Allowlisting the sections the four
+ * call sites actually write (`enrich_threat_report.yaml`'s `persist_gate_rejection` /
+ * `persist_diamond_fields` / `persist_extractions` / `persist_classified_severity`) makes both
+ * unreachable by construction rather than by review.
+ *
+ * Which report may be enriched is enforced separately, in the route: enrichment addresses each write
+ * through the report's own space, so the handler can reject an id belonging to another space. This
+ * allowlist and that check are independent bounds -- neither one makes the other redundant.
+ */
+export const persistReportFieldsBodySchema = schema.object({
+  index: schema.string({
+    minLength: 1,
+    maxLength: 256,
+    validate: (value) =>
+      value.startsWith(THREAT_REPORTS_INDEX) ? undefined : `must target ${THREAT_REPORTS_INDEX}`,
+  }),
+  id: schema.string({ minLength: 1, maxLength: 512 }),
+  // `unknowns: 'forbid'` is the point of this object, not a default: an unrecognized section is a
+  // caller reaching for a field no enrichment step writes, and rejecting the request is better
+  // than merging it. It also keeps a misnested key (e.g. `rank_score` under `doc.severity`) a
+  // loud 400 here instead of a silent drop.
+  doc: schema.object(
+    {
+      extracted: schema.maybe(enrichmentSectionSchema),
+      geography: schema.maybe(enrichmentSectionSchema),
+      lineage: schema.maybe(enrichmentSectionSchema),
+      severity: schema.maybe(enrichmentSectionSchema),
+      // `persist_classified_severity` computes this with a Liquid `times` filter, which the engine
+      // resolves to a number, same as `attributeAlertsEvidenceBodySchema`'s hit counts.
+      rank_score: schema.maybe(schema.number()),
+    },
+    { unknowns: 'forbid' }
+  ),
+});
+
+// ── ingest_threat_report ─────────────────────────────────────────────────────
+
+/**
+ * The document body stays open because its shape comes from whichever adapter (RSS, text indicator
+ * list, ...) fetched it, and Elasticsearch's `dynamic: 'strict'` mapping is the check on it. This
+ * is a `create`, so there is no stored document for an open payload to overwrite.
+ *
+ * `space_id` is called out rather than left among the unknowns because it is the one field that
+ * decides who sees the report, and the route writes as the internal user. The route checks its
+ * value against the request's space (see `registerIngestThreatReportRoute`); declaring it here is
+ * what gives that check a typed field to read instead of an index into an open bag.
+ */
+export const ingestThreatReportBodySchema = schema.object({
+  document: schema.object(
+    { space_id: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })) },
+    { unknowns: 'allow' }
+  ),
+});
+
+export const ingestThreatReportResponseSchema = schema.object({
+  reportId: schema.string(),
+});
+
+export type IngestThreatReportResponse = TypeOf<typeof ingestThreatReportResponseSchema>;
+
+export const persistReportFieldsResponseSchema = schema.object({
+  acknowledged: schema.boolean(),
+});
+
+export type PersistReportFieldsResponse = TypeOf<typeof persistReportFieldsResponseSchema>;
 
 // ── get_threat_report ───────────────────────────────────────────────────────
 
