@@ -172,7 +172,7 @@ else
   ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/deploy.json > "$ECCTL_LOGS"
 fi
 
-VAULT_READ_COMMAND=$(print_deployment_credentials_read "$CLOUD_DEPLOYMENT_NAME")
+VAULT_READ_COMMAND=$(deployment_vault_read_command "$CLOUD_DEPLOYMENT_NAME")
 
 CLOUD_DEPLOYMENT_KIBANA_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.kibana[0].info.metadata.aliased_url')
 CLOUD_DEPLOYMENT_ELASTICSEARCH_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.elasticsearch[0].info.metadata.aliased_url')
@@ -184,7 +184,7 @@ Kibana: $CLOUD_DEPLOYMENT_KIBANA_URL
 
 Elasticsearch: $CLOUD_DEPLOYMENT_ELASTICSEARCH_URL
 
-Credentials: \`$VAULT_READ_COMMAND\`
+Credentials: \`$VAULT_READ_COMMAND\`, or reach out to #kibana-operations to join the PR deployment organization
 
 Kibana image: \`$KIBANA_CLOUD_IMAGE\`
 

@@ -143,7 +143,7 @@ deploy() {
   PROJECT_KIBANA_LOGIN_URL="${PROJECT_KIBANA_URL}/login"
   PROJECT_ELASTICSEARCH_URL=$(jq -r '.endpoints.elasticsearch' $PROJECT_INFO_LOGS)
 
-  VAULT_READ_COMMAND=$(print_deployment_credentials_read "$VAULT_KEY_NAME")
+  VAULT_READ_COMMAND=$(deployment_vault_read_command "$VAULT_KEY_NAME")
 
   cat << EOF | buildkite-agent annotate --style "info" --context "project-$PROJECT_TYPE"
 ### $PROJECT_TYPE_LABEL Deployment
@@ -152,7 +152,7 @@ Kibana: $PROJECT_KIBANA_LOGIN_URL
 
 Elasticsearch: $PROJECT_ELASTICSEARCH_URL
 
-Credentials: \`$VAULT_READ_COMMAND\`
+Credentials: \`$VAULT_READ_COMMAND\`, or reach out to #kibana-operations to join the PR deployment organization
 
 Kibana image: \`$KIBANA_IMAGE\`
 EOF

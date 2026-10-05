@@ -81,8 +81,8 @@ unset_deployment_credentials() {
   retry 5 5 vault kv delete "$VAULT_DEPLOYMENTS_PATH/$key_path"
 }
 
-print_deployment_credentials_read() {
+deployment_vault_read_command() {
   key_path=$1
 
-  echo "vault kv get -address=https://vault-ci-prod.elastic.dev $VAULT_DEPLOYMENTS_PATH/$key_path"
+  echo "vault kv get $VAULT_DEPLOYMENTS_PATH/$key_path"
 }
