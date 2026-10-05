@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mapValues, omitBy, partition, pick, uniq } from 'lodash';
+import { mapValues, omit, partition, pick, uniq } from 'lodash';
 import { z } from '@kbn/zod';
 import { xyConfigSchemaESQL } from '@kbn/lens-embeddable-utils';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -24,15 +24,13 @@ const USEFUL_DESCRIPTION_RE =
 const DEF_REF_PREFIX = '#/$defs/';
 
 /** `type` is set by every example, and the system injects `data_source`. */
-const EXCLUDED_KEYS = new Set(['type', 'data_source']);
+const EXCLUDED_KEYS = ['type', 'data_source'] as const;
 
 type JsonNode = Record<string, unknown>;
 
 interface ChartSchemaSections {
-  /** Top-level config keys the model can load, mapped to their JSON schema. */
-  sections: JsonNode;
-  /** Definitions the sections reference. */
-  defs: JsonNode;
+  /** The top-level config keys the model can load. */
+  schema: z.ZodObject;
   /** One line per section that lists the fields it holds. */
   index: string;
 }
@@ -65,27 +63,6 @@ const resolveRef = (node: unknown, defs: JsonNode): unknown => {
     current = defs[current.$ref.slice(DEF_REF_PREFIX.length)];
   }
   return current;
-};
-
-const collectDefRefs = (node: unknown, defs: JsonNode, refs: Set<string>): void => {
-  if (Array.isArray(node)) {
-    node.forEach((child) => collectDefRefs(child, defs, refs));
-    return;
-  }
-  if (!isJsonNode(node)) {
-    return;
-  }
-  for (const [key, value] of Object.entries(node)) {
-    if (key === '$ref' && typeof value === 'string' && value.startsWith(DEF_REF_PREFIX)) {
-      const name = value.slice(DEF_REF_PREFIX.length);
-      if (!refs.has(name)) {
-        refs.add(name);
-        collectDefRefs(defs[name], defs, refs);
-      }
-    } else {
-      collectDefRefs(value, defs, refs);
-    }
-  }
 };
 
 /** Merges fields of union variants, keeping every variant's schema for a shared field name. */
@@ -245,35 +222,42 @@ const describeSection = (section: unknown, defs: JsonNode): string => {
   return isJsonNode(resolved) && typeof resolved.type === 'string' ? resolved.type : 'value';
 };
 
-const buildSchemaSections = (schema: z.ZodType): ChartSchemaSections => {
-  const { properties, $defs } = trimSchemaDescriptions(z.toJSONSchema(schema, { io: 'input' })) as {
+const toJsonSchema = (schema: z.ZodObject) =>
+  trimSchemaDescriptions(z.toJSONSchema(schema, { io: 'input' })) as {
     properties?: JsonNode;
     $defs?: JsonNode;
   };
-  const sections = omitBy(properties ?? {}, (_, key) => EXCLUDED_KEYS.has(key));
-  const defs = $defs ?? {};
-  const index = Object.entries(sections)
-    .map(([name, section]) => `- ${name}: ${describeSection(section, defs)}`)
-    .join('\n');
-  return { sections, defs, index };
-};
+
+/** Rebuilds a chart config schema with only the top-level keys the model can load. */
+const toSectionsSchema = ({ shape }: z.ZodObject): z.ZodObject =>
+  z.object(omit(shape, EXCLUDED_KEYS));
 
 /**
  * XY sections describe ES|QL data layers only. The system injects an ES|QL
  * `data_source` into every layer, which reference line and annotation layers reject.
  */
 const [xyDataLayerSchema] = xyConfigSchemaESQL.shape.layers.element.options;
-const xySectionsSchema = xyConfigSchemaESQL.extend({
+const xySectionsSchema = toSectionsSchema(xyConfigSchemaESQL).extend({
   layers: z.array(xyDataLayerSchema.omit({ data_source: true })).min(1),
 });
 
+const buildSchemaSections = (schema: z.ZodObject): ChartSchemaSections => {
+  const { properties = {}, $defs = {} } = toJsonSchema(schema);
+  const index = Object.entries(properties)
+    .map(([name, section]) => `- ${name}: ${describeSection(section, $defs)}`)
+    .join('\n');
+  return { schema, index };
+};
+
 const chartSchemaSections = mapValues(chartTypeRegistry, ({ schema }, chartType) =>
-  buildSchemaSections(chartType === SupportedChartType.XY ? xySectionsSchema : schema)
+  buildSchemaSections(
+    chartType === SupportedChartType.XY ? xySectionsSchema : toSectionsSchema(schema)
+  )
 );
 
 /** Names of the sections the config author can load for a chart type. */
 export const getSchemaSectionNames = (chartType: SupportedChartType): string[] =>
-  Object.keys(chartSchemaSections[chartType].sections);
+  Object.keys(chartSchemaSections[chartType].schema.shape);
 
 /** Lists the loadable sections of a chart type with the fields each one holds. */
 export const getSchemaSectionIndex = (chartType: SupportedChartType): string =>
@@ -284,14 +268,9 @@ export const renderSchemaSections = (
   chartType: SupportedChartType,
   sectionNames: readonly string[]
 ): string => {
-  const { sections, defs } = chartSchemaSections[chartType];
-  const properties = pick(sections, sectionNames);
-  const refs = new Set<string>();
-  collectDefRefs(properties, defs, refs);
-  return JSON.stringify({
-    properties,
-    ...(refs.size > 0 ? { $defs: pick(defs, [...refs]) } : {}),
-  });
+  const { shape } = chartSchemaSections[chartType].schema;
+  const { properties, $defs } = toJsonSchema(z.object(pick(shape, sectionNames)));
+  return JSON.stringify({ properties, ...($defs ? { $defs } : {}) });
 };
 
 /** Keeps the names that are loadable sections of the chart type. */
@@ -299,9 +278,9 @@ export const filterSchemaSections = (
   chartType: SupportedChartType,
   names: readonly unknown[]
 ): string[] => {
-  const { sections } = chartSchemaSections[chartType];
+  const { shape } = chartSchemaSections[chartType].schema;
   return uniq(names).filter(
-    (name): name is string => typeof name === 'string' && Object.hasOwn(sections, name)
+    (name): name is string => typeof name === 'string' && Object.hasOwn(shape, name)
   );
 };
 
