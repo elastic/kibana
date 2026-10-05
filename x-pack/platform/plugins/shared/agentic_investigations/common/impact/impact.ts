@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { investigationEvidenceSchema, MAX_EVIDENCE_TEXT_LENGTH } from '../evidence/evidence';
+import { investigationEvidenceSchema, MAX_EVIDENCE_TEXT_LENGTH } from '../evidence';
 import { userSchema } from '../user';
 import {
   MAX_ENTITY_ID_LENGTH,

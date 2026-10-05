@@ -8,7 +8,8 @@
 import { z } from '@kbn/zod/v4';
 
 // Shape copied from `@kbn/significant-events-schema` (#293532) so every investigation entity
-// shares one evidence format. TODO(ns-1619 s6): remove the significant-events copy.
+// shares one evidence format. The significant-events copy is removed once Nightshift reads
+// investigations from this plugin.
 
 /** Bound on Markdown evidence descriptions and other free text an investigation writes. */
 export const MAX_EVIDENCE_TEXT_LENGTH = 10_000;

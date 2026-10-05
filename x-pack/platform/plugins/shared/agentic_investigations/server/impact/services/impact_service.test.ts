@@ -448,46 +448,6 @@ describe('ImpactService', () => {
     });
   });
 
-  describe('get', () => {
-    it('returns the document by id in the caller space', async () => {
-      const storage = createStorage(baseDocument());
-      const service = createService(storage);
-      const id = impactDocumentId(SPACE_ID, CONVERSATION_ID);
-
-      const impact = await service.get(id, SPACE_ID);
-
-      expect(impact).toEqual({ id, ...baseDocument() });
-      expect(storage.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          seq_no_primary_term: true,
-          query: {
-            bool: {
-              filter: [{ term: { _id: id } }],
-            },
-          },
-        })
-      );
-    });
-
-    it('throws when the id is missing in the caller space', async () => {
-      const storage = createStorage();
-      const service = createService(storage);
-
-      await expect(service.get('impact-missing', SPACE_ID)).rejects.toBeInstanceOf(
-        ImpactNotFoundError
-      );
-    });
-
-    it('throws when the document belongs to another space', async () => {
-      const storage = createStorage(baseDocument());
-      const service = createService(storage);
-
-      await expect(
-        service.get(impactDocumentId(SPACE_ID, CONVERSATION_ID), 'other-space')
-      ).rejects.toBeInstanceOf(ImpactNotFoundError);
-    });
-  });
-
   describe('listByConversationIds', () => {
     it('returns one document per conversation and omits missing ones', async () => {
       const first = baseDocument();

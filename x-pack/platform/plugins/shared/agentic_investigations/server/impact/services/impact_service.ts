@@ -155,20 +155,6 @@ export class ImpactService {
     return this.documents.get(impactDocumentId(spaceId, conversationId), spaceId);
   }
 
-  /** Loads an Impact document by id for by-reference attachment resolve. */
-  async get(id: string, spaceId: string): Promise<Impact> {
-    assertBoundedId(spaceId, 'spaceId');
-    if (id.length < 1 || id.length > MAX_IMPACT_ID_LENGTH) {
-      throw new ImpactNotFoundError(id);
-    }
-
-    const existing = await this.documents.get(id, spaceId);
-    if (!existing) {
-      throw new ImpactNotFoundError(id);
-    }
-    return existing;
-  }
-
   /**
    * Undoes an attach whose conversation attachment did not land. Deletes a
    * document this call created, or restores `previous`, only while the stored

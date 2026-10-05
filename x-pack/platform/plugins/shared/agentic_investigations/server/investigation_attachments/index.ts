@@ -13,8 +13,6 @@ export {
 } from './define_investigation_attachment';
 export {
   InvestigationAttachmentDocService,
-  MAX_INVESTIGATION_ATTACHMENT_CONVERSATION_IDS,
-  MAX_INVESTIGATION_ATTACHMENT_ID_LENGTH,
   type InvestigationAttachmentStorage,
   type WrittenInvestigationAttachment,
 } from './attachment_doc_service';

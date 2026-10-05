@@ -32,7 +32,7 @@ export interface InvestigationAttachmentRenderer<TDocument> {
  * Builds the Agent Builder UI definition of a by-reference investigation attachment: one lazily
  * loaded content component for both the inline chat render and the details flyout.
  */
-export const createInvestigationAttachmentUIDefinition = <TType extends string, TDocument>({
+const createInvestigationAttachmentUIDefinition = <TType extends string, TDocument>({
   getLabel,
   icon,
   loadContent,

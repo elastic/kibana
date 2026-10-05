@@ -6,7 +6,6 @@
  */
 
 export {
-  createInvestigationAttachmentUIDefinition,
   registerInvestigationAttachmentRenderer,
   type InvestigationAttachmentContentProps,
   type InvestigationAttachmentRenderer,
