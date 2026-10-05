@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse, stringify } from 'query-string';
+import queryString from 'query-string';
 import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 
@@ -26,7 +26,7 @@ export function useWorkflowUrlState() {
   const location = useLocation();
 
   const urlState = useMemo(() => {
-    const params = parse(location.search);
+    const params = queryString.parse(location.search);
     return {
       tab: (params.tab as WorkflowUrlStateTabType) || 'workflow',
       executionId: params.executionId as string | undefined,
@@ -38,7 +38,7 @@ export function useWorkflowUrlState() {
 
   const updateUrlState = useCallback(
     (updates: Partial<WorkflowUrlState>) => {
-      const currentParams = parse(history.location.search);
+      const currentParams = queryString.parse(history.location.search);
 
       // Update the params with new values
       const newParams = {
@@ -55,7 +55,7 @@ export function useWorkflowUrlState() {
       });
 
       // Update the URL without causing a full page reload
-      const newSearch = stringify(cleanParams, { encode: false });
+      const newSearch = queryString.stringify(cleanParams, { encode: false });
       const newLocation = {
         ...history.location,
         search: newSearch ? `?${newSearch}` : '',
