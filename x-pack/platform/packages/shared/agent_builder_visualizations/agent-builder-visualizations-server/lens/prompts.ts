@@ -73,7 +73,7 @@ export const createGenerateConfigPrompt = ({
 }: {
   nlQuery: string;
   esqlQuery: string;
-  /** Result columns of the resolved query, when it was generated in this run. */
+  /** Result columns of the resolved query, when they could be collected. */
   columns?: readonly EsqlEsqlColumnInfo[];
   chartType: SupportedChartType;
   existingConfig?: string;

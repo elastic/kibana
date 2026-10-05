@@ -6,10 +6,13 @@
  */
 import { StateGraph, Annotation } from '@langchain/langgraph';
 import { ToolMessage, type BaseMessage, type BaseMessageLike } from '@langchain/core/messages';
+import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { executeEsql } from '@kbn/agent-builder-genai-utils';
+import { buildTimeRangeParams } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
 import { extractTextFromMessage } from '../utils/extract_text_from_message';
 import { generateVisualizationEsql } from '../shared/generate_visualization_esql';
 import { formatRepairMessages } from '../shared/repair_messages';
@@ -17,6 +20,7 @@ import { chartTypeRegistry } from './chart_type_registry';
 import type { VisualizationConfig } from './chart_type_registry';
 import {
   GENERATE_ESQL_NODE,
+  RESOLVE_COLUMNS_NODE,
   GENERATE_CONFIG_NODE,
   VALIDATE_CONFIG_NODE,
   MAX_RETRY_ATTEMPTS,
@@ -38,6 +42,12 @@ import {
 
 // Regex to extract JSON from markdown code blocks
 const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
+
+/**
+ * Range bound to `?_tstart`/`?_tend` when a provided query runs to collect its
+ * columns. Kibana applies the live range at render time.
+ */
+const COLUMNS_PROBE_TIME_RANGE = { from: 'now-24h', to: 'now' } as const;
 
 const REPAIR_INSTRUCTIONS =
   'Return the complete corrected response in the same minified JSON format ("authoring_note" and "config"). Change only what is needed to fix the error.';
@@ -156,6 +166,8 @@ const VisualizationStateAnnotation = Annotation.Root({
   applyChartRules: Annotation<boolean>(),
   // internal
   esqlQuery: Annotation<string>(),
+  /** Result columns of the resolved query. Absent when they could not be collected. */
+  columns: Annotation<EsqlEsqlColumnInfo[] | undefined>(),
   /** The tool exchange that loaded schema sections, replayed on every later attempt. */
   schemaSectionMessages: Annotation<BaseMessage[]>({
     reducer: (_, newValue) => newValue,
@@ -242,8 +254,34 @@ export const createVisualizationGraph = async (
     }
 
     return {
+      columns: action.columns,
       actions: [action],
     };
+  };
+
+  // Node: Collect the result columns of a provided or preserved query, so the
+  // config author gets the examples and column types that fit it. The query is
+  // kept as is; when it fails to run, the config is authored without columns.
+  const resolveColumnsNode = async (state: VisualizationState) => {
+    // Preserved layers with different queries have different columns, so one
+    // query's columns would mislead the config author.
+    if (state.preserveESQL && getExistingEsqlQueries(state.parsedExistingConfig).length > 1) {
+      return {};
+    }
+    try {
+      const { columns } = await executeEsql({
+        query: state.esqlQuery,
+        params: buildTimeRangeParams(COLUMNS_PROBE_TIME_RANGE),
+        limit: 1,
+        dropNullColumns: false,
+        esClient: esClient.asCurrentUser,
+      });
+      return { columns };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.warn(`Failed to collect the result columns of the ES|QL query: ${errorMessage}`);
+      return {};
+    }
   };
 
   // Offers the schema-section tool once. When the model calls it, the sections are
@@ -314,7 +352,7 @@ export const createVisualizationGraph = async (
       ...createGenerateConfigPrompt({
         nlQuery: state.nlQuery,
         esqlQuery,
-        columns: lastGenerateEsqlAction?.columns,
+        columns: state.columns,
         chartType: state.chartType,
         existingConfig: state.existingConfig,
         parsedExistingConfig: state.parsedExistingConfig,
@@ -522,7 +560,7 @@ export const createVisualizationGraph = async (
   const shouldGenerateESQLRouter = (state: VisualizationState): string => {
     if (state.esqlQuery) {
       logger.debug('Using provided ES|QL query');
-      return GENERATE_CONFIG_NODE;
+      return RESOLVE_COLUMNS_NODE;
     }
 
     logger.debug('No ES|QL query provided, generating ES|QL query');
@@ -533,14 +571,16 @@ export const createVisualizationGraph = async (
   const graph = new StateGraph(VisualizationStateAnnotation)
     // Add nodes
     .addNode(GENERATE_ESQL_NODE, generateESQLNode)
+    .addNode(RESOLVE_COLUMNS_NODE, resolveColumnsNode)
     .addNode(GENERATE_CONFIG_NODE, generateConfigNode)
     .addNode(VALIDATE_CONFIG_NODE, validateConfigNode)
     .addNode('finalize', finalizeNode)
     // Add edges
     .addConditionalEdges('__start__', shouldGenerateESQLRouter, {
-      [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,
+      [RESOLVE_COLUMNS_NODE]: RESOLVE_COLUMNS_NODE,
       [GENERATE_ESQL_NODE]: GENERATE_ESQL_NODE,
     })
+    .addEdge(RESOLVE_COLUMNS_NODE, GENERATE_CONFIG_NODE)
     .addConditionalEdges(GENERATE_ESQL_NODE, afterGenerateEsqlRouter, {
       [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,
       finalize: 'finalize',

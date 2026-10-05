@@ -7,7 +7,7 @@
 
 import { ToolMessage } from '@langchain/core/messages';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { generateEsql } from '@kbn/agent-builder-genai-utils';
+import { executeEsql, generateEsql } from '@kbn/agent-builder-genai-utils';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
@@ -16,6 +16,7 @@ import { getFailingSchemaSections } from './schema_sections';
 import type { VisualizationConfig } from './types';
 
 jest.mock('@kbn/agent-builder-genai-utils', () => ({
+  executeEsql: jest.fn(),
   generateEsql: jest.fn(),
 }));
 
@@ -48,6 +49,7 @@ jest.mock('./schema_sections', () => ({
   renderSchemaSections: (_chartType: string, names: string[]) => `schema of ${names.join(', ')}`,
 }));
 
+const mockedExecuteEsql = jest.mocked(executeEsql);
 const mockedGenerateEsql = jest.mocked(generateEsql);
 const mockedGetFailingSchemaSections = jest.mocked(getFailingSchemaSections);
 
@@ -94,6 +96,7 @@ describe('createVisualizationGraph', () => {
   };
 
   beforeEach(() => {
+    mockedExecuteEsql.mockReset().mockResolvedValue({ columns: [], values: [] });
     mockedGenerateEsql.mockReset();
     mockedGetFailingSchemaSections.mockReset().mockReturnValue([]);
   });
@@ -413,6 +416,8 @@ describe('createVisualizationGraph', () => {
     });
 
     expect(mockedGenerateEsql).not.toHaveBeenCalled();
+    // One query's columns would not describe the other layer.
+    expect(mockedExecuteEsql).not.toHaveBeenCalled();
     const validated = finalState.validatedConfig as {
       layers?: Array<{ data_source?: { type: string; query: string } }>;
     };
@@ -465,6 +470,77 @@ describe('createVisualizationGraph', () => {
       'system',
       expect.stringContaining('Time series: a date column'),
     ]);
+  });
+
+  describe('provided query columns', () => {
+    const esqlQuery =
+      'FROM logs-* | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, 75, ?_tstart, ?_tend)';
+
+    const runGraph = async (model: ReturnType<typeof createMockModel>) => {
+      const graph = await createVisualizationGraph(model as never, logger, events, esClient);
+      return graph.invoke({
+        nlQuery: 'Count logs over time',
+        index: 'logs-*',
+        chartType: SupportedChartType.XY,
+        existingConfig: undefined,
+        parsedExistingConfig: null,
+        esqlQuery,
+        currentAttempt: 0,
+        actions: [],
+        validatedConfig: null,
+        error: null,
+      });
+    };
+
+    it('runs the provided query for its columns and passes them to the config author', async () => {
+      mockedExecuteEsql.mockResolvedValue({
+        columns: [
+          { name: 'count', type: 'long' },
+          { name: 'bucket', type: 'date' },
+        ],
+        values: [],
+      });
+      const model = createMockModel(
+        asAuthoringResponse({ type: 'xy', layers: [{ type: 'line' }] })
+      );
+
+      await runGraph(model);
+
+      expect(mockedGenerateEsql).not.toHaveBeenCalled();
+      expect(mockedExecuteEsql).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: esqlQuery,
+          limit: 1,
+          dropNullColumns: false,
+          params: [{ _tstart: expect.any(String) }, { _tend: expect.any(String) }],
+        })
+      );
+      const { chatModel } = await model.getDefaultModel();
+      const [[prompt]] = chatModel.invoke.mock.calls;
+      expect(prompt).toContainEqual([
+        'human',
+        expect.stringContaining('Result columns: "count" (long), "bucket" (date)'),
+      ]);
+      expect(prompt).not.toContainEqual(['system', expect.stringContaining('Ranking by category')]);
+    });
+
+    it('keeps the provided query and authors without columns when the query fails to run', async () => {
+      mockedExecuteEsql.mockRejectedValue(new Error('Unknown column [bucket]'));
+      const model = createMockModel(
+        asAuthoringResponse({ type: 'xy', layers: [{ type: 'line' }] })
+      );
+
+      const finalState = await runGraph(model);
+
+      expect(mockedGenerateEsql).not.toHaveBeenCalled();
+      const { chatModel } = await model.getDefaultModel();
+      const [[prompt]] = chatModel.invoke.mock.calls;
+      expect(prompt).not.toContainEqual(['human', expect.stringContaining('Result columns')]);
+      expect(finalState.validatedConfig).toEqual({
+        type: 'xy',
+        layers: [{ type: 'line', data_source: { type: 'esql', query: esqlQuery } }],
+      });
+    });
   });
 
   describe('schema sections', () => {
