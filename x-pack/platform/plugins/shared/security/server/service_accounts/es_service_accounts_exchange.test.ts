@@ -154,6 +154,8 @@ describe('Elasticsearch service account token exchange', () => {
   it.each([
     ['at the same moment as', credential.createdAt],
     ['after', '2026-09-24T00:00:00.000Z'],
+    // The two timestamps come from different Kibana nodes' clocks.
+    ['within the clock skew tolerance before', '2026-09-22T23:59:00.000Z'],
   ])('exchanges for a workload bound %s the account was created', async (_, boundAt) => {
     const { backend, exchange } = setup();
 
@@ -164,6 +166,7 @@ describe('Elasticsearch service account token exchange', () => {
 
   it.each([
     ['before the account was created', '2026-09-22T00:00:00.000Z'],
+    ['just past the clock skew tolerance', '2026-09-22T23:58:59.999Z'],
     ['at a time that does not parse', 'not-a-timestamp'],
   ])('refuses a workload bound %s', async (_, boundAt) => {
     const { backend, exchange, logger } = setup();
@@ -174,9 +177,9 @@ describe('Elasticsearch service account token exchange', () => {
 
     expect(exchange).not.toHaveBeenCalled();
     expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining(
-        `Refusing to exchange service account [${ACCOUNT_ID}] for a workload bound at [${boundAt}]`
-      )
+      `Refusing to exchange service account [${ACCOUNT_ID}]: its workload was bound at ` +
+        `[${boundAt}], before the account was created at [${credential.createdAt}]. Bind the ` +
+        'workload again to run it as this account.'
     );
   });
 

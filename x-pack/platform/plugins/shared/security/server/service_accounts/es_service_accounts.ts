@@ -70,9 +70,18 @@ const getUndeletedTokensWarning = (id: string, name: string, tokenNames: string[
 const getAccessTokensWarning = (id: string): string =>
   i18n.translate('xpack.security.serviceAccounts.delete.accessTokensNotInvalidatedWarning', {
     defaultMessage:
-      'Service account [{id}] was deleted, but the access tokens it was issued could not be invalidated. They stay valid until they expire.',
+      'Service account [{id}] was deleted, but the access tokens it was issued could not be invalidated.',
     values: { id },
   });
+
+/**
+ * How much later than a workload's binding its account may have been created before the exchange
+ * refuses it. The two timestamps come from the clocks of whichever Kibana nodes handled the create
+ * and the bind, so a workload bound right after its account was created can look bound before it.
+ * The cost is that an account deleted and created again this soon after a bind inherits the
+ * binding.
+ */
+const BINDING_CLOCK_SKEW_TOLERANCE_MS = 60_000;
 
 /** How many of an account's tokens are deleted at once. */
 const TOKEN_DELETE_CONCURRENCY = 10;
@@ -552,7 +561,9 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     }
 
     this.logger.debug(
-      `Service account [${id}] was already gone, so only what it left behind was cleaned up`
+      `Service account [${id}] no longer exists. Deleted ${
+        tokenNames.length - undeletedTokens.length
+      } leftover tokens and invalidated ${invalidated ?? 0} access tokens.`
     );
     const warnings: string[] = [];
     if (undeletedTokens.length > 0) {
@@ -727,10 +738,14 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       // An account deleted and created again keeps its `{namespace}/{name}` id, so a binding left
       // over from the earlier account would otherwise run as the new one. Both timestamps are
       // authenticated, and one that does not parse is refused rather than waved through.
-      if (boundAt !== undefined && !(Date.parse(credential.createdAt) <= Date.parse(boundAt))) {
+      if (
+        boundAt !== undefined &&
+        !(Date.parse(credential.createdAt) <= Date.parse(boundAt) + BINDING_CLOCK_SKEW_TOLERANCE_MS)
+      ) {
         this.logger.error(
-          `Refusing to exchange service account [${serviceAccountId}] for a workload bound at ` +
-            `[${boundAt}]: the account was created after that, at [${credential.createdAt}].`
+          `Refusing to exchange service account [${serviceAccountId}]: its workload was bound at ` +
+            `[${boundAt}], before the account was created at [${credential.createdAt}]. Bind the ` +
+            'workload again to run it as this account.'
         );
         throw Boom.forbidden(
           'The workload was bound to an earlier service account with the same name.'

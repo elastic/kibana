@@ -13,7 +13,6 @@ import type { ServiceAccountWorkloadBinding } from '@kbn/core-security-server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 
 import type { WorkloadBindingStore } from './bindings';
-import type { ServiceAccountClusterPrivilege } from './cluster_privilege';
 import { ensureClusterPrivilege } from './cluster_privilege';
 import type { ServiceAccountsBackend } from './types';
 import type { SecurityLicense } from '../../common';
@@ -45,8 +44,7 @@ export interface DeleteServiceAccountOptions {
 export interface ServiceAccountsManagementApi {
   /**
    * Lists every workload bound to the account, across plugins and spaces, the same way a delete
-   * checks for them. Requires `manage_security`, the same as a delete: the bindings span every
-   * space, and `read_security` says nothing about which spaces the caller may see.
+   * checks for them. Requires `manage_security`.
    */
   listWorkloads(
     request: KibanaRequest,
@@ -105,7 +103,7 @@ export class ServiceAccountsManagement implements ServiceAccountsManagementApi {
     request: KibanaRequest,
     serviceAccountId: string
   ): Promise<ServiceAccountBoundWorkload[]> {
-    await this.authorize(request, 'manage_security', 'list the workloads of a service account');
+    await this.authorize(request, 'list the workloads of a service account');
 
     return await this.findBoundWorkloads(serviceAccountId);
   }
@@ -118,7 +116,7 @@ export class ServiceAccountsManagement implements ServiceAccountsManagementApi {
     if (!force) {
       // The backend checks this privilege too. Checking it here first means a caller who may not
       // delete the account never learns what it is bound to.
-      await this.authorize(request, 'manage_security', 'delete a service account');
+      await this.authorize(request, 'delete a service account');
 
       const workloads = await this.findBoundWorkloads(serviceAccountId);
       if (workloads.length > 0) {
@@ -173,11 +171,7 @@ export class ServiceAccountsManagement implements ServiceAccountsManagementApi {
     );
   }
 
-  private async authorize(
-    request: KibanaRequest,
-    privilege: ServiceAccountClusterPrivilege,
-    action: string
-  ): Promise<void> {
+  private async authorize(request: KibanaRequest, action: string): Promise<void> {
     if (!this.license.isEnabled()) {
       throw Boom.forbidden(`Cannot ${action}: security features are disabled in Elasticsearch`);
     }
@@ -186,7 +180,7 @@ export class ServiceAccountsManagement implements ServiceAccountsManagementApi {
       request,
       checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
       logger: this.logger,
-      privilege,
+      privilege: 'manage_security',
       action,
     });
   }

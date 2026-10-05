@@ -1261,7 +1261,7 @@ describe('EsServiceAccounts', () => {
       await expect(serviceAccounts.delete(request, ACCOUNT_ID)).resolves.toEqual({
         warnings: [
           `Service account [${ACCOUNT_ID}] was deleted, but the access tokens it was issued could ` +
-            'not be invalidated. They stay valid until they expire.',
+            'not be invalidated.',
         ],
       });
       expect(credentialStore.delete).toHaveBeenCalledWith(ACCOUNT_ID);
@@ -1395,7 +1395,7 @@ describe('EsServiceAccounts', () => {
         await expect(serviceAccounts.delete(request, ACCOUNT_ID)).resolves.toEqual({
           warnings: [
             `Service account [${ACCOUNT_ID}] was deleted, but the access tokens it was issued ` +
-              'could not be invalidated. They stay valid until they expire.',
+              'could not be invalidated.',
           ],
         });
       }

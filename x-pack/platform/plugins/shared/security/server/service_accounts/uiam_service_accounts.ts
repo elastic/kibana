@@ -11,6 +11,7 @@ import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server'
 import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
 import { getAuthenticatedPrincipal } from '@kbn/core-security-common';
 import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 import { z } from '@kbn/zod';
 
@@ -45,6 +46,7 @@ import {
 import { getDetailedErrorMessage } from '../errors';
 import { securityTelemetry } from '../otel/instrumentation';
 import {
+  assertUiamCredential,
   getUiamAuthorizationHeaderFromRequest,
   isExternalApiKey,
   type UiamServiceAccount,
@@ -351,6 +353,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     // UIAM keeps a revoked account around for a while, but it is gone as far as Kibana is
     // concerned: it cannot be exchanged, restored or listed.
     if (account.revoked) {
+      this.logger.debug(`Service account [${id}] was found, but it was revoked`);
       throw Boom.notFound(`Service account [${id}] was not found`);
     }
 
@@ -382,8 +385,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       action: 'delete a service account',
     });
 
-    // Throws for a credential UIAM would not accept, the same check `create` makes.
-    getUiamAuthorizationHeaderFromRequest(request);
+    assertUiamCredential(HTTPAuthorizationHeader.parseFromRequest(request));
 
     const user = this.getCurrentUser(request);
     if (!user) {
@@ -396,12 +398,12 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    this.logger.debug(`Attempting to delete service account ${id}`);
+    this.logger.debug(`Attempting to delete service account [${id}]`);
 
     try {
       await this.uiam.revokeServiceAccount(id);
     } catch (e) {
-      this.logger.error(`Failed to delete service account: ${getDetailedErrorMessage(e)}`);
+      this.logger.error(`Failed to delete service account [${id}]: ${getDetailedErrorMessage(e)}`);
       throw getNotFound(id, e) ?? e;
     }
 

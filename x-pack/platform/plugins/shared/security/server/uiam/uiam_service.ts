@@ -906,7 +906,7 @@ export class UiamService implements UiamServicePublic {
    */
   async revokeServiceAccount(serviceAccountId: string): Promise<void> {
     try {
-      this.#logger.debug(`Attempting to revoke service account ${serviceAccountId}.`);
+      this.#logger.debug(`Attempting to revoke service account [${serviceAccountId}].`);
 
       await UiamService.#parseUiamResponse(
         await fetch(
@@ -923,9 +923,12 @@ export class UiamService implements UiamServicePublic {
         )
       );
 
-      this.#logger.debug(`Successfully revoked service account ${serviceAccountId}.`);
+      this.#logger.debug(`Successfully revoked service account [${serviceAccountId}].`);
     } catch (err) {
-      this.#logger.error(() => `Failed to revoke service account: ${getDetailedErrorMessage(err)}`);
+      this.#logger.error(
+        () =>
+          `Failed to revoke service account [${serviceAccountId}]: ${getDetailedErrorMessage(err)}`
+      );
 
       throw err;
     }

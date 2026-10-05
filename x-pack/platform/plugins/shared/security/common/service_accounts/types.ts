@@ -68,9 +68,6 @@ export interface ListServiceAccountsResponse {
  * A workload bound to a service account, as the management routes report it. The workload type is
  * scoped to the plugin that registered it, so `pluginId` and `workloadType` name the type
  * together.
- *
- * The workload's space is left out on purpose. `read_security` is enough to list these, and it
- * says nothing about which spaces the caller may see.
  */
 export interface ServiceAccountBoundWorkload {
   pluginId: string;

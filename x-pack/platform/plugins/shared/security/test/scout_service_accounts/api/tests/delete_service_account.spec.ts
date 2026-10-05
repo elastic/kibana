@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { setTimeout } from 'timers/promises';
+
 import type { ApiClientFixture, EsClient } from '@kbn/scout';
 import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -17,6 +19,11 @@ import {
 
 const SERVICE_ACCOUNT_ENDPOINT = 'internal/security/service_account';
 const HEADERS = { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'kibana' };
+/**
+ * How much later than a workload's binding its account may have been created and still run it,
+ * mirroring `BINDING_CLOCK_SKEW_TOLERANCE_MS` on the server.
+ */
+const CLOCK_SKEW_TOLERANCE_MS = 60_000;
 /** A token minted straight through Elasticsearch, which Kibana did not create. */
 const OPERATOR_TOKEN_NAME = 'operator-token';
 
@@ -287,10 +294,14 @@ apiTest.describe(
     apiTest(
       'does not let an account created again under the same name run the old one’s workloads',
       async ({ apiClient }) => {
+        apiTest.setTimeout(CLOCK_SKEW_TOLERANCE_MS + 60_000);
         const account = await createAccount(apiClient);
         const workloadId = uniqueName();
         await bindWorkload(apiClient, workloadId, account);
         expect(await runWorkload(apiClient, workloadId)).toHaveStatusCode(200);
+
+        // An account created again within the tolerance of a bind still inherits the binding.
+        await setTimeout(CLOCK_SKEW_TOLERANCE_MS + 1_000);
 
         const forced = await apiClient.delete(`${accountPath(idOf(account))}?force=true`, {
           headers: adminHeaders,
