@@ -200,7 +200,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'significant-events.eventCreated',
-    schemaHash: 'b2a0b53f92992ef70e61a58d6b708092a98d85d9478694914bc00692bcb69123',
+    schemaHash: '090e3242d2363bc4171d8136809cbf578ca1002e1e2cde81e4f354b4ba9dbb6e',
   },
   {
     id: 'significant-events.eventStatusChanged',
