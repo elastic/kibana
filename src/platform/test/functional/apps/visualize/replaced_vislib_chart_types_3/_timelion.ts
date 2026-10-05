@@ -263,12 +263,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const typeExpressionTriggeringSuggestions = async (expression: string) => {
             const prefix = expression.slice(0, -1);
             const triggerCharacter = expression.slice(-1);
-            await monacoEditor.typeCodeEditorValue(prefix, 'timelionCodeEditor');
+            await monacoEditor.setCodeEditorValue(prefix);
+            await monacoEditor.setCodeEditorCursorAfterText(prefix);
+            await monacoEditor.typeCodeEditorValue(triggerCharacter, 'timelionCodeEditor');
             await retry.try(async () => {
               const value = await monacoEditor.getCodeEditorValue(0);
-              expect(value.includes(prefix)).to.eql(true);
+              expect(value.includes(expression)).to.eql(true);
             });
-            await monacoEditor.typeCodeEditorValue(triggerCharacter, 'timelionCodeEditor');
           };
 
           it('should show index pattern suggestions for index argument', async () => {

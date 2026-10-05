@@ -87,6 +87,31 @@ export class MonacoEditorService extends FtrService {
     );
   }
 
+  public async setCodeEditorCursorAfterText(text: string, nthIndex: number = 0) {
+    await this.browser.execute(
+      (editorIndex, searchText) => {
+        const editorApi = window.MonacoEnvironment?.monaco?.editor;
+        const model = editorApi?.getModels()[editorIndex];
+        const editor = editorApi
+          ?.getEditors()
+          .find((candidate) => candidate.getModel()?.uri.toString() === model?.uri.toString());
+        if (!editor || !model) {
+          throw new Error('No Monaco editor found');
+        }
+
+        const offset = model.getValue().indexOf(searchText);
+        if (offset === -1) {
+          throw new Error(`Text "${searchText}" not found in Monaco editor`);
+        }
+
+        editor.setPosition(model.getPositionAt(offset + searchText.length));
+        editor.focus();
+      },
+      nthIndex,
+      text
+    );
+  }
+
   public async setScrollTop(scrollTop: number, nthIndex: number = 0) {
     await this.browser.execute(
       (editorIndex, scrollAmount) => {
