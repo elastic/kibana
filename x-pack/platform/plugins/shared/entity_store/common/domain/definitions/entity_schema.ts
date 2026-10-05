@@ -186,6 +186,27 @@ const creatableFromSingleDocumentSchema = z.union([
 ]);
 export type CreatableFromSingleDocument = z.infer<typeof creatableFromSingleDocumentSchema>;
 
+const MAX_MANAGED_BY_STRING_LENGTH = 256;
+
+/**
+ * Who manages a definition. More fields may be added to a kind later.
+ * - `plugin`: a Kibana plugin registering in code at setup; `id` is its plugin id.
+ * - `integration`: installed by a Fleet integration package; `package` is the package name.
+ * - `user`: created through the API or UI; `id` is the Kibana user profile uid when known.
+ */
+export type EntityDefinitionManagedBy = z.infer<typeof EntityDefinitionManagedBy>;
+export const EntityDefinitionManagedBy = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('plugin'), id: z.string().max(MAX_MANAGED_BY_STRING_LENGTH) }),
+  z.object({
+    kind: z.literal('integration'),
+    package: z.string().max(MAX_MANAGED_BY_STRING_LENGTH),
+  }),
+  z.object({
+    kind: z.literal('user'),
+    id: z.string().max(MAX_MANAGED_BY_STRING_LENGTH).optional(),
+  }),
+]);
+
 export const entitySchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -214,6 +235,8 @@ export const entitySchema = z.object({
   creatableFromSingleDocument: z.optional(creatableFromSingleDocumentSchema),
   // Omission means entities of this type are not materialised (not extracted).
   materialization: z.optional(EntityMaterialization),
+  // Who manages the definition. Optional here; the registry requires it.
+  managedBy: z.optional(EntityDefinitionManagedBy),
 });
 
 export type EntityField = z.infer<typeof fieldSchema>; // entities fields

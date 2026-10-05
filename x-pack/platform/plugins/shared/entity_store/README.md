@@ -118,6 +118,7 @@ public setup(core: CoreSetup, { entityStore }: MyPluginSetupDeps) {
     identityField: { singleField: 'kubernetes.pod.uid' },
     indexPatterns: ['logs-*', 'metrics-*'],
     fields: [],
+    managedBy: { kind: 'plugin', id: 'myPlugin' },
   });
   if (!result.ok) {
     // result.reason explains the rejection; it has already been logged.
@@ -125,15 +126,26 @@ public setup(core: CoreSetup, { entityStore }: MyPluginSetupDeps) {
 }
 ```
 
+- Every definition must carry `managedBy: { kind: 'plugin', id: <your plugin id> }`. Other kinds are rejected at setup.
 - Registration is only possible during setup. The registry is frozen when the Entity Store starts, so later calls are logged and ignored.
-- A rejected definition (invalid schema, invalid or duplicate type name) is logged and skipped. Registration never throws, and Kibana keeps starting.
+- A rejected definition (invalid schema, missing or non-plugin `managedBy`, invalid or duplicate type name) is logged and skipped. Registration never throws, and Kibana keeps starting.
 - Registered definitions are deep-frozen in place (the registry holds the object you pass, not a copy), so neither the registry nor the caller can modify them afterwards. Unknown keys, including `id`, are rejected.
 
 ### Type names
 
 - Lowercase letters, digits and the separators `.`, `_` and `-`, starting with a letter (`ENTITY_DEFINITION_TYPE_PATTERN`). Separators cannot lead, trail or repeat. Examples: `k8s.pod`, `aws_s3-bucket`.
 - At most 64 characters.
-- Must be unique. `user`, `host`, `service` and `generic` are reserved for the built-in definitions, which the Entity Store registers itself at setup.
+- Must be unique. Uniqueness is the only name protection; there are no reserved names. The built-ins (`user`, `host`, `service`, `generic`) are registered by the Entity Store during its own setup, before dependent plugins can register, so those names are already taken.
+
+### Managed by
+
+Every registered definition has a `managedBy` field saying who manages it:
+
+- `{ kind: 'plugin', id }`: a Kibana plugin registering in code at setup; `id` is its plugin id.
+- `{ kind: 'integration', package }`: installed by a Fleet integration package.
+- `{ kind: 'user', id? }`: created through the API or UI; `id` is the Kibana user profile uid when known.
+
+Only `plugin` can be registered today. The four built-ins are managed by the `entityStore` plugin (`{ kind: 'plugin', id: 'entityStore' }`). `managedBy` is returned on every definition read from the registry, so readers can tell who manages it.
 
 ### Materialization
 
@@ -146,6 +158,6 @@ The start contract exposes two ways to get an `EntityDefinitionsClient` (`get(ty
 - `getEntityDefinitionsClient(request)` for request-scoped work. The space is derived from the request.
 - `getEntityDefinitionsClientForSpace(spaceId)` for background work without a request.
 
-`list()` returns the built-ins first (`user`, `host`, `service`, `generic`), then other definitions in registration order. `listMaterialized()` applies the same order to materialized definitions only.
+`list()` returns definitions in registration order. The built-ins (`user`, `host`, `service`, `generic`) come first because the Entity Store registers them during its own setup. `listMaterialized()` applies the same order to materialized definitions only.
 
 Reading definitions requires no Kibana privilege today, because every definition is plugin code. Authorisation will apply once definitions can be stored and managed outside plugin code; the request parameter exists so that can be added without changing callers.

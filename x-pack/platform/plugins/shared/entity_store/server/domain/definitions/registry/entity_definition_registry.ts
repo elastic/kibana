@@ -8,8 +8,8 @@
 import type { Logger } from '@kbn/logging';
 import { z } from '@kbn/zod/v4';
 import {
-  ALL_ENTITY_TYPES,
   entitySchema,
+  EntityDefinitionManagedBy,
   type EntityDefinitionType,
   type EntityDefinitionWithoutId,
 } from '../../../../common/domain/definitions/entity_schema';
@@ -22,12 +22,10 @@ import {
 export const ENTITY_DEFINITION_TYPE_PATTERN = /^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/;
 export const ENTITY_DEFINITION_TYPE_MAX_LENGTH = 64;
 
-/** Built-in names (`user`, `host`, `service`, `generic`) in listing order. Only `registerBuiltIn` may use them. */
-const RESERVED_TYPES: readonly EntityDefinitionType[] = ALL_ENTITY_TYPES;
-
-/** A definition as accepted by the registry: the built-in shape with a wider type name. */
-export type RegistrableEntityDefinition = Omit<EntityDefinitionWithoutId, 'type'> & {
+/** A definition as accepted by the registry: the built-in shape with a wider type name and a required `managedBy`. */
+export type RegistrableEntityDefinition = Omit<EntityDefinitionWithoutId, 'type' | 'managedBy'> & {
   type: EntityDefinitionType;
+  managedBy: EntityDefinitionManagedBy;
 };
 
 /** Registered definitions are deep-frozen, so this shallow `Readonly` is backed at runtime. */
@@ -40,19 +38,13 @@ export interface RegistrationRejection {
   reason: string;
 }
 
-type Provenance = 'builtIn' | 'other';
-
-interface RegistryEntry {
-  definition: RegisteredEntityDefinition;
-  provenance: Provenance;
-}
-
 // Strict so unknown keys (notably a stale `id` from a full definition) are rejected, not kept.
 const registrableEntityDefinitionSchema = entitySchema
   .omit({ id: true })
   .extend({
-    // Any string here; the name pattern and reservation are checked separately.
+    // Any string here; the name pattern is checked separately.
     type: z.string(),
+    managedBy: EntityDefinitionManagedBy,
   })
   .strict();
 
@@ -78,23 +70,32 @@ const deepFreeze = <T>(value: T): T => {
 
 /**
  * In-memory registry of entity definitions. Validates on registration, logs and records rejections
- * instead of throwing. It holds the passed-in objects themselves (built-ins stay shared with the
+ * instead of throwing. Only plugin-managed definitions are accepted at setup, and type name
+ * uniqueness is the only name protection. `list()` returns definitions in registration order; the
+ * entity store registers its built-ins during its own setup, before dependent plugins can, so they
+ * come first. It holds the passed-in objects themselves (built-ins stay shared with the
  * static lookup) and deep-freezes them in place at registration, so once registered nothing,
  * including the owner, can modify a definition. Reads return those same references.
  */
 export class EntityDefinitionRegistry {
-  private readonly entries = new Map<EntityDefinitionType, RegistryEntry>();
+  private readonly entries = new Map<EntityDefinitionType, RegisteredEntityDefinition>();
   private readonly rejections: RegistrationRejection[] = [];
   private frozen = false;
 
   constructor(private readonly logger: Logger) {}
 
   public register(definition: RegistrableEntityDefinition): RegisterResult {
-    return this.add(definition, 'other');
-  }
+    if (!isObject(definition)) {
+      return this.reject(describeType(definition), 'definition is not an object');
+    }
 
-  public registerBuiltIn(definition: RegistrableEntityDefinition): RegisterResult {
-    return this.add(definition, 'builtIn');
+    const reason = this.validate(definition);
+    if (reason) {
+      return this.reject(describeType(definition.type), reason);
+    }
+
+    this.entries.set(definition.type, deepFreeze(definition));
+    return { ok: true };
   }
 
   public freeze(): void {
@@ -102,18 +103,11 @@ export class EntityDefinitionRegistry {
   }
 
   public get(type: EntityDefinitionType): RegisteredEntityDefinition | undefined {
-    return this.entries.get(type)?.definition;
+    return this.entries.get(type);
   }
 
   public list(): RegisteredEntityDefinition[] {
-    const entries = [...this.entries.values()];
-    const builtIns = RESERVED_TYPES.flatMap((type) => {
-      const entry = this.entries.get(type);
-      return entry?.provenance === 'builtIn' ? [entry] : [];
-    });
-    const others = entries.filter(({ provenance }) => provenance === 'other');
-
-    return [...builtIns, ...others].map(({ definition }) => definition);
+    return [...this.entries.values()];
   }
 
   public listMaterialized(): RegisteredEntityDefinition[] {
@@ -124,27 +118,7 @@ export class EntityDefinitionRegistry {
     return [...this.rejections];
   }
 
-  private add(definition: RegistrableEntityDefinition, provenance: Provenance): RegisterResult {
-    if (!isObject(definition)) {
-      return this.reject(describeType(definition), 'definition is not an object');
-    }
-
-    const reason = this.validate(definition, provenance);
-    if (reason) {
-      return this.reject(describeType(definition.type), reason);
-    }
-
-    this.entries.set(definition.type, {
-      definition: deepFreeze(definition),
-      provenance,
-    });
-    return { ok: true };
-  }
-
-  private validate(
-    definition: RegistrableEntityDefinition,
-    provenance: Provenance
-  ): string | undefined {
+  private validate(definition: RegistrableEntityDefinition): string | undefined {
     if (this.frozen) {
       return 'registry is frozen, registrations are no longer accepted';
     }
@@ -154,19 +128,15 @@ export class EntityDefinitionRegistry {
       return `definition failed schema validation: ${formatSchemaIssues(parsed.error)}`;
     }
 
-    const { type } = parsed.data;
+    const { type, managedBy } = parsed.data;
+    if (managedBy.kind !== 'plugin') {
+      return 'only plugin-managed definitions can be registered at setup';
+    }
     if (type.length > ENTITY_DEFINITION_TYPE_MAX_LENGTH) {
       return `type name exceeds the maximum length of ${ENTITY_DEFINITION_TYPE_MAX_LENGTH}`;
     }
     if (!ENTITY_DEFINITION_TYPE_PATTERN.test(type)) {
       return `type name does not match pattern ${ENTITY_DEFINITION_TYPE_PATTERN}`;
-    }
-    const isReserved = RESERVED_TYPES.includes(type);
-    if (provenance === 'builtIn' && !isReserved) {
-      return 'type name is not a built-in';
-    }
-    if (provenance !== 'builtIn' && isReserved) {
-      return 'type name is reserved for built-in definitions';
     }
     if (this.entries.has(type)) {
       return 'type name is already registered';

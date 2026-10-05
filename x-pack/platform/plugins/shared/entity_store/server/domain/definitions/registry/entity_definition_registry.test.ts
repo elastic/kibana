@@ -31,6 +31,7 @@ const makeDefinition = (
   ],
   identityField: { singleField: `${type}.name` },
   indexPatterns: ['logs-*'],
+  managedBy: { kind: 'plugin', id: 'testPlugin' },
   ...overrides,
 });
 
@@ -51,6 +52,7 @@ describe('EntityDefinitionRegistry', () => {
 
     expect(result).toEqual({ ok: true });
     expect(registry.get('k8s.pod')?.name).toBe(`Test 'k8s.pod' definition`);
+    expect(registry.get('k8s.pod')?.managedBy).toEqual({ kind: 'plugin', id: 'testPlugin' });
     expect(registry.rejected()).toEqual([]);
     expect(logger.error).not.toHaveBeenCalled();
   });
@@ -125,37 +127,40 @@ describe('EntityDefinitionRegistry', () => {
       ]);
     });
 
-    it.each(['user', 'host', 'service', 'generic'])(
-      'reserves built-in name %p for registerBuiltIn',
-      (type) => {
-        expect(registry.register(makeDefinition(type))).toEqual({
-          ok: false,
-          reason: 'type name is reserved for built-in definitions',
-        });
-        expectRejected(type, /reserved for built-in/);
-
-        expect(registry.registerBuiltIn(makeDefinition(type))).toEqual({ ok: true });
-        expect(registry.get(type)).toBeDefined();
-      }
-    );
-
-    it('rejects a duplicate built-in registration', () => {
-      registry.registerBuiltIn(makeDefinition('host'));
-
-      expect(registry.registerBuiltIn(makeDefinition('host'))).toEqual({
+    it.each([
+      [{ kind: 'integration', package: 'aws' }],
+      [{ kind: 'user', id: 'u_123' }],
+      [{ kind: 'user' }],
+    ] as const)('rejects a non-plugin managedBy %p at setup', (managedBy) => {
+      expect(registry.register(makeDefinition('not_plugin', { managedBy }))).toEqual({
         ok: false,
-        reason: 'type name is already registered',
+        reason: 'only plugin-managed definitions can be registered at setup',
       });
-      expect(types(registry.list())).toEqual(['host']);
-      expect(logger.error).toHaveBeenCalledTimes(1);
+      expectRejected('not_plugin', /only plugin-managed definitions/);
     });
 
-    it('rejects registerBuiltIn for a non-built-in type name', () => {
-      expect(registry.registerBuiltIn(makeDefinition('k8s.pod'))).toEqual({
-        ok: false,
-        reason: 'type name is not a built-in',
+    it('rejects a definition missing managedBy', () => {
+      const withoutManagedBy: Partial<RegistrableEntityDefinition> = makeDefinition('unmanaged');
+      delete withoutManagedBy.managedBy;
+
+      const result = registry.register(withoutManagedBy as RegistrableEntityDefinition);
+
+      expect(result.ok).toBe(false);
+      expectRejected('unmanaged', /failed schema validation: managedBy/);
+    });
+
+    it('rejects an unknown managedBy kind and over-long managedBy strings', () => {
+      const unknownKind = makeDefinition('unknown_kind', {
+        managedBy: { kind: 'space' } as unknown as RegistrableEntityDefinition['managedBy'],
       });
-      expectRejected('k8s.pod', /not a built-in/);
+      const longId = makeDefinition('long_id', {
+        managedBy: { kind: 'plugin', id: 'a'.repeat(257) },
+      });
+
+      expect(registry.register(unknownKind).ok).toBe(false);
+      expectRejected('unknown_kind', /failed schema validation: managedBy/);
+      expect(registry.register(longId).ok).toBe(false);
+      expectRejected('long_id', /failed schema validation: managedBy\.id/);
     });
 
     it.each([
@@ -166,7 +171,7 @@ describe('EntityDefinitionRegistry', () => {
       const invalid = input as unknown as RegistrableEntityDefinition;
 
       expect(() => registry.register(invalid)).not.toThrow();
-      expect(registry.registerBuiltIn(invalid)).toEqual({
+      expect(registry.register(invalid)).toEqual({
         ok: false,
         reason: 'definition is not an object',
       });
@@ -189,56 +194,42 @@ describe('EntityDefinitionRegistry', () => {
   });
 
   describe('freeze', () => {
-    it('rejects register and registerBuiltIn after freezing', () => {
+    it('rejects registrations after freezing', () => {
       registry.register(makeDefinition('before'));
       registry.freeze();
 
       expect(registry.register(makeDefinition('after')).ok).toBe(false);
-      expect(registry.registerBuiltIn(makeDefinition('host')).ok).toBe(false);
 
       expect(types(registry.list())).toEqual(['before']);
       expect(registry.rejected()).toEqual([
         { type: 'after', reason: expect.stringContaining('frozen') },
-        { type: 'host', reason: expect.stringContaining('frozen') },
       ]);
-      expect(logger.error).toHaveBeenCalledTimes(2);
+      expect(logger.error).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('ordering', () => {
-    it('lists built-ins first in fixed order, then others in registration order', () => {
-      registry.register(makeDefinition('zeta'));
-      registry.registerBuiltIn(makeDefinition('generic'));
-      registry.register(makeDefinition('alpha'));
-      registry.registerBuiltIn(makeDefinition('host'));
-      registry.registerBuiltIn(makeDefinition('service'));
-      registry.register(makeDefinition('middle'));
-      registry.registerBuiltIn(makeDefinition('user'));
+    it('lists definitions in registration order', () => {
+      ['zeta', 'generic', 'alpha', 'host', 'middle'].forEach((type) =>
+        registry.register(makeDefinition(type))
+      );
 
-      expect(types(registry.list())).toEqual([
-        'user',
-        'host',
-        'service',
-        'generic',
-        'zeta',
-        'alpha',
-        'middle',
-      ]);
+      expect(types(registry.list())).toEqual(['zeta', 'generic', 'alpha', 'host', 'middle']);
     });
 
     it('filters listMaterialized to extracted definitions, preserving order', () => {
       registry.register(makeDefinition('not_extracted'));
       registry.register(makeDefinition('extracted_custom', { materialization: 'extracted' }));
-      registry.registerBuiltIn(makeDefinition('service'));
-      registry.registerBuiltIn(makeDefinition('host', { materialization: 'extracted' }));
+      registry.register(makeDefinition('service'));
+      registry.register(makeDefinition('host', { materialization: 'extracted' }));
 
       expect(types(registry.list())).toEqual([
-        'host',
-        'service',
         'not_extracted',
         'extracted_custom',
+        'service',
+        'host',
       ]);
-      expect(types(registry.listMaterialized())).toEqual(['host', 'extracted_custom']);
+      expect(types(registry.listMaterialized())).toEqual(['extracted_custom', 'host']);
     });
 
     it('treats a definition without materialization as not extracted', () => {
@@ -314,21 +305,46 @@ describe('EntityDefinitionRegistry', () => {
   });
 
   describe('built-in definitions', () => {
-    it('registers all four built-ins and lists them as materialized', () => {
-      const builtIns = [
-        hostEntityDefinition,
-        genericEntityDefinition,
-        userEntityDefinition,
-        serviceEntityDefinition,
-      ];
+    const builtIns = [
+      userEntityDefinition,
+      hostEntityDefinition,
+      serviceEntityDefinition,
+      genericEntityDefinition,
+    ];
 
-      const results = builtIns.map((definition) => registry.registerBuiltIn(definition));
+    it('registers all four built-ins and lists them as materialized', () => {
+      const results = builtIns.map((definition) => registry.register(definition));
 
       expect(results).toEqual(builtIns.map(() => ({ ok: true })));
       expect(registry.rejected()).toEqual([]);
       expect(types(registry.listMaterialized())).toEqual(['user', 'host', 'service', 'generic']);
       expect(registry.get('host')).toBe(hostEntityDefinition);
       expect(Object.isFrozen(hostEntityDefinition)).toBe(true);
+    });
+
+    it('lists the built-ins first when they are registered first', () => {
+      builtIns.forEach((definition) => registry.register(definition));
+      registry.register(makeDefinition('k8s.pod'));
+
+      expect(types(registry.list())).toEqual(['user', 'host', 'service', 'generic', 'k8s.pod']);
+    });
+
+    it('returns managedBy on each built-in', () => {
+      builtIns.forEach((definition) => registry.register(definition));
+
+      builtIns.forEach(({ type }) => {
+        expect(registry.get(type)?.managedBy).toEqual({ kind: 'plugin', id: 'entityStore' });
+      });
+    });
+
+    it('rejects a second registration of a built-in name', () => {
+      registry.register(hostEntityDefinition);
+
+      expect(registry.register(makeDefinition('host'))).toEqual({
+        ok: false,
+        reason: 'type name is already registered',
+      });
+      expect(registry.get('host')).toBe(hostEntityDefinition);
     });
   });
 });

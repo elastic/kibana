@@ -145,8 +145,9 @@ export interface EntityStoreSetupContract {
   /**
    * Registers an entity definition. Registration is only possible during plugin setup; calls
    * after setup are logged and ignored. Type names must match `ENTITY_DEFINITION_TYPE_PATTERN`
-   * (at most 64 characters, and not one of the built-in names). A rejected definition is logged
-   * and skipped, and Kibana keeps starting.
+   * (at most 64 characters) and be unique. The definition must carry
+   * `managedBy: { kind: 'plugin', id: <your plugin id> }`. A rejected definition is logged and
+   * skipped, and Kibana keeps starting.
    */
   registerEntityDefinition: (definition: RegistrableEntityDefinition) => RegisterResult;
 }

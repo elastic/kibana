@@ -18,6 +18,7 @@ const makeDefinition = (
   fields: [],
   identityField: { singleField: `${type}.name` },
   indexPatterns: ['logs-*'],
+  managedBy: { kind: 'plugin', id: 'testPlugin' },
   ...(materialization ? { materialization } : {}),
 });
 

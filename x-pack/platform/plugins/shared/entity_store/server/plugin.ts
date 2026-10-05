@@ -210,7 +210,7 @@ export class EntityStorePlugin
       genericEntityDefinition,
     ];
     builtIns.forEach((definition) => {
-      const result = this.entityDefinitionRegistry.registerBuiltIn(definition);
+      const result = this.entityDefinitionRegistry.register(definition);
       if (!result.ok) {
         this.logger.error(
           `Failed to register built-in entity definition '${definition.type}': ${result.reason}`

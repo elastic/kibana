@@ -7,6 +7,7 @@
 
 import { newestValue } from './field_retention_operations';
 import type { EntityDefinitionWithoutId } from './entity_schema';
+import { PLUGIN_ID } from '../../plugin_id';
 import {
   ENTITY_SOURCE_FIELD_EVALUATION,
   getCommonFieldDescriptions,
@@ -21,6 +22,7 @@ import {
 // strings mint entities.
 export const genericEntityDefinition = {
   type: 'generic',
+  managedBy: { kind: 'plugin', id: PLUGIN_ID },
   name: `Security 'generic' Entity Store Definition`,
   materialization: 'extracted',
   identityField: { singleField: 'entity.id', skipTypePrepend: true },

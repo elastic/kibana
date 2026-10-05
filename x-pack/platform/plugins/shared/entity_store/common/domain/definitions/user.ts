@@ -13,7 +13,8 @@ import {
   getEntityFieldsDescriptions,
   isNotEmptyCondition,
 } from './common_fields';
-import type { EntityDefinitionWithoutId } from './entity_schema';
+import type { EntityDefinitionManagedBy, EntityDefinitionWithoutId } from './entity_schema';
+import { PLUGIN_ID } from '../../plugin_id';
 import {
   ENTITY_CONFIDENCE,
   LOCAL_NAMESPACE_EXCLUDED_USER_NAMES,
@@ -35,8 +36,11 @@ const localNamespaceGate: Condition = {
   ],
 };
 
-export const userEntityDefinition: EntityDefinitionWithoutId = {
+export const userEntityDefinition: EntityDefinitionWithoutId & {
+  managedBy: EntityDefinitionManagedBy;
+} = {
   type: 'user',
+  managedBy: { kind: 'plugin', id: PLUGIN_ID },
   name: `Security 'user' Entity Store Definition`,
   materialization: 'extracted',
   fieldEvaluations: [ENTITY_SOURCE_FIELD_EVALUATION],

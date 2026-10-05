@@ -29,6 +29,7 @@ const makeDefinition = (type: string): RegistrableEntityDefinition => ({
   fields: [],
   identityField: { singleField: `${type}.name` },
   indexPatterns: ['logs-*'],
+  managedBy: { kind: 'plugin', id: 'testPlugin' },
 });
 
 const types = (definitions: ReadonlyArray<{ type: string }>): string[] =>
@@ -77,6 +78,16 @@ describe('EntityStorePlugin entity definition registry', () => {
     expect(loggingSystemMock.collect(initializerContext.logger).error).toEqual([]);
   });
 
+  it('marks the built-in definitions as managed by the entity store plugin', async () => {
+    const client = startPlugin().getEntityDefinitionsClientForSpace('default');
+
+    const definitions = await client.list();
+
+    expect(definitions.map(({ managedBy }) => managedBy)).toEqual(
+      BUILT_IN_TYPES.map(() => ({ kind: 'plugin', id: 'entityStore' }))
+    );
+  });
+
   it('accepts registrations during setup', async () => {
     expect(setupContract.registerEntityDefinition(makeDefinition('k8s.pod'))).toEqual({
       ok: true,
@@ -95,7 +106,7 @@ describe('EntityStorePlugin entity definition registry', () => {
       result = setupContract.registerEntityDefinition(makeDefinition('host'));
     }).not.toThrow();
 
-    expect(result).toEqual({ ok: false, reason: 'type name is reserved for built-in definitions' });
+    expect(result).toEqual({ ok: false, reason: 'type name is already registered' });
     expect(loggingSystemMock.collect(initializerContext.logger).error).toEqual([
       [expect.stringContaining(`Rejected entity definition 'host'`)],
     ]);
