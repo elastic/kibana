@@ -100,7 +100,11 @@ describe('getUnprocessedOtelErrorsByService', () => {
   it('respects maxRows when provided', async () => {
     const hits = Array.from({ length: 10 }, (_, i) => makeRawHit({ _id: `doc-${i}` }));
     const logsClient = makeLogsClient(hits);
-    const result = await getUnprocessedOtelErrorsByService({ logsClient, ...BASE_ARGS, maxRows: 5 });
+    const result = await getUnprocessedOtelErrorsByService({
+      logsClient,
+      ...BASE_ARGS,
+      maxRows: 5,
+    });
 
     expect(result.maxCountExceeded).toBe(true);
     expect(result.unprocessedOtelErrors).toHaveLength(5);

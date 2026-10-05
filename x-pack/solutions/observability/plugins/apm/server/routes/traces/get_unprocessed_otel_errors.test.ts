@@ -171,7 +171,13 @@ describe('getUnprocessedOtelErrors', () => {
   describe('query construction', () => {
     it('includes an exists filter on span.id when docId is absent', async () => {
       const { logsClient, getLastSearchArg } = captureLogsClientMock();
-      await getUnprocessedOtelErrors({ logsClient, logger, traceId: 'trace-1', start: 0, end: 1000 });
+      await getUnprocessedOtelErrors({
+        logsClient,
+        logger,
+        traceId: 'trace-1',
+        start: 0,
+        end: 1000,
+      });
 
       const searchArg = getLastSearchArg() as { query: { bool: { filter: unknown[] } } };
       const filters = searchArg.query.bool.filter;
@@ -197,7 +203,10 @@ describe('getUnprocessedOtelErrors', () => {
       const filters = searchArg.query.bool.filter;
       const termFilter = filters.find(
         (f): f is { term: Record<string, unknown> } =>
-          typeof f === 'object' && f !== null && 'term' in f && SPAN_ID in (f as { term: Record<string, unknown> }).term
+          typeof f === 'object' &&
+          f !== null &&
+          'term' in f &&
+          SPAN_ID in (f as { term: Record<string, unknown> }).term
       );
       expect(termFilter?.term?.[SPAN_ID]).toBe('span-abc');
     });
