@@ -42,6 +42,7 @@ export {
   ALERTING_V2_INTERNAL_RULE_MATCH_API_PATH,
   ALERTING_V2_INTERNAL_CHANGE_HISTORY_RULES_API_PATH,
   ALERTING_V2_ACTION_POLICY_API_PATH,
+  ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH,
   ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH,
   ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH,
   ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH,
@@ -62,7 +63,7 @@ export interface AlertEpisodesListLinkOptions {
      */
     groupingValues?: Record<string, string | null>;
   };
-  /** Time range embedded in `_a.episodesList.{timeFrom,timeTo}`. */
+  /** Time range embedded in `_a.alertsList.{timeFrom,timeTo}`. */
   timeRange?: { from: string; to: string };
 }
 
@@ -81,23 +82,23 @@ export const paths = {
     `${ALERTING_V2_ACTION_POLICIES_BASE_PATH}/edit/${encodeURIComponent(id)}`,
   actionPolicyList: ALERTING_V2_ACTION_POLICIES_BASE_PATH,
   /** Plain base path — safe for `<Route path={...}>` definitions. */
-  alertEpisodesList: ALERTING_V2_EPISODES_BASE_PATH,
+  alertsList: ALERTING_V2_EPISODES_BASE_PATH,
   /**
-   * Builds a deep-link URL to the episodes list, optionally pre-seeding
-   * filters and time range via `_a.episodesList.*`.
+   * Builds a deep-link URL to the alerts list, optionally pre-seeding
+   * filters and time range via `_a.alertsList.*`.
    *
    * Shape MUST match what `readEpisodesListAppStateFromUrlStorage` reads:
-   * flat fields inside `_a.episodesList` (`ruleId`, `groupHash`,
+   * flat fields inside `_a.alertsList` (`ruleId`, `groupHash`,
    * `groupingValues`, `timeFrom`, `timeTo`). Time is NOT put in `_g` —
-   * the episodes list reads time from `_a.episodesList.{timeFrom,timeTo}`
+   * the alerts list reads time from `_a.alertsList.{timeFrom,timeTo}`
    * so that no Kibana global-time sync fires on mount and pushes a spurious
    * history entry.
    */
-  alertEpisodesListHref: (opts?: AlertEpisodesListLinkOptions): string => {
+  alertsListHref: (opts?: AlertEpisodesListLinkOptions): string => {
     if (!opts) return ALERTING_V2_EPISODES_BASE_PATH;
 
     const { filters, timeRange } = opts;
-    const episodesList = Object.fromEntries(
+    const alertsList = Object.fromEntries(
       Object.entries({
         ruleId: filters?.ruleId,
         groupHash: filters?.groupHash,
@@ -111,14 +112,14 @@ export const paths = {
       }).filter(([_key, value]) => value != null)
     );
 
-    if (Object.keys(episodesList).length === 0) return ALERTING_V2_EPISODES_BASE_PATH;
+    if (Object.keys(alertsList).length === 0) return ALERTING_V2_EPISODES_BASE_PATH;
 
     const search = new URLSearchParams();
-    search.set('_a', encodeRison({ episodesList }));
+    search.set('_a', encodeRison({ alertsList }));
     return `${ALERTING_V2_EPISODES_BASE_PATH}?${search.toString()}`;
   },
-  alertEpisodeDetails: (episodeId: string) =>
-    `${ALERTING_V2_EPISODES_BASE_PATH}/${encodeURIComponent(episodeId)}`,
+  alertDetails: (alertId: string) =>
+    `${ALERTING_V2_EPISODES_BASE_PATH}/${encodeURIComponent(alertId)}`,
   executionHistoryList: ALERTING_V2_EXECUTION_HISTORY_BASE_PATH,
   ruleLibraryList: ALERTING_V2_RULE_LIBRARY_BASE_PATH,
 };

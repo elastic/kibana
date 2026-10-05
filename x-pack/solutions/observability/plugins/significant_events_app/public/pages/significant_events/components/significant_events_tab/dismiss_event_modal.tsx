@@ -26,30 +26,30 @@ import { MAX_ASSESSMENT_NOTE_LENGTH } from '@kbn/significant-events-schema';
 import { useUpdateSignificantEvent } from '../../../../hooks/use_update_significant_event';
 
 const MODAL_TITLE = i18n.translate(
-  'xpack.significantEventsApp.significantEventsTab.dismissModal.title',
-  { defaultMessage: 'Dismiss significant event' }
+  'xpack.significantEventsApp.significantEventsTab.deactivateModal.title',
+  { defaultMessage: 'Mark significant event inactive' }
 );
 
 const MODAL_DESCRIPTION = i18n.translate(
-  'xpack.significantEventsApp.significantEventsTab.dismissModal.description',
+  'xpack.significantEventsApp.significantEventsTab.deactivateModal.description',
   {
     defaultMessage:
-      'Dismiss this event as known noise. A reason is required so Discovery can skip future recurrences of the same detection rules.',
+      'Mark this event inactive. Optionally add an assessment note to record the operator rationale.',
   }
 );
 
 const REASON_LABEL = i18n.translate(
-  'xpack.significantEventsApp.significantEventsTab.dismissModal.reasonLabel',
-  { defaultMessage: 'Reason for dismissal' }
+  'xpack.significantEventsApp.significantEventsTab.deactivateModal.reasonLabel',
+  { defaultMessage: 'Assessment note (optional)' }
 );
 
 const CONFIRM_BUTTON_LABEL = i18n.translate(
-  'xpack.significantEventsApp.significantEventsTab.dismissModal.confirmButton',
-  { defaultMessage: 'Dismiss' }
+  'xpack.significantEventsApp.significantEventsTab.deactivateModal.confirmButton',
+  { defaultMessage: 'Mark inactive' }
 );
 
 const CANCEL_BUTTON_LABEL = i18n.translate(
-  'xpack.significantEventsApp.significantEventsTab.dismissModal.cancelButton',
+  'xpack.significantEventsApp.significantEventsTab.deactivateModal.cancelButton',
   { defaultMessage: 'Cancel' }
 );
 
@@ -69,13 +69,10 @@ export const DismissEventModal = ({ eventId, onClose, onSuccess }: DismissEventM
   const trimmedReason = assessmentNote.trim();
 
   const handleConfirm = () => {
-    if (!trimmedReason) {
-      return;
-    }
     updateEventStatus({
       eventId,
-      status: 'dismissed',
-      assessmentNote: trimmedReason,
+      status: 'inactive',
+      assessmentNote: trimmedReason || undefined,
     });
   };
 
@@ -122,7 +119,7 @@ export const DismissEventModal = ({ eventId, onClose, onSuccess }: DismissEventM
           fill
           onClick={handleConfirm}
           isLoading={isUpdating}
-          isDisabled={isUpdating || !trimmedReason}
+          isDisabled={isUpdating}
           data-test-subj="sigEventDismissConfirmButton"
         >
           {CONFIRM_BUTTON_LABEL}

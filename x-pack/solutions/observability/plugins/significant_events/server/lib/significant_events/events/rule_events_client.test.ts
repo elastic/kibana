@@ -110,9 +110,8 @@ describe('RuleEventsClient', () => {
         {
           ...dataDoc,
           '@timestamp': '2026-01-02T00:00:00.000Z',
-          event_uuid: 'group-hash-1',
-          status: 'open',
-          severity: '40-medium',
+          status: 'active',
+          severity: 'medium',
         },
       ]);
     });
@@ -162,7 +161,7 @@ describe('RuleEventsClient', () => {
         request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
       );
 
-      await client.findLatestByCurrentStatePaginated({ status: ['open'] });
+      await client.findLatestByCurrentStatePaginated({ status: ['active'] });
 
       const q = lastQuery(query, (query_) => !query_.includes('STATS total'));
       expect(q).toContain('`alert.status` IN ("active")');
@@ -181,7 +180,7 @@ describe('RuleEventsClient', () => {
 
       const { hits } = await client.findLatestByCurrentStatePaginated({});
 
-      expect(hits[0].status).toBe('closed');
+      expect(hits[0].status).toBe('inactive');
     });
 
     it('filters severity on top-level severity, translated from SIGNIFICANT_EVENTS_SEVERITY_MAP', async () => {
@@ -189,7 +188,7 @@ describe('RuleEventsClient', () => {
         request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
       );
 
-      await client.findLatestByCurrentStatePaginated({ severity: ['80-critical'] });
+      await client.findLatestByCurrentStatePaginated({ severity: ['critical'] });
 
       const q = lastQuery(query, (query_) => !query_.includes('STATS total'));
       expect(q).toContain('severity IN ("critical")');
@@ -259,7 +258,7 @@ describe('RuleEventsClient', () => {
         from: '2026-01-01T00:00:00.000Z',
         to: '2026-01-02T00:00:00.000Z',
         search: 'checkout',
-        status: ['closed'],
+        status: ['inactive'],
       });
 
       const { commands, params } = getPageRequest(query);
@@ -306,9 +305,8 @@ describe('RuleEventsClient', () => {
           {
             ...dataDoc,
             '@timestamp': '2026-01-02T00:00:00.000Z',
-            event_uuid: 'group-hash-1',
-            status: 'open',
-            severity: '40-medium',
+            status: 'active',
+            severity: 'medium',
             created_at: createdAt,
           },
         ],
@@ -373,9 +371,8 @@ describe('RuleEventsClient', () => {
         {
           ...dataDoc,
           '@timestamp': '2026-01-02T00:00:00.000Z',
-          event_uuid: 'group-hash-1',
-          status: 'open',
-          severity: '40-medium',
+          status: 'active',
+          severity: 'medium',
         },
       ]);
     });

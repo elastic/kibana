@@ -18,13 +18,12 @@ import type { SignificantEvent } from './data_stream';
 
 const createEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
-  event_uuid: 'event-1',
   event_id: 'agent-event-1',
-  status: 'open',
+  status: 'active',
   stream_names: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
-  severity: '40-medium',
+  severity: 'medium',
   confidence: 0.8,
   ...overrides,
 });
@@ -59,7 +58,7 @@ const createEventClient = (hits: SignificantEvent[]) => {
 
 describe('attachInvestigationToEvent', () => {
   it('appends a new investigation entry and creates a new event version', async () => {
-    const existing = createEvent({ event_uuid: 'event-1' });
+    const existing = createEvent();
     const { client, dataStreamClient } = createEventClient([existing]);
     const investigation = createInvestigation();
 
@@ -76,14 +75,11 @@ describe('attachInvestigationToEvent', () => {
     const written: SignificantEvent = callArg.documents[0];
 
     expect(written.investigations).toEqual([investigation]);
-    expect(written.previous_event_uuid).toBe('event-1');
-    expect(written.event_uuid).not.toBe('event-1');
     expect(written.workflow_execution_id).toBe(investigation.workflow_execution_id);
   });
 
   it('attaches an investigation to a legacy event with longer narratives', async () => {
     const existing = createEvent({
-      event_uuid: 'event-1',
       symptom_hypothesis: 'x'.repeat(MAX_SYMPTOM_HYPOTHESIS_LENGTH + 1),
       summary: 'x'.repeat(MAX_SUMMARY_LENGTH + 1),
       assessment_note: 'x'.repeat(MAX_ASSESSMENT_NOTE_LENGTH + 1),
@@ -103,7 +99,7 @@ describe('attachInvestigationToEvent', () => {
 
   it('replaces an existing entry with a completed one, preserving started_at', async () => {
     const pending = createInvestigation();
-    const existing = createEvent({ event_uuid: 'event-1', investigations: [pending] });
+    const existing = createEvent({ investigations: [pending] });
     const { client, dataStreamClient } = createEventClient([existing]);
 
     const terminal = createInvestigation({
@@ -131,7 +127,7 @@ describe('attachInvestigationToEvent', () => {
       workflow_execution_id: 'exec-1',
       completed_at: '2026-01-01T01:30:00.000Z',
     });
-    const existing = createEvent({ event_uuid: 'event-1', investigations: [first] });
+    const existing = createEvent({ investigations: [first] });
     const { client, dataStreamClient } = createEventClient([existing]);
 
     const second = createInvestigation({ workflow_execution_id: 'exec-2' });
@@ -151,7 +147,7 @@ describe('attachInvestigationToEvent', () => {
 
   it('is idempotent: ignores when the entry is identical', async () => {
     const investigation = createInvestigation();
-    const existing = createEvent({ event_uuid: 'event-1', investigations: [investigation] });
+    const existing = createEvent({ investigations: [investigation] });
     const { client, dataStreamClient } = createEventClient([existing]);
 
     const result = await attachInvestigationToEvent({
@@ -179,11 +175,9 @@ describe('attachInvestigationToEvent', () => {
     expect(dataStreamClient.create).not.toHaveBeenCalled();
   });
 
-  it('carries forward the previous_event_uuid lineage', async () => {
+  it('preserves the stable event_id when an investigation attaches', async () => {
     const existing = createEvent({
-      event_uuid: 'event-3',
       event_id: 'agent-event-3',
-      previous_event_uuid: 'event-2',
     });
     const { client } = createEventClient([existing]);
 
@@ -194,12 +188,11 @@ describe('attachInvestigationToEvent', () => {
     });
 
     expect(result.updated).toBe(1);
-    expect(result.event_uuid).not.toBe('event-3');
   });
 
   it('preserves other entries unchanged when a new execution attaches', async () => {
     const orphaned = createInvestigation({ workflow_execution_id: 'exec-1' });
-    const existing = createEvent({ event_uuid: 'event-1', investigations: [orphaned] });
+    const existing = createEvent({ investigations: [orphaned] });
     const { client, dataStreamClient } = createEventClient([existing]);
 
     const incoming = createInvestigation({ workflow_execution_id: 'exec-2' });
@@ -223,7 +216,7 @@ describe('attachInvestigationToEvent', () => {
 
   it('preserves other entries unchanged when a completed execution attaches', async () => {
     const orphaned = createInvestigation({ workflow_execution_id: 'exec-1' });
-    const existing = createEvent({ event_uuid: 'event-1', investigations: [orphaned] });
+    const existing = createEvent({ investigations: [orphaned] });
     const { client, dataStreamClient } = createEventClient([existing]);
 
     const terminal = createInvestigation({
@@ -256,7 +249,7 @@ describe('attachInvestigationToEvent', () => {
         completed_at: '2026-01-01T01:30:00.000Z',
       })
     );
-    const existing = createEvent({ event_uuid: 'event-1', investigations: fullInvestigations });
+    const existing = createEvent({ investigations: fullInvestigations });
     const { client, dataStreamClient } = createEventClient([existing]);
 
     const newInvestigation = createInvestigation({ workflow_execution_id: 'exec-100' });
@@ -272,7 +265,7 @@ describe('attachInvestigationToEvent', () => {
   });
 
   it('falls back to canonical eventClient when eventSearchClient returns empty hits (dual-write lag)', async () => {
-    const existing = createEvent({ event_uuid: 'event-1' });
+    const existing = createEvent({ event_id: 'event-1' });
     // eventSearchClient simulates a stale `.rule-events` index: returns no hits
     const { client: searchClient } = createEventClient([]);
     // eventClient is the authoritative legacy store: has the event
@@ -295,11 +288,10 @@ describe('attachInvestigationToEvent', () => {
     const written: SignificantEvent = callArg.documents[0];
 
     expect(written.investigations).toEqual([investigation]);
-    expect(written.previous_event_uuid).toBe('event-1');
   });
 
   it('falls back to canonical eventClient when eventSearchClient.findLatestByEventId rejects (read-store outage)', async () => {
-    const existing = createEvent({ event_uuid: 'event-1' });
+    const existing = createEvent({ event_id: 'event-1' });
     // eventSearchClient simulates a read-store outage
     const rejectingSearchClient = {
       findLatestByEventId: jest.fn().mockRejectedValue(new Error('read-store outage')),
@@ -324,21 +316,17 @@ describe('attachInvestigationToEvent', () => {
     const written: SignificantEvent = callArg.documents[0];
 
     expect(written.investigations).toEqual([investigation]);
-    // Chain must use the real UUID from the canonical store, not a synthetic one
-    expect(written.previous_event_uuid).toBe('event-1');
   });
 
   it('resolves lineage: attach targets the latest event version for the given event_id', async () => {
     const pending = createInvestigation({ workflow_execution_id: 'exec-1' });
-    const e0 = createEvent({ event_uuid: 'event-0', event_id: 'slug-1' });
+    const e0 = createEvent({ event_id: 'slug-1' });
     const e1 = createEvent({
-      event_uuid: 'event-1',
       event_id: 'slug-1',
-      previous_event_uuid: 'event-0',
       '@timestamp': '2026-01-01T00:01:00.000Z',
       investigations: [pending],
     });
-    // findByEventId returns the full lineage; the last element is the latest version
+    // findByEventId returns the matching event.
     const { client, dataStreamClient } = createEventClient([e0, e1]);
 
     const terminal = createInvestigation({
@@ -356,8 +344,6 @@ describe('attachInvestigationToEvent', () => {
     const [[callArg]] = dataStreamClient.create.mock.calls;
     const written: SignificantEvent = callArg.documents[0];
 
-    // Must chain off E1 (the true latest), not E0 (the frozen caller reference)
-    expect(written.previous_event_uuid).toBe('event-1');
     // Replace-by-execution-id: pending entry replaced with terminal, not duplicated
     expect(written.investigations).toHaveLength(1);
     expect(written.investigations![0].started_at).toBe(pending.started_at);
