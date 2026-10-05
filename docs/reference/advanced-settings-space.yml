@@ -405,14 +405,14 @@ groups:
         description: |
           When date histograms use the `auto` interval, {{product.kibana}} attempts to generate this number of bars.
         datatype: int
-        default: 50
+        default: 100
         applies_to:
           stack: ga
           ech: ga
           ece: ga
           eck: ga
           self: ga
-          serverless: unavailable
+          serverless: ga
 
       - setting: "histogram:maxBars"
         id: histogram-maxbars
