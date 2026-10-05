@@ -14,8 +14,6 @@ import type {
 } from '@elastic/eui';
 import {
   EuiAvatar,
-  EuiBadge,
-  EuiBadgeGroup,
   EuiBasicTable,
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -23,10 +21,8 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import type { OperatingSystem } from '@kbn/securitysolution-utils';
-import type { ExceptionListItemSchema, OsType } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { FormattedDate } from '../../../../common/components/formatted_date';
-import { OS_TITLES } from '../../../common/translations';
 import { ActionsContextMenu } from '../../actions_context_menu';
 import type { ContextMenuItemNavByRouterProps } from '../../context_menu_with_router_support';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
@@ -37,11 +33,9 @@ import type { ExceptionsListApiClient } from '../../../services/exceptions_list/
 import { useArtifactAssignedPolicies } from '../hooks/use_artifact_assigned_policies';
 import { PolicyAssignmentCell } from './policy_assignment_cell';
 import { ArtifactEnabledSwitch } from './artifact_enabled_switch';
+import { ArtifactOperatingSystemBadges } from './artifact_os_badges';
 
-const EMPTY_OS_TYPES: OsType[] = [];
 const EMPTY_SORTABLE_FIELDS: readonly string[] = [];
-
-const getOsTitle = (os: OsType): string => OS_TITLES[os as OperatingSystem] ?? os;
 
 export type ArtifactSimpleTableActionType = 'edit' | 'delete' | 'view';
 
@@ -174,13 +168,10 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
           field: 'os_types',
           name: labels.tableColumnOperatingSystemsLabel,
           render: (osTypes: ExceptionListItemSchema['os_types']) => (
-            <EuiBadgeGroup gutterSize="s" data-test-subj={getTestId('columnOs')}>
-              {(osTypes ?? EMPTY_OS_TYPES).map((os) => (
-                <EuiBadge key={os} color="hollow" data-test-subj={getTestId(`osBadge-${os}`)}>
-                  {getOsTitle(os)}
-                </EuiBadge>
-              ))}
-            </EuiBadgeGroup>
+            <ArtifactOperatingSystemBadges
+              osTypes={osTypes}
+              data-test-subj={getTestId('columnOs')}
+            />
           ),
         },
         {

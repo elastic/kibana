@@ -206,7 +206,7 @@ describe('When using the ArtifactListPage component', () => {
         expect(getByTestId('testPage-simpleTable-cardDeleteAction')).toBeInTheDocument();
       });
 
-      it('should open an empty view flyout when the name is clicked', async () => {
+      it('should open the view flyout when the name is clicked', async () => {
         const { getAllByTestId, getByTestId, queryByTestId } = await renderWithListData({
           showAsSimpleTable: true,
           allowCardEditAction: false,
@@ -221,6 +221,19 @@ describe('When using the ArtifactListPage component', () => {
         expect(queryByTestId('formMock')).not.toBeInTheDocument();
         expect(history.location.search).toMatch(/show=view/);
         expect(history.location.search).toMatch(/itemId=/);
+
+        await waitFor(() => {
+          expect(getByTestId('testPage-viewFlyout-title')).toHaveTextContent(/Generated Exception/);
+        });
+        expect(getByTestId('testPage-viewFlyout-lastUpdated')).toHaveTextContent(
+          /Last updated: Apr 20, 2020 @ 15:25:31/
+        );
+        expect(getByTestId('testPage-viewFlyout-os-osBadge-windows')).toHaveTextContent('Windows');
+        expect(getByTestId('testPage-viewFlyout-updatedByAvatar')).toBeInTheDocument();
+        expect(getByTestId('testPage-viewFlyout-description')).toHaveTextContent(
+          'created by ExceptionListItemGenerator'
+        );
+        expect(getByTestId('testPage-viewFlyout-definitionTitle')).toHaveTextContent('Definition');
       });
 
       it('should open the view flyout from the show=view URL without the edit form', async () => {

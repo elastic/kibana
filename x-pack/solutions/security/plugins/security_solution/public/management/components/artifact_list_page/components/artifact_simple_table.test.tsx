@@ -126,9 +126,11 @@ describe('ArtifactSimpleTable', () => {
   it('renders operating system badges with human-readable labels', () => {
     render();
 
-    expect(renderResult.getByTestId('testTable-osBadge-windows')).toHaveTextContent('Windows');
-    expect(renderResult.getByTestId('testTable-osBadge-linux')).toHaveTextContent('Linux');
-    expect(renderResult.getByTestId('testTable-osBadge-macos')).toHaveTextContent('Mac');
+    expect(renderResult.getByTestId('testTable-columnOs-osBadge-windows')).toHaveTextContent(
+      'Windows'
+    );
+    expect(renderResult.getByTestId('testTable-columnOs-osBadge-linux')).toHaveTextContent('Linux');
+    expect(renderResult.getByTestId('testTable-columnOs-osBadge-macos')).toHaveTextContent('Mac');
   });
 
   it('renders the updated by avatar and name', () => {

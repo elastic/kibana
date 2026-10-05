@@ -463,6 +463,8 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
 
         {isViewFlyoutOpened && (
           <ArtifactViewFlyout
+            apiClient={apiClient}
+            labels={labels}
             onClose={handleArtifactViewFlyoutOnClose}
             data-test-subj={getTestId('viewFlyout')}
           />
