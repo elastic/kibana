@@ -27,6 +27,8 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
     query: z.object({
       page: z.coerce.number().int().min(1).optional().default(1),
       size: z.coerce.number().int().min(1).max(100).optional().default(20),
+      startedAfter: z.string().max(64).optional(),
+      startedBefore: z.string().max(64).optional(),
     }),
   }),
   handler: async ({ request, params, getAutomationsSoClient, getWorkflowsManagement, context }) => {
@@ -53,6 +55,8 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         omitStepRuns: true,
         page: params.query.page,
         size: params.query.size,
+        startedAfter: params.query.startedAfter,
+        startedBefore: params.query.startedBefore,
         request,
       },
       spaceId

@@ -172,7 +172,10 @@ export const doctorCmd: Command<void> = {
         const state = readState(repoRoot);
         const configSet = state.scout?.serverConfigSet;
         const configSetInfo = configSet ? `, serverConfigSet=${configSet}` : '';
-        detail = `running (managed, PID ${state.scout?.pid}${configSetInfo})`;
+        const targetInfo = state.scout?.scoutArch
+          ? `, ${state.scout.scoutArch}/${state.scout.scoutDomain}`
+          : '';
+        detail = `running (managed, PID ${state.scout?.pid}${targetInfo}${configSetInfo})`;
       } else if (scoutProcessLine) {
         const configMatch = scoutProcessLine.match(/--serverConfigSet(?:=|\s+)(\S+)/);
         const archMatch = /--arch(?:=|\s+)(stateful|serverless)/.exec(scoutProcessLine);

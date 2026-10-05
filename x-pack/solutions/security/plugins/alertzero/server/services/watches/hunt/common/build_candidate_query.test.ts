@@ -495,4 +495,38 @@ describe('buildCandidateQuery', () => {
     });
     expect(result.truncated).toBe(true);
   });
+
+  describe('truncated only counts skips of reports the search actually returned', () => {
+    it('reports truncated when limit cuts the selection, even with a not_found named id', async () => {
+      // 'rpt-b' matched but was pushed out by `limit`; it is examined yet unrecorded in
+      // `skipped`. 'rpt-missing' never matched at all, so it was never in `total` to
+      // begin with. Subtracting it anyway (the old bug) cancels out the cut and
+      // reports `truncated: false` although 'rpt-b' was left unselected.
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue(searchResponseOf(['rpt-a', 'rpt-b'], 2));
+      const result = await buildCandidateQuery(esClient, logger, {
+        trigger: 'manual',
+        report_ids: ['rpt-a', 'rpt-missing', 'rpt-b'],
+        spaceId: 'default',
+        limit: 1,
+      });
+      expect(result.ids).toEqual(['rpt-a']);
+      expect(result.skipped).toEqual([{ id: 'rpt-missing', reason: 'not_found' }]);
+      expect(result.truncated).toBe(true);
+    });
+
+    it('still reports truncated: false when an open_proposal skip accounts for the gap', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue(searchResponseOf(['rpt-open', 'rpt-free'], 2));
+      const result = await buildCandidateQuery(
+        esClient,
+        logger,
+        { trigger: 'scheduled', spaceId: 'default' },
+        async () => new Set([buildHuntInvestigationConversationId('rpt-open')])
+      );
+      expect(result.ids).toEqual(['rpt-free']);
+      expect(result.skipped).toEqual([{ id: 'rpt-open', reason: 'open_proposal' }]);
+      expect(result.truncated).toBe(false);
+    });
+  });
 });

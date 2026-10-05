@@ -714,6 +714,49 @@ describe('EsServiceAccounts', () => {
         expect.stringContaining('Could not determine whether the failed create')
       );
     });
+
+    it('sends the trimmed description with the account and reports it back', async () => {
+      mockHappyPath();
+
+      await expect(
+        serviceAccounts.create(request, {
+          ...createParams,
+          description: ' Relays the nightshift alerts. ',
+        })
+      ).resolves.toEqual({ ...createdAccount, description: 'Relays the nightshift alerts.' });
+
+      const calls = esClient.asCurrentUser.transport.request.mock.calls;
+      expect(calls[1][0]).toEqual({
+        method: 'PUT',
+        path: ACCOUNT_PATH,
+        body: { roles: ['viewer', 'editor'], description: 'Relays the nightshift alerts.' },
+        querystring: { refresh: 'wait_for' },
+      });
+    });
+
+    it('leaves a blank description out of the account write', async () => {
+      mockHappyPath();
+
+      const created = await serviceAccounts.create(request, {
+        ...createParams,
+        description: '   ',
+      });
+
+      expect(Object.keys(created).sort()).toEqual(['id', 'name', 'roles']);
+      const calls = esClient.asCurrentUser.transport.request.mock.calls;
+      expect(calls[1][0].body).toStrictEqual({ roles: ['viewer', 'editor'] });
+    });
+
+    it('refuses rather than overwriting an account whose description it cannot read', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce(
+        accountEntry({ description: 42 })
+      );
+
+      await expect(serviceAccounts.create(request, createParams)).rejects.toMatchObject({
+        output: { statusCode: 502 },
+      });
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('#list', () => {
@@ -893,6 +936,36 @@ describe('EsServiceAccounts', () => {
 
       await expect(serviceAccounts.list(request)).rejects.toThrow('socket hang up');
     });
+
+    it('reports the description of each account that has one', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        service_accounts: [
+          queried('kibana/a', { description: 'Relays the nightshift alerts.' }),
+          queried('kibana/b'),
+        ],
+      });
+
+      const {
+        serviceAccounts: [described, undescribed],
+      } = await serviceAccounts.list(request);
+
+      expect(described.description).toBe('Relays the nightshift alerts.');
+      expect(undescribed).not.toHaveProperty('description');
+    });
+
+    it('omits an empty or null description', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        service_accounts: [
+          queried('kibana/a', { description: '' }),
+          queried('kibana/b', { description: null }),
+        ],
+      });
+
+      const { serviceAccounts: entries } = await serviceAccounts.list(request);
+
+      expect(entries[0]).not.toHaveProperty('description');
+      expect(entries[1]).not.toHaveProperty('description');
+    });
   });
 
   describe('#get', () => {
@@ -1049,6 +1122,51 @@ describe('EsServiceAccounts', () => {
         output: { statusCode: 403 },
       });
       expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('reports the description Elasticsearch holds for the account', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce(
+        accountEntry({ description: 'Relays the nightshift alerts.' })
+      );
+
+      await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toMatchObject({
+        description: 'Relays the nightshift alerts.',
+      });
+    });
+
+    // Elasticsearch caps a description at 1,000 characters on write, so Kibana does not bound it
+    // again on read.
+    it('reports a description longer than Kibana accepts on create', async () => {
+      const description = 'a'.repeat(1001);
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce(accountEntry({ description }));
+
+      await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toMatchObject({
+        description,
+      });
+    });
+
+    it('omits the description when Elasticsearch reports none', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce(accountEntry());
+
+      expect(await serviceAccounts.get(request, ACCOUNT_ID)).not.toHaveProperty('description');
+    });
+
+    it('answers 502 for a description that is not a string', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce(
+        accountEntry({ description: 42 })
+      );
+
+      await expect(serviceAccounts.get(request, ACCOUNT_ID)).rejects.toMatchObject({
+        output: { statusCode: 502 },
+      });
+    });
+
+    it('omits an empty description', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce(
+        accountEntry({ description: '' })
+      );
+
+      expect(await serviceAccounts.get(request, ACCOUNT_ID)).not.toHaveProperty('description');
     });
   });
 });
