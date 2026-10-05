@@ -110,7 +110,8 @@ const addMappingField = async ({
   await expect(page.getByText(name)).toBeVisible();
 };
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/295469
+test.describe.skip(
   'ES|QL Data Federation — create CSV dataset wizard',
   { tag: tags.stateful.classic },
   () => {
