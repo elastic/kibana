@@ -48,10 +48,7 @@ import { useTimeRange } from '../../hooks/use_time_range';
 import { StreamFlyoutOverview } from './stream_flyout_overview';
 import { StreamDeleteModal } from '../stream_delete_modal';
 import { StreamProcessing } from './stream_processing';
-import {
-  useCanvasEvents,
-  useShowConfirmRemoveProcessingModal,
-} from '../stream_management/data_management/stream_detail_canvas/state_management';
+import { StreamRemoveProcessingConfirmationModal } from './stream_remove_processing_confirm_modal';
 
 const TABS = [
   {
@@ -189,8 +186,7 @@ function StreamFlyoutContent({
       ? requestedTab
       : DEFAULT_TAB;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const { showProcessingRemovalPrompt, hideProcessingRemovalPrompt } = useCanvasEvents();
-  const confirmModalState = useShowConfirmRemoveProcessingModal();
+  const [showProcessingModal, setShowProcessingModal] = useState(false);
   const [isHeaderMenuOpen, setHeaderMenuOpen] = useState(false);
   const headerId = useGeneratedHtmlId();
   const headerMenuId = useGeneratedHtmlId({ prefix: 'canvasFlyoutHeaderMenu' });
@@ -244,18 +240,7 @@ function StreamFlyoutContent({
     if (definition && !loading && !isProcessingEnabled && selectedTab === 'processing') {
       selectTab('overview');
     }
-    if (definition && !loading && isProcessingEnabled && !confirmModalState) {
-      setShowProcessing(true);
-    }
-  }, [definition, loading, isProcessingEnabled, selectedTab, selectTab, confirmModalState]);
-
-  useEffect(() => {
-    if (confirmModalState === 'confirmed') {
-      setShowProcessing(false);
-      hideProcessingRemovalPrompt();
-      selectTab('overview');
-    }
-  }, [confirmModalState, selectTab, hideProcessingRemovalPrompt]);
+  }, [definition, loading, isProcessingEnabled, selectedTab, selectTab]);
 
   const deleteStream = useCallback(async () => {
     if (!Streams.ingest.all.GetResponse.is(definition)) {
@@ -374,7 +359,7 @@ function StreamFlyoutContent({
             selectTab('processing');
             setShowProcessing(showing);
           } else {
-            showProcessingRemovalPrompt();
+            setShowProcessingModal(true);
           }
           setHeaderMenuOpen(false);
         }}
@@ -522,6 +507,14 @@ function StreamFlyoutContent({
           onClose={() => setShowDeleteModal(false)}
           onCancel={() => setShowDeleteModal(false)}
           onDelete={deleteStream}
+        />
+      )}
+      {showProcessingModal && (
+        <StreamRemoveProcessingConfirmationModal
+          name={name}
+          refresh={refreshAll}
+          onClose={() => setShowProcessingModal(false)}
+          onConfirm={() => setShowProcessing(false)}
         />
       )}
     </EuiFlyout>
