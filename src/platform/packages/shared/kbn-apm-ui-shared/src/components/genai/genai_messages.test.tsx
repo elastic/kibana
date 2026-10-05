@@ -54,6 +54,27 @@ describe('GenAiMessages', () => {
     expect(screen.getByTestId('genAiMessage-0')).toBeInTheDocument();
   });
 
+  it('does not duplicate system instructions already present in an input system message', () => {
+    const content = 'You are a helpful coding assistant.';
+    renderMessages([{ role: 'system', parts: [{ type: 'text', content }] }], [], content);
+    expect(screen.getAllByTestId(/genAiMessage-/)).toHaveLength(1);
+  });
+
+  it('does not duplicate system instructions already present in an input system message with content format', () => {
+    const content = 'You are a helpful coding assistant.';
+    renderMessages([{ role: 'system', content }], [], content);
+    expect(screen.getAllByTestId(/genAiMessage-/)).toHaveLength(1);
+  });
+
+  it('adds system instructions when input system messages have different content', () => {
+    renderMessages(
+      [{ role: 'system', parts: [{ type: 'text', content: 'Answer in JSON.' }] }],
+      [],
+      'You are a helpful coding assistant.'
+    );
+    expect(screen.getAllByTestId(/genAiMessage-/)).toHaveLength(2);
+  });
+
   it('renders text content via markdown for multiline/markdown content', () => {
     renderMessages([{ role: 'user', content: '# Hello\nWorld' }]);
     expect(screen.getByTestId('markdownContent')).toBeInTheDocument();

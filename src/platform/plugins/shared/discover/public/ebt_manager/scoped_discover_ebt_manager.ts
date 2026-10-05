@@ -77,6 +77,7 @@ type FilterOperation = '+' | '-' | '_exists_';
 enum FieldUsageEventName {
   dataTableSelection = 'dataTableSelection',
   dataTableRemoval = 'dataTableRemoval',
+  dataTableClearSelectedFields = 'dataTableClearSelectedFields',
   filterAddition = 'filterAddition',
 }
 
@@ -89,6 +90,7 @@ interface FieldUsageEventData {
   [FIELD_USAGE_EVENT_NAME]: FieldUsageEventName;
   [FIELD_USAGE_FIELD_NAME]?: string;
   [FIELD_USAGE_FILTER_OPERATION]?: FilterOperation;
+  [QUERY_FIELDS_USAGE_FIELD_NAMES]?: string[];
 }
 
 interface QueryFieldsUsageEventData {
@@ -238,6 +240,36 @@ export class ScopedDiscoverEBTManager {
       fieldName,
       fieldsMetadata,
     });
+  }
+
+  public async trackDataTableClearSelectedFields({
+    fieldNames,
+    fieldsMetadata,
+  }: {
+    fieldNames: string[];
+    fieldsMetadata: FieldsMetadataPublicStart | undefined;
+  }) {
+    if (!this.reportEvent || fieldNames.length === 0) {
+      return;
+    }
+
+    const eventData: FieldUsageEventData = {
+      [FIELD_USAGE_EVENT_NAME]: FieldUsageEventName.dataTableClearSelectedFields,
+    };
+
+    if (fieldsMetadata) {
+      const fields = await this.getFieldsFromMetadata({
+        fieldsMetadata,
+        fieldNames,
+      });
+
+      const categorizedFields = fieldNames.map((fieldName) =>
+        fields[fieldName]?.short ? fieldName : NON_ECS_FIELD
+      );
+      eventData[QUERY_FIELDS_USAGE_FIELD_NAMES] = [...new Set(categorizedFields)];
+    }
+
+    this.reportEvent(FIELD_USAGE_EVENT_TYPE, eventData);
   }
 
   public async trackFilterAddition({

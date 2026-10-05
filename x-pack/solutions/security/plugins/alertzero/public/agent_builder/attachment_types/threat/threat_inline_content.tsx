@@ -458,19 +458,21 @@ const renderDiamondSection = (liveData: ThreatReportApiResponse): React.ReactNod
   );
 };
 
-/** Known hunt statuses get a label; anything else is shown as-is. */
+/**
+ * Keyed on the collapsed values the hunt's evidence step writes, not the raw Tier 1
+ * statuses: `evidence[].last_hunt_status` only ever holds the collapse. Anything else is
+ * shown as-is.
+ */
 const HUNT_STATUS_LABELS: Record<string, string> = {
-  environment_hits_found: i18n.translate(
-    'xpack.alertzero.agentBuilder.attachments.threat.huntStatusHitsFound',
-    { defaultMessage: 'Environment hits found' }
-  ),
-  no_environment_hits: i18n.translate(
-    'xpack.alertzero.agentBuilder.attachments.threat.huntStatusNoHits',
-    { defaultMessage: 'No environment hits' }
-  ),
-  no_searchable_terms: i18n.translate(
-    'xpack.alertzero.agentBuilder.attachments.threat.huntStatusNoTerms',
-    { defaultMessage: 'No searchable terms' }
+  hit: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.huntStatusHit', {
+    defaultMessage: 'Environment hits found',
+  }),
+  clean: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.huntStatusClean', {
+    defaultMessage: 'No environment hits',
+  }),
+  incomplete: i18n.translate(
+    'xpack.alertzero.agentBuilder.attachments.threat.huntStatusIncomplete',
+    { defaultMessage: 'Not fully searched' }
   ),
 };
 
@@ -514,7 +516,7 @@ const renderEvidenceSection = (liveData: ThreatReportApiResponse): React.ReactNo
   if (lastHuntStatus != null) {
     stats.push({
       title: (
-        <EuiBadge color={lastHuntStatus === 'environment_hits_found' ? 'warning' : 'hollow'}>
+        <EuiBadge color={lastHuntStatus === 'hit' ? 'warning' : 'hollow'}>
           {HUNT_STATUS_LABELS[lastHuntStatus] ?? lastHuntStatus}
         </EuiBadge>
       ),

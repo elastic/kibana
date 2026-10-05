@@ -191,17 +191,60 @@ describe('ESQLEditor', () => {
     expect(queryByTestId('ESQLEditor-run-query-button')).not.toBeInTheDocument();
   });
 
-  it('should render the visor by default', async () => {
+  it('should not render the visor in non-inline mode (handled by the parent)', async () => {
     const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
+    expect(queryByTestId('ESQLEditor-quick-search-visor')).not.toBeInTheDocument();
+  });
+
+  it('should render the visor in inline mode by default', async () => {
+    const newProps = {
+      ...props,
+      editorIsInline: true,
+    };
+    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
     expect(queryByTestId('ESQLEditor-quick-search-visor')).toBeInTheDocument();
   });
 
-  it('should hide the visor by default if the hideQuickSearch prop is set to true', async () => {
+  it('should render the visor closed (inert) in inline mode until toggled', async () => {
     const newProps = {
       ...props,
-      hideQuickSearch: true,
+      editorIsInline: true,
+    };
+    const { getByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
+    expect(getByTestId('ESQLEditor-quick-search-visor')).toHaveAttribute('inert');
+  });
+
+  it('should show the visor toggle button in inline mode', async () => {
+    const newProps = {
+      ...props,
+      editorIsInline: true,
     };
     const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
+    expect(queryByTestId('esql-menu-button')).toBeInTheDocument();
+  });
+
+  it('should not show the visor toggle button in non-inline mode', async () => {
+    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
+    expect(queryByTestId('esql-menu-button')).not.toBeInTheDocument();
+  });
+
+  it('should open the visor when the toggle button is clicked', async () => {
+    const newProps = {
+      ...props,
+      editorIsInline: true,
+    };
+    const { getByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
+    expect(getByTestId('ESQLEditor-quick-search-visor')).toHaveAttribute('inert');
+    await act(async () => {
+      await userEvent.click(getByTestId('esql-menu-button'));
+    });
+    expect(getByTestId('ESQLEditor-quick-search-visor')).not.toHaveAttribute('inert');
+  });
+
+  it('should hide the visor if hideQuickSearch is true', async () => {
+    const { queryByTestId } = renderWithI18n(
+      renderESQLEditorComponent({ ...props, hideQuickSearch: true })
+    );
     expect(queryByTestId('ESQLEditor-quick-search-visor')).not.toBeInTheDocument();
   });
 
