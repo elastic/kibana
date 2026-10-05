@@ -42,6 +42,11 @@ interface ConversationCardProps {
    * trigger the card click.
    */
   renderAssignees: (investigation: Investigation) => React.ReactNode;
+  /**
+   * Optional: render a badge for an approve/decline still being submitted, or nothing otherwise.
+   * Supplied by the page so the mutation state stays outside the package.
+   */
+  renderInFlightStatus?: (investigation: Investigation) => React.ReactNode;
 }
 
 export const ConversationCard = memo<ConversationCardProps>(
@@ -57,6 +62,7 @@ export const ConversationCard = memo<ConversationCardProps>(
     canManageEscalations,
     canCloseInvestigation,
     renderAssignees,
+    renderInFlightStatus,
   }) => {
     const { euiTheme } = useEuiTheme();
 
@@ -105,10 +111,13 @@ export const ConversationCard = memo<ConversationCardProps>(
               direction="row"
             >
               <EuiFlexItem grow={false}>
-                <ConversationMetaInfo createdAt={investigation.createdAt} />
+                <ConversationMetaInfo
+                  createdAt={investigation.createdAt}
+                  inFlightStatus={renderInFlightStatus?.(investigation)}
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
                   {/*
                    * Stop propagation so interacting with the assignee picker
                    * (clicking the + button or selecting a user) does not trigger the card click.

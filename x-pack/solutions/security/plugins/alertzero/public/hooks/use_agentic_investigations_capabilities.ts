@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERTZERO_FEATURE_ID } from '@kbn/alertzero-common';
 import type { Capabilities } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -28,11 +29,13 @@ export interface AgenticInvestigationsCapabilities {
 export const getAgenticInvestigationsCapabilities = (
   capabilities: Capabilities
 ): AgenticInvestigationsCapabilities => {
-  const cap = capabilities[AGENTIC_INVESTIGATIONS_PLUGIN_ID];
+  const canWrite = capabilities[ALERTZERO_FEATURE_ID]?.write === true;
+  const investigationsCap = capabilities[AGENTIC_INVESTIGATIONS_PLUGIN_ID];
   return {
-    showEscalations: cap?.[ESCALATIONS_UI_CAPABILITY_SHOW] === true,
-    manageEscalations: cap?.[ESCALATIONS_UI_CAPABILITY_MANAGE] === true,
-    manageInvestigations: cap?.[INVESTIGATIONS_UI_CAPABILITY_MANAGE] === true,
+    showEscalations: investigationsCap?.[ESCALATIONS_UI_CAPABILITY_SHOW] === true,
+    manageEscalations: canWrite && investigationsCap?.[ESCALATIONS_UI_CAPABILITY_MANAGE] === true,
+    manageInvestigations:
+      canWrite && investigationsCap?.[INVESTIGATIONS_UI_CAPABILITY_MANAGE] === true,
   };
 };
 

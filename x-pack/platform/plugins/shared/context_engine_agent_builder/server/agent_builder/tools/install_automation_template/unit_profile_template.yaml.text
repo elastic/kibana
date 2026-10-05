@@ -1,0 +1,293 @@
+version: "1"
+# Unit-profile strategy — one `entity` KI per distinct unit in a corpus.
+#
+# This is a working workflow, not a sketch. Edit the `consts` block and it runs as it stands;
+# everything below `consts` is already correct and does not need to be rewritten to make it work.
+#
+# The `consts` are the three strategy choices from `analyze-and-improve`, written down:
+#   - the unit: `unit_index` and `unit_key` are the unit identity;
+#   - what one KI carries: `breakdown_field`, the `activity_field` range, and per-unit aggregations;
+#   - how units are found: the discovery query ranks by activity and keeps the top `max_units`.
+#
+# To adapt it:
+#   1. Set every value in `consts`. Field names that contain spaces or capitals go in backticks
+#      inside the const value itself, e.g. unit_key: "`Product Key`", because the value is pasted
+#      into ES|QL as written.
+#   2. Extend `unit_totals` with any extra STATS columns that distinguish one unit from another.
+#      Column names are derived from field names automatically, so a new metric is one STATS edit.
+#   3. Set `corpus_filter` to a `| WHERE` clause to restrict which units are profiled.
+#
+# A re-run regenerates every unit and replaces its KI, because `ki_id` is derived from the unit.
+name: Unit profile KI automation
+description: >
+  Generates one Knowledge Indicator per distinct unit found in a source index, ranked by activity
+  (most active first), each grounded in per-unit ES|QL aggregations, written into a Context Engine
+  AI index.
+enabled: true
+
+consts:
+  # The Context Engine AI index the indicators are written into.
+  ai_index_id: __AI_INDEX_ID__
+  # The human-readable name of this automation instance, used as a KI ID prefix so that
+  # multiple installations on the same source index produce distinct, non-colliding KIs.
+  automation_name: __AUTOMATION_NAME__
+  # The index the units are discovered in and their activity is aggregated from.
+  unit_index: __UNIT_INDEX__
+  # The keyword field holding the unit identity — one KI is produced per distinct value.
+  unit_key: __UNIT_KEY__
+  # A date field in `unit_index`. Its minimum and maximum per unit bound the unit's activity.
+  activity_field: __ACTIVITY_FIELD__
+  # A second field whose per-unit distribution characterises the unit.
+  breakdown_field: __BREAKDOWN_FIELD__
+  # The agreed scope, as a complete ES|QL line beginning with `| WHERE`. It bounds both which units
+  # are found and which of their rows the figures describe, so a profile never counts rows outside
+  # it. Set to "" to take every row.
+  corpus_filter: __CORPUS_FILTER__
+  # The KI budget: the most active units profiled in one run, one model call each. 100 is the
+  # onboarding ceiling; raise it once the output is trusted.
+  max_units: __MAX_UNITS__
+
+tags:
+  - unit-profile
+  - ce-template:unit_profile
+
+triggers:
+  - type: manual
+
+steps:
+  # The mapping is fetched once, outside the per-unit loop, and handed to every `profile_unit`
+  # prompt so the model can name fields correctly without guessing.
+  - name: fetch_mapping
+    type: elasticsearch.request
+    with:
+      method: GET
+      path: /{{ consts.unit_index }}/_mapping
+
+  # All units in one query, ranked by activity descending, capped at `max_units`. No paging.
+  - name: discover_units
+    type: elasticsearch.esql.query
+    with:
+      query: |
+        FROM {{ consts.unit_index }}
+        | WHERE `{{ consts.unit_key }}` IS NOT NULL
+        {{ consts.corpus_filter }}
+        | STATS docs = COUNT(*) BY `{{ consts.unit_key }}`
+        | SORT docs DESC, `{{ consts.unit_key }}` ASC
+        | LIMIT {{ consts.max_units }}
+        | KEEP `{{ consts.unit_key }}`
+
+  # Units are chunked into batches of at most 100 before entering `parallel`: the engine
+  # throws above that fan-out limit. Each batch runs concurrently; batches run sequentially.
+  - name: loop_batches
+    type: foreach
+    foreach: "{{ steps.discover_units.output.values | chunk: 100 | json }}"
+    iteration-on-failure:
+      continue: true
+    steps:
+      # Profiling one unit costs two ES|QL queries and a model call, and no unit's profile
+      # depends on another's, so five run at a time rather than the batch running end to end.
+      - name: loop_units
+        type: parallel
+        foreach: "{{ foreach.item | json }}"
+        concurrency: 5
+        # One unit that fails to profile should not cost the rest: `settled` runs every branch to a
+        # terminal state, where the default `fail-fast` stops scheduling on the first failure.
+        mode: settled
+        steps:
+          # `foreach.item[0]` is the unit key, the one column `discover_units` keeps.
+          - name: unit_context
+            type: data.set
+            with:
+              unit: "{{ foreach.item[0] }}"
+              # The key as an ES|QL string literal body: backslashes first, then quotes. LiquidJS
+              # reads backslash escapes inside a quoted argument, so '\\' is one backslash.
+              unit_escaped: >-
+                {{ foreach.item[0] | replace: '\\', '\\\\' | replace: '"', '\\"' }}
+              # The raw key, never a slug: `slugify` folds `ABC` and `abc` into one id, and those
+              # units would overwrite each other. `ki_id` takes any string up to 512 characters.
+              # Prefixed with automation_name so two installations on the same source index
+              # produce distinct, non-colliding KIs.
+              ki_id: "{{ consts.automation_name }}/{{ foreach.item[0] }}"
+
+          # Grounding 1: totals over every row referencing the unit. Column names are derived from
+          # field names so a new metric is one STATS edit — add a column here and it propagates
+          # through the description and content automatically.
+          - name: unit_totals
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM {{ consts.unit_index }}
+                | WHERE `{{ consts.unit_key }}` == "{{ steps.unit_context.output.unit_escaped }}"
+                {{ consts.corpus_filter }}
+                | STATS records = COUNT(*),
+                        `distinct {{ consts.breakdown_field | remove: '`' }} values` = COUNT_DISTINCT(`{{ consts.breakdown_field }}`),
+                        `first {{ consts.activity_field | remove: '`' }}` = MIN(`{{ consts.activity_field }}`),
+                        `last {{ consts.activity_field | remove: '`' }}` = MAX(`{{ consts.activity_field }}`)
+
+          # Grounding 2: the unit's distribution over the breakdown field.
+          - name: unit_breakdown
+            type: elasticsearch.esql.query
+            with:
+              query: |
+                FROM {{ consts.unit_index }}
+                | WHERE `{{ consts.unit_key }}` == "{{ steps.unit_context.output.unit_escaped }}"
+                {{ consts.corpus_filter }}
+                | STATS count = COUNT(*) BY `{{ consts.breakdown_field }}`
+                | SORT count DESC
+                | LIMIT 10
+
+          - name: profile_unit
+            type: ai.prompt
+            connector-id-by-feature: context_engine_prompt
+            with:
+              systemPrompt: |
+                You are a precise data analyst assistant. Ground every statement strictly in the
+                ES|QL results provided in the prompt. Never invent, estimate or extrapolate a
+                figure that is not present in that data. Every ES|QL query you write must be
+                syntactically and semantically valid against the fields named to you.
+              prompt: |
+                You are writing a factual profile of the {{ consts.unit_key }}
+                "{{ steps.unit_context.output.unit }}", based on aggregated data from the
+                {{ consts.unit_index }} index.
+
+                Use ONLY the data below. Do not invent, estimate or hallucinate any other figure.
+                {% if consts.corpus_filter != "" %}
+                Every figure below covers only the rows matching `{{ consts.corpus_filter }}`.
+                {% endif %}
+
+                ### Index mapping (use only fields that appear here)
+                {{ steps.fetch_mapping.output | json }}
+
+                Every field you name must appear in the mapping above.
+
+                ### Totals for this unit (ES|QL result)
+                {{ steps.unit_totals.output | json }}
+
+                ### Breakdown by {{ consts.breakdown_field }} (ES|QL result)
+                {{ steps.unit_breakdown.output | json }}
+
+                Write a structured profile grounded strictly in the data above.
+
+                This profile sits alongside one sibling KI per other {{ consts.unit_key }} value,
+                all with near-identical titles. The `summary` is what a retriever uses to tell them
+                apart, so lead it with the numbers that make this unit different from its siblings
+                rather than with what they all have in common.
+
+                For `access_patterns` give up to 3 distinct analyst questions about this unit that
+                the data above can actually answer. Return an empty array rather than an invented
+                query when none can; a profile that only orients is allowed, a query that answers
+                nothing is not. Each entry has:
+                - question_type: a short label for the kind of question.
+                - esql_template: an ES|QL query scoped to this unit using the filter
+                  `{{ consts.unit_key }} == ?unit` — a bare named parameter without quotes.
+                - esql_example: the same query with ?unit replaced by the string literal
+                  "{{ steps.unit_context.output.unit_escaped }}"; copy it exactly as written,
+                  every backslash included.
+                - returns: a short description of what the query returns.
+
+                esql_example is executed by the verifier, so it must be valid and runnable:
+                - Start with `FROM {{ consts.unit_index }}`; use `|` between commands; use real field
+                  names only, exactly as they appear in the mapping above, including backticks around
+                  names with spaces.
+                - Scope every query to this unit with `WHERE {{ consts.unit_key }} == "..."`.
+                - Quote string literals with double quotes; do not quote numbers or booleans.
+                - Boolean fields take `COUNT(*) WHERE field == true`, never SUM()/AVG()/MIN()/MAX(),
+                  which fail at runtime on a boolean. For a rate, divide that count by the total with
+                  `EVAL rate = TO_DOUBLE(count_true) / total`.
+                - Only use AVG()/SUM() on genuinely numeric fields.
+                - Keep esql_example runnable and cheap: end it with a small `| LIMIT n` (n <= 20).
+              schema:
+                type: object
+                properties:
+                  summary:
+                    type: string
+                    description: "What distinguishes this unit from its siblings, in numbers"
+                  notable_values:
+                    type: array
+                    items:
+                      type: string
+                    description: "Standout values from the breakdown aggregation"
+                  when_to_use:
+                    type: string
+                    description: "When an analyst or agent should consult this KI"
+                  access_patterns:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        question_type:
+                          type: string
+                        esql_template:
+                          type: string
+                        esql_example:
+                          type: string
+                        returns:
+                          type: string
+                      required: ["question_type", "esql_template", "esql_example", "returns"]
+                required: ["summary", "notable_values", "when_to_use", "access_patterns"]
+
+          # Built once, then handed to create_ki to verify and write.
+          - name: assemble_ki
+            type: data.set
+            with:
+              ki:
+                type: entity
+                title: "{{ steps.unit_context.output.unit }} — {{ consts.unit_key }} profile"
+                # The description is the differentiator between near-identical sibling KIs. Column
+                # names are rendered directly from `unit_totals.output.columns`, so adding a metric
+                # to the STATS clause propagates here automatically.
+                description: >-
+                  {{ steps.unit_context.output.unit }}: {% for col in steps.unit_totals.output.columns %}{{ col.name }} {{ steps.unit_totals.output.values[0][forloop.index0] }}{% unless forloop.last %}, {% endunless %}{% endfor %}. {{ steps.profile_unit.output.content.summary }}
+                content: |
+                  # {{ steps.unit_context.output.unit }}
+
+                  ## Summary
+                  {{ steps.profile_unit.output.content.summary }}
+
+                  ## Key metrics (grounded in ES|QL aggregations)
+                  {% for col in steps.unit_totals.output.columns -%}
+                  - {{ col.name }}: {{ steps.unit_totals.output.values[0][forloop.index0] }}
+                  {% endfor %}
+                  ## Notable values
+                  {% for value in steps.profile_unit.output.content.notable_values -%}
+                  - {{ value }}
+                  {% endfor %}
+                  ## When to use
+                  {{ steps.profile_unit.output.content.when_to_use }}
+
+                  ## Access patterns
+                  {% if steps.profile_unit.output.content.access_patterns.size > 0 -%}
+                  {% for ap in steps.profile_unit.output.content.access_patterns -%}
+                  - [{{ ap.question_type }}] {{ ap.returns }}
+                    Template: `{{ ap.esql_template }}`
+                    Example: `{{ ap.esql_example }}`
+                  {% endfor %}
+                  {%- else -%}
+                  None. Query {{ consts.unit_index }} directly, filtered on {{ consts.unit_key }}.
+                  {%- endif %}
+                tags:
+                  - entity
+                references:
+                  - uri: "index://{{ consts.unit_index }}"
+                    relation: derived_from
+                attributes:
+                  # Every ES|QL the KI carries goes here, which is what the verifiers check. `default: nil`
+                  # omits the attribute when there are no access patterns, so the verifiers skip the KI
+                  # instead of failing an empty list.
+                  esql: "${{ steps.profile_unit.output.content.access_patterns | map: 'esql_example' | default: nil }}"
+                  doc_count: "${{ steps.unit_totals.output.values[0][0] }}"
+                  distinct_breakdown: "${{ steps.unit_totals.output.values[0][1] }}"
+                  unit_key: "{{ consts.unit_key }}"
+                  unit: "{{ steps.unit_context.output.unit }}"
+
+          # `ki_id` is derived from the unit, so a re-run replaces that unit's profile rather than
+          # writing a second KI. A re-run regenerates every unit on every run.
+          - name: create_ki
+            type: context-engine.createKi
+            with:
+              ai_index_id: "{{ consts.ai_index_id }}"
+              ki_id: "{{ steps.unit_context.output.ki_id }}"
+              ki: "${{ steps.assemble_ki.output.ki }}"
+              verifiers:
+                - esql-valid-syntax
+                - esql-valid-runtime

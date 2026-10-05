@@ -27,6 +27,7 @@
     "@kbn/zod-helpers",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-server",
+    "@kbn/es-query",
     "@kbn/agent-builder-platform-plugin",
     "@kbn/agent-builder-browser",
     "@kbn/core-http-browser",

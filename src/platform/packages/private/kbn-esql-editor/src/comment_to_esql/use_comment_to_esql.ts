@@ -47,6 +47,8 @@ interface UseCommentToEsqlParams {
   // "Generating..." decoration during the LLM call. Populated by useGhostLineHint.
   clearGhostHintRef?: MutableRefObject<() => void>;
   telemetryService?: ESQLEditorTelemetryService;
+  // When set, generation auto-accepts: removes the comment line, keeps generated code, and calls this callback with the final query instead of showing the review UI.
+  autoAcceptCallbackRef?: MutableRefObject<((finalQuery: string) => void) | undefined>;
   onAfterInsert?: () => void;
 }
 
@@ -58,6 +60,7 @@ export const useCommentToEsql = ({
   isEnabled,
   clearGhostHintRef,
   telemetryService,
+  autoAcceptCallbackRef,
   onAfterInsert,
 }: UseCommentToEsqlParams) => {
   const { euiTheme } = useEuiTheme();
@@ -424,6 +427,22 @@ export const useCommentToEsql = ({
           ? generatedLineEnd + 1
           : null;
 
+      if (autoAcceptCallbackRef?.current) {
+        const cb = autoAcceptCallbackRef.current;
+        autoAcceptCallbackRef.current = undefined;
+        const currentEditor = editorRef.current;
+        if (currentEditor && liveModel) {
+          currentEditor.executeEdits('nl-to-esql-auto-accept', [
+            {
+              range: new monaco.Range(currentCommentLine, 1, generatedLineStart, 1),
+              text: null,
+            },
+          ]);
+          cb(liveModel.getValue());
+        }
+        return;
+      }
+
       showReview({
         commentLineNumber: currentCommentLine,
         generatedLineStart,
@@ -438,6 +457,7 @@ export const useCommentToEsql = ({
     editorRef,
     editorModel,
     clearGhostHintRef,
+    autoAcceptCallbackRef,
     showGeneratingDecoration,
     cleanup,
     generateESQL,
