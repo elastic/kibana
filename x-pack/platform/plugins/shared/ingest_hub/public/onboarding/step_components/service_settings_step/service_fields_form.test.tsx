@@ -229,3 +229,116 @@ describe('ServiceFieldsForm — ECF single-DS multi-input trigger vars', () => {
     expect(logGroupVar).toMatchObject({ multi: true, required: true });
   });
 });
+
+describe('ServiceFieldsForm — data_stream.dataset onChange extraction', () => {
+  const DATASET_SERVICE: AwsServiceMatrixEntry = {
+    id: 'test_otel',
+    name: 'Test OTel',
+    packageName: 'aws',
+    dataStreams: ['otel_logs'],
+    inputs: ['aws-s3'],
+    showInUI: true,
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+    varDefsByDataStream: {
+      otel_logs: {
+        title: 'OTel Logs',
+        type: 'logs',
+        inputs: ['aws-s3'],
+        defaultEnabledInputs: ['aws-s3'],
+        requiredConfig: ['data_stream.dataset'],
+        varDefsByInput: {
+          'aws-s3': {
+            'data_stream.dataset': {
+              name: 'data_stream.dataset',
+              type: 'text',
+              title: 'Dataset',
+              show_user: true,
+            },
+          },
+        },
+      },
+    },
+  } as unknown as AwsServiceMatrixEntry;
+
+  beforeEach(() => {
+    (LazyPackagePolicyInputVarField as unknown as jest.Mock).mockClear();
+  });
+
+  it('extracts .dataset string from DatasetComponent object instead of stringifying it', () => {
+    const { onFieldChange } = renderForm(DATASET_SERVICE);
+    const varFieldCall = (LazyPackagePolicyInputVarField as unknown as jest.Mock).mock.calls.find(
+      ([props]: [{ varDef?: { name?: string }; onChange?: (v: unknown) => void }]) =>
+        props.varDef?.name === 'data_stream.dataset'
+    );
+    expect(varFieldCall).toBeDefined();
+    const { onChange } = varFieldCall![0] as { onChange: (val: unknown) => void };
+    onChange({ dataset: 'my-custom-dataset', package: 'aws' });
+    expect(onFieldChange).toHaveBeenCalledWith(
+      'otel_logs',
+      'aws-s3',
+      'data_stream.dataset',
+      'my-custom-dataset'
+    );
+  });
+});
+
+describe('ServiceFieldsForm — VarField onChange suppression', () => {
+  // Service with a text field that has a manifest default ('manifest-default').
+  // When the draft is empty the effective displayed value is that default; clearing
+  // it must still fire onFieldChange even though the raw draft entry is undefined.
+  const DEFAULT_SERVICE: AwsServiceMatrixEntry = {
+    id: 'test_default',
+    name: 'Test Default',
+    packageName: 'aws',
+    dataStreams: ['logs'],
+    inputs: ['aws-s3'],
+    showInUI: true,
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+    varDefsByDataStream: {
+      logs: {
+        title: 'Logs',
+        type: 'logs',
+        inputs: ['aws-s3'],
+        defaultEnabledInputs: ['aws-s3'],
+        requiredConfig: [],
+        optionalConfig: ['my_field'],
+        varDefsByInput: {
+          'aws-s3': {
+            my_field: {
+              name: 'my_field',
+              type: 'text',
+              default: 'manifest-default',
+              show_user: true,
+            },
+          },
+        },
+      },
+    },
+  } as unknown as AwsServiceMatrixEntry;
+
+  function getVarFieldOnChange() {
+    const varFieldCall = (LazyPackagePolicyInputVarField as unknown as jest.Mock).mock.calls.find(
+      ([props]: [{ varDef?: { name?: string } }]) => props.varDef?.name === 'my_field'
+    );
+    expect(varFieldCall).toBeDefined();
+    return varFieldCall![0].onChange as (v: unknown) => void;
+  }
+
+  beforeEach(() => {
+    (LazyPackagePolicyInputVarField as unknown as jest.Mock).mockClear();
+  });
+
+  it('fires onFieldChange when clearing an untouched field with a manifest default', () => {
+    // Draft is empty — the field shows 'manifest-default' via toTyped but no draft entry exists.
+    const { onFieldChange } = renderForm(DEFAULT_SERVICE);
+    getVarFieldOnChange()('');
+    expect(onFieldChange).toHaveBeenCalledWith('logs', 'aws-s3', 'my_field', '');
+  });
+
+  it('suppresses onFieldChange when new value matches the effective displayed value', () => {
+    // User re-types the exact manifest default — no actual change.
+    const { onFieldChange } = renderForm(DEFAULT_SERVICE);
+    getVarFieldOnChange()('manifest-default');
+    expect(onFieldChange).not.toHaveBeenCalled();
+  });
+});

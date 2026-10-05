@@ -23,7 +23,7 @@ import {
 
 /**
  * Persists episode table display options (columns, sort, row height, column widths) to both
- * the URL (`_a.episodesTable`) and localStorage, so they survive reloads and are shareable via URL.
+ * the URL (`_a.alertsTable`) and localStorage, so they survive reloads and are shareable via URL.
  *
  * Precedence on load (and on re-sync from browser Back/Forward): URL > localStorage > default.
  * Every setter writes to both stores, so the two stay in sync going forward.

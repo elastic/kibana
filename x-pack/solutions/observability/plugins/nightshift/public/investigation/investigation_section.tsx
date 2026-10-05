@@ -79,10 +79,10 @@ const getSectionPresentation = (id: InvestigationSectionId): SectionPresentation
           defaultMessage: 'Failed & cancelled',
         }),
       };
-    case '80-critical':
-    case '60-high':
-    case '40-medium':
-    case '20-low':
+    case 'critical':
+    case 'high':
+    case 'medium':
+    case 'low':
       return { ...anchors, title: getSeverityLabel(id), severity: id };
     default: {
       const exhaustive: never = id;

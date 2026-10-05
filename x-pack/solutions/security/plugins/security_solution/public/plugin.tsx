@@ -374,6 +374,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
       registerAttackDiscoveryAttachment({
         attachments: plugins.agentBuilder.attachments,
+        getUrlForApp: core.application.getUrlForApp,
       });
       registerAttackDiscoveryVerdictAttachment({
         attachments: plugins.agentBuilder.attachments,
