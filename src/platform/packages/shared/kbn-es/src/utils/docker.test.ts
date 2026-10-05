@@ -59,6 +59,9 @@ import * as mockIdpPluginUtil from '@kbn/mock-idp-utils';
  */
 process.env.KBN_ES_SNAPSHOT_USE_CACHED = 'false';
 
+// Pin the published loopback addresses, which otherwise follow the host's IPv6 support.
+jest.mock('./has_ipv6_loopback', () => ({ hasIpv6Loopback: () => true }));
+
 jest.mock('execa');
 const execa = jest.requireMock('execa');
 execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
@@ -252,6 +255,17 @@ describe('resolveDockerImage()', () => {
       If you require this functionality in @kbn/es please contact the Kibana Operations Team."
     `);
   });
+
+  test('should error when the registry only appears later in the image name', () => {
+    expect(() =>
+      resolveDockerImage({
+        repo: defaultRepo,
+        tag,
+        image: 'another.registry.co/docker.elastic.co/es:latest',
+        defaultImg,
+      })
+    ).toThrow('Only verified images from docker.elastic.co are currently allowed.');
+  });
 });
 
 describe('resolvePort()', () => {
@@ -262,6 +276,8 @@ describe('resolvePort()', () => {
       Array [
         "-p",
         "127.0.0.1:9200:9200",
+        "-p",
+        "[::1]:9200:9200",
       ]
     `);
   });
@@ -273,6 +289,8 @@ describe('resolvePort()', () => {
       Array [
         "-p",
         "127.0.0.1:9200:9200",
+        "-p",
+        "[::1]:9200:9200",
         "-p",
         "192.168.25.1:9200:9200",
       ]
@@ -286,6 +304,8 @@ describe('resolvePort()', () => {
       Array [
         "-p",
         "127.0.0.1:9220:9220",
+        "-p",
+        "[::1]:9220:9220",
         "--env",
         "http.port=9220",
       ]
@@ -299,6 +319,8 @@ describe('resolvePort()', () => {
       Array [
         "-p",
         "127.0.0.1:9220:9220",
+        "-p",
+        "[::1]:9220:9220",
         "-p",
         "192.168.25.1:9220:9220",
         "--env",
