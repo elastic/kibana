@@ -105,9 +105,11 @@ export const createGraphStore = (deps: GraphStoreDependencies): Store => {
       getDefaultMiddleware({
         // graph uses listeners instead of thunks
         thunk: false,
-        // graph state carries non-serializable URL template encoder functions
-        serializableCheck: false,
-        immutableCheck: false,
+        serializableCheck: {
+          // URL template encoders are executable strategies selected by persisted encoder IDs.
+          ignoredPaths: [/^urlTemplates\.\d+\.encoder$/],
+          ignoredActionPaths: [/^payload\.\d+\.encoder$/, 'payload.template.encoder'],
+        },
       }).prepend(listenerMiddleware.middleware),
   });
 
