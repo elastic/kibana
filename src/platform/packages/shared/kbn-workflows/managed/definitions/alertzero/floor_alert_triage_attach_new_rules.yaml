@@ -44,7 +44,6 @@ steps:
         elastic-api-version: "1"
         Content-Type: application/json
       body:
-        target: ids
         ruleIds: "${{ event.ids }}"
     on-failure:
       retry:

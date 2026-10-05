@@ -51,8 +51,6 @@ describe('Alert Triage attach new rules workflow', () => {
 
   it('sends the ids of the created rules as an array, not as text', () => {
     const body = (attach?.with as { body: Record<string, string> }).body;
-    expect(body.target).toBe('ids');
-
     const expression = body.ruleIds;
     const sentIds = engine.evalValueSync(expression.trim().slice(3, -2).trim(), {
       event: { ids: ['so-1', 'so-2'], types: ['query'], tags: [], totalCount: 2 },

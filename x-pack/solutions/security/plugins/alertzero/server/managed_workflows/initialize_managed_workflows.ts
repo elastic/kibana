@@ -42,6 +42,8 @@ export const initializeManagedWorkflows = async ({
   // A managed workflow is validated against the triggers registered when it is installed, and a
   // failed global install stops reconciliation of every AlertZero workflow. The attach workflow's
   // trigger belongs to security_solution, so it is only installed where that trigger exists.
+  // security_solution registers it in setup, which finishes before any plugin starts, so this
+  // start-time check does not depend on plugin start order.
   const isAttachWorkflowInstallable =
     workflowsExtensions.getTriggerDefinition(SECURITY_DETECTION_RULES_CREATED_TRIGGER_ID) !==
     undefined;

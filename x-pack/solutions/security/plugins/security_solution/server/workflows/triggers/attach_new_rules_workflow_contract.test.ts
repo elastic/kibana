@@ -81,9 +81,7 @@ describe('attach new rules workflow and the detectionRulesCreated trigger', () =
 
       expect(payloads).toHaveLength(events);
       for (const { ids } of payloads) {
-        expect(
-          AttachAlertTriageRulesRequestBody.safeParse({ target: 'ids', ruleIds: ids }).success
-        ).toBe(true);
+        expect(AttachAlertTriageRulesRequestBody.safeParse({ ruleIds: ids }).success).toBe(true);
       }
       expect(payloads.flatMap(({ ids }) => ids)).toHaveLength(total);
     }
