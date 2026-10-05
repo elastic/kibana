@@ -81,7 +81,7 @@ The suite's stack uses the `evals_attack_discovery_fp_tp` Scout config set, whic
 
 Run with `--repetitions 5` or more. Each repetition is a separate run in the report, so per-example agreement is the share of an example's repetitions that land on the same outcome; `OutcomeAccuracy`'s label distribution per example shows it directly.
 
-### Measured baseline (managed workflow)
+## Measured baseline (managed workflow)
 
 Measured on commit `a688380f67b468802c0479e2c589f7e94bab1200` (the commit in this PR), 2026-10-05 on the Azure eval farm: 3 repetitions × 23 examples, 0 errored examples, judge `eis-google-gemini-3-1-pro`, 345 commit-pinned golden documents per model. The sweep refuses a judge that is also a candidate, so the gemini family is not measured and no cell is self-judged.
 
@@ -103,6 +103,6 @@ Measured on commit `a688380f67b468802c0479e2c589f7e94bab1200` (the commit in thi
 
 1. Add the claim-grounding evaluator.
 2. Add a weekly step to `.buildkite/pipelines/evals/llm_evals.yml`, copying `Evals: Alert Analysis Workflow` with `EVAL_SUITE_ID: 'security-attack-discovery-fp-tp'`.
-3. Give `PayloadConformance` and `UnsafeClose` a stricter definition or new discriminating cases — both sit at 1.0 in the baseline above and cannot fail a regression yet. Track this as a separate issue.
+3. Give `PayloadConformance` and `UnsafeClose` a stricter definition or new discriminating cases — both sit at 1.0 in the baseline above and cannot fail a regression yet. Tracked in #295393.
 
 Until then the suite runs on demand through the `evals:security-attack-discovery-fp-tp` PR label.
