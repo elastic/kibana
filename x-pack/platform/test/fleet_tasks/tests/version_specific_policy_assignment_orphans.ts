@@ -7,7 +7,10 @@
 
 import expect from '@kbn/expect';
 
-import { AGENT_POLICY_VERSION_SEPARATOR } from '@kbn/fleet-plugin/common/constants';
+import {
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_VERSION_SEPARATOR,
+} from '@kbn/fleet-plugin/common/constants';
 import type { FtrProviderContextWithServices } from '../ftr_provider_context';
 import { cleanupAgentDocs, createAgentDoc } from '../helpers';
 
@@ -16,11 +19,8 @@ export default function (providerContext: FtrProviderContextWithServices) {
   const supertest = getService('supertest');
   const es = getService('es');
   const retry = getService('retry');
-  const TASK_INTERVAL = 30000; // as set in the config
-
-  async function waitForTask() {
-    await new Promise((resolve) => setTimeout(resolve, TASK_INTERVAL + 5000));
-  }
+  // The task runs every 30s (see config); allow a few cycles for it to pick up the test data.
+  const TASK_TIMEOUT = 120000;
 
   async function getAgent(agentId: string) {
     const res = await supertest.get(`/api/fleet/agents/${agentId}`).set('kbn-xsrf', 'xxx');
@@ -61,6 +61,28 @@ export default function (providerContext: FtrProviderContextWithServices) {
 
     before(async () => {
       await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
+      // Fail fast with a clear message instead of two opaque timeouts: a leftover policy with
+      // version conditions makes Phase 1 run a wildcard query that fails with expensive queries off.
+      const versionConditioned = await es.search({
+        index: '.kibana*',
+        ignore_unavailable: true,
+        size: 100,
+        _source: false,
+        query: {
+          bool: {
+            filter: [
+              { term: { type: AGENT_POLICY_SAVED_OBJECT_TYPE } },
+              {
+                term: { [`${AGENT_POLICY_SAVED_OBJECT_TYPE}.has_agent_version_conditions`]: true },
+              },
+            ],
+          },
+        },
+      });
+      expect(versionConditioned.hits.hits.map((hit) => hit._id)).to.eql(
+        [],
+        'A policy with has_agent_version_conditions: true exists; it must be deleted by an earlier suite, otherwise the task aborts before the orphan sweep when expensive queries are disabled'
+      );
       await es.cluster.putSettings({
         persistent: { 'search.allow_expensive_queries': false },
       });
@@ -99,9 +121,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
       // Not an orphan: plain (non-versioned) policy id without policy_base_id.
       await createAgentDoc(providerContext, 'agent-plain', parentId, '9.4.0');
 
-      await waitForTask();
-
-      await retry.tryForTime(30000, async () => {
+      await retry.tryForTime(TASK_TIMEOUT, async () => {
         const agent = await getAgent('agent-no-base');
         expect(agent.policy_id).to.be(parentId);
         const docs = await getFleetPolicies(parentId);
@@ -114,9 +134,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
       // No variant doc in `.fleet-policies` at all: parent is only discoverable via the agent.
       await createAgentDoc(providerContext, 'agent-no-base-no-doc', variantId(), '9.4.0');
 
-      await waitForTask();
-
-      await retry.tryForTime(30000, async () => {
+      await retry.tryForTime(TASK_TIMEOUT, async () => {
         const agent = await getAgent('agent-no-base-no-doc');
         expect(agent.policy_id).to.be(parentId);
       });
