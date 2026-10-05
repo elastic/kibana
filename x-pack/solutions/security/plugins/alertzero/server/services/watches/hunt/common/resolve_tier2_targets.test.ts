@@ -8,6 +8,7 @@
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { DiscoveredDataset } from './discover_hunt_datasets';
+import { buildMatchesRequired } from './matches_required';
 import { matchDatasetsWithModel } from './match_hunt_datasets';
 import { resolveTier2Targets } from './resolve_tier2_targets';
 import { MAX_SCOPE_TARGETS } from './scope_bounds';
@@ -30,7 +31,12 @@ const oktaDataset: DiscoveredDataset = {
   search_patterns: ['logs-okta.system-*'],
 };
 
-const emptyScope = { report_matches: [], actionable_indices: [], discovered: [oktaDataset] };
+const emptyScope = {
+  report_matches: [],
+  actionable_indices: [],
+  discovered: [oktaDataset],
+  index_patterns: ['*'],
+};
 
 const hits = (...indices: string[]) => ({
   per_index: indices.map((index) => ({ index, hit_count: 1, required: true })),
@@ -215,6 +221,77 @@ describe('resolveTier2Targets', () => {
       });
 
       expect(result).toEqual({ tier2_targets: [], tier2_target_sources: [], degraded: true });
+    });
+  });
+
+  describe('constraining against the universe', () => {
+    it('narrows a generalized dataset pattern that reaches outside the universe exclusion to its own backing streams', async () => {
+      const result = await resolveTier2Targets({
+        scope: {
+          ...emptyScope,
+          report_matches: ['logs-okta.system-*'],
+          index_patterns: ['logs-okta.system-*', '-logs-okta.system-prod*'],
+        },
+        tier1: hits(),
+        logger,
+      });
+
+      expect(result.tier2_targets).toEqual(['logs-okta.system-default*']);
+      expect(result.tier2_target_sources).toEqual(['report_match']);
+      expect(result.degraded).toBe(true);
+
+      // The excluded stream must be absent from both what Tier 2 targets (the FROM)
+      // and what it allows (the hit bar / `assertEsqlSourcesAllowed` allowlist) — both
+      // read straight off `tier2_targets`.
+      const matchesRequired = buildMatchesRequired(result.tier2_targets);
+      expect(matchesRequired('.ds-logs-okta.system-prod-2026.09.30-000001')).toBe(false);
+      expect(matchesRequired('.ds-logs-okta.system-default-2026.09.30-000001')).toBe(true);
+    });
+
+    it('drops a pattern that reaches outside the universe and has no owning dataset to narrow it against', async () => {
+      const result = await resolveTier2Targets({
+        scope: {
+          ...emptyScope,
+          report_matches: ['logs-okta.system-*', 'logs-okta.system-prod*'],
+          index_patterns: ['logs-okta.system-*', '-logs-okta.system-prod*'],
+        },
+        tier1: hits(),
+        logger,
+      });
+
+      expect(result.tier2_targets).toEqual(['logs-okta.system-default*']);
+      expect(result.tier2_target_sources).toEqual(['report_match']);
+      expect(result.degraded).toBe(true);
+    });
+
+    it('constrains a namespace restriction with no exclusion syntax the same way', async () => {
+      const result = await resolveTier2Targets({
+        scope: {
+          ...emptyScope,
+          report_matches: ['logs-okta.system-*'],
+          index_patterns: ['logs-okta.system-default*'],
+        },
+        tier1: hits(),
+        logger,
+      });
+
+      expect(result.tier2_targets).toEqual(['logs-okta.system-default*']);
+      expect(result.degraded).toBe(true);
+    });
+
+    it('leaves a pattern untouched and not degraded when it already stays inside the universe', async () => {
+      const result = await resolveTier2Targets({
+        scope: {
+          ...emptyScope,
+          report_matches: ['logs-okta.system-*'],
+          index_patterns: ['logs-*'],
+        },
+        tier1: hits(),
+        logger,
+      });
+
+      expect(result.tier2_targets).toEqual(['logs-okta.system-*']);
+      expect(result.degraded).toBe(false);
     });
   });
 
