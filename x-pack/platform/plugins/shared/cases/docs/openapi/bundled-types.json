@@ -577,7 +577,7 @@
                         "items": {
                           "type": "string",
                           "minLength": 1,
-                          "maxLength": 256
+                          "maxLength": 1024
                         }
                       },
                       "updated_at": {
@@ -852,7 +852,7 @@
                       "items": {
                         "type": "string",
                         "minLength": 1,
-                        "maxLength": 256
+                        "maxLength": 1024
                       }
                     },
                     "updated_at": {
@@ -1131,7 +1131,7 @@
                       "items": {
                         "type": "string",
                         "minLength": 1,
-                        "maxLength": 256
+                        "maxLength": 1024
                       }
                     },
                     "updated_at": {
@@ -5619,7 +5619,7 @@
             "items": {
               "type": "string",
               "minLength": 1,
-              "maxLength": 256
+              "maxLength": 1024
             }
           }
         }
@@ -5729,7 +5729,7 @@
             "items": {
               "type": "string",
               "minLength": 1,
-              "maxLength": 256
+              "maxLength": 1024
             }
           },
           "version": {

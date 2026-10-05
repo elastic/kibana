@@ -17,6 +17,7 @@ import {
   MAX_CUSTOM_OBSERVABLE_TYPES,
   MAX_DESCRIPTION_LENGTH,
   MAX_LENGTH_PER_TAG,
+  MAX_LENGTH_PER_WORKFLOW_TAG,
   MAX_OBSERVABLE_TYPE_KEY_LENGTH,
   MAX_OBSERVABLE_TYPE_LABEL_LENGTH,
   MAX_TAGS_PER_CASE,
@@ -446,9 +447,9 @@ describe('configure', () => {
         );
       });
 
-      it(`limits each workflow tag to ${MAX_LENGTH_PER_TAG} characters`, () => {
-        const workflowTags = ['a'.repeat(MAX_LENGTH_PER_TAG + 1)];
-        const message = `The length of the workflow tag is too long. The maximum length is ${MAX_LENGTH_PER_TAG}.`;
+      it(`limits each workflow tag to ${MAX_LENGTH_PER_WORKFLOW_TAG} characters`, () => {
+        const workflowTags = ['a'.repeat(MAX_LENGTH_PER_WORKFLOW_TAG + 1)];
+        const message = `The length of the workflow tag is too long. The maximum length is ${MAX_LENGTH_PER_WORKFLOW_TAG}.`;
 
         expect(PathReporter.report(codec.decode({ ...defaultRequest, workflowTags }))[0]).toContain(
           message

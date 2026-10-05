@@ -381,7 +381,7 @@ paths:
                       items:
                         type: string
                         minLength: 1
-                        maxLength: 256
+                        maxLength: 1024
                     updated_at:
                       type: string
                       format: date-time
@@ -580,7 +580,7 @@ paths:
                     items:
                       type: string
                       minLength: 1
-                      maxLength: 256
+                      maxLength: 1024
                   updated_at:
                     type: string
                     format: date-time
@@ -781,7 +781,7 @@ paths:
                     items:
                       type: string
                       minLength: 1
-                      maxLength: 256
+                      maxLength: 1024
                   updated_at:
                     type: string
                     format: date-time
@@ -3864,7 +3864,7 @@ components:
           items:
             type: string
             minLength: 1
-            maxLength: 256
+            maxLength: 1024
     update_case_configuration_request:
       title: Update case configuration request
       description: |
@@ -3950,7 +3950,7 @@ components:
           items:
             type: string
             minLength: 1
-            maxLength: 256
+            maxLength: 1024
         version:
           description: |
             The version of the connector. To retrieve the version value, use the get configuration API.

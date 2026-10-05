@@ -8,7 +8,10 @@
 import React from 'react';
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MAX_LENGTH_PER_TAG, MAX_WORKFLOW_TAGS_PER_CONFIGURATION } from '../../../common/constants';
+import {
+  MAX_LENGTH_PER_WORKFLOW_TAG,
+  MAX_WORKFLOW_TAGS_PER_CONFIGURATION,
+} from '../../../common/constants';
 import { renderWithTestingProviders } from '../../common/mock';
 import { useGetWorkflowTags } from '../../containers/configure/use_get_workflow_tags';
 import { WorkflowTags } from './workflow_tags';
@@ -80,12 +83,12 @@ describe('WorkflowTags', () => {
     renderWithTestingProviders(<WorkflowTags {...defaultProps} />);
 
     await userEvent.click(getSearchInput());
-    await userEvent.paste('a'.repeat(MAX_LENGTH_PER_TAG + 1));
+    await userEvent.paste('a'.repeat(MAX_LENGTH_PER_WORKFLOW_TAG + 1));
     await userEvent.keyboard('{enter}');
 
     expect(onChange).not.toHaveBeenCalled();
     expect(
-      await screen.findByText(`Tag must be ${MAX_LENGTH_PER_TAG} characters or fewer.`)
+      await screen.findByText(`Tag must be ${MAX_LENGTH_PER_WORKFLOW_TAG} characters or fewer.`)
     ).toBeInTheDocument();
   });
 
@@ -93,17 +96,17 @@ describe('WorkflowTags', () => {
     renderWithTestingProviders(<WorkflowTags {...defaultProps} />);
 
     await userEvent.click(getSearchInput());
-    await userEvent.paste('a'.repeat(MAX_LENGTH_PER_TAG + 1));
+    await userEvent.paste('a'.repeat(MAX_LENGTH_PER_WORKFLOW_TAG + 1));
     await userEvent.keyboard('{enter}');
     await userEvent.keyboard('{backspace}');
 
     expect(
-      screen.queryByText(`Tag must be ${MAX_LENGTH_PER_TAG} characters or fewer.`)
+      screen.queryByText(`Tag must be ${MAX_LENGTH_PER_WORKFLOW_TAG} characters or fewer.`)
     ).not.toBeInTheDocument();
   });
 
   it('does not suggest workflow tags longer than the maximum tag length', async () => {
-    const longTag = 'a'.repeat(MAX_LENGTH_PER_TAG + 1);
+    const longTag = 'a'.repeat(MAX_LENGTH_PER_WORKFLOW_TAG + 1);
     useGetWorkflowTagsMock.mockReturnValue({
       data: ['enrichment', longTag],
       isLoading: false,

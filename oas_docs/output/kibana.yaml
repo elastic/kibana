@@ -21251,7 +21251,7 @@ paths:
                       description: |
                         Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
                       items:
-                        maxLength: 256
+                        maxLength: 1024
                         minLength: 1
                         type: string
                       maxItems: 100
@@ -21460,7 +21460,7 @@ paths:
                     description: |
                       Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
                     items:
-                      maxLength: 256
+                      maxLength: 1024
                       minLength: 1
                       type: string
                     maxItems: 100
@@ -21670,7 +21670,7 @@ paths:
                     description: |
                       Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
                     items:
-                      maxLength: 256
+                      maxLength: 1024
                       minLength: 1
                       type: string
                     maxItems: 100
@@ -149875,7 +149875,7 @@ components:
           description: |
             Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
           items:
-            maxLength: 256
+            maxLength: 1024
             minLength: 1
             type: string
           maxItems: 100
@@ -150274,7 +150274,7 @@ components:
           description: |
             Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
           items:
-            maxLength: 256
+            maxLength: 1024
             minLength: 1
             type: string
           maxItems: 100

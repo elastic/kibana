@@ -1311,7 +1311,7 @@ export const SetCaseConfigurationRequest = lazySchema(() =>
 
       */
     workflowTags: z
-      .array(z.string().min(1).max(256))
+      .array(z.string().min(1).max(1024))
       .max(100)
       .optional()
       .describe(
@@ -1430,7 +1430,7 @@ export const UpdateCaseConfigurationRequest = lazySchema(() =>
 
       */
     workflowTags: z
-      .array(z.string().min(1).max(256))
+      .array(z.string().min(1).max(1024))
       .max(100)
       .optional()
       .describe(

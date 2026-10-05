@@ -12,7 +12,7 @@ import {
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
 import type { ConfigurationPatchRequest } from '@kbn/cases-plugin/common/types/api';
-import { MAX_LENGTH_PER_TAG } from '@kbn/cases-plugin/common/constants';
+import { MAX_LENGTH_PER_WORKFLOW_TAG } from '@kbn/cases-plugin/common/constants';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -234,7 +234,7 @@ export default ({ getService }: FtrProviderContext): void => {
         configuration.id,
         {
           version: configuration.version,
-          workflowTags: ['a'.repeat(MAX_LENGTH_PER_TAG + 1)],
+          workflowTags: ['a'.repeat(MAX_LENGTH_PER_WORKFLOW_TAG + 1)],
         },
         400
       );

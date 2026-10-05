@@ -77,7 +77,7 @@ workflowTags:
   items:
     type: string
     minLength: 1
-    maxLength: 256
+    maxLength: 1024
 updated_at:
   type: string
   format: date-time

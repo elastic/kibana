@@ -8,7 +8,10 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { MAX_LENGTH_PER_TAG, MAX_WORKFLOW_TAGS_PER_CONFIGURATION } from '../../../common/constants';
+import {
+  MAX_LENGTH_PER_WORKFLOW_TAG,
+  MAX_WORKFLOW_TAGS_PER_CONFIGURATION,
+} from '../../../common/constants';
 import { useGetWorkflowTags } from '../../containers/configure/use_get_workflow_tags';
 import * as i18n from './translations';
 
@@ -23,7 +26,7 @@ interface WorkflowTagsProps {
 const toOption = (tag: string): EuiComboBoxOptionOption<string> => ({ label: tag });
 
 // Workflows don't bound tag length, but the configuration API does, so longer tags can't be saved.
-const isTagWithinMaxLength = (tag: string): boolean => tag.length <= MAX_LENGTH_PER_TAG;
+const isTagWithinMaxLength = (tag: string): boolean => tag.length <= MAX_LENGTH_PER_WORKFLOW_TAG;
 
 /**
  * Settings-page combo box for configuring which workflow tags are visible in
@@ -61,7 +64,7 @@ export const WorkflowTags: React.FC<WorkflowTagsProps> = ({
       const trimmed = searchValue.trim();
       if (!trimmed) return false;
       if (!isTagWithinMaxLength(trimmed)) {
-        setError(i18n.WORKFLOW_TAG_TOO_LONG(MAX_LENGTH_PER_TAG));
+        setError(i18n.WORKFLOW_TAG_TOO_LONG(MAX_LENGTH_PER_WORKFLOW_TAG));
         return false;
       }
       if (workflowTags.includes(trimmed)) return false;
