@@ -73,60 +73,58 @@ export class GraphPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.contentList = new ContentListWrapper(page);
     this.appMenu = new AppMenu(page);
-    this.createGraphPromptButton = this.page.testSubj.locator('graphCreateGraphPromptButton');
-    this.createGraphButton = this.page.testSubj.locator('graphCreateGraphButton');
+    this.createGraphPromptButton = this.page.getByTestId('graphCreateGraphPromptButton');
+    this.createGraphButton = this.page.getByTestId('graphCreateGraphButton');
 
-    this.newButton = this.page.testSubj.locator('graphNewButton');
-    this.saveButton = this.page.testSubj.locator('graphSaveButton');
-    this.settingsButton = this.page.testSubj.locator('graphSettingsButton');
-    this.emptyState = this.page.testSubj.locator('content-list-emptyState');
-    this.currentGraphBreadcrumb = this.page.locator(
-      '[data-test-subj~="graphCurrentGraphBreadcrumb"]'
-    );
-    this.datasourceButton = this.page.testSubj.locator('graphDatasourceButton');
-    this.addFieldButton = this.page.testSubj.locator('graph-add-field-button');
-    this.fieldSearchInput = this.page.testSubj.locator('graph-field-search');
-    this.exploreButton = this.page.testSubj.locator('graph-explore-button');
-    this.queryInput = this.page.testSubj.locator('queryInput');
+    this.newButton = this.page.getByTestId('graphNewButton');
+    this.saveButton = this.page.getByTestId('graphSaveButton');
+    this.settingsButton = this.page.getByTestId('graphSettingsButton');
+    this.emptyState = this.page.getByTestId('content-list-emptyState');
+    this.currentGraphBreadcrumb = this.page.getByTestId(/graphCurrentGraphBreadcrumb/);
+    this.datasourceButton = this.page.getByTestId('graphDatasourceButton');
+    this.addFieldButton = this.page.getByTestId('graph-add-field-button');
+    this.fieldSearchInput = this.page.getByTestId('graph-field-search');
+    this.exploreButton = this.page.getByTestId('graph-explore-button');
+    this.queryInput = this.page.getByTestId('queryInput');
 
-    this.selectAllButton = this.page.testSubj.locator('graphSelectAll');
-    this.invertSelectionButton = this.page.testSubj.locator('graphInvertSelection');
-    this.removeSelectionButton = this.page.testSubj.locator('graphRemoveSelection');
-    this.pauseLayoutButton = this.page.testSubj.locator('graphPauseLayout');
-    this.resumeLayoutButton = this.page.testSubj.locator('graphResumeLayout');
+    this.selectAllButton = this.page.getByTestId('graphSelectAll');
+    this.invertSelectionButton = this.page.getByTestId('graphInvertSelection');
+    this.removeSelectionButton = this.page.getByTestId('graphRemoveSelection');
+    this.pauseLayoutButton = this.page.getByTestId('graphPauseLayout');
+    this.resumeLayoutButton = this.page.getByTestId('graphResumeLayout');
 
-    this.saveTitleInput = this.page.testSubj.locator('savedObjectTitle');
-    this.saveConfirmButton = this.page.testSubj.locator('confirmSaveSavedObjectButton');
-    this.saveSuccessToast = this.page.testSubj.locator('saveGraphSuccess');
+    this.saveTitleInput = this.page.getByTestId('savedObjectTitle');
+    this.saveConfirmButton = this.page.getByTestId('confirmSaveSavedObjectButton');
+    this.saveSuccessToast = this.page.getByTestId('saveGraphSuccess');
 
-    this.confirmModalTitle = this.page.testSubj.locator('confirmModalTitleText');
-    this.confirmModalConfirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
+    this.confirmModalTitle = this.page.getByTestId('confirmModalTitleText');
+    this.confirmModalConfirmButton = this.page.getByTestId('confirmModalConfirmButton');
 
-    this.nodeCircles = this.page.testSubj.locator('graphNodeCircle');
-    this.clickableEdges = this.page.testSubj.locator('graphClickableEdge');
-    this.selectionListFields = this.page.locator('[data-test-subj^="graphSelectionListField-"]');
-    this.graphNodes = this.page.testSubj.locator('graphNode');
-    this.undoButton = this.page.testSubj.locator('graphUndo');
-    this.redoButton = this.page.testSubj.locator('graphRedo');
-    this.groupButton = this.page.testSubj.locator('graphGroupSelection');
-    this.ungroupButton = this.page.testSubj.locator('graphUngroupSelection');
-    this.mergeLeftIntoRightButton = this.page.testSubj.locator('graphMergeLeftIntoRight');
-    this.expandSelectionButton = this.page.testSubj.locator('graphExpandSelection');
-    this.fillConnectionsButton = this.page.testSubj.locator('graphFillConnections');
-    this.blockSelectionButton = this.page.testSubj.locator('graphBlockSelection');
-    this.styleSelectionButton = this.page.testSubj.locator('graphStyleSelection');
-    this.drilldownButton = this.page.testSubj.locator('graphDrilldown');
-    this.inspectButton = this.page.testSubj.locator('graphInspectButton');
-    this.nodeLabelInput = this.page.testSubj.locator('graphNodeLabelInput');
-    this.rawDocumentsDrilldown = this.page.testSubj.locator('graphRawDocumentsDrilldown');
+    this.nodeCircles = this.page.getByTestId('graphNodeCircle');
+    this.clickableEdges = this.page.getByTestId('graphClickableEdge');
+    this.selectionListFields = this.page.getByTestId(/^graphSelectionListField-/);
+    this.graphNodes = this.page.getByTestId('graphNode');
+    this.undoButton = this.page.getByTestId('graphUndo');
+    this.redoButton = this.page.getByTestId('graphRedo');
+    this.groupButton = this.page.getByTestId('graphGroupSelection');
+    this.ungroupButton = this.page.getByTestId('graphUngroupSelection');
+    this.mergeLeftIntoRightButton = this.page.getByTestId('graphMergeLeftIntoRight');
+    this.expandSelectionButton = this.page.getByTestId('graphExpandSelection');
+    this.fillConnectionsButton = this.page.getByTestId('graphFillConnections');
+    this.blockSelectionButton = this.page.getByTestId('graphBlockSelection');
+    this.styleSelectionButton = this.page.getByTestId('graphStyleSelection');
+    this.drilldownButton = this.page.getByTestId('graphDrilldown');
+    this.inspectButton = this.page.getByTestId('graphInspectButton');
+    this.nodeLabelInput = this.page.getByTestId('graphNodeLabelInput');
+    this.rawDocumentsDrilldown = this.page.getByTestId('graphRawDocumentsDrilldown');
     this.inspectorRequestTab = this.page.getByRole('tab', { name: 'Request', exact: true });
     this.inspectorResponseTab = this.page.getByRole('tab', { name: 'Response', exact: true });
 
-    this.vennLargeTerm1 = this.page.testSubj.locator('graphVennLargeTerm1');
-    this.vennLargeTerm2 = this.page.testSubj.locator('graphVennLargeTerm2');
-    this.vennSmallTerm1 = this.page.testSubj.locator('graphVennSmallTerm1');
-    this.vennSmallOverlap = this.page.testSubj.locator('graphVennSmallOverlap');
-    this.vennSmallTerm2 = this.page.testSubj.locator('graphVennSmallTerm2');
+    this.vennLargeTerm1 = this.page.getByTestId('graphVennLargeTerm1');
+    this.vennLargeTerm2 = this.page.getByTestId('graphVennLargeTerm2');
+    this.vennSmallTerm1 = this.page.getByTestId('graphVennSmallTerm1');
+    this.vennSmallOverlap = this.page.getByTestId('graphVennSmallOverlap');
+    this.vennSmallTerm2 = this.page.getByTestId('graphVennSmallTerm2');
   }
 
   async goto() {
@@ -164,16 +162,14 @@ export class GraphPage {
 
   async pickIndexPattern(indexPattern: string) {
     await this.datasourceButton.click();
-    await this.page.testSubj.locator(`savedObjectTitle${indexPattern}`).click();
+    await this.page.getByTestId(`savedObjectTitle${indexPattern}`).click();
     // "Add fields" stays `aria-disabled` until the fields finish loading.
     await this.addFieldButton.waitFor({ state: 'visible' });
     await this.page.waitForFunction(
       () =>
         document
           .querySelector('[data-test-subj="graph-add-field-button"]')
-          ?.getAttribute('aria-disabled') === 'false',
-      undefined,
-      { timeout: 10000 }
+          ?.getAttribute('aria-disabled') === 'false'
     );
   }
 
@@ -188,9 +184,7 @@ export class GraphPage {
       () =>
         document
           .querySelector('[data-test-subj="graph-add-field-button"]')
-          ?.getAttribute('aria-disabled') === 'false',
-      undefined,
-      { timeout: 10000 }
+          ?.getAttribute('aria-disabled') === 'false'
     );
   }
 
@@ -206,9 +200,7 @@ export class GraphPage {
       () =>
         document
           .querySelector('[data-test-subj="graph-add-field-button"]')
-          ?.getAttribute('aria-disabled') === 'false',
-      undefined,
-      { timeout: 10000 }
+          ?.getAttribute('aria-disabled') === 'false'
     );
   }
 
@@ -217,7 +209,7 @@ export class GraphPage {
     await this.fieldSearchInput.waitFor({ state: 'visible' });
     for (const field of fields) {
       await this.fieldSearchInput.fill(field);
-      const option = this.page.testSubj.locator(`graph-field-option-${field}`);
+      const option = this.page.getByTestId(`graph-field-option-${field}`);
       await option.waitFor({ state: 'visible' });
       await option.click();
     }
@@ -282,14 +274,14 @@ export class GraphPage {
     const labelsToKeep = new Set(labels);
     for (const selectedLabel of selectedLabels) {
       if (!labelsToKeep.has(selectedLabel)) {
-        await this.page.locator(`[data-test-subj="graph-selected-${selectedLabel}"]`).click();
+        await this.page.getByTestId(`graph-selected-${selectedLabel}`).click();
       }
     }
 
     const focusedLabel = labels[labels.length - 1];
     if (focusedLabel) {
-      await this.page.testSubj
-        .locator(`graphSelectionListField-${focusedLabel}`)
+      await this.page
+        .getByTestId(`graphSelectionListField-${focusedLabel}`)
         .getByText(focusedLabel, { exact: true })
         .click();
     }
@@ -338,7 +330,7 @@ export class GraphPage {
 
   async selectNodeColor(color: string) {
     await this.styleSelectionButton.click();
-    await this.page.testSubj.locator(`graphColorPicker-${color}`).click();
+    await this.page.getByTestId(`graphColorPicker-${color}`).click();
   }
 
   async openInspector() {
@@ -357,11 +349,11 @@ export class GraphPage {
 
   async openHiddenList() {
     await this.clickSettings();
-    await this.page.testSubj.locator('blocklist').click();
+    await this.page.getByTestId('blocklist').click();
   }
 
   async unblockAllNodes() {
-    await this.page.testSubj.locator('graphUnblocklistAll').click();
+    await this.page.getByTestId('graphUnblocklistAll').click();
   }
 
   async saveWorkspaceAs(title: string) {
