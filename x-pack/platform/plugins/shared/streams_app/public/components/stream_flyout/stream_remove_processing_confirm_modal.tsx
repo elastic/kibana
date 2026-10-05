@@ -68,7 +68,6 @@ export function StreamRemoveProcessingConfirmationModal({
   if (loading || !value) {
     return (
       <EuiConfirmModal
-        key="processingConfirmModal"
         aria-labelledby={modalTitleId}
         title={i18n.translate('xpack.streams.flyout.processingRemovalConfirmModal.deleteLabel', {
           defaultMessage: 'Remove processing?',
@@ -106,7 +105,6 @@ export function StreamRemoveProcessingConfirmationModal({
       refreshDefinition={refresh}
     >
       <StreamRemoveProcessingConfirmationModalInner
-        key="processingConfirmModal"
         refresh={refreshAll}
         definition={value.definition}
         pipeline={value.pipeline}
