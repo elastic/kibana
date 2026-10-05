@@ -19,9 +19,8 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 const TIMEOUT_CHECK = 3000;
 const MORE_POPOVER = 'side-nav-popover-More';
 // Every primary item renders in the rail until the overflow split into "More" is measured a frame
-// later. The negated match also holds when the attribute is absent.
-const MEASURED_PRIMARY_NAV =
-  '#kbnChromeNav-primaryNavigation:not([data-overflow-measured="false"])';
+// later.
+const MEASURED_PRIMARY_NAV = '#kbnChromeNav-primaryNavigation[data-overflow-measured="true"]';
 
 export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getService'>) {
   const testSubjects = ctx.getService('testSubjects');
