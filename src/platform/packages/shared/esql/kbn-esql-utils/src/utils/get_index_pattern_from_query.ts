@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { BasicPrettyPrinter, Parser, isSubQuery, synth } from '@elastic/esql';
+import { BasicPrettyPrinter, Parser, isSource, isSubQuery, synth } from '@elastic/esql';
 import { esqlCommandRegistry, getIndexFromPromQLParams } from '@kbn/esql-language';
 import type { ESQLSource, ESQLCommand, ESQLAstPromqlCommand } from '@elastic/esql/types';
 
@@ -168,7 +168,9 @@ export function getSourceCommandQueryFromESQLQuery(esql: string | undefined): st
   );
 
   if (sourceCommand) {
-    return BasicPrettyPrinter.command(reduceSubqueriesToSource(sourceCommand));
+    // Nothing to describe yet, e.g. `FROM ` while typing.
+    const hasSources = sourceCommand.args.some((arg) => isSource(arg) || isSubQuery(arg));
+    return hasSources ? BasicPrettyPrinter.command(reduceSubqueriesToSource(sourceCommand)) : '';
   }
 
   const [promqlIndex] = getPromQLSources(root.commands);

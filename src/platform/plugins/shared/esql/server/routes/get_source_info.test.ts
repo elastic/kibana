@@ -57,6 +57,7 @@ function buildMocks() {
   const response = {
     ok: jest.fn((r) => ({ status: 200, ...r })),
     badRequest: jest.fn((r) => ({ status: 400, ...r })),
+    customError: jest.fn((r) => ({ status: r.statusCode, ...r })),
   };
   const context = { logger: { get: () => errorLogger } };
 
@@ -149,14 +150,33 @@ describe('registerGetSourceInfoRoute', () => {
     esqlQuery.mockRejectedValueOnce(new Error('esql failed'));
     registerGetSourceInfoRoute(router, context);
 
-    await expect(
-      handler(requestHandlerContext, { body: { query: 'FROM logs-*' } }, response)
-    ).rejects.toThrow('esql failed');
+    await handler(requestHandlerContext, { body: { query: 'FROM logs-*' } }, response);
 
     expect(errorLogger.error).toHaveBeenCalledWith(
       expect.stringContaining('Failed to fetch ES|QL source info columns'),
       expect.objectContaining({ tags: ['esql', 'source_info'] })
     );
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 500,
+      body: { message: 'esql failed' },
+    });
     expect(response.ok).not.toHaveBeenCalled();
+  });
+
+  it('returns the Elasticsearch status for an invalid query without logging an error', async () => {
+    const { router, handler, requestHandlerContext, response, context, esqlQuery, errorLogger } =
+      buildMocks();
+    esqlQuery.mockRejectedValueOnce(
+      Object.assign(new Error('Unknown index [lo]'), { meta: { statusCode: 400 } })
+    );
+    registerGetSourceInfoRoute(router, context);
+
+    await handler(requestHandlerContext, { body: { query: 'FROM lo' } }, response);
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 400,
+      body: { message: 'Unknown index [lo]' },
+    });
+    expect(errorLogger.error).not.toHaveBeenCalled();
   });
 });

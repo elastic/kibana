@@ -206,6 +206,8 @@ describe('getSourceCommandQueryFromESQLQuery', () => {
     expect(getSourceCommandQueryFromESQLQuery('')).toBe('');
     expect(getSourceCommandQueryFromESQLQuery(undefined)).toBe('');
     expect(getSourceCommandQueryFromESQLQuery('ROW a = 1')).toBe('');
+    expect(getSourceCommandQueryFromESQLQuery('FROM ')).toBe('');
+    expect(getSourceCommandQueryFromESQLQuery('FROM | LIMIT 10')).toBe('');
     expect(
       getSourceCommandQueryFromESQLQuery(
         'PROMQL step=1m start=?_tstart end=?_tend (avg(cpu_usage))'

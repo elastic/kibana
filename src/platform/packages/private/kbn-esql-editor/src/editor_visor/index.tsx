@@ -22,6 +22,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AiButton } from '@kbn/ui-ai-components';
 import { useEffectiveProjectRouting } from '../hooks/use_effective_project_routing';
+import { VALIDATION_DEBOUNCE_MS } from '../hooks/use_query_validation';
 import { SubmitButton } from './submit_button';
 import { VisorMode } from './visor_mode';
 import { useNlGeneration } from './use_nl_generation';
@@ -152,14 +153,18 @@ export function QuickSearchVisor({
       return;
     }
     let cancelled = false;
-    EsqlSource.create({ query: sourceQuery, http: core.http, projectRouting })
-      .then((source) => registerEsqlSourceInDataViewsCache(data.dataViews, source, core.http))
-      .then(
-        (dataView) => !cancelled && setAdHocDataView(dataView),
-        () => !cancelled && setAdHocDataView(null)
-      );
+    // The query is the live editor text: wait for typing to pause before looking up the source.
+    const timeout = setTimeout(() => {
+      EsqlSource.create({ query: sourceQuery, http: core.http, projectRouting })
+        .then((source) => registerEsqlSourceInDataViewsCache(data.dataViews, source, core.http))
+        .then(
+          (dataView) => !cancelled && setAdHocDataView(dataView),
+          () => !cancelled && setAdHocDataView(null)
+        );
+    }, VALIDATION_DEBOUNCE_MS);
     return () => {
       cancelled = true;
+      clearTimeout(timeout);
     };
   }, [isVisible, sourceQuery, projectRouting, data.dataViews, core.http]);
 

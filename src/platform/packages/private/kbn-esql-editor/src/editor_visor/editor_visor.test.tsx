@@ -84,6 +84,16 @@ describe('Quick search visor', () => {
     });
   });
 
+  it('looks up the source once typing pauses, not on every keystroke', async () => {
+    const { rerender } = renderWithI18n(renderESQLVisor({ ...props, query: 'FROM l' }));
+    rerender(renderESQLVisor({ ...props, query: 'FROM lo' }));
+    rerender(renderESQLVisor({ ...props, query: 'FROM logs' }));
+
+    await waitFor(() => expect(EsqlSource.create).toHaveBeenCalled());
+    expect(EsqlSource.create).toHaveBeenCalledTimes(1);
+    expect(EsqlSource.create).toHaveBeenCalledWith(expect.objectContaining({ query: 'FROM logs' }));
+  });
+
   it('suggests the fields of the queried dataset, not of the query result', async () => {
     renderWithI18n(
       renderESQLVisor({ ...props, query: 'FROM meow1 | STATS count = COUNT(*) BY host' })

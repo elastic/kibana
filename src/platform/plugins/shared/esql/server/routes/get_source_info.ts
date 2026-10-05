@@ -113,13 +113,16 @@ export const registerGetSourceInfoRoute = (
             settings: { column_metadata: true },
           })) as unknown as ESQLSearchResponse;
         } catch (error) {
-          const message = error instanceof Error ? error.message : String(error);
-          logger.get().error(`Failed to fetch ES|QL source info columns: ${message}`, {
-            tags: ['esql', 'source_info'],
-            error: {
-              stack_trace: error instanceof Error ? error.stack : undefined,
-            },
-          });
+          // Invalid or partial queries (e.g. while typing) are client errors, not worth an error log.
+          if (getErrorStatusCode(error) >= 500) {
+            const message = error instanceof Error ? error.message : String(error);
+            logger.get().error(`Failed to fetch ES|QL source info columns: ${message}`, {
+              tags: ['esql', 'source_info'],
+              error: {
+                stack_trace: error instanceof Error ? error.stack : undefined,
+              },
+            });
+          }
           throw error;
         }
 
@@ -140,12 +143,17 @@ export const registerGetSourceInfoRoute = (
         });
         return response.ok({ body: { columns } });
       } catch (error) {
+        const statusCode = getErrorStatusCode(error);
         esqlRouteRequestCounter.add(1, {
           route: 'source_info',
           outcome: 'failure',
-          'http.response.status_code': getErrorStatusCode(error),
+          'http.response.status_code': statusCode,
         });
-        throw error;
+        // Return Elasticsearch's status, e.g. 400 for an invalid query, instead of a generic 500.
+        return response.customError({
+          statusCode,
+          body: { message: error instanceof Error ? error.message : String(error) },
+        });
       }
     }
   );
