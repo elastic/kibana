@@ -33,6 +33,16 @@ export interface SortField {
   ascLabel?: string;
   /** Custom label for descending sort (overrides auto-generated label). */
   descLabel?: string;
+  /**
+   * Restricts the directions offered in the sort dropdown. Omit to offer both.
+   * Use single-direction arrays for fields where only one direction is meaningful.
+   */
+  allowedDirections?: readonly ['asc' | 'desc', ...Array<'asc' | 'desc'>];
+  /**
+   * Help text for this field. When set, the field's dropdown options show a "?"
+   * icon with this text as a tooltip instead of the direction arrow.
+   */
+  description?: string;
 }
 
 /**

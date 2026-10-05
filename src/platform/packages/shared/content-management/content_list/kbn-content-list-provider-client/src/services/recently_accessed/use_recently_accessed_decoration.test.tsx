@@ -10,9 +10,14 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { render, screen } from '@testing-library/react';
-import { useRecentlyAccessedDecoration } from './use_recently_accessed_decoration';
+import {
+  ACCESSED_AT_FIELD,
+  useRecentlyAccessedDecoration,
+} from './use_recently_accessed_decoration';
 import type { RecentlyAccessedHistorySource } from './types';
 import { RECENT_FIELD } from './recents_filter_renderer';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import { createClientStrategy } from '../../strategy';
 
 // Simulate per-component resolver isolation: each `createComponent` call
 // returns a unique component whose `resolve` is closure-bound to that call.
@@ -133,6 +138,125 @@ describe('useRecentlyAccessedDecoration', () => {
       // sourceB has an entry → filter B renders the button.
       render(<resultB.current.RecentsFilter />);
       expect(screen.getByRole('button')).toBeInTheDocument();
+    });
+  });
+
+  describe('sortField', () => {
+    const createMockItem = (id: string): UserContentCommonSchema => ({
+      id,
+      type: 'dashboard',
+      updatedAt: '2024-01-15T10:30:00.000Z',
+      references: [],
+      attributes: {
+        title: `Dashboard ${id}`,
+        description: `Description for ${id}`,
+      },
+    });
+
+    it('has the expected id so the strategy resolves it against the decorated field', () => {
+      const source = buildSource([{ id: 'a' }]);
+      const { result } = renderHook(() => useRecentlyAccessedDecoration(source));
+      expect(result.current.sortField.id).toBe(ACCESSED_AT_FIELD);
+    });
+
+    it('getValue returns the accessedAt score based on history order', () => {
+      // First entry in the array is the most recently accessed.
+      // 'b' at index 0 → score 2, 'a' at index 1 → score 1.
+      const source = buildSource([{ id: 'b' }, { id: 'a' }]);
+      const { result } = renderHook(() => useRecentlyAccessedDecoration(source));
+
+      const { hits } = result.current.decorate({
+        total: 2,
+        hits: [createMockItem('a'), createMockItem('b')],
+      });
+
+      const { getValue } = result.current.sortField;
+      expect(getValue?.(hits[0])).toBe(1); // 'a' — older
+      expect(getValue?.(hits[1])).toBe(2); // 'b' — most recent
+    });
+
+    it('getValue returns null for items not in the history, enabling the updatedAt fallback', () => {
+      const source = buildSource([{ id: 'a' }]);
+      const { result } = renderHook(() => useRecentlyAccessedDecoration(source));
+
+      const { hits } = result.current.decorate({
+        total: 2,
+        hits: [createMockItem('a'), createMockItem('z')],
+      });
+
+      const { getValue } = result.current.sortField;
+      expect(getValue?.(hits[0])).toBe(1); // in history
+      expect(getValue?.(hits[1])).toBeNull(); // not in history
+    });
+
+    it('is descending-only', () => {
+      const { result } = renderHook(() => useRecentlyAccessedDecoration(buildSource([])));
+      const { allowedDirections } = result.current.sortField;
+
+      expect(allowedDirections).toEqual(['desc']);
+    });
+
+    it('falls back to updatedAt descending', () => {
+      const { result } = renderHook(() => useRecentlyAccessedDecoration(buildSource([])));
+
+      expect(result.current.sortField.fallbackSort).toEqual({
+        field: 'updatedAt',
+        direction: 'desc',
+      });
+    });
+
+    it('orders recents by history, then the rest by updatedAt, through the client strategy', async () => {
+      const source = buildSource([{ id: 'b' }, { id: 'a' }]);
+      const { result } = renderHook(() => useRecentlyAccessedDecoration(source));
+      const items = [
+        { ...createMockItem('a'), updatedAt: '2024-01-01T00:00:00.000Z' },
+        { ...createMockItem('b'), updatedAt: '2024-01-02T00:00:00.000Z' },
+        { ...createMockItem('c'), updatedAt: '2024-01-03T00:00:00.000Z' },
+        { ...createMockItem('d'), updatedAt: '2024-01-04T00:00:00.000Z' },
+      ];
+      const { findItems } = createClientStrategy(
+        async () => result.current.decorate({ total: items.length, hits: items }),
+        undefined,
+        undefined,
+        undefined,
+        { [result.current.sortField.id]: result.current.sortField }
+      );
+      const response = await findItems({
+        searchQuery: '',
+        filters: {},
+        sort: { field: ACCESSED_AT_FIELD, direction: 'desc' },
+        page: { index: 0, size: 20 },
+      });
+
+      // b was viewed most recently, then a; c and d follow by updatedAt descending.
+      expect(response.items.map(({ id }) => id)).toEqual(['b', 'a', 'd', 'c']);
+    });
+  });
+
+  describe('hasHistory', () => {
+    it('is true when the source has entries on mount', () => {
+      const { result } = renderHook(() =>
+        useRecentlyAccessedDecoration(buildSource([{ id: 'a' }]))
+      );
+
+      expect(result.current.hasHistory).toBe(true);
+    });
+
+    it('is false when the source is empty on mount', () => {
+      const { result } = renderHook(() => useRecentlyAccessedDecoration(buildSource([])));
+
+      expect(result.current.hasHistory).toBe(false);
+    });
+
+    it('is read once and does not change when the history changes after mount', () => {
+      const entries: Array<{ id: string }> = [];
+      const source: RecentlyAccessedHistorySource = { get: () => entries.slice() };
+      const { result, rerender } = renderHook(() => useRecentlyAccessedDecoration(source));
+
+      entries.push({ id: 'a' });
+      rerender();
+
+      expect(result.current.hasHistory).toBe(false);
     });
   });
 });

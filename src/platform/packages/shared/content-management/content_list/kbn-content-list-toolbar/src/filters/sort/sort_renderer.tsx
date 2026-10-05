@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { EuiSelectable, EuiIcon, useEuiTheme, type Query } from '@elastic/eui';
+import { EuiSelectable, EuiIcon, useEuiTheme, type Query, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   useContentListConfig,
@@ -75,6 +75,9 @@ const i18nText = {
   dateDesc: i18n.translate('contentManagement.contentList.sortRenderer.dateDescLabel', {
     defaultMessage: 'Newest first',
   }),
+  additionalInfo: i18n.translate('contentManagement.contentList.sortRenderer.additionalInfoLabel', {
+    defaultMessage: 'Additional information',
+  }),
 };
 
 /** Fields that receive the `A-Z` / `Z-A` treatment by default. */
@@ -107,6 +110,24 @@ const isDateLikeField = (field: string): boolean => {
   return field.length > 2 && field.endsWith('At');
 };
 
+const SORT_DIRECTIONS = ['asc', 'desc'] as const;
+/**
+ * Returns the icon appended to a sort option: a help tooltip when the field
+ * has a `description`, otherwise the direction arrow.
+ */
+const getOptionAppend = (direction: 'asc' | 'desc', description?: string): React.ReactNode =>
+  description ? (
+    <EuiIconTip
+      type="question"
+      color="inherit"
+      position="right"
+      content={description}
+      aria-label={i18nText.additionalInfo}
+    />
+  ) : (
+    <EuiIcon type={direction === 'asc' ? 'sortUp' : 'sortDown'} aria-hidden={true} />
+  );
+
 /**
  * Generates sort options from an array of {@link SortField} configurations.
  *
@@ -124,27 +145,19 @@ const isDateLikeField = (field: string): boolean => {
  * @param fields - Array of sort field configurations.
  * @returns Array of {@link SortItem} options for the sort selector.
  */
-const generateOptionsFromFields = (fields: SortField[]): SortItem[] => {
-  const options: SortItem[] = [];
-
-  for (const { field, name, ascLabel, descLabel } of fields) {
-    options.push({
-      label: ascLabel ?? getDefaultLabel(field, name, 'asc'),
-      field,
-      direction: 'asc',
-      append: <EuiIcon type="sortUp" aria-hidden={true} />,
-    });
-
-    options.push({
-      label: descLabel ?? getDefaultLabel(field, name, 'desc'),
-      field,
-      direction: 'desc',
-      append: <EuiIcon type="sortDown" aria-hidden={true} />,
-    });
-  }
-
-  return options;
-};
+const generateOptionsFromFields = (fields: SortField[]): SortItem[] =>
+  fields.flatMap(
+    ({ field, name, ascLabel, descLabel, description, allowedDirections = SORT_DIRECTIONS }) =>
+      SORT_DIRECTIONS.filter((direction) => allowedDirections.includes(direction)).map(
+        (direction) => ({
+          label:
+            (direction === 'asc' ? ascLabel : descLabel) ?? getDefaultLabel(field, name, direction),
+          field,
+          direction,
+          append: getOptionAppend(direction, description),
+        })
+      )
+  );
 
 /**
  * Generates a default sort label when no explicit label is provided.

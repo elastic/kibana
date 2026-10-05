@@ -124,7 +124,7 @@ Each subfolder is named after the `ContentListClientProvider` field it serves:
 | `createUserProfilesService(profile)`  | `services/user_profiles/`| `services.userProfiles`                        |
 | `createContentInsightsService(opts)` + `<SavedObjectActivityRow>` | `services/content_insights/` | `features.contentEditor.appendRows`            |
 | `createDuplicateTitleValidator(opts)` | `services/duplicate_title/` | `features.contentEditor.customValidators.title`|
-| `useRecentlyAccessedDecoration(src)`  | `services/recently_accessed/` | `findItems` decoration + `features.flags` + a closure-bound `RecentsFilter` |
+| `useRecentlyAccessedDecoration(src)`  | `services/recently_accessed/` | `findItems` decoration + `features.flags` + a closure-bound `RecentsFilter` + a `sortField` for `features.sorting.fields` |
 | `withPerformanceMetrics(fn, opts)`    | `services/performance_metrics/` | wraps `findItems` / `actions.delete.onBulkAction` |
 
 Each helper is tested in isolation and is independently optional. Use one, several, or none — `ContentListClientProvider` accepts the raw types either way.
@@ -176,6 +176,16 @@ return (
     findItems={async (q, opts) => recents.decorate(await search(q, opts))}
     features={{
       flags: [recents.flag],
+      sorting: {
+        // Offer the sort, and land on it, only when there is history to sort by.
+        initialSort: recents.hasHistory
+          ? { field: recents.sortField.id, direction: 'desc' }
+          : { field: 'updatedAt', direction: 'desc' },
+        fields: (defaults) => ({
+          ...defaults,
+          ...(recents.hasHistory && { [recents.sortField.id]: recents.sortField }),
+        }),
+      },
       contentEditor: {
         onSave: updateItemMeta,
         customValidators: {
@@ -212,6 +222,13 @@ return (
   </ContentListClientProvider>
 );
 ```
+
+### Recently accessed: filter vs sort
+
+`useRecentlyAccessedDecoration` returns two independent, opt-in features. Use either or both:
+
+- **Filter:** `recents.flag` and `<recents.RecentsFilter />` add an `is:recent` toggle that **narrows** the list to items in the history.
+- **Sort:** `recents.sortField` adds a descending-only "Recently viewed" option, with a "?" tooltip explaining the history is stored in the browser. It **reorders** the full list: items in the history come first (most recent first), and the rest follow ordered by `updatedAt` descending. Pair it with `recents.hasHistory`, which is `true` when the history had entries on mount. Register `sortField`, and use it as `initialSort`, only when it is `true`. That way the option isn't offered, or selected by default, when there's nothing to sort by.
 
 ### Custom filters
 
