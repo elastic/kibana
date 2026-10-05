@@ -103,4 +103,33 @@ describe('buildImpactEntities', () => {
   it('returns an empty list when there are no SSE entries', () => {
     expect(buildImpactEntities([])).toEqual([]);
   });
+
+  it('skips an entity with an empty name, which the impact route would otherwise reject', () => {
+    expect(
+      buildImpactEntities([
+        entry([
+          { field: 'host.name', value: '' },
+          { field: 'user.name', value: 'james' },
+        ]),
+      ])
+    ).toEqual([{ id: 'user:james', name: 'james', type: 'user' }]);
+  });
+
+  it('keeps two over-long values apart even when they share a long common prefix', () => {
+    const sharedPrefix = 'x'.repeat(300);
+    const nameA = `${sharedPrefix}-A`;
+    const nameB = `${sharedPrefix}-B`;
+
+    const entities = buildImpactEntities([
+      entry([
+        { field: 'user.name', value: nameA },
+        { field: 'user.name', value: nameB },
+      ]),
+    ]);
+
+    expect(entities).toHaveLength(2);
+    expect(entities[0].id).not.toBe(entities[1].id);
+    expect(entities[0].id).toHaveLength(MAX_ENTITY_ID_LENGTH);
+    expect(entities[1].id).toHaveLength(MAX_ENTITY_ID_LENGTH);
+  });
 });

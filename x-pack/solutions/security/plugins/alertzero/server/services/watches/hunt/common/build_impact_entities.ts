@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import {
   MAX_ENTITY_ID_LENGTH,
   MAX_ENTITY_IDS,
@@ -40,15 +41,34 @@ const TYPE_BY_FIELD: Partial<Record<AttachmentEntityField, HuntImpactEntityType>
   'user.name': 'user',
 };
 
+/** `-` plus 8 hex chars of a sha256 digest: enough to make a truncated id collision-proof in practice. */
+const HASH_SUFFIX_LENGTH = 9;
+
+/**
+ * Builds the `${type}:` id, bounded to `MAX_ENTITY_ID_LENGTH`. A value that fits keeps the id
+ * readable; a value that doesn't is cut short and given a hash suffix of the value it was cut
+ * from, so two distinct over-long values that share a long common prefix still get distinct ids
+ * instead of colliding into the same truncated one.
+ */
+const buildEntityId = (type: HuntImpactEntityType, value: string): string => {
+  const prefix = `${type}:`;
+  const budget = MAX_ENTITY_ID_LENGTH - prefix.length;
+  if (value.length <= budget) {
+    return `${prefix}${value}`;
+  }
+  const hash = createHash('sha256').update(value).digest('hex').slice(0, 8);
+  return `${prefix}${value.slice(0, budget - HASH_SUFFIX_LENGTH)}-${hash}`;
+};
+
 /**
  * The hosts and users this run's SSE entries name, as investigation impact entities.
  *
  * Ids use the `host:` / `user:` form the Alert Triage Worker uses. The hunt only collects names,
- * so a host Alert Triage keys by `host.id` shows up as a separate Impact pill. The value is cut so
- * the prefixed id fits the shared id limit: an over-long id would fail the whole attach.
+ * so a host Alert Triage keys by `host.id` shows up as a separate Impact pill.
  *
  * Entries keep the mapper's order (Tier 1 assets by hit count, alternating with Tier 2), so the
- * cap drops the lowest-priority entities.
+ * cap drops the lowest-priority entities. An entity with an empty name is dropped rather than
+ * forwarded: the impact route rejects a blank name, which would otherwise fail the whole attach.
  */
 export const buildImpactEntities = (
   sse: ReadonlyArray<{ data: { entities: AttachmentEntityRef[] } }>
@@ -58,11 +78,10 @@ export const buildImpactEntities = (
   for (const entry of sse) {
     for (const { field, value } of entry.data.entities) {
       const type = TYPE_BY_FIELD[field];
-      if (!type) {
+      if (!type || value.length === 0) {
         continue;
       }
-      const prefix = `${type}:`;
-      const id = `${prefix}${value.slice(0, MAX_ENTITY_ID_LENGTH - prefix.length)}`;
+      const id = buildEntityId(type, value);
       if (byId.has(id)) {
         continue;
       }
