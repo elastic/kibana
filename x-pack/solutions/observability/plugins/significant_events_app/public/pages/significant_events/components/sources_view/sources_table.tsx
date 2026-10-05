@@ -55,6 +55,8 @@ interface ISourcesTableProps {
   selection?: EuiTableSelectionType<NightshiftSource>;
   /** When true, per-row onboard actions are disabled (global pause / status loading). */
   blocksActivity?: boolean;
+  /** Sources whose onboard request is in flight or accepted and not yet reflected in status. */
+  generatingSourceIds?: readonly string[];
   /** Explains why onboard actions are disabled (loading / error / paused). */
   activityBlockTooltip?: string;
   canManage: boolean;
@@ -76,6 +78,7 @@ export function SourcesTable({
   searchText,
   selection,
   blocksActivity = false,
+  generatingSourceIds = [],
   activityBlockTooltip,
   canManage,
   pendingEnabledSourceId,
@@ -108,6 +111,7 @@ export function SourcesTable({
         source={source}
         onboardingStatus={onboardingResultMap[source.id]?.status}
         blocksActivity={blocksActivity}
+        isOnboardPending={generatingSourceIds.includes(source.id)}
         onboardTooltip={onboardTooltip}
         onOnboard={onOnboardSource}
         onStopOnboarding={onStopOnboarding}

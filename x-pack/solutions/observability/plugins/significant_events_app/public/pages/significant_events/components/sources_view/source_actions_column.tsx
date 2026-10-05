@@ -11,7 +11,7 @@ import {
   SignificantEventsWorkflowStatus,
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   DELETE_SOURCE_ACTION_DESCRIPTION,
   DELETE_SOURCE_ACTION_LABEL,
@@ -26,9 +26,11 @@ interface SourceActionsColumnProps {
   onboardingStatus?: SignificantEventsWorkflowStatusResult['status'];
   /** Global pause or unknown activity status: onboarding cannot start. */
   blocksActivity: boolean;
+  /** Schedule accepted or in flight; the row stays disabled until that fails or status takes over. */
+  isOnboardPending: boolean;
   onboardTooltip: string;
   onOnboard: (sourceId: string) => void;
-  onStopOnboarding: (sourceId: string) => void;
+  onStopOnboarding: (sourceId: string) => void | Promise<void>;
   onDelete: (source: NightshiftSource) => void;
 }
 
@@ -40,11 +42,29 @@ export function SourceActionsColumn({
   source,
   onboardingStatus,
   blocksActivity,
+  isOnboardPending,
   onboardTooltip,
   onOnboard,
   onStopOnboarding,
   onDelete,
 }: SourceActionsColumnProps) {
+  const [isStopPending, setIsStopPending] = useState(false);
+  // A resolved cancel stays InProgress until the next poll. Drop the lock once status moves on,
+  // so a later run of this source is not stuck with a disabled stop button.
+  if (isStopPending && onboardingStatus !== SignificantEventsWorkflowStatus.InProgress) {
+    setIsStopPending(false);
+  }
+
+  const handleStopOnboarding = async () => {
+    setIsStopPending(true);
+    try {
+      await onStopOnboarding(source.id);
+    } catch {
+      // Status will not move, so the button has to accept another attempt.
+      setIsStopPending(false);
+    }
+  };
+
   return (
     <EuiFlexGroup
       data-test-subj={`significantEventsAppSourceActions-${source.id}`}
@@ -59,8 +79,12 @@ export function SourceActionsColumn({
               data-test-subj="significantEventsAppSourcesTableStopButton"
               iconType="stop"
               aria-label={STOP_SOURCE_ONBOARDING_BUTTON_LABEL}
-              isDisabled={onboardingStatus === SignificantEventsWorkflowStatus.BeingCanceled}
-              onClick={() => onStopOnboarding(source.id)}
+              isDisabled={
+                isStopPending || onboardingStatus === SignificantEventsWorkflowStatus.BeingCanceled
+              }
+              onClick={() => {
+                void handleStopOnboarding();
+              }}
             />
           </EuiToolTip>
         ) : (
@@ -69,8 +93,9 @@ export function SourceActionsColumn({
               data-test-subj="significantEventsAppSourcesTableOnboardButton"
               iconType="radar"
               aria-label={RUN_SOURCE_ONBOARDING_BUTTON_LABEL}
-              // The onboarding route rejects disabled sources.
-              isDisabled={!source.enabled || blocksActivity}
+              // The onboarding route rejects disabled sources. Pending covers the gap before status
+              // reports in progress, including a schedule that has been accepted but not polled yet.
+              isDisabled={!source.enabled || blocksActivity || isOnboardPending}
               onClick={() => onOnboard(source.id)}
             />
           </EuiToolTip>

@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { SIGNIFICANT_EVENTS_TAB } from '../../../common';
+import { isValidSignificantEventsTab } from './significant_events_tabs';
 import { useKibana } from '../../hooks/use_kibana';
 import { useDeveloperMode } from '../../hooks/use_developer_mode';
 import { getFormattedError } from '../../util/errors';
@@ -41,21 +42,6 @@ import { useDecisionTreesEnabled } from './components/decision_trees/use_decisio
 import { DetectionsTab } from './components/detections_tab';
 import { SignificantEventsTab } from './components/significant_events_tab';
 import { RunLimitsBanner } from './components/run_limits_banner';
-
-const significantEventsTabs = [
-  'sources',
-  'knowledge_indicators',
-  'queries',
-  'detections',
-  SIGNIFICANT_EVENTS_TAB,
-  'cortex',
-  'decision_trees',
-] as const;
-type SignificantEventsTabId = (typeof significantEventsTabs)[number];
-
-function isValidSignificantEventsTab(value: string): value is SignificantEventsTabId {
-  return significantEventsTabs.includes(value as SignificantEventsTabId);
-}
 
 export function SignificantEventsPage() {
   const {

@@ -20,6 +20,7 @@ import { useSignificantEventsAppParams } from '../../hooks/use_significant_event
 import { useSignificantEventsAppRouter } from '../../hooks/use_significant_events_app_router';
 import { useSignificantEventsAvailability } from '../../hooks/use_significant_events_availability';
 import { SettingsTab } from '../significant_events/components/settings/tab';
+import { isValidSignificantEventsTab } from '../significant_events/significant_events_tabs';
 
 const settingsTitle = i18n.translate('xpack.significantEventsApp.settingsPage.title', {
   defaultMessage: 'Settings',
@@ -55,8 +56,12 @@ export function SettingsPage() {
   const { canConfigure } = getNightshiftCapabilities(nightshift);
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
   // Settings opens from both Nightshift and the Management page; Back returns to the one it
-  // came from.
-  const fromTab = query?.fromTab;
+  // came from. An unknown fromTab is ignored, so a hand-edited query does not claim to return
+  // to Management.
+  const fromTab =
+    query?.fromTab !== undefined && isValidSignificantEventsTab(query.fromTab)
+      ? query.fromTab
+      : undefined;
   const backHref = fromTab
     ? router.link('/{tab}', { path: { tab: fromTab } })
     : getUrlForApp(NIGHTSHIFT_APP_ID);

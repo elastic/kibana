@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSignificantEventsAppParams } from '../../hooks/use_significant_events_app_params';
@@ -83,5 +83,33 @@ describe('SettingsPage', () => {
     await waitFor(() => {
       expect(navigateToApp).toHaveBeenCalledWith(NIGHTSHIFT_APP_ID);
     });
+  });
+
+  it('returns to the management tab when fromTab is a known tab', () => {
+    mockUseSignificantEventsAppParams.mockReturnValue({ query: { fromTab: 'sources' } } as never);
+
+    render(<SettingsPage />);
+
+    expect(screen.getByTestId('settingsPageBackLink')).toHaveAttribute(
+      'href',
+      '/app/significant_events/sources'
+    );
+    expect(screen.getByTestId('settingsPageBackLink')).toHaveTextContent('Nightshift Management');
+  });
+
+  it('returns to Nightshift when fromTab is absent', () => {
+    render(<SettingsPage />);
+
+    expect(screen.getByTestId('settingsPageBackLink')).toHaveAttribute('href', '/app/nightshift');
+    expect(screen.getByTestId('settingsPageBackLink')).toHaveTextContent(/^Nightshift$/);
+  });
+
+  it('returns to Nightshift when fromTab is not a tab', () => {
+    mockUseSignificantEventsAppParams.mockReturnValue({ query: { fromTab: 'streams' } } as never);
+
+    render(<SettingsPage />);
+
+    expect(screen.getByTestId('settingsPageBackLink')).toHaveAttribute('href', '/app/nightshift');
+    expect(screen.getByTestId('settingsPageBackLink')).toHaveTextContent(/^Nightshift$/);
   });
 });
