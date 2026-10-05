@@ -33,16 +33,10 @@ const binding = (
   ...overrides,
 });
 
-const workloadOf = ({
+const workloadOf = ({ pluginId, workloadType, workloadId }: ServiceAccountWorkloadBinding) => ({
   pluginId,
   workloadType,
   workloadId,
-  spaceId,
-}: ServiceAccountWorkloadBinding) => ({
-  pluginId,
-  workloadType,
-  workloadId,
-  spaceId,
   displayName: workloadId,
 });
 
@@ -87,13 +81,15 @@ describe('ServiceAccountsManagement', () => {
   });
 
   describe('#listWorkloads', () => {
-    it('lists the bound workloads after checking `read_security`', async () => {
+    it('lists the bound workloads after checking `read_security`, leaving out their spaces', async () => {
       const bindings = [binding(), binding({ workloadId: 'workflow-2', spaceId: 'other' })];
       store.findByServiceAccountId.mockResolvedValue(bindings);
 
-      await expect(management.listWorkloads(request, SERVICE_ACCOUNT_ID)).resolves.toEqual(
-        bindings.map(workloadOf)
-      );
+      const workloads = await management.listWorkloads(request, SERVICE_ACCOUNT_ID);
+      expect(workloads).toStrictEqual(bindings.map(workloadOf));
+      for (const workload of workloads) {
+        expect(workload).not.toHaveProperty('spaceId');
+      }
 
       expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
         elasticsearch: { cluster: ['read_security'], index: {} },

@@ -23,7 +23,6 @@ const workload = {
   pluginId: 'workflows',
   workloadType: 'workflow',
   workloadId: 'workflow-1',
-  spaceId: 'default',
   displayName: 'workflow-1',
 };
 

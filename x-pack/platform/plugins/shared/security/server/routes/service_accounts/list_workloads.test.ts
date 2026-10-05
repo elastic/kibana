@@ -94,7 +94,6 @@ describe('List service account workloads route', () => {
         pluginId: 'workflows',
         workloadType: 'workflow',
         workloadId: 'w-1',
-        spaceId: 'default',
         displayName: 'w-1',
       },
     ];

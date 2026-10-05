@@ -168,7 +168,6 @@ apiTest.describe(
             pluginId: 'serviceAccountsTest',
             workloadType: 'job',
             workloadId,
-            spaceId: 'default',
             displayName: workloadId,
           },
         ];

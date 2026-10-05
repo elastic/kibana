@@ -72,12 +72,10 @@ const toBoundWorkload = ({
   pluginId,
   workloadType,
   workloadId,
-  spaceId,
 }: ServiceAccountWorkloadBinding): ServiceAccountBoundWorkload => ({
   pluginId,
   workloadType,
   workloadId,
-  spaceId,
   displayName: workloadId,
 });
 
