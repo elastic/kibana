@@ -13,7 +13,7 @@ import {
   createQueryParamsObservable,
 } from './history_observable';
 import { createMemoryHistory, History } from 'history';
-import { ParsedQuery } from 'query-string';
+import type { ParsedQuery } from 'query-string';
 
 let history: History;
 
