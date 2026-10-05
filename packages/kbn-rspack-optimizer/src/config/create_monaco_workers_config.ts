@@ -10,6 +10,7 @@
 import Path from 'path';
 import type { Configuration } from '@rspack/core';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
+import { MONACO_WORKER_ENTRIES } from '@kbn/monaco/server';
 import { rspack } from '../rspack_runtime';
 import { getSwcOptions } from './shared_config';
 import { resolveSharedAssetPaths } from './shared_asset_paths';
@@ -34,14 +35,12 @@ export function createMonacoWorkersConfig({
     mode: dist ? 'production' : 'development',
     devtool: dist ? false : 'cheap-source-map',
     target: 'web',
-    entry: {
-      default: 'monaco-editor/esm/vs/editor/editor.worker.js',
-      json: 'monaco-editor/esm/vs/language/json/json.worker.js',
-      xjson: Path.resolve(monacoPackageRoot, 'src/languages/xjson/worker/xjson.worker.ts'),
-      painless: Path.resolve(monacoPackageRoot, 'src/languages/painless/worker/painless.worker.ts'),
-      yaml: Path.resolve(monacoPackageRoot, 'src/languages/yaml/worker/yaml.worker.ts'),
-      console: Path.resolve(monacoPackageRoot, 'src/languages/console/worker/console.worker.ts'),
-    },
+    entry: Object.fromEntries(
+      Object.entries(MONACO_WORKER_ENTRIES).map(([workerId, entry]) => [
+        workerId,
+        resolveMonacoWorkerEntry(monacoPackageRoot, entry),
+      ])
+    ),
     output: {
       path: monacoOutput,
       filename: '[name].editor.worker.js',
@@ -93,4 +92,8 @@ export function createMonacoWorkersConfig({
       timings: true,
     },
   };
+}
+
+function resolveMonacoWorkerEntry(monacoPackageRoot: string, entry: string): string {
+  return entry.startsWith('src/') ? Path.resolve(monacoPackageRoot, entry) : entry;
 }

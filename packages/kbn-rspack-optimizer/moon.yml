@@ -29,6 +29,7 @@ dependsOn:
   - '@kbn/repo-packages'
   - '@kbn/projects-solutions-groups'
   - '@kbn/ci-stats-reporter'
+  - '@kbn/monaco'
 tags:
   - shared-server
   - package

@@ -7,21 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { XJSON_LANG_ID, PAINLESS_LANG_ID, CONSOLE_LANG_ID, YAML_LANG_ID } from './languages';
 import { monaco } from './monaco_imports';
+import { DEFAULT_WORKER_ID, LANG_SPECIFIC_WORKER_IDS } from './worker_entries';
 
-export const DEFAULT_WORKER_ID = 'default' as const;
+export { DEFAULT_WORKER_ID };
+export type { LangSpecificWorkerIds } from './worker_entries';
 
-const langSpecificWorkerIds = [
-  monaco.languages.json.jsonDefaults.languageId,
-  XJSON_LANG_ID,
-  PAINLESS_LANG_ID,
-  YAML_LANG_ID,
-  CONSOLE_LANG_ID,
-] as const;
-
-// exported for use in webpack config to build workers
-export type LangSpecificWorkerIds = [typeof DEFAULT_WORKER_ID, ...typeof langSpecificWorkerIds];
+const langSpecificWorkerIds: readonly string[] = LANG_SPECIFIC_WORKER_IDS;
 
 declare module 'monaco-editor/esm/vs/editor/editor.api' {
   export interface Environment {
