@@ -13,7 +13,8 @@ import type {
   SaveDiscoverSessionParams,
   SavedSearchPublicPluginStart,
 } from '@kbn/saved-search-plugin/public';
-import type { DiscoverSessionApiResponse, DiscoverSessionWarning } from '../../server';
+import type { DiscoverSessionWarning } from '../../server';
+import type { DiscoverSessionInternalResponse } from '../../server/api/internal_schema';
 import type { DiscoverSessionClient } from './api_client';
 import {
   fromDiscoverSessionApiResponse,
@@ -23,7 +24,7 @@ import {
 
 // Coordinates session loading and saving through HTTP or the legacy client, selected by the flag.
 // HTTP loads convert the API response and return its warnings without showing UI.
-// Local Data View IDs are assigned when the UI restores its tabs, not by this service.
+// Internal routes preserve inline Data View IDs; tab restoration fills any missing IDs.
 // HTTP saves convert the session into a create or upsert request, then keep the submitted tabs
 // and update only the session ID, metadata, and references from the response.
 
@@ -39,7 +40,7 @@ interface DiscoverSessionLoadResult {
 
 // Keep the legacy save types while callers use the existing save flow.
 // Revisit those types when the legacy path is removed; the session service can remain.
-export interface SessionService {
+export interface DiscoverSessionService {
   get: (id: string) => Promise<DiscoverSessionLoadResult>;
   save: (
     session: SaveDiscoverSessionParams,
@@ -48,7 +49,7 @@ export interface SessionService {
 }
 
 /** Selects the REST or legacy path for loading and saving Discover sessions. */
-export const createSessionService = ({
+export const createDiscoverSessionService = ({
   apiClient,
   legacyClient,
   useHttpApi,
@@ -56,9 +57,9 @@ export const createSessionService = ({
   apiClient: DiscoverSessionClient;
   legacyClient: LegacyDiscoverSessionClient;
   useHttpApi: boolean;
-}): SessionService => {
+}): DiscoverSessionService => {
   if (!useHttpApi) {
-    return createLegacySessionService(legacyClient);
+    return createLegacyDiscoverSessionService(legacyClient);
   }
 
   return {
@@ -71,7 +72,7 @@ export const createSessionService = ({
     },
     save: async (session, options) => {
       const data = toDiscoverSessionApiData(session);
-      let response: DiscoverSessionApiResponse;
+      let response: DiscoverSessionInternalResponse;
 
       if (options.copyOnSave || session.id === undefined) {
         response = await apiClient.create(data);
@@ -80,7 +81,7 @@ export const createSessionService = ({
       }
 
       // Saving confirms the submitted tabs; it does not reload them. The API document omits
-      // local values such as pin markers, inline IDs, and the live chart fingerprint.
+      // local values such as pin markers, control order numbers, and the live chart fingerprint.
       return {
         ...session,
         id: response.id,
@@ -92,7 +93,9 @@ export const createSessionService = ({
 };
 
 // Remove this fallback and the flag once Discover uses only HTTP.
-const createLegacySessionService = (legacyClient: LegacyDiscoverSessionClient): SessionService => ({
+const createLegacyDiscoverSessionService = (
+  legacyClient: LegacyDiscoverSessionClient
+): DiscoverSessionService => ({
   get: async (id) => ({
     session: await legacyClient.getDiscoverSession(id),
     warnings: [],

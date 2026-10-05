@@ -59,6 +59,8 @@ const buildConnector = (tenantKey: string): InMemoryConnector => ({
   isDeprecated: false,
   isSystemAction: false,
   isConnectorTypeDeprecated: false,
+  // Events are on for this connector.
+  isInboundEventsEnabled: true,
 });
 
 /** Pagination options for a single page of connected channels. */

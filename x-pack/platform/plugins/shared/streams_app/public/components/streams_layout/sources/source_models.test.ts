@@ -6,7 +6,12 @@
  */
 
 import type { StreamsUnit } from '@kbn/streams-schema';
-import { createUnitSource, getConfiguredSources, withUnitSources } from './source_models';
+import {
+  connectedDestinationLabels,
+  createUnitSource,
+  getConfiguredSources,
+  withUnitSources,
+} from './source_models';
 
 const storedUnit: StreamsUnit.GetResponse = {
   unit: {
@@ -41,6 +46,12 @@ const storedUnit: StreamsUnit.GetResponse = {
 };
 
 describe('source models', () => {
+  it('labels each source with the destinations its pipelines forward to', () => {
+    expect(connectedDestinationLabels(storedUnit)).toEqual({
+      'otlp-input': ['es-prod'],
+    });
+  });
+
   it('maps configured sources from the unit and ignores unmanaged types', () => {
     expect(getConfiguredSources(storedUnit)).toEqual([
       {

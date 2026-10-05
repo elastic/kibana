@@ -13,6 +13,10 @@
 
 import { restoreSelfClientTestEnvironment } from './self_client_test_environment';
 import { readFileSync } from 'node:fs';
+import {
+  ReadableStream as NodeReadableStream,
+  TransformStream as NodeTransformStream,
+} from 'node:stream/web';
 import http from 'node:http';
 import https from 'node:https';
 import Supertest from 'supertest';
@@ -21,6 +25,7 @@ import {
   Headers as UndiciHeaders,
   Request as UndiciRequest,
   Response as UndiciResponse,
+  FormData as UndiciFormData,
 } from 'undici';
 import { schema } from '@kbn/config-schema';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
@@ -36,6 +41,8 @@ import {
   type HttpService,
   type InternalHttpServiceStart,
 } from '@kbn/core-http-server-internal';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { errors } from '@elastic/elasticsearch';
 import { createInternalHttpService } from '../utilities';
 
 interface RecursiveResponse {
@@ -48,6 +55,9 @@ const originalFetch = global.fetch;
 const originalHeaders = global.Headers;
 const originalRequest = global.Request;
 const originalResponse = global.Response;
+const originalFormData = global.FormData;
+const originalReadableStream = global.ReadableStream;
+const originalTransformStream = global.TransformStream;
 const routeSecurity = {
   authz: {
     enabled: false,
@@ -67,7 +77,10 @@ type TestHttpConfig = Omit<Partial<HttpConfigType>, 'selfHttp' | 'ssl' | 'versio
   versioned?: Partial<HttpConfigType['versioned']>;
 };
 
-const startServer = async (serverConfig: TestHttpConfig = { port: TEST_PORT }) => {
+const startServer = async (
+  serverConfig: TestHttpConfig = { port: TEST_PORT },
+  { withAuth = false }: { withAuth?: boolean } = {}
+) => {
   const logger = loggingSystemMock.create();
   const server = createInternalHttpService({
     logger,
@@ -87,10 +100,35 @@ const startServer = async (serverConfig: TestHttpConfig = { port: TEST_PORT }) =
     docLinks: docLinksServiceMock.createSetupContract(),
   });
 
-  const { server: innerServer, createRouter, registerOnPostAuth } = await server.setup(setupDeps);
+  const {
+    server: innerServer,
+    createRouter,
+    registerAuth,
+    registerOnPostAuth,
+    setSelfClientUnauthorizedErrorHandler,
+  } = await server.setup(setupDeps);
   const router = createRouter('/');
   const supertest = Supertest(innerServer.listener);
   const started = { httpStart: null as InternalHttpServiceStart | null };
+  // One credential rotation: the self call's first attempt carries the stale token.
+  const credentials = { current: 'Bearer fresh', minted: 0, sideEffects: 0 };
+
+  if (withAuth) {
+    registerAuth((request, response, toolkit) => {
+      if (
+        request.route.path === '/self/rotating_target' &&
+        request.headers.authorization !== credentials.current
+      ) {
+        return response.unauthorized({ body: 'Stale credential' });
+      }
+      return toolkit.authenticated();
+    });
+
+    setSelfClientUnauthorizedErrorHandler((_options, toolkit) => {
+      credentials.minted += 1;
+      return toolkit.retry({ authHeaders: { authorization: credentials.current } });
+    });
+  }
   registerOnPostAuth((request, response, toolkit) => {
     if (request.route.path === '/self/authz_denied') {
       return response.forbidden({ body: 'Rejected by test authorization' });
@@ -155,6 +193,41 @@ const startServer = async (serverConfig: TestHttpConfig = { port: TEST_PORT }) =
 
   router.get(
     {
+      path: '/self/call_form_data',
+      security: routeSecurity,
+      validate: false,
+    },
+    async (_context, req, res) => {
+      const form = new FormData();
+      form.append('message', 'hello');
+      try {
+        const response = await started
+          .httpStart!.selfClient.asScoped(req)
+          .fetch<{ body: string; contentType: string }>('/self/form_target', {
+            method: 'POST',
+            rawBody: form,
+          });
+        return res.ok({ body: response });
+      } catch (error) {
+        const cause = (error as Error & { cause?: Error }).cause;
+        return res.ok({ body: { error: (error as Error).message, cause: cause?.message } });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/self/form_target',
+      options: { body: { accepts: 'multipart/form-data', output: 'stream' } },
+      security: routeSecurity,
+      validate: { body: schema.any() },
+    },
+    (_context, req, res) =>
+      res.ok({ body: { received: req.body, contentType: req.headers['content-type'] } })
+  );
+
+  router.get(
+    {
       path: '/self/authz_denied',
       security: routeSecurity,
       validate: false,
@@ -198,6 +271,31 @@ const startServer = async (serverConfig: TestHttpConfig = { port: TEST_PORT }) =
     async (_context, req, res) => {
       try {
         await started.httpStart!.selfClient.asScoped(req).fetch('/self/redirect');
+        return res.ok({ body: { error: null } });
+      } catch (error) {
+        return res.ok({ body: { error: (error as Error).message } });
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: '/self/redirect_cross',
+      security: routeSecurity,
+      validate: false,
+    },
+    (_context, _req, res) => res.redirected({ headers: { location: 'https://evil.example/steal' } })
+  );
+
+  router.get(
+    {
+      path: '/self/call_redirect_cross',
+      security: routeSecurity,
+      validate: false,
+    },
+    async (_context, req, res) => {
+      try {
+        await started.httpStart!.selfClient.asScoped(req).fetch('/self/redirect_cross');
         return res.ok({ body: { error: null } });
       } catch (error) {
         return res.ok({ body: { error: (error as Error).message } });
@@ -340,6 +438,94 @@ const startServer = async (serverConfig: TestHttpConfig = { port: TEST_PORT }) =
     }
   );
 
+  router.get(
+    {
+      path: '/self/rotating_target',
+      security: routeSecurity,
+      validate: { query: schema.object({ payload: schema.string() }) },
+    },
+    (_context, req, res) =>
+      res.ok({ body: { payload: req.query.payload, authorization: req.headers.authorization } })
+  );
+
+  router.get(
+    {
+      path: '/self/call_rotating',
+      security: routeSecurity,
+      validate: false,
+    },
+    async (_context, req, res) => {
+      const fakeRequest = kibanaRequestFactory({
+        headers: { authorization: 'Bearer stale' },
+        auth: { isAuthenticated: true },
+      });
+
+      try {
+        const body = await started
+          .httpStart!.selfClient.asScoped(fakeRequest)
+          .fetch('/self/rotating_target', {
+            query: { payload: 'replayed-intact' },
+          });
+        return res.ok({ body: { body, minted: credentials.minted } });
+      } catch (error) {
+        return res.ok({ body: { error: (error as Error).message, minted: credentials.minted } });
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: '/self/side_effect_then_401',
+      security: routeSecurity,
+      validate: false,
+    },
+    async () => {
+      // The handler runs, mutates state, and only then hits an expired credential downstream.
+      // Core turns an Elasticsearch 401 thrown by a handler into a 401 response, which must not
+      // be mistaken for an authentication-stage rejection.
+      credentials.sideEffects += 1;
+      throw Object.assign(
+        new errors.ResponseError({
+          statusCode: 401,
+          body: { error: { reason: 'token expired' } },
+          headers: {},
+          meta: {} as any,
+          warnings: null,
+        } as any),
+        { name: 'ResponseError' }
+      );
+    }
+  );
+
+  router.get(
+    {
+      path: '/self/call_side_effect',
+      security: routeSecurity,
+      validate: false,
+    },
+    async (_context, req, res) => {
+      const fakeRequest = kibanaRequestFactory({
+        headers: { authorization: 'Bearer stale' },
+        auth: { isAuthenticated: true },
+      });
+
+      try {
+        await started
+          .httpStart!.selfClient.asScoped(fakeRequest)
+          .fetch('/self/side_effect_then_401');
+        return res.ok({ body: { error: null, sideEffects: credentials.sideEffects } });
+      } catch (error) {
+        return res.ok({
+          body: {
+            error: (error as Error).message,
+            sideEffects: credentials.sideEffects,
+            minted: credentials.minted,
+          },
+        });
+      }
+    }
+  );
+
   started.httpStart = await server.start();
 
   return { server, httpStart: started.httpStart, logger, supertest };
@@ -351,6 +537,9 @@ describe('Http self client', () => {
     global.Headers = UndiciHeaders as typeof global.Headers;
     global.Request = UndiciRequest as unknown as typeof global.Request;
     global.Response = UndiciResponse as unknown as typeof global.Response;
+    global.FormData = UndiciFormData as unknown as typeof global.FormData;
+    global.ReadableStream = NodeReadableStream as typeof global.ReadableStream;
+    global.TransformStream = NodeTransformStream as typeof global.TransformStream;
   });
 
   afterAll(() => {
@@ -358,7 +547,44 @@ describe('Http self client', () => {
     global.Headers = originalHeaders;
     global.Request = originalRequest;
     global.Response = originalResponse;
+    global.FormData = originalFormData;
+    global.ReadableStream = originalReadableStream;
+    global.TransformStream = originalTransformStream;
     restoreSelfClientTestEnvironment();
+  });
+
+  describe('401 refresh and replay', () => {
+    let server: HttpService;
+    let supertest: Supertest.Agent;
+
+    beforeEach(async () => {
+      ({ server, supertest } = await startServer({ port: TEST_PORT }, { withAuth: true }));
+    });
+
+    afterEach(async () => {
+      await server.stop();
+      http.globalAgent.destroy();
+      https.globalAgent.destroy();
+    });
+
+    it('replays a call rejected by the authentication lifecycle with the refreshed credential', async () => {
+      const response = await supertest.get('/self/call_rotating').expect(200);
+
+      expect(response.body.minted).toBe(1);
+      expect(response.body.body).toEqual({
+        payload: 'replayed-intact',
+        authorization: 'Bearer fresh',
+      });
+    });
+
+    it('does not replay a 401 a route handler produced after a side effect', async () => {
+      const response = await supertest.get('/self/call_side_effect').expect(200);
+
+      // The handler ran exactly once: no replay, so its side effect was not duplicated.
+      expect(response.body.sideEffects).toBe(1);
+      expect(response.body.minted).toBe(0);
+      expect(response.body.error).toBeTruthy();
+    });
   });
 
   describe('path safety and recursion limits', () => {
@@ -393,6 +619,12 @@ describe('Http self client', () => {
       expect(response.body.error).toContain('a self call cannot issue another self call');
     });
 
+    it('sends a buffered FormData self-call with its multipart boundary', async () => {
+      const response = await supertest.get('/self/call_form_data').expect(200);
+      expect(response.body.received).toEqual({ message: 'hello' });
+      expect(response.body.contentType).toMatch(/^multipart\/form-data; boundary=/);
+    });
+
     it('does not follow redirects', async () => {
       const response = await supertest.get('/self/call_redirect').expect(200);
 
@@ -409,6 +641,36 @@ describe('Http self client', () => {
     });
   });
 
+  describe('same-origin redirects', () => {
+    let server: HttpService;
+    let supertest: Supertest.Agent;
+
+    beforeEach(async () => {
+      ({ server, supertest } = await startServer({
+        port: TEST_PORT,
+        selfHttp: { maxRedirects: 1 },
+      }));
+    });
+
+    afterEach(async () => {
+      await server.stop();
+      http.globalAgent.destroy();
+      https.globalAgent.destroy();
+    });
+
+    it('follows a same-origin redirect', async () => {
+      const response = await supertest.get('/self/call_redirect').expect(200);
+
+      expect(response.body.error).toBeNull();
+    });
+
+    it('refuses a cross-origin redirect', async () => {
+      const response = await supertest.get('/self/call_redirect_cross').expect(200);
+
+      expect(response.body.error).toMatch(/cross-origin redirect/i);
+    });
+  });
+
   describe('receiving self-call observation', () => {
     let server: HttpService;
 
@@ -421,6 +683,7 @@ describe('Http self client', () => {
     it('allows and safely logs self calls after authorization', async () => {
       const started = await startServer({ port: TEST_PORT });
       server = started.server;
+      (started.logger.get().debug as jest.Mock).mockClear();
       (started.logger.get().info as jest.Mock).mockClear();
 
       await started.supertest
@@ -428,27 +691,35 @@ describe('Http self client', () => {
         .set('x-kbn-self-call', 'true')
         .expect(200, { ok: true });
 
-      expect(started.logger.get().info).toHaveBeenCalledWith(
-        'Kibana self HTTP call completed',
-        expect.objectContaining({
-          event: { action: 'kibana_self_http_request' },
-          http: {
-            request: { method: 'GET' },
-            response: { status_code: 200 },
-          },
-          labels: expect.objectContaining({
-            self_http_route_template: '/self/observed_target',
-            self_http_status_class: '2xx',
+      const completedCalls = (started.logger.get().debug as jest.Mock).mock.calls.filter(
+        ([message]) => message === 'Kibana self HTTP call completed'
+      );
+      expect(completedCalls).toEqual([
+        [
+          'Kibana self HTTP call completed',
+          expect.objectContaining({
+            event: { action: 'kibana_self_http_request' },
+            http: {
+              request: { method: 'GET' },
+              response: { status_code: 200 },
+            },
+            labels: expect.objectContaining({
+              self_http_route_template: '/self/observed_target',
+              self_http_status_class: '2xx',
+            }),
           }),
-        })
-      );
-      expect(started.logger.get().info).toHaveBeenCalledTimes(1);
-      expect(JSON.stringify((started.logger.get().info as jest.Mock).mock.calls)).not.toContain(
-        'filter=raw-value'
-      );
+        ],
+      ]);
+      expect(started.logger.get().info).not.toHaveBeenCalled();
+      expect(JSON.stringify(completedCalls)).not.toContain('filter=raw-value');
 
-      (started.logger.get().info as jest.Mock).mockClear();
+      (started.logger.get().debug as jest.Mock).mockClear();
       await started.supertest.get('/self/authz_denied').set('x-kbn-self-call', 'true').expect(403);
+      expect(
+        (started.logger.get().debug as jest.Mock).mock.calls.some(
+          ([message]) => message === 'Kibana self HTTP call completed'
+        )
+      ).toBe(false);
       expect(started.logger.get().info).not.toHaveBeenCalled();
     });
 

@@ -15,17 +15,21 @@ export const registerAgentBuilderSmlTypes = ({
   getScopedClients,
   getDataStreams,
   isAvailable,
+  getUseRuleEventsRead,
 }: {
   agentBuilderSml?: AgentBuilderSmlPluginSetup;
   getScopedClients: GetScopedClients;
   getDataStreams: () => Promise<DataStreamsStart>;
   isAvailable: () => Promise<boolean>;
+  /** Gated by `SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ` (`@kbn/nightshift-shared`). */
+  getUseRuleEventsRead: () => Promise<boolean>;
 }): void => {
   agentBuilderSml?.registerType(
     createSignificantEventSmlType({
       getScopedClients,
       getDataStreams,
       isAvailable,
+      getUseRuleEventsRead,
     })
   );
 };

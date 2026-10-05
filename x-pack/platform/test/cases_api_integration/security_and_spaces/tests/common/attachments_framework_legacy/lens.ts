@@ -18,7 +18,8 @@ import {
   defaultUser,
   persistableStateAttachment,
   postCaseReq,
-  postCommentUserReq,
+  postUnifiedCommentReq,
+  postUnifiedLensReq,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -136,7 +137,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const patchedCase = await bulkCreateAttachments({
         supertest,
         caseId: postedCase.id,
-        params: [postCommentUserReq, persistableStateAttachment],
+        params: [postUnifiedCommentReq, postUnifiedLensReq],
       });
 
       const persistableStateComment = patchedCase.comments?.find(
@@ -237,15 +238,12 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('400s when bulk creating a non registered persistable state attachment type', async () => {
+    it('400s when bulk creating a non registered attachment type', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
       await bulkCreateAttachments({
         supertest,
         caseId: postedCase.id,
-        params: [
-          persistableStateAttachment,
-          { ...persistableStateAttachment, persistableStateAttachmentTypeId: 'not-exists' },
-        ],
+        params: [postUnifiedLensReq, { ...postUnifiedLensReq, type: 'not-exists' }],
         expectedHttpCode: 400,
       });
     });

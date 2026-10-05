@@ -211,7 +211,6 @@ export class AgentBuilderPlugin
         }
         return services.execution;
       },
-      isExperimentalEnabled: this.isExperimentalEnabled,
     });
 
     registerAttachmentWorkflowSteps(setupDeps.workflowsExtensions, {
@@ -230,7 +229,6 @@ export class AgentBuilderPlugin
           source: 'workflow',
         });
       },
-      isExperimentalEnabled: this.isExperimentalEnabled,
     });
 
     registerAgentBuilderHandlerContext({ coreSetup });
@@ -409,8 +407,6 @@ export class AgentBuilderPlugin
 
     const modelProviderFactory = createModelProviderFactory({
       inference,
-      uiSettings,
-      savedObjects,
       trackingService: this.trackingService,
       searchInferenceEndpoints,
       logger: this.logger.get('model-provider'),

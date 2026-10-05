@@ -96,6 +96,55 @@ describe('ruleModelVersions', () => {
     });
   });
 
+  describe('v7 to v8 migration', () => {
+    const migrator = createModelVersionTestMigrator({ type: ruleType });
+
+    // Built by running the real v7 migration so the fixture tracks the v7 shape.
+    const createV7RuleDocument = (metadata: Record<string, unknown>): SavedObject =>
+      migrator.migrate({
+        document: createV5RuleDocument({
+          metadata,
+          createdBy: { profile_uid: 'author_profile_uid' },
+          updatedBy: { profile_uid: 'editor_profile_uid' },
+        }),
+        fromVersion: 6,
+        toVersion: 7,
+      });
+
+    const migrate = (document: SavedObject) =>
+      migrator.migrate({ document, fromVersion: 7, toVersion: 8 }).attributes as Record<
+        string,
+        unknown
+      >;
+
+    it('copies the configuration version counter to the attributes root', () => {
+      expect(migrate(createV7RuleDocument({ name: 'test-rule', version: 4 })).version).toBe(4);
+    });
+
+    it('backfills the baseline counter for a rule written before versioning', () => {
+      expect(migrate(createV7RuleDocument({ name: 'test-rule' })).version).toBe(1);
+    });
+
+    it('leaves the legacy metadata.version in place for rollback', () => {
+      const document = createV7RuleDocument({ name: 'test-rule', version: 4 });
+
+      expect(migrate(document)).toEqual({
+        ...(document.attributes as Record<string, unknown>),
+        version: 4,
+      });
+    });
+
+    it('accepts a migrated rule in the v8 forward compatibility schema', () => {
+      const forwardCompatibility = ruleModelVersions['8']?.schemas
+        ?.forwardCompatibility as ObjectType;
+      const attributes = migrate(createV7RuleDocument({ name: 'test-rule', version: 4 }));
+
+      expect((forwardCompatibility.validate(attributes) as Record<string, unknown>).version).toBe(
+        4
+      );
+    });
+  });
+
   // The actor is a nested object, so these pin that `unknowns: 'ignore'` on the
   // attributes schema reaches it. It does: config-schema maps the option to Joi's
   // `stripUnknown`, which cascades to children that do not override it. Without

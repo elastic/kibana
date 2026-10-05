@@ -17,7 +17,7 @@ import {
   matchActionPoliciesResponseSchema,
   ruleEventFieldsResponseSchema,
   snoozeActionPolicyBodySchema,
-  updateActionPolicyBodySchema,
+  updateActionPolicyDataSchema,
 } from '@kbn/alerting-v2-schemas';
 import {
   ACTION_POLICY_LICENSE_NOT_SUPPORTED_RESPONSE,
@@ -45,8 +45,8 @@ describe('action policy OAS example payloads', () => {
     expect(actionPolicyResponseSchema.safeParse(ACTION_POLICY_RESPONSE).success).toBe(true);
   });
 
-  it('keeps update request example valid against updateActionPolicyBodySchema', () => {
-    expect(updateActionPolicyBodySchema.safeParse(UPDATE_ACTION_POLICY_REQUEST).success).toBe(true);
+  it('keeps update request example valid against updateActionPolicyDataSchema', () => {
+    expect(updateActionPolicyDataSchema.safeParse(UPDATE_ACTION_POLICY_REQUEST).success).toBe(true);
   });
 
   it('keeps snooze request example valid against snoozeActionPolicyBodySchema', () => {

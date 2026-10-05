@@ -10,10 +10,11 @@ import {
   bulkSnoozeActionPoliciesBodySchema,
   createActionPolicyDataSchema,
   findActionPoliciesRequestSchema,
+  putActionPolicyDataSchema,
   snoozeActionPolicyBodySchema,
   updateActionPolicyDataSchema,
 } from './action_policy_data_schema';
-import { FIND_MAX_RESULT_WINDOW, MAX_BULK_ITEMS } from './constants';
+import { FIND_MAX_RESULT_WINDOW, MAX_BULK_ITEMS, MAX_KQL_LENGTH } from './constants';
 
 const DESTINATIONS = [{ type: 'workflow' as const, id: 'wf-1' }];
 
@@ -250,6 +251,35 @@ describe('createActionPolicyDataSchema', () => {
   });
 });
 
+describe('putActionPolicyDataSchema', () => {
+  const base = { name: 'Test', description: 'Desc', destinations: DESTINATIONS };
+
+  it('leaves enabled undefined when omitted', () => {
+    const result = putActionPolicyDataSchema.parse(base);
+    expect(result.enabled).toBeUndefined();
+  });
+
+  it('accepts an explicit enabled: true', () => {
+    const result = putActionPolicyDataSchema.parse({ ...base, enabled: true });
+    expect(result.enabled).toBe(true);
+  });
+
+  it('accepts an explicit enabled: false', () => {
+    const result = putActionPolicyDataSchema.parse({ ...base, enabled: false });
+    expect(result.enabled).toBe(false);
+  });
+
+  it('rejects a non-boolean enabled', () => {
+    const result = putActionPolicyDataSchema.safeParse({ ...base, enabled: 'true' });
+    expect(result.success).toBe(false);
+  });
+
+  it('does not add enabled to createActionPolicyDataSchema', () => {
+    const result = createActionPolicyDataSchema.safeParse({ ...base, enabled: true });
+    expect(result.success).toBe(false);
+  });
+});
+
 describe('updateActionPolicyDataSchema', () => {
   it('rejects any unknown key (strict)', () => {
     expect(() => updateActionPolicyDataSchema.parse({ name: 'New', unknownField: 'x' })).toThrow();
@@ -421,16 +451,16 @@ describe('findActionPoliciesRequestSchema', () => {
       findActionPoliciesRequestSchema.parse({
         page: 2,
         per_page: 50,
+        filter: 'enabled: true',
         search: 'cpu',
-        enabled: 'true',
         sort_field: 'name',
         sort_order: 'asc',
       })
     ).toEqual({
       page: 2,
       per_page: 50,
+      filter: 'enabled: true',
       search: 'cpu',
-      enabled: true,
       sort_field: 'name',
       sort_order: 'asc',
     });
@@ -438,6 +468,16 @@ describe('findActionPoliciesRequestSchema', () => {
 
   it('rejects unknown keys', () => {
     expect(() => findActionPoliciesRequestSchema.parse({ unknown_field: 'x' })).toThrow();
+  });
+
+  it('rejects a filter over the maximum KQL length', () => {
+    expect(
+      findActionPoliciesRequestSchema.safeParse({ filter: 'a'.repeat(MAX_KQL_LENGTH) }).success
+    ).toBe(true);
+
+    expect(
+      findActionPoliciesRequestSchema.safeParse({ filter: 'a'.repeat(MAX_KQL_LENGTH + 1) }).success
+    ).toBe(false);
   });
 
   it('coerces numeric strings for page and per_page', () => {
