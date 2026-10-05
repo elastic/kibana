@@ -22,7 +22,6 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AiButton } from '@kbn/ui-ai-components';
 import { useEffectiveProjectRouting } from '../hooks/use_effective_project_routing';
-import { VALIDATION_DEBOUNCE_MS } from '../hooks/use_query_validation';
 import { SubmitButton } from './submit_button';
 import { VisorMode } from './visor_mode';
 import { useNlGeneration } from './use_nl_generation';
@@ -80,7 +79,8 @@ export function QuickSearchVisor({
   const euiThemeContext = useEuiTheme();
   const [searchValue, setSearchValue] = useState('');
   const [visorMode, setVisorMode] = useState<VisorMode>(VisorMode.KQL);
-  const [adHocDataView, setAdHocDataView] = useState<DataView | null>(null);
+  const [kqlDataView, setKqlDataView] = useState<{ sourceQuery: string; dataView: DataView }>();
+  const [isKqlFocused, setIsKqlFocused] = useState(false);
   const wasVisibleRef = useRef(isVisible);
   const telemetryService = useMemo(
     () => new ESQLEditorTelemetryService(core.analytics),
@@ -149,24 +149,34 @@ export function QuickSearchVisor({
 
   useEffect(() => {
     if (!isVisible || !sourceQuery) {
-      setAdHocDataView(null);
+      setKqlDataView(undefined);
+      return;
+    }
+    // The fields only serve KQL suggestions: look them up once the KQL input is focused, never
+    // while the ES|QL query is typed. They are kept after blur, for the same source.
+    if (!isKqlFocused) {
       return;
     }
     let cancelled = false;
-    // The query is the live editor text: wait for typing to pause before looking up the source.
-    const timeout = setTimeout(() => {
-      EsqlSource.create({ query: sourceQuery, http: core.http, projectRouting })
-        .then((source) => registerEsqlSourceInDataViewsCache(data.dataViews, source, core.http))
-        .then(
-          (dataView) => !cancelled && setAdHocDataView(dataView),
-          () => !cancelled && setAdHocDataView(null)
-        );
-    }, VALIDATION_DEBOUNCE_MS);
+    // Only the fields are needed, as before: skip the time field request.
+    EsqlSource.create({
+      query: sourceQuery,
+      http: core.http,
+      projectRouting,
+      resolveTimeField: false,
+    })
+      .then((source) => registerEsqlSourceInDataViewsCache(data.dataViews, source, core.http))
+      .then(
+        (dataView) => !cancelled && setKqlDataView({ sourceQuery, dataView }),
+        () => !cancelled && setKqlDataView(undefined)
+      );
     return () => {
       cancelled = true;
-      clearTimeout(timeout);
     };
-  }, [isVisible, sourceQuery, projectRouting, data.dataViews, core.http]);
+  }, [isVisible, isKqlFocused, sourceQuery, projectRouting, data.dataViews, core.http]);
+
+  // Fields loaded for another source are stale.
+  const adHocDataView = kqlDataView?.sourceQuery === sourceQuery ? kqlDataView.dataView : undefined;
 
   const isKqlMode = visorMode === VisorMode.KQL;
   const styles = visorStyles(euiThemeContext, Boolean(isInline), isVisible);
@@ -253,6 +263,7 @@ export function QuickSearchVisor({
                       onSubmit={(newQuery) => onKqlSubmit(newQuery.query as string)}
                       appName="esqlEditorVisor"
                       dataTestSubj="esqlVisorKQLQueryInput"
+                      onChangeQueryInputFocus={setIsKqlFocused}
                       size="s"
                       isClearable={false}
                     />

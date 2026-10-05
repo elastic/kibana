@@ -163,7 +163,7 @@ describe('registerGetSourceInfoRoute', () => {
     expect(response.ok).not.toHaveBeenCalled();
   });
 
-  it('returns the Elasticsearch status for an invalid query without logging an error', async () => {
+  it('answers an invalid query with no columns and the error, without logging an error', async () => {
     const { router, handler, requestHandlerContext, response, context, esqlQuery, errorLogger } =
       buildMocks();
     esqlQuery.mockRejectedValueOnce(
@@ -173,10 +173,26 @@ describe('registerGetSourceInfoRoute', () => {
 
     await handler(requestHandlerContext, { body: { query: 'FROM lo' } }, response);
 
-    expect(response.customError).toHaveBeenCalledWith({
-      statusCode: 400,
-      body: { message: 'Unknown index [lo]' },
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { columns: [], error: { statusCode: 400, message: 'Unknown index [lo]' } },
     });
+    expect(response.customError).not.toHaveBeenCalled();
     expect(errorLogger.error).not.toHaveBeenCalled();
+  });
+
+  it('keeps errors that are not about the query as HTTP errors', async () => {
+    const { router, handler, requestHandlerContext, response, context, esqlQuery } = buildMocks();
+    esqlQuery.mockRejectedValueOnce(
+      Object.assign(new Error('unauthorized'), { meta: { statusCode: 403 } })
+    );
+    registerGetSourceInfoRoute(router, context);
+
+    await handler(requestHandlerContext, { body: { query: 'FROM logs-*' } }, response);
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 403,
+      body: { message: 'unauthorized' },
+    });
+    expect(response.ok).not.toHaveBeenCalled();
   });
 });

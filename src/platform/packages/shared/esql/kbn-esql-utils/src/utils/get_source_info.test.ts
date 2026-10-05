@@ -111,6 +111,18 @@ describe('getESQLSourceInfo', () => {
     expect(http.post).toHaveBeenCalledTimes(1);
   });
 
+  it('rejects a query error answered with 200 and does not cache it', async () => {
+    const http = createHttp(() => ({
+      columns: [],
+      error: { statusCode: 400, message: 'Unknown index [lo]' },
+    }));
+    const query = 'FROM lo';
+
+    await expect(getESQLSourceInfo({ query, http })).rejects.toThrow('Unknown index [lo]');
+    await expect(getESQLSourceInfo({ query, http })).rejects.toThrow('Unknown index [lo]');
+    expect(http.post).toHaveBeenCalledTimes(2);
+  });
+
   it('evicts the cache entry when the request fails', async () => {
     const http = createHttp(() => {
       throw new Error('network');

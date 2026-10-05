@@ -17,6 +17,7 @@ import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
 import { getMaxNestingDepth, MAX_NESTING_DEPTH } from './get_timefield';
 
 const DATE_FORMAT_TZ_SETTING = 'dateFormat:tz';
+const QUERY_ERROR_STATUS_CODES = new Set([400, 404]);
 
 const esqlVariableValueSchema = schema.oneOf([
   schema.string({ maxLength: 10000 }),
@@ -149,11 +150,13 @@ export const registerGetSourceInfoRoute = (
           outcome: 'failure',
           'http.response.status_code': statusCode,
         });
-        // Return Elasticsearch's status, e.g. 400 for an invalid query, instead of a generic 500.
-        return response.customError({
-          statusCode,
-          body: { message: error instanceof Error ? error.message : String(error) },
-        });
+        const message = error instanceof Error ? error.message : String(error);
+        // Errors in the query text (invalid or partial query, unknown index) are expected while
+        // typing: answer 200 with no columns and the error, which clients treat as a failure.
+        if (QUERY_ERROR_STATUS_CODES.has(statusCode)) {
+          return response.ok({ body: { columns: [], error: { statusCode, message } } });
+        }
+        return response.customError({ statusCode, body: { message } });
       }
     }
   );
