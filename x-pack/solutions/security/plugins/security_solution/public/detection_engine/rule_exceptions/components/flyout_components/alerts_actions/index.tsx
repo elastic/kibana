@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import styled from '@emotion/styled';
 
 import { EuiCallOut, EuiCheckbox, EuiFormRow, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
@@ -81,9 +81,17 @@ const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<
   onSingleAlertCloseCheckboxChange,
   onCloseAlertsReasonChange,
 }): JSX.Element => {
+  const sectionRef = useRef<HTMLElement>(null);
+  // Set when the user checks a close option. This section sits at the bottom of
+  // the flyout body, so the reason select and callout it reveals render below
+  // the fold unless we scroll them into view once they're rendered.
+  const shouldScrollIntoViewRef = useRef(false);
+
   const handleBulkCloseCheckbox = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>): void => {
-      onBulkCloseCheckboxChange(event.currentTarget.checked);
+      const { checked } = event.currentTarget;
+      shouldScrollIntoViewRef.current = checked;
+      onBulkCloseCheckboxChange(checked);
     },
     [onBulkCloseCheckboxChange]
   );
@@ -91,7 +99,9 @@ const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<
   const handleCloseSingleAlertCheckbox = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>): void => {
       if (onSingleAlertCloseCheckboxChange != null) {
-        onSingleAlertCloseCheckboxChange(event.currentTarget.checked);
+        const { checked } = event.currentTarget;
+        shouldScrollIntoViewRef.current = checked;
+        onSingleAlertCloseCheckboxChange(checked);
       }
     },
     [onSingleAlertCloseCheckboxChange]
@@ -133,8 +143,16 @@ const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<
     [shouldBulkCloseAlert, isSignalIndexPatternLoading, exceptionListItems, signalIndexPatterns]
   );
 
+  useEffect((): void => {
+    if (!shouldScrollIntoViewRef.current) {
+      return;
+    }
+    shouldScrollIntoViewRef.current = false;
+    sectionRef.current?.scrollIntoView({ block: 'nearest' });
+  }, [shouldCloseSingleAlert, shouldBulkCloseAlert]);
+
   return (
-    <FlyoutCheckboxesSection>
+    <FlyoutCheckboxesSection ref={sectionRef}>
       <SectionHeader size="xs">
         <h3>{i18n.CLOSE_ALERTS_SECTION_TITLE}</h3>
       </SectionHeader>
