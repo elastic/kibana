@@ -32,6 +32,7 @@ import {
 import { getServerlessImageTag, getCommitUrl } from './extract_image_info';
 import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
+import { isAllowedSnapshotUrl } from '../artifact';
 import { shouldPreferCachedSnapshot } from './find_local_cached_snapshot';
 import type { EsClusterExecOptions } from '../cluster_exec_options';
 import {
@@ -110,6 +111,7 @@ interface ServerlessEsNodeArgs {
 
 export const DEFAULT_PORT = 9200;
 const DOCKER_REGISTRY = 'docker.elastic.co';
+const ALLOWED_IMAGE_PREFIX = `${DOCKER_REGISTRY}/`;
 
 const DOCKER_BASE_CMD = [
   'run',
@@ -318,7 +320,7 @@ export function resolveDockerImage({
   defaultImg: string;
 }) {
   if (image) {
-    if (!image.includes(DOCKER_REGISTRY)) {
+    if (!image.startsWith(ALLOWED_IMAGE_PREFIX)) {
       throw createCliError(
         `Only verified images from ${DOCKER_REGISTRY} are currently allowed.\nIf you require this functionality in @kbn/es please contact the Kibana Operations Team.`
       );

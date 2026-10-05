@@ -167,6 +167,17 @@ describe('resolveDockerImage()', () => {
       If you require this functionality in @kbn/es please contact the Kibana Operations Team."
     `);
   });
+
+  test('should error when the registry only appears later in the image name', () => {
+    expect(() =>
+      resolveDockerImage({
+        repo: defaultRepo,
+        tag,
+        image: 'another.registry.co/docker.elastic.co/es:latest',
+        defaultImg,
+      })
+    ).toThrow('Only verified images from docker.elastic.co are currently allowed.');
+  });
 });
 
 describe('resolvePort()', () => {
