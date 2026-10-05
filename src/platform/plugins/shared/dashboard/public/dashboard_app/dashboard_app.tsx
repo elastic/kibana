@@ -191,7 +191,6 @@ export function DashboardApp({
       <DashboardChangeHistoryProvider dashboardId={savedDashboardId ?? 'new-dashboard'}>
         {dashboardApi && dashboardInternalApi && (
           <>
-            <ChangeHistoryTrigger />
             <DashboardTabTitleSetter dashboardApi={dashboardApi} />
             <DashboardTopNav
               key={dashboardApi.uuid}
@@ -200,7 +199,6 @@ export function DashboardApp({
               dashboardApi={dashboardApi}
               dashboardInternalApi={dashboardInternalApi}
             />
-            <PrettifyDashboardButton dashboardApi={dashboardApi} />
           </>
         )}
 
