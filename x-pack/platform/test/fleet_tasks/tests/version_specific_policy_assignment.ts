@@ -267,11 +267,15 @@ export default function (providerContext: FtrProviderContextWithServices) {
         expect(agent1.policy_id).to.be(`${policyId}${AGENT_POLICY_VERSION_SEPARATOR}8.18`);
         expect(agent2.policy_id).to.be(`${secondPolicyId}${AGENT_POLICY_VERSION_SEPARATOR}9.0`);
       } finally {
-        // Cleanup the second policy
+        // Cleanup the second policy. Policy deletion is rejected while agents are assigned, so
+        // remove the agent docs first and assert the deletion; a leftover version-conditioned
+        // parent would break suites that run later with expensive queries disabled.
+        await cleanupAgentDocs(providerContext);
         await supertest
           .post('/api/fleet/agent_policies/delete')
           .send({ agentPolicyId: secondPolicyId })
-          .set('kbn-xsrf', 'xxxx');
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
       }
     });
 
