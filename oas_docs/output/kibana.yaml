@@ -22944,7 +22944,7 @@ paths:
                     description: 'The conversation the message was added to: the one requested, or the one created for it.'
                     type: string
                   declined_prompts:
-                    description: Prompts the agent raised that would have paused an interactive conversation (tool confirmations, questions to the user, destructive API approvals). This endpoint has no user to answer them, so each was declined and the agent told why. Omitted when the agent asked for none.
+                    description: The prompts that the endpoint declined. In an interactive conversation, these prompts pause the agent until the user answers. Examples are tool confirmations, questions to the user, and destructive API approvals. This endpoint has no user, so it declines each prompt and tells the agent why. The property is absent if the agent raised no prompts.
                     items:
                       additionalProperties: false
                       type: object
