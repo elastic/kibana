@@ -89,4 +89,5 @@ export {
   RULE_TUNING_DEFAULT_EXTRAS,
 } from './detection_watch';
 export { ALERT_TRIAGE_DEFAULT_EXTRAS } from './floor_watch';
+export { CONTINUOUS_THREAT_HUNT_SETTINGS } from './hunt_watch';
 export type { WorkerSettingsDeclaration } from './types';
