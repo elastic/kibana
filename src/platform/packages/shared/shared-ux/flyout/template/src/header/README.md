@@ -41,7 +41,7 @@ All three also take an optional `id`. It identifies the part internally, is gene
 
 **Badges as labels or controls.** A badge is a label by default. Pass `href` (with `target`/`rel`) or `onClick` with `onClickAriaLabel` to make the whole badge navigate or act, which EUI renders as an `<a>` or a `<button>`.
 
-**Badge tooltips.** `toolTipContent` wraps the badge in an `EuiToolTip`, positioned by `toolTipPosition`. Because a tooltip also opens on keyboard focus, a tooltipped badge that is neither a link nor a button gets a tab stop so keyboard users can reach it; give those badges an `aria-label`, and `role="img"` when the label is purely visual.
+**Badge tooltips.** `toolTipContent` wraps the badge in an `EuiToolTip`, positioned by `toolTipPosition`. A tooltipped badge that is not a link or button gets a tab stop, so keyboard users can open the tooltip. Give it an `aria-label` and `role="img"` so screen readers announce it.
 
 All three groups live in the header's collapsible region. They animate away when the header collapses on scroll, and they never show when `collapsed` is set. Put content that must stay visible in the title or the tab bar.
 
