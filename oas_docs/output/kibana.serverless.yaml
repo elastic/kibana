@@ -11641,6 +11641,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert episode was not found.
+        '409':
+          content:
+            application/json:
+              examples:
+                alertAlreadyAcknowledged:
+                  summary: The alert is already acknowledged, so the request would change nothing
+                  value:
+                    code: INVALID_ALERT_STATE_TRANSITION
+                    details:
+                      action_type: ack
+                      alert_id: episode-1
+                      group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
+                    error: Conflict
+                    message: Cannot acknowledge alert [episode-1]. It is already acknowledged
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the alert is already acknowledged.
         '500':
           content:
             application/json:
@@ -11919,6 +11936,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert episode was not found.
+        '409':
+          content:
+            application/json:
+              examples:
+                alertAssigneeUnchanged:
+                  summary: The alert is already assigned to the requested user
+                  value:
+                    code: ALERT_ACTION_NO_OP
+                    details:
+                      action_type: assign
+                      alert_id: episode-1
+                      group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
+                    error: Conflict
+                    message: Cannot assign alert [episode-1]. It is already assigned to [u_abc123]
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the alert already carries the requested assignee.
         '500':
           content:
             application/json:
@@ -12199,6 +12233,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert episode was not found.
+        '409':
+          content:
+            application/json:
+              examples:
+                alertTagsUnchanged:
+                  summary: The alert already carries exactly the requested tags
+                  value:
+                    code: ALERT_ACTION_NO_OP
+                    details:
+                      action_type: tag
+                      alert_id: episode-1
+                      group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
+                    error: Conflict
+                    message: Cannot tag alert [episode-1]. It already carries the requested tags
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the alert already carries exactly the requested tags.
         '500':
           content:
             application/json:
@@ -12329,6 +12380,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert episode was not found.
+        '409':
+          content:
+            application/json:
+              examples:
+                alertNotAcknowledged:
+                  summary: The alert is not acknowledged, so the request would change nothing
+                  value:
+                    code: INVALID_ALERT_STATE_TRANSITION
+                    details:
+                      action_type: unack
+                      alert_id: episode-1
+                      group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
+                    error: Conflict
+                    message: Cannot remove the acknowledgement from alert [episode-1]. It is not acknowledged
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the alert is not acknowledged.
         '500':
           content:
             application/json:
