@@ -126,7 +126,7 @@ export const seedEndpointHosts = async ({
         ENDPOINT_EVENTS_INDEX,
         ENDPOINT_ALERTS_INDEX,
         ENDPOINT_DEVICE_INDEX,
-        1,
+        0,
         true,
         {},
         DocGenerator,

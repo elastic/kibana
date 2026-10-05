@@ -5,10 +5,16 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
+import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import type { EsClient, KbnClient, ScoutTestConfig } from '@kbn/scout-security';
 import { INTERNAL_API_HEADERS } from '@kbn/scout-security';
 import type { ActionDetails } from '../../../../common/endpoint/types';
-import { AGENT_STATUS_ROUTE } from '../../../../common/endpoint/constants';
+import {
+  AGENT_STATUS_ROUTE,
+  ENDPOINT_ACTION_RESPONSES_INDEX,
+  ENDPOINT_ACTIONS_INDEX,
+} from '../../../../common/endpoint/constants';
 import {
   sendEndpointActionResponse,
   sendFleetActionResponse,
@@ -43,6 +49,53 @@ export const completeHostAction = async ({
       );
     }
     await sendEndpointActionResponse(systemEsClient, action, { state: 'success' });
+  } finally {
+    await systemEsClient.close();
+  }
+};
+
+const SUBMITTED_ACTION_INDICES = [
+  AGENT_ACTIONS_INDEX,
+  AGENT_ACTIONS_RESULTS_INDEX,
+  ENDPOINT_ACTIONS_INDEX,
+  ENDPOINT_ACTION_RESPONSES_INDEX,
+];
+
+/**
+ * Deletes isolate and release requests and responses written during the test.
+ * Host teardown only removes action ids captured at seed time.
+ */
+export const deleteSubmittedHostActions = async ({
+  esClient,
+  config,
+  actionIds,
+}: {
+  esClient: EsClient;
+  config: ScoutTestConfig;
+  actionIds: readonly string[];
+}): Promise<void> => {
+  if (actionIds.length === 0) {
+    return;
+  }
+
+  const ids = [...actionIds];
+  const query: estypes.QueryDslQueryContainer = {
+    bool: {
+      should: [{ terms: { action_id: ids } }, { terms: { 'EndpointActions.action_id': ids } }],
+      minimum_should_match: 1,
+    },
+  };
+  const systemEsClient = await createSystemIndicesEsClient(esClient, config);
+
+  try {
+    await systemEsClient.deleteByQuery({
+      index: SUBMITTED_ACTION_INDICES,
+      query,
+      conflicts: 'proceed',
+      ignore_unavailable: true,
+      refresh: true,
+      wait_for_completion: true,
+    });
   } finally {
     await systemEsClient.close();
   }

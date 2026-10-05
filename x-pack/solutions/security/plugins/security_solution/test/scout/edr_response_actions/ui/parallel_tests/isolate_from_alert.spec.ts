@@ -9,7 +9,11 @@ import { expect } from '@kbn/scout-security/ui';
 import { getResponseActionsAccessRole } from '../fixtures/response_actions_access_role';
 import { spaceTest, tags } from '../fixtures';
 import { seedHostWithAlert, type SeededHostAlert } from '../../common/seed_endpoint_hosts';
-import { completeHostAction, waitForHostIsolation } from '../../common/complete_host_action';
+import {
+  completeHostAction,
+  deleteSubmittedHostActions,
+  waitForHostIsolation,
+} from '../../common/complete_host_action';
 import { captureEndpointAction } from '../fixtures/page_objects/host_isolation_form';
 import { openAlertFlyoutForRule } from '../fixtures/open_alert_flyout';
 
@@ -25,6 +29,7 @@ spaceTest.describe(
     spaceTest.setTimeout(240_000);
 
     let seededHost: (SeededHostAlert & { cleanup: () => Promise<void> }) | undefined;
+    const submittedActionIds: string[] = [];
 
     spaceTest.beforeAll(async ({ esClient, kbnClient, scoutSpace, config }) => {
       // One host seed waits up to 8 minutes, after the other worker's metadata-transform lock.
@@ -42,8 +47,24 @@ spaceTest.describe(
       await browserAuth.loginWithCustomRole(getResponseActionsAccessRole());
     });
 
-    spaceTest.afterAll(async () => {
-      await seededHost?.cleanup();
+    spaceTest.afterAll(async ({ esClient, config }) => {
+      const failures: unknown[] = [];
+      for (const cleanup of [
+        () => deleteSubmittedHostActions({ esClient, config, actionIds: submittedActionIds }),
+        () => seededHost?.cleanup(),
+      ]) {
+        try {
+          await cleanup();
+        } catch (error) {
+          failures.push(error);
+        }
+      }
+      if (failures.length === 1) {
+        throw failures[0];
+      }
+      if (failures.length > 1) {
+        throw new AggregateError(failures, 'Failed to clean up the seeded host and its actions');
+      }
     });
 
     spaceTest(
@@ -69,6 +90,7 @@ spaceTest.describe(
           const action = await captureEndpointAction(page, 'isolate', () =>
             hostIsolation.confirm()
           );
+          submittedActionIds.push(action.id);
           await expect(
             page.getByText(`Isolation on host ${host.hostname} successfully submitted`)
           ).toBeVisible();
@@ -94,6 +116,7 @@ spaceTest.describe(
           const action = await captureEndpointAction(page, 'unisolate', () =>
             hostIsolation.confirm()
           );
+          submittedActionIds.push(action.id);
           await expect(
             page.getByText(`Release on host ${host.hostname} successfully submitted`)
           ).toBeVisible();
