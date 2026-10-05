@@ -7,6 +7,7 @@
 
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -137,16 +138,16 @@ export const LinkedActionPoliciesStep = ({
           {CreateActionPolicyFormFlyout && (
             <EuiFlexItem grow={false}>
               <EuiToolTip content={createActionPolicyDisabledReason} position="top">
-                <EuiLink
-                  onClick={() => {
-                    if (!createActionPolicyDisabledReason) setIsCreateFlyoutOpen(true);
-                  }}
-                  color={createActionPolicyDisabledReason ? 'subdued' : 'primary'}
-                  aria-disabled={Boolean(createActionPolicyDisabledReason)}
+                <EuiButtonEmpty
+                  size="s"
+                  flush="right"
+                  onClick={() => setIsCreateFlyoutOpen(true)}
+                  isDisabled={Boolean(createActionPolicyDisabledReason)}
+                  hasAriaDisabled
                   data-test-subj="linkedActionPoliciesCreateLink"
                 >
                   {createActionPolicyLabel}
-                </EuiLink>
+                </EuiButtonEmpty>
               </EuiToolTip>
             </EuiFlexItem>
           )}
