@@ -17,7 +17,7 @@ import {
   syntheticsMonitorAttributes,
   syntheticsMonitorSOTypes,
 } from '../../common/types/saved_objects';
-import type { DeferredRevisionBumps } from '../synthetics_service/private_location/package_policy_service';
+import type { DeferredRevisionBumps } from '../synthetics_service/private_location/deferred_revision_bumps';
 import { normalizeSecrets } from '../synthetics_service/utils';
 import type { PrivateLocationAttributes } from '../runtime_types/private_locations';
 import type {
@@ -41,6 +41,19 @@ import {
 interface SyncConfig {
   config: HeartbeatConfig;
   globalParams: Record<string, string>;
+}
+
+/** What is needed to strip a deleted maintenance window from a monitor saved object. */
+interface MonitorMwReference {
+  id: string;
+  type: string;
+  namespace?: string;
+  maintenanceWindows: string[];
+}
+
+interface PendingMwRemoval {
+  mwId: string;
+  monitors: MonitorMwReference[];
 }
 
 /** Per-space count of package policies `editMonitors` could not create. */
@@ -87,11 +100,15 @@ export class DeployPrivateLocationMonitors {
     const listOfUpdatedConfigs: Array<string> = [];
 
     return this.serverSetup.fleet.runWithCache(async () => {
+      const { privateLocationAPI } = this.syntheticsMonitorClient;
       // Pages are written one after another and each write waits for its agent
       // policy bump, so the revision batcher never sees two pages at once and
       // would redeploy every agent policy once per page. Collect the bumps and
       // issue them once for the whole sync instead.
-      const deferredBumps: DeferredRevisionBumps = new Set();
+      const deferredBumps = privateLocationAPI.createDeferredRevisionBumps();
+      // A deleted maintenance window stays referenced on its monitors until it is
+      // deployed: that reference is how the next run finds the window to retry.
+      const pendingMwRemovals: PendingMwRemoval[] = [];
       const commonProps = {
         listOfUpdatedConfigs,
         allPrivateLocations,
@@ -99,6 +116,7 @@ export class DeployPrivateLocationMonitors {
         soClient,
         paramsBySpace,
         deferredBumps,
+        pendingMwRemovals,
       };
 
       try {
@@ -116,10 +134,21 @@ export class DeployPrivateLocationMonitors {
             isMissingMw: true,
           });
         }
-      } finally {
-        // in a finally: pages already written used `bumpRevision: false`, so an
-        // early exit would leave them undeployed until a later write bumps
-        await this.syntheticsMonitorClient.privateLocationAPI.scheduleRevisionBumps(deferredBumps);
+      } catch (error) {
+        // Pages already written used `bumpRevision: false`, so they still need
+        // their bump. The sync error is the one to report, not a bump failure.
+        await deferredBumps.flush().catch((bumpError) => {
+          this.serverSetup.logger.error(
+            `[DeployPrivateLocationMonitors] ${bumpError.message} (after sync error: ${error.message})`
+          );
+        });
+        throw error;
+      }
+
+      await deferredBumps.flush();
+
+      for (const { mwId, monitors } of pendingMwRemovals) {
+        await this.removeMwsFromMonitorConfigs({ mwId, monitors, soClient });
       }
     });
   }
@@ -132,6 +161,7 @@ export class DeployPrivateLocationMonitors {
     soClient,
     paramsBySpace,
     deferredBumps,
+    pendingMwRemovals,
     isMissingMw = false,
   }: {
     mwId: string;
@@ -142,6 +172,8 @@ export class DeployPrivateLocationMonitors {
     paramsBySpace: Record<string, Record<string, string>>;
     listOfUpdatedConfigs: Array<string>;
     deferredBumps?: DeferredRevisionBumps;
+    /** When given, a missing MW's removal is queued here instead of run per page. */
+    pendingMwRemovals?: PendingMwRemoval[];
     isMissingMw?: boolean;
   }) {
     const {
@@ -190,11 +222,19 @@ export class DeployPrivateLocationMonitors {
         });
 
         if (isMissingMw) {
-          await this.removeMwsFromMonitorConfigs({
-            mwId,
-            monitors,
-            soClient,
-          });
+          const references = monitors.map(
+            ({ id, type, namespaces, attributes }): MonitorMwReference => ({
+              id,
+              type,
+              namespace: namespaces?.[0],
+              maintenanceWindows: attributes[ConfigKey.MAINTENANCE_WINDOWS] || [],
+            })
+          );
+          if (pendingMwRemovals) {
+            pendingMwRemovals.push({ mwId, monitors: references });
+          } else {
+            await this.removeMwsFromMonitorConfigs({ mwId, monitors: references, soClient });
+          }
         }
       }
     } finally {
@@ -449,24 +489,20 @@ export class DeployPrivateLocationMonitors {
     soClient,
   }: {
     mwId: string;
-    monitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>>;
+    monitors: MonitorMwReference[];
     soClient: SavedObjectsClientContract;
   }) => {
     this.debugLog(
       `Removing maintenance window id: ${mwId} from monitors count: ${monitors?.length ?? 0}`
     );
-    const toUpdateMonitors = monitors.map((monitor) => {
-      const existingMws = monitor.attributes[ConfigKey.MAINTENANCE_WINDOWS] || [];
-      const updatedMws = existingMws.filter((id) => id !== mwId);
-      return {
-        id: monitor.id,
-        type: monitor.type,
-        attributes: {
-          [ConfigKey.MAINTENANCE_WINDOWS]: updatedMws,
-        },
-        namespace: monitor.namespaces?.[0],
-      };
-    });
+    const toUpdateMonitors = monitors.map(({ id, type, namespace, maintenanceWindows }) => ({
+      id,
+      type,
+      attributes: {
+        [ConfigKey.MAINTENANCE_WINDOWS]: maintenanceWindows.filter((mw) => mw !== mwId),
+      },
+      namespace,
+    }));
 
     const result = await soClient.bulkUpdate(toUpdateMonitors);
     this.debugLog(

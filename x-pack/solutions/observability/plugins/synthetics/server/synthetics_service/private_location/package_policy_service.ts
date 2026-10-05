@@ -14,6 +14,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { uniqBy } from 'lodash';
 import type { SyntheticsServerSetup } from '../../types';
 import { AgentPolicyRevisionBatcher } from './agent_policy_revision_batcher';
+import { DeferredRevisionBumps } from './deferred_revision_bumps';
 import type { ConditionUpdate, ShardedPackagePolicy } from './rebalance_writes';
 import { SHARDED_PACKAGE_POLICY_FIELDS } from './rebalance_writes';
 
@@ -130,13 +131,6 @@ export const flushPendingAgentPolicyRevisionBumps = async (
   await revisionBatchersByServer.get(server)?.flushPending();
 };
 
-/**
- * Collects the agent policy ids whose revision bump a multi-write operation
- * (e.g. a paged maintenance-window sync) wants to defer to a single
- * {@link PackagePolicyService.scheduleRevisionBumps} call at the end.
- */
-export type DeferredRevisionBumps = Set<string>;
-
 export class PackagePolicyService {
   private readonly server: SyntheticsServerSetup;
   private readonly revisionBatcher: AgentPolicyRevisionBatcher;
@@ -151,31 +145,23 @@ export class PackagePolicyService {
   }
 
   /**
-   * Bumps the revision of every agent policy collected in `deferredBumps`.
-   *
-   * Callers that pass `deferredBumps` to the write methods must call this once
-   * they are done — also when the operation fails part-way — because those
-   * package policies were written with `bumpRevision: false`, so Fleet never
-   * redeploys them until this runs.
+   * Creates a collector that lets a multi-write operation pass it to the write
+   * methods and bump each affected agent policy once, on `flush()`, instead of
+   * once per write. The caller must flush when done, also on failure.
    */
-  async scheduleRevisionBumps(deferredBumps: DeferredRevisionBumps): Promise<void> {
-    if (deferredBumps.size === 0) {
-      return;
-    }
-    const policyIds = [...deferredBumps];
-    deferredBumps.clear();
-    await this.revisionBatcher.schedule(policyIds);
+  createDeferredRevisionBumps(): DeferredRevisionBumps {
+    return new DeferredRevisionBumps((policyIds) => this.revisionBatcher.schedule(policyIds));
   }
 
   private async scheduleOrDeferRevisionBumps(
     policyIds: string[],
     deferredBumps?: DeferredRevisionBumps
   ): Promise<void> {
-    if (!deferredBumps) {
-      await this.revisionBatcher.schedule(policyIds);
+    if (deferredBumps) {
+      await deferredBumps.add(policyIds);
       return;
     }
-    policyIds.forEach((policyId) => deferredBumps.add(policyId));
+    await this.revisionBatcher.schedule(policyIds);
   }
 
   private getInternalEsClient() {
