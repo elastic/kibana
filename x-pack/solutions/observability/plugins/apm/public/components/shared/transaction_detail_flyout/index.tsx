@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { EuiFlyout, EuiFlyoutBody, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
+import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 import React, { useCallback, useMemo, useState } from 'react';
 import { TraceWaterfallFlyout } from '../../app/transaction_details/waterfall_with_summary/trace_waterfall_flyout';
-import { TransactionDetailFlyoutHeader } from './header';
-import { TransactionDetailFlyoutFooter } from './footer';
+import { TRANSACTION_DETAIL_FLYOUT_EBT_ELEMENTS } from './ebt_constants';
+import { useTransactionDetailFlyoutHeader } from './header';
+import { useTransactionDetailFlyoutFooterMenu } from './footer';
 import { TransactionDetailFlyoutLatencyDistribution } from './latency_distribution';
 import { TransactionDetailFlyoutRedMetrics } from './red_metrics';
-import { TransactionDetailFlyoutSummary } from './summary';
 import { TransactionDetailFlyoutTraceSample } from './trace_sample';
 import {
   TransactionDetailFlyoutContextProvider,
@@ -32,6 +33,80 @@ const STALE_FILTERS_CALLOUT_TITLE = i18n.translate(
       "This transaction isn't available with the current filters. Showing previous data.",
   }
 );
+
+const ACTIONS_BUTTON_LABEL = i18n.translate(
+  'xpack.apm.transactionDetailFlyout.actionsButtonLabel',
+  {
+    defaultMessage: 'Actions',
+  }
+);
+
+interface TransactionDetailFlyoutContentProps {
+  transactionName: string;
+  onClose: () => void;
+  historyKey: symbol;
+  isFiltersStale: boolean;
+  isFiltersPending: boolean;
+}
+
+/**
+ * Authors the `FlyoutTemplate` tree. Rendered inside the flyout's context provider so the header and
+ * footer hooks have access; the template assembly requires the zones and their parts to be direct
+ * children of `<FlyoutTemplate>`, so they are composed here rather than in sub-components.
+ */
+function TransactionDetailFlyoutContent({
+  transactionName,
+  onClose,
+  historyKey,
+  isFiltersStale,
+  isFiltersPending,
+}: TransactionDetailFlyoutContentProps) {
+  const { titleNode, metaBlocks, badges } = useTransactionDetailFlyoutHeader({ isFiltersPending });
+  const { panels, isLoading, hasActions } = useTransactionDetailFlyoutFooterMenu();
+
+  return (
+    <FlyoutTemplate
+      data-test-subj="transactionDetailFlyout"
+      onClose={onClose}
+      ownFocus={false}
+      size="fill"
+      session="inherit"
+      historyKey={historyKey}
+    >
+      <FlyoutTemplate.Header title={titleNode} titleText={transactionName}>
+        {metaBlocks}
+        {badges}
+      </FlyoutTemplate.Header>
+      <FlyoutTemplate.Body>
+        {isFiltersStale ? (
+          <FlyoutTemplate.Body.Callout
+            level="warning"
+            title={STALE_FILTERS_CALLOUT_TITLE}
+            data-test-subj="transactionDetailFlyoutStaleFiltersCallout"
+          />
+        ) : null}
+        <TransactionDetailFlyoutRedMetrics />
+        <EuiSpacer size="m" />
+        <TransactionDetailFlyoutLatencyDistribution />
+        <EuiSpacer size="m" />
+        <TransactionDetailFlyoutTraceSample />
+      </FlyoutTemplate.Body>
+      <FlyoutTemplate.Footer>
+        <FlyoutTemplate.Footer.PrimaryActionMenu
+          label={ACTIONS_BUTTON_LABEL}
+          panels={panels}
+          data-test-subj="transactionDetailFlyoutActionsButton"
+          isLoading={isLoading}
+          isDisabled={!hasActions}
+          {...getEbtProps({
+            action: EBT_CLICK_ACTIONS.OPEN_ACTIONS,
+            element: TRANSACTION_DETAIL_FLYOUT_EBT_ELEMENTS.ACTIONS_MENU,
+          })}
+        />
+      </FlyoutTemplate.Footer>
+    </FlyoutTemplate>
+  );
+}
 
 interface TransactionDetailFlyoutComponentProps extends TransactionDetailFlyoutProps {
   deps: TransactionDetailFlyoutContextValue['deps'];
@@ -54,7 +129,6 @@ export function TransactionDetailFlyout({
   alertsCount,
 }: TransactionDetailFlyoutComponentProps) {
   const { transactionName, rangeFrom, rangeTo, start, end } = filters;
-  const titleId = useGeneratedHtmlId({ prefix: 'transactionDetailFlyoutTitle' });
   const [fullTraceFlyout, setFullTraceFlyout] = useState<FullTraceFlyoutState | null>(null);
 
   const openFullTraceFlyout = useCallback((state: FullTraceFlyoutState) => {
@@ -92,44 +166,13 @@ export function TransactionDetailFlyout({
 
   return (
     <TransactionDetailFlyoutContextProvider value={contextValue}>
-      <EuiFlyout
-        data-test-subj="transactionDetailFlyout"
-        flyoutMenuDisplayMode="always"
+      <TransactionDetailFlyoutContent
+        transactionName={transactionName}
         onClose={onClose}
-        ownFocus={false}
-        size="fill"
-        paddingSize="m"
-        session="inherit"
         historyKey={historyKey}
-        flyoutMenuProps={{ title: transactionName }}
-        aria-labelledby={titleId}
-      >
-        <TransactionDetailFlyoutHeader
-          transactionName={transactionName}
-          titleId={titleId}
-          isFiltersPending={isFiltersPending}
-        />
-        <EuiFlyoutBody>
-          {isFiltersStale ? (
-            <>
-              <KbnWarningCallout
-                size="s"
-                data-test-subj="transactionDetailFlyoutStaleFiltersCallout"
-                title={STALE_FILTERS_CALLOUT_TITLE}
-              />
-              <EuiSpacer size="m" />
-            </>
-          ) : null}
-          <TransactionDetailFlyoutSummary />
-          <EuiSpacer size="m" />
-          <TransactionDetailFlyoutRedMetrics />
-          <EuiSpacer size="m" />
-          <TransactionDetailFlyoutLatencyDistribution />
-          <EuiSpacer size="m" />
-          <TransactionDetailFlyoutTraceSample />
-        </EuiFlyoutBody>
-        <TransactionDetailFlyoutFooter />
-      </EuiFlyout>
+        isFiltersStale={isFiltersStale}
+        isFiltersPending={isFiltersPending}
+      />
       {fullTraceFlyout ? (
         <TraceWaterfallFlyout
           traceId={fullTraceFlyout.traceId}

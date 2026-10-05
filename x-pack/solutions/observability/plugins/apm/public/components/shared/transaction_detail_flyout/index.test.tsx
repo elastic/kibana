@@ -8,19 +8,68 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { CoreStart } from '@kbn/core/public';
-import { TransactionDetailFlyout } from '.';
+import { TransactionDetailFlyout, TRANSACTION_DETAIL_FLYOUT_HISTORY_KEY } from '.';
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
-  return {
-    ...original,
-    EuiPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    useGeneratedHtmlId: () => 'transaction-detail-flyout-title-id',
-    EuiFlyout: ({ children }: { children: React.ReactNode }) => (
-      <section data-test-subj="transactionDetailFlyout">{children}</section>
-    ),
+const mockFlyoutTemplateProps = jest.fn();
+
+// A lightweight stand-in for the template that renders the zones' children and records the root
+// props, so the container's wiring can be asserted in isolation.
+jest.mock('@kbn/flyout-template', () => {
+  const passthrough = ({ children }: { children?: React.ReactNode }) => <>{children}</>;
+  const FlyoutTemplate = ({ children, ...props }: { children: React.ReactNode }) => {
+    mockFlyoutTemplateProps(props);
+    return <section data-test-subj="transactionDetailFlyout">{children}</section>;
   };
+  FlyoutTemplate.Header = ({
+    title,
+    children,
+  }: {
+    title: React.ReactNode;
+    children?: React.ReactNode;
+  }) => (
+    <header>
+      {title}
+      {children}
+    </header>
+  );
+  FlyoutTemplate.Body = Object.assign(passthrough, {
+    Callout: ({ title, ...rest }: { title: React.ReactNode }) => <div {...rest}>{title}</div>,
+  });
+  FlyoutTemplate.Footer = Object.assign(passthrough, {
+    PrimaryActionMenu: () => <div data-test-subj="transactionDetailFlyoutFooter">footer</div>,
+  });
+  return { __esModule: true, FlyoutTemplate };
 });
+
+jest.mock('./header', () => ({
+  useTransactionDetailFlyoutHeader: ({ isFiltersPending }: { isFiltersPending?: boolean }) => {
+    const { useTransactionDetailFlyoutContext } = jest.requireActual(
+      './transaction_detail_flyout_context'
+    );
+    const {
+      filters: { transactionName },
+    } = useTransactionDetailFlyoutContext();
+    return {
+      titleNode: (
+        <span data-test-subj="transactionDetailFlyoutTitle">
+          {transactionName}
+          {isFiltersPending ? (
+            <span data-test-subj="transactionDetailFlyoutFiltersPendingSpinner" />
+          ) : null}
+        </span>
+      ),
+      metaBlocks: [],
+      badges: [],
+    };
+  },
+}));
+jest.mock('./footer', () => ({
+  useTransactionDetailFlyoutFooterMenu: () => ({
+    panels: [{ id: 0, items: [] }],
+    isLoading: false,
+    hasActions: false,
+  }),
+}));
 
 jest.mock('./latency_distribution', () => ({
   TransactionDetailFlyoutLatencyDistribution: () => (
@@ -48,16 +97,6 @@ jest.mock('./trace_sample', () => ({
       </button>
     );
   },
-}));
-jest.mock('./summary', () => ({
-  TransactionDetailFlyoutSummary: () => (
-    <div data-test-subj="transactionDetailFlyoutSummary">summary</div>
-  ),
-}));
-jest.mock('./footer', () => ({
-  TransactionDetailFlyoutFooter: () => (
-    <div data-test-subj="transactionDetailFlyoutFooter">footer</div>
-  ),
 }));
 
 const mockTraceWaterfallFlyout = jest.fn((_props: unknown) => (
@@ -95,10 +134,24 @@ const BASE_PROPS = {
 };
 
 describe('TransactionDetailFlyout', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders the transaction name in the header and flyout content', () => {
     render(<TransactionDetailFlyout {...BASE_PROPS} />);
 
     expect(screen.getByTestId('transactionDetailFlyout')).toBeInTheDocument();
+    expect(mockFlyoutTemplateProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        'data-test-subj': 'transactionDetailFlyout',
+        onClose: BASE_PROPS.onClose,
+        ownFocus: false,
+        size: 'fill',
+        session: 'inherit',
+        historyKey: TRANSACTION_DETAIL_FLYOUT_HISTORY_KEY,
+      })
+    );
     expect(screen.getByTestId('transactionDetailFlyoutTitle')).toHaveTextContent(
       FILTERS.transactionName
     );

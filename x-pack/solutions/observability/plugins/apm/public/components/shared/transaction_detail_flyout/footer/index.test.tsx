@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { TransactionDetailFlyoutFooter } from '.';
+import type { FlyoutFooterMenuItem } from '@kbn/flyout-template';
+import { renderHook } from '@testing-library/react';
+import type { MouseEvent } from 'react';
+import { useTransactionDetailFlyoutFooterMenu } from '.';
 
 const mockUseTransactionDetailFlyoutLinks = jest.fn();
 jest.mock('../hooks/use_transaction_detail_flyout_links', () => ({
@@ -37,58 +37,73 @@ function makeLinks(
   };
 }
 
-function renderFooter() {
-  return render(
-    <IntlProvider locale="en">
-      <TransactionDetailFlyoutFooter />
-    </IntlProvider>
-  );
+/** The resolved menu-item props these tests assert against (the spread EBT attributes are not on the base type). */
+interface ResolvedMenuItem {
+  name?: string;
+  href?: string;
+  onClick?: (event: Partial<MouseEvent>) => void;
+  'data-test-subj'?: string;
+  'data-ebt-action'?: string;
+  'data-ebt-element'?: string;
+  'data-ebt-detail'?: string;
 }
 
-function openActionsMenu() {
-  fireEvent.click(screen.getByTestId('transactionDetailFlyoutActionsButton'));
+function renderFooterMenu() {
+  return renderHook(() => useTransactionDetailFlyoutFooterMenu());
 }
 
-describe('TransactionDetailFlyoutFooter', () => {
+function getItems(): ResolvedMenuItem[] {
+  const { result } = renderFooterMenu();
+  return result.current.panels[0].items as unknown as ResolvedMenuItem[];
+}
+
+function findItem(
+  items: FlyoutFooterMenuItem[] | ResolvedMenuItem[],
+  dataTestSubj: string
+): ResolvedMenuItem | undefined {
+  return (items as ResolvedMenuItem[]).find((item) => item['data-test-subj'] === dataTestSubj);
+}
+
+describe('useTransactionDetailFlyoutFooterMenu', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseTransactionDetailFlyoutLinks.mockReturnValue(makeLinks());
   });
 
-  afterEach(() => {
-    cleanup();
-  });
-
   it('enables the actions button and renders Discover and transaction details actions', () => {
-    renderFooter();
+    const { result } = renderFooterMenu();
+    expect(result.current.hasActions).toBe(true);
+    expect(result.current.isLoading).toBe(false);
 
-    const button = screen.getByTestId('transactionDetailFlyoutActionsButton');
-    expect(button).not.toBeDisabled();
-    expect(button).toHaveAttribute('data-ebt-action', 'openActions');
-    expect(button).toHaveAttribute('data-ebt-element', 'transactionDetailFlyoutActionsMenu');
+    const items = result.current.panels[0].items;
 
-    openActionsMenu();
-
-    const discoverAction = screen.getByTestId(
+    const discoverAction = findItem(
+      items,
       'transactionDetailFlyoutActionsMenuItem-openTracesInDiscover'
     );
-    expect(discoverAction).toHaveAttribute('href', '/app/discover/traces');
-    expect(discoverAction).toHaveTextContent('Open traces in Discover');
-    expect(discoverAction).toHaveAttribute('data-ebt-action', 'openInDiscover');
-    expect(discoverAction).toHaveAttribute(
-      'data-ebt-element',
-      'transactionDetailFlyoutActionsMenu'
+    expect(discoverAction).toEqual(
+      expect.objectContaining({
+        href: '/app/discover/traces',
+        name: 'Open traces in Discover',
+        'data-ebt-action': 'openInDiscover',
+        'data-ebt-element': 'transactionDetailFlyoutActionsMenu',
+        'data-ebt-detail': 'traces',
+      })
     );
-    expect(discoverAction).toHaveAttribute('data-ebt-detail', 'traces');
 
-    const detailsAction = screen.getByTestId(
+    const detailsAction = findItem(
+      items,
       'transactionDetailFlyoutActionsMenuItem-openTransactionDetails'
     );
-    expect(detailsAction).toHaveAttribute('href', '/app/apm/services/checkout/transactions/view');
-    expect(detailsAction).toHaveTextContent('Open transaction details');
-    expect(detailsAction).toHaveAttribute('data-ebt-action', 'viewSpan');
-    expect(detailsAction).toHaveAttribute('data-ebt-element', 'transactionDetailFlyoutActionsMenu');
-    expect(detailsAction).toHaveAttribute('data-ebt-detail', 'transactionDetails');
+    expect(detailsAction).toEqual(
+      expect.objectContaining({
+        href: '/app/apm/services/checkout/transactions/view',
+        name: 'Open transaction details',
+        'data-ebt-action': 'viewSpan',
+        'data-ebt-element': 'transactionDetailFlyoutActionsMenu',
+        'data-ebt-detail': 'transactionDetails',
+      })
+    );
   });
 
   it('keeps the actions button enabled while indices load if transaction details is available', () => {
@@ -98,17 +113,17 @@ describe('TransactionDetailFlyoutFooter', () => {
       discover: { href: undefined, openInDiscoverTab: undefined },
     });
 
-    renderFooter();
+    const { result } = renderFooterMenu();
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.hasActions).toBe(true);
 
-    expect(screen.getByTestId('transactionDetailFlyoutActionsButton')).not.toBeDisabled();
-
-    openActionsMenu();
+    const items = result.current.panels[0].items;
     expect(
-      screen.getByTestId('transactionDetailFlyoutActionsMenuItem-openTransactionDetails')
-    ).toBeInTheDocument();
+      findItem(items, 'transactionDetailFlyoutActionsMenuItem-openTransactionDetails')
+    ).toBeDefined();
     expect(
-      screen.queryByTestId('transactionDetailFlyoutActionsMenuItem-openTracesInDiscover')
-    ).not.toBeInTheDocument();
+      findItem(items, 'transactionDetailFlyoutActionsMenuItem-openTracesInDiscover')
+    ).toBeUndefined();
   });
 
   it('shows loading and disables the actions button when no actions are available yet', () => {
@@ -118,9 +133,9 @@ describe('TransactionDetailFlyoutFooter', () => {
       discover: { href: undefined, openInDiscoverTab: undefined },
     });
 
-    renderFooter();
-
-    expect(screen.getByTestId('transactionDetailFlyoutActionsButton')).toBeDisabled();
+    const { result } = renderFooterMenu();
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.hasActions).toBe(false);
   });
 
   it('disables the actions button when no actions are available', () => {
@@ -130,9 +145,10 @@ describe('TransactionDetailFlyoutFooter', () => {
       discover: { href: undefined, openInDiscoverTab: undefined },
     });
 
-    renderFooter();
-
-    expect(screen.getByTestId('transactionDetailFlyoutActionsButton')).toBeDisabled();
+    const { result } = renderFooterMenu();
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.hasActions).toBe(false);
+    expect(result.current.panels[0].items).toHaveLength(0);
   });
 
   it('omits Discover when unavailable and still shows transaction details', () => {
@@ -142,30 +158,33 @@ describe('TransactionDetailFlyoutFooter', () => {
       discover: { href: undefined, openInDiscoverTab: undefined },
     });
 
-    renderFooter();
-    openActionsMenu();
+    const items = getItems();
 
     expect(
-      screen.queryByTestId('transactionDetailFlyoutActionsMenuItem-openTracesInDiscover')
-    ).not.toBeInTheDocument();
+      findItem(items, 'transactionDetailFlyoutActionsMenuItem-openTracesInDiscover')
+    ).toBeUndefined();
     expect(
-      screen.getByTestId('transactionDetailFlyoutActionsMenuItem-openTransactionDetails')
-    ).toBeInTheDocument();
+      findItem(items, 'transactionDetailFlyoutActionsMenuItem-openTransactionDetails')
+    ).toBeDefined();
   });
 
   it('uses the Discover tab label and onClick when openInDiscoverTab is provided', () => {
     const openInDiscoverTab = jest.fn();
     mockUseTransactionDetailFlyoutLinks.mockReturnValue(makeLinks({ openInDiscoverTab }));
 
-    renderFooter();
-    openActionsMenu();
-
-    const discoverAction = screen.getByTestId(
+    const discoverAction = findItem(
+      getItems(),
       'transactionDetailFlyoutActionsMenuItem-openTracesInDiscover'
     );
-    expect(discoverAction).toHaveTextContent('Open traces in a Discover tab');
+    expect(discoverAction?.name).toBe('Open traces in a Discover tab');
+    expect(discoverAction?.href).toBe('/app/discover/traces');
 
-    fireEvent.click(discoverAction);
+    const preventDefault = jest.fn();
+    discoverAction?.onClick?.({ button: 0, preventDefault });
+    expect(preventDefault).toHaveBeenCalledTimes(1);
+    expect(openInDiscoverTab).toHaveBeenCalledTimes(1);
+
+    discoverAction?.onClick?.({ button: 0, metaKey: true, preventDefault });
     expect(openInDiscoverTab).toHaveBeenCalledTimes(1);
   });
 });
