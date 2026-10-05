@@ -55,7 +55,7 @@ describe('DispatcherPipeline', () => {
 
       const step2 = createMockDispatcherStep('step2', async () => {
         executionOrder.push('step2');
-        return { type: 'halt', reason: 'no_episodes' };
+        return { type: 'halt', reason: 'no_alerts' };
       });
 
       const step3 = createMockDispatcherStep('step3', async () => {
@@ -69,7 +69,7 @@ describe('DispatcherPipeline', () => {
       const result = await pipeline.execute(input, createLoggerService().loggerService);
 
       expect(result.completed).toBe(false);
-      expect(result.haltReason).toBe('no_episodes');
+      expect(result.haltReason).toBe('no_alerts');
       expect(executionOrder).toEqual(['step1', 'step2']);
       expect(step3.execute).not.toHaveBeenCalled();
     });

@@ -46,7 +46,7 @@ export function buildActionGroups(
       case 'per_alert':
         groupKey = {
           groupHash: episode.group_hash,
-          episodeId: episode.alert_id,
+          alertId: episode.alert_id,
         };
         break;
       case 'all':

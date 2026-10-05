@@ -16,7 +16,7 @@ import type { DispatcherPipelineInput, DispatcherPipelineResult } from './types'
  * - No actions: window fully consumed. Advance to windowEnd.
  * - Truncated (row count === ESQL_QUERY_ROW_LIMIT): advance to the last fetched
  *   episode's timestamp (the truncation edge); the deferred tail is re-read next tick.
- * - All other outcomes (no_episodes, normal completion): advance to windowEnd.
+ * - All other outcomes (no_alerts, normal completion): advance to windowEnd.
  *
  * The result is always clamped to `≥ eventWatermark` so the watermark never regresses.
  */
@@ -41,7 +41,7 @@ export const computeNextWatermark = ({
     //   'inline_stats_too_large': ES rejected the INLINE STATS pre-fetch query (sub-plan
     //     too large); scan was refused, not executed. stuckTicks increments so the
     //     pre-fetch escape hatch can eventually force-advance. Do NOT fall through to the
-    //     no_episodes path — that would advance to windowEnd on the first hit.
+    //     no_alerts path — that would advance to windowEnd on the first hit.
     nextWatermark = eventWatermark;
   } else if (haltReason === 'no_actions') {
     // All episodes were filtered (e.g. maintenance window) — window fully consumed.
@@ -53,7 +53,7 @@ export const computeNextWatermark = ({
     // re-read from eventWatermark - OVERLAP on the next tick.
     nextWatermark = finalState.scan.truncationEdge() ?? eventWatermark;
   } else {
-    // Window fully consumed (no_episodes, or normal completion).
+    // Window fully consumed (no_alerts, or normal completion).
     nextWatermark = windowEnd;
   }
 

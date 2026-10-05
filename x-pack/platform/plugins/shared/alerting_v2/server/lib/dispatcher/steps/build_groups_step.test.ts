@@ -378,6 +378,34 @@ describe('buildActionGroups', () => {
     const groups = buildActionGroups(matched);
 
     expect(groups).toHaveLength(2);
+    expect(groups.map(({ groupKey }) => groupKey)).toEqual([
+      { groupHash: 'h1', alertId: 'e1' },
+      { groupHash: 'h1', alertId: 'e2' },
+    ]);
+  });
+
+  it('collapses alerts with the same group_hash and alert_id into one group for per_alert mode', () => {
+    const policy = createActionPolicy({
+      id: 'p1',
+      groupingMode: 'per_alert',
+      destinations: [{ type: 'workflow', id: 'w1' }],
+    });
+    const matched = [
+      createMatchedPair({
+        alert: createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' }),
+        policy,
+      }),
+      createMatchedPair({
+        alert: createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' }),
+        policy,
+      }),
+    ];
+
+    const groups = buildActionGroups(matched);
+
+    expect(groups).toHaveLength(1);
+    expect(groups[0].groupKey).toEqual({ groupHash: 'h1', alertId: 'e1' });
+    expect(groups[0].alerts).toHaveLength(2);
   });
 
   it('external episode (null rule_id) groups successfully with no rule entry in group.rules', () => {

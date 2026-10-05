@@ -33,6 +33,12 @@ const makeSubPlanError = () =>
 const logger = createStepLogger();
 
 describe('FetchAlertsStep', () => {
+  it('is named fetch_alerts', () => {
+    const { queryService } = createQueryService();
+
+    expect(new FetchAlertsStep(queryService).name).toBe('fetch_alerts');
+  });
+
   it('returns episodes and continues when episodes are found', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const step = new FetchAlertsStep(queryService);
@@ -53,7 +59,7 @@ describe('FetchAlertsStep', () => {
     expect(result.data?.scan?.alerts[0].rule_id).toBe('r1');
   });
 
-  it('halts with no_episodes when none are found', async () => {
+  it('halts with no_alerts when none are found', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const step = new FetchAlertsStep(queryService);
 
@@ -62,7 +68,7 @@ describe('FetchAlertsStep', () => {
     const state = createDispatcherPipelineState();
     const result = await step.execute(state, logger);
 
-    expect(result).toEqual({ type: 'halt', reason: 'no_episodes' });
+    expect(result).toEqual({ type: 'halt', reason: 'no_alerts' });
   });
 
   it('does not cap the Lucene filter at windowEnd so actions stamped after the settle buffer still join last_fired', async () => {

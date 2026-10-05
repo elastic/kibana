@@ -68,7 +68,7 @@ describe('computeNextWatermark', () => {
         }),
       });
 
-      // Not truncated, not no_episodes/no_actions — falls through to windowEnd
+      // Not truncated, not no_alerts/no_actions — falls through to windowEnd
       expect(result.toISOString()).toBe('2026-01-22T07:35:00.000Z');
     });
   });
@@ -97,11 +97,11 @@ describe('computeNextWatermark', () => {
     });
   });
 
-  describe('no_episodes halt', () => {
+  describe('no_alerts halt', () => {
     it('advances to windowEnd', () => {
       const result = computeNextWatermark({
         input: BASE_INPUT,
-        result: makeResult({ completed: false, haltReason: 'no_episodes' }),
+        result: makeResult({ completed: false, haltReason: 'no_alerts' }),
       });
 
       expect(result.toISOString()).toBe('2026-01-22T07:35:00.000Z');
@@ -205,7 +205,7 @@ describe('computeNextWatermark', () => {
 
       const result = computeNextWatermark({
         input,
-        result: makeResult({ haltReason: 'no_episodes', finalState: { input } }),
+        result: makeResult({ haltReason: 'no_alerts', finalState: { input } }),
       });
 
       expect(result.toISOString()).toBe('2026-01-22T07:30:00.000Z');

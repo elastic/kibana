@@ -36,7 +36,7 @@ interface RawAlert {
 
 @injectable()
 export class FetchAlertsStep implements DispatcherStep {
-  public readonly name = 'fetch_episodes';
+  public readonly name = 'fetch_alerts';
 
   constructor(
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract
@@ -90,7 +90,7 @@ export class FetchAlertsStep implements DispatcherStep {
     const episodes = parseAlerts(result);
 
     if (episodes.length === 0) {
-      return { type: 'halt', reason: 'no_episodes' };
+      return { type: 'halt', reason: 'no_alerts' };
     }
 
     return { type: 'continue', data: { scan: AlertScan.of({ alerts: episodes, truncated }) } };

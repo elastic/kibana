@@ -214,7 +214,7 @@ export interface DispatcherPipelineState {
 }
 
 export type DispatcherHaltReason =
-  | 'no_episodes'
+  | 'no_alerts'
   | 'no_actions'
   | 'aborted'
   | 'inline_stats_too_large';

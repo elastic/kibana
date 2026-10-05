@@ -12,6 +12,12 @@ import { createAlert, createDispatcherPipelineState } from '../fixtures/test_uti
 import { createAlertDataResponse } from '../fixtures/dispatcher';
 
 describe('HydrateAlertDataStep', () => {
+  it('is named hydrate_alert_data', () => {
+    const { queryService } = createQueryService();
+
+    expect(new HydrateAlertDataStep(queryService).name).toBe('hydrate_alert_data');
+  });
+
   it('returns continue without querying when dispatchable is empty', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
@@ -112,7 +118,13 @@ describe('HydrateAlertDataStep', () => {
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     expect(result.data?.triage?.dispatchable[0].data).toBeUndefined();
-    expect(mockLogger.warn).toHaveBeenCalled();
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.any(Function), {
+      labels: { code: 'HYDRATE_ALERT_DATA_STEP_MISSING_RULE_EVENTS_ROW' },
+    });
+    const [message] = mockLogger.warn.mock.calls[0];
+    expect(typeof message === 'function' ? message() : message).toBe(
+      '1 of 1 alerts had no matching rule-events row; their data will be absent'
+    );
   });
 
   it('leaves data undefined when data_json is null', async () => {

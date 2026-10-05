@@ -1381,7 +1381,7 @@ describe('DispatcherService', () => {
       const { storageService: noopStorage } = createStorageService();
       const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
 
-      // Pipeline that advances the watermark (no_episodes → windowEnd > eventWatermark)
+      // Pipeline that advances the watermark (no_alerts → windowEnd > eventWatermark)
       const advancingPipeline: jest.Mocked<DispatcherPipelineContract> = {
         execute: jest
           .fn()
@@ -1389,7 +1389,7 @@ describe('DispatcherService', () => {
             ({ signal, eventWatermark: ew, windowStart, windowEnd, startedAt, executionUuid }) => {
               return Promise.resolve({
                 completed: true,
-                haltReason: 'no_episodes',
+                haltReason: 'no_alerts',
                 finalState: {
                   input: {
                     startedAt,

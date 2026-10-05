@@ -27,7 +27,7 @@ interface RawAlertData {
 
 @injectable()
 export class HydrateAlertDataStep implements DispatcherStep {
-  public readonly name = 'hydrate_episode_data';
+  public readonly name = 'hydrate_alert_data';
 
   constructor(
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract
@@ -67,9 +67,9 @@ export class HydrateAlertDataStep implements DispatcherStep {
     const requested = episodeIds.length;
     if (hydrated < requested) {
       logger.warn({
-        code: ALERTING_LOG_CODES.HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW,
+        code: ALERTING_LOG_CODES.HYDRATE_ALERT_DATA_STEP_MISSING_RULE_EVENTS_ROW,
         message: () =>
-          `${requested - hydrated} of ${requested} episodes had no matching rule-events row; ` +
+          `${requested - hydrated} of ${requested} alerts had no matching rule-events row; ` +
           `their data will be absent`,
       });
     }

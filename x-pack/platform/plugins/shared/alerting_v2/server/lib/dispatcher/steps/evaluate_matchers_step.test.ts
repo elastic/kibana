@@ -247,7 +247,7 @@ describe('EvaluateMatchersStep', () => {
       expect.objectContaining({
         labels: expect.objectContaining({
           policy_id: 'p1',
-          episode_id: episode.alert_id,
+          alert_id: episode.alert_id,
           code: ALERTING_LOG_CODES.POLICY_MATCHER_KQL_INVALID,
         }),
       })
@@ -323,7 +323,7 @@ describe('EvaluateMatchersStep', () => {
       expect.objectContaining({
         labels: expect.objectContaining({
           policy_id: 'p-broken',
-          episode_id: 'ep-42',
+          alert_id: 'ep-42',
           code: ALERTING_LOG_CODES.POLICY_MATCHER_KQL_INVALID,
         }),
       })

@@ -192,11 +192,11 @@ export type AlertingV2ErrorCode = (typeof ALERTING_ERROR_CODES)[keyof typeof ALE
 export const ALERTING_LOG_CODES = {
   // ─────────────────────────────── Dispatcher steps ──────────────────────
   /**
-   * Hydrate episode data step: some episodes had no matching .rule-events row;
-   * data will be absent for those episodes
+   * Hydrate alert data step: some alerts had no matching .rule-events row;
+   * data will be absent for those alerts
    */
-  HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW:
-    'HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW',
+  HYDRATE_ALERT_DATA_STEP_MISSING_RULE_EVENTS_ROW:
+    'HYDRATE_ALERT_DATA_STEP_MISSING_RULE_EVENTS_ROW',
   /**
    * Fetch suppressions step: a suppressions query chunk returned the ES|QL row
    * limit, so rows past it were dropped. Episodes whose ack, snooze or
