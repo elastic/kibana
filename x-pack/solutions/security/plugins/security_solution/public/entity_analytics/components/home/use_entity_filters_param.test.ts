@@ -8,7 +8,7 @@
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { useEntityFiltersParam } from './use_entity_filters_param';
+import { getEntityFilterESQL, useEntityFiltersParam } from './use_entity_filters_param';
 import { toBucketMap } from './entity_filters_bar';
 import type { AggregationsStringTermsAggregate } from '@elastic/elasticsearch/lib/api/types';
 import { EntityType } from '../../../../common/entity_analytics/types';
@@ -106,5 +106,45 @@ describe('useEntityFiltersParam', () => {
 
       expect(result.current.entityFilters.entityTypes).toEqual([]);
     });
+  });
+});
+
+describe('getEntityFilterESQL', () => {
+  it('escapes quotes and backslashes so URL-derived values stay one string literal', () => {
+    const clauses = getEntityFilterESQL({
+      entityTypes: [],
+      riskLevels: [],
+      assetCriticality: [],
+      watchlists: [],
+      dataSources: ['a" OR true OR "', 'x\\y'],
+    });
+    expect(clauses).toHaveLength(1);
+    expect(clauses[0]).toBe(
+      '| WHERE MV_CONTAINS(entity.source, "a\\" OR true OR \\"") OR MV_CONTAINS(entity.source, "x\\\\y")'
+    );
+  });
+
+  it('uses MV_CONTAINS for watchlists and dataSources (multi-value fields)', () => {
+    const clauses = getEntityFilterESQL({
+      entityTypes: [],
+      riskLevels: [],
+      assetCriticality: [],
+      watchlists: ['my-watchlist'],
+      dataSources: [],
+    });
+    expect(clauses).toHaveLength(1);
+    expect(clauses[0]).toBe('| WHERE MV_CONTAINS(entity.attributes.watchlists, "my-watchlist")');
+  });
+
+  it('uses IN for scalar fields like entityTypes', () => {
+    const clauses = getEntityFilterESQL({
+      entityTypes: [EntityType.host, EntityType.user],
+      riskLevels: [],
+      assetCriticality: [],
+      watchlists: [],
+      dataSources: [],
+    });
+    expect(clauses).toHaveLength(1);
+    expect(clauses[0]).toBe('| WHERE entity.EngineMetadata.Type IN ("host", "user")');
   });
 });

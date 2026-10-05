@@ -12,27 +12,27 @@ import { ALERTING_V2_EPISODES_BASE_PATH, paths } from './constants';
 const decodeAppState = (url: string): unknown => {
   const raw = new URL(url, 'http://localhost').searchParams.get('_a');
   if (!raw) return undefined;
-  return (decodeRison(raw) as Record<string, unknown>)?.episodesList;
+  return (decodeRison(raw) as Record<string, unknown>)?.alertsList;
 };
 
-describe('paths.alertEpisodesListHref', () => {
-  it('returns the base episodes path when called with no options', () => {
-    expect(paths.alertEpisodesListHref()).toBe(ALERTING_V2_EPISODES_BASE_PATH);
+describe('paths.alertsListHref', () => {
+  it('returns the base alerts path when called with no options', () => {
+    expect(paths.alertsListHref()).toBe(ALERTING_V2_EPISODES_BASE_PATH);
   });
 
-  it('returns the base episodes path when all filter fields are empty', () => {
-    expect(paths.alertEpisodesListHref({ filters: {}, timeRange: undefined })).toBe(
+  it('returns the base alerts path when all filter fields are empty', () => {
+    expect(paths.alertsListHref({ filters: {}, timeRange: undefined })).toBe(
       ALERTING_V2_EPISODES_BASE_PATH
     );
   });
 
-  it('encodes ruleId into _a.episodesList', () => {
-    const url = paths.alertEpisodesListHref({ filters: { ruleId: 'rule-1' } });
+  it('encodes ruleId into _a.alertsList', () => {
+    const url = paths.alertsListHref({ filters: { ruleId: 'rule-1' } });
     expect(decodeAppState(url)).toMatchObject({ ruleId: 'rule-1' });
   });
 
-  it('encodes groupHash and groupingValues into _a.episodesList', () => {
-    const url = paths.alertEpisodesListHref({
+  it('encodes groupHash and groupingValues into _a.alertsList', () => {
+    const url = paths.alertsListHref({
       filters: {
         groupHash: 'abc123',
         groupingValues: { 'host.name': 'web-01', region: null },
@@ -44,8 +44,8 @@ describe('paths.alertEpisodesListHref', () => {
     });
   });
 
-  it('encodes timeRange as timeFrom/timeTo inside _a.episodesList, not in _g', () => {
-    const url = paths.alertEpisodesListHref({
+  it('encodes timeRange as timeFrom/timeTo inside _a.alertsList, not in _g', () => {
+    const url = paths.alertsListHref({
       filters: { ruleId: 'r1' },
       timeRange: { from: 'now-7d', to: 'now' },
     });
@@ -54,7 +54,7 @@ describe('paths.alertEpisodesListHref', () => {
   });
 
   it('omits empty groupingValues objects', () => {
-    const url = paths.alertEpisodesListHref({
+    const url = paths.alertsListHref({
       filters: { ruleId: 'r1', groupingValues: {} },
     });
     const state = decodeAppState(url) as Record<string, unknown>;
@@ -62,7 +62,7 @@ describe('paths.alertEpisodesListHref', () => {
   });
 
   it('encodes all fields together', () => {
-    const url = paths.alertEpisodesListHref({
+    const url = paths.alertsListHref({
       filters: {
         ruleId: 'r1',
         groupHash: 'gh1',

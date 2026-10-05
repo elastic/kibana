@@ -29,11 +29,11 @@ jest.mock('./handler', () => ({
 
 const input = {
   event_id: 'event-1',
-  status: 'open' as const,
+  status: 'active' as const,
   stream_names: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
-  severity: '60-high' as const,
+  severity: 'high' as const,
   confidence: 0.8,
 };
 
@@ -42,6 +42,7 @@ const getFeatures = jest.fn().mockResolvedValue({ hits: [] });
 const createTool = (telemetry: { trackAgentToolEventsWrite: jest.Mock }) => {
   const getScopedClients = jest.fn().mockResolvedValue({
     getEventClient: jest.fn().mockReturnValue({}),
+    getEventSearchClient: jest.fn().mockReturnValue({}),
     getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
     getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
     licensing: {},
@@ -139,7 +140,7 @@ describe('events_write tool', () => {
       },
     });
 
-    it('rejects a new open 60-high item whose grounded signals lack a confirms verdict', () => {
+    it('rejects a new active high item whose grounded signals lack a confirms verdict', () => {
       const { event_id: _omitted, ...newEventInput } = input;
       const result = eventsWriteSchema.safeParse({
         items: [{ ...newEventInput, signals: [signalWith('inconclusive')] }],
@@ -150,7 +151,7 @@ describe('events_write tool', () => {
       }
     });
 
-    it('accepts an open 60-high continuation (event_id present) with only inconclusive grounded signals', () => {
+    it('accepts an active high continuation (event_id present) with only inconclusive grounded signals', () => {
       expect(
         eventsWriteSchema.safeParse({
           items: [{ ...input, signals: [signalWith('inconclusive')] }],
@@ -158,7 +159,7 @@ describe('events_write tool', () => {
       ).toBe(true);
     });
 
-    it('accepts an open 60-high item backed by a confirms signal', () => {
+    it('accepts an active high item backed by a confirms signal', () => {
       expect(
         eventsWriteSchema.safeParse({
           items: [{ ...input, signals: [signalWith('confirms')] }],
@@ -166,12 +167,10 @@ describe('events_write tool', () => {
       ).toBe(true);
     });
 
-    it('accepts an open 40-medium item with only inconclusive grounded signals', () => {
+    it('accepts an active medium item with only inconclusive grounded signals', () => {
       expect(
         eventsWriteSchema.safeParse({
-          items: [
-            { ...input, severity: '40-medium' as const, signals: [signalWith('inconclusive')] },
-          ],
+          items: [{ ...input, severity: 'medium' as const, signals: [signalWith('inconclusive')] }],
         }).success
       ).toBe(true);
     });
@@ -198,7 +197,7 @@ describe('events_write tool', () => {
       }
     });
 
-    it('accepts an open 60-high item whose only grounded signal is off_topic (observed-error path)', () => {
+    it('accepts an active high item whose only grounded signal is off_topic (observed-error path)', () => {
       expect(
         eventsWriteSchema.safeParse({
           items: [{ ...input, signals: [signalWith('off_topic')] }],
@@ -206,7 +205,7 @@ describe('events_write tool', () => {
       ).toBe(true);
     });
 
-    it('accepts an open 60-high item whose signals carry no evidence (quiet rules)', () => {
+    it('accepts an active high item whose signals carry no evidence (quiet rules)', () => {
       const quiet = {
         type: 'detection' as const,
         stream_name: 'logs.test',
@@ -233,9 +232,9 @@ describe('events_write tool', () => {
     expect(result.items[0].event_id).toBeUndefined();
   });
 
-  it('accepts 40-medium for known-ongoing events', () => {
+  it('accepts medium for known-ongoing events', () => {
     const result = eventsWriteSchema.safeParse({
-      items: [{ ...input, severity: '40-medium' }],
+      items: [{ ...input, severity: 'medium' }],
     });
 
     expect(result.success).toBe(true);
