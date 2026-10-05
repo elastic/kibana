@@ -36,10 +36,7 @@ describe('ConversationMetaInfo', () => {
 
   it('shows the in-flight status beside the age', () => {
     renderWithKibanaRenderContext(
-      <ConversationMetaInfo
-        createdAt={agedBy(90 * 1000)}
-        inFlightStatus={<span>Applying</span>}
-      />
+      <ConversationMetaInfo createdAt={agedBy(90 * 1000)} inFlightStatus={<span>Applying</span>} />
     );
 
     expect(screen.getByText('Applying')).toBeInTheDocument();
