@@ -560,7 +560,8 @@ export class UserActionPersister {
   private async bulkCreateAndLog({
     userActions,
     refresh,
-  }: { userActions: UserActionEvent[] } & IndexRefresh) {
+    throwOnItemError = false,
+  }: { userActions: UserActionEvent[]; throwOnItemError?: boolean } & IndexRefresh) {
     const createdUserActions = await this.bulkCreate({ actions: userActions, refresh });
 
     if (!createdUserActions) {
@@ -568,7 +569,18 @@ export class UserActionPersister {
     }
 
     for (let i = 0; i < userActions.length; i++) {
-      this.auditLogger.log(userActions[i].eventDetails, createdUserActions.saved_objects[i].id);
+      const savedObject = createdUserActions.saved_objects[i];
+      if (savedObject != null && !isSavedObjectErrorResult(savedObject)) {
+        this.auditLogger.log(userActions[i].eventDetails, savedObject.id);
+      }
+    }
+
+    const itemErrors = createdUserActions.saved_objects.filter(isSavedObjectErrorResult);
+    if (throwOnItemError && itemErrors.length > 0) {
+      const firstError = itemErrors[0].error;
+      throw new Error(
+        `Failed to create ${itemErrors.length} of ${userActions.length} user actions: ${firstError.message}`
+      );
     }
   }
 
@@ -589,7 +601,7 @@ export class UserActionPersister {
         await this.context.unsecuredSavedObjectsClient.bulkCreate<UserActionPersistedAttributes>(
           actions.map((action) => {
             const decodedAttributes = decodeOrThrow(UserActionPersistedAttributesRt)(
-              action.parameters.attributes
+              this.withActionSource(action.parameters.attributes)
             );
 
             return {
@@ -665,6 +677,7 @@ export class UserActionPersister {
   public async bulkCreateUserAction<T extends keyof BuilderParameters>({
     userActions,
     refresh,
+    throwOnItemError,
   }: BulkCreateUserActionArgs<T>): Promise<void> {
     try {
       this.context.log.debug(`Attempting to bulk create a user actions`);
@@ -707,7 +720,7 @@ export class UserActionPersister {
         )
         .filter(Boolean) as UserActionEvent[];
 
-      await this.bulkCreateAndLog({ userActions: userActionsPayload, refresh });
+      await this.bulkCreateAndLog({ userActions: userActionsPayload, refresh, throwOnItemError });
     } catch (error) {
       this.context.log.error(`Error on bulk creating user actions. Error: ${error}`);
       throw error;
@@ -733,7 +746,9 @@ export class UserActionPersister {
     try {
       this.context.log.debug(`Attempting to POST a new case user action`);
 
-      const decodedAttributes = decodeOrThrow(UserActionPersistedAttributesRt)(attributes);
+      const decodedAttributes = decodeOrThrow(UserActionPersistedAttributesRt)(
+        this.withActionSource(attributes)
+      );
 
       const res = await this.context.unsecuredSavedObjectsClient.create<T>(
         CASE_USER_ACTION_SAVED_OBJECT,
@@ -772,5 +787,13 @@ export class UserActionPersister {
         savedObjectType: CASE_SAVED_OBJECT,
       });
     }
+  }
+
+  private withActionSource(attributes: unknown): unknown {
+    if (this.context.actionSource == null || attributes == null || typeof attributes !== 'object') {
+      return attributes;
+    }
+
+    return { ...attributes, source: this.context.actionSource };
   }
 }

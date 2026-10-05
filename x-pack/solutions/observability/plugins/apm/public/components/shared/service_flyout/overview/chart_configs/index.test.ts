@@ -178,6 +178,34 @@ describe('service flyout chart_configs', () => {
         });
       });
     });
+
+    it('scopes ECS charts to transaction.name when transactionName is set', () => {
+      const keyMetrics = buildEcsKeyMetrics({ transactionName: 'GET /api/orders' });
+
+      keyMetrics.forEach(({ config }) => {
+        expect(config?.dataset.esql).toContain('`transaction.name` == "GET /api/orders"');
+      });
+    });
+
+    it('scopes OTel charts to span.name when transactionName is set', () => {
+      const keyMetrics = buildOtelKeyMetrics({ transactionName: 'GET /api/orders' });
+
+      keyMetrics.forEach(({ config }) => {
+        expect(config?.dataset.esql).toContain('`span.name` == "GET /api/orders"');
+      });
+    });
+
+    it('omits transaction/span name filters when transactionName is unset', () => {
+      const ecs = buildEcsKeyMetrics();
+      const otel = buildOtelKeyMetrics();
+
+      ecs.forEach(({ config }) => {
+        expect(config?.dataset.esql).not.toContain('`transaction.name`');
+      });
+      otel.forEach(({ config }) => {
+        expect(config?.dataset.esql).not.toContain('`span.name`');
+      });
+    });
   });
 
   describe('getInfrastructureMetricCharts', () => {

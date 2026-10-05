@@ -7,17 +7,17 @@ Workplace AI application plugin
 ### Setup
 ```bash
 nvm use
-yarn kbn bootstrap
+pnpm kbn bootstrap
 ```
 
 ### Start ES
 ```bash
-yarn es serverless --projectType workplaceai
+pnpm es serverless --projectType workplaceai
 ```
 
 ### Start Workplace AI in Kibana
 ```bash
-yarn serverless-workplace-ai
+pnpm serverless-workplace-ai
 ```
 
 ## EARS Integration (Elastic Auth Redirect Service)

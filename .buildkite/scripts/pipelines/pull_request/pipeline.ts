@@ -15,9 +15,9 @@
             }
         ] */
 
-import prConfigs from '../../../pull_requests.json';
-import { runPreBuild } from './pre_build';
-import { getEvalTriggerStep } from '../../../pipelines/evals/eval_pipeline';
+import { runPreBuild } from './pre_build.ts';
+import { getEvalTriggerStep } from '../../../pipelines/evals/eval_pipeline.ts';
+import { loadBuildkiteJson } from '../../../pipeline-utils/load_buildkite_json.ts';
 import {
   areChangesSkippable,
   doAnyChangesMatch,
@@ -36,6 +36,9 @@ import {
   isAutomatedVersionBumpPR,
 } from '#pipeline-utils';
 
+const prConfigs =
+  loadBuildkiteJson<typeof import('../../../pull_requests.json')>('pull_requests.json');
+
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 const emptyStep = `steps: []`;
 const cancelable: GetPipelineOptions = { cancelOnGateFailure: true };
@@ -52,7 +55,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
 // this covers external dependency changes, which the package graph below cannot see.
 const STORYBOOK_BUILD_CRITICAL_PATHS = [
-  /^yarn\.lock$/,
+  /^pnpm-lock\.yaml$/,
   /^pnpm-workspace\.yaml$/,
   /^\.buildkite\/scripts\/steps\/storybooks\//,
 ];
@@ -336,12 +339,6 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       (await isStorybookBuildAffected())
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/storybooks.yml', cancelable));
-    }
-
-    if (GITHUB_PR_LABELS.includes('ci:build-webpack-bundle-analyzer')) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/webpack_bundle_analyzer.yml', cancelable)
-      );
     }
 
     if (
@@ -655,6 +652,37 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       pipeline.push(
         getPipeline(
           '.buildkite/pipelines/pull_request/security_solution/cspm_agentless_scout.yml',
+          cancelable
+        )
+      );
+    }
+
+    if (
+      // Scout suite: changes to its own Scout tests must still trigger it.
+      (await doAnyChangesMatch([
+        /^fleet_packages\.json/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/management/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/server\/endpoint/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/common\/endpoint/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/scripts\/endpoint/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/server\/lib\/detection_engine\/rule_response_actions/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/detection_engine\/rule_response_actions/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/flyout_v2\/document\/tools\/response/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/flyout_v2\/document\/main\/components\/response_section/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/common\/components\/response_actions/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/test\/scout_edr_real_fleet/,
+        /^src\/platform\/packages\/shared\/kbn-scout\/src\/servers\/configs\/config_sets\/edr_real_fleet/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/scout_edr_real_fleet\.yml/,
+        /^\.buildkite\/pipelines\/security_solution\/scout_edr_real_fleet\.yml/,
+        /^\.buildkite\/pipeline-resource-definitions\/kibana-scout-edr-real-fleet\.yml/,
+        /^\.buildkite\/scripts\/steps\/test\/scout_edr_real_fleet\.sh/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:scout-edr-real-fleet') ||
+      ALL_UI_TEST_SUITES
+    ) {
+      pipeline.push(
+        getPipeline(
+          '.buildkite/pipelines/pull_request/security_solution/scout_edr_real_fleet.yml',
           cancelable
         )
       );

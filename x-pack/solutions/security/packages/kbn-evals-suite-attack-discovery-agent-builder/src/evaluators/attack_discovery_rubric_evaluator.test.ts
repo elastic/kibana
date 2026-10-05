@@ -7,6 +7,7 @@
 
 import type { DefaultEvaluators } from '@kbn/evals';
 import { createAttackDiscoveryRubricEvaluator } from './attack_discovery_rubric_evaluator';
+import { EMPTY_RETRIEVAL_EVIDENCE } from '../types';
 import type {
   AttackDiscovery,
   AttackDiscoveryAgentBuilderExample,
@@ -35,8 +36,10 @@ const baseOutput = (insights: AttackDiscovery[] | null): AttackDiscoveryAgentBui
   workflow: {
     stages: [],
     retrievedAlertCount: null,
+    retrievedAlertCountSource: 'none',
     passedAlertCount: null,
     validatedDiscoveryCount: null,
+    retrievalEvidence: EMPTY_RETRIEVAL_EVIDENCE,
   },
 });
 

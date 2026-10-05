@@ -115,11 +115,21 @@ async function resolveTaskDocumentConflictsOnce({
       : {}),
   };
 
-  // we've already validated the current task, so we can skip validation
-  await bufferedTaskStore.partialUpdate(updatedTask, {
-    validate: false,
-    doc: currentTask,
-  });
+  // we've already validated the current task, so we can skip validation.
+  // BufferedTaskStore rejects with the raw bulk update result, which is not an Error and
+  // therefore not retryable by pRetry, so normalize it like the get() call above.
+  try {
+    await bufferedTaskStore.partialUpdate(updatedTask, {
+      validate: false,
+      doc: currentTask,
+    });
+  } catch (error) {
+    throw Error(
+      `Unable to resolve task document conflicts for task "${label}": ${
+        error.message ?? JSON.stringify(error)
+      }`
+    );
+  }
 }
 
 interface ResolveTaskDocumentConflictsOpts {

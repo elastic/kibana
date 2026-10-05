@@ -25,6 +25,12 @@ describe('getDefaultSecurityImplementation', () => {
     });
   });
 
+  describe('authc.getPrincipal', () => {
+    it('returns null', () => {
+      expect(implementation.authc.getPrincipal({} as any)).toBeNull();
+    });
+  });
+
   describe('authc.getRedactedSessionId', () => {
     it('returns undefined', async () => {
       const sessionId = await implementation.authc.getRedactedSessionId({} as any);
@@ -65,7 +71,21 @@ describe('getDefaultSecurityImplementation', () => {
       await expect(
         implementation.serviceAccounts.create(httpServerMock.createKibanaRequest(), {
           name: 'my-service-account',
+          roles: ['viewer'],
         })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are disabled"`);
+    });
+
+    // Handles are handed out at setup regardless of whether a delegate ever registers, so every
+    // workload method has to fail closed rather than run unauthenticated.
+    it.each([
+      'bindWorkload',
+      'unbindWorkload',
+      'getWorkloadBinding',
+      'withScopedRequestForWorkload',
+    ] as const)('%s rejects', async (method) => {
+      await expect(
+        (implementation.serviceAccounts[method] as () => Promise<unknown>)()
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are disabled"`);
     });
   });

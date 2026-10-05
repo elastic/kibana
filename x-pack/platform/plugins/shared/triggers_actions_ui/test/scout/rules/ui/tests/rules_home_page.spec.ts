@@ -8,11 +8,16 @@
 import type { KibanaRole } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test, makeEsQueryRule, openRulesListAndSearch } from '../fixtures';
+import { triggersActionsRoute } from '@kbn/rule-data-utils';
+import {
+  test,
+  makeEsQueryRule,
+  openRulesListAndSearch,
+  CLASSIC_RULES_LIST_URL_RE,
+} from '../fixtures';
 
 const RULES_APP = 'rules';
 const APP_TITLE_SUBJ = 'appHeaderTitle';
-const RULES_LIST_SUBJ = 'rulesList';
 
 const ALERTS_AND_ACTIONS_ROLE: KibanaRole = {
   elasticsearch: {
@@ -52,6 +57,7 @@ test.describe('Rules home page', { tag: tags.stateful.classic }, () => {
     await page.gotoApp(RULES_APP);
 
     await expect(page.testSubj.locator(APP_TITLE_SUBJ)).toHaveText('Rules');
+    await expect(page).toHaveURL(CLASSIC_RULES_LIST_URL_RE);
   });
 
   test('shows the no-permission prompt when the user has actions but no alerting privilege', async ({
@@ -69,13 +75,16 @@ test.describe('Rules home page', { tag: tags.stateful.classic }, () => {
     await page.gotoApp(RULES_APP);
 
     await expect(page.testSubj.locator(APP_TITLE_SUBJ)).toHaveText('Rules');
+    await expect(page).toHaveURL(CLASSIC_RULES_LIST_URL_RE);
   });
 
   test('renders a newly-created rule and opens its details', async ({
     apiServices,
     browserAuth,
     page,
+    pageObjects,
   }) => {
+    const rules = pageObjects.classicRulesPage;
     const ruleResponse = await apiServices.alerting.rules.create(
       makeEsQueryRule('scout-home-page')
     );
@@ -86,19 +95,23 @@ test.describe('Rules home page', { tag: tags.stateful.classic }, () => {
     await browserAuth.loginAsAdmin();
     await openRulesListAndSearch(page, ruleName);
 
-    const ruleRow = page.testSubj
-      .locator(RULES_LIST_SUBJ)
-      .locator(`[data-test-subj="rulesListTableRowName-${ruleName}"]`);
-
     await test.step('renders the rules list with the rule visible', async () => {
-      await expect(page.testSubj.locator(RULES_LIST_SUBJ)).toBeVisible();
-      await expect(ruleRow).toBeVisible();
+      await expect(rules.rulesList).toBeVisible();
+      await expect(rules.ruleNameLink(ruleName)).toBeVisible();
+    });
+
+    await test.step('rule-name link href stays within the host mount', async () => {
+      await expect(rules.ruleNameLink(ruleName)).toHaveAttribute(
+        'href',
+        /\/triggersActions\/rule\//
+      );
+      await expect(rules.ruleNameLink(ruleName)).not.toHaveAttribute('href', /\/app\/rules\//);
     });
 
     await test.step('navigates to the rule details page when clicking the rule', async () => {
-      await ruleRow.click();
+      await rules.clickRuleName(ruleName);
       await page.waitForURL(new RegExp(`/rule/${ruleId}(\\b|$)`));
-      expect(page.url()).toContain(`/rule/${ruleId}`);
+      await expect(page).toHaveURL(new RegExp(`${triggersActionsRoute}/rule/${ruleId}`));
     });
   });
 });

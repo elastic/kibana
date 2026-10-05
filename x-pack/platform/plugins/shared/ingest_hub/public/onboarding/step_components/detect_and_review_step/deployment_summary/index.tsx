@@ -79,12 +79,14 @@ export function DeploymentSummary({
   );
 
   const listItems = summaryFields.map((f) => ({
+    key: f.labelId,
     title: (
       <EuiText color="subdued" size="s">
         <FormattedMessage id={f.labelId} defaultMessage={f.defaultMessage} />
       </EuiText>
     ),
-    description: f.value as string,
+    // f.value is ReactNode — dropping the `as string` cast so masked credential nodes render.
+    description: f.value,
   }));
 
   return (
@@ -126,7 +128,7 @@ export function DeploymentSummary({
               <>
                 <EuiFlexGroup direction="row" gutterSize="xl" responsive={false}>
                   {listItems.map((item) => (
-                    <EuiFlexItem grow={false} key={item.description}>
+                    <EuiFlexItem grow={false} key={item.key}>
                       <EuiStat title={item.description} description={item.title} titleSize="xs" />
                     </EuiFlexItem>
                   ))}

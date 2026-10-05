@@ -12,8 +12,9 @@ import { createCasesClientMockArgs, createCasesClientMock } from '../mocks';
 import { bulkGet } from './bulk_get';
 
 describe('bulkGet', () => {
-  const attachmentSO = mockCaseComments[0];
+  const attachmentSO = mockCaseUnifiedAttachments[0];
   const unifiedAttachmentSO = mockCaseUnifiedAttachments[0];
+  const legacyAttachmentSO = mockCaseComments[0];
 
   describe('errors', () => {
     const casesClient = createCasesClientMock();
@@ -151,6 +152,38 @@ describe('bulkGet', () => {
           id: unifiedAttachmentSO.id,
           type: 'comment',
           data: { content: 'test' },
+        })
+      );
+    });
+  });
+
+  describe('returns a legacy attachment as unified', () => {
+    const casesClient = createCasesClientMock();
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.authorization.getAndEnsureAuthorizedEntities.mockResolvedValue({
+        authorized: [legacyAttachmentSO],
+        unauthorized: [],
+      });
+      clientArgs.services.attachmentService.getter.bulkGet.mockResolvedValue({
+        saved_objects: [legacyAttachmentSO],
+      });
+    });
+
+    it('returns a legacy attachment as unified', async () => {
+      const res = await bulkGet(
+        { savedObjectIds: [legacyAttachmentSO.id], caseID: 'mock-id-1' },
+        clientArgs,
+        casesClient
+      );
+
+      expect(res.attachments[0]).toEqual(
+        expect.objectContaining({
+          id: legacyAttachmentSO.id,
+          type: 'comment',
+          data: { content: 'Wow, good luck catching that bad meanie!' },
         })
       );
     });

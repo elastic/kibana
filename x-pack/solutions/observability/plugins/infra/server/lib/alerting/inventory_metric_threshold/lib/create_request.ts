@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ESSearchRequest } from '@kbn/es-types';
-import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { findInventoryFields, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import type { estypes } from '@elastic/elasticsearch';
@@ -37,6 +37,7 @@ function wildcardToRegex(str: string) {
 }
 
 const ADDITIONAL_CONTEXT_ALLOW_LIST = ['host.*', 'labels.*', 'tags', 'cloud.*', 'orchestrator.*'];
+
 export const ADDITIONAL_CONTEXT_BLOCKED_LIST = ['host.cpu.*', 'host.disk.*', 'host.network.*'];
 
 export const ADDITIONAL_CONTEXT_BLOCKED_LIST_REGEX = new RegExp(
@@ -55,12 +56,13 @@ export const createRequest = async (
   customMetric?: SnapshotCustomMetricInput,
   fieldsExisted?: Record<string, boolean> | null,
   schema?: DataSchemaFormat
-) => {
+): Promise<ESSearchRequest> => {
   const inventoryModels = findInventoryModel(nodeType);
+  const inventoryFields = findInventoryFields(nodeType, schema);
 
   const composite: estypes.AggregationsCompositeAggregation = {
     size: compositeSize,
-    sources: [{ node: { terms: { field: inventoryModels.fields.id } } }],
+    sources: [{ node: { terms: { field: inventoryFields.id } } }],
     ...(afterKey ? { after: afterKey } : {}),
   };
 
@@ -73,6 +75,8 @@ export const createRequest = async (
   );
   const bucketSelector = createBucketSelector(metric, condition, customMetric);
 
+  // Container context stays on the ECS pod uid (`kubernetes.pod.uid` → `container.id`).
+  // SemConv pod documents do not populate it.
   const containerContextAgg: Record<string, estypes.AggregationsAggregationContainer> | undefined =
     nodeType === 'pod' && fieldsExisted && fieldsExisted[termsAggField[KUBERNETES_POD_UID]]
       ? {
