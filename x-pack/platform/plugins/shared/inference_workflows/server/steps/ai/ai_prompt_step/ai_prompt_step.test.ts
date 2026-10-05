@@ -7,6 +7,7 @@
 
 import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { InferenceConnectorType, type InferenceConnector } from '@kbn/inference-common';
 
 jest.mock('../utils/resolve_connector_id', () => ({
   resolveConnectorId: jest.fn(),
@@ -413,6 +414,85 @@ describe('aiPromptStepDefinition', () => {
         mockChatModel.invoke.mockRejectedValue(error);
 
         await expect(handler(mockContext)).rejects.toThrow('Aborted');
+      });
+    });
+
+    describe('reasoning-level validation', () => {
+      const createConnector = (parts: Partial<InferenceConnector>): InferenceConnector => ({
+        type: InferenceConnectorType.Inference,
+        name: 'Claude Haiku',
+        connectorId: '.anthropic-claude-haiku-chat_completion',
+        config: {},
+        capabilities: {},
+        isInferenceEndpoint: true,
+        isPreconfigured: true,
+        isEis: true,
+        ...parts,
+      });
+
+      const withReasoningLevel = (reasoningLevel: string) => ({
+        ...mockContext,
+        config: { ...mockContext.config, 'reasoning-level': reasoningLevel },
+      });
+
+      beforeEach(() => {
+        mockChatModel.invoke.mockResolvedValue({ content: 'response', response_metadata: {} });
+      });
+
+      it('does not inspect the connector when no reasoning level is set', async () => {
+        mockChatModel.getConnector = jest.fn();
+
+        await handler(mockContext);
+
+        expect(mockChatModel.getConnector).not.toHaveBeenCalled();
+        expect(mockChatModel.invoke).toHaveBeenCalled();
+      });
+
+      it('invokes the model when the EIS endpoint supports the level', async () => {
+        mockChatModel.getConnector = jest.fn().mockReturnValue(
+          createConnector({
+            metadata: { capabilities: { reasoning: { supported_effort_levels: ['high', 'low'] } } },
+          })
+        );
+
+        await handler(withReasoningLevel('high'));
+
+        expect(mockChatModel.invoke).toHaveBeenCalled();
+      });
+
+      it('invokes the model for non-EIS connectors', async () => {
+        mockChatModel.getConnector = jest
+          .fn()
+          .mockReturnValue(createConnector({ type: InferenceConnectorType.OpenAI, isEis: false }));
+
+        await handler(withReasoningLevel('xhigh'));
+
+        expect(mockChatModel.invoke).toHaveBeenCalled();
+      });
+
+      it('rejects a level the EIS endpoint does not support, before invoking the model', async () => {
+        mockChatModel.getConnector = jest.fn().mockReturnValue(
+          createConnector({
+            metadata: { capabilities: { reasoning: { supported_effort_levels: ['high', 'low'] } } },
+          })
+        );
+
+        await expect(handler(withReasoningLevel('xhigh'))).rejects.toThrow(
+          'Reasoning level "xhigh" is not supported by model "Claude Haiku" (.anthropic-claude-haiku-chat_completion). Supported levels: high, low.'
+        );
+        expect(mockChatModel.invoke).not.toHaveBeenCalled();
+      });
+
+      it('invokes the model when the EIS endpoint advertises no reasoning control', async () => {
+        mockChatModel.getConnector = jest.fn().mockReturnValue(
+          createConnector({
+            metadata: { capabilities: { context_window: { max_input_tokens: 1000 } } },
+          })
+        );
+
+        await handler(withReasoningLevel('low'));
+
+        expect(mockChatModel.invoke).toHaveBeenCalled();
       });
     });
 

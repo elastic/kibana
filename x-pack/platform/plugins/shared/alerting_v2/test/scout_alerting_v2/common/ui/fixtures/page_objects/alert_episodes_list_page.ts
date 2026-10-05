@@ -10,12 +10,12 @@ import type { Locator, ScoutPage } from '@kbn/scout';
 // compile-time coupling to the production id without pulling the barrel's
 // React/EUI action modules into the Node-side Playwright config load.
 import { OPEN_IN_DISCOVER_EPISODE_ACTION_ID } from '@kbn/alerting-v2-episodes-ui/actions/open_in_discover';
+import type { AlertingMountConfig } from './alerting_mount_config';
 
 /**
  * Drives the Alerts (episodes) list page. Episode row actions are rendered as
- * UnifiedDataTable leading controls: read-only users only get the read-safe
- * "Open in Discover" inline control, while editors get enough write actions
- * that they collapse into the overflow actions menu.
+ * UnifiedDataTable leading controls. Editors get enough write actions that
+ * they collapse into the overflow actions menu.
  */
 export class AlertEpisodesListPage {
   public readonly pageContainer: Locator;
@@ -27,7 +27,8 @@ export class AlertEpisodesListPage {
   public readonly histogramChart: Locator;
   public readonly tagsFilterButton: Locator;
   public readonly tagsFilterSearch: Locator;
-  /** Inline "Open in Discover" leading control (the only read-safe episode action). */
+  public readonly searchInput: Locator;
+  /** Inline "Open in Discover" leading control. */
   public readonly openInDiscoverRowControl: Locator;
   /**
    * Overflow row actions ("Additional actions") menu. Episode actions are
@@ -37,8 +38,8 @@ export class AlertEpisodesListPage {
    */
   public readonly rowActionsMenuButton: Locator;
 
-  constructor(private readonly page: ScoutPage) {
-    this.pageContainer = this.page.testSubj.locator('alertingV2EpisodesListPage');
+  constructor(private readonly page: ScoutPage, private readonly mountConfig: AlertingMountConfig) {
+    this.pageContainer = this.page.testSubj.locator('alertingV2AlertsListPage');
     this.tableToolbar = this.page.testSubj.locator('unifiedDataTableToolbar');
     this.itemCount = this.page.testSubj.locator('alertEpisodesItemCount');
     this.kpisAlertsPanel = this.page.testSubj.locator('episodesKpisAlertsPanel');
@@ -47,6 +48,7 @@ export class AlertEpisodesListPage {
     this.histogramChart = this.page.testSubj.locator('unifiedHistogramChart');
     this.tagsFilterButton = this.page.testSubj.locator('episodesFilterBar-tags-button');
     this.tagsFilterSearch = this.page.getByPlaceholder('Search alert tags…');
+    this.searchInput = this.page.testSubj.locator('episodesFilterBar-search');
     this.openInDiscoverRowControl = this.page.testSubj.locator(
       `unifiedDataTable_rowControl_${OPEN_IN_DISCOVER_EPISODE_ACTION_ID}`
     );
@@ -56,7 +58,7 @@ export class AlertEpisodesListPage {
   }
 
   async goto() {
-    await this.page.gotoApp('management/alertingV2/episodes');
+    await this.page.gotoApp(`${this.mountConfig.appRoute}${this.mountConfig.paths.alerts}`);
   }
 
   async openTagsFilter(): Promise<void> {
@@ -68,6 +70,10 @@ export class AlertEpisodesListPage {
 
   async searchTagsFilter(query: string): Promise<void> {
     await this.tagsFilterSearch.fill(query);
+  }
+
+  async searchEpisodes(query: string): Promise<void> {
+    await this.searchInput.fill(query);
   }
 
   tagFilterOption(tag: string): Locator {
