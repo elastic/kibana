@@ -82,7 +82,7 @@ test.describe('Console core', { tag: tags.deploymentAgnostic }, () => {
       await expect(pageObjects.console.outputEditorContent).toContainText('"timed_out": false', {
         timeout: SCROLL_ATTEMPT_TIMEOUT_MS,
       });
-    }).toPass();
+    }).toPass({ timeout: 10_000 });
     await expect(pageObjects.console.outputPanelEmptyState).toBeHidden();
   });
 
