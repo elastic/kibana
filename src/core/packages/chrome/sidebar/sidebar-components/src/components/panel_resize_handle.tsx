@@ -19,7 +19,7 @@ const resizeButtonStyles = {
   button: ({ euiTheme }: UseEuiTheme) => css`
     position: relative;
     inset-inline-start: -${euiTheme.border.width.thin};
-    block-size: calc(100% - ${euiTheme.border.radius.frame} * 2);
+    block-size: calc(100% - var(--kbn-layout--sidebar-border-radius, 0px) * 2);
     flex-shrink: 0;
     align-self: center;
   `,
