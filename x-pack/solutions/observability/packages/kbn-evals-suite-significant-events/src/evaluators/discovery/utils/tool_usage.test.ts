@@ -120,7 +120,7 @@ describe('summarizePersistenceCalls', () => {
   });
 
   it('accepts exactly one retry after an item-level bulk error', () => {
-    const failedItem = { event_id: 'failed-event', status: 'open', title: 'Failed event' };
+    const failedItem = { event_id: 'failed-event', status: 'active', title: 'Failed event' };
     expect(
       summarize([
         writeCall({
@@ -139,7 +139,7 @@ describe('summarizePersistenceCalls', () => {
   });
 
   it('rejects an item retry from the same parallel call group', () => {
-    const failedItem = { event_id: 'failed-event', status: 'open', title: 'Failed event' };
+    const failedItem = { event_id: 'failed-event', status: 'active', title: 'Failed event' };
     expect(
       summarize([
         writeCall({
@@ -225,7 +225,7 @@ describe('summarizePersistenceCalls', () => {
     const signal = { type: 'detection', metadata: { rule_uuid: 'rule-x' } };
     const failedItem = {
       event_id: 'unknown-id',
-      status: 'open',
+      status: 'active',
       title: 'Event X',
       signals: [signal],
     };
@@ -292,7 +292,7 @@ describe('summarizePersistenceCalls', () => {
   });
 
   it('rejects a bulk error retry that changes an input field', () => {
-    const failedItem = { event_id: 'event-x', status: 'open', title: 'Original' };
+    const failedItem = { event_id: 'event-x', status: 'active', title: 'Original' };
 
     expect(
       summarize([
@@ -307,7 +307,7 @@ describe('summarizePersistenceCalls', () => {
   });
 
   it('rejects an unknown event id retry that repeats the rejected id', () => {
-    const failedItem = { event_id: 'unknown-id', status: 'open', title: 'Event X' };
+    const failedItem = { event_id: 'unknown-id', status: 'active', title: 'Event X' };
 
     expect(
       summarize([
@@ -322,8 +322,8 @@ describe('summarizePersistenceCalls', () => {
   });
 
   it('rejects swapping two rejected ids between otherwise identical items', () => {
-    const failedA = { event_id: 'unknown-a', status: 'open', title: 'Same event' };
-    const failedB = { event_id: 'unknown-b', status: 'open', title: 'Same event' };
+    const failedA = { event_id: 'unknown-a', status: 'active', title: 'Same event' };
+    const failedB = { event_id: 'unknown-b', status: 'active', title: 'Same event' };
     const search: ConverseStep = {
       type: 'tool_call',
       tool_id: TOOL_ID_EVENT_SEARCH,
@@ -333,8 +333,8 @@ describe('summarizePersistenceCalls', () => {
         {
           data: {
             events: [
-              { event_id: 'unknown-a', status: 'open' },
-              { event_id: 'unknown-b', status: 'open' },
+              { event_id: 'unknown-a', status: 'active' },
+              { event_id: 'unknown-b', status: 'active' },
             ],
           },
         },
@@ -363,17 +363,19 @@ describe('summarizePersistenceCalls', () => {
   });
 
   it.each<[string, string, string, boolean]>([
-    ['an open id from an earlier search group', 'known-open-id', 'retry-group', true],
+    ['an active id from an earlier search group', 'known-active-id', 'retry-group', true],
     ['a freshly invented id', 'invented-id', 'retry-group', false],
-    ['an open id from the retry call group', 'known-open-id', 'shared-group', false],
+    ['an active id from the retry call group', 'known-active-id', 'shared-group', false],
   ])('handles corrected unknown ids using %s', (_, retryEventId, retryGroupId, expectedValid) => {
-    const failedItem = { event_id: 'unknown-id', status: 'open', title: 'Event X' };
+    const failedItem = { event_id: 'unknown-id', status: 'active', title: 'Event X' };
     const search: ConverseStep = {
       type: 'tool_call',
       tool_id: TOOL_ID_EVENT_SEARCH,
       tool_call_id: 'search-1',
       tool_call_group_id: 'shared-group',
-      results: [{ data: { events: [{ event_id: 'known-open-id', status: 'open' }], total: 1 } }],
+      results: [
+        { data: { events: [{ event_id: 'known-active-id', status: 'active' }], total: 1 } },
+      ],
     };
 
     expect(
@@ -395,7 +397,7 @@ describe('summarizePersistenceCalls', () => {
   });
 
   it('rejects a second call that only resends successful first-call items', () => {
-    const successfulItem = { event_id: 'successful-event', status: 'open' };
+    const successfulItem = { event_id: 'successful-event', status: 'active' };
 
     expect(
       summarize([

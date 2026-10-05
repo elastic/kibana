@@ -17,7 +17,7 @@ const searchCall = (
   tool_id: platformSignificantEventsTools.searchEvent,
   tool_call_id: `search-${groupId}`,
   tool_call_group_id: groupId,
-  params: { status: 'open' },
+  params: { status: 'active' },
   results: [{ data: { events, total: events.length } }],
 });
 
@@ -39,23 +39,23 @@ const writeCall = ({
 });
 
 describe('event_id_provenance', () => {
-  it('accepts an id from an open event returned by a prior event_search group', () => {
+  it('accepts an id from an active event returned by a prior event_search group', () => {
     const result = scoreEventIdProvenance([
-      searchCall([{ event_id: 'open-event', status: 'open' }]),
-      writeCall({ items: [{ event_id: 'open-event' }] }),
+      searchCall([{ event_id: 'active-event', status: 'active' }]),
+      writeCall({ items: [{ event_id: 'active-event' }] }),
     ]);
 
     expect(result).toMatchObject({ score: 1, idBearingItems: 1, validItems: 1 });
   });
 
-  it.each(['closed', 'dismissed'])('rejects an id from a %s event_search result', (status) => {
+  it('rejects an id from an inactive event_search result', () => {
     const result = scoreEventIdProvenance([
-      searchCall([{ event_id: `${status}-event`, status }]),
-      writeCall({ items: [{ event_id: `${status}-event` }] }),
+      searchCall([{ event_id: 'inactive-event', status: 'inactive' }]),
+      writeCall({ items: [{ event_id: 'inactive-event' }] }),
     ]);
 
     expect(result).toMatchObject({ score: 0, idBearingItems: 1, validItems: 0 });
-    expect(result.explanation).toContain(`${status}-event`);
+    expect(result.explanation).toContain('inactive-event');
   });
 
   it('rejects an invented id', () => {
@@ -69,12 +69,12 @@ describe('event_id_provenance', () => {
     const result = scoreEventIdProvenance([
       writeCall({
         groupId: 'first-write',
-        items: [{ status: 'open' }],
+        items: [{ status: 'active' }],
         itemResults: [{ index: 0, event_id: 'generated-event', written: true }],
       }),
       writeCall({
         groupId: 'second-write',
-        items: [{ event_id: 'generated-event', status: 'open' }],
+        items: [{ event_id: 'generated-event', status: 'active' }],
       }),
     ]);
 
@@ -98,9 +98,9 @@ describe('event_id_provenance', () => {
     expect(result.explanation).toContain('bad-event');
   });
 
-  it('rejects an open event_search id from the same tool-call group as the write', () => {
+  it('rejects an active event_search id from the same tool-call group as the write', () => {
     const result = scoreEventIdProvenance([
-      searchCall([{ event_id: 'parallel-event', status: 'open' }], 'parallel-group'),
+      searchCall([{ event_id: 'parallel-event', status: 'active' }], 'parallel-group'),
       writeCall({
         groupId: 'parallel-group',
         items: [{ event_id: 'parallel-event' }],
@@ -112,8 +112,8 @@ describe('event_id_provenance', () => {
 
   it('returns a null score when no write item carries an event_id', () => {
     const result = scoreEventIdProvenance([
-      searchCall([{ event_id: 'open-event', status: 'open' }]),
-      writeCall({ items: [{ status: 'open' }] }),
+      searchCall([{ event_id: 'active-event', status: 'active' }]),
+      writeCall({ items: [{ status: 'active' }] }),
     ]);
 
     expect(result).toMatchObject({ score: null, idBearingItems: 0, validItems: 0 });
@@ -122,18 +122,18 @@ describe('event_id_provenance', () => {
   it('resets provenance per continuation cycle and pools item scores', () => {
     const result = scoreContinuationEventIdProvenance([
       {
-        producedEventIds: ['open-event'],
+        producedEventIds: ['active-event'],
         steps: [
-          searchCall([{ event_id: 'open-event', status: 'open' }]),
-          writeCall({ items: [{ event_id: 'open-event' }] }),
+          searchCall([{ event_id: 'active-event', status: 'active' }]),
+          writeCall({ items: [{ event_id: 'active-event' }] }),
         ],
       },
       {
-        producedEventIds: ['open-event'],
+        producedEventIds: ['active-event'],
         steps: [
           writeCall({
             groupId: 'cycle-two-write',
-            items: [{ event_id: 'open-event' }],
+            items: [{ event_id: 'active-event' }],
           }),
         ],
       },

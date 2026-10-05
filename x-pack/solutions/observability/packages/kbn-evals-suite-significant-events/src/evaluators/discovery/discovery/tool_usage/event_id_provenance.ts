@@ -9,10 +9,10 @@ import type { ConverseStep } from '@kbn/evals';
 import { platformSignificantEventsTools } from '@kbn/agent-builder-common';
 import type { DiscoveryEvaluator } from '../../types';
 import {
+  activeEventIdsBefore,
   extractOrderedToolCalls,
   isRecord,
   isToolId,
-  openEventIdsBefore,
 } from '../../utils/tool_usage';
 import type {
   ContinuationCycle,
@@ -49,7 +49,7 @@ const collectEventIdProvenance = (
       continue;
     }
 
-    const availableOpenEventIds = openEventIdsBefore(calls, call);
+    const availableActiveEventIds = activeEventIdsBefore(calls, call);
     for (const [itemIndex, item] of call.params.items.entries()) {
       if (!isRecord(item) || typeof item.event_id !== 'string' || item.event_id.length === 0) {
         continue;
@@ -58,7 +58,7 @@ const collectEventIdProvenance = (
         eventId: item.event_id,
         callIndex: call.index,
         itemIndex,
-        valid: availableOpenEventIds.has(item.event_id),
+        valid: availableActiveEventIds.has(item.event_id),
         cycleIndex,
       });
     }
@@ -97,10 +97,10 @@ const scoreObservations = (
     validItems,
     explanation:
       offenders.length === 0
-        ? `All ${observations.length} event_id-bearing item(s) used an open event_id from an earlier event_search call group`
+        ? `All ${observations.length} event_id-bearing item(s) used an active event_id from an earlier event_search call group`
         : `${validItems}/${
             observations.length
-          } event_id-bearing item(s) used an open event_id from an earlier event_search call group. Offenders: ${offenders
+          } event_id-bearing item(s) used an active event_id from an earlier event_search call group. Offenders: ${offenders
             .map(formatObservation)
             .join('; ')}`,
   };

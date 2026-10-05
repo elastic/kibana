@@ -288,7 +288,7 @@ describe('scoreToolUsage', () => {
   });
 
   it('allows one retry after an unknown event id failure when the id is removed', () => {
-    const failedItem = { event_id: 'unknown-id', status: 'open', title: 'Event X' };
+    const failedItem = { event_id: 'unknown-id', status: 'active', title: 'Event X' };
     const firstWrite = toolCall(TOOL_ID_EVENTS_WRITE, { items: [failedItem] }, [
       {
         data: {
@@ -297,7 +297,7 @@ describe('scoreToolUsage', () => {
       },
     ]);
     const retry = toolCall(TOOL_ID_EVENTS_WRITE, {
-      items: [{ status: 'open', title: 'Event X' }],
+      items: [{ status: 'active', title: 'Event X' }],
     });
     const steps = [
       ...allExpectedTools.filter((step) => step.tool_id !== TOOL_ID_EVENTS_WRITE),
@@ -312,10 +312,10 @@ describe('scoreToolUsage', () => {
   });
 
   it('labels a retry of a successful item as an unjustified second write', () => {
-    const failedItem = { event_id: 'failed-event', status: 'open', title: 'Failed' };
+    const failedItem = { event_id: 'failed-event', status: 'active', title: 'Failed' };
     const successfulItem = {
       event_id: 'successful-event',
-      status: 'open',
+      status: 'active',
       title: 'Successful',
     };
     const firstWrite = toolCall(TOOL_ID_EVENTS_WRITE, { items: [failedItem, successfulItem] }, [
@@ -347,13 +347,13 @@ describe('scoreToolUsage', () => {
     });
     const bulkErrorItem = {
       event_id: 'bulk-event',
-      status: 'open',
+      status: 'active',
       title: 'Bulk failure',
       signals: [detectionSignal('bulk-rule')],
     };
     const unknownIdItem = {
       event_id: 'unknown-event',
-      status: 'open',
+      status: 'active',
       title: 'Unknown id',
       signals: [detectionSignal('unknown-rule')],
     };

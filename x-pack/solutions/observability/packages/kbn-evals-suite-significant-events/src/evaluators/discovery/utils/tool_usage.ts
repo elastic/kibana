@@ -60,8 +60,8 @@ const isEarlierCallGroup = (candidate: OrderedToolCall, call: OrderedToolCall): 
     call.groupId === undefined ||
     candidate.groupId !== call.groupId);
 
-/** Open event IDs returned by event_search call groups that completed before the target call group. */
-export function openEventIdsBefore(calls: OrderedToolCall[], call: OrderedToolCall): Set<string> {
+/** Active event IDs returned by event_search call groups completed before the target call group. */
+export function activeEventIdsBefore(calls: OrderedToolCall[], call: OrderedToolCall): Set<string> {
   const eventIds = new Set<string>();
   for (const candidate of calls) {
     if (
@@ -77,7 +77,7 @@ export function openEventIdsBefore(calls: OrderedToolCall[], call: OrderedToolCa
       for (const event of result.data.events) {
         if (
           isRecord(event) &&
-          event.status === 'open' &&
+          event.status === 'active' &&
           typeof event.event_id === 'string' &&
           event.event_id.length > 0
         ) {
@@ -222,7 +222,7 @@ export function pairRetryItems({
       reason === 'unknown_event_id' && typeof item.event_id === 'string' ? [item.event_id] : []
     )
   );
-  const availableOpenEventIds = openEventIdsBefore(calls, retryCall);
+  const availableActiveEventIds = activeEventIdsBefore(calls, retryCall);
   const pairs: RetryItemPair[] = [];
 
   for (const [key, matchingFailures] of failuresByKey) {
@@ -253,7 +253,7 @@ export function pairRetryItems({
         retryEventId === undefined ||
         (typeof retryEventId === 'string' &&
           !rejectedEventIds.has(retryEventId) &&
-          availableOpenEventIds.has(retryEventId));
+          availableActiveEventIds.has(retryEventId));
       if (!eventIdIsValid) {
         return null;
       }
