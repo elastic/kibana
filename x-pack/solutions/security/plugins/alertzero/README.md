@@ -106,7 +106,7 @@ Real data is served by default. Keep these in mind when running AlertZero in sha
 - Settings writes (autonomy, schedule, extras) require `alertzero_write`; managed install is requestless, so the AlertZero route is the authorization boundary for those fields.
 - Enable/disable also requires Workflows `workflowsManagement:update` **and** `workflowsManagement:managed:update`. `workflows:all` does **not** include `workflow_update_managed` — that sub-feature must be granted explicitly.
 - Autonomy and enablement are durable per Worker. There is no Watch-owned settings write path.
-- Enabling a Worker is refused while the requesting user has no AI model to run it on: no LLM connector they can use and no Elastic Managed LLM (EIS), or "use only the default connector" is on with no default set. Every Worker then reports `blockingReasons: ['no_model']`, its switch can't be turned on, and `PATCH enabled: true` returns a 400. The stored `enabled` value is never changed, and switching a Worker off or saving its settings still works. Adding any chat connector, or running `node scripts/eis.js` against a running stack, unblocks it.
+- Enabling a Worker is refused while the space has no AI model to run it on: no LLM connector and no Elastic Managed LLM (EIS), or "use only the default connector" is on with no default set. Every Worker then reports `blockingReasons: ['no_model']`, its switch can't be turned on, and `PATCH enabled: true` returns a 400. The stored `enabled` value is never changed, and switching a Worker off or saving its settings still works. Adding any chat connector, or running `node scripts/eis.js` against a running stack, unblocks it.
 
 ### Skills projection
 

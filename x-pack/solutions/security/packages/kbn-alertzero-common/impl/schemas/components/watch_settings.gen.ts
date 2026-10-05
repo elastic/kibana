@@ -46,7 +46,7 @@ export type WorkerRunStateEnum = typeof WorkerRunState.enum;
 export const WorkerRunStateEnum = WorkerRunState.enum;
 
 /**
- * Why a Worker can't run in this space. `no_model`: the requesting user has no AI model to run it on (no LLM connector they can use and no Elastic Managed LLM, or "use only the default connector" is on with no default set). Workers run as the user who enabled them and resolve their model the same way. It applies to every Worker alike, and while it holds the Worker can't be switched on; switching it off is still allowed.
+ * Why a Worker can't run in this space. `no_model`: the space has no AI model to run it on (no LLM connector and no Elastic Managed LLM, or "use only the default connector" is on with no default set). It applies to every Worker alike, and while it holds the Worker can't be switched on; switching it off is still allowed.
  */
 export const WorkerBlockingReason = lazySchema(() => z.literal('no_model'));
 export type WorkerBlockingReason = z.infer<typeof WorkerBlockingReason>;

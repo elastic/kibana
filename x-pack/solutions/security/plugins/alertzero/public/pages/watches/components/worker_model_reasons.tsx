@@ -11,7 +11,7 @@ import { isWorkerEnableBlocked, type Worker } from '@kbn/alertzero-common';
 import { FeatureSettingsLink } from './feature_settings_link';
 import type { WorkerWarningReason } from './worker_warning_content';
 
-/** Warning reasons for a Worker the user has no model for. */
+/** Warning reasons for a Worker the space has no model for. */
 export const getModelWarningReasons = (
   worker: Pick<Worker, 'id' | 'blockingReasons'>
 ): WorkerWarningReason[] =>

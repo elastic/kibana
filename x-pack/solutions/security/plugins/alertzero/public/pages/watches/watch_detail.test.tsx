@@ -1471,6 +1471,22 @@ describe('WatchDetailPage', () => {
       expect(warningIcon(HUNT)).toBeInTheDocument();
     });
 
+    it('still asks before turning off a blocked Continuous Threat Hunt while Rule Coverage is enabled', () => {
+      const workers = allWorkers([HUNT, RULE_COVERAGE]).map(
+        (worker): Worker => ({ ...worker, blockingReasons: ['no_model'] })
+      );
+      renderWatch(SYSTEM_SECURITY_WATCH_HUNT_ID, workers);
+
+      expect(enabledSwitch(HUNT)).toBeEnabled();
+      fireEvent.click(enabledSwitch(HUNT));
+      expect(disableModal()).toHaveTextContent('Disable Continuous Threat Hunt?');
+
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      expect(enabledSwitch(HUNT)).not.toBeChecked();
+      expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeEnabled();
+    });
+
     it('drops an open disable dialog when navigating to another Watch', () => {
       // Parameter-only navigation keeps the page mounted, so the dialog must be cleared explicitly.
       const workers = allWorkers([HUNT, RULE_COVERAGE]);
