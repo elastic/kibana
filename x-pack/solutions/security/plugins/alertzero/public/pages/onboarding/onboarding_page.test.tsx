@@ -55,7 +55,7 @@ const ALL_WORKERS_RESPONSE = {
 };
 
 const renderPage = ({
-  canWrite = false,
+  canWrite = true,
   httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } }),
   serverWorkers = ALL_WORKERS_RESPONSE,
   skipIntro = true,
@@ -121,12 +121,28 @@ describe('OnboardingPage', () => {
       expect(screen.queryByRole('switch')).not.toBeInTheDocument();
     });
 
-    it('is shown to read-only users and does not send PATCHes', () => {
+    it('disables Continue with an explanation for users without write access', () => {
       const httpPatch = jest.fn();
       renderPage({ canWrite: false, skipIntro: false, httpPatch });
 
-      expect(screen.getByTestId('alertZeroOnboardingContinueButton')).toBeInTheDocument();
+      expect(screen.getByTestId('alertZeroOnboardingContinueButton')).toBeDisabled();
+      expect(screen.getByTestId('alertZeroOnboardingContinueDisabledReason')).toHaveTextContent(
+        'You need the AlertZero All privilege'
+      );
+
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
+      expect(screen.getByTestId('alertZeroOnboardingIntroPromo')).toBeInTheDocument();
+      expect(screen.queryByRole('switch')).not.toBeInTheDocument();
       expect(httpPatch).not.toHaveBeenCalled();
+    });
+
+    it('enables Continue without an explanation for users with write access', () => {
+      renderPage({ canWrite: true, skipIntro: false });
+
+      expect(screen.getByTestId('alertZeroOnboardingContinueButton')).toBeEnabled();
+      expect(
+        screen.queryByTestId('alertZeroOnboardingContinueDisabledReason')
+      ).not.toBeInTheDocument();
     });
 
     it('shows a disabled video placeholder', () => {
@@ -562,14 +578,10 @@ describe('OnboardingPage', () => {
   });
 
   describe('without write capability (read-only user)', () => {
-    it('renders the read-only body copy', () => {
-      renderPage({ canWrite: false });
-      expect(screen.getByText(/Ask an administrator to enable a Watch worker/)).toBeInTheDocument();
-    });
-
-    it('does not render the worker toggle list', () => {
+    it('cannot reach the worker selection step', () => {
       renderPage({ canWrite: false });
       expect(screen.queryByTestId(/alertZeroOnboardingWorkerToggle/)).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Enable and run' })).not.toBeInTheDocument();
     });
   });
 });

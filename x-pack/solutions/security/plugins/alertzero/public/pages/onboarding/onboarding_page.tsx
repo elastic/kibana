@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { EuiCallOut, EuiEmptyPrompt, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -59,19 +59,11 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
   );
 
   if (step === 'intro') {
-    return <OnboardingIntro onContinue={() => setStep('workers')} />;
-  }
-
-  if (!canWrite) {
     return (
-      <AlertZeroPageSection>
-        <ScanFailureCallout />
-        <EuiEmptyPrompt
-          iconType="watchesApp"
-          title={<h2>{i18n.ONBOARDING_TITLE}</h2>}
-          body={<p>{i18n.ONBOARDING_READ_ONLY_BODY}</p>}
-        />
-      </AlertZeroPageSection>
+      <OnboardingIntro
+        onContinue={() => setStep('workers')}
+        continueDisabledReason={canWrite ? undefined : i18n.ONBOARDING_CONTINUE_REQUIRES_WRITE}
+      />
     );
   }
 
