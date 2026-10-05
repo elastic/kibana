@@ -52,6 +52,7 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
   docViewerRef: React.RefObject<DocViewerApi>;
   setExpandedDoc?: (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => void;
   searchContext?: CellRenderersSearchContext;
+  displayMode?: 'default' | 'print';
   flyoutMenuTrailingActions?: EuiFlyoutMenuAction[];
   dataSource?: DataSource;
 }
@@ -160,6 +161,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     >
       <DiscoverGrid
         {...gridProps}
+        displayMode={props.displayMode}
         isPaginationEnabled={!gridProps.isPlainRecord}
         totalHits={props.totalHitCount}
         setExpandedDoc={props.setExpandedDoc}
