@@ -214,6 +214,14 @@ describe('getServiceAccountPicker UI API', () => {
     expect(await screen.findByText('No service accounts available.')).toBeVisible();
   });
 
+  it('keeps account creation available when the directory cannot be loaded', async () => {
+    const { core, render } = setup();
+    core.http.get.mockRejectedValue(new Error('offline'));
+    await render();
+    expect(await screen.findByRole('alert')).toHaveTextContent('Unable to load service accounts.');
+    expect(screen.getByRole('button', { name: 'Create account' })).toBeVisible();
+  });
+
   it('creates through the shared flyout, refreshes the directory, and selects the result', async () => {
     const { core, render, onSelect } = setup();
     const created = { id: 'created-id', name: 'new-account', roles: ['viewer'] };

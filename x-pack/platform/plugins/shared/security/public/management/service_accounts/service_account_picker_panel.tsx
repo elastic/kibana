@@ -131,7 +131,7 @@ export const ServiceAccountPickerPanel = ({
           )}
         </EuiText>
       )}
-      {status === 'ready' && security.serviceAccounts.canCreate() && (
+      {(status === 'ready' || status === 'unavailable') && security.serviceAccounts.canCreate() && (
         <div
           css={css({ padding: euiTheme.size.s, borderTop: euiTheme.border.thin, flexShrink: 0 })}
         >
