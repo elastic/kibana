@@ -54,10 +54,13 @@ import {
   fillMissingCustomFields,
   getCloseReasonIfValid,
   getClosedInfoForUpdate,
+  getConfiguredStatuses,
   getDurationForUpdate,
   getInProgressInfoForUpdate,
+  getPauseFieldsForUpdate,
   getTimingMetricsForUpdate,
   getUserProfilesSafe,
+  resolveStatusForUpdate,
 } from './utils';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
@@ -68,6 +71,7 @@ import type {
   User,
   CaseAssignees,
   AttachmentAttributes,
+  CaseStatusesConfiguration,
   CustomFieldsConfiguration,
 } from '../../../common/types/domain';
 import { CaseStatuses, AttachmentType } from '../../../common/types/domain';
@@ -416,7 +420,7 @@ function partitionPatchRequest(
 /**
  * Fields that are allowed to be present when users reopen cases
  */
-const REOPEN_ONLY_CASE_FIELDS = new Set(['id', 'version', 'status']);
+const REOPEN_ONLY_CASE_FIELDS = new Set(['id', 'version', 'status', 'status_key']);
 
 /**
  * Fields that are allowed to be present when case is reassigned
@@ -558,8 +562,8 @@ export const bulkUpdate = async (
 
   try {
     const rawQuery = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
-    const query = emptyCasesAssigneesSanitizer(rawQuery);
-    const caseIds = query.cases.map((q) => q.id);
+    const sanitizedQuery = emptyCasesAssigneesSanitizer(rawQuery);
+    const caseIds = sanitizedQuery.cases.map((q) => q.id);
     const myCases = await caseService.getCases({
       caseIds,
     });
@@ -573,6 +577,50 @@ export const bulkUpdate = async (
       acc.set(so.id, so as CaseSavedObjectTransformed);
       return acc;
     }, new Map<string, CaseSavedObjectTransformed>());
+
+    const configurations = await casesClient.configure.get();
+    const customStatusesEnabled = clientArgs.config.customStatuses.enabled;
+    const statusesByOwner = new Map(
+      configurations.map((conf) => [
+        conf.owner,
+        getConfiguredStatuses({ configuration: conf, customStatusesEnabled }),
+      ])
+    );
+    const pauseReasonsByOwner = new Map(
+      configurations.map((conf) => [conf.owner, conf.pauseReasons ?? []])
+    );
+
+    // Resolve the requested status before partitioning so reopen detection and every
+    // status-dependent step below see the category. A `status` equal to the case's current
+    // category is left alone so legacy clients don't move cases off a custom status.
+    const query = {
+      ...sanitizedQuery,
+      cases: sanitizedQuery.cases.map((reqCase) => {
+        const foundCase = casesMap.get(reqCase.id);
+        const { status_key: statusKey, ...reqCaseWithoutStatusKey } = reqCase;
+
+        if (
+          !foundCase ||
+          isSOError(foundCase) ||
+          (statusKey == null &&
+            (reqCase.status == null || reqCase.status === foundCase.attributes.status))
+        ) {
+          return reqCase;
+        }
+
+        return {
+          ...reqCaseWithoutStatusKey,
+          ...resolveStatusForUpdate({
+            status: reqCase.status,
+            statusKey,
+            statuses:
+              statusesByOwner.get(foundCase.attributes.owner) ??
+              getConfiguredStatuses({ customStatusesEnabled }),
+            customStatusesEnabled,
+          }),
+        };
+      }),
+    };
 
     const { nonExistingCases, conflictedCases, casesToAuthorize, reopenedCases, changedAssignees } =
       partitionPatchRequest(casesMap, query.cases);
@@ -604,7 +652,6 @@ export const bulkUpdate = async (
       );
     }
 
-    const configurations = await casesClient.configure.get();
     const customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration> = new Map(
       configurations.map((conf) => [conf.owner, conf.customFields])
     );
@@ -799,6 +846,9 @@ export const bulkUpdate = async (
       user,
       casesToUpdate,
       customFieldsConfigurationMap,
+      statusesByOwner,
+      pauseReasonsByOwner,
+      customStatusesEnabled,
       linkMapsByOwner,
       logger,
       usageCounter: clientArgs.usageCounter,
@@ -1049,7 +1099,7 @@ export const bulkUpdate = async (
 const normalizeCaseAttributes = (
   updateCaseAttributes: Omit<
     CasePatchRequest,
-    'id' | 'version' | 'owner' | 'assignees' | 'closeReason'
+    'id' | 'version' | 'owner' | 'assignees' | 'closeReason' | 'pause_reason'
   >,
   customFieldsConfiguration?: CustomFieldsConfiguration
 ) => {
@@ -1094,6 +1144,9 @@ const createPatchCasesPayload = async ({
   casesToUpdate,
   user,
   customFieldsConfigurationMap,
+  statusesByOwner,
+  pauseReasonsByOwner,
+  customStatusesEnabled,
   linkMapsByOwner,
   logger,
   usageCounter,
@@ -1104,6 +1157,9 @@ const createPatchCasesPayload = async ({
   casesToUpdate: UpdateRequestWithOriginalCase[];
   user: User;
   customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration>;
+  statusesByOwner: Map<string, CaseStatusesConfiguration>;
+  pauseReasonsByOwner: Map<string, string[]>;
+  customStatusesEnabled: boolean;
   linkMapsByOwner: Map<string, ActiveLinkMaps>;
   logger: CasesClientArgs['logger'];
   usageCounter: CasesClientArgs['usageCounter'];
@@ -1145,6 +1201,7 @@ const createPatchCasesPayload = async ({
         owner,
         assignees,
         closeReason: _closeReason,
+        pause_reason: pauseReason,
         ...updateCaseAttributes
       } = updateReq;
 
@@ -1261,6 +1318,26 @@ const createPatchCasesPayload = async ({
         );
       }
 
+      const pauseFields = getPauseFieldsForUpdate({
+        originalCase: originalCase.attributes,
+        targetStatusKey: trimmedCaseAttributes.status_key,
+        targetCategory: trimmedCaseAttributes.status ?? originalCase.attributes.status,
+        pauseReason,
+        statuses:
+          statusesByOwner.get(originalCase.attributes.owner) ??
+          getConfiguredStatuses({ customStatusesEnabled }),
+        pauseReasons: pauseReasonsByOwner.get(originalCase.attributes.owner) ?? [],
+        customStatusesEnabled,
+        stateTransitionTimestamp: updatedDt,
+      });
+      const timePaused = pauseFields?.time_paused ?? originalCase.attributes.time_paused ?? 0;
+      if (pauseFields?.paused_at !== undefined) {
+        usageCounter?.incrementCounter({
+          counterName: pauseFields.paused_at != null ? 'CasesStatusPaused' : 'CasesStatusResumed',
+          incrementBy: 1,
+        });
+      }
+
       return {
         caseId,
         originalCase,
@@ -1271,6 +1348,7 @@ const createPatchCasesPayload = async ({
         updatedAttributes: {
           ...trimmedCaseAttributes,
           ...(dedupedAssignees && { assignees: dedupedAssignees }),
+          ...pauseFields,
           ...getClosedInfoForUpdate({
             user,
             closedDate: updatedDt,
@@ -1280,6 +1358,7 @@ const createPatchCasesPayload = async ({
             status: trimmedCaseAttributes.status,
             closedAt: updatedDt,
             createdAt: originalCase.attributes.created_at,
+            timePaused,
           }),
           ...getInProgressInfoForUpdate({
             status: trimmedCaseAttributes.status,
@@ -1291,6 +1370,7 @@ const createPatchCasesPayload = async ({
             stateTransitionTimestamp: updatedDt,
             createdAt: originalCase.attributes.created_at,
             inProgressAt: originalCase.attributes.in_progress_at,
+            timePaused,
           }),
           updated_at: updatedDt,
           updated_by: user,

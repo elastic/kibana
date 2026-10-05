@@ -58,6 +58,21 @@ properties:
           $ref: 'case_severity.yaml'
         status:
           $ref: 'case_status.yaml'
+        status_key:
+          type: string
+          description: >
+            The key of a configured status to move the case to. The `status` field is derived from
+            the configured status's category and must match it when both are provided.
+            Requires `xpack.cases.customStatuses.enabled`. Technical preview.
+          maxLength: 50
+          example: awaiting_customer
+        pause_reason:
+          type: string
+          maxLength: 50
+          description: >
+            One of the configured pause reasons. Required when the target status pauses time
+            tracking and the case is not already paused; rejected when the target status does not.
+          example: Awaiting vendor
         tags:
           $ref: 'case_tags.yaml'
         title:

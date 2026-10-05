@@ -34,6 +34,8 @@ const mockConfigurationData = {
   owner: mockedTestProvidersOwner[0],
   observableTypes: [],
   extractObservables: true,
+  statuses: [],
+  pauseReasons: [],
 };
 
 export const useCaseConfigureResponse = {

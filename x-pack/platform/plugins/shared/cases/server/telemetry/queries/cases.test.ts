@@ -163,6 +163,25 @@ describe('getCasesTelemetryData', () => {
             },
           ],
         },
+        customStatuses: {
+          buckets: [
+            {
+              key: 'awaiting_customer',
+              doc_count: 3,
+              status: { buckets: [{ key: CasePersistedStatus.IN_PROGRESS, doc_count: 3 }] },
+            },
+            {
+              key: 'triage',
+              doc_count: 2,
+              status: {
+                buckets: [
+                  { key: CasePersistedStatus.IN_PROGRESS, doc_count: 1 },
+                  { key: CasePersistedStatus.OPEN, doc_count: 1 },
+                ],
+              },
+            },
+          ],
+        },
         totalsByOwner: {
           buckets: [
             {
@@ -376,6 +395,16 @@ describe('getCasesTelemetryData', () => {
             closed: 0,
             inProgress: 0,
             open: 2,
+          },
+          customStatuses: {
+            closed: 0,
+            inProgress: 4,
+            open: 1,
+          },
+          pausedCases: {
+            closed: 0,
+            inProgress: 0,
+            open: 0,
           },
           syncAlertsOff: 1,
           syncAlertsOn: 1,
@@ -617,6 +646,24 @@ describe('getCasesTelemetryData', () => {
                 ],
               },
             },
+            "customStatuses": Object {
+              "aggs": Object {
+                "status": Object {
+                  "terms": Object {
+                    "field": "cases.attributes.status",
+                  },
+                },
+              },
+              "terms": Object {
+                "exclude": Array [
+                  "open",
+                  "in-progress",
+                  "closed",
+                ],
+                "field": "cases.attributes.status_key",
+                "size": 100,
+              },
+            },
             "extractObservables": Object {
               "terms": Object {
                 "field": "cases.attributes.settings.extractObservables",
@@ -730,6 +777,20 @@ describe('getCasesTelemetryData', () => {
               },
               "nested": Object {
                 "path": "cases.attributes.observables",
+              },
+            },
+            "pausedCases": Object {
+              "aggs": Object {
+                "status": Object {
+                  "terms": Object {
+                    "field": "cases.attributes.status",
+                  },
+                },
+              },
+              "filter": Object {
+                "exists": Object {
+                  "field": "cases.attributes.paused_at",
+                },
               },
             },
             "securitySolution": Object {

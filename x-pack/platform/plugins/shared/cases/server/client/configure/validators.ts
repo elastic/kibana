@@ -7,10 +7,14 @@
 
 import Boom from '@hapi/boom';
 import type {
+  CaseStatusesConfiguration,
   CustomFieldsConfiguration,
   CustomFieldTypes,
   TemplatesConfiguration,
 } from '../../../common/types/domain';
+import { MAX_CASE_STATUSES_PER_CATEGORY } from '../../../common/constants';
+import { CASE_STATUS_CATEGORIES } from '../../../common/utils/statuses';
+import { CaseStatuses } from '../../../common/types/domain';
 import { validateDuplicatedKeysInRequest } from '../validators';
 import {
   validateCustomFieldKeysAgainstConfiguration,
@@ -85,4 +89,143 @@ export const validateTemplatesCustomFieldsInRequest = ({
     validateCustomFieldKeysAgainstConfiguration(params);
     validateCaseCustomFieldTypesInRequest(params);
   });
+};
+
+/**
+ * Enforces what the rest of the plugin relies on: the built-in keys always exist, keys and
+ * categories never change once written, and every category keeps exactly one enabled default.
+ */
+export const validateStatusesConfiguration = ({
+  requestStatuses,
+  originalStatuses = [],
+  customStatusesEnabled,
+}: {
+  requestStatuses?: CaseStatusesConfiguration;
+  originalStatuses?: CaseStatusesConfiguration;
+  customStatusesEnabled: boolean;
+}) => {
+  if (requestStatuses === undefined) {
+    return;
+  }
+
+  if (!customStatusesEnabled) {
+    throw Boom.badRequest('Custom statuses are not enabled');
+  }
+
+  validateDuplicatedKeysInRequest({ requestFields: requestStatuses, fieldName: 'statuses' });
+
+  const byKey = new Map(requestStatuses.map((status) => [status.key, status]));
+
+  for (const category of CASE_STATUS_CATEGORIES) {
+    const builtIn = byKey.get(category);
+
+    if (!builtIn) {
+      throw Boom.badRequest(`The built-in status "${category}" is required`);
+    }
+
+    if (builtIn.category !== category) {
+      throw Boom.badRequest(
+        `The built-in status "${category}" must belong to the "${category}" category`
+      );
+    }
+  }
+
+  for (const category of CASE_STATUS_CATEGORIES) {
+    const inCategory = requestStatuses.filter((status) => status.category === category);
+
+    if (inCategory.length > MAX_CASE_STATUSES_PER_CATEGORY) {
+      throw Boom.badRequest(
+        `The category "${category}" can have at most ${MAX_CASE_STATUSES_PER_CATEGORY} statuses`
+      );
+    }
+
+    const labels = inCategory.map((status) => status.label.trim().toLowerCase());
+    const duplicatedLabels = labels.filter((label, index) => labels.indexOf(label) !== index);
+
+    if (duplicatedLabels.length > 0) {
+      throw Boom.badRequest(
+        `Invalid duplicated statuses labels in category "${category}": ${[
+          ...new Set(duplicatedLabels),
+        ].join(', ')}`
+      );
+    }
+
+    if (!inCategory.some((status) => !status.disabled)) {
+      throw Boom.badRequest(`The category "${category}" needs at least one enabled status`);
+    }
+
+    const defaults = inCategory.filter((status) => status.isDefault);
+
+    if (defaults.length !== 1) {
+      throw Boom.badRequest(`The category "${category}" must have exactly one default status`);
+    }
+
+    if (defaults[0].disabled) {
+      throw Boom.badRequest(`The default status of the category "${category}" cannot be disabled`);
+    }
+    if (defaults[0].pausesTimeTracking) {
+      throw Boom.badRequest(
+        `The default status of the category "${category}" cannot pause time tracking`
+      );
+    }
+  }
+  for (const status of requestStatuses) {
+    if (status.pausesTimeTracking && status.category === CaseStatuses.closed) {
+      throw Boom.badRequest(
+        `The status "${status.key}" cannot pause time tracking: only statuses in the "open" and "in-progress" categories can`
+      );
+    }
+  }
+
+  for (const original of originalStatuses) {
+    const updated = byKey.get(original.key);
+
+    if (!updated) {
+      throw Boom.badRequest(`The status "${original.key}" cannot be removed, disable it instead`);
+    }
+
+    if (updated.category !== original.category) {
+      throw Boom.badRequest(`The category of the status "${original.key}" cannot be changed`);
+    }
+  }
+};
+
+/**
+ * Pause reasons are what analysts pick when moving a case to a status that pauses time
+ * tracking, so the list cannot be empty while such a status is enabled. `statuses` and
+ * `pauseReasons` are the values that will be persisted: the request's or the original's.
+ */
+export const validatePauseReasons = ({
+  requestPauseReasons,
+  pauseReasons,
+  statuses = [],
+  customStatusesEnabled,
+}: {
+  requestPauseReasons?: string[];
+  pauseReasons?: string[];
+  statuses?: CaseStatusesConfiguration;
+  customStatusesEnabled: boolean;
+}) => {
+  if (requestPauseReasons !== undefined && !customStatusesEnabled) {
+    throw Boom.badRequest('Custom statuses are not enabled');
+  }
+  if (pauseReasons === undefined) {
+    return;
+  }
+
+  const normalized = pauseReasons.map((reason) => reason.trim().toLowerCase());
+  const duplicated = normalized.filter((reason, index) => normalized.indexOf(reason) !== index);
+
+  if (duplicated.length > 0) {
+    throw Boom.badRequest(
+      `Invalid duplicated pause reasons: ${[...new Set(duplicated)].join(', ')}`
+    );
+  }
+
+  if (
+    statuses.some((status) => status.pausesTimeTracking && !status.disabled) &&
+    pauseReasons.length === 0
+  ) {
+    throw Boom.badRequest('Add at least one pause reason when a status pauses time tracking');
+  }
 };

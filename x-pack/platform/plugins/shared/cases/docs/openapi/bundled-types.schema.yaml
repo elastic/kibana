@@ -148,6 +148,7 @@ paths:
         - $ref: '#/components/parameters/sortField'
         - $ref: '#/components/parameters/sort_order'
         - $ref: '#/components/parameters/status'
+        - $ref: '#/components/parameters/status_key'
         - $ref: '#/components/parameters/tags'
         - $ref: '#/components/parameters/to'
       responses:
@@ -169,6 +170,9 @@ paths:
                     type: integer
                   count_open_cases:
                     type: integer
+                  count_paused_cases:
+                    type: integer
+                    description: Cases in a status that pauses time tracking. Present when such statuses are configured.
                   page:
                     type: integer
                   per_page:
@@ -371,6 +375,10 @@ paths:
                       example: true
                     owner:
                       $ref: '#/components/schemas/owner'
+                    statuses:
+                      $ref: '#/components/schemas/case_statuses_configuration'
+                    pauseReasons:
+                      $ref: '#/components/schemas/pause_reasons_configuration'
                     templates:
                       $ref: '#/components/schemas/templates'
                     updated_at:
@@ -561,6 +569,10 @@ paths:
                     example: true
                   owner:
                     $ref: '#/components/schemas/owner'
+                  statuses:
+                    $ref: '#/components/schemas/case_statuses_configuration'
+                  pauseReasons:
+                    $ref: '#/components/schemas/pause_reasons_configuration'
                   templates:
                     $ref: '#/components/schemas/templates'
                   updated_at:
@@ -753,6 +765,10 @@ paths:
                     example: true
                   owner:
                     $ref: '#/components/schemas/owner'
+                  statuses:
+                    $ref: '#/components/schemas/case_statuses_configuration'
+                  pauseReasons:
+                    $ref: '#/components/schemas/pause_reasons_configuration'
                   templates:
                     $ref: '#/components/schemas/templates'
                   updated_at:
@@ -2283,6 +2299,15 @@ components:
           - in-progress
           - open
       example: open
+    status_key:
+      in: query
+      name: status_key
+      description: Filters the returned cases by the key of their configured status. Technical preview.
+      schema:
+        oneOf:
+          - $ref: '#/components/schemas/string'
+          - $ref: '#/components/schemas/string_array'
+      example: awaiting_customer
     tags:
       in: query
       name: tags
@@ -3278,6 +3303,12 @@ components:
         - closed
         - in-progress
         - open
+    case_status_key:
+      type: string
+      nullable: true
+      description: |
+        The key of the configured status the case is in. Configured statuses are grouped under the built-in statuses, which `status` continues to report. Null for cases last updated before statuses were configured. Technical preview.
+      example: awaiting_customer
     case_response_properties:
       title: Case response properties
       type: object
@@ -3426,6 +3457,28 @@ components:
           $ref: '#/components/schemas/case_severity'
         status:
           $ref: '#/components/schemas/case_status'
+        status_key:
+          $ref: '#/components/schemas/case_status_key'
+        paused_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Set while the case is in a status that pauses time tracking.
+          example: '2026-10-01T15:05:00.000Z'
+        time_paused:
+          type: integer
+          description: Seconds the case has spent in statuses that pause time tracking, left out of `duration`, `time_to_investigate`, and `time_to_resolve`.
+          example: 86400
+        pause_reason:
+          type: string
+          nullable: true
+          description: The reason picked when the case was paused.
+          example: Awaiting vendor
+        resume_to_status_key:
+          type: string
+          nullable: true
+          description: The status key the case was paused from; moving the case back to it resumes time tracking.
+          example: in-progress
         tags:
           type: array
           items:
@@ -3562,6 +3615,18 @@ components:
                 $ref: '#/components/schemas/case_severity'
               status:
                 $ref: '#/components/schemas/case_status'
+              status_key:
+                type: string
+                description: |
+                  The key of a configured status to move the case to. The `status` field is derived from the configured status's category and must match it when both are provided. Requires `xpack.cases.customStatuses.enabled`. Technical preview.
+                maxLength: 50
+                example: awaiting_customer
+              pause_reason:
+                type: string
+                maxLength: 50
+                description: |
+                  One of the configured pause reasons. Required when the target status pauses time tracking and the case is not already paused; rejected when the target status does not.
+                example: Awaiting vendor
               tags:
                 $ref: '#/components/schemas/case_tags'
               title:
@@ -3640,6 +3705,8 @@ components:
           description: The case description.
         status:
           $ref: '#/components/schemas/case_status'
+        status_key:
+          $ref: '#/components/schemas/case_status_key'
         createdAt:
           type: string
           format: date-time
@@ -3665,6 +3732,64 @@ components:
         - .servicenow-sir
         - .swimlane
       example: .none
+    case_statuses_configuration:
+      type: array
+      description: |
+        The statuses available for cases. Each entry belongs to one of the built-in statuses, its category, which drives every status-dependent behavior such as alert synchronization and closure. An empty array means only the built-in statuses are available. Requires `xpack.cases.customStatuses.enabled`. Technical preview.
+      maxItems: 30
+      items:
+        type: object
+        required:
+          - key
+          - label
+          - category
+          - order
+          - isDefault
+          - disabled
+        properties:
+          key:
+            type: string
+            description: The identifier used as `status_key` on cases. It cannot be changed after creation. The built-in statuses use `open`, `in-progress`, and `closed`.
+            maxLength: 50
+            example: awaiting_customer
+          label:
+            type: string
+            description: The label shown on cases.
+            maxLength: 50
+            example: Awaiting customer
+          category:
+            $ref: '#/components/schemas/case_status'
+          order:
+            type: integer
+            description: The display position of the status.
+            example: 3
+          isDefault:
+            type: boolean
+            description: Whether updates that only specify `status` move cases in this category to this status. Exactly one status per category must be the default.
+            example: false
+          disabled:
+            type: boolean
+            description: Disabled statuses cannot be applied but keep their label on cases that already use them.
+            example: false
+          pausesTimeTracking:
+            type: boolean
+            description: |
+              Time a case spends in this status is left out of its `duration`, `time_to_investigate`, `time_to_resolve`, and the all-cases MTTR. Only allowed on statuses in the `open` and `in-progress` categories, and never on a category's default status. Moving a case to such a status requires `pause_reason`.
+            default: false
+            example: true
+    pause_reasons_configuration:
+      type: array
+      description: |
+        The reasons an analyst can pick from when moving a case to a status that pauses time tracking. At least one is required while any enabled status pauses time tracking. Requires `xpack.cases.customStatuses.enabled`. Technical preview.
+      maxItems: 10
+      items:
+        type: string
+        maxLength: 50
+      example:
+        - Awaiting customer
+        - Awaiting vendor
+        - Awaiting another team
+        - Scheduled work
     template_tags:
       description: |
         The words and phrases that help categorize templates. It can be an empty array.
@@ -3827,6 +3952,10 @@ components:
             Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. For owners that do not support observable extraction (currently Observability), setting this to `true` has no effect on case creation; new cases for those owners always use `false`.
         owner:
           $ref: '#/components/schemas/owner'
+        statuses:
+          $ref: '#/components/schemas/case_statuses_configuration'
+        pauseReasons:
+          $ref: '#/components/schemas/pause_reasons_configuration'
         templates:
           $ref: '#/components/schemas/templates'
     update_case_configuration_request:
@@ -3904,6 +4033,10 @@ components:
           type: boolean
           description: |
             Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
+        statuses:
+          $ref: '#/components/schemas/case_statuses_configuration'
+        pauseReasons:
+          $ref: '#/components/schemas/pause_reasons_configuration'
         templates:
           $ref: '#/components/schemas/templates'
         version:
@@ -4451,6 +4584,8 @@ components:
           $ref: '#/components/schemas/case_severity'
         status:
           $ref: '#/components/schemas/case_status'
+        status_key:
+          $ref: '#/components/schemas/case_status_key'
         tags:
           type: array
           items:
@@ -4946,6 +5081,14 @@ components:
       properties:
         status:
           $ref: '#/components/schemas/case_status'
+        status_key:
+          type: string
+          description: The key of the configured status the case was moved to.
+          example: awaiting_customer
+        pause_reason:
+          type: string
+          description: The reason picked when the status pauses time tracking.
+          example: Awaiting vendor
     payload_tags:
       type: object
       properties:

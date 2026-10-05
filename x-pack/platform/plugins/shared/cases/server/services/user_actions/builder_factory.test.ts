@@ -1144,6 +1144,19 @@ describe('UserActionBuilder', () => {
       });
     });
 
+    it('records the status key on a status user action', () => {
+      const builder = builderFactory.getBuilder(UserActionTypes.status)!;
+      const userAction = builder.build({
+        payload: { status: CaseStatuses['in-progress'], status_key: 'awaiting_customer' },
+        ...commonArgs,
+      });
+
+      expect(userAction!.parameters.attributes.payload).toEqual({
+        status: 'in-progress',
+        status_key: 'awaiting_customer',
+      });
+    });
+
     it('logs a severity user action correctly', () => {
       const builder = builderFactory.getBuilder(UserActionTypes.severity)!;
       const userAction = builder.build({

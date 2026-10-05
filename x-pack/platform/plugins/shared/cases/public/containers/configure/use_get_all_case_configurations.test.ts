@@ -44,6 +44,8 @@ describe('Use get all case configurations hook', () => {
         version: '',
         owner: '',
         observableTypes: [],
+        statuses: [],
+        pauseReasons: [],
       },
     ]);
 
@@ -77,6 +79,8 @@ describe('Use get all case configurations hook', () => {
           version: '',
           owner: '',
           observableTypes: [],
+          statuses: [],
+          pauseReasons: [],
         },
       ])
     );

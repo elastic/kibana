@@ -21,8 +21,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import { useKibana } from '../../common/lib/kibana';
+import { useCasesConfig, useKibana } from '../../common/lib/kibana';
 import { CasesPageBody } from '../app/cases_page_body';
+import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
+import { CaseStatusesSection } from './statuses';
+import * as statusesI18n from './statuses/translations';
 import { Connectors } from './connectors';
 import * as configureCasesI18n from './translations';
 import { useConfigureCasesController } from './use_configure_cases_controller';
@@ -57,6 +60,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
   const { euiTheme } = useEuiTheme();
   const { permissions } = useCasesContext();
   const { docLinks } = useKibana().services;
+  const { customStatusesEnabled } = useCasesConfig();
 
   const {
     hasMinimumLicensePermissions,
@@ -95,7 +99,23 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
     onEditObservableType,
     onDeleteObservableType,
     AddOrEditObservableTypeFlyout,
+    statuses,
+    onAddStatus,
+    onEditStatus,
+    onMoveStatus,
+    onSetDefaultStatus,
+    onToggleStatusDisabled,
+    AddOrEditStatusFlyout,
+    pauseReasons,
+    onAddOnHoldStatus,
+    onAddPauseReason,
+    onEditPauseReason,
+    onMovePauseReason,
+    onRemovePauseReason,
+    AddOrEditPauseReasonFlyout,
   } = useConfigureCasesController<LegacyFlyoutType>();
+
+  const showStatusesSection = customStatusesEnabled && permissions.settings;
 
   const showObservableTypesSection =
     hasMinimumLicensePermissionsForObservables && isObservablesFeatureEnabled;
@@ -177,6 +197,38 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
                   </SettingsSection>
                 )}
 
+                {showStatusesSection && <EuiHorizontalRule margin="l" />}
+
+                {showStatusesSection && (
+                  <SettingsSection
+                    data-test-subj="cases-statuses-section"
+                    title={
+                      <>
+                        {statusesI18n.TITLE}
+                        <ExperimentalBadge data-test-subj="cases-statuses-experimental-badge" />
+                      </>
+                    }
+                    description={statusesI18n.DESCRIPTION}
+                  >
+                    <CaseStatusesSection
+                      statuses={statuses}
+                      disabled={isLoadingCaseConfiguration || isConfigurationFetchError}
+                      isLoading={isLoadingCaseConfiguration}
+                      onAddStatus={onAddStatus}
+                      onEditStatus={onEditStatus}
+                      onMoveStatus={onMoveStatus}
+                      onSetDefaultStatus={onSetDefaultStatus}
+                      onToggleStatusDisabled={onToggleStatusDisabled}
+                      pauseReasons={pauseReasons}
+                      onAddOnHoldStatus={onAddOnHoldStatus}
+                      onAddPauseReason={onAddPauseReason}
+                      onEditPauseReason={onEditPauseReason}
+                      onMovePauseReason={onMovePauseReason}
+                      onRemovePauseReason={onRemovePauseReason}
+                    />
+                  </SettingsSection>
+                )}
+
                 {hasMinimumLicensePermissions && showObservableTypesSection && (
                   <EuiHorizontalRule margin="l" />
                 )}
@@ -253,6 +305,8 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
             {ConnectorAddFlyout}
             {ConnectorEditFlyout}
             {AddOrEditObservableTypeFlyout}
+            {AddOrEditStatusFlyout}
+            {AddOrEditPauseReasonFlyout}
           </div>
         </EuiPageBody>
       </CasesPageBody>

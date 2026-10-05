@@ -36,9 +36,12 @@ import { UNIFIED_ALERT_TYPES_ARRAY } from '../../../common/utils/attachments';
 
 import {
   createIncident,
+  getConfiguredStatuses,
   getDurationInSeconds,
+  getPauseFieldsForUpdate,
   getTimingMetricsForUpdate,
   getUserProfiles,
+  resolveStatusForUpdate,
 } from './utils';
 import { createCaseError } from '../../common/error';
 import {
@@ -247,23 +250,46 @@ export const push = async (
     };
 
     const shouldMarkAsClosed = shouldCloseByPush(myCaseConfigure);
+    const customStatusesEnabled = clientArgs.config.customStatuses.enabled;
+    const statuses = getConfiguredStatuses({
+      configuration: myCaseConfigure.saved_objects[0]?.attributes,
+      customStatusesEnabled,
+    });
+    const closedStatus = shouldMarkAsClosed
+      ? resolveStatusForUpdate({ status: CaseStatuses.closed, statuses, customStatusesEnabled })
+      : undefined;
+    // Closing ends any running pause so the closing metrics leave the paused time out.
+    const pauseFields = shouldMarkAsClosed
+      ? getPauseFieldsForUpdate({
+          originalCase: theCase,
+          targetStatusKey: closedStatus?.status_key,
+          targetCategory: CaseStatuses.closed,
+          statuses,
+          pauseReasons: myCaseConfigure.saved_objects[0]?.attributes.pauseReasons ?? [],
+          customStatusesEnabled,
+          stateTransitionTimestamp: pushedDate,
+        })
+      : undefined;
+    const timePaused = pauseFields?.time_paused ?? theCase.time_paused ?? 0;
 
     const [updatedCase, updatedComments] = await Promise.all([
       caseService.patchCase({
         originalCase: myCase,
         caseId,
         updatedAttributes: {
-          ...(shouldMarkAsClosed
+          ...(closedStatus
             ? {
-                status: CaseStatuses.closed,
+                ...closedStatus,
                 closed_at: pushedDate,
                 closed_by: { email, full_name, username, profile_uid },
               }
             : {}),
+          ...pauseFields,
           ...(shouldMarkAsClosed
             ? getDurationInSeconds({
                 closedAt: pushedDate,
                 createdAt: theCase.created_at,
+                timePaused,
               })
             : {}),
           ...(shouldMarkAsClosed
@@ -272,6 +298,7 @@ export const push = async (
                 stateTransitionTimestamp: pushedDate,
                 createdAt: theCase.created_at,
                 inProgressAt: theCase.in_progress_at,
+                timePaused,
               })
             : {}),
           external_service: externalService,
@@ -298,11 +325,11 @@ export const push = async (
       }),
     ]);
 
-    if (shouldMarkAsClosed) {
+    if (closedStatus) {
       await userActionService.creator.createUserAction({
         userAction: {
           type: UserActionTypes.status,
-          payload: { status: CaseStatuses.closed },
+          payload: closedStatus,
           user,
           caseId,
           owner: myCase.attributes.owner,

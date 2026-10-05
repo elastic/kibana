@@ -33,6 +33,10 @@ properties:
     type: boolean
     description: >
       Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
+  statuses:
+    $ref: 'case_statuses_configuration.yaml'
+  pauseReasons:
+    $ref: 'pause_reasons_configuration.yaml'
   templates:
     $ref: 'templates.yaml'
   version:

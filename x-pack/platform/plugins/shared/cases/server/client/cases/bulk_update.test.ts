@@ -19,6 +19,7 @@ import {
   MAX_CUSTOM_FIELDS_PER_CASE,
 } from '../../../common/constants';
 import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER } from '../../../common/constants/owners';
+import { getBuiltInStatuses } from '../../../common/utils/statuses';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { mockCaseComments, mockCases } from '../../mocks';
@@ -236,7 +237,7 @@ describe('update', () => {
         {
           caseId: mockCases[0].id,
           owner: mockCases[0].attributes.owner,
-          updatedFields: ['status'],
+          updatedFields: ['status', 'status_key'],
         },
         expect.anything()
       );
@@ -1693,6 +1694,7 @@ describe('update', () => {
             },
             "severity": "low",
             "status": "open",
+            "status_key": null,
             "tags": Array [
               "defacement",
             ],
@@ -1741,6 +1743,7 @@ describe('update', () => {
             },
             "severity": "low",
             "status": "open",
+            "status_key": null,
             "tags": Array [
               "Data Destruction",
             ],
@@ -2773,6 +2776,111 @@ describe('update', () => {
           )
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Unauthorized"`
+        );
+      });
+    });
+
+    describe('Status keys', () => {
+      const clientArgs = createCasesClientMockArgs();
+      const awaitingCustomer = {
+        key: 'awaiting_customer',
+        label: 'Awaiting customer',
+        category: CaseStatuses['in-progress'],
+        order: 3,
+        isDefault: false,
+        disabled: false,
+      };
+      const configuredCasesClient = createCasesClientMock();
+      configuredCasesClient.configure.get = jest.fn().mockResolvedValue([
+        {
+          owner: SECURITY_SOLUTION_OWNER,
+          customFields: [],
+          statuses: [...getBuiltInStatuses(), awaitingCustomer],
+        },
+      ]);
+
+      const patchStatus = (patch: { status?: CaseStatuses; status_key?: string }) =>
+        bulkUpdate(
+          { cases: [{ id: mockCases[0].id, version: mockCases[0].version ?? '', ...patch }] },
+          clientArgs,
+          configuredCasesClient
+        );
+
+      const patchedAttributes = () =>
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
+
+      beforeEach(() => {
+        jest.clearAllMocks();
+        clientArgs.config = { ...clientArgs.config, customStatuses: { enabled: true } };
+        clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
+        clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+          saved_objects: [],
+          total: 0,
+          per_page: 10,
+          page: 1,
+        });
+        clientArgs.services.caseService.patchCases.mockResolvedValue({
+          saved_objects: [{ ...mockCases[0] }],
+        });
+        clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+          new Map()
+        );
+      });
+
+      it('derives the status from the category of the status key', async () => {
+        await patchStatus({ status_key: 'awaiting_customer' });
+
+        expect(patchedAttributes()).toEqual(
+          expect.objectContaining({
+            status: CaseStatuses['in-progress'],
+            status_key: 'awaiting_customer',
+          })
+        );
+      });
+
+      it('fills the default status key when only the status is given', async () => {
+        await patchStatus({ status: CaseStatuses.closed });
+
+        expect(patchedAttributes()).toEqual(
+          expect.objectContaining({ status: CaseStatuses.closed, status_key: 'closed' })
+        );
+      });
+
+      it('does not touch a case whose category already matches the requested status', async () => {
+        await expect(patchStatus({ status: CaseStatuses.open })).rejects.toThrow(
+          'All update fields are identical to current version.'
+        );
+      });
+
+      it('rejects an unknown status key', async () => {
+        await expect(patchStatus({ status_key: 'nope' })).rejects.toThrow(
+          'Unknown status key: nope'
+        );
+      });
+
+      it('rejects a status that does not match the category of the status key', async () => {
+        await expect(
+          patchStatus({ status: CaseStatuses.closed, status_key: 'awaiting_customer' })
+        ).rejects.toThrow(
+          'The status "closed" does not match the category of the status key "awaiting_customer"'
+        );
+      });
+
+      it('rejects a status key when custom statuses are disabled', async () => {
+        clientArgs.config = { ...clientArgs.config, customStatuses: { enabled: false } };
+
+        await expect(patchStatus({ status_key: 'awaiting_customer' })).rejects.toThrow(
+          'Custom statuses are not enabled'
+        );
+      });
+
+      it('does not write a status key when custom statuses are disabled', async () => {
+        clientArgs.config = { ...clientArgs.config, customStatuses: { enabled: false } };
+
+        await patchStatus({ status: CaseStatuses.closed });
+
+        expect(patchedAttributes()).toEqual(
+          expect.not.objectContaining({ status_key: expect.anything() })
         );
       });
     });

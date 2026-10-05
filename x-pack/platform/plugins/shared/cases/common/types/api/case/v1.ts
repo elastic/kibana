@@ -27,12 +27,16 @@ import {
   MAX_EXTENDED_FIELD_FILTERS,
   MAX_TEMPLATE_DEFINITION_LENGTH,
   CASE_EXTENDED_FIELDS,
+  MAX_CASE_STATUSES,
+  MAX_CASE_PAUSE_REASON_LENGTH,
+  MAX_CASE_STATUS_KEY_LENGTH,
 } from '../../../constants';
 import {
   limitedStringSchema,
   limitedArraySchema,
   NonEmptyString,
   paginationSchema,
+  regexStringRt,
 } from '../../../schema';
 import {
   CaseCustomFieldToggleRt,
@@ -181,6 +185,12 @@ export const CaseBaseOptionalFieldsRequestRt = rt.exact(
   })
 );
 
+export const CaseStatusKeyRt = regexStringRt({
+  codec: limitedStringSchema({ fieldName: 'status_key', min: 1, max: MAX_CASE_STATUS_KEY_LENGTH }),
+  pattern: '^[a-z0-9_-]+$',
+  message: `Key must be lower case, a-z, 0-9, '_', and '-' are allowed`,
+});
+
 export const CaseRequestFieldsRt = rt.intersection([
   CaseBaseOptionalFieldsRequestRt,
   rt.exact(
@@ -189,6 +199,18 @@ export const CaseRequestFieldsRt = rt.intersection([
        * The current status of the case (open, closed, in-progress)
        */
       status: CaseStatusRt,
+      /**
+       * The key of a configured status; the server derives `status` from its category
+       */
+      status_key: CaseStatusKeyRt,
+      /**
+       * Why the case is paused; required when the target status pauses time tracking
+       */
+      pause_reason: limitedStringSchema({
+        fieldName: 'pause_reason',
+        min: 1,
+        max: MAX_CASE_PAUSE_REASON_LENGTH,
+      }),
 
       /**
        * The plugin owner of the case
@@ -327,6 +349,18 @@ export const CasesFindRequestBaseFieldsRt = rt.intersection([
        * The status of the case (open, closed, in-progress)
        */
       status: rt.union([CaseStatusRt, rt.array(CaseStatusRt)]),
+      /**
+       * The keys of configured statuses to filter by
+       */
+      status_key: rt.union([
+        limitedArraySchema({
+          codec: rt.string,
+          fieldName: 'status_key',
+          min: 0,
+          max: MAX_CASE_STATUSES,
+        }),
+        rt.string,
+      ]),
       /**
        * The severity of the case
        */
@@ -520,6 +554,14 @@ export const CasesFindResponseRt = rt.intersection([
     total: rt.number,
   }),
   CasesStatusResponseRt,
+  rt.exact(
+    rt.partial({
+      /**
+       * Cases in a status that pauses time tracking; present when such statuses are configured
+       */
+      count_paused_cases: rt.number,
+    })
+  ),
 ]);
 
 /**

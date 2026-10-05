@@ -142,6 +142,8 @@ export type CaseAggregationResult = Record<
   extractObservables: Buckets;
   observables: ObservablesAggregationResult;
   status: Buckets;
+  customStatuses?: { buckets: Array<Bucket<string> & { status: Buckets<number> }> };
+  pausedCases?: { status: Buckets<number> };
   users: Cardinality;
   tags: Cardinality;
   totalAssignees: ValueCount;
@@ -313,6 +315,10 @@ export interface CasesTelemetry {
       AttachmentFramework & {
         assignees: Assignees;
         status: Status;
+        /** Cases currently on a custom (non built-in) status, per category */
+        customStatuses: Status;
+        /** Cases currently in a status that pauses time tracking, per category */
+        pausedCases: Status;
         syncAlertsOn: number;
         syncAlertsOff: number;
         extractObservablesOn: number;
@@ -354,6 +360,20 @@ export interface CasesTelemetry {
         automatic: number;
       };
       customFields: CustomFieldsTelemetry;
+      customStatuses: {
+        /** Configurations with at least one custom status */
+        configurations: number;
+        /** Configured custom statuses, per category */
+        statuses: Status;
+        pausing: {
+          /** Configurations with at least one enabled status that pauses time tracking */
+          configurations: number;
+          /** Enabled statuses that pause time tracking, per category */
+          statuses: Status;
+          /** Configurations whose pause reason list differs from the defaults */
+          customizedReasons: number;
+        };
+      };
     };
     sec: CustomFieldsSolutionTelemetry;
     obs: CustomFieldsSolutionTelemetry;

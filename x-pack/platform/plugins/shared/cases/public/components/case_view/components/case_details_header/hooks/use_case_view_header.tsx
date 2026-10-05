@@ -8,8 +8,9 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import moment from 'moment-timezone';
 import type { AppHeaderMetadataItems, AppHeaderTitle } from '@kbn/app-header';
-import type { CaseSeverity, CaseStatuses } from '../../../../../../common/types/domain';
+import type { CaseSeverity, CaseStatusConfiguration } from '../../../../../../common/types/domain';
 import type { CaseUI } from '../../../../../../common';
+import { useCaseStatuses } from '../../../../status/use_case_statuses';
 import type { OnUpdateFields } from '../../../types';
 import { useAllCasesNavigation } from '../../../../../common/navigation';
 import { useCasesContext } from '../../../../cases_context/use_cases_context';
@@ -35,7 +36,7 @@ import { RunCaseWorkflowModal } from '../../../../workflows/run_case_workflow_mo
 
 interface UseCaseViewHeaderArgs {
   caseData: CaseUI;
-  onStatusChanged: (status: CaseStatuses) => void;
+  onStatusChanged: (status: CaseStatusConfiguration) => void;
   onSeverityChanged: (severity: CaseSeverity) => void;
   onUpdateField: (args: OnUpdateFields) => void;
 }
@@ -139,16 +140,27 @@ export const useCaseViewHeader = ({
   const backHref = useMemo(() => getAllCasesUrl(), [getAllCasesUrl]);
 
   // Badges
+  const { enabledStatuses, getStatus } = useCaseStatuses();
   const badges = useMemo(
     () =>
       getBadges({
         caseData,
+        currentStatus: getStatus(caseData.statusKey, caseData.status),
+        statusOptions: enabledStatuses,
         isStatusMenuDisabled,
         isSeverityMenuDisabled,
         onStatusChanged,
         onSeverityChanged,
       }),
-    [caseData, isStatusMenuDisabled, isSeverityMenuDisabled, onStatusChanged, onSeverityChanged]
+    [
+      caseData,
+      enabledStatuses,
+      getStatus,
+      isStatusMenuDisabled,
+      isSeverityMenuDisabled,
+      onStatusChanged,
+      onSeverityChanged,
+    ]
   );
 
   // Menu

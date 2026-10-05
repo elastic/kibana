@@ -41,5 +41,9 @@ properties:
       has no effect on case creation; new cases for those owners always use `false`.
   owner:
     $ref: 'owner.yaml'
+  statuses:
+    $ref: 'case_statuses_configuration.yaml'
+  pauseReasons:
+    $ref: 'pause_reasons_configuration.yaml'
   templates:
     $ref: 'templates.yaml'

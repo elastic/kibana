@@ -12,15 +12,21 @@ import {
   OBSERVABILITY_OWNER,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
+import { CASE_STATUS_CATEGORIES, DEFAULT_CASE_PAUSE_REASONS } from '../../../common/utils/statuses';
 import type { Buckets, CasesTelemetry, CollectTelemetryDataParams } from '../types';
 import type { ConfigurationPersistedAttributes } from '../../common/types/configure';
 import { findValueInBuckets, getCustomFieldsTelemetry } from './utils';
+
+const isCustomStatus = (status: { key: string }) =>
+  !(CASE_STATUS_CATEGORIES as string[]).includes(status.key);
 
 export const getConfigurationTelemetryData = async ({
   savedObjectsClient,
 }: CollectTelemetryDataParams): Promise<CasesTelemetry['configuration']> => {
   const res = await savedObjectsClient.find<
-    { customFields: ConfigurationPersistedAttributes['customFields']; owner: Owner },
+    Pick<ConfigurationPersistedAttributes, 'customFields' | 'statuses' | 'pauseReasons'> & {
+      owner: Owner;
+    },
     {
       closureType: Buckets;
     }
@@ -52,6 +58,30 @@ export const getConfigurationTelemetryData = async ({
 
   const mainCustomFields = getCustomFieldsPerOwner(GENERAL_CASES_OWNER);
 
+  const customStatusesPerConfiguration = res.saved_objects.map((sObj) =>
+    (sObj.attributes.statuses ?? []).filter(isCustomStatus)
+  );
+  const customStatuses = customStatusesPerConfiguration.flat();
+  const countCustomStatuses = (category: string) =>
+    customStatuses.filter((status) => status.category === category).length;
+
+  const pausingPerConfiguration = res.saved_objects.map((sObj) =>
+    (sObj.attributes.statuses ?? []).filter(
+      (status) => status.pausesTimeTracking && !status.disabled
+    )
+  );
+  const pausingStatuses = pausingPerConfiguration.flat();
+  const countPausingStatuses = (category: string) =>
+    pausingStatuses.filter((status) => status.category === category).length;
+  const customizedReasons = res.saved_objects.filter((sObj) => {
+    const reasons = sObj.attributes.pauseReasons ?? [];
+    return (
+      reasons.length > 0 &&
+      (reasons.length !== DEFAULT_CASE_PAUSE_REASONS.length ||
+        reasons.some((reason, index) => reason !== DEFAULT_CASE_PAUSE_REASONS[index]))
+    );
+  }).length;
+
   return {
     all: {
       closure: {
@@ -61,6 +91,24 @@ export const getConfigurationTelemetryData = async ({
       customFields: getCustomFieldsTelemetry(
         allCustomFields as ConfigurationPersistedAttributes['customFields']
       ),
+      customStatuses: {
+        configurations: customStatusesPerConfiguration.filter((statuses) => statuses.length > 0)
+          .length,
+        statuses: {
+          open: countCustomStatuses('open'),
+          inProgress: countCustomStatuses('in-progress'),
+          closed: countCustomStatuses('closed'),
+        },
+        pausing: {
+          configurations: pausingPerConfiguration.filter((statuses) => statuses.length > 0).length,
+          statuses: {
+            open: countPausingStatuses('open'),
+            inProgress: countPausingStatuses('in-progress'),
+            closed: countPausingStatuses('closed'),
+          },
+          customizedReasons,
+        },
+      },
     },
     sec: {
       customFields: getCustomFieldsTelemetry(secCustomFields),

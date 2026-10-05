@@ -88,10 +88,15 @@ export const CaseAttributesSchema = CaseBasicSchema.extend({
   updated_by: UserSchema.nullable(),
   total_observables: z.number().nullable(),
   incremental_id: z.number().nullable().optional(),
+  status_key: z.string().nullable().optional(),
   in_progress_at: z.string().nullable().optional(),
   time_to_acknowledge: z.number().nullable().optional(),
   time_to_investigate: z.number().nullable().optional(),
   time_to_resolve: z.number().nullable().optional(),
+  paused_at: z.string().nullable().optional(),
+  time_paused: z.number().nullable().optional(),
+  pause_reason: z.string().nullable().optional(),
+  resume_to_status_key: z.string().nullable().optional(),
   template: CaseTemplateSchema.nullable().optional(),
   [CASE_EXTENDED_FIELDS]: z.record(z.string(), z.string()).optional(),
 });
@@ -118,6 +123,7 @@ export const RelatedCaseSchema = z.object({
   title: z.string(),
   description: z.string(),
   status: CaseStatusSchema,
+  status_key: z.string().nullable().optional(),
   createdAt: z.string(),
   totals: AttachmentTotalsSchema,
 });

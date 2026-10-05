@@ -95,19 +95,34 @@ export class UserActionPersister {
       // action already records are suppressed (#282474) — see getSuppressedCustomFieldKeys.
       const suppressedCustomFieldKeys = this.getSuppressedCustomFieldKeys(updatedCase);
 
+      // A move between two statuses of the same category only changes `status_key`; it still
+      // gets the one status user action.
+      const statusKeyOnlyChange =
+        updatedCase.updatedAttributes.status == null &&
+        updatedCase.updatedAttributes.status_key != null;
+
       updatedFields
-        .filter((field) => UserActionPersister.userActionFieldsAllowed.has(field))
+        .filter(
+          (field) =>
+            UserActionPersister.userActionFieldsAllowed.has(field) ||
+            (field === 'status_key' && statusKeyOnlyChange)
+        )
         .forEach((field) => {
           // Special case for status as it can possibly have an associated closeReason (syncing to alerts)
           // Persist the closeReason to the status userAction
-          if (field === UserActionTypes.status && updatedCase.updatedAttributes.status != null) {
+          if (
+            (field === UserActionTypes.status && updatedCase.updatedAttributes.status != null) ||
+            field === 'status_key'
+          ) {
             const userActionBuilder = this.builderFactory.getBuilder(UserActionTypes.status);
             const statusUserAction = userActionBuilder?.build({
               caseId,
               owner,
               user,
               payload: {
-                status: updatedCase.updatedAttributes.status,
+                status: updatedCase.updatedAttributes.status ?? originalCase.attributes.status,
+                status_key: updatedCase.updatedAttributes.status_key ?? undefined,
+                pause_reason: updatedCase.updatedAttributes.pause_reason ?? undefined,
                 closeReason: updatedCase.closeReason,
                 syncAlerts:
                   updatedCase.updatedAttributes.settings?.syncAlerts ??

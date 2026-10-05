@@ -523,6 +523,20 @@ describe('case transforms', () => {
       `);
     });
 
+    it('defaults status_key to null', () => {
+      expect(
+        transformSavedObjectToExternalModel(createCaseSavedObjectResponse()).attributes.status_key
+      ).toBeNull();
+    });
+
+    it('returns the persisted status_key', () => {
+      expect(
+        transformSavedObjectToExternalModel(
+          createCaseSavedObjectResponse({ overrides: { status_key: 'awaiting_customer' } })
+        ).attributes.status_key
+      ).toBe('awaiting_customer');
+    });
+
     it('sets external_service to null when it is null', () => {
       expect(
         transformSavedObjectToExternalModel(
@@ -797,6 +811,17 @@ describe('case transforms', () => {
       expect(result.totalEvents).toBe(2);
       expect(result.severity).toBe(CaseSeverity.LOW);
       expect(result.status).toBe(CaseStatuses.open);
+      expect(result.status_key).toBeNull();
+    });
+
+    it('returns the persisted status_key', () => {
+      const result = transformESModelToCase(
+        'case-1',
+        { ...basicESCaseFields, status_key: 'awaiting_customer' },
+        createMockSearchHit([])
+      );
+
+      expect(result.status_key).toBe('awaiting_customer');
     });
 
     it('transforms connector with reference correctly', () => {

@@ -364,6 +364,8 @@ describe('CommonFlyout ', () => {
       id: '',
       owner: mockedTestProvidersOwner[0],
       observableTypes: [],
+      statuses: [],
+      pauseReasons: [],
       extractObservables: true,
     };
 

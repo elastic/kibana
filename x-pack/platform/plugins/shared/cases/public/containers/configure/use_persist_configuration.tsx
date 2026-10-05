@@ -36,6 +36,8 @@ export const usePersistConfiguration = () => {
       connector,
       observableTypes,
       extractObservables,
+      statuses,
+      pauseReasons,
     }: Request) => {
       if (isEmpty(id) || isEmpty(version)) {
         return postCaseConfigure({
@@ -46,6 +48,8 @@ export const usePersistConfiguration = () => {
           owner: owner[0],
           observableTypes,
           extractObservables,
+          statuses,
+          pauseReasons,
         });
       }
 
@@ -57,6 +61,8 @@ export const usePersistConfiguration = () => {
         templates: templates ?? [],
         observableTypes,
         extractObservables,
+        statuses,
+        pauseReasons,
       });
     },
     {

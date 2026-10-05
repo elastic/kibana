@@ -19,6 +19,10 @@ import {
   MAX_TEMPLATE_KEY_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
   MAX_TEMPLATE_TAG_LENGTH,
+  MAX_CASE_PAUSE_REASONS,
+  MAX_CASE_PAUSE_REASON_LENGTH,
+  MAX_CASE_STATUSES,
+  MAX_CASE_STATUS_LABEL_LENGTH,
 } from '../../../constants';
 import { limitedArraySchema, limitedStringSchema, regexStringSchema } from '../../../schema_zod';
 import {
@@ -30,8 +34,9 @@ import {
   ClosureTypeSchema,
   ConfigurationBasicWithoutOwnerSchema,
 } from '../../domain_zod/configure/v1';
+import { CaseStatusSchema } from '../../domain_zod/case/v1';
 import { CaseConnectorSchema } from '../../domain_zod/connector/v1';
-import { CaseBaseOptionalFieldsRequestSchema } from '../case/v1';
+import { CaseBaseOptionalFieldsRequestSchema, CaseStatusKeySchema } from '../case/v1';
 import {
   CaseCustomFieldTextWithValidationValueSchema,
   CaseCustomFieldNumberWithValidationValueSchema,
@@ -131,6 +136,32 @@ export const TemplatesConfigurationSchema = limitedArraySchema({
   fieldName: 'templates',
 });
 
+export const CaseStatusesConfigurationSchema = limitedArraySchema({
+  min: 0,
+  max: MAX_CASE_STATUSES,
+  fieldName: 'statuses',
+  codec: z.object({
+    key: CaseStatusKeySchema,
+    label: limitedStringSchema({ fieldName: 'label', min: 1, max: MAX_CASE_STATUS_LABEL_LENGTH }),
+    category: CaseStatusSchema,
+    order: z.number(),
+    isDefault: z.boolean(),
+    disabled: z.boolean(),
+    pausesTimeTracking: z.boolean().optional(),
+  }),
+});
+
+export const PauseReasonsConfigurationSchema = limitedArraySchema({
+  min: 0,
+  max: MAX_CASE_PAUSE_REASONS,
+  fieldName: 'pauseReasons',
+  codec: limitedStringSchema({
+    fieldName: 'pauseReasons',
+    min: 1,
+    max: MAX_CASE_PAUSE_REASON_LENGTH,
+  }),
+});
+
 export const ConfigurationRequestSchema = z.object({
   connector: CaseConnectorSchema,
   closure_type: ClosureTypeSchema,
@@ -139,6 +170,8 @@ export const ConfigurationRequestSchema = z.object({
   templates: TemplatesConfigurationSchema.optional(),
   observableTypes: ObservableTypesConfigurationSchema.optional(),
   extractObservables: z.boolean().optional(),
+  statuses: CaseStatusesConfigurationSchema.optional(),
+  pauseReasons: PauseReasonsConfigurationSchema.optional(),
 });
 
 export const GetConfigurationFindRequestSchema = z.object({
@@ -156,6 +189,8 @@ export const ConfigurationPatchRequestSchema = z.object({
   templates: TemplatesConfigurationSchema.optional(),
   observableTypes: ObservableTypesConfigurationSchema.optional(),
   extractObservables: z.boolean().optional(),
+  statuses: CaseStatusesConfigurationSchema.optional(),
+  pauseReasons: PauseReasonsConfigurationSchema.optional(),
   version: z.string(),
 });
 

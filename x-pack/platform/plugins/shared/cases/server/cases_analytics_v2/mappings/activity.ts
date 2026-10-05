@@ -116,6 +116,8 @@ export const ACTIVITY_INDEX_MAPPING: MappingTypeMapping = {
         // For `status` actions: the new status (`open`, `in-progress`,
         // `closed`).
         status_new: { type: 'keyword' },
+        // For `status` actions that pause time tracking: the reason picked.
+        pause_reason: { type: 'keyword' },
         // For `severity` actions: the new severity (`low`, `medium`,
         // ...).
         severity_new: { type: 'keyword' },

@@ -55,6 +55,8 @@ import {
 } from '../validators';
 import {
   validateCustomFieldTypesInRequest,
+  validatePauseReasons,
+  validateStatusesConfiguration,
   validateTemplatesCustomFieldsInRequest,
 } from './validators';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
@@ -331,6 +333,19 @@ export async function update(
       originalCustomFields: configuration.attributes.customFields,
     });
 
+    validateStatusesConfiguration({
+      requestStatuses: request.statuses,
+      originalStatuses: configuration.attributes.statuses,
+      customStatusesEnabled: clientArgs.config.customStatuses.enabled,
+    });
+
+    validatePauseReasons({
+      requestPauseReasons: request.pauseReasons,
+      pauseReasons: request.pauseReasons ?? configuration.attributes.pauseReasons,
+      statuses: request.statuses ?? configuration.attributes.statuses,
+      customStatusesEnabled: clientArgs.config.customStatuses.enabled,
+    });
+
     const updatedTemplates = transformTemplateCustomFields({
       templates,
       customFields: request.customFields,
@@ -480,6 +495,18 @@ export async function create(
       requestFields: validatedConfigurationRequest.observableTypes,
     });
 
+    validateStatusesConfiguration({
+      requestStatuses: validatedConfigurationRequest.statuses,
+      customStatusesEnabled: clientArgs.config.customStatuses.enabled,
+    });
+
+    validatePauseReasons({
+      requestPauseReasons: validatedConfigurationRequest.pauseReasons,
+      pauseReasons: validatedConfigurationRequest.pauseReasons ?? [],
+      statuses: validatedConfigurationRequest.statuses,
+      customStatusesEnabled: clientArgs.config.customStatuses.enabled,
+    });
+
     let error = null;
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
@@ -569,12 +596,14 @@ export async function create(
         ...validatedConfigurationRequest,
         customFields: validatedConfigurationRequest.customFields ?? [],
         templates: validatedConfigurationRequest.templates ?? [],
+        pauseReasons: validatedConfigurationRequest.pauseReasons ?? [],
         connector: validatedConfigurationRequest.connector,
         created_at: creationDate,
         created_by: user,
         updated_at: null,
         updated_by: null,
         observableTypes: validatedConfigurationRequest.observableTypes ?? [],
+        statuses: validatedConfigurationRequest.statuses ?? [],
         extractObservables:
           validatedConfigurationRequest.extractObservables ??
           OWNER_INFO[validatedConfigurationRequest.owner as Owner]?.features.observables

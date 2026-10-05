@@ -45,6 +45,8 @@ import { builderMap as customFieldsBuilderMap } from '../../custom_fields/builde
 import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
 import { IncrementalIdText } from '../../incremental_id';
 import { severities } from '../../severity/config';
+import { useCaseStatuses } from '../../status/use_case_statuses';
+import { PausedStatusTooltip } from '../../status/paused_status_tooltip';
 
 type CasesColumns = EuiBasicTableColumn<CaseUI>;
 
@@ -89,6 +91,7 @@ export const useCasesColumns = ({
   const casesColumnsConfig = useCasesColumnsConfiguration(isSelectorView);
   const { actions } = useActions({ disableActions });
   const { templatesEnabled } = useCasesConfig();
+  const { getStatus } = useCaseStatuses();
 
   const {
     data: { customFields },
@@ -293,9 +296,13 @@ export const useCasesColumns = ({
         field: casesColumnsConfig.status.field,
         name: casesColumnsConfig.status.name,
         sortable: true,
-        render: (status: CaseUI['status']) => {
+        render: (status: CaseUI['status'], theCase: CaseUI) => {
           if (status != null) {
-            return <Status status={status} />;
+            return (
+              <PausedStatusTooltip pausedAt={theCase.pausedAt} pauseReason={theCase.pauseReason}>
+                <Status status={status} label={getStatus(theCase.statusKey, status).label} />
+              </PausedStatusTooltip>
+            );
           }
 
           return getEmptyCellValue();
@@ -365,7 +372,15 @@ export const useCasesColumns = ({
         width: '8em',
       },
     }),
-    [assignCaseAction, casesColumnsConfig, connectors, isSelectorView, userProfiles, disabledCases]
+    [
+      assignCaseAction,
+      casesColumnsConfig,
+      connectors,
+      isSelectorView,
+      userProfiles,
+      disabledCases,
+      getStatus,
+    ]
   );
 
   const allColumnsDict = useMemo(() => {
