@@ -94,3 +94,7 @@ export {
   FindOrCreateInvestigationRequestBody,
   FindOrCreateInvestigationResponse,
 } from './hunt/find_or_create_investigation_route.gen';
+export {
+  WriteHuntEvidenceRequestBody,
+  WriteHuntEvidenceResponse,
+} from './hunt/write_hunt_evidence_route.gen';

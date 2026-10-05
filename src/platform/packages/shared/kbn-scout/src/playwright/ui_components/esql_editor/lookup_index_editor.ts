@@ -7,24 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataGrid, KibanaCodeEditorWrapper, Locator, ScoutPage } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
+import type { Locator } from '@playwright/test';
 import { escapeRegExp } from 'lodash';
+import type { ScoutPage } from '../..';
+import { DataGrid } from '../../page_objects/data_grid';
+import type { EsqlEditor } from './esql_editor';
 
 /**
- * Page object for the lookup-join "index editor" flyout
+ * UI component object for the lookup-join "index editor" flyout
  * (`@kbn/index-editor`), opened from the ES|QL editor's `LOOKUP JOIN`
- * suggestion or the lookup-join badge hover menu.
+ * suggestion or the lookup-join badge hover menu. It only exists as part of the
+ * ES|QL editor, so reach it through {@link EsqlEditor.lookupIndexEditor}.
  *
- * Kept plugin-local (rather than in `@kbn/scout`) because its data grid uses a
- * bespoke `indexEditorCellValue-{rowIndex}-{colIndex}` cell addressing scheme
- * that the generic `DataGrid` page object doesn't support.
+ * Its data grid uses a bespoke `indexEditorCellValue-{rowIndex}-{colIndex}`
+ * cell addressing scheme that the generic `DataGrid` page object doesn't
+ * support, so cells and rows are addressed here directly.
  */
 export class LookupIndexEditor {
   readonly flyout: Locator;
   readonly unsavedChangesModal: Locator;
+  private readonly dataGrid: DataGrid;
 
-  constructor(private readonly page: ScoutPage, private readonly dataGrid: DataGrid) {
+  constructor(private readonly page: ScoutPage, private readonly esqlEditor: EsqlEditor) {
+    this.dataGrid = new DataGrid(page);
     this.flyout = page.testSubj.locator('lookupIndexFlyout');
     this.unsavedChangesModal = page.testSubj.locator('indexEditorUnsavedChangesModal');
   }
@@ -42,29 +47,8 @@ export class LookupIndexEditor {
    * and clicks the suggestion whose label contains `suggestionLabel` (e.g. a
    * `Create lookup index "my-index"` suggestion). Waits for the flyout to open.
    */
-  async openFromSuggestion(
-    codeEditor: KibanaCodeEditorWrapper,
-    query: string,
-    suggestionLabel: string
-  ): Promise<void> {
-    await codeEditor.setCodeEditorValue(query);
-
-    const suggestWidget = codeEditor.getCodeEditorSuggestWidget();
-    const targetSuggestion = suggestWidget.locator('.monaco-list-row', {
-      hasText: suggestionLabel,
-    });
-
-    // `triggerSuggest(query)` moves the cursor to the end of `query` first (needed
-    // since `setCodeEditorValue` doesn't). Retry the whole trigger, not just the
-    // wait: ES|QL re-validates the query asynchronously, so a suggest triggered
-    // too early can latch Monaco onto an empty widget that never repopulates.
-    await expect(async () => {
-      await codeEditor.triggerSuggest(query);
-      await expect(targetSuggestion).toBeVisible({ timeout: 1_000 });
-    }).toPass();
-
-    await targetSuggestion.click();
-
+  async openFromSuggestion(query: string, suggestionLabel: string): Promise<void> {
+    await this.esqlEditor.selectSuggestion(query, suggestionLabel);
     await this.waitForOpen();
   }
 
@@ -75,7 +59,9 @@ export class LookupIndexEditor {
 
   async getColumnNames(): Promise<string[]> {
     const columnNameButtons = this.page.testSubj.locator('indexEditorColumnNameButton');
-    await expect(columnNameButtons).not.toHaveCount(0);
+    await this.page
+      .locator('[data-column-index="0"] [data-test-subj="indexEditorColumnNameButton"]')
+      .waitFor({ state: 'visible' });
     return columnNameButtons.allInnerTexts();
   }
 
@@ -99,7 +85,7 @@ export class LookupIndexEditor {
       .locator('.euiComboBoxOption__renderOption', {
         hasText: new RegExp(`^${escapeRegExp(type)}$`, 'i'),
       });
-    await expect(option).toHaveCount(1);
+    // Strict mode makes the click fail if more than one option still matches.
     await option.click();
     await searchField.blur();
   }
@@ -143,8 +129,8 @@ export class LookupIndexEditor {
   /**
    * Adds a new empty row immediately after `afterRowIndex`, via the row's
    * `actions` control-column cell. Uses `this.flyout` rather than
-   * `this.dataGrid.getCell()`: the latter is page-wide, and the Discover
-   * results grid behind the flyout has the same `actions` column.
+   * `this.dataGrid.getCell()`: the latter is page-wide, and the host's
+   * results grid (e.g. Discover's) behind the flyout has the same `actions` column.
    */
   async addRow(afterRowIndex: number): Promise<void> {
     const addRowCell = this.flyout.locator(
@@ -159,7 +145,7 @@ export class LookupIndexEditor {
    *
    * Uses `this.flyout`-scoped locators rather than `this.dataGrid.selectRow()`
    * / `.openSelectedRowsMenu()`: the index editor's grid shares the same
-   * `UnifiedDataTable` test subjects as Discover's main results grid, so a
+   * `UnifiedDataTable` test subjects as the host's results grid (e.g. Discover's), so a
    * page-wide locator would match both. The resulting menu is looked up
    * page-wide instead, since EUI renders it into a `document.body` portal
    * outside the flyout (only one can be open at a time, so this stays safe).
@@ -179,7 +165,7 @@ export class LookupIndexEditor {
   /**
    * Locator matching one element per rendered grid row (via the
    * selection-checkbox cell). Scoped to `this.flyout`, not `this.page`: the
-   * Discover results grid stays mounted behind the flyout and shares the same
+   * host's results grid (e.g. Discover's) stays mounted behind the flyout and shares the same
    * data-grid attributes, so an unscoped locator would also match its rows.
    * Prefer `expect(rows).toHaveCount(n)` over reading `.count()` directly,
    * since rows load asynchronously.

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { getAlertingV2ManagementNavPanel } from './get_management_nav_panel';
 export {
   hasAlertingV2Capability,
   isAlertingV2Enabled,
