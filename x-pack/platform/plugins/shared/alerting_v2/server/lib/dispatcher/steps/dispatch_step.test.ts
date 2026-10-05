@@ -15,7 +15,7 @@ import { DISPATCH_CHUNK_SIZE } from '../constants';
 import {
   createActionGroup,
   createActionPolicy,
-  createAlertEpisode,
+  createAlert,
   createDispatcherPipelineInput,
   createDispatcherPipelineState,
 } from '../fixtures/test_utils';
@@ -399,12 +399,12 @@ describe('DispatchStep', () => {
     ]);
     mockWfm.bulkScheduleWorkflow.mockResolvedValue([scheduled('exec-1')]);
 
-    const episode = createAlertEpisode({ rule_id: 'rule-1' });
+    const episode = createAlert({ rule_id: 'rule-1' });
     const group = createActionGroup({
       id: 'g1',
       policyId: 'p1',
       destinations: [{ type: 'workflow', id: 'workflow-1' }],
-      episodes: [episode],
+      alerts: [episode],
       rules: { 'rule-1': { name: 'CPU spike monitor' } },
     });
     const policy = createActionPolicy({ id: 'p1', apiKey: API_KEY });
@@ -438,12 +438,12 @@ describe('DispatchStep', () => {
     ]);
     mockWfm.bulkScheduleWorkflow.mockResolvedValue([scheduled('exec-1')]);
 
-    const episode = createAlertEpisode({ rule_id: 'rule-unknown' });
+    const episode = createAlert({ rule_id: 'rule-unknown' });
     const group = createActionGroup({
       id: 'g1',
       policyId: 'p1',
       destinations: [{ type: 'workflow', id: 'workflow-1' }],
-      episodes: [episode],
+      alerts: [episode],
       rules: {},
     });
     const policy = createActionPolicy({ id: 'p1', apiKey: API_KEY });
@@ -474,7 +474,7 @@ describe('DispatchStep', () => {
     ]);
     mockWfm.bulkScheduleWorkflow.mockResolvedValue([scheduled('exec-1')]);
 
-    const episode = createAlertEpisode({
+    const episode = createAlert({
       alert_id: 'ep-1',
       alert_status: 'recovering',
       severity: 'high',
@@ -484,7 +484,7 @@ describe('DispatchStep', () => {
       id: 'g1',
       policyId: 'p1',
       destinations: [{ type: 'workflow', id: 'workflow-1' }],
-      episodes: [episode],
+      alerts: [episode],
     });
     const policy = createActionPolicy({ id: 'p1', apiKey: API_KEY });
 
@@ -547,12 +547,12 @@ describe('DispatchStep', () => {
   it('records a missing_api_key failure per destination when the policy has no API key', async () => {
     const step = new DispatchStep(mockWfm, mockLicenseService);
 
-    const episode = createAlertEpisode({ rule_id: 'rule-1', alert_id: 'ep-1' });
+    const episode = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
     const group = createActionGroup({
       id: 'g1',
       policyId: 'p1',
       spaceId: 'default',
-      episodes: [episode],
+      alerts: [episode],
       destinations: [
         { type: 'workflow', id: 'workflow-1' },
         { type: 'workflow', id: 'workflow-2' },
@@ -572,7 +572,7 @@ describe('DispatchStep', () => {
         spaceId: 'default',
         actionGroupId: 'g1',
         workflowId: 'workflow-1',
-        episodes: [episode],
+        alerts: [episode],
         reason: DISPATCH_FAILURE_REASONS.MISSING_API_KEY,
         message: expect.stringContaining('No API key found for policy p1'),
       },
@@ -581,7 +581,7 @@ describe('DispatchStep', () => {
         spaceId: 'default',
         actionGroupId: 'g1',
         workflowId: 'workflow-2',
-        episodes: [episode],
+        alerts: [episode],
         reason: DISPATCH_FAILURE_REASONS.MISSING_API_KEY,
         message: expect.stringContaining('No API key found for policy p1'),
       },

@@ -12,12 +12,12 @@ import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../.
 import type { EventLogServiceContract } from '../../services/event_log_service/event_log_service';
 import { EventLogServiceToken } from '../../services/event_log_service/tokens';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
-import { DispatchOutcome, DispatchPlan, EpisodeTriage, RuleCatalog } from '../state';
+import { DispatchOutcome, DispatchPlan, AlertTriage, RuleCatalog } from '../state';
 import type {
   ActionGroup,
   ActionGroupId,
   ActionPolicyId,
-  AlertEpisode,
+  Alert,
   DispatchFailure,
   DispatcherPipelineState,
   DispatcherStep,
@@ -29,7 +29,7 @@ import {
   type ActionPolicyEventAction,
   type DispatchFailureReason,
 } from './constants';
-import { episodeSubject } from './utils/subject';
+import { alertSubject } from './utils/subject';
 
 const RULE_REF_CAP = 50;
 
@@ -104,7 +104,7 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
   ): Promise<DispatcherStepOutput> {
     const {
       plan = DispatchPlan.empty(),
-      triage = EpisodeTriage.empty(),
+      triage = AlertTriage.empty(),
       outcome = DispatchOutcome.empty(),
       rules = RuleCatalog.empty(),
       input,
@@ -233,7 +233,7 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
   }): void {
     const ruleIdSet = new Set<string>();
     const episodeIdSet = new Set<string>();
-    for (const { rule_id, alert_id } of failure.episodes) {
+    for (const { rule_id, alert_id } of failure.alerts) {
       if (rule_id != null) ruleIdSet.add(rule_id);
       episodeIdSet.add(alert_id);
     }
@@ -312,7 +312,7 @@ function aggregateByPolicy(
     for (const executionId of outcome.executionIdsFor(group.id)) {
       summary.workflowExecutionIds.add(executionId);
     }
-    for (const episode of group.episodes) {
+    for (const episode of group.alerts) {
       summary.episodeIds.add(episode.alert_id);
       if (episode.rule_id != null) {
         summary.ruleIds.add(episode.rule_id);
@@ -337,10 +337,10 @@ function buildPolicyAndRuleRefs(
   return { refs, spillOver };
 }
 
-function aggregateUnmatchedBySubject(unmatched: readonly AlertEpisode[]): UnmatchedGroup[] {
+function aggregateUnmatchedBySubject(unmatched: readonly Alert[]): UnmatchedGroup[] {
   const bySubject = new Map<string, UnmatchedGroup>();
   for (const episode of unmatched) {
-    const subject = episodeSubject(episode);
+    const subject = alertSubject(episode);
     let group = bySubject.get(subject);
     if (!group) {
       group = {

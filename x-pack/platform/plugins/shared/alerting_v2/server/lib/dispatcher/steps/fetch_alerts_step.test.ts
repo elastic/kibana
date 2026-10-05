@@ -8,12 +8,12 @@
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
-import { FetchEpisodesStep, parseAlertEpisodes } from './fetch_alerts_step';
+import { FetchAlertsStep, parseAlerts } from './fetch_alerts_step';
 import { createQueryService } from '../../services/query_service/query_service.mock';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createDispatchableAlertEventsResponse } from '../fixtures/dispatcher';
 import {
-  createAlertEpisode,
+  createAlert,
   createDispatcherPipelineState,
   createStepLogger,
 } from '../fixtures/test_utils';
@@ -32,14 +32,14 @@ const makeSubPlanError = () =>
 
 const logger = createStepLogger();
 
-describe('FetchEpisodesStep', () => {
+describe('FetchAlertsStep', () => {
   it('returns episodes and continues when episodes are found', async () => {
     const { queryService, mockEsClient } = createQueryService();
-    const step = new FetchEpisodesStep(queryService);
+    const step = new FetchAlertsStep(queryService);
 
     const episodes = [
-      createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' }),
-      createAlertEpisode({ rule_id: 'r2', group_hash: 'h2', alert_id: 'e2' }),
+      createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' }),
+      createAlert({ rule_id: 'r2', group_hash: 'h2', alert_id: 'e2' }),
     ];
 
     mockEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse(episodes));
@@ -49,13 +49,13 @@ describe('FetchEpisodesStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.scan?.episodes).toHaveLength(2);
-    expect(result.data?.scan?.episodes[0].rule_id).toBe('r1');
+    expect(result.data?.scan?.alerts).toHaveLength(2);
+    expect(result.data?.scan?.alerts[0].rule_id).toBe('r1');
   });
 
   it('halts with no_episodes when none are found', async () => {
     const { queryService, mockEsClient } = createQueryService();
-    const step = new FetchEpisodesStep(queryService);
+    const step = new FetchAlertsStep(queryService);
 
     mockEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse([]));
 
@@ -67,10 +67,10 @@ describe('FetchEpisodesStep', () => {
 
   it('does not cap the Lucene filter at windowEnd so actions stamped after the settle buffer still join last_fired', async () => {
     const { queryService, mockEsClient } = createQueryService();
-    const step = new FetchEpisodesStep(queryService);
+    const step = new FetchAlertsStep(queryService);
 
     mockEsClient.esql.query.mockResolvedValueOnce(
-      createDispatchableAlertEventsResponse([createAlertEpisode()])
+      createDispatchableAlertEventsResponse([createAlert()])
     );
 
     const state = createDispatcherPipelineState();
@@ -92,10 +92,10 @@ describe('FetchEpisodesStep', () => {
 
   it('sets truncated: true when the query returns exactly ESQL_QUERY_ROW_LIMIT rows', async () => {
     const { queryService, mockEsClient } = createQueryService();
-    const step = new FetchEpisodesStep(queryService);
+    const step = new FetchAlertsStep(queryService);
 
     const maxEpisodes = Array.from({ length: ESQL_QUERY_ROW_LIMIT }, (_, i) =>
-      createAlertEpisode({ alert_id: `ep-${i}`, group_hash: `h-${i}` })
+      createAlert({ alert_id: `ep-${i}`, group_hash: `h-${i}` })
     );
     mockEsClient.esql.query.mockResolvedValueOnce(
       createDispatchableAlertEventsResponse(maxEpisodes)
@@ -111,10 +111,10 @@ describe('FetchEpisodesStep', () => {
 
   it('sets truncated: false when the query returns fewer than ESQL_QUERY_ROW_LIMIT rows', async () => {
     const { queryService, mockEsClient } = createQueryService();
-    const step = new FetchEpisodesStep(queryService);
+    const step = new FetchAlertsStep(queryService);
 
     const episodes = Array.from({ length: ESQL_QUERY_ROW_LIMIT - 1 }, (_, i) =>
-      createAlertEpisode({ alert_id: `ep-${i}`, group_hash: `h-${i}` })
+      createAlert({ alert_id: `ep-${i}`, group_hash: `h-${i}` })
     );
     mockEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse(episodes));
 
@@ -128,7 +128,7 @@ describe('FetchEpisodesStep', () => {
 
   it('propagates unclassified query errors', async () => {
     const { queryService, mockEsClient } = createQueryService();
-    const step = new FetchEpisodesStep(queryService);
+    const step = new FetchAlertsStep(queryService);
 
     mockEsClient.esql.query.mockRejectedValueOnce(new Error('ES error'));
 
@@ -138,7 +138,7 @@ describe('FetchEpisodesStep', () => {
 
   it('halts with inline_stats_too_large on a 400 illegal_argument_exception sub-plan error', async () => {
     const { queryService, mockEsClient } = createQueryService();
-    const step = new FetchEpisodesStep(queryService);
+    const step = new FetchAlertsStep(queryService);
 
     mockEsClient.esql.query.mockRejectedValueOnce(makeSubPlanError());
 
@@ -151,7 +151,7 @@ describe('FetchEpisodesStep', () => {
   it('logs the held watermark, its lag, and the force-advance threshold on a sub-plan error', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService, mockLogger } = createLoggerService();
-    const step = new FetchEpisodesStep(queryService);
+    const step = new FetchAlertsStep(queryService);
 
     mockEsClient.esql.query.mockRejectedValueOnce(makeSubPlanError());
 
@@ -171,7 +171,7 @@ describe('FetchEpisodesStep', () => {
 
   it('propagates a 400 with a different reason (not sub-plan)', async () => {
     const { queryService, mockEsClient } = createQueryService();
-    const step = new FetchEpisodesStep(queryService);
+    const step = new FetchAlertsStep(queryService);
 
     const otherError = new errors.ResponseError({
       statusCode: 400,
@@ -187,7 +187,7 @@ describe('FetchEpisodesStep', () => {
   });
 });
 
-describe('parseAlertEpisodes', () => {
+describe('parseAlerts', () => {
   it('passes through all core fields', () => {
     const raw = [
       {
@@ -202,7 +202,7 @@ describe('parseAlertEpisodes', () => {
       },
     ];
 
-    const result = parseAlertEpisodes(raw);
+    const result = parseAlerts(raw);
 
     expect(result).toHaveLength(1);
     expect(result[0].rule_id).toBe('r1');
@@ -226,7 +226,7 @@ describe('parseAlertEpisodes', () => {
       },
     ];
 
-    const result = parseAlertEpisodes(raw);
+    const result = parseAlerts(raw);
 
     expect(result).toHaveLength(1);
     expect(result[0].severity).toBe('medium');
@@ -246,7 +246,7 @@ describe('parseAlertEpisodes', () => {
       },
     ];
 
-    const result = parseAlertEpisodes(raw);
+    const result = parseAlerts(raw);
 
     expect(result).toHaveLength(1);
     expect(result[0].severity).toBeUndefined();
@@ -266,7 +266,7 @@ describe('parseAlertEpisodes', () => {
       },
     ];
 
-    const result = parseAlertEpisodes(raw);
+    const result = parseAlerts(raw);
 
     expect(result).toHaveLength(1);
     expect(result[0].rule_id).toBeNull();

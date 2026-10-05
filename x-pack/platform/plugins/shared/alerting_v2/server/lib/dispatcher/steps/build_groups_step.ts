@@ -40,7 +40,7 @@ export function buildActionGroups(
 ): ActionGroup[] {
   const groupMap = new Map<string, ActionGroup>();
 
-  for (const { episode, policy } of matched) {
+  for (const { alert: episode, policy } of matched) {
     let groupKey: Record<string, unknown>;
     switch (policy.groupingMode) {
       case 'per_alert':
@@ -71,15 +71,15 @@ export function buildActionGroups(
         policyId: policy.id,
         destinations: policy.destinations,
         groupKey,
-        episodes: [],
+        alerts: [],
         rules: {},
       });
     }
 
     const group = groupMap.get(actionGroupId)!;
-    group.episodes.push(episode);
+    group.alerts.push(episode);
     const ruleId = episode.rule_id;
-    const rule = rules.forEpisode(episode);
+    const rule = rules.forAlert(episode);
     if (rule && ruleId != null) {
       group.rules[ruleId] = { name: rule.name };
     }

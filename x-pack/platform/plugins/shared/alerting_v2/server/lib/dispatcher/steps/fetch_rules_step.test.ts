@@ -10,7 +10,7 @@ import type { RulesSavedObjectService } from '../../services/rules_saved_object_
 import { createRulesSavedObjectService } from '../../services/rules_saved_object_service/rules_saved_object_service.mock';
 import { createRuleSoAttributes } from '../../test_utils';
 import {
-  createAlertEpisode,
+  createAlert,
   createDispatcherPipelineState,
   createStepLogger,
 } from '../fixtures/test_utils';
@@ -39,8 +39,8 @@ describe('FetchRulesStep', () => {
     const step = new FetchRulesStep(rulesSoService);
     const state = createDispatcherPipelineState({
       dispatchable: [
-        createAlertEpisode({ rule_id: 'r1' }),
-        createAlertEpisode({ rule_id: 'r1', alert_id: 'e2' }),
+        createAlert({ rule_id: 'r1' }),
+        createAlert({ rule_id: 'r1', alert_id: 'e2' }),
       ],
     });
 
@@ -83,9 +83,9 @@ describe('FetchRulesStep', () => {
     const step = new FetchRulesStep(rulesSoService);
     const state = createDispatcherPipelineState({
       dispatchable: [
-        createAlertEpisode({ rule_id: 'r1' }),
-        createAlertEpisode({ rule_id: 'r2', alert_id: 'e2' }),
-        createAlertEpisode({ rule_id: 'r1', alert_id: 'e3' }),
+        createAlert({ rule_id: 'r1' }),
+        createAlert({ rule_id: 'r2', alert_id: 'e2' }),
+        createAlert({ rule_id: 'r1', alert_id: 'e3' }),
       ],
     });
 
@@ -108,7 +108,7 @@ describe('FetchRulesStep', () => {
 
     const step = new FetchRulesStep(rulesSoService);
     const state = createDispatcherPipelineState({
-      dispatchable: [createAlertEpisode({ rule_id: 'r1' })],
+      dispatchable: [createAlert({ rule_id: 'r1' })],
     });
 
     const result = await step.execute(state, logger);
@@ -128,7 +128,7 @@ describe('FetchRulesStep', () => {
 
     const step = new FetchRulesStep(rulesSoService);
     const state = createDispatcherPipelineState({
-      dispatchable: [createAlertEpisode({ rule_id: 'r1' })],
+      dispatchable: [createAlert({ rule_id: 'r1' })],
     });
 
     const result = await step.execute(state, logger);
@@ -150,9 +150,9 @@ describe('FetchRulesStep', () => {
     const step = new FetchRulesStep(rulesSoService);
     const state = createDispatcherPipelineState({
       dispatchable: [
-        createAlertEpisode({ rule_id: 'r1' }),
-        createAlertEpisode({ source: 'pagerduty', rule_id: null, alert_id: 'ext-1' }),
-        createAlertEpisode({ source: 'datadog', rule_id: null, alert_id: 'ext-2' }),
+        createAlert({ rule_id: 'r1' }),
+        createAlert({ source: 'pagerduty', rule_id: null, alert_id: 'ext-1' }),
+        createAlert({ source: 'datadog', rule_id: null, alert_id: 'ext-2' }),
       ],
     });
 
@@ -168,8 +168,8 @@ describe('FetchRulesStep', () => {
     const step = new FetchRulesStep(rulesSoService);
     const state = createDispatcherPipelineState({
       dispatchable: [
-        createAlertEpisode({ source: 'pagerduty', rule_id: null, alert_id: 'ext-1' }),
-        createAlertEpisode({ source: 'datadog', rule_id: null, alert_id: 'ext-2' }),
+        createAlert({ source: 'pagerduty', rule_id: null, alert_id: 'ext-1' }),
+        createAlert({ source: 'datadog', rule_id: null, alert_id: 'ext-2' }),
       ],
     });
 

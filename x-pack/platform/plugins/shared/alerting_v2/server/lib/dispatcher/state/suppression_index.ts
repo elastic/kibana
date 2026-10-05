@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { suppressionEpisodeKey, suppressionSeriesKey } from '../steps/utils/suppression_key';
-import type { AlertEpisode, SuppressionRow } from '../types';
+import { suppressionAlertKey, suppressionSeriesKey } from '../steps/utils/suppression_key';
+import type { Alert, SuppressionRow } from '../types';
 
 /**
  * Suppression facts loaded from `.alert-actions` (FetchSuppressionsStep),
@@ -22,7 +22,7 @@ export class SuppressionIndex {
     for (const suppression of suppressions) {
       const { alert_id: alertId } = suppression;
       const key = alertId
-        ? suppressionEpisodeKey({ ...suppression, alert_id: alertId })
+        ? suppressionAlertKey({ ...suppression, alert_id: alertId })
         : suppressionSeriesKey(suppression);
       byKey.set(key, suppression);
     }
@@ -41,8 +41,8 @@ export class SuppressionIndex {
    * Reason the episode must not notify, or undefined when it may dispatch.
    * An episode-scoped suppression wins over a series-scoped one.
    */
-  public suppressionReasonFor(episode: AlertEpisode): string | undefined {
-    const episodeSuppression = this.byKey.get(suppressionEpisodeKey(episode));
+  public suppressionReasonFor(episode: Alert): string | undefined {
+    const episodeSuppression = this.byKey.get(suppressionAlertKey(episode));
     if (episodeSuppression?.should_suppress) {
       return suppressionReason(episodeSuppression);
     }

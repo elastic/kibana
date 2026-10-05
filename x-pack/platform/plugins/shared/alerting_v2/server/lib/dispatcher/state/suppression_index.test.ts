@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createAlertEpisode, createSuppressionRow } from '../fixtures/test_utils';
+import { createAlert, createSuppressionRow } from '../fixtures/test_utils';
 import { SuppressionIndex } from './suppression_index';
 
 describe('SuppressionIndex', () => {
@@ -20,7 +20,7 @@ describe('SuppressionIndex', () => {
       }),
     ]);
 
-    const episode = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
+    const episode = createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
     expect(index.suppressionReasonFor(episode)).toBe('ack');
   });
 
@@ -35,7 +35,7 @@ describe('SuppressionIndex', () => {
       }),
     ]);
 
-    const episode = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
+    const episode = createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
     expect(index.suppressionReasonFor(episode)).toBe('snooze');
   });
 
@@ -50,7 +50,7 @@ describe('SuppressionIndex', () => {
       }),
     ]);
 
-    const episode = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
+    const episode = createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
     expect(index.suppressionReasonFor(episode)).toBe('deactivate');
   });
 
@@ -64,7 +64,7 @@ describe('SuppressionIndex', () => {
       }),
     ]);
 
-    const episode = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
+    const episode = createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
     expect(index.suppressionReasonFor(episode)).toBe('unknown suppression reason');
   });
 
@@ -86,7 +86,7 @@ describe('SuppressionIndex', () => {
       }),
     ]);
 
-    const episode = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
+    const episode = createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
     expect(index.suppressionReasonFor(episode)).toBe('ack');
   });
 
@@ -100,12 +100,12 @@ describe('SuppressionIndex', () => {
       }),
     ]);
 
-    const episode = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
+    const episode = createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
     expect(index.suppressionReasonFor(episode)).toBeUndefined();
   });
 
   it('returns undefined for every episode when empty', () => {
-    expect(SuppressionIndex.empty().suppressionReasonFor(createAlertEpisode())).toBeUndefined();
+    expect(SuppressionIndex.empty().suppressionReasonFor(createAlert())).toBeUndefined();
     expect(SuppressionIndex.empty().size).toBe(0);
   });
 
@@ -121,7 +121,7 @@ describe('SuppressionIndex', () => {
       }),
     ]);
 
-    const episode = createAlertEpisode({
+    const episode = createAlert({
       source: 'pagerduty',
       rule_id: null,
       group_hash: 'pd-hash',
@@ -149,13 +149,13 @@ describe('SuppressionIndex', () => {
       }),
     ]);
 
-    const internalEpisode = createAlertEpisode({
+    const internalEpisode = createAlert({
       source: 'internal',
       rule_id: 'rule-1',
       group_hash: 'hash-1',
       alert_id: 'ep-internal',
     });
-    const externalEpisode = createAlertEpisode({
+    const externalEpisode = createAlert({
       source: 'pagerduty',
       rule_id: null,
       group_hash: 'hash-1',
@@ -182,7 +182,7 @@ describe('SuppressionIndex', () => {
     ]);
 
     const externalEpisode = (spaceId: string) =>
-      createAlertEpisode({
+      createAlert({
         source: 'pagerduty',
         rule_id: null,
         space_id: spaceId,
@@ -207,7 +207,7 @@ describe('SuppressionIndex', () => {
       }),
     ]);
 
-    const episode = createAlertEpisode({
+    const episode = createAlert({
       source: 'internal',
       rule_id: 'rule-1',
       group_hash: 'h1',

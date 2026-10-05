@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { episodeSubject, type SubjectInput } from './subject';
+import { alertSubject, type SubjectInput } from './subject';
 
 /**
- * Builds the episode-scoped composite suppression key:
- * `${subject}:${group_hash}:${episode_id}`
+ * Builds the alert-scoped composite suppression key:
+ * `${subject}:${group_hash}:${alert_id}`
  *
- * For internal episodes `subject = rule_id`; for external episodes
+ * For internal alerts `subject = rule_id`; for external alerts
  * `subject = ${space_id}::${source}` (e.g. "default::pagerduty").
  */
-export const suppressionEpisodeKey = (
+export const suppressionAlertKey = (
   x: SubjectInput & { group_hash: string; alert_id: string }
-): string => `${episodeSubject(x)}:${x.group_hash}:${x.alert_id}`;
+): string => `${alertSubject(x)}:${x.group_hash}:${x.alert_id}`;
 
 /**
  * Builds the series-scoped composite suppression key:
  * `${subject}:${group_hash}:*`
  *
  * Used to match series-level suppressions (null `alert_id`) against any
- * episode that belongs to the same series.
+ * alert that belongs to the same series.
  */
 export const suppressionSeriesKey = (x: SubjectInput & { group_hash: string }): string =>
-  `${episodeSubject(x)}:${x.group_hash}:*`;
+  `${alertSubject(x)}:${x.group_hash}:*`;

@@ -12,7 +12,7 @@ import {
   type AlertActionDocument,
 } from '../../../resources/datastreams/alert_actions';
 import type {
-  AlertEpisode,
+  Alert,
   DispatcherStep,
   DispatcherPipelineState,
   DispatcherStepOutput,
@@ -20,7 +20,7 @@ import type {
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import type { StorageServiceContract } from '../../services/storage_service/storage_service';
 import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
-import { DispatchPlan, EpisodeTriage, PolicyCatalog } from '../state';
+import { DispatchPlan, AlertTriage, PolicyCatalog } from '../state';
 
 @injectable()
 export class StoreActionsStep implements DispatcherStep {
@@ -35,7 +35,7 @@ export class StoreActionsStep implements DispatcherStep {
     _: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
     const {
-      triage = EpisodeTriage.empty(),
+      triage = AlertTriage.empty(),
       plan = DispatchPlan.empty(),
       policies = PolicyCatalog.empty(),
     } = state;
@@ -59,7 +59,7 @@ export class StoreActionsStep implements DispatcherStep {
         })
       ),
       ...throttled.flatMap((group) =>
-        group.episodes.map((episode) =>
+        group.alerts.map((episode) =>
           toAction({
             episode,
             actionType: 'suppress',
@@ -69,7 +69,7 @@ export class StoreActionsStep implements DispatcherStep {
         )
       ),
       ...toDispatch.flatMap((group) =>
-        group.episodes.map((episode) =>
+        group.alerts.map((episode) =>
           toAction({
             episode,
             actionType: 'fire',
@@ -89,10 +89,10 @@ export class StoreActionsStep implements DispatcherStep {
     ];
 
     // One `notified` doc per dispatched group — group-scoped, so excluded from
-    // the recordedEpisodes tally.
+    // the recordedAlerts tally.
     const notifiedActions: AlertActionDocument[] = toDispatch.map((group) => {
       const groupingMode = policies.groupingModeOf(group.policyId);
-      const firstEpisode = group.episodes[0];
+      const firstEpisode = group.alerts[0];
       const spaceId = firstEpisode?.space_id ?? 'default';
       const action: AlertActionDocument = {
         actor: { type: alertActionActorType.internal },
@@ -116,7 +116,7 @@ export class StoreActionsStep implements DispatcherStep {
       docs: [...episodeActions, ...notifiedActions],
     });
 
-    return { type: 'continue', data: { recordedEpisodes: episodeActions.length } };
+    return { type: 'continue', data: { recordedAlerts: episodeActions.length } };
   }
 }
 
@@ -126,7 +126,7 @@ export function toAction({
   reason,
   spaceId,
 }: {
-  episode: AlertEpisode;
+  episode: Alert;
   actionType: 'suppress' | 'fire' | 'notified' | 'unmatched';
   reason?: string;
   spaceId: string;

@@ -8,7 +8,7 @@
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { DispatcherPipeline } from './execution_pipeline';
 import { createDispatcherPipelineInput, createMockDispatcherStep } from './fixtures/test_utils';
-import { EpisodeScan, EpisodeTriage } from './state';
+import { AlertScan, AlertTriage } from './state';
 import type { DispatcherPipelineState } from './types';
 
 jest.mock('./with_dispatcher_span', () => ({
@@ -79,12 +79,12 @@ describe('DispatcherPipeline', () => {
 
       const step1 = createMockDispatcherStep('step1', async (state) => {
         statesReceived.push({ ...state });
-        return { type: 'continue', data: { scan: EpisodeScan.empty() } };
+        return { type: 'continue', data: { scan: AlertScan.empty() } };
       });
 
       const step2 = createMockDispatcherStep('step2', async (state) => {
         statesReceived.push({ ...state });
-        return { type: 'continue', data: { triage: EpisodeTriage.empty() } };
+        return { type: 'continue', data: { triage: AlertTriage.empty() } };
       });
 
       const step3 = createMockDispatcherStep('step3', async (state) => {

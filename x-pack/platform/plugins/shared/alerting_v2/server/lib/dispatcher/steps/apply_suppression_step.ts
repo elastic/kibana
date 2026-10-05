@@ -7,7 +7,7 @@
 
 import { injectable } from 'inversify';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
-import { EpisodeScan, EpisodeTriage, SuppressionIndex } from '../state';
+import { AlertScan, AlertTriage, SuppressionIndex } from '../state';
 import type { DispatcherPipelineState, DispatcherStep, DispatcherStepOutput } from '../types';
 
 @injectable()
@@ -18,9 +18,9 @@ export class ApplySuppressionStep implements DispatcherStep {
     state: Readonly<DispatcherPipelineState>,
     _: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
-    const { scan = EpisodeScan.empty(), suppressions = SuppressionIndex.empty() } = state;
+    const { scan = AlertScan.empty(), suppressions = SuppressionIndex.empty() } = state;
 
-    const triage = EpisodeTriage.partition(scan.episodes, (episode) =>
+    const triage = AlertTriage.partition(scan.alerts, (episode) =>
       suppressions.suppressionReasonFor(episode)
     );
 

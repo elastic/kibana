@@ -11,7 +11,7 @@ import type { DispatcherPipelineInput, DispatcherPipelineResult } from './types'
  * Derives the next persisted watermark from a tick's outcome.
  *
  * Rules (applied in order):
- * - Aborted before StoreActionsStep (recordedEpisodes undefined), or
+ * - Aborted before StoreActionsStep (recordedAlerts undefined), or
  *   inline_stats_too_large (scan query rejected): no advance.
  * - No actions: window fully consumed. Advance to windowEnd.
  * - Truncated (row count === ESQL_QUERY_ROW_LIMIT): advance to the last fetched
@@ -33,7 +33,7 @@ export const computeNextWatermark = ({
   let nextWatermark: Date;
 
   if (
-    (haltReason === 'aborted' && finalState.recordedEpisodes === undefined) ||
+    (haltReason === 'aborted' && finalState.recordedAlerts === undefined) ||
     haltReason === 'inline_stats_too_large'
   ) {
     // Pipeline stopped before any records were written — do not advance.

@@ -25,7 +25,7 @@ import {
   TICK_DEADLINE_MS,
 } from './constants';
 import { DispatcherPipeline, type DispatcherPipelineContract } from './execution_pipeline';
-import { EpisodeScan } from './state';
+import { AlertScan } from './state';
 import { toAction } from './steps/store_actions_step';
 import type {
   DispatcherExecutionParams,
@@ -130,7 +130,7 @@ export class DispatcherService implements DispatcherServiceContract {
       const nextWatermark = computeNextWatermark({ input, result: pipelineResult });
       const isStuck = nextWatermark.getTime() === resolvedWatermark.getTime();
       const nextStuckTicks = isStuck ? stuckTicks + 1 : 0;
-      const scan = pipelineResult.finalState.scan ?? EpisodeScan.empty();
+      const scan = pipelineResult.finalState.scan ?? AlertScan.empty();
 
       logger.debug({
         message: () => {
@@ -142,7 +142,7 @@ export class DispatcherService implements DispatcherServiceContract {
             `watermark_lag_ms=${watermarkLagMs}`,
             `window_span_ms=${windowSpanMs}`,
             `truncated=${scan.truncated}`,
-            `episode_count=${scan.episodes.length}`,
+            `episode_count=${scan.alerts.length}`,
             `stuck_ticks=${nextStuckTicks}`,
           ].join(' ');
         },
@@ -206,11 +206,11 @@ export class DispatcherService implements DispatcherServiceContract {
     logger: LoggerServiceContract;
   }): Promise<DispatcherExecutionResult> {
     const { startedAt, eventWatermark, windowEnd } = input;
-    const blockingEpisodes = pipelineResult.finalState.scan?.episodes ?? [];
+    const blockingEpisodes = pipelineResult.finalState.scan?.alerts ?? [];
     const lagMs = startedAt.getTime() - eventWatermark.getTime();
 
     if (blockingEpisodes.length === 0) {
-      // No episodes were fetched (aborted before or during FetchEpisodesStep, or
+      // No episodes were fetched (aborted before or during FetchAlertsStep, or
       // the scan query was rejected): nothing to force-record, and advancing
       // would silently drop the window. Hold while lag is within one max scan
       // window so the scan can recover and the overlap re-read still covers the

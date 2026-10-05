@@ -11,8 +11,8 @@ import type { LoggerServiceContract } from '../services/logger_service/logger_se
 import type {
   DispatchOutcome,
   DispatchPlan,
-  EpisodeScan,
-  EpisodeTriage,
+  AlertScan,
+  AlertTriage,
   PolicyCatalog,
   RuleCatalog,
   SuppressionIndex,
@@ -22,14 +22,14 @@ import type { DispatchFailureReason } from './steps/constants';
 export type RuleId = string;
 export type ActionPolicyId = string;
 export type ActionGroupId = string;
-export type AlertEpisodeData = Record<string, unknown>;
+export type AlertData = Record<string, unknown>;
 
 export interface ActionPolicyDestination {
   type: 'workflow';
   id: string;
 }
 
-export interface AlertEpisode {
+export interface Alert {
   last_event_timestamp: string;
   rule_id: RuleId | null;
   source: string;
@@ -38,7 +38,7 @@ export interface AlertEpisode {
   alert_id: string;
   alert_status: AlertEpisodeStatus;
   severity?: AlertEventSeverity;
-  data?: AlertEpisodeData;
+  data?: AlertData;
 }
 
 /** Suppression fact read from `.alert-actions`; a null `alert_id` means series-scoped. */
@@ -54,8 +54,8 @@ export interface SuppressionRow {
   last_snooze_action?: string | null;
 }
 
-/** Row of the episode suppressions query: ack and deactivate state of one episode. */
-export type EpisodeSuppressionRow = Omit<SuppressionRow, 'alert_id' | 'last_snooze_action'> & {
+/** Row of the alert suppressions query: ack and deactivate state of one alert. */
+export type AlertSuppressionRow = Omit<SuppressionRow, 'alert_id' | 'last_snooze_action'> & {
   alert_id: string;
 };
 
@@ -129,7 +129,7 @@ export interface ActionPolicy {
 }
 
 export interface MatchedPair {
-  episode: AlertEpisode;
+  alert: Alert;
   policy: ActionPolicy;
 }
 
@@ -139,13 +139,13 @@ export interface ActionGroup {
   policyId: ActionPolicyId;
   destinations: ActionPolicyDestination[];
   groupKey: Record<string, unknown>;
-  episodes: AlertEpisode[];
+  alerts: Alert[];
   rules: Record<RuleId, ActionPolicyWorkflowPayloadRule>;
 }
 
 export type ActionPolicyWorkflowPayloadRule = Pick<Rule, 'name'>;
 
-export type ActionPolicyWorkflowPayloadAlert = AlertEpisode;
+export type ActionPolicyWorkflowPayloadAlert = Alert;
 
 export interface ActionPolicyWorkflowPayload {
   id: ActionGroupId;
@@ -163,21 +163,21 @@ export interface LastNotifiedRecord {
 
 export interface LastNotifiedInfo {
   lastNotified: Date;
-  episodeStatus?: string;
+  alertStatus?: string;
 }
 
 /**
  * A single failed attempt to dispatch one action group to one workflow
  * destination. Carries everything the execution-history step needs to emit a
  * `dispatch_failed` event: the parent policy, the failing group + workflow, the
- * affected episodes, and a machine-readable + human-readable cause.
+ * affected alerts, and a machine-readable + human-readable cause.
  */
 export interface DispatchFailure {
   policyId: ActionPolicyId;
   spaceId: string;
   actionGroupId: ActionGroupId;
   workflowId: string;
-  episodes: AlertEpisode[];
+  alerts: Alert[];
   reason: DispatchFailureReason;
   message: string;
 }
@@ -196,13 +196,13 @@ export interface DispatcherPipelineInput {
 export interface DispatcherPipelineState {
   readonly input: DispatcherPipelineInput;
   /** Result of the windowed candidate scan (episodes + truncation flag). */
-  readonly scan?: EpisodeScan;
-  /** Count of episodes that received an `.alert-actions` record this tick. */
-  readonly recordedEpisodes?: number;
+  readonly scan?: AlertScan;
+  /** Count of alerts that received an `.alert-actions` record this tick. */
+  readonly recordedAlerts?: number;
   /** Suppression facts from `.alert-actions`, indexed for per-episode lookup. */
   readonly suppressions?: SuppressionIndex;
   /** Dispatchable vs suppressed verdict on the scanned episodes. */
-  readonly triage?: EpisodeTriage;
+  readonly triage?: AlertTriage;
   readonly rules?: RuleCatalog;
   readonly policies?: PolicyCatalog;
   readonly matched?: MatchedPair[];

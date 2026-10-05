@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createAlertEpisode, createRule } from '../fixtures/test_utils';
+import { createAlert, createRule } from '../fixtures/test_utils';
 import { RuleCatalog } from './rule_catalog';
 
 describe('RuleCatalog', () => {
@@ -16,8 +16,8 @@ describe('RuleCatalog', () => {
   it('resolves rules by id and by episode', () => {
     expect(catalog.get('rule-1')?.id).toBe('rule-1');
     expect(catalog.get('missing')).toBeUndefined();
-    expect(catalog.forEpisode(createAlertEpisode({ rule_id: 'rule-1' }))?.id).toBe('rule-1');
-    expect(catalog.forEpisode(createAlertEpisode({ rule_id: null }))).toBeUndefined();
+    expect(catalog.forAlert(createAlert({ rule_id: 'rule-1' }))?.id).toBe('rule-1');
+    expect(catalog.forAlert(createAlert({ rule_id: null }))).toBeUndefined();
   });
 
   it('resolves the rule space id', () => {
@@ -25,24 +25,18 @@ describe('RuleCatalog', () => {
     expect(catalog.spaceIdOf('missing')).toBeUndefined();
   });
 
-  describe('isOrphanedInternalEpisode', () => {
+  describe('isOrphanedInternalAlert', () => {
     it('is true for an internal episode whose rule is absent', () => {
-      expect(catalog.isOrphanedInternalEpisode(createAlertEpisode({ rule_id: 'deleted' }))).toBe(
-        true
-      );
+      expect(catalog.isOrphanedInternalAlert(createAlert({ rule_id: 'deleted' }))).toBe(true);
     });
 
     it('is false for an internal episode whose rule exists', () => {
-      expect(catalog.isOrphanedInternalEpisode(createAlertEpisode({ rule_id: 'rule-1' }))).toBe(
-        false
-      );
+      expect(catalog.isOrphanedInternalAlert(createAlert({ rule_id: 'rule-1' }))).toBe(false);
     });
 
     it('is false for an external episode (null rule_id)', () => {
       expect(
-        catalog.isOrphanedInternalEpisode(
-          createAlertEpisode({ rule_id: null, source: 'pagerduty' })
-        )
+        catalog.isOrphanedInternalAlert(createAlert({ rule_id: null, source: 'pagerduty' }))
       ).toBe(false);
     });
   });

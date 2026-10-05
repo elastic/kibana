@@ -385,7 +385,7 @@ export const ALERTING_LOG_CODES = {
   DISPATCHER_INVALID_WATERMARK: 'DISPATCHER_INVALID_WATERMARK',
   /**
    * The escape hatch fired but no episodes were fetched for the window (the
-   * pipeline was aborted before or during FetchEpisodesStep, or the scan query
+   * pipeline was aborted before or during FetchAlertsStep, or the scan query
    * was rejected, e.g. `inline_stats_too_large`), and watermark lag is still
    * within one max scan window. The watermark is held; the stuck counter is
    * reset so the scan can recover without dropping the window. The message

@@ -9,7 +9,7 @@ import type { MaintenanceWindowServiceContract } from '../../services/maintenanc
 import { createMaintenanceWindowServiceMock } from '../../services/maintenance_window_service/maintenance_window_service.mock';
 import { ApplyMaintenanceWindowStep } from './apply_maintenance_window_step';
 import {
-  createAlertEpisode,
+  createAlert,
   createDispatcherPipelineInput,
   createDispatcherPipelineState,
   createRule,
@@ -56,7 +56,7 @@ describe('ApplyMaintenanceWindowStep', () => {
     service.getEnabledMaintenanceWindows.mockResolvedValue([]);
 
     const state = createDispatcherPipelineState({
-      dispatchable: [createAlertEpisode()],
+      dispatchable: [createAlert()],
       rules: new Map([['rule-1', createRule()]]),
     });
 
@@ -68,7 +68,7 @@ describe('ApplyMaintenanceWindowStep', () => {
   it('keeps episodes whose rule is in a different space than active MW', async () => {
     service.getEnabledMaintenanceWindows.mockResolvedValue([buildMw({ spaceId: 'other-space' })]);
 
-    const ep = createAlertEpisode();
+    const ep = createAlert();
     const state = createDispatcherPipelineState({
       dispatchable: [ep],
       rules: new Map([[ep.rule_id!, createRule({ id: ep.rule_id!, spaceId: 'default' })]]),
@@ -82,7 +82,7 @@ describe('ApplyMaintenanceWindowStep', () => {
   it('suppresses episodes inside the schedule window with no episode-data filter', async () => {
     service.getEnabledMaintenanceWindows.mockResolvedValue([buildMw()]);
 
-    const ep = createAlertEpisode({ last_event_timestamp: '2026-01-22T07:30:00.000Z' });
+    const ep = createAlert({ last_event_timestamp: '2026-01-22T07:30:00.000Z' });
     const state = createDispatcherPipelineState({
       dispatchable: [ep],
       rules: new Map([[ep.rule_id!, createRule({ id: ep.rule_id!, spaceId: 'default' })]]),
@@ -102,7 +102,7 @@ describe('ApplyMaintenanceWindowStep', () => {
   it('keeps episodes outside the schedule window', async () => {
     service.getEnabledMaintenanceWindows.mockResolvedValue([buildMw()]);
 
-    const ep = createAlertEpisode({ last_event_timestamp: '2026-01-22T09:00:00.000Z' });
+    const ep = createAlert({ last_event_timestamp: '2026-01-22T09:00:00.000Z' });
     const state = createDispatcherPipelineState({
       dispatchable: [ep],
       rules: new Map([[ep.rule_id!, createRule({ id: ep.rule_id!, spaceId: 'default' })]]),
@@ -120,7 +120,7 @@ describe('ApplyMaintenanceWindowStep', () => {
       }),
     ]);
 
-    const ep = createAlertEpisode({
+    const ep = createAlert({
       last_event_timestamp: '2026-01-22T07:30:00.000Z',
       data: { severity: 'critical' },
     });
@@ -144,7 +144,7 @@ describe('ApplyMaintenanceWindowStep', () => {
       }),
     ]);
 
-    const ep = createAlertEpisode({
+    const ep = createAlert({
       last_event_timestamp: '2026-01-22T07:30:00.000Z',
       data: { severity: 'low' },
     });
@@ -167,7 +167,7 @@ describe('ApplyMaintenanceWindowStep', () => {
       buildMw({ id: 'mw-matching' }),
     ]);
 
-    const ep = createAlertEpisode({
+    const ep = createAlert({
       last_event_timestamp: '2026-01-22T07:30:00.000Z',
       data: { severity: 'critical' },
     });
@@ -188,7 +188,7 @@ describe('ApplyMaintenanceWindowStep', () => {
   it('passes through an internal episode whose rule is missing from the rules map (rule deleted)', async () => {
     service.getEnabledMaintenanceWindows.mockResolvedValue([buildMw()]);
 
-    const ep = createAlertEpisode({
+    const ep = createAlert({
       last_event_timestamp: '2026-01-22T07:30:00.000Z',
       space_id: 'default',
     });
@@ -207,9 +207,9 @@ describe('ApplyMaintenanceWindowStep', () => {
   it('appends to existing suppressed array rather than overwriting it', async () => {
     service.getEnabledMaintenanceWindows.mockResolvedValue([buildMw()]);
 
-    const ep = createAlertEpisode({ last_event_timestamp: '2026-01-22T07:30:00.000Z' });
+    const ep = createAlert({ last_event_timestamp: '2026-01-22T07:30:00.000Z' });
     const previouslySuppressed = {
-      ...createAlertEpisode({ alert_id: 'previously-suppressed' }),
+      ...createAlert({ alert_id: 'previously-suppressed' }),
       reason: 'snooze',
     };
     const state = createDispatcherPipelineState({
@@ -230,7 +230,7 @@ describe('ApplyMaintenanceWindowStep', () => {
     // but the episode fired at 07:30 — still inside the window, must be suppressed.
     service.getEnabledMaintenanceWindows.mockResolvedValue([buildMw({ id: 'mw-closed' })]);
 
-    const ep = createAlertEpisode({ last_event_timestamp: '2026-01-22T07:30:00.000Z' });
+    const ep = createAlert({ last_event_timestamp: '2026-01-22T07:30:00.000Z' });
     const state = createDispatcherPipelineState({
       input: createDispatcherPipelineInput({ startedAt: new Date('2026-01-22T12:05:00.000Z') }),
       dispatchable: [ep],
@@ -252,7 +252,7 @@ describe('ApplyMaintenanceWindowStep', () => {
 
     const state = createDispatcherPipelineState({
       input: createDispatcherPipelineInput({ startedAt: new Date('2026-01-22T07:45:00.000Z') }),
-      dispatchable: [createAlertEpisode()],
+      dispatchable: [createAlert()],
       rules: new Map([['rule-1', createRule()]]),
     });
 
@@ -265,7 +265,7 @@ describe('ApplyMaintenanceWindowStep', () => {
     it('suppresses an external episode in the same space as the MW (no rule KQL scope)', async () => {
       service.getEnabledMaintenanceWindows.mockResolvedValue([buildMw({ spaceId: 'default' })]);
 
-      const ep = createAlertEpisode({
+      const ep = createAlert({
         source: 'pagerduty',
         rule_id: null,
         space_id: 'default',
@@ -290,7 +290,7 @@ describe('ApplyMaintenanceWindowStep', () => {
     it('does not suppress an external episode when the MW is in a different space', async () => {
       service.getEnabledMaintenanceWindows.mockResolvedValue([buildMw({ spaceId: 'other-space' })]);
 
-      const ep = createAlertEpisode({
+      const ep = createAlert({
         source: 'pagerduty',
         rule_id: null,
         space_id: 'default',
@@ -314,7 +314,7 @@ describe('ApplyMaintenanceWindowStep', () => {
         }),
       ]);
 
-      const ep = createAlertEpisode({
+      const ep = createAlert({
         source: 'pagerduty',
         rule_id: null,
         space_id: 'default',
@@ -345,7 +345,7 @@ describe('ApplyMaintenanceWindowStep', () => {
         }),
       ]);
 
-      const ep = createAlertEpisode({
+      const ep = createAlert({
         source: 'pagerduty',
         rule_id: null,
         space_id: 'default',
@@ -368,7 +368,7 @@ describe('ApplyMaintenanceWindowStep', () => {
         buildMw({ spaceId: 'default', scope: {} }),
       ]);
 
-      const ep = createAlertEpisode({
+      const ep = createAlert({
         source: 'pagerduty',
         rule_id: null,
         space_id: 'default',
@@ -389,7 +389,7 @@ describe('ApplyMaintenanceWindowStep', () => {
   it('does not suppress an episode when the MW has no scope at all (v2 not selected)', async () => {
     service.getEnabledMaintenanceWindows.mockResolvedValue([buildMw({ scope: undefined })]);
 
-    const ep = createAlertEpisode({ last_event_timestamp: '2026-01-22T07:30:00.000Z' });
+    const ep = createAlert({ last_event_timestamp: '2026-01-22T07:30:00.000Z' });
     const state = createDispatcherPipelineState({
       dispatchable: [ep],
       rules: new Map([[ep.rule_id!, createRule({ id: ep.rule_id!, spaceId: 'default' })]]),

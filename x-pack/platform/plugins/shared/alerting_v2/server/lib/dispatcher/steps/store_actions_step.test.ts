@@ -12,7 +12,7 @@ import type { AlertAction } from '../../../resources/datastreams/alert_actions';
 import {
   createActionGroup,
   createActionPolicy,
-  createAlertEpisode,
+  createAlert,
   createDispatcherPipelineState,
   createRule,
   createStepLogger,
@@ -84,7 +84,7 @@ describe('StoreActionsStep', () => {
     const mockService = createMockStorageServiceContract();
     const step = new StoreActionsStep(mockService);
 
-    const episode = createAlertEpisode({
+    const episode = createAlert({
       rule_id: 'rule-1',
       group_hash: 'hash-1',
       last_event_timestamp: '2026-01-22T07:00:00.000Z',
@@ -122,7 +122,7 @@ describe('StoreActionsStep', () => {
     const mockService = createMockStorageServiceContract();
     const step = new StoreActionsStep(mockService);
 
-    const episode = createAlertEpisode({
+    const episode = createAlert({
       rule_id: 'rule-1',
       group_hash: 'hash-1',
       last_event_timestamp: '2026-01-22T07:00:00.000Z',
@@ -131,7 +131,7 @@ describe('StoreActionsStep', () => {
     const group = createActionGroup({
       id: 'group-1',
       policyId: 'policy-1',
-      episodes: [episode],
+      alerts: [episode],
     });
 
     const state = createDispatcherPipelineState({
@@ -166,7 +166,7 @@ describe('StoreActionsStep', () => {
     const mockService = createMockStorageServiceContract();
     const step = new StoreActionsStep(mockService);
 
-    const episode = createAlertEpisode({
+    const episode = createAlert({
       rule_id: 'rule-1',
       group_hash: 'hash-1',
       last_event_timestamp: '2026-01-22T07:00:00.000Z',
@@ -175,7 +175,7 @@ describe('StoreActionsStep', () => {
     const group = createActionGroup({
       id: 'group-1',
       policyId: 'policy-1',
-      episodes: [episode],
+      alerts: [episode],
     });
 
     const state = createDispatcherPipelineState({
@@ -219,7 +219,7 @@ describe('StoreActionsStep', () => {
     const mockService = createMockStorageServiceContract();
     const step = new StoreActionsStep(mockService);
 
-    const episode = createAlertEpisode({
+    const episode = createAlert({
       rule_id: 'rule-1',
       group_hash: 'hash-1',
       alert_status: 'recovering',
@@ -229,7 +229,7 @@ describe('StoreActionsStep', () => {
     const group = createActionGroup({
       id: 'group-1',
       policyId: 'policy-1',
-      episodes: [episode],
+      alerts: [episode],
     });
 
     const state = createDispatcherPipelineState({
@@ -265,7 +265,7 @@ describe('StoreActionsStep', () => {
     const mockService = createMockStorageServiceContract();
     const step = new StoreActionsStep(mockService);
 
-    const episode = createAlertEpisode({
+    const episode = createAlert({
       rule_id: 'rule-1',
       group_hash: 'hash-1',
       last_event_timestamp: '2026-01-22T07:00:00.000Z',
@@ -274,7 +274,7 @@ describe('StoreActionsStep', () => {
     const group = createActionGroup({
       id: 'group-1',
       policyId: 'policy-1',
-      episodes: [episode],
+      alerts: [episode],
     });
 
     const state = createDispatcherPipelineState({
@@ -307,21 +307,21 @@ describe('StoreActionsStep', () => {
     const mockService = createMockStorageServiceContract();
     const step = new StoreActionsStep(mockService);
 
-    const suppressedEpisode = createAlertEpisode({
+    const suppressedEpisode = createAlert({
       rule_id: 'rule-suppressed',
       group_hash: 'hash-suppressed',
       alert_id: 'ep-suppressed',
       last_event_timestamp: '2026-01-22T07:00:00.000Z',
     });
 
-    const throttledEpisode = createAlertEpisode({
+    const throttledEpisode = createAlert({
       rule_id: 'rule-throttled',
       group_hash: 'hash-throttled',
       alert_id: 'ep-throttled',
       last_event_timestamp: '2026-01-22T07:10:00.000Z',
     });
 
-    const dispatchEpisode = createAlertEpisode({
+    const dispatchEpisode = createAlert({
       rule_id: 'rule-dispatch',
       group_hash: 'hash-dispatch',
       alert_id: 'ep-dispatch',
@@ -331,13 +331,13 @@ describe('StoreActionsStep', () => {
     const throttledGroup = createActionGroup({
       id: 'throttled-group',
       policyId: 'throttle-policy',
-      episodes: [throttledEpisode],
+      alerts: [throttledEpisode],
     });
 
     const dispatchGroup = createActionGroup({
       id: 'dispatch-group',
       policyId: 'dispatch-policy',
-      episodes: [dispatchEpisode],
+      alerts: [dispatchEpisode],
     });
 
     const state = createDispatcherPipelineState({
@@ -412,7 +412,7 @@ describe('StoreActionsStep', () => {
     const mockService = createMockStorageServiceContract();
     const step = new StoreActionsStep(mockService);
 
-    const unmatchedEpisode = createAlertEpisode({
+    const unmatchedEpisode = createAlert({
       rule_id: 'rule-unmatched',
       group_hash: 'hash-unmatched',
       alert_id: 'ep-unmatched',
@@ -452,13 +452,13 @@ describe('StoreActionsStep', () => {
     const mockService = createMockStorageServiceContract();
     const step = new StoreActionsStep(mockService);
 
-    const episode1 = createAlertEpisode({
+    const episode1 = createAlert({
       rule_id: 'rule-1',
       group_hash: 'hash-1',
       alert_id: 'ep-1',
     });
 
-    const episode2 = createAlertEpisode({
+    const episode2 = createAlert({
       rule_id: 'rule-2',
       group_hash: 'hash-2',
       alert_id: 'ep-2',
@@ -487,21 +487,21 @@ describe('StoreActionsStep', () => {
     const mockService = createMockStorageServiceContract();
     const step = new StoreActionsStep(mockService);
 
-    const dispatchedEpisode = createAlertEpisode({
+    const dispatchedEpisode = createAlert({
       rule_id: 'rule-dispatch',
       group_hash: 'hash-dispatch',
       alert_id: 'ep-dispatch',
       last_event_timestamp: '2026-01-22T07:00:00.000Z',
     });
 
-    const throttledEpisode = createAlertEpisode({
+    const throttledEpisode = createAlert({
       rule_id: 'rule-throttled',
       group_hash: 'hash-throttled',
       alert_id: 'ep-throttled',
       last_event_timestamp: '2026-01-22T07:05:00.000Z',
     });
 
-    const unmatchedEpisode = createAlertEpisode({
+    const unmatchedEpisode = createAlert({
       rule_id: 'rule-unmatched',
       group_hash: 'hash-unmatched',
       alert_id: 'ep-unmatched',
@@ -511,13 +511,13 @@ describe('StoreActionsStep', () => {
     const dispatchGroup = createActionGroup({
       id: 'dispatch-group',
       policyId: 'dispatch-policy',
-      episodes: [dispatchedEpisode],
+      alerts: [dispatchedEpisode],
     });
 
     const throttledGroup = createActionGroup({
       id: 'throttled-group',
       policyId: 'throttle-policy',
-      episodes: [throttledEpisode],
+      alerts: [throttledEpisode],
     });
 
     const state = createDispatcherPipelineState({
@@ -561,14 +561,14 @@ describe('StoreActionsStep', () => {
     const mockService = createMockStorageServiceContract();
     const step = new StoreActionsStep(mockService);
 
-    const episode1 = createAlertEpisode({
+    const episode1 = createAlert({
       rule_id: 'rule-1',
       group_hash: 'hash-1',
       alert_id: 'ep-1',
       last_event_timestamp: '2026-01-22T07:00:00.000Z',
     });
 
-    const episode2 = createAlertEpisode({
+    const episode2 = createAlert({
       rule_id: 'rule-1',
       group_hash: 'hash-2',
       alert_id: 'ep-2',
@@ -578,7 +578,7 @@ describe('StoreActionsStep', () => {
     const group = createActionGroup({
       id: 'group-1',
       policyId: 'policy-1',
-      episodes: [episode1, episode2],
+      alerts: [episode1, episode2],
     });
 
     const state = createDispatcherPipelineState({
@@ -606,7 +606,7 @@ describe('StoreActionsStep', () => {
       const mockService = createMockStorageServiceContract();
       const step = new StoreActionsStep(mockService);
 
-      const episode = createAlertEpisode({
+      const episode = createAlert({
         rule_id: 'rule-in-custom-space',
         space_id: 'custom',
         group_hash: 'hash-1',
@@ -627,7 +627,7 @@ describe('StoreActionsStep', () => {
       const mockService = createMockStorageServiceContract();
       const step = new StoreActionsStep(mockService);
 
-      const episode = createAlertEpisode({
+      const episode = createAlert({
         rule_id: 'rule-1',
         space_id: 'default',
         group_hash: 'hash-1',
@@ -648,7 +648,7 @@ describe('StoreActionsStep', () => {
       const mockService = createMockStorageServiceContract();
       const step = new StoreActionsStep(mockService);
 
-      const episode = createAlertEpisode({
+      const episode = createAlert({
         rule_id: 'rule-1',
         group_hash: 'hash-1',
         last_event_timestamp: '2026-01-22T07:00:00.000Z',
@@ -668,14 +668,14 @@ describe('StoreActionsStep', () => {
       const mockService = createMockStorageServiceContract();
       const step = new StoreActionsStep(mockService);
 
-      const episode1 = createAlertEpisode({
+      const episode1 = createAlert({
         rule_id: 'rule-space-a',
         space_id: 'space-a',
         group_hash: 'hash-1',
         last_event_timestamp: '2026-01-22T07:00:00.000Z',
       });
 
-      const episode2 = createAlertEpisode({
+      const episode2 = createAlert({
         rule_id: 'rule-space-b',
         space_id: 'space-b',
         group_hash: 'hash-2',
@@ -702,7 +702,7 @@ describe('StoreActionsStep', () => {
       const mockService = createMockStorageServiceContract();
       const step = new StoreActionsStep(mockService);
 
-      const externalEpisode = createAlertEpisode({
+      const externalEpisode = createAlert({
         rule_id: null,
         source: 'pagerduty',
         space_id: 'space-a',
@@ -713,7 +713,7 @@ describe('StoreActionsStep', () => {
       const group = createActionGroup({
         id: 'group-pd',
         policyId: 'policy-1',
-        episodes: [externalEpisode],
+        alerts: [externalEpisode],
       });
 
       const state = createDispatcherPipelineState({
@@ -742,7 +742,7 @@ describe('StoreActionsStep', () => {
       const mockService = createMockStorageServiceContract();
       const step = new StoreActionsStep(mockService);
 
-      const externalEpisode = createAlertEpisode({
+      const externalEpisode = createAlert({
         rule_id: null,
         source: 'pagerduty',
         space_id: 'space-a',
@@ -753,7 +753,7 @@ describe('StoreActionsStep', () => {
       const group = createActionGroup({
         id: 'group-pd',
         policyId: 'policy-1',
-        episodes: [externalEpisode],
+        alerts: [externalEpisode],
       });
 
       const state = createDispatcherPipelineState({
@@ -781,15 +781,15 @@ describe('StoreActionsStep', () => {
     });
   });
 
-  describe('recordedEpisodes count', () => {
+  describe('recordedAlerts count', () => {
     it('counts suppressed episodes', async () => {
       const mockService = createMockStorageServiceContract();
       const step = new StoreActionsStep(mockService);
 
       const state = createDispatcherPipelineState({
         suppressed: [
-          { ...createAlertEpisode({ alert_id: 'ep-1' }), reason: 'acked' },
-          { ...createAlertEpisode({ alert_id: 'ep-2' }), reason: 'acked' },
+          { ...createAlert({ alert_id: 'ep-1' }), reason: 'acked' },
+          { ...createAlert({ alert_id: 'ep-2' }), reason: 'acked' },
         ],
         throttled: [],
         dispatch: [],
@@ -798,7 +798,7 @@ describe('StoreActionsStep', () => {
       const result = await step.execute(state, logger);
 
       expect(result).toEqual(
-        expect.objectContaining({ type: 'continue', data: { recordedEpisodes: 2 } })
+        expect.objectContaining({ type: 'continue', data: { recordedAlerts: 2 } })
       );
     });
 
@@ -811,12 +811,9 @@ describe('StoreActionsStep', () => {
         throttled: [
           createActionGroup({
             id: 'g1',
-            episodes: [
-              createAlertEpisode({ alert_id: 'e1' }),
-              createAlertEpisode({ alert_id: 'e2' }),
-            ],
+            alerts: [createAlert({ alert_id: 'e1' }), createAlert({ alert_id: 'e2' })],
           }),
-          createActionGroup({ id: 'g2', episodes: [createAlertEpisode({ alert_id: 'e3' })] }),
+          createActionGroup({ id: 'g2', alerts: [createAlert({ alert_id: 'e3' })] }),
         ],
         dispatch: [],
       });
@@ -824,7 +821,7 @@ describe('StoreActionsStep', () => {
       const result = await step.execute(state, logger);
 
       expect(result).toEqual(
-        expect.objectContaining({ type: 'continue', data: { recordedEpisodes: 3 } })
+        expect.objectContaining({ type: 'continue', data: { recordedAlerts: 3 } })
       );
     });
 
@@ -838,10 +835,7 @@ describe('StoreActionsStep', () => {
         dispatch: [
           createActionGroup({
             id: 'g1',
-            episodes: [
-              createAlertEpisode({ alert_id: 'e1' }),
-              createAlertEpisode({ alert_id: 'e2' }),
-            ],
+            alerts: [createAlert({ alert_id: 'e1' }), createAlert({ alert_id: 'e2' })],
           }),
         ],
       });
@@ -849,7 +843,7 @@ describe('StoreActionsStep', () => {
       const result = await step.execute(state, logger);
 
       expect(result).toEqual(
-        expect.objectContaining({ type: 'continue', data: { recordedEpisodes: 2 } })
+        expect.objectContaining({ type: 'continue', data: { recordedAlerts: 2 } })
       );
     });
 
@@ -859,9 +853,9 @@ describe('StoreActionsStep', () => {
 
       const state = createDispatcherPipelineState({
         dispatchable: [
-          createAlertEpisode({ alert_id: 'e1' }),
-          createAlertEpisode({ alert_id: 'e2' }),
-          createAlertEpisode({ alert_id: 'e3' }),
+          createAlert({ alert_id: 'e1' }),
+          createAlert({ alert_id: 'e2' }),
+          createAlert({ alert_id: 'e3' }),
         ],
         suppressed: [],
         throttled: [],
@@ -871,7 +865,7 @@ describe('StoreActionsStep', () => {
       const result = await step.execute(state, logger);
 
       expect(result).toEqual(
-        expect.objectContaining({ type: 'continue', data: { recordedEpisodes: 3 } })
+        expect.objectContaining({ type: 'continue', data: { recordedAlerts: 3 } })
       );
     });
 
@@ -880,30 +874,30 @@ describe('StoreActionsStep', () => {
       const step = new StoreActionsStep(mockService);
 
       // 1 suppressed + 1 throttled (in a group) + 1 dispatch (in a group) + 1 unmatched = 4
-      const unmatchedEpisode = createAlertEpisode({
+      const unmatchedEpisode = createAlert({
         alert_id: 'ep-unmatched',
         group_hash: 'h-unmatched',
       });
-      const dispatchedEpisode = createAlertEpisode({
+      const dispatchedEpisode = createAlert({
         alert_id: 'ep-dispatch',
         group_hash: 'h-dispatch',
       });
-      const throttledEpisode = createAlertEpisode({
+      const throttledEpisode = createAlert({
         alert_id: 'ep-throttled',
         group_hash: 'h-throttled',
       });
 
       const state = createDispatcherPipelineState({
         dispatchable: [dispatchedEpisode, throttledEpisode, unmatchedEpisode],
-        suppressed: [{ ...createAlertEpisode({ alert_id: 'ep-sup' }), reason: 'acked' }],
-        throttled: [createActionGroup({ id: 'g-throttle', episodes: [throttledEpisode] })],
-        dispatch: [createActionGroup({ id: 'g-dispatch', episodes: [dispatchedEpisode] })],
+        suppressed: [{ ...createAlert({ alert_id: 'ep-sup' }), reason: 'acked' }],
+        throttled: [createActionGroup({ id: 'g-throttle', alerts: [throttledEpisode] })],
+        dispatch: [createActionGroup({ id: 'g-dispatch', alerts: [dispatchedEpisode] })],
       });
 
       const result = await step.execute(state, logger);
 
       expect(result).toEqual(
-        expect.objectContaining({ type: 'continue', data: { recordedEpisodes: 4 } })
+        expect.objectContaining({ type: 'continue', data: { recordedAlerts: 4 } })
       );
     });
   });

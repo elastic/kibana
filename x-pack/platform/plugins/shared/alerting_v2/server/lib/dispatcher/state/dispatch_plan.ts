@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { suppressionEpisodeKey } from '../steps/utils/suppression_key';
-import type { ActionGroup, AlertEpisode } from '../types';
+import { suppressionAlertKey } from '../steps/utils/suppression_key';
+import type { ActionGroup, Alert } from '../types';
 
 /**
  * The final delivery decision (ApplyThrottlingStep): action groups eligible to
@@ -20,7 +20,7 @@ export class DispatchPlan {
     public readonly toDispatch: readonly ActionGroup[],
     public readonly throttled: readonly ActionGroup[],
     /** Episodes that survived triage but matched no enabled action policy. */
-    public readonly unmatched: readonly AlertEpisode[]
+    public readonly unmatched: readonly Alert[]
   ) {}
 
   public static of({
@@ -31,7 +31,7 @@ export class DispatchPlan {
     toDispatch: readonly ActionGroup[];
     throttled: readonly ActionGroup[];
     /** Dispatchable episodes the plan was built from; those in no group become `unmatched`. */
-    dispatchable: readonly AlertEpisode[];
+    dispatchable: readonly Alert[];
   }): DispatchPlan {
     return new DispatchPlan(
       toDispatch,
@@ -52,19 +52,19 @@ export class DispatchPlan {
 function deriveUnmatched(
   toDispatch: readonly ActionGroup[],
   throttled: readonly ActionGroup[],
-  dispatchable: readonly AlertEpisode[]
-): readonly AlertEpisode[] {
+  dispatchable: readonly Alert[]
+): readonly Alert[] {
   if (toDispatch.length === 0 && throttled.length === 0) {
     return dispatchable;
   }
 
-  const handledEpisodeKeys = new Set<string>();
+  const handledAlertKeys = new Set<string>();
   for (const groups of [toDispatch, throttled]) {
     for (const group of groups) {
-      for (const episode of group.episodes) {
-        handledEpisodeKeys.add(suppressionEpisodeKey(episode));
+      for (const episode of group.alerts) {
+        handledAlertKeys.add(suppressionAlertKey(episode));
       }
     }
   }
-  return dispatchable.filter((episode) => !handledEpisodeKeys.has(suppressionEpisodeKey(episode)));
+  return dispatchable.filter((episode) => !handledAlertKeys.has(suppressionAlertKey(episode)));
 }

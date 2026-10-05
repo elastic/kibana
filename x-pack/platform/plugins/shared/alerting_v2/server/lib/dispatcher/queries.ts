@@ -8,8 +8,8 @@
 import { esql, type EsqlRequest } from '@elastic/esql';
 import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import type { AlertEventType } from '../../resources/datastreams/alert_events';
-import type { AlertEpisode, ActionGroupId } from './types';
-import { episodeSubject, SUBJECT_SEPARATOR } from './steps/utils/subject';
+import type { Alert, ActionGroupId } from './types';
+import { alertSubject, SUBJECT_SEPARATOR } from './steps/utils/subject';
 
 const ALERT_EVENT_TYPE: AlertEventType = 'alert';
 
@@ -18,7 +18,7 @@ const ALERT_EVENT_TYPE: AlertEventType = 'alert';
 // See: https://github.com/elastic/elasticsearch/issues/146318
 //
 // This scan is keys-only by design: no METADATA _source, no JSON_EXTRACT, no data_json.
-// Episode `data` is hydrated lazily by HydrateEpisodeDataStep (getEpisodeDataQueries) for the
+// Episode `data` is hydrated lazily by HydrateAlertDataStep (getAlertDataQueries) for the
 // surviving dispatchable set only, which is at most 10 000 episodes rather than the entire
 // multi-million-row window. See: https://github.com/elastic/rna-program/issues/838
 //
@@ -80,7 +80,7 @@ const PAIR_SEPARATOR = '::';
 
 // Shared subject-derivation expression used in both dispatchable and suppression queries.
 // null/absent source is treated as 'internal' for backward compat with legacy action rows.
-// Must produce the same key as `episodeSubject`, which documents why the space is folded in.
+// Must produce the same key as `alertSubject`, which documents why the space is folded in.
 const SUBJECT_EVAL = esql.exp`subject = CASE(source IS NULL OR source == "internal", rule_id, CONCAT(space_id, ${SUBJECT_SEPARATOR}, source))`;
 
 // ES|QL caps statement text at 1 MB. IN-list queries exceed this at production cardinality,
@@ -189,12 +189,10 @@ const buildSuppressionsPreFilter = (
 // Episode ids are UUIDv4, so there is one row per id and rows per chunk stay within the literal
 // cap, below ESQL_QUERY_ROW_LIMIT. subject and group_hash stay in the BY clause so a reused id
 // cannot merge the actions of two series.
-export const getEpisodeSuppressionsQueries = (
-  alertEpisodes: readonly AlertEpisode[]
-): EsqlRequest[] => {
-  const episodeIds = [...new Set(alertEpisodes.map(({ alert_id: alertId }) => alertId))];
+export const getAlertSuppressionsQueries = (alerts: readonly Alert[]): EsqlRequest[] => {
+  const alertIds = [...new Set(alerts.map(({ alert_id: alertId }) => alertId))];
 
-  return chunkInClauseLiterals(episodeIds).map((chunk) => {
+  return chunkInClauseLiterals(alertIds).map((chunk) => {
     const ids = chunk.map((id) => esql.str(id));
 
     return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
@@ -218,9 +216,9 @@ export const getEpisodeSuppressionsQueries = (
   });
 };
 
-const getMinLastEventTimestamp = (alertEpisodes: readonly AlertEpisode[]): string =>
-  alertEpisodes.reduce<string | undefined>((min, ep) => {
-    const parsedTimestamp = new Date(ep.last_event_timestamp);
+const getMinLastEventTimestamp = (alerts: readonly Alert[]): string =>
+  alerts.reduce<string | undefined>((min, alert) => {
+    const parsedTimestamp = new Date(alert.last_event_timestamp);
     if (Number.isNaN(parsedTimestamp.getTime())) {
       return min;
     }
@@ -240,28 +238,26 @@ const getMinLastEventTimestamp = (alertEpisodes: readonly AlertEpisode[]): strin
 // Expired snoozes are mapped to "snooze_expired" instead of being filtered out: they must stay
 // in the row set so LAST() still picks them as the latest snooze intent. Dropping them before
 // LAST() would resurrect an older snooze (e.g. an indefinite one) for the same series.
-export const getSeriesSuppressionsQueries = (
-  alertEpisodes: readonly AlertEpisode[]
-): EsqlRequest[] => {
-  const minLastEventTimestamp = getMinLastEventTimestamp(alertEpisodes);
+export const getSeriesSuppressionsQueries = (alerts: readonly Alert[]): EsqlRequest[] => {
+  const minLastEventTimestamp = getMinLastEventTimestamp(alerts);
 
   const componentsByPairKey = new Map<string, PairComponents>();
   const uniquePairKeys = [
     ...new Set(
-      alertEpisodes.map((ep) => {
-        const subject = episodeSubject(ep);
-        const pairKey = `${subject}${PAIR_SEPARATOR}${ep.group_hash}`;
+      alerts.map((alert) => {
+        const subject = alertSubject(alert);
+        const pairKey = `${subject}${PAIR_SEPARATOR}${alert.group_hash}`;
         if (!componentsByPairKey.has(pairKey)) {
-          const isInternal = ep.source == null || ep.source === 'internal';
+          const isInternal = alert.source == null || alert.source === 'internal';
           componentsByPairKey.set(
             pairKey,
             isInternal
-              ? { kind: 'internal', groupHash: ep.group_hash, ruleId: subject }
+              ? { kind: 'internal', groupHash: alert.group_hash, ruleId: subject }
               : {
                   kind: 'external',
-                  groupHash: ep.group_hash,
-                  spaceId: ep.space_id,
-                  source: ep.source,
+                  groupHash: alert.group_hash,
+                  spaceId: alert.space_id,
+                  source: alert.source,
                 }
           );
         }
@@ -335,11 +331,11 @@ export const getLastNotifiedTimestampsQueries = (
 //
 // Returns one request per chunk (see ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES). Safe to concat:
 // STATS aggregates by episode_id.
-export const getEpisodeDataQueries = (
-  episodeIds: readonly string[],
+export const getAlertDataQueries = (
+  alertIds: readonly string[],
   { gte, lte }: { gte: string; lte: string }
 ): EsqlRequest[] => {
-  return chunkInClauseLiterals(episodeIds).map((chunk) => {
+  return chunkInClauseLiterals(alertIds).map((chunk) => {
     const ids = chunk.map((id) => esql.str(id));
 
     return esql`FROM ${ALERT_EVENTS_DATA_STREAM} METADATA _source

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { createActionGroup, createAlertEpisode } from '../fixtures/test_utils';
+import { createActionGroup, createAlert } from '../fixtures/test_utils';
 import { DispatchPlan } from './dispatch_plan';
 
 describe('DispatchPlan', () => {
-  const ep1 = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
-  const ep2 = createAlertEpisode({ rule_id: 'r2', group_hash: 'h2', alert_id: 'e2' });
-  const ep3 = createAlertEpisode({ rule_id: 'r3', group_hash: 'h3', alert_id: 'e3' });
+  const ep1 = createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
+  const ep2 = createAlert({ rule_id: 'r2', group_hash: 'h2', alert_id: 'e2' });
+  const ep3 = createAlert({ rule_id: 'r3', group_hash: 'h3', alert_id: 'e3' });
 
   it('reports emptiness', () => {
     const plan = DispatchPlan.of({
-      toDispatch: [createActionGroup({ id: 'g1', episodes: [ep1] })],
-      throttled: [createActionGroup({ id: 'g2', episodes: [ep2] })],
+      toDispatch: [createActionGroup({ id: 'g1', alerts: [ep1] })],
+      throttled: [createActionGroup({ id: 'g2', alerts: [ep2] })],
       dispatchable: [ep1, ep2],
     });
 
@@ -27,8 +27,8 @@ describe('DispatchPlan', () => {
   describe('unmatched', () => {
     it('contains the dispatchable episodes that landed in no group', () => {
       const plan = DispatchPlan.of({
-        toDispatch: [createActionGroup({ id: 'g1', episodes: [ep1] })],
-        throttled: [createActionGroup({ id: 'g2', episodes: [ep2] })],
+        toDispatch: [createActionGroup({ id: 'g1', alerts: [ep1] })],
+        throttled: [createActionGroup({ id: 'g2', alerts: [ep2] })],
         dispatchable: [ep1, ep2, ep3],
       });
 
@@ -43,7 +43,7 @@ describe('DispatchPlan', () => {
 
     it('is empty when every dispatchable episode is grouped', () => {
       const plan = DispatchPlan.of({
-        toDispatch: [createActionGroup({ id: 'g1', episodes: [ep1, ep2] })],
+        toDispatch: [createActionGroup({ id: 'g1', alerts: [ep1, ep2] })],
         throttled: [],
         dispatchable: [ep1, ep2],
       });

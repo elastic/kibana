@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { HydrateEpisodeDataStep } from './hydrate_alert_data_step';
+import { HydrateAlertDataStep } from './hydrate_alert_data_step';
 import { createQueryService } from '../../services/query_service/query_service.mock';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
-import { createAlertEpisode, createDispatcherPipelineState } from '../fixtures/test_utils';
-import { createEpisodeDataResponse } from '../fixtures/dispatcher';
+import { createAlert, createDispatcherPipelineState } from '../fixtures/test_utils';
+import { createAlertDataResponse } from '../fixtures/dispatcher';
 
-describe('HydrateEpisodeDataStep', () => {
+describe('HydrateAlertDataStep', () => {
   it('returns continue without querying when dispatchable is empty', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateEpisodeDataStep(queryService);
+    const step = new HydrateAlertDataStep(queryService);
 
     const state = createDispatcherPipelineState({ dispatchable: [] });
     const result = await step.execute(state, loggerService);
@@ -27,7 +27,7 @@ describe('HydrateEpisodeDataStep', () => {
   it('returns continue without querying when dispatchable is absent', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateEpisodeDataStep(queryService);
+    const step = new HydrateAlertDataStep(queryService);
 
     const state = createDispatcherPipelineState();
     const result = await step.execute(state, loggerService);
@@ -39,14 +39,12 @@ describe('HydrateEpisodeDataStep', () => {
   it('attaches data to the matching episode', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateEpisodeDataStep(queryService);
+    const step = new HydrateAlertDataStep(queryService);
 
-    const episodes = [createAlertEpisode({ alert_id: 'ep-1', rule_id: 'r1' })];
+    const episodes = [createAlert({ alert_id: 'ep-1', rule_id: 'r1' })];
 
     mockEsClient.esql.query.mockResolvedValueOnce(
-      createEpisodeDataResponse([
-        { alert_id: 'ep-1', data_json: '{"host":"server-01","count":3}' },
-      ])
+      createAlertDataResponse([{ alert_id: 'ep-1', data_json: '{"host":"server-01","count":3}' }])
     );
 
     const state = createDispatcherPipelineState({ dispatchable: episodes });
@@ -60,12 +58,12 @@ describe('HydrateEpisodeDataStep', () => {
   it('un-flattens dot-separated keys in data_json', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateEpisodeDataStep(queryService);
+    const step = new HydrateAlertDataStep(queryService);
 
-    const episodes = [createAlertEpisode({ alert_id: 'ep-1' })];
+    const episodes = [createAlert({ alert_id: 'ep-1' })];
 
     mockEsClient.esql.query.mockResolvedValueOnce(
-      createEpisodeDataResponse([
+      createAlertDataResponse([
         { alert_id: 'ep-1', data_json: '{"host.name":"srv-01","host.ip":"10.0.0.1"}' },
       ])
     );
@@ -83,12 +81,12 @@ describe('HydrateEpisodeDataStep', () => {
   it('attaches an empty object for data_json "{}"', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateEpisodeDataStep(queryService);
+    const step = new HydrateAlertDataStep(queryService);
 
-    const episodes = [createAlertEpisode({ alert_id: 'ep-1' })];
+    const episodes = [createAlert({ alert_id: 'ep-1' })];
 
     mockEsClient.esql.query.mockResolvedValueOnce(
-      createEpisodeDataResponse([{ alert_id: 'ep-1', data_json: '{}' }])
+      createAlertDataResponse([{ alert_id: 'ep-1', data_json: '{}' }])
     );
 
     const state = createDispatcherPipelineState({ dispatchable: episodes });
@@ -102,11 +100,11 @@ describe('HydrateEpisodeDataStep', () => {
   it('leaves data undefined when the hydration query returns no row for an episode', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService, mockLogger } = createLoggerService();
-    const step = new HydrateEpisodeDataStep(queryService);
+    const step = new HydrateAlertDataStep(queryService);
 
-    const episodes = [createAlertEpisode({ alert_id: 'ep-missing' })];
+    const episodes = [createAlert({ alert_id: 'ep-missing' })];
 
-    mockEsClient.esql.query.mockResolvedValueOnce(createEpisodeDataResponse([]));
+    mockEsClient.esql.query.mockResolvedValueOnce(createAlertDataResponse([]));
 
     const state = createDispatcherPipelineState({ dispatchable: episodes });
     const result = await step.execute(state, loggerService);
@@ -120,12 +118,12 @@ describe('HydrateEpisodeDataStep', () => {
   it('leaves data undefined when data_json is null', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateEpisodeDataStep(queryService);
+    const step = new HydrateAlertDataStep(queryService);
 
-    const episodes = [createAlertEpisode({ alert_id: 'ep-1' })];
+    const episodes = [createAlert({ alert_id: 'ep-1' })];
 
     mockEsClient.esql.query.mockResolvedValueOnce(
-      createEpisodeDataResponse([{ alert_id: 'ep-1', data_json: null }])
+      createAlertDataResponse([{ alert_id: 'ep-1', data_json: null }])
     );
 
     const state = createDispatcherPipelineState({ dispatchable: episodes });
@@ -139,25 +137,25 @@ describe('HydrateEpisodeDataStep', () => {
   it('derives range bounds from min/max last_event_timestamp across all episodes', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateEpisodeDataStep(queryService);
+    const step = new HydrateAlertDataStep(queryService);
 
     const episodes = [
-      createAlertEpisode({
+      createAlert({
         alert_id: 'ep-1',
         last_event_timestamp: '2026-01-22T07:05:00.000Z',
       }),
-      createAlertEpisode({
+      createAlert({
         alert_id: 'ep-2',
         last_event_timestamp: '2026-01-22T07:10:00.000Z',
       }),
-      createAlertEpisode({
+      createAlert({
         alert_id: 'ep-3',
         last_event_timestamp: '2026-01-22T07:01:00.000Z',
       }),
     ];
 
     mockEsClient.esql.query.mockResolvedValueOnce(
-      createEpisodeDataResponse([
+      createAlertDataResponse([
         { alert_id: 'ep-1', data_json: '{"a":1}' },
         { alert_id: 'ep-2', data_json: '{"b":2}' },
         { alert_id: 'ep-3', data_json: '{"c":3}' },
@@ -175,15 +173,15 @@ describe('HydrateEpisodeDataStep', () => {
   it('attaches data to each episode independently', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateEpisodeDataStep(queryService);
+    const step = new HydrateAlertDataStep(queryService);
 
     const episodes = [
-      createAlertEpisode({ alert_id: 'ep-1', rule_id: 'r1' }),
-      createAlertEpisode({ alert_id: 'ep-2', rule_id: 'r2' }),
+      createAlert({ alert_id: 'ep-1', rule_id: 'r1' }),
+      createAlert({ alert_id: 'ep-2', rule_id: 'r2' }),
     ];
 
     mockEsClient.esql.query.mockResolvedValueOnce(
-      createEpisodeDataResponse([
+      createAlertDataResponse([
         { alert_id: 'ep-1', data_json: '{"x":1}' },
         { alert_id: 'ep-2', data_json: '{"y":2}' },
       ])
@@ -201,22 +199,20 @@ describe('HydrateEpisodeDataStep', () => {
   it('concatenates results from multiple chunks', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
-    const step = new HydrateEpisodeDataStep(queryService);
+    const step = new HydrateAlertDataStep(queryService);
 
     // Two episodes that each end up in different chunks via oversized IDs
     const longId1 = 'a'.repeat(400_000) + '-1';
     const longId2 = 'b'.repeat(400_000) + '-2';
     const episodes = [
-      createAlertEpisode({ alert_id: longId1, last_event_timestamp: '2026-01-22T07:00:00.000Z' }),
-      createAlertEpisode({ alert_id: longId2, last_event_timestamp: '2026-01-22T07:01:00.000Z' }),
+      createAlert({ alert_id: longId1, last_event_timestamp: '2026-01-22T07:00:00.000Z' }),
+      createAlert({ alert_id: longId2, last_event_timestamp: '2026-01-22T07:01:00.000Z' }),
     ];
 
     mockEsClient.esql.query
+      .mockResolvedValueOnce(createAlertDataResponse([{ alert_id: longId1, data_json: '{"c":1}' }]))
       .mockResolvedValueOnce(
-        createEpisodeDataResponse([{ alert_id: longId1, data_json: '{"c":1}' }])
-      )
-      .mockResolvedValueOnce(
-        createEpisodeDataResponse([{ alert_id: longId2, data_json: '{"d":2}' }])
+        createAlertDataResponse([{ alert_id: longId2, data_json: '{"d":2}' }])
       );
 
     const state = createDispatcherPipelineState({ dispatchable: episodes });

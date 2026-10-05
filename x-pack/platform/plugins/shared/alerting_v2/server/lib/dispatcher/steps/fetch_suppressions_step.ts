@@ -12,15 +12,15 @@ import type { QueryServiceContract } from '../../services/query_service/query_se
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
 import {
   ESQL_QUERY_ROW_LIMIT,
-  getEpisodeSuppressionsQueries,
+  getAlertSuppressionsQueries,
   getSeriesSuppressionsQueries,
 } from '../queries';
-import { EpisodeScan, SuppressionIndex } from '../state';
+import { AlertScan, SuppressionIndex } from '../state';
 import type {
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
-  EpisodeSuppressionRow,
+  AlertSuppressionRow,
   SeriesSuppressionRow,
   SuppressionRow,
 } from '../types';
@@ -38,7 +38,7 @@ export class FetchSuppressionsStep implements DispatcherStep {
     state: Readonly<DispatcherPipelineState>,
     logger: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
-    const { scan = EpisodeScan.empty() } = state;
+    const { scan = AlertScan.empty() } = state;
     if (scan.isEmpty()) {
       return { type: 'continue', data: { suppressions: SuppressionIndex.empty() } };
     }
@@ -46,8 +46,8 @@ export class FetchSuppressionsStep implements DispatcherStep {
     const { signal } = state.input;
 
     const [episodeResponses, seriesResponses] = await Promise.all([
-      this.runQueries<EpisodeSuppressionRow>(getEpisodeSuppressionsQueries(scan.episodes), signal),
-      this.runQueries<SeriesSuppressionRow>(getSeriesSuppressionsQueries(scan.episodes), signal),
+      this.runQueries<AlertSuppressionRow>(getAlertSuppressionsQueries(scan.alerts), signal),
+      this.runQueries<SeriesSuppressionRow>(getSeriesSuppressionsQueries(scan.alerts), signal),
     ]);
 
     // Both queries return at most one row per chunk literal, so reaching the limit means that

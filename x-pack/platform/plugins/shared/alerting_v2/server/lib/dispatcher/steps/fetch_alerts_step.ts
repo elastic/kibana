@@ -8,7 +8,7 @@
 import { inject, injectable } from 'inversify';
 import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
 import type {
-  AlertEpisode,
+  Alert,
   DispatcherStep,
   DispatcherPipelineState,
   DispatcherStepOutput,
@@ -17,13 +17,13 @@ import type { AlertEpisodeStatus } from '../../../resources/datastreams/alert_ev
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
 import { ESQL_QUERY_ROW_LIMIT, getDispatchableAlertEventsQuery } from '../queries';
-import { EpisodeScan } from '../state';
+import { AlertScan } from '../state';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { isEsqlSubPlanTooLargeError } from '../../errors/esql_sub_plan_too_large_error';
 import { PRE_FETCH_STUCK_ADVANCE_LAG_MS } from '../constants';
 
-interface RawAlertEpisode {
+interface RawAlert {
   last_event_timestamp: string;
   rule_id: string | null;
   source: string;
@@ -35,7 +35,7 @@ interface RawAlertEpisode {
 }
 
 @injectable()
-export class FetchEpisodesStep implements DispatcherStep {
+export class FetchAlertsStep implements DispatcherStep {
   public readonly name = 'fetch_episodes';
 
   constructor(
@@ -50,9 +50,9 @@ export class FetchEpisodesStep implements DispatcherStep {
     const gte = windowStart.toISOString();
     const lte = windowEnd.toISOString();
 
-    let result: RawAlertEpisode[];
+    let result: RawAlert[];
     try {
-      result = await this.queryService.executeQueryRows<RawAlertEpisode>({
+      result = await this.queryService.executeQueryRows<RawAlert>({
         query: getDispatchableAlertEventsQuery({ gte, lte }).query,
         // Lucene push-down is lower-bounded only. An `lte: windowEnd` here would
         // drop action docs stamped with `now` (after the settle buffer) and
@@ -87,17 +87,17 @@ export class FetchEpisodesStep implements DispatcherStep {
     // the scan has a defined upper edge to advance to.
     const truncated = result.length === ESQL_QUERY_ROW_LIMIT;
 
-    const episodes = parseAlertEpisodes(result);
+    const episodes = parseAlerts(result);
 
     if (episodes.length === 0) {
       return { type: 'halt', reason: 'no_episodes' };
     }
 
-    return { type: 'continue', data: { scan: EpisodeScan.of({ episodes, truncated }) } };
+    return { type: 'continue', data: { scan: AlertScan.of({ alerts: episodes, truncated }) } };
   }
 }
 
-export function parseAlertEpisodes(raw: RawAlertEpisode[]): AlertEpisode[] {
+export function parseAlerts(raw: RawAlert[]): Alert[] {
   return raw.map(({ severity, ...rest }) => ({
     ...rest,
     ...(severity ? { severity } : {}),

@@ -43,13 +43,13 @@ import { DispatcherService } from './dispatcher';
 import { DispatcherPipeline, type DispatcherPipelineContract } from './execution_pipeline';
 import {
   createDispatchableAlertEventsResponse,
-  createEpisodeDataResponse,
-  createEpisodeSuppressionsResponse,
+  createAlertDataResponse,
+  createAlertSuppressionsResponse,
   createLastNotifiedTimestampsResponse,
   createSeriesSuppressionsResponse,
 } from './fixtures/dispatcher';
-import { createAlertEpisode, createEpisodeSuppressionRow } from './fixtures/test_utils';
-import { EpisodeScan } from './state';
+import { createAlert, createAlertSuppressionRow } from './fixtures/test_utils';
+import { AlertScan } from './state';
 import { getDispatchableAlertEventsQuery } from './queries';
 import {
   ApplyMaintenanceWindowStep,
@@ -58,18 +58,18 @@ import {
   BuildGroupsStep,
   DispatchStep,
   EvaluateMatchersStep,
-  FetchEpisodesStep,
+  FetchAlertsStep,
   FetchPoliciesStep,
   FetchRulesStep,
   FetchSuppressionsStep,
-  HydrateEpisodeDataStep,
+  HydrateAlertDataStep,
   StoreActionsStep,
   StoreExecutionHistoryStep,
 } from './steps';
 import type {
-  AlertEpisode,
+  Alert,
   DispatcherHaltReason,
-  EpisodeSuppressionRow,
+  AlertSuppressionRow,
   SeriesSuppressionRow,
 } from './types';
 
@@ -142,10 +142,10 @@ function buildDispatcherService(deps: {
   licenseService?: LicenseServiceContract;
 }): DispatcherService {
   const pipeline = new DispatcherPipeline([
-    new FetchEpisodesStep(deps.queryService),
+    new FetchAlertsStep(deps.queryService),
     new FetchSuppressionsStep(deps.queryService),
     new ApplySuppressionStep(),
-    new HydrateEpisodeDataStep(deps.queryService),
+    new HydrateAlertDataStep(deps.queryService),
     new FetchRulesStep(deps.rulesSoService),
     new ApplyMaintenanceWindowStep(deps.maintenanceWindowService),
     new FetchPoliciesStep(deps.npSoService),
@@ -211,7 +211,7 @@ describe('DispatcherService', () => {
 
   describe('run', () => {
     it('indexes fire actions for dispatchable alert episodes when no suppressions exist', async () => {
-      const alertEpisodes: AlertEpisode[] = [
+      const alertEpisodes: Alert[] = [
         {
           last_event_timestamp: '2026-01-22T07:10:00.000Z',
           rule_id: 'rule-1',
@@ -232,7 +232,7 @@ describe('DispatcherService', () => {
         },
       ];
 
-      const suppressions: EpisodeSuppressionRow[] = [
+      const suppressions: AlertSuppressionRow[] = [
         {
           rule_id: 'rule-1',
           source: 'internal',
@@ -253,10 +253,10 @@ describe('DispatcherService', () => {
 
       queryEsClient.esql.query
         .mockResolvedValueOnce(createDispatchableAlertEventsResponse(alertEpisodes))
-        .mockResolvedValueOnce(createEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(createAlertSuppressionsResponse(suppressions))
         .mockResolvedValueOnce(createSeriesSuppressionsResponse())
         .mockResolvedValueOnce(
-          createEpisodeDataResponse([
+          createAlertDataResponse([
             { alert_id: 'episode-1', data_json: null },
             { alert_id: 'episode-2', data_json: null },
           ])
@@ -347,7 +347,7 @@ describe('DispatcherService', () => {
     });
 
     it('indexes suppress actions for suppressed alert episodes', async () => {
-      const alertEpisodes: AlertEpisode[] = [
+      const alertEpisodes: Alert[] = [
         {
           last_event_timestamp: '2026-01-22T07:10:00.000Z',
           rule_id: 'rule-1',
@@ -368,7 +368,7 @@ describe('DispatcherService', () => {
         },
       ];
 
-      const suppressions: EpisodeSuppressionRow[] = [
+      const suppressions: AlertSuppressionRow[] = [
         {
           rule_id: 'rule-1',
           source: 'internal',
@@ -389,10 +389,10 @@ describe('DispatcherService', () => {
 
       queryEsClient.esql.query
         .mockResolvedValueOnce(createDispatchableAlertEventsResponse(alertEpisodes))
-        .mockResolvedValueOnce(createEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(createAlertSuppressionsResponse(suppressions))
         .mockResolvedValueOnce(createSeriesSuppressionsResponse())
         .mockResolvedValueOnce(
-          createEpisodeDataResponse([{ alert_id: 'episode-2', data_json: null }])
+          createAlertDataResponse([{ alert_id: 'episode-2', data_json: null }])
         )
         .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
 
@@ -455,17 +455,17 @@ describe('DispatcherService', () => {
       queryEsClient.esql.query
         .mockResolvedValueOnce(
           createDispatchableAlertEventsResponse([
-            createAlertEpisode(),
-            createAlertEpisode({
+            createAlert(),
+            createAlert({
               ...secondEpisode,
               last_event_timestamp: '2026-01-22T07:15:00.000Z',
             }),
           ])
         )
         .mockResolvedValueOnce(
-          createEpisodeSuppressionsResponse([
-            createEpisodeSuppressionRow({ should_suppress: true }),
-            createEpisodeSuppressionRow({
+          createAlertSuppressionsResponse([
+            createAlertSuppressionRow({ should_suppress: true }),
+            createAlertSuppressionRow({
               rule_id: secondEpisode.rule_id,
               group_hash: secondEpisode.group_hash,
               alert_id: secondEpisode.alert_id,
@@ -474,7 +474,7 @@ describe('DispatcherService', () => {
         )
         .mockResolvedValueOnce(createSeriesSuppressionsResponse())
         .mockResolvedValueOnce(
-          createEpisodeDataResponse([{ alert_id: 'episode-2', data_json: null }])
+          createAlertDataResponse([{ alert_id: 'episode-2', data_json: null }])
         )
         .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
 
@@ -573,7 +573,7 @@ describe('DispatcherService', () => {
       // rule-003: two series (series-1 active, series-2 recovered + new episode) → all fire (no actions)
       // rule-004: two series, both snoozed (null episode_id) → both suppress
       // rule-005: two series, series-1 deactivated → suppress; series-2 no actions → fire
-      const alertEpisodes: AlertEpisode[] = [
+      const alertEpisodes: Alert[] = [
         {
           last_event_timestamp: '2026-01-27T16:15:00.000Z',
           rule_id: 'rule-001',
@@ -672,7 +672,7 @@ describe('DispatcherService', () => {
       // - rule-003: no actions → no suppression records
       // - rule-005 series-1: deactivated at 16:08 → should_suppress: true
       // - rule-005 series-2: no actions → no suppression record
-      const episodeSuppressions: EpisodeSuppressionRow[] = [
+      const episodeSuppressions: AlertSuppressionRow[] = [
         {
           rule_id: 'rule-001',
           source: 'internal',
@@ -725,9 +725,9 @@ describe('DispatcherService', () => {
 
       queryEsClient.esql.query
         .mockResolvedValueOnce(createDispatchableAlertEventsResponse(alertEpisodes))
-        .mockResolvedValueOnce(createEpisodeSuppressionsResponse(episodeSuppressions))
+        .mockResolvedValueOnce(createAlertSuppressionsResponse(episodeSuppressions))
         .mockResolvedValueOnce(createSeriesSuppressionsResponse(seriesSuppressions))
-        .mockResolvedValueOnce(createEpisodeDataResponse([]))
+        .mockResolvedValueOnce(createAlertDataResponse([]))
         .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
 
       storageEsClient.bulk.mockResolvedValue({
@@ -852,7 +852,7 @@ describe('DispatcherService', () => {
     it('keeps external episodes isolated per space when a vendor group_hash collides', async () => {
       // The same PagerDuty incident is ingested into two spaces: identical source,
       // group_hash and episode_id. Only space-a has acked it.
-      const externalEpisode = (spaceId: string): AlertEpisode => ({
+      const externalEpisode = (spaceId: string): Alert => ({
         last_event_timestamp: '2026-01-22T07:10:00.000Z',
         rule_id: null,
         source: 'pagerduty',
@@ -862,7 +862,7 @@ describe('DispatcherService', () => {
         alert_status: 'active',
       });
 
-      const suppressions: EpisodeSuppressionRow[] = [
+      const suppressions: AlertSuppressionRow[] = [
         {
           rule_id: null,
           source: 'pagerduty',
@@ -886,11 +886,9 @@ describe('DispatcherService', () => {
             externalEpisode('space-b'),
           ])
         )
-        .mockResolvedValueOnce(createEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(createAlertSuppressionsResponse(suppressions))
         .mockResolvedValueOnce(createSeriesSuppressionsResponse())
-        .mockResolvedValueOnce(
-          createEpisodeDataResponse([{ alert_id: 'pd-ep-1', data_json: null }])
-        )
+        .mockResolvedValueOnce(createAlertDataResponse([{ alert_id: 'pd-ep-1', data_json: null }]))
         .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
 
       storageEsClient.bulk.mockResolvedValue({
@@ -930,7 +928,7 @@ describe('DispatcherService', () => {
         matcher: { expression: 'data.severity: "critical"' },
       });
 
-      const alertEpisodes: AlertEpisode[] = [
+      const alertEpisodes: Alert[] = [
         {
           last_event_timestamp: '2026-01-22T07:10:00.000Z',
           rule_id: 'rule-1',
@@ -951,7 +949,7 @@ describe('DispatcherService', () => {
         },
       ];
 
-      const suppressions: EpisodeSuppressionRow[] = [
+      const suppressions: AlertSuppressionRow[] = [
         {
           rule_id: 'rule-1',
           source: 'internal',
@@ -972,10 +970,10 @@ describe('DispatcherService', () => {
 
       queryEsClient.esql.query
         .mockResolvedValueOnce(createDispatchableAlertEventsResponse(alertEpisodes))
-        .mockResolvedValueOnce(createEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(createAlertSuppressionsResponse(suppressions))
         .mockResolvedValueOnce(createSeriesSuppressionsResponse())
         .mockResolvedValueOnce(
-          createEpisodeDataResponse([
+          createAlertDataResponse([
             { alert_id: 'episode-critical', data_json: JSON.stringify({ severity: 'critical' }) },
             { alert_id: 'episode-low', data_json: JSON.stringify({ severity: 'low' }) },
           ])
@@ -1090,8 +1088,8 @@ describe('DispatcherService', () => {
       lastEpisodeTs: string
     ): jest.Mocked<DispatcherPipelineContract> {
       const episodes = [
-        createAlertEpisode({ alert_id: 'e1', last_event_timestamp: '2026-01-22T07:21:00.000Z' }),
-        createAlertEpisode({ alert_id: 'e2', last_event_timestamp: lastEpisodeTs }),
+        createAlert({ alert_id: 'e1', last_event_timestamp: '2026-01-22T07:21:00.000Z' }),
+        createAlert({ alert_id: 'e2', last_event_timestamp: lastEpisodeTs }),
       ];
       const mockInput = {
         startedAt: new Date('2026-01-22T08:00:00.000Z'),
@@ -1106,8 +1104,8 @@ describe('DispatcherService', () => {
           completed: true,
           finalState: {
             input: mockInput,
-            scan: EpisodeScan.of({ episodes, truncated: true }),
-            recordedEpisodes: 2,
+            scan: AlertScan.of({ alerts: episodes, truncated: true }),
+            recordedAlerts: 2,
           },
         }),
       };
@@ -1172,8 +1170,8 @@ describe('DispatcherService', () => {
           completed: true,
           finalState: {
             input: tick2MockInput,
-            scan: EpisodeScan.empty(),
-            recordedEpisodes: 0,
+            scan: AlertScan.empty(),
+            recordedAlerts: 0,
           },
         }),
       };
@@ -1213,7 +1211,7 @@ describe('DispatcherService', () => {
                     executionUuid: 'test',
                     signal,
                   },
-                  // recordedEpisodes undefined — aborted before StoreActionsStep
+                  // recordedAlerts undefined — aborted before StoreActionsStep
                 },
               });
             });
@@ -1324,11 +1322,11 @@ describe('DispatcherService', () => {
   // ── Phase 5: stuck-watermark escape hatch ────────────────────────────────────
   describe('stuck-watermark escape hatch (STUCK_TICK_LIMIT)', () => {
     // Returns a pipeline whose watermark stays pinned. `haltReason: 'aborted'` with
-    // no `recordedEpisodes` returns `input.eventWatermark` unchanged from
+    // no `recordedAlerts` returns `input.eventWatermark` unchanged from
     // computeNextWatermark — simulating a tick where the pipeline was interrupted
     // before StoreActionsStep wrote any records. `inline_stats_too_large` pins it too.
     function buildStuckPipeline(
-      episodes: AlertEpisode[],
+      episodes: Alert[],
       haltReason: DispatcherHaltReason = 'aborted'
     ): jest.Mocked<DispatcherPipelineContract> {
       return {
@@ -1349,8 +1347,8 @@ describe('DispatcherService', () => {
                 haltReason,
                 finalState: {
                   input,
-                  scan: EpisodeScan.of({ episodes }),
-                  // recordedEpisodes absent → computeNextWatermark returns input.eventWatermark
+                  scan: AlertScan.of({ alerts: episodes }),
+                  // recordedAlerts absent → computeNextWatermark returns input.eventWatermark
                 },
               });
             }
@@ -1362,9 +1360,9 @@ describe('DispatcherService', () => {
       const { storageService: noopStorage } = createStorageService();
       const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
 
-      // Stuck pipeline — episodes present but no recordedEpisodes → watermark won't advance
+      // Stuck pipeline — episodes present but no recordedAlerts → watermark won't advance
       const mockPipeline = buildStuckPipeline([
-        createAlertEpisode({ alert_id: 'e1', last_event_timestamp: '2026-01-22T07:31:00.000Z' }),
+        createAlert({ alert_id: 'e1', last_event_timestamp: '2026-01-22T07:31:00.000Z' }),
       ]);
       const service = new DispatcherService(
         mockPipeline,
@@ -1425,7 +1423,7 @@ describe('DispatcherService', () => {
       escapeMockEsClient.bulk.mockResolvedValue({ errors: false, took: 0, items: [] });
 
       const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
-      const blockingEpisode = createAlertEpisode({
+      const blockingEpisode = createAlert({
         alert_id: 'blocked-e1',
         last_event_timestamp: '2026-01-22T07:31:00.000Z',
         space_id: 'default',
@@ -1475,7 +1473,7 @@ describe('DispatcherService', () => {
       const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
 
       const mockPipeline = buildStuckPipeline([
-        createAlertEpisode({ alert_id: 'e1', last_event_timestamp: '2026-01-22T07:31:00.000Z' }),
+        createAlert({ alert_id: 'e1', last_event_timestamp: '2026-01-22T07:31:00.000Z' }),
       ]);
       const service = new DispatcherService(mockPipeline, escapeStorage, loggerService);
 

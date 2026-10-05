@@ -6,9 +6,9 @@
  */
 
 import type { MatcherContext } from '@kbn/alerting-v2-schemas';
-import type { AlertEpisode } from '../../types';
+import type { Alert } from '../../types';
 
-export function createMatcherContext(episode: AlertEpisode): MatcherContext {
+export function createMatcherContext(episode: Alert): MatcherContext {
   return {
     last_event_timestamp: episode.last_event_timestamp,
     group_hash: episode.group_hash,

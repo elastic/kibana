@@ -9,10 +9,10 @@ import { inject, injectable } from 'inversify';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
-import { getEpisodeDataQueries } from '../queries';
-import { EpisodeTriage } from '../state';
+import { getAlertDataQueries } from '../queries';
+import { AlertTriage } from '../state';
 import type {
-  AlertEpisode,
+  Alert,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
@@ -20,13 +20,13 @@ import type {
 import { parseDataJson } from './utils/parse_alert_data';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 
-interface RawEpisodeData {
+interface RawAlertData {
   alert_id: string;
   data_json: string | null;
 }
 
 @injectable()
-export class HydrateEpisodeDataStep implements DispatcherStep {
+export class HydrateAlertDataStep implements DispatcherStep {
   public readonly name = 'hydrate_episode_data';
 
   constructor(
@@ -37,21 +37,21 @@ export class HydrateEpisodeDataStep implements DispatcherStep {
     state: Readonly<DispatcherPipelineState>,
     logger: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
-    const { triage = EpisodeTriage.empty() } = state;
+    const { triage = AlertTriage.empty() } = state;
 
     if (!triage.hasDispatchable()) {
       return { type: 'continue' };
     }
 
-    const episodeIds = triage.dispatchableEpisodeIds();
+    const episodeIds = triage.dispatchableAlertIds();
 
     const { gte, lte } = computeTimestampBounds(triage.dispatchable);
 
     const { signal } = state.input;
 
     const responses = await Promise.all(
-      getEpisodeDataQueries(episodeIds, { gte, lte }).map((request) =>
-        this.queryService.executeQueryRows<RawEpisodeData>({
+      getAlertDataQueries(episodeIds, { gte, lte }).map((request) =>
+        this.queryService.executeQueryRows<RawAlertData>({
           query: request.query,
           abortSignal: signal,
         })
@@ -84,7 +84,7 @@ export class HydrateEpisodeDataStep implements DispatcherStep {
   }
 }
 
-function computeTimestampBounds(episodes: readonly AlertEpisode[]): { gte: string; lte: string } {
+function computeTimestampBounds(episodes: readonly Alert[]): { gte: string; lte: string } {
   const epoch = new Date(0).toISOString();
   let gte: string | undefined;
   let lte: string | undefined;

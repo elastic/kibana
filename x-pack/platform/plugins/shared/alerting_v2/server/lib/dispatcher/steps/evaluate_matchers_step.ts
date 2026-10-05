@@ -10,9 +10,9 @@ import { evaluateKql } from '@kbn/eval-kql';
 import { injectable } from 'inversify';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
-import { EpisodeTriage, PolicyCatalog, PolicyMatcher, RuleCatalog } from '../state';
+import { AlertTriage, PolicyCatalog, PolicyMatcher, RuleCatalog } from '../state';
 import type {
-  AlertEpisode,
+  Alert,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
@@ -29,7 +29,7 @@ export class EvaluateMatchersStep implements DispatcherStep {
     logger: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
     const {
-      triage = EpisodeTriage.empty(),
+      triage = AlertTriage.empty(),
       rules = RuleCatalog.empty(),
       policies = PolicyCatalog.empty(),
     } = state;
@@ -40,7 +40,7 @@ export class EvaluateMatchersStep implements DispatcherStep {
   }
 
   private evaluateMatchers(
-    dispatchable: readonly AlertEpisode[],
+    dispatchable: readonly Alert[],
     rules: RuleCatalog,
     policies: PolicyCatalog,
     logger: LoggerServiceContract
@@ -49,8 +49,8 @@ export class EvaluateMatchersStep implements DispatcherStep {
     const now = Date.now();
 
     for (const episode of dispatchable) {
-      if (rules.isOrphanedInternalEpisode(episode)) continue;
-      const rule = rules.forEpisode(episode);
+      if (rules.isOrphanedInternalAlert(episode)) continue;
+      const rule = rules.forAlert(episode);
 
       const spacePolicies = policies.inSpace(episode.space_id);
       let context: MatcherContext | undefined;
@@ -61,7 +61,7 @@ export class EvaluateMatchersStep implements DispatcherStep {
 
         const policyMatcher = PolicyMatcher.of(policy.matcher);
         if (policyMatcher.isCatchAll()) {
-          matched.push({ episode, policy });
+          matched.push({ alert: episode, policy });
           continue;
         }
 
@@ -69,7 +69,7 @@ export class EvaluateMatchersStep implements DispatcherStep {
 
         const expression = policyMatcher.expressionKql();
         if (expression === null) {
-          matched.push({ episode, policy });
+          matched.push({ alert: episode, policy });
           continue;
         }
 
@@ -92,7 +92,7 @@ export class EvaluateMatchersStep implements DispatcherStep {
         }
 
         if (isMatch) {
-          matched.push({ episode, policy });
+          matched.push({ alert: episode, policy });
         }
       }
     }

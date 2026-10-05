@@ -351,7 +351,7 @@ export class DispatchStep implements DispatcherStep {
       id: group.id,
       policyId: group.policyId,
       groupKey: group.groupKey,
-      alerts: group.episodes,
+      alerts: group.alerts,
       rules: group.rules,
     };
     const inputs: Record<string, unknown> = { payload };
@@ -454,7 +454,7 @@ export class DispatchStep implements DispatcherStep {
       spaceId: group.spaceId,
       actionGroupId: group.id,
       workflowId,
-      episodes: group.episodes,
+      alerts: group.alerts,
       reason,
       message,
     };

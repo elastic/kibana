@@ -7,14 +7,14 @@
 
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type {
-  AlertEpisode,
-  EpisodeSuppressionRow,
+  Alert,
+  AlertSuppressionRow,
   LastNotifiedRecord,
   SeriesSuppressionRow,
 } from '../types';
 
 export const createDispatchableAlertEventsResponse = (
-  alertEpisodes: AlertEpisode[]
+  alertEpisodes: Alert[]
 ): EsqlQueryResponse => {
   return {
     columns: [
@@ -40,8 +40,8 @@ export const createDispatchableAlertEventsResponse = (
   };
 };
 
-export const createEpisodeSuppressionsResponse = (
-  suppressions: EpisodeSuppressionRow[] = []
+export const createAlertSuppressionsResponse = (
+  suppressions: AlertSuppressionRow[] = []
 ): EsqlQueryResponse => {
   return {
     columns: [
@@ -90,12 +90,12 @@ export const createSeriesSuppressionsResponse = (
   };
 };
 
-export interface EpisodeDataRow {
+export interface AlertDataRow {
   alert_id: string;
   data_json: string | null;
 }
 
-export const createEpisodeDataResponse = (rows: EpisodeDataRow[]): EsqlQueryResponse => {
+export const createAlertDataResponse = (rows: AlertDataRow[]): EsqlQueryResponse => {
   return {
     columns: [
       { name: 'alert_id', type: 'keyword' },
