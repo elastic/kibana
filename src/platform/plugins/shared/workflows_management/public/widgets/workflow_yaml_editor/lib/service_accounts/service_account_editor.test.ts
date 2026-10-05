@@ -166,7 +166,7 @@ describe('service account editor', () => {
     });
     editor.loadMore();
     const second = await complete();
-    expect(directory.list).toHaveBeenLastCalledWith('page-b');
+    expect(directory.list).toHaveBeenLastCalledWith('page-b', false);
     expect(second?.suggestions.map((suggestion) => suggestion.insertText)).toEqual([
       JSON.stringify(account.id),
       '"b"',
@@ -193,8 +193,36 @@ describe('service account editor', () => {
     editor.loadMore();
     directory.list
       .mockResolvedValueOnce({ serviceAccounts: [account], nextPage: 'b' })
-      .mockResolvedValueOnce(null);
-    expect((await complete())?.suggestions).toEqual([]);
+      .mockResolvedValueOnce({ error: 'forbidden' });
+    expect(await complete()).toEqual({ suggestions: [], error: 'forbidden' });
+  });
+
+  it('keeps loaded pages and retries the failed cursor after a temporary failure', async () => {
+    const { complete, directory, editor } = setup('settings:\n  run_as: |<-');
+    const second = { ...account, id: 'b', name: 'Second reader' };
+    directory.list.mockResolvedValueOnce({ serviceAccounts: [account], nextPage: 'b' });
+    await complete();
+    editor.loadMore();
+    directory.list
+      .mockResolvedValueOnce({ serviceAccounts: [account], nextPage: 'b' })
+      .mockResolvedValueOnce({ error: 'unavailable' });
+    const failed = await complete();
+    expect(failed?.loadMoreFailed).toBe(true);
+    expect(failed?.error).toBeUndefined();
+    expect(failed?.suggestions.map(({ account: entry }) => entry?.id)).toEqual([
+      account.id,
+      undefined,
+    ]);
+    editor.loadMore();
+    directory.list
+      .mockResolvedValueOnce({ serviceAccounts: [account], nextPage: 'b' })
+      .mockResolvedValueOnce({ serviceAccounts: [second] });
+    const recovered = await complete();
+    expect(directory.list).toHaveBeenLastCalledWith('b', false);
+    expect(recovered?.suggestions.map(({ account: entry }) => entry?.id)).toEqual([
+      account.id,
+      second.id,
+    ]);
   });
 
   it('resolves details using the stable ID and preserves role metadata', async () => {

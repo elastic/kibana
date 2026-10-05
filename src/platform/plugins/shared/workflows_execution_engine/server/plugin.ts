@@ -21,7 +21,6 @@ import type {
 } from '@kbn/core/server';
 import {
   ExecutionStatus,
-  getWorkflowPermissions,
   isTerminalStatus,
   toWorkflowExecutionEngineModel,
   WorkflowRepository,
@@ -57,7 +56,7 @@ import {
   UNKNOWN_EXECUTION_IDENTITY,
 } from './lib/execution_identity';
 import { getAuthenticatedUser } from './lib/get_user';
-import { hasWorkflowAccess } from './lib/has_workflow_access';
+import { checkWorkflowAccess, hasWorkflowAccess } from './lib/has_workflow_access';
 import { logWorkflowTaskFailure } from './lib/log_workflow_task_failure';
 import {
   failExecutionMissingIdentity,
@@ -880,7 +879,12 @@ export class WorkflowsExecutionEnginePlugin
                     state: taskInstance.state,
                   };
                 }
-                if (!(await hasWorkflowAccess(workflow, fakeRequest, coreStart))) {
+                if (
+                  !(await hasWorkflowAccess(workflow, fakeRequest, coreStart, {
+                    id: workflowId,
+                    spaceId,
+                  }))
+                ) {
                   logger.warn(
                     `Skipping scheduled workflow ${workflow.id}: execution access was removed.`
                   );
@@ -1274,7 +1278,10 @@ export class WorkflowsExecutionEnginePlugin
         includeGlobal: true,
         includeDeleted: true,
       });
-      if (current && !(await hasWorkflowAccess(current, request, coreStart))) {
+      if (
+        current &&
+        !(await hasWorkflowAccess(current, request, coreStart, { id: workflow.id, spaceId }))
+      ) {
         throw new Error('You do not have permission to execute this workflow.');
       }
     };
@@ -1579,7 +1586,15 @@ export class WorkflowsExecutionEnginePlugin
           const spaceId = spaceIdFor(item);
           if (!item.workflow.isEphemeral) {
             const state = executionStates.get(`${spaceId}:${item.workflow.id}`);
-            if (state && !getWorkflowPermissions(state, profileId).execute) {
+            if (
+              state &&
+              !checkWorkflowAccess(state, profileId, {
+                core: coreStart,
+                request,
+                id: item.workflow.id,
+                spaceId,
+              })
+            ) {
               throw new Error('You do not have permission to execute this workflow.');
             }
             if (!state?.enabled) {

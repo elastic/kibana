@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { omit } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import { expect } from '@kbn/scout/ui';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { XYVisualizationState } from '@kbn/lens-plugin/public';
+import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 import type { DiscoverSessionApiData } from '@kbn/as-code-discover-schema';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import {
@@ -34,7 +39,11 @@ const roundTripSavedVisualization = async (
     'config' | 'page' | 'scoutSpace' | 'kbnClient'
   >,
   sessionName: string
-) => {
+): Promise<{
+  sessionId: string;
+  tab: DiscoverSessionApiData['tabs'][number];
+  visContext: DiscoverSessionAttributes['tabs'][number]['attributes']['visContext'];
+}> => {
   const { id: sessionId, attributes: savedAttributes } = await spaceTest.step(
     'copy the saved session without local tab state',
     async () => {
@@ -109,6 +118,93 @@ const roundTripSavedVisualization = async (
   );
 };
 
+type LegacyVisContext = Omit<UnifiedHistogramVisContext, 'attributes'> & {
+  attributes: Omit<UnifiedHistogramVisContext['attributes'], 'version'> & { version?: 1 };
+};
+
+const createLegacySession = async (
+  { kbnClient, scoutSpace }: Pick<DiscoverWorkerFixtures, 'kbnClient' | 'scoutSpace'>,
+  sourceSession: SavedObject<DiscoverSessionAttributes>,
+  visContext: LegacyVisContext
+): Promise<string> => {
+  const [tab] = sourceSession.attributes.tabs;
+  const { id } = await kbnClient.savedObjects.create({
+    type: 'search',
+    space: scoutSpace.id,
+    overwrite: false,
+    attributes: {
+      ...sourceSession.attributes,
+      title: `${sourceSession.attributes.title} legacy`,
+      tabs: [{ ...tab, attributes: { ...tab.attributes, visContext } }],
+    },
+    references: sourceSession.references,
+  });
+  const stored = await kbnClient.savedObjects.get<DiscoverSessionAttributes>({
+    type: 'search',
+    id,
+    space: scoutSpace.id,
+  });
+  expect(stored.attributes.tabs[0].attributes.visContext).toStrictEqual(visContext);
+
+  return id;
+};
+
+const prepareLegacyVisualization = async ({
+  pageObjects,
+  scoutSpace,
+  kbnClient,
+}: Pick<
+  DiscoverTestFixtures & DiscoverWorkerFixtures,
+  'pageObjects' | 'scoutSpace' | 'kbnClient'
+>): Promise<{
+  sourceSession: SavedObject<DiscoverSessionAttributes>;
+  legacyVisContext: LegacyVisContext;
+}> => {
+  const { discover } = pageObjects;
+  const sessionName = `ESQL legacy chart ${scoutSpace.id} ${uuidv4()}`;
+  await discover.writeAndSubmitEsqlQuery(BREAKDOWN_QUERY);
+  await discover.chooseBreakdownField('extension');
+  await discover.changeVisualizationShape('Line');
+  await expect
+    .poll(() => discover.getHistogramLegendLabels())
+    .toStrictEqual(BREAKDOWN_LEGEND_LABELS);
+  expect(await discover.getVisualizationTitle()).toBe('Line');
+  await discover.saveSearch(sessionName);
+
+  const { saved_objects: sessions } = await kbnClient.savedObjects.find<DiscoverSessionAttributes>({
+    type: 'search',
+    space: scoutSpace.id,
+  });
+  const matchingSessions = sessions.filter(({ attributes }) => attributes.title === sessionName);
+  expect(matchingSessions).toHaveLength(1);
+  const [sourceSession] = matchingSessions;
+  expect(sourceSession.attributes.tabs).toHaveLength(1);
+  const { visContext } = sourceSession.attributes.tabs[0].attributes;
+  expect(visContext).toMatchObject({ attributes: { visualizationType: 'lnsXY' } });
+  const chart = visContext as UnifiedHistogramVisContext;
+  const visualization = chart.attributes.state.visualization as XYVisualizationState;
+  expect(visualization.layers).toHaveLength(1);
+  const [layer] = visualization.layers;
+  expect(layer).toMatchObject({ splitAccessors: ['extension'] });
+
+  // Keep the current query and fingerprint, changing only the stored visualization format.
+  const legacyVisContext: LegacyVisContext = {
+    ...chart,
+    attributes: {
+      ...omit(chart.attributes, 'version'),
+      state: {
+        ...chart.attributes.state,
+        visualization: {
+          ...visualization,
+          layers: [{ ...omit(layer, 'splitAccessors'), splitAccessor: 'extension' }],
+        },
+      },
+    },
+  };
+
+  return { sourceSession, legacyVisContext };
+};
+
 spaceTest.describe(
   'Discover session API — visualization persistence',
   { tag: '@local-stateful-classic' },
@@ -164,6 +260,19 @@ spaceTest.describe(
           expect(await discover.getVisualizationTitle()).toBe('Line');
           expect(await discover.getHistogramSuggestionType()).toBe('histogramForESQL');
         });
+
+        await spaceTest.step('save the reopened chart and verify a fresh copy', async () => {
+          const resavedName = `${sessionName} resaved`;
+          await discover.saveSearch(resavedName);
+          const { sessionId: resavedId, visContext: resavedVisContext } =
+            await roundTripSavedVisualization({ config, page, scoutSpace, kbnClient }, resavedName);
+          expect(resavedVisContext).toStrictEqual(visContext);
+
+          await discover.goto({ queryMode: 'esql', savedSearchId: resavedId });
+          await discover.waitUntilTabIsLoaded();
+          expect(await discover.getVisualizationTitle()).toBe('Line');
+          expect(await discover.getEsqlQueryValue()).toBe(ESQL_QUERY);
+        });
       }
     );
 
@@ -214,6 +323,21 @@ spaceTest.describe(
           expect(await discover.getVisualizationTitle()).toBe('Line');
           expect(await discover.getEsqlQueryValue()).toBe(BREAKDOWN_QUERY);
         });
+
+        await spaceTest.step('save the reopened breakdown and verify a fresh copy', async () => {
+          const resavedName = `${sessionName} resaved`;
+          await discover.saveSearch(resavedName);
+          const { sessionId: resavedId, visContext: resavedVisContext } =
+            await roundTripSavedVisualization({ config, page, scoutSpace, kbnClient }, resavedName);
+          expect(resavedVisContext).toStrictEqual(visContext);
+
+          await discover.goto({ queryMode: 'esql', savedSearchId: resavedId });
+          await discover.waitUntilTabIsLoaded();
+          await expect
+            .poll(() => discover.getHistogramLegendLabels())
+            .toStrictEqual(BREAKDOWN_LEGEND_LABELS);
+          expect(await discover.getVisualizationTitle()).toBe('Line');
+        });
       }
     );
 
@@ -257,6 +381,124 @@ spaceTest.describe(
           );
           expect(await discover.getVisualizationTitle()).toBe('Treemap');
           expect(await discover.getEsqlQueryValue()).toBe(STATS_QUERY);
+        });
+
+        await spaceTest.step('save the reopened Treemap and verify a fresh copy', async () => {
+          const resavedName = `${sessionName} resaved`;
+          await discover.saveSearch(resavedName);
+          const { sessionId: resavedId, visContext: resavedVisContext } =
+            await roundTripSavedVisualization({ config, page, scoutSpace, kbnClient }, resavedName);
+          expect(resavedVisContext).toStrictEqual(visContext);
+
+          await discover.goto({ queryMode: 'esql', savedSearchId: resavedId });
+          await discover.waitUntilTabIsLoaded();
+          await expect(page.getByTestId('partitionVisChart')).toBeVisible();
+          expect(await discover.getVisualizationTitle()).toBe('Treemap');
+        });
+      }
+    );
+
+    spaceTest(
+      'preserves a legacy single-field breakdown through UI save and an API round trip',
+      async ({ config, page, pageObjects, scoutSpace, kbnClient }) => {
+        const { discover } = pageObjects;
+        const { sourceSession, legacyVisContext } = await prepareLegacyVisualization({
+          pageObjects,
+          scoutSpace,
+          kbnClient,
+        });
+        const sessionName = `${sourceSession.attributes.title} resaved`;
+        const sessionId = await createLegacySession({ kbnClient, scoutSpace }, sourceSession, {
+          ...legacyVisContext,
+          attributes: { ...legacyVisContext.attributes, version: 1 },
+        });
+
+        await spaceTest.step('open the legacy Line histogram and its breakdown', async () => {
+          await discover.goto({ queryMode: 'esql', savedSearchId: sessionId });
+          await discover.waitUntilTabIsLoaded();
+          await expect
+            .poll(() => discover.getHistogramLegendLabels())
+            .toStrictEqual(BREAKDOWN_LEGEND_LABELS);
+          expect(await discover.getVisualizationTitle()).toBe('Line');
+        });
+
+        await discover.saveSearch(sessionName);
+        const { sessionId: copiedId, tab } = await roundTripSavedVisualization(
+          { config, page, scoutSpace, kbnClient },
+          sessionName
+        );
+        expect(tab).toMatchObject({
+          data_source: { type: 'esql', query: BREAKDOWN_QUERY },
+          breakdown_field: 'extension',
+          vis_context: { suggestion_type: 'histogramForESQL' },
+        });
+
+        await spaceTest.step('reopen the persisted chart without local tab state', async () => {
+          await discover.goto({ queryMode: 'esql', savedSearchId: copiedId });
+          await discover.waitUntilTabIsLoaded();
+          await expect
+            .poll(() => discover.getHistogramLegendLabels())
+            .toStrictEqual(BREAKDOWN_LEGEND_LABELS);
+          expect(await discover.getVisualizationTitle()).toBe('Line');
+          expect(await discover.getEsqlQueryValue()).toBe(BREAKDOWN_QUERY);
+        });
+      }
+    );
+
+    spaceTest(
+      'preserves legacy legend values through UI save and an API round trip',
+      async ({ config, page, pageObjects, scoutSpace, kbnClient }) => {
+        const { discover } = pageObjects;
+        const { sourceSession } = await prepareLegacyVisualization({
+          pageObjects,
+          scoutSpace,
+          kbnClient,
+        });
+        const sessionName = `${sourceSession.attributes.title} resaved`;
+        const chart = sourceSession.attributes.tabs[0].attributes
+          .visContext as UnifiedHistogramVisContext;
+        const visualization = chart.attributes.state.visualization as XYVisualizationState;
+        const sessionId = await createLegacySession({ kbnClient, scoutSpace }, sourceSession, {
+          ...chart,
+          attributes: {
+            ...omit(chart.attributes, 'version'),
+            state: {
+              ...chart.attributes.state,
+              visualization: {
+                ...visualization,
+                valuesInLegend: true,
+                legend: { ...omit(visualization.legend, 'legendStats'), isVisible: true },
+              },
+            },
+          },
+        });
+        const legendItems = discover.getHistogramChart().getByRole('listitem');
+
+        await spaceTest.step('open the legacy chart with values in the legend', async () => {
+          await discover.goto({ queryMode: 'esql', savedSearchId: sessionId });
+          await discover.waitUntilTabIsLoaded();
+          await expect
+            .poll(() => discover.getHistogramLegendLabels())
+            .toStrictEqual(BREAKDOWN_LEGEND_LABELS);
+          await expect(legendItems).toContainText([/\d/]);
+          expect(await discover.getVisualizationTitle()).toBe('Line');
+        });
+
+        await discover.saveSearch(sessionName);
+        const { sessionId: copiedId } = await roundTripSavedVisualization(
+          { config, page, scoutSpace, kbnClient },
+          sessionName
+        );
+
+        await spaceTest.step('reopen the persisted legend without local tab state', async () => {
+          await discover.goto({ queryMode: 'esql', savedSearchId: copiedId });
+          await discover.waitUntilTabIsLoaded();
+          await expect
+            .poll(() => discover.getHistogramLegendLabels())
+            .toStrictEqual(BREAKDOWN_LEGEND_LABELS);
+          await expect(legendItems).toContainText([/\d/]);
+          expect(await discover.getVisualizationTitle()).toBe('Line');
+          expect(await discover.getEsqlQueryValue()).toBe(BREAKDOWN_QUERY);
         });
       }
     );
