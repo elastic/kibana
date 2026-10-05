@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -19,6 +19,7 @@ import { ScanFailureCallout } from '../../components/scan_failure_callout/scan_f
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { ONBOARDING_CONTENT_MAX_WIDTH } from './constants';
 import { OnboardingEnableFooter } from './onboarding_enable_footer';
+import { OnboardingIntro } from './onboarding_intro';
 import { useEnableWorkers } from './use_enable_workers';
 import { useWorkerSelection } from './use_worker_selection';
 import { WorkerSelectionDescription } from './worker_selection_description';
@@ -35,6 +36,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
     services: { application },
   } = useKibana<CoreStart>();
   const history = useHistory();
+  const [step, setStep] = useState<'intro' | 'workers'>('intro');
 
   useAlertZeroDocTitle(i18n.ONBOARDING_TITLE);
 
@@ -48,6 +50,10 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
     () => history.push('/watches'),
     onSavingChange
   );
+
+  if (step === 'intro') {
+    return <OnboardingIntro onContinue={() => setStep('workers')} />;
+  }
 
   if (!canWrite) {
     return (
@@ -86,7 +92,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
         <AlertZeroPageHeader greeting={i18n.ONBOARDING_GREETING} title={i18n.ONBOARDING_TITLE} />
         <EuiSpacer size="l" />
         <EuiTitle size="xs">
-          <h2>{i18n.ONBOARDING_INTRO_HEADING}</h2>
+          <h2>{i18n.ONBOARDING_WATCHES_HEADING}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         <WorkerSelectionDescription

@@ -22,7 +22,7 @@ import {
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
 } from '@kbn/alertzero-common';
-import { SECURITY_APP_ID } from '@kbn/deeplinks-security';
+import { SECURITY_APP_ID, SecurityPageName } from '@kbn/deeplinks-security';
 import { queryKeys } from '../../query_keys';
 import { ONBOARDING_READ_MORE_URL_PLACEHOLDER } from './constants';
 import { OnboardingPage } from './onboarding_page';
@@ -58,7 +58,9 @@ const renderPage = ({
   canWrite = false,
   httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } }),
   serverWorkers = ALL_WORKERS_RESPONSE,
+  skipIntro = true,
 }: {
+  skipIntro?: boolean;
   canWrite?: boolean;
   httpPatch?: jest.Mock;
   serverWorkers?: {
@@ -100,10 +102,90 @@ const renderPage = ({
     </I18nProvider>
   );
 
+  if (skipIntro) {
+    fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
+  }
+
   return { history, application: core.application };
 };
 
 describe('OnboardingPage', () => {
+  describe('intro step', () => {
+    it('renders the promo, the UI preview and the Continue button instead of worker toggles', () => {
+      renderPage({ canWrite: true, skipIntro: false });
+
+      expect(screen.getByTestId('alertZeroOnboardingIntroPromo')).toBeInTheDocument();
+      expect(screen.getByTestId('alertZeroOnboardingUiPreview')).toBeInTheDocument();
+      expect(screen.getByTestId('alertZeroOnboardingContinueButton')).toBeInTheDocument();
+      expect(screen.queryByRole('switch')).not.toBeInTheDocument();
+    });
+
+    it('is shown to read-only users and does not send PATCHes', () => {
+      const httpPatch = jest.fn();
+      renderPage({ canWrite: false, skipIntro: false, httpPatch });
+
+      expect(screen.getByTestId('alertZeroOnboardingContinueButton')).toBeInTheDocument();
+      expect(httpPatch).not.toHaveBeenCalled();
+    });
+
+    it('shows a disabled video placeholder', () => {
+      renderPage({ canWrite: true, skipIntro: false });
+
+      expect(screen.getByTestId('alertZeroOnboardingVideoPlaceholder')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /video placeholder/ })).toBeDisabled();
+    });
+
+    it('switches the preview section when a dot is selected', () => {
+      renderPage({ canWrite: true, skipIntro: false });
+
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingPreviewDot-investigate'));
+
+      expect(
+        screen.getByText('Run investigations end to end and close what I can')
+      ).toBeInTheDocument();
+      expect(screen.getByText('Named-pipe backdoor — eng-ws-19')).toBeInTheDocument();
+    });
+
+    it('moves between preview sections with the arrow keys', () => {
+      renderPage({ canWrite: true, skipIntro: false });
+
+      const firstTab = screen.getAllByRole('tab')[0];
+      fireEvent.keyDown(firstTab, { key: 'ArrowRight' });
+
+      const [, secondTab] = screen.getAllByRole('tab');
+      expect(secondTab).toHaveAttribute('aria-selected', 'true');
+      expect(secondTab).toHaveFocus();
+    });
+
+    it('links Read more to the placeholder destination', () => {
+      renderPage({ canWrite: true, skipIntro: false });
+
+      expect(screen.getByTestId('alertZeroOnboardingReadMoreLink')).toHaveAttribute(
+        'href',
+        ONBOARDING_READ_MORE_URL_PLACEHOLDER
+      );
+    });
+
+    it('navigates to the Security Get Started page from the set up data link', () => {
+      const { application } = renderPage({ canWrite: true, skipIntro: false });
+
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingSetUpDataLink'));
+
+      expect(application.navigateToApp).toHaveBeenCalledWith(SECURITY_APP_ID, {
+        deepLinkId: SecurityPageName.landing,
+      });
+    });
+
+    it('moves to worker selection when Continue is clicked', () => {
+      renderPage({ canWrite: true, skipIntro: false });
+
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
+
+      expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
+      expect(screen.getAllByRole('switch').length).toBeGreaterThan(0);
+    });
+  });
+
   it('mounts the scan-failure callout', () => {
     renderPage();
     expect(screen.getByTestId('alertZeroScanFailureCallout')).toBeInTheDocument();
@@ -435,6 +517,7 @@ describe('OnboardingPage', () => {
       );
 
       const { rerender } = render(makeUI());
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
 
       // Catalog order: Alert Triage (B=ALL_ONBOARDING_WORKER_IDS[1]) is toggles[0],
       // Attack Discovery (A=ALL_ONBOARDING_WORKER_IDS[0]) is toggles[1].

@@ -114,6 +114,7 @@ describe('LandingPage', () => {
   it('mounts the scan-failure callout on onboarding', () => {
     renderPage();
 
+    fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
     expect(screen.getByTestId('alertZeroScanFailureCallout')).toBeInTheDocument();
   });
 
@@ -122,7 +123,7 @@ describe('LandingPage', () => {
 
     renderPage();
 
-    expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
+    expect(screen.getByText('AlertZero in 90 seconds')).toBeInTheDocument();
     expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
   });
 
@@ -131,7 +132,7 @@ describe('LandingPage', () => {
 
     renderPage();
 
-    expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
+    expect(screen.getByText('AlertZero in 90 seconds')).toBeInTheDocument();
   });
 
   it('shows the queue when at least one worker is enabled', () => {
@@ -140,7 +141,7 @@ describe('LandingPage', () => {
     renderPage();
 
     expect(screen.getByTestId('conversations-page')).toBeInTheDocument();
-    expect(screen.queryByText("Let's turn on the Watches?")).not.toBeInTheDocument();
+    expect(screen.queryByText('AlertZero in 90 seconds')).not.toBeInTheDocument();
   });
 
   it('shows the queue when investigations exist even with no workers enabled', () => {
@@ -149,7 +150,7 @@ describe('LandingPage', () => {
     renderPage();
 
     expect(screen.getByTestId('conversations-page')).toBeInTheDocument();
-    expect(screen.queryByText("Let's turn on the Watches?")).not.toBeInTheDocument();
+    expect(screen.queryByText('AlertZero in 90 seconds')).not.toBeInTheDocument();
   });
 
   it('shows a loading spinner while workers are loading', () => {
@@ -157,7 +158,7 @@ describe('LandingPage', () => {
 
     renderPage();
 
-    expect(screen.queryByText("Let's turn on the Watches?")).not.toBeInTheDocument();
+    expect(screen.queryByText('AlertZero in 90 seconds')).not.toBeInTheDocument();
     expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
     expect(document.querySelector('[class*="euiLoadingSpinner"]')).toBeInTheDocument();
   });
@@ -198,7 +199,7 @@ describe('LandingPage', () => {
 
     renderPage();
 
-    expect(screen.queryByText("Let's turn on the Watches?")).not.toBeInTheDocument();
+    expect(screen.queryByText('AlertZero in 90 seconds')).not.toBeInTheDocument();
     expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
     expect(document.querySelector('[class*="euiLoadingSpinner"]')).toBeInTheDocument();
   });
@@ -211,7 +212,7 @@ describe('LandingPage', () => {
 
     renderPage();
 
-    expect(screen.queryByText("Let's turn on the Watches?")).not.toBeInTheDocument();
+    expect(screen.queryByText('AlertZero in 90 seconds')).not.toBeInTheDocument();
     expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
     expect(document.querySelector('[class*="euiLoadingSpinner"]')).toBeInTheDocument();
   });
@@ -221,14 +222,14 @@ describe('LandingPage', () => {
     mockUseWorkers.mockReturnValue(workersResult([]));
     const { rerender } = render(wrap(<LandingPage />));
 
-    expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
+    expect(screen.getByText('AlertZero in 90 seconds')).toBeInTheDocument();
 
     // Phase 2: another admin enables a worker — page should transition without a reload.
     mockUseWorkers.mockReturnValue(workersResult([{ enabled: true }]));
     rerender(wrap(<LandingPage />));
 
     expect(screen.getByTestId('conversations-page')).toBeInTheDocument();
-    expect(screen.queryByText("Let's turn on the Watches?")).not.toBeInTheDocument();
+    expect(screen.queryByText('AlertZero in 90 seconds')).not.toBeInTheDocument();
   });
 
   it('does not transition to the queue when a background refetch returns partial state mid-save', async () => {
@@ -286,6 +287,8 @@ describe('LandingPage', () => {
 
     const { rerender } = render(makeUI());
 
+    expect(screen.getByText('AlertZero in 90 seconds')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
     expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
 
     // Start the save — this calls onSavingChange(true) in LandingPage.
@@ -373,6 +376,8 @@ describe('LandingPage', () => {
     );
 
     const { rerender } = render(makeUI());
+    expect(screen.getByText('AlertZero in 90 seconds')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
     expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
@@ -400,7 +405,7 @@ describe('LandingPage', () => {
     rerender(makeUI());
 
     expect(screen.getByTestId('conversations-page')).toBeInTheDocument();
-    expect(screen.queryByText("Let's turn on the Watches?")).not.toBeInTheDocument();
+    expect(screen.queryByText('AlertZero in 90 seconds')).not.toBeInTheDocument();
   });
 
   it('transitions from queue to onboarding when stale positive cache is corrected by a fresh empty response', () => {
@@ -414,7 +419,7 @@ describe('LandingPage', () => {
     mockUseWorkers.mockReturnValue(workersResult([{ enabled: false }]));
     rerender(wrap(<LandingPage />));
 
-    expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
+    expect(screen.getByText('AlertZero in 90 seconds')).toBeInTheDocument();
     expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
   });
 

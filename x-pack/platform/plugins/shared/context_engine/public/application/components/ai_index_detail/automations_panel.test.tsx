@@ -105,10 +105,24 @@ const aiIndex: GetAiIndexResponse = {
 
 type PanelProps = React.ComponentProps<typeof AutomationsPanel>;
 
+interface RenderPanelOptions {
+  canCreateWorkflow?: boolean;
+}
+
 /** Rerender re-wraps in the same providers so tests can flip the mocked hook and re-render in one call. */
-const renderPanel = (props: Partial<PanelProps> = {}) => {
+const renderPanel = (
+  props: Partial<PanelProps> = {},
+  { canCreateWorkflow = true }: RenderPanelOptions = {}
+) => {
   const onSaved = jest.fn();
   const services = coreMock.createStart();
+  services.application.capabilities = {
+    ...services.application.capabilities,
+    workflowsManagement: {
+      ...services.application.capabilities.workflowsManagement,
+      createWorkflow: canCreateWorkflow,
+    },
+  };
   const wrap = (overrides: Partial<PanelProps> = {}) => (
     <I18nProvider>
       <EuiProvider>
@@ -234,6 +248,19 @@ describe('AutomationsPanel', () => {
     openAddAutomationMenu();
 
     expect(screen.queryByTestId('contextSuggestAutomationButton')).not.toBeInTheDocument();
+  });
+
+  it('disables create workflow when the user lacks the workflows create privilege', async () => {
+    const createAndAttach = jest.fn().mockResolvedValue('wf-created');
+    mockUseAutomationsEditor.mockReturnValue(editorResult({ createAndAttach }));
+
+    renderPanel({}, { canCreateWorkflow: false });
+    openAddAutomationMenu();
+
+    const createButton = screen.getByTestId('contextCreateAutomationButton');
+    expect(createButton).toBeDisabled();
+    fireEvent.click(createButton);
+    expect(createAndAttach).not.toHaveBeenCalled();
   });
 
   it('opens the created workflow in the Workflows app', async () => {
