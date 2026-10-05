@@ -15,6 +15,7 @@ import { createStateService } from '../services/state_service';
 import { useStateProps } from './use_state_props';
 import type { UnifiedHistogramFetchParamsExternal } from '../types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { DataViewSource } from '@kbn/data-source';
 
 jest.mock('../services/state_service');
 jest.mock('./use_state_props');
@@ -72,7 +73,7 @@ describe('useServicesBootstrap', () => {
 
     const fetchParamsExternal: UnifiedHistogramFetchParamsExternal = {
       searchSessionId: 'test-session',
-      dataView: dataViewWithTimefieldMock,
+      dataSource: new DataViewSource(dataViewWithTimefieldMock),
       query,
       relativeTimeRange: { from: 'now-15m', to: 'now' },
       requestAdapter: new RequestAdapter(),
@@ -88,7 +89,7 @@ describe('useServicesBootstrap', () => {
     expect(hook.result.current.fetchParams).toEqual(
       expect.objectContaining({
         searchSessionId: 'test-session',
-        dataView: dataViewWithTimefieldMock,
+        dataSource: fetchParamsExternal.dataSource,
         query,
       })
     );
