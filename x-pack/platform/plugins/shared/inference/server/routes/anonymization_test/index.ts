@@ -44,12 +44,13 @@ interface AnonymizationBreakdownEntry {
 export function registerAnonymizationTestRoute({
   router,
   coreSetup,
-  getRegexWorker,
+  getTestRegexWorker,
   logger,
 }: {
   router: IRouter<RequestHandlerContext>;
   coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>;
-  getRegexWorker: () => RegexWorkerService | undefined;
+  /** A pool dedicated to this route, never the one serving `chatComplete` traffic. */
+  getTestRegexWorker: () => RegexWorkerService | undefined;
   logger: Logger;
 }) {
   router.post(
@@ -57,11 +58,10 @@ export function registerAnonymizationTestRoute({
       path: '/internal/inference/anonymization/_test',
       security: {
         authz: {
-          enabled: false,
-          reason:
-            'This route runs an ephemeral, non-persisting anonymization dry-run using rules ' +
-            'supplied in the request body; it reads and writes no stored data. It backs the ' +
-            'Pattern tester in the Anonymization Settings management page.',
+          // Executes caller-supplied regular expressions, so it is limited to the privilege
+          // needed to edit `ai:anonymizationSettings` itself (the same one core's uiSettings
+          // routes require).
+          requiredPrivileges: ['manage_advanced_settings'],
         },
       },
       validate: {
@@ -69,7 +69,7 @@ export function registerAnonymizationTestRoute({
       },
     },
     async (_context, request, response) => {
-      const regexWorker = getRegexWorker();
+      const regexWorker = getTestRegexWorker();
       if (!regexWorker) {
         return response.customError({
           statusCode: 503,

@@ -21,12 +21,12 @@ export const registerRoutes = ({
   router,
   logger,
   coreSetup,
-  getRegexWorker,
+  getTestRegexWorker,
 }: {
   router: IRouter;
   logger: Logger;
   coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>;
-  getRegexWorker: () => RegexWorkerService | undefined;
+  getTestRegexWorker: () => RegexWorkerService | undefined;
 }) => {
   registerChatCompleteRoute({ router, coreSetup, logger: logger.get('chatComplete') });
   registerPromptRoute({ router, coreSetup, logger: logger.get('prompt') });
@@ -40,6 +40,6 @@ export const registerRoutes = ({
     router,
     coreSetup,
     logger: logger.get('anonymizationTest'),
-    getRegexWorker,
+    getTestRegexWorker,
   });
 };
