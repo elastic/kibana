@@ -256,7 +256,7 @@ Each score a user-defined judge declares carries its own `direction`, so one jud
 
 Direction covers both numeric scores and the values assigned to categorical labels. A score that omits it is `maximize`, which is how every score was read before scores could declare one, so existing versions behave exactly as before. A numeric score's direction is also stated to the judge, so a lower-is-better score is not reported on an inverted scale.
 
-`_evaluate` and `_test` return the direction on each score, and every score document is stamped with it. Experiment comparison reads it per score, so improvements and regressions are colored correctly even when one evaluator's scores point different ways. The evaluator-level `direction` (`maximize` for user-defined judges) remains the fallback for scores that do not set one, which is how built-in evaluators and older score documents are read.
+`_evaluate` and `_test` return the direction on each score, and every score document is stamped with it. Experiment comparison reads it per score, so improvements and regressions are colored correctly even when one evaluator's scores point different ways. The evaluator-level `direction` remains the fallback for scores that do not set one, which is how built-in evaluators and older score documents are read. For a user-defined judge it is the direction its scores share, or `maximize` when they point different ways.
 
 #### Evaluator versions
 

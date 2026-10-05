@@ -78,6 +78,41 @@ describe('compileUserDefinedEvaluator', () => {
     );
   });
 
+  describe('evaluator direction', () => {
+    const withScores = (scores: LlmJudgeConfig['output']['scores']) =>
+      compileUserDefinedEvaluator(document({ ...NUMERIC_JUDGE, output: { scores } })).direction;
+
+    it('takes the direction its scores share', () => {
+      expect(withScores([{ name: 'hallucination', type: 'number', direction: 'minimize' }])).toBe(
+        'minimize'
+      );
+      expect(
+        withScores([
+          { name: 'length', type: 'number', direction: 'neutral' },
+          { name: 'turns', type: 'number', direction: 'neutral' },
+        ])
+      ).toBe('neutral');
+    });
+
+    it('reads scores without a direction as maximize', () => {
+      expect(
+        withScores([
+          { name: 'tone', type: 'number' },
+          { name: 'grounded', type: 'number', direction: 'maximize' },
+        ])
+      ).toBe('maximize');
+    });
+
+    it('keeps maximize for a judge whose scores point different ways', () => {
+      expect(
+        withScores([
+          { name: 'grounded', type: 'number' },
+          { name: 'hallucination', type: 'number', direction: 'minimize' },
+        ])
+      ).toBe('maximize');
+    });
+  });
+
   describe('evidence schema', () => {
     it('requires the evidence the judge declared', () => {
       const { evidenceSchema } = compileUserDefinedEvaluator(document(NUMERIC_JUDGE));

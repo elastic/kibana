@@ -37,7 +37,9 @@ import { KbnDangerCallout, KbnSuccessCallout } from '@kbn/ui-callout';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { NotificationsStart } from '@kbn/core/public';
 import {
+  DEFAULT_SCORE_DIRECTION,
   UserDefinedEvaluatorDraft,
+  getScoreDirection,
   type Direction,
   type JudgeEvidence,
   type JudgeScore,
@@ -59,7 +61,6 @@ import {
 } from '../../components/shared/connector_selector';
 import { getErrorMessage } from '../../utils/get_error_message';
 import {
-  DEFAULT_SCORE_DIRECTION,
   SCORE_DIRECTION_LABELS,
   SCORE_DIRECTION_OPTIONS,
   parseLabels,
@@ -108,7 +109,7 @@ const toScoreFormValue = (score: JudgeScore, id: number): ScoreFormValue => ({
   id,
   name: score.name,
   type: score.type,
-  direction: score.direction ?? DEFAULT_SCORE_DIRECTION,
+  direction: getScoreDirection(score),
   description: score.description ?? '',
   labels: (score.labels ?? [])
     .map(({ value, score: labelScore }) => `${value}=${labelScore}`)

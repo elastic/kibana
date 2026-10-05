@@ -47,3 +47,4 @@ export {
   isImproved,
 } from './impl/statistical_analysis';
 export type { PairedScore } from './impl/statistical_analysis';
+export { DEFAULT_SCORE_DIRECTION, getScoreDirection } from './impl/score_direction';

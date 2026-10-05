@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { Direction } from '@kbn/evals-common';
+import { getScoreDirection, type Direction } from '@kbn/evals-common';
 import { createPrompt } from '@kbn/inference-common';
 import type { Prompt, ToolSchema, ToolSchemaType } from '@kbn/inference-common';
 import { z } from '@kbn/zod/v4';
 import type { EvidenceRound } from '../evidence/types';
 import {
   JUDGE_EVIDENCE_TEMPLATE_VARIABLES,
-  getScoreDirection,
   type JudgeScoreDefinition,
   type LlmJudgeConfig,
 } from './types';

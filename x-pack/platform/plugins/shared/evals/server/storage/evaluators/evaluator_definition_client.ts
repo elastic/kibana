@@ -16,11 +16,11 @@ import {
   MAX_EVALUATOR_NAME_LENGTH,
   buildSpaceFilter,
   getEvaluatorDefinitionId,
-} from '@kbn/evals-common';
-import {
   getScoreDirection,
-  type EvaluatorDefinitionDocument,
-  type LlmJudgeConfig,
+} from '@kbn/evals-common';
+import type {
+  EvaluatorDefinitionDocument,
+  LlmJudgeConfig,
 } from '../../evaluators/user_defined/types';
 import { validateJudgeConfig } from '../../evaluators/user_defined/validate_config';
 import { EvaluatorAlreadyExistsError } from './evaluator_already_exists_error';

@@ -29,10 +29,10 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import type { JudgeEvidence, LlmJudgeConfig } from '@kbn/evals-common';
+import { getScoreDirection, type JudgeEvidence, type LlmJudgeConfig } from '@kbn/evals-common';
 import { useEvaluator } from '../../hooks/use_evaluators_api';
 import { getErrorMessage } from '../../utils/get_error_message';
-import { DEFAULT_SCORE_DIRECTION, SCORE_DIRECTION_LABELS } from './lib';
+import { SCORE_DIRECTION_LABELS } from './lib';
 import * as i18n from './translations';
 
 interface EvaluatorDetailFlyoutProps {
@@ -130,7 +130,7 @@ const JudgeDetails: React.FC<{ judge: LlmJudgeConfig }> = ({ judge }) => (
                 color="hollow"
                 data-test-subj={`evalsEvaluatorDetailDirection-${score.name}`}
               >
-                {SCORE_DIRECTION_LABELS[score.direction ?? DEFAULT_SCORE_DIRECTION]}
+                {SCORE_DIRECTION_LABELS[getScoreDirection(score)]}
               </EuiBadge>
             </EuiFlexItem>
           </EuiFlexGroup>

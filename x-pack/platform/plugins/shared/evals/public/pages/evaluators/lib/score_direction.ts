@@ -8,9 +8,6 @@
 import type { Direction } from '@kbn/evals-common';
 import * as i18n from '../translations';
 
-/** A score saved before scores declared a direction was read as higher-is-better. */
-export const DEFAULT_SCORE_DIRECTION: Direction = 'maximize';
-
 export const SCORE_DIRECTION_LABELS: Record<Direction, string> = {
   maximize: i18n.MAXIMIZE_DIRECTION,
   minimize: i18n.MINIMIZE_DIRECTION,

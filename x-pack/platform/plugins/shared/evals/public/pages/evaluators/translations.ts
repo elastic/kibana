@@ -181,23 +181,20 @@ export const SCORES_TITLE = i18n.translate('xpack.evals.evaluators.scoresTitle',
 });
 export const SCORES_DESCRIPTION = i18n.translate('xpack.evals.evaluators.scoresDescription', {
   defaultMessage:
-    'Set a direction for each score so comparisons read it the right way. It applies both to numbers and to the values given to labels: groundedness is higher is better, a hallucination rate is lower is better, and a neutral score is recorded without being shown as an improvement or a regression.',
+    'Choose a direction for each score so comparisons read it the right way. It applies to numeric scores and to the values given to labels. For example, groundedness would be "Higher is better", a hallucination rate would be "Lower is better", and a "Neutral" score is recorded without being shown as an improvement or a regression.',
 });
 export const SCORE_DIRECTION_LABEL = i18n.translate('xpack.evals.evaluators.scoreDirectionLabel', {
   defaultMessage: 'Direction',
 });
-export const MAXIMIZE_DIRECTION = i18n.translate(
-  'xpack.evals.evaluators.maximizeDirectionDropDownOptionLabel',
-  { defaultMessage: 'Higher is better' }
-);
-export const MINIMIZE_DIRECTION = i18n.translate(
-  'xpack.evals.evaluators.minimizeDirectionDropDownOptionLabel',
-  { defaultMessage: 'Lower is better' }
-);
-export const NEUTRAL_DIRECTION = i18n.translate(
-  'xpack.evals.evaluators.neutralDirectionDropDownOptionLabel',
-  { defaultMessage: 'Neutral' }
-);
+export const MAXIMIZE_DIRECTION = i18n.translate('xpack.evals.evaluators.maximizeDirectionLabel', {
+  defaultMessage: 'Higher is better',
+});
+export const MINIMIZE_DIRECTION = i18n.translate('xpack.evals.evaluators.minimizeDirectionLabel', {
+  defaultMessage: 'Lower is better',
+});
+export const NEUTRAL_DIRECTION = i18n.translate('xpack.evals.evaluators.neutralDirectionLabel', {
+  defaultMessage: 'Neutral',
+});
 export const ADD_SCORE_BUTTON = i18n.translate('xpack.evals.evaluators.addScoreButtonLabel', {
   defaultMessage: 'Add score',
 });
