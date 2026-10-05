@@ -50,6 +50,16 @@ async function distributeScoutTestsByModule() {
   }
 }
 
+type SingleConfigSetLaneInfo = { label: string; loadIDs: string[] };
+// Combined lane: runner restarts the server for each group; SCOUT_TEST_SERVER_CONFIG_SET is not set on the step.
+type CombinedLaneInfo = { label: string; loadGroups: Array<{ configSet: string; loadIDs: string[] }> };
+
+type LanePair = {
+  testTarget: ScoutTestTrack['metadata']['testTarget'];
+  server: ScoutTestTrack['metadata']['server'];
+  lane: ScoutTestTrack['lanes'][0];
+};
+
 async function distributeScoutTestsOnLanes() {
   const testTracksDefinitionPaths = scoutTestTrack.definitions.all();
 
@@ -58,59 +68,135 @@ async function distributeScoutTestsOnLanes() {
   }
 
   const steps: BuildkiteCommandStep[] = [];
-  const loadInfoByStepKey: Record<string, { label: string; loadIDs: string[] }> = {};
+  const loadInfoByStepKey: Record<string, SingleConfigSetLaneInfo | CombinedLaneInfo> = {};
   const testLaneLoadsFilePath = path.relative(getKibanaDir(), SCOUT_TEST_LANE_LOADS_PATH);
 
-  testTracksDefinitionPaths
+  const targetRuntimeMs =
+    parseFloat(process.env.SCOUT_TEST_LANE_TARGET_RUNTIME_MINUTES || '20') * 60 * 1000;
+  // target/2 guarantees at least two compact lanes always fit into one combined step.
+  const compactThresholdMs = targetRuntimeMs / 2;
+
+  const allLanePairs: LanePair[] = testTracksDefinitionPaths
     .map(scoutTestTrack.definitions.loadFromPath)
     .flatMap((definition: { tracks: ScoutTestTrack[] }) =>
       definition.tracks.flatMap((track) =>
-        track.lanes.flatMap((lane) => ({ ...track.metadata, lane }))
+        track.lanes.map((lane) => ({ ...track.metadata, lane }))
       )
-    )
-    .forEach(({ testTarget, server, lane }) => {
-      // Define the effective lane number. `lane.number` is only accurate in reference to the originating test track
-      const effectiveLaneNumber = steps.length + 1;
+    );
 
-      const laneEnv = {
+  const regularPairs = allLanePairs.filter(({ lane }) => lane.runtimeEstimate >= compactThresholdMs);
+  const compactPairs = allLanePairs.filter(({ lane }) => lane.runtimeEstimate < compactThresholdMs);
+
+  const sharedEnv = {
+    SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS:
+      process.env.SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS || '300',
+    ...envVarsIfSet(['SERVERLESS_TESTS_ONLY', 'UIAM_DOCKER_IMAGE', 'UIAM_COSMOSDB_DOCKER_IMAGE']),
+    ...collectEnvFromLabels(),
+  };
+
+  const addRegularLaneStep = ({ testTarget, server, lane }: LanePair) => {
+    const effectiveLaneNumber = steps.length + 1;
+    const stepKey = `scout_test_lane_${effectiveLaneNumber}`;
+    // `lane.number` is only accurate relative to its originating track; use the global counter instead
+    const stepLabel = `Scout Lane #${effectiveLaneNumber} - ${testTarget.arch}-${testTarget.domain} / ${server.configSet}`;
+
+    steps.push({
+      key: stepKey,
+      label: stepLabel,
+      command: '.buildkite/scripts/steps/test/scout/run_test_lane.sh',
+      timeout_in_minutes: 60,
+      agents: expandAgentQueue(lane.metadata.buildkite.agentQueue),
+      env: {
         SCOUT_TEST_LANE_LOADS_PATH: testLaneLoadsFilePath,
         SCOUT_TEST_LANE_NUMBER: `${effectiveLaneNumber}`,
         SCOUT_TEST_TARGET_LOCATION: testTarget.location,
         SCOUT_TEST_TARGET_ARCH: testTarget.arch,
         SCOUT_TEST_TARGET_DOMAIN: testTarget.domain,
         SCOUT_TEST_SERVER_CONFIG_SET: server.configSet,
-        SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS:
-          process.env.SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS || '300',
-        ...envVarsIfSet([
-          'SERVERLESS_TESTS_ONLY',
-          'UIAM_DOCKER_IMAGE',
-          'UIAM_COSMOSDB_DOCKER_IMAGE',
-        ]),
-        ...collectEnvFromLabels(),
-      };
-
-      const stepKey = `scout_test_lane_${effectiveLaneNumber}`;
-      const stepLabel = `Scout Lane #${effectiveLaneNumber} - ${testTarget.arch}-${testTarget.domain} / ${server.configSet}`;
-
-      // Agent that will do the actual work of running the test loads
-      steps.push({
-        key: stepKey,
-        label: stepLabel,
-        command: '.buildkite/scripts/steps/test/scout/run_test_lane.sh',
-        timeout_in_minutes: 60,
-        agents: expandAgentQueue(lane.metadata.buildkite.agentQueue),
-        env: laneEnv,
-        retry: {
-          automatic: [
-            { exit_status: '-1', limit: 3 },
-            { exit_status: '*', limit: 1 },
-          ],
-        },
-      });
-
-      // Lane load information to be referenced by the agent (IDs in particular)
-      loadInfoByStepKey[stepKey] = { label: stepLabel, loadIDs: lane.loads };
+        ...sharedEnv,
+      },
+      retry: {
+        automatic: [
+          { exit_status: '-1', limit: 3 },
+          { exit_status: '*', limit: 1 },
+        ],
+      },
     });
+
+    loadInfoByStepKey[stepKey] = { label: stepLabel, loadIDs: lane.loads };
+  };
+
+  regularPairs.forEach(addRegularLaneStep);
+
+  // Pack compact lanes: group by testTarget then greedy bin-pack into combined Buildkite steps.
+  if (compactPairs.length > 0) {
+    const compactByTarget = new Map<string, LanePair[]>();
+    for (const pair of compactPairs) {
+      const key = `${pair.testTarget.location}-${pair.testTarget.arch}-${pair.testTarget.domain}`;
+      const existing = compactByTarget.get(key) ?? [];
+      existing.push(pair);
+      compactByTarget.set(key, existing);
+    }
+
+    type CombinedSlot = {
+      testTarget: LanePair['testTarget'];
+      agentQueue: string;
+      usedMs: number;
+      groups: CombinedLaneInfo['loadGroups'];
+    };
+
+    for (const [, pairs] of compactByTarget) {
+      const combinedSlots: CombinedSlot[] = [];
+
+      for (const { testTarget, server, lane } of pairs) {
+        let slot = combinedSlots.find((s) => s.usedMs + lane.runtimeEstimate <= targetRuntimeMs);
+        if (!slot) {
+          slot = {
+            testTarget,
+            agentQueue: lane.metadata.buildkite.agentQueue,
+            usedMs: 0,
+            groups: [],
+          };
+          combinedSlots.push(slot);
+        }
+        slot.groups.push({ configSet: server.configSet, loadIDs: lane.loads });
+        slot.usedMs += lane.runtimeEstimate;
+      }
+
+      for (const { testTarget, agentQueue, usedMs, groups } of combinedSlots) {
+        const effectiveLaneNumber = steps.length + 1;
+        const stepKey = `scout_test_lane_${effectiveLaneNumber}`;
+        const configSetNames = groups.map((g) => g.configSet).join('+');
+        const stepLabel = `Scout Lane #${effectiveLaneNumber} - ${testTarget.arch}-${testTarget.domain} / combined [${configSetNames}]`;
+
+        steps.push({
+          key: stepKey,
+          label: stepLabel,
+          command: '.buildkite/scripts/steps/test/scout/run_test_lane.sh',
+          // Combined lanes restart the server per configSet group; allow extra wall-clock time
+          timeout_in_minutes: Math.ceil(usedMs / 60000) + 30,
+          agents: expandAgentQueue(agentQueue),
+          env: {
+            SCOUT_TEST_LANE_LOADS_PATH: testLaneLoadsFilePath,
+            SCOUT_TEST_LANE_NUMBER: `${effectiveLaneNumber}`,
+            SCOUT_TEST_TARGET_LOCATION: testTarget.location,
+            SCOUT_TEST_TARGET_ARCH: testTarget.arch,
+            SCOUT_TEST_TARGET_DOMAIN: testTarget.domain,
+            // SCOUT_TEST_SERVER_CONFIG_SET intentionally omitted — runner reads it per group from loadGroups
+            ...sharedEnv,
+          },
+          retry: {
+            automatic: [
+              { exit_status: '-1', limit: 3 },
+              { exit_status: '*', limit: 1 },
+            ],
+          },
+        });
+
+        loadInfoByStepKey[stepKey] = { label: stepLabel, loadGroups: groups };
+      }
+    }
+  }
 
   if (steps.length === 0) {
     // Stop early. No test steps to upload. ✨
