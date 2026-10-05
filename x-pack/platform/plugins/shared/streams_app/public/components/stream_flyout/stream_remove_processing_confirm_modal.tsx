@@ -83,7 +83,17 @@ export function StreamRemoveProcessingConfirmationModal({
               pipelineDefinition: { steps: [] },
             })
             .then(onConfirm)
-            .catch(() => setLoading(false))
+            .catch((e) => {
+              setLoading(false);
+              core.notifications.toasts.addError(e, {
+                title: i18n.translate(
+                  'xpack.streams.flyout.processingRemovalConfirmModal.failedRemoval',
+                  {
+                    defaultMessage: 'Failed to remove processing info',
+                  }
+                ),
+              });
+            })
             .finally(() => {
               onClose();
               refreshProcessing();
