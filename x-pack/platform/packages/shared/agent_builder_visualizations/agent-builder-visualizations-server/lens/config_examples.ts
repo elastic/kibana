@@ -229,8 +229,8 @@ const lensConfigExamples: Record<SupportedChartType, readonly LensConfigExample[
       } satisfies AuthoredLensConfig<SupportedChartType.XY>,
     },
     {
-      label: 'Specific series color, only when the request asks for one',
-      fits: ({ hasDate, hasCategory }) => !(hasDate && hasCategory),
+      label: 'Time series with a specific series color, only when the request asks for one',
+      fits: ({ hasDate, hasCategory }) => hasDate && !hasCategory,
       config: {
         type: 'xy',
         title: '<Measure> over time',
@@ -241,6 +241,23 @@ const lensConfigExamples: Record<SupportedChartType, readonly LensConfigExample[
           {
             type: 'area',
             x: { column: '<date column>' },
+            y: [{ column: '<measure column>', color: { type: 'static', color: '<hex color>' } }],
+          },
+        ],
+      } satisfies AuthoredLensConfig<SupportedChartType.XY>,
+    },
+    {
+      label: 'Ranking with a specific bar color, only when the request asks for one',
+      fits: ({ hasDate }) => !hasDate,
+      config: {
+        type: 'xy',
+        title: '<Measure> by <category>',
+        axis: { x: hiddenAxisTitle, y: hiddenAxisTitle },
+        legend: listLegend,
+        layers: [
+          {
+            type: 'bar_horizontal',
+            x: { column: '<category column>' },
             y: [{ column: '<measure column>', color: { type: 'static', color: '<hex color>' } }],
           },
         ],

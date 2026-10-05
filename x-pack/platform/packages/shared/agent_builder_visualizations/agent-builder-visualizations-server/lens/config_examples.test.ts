@@ -50,7 +50,11 @@ describe('Lens config examples', () => {
     [
       'a date and a measure',
       [dateColumn, measureColumn],
-      ['Time series: ', 'Time series with legend statistics', 'Specific series color'],
+      [
+        'Time series: ',
+        'Time series with legend statistics',
+        'Time series with a specific series color',
+      ],
     ],
     [
       'a date, a category, and a measure',
@@ -60,7 +64,7 @@ describe('Lens config examples', () => {
     [
       'a category and a measure',
       [categoryColumn, measureColumn],
-      ['Ranking by category', 'Specific series color'],
+      ['Ranking by category', 'Ranking with a specific bar color'],
     ],
   ])('picks the xy examples that fit %s', (_, columns, labels) => {
     const examples = selectConfigExamples(SupportedChartType.XY, columns);
@@ -71,7 +75,7 @@ describe('Lens config examples', () => {
   });
 
   it('offers every xy example when the result columns are unknown', () => {
-    expect(selectConfigExamples(SupportedChartType.XY)).toHaveLength(6);
+    expect(selectConfigExamples(SupportedChartType.XY)).toHaveLength(7);
   });
 
   it('keeps examples that fit any result columns', () => {
