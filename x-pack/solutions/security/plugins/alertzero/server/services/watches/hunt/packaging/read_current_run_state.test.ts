@@ -19,6 +19,8 @@ const sseAttachment = ({
   evidenceFor = ['Tier 1 hit'],
   tier1TotalHits = 1,
   tier2Behaviors = [],
+  techniqueIds = ['T1078.004'],
+  corroboratedTechniqueId,
 }: {
   actionableIndices?: string[];
   events?: Array<{ event_id: string; source_index: string }>;
@@ -32,6 +34,13 @@ const sseAttachment = ({
     row_count: number;
     hit?: boolean;
   }>;
+  /** Technique SKIs this entry lists, proposed or corroborated. */
+  techniqueIds?: string[];
+  /**
+   * Mirrors `sse_mapper`'s `corroborated_technique_id`: set only on an entry scoped to a
+   * technique the run actually corroborated, never on the report-scoped fallback entry.
+   */
+  corroboratedTechniqueId?: string;
 }): VersionedAttachment => ({
   id: attachmentId,
   type: 'security.significant_security_event',
@@ -50,9 +59,12 @@ const sseAttachment = ({
         capability: 'continuous_threat_hunt',
         run_id: runId,
         report_id: reportId,
-        security_knowledge_indicators: [
-          { type: 'technique', value: 'T1078.004', technique_id: 'T1078.004' },
-        ],
+        ...(corroboratedTechniqueId ? { corroborated_technique_id: corroboratedTechniqueId } : {}),
+        security_knowledge_indicators: techniqueIds.map((techniqueId) => ({
+          type: 'technique' as const,
+          value: techniqueId,
+          technique_id: techniqueId,
+        })),
         entities: [{ field: 'host.name', value: 'host-a' }],
         events: events ?? [
           {
@@ -283,5 +295,57 @@ describe('readCurrentRunState', () => {
       { techniqueId: 'T1059.001', techniqueName: undefined, rowCount: 3 },
       { techniqueId: 'T1078.004', techniqueName: undefined, rowCount: 4 },
     ]);
+  });
+
+  it('collects every technique seen but only the ones an entry corroborated', async () => {
+    // The report-scoped fallback entry: lists both proposed techniques, corroborates neither.
+    const state = await readCurrentRunState({
+      attachments: [sseAttachment({ techniqueIds: ['T1078.004', 'T1021.001'] })],
+      reportId,
+      runId,
+      resolveHostEnrollment,
+      rehydrateProcessSelectors,
+    });
+
+    expect(state?.techniques.sort()).toEqual(['T1021.001', 'T1078.004']);
+    expect(state?.corroboratedTechniques).toEqual([]);
+  });
+
+  it('marks a technique corroborated only when its own entry says so', async () => {
+    const state = await readCurrentRunState({
+      attachments: [
+        sseAttachment({
+          techniqueIds: ['T1078.004'],
+          corroboratedTechniqueId: 'T1078.004',
+        }),
+      ],
+      reportId,
+      runId,
+      resolveHostEnrollment,
+      rehydrateProcessSelectors,
+    });
+
+    expect(state?.techniques).toEqual(['T1078.004']);
+    expect(state?.corroboratedTechniques).toEqual(['T1078.004']);
+  });
+
+  it('does not let one corroborated entry vouch for another entry’s uncorroborated technique', async () => {
+    const state = await readCurrentRunState({
+      attachments: [
+        sseAttachment({
+          attachmentId: 'sse-1',
+          techniqueIds: ['T1078.004'],
+          corroboratedTechniqueId: 'T1078.004',
+        }),
+        sseAttachment({ attachmentId: 'sse-2', techniqueIds: ['T1021.001'] }),
+      ],
+      reportId,
+      runId,
+      resolveHostEnrollment,
+      rehydrateProcessSelectors,
+    });
+
+    expect(state?.techniques.sort()).toEqual(['T1021.001', 'T1078.004']);
+    expect(state?.corroboratedTechniques).toEqual(['T1078.004']);
   });
 });

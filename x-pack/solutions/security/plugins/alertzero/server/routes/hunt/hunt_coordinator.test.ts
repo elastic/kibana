@@ -334,6 +334,9 @@ describe('registerHuntCoordinatorRoute', () => {
     });
   });
 
+  // The hunt-once evidence write is its own route (`write_hunt_evidence.ts`), called by hunt.yaml
+  // only after this step succeeds -- see that route's doc comment for why it isn't folded in here.
+
   it('logs and returns a generic 500 when the coordinator throws', async () => {
     huntCoordinatorMock.mockRejectedValue(new Error('tier1 search failed'));
     const { handler, context, logger } = makeDeps();

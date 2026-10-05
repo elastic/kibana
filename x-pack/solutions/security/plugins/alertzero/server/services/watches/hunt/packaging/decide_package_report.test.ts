@@ -6,7 +6,11 @@
  */
 
 import type { ActionCatalogEntry } from '@kbn/alertzero-common';
-import { buildProposalSubjectKey, decidePackageReport } from './decide_package_report';
+import {
+  buildProposalSubjectKey,
+  canFillRespondAction,
+  decidePackageReport,
+} from './decide_package_report';
 import type { CurrentRunState } from './types';
 
 const isolateHost: ActionCatalogEntry = {
@@ -53,6 +57,22 @@ const suspendProcess: ActionCatalogEntry = {
   },
 };
 
+/** Required field `buildActionInput` has no way to supply — neither endpoint_ids nor parameters. */
+const quarantineFileWithJustification: ActionCatalogEntry = {
+  workflowId: 'system-security-action-quarantine-file',
+  name: 'Quarantine file',
+  category: 'respond',
+  impact: 'medium',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      endpoint_ids: { type: 'array', items: { type: 'string' } },
+      justification: { type: 'string' },
+    },
+    required: ['endpoint_ids', 'justification'],
+  },
+};
+
 const configureAction: ActionCatalogEntry = {
   workflowId: 'system-security-action-configure-something',
   name: 'Configure',
@@ -73,6 +93,7 @@ const baseHitState = (overrides: Partial<CurrentRunState> = {}): CurrentRunState
   titles: ['Shadow admin AssumeRole'],
   evidenceLines: ['Tier 1 hits in cloudtrail'],
   techniques: ['T1078.004'],
+  corroboratedTechniques: ['T1078.004'],
   hosts: [{ name: 'host-a', enrolled: true, agentId: 'agent-a' }],
   processSelectors: [],
   // Fully-covered defaults: no recommendation trigger fires unless a test overrides one.
@@ -223,6 +244,22 @@ describe('decidePackageReport', () => {
     expect(result.proposals[0].title).toBe('Analyst recommendation');
   });
 
+  it('treats a required field the builder cannot supply as unfillable', () => {
+    // `canFillRespondAction` only checked `parameters`; a schema requiring anything else
+    // (here `justification`) used to mint as executable anyway and fail after approval.
+    expect(canFillRespondAction({ entry: quarantineFileWithJustification })).toBe(false);
+  });
+
+  it('mints a recommendation instead of an executable proposal when a required field cannot be filled (trigger: no executable proposal at all)', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState(),
+      catalog: { ok: true, actions: [quarantineFileWithJustification] },
+    });
+    expect(result.proposals).toHaveLength(1);
+    expect(result.proposals[0].title).toBe('Analyst recommendation');
+  });
+
   it('mints executable isolate-host plus a recommendation when a process-bearing finding has no selector (trigger: process uncovered)', () => {
     const result = decidePackageReport({
       conversationId,
@@ -294,7 +331,38 @@ describe('decidePackageReport', () => {
     expect(a.proposals[0].subjectKey).toBe(b.proposals[0].subjectKey);
   });
 
-  it('mints kill/suspend per process selector when process fields are present', () => {
+  it('treats a bare pid, without entity_id, as unfillable for a process-scoped action', () => {
+    expect(
+      canFillRespondAction({
+        entry: killProcess,
+        processSelector: {
+          pid: 100,
+          processKey: 'pid:100',
+          hostName: 'host-a',
+          processName: 'a.exe',
+        },
+      })
+    ).toBe(false);
+  });
+
+  it('treats entity_id as fillable for a process-scoped action', () => {
+    expect(
+      canFillRespondAction({
+        entry: killProcess,
+        processSelector: {
+          entityId: 'ent-9',
+          processKey: 'entity:ent-9',
+          hostName: 'host-a',
+          processName: 'b.exe',
+        },
+      })
+    ).toBe(true);
+  });
+
+  it('mints an executable kill action only for the selector carrying entity_id, not the bare-pid one', () => {
+    // A bare pid is reused by the OS, so it can't safely back an executable action by the
+    // time an analyst approves it (the gate's decision window is measured in days);
+    // entity_id is Endpoint's durable per-process identity and doesn't have that problem.
     const result = decidePackageReport({
       conversationId,
       state: baseHitState({
@@ -310,16 +378,33 @@ describe('decidePackageReport', () => {
       }),
       catalog: { ok: true, actions: [killProcess] },
     });
+    const executable = result.proposals.filter(
+      (p) => p.actionWorkflowId === killProcess.workflowId
+    );
+    expect(executable).toHaveLength(1);
+    expect(executable[0].actionInput?.parameters).toEqual({ entity_id: 'ent-9' });
+    expect(executable[0].title).toBe('Kill b.exe on host-a');
+    expect(executable[0].comment).toContain('b.exe');
+  });
+
+  it('does not mint an executable action from a bare pid, even when it is the only process selector found (trigger: process uncovered, PID reuse)', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState({
+        hasProcessBearingEvent: true,
+        processSelectors: [
+          { pid: 100, processKey: 'pid:100', hostName: 'host-a', processName: 'a.exe' },
+        ],
+      }),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
     expect(result.proposals).toHaveLength(2);
-    expect(result.proposals.every((p) => p.actionWorkflowId === killProcess.workflowId)).toBe(true);
-    expect(result.proposals[0].actionInput?.parameters).toEqual({ pid: 100 });
-    expect(result.proposals[1].actionInput?.parameters).toEqual({ entity_id: 'ent-9' });
-    // Distinct titles: each process gets its own title, so two kill-process proposals on the
-    // same host read as distinct, not duplicates.
-    expect(result.proposals[0].title).toBe('Kill a.exe (PID 100) on host-a');
-    expect(result.proposals[1].title).toBe('Kill b.exe on host-a');
-    expect(result.proposals[0].comment).toContain('a.exe');
-    expect(result.proposals[1].comment).toContain('b.exe');
+    expect(
+      result.proposals.some((p) => p.actionWorkflowId === 'system-security-action-kill-process')
+    ).toBe(false);
+    expect(result.proposals.some((p) => p.actionWorkflowId === isolateHost.workflowId)).toBe(true);
+    const recommendation = result.proposals.find((p) => p.title === 'Analyst recommendation');
+    expect(recommendation?.comment).toContain('could not be resolved to a live process');
   });
 
   it('never applies a process selector observed on one host to a different host', () => {
@@ -331,7 +416,12 @@ describe('decidePackageReport', () => {
           { name: 'host-b', enrolled: true, agentId: 'agent-b' },
         ],
         processSelectors: [
-          { pid: 100, processKey: 'pid:100', hostName: 'host-a', processName: 'a.exe' },
+          {
+            entityId: 'ent-1',
+            processKey: 'entity:ent-1',
+            hostName: 'host-a',
+            processName: 'a.exe',
+          },
         ],
       }),
       catalog: { ok: true, actions: [killProcess] },
@@ -340,7 +430,7 @@ describe('decidePackageReport', () => {
     // mints nothing rather than borrowing host-a's.
     expect(result.proposals).toHaveLength(1);
     expect(result.proposals[0].hostName).toBe('host-a');
-    expect(result.proposals[0].actionInput?.parameters).toEqual({ pid: 100 });
+    expect(result.proposals[0].actionInput?.parameters).toEqual({ entity_id: 'ent-1' });
   });
 
   it('builds stable subject keys for the same host × action × process', () => {
