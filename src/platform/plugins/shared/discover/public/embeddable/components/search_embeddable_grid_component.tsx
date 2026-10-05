@@ -416,7 +416,7 @@ export function SearchEmbeddableGridComponent({
       docViewerRef={docViewerRef}
       setExpandedDoc={setExpandedDoc}
       searchContext={searchContext}
-      displayMode={isPrintMode ? 'print' : 'default'}
+      viewMode={isPrintMode ? 'print' : 'default'}
       flyoutMenuTrailingActions={flyoutMenuTrailingActions}
     />
   );

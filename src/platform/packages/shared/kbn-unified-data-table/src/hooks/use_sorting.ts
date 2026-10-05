@@ -95,8 +95,12 @@ export const useSorting = ({
   }, [comparators, rows]);
 
   const sorting = useMemo<EuiDataGridProps['sorting']>(() => {
+    // read-only: keeps the sort direction indicator in the column header without allowing changes
     if (!isInteractive || !isSortEnabled) {
-      return undefined;
+      return {
+        columns: sortingColumns,
+        onSort: () => {},
+      };
     }
 
     // in ES|QL mode, sorting is disabled when in Document view

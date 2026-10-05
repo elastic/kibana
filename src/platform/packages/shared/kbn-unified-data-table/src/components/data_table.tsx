@@ -81,7 +81,7 @@ import type {
   DocMap,
   DocumentsDisplayMode,
   JsonModeSettings,
-  DisplayMode,
+  DataGridViewMode,
 } from '../types';
 import {
   getDisplayedColumns,
@@ -269,7 +269,7 @@ interface InternalUnifiedDataTableProps {
    * Display mode of the grid.
    * @default 'default'
    */
-  displayMode?: DisplayMode;
+  viewMode?: DataGridViewMode;
   /**
    * Only for ES|QL mode for now.
    * When false, disables in-memory (client-side) row sorting. Use this when sorting is performed
@@ -600,7 +600,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       showFullScreenButton = true,
       sort,
       isSortEnabled = true,
-      displayMode = 'default',
+      viewMode = 'default',
       isInMemorySortEnabled = true,
       isPaginationEnabled = true,
       paginationMode = DEFAULT_PAGINATION_MODE,
@@ -669,7 +669,7 @@ const InternalUnifiedDataTable = React.forwardRef<
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
     useImperativeHandle(ref, () => dataGridRef.current!);
 
-    const isInteractive = displayMode === 'default';
+    const isInteractive = viewMode === 'default';
 
     const [isFilterActive, setIsFilterActive] = useRestorableState('isFilterActive', false);
     const [isCompareActive, setIsCompareActive] = useRestorableState('isCompareActive', false);
@@ -1339,7 +1339,10 @@ const InternalUnifiedDataTable = React.forwardRef<
     // When a custom toolbar is used, in-table search is passed via
     // gridProps.inTableSearchControl. Otherwise it goes on EUI's right controls.
     const additionalControls = useMemo(() => {
-      if (!externalAdditionalControls && !selectedDocsCount && !inTableSearchControl) {
+      if (
+        !isInteractive ||
+        (!externalAdditionalControls && !selectedDocsCount && !inTableSearchControl)
+      ) {
         return null;
       }
 
@@ -1380,6 +1383,7 @@ const InternalUnifiedDataTable = React.forwardRef<
 
       return leftControls;
     }, [
+      isInteractive,
       externalAdditionalControls,
       selectedDocsCount,
       inTableSearchControl,

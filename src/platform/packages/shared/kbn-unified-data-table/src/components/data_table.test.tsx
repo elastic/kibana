@@ -772,15 +772,43 @@ describe('UnifiedDataTable', () => {
       EXTENDED_JEST_TIMEOUT
     );
 
-    it('should hide sorting when interactive controls are disabled', async () => {
+    it('should keep showing the current sort as read-only when sorting is disabled', async () => {
       await renderComponent({
         ...getProps(),
         columns: ['message'],
         sort: [['message', 'desc']],
-        displayMode: 'print',
+        isSortEnabled: false,
       });
 
-      expect(getLastEuiDataGridProps().sorting).toBeUndefined();
+      expect(getLastEuiDataGridProps().sorting).toEqual({
+        onSort: expect.any(Function),
+        columns: [{ direction: 'desc', id: 'message' }],
+      });
+    });
+
+    it('should render the sort direction indicator in the column header in print view', async () => {
+      await renderComponent({
+        ...getProps(),
+        columns: ['message'],
+        sort: [['message', 'desc']],
+        viewMode: 'print',
+      });
+
+      expect(screen.getByTestId('dataGridHeaderCellSortingIcon-message')).toBeInTheDocument();
+    });
+
+    it('should keep showing the current sort as read-only in print view', async () => {
+      await renderComponent({
+        ...getProps(),
+        columns: ['message'],
+        sort: [['message', 'desc']],
+        viewMode: 'print',
+      });
+
+      expect(getLastEuiDataGridProps().sorting).toEqual({
+        onSort: expect.any(Function),
+        columns: [{ direction: 'desc', id: 'message' }],
+      });
     });
 
     it(
@@ -994,7 +1022,7 @@ describe('UnifiedDataTable', () => {
     it('should hide toolbar controls when interactive controls are disabled', async () => {
       await renderComponent({
         ...getProps(),
-        displayMode: 'print',
+        viewMode: 'print',
         onUpdateRowHeight: jest.fn(),
         onUpdateSampleSize: jest.fn(),
       });
@@ -1006,6 +1034,20 @@ describe('UnifiedDataTable', () => {
         showKeyboardShortcuts: false,
         showSortSelector: false,
       });
+    });
+
+    it('should hide additional controls when interactive controls are disabled', async () => {
+      await renderComponent({
+        ...getProps(),
+        viewMode: 'print',
+        externalAdditionalControls: <div data-test-subj="externalControl" />,
+      });
+
+      const { toolbarVisibility } = getLastEuiDataGridProps();
+      expect(
+        typeof toolbarVisibility === 'object' && toolbarVisibility.additionalControls
+      ).toBeNull();
+      expect(screen.queryByTestId('externalControl')).not.toBeInTheDocument();
     });
   });
 
@@ -1895,12 +1937,13 @@ describe('UnifiedDataTable', () => {
       await renderComponent({
         ...getProps(),
         columns: ['message'],
-        displayMode: 'print',
+        viewMode: 'print',
       });
 
       expect(getLastEuiDataGridProps().onColumnResize).toBeUndefined();
       expect(getLastEuiDataGridProps().leadingControlColumns).toEqual([]);
       expect(getLastEuiDataGridProps().columns[1].actions).toBe(false);
+      expect(getLastEuiDataGridProps().columns[1].cellActions).toEqual([]);
       expect(
         screen.queryByTestId('dataGridHeaderCellActionButton-message')
       ).not.toBeInTheDocument();
@@ -1992,7 +2035,7 @@ describe('UnifiedDataTable', () => {
         ...getProps(),
         rowsPerPageOptions: [1, 5],
         rowsPerPageState: 1,
-        displayMode: 'print',
+        viewMode: 'print',
       });
 
       expect(getLastEuiDataGridProps().pagination).toBeUndefined();

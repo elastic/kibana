@@ -338,7 +338,7 @@ describe('SearchEmbeddableGridComponent', () => {
     });
 
     const lastCallProps = mockDiscoverGridEmbeddableProps.mock.calls.at(-1)?.[0];
-    expect(lastCallProps?.displayMode).toBe('print');
+    expect(lastCallProps?.viewMode).toBe('print');
   });
 
   describe('share direct link', () => {

@@ -206,7 +206,7 @@ function buildEuiGridColumn({
 
   let cellActions: EuiDataGridColumnCellAction[];
 
-  if (disableCellActions) {
+  if (disableCellActions || !isInteractive) {
     cellActions = EMPTY_CELL_ACTIONS;
   } else {
     if (columnCellActions?.length && cellActionsHandling === 'replace') {
