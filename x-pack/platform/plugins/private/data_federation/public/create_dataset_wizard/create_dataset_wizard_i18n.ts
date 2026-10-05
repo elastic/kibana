@@ -203,6 +203,12 @@ export const createDatasetWizardStrings = {
       defaultMessage: 'Could not delete the previous dataset',
     }
   ),
+  dataSourceRefreshAfterSaveError: (savedName: string, reason: string) =>
+    i18n.translate('xpack.dataFederation.createDatasetWizard.dataSourceRefreshAfterSaveError', {
+      defaultMessage:
+        'Data source "{savedName}" was saved, but the data sources list could not be refreshed: {reason}',
+      values: { savedName, reason },
+    }),
   refreshAfterSaveErrorTitle: (savedName: string) =>
     i18n.translate('xpack.dataFederation.createDatasetWizard.refreshAfterSaveErrorTitle', {
       defaultMessage:

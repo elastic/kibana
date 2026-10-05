@@ -16,6 +16,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
 import type { DataSetWithName, DataSource } from '../../common';
 import { CREATE_DATASET_PATH, DATASETS_PATH } from '../app_paths';
+import { useLoadList } from '../use_load_list';
 import { CreateDatasetWizardPage } from './create_dataset_wizard_page';
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 
@@ -581,7 +582,6 @@ describe('CreateDatasetWizardPage', () => {
   it('returns to the datasets list and reports a refresh failure after saving in a toast', async () => {
     const history = createMemoryHistory({ initialEntries: ['/datasets/edit/logs-dataset'] });
     const add = jest.fn().mockResolvedValue(undefined);
-    const loadDataSets = jest.fn().mockRejectedValue(new Error('list unavailable'));
     const addDanger = jest.fn();
     const initialDataSet: DataSetWithName = {
       name: 'logs-dataset',
@@ -589,6 +589,25 @@ describe('CreateDatasetWizardPage', () => {
       resource: 's3://bucket/*',
       description: '',
       settings: { format: 'csv' },
+    };
+    // The initial load succeeds; the refresh after saving fails.
+    const getDataSets = jest
+      .fn()
+      .mockResolvedValueOnce([initialDataSet])
+      .mockRejectedValueOnce(new Error('list unavailable'));
+
+    // Wires the wizard to `useLoadList().reload` the same way `Main` does.
+    const WizardWithLoadList = () => {
+      const { reload } = useLoadList<DataSetWithName>(getDataSets);
+      return (
+        <CreateDatasetWizardPage
+          dataSources={dataSources}
+          existingDataSetNames={['logs-dataset']}
+          loadDataSets={reload}
+          loadDataSources={jest.fn().mockResolvedValue(undefined)}
+          initialDataSet={initialDataSet}
+        />
+      );
     };
 
     const { getByTestId, queryByTestId } = render(
@@ -604,13 +623,7 @@ describe('CreateDatasetWizardPage', () => {
                   toasts: { addDanger },
                 }}
               >
-                <CreateDatasetWizardPage
-                  dataSources={dataSources}
-                  existingDataSetNames={['logs-dataset']}
-                  loadDataSets={loadDataSets}
-                  loadDataSources={jest.fn().mockResolvedValue(undefined)}
-                  initialDataSet={initialDataSet}
-                />
+                <WizardWithLoadList />
               </KibanaContextProvider>
             </Router>
           </MockAppHeaderProvider>
@@ -634,6 +647,7 @@ describe('CreateDatasetWizardPage', () => {
 
     await waitFor(() => expect(history.location.pathname).toBe(DATASETS_PATH));
     expect(add).toHaveBeenCalledTimes(1);
+    expect(getDataSets).toHaveBeenCalledTimes(2);
     expect(addDanger).toHaveBeenCalledWith({
       title: createDatasetWizardStrings.refreshAfterSaveErrorTitle('logs-dataset'),
       text: 'list unavailable',
