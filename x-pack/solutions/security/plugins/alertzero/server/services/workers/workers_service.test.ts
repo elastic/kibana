@@ -254,6 +254,96 @@ describe('WorkersService', () => {
     expect(harness.install).not.toHaveBeenCalled();
   });
 
+  describe('an already-enabled worker with no stored account', () => {
+    const installEnabledWithoutAccount = async () => {
+      const harness = createPersistentHarness();
+      const service = harness.createService();
+      const saved = await service.update(
+        ATTACK_DISCOVERY,
+        { settings: { scheduleInterval: '24h' }, settingsRevision: null },
+        SPACE,
+        request
+      );
+      if (saved.outcome !== 'updated') throw new Error('Expected the worker to install');
+      const document = harness.documents.get(`${ATTACK_DISCOVERY}-${SPACE}`);
+      if (!document) throw new Error('Expected an installed worker');
+      document.enabled = true;
+      harness.install.mockClear();
+      harness.updateWorkflow.mockClear();
+      return { harness, service, revision: saved.response.worker.settingsRevision };
+    };
+
+    it('rejects a settings save that would leave it on', async () => {
+      const { harness, service, revision } = await installEnabledWithoutAccount();
+
+      const result = await service.update(
+        ATTACK_DISCOVERY,
+        { settings: { scheduleInterval: '15m' }, settingsRevision: revision },
+        SPACE,
+        request
+      );
+
+      expect(result).toEqual({
+        outcome: 'rejected',
+        what: 'a worker that is enabled without a service account',
+      });
+      expect(harness.install).not.toHaveBeenCalled();
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('rejects a save that keeps it enabled', async () => {
+      const { harness, service } = await installEnabledWithoutAccount();
+
+      const result = await service.update(ATTACK_DISCOVERY, { enabled: true }, SPACE, request);
+
+      expect(result).toEqual({
+        outcome: 'rejected',
+        what: 'a worker that is enabled without a service account',
+      });
+      expect(harness.install).not.toHaveBeenCalled();
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('allows turning it off without an account', async () => {
+      const { harness, service } = await installEnabledWithoutAccount();
+
+      const result = await service.update(ATTACK_DISCOVERY, { enabled: false }, SPACE, request);
+
+      expect(result.outcome).toBe('updated');
+      if (result.outcome !== 'updated') throw new Error('Expected disable to succeed');
+      expect(result.response.worker.enabled).toBe(false);
+      expect(harness.install).not.toHaveBeenCalled();
+      expect(harness.documents.get(`${ATTACK_DISCOVERY}-${SPACE}`)?.enabled).toBe(false);
+    });
+
+    it('accepts an account at the current revision and resynchronizes the worker', async () => {
+      const { harness, service, revision } = await installEnabledWithoutAccount();
+      const workflowId = reportedWorkflowId(ATTACK_DISCOVERY, SPACE);
+
+      const result = await service.update(
+        ATTACK_DISCOVERY,
+        { settings: { serviceAccountId: 'sa-1' }, settingsRevision: revision },
+        SPACE,
+        request
+      );
+
+      expect(result.outcome).toBe('updated');
+      expect(harness.install).toHaveBeenCalledWith(
+        ATTACK_DISCOVERY,
+        expect.objectContaining({
+          values: expect.objectContaining({ serviceAccountId: 'sa-1' }),
+        })
+      );
+      expect(harness.updateWorkflow).toHaveBeenCalledWith(
+        workflowId,
+        { enabled: true },
+        SPACE,
+        request
+      );
+      expect(harness.scheduledTasks.get(workflowId)?.apiKeyId).toEqual(expect.any(String));
+    });
+  });
+
   it('installs a user save through the request-scoped client', async () => {
     const harness = createPersistentHarness();
     const installWorkerForRequest = jest.fn(async (_request, registration, options) => {
