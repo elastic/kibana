@@ -18,7 +18,7 @@ const SHARDS_FILTER = '._shards';
 spaceTest.describe('Console output filter', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
-    await pageObjects.console.gotoWithRequestLoaded('GET /_search?pretty');
+    await pageObjects.console.gotoWithRequestLoaded('GET /_search?size=0&pretty');
     await pageObjects.console.skipTourIfExists();
     await pageObjects.console.sendRequest();
     await expect(pageObjects.console.outputEditorContent).toContainText('hits');
