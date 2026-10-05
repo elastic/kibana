@@ -53,7 +53,7 @@ spaceTest.describe('Lens chart switching from scratch', { tag: tags.deploymentAg
     await lens.waitForVisualization();
 
     // Verify the date_histogram and average aggregations transferred correctly after the switch.
-    expect(await lens.datatable.getHeaderText(0)).toBe('@timestamp per 3 hours');
+    expect(await lens.datatable.getHeaderText(0)).toBe('@timestamp per hour');
     expect(await lens.datatable.getHeaderText(1)).toBe(testData.AVERAGE_OF_BYTES);
     // Confirm the datatable has populated rows (aggregation produced results).
     await expect(lens.datatable.getCellLocator(0, 0)).not.toBeEmpty();
