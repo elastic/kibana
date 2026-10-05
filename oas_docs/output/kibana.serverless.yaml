@@ -194171,10 +194171,11 @@ components:
             - sourceType
             - source
     Security_Osquery_API_MinOsqueryVersion:
-      description: Minimum osquery version required to run this pack or query. Formatted as a semver string, e.g. `"5.10.0"`.
+      description: Minimum osquery version required to run this pack or query. Formatted as a numeric version string, e.g. `"5.10.0"`. Non-numeric values (e.g. `"latest"`) are rejected.
       example: 5.10.0
       maxLength: 64
       minLength: 1
+      pattern: ^\d+(\.\d+){0,2}$
       type: string
     Security_Osquery_API_MinOsqueryVersionOrUndefined:
       $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
