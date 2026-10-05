@@ -733,11 +733,7 @@ describe('CreateDatasetWizardPage', () => {
     fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 's3://bucket/*' } });
     selectFormat(getByTestId, 'csv');
 
-    await clickNext(getByTestId);
-    expect(
-      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
-    ).toBeInTheDocument();
-    await clickNext(getByTestId);
+    await clickStep(getByTestId, 'mapping');
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
 
     await act(async () => {
