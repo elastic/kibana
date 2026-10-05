@@ -86,6 +86,17 @@ describe('getUnprocessedOtelErrorsByService', () => {
     expect(result.unprocessedOtelErrors).toHaveLength(MAX_UNPROCESSED_OTEL_ERRORS);
   });
 
+  it('does not set maxCountExceeded when hits equal the cap exactly', async () => {
+    const hits = Array.from({ length: MAX_UNPROCESSED_OTEL_ERRORS }, (_, i) =>
+      makeRawHit({ _id: `doc-${i}` })
+    );
+    const logsClient = makeLogsClient(hits);
+    const result = await getUnprocessedOtelErrorsByService({ logsClient, ...BASE_ARGS });
+
+    expect(result.maxCountExceeded).toBe(false);
+    expect(result.unprocessedOtelErrors).toHaveLength(MAX_UNPROCESSED_OTEL_ERRORS);
+  });
+
   it('respects maxRows when provided', async () => {
     const hits = Array.from({ length: 10 }, (_, i) => makeRawHit({ _id: `doc-${i}` }));
     const logsClient = makeLogsClient(hits);

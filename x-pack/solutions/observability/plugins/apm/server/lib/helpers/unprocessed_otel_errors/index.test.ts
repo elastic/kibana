@@ -12,6 +12,7 @@ import {
   OTEL_EVENT_NAME,
   SERVICE_NAME,
   SPAN_ID,
+  TIMESTAMP_US,
   TRACE_ID,
 } from '../../../../common/es_fields/apm';
 import { toUnprocessedOtelError } from '.';
@@ -70,7 +71,8 @@ describe('toUnprocessedOtelError', () => {
   });
 
   it('omits span when span.id is absent', () => {
-    const { [SPAN_ID]: _removed, ...fieldsWithoutSpan } = makeHit().fields;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { [SPAN_ID]: _ignored, ...fieldsWithoutSpan } = makeHit().fields;
     const hit = makeHit({ fields: fieldsWithoutSpan as Record<string, unknown[]> });
     const result = toUnprocessedOtelError(hit);
     expect(result?.span).toBeUndefined();
@@ -83,10 +85,26 @@ describe('toUnprocessedOtelError', () => {
   });
 
   it('derives timestamp from @timestamp when timestamp_us is absent', () => {
-    const { fields } = makeHit();
-    const hitWithoutUsTimestamp = makeHit({ fields });
-    const result = toUnprocessedOtelError(hitWithoutUsTimestamp);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { [TIMESTAMP_US]: _ignored, ...fieldsWithoutUsTimestamp } = makeHit().fields as Record<
+      string,
+      unknown[]
+    >;
+    const hit = makeHit({ fields: fieldsWithoutUsTimestamp });
+    const result = toUnprocessedOtelError(hit);
     const expectedUs = new Date('2024-01-01T00:00:00.000Z').getTime() * 1000;
     expect(result?.timestamp.us).toBe(expectedUs);
+  });
+
+  it('returns a valid row when trace.id is absent', () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { [TRACE_ID]: _ignored, ...fieldsWithoutTrace } = makeHit().fields as Record<
+      string,
+      unknown[]
+    >;
+    const hit = makeHit({ fields: fieldsWithoutTrace });
+    const result = toUnprocessedOtelError(hit);
+    expect(result).not.toBeNull();
+    expect(result?.trace).toBeUndefined();
   });
 });

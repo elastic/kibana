@@ -11,6 +11,9 @@ import { MAX_SERVICE_NAME_LENGTH } from '../../constants';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema } from '../../default_api_types';
 
+/** Maximum number of unprocessed OTel error rows returned per request by default. */
+export const MAX_UNPROCESSED_OTEL_ERRORS = 500;
+
 export interface UnprocessedOtelErrorsResponse {
   /** Raw unprocessed OTel exception log documents, up to MAX_UNPROCESSED_OTEL_ERRORS. */
   unprocessedOtelErrors: ApmError[];
@@ -32,8 +35,9 @@ export const unprocessedOtelErrorsRoute = defineRoute<UnprocessedOtelErrorsRespo
            * When provided, caps the result to this many rows instead of the default
            * MAX_UNPROCESSED_OTEL_ERRORS. Use in compact/preview contexts (e.g. Service Overview)
            * to avoid fetching 500+ rows that will never be rendered.
+           * Capped server-side at MAX_UNPROCESSED_OTEL_ERRORS regardless of what is passed.
            */
-          maxRows: z.number().int().min(1).optional(),
+          maxRows: z.coerce.number().int().min(1).max(MAX_UNPROCESSED_OTEL_ERRORS).optional(),
         })
         .merge(environmentSchema)
         .merge(kuerySchema)
