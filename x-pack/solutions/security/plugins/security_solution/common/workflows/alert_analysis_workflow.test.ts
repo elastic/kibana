@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  MAX_ENTITY_ID_LENGTH,
+  MAX_ENTITY_IDS,
+  MAX_ENTITY_NAME_LENGTH,
+} from '@kbn/agentic-investigations-plugin/common';
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW } from '@kbn/workflows/managed';
 import { parse } from 'yaml';
 import {
@@ -200,7 +205,10 @@ describe('AlertAnalysisWorkflowOutput YAML sync', () => {
             maxItems?: number;
             items?: {
               required?: string[];
-              properties?: Record<string, { maxLength?: number; maxItems?: number }>;
+              properties?: Record<
+                string,
+                { maxLength?: number; maxItems?: number; enum?: string[] }
+              >;
             };
             maxLength?: number;
           }
@@ -213,7 +221,13 @@ describe('AlertAnalysisWorkflowOutput YAML sync', () => {
     expect(yamlKeys).toEqual(zodKeys);
     expect([...workflow.outputs.required].sort()).toEqual(zodKeys);
 
-    expect(workflow.outputs.properties.impacted_entities.maxItems).toBe(100);
+    // The YAML carries literal values; they must stay on the shared impact limits, or the
+    // output validates while the attachImpact step rejects the same entities.
+    const impactedEntity = workflow.outputs.properties.impacted_entities;
+    expect(impactedEntity.maxItems).toBe(MAX_ENTITY_IDS);
+    expect(impactedEntity.items?.properties?.id?.maxLength).toBe(MAX_ENTITY_ID_LENGTH);
+    expect(impactedEntity.items?.properties?.name?.maxLength).toBe(MAX_ENTITY_NAME_LENGTH);
+    expect(impactedEntity.items?.properties?.type?.enum).toEqual(['host', 'user']);
     expect(workflow.outputs.properties.missing_alert_ids?.maxItems).toBe(1000);
     expect(workflow.outputs.properties.verdicts.items?.properties?.rationale?.maxLength).toBe(500);
     expect(
