@@ -23,6 +23,7 @@ import {
   clearResolutionRuleOverrides,
   seedUserEntity,
   waitForResolution,
+  assertResolutionGroup,
   assertNotResolved,
   assertSidRuleWatermarked,
   triggerMaintainerRun,
@@ -483,6 +484,108 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
     await triggerMaintainerRun(apiClient, internalHeaders);
     await waitForResolution(esClient, entraEntity, oktaEntity);
   });
+
+  apiTest(
+    'Email links local entities on several hosts together with Okta onto the Active Directory user',
+    async ({ apiClient, esClient }) => {
+      const email = 'john.smith@email-local.example';
+      const localA = 'user:john.smith@host-a@local';
+      const localB = 'user:john.smith@host-b@local';
+      const adEntity = 'user:john.smith@active_directory';
+      const oktaEntity = 'user:john.smith@okta';
+
+      for (const [entityId, namespace] of [
+        [localA, 'local'],
+        [localB, 'local'],
+        [adEntity, 'active_directory'],
+        [oktaEntity, 'okta'],
+      ]) {
+        await seedUserEntity(esClient, { entityId, namespace, email, userName: 'john.smith' });
+      }
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, localA, adEntity);
+      await waitForResolution(esClient, localB, adEntity);
+      await waitForResolution(esClient, oktaEntity, adEntity);
+
+      await assertResolutionGroup(apiClient, defaultHeaders, {
+        targetId: adEntity,
+        aliasIds: [localA, localB, oktaEntity],
+      });
+    }
+  );
+
+  apiTest(
+    'Email declines two Active Directory users sharing a mailbox, even next to local users',
+    async ({ apiClient, esClient }) => {
+      const sharedEmail = 'helpdesk@email-ambiguous.example';
+      const declined = [
+        ['test-ambiguous-ad-a', 'active_directory'],
+        ['test-ambiguous-ad-b', 'active_directory'],
+        ['test-ambiguous-okta', 'okta'],
+        ['user:helpdesk@host-a@local', 'local'],
+        ['user:helpdesk@host-b@local', 'local'],
+      ];
+      for (const [entityId, namespace] of declined) {
+        await seedUserEntity(esClient, { entityId, namespace, email: sharedEmail });
+      }
+
+      // A clean pair in the same run: once it links, the run has processed the declined group.
+      const runCompletedProbeEmail = 'probe@email-ambiguous.example';
+      const runCompletedProbeOkta = 'test-ambiguous-probe-okta';
+      const runCompletedProbeEntra = 'test-ambiguous-probe-entra';
+      await seedUserEntity(esClient, {
+        entityId: runCompletedProbeOkta,
+        namespace: 'okta',
+        email: runCompletedProbeEmail,
+      });
+      await seedUserEntity(esClient, {
+        entityId: runCompletedProbeEntra,
+        namespace: 'entra_id',
+        email: runCompletedProbeEmail,
+      });
+
+      await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
+        sync: true,
+      });
+      await waitForResolution(esClient, runCompletedProbeEntra, runCompletedProbeOkta);
+
+      // The run already finished, so each entity after the first needs only a short check.
+      const settledRunCheckMs = 1_000;
+      const [[firstEntityId], ...rest] = declined;
+      await assertNotResolved(esClient, firstEntityId);
+      for (const [entityId] of rest) {
+        await assertNotResolved(esClient, entityId, settledRunCheckMs);
+      }
+    }
+  );
+
+  apiTest(
+    'Email links local entities before the Active Directory user arrives, then retargets onto it',
+    async ({ apiClient, esClient }) => {
+      const email = 'jane.pre-ad@email-local.example';
+      const localA = 'user:jane.pre-ad@host-a@local';
+      const localB = 'user:jane.pre-ad@host-b@local';
+      const adEntity = 'user:jane.pre-ad@active_directory';
+
+      await seedUserEntity(esClient, { entityId: localA, namespace: 'local', email });
+      await seedUserEntity(esClient, { entityId: localB, namespace: 'local', email });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, localB, localA);
+
+      await seedUserEntity(esClient, { entityId: adEntity, namespace: 'active_directory', email });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, localA, adEntity);
+      await waitForResolution(esClient, localB, adEntity);
+
+      await assertResolutionGroup(apiClient, defaultHeaders, {
+        targetId: adEntity,
+        aliasIds: [localA, localB],
+      });
+    }
+  );
 
   apiTest(
     'Windows SID bridge links system account-management (IAM) entities to Active Directory',

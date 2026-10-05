@@ -6,7 +6,6 @@
  */
 
 import { isEqual } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
 import type { Logger } from '@kbn/core/server';
 import type {
   SignificantEventInvestigation,
@@ -30,16 +29,15 @@ export const attachInvestigationToEvent = async ({
   eventClient: EventClient;
   /**
    * Flag-aware read surface (`getEventSearchClient()`). When provided, `resolvedSearchClient`
-   * uses this for the initial read; canonical lineage (previous_event_uuid, investigations) is
-   * always sourced from `eventClient`. Defaults to `eventClient` for legacy tests. Production
-   * callers must always supply this.
+   * uses this for the initial read; canonical investigations are always sourced from `eventClient`.
+   * Defaults to `eventClient` for legacy tests. Production callers must always supply this.
    */
   eventSearchClient?: SignificantEventsReadClient;
   eventId: string;
   investigation: SignificantEventInvestigation;
   alertEventsClient?: AlertEventsClientApi;
   logger?: Logger;
-}): Promise<{ event_uuid?: string; updated: number; ignored: number }> => {
+}): Promise<{ updated: number; ignored: number }> => {
   const resolvedSearchClient = eventSearchClient ?? eventClient;
   let latestByEventId: SignificantEventResponse | undefined;
   let readStoreThrew = false;
@@ -68,8 +66,8 @@ export const attachInvestigationToEvent = async ({
     return { updated: 0, ignored: 1 };
   }
 
-  // RuleEventsClient uses `group_hash` as a synthetic event_uuid, so a legacy write must retain
-  // the actual EventClient version as its predecessor.
+  // RuleEventsClient uses `group_hash` as a synthetic identifier, so writes must source the
+  // current canonical event from EventClient.
   // If we already fell back to eventClient above, reuse that result — no second round-trip needed.
   const latestLegacy =
     usedLegacyFallback || resolvedSearchClient === eventClient
@@ -106,16 +104,13 @@ export const attachInvestigationToEvent = async ({
   }
 
   if (isEqual(investigations, existing)) {
-    return { event_uuid: latestLegacy.event_uuid, updated: 0, ignored: 1 };
+    return { updated: 0, ignored: 1 };
   }
 
   const now = new Date().toISOString();
-  const nextEventUuid = uuidv4();
   const updatedEvent = {
     ...latestLegacy,
     '@timestamp': now,
-    event_uuid: nextEventUuid,
-    previous_event_uuid: latestLegacy.event_uuid,
     investigations,
     workflow_execution_id: investigation.workflow_execution_id,
   };
@@ -138,5 +133,5 @@ export const attachInvestigationToEvent = async ({
     priorSignificantEvent: latestLegacy,
   });
 
-  return { event_uuid: nextEventUuid, updated: 1, ignored: 0 };
+  return { updated: 1, ignored: 0 };
 };

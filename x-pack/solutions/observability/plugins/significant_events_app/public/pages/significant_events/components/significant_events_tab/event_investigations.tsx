@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import moment from 'moment';
 import {
   EuiAccordion,
@@ -23,13 +23,7 @@ import type {
   SignificantEvent,
   SignificantEventInvestigation,
 } from '@kbn/significant-events-schema';
-import {
-  InvestigationOutput,
-  useInvestigationState,
-  type InvestigationDiscoverParams,
-} from '@kbn/investigation-output';
-import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { InvestigationOutput, useInvestigationState } from '@kbn/investigation-output';
 import { formatTimestamp } from '../../../../util/formatters';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { isInvestigationRunning } from '../shared/investigation_status';
@@ -80,9 +74,6 @@ const InvestigationRow = ({
 }) => {
   const {
     core: { http },
-    dependencies: {
-      start: { share },
-    },
   } = useKibana();
   const { started_at: startedAt, completed_at: completedAt, workflow_execution_id } = investigation;
   const duration = formatDuration(startedAt, completedAt);
@@ -103,12 +94,6 @@ const InvestigationRow = ({
   const conversationHref = conversationId
     ? http.basePath.prepend(`/app/agent_builder/conversations/${conversationId}`)
     : undefined;
-
-  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
-  const getQueryHref = useCallback(
-    (params: InvestigationDiscoverParams) => discoverLocator?.getRedirectUrl(params),
-    [discoverLocator]
-  );
 
   return (
     <EuiAccordion
@@ -142,12 +127,7 @@ const InvestigationRow = ({
       }
     >
       <EuiSpacer size="s" />
-      <InvestigationOutput
-        status={status}
-        state={state}
-        error={error}
-        getQueryHref={getQueryHref}
-      />
+      <InvestigationOutput status={status} state={state} error={error} />
     </EuiAccordion>
   );
 };
