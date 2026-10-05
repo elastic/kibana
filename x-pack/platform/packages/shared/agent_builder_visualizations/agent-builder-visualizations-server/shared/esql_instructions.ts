@@ -48,7 +48,7 @@ Use the event-time field. Do not hardcode times or \`now()\` ranges. On a time s
 
 ### FROM
 
-\`@timestamp\` — \`TBUCKET(100, ?_tstart, ?_tend)\`. No timestamp \`WHERE\`. The bounds size the buckets; Kibana binds \`?_tstart\` / \`?_tend\` when the chart renders:
+\`@timestamp\` — \`TBUCKET(100, ?_tstart, ?_tend)\`. A timestamp \`WHERE\` is not needed. The bounds size the buckets; Kibana binds \`?_tstart\` / \`?_tend\` when the chart renders:
 
 \`\`\`esql
 FROM logs | STATS count = COUNT() BY bucket = TBUCKET(100, ?_tstart, ?_tend)
