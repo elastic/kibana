@@ -130,6 +130,13 @@ export const flushPendingAgentPolicyRevisionBumps = async (
   await revisionBatchersByServer.get(server)?.flushPending();
 };
 
+/**
+ * Collects the agent policy ids whose revision bump a multi-write operation
+ * (e.g. a paged maintenance-window sync) wants to defer to a single
+ * {@link PackagePolicyService.scheduleRevisionBumps} call at the end.
+ */
+export type DeferredRevisionBumps = Set<string>;
+
 export class PackagePolicyService {
   private readonly server: SyntheticsServerSetup;
   private readonly revisionBatcher: AgentPolicyRevisionBatcher;
@@ -141,6 +148,34 @@ export class PackagePolicyService {
 
   private getSpaceSoClient(spaceId: string) {
     return getSpaceSoClientFor(this.server, spaceId);
+  }
+
+  /**
+   * Bumps the revision of every agent policy collected in `deferredBumps`.
+   *
+   * Callers that pass `deferredBumps` to the write methods must call this once
+   * they are done — also when the operation fails part-way — because those
+   * package policies were written with `bumpRevision: false`, so Fleet never
+   * redeploys them until this runs.
+   */
+  async scheduleRevisionBumps(deferredBumps: DeferredRevisionBumps): Promise<void> {
+    if (deferredBumps.size === 0) {
+      return;
+    }
+    const policyIds = [...deferredBumps];
+    deferredBumps.clear();
+    await this.revisionBatcher.schedule(policyIds);
+  }
+
+  private async scheduleOrDeferRevisionBumps(
+    policyIds: string[],
+    deferredBumps?: DeferredRevisionBumps
+  ): Promise<void> {
+    if (!deferredBumps) {
+      await this.revisionBatcher.schedule(policyIds);
+      return;
+    }
+    policyIds.forEach((policyId) => deferredBumps.add(policyId));
   }
 
   private getInternalEsClient() {
@@ -245,9 +280,12 @@ export class PackagePolicyService {
   async bulkCreate({
     newPolicies,
     spaceId,
+    deferredBumps,
   }: {
     newPolicies: NewPackagePolicyWithId[];
     spaceId: string;
+    /** Collects the agent policy ids to bump instead of bumping them now. */
+    deferredBumps?: DeferredRevisionBumps;
   }) {
     if (newPolicies.length === 0) {
       return { created: [], failed: [] };
@@ -269,7 +307,9 @@ export class PackagePolicyService {
               ),
             ]
           : []),
-        ...(batched.length > 0 ? [this.bulkCreateWithBatchedRevision(client, batched)] : []),
+        ...(batched.length > 0
+          ? [this.bulkCreateWithBatchedRevision(client, batched, deferredBumps)]
+          : []),
       ];
     });
 
@@ -284,9 +324,12 @@ export class PackagePolicyService {
   async bulkUpdate({
     policiesToUpdate,
     spaceId,
+    deferredBumps,
   }: {
     policiesToUpdate: UpdatePackagePolicyWithId[];
     spaceId: string;
+    /** Collects the agent policy ids to bump instead of bumping them now. */
+    deferredBumps?: DeferredRevisionBumps;
   }) {
     if (policiesToUpdate.length === 0) {
       return [];
@@ -308,7 +351,9 @@ export class PackagePolicyService {
               ),
             ]
           : []),
-        ...(batched.length > 0 ? [this.bulkUpdateWithBatchedRevision(client, batched)] : []),
+        ...(batched.length > 0
+          ? [this.bulkUpdateWithBatchedRevision(client, batched, deferredBumps)]
+          : []),
       ];
     });
 
@@ -375,9 +420,12 @@ export class PackagePolicyService {
   async bulkDelete({
     policyIdsToDelete,
     spaceId,
+    deferredBumps,
   }: {
     policyIdsToDelete: string[];
     spaceId: string;
+    /** Collects the agent policy ids to bump instead of bumping them now. */
+    deferredBumps?: DeferredRevisionBumps;
   }) {
     if (policyIdsToDelete.length === 0) {
       return;
@@ -406,7 +454,9 @@ export class PackagePolicyService {
               ),
             ]
           : []),
-        ...(batched.length > 0 ? [this.bulkDeleteWithBatchedRevision(client, batched)] : []),
+        ...(batched.length > 0
+          ? [this.bulkDeleteWithBatchedRevision(client, batched, deferredBumps)]
+          : []),
       ];
     });
 
@@ -433,7 +483,8 @@ export class PackagePolicyService {
 
   private async bulkCreateWithBatchedRevision(
     client: SavedObjectsClientContract,
-    policies: NewPackagePolicyWithId[]
+    policies: NewPackagePolicyWithId[],
+    deferredBumps?: DeferredRevisionBumps
   ) {
     const result = await this.server.fleet.packagePolicyService.bulkCreate(
       client,
@@ -442,15 +493,17 @@ export class PackagePolicyService {
       { asyncDeploy: true, bumpRevision: false }
     );
 
-    await this.revisionBatcher.schedule(
-      result.created.flatMap(({ policy_ids: policyIds }) => policyIds)
+    await this.scheduleOrDeferRevisionBumps(
+      result.created.flatMap(({ policy_ids: policyIds }) => policyIds),
+      deferredBumps
     );
     return result;
   }
 
   private async bulkUpdateWithBatchedRevision(
     client: SavedObjectsClientContract,
-    policies: UpdatePackagePolicyWithId[]
+    policies: UpdatePackagePolicyWithId[],
+    deferredBumps?: DeferredRevisionBumps
   ) {
     const result = await this.server.fleet.packagePolicyService.bulkUpdate(
       client,
@@ -459,15 +512,17 @@ export class PackagePolicyService {
       { force: true, asyncDeploy: true, bumpRevision: false }
     );
 
-    await this.revisionBatcher.schedule(
-      result.updatedPolicies?.flatMap(({ policy_ids: policyIds }) => policyIds) ?? []
+    await this.scheduleOrDeferRevisionBumps(
+      result.updatedPolicies?.flatMap(({ policy_ids: policyIds }) => policyIds) ?? [],
+      deferredBumps
     );
     return result;
   }
 
   private async bulkDeleteWithBatchedRevision(
     client: SavedObjectsClientContract,
-    policies: PackagePolicyWithAgentPolicyIds[]
+    policies: PackagePolicyWithAgentPolicyIds[],
+    deferredBumps?: DeferredRevisionBumps
   ) {
     const result = await this.server.fleet.packagePolicyService.delete(
       client,
@@ -476,8 +531,9 @@ export class PackagePolicyService {
       { force: true, asyncDeploy: true, bumpRevision: false }
     );
 
-    await this.revisionBatcher.schedule(
-      result.flatMap(({ success, policy_ids: policyIds }) => (success ? policyIds ?? [] : []))
+    await this.scheduleOrDeferRevisionBumps(
+      result.flatMap(({ success, policy_ids: policyIds }) => (success ? policyIds ?? [] : [])),
+      deferredBumps
     );
     return result;
   }

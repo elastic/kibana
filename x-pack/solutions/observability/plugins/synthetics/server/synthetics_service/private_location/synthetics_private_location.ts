@@ -38,6 +38,7 @@ import {
 } from '../../../common/runtime_types';
 import { stringifyString } from '../formatters/private_formatters/formatting_utils';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
+import type { DeferredRevisionBumps } from './package_policy_service';
 import { PackagePolicyService } from './package_policy_service';
 import { rebalanceByCost } from './assign_shards';
 import {
@@ -521,11 +522,25 @@ export class SyntheticsPrivateLocation {
     }
   }
 
+  /**
+   * Bumps the agent policies collected via `deferredBumps` passed to
+   * {@link editMonitors}; must be called once the caller is done editing.
+   */
+  async scheduleRevisionBumps(deferredBumps: DeferredRevisionBumps) {
+    await this.packagePolicyService.scheduleRevisionBumps(deferredBumps);
+  }
+
+  /**
+   * When `deferredBumps` is passed, scalable-location agent policy revision
+   * bumps are collected there instead of awaited per call — so a caller editing
+   * many batches in sequence can bump each agent policy once, not once per batch.
+   */
   async editMonitors(
     configs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }>,
     allPrivateLocations: SyntheticsPrivateLocations,
     spaceId: string,
-    maintenanceWindows: MaintenanceWindow[]
+    maintenanceWindows: MaintenanceWindow[],
+    deferredBumps?: DeferredRevisionBumps
   ) {
     if (configs.length === 0) {
       return {
@@ -635,6 +650,7 @@ export class SyntheticsPrivateLocation {
     const createResponse = await this.packagePolicyService.bulkCreate({
       newPolicies: policiesToCreate,
       spaceId,
+      deferredBumps,
     });
 
     if (createResponse.failed.length > 0) {
@@ -654,10 +670,12 @@ export class SyntheticsPrivateLocation {
       this.packagePolicyService.bulkUpdate({
         policiesToUpdate,
         spaceId,
+        deferredBumps,
       }),
       this.packagePolicyService.bulkDelete({
         policyIdsToDelete: uniqueToDelete,
         spaceId,
+        deferredBumps,
       }),
     ]);
 

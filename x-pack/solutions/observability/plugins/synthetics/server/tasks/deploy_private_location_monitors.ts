@@ -17,6 +17,7 @@ import {
   syntheticsMonitorAttributes,
   syntheticsMonitorSOTypes,
 } from '../../common/types/saved_objects';
+import type { DeferredRevisionBumps } from '../synthetics_service/private_location/package_policy_service';
 import { normalizeSecrets } from '../synthetics_service/utils';
 import type { PrivateLocationAttributes } from '../runtime_types/private_locations';
 import type {
@@ -86,26 +87,39 @@ export class DeployPrivateLocationMonitors {
     const listOfUpdatedConfigs: Array<string> = [];
 
     return this.serverSetup.fleet.runWithCache(async () => {
+      // Pages are written one after another and each write waits for its agent
+      // policy bump, so the revision batcher never sees two pages at once and
+      // would redeploy every agent policy once per page. Collect the bumps and
+      // issue them once for the whole sync instead.
+      const deferredBumps: DeferredRevisionBumps = new Set();
       const commonProps = {
         listOfUpdatedConfigs,
         allPrivateLocations,
         maintenanceWindows,
         soClient,
         paramsBySpace,
+        deferredBumps,
       };
-      for (const mw of updatedMWs || []) {
-        await this.updateMonitorsForMw({
-          ...commonProps,
-          mwId: mw.id,
-        });
-      }
 
-      for (const mwId of missingMWIds || []) {
-        await this.updateMonitorsForMw({
-          ...commonProps,
-          mwId,
-          isMissingMw: true,
-        });
+      try {
+        for (const mw of updatedMWs || []) {
+          await this.updateMonitorsForMw({
+            ...commonProps,
+            mwId: mw.id,
+          });
+        }
+
+        for (const mwId of missingMWIds || []) {
+          await this.updateMonitorsForMw({
+            ...commonProps,
+            mwId,
+            isMissingMw: true,
+          });
+        }
+      } finally {
+        // in a finally: pages already written used `bumpRevision: false`, so an
+        // early exit would leave them undeployed until a later write bumps
+        await this.syntheticsMonitorClient.privateLocationAPI.scheduleRevisionBumps(deferredBumps);
       }
     });
   }
@@ -117,6 +131,7 @@ export class DeployPrivateLocationMonitors {
     maintenanceWindows,
     soClient,
     paramsBySpace,
+    deferredBumps,
     isMissingMw = false,
   }: {
     mwId: string;
@@ -126,6 +141,7 @@ export class DeployPrivateLocationMonitors {
     allPrivateLocations: PrivateLocationAttributes[];
     paramsBySpace: Record<string, Record<string, string>>;
     listOfUpdatedConfigs: Array<string>;
+    deferredBumps?: DeferredRevisionBumps;
     isMissingMw?: boolean;
   }) {
     const {
@@ -170,6 +186,7 @@ export class DeployPrivateLocationMonitors {
           monitorSpaceIds,
           paramsBySpace,
           maintenanceWindows,
+          deferredBumps,
         });
 
         if (isMissingMw) {
@@ -253,12 +270,14 @@ export class DeployPrivateLocationMonitors {
     monitorSpaceIds,
     paramsBySpace,
     maintenanceWindows,
+    deferredBumps,
   }: {
     allPrivateLocations: PrivateLocationAttributes[];
     configsBySpaces: Record<string, HeartbeatConfig[]>;
     monitorSpaceIds: Set<string>;
     paramsBySpace: Record<string, Record<string, string>>;
     maintenanceWindows: MaintenanceWindow[];
+    deferredBumps?: DeferredRevisionBumps;
   }) {
     const { privateLocationAPI } = this.syntheticsMonitorClient;
     const failedCreatesBySpace: FailedCreatesBySpace[] = [];
@@ -290,7 +309,8 @@ export class DeployPrivateLocationMonitors {
           privateConfigs,
           allPrivateLocations,
           spaceId,
-          maintenanceWindows
+          maintenanceWindows,
+          deferredBumps
         );
 
         if (result?.failedCreates && result.failedCreates.length > 0) {

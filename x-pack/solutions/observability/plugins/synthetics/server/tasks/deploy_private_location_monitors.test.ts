@@ -100,9 +100,11 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
   const buildDeployer = ({
     pages,
     editMonitors,
+    scheduleRevisionBumps = jest.fn().mockResolvedValue(undefined),
   }: {
     pages: string[][];
     editMonitors: jest.Mock;
+    scheduleRevisionBumps?: jest.Mock;
   }) => {
     const close = jest.fn().mockResolvedValue(undefined);
     // one finder per maintenance window; monitor ids are unique per finder because
@@ -130,7 +132,7 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
 
     const deployer = new DeployPrivateLocationMonitors(serverSetup, {
       ...mockSyntheticsMonitorClient,
-      privateLocationAPI: { editMonitors },
+      privateLocationAPI: { editMonitors, scheduleRevisionBumps },
     } as any);
 
     // keep the test focused on the failed-create control flow, not on monitor formatting
@@ -142,7 +144,7 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
       .spyOn(deployer, 'parseLocations')
       .mockReturnValue({ privateLocations, publicLocations: [] } as any);
 
-    return { deployer, close, editMonitors };
+    return { deployer, close, editMonitors, scheduleRevisionBumps };
   };
 
   const withFailedCreates = { failedUpdates: [], failedCreates: [{ packagePolicy: { id: 'p1' } }] };
@@ -252,6 +254,45 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
       });
 
       expect(mockSoClient.bulkUpdate).toHaveBeenCalled();
+    });
+
+    it('bumps agent policies once for the whole sync, not once per page', async () => {
+      // each page's write reports the agent policy it touched, like the real
+      // package-policy service does when it is handed the shared collection
+      const editMonitors = jest
+        .fn()
+        .mockImplementation(async (_configs, _locations, _space, _mws, deferredBumps) => {
+          deferredBumps.add('agent-policy-1');
+          return withoutFailures;
+        });
+      const { deployer, scheduleRevisionBumps } = buildDeployer({
+        pages: [['m1'], ['m2'], ['m3']],
+        editMonitors,
+      });
+
+      await syncForMws(deployer, ['mw-1', 'mw-2']);
+
+      expect(editMonitors).toHaveBeenCalledTimes(6);
+      const sharedBumps = editMonitors.mock.calls[0][4];
+      editMonitors.mock.calls.forEach((call) => expect(call[4]).toBe(sharedBumps));
+      expect(scheduleRevisionBumps).toHaveBeenCalledTimes(1);
+      expect(scheduleRevisionBumps).toHaveBeenCalledWith(sharedBumps);
+      expect(sharedBumps).toEqual(new Set(['agent-policy-1']));
+    });
+
+    it('still bumps agent policies already written when a later page throws', async () => {
+      const editMonitors = jest
+        .fn()
+        .mockResolvedValueOnce(withoutFailures)
+        .mockRejectedValueOnce(new Error('boom'));
+      const { deployer, scheduleRevisionBumps } = buildDeployer({
+        pages: [['m1'], ['m2']],
+        editMonitors,
+      });
+
+      await expect(syncForMws(deployer, ['mw-1'])).rejects.toThrow('boom');
+
+      expect(scheduleRevisionBumps).toHaveBeenCalledTimes(1);
     });
 
     it('logs the failed creates so they are still visible', async () => {
