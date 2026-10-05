@@ -103,10 +103,13 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
    \`${SIEM_MIGRATION_UPDATE_TRANSLATED_RULE_TOOL_ID}\`. Explain that the rule can only be fixed by
    reprocessing it, and offer to reprocess it with the \`${RULE_MIGRATION_SKILLS.START}\` skill
    (retry only this rule by its id). Stop there.
-4. **Present options**: Ask the user what they want to fix:
-   - Fix **ES|QL query**
-   - Fix **Prebuilt rule match**
-   - Fix **Integration match** (for a prebuilt-matched rule, see the caveat in the Integration match update workflow)
+4. **Present multiple choice options**: Ask the user what they want to fix:
+   - if Rule already has a prebuilt match, present options to either:
+      - Switch to custom Translation (this will unmatch the prebuilt rule and make it a custom ES|QL translation)
+      - Fix **Prebuilt rule match** (choose another prebuilt rule)
+    - if Rule has no prebuilt match (i.e. if rule has custom translation), present options to either:
+      - Fix **ES|QL query**
+      - Match to **Prebuilt rule** (choose a prebuilt rule that matches the original detection logic)
 5. Based on the user's selection, follow the appropriate sub-workflow below.
 
 ### Pre-built rule update workflow
