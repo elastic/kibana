@@ -54,12 +54,8 @@ export const completeHostAction = async ({
   }
 };
 
-const SUBMITTED_ACTION_INDICES = [
-  AGENT_ACTIONS_INDEX,
-  AGENT_ACTIONS_RESULTS_INDEX,
-  ENDPOINT_ACTIONS_INDEX,
-  ENDPOINT_ACTION_RESPONSES_INDEX,
-];
+const FLEET_ACTION_INDICES = [AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX];
+const ENDPOINT_ACTION_INDICES = [ENDPOINT_ACTIONS_INDEX, ENDPOINT_ACTION_RESPONSES_INDEX];
 
 /**
  * Deletes isolate and release requests and responses written during the test.
@@ -87,15 +83,48 @@ export const deleteSubmittedHostActions = async ({
   };
   const systemEsClient = await createSystemIndicesEsClient(esClient, config);
 
+  const deleteMatching = async (
+    index: string[],
+    options?: { headers: { 'X-elastic-product-origin': string } }
+  ): Promise<void> => {
+    await systemEsClient.deleteByQuery(
+      {
+        index,
+        query,
+        conflicts: 'proceed',
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        refresh: true,
+        wait_for_completion: true,
+      },
+      options
+    );
+  };
+
   try {
-    await systemEsClient.deleteByQuery({
-      index: SUBMITTED_ACTION_INDICES,
-      query,
-      conflicts: 'proceed',
-      ignore_unavailable: true,
-      refresh: true,
-      wait_for_completion: true,
-    });
+    const failures: unknown[] = [];
+
+    try {
+      // .fleet-actions-results is a system data stream and rejects this call without the fleet origin.
+      await deleteMatching(FLEET_ACTION_INDICES, {
+        headers: { 'X-elastic-product-origin': 'fleet' },
+      });
+    } catch (error) {
+      failures.push(error);
+    }
+
+    try {
+      await deleteMatching(ENDPOINT_ACTION_INDICES);
+    } catch (error) {
+      failures.push(error);
+    }
+
+    if (failures.length === 1) {
+      throw failures[0];
+    }
+    if (failures.length > 1) {
+      throw new AggregateError(failures, 'Failed to delete submitted host actions');
+    }
   } finally {
     await systemEsClient.close();
   }
