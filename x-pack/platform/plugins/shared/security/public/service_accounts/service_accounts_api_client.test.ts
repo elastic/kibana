@@ -64,7 +64,20 @@ describe('ServiceAccountsAPIClient', () => {
       ).resolves.toEqual({ warnings: [] });
 
       expect(http.delete).toHaveBeenCalledWith(
-        '/internal/security/service_account/kibana%2Fnightshift-relay'
+        '/internal/security/service_account/kibana%2Fnightshift-relay',
+        { query: {} }
+      );
+    });
+
+    it('asks the route to delete a bound account when forced', async () => {
+      const http = httpServiceMock.createStartContract();
+      http.delete.mockResolvedValue({ warnings: [] });
+
+      await new ServiceAccountsAPIClient(http).delete('kibana/nightshift-relay', { force: true });
+
+      expect(http.delete).toHaveBeenCalledWith(
+        '/internal/security/service_account/kibana%2Fnightshift-relay',
+        { query: { force: true } }
       );
     });
   });

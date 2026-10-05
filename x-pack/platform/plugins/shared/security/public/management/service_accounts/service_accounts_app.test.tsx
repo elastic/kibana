@@ -473,7 +473,7 @@ describe('ServiceAccountsApp', () => {
 
       await waitFor(() => expect(onDeleted).toHaveBeenCalledWith(directoryEntry, []));
       expect(listWorkloads).toHaveBeenCalledWith(directoryEntry.id);
-      expect(deleteAccount).toHaveBeenCalledWith(directoryEntry.id);
+      expect(deleteAccount).toHaveBeenCalledWith(directoryEntry.id, { force: false });
       expect(screen.queryByTestId('serviceAccountDeleteConfirmModal')).not.toBeInTheDocument();
       await waitFor(() => expect(list).toHaveBeenCalledTimes(2));
     });

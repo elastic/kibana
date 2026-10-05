@@ -29,6 +29,11 @@ export interface ListServiceAccountsParams {
   after?: string;
 }
 
+export interface DeleteServiceAccountOptions {
+  /** Deletes the account even when workloads are still bound to it. Those workloads stop running. */
+  force?: boolean;
+}
+
 export class ServiceAccountsAPIClient {
   constructor(private readonly http: HttpStart) {}
 
@@ -48,12 +53,16 @@ export class ServiceAccountsAPIClient {
   }
 
   /**
-   * Deletes the account. Rejects with a 409 carrying `DeleteServiceAccountConflictAttributes` when
-   * workloads are still bound to it.
+   * Deletes the account. Unless `force` is set, rejects with a 409 carrying
+   * `DeleteServiceAccountConflictAttributes` when workloads are still bound to it.
    */
-  public async delete(id: string): Promise<DeleteServiceAccountResponse> {
+  public async delete(
+    id: string,
+    { force = false }: DeleteServiceAccountOptions = {}
+  ): Promise<DeleteServiceAccountResponse> {
     return await this.http.delete<DeleteServiceAccountResponse>(
-      `/internal/security/service_account/${encodeURIComponent(id)}`
+      `/internal/security/service_account/${encodeURIComponent(id)}`,
+      { query: { ...(force ? { force: true } : {}) } }
     );
   }
 
