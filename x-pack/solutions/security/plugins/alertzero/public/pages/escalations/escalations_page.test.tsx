@@ -19,15 +19,15 @@ import {
   useListEscalations,
   useUserProfiles,
   useSuggestUserProfiles,
+  useOpenInChat,
 } from '@kbn/agentic-investigations-plugin/public';
-import { useOpenInChat } from '../../hooks/use_open_in_chat';
-import { useAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
+import { useAlertZeroInvestigationsCapabilities } from '../../hooks/use_alertzero_investigations_capabilities';
 import { useConversationsUrlParams } from '../conversations/conversations_url_params';
 import { useInvestigationDetails } from '../conversations/use_investigation_details';
 import { EscalationsPage } from './escalations_page';
 
-jest.mock('../../hooks/use_agentic_investigations_capabilities');
-const mockUseCapabilities = useAgenticInvestigationsCapabilities as jest.Mock;
+jest.mock('../../hooks/use_alertzero_investigations_capabilities');
+const mockUseCapabilities = useAlertZeroInvestigationsCapabilities as jest.Mock;
 
 // These hooks open the Agent Builder flyout and manage the URL; stub them out here.
 jest.mock('../conversations/use_investigation_details', () => ({
@@ -36,9 +36,6 @@ jest.mock('../conversations/use_investigation_details', () => ({
 jest.mock('../conversations/conversations_url_params', () => ({
   useConversationsUrlParams: jest.fn(),
 }));
-jest.mock('../../hooks/use_open_in_chat', () => ({
-  useOpenInChat: jest.fn(),
-}));
 
 jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
   ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
@@ -46,6 +43,7 @@ jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
   useListEscalations: jest.fn(),
   useUserProfiles: jest.fn(),
   useSuggestUserProfiles: jest.fn(),
+  useOpenInChat: jest.fn(),
 }));
 
 // Replace AssignToUsers with a minimal stub: clicking the "assign" button calls
