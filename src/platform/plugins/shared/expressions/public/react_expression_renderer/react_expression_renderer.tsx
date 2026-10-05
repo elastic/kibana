@@ -27,10 +27,6 @@ export interface ReactExpressionRendererProps
   ) => React.ReactElement | React.ReactElement[];
   padding?: 'xs' | 's' | 'm' | 'l' | 'xl';
   paddingTop?: boolean;
-  /**
-   * Border on the loading panel shown until the expression renders.
-   * Omit to keep the default panel border.
-   */
   showBorder?: boolean;
 }
 
