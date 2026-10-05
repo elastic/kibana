@@ -16,7 +16,7 @@ const ROUND_TRIP_INDEX_PREFIX = 'field_formats_round_trip';
 const META_UNIT_INDEX_PREFIX = 'field_formats_meta_unit';
 
 spaceTest.describe('Data view field formatters', { tag: '@local-stateful-classic' }, () => {
-  const created: Array<{ index: string; dataViewId: string; documentId: string }> = [];
+  const createdIndices: string[] = [];
 
   const createIndexWithDataView = async (
     { esClient, apiServices }: Pick<ScoutParallelWorkerFixtures, 'esClient' | 'apiServices'>,
@@ -29,6 +29,8 @@ spaceTest.describe('Data view field formatters', { tag: '@local-stateful-classic
       await esClient.indices.delete({ index });
     }
     await esClient.indices.create({ index, mappings: { properties } });
+    // Tracked right away so a later failure in this helper doesn't leak the index
+    createdIndices.push(index);
     const { _id: documentId } = await esClient.index({ index, document, refresh: 'wait_for' });
     // The trailing wildcard sidesteps field caching when the data view is reused
     const { data } = await apiServices.dataViews.create({
@@ -36,7 +38,6 @@ spaceTest.describe('Data view field formatters', { tag: '@local-stateful-classic
       override: true,
       spaceId,
     });
-    created.push({ index, dataViewId: data.id, documentId });
     return { dataViewId: data.id, documentId };
   };
 
@@ -49,7 +50,7 @@ spaceTest.describe('Data view field formatters', { tag: '@local-stateful-classic
   });
 
   spaceTest.afterAll(async ({ esClient, scoutSpace }) => {
-    for (const { index } of created) {
+    for (const index of createdIndices) {
       await esClient.indices.delete({ index }, { ignore: [404] });
     }
     await scoutSpace.uiSettings.unset('data_views:cache_max_age');
@@ -61,7 +62,7 @@ spaceTest.describe('Data view field formatters', { tag: '@local-stateful-classic
   spaceTest(
     'applies text, link and color formats from the field flyout',
     async ({ esClient, apiServices, scoutSpace, page, pageObjects }) => {
-      const { dataViewDetail, dataViewFieldEditor } = pageObjects;
+      const { dataViewDetail } = pageObjects;
       // Index names are unique per space so parallel workers don't share them
       const index = `${ROUND_TRIP_INDEX_PREFIX}_${scoutSpace.id}`.toLowerCase();
       const { dataViewId, documentId } = await createIndexWithDataView(
@@ -79,18 +80,18 @@ spaceTest.describe('Data view field formatters', { tag: '@local-stateful-classic
       const editField = async (fieldName: string, format: string) => {
         await dataViewDetail.goto(dataViewId);
         await dataViewDetail.openFieldEditorForField(fieldName);
-        await dataViewFieldEditor.enableFormatAndSelect(format);
+        await dataViewDetail.enableFormatAndSelect(format);
       };
 
       await spaceTest.step('upper-case the text field', async () => {
         await editField('textField', 'string');
-        await dataViewFieldEditor.setStringTransform('upper');
+        await dataViewDetail.setStringTransform('upper');
         await dataViewDetail.saveFieldEditor();
       });
 
       await spaceTest.step('turn the number field into a link', async () => {
         await editField('linkField', 'url');
-        await dataViewFieldEditor.setUrlTemplates({
+        await dataViewDetail.setUrlTemplates({
           urlTemplate: 'https://elastic.co/?value={{value}}',
           labelTemplate: 'url label',
         });
@@ -99,7 +100,7 @@ spaceTest.describe('Data view field formatters', { tag: '@local-stateful-classic
 
       await spaceTest.step('color the keyword field', async () => {
         await editField('colorField', 'color');
-        await dataViewFieldEditor.addColorRule({
+        await dataViewDetail.addColorRule({
           pattern: 'red',
           textColor: '#ffffff',
           backgroundColor: '#ff0000',

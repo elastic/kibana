@@ -27,6 +27,9 @@ export class DataViewDetailPage {
   readonly popularityInput;
   readonly fieldEditorAdvancedToggle;
   readonly currentTimeField;
+  readonly fieldPreviewItem;
+  readonly changeWarning;
+  readonly formatSelect;
 
   private readonly codeEditor: KibanaCodeEditorWrapper;
 
@@ -49,6 +52,9 @@ export class DataViewDetailPage {
     this.popularityInput = page.testSubj.locator('editorFieldCount');
     this.fieldEditorAdvancedToggle = page.testSubj.locator('toggleAdvancedSetting');
     this.currentTimeField = page.testSubj.locator('currentIndexPatternTimeField');
+    this.fieldPreviewItem = page.testSubj.locator('fieldPreviewItem');
+    this.changeWarning = page.testSubj.locator('changeWarning');
+    this.formatSelect = page.testSubj.locator('editorSelectedFormatId');
   }
 
   async goto(dataViewId: string): Promise<void> {
@@ -185,24 +191,101 @@ export class DataViewDetailPage {
     await this.fieldEditorFlyout.waitFor({ state: 'hidden' });
   }
 
+  // ── Field editor flyout inputs ─────────────────────────────────────────────
+
+  async setFieldName(name: string): Promise<void> {
+    await this.page.testSubj.locator('nameField').locator('input').fill(name);
+  }
+
+  /** Picks a field type (for example `Keyword`, `Long` or `Composite`) in the type combo box. */
+  async setFieldType(type: string): Promise<void> {
+    await this.page.components.comboBox('typeField').setSelectedOptions([type]);
+  }
+
+  /** Enables the "Set value" toggle of a new runtime field, then writes its painless script. */
+  async setFieldScript(script: string): Promise<void> {
+    await this.toggleFlyoutRow('valueRow');
+    await this.replaceFieldScript(script);
+  }
+
+  /** Writes the script of a runtime field whose "Set value" toggle is already on. */
+  async replaceFieldScript(script: string): Promise<void> {
+    await this.page.testSubj.locator('scriptFieldRow').waitFor({ state: 'visible' });
+    await this.codeEditor.setCodeEditorValueByTestSubj('scriptFieldRow', script);
+  }
+
+  /** Writes the script of a composite runtime field. */
+  async setCompositeScript(script: string): Promise<void> {
+    await this.replaceFieldScript(script);
+  }
+
+  /** Locator for a field name in the preview pane of the flyout. */
+  previewField(name: string): Locator {
+    return this.fieldPreviewItem.filter({ hasText: name });
+  }
+
+  /** Locator for the subfield type selector of a composite runtime field. */
+  compositeSubfieldType(index: number): Locator {
+    return this.page.testSubj.locator(`typeField_${index}`);
+  }
+
+  /** Turns on the optional "Set format" row and selects a format. */
+  async enableFormatAndSelect(format: string): Promise<void> {
+    await this.toggleFlyoutRow('formatRow');
+    await this.formatSelect.selectOption(format);
+  }
+
+  async setStringTransform(transform: string): Promise<void> {
+    await this.page.testSubj.locator('stringEditorTransform').selectOption(transform);
+  }
+
+  async setUrlTemplates({
+    urlTemplate,
+    labelTemplate,
+  }: {
+    urlTemplate: string;
+    labelTemplate: string;
+  }): Promise<void> {
+    await this.page.testSubj.fill('urlEditorUrlTemplate', urlTemplate);
+    await this.page.testSubj.fill('urlEditorLabelTemplate', labelTemplate);
+  }
+
+  /** Adds a color rule that matches `pattern` with the given hex text and background colors. */
+  async addColorRule({
+    pattern,
+    textColor,
+    backgroundColor,
+  }: {
+    pattern: string;
+    textColor: string;
+    backgroundColor: string;
+  }): Promise<void> {
+    await this.page.testSubj.click('colorEditorAddColor');
+    // The editor starts with a default rule at index 0; the rule is configured in place.
+    await this.page.testSubj.fill('colorEditorKeyPattern 0', pattern);
+    await this.pickColor('Select a text color for item 0', textColor);
+    await this.pickColor('Select a background color for item 0', backgroundColor);
+  }
+
+  /** Saves and confirms the "change field type" modal, then waits for the flyout to close. */
+  async saveFieldEditorAndConfirmChange(): Promise<void> {
+    await this.fieldEditorSaveButton.click();
+    await this.page.testSubj.fill('saveModalConfirmText', 'change');
+    await this.page.testSubj.click('confirmModalConfirmButton');
+    await this.fieldEditorFlyout.waitFor({ state: 'hidden' });
+  }
+
   async openEditFlyout(): Promise<void> {
     await this.editButton.click();
     await this.page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'visible' });
   }
 
   async addRuntimeField(name: string, type: string, script: string): Promise<void> {
-    await this.addFieldButton.click();
-    await this.page.testSubj.locator('flyoutTitle').waitFor({ state: 'visible' });
-    await this.page.testSubj.locator('nameField').locator('input').fill(name);
-    await this.page.components.comboBox('typeField').setSelectedOptions([type]);
-    // Click the toggle inside the "Set value" row to reveal the script editor
-    const valueRow = this.page.testSubj.locator('valueRow');
-    await valueRow.locator('[data-test-subj="toggle"]').click();
-    const scriptFieldRow = this.page.testSubj.locator('scriptFieldRow');
-    await scriptFieldRow.waitFor({ state: 'visible' });
-    await this.codeEditor.setCodeEditorValueByTestSubj('scriptFieldRow', script);
-    await this.fieldEditorSaveButton.click();
-    await this.fieldEditorFlyout.waitFor({ state: 'hidden' });
+    await this.openAddFieldFlyout();
+    await this.setFieldName(name);
+    await this.setFieldType(type);
+    await this.setFieldScript(script);
+    await this.saveFieldEditor();
   }
 
   async delete(): Promise<void> {
@@ -216,5 +299,19 @@ export class DataViewDetailPage {
     await deleteBtn.click();
     await this.page.testSubj.locator('deleteDataViewFlyoutHeader').waitFor({ state: 'visible' });
     await this.page.testSubj.click('confirmFlyoutConfirmButton');
+  }
+
+  private async toggleFlyoutRow(rowTestSubj: string): Promise<void> {
+    await this.page.testSubj.locator(rowTestSubj).locator('[data-test-subj="toggle"]').click();
+  }
+
+  private async pickColor(buttonName: string, hex: string): Promise<void> {
+    const button = this.page.getByRole('button', { name: buttonName });
+    const input = this.page.locator('[data-test-subj~="euiColorPickerInput_bottom"]');
+    await button.click();
+    await input.fill(hex);
+    // Close the popover so only one picker input is in the DOM at a time
+    await button.click();
+    await input.waitFor({ state: 'hidden' });
   }
 }

@@ -33,33 +33,33 @@ spaceTest.describe('Data view scripted fields', { tag: '@local-stateful-classic'
   // Save runs isScriptValid(), which posts to the preview route, so a real painless compile error
   // from Elasticsearch has to surface as `invalidScriptError`.
   spaceTest('does not allow saving of invalid scripts', async ({ pageObjects }) => {
-    const { dataViewFieldEditor } = pageObjects;
+    const { scriptedFieldForm } = pageObjects;
 
-    await dataViewFieldEditor.gotoCreateScriptedField(dataViewId);
-    await dataViewFieldEditor.fillScriptedField({
+    await scriptedFieldForm.gotoCreate(dataViewId);
+    await scriptedFieldForm.fill({
       name: 'doomedScriptedField',
       language: 'painless',
       type: 'number',
       popularity: '1',
       script: 'i n v a l i d  s c r i p t',
     });
-    await dataViewFieldEditor.saveScriptedField();
+    await scriptedFieldForm.save();
 
-    await expect(dataViewFieldEditor.invalidScriptError).toBeVisible();
+    await expect(scriptedFieldForm.invalidScriptError).toBeVisible();
   });
 
   // Regression for #33251: saving a scripted field serialised its format so that re-opening it
   // crashed the editor (`field.format.params is not a function`).
   spaceTest('creates a scripted field and re-saves it repeatedly', async ({ pageObjects }) => {
-    const { dataViewDetail, dataViewFieldEditor } = pageObjects;
+    const { dataViewDetail, scriptedFieldForm } = pageObjects;
     const fieldName = 'ram_Pain_ui';
 
     await dataViewDetail.goto(dataViewId);
     const startingCount = await dataViewDetail.getScriptedFieldsTabCount();
 
     await spaceTest.step('create the field through the management form', async () => {
-      await dataViewFieldEditor.gotoCreateScriptedField(dataViewId);
-      await dataViewFieldEditor.fillScriptedField({
+      await scriptedFieldForm.gotoCreate(dataViewId);
+      await scriptedFieldForm.fill({
         name: fieldName,
         language: 'painless',
         type: 'number',
@@ -68,7 +68,7 @@ spaceTest.describe('Data view scripted fields', { tag: '@local-stateful-classic'
           else return doc['machine.ram'].value / (1024 * 1024 * 1024);
         `,
       });
-      await dataViewFieldEditor.saveScriptedFieldAndWaitForReturn();
+      await scriptedFieldForm.saveAndWaitForReturn();
 
       await dataViewDetail.goto(dataViewId);
       await expect.poll(() => dataViewDetail.getScriptedFieldsTabCount()).toBe(startingCount + 1);
@@ -78,8 +78,8 @@ spaceTest.describe('Data view scripted fields', { tag: '@local-stateful-classic'
       for (let i = 0; i < 3; i++) {
         await dataViewDetail.goto(dataViewId);
         await dataViewDetail.openScriptedFieldsTab();
-        await dataViewFieldEditor.openEditScriptedField(fieldName);
-        await dataViewFieldEditor.saveScriptedFieldAndWaitForReturn();
+        await scriptedFieldForm.openEdit(fieldName);
+        await scriptedFieldForm.saveAndWaitForReturn();
       }
     });
   });

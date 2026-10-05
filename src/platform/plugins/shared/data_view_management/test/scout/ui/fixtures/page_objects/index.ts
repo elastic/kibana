@@ -9,4 +9,4 @@
 
 export { DataViewEditorFlyoutPage } from './data_view_editor_flyout';
 export { DataViewDetailPage } from './data_view_detail_page';
-export { DataViewFieldEditor } from './data_view_field_editor';
+export { ScriptedFieldForm } from './scripted_field_form';
