@@ -22,7 +22,6 @@ import { vegaLibraryItemSavedObjectType } from './vega_saved_object';
 import { registerRoutes } from './api/register_routes';
 
 export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisTypeVegaPluginStart> {
-  private standaloneEmbeddableEnabled = false;
   private readonly logger: Logger;
   private apiUsageCounter?: UsageCounter;
 
@@ -35,22 +34,24 @@ export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisType
     { embeddable, usageCollection }: VisTypeVegaPluginSetupDependencies
   ) {
     // Startup-only: public API/OpenAPI contract should not hot-swap mid-process.
+    // The embeddable definition is registered only once the flag is known, so
+    // `getSchema` can never observe the default (disabled) value while the flag is on.
     void core
       .getStartServices()
-      .then(([{ featureFlags }]) =>
-        firstValueFrom(featureFlags.getBooleanValue$(VEGA_STANDALONE_EMBEDDABLE_FLAG, false))
-      )
-      .then((enabled) => {
-        this.standaloneEmbeddableEnabled = enabled;
+      .then(async ([{ featureFlags }]) => {
+        const standaloneEmbeddableEnabled = await firstValueFrom(
+          featureFlags.getBooleanValue$(VEGA_STANDALONE_EMBEDDABLE_FLAG, false)
+        );
+        embeddable.registerEmbeddableServerDefinition(VEGA_EMBEDDABLE_TYPE, {
+          title: 'Vega',
+          getTransforms,
+          getSchema: (getDrilldownsSchema) =>
+            standaloneEmbeddableEnabled ? getVegaEmbeddableSchema(getDrilldownsSchema) : undefined,
+        });
       })
-      .catch(() => {});
-
-    embeddable.registerEmbeddableServerDefinition(VEGA_EMBEDDABLE_TYPE, {
-      title: 'Vega',
-      getSchema: (getDrilldownsSchema) =>
-        this.standaloneEmbeddableEnabled ? getVegaEmbeddableSchema(getDrilldownsSchema) : undefined,
-      getTransforms,
-    });
+      .catch((error) => {
+        this.logger.error(`Failed to register the Vega embeddable: ${error}`);
+      });
 
     core.savedObjects.registerType(vegaLibraryItemSavedObjectType);
 

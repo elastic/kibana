@@ -24,7 +24,6 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/as-code-filters-constants'
   - '@kbn/zod'
-  - '@kbn/content-management-utils'
 tags:
   - shared-common
   - package

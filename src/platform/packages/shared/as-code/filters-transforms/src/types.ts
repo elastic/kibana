@@ -24,3 +24,13 @@ export type StoredAsCodeFilter = AsCodeFilter & {
   data_view_id?: never;
   data_view_ref_name?: string;
 };
+
+/**
+ * Reference to a saved object. Structurally compatible with the `SavedObjectReference` from `@kbn/core/server`,
+ * defined locally because this package is `shared-common` and cannot depend on server packages.
+ */
+export interface FilterReference {
+  name: string;
+  type: string;
+  id: string;
+}
