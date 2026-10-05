@@ -90,6 +90,7 @@ describe('AlertAnalysisWorkflowOutput', () => {
         rationale: 'c2 url',
         contributing_factors: ['external url'],
         host_name: 'ws-1',
+        host_entity_key: 'HW-UUID-1',
         user_name: 'alice',
       },
       {
@@ -99,6 +100,7 @@ describe('AlertAnalysisWorkflowOutput', () => {
         rationale: 'signed installer',
         contributing_factors: ['vendor signature'],
         host_name: 'ws-1',
+        host_entity_key: 'HW-UUID-1',
         user_name: 'bob',
       },
     ],

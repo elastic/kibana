@@ -100,6 +100,7 @@ export const AlertAnalysisVerdict = z.object({
   // in YAML when the alert document has no host/user name (avoids colliding with a real
   // ECS name "unknown").
   host_name: z.string().max(512),
+  host_entity_key: z.string().max(512),
   user_name: z.string().max(512),
 });
 export type AlertAnalysisVerdict = z.infer<typeof AlertAnalysisVerdict>;

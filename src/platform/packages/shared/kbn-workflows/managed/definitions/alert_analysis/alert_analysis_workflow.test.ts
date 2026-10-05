@@ -1490,6 +1490,7 @@ const createMockOutputVerdict = (
     rationale: string;
     contributing_factors: string[];
     host_name: string;
+    host_entity_key: string;
     user_name: string;
   }> = {}
 ) => ({
@@ -1499,6 +1500,7 @@ const createMockOutputVerdict = (
   rationale: 'suspicious',
   contributing_factors: ['c2 url'],
   host_name: 'host-a',
+  host_entity_key: 'host-a',
   user_name: 'user-a',
   ...overrides,
 });
@@ -1651,8 +1653,26 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       rationale: 'signed installer',
       contributing_factors: ['vendor signature'],
       host_name: '__missing__',
+      host_entity_key: '__missing__',
       user_name: '__missing__',
     });
+  });
+
+  it('keys the host entity on host.id when the alert has one, else host.name, like the Entity Store', () => {
+    const buildStep = findStepByName(workflow.steps, 'build_output_verdict') as {
+      with: { output_verdict: Record<string, unknown> };
+    };
+    const keyFor = (host: Record<string, unknown>) =>
+      (
+        renderValueRecursively(engine, buildStep.with.output_verdict, {
+          foreach: { item: { _id: 'a', host, user: {} } },
+          variables: { batch_alert_verdict: { contributing_factors: [] } },
+        }) as Record<string, unknown>
+      ).host_entity_key;
+
+    expect(keyFor({ id: 'HW-UUID-ABC', name: 'prod-web-01' })).toBe('HW-UUID-ABC');
+    expect(keyFor({ name: 'prod-web-01' })).toBe('prod-web-01');
+    expect(keyFor({})).toBe('__missing__');
   });
 
   it('truncates host_name and user_name to the workflow.output 512-char limit', () => {
@@ -2214,7 +2234,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
 
   it('builds type-prefixed host and user impact entities, skipping alerts without the field', () => {
     const collectStep = findStepByName(workflow.steps, 'collect_unique_entity_names') as {
-      with: { host_names_for_entities: string; user_names_for_entities: string };
+      with: { host_keys_for_entities: string; user_names_for_entities: string };
     };
     const hostStep = findStepByName(workflow.steps, 'build_host_entity') as {
       with: { current_entity: Record<string, unknown> };
@@ -2223,29 +2243,75 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       with: { current_entity: Record<string, unknown> };
     };
     const verdicts = [
-      createMockOutputVerdict({ alert_id: 'a1', host_name: 'ws-1', user_name: 'alice' }),
-      createMockOutputVerdict({ alert_id: 'a2', host_name: 'ws-1', user_name: '__missing__' }),
-      createMockOutputVerdict({ alert_id: 'a3', host_name: '__missing__', user_name: 'alice' }),
+      createMockOutputVerdict({
+        alert_id: 'a1',
+        host_name: 'ws-1',
+        host_entity_key: 'HW-1',
+        user_name: 'alice',
+      }),
+      createMockOutputVerdict({
+        alert_id: 'a2',
+        host_name: 'ws-1',
+        host_entity_key: 'HW-1',
+        user_name: '__missing__',
+      }),
+      createMockOutputVerdict({
+        alert_id: 'a3',
+        host_name: '__missing__',
+        host_entity_key: '__missing__',
+        user_name: 'alice',
+      }),
     ];
 
-    expect(
-      evaluateExpression(engine, collectStep.with.host_names_for_entities, {
-        variables: { output_verdicts: verdicts },
-      })
-    ).toEqual(['ws-1']);
+    const hostKeys = evaluateExpression(engine, collectStep.with.host_keys_for_entities, {
+      variables: { output_verdicts: verdicts },
+    }) as string[];
+    // Two alerts for one host.id are one entity, and the alert without a host is skipped.
+    expect(hostKeys).toEqual(['HW-1']);
     expect(
       evaluateExpression(engine, collectStep.with.user_names_for_entities, {
         variables: { output_verdicts: verdicts },
       })
     ).toEqual(['alice']);
 
-    // The type prefix keeps a host and a user that share a name distinct in the shared impact.
+    // The id uses the Entity Store key (host.id) while the name stays readable.
     expect(
-      renderValueRecursively(engine, hostStep.with.current_entity, { foreach: { item: 'dup' } })
-    ).toEqual({ id: 'host:dup', name: 'dup', type: 'host' });
+      renderValueRecursively(engine, hostStep.with.current_entity, {
+        foreach: { item: hostKeys[0] },
+        variables: { output_verdicts: verdicts },
+      })
+    ).toEqual({ id: 'host:HW-1', name: 'ws-1', type: 'host' });
+    // A host with an id but no name is labelled by its key, since the shared impact needs a name.
+    expect(
+      renderValueRecursively(engine, hostStep.with.current_entity, {
+        foreach: { item: 'HW-2' },
+        variables: {
+          output_verdicts: [
+            createMockOutputVerdict({ host_name: '__missing__', host_entity_key: 'HW-2' }),
+          ],
+        },
+      })
+    ).toEqual({ id: 'host:HW-2', name: 'HW-2', type: 'host' });
+    // The type prefix keeps a host and a user that share a name distinct in the shared impact.
     expect(
       renderValueRecursively(engine, userStep.with.current_entity, { foreach: { item: 'dup' } })
     ).toEqual({ id: 'user:dup', name: 'dup', type: 'user' });
+  });
+
+  it('keeps hosts that report a different identity field as separate entities, as the Entity Store does', () => {
+    const collectStep = findStepByName(workflow.steps, 'collect_unique_entity_names') as {
+      with: { host_keys_for_entities: string };
+    };
+    const verdicts = [
+      createMockOutputVerdict({ alert_id: 'a1', host_name: 'ws-1', host_entity_key: 'HW-1' }),
+      createMockOutputVerdict({ alert_id: 'a2', host_name: 'ws-1', host_entity_key: 'ws-1' }),
+    ];
+
+    const hostKeys = evaluateExpression(engine, collectStep.with.host_keys_for_entities, {
+      variables: { output_verdicts: verdicts },
+    });
+
+    expect(hostKeys).toEqual(['HW-1', 'ws-1']);
   });
 
   it('keeps the prefixed entity id within the shared 256-character limit for long names', () => {
@@ -2256,6 +2322,11 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
 
     const entity = renderValueRecursively(engine, hostStep.with.current_entity, {
       foreach: { item: longName },
+      variables: {
+        output_verdicts: [
+          createMockOutputVerdict({ host_name: longName, host_entity_key: longName }),
+        ],
+      },
     }) as { id: string; name: string };
 
     expect(entity.id.length).toBeLessThanOrEqual(256);
@@ -2265,17 +2336,18 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
 
   it('caps hosts and users at 50 each so impact stays within the shared 100-entity limit', () => {
     const collectStep = findStepByName(workflow.steps, 'collect_unique_entity_names') as {
-      with: { host_names_for_entities: string; user_names_for_entities: string };
+      with: { host_keys_for_entities: string; user_names_for_entities: string };
     };
     const verdicts = Array.from({ length: 70 }, (_, i) =>
       createMockOutputVerdict({
         alert_id: `a${i}`,
         host_name: `host-${i}`,
+        host_entity_key: `host-${i}`,
         user_name: `user-${i}`,
       })
     );
 
-    const hosts = evaluateExpression(engine, collectStep.with.host_names_for_entities, {
+    const hosts = evaluateExpression(engine, collectStep.with.host_keys_for_entities, {
       variables: { output_verdicts: verdicts },
     }) as string[];
     const users = evaluateExpression(engine, collectStep.with.user_names_for_entities, {
