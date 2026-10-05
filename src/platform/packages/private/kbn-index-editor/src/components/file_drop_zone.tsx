@@ -17,7 +17,7 @@ import { useDropzone } from 'react-dropzone';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
-import { FileUploadLiteLookUpView } from '@kbn/file-upload/src/file_upload_component/new/file_upload_lite_lookup_view';
+import { FileUploadLiteLookUpView } from '@kbn/file-upload/src/file_upload_component';
 import { getOverrideConfirmation } from './modals/override_warning_modal';
 import { EmptyPrompt } from './empty_prompt';
 import type { KibanaContextExtra } from '../types';

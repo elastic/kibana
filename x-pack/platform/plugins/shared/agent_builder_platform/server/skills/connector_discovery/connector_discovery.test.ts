@@ -11,7 +11,7 @@ import type {
   ToolHandlerContext,
   ToolHandlerStandardReturn,
 } from '@kbn/agent-builder-server/tools';
-import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
+import { getConnectorSpec, isToolAction, isSelectedActionEnabled } from '@kbn/connector-specs';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { createListConnectorsTool } from './list_connectors_tool';
 import { createGetConnectorSubActionsTool } from './get_connector_sub_actions_tool';
@@ -19,6 +19,7 @@ import { createGetConnectorSubActionsTool } from './get_connector_sub_actions_to
 jest.mock('@kbn/connector-specs', () => ({
   getConnectorSpec: jest.fn(),
   isToolAction: jest.fn(),
+  isSelectedActionEnabled: jest.fn().mockReturnValue(true),
 }));
 
 jest.mock('@kbn/agent-builder-server', () => {
@@ -37,6 +38,7 @@ jest.mock('@kbn/agent-builder-server', () => {
 
 const mockGetConnectorSpec = getConnectorSpec as jest.Mock;
 const mockIsToolAction = isToolAction as jest.Mock;
+const mockIsSelectedActionEnabled = isSelectedActionEnabled as jest.Mock;
 
 const makeConnector = (
   overrides: Partial<{ id: string; name: string; actionTypeId: string }> = {}
@@ -80,6 +82,7 @@ describe('connector-discovery inline tools', () => {
     jest.clearAllMocks();
     mockGetConnectorSpec.mockReturnValue(undefined);
     mockIsToolAction.mockReturnValue(false);
+    mockIsSelectedActionEnabled.mockReturnValue(true);
   });
 
   describe('list_connectors', () => {

@@ -124,6 +124,21 @@ function isValidEntity(
 
 export const INVALID_NAMESPACE_CHARACTERS = /[\*\\/\?"<>|\s,#:-]+/;
 
+// Namespaces cannot contain `-`, so everything after the last one is the namespace.
+const DATA_STREAM_INDEX_PATTERN_REGEX = /^(logs|metrics)-[a-z0-9_.]+-([^-]+)$/;
+
+/**
+ * Whether `pattern` is a `logs-<dataset>-<namespace>` or `metrics-<dataset>-<namespace>` pattern
+ * accepted by `DATA_STREAM_API_ROUTES.HAS_DATA_PATTERN`, where `<namespace>` is `*` or a valid namespace.
+ */
+export function isValidDataStreamIndexPattern(pattern: string): boolean {
+  const namespace = DATA_STREAM_INDEX_PATTERN_REGEX.exec(pattern)?.[2];
+  if (namespace === undefined) {
+    return false;
+  }
+  return namespace === '*' || isValidNamespace(namespace).valid;
+}
+
 export const VALID_DATA_STREAM_TYPES: readonly PackageDataStreamTypes[] = [
   'logs',
   'metrics',

@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { timingSafeEqual } from 'crypto';
 
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
@@ -20,7 +21,7 @@ import type {
 
 import type { SecurityLicense } from '../../../../common';
 import { getDetailedErrorMessage } from '../../../errors';
-import { isExternalApiKey, type UiamServicePublic } from '../../../uiam';
+import { type UiamServicePublic, isExternalApiKey as userHasExternalApiKey } from '../../../uiam';
 import { getUiamClientAuthentication } from '../../../uiam/get_client_authentication';
 
 /**
@@ -84,7 +85,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     try {
       // External API keys must not carry client authentication (`null`). For other credentials,
       // preserve the request's secret and only default to Kibana's for internally created requests.
-      const clientAuthentication = isExternalApiKey(this.getCurrentUser(request))
+      const clientAuthentication = userHasExternalApiKey(this.getCurrentUser(request))
         ? null
         : getUiamClientAuthentication(request);
       const { id, key, description } = await this.uiam?.grantApiKey(
@@ -195,6 +196,17 @@ export class UiamAPIKeys implements UiamAPIKeysType {
    */
   getInternalCallerAttestationHeaders(credential: HTTPAuthorizationHeader) {
     return this.uiam.getInternalCallerAttestationHeaders(credential);
+  }
+
+  isOwnClientAuthentication(value: string): boolean {
+    const own = this.uiam.getClientAuthentication().value;
+    const presented = Buffer.from(value);
+    const expected = Buffer.from(own);
+    return presented.length === expected.length && timingSafeEqual(presented, expected);
+  }
+
+  isExternalApiKey(request: KibanaRequest): boolean {
+    return userHasExternalApiKey(this.getCurrentUser(request));
   }
 
   /**

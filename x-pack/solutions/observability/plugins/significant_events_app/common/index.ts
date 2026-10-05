@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { SIGNIFICANT_EVENTS_APP_ROUTE } from './constants';
+export { SIGNIFICANT_EVENTS_APP_ROUTE, SIGNIFICANT_EVENTS_TAB } from './constants';
 export {
   SignificantEventsAppLocatorDefinition,
   type SignificantEventsAppLocator,

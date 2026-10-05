@@ -6,12 +6,14 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import { Parser } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import {
   MAX_AI_INDEX_DESCRIBE_TAG_COUNTS,
   MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS,
 } from '../../common/constants';
+import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import { buildAiIndexSpaceFilter } from '../../common/space_filter';
 import { describeAiIndexAggregations } from './describe_aggregations';
 import type { AiIndexField } from './types';
@@ -28,23 +30,30 @@ const esResponseError = (statusCode: number, type: string) =>
     elasticsearchClientMock.createApiResponse({ statusCode, body: { error: { type } } })
   );
 
+const LIFECYCLE =
+  '| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"\n| WHERE expires_at IS NULL OR expires_at > NOW()';
+
+const emptyResponse = { columns: [], values: [] };
+
 describe('describeAiIndexAggregations', () => {
-  const search = jest.fn();
-  const esClient = { search } as unknown as ElasticsearchClient;
-  const params = { esClient, target: 'ai-index-idx-*', spaceId: 'team-a' };
+  const esqlQuery = jest.fn();
+  const esClient = { esql: { query: esqlQuery } } as unknown as ElasticsearchClient;
+  const dest: AiIndexDest = { type: 'index', value: 'ai-index-idx-*' };
+  const params = { esClient, dest, spaceId: 'team-a' };
+  const queries = () => esqlQuery.mock.calls.map(([request]) => request.query as string);
 
   beforeEach(() => {
-    search.mockReset();
-    search.mockResolvedValue({ aggregations: {} });
+    esqlQuery.mockReset();
+    esqlQuery.mockResolvedValue(emptyResponse);
   });
 
-  it('skips the search when neither type nor tags is aggregatable', async () => {
+  it('skips the queries when neither type nor tags is aggregatable', async () => {
     const result = await describeAiIndexAggregations({
       ...params,
       fields: [field('type', false), field('title', true)],
     });
 
-    expect(search).not.toHaveBeenCalled();
+    expect(esqlQuery).not.toHaveBeenCalled();
     expect(result).toEqual({ kiTypeCounts: [], tagCounts: [] });
   });
 
@@ -54,7 +63,7 @@ describe('describeAiIndexAggregations', () => {
       fields: [field('type', true, 'conflict'), field('tags', true, 'long')],
     });
 
-    expect(search).not.toHaveBeenCalled();
+    expect(esqlQuery).not.toHaveBeenCalled();
     expect(result).toEqual({ kiTypeCounts: [], tagCounts: [] });
   });
 
@@ -64,65 +73,80 @@ describe('describeAiIndexAggregations', () => {
       fields: [field('type', true, 'constant_keyword'), field('tags', true, 'wildcard')],
     });
 
-    const { aggs } = search.mock.calls[0][0];
-    expect(Object.keys(aggs)).toEqual(['types', 'tags']);
+    expect(queries()).toHaveLength(2);
   });
 
-  it('runs one space-filtered, hit-free, non-partial search with a terms agg per field', async () => {
+  it('runs one space-filtered lifecycle query per field', async () => {
     await describeAiIndexAggregations({
       ...params,
       fields: [field('type', true), field('tags', true)],
     });
 
-    expect(search).toHaveBeenCalledTimes(1);
-    expect(search).toHaveBeenCalledWith({
-      index: 'ai-index-idx-*',
-      ignore_unavailable: true,
-      allow_no_indices: true,
-      allow_partial_search_results: false,
-      size: 0,
-      track_total_hits: false,
-      query: buildAiIndexSpaceFilter('team-a'),
-      aggs: {
-        types: {
-          terms: {
-            field: 'type',
-            size: MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS,
-            order: [{ _count: 'desc' }, { _key: 'asc' }],
-          },
-        },
-        tags: {
-          terms: {
-            field: 'tags',
-            size: MAX_AI_INDEX_DESCRIBE_TAG_COUNTS,
-            order: [{ _count: 'desc' }, { _key: 'asc' }],
-          },
-        },
-      },
+    expect(esqlQuery).toHaveBeenCalledTimes(2);
+    expect(esqlQuery).toHaveBeenCalledWith({
+      query: [
+        'FROM ai-index-idx-* METADATA _id, _index',
+        LIFECYCLE,
+        '| WHERE type IS NOT NULL',
+        '| STATS count = COUNT(*) BY type',
+        '| SORT count DESC, type ASC',
+        `| LIMIT ${MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS}`,
+      ].join('\n'),
+      filter: buildAiIndexSpaceFilter('team-a'),
+      allow_partial_results: false,
     });
+    expect(esqlQuery).toHaveBeenCalledWith({
+      query: [
+        'FROM ai-index-idx-* METADATA _id, _index',
+        LIFECYCLE,
+        '| MV_EXPAND tags',
+        '| WHERE tags IS NOT NULL',
+        '| STATS count = COUNT(*) BY tags',
+        '| SORT count DESC, tags ASC',
+        `| LIMIT ${MAX_AI_INDEX_DESCRIBE_TAG_COUNTS}`,
+      ].join('\n'),
+      filter: buildAiIndexSpaceFilter('team-a'),
+      allow_partial_results: false,
+    });
+    for (const query of queries()) {
+      expect(Parser.parse(query).errors).toEqual([]);
+    }
   });
 
-  it('only aggregates the fields that are aggregatable', async () => {
+  it('collapses a data stream to the newest revision before counting', async () => {
+    await describeAiIndexAggregations({
+      ...params,
+      dest: { type: 'data_stream', value: 'ai-index-ds-a' },
+      fields: [field('type', true)],
+    });
+
+    const [query] = queries();
+    expect(query).toContain('| INLINE STATS latest = MAX(@timestamp) BY id\n');
+    expect(query.indexOf('INLINE STATS')).toBeLessThan(query.indexOf('governance.lifecycle'));
+    expect(Parser.parse(query).errors).toEqual([]);
+  });
+
+  it('only counts the fields that are aggregatable', async () => {
     await describeAiIndexAggregations({
       ...params,
       fields: [field('type', false), field('tags', true)],
     });
 
-    const { aggs } = search.mock.calls[0][0];
-    expect(Object.keys(aggs)).toEqual(['tags']);
+    expect(queries()).toHaveLength(1);
+    expect(queries()[0]).toContain('BY tags');
   });
 
-  it('maps buckets to counts', async () => {
-    search.mockResolvedValue({
-      aggregations: {
-        types: {
-          buckets: [
-            { key: 'document', doc_count: 7 },
-            { key: 'detection', doc_count: 2 },
-          ],
-        },
-        tags: { buckets: [{ key: 'billing', doc_count: 3 }] },
-      },
+  it('maps rows to counts by column name', async () => {
+    esqlQuery.mockResolvedValueOnce({
+      columns: [{ name: 'count' }, { name: 'type' }],
+      values: [
+        [7, 'document'],
+        [2, 'detection'],
+      ],
+    });
+    esqlQuery.mockResolvedValueOnce({
+      columns: [{ name: 'count' }, { name: 'tags' }],
+      values: [[3, 'billing']],
     });
 
     const result = await describeAiIndexAggregations({
@@ -139,30 +163,8 @@ describe('describeAiIndexAggregations', () => {
     });
   });
 
-  it('returns empty counts when Elasticsearch omits aggregations', async () => {
-    search.mockResolvedValue({});
-
-    const result = await describeAiIndexAggregations({
-      ...params,
-      fields: [field('type', true)],
-    });
-
-    expect(result).toEqual({ kiTypeCounts: [], tagCounts: [] });
-  });
-
-  it('returns empty counts when the caller lacks read on the backing indices', async () => {
-    search.mockRejectedValue(esResponseError(403, 'security_exception'));
-
-    const result = await describeAiIndexAggregations({
-      ...params,
-      fields: [field('type', true)],
-    });
-
-    expect(result).toEqual({ kiTypeCounts: [], tagCounts: [] });
-  });
-
-  it('rethrows other Elasticsearch errors', async () => {
-    search.mockRejectedValue(esResponseError(500, 'search_phase_execution_exception'));
+  it('rethrows Elasticsearch errors', async () => {
+    esqlQuery.mockRejectedValue(esResponseError(500, 'search_phase_execution_exception'));
 
     await expect(
       describeAiIndexAggregations({ ...params, fields: [field('type', true)] })

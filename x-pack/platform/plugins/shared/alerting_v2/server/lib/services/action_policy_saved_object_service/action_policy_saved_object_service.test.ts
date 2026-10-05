@@ -20,8 +20,8 @@ const mockAttrs: ActionPolicySavedObjectAttributes = {
   apiKey: 'test-api-key',
   apiKeyOwner: 'test-user',
   apiKeyCreatedByUser: false,
-  createdBy: 'elastic',
-  updatedBy: 'elastic',
+  createdBy: { profile_uid: 'elastic' },
+  updatedBy: { profile_uid: 'elastic' },
   createdAt: '2025-01-01T00:00:00Z',
   updatedAt: '2025-01-01T00:00:00Z',
 };
@@ -437,6 +437,7 @@ describe('ActionPolicySavedObjectService', () => {
       await service.find({
         page: 2,
         perPage: 5,
+        filter: `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.enabled: true`,
         sortField: 'createdAt',
         sortOrder: 'desc',
       });
@@ -445,6 +446,7 @@ describe('ActionPolicySavedObjectService', () => {
         expect.objectContaining({
           page: 2,
           perPage: 5,
+          filter: `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.enabled: true`,
           sortField: 'createdAt',
           sortOrder: 'desc',
         })

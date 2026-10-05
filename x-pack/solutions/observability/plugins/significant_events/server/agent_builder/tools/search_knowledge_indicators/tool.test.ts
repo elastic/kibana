@@ -8,7 +8,7 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../../types';
 import { DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE } from '@kbn/nightshift-ai';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../routes/types';
 import {
@@ -23,7 +23,7 @@ jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
 
 describe('ki_search tool', () => {
   const logger = loggingSystemMock.createLogger();
-  const server = {} as unknown as StreamsServer;
+  const server = {} as unknown as SignificantEventsServer;
   const request = {} as unknown as KibanaRequest;
   const uiSettings = {} as unknown as IUiSettingsClient;
 

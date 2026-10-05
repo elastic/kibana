@@ -6,14 +6,20 @@
  */
 
 import {
+  ESQL_QUERY_ROW_LIMIT,
   ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES,
   chunkInClauseLiterals,
   getDispatchableAlertEventsQuery,
-  getAlertEpisodeSuppressionsQueries,
+  getEpisodeSuppressionsQueries,
+  getSeriesSuppressionsQueries,
   getLastNotifiedTimestampsQueries,
   getEpisodeDataQueries,
 } from './queries';
 import { createAlertEpisode } from './fixtures/test_utils';
+
+// Without an explicit LIMIT, ES|QL truncates results to 1 000 rows.
+const endsWithRowLimit = (query: string) =>
+  query.trimEnd().endsWith(`| LIMIT ${ESQL_QUERY_ROW_LIMIT}`);
 
 describe('getDispatchableAlertEventsQuery', () => {
   const SCAN_WINDOW = {
@@ -142,7 +148,7 @@ describe('getDispatchableAlertEventsQuery', () => {
     const query = queryOf();
 
     expect(query).toContain('SORT last_event_timestamp ASC');
-    expect(query).toContain('LIMIT 10000');
+    expect(endsWithRowLimit(query)).toBe(true);
   });
 });
 
@@ -236,6 +242,16 @@ describe('getEpisodeDataQueries', () => {
     expect(requests[0].query).toContain('KEEP episode_id, data_json');
   });
 
+  it('ends every chunk with an explicit row limit', () => {
+    const longIds = Array.from({ length: 200 }, (_, i) => 'x'.repeat(4_000) + `-${i}`);
+    const requests = getEpisodeDataQueries(longIds, { gte: GTE, lte: LTE });
+
+    expect(requests.length).toBeGreaterThanOrEqual(2);
+    for (const request of requests) {
+      expect(endsWithRowLimit(request.query)).toBe(true);
+    }
+  });
+
   it('splits into multiple requests when episode ids exceed the size budget', () => {
     // 36-byte UUIDs + 6 bytes overhead = 42 bytes each; ~14_285 per 600 KB chunk.
     const longIds = Array.from({ length: 200 }, (_, i) => 'x'.repeat(4_000) + `-${i}`);
@@ -249,6 +265,15 @@ describe('getEpisodeDataQueries', () => {
     const concatenated = requests.map((r) => r.query).join('\n');
     expect(concatenated).toContain(longIds[0]);
     expect(concatenated).toContain(longIds[longIds.length - 1]);
+  });
+
+  it('never puts more episode ids in a chunk than the row limit returns', () => {
+    const ids = Array.from({ length: ESQL_QUERY_ROW_LIMIT + 1 }, (_, i) => `ep-${i}`);
+
+    const requests = getEpisodeDataQueries(ids, { gte: GTE, lte: LTE });
+
+    expect(requests).toHaveLength(2);
+    expect(requests[1].query).toContain(`episode.id IN ("ep-${ESQL_QUERY_ROW_LIMIT}")`);
   });
 
   it('applies the same gte/lte bounds on every chunk', () => {
@@ -334,6 +359,24 @@ describe('chunkInClauseLiterals', () => {
     expect(seen.size).toBe(literals.length);
   });
 
+  it('caps each chunk at the row limit even when the byte budget would fit more', () => {
+    // 36-byte UUID-sized literals: the 600 KB budget alone fits ~14 285 per chunk.
+    const literals = Array.from({ length: ESQL_QUERY_ROW_LIMIT + 5 }, (_, i) =>
+      `${i}`.padStart(36, '0')
+    );
+
+    const chunks = chunkInClauseLiterals(literals);
+
+    expect(chunks.map((chunk) => chunk.length)).toEqual([ESQL_QUERY_ROW_LIMIT, 5]);
+    expect(chunks.flat()).toEqual(literals);
+  });
+
+  it('honors a custom max literal count', () => {
+    const chunks = chunkInClauseLiterals(['a', 'b', 'c', 'd', 'e'], undefined, 2);
+
+    expect(chunks).toEqual([['a', 'b'], ['c', 'd'], ['e']]);
+  });
+
   it('honors a custom budget smaller than the default', () => {
     const literalSize = 100;
     const literals = Array.from({ length: 100 }, (_, i) => `${i}`.padStart(literalSize, '0'));
@@ -352,9 +395,9 @@ describe('chunkInClauseLiterals', () => {
   });
 });
 
-describe('getAlertEpisodeSuppressionsQueries', () => {
+describe('getSeriesSuppressionsQueries', () => {
   it('returns an empty array for empty input', () => {
-    expect(getAlertEpisodeSuppressionsQueries([])).toEqual([]);
+    expect(getSeriesSuppressionsQueries([])).toEqual([]);
   });
 
   it('uses CONCAT + IN to filter by (subject, group_hash) pairs', () => {
@@ -363,7 +406,7 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
       createAlertEpisode({ rule_id: 'rule-2', group_hash: 'hash-2' }),
     ];
 
-    const requests = getAlertEpisodeSuppressionsQueries(episodes);
+    const requests = getSeriesSuppressionsQueries(episodes);
 
     expect(requests).toHaveLength(1);
     expect(requests[0].query).toContain('CONCAT(subject, "::", group_hash)');
@@ -378,7 +421,7 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
       createAlertEpisode({ rule_id: 'rule-2', group_hash: 'hash-2', episode_id: 'ep-3' }),
     ];
 
-    const requests = getAlertEpisodeSuppressionsQueries(episodes);
+    const requests = getSeriesSuppressionsQueries(episodes);
 
     const matches = requests[0].query.match(/rule-1::hash-1/g);
     expect(matches).toHaveLength(1);
@@ -386,17 +429,31 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
   });
 
   it('queries the alert actions data stream', () => {
-    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+    const requests = getSeriesSuppressionsQueries([createAlertEpisode()]);
 
     expect(requests[0].query).toContain('.alert-actions');
   });
 
-  it('filters for suppression action types', () => {
-    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+  it('reads only series-level snooze actions', () => {
+    const { query } = getSeriesSuppressionsQueries([createAlertEpisode()])[0];
 
-    expect(requests[0].query).toContain(
-      'action_type IN ("ack", "unack", "deactivate", "activate", "snooze", "unsnooze")'
-    );
+    expect(query).toContain('episode_id IS NULL');
+    expect(query).toContain('action_type IN ("snooze", "unsnooze")');
+    expect(query).not.toContain('"ack"');
+    expect(query).not.toContain('"deactivate"');
+  });
+
+  it('keeps the series filters in their own WHERE so the OR-ed pre-filter stays intact', () => {
+    const episodes = [
+      createAlertEpisode({ source: 'internal', rule_id: 'rule-1', group_hash: 'hash-1' }),
+      createAlertEpisode({ source: 'pagerduty', rule_id: null, group_hash: 'hash-pd' }),
+    ];
+
+    const { query } = getSeriesSuppressionsQueries(episodes)[0];
+
+    expect(query).toMatch(/\| WHERE \(?episode_id IS NULL\)? AND \(?action_type IN/);
+    expect(query.indexOf('episode_id IS NULL')).toBeGreaterThan(query.indexOf(' OR '));
+    expect(query.indexOf('episode_id IS NULL')).toBeLessThan(query.indexOf('subject = CASE('));
   });
 
   it('uses the minimum last_event_timestamp for snooze expiry filtering', () => {
@@ -405,13 +462,13 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
       createAlertEpisode({ last_event_timestamp: '2026-01-22T08:00:00.000Z' }),
     ];
 
-    const requests = getAlertEpisodeSuppressionsQueries(episodes);
+    const requests = getSeriesSuppressionsQueries(episodes);
 
     expect(requests[0].query).toContain('expiry > "2026-01-22T08:00:00.000Z"::DATETIME');
   });
 
   it('classifies snooze rows by expiry instead of pre-filtering expired ones', () => {
-    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+    const requests = getSeriesSuppressionsQueries([createAlertEpisode()]);
 
     // Expired snoozes must stay in the row set so LAST() still sees them: dropping them before
     // LAST() would resurrect an older snooze (e.g. an indefinite one) as the latest snooze action.
@@ -421,7 +478,7 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
   });
 
   it('retains indefinite snoozes (no expiry) as active snoozes', () => {
-    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+    const requests = getSeriesSuppressionsQueries([createAlertEpisode()]);
 
     // `expiry > <ts>` alone evaluates to NULL when expiry is NULL (ES|QL null comparison), which
     // would misclassify indefinite snoozes as expired. `expiry IS NULL` marks them active.
@@ -431,7 +488,7 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
   it('falls back to epoch when all timestamps are invalid', () => {
     const episodes = [createAlertEpisode({ last_event_timestamp: 'not-a-date' })];
 
-    const requests = getAlertEpisodeSuppressionsQueries(episodes);
+    const requests = getSeriesSuppressionsQueries(episodes);
 
     expect(requests[0].query).toContain('expiry > "1970-01-01T00:00:00.000Z"::DATETIME');
   });
@@ -442,31 +499,28 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
       createAlertEpisode({ last_event_timestamp: '2026-01-22T09:00:00.000Z' }),
     ];
 
-    const requests = getAlertEpisodeSuppressionsQueries(episodes);
+    const requests = getSeriesSuppressionsQueries(episodes);
 
     expect(requests[0].query).toContain('expiry > "2026-01-22T09:00:00.000Z"::DATETIME');
   });
 
-  it('computes should_suppress with snooze, ack, and deactivate precedence', () => {
-    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+  it('suppresses only when the latest snooze intent is an active snooze', () => {
+    const { query } = getSeriesSuppressionsQueries([createAlertEpisode()])[0];
 
-    expect(requests[0].query).toContain('EVAL should_suppress = CASE(');
-    expect(requests[0].query).toContain('last_snooze_action == "snooze", TRUE');
-    expect(requests[0].query).toContain('last_ack_action == "ack", TRUE');
-    expect(requests[0].query).toContain('last_deactivate_action == "deactivate", TRUE');
+    expect(query).toContain('LAST(_snooze_action, @timestamp)');
+    expect(query).toContain('EVAL should_suppress = last_snooze_action == "snooze"');
+    expect(query).not.toContain('last_ack_action');
+    expect(query).not.toContain('last_deactivate_action');
   });
 
-  it('keeps the expected output columns including source and rule_id', () => {
-    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+  it('projects rule_id via LAST aggregation in STATS', () => {
+    const requests = getSeriesSuppressionsQueries([createAlertEpisode()]);
 
     expect(requests[0].query).toContain('rule_id = LAST(rule_id, @timestamp)');
-    expect(requests[0].query).toContain(
-      'KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action, source'
-    );
   });
 
   it('handles a single episode', () => {
-    const requests = getAlertEpisodeSuppressionsQueries([
+    const requests = getSeriesSuppressionsQueries([
       createAlertEpisode({ rule_id: 'only-rule', group_hash: 'only-hash' }),
     ]);
 
@@ -479,7 +533,7 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
       createAlertEpisode({ rule_id: `rule-${i}`, group_hash: `hash-${i}` })
     );
 
-    const requests = getAlertEpisodeSuppressionsQueries(episodes);
+    const requests = getSeriesSuppressionsQueries(episodes);
 
     expect(requests).toHaveLength(1);
     expect(requests[0].query).toContain('CONCAT(subject, "::", group_hash)');
@@ -495,7 +549,7 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
       createAlertEpisode({ rule_id: `${longSegment}-r${i}`, group_hash: `${longSegment}-g${i}` })
     );
 
-    const requests = getAlertEpisodeSuppressionsQueries(episodes);
+    const requests = getSeriesSuppressionsQueries(episodes);
 
     expect(requests.length).toBeGreaterThanOrEqual(2);
     for (const request of requests) {
@@ -516,7 +570,7 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
       })
     );
 
-    const requests = getAlertEpisodeSuppressionsQueries(episodes);
+    const requests = getSeriesSuppressionsQueries(episodes);
 
     expect(requests.length).toBeGreaterThanOrEqual(2);
     for (const request of requests) {
@@ -525,7 +579,7 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
   });
 
   it('computes subject via CASE to distinguish internal from external episodes', () => {
-    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+    const requests = getSeriesSuppressionsQueries([createAlertEpisode()]);
 
     expect(requests[0].query).toContain(
       'subject = CASE(source IS NULL OR source == "internal", rule_id, CONCAT(space_id, "::", source))'
@@ -533,43 +587,53 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
   });
 
   it('builds _pair_key from subject (not rule_id directly)', () => {
-    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+    const requests = getSeriesSuppressionsQueries([createAlertEpisode()]);
 
     expect(requests[0].query).toContain('CONCAT(subject, "::", group_hash)');
     expect(requests[0].query).not.toContain('CONCAT(rule_id, "::", group_hash)');
   });
 
-  it('groups INLINE STATS BY subject, group_hash', () => {
-    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+  it('aggregates once per series, without INLINE STATS or an episode_id grouping', () => {
+    const { query } = getSeriesSuppressionsQueries([createAlertEpisode()])[0];
 
-    expect(requests[0].query).toContain('BY subject, group_hash');
-  });
-
-  it('groups STATS BY subject, group_hash, episode_id', () => {
-    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
-
-    expect(requests[0].query).toContain('BY subject, group_hash, episode_id');
+    expect(query).not.toContain('INLINE STATS');
+    expect(query).toMatch(/BY subject, group_hash \|/);
+    expect(query).not.toContain('BY subject, group_hash, episode_id');
   });
 
   it('projects source and space_id via LAST aggregation in STATS', () => {
-    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+    const requests = getSeriesSuppressionsQueries([createAlertEpisode()]);
 
     expect(requests[0].query).toContain('source = LAST(source, @timestamp)');
     expect(requests[0].query).toContain('space_id = LAST(space_id, @timestamp)');
   });
 
   it('keeps the expected output columns', () => {
-    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+    const requests = getSeriesSuppressionsQueries([createAlertEpisode()]);
 
     expect(requests[0].query).toContain(
-      'KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action, source, space_id'
+      'KEEP rule_id, group_hash, should_suppress, last_snooze_action, source, space_id'
     );
   });
 
   it('drops rows whose subject could not be resolved', () => {
-    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+    const requests = getSeriesSuppressionsQueries([createAlertEpisode()]);
 
     expect(requests[0].query).toContain('WHERE subject IS NOT NULL');
+  });
+
+  it('ends every chunk with an explicit row limit', () => {
+    const longSegment = 'l'.repeat(5_000);
+    const episodes = Array.from({ length: 200 }, (_, i) =>
+      createAlertEpisode({ rule_id: `${longSegment}-r${i}`, group_hash: `${longSegment}-g${i}` })
+    );
+
+    const requests = getSeriesSuppressionsQueries(episodes);
+
+    expect(requests.length).toBeGreaterThanOrEqual(2);
+    for (const request of requests) {
+      expect(endsWithRowLimit(request.query)).toBe(true);
+    }
   });
 
   it('uses episodeSubject for pair key construction (internal episode uses rule_id)', () => {
@@ -577,7 +641,7 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
       createAlertEpisode({ source: 'internal', rule_id: 'rule-abc', group_hash: 'hash-abc' }),
     ];
 
-    const requests = getAlertEpisodeSuppressionsQueries(episodes);
+    const requests = getSeriesSuppressionsQueries(episodes);
 
     // For internal episodes, episodeSubject returns rule_id
     expect(requests[0].query).toContain('rule-abc::hash-abc');
@@ -588,7 +652,7 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
       createAlertEpisode({ source: 'pagerduty', rule_id: null, group_hash: 'hash-pd' }),
     ];
 
-    const requests = getAlertEpisodeSuppressionsQueries(episodes);
+    const requests = getSeriesSuppressionsQueries(episodes);
 
     // For external episodes, episodeSubject returns `${space_id}::${source}`
     expect(requests[0].query).toContain('default::pagerduty::hash-pd');
@@ -610,7 +674,7 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
       }),
     ];
 
-    const requests = getAlertEpisodeSuppressionsQueries(episodes);
+    const requests = getSeriesSuppressionsQueries(episodes);
 
     expect(requests[0].query).toContain('space-a::pagerduty::hash-pd');
     expect(requests[0].query).toContain('space-b::pagerduty::hash-pd');
@@ -622,7 +686,7 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
       createAlertEpisode({ rule_id: 'rule-2', group_hash: 'hash-2', episode_id: 'ep-2' }),
     ];
 
-    const { query } = getAlertEpisodeSuppressionsQueries(episodes)[0];
+    const { query } = getSeriesSuppressionsQueries(episodes)[0];
 
     expect(query).toContain('group_hash IN ("hash-1", "hash-2")');
     expect(query).toContain('rule_id IN ("rule-1", "rule-2")');
@@ -632,7 +696,7 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
   });
 
   it('places the raw-field pre-filter before the subject EVAL so it can push down', () => {
-    const { query } = getAlertEpisodeSuppressionsQueries([createAlertEpisode()])[0];
+    const { query } = getSeriesSuppressionsQueries([createAlertEpisode()])[0];
 
     expect(query.indexOf('group_hash IN (')).toBeLessThan(query.indexOf('subject = CASE('));
   });
@@ -647,7 +711,7 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
       }),
     ];
 
-    const { query } = getAlertEpisodeSuppressionsQueries(episodes)[0];
+    const { query } = getSeriesSuppressionsQueries(episodes)[0];
 
     expect(query).toContain('group_hash IN ("hash-pd")');
     expect(query).toContain('space_id IN ("space-a")');
@@ -668,7 +732,7 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
       }),
     ];
 
-    const { query } = getAlertEpisodeSuppressionsQueries(episodes)[0];
+    const { query } = getSeriesSuppressionsQueries(episodes)[0];
 
     expect(query).toContain('(group_hash IN ("hash-1")) AND (rule_id IN ("rule-1"))');
     expect(query).toContain('space_id IN ("space-a")');
@@ -692,7 +756,7 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
       })
     );
 
-    const requests = getAlertEpisodeSuppressionsQueries(episodes);
+    const requests = getSeriesSuppressionsQueries(episodes);
 
     expect(requests.length).toBeGreaterThanOrEqual(2);
     for (const request of requests) {
@@ -702,6 +766,129 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
     }
     // The first chunk must not carry the last episode's rule_id (per-chunk scoping).
     expect(requests[0].query).not.toContain(`${longSegment}-r199`);
+  });
+});
+
+describe('getEpisodeSuppressionsQueries', () => {
+  it('returns an empty array for empty input', () => {
+    expect(getEpisodeSuppressionsQueries([])).toEqual([]);
+  });
+
+  it('queries the alert actions data stream', () => {
+    const { query } = getEpisodeSuppressionsQueries([createAlertEpisode()])[0];
+
+    expect(query).toContain('.alert-actions');
+  });
+
+  it('filters by the scan episode ids and episode-level action types in the first WHERE', () => {
+    const episodes = [
+      createAlertEpisode({ episode_id: 'ep-1' }),
+      createAlertEpisode({ episode_id: 'ep-2' }),
+    ];
+
+    const { query } = getEpisodeSuppressionsQueries(episodes)[0];
+
+    expect(query).toContain('episode_id IN ("ep-1", "ep-2")');
+    expect(query).toContain('action_type IN ("ack", "unack", "deactivate", "activate")');
+    // Both filters sit on indexed fields ahead of any EVAL, so ES pushes them down to Lucene.
+    expect(query.indexOf('episode_id IN (')).toBeLessThan(query.indexOf('| EVAL'));
+    expect(query.indexOf('action_type IN (')).toBeLessThan(query.indexOf('| EVAL'));
+  });
+
+  it('does not read series-level snooze actions', () => {
+    const { query } = getEpisodeSuppressionsQueries([createAlertEpisode()])[0];
+
+    expect(query).not.toContain('"snooze"');
+    expect(query).not.toContain('"unsnooze"');
+    expect(query).not.toContain('last_snooze_action');
+  });
+
+  it('does not filter by series pair keys', () => {
+    const { query } = getEpisodeSuppressionsQueries([
+      createAlertEpisode({ rule_id: 'rule-1', group_hash: 'hash-1' }),
+    ])[0];
+
+    expect(query).not.toContain('_pair_key');
+    expect(query).not.toContain('rule-1::hash-1');
+  });
+
+  it('deduplicates episode ids', () => {
+    const episodes = [
+      createAlertEpisode({ group_hash: 'hash-1', episode_id: 'ep-1' }),
+      createAlertEpisode({ group_hash: 'hash-2', episode_id: 'ep-1' }),
+    ];
+
+    const { query } = getEpisodeSuppressionsQueries(episodes)[0];
+
+    expect(query.match(/"ep-1"/g)).toHaveLength(1);
+  });
+
+  it('drops rows whose subject could not be resolved', () => {
+    const { query } = getEpisodeSuppressionsQueries([createAlertEpisode()])[0];
+
+    expect(query).toContain(
+      'subject = CASE(source IS NULL OR source == "internal", rule_id, CONCAT(space_id, "::", source))'
+    );
+    expect(query).toContain('WHERE subject IS NOT NULL');
+  });
+
+  it('aggregates once per episode, keyed by series too, without INLINE STATS', () => {
+    const { query } = getEpisodeSuppressionsQueries([createAlertEpisode()])[0];
+
+    expect(query).not.toContain('INLINE STATS');
+    expect(query).toContain('BY subject, group_hash, episode_id');
+    expect(query).toContain(
+      'last_ack_action = LAST(action_type, @timestamp) WHERE (action_type IN ("ack", "unack"))'
+    );
+    expect(query).toContain(
+      'last_deactivate_action = LAST(action_type, @timestamp) WHERE (action_type IN ("deactivate", "activate"))'
+    );
+    expect(query).toContain('source = LAST(source, @timestamp)');
+    expect(query).toContain('space_id = LAST(space_id, @timestamp)');
+    expect(query).toContain('rule_id = LAST(rule_id, @timestamp)');
+  });
+
+  it('computes should_suppress from ack and deactivate', () => {
+    const { query } = getEpisodeSuppressionsQueries([createAlertEpisode()])[0];
+
+    expect(query).toContain('EVAL should_suppress = CASE(');
+    expect(query).toContain('last_ack_action == "ack", TRUE');
+    expect(query).toContain('last_deactivate_action == "deactivate", TRUE');
+  });
+
+  it('keeps the expected output columns', () => {
+    const { query } = getEpisodeSuppressionsQueries([createAlertEpisode()])[0];
+
+    expect(query).toContain(
+      'KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, source, space_id'
+    );
+  });
+
+  it('never puts more episode ids in a chunk than the row limit returns', () => {
+    const episodes = Array.from({ length: ESQL_QUERY_ROW_LIMIT + 1 }, (_, i) =>
+      createAlertEpisode({ episode_id: `ep-${i}` })
+    );
+
+    const requests = getEpisodeSuppressionsQueries(episodes);
+
+    expect(requests).toHaveLength(2);
+    for (const { query } of requests) {
+      const idList = query.slice(query.indexOf('episode_id IN ('), query.indexOf(')'));
+      expect(idList.match(/"ep-\d+"/g)?.length).toBeLessThanOrEqual(ESQL_QUERY_ROW_LIMIT);
+    }
+  });
+
+  it('ends every chunk with an explicit row limit', () => {
+    const episodes = Array.from({ length: ESQL_QUERY_ROW_LIMIT + 1 }, (_, i) =>
+      createAlertEpisode({ episode_id: `ep-${i}` })
+    );
+
+    const requests = getEpisodeSuppressionsQueries(episodes);
+
+    expect(requests.length).toBeGreaterThanOrEqual(2);
+    for (const request of requests) {
+      expect(endsWithRowLimit(request.query)).toBe(true);
+    }
   });
 });
 
@@ -748,6 +935,30 @@ describe('getLastNotifiedTimestampsQueries', () => {
     const requests = getLastNotifiedTimestampsQueries(['group-1']);
 
     expect(requests[0].query).toContain('BY action_group_id');
+  });
+
+  it('never puts more action group ids in a chunk than the row limit returns', () => {
+    // 40-char object-hash ids fit ~13 000 per chunk by bytes alone.
+    const ids = Array.from({ length: ESQL_QUERY_ROW_LIMIT + 1 }, (_, i) =>
+      `${i}`.padStart(40, '0')
+    );
+
+    const requests = getLastNotifiedTimestampsQueries(ids);
+
+    expect(requests).toHaveLength(2);
+    expect(requests[1].query).toContain(`action_group_id IN ("${ids[ESQL_QUERY_ROW_LIMIT]}")`);
+  });
+
+  it('ends every chunk with an explicit row limit', () => {
+    const longSegment = 'z'.repeat(10_000);
+    const ids = Array.from({ length: 200 }, (_, i) => `${longSegment}-${i}`);
+
+    const requests = getLastNotifiedTimestampsQueries(ids);
+
+    expect(requests.length).toBeGreaterThanOrEqual(2);
+    for (const request of requests) {
+      expect(endsWithRowLimit(request.query)).toBe(true);
+    }
   });
 
   it('splits into multiple requests when ids exceed the size budget', () => {
