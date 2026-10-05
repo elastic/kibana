@@ -9,6 +9,7 @@ import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
 import {
   getFieldEvaluationsEsql,
   getEuidEsqlEvaluation,
+  getEuidNamespaceSourceFields,
   getEuidSourceFields,
 } from '@kbn/entity-store/common/domain/euid';
 import type { EuiDataGridColumn } from '@elastic/eui';
@@ -38,10 +39,21 @@ export const MS_PER_DAY = 86_400_000;
 export const TIME_RANGE_OPTIONS = ['24h', '7d', '30d'] as const;
 export const TIME_RANGE_DAYS = { '24h': 1, '7d': 7, '30d': 30 } as const;
 
-/** Identity fields from entity definitions — needed for alert enrich reverse-identity prefilter. */
+/**
+ * Identity and namespace source fields from entity definitions. The alert enrich rebuilds
+ * each row's EUID filter from them; without the namespace sources (e.g. `event.module`)
+ * the filter derives a different namespace and misses unstamped alerts.
+ */
 const IDENTITY_KEEP_FIELDS = [
   ...new Set([
-    ...ALLOWED_ENTITY_TYPES.flatMap((t) => getEuidSourceFields(t).identitySourceFields),
+    ...ALLOWED_ENTITY_TYPES.flatMap((t) => {
+      const { exactMatchFields, prefixMatchFields } = getEuidNamespaceSourceFields(t);
+      return [
+        ...getEuidSourceFields(t).identitySourceFields,
+        ...exactMatchFields,
+        ...prefixMatchFields,
+      ];
+    }),
     'entity.namespace',
   ]),
 ];
