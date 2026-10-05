@@ -101,6 +101,33 @@ const isValidAlert = (source?: estypes.SearchHit<ParsedTechnicalFields>): source
   );
 };
 
+const scalarToAuthField = (value: unknown): string | undefined => {
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+  return undefined;
+};
+
+/**
+ * Reads a field from `_source`, accepting both the original dotted key and the nested
+ * object form synthetic `_source` reconstructs from the alerts mapping.
+ */
+const readAlertSourceField = (source: object, field: string): unknown => {
+  const record = source as Record<string, unknown>;
+  if (Object.prototype.hasOwnProperty.call(record, field)) {
+    return record[field];
+  }
+
+  let current: unknown = source;
+  for (const segment of field.split('.')) {
+    if (current == null || typeof current !== 'object' || Array.isArray(current)) {
+      return undefined;
+    }
+    current = (current as Record<string, unknown>)[segment];
+  }
+  return current;
+};
+
 /**
  * Reads an authorization field from an alert hit, preferring the `fields` API (which is
  * populated even when `_source` is disabled) and falling back to `_source` for `mget`
@@ -110,20 +137,26 @@ const getAlertAuthField = (
   hit:
     | {
         fields?: Record<string, unknown[]>;
-        _source?: {
-          [ALERT_RULE_TYPE_ID]?: string | null;
-          [ALERT_RULE_CONSUMER]?: string | null;
-        } | null;
+        _source?: object | null;
       }
     | undefined,
   field: typeof ALERT_RULE_TYPE_ID | typeof ALERT_RULE_CONSUMER
 ): string | undefined => {
   const fromFields = hit?.fields?.[field]?.[0];
   if (fromFields != null) {
-    return String(fromFields);
+    const fieldValue = scalarToAuthField(fromFields);
+    if (fieldValue != null) {
+      return fieldValue;
+    }
   }
-  const fromSource = hit?._source?.[field];
-  return fromSource == null ? undefined : String(fromSource);
+
+  if (hit?._source == null) {
+    return undefined;
+  }
+
+  const fromSource = readAlertSourceField(hit._source, field);
+  const sourceValue = Array.isArray(fromSource) ? fromSource[0] : fromSource;
+  return scalarToAuthField(sourceValue);
 };
 
 export interface ConstructorOptions {
@@ -300,17 +333,18 @@ export class AlertsClient {
   }
 
   /**
-   * Accepts an array of ES documents and executes ensureAuthorized for the given operation
+   * Accepts an array of ES documents and executes ensureAuthorized for the given operation.
+   * Present documents missing ruleTypeId or consumer are rejected. Not-found documents and
+   * per-document lookup errors are skipped so valid siblings can still be processed.
    */
   private async ensureAllAuthorized(
     items: Array<{
       _id: string;
+      found?: boolean;
+      error?: unknown;
       // this is typed kind of crazy to fit the output of es api response to this
       fields?: Record<string, unknown[]>;
-      _source?: {
-        [ALERT_RULE_TYPE_ID]?: string | null;
-        [ALERT_RULE_CONSUMER]?: string | null;
-      } | null;
+      _source?: object | null;
     }>,
     operation: ReadOperations.Find | ReadOperations.Get | WriteOperations.Update
   ) {
@@ -318,7 +352,9 @@ export class AlertsClient {
     // Deduplicate authorization checks: authorization is granted per (ruleTypeId, consumer)
     // pair, so we only need to call `ensureAuthorized` once per unique pair.
     const ownersAndRuleTypeIds = new Map<string, { ruleTypeId: string; consumer: string }>();
-    const unauthorizableIds: string[] = [];
+    const invalidAlertIds: string[] = [];
+    const isAbsentLookup = (hit: (typeof items)[number]): boolean =>
+      hit.found === false || hit.error != null;
 
     items.forEach((hit) => {
       hitIds.push(hit._id);
@@ -328,14 +364,14 @@ export class AlertsClient {
 
       if (ruleTypeId != null && consumer != null) {
         ownersAndRuleTypeIds.set(`${ruleTypeId}|${consumer}`, { ruleTypeId, consumer });
-      } else {
-        unauthorizableIds.push(hit._id);
+      } else if (!isAbsentLookup(hit)) {
+        invalidAlertIds.push(hit._id);
       }
     });
 
     try {
-      if (unauthorizableIds.length > 0) {
-        const errorMessage = `Invalid alert found with id of "${unauthorizableIds.join(
+      if (invalidAlertIds.length > 0) {
+        const errorMessage = `Invalid alert found with id of "${invalidAlertIds.join(
           ', '
         )}" and operation ${operation}`;
         this.logger.error(errorMessage);

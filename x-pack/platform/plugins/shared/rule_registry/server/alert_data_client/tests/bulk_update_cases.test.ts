@@ -31,6 +31,26 @@ describe('bulkUpdateCases', () => {
     },
   ];
 
+  const validDoc = {
+    found: true as const,
+    _id: 'alert-id',
+    _index: 'alert-index',
+    _source: {
+      [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+      [ALERT_RULE_CONSUMER]: 'apm',
+      [ALERT_CASE_IDS]: caseIds,
+    },
+  };
+
+  const forgedDoc = {
+    found: true as const,
+    _id: 'forged-id',
+    _index: 'alert-index',
+    _source: {
+      [ALERT_CASE_IDS]: caseIds,
+    },
+  };
+
   const alertsClientParams: jest.Mocked<ConstructorOptions> = {
     logger: loggingSystemMock.create().get(),
     authorization: alertingAuthMock,
@@ -47,18 +67,7 @@ describe('bulkUpdateCases', () => {
     jest.clearAllMocks();
 
     esClientMock.mget.mockResponse({
-      docs: [
-        {
-          found: true,
-          _id: 'alert-id',
-          _index: 'alert-index',
-          _source: {
-            [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
-            [ALERT_RULE_CONSUMER]: 'apm',
-            [ALERT_CASE_IDS]: caseIds,
-          },
-        },
-      ],
+      docs: [validDoc],
     });
   });
 
@@ -309,16 +318,7 @@ describe('bulkUpdateCases', () => {
 
   it('throws and does not write when a document is missing the authorization fields', async () => {
     esClientMock.mget.mockResponse({
-      docs: [
-        {
-          found: true,
-          _id: 'forged-id',
-          _index: 'alert-index',
-          _source: {
-            [ALERT_CASE_IDS]: caseIds,
-          },
-        },
-      ],
+      docs: [forgedDoc],
     });
 
     const alertsClient = new AlertsClient(alertsClientParams);
@@ -336,26 +336,7 @@ describe('bulkUpdateCases', () => {
 
   it('throws when only some documents in a batch are missing the authorization fields', async () => {
     esClientMock.mget.mockResponse({
-      docs: [
-        {
-          found: true,
-          _id: 'alert-id',
-          _index: 'alert-index',
-          _source: {
-            [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
-            [ALERT_RULE_CONSUMER]: 'apm',
-            [ALERT_CASE_IDS]: caseIds,
-          },
-        },
-        {
-          found: true,
-          _id: 'forged-id',
-          _index: 'alert-index',
-          _source: {
-            [ALERT_CASE_IDS]: caseIds,
-          },
-        },
-      ],
+      docs: [validDoc, forgedDoc],
     });
 
     const alertsClient = new AlertsClient(alertsClientParams);
@@ -384,5 +365,169 @@ describe('bulkUpdateCases', () => {
         message: 'Invalid alert found with id of "forged-id" and operation get',
       },
     });
+    expect(auditLogger.log).toHaveBeenCalledWith({
+      message: 'Failed attempt to access alert [id=alert-id]',
+      event: {
+        action: 'alert_get',
+        category: ['database'],
+        outcome: 'failure',
+        type: ['access'],
+      },
+      error: {
+        code: 'Error',
+        message: 'Invalid alert found with id of "forged-id" and operation get',
+      },
+    });
+    expect(auditLogger.log).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({ outcome: 'success' }),
+      })
+    );
+  });
+
+  it('skips a missing document and still updates the valid sibling', async () => {
+    esClientMock.mget.mockResponse({
+      docs: [
+        validDoc,
+        {
+          found: false,
+          _id: 'missing-id',
+          _index: 'alert-index',
+        },
+      ],
+    });
+
+    const alertsClient = new AlertsClient(alertsClientParams);
+    const mixedAlerts = [
+      { id: 'alert-id', index: 'alert-index' },
+      { id: 'missing-id', index: 'alert-index' },
+    ];
+
+    await alertsClient.bulkUpdateCases({ caseIds, alerts: mixedAlerts });
+
+    expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledTimes(1);
+    expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledWith({
+      consumer: 'apm',
+      entity: 'alert',
+      operation: 'get',
+      ruleTypeId: 'apm.error_rate',
+    });
+    expect(esClientMock.bulk).toHaveBeenCalled();
+    expect(auditLogger.log).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({ outcome: 'failure' }),
+      })
+    );
+  });
+
+  it('skips a document with an mget error and still updates the valid sibling', async () => {
+    esClientMock.mget.mockResponse({
+      docs: [
+        validDoc,
+        {
+          _id: 'error-id',
+          _index: 'alert-index',
+          error: {
+            type: 'index_not_found_exception',
+            reason: 'no such index [alert-index]',
+          },
+        },
+      ],
+    });
+
+    const alertsClient = new AlertsClient(alertsClientParams);
+    const mixedAlerts = [
+      { id: 'alert-id', index: 'alert-index' },
+      { id: 'error-id', index: 'alert-index' },
+    ];
+
+    await alertsClient.bulkUpdateCases({ caseIds, alerts: mixedAlerts });
+
+    expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledTimes(1);
+    expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledWith({
+      consumer: 'apm',
+      entity: 'alert',
+      operation: 'get',
+      ruleTypeId: 'apm.error_rate',
+    });
+    expect(esClientMock.bulk).toHaveBeenCalled();
+    expect(auditLogger.log).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({ outcome: 'failure' }),
+      })
+    );
+  });
+
+  it.each([
+    {
+      label: 'rule type id',
+      source: { [ALERT_RULE_CONSUMER]: 'apm', [ALERT_CASE_IDS]: caseIds },
+    },
+    {
+      label: 'consumer',
+      source: { [ALERT_RULE_TYPE_ID]: 'apm.error_rate', [ALERT_CASE_IDS]: caseIds },
+    },
+  ])(
+    'throws and does not write when a present document is missing the $label',
+    async ({ source }) => {
+      esClientMock.mget.mockResponse({
+        docs: [
+          {
+            found: true,
+            _id: 'forged-id',
+            _index: 'alert-index',
+            _source: source,
+          },
+        ],
+      });
+
+      const alertsClient = new AlertsClient(alertsClientParams);
+
+      await expect(
+        alertsClient.bulkUpdateCases({
+          caseIds,
+          alerts: [{ id: 'forged-id', index: 'alert-index' }],
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Invalid alert found with id of \\"forged-id\\" and operation get"`
+      );
+
+      expect(alertingAuthMock.ensureAuthorized).not.toHaveBeenCalled();
+      expect(esClientMock.bulk).not.toHaveBeenCalled();
+    }
+  );
+
+  it('authorizes a present document whose authorization fields are nested in _source', async () => {
+    esClientMock.mget.mockResponse({
+      docs: [
+        {
+          found: true,
+          _id: 'alert-id',
+          _index: 'alert-index',
+          _source: {
+            kibana: {
+              alert: {
+                rule: {
+                  rule_type_id: 'apm.error_rate',
+                  consumer: 'apm',
+                },
+                case_ids: caseIds,
+              },
+            },
+          },
+        },
+      ],
+    });
+
+    const alertsClient = new AlertsClient(alertsClientParams);
+    await alertsClient.bulkUpdateCases({ caseIds, alerts });
+
+    expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledWith({
+      consumer: 'apm',
+      entity: 'alert',
+      operation: 'get',
+      ruleTypeId: 'apm.error_rate',
+    });
+    expect(esClientMock.bulk).toHaveBeenCalled();
   });
 });
