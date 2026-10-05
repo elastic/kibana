@@ -245,11 +245,17 @@ const EntityCardMetadata = styled.div<{ euiTheme: EuiThemeComputed }>`
 `;
 
 /** Capsule badge showing the entity count for grouped nodes. Capped at "99+". */
-const CountBadge = ({ children, ...props }: React.ComponentPropsWithoutRef<'span'>) => {
+const CountBadge = ({
+  children,
+  'data-test-subj': dataTestSubj,
+}: {
+  children: React.ReactNode;
+  'data-test-subj'?: string;
+}) => {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiBadge
-      {...props}
+      data-test-subj={dataTestSubj}
       color={euiTheme.colors.backgroundBaseSubdued}
       css={css`
         flex-shrink: 0;
