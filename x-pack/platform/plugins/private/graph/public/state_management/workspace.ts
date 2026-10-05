@@ -325,10 +325,15 @@ export const workspaceInitializedSelector = createSelector(
   (workspace: WorkspaceState) => workspace.isInitialized
 );
 
-export const selectedNodeIdsSelector = createSelector(
-  workspaceSelector,
-  (workspace: WorkspaceState) => workspace.selectedNodeIds
-);
+export const selectedNodeIdsSelector = (state: GraphState) => state.workspace.selectedNodeIds;
+export const selectedEdgeIdsSelector = (state: GraphState) => state.workspace.selectedEdgeIds;
+export const workspaceNodeCountSelector = (state: GraphState) => state.workspace.nodeIds.length;
+export const isWorkspaceLayoutRunningSelector = (state: GraphState) =>
+  state.workspace.isLayoutRunning;
+export const canUndoWorkspaceSelector = (state: GraphState) =>
+  state.workspace.undoHistory.length > 0;
+export const canRedoWorkspaceSelector = (state: GraphState) =>
+  state.workspace.redoHistory.length > 0;
 
 const toSnapshot = ({ undoHistory, redoHistory, ...snapshot }: WorkspaceState): WorkspaceSnapshot =>
   snapshot;
