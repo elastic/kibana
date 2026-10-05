@@ -50,6 +50,20 @@ describe('actionPolicyResponseSchema', () => {
     expect(result.throttle).toBeNull();
   });
 
+  it('accepts a throttle with a null strategy', () => {
+    const result = actionPolicyResponseSchema.parse({
+      ...validResponse,
+      throttle: { strategy: null, interval: '1h' },
+    });
+    expect(result.throttle).toEqual({ strategy: null, interval: '1h' });
+  });
+
+  it('rejects a throttle that omits strategy', () => {
+    expect(() =>
+      actionPolicyResponseSchema.parse({ ...validResponse, throttle: { interval: '1h' } })
+    ).toThrow();
+  });
+
   it('rejects missing required fields', () => {
     expect(() => actionPolicyResponseSchema.parse({})).toThrow();
   });
