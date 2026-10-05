@@ -50,15 +50,21 @@ async function distributeScoutTestsByModule() {
   }
 }
 
-type SingleConfigSetLaneInfo = { label: string; loadIDs: string[] };
+interface SingleConfigSetLaneInfo {
+  label: string;
+  loadIDs: string[];
+}
 // Combined lane: runner restarts the server for each group; SCOUT_TEST_SERVER_CONFIG_SET is not set on the step.
-type CombinedLaneInfo = { label: string; loadGroups: Array<{ configSet: string; loadIDs: string[] }> };
+interface CombinedLaneInfo {
+  label: string;
+  loadGroups: Array<{ configSet: string; loadIDs: string[] }>;
+}
 
-type LanePair = {
+interface LanePair {
   testTarget: ScoutTestTrack['metadata']['testTarget'];
   server: ScoutTestTrack['metadata']['server'];
   lane: ScoutTestTrack['lanes'][0];
-};
+}
 
 async function distributeScoutTestsOnLanes() {
   const testTracksDefinitionPaths = scoutTestTrack.definitions.all();
@@ -79,12 +85,12 @@ async function distributeScoutTestsOnLanes() {
   const allLanePairs: LanePair[] = testTracksDefinitionPaths
     .map(scoutTestTrack.definitions.loadFromPath)
     .flatMap((definition: { tracks: ScoutTestTrack[] }) =>
-      definition.tracks.flatMap((track) =>
-        track.lanes.map((lane) => ({ ...track.metadata, lane }))
-      )
+      definition.tracks.flatMap((track) => track.lanes.map((lane) => ({ ...track.metadata, lane })))
     );
 
-  const regularPairs = allLanePairs.filter(({ lane }) => lane.runtimeEstimate >= compactThresholdMs);
+  const regularPairs = allLanePairs.filter(
+    ({ lane }) => lane.runtimeEstimate >= compactThresholdMs
+  );
   const compactPairs = allLanePairs.filter(({ lane }) => lane.runtimeEstimate < compactThresholdMs);
 
   const sharedEnv = {
@@ -138,12 +144,12 @@ async function distributeScoutTestsOnLanes() {
       compactByTarget.set(key, existing);
     }
 
-    type CombinedSlot = {
+    interface CombinedSlot {
       testTarget: LanePair['testTarget'];
       agentQueue: string;
       usedMs: number;
       groups: CombinedLaneInfo['loadGroups'];
-    };
+    }
 
     for (const [, pairs] of compactByTarget) {
       const combinedSlots: CombinedSlot[] = [];

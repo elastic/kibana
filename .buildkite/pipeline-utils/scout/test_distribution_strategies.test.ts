@@ -310,9 +310,7 @@ describe('scoutTestDistributionStrategies', () => {
         ]);
 
         mockDefinitionsAll.mockReturnValue(['/mock/tracks.json']);
-        mockDefinitionsLoadFromPath.mockReturnValue(
-          createMockTrackDefinition([regular, compact])
-        );
+        mockDefinitionsLoadFromPath.mockReturnValue(createMockTrackDefinition([regular, compact]));
 
         await scoutTestDistributionStrategies.lanes();
 
