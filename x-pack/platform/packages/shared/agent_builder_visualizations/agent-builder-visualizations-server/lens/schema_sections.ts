@@ -88,23 +88,34 @@ const getFields = (node: unknown, defs: JsonNode, seen = new Set<unknown>()): Js
   ].reduce(mergeFields, {});
 };
 
+/**
+ * Ancestors of a node on the current path, so recursive definitions stop instead of looping.
+ * Siblings may share a definition, so this tracks the path rather than every node visited.
+ */
+type Ancestors = ReadonlySet<unknown>;
+
 /** Names of the fields a schema node requires. A union requires the fields every variant requires. */
-const getRequiredFields = (node: unknown, defs: JsonNode): Set<string> => {
+const getRequiredFields = (
+  node: unknown,
+  defs: JsonNode,
+  ancestors: Ancestors = new Set()
+): Set<string> => {
   const resolved = resolveRef(node, defs);
-  if (!isJsonNode(resolved)) {
+  if (!isJsonNode(resolved) || ancestors.has(resolved)) {
     return new Set();
   }
+  const path = new Set([...ancestors, resolved]);
   if (resolved.items) {
-    return getRequiredFields(resolved.items, defs);
+    return getRequiredFields(resolved.items, defs, path);
   }
   const ownRequired = Array.isArray(resolved.required)
     ? resolved.required.filter((name): name is string => typeof name === 'string')
     : [];
   const partsRequired = getSubschemas(resolved, ['allOf']).flatMap((part) => [
-    ...getRequiredFields(part, defs),
+    ...getRequiredFields(part, defs, path),
   ]);
   const variantsRequired = getSubschemas(resolved, UNION_KEYS).map((variant) =>
-    getRequiredFields(variant, defs)
+    getRequiredFields(variant, defs, path)
   );
   const [firstVariantRequired = new Set<string>()] = variantsRequired;
   const unionRequired = [...firstVariantRequired].filter((name) =>
@@ -113,19 +124,17 @@ const getRequiredFields = (node: unknown, defs: JsonNode): Set<string> => {
   return new Set([...ownRequired, ...partsRequired, ...unionRequired]);
 };
 
-/** Fields of a schema node, with `*` marking the names of required ones. */
-const getLabeledFields = (node: unknown, defs: JsonNode): Array<[string, unknown]> => {
-  const required = getRequiredFields(node, defs);
-  return Object.entries(getFields(node, defs)).map(([name, field]) => [
-    required.has(name) ? `${name}*` : name,
-    field,
-  ]);
-};
-
-/** Allowed values of an enum-like node: an enum, a constant, a union of them, or an array of them. */
-const getEnumValues = (node: unknown, defs: JsonNode): unknown[] => {
+/**
+ * Allowed values of an enum-like node: an enum, a constant, an array of them, or a union
+ * whose every variant is one of them.
+ */
+const getEnumValues = (
+  node: unknown,
+  defs: JsonNode,
+  ancestors: Ancestors = new Set()
+): unknown[] => {
   const resolved = resolveRef(node, defs);
-  if (!isJsonNode(resolved)) {
+  if (!isJsonNode(resolved) || ancestors.has(resolved)) {
     return [];
   }
   if (Array.isArray(resolved.enum)) {
@@ -134,13 +143,81 @@ const getEnumValues = (node: unknown, defs: JsonNode): unknown[] => {
   if ('const' in resolved) {
     return [resolved.const];
   }
+  const path = new Set([...ancestors, resolved]);
   if (resolved.items) {
-    return getEnumValues(resolved.items, defs);
+    return getEnumValues(resolved.items, defs, path);
   }
-  const values = getSubschemas(resolved, UNION_KEYS).map((variant) => getEnumValues(variant, defs));
+  const values = getSubschemas(resolved, UNION_KEYS).map((variant) =>
+    getEnumValues(variant, defs, path)
+  );
   return values.length > 0 && values.every((variantValues) => variantValues.length > 0)
     ? uniq(values.flat())
     : [];
+};
+
+/** What the index states about a field. */
+interface FieldModel {
+  name: string;
+  required: boolean;
+  values: unknown[];
+  fields: FieldModel[];
+}
+
+/** What the index states about a section. */
+interface SectionModel {
+  name: string;
+  fields: FieldModel[];
+  /** The fields of each union variant, set only when the variants hold different fields. */
+  variants: FieldModel[][];
+  /** The JSON type, for sections without fields. */
+  type: string;
+}
+
+/** The index lists section fields and their own fields, never deeper. */
+const MAX_FIELD_DEPTH = 2;
+
+/** Fields of a schema node down to `MAX_FIELD_DEPTH`, counting the node's own fields as depth 1. */
+const toFieldModels = (node: unknown, defs: JsonNode, depth = 1): FieldModel[] => {
+  if (depth > MAX_FIELD_DEPTH) {
+    return [];
+  }
+  const required = getRequiredFields(node, defs);
+  return Object.entries(getFields(node, defs)).map(([name, field]) => ({
+    name,
+    required: required.has(name),
+    values: getEnumValues(field, defs),
+    fields: toFieldModels(field, defs, depth + 1),
+  }));
+};
+
+/** Union variants of a section, or of its array items. */
+const getUnionVariants = (section: unknown, defs: JsonNode): unknown[] => {
+  const resolved = resolveRef(section, defs);
+  const node = isJsonNode(resolved) ? resolveRef(resolved.items ?? resolved, defs) : undefined;
+  return isJsonNode(node) ? getSubschemas(node, UNION_KEYS) : [];
+};
+
+/**
+ * Keeps union variants apart when they hold different fields, because merging them
+ * would hide which field belongs to which variant.
+ */
+const toSectionModel = (name: string, section: unknown, defs: JsonNode): SectionModel => {
+  const variants = getUnionVariants(section, defs).map((variant) => toFieldModels(variant, defs));
+  const fieldSets = variants.map((fields) =>
+    fields
+      .map((field) => field.name)
+      .sort()
+      .join()
+  );
+  const hasDistinctVariants =
+    variants.length > 1 && fieldSets.every(Boolean) && new Set(fieldSets).size > 1;
+  const resolved = resolveRef(section, defs);
+  return {
+    name,
+    fields: toFieldModels(section, defs),
+    variants: hasDistinctVariants ? variants : [],
+    type: isJsonNode(resolved) && typeof resolved.type === 'string' ? resolved.type : 'value',
+  };
 };
 
 /**
@@ -149,51 +226,24 @@ const getEnumValues = (node: unknown, defs: JsonNode): unknown[] => {
  */
 const MAX_NESTED_ENUM_VALUES = 4;
 
-const describeField = (name: string, node: unknown, defs: JsonNode, maxValues = Infinity) => {
-  const values = getEnumValues(node, defs);
-  return values.length > 0 && values.length <= maxValues ? `${name}: ${values.join('|')}` : name;
-};
-
-/** Describes a section field, listing its own fields one level down when it has any. */
-const describeSectionField = (name: string, node: unknown, defs: JsonNode): string => {
-  const subfields = getLabeledFields(node, defs).map(([subname, subnode]) =>
-    describeField(subname, subnode, defs, MAX_NESTED_ENUM_VALUES)
-  );
-  return subfields.length > 0
-    ? `${name} (${subfields.join(', ')})`
-    : describeField(name, node, defs);
-};
-
-/**
- * Union variants of a section, or of its array items, when they hold different fields.
- * Merging them would hide which field belongs to which variant.
- */
-const getDistinctVariants = (section: unknown, defs: JsonNode): unknown[] => {
-  const resolved = resolveRef(section, defs);
-  const node = isJsonNode(resolved) ? resolveRef(resolved.items ?? resolved, defs) : undefined;
-  if (!isJsonNode(node)) {
-    return [];
+/** Renders a field as `name*: a|b`, or as `name (subfields)` when it has fields of its own. */
+const renderField = ({ name, required, values, fields }: FieldModel, depth = 1): string => {
+  const label = required ? `${name}*` : name;
+  if (fields.length > 0) {
+    return `${label} (${fields.map((field) => renderField(field, depth + 1)).join(', ')})`;
   }
-  const variants = getSubschemas(node, UNION_KEYS);
-  const fieldSets = variants.map((variant) => Object.keys(getFields(variant, defs)).sort().join());
-  return variants.length > 1 && fieldSets.every(Boolean) && new Set(fieldSets).size > 1
-    ? variants
-    : [];
+  const maxValues = depth > 1 ? MAX_NESTED_ENUM_VALUES : Infinity;
+  return values.length > 0 && values.length <= maxValues ? `${label}: ${values.join('|')}` : label;
 };
 
 /**
  * Lists the fields every variant shares once, then the fields of each variant. Fixed-value
  * fields (e.g. `type: primary`) name a variant, so they come first in it.
  */
-const describeVariants = (variants: readonly unknown[], defs: JsonNode): string => {
-  const variantFields = variants.map((variant) => {
-    const [fixedFields, otherFields] = partition(
-      getLabeledFields(variant, defs),
-      ([, node]) => getEnumValues(node, defs).length === 1
-    );
-    return [...fixedFields, ...otherFields].map(([name, node]) =>
-      describeSectionField(name, node, defs)
-    );
+const renderVariants = (variants: readonly FieldModel[][]): string => {
+  const variantFields = variants.map((fields) => {
+    const [fixedFields, otherFields] = partition(fields, ({ values }) => values.length === 1);
+    return [...fixedFields, ...otherFields].map((field) => renderField(field));
   });
   const [firstFields] = variantFields;
   const sharedFields = firstFields.filter((field) =>
@@ -207,19 +257,13 @@ const describeVariants = (variants: readonly unknown[], defs: JsonNode): string 
 
 // Listing enum values lets the model write fields like `layers[].type` or
 // `styling.values.mode` without loading the section or guessing the values.
-const describeSection = (section: unknown, defs: JsonNode): string => {
-  const variants = getDistinctVariants(section, defs);
+const renderSection = ({ name, fields, variants, type }: SectionModel): string => {
   if (variants.length > 0) {
-    return describeVariants(variants, defs);
+    return `- ${name}: ${renderVariants(variants)}`;
   }
-  const fields = getLabeledFields(section, defs).map(([name, node]) =>
-    describeSectionField(name, node, defs)
-  );
-  if (fields.length > 0) {
-    return fields.join(', ');
-  }
-  const resolved = resolveRef(section, defs);
-  return isJsonNode(resolved) && typeof resolved.type === 'string' ? resolved.type : 'value';
+  return `- ${name}: ${
+    fields.length > 0 ? fields.map((field) => renderField(field)).join(', ') : type
+  }`;
 };
 
 const toJsonSchema = (schema: z.ZodObject) =>
@@ -244,7 +288,7 @@ const xySectionsSchema = toSectionsSchema(xyConfigSchemaESQL).extend({
 const buildSchemaSections = (schema: z.ZodObject): ChartSchemaSections => {
   const { properties = {}, $defs = {} } = toJsonSchema(schema);
   const index = Object.entries(properties)
-    .map(([name, section]) => `- ${name}: ${describeSection(section, $defs)}`)
+    .map(([name, section]) => renderSection(toSectionModel(name, section, $defs)))
     .join('\n');
   return { schema, index };
 };
