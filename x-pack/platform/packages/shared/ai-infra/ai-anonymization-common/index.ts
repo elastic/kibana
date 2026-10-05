@@ -16,3 +16,5 @@ export type {
 export { NER_MODEL_ID, aiAnonymizationSettings } from './src/constants';
 export { DEFAULT_BUILTIN_REGEX_RULES } from './src/default_builtin_regex_rules';
 export { refreshBuiltInAnonymizationRules } from './src/refresh_builtin_rules';
+export { isAnonymizationMaskingEnabled } from './src/is_masking_enabled';
+export { parseLegacyAnonymizationRules, parseLegacyOnFailureMode } from './src/legacy_settings';
