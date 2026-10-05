@@ -641,6 +641,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             currentBatch: 0,
             hasTransformedDocs: true,
             progress,
+            explainAllocation: true,
           };
         } else {
           return {
@@ -688,6 +689,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           ...stateP,
           controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',
           currentBatch: stateP.currentBatch + 1,
+          explainAllocation: true,
         };
       }
       return {
@@ -708,7 +710,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       } else if (isTypeof(left, 'unavailable_shards_exception')) {
         // Not all shard copies are active. Retry indefinitely with exponential
         // backoff until shards become available, matching wait_for_task_completion_timeout.
-        return delayRetryState(stateP, left.message, Number.MAX_SAFE_INTEGER);
+        return {
+          ...delayRetryState(stateP, left.message, Number.MAX_SAFE_INTEGER),
+          explainAllocation: false,
+        };
       } else if (
         isTypeof(left, 'target_index_had_write_block') ||
         isTypeof(left, 'index_not_found_exception')

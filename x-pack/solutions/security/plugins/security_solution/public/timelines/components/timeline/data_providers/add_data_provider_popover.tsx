@@ -203,6 +203,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
   return (
     <EuiPopover
       id="addFieldsPopover"
+      aria-label={ADD_FIELD_LABEL}
       button={button}
       isOpen={isAddFilterPopoverOpen}
       closePopover={handleClosePopover}

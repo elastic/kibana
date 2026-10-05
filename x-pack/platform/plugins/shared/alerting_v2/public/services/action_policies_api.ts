@@ -14,17 +14,17 @@ import type {
   CreateActionPolicyData,
   ActionPolicyResponse,
   FindActionPoliciesRequest,
-  UpdateActionPolicyBody,
+  FindActionPoliciesResponse,
+  UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH } from '@kbn/alerting-v2-constants';
-import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
+import { ALERTING_V2_INTERNAL_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH } from '@kbn/alerting-v2-constants';
+import {
+  ALERTING_V2_ACTION_POLICY_API_PATH,
+  ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH,
+} from '../constants';
 
-export interface FindActionPoliciesResponse {
-  items: ActionPolicyResponse[];
-  total: number;
-  page: number;
-  perPage: number;
-}
+/** Re-exported from the shared schemas package. */
+export type { FindActionPoliciesResponse };
 
 /**
  * Encodes the `id` path parameter safely. Wraps `buildPath` so a single call
@@ -48,13 +48,12 @@ export class ActionPoliciesApi {
   }
 
   public async listActionPolicies(params: FindActionPoliciesRequest = {}) {
-    return this.http.get<FindActionPoliciesResponse>(ALERTING_V2_ACTION_POLICY_API_PATH, {
+    return this.http.get<FindActionPoliciesResponse>(ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH, {
       query: {
         page: params.page,
         per_page: params.per_page,
+        filter: params.filter || undefined,
         search: params.search || undefined,
-        tags: params.tags && params.tags.length > 0 ? params.tags : undefined,
-        enabled: params.enabled,
         sort_field: params.sort_field,
         sort_order: params.sort_order,
       },
@@ -73,7 +72,7 @@ export class ActionPoliciesApi {
     });
   }
 
-  public async updateActionPolicy(id: string, data: UpdateActionPolicyBody) {
+  public async updateActionPolicy(id: string, data: UpdateActionPolicyData) {
     return this.http.patch<ActionPolicyResponse>(buildActionPolicyPath(id), {
       body: JSON.stringify(data),
     });
@@ -93,7 +92,7 @@ export class ActionPoliciesApi {
 
   public async snoozeActionPolicy(id: string, snoozedUntil: string) {
     return this.http.post<ActionPolicyResponse>(buildActionPolicyPath(id, '_snooze'), {
-      body: JSON.stringify({ snoozedUntil }),
+      body: JSON.stringify({ snoozed_until: snoozedUntil }),
     });
   }
 
@@ -102,7 +101,7 @@ export class ActionPoliciesApi {
   }
 
   public async updateActionPolicyApiKey(id: string) {
-    await this.http.post(buildActionPolicyPath(id, '_update_api_key'));
+    return this.http.post<ActionPolicyResponse>(buildActionPolicyPath(id, '_update_api_key'));
   }
 
   public async bulkDeleteActionPolicies(ids: string[]) {
@@ -125,7 +124,7 @@ export class ActionPoliciesApi {
 
   public async bulkSnoozeActionPolicies(ids: string[], snoozedUntil: string) {
     return this.http.post<BulkResponse>(`${ALERTING_V2_ACTION_POLICY_API_PATH}/_bulk_snooze`, {
-      body: JSON.stringify({ ids, snoozedUntil }),
+      body: JSON.stringify({ ids, snoozed_until: snoozedUntil }),
     });
   }
 
@@ -145,16 +144,8 @@ export class ActionPoliciesApi {
   public async fetchRuleEventFields(matcher?: string) {
     const trimmed = matcher?.trim();
     return this.http.get<string[]>(
-      ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH,
+      ALERTING_V2_INTERNAL_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH,
       trimmed ? { query: { matcher: trimmed } } : {}
     );
-  }
-
-  public async fetchTags(params?: { search?: string }) {
-    return this.http.get<string[]>(`${ALERTING_V2_ACTION_POLICY_API_PATH}/suggestions/tags`, {
-      query: {
-        search: params?.search || undefined,
-      },
-    });
   }
 }

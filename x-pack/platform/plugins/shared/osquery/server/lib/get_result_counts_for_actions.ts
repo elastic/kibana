@@ -15,6 +15,9 @@ import { prefixIndexPatternsWithCcs } from '../utils/ccs_utils';
 
 const MAX_ACTION_IDS_PER_BATCH = 1000;
 
+// The `*Agents` fields hold DOCUMENT counts. Correct only on live-query paths,
+// where an agent emits one response doc per `action_id`. Names kept: they are
+// part of the live-query response schema.
 export interface ResultCountsEntry {
   totalRows: number;
   respondedAgents: number;
@@ -47,7 +50,7 @@ export const getResultCountsForActions = async (
   // When Fleet cannot resolve integration namespaces the caller passes
   // `undefined`; buildIndexNamesWithNamespaces then falls back to the base
   // pattern, mirroring the other result read paths. Results stay scoped to the
-  // active space via the `space_id` filter.
+  // active space via the `space_id` / `action_data.space_id` filter.
   integrationNamespaces?: readonly string[],
   ccsEnabled = false
 ): Promise<ResultCountsMap> => {
@@ -93,7 +96,13 @@ const fetchResultCountsBatch = async (
     size: 0,
     query: {
       bool: {
-        filter: [{ terms: { action_id: actionIds } }, buildSpaceIdFilter(spaceId)],
+        filter: [
+          { terms: { action_id: actionIds } },
+          // Id-bound via `action_id` collected from already space-scoped Kibana
+          // action docs, so this read may also match the agent-carried
+          // `action_data.space_id`. Live responses often carry space only there.
+          buildSpaceIdFilter(spaceId, { matchActionDataSpaceId: true }),
+        ],
       },
     },
     aggs: {

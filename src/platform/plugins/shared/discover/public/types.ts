@@ -185,4 +185,11 @@ export interface DiscoverStartPlugins {
   apmSourcesAccess?: ApmSourceAccessPluginStart;
   fileUpload?: FileUploadPluginStart;
   cps?: CPSPluginStart;
+  feedback?: {
+    setContext: (
+      appId: string,
+      context: Record<string, string | boolean | number>,
+      options?: { title?: string }
+    ) => () => void;
+  };
 }

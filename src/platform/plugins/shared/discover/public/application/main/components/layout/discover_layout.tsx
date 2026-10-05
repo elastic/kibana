@@ -24,14 +24,14 @@ import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
-import { DataViewType, type DataView, type DataViewField } from '@kbn/data-views-plugin/public';
+import { type DataView, type DataViewField } from '@kbn/data-views-plugin/public';
 import {
   ErrorCallout,
   SHOW_FIELD_STATISTICS,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
 import type { UseColumnsProps } from '@kbn/unified-data-table';
-import { useColumns } from '@kbn/unified-data-table';
+import { SOURCE_COLUMN, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { BehaviorSubject } from 'rxjs';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
@@ -59,8 +59,10 @@ import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import { useRegisterDiscoverEsqlFeedback } from '../../hooks/use_register_discover_esql_feedback';
 import {
   internalStateActions,
+  useCurrentDataSource,
   useCurrentDataView,
   useCurrentTabAction,
   useCurrentTabSelector,
@@ -69,9 +71,10 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
+import { DiscoverDocumentFlyout } from '../document_flyout';
 import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
-import { useIsChromeNextProjectHeader } from '../chrome_app_header';
+import { useIsProjectChromeStyle } from '../chrome_app_header';
 
 const queryClient = new QueryClient();
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -107,7 +110,7 @@ export function DiscoverLayout() {
   const { euiTheme } = useEuiTheme();
   const globalQueryState = data.query.getState();
   const dataStateContainer = useCurrentTabDataStateContainer();
-  const isChromeNextProjectHeader = useIsChromeNextProjectHeader();
+  const isProjectChromeStyle = useIsProjectChromeStyle();
 
   const { main$ } = dataStateContainer.data$;
   const [query, savedQuery, columns, sort, grid] = useAppStateSelector((state) => [
@@ -118,6 +121,7 @@ export function DiscoverLayout() {
     state.grid,
   ]);
   const isEsqlMode = useIsEsqlMode();
+  useRegisterDiscoverEsqlFeedback();
   const viewMode: VIEW_MODE = useAppStateSelector((state) => {
     const fieldStatsNotAvailable =
       !uiSettings.get(SHOW_FIELD_STATISTICS) && !!dataVisualizerService;
@@ -126,6 +130,7 @@ export function DiscoverLayout() {
     }
     return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
   });
+  const currentDataSource = useCurrentDataSource();
   const dataView = useCurrentDataView();
   const dataViewLoading = useCurrentTabSelector((state) => state.isDataViewLoading);
   const dataState: DataMainMsg = useDataState(main$);
@@ -143,9 +148,10 @@ export function DiscoverLayout() {
   // in a non time based way using the regular _search API, since the internal
   // representation of those documents does not have the time field that _field_caps
   // reports us.
-  const isTimeBased = useMemo(() => {
-    return dataView.type !== DataViewType.ROLLUP && dataView.isTimeBased();
-  }, [dataView]);
+  const isTimeBased = useMemo(
+    () => !currentDataSource.isRollup() && currentDataSource.isTimeBased(),
+    [currentDataSource]
+  );
 
   const resultState = useMemo(
     () => getResultState(dataState.fetchStatus, dataState.foundDocuments ?? false),
@@ -173,6 +179,11 @@ export function DiscoverLayout() {
     sort,
     settings: grid,
   });
+
+  const sidebarColumns = useMemo(
+    () => currentColumns.filter((column) => column !== SOURCE_COLUMN),
+    [currentColumns]
+  );
 
   const onAddColumnWithTracking = useCallback(
     (columnName: string) => {
@@ -211,9 +222,9 @@ export function DiscoverLayout() {
   const canSetBreakdownField = useMemo(
     () =>
       isOfAggregateQueryType(query)
-        ? dataView?.isTimeBased() && !hasTransformationalCommand(query.esql)
+        ? currentDataSource.isTimeBased() && !hasTransformationalCommand(query.esql)
         : true,
-    [dataView, query]
+    [currentDataSource, query]
   );
 
   const onAddBreakdownField = useCallback(
@@ -294,6 +305,8 @@ export function DiscoverLayout() {
     () => new BehaviorSubject<SidebarToggleState>({ isCollapsed: false, toggle: () => {} })
   );
 
+  const isSidebarHidden = resultState === 'uninitialized';
+
   const mainDisplay = useMemo(() => {
     if (resultState === 'uninitialized') {
       addLog('[DiscoverLayout] uninitialized triggers data fetching');
@@ -363,12 +376,12 @@ export function DiscoverLayout() {
 
   const fullBodyHeightOffset = useMemo(() => {
     const isStandalone = customizationContext.displayMode === 'standalone';
-    if (isChromeNextProjectHeader && isStandalone) {
+    if (isProjectChromeStyle && isStandalone) {
       return mathWithUnits(euiTheme.size.xxl, (x) => x * 3);
     }
 
     return `${TABS_BAR_HEIGHT + 1}px`;
-  }, [customizationContext.displayMode, euiTheme.size.xxl, isChromeNextProjectHeader]);
+  }, [customizationContext.displayMode, euiTheme.size.xxl, isProjectChromeStyle]);
 
   return (
     <EuiPage
@@ -394,22 +407,23 @@ export function DiscoverLayout() {
         onCancelClick={onCancelClick}
       />
       <EuiPageBody css={styles.pageBody}>
+        <SavedSearchURLConflictCallout
+          discoverSession={discoverSession}
+          spaces={spaces}
+          history={history}
+        />
         <div css={styles.sidebarContainer}>
           {dataViewLoading && (
             <EuiDelayRender delay={300}>
               <EuiProgress size="xs" color="accent" position="absolute" />
             </EuiDelayRender>
           )}
-          <SavedSearchURLConflictCallout
-            discoverSession={discoverSession}
-            spaces={spaces}
-            history={history}
-          />
           <DiscoverResizableLayout
             sidebarToggleState$={sidebarToggleState$}
+            isSidebarHidden={isSidebarHidden}
             sidebarPanel={
               <SidebarMemoized
-                columns={currentColumns}
+                columns={sidebarColumns}
                 documents$={dataStateContainer.data$.documents$}
                 onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
                 onAddField={onAddColumnWithTracking}
@@ -475,6 +489,13 @@ export function DiscoverLayout() {
           />
         </div>
       </EuiPageBody>
+      <DiscoverDocumentFlyout
+        dataView={dataView}
+        columns={currentColumns}
+        onAddColumn={onAddColumnWithTracking}
+        onRemoveColumn={onRemoveColumnWithTracking}
+        onAddFilter={onAddFilter}
+      />
     </EuiPage>
   );
 }

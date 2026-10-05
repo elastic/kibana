@@ -46,11 +46,10 @@ export function SearchEmbeddablePatternAnalysisComponent({
       input: {
         dataView,
         savedSearch: { searchSource: savedSearch.searchSource },
-        lastReloadRequestTime: Date.now(),
+        lastReloadRequestTime: fetchContext ? Date.now() : undefined,
       },
       renderViewModeToggle: () => <></>,
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [dataView, savedSearch, fetchContext]
   );
 

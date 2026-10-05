@@ -36,16 +36,6 @@ const renderDetailsPanel = ({
   const store = createMockStore(
     {
       ...mockGlobalState,
-      sourcerer: {
-        ...mockGlobalState.sourcerer,
-        sourcererScopes: {
-          ...mockGlobalState.sourcerer.sourcererScopes,
-          analyzer: {
-            ...mockGlobalState.sourcerer.sourcererScopes.default,
-            selectedPatterns: [],
-          },
-        },
-      },
       analyzer: {
         'details-panel-test': reduxState,
       },

@@ -7,7 +7,14 @@
 
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 
-import { buildActorDiscoveryQuery, buildActorPageFilter } from './build_actor_discovery_query';
+import {
+  buildActorDiscoveryQuery,
+  buildActorPageFilter,
+  getPageActorValues,
+} from './build_actor_discovery_query';
+import { buildTargetsPerActorQuery } from './build_targets_per_actor_query';
+import { COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS } from '../communicates_with/configs';
+import { ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS } from '../accesses/configs';
 import type { RelationshipIntegrationConfig, CompositeBucket } from './types';
 
 const HOST_EUID_FILTER = euid.dsl.getEuidDocumentsContainsIdFilter('host');
@@ -385,4 +392,99 @@ describe('buildActorPageFilter (page filter)', () => {
       expect(byField['user.email']).toBeUndefined();
     });
   });
+});
+
+describe('getPageActorValues', () => {
+  const managerConfig: RelationshipIntegrationConfig = {
+    ...accessesConfig,
+    customActor: { fields: ['manager.email', 'manager.id'] },
+  };
+
+  it('returns the distinct non-null values across every actor field and bucket', () => {
+    const buckets: CompositeBucket[] = [
+      { key: { 'manager.email': 'bob@corp', 'manager.id': '001' }, doc_count: 1 },
+      { key: { 'manager.email': 'bob@corp', 'manager.id': '002' }, doc_count: 1 },
+      { key: { 'manager.email': null, 'manager.id': '003' }, doc_count: 1 },
+      { key: { 'manager.email': 'carol@corp', 'manager.id': null }, doc_count: 1 },
+    ];
+    expect(getPageActorValues(managerConfig, buckets).sort()).toEqual([
+      '001',
+      '002',
+      '003',
+      'bob@corp',
+      'carol@corp',
+    ]);
+  });
+
+  it('returns exactly the values the page filter narrows Step 2 to', () => {
+    const buckets: CompositeBucket[] = [
+      { key: { 'manager.email': 'bob@corp', 'manager.id': '001' }, doc_count: 1 },
+      { key: { 'manager.email': null, 'manager.id': '002' }, doc_count: 1 },
+    ];
+    const filter = buildActorPageFilter(managerConfig, buckets) as {
+      bool: { should: Array<{ terms: Record<string, string[]> }> };
+    };
+    const filterValues = filter.bool.should.flatMap((clause) => Object.values(clause.terms).flat());
+    expect(getPageActorValues(managerConfig, buckets).sort()).toEqual(filterValues.sort());
+  });
+
+  it('reads only the declared actor fields', () => {
+    const buckets: CompositeBucket[] = [
+      { key: { 'manager.email': 'bob@corp', 'user.name': 'alice' }, doc_count: 1 },
+    ];
+    expect(getPageActorValues(managerConfig, buckets)).toEqual(['bob@corp']);
+  });
+
+  it('returns no values for an empty page', () => {
+    expect(getPageActorValues(managerConfig, [])).toEqual([]);
+  });
+});
+
+describe('hostScopedUsersOnly configs: Step 1 actor fields agree with Step 2', () => {
+  // The host-scoped EUID reads `user.name` only, so Step 1 must bucket on exactly
+  // that. Listing extra fields (e.g. `user.email`) multiplies composite buckets —
+  // `missing_bucket: true` emits a bucket per (null, name) AND (email, null)
+  // combination — surfacing actors Step 2 discards when it cannot build an EUID.
+  const hostScopedConfigs = [
+    ...COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS,
+    ...ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS,
+  ].filter((c) => c.hostScopedUsersOnly);
+
+  it('covers the shipped host-scoped configs', () => {
+    expect(hostScopedConfigs.map((c) => c.id).sort()).toEqual([
+      'crowdstrike_fdr',
+      'crowdstrike_fdr',
+      'system_auth',
+      'system_auth',
+      'system_security',
+      'system_security',
+    ]);
+  });
+
+  it.each(hostScopedConfigs.map((c) => [c.id, c] as const))(
+    '%s buckets on user.name alone',
+    (_id, config) => {
+      expect(config.customActor?.fields).toEqual(['user.name']);
+
+      const { aggs } = buildActorDiscoveryQuery(config, undefined) as {
+        aggs: { users: { composite: { sources: Array<Record<string, unknown>> } } };
+      };
+      expect(aggs.users.composite.sources).toHaveLength(1);
+      expect(Object.keys(aggs.users.composite.sources[0])).toEqual(['user.name']);
+    }
+  );
+
+  it.each(hostScopedConfigs.map((c) => [c.id, c] as const))(
+    '%s Step 1 presence filter references no field the Step 2 EUID ignores',
+    (_id, config) => {
+      const { query } = buildActorDiscoveryQuery(config, undefined) as {
+        query: { bool: { filter: Array<Record<string, unknown>> } };
+      };
+      const step2 = buildTargetsPerActorQuery(config, 'default');
+
+      // `user.email` must appear in neither step for these configs.
+      expect(JSON.stringify(query.bool.filter)).not.toContain('user.email');
+      expect(step2).not.toContain('user.email');
+    }
+  );
 });

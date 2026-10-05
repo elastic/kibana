@@ -14,6 +14,7 @@
       "build_on_commit": true,
       "build_on_comment": true,
       "build_drafts": false,
+      "build_drafts_label": "ci:build-draft",
       "build_on_ready": true,
       "trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:build|test)\\W+(?:this|it))|^\\/ci$",
       "always_trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:build|test)\\W+(?:this|it))|^\\/ci$",
@@ -33,11 +34,13 @@
         "^\\.devcontainer/",
         "^\\.ona/",
         "(^|/)\\.gitignore$",
-        "(^|/)\\.editorconfig$"
+        "(^|/)\\.editorconfig$",
+        "^\\.libra/"
       ],
       "always_require_ci_on_changed": [
         "^docs/developer/plugin-list.asciidoc$",
         "^\\.github/CODEOWNERS$",
+        "^\\.github/.*\\.(js|mjs|cjs|ts)$",
         "/plugins/([^/]+/)+readme\\.(md|asciidoc)$"
       ],
       "enable_trigger_checkbox": true,

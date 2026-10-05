@@ -47,7 +47,7 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
   } = services;
   const mlApi = useMlApi();
   const { showNodeInfo } = useEnabledFeatures();
-  const { selectedDataView: dataView } = useDataSource();
+  const { selectedDataView: dataView, projectRouting } = useDataSource();
   const mlLocator = useMlLocator()!;
   const mlManagementLocator = useMlManagementLocator();
   const mlFeaturesDisabled = !isFullLicense();
@@ -251,6 +251,7 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
               getAdditionalLinks={getAdditionalLinks}
               showFrozenDataTierChoice={showNodeInfo}
               esql={esql}
+              projectRouting={projectRouting}
             />
           )}
         </>

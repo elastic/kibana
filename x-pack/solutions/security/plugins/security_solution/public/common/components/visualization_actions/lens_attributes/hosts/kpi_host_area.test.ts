@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ENTITY_LATEST, getEntitiesAlias } from '@kbn/entity-store/common';
 import { renderHook } from '@testing-library/react';
 import { wrapper } from '../../mocks';
 
@@ -44,7 +45,7 @@ describe('getKpiHostAreaLensAttributes', () => {
     expect(result?.current).toMatchSnapshot();
   });
 
-  it('uses Entity Store v2 latest index as ad-hoc data source when entityStoreV2Enabled', () => {
+  it('uses Entity Store v2 latest alias as ad-hoc data source when entityStoreV2Enabled', () => {
     const { result } = renderHook(
       () =>
         useLensAttributes({
@@ -61,7 +62,7 @@ describe('getKpiHostAreaLensAttributes', () => {
     const adHoc = attrs?.state.adHocDataViews;
     expect(adHoc).toBeDefined();
     const spec = Object.values(adHoc ?? {})[0];
-    expect(spec?.title).toBe('.entities.v2.latest.security_my_space-00001');
+    expect(spec?.title).toBe(getEntitiesAlias(ENTITY_LATEST, 'my_space'));
     const hostTypeFilter = attrs?.state.filters?.find(
       (f) => f.meta?.key === 'entity.EngineMetadata.Type'
     );

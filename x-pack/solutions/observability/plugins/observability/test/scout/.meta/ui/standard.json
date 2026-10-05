@@ -1,22 +1,39 @@
 {
-  "sha1": "4cae2e128cc7c487840141f8baf8dbfbc1f97db8",
+  "sha1": "7e2f03be824ce018ad0dbbb560ee18b1ea839d45",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "7f09fed36a7e0d8-c1ae45431291e6d",
-      "title": "Observability alerts - status controls filters the alerts table by status",
-      "expectedStatus": "skipped",
+      "id": "0147ac2363a8f93-21381b726c466b4",
+      "title": "Reset alerting v2 nav settings",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "7f09fed36a7e0d8-c1ae45431291e6d",
+      "title": "Observability alerts - status controls filters the alerts table by status",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alert_controls.spec.ts",
-        "line": 28,
-        "column": 41
+        "line": 27,
+        "column": 43
       }
     },
     {
@@ -25,12 +42,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alert_summary_widget.spec.ts",
-        "line": 23,
-        "column": 39
+        "line": 26,
+        "column": 43
       }
     },
     {
@@ -39,12 +58,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_actions.spec.ts",
-        "line": 21,
-        "column": 59
+        "line": 25,
+        "column": 25
       }
     },
     {
@@ -53,12 +74,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_flyout.spec.ts",
-        "line": 23,
-        "column": 39
+        "line": 26,
+        "column": 43
       }
     },
     {
@@ -67,12 +90,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_flyout.spec.ts",
-        "line": 28,
-        "column": 72
+        "line": 32,
+        "column": 13
       }
     },
     {
@@ -81,12 +106,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_pagination.spec.ts",
-        "line": 24,
-        "column": 8
+        "line": 27,
+        "column": 41
       }
     },
     {
@@ -95,12 +122,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_pagination.spec.ts",
-        "line": 34,
-        "column": 13
+        "line": 40,
+        "column": 9
       }
     },
     {
@@ -109,12 +138,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_state_sync.spec.ts",
         "line": 30,
-        "column": 10
+        "column": 30
       }
     },
     {
@@ -123,12 +154,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_state_sync.spec.ts",
-        "line": 39,
-        "column": 14
+        "line": 40,
+        "column": 20
       }
     },
     {
@@ -137,12 +170,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table_configuration.spec.ts",
         "line": 122,
-        "column": 10
+        "column": 49
       }
     },
     {
@@ -151,7 +186,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table_configuration.spec.ts",
@@ -165,12 +202,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table_configuration.spec.ts",
-        "line": 143,
-        "column": 13
+        "line": 142,
+        "column": 15
       }
     },
     {
@@ -179,11 +218,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table_configuration.spec.ts",
-        "line": 145,
+        "line": 146,
         "column": 13
       }
     },
@@ -193,11 +234,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table_configuration.spec.ts",
-        "line": 159,
+        "line": 158,
         "column": 13
       }
     },
@@ -207,7 +250,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table_configuration.spec.ts",
@@ -221,11 +266,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table.spec.ts",
-        "line": 29,
+        "line": 30,
         "column": 25
       }
     },
@@ -235,12 +282,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table.spec.ts",
-        "line": 33,
-        "column": 25
+        "line": 34,
+        "column": 7
       }
     },
     {
@@ -249,12 +298,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table.spec.ts",
-        "line": 36,
-        "column": 82
+        "line": 37,
+        "column": 13
       }
     },
     {
@@ -263,12 +314,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table.spec.ts",
         "line": 41,
-        "column": 10
+        "column": 69
       }
     },
     {
@@ -277,12 +330,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table.spec.ts",
         "line": 48,
-        "column": 10
+        "column": 76
       }
     },
     {
@@ -448,28 +503,32 @@
     {
       "id": "ce6d2554bbcb1a3-35498c416011944",
       "title": "Observability alerts - overview alert table navigates to onboarding from the no-data \"Add data\" CTA",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/overview_alert_table.spec.ts",
-        "line": 32,
+        "line": 33,
         "column": 25
       }
     },
     {
       "id": "ce6d2554bbcb1a3-28cf5e151e58caf",
       "title": "Observability alerts - overview alert table renders the alerts section with alerts once a rule exists",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/overview_alert_table.spec.ts",
-        "line": 51,
+        "line": 52,
         "column": 96
       }
     },
@@ -479,21 +538,25 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/rule_stats.spec.ts",
-        "line": 44,
-        "column": 24
+        "line": 48,
+        "column": 15
       }
     },
     {
-      "id": "3d30f1f27e8f75f-13c366bfc2c5cd4",
-      "title": "Observability alerts - add to case (all privileges) renders the case options in the row actions menu",
-      "expectedStatus": "skipped",
+      "id": "3d30f1f27e8f75f-b5e5985d163c94d",
+      "title": "Observability alerts - add to case (all privileges) renders the case action in the row actions menu",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/add_to_case.all.spec.ts",
@@ -502,31 +565,19 @@
       }
     },
     {
-      "id": "3d30f1f27e8f75f-92c49a4a4bc87de",
-      "title": "Observability alerts - add to case (all privileges) opens the create-case flyout from \"Add to new case\"",
-      "expectedStatus": "skipped",
+      "id": "3d30f1f27e8f75f-3e2ef3be56728e7",
+      "title": "Observability alerts - add to case (all privileges) opens the create-case flyout from the case selector",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/add_to_case.all.spec.ts",
-        "line": 33,
+        "line": 32,
         "column": 7
-      }
-    },
-    {
-      "id": "3d30f1f27e8f75f-329e97db5764fcf",
-      "title": "Observability alerts - add to case (all privileges) opens the existing-cases modal from \"Add to existing case\"",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/add_to_case.all.spec.ts",
-        "line": 37,
-        "column": 13
       }
     },
     {
@@ -535,12 +586,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/add_to_case.read.spec.ts",
         "line": 25,
-        "column": 41
+        "column": 43
       }
     },
     {
@@ -549,12 +602,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/case_details_rule_link.spec.ts",
         "line": 49,
-        "column": 10
+        "column": 30
       }
     },
     {
@@ -563,12 +618,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/cases_feature_controls.all.spec.ts",
-        "line": 31,
-        "column": 28
+        "line": 34,
+        "column": 48
       }
     },
     {
@@ -577,12 +634,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/cases_feature_controls.all.spec.ts",
-        "line": 37,
-        "column": 5
+        "line": 42,
+        "column": 10
       }
     },
     {
@@ -591,26 +650,30 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/cases_feature_controls.all.spec.ts",
-        "line": 42,
-        "column": 38
+        "line": 46,
+        "column": 23
       }
     },
     {
-      "id": "d3ffd39f648f151-47502b229835fc7",
-      "title": "Observability cases - no privileges returns Application not found when the Observability app is inaccessible",
+      "id": "d3ffd39f648f151-343f30c629749f3",
+      "title": "Observability cases - no privileges returns Application unavailable when the Observability app is inaccessible",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/cases_feature_controls.none.spec.ts",
-        "line": 17,
-        "column": 46
+        "line": 21,
+        "column": 25
       }
     },
     {
@@ -619,12 +682,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/cases_feature_controls.read.spec.ts",
         "line": 35,
-        "column": 30
+        "column": 48
       }
     },
     {
@@ -633,12 +698,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/cases_feature_controls.read.spec.ts",
-        "line": 40,
-        "column": 25
+        "line": 41,
+        "column": 7
       }
     },
     {
@@ -647,11 +714,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/cases_feature_controls.read.spec.ts",
-        "line": 49,
+        "line": 50,
         "column": 13
       }
     },
@@ -665,7 +734,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/esql_landing.spec.ts",
-        "line": 46,
+        "line": 45,
         "column": 7
       }
     },
@@ -679,13 +748,103 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/esql_landing.spec.ts",
-        "line": 58,
+        "line": 57,
         "column": 10
       }
     },
     {
-      "id": "b997ef31f0ad15f-5f0c7e85e95a610",
-      "title": "Nightshift navigation from Significant Events Discovery navigates between Streams discovery, Nightshift, and settings",
+      "id": "16bb4a7ec47d274-1887bb9ce43cc37",
+      "title": "Observability Landing Page redirects to page specified in defaultRoute uiSetting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
+        "line": 33,
+        "column": 10
+      }
+    },
+    {
+      "id": "16bb4a7ec47d274-b4d285151fca090",
+      "title": "Observability Landing Page redirects to Discover logs when logs data exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
+        "line": 51,
+        "column": 15
+      }
+    },
+    {
+      "id": "16bb4a7ec47d274-1089e5f36b13719",
+      "title": "Observability Landing Page redirects to APM services when only APM data exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
+        "line": 62,
+        "column": 18
+      }
+    },
+    {
+      "id": "16bb4a7ec47d274-b8a96bff3cd83db",
+      "title": "Observability Landing Page redirects to Discover logs when both logs and APM data exist (logs priority)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
+        "line": 76,
+        "column": 13
+      }
+    },
+    {
+      "id": "16bb4a7ec47d274-00e86e3614855e3",
+      "title": "Observability Landing Page redirects to onboarding when no data exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
+        "line": 94,
+        "column": 7
+      }
+    },
+    {
+      "id": "16bb4a7ec47d274-d5a54704b60249e",
+      "title": "Observability Landing Page redirects to onboarding when log data that should be ignored exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
+        "line": 101,
+        "column": 7
+      }
+    },
+    {
+      "id": "f4aa79fe6e25bc1-bbd736b172e31b8",
+      "title": "Observability Alerting global search — alerting v2 offers Action Policies in global search when the user has v2 action policies read",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -694,9 +853,361 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/nightshift.spec.ts",
-        "line": 46,
-        "column": 9
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_search.spec.ts",
+        "line": 55,
+        "column": 13
+      }
+    },
+    {
+      "id": "f4aa79fe6e25bc1-434f0bd629df065",
+      "title": "Observability Alerting global search — alerting v2 hides Action Policies from global search when the user only has v2 alerts read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_search.spec.ts",
+        "line": 68,
+        "column": 13
+      }
+    },
+    {
+      "id": "33b867a7e4eb3bf-2c77c1aef41e335",
+      "title": "Observability Alerts nav — alerting v2 shows a plain Alerts link that loads the classic alerts page when v2 is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
+        "line": 179,
+        "column": 13
+      }
+    },
+    {
+      "id": "33b867a7e4eb3bf-a73f9ecc1463404",
+      "title": "Observability Alerts nav — alerting v2 hides Alerting V2 Preview from project settings when v2 is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
+        "line": 186,
+        "column": 13
+      }
+    },
+    {
+      "id": "33b867a7e4eb3bf-0e3d349dd96befd",
+      "title": "Observability Alerts nav — alerting v2 opens an Alerts panel without Alerts V1 when v2 is on and the V1 alerts table is off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
+        "line": 209,
+        "column": 11
+      }
+    },
+    {
+      "id": "33b867a7e4eb3bf-ff1ea68fdcf4fdd",
+      "title": "Observability Alerts nav — alerting v2 clicking Alerts loads Alert episodes when alerting v2 is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
+        "line": 242,
+        "column": 24
+      }
+    },
+    {
+      "id": "33b867a7e4eb3bf-2376e2796b9a360",
+      "title": "Observability Alerts nav — alerting v2 clicking Rules loads Rules when alerting v2 is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
+        "line": 256,
+        "column": 13
+      }
+    },
+    {
+      "id": "33b867a7e4eb3bf-2eb762d6ab2df1a",
+      "title": "Observability Alerts nav — alerting v2 clicking Action Policies loads Action Policies when alerting v2 is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
+        "line": 278,
+        "column": 11
+      }
+    },
+    {
+      "id": "33b867a7e4eb3bf-3373d4814aed62f",
+      "title": "Observability Alerts nav — alerting v2 clicking Maintenance Windows loads Maintenance Windows when alerting v2 is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
+        "line": 294,
+        "column": 11
+      }
+    },
+    {
+      "id": "33b867a7e4eb3bf-cd26dfd34daf5ab",
+      "title": "Observability Alerts nav — alerting v2 clicking Execution history loads Execution history when alerting v2 is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
+        "line": 304,
+        "column": 10
+      }
+    },
+    {
+      "id": "33b867a7e4eb3bf-bda432439390660",
+      "title": "Observability Alerts nav — alerting v2 clicking Alerts V1 loads the classic alerts page when the V1 alerts table setting is on",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
+        "line": 310,
+        "column": 71
+      }
+    },
+    {
+      "id": "33b867a7e4eb3bf-6d7b13cb07e54ec",
+      "title": "Observability Alerts nav — alerting v2 reverts to a plain Alerts link that loads the classic alerts page after disabling v2",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
+        "line": 334,
+        "column": 10
+      }
+    },
+    {
+      "id": "33b867a7e4eb3bf-240b6dd4bad589e",
+      "title": "Observability Alerts nav — alerting v2 hides the Alerting panel when the user has no alerting privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
+        "line": 346,
+        "column": 29
+      }
+    },
+    {
+      "id": "33b867a7e4eb3bf-31994fa08a29007",
+      "title": "Observability Alerts nav — alerting v2 shows Alerts in the panel when the user has v2 alerts read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
+        "line": 355,
+        "column": 32
+      }
+    },
+    {
+      "id": "33b867a7e4eb3bf-b2b87c02afbb4a9",
+      "title": "Observability Alerts nav — alerting v2 shows Rules in the panel when the user has v2 rules read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
+        "line": 369,
+        "column": 11
+      }
+    },
+    {
+      "id": "33b867a7e4eb3bf-130abd55448a0e7",
+      "title": "Observability Alerts nav — alerting v2 shows Rules in the panel when the user has v2 rules write",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
+        "line": 388,
+        "column": 18
+      }
+    },
+    {
+      "id": "33b867a7e4eb3bf-0ce7213bb7924fe",
+      "title": "Observability Alerts nav — alerting v2 shows Action Policies in the panel when the user has v2 action policies read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
+        "line": 406,
+        "column": 28
+      }
+    },
+    {
+      "id": "33b867a7e4eb3bf-2958750788469aa",
+      "title": "Observability Alerts nav — alerting v2 shows Execution history in the panel when the user has v2 execution history read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
+        "line": 423,
+        "column": 7
+      }
+    },
+    {
+      "id": "33b867a7e4eb3bf-623a9708c1f3c15",
+      "title": "Observability Alerts nav — alerting v2 shows Alerts in the panel when the user has v1 observability alerts read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
+        "line": 437,
+        "column": 11
+      }
+    },
+    {
+      "id": "33b867a7e4eb3bf-428fce45a4a2a7b",
+      "title": "Observability Alerts nav — alerting v2 shows Alerts and classic Rules in the panel when the user has v1 logs read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
+        "line": 449,
+        "column": 7
+      }
+    },
+    {
+      "id": "33b867a7e4eb3bf-8630b3087b339d4",
+      "title": "Observability Alerts nav — alerting v2 shows Alerts and classic Rules in the panel when the user has v1 uptime all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
+        "line": 462,
+        "column": 7
+      }
+    },
+    {
+      "id": "33b867a7e4eb3bf-50822b065f0b839",
+      "title": "Observability Alerts nav — alerting v2 shows Alerts and Alerts V1 when the user has v1 observability alerts read and the V1 alerts table is on",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2.spec.ts",
+        "line": 475,
+        "column": 7
+      }
+    },
+    {
+      "id": "52f24494fa48204-21381b726c466b4",
+      "title": "Reset alerting v2 nav settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
       }
     }
   ]

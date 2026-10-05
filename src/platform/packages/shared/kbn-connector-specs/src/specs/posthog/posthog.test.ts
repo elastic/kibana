@@ -334,7 +334,7 @@ describe('PostHog', () => {
       if (!PostHog.test) throw new Error('Test handler not defined');
       const result = await PostHog.test.handler(mockContext);
 
-      expect(result).toEqual({ ok: true, message: 'Successfully connected to the PostHog API.' });
+      expect(result).toEqual({ message: 'Successfully connected to the PostHog API.' });
     });
 
     it('should throw a formatted error on failure', async () => {

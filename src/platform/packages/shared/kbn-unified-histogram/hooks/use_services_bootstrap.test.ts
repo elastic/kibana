@@ -15,6 +15,7 @@ import { createStateService } from '../services/state_service';
 import { useStateProps } from './use_state_props';
 import type { UnifiedHistogramFetchParamsExternal } from '../types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { DataViewSource } from '@kbn/data-source';
 
 jest.mock('../services/state_service');
 jest.mock('./use_state_props');
@@ -53,9 +54,9 @@ describe('useServicesBootstrap', () => {
       )
     );
 
-    expect(createStateServiceMock).toBeCalledTimes(1);
-    expect(getBreakdownFieldMock).toBeCalledTimes(1);
-    expect(useStatePropsMock).toBeCalledTimes(1);
+    expect(createStateServiceMock).toHaveBeenCalledTimes(1);
+    expect(getBreakdownFieldMock).toHaveBeenCalledTimes(1);
+    expect(useStatePropsMock).toHaveBeenCalledTimes(1);
 
     expect(hook.result.current.api).not.toBeUndefined();
     expect(hook.result.current.fetch$).not.toBeUndefined();
@@ -68,11 +69,11 @@ describe('useServicesBootstrap', () => {
     const subscriber = jest.fn();
     hook.result.current.fetch$.subscribe(subscriber);
 
-    expect(subscriber).toBeCalledTimes(0);
+    expect(subscriber).toHaveBeenCalledTimes(0);
 
     const fetchParamsExternal: UnifiedHistogramFetchParamsExternal = {
       searchSessionId: 'test-session',
-      dataView: dataViewWithTimefieldMock,
+      dataSource: new DataViewSource(dataViewWithTimefieldMock),
       query,
       relativeTimeRange: { from: 'now-15m', to: 'now' },
       requestAdapter: new RequestAdapter(),
@@ -88,14 +89,14 @@ describe('useServicesBootstrap', () => {
     expect(hook.result.current.fetchParams).toEqual(
       expect.objectContaining({
         searchSessionId: 'test-session',
-        dataView: dataViewWithTimefieldMock,
+        dataSource: fetchParamsExternal.dataSource,
         query,
       })
     );
     expect(hook.result.current.lensVisService).toBeDefined();
     expect(hook.result.current.lensVisServiceState).toBeDefined();
-    expect(subscriber).toBeCalledTimes(1);
-    expect(subscriber).toBeCalledWith({
+    expect(subscriber).toHaveBeenCalledTimes(1);
+    expect(subscriber).toHaveBeenCalledWith({
       fetchParams: hook.result.current.fetchParams,
       lensVisServiceState: hook.result.current.lensVisServiceState,
     });

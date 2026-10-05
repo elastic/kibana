@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger } from '@kbn/logging';
 import type {
   AllActionStates,
   State,
@@ -55,7 +54,7 @@ export type ResponseType<ControlState extends AllActionStates> = Awaited<
   ReturnType<ReturnType<ActionMap[ControlState]>>
 >;
 
-export const nextActionMap = (context: MigratorContext, logger: Logger) => {
+export const nextActionMap = (context: MigratorContext) => {
   const client = context.elasticsearchClient;
   return {
     INIT: (state: InitState) =>
@@ -148,7 +147,7 @@ export const nextActionMap = (context: MigratorContext, logger: Logger) => {
         client,
         pitId: state.pitId,
         searchAfter: state.lastHitSortValue,
-        batchSize: context.migrationConfig.batchSize,
+        batchSize: state.batchSize,
         query: state.outdatedDocumentsQuery,
         seqNoPrimaryTerm: true,
       }),
@@ -163,8 +162,9 @@ export const nextActionMap = (context: MigratorContext, logger: Logger) => {
         index: state.currentIndex,
         operations: state.bulkOperationBatches[state.currentBatch],
         refresh: false,
-        fetchAllocationExplain: state.retryCount === 0,
-        logger,
+        // `_cluster/allocation/explain` isn't available on Serverless, which is the only
+        // place the zdt algorithm runs, so we don't attempt to fetch it here.
+        fetchAllocationExplain: false,
       }),
     OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT: (state: OutdatedDocumentsSearchClosePitState) =>
       Actions.closePit({
@@ -194,8 +194,8 @@ export const nextActionMap = (context: MigratorContext, logger: Logger) => {
   };
 };
 
-export const next = (context: MigratorContext, logger: Logger) => {
-  const map = nextActionMap(context, logger);
+export const next = (context: MigratorContext) => {
+  const map = nextActionMap(context);
 
   return (state: State) => {
     const delay = createDelayFn(state);

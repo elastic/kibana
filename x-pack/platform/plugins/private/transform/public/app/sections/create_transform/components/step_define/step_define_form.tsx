@@ -99,6 +99,7 @@ export const ConfigSectionTitle: FC<{ title: string }> = ({ title }) => (
 );
 
 export interface StepDefineFormProps {
+  dataViewPicker?: JSX.Element;
   overrides?: StepDefineExposedState;
   onChange(s: StepDefineExposedState): void;
   searchItems: SearchItems;
@@ -117,9 +118,10 @@ export const EmptyStepDefineForm: FC<EmptyStepDefineFormProps> = ({
 }) => (
   <div data-test-subj="transformStepDefineEmptyForm">
     <EuiForm>
-      {dataViewPicker}
-
       <ConfigSectionTitle title="Source data" />
+
+      {dataViewPicker}
+      <EuiSpacer size="m" />
 
       <EuiFormRow
         fullWidth
@@ -280,6 +282,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
       query: transformConfigQuery,
       populatedFields,
       combinedRuntimeMappings: runtimeMappings,
+      projectRouting: props.overrides?.projectRouting,
       timeRangeMs,
     }),
     dataTestSubj: 'transformIndexPreview',
@@ -442,6 +445,9 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
       <EuiForm>
         <ConfigSectionTitle title="Source data" />
 
+        {props.dataViewPicker}
+        <EuiSpacer size="m" />
+
         {hasValidTimeField && (
           <EuiFormRow
             fullWidth
@@ -487,6 +493,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
                   setFrozenDataPreference={setFrozenDataPreference}
                   dataView={dataView}
                   query={undefined}
+                  projectRouting={props.overrides?.projectRouting}
                   disabled={false}
                   timefilter={timefilter}
                 />
@@ -541,7 +548,6 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
                           tooltipProps={{ disableScreenReaderOutput: true }}
                         >
                           {(copy: () => void) => (
-                            /* eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap */
                             <EuiButtonIcon
                               onClick={copy}
                               iconType="copy"

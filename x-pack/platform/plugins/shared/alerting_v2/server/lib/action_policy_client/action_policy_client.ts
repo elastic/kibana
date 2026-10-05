@@ -10,27 +10,26 @@ import pMap from 'p-map';
 import type {
   ActionPolicyResponse,
   BulkResponse,
-  CreateActionPolicyDataInput,
+  MatchActionPoliciesResponse,
   MatchedActionPolicy,
-  MatcherContext,
+  PutActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import {
   createActionPolicyDataSchema,
+  putActionPolicyDataSchema,
   updateActionPolicyDataSchema,
 } from '@kbn/alerting-v2-schemas';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { KueryNode } from '@kbn/es-query';
-import { nodeBuilder } from '@kbn/es-query';
-import { evaluateKql } from '@kbn/eval-kql';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import {
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   type ActionPolicySavedObjectAttributes,
+  type PartiallyUpdateableActionPolicyAttributes,
 } from '../../saved_objects';
-import { ALERTING_V2_ERROR_CODES, ALERTING_V2_LOG_CODES } from '../errors/error_codes';
+import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes';
 import {
   getActionPolicyAlreadyExistsMessage,
   getActionPolicyNotFoundMessage,
@@ -38,17 +37,19 @@ import {
   getInvalidActionPolicyDataMessage,
 } from '../errors/action_policy_error_messages';
 import { EncryptedSavedObjectsClientToken } from '../dispatcher/steps/dispatch_step_tokens';
+import { PolicyMatcher } from '../dispatcher/state';
 import { ActionPolicySavedObjectServiceScopedToken } from '../services/action_policy_saved_object_service/tokens';
 import type { ActionPolicySavedObjectServiceContract } from '../services/action_policy_saved_object_service/types';
 import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
 import { ApiKeyService } from '../services/api_key_service/api_key_service';
+import type { LicenseServiceContract } from '../services/license_service/license_service';
+import { LicenseServiceToken } from '../services/license_service/tokens';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
 import { buildSoSearch } from '../build_so_search';
-import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
-import { RulesSavedObjectServiceScopedToken } from '../services/rules_saved_object_service/tokens';
+import { buildActionPolicySoFilter } from './build_action_policy_filter';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
 import { ActionPolicyNamespaceToken } from './tokens';
@@ -58,8 +59,7 @@ import type {
   CreateActionPolicyParams,
   FindActionPoliciesArgs,
   FindActionPoliciesResponse,
-  MatchActionPoliciesForRuleParams,
-  MatchActionPoliciesForRuleResponse,
+  MatchActionPoliciesParams,
   SnoozeActionPolicyParams,
   UpdateActionPolicyApiKeyParams,
   UpdateActionPolicyParams,
@@ -67,12 +67,16 @@ import type {
 import {
   buildCreateActionPolicyAttributes,
   buildUpdateActionPolicyAttributes,
+  toApiKeyAttributes,
   transformActionPolicySoAttributesToApiResponse,
   validateDateString,
 } from './utils';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 20;
+
+const getActionPolicyApiKeyName = (policyName: string): string =>
+  `Action Policy: ${policyName.trim()}`;
 
 /**
  * Concurrency cap for {@link ActionPolicyClient.bulkUpdateActionPoliciesApiKey}.
@@ -103,12 +107,12 @@ interface ActionPolicyAuth {
  */
 const actionPolicyBulkErrorCodeForStatus = (statusCode: number): string => {
   if (statusCode === 404) {
-    return ALERTING_V2_ERROR_CODES.ACTION_POLICY_NOT_FOUND;
+    return ALERTING_ERROR_CODES.ACTION_POLICY_NOT_FOUND;
   }
   if (statusCode === 409) {
-    return ALERTING_V2_ERROR_CODES.ACTION_POLICY_VERSION_CONFLICT;
+    return ALERTING_ERROR_CODES.ACTION_POLICY_VERSION_CONFLICT;
   }
-  return ALERTING_V2_ERROR_CODES.INTERNAL_SERVER_ERROR;
+  return ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR;
 };
 
 const toActionPolicyBulkError = (
@@ -131,20 +135,22 @@ const bulkErrorFromThrown = (id: string, e: unknown): ActionPolicyBulkError => {
 
 @injectable()
 export class ActionPolicyClient {
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(ActionPolicySavedObjectServiceScopedToken)
     private readonly actionPolicySavedObjectService: ActionPolicySavedObjectServiceContract,
-    @inject(RulesSavedObjectServiceScopedToken)
-    private readonly rulesSavedObjectService: RulesSavedObjectServiceContract,
     @inject(UserService) private readonly userService: UserServiceContract,
     @inject(ApiKeyService) private readonly apiKeyService: ApiKeyServiceContract,
     @inject(EncryptedSavedObjectsClientToken)
     private readonly esoClient: EncryptedSavedObjectsClient,
     @inject(ActionPolicyNamespaceToken)
     private readonly namespace: string | undefined,
-    @inject(LoggerServiceToken)
-    private readonly logger: LoggerServiceContract
-  ) {}
+    @inject(LicenseServiceToken) private readonly licenseService: LicenseServiceContract,
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('actionPolicyClient');
+  }
 
   /**
    * Validates a request body with a Zod schema and produces a uniform
@@ -161,7 +167,7 @@ export class ActionPolicyClient {
       throw Boom.badRequest(
         getInvalidActionPolicyDataMessage(context, stringifyZodError(parsed.error)),
         {
-          code: ALERTING_V2_ERROR_CODES.INVALID_ACTION_POLICY_DATA,
+          code: ALERTING_ERROR_CODES.INVALID_ACTION_POLICY_DATA,
           details: { context, errors: treeifyError(parsed.error) },
         }
       );
@@ -183,7 +189,7 @@ export class ActionPolicyClient {
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw Boom.notFound(getActionPolicyNotFoundMessage(id), {
-          code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
+          code: ALERTING_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
           details: { action_policy_id: id },
         });
       }
@@ -212,7 +218,7 @@ export class ActionPolicyClient {
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         throw Boom.conflict(getActionPolicyVersionConflictMessage(id), {
-          code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_VERSION_CONFLICT,
+          code: ALERTING_ERROR_CODES.ACTION_POLICY_VERSION_CONFLICT,
           details: { action_policy_id: id },
         });
       }
@@ -221,39 +227,40 @@ export class ActionPolicyClient {
   }
 
   public async createActionPolicy(params: CreateActionPolicyParams): Promise<ActionPolicyResponse> {
+    await this.licenseService.assertActionPoliciesLicense();
     const parsed = this.parseActionPolicyData(createActionPolicyDataSchema, params.data, 'create');
 
-    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const actor = await this.userService.getCurrentActor();
     const now = new Date().toISOString();
 
-    const apiKeyAttrs = await this.apiKeyService.create(`Action Policy: ${parsed.name}`);
+    const apiKeyAttrs = await this.apiKeyService.create(getActionPolicyApiKeyName(parsed.name));
 
     const attributes = buildCreateActionPolicyAttributes({
       data: parsed,
+      enabled: params.options?.enabled ?? true,
       auth: apiKeyAttrs,
-      createdBy: userProfileUid,
+      createdBy: actor,
       createdAt: now,
-      updatedBy: userProfileUid,
+      updatedBy: actor,
       updatedAt: now,
     });
 
     try {
-      const { id, version } = await this.actionPolicySavedObjectService.create({
+      const { id } = await this.actionPolicySavedObjectService.create({
         attrs: attributes,
         id: params.options?.id,
       });
 
       return transformActionPolicySoAttributesToApiResponse({
         id,
-        version,
         attributes,
       });
     } catch (e) {
-      this.markApiKeysForInvalidation(attributes.auth?.apiKey, false);
+      this.markApiKeysForInvalidation(attributes.apiKey, false, params.options?.id);
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         const conflictId = params.options?.id ?? 'unknown';
         throw Boom.conflict(getActionPolicyAlreadyExistsMessage(conflictId), {
-          code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_ALREADY_EXISTS,
+          code: ALERTING_ERROR_CODES.ACTION_POLICY_ALREADY_EXISTS,
           details: { action_policy_id: conflictId },
         });
       }
@@ -262,10 +269,9 @@ export class ActionPolicyClient {
   }
 
   public async getActionPolicy({ id }: { id: string }): Promise<ActionPolicyResponse> {
-    const { attrs, version } = await this.getExistingActionPolicy(id);
+    const { attrs } = await this.getExistingActionPolicy(id);
     return transformActionPolicySoAttributesToApiResponse({
       id,
-      version,
       attributes: attrs,
     });
   }
@@ -297,7 +303,6 @@ export class ActionPolicyClient {
       return [
         transformActionPolicySoAttributesToApiResponse({
           id: doc.id,
-          version: doc.version,
           attributes: doc.attributes,
         }),
       ];
@@ -305,43 +310,44 @@ export class ActionPolicyClient {
   }
 
   public async updateActionPolicy(params: UpdateActionPolicyParams): Promise<ActionPolicyResponse> {
+    await this.licenseService.assertActionPoliciesLicense();
     const parsed = this.parseActionPolicyData(updateActionPolicyDataSchema, params.data, 'update');
 
-    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const actor = await this.userService.getCurrentActor();
     const now = new Date().toISOString();
 
-    const { attrs: existingPolicy } = await this.getExistingActionPolicy(params.options.id);
+    const { attrs: existingPolicy, version: existingVersion } = await this.getExistingActionPolicy(
+      params.options.id
+    );
 
     const oldAuth = await this.getDecryptedAuth(params.options.id);
 
     const policyName = parsed.name ?? existingPolicy.name;
-    const apiKeyAttrs = await this.apiKeyService.create(`Action Policy: ${policyName}`);
+    const apiKeyAttrs = await this.apiKeyService.create(getActionPolicyApiKeyName(policyName));
 
     const nextAttrs = buildUpdateActionPolicyAttributes({
       existing: existingPolicy,
       update: parsed,
       auth: apiKeyAttrs,
-      updatedBy: userProfileUid,
+      updatedBy: actor,
       updatedAt: now,
     });
 
-    let updated: { id: string; version?: string };
     try {
-      updated = await this.writeActionPolicyAttrs({
+      await this.writeActionPolicyAttrs({
         id: params.options.id,
         attrs: nextAttrs,
-        version: params.options.version,
+        version: existingVersion,
       });
     } catch (e) {
-      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false);
+      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, params.options.id);
       throw e;
     }
 
-    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser);
+    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser, params.options.id);
 
     return transformActionPolicySoAttributesToApiResponse({
       id: params.options.id,
-      version: updated.version,
       attributes: nextAttrs,
     });
   }
@@ -352,7 +358,7 @@ export class ActionPolicyClient {
     const page = params.page ?? DEFAULT_PAGE;
     const perPage = params.perPage ?? DEFAULT_PER_PAGE;
 
-    const filter = this.buildFindFilter(params);
+    const filter = params.filter ? buildActionPolicySoFilter(params.filter) : undefined;
     const sortField = this.mapSortField(params.sortField);
 
     const search = buildSoSearch(params.search);
@@ -370,7 +376,6 @@ export class ActionPolicyClient {
       items: res.saved_objects.map((so) =>
         transformActionPolicySoAttributesToApiResponse({
           id: so.id,
-          version: so.version,
           attributes: so.attributes,
         })
       ),
@@ -380,73 +385,38 @@ export class ActionPolicyClient {
     };
   }
 
-  public async matchActionPoliciesForRule(
-    params: MatchActionPoliciesForRuleParams
-  ): Promise<MatchActionPoliciesForRuleResponse> {
-    const { ruleId, ruleName, ruleTags } = params;
-
-    let resolvedName = ruleName ?? '';
-    let resolvedTags = ruleTags ?? [];
-
-    // If ruleId is provided but not name or tags, fetch the rule from the DB to get the current name and tags
-    if (ruleId && (ruleName === undefined || ruleTags === undefined)) {
-      try {
-        const rule = await this.rulesSavedObjectService.get(ruleId);
-        resolvedName = ruleName ?? rule.attributes.metadata.name;
-        resolvedTags = ruleTags ?? rule.attributes.metadata.tags ?? [];
-      } catch (e) {
-        if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-          return { items: [], total: 0 };
-        }
-        throw e;
-      }
-    }
-
-    const context: MatcherContext = {
-      last_event_timestamp: '',
-      group_hash: '',
-      episode_id: '',
-      episode_status: 'active',
-      rule: {
-        id: ruleId ?? '',
-        name: resolvedName,
-        tags: resolvedTags,
-      },
-    };
+  public async matchActionPolicies(
+    params: MatchActionPoliciesParams
+  ): Promise<MatchActionPoliciesResponse> {
+    const { ruleTags = [] } = params;
 
     const items: MatchedActionPolicy[] = [];
 
-    const allPolicies = await this.findActionPolicies({ perPage: 100 });
+    const allPolicies = await this.findActionPolicies({ perPage: 100, sortField: 'name' });
     for (const actionPolicy of allPolicies.items) {
-      if (!actionPolicy.matcher || actionPolicy.matcher.trim() === '') {
-        items.push({ actionPolicy, category: 'global' });
+      const { matcher } = actionPolicy;
+
+      const policyMatcher = PolicyMatcher.of(matcher);
+      if (policyMatcher.isCatchAll()) {
+        items.push({ action_policy: actionPolicy, category: 'catch_all' });
         continue;
       }
 
-      let isMatch = false;
-      try {
-        isMatch = evaluateKql(actionPolicy.matcher, context);
-      } catch (err) {
-        this.logger.warn({
-          message: () =>
-            `Failed to evaluate KQL matcher for action policy "${
-              actionPolicy.id
-            }" during pre-matching: ${
-              err instanceof Error ? err.message : String(err)
-            }. Treating as no-match.`,
-        });
-        continue;
-      }
-
-      if (isMatch) {
-        items.push({ actionPolicy, category: 'global-filtered' });
+      if (policyMatcher.hasTags() && policyMatcher.matchesTags(ruleTags)) {
+        items.push({ action_policy: actionPolicy, category: 'tags' });
       }
     }
 
-    return { items, total: allPolicies.total };
+    const evaluatedCount = allPolicies.items.length;
+    return {
+      items,
+      evaluated_count: evaluatedCount,
+      is_truncated: allPolicies.total > evaluatedCount,
+    };
   }
 
   public async enableActionPolicy({ id }: { id: string }): Promise<ActionPolicyResponse> {
+    await this.licenseService.assertActionPoliciesLicense();
     return this.updatePolicyState(id, { enabled: true });
   }
 
@@ -465,34 +435,45 @@ export class ActionPolicyClient {
     return this.updatePolicyState(id, { snoozedUntil: null });
   }
 
-  public async updateActionPolicyApiKey({ id }: UpdateActionPolicyApiKeyParams): Promise<void> {
+  public async updateActionPolicyApiKey({
+    id,
+  }: UpdateActionPolicyApiKeyParams): Promise<ActionPolicyResponse> {
+    await this.rotateApiKey(id);
+
+    return this.getActionPolicy({ id });
+  }
+
+  private async rotateApiKey(id: string): Promise<void> {
     const { attrs: existingPolicy } = await this.getExistingActionPolicy(id);
 
     const oldAuth = await this.getDecryptedAuth(id);
-    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const actor = await this.userService.getCurrentActor();
     const now = new Date().toISOString();
-    const apiKeyAttrs = await this.apiKeyService.create(`Action Policy: ${existingPolicy.name}`);
+    const apiKeyAttrs = await this.apiKeyService.create(
+      getActionPolicyApiKeyName(existingPolicy.name)
+    );
 
     try {
       await this.writeActionPolicyAttrs({
         id,
         attrs: {
-          auth: apiKeyAttrs,
-          updatedBy: userProfileUid,
+          ...toApiKeyAttributes(apiKeyAttrs),
+          updatedBy: actor,
           updatedAt: now,
         },
       });
     } catch (e) {
-      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false);
+      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, id);
       throw e;
     }
 
-    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser);
+    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser, id);
   }
 
   public async bulkEnableActionPolicies({
     ids,
   }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
+    await this.licenseService.assertActionPoliciesLicense();
     return this.executeBulkUpdate(ids, { enabled: true });
   }
 
@@ -572,15 +553,17 @@ export class ActionPolicyClient {
     ids,
   }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
     // Each id rotates its own API key (SO get + decrypt + key create + write),
-    // so the work is per-item rather than a single SO round-trip. Fan out with a
-    // bounded concurrency; failures are isolated per id inside the mapper so one
-    // bad policy never aborts the rest of the batch. `pMap` preserves input
-    // order, keeping the `errors` ordering deterministic.
+    // so the work is per-item rather than a single SO round-trip. Rotate
+    // directly rather than through `updateActionPolicyApiKey`, whose trailing
+    // read only exists to build a body this response does not carry. Fan out
+    // with a bounded concurrency; failures are isolated per id inside the mapper
+    // so one bad policy never aborts the rest of the batch. `pMap` preserves
+    // input order, keeping the `errors` ordering deterministic.
     const results = await pMap(
       ids,
       async (id): Promise<ActionPolicyBulkError | null> => {
         try {
-          await this.updateActionPolicyApiKey({ id });
+          await this.rotateApiKey(id);
           return null;
         } catch (e) {
           return bulkErrorFromThrown(id, e);
@@ -602,20 +585,20 @@ export class ActionPolicyClient {
    */
   private async executeBulkUpdate(
     ids: string[],
-    stateUpdate: Partial<ActionPolicySavedObjectAttributes>
+    stateUpdate: PartiallyUpdateableActionPolicyAttributes
   ): Promise<BulkResponse> {
     if (ids.length === 0) {
       return { affected_count: 0, errors: [] };
     }
 
-    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const actor = await this.userService.getCurrentActor();
     const now = new Date().toISOString();
 
     const objects = ids.map((id) => ({
       id,
       attrs: {
         ...stateUpdate,
-        updatedBy: userProfileUid,
+        updatedBy: actor,
         updatedAt: now,
       },
     }));
@@ -636,28 +619,6 @@ export class ActionPolicyClient {
     return { affected_count: affectedCount, errors };
   }
 
-  private buildFindFilter(params: FindActionPoliciesArgs): KueryNode | undefined {
-    const conditions: KueryNode[] = [];
-    const attrPrefix = `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes`;
-
-    if (params.enabled !== undefined) {
-      conditions.push(nodeBuilder.is(`${attrPrefix}.enabled`, params.enabled ? 'true' : 'false'));
-    }
-
-    if (params.tags && params.tags.length > 0) {
-      const tagConditions = params.tags.map((tag) => nodeBuilder.is(`${attrPrefix}.tags`, tag));
-      conditions.push(
-        tagConditions.length === 1 ? tagConditions[0] : nodeBuilder.or(tagConditions)
-      );
-    }
-
-    if (conditions.length === 0) {
-      return undefined;
-    }
-
-    return conditions.length === 1 ? conditions[0] : nodeBuilder.and(conditions);
-  }
-
   private mapSortField(sortField?: string): string | undefined {
     if (!sortField) {
       return undefined;
@@ -672,12 +633,6 @@ export class ActionPolicyClient {
     return sortFieldMap[sortField];
   }
 
-  public async getAllTags(params?: { search?: string }): Promise<string[]> {
-    return this.actionPolicySavedObjectService.getDistinctTags({
-      search: params?.search,
-    });
-  }
-
   /**
    * Deletes a single action policy, queueing its API key for invalidation
    * before the saved object that references the key is removed. In case of
@@ -686,7 +641,7 @@ export class ActionPolicyClient {
   public async deleteActionPolicy({ id }: { id: string }): Promise<void> {
     if (!(await this.actionPolicyExists({ id }))) {
       throw Boom.notFound(getActionPolicyNotFoundMessage(id), {
-        code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
+        code: ALERTING_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
         details: { action_policy_id: id },
       });
     }
@@ -748,7 +703,7 @@ export class ActionPolicyClient {
       errors.push({
         id,
         error: {
-          code: ALERTING_V2_ERROR_CODES.API_KEY_INVALIDATION_FAILED,
+          code: ALERTING_ERROR_CODES.API_KEY_INVALIDATION_FAILED,
           message: `Action policy with id "${id}" was not deleted because its API key could not be queued for invalidation${
             result ? `: ${result.message}` : ''
           }`,
@@ -765,7 +720,7 @@ export class ActionPolicyClient {
               ', '
             )}]; their API keys could not be queued for invalidation, and deleting them would leave the keys valid with nothing referencing them`
         ),
-        code: ALERTING_V2_LOG_CODES.ACTION_POLICY_DELETE_BLOCKED_BY_API_KEY_INVALIDATION,
+        code: ALERTING_LOG_CODES.ACTION_POLICY_DELETE_BLOCKED_BY_API_KEY_INVALIDATION,
       });
     }
 
@@ -784,16 +739,27 @@ export class ActionPolicyClient {
           ', '
         )}] for invalidation but failed to delete them; the policies remain with keys that are about to be invalidated and must be rotated to keep dispatching`
       ),
-      code: ALERTING_V2_LOG_CODES.ACTION_POLICY_API_KEY_INVALIDATION_DIVERGED,
+      code: ALERTING_LOG_CODES.ACTION_POLICY_API_KEY_INVALIDATION_DIVERGED,
     });
   }
 
-  private markApiKeysForInvalidation(apiKey?: string, createdByUser?: boolean): void {
+  private markApiKeysForInvalidation(
+    apiKey?: string,
+    createdByUser?: boolean,
+    policyId?: string
+  ): void {
     if (!apiKey || createdByUser) {
       return;
     }
 
-    this.apiKeyService.markApiKeysForInvalidation([apiKey]).catch(() => {});
+    this.apiKeyService.markApiKeysForInvalidation([apiKey]).catch((error) => {
+      this.logger.warn({
+        message: 'Failed to mark superseded API key for invalidation',
+        code: ALERTING_LOG_CODES.POLICY_API_KEY_INVALIDATION_FAILED,
+        labels: policyId != null ? { policy_id: policyId } : undefined,
+        error,
+      });
+    });
   }
 
   private async getDecryptedAuth(id: string): Promise<ActionPolicyAuth | null> {
@@ -804,14 +770,20 @@ export class ActionPolicyClient {
           id,
           this.namespace ? { namespace: this.namespace } : undefined
         );
-      const auth = doc.attributes?.auth;
-      if (!auth?.apiKey) return null;
+      const { apiKey, apiKeyCreatedByUser } = doc.attributes ?? {};
+      if (!apiKey) return null;
 
       return {
-        apiKey: auth.apiKey,
-        createdByUser: auth.createdByUser,
+        apiKey,
+        createdByUser: apiKeyCreatedByUser ?? false,
       };
-    } catch {
+    } catch (error) {
+      this.logger.warn({
+        message: 'Failed to decrypt action policy auth; skipping API key invalidation',
+        code: ALERTING_LOG_CODES.POLICY_API_KEY_LOOKUP_FAILED,
+        labels: { policy_id: id },
+        error,
+      });
       return null;
     }
   }
@@ -832,10 +804,10 @@ export class ActionPolicyClient {
 
       for await (const response of finder.find()) {
         for (const so of response.saved_objects) {
-          if (targetIds.has(so.id) && so.attributes.auth?.apiKey) {
+          if (targetIds.has(so.id) && so.attributes.apiKey) {
             authMap.set(so.id, {
-              apiKey: so.attributes.auth.apiKey,
-              createdByUser: so.attributes.auth.createdByUser,
+              apiKey: so.attributes.apiKey,
+              createdByUser: so.attributes.apiKeyCreatedByUser ?? false,
             });
           }
         }
@@ -844,8 +816,12 @@ export class ActionPolicyClient {
           break;
         }
       }
-    } catch {
-      // best-effort — same as getDecryptedAuth returning null on failure
+    } catch (error) {
+      this.logger.warn({
+        message: 'Failed to decrypt action policy auth; skipping API key invalidation',
+        code: ALERTING_LOG_CODES.POLICY_API_KEY_LOOKUP_FAILED,
+        error,
+      });
     }
 
     return authMap;
@@ -853,13 +829,13 @@ export class ActionPolicyClient {
 
   private async updatePolicyState(
     id: string,
-    stateUpdate: { enabled?: boolean; snoozedUntil?: string | null }
+    stateUpdate: PartiallyUpdateableActionPolicyAttributes
   ): Promise<ActionPolicyResponse> {
     if (stateUpdate.snoozedUntil) {
       validateDateString(stateUpdate.snoozedUntil);
     }
 
-    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const actor = await this.userService.getCurrentActor();
     const now = new Date().toISOString();
 
     try {
@@ -867,14 +843,14 @@ export class ActionPolicyClient {
         id,
         attrs: {
           ...stateUpdate,
-          updatedBy: userProfileUid,
+          updatedBy: actor,
           updatedAt: now,
         },
       });
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw Boom.notFound(getActionPolicyNotFoundMessage(id), {
-          code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
+          code: ALERTING_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
           details: { action_policy_id: id },
         });
       }
@@ -889,20 +865,22 @@ export class ActionPolicyClient {
     data,
   }: {
     id: string;
-    data: CreateActionPolicyDataInput;
+    data: PutActionPolicyData;
   }): Promise<{ policy: ActionPolicyResponse; created: boolean }> {
+    await this.licenseService.assertActionPoliciesLicense();
     // Validate up front so a bad body never spends an API key allocation or
     // even consults the SO store.
-    const parsed = this.parseActionPolicyData(createActionPolicyDataSchema, data, 'upsert');
+    const parsed = this.parseActionPolicyData(putActionPolicyDataSchema, data, 'upsert');
 
     const exists = await this.actionPolicyExists({ id });
 
     if (!exists) {
-      const policy = await this.createActionPolicy({ data, options: { id } });
+      const { enabled, ...createData } = parsed;
+      const policy = await this.createActionPolicy({ data: createData, options: { id, enabled } });
       return { policy, created: true };
     }
 
-    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const actor = await this.userService.getCurrentActor();
     const now = new Date().toISOString();
 
     const { attrs: existingAttrs, version: existingVersion } = await this.getExistingActionPolicy(
@@ -913,42 +891,47 @@ export class ActionPolicyClient {
     // only after the SO write succeeds, so a failed replace doesn't leave
     // the policy with a key that has already been invalidated.
     const oldAuth = await this.getDecryptedAuth(id);
-    const apiKeyAttrs = await this.apiKeyService.create(`Action Policy: ${parsed.name}`);
+    const apiKeyAttrs = await this.apiKeyService.create(getActionPolicyApiKeyName(parsed.name));
 
-    // PUT replaces every field accepted by createActionPolicyDataSchema. Audit
-    // metadata (createdBy/createdAt) and operational state (enabled,
-    // snoozedUntil) are not part of the create schema and are preserved here.
+    // PUT replaces every field accepted by createActionPolicyDataSchema, plus
+    // the optional `enabled`: omitted preserves the existing stored value,
+    // otherwise it becomes the new value. Audit metadata (createdBy/createdAt)
+    // and other operational state (snoozedUntil) are not part of the create
+    // schema and are preserved here. Tags are also preserved: they are no
+    // longer part of the API contract but remain in the saved object so they
+    // can be re-exposed later.
+    const nextEnabled = parsed.enabled ?? existingAttrs.enabled;
     const replacementAttrs: ActionPolicySavedObjectAttributes = {
       ...buildCreateActionPolicyAttributes({
         data: parsed,
+        enabled: nextEnabled,
         auth: apiKeyAttrs,
         createdBy: existingAttrs.createdBy,
         createdAt: existingAttrs.createdAt,
-        updatedBy: userProfileUid,
+        updatedBy: actor,
         updatedAt: now,
       }),
-      enabled: existingAttrs.enabled,
+      enabled: nextEnabled,
       snoozedUntil: existingAttrs.snoozedUntil,
+      tags: existingAttrs.tags,
     };
 
-    let updated: { id: string; version?: string };
     try {
-      updated = await this.writeActionPolicyAttrs({
+      await this.writeActionPolicyAttrs({
         id,
         attrs: replacementAttrs,
         version: existingVersion,
       });
     } catch (e) {
-      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false);
+      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, id);
       throw e;
     }
 
-    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser);
+    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser, id);
 
     return {
       policy: transformActionPolicySoAttributesToApiResponse({
         id,
-        version: updated.version,
         attributes: replacementAttrs,
       }),
       created: false,

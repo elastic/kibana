@@ -8,6 +8,7 @@
 import { useCallback, useMemo, useRef } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { ONBOARDING_STEPS } from './steps';
+import { getOnboardingSessionKey } from './onboarding_session_storage';
 
 type StepStatus = 'incomplete' | 'complete';
 type StepState = Record<string, StepStatus>;
@@ -17,7 +18,7 @@ function buildDefaultState(): StepState {
 }
 
 export function useStepState(integrationId: string) {
-  const storageKey = `onboarding.${integrationId}.stepState`;
+  const storageKey = getOnboardingSessionKey(integrationId, 'stepState');
   const [state, setState] = useSessionStorage<StepState>(storageKey, buildDefaultState());
   const stateRef = useRef(state);
   stateRef.current = state;
@@ -40,14 +41,29 @@ export function useStepState(integrationId: string) {
     [setState]
   );
 
-  const resetSteps = useCallback(() => {
-    setState(buildDefaultState());
-  }, [setState]);
+  const markStepsIncomplete = useCallback(
+    (stepIds: string[]) => {
+      if (stepIds.length === 0) return;
+      const current = stateRef.current ?? buildDefaultState();
+      // No-op guard: avoid a setState (→ render → sessionStorage write) when
+      // nothing actually changed. This keeps reactive callers stable.
+      if (!stepIds.some((id) => current[id] === 'complete')) return;
+      const next = { ...current };
+      for (const id of stepIds) next[id] = 'incomplete';
+      setState(next);
+    },
+    [setState]
+  );
 
   const firstIncompleteStepId = useMemo(() => {
     const step = ONBOARDING_STEPS.find((s) => !completedSteps.has(s.id));
     return step?.id ?? ONBOARDING_STEPS[0].id;
   }, [completedSteps]);
 
-  return { completedSteps, markStepComplete, resetSteps, firstIncompleteStepId };
+  return {
+    completedSteps,
+    markStepComplete,
+    markStepsIncomplete,
+    firstIncompleteStepId,
+  };
 }

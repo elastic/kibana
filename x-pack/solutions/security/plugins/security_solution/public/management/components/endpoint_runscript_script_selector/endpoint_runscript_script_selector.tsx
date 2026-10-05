@@ -157,7 +157,7 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
               <EuiFlexItem grow={false}>
                 <EuiToolTip content={CLEAR_SELECTION_LABEL} disableScreenReaderOutput>
                   <EuiButtonIcon
-                    iconType="crossInCircle"
+                    iconType="crossCircle"
                     color="text"
                     display="empty"
                     onClick={clearCurrentSelectionHandler}

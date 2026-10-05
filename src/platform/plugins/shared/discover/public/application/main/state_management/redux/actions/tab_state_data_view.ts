@@ -8,6 +8,8 @@
  */
 
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -15,6 +17,8 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   DEFAULT_COLUMNS_SETTING,
 } from '@kbn/discover-utils';
+import { DataViewSource, isSameDataset } from '@kbn/data-source';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import {
   internalStateSlice,
   type TabActionPayload,
@@ -34,6 +38,7 @@ import {
 } from '../../../../../../common/data_sources';
 import { addLog } from '../../../../../utils/add_log';
 import { getDataViewAppState } from '../../utils/get_switch_data_view_app_state';
+import { resolveEsqlSource } from '../../../data_fetching/resolve_esql_source';
 import { fetchData } from './tab_state';
 
 /**
@@ -43,14 +48,35 @@ export const setDataView: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataView: DataView }>]
 > =
   ({ tabId, dataView }) =>
-  (dispatch, _, { runtimeStateManager }) => {
-    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+  (dispatch, _, { runtimeStateManager, services }) => {
+    const { currentDataView$, currentDataSource$ } = selectTabRuntimeState(
+      runtimeStateManager,
+      tabId
+    );
+    const currentSource = currentDataSource$.getValue();
+    const nextSource =
+      services.dataSourceService.fromDataView(dataView) ??
+      (dataView.type !== ESQL_TYPE ? new DataViewSource(dataView) : undefined);
 
-    if (dataView.id !== currentDataView$.getValue()?.id) {
+    if (!isSameDataset(currentSource, nextSource)) {
       dispatch(internalStateSlice.actions.setExpandedDoc({ tabId, expandedDoc: undefined }));
     }
 
     currentDataView$.next(dataView);
+
+    const existingSource = currentDataSource$.getValue();
+    if (existingSource?.kind === 'index-pattern' && existingSource.getDataView() === dataView) {
+      return;
+    }
+
+    if (nextSource) {
+      currentDataSource$.next(nextSource);
+      return;
+    }
+
+    if (!existingSource) {
+      currentDataSource$.next(new DataViewSource(dataView));
+    }
   };
 
 /**
@@ -62,6 +88,38 @@ export const assignNextDataView: InternalStateThunkActionCreator<
   function assignNextDataViewThunkFn(dispatch) {
     dispatch(setDataView({ tabId, dataView }));
     dispatch(internalStateActions.pauseAutoRefreshInterval({ tabId, dataView }));
+  };
+
+/**
+ * Publish a new ES|QL source for a control-value change, then fetch.
+ * The source id includes those values, so the chart id matches a later reload.
+ */
+export const applyEsqlControlVariables: InternalStateThunkActionCreator<
+  [TabActionPayload<{ esqlVariables: ESQLControlVariable[] }>],
+  Promise<void>
+> = ({ tabId, esqlVariables }) =>
+  async function applyEsqlControlVariablesThunkFn(
+    dispatch,
+    getState,
+    { services, runtimeStateManager }
+  ) {
+    dispatch(internalStateSlice.actions.setEsqlVariables({ tabId, esqlVariables }));
+
+    const query = selectTab(getState(), tabId).appState.query;
+    if (isOfAggregateQueryType(query) && query.esql.trim() !== '') {
+      const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+      const previousSource = currentDataSource$.getValue();
+      const { dataView } = await resolveEsqlSource({
+        esql: query.esql,
+        services,
+        esqlVariables: esqlVariables.length ? esqlVariables : undefined,
+        timeRange: services.data.query.timefilter.timefilter.getTime(),
+        previousSourceId: previousSource?.kind === 'esql' ? previousSource.id : undefined,
+      });
+      dispatch(assignNextDataView({ tabId, dataView }));
+    }
+
+    dispatch(fetchData({ tabId }));
   };
 
 /**
@@ -99,9 +157,9 @@ export const changeDataView: InternalStateThunkActionCreator<
     }
 
     if (nextDataView && currentDataView) {
-      // Mark all profile state fields to reset if we are switching to a different data view
+      // Mark all profile app state default fields to reset if we are switching to a different data view
       dispatch(
-        internalStateActions.setProfileStateFieldsToReset({
+        internalStateActions.setProfileAppStateDefaultFieldsToReset({
           tabId,
           fieldsToReset: 'all',
         })
@@ -128,12 +186,7 @@ export const changeDataView: InternalStateThunkActionCreator<
         })
       );
 
-      const currentTab = selectTab(currentState, tabId);
-      if (currentTab.expandedDoc) {
-        dispatch(
-          internalStateActions.setExpandedDoc({ tabId: currentTab.id, expandedDoc: undefined })
-        );
-      }
+      dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc: undefined }));
     }
 
     dispatch(internalStateActions.setIsDataViewLoading({ tabId, isDataViewLoading: false }));

@@ -51,10 +51,10 @@ const mockAction: EpisodeActionHistoryEntry = {
   _id: 'action-1',
   '@timestamp': '2024-01-01T00:01:30.000Z',
   action_type: 'ack',
-  actor: 'user-uid-1',
+  actor: { type: 'user', profile_uid: 'user-uid-1' },
   episode_id: 'ep-1',
   group_hash: 'hash-1',
-  tags: null,
+  tags: [],
   assignee_uid: null,
   expiry: null,
   reason: null,
@@ -100,16 +100,24 @@ beforeEach(() => {
 });
 
 describe('AlertEpisodeTimelineSection', () => {
-  it('shows a spinner while loading actions', () => {
+  it('shows a skeleton while loading actions', () => {
     mockActions([], true);
     renderSection();
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    expect(
+      screen
+        .getByTestId('alertingV2EpisodeTimelineSectionLoading')
+        .querySelector('.euiSkeletonCircle')
+    ).not.toBeNull();
   });
 
-  it('shows a spinner while loading events', () => {
+  it('shows a skeleton while loading events', () => {
     mockEvents(mockEventRows, true);
     renderSection();
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    expect(
+      screen
+        .getByTestId('alertingV2EpisodeTimelineSectionLoading')
+        .querySelector('.euiSkeletonCircle')
+    ).not.toBeNull();
   });
 
   it('shows empty prompt when there are no events and no actions', () => {
@@ -154,9 +162,9 @@ describe('AlertEpisodeTimelineSection', () => {
     expect(screen.getByText('acknowledged the episode')).toBeInTheDocument();
   });
 
-  it('falls back to "system" username when actor is null', () => {
+  it('falls back to "system" username for an internal actor', () => {
     mockEvents([]);
-    mockActions([{ ...mockAction, actor: null }]);
+    mockActions([{ ...mockAction, actor: { type: 'internal', profile_uid: null } }]);
     renderSection();
     expect(screen.getAllByText('system').length).toBeGreaterThan(0);
   });

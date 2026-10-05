@@ -16,6 +16,8 @@ export default createTestConfig({
       { product_line: 'cloud', product_tier: 'complete' },
     ])}`,
   ],
+  // Explore tests do not exercise prebuilt-rule management endpoints.
+  installMockPrebuiltRulesPackage: false,
   testFiles: [require.resolve('../tests')],
   junit: {
     reportName: 'Explore - Network Integration Tests - Serverless Env - Complete Tier',

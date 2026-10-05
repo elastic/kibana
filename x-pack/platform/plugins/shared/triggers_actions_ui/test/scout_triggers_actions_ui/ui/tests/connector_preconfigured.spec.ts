@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRole, KibanaUrl, ScoutPage } from '@kbn/scout';
-import { test, tags } from '@kbn/scout';
+import { euiSelectors, test, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 const CONNECTORS_APP_PATH =
@@ -59,7 +59,9 @@ const searchConnectors = async (page: ScoutPage, name: string) => {
   await searchBox.fill(name);
   await searchBox.press('Enter');
   await page
-    .locator('.euiBasicTable[data-test-subj="actionsTable"].euiBasicTable-loading')
+    .locator(
+      `${euiSelectors.basicTable.ROOT_SELECTOR}[data-test-subj="actionsTable"].euiBasicTable-loading`
+    )
     .waitFor({ state: 'visible', timeout: 1_000 })
     .catch(() => {});
   await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();

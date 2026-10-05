@@ -69,7 +69,7 @@ export const useScheduleApi = (): ScheduleApi => {
   // returned hooks after mount when the flag is ON, violating the Rules of Hooks in consumers
   // that call these hooks by identity.
   const isWorkflowsEnabled =
-    featureFlags.getBooleanValue('securitySolution.attackDiscoveryWorkflowsEnabled', true) &&
+    featureFlags.useBooleanValue('securitySolution.attackDiscoveryWorkflowsEnabled', true) &&
     uiSettings.get(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING, false);
 
   return useMemo(

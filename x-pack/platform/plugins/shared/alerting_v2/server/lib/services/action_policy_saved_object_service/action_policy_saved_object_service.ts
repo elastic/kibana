@@ -9,7 +9,6 @@ import { PluginStart } from '@kbn/core-di';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult, SavedObjectsUtils } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { KueryNode } from '@kbn/es-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { inject, injectable } from 'inversify';
 import type { ActionPolicySavedObjectAttributes } from '../../../saved_objects';
@@ -31,8 +30,6 @@ export type {
   ActionPolicySavedObjectBulkUpdateItem,
   ActionPolicySavedObjectServiceContract,
 };
-
-const escapeRegex = (str: string): string => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 @injectable()
 export class ActionPolicySavedObjectService implements ActionPolicySavedObjectServiceContract {
@@ -227,7 +224,7 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
     page: number;
     perPage: number;
     search?: string;
-    filter?: KueryNode;
+    filter?: string;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
   }) {
@@ -246,32 +243,5 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
       sortField,
       sortOrder,
     });
-  }
-
-  public async getDistinctTags(params?: { search?: string }): Promise<string[]> {
-    const search = params?.search;
-    const result = await this.client.find<
-      ActionPolicySavedObjectAttributes,
-      { tags: { buckets: Array<{ key: string }> } }
-    >({
-      type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-      perPage: 0,
-      aggs: {
-        tags: {
-          terms: {
-            field: `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.tags`,
-            size: 100,
-            order: { _key: 'asc' },
-            ...(search ? { include: `${escapeRegex(search)}.*` } : {}),
-          },
-        },
-      },
-    });
-
-    return (
-      result.aggregations?.tags.buckets
-        .map((bucket) => bucket.key)
-        .filter((key) => key.length > 0) ?? []
-    );
   }
 }

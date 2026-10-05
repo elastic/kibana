@@ -10,11 +10,18 @@ import { termQuery } from '@kbn/observability-plugin/server';
 import { withApmSpan } from '../../../../../utils/with_apm_span';
 import {
   FAAS_ID,
+  LABEL_TYPE,
   METRIC_CGROUP_MEMORY_LIMIT_BYTES,
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
+  METRIC_JVM_MEMORY_LIMIT,
+  METRIC_JVM_MEMORY_TYPE,
+  METRIC_JVM_MEMORY_USED,
+  METRIC_OTEL_JVM_PROCESS_MEMORY_LIMIT,
+  METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE,
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
   METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION,
+  VALUE_OTEL_JVM_MEMORY_TYPE_HEAP,
 } from '../../../../../../common/es_fields/apm';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 import type { ChartBase } from '../../../types';
@@ -95,6 +102,54 @@ export const cgroupMemory = {
 
     double used = (double)$('${METRIC_CGROUP_MEMORY_USAGE_BYTES}', 0);
     return used / total;
+    `,
+  },
+};
+
+/** Same heap fields/filter as Metrics tab `getHeapMemoryChart` for OTel (`process.runtime.jvm.*`). */
+export const jvmHeapMemory = {
+  filter: {
+    bool: {
+      filter: [
+        { term: { [LABEL_TYPE]: VALUE_OTEL_JVM_MEMORY_TYPE_HEAP } },
+        { exists: { field: METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE } },
+        { exists: { field: METRIC_OTEL_JVM_PROCESS_MEMORY_LIMIT } },
+      ],
+    },
+  },
+  script: {
+    lang: 'painless',
+    source: `
+      double used = (double)$('${METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE}', 0);
+      double limit = (double)$('${METRIC_OTEL_JVM_PROCESS_MEMORY_LIMIT}', 0);
+      if (limit <= 0) {
+        return null;
+      }
+      return used / limit;
+    `,
+  },
+};
+
+/** Stable JVM SemConv heap % (`jvm.memory.*`) as used by Metrics Lens dashboards / EDOT. */
+export const jvmStableHeapMemory = {
+  filter: {
+    bool: {
+      filter: [
+        { term: { [METRIC_JVM_MEMORY_TYPE]: VALUE_OTEL_JVM_MEMORY_TYPE_HEAP } },
+        { exists: { field: METRIC_JVM_MEMORY_USED } },
+        { exists: { field: METRIC_JVM_MEMORY_LIMIT } },
+      ],
+    },
+  },
+  script: {
+    lang: 'painless',
+    source: `
+      double used = (double)$('${METRIC_JVM_MEMORY_USED}', 0);
+      double limit = (double)$('${METRIC_JVM_MEMORY_LIMIT}', 0);
+      if (limit <= 0) {
+        return null;
+      }
+      return used / limit;
     `,
   },
 };

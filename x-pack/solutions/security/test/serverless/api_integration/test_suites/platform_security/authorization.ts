@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -49,23 +50,8 @@ if (sourceFilePath === 'authorization.ts') {
           .set(adminCredentials)
           .expect(200);
 
-        // The following features are composed of other features in a way that is
-        // specific to the security solution.
-        // The deprecated features are listed here because
-        // they are not explicitly hidden, and we can check them to confirm legacy
-        // roles will still function correctly
-        const compositeFeatureIds = [
-          'dashboard',
-          'dashboard_v2',
-          'discover',
-          'discover_v2',
-          'reporting',
-          'siem',
-          'siemV2',
-          'siemV3',
-          'siemV4',
-          'siemV5',
-        ];
+        // Security-specific composition. Dashboard and Discover are covered below.
+        const compositeFeatureIds = ['reporting', 'siem', 'siemV2', 'siemV3', 'siemV4', 'siemV5'];
 
         const features = Object.fromEntries(
           Object.entries(body.features).filter(([key]) => compositeFeatureIds.includes(key))
@@ -388,6 +374,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "api:notes_write",
                 "api:notes_read",
                 "api:securitySolution-entity-analytics",
+                "api:securitySolution-entity-analytics-manage",
                 "api:bulkGetUserProfiles",
                 "api:securitySolution-threat-intelligence",
                 "api:securitySolution-writeGlobalArtifacts",
@@ -1268,6 +1255,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "ui:discover_v2/createShortUrl",
                 "ui:discover_v2/storeSearchSession",
                 "ui:discover_v2/generateCsv",
+                "ai_index:dashboard/read",
                 "api:dashboardUsageStats",
                 "api:downloadCsv",
                 "app:dashboards",
@@ -1353,6 +1341,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "saved_object:map/share_to_space",
                 "ui:maps_v2/save",
                 "ui:maps_v2/show",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -1640,6 +1629,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "api:notes_write",
                 "api:notes_read",
                 "api:securitySolution-entity-analytics",
+                "api:securitySolution-entity-analytics-manage",
                 "api:bulkGetUserProfiles",
                 "api:securitySolution-threat-intelligence",
                 "api:securitySolution-writeGlobalArtifacts",
@@ -2516,6 +2506,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "ui:discover_v2/createShortUrl",
                 "ui:discover_v2/storeSearchSession",
                 "ui:discover_v2/generateCsv",
+                "ai_index:dashboard/read",
                 "api:dashboardUsageStats",
                 "api:downloadCsv",
                 "app:dashboards",
@@ -2601,6 +2592,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "saved_object:map/share_to_space",
                 "ui:maps_v2/save",
                 "ui:maps_v2/show",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -3095,6 +3087,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "saved_object:search/close_point_in_time",
                 "ui:discover_v2/show",
                 "ui:discover_v2/createShortUrl",
+                "ai_index:dashboard/read",
                 "api:dashboardUsageStats",
                 "app:dashboards",
                 "ui:catalogue/dashboard",
@@ -3145,6 +3138,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "ui:catalogue/maps",
                 "ui:navLinks/maps",
                 "ui:maps_v2/show",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -3643,6 +3637,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "saved_object:search/close_point_in_time",
                 "ui:discover_v2/show",
                 "ui:discover_v2/createShortUrl",
+                "ai_index:dashboard/read",
                 "api:dashboardUsageStats",
                 "app:dashboards",
                 "ui:catalogue/dashboard",
@@ -3693,6 +3688,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "ui:catalogue/maps",
                 "ui:navLinks/maps",
                 "ui:maps_v2/show",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -3808,6 +3804,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "api:users-read",
                 "api:initialize-security-solution",
                 "api:securitySolution-entity-analytics",
+                "api:securitySolution-entity-analytics-manage",
                 "api:cloud-security-posture-all",
                 "api:cloud-security-posture-read",
                 "api:bulkGetUserProfiles",
@@ -4654,6 +4651,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "ui:discover_v2/createShortUrl",
                 "ui:discover_v2/storeSearchSession",
                 "ui:discover_v2/generateCsv",
+                "ai_index:dashboard/read",
                 "api:dashboardUsageStats",
                 "api:downloadCsv",
                 "app:dashboards",
@@ -4739,6 +4737,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "saved_object:map/share_to_space",
                 "ui:maps_v2/save",
                 "ui:maps_v2/show",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -5004,6 +5003,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "api:users-read",
                 "api:initialize-security-solution",
                 "api:securitySolution-entity-analytics",
+                "api:securitySolution-entity-analytics-manage",
                 "api:cloud-security-posture-all",
                 "api:cloud-security-posture-read",
                 "api:bulkGetUserProfiles",
@@ -5846,6 +5846,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "ui:discover_v2/createShortUrl",
                 "ui:discover_v2/storeSearchSession",
                 "ui:discover_v2/generateCsv",
+                "ai_index:dashboard/read",
                 "api:dashboardUsageStats",
                 "api:downloadCsv",
                 "app:dashboards",
@@ -5931,6 +5932,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "saved_object:map/share_to_space",
                 "ui:maps_v2/save",
                 "ui:maps_v2/show",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -6386,6 +6388,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "saved_object:search/close_point_in_time",
                 "ui:discover_v2/show",
                 "ui:discover_v2/createShortUrl",
+                "ai_index:dashboard/read",
                 "api:dashboardUsageStats",
                 "app:dashboards",
                 "ui:catalogue/dashboard",
@@ -6436,6 +6439,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "ui:catalogue/maps",
                 "ui:navLinks/maps",
                 "ui:maps_v2/show",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -6906,6 +6910,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "saved_object:search/close_point_in_time",
                 "ui:discover_v2/show",
                 "ui:discover_v2/createShortUrl",
+                "ai_index:dashboard/read",
                 "api:dashboardUsageStats",
                 "app:dashboards",
                 "ui:catalogue/dashboard",
@@ -6956,6 +6961,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "ui:catalogue/maps",
                 "ui:navLinks/maps",
                 "ui:maps_v2/show",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -7075,6 +7081,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "api:users-read",
                 "api:initialize-security-solution",
                 "api:securitySolution-entity-analytics",
+                "api:securitySolution-entity-analytics-manage",
                 "api:cloud-security-posture-all",
                 "api:cloud-security-posture-read",
                 "api:bulkGetUserProfiles",
@@ -7918,6 +7925,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "ui:discover_v2/createShortUrl",
                 "ui:discover_v2/storeSearchSession",
                 "ui:discover_v2/generateCsv",
+                "ai_index:dashboard/read",
                 "api:dashboardUsageStats",
                 "api:downloadCsv",
                 "app:dashboards",
@@ -8003,6 +8011,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "saved_object:map/share_to_space",
                 "ui:maps_v2/save",
                 "ui:maps_v2/show",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -8260,6 +8269,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "api:users-read",
                 "api:initialize-security-solution",
                 "api:securitySolution-entity-analytics",
+                "api:securitySolution-entity-analytics-manage",
                 "api:cloud-security-posture-all",
                 "api:cloud-security-posture-read",
                 "api:bulkGetUserProfiles",
@@ -9099,6 +9109,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "ui:discover_v2/createShortUrl",
                 "ui:discover_v2/storeSearchSession",
                 "ui:discover_v2/generateCsv",
+                "ai_index:dashboard/read",
                 "api:dashboardUsageStats",
                 "api:downloadCsv",
                 "app:dashboards",
@@ -9184,6 +9195,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "saved_object:map/share_to_space",
                 "ui:maps_v2/save",
                 "ui:maps_v2/show",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -9638,6 +9650,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "saved_object:search/close_point_in_time",
                 "ui:discover_v2/show",
                 "ui:discover_v2/createShortUrl",
+                "ai_index:dashboard/read",
                 "api:dashboardUsageStats",
                 "app:dashboards",
                 "ui:catalogue/dashboard",
@@ -9688,6 +9701,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "ui:catalogue/maps",
                 "ui:navLinks/maps",
                 "ui:maps_v2/show",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -10157,6 +10171,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "saved_object:search/close_point_in_time",
                 "ui:discover_v2/show",
                 "ui:discover_v2/createShortUrl",
+                "ai_index:dashboard/read",
                 "api:dashboardUsageStats",
                 "app:dashboards",
                 "ui:catalogue/dashboard",
@@ -10207,6 +10222,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "ui:catalogue/maps",
                 "ui:navLinks/maps",
                 "ui:maps_v2/show",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -10360,6 +10376,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "api:users-read",
                 "api:initialize-security-solution",
                 "api:securitySolution-entity-analytics",
+                "api:securitySolution-entity-analytics-manage",
                 "api:cloud-security-posture-all",
                 "api:cloud-security-posture-read",
                 "api:bulkGetUserProfiles",
@@ -11201,6 +11218,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "ui:discover_v2/createShortUrl",
                 "ui:discover_v2/storeSearchSession",
                 "ui:discover_v2/generateCsv",
+                "ai_index:dashboard/read",
                 "api:dashboardUsageStats",
                 "api:downloadCsv",
                 "app:dashboards",
@@ -11286,6 +11304,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "saved_object:map/share_to_space",
                 "ui:maps_v2/save",
                 "ui:maps_v2/show",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -11540,6 +11559,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "api:users-read",
                 "api:initialize-security-solution",
                 "api:securitySolution-entity-analytics",
+                "api:securitySolution-entity-analytics-manage",
                 "api:cloud-security-posture-all",
                 "api:cloud-security-posture-read",
                 "api:bulkGetUserProfiles",
@@ -12381,6 +12401,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "ui:discover_v2/createShortUrl",
                 "ui:discover_v2/storeSearchSession",
                 "ui:discover_v2/generateCsv",
+                "ai_index:dashboard/read",
                 "api:dashboardUsageStats",
                 "api:downloadCsv",
                 "app:dashboards",
@@ -12466,6 +12487,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "saved_object:map/share_to_space",
                 "ui:maps_v2/save",
                 "ui:maps_v2/show",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -12921,6 +12943,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "saved_object:search/close_point_in_time",
                 "ui:discover_v2/show",
                 "ui:discover_v2/createShortUrl",
+                "ai_index:dashboard/read",
                 "api:dashboardUsageStats",
                 "app:dashboards",
                 "ui:catalogue/dashboard",
@@ -12971,6 +12994,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "ui:catalogue/maps",
                 "ui:navLinks/maps",
                 "ui:maps_v2/show",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -13438,6 +13462,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "saved_object:search/close_point_in_time",
                 "ui:discover_v2/show",
                 "ui:discover_v2/createShortUrl",
+                "ai_index:dashboard/read",
                 "api:dashboardUsageStats",
                 "app:dashboards",
                 "ui:catalogue/dashboard",
@@ -13488,6 +13513,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "ui:catalogue/maps",
                 "ui:navLinks/maps",
                 "ui:maps_v2/show",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -13630,6 +13656,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "api:users-read",
                 "api:initialize-security-solution",
                 "api:securitySolution-entity-analytics",
+                "api:securitySolution-entity-analytics-manage",
                 "api:cloud-security-posture-all",
                 "api:cloud-security-posture-read",
                 "api:bulkGetUserProfiles",
@@ -14055,6 +14082,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "ui:discover_v2/createShortUrl",
                 "ui:discover_v2/storeSearchSession",
                 "ui:discover_v2/generateCsv",
+                "ai_index:dashboard/read",
                 "api:dashboardUsageStats",
                 "api:downloadCsv",
                 "app:dashboards",
@@ -14140,6 +14168,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "saved_object:map/share_to_space",
                 "ui:maps_v2/save",
                 "ui:maps_v2/show",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -14343,6 +14372,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "api:users-read",
                 "api:initialize-security-solution",
                 "api:securitySolution-entity-analytics",
+                "api:securitySolution-entity-analytics-manage",
                 "api:cloud-security-posture-all",
                 "api:cloud-security-posture-read",
                 "api:bulkGetUserProfiles",
@@ -14768,6 +14798,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "ui:discover_v2/createShortUrl",
                 "ui:discover_v2/storeSearchSession",
                 "ui:discover_v2/generateCsv",
+                "ai_index:dashboard/read",
                 "api:dashboardUsageStats",
                 "api:downloadCsv",
                 "app:dashboards",
@@ -14853,6 +14884,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "saved_object:map/share_to_space",
                 "ui:maps_v2/save",
                 "ui:maps_v2/show",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -15090,6 +15122,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "saved_object:search/close_point_in_time",
                 "ui:discover_v2/show",
                 "ui:discover_v2/createShortUrl",
+                "ai_index:dashboard/read",
                 "api:dashboardUsageStats",
                 "app:dashboards",
                 "ui:catalogue/dashboard",
@@ -15140,6 +15173,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "ui:catalogue/maps",
                 "ui:navLinks/maps",
                 "ui:maps_v2/show",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -15394,6 +15428,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "saved_object:search/close_point_in_time",
                 "ui:discover_v2/show",
                 "ui:discover_v2/createShortUrl",
+                "ai_index:dashboard/read",
                 "api:dashboardUsageStats",
                 "app:dashboards",
                 "ui:catalogue/dashboard",
@@ -15444,6 +15479,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "ui:catalogue/maps",
                 "ui:navLinks/maps",
                 "ui:maps_v2/show",
+                "ai_index:visualization/read",
                 "app:visualize",
                 "app:lens",
                 "ui:catalogue/visualize",
@@ -15553,6 +15589,78 @@ if (sourceFilePath === 'authorization.ts') {
             },
           }
         `);
+      });
+
+      it('registers Dashboard and Discover privileges', async () => {
+        const { body } = await supertestWithoutAuth
+          .get('/api/security/privileges')
+          .set(svlCommonApi.getInternalRequestHeader())
+          .set(adminCredentials)
+          .expect(200);
+
+        for (const featureId of ['dashboard', 'dashboard_v2', 'discover', 'discover_v2']) {
+          expect(body.features[featureId]).not.to.be(undefined);
+        }
+      });
+
+      it('does not register Visualize or Maps privileges', async () => {
+        const { body } = await supertestWithoutAuth
+          .get('/api/security/privileges')
+          .set(svlCommonApi.getInternalRequestHeader())
+          .set(adminCredentials)
+          .expect(200);
+
+        expect(body.features.visualize).to.be(undefined);
+        expect(body.features.visualize_v2).to.be(undefined);
+        expect(body.features.maps).to.be(undefined);
+        expect(body.features.maps_v2).to.be(undefined);
+      });
+
+      it('grants Dashboard app access from dashboard_v2 read', async () => {
+        const { body } = await supertestWithoutAuth
+          .get('/api/security/privileges?includeActions=true')
+          .set(svlCommonApi.getInternalRequestHeader())
+          .set(adminCredentials)
+          .expect(200);
+
+        expect(body.features.dashboard_v2.read).to.contain('app:dashboards');
+        expect(body.features.dashboard_v2.read).to.contain('ui:navLinks/dashboards');
+        expect(body.features.dashboard_v2.read).to.contain('saved_object:dashboard/bulk_get');
+      });
+
+      it('grants Discover app access from discover_v2 read', async () => {
+        const { body } = await supertestWithoutAuth
+          .get('/api/security/privileges?includeActions=true')
+          .set(svlCommonApi.getInternalRequestHeader())
+          .set(adminCredentials)
+          .expect(200);
+
+        expect(body.features.discover_v2.read).to.contain('app:discover');
+        expect(body.features.discover_v2.read).to.contain('ui:navLinks/discover');
+      });
+
+      it('places Dashboard and Discover under Security in role management', async () => {
+        const { body } = await supertestWithoutAuth
+          .get('/api/features')
+          .set(svlCommonApi.getInternalRequestHeader())
+          .set(adminCredentials)
+          .expect(200);
+
+        const features = body as Array<{
+          id: string;
+          hidden?: boolean;
+          order?: number;
+          category?: { id: string };
+        }>;
+        const dashboardV2 = features.find((feature) => feature.id === 'dashboard_v2');
+        const discoverV2 = features.find((feature) => feature.id === 'discover_v2');
+
+        expect(dashboardV2?.hidden).not.to.be(true);
+        expect(discoverV2?.hidden).not.to.be(true);
+        expect(dashboardV2?.category?.id).to.be('securitySolution');
+        expect(discoverV2?.category?.id).to.be('securitySolution');
+        expect(discoverV2?.order).to.be(1101);
+        expect(dashboardV2?.order).to.be(1102);
       });
     });
   });

@@ -213,7 +213,7 @@ describe('Databricks', () => {
   });
 
   describe('listTools action', () => {
-    it('is not exposed as a tool (workflow-only)', () => {
+    it('is workflow-only (not exposed as agent tool)', () => {
       expect(Databricks.actions.listTools.isTool).toBe(false);
     });
 
@@ -229,7 +229,7 @@ describe('Databricks', () => {
   });
 
   describe('callTool action', () => {
-    it('is not exposed as a tool (workflow-only)', () => {
+    it('is workflow-only (not exposed as agent tool)', () => {
       expect(Databricks.actions.callTool.isTool).toBe(false);
     });
 
@@ -257,11 +257,9 @@ describe('Databricks', () => {
 
   describe('test handler', () => {
     it('returns ok with tool count on successful connection', async () => {
-      if (!Databricks.test) throw new Error('test handler not defined');
       const result = await Databricks.test.handler(mockContext);
       expect(mockListTools).toHaveBeenCalled();
       expect(result).toEqual({
-        ok: true,
         message: 'Connected to Databricks MCP server. 3 tools available.',
       });
     });

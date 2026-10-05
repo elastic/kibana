@@ -46,7 +46,6 @@ interface SiemSearchBarProps {
   hideFilterBar?: boolean;
   hideQueryInput?: boolean;
   id: InputsModelId.global | InputsModelId.timeline;
-  pollForSignalIndex?: () => void;
   timelineId?: string;
   /**
    * Allows to hide the query menu button displayed to the left of the query input.
@@ -57,12 +56,17 @@ interface SiemSearchBarProps {
    * KQL input and pinned filter bar remain visible.
    */
   hideDatePicker?: boolean;
+  /**
+   * Controls the search bar's padding and border. Use 'inPage' to align it with the page content.
+   */
+  displayStyle?: 'inPage' | 'detached' | 'withBorders';
 }
 
 export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
   ({
     dataTestSubj,
     dataView,
+    displayStyle,
     end,
     filterQuery,
     fromStr,
@@ -72,7 +76,6 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     hideDatePicker = false,
     id,
     isLoading = false,
-    pollForSignalIndex,
     queries,
     savedQuery,
     setSavedQuery,
@@ -118,11 +121,6 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
 
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
-        // if the function is there, call it to check if the signals index exists yet
-        // in order to update the index fields
-        if (pollForSignalIndex != null) {
-          pollForSignalIndex();
-        }
         const isQuickSelection =
           payload.dateRange.from.includes('now') || payload.dateRange.to.includes('now');
         let updateSearchBar: UpdateReduxSearchBar = {
@@ -170,7 +168,6 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       },
       [
         id,
-        pollForSignalIndex,
         toStr,
         end,
         fromStr,
@@ -346,6 +343,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           showQueryMenu={!hideQueryMenu}
           allowSavingQueries
           dataTestSubj={dataTestSubj}
+          displayStyle={displayStyle}
         />
       </div>
     ) : null;
@@ -363,6 +361,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     prevProps.toStr === nextProps.toStr &&
     prevProps.updateSearch === nextProps.updateSearch &&
     prevProps.dataTestSubj === nextProps.dataTestSubj &&
+    prevProps.displayStyle === nextProps.displayStyle &&
     deepEqual(prevProps.queries, nextProps.queries) &&
     deepEqual(prevProps.dataView, nextProps.dataView)
 );

@@ -65,9 +65,7 @@ export const getToolIds = (output: DashboardAgentTaskOutput): string[] => {
 };
 
 const didLoadDashboardSkill = (output: DashboardAgentTaskOutput): boolean =>
-  getLowerCaseSkillPaths(output).some(
-    (path) => path.includes('dashboard') || path.includes('dashboard-management')
-  );
+  getLowerCaseSkillPaths(output).some((path) => path.includes('dashboard'));
 
 const didLoadVisualizationSkill = (output: DashboardAgentTaskOutput): boolean =>
   getLowerCaseSkillPaths(output).some(
@@ -83,6 +81,7 @@ export const dashboardSkillActivatedEvaluator: Evaluator<
 > = {
   name: 'Dashboard skill activated',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output }): Promise<EvaluationResult> => {
     const skillReadPaths = getSkillReadPaths(output);
     const dashboardSkillLoaded = didLoadDashboardSkill(output);
@@ -104,6 +103,7 @@ export const visualizationSkillWithoutDashboardEvaluator: Evaluator<
 > = {
   name: 'Visualization skill activated without dashboard',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output }): Promise<EvaluationResult> => {
     const skillReadPaths = getSkillReadPaths(output);
     const toolIds = getToolIds(output);
@@ -139,6 +139,7 @@ export const dashboardSkillNotActivatedEvaluator: Evaluator<
 > = {
   name: 'Dashboard skill not activated',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output }): Promise<EvaluationResult> => {
     const skillReadPaths = getSkillReadPaths(output);
     const toolIds = getToolIds(output);

@@ -12,12 +12,12 @@
 import * as fs from 'fs';
 import { getLicenseInfoForCommand } from '@kbn/language-documentation';
 import type { CommandDefinition, MultipleLicenseInfo } from '@kbn/language-documentation';
+import { commandDefinitions as pkgCommandDefs } from '@elastic/esql-definitions/commands';
 import {
   processingCommandsIntro,
   processingCommandsItems,
 } from './resources/commands/processing_data';
 import { sourceCommandsIntro, sourceCommandsItems } from './resources/commands/source_data';
-import { readElasticsearchDefinitions } from '../lib/elasticsearch_definitions';
 import { OUTPUT_DIR } from './constants';
 
 interface CommandItemMetadata {
@@ -55,6 +55,11 @@ const commandsData: CommandSectionMetadata[] = [
   },
 ];
 
+const BACKSLASH_REGEX = /\\/g;
+const SINGLE_QUOTE_REGEX = /'/g;
+const BACKTICK_REGEX = /`/g;
+const TEMPLATE_EXPRESSION_REGEX = /\$\{/g;
+
 /**
  * This script generates the ESQL inline command documentation files by merging
  * the source and processing commands with Elasticsearch definitions.
@@ -68,18 +73,10 @@ const commandsData: CommandSectionMetadata[] = [
   try {
     console.log(`Start generating commands documentation`);
 
-    const pathToElasticsearch = process.argv[2];
-    if (!pathToElasticsearch) {
-      throw new Error(
-        'No Elasticsearch path provided, generating without license info for testing...'
-      );
-    }
-
-    const cmdDefinitions = readElasticsearchDefinitions<CommandDefinition>({
-      pathToElasticsearch,
-      keywordType: 'commands',
-      language: 'esql',
-    });
+    const cmdDefinitions: CommandDefinition[] = pkgCommandDefs.map((cmd) => ({
+      name: cmd.name,
+      license: cmd.license as CommandDefinition['license'],
+    }));
     const cmdDefinitionsMap = new Map(cmdDefinitions.map((cmd) => [cmd.name, cmd]));
     const commands = commandsData.map((cmd) => addDefinitionsToCommands(cmd, cmdDefinitionsMap));
     const docContents = commands.map((cmd) => generateDoc(cmd));
@@ -134,11 +131,6 @@ import { i18n } from '@kbn/i18n';
 export const commands = ${generateCommandSectionDoc(data)};
 `;
 }
-
-const BACKSLASH_REGEX = /\\/g;
-const SINGLE_QUOTE_REGEX = /'/g;
-const BACKTICK_REGEX = /`/g;
-const TEMPLATE_EXPRESSION_REGEX = /\$\{/g;
 
 /**
  * Escapes a string for safe interpolation inside a single-quoted JS string literal.

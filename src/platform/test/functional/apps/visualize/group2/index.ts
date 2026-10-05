@@ -22,7 +22,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.update({
         'histogram:maxBars': 100,
-        'visualization:visualize:legacyHeatmapChartsLibrary': true,
       });
       await browser.refresh();
 

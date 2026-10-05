@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import '@emotion/jest';
 import React from 'react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { LEGACY_LIGHT_THEME, Partition, Settings } from '@elastic/charts';
@@ -168,5 +169,28 @@ describe('DonutChart', () => {
     const { container } = render(<DonutChart {...props} />);
     const tooltip = container.getElementsByClassName('euiToolTipAnchor')[0];
     expect(tooltip.textContent).toBe(props.label);
+  });
+
+  test('should vertically center the center label on the donut when data exists', () => {
+    const { getByTestId } = render(<DonutChart {...props} />);
+    const labelWrapper = getByTestId('donut-chart-label');
+
+    expect(labelWrapper).toHaveStyleRule('top', '50%');
+    expect(labelWrapper).toHaveStyleRule('transform', 'translateY(-50%)');
+  });
+
+  test('should vertically center the center label on the empty donut', () => {
+    const emptyProps = {
+      ...props,
+      data: parsedMockAlertsData?.acknowledged?.severities,
+      label: 'Acknowledged',
+      title: <ChartLabel count={parsedMockAlertsData?.acknowledged?.total} />,
+      totalCount: parsedMockAlertsData?.acknowledged?.total,
+    };
+    const { getByTestId } = render(<DonutChart {...emptyProps} />);
+    const labelWrapper = getByTestId('donut-chart-label');
+
+    expect(labelWrapper).toHaveStyleRule('top', '50%');
+    expect(labelWrapper).toHaveStyleRule('transform', 'translateY(-50%)');
   });
 });

@@ -17,6 +17,7 @@ import {
   EuiRadioGroup,
   EuiText,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CONFIRM_MODAL_TITLE, CONFIRM_MODAL_CANCEL, CONFIRM_MODAL_CONFIRM } from './translations';
@@ -38,6 +39,7 @@ export const ConfirmResolutionModal: React.FC<ConfirmResolutionModalProps> = ({
   onCancel,
   isLoading,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
   const currentId = getEntityId(currentEntity);
   const newId = getEntityId(newEntity);
 
@@ -76,9 +78,13 @@ export const ConfirmResolutionModal: React.FC<ConfirmResolutionModalProps> = ({
   }, [selectedOption, currentId, newId, onConfirm]);
 
   return (
-    <EuiModal onClose={onCancel} data-test-subj={CONFIRM_RESOLUTION_MODAL_TEST_ID}>
+    <EuiModal
+      onClose={onCancel}
+      data-test-subj={CONFIRM_RESOLUTION_MODAL_TEST_ID}
+      aria-labelledby={modalTitleId}
+    >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{CONFIRM_MODAL_TITLE}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>{CONFIRM_MODAL_TITLE}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiText size="s">

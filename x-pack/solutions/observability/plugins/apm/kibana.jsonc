@@ -32,7 +32,6 @@
       "unifiedSearch",
       "kql",
       "dataViews",
-      "presentationUtil",
       "lens",
       "maps",
       "uiActions",
@@ -76,7 +75,8 @@
       "observability",
       "maps",
       "observabilityAgentBuilder",
-      "unifiedDocViewer"
+      "unifiedDocViewer",
+      "presentationUtil"
     ]
   }
 }

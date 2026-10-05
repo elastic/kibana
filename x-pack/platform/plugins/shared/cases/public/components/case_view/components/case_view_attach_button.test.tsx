@@ -13,6 +13,7 @@ import { CaseViewAttachButton } from './case_view_attach_button';
 import { basicCase } from '../../../containers/mock';
 import { buildCasesPermissions, renderWithTestingProviders } from '../../../common/mock';
 import { KibanaServices } from '../../../common/lib/kibana';
+import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
 import { useRefreshCaseViewPage } from '../use_on_refresh_case_view_page';
 import {
@@ -248,6 +249,35 @@ describe('CaseViewAttachButton', () => {
       onSuccess();
 
       expect(refreshCaseViewPageMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('shows a success toast after a successful timeline attachment', async () => {
+      const services = createStartServicesMock();
+      getConfigMock.mockReturnValue(getCasesConfig(true));
+      renderWithTestingProviders(
+        withTimelineIntegration(
+          <CaseViewAttachButton caseData={basicCase} attachLocation="activity" />
+        ),
+        { wrapperProps: { services } }
+      );
+      await user.click(await screen.findByTestId('case-view-attach-button'));
+      await user.click(await screen.findByTestId('case-view-attach-menu-timeline'));
+      await user.click(await screen.findByTestId('select-timeline-modal-mock-select'));
+
+      await waitFor(() => {
+        expect(createAttachmentsMutate).toHaveBeenCalled();
+      });
+
+      const { onSuccess } = createAttachmentsMutate.mock.calls[0][1] as {
+        onSuccess: () => void;
+      };
+      onSuccess();
+
+      expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Added timeline My investigation to case',
+        })
+      );
     });
   });
 });

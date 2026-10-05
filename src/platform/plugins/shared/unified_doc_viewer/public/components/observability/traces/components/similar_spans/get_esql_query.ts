@@ -8,7 +8,8 @@
  */
 
 import { SERVICE_NAME, SPAN_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '@kbn/apm-types';
-import { where } from '@kbn/esql-composer';
+import type { ESQLAstExpression } from '@elastic/esql/types';
+import { esqlAnd, esqlEquals } from '../../../../../utils/esql_expressions';
 import type { SimilarSpansProps } from '.';
 
 export function getEsqlQuery({
@@ -16,7 +17,9 @@ export function getEsqlQuery({
   spanName,
   transactionName,
   transactionType,
-}: Pick<SimilarSpansProps, 'serviceName' | 'spanName' | 'transactionName' | 'transactionType'>) {
+}: Pick<SimilarSpansProps, 'serviceName' | 'spanName' | 'transactionName' | 'transactionType'>):
+  | ESQLAstExpression
+  | undefined {
   if (transactionType && serviceName && transactionName) {
     return getSimilarTransactionsESQL({ serviceName, transactionName, transactionType });
   }
@@ -27,11 +30,14 @@ export function getEsqlQuery({
   return undefined;
 }
 
-function getSimilarSpansESQL({ serviceName, spanName }: { serviceName: string; spanName: string }) {
-  return where(`${SERVICE_NAME} == ?serviceName AND ${SPAN_NAME} == ?spanName`, {
-    serviceName,
-    spanName,
-  });
+function getSimilarSpansESQL({
+  serviceName,
+  spanName,
+}: {
+  serviceName: string;
+  spanName: string;
+}): ESQLAstExpression {
+  return esqlAnd([esqlEquals(SERVICE_NAME, serviceName), esqlEquals(SPAN_NAME, spanName)]);
 }
 
 function getSimilarTransactionsESQL({
@@ -42,9 +48,10 @@ function getSimilarTransactionsESQL({
   serviceName: string;
   transactionName: string;
   transactionType: string;
-}) {
-  return where(
-    `${SERVICE_NAME} == ?serviceName AND ${TRANSACTION_NAME} == ?transactionName AND ${TRANSACTION_TYPE} == ?transactionType`,
-    { serviceName, transactionName, transactionType }
-  );
+}): ESQLAstExpression {
+  return esqlAnd([
+    esqlEquals(SERVICE_NAME, serviceName),
+    esqlEquals(TRANSACTION_NAME, transactionName),
+    esqlEquals(TRANSACTION_TYPE, transactionType),
+  ]);
 }

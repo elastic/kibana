@@ -28,9 +28,11 @@ export const episodeActionEnvelopeSchema = z
       .string()
       .min(1)
       .max(256)
+      .nullable()
       .describe(
         i18n.translate('xpack.alertingVTwo.triggers.episodeAction.schema.episodeId', {
-          defaultMessage: 'Identifier of the alerting episode the action was applied to.',
+          defaultMessage:
+            'Identifier of the alerting episode the action was applied to, or null for series-level actions that target the series as a whole.',
         })
       ),
     ruleId: z

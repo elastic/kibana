@@ -139,7 +139,7 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
           ? [
               <EuiContextMenuItem
                 key="export"
-                icon="exportAction"
+                icon="upload"
                 onClick={openExportModal}
                 disabled={isEmpty}
                 toolTipContent={isEmpty ? EXPORT_NO_DATA_TOOLTIP : undefined}

@@ -20,6 +20,10 @@ const GOOGLE_DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3';
 const DEFAULT_PAGE_SIZE = 250;
 const MAX_PAGE_SIZE = 1000;
 const DEFAULT_FOLDER_ID = 'root';
+const ID_MAX_LENGTH = 200;
+const QUERY_MAX_LENGTH = 2000;
+const PAGE_TOKEN_MAX_LENGTH = 2048;
+const MAX_FILE_IDS = 250;
 const GOOGLE_WORKSPACE_MIME_PREFIX = 'application/vnd.google-apps.';
 const DEFAULT_EXPORT_MIME_TYPE = 'application/pdf';
 // XLSX preserves tabular structure better than PDF for spreadsheets
@@ -111,7 +115,6 @@ export const GoogleDriveConnector: ConnectorSpec = {
       {
         type: 'ears',
         isRecommended: true,
-        isExperimental: true,
         overrides: {
           meta: { scope: { disabled: true } },
         },
@@ -147,6 +150,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
   actions: {
     searchFiles: {
       isTool: true,
+      scope: 'read',
       description:
         "Search for files in Google Drive using Google's query syntax. Use this to find files by name, content, type, owner, or modification date across the entire Drive.",
       input: lazySchema(() =>
@@ -154,6 +158,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
           query: z
             .string()
             .min(1)
+            .max(QUERY_MAX_LENGTH)
             .describe(
               'Google Drive search query passed verbatim to the Drive API `q` parameter. ' +
                 'Key patterns: ' +
@@ -175,6 +180,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
             .describe('Number of results to return (default 250, max 1000)'),
           pageToken: z
             .string()
+            .max(PAGE_TOKEN_MAX_LENGTH)
             .optional()
             .describe(
               "Pagination token. Pass the 'nextPageToken' value from a previous response to get the next page. When nextPageToken is absent in the response, there are no more results."
@@ -240,12 +246,16 @@ export const GoogleDriveConnector: ConnectorSpec = {
 
     listFiles: {
       isTool: true,
+      scope: 'read',
       description:
         'List files and subfolders within a specific Google Drive folder. Use this to browse folder contents by folder ID, or start at the root folder.',
       input: lazySchema(() =>
         z.object({
           folderId: z
-            .preprocess((val) => (val === '' ? undefined : val), z.string().optional())
+            .preprocess(
+              (val) => (val === '' ? undefined : val),
+              z.string().max(ID_MAX_LENGTH).optional()
+            )
             .default(DEFAULT_FOLDER_ID)
             .describe(
               "Folder ID to list contents of. Use 'root' for the root folder, or a folder ID from search/list results. Defaults to 'root'."
@@ -257,6 +267,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
             .describe('Number of results to return (default 250, max 1000)'),
           pageToken: z
             .string()
+            .max(PAGE_TOKEN_MAX_LENGTH)
             .optional()
             .describe(
               "Pagination token. Pass the 'nextPageToken' value from a previous response to get the next page. When nextPageToken is absent in the response, there are no more results."
@@ -319,6 +330,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
 
     downloadFile: {
       isTool: true,
+      scope: 'read',
       description:
         'Download a file from Google Drive and return its content. ' +
         'With the default responseType "arraybuffer", content is returned base64-encoded — suitable for PDFs, images, Office documents, and any binary format. ' +
@@ -331,6 +343,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
           fileId: z
             .string()
             .min(1)
+            .max(ID_MAX_LENGTH)
             .describe(
               'The ID of the file to download. Use IDs from searchFiles or listFiles results.'
             ),
@@ -438,15 +451,17 @@ export const GoogleDriveConnector: ConnectorSpec = {
 
     getFileMetadata: {
       isTool: true,
+      scope: 'read',
       description:
         'Get detailed metadata for one or more specific files, including ownership, sharing status, permissions, labels, and descriptions. Use after searchFiles or listFiles to inspect specific files in depth.',
       input: lazySchema(() =>
         z.object({
           fileIds: z
-            .array(z.string().min(1))
+            .array(z.string().min(1).max(ID_MAX_LENGTH))
             .min(1)
+            .max(MAX_FILE_IDS)
             .describe(
-              'Array of file IDs to fetch metadata for. Use IDs from searchFiles or listFiles results. Returns ownership, sharing, permissions, and other details for each file.'
+              'Array of file IDs (up to 250) to fetch metadata for. Use IDs from searchFiles or listFiles results. Returns ownership, sharing, permissions, and other details for each file.'
             ),
         })
       ),
@@ -537,31 +552,11 @@ export const GoogleDriveConnector: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       ctx.log.debug('Google Drive test handler');
-      try {
-        const response = await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/about`, {
-          params: {
-            fields: 'user',
-          },
-        });
-
-        if (response.status !== 200) {
-          return { ok: false, message: 'Failed to connect to Google Drive API' };
-        }
-
-        return {
-          ok: true,
-          message: `Successfully connected to Google Drive API as ${
-            response.data.user?.emailAddress || 'user'
-          }`,
-        };
-      } catch (error) {
-        return {
-          ok: false,
-          message: `Failed to connect to Google Drive API: ${
-            error instanceof Error ? error.message : 'Unknown error'
-          }`,
-        };
-      }
+      await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/about`, {
+        params: { fields: 'user' },
+      });
+      return {};
     },
+    enabled: true,
   },
 };

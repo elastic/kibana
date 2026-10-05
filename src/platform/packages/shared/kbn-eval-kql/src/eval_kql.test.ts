@@ -14,7 +14,7 @@ const FAKE_NOW = new Date('2025-01-15T12:00:00.000Z');
 
 describe('evaluateKql', () => {
   it('should throw an error for invalid KQL', () => {
-    expect(() => evaluateKql('invalid "kql', {})).toThrowError();
+    expect(() => evaluateKql('invalid "kql', {})).toThrow();
   });
 
   describe('"is" expressions', () => {

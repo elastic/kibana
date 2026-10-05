@@ -19,7 +19,6 @@ import {
   dismissFlyouts,
   DiscoverFlyouts,
 } from '@kbn/discover-utils';
-import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
 import type { RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
@@ -34,6 +33,7 @@ import type { AppMenuDiscoverParams } from './app_menu_actions';
 import {
   getAlertsAppMenuItem,
   getCreateRuleOptionsAppMenuItem,
+  getExportAppMenuItem,
   getNewSearchAppMenuItem,
   getOpenSearchAppMenuItem,
   getShareAppMenuItem,
@@ -57,6 +57,7 @@ import type { DiscoverAppState } from '../../state_management/redux';
 import { useCurrentTabMenuActions } from '../../hooks/use_current_tab_menu_actions';
 import { useDataState } from '../../hooks/use_data_state';
 import { TransferAction } from '../../../../plugin_imports/embeddable_editor_service';
+import { useDiscoverShareAction } from './use_discover_share_action';
 
 const TAB_SCOPED_APP_MENU_ITEM_IDS = new Set<string>([
   AppMenuActionId.alerts,
@@ -70,10 +71,14 @@ export interface UseTopNavLinksParams {
   hasUnsavedChanges: boolean;
   isEsqlMode: boolean;
   adHocDataViews: DataView[];
-  hasShareIntegration: boolean;
   persistedDiscoverSession: DiscoverSession | undefined;
   onOpenSaveModal: () => void;
   onOpenSaveAsModal: () => void;
+}
+
+export interface UseTopNavLinksResult {
+  menu: AppMenuConfig;
+  shareAction: ReturnType<typeof useDiscoverShareAction>;
 }
 
 /**
@@ -85,11 +90,10 @@ export const useTopNavLinks = ({
   hasUnsavedChanges,
   isEsqlMode,
   adHocDataViews,
-  hasShareIntegration,
   persistedDiscoverSession,
   onOpenSaveModal,
   onOpenSaveAsModal,
-}: UseTopNavLinksParams): AppMenuConfig => {
+}: UseTopNavLinksParams): UseTopNavLinksResult => {
   const intl = useI18n();
   const dispatch = useInternalStateDispatch();
   const getState = useInternalStateGetState();
@@ -148,6 +152,16 @@ export const useTopNavLinks = ({
     [isEsqlMode, dataView, adHocDataViews, authorizedRuleTypes]
   );
 
+  const shareAction = useDiscoverShareAction({
+    discoverParams,
+    services,
+    currentTab,
+    runtimeStateManager,
+    persistedDiscoverSession,
+    totalHitsState,
+    hasUnsavedChanges,
+  });
+
   const showCreateRuleV2 = isEsqlMode && shouldShowAlertingV2CreateRuleFlyout(services.core);
 
   const appMenuItems: DiscoverAppMenuItemType[] = useMemo(() => {
@@ -191,10 +205,9 @@ export const useTopNavLinks = ({
     }
 
     if (!services.embeddableEditor.isEmbeddedEditor()) {
-      const defaultEsqlState: Pick<DiscoverAppState, 'query'> | undefined =
-        isEsqlMode && currentDataView.type === ESQL_TYPE
-          ? { query: { esql: getInitialESQLQuery(currentDataView) } }
-          : undefined;
+      const defaultEsqlState: Pick<DiscoverAppState, 'query'> | undefined = isEsqlMode
+        ? { query: { esql: getInitialESQLQuery(currentDataView) } }
+        : undefined;
       const locatorParams: DiscoverAppLocatorParams = defaultEsqlState
         ? defaultEsqlState
         : currentDataView.isPersisted()
@@ -222,18 +235,27 @@ export const useTopNavLinks = ({
       items.push(openSearchMenuItem);
     }
 
-    const shareAppMenuItem = getShareAppMenuItem({
+    const exportAppMenuItem = getExportAppMenuItem({
       discoverParams,
       services,
-      hasIntegrations: hasShareIntegration,
-      hasUnsavedChanges,
       currentTab,
       runtimeStateManager,
       persistedDiscoverSession,
       totalHitsState,
+      hasUnsavedChanges,
+      getState,
       intl,
     });
-    items.push(...shareAppMenuItem);
+
+    if (exportAppMenuItem) {
+      items.push(exportAppMenuItem);
+    }
+
+    const shareAppMenuItem = getShareAppMenuItem({ shareAction });
+
+    if (shareAppMenuItem) {
+      items.push(shareAppMenuItem);
+    }
 
     if (canSwitchLanguageMode) {
       items.push({
@@ -254,7 +276,7 @@ export const useTopNavLinks = ({
           : i18n.translate('discover.localMenu.switchToClassicTooltip', {
               defaultMessage: 'Search your data with data views and KQL in Classic Discover',
             }),
-        iconType: isDataViewMode ? 'code' : 'discoverApp',
+        iconType: isDataViewMode ? 'code' : 'productDiscover',
         testId: isDataViewMode ? 'select-text-based-language-btn' : 'select-classic-mode-btn',
         run: switchLanguageMode,
       });
@@ -292,12 +314,12 @@ export const useTopNavLinks = ({
     isDataViewMode,
     openInspector,
     persistedDiscoverSession,
-    hasShareIntegration,
     hasUnsavedChanges,
     totalHitsState,
     intl,
     showCreateRuleV2,
     switchLanguageMode,
+    shareAction,
   ]);
 
   const getAppMenuAccessor = useProfileAccessor('getAppMenu');
@@ -443,22 +465,25 @@ export const useTopNavLinks = ({
     onOpenSaveAsModal,
   ]);
 
-  return useMemo((): AppMenuConfig => {
+  return useMemo((): UseTopNavLinksResult => {
     const config = appMenuRegistry.getAppMenuConfig();
 
     return {
-      items: config.items?.map((item) =>
-        enhanceAppMenuItemWithRunAction({
-          appMenuItem: item,
-          services,
-        })
-      ),
-      primaryActionItem: config.primaryActionItem
-        ? enhanceAppMenuItemWithRunAction({
-            appMenuItem: config.primaryActionItem,
+      menu: {
+        items: config.items?.map((item) =>
+          enhanceAppMenuItemWithRunAction({
+            appMenuItem: item,
             services,
           })
-        : undefined,
+        ),
+        primaryActionItem: config.primaryActionItem
+          ? enhanceAppMenuItemWithRunAction({
+              appMenuItem: config.primaryActionItem,
+              services,
+            })
+          : undefined,
+      },
+      shareAction,
     };
-  }, [appMenuRegistry, services]);
+  }, [appMenuRegistry, services, shareAction]);
 };

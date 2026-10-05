@@ -185,7 +185,7 @@ export const WatchlistCsvUpload: React.FC<WatchlistCsvUploadProps> = ({ watchlis
             data-test-subj="watchlist-csv-upload-button"
             onClick={onUpload}
             isLoading={isUploading}
-            iconType="importAction"
+            iconType="download"
           >
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.watchlists.flyout.csv.uploadButton"
@@ -212,7 +212,7 @@ const UploadResult: React.FC<{
 
   if (allSuccessful) {
     color = 'success';
-    iconType = 'checkInCircleFilled';
+    iconType = 'checkCircleFill';
     title = i18n.translate(
       'xpack.securitySolution.entityAnalytics.watchlists.flyout.csv.result.allSuccess',
       {

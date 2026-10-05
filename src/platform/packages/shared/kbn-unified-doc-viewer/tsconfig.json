@@ -12,6 +12,7 @@
   ],
   "kbn_references": [
     "@kbn/discover-utils",
+    "@kbn/ebt-click",
     "@kbn/data-views-plugin",
     "@kbn/es-query",
     "@kbn/data-plugin",

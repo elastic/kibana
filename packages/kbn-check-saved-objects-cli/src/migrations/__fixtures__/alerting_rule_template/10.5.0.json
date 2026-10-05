@@ -1,0 +1,100 @@
+{
+  "10.4.0": [
+    {
+      "name": "test template",
+      "tags": [],
+      "ruleTypeId": ".test",
+      "flapping": {
+        "lookBackWindow": 20,
+        "statusChangeThreshold": 4
+      },
+      "params": {},
+      "schedule": {
+        "interval": "1m"
+      },
+      "alertDelay": {
+        "active": 1
+      },
+      "engine": "v1"
+    },
+    {
+      "engine": "v2",
+      "rule": {
+        "kind": "alert",
+        "metadata": {
+          "name": "Pod CrashLoopBackOff",
+          "description": "Alerts when containers have a high restart count.",
+          "tags": ["Kubernetes"]
+        },
+        "schedule": {
+          "every": "1m",
+          "lookback": "15m"
+        },
+        "state_transition": {
+          "pending_count": 3
+        },
+        "recovery_strategy": "no_breach",
+        "query": {
+          "format": "composed",
+          "base": "TS metrics-k8sclusterreceiver.otel-* | STATS restarts = MAX(k8s.container.restarts) BY k8s.pod.name",
+          "breach": {
+            "segment": "WHERE restarts > 0 | SORT restarts DESC | LIMIT 50"
+          }
+        },
+        "grouping": {
+          "fields": ["k8s.pod.name"]
+        },
+        "time_field": "@timestamp"
+      }
+    }
+  ],
+  "10.5.0": [
+    {
+      "name": "test template",
+      "tags": [],
+      "ruleTypeId": ".test",
+      "flapping": {
+        "lookBackWindow": 20,
+        "statusChangeThreshold": 4
+      },
+      "params": {},
+      "schedule": {
+        "interval": "1m"
+      },
+      "alertDelay": {
+        "active": 1
+      },
+      "engine": "v1"
+    },
+    {
+      "engine": "v2",
+      "rule": {
+        "kind": "alert",
+        "metadata": {
+          "name": "Pod CrashLoopBackOff",
+          "description": "Alerts when containers have a high restart count.",
+          "tags": ["Kubernetes"]
+        },
+        "schedule": {
+          "every": "1m",
+          "lookback": "15m"
+        },
+        "state_transition": {
+          "pending_count": 3
+        },
+        "recovery_strategy": "no_breach",
+        "query": {
+          "format": "composed",
+          "base": "TS metrics-k8sclusterreceiver.otel-* | STATS restarts = MAX(k8s.container.restarts) BY k8s.pod.name",
+          "breach": {
+            "segment": "WHERE restarts > 0 | SORT restarts DESC | LIMIT 50"
+          }
+        },
+        "grouping": {
+          "fields": ["k8s.pod.name"]
+        },
+        "time_field": "@timestamp"
+      }
+    }
+  ]
+}

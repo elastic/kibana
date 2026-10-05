@@ -10,6 +10,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import type { UserProfileWithSecurity } from '@kbn/core-user-profile-common';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { LoggerService } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { RuleChangesHistoryAction } from '../../rule_changes_history';
@@ -40,8 +41,7 @@ const profile = {
   user: { username: author.username },
 } as UserProfileWithSecurity;
 
-const rule = createRuleResponse({ id: 'rule-1', metadata: { version: 3 } });
-const { version: _occVersion, ...ruleSnapshot } = rule;
+const rule = createRuleResponse({ id: 'rule-1', version: 3 });
 
 const payload: RuleEvent['payload'] = {
   ruleId: 'rule-1',
@@ -120,7 +120,7 @@ describe('RuleChangesHistorySubscriber', () => {
         expect(changeHistory.logRuleChanges).toHaveBeenCalledWith({
           spaceId: 'my-space',
           author,
-          entries: [{ id: 'rule-1', snapshot: ruleSnapshot, sequence: 3 }],
+          entries: [{ id: 'rule-1', snapshot: rule, sequence: 3 }],
           action,
           eventType: ecsEventType,
           correlationId: 'corr-1',
@@ -154,24 +154,6 @@ describe('RuleChangesHistorySubscriber', () => {
       expect(changeHistory.logRuleChanges).not.toHaveBeenCalled();
     });
 
-    it('skips events whose rule has no version sequence', async () => {
-      subscriber.start();
-      // The API always populates `metadata.version`; drop it to exercise the
-      // subscriber's defensive guard against a malformed runtime event.
-      const { version: _version, ...metadataWithoutVersion } = rule.metadata;
-      const ruleWithoutSequence = {
-        ...rule,
-        metadata: metadataWithoutVersion,
-      } as typeof rule;
-
-      await handlerFor(RULE_UPDATED_EVENT_TYPE)(
-        eventOf(RULE_UPDATED_EVENT_TYPE, { ...payload, rule: ruleWithoutSequence }),
-        { request }
-      );
-
-      expect(changeHistory.logRuleChanges).not.toHaveBeenCalled();
-    });
-
     it('omits timestamp so logRuleChanges defaults to now', async () => {
       subscriber.start();
 
@@ -191,6 +173,15 @@ describe('RuleChangesHistorySubscriber', () => {
       ).resolves.toBeUndefined();
 
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
+      expect(mockLogger.error).toHaveBeenCalledWith('es unreachable', {
+        labels: {
+          event_type: RULE_CREATED_EVENT_TYPE,
+          rule_id: payload.ruleId,
+          space_id: payload.spaceId,
+          code: ALERTING_LOG_CODES.EVENTS_RULE_CHANGES_HISTORY_SUBSCRIBER_FAILED,
+        },
+        error: expect.objectContaining({ message: 'es unreachable' }),
+      });
     });
   });
 

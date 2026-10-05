@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render } from '@testing-library/react';
 
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataSource } from '../common';
 import { DataSourcesTable } from './data_sources_table';
 
@@ -20,6 +21,23 @@ const createDataSource = (name: string, type: DataSource['type'] | string): Data
     description: '',
     settings: {},
   } as unknown as DataSource);
+
+const docLinksMock = {
+  links: {
+    dataFederation: {
+      overview: '',
+      quickstart: '',
+      dataSources: '',
+      datasets: '',
+      datasetSettings: '',
+      authentication: '',
+      staticCredentials: '',
+      federatedIdentity: '',
+      querying: '',
+      security: '',
+    },
+  },
+};
 
 describe('DataSourcesTable', () => {
   const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: unknown[]) => {
@@ -38,16 +56,18 @@ describe('DataSourcesTable', () => {
 
     const { getByTestId } = render(
       <EuiProvider>
-        <DataSourcesTable
-          dataSources={[createDataSource('ds1', 's3')]}
-          selectedDataSources={[]}
-          dataSetsCountByDataSource={new Map()}
-          onSelectionChange={jest.fn()}
-          onCreate={onCreate}
-          onEdit={jest.fn()}
-          onDelete={jest.fn()}
-          onDeleteSelected={jest.fn()}
-        />
+        <KibanaContextProvider services={{ docLinks: docLinksMock }}>
+          <DataSourcesTable
+            dataSources={[createDataSource('ds1', 's3')]}
+            selectedDataSources={[]}
+            dataSetsCountByDataSource={new Map()}
+            onSelectionChange={jest.fn()}
+            onCreate={onCreate}
+            onEdit={jest.fn()}
+            onDelete={jest.fn()}
+            onDeleteSelected={jest.fn()}
+          />
+        </KibanaContextProvider>
       </EuiProvider>
     );
 
@@ -60,19 +80,21 @@ describe('DataSourcesTable', () => {
 
     const { getAllByTestId } = render(
       <EuiProvider>
-        <DataSourcesTable
-          dataSources={[
-            createDataSource('supported', 's3'),
-            createDataSource('unsupported', 'http'),
-          ]}
-          selectedDataSources={[]}
-          dataSetsCountByDataSource={new Map()}
-          onSelectionChange={jest.fn()}
-          onCreate={jest.fn()}
-          onEdit={onEdit}
-          onDelete={jest.fn()}
-          onDeleteSelected={jest.fn()}
-        />
+        <KibanaContextProvider services={{ docLinks: docLinksMock }}>
+          <DataSourcesTable
+            dataSources={[
+              createDataSource('supported', 's3'),
+              createDataSource('unsupported', 'http'),
+            ]}
+            selectedDataSources={[]}
+            dataSetsCountByDataSource={new Map()}
+            onSelectionChange={jest.fn()}
+            onCreate={jest.fn()}
+            onEdit={onEdit}
+            onDelete={jest.fn()}
+            onDeleteSelected={jest.fn()}
+          />
+        </KibanaContextProvider>
       </EuiProvider>
     );
 
@@ -97,16 +119,18 @@ describe('DataSourcesTable', () => {
 
     const { getAllByTestId, getByText } = render(
       <EuiProvider>
-        <DataSourcesTable
-          dataSources={[createDataSource('Source A', 's3'), createDataSource('Source B', 's3')]}
-          selectedDataSources={[]}
-          dataSetsCountByDataSource={dataSetsCountByDataSource}
-          onSelectionChange={jest.fn()}
-          onCreate={jest.fn()}
-          onEdit={jest.fn()}
-          onDelete={onDelete}
-          onDeleteSelected={jest.fn()}
-        />
+        <KibanaContextProvider services={{ docLinks: docLinksMock }}>
+          <DataSourcesTable
+            dataSources={[createDataSource('Source A', 's3'), createDataSource('Source B', 's3')]}
+            selectedDataSources={[]}
+            dataSetsCountByDataSource={dataSetsCountByDataSource}
+            onSelectionChange={jest.fn()}
+            onCreate={jest.fn()}
+            onEdit={jest.fn()}
+            onDelete={onDelete}
+            onDeleteSelected={jest.fn()}
+          />
+        </KibanaContextProvider>
       </EuiProvider>
     );
 
@@ -139,16 +163,18 @@ describe('DataSourcesTable', () => {
 
     const { getByTestId } = render(
       <EuiProvider>
-        <DataSourcesTable
-          dataSources={[...selectedDataSources, createDataSource('other', 's3')]}
-          selectedDataSources={selectedDataSources}
-          dataSetsCountByDataSource={new Map()}
-          onSelectionChange={jest.fn()}
-          onCreate={jest.fn()}
-          onEdit={jest.fn()}
-          onDelete={jest.fn()}
-          onDeleteSelected={onDeleteSelected}
-        />
+        <KibanaContextProvider services={{ docLinks: docLinksMock }}>
+          <DataSourcesTable
+            dataSources={[...selectedDataSources, createDataSource('other', 's3')]}
+            selectedDataSources={selectedDataSources}
+            dataSetsCountByDataSource={new Map()}
+            onSelectionChange={jest.fn()}
+            onCreate={jest.fn()}
+            onEdit={jest.fn()}
+            onDelete={jest.fn()}
+            onDeleteSelected={onDeleteSelected}
+          />
+        </KibanaContextProvider>
       </EuiProvider>
     );
 

@@ -17,7 +17,7 @@ import { createCaseError } from '../../common/error';
 import { validateMaxUserActions } from '../../common/validators';
 import { constructFileKindIdByOwner } from '../../../common/files';
 import { Operations } from '../../authorization';
-import { validateRegisteredAttachments } from './validators';
+import { validateUnifiedAttachments } from './validators';
 import { buildAttachmentRequestFromFileJSON } from '../utils';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 
@@ -29,12 +29,10 @@ export const addFile = async (
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
 ): Promise<Case> => {
-  const { caseId, file, filename, mimeType, $abort, mode = 'legacy' } = addFileArgs;
+  const { caseId, file, filename, mimeType, $abort } = addFileArgs;
   const {
     logger,
     authorization,
-    persistableStateAttachmentTypeRegistry,
-    externalReferenceAttachmentTypeRegistry,
     unifiedAttachmentTypeRegistry,
     services: { userActionService },
     fileService,
@@ -79,10 +77,8 @@ export const addFile = async (
       fileMetadata: createdFile.toJSON(),
     });
 
-    validateRegisteredAttachments({
+    validateUnifiedAttachments({
       query: commentReq,
-      persistableStateAttachmentTypeRegistry,
-      externalReferenceAttachmentTypeRegistry,
       unifiedAttachmentTypeRegistry,
     });
 
@@ -96,7 +92,7 @@ export const addFile = async (
       id: savedObjectID,
     });
 
-    return await updatedModel.encodeWithComments({ mode });
+    return await updatedModel.encodeWithComments();
   } catch (error) {
     if (createdFile?.id) {
       await fileService.delete({ id: createdFile.id });

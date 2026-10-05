@@ -9,11 +9,17 @@
 
 import type { ScoutPage } from '..';
 
+export type QueryBarLanguage = 'kql' | 'lucene';
+
+const LANGUAGE_MENU_LABEL: Record<QueryBarLanguage, string> = {
+  kql: 'KQL',
+  lucene: 'Lucene',
+};
+
 /**
  * Page object for the global query text input (`queryInput`) shared by
  * Discover, Dashboard, Maps, Visualize/Lens and other apps that embed
- * `unified_search`. Covers setting and clearing the live query without
- * submitting; callers own the submit step when they need it.
+ * `unified_search`.
  */
 export class QueryBar {
   constructor(private readonly page: ScoutPage) {}
@@ -28,7 +34,30 @@ export class QueryBar {
     return this.page.testSubj.locator('queryInput').inputValue();
   }
 
+  async submitQuery(): Promise<void> {
+    await this.page.testSubj.click('querySubmitButton');
+  }
+
   async clearQuery(): Promise<void> {
     await this.page.testSubj.clearInput('queryInput');
+  }
+
+  /** Switches the unified-search query bar between KQL and Lucene via the query-bar menu. */
+  async switchQueryLanguage(language: QueryBarLanguage): Promise<void> {
+    const menuButton = this.page.testSubj.locator('showQueryBarMenu');
+    const menuPanel = this.page.testSubj.locator('queryBarMenuPanel');
+    const languageItem = this.page.testSubj.locator(`${language}LanguageMenuItem`);
+    const languageLabel = LANGUAGE_MENU_LABEL[language];
+
+    await menuButton.click();
+    await menuPanel.waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('switchQueryLanguageButton').click();
+    await languageItem.click();
+    await this.page.testSubj.locator('contextMenuPanelTitleButton').click();
+    await this.page.testSubj
+      .locator('switchQueryLanguageButton', { hasText: `Language: ${languageLabel}` })
+      .waitFor({ state: 'visible' });
+    await menuButton.click();
+    await menuPanel.waitFor({ state: 'hidden' });
   }
 }

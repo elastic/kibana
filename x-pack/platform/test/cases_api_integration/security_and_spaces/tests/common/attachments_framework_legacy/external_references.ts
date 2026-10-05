@@ -7,42 +7,50 @@
 
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
-
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
 } from '@kbn/cases-plugin/common/constants';
 import { AttachmentType, UserActionTypes } from '@kbn/cases-plugin/common/types/domain';
-import type { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
+import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
   postCaseReq,
-  postCommentUserReq,
   postExternalReferenceESReq,
   postExternalReferenceSOReq,
+  getUnifiedFilesAttachmentReq,
+  postUnifiedCommentReq,
+  postUnifiedIndicatorReq,
 } from '../../../../common/lib/mock';
 import {
-  deleteAllCaseItems,
+  bulkCreateAttachments,
   createCase,
   createComment,
-  removeServerGeneratedPropertiesFromSavedObject,
-  bulkCreateAttachments,
-  updateComment,
-  getSOFromKibanaIndex,
-  getReferenceFromEsResponse,
+  deleteAllCaseItems,
   findCaseUserActions,
+  getReferenceFromEsResponse,
+  getSOFromKibanaIndex,
+  removeServerGeneratedPropertiesFromSavedObject,
+  updateComment,
 } from '../../../../common/lib/api';
 
+/**
+ * Legacy externalReference wire-shape coverage, ported from the former `.test`-based
+ * `external_references.ts` onto real migrated types: `.files` (SO-backed) and `indicator`
+ * (ES-doc). Both are routed through `EXTERNAL_REFERENCE_TYPE_MAP` to the unified validator and
+ * stored byte-clean, so the legacy round-trip stays lossless.
+ *
+ * Not ported (premise no longer holds for typed migrated subtypes): the arbitrary-metadata
+ * test (unified schemas are strict), the so<->doc update-restriction pair (`.files` and
+ * `indicator` are distinct types, not one type toggling storage), and the registered-types
+ * hash snapshot (the fixture registry-hash route was removed; unified snapshots cover it).
+ */
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  /**
-   * Attachment types are being registered in
-   * x-pack/platform/test/cases_api_integration/common/plugins/cases/server/plugin.ts
-   */
-  describe('External references', () => {
+  describe('Legacy external reference wire shapes (files / indicator)', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });
@@ -77,36 +85,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(comment).to.eql({
         ...postExternalReferenceESReq,
-        created_by: defaultUser,
-        pushed_at: null,
-        pushed_by: null,
-        updated_by: null,
-        owner: 'securitySolutionFixture',
-      });
-    });
-
-    it('should create an external reference attachment type with metadata', async () => {
-      const req = {
-        ...postExternalReferenceSOReq,
-        externalReferenceMetadata: {
-          foo: 'foo',
-          bar: { a: 'a' },
-          baz: [{ b: 'b' }],
-          total: 1,
-          isValid: true,
-        },
-      };
-
-      const postedCase = await createCase(supertest, postCaseReq);
-      const patchedCase = await createComment({
-        supertest,
-        caseId: postedCase.id,
-        params: req,
-      });
-      const comment = removeServerGeneratedPropertiesFromSavedObject(patchedCase.comments![0]);
-
-      expect(comment).to.eql({
-        ...req,
         created_by: defaultUser,
         pushed_at: null,
         pushed_by: null,
@@ -157,7 +135,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(ref).to.eql({
         id: 'my-id',
         name: 'externalReferenceId',
-        type: 'test-type',
+        type: FILE_SO_TYPE,
       });
 
       expect(comment).to.eql({
@@ -196,7 +174,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(ref).to.eql({
         id: 'my-id',
         name: 'externalReferenceId',
-        type: 'test-type',
+        type: FILE_SO_TYPE,
       });
 
       expect(commentOnES).to.eql(withoutId);
@@ -220,7 +198,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const comment = removeServerGeneratedPropertiesFromSavedObject(commentOnES);
       const ref = getReferenceFromEsResponse(
         esResponse,
-        postExternalReferenceSOReq.externalReferenceId
+        postExternalReferenceESReq.externalReferenceId
       );
 
       expect(ref).to.be(undefined);
@@ -255,7 +233,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const commentOnES = esResponse.body._source?.[CASE_USER_ACTION_SAVED_OBJECT]?.payload.comment;
       const ref = getReferenceFromEsResponse(
         esResponse,
-        postExternalReferenceSOReq.externalReferenceId
+        postExternalReferenceESReq.externalReferenceId
       );
 
       expect(ref).to.be(undefined);
@@ -267,7 +245,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const patchedCase = await bulkCreateAttachments({
         supertest,
         caseId: postedCase.id,
-        params: [postCommentUserReq, postExternalReferenceSOReq],
+        params: [postUnifiedCommentReq, getUnifiedFilesAttachmentReq()],
       });
 
       const externalRefComment = patchedCase.comments?.find(
@@ -293,7 +271,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(ref).to.eql({
         id: 'my-id',
         name: 'externalReferenceId',
-        type: 'test-type',
+        type: FILE_SO_TYPE,
       });
 
       expect(comment).to.eql({
@@ -310,7 +288,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const patchedCase = await bulkCreateAttachments({
         supertest,
         caseId: postedCase.id,
-        params: [postCommentUserReq, postExternalReferenceESReq],
+        params: [postUnifiedCommentReq, postUnifiedIndicatorReq],
       });
 
       const externalRefComment = patchedCase.comments?.find(
@@ -373,7 +351,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(ref).to.eql({
         id: 'my-new-id',
         name: 'externalReferenceId',
-        type: 'test-type',
+        type: FILE_SO_TYPE,
       });
 
       expect(comment).to.eql({
@@ -382,56 +360,6 @@ export default ({ getService }: FtrProviderContext): void => {
         pushed_at: null,
         pushed_by: null,
         updated_by: defaultUser,
-      });
-    });
-
-    it('should return 400 when updating from so to doc', async () => {
-      const docAttachment: AttachmentRequest = {
-        ...postExternalReferenceESReq,
-        externalReferenceId: 'my-doc-id',
-      };
-
-      const postedCase = await createCase(supertest, postCaseReq);
-      const patchedCase = await createComment({
-        supertest,
-        caseId: postedCase.id,
-        params: postExternalReferenceSOReq,
-      });
-
-      await updateComment({
-        supertest,
-        caseId: postedCase.id,
-        req: {
-          id: patchedCase.comments![0].id,
-          version: patchedCase.comments![0].version,
-          ...docAttachment,
-        },
-        expectedHttpCode: 400,
-      });
-    });
-
-    it('should return 400 when updating from doc to so', async () => {
-      const docAttachment: AttachmentRequest = {
-        ...postExternalReferenceESReq,
-        externalReferenceId: 'my-doc-id',
-      };
-
-      const postedCase = await createCase(supertest, postCaseReq);
-      const patchedCase = await createComment({
-        supertest,
-        caseId: postedCase.id,
-        params: docAttachment,
-      });
-
-      await updateComment({
-        supertest,
-        caseId: postedCase.id,
-        req: {
-          id: patchedCase.comments![0].id,
-          version: patchedCase.comments![0].version,
-          ...postExternalReferenceSOReq,
-        },
-        expectedHttpCode: 400,
       });
     });
 
@@ -470,36 +398,16 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('400s when bulk creating a non registered external reference attachment type', async () => {
+    it('400s when bulk creating a non registered attachment type', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
       await bulkCreateAttachments({
         supertest,
         caseId: postedCase.id,
         params: [
-          postExternalReferenceSOReq,
-          { ...postExternalReferenceSOReq, externalReferenceAttachmentTypeId: 'not-exists' },
+          getUnifiedFilesAttachmentReq(),
+          { ...getUnifiedFilesAttachmentReq(), type: 'not-exists' },
         ],
         expectedHttpCode: 400,
-      });
-    });
-
-    // This test is intended to fail when new external reference attachment types are registered.
-    // To resolve, add the new external reference attachment types ID to this list. This will trigger
-    // a CODEOWNERS review by Response Ops.
-    describe('check registered external reference attachment types', () => {
-      const getRegisteredTypes = () => {
-        return supertest
-          .get('/api/cases_fixture/registered_external_reference_attachments')
-          .expect(200)
-          .then((response) => response.body);
-      };
-
-      it('should check changes on all registered external reference attachment types', async () => {
-        const types = await getRegisteredTypes();
-
-        expect(types).to.eql({
-          '.test': 'ab2204830c67f5cf992c9aa2f7e3ead752cc60a1',
-        });
       });
     });
   });

@@ -18,6 +18,7 @@ import type {
 } from './types';
 import { createShadowMount, createStoryElement } from './render';
 import { createResizeController } from './resize';
+import { preventHostScrollLock } from './scroll_lock';
 
 const getEmbeddableParameters = (story: ComposedStory): EmbeddableStoryParameters =>
   story.parameters?.embeddable ?? {};
@@ -36,6 +37,8 @@ export const createDocsRegistry = ({
   const roots = new WeakMap<HTMLElement, ReturnType<typeof createRoot>>();
   const resize = createResizeController();
   const annotations = setProjectAnnotations(projectAnnotations);
+
+  preventHostScrollLock();
 
   const getComposedStory = async (storybookId: string): Promise<ComposedStory> => {
     const loadStoryModule = storyModules[storybookId];

@@ -11,7 +11,7 @@ import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import {
-  getHistorySnapshotIndexPattern,
+  resolveHistorySnapshotIndexPatterns,
   getEntitiesAlias,
   ENTITY_LATEST,
 } from '@kbn/entity-store/server';
@@ -24,11 +24,11 @@ import {
 import type { ExperimentalFeatures } from '../../../../common';
 import { AssetCriticalityLevel } from '../../../../common/api/entity_analytics/asset_criticality/common.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
-import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { securityTool } from '../constants';
+import { buildRenderAttachmentTag } from './attachment_utils';
+import { getEntityAnalyticsToolAvailability } from './entity_analytics_availability';
 import {
   buildListEntityAttachmentId,
-  buildRenderAttachmentTag,
   buildSingleEntityAttachmentId,
   describeAttachmentForRow,
   ensureEntityAttachment,
@@ -689,46 +689,24 @@ export const searchEntitiesTool = (
     When the user asks to show, open, view, or summarize the Entity Analytics dashboard/home/overview (built-in Security page), use these results (and optional security.get_entity) then call attachments.add with type "security.entity_analytics_dashboard" so the UI shows Preview→Canvas (see entity-analytics skill). Do not treat that as a request to compose a new Kibana saved dashboard.
     Do NOT use if entity ID (EUID) is known; use the "security.get_entity" tool instead.`,
     tags: ['security', 'entity-store', 'entity-analytics'],
+    annotations: {
+      title: 'Search Entities',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     schema,
     availability: {
       cacheMode: 'space',
-      handler: async ({ request, spaceId }: ToolAvailabilityContext) => {
-        try {
-          const availability = await getAgentBuilderResourceAvailability({ core, request, logger });
-          if (availability.status === 'available') {
-            const isEntityStoreV2Enabled = experimentalFeatures.entityAnalyticsEntityStoreV2;
-            if (!isEntityStoreV2Enabled) {
-              return {
-                status: 'unavailable',
-                reason: 'Entity Store V2 is not enabled.',
-              };
-            }
-
-            const [coreStart] = await core.getStartServices();
-            const esClient = coreStart.elasticsearch.client.asInternalUser;
-
-            const indexExists = await esClient.indices.exists({
-              index: getEntitiesAlias(ENTITY_LATEST, spaceId),
-            });
-
-            if (!indexExists) {
-              return {
-                status: 'unavailable',
-                reason: 'Entity Store V2 index does not exist for this space',
-              };
-            }
-          }
-
-          return availability;
-        } catch (error) {
-          return {
-            status: 'unavailable',
-            reason: `Failed to check entity store v2 index availability: ${
-              error instanceof Error ? error.message : 'Unknown error'
-            }`,
-          };
-        }
-      },
+      handler: async ({ request, spaceId }: ToolAvailabilityContext) =>
+        getEntityAnalyticsToolAvailability({
+          core,
+          request,
+          spaceId,
+          experimentalFeatures,
+          logger,
+        }),
     },
     handler: async (params, { spaceId, esClient, attachments }) => {
       logger.debug(
@@ -750,23 +728,22 @@ export const searchEntitiesTool = (
         const [, { entityStore }] = await core.getStartServices();
         const client = esClient.asCurrentUser;
         const entityIndex = getEntitiesAlias(ENTITY_LATEST, spaceId);
-        const entitySnapshotIndex = getHistorySnapshotIndexPattern(spaceId);
+        const historyPatterns = await resolveHistorySnapshotIndexPatterns(client, spaceId);
 
-        const [snapshotIndexExists, grounding] = await Promise.all([
-          client.indices.exists({ index: entitySnapshotIndex }),
+        const [patternExistence, grounding] = await Promise.all([
+          Promise.all(historyPatterns.map((pattern) => client.indices.exists({ index: pattern }))),
           fetchRiskScoreGrounding({
             entityStore,
             namespace: spaceId,
             logger,
           }),
         ]);
+        const liveHistoryPatterns = historyPatterns.filter((_, i) => patternExistence[i]);
+        const entitySnapshotIndex =
+          liveHistoryPatterns.length > 0 ? liveHistoryPatterns.join(',') : undefined;
         const groundingResult = grounding ? [grounding] : [];
 
-        const query = buildQuery(
-          normalized,
-          entityIndex,
-          snapshotIndexExists ? entitySnapshotIndex : undefined
-        );
+        const query = buildQuery(normalized, entityIndex, entitySnapshotIndex);
 
         const { columns, values } = await executeEsql({ query, esClient: client });
 

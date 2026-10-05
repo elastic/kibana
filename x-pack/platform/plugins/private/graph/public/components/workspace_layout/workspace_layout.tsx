@@ -8,7 +8,7 @@
 import React, { Fragment, memo, useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
-import { connect } from 'react-redux-v7';
+import { connect } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
@@ -21,7 +21,6 @@ import { FieldManager } from '../field_manager';
 import type { ControlType, IndexPatternProvider, TermIntersect, WorkspaceNode } from '../../types';
 import { WorkspaceTopNavMenu } from './workspace_top_nav_menu';
 import { GuidancePanel } from '../guidance_panel';
-import { GraphTitle } from '../graph_title';
 import type { GraphWorkspaceSavedObject, Workspace } from '../../types';
 import type { GraphServices } from '../../application';
 import { ControlPanel } from '../control_panel';
@@ -40,9 +39,7 @@ const GuidancePanelMemoized = memo(GuidancePanel);
 
 type WorkspaceLayoutProps = Pick<
   GraphServices,
-  | 'setHeaderActionMenu'
   | 'graphSavePolicy'
-  | 'navigation'
   | 'capabilities'
   | 'coreStart'
   | 'canEditDrillDownUrls'
@@ -76,9 +73,7 @@ export const WorkspaceLayoutComponent = ({
   capabilities,
   coreStart,
   graphSavePolicy,
-  navigation,
   canEditDrillDownUrls,
-  setHeaderActionMenu,
   sharingSavedObjectProps,
   spaces,
   inspect,
@@ -188,18 +183,15 @@ export const WorkspaceLayoutComponent = ({
         workspace={workspace}
         savedWorkspace={savedWorkspace}
         graphSavePolicy={graphSavePolicy}
-        navigation={navigation}
         capabilities={capabilities}
         inspect={inspect}
         requestAdapter={requestAdapter}
         coreStart={coreStart}
         canEditDrillDownUrls={canEditDrillDownUrls}
         confirmWipeWorkspace={confirmWipeWorkspace}
-        setHeaderActionMenu={setHeaderActionMenu}
         isInitialized={isInitialized}
       />
 
-      {isInitialized && <GraphTitle />}
       <div css={styles.bar}>
         <SearchBar
           isLoading={loading}

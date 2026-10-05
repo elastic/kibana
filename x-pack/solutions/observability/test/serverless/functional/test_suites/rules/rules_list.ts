@@ -32,7 +32,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click('rules-list-clear-filter');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
     }
-    await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
+    await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:alerts' });
     await testSubjects.click('manageRulesPageButton');
   }
 
@@ -79,7 +79,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       await svlCommonPage.loginWithPrivilegedRole();
       await svlObltNavigation.navigateToLandingPage();
-      await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:alerts' });
       await testSubjects.click('manageRulesPageButton');
     });
 
@@ -285,7 +285,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
       await testSubjects.click('disableButton');
 
+      await testSubjects.existOrFail('untrackAlertsModal');
       await testSubjects.click('confirmModalConfirmButton');
+      await testSubjects.missingOrFail('untrackAlertsModal');
 
       await header.waitUntilLoadingHasFinished();
 
@@ -659,18 +661,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await testSubjects.click('ruleTypeFilterButton');
-
-      await retry.try(async () => {
-        const isOpen = await testSubjects.exists('ruleType0Group');
-        if (!isOpen) {
-          await testSubjects.click('ruleTypeFilterButton');
-        }
-
-        expect(await (await testSubjects.find('ruleType0Group')).getVisibleText()).toEqual(
-          'Applications'
-        );
-      });
-
+      await testSubjects.existOrFail('ruleType0Group', { timeout: 5000 });
+      expect(await (await testSubjects.find('ruleType0Group')).getVisibleText()).toEqual(
+        'Applications'
+      );
       await testSubjects.click('ruleTypeapm.anomalyFilterOption');
 
       await retry.try(async () => {

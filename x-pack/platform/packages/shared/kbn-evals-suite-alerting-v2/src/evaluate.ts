@@ -7,7 +7,6 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { evaluate as evalsBase } from '@kbn/evals';
-import { withPhoenixExecutor } from '@kbn/evals-phoenix-executor';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { createEvaluateDataset } from './evaluate_dataset';
 import type { EvaluateDataset } from './types';
@@ -18,9 +17,7 @@ import {
   removeFullStackDataForge,
 } from './full_stack_data';
 
-const base = withPhoenixExecutor(evalsBase);
-
-export const evaluate = base.extend<{
+export const evaluate = evalsBase.extend<{
   evaluateDataset: EvaluateDataset;
   /**
    * Seeds all data-forge eval data (see `full_stack_data.ts`) before the test

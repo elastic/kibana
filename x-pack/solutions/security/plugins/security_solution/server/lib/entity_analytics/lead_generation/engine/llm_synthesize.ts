@@ -9,13 +9,11 @@ import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-import type { LeadEntity, Observation } from '../types';
-
-export interface ScoredEntityInput {
-  readonly entity: LeadEntity;
-  readonly priority: number;
-  readonly observations: Observation[];
-}
+import {
+  formatRelatedEntity,
+  formatOmittedRelatedEntityCounts,
+} from '../../../../../common/entity_analytics/lead_generation/format_related_entity';
+import type { ScoredEntity } from '../types';
 
 export interface LlmSynthesisResult {
   readonly title: string;
@@ -56,6 +54,10 @@ Rules:
 - When a lead includes "Peer context" (other candidate entities sharing the same signal), you may reference it in the byline or description to convey scope — e.g. "alongside 5 other privileged accounts escalating in the same window". Only use peer counts that are provided; never invent them.
 - Never mention, quote, or paraphrase the \`signal_strength\` value anywhere (title, byline, description, tags). It is an internal ranking signal, not something meaningful to an analyst, and must not be shown.
 - Only state a numeric risk score when a "Risk escalation" line is present for that lead; use exactly the from/to numbers and window given, and never invent, estimate, or restate a risk score from any other field (including \`signal_strength\`). If no "Risk escalation" line is present, do not mention a risk score at all.
+- Reference other entities only by name from those explicitly listed under "Related entities" for that lead; never infer or invent a connection. When that section is absent, do not mention related entities or their absence.
+- "interacted with: at least N entities" is a lower bound, not an exact count — write "at least N", never "only N" or "exactly N".
+- A "(not shown: N more X)" note means the list was truncated, not an additional entity — you may mention that more exist (e.g. "among dozens of other hosts it accesses"), but never treat it as a specific, nameable entity.
+- When a lead includes a "Promotion reason" line, this entity was surfaced by relationship review, not by its own score — observations may be sparse or absent. Build the byline and description around that reason instead of implying the entity itself triggered detections it didn't.
 
 You will receive data for {lead_count} lead(s). Respond ONLY with a valid JSON array (no markdown fences, no extra text) containing exactly {lead_count} objects in the same order as the input, each matching this schema:
 {{
@@ -73,21 +75,21 @@ Respond with the JSON array only.`;
 
 const batchSynthesisPrompt = ChatPromptTemplate.fromTemplate(BATCH_SYNTHESIS_PROMPT);
 
-const formatEntityLine = (s: ScoredEntityInput): string => {
+const formatEntityLine = (s: ScoredEntity): string => {
   const entityDoc = JSON.stringify(s.entity.record);
   return `  - ${s.entity.type} "${s.entity.name}" (priority: ${s.priority}/10)\n    Entity document: ${entityDoc}`;
 };
 
 /**
- * Builds a "Peer context" line for a lead: for each observation type present in
- * the group, how many OTHER candidate entities share it. Returns an empty string
- * when no peers share any of the lead's signals.
+ * Builds a "Peer context" line for a lead: for each observation type the
+ * entity has, how many OTHER candidate entities share it. Returns an empty
+ * string when no peers share any of the lead's signals.
  */
-const formatPeerContext = (group: ScoredEntityInput[], cohort?: CohortContext): string => {
+const formatPeerContext = (entity: ScoredEntity, cohort?: CohortContext): string => {
   if (!cohort) return '';
 
-  const groupTypes = new Set(group.flatMap((s) => s.observations.map((o) => o.type)));
-  const peerSignals = [...groupTypes]
+  const entityTypes = new Set(entity.observations.map((o) => o.type));
+  const peerSignals = [...entityTypes]
     .map((type) => ({ type, peers: (cohort.entityCountByObservationType[type] ?? 1) - 1 }))
     .filter(({ peers }) => peers > 0)
     .sort((a, b) => b.peers - a.peers)
@@ -112,9 +114,8 @@ const SHORT_WINDOW_ESCALATION_TYPES = new Set(['risk_escalation_24h', 'risk_esca
  * in the prompt — see the corresponding prompt rule — so the LLM never has
  * to infer or invent one from an unrelated observation's signal strength.
  */
-const formatRiskEscalation = (group: ScoredEntityInput[]): string => {
-  const escalation = group
-    .flatMap((s) => s.observations)
+const formatRiskEscalation = (entity: ScoredEntity): string => {
+  const escalation = entity.observations
     .filter((o) => SHORT_WINDOW_ESCALATION_TYPES.has(o.type))
     .sort((a, b) => Number(b.metadata.delta ?? 0) - Number(a.metadata.delta ?? 0))[0];
   if (!escalation) return '';
@@ -130,35 +131,57 @@ const formatRiskEscalation = (group: ScoredEntityInput[]): string => {
   )} (+${Math.round(delta)}) over the last ${window}.`;
 };
 
-const formatLeadsPayload = (groups: ScoredEntityInput[][], cohort?: CohortContext): string => {
-  return groups
-    .map((group, i) => {
-      const entityLines = group.map(formatEntityLine).join('\n');
+const formatPromotionReason = (entity: ScoredEntity): string =>
+  entity.promotionReason
+    ? `  Promotion reason (confidence: ${entity.promotionConfidence ?? 'unknown'}): ${
+        entity.promotionReason
+      }`
+    : '';
 
-      const obsLines = group
-        .flatMap((s) => {
-          const key = s.entity.id;
-          return s.observations
-            .filter((o) => o.entityId === key)
-            .map((obs) => {
-              const metaEntries = Object.entries(obs.metadata)
-                .filter(([, v]) => v !== undefined && v !== null && v !== '')
-                .map(([k, v]) => `${k}=${typeof v === 'object' ? JSON.stringify(v) : String(v)}`)
-                .join(', ');
-              return `  - [${obs.severity.toUpperCase()}] ${obs.description} (type=${
-                obs.type
-              }, signal_strength=${obs.score}/100${metaEntries ? `, ${metaEntries}` : ''})`;
-            });
+const formatRelatedEntities = (entity: ScoredEntity): string => {
+  if (entity.topRelatedEntities.length === 0) return '';
+  const lines = entity.topRelatedEntities.map((r) => `  - ${formatRelatedEntity(r)}`).join('\n');
+  const omitted = formatOmittedRelatedEntityCounts(
+    entity.topRelatedEntities,
+    entity.relatedEntityCounts
+  );
+  return `  Related entities:\n${lines}${omitted ? `\n  (not shown: ${omitted})` : ''}`;
+};
+
+const formatLeadsPayload = (
+  entities: ReadonlyArray<ScoredEntity>,
+  cohort?: CohortContext
+): string => {
+  return entities
+    .map((entity, i) => {
+      const entityLine = formatEntityLine(entity);
+
+      const obsLines = entity.observations
+        .map((obs) => {
+          const metaEntries = Object.entries(obs.metadata)
+            .filter(([, v]) => v !== undefined && v !== null && v !== '')
+            .map(([k, v]) => `${k}=${typeof v === 'object' ? JSON.stringify(v) : String(v)}`)
+            .join(', ');
+          return `  - [${obs.severity.toUpperCase()}] ${obs.description} (type=${
+            obs.type
+          }, signal_strength=${obs.score}/100${metaEntries ? `, ${metaEntries}` : ''})`;
         })
         .join('\n');
 
-      const header =
-        group.length > 1
-          ? `### Lead ${i + 1} — Campaign (${group.length} entities)`
-          : `### Lead ${i + 1} — Single entity`;
-      const riskEscalation = formatRiskEscalation(group);
-      const peerContext = formatPeerContext(group, cohort);
-      return [header, entityLines, obsLines, riskEscalation, peerContext]
+      const header = `### Lead ${i + 1}`;
+      const riskEscalation = formatRiskEscalation(entity);
+      const peerContext = formatPeerContext(entity, cohort);
+      const relatedEntities = formatRelatedEntities(entity);
+      const promotionReason = formatPromotionReason(entity);
+      return [
+        header,
+        entityLine,
+        obsLines,
+        riskEscalation,
+        peerContext,
+        relatedEntities,
+        promotionReason,
+      ]
         .filter(Boolean)
         .join('\n');
     })
@@ -167,25 +190,27 @@ const formatLeadsPayload = (groups: ScoredEntityInput[][], cohort?: CohortContex
 
 /**
  * Use an LLM to synthesize content for all leads in a single batch call.
- * Returns results in the same order as the input groups.
+ * Returns results in the same order as the input entities.
  * Throws on failure — the caller should surface the error.
  */
 export const llmSynthesizeBatch = async (
   chatModel: InferenceChatModel,
-  groups: ScoredEntityInput[][],
+  entities: ReadonlyArray<ScoredEntity>,
   logger: Logger,
   cohort?: CohortContext
 ): Promise<LlmSynthesisResult[]> => {
-  if (groups.length === 0) return [];
+  if (entities.length === 0) return [];
 
-  const leadsPayload = formatLeadsPayload(groups, cohort);
+  const leadsPayload = formatLeadsPayload(entities, cohort);
   const jsonParser = new JsonOutputParser<LlmSynthesisResult[]>();
   const chain = batchSynthesisPrompt.pipe(chatModel).pipe(jsonParser);
 
-  logger.info(`[LeadGenerationEngine] Invoking LLM for batch synthesis of ${groups.length} leads`);
+  logger.info(
+    `[LeadGenerationEngine] Invoking LLM for batch synthesis of ${entities.length} leads`
+  );
 
   const results = await chain.invoke({
-    lead_count: String(groups.length),
+    lead_count: String(entities.length),
     leads_payload: leadsPayload,
   });
 
@@ -195,11 +220,11 @@ export const llmSynthesizeBatch = async (
     } results returned`
   );
 
-  if (!Array.isArray(results) || results.length !== groups.length) {
+  if (!Array.isArray(results) || results.length !== entities.length) {
     throw new Error(
       `LLM batch synthesis returned ${
         Array.isArray(results) ? results.length : typeof results
-      } items, expected ${groups.length}`
+      } items, expected ${entities.length}`
     );
   }
 
@@ -248,4 +273,6 @@ const stripMarkdown = (text: string): string =>
 export const __testables = {
   formatLeadsPayload,
   formatRiskEscalation,
+  formatRelatedEntities,
+  formatPromotionReason,
 };

@@ -22,7 +22,7 @@ import { SOURCE_NODE_TYPE, type SourceNode, type SourceNodeData } from './types'
  */
 export const BULK_SOURCE_SUBTITLE = '_bulk';
 
-const SOURCE_ICON_TYPE: IconType = 'push';
+const SOURCE_ICON_TYPE: IconType = 'send';
 
 /** Stable React Flow node id for a stream's inferred source. */
 export const getSourceNodeId = (definition: Streams.ClassicStream.Definition): string =>

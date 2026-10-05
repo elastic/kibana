@@ -32,6 +32,14 @@ jest.mock('../connectors_cache', () => ({
       type: 'no_id_connector',
       hasConnectorId: undefined,
     },
+    {
+      type: 'security.setAttackStatus',
+      hasConnectorId: undefined,
+    },
+    {
+      type: 'custom.typed',
+      hasConnectorId: undefined,
+    },
   ]),
 }));
 
@@ -60,6 +68,20 @@ jest.mock('../get_required_params_for_connector', () => ({
     }
     if (connectorType === 'no_id_connector') {
       return [{ name: 'body', defaultValue: '{}' }];
+    }
+    if (connectorType === 'security.setAttackStatus') {
+      // Mirrors what the real getRequiredParamsForConnector now derives from a discriminated union.
+      return [
+        { name: 'ids', example: [''] },
+        { name: 'status', example: 'closed' },
+      ];
+    }
+    if (connectorType === 'custom.typed') {
+      // What the real getRequiredParamsForConnector derives for `z.number()` / `z.boolean()` fields.
+      return [
+        { name: 'count', example: 0 },
+        { name: 'enabled', example: false },
+      ];
     }
     if (connectorType === 'cases.addAttachments') {
       return [
@@ -133,6 +155,32 @@ describe('generateConnectorSnippet', () => {
     });
   });
 
+  describe('union-schema steps (typed placeholders)', () => {
+    it('should populate the with block with the union step params instead of the placeholder comment', () => {
+      const result = generateConnectorSnippet('security.setAttackStatus', {
+        full: true,
+        withStepsSection: false,
+      });
+      expect(result).not.toContain('# Add parameters here');
+    });
+
+    it('should render the discriminator enum/literal value', () => {
+      const result = generateConnectorSnippet('security.setAttackStatus', {
+        full: true,
+        withStepsSection: false,
+      });
+      expect(result).toContain('status: closed');
+    });
+
+    it('should render an array placeholder for the ids field', () => {
+      const result = generateConnectorSnippet('security.setAttackStatus', {
+        full: true,
+        withStepsSection: false,
+      });
+      expect(result).toContain('ids:');
+    });
+  });
+
   describe('non-full snippet (type value only)', () => {
     it('should return type value and parameters when full is false', () => {
       const result = generateConnectorSnippet('slack', { full: false, withStepsSection: false });
@@ -166,6 +214,17 @@ describe('generateConnectorSnippet', () => {
         withStepsSection: false,
       });
       expect(result).toContain('body: "{}"');
+    });
+  });
+
+  describe('falsy param placeholders', () => {
+    it('should keep 0 and false placeholders instead of falling back to an empty string', () => {
+      const result = generateConnectorSnippet('custom.typed', {
+        full: true,
+        withStepsSection: false,
+      });
+      expect(result).toContain('count: 0');
+      expect(result).toContain('enabled: false');
     });
   });
 

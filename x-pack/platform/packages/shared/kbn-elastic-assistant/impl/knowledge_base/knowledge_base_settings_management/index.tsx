@@ -30,7 +30,7 @@ import type {
 import { DocumentEntryType, IndexEntryType } from '@kbn/elastic-assistant-common';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import useAsync from 'react-use/lib/useAsync';
-import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useSearchParams } from '@kbn/shared-ux-router';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { CANCEL_BUTTON_TEXT } from '../../assistant/settings/settings_context_menu/translations';
 import { useKnowledgeBaseUpdater } from '../../assistant/settings/use_settings_updater/use_knowledge_base_updater';

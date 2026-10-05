@@ -20,7 +20,6 @@ export function page<
   children,
   title,
   searchBar,
-  showServiceGroupSaveButton = false,
   params,
 }: {
   path: TPath;
@@ -28,7 +27,6 @@ export function page<
   children?: TChildren;
   title: string;
   searchBar?: React.ReactNode;
-  showServiceGroupSaveButton?: boolean;
   params?: TParams;
 }): Record<
   TPath,
@@ -41,11 +39,7 @@ export function page<
     [path]: {
       element: (
         <Breadcrumb title={title} href={path} omitOnServerless>
-          <ApmMainTemplate
-            pageTitle={title}
-            searchBar={searchBar}
-            showServiceGroupSaveButton={showServiceGroupSaveButton}
-          >
+          <ApmMainTemplate header={{ title }} searchBar={searchBar}>
             {element}
           </ApmMainTemplate>
         </Breadcrumb>

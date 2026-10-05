@@ -6,7 +6,6 @@
  */
 
 import type { SavedObjectError } from '@kbn/core/types';
-import type { KueryNode } from '@kbn/es-query';
 import type { ActionPolicySavedObjectAttributes } from '../../../saved_objects';
 
 export type ActionPolicySavedObjectBulkGetItem =
@@ -59,7 +58,7 @@ export interface ActionPolicySavedObjectServiceContract {
     page: number;
     perPage: number;
     search?: string;
-    filter?: KueryNode;
+    filter?: string;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
   }): Promise<{
@@ -70,5 +69,4 @@ export interface ActionPolicySavedObjectServiceContract {
     }>;
     total: number;
   }>;
-  getDistinctTags(params?: { search?: string }): Promise<string[]>;
 }

@@ -10,7 +10,14 @@
 import { BehaviorSubject, Subject } from 'rxjs';
 import { waitFor } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
+import {
+  dataViewMock,
+  esHitsMockWithSort,
+  buildDataViewMock,
+} from '@kbn/discover-utils/src/__mocks__';
+import { DataViewSource } from '@kbn/data-source';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { createDiscoverServicesMock, discoverServiceMock } from '../../../__mocks__/services';
 import { FetchStatus } from '../../types';
 import type { DataDocuments$ } from './discover_data_state_container';
@@ -20,6 +27,7 @@ import {
   initializeDataStateInDiscoverStateMock,
 } from '../../../__mocks__/discover_state.mock';
 import { fetchDocuments } from '../data_fetching/fetch_documents';
+import { fetchEsql } from '../data_fetching/fetch_esql';
 import {
   DEFAULT_TAB_STATE,
   createTabItem,
@@ -30,6 +38,7 @@ import {
 } from './redux';
 import { PROFILE_STATE_URL_KEY } from '../../../../common/constants';
 import { TEST_PROFILE_STATE_DEF } from '../../../context_awareness/__mocks__/profile_state';
+import * as resolveEsqlSourceModule from '../data_fetching/resolve_esql_source';
 
 jest.mock('../data_fetching/fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue({ records: [] }),
@@ -44,10 +53,12 @@ jest.mock('@kbn/ebt-tools', () => ({
 }));
 
 const mockFetchDocuments = jest.mocked(fetchDocuments);
+const mockFetchEsql = jest.mocked(fetchEsql);
 
 describe('test getDataStateContainer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockFetchDocuments.mockResolvedValue({ records: [] });
   });
 
   test('return is valid', async () => {
@@ -58,6 +69,80 @@ describe('test getDataStateContainer', () => {
     expect(dataState.data$.main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
     expect(dataState.data$.documents$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
     expect(dataState.data$.totalHits$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
+  });
+
+  test('fetch clears skipInitialFetch so later query switches do not return to the empty state', async () => {
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    const tabId = stateContainer.getCurrentTab().id;
+
+    stateContainer.internalState.dispatch(
+      internalStateActions.setSkipInitialFetch({ tabId, skipInitialFetch: true })
+    );
+    expect(stateContainer.getCurrentTab().skipInitialFetch).toBe(true);
+
+    const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
+    await dataState.fetch();
+
+    expect(stateContainer.getCurrentTab().skipInitialFetch).toBe(false);
+  });
+
+  test('fetch does not run or clear skipInitialFetch for an empty ES|QL query', async () => {
+    const toolkit = getDiscoverInternalStateMock();
+    await toolkit.initializeTabs();
+    const tabId = toolkit.getCurrentTab().id;
+
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.updateAppState)({
+        appState: { query: { esql: '' } },
+      })
+    );
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.setSkipInitialFetch)({
+        skipInitialFetch: true,
+      })
+    );
+
+    const { dataStateContainer } = await toolkit.initializeSingleTab({
+      tabId,
+      skipWaitForDataFetching: true,
+    });
+    await dataStateContainer.fetch();
+
+    expect(toolkit.getCurrentTab().skipInitialFetch).toBe(true);
+    expect(mockFetchEsql).not.toHaveBeenCalled();
+    expect(mockFetchDocuments).not.toHaveBeenCalled();
+  });
+
+  test('timefilter-triggered refetch does not search an empty ES|QL query', async () => {
+    const toolkit = getDiscoverInternalStateMock();
+    await toolkit.initializeTabs();
+    const tabId = toolkit.getCurrentTab().id;
+
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.updateAppState)({
+        appState: { query: { esql: '' } },
+      })
+    );
+
+    jest.spyOn(toolkit.searchSessionManager, 'getNextSearchSessionId');
+
+    const { dataStateContainer } = await toolkit.initializeSingleTab({
+      tabId,
+      skipWaitForDataFetching: true,
+    });
+    expect(dataStateContainer.data$.main$.getValue().fetchStatus).toBe(FetchStatus.UNINITIALIZED);
+
+    const unsubscribe = dataStateContainer.subscribe();
+    dataStateContainer.refetch$.next(undefined);
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    expect(toolkit.searchSessionManager.getNextSearchSessionId).not.toHaveBeenCalled();
+    expect(mockFetchEsql).not.toHaveBeenCalled();
+    expect(mockFetchDocuments).not.toHaveBeenCalled();
+    expect(dataStateContainer.data$.main$.getValue().fetchStatus).toBe(FetchStatus.UNINITIALIZED);
+
+    unsubscribe();
   });
 
   test('refetch$ triggers a search', async () => {
@@ -112,6 +197,93 @@ describe('test getDataStateContainer', () => {
     ).toHaveBeenCalled();
 
     unsubscribe();
+  });
+
+  test('restores EsqlSource from the registry on fetch without resolveEsqlSource', async () => {
+    const services = createDiscoverServicesMock();
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true, services });
+    const shim = buildDataViewMock({
+      id: 'esql-from-logs',
+      title: 'logs-*',
+      type: ESQL_TYPE,
+      timeFieldName: '@timestamp',
+      isPersisted: false,
+    });
+    const esqlSource = createMockEsqlSource([], [], '@timestamp', 'FROM logs-*');
+    (esqlSource as { id: string }).id = 'esql-from-logs';
+    services.dataSourceService.registerEsqlSource(esqlSource);
+
+    const { currentDataView$, currentDataSource$ } = selectTabRuntimeState(
+      stateContainer.runtimeStateManager,
+      stateContainer.getCurrentTab().id
+    );
+    currentDataView$.next(shim);
+    currentDataSource$.next(new DataViewSource(shim));
+
+    const resolveSpy = jest.spyOn(resolveEsqlSourceModule, 'resolveEsqlSource');
+    services.data.query.timefilter.timefilter.getTime = jest.fn(() => {
+      return { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
+    });
+    const dataState = initializeDataStateInDiscoverStateMock(stateContainer, services);
+    const unsubscribe = dataState.subscribe();
+
+    dataState.refetch$.next(undefined);
+    await waitFor(() => {
+      expect(dataState.data$.main$.value.fetchStatus).toBe('complete');
+    });
+
+    expect(currentDataSource$.getValue()).toBe(esqlSource);
+    expect(resolveSpy).not.toHaveBeenCalled();
+
+    unsubscribe();
+    resolveSpy.mockRestore();
+  });
+
+  test('does not reset warning callout dismiss on fetch more', async () => {
+    const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
+
+    const toolkit = getDiscoverInternalStateMock();
+    await toolkit.initializeTabs();
+    const { dataStateContainer } = await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+    });
+
+    dataStateContainer.data$.documents$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: records.slice(0, 2),
+    });
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.setIsWarningCalloutDismissed)({
+        isWarningCalloutDismissed: true,
+      })
+    );
+
+    mockFetchDocuments.mockResolvedValue({ records: records.slice(2) });
+    dataStateContainer.refetch$.next('fetch_more');
+
+    await waitFor(() => {
+      expect(dataStateContainer.data$.documents$.value.result).toEqual(records);
+    });
+    expect(toolkit.getCurrentTab().isWarningCalloutDismissed).toBe(true);
+  });
+
+  test('resets warning callout dismiss when a new fetch completes', async () => {
+    const toolkit = getDiscoverInternalStateMock();
+    await toolkit.initializeTabs();
+    const { dataStateContainer } = await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+    });
+
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.setIsWarningCalloutDismissed)({
+        isWarningCalloutDismissed: true,
+      })
+    );
+    dataStateContainer.refetch$.next(undefined);
+
+    await waitFor(() => {
+      expect(toolkit.getCurrentTab().isWarningCalloutDismissed).toBe(false);
+    });
   });
 
   test('refetch$ clears stale profile URL state when the resolved profile has no URL state', async () => {
@@ -291,7 +463,7 @@ describe('test getDataStateContainer', () => {
     dataState.refetch$.next('fetch_more');
   });
 
-  describe('default profile state', () => {
+  describe('profile app state defaults', () => {
     it('should populate snapshotsByProfileId when the data source profile changes', async () => {
       const toolkit = getDiscoverInternalStateMock();
 
@@ -331,7 +503,7 @@ describe('test getDataStateContainer', () => {
         })
       );
       toolkit.internalState.dispatch(
-        internalStateActions.setProfileStateFieldsToReset({
+        internalStateActions.setProfileAppStateDefaultFieldsToReset({
           tabId,
           fieldsToReset: ['columns', 'rowHeight'],
         })
@@ -340,8 +512,8 @@ describe('test getDataStateContainer', () => {
       await waitFor(() => {
         const currentTab = toolkit.getCurrentTab();
 
-        expect(currentTab.defaultProfileState.fieldsToReset).toEqual(['columns', 'rowHeight']);
-        expect(currentTab.defaultProfileState.snapshotsByProfileId[previousProfileId]).toEqual({
+        expect(currentTab.profileAppStateDefaults.fieldsToReset).toEqual(['columns', 'rowHeight']);
+        expect(currentTab.profileAppStateDefaults.snapshotsByProfileId[previousProfileId]).toEqual({
           columns: ['custom_column'],
           rowHeight: 5,
           breakdownField: 'extension',
@@ -352,7 +524,7 @@ describe('test getDataStateContainer', () => {
       fetchDocumentsDeferred.resolve({ records: [] });
     });
 
-    it('should restore previous state without applying default profile state for a previously resolved profile', async () => {
+    it('should restore previous state without applying profile app state defaults for a previously resolved profile', async () => {
       const toolkit = getDiscoverInternalStateMock();
 
       await toolkit.initializeTabs();
@@ -404,7 +576,7 @@ describe('test getDataStateContainer', () => {
         })
       );
       toolkit.internalState.dispatch(
-        internalStateActions.setProfileStateFieldsToReset({
+        internalStateActions.setProfileAppStateDefaultFieldsToReset({
           tabId,
           fieldsToReset: ['columns', 'rowHeight', 'breakdownField', 'hideChart'],
         })
@@ -456,7 +628,7 @@ describe('test getDataStateContainer', () => {
       });
     });
 
-    it('should restore previous profile state on a profile switch even when fieldsToReset has been cleared to "none"', async () => {
+    it('should restore previous profile app state snapshot on a profile switch even when fieldsToReset has been cleared to "none"', async () => {
       // Returning to a previously-visited profile must restore its saved
       // snapshot even when the reset flag was already cleared to 'none' by an earlier fetch.
       const toolkit = getDiscoverInternalStateMock();
@@ -532,7 +704,7 @@ describe('test getDataStateContainer', () => {
 
       // Simulate fieldsToReset set to 'none
       toolkit.internalState.dispatch(
-        internalStateActions.setProfileStateFieldsToReset({
+        internalStateActions.setProfileAppStateDefaultFieldsToReset({
           tabId,
           fieldsToReset: 'none',
         })
@@ -560,7 +732,7 @@ describe('test getDataStateContainer', () => {
       });
     });
 
-    it('should apply default profile state when switching to a new profile after fieldsToReset has been cleared to "none"', async () => {
+    it('should apply profile app state defaults when switching to a new profile after fieldsToReset has been cleared to "none"', async () => {
       const toolkit = getDiscoverInternalStateMock();
 
       await toolkit.initializeTabs();
@@ -630,7 +802,7 @@ describe('test getDataStateContainer', () => {
         })
       );
       toolkit.internalState.dispatch(
-        internalStateActions.setProfileStateFieldsToReset({
+        internalStateActions.setProfileAppStateDefaultFieldsToReset({
           tabId,
           fieldsToReset: 'none',
         })
@@ -646,7 +818,7 @@ describe('test getDataStateContainer', () => {
       fetchDocumentsDeferred.resolve({ records: [] });
       await toolkit.waitForDataFetching({ tabId });
 
-      expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
+      expect(toolkit.getCurrentTab().profileAppStateDefaults.fieldsToReset).toEqual('none');
       expect(toolkit.getCurrentTab().appState.columns).toEqual(['message', 'extension']);
       expect(toolkit.getCurrentTab().appState.rowHeight).toBe(3);
       expect(toolkit.getCurrentTab().appState.breakdownField).toBe('extension');
@@ -654,7 +826,7 @@ describe('test getDataStateContainer', () => {
       expect(toolkit.getCurrentTab().appState.hideTable).toBe(false);
     });
 
-    it('should update app state from default profile state', async () => {
+    it('should update app state from profile app state defaults', async () => {
       mockFetchDocuments.mockResolvedValue({ records: [] });
       const stateContainer = getDiscoverStateMock({ isTimeBased: true });
       const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
@@ -674,7 +846,9 @@ describe('test getDataStateContainer', () => {
         })
       );
       stateContainer.internalState.dispatch(
-        stateContainer.injectCurrentTab(internalStateActions.setProfileStateFieldsToReset)({
+        stateContainer.injectCurrentTab(
+          internalStateActions.setProfileAppStateDefaultFieldsToReset
+        )({
           fieldsToReset: ['columns', 'rowHeight', 'breakdownField'],
         })
       );
@@ -688,7 +862,7 @@ describe('test getDataStateContainer', () => {
       await waitFor(() => {
         expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
       });
-      expect(stateContainer.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
+      expect(stateContainer.getCurrentTab().profileAppStateDefaults.fieldsToReset).toEqual('none');
       expect(stateContainer.getCurrentTab().appState.columns).toEqual(['message', 'extension']);
       expect(stateContainer.getCurrentTab().appState.rowHeight).toEqual(3);
       dataUnsub();
@@ -751,7 +925,7 @@ describe('test getDataStateContainer', () => {
         })
       );
       toolkit.internalState.dispatch(
-        internalStateActions.setProfileStateFieldsToReset({
+        internalStateActions.setProfileAppStateDefaultFieldsToReset({
           tabId,
           fieldsToReset: 'none',
         })
@@ -771,14 +945,14 @@ describe('test getDataStateContainer', () => {
       fetchDocumentsDeferred.resolve({ records: [] });
       await toolkit.waitForDataFetching({ tabId });
 
-      expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
+      expect(toolkit.getCurrentTab().profileAppStateDefaults.fieldsToReset).toEqual('none');
       expect(toolkit.getCurrentTab().appState.columns).toEqual(['default_column']);
       expect(toolkit.getCurrentTab().appState.hideChart).toBe(true);
       expect(toolkit.getCurrentTab().appState.hideTable).toBe(false);
       expect(toolkit.getCurrentTab().appState.rowHeight).toBeUndefined();
     });
 
-    it('should not update app state from default profile state', async () => {
+    it('should not update app state from profile app state defaults', async () => {
       const stateContainer = getDiscoverStateMock({ isTimeBased: true });
       const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
       const dataUnsub = dataState.subscribe();
@@ -797,7 +971,9 @@ describe('test getDataStateContainer', () => {
         })
       );
       stateContainer.internalState.dispatch(
-        stateContainer.injectCurrentTab(internalStateActions.setProfileStateFieldsToReset)({
+        stateContainer.injectCurrentTab(
+          internalStateActions.setProfileAppStateDefaultFieldsToReset
+        )({
           fieldsToReset: 'none',
         })
       );
@@ -809,7 +985,7 @@ describe('test getDataStateContainer', () => {
       await waitFor(() => {
         expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
       });
-      expect(stateContainer.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
+      expect(stateContainer.getCurrentTab().profileAppStateDefaults.fieldsToReset).toEqual('none');
       expect(stateContainer.getCurrentTab().appState.columns).toEqual(['default_column']);
       expect(stateContainer.getCurrentTab().appState.rowHeight).toBeUndefined();
       dataUnsub();

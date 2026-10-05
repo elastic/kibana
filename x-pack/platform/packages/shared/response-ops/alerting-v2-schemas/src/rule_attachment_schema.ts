@@ -9,27 +9,46 @@ import type { z } from '@kbn/zod/v4';
 import { optionalWithDescription as opt } from './common';
 import { ruleResponseSchema } from './rule_data_schema';
 
-export const RULE_ATTACHMENT_TYPE = 'rule' as const;
-export const RULE_SML_TYPE = 'alerting_v2_rule' as const;
+export const RULE_ATTACHMENT_TYPE = 'platform.alerting.rule' as const;
 
 /**
  * Data stored inside a rule attachment.
  *
- * Server-generated fields (id, enabled, createdBy, createdAt, updatedBy, updatedAt, metadata.version)
- * are optional so that the same schema covers both:
+ * Server-generated fields (id, enabled, created_at, updated_at) are optional so
+ * that the same schema covers both:
  *   - proposed rules (by-value, not yet saved — no id or audit fields)
  *   - saved rules    (by-reference, linked via attachment.origin = rule saved object id)
+ *
+ * The `created_by` / `updated_by` actors are excluded entirely: nothing on the
+ * attachment side reads them, and we don't want per-user identity baked into a
+ * conversation attachment. The timestamps stay because staleness detection
+ * compares `updated_at` against the snapshot.
+ *
+ * `version` is excluded for the same reason — nothing here reads the counter —
+ * and declaring it would break older attachments: they captured the whole
+ * `RuleResponse` back when `version` was the saved-object OCC token, so the
+ * stored value is a string. A declared-but-mistyped key is a parse error,
+ * whereas an undeclared one is stripped.
+ *
+ * `.strip()` undoes the `.strict()` inherited from the create-rule base schema,
+ * making this a projection rather than a validator: callers hand over a whole
+ * `RuleResponse` and the actors are dropped instead of raising
+ * `unrecognized_keys`. It also lets attachments stored before the actors,
+ * `metadata.owner` and `metadata.version` were removed still resolve. Unlike the
+ * strictness itself, `.strip()` does not cascade, so the nested metadata needs
+ * its own.
  */
 const { shape } = ruleResponseSchema;
 
-export const ruleAttachmentDataSchema = ruleResponseSchema.extend({
-  id: opt(shape.id),
-  enabled: opt(shape.enabled),
-  createdBy: opt(shape.createdBy),
-  createdAt: opt(shape.createdAt),
-  updatedBy: opt(shape.updatedBy),
-  updatedAt: opt(shape.updatedAt),
-  metadata: shape.metadata.extend({ version: opt(shape.metadata.shape.version) }),
-});
+export const ruleAttachmentDataSchema = ruleResponseSchema
+  .omit({ created_by: true, updated_by: true, version: true })
+  .extend({
+    id: opt(shape.id),
+    enabled: opt(shape.enabled),
+    created_at: opt(shape.created_at),
+    updated_at: opt(shape.updated_at),
+    metadata: shape.metadata.strip(),
+  })
+  .strip();
 
 export type RuleAttachmentData = z.infer<typeof ruleAttachmentDataSchema>;

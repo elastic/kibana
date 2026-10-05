@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { TLSParamsType } from '../zod/alerts';
 
-// This should be replaced by TLSParams from @kbn/response-ops-rule-params
-export const TLSParamsType = t.partial({
-  search: t.string,
-  certAgeThreshold: t.number,
-  certExpirationThreshold: t.number,
-});
+export { TLSParamsType };

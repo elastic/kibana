@@ -1,8 +1,7 @@
 {
-  "sha1": "8433a06bd534bed01093b01ff001b3af14592268",
+  "sha1": "e14b2d4140a938177c7dad676d750e71306f10ce",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -12,8 +11,50 @@
       "tags": [],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 10,
-        "column": 16
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "d6a5596416886d5-5d87a4be1a90011",
+      "title": "serverless security dashboard-only landing redirects a dashboard-only user from Get started to dashboards",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/dashboard_only_landing.spec.ts",
+        "line": 62,
+        "column": 40
+      }
+    },
+    {
+      "id": "d6a5596416886d5-b44a816d587963f",
+      "title": "serverless security dashboard-only landing redirects a discover-only user from Get started to discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/dashboard_only_landing.spec.ts",
+        "line": 69,
+        "column": 72
+      }
+    },
+    {
+      "id": "d6a5596416886d5-f0e222dae35a6ef",
+      "title": "serverless security dashboard-only landing keeps a privileged user on Get started",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/dashboard_only_landing.spec.ts",
+        "line": 73,
+        "column": 25
       }
     },
     {
@@ -26,8 +67,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/navigation_destinations.spec.ts",
-        "line": 15,
-        "column": 14
+        "line": 14,
+        "column": 9
       }
     },
     {
@@ -40,13 +81,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/navigation_destinations.spec.ts",
-        "line": 70,
-        "column": 14
+        "line": 51,
+        "column": 29
       }
     },
     {
-      "id": "b760102fdea7e93-8fde21219c56e4f",
-      "title": "serverless security navigation security serverless side nav, breadcrumbs, Launchpad panel, and active nav highlight",
+      "id": "b760102fdea7e93-de1b1b33189da0f",
+      "title": "serverless security navigation security serverless navigation, Launchpad panel, and active nav highlight",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-security_complete",
@@ -54,8 +95,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/navigation.spec.ts",
-        "line": 22,
-        "column": 14
+        "line": 18,
+        "column": 51
       }
     },
     {
@@ -68,8 +109,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/navigation.spec.ts",
-        "line": 71,
-        "column": 14
+        "line": 46,
+        "column": 15
       }
     }
   ]

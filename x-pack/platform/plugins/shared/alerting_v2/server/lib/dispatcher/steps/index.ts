@@ -9,6 +9,7 @@ export { WaitForResourcesStep } from './wait_for_resources_step';
 export { FetchEpisodesStep } from './fetch_episodes_step';
 export { FetchSuppressionsStep } from './fetch_suppressions_step';
 export { ApplySuppressionStep } from './apply_suppression_step';
+export { HydrateEpisodeDataStep } from './hydrate_episode_data_step';
 export { ApplyMaintenanceWindowStep } from './apply_maintenance_window_step';
 export { FetchRulesStep } from './fetch_rules_step';
 export { FetchPoliciesStep } from './fetch_policies_step';

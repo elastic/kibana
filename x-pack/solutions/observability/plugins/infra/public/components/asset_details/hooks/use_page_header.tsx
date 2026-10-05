@@ -11,6 +11,7 @@ import {
   type EuiBreadcrumbsProps,
   type EuiPageHeaderProps,
 } from '@elastic/eui';
+import type { AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
@@ -33,10 +34,10 @@ type TabItem = NonNullable<Pick<EuiPageHeaderProps, 'tabs'>['tabs']>[number];
 
 export const usePageHeader = (tabs: Tab[] = [], links: LinkOptions[] = []) => {
   const { rightSideItems } = useRightSideItems(links);
-  const { tabEntries } = useTabs(tabs);
+  const { tabEntries, appHeaderTabs } = useTabs(tabs);
   const { breadcrumbs } = useTemplateHeaderBreadcrumbs();
 
-  return { rightSideItems, tabEntries, breadcrumbs };
+  return { rightSideItems, tabEntries, appHeaderTabs, breadcrumbs };
 };
 
 export const useTemplateHeaderBreadcrumbs = () => {
@@ -45,6 +46,7 @@ export const useTemplateHeaderBreadcrumbs = () => {
   const {
     services: {
       application: { navigateToApp },
+      chrome,
     },
   } = useKibanaContextForPlugin();
 
@@ -59,6 +61,11 @@ export const useTemplateHeaderBreadcrumbs = () => {
     }
     e.preventDefault();
   };
+
+  // The compatibility Back only renders when Chrome Next is active in the project layout.
+  if (chrome.getChromeStyle() === 'project') {
+    return { breadcrumbs: [] satisfies EuiBreadcrumbsProps['breadcrumbs'] };
+  }
 
   const breadcrumbs: EuiBreadcrumbsProps['breadcrumbs'] =
     // If there is a state object in location, it's persisted in case the page is opened in a new tab or after page refresh
@@ -178,5 +185,17 @@ const useTabs = (tabs: Tab[]) => {
     [activeTabId, isTabEnabled, onTabClick, tabs]
   );
 
-  return { tabEntries };
+  const appHeaderTabs: AppHeaderTab[] = useMemo(
+    () =>
+      tabs.filter(isTabEnabled).map(({ name, id }) => ({
+        id,
+        label: name,
+        isSelected: id === activeTabId,
+        onClick: () => onTabClick(id),
+        'data-test-subj': `infraAssetDetails${capitalize(id)}Tab`,
+      })),
+    [activeTabId, isTabEnabled, onTabClick, tabs]
+  );
+
+  return { tabEntries, appHeaderTabs };
 };

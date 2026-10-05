@@ -13,15 +13,24 @@ import type {
   BulkByIdsParams,
   BulkByQueryParams,
   BulkByQueryResult,
+  BulkCreateRulesParams,
+  BulkCreateRulesResponse,
   BulkResponse,
   CreateRuleData,
   DryRunResponse,
   FindRulesRequest,
   FindRulesResponse,
+  MatchRulesBody,
   RuleResponse,
   UpdateRuleData,
+  RuleTagsParams,
+  TagsResponse,
 } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_RULE_API_PATH } from '../constants';
+import {
+  ALERTING_V2_RULE_API_PATH,
+  ALERTING_V2_INTERNAL_RULE_API_PATH,
+  ALERTING_V2_INTERNAL_RULE_MATCH_API_PATH,
+} from '../constants';
 
 /**
  * Encodes the `id` path parameter safely. Wraps `buildPath` so a single call
@@ -33,15 +42,26 @@ const buildRulePath = (id: string): string =>
 /** Re-exported from the shared schemas package. */
 export type { RuleResponse as RuleApiResponse, FindRulesResponse };
 
-export type { BulkByIdsParams, BulkByQueryParams, BulkByQueryResult, BulkResponse, DryRunResponse };
+export type {
+  BulkByIdsParams,
+  BulkByQueryParams,
+  BulkByQueryResult,
+  BulkCreateRulesParams,
+  BulkCreateRulesResponse,
+  BulkResponse,
+  DryRunResponse,
+};
 
 @injectable()
 export class RulesApi {
   constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}
 
-  public async listTags(params: { filter?: string } = {}) {
-    return this.http.get<{ tags: string[] }>(`${ALERTING_V2_RULE_API_PATH}/_tags`, {
-      query: { filter: params.filter },
+  public async listTags(params: RuleTagsParams = {}): Promise<TagsResponse> {
+    return this.http.get<TagsResponse>(`${ALERTING_V2_INTERNAL_RULE_API_PATH}/tags`, {
+      query: {
+        search: params.search || undefined,
+        kind: params.kind || undefined,
+      },
     });
   }
 
@@ -51,9 +71,21 @@ export class RulesApi {
     });
   }
 
+  public async matchRules(body: MatchRulesBody = {}) {
+    return this.http.post<FindRulesResponse>(ALERTING_V2_INTERNAL_RULE_MATCH_API_PATH, {
+      body: JSON.stringify(body),
+    });
+  }
+
   public async createRule(payload: CreateRuleData) {
     return this.http.post<RuleResponse>(ALERTING_V2_RULE_API_PATH, {
       body: JSON.stringify(payload),
+    });
+  }
+
+  public async bulkCreateRules(params: BulkCreateRulesParams) {
+    return this.http.post<BulkCreateRulesResponse>(`${ALERTING_V2_RULE_API_PATH}/_bulk_create`, {
+      body: JSON.stringify(params),
     });
   }
 
@@ -78,15 +110,19 @@ export class RulesApi {
   }
 
   public async enableRule(id: string) {
-    return this.http.post<RuleResponse>(`${buildRulePath(id)}/_enable`);
+    return this.http.post<RuleResponse>(
+      buildPath(`${ALERTING_V2_RULE_API_PATH}/{id}/_enable`, { id })
+    );
   }
 
   public async disableRule(id: string) {
-    return this.http.post<RuleResponse>(`${buildRulePath(id)}/_disable`);
+    return this.http.post<RuleResponse>(
+      buildPath(`${ALERTING_V2_RULE_API_PATH}/{id}/_disable`, { id })
+    );
   }
 
   public async runRule(id: string) {
-    return this.http.post<void>(`${buildRulePath(id)}/_run`);
+    return this.http.post<void>(buildPath(`${ALERTING_V2_RULE_API_PATH}/{id}/_run`, { id }));
   }
 
   public async bulkDeleteRules(params: BulkByIdsParams) {
@@ -103,6 +139,12 @@ export class RulesApi {
 
   public async bulkDisableRules(params: BulkByIdsParams) {
     return this.http.post<BulkResponse>(`${ALERTING_V2_RULE_API_PATH}/_bulk_disable`, {
+      body: JSON.stringify(params),
+    });
+  }
+
+  public async bulkUpdateRuleApiKey(params: BulkByIdsParams) {
+    return this.http.post<BulkResponse>(`${ALERTING_V2_RULE_API_PATH}/_bulk_update_api_key`, {
       body: JSON.stringify(params),
     });
   }
@@ -135,5 +177,18 @@ export class RulesApi {
     return this.http.post<BulkByQueryResult>(`${ALERTING_V2_RULE_API_PATH}/_disable_by_query`, {
       body: JSON.stringify(params),
     });
+  }
+
+  public async updateRuleApiKeyByQuery(
+    params: BulkByQueryParams & { force: true }
+  ): Promise<BulkResponse>;
+  public async updateRuleApiKeyByQuery(params: BulkByQueryParams): Promise<BulkByQueryResult>;
+  public async updateRuleApiKeyByQuery(params: BulkByQueryParams): Promise<BulkByQueryResult> {
+    return this.http.post<BulkByQueryResult>(
+      `${ALERTING_V2_RULE_API_PATH}/_update_api_key_by_query`,
+      {
+        body: JSON.stringify(params),
+      }
+    );
   }
 }

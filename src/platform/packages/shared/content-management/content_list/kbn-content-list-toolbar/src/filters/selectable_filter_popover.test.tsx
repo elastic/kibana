@@ -138,6 +138,38 @@ describe('SelectableFilterPopover', () => {
     expect(screen.queryByText('1')).not.toBeInTheDocument();
   });
 
+  it('hides the search box when hideSearch is set', async () => {
+    render(
+      <SelectableFilterPopover
+        fieldName="tag"
+        title="Tags"
+        options={options}
+        hideSearch
+        renderOption={(option) => <span>{option.label}</span>}
+      />
+    );
+
+    fireEvent.click(screen.getByText('Tags'));
+
+    await screen.findByText('Production');
+    expect(screen.queryByRole('searchbox')).not.toBeInTheDocument();
+  });
+
+  it('shows the search box by default', async () => {
+    render(
+      <SelectableFilterPopover
+        fieldName="tag"
+        title="Tags"
+        options={options}
+        renderOption={(option) => <span>{option.label}</span>}
+      />
+    );
+
+    fireEvent.click(screen.getByText('Tags'));
+
+    expect(await screen.findByRole('searchbox')).toBeInTheDocument();
+  });
+
   it('uses the captured modifier key to add an exclude filter', async () => {
     const onChange = jest.fn();
 

@@ -16,8 +16,6 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
     '.scout/reports/scout-playwright-test-failures-*/**/*'
     '.scout/reports/scout-playwright-test-failures-*/scout-failures-*.ndjson'
     'target/junit/**/*'
-    'target/kibana-coverage/jest/**/*'
-    'target/kibana-coverage/functional/**/*'
     'target/kibana-*'
     'target/kibana-security-solution/**/*.png'
     'target/kibana-security-solution/**/management/**/*.mp4'
@@ -82,7 +80,7 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
 
   if [[ -d 'target/test_failures' ]]; then
     buildkite-agent artifact upload 'target/test_failures/**/*'
-    ts-node .buildkite/scripts/lifecycle/annotate_test_failures.ts
+    node .buildkite/scripts/lifecycle/annotate_test_failures.ts
   fi
 
   if [[ -d 'target/agent_diagnostics' ]]; then

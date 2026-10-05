@@ -9,11 +9,17 @@
 
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { internalStateActions, selectTabRuntimeState, selectTab } from '..';
 import { createDataViewDataSource } from '../../../../../../common/data_sources';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
-import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
+import {
+  dataViewMock,
+  dataViewMockWithTimeField,
+  buildDataViewMock,
+} from '@kbn/discover-utils/src/__mocks__';
 import { savedSearchMock } from '../../../../../__mocks__/saved_search';
 import {
   dataViewAdHoc,
@@ -71,6 +77,111 @@ const setup = async ({ dataView = dataViewMockWithTimeField }: { dataView?: Data
 describe('tab_state_data_view actions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('setDataView', () => {
+    it('keeps a registered EsqlSource instead of wrapping the shim as DataViewSource', async () => {
+      const { internalState, tabId, runtimeStateManager, services } = await setup();
+      const esqlSource = createMockEsqlSource([], [], '@timestamp', 'FROM logs-*');
+      (esqlSource as { id: string }).id = 'esql-from-logs';
+      services.dataSourceService.registerEsqlSource(esqlSource);
+
+      const shim = buildDataViewMock({
+        id: 'esql-from-logs',
+        title: 'logs-*',
+        type: ESQL_TYPE,
+        timeFieldName: '@timestamp',
+        isPersisted: false,
+      });
+
+      internalState.dispatch(
+        internalStateActions.setDataView({
+          tabId,
+          dataView: shim,
+        })
+      );
+
+      expect(selectTabRuntimeState(runtimeStateManager, tabId).currentDataSource$.getValue()).toBe(
+        esqlSource
+      );
+    });
+
+    it('reuses the existing DataViewSource when setDataView is called with the same DataView', async () => {
+      const { internalState, tabId, runtimeStateManager } = await setup();
+      const currentDataSource$ = selectTabRuntimeState(
+        runtimeStateManager,
+        tabId
+      ).currentDataSource$;
+      const existing = currentDataSource$.getValue();
+      const dataView = selectTabRuntimeState(
+        runtimeStateManager,
+        tabId
+      ).currentDataView$.getValue();
+
+      internalState.dispatch(
+        internalStateActions.setDataView({
+          tabId,
+          dataView: dataView!,
+        })
+      );
+
+      expect(currentDataSource$.getValue()).toBe(existing);
+    });
+
+    it('does not wrap an unregistered ES|QL shim as DataViewSource', async () => {
+      const { internalState, tabId, runtimeStateManager } = await setup();
+      const previous = selectTabRuntimeState(
+        runtimeStateManager,
+        tabId
+      ).currentDataSource$.getValue();
+
+      const shim = buildDataViewMock({
+        id: 'esql-unregistered',
+        title: 'logs-*',
+        type: ESQL_TYPE,
+        timeFieldName: '@timestamp',
+        isPersisted: false,
+      });
+
+      internalState.dispatch(
+        internalStateActions.setDataView({
+          tabId,
+          dataView: shim,
+        })
+      );
+
+      const next = selectTabRuntimeState(runtimeStateManager, tabId).currentDataSource$.getValue();
+      expect(next).toBe(previous);
+      expect(next?.id).not.toBe('esql-unregistered');
+    });
+
+    it('publishes a DataViewSource for an unregistered ES|QL shim when the tab has no source', async () => {
+      const { internalState, tabId, runtimeStateManager } = await setup();
+      const currentDataSource$ = selectTabRuntimeState(
+        runtimeStateManager,
+        tabId
+      ).currentDataSource$;
+      currentDataSource$.next(undefined);
+
+      const shim = buildDataViewMock({
+        id: 'esql-unregistered',
+        title: 'logs-*',
+        type: ESQL_TYPE,
+        timeFieldName: '@timestamp',
+        isPersisted: false,
+      });
+
+      internalState.dispatch(
+        internalStateActions.setDataView({
+          tabId,
+          dataView: shim,
+        })
+      );
+
+      const next = currentDataSource$.getValue();
+      expect(next?.kind).toBe('index-pattern');
+      expect(next?.id).toBe('esql-unregistered');
+    });
   });
 
   describe('assignNextDataView', () => {
@@ -164,8 +275,8 @@ describe('tab_state_data_view actions', () => {
         params.getCurrentTab().id
       );
       const previousSnapshot =
-        params.getCurrentTab().defaultProfileState.snapshotsByProfileId[profileId];
-      const previousResetId = params.getCurrentTab().defaultProfileState.resetId;
+        params.getCurrentTab().profileAppStateDefaults.snapshotsByProfileId[profileId];
+      const previousResetId = params.getCurrentTab().profileAppStateDefaults.resetId;
 
       await params.internalState.dispatch(
         params.injectCurrentTab(internalStateActions.changeDataView)({
@@ -173,9 +284,9 @@ describe('tab_state_data_view actions', () => {
         })
       );
 
-      expect(params.getCurrentTab().defaultProfileState.fieldsToReset).toBe('all');
-      expect(params.getCurrentTab().defaultProfileState.resetId).not.toBe(previousResetId);
-      expect(params.getCurrentTab().defaultProfileState.snapshotsByProfileId[profileId]).toBe(
+      expect(params.getCurrentTab().profileAppStateDefaults.fieldsToReset).toBe('all');
+      expect(params.getCurrentTab().profileAppStateDefaults.resetId).not.toBe(previousResetId);
+      expect(params.getCurrentTab().profileAppStateDefaults.snapshotsByProfileId[profileId]).toBe(
         previousSnapshot
       );
     });
@@ -214,15 +325,36 @@ describe('tab_state_data_view actions', () => {
       expect(params.getCurrentTab().isDataViewLoading).toBe(false);
     });
 
-    it('should call setProfileStateFieldsToReset correctly when switching data view', async () => {
+    it('should call setProfileAppStateDefaultFieldsToReset correctly when switching data view', async () => {
       const params = await setupTestParams(dataViewComplexMock);
-      expect(params.getCurrentTab().defaultProfileState.fieldsToReset).toBe('none');
+      expect(params.getCurrentTab().profileAppStateDefaults.fieldsToReset).toBe('none');
       await params.internalState.dispatch(
         params.injectCurrentTab(internalStateActions.changeDataView)({
           dataViewOrDataViewId: dataViewComplexMock.id!,
         })
       );
-      expect(params.getCurrentTab().defaultProfileState.fieldsToReset).toBe('all');
+      expect(params.getCurrentTab().profileAppStateDefaults.fieldsToReset).toBe('all');
+    });
+
+    it('should clear an unresolved expanded document reference when switching data view', async () => {
+      const params = await setupTestParams(dataViewComplexMock);
+      params.internalState.dispatch(
+        params.injectCurrentTab(internalStateActions.updateAppState)({
+          appState: { expandedDoc: { id: 'missing-document', index: 'missing-index' } },
+        })
+      );
+
+      expect(params.getCurrentTab().expandedDoc).toBeUndefined();
+      expect(params.getCurrentTab().appState.expandedDoc).toBeDefined();
+
+      await params.internalState.dispatch(
+        params.injectCurrentTab(internalStateActions.changeDataView)({
+          dataViewOrDataViewId: dataViewComplexMock.id!,
+        })
+      );
+
+      expect(params.getCurrentTab().expandedDoc).toBeUndefined();
+      expect(params.getCurrentTab().appState.expandedDoc).toBeUndefined();
     });
   });
 

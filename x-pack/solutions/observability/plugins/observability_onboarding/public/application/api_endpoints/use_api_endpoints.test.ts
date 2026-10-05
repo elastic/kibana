@@ -62,7 +62,7 @@ const setup = ({
     services: {
       context: { isServerless },
       featureFlags: {
-        getBooleanValue: jest.fn().mockImplementation((key: string) => {
+        useBooleanValue: jest.fn().mockImplementation((key: string) => {
           if (key === IS_VENDOR_ENDPOINTS_ENABLED) {
             return vendorEndpointsEnabled;
           }
@@ -212,7 +212,7 @@ describe('useApiEndpoints', () => {
     });
 
     expect(findEndpoint(result, 'prometheus')?.url).toBe(
-      'https://otlp.example.com:443/api/v1/write'
+      'https://otlp.example.com:443/inputs/prometheus-remote-write/_default_/api/v1/write'
     );
   });
 
@@ -239,7 +239,7 @@ describe('useApiEndpoints', () => {
     });
 
     expect(findEndpoint(result, 'prometheus')?.url).toBe(
-      'https://otlp.example.com:443/api/v1/write'
+      'https://otlp.example.com:443/inputs/prometheus-remote-write/_default_/api/v1/write'
     );
   });
 
@@ -275,7 +275,7 @@ describe('useApiEndpoints', () => {
       cardTitle: 'Supabase',
       fieldLabel: 'Supabase logs endpoint',
       logo: 'supabase',
-      url: 'https://otlp.example.com:443/supabase/v1/logs',
+      url: 'https://otlp.example.com:443/inputs/supabase/_default_/v1/logs',
     });
   });
 

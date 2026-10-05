@@ -20,7 +20,7 @@ import {
 import { i18n, i18nLoader } from '@kbn/i18n';
 
 import del from 'del';
-import globby from 'globby';
+import { globbySync } from 'globby';
 
 import type { Task } from '../lib';
 import { mkdirp, compressTar, copyAll, write } from '../lib';
@@ -38,7 +38,7 @@ export const CreateCdnAssets: Task = {
     await del(assets);
     await mkdirp(assets);
 
-    const plugins = globby.sync([`${buildSource}/node_modules/@kbn/**/*/kibana.jsonc`]);
+    const plugins = globbySync([`${buildSource}/node_modules/@kbn/**/*/kibana.jsonc`]);
 
     // translation files: discover every locale that any plugin or package
     // ships a translation file for, and bundle one CDN asset per locale.
@@ -96,18 +96,10 @@ export const CreateCdnAssets: Task = {
       resolve(buildSource, 'node_modules/@kbn/ui-shared-deps-src/shared_built_assets'),
       resolve(bundles, 'kbn-ui-shared-deps-src')
     );
-    // [rspack-transition] When the legacy optimizer is removed, delete the else branch.
-    if (process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1') {
-      // Rspack: all bundles (core + plugins) are in the unified output directory.
-      // Copy into the CDN bundles root so URLs like /bundles/kibana.bundle.js
-      // and /bundles/chunks/<hash>.js resolve correctly.
-      await copyAll(resolve(buildSource, 'target/public/bundles'), resolve(bundles));
-    } else {
-      await copyAll(
-        resolve(buildSource, 'node_modules/@kbn/core/target/public'),
-        resolve(bundles, 'core')
-      );
-    }
+    // All bundles (core + plugins) are in the unified output directory.
+    // Copy into the CDN bundles root so URLs like /bundles/kibana.bundle.js
+    // and /bundles/chunks/<hash>.js resolve correctly.
+    await copyAll(resolve(buildSource, 'target/public/bundles'), resolve(bundles));
     await copyAll(
       resolve(buildSource, 'node_modules/@kbn/monaco/target_workers'),
       resolve(bundles, 'kbn-monaco')
