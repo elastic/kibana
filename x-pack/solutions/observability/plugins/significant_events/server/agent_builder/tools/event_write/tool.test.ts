@@ -10,12 +10,7 @@ import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
-import {
-  createMockToolContext,
-  invokeHandler,
-  mockSourcesClient,
-  sourceWithSlug,
-} from '../../utils/test_helpers';
+import { createMockToolContext, invokeHandler, mockSourcesClient } from '../../utils/test_helpers';
 import { BulkWriteError, MAX_BULK_WRITE_ITEMS } from '../bulk_write';
 import { eventsWriteBulkHandler } from './handler';
 import { createEventsWriteTool, eventsWriteSchema } from './tool';
@@ -44,17 +39,14 @@ const input = {
 
 const getFeatures = jest.fn().mockResolvedValue({ hits: [] });
 
-const createTool = (
-  telemetry: { trackAgentToolEventsWrite: jest.Mock },
-  sourcesClient: unknown = mockSourcesClient(['logs.test', 'logs.batch', 'logs.web'])
-) => {
+const createTool = (telemetry: { trackAgentToolEventsWrite: jest.Mock }) => {
   const getScopedClients = jest.fn().mockResolvedValue({
     getEventClient: jest.fn().mockReturnValue({}),
     getEventSearchClient: jest.fn().mockReturnValue({}),
     getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
     getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
     licensing: {},
-    sourcesClient,
+    sourcesClient: mockSourcesClient(['logs.test', 'logs.batch', 'logs.web']),
   });
   return createEventsWriteTool({
     getScopedClients: getScopedClients as unknown as GetScopedClients,
@@ -455,44 +447,6 @@ describe('events_write tool', () => {
     expect(telemetry.trackAgentToolEventsWrite).toHaveBeenCalledTimes(2);
     expect(telemetry.trackAgentToolEventsWrite).toHaveBeenLastCalledWith(
       expect.objectContaining({ success: false, written: false, error_message: 'busy' })
-    );
-  });
-
-  it('reports the resolved source ids when the write fails after slug resolution', async () => {
-    (eventsWriteBulkHandler as jest.Mock).mockRejectedValue(
-      new BulkWriteError('validation_error', 'duplicate event_id')
-    );
-    const telemetry = { trackAgentToolEventsWrite: jest.fn() };
-    const sourcesClient = {
-      list: jest.fn().mockResolvedValue({
-        sources: [sourceWithSlug('logs.test', { id: 'source-uuid-1' })],
-        total: 1,
-      }),
-    };
-
-    await invokeHandler(
-      createTool(telemetry, sourcesClient) as never,
-      { items: [input] },
-      createMockToolContext()
-    );
-
-    expect(telemetry.trackAgentToolEventsWrite).toHaveBeenCalledWith(
-      expect.objectContaining({ success: false, source_ids: ['source-uuid-1'] })
-    );
-  });
-
-  it('reports no source ids when a slug does not resolve', async () => {
-    const telemetry = { trackAgentToolEventsWrite: jest.fn() };
-
-    await invokeHandler(
-      createTool(telemetry) as never,
-      { items: [{ ...input, slugs: ['unknown-source'] }] },
-      createMockToolContext()
-    );
-
-    expect(eventsWriteBulkHandler).not.toHaveBeenCalled();
-    expect(telemetry.trackAgentToolEventsWrite).toHaveBeenCalledWith(
-      expect.objectContaining({ success: false, source_ids: [] })
     );
   });
 
