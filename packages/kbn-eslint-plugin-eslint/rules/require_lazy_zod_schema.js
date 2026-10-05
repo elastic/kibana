@@ -148,9 +148,32 @@ const inspectZodChain = (node) => {
 };
 
 /**
+ * @typedef {{
+ *   zodNamespaces: Set<string>;
+ *   lazySchemaNames: Set<string>;
+ *   schemaBindings: Set<string>;
+ * }} FileState
+ */
+
+/**
+ * True when init is a Zod-namespace builder chain (`z.object`, `z.lazy`, ...).
+ * @param {Expression} init
+ * @param {FileState} state
+ * @returns {boolean}
+ */
+const isZodNamespaceChain = (init, state) => {
+  const { hasCall } = inspectZodChain(init);
+  if (!hasCall) {
+    return false;
+  }
+  const root = getChainRootIdentifier(init);
+  return Boolean(root && state.zodNamespaces.has(root.name));
+};
+
+/**
  * Root is a zod namespace and the first member is not `lazy`.
  * @param {Expression} init
- * @param {{ zodNamespaces: Set<string> }} state
+ * @param {FileState} state
  * @returns {boolean}
  */
 const isEagerZodNamespaceChain = (init, state) => {
@@ -160,6 +183,70 @@ const isEagerZodNamespaceChain = (init, state) => {
   }
   const root = getChainRootIdentifier(init);
   return Boolean(root && state.zodNamespaces.has(root.name));
+};
+
+/**
+ * True when init is `lazySchema(() => ...)` using a recorded lazySchema binding.
+ * @param {Expression} init
+ * @param {FileState} state
+ * @returns {boolean}
+ */
+const isLazySchemaCall = (init, state) => {
+  const unwrapped = unwrapExpression(init);
+  if (!unwrapped || unwrapped.type !== esTypes.CallExpression) {
+    return false;
+  }
+  const callee = unwrapExpression(unwrapped.callee);
+  if (
+    !callee ||
+    callee.type !== esTypes.Identifier ||
+    !state.lazySchemaNames.has(callee.name)
+  ) {
+    return false;
+  }
+  if (unwrapped.arguments.length !== 1) {
+    return false;
+  }
+  const [arg] = unwrapped.arguments;
+  return (
+    arg.type === esTypes.ArrowFunctionExpression || arg.type === esTypes.FunctionExpression
+  );
+};
+
+/**
+ * Root identifier is in schemaBindings and the chain has at least one call.
+ * @param {Expression} init
+ * @param {FileState} state
+ * @returns {boolean}
+ */
+const isEagerDerivedSchemaChain = (init, state) => {
+  if (isLazySchemaCall(init, state)) {
+    return false;
+  }
+  const { hasCall } = inspectZodChain(init);
+  if (!hasCall) {
+    return false;
+  }
+  const root = getChainRootIdentifier(init);
+  return Boolean(root && state.schemaBindings.has(root.name));
+};
+
+/**
+ * Adds declarator id name to schemaBindings when init is a Zod chain or a lazySchema call.
+ * @param {VariableDeclarator} node
+ * @param {FileState} state
+ */
+const recordSchemaBinding = (node, state) => {
+  if (node.id.type !== esTypes.Identifier || !node.init) {
+    return;
+  }
+  if (
+    isLazySchemaCall(node.init, state) ||
+    isZodNamespaceChain(node.init, state) ||
+    isEagerDerivedSchemaChain(node.init, state)
+  ) {
+    state.schemaBindings.add(node.id.name);
+  }
 };
 
 /**
@@ -204,27 +291,27 @@ module.exports = {
     messages: {
       eagerZodSchema:
         'Wrap module-scope Zod schemas in `lazySchema(() => ...)` so they are not materialized at import. See https://github.com/elastic/kibana/pull/294667.',
+      eagerDerivedZodSchema:
+        'Calling `.extend()` / `.optional()` / `.array()` / `.pick()` on a Zod schema at module scope retains the materialized schema. Wrap the derivation in `lazySchema(() => ...)` too. See https://github.com/elastic/kibana/pull/294667.',
     },
   },
 
   createOnce(context) {
-    /** @type {Set<string>} */
-    let zodNamespaces;
-    /** @type {Set<string>} */
-    let lazySchemaNames;
+    /** @type {FileState} */
+    let state;
     let sourceCode;
 
     return {
       before() {
-        zodNamespaces = new Set();
-        lazySchemaNames = new Set();
+        state = {
+          zodNamespaces: new Set(),
+          lazySchemaNames: new Set(),
+          schemaBindings: new Set(),
+        };
         sourceCode = context.sourceCode;
       },
       ImportDeclaration(node) {
-        recordImportBindings(/** @type {ImportDeclaration} */ (node), {
-          zodNamespaces,
-          lazySchemaNames,
-        });
+        recordImportBindings(/** @type {ImportDeclaration} */ (node), state);
       },
       VariableDeclarator(node) {
         const declarator = /** @type {VariableDeclarator} */ (node);
@@ -235,9 +322,19 @@ module.exports = {
         if (!isModuleScopeDeclarator(declarator, ancestors)) {
           return;
         }
-        if (isEagerZodNamespaceChain(declarator.init, { zodNamespaces })) {
-          context.report({ node: declarator.init, messageId: 'eagerZodSchema' });
+
+        if (isLazySchemaCall(declarator.init, state)) {
+          recordSchemaBinding(declarator, state);
+          return;
         }
+
+        if (isEagerZodNamespaceChain(declarator.init, state)) {
+          context.report({ node: declarator.init, messageId: 'eagerZodSchema' });
+        } else if (isEagerDerivedSchemaChain(declarator.init, state)) {
+          context.report({ node: declarator.init, messageId: 'eagerDerivedZodSchema' });
+        }
+
+        recordSchemaBinding(declarator, state);
       },
     };
   },

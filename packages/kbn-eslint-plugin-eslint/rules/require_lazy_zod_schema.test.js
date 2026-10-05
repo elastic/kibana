@@ -23,6 +23,7 @@ const ruleTester = new RuleTester({
 });
 
 const EAGER = { messageId: 'eagerZodSchema' };
+const DERIVED = { messageId: 'eagerDerivedZodSchema' };
 
 ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
   valid: [
@@ -93,6 +94,33 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
         export const X = z.object({});
       `,
     },
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const Base = lazySchema(() => z.object({}));
+        const useIt = () => Base.extend({});
+      `,
+    },
+    {
+      code: dedent`
+        import { z } from '@kbn/zod';
+        export const Ext = UnknownSchema.extend({ a: z.string() });
+      `,
+    },
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const Base = lazySchema(() => z.object({}));
+        export const Ext = lazySchema(() => Base.extend({ a: z.string() }));
+      `,
+    },
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const Base = lazySchema(() => z.object({}));
+        export const Alias = Base;
+      `,
+    },
   ],
 
   invalid: [
@@ -158,6 +186,39 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
         const A = z.object({}), B = z.string();
       `,
       errors: [EAGER, EAGER],
+    },
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        export const Base = lazySchema(() => z.object({}));
+        export const Ext = Base.extend({ a: z.string() });
+      `,
+      errors: [DERIVED],
+    },
+    {
+      code: dedent`
+        import { z } from '@kbn/zod';
+        export const Base = z.object({});
+        export const Opt = Base.optional();
+      `,
+      errors: [EAGER, DERIVED],
+    },
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const Base = lazySchema(() => z.object({}));
+        export const Arr = Base.array();
+      `,
+      errors: [DERIVED],
+    },
+    {
+      code: dedent`
+        import { z } from '@kbn/zod';
+        export const Base = z.object({});
+        export const Ext = Base.extend({ a: z.string() });
+        export const Picked = Ext.pick({ a: true });
+      `,
+      errors: [EAGER, DERIVED, DERIVED],
     },
   ],
 });
