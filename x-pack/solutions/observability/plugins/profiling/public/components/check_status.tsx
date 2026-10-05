@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { AsyncStatus } from '../hooks/use_async';
+import { PROFILING_PATHNAMES } from '../routing/pathnames';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
 import { AddDataTabs } from '../views/add_data_view/types';
 import { useLicenseContext } from './contexts/license/use_license_context';
@@ -18,12 +19,12 @@ import { LicensePrompt } from './license_prompt';
 import { ProfilingAppPageTemplate } from './profiling_app_page_template';
 import { ProfilingStatusErrorPrompt } from './profiling_status_error_prompt';
 
-const ADD_DATA_INSTRUCTIONS_PATHNAME = '/add-data-instructions';
-const PROFILING_NOT_ENABLED_PATHNAME = '/profiling-not-enabled';
-
 // Pages that can be opened without any profiling data. The profiling router is not used to match
 // them because, at this point, the current route might not have all of its required params.
-const UTILITY_PATHNAMES = [ADD_DATA_INSTRUCTIONS_PATHNAME, PROFILING_NOT_ENABLED_PATHNAME];
+const UTILITY_PATHNAMES: readonly string[] = [
+  PROFILING_PATHNAMES.addDataInstructions,
+  PROFILING_PATHNAMES.profilingNotEnabled,
+];
 
 export function CheckStatus({ children }: { children: React.ReactElement }) {
   const { status, data, error, refresh } = useProfilingStatus();
@@ -68,18 +69,18 @@ export function CheckStatus({ children }: { children: React.ReactElement }) {
   }
 
   if (!data.isEnabled) {
-    if (pathname !== PROFILING_NOT_ENABLED_PATHNAME) {
-      router.push(PROFILING_NOT_ENABLED_PATHNAME, { path: {}, query: {} });
+    if (pathname !== PROFILING_PATHNAMES.profilingNotEnabled) {
+      router.push(PROFILING_PATHNAMES.profilingNotEnabled, { path: {}, query: {} });
       return null;
     }
     return children;
   }
 
   if (data.universalProfiling.hasLegacyData) {
-    if (pathname !== ADD_DATA_INSTRUCTIONS_PATHNAME) {
+    if (pathname !== PROFILING_PATHNAMES.addDataInstructions) {
       // If the cluster still has data from before 8.9.1, redirect to the add data page,
       // which shows the instructions to delete it
-      router.push(ADD_DATA_INSTRUCTIONS_PATHNAME, {
+      router.push(PROFILING_PATHNAMES.addDataInstructions, {
         path: {},
         query: { selectedTab: AddDataTabs.Kubernetes },
       });
@@ -95,7 +96,7 @@ export function CheckStatus({ children }: { children: React.ReactElement }) {
     return children;
   }
 
-  router.push(ADD_DATA_INSTRUCTIONS_PATHNAME, {
+  router.push(PROFILING_PATHNAMES.addDataInstructions, {
     path: {},
     query: { selectedTab: AddDataTabs.Kubernetes },
   });
