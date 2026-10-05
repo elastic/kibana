@@ -23,6 +23,7 @@ import {
 } from '../../../../scripts/endpoint/common/constants';
 import { createSystemIndicesEsClient } from '../ui/fixtures/system_indices_es_client';
 import { scopeKbnClientToSpace } from './scope_kbn_client_to_space';
+import { withMetadataTransformLock } from './with_metadata_transform_lock';
 
 export interface SeededEndpointHost {
   readonly agentId: string;
@@ -113,25 +114,27 @@ export const seedEndpointHosts = async ({
       CustomMetadataGenerator: EndpointMetadataGenerator.custom({ isolation }),
     });
 
-    indexed = await indexHostsAndAlerts(
-      systemEsClient,
-      kbnClient,
-      `isolate-metadata-${randomUUID()}`,
-      count,
-      1,
-      METADATA_DATASTREAM,
-      POLICY_RESPONSE_INDEX,
-      ENDPOINT_EVENTS_INDEX,
-      ENDPOINT_ALERTS_INDEX,
-      ENDPOINT_DEVICE_INDEX,
-      1,
-      true,
-      {},
-      DocGenerator,
-      false,
-      undefined,
-      undefined,
-      config.serverless
+    indexed = await withMetadataTransformLock(() =>
+      indexHostsAndAlerts(
+        systemEsClient,
+        kbnClient,
+        `isolate-metadata-${randomUUID()}`,
+        count,
+        1,
+        METADATA_DATASTREAM,
+        POLICY_RESPONSE_INDEX,
+        ENDPOINT_EVENTS_INDEX,
+        ENDPOINT_ALERTS_INDEX,
+        ENDPOINT_DEVICE_INDEX,
+        1,
+        true,
+        {},
+        DocGenerator,
+        false,
+        undefined,
+        undefined,
+        config.serverless
+      )
     );
 
     return { hosts: hostIdentity(indexed), cleanup };

@@ -27,8 +27,8 @@ spaceTest.describe(
     let seededHost: (SeededHostAlert & { cleanup: () => Promise<void> }) | undefined;
 
     spaceTest.beforeAll(async ({ esClient, kbnClient, scoutSpace, config }) => {
-      // One host seed waits up to 4 minutes for the current index and 4 for the united index.
-      spaceTest.setTimeout(720_000);
+      // One host seed waits up to 8 minutes, after the other worker's metadata-transform lock.
+      spaceTest.setTimeout(1_200_000);
       await scoutSpace.setSolutionView('security');
       seededHost = await seedHostWithAlert({
         esClient,
