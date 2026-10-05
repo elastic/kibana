@@ -174,5 +174,21 @@ describe('entities grid query builders', () => {
         ],
       ]);
     });
+
+    it.each(['alert_count', 'last_seen_alert'])(
+      'skips the alerts query when the page is sorted by %s',
+      async (sortField) => {
+        const runQuery = jest.fn(async (_query: string) => []);
+
+        await alertCountColumn.enrichPage(
+          PAGE_ROWS.map((row) => ({ ...row })),
+          BASE_ARGS,
+          new Set([sortField]),
+          createRunContext(runQuery)
+        );
+
+        expect(runQuery).not.toHaveBeenCalled();
+      }
+    );
   });
 });

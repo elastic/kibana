@@ -38,6 +38,30 @@ const SEVERITY_COUNT_FIELDS = {
 } as const;
 
 const ALERT_COUNT_FIELDS = [ALERT_COUNT_FIELD, ...Object.values(SEVERITY_COUNT_FIELDS)] as const;
+const ALERT_FIELDS = [LAST_SEEN_ALERT_FIELD, ...ALERT_COUNT_FIELDS] as const;
+
+const ALERT_AGGREGATIONS: ReadonlyArray<{
+  field: string;
+  aggregation: string;
+  condition?: string;
+}> = [
+  { field: LAST_SEEN_ALERT_FIELD, aggregation: 'MAX(`@timestamp`)' },
+  { field: ALERT_COUNT_FIELD, aggregation: 'COUNT(*)' },
+  ...Object.entries(SEVERITY_COUNT_FIELDS).map(([severity, field]) => ({
+    field,
+    aggregation: 'COUNT(*)',
+    condition: `\`kibana.alert.severity\` == "${severity}"`,
+  })),
+];
+
+/** STATS aggregations of every alert column, over the rows that match `rowCondition`. */
+const buildAlertAggregations = (rowCondition?: string): string[] =>
+  ALERT_AGGREGATIONS.map(({ field, aggregation, condition }) => {
+    const conditions = [rowCondition, condition].filter(Boolean);
+    return conditions.length
+      ? `${field} = ${aggregation} WHERE ${conditions.join(' AND ')}`
+      : `${field} = ${aggregation}`;
+  });
 
 const isAllowedEntityType = (type: unknown): type is (typeof ALLOWED_ENTITY_TYPES)[number] =>
   typeof type === 'string' && (ALLOWED_ENTITY_TYPES as readonly string[]).includes(type);
@@ -81,8 +105,9 @@ const buildUnstampedIdentityFilters = (pageRows: Row[]): UnstampedIdentityFilter
  * FROM subquery, so instead of the subquery merge the alerts and the entity index share
  * one FROM: alert docs go through the stamped/unstamped branches, entity docs in view
  * through a third branch, and the merge by `entity.id` keeps entities without alerts.
+ * It computes every alert column, so the page needs no alerts enrichment.
  */
-const buildAlertSortQuery = (args: QueryArgs, sortField: string, aggregation: string): string => {
+const buildAlertSortQuery = (args: QueryArgs, sortField: string): string => {
   const { namespace, timeRange, concreteEntityIndexName } = args;
   const isEntityDoc = `_index == "${concreteEntityIndexName}"`;
   const entityConditions = buildEntitiesInViewConditions(args).map((c) => `(${c})`);
@@ -101,9 +126,12 @@ const buildAlertSortQuery = (args: QueryArgs, sortField: string, aggregation: st
         `| KEEP _ea_entity_id, ${IN_VIEW_FIELD}`,
       ],
     }),
-    `| STATS ${sortField} = ${aggregation} WHERE ${IN_VIEW_FIELD} IS NULL, ${IN_VIEW_FIELD} = MAX(${IN_VIEW_FIELD}) BY \`entity.id\``,
+    `| STATS ${[
+      ...buildAlertAggregations(`${IN_VIEW_FIELD} IS NULL`),
+      `${IN_VIEW_FIELD} = MAX(${IN_VIEW_FIELD})`,
+    ].join(', ')} BY \`entity.id\``,
     `| WHERE ${IN_VIEW_FIELD} == 1`,
-    ...buildForeignSortPageSteps(args, sortField),
+    ...buildForeignSortPageSteps(args, sortField, ALERT_FIELDS),
   ].join('\n');
 };
 
@@ -121,14 +149,7 @@ const buildAlertsEnrichQuery = (
     `| WHERE ${ALERT_OPEN_STATUS_FILTER}`,
     ...buildAlertEuidPipeline({ stampedEntityIds: entityIds, ...unstampedIdentity }),
     `| WHERE \`entity.id\` IN (${toList(entityIds)})`,
-    `| STATS ${[
-      `${LAST_SEEN_ALERT_FIELD} = MAX(\`@timestamp\`)`,
-      `${ALERT_COUNT_FIELD} = COUNT(*)`,
-      ...Object.entries(SEVERITY_COUNT_FIELDS).map(
-        ([severity, field]) =>
-          `${field} = COUNT(*) WHERE \`kibana.alert.severity\` == "${severity}"`
-      ),
-    ].join(', ')} BY \`entity.id\``,
+    `| STATS ${buildAlertAggregations().join(', ')} BY \`entity.id\``,
   ].join('\n');
 };
 
@@ -139,6 +160,9 @@ const enrichAlerts = async (
   skip: Set<string>,
   { runQuery }: RunContext
 ): Promise<void> => {
+  // An alert sort query already computed every alert column of the page rows.
+  if (skip.has(ALERT_COUNT_FIELD) || skip.has(LAST_SEEN_ALERT_FIELD)) return;
+
   const entityIds = entityIdsOf(pageRows);
   if (!entityIds.length) return;
 
@@ -151,9 +175,7 @@ const enrichAlerts = async (
   const byId = new Map(rows.map((r) => [getEntityId(r), r]));
   for (const row of pageRows) {
     const alerts = byId.get(getEntityId(row));
-    if (!skip.has(LAST_SEEN_ALERT_FIELD)) {
-      row[LAST_SEEN_ALERT_FIELD] = alerts?.[LAST_SEEN_ALERT_FIELD] ?? null;
-    }
+    row[LAST_SEEN_ALERT_FIELD] = alerts?.[LAST_SEEN_ALERT_FIELD] ?? null;
     for (const field of ALERT_COUNT_FIELDS) {
       row[field] = alerts?.[field] ?? 0;
     }
@@ -170,7 +192,7 @@ export const alertCountColumn = {
   sortKind: 'foreign',
   isExpandable: false,
   // Entities without alerts count 0, so they sort first in ascending order.
-  buildSortQuery: (args) => buildAlertSortQuery(args, ALERT_COUNT_FIELD, 'COUNT(*)'),
+  buildSortQuery: (args) => buildAlertSortQuery(args, ALERT_COUNT_FIELD),
   buildCountQuery: buildEntitiesInViewCountQuery,
   enrichPage: enrichAlerts,
 } as const satisfies ColumnDescriptor;
@@ -182,7 +204,7 @@ export const lastSeenAlertColumn = {
   isSortable: true,
   sortKind: 'foreign',
   isExpandable: false,
-  buildSortQuery: (args) => buildAlertSortQuery(args, LAST_SEEN_ALERT_FIELD, 'MAX(`@timestamp`)'),
+  buildSortQuery: (args) => buildAlertSortQuery(args, LAST_SEEN_ALERT_FIELD),
   buildCountQuery: buildEntitiesInViewCountQuery,
   // No enrichPage: enrichAlerts on alertCountColumn also fills this field.
   // The registry runs each enrichPage function once.

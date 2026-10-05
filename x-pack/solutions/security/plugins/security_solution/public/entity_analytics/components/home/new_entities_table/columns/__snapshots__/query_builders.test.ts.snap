@@ -269,13 +269,13 @@ exports[`entities grid query builders sort by alert_count builds the sort and co
 | MV_EXPAND _ea_entity_id
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
-| STATS alert_count = COUNT(*) WHERE _in_view IS NULL, _in_view = MAX(_in_view) BY \`entity.id\`
+| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _in_view IS NULL, alert_count = COUNT(*) WHERE _in_view IS NULL, alert_critical = COUNT(*) WHERE _in_view IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _in_view IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _in_view IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _in_view IS NULL AND \`kibana.alert.severity\` == \\"low\\", _in_view = MAX(_in_view) BY \`entity.id\`
 | WHERE _in_view == 1
 | WHERE (alert_count < 42) OR (alert_count == 42 AND entity.id > \\"host:h-1\\") OR alert_count IS NULL
 | SORT alert_count ASC NULLS LAST, entity.id ASC
 | LIMIT 26
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name, alert_count
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name, alert_count, last_seen_alert, alert_critical, alert_high, alert_medium, alert_low
 | SORT alert_count ASC NULLS LAST, entity.id ASC
 | LIMIT 26"
 `;
@@ -357,12 +357,12 @@ exports[`entities grid query builders sort by alert_count builds the sort and co
 | MV_EXPAND _ea_entity_id
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
-| STATS alert_count = COUNT(*) WHERE _in_view IS NULL, _in_view = MAX(_in_view) BY \`entity.id\`
+| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _in_view IS NULL, alert_count = COUNT(*) WHERE _in_view IS NULL, alert_critical = COUNT(*) WHERE _in_view IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _in_view IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _in_view IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _in_view IS NULL AND \`kibana.alert.severity\` == \\"low\\", _in_view = MAX(_in_view) BY \`entity.id\`
 | WHERE _in_view == 1
 | SORT alert_count DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, alert_count
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, alert_count, last_seen_alert, alert_critical, alert_high, alert_medium, alert_low
 | SORT alert_count DESC NULLS LAST, entity.id ASC
 | LIMIT 26"
 `;
@@ -828,13 +828,13 @@ exports[`entities grid query builders sort by last_seen_alert builds the sort an
 | MV_EXPAND _ea_entity_id
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
-| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _in_view IS NULL, _in_view = MAX(_in_view) BY \`entity.id\`
+| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _in_view IS NULL, alert_count = COUNT(*) WHERE _in_view IS NULL, alert_critical = COUNT(*) WHERE _in_view IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _in_view IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _in_view IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _in_view IS NULL AND \`kibana.alert.severity\` == \\"low\\", _in_view = MAX(_in_view) BY \`entity.id\`
 | WHERE _in_view == 1
 | WHERE (last_seen_alert < 42) OR (last_seen_alert == 42 AND entity.id > \\"host:h-1\\") OR last_seen_alert IS NULL
 | SORT last_seen_alert ASC NULLS LAST, entity.id ASC
 | LIMIT 26
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name, last_seen_alert
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, host.os.name, last_seen_alert, alert_count, alert_critical, alert_high, alert_medium, alert_low
 | SORT last_seen_alert ASC NULLS LAST, entity.id ASC
 | LIMIT 26"
 `;
@@ -916,12 +916,12 @@ exports[`entities grid query builders sort by last_seen_alert builds the sort an
 | MV_EXPAND _ea_entity_id
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
-| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _in_view IS NULL, _in_view = MAX(_in_view) BY \`entity.id\`
+| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _in_view IS NULL, alert_count = COUNT(*) WHERE _in_view IS NULL, alert_critical = COUNT(*) WHERE _in_view IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _in_view IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _in_view IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _in_view IS NULL AND \`kibana.alert.severity\` == \\"low\\", _in_view = MAX(_in_view) BY \`entity.id\`
 | WHERE _in_view == 1
 | SORT last_seen_alert DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
-| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, last_seen_alert
+| KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, last_seen_alert, alert_count, alert_critical, alert_high, alert_medium, alert_low
 | SORT last_seen_alert DESC NULLS LAST, entity.id ASC
 | LIMIT 26"
 `;

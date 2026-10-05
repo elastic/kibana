@@ -365,11 +365,15 @@ export const IN_VIEW_FIELD = '_in_view';
  * limiting before the join keeps the join to the page rows: it runs after STATS, on the
  * coordinator, so joining every merged row is what made foreign sorts slow.
  */
-export const buildForeignSortPageSteps = (args: QueryArgs, sortField: string): string[] => [
+export const buildForeignSortPageSteps = (
+  args: QueryArgs,
+  sortField: string,
+  extraFields: readonly string[] = []
+): string[] => [
   ...buildCursorClause(args.cursor),
   buildSortSuffix(sortField, args.sort.direction, args.pageSize),
   buildLookupJoinClause(args.concreteEntityIndexName),
-  buildKeepClause(args, sortField),
+  buildKeepClause(args, sortField, ...extraFields),
   // LOOKUP JOIN may not keep the input order.
   buildSortSuffix(sortField, args.sort.direction, args.pageSize),
 ];
