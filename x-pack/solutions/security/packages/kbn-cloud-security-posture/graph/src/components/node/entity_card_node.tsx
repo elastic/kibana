@@ -31,7 +31,6 @@ import {
   NodeShapeContainer,
   NodeButton,
   HandleStyleOverride,
-  useNodeFillColor,
 } from './styles';
 import { NodeExpandButton } from './node_expand_button';
 import { ENTITY_CARD_HEADER_HEIGHT, NODE_WIDTH } from '../constants';
@@ -212,16 +211,6 @@ const getRiskScoreColors = (
 };
 
 /**
- * Returns the icon box background color for an entity node.
- * Currently a passthrough — icon always uses the node's default fill color.
- */
-const getIconColorByRiskScore = (
-  _riskScore: { min: number; max: number } | undefined,
-  defaultColor: string
-): string => {
-  return defaultColor;
-};
-
 /**
  * Contained colored icon box — inset with padding so it doesn't span
  * the full card height. Rounded corners match the card radius.
@@ -942,8 +931,6 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
 
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('m');
-  const fillColor = useNodeFillColor(color ?? 'primary');
-  const iconBgColor = getIconColorByRiskScore(riskScore, fillColor);
   // Hover state for toolbar visibility.
   // A generous hide-delay keeps the toolbar alive while the mouse travels from
   // the card into the toolbar, which lives in a separate DOM subtree (portal).
