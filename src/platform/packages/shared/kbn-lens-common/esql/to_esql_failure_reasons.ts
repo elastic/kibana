@@ -86,7 +86,7 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
     'xpack.lens.config.cannotConvertToEsqlTermsDateHistogramTooltip',
     {
       defaultMessage:
-        'Top values combined with a date histogram will be supported in an upcoming update.',
+        'This arrangement of Top values and date histogram dimensions is not supported yet.',
     }
   ),
   terms_multi_level_not_supported: i18n.translate(

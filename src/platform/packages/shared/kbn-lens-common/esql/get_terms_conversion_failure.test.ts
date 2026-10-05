@@ -14,7 +14,7 @@ import {
 import { createTermsColumn } from './__mocks__/esql_query_mocks';
 
 const context = (overrides: Partial<TermsConversionContext> = {}): TermsConversionContext => ({
-  hasDateHistogram: false,
+  hasUnsupportedDateHistogramNesting: false,
   termsBucketCount: 1,
   ...overrides,
 });
@@ -24,9 +24,12 @@ describe('getTermsConversionFailure', () => {
     expect(getTermsConversionFailure(createTermsColumn(), context())).toBeUndefined();
   });
 
-  it('returns terms_date_histogram_not_supported when a date histogram is present', () => {
+  it('returns terms_date_histogram_not_supported for an unsupported date histogram nesting', () => {
     expect(
-      getTermsConversionFailure(createTermsColumn(), context({ hasDateHistogram: true }))
+      getTermsConversionFailure(
+        createTermsColumn(),
+        context({ hasUnsupportedDateHistogramNesting: true })
+      )
     ).toBe('terms_date_histogram_not_supported');
   });
 
@@ -101,7 +104,7 @@ describe('getTermsConversionFailure', () => {
           otherBucket: true,
           orderBy: { type: 'rare', maxDocCount: 3 },
         }),
-        context({ hasDateHistogram: true })
+        context({ hasUnsupportedDateHistogramNesting: true })
       )
     ).toBe('terms_other_bucket_not_supported');
   });
