@@ -55,7 +55,7 @@ const sharedFilterFields = {
   rule_ids: idFilterArraySchema
     .optional()
     .describe(
-      'Explicit rule filter. Narrows events to those referencing at least one of the provided rule ids. Also unions with the search filter if both are provided.'
+      'Explicit rule filter. Narrows events to those referencing at least one of the provided rule IDs. Also unions with the search filter if both are provided.'
     ),
   outcomes: policyExecutionOutcomeFilterSchema
     .optional()
@@ -85,7 +85,7 @@ export const listPolicyExecutionHistoryRequestSchema = z
     alert_ids: idFilterArraySchema
       .optional()
       .describe(
-        'Alert filter. Narrows events to those referencing at least one of the provided alert ids.'
+        'Alert filter. Narrows events to those referencing at least one of the provided alert IDs.'
       ),
     sort_field: z
       .enum(['dispatched_at'])
@@ -138,7 +138,7 @@ export const policyExecutionHistoryItemSchema = z
       .array(alertRefSchema)
       .max(MAX_EMBEDDED_ALERTS_PER_ITEM)
       .describe(
-        `Alert ids referenced by this event, bounded to ${MAX_EMBEDDED_ALERTS_PER_ITEM}. Empty when the event references no alerts. Use \`alert_count\` for the true total.`
+        `Alert IDs referenced by this event, bounded to ${MAX_EMBEDDED_ALERTS_PER_ITEM}. Empty when the event references no alerts. Use \`alert_count\` for the true total.`
       ),
     action_group_count: z.number(),
     rules: z
@@ -150,7 +150,7 @@ export const policyExecutionHistoryItemSchema = z
     rule_count: z
       .number()
       .describe(
-        'Number of rules referenced by this event after search / rule-filter narrowing. Unlike `total` on a list response this is an exact count, and it may exceed `rules.length` when the embedded array is truncated to the cap.'
+        'Number of rules referenced by this event after search or rule-filter narrowing. Unlike `total` on a list response, this is an exact count and it can exceed `rules.length` when the embedded array is truncated to the cap.'
       ),
     workflows: z.array(namedRefSchema).max(MAX_WORKFLOWS_PER_ITEM),
     failure_reason: dispatchFailureReasonSchema.optional(),

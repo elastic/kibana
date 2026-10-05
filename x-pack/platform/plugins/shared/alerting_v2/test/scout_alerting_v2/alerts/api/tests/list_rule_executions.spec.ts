@@ -132,6 +132,15 @@ apiTest.describe('List rule executions API', { tag: '@local-stateful-classic' },
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
+  apiTest('validation: rejects perPage=0', async ({ apiClient }) => {
+    const response = await apiClient.get(listRuleExecutionsUrl({ per_page: 0 }), {
+      headers: readerHeaders,
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
+
   apiTest('validation: rejects perPage above the maximum', async ({ apiClient }) => {
     const response = await apiClient.get(listRuleExecutionsUrl({ per_page: 101 }), {
       headers: readerHeaders,
