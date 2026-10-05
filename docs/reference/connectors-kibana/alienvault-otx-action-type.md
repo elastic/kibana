@@ -9,6 +9,8 @@ applies_to:
 
 The AlienVault OTX (Open Threat Exchange) connector communicates with the AlienVault OTX API to retrieve community-driven threat intelligence.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-alienvault-otx-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**. For example:

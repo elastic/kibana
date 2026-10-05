@@ -17,10 +17,6 @@ const mockUseAuthz = jest.fn();
 const mockExperimentalFeaturesGet = jest.fn();
 const mockUseAlertingAssets = jest.fn();
 const mockIsAlertingV2Enabled = jest.fn();
-const mockGetRuleLibraryRedirectUrl = jest.fn(
-  ({ templateId }: { templateId?: string }) =>
-    `/app/r?l=ALERTING_V2_RULE_LIBRARY_LOCATOR&templateId=${templateId}`
-);
 
 jest.mock('../../../../../services', () => ({
   ExperimentalFeaturesService: {
@@ -55,9 +51,6 @@ jest.mock('../../../../../hooks', () => ({
   useAuthz: (...args: any[]) => mockUseAuthz(...args),
   sendRequestInstallRuleAssets: jest.fn(),
   useAlertingAssets: (...args: any[]) => mockUseAlertingAssets(...args),
-  useAlertingV2RuleLibraryLocator: () => ({
-    getRedirectUrl: mockGetRuleLibraryRedirectUrl,
-  }),
 }));
 
 import { useGetPackageInstallStatus } from '../../../../../hooks';
@@ -187,11 +180,9 @@ describe('AlertingPage', () => {
     expect(screen.getByTestId('fleetAlertingEngineTab-v2')).toHaveTextContent('ES|QL Rules');
     expect(screen.getByTestId('fleetAlertingEngineTab-v1')).toHaveTextContent('Standard Rules');
     expect(screen.getByText('[System] Metrics template')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: '[System] Metrics template' })).toHaveAttribute(
-      'href',
-      '/mock/app/r?l=ALERTING_V2_RULE_LIBRARY_LOCATOR&templateId=template-2'
-    );
-    expect(mockGetRuleLibraryRedirectUrl).toHaveBeenCalledWith({ templateId: 'template-2' });
+    expect(
+      screen.queryByRole('link', { name: '[System] Metrics template' })
+    ).not.toBeInTheDocument();
     expect(screen.queryByText('[System] Logs template')).not.toBeInTheDocument();
     expect(screen.getByTestId('fleetAssetsAccordion.engineBadge.v2')).toHaveTextContent('ES|QL');
     expect(screen.queryByTestId('fleetAssetsAccordion.engineBadge.v1')).not.toBeInTheDocument();

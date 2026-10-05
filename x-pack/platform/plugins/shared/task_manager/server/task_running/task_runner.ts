@@ -51,10 +51,15 @@ import { isFailedRunResult, TaskStatus, TaskCost, getTaskCostFromInstance } from
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import { isUnrecoverableError, isUserError, type DecoratedError } from './errors';
 import {
+  createTaskRunError,
+  isUnrecoverableError,
+  isUserError,
   getTaskReclaimReason,
   isVersionConflictError,
   resolveTaskDocumentConflicts,
-} from './resolve_so_conflicts';
+  type DecoratedError,
+} from './errors';
+import { resolveTaskDocumentConflicts } from './resolve_so_conflicts';
 import type { TaskManagerConfig } from '../config';
 import type { ApiKeyStrategy } from '../api_key_strategy';
 import { TaskValidator } from '../task_validator';
@@ -72,6 +77,7 @@ export const TASK_MANAGER_TRANSACTION_TYPE = 'task-manager';
 export const TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING = 'mark-task-as-running';
 
 const UPDATE_RETRY_AT_INTERVAL = 60000; // 1m
+const UNSUPPORTED_CREDENTIAL_RETRY_DELAY = 5 * 60 * 1000; // 5m
 const MAX_CUSTOM_TASK_RUN_EVENT_FIELDS_SIZE = 4096; // 4 KB
 
 export interface TaskRunner {
@@ -436,6 +442,44 @@ export class TaskManagerRunner implements TaskRunner {
           this.updateRetryAtOnIntervalForLongRunningTasks(startedAt);
 
         try {
+          // This version runs no credential type, including types added by later versions.
+          const { credential } = this.instance.task;
+          if (credential) {
+            stopUpdatingLongRunningTasks();
+            const error = createTaskRunError(
+              new Error(
+                `Task uses credential type "${credential.type}", which this version of Kibana cannot run`
+              ),
+              TaskErrorSource.FRAMEWORK
+            );
+            this.logger.error(`Task ${this} failed: ${error}`, {
+              tags: [
+                this.taskType,
+                this.instance.task.id,
+                'task-run-failed',
+                `${TaskErrorSource.FRAMEWORK}-error`,
+              ],
+            });
+            // Reported as a successful run with an error, because a failed run uses up an attempt
+            // and a one-off task is deleted once it runs out of attempts.
+            const processedResult = await withSpan(
+              { name: 'process result', type: 'task manager' },
+              () =>
+                this.processResult(
+                  asOk({
+                    state: modifiedContext.taskInstance.state,
+                    taskRunError: error,
+                    ...(this.instance.task.schedule
+                      ? {}
+                      : { runAt: new Date(Date.now() + UNSUPPORTED_CREDENTIAL_RETRY_DELAY) }),
+                  }),
+                  makeTaskTiming()
+                )
+            );
+            if (apmTrans) apmTrans.end('failure');
+            return processedResult;
+          }
+
           const sanitizedTaskInstance = omit(modifiedContext.taskInstance, [
             'apiKey',
             'uiamApiKey',
