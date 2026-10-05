@@ -875,6 +875,54 @@ describe('UiamServiceAccounts', () => {
   });
 
   describe('#delete', () => {
+    beforeEach(() => {
+      getCurrentUser.mockReturnValue(mockAuthenticatedUser({ username: 'user-id' }));
+    });
+
+    it('rejects a credential UIAM would not accept, without revoking', async () => {
+      await expect(
+        serviceAccounts.delete(
+          createMockRequest('Basic dXNlcjpwYXNzd29yZA=='),
+          'service-account-id'
+        )
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+      expect(mockUiam.revokeServiceAccount).not.toHaveBeenCalled();
+    });
+
+    it('rejects a request without credentials, without revoking', async () => {
+      await expect(
+        serviceAccounts.delete(createMockRequest(), 'service-account-id')
+      ).rejects.toMatchObject({ output: { statusCode: 401 } });
+
+      expect(mockUiam.revokeServiceAccount).not.toHaveBeenCalled();
+    });
+
+    it('rejects a service account caller, without revoking', async () => {
+      getCurrentUser.mockReturnValue(
+        mockAuthenticatedUser({
+          username: 'caller-service-account-id',
+          authentication_provider: { type: 'http', name: '__http__' },
+          authentication_realm: { type: '_cloud_service_account', name: '_cloud_service_account' },
+        })
+      );
+
+      await expect(
+        serviceAccounts.delete(createMockRequest('Bearer essu_my_token'), 'service-account-id')
+      ).rejects.toMatchObject({
+        output: {
+          statusCode: 400,
+          payload: {
+            message:
+              'Cannot delete a service account: a service account cannot delete service ' +
+              'accounts. Make the request from a user session',
+          },
+        },
+      });
+
+      expect(mockUiam.revokeServiceAccount).not.toHaveBeenCalled();
+    });
+
     it('revokes the account in UIAM as Kibana, not as the user', async () => {
       const request = createMockRequest('Bearer essu_my_token');
 

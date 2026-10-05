@@ -71,7 +71,7 @@ describe('List service account workloads route', () => {
     expect(routeConfig.security?.authz).toEqual({
       enabled: false,
       reason:
-        'This route delegates authorization to the service accounts backend, which requires the `read_security` cluster privilege',
+        'This route delegates authorization to the service accounts backend, which requires the `manage_security` cluster privilege',
     });
   });
 
@@ -109,7 +109,7 @@ describe('List service account workloads route', () => {
     );
   });
 
-  it('reproduces a 403 for a caller who may not read service accounts', async () => {
+  it('reproduces a 403 for a caller who may not manage service accounts', async () => {
     const { routeHandler, serviceAccounts } = setup();
     serviceAccounts.management.listWorkloads.mockRejectedValue(Boom.forbidden('nope'));
 

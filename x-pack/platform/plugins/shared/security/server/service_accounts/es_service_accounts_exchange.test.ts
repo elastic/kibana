@@ -151,6 +151,35 @@ describe('Elasticsearch service account token exchange', () => {
     }
   );
 
+  it.each([
+    ['at the same moment as', credential.createdAt],
+    ['after', '2026-09-24T00:00:00.000Z'],
+  ])('exchanges for a workload bound %s the account was created', async (_, boundAt) => {
+    const { backend, exchange } = setup();
+
+    await backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID, boundAt });
+
+    expect(exchange).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    ['before the account was created', '2026-09-22T00:00:00.000Z'],
+    ['at a time that does not parse', 'not-a-timestamp'],
+  ])('refuses a workload bound %s', async (_, boundAt) => {
+    const { backend, exchange, logger } = setup();
+
+    await expect(
+      backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID, boundAt })
+    ).rejects.toMatchObject({ retryable: false });
+
+    expect(exchange).not.toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining(
+        `Refusing to exchange service account [${ACCOUNT_ID}] for a workload bound at [${boundAt}]`
+      )
+    );
+  });
+
   it.each([400, 401, 403, 404])(
     'classifies HTTP %s as terminal without logging secrets',
     async (statusCode) => {

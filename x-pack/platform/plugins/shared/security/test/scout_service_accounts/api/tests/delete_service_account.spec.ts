@@ -31,21 +31,55 @@ apiTest.describe(
   () => {
     const created: ServiceAccountPrincipal[] = [];
     const boundWorkloads: string[] = [];
+    /** Grants `monitor`, which is what the test plugin's workload needs to run. */
+    const workloadRole = uniqueName();
     let adminHeaders: Record<string, string>;
 
-    const createAccount = async (apiClient: ApiClientFixture): Promise<ServiceAccountPrincipal> => {
-      const account = { namespace: ES_SERVICE_ACCOUNT_NAMESPACE, name: uniqueName() };
+    const idOf = ({ namespace, name }: ServiceAccountPrincipal) => `${namespace}/${name}`;
+
+    const createAccount = async (
+      apiClient: ApiClientFixture,
+      name: string = uniqueName()
+    ): Promise<ServiceAccountPrincipal> => {
+      const account = { namespace: ES_SERVICE_ACCOUNT_NAMESPACE, name };
       created.push(account);
       const response = await apiClient.post(SERVICE_ACCOUNT_ENDPOINT, {
         headers: adminHeaders,
-        body: { name: account.name, roles: ['viewer'] },
+        body: { name, roles: [workloadRole] },
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
       return account;
     };
 
-    const idOf = ({ namespace, name }: ServiceAccountPrincipal) => `${namespace}/${name}`;
+    const runWorkload = (apiClient: ApiClientFixture, workloadId: string) =>
+      apiClient.post(workloadPath(workloadId), {
+        headers: adminHeaders,
+        body: { operation: 'execute' },
+        responseType: 'json',
+      });
+
+    const bindWorkload = async (
+      apiClient: ApiClientFixture,
+      workloadId: string,
+      account: ServiceAccountPrincipal
+    ) => {
+      boundWorkloads.push(workloadId);
+      const bound = await apiClient.post(workloadPath(workloadId), {
+        headers: adminHeaders,
+        body: { operation: 'bind', serviceAccountId: idOf(account) },
+        responseType: 'json',
+      });
+      expect(bound).toHaveStatusCode(200);
+    };
+
+    apiTest.beforeAll(async ({ esClient }) => {
+      await esClient.security.putRole({
+        name: workloadRole,
+        cluster: ['monitor'],
+        refresh: 'wait_for',
+      });
+    });
 
     apiTest.beforeEach(async ({ samlAuth }) => {
       adminHeaders = { ...(await samlAuth.asInteractiveUser('admin')).cookieHeader, ...HEADERS };
@@ -74,6 +108,7 @@ apiTest.describe(
           }
         },
         async () => deleteServiceAccounts(esClient, config, created),
+        async () => esClient.security.deleteRole({ name: workloadRole, refresh: 'wait_for' }),
       ];
       for (const remove of cleanup) {
         try {
@@ -246,6 +281,94 @@ apiTest.describe(
           responseType: 'json',
         });
         expect(stillThere).toHaveStatusCode(200);
+      }
+    );
+
+    apiTest(
+      'does not let an account created again under the same name run the old one’s workloads',
+      async ({ apiClient }) => {
+        const account = await createAccount(apiClient);
+        const workloadId = uniqueName();
+        await bindWorkload(apiClient, workloadId, account);
+        expect(await runWorkload(apiClient, workloadId)).toHaveStatusCode(200);
+
+        const forced = await apiClient.delete(`${accountPath(idOf(account))}?force=true`, {
+          headers: adminHeaders,
+          responseType: 'json',
+        });
+        expect(forced).toHaveStatusCode(200);
+        await createAccount(apiClient, account.name);
+
+        // The binding still names `kibana/<name>`, but it was made for the deleted account.
+        expect(await runWorkload(apiClient, workloadId)).toHaveStatusCode(500);
+
+        // Binding it again is what lets it run as the new account.
+        await bindWorkload(apiClient, workloadId, account);
+        const rebound = await runWorkload(apiClient, workloadId);
+        expect(rebound).toHaveStatusCode(200);
+        expect(rebound.body).toMatchObject({ username: idOf(account) });
+      }
+    );
+
+    apiTest(
+      'deletes the tokens a forced delete left behind, so the name can be used again',
+      async ({ apiClient, esClient }) => {
+        const account = await createAccount(apiClient);
+        // Forced straight through Elasticsearch, which leaves Kibana's token behind.
+        await esClient.transport.request({
+          method: 'DELETE',
+          path: `/_security/service/${account.namespace}/${account.name}`,
+          querystring: { force: 'true' },
+        });
+
+        const cleaned = await apiClient.delete(accountPath(idOf(account)), {
+          headers: adminHeaders,
+          responseType: 'json',
+        });
+        expect(cleaned).toHaveStatusCode(200);
+        expect(cleaned.body).toStrictEqual({ warnings: [] });
+
+        const repeated = await apiClient.delete(accountPath(idOf(account)), {
+          headers: adminHeaders,
+          responseType: 'json',
+        });
+        expect(repeated).toHaveStatusCode(404);
+
+        await createAccount(apiClient, account.name);
+      }
+    );
+
+    apiTest(
+      'stops access tokens issued before the delete from authenticating',
+      async ({ apiClient, esClient }) => {
+        const account = await createAccount(apiClient);
+        const { token } = await esClient.security.createServiceToken({
+          namespace: account.namespace,
+          service: account.name,
+          name: OPERATOR_TOKEN_NAME,
+        });
+        const { access_token: accessToken } = await esClient.transport.request<{
+          access_token: string;
+        }>({
+          method: 'POST',
+          path: '/_security/oauth2/token',
+          body: { grant_type: '_user_managed_service_account', service_account_token: token.value },
+        });
+        const authenticate = () =>
+          esClient.transport.request(
+            { method: 'GET', path: '/_security/_authenticate' },
+            { headers: { authorization: `Bearer ${accessToken}` }, ignore: [401] }
+          );
+        expect(await authenticate()).toMatchObject({ username: idOf(account) });
+
+        const deleted = await apiClient.delete(accountPath(idOf(account)), {
+          headers: adminHeaders,
+          responseType: 'json',
+        });
+        expect(deleted).toHaveStatusCode(200);
+        expect(deleted.body).toStrictEqual({ warnings: [] });
+
+        expect(await authenticate()).not.toMatchObject({ username: idOf(account) });
       }
     );
   }

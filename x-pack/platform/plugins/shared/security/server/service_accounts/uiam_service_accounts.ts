@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
+import { getAuthenticatedPrincipal } from '@kbn/core-security-common';
 import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 import { z } from '@kbn/zod';
@@ -179,6 +180,8 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     this.getCurrentUser = getCurrentUser;
     this.fakeRequests = new ServiceAccountFakeRequests(
       logger,
+      // `boundAt` is not consulted: UIAM issues a new id on every create, so a binding can never
+      // name a later account than the one it was made for.
       async (serviceAccountId) => {
         const { token } = await this.exchangeToken(serviceAccountId);
         return token;
@@ -355,9 +358,11 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
   }
 
   /**
-   * Revokes the account in UIAM. Requires the same `manage_security` privilege as {@link create},
-   * which is the only user-level gate: UIAM authorizes the revoke against Kibana's certificate and
-   * the account's `assumable_by` policy, not against the end user.
+   * Revokes the account in UIAM. UIAM authorizes the revoke against Kibana's certificate and the
+   * account's `assumable_by` policy, not against the end user, so the user-level gates are all
+   * Kibana's. They match {@link create}: the `manage_security` privilege, a UIAM credential, and a
+   * caller that is not a service account. Create gets the last two from UIAM, which sees the
+   * caller's credential there.
    *
    * Repeating a revoke while UIAM still holds the record succeeds, so a retry is safe. Once UIAM
    * drops the record, the same call answers 404.
@@ -376,6 +381,20 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       privilege: 'manage_security',
       action: 'delete a service account',
     });
+
+    // Throws for a credential UIAM would not accept, the same check `create` makes.
+    getUiamAuthorizationHeaderFromRequest(request);
+
+    const user = this.getCurrentUser(request);
+    if (!user) {
+      throw Boom.unauthorized('Cannot delete a service account: the request is not authenticated');
+    }
+    if (getAuthenticatedPrincipal(user).type === 'service_account') {
+      throw Boom.badRequest(
+        'Cannot delete a service account: a service account cannot delete service accounts. Make ' +
+          'the request from a user session'
+      );
+    }
 
     this.logger.debug(`Attempting to delete service account ${id}`);
 

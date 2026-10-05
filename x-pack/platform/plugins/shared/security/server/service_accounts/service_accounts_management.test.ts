@@ -81,9 +81,12 @@ describe('ServiceAccountsManagement', () => {
   });
 
   describe('#listWorkloads', () => {
-    it('lists the bound workloads after checking `read_security`, leaving out their spaces', async () => {
+    it('lists the verified bound workloads after checking `manage_security`, without their spaces', async () => {
       const bindings = [binding(), binding({ workloadId: 'workflow-2', spaceId: 'other' })];
       store.findByServiceAccountId.mockResolvedValue(bindings);
+      store.getVerified.mockImplementation(
+        async ({ workloadId }) => bindings.find((candidate) => candidate.workloadId === workloadId)!
+      );
 
       const workloads = await management.listWorkloads(request, SERVICE_ACCOUNT_ID);
       expect(workloads).toStrictEqual(bindings.map(workloadOf));
@@ -92,12 +95,31 @@ describe('ServiceAccountsManagement', () => {
       }
 
       expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
-        elasticsearch: { cluster: ['read_security'], index: {} },
+        elasticsearch: { cluster: ['manage_security'], index: {} },
       });
       expect(store.findByServiceAccountId).toHaveBeenCalledWith(SERVICE_ACCOUNT_ID);
+      expect(store.getVerified).toHaveBeenCalledTimes(2);
     });
 
-    it('rejects with a 403 before searching when the caller lacks `read_security`', async () => {
+    it('lists the same workloads a delete would be refused for', async () => {
+      const kept = binding({ workloadId: 'kept' });
+      const tampered = binding({ workloadId: 'tampered' });
+      const removed = binding({ workloadId: 'removed' });
+      store.findByServiceAccountId.mockResolvedValue([kept, tampered, removed]);
+      store.getVerified.mockImplementation(async ({ workloadId }) => {
+        if (workloadId === 'tampered') {
+          throw Boom.forbidden('failed integrity verification');
+        }
+        return workloadId === 'kept' ? kept : null;
+      });
+
+      await expect(management.listWorkloads(request, SERVICE_ACCOUNT_ID)).resolves.toStrictEqual([
+        workloadOf(kept),
+        workloadOf(tampered),
+      ]);
+    });
+
+    it('rejects with a 403 before searching when the caller lacks `manage_security`', async () => {
       mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
 
       await expect(management.listWorkloads(request, SERVICE_ACCOUNT_ID)).rejects.toMatchObject({

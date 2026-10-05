@@ -54,6 +54,19 @@ import {
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import { securityTelemetry } from '../otel/instrumentation';
 
+/** Elasticsearch's namespace for its built-in service accounts. */
+const ES_BUILT_IN_SERVICE_ACCOUNT_NAMESPACE = 'elastic';
+
+/** The realm Elasticsearch authenticates service accounts, and the tokens issued to them, in. */
+const SERVICE_ACCOUNT_REALM_NAME = '_service_account';
+
+const getUndeletedTokensWarning = (id: string, name: string, tokenNames: string[]): string =>
+  i18n.translate('xpack.security.serviceAccounts.delete.undeletedTokensWarning', {
+    defaultMessage:
+      'Service account [{id}] was deleted, but its tokens [{tokenNames}] could not be. They can no longer authenticate, but an account named [{name}] cannot be created again until they are deleted.',
+    values: { id, name, tokenNames: tokenNames.join(', ') },
+  });
+
 /** How many of an account's tokens are deleted at once. */
 const TOKEN_DELETE_CONCURRENCY = 10;
 
@@ -167,7 +180,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     this.getCurrentUserProfileId = getCurrentUserProfileId;
     this.fakeRequests = new ServiceAccountFakeRequests(
       logger,
-      (serviceAccountId) => this.exchangeToken(serviceAccountId),
+      (serviceAccountId, { boundAt }) => this.exchangeToken(serviceAccountId, boundAt),
       requestLifetimeMs
     );
   }
@@ -400,20 +413,18 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
   }
 
   /**
-   * Deletes the account's tokens, then the account, then the credential Kibana stored for it.
+   * Deletes the account's tokens, then the account, and invalidates the access tokens it was
+   * issued. The credential Kibana stored for the account goes too, at whichever point keeps a
+   * concurrent create of the same name from losing its own.
    *
    * Every token goes, not only the one Kibana minted, because a token that outlives its account
    * blocks re-creating that name. The token deletes are best effort: a token that cannot be
-   * deleted does not stop the account delete, and is reported back as a warning instead.
+   * deleted does not stop the account delete, which is then forced, and is reported back as a
+   * warning. When every token is gone the account delete stays unforced, so a token minted in the
+   * meantime makes Elasticsearch refuse rather than leave it behind with no warning.
    *
-   * The account delete is forced only when a token was left behind, since Elasticsearch refuses an
-   * unforced delete while any token remains. Otherwise it stays unforced, so a token minted after
-   * the tokens were read makes Elasticsearch refuse the delete rather than strand that token
-   * without a warning.
-   *
-   * Safe to retry after a partial failure. The credential is only deleted once the account is
-   * gone, for the same reason {@link rollback} keeps it, so an account that is already gone but
-   * still has a credential gets that credential cleaned up instead of a 404.
+   * An account that is already gone is a 404, unless tokens are left over from it. Those are
+   * deleted, so a retry can finish what a forced delete left behind.
    */
   async delete(request: KibanaRequest, id: string): Promise<DeleteServiceAccountResponse> {
     if (!this.license.isEnabled()) {
@@ -430,69 +441,142 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       action: 'delete a service account',
     });
 
+    // `elastic` is Elasticsearch's namespace for built-in accounts, which are not Kibana's to
+    // delete, nor are their tokens.
     const principal = parseEsServiceAccountId(id);
-    if (!principal) {
+    if (!principal || principal.namespace === ES_BUILT_IN_SERVICE_ACCOUNT_NAMESPACE) {
       throw Boom.notFound(`Service account [${id}] was not found`);
     }
     const { namespace, name } = principal;
 
     const esClient = this.clusterClient.asScoped(request).asCurrentUser;
 
-    const warnings: string[] = [];
+    try {
+      if (!(await this.readAccount(esClient, namespace, name))) {
+        return await this.deleteLeftoverTokens(esClient, principal);
+      }
 
-    // Built-in accounts resolve to `undefined` here, so they are a 404 like they are for `get`.
-    if (await this.readAccount(esClient, namespace, name)) {
       this.logger.debug(`Attempting to delete service account [${id}]`);
-
-      try {
-        const undeletedTokens = await this.deleteTokens(
-          esClient,
-          namespace,
-          name,
-          await this.readTokenNames(esClient, namespace, name)
-        );
-
-        await this.deleteAccount(esClient, namespace, name, {
-          force: undeletedTokens.length > 0,
-        });
-
-        if (undeletedTokens.length > 0) {
-          // Translated here because callers show it as is. Kibana's locale is set for the whole
-          // deployment, so this matches the language of the UI that shows it.
-          warnings.push(
-            i18n.translate('xpack.security.serviceAccounts.delete.undeletedTokensWarning', {
-              defaultMessage:
-                'Service account [{id}] was deleted, but its tokens [{tokenNames}] could not be. They can no longer authenticate, but an account named [{name}] cannot be created again until they are deleted.',
-              values: { id, name, tokenNames: undeletedTokens.join(', ') },
-            })
-          );
-        }
-      } catch (e) {
+      return await this.deleteAccountAndCredentials(esClient, principal);
+    } catch (e) {
+      if (!Boom.isBoom(e) || e.output.statusCode !== 404) {
         this.logger.error(
           `Failed to delete service account [${id}]: ${getDetailedErrorMessage(e)}`
         );
-        throw e;
       }
-    } else if (!(await this.credentialStore.findExisting([id])).has(id)) {
-      throw Boom.notFound(`Service account [${id}] was not found`);
-    } else {
-      this.logger.debug(
-        `Service account [${id}] is already gone, so only the credential Kibana stored for it is deleted`
+      throw e;
+    }
+  }
+
+  private async deleteAccountAndCredentials(
+    esClient: ElasticsearchClient,
+    { namespace, name }: EsServiceAccountPrincipal
+  ): Promise<DeleteServiceAccountResponse> {
+    const id = `${namespace}/${name}`;
+    const undeletedTokens = await this.deleteTokens(
+      esClient,
+      namespace,
+      name,
+      await this.readTokenNames(esClient, namespace, name)
+    );
+    const keptManagedToken = undeletedTokens.includes(ES_SERVICE_ACCOUNT_TOKEN_NAME);
+
+    // Once Kibana's token is gone, the credential no longer works and there is no reason to keep
+    // it. Deleting it while the account still exists also means no create can take the name, and
+    // write a credential of its own, until this delete is done with it.
+    if (!keptManagedToken) {
+      await this.credentialStore.delete(id);
+    }
+
+    await this.deleteAccount(esClient, namespace, name, { force: undeletedTokens.length > 0 });
+
+    const warnings: string[] = [];
+    if (undeletedTokens.length > 0) {
+      warnings.push(getUndeletedTokensWarning(id, name, undeletedTokens));
+    }
+
+    if (!(await this.invalidateAccessTokens(esClient, id))) {
+      warnings.push(
+        i18n.translate('xpack.security.serviceAccounts.delete.accessTokensNotInvalidatedWarning', {
+          defaultMessage:
+            'Service account [{id}] was deleted, but the access tokens it was issued could not be invalidated. They stay valid until they expire.',
+          values: { id },
+        })
       );
     }
 
-    try {
-      await this.credentialStore.delete(id);
-    } catch (e) {
-      this.logger.error(
-        `Deleted service account [${id}], but failed to delete its credential: ${getDetailedErrorMessage(
-          e
-        )}`
-      );
-      throw e;
+    // While Kibana's token is left, Elasticsearch refuses to create an account with this name, so
+    // deleting the credential this late cannot remove one a new account just wrote. Best effort:
+    // the account is gone, and a credential left behind is overwritten by the next create.
+    if (keptManagedToken) {
+      try {
+        await this.credentialStore.delete(id);
+      } catch (e) {
+        this.logger.error(
+          `Deleted service account [${id}], but failed to delete its credential: ${getDetailedErrorMessage(
+            e
+          )}`
+        );
+      }
     }
 
     return { warnings };
+  }
+
+  /**
+   * Cleans up after an account that is already gone. A forced delete leaves its tokens behind,
+   * and Elasticsearch can delete them without the account. The credential is left alone: the next
+   * create overwrites it and nothing reports it for an account that does not exist, while deleting
+   * it here could remove one a concurrent create just wrote.
+   */
+  private async deleteLeftoverTokens(
+    esClient: ElasticsearchClient,
+    { namespace, name }: EsServiceAccountPrincipal
+  ): Promise<DeleteServiceAccountResponse> {
+    const id = `${namespace}/${name}`;
+    const tokenNames = await this.readTokenNames(esClient, namespace, name);
+    if (tokenNames.length === 0) {
+      throw Boom.notFound(`Service account [${id}] was not found`);
+    }
+
+    this.logger.debug(
+      `Service account [${id}] is already gone, so only the tokens left over from it are deleted`
+    );
+    const undeletedTokens = await this.deleteTokens(esClient, namespace, name, tokenNames);
+    return {
+      warnings:
+        undeletedTokens.length > 0 ? [getUndeletedTokensWarning(id, name, undeletedTokens)] : [],
+    };
+  }
+
+  /**
+   * Invalidates the access tokens the account was issued through the token grant, which would
+   * otherwise stay valid until they expire. Best effort, resolving whether it succeeded.
+   */
+  private async invalidateAccessTokens(
+    esClient: ElasticsearchClient,
+    serviceAccountId: string
+  ): Promise<boolean> {
+    try {
+      const { error_count: errorCount = 0 } = await esClient.security.invalidateToken(
+        { username: serviceAccountId, realm_name: SERVICE_ACCOUNT_REALM_NAME },
+        // Elasticsearch answers 404 when there is nothing to invalidate.
+        { ignore: [404] }
+      );
+      if (errorCount === 0) {
+        return true;
+      }
+      this.logger.warn(
+        `Failed to invalidate ${errorCount} access tokens of deleted service account [${serviceAccountId}]`
+      );
+    } catch (e) {
+      this.logger.warn(
+        `Failed to invalidate the access tokens of deleted service account [${serviceAccountId}]: ${getDetailedErrorMessage(
+          e
+        )}`
+      );
+    }
+    return false;
   }
 
   /**
@@ -574,7 +658,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       : null;
   }
 
-  private async exchangeToken(serviceAccountId: string): Promise<string> {
+  private async exchangeToken(serviceAccountId: string, boundAt?: string): Promise<string> {
     if (!this.license.isEnabled()) {
       throw Boom.forbidden(
         'Cannot exchange a service account token: security features are disabled in Elasticsearch'
@@ -621,6 +705,19 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
           )}).`
         );
         throw Boom.forbidden('The stored service account credential is inconsistent.');
+      }
+
+      // An account deleted and created again keeps its `{namespace}/{name}` id, so a binding left
+      // over from the earlier account would otherwise run as the new one. Both timestamps are
+      // authenticated, and one that does not parse is refused rather than waved through.
+      if (boundAt !== undefined && !(Date.parse(credential.createdAt) <= Date.parse(boundAt))) {
+        this.logger.error(
+          `Refusing to exchange service account [${serviceAccountId}] for a workload bound at ` +
+            `[${boundAt}]: the account was created after that, at [${credential.createdAt}].`
+        );
+        throw Boom.forbidden(
+          'The workload was bound to an earlier service account with the same name.'
+        );
       }
 
       const response = await this.clusterClient.asInternalUser.security.getToken({

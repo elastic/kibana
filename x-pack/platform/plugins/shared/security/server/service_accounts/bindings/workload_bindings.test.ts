@@ -293,6 +293,14 @@ describe('ServiceAccountWorkloadBindings', () => {
       );
     });
 
+    it('tells the backend when the workload was bound', async () => {
+      await bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined);
+
+      expect(backend.createFakeRequest).toHaveBeenCalledWith(
+        expect.objectContaining({ boundAt: '2026-08-21T00:00:00.000Z' })
+      );
+    });
+
     it('opts out of the time-based lease in favour of per-mint binding checks', async () => {
       await bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined);
 

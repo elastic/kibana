@@ -44,8 +44,9 @@ export interface DeleteServiceAccountOptions {
  */
 export interface ServiceAccountsManagementApi {
   /**
-   * Lists every workload bound to the account, across plugins and spaces. Requires
-   * `read_security`, the same as reading the account itself.
+   * Lists every workload bound to the account, across plugins and spaces, the same way a delete
+   * checks for them. Requires `manage_security`, the same as a delete: the bindings span every
+   * space, and `read_security` says nothing about which spaces the caller may see.
    */
   listWorkloads(
     request: KibanaRequest,
@@ -104,10 +105,9 @@ export class ServiceAccountsManagement implements ServiceAccountsManagementApi {
     request: KibanaRequest,
     serviceAccountId: string
   ): Promise<ServiceAccountBoundWorkload[]> {
-    await this.authorize(request, 'read_security', 'list the workloads of a service account');
+    await this.authorize(request, 'manage_security', 'list the workloads of a service account');
 
-    const bindings = await this.store.findByServiceAccountId(serviceAccountId);
-    return bindings.map(toBoundWorkload);
+    return await this.findBoundWorkloads(serviceAccountId);
   }
 
   async delete(
@@ -120,7 +120,7 @@ export class ServiceAccountsManagement implements ServiceAccountsManagementApi {
       // delete the account never learns what it is bound to.
       await this.authorize(request, 'manage_security', 'delete a service account');
 
-      const workloads = await this.findBlockingWorkloads(serviceAccountId);
+      const workloads = await this.findBoundWorkloads(serviceAccountId);
       if (workloads.length > 0) {
         this.logger.debug(
           `Refused to delete service account [${serviceAccountId}]: it is still bound to ${workloads.length} workloads`
@@ -141,7 +141,7 @@ export class ServiceAccountsManagement implements ServiceAccountsManagementApi {
    * fails verification still does: it cannot be trusted to say which account it names, and the
    * safe answer to "would deleting this account break it?" is yes.
    */
-  private async findBlockingWorkloads(
+  private async findBoundWorkloads(
     serviceAccountId: string
   ): Promise<ServiceAccountBoundWorkload[]> {
     const candidates = await this.store.findByServiceAccountId(serviceAccountId);
