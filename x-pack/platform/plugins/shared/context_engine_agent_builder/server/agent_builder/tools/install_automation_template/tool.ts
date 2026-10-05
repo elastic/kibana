@@ -25,7 +25,7 @@ const MAX_DOCUMENTS_LIMIT = 10_000;
 const MAX_BODY_CHARS_LIMIT = 50_000;
 const MAX_UNITS_LIMIT = 10_000;
 const MAX_KIS_LENGTH = 50_000;
-/** One KI per source, so the list is capped at the 100-KI budget. */
+/** One KI per source, so the list is capped at the 100-KI onboarding budget (`strategy_catalog`, "The KI budget"). */
 const MAX_INDEX_METADATA_SOURCES = 100;
 
 /**

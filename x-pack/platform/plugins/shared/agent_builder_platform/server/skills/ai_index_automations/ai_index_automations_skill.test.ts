@@ -525,10 +525,21 @@ describe('aiIndexAutomationsSkill', () => {
         'context-engine.createKi',
         'context-engine.updateKi',
         'context-engine.deleteKi',
-        'context-engine.verifyKi',
       ]) {
         expect(content).toContain(stepType);
       }
+    });
+
+    it('describes verification as the verifiers on createKi, with no separate verifyKi step', () => {
+      const prose = content.replace(/\s+/g, ' ');
+      expect(prose).toMatch(
+        /\*\*Verification rides on `createKi`\.\*\* Its `verifiers` list is non-empty and duplicate-free/
+      );
+      expect(prose).toMatch(
+        /When any verifier fails, nothing is written, the output carries no `id`, and `verification\.results` names/
+      );
+      expect(prose).toMatch(/Pass `verifiers` on every write/);
+      expect(content).not.toMatch(/verifyKi|verify_ki|Gate every write on this/);
     });
 
     it('names both verifier ids, since an unknown id fails the step', () => {
@@ -565,7 +576,7 @@ describe('aiIndexAutomationsSkill', () => {
 
     it('allows custom verifier workflows while keeping the verifier list non-empty', () => {
       expect(content).toMatch(/`\{ workflow_id \}`/);
-      expect(content).toMatch(/non-empty, duplicate-free `verifiers` list/);
+      expect(content).toMatch(/`verifiers` list is non-empty and duplicate-free/);
     });
 
     it('asks the brief for the ids a targeted KI turns into references', () => {
@@ -601,6 +612,9 @@ describe('aiIndexAutomationsSkill', () => {
     it('carries the workflow syntax itself, rather than depending on another skill for it', () => {
       expect(content).toContain('The rest of the syntax these automations use');
       expect(content).toMatch(/An `if` condition is KQL, not Liquid/);
+      expect(content.replace(/\s+/g, ' ')).toMatch(
+        /A gate on a step's output reads `condition: "steps\.set_flag\.output\.ready : true"`/
+      );
       expect(content).toContain('iteration-on-failure');
       expect(content).toContain('on-failure');
     });

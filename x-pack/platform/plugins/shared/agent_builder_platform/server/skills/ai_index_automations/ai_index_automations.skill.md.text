@@ -132,14 +132,15 @@ On an index `deleteKi` removes the document; on a data stream it appends a revis
 `platform.context_engine.query_ai_indices` hides the indicator. It fails when the indicator does
 not exist. This is what pilot cleanup runs.
 
-**`context-engine.verifyKi`** takes a partial `ki` and a non-empty, duplicate-free `verifiers` list,
-and outputs `passed` plus a per-verifier `results` array of `{ verifier, passed, reason }`. The two
-built-in verifier ids are `esql-valid-syntax`, which parses each query the indicator carries without
-touching the cluster, and `esql-valid-runtime`, which executes it against live data bounded to a
-single row. An entry can also be a custom verifier workflow, `{ workflow_id }`, with an optional
-`timeout_sec` and `applies_to`; the templates use the two built-ins. An unknown id fails the step.
-Gate every write on this: an indicator carrying ES|QL that does not run is worse than a missing
-one, because retrieval surfaces it as though it worked.
+**Verification rides on `createKi`.** Its `verifiers` list is non-empty and duplicate-free, and the
+step runs each entry in order before it writes. The two built-in verifier ids are
+`esql-valid-syntax`, which parses each query the indicator carries without touching the cluster,
+and `esql-valid-runtime`, which executes it against live data bounded to a single row. An entry can
+also be a custom verifier workflow, `{ workflow_id }`, with an optional `timeout_sec` and
+`applies_to`; the templates use the two built-ins. An unknown id fails the step. When any verifier
+fails, nothing is written, the output carries no `id`, and `verification.results` names the
+verifier and the reason. Pass `verifiers` on every write: an indicator carrying ES|QL that does not
+run is worse than a missing one, because retrieval surfaces it as though it worked.
 
 `attributes` values are strings, numbers, booleans or arrays of strings — never nested objects. A
 single value caps at 10,000 characters, which is what bounds the ES|QL an indicator can carry. A
@@ -180,8 +181,8 @@ reference is `workflow-authoring`, and it is worth loading for a validation erro
 — but not for authoring, for the reason given at the top.
 
 **An `if` condition is KQL, not Liquid.** `condition:` is the one place in a workflow where `{{ }}`
-does not apply. A gate on a `verifyKi` step reads `condition: "steps.verify_ki.output.passed :
-true"` — a KQL field match, with the colon, not `==` and not an interpolation. KQL cannot evaluate
+does not apply. A gate on a step's output reads `condition: "steps.set_flag.output.ready : true"`
+— a KQL field match, with the colon, not `==` and not an interpolation. KQL cannot evaluate
 filters, so anything computed goes through a `data.set` first and the condition reads that step's
 output:
 
