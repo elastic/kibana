@@ -126,6 +126,12 @@ export interface TooltipHold {
   release(point?: Point): void;
   /** Ends the holds, the focus one too: the page learns of focus's going, to where it is. */
   end(): void;
+  /**
+   * While suspended, the hold does not end: a full-screen screenshot covers the
+   * page, pointer and focus included. Events that would tell the page the
+   * tooltip's element was left are still held back.
+   */
+  suspend(suspended: boolean): void;
   /** The element that shows the tooltip held, when known. */
   trigger(): Element | null;
 }
@@ -143,7 +149,9 @@ export interface TooltipHold {
  * tooltip, which the tooltip covers, being entered or moved over (EUI shows one
  * tooltip at a time, so another trigger entered would take the tooltip down).
  * As the pointer turns away, or focus lands on the page, the element learns of
- * the leave, to where the pointer or focus is then.
+ * the leave, to where the pointer or focus is then. While suspended, neither
+ * does: a full-screen screenshot covers the page, and the tooltip stays until
+ * the screenshot is gone and the pointer or focus has left.
  */
 export const createTooltipHold = (): TooltipHold => {
   let pointer: {
@@ -162,6 +170,7 @@ export const createTooltipHold = (): TooltipHold => {
     held: Held[];
   } | null = null;
   let releasing = false;
+  let suspended = false;
 
   const keeps = (point: Point): boolean => {
     if (!pointer) {
@@ -231,7 +240,14 @@ export const createTooltipHold = (): TooltipHold => {
       }
       const point = pointOf(event);
       if (pointer && !keeps(point)) {
-        releasePointer(point);
+        if (suspended) {
+          // The screenshot's own events pass; a leave of the element itself stays held back.
+          if (!pointer.origin.contains(target)) {
+            return false;
+          }
+        } else {
+          releasePointer(point);
+        }
       }
       const atUi = isAtTooltip(target);
       if (!atUi && isIgnored(target, ignoreSelectors)) {
@@ -277,6 +293,9 @@ export const createTooltipHold = (): TooltipHold => {
     move(event, ignoreSelectors) {
       const point = pointOf(event);
       if (pointer && !keeps(point)) {
+        if (suspended) {
+          return false;
+        }
         releasePointer(point);
       }
       const { target } = event;
@@ -299,6 +318,9 @@ export const createTooltipHold = (): TooltipHold => {
         return false;
       }
       if (type === 'focus' || type === 'focusin') {
+        if (suspended) {
+          return false;
+        }
         // Focus on the page again: where the page believes it to be, or elsewhere, which it learns of now.
         if (focused && !isIgnored(target, ignoreSelectors)) {
           if (focused.trigger.contains(target)) {
@@ -336,6 +358,10 @@ export const createTooltipHold = (): TooltipHold => {
       } else {
         releaseFocus(active instanceof Element && active !== document.body ? active : null);
       }
+    },
+
+    suspend(next) {
+      suspended = next;
     },
 
     trigger: () => live(pointer?.trigger) ?? live(focused?.trigger),

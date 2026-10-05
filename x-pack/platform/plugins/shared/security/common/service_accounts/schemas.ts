@@ -31,6 +31,17 @@ export const serviceAccountNameSchema = z
   );
 
 /**
+ * The cap applies to the raw input, before the trim, so the body limit on the route covers every
+ * valid description. A blank description becomes `undefined`. UIAM refuses an empty string and
+ * Elasticsearch accepts one, so Kibana never sends one to either backend.
+ */
+export const serviceAccountDescriptionSchema = z
+  .string()
+  .max(SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH)
+  .trim()
+  .transform((description) => (description === '' ? undefined : description));
+
+/**
  * The role list an account is created with, held to one backend's `limits`. What Kibana reads
  * back from a backend is bounded by that backend's own limits too, but validated separately,
  * since accounts can be written there without Kibana.
@@ -60,6 +71,6 @@ export const getServiceAccountRolesSchema = ({
 export const getCreateServiceAccountParamsSchema = (limits: ServiceAccountRoleLimits) =>
   z.object({
     name: serviceAccountNameSchema,
-    description: z.string().max(SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH).optional(),
+    description: serviceAccountDescriptionSchema.optional(),
     roles: getServiceAccountRolesSchema(limits),
   });

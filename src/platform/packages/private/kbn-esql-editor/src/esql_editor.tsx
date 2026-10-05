@@ -31,8 +31,16 @@ import { ESQL_LANG_ID, monaco } from '@kbn/code-editor';
 import { DataSourceBrowser, FieldsBrowser } from '@kbn/esql-resource-browser';
 import { useStableCallback } from '@kbn/react-hooks';
 import type { RestorableStateProviderApi } from '@kbn/restorable-state';
-import type { ComponentProps } from 'react';
-import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ComponentProps, Ref } from 'react';
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
@@ -98,6 +106,16 @@ import { useSourcesBadge } from './resource_browser/use_resource_browser_badge';
 
 const BREAKPOINT_WIDTH = 540;
 
+export interface ESQLEditorFocusApi {
+  focus: () => void;
+}
+
+export type ESQLEditorApi = RestorableStateProviderApi & ESQLEditorFocusApi;
+
+type ESQLEditorInternalProps = ESQLEditorPropsInternal & {
+  editorApiRef?: Ref<ESQLEditorFocusApi>;
+};
+
 // React.memo is applied inside the withRestorableState HOC (called below)
 const ESQLEditorInternal = function ESQLEditor({
   query,
@@ -128,10 +146,12 @@ const ESQLEditorInternal = function ESQLEditor({
   enableCreateView = false,
   onESQLDocsFlyoutVisibilityChanged,
   onVisorNlResultReady,
-}: ESQLEditorPropsInternal) {
+  editorApiRef,
+}: ESQLEditorInternalProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
+  useImperativeHandle(editorApiRef, () => ({ focus: () => editorRef.current?.focus() }), []);
   const editorModelUriRef = useRef<string | undefined>(undefined);
   const containerRef = useRef<HTMLElement>(null);
   const suppressSuggestionsRef = useRef(false);
@@ -670,6 +690,8 @@ const ESQLEditorInternal = function ESQLEditor({
     onAfterInsert: expandToFitContent,
   });
 
+  const focusEditor = useCallback(() => editorRef.current?.focus(), []);
+
   const visorNlOnSubmit = useCallback(
     (generatedQuery: string) => onUpdateAndSubmitQuery(generatedQuery, QuerySource.QUICK_SEARCH),
     [onUpdateAndSubmitQuery]
@@ -969,7 +991,9 @@ const ESQLEditorInternal = function ESQLEditor({
           onUpdateAndSubmitQuery={(newQuery) =>
             onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
           }
-          isDisabled={Boolean(isDisabled || disableSubmitAction)}
+          isDisabled={Boolean(isDisabled)}
+          disableSubmitAction={Boolean(disableSubmitAction)}
+          onKqlSubmitted={focusEditor}
         />
       )}
       {(isHistoryOpen || (isLanguageComponentOpen && editorIsInline)) && (
@@ -1133,22 +1157,21 @@ const ESQLEditorInternal = function ESQLEditor({
   return editorPanel;
 };
 
-const ESQLEditorWithActionsProvider = forwardRef<
-  RestorableStateProviderApi,
-  ESQLEditorPropsInternal
->(function ESQLEditorWithActionsProvider(props, _ref) {
-  const hasProvider = useHasEsqlEditorActionsProvider();
+const ESQLEditorWithActionsProvider = forwardRef<ESQLEditorApi, ESQLEditorPropsInternal>(
+  function ESQLEditorWithActionsProvider(props, ref) {
+    const hasProvider = useHasEsqlEditorActionsProvider();
 
-  if (hasProvider) {
-    return <ESQLEditorInternal {...props} />;
+    if (hasProvider) {
+      return <ESQLEditorInternal {...props} editorApiRef={ref} />;
+    }
+
+    return (
+      <EsqlEditorActionsProvider>
+        <ESQLEditorInternal {...props} editorApiRef={ref} />
+      </EsqlEditorActionsProvider>
+    );
   }
-
-  return (
-    <EsqlEditorActionsProvider>
-      <ESQLEditorInternal {...props} />
-    </EsqlEditorActionsProvider>
-  );
-});
+);
 
 export const ESQLEditor = withRestorableState(ESQLEditorWithActionsProvider);
 export type ESQLEditorProps = ComponentProps<typeof ESQLEditor>;

@@ -150,7 +150,7 @@ describe('InvestigationDetailFlyout', () => {
       inv: investigation({
         status: 'completed',
         completed_at: '2026-09-15T12:10:00.000Z',
-        severity: '60-high',
+        severity: 'high',
         summary: 'Checkout **failed** for 30% of requests.',
         conclusion: 'The 12:02 deploy shrank the connection pool.',
         impact: {
