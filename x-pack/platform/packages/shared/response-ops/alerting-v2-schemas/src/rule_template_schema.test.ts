@@ -318,6 +318,17 @@ describe('rule template create-rule schema coupling', () => {
                   "minLength": 1,
                   "type": "string",
                 },
+                "routing_tags": Object {
+                  "description": "Routing tags that link alerts from this rule to action policies. An action policy applies when its \`matcher.tags\` contains at least one of these tags. Only allowed when kind is \\"alert\\".",
+                  "items": Object {
+                    "maxLength": 128,
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "maxItems": 20,
+                  "minItems": 1,
+                  "type": "array",
+                },
                 "tags": Object {
                   "description": "Tags for categorization, e.g. [\\"production\\", \\"infra\\"].",
                   "items": Object {

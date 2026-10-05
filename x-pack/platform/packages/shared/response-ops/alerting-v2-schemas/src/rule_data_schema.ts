@@ -95,6 +95,12 @@ export const metadataSchema = z
       .min(1)
       .optional()
       .describe('Tags for categorization, e.g. ["production", "infra"].'),
+    routing_tags: tagsSchema
+      .min(1)
+      .optional()
+      .describe(
+        'Routing tags that link alerts from this rule to action policies. An action policy applies when its `matcher.tags` contains at least one of these tags. Only allowed when kind is "alert".'
+      ),
     builder_type: z
       .string()
       .max(64)
@@ -593,6 +599,15 @@ export const isStateTransitionAllowed = (data: {
   state_transition?: unknown;
 }): boolean => data.kind === 'alert' || data.state_transition == null;
 
+/** Signal rules never create alerts, so no action policy can be routed to them. */
+export const isRoutingTagsAllowedForKind = (data: {
+  kind?: string;
+  metadata?: { routing_tags?: unknown } | null;
+}): boolean => data.kind !== 'signal' || data.metadata?.routing_tags == null;
+
+export const ROUTING_TAGS_SIGNAL_RULE_MESSAGE =
+  'metadata.routing_tags is only allowed when kind is "alert".';
+
 /** The two objects that describe an alert rule's episode lifecycle. */
 const LIFECYCLE_FIELDS = ['recovery', 'no_data'] as const;
 
@@ -664,7 +679,7 @@ export const isRecoveryTransitionConsistentWithStrategy = (data: RuleLifecycleSh
 /** The create-rule fields the refinements below read. */
 type CreateRuleRefinementFields = Pick<
   z.infer<typeof createRuleDataBaseSchema>,
-  'kind' | 'query' | 'recovery' | 'no_data' | 'state_transition'
+  'kind' | 'metadata' | 'query' | 'recovery' | 'no_data' | 'state_transition'
 >;
 
 /**
@@ -681,6 +696,10 @@ const applyCreateRuleRefinements = <T extends z.ZodType<CreateRuleRefinementFiel
     .refine(isStateTransitionAllowed, {
       message: 'state_transition is only allowed when kind is "alert".',
       path: ['state_transition'],
+    })
+    .refine(isRoutingTagsAllowedForKind, {
+      message: ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
+      path: ['metadata', 'routing_tags'],
     })
     .check((ctx) => {
       const allowed = isLifecycleConfigAllowedForKind(ctx.value);
@@ -773,6 +792,8 @@ export const updateRuleDataSchema = z
         // `null` clears all tags (an empty array is rejected by `.min(1)`, and
         // omitting `tags` preserves the existing ones on a partial update).
         tags: tagsSchema.min(1).nullable().optional(),
+        // Same `null`-clears semantics as `tags`.
+        routing_tags: tagsSchema.min(1).nullable().optional(),
       })
       .optional(),
     time_field: z

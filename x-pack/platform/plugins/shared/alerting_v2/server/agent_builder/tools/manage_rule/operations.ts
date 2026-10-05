@@ -36,7 +36,9 @@ import {
   isLifecycleConfigAllowedForKind,
   isRecoveryConditionUsableWithBreach,
   isRecoveryTransitionConsistentWithStrategy,
+  isRoutingTagsAllowedForKind,
   REQUIRE_DISTINGUISHABLE_ABSENCE_MESSAGE,
+  ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
 } from '@kbn/alerting-v2-schemas';
 import { resolveArtifactId } from '@kbn/alerting-v2-utils';
 import { buildRulePayload } from '@kbn/alerting-v2-utils';
@@ -359,6 +361,7 @@ export const executeRuleOperations = async (
             name: mergedName,
             ...(op.description !== undefined ? { description: op.description } : {}),
             ...(op.tags !== undefined ? { tags: op.tags } : {}),
+            ...(op.routing_tags !== undefined ? { routing_tags: op.routing_tags } : {}),
           },
         };
         break;
@@ -369,7 +372,12 @@ export const executeRuleOperations = async (
         // can remove them, so converting to a signal has to clear them here.
         next =
           op.kind === 'signal'
-            ? omit({ ...next, kind: op.kind }, ['recovery', 'no_data', 'state_transition'])
+            ? omit({ ...next, kind: op.kind }, [
+                'recovery',
+                'no_data',
+                'state_transition',
+                'metadata.routing_tags',
+              ])
             : { ...next, kind: op.kind };
         break;
 
@@ -567,6 +575,10 @@ export const executeRuleOperations = async (
 
   if (!isLifecycleConfigAllowedForKind(next)) {
     throw new RuleOperationValidationError('Signal rules cannot set recovery or no_data.');
+  }
+
+  if (!isRoutingTagsAllowedForKind(next)) {
+    throw new RuleOperationValidationError(ROUTING_TAGS_SIGNAL_RULE_MESSAGE);
   }
 
   // `set_query` replaces the query and `set_recovery` replaces the strategy, so
