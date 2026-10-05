@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import {
   EuiCheckableCard,
   EuiFlexGroup,
@@ -15,6 +16,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SchemaResolutionField } from '../components/fields/schema_resolution_field';
+import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
+
+const fillFlexItemStyles = css({ flexGrow: 1 });
 
 export interface InferSchemaToggleProps {
   dynamicMode: boolean;
@@ -29,13 +33,10 @@ export function InferSchemaToggle({ dynamicMode, onDynamicModeChange }: InferSch
         <EuiFlexItem>
           <EuiCheckableCard
             id="createDatasetWizardInferSchema"
+            css={fillFlexItemStyles}
             label={
               <EuiText size="s">
-                <strong>
-                  {i18n.translate('xpack.dataFederation.createDatasetWizard.inferSchemaLabel', {
-                    defaultMessage: 'Infer unmapped fields',
-                  })}
-                </strong>
+                <strong>{createDatasetWizardStrings.inferSchemaLabel}</strong>
               </EuiText>
             }
             checked={dynamicMode}
@@ -56,13 +57,10 @@ export function InferSchemaToggle({ dynamicMode, onDynamicModeChange }: InferSch
         <EuiFlexItem>
           <EuiCheckableCard
             id="createDatasetWizardDefineSchema"
+            css={fillFlexItemStyles}
             label={
               <EuiText size="s">
-                <strong>
-                  {i18n.translate('xpack.dataFederation.createDatasetWizard.defineSchemaLabel', {
-                    defaultMessage: 'Use mapped fields only',
-                  })}
-                </strong>
+                <strong>{createDatasetWizardStrings.defineSchemaLabel}</strong>
               </EuiText>
             }
             checked={!dynamicMode}

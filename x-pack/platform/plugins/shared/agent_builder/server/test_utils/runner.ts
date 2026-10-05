@@ -17,6 +17,7 @@ import {
 } from '@kbn/core/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   AgentHandlerContext,
@@ -54,6 +55,13 @@ import { createAgentsServiceStartMock } from './agents';
 import { createConversationServiceMock } from './conversations';
 import type { SkillRegistry, SkillServiceStart } from '../services/skills';
 import type { PluginsServiceStart } from '../services/plugins/plugin_service';
+import type { DeploymentInfo } from '../utils/deployment_info';
+
+export const createDeploymentInfoMock = (): DeploymentInfo => ({
+  environment: 'self_managed',
+  version: '9.3.0',
+  airgapped: false,
+});
 
 export type ToolResultStoreMock = jest.Mocked<WritableToolResultStore>;
 export type SkillsStoreMock = jest.Mocked<WritableSkillsStore>;
@@ -331,6 +339,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
   return {
     request: httpServerMock.createKibanaRequest(),
     spaceId: 'default',
+    deployment: createDeploymentInfoMock(),
     esClient: elasticsearchServiceMock.createScopedClusterClient(),
     selfClient: httpServiceMock.createStartContract().selfClient,
     savedObjectsClient: savedObjectsServiceMock.createStartContract().getScopedClient({} as any),
@@ -472,8 +481,10 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     savedObjects: savedObjectsServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     deductiveRegister: false,
+    deploymentInfo: createDeploymentInfoMock(),
     spaces: spacesMock.createStart(),
     actions: actionsMock.createStart(),
+    licensing: licensingMock.createStart(),
     modelProvider: createModelProviderMock(),
     toolsService: createToolsServiceStartMock(),
     agentsService: createAgentsServiceStartMock(),
@@ -523,8 +534,10 @@ export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
     savedObjects: savedObjectsServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     deductiveRegister: false,
+    deploymentInfo: createDeploymentInfoMock(),
     spaces: spacesMock.createStart(),
     actions: actionsMock.createStart(),
+    licensing: licensingMock.createStart(),
     modelProviderFactory: createModelProviderFactoryMock(),
     toolsService: createToolsServiceStartMock(),
     agentsService: createAgentsServiceStartMock(),
