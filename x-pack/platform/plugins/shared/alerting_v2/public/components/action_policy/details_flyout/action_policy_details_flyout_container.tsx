@@ -83,7 +83,7 @@ export const ActionPolicyDetailsFlyoutContainer = ({
       name: `${name} [clone]`,
       description,
       destinations,
-      grouping_mode: groupingMode ?? 'per_episode',
+      grouping_mode: groupingMode ?? 'per_alert',
       ...(matcher != null && { matcher }),
       ...(groupBy != null && { group_by: groupBy }),
       ...(throttle != null && { throttle }),
