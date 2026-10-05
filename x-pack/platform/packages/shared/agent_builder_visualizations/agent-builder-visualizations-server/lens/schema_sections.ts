@@ -10,13 +10,28 @@ import { z } from '@kbn/zod';
 import { xyConfigSchemaESQL } from '@kbn/lens-embeddable-utils';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { chartTypeRegistry } from './chart_type_registry';
-import { toJsonSchema } from './json_schema_utils';
 import { buildSchemaSectionIndex } from './schema_section_index';
 
 export const LOAD_SCHEMA_SECTIONS_TOOL_NAME = 'load_schema_sections';
 
+/**
+ * Matches descriptions that carry constraint or usage info worth keeping
+ * in the LLM prompt (numbers, ranges, defaults, examples, units).
+ * Everything else (e.g. "Label for the operation") is stripped to save tokens.
+ */
+const USEFUL_DESCRIPTION_RE =
+  /(\d|default|e\.g\.|i\.e\.|example|must|between|minimum|maximum|at least|at most|up to|pixels|millisecond|factor|typical|legacy|truncat)/i;
+
 /** `type` is set by every example, and the system injects `data_source`. */
 const EXCLUDED_KEYS = ['type', 'data_source'] as const;
+
+/** The JSON schema of a zod object's input, without descriptions that carry no constraint or usage info. */
+const toJsonSchema = (schema: z.ZodObject): { properties?: object; $defs?: object } =>
+  JSON.parse(JSON.stringify(z.toJSONSchema(schema, { io: 'input' })), (key, value) =>
+    key === 'description' && typeof value === 'string' && !USEFUL_DESCRIPTION_RE.test(value)
+      ? undefined
+      : value
+  );
 
 /** Rebuilds a chart config schema with only the top-level keys the model can load. */
 const toSectionsSchema = ({ shape }: z.ZodObject): z.ZodObject =>
@@ -44,10 +59,9 @@ export const getSchemaSectionNames = (chartType: SupportedChartType): string[] =
   Object.keys(getSectionsSchema(chartType).shape);
 
 /** Lists the loadable sections of a chart type with the fields each one holds. */
-export const getSchemaSectionIndex = memoize((chartType: SupportedChartType): string => {
-  const { properties = {}, $defs = {} } = toJsonSchema(getSectionsSchema(chartType));
-  return buildSchemaSectionIndex(properties, $defs);
-});
+export const getSchemaSectionIndex = memoize((chartType: SupportedChartType): string =>
+  buildSchemaSectionIndex(getSectionsSchema(chartType))
+);
 
 /** Renders the JSON schema of the given sections, with the definitions they reference. */
 export const renderSchemaSections = (
