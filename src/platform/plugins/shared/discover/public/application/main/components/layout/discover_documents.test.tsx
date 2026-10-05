@@ -64,11 +64,13 @@ async function mountComponent({
   hits,
   toolkit,
   isEsqlMode,
+  error,
 }: {
   fetchStatus: FetchStatus;
   hits: EsHitRecord[];
   toolkit?: InternalStateMockToolkit;
   isEsqlMode?: boolean;
+  error?: Error;
 }) {
   if (!toolkit) {
     ({ toolkit } = await setup());
@@ -89,6 +91,7 @@ async function mountComponent({
   const testDocuments = {
     fetchStatus,
     result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
+    error,
     ...(isEsqlMode
       ? {
           dataSource: createMockEsqlSource(
@@ -141,6 +144,18 @@ describe('Discover documents layout', () => {
   test('render loading when loading and no documents', async () => {
     await mountComponent({ fetchStatus: FetchStatus.LOADING, hits: [] });
     expect(screen.getByText('Loading documents')).toBeVisible();
+    expect(screen.getByTestId('discoverDocumentsLoading')).toBeVisible();
+    expect(screen.queryByTestId('discoverDocumentsTable')).not.toBeInTheDocument();
+  });
+
+  test('render the error when the documents request failed', async () => {
+    await mountComponent({
+      fetchStatus: FetchStatus.ERROR,
+      hits: [],
+      error: new Error('Documents failed'),
+    });
+    expect(screen.getByTestId('discoverDocumentsError')).toBeVisible();
+    expect(screen.getByTestId('discoverErrorCalloutTitle')).toBeVisible();
     expect(screen.queryByTestId('discoverDocumentsTable')).not.toBeInTheDocument();
   });
 
