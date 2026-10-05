@@ -12,6 +12,8 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { hydrateMemoryWorkspace } from '../memory/register_memory';
+import { MEMORY_WORKSPACE_ROOT } from '../memory/materialize';
+import { degradeOnWriterFailure } from '../lib/hydrate_notification';
 import type { NightshiftTelemetryClient } from '../telemetry';
 import { unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withTimeout } from './with_timeout';
@@ -64,12 +66,16 @@ export const memoryMaterializeToSandboxStepDefinition = ({
     outputSchema: z.object({
       sandbox_id: z.string().describe('Sandbox that received the memory pages.'),
       skipped: z.boolean().optional(),
+      failed: z.boolean().optional().describe('The write failed; its contents may be incomplete.'),
       recalled_ids: z
         .array(z.string())
         .describe('Memory page ids recalled for this exact conversation round.'),
       notification: z
         .string()
-        .describe('Markdown fragment listing memory pages new this turn, or empty.'),
+        .describe(
+          'Markdown fragment listing memory pages new this turn, empty when there were none. ' +
+            'On failure, the incomplete-materialization notice for /workspace/memories.'
+        ),
     }),
     handler: async (context) => {
       const {
@@ -149,7 +155,22 @@ export const memoryMaterializeToSandboxStepDefinition = ({
           workflow_execution_id: workflowExecutionId,
           outcome: 'failure',
         });
-        throw error;
+        // Degrade to a system_update line rather than a failed step: this is a
+        // before-agent hook, so throwing here aborts the investigator round over one
+        // writer that could not reach the sandbox.
+        return {
+          output: {
+            sandbox_id: sandboxId,
+            recalled_ids: [],
+            ...degradeOnWriterFailure({
+              logger: context.logger,
+              label: 'Memory materialize',
+              sandboxId,
+              directory: MEMORY_WORKSPACE_ROOT,
+              error,
+            }),
+          },
+        };
       }
 
       telemetry.reportSemanticMemoryMaterialized({

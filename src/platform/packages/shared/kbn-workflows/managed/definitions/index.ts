@@ -57,7 +57,6 @@ import {
 } from './discoveries';
 import { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW } from './nightshift_investigations/agent_optimize';
 import { NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW } from './nightshift_investigations/decision_tree_hydrate';
-import { NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW } from './nightshift_investigations/decision_tree_reinforce';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW } from './nightshift_investigations/investigation';
 import { NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW } from './nightshift_investigations/sandbox_materialize_workspace';
 import { CREATE_PROPOSAL_WORKFLOW } from './proposals';
@@ -127,7 +126,6 @@ export {
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './significant_events';
 export { NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID } from './nightshift_investigations/decision_tree_hydrate';
-export { NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW_ID } from './nightshift_investigations/decision_tree_reinforce';
 export { NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID } from './nightshift_investigations/sandbox_materialize_workspace';
 export { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID } from './nightshift_investigations/agent_optimize';
 export { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from './nightshift_investigations/investigation';
@@ -217,7 +215,6 @@ export const managedWorkflowDefinitions = [
   SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW,
   SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW,
   NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW,
-  NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW,
   NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW,
   NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW,
   NIGHTSHIFT_INVESTIGATION_WORKFLOW,

@@ -345,6 +345,16 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           composeHydrateNotificationsStepDefinition()
         );
+        // Registered unconditionally: the combined materialize workflow installs with Cortex
+        // or Memory, so a trees-off install would otherwise reference an unknown step type.
+        // The handler no-ops on the flag instead, matching cortex/memory above.
+        plugins.workflowsExtensions.registerStepDefinition(
+          decisionTreeHydrateStepDefinition({
+            getSandboxStart: () => this.sandboxStart,
+            logger: this.logger.get('decision_trees'),
+            isEnabled: () => this.decisionTreesEnabled,
+          })
+        );
         plugins.workflowsExtensions.registerStepDefinition(
           cortexOptimizeStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
@@ -368,21 +378,16 @@ export class NightshiftInvestigationsPlugin
             telemetry,
           })
         );
-        if (this.decisionTreesEnabled) {
-          const decisionTreeLogger = this.logger.get('decision_trees');
-          plugins.workflowsExtensions.registerStepDefinition(
-            decisionTreeHydrateStepDefinition({
-              getSandboxStart: () => this.sandboxStart,
-              logger: decisionTreeLogger,
-            })
-          );
-          plugins.workflowsExtensions.registerStepDefinition(
-            decisionTreePrepareStepDefinition({
-              getTelemetryConnectorId: () => this.ctx.config.get().sandbox?.telemetry_connector_id,
-              logger: decisionTreeLogger,
-            })
-          );
-        }
+        // Registered unconditionally for the same reason as the tree hydrate above: the
+        // combined optimize workflow installs with Cortex or Memory and now runs the
+        // reinforcement phase too. The handler no-ops on the flag.
+        plugins.workflowsExtensions.registerStepDefinition(
+          decisionTreePrepareStepDefinition({
+            getTelemetryConnectorId: () => this.ctx.config.get().sandbox?.telemetry_connector_id,
+            logger: this.logger.get('decision_trees'),
+            isEnabled: () => this.decisionTreesEnabled,
+          })
+        );
       }
 
       registerRoutes({
