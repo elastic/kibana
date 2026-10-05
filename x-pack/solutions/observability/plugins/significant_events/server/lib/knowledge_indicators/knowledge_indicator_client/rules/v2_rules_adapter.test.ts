@@ -36,9 +36,9 @@ function makeRulesClientMock() {
 
 function makeAdapter(
   mock: ReturnType<typeof makeRulesClientMock>,
-  { isServerless }: Pick<RulesAdapterV2Params, 'isServerless'> = { isServerless: false }
+  { cpsEnabled }: Pick<RulesAdapterV2Params, 'cpsEnabled'> = { cpsEnabled: false }
 ) {
-  return new RulesAdapterV2({ rulesClient: mock, isServerless });
+  return new RulesAdapterV2({ rulesClient: mock, cpsEnabled });
 }
 
 function lastCreateCall(mock: ReturnType<typeof makeRulesClientMock>) {
@@ -170,22 +170,22 @@ describe('RulesAdapterV2', () => {
     });
   });
 
-  describe('serverless project routing', () => {
+  describe('CPS project routing', () => {
     const SET_DIRECTIVE = `SET project_routing="${PROJECT_ROUTING_ALL}";`;
 
-    it('omits the project routing directive on stateful', async () => {
+    it('omits the project routing directive when CPS is disabled', async () => {
       const mock = makeRulesClientMock();
       mock.createRule.mockResolvedValue({} as never);
-      const adapter = makeAdapter(mock, { isServerless: false });
+      const adapter = makeAdapter(mock, { cpsEnabled: false });
       await adapter.createRule('rule-1', createDefinition);
 
       expect(lastCreateCall(mock).data.query.base).not.toContain('SET project_routing');
     });
 
-    it('scopes the create breach query across all projects on serverless', async () => {
+    it('scopes the create breach query across all projects when CPS is enabled', async () => {
       const mock = makeRulesClientMock();
       mock.createRule.mockResolvedValue({} as never);
-      const adapter = makeAdapter(mock, { isServerless: true });
+      const adapter = makeAdapter(mock, { cpsEnabled: true });
       await adapter.createRule('rule-1', createDefinition);
 
       const query = lastCreateCall(mock).data.query.base;
@@ -193,10 +193,10 @@ describe('RulesAdapterV2', () => {
       expectMetricSeriesBreach(query);
     });
 
-    it('scopes the update breach query across all projects on serverless', async () => {
+    it('scopes the update breach query across all projects when CPS is enabled', async () => {
       const mock = makeRulesClientMock();
       mock.updateRule.mockResolvedValue({} as never);
-      const adapter = makeAdapter(mock, { isServerless: true });
+      const adapter = makeAdapter(mock, { cpsEnabled: true });
       await adapter.updateRule('rule-1', updateDefinition);
 
       const query = lastUpdateCall(mock).data.query.base;
@@ -207,7 +207,7 @@ describe('RulesAdapterV2', () => {
     it('emits a query Alerting v2 rule validation accepts', async () => {
       const mock = makeRulesClientMock();
       mock.createRule.mockResolvedValue({} as never);
-      const adapter = makeAdapter(mock, { isServerless: true });
+      const adapter = makeAdapter(mock, { cpsEnabled: true });
       await adapter.createRule('rule-1', createDefinition);
 
       expect(Parser.parseErrors(lastCreateCall(mock).data.query.base)).toEqual([]);

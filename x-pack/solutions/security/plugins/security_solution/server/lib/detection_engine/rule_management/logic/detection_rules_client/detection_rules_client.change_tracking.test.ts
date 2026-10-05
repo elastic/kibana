@@ -78,6 +78,22 @@ describe('DetectionRulesClient change tracking', () => {
       errors: [],
       total: 0,
     });
+    rulesClient.bulkUpdateRules.mockImplementation(async (args) => ({
+      successfulIds: args.rules.map((rule) => rule.id),
+      errors: [],
+      total: args.rules.length,
+    }));
+    rulesClient.bulkEnableRules.mockResolvedValue({
+      errors: [],
+      rules: [],
+      total: 0,
+      taskIdsFailedToBeEnabled: [],
+    });
+    rulesClient.bulkDisableRules.mockResolvedValue({
+      errors: [],
+      rules: [],
+      total: 0,
+    });
 
     detectionRulesClient = createDetectionRulesClient({
       actionsClient,
@@ -161,7 +177,7 @@ describe('DetectionRulesClient change tracking', () => {
           },
         });
 
-        expect(rulesClient.update).toHaveBeenCalledWith(
+        expect(rulesClient.bulkUpdateRules).toHaveBeenCalledWith(
           expect.objectContaining({
             changeTracking: {
               action: SecurityRuleChangeTrackingAction.ruleImport,

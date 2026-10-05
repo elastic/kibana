@@ -19,7 +19,7 @@ const investigation: ListInvestigationItem = {
   created_at: '2026-09-11T09:00:00.000Z',
   subject: { type: 'significant_event', id: 'event-1', summary: 'Investigate checkout errors' },
   summary: 'Checkout errors are elevated',
-  severity: '80-critical',
+  severity: 'critical',
 };
 
 const makeSection = (
@@ -49,39 +49,34 @@ const renderSections = (sections: InvestigationSectionState[]) =>
 
 describe('InvestigationList', () => {
   it('keeps skeletons visible while a section is loading', () => {
-    renderSections([
-      makeSection('80-critical', { isInitialLoading: true }),
-      makeSection('60-high'),
-    ]);
+    renderSections([makeSection('critical', { isInitialLoading: true }), makeSection('high')]);
 
     expect(
-      screen.getByTestId('nightshiftInvestigationSectionSkeleton-80-critical')
+      screen.getByTestId('nightshiftInvestigationSectionSkeleton-critical')
     ).toBeInTheDocument();
-    expect(screen.queryByTestId('nightshiftInvestigationSection-60-high')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftInvestigationSection-high')).not.toBeInTheDocument();
   });
 
   it('hides a resolved empty section', () => {
     renderSections([
-      makeSection('80-critical', { investigations: [investigation], total: 1 }),
-      makeSection('60-high'),
+      makeSection('critical', { investigations: [investigation], total: 1 }),
+      makeSection('high'),
     ]);
 
-    expect(screen.getByTestId('nightshiftInvestigationSection-80-critical')).toBeInTheDocument();
-    expect(screen.queryByTestId('nightshiftInvestigationSection-60-high')).not.toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftInvestigationSection-critical')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftInvestigationSection-high')).not.toBeInTheDocument();
     expect(screen.queryByTestId('nightshiftInvestigationsEmpty')).not.toBeInTheDocument();
   });
 
   it('keeps an empty section that failed to load so it can be retried', () => {
-    renderSections([makeSection('80-critical', { error: new Error('Network unavailable') })]);
+    renderSections([makeSection('critical', { error: new Error('Network unavailable') })]);
 
-    expect(screen.getByTestId('nightshiftInvestigationSection-80-critical')).toBeInTheDocument();
-    expect(
-      screen.getByTestId('nightshiftInvestigationSectionRetry-80-critical')
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftInvestigationSection-critical')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftInvestigationSectionRetry-critical')).toBeInTheDocument();
   });
 
   it('shows a single empty state when every section is empty', () => {
-    renderSections([makeSection('in-progress'), makeSection('80-critical')]);
+    renderSections([makeSection('in-progress'), makeSection('critical')]);
 
     expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toHaveTextContent(
       'No investigations found'
@@ -89,15 +84,13 @@ describe('InvestigationList', () => {
     expect(
       screen.queryByTestId('nightshiftInvestigationSection-in-progress')
     ).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId('nightshiftInvestigationSection-80-critical')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftInvestigationSection-critical')).not.toBeInTheDocument();
   });
 
   it('renders in progress first and failed last', () => {
     renderSections([
       makeSection('in-progress', { investigations: [investigation], total: 1 }),
-      makeSection('80-critical', { investigations: [investigation], total: 1 }),
+      makeSection('critical', { investigations: [investigation], total: 1 }),
       makeSection('failed', { investigations: [investigation], total: 1 }),
     ]);
 

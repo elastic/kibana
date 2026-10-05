@@ -9,11 +9,15 @@ applies_to:
 
 # PostHog connector [posthog-action-type]
 
-The PostHog connector connects directly to the PostHog REST API. It lets a workflow or agent find, own, and act on a product error without leaving Elastic: list and read error-tracking issues, set their status, assign an owner, run a HogQL query for enrichment, toggle a feature flag as a mitigation lever, mark events on charts with annotations, and look up session recordings around an error.
+The PostHog connector connects directly to the PostHog REST API. It lets an agent find, own, and act on a product error without leaving Elastic: list and read error-tracking issues, set their status, assign an owner, run a HogQL query for enrichment, toggle a feature flag as a mitigation lever, mark events on charts with annotations, and look up session recordings around an error.
+
+::::{note}
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
+::::
 
 ## Overview
 
-This is a **custom connector** that uses PostHog's REST API with personal API key (Bearer token) authentication. Works with PostHog US Cloud, EU Cloud, or a self-managed instance.
+The PostHog connector uses PostHog's REST API with personal API key (Bearer token) authentication. It works with PostHog US Cloud, EU Cloud, or a self-managed instance.
 
 ## Create connectors in {{kib}} [define-posthog-ui]
 

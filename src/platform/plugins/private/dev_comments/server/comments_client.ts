@@ -89,6 +89,11 @@ export class CommentsClient {
     );
   }
 
+  public async get(id: string): Promise<Comment | undefined> {
+    const stored = (await ifStored(() => this.comments.get({ id })))?._source;
+    return stored && fromStored(id, stored);
+  }
+
   public async getSnapshot(id: string): Promise<CommentSnapshot | undefined> {
     return (await ifStored(() => this.snapshots.get({ id })))?._source;
   }
@@ -111,9 +116,8 @@ export class CommentsClient {
       updatedAt: now,
       ...(snapshot ? { snapshot: sizeOf(snapshot) } : {}),
     };
-    // The image goes first, so that a comment is never seen without its screenshot.
-    // Nothing would ever read or remove the screenshot of a comment that is not
-    // stored, so it is taken out again as soon as that is known.
+    // The image goes first, so that a comment is never seen without its screenshot;
+    // the screenshot of a comment that is not stored is taken out again.
     if (snapshot) {
       try {
         await this.snapshots.index({ id, document: snapshot });
@@ -139,13 +143,10 @@ export class CommentsClient {
   }
 
   /**
-   * Stores a new comment. Elasticsearch answering with an error means the comment
-   * is not stored, and the error is thrown as it is. Without an answer (a timeout,
-   * a lost connection) the comment may well be stored, so the same creation is
-   * made once more: it goes through, or is refused because the comment is there
-   * already, and either way the comment is stored, without the browser having to
-   * try again and store a second one. Should that fail too, nothing is known about
-   * the comment, which an `UncertainWriteError` says.
+   * Stores a new comment. An error from Elasticsearch means it is not stored.
+   * Without an answer (a timeout) it may be, so the same creation is made once
+   * more: it goes through, or is refused as a duplicate, and either way the
+   * comment is stored once. Failing that too, an `UncertainWriteError`.
    */
   private async storeComment(id: string, document: StoredComment): Promise<void> {
     const write = () => this.comments.index({ id, document, op_type: 'create' });
@@ -176,12 +177,7 @@ export class CommentsClient {
     }
   }
 
-  /**
-   * The updated comment, or undefined when there is none with that id. The
-   * comment is written back only if it is still as it was read, so that
-   * replies posted at the same time append rather than overwrite each other
-   * and the reply limit holds.
-   */
+  /** The updated comment, or undefined when there is none by the id. Written back only if still as read, so that concurrent replies append rather than overwrite. */
   public async update(id: string, patch: CommentPatch): Promise<Comment | undefined> {
     for (let attempt = 0; ; attempt++) {
       const current = await ifStored(() => this.comments.get({ id, seq_no_primary_term: true }));
