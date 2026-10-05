@@ -11544,17 +11544,17 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/alerting/v2/alerts/{alert_id}/_ack:
+  /api/alerting/v2/alerts/{id}/_ack:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{alert_id}/_ack</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{id}/_ack</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-alerts-alert-id-ack
+      operationId: post-alerting-v2-alerts-id-ack
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -11565,7 +11565,7 @@ paths:
             type: string
         - description: Identifier of the alert to apply the action to.
           in: path
-          name: alert_id
+          name: id
           required: true
           schema:
             maxLength: 150
@@ -11588,15 +11588,15 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Path is missing required alert_id
+                  summary: Path is missing required id
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        alert_id:
+                        id:
                           - Required
                     error: Bad Request
-                    message: 'alert_id: Required'
+                    message: 'id: Required'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -11674,17 +11674,17 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/alerting/v2/alerts/{alert_id}/_activate:
+  /api/alerting/v2/alerts/{id}/_activate:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{alert_id}/_activate</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{id}/_activate</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-alerts-alert-id-activate
+      operationId: post-alerting-v2-alerts-id-activate
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -11695,7 +11695,7 @@ paths:
             type: string
         - description: Identifier of the alert to apply the action to.
           in: path
-          name: alert_id
+          name: id
           required: true
           schema:
             maxLength: 150
@@ -11719,15 +11719,15 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Path is missing required alert_id
+                  summary: Path is missing required id
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        alert_id:
+                        id:
                           - Required
                     error: Bad Request
-                    message: 'alert_id: Required'
+                    message: 'id: Required'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -11821,17 +11821,17 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/alerting/v2/alerts/{alert_id}/_assign:
+  /api/alerting/v2/alerts/{id}/_assign:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{alert_id}/_assign</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{id}/_assign</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-alerts-alert-id-assign
+      operationId: post-alerting-v2-alerts-id-assign
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -11842,7 +11842,7 @@ paths:
             type: string
         - description: Identifier of the alert to apply the action to.
           in: path
-          name: alert_id
+          name: id
           required: true
           schema:
             maxLength: 150
@@ -11866,15 +11866,15 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Path is missing required alert_id
+                  summary: Path is missing required id
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        alert_id:
+                        id:
                           - Required
                     error: Bad Request
-                    message: 'alert_id: Required'
+                    message: 'id: Required'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -11952,17 +11952,17 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/alerting/v2/alerts/{alert_id}/_deactivate:
+  /api/alerting/v2/alerts/{id}/_deactivate:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{alert_id}/_deactivate</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{id}/_deactivate</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-alerts-alert-id-deactivate
+      operationId: post-alerting-v2-alerts-id-deactivate
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -11973,7 +11973,7 @@ paths:
             type: string
         - description: Identifier of the alert to apply the action to.
           in: path
-          name: alert_id
+          name: id
           required: true
           schema:
             maxLength: 150
@@ -11997,15 +11997,15 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Path is missing required alert_id
+                  summary: Path is missing required id
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        alert_id:
+                        id:
                           - Required
                     error: Bad Request
-                    message: 'alert_id: Required'
+                    message: 'id: Required'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -12099,17 +12099,17 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/alerting/v2/alerts/{alert_id}/_tag:
+  /api/alerting/v2/alerts/{id}/_tag:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{alert_id}/_tag</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{id}/_tag</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-alerts-alert-id-tag
+      operationId: post-alerting-v2-alerts-id-tag
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -12120,7 +12120,7 @@ paths:
             type: string
         - description: Identifier of the alert to apply the action to.
           in: path
-          name: alert_id
+          name: id
           required: true
           schema:
             maxLength: 150
@@ -12146,15 +12146,15 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Path is missing required alert_id
+                  summary: Path is missing required id
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        alert_id:
+                        id:
                           - Required
                     error: Bad Request
-                    message: 'alert_id: Required'
+                    message: 'id: Required'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -12232,17 +12232,17 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/alerting/v2/alerts/{alert_id}/_unack:
+  /api/alerting/v2/alerts/{id}/_unack:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{alert_id}/_unack</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{id}/_unack</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-alerts-alert-id-unack
+      operationId: post-alerting-v2-alerts-id-unack
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -12253,7 +12253,7 @@ paths:
             type: string
         - description: Identifier of the alert to apply the action to.
           in: path
-          name: alert_id
+          name: id
           required: true
           schema:
             maxLength: 150
@@ -12276,15 +12276,15 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Path is missing required alert_id
+                  summary: Path is missing required id
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        alert_id:
+                        id:
                           - Required
                     error: Bad Request
-                    message: 'alert_id: Required'
+                    message: 'id: Required'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -12383,14 +12383,14 @@ paths:
             maximum: 10000
             minimum: 1
             type: integer
-        - description: Number of events per page. Defaults to 20. Pass 0 for a count-only read.
+        - description: Number of events per page. Defaults to 20.
           in: query
           name: per_page
           required: true
           schema:
             default: 20
             maximum: 100
-            minimum: 0
+            minimum: 1
             type: integer
         - description: Inclusive ISO datetime lower bound on the event timestamp; overrides the default 24-hour window. Independent of alert_ids — e.g. set it to an alert’s start time to scope results to that alert’s lifetime.
           in: query
@@ -12492,10 +12492,10 @@ paths:
                         policy:
                           id: action-policy-1
                           name: Notify on production alerts
+                        rule_count: 1
                         rules:
                           - id: rule-1
                             name: Host CPU high
-                        total_rule_count: 1
                         workflows:
                           - id: workflow-1
                             name: Notify oncall
@@ -12664,14 +12664,14 @@ paths:
             maximum: 10000
             minimum: 1
             type: integer
-        - description: Number of results per page. Pass 0 for a count-only read.
+        - description: Number of results per page.
           in: query
           name: per_page
           required: true
           schema:
             default: 20
             maximum: 100
-            minimum: 0
+            minimum: 1
             type: integer
       responses:
         '200':
@@ -13172,7 +13172,7 @@ paths:
               bulkCreateRulesRequest:
                 summary: Create two rules, one of them disabled
                 value:
-                  rules:
+                  items:
                     - grouping:
                         fields:
                           - host.name
@@ -13321,15 +13321,15 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Request body is missing required rules
+                  summary: Request body is missing required items
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        rules:
+                        items:
                           - Required
                     error: Bad Request
-                    message: 'rules: Required'
+                    message: 'items: Required'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -15522,7 +15522,7 @@ paths:
                     code: MAX_SCHEDULES_PER_MINUTE_EXCEEDED
                     details:
                       interval: 1m
-                      maxScheduledPerMinute: 400
+                      max_scheduled_per_minute: 400
                     error: Bad Request
                     message: Rule schedule of "1m" would exceed the limit of 400 rule runs per minute
               schema:
@@ -143459,8 +143459,10 @@ components:
                   enum:
                     - every_time
                   type: string
-              description: The throttle strategy.
+              description: The throttle strategy that controls how often notifications are sent.
+              nullable: true
           required:
+            - strategy
             - interval
         updated_at:
           description: The ISO datetime when the action policy was last updated.
@@ -143591,7 +143593,8 @@ components:
           type: string
         assignee_uid:
           description: User profile UID of the assignee, or null to remove the assignee from the episode.
-          maxLength: 256
+          maxLength: 150
+          minLength: 1
           nullable: true
           type: string
       required:
@@ -143711,7 +143714,7 @@ components:
       additionalProperties: false
       type: object
       properties:
-        rules:
+        items:
           description: The rules to create. Must contain between 1 and 100 rules.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_create_rule_item'
@@ -143719,7 +143722,7 @@ components:
           minItems: 1
           type: array
       required:
-        - rules
+        - items
     Kibana_HTTP_APIs_alerting_bulk_create_rules_response:
       additionalProperties: false
       type: object
@@ -144039,7 +144042,8 @@ components:
       properties:
         assignee_uid:
           description: User profile UID of the assignee, or null to remove the assignee from the episode.
-          maxLength: 256
+          maxLength: 150
+          minLength: 1
           nullable: true
           type: string
       required:
@@ -144130,7 +144134,7 @@ components:
         alert_count:
           type: number
         alerts:
-          description: Alert ids referenced by this event, bounded to MAX_EMBEDDED_EPISODES_PER_ITEM. Use `alert_count` for the true total.
+          description: Alert ids referenced by this event, bounded to 50. Empty when the event references no alerts. Use `alert_count` for the true total.
           items:
             type: object
             properties:
@@ -144182,8 +144186,11 @@ components:
               type: string
           required:
             - id
+        rule_count:
+          description: Number of rules referenced by this event after search / rule-filter narrowing. Unlike `total` on a list response this is an exact count, and it may exceed `rules.length` when the embedded array is truncated to the cap.
+          type: number
         rules:
-          description: Rules referenced by this event, bounded to MAX_EMBEDDED_RULES_PER_ITEM. When a search or rule filter narrows the match, this array is intersected with the matched subset server-side. Use `total_rule_count` for the full count.
+          description: Rules referenced by this event, bounded to 20. When a search or rule filter narrows the match, this array is intersected with the matched subset server-side. Use `rule_count` for the full count.
           items:
             type: object
             properties:
@@ -144196,9 +144203,6 @@ components:
               - id
           maxItems: 20
           type: array
-        total_rule_count:
-          description: Total number of rules referenced by this event after search / rule-filter narrowing. May exceed `rules.length` when the embedded array is truncated to the cap.
-          type: number
         workflows:
           items:
             type: object
@@ -144217,9 +144221,10 @@ components:
         - policy
         - outcome
         - alert_count
+        - alerts
         - action_group_count
         - rules
-        - total_rule_count
+        - rule_count
         - workflows
         - error
     Kibana_HTTP_APIs_alerting_policy_execution_history_response:
@@ -144236,7 +144241,7 @@ components:
           type: integer
         per_page:
           maximum: 9007199254740991
-          minimum: 0
+          minimum: 1
           type: integer
         search_matches:
           additionalProperties: false
@@ -144454,7 +144459,7 @@ components:
           type: integer
         per_page:
           maximum: 9007199254740991
-          minimum: 0
+          minimum: 1
           type: integer
         total:
           description: 'The number of rule executions matching the query. This count is an estimate: results above 10,000 may be reported as 10,000.'
@@ -144958,7 +144963,6 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery'
         schedule:
           additionalProperties: false
-          nullable: true
           type: object
           properties:
             every:
