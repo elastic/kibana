@@ -19,13 +19,13 @@ const EMPTY_ESQL_COLUMNS: DatatableColumn[] = [];
  */
 export const getEsqlDatatableFromDocuments = ({
   documentsValue,
-  isEsqlMode,
 }: {
   documentsValue: DataDocumentsMsg | undefined;
-  isEsqlMode: boolean;
 }): { table: Datatable | undefined; esqlQueryColumns: DatatableColumn[] } => {
+  const dataSource =
+    documentsValue?.dataSource?.kind === 'esql' ? documentsValue.dataSource : undefined;
   if (
-    !isEsqlMode ||
+    !dataSource ||
     !documentsValue?.result ||
     ![FetchStatus.COMPLETE, FetchStatus.ERROR].includes(documentsValue.fetchStatus)
   ) {
@@ -35,7 +35,7 @@ export const getEsqlDatatableFromDocuments = ({
     };
   }
 
-  const esqlQueryColumns = documentsValue.esqlQueryColumns || EMPTY_ESQL_COLUMNS;
+  const esqlQueryColumns = [...dataSource.resultColumns];
   return {
     table: {
       type: 'datatable',
