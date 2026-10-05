@@ -145,7 +145,9 @@ async function resolveStreamNames(
   const requested = params.source_ids?.length
     ? intersection(uniq(params.source_ids), accessible)
     : accessible;
-  return compact(requested.filter((name) => typeof name === 'string' && name.length > 0));
+  return compact(
+    requested.filter((sourceId) => typeof sourceId === 'string' && sourceId.length > 0)
+  );
 }
 
 async function fetchFeatureIndicators({
@@ -171,7 +173,7 @@ async function fetchFeatureIndicators({
   onFeatureFetchError?: (sourceId: string, error: unknown) => void;
 }): Promise<KnowledgeIndicatorFeature[]> {
   const results = await Promise.allSettled(
-    sourceIds.map((name) => getFeatures(name, { searchText, featureTypes, featureIds }))
+    sourceIds.map((sourceId) => getFeatures(sourceId, { searchText, featureTypes, featureIds }))
   );
 
   const indicators: KnowledgeIndicatorFeature[] = [];
@@ -283,11 +285,11 @@ export async function searchKnowledgeIndicators({
   // Step 1: Normalize inputs.
   const normalized = normalizeParams(params);
 
-  // Step 2: Resolve streams (requested ∩ accessible).
+  // Step 2: Resolve sources (requested ∩ accessible).
   const sourceIds = await resolveStreamNames(params, getStreamNames);
-  const hasRequestedStreamNames = Array.isArray(params.source_ids) && params.source_ids.length > 0;
-  // Handle the case where no streams are accessible and streams were requested.
-  if (hasRequestedStreamNames && sourceIds.length === 0) {
+  const hasRequestedSourceIds = Array.isArray(params.source_ids) && params.source_ids.length > 0;
+  // Handle the case where no sources are accessible and sources were requested.
+  if (hasRequestedSourceIds && sourceIds.length === 0) {
     return {
       knowledge_indicators: [],
       page: normalized.page,

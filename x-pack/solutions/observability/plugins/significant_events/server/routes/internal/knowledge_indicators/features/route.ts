@@ -19,7 +19,7 @@ import { searchModeSchema } from '../../../utils/search_mode';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { StatusError } from '../../../../lib/errors/status_error';
-import { resolveSourceIds } from '../../../utils/resolve_source_ids';
+import { requestedOrAllSourceIds } from '../../../utils/resolve_source_ids';
 import type { KIBulkOperation } from '../../../../lib/knowledge_indicators';
 
 const MAX_INPUT_STRING_LENGTH = 255;
@@ -221,7 +221,7 @@ export const listAllFeaturesRoute = createServerRoute({
       licensing: scopedClients.licensing,
     });
 
-    const sourceIds = await resolveSourceIds(undefined, scopedClients.sourcesClient);
+    const sourceIds = await requestedOrAllSourceIds(undefined, scopedClients.sourcesClient);
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const {
@@ -328,7 +328,7 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     access: 'internal',
     summary: 'Bulk feature operations across sources',
     description:
-      'Performs bulk delete / exclude / restore operations on features across multiple sources in a single request. Client sends flat operations keyed by feature UUID; the server resolves source ownership via featureClient.findFeaturesByUuids and delegates per-source to featureClient.bulk.',
+      'Performs bulk delete / exclude / restore operations on features across multiple sources in a single request. Client sends flat operations keyed by feature UUID; the server resolves which source owns each feature and applies the operations per source.',
   },
   security: {
     authz: {
@@ -379,7 +379,7 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     const skippedFromLookup = requestedUuids.length - resolved.length;
 
     // Group resolved ops by source.
-    const byStream = resolved.reduce<Record<string, KIBulkOperation[]>>(
+    const bySource = resolved.reduce<Record<string, KIBulkOperation[]>>(
       (acc, { id: featureId, source_id: sourceId }) => {
         const op = opsByUuid.get(featureId);
         if (!op) {
@@ -402,19 +402,19 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     let failed = 0;
     let skipped = skippedFromLookup;
 
-    const streamsWithShrinkingOps = new Set<string>();
+    const sourcesWithShrinkingOps = new Set<string>();
 
-    for (const [streamName, ops] of Object.entries(byStream)) {
+    for (const [sourceId, ops] of Object.entries(bySource)) {
       try {
-        const { applied, skipped: streamSkipped } = await kiClient.bulk(streamName, ops);
+        const { applied, skipped: sourceSkipped } = await kiClient.bulk(sourceId, ops);
         succeeded += applied;
-        skipped += streamSkipped;
+        skipped += sourceSkipped;
         if (ops.some((op) => 'delete' in op || 'exclude' in op)) {
-          streamsWithShrinkingOps.add(streamName);
+          sourcesWithShrinkingOps.add(sourceId);
         }
       } catch (error) {
         logger.error(
-          `Bulk feature operation failed for source ${streamName}: ${
+          `Bulk feature operation failed for source ${sourceId}: ${
             error instanceof Error ? error.message : String(error)
           }`
         );
@@ -422,13 +422,13 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
       }
     }
 
-    for (const streamName of streamsWithShrinkingOps) {
+    for (const sourceId of sourcesWithShrinkingOps) {
       try {
-        await sourcesClient.get(streamName);
-        await kiClient.reconcileStream(streamName);
+        await sourcesClient.get(sourceId);
+        await kiClient.reconcileStream(sourceId);
       } catch (err) {
         logger.warn(
-          `reconcileStream after bulk cross-source feature ops failed for source "${streamName}": ${
+          `reconcileStream after bulk cross-source feature ops failed for source "${sourceId}": ${
             err instanceof Error ? err.message : String(err)
           }`
         );

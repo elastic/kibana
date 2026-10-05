@@ -14,6 +14,7 @@ interface WorkflowStep {
   name: string;
   type?: string;
   if?: string;
+  condition?: string;
   'plugin-id'?: string;
   'product-solution'?: string;
   'product-feature'?: string;
@@ -124,6 +125,32 @@ describe('Nightshift investigation workflow', () => {
       'product-solution': 'observability',
       'product-feature': 'nightshift',
     });
+  });
+
+  it('lists the source catalog only when sources were requested and matches them by id or slug', () => {
+    expect(requireStep('init_nightshift_sources').with).toMatchObject({
+      nightshift_sources_page_size: 100,
+      nightshift_sources_exhausted: '${{ (inputs.source_ids | size | default: 0) == 0 }}',
+    });
+
+    const listing = requireStep('list_nightshift_sources');
+    expect(listing.condition).toBe('${{ variables.nightshift_sources_exhausted == false }}');
+    const [fetchPage, addPage] = listing.steps ?? [];
+    expect(fetchPage.with?.path).toContain('per_page={{ variables.nightshift_sources_page_size }}');
+    expect(addPage.with?.nightshift_sources_exhausted).toContain(
+      'size != variables.nightshift_sources_page_size'
+    );
+
+    expect(requireStep('resolve_investigation_sources').with?.investigation_sources).toContain(
+      'inputs.source_ids contains source.id or inputs.source_ids contains source.slug'
+    );
+  });
+
+  it('tells the investigator when requested sources could not be resolved', () => {
+    const message = requireStep('investigate').with?.message;
+
+    expect(message).toContain('(id {{ source.id }}): FROM {{ source.view_name }}');
+    expect(message).toContain('none of the requested sources could be resolved');
   });
 
   it('space-scopes the path of every kibana.request step', () => {

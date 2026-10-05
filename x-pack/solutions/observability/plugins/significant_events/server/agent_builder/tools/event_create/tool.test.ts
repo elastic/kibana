@@ -85,4 +85,40 @@ describe('event_create tool', () => {
       expect.objectContaining({ request: expect.anything() })
     );
   });
+
+  it('reports no source ids in failure telemetry when a slug does not resolve', async () => {
+    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+    (assertCanManageSignificantEvents as jest.Mock).mockResolvedValue(undefined);
+    const failureTelemetry = { trackAgentToolEventCreate: jest.fn() };
+    const getScopedClients = jest.fn().mockResolvedValue({
+      getEventClient: jest.fn().mockReturnValue({}),
+      getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
+      licensing: {},
+      uiSettingsClient: {},
+      sourcesClient: mockSourcesClient(['logs.a']),
+    });
+    const tool = createEventTool({
+      getScopedClients: getScopedClients as unknown as GetScopedClients,
+      server: {} as SignificantEventsServer,
+      logger: loggingSystemMock.createLogger(),
+      telemetry: failureTelemetry as never,
+    });
+
+    await invokeHandler(
+      tool as never,
+      {
+        title: 'T',
+        symptom_hypothesis: 'Requests fail because the upstream dependency is unavailable.',
+        summary: 'S',
+        slugs: ['unknown-source'],
+        severity: '60-high',
+        confidence: 0.8,
+      },
+      createMockToolContext()
+    );
+
+    expect(failureTelemetry.trackAgentToolEventCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, source_ids: [] })
+    );
+  });
 });

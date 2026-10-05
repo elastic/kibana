@@ -207,6 +207,7 @@ describe('SignificantEventsAlertsReaderV2', () => {
           top: [{ metrics: { 'kibana.alert.rule.name': 'Linked rule title' } }],
         },
         source_id: 'logs.test',
+        stream: { buckets: [{ key: 'logs.test' }] },
         change_points: { type: { mean_shift: { p_value: 0.02 } } },
       },
     ]);

@@ -36,10 +36,10 @@ interface StoredSourceIds {
 
 const rewriteNested = <T extends NestedSourceId>(
   entries: readonly T[],
-  mapName: (name: string) => string
+  mapSourceId: (sourceId: string) => string
 ): T[] =>
   entries.map((entry) =>
-    entry.source_id === undefined ? entry : { ...entry, source_id: mapName(entry.source_id) }
+    entry.source_id === undefined ? entry : { ...entry, source_id: mapSourceId(entry.source_id) }
   );
 
 /**
@@ -66,8 +66,9 @@ export function assignStoredSourceIds<T extends SlugScopedEvent>(
 }
 
 /**
- * Shows stored source ids as slugs on `source_ids` and nested `source_id`.
- * An id missing from the catalog is left unchanged.
+ * Tool output shape: stored source ids shown as slugs on `source_ids` and nested `source_id`. The
+ * keys keep their stored names because tool inputs accept a slug or an id there. An id missing
+ * from the catalog is left unchanged.
  */
 export function presentStoredSourceFields<T extends StoredSourceIds>(
   catalog: SourceCatalog,

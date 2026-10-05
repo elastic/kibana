@@ -41,6 +41,7 @@ import type {
   EventsPaginatedSearchOptions,
   SignificantEventsReadClient,
 } from './event_client';
+import { readLegacySourceFields } from './legacy_source_fields';
 
 /** `.rule-events` groups a series of writes by `group_hash`, not `event_id` (unavailable as a column). */
 const GROUP_HASH_FIELD = 'group_hash';
@@ -126,10 +127,10 @@ const decodeSignificantEvent = (row: RuleEventSourceRow): SignificantEvent => {
   const data = JSON.parse(row.data_json || '{}') as Omit<
     SignificantEvent,
     '@timestamp' | 'event_uuid' | 'status' | 'severity'
-  >;
-  return {
+  > & { stream_names?: unknown };
+  return readLegacySourceFields({
     ...data,
-    source_ids: normalizeSourceIds(data.source_ids),
+    source_ids: normalizeSourceIds(data.source_ids ?? data.stream_names),
     '@timestamp': row['@timestamp'],
     event_uuid: row[GROUP_HASH_FIELD],
     status:
@@ -138,7 +139,7 @@ const decodeSignificantEvent = (row: RuleEventSourceRow): SignificantEvent => {
     // never writes it) — fall back to `'40-medium'` for any row this reader wasn't built to expect.
     severity:
       RULE_EVENT_SEVERITY_TO_SIGNIFICANT_EVENT_SEVERITY[row.severity ?? 'medium'] ?? '40-medium',
-  };
+  });
 };
 
 const decodeSignificantEventResponse = (

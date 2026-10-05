@@ -72,7 +72,8 @@ interface LifecycleDetection {
   rule_name: string;
   /** Alerting rule that produced the detection; used to match event evidence. */
   rule_uuid?: string;
-  source_id: string;
+  /** Absent when the stored signal or detection carries no source. */
+  source_id?: string;
   change_point_type: ChangePointType;
   '@timestamp': string;
 }

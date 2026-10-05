@@ -100,6 +100,7 @@ export function createEventTool({
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
       const { request } = context;
+      let sourceIds: string[] = [];
       try {
         const { getEventClient, getAlertEventsClient, licensing, sourcesClient } =
           await getScopedClients({ request });
@@ -107,7 +108,7 @@ export function createEventTool({
         await assertCanManageSignificantEvents({ request, server });
         const catalog = await loadSourceCatalog(sourcesClient);
         const eventInput = assignStoredSourceIds(catalog, toolParams);
-        const sources = eventInput.source_ids;
+        sourceIds = eventInput.source_ids;
 
         const data = await createEventToolHandler({
           eventClient: await getEventClient(),
@@ -118,7 +119,7 @@ export function createEventTool({
 
         telemetry.trackAgentToolEventCreate({
           success: true,
-          source_ids: sources,
+          source_ids: sourceIds,
         });
 
         return {
@@ -127,7 +128,7 @@ export function createEventTool({
               type: ToolResultType.other,
               data: {
                 ...data,
-                sources: eventInput.source_ids.flatMap((sourceId) => {
+                sources: sourceIds.flatMap((sourceId) => {
                   const source = catalog.byId.get(sourceId);
                   return source ? [toSourceRef(source)] : [];
                 }),
@@ -141,7 +142,7 @@ export function createEventTool({
         logger.error(`Error running event_create: ${rawMessage}`);
         telemetry.trackAgentToolEventCreate({
           success: false,
-          source_ids: toolParams.slugs,
+          source_ids: sourceIds,
           error_message: rawMessage,
         });
         return {

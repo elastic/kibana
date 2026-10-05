@@ -454,7 +454,7 @@ export class NightshiftInvestigationsClient {
     const inputs = {
       message: prepared.message,
       title,
-      source_ids: source_ids ?? [],
+      ...(source_ids?.length ? { source_ids } : {}),
       ...(connector_id?.trim() ? { connector_id: resolvedConnectorId } : {}),
       ...(concurrency_key ? { concurrency_key } : {}),
       context: {

@@ -40,7 +40,7 @@ export const formatDetectionAsText = (detection: LifecycleDetection): string => 
   return [
     `Significant Events detection "${detection.rule_name}"`,
     `Detection ID: ${detection.detection_id}`,
-    `Source: ${detection.source_id}`,
+    `Source: ${detection.source_id ?? 'unknown'}`,
     `Change point: ${detection.change_point_type}`,
     `Timestamp: ${detection['@timestamp']}`,
   ].join('\n');

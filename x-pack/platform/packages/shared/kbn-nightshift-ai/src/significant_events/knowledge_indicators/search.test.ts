@@ -95,7 +95,7 @@ describe('searchKnowledgeIndicators', () => {
     expect(res.knowledge_indicators[0].kind).toBe('feature');
   });
 
-  it('filters requested source_ids against accessible streams', async () => {
+  it('filters requested source_ids against accessible sources', async () => {
     const getFeatures = jest.fn(async () => []);
     const getQueries = jest.fn(async () => []);
 
@@ -128,6 +128,41 @@ describe('searchKnowledgeIndicators', () => {
     expect(res.knowledge_indicators).toHaveLength(0);
     expect(getFeatures).not.toHaveBeenCalled();
     expect(getQueries).not.toHaveBeenCalled();
+  });
+
+  describe('ordering features of equal confidence by source', () => {
+    const getFeatures = async (sourceId: string): Promise<Feature[]> => [
+      makeFeature({ id: 'f1', uuid: `uuid-${sourceId}`, source_id: sourceId }),
+    ];
+    const slugs: Record<string, string> = { 'id-a': 'zebra-logs', 'id-b': 'alpha-logs' };
+
+    it('orders by the source slug when one is provided', async () => {
+      const res = await searchKnowledgeIndicators({
+        params: { kind: ['feature'] },
+        getStreamNames: async () => ['id-a', 'id-b'],
+        getSourceSlug: (sourceId) => slugs[sourceId],
+        getFeatures,
+        getQueries: jest.fn(),
+      });
+
+      expect(
+        res.knowledge_indicators.map((ki) => ki.kind === 'feature' && ki.feature.source_id)
+      ).toEqual(['id-b', 'id-a']);
+    });
+
+    it('falls back to the source id when no slug is known', async () => {
+      const res = await searchKnowledgeIndicators({
+        params: { kind: ['feature'] },
+        getStreamNames: async () => ['id-b', 'id-a'],
+        getSourceSlug: () => undefined,
+        getFeatures,
+        getQueries: jest.fn(),
+      });
+
+      expect(
+        res.knowledge_indicators.map((ki) => ki.kind === 'feature' && ki.feature.source_id)
+      ).toEqual(['id-a', 'id-b']);
+    });
   });
 
   it('applies per_page to the merged output', async () => {

@@ -246,6 +246,68 @@ describe('GET /internal/significant_events/events/{id}/lifecycle', () => {
 
     expect(response.events).toEqual([firstVersion, latestVersion]);
   });
+
+  it('keeps a detection whose stored signal has no source', async () => {
+    const detectionId = 'detection-1';
+    const event = {
+      '@timestamp': '2026-01-01T00:00:00.000Z',
+      event_uuid: 'version-1',
+      event_id: 'event-1',
+      status: 'open' as const,
+      source_ids: [],
+      title: 'Test event',
+      summary: 'Test summary',
+      severity: '40-medium' as const,
+      confidence: 0.8,
+      signals: [
+        {
+          type: 'detection' as const,
+          description: 'Found: x Impact: y',
+          verdict: 'not_checked' as const,
+          metadata: {
+            detection_id: detectionId,
+            rule_name: 'High error rate',
+            rule_uuid: 'rule-1',
+            change_point_type: 'spike',
+            p_value: 0.01,
+          },
+        },
+      ],
+    };
+    const storedDetection = {
+      detection_id: detectionId,
+      rule_name: 'High error rate',
+      rule_uuid: 'rule-1',
+      change_point_type: 'spike',
+      '@timestamp': '2026-01-01T00:00:00.000Z',
+    };
+
+    const response = await lifecycleRoute.handler({
+      params: { path: { id: event.event_id } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        getEventSearchClient: () => ({
+          findByEventId: jest.fn().mockResolvedValue({ hits: [event] }),
+        }),
+        getDetectionClient: () => ({
+          findByIds: jest.fn().mockResolvedValue({ hits: [storedDetection] }),
+        }),
+      }),
+      server: {},
+    } as never);
+
+    expect(response.detections).toEqual([
+      {
+        detection_id: detectionId,
+        rule_name: 'High error rate',
+        rule_uuid: 'rule-1',
+        source_id: undefined,
+        change_point_type: 'spike',
+        '@timestamp': '2026-01-01T00:00:00.000Z',
+      },
+    ]);
+  });
 });
 
 describe('GET /internal/significant_events/events/{id}', () => {

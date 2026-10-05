@@ -797,7 +797,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
   // Uses a significant event subject: an alert investigation cannot reach the generic fallback
   // any more, because it is rejected without the alert data the brief is composed from.
-  it('falls back to a generic message and empty source_ids when omitted', async () => {
+  it('falls back to a generic message and omits source_ids when none are given', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-999');
 
@@ -809,7 +809,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
     const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
     expect(inputs.message).toBe('Investigation requested for significant_event se-1');
-    expect(inputs.source_ids).toEqual([]);
+    expect(inputs).not.toHaveProperty('source_ids');
   });
 
   it('ensures the investigation agent exists in the space before running the workflow', async () => {

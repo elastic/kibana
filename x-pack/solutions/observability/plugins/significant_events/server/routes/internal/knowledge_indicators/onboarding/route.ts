@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import {
   MAX_ID_LENGTH,
   KIsOnboardingStep,
@@ -242,7 +241,7 @@ const onboardingBulkStatusRoute = createServerRoute({
   },
   params: z.object({
     body: z.object({
-      sourceIds: z.array(z.string().max(MAX_STREAM_NAME_LENGTH)).min(1).max(MAX_STREAMS_PER_QUERY),
+      sourceIds: z.array(z.string().max(MAX_ID_LENGTH)).min(1).max(MAX_STREAMS_PER_QUERY),
     }),
   }),
   handler: async ({

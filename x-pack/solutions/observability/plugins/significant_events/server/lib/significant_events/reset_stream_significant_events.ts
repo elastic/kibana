@@ -41,76 +41,75 @@ export const emptySignificantEventsResetDeletedCounts =
 
 const sumDeletedCounts = (
   totals: SignificantEventsResetDeletedCounts,
-  streamCounts: SignificantEventsResetDeletedCounts
+  sourceCounts: SignificantEventsResetDeletedCounts
 ): void => {
-  totals.queries += streamCounts.queries;
-  totals.features += streamCounts.features;
-  totals.rules += streamCounts.rules;
+  totals.queries += sourceCounts.queries;
+  totals.features += sourceCounts.features;
+  totals.rules += sourceCounts.rules;
 };
 
 interface ResetSnapshot {
-  streamNames: string[];
+  sourceIds: string[];
   ruleIds: string[];
-  byStream: Record<string, SignificantEventsResetDeletedCounts>;
+  bySource: Record<string, SignificantEventsResetDeletedCounts>;
 }
 
 const collectResetSnapshot = async (kiClient: KnowledgeIndicatorClient): Promise<ResetSnapshot> => {
-  const streamNames = await kiClient.getStreamNamesWithKnowledgeIndicators();
-  const byStream: Record<string, SignificantEventsResetDeletedCounts> = {};
+  const sourceIds = await kiClient.getStreamNamesWithKnowledgeIndicators();
+  const bySource: Record<string, SignificantEventsResetDeletedCounts> = {};
   const ruleIds = new Set<string>();
 
-  for (const streamName of streamNames) {
-    const streamCounts = emptySignificantEventsResetDeletedCounts();
-    const { [streamName]: queryLinks = [] } = await kiClient.getStreamToQueryLinksMap(
-      [streamName],
-      { includeExpired: true }
-    );
-    streamCounts.queries = queryLinks.length;
+  for (const sourceId of sourceIds) {
+    const sourceCounts = emptySignificantEventsResetDeletedCounts();
+    const { [sourceId]: queryLinks = [] } = await kiClient.getStreamToQueryLinksMap([sourceId], {
+      includeExpired: true,
+    });
+    sourceCounts.queries = queryLinks.length;
     for (const link of queryLinks) {
       if (link.rule_backed && link.rule_id) {
         ruleIds.add(link.rule_id);
       }
     }
-    streamCounts.rules = queryLinks.filter((link) => link.rule_backed && link.rule_id).length;
+    sourceCounts.rules = queryLinks.filter((link) => link.rule_backed && link.rule_id).length;
 
     // Match `deleteIndicators`, which tombstones every non-deleted feature: count excluded and
     // expired features too, otherwise this snapshot undercounts what the reset actually deletes.
-    const { hits: features } = await kiClient.getFeatures(streamName, {
+    const { hits: features } = await kiClient.getFeatures(sourceId, {
       includeExcluded: true,
       includeExpired: true,
     });
-    streamCounts.features = features.length;
+    sourceCounts.features = features.length;
 
-    byStream[streamName] = streamCounts;
+    bySource[sourceId] = sourceCounts;
   }
 
   return {
-    streamNames,
+    sourceIds,
     ruleIds: [...ruleIds],
-    byStream,
+    bySource,
   };
 };
 
 const resetStreamKnowledgeIndicators = async ({
-  streamName,
+  sourceId,
   kiClient,
   ruleIds,
   logger,
 }: {
-  streamName: string;
+  sourceId: string;
   kiClient: KnowledgeIndicatorClient;
   ruleIds: string[];
   logger: Logger;
 }): Promise<void> => {
   try {
-    await kiClient.deleteAllQueries(streamName);
-    await kiClient.deleteIndicators(streamName);
+    await kiClient.deleteAllQueries(sourceId);
+    await kiClient.deleteIndicators(sourceId);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     const orphanContext =
       ruleIds.length > 0 ? ` candidateOrphanedRuleIds=[${ruleIds.join(',')}]` : '';
     logger.error(
-      `Significant events reset failed for source ${streamName} during KI cleanup: ${errorMessage}.${orphanContext}`
+      `Significant events reset failed for source ${sourceId} during KI cleanup: ${errorMessage}.${orphanContext}`
     );
     throw error;
   }
@@ -140,11 +139,11 @@ export const resetSignificantEvents = async ({
   deleteLegacyRules,
 }: ResetSignificantEventsDeps): Promise<SignificantEventsResetResult> => {
   const canceledOnboardingCount = await streamsKIsOnboardingClient.cancelAllRunning({ request });
-  const { streamNames, ruleIds, byStream } = await collectResetSnapshot(kiClient);
+  const { sourceIds, ruleIds, bySource } = await collectResetSnapshot(kiClient);
 
   const deleted = emptySignificantEventsResetDeletedCounts();
-  for (const streamCounts of Object.values(byStream)) {
-    sumDeletedCounts(deleted, streamCounts);
+  for (const sourceCounts of Object.values(bySource)) {
+    sumDeletedCounts(deleted, sourceCounts);
   }
   deleted.rules = ruleIds.length;
 
@@ -152,9 +151,9 @@ export const resetSignificantEvents = async ({
   // are expected for v2-backed links and are ignored by the cleanup-only v1 client.
   await deleteLegacyRules(ruleIds);
 
-  for (const streamName of streamNames) {
-    logger.info(`Significant events reset: clearing KIs and rules for source "${streamName}"`);
-    await resetStreamKnowledgeIndicators({ streamName, kiClient, ruleIds, logger });
+  for (const sourceId of sourceIds) {
+    logger.info(`Significant events reset: clearing KIs and rules for source "${sourceId}"`);
+    await resetStreamKnowledgeIndicators({ sourceId, kiClient, ruleIds, logger });
   }
 
   // `.alerts-streams.alerts-default` is shared across spaces, so `match_all` wipes v1 alerts
@@ -170,9 +169,9 @@ export const resetSignificantEvents = async ({
   deleted.alerts_v1 = alertsDeleteResponse.deleted ?? 0;
 
   return {
-    sources: streamNames,
+    sources: sourceIds,
     canceled_onboarding_count: canceledOnboardingCount,
     deleted,
-    by_source: byStream,
+    by_source: bySource,
   };
 };

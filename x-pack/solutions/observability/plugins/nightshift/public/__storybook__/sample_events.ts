@@ -149,11 +149,13 @@ export const checkoutEventWithSignals: SignificantEventResponse = {
   signals: [checkoutDetectionSignal],
 };
 
+const CHECKOUT_SOURCE_ID = 'logs.checkout-api';
+
 export const checkoutDetection: LifecycleDetection = {
   detection_id: 'checkout-latency-detection',
   rule_name: 'checkout-api-p95-latency',
   rule_uuid: 'checkout-latency-rule',
-  source_id: 'logs.checkout-api',
+  source_id: CHECKOUT_SOURCE_ID,
   change_point_type: 'spike',
   '@timestamp': '2026-07-24T09:42:00.000Z',
 };
@@ -175,7 +177,7 @@ export const checkoutOccurrences: QueryOccurrencesResponse = {
       },
       severity_score: 80,
       rule_uuid: checkoutDetection.rule_uuid ?? 'checkout-latency-rule',
-      source_id: checkoutDetection.source_id,
+      source_id: CHECKOUT_SOURCE_ID,
       occurrences: [
         { date: '2026-07-24T09:20:00.000Z', count: 2 },
         { date: '2026-07-24T09:25:00.000Z', count: 3 },

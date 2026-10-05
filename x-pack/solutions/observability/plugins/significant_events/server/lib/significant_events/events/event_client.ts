@@ -45,6 +45,7 @@ import {
   type StoredEvent,
   type eventsMappings,
 } from './data_stream';
+import { readLegacySourceFields } from './legacy_source_fields';
 import { FIELD_EVENT_UUID, FIELD_EVENT_ID } from '../field_names';
 import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 import type {
@@ -115,11 +116,13 @@ export const normalizeLegacyVerdict = (signal: LegacySignal): SignalEntry => {
   return { ...normalizedSignal, verdict } as SignalEntry;
 };
 
-const normalizeLegacyVerification = (event: SignificantEvent): SignificantEvent => ({
-  ...event,
-  source_ids: event.source_ids ?? [],
-  signals: event.signals?.map((signal) => normalizeLegacyVerdict(signal as LegacySignal)),
-});
+const normalizeStoredEvent = (stored: SignificantEvent): SignificantEvent => {
+  const event = readLegacySourceFields(stored);
+  return {
+    ...event,
+    signals: event.signals?.map((signal) => normalizeLegacyVerdict(signal as LegacySignal)),
+  };
+};
 
 const multiValueContainsAnyFilter = ({
   where,
@@ -313,7 +316,7 @@ export class EventClient implements SignificantEventsReadClient {
       index: EVENTS_DATA_STREAM,
       groupBy: FIELD_EVENT_ID,
     });
-    return { hits: result.hits.map(normalizeLegacyVerification) };
+    return { hits: result.hits.map(normalizeStoredEvent) };
   }
 
   async findLatestPaginated(
@@ -349,7 +352,7 @@ export class EventClient implements SignificantEventsReadClient {
 
     return {
       hits: paginatedHits.map((event) => ({
-        ...normalizeLegacyVerification(event),
+        ...normalizeStoredEvent(event),
         created_at: event.created_at,
       })),
       page,
@@ -377,7 +380,7 @@ export class EventClient implements SignificantEventsReadClient {
 
     return {
       hits: hits.map((event) => ({
-        ...normalizeLegacyVerification(event),
+        ...normalizeStoredEvent(event),
         created_at: event.created_at,
       })),
     };
@@ -421,7 +424,7 @@ export class EventClient implements SignificantEventsReadClient {
       esClient: this.clients.esClient,
       query: query.keep('_source').limit(MAX_DEDUP_SCAN_LIMIT),
     });
-    return { hits: hits.map(normalizeLegacyVerification) };
+    return { hits: hits.map(normalizeStoredEvent) };
   }
 
   async findByEventUuid(id: string): Promise<{ hits: SignificantEvent[] }> {
@@ -432,7 +435,7 @@ export class EventClient implements SignificantEventsReadClient {
       idField: FIELD_EVENT_UUID,
       idValue: id,
     });
-    return { hits: result.hits.map(normalizeLegacyVerification) };
+    return { hits: result.hits.map(normalizeStoredEvent) };
   }
 
   async findByEventId(eventId: string): Promise<{ hits: SignificantEventResponse[] }> {
@@ -452,7 +455,7 @@ export class EventClient implements SignificantEventsReadClient {
     });
     return {
       hits: hits.map((event) => ({
-        ...normalizeLegacyVerification(event),
+        ...normalizeStoredEvent(event),
         created_at: event.created_at,
       })),
     };
@@ -481,7 +484,7 @@ export class EventClient implements SignificantEventsReadClient {
       groupBy: FIELD_EVENT_ID,
     });
     const map = new Map<string, SignificantEvent>();
-    for (const event of hits.map(normalizeLegacyVerification)) {
+    for (const event of hits.map(normalizeStoredEvent)) {
       if (event.event_id) map.set(event.event_id, event);
     }
     return map;

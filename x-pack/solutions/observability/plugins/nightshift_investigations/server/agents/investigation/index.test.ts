@@ -66,7 +66,7 @@ describe('Nightshift investigation agent type', () => {
     expect(base.instructions).toContain('<alert_data>');
     expect(base.instructions).toContain('Affected entity');
     expect(base.instructions).not.toContain('inputs.context.alerts');
-    expect(base.instructions).toContain('`- <slug>: FROM <view_name>`');
+    expect(base.instructions).toContain('`- <slug> (id <id>): FROM <view_name>`');
     expect(base.instructions).toContain('FROM <view_name> | LIMIT 0');
   });
 

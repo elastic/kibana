@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { MAX_ID_LENGTH, type QueryOccurrencesResponse } from '@kbn/significant-events-schema';
-import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { BUCKET_SIZE_PATTERN } from '../../../../lib/significant_events/helpers/fill_bucket_gaps';
@@ -13,7 +12,10 @@ import { createSignificantEventsTracedEsClient } from '../../../../lib/significa
 import { fetchQueryOccurrencesFromAlerts } from '../../../../lib/significant_events/fetch_query_occurrences_from_alerts';
 import { searchModeSchema } from '../../../utils/search_mode';
 import { assertValidDateRange, makeIsoDateFromString } from '../../../utils/iso_date_param';
-import { MAX_SOURCE_IDS_PER_REQUEST, resolveSourceIds } from '../../../utils/resolve_source_ids';
+import {
+  MAX_SOURCE_IDS_PER_REQUEST,
+  requestedOrAllSourceIds,
+} from '../../../utils/resolve_source_ids';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 
@@ -35,9 +37,9 @@ const readQueryOccurrencesRoute = createServerRoute({
         .union([
           z
             .string()
-            .max(MAX_STREAM_NAME_LENGTH)
+            .max(MAX_ID_LENGTH)
             .transform((val) => [val]),
-          z.array(z.string().max(MAX_STREAM_NAME_LENGTH)).max(MAX_SOURCE_IDS_PER_REQUEST),
+          z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_SOURCE_IDS_PER_REQUEST),
         ])
         .optional()
         .describe('Source ids to filter results by'),
@@ -91,7 +93,10 @@ const readQueryOccurrencesRoute = createServerRoute({
     } = params.query;
     assertValidDateRange(from, to);
 
-    const sourceIds = await resolveSourceIds(requestedSourceIds, scopedClients.sourcesClient);
+    const sourceIds = await requestedOrAllSourceIds(
+      requestedSourceIds,
+      scopedClients.sourcesClient
+    );
 
     const [kiClient, { alertsReader }] = await Promise.all([
       scopedClients.getKnowledgeIndicatorClient(),

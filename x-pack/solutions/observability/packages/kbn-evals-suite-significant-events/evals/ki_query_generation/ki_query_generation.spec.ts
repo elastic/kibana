@@ -189,8 +189,9 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                 );
 
             if (!shouldUseCanonicalKIs && resolvedKIs.length === 0) {
-              log.info(
-                `No snapshot KIs available for "${source.snapshotName}" - skipping snapshot variant`
+              log.warning(
+                `No snapshot KIs for source "${scenario.input.source_id}" in "${source.snapshotName}" - skipping snapshot variant. ` +
+                  'Snapshots captured before the source_id rename store KIs under stream_name and must be re-captured.'
               );
               continue;
             }

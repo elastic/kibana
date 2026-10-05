@@ -48,7 +48,7 @@ const searchEventsSchema = significantEventSchema
     slugs: sourceSlugsSchema.optional().describe(
       i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.slugs', {
         defaultMessage:
-          'Optional Nightshift source slugs. Omit to search events for every source. Not titles and not view names. Disabled sources are accepted. Events written before the source id cutover carry no source and are not matched.',
+          'Optional Nightshift source slugs. Omit to search events for every source. Not titles and not view names. Disabled sources are accepted. Older events stored without `source_ids` are not matched when `slugs` is set.',
       })
     ),
     status: significantEventSchema.shape.status.default('open').describe(

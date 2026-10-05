@@ -123,7 +123,8 @@ export const cleanupStaleEvents = async ({
     const staleEvents = eventsWithRuleIds.filter(
       ({ ruleIds }) => ruleIds.length > 0 && ruleIds.every((ruleId) => !existingRuleIds.has(ruleId))
     );
-    const results = await Promise.all(
+    // One event that cannot be closed stays open and must not stop the rest of the cleanup.
+    const results = await Promise.allSettled(
       staleEvents.map(({ event }) =>
         updateLimit(() =>
           updateSignificantEventStatus({
@@ -137,7 +138,16 @@ export const cleanupStaleEvents = async ({
         )
       )
     );
-    closed += results.reduce((total, result) => total + result.updated, 0);
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled') {
+        closed += result.value.updated;
+        return;
+      }
+      const reason = result.reason instanceof Error ? result.reason.message : result.reason;
+      logger?.warn(
+        `Stale event cleanup could not close event "${staleEvents[index].event.event_id}": ${reason}`
+      );
+    });
   }
 
   return {

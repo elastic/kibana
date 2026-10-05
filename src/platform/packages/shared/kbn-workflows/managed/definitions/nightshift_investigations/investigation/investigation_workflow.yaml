@@ -95,15 +95,18 @@ steps:
     on-failure:
       continue: true
 
-  # Reads the whole source catalog so callers can pass plain ids or slugs. The list endpoint returns
-  # at most 100 sources per page, so this pages until a short page comes back. A failed page ends the
-  # loop with what was collected so far: a missing source list must not block the investigation.
+  # Resolves the requested source ids (or slugs) to their slug and ES|QL view. The list endpoint
+  # returns at most one page_size page, so this pages until a short page comes back. Nothing is
+  # listed when no sources were requested, and a failed page ends the loop with what was collected so
+  # far: a missing source list must not block the investigation. max-iterations bounds the catalog
+  # at 10,000 sources.
   - name: init_nightshift_sources
     type: data.set
     with:
       nightshift_sources: []
       nightshift_sources_page: 1
-      nightshift_sources_exhausted: false
+      nightshift_sources_page_size: 100
+      nightshift_sources_exhausted: '${{ (inputs.source_ids | size | default: 0) == 0 }}'
 
   - name: list_nightshift_sources
     type: while
@@ -114,7 +117,7 @@ steps:
         type: kibana.request
         with:
           method: GET
-          path: '/s/{{ workflow.spaceId }}/internal/nightshift/sources?per_page=100&page={{ variables.nightshift_sources_page }}'
+          path: '/s/{{ workflow.spaceId }}/internal/nightshift/sources?per_page={{ variables.nightshift_sources_page_size }}&page={{ variables.nightshift_sources_page }}'
           headers:
             x-elastic-internal-origin: 'kibana'
         on-failure:
@@ -125,7 +128,7 @@ steps:
         with:
           nightshift_sources: '${{ variables.nightshift_sources | concat: steps.fetch_nightshift_sources_page.output.sources }}'
           nightshift_sources_page: '${{ variables.nightshift_sources_page | plus: 1 }}'
-          nightshift_sources_exhausted: '${{ steps.fetch_nightshift_sources_page.output.sources.size != 100 }}'
+          nightshift_sources_exhausted: '${{ steps.fetch_nightshift_sources_page.output.sources.size != variables.nightshift_sources_page_size }}'
 
   - name: resolve_investigation_sources
     type: data.set
@@ -154,8 +157,10 @@ steps:
 
         {% if variables.investigation_sources and variables.investigation_sources.size > 0 %}
         Related sources:
-        {% for source in variables.investigation_sources %}- {{ source.slug }}: FROM {{ source.view_name }}
+        {% for source in variables.investigation_sources %}- {{ source.slug }} (id {{ source.id }}): FROM {{ source.view_name }}
         {% endfor %}
+        {% elsif inputs.source_ids and inputs.source_ids.size > 0 %}
+        Related sources: none of the requested sources could be resolved to an ES|QL view. The source list was unavailable or the sources no longer exist, so no source scope applies.
         {% endif %}
 
         {% if inputs.context and inputs.context.size > 0 and inputs.context.source != 'alert' %}

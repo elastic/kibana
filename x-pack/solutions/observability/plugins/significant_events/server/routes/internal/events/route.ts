@@ -36,6 +36,7 @@ import type { PaginatedResponse } from '../../../lib/significant_events/query_ut
 import { createServerRoute } from '../../create_server_route';
 import { assertNotPaused } from '../../utils/assert_not_paused';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
+import { MAX_SOURCE_IDS_PER_REQUEST } from '../../utils/resolve_source_ids';
 
 const toArray = <T extends string>(val: T | T[] | undefined): T[] | undefined =>
   val === undefined ? undefined : Array.isArray(val) ? val : [val];
@@ -59,22 +60,15 @@ const collectEmbeddedDetections = (events: SignificantEvent[]) => {
     for (const signal of event.signals ?? []) {
       if (signal.type !== 'detection') continue;
       const { detection_id, rule_name, change_point_type } = signal.metadata;
-      const sourceId = signal.source_id;
       const parsedChangePointType = parseChangePointType(change_point_type);
-      if (
-        !detection_id ||
-        !rule_name ||
-        !sourceId ||
-        !parsedChangePointType ||
-        seen.has(detection_id)
-      ) {
+      if (!detection_id || !rule_name || !parsedChangePointType || seen.has(detection_id)) {
         continue;
       }
       seen.add(detection_id);
       result.push({
         detection_id,
         rule_name,
-        source_id: sourceId,
+        source_id: signal.source_id,
         change_point_type: parsedChangePointType,
       });
     }
@@ -108,7 +102,10 @@ const eventsSearchRoute = createServerRoute({
         ])
         .optional(),
       source_id: z
-        .union([z.string().max(255), z.array(z.string().max(255)).max(50)])
+        .union([
+          z.string().max(MAX_ID_LENGTH),
+          z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_SOURCE_IDS_PER_REQUEST),
+        ])
         .optional()
         .describe('Source id(s) to filter events by'),
       search: z.string().max(500).optional(),
@@ -132,7 +129,7 @@ const eventsSearchRoute = createServerRoute({
 
     const {
       status,
-      source_id: sourceId,
+      source_id: sourceIdFilter,
       search,
       severity,
       from,
@@ -148,7 +145,7 @@ const eventsSearchRoute = createServerRoute({
       from,
       to,
       status: toArray(status),
-      sourceIds: toArray(sourceId),
+      sourceIds: toArray(sourceIdFilter),
       severity: toArray(severity),
       topologyFeatureIds: toArray(topologyFeatureId),
       search: search || undefined,

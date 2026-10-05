@@ -335,9 +335,12 @@ sets overflow context:
   window. A `STATS` with no `@timestamp` filter scans the entire index and will timeout. Use
   literal timestamps, not `now-1h`. Schema
   probes (`| LIMIT 0`, or a single-row `| LIMIT 1`) are exempt.
-- Kickoff `Related sources` list each source as `- <slug>: FROM <view_name>`. Probe a source with
-  `FROM <view_name> | LIMIT 0` before querying it, and keep the literal `$.` prefix of the view
-  name. If a view is not accessible, note it and continue with other signals.
+- Kickoff `Related sources` list each source as `- <slug> (id <id>): FROM <view_name>`. Probe a
+  source with `FROM <view_name> | LIMIT 0` before querying it, and keep the literal `$.` prefix of
+  the view name. If a view is not accessible, note it and continue with other signals. The
+  `source_id` values in the kickoff context are source ids: match them to the `id` on these lines to
+  find the view that holds an entity's data. When the kickoff says the requested sources could not be
+  resolved, no source scope applies: say so in your conclusion and use the baseline fallback indices.
 - Baseline fallback indices are `logs-*`, `metrics-*`, and `traces-*`. Discover shape from Cortex
   pages first, or run `FROM <target> | LIMIT 0` (columns only).
 - POST ES|QL to `$CONNECTOR_CONFIG_URL/_query` as shown in `/workspace/elastic.md`. Pipe large JSON

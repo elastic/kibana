@@ -315,10 +315,7 @@ export function createEventsWriteTool({
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
       const { request } = context;
-      let storedItems: EventsWriteInput[] = toolParams.items.map((item) => ({
-        ...item,
-        source_ids: [...item.slugs],
-      }));
+      let storedItems: EventsWriteInput[] | undefined;
       try {
         const {
           getEventClient,
@@ -333,8 +330,13 @@ export function createEventsWriteTool({
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
         const catalog = await loadSourceCatalog(sourcesClient);
-        storedItems = toolParams.items.map((item) => assignStoredSourceIds(catalog, item));
-        const items = await enrichCausalFeatures(storedItems, getKnowledgeIndicatorClient, logger);
+        const resolvedItems = toolParams.items.map((item) => assignStoredSourceIds(catalog, item));
+        storedItems = resolvedItems;
+        const items = await enrichCausalFeatures(
+          resolvedItems,
+          getKnowledgeIndicatorClient,
+          logger
+        );
 
         const data = await eventsWriteBulkHandler({
           eventClient: await getEventClient(),
@@ -346,7 +348,7 @@ export function createEventsWriteTool({
         });
 
         data.forEach((result) => {
-          const input = storedItems[result.index];
+          const input = resolvedItems[result.index];
           if (input === undefined) return;
           const isSkipped = !result.written && 'skipped' in result;
           const isBulkError = !result.written && 'error' in result;
@@ -371,7 +373,7 @@ export function createEventsWriteTool({
               type: ToolResultType.other,
               data: {
                 results: data.map((result) => {
-                  const input = storedItems[result.index];
+                  const input = resolvedItems[result.index];
                   if (!input) {
                     return result;
                   }
@@ -390,7 +392,8 @@ export function createEventsWriteTool({
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         logger.error(`Error running events_write: ${message}`);
-        storedItems.forEach((input) => {
+        // Source ids exist only once the slugs resolved; earlier failures report none.
+        (storedItems ?? toolParams.items).forEach((input) => {
           trackTelemetryBestEffort({
             logger,
             description: 'failed events_write telemetry',
@@ -400,7 +403,7 @@ export function createEventsWriteTool({
                 event_id: input.event_id ?? 'unknown',
                 status: input.status,
                 written: false,
-                source_ids: input.source_ids,
+                source_ids: 'source_ids' in input ? input.source_ids : [],
                 error_message: message,
               }),
           });

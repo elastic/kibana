@@ -34,6 +34,13 @@ export interface ChangePointRuleBucket {
     top: Array<{ metrics: Record<string, string> }>;
   };
   source_id: string;
+  /**
+   * Shape read by the version 7 detection workflow. A stored v7 definition keeps running until the
+   * managed install replaces it, so both shapes are returned until v8 is the only installed version.
+   */
+  stream: {
+    buckets: Array<{ key: string }>;
+  };
   change_points: {
     type: ChangePointTypeMap;
   };
