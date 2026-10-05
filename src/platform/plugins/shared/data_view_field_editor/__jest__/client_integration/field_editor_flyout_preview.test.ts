@@ -306,6 +306,36 @@ describe('Field editor Preview panel', () => {
       ]);
     });
 
+    it('should display all the values when the script emits multiple values', async () => {
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['a', 'b'] });
+      const {
+        actions: { fields, flushPreviewAndSearchTimers, getRenderedFieldsPreview, toggleFormRow },
+      } = await setup();
+
+      await toggleFormRow('value');
+      await fields.updateName('myRuntimeField');
+      await fields.updateScript("emit('a'); emit('b');");
+      await flushPreviewAndSearchTimers();
+
+      expect(getRenderedFieldsPreview()).toEqual([{ key: 'myRuntimeField', value: '[a, b]' }]);
+    });
+
+    it('should display "Value not set" when the script emits no value', async () => {
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: [] });
+      const {
+        actions: { fields, flushPreviewAndSearchTimers, getRenderedFieldsPreview, toggleFormRow },
+      } = await setup();
+
+      await toggleFormRow('value');
+      await fields.updateName('myRuntimeField');
+      await fields.updateScript("if (false) { emit('a'); }");
+      await flushPreviewAndSearchTimers();
+
+      expect(getRenderedFieldsPreview()).toEqual([
+        { key: 'myRuntimeField', value: 'Value not set' },
+      ]);
+    });
+
     describe('read from _source', () => {
       it('should display the _source value when no script is provided and the name matched one of the fields in _source', async () => {
         const {
@@ -833,6 +863,21 @@ describe('Field editor Preview panel', () => {
       await flushPreviewAndSearchTimers();
       expect(screen.queryByTestId('typeField_0')).toBeVisible();
       expect(screen.queryByTestId('typeField_1')).not.toBeInTheDocument();
+    });
+
+    it('should display all the values of a multi-value subfield and detect its type', async () => {
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: { 'composite_field.a': [1, 2] } });
+      const {
+        actions: { fields, flushPreviewAndSearchTimers, getRenderedFieldsPreview },
+      } = await setup();
+
+      await fields.updateName('myRuntimeField');
+      await fields.updateType('Composite');
+      await fields.updateScript("emit('a',1); emit('a',2)");
+      await flushPreviewAndSearchTimers();
+
+      expect(getRenderedFieldsPreview()).toEqual([{ key: 'myRuntimeField.a', value: '[1, 2]' }]);
+      expect(screen.getByTestId('typeField_0')).toHaveValue('double');
     });
   });
 });

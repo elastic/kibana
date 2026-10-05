@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import {
   createRuleDataSchema,
-  updateRuleBodySchema,
+  updateRuleDataSchema,
   ruleResponseSchema,
   findRulesResponseSchema,
   ruleTagsResponseSchema,
@@ -17,16 +17,16 @@ import {
   bulkCreateRulesRequestSchema,
   bulkCreateRulesResponseSchema,
   querySchema,
-  composedQuerySchema,
-  standaloneQuerySchema,
+  recoverySchema,
+  noDataSchema,
+  stateTransitionSchema,
   scheduleSchema,
   metadataSchema,
-  ruleResponseMetadataSchema,
   groupingSchema,
 } from './rule_data_schema';
 import {
   createActionPolicyDataSchema,
-  updateActionPolicyBodySchema,
+  updateActionPolicyDataSchema,
   bulkSnoozeActionPoliciesBodySchema,
   snoozeActionPolicyBodySchema,
   actionPolicyDestinationSchema,
@@ -69,6 +69,7 @@ import {
   matchedActionPolicySchema,
   matchActionPoliciesResponseSchema,
 } from './match_action_policies_schema';
+import { matchRulesBodySchema } from './match_rules_schema';
 import {
   ruleExecutionViewSchema,
   listRuleExecutionsResponseSchema,
@@ -101,7 +102,7 @@ const getMetaId = (schema: z.ZodType): string | undefined => getMeta(schema).id;
 const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
   // rules
   [createRuleDataSchema, 'alerting_new_rule'],
-  [updateRuleBodySchema, 'alerting_update_rule'],
+  [updateRuleDataSchema, 'alerting_update_rule'],
   [ruleResponseSchema, 'alerting_rule_response'],
   [findRulesResponseSchema, 'alerting_rule_list_response'],
   [ruleTagsResponseSchema, 'alerting_rule_tags_response'],
@@ -110,15 +111,15 @@ const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
   [bulkCreateRulesRequestSchema, 'alerting_bulk_create_rules_request'],
   [bulkCreateRulesResponseSchema, 'alerting_bulk_create_rules_response'],
   [querySchema, 'alerting_rule_query'],
-  [composedQuerySchema, 'alerting_composed_rule_query'],
-  [standaloneQuerySchema, 'alerting_standalone_rule_query'],
+  [recoverySchema, 'alerting_rule_recovery'],
+  [noDataSchema, 'alerting_rule_no_data'],
+  [stateTransitionSchema, 'alerting_rule_state_transition'],
   [scheduleSchema, 'alerting_rule_schedule'],
   [metadataSchema, 'alerting_rule_metadata'],
-  [ruleResponseMetadataSchema, 'alerting_rule_response_metadata'],
   [groupingSchema, 'alerting_rule_grouping'],
   // action policies
   [createActionPolicyDataSchema, 'alerting_new_action_policy'],
-  [updateActionPolicyBodySchema, 'alerting_update_action_policy'],
+  [updateActionPolicyDataSchema, 'alerting_update_action_policy'],
   [bulkSnoozeActionPoliciesBodySchema, 'alerting_bulk_snooze_action_policies_request'],
   [snoozeActionPolicyBodySchema, 'alerting_snooze_action_policy_request'],
   [actionPolicyDestinationSchema, 'alerting_action_policy_destination'],
@@ -156,6 +157,8 @@ const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
   [matchActionPoliciesBodySchema, 'alerting_match_action_policies_request'],
   [matchedActionPolicySchema, 'alerting_matched_action_policy'],
   [matchActionPoliciesResponseSchema, 'alerting_match_action_policies_response'],
+  // matched rules
+  [matchRulesBodySchema, 'alerting_match_rules_request'],
   // execution history
   [ruleExecutionViewSchema, 'alerting_rule_execution'],
   [listRuleExecutionsResponseSchema, 'alerting_rule_executions_response'],
@@ -171,7 +174,8 @@ const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
 
 /** Discriminated unions whose every variant must be named for OAS to emit a discriminator mapping. */
 const DISCRIMINATED_UNIONS: ReadonlyArray<readonly [string, z.ZodType]> = [
-  ['querySchema', querySchema],
+  ['recoverySchema', recoverySchema],
+  ['noDataSchema', noDataSchema],
   ['actionPolicyDestinationSchema', actionPolicyDestinationSchema],
   ['createSeriesAlertActionBodySchema', createSeriesAlertActionBodySchema],
   ['createEpisodeAlertActionBodySchema', createEpisodeAlertActionBodySchema],
@@ -199,7 +203,9 @@ describe('alerting v2 OAS component ids', () => {
     // querySchema is defined as `.describe(...).meta({ id })`; the description must survive
     // the merge so the generated OAS component keeps its documentation.
     const meta = getMeta(querySchema);
-    expect(meta.description).toBe('Detection query configuration.');
+    expect(meta.description).toBe(
+      'ES|QL query the rule evaluates. `base` is required. `breach` is an optional clause appended to it.'
+    );
     expect(meta.id).toBe('alerting_rule_query');
   });
 

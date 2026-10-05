@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsqlConversionCase } from './types';
+import type { EsqlConversionCase, EsqlConversionDataset } from './types';
 import { count, dateHistogram, metric } from './columns';
 import { createEsqlConversionCaseContext } from './fixtures';
 
 export const buildDateHistogramCases = (): EsqlConversionCase[] => {
   const { ecommerce, ecommerceFrom, ecommerceWhere } = createEsqlConversionCaseContext();
+  const ecommerceWithHyphenatedDateField: EsqlConversionDataset = {
+    ...ecommerce,
+    timeField: 'order-date',
+    fieldTypes: { ...ecommerce.fieldTypes, 'order-date': 'date' },
+  };
 
   return [
     {
@@ -26,11 +31,11 @@ export const buildDateHistogramCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: true,
-        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) BY BUCKET(order_date, 75, ?_tstart, ?_tend)`,
-        columnNames: ['COUNT(*)', 'BUCKET(order_date, 75, ?_tstart, ?_tend)'],
+        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) BY order_date = BUCKET(order_date, 75, ?_tstart, ?_tend)`,
+        columnNames: ['COUNT(*)', 'order_date'],
         expectedSourceIds: {
           'COUNT(*)': ['col2'],
-          'BUCKET(order_date, 75, ?_tstart, ?_tend)': ['col1'],
+          order_date: ['col1'],
         },
       },
     },
@@ -64,11 +69,11 @@ export const buildDateHistogramCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: true,
-        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) BY BUCKET(order_date, 75, ?_tstart, ?_tend)`,
-        columnNames: ['COUNT(*)', 'BUCKET(order_date, 75, ?_tstart, ?_tend)'],
+        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) BY order_date = BUCKET(order_date, 75, ?_tstart, ?_tend)`,
+        columnNames: ['COUNT(*)', 'order_date'],
         expectedSourceIds: {
           'COUNT(*)': ['col2'],
-          'BUCKET(order_date, 75, ?_tstart, ?_tend)': ['col1'],
+          order_date: ['col1'],
         },
       },
     },
@@ -151,6 +156,27 @@ export const buildDateHistogramCases = (): EsqlConversionCase[] => {
       },
       columnOrder: ['col1', 'col2'],
       expected: { success: false, reason: 'include_empty_rows_not_supported' },
+    },
+    {
+      group: 'date_histogram',
+      dataset: ecommerceWithHyphenatedDateField,
+      description: 'date histogram escapes a bucket alias that is not a bare identifier',
+      columns: {
+        col1: dateHistogram('order-date', { interval: 'auto' }),
+        col2: count(),
+      },
+      columnOrder: ['col1', 'col2'],
+      // The pinned ecommerce sample data has no synthetic `order-date` field.
+      skipApiExecution: true,
+      expected: {
+        success: true,
+        esql: `${ecommerceFrom} | WHERE \`order-date\` >= ?_tstart AND \`order-date\` <= ?_tend | STATS COUNT(*) BY \`order-date\` = BUCKET(\`order-date\`, 75, ?_tstart, ?_tend)`,
+        columnNames: ['COUNT(*)', 'order-date'],
+        expectedSourceIds: {
+          'COUNT(*)': ['col2'],
+          'order-date': ['col1'],
+        },
+      },
     },
   ];
 };

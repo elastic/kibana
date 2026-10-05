@@ -65,7 +65,7 @@ const getInternalEsClientFor = (server: SyntheticsServerSetup) =>
  * attaches no extensions, matching {@link listByAgentPolicy}'s existing
  * cross-space Fleet lookup in this same file.
  */
-const bumpAgentPolicyRevision = async (
+export const bumpAgentPolicyRevision = async (
   server: SyntheticsServerSetup,
   policyId: string
 ): Promise<void> => {

@@ -81,6 +81,11 @@ const actionNames: {
     completedText: 'removed',
     cancelledText: 'removal',
   },
+  RESTART: {
+    inProgressText: 'Restarting',
+    completedText: 'restarted',
+    cancelledText: 'restart',
+  },
   ACTION: { inProgressText: 'Actioning', completedText: 'actioned', cancelledText: 'action' },
 };
 

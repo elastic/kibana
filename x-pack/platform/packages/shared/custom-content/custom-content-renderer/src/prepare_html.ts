@@ -126,7 +126,7 @@ export function applyHtmlTheme(
 
 export function sanitizeHtml(html: string): string {
   return DOMPurify.sanitize(html, {
-    FORBID_TAGS: ['a'],
+    FORBID_TAGS: ['a', 'area', 'map'],
     WHOLE_DOCUMENT: true,
     FORCE_BODY: false,
   });

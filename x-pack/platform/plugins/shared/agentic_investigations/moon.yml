@@ -33,6 +33,7 @@ dependsOn:
   - '@kbn/zod-helpers'
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-server'
+  - '@kbn/es-query'
   - '@kbn/agent-builder-platform-plugin'
   - '@kbn/agent-builder-browser'
   - '@kbn/core-http-browser'
@@ -41,6 +42,12 @@ dependsOn:
   - '@kbn/user-profile-components'
   - '@kbn/proposals-plugin'
   - '@kbn/proposals-common'
+  - '@kbn/agentic-investigations-common'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/i18n-react'
+  - '@kbn/ui-callout'
+  - '@kbn/shared-ux-error-boundary'
+  - '@kbn/proposals-ui'
 tags:
   - plugin
   - prod
