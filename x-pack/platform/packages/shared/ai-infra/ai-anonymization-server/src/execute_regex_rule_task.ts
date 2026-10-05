@@ -9,6 +9,24 @@ import type { RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
 import type { DetectedMatch } from './types';
 
 /**
+ * Compiles a rule's pattern. A pattern that does not compile throws instead of being skipped,
+ * so the pipeline's `onFailure` mode decides what happens: silently dropping the rule would
+ * leave data the admin believes is masked going to the model.
+ */
+const compileRulePattern = (rule: RegexAnonymizationRule): RegExp => {
+  try {
+    return new RegExp(rule.pattern, 'g');
+  } catch (error) {
+    const label = rule.name ?? rule.id ?? rule.entityClass;
+    throw new Error(
+      `Anonymization rule "${label}" has an invalid regular expression: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+};
+
+/**
  * Executes multiple regex anonymization rules against records to detect all matches.
  * - Processes rules in order, preserving rule precedence via ruleIndex
  * - Returns all matches with their original positions in the unmodified text
@@ -25,12 +43,7 @@ export const executeRegexRulesTask = ({
   records: Array<Record<string, string>>;
 }): DetectedMatch[] =>
   rules.flatMap((rule, ruleIndex) => {
-    let regex: RegExp;
-    try {
-      regex = new RegExp(rule.pattern, 'g');
-    } catch {
-      return [];
-    }
+    const regex = compileRulePattern(rule);
 
     return records.flatMap((record: Record<string, string>, recordIndex: number) =>
       Object.entries(record).flatMap(([key, value]) => {
