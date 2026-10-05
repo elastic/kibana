@@ -32,8 +32,7 @@ const ABSOLUTE_DATE = {
 
 const RULE_ID = '5a4a0460-d822-11eb-8962-bfd4aff0a9b3';
 
-// FLAKY: https://github.com/elastic/kibana/issues/181008
-describe.skip('URL compatibility', { tags: ['@ess', '@skipInServerless'] }, () => {
+describe('URL compatibility', { tags: ['@ess', '@skipInServerless'] }, () => {
   beforeEach(() => {
     login();
   });
