@@ -9,6 +9,7 @@ import {
   deleteObservable,
   updateObservable,
   bulkAddObservables,
+  bulkDeleteObservables,
   applyObservablesToCase,
 } from './observables';
 import Boom from '@hapi/boom';
@@ -44,11 +45,31 @@ const mockObservable = {
   createdAt: '2024-12-05',
   updatedAt: '2024-12-05',
 };
+const mockObservable2 = {
+  ...mockObservablePost,
+  id: '6d542491-d7fg-560g-c1gf-2700f089628c',
+  createdAt: '2024-12-06',
+  updatedAt: '2024-12-06',
+};
+const mockObservable3 = {
+  ...mockObservablePost,
+  id: '7e6535a2-e8gh-671h-d2hg-3811g190739d',
+  createdAt: '2024-12-07',
+  updatedAt: '2024-12-07',
+  value: '192.168.0.1',
+};
 const caseSOWithObservables = {
   ...caseSO,
   attributes: {
     ...caseSO.attributes,
     observables: [mockObservable],
+  },
+};
+const caseSOWithMultipleObservables = {
+  ...caseSO,
+  attributes: {
+    ...caseSO.attributes,
+    observables: [mockObservable, mockObservable2, mockObservable3],
   },
 };
 describe('addObservable', () => {
@@ -653,6 +674,143 @@ describe('bulkAddObservables', () => {
       OBSERVABLE_TYPE_IPV4.key,
       OBSERVABLE_TYPE_IPV6.key,
     ]);
+  });
+});
+
+describe('bulkDeleteObservables', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockCaseService.patchCase.mockResolvedValue(caseSOWithMultipleObservables);
+    mockCaseService.getCase.mockResolvedValue(caseSOWithMultipleObservables);
+    mockClientArgs.authorization.ensureAuthorized.mockResolvedValue(undefined);
+  });
+
+  it('should bulk delete all requested observables when all ids exist', async () => {
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+
+    const result = await bulkDeleteObservables(
+      {
+        caseId: caseSO.id,
+        observableIds: [mockObservable.id, mockObservable2.id],
+      },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    expect(mockLicensingService.notifyUsage).toHaveBeenCalledWith(
+      LICENSING_CASE_OBSERVABLES_FEATURE
+    );
+    expect(result).toBeDefined();
+    expect(mockCaseService.patchCase).toHaveBeenCalledWith(
+      expect.objectContaining({
+        updatedAttributes: {
+          observables: [mockObservable3],
+          total_observables: 1,
+        },
+      })
+    );
+  });
+
+  it('should delete existing ids and ignore missing ids', async () => {
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+
+    await bulkDeleteObservables(
+      {
+        caseId: caseSO.id,
+        observableIds: [mockObservable.id, 'missing-observable-id'],
+      },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    expect(mockCaseService.patchCase).toHaveBeenCalledWith(
+      expect.objectContaining({
+        updatedAttributes: {
+          observables: [mockObservable2, mockObservable3],
+          total_observables: 2,
+        },
+      })
+    );
+  });
+
+  it('should throw 404 when none of the requested ids exist', async () => {
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+
+    await expect(
+      bulkDeleteObservables(
+        {
+          caseId: caseSO.id,
+          observableIds: ['missing-id-1', 'missing-id-2'],
+        },
+        mockClientArgs,
+        mockCasesClient
+      )
+    ).rejects.toThrow(
+      Boom.notFound('Failed to bulk delete observables: none of the requested ids were found')
+    );
+
+    expect(mockCaseService.patchCase).not.toHaveBeenCalled();
+    expect(mockUserActionService.creator.createUserAction).not.toHaveBeenCalled();
+  });
+
+  it('should throw an error if license is not platinum', async () => {
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(false);
+
+    await expect(
+      bulkDeleteObservables(
+        {
+          caseId: caseSO.id,
+          observableIds: [mockObservable.id],
+        },
+        mockClientArgs,
+        mockCasesClient
+      )
+    ).rejects.toThrow(
+      Boom.forbidden(
+        'In order to delete observables from cases, you must be subscribed to an Elastic Platinum license'
+      )
+    );
+  });
+
+  it('should throw when the user is unauthorized', async () => {
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+    mockClientArgs.authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
+
+    await expect(
+      bulkDeleteObservables(
+        {
+          caseId: caseSO.id,
+          observableIds: [mockObservable.id],
+        },
+        mockClientArgs,
+        mockCasesClient
+      )
+    ).rejects.toThrow('Unauthorized');
+
+    expect(mockCaseService.patchCase).not.toHaveBeenCalled();
+  });
+
+  it('should create a user action with the count of removed observables, not requested', async () => {
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+
+    await bulkDeleteObservables(
+      {
+        caseId: caseSO.id,
+        observableIds: [mockObservable.id, 'missing-observable-id'],
+      },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    expect(mockUserActionService.creator.createUserAction).toHaveBeenCalledWith({
+      userAction: {
+        type: UserActionTypes.observables,
+        caseId: caseSO.id,
+        owner: 'securitySolution',
+        user: mockClientArgs.user,
+        payload: { observables: { count: 1, actionType: 'delete' } },
+      },
+    });
   });
 });
 

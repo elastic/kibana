@@ -6,6 +6,8 @@
  */
 
 import * as rt from 'io-ts';
+import { MAX_OBSERVABLES_PER_CASE } from '../../../constants';
+import { limitedArraySchema, NonEmptyString } from '../../../schema';
 import { CaseObservableBaseRt } from '../../domain/observable/v1';
 
 /**
@@ -34,6 +36,19 @@ export const BulkAddObservablesRequestRt = rt.strict({
   observables: rt.array(ObservablePostRt),
 });
 
+const MIN_DELETE_OBSERVABLE_IDS = 1;
+
+export const BulkDeleteObservablesRequestRt = rt.strict({
+  caseId: rt.string,
+  observableIds: limitedArraySchema({
+    codec: NonEmptyString,
+    min: MIN_DELETE_OBSERVABLE_IDS,
+    max: MAX_OBSERVABLES_PER_CASE,
+    fieldName: 'observableIds',
+  }),
+});
+
 export type AddObservableRequest = rt.TypeOf<typeof AddObservableRequestRt>;
 export type UpdateObservableRequest = rt.TypeOf<typeof UpdateObservableRequestRt>;
 export type BulkAddObservablesRequest = rt.TypeOf<typeof BulkAddObservablesRequestRt>;
+export type BulkDeleteObservablesRequest = rt.TypeOf<typeof BulkDeleteObservablesRequestRt>;

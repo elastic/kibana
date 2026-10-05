@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { AddObservableRequestRt, UpdateObservableRequestRt } from './v1';
+import { PathReporter } from 'io-ts/lib/PathReporter';
+import { MAX_OBSERVABLES_PER_CASE } from '../../../constants';
+import {
+  AddObservableRequestRt,
+  BulkDeleteObservablesRequestRt,
+  UpdateObservableRequestRt,
+} from './v1';
 import {
   AddObservableRequestSchema,
   UpdateObservableRequestSchema,
@@ -70,5 +76,60 @@ describe('UpdateObservableRequestRT', () => {
     const result = UpdateObservableRequestSchema.safeParse(defaultRequest);
     expect(result.success).toBe(true);
     expect(result.data).toStrictEqual(defaultRequest);
+  });
+});
+
+describe('BulkDeleteObservablesRequestRt', () => {
+  const validRequest = {
+    caseId: 'case-1',
+    observableIds: ['obs-1', 'obs-2'],
+  };
+
+  it('has expected attributes in request', () => {
+    const query = BulkDeleteObservablesRequestRt.decode(validRequest);
+
+    expect(query).toStrictEqual({
+      _tag: 'Right',
+      right: validRequest,
+    });
+  });
+
+  it('rejects an empty observableIds array', () => {
+    const query = BulkDeleteObservablesRequestRt.decode({
+      caseId: 'case-1',
+      observableIds: [],
+    });
+
+    expect(query._tag).toBe('Left');
+    expect(PathReporter.report(query)).toContain(
+      'The length of the field observableIds is too short. Array must be of length >= 1.'
+    );
+  });
+
+  it('rejects observableIds longer than MAX_OBSERVABLES_PER_CASE', () => {
+    const query = BulkDeleteObservablesRequestRt.decode({
+      caseId: 'case-1',
+      observableIds: new Array(MAX_OBSERVABLES_PER_CASE + 1).fill('obs-id'),
+    });
+
+    expect(query._tag).toBe('Left');
+    expect(PathReporter.report(query)).toContain(
+      `The length of the field observableIds is too long. Array must be of length <= ${MAX_OBSERVABLES_PER_CASE}.`
+    );
+  });
+
+  it('rejects empty strings in observableIds', () => {
+    const query = BulkDeleteObservablesRequestRt.decode({
+      caseId: 'case-1',
+      observableIds: [''],
+    });
+
+    expect(query._tag).toBe('Left');
+    expect(PathReporter.report(query)).toContain('string must have length >= 1');
+  });
+
+  it('rejects requests missing required fields', () => {
+    expect(BulkDeleteObservablesRequestRt.decode({ caseId: 'case-1' })._tag).toBe('Left');
+    expect(BulkDeleteObservablesRequestRt.decode({ observableIds: ['obs-1'] })._tag).toBe('Left');
   });
 });
