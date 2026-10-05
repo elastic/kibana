@@ -14,6 +14,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
 import type { KibanaGroup } from '@kbn/projects-solutions-groups';
+import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import { rspack, loadReactRefreshRspackPlugin, loadRsdoctorRspackPlugin } from '../rspack_runtime';
 import { discoverPlugins } from '../utils/plugin_discovery';
 import {
@@ -22,7 +23,6 @@ import {
   createUnifiedEntry,
 } from '../utils/entry_generation';
 import { resolveBundlesDir, resolveEntryWrappersDir } from '../paths';
-import { loadDllManifest } from './dll_manifest';
 import { getExternals, isKeaReactReduxImport } from './externals';
 import {
   getSharedResolveConfig,
@@ -147,6 +147,9 @@ export async function createSingleCompileConfig(
     hmrPort,
     limitsPath = DEFAULT_LIMITS_PATH,
   } = options;
+  // Path, not parsed JSON: DllReferencePlugin reads it when this compiler runs,
+  // after shared-npm has rewritten it.
+  const dllManifestPath = options.dllManifestPath ?? UiSharedDepsNpm.dllManifestPath;
 
   if (hmr && hmrPort == null) {
     throw new Error(
@@ -350,6 +353,8 @@ export async function createSingleCompileConfig(
         allowlistPluginGroups ? [...allowlistPluginGroups].sort().join(',') : 'all'
       }`,
       configFiles: CACHE_CONFIG_FILES,
+      // Not in CACHE_CONFIG_FILES: that hash is computed before shared-npm writes the manifest.
+      extraBuildDependencies: [dllManifestPath],
       managedNodeModules: true,
     }),
 
@@ -372,7 +377,7 @@ export async function createSingleCompileConfig(
       // being re-bundled into every plugin chunk.
       new rspack.DllReferencePlugin({
         context: repoRoot,
-        manifest: options.dllManifestPath ?? loadDllManifest(),
+        manifest: dllManifestPath,
       }),
 
       // Define environment variables
