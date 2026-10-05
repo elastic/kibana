@@ -603,9 +603,14 @@
     "new_relic.runNrqlQuery",
     "new_relic.unacknowledgeIssue",
     "new_relic.updateMutingRule",
+    "nightshift.composeHydrateNotifications",
     "nightshift.cortexHydrate",
     "nightshift.cortexOptimize",
     "nightshift.ensureInvestigationAgent",
+    "nightshift.memoryMaterializeToSandbox",
+    "nightshift.memoryOptimize",
+    "nightshift.obtainSandbox",
+    "nightshift.resolveModel",
     "nightshift.triggerInvestigation",
     "notion.getDataSource",
     "notion.getPage",
@@ -797,6 +802,7 @@
     "shodan.getHostInfo",
     "shodan.getServices",
     "shodan.searchHosts",
+    "significantEvents.resolveModel",
     "slack",
     "slack2.createConversation",
     "slack2.getConversationHistory",
@@ -988,11 +994,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "928d97960ac7ef85c1e4956f9f113474f726a74dff6a3d97819f57126c146f65"
+      "sha256": "f5ce344508dcf7781ab75aaf60d6099a2ba6a047efd29239d7c8e2b634ee240f"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "7ecf261b034a966adf498421fa4c6dfa758521dcbbc187534645b55ab6a49825"
+      "sha256": "bc585aaf72e2dd2789bbe38347e7aa55e88a0dfb425d303140ee219304ec244f"
     }
   }
 }
