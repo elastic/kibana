@@ -91,7 +91,8 @@ export const computeExpectedProposalCount = ({
  * Orchestrates packaging for one Investigation run. Throws
  * {@link PackageReportIdentityError} when the conversation id does not match the report
  * binding; returns typed `run_incomplete` when the run claimed a hit whose current-run SSE
- * state cannot be read, and when a hunt that did not complete left nothing to package.
+ * state cannot be read, when fewer current-run SSEs were found than the hunt prepared (a
+ * partial `attach_sse` foreach), and when a hunt that did not complete left nothing to package.
  */
 export const runPackageReport = async ({
   spaceId,
@@ -100,6 +101,7 @@ export const runPackageReport = async ({
   runId,
   huntStatus,
   hasConfirmedHit,
+  expectedSseCount,
   attachments,
   deps,
 }: {
@@ -109,6 +111,14 @@ export const runPackageReport = async ({
   runId: string;
   huntStatus: PackageReportInput['huntStatus'];
   hasConfirmedHit: boolean;
+  /**
+   * Number of SSE attachments the hunt child prepared for this run (`hunt.yaml`'s `sse_count`
+   * output). Compared against what `readCurrentRunState` actually found: `attach_sse`'s
+   * `foreach` swallows a per-item attach failure with `continue`, so a shortfall here is
+   * otherwise invisible -- packaging would read the attachments that did land and proceed as
+   * if the run were complete, silently dropping whichever finding failed to attach.
+   */
+  expectedSseCount: number;
   attachments: VersionedAttachment[] | undefined;
   deps: RunPackageReportDeps;
 }): Promise<PackageReportOutput> => {
@@ -165,6 +175,17 @@ export const runPackageReport = async ({
       reason: hasConfirmedHit
         ? `No current-run SSE attachment for runId=${runId}`
         : `Hunt did not complete (status=${huntStatus}), so there is no verdict to record for runId=${runId}`,
+    };
+  }
+
+  // A partial `attach_sse` foreach (some items attached, some swallowed a failure via
+  // `continue`) leaves a non-empty but short current-run state -- the gap the `!state`
+  // branch above cannot see, since it only catches a total miss. Reported the same way as a
+  // total miss: `run_incomplete`, not packaged off an incomplete finding set.
+  if (state.sseCount < expectedSseCount) {
+    return {
+      status: 'run_incomplete',
+      reason: `Hunt prepared ${expectedSseCount} significant security event attachment(s) but only ${state.sseCount} were found for runId=${runId}; the remainder failed to attach`,
     };
   }
 

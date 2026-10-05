@@ -65,12 +65,22 @@ triggers:
         hasConfirmedHit:
           type: boolean
           description: Whether the hunt cleared the confirmed-hit bar.
+        # Number of SSE attachments the hunt child prepared (hunt.yaml's `sse_count` output).
+        # `attach_sse`'s foreach swallows a per-item attach failure with `continue`, so without
+        # this count, packaging has no way to tell a partial attach (some items landed, some
+        # did not) from a complete one -- it would read whatever current-run state exists and
+        # proceed as if the run were complete. Compared against what read_current_run_state
+        # actually finds; a shortfall reports run_incomplete instead of packaging.
+        expectedSseCount:
+          type: number
+          description: Number of significant security event attachments the hunt child prepared for this run (its `sse_count` output).
       required:
         - reportId
         - investigationConversationId
         - runId
         - huntStatus
         - hasConfirmedHit
+        - expectedSseCount
       additionalProperties: false
 outputs:
   - name: status
@@ -101,6 +111,7 @@ steps:
       # `${{ }}`, not `{{ }}`: the step schema types this as a boolean, and the text form
       # renders it as the string "false", which fails input validation.
       hasConfirmedHit: "${{ inputs.hasConfirmedHit }}"
+      expectedSseCount: "${{ inputs.expectedSseCount }}"
     on-failure:
       fallback:
         - name: emit_package_failed

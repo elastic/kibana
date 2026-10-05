@@ -42,6 +42,20 @@ export const packageReportInputSchema = z.object({
     .describe(
       "Whether the hunt cleared the confirmed-hit bar (the coordinator's top-level `has_confirmed_hit`: a required-or-baseline index hit from Tier 1, or a Tier 2 behavior that executed and hit). False covers both an environment that is clean and one where nothing was searchable."
     ),
+  /**
+   * Number of SSE attachments the hunt child prepared for this run (`hunt.yaml`'s `sse_count`
+   * output). Compared against the current-run SSE attachments packaging actually finds: the
+   * hunt's `attach_sse` foreach swallows a per-item attach failure with `continue`, so without
+   * this count a shortfall is invisible and packaging would read a partial finding set as
+   * complete.
+   */
+  expectedSseCount: z
+    .number()
+    .int()
+    .min(0)
+    .describe(
+      'Number of significant security event attachments the hunt child prepared for this run (its `sse_count` output). A packaging read that finds fewer than this is a partial attach, reported as `run_incomplete` rather than packaged.'
+    ),
 });
 
 const coverageWrittenSchema = z.object({
@@ -148,6 +162,7 @@ export const packageReportStepCommonDefinition: CommonStepDefinition<
     runId: "{{ inputs.runId }}"
     huntStatus: "{{ inputs.huntStatus }}"
     hasConfirmedHit: "\${{ inputs.hasConfirmedHit }}"
+    expectedSseCount: "\${{ inputs.expectedSseCount }}"
 \`\`\``,
     ],
   },

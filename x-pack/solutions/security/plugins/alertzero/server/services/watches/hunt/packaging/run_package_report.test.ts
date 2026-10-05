@@ -172,6 +172,7 @@ describe('runPackageReport', () => {
         huntStatus: 'success',
         hasConfirmedHit: true,
         attachments: [sseAttachment({ hit: true, hostName: 'h1' })],
+        expectedSseCount: 1,
         deps: deps(),
       })
     ).rejects.toBeInstanceOf(PackageReportIdentityError);
@@ -188,6 +189,7 @@ describe('runPackageReport', () => {
       huntStatus: 'success',
       hasConfirmedHit: false,
       attachments: [],
+      expectedSseCount: 0,
       deps: deps(),
     });
 
@@ -220,6 +222,7 @@ describe('runPackageReport', () => {
         huntStatus,
         hasConfirmedHit: false,
         attachments: [],
+        expectedSseCount: 0,
         deps: deps(),
       });
 
@@ -241,11 +244,34 @@ describe('runPackageReport', () => {
       huntStatus: 'success',
       hasConfirmedHit: true,
       attachments: [],
+      expectedSseCount: 1,
       deps: deps(),
     });
     expect(result).toEqual({
       status: 'run_incomplete',
       reason: expect.stringContaining(runId),
+    });
+  });
+
+  // `attach_sse`'s foreach swallows a per-item attach failure with `continue`, so a shortfall
+  // leaves a non-empty but incomplete current-run state -- the gap the all-missing case above
+  // cannot see. This must not package off the findings that did land; the dropped one would
+  // never get a proposal or a retry.
+  it('returns run_incomplete when fewer current-run SSEs are found than the hunt prepared', async () => {
+    const result = await runPackageReport({
+      spaceId: 'default',
+      reportId,
+      investigationConversationId: conversationId,
+      runId,
+      huntStatus: 'success',
+      hasConfirmedHit: true,
+      attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
+      expectedSseCount: 2,
+      deps: deps(),
+    });
+    expect(result).toEqual({
+      status: 'run_incomplete',
+      reason: expect.stringContaining('1'),
     });
   });
 
@@ -258,6 +284,7 @@ describe('runPackageReport', () => {
       huntStatus: 'success',
       hasConfirmedHit: false,
       attachments: [sseAttachment({ hit: false })],
+      expectedSseCount: 1,
       deps: deps(),
     });
     expect(result.status).toBe('packaged');
@@ -279,6 +306,7 @@ describe('runPackageReport', () => {
       huntStatus: 'success',
       hasConfirmedHit: true,
       attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
+      expectedSseCount: 1,
       deps: deps(),
     });
     expect(result.status).toBe('packaged');
@@ -301,6 +329,7 @@ describe('runPackageReport', () => {
       huntStatus: 'success',
       hasConfirmedHit: true,
       attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
+      expectedSseCount: 1,
       deps: deps({ resolveHostEnrollment: async () => ({ enrolled: false }) }),
     });
     expect(result.status).toBe('packaged');
@@ -323,6 +352,7 @@ describe('runPackageReport', () => {
       huntStatus: 'success',
       hasConfirmedHit: true,
       attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
+      expectedSseCount: 1,
       deps: deps({
         listRespondActions: async () => ({ ok: true, actions: [killProcess, suspendProcess] }),
         rehydrateProcessSelectors: async () => [
@@ -364,6 +394,7 @@ describe('runPackageReport', () => {
         huntStatus: 'success',
         hasConfirmedHit: true,
         attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
+        expectedSseCount: 1,
         deps: deps({ countExistingProposals: async () => 1 }),
       });
       expect(result.status).toBe('packaged');
@@ -389,6 +420,7 @@ describe('runPackageReport', () => {
         huntStatus: 'success',
         hasConfirmedHit: true,
         attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
+        expectedSseCount: 1,
         deps: deps({
           countExistingProposals: async () => {
             throw new Error('proposals index unavailable');
@@ -415,6 +447,7 @@ describe('runPackageReport', () => {
         huntStatus: 'success',
         hasConfirmedHit: false,
         attachments: [sseAttachment({ hit: false })],
+        expectedSseCount: 1,
         deps: deps({ countExistingProposals }),
       });
       expect(result.status).toBe('packaged');
@@ -439,6 +472,7 @@ describe('runPackageReport', () => {
         huntStatus: 'success',
         hasConfirmedHit: true,
         attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
+        expectedSseCount: 1,
         deps: deps({ countExistingProposals: async () => 4 }),
       });
       expect(result.status).toBe('packaged');
