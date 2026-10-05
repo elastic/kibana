@@ -67,9 +67,9 @@ describe('AutomationTriggerSection', () => {
 
   it('shows the Slack daily limit help for Slack triggers', async () => {
     render(<TriggerSection />);
-    await selectTrigger('automationAddTrigger', 'Agent mentioned in channel');
+    await selectTrigger('automationAddTrigger', 'New message in channel');
 
-    expect(screen.getByText('Agent mentioned')).toBeInTheDocument();
+    expect(screen.getByText('New message')).toBeInTheDocument();
     expect(
       screen.getByText(
         'When reached, Nightshift replies in Slack that the automation is paused. Resets daily at 12:00 AM UTC.'

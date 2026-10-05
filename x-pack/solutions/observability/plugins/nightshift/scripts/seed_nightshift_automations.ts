@@ -74,7 +74,7 @@ const AUTOMATIONS: SeedAutomation[] = [
   },
   {
     name: 'Managed Slack bot mention',
-    trigger: { kind: 'slack', event: 'mention' },
+    trigger: { kind: 'slack', event: 'message' },
     tags: [],
     author: 'Nightshift',
     enabled: true,

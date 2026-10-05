@@ -14,15 +14,11 @@ export type SlackTarget = 'channel' | 'self';
 
 export const SLACK_TRIGGER_EVENTS = {
   slack_message: 'message',
-  slack_mention: 'mention',
-  slack_invite: 'invite',
 } as const;
 export type SlackTriggerKind = keyof typeof SLACK_TRIGGER_EVENTS;
 
 const SLACK_EVENT_TO_FORM_KIND = {
   message: 'slack_message',
-  mention: 'slack_mention',
-  invite: 'slack_invite',
 } as const;
 
 export const isSlackTriggerKind = (kind: string): kind is SlackTriggerKind =>

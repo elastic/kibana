@@ -22,12 +22,6 @@ export const slackTriggerLabels: Record<SlackTriggerKind, string> = {
   slack_message: i18n.translate('xpack.nightshift.automations.flyout.slackMessageTrigger', {
     defaultMessage: 'New message in channel',
   }),
-  slack_mention: i18n.translate('xpack.nightshift.automations.flyout.slackMentionTrigger', {
-    defaultMessage: 'Agent mentioned in channel',
-  }),
-  slack_invite: i18n.translate('xpack.nightshift.automations.flyout.slackInviteTrigger', {
-    defaultMessage: 'Agent invited to channel',
-  }),
 };
 
 export const TRIGGER_LABEL_ORDER = [
@@ -38,8 +32,6 @@ export const TRIGGER_LABEL_ORDER = [
 
 const SLACK_EVENT_KINDS = {
   message: 'slack_message',
-  mention: 'slack_mention',
-  invite: 'slack_invite',
 } as const;
 
 export const getTriggerDisplay = (
