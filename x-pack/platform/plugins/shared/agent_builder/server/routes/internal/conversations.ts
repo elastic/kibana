@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { FeedbackChipId } from '@kbn/agent-builder-common';
 import {
   CONVERSATION_ID_MAX_LENGTH,
@@ -91,21 +90,18 @@ export function registerInternalConversationRoutes({
         authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
     },
-    wrapHandler(
-      async (ctx, request, response) => {
-        const { conversations: conversationsService } = getInternalServices();
-        const { conversation_id: conversationId } = request.params;
-        const { template_id: templateId } = request.body;
+    wrapHandler(async (ctx, request, response) => {
+      const { conversations: conversationsService } = getInternalServices();
+      const { conversation_id: conversationId } = request.params;
+      const { template_id: templateId } = request.body;
 
-        const client = await conversationsService.getScopedClient({ request });
-        const updatedConversation = await client.applyTemplate(conversationId, templateId);
+      const client = await conversationsService.getScopedClient({ request });
+      const updatedConversation = await client.applyTemplate(conversationId, templateId);
 
-        return response.ok<ApplyTemplateResponse>({
-          body: { id: updatedConversation.id },
-        });
-      },
-      { featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID }
-    )
+      return response.ok<ApplyTemplateResponse>({
+        body: { id: updatedConversation.id },
+      });
+    })
   );
 
   router.patch(
@@ -139,27 +135,24 @@ export function registerInternalConversationRoutes({
         authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
     },
-    wrapHandler(
-      async (ctx, request, response) => {
-        const { conversations: conversationsService } = getInternalServices();
-        const { conversation_id: conversationId } = request.params;
-        const { metadata } = request.body;
+    wrapHandler(async (ctx, request, response) => {
+      const { conversations: conversationsService } = getInternalServices();
+      const { conversation_id: conversationId } = request.params;
+      const { metadata } = request.body;
 
-        const client = await conversationsService.getScopedClient({ request });
-        const { conversation: updatedConversation } = await client.patchMetadata(
-          conversationId,
-          metadata
-        );
+      const client = await conversationsService.getScopedClient({ request });
+      const { conversation: updatedConversation } = await client.patchMetadata(
+        conversationId,
+        metadata
+      );
 
-        return response.ok<PatchConversationMetadataResponse>({
-          body: {
-            id: updatedConversation.id,
-            metadata: updatedConversation.metadata ?? {},
-          },
-        });
-      },
-      { featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID }
-    )
+      return response.ok<PatchConversationMetadataResponse>({
+        body: {
+          id: updatedConversation.id,
+          metadata: updatedConversation.metadata ?? {},
+        },
+      });
+    })
   );
 
   router.post(

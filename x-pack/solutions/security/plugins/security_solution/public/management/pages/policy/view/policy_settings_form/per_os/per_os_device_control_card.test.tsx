@@ -190,11 +190,15 @@ describe('PerOsDeviceControlCard', () => {
     delete policy[PolicyOperatingSystem.mac].device_control;
 
     expect(() => render()).not.toThrow();
-    expect(renderResult.getByTestId(testSubj.mac.accessLevelSelect)).toHaveTextContent(
-      'Allow read, write and execute'
-    );
-    expect(renderResult.getByTestId(testSubj.mac.accessLevelSelect)).toBeDisabled();
-    expect(renderResult.getByTestId(testSubj.enableDisableSwitch)).not.toBeChecked();
+    expect(renderResult.getByTestId(testSubj.mac.accessLevelSelect)).toHaveTextContent('Disable');
+    expect(renderResult.getByTestId(testSubj.mac.accessLevelSelect)).toBeEnabled();
+  });
+
+  it('reports the card enabled when the other OS has no device_control field', () => {
+    delete policy[PolicyOperatingSystem.mac].device_control;
+    render();
+
+    expect(renderResult.getByTestId(testSubj.enableDisableSwitch)).toBeChecked();
   });
 
   it('reports the card enabled when only one OS is enabled', () => {
@@ -219,6 +223,103 @@ describe('PerOsDeviceControlCard', () => {
     render();
 
     expect(renderResult.getByTestId(testSubj.enableDisableSwitch)).not.toBeChecked();
+  });
+
+  describe('when the card is switched off', () => {
+    beforeEach(() => {
+      for (const os of [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac] as const) {
+        policy[os].device_control = { enabled: false, usb_storage: DeviceControlAccessLevel.audit };
+        policy[os].popup.device_control!.enabled = false;
+      }
+    });
+
+    it('keeps both OS selects usable and shows Disable', () => {
+      render();
+
+      expect(renderResult.getByTestId(testSubj.enableDisableSwitch)).not.toBeChecked();
+      for (const os of [testSubj.windows, testSubj.mac]) {
+        expect(renderResult.getByTestId(os.accessLevelSelect)).toHaveTextContent('Disable');
+        expect(renderResult.getByTestId(os.accessLevelSelect)).toBeEnabled();
+      }
+    });
+
+    it('enables only Windows when Block all is chosen for it', async () => {
+      const macBefore = cloneDeep(policy[PolicyOperatingSystem.mac]);
+      const linuxBefore = cloneDeep(policy[PolicyOperatingSystem.linux]);
+      render();
+
+      await selectOsControlOption(renderResult, testSubj.windows.accessLevelSelect, 'Block all');
+
+      const updatedPolicy = getUpdatedPolicy();
+      expect(updatedPolicy.windows.device_control).toEqual({
+        enabled: true,
+        usb_storage: DeviceControlAccessLevel.deny_all,
+      });
+      expect(updatedPolicy.windows.popup.device_control?.enabled).toBe(true);
+      expect(updatedPolicy.mac).toEqual(macBefore);
+      expect(updatedPolicy.linux).toEqual(linuxBefore);
+
+      renderResult.rerender(<PerOsDeviceControlCard {...props} policy={updatedPolicy} />);
+
+      expect(renderResult.getByTestId(testSubj.enableDisableSwitch)).toBeChecked();
+    });
+
+    it('enables only macOS without a notification when Read only is chosen for it', async () => {
+      const windowsBefore = cloneDeep(policy[PolicyOperatingSystem.windows]);
+      render();
+
+      await selectOsControlOption(renderResult, testSubj.mac.accessLevelSelect, 'Read only');
+
+      const updatedPolicy = getUpdatedPolicy();
+      expect(updatedPolicy.mac.device_control).toEqual({
+        enabled: true,
+        usb_storage: DeviceControlAccessLevel.read_only,
+      });
+      expect(updatedPolicy.mac.popup.device_control?.enabled).toBe(false);
+      expect(updatedPolicy.windows).toEqual(windowsBefore);
+    });
+  });
+
+  it('Disable turns off only that OS and keeps the card enabled while another OS is on', async () => {
+    policy[PolicyOperatingSystem.windows].device_control!.usb_storage =
+      DeviceControlAccessLevel.deny_all;
+    const macBefore = cloneDeep(policy[PolicyOperatingSystem.mac]);
+    const linuxBefore = cloneDeep(policy[PolicyOperatingSystem.linux]);
+    render();
+
+    await selectOsControlOption(renderResult, testSubj.windows.accessLevelSelect, 'Disable');
+
+    const updatedPolicy = getUpdatedPolicy();
+    expect(updatedPolicy.windows.device_control).toEqual({
+      enabled: false,
+      usb_storage: DeviceControlAccessLevel.audit,
+    });
+    expect(updatedPolicy.windows.popup.device_control).toEqual({
+      enabled: false,
+      message: 'Windows message',
+    });
+    expect(updatedPolicy.mac).toEqual(macBefore);
+    expect(updatedPolicy.linux).toEqual(linuxBefore);
+
+    renderResult.rerender(<PerOsDeviceControlCard {...props} policy={updatedPolicy} />);
+
+    expect(renderResult.getByTestId(testSubj.windows.accessLevelSelect)).toHaveTextContent(
+      'Disable'
+    );
+    expect(renderResult.getByTestId(testSubj.enableDisableSwitch)).toBeChecked();
+  });
+
+  it('shows Disable and no notification for an OS stored as disabled with Block all', () => {
+    policy[PolicyOperatingSystem.windows].device_control = {
+      enabled: false,
+      usb_storage: DeviceControlAccessLevel.deny_all,
+    };
+    render();
+
+    expect(renderResult.getByTestId(testSubj.windows.accessLevelSelect)).toHaveTextContent(
+      'Disable'
+    );
+    expect(renderResult.queryByTestId(testSubj.windows.notifyUser)).not.toBeInTheDocument();
   });
 
   it('the card-local master toggle updates both supported OSes and not Linux', async () => {
@@ -263,6 +364,16 @@ describe('PerOsDeviceControlCard', () => {
   describe('and in view mode', () => {
     beforeEach(() => {
       props.mode = 'view';
+    });
+
+    it('keeps the select of a switched-off OS disabled', () => {
+      policy[PolicyOperatingSystem.windows].device_control!.enabled = false;
+      render();
+
+      expect(renderResult.getByTestId(testSubj.windows.accessLevelSelect)).toHaveTextContent(
+        'Disable'
+      );
+      expect(renderResult.getByTestId(testSubj.windows.accessLevelSelect)).toBeDisabled();
     });
 
     it('should render in view mode', () => {

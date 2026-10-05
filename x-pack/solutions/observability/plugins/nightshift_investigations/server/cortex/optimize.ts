@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Path from 'path';
 import type { Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import {
@@ -17,6 +18,9 @@ import {
 import type { AppliedCortexEdit, CortexTelemetry } from '../telemetry';
 import { isReinforcementOwnedSlug } from '../../common/decision_trees';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
+import { DECISION_TREE_WORKSPACE_ROOT } from '../decision_trees/materialize';
+import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
+import { CORTEX_WORKSPACE_ROOT } from './materialize';
 import type { CortexPageStore } from './page_store';
 import {
   canonicalizeSlug,
@@ -26,8 +30,9 @@ import {
 } from './page_store';
 
 const MAX_TRANSCRIPT_CHARS = 12_000;
-const MAX_TOOL_CALLS_CHARS = 12_000;
+const MAX_TOOL_CALLS_CHARS = 32_000;
 const MAX_TOOL_CALL_PARAMS_CHARS = 1_000;
+const MAX_TOOL_CALL_RESULT_CHARS = 2_000;
 const MAX_TOOL_CALL_PARAM_ARRAY_ITEMS = 20;
 const MAX_PROPOSALS = 8;
 
@@ -124,15 +129,69 @@ const boundToolCallParam = (_key: string, value: unknown): unknown => {
   return value;
 };
 
-/** Renders tool calls as one line each, dropping the tail once the transcript budget is spent. */
+const boundToolCallResult = (_key: string, value: unknown): unknown => {
+  if (typeof value === 'string') {
+    return value.slice(0, MAX_TOOL_CALL_RESULT_CHARS);
+  }
+  if (Array.isArray(value)) {
+    return value.slice(0, MAX_TOOL_CALL_PARAM_ARRAY_ITEMS);
+  }
+  return value;
+};
+
+// Nightshift writes these trees into the sandbox before the run, so reading them back is not
+// evidence, and echoing the wiki into its own optimizer would spend the budget on known pages.
+const SEEDED_WORKSPACE_ROOTS = [CORTEX_WORKSPACE_ROOT, DECISION_TREE_WORKSPACE_ROOT];
+
+const isSeededWorkspaceRead = ({ tool_id: toolId, params }: InvestigationToolCall): boolean => {
+  const filePath = params?.file_path;
+  if (toolId !== SANDBOX_VIEW_FILE_TOOL_ID || typeof filePath !== 'string') {
+    return false;
+  }
+  const resolved = Path.posix.resolve('/workspace', filePath);
+  return SEEDED_WORKSPACE_ROOTS.some((root) => resolved.startsWith(`${root}/`));
+};
+
+const renderToolResultValue = (value: unknown): string =>
+  typeof value === 'string' ? value : JSON.stringify(value, boundToolCallResult) ?? '';
+
+// Top-level string fields (e.g. `stdout`) are rendered raw so command output isn't JSON-escaped.
+const renderToolResultData = (data: unknown): string => {
+  if (typeof data !== 'object' || data === null || Array.isArray(data)) {
+    return renderToolResultValue(data);
+  }
+  return Object.entries(data)
+    .map(([key, value]) => `${key}: ${renderToolResultValue(value)}`)
+    .join('\n');
+};
+
+const renderToolCallResults = (results: unknown[]): string =>
+  results
+    .map((result) =>
+      renderToolResultData(
+        typeof result === 'object' && result !== null && 'data' in result ? result.data : result
+      )
+    )
+    .join('\n')
+    .slice(0, MAX_TOOL_CALL_RESULT_CHARS);
+
+/**
+ * Renders tool calls one per line, followed by a bounded result line when the call's results are
+ * known, dropping the tail once the transcript budget is spent.
+ */
 export const renderToolCalls = (toolCalls: InvestigationToolCall[]): string => {
   const lines: string[] = [];
   let used = 0;
-  for (const { tool_id: toolId, params } of toolCalls) {
-    const line = `- ${toolId ?? 'unknown'} ${JSON.stringify(params ?? {}, boundToolCallParam).slice(
-      0,
-      MAX_TOOL_CALL_PARAMS_CHARS
-    )}`;
+  for (const call of toolCalls) {
+    const { tool_id: toolId, params, results } = call;
+    const callLine = `- ${toolId ?? 'unknown'} ${JSON.stringify(
+      params ?? {},
+      boundToolCallParam
+    ).slice(0, MAX_TOOL_CALL_PARAMS_CHARS)}`;
+    const line =
+      results && !isSeededWorkspaceRead(call)
+        ? `${callLine}\n  result: ${renderToolCallResults(results)}`
+        : callLine;
     if (used + line.length > MAX_TOOL_CALLS_CHARS) {
       lines.push(`- (${toolCalls.length - lines.length} more tool calls omitted)`);
       break;
@@ -181,7 +240,7 @@ What each entity type holds (use these markdown sections; skip ones that would b
 
 Services and integrations:
 - When the transcript establishes a durable fact about a service or an integration — what it does, what it depends on, which indices or fields hold its telemetry, how to query it, how it fails — record it on that service or integration page, not only inside a postmortem, alert, or topic. Create the page when the catalog has none.
-- The tool calls show what the investigator ran, with parameters but without results. Use them to learn which services, indices, and integrations were queried and how. Treat a fact as established only when the assistant's answer confirms it.
+- The tool calls show what the investigator ran and, on the "result:" line under a call, a truncated excerpt of what it returned. Use them to learn which services, indices, and integrations were queried, how, and what the data showed. A result is evidence, not a conclusion: treat a causal claim as established only when the assistant's answer confirms it.
 
 Rules:
 - Only propose facts that the transcript actually established. No speculation.
@@ -242,6 +301,12 @@ export const applyCortexEdits = async ({
   logger: Logger;
 }): Promise<void> => {
   const { pages } = await store.list();
+  logger.info(`Applying ${edits.length} Cortex edit(s)`);
+  logger.debug(
+    `Cortex edit proposals: ${edits
+      .map((edit) => `${edit.action}:${edit.entity_type}/${edit.slug}`)
+      .join(', ')}`
+  );
   const applied: AppliedCortexEdit[] = [];
   // A run confirms a page at most once, and never one it created: promotion needs a confirmation
   // from a later run.
@@ -267,7 +332,7 @@ export const applyCortexEdits = async ({
         if (updated) {
           touchedIds.add(id);
           applied.push({ action: 'corroborate', entityType: edit.entity_type });
-          logger.info(`Corroborated Cortex page ${id}`);
+          logger.debug(`Corroborated Cortex page ${id}`);
         }
         continue;
       }
@@ -276,7 +341,7 @@ export const applyCortexEdits = async ({
         const updated = await store.archive(id);
         if (updated) {
           applied.push({ action: 'archive', entityType: edit.entity_type });
-          logger.info(`Archived Cortex page ${id}`);
+          logger.debug(`Archived Cortex page ${id}`);
         }
         continue;
       }
@@ -305,7 +370,7 @@ export const applyCortexEdits = async ({
         corroborations,
       });
       applied.push({ action: 'upsert', entityType: edit.entity_type });
-      logger.info(`Upserted Cortex page ${id}`);
+      logger.debug(`Upserted Cortex page ${id}`);
     }
   } finally {
     telemetry.reportEditsApplied(applied);
@@ -339,7 +404,7 @@ export const optimizeCortex = async ({
     '## User',
     userMessage.slice(0, MAX_TRANSCRIPT_CHARS),
     '',
-    '## Tool calls (parameters only)',
+    '## Tool calls',
     renderToolCalls(toolCalls),
     '',
     '## Assistant',
@@ -347,8 +412,8 @@ export const optimizeCortex = async ({
   ].join('\n');
 
   const { edits } = await proposeEdits({ transcript, catalog: pages });
+  logger.info(`Cortex optimizer proposed ${edits.length} edit(s)`);
   if (edits.length === 0) {
-    logger.debug('Cortex optimizer proposed no edits');
     return;
   }
 

@@ -8,7 +8,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  PROPOSALS_UI_CAPABILITY_SHOW,
+  PROPOSALS_UI_CAPABILITY_DECIDE,
+} from '@kbn/proposals-common';
 import {
   type ConversationsActionsGroupProps,
   type BaseActionsProps,
@@ -49,6 +54,7 @@ import { decisionErrorMessage } from './decision_errors';
 import { ProposalsTrendChartRow } from '../../components/proposals_trend_chart';
 import { DismissProposalModal } from '../../components/pending_proposals/dismiss_proposal_modal';
 import { EscalationModalBoundary } from './escalation_modal_boundary';
+import { InFlightProposalBadge } from './in_flight_proposal_badge';
 import { useQueueSections } from './queue/use_queue_sections';
 import { useDropDecidedProposal } from './queue/use_drop_decided_proposal';
 import { QueueSection } from './queue/queue_section';
@@ -62,6 +68,39 @@ const LazyConnectedEscalationModal = React.lazy(() =>
 );
 
 export const ConversationsPage: React.FC = () => {
+  const {
+    services: { application },
+  } = useKibana<CoreStart>();
+
+  if (application.capabilities.proposals?.[PROPOSALS_UI_CAPABILITY_SHOW] !== true) {
+    return (
+      <EuiEmptyPrompt
+        data-test-subj="alertzeroProposalsPrivilegesGate"
+        iconType="lock"
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.alertzero.queue.missingProposalsPrivilegesTitle"
+              defaultMessage="Contact your administrator for access"
+            />
+          </h2>
+        }
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.alertzero.queue.missingProposalsPrivilegesDescription"
+              defaultMessage="To view the AlertZero queue in this space, you need the Proposed Actions Read privilege."
+            />
+          </p>
+        }
+      />
+    );
+  }
+
+  return <ConversationsPageContent />;
+};
+
+const ConversationsPageContent: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const queryClient = useQueryClient();
   const { sections, proposalsById, investigations: conversations } = useQueueSections();
@@ -160,9 +199,10 @@ export const ConversationsPage: React.FC = () => {
   );
 
   const {
-    services: { notifications },
+    services: { application, notifications },
   } = useKibana<CoreStart>();
 
+  const canDecide = application.capabilities.proposals?.[PROPOSALS_UI_CAPABILITY_DECIDE] === true;
   const { manageEscalations: canManageEscalations, manageInvestigations: canManageInvestigations } =
     useAgenticInvestigationsCapabilities();
 
@@ -171,6 +211,11 @@ export const ConversationsPage: React.FC = () => {
   // ---------------------------------------------------------------------------
 
   const assignInvestigation = useAssignInvestigation();
+
+  const renderInFlightStatus = useCallback(
+    ({ id }: Investigation) => <InFlightProposalBadge proposalId={id} />,
+    []
+  );
 
   const renderAssignees = useQueueAssignees({
     items: conversations,
@@ -338,6 +383,7 @@ export const ConversationsPage: React.FC = () => {
         initialAssignee={actionInvestigation?.assignee}
         investigation={actionInvestigation}
         approvalProposal={selectedProposal}
+        readOnly={!canDecide}
         onCloseAction={closeModal}
         onCloseApproval={closeApproval}
         onConfirmApproval={confirmApproval}
@@ -383,7 +429,7 @@ export const ConversationsPage: React.FC = () => {
               section={section}
               entityFilter={effectiveEntityFilter}
               selectedConversationId={selectedConversationId}
-              onClickRecommendedAction={onClickRecommendedAction}
+              onClickRecommendedAction={canDecide ? onClickRecommendedAction : undefined}
               onClickAction={onClickAction}
               onClickCard={onClickCard}
               onOpenChat={openChatForProposal}
@@ -391,6 +437,7 @@ export const ConversationsPage: React.FC = () => {
               canManageEscalations={canManageEscalations}
               canCloseInvestigation={canManageInvestigations}
               renderAssignees={renderAssignees}
+              renderInFlightStatus={renderInFlightStatus}
             />
           </EuiFlexItem>
         ))}

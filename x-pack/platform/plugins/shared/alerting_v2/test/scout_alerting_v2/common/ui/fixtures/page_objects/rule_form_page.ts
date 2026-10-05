@@ -6,7 +6,8 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import { EsqlEditor } from '@kbn/scout';
+import type { AlertingMountConfig } from './alerting_mount_config';
 import type { DiscoverAppMenu } from './discover_app_menu';
 
 const RULE_FORM_ID = 'ruleV2Form';
@@ -28,10 +29,14 @@ export class RuleFormPage {
   public readonly form: Locator;
   public readonly esqlModeButton: Locator;
 
-  private readonly codeEditor: KibanaCodeEditorWrapper;
+  private readonly esqlEditor: EsqlEditor;
 
-  constructor(private readonly page: ScoutPage, private readonly discoverAppMenu: DiscoverAppMenu) {
-    this.codeEditor = new KibanaCodeEditorWrapper(page);
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly discoverAppMenu: DiscoverAppMenu,
+    private readonly mountConfig: AlertingMountConfig
+  ) {
+    this.esqlEditor = new EsqlEditor(page);
 
     this.nameInput = this.page.testSubj.locator('ruleNameInput');
     this.submitButton = this.page.testSubj.locator('ruleV2FormSubmitButton');
@@ -48,15 +53,17 @@ export class RuleFormPage {
   }
 
   async gotoCreate() {
-    await this.page.gotoApp('management/alertingV2/rules/create');
+    await this.page.gotoApp(`${this.mountConfig.appRoute}${this.mountConfig.subPaths.rulesCreate}`);
   }
 
   async gotoRulesList() {
-    await this.page.gotoApp('management/alertingV2/rules');
+    await this.page.gotoApp(`${this.mountConfig.appRoute}${this.mountConfig.paths.rules}`);
   }
 
   async gotoRuleDetails(ruleId: string) {
-    await this.page.gotoApp(`management/alertingV2/rules/${ruleId}`);
+    await this.page.gotoApp(
+      `${this.mountConfig.appRoute}${this.mountConfig.subPaths.rulesDetail(ruleId)}`
+    );
   }
 
   async gotoDiscover() {
@@ -149,9 +156,9 @@ export class RuleFormPage {
     await this.discoverAppMenu.openCreateEsqlRuleFlyout();
   }
 
-  /** Sets the Discover ES|QL editor (model index 0) without submitting. */
+  /** Sets the Discover ES|QL editor without submitting. */
   async setDiscoverQueryWithFlyoutOpen(query: string) {
-    await this.codeEditor.setCodeEditorValue(query, 0);
+    await this.esqlEditor.setQuery(query);
   }
 
   /**

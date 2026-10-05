@@ -11,9 +11,11 @@ applies_to:
 
 The Grafana connector connects directly to the Grafana HTTP API. It lets a workflow or agent read Grafana-managed alerts and rules, manage silences, post dashboard annotations, and search dashboards and notification configuration, for both self-hosted Grafana and Grafana Cloud.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Overview
 
-This is a **custom connector** that uses Grafana's REST API with Bearer token (service account) authentication. You configure your Grafana instance URL, an optional organization ID (for multi-org instances), and a service account token when creating the connector.
+The Grafana connector uses Grafana's REST API with Bearer token (service account) authentication. You configure your Grafana instance URL, an optional organization ID (for multi-org instances), and a service account token when creating the connector.
 
 ## Create connectors in {{kib}} [define-grafana-ui]
 

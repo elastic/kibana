@@ -27,7 +27,7 @@ export const POLICY_EXECUTION_FIELDS = {
   policy: 'policy',
   outcome: 'outcome',
   rules: 'rules',
-  episodeCount: 'episode_count',
+  episodeCount: 'alert_count',
   actionGroupCount: 'action_group_count',
   workflows: 'workflows',
 } as const satisfies Record<string, keyof PolicyExecutionHistoryItem>;
@@ -106,7 +106,7 @@ export const policyExecutionToDataTableRecord = (
     [POLICY_EXECUTION_FIELDS.policy]: item.policy,
     [POLICY_EXECUTION_FIELDS.outcome]: item.outcome,
     [POLICY_EXECUTION_FIELDS.rules]: item.rules,
-    [POLICY_EXECUTION_FIELDS.episodeCount]: item.episode_count,
+    [POLICY_EXECUTION_FIELDS.episodeCount]: item.alert_count,
     [POLICY_EXECUTION_FIELDS.actionGroupCount]: item.action_group_count,
     [POLICY_EXECUTION_FIELDS.workflows]: item.workflows,
     [POLICY_RECORD_EXTRA_FIELDS.totalRuleCount]: item.total_rule_count,

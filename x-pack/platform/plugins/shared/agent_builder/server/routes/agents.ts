@@ -104,9 +104,9 @@ const SUBAGENT_IDS_SCHEMA = schema.arrayOf(
   {
     maxSize: 50,
     meta: {
-      availability: { stability: 'tech_preview' },
+      availability: { stability: 'stable', since: '9.6.0' },
       description:
-        "**Technical Preview; added in 9.6.0.** Allowlist of subagent IDs this agent may spawn. Missing or empty disables the `run_subagent` tool. Use '_self' to enable self-fork.",
+        "Allowlist of subagent IDs this agent may spawn. Missing or empty disables the `run_subagent` tool. Use '_self' to enable self-fork.",
     },
   }
 );
@@ -165,8 +165,9 @@ const ACCESS_CONTROL_MODE_SCHEMA = schema.oneOf(
   ],
   {
     meta: {
+      availability: { stability: 'stable', since: '9.4.0' },
       description:
-        '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.',
+        'Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.',
     },
   }
 );
@@ -180,7 +181,7 @@ const ACCESS_CONTROL_ENTRIES_SCHEMA = schema.arrayOf(
           minLength: 1,
           maxLength: AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
           meta: {
-            availability: { stability: 'tech_preview', since: '9.6.0' },
+            availability: { stability: 'stable', since: '9.6.0' },
             description:
               'Stable identifier of the user to grant access to (Kibana user profile uid). Preferred over `name`.',
           },
@@ -685,7 +686,7 @@ export function registerAgentRoutes({
         'Get the access control for a specific agent. Callers without permission to manage access control receive `permissions.update_access_control: false` and only their own entry. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
-        availability: { stability: 'tech_preview', since: '9.5.0' },
+        availability: { stability: 'stable', since: '9.5.0' },
       },
     })
     .addVersion(
@@ -727,7 +728,7 @@ export function registerAgentRoutes({
         'Replace the per-agent access-control entries. Each entry grants one user a role on this agent. Identify the user by their Kibana user profile uid (`id`). Entries created before profile uids were adopted may use `name` (deprecated) instead. The agent owner, cluster admins, and anyone access control grants Manager can call this endpoint. Each call replaces the entire entries list — the most recent successful update wins. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
-        availability: { stability: 'tech_preview', since: '9.5.0' },
+        availability: { stability: 'stable', since: '9.5.0' },
       },
     })
     .addVersion(
