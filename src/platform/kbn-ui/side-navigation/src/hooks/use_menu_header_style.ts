@@ -10,15 +10,16 @@
 import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+import { APP_HEADER_ROW_HEIGHT } from '../constants';
+
 /**
  * Menu header rendered above the scrolling menu body, so it stays in view.
  */
 export function useMenuHeaderStyle(isPanel = false) {
   const { euiTheme } = useEuiTheme();
   const { fontSize, lineHeight } = useEuiFontSize('s');
-  // In the side panel, center the title on the adjacent 64px App Header row.
   const panelStyles = css`
-    padding-top: calc((64px - ${lineHeight}) / 2);
+    padding-top: calc((${APP_HEADER_ROW_HEIGHT}px - ${lineHeight}) / 2);
   `;
 
   return css`
