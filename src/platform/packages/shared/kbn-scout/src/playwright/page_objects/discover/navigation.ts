@@ -77,7 +77,7 @@ export abstract class DiscoverNavigation extends DiscoverAppBase {
 
   /** Detects whether Discover is in ES|QL or classic mode by checking which editor is visible. */
   async getCurrentQueryMode(): Promise<DiscoverQueryMode> {
-    const esqlEditor = this.page.testSubj.locator('ESQLEditor');
+    const esqlEditor = this.esqlEditor.editor;
     const classicQueryInput = this.page.testSubj.locator('queryInput');
     await expect(esqlEditor.or(classicQueryInput)).toBeVisible();
     return (await esqlEditor.isVisible()) ? 'esql' : 'classic';
@@ -88,7 +88,7 @@ export abstract class DiscoverNavigation extends DiscoverAppBase {
     if (currentMode !== 'esql') {
       await this.page.testSubj.click('select-text-based-language-btn');
     }
-    await this.codeEditor.waitCodeEditorReady('ESQLEditor');
+    await this.esqlEditor.waitReady();
   }
 
   async writeAndSubmitEsqlQuery(query: string) {

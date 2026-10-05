@@ -5,35 +5,47 @@
  * 2.0.
  */
 
+import type { ComponentProps } from 'react';
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
+import { useArgs } from '@storybook/preview-api';
 
-import type { CreateDatasetSettingsFormValues } from '../../create_dataset_form_state';
-import { DatasetFormStoryProvider } from '../../__stories__/dataset_form_story_provider';
+import type { DatasetPartitionDetectionFormValue } from '../../create_dataset_form_state';
 import { fieldStoryDecorator } from '../../__stories__/field_story_decorator';
+import type { ComboBoxChange } from '../combo_box_selection_validity';
 import { PartitionDetectionSelect } from './partition_detection_select';
 
-type StoryArgs = Pick<CreateDatasetSettingsFormValues, 'partition_detection'>;
+type PartitionDetectionSelectProps = ComponentProps<typeof PartitionDetectionSelect>;
 
-const meta: Meta<StoryArgs> = {
+const meta: Meta<typeof PartitionDetectionSelect> = {
+  component: PartitionDetectionSelect,
   title: 'data_federation/Fields/PartitionDetectionSelect',
   decorators: [fieldStoryDecorator],
-  args: { partition_detection: '' },
-  argTypes: {
-    partition_detection: { control: 'select', options: ['', 'auto', 'hive', 'template', 'none'] },
+  args: {
+    value: '',
+    isInvalid: false,
+    onChange: action('onChange'),
+    onBlur: action('onBlur'),
   },
-  render: (args) => (
-    <DatasetFormStoryProvider settings={args}>
-      {(control) => <PartitionDetectionSelect control={control} />}
-    </DatasetFormStoryProvider>
-  ),
+  argTypes: {
+    value: { control: 'select', options: ['', 'auto', 'hive', 'template', 'none'] },
+  },
+  render: function Render(args) {
+    const [, updateArgs] = useArgs<PartitionDetectionSelectProps>();
+    const onChange = (change: ComboBoxChange<DatasetPartitionDetectionFormValue>) => {
+      args.onChange(change);
+      updateArgs({ value: change.value });
+    };
+    return <PartitionDetectionSelect {...args} onChange={onChange} />;
+  },
 };
 
 export default meta;
-type Story = StoryObj<StoryArgs>;
+type Story = StoryObj<typeof PartitionDetectionSelect>;
 
 export const Empty: Story = {};
 
 export const Selected: Story = {
-  args: { partition_detection: 'hive' },
+  args: { value: 'hive' },
 };

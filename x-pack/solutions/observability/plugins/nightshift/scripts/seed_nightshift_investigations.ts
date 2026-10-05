@@ -246,7 +246,7 @@ const unfinished = ({
 
 const INVESTIGATIONS: InvestigationAttributes[] = [
   completed({
-    severity: '80-critical',
+    severity: 'critical',
     title: 'api-gateway v2.8.1 auth middleware blocks the event loop',
     subject: {
       type: 'significant_event',
@@ -344,7 +344,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     },
   }),
   completed({
-    severity: '80-critical',
+    severity: 'critical',
     title: 'Transaction batching leaks references and OOM-kills payment-service',
     subject: {
       type: 'significant_event',
@@ -420,7 +420,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     },
   }),
   completed({
-    severity: '80-critical',
+    severity: 'critical',
     title: 'ILM policy gap fills Elasticsearch data nodes past the high watermark',
     subject: {
       type: 'significant_event',
@@ -492,7 +492,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     },
   }),
   completed({
-    severity: '60-high',
+    severity: 'high',
     title: 'Stale JWKS cache rejects valid tokens after IdP key rotation',
     subject: { type: 'significant_event', id: 'evt-009', summary: 'Auth API — elevated 401 rate' },
     minutesAgo: 70,
@@ -560,7 +560,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     },
   }),
   completed({
-    severity: '60-high',
+    severity: 'high',
     title: 'order-processors stuck in deserialisation retries after schema registry blip',
     subject: {
       type: 'significant_event',
@@ -637,7 +637,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     },
   }),
   completed({
-    severity: '60-high',
+    severity: 'high',
     title: 'Checkout error rate alert traced to payment-service restarts',
     subject: {
       type: 'alert',
@@ -714,7 +714,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     },
   }),
   completed({
-    severity: '40-medium',
+    severity: 'medium',
     title: 'Catalog index lag returns empty search facets for new SKUs',
     subject: {
       type: 'significant_event',
@@ -766,7 +766,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     },
   }),
   completed({
-    severity: '40-medium',
+    severity: 'medium',
     title: 'Nightly batch saturates the cache-service connection pool',
     subject: {
       type: 'manual',
@@ -817,7 +817,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     },
   }),
   completed({
-    severity: '20-low',
+    severity: 'low',
     title: 'Cache hit-rate dip was a planned node replacement',
     subject: {
       type: 'significant_event',
@@ -844,7 +844,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
     },
   }),
   completed({
-    severity: '20-low',
+    severity: 'low',
     title: 'cert-manager lost DNS01 permissions after RBAC tightening',
     subject: {
       type: 'significant_event',
@@ -949,6 +949,20 @@ const resolveKibanaUrl = async (url: string, auth: string): Promise<string> => {
     : base;
 };
 
+// Investigations persist severity with a sortable numeric prefix; the API converts it back to the
+// canonical value on read. Seeds are written straight into .kibana, so they must use the stored form.
+const STORED_SEVERITY: Record<Severity, string> = {
+  critical: '80-critical',
+  high: '60-high',
+  medium: '40-medium',
+  low: '20-low',
+};
+
+const toStoredAttributes = (attributes: InvestigationAttributes) =>
+  attributes.severity === undefined
+    ? attributes
+    : { ...attributes, severity: STORED_SEVERITY[attributes.severity] };
+
 const toBulkBody = (): string =>
   INVESTIGATIONS.flatMap((attributes, index) => [
     { index: { _id: `${SO_TYPE}:${ID_PREFIX}${String(index + 1).padStart(2, '0')}` } },
@@ -960,7 +974,7 @@ const toBulkBody = (): string =>
       typeMigrationVersion: TYPE_MIGRATION_VERSION,
       created_at: attributes.created_at,
       updated_at: attributes.completed_at ?? attributes.created_at,
-      [SO_TYPE]: attributes,
+      [SO_TYPE]: toStoredAttributes(attributes),
     },
   ])
     .map((line) => JSON.stringify(line))
