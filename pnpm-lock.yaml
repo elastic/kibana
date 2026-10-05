@@ -446,8 +446,8 @@ importers:
         specifier: 10.0.4
         version: 10.0.4
       '@hapi/hapi':
-        specifier: 21.4.9
-        version: 21.4.9
+        specifier: 21.4.10
+        version: 21.4.10
       '@hapi/hoek':
         specifier: 11.0.7
         version: 11.0.7
@@ -4152,7 +4152,7 @@ importers:
         version: 3.0.0
       brok:
         specifier: 6.0.0
-        version: 6.0.0(@hapi/hapi@21.4.9)
+        version: 6.0.0(@hapi/hapi@21.4.10)
       byte-size:
         specifier: 9.0.1
         version: 9.0.1
@@ -4385,8 +4385,8 @@ importers:
         specifier: 4.18.1
         version: 4.18.1
       lru-cache:
-        specifier: 11.5.2
-        version: 11.5.2
+        specifier: 11.5.3
+        version: 11.5.3
       lz-string:
         specifier: 1.5.0
         version: 1.5.0
@@ -11176,8 +11176,8 @@ packages:
     resolution: {integrity: sha512-dvD8+Y/Okc0fh0blqaYCLIrcy0+1LqIhMr7hjk8elLQZ9mkw2hKFB9dFKuRfWf+1nvHpGlW+PwccqkdebynQbg==}
     engines: {node: '>=14.0.0'}
 
-  '@hapi/hapi@21.4.9':
-    resolution: {integrity: sha512-YnecZOVx2AD08VvPl0ZaFS0MjEHqg+InGRmBRli731ct+VwI++dpu3BIYA1Z4SMr6HUAnpyvbQ1aq5woe3fBWg==}
+  '@hapi/hapi@21.4.10':
+    resolution: {integrity: sha512-G0l7tch1/85Gkyasmmjvjam2IWbx/9zCp4AQx4nZ/nn/rrrmVmRvFejj2ZGe5j3wFZVCLt2+Zeg95ImFFom+7w==}
     engines: {node: '>=14.15.0'}
 
   '@hapi/heavy@8.0.1':
@@ -21023,8 +21023,8 @@ packages:
     resolution: {integrity: sha512-ESL2CrkS/2wTPfuend7Zhkzo2u0daGJ/A2VucJOgQ/C48S/zB8MMeMHSGKYpXhIjbPxfuezITkaBH1wqv00DDQ==}
     engines: {node: 20 || >=22}
 
-  lru-cache@11.5.2:
-    resolution: {integrity: sha512-4pfM1Ff0x50o0tQwb5ucw/RzNyD0/YJME6IVcStalZuMWxdt3sR3huStTtxz4PUmvZfRguvDejasvQ2kifR11g==}
+  lru-cache@11.5.3:
+    resolution: {integrity: sha512-U4N8FgzmWxc8k1VH8Kr6lQg18U7Fjvby6wXHVRX/ZZ7IwWbRMgrRbP0Wrb5q5NVinryp4SQampHKdvtecItxUg==}
     engines: {node: 20 || >=22}
 
   lru-cache@5.1.1:
@@ -22289,8 +22289,8 @@ packages:
     resolution: {integrity: sha512-XDF38WCH3z5OV/OVa8GKUNtLAyneuzbCisx7QUCF8Q6Nutx0WnJrQe5O+kOtBlLfRNUws98Y58Lblp+NJG5T4Q==}
     hasBin: true
 
-  pbkdf2@3.1.6:
-    resolution: {integrity: sha512-BT6eelPB1EyGHo8pC0o9Bl6k6SYVhKO1jEbd3lcTrtr7XHdjP8BW1YpfCV3G9Kwkxgattk+S5q2/RvuttCsS1g==}
+  pbkdf2@3.1.7:
+    resolution: {integrity: sha512-nS4mvFgVwUrecPTRdpdseM2fwpdfnX0/HibA8DgBRQtihUAzHQYJFU2l+OlEtiXtpqkrMvCPDwyXMUnASDt6Qw==}
     engines: {node: '>= 0.10'}
 
   pdf-lib@1.17.1:
@@ -28533,7 +28533,7 @@ snapshots:
       '@hapi/validate': 2.0.1
       '@hapi/wreck': 18.1.2
 
-  '@hapi/hapi@21.4.9':
+  '@hapi/hapi@21.4.10':
     dependencies:
       '@hapi/accept': 6.0.3
       '@hapi/ammo': 6.0.1
@@ -32786,7 +32786,7 @@ snapshots:
 
   '@types/hapi__cookie@12.0.5':
     dependencies:
-      '@hapi/hapi': 21.4.9
+      '@hapi/hapi': 21.4.10
       '@types/node': 24.10.13
       joi: 17.13.8
 
@@ -34546,9 +34546,9 @@ snapshots:
     dependencies:
       object.entries: 1.1.9
 
-  brok@6.0.0(@hapi/hapi@21.4.9):
+  brok@6.0.0(@hapi/hapi@21.4.10):
     dependencies:
-      '@hapi/hapi': 21.4.9
+      '@hapi/hapi': 21.4.10
       '@hapi/hoek': 11.0.7
       '@hapi/validate': 2.0.1
 
@@ -35398,7 +35398,7 @@ snapshots:
       diffie-hellman: 5.0.3
       hash-base: 3.0.5
       inherits: 2.0.4
-      pbkdf2: 3.1.6
+      pbkdf2: 3.1.7
       public-encrypt: 4.0.3
       randombytes: 2.1.0
       randomfill: 1.0.4
@@ -40059,7 +40059,7 @@ snapshots:
 
   lru-cache@11.2.6: {}
 
-  lru-cache@11.5.2: {}
+  lru-cache@11.5.3: {}
 
   lru-cache@5.1.1:
     dependencies:
@@ -41638,7 +41638,7 @@ snapshots:
       asn1.js: 4.10.1
       browserify-aes: 1.2.0
       evp_bytestokey: 1.0.3
-      pbkdf2: 3.1.6
+      pbkdf2: 3.1.7
       safe-buffer: 5.2.1
 
   parse-entities@2.0.0:
@@ -41719,7 +41719,7 @@ snapshots:
 
   path-scurry@2.0.2:
     dependencies:
-      lru-cache: 11.5.2
+      lru-cache: 11.5.3
       minipass: 7.1.3
 
   path-to-regexp@0.1.13: {}
@@ -41748,7 +41748,7 @@ snapshots:
       ieee754: 1.2.1
       resolve-protobuf-schema: 2.1.0
 
-  pbkdf2@3.1.6:
+  pbkdf2@3.1.7:
     dependencies:
       create-hash: 1.2.0
       create-hmac: 1.1.7
