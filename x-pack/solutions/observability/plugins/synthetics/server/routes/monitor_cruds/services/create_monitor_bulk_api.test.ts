@@ -171,6 +171,41 @@ describe('CreateMonitorBulkAPI.prepare helpers', () => {
     ]);
   });
 
+  it('reuses private-location lookups for monitors with the same space scope', async () => {
+    const internalRepository = {};
+    const routeContext = {
+      ...mockRouteContext(),
+      server: {
+        coreStart: {
+          savedObjects: { createInternalRepository: jest.fn(() => internalRepository) },
+        },
+      },
+    } as unknown as RouteContext;
+    const api = new CreateMonitorBulkAPI(routeContext);
+    const getPrivateLocationsForNamespaces = jest.requireMock(
+      '../../../synthetics_service/get_private_locations'
+    ).getPrivateLocationsForNamespaces;
+    getPrivateLocationsForNamespaces.mockResolvedValue([]);
+
+    await (api as any).getPrivateLocationsForMonitors([
+      {
+        private_locations: ['marketing-location'],
+        [ConfigKey.KIBANA_SPACES]: ['marketing', 'sre'],
+      },
+      {
+        private_locations: ['another-marketing-location'],
+        [ConfigKey.KIBANA_SPACES]: ['sre', 'marketing'],
+      },
+    ]);
+
+    expect(getPrivateLocationsForNamespaces).toHaveBeenCalledTimes(1);
+    expect(getPrivateLocationsForNamespaces).toHaveBeenCalledWith(internalRepository, [
+      'default',
+      'marketing',
+      'sre',
+    ]);
+  });
+
   it('skips private-location repository work for batches without private locations', async () => {
     const createInternalRepository = jest.fn();
     const routeContext = {

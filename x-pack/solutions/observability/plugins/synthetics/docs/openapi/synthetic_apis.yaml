@@ -602,6 +602,7 @@ paths:
                       - $ref: "#/components/schemas/httpMonitorFields"
                       - $ref: "#/components/schemas/icmpMonitorFields"
                       - $ref: "#/components/schemas/tcpMonitorFields"
+                      - $ref: "#/components/schemas/apiMonitorFields"
                     discriminator:
                       propertyName: type
             examples:
@@ -1731,6 +1732,45 @@ components:
               description: The monitor type.
               enum:
                 - browser
+    apiMonitorFields:
+      title: API Journey monitor fields
+      allOf: # Combines the common fields schema with the API Journey-specific details
+        - $ref: "#/components/schemas/commonMonitorFields"
+        - type: object
+          required:
+            - inline_script
+            - type
+          additionalProperties: true
+          properties:
+            ignore_https_errors:
+              type: boolean
+              default: false
+              description: Ignore HTTPS errors.
+            certificate_error_spki_allowlist:
+              type: array
+              default: []
+              description: >-
+                PEM certificates whose public keys (SPKI) are allowlisted so the API request
+                context bypasses certificate errors for matching presented certificates.
+                This does not add a CA to the trust store.
+              items:
+                type: string
+            inline_script:
+              type: string
+              description: The inline API Journey script.
+            playwright_options:
+              type: object
+              description: Playwright API request context options.
+            synthetics_args:
+              type: array
+              description: Synthetics agent CLI arguments.
+              items:
+                type: string
+            type:
+              type: string
+              description: The monitor type.
+              enum:
+                - api
     httpMonitorFields:
       title: HTTP monitor fields
       allOf: # Combines the common fields schema with the hTTP monitor-specific details

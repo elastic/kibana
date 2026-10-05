@@ -127,6 +127,10 @@ export class CreateMonitorBulkAPI {
 
     const internalClient =
       this.routeContext.server.coreStart.savedObjects.createInternalRepository();
+    const privateLocationsByNamespaceScope = new Map<
+      string,
+      Promise<PrivateLocationAttributes[]>
+    >();
     return Promise.all(
       monitors.map((monitor) => {
         if (!this.hasPrivateLocationInput(monitor)) {
@@ -135,7 +139,13 @@ export class CreateMonitorBulkAPI {
         const namespaces = [
           ...new Set([this.routeContext.spaceId, ...(monitor[ConfigKey.KIBANA_SPACES] ?? [])]),
         ];
-        return getPrivateLocationsForNamespaces(internalClient, namespaces);
+        const namespaceScope = JSON.stringify([...namespaces].sort());
+        let privateLocations = privateLocationsByNamespaceScope.get(namespaceScope);
+        if (!privateLocations) {
+          privateLocations = getPrivateLocationsForNamespaces(internalClient, namespaces);
+          privateLocationsByNamespaceScope.set(namespaceScope, privateLocations);
+        }
+        return privateLocations;
       })
     );
   }

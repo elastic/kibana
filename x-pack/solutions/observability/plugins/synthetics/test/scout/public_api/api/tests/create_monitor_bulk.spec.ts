@@ -72,9 +72,9 @@ apiTest.describe(
       const response = await bulkCreateMonitors(apiClient, editorHeaders, { monitors });
       const result = response.body.result as BulkCreateResult[];
 
+      createdMonitorIds.push(...result.filter(({ created }) => created).map(({ id }) => id));
       expect(result).toHaveLength(monitors.length);
       expect(result.every((entry) => entry.created && entry.id)).toBe(true);
-      createdMonitorIds.push(...result.map(({ id }) => id));
 
       await Promise.all(
         result.map(async ({ id }, index) => {
@@ -115,6 +115,59 @@ apiTest.describe(
           apiClient,
           editorHeaders,
           `query=${encodeURIComponent(name)}`
+        );
+        expect((listed.body as { total: number }).total).toBe(0);
+      }
+    );
+
+    apiTest(
+      'rejects persisted duplicate names before creating earlier valid monitors',
+      async ({ apiClient }) => {
+        const existingName = `persisted-duplicate-bulk-create-${uuidv4()}`;
+        const newName = `should-not-create-bulk-${uuidv4()}`;
+        const existingResponse = await bulkCreateMonitors(apiClient, editorHeaders, {
+          monitors: [
+            {
+              type: 'http',
+              name: existingName,
+              url: 'https://example.com/existing',
+              locations: [LOCAL_PUBLIC_LOCATION.id],
+            },
+          ],
+        });
+        const existingResult = existingResponse.body.result as BulkCreateResult[];
+        createdMonitorIds.push(
+          ...existingResult.filter(({ created }) => created).map(({ id }) => id)
+        );
+        expect(existingResult).toStrictEqual([expect.objectContaining({ created: true })]);
+
+        const response = await bulkCreateMonitors(
+          apiClient,
+          editorHeaders,
+          {
+            monitors: [
+              {
+                type: 'http',
+                name: newName,
+                url: 'https://example.com/valid-but-rejected',
+                locations: [LOCAL_PUBLIC_LOCATION.id],
+              },
+              {
+                type: 'http',
+                name: existingName.toUpperCase(),
+                url: 'https://example.com/duplicate',
+                locations: [LOCAL_PUBLIC_LOCATION.id],
+              },
+            ],
+          },
+          { statusCode: 400 }
+        );
+
+        expect((response.body as { message: string }).message).toMatch(/already exists/i);
+        const listed = await listMonitors(
+          apiClient,
+          editorHeaders,
+          `query=${encodeURIComponent(newName)}`
         );
         expect((listed.body as { total: number }).total).toBe(0);
       }
