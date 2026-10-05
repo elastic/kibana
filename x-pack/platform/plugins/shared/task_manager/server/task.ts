@@ -328,6 +328,7 @@ export const taskDefinitionSchema = schema.object(
 
     runAs: schema.maybe(
       schema.object({
+        // codeql[js/kibana/unbounded-array-in-schema] Task type registration at plugin setup, not HTTP input
         workloadTypes: schema.arrayOf(
           schema.string({
             maxLength: SERVICE_ACCOUNT_WORKLOAD_TYPE_MAX_LENGTH,
