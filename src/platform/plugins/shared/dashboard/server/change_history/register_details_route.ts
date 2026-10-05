@@ -15,6 +15,18 @@ import { getDashboardStateSchema } from '../api/dashboard_state_schemas';
 import type { SetupDeps } from '../plugin';
 import { getChangeHistoryClient } from './change_history_service';
 
+const detailsResponseSchema = z.object({
+  id: z.string(),
+  timestamp: z.string(),
+  actor: z.object({
+    name: z.string(),
+    profileId: z.string().optional(),
+  }),
+  action: z.string(),
+  snapshot: getDashboardStateSchema(true),
+});
+export type ChangeDetailsResponse = z.infer<typeof detailsResponseSchema>;
+
 export const registerChangeDetailsRoute = (
   services: SetupDeps,
   router: IRouter<RequestHandlerContext>
@@ -33,10 +45,7 @@ export const registerChangeDetailsRoute = (
         },
         response: {
           200: {
-            body: () =>
-              z.object({
-                snapshot: getDashboardStateSchema(true),
-              }),
+            body: () => detailsResponseSchema,
             description: 'success',
           },
         },
@@ -80,11 +89,19 @@ export const registerChangeDetailsRoute = (
       console.log({
         total,
         changeId: req.params.changeId,
-        item: JSON.stringify(items[0]?.object.snapshot, null, 2),
+        item: JSON.stringify(items[0], null, 2),
       });
+      const item = items[0];
+      if (!item) {
+        return res.notFound();
+      }
       return res.ok({
         body: {
-          snapshot: items[0]?.object.snapshot,
+          id: req.params.changeId,
+          timestamp: item['@timestamp'],
+          actor: item.user,
+          action: item.event.action,
+          snapshot: item.object.snapshot,
         },
       });
     }

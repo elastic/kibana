@@ -39,7 +39,7 @@ import type { DashboardRedirect } from './types';
 import { type DashboardEmbedSettings } from './types';
 import { startSyncingExpandedPanelState } from './url';
 import type { DashboardInternalApi } from '../dashboard_api/types';
-import { DashboardChangeHistoryProvider } from '../dashboard_renderer/dashboard_change_history_provider';
+import { DashboardChangeHistoryProvider } from '../dashboard_history/dashboard_change_history_provider';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { dashboardQueryClient } from '../services/dashboard_query_client';
 import { ChangeHistoryTrigger } from '@kbn/change-history-ui';

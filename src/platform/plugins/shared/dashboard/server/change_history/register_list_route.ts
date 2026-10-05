@@ -17,6 +17,21 @@ import type { SetupDeps, StartDeps } from '../plugin';
 import type { DashboardPluginStart } from '../types';
 import { getChangeHistoryClient } from './change_history_service';
 
+const listResponseSchema = z.object({
+  items: z.array(
+    z.object({
+      id: z.string(),
+      timestamp: z.string(),
+      actor: z.object({ name: z.string(), id: z.string().optional() }),
+      action: z.string(),
+      changes: z.object({ count: z.number(), summary: z.any().optional() }).optional(),
+      metadata: z.record(z.string(), z.any()).optional(),
+    })
+  ),
+  total: z.number(),
+});
+export type HistoryListResponse = z.infer<typeof listResponseSchema>;
+
 export const registerHistoryListRoute = (
   services: SetupDeps,
   coreSetup: CoreSetup<StartDeps, DashboardPluginStart>,
@@ -41,20 +56,7 @@ export const registerHistoryListRoute = (
         },
         response: {
           200: {
-            body: () =>
-              z.object({
-                items: z.array(
-                  z.object({
-                    id: z.string(),
-                    timestamp: z.string(),
-                    actor: z.object({ name: z.string(), id: z.string().optional() }),
-                    action: z.string(),
-                    changes: z.record(z.string(), z.any()).optional(),
-                    metadata: z.record(z.string(), z.any()).optional(),
-                  })
-                ),
-                total: z.number(),
-              }),
+            body: () => listResponseSchema,
             description: 'success',
           },
         },

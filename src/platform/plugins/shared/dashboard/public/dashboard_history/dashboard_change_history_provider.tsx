@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ChangeHistoryPreviewRenderFn } from '@kbn/change-history-ui';
 import {
   type ChangeHistoryHttpClient,
   ChangeHistoryModal,
-  ChangeHistoryPreviewRenderFn,
   ChangeHistoryProvider,
   createChangeHistoryHttpAdapter,
 } from '@kbn/change-history-ui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { DashboardApi, DashboardInitializationState, DashboardRenderer } from '..';
+import type { DashboardApi, DashboardInitializationState } from '..';
+import { DashboardRenderer } from '..';
 import { coreServices } from '../services/kibana_services';
+import { createDashboardChangeHistoryAdapter } from './dashboard_change_history_adapter';
 
 export interface DashboardChangeHistoryProviderProps {
   dashboardId: string;
@@ -40,12 +42,13 @@ export const DashboardChangeHistoryProvider = ({
   );
 
   const adapter = useMemo(() => {
-    return createChangeHistoryHttpAdapter({
-      http: coreServices.http as ChangeHistoryHttpClient,
-      listPath: `/internal/dashboard/change_history/{objectId}`,
-      detailPath: `/internal/dashboard/change_history/{objectId}/{eventId}`,
-      restorePath: `/internal/dashboard/change_history/{objectId}/{eventId}/restore`, // TODO
-    });
+    return createDashboardChangeHistoryAdapter(coreServices.http);
+    // return createChangeHistoryHttpAdapter({
+    //   http: coreServices.http as ChangeHistoryHttpClient,
+    //   listPath: `/internal/dashboard/change_history/{objectId}`,
+    //   detailPath: `/internal/dashboard/change_history/{objectId}/{eventId}`,
+    //   restorePath: `/internal/dashboard/change_history/{objectId}/{eventId}/restore`, // TODO
+    // });
   }, []);
 
   // if (!isEnabled) {
