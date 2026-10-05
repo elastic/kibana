@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { AGENT_BUILDER_MANAGED_WORKFLOW_PLUGIN_ID } from '@kbn/workflows/managed';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import {
@@ -55,6 +56,7 @@ import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_swi
 import { registerInferenceFeatures } from './inference_features';
 import { createConversationEventBus } from './workflows/triggers/conversation_event_bus';
 import { registerAttachmentWorkflowSteps, registerConversationWorkflowSteps } from './workflows';
+import { initializeConversationSummaryWorkflow } from './workflows/initialize_managed_workflows';
 import { registerConversationWorkflowEventBridge } from './workflows/triggers/event_bridge';
 import { AGENTBUILDER_FEATURE_ID } from '../common/features';
 import { runToolIdBackfill } from './backfills/tool_id_backfill';
@@ -183,6 +185,10 @@ export class AgentBuilderPlugin
         .asScopedToClient(soClient)
         .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
     };
+
+    setupDeps.workflowsExtensions.registerManagedWorkflowOwner(
+      AGENT_BUILDER_MANAGED_WORKFLOW_PLUGIN_ID
+    );
 
     setupDeps.workflowsExtensions.registerStepDefinition(
       getRunAgentStepDefinition(this.serviceManager)
@@ -387,6 +393,11 @@ export class AgentBuilderPlugin
       this.logger,
       this.isExperimentalEnabled!
     );
+
+    void initializeConversationSummaryWorkflow({
+      workflowsExtensions: startDeps.workflowsExtensions,
+      logger: this.logger,
+    });
 
     const {
       tools,

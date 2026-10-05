@@ -1,0 +1,46 @@
+version: '1'
+name: Conversation summary
+description: |
+  Refreshes metadata.summary when an investigation or escalation conversation
+  gains content. Execution lifecycle events and a write that only updates
+  summary itself do not match the trigger condition.
+
+  The agent runs beside the investigation and returns the summary as structured
+  output. The following step writes that text onto the investigation. The
+  workflow is managed and not billable: the customer pays for the agent
+  execution, not for this workflow record.
+enabled: true
+tags:
+  - agent-builder
+  - conversation-summary
+triggers:
+  - type: ai.conversation.updated
+    on:
+      condition: 'event.contentChange: true and event.summaryOnly: false and (event.templateId: "investigation" or event.templateId: "escalation")'
+steps:
+  - name: summarize
+    type: ai.agent
+    with:
+      schema:
+        type: object
+        additionalProperties: false
+        required:
+          - summary
+        properties:
+          summary:
+            type: string
+            description: Short summary of the conversation so far.
+      message: |
+        Use the [/summarize-conversation](skill://summarize-conversation) skill.
+
+        Conversation id: {{ event.conversationId }}
+        Template: {{ event.templateId }}
+
+        Read that conversation before you summarize. Return only the structured
+        summary. Do not write metadata yourself; a later step stores it.
+  - name: write_summary
+    type: ai.conversation.metadata.patch
+    with:
+      conversation_id: '{{ event.conversationId }}'
+      updates:
+        summary: '{{ steps.summarize.output.structured_output.summary }}'

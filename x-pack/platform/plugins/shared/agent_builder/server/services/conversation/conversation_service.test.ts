@@ -52,7 +52,11 @@ describe('ConversationServiceImpl', () => {
     const agents = { getRegistry: jest.fn().mockResolvedValue({ id: 'registry' }) };
 
     it('wires the scoped event emitter to the event bus with the request', async () => {
-      const eventBus = { emitMetadataPatched: jest.fn(), emitAttachmentEvents: jest.fn() };
+      const eventBus = {
+        emitMetadataPatched: jest.fn(),
+        emitAttachmentEvents: jest.fn(),
+        emitConversationUpdated: jest.fn(),
+      };
       await createService({ agents, eventBus }).getScopedClient({ request });
 
       const { eventEmitter } = createClientMock.mock.calls[0][0];

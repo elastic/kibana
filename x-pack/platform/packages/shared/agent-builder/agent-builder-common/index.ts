@@ -9,10 +9,13 @@ export type { AgentBuilderEvent } from './base/events';
 export { apiTargets, type ApiTarget } from './apis';
 export {
   ConversationMetadataUpdatedTriggerId,
+  ConversationUpdatedTriggerId,
   ConversationAttachmentAddedTriggerId,
   ConversationAttachmentUpdatedTriggerId,
   ConversationAttachmentDeletedTriggerId,
   type ConversationMetadataUpdatedEvent,
+  type ConversationUpdatedEvent,
+  type ConversationChangeKind,
   type AttachmentAddedTriggerEvent,
   type AttachmentUpdatedTriggerEvent,
   type AttachmentDeletedTriggerEvent,

@@ -19,6 +19,7 @@ import { contextEngineSignalsSkill } from './context_engine_signals';
 import { aiIndexSourcesSkill } from './ai_index_sources';
 import { aiIndexAutomationsSkill } from './ai_index_automations';
 import { loadElasticSkills } from './elastic_skills';
+import { summarizeConversationSkill } from './summarize_conversation/summarize_conversation_skill';
 
 export const registerSkills = (
   agentBuilder: AgentBuilderPluginSetup,
@@ -26,6 +27,7 @@ export const registerSkills = (
   logger: Logger
 ) => {
   agentBuilder.skills.register(graphCreationSkill);
+  agentBuilder.skills.register(summarizeConversationSkill);
   agentBuilder.skills.register(skillManagementSkill);
   agentBuilder.skills.register(agentBuilderTracesSkill);
   agentBuilder.skills.register(connectorAuthoringSkill({ getActionsStart }));

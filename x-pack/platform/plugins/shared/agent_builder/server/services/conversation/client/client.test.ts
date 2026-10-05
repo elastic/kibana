@@ -2338,6 +2338,7 @@ describe('ConversationClient', () => {
       const buildEventEmitter = () => ({
         emitMetadataPatched: jest.fn(),
         emitAttachmentEvents: jest.fn(),
+        emitConversationUpdated: jest.fn(),
       });
 
       it('emits emitMetadataPatched with changed fields after a successful write', async () => {
@@ -3345,7 +3346,11 @@ describe('ConversationClient', () => {
         agentRegistry: agentRegistry as unknown as AgentRegistry,
         user: { id: 'user-1', username: 'test-user', isAdmin: false },
         conversationEvents: mockConversationEvents,
-        eventEmitter: { emitMetadataPatched: jest.fn(), emitAttachmentEvents },
+        eventEmitter: {
+          emitMetadataPatched: jest.fn(),
+          emitAttachmentEvents,
+          emitConversationUpdated: jest.fn(),
+        },
       });
       mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
     });
@@ -3734,6 +3739,7 @@ describe('ConversationClient', () => {
           eventEmitter: {
             emitMetadataPatched: jest.fn(),
             emitAttachmentEvents: onAttachmentEvents,
+            emitConversationUpdated: jest.fn(),
           },
         });
         mockGetDocumentResponse(

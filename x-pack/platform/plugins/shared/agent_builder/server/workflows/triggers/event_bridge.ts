@@ -7,7 +7,10 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import { ConversationMetadataUpdatedTriggerId } from '../../../common/workflows/triggers';
+import {
+  ConversationMetadataUpdatedTriggerId,
+  ConversationUpdatedTriggerId,
+} from '../../../common/workflows/triggers';
 import type { ConversationEventBus } from './conversation_event_bus';
 import { toAttachmentTriggerEvent } from './attachment_trigger_mapping';
 
@@ -63,6 +66,10 @@ export function registerConversationWorkflowEventBridge(
 
   conversationEventBus.onMetadataPatched((request, payload) => {
     void forward(ConversationMetadataUpdatedTriggerId, payload, request);
+  });
+
+  conversationEventBus.onConversationUpdated((request, payload) => {
+    void forward(ConversationUpdatedTriggerId, payload, request);
   });
 
   conversationEventBus.onAttachmentEvents((request, { conversationId, events }) => {
