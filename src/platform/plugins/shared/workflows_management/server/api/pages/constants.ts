@@ -10,11 +10,11 @@
 /**
  * Public page endpoint. GET renders the form, POST submits it.
  *
- * `{pageKey}` is an opaque random id stored on the workflow document, so the URL
- * reveals nothing about the workflow. `{secret}` is derived from the page key with the
- * deployment signing key, so it is never stored and never appears in the YAML.
+ * `{pageKey}` is an opaque random id stored on the workflow document, never in the
+ * YAML. It is the page's capability: anyone with the URL can submit the page, and
+ * rotating assigns a new key that retires the old URL.
  */
-export const PAGE_FORM_API_PATH = '/api/workflows/pages/{pageKey}/{secret}';
+export const PAGE_FORM_API_PATH = '/api/workflows/pages/{pageKey}';
 
 export { PAGE_LINK_API_PATH, PAGE_ROTATE_API_PATH } from '../../../common/lib/api_constants';
 

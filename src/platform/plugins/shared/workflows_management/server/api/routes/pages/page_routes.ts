@@ -18,7 +18,6 @@ import {
   PAGE_WORKFLOW_ID_MAX_LENGTH,
 } from '../../pages/constants';
 import { buildPageRunRequest } from '../../pages/page_run_identity';
-import { computePageSecret, PAGE_SECRET_LENGTH } from '../../pages/page_secret';
 import {
   buildPageUrl,
   getPageSubmitter,
@@ -37,17 +36,13 @@ import {
 import type { RouteDependencies } from '../types';
 import { API_VERSION, INTERNAL_API_VERSION } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
-import { WORKFLOW_UPDATE_SECURITY } from '../utils/route_security';
+import { WORKFLOW_READ_SECURITY, WORKFLOW_UPDATE_SECURITY } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 const pageParamsSchema = schema.object({
   pageKey: schema.string({
     maxLength: PAGE_KEY_MAX_LENGTH,
-    meta: { description: 'Opaque page id. Reveals nothing about the workflow.' },
-  }),
-  secret: schema.string({
-    maxLength: PAGE_SECRET_LENGTH,
-    meta: { description: 'Secret derived from the page id. Opens the page.' },
+    meta: { description: 'Opaque page id. Opens the page and reveals nothing about the workflow.' },
   }),
 });
 
@@ -62,25 +57,18 @@ const hasPageTrigger = (workflow: WorkflowDetailDto | null): workflow is Workflo
   Boolean(workflow?.definition?.triggers.some(isPageTrigger));
 
 /** Response body for the author-facing link and rotate routes. */
-const toPageLinkBody = (
-  signingKey: string,
-  {
-    basePath,
-    spaceId,
-    pageKey,
-    enabled,
-  }: { basePath: string; spaceId: string; pageKey: string; enabled: boolean }
-) => ({
+const toPageLinkBody = ({
+  basePath,
+  pageKey,
   enabled,
-  path: buildPageUrl({
-    basePath,
-    pageKey,
-    secret: computePageSecret(signingKey, { spaceId, pageKey }),
-  }),
-});
+}: {
+  basePath: string;
+  pageKey: string;
+  enabled: boolean;
+}) => ({ enabled, path: buildPageUrl({ basePath, pageKey }) });
 
-/** GET the hosted form for a workflow page. The derived URL secret is the credential. */
-export function registerPageFormRoute(deps: RouteDependencies, signingKey: string) {
+/** GET the hosted form for a workflow page. The page key is the credential. */
+export function registerPageFormRoute(deps: RouteDependencies) {
   const { router, workflowsService, spaces, logger } = deps;
 
   router.versioned
@@ -97,12 +85,12 @@ export function registerPageFormRoute(deps: RouteDependencies, signingKey: strin
       { version: API_VERSION, validate: { request: { params: pageParamsSchema } } },
       withAvailabilityCheck(async (context, request, response) => {
         try {
-          const { pageKey, secret } = request.params;
+          const { pageKey } = request.params;
           const page = await resolvePage(
             workflowsService.getWorkflowByPageKey.bind(workflowsService),
-            { signingKey, spaceId: spaces.getSpaceId(request), pageKey, secret }
+            { spaceId: spaces.getSpaceId(request), pageKey }
           );
-          return htmlOk(response, renderPageForm({ page, basePath: request.basePath, secret }));
+          return htmlOk(response, renderPageForm({ page, basePath: request.basePath }));
         } catch (error) {
           return handleExternalResumeError(response, error, logger);
         }
@@ -111,11 +99,7 @@ export function registerPageFormRoute(deps: RouteDependencies, signingKey: strin
 }
 
 /** POST a page submission, which validates the input and runs the workflow. */
-export function registerPageSubmitRoute(
-  deps: RouteDependencies,
-  signingKey: string,
-  runAsApiKey: string
-) {
+export function registerPageSubmitRoute(deps: RouteDependencies, runAsApiKey: string) {
   const { router, api, workflowsService, spaces, logger, audit } = deps;
 
   router.versioned
@@ -139,14 +123,14 @@ export function registerPageSubmitRoute(
         },
       },
       withAvailabilityCheck(async (context, request, response) => {
-        const { pageKey, secret } = request.params;
+        const { pageKey } = request.params;
         // Set only once the URL resolves to a real page; a bad URL is not a run attempt.
         let workflowId: string | undefined;
         try {
           const spaceId = spaces.getSpaceId(request);
           const page = await resolvePage(
             workflowsService.getWorkflowByPageKey.bind(workflowsService),
-            { signingKey, spaceId, pageKey, secret }
+            { spaceId, pageKey }
           );
           workflowId = page.workflow.id;
           const inputs = parsePageSubmission(request.body, page.inputsSchema);
@@ -176,15 +160,15 @@ export function registerPageSubmitRoute(
 }
 
 /** Authenticated helper that returns the page URL to the workflow's author. */
-export function registerPageLinkRoute(deps: RouteDependencies, signingKey: string) {
+export function registerPageLinkRoute(deps: RouteDependencies) {
   const { router, api, spaces, logger } = deps;
 
   router.versioned
     .get({
       path: PAGE_LINK_API_PATH,
       access: 'internal',
-      // Edit rights, not read: anyone who has the URL can submit the page.
-      security: WORKFLOW_UPDATE_SECURITY,
+      // Read access is enough, as in Tines: a page link is meant to be shared.
+      security: WORKFLOW_READ_SECURITY,
       summary: 'Get the shareable URL of a workflow page',
     })
     .addVersion(
@@ -204,9 +188,8 @@ export function registerPageLinkRoute(deps: RouteDependencies, signingKey: strin
             });
           }
           return response.ok({
-            body: toPageLinkBody(signingKey, {
+            body: toPageLinkBody({
               basePath: request.basePath,
-              spaceId,
               pageKey: workflow.pageKey,
               enabled: workflow.enabled,
             }),
@@ -219,7 +202,7 @@ export function registerPageLinkRoute(deps: RouteDependencies, signingKey: strin
 }
 
 /** Retires the current page URL by assigning a new page key, and returns the new URL. */
-export function registerPageRotateRoute(deps: RouteDependencies, signingKey: string) {
+export function registerPageRotateRoute(deps: RouteDependencies) {
   const { router, api, spaces, audit, logger } = deps;
 
   router.versioned
@@ -242,9 +225,8 @@ export function registerPageRotateRoute(deps: RouteDependencies, signingKey: str
           const pageKey = await api.rotatePage(workflowId, spaceId, request);
           audit.logWorkflowUpdated(request, { id: workflowId });
           return response.ok({
-            body: toPageLinkBody(signingKey, {
+            body: toPageLinkBody({
               basePath: request.basePath,
-              spaceId,
               pageKey,
               enabled: workflow.enabled,
             }),

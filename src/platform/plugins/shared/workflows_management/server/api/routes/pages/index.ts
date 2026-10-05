@@ -16,18 +16,18 @@ import {
 import type { RouteDependencies } from '../types';
 
 /**
- * Workflow pages are a proof of concept. They stay unmounted unless an operator
- * enables them and supplies both a signing key and a run identity, so no
- * unauthenticated surface appears by default.
+ * Workflow pages are a proof of concept. `workflowsManagement.pages.enabled` is the
+ * deployment-wide kill switch: while it is off, or no run identity is configured, the
+ * routes are not mounted and no unauthenticated surface exists.
  */
 export function registerPageRoutes(deps: RouteDependencies) {
   const pages = deps.config?.pages;
-  if (!pages?.enabled || !pages.signingKey || !pages.runAsApiKey) {
+  if (!pages?.enabled || !pages.runAsApiKey) {
     return;
   }
 
-  registerPageFormRoute(deps, pages.signingKey);
-  registerPageSubmitRoute(deps, pages.signingKey, pages.runAsApiKey);
-  registerPageLinkRoute(deps, pages.signingKey);
-  registerPageRotateRoute(deps, pages.signingKey);
+  registerPageFormRoute(deps);
+  registerPageSubmitRoute(deps, pages.runAsApiKey);
+  registerPageLinkRoute(deps);
+  registerPageRotateRoute(deps);
 }

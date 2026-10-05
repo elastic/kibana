@@ -447,13 +447,6 @@ export const WorkflowDetailHeader = React.memo(
           iconType: 'link',
           run: () => setIsPageShareOpen(true),
           testId: 'workflowPageShareButton',
-          // Anyone with the URL can submit the page, so revealing it needs edit rights.
-          disableButton: !canUpdateWorkflow,
-          tooltipContent: !canUpdateWorkflow
-            ? i18n.translate('workflows.workflowDetailHeader.sharePageDisabledTooltip', {
-                defaultMessage: 'You need the Workflows Update privilege to share the page.',
-              })
-            : undefined,
         });
       }
       if (!isVisualEditorEnabled) {
@@ -506,7 +499,6 @@ export const WorkflowDetailHeader = React.memo(
       workflowId,
       executionsToggleItem,
       hasPage,
-      canUpdateWorkflow,
       historyItem,
       addConnectorsMenuItem,
       enabledSwitchConfig,
@@ -543,6 +535,7 @@ export const WorkflowDetailHeader = React.memo(
         {isPageShareOpen && workflowId && (
           <WorkflowPageShareModal
             workflowId={workflowId}
+            canRotate={canUpdateWorkflow}
             onClose={() => setIsPageShareOpen(false)}
           />
         )}
