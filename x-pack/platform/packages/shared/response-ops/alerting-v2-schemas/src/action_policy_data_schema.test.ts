@@ -140,6 +140,15 @@ describe('createActionPolicyDataSchema', () => {
       ).toThrow();
     });
 
+    it.each([
+      ['an empty tags array', { tags: [] }],
+      ['an empty expression', { expression: '' }],
+      ['a null tags array', { tags: null }],
+      ['a null expression', { expression: null }],
+    ])('rejects a matcher with %s', (_, matcher) => {
+      expect(() => createActionPolicyDataSchema.parse({ ...base, matcher })).toThrow();
+    });
+
     it('rejects per_alert + time_interval', () => {
       expect(() =>
         createActionPolicyDataSchema.parse({
@@ -371,6 +380,18 @@ describe('updateActionPolicyDataSchema', () => {
       });
 
       expect(result.matcher).toBeNull();
+    });
+
+    it('accepts a matcher that omits both sub-fields', () => {
+      const result = updateActionPolicyDataSchema.parse({ matcher: {} });
+
+      expect(result.matcher).toEqual({});
+    });
+
+    it('clears a sub-field by omitting it from the replacement matcher', () => {
+      const result = updateActionPolicyDataSchema.parse({ matcher: { tags: ['prod'] } });
+
+      expect(result.matcher).toEqual({ tags: ['prod'] });
     });
 
     it('accepts setting group_by to null', () => {

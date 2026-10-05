@@ -56,11 +56,18 @@ const toApiThrottle = (
   return { strategy: normalized.strategy, interval: normalized.interval ?? undefined };
 };
 
+/** Policies stored before the API rejected empty sentinels can hold `tags: []` or `expression: ''`, both meaning "no constraint". */
 const toApiMatcher = (
   matcher: ActionPolicySavedObjectAttributes['matcher']
 ): ActionPolicyResponse['matcher'] => {
   if (matcher == null) return undefined;
-  return { tags: matcher.tags ?? undefined, expression: matcher.expression ?? undefined };
+
+  const tags = matcher.tags?.length ? matcher.tags : undefined;
+  const expression = matcher.expression || undefined;
+
+  if (tags === undefined && expression === undefined) return undefined;
+
+  return { tags, expression };
 };
 
 export const toApiKeyAttributes = (auth: ApiKeyAttributes) => ({

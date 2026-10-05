@@ -355,24 +355,25 @@ describe('ActionPolicyClient', () => {
   });
 
   describe('getActionPolicy', () => {
+    const storedAttributes: ActionPolicySavedObjectAttributes = {
+      name: 'test-policy',
+      description: 'test-policy description',
+      enabled: true,
+      destinations: [{ type: 'workflow', id: 'test-workflow' }],
+      apiKey: 'encrypted-api-key',
+      apiKeyOwner: 'test-user',
+      apiKeyCreatedByUser: false,
+      createdBy: { profile_uid: 'elastic_profile_uid' },
+      createdAt: '2025-01-01T00:00:00.000Z',
+      updatedBy: { profile_uid: 'elastic_profile_uid' },
+      updatedAt: '2025-01-01T00:00:00.000Z',
+    };
+
     it('returns a action policy by id with auth.apiKey stripped', async () => {
-      const existingAttributes: ActionPolicySavedObjectAttributes = {
-        name: 'test-policy',
-        description: 'test-policy description',
-        enabled: true,
-        destinations: [{ type: 'workflow', id: 'test-workflow' }],
-        apiKey: 'encrypted-api-key',
-        apiKeyOwner: 'test-user',
-        apiKeyCreatedByUser: false,
-        createdBy: { profile_uid: 'elastic_profile_uid' },
-        createdAt: '2025-01-01T00:00:00.000Z',
-        updatedBy: { profile_uid: 'elastic_profile_uid' },
-        updatedAt: '2025-01-01T00:00:00.000Z',
-      };
       mockSavedObjectsClient.get.mockResolvedValueOnce({
         id: 'policy-id-get-1',
         type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-        attributes: existingAttributes,
+        attributes: storedAttributes,
         references: [],
         version: 'WzEsMV0=',
       });
@@ -388,6 +389,40 @@ describe('ActionPolicyClient', () => {
       expect(res.group_by).toBeUndefined();
       expect(res.throttle).toBeUndefined();
       expect(res.snoozed_until).toBeUndefined();
+    });
+
+    it.each([
+      ['an empty tags array and expression', { tags: [], expression: '' }],
+      ['null sub-fields', { tags: null, expression: null }],
+    ])('omits a matcher stored with %s', async (_, matcher) => {
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-get-empty-matcher',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: { ...storedAttributes, matcher } as ActionPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzEsMV0=',
+      });
+
+      const res = await client.getActionPolicy({ id: 'policy-id-get-empty-matcher' });
+
+      expect(res.matcher).toBeUndefined();
+    });
+
+    it('omits only the empty sub-field of a partially populated stored matcher', async () => {
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-get-partial-matcher',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {
+          ...storedAttributes,
+          matcher: { tags: [], expression: 'severity: critical' },
+        } as ActionPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzEsMV0=',
+      });
+
+      const res = await client.getActionPolicy({ id: 'policy-id-get-partial-matcher' });
+
+      expect(res.matcher).toEqual({ expression: 'severity: critical' });
     });
 
     it('throws 404 when action policy is not found', async () => {
