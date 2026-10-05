@@ -8,10 +8,18 @@
 import type { HttpStart } from '@kbn/core/public';
 import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-browser';
 
-import type { ListServiceAccountsResponse } from '../../common/service_accounts';
+import type {
+  DeleteServiceAccountResponse,
+  ListServiceAccountsResponse,
+  ListServiceAccountWorkloadsResponse,
+} from '../../common/service_accounts';
 
 export type {
+  DeleteServiceAccountConflictAttributes,
+  DeleteServiceAccountResponse,
+  ListServiceAccountWorkloadsResponse,
   ListServiceAccountsResponse,
+  ServiceAccountBoundWorkload,
   ServiceAccountDirectoryCreator,
   ServiceAccountDirectoryEntry,
 } from '../../common/service_accounts';
@@ -37,5 +45,21 @@ export class ServiceAccountsAPIClient {
         ...(params.after !== undefined ? { after: params.after } : {}),
       },
     });
+  }
+
+  /**
+   * Deletes the account. Rejects with a 409 carrying `DeleteServiceAccountConflictAttributes` when
+   * workloads are still bound to it.
+   */
+  public async delete(id: string): Promise<DeleteServiceAccountResponse> {
+    return await this.http.delete<DeleteServiceAccountResponse>(
+      `/internal/security/service_account/${encodeURIComponent(id)}`
+    );
+  }
+
+  public async listWorkloads(id: string): Promise<ListServiceAccountWorkloadsResponse> {
+    return await this.http.get<ListServiceAccountWorkloadsResponse>(
+      `/internal/security/service_account/${encodeURIComponent(id)}/workloads`
+    );
   }
 }

@@ -13,17 +13,24 @@ import type { ServiceAccount } from '@kbn/core-security-browser';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { CreateServiceAccountFlyout } from './create_service_account_flyout';
+import { DeleteServiceAccountModal } from './delete_service_account_modal';
 import { ServiceAccountsPage } from './service_accounts_page';
+import type { ServiceAccountTableItem } from './service_accounts_table';
 import type { ServiceAccountsAPIClient } from '../../service_accounts';
 import type { RolesAPIClient } from '../roles';
 
 interface Props {
   isServerless: boolean;
   canCreate: boolean;
-  serviceAccountsAPIClient: Pick<PublicMethodsOf<ServiceAccountsAPIClient>, 'create' | 'list'>;
+  serviceAccountsAPIClient: Pick<
+    PublicMethodsOf<ServiceAccountsAPIClient>,
+    'create' | 'list' | 'delete' | 'listWorkloads'
+  >;
   rolesAPIClient: Pick<PublicMethodsOf<RolesAPIClient>, 'getRoles'>;
   createRoleUrl?: string;
   onCreated: (account: ServiceAccount) => void;
+  onDeleted: (account: ServiceAccountTableItem, warnings: string[]) => void;
+  onDeleteError: (error: Error, title: string) => void;
 }
 
 export const ServiceAccountsApp = ({
@@ -33,10 +40,13 @@ export const ServiceAccountsApp = ({
   rolesAPIClient,
   createRoleUrl,
   onCreated,
+  onDeleted,
+  onDeleteError,
 }: Props) => {
   const history = useHistory();
   const location = useLocation();
   const [refreshKey, setRefreshKey] = useState(0);
+  const [accountToDelete, setAccountToDelete] = useState<ServiceAccountTableItem>();
   const isMounted = useMountedState();
   const creationClient = useMemo(
     () => ({
@@ -59,7 +69,23 @@ export const ServiceAccountsApp = ({
         canCreate={canCreate}
         serviceAccountsAPIClient={serviceAccountsAPIClient}
         onCreateAccount={() => history.push('/create')}
+        // Deleting takes the same privilege as creating.
+        onDeleteAccount={canCreate ? setAccountToDelete : undefined}
       />
+      {accountToDelete && (
+        <DeleteServiceAccountModal
+          key={accountToDelete.id}
+          serviceAccount={accountToDelete}
+          serviceAccountsAPIClient={serviceAccountsAPIClient}
+          onClose={() => setAccountToDelete(undefined)}
+          onDeleted={(warnings) => {
+            setAccountToDelete(undefined);
+            setRefreshKey((value) => value + 1);
+            onDeleted(accountToDelete, warnings);
+          }}
+          onError={onDeleteError}
+        />
+      )}
       {canCreate && location.pathname === '/create' && (
         <CreateServiceAccountFlyout
           isServerless={isServerless}

@@ -87,6 +87,34 @@ export const serviceAccountsManagementApp = Object.freeze({
                       )
                     );
                   }}
+                  onDeleted={({ name }, warnings) => {
+                    if (warnings.length === 0) {
+                      coreStart.notifications.toasts.addSuccess(
+                        i18n.translate(
+                          'xpack.security.management.serviceAccounts.delete.successTitle',
+                          {
+                            defaultMessage: 'Deleted service account "{name}"',
+                            values: { name },
+                          }
+                        )
+                      );
+                      return;
+                    }
+
+                    coreStart.notifications.toasts.addWarning({
+                      title: i18n.translate(
+                        'xpack.security.management.serviceAccounts.delete.warningTitle',
+                        {
+                          defaultMessage: 'Deleted service account "{name}" with warnings',
+                          values: { name },
+                        }
+                      ),
+                      text: warnings.join(' '),
+                    });
+                  }}
+                  onDeleteError={(error, errorTitle) => {
+                    coreStart.notifications.toasts.addError(error, { title: errorTitle });
+                  }}
                 />
               </Breadcrumb>
             </Providers>
