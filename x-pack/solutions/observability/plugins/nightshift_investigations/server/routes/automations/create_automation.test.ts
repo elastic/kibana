@@ -95,6 +95,6 @@ describe('request validation', () => {
   });
 
   it('rejects an unknown Slack event', () => {
-    expect(() => parseRows([{ ...slackRow, event: 'reaction' }])).toThrow();
+    expect(() => parseRows([{ ...slackRow, event: 'invite' }])).toThrow();
   });
 });

@@ -24,7 +24,7 @@ export const triggerRowSchema = z.discriminatedUnion('kind', [
   }),
   z.object({
     kind: z.literal('slack'),
-    event: z.enum(['message', 'mention', 'invite']),
+    event: z.enum(['message', 'mention']),
     channels: z.array(z.string().max(500)).max(100).optional(),
     users: z.array(z.string().max(500)).max(100).optional(),
     messageFilter: z.string().max(1000).optional(),
