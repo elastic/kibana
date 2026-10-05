@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
+import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { HuntCoordinatorResponse } from '@kbn/alertzero-common';
 import {
   ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
@@ -17,10 +19,36 @@ import { randomUUID } from 'crypto';
 import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { InvalidHuntWindowError } from '../../services/watches/hunt/common/assert_hunt_window';
 import { huntCoordinator } from '../../services/watches/hunt/hunt_coordinator';
-import { parseTechnologyInput } from '../../services/watches/hunt/common/resolve_index_scope';
 import { buildSseData } from '../../services/watches/hunt/common/sse_mapper';
 import { resolveScopedModel } from './lib/scoped_model';
+import { resolveHuntUniverse } from './resolve_hunt_universe';
+import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
+
+/**
+ * Resolves the Reasoning-tier model, or `undefined` when none is available. A missing
+ * connector is the ordinary outcome, not an error, so it never fails the request: the
+ * coordinator degrades (no model fallback for Tier 2 targets, Tier 2 reports `no_inference`).
+ */
+const resolveModelForHunt = async ({
+  resolve,
+  logger,
+}: {
+  resolve: () => ReturnType<typeof resolveScopedModel>;
+  logger: Logger;
+}): Promise<ScopedModel | undefined> => {
+  try {
+    const outcome = await resolve();
+    return outcome.ok ? outcome.model : undefined;
+  } catch (err) {
+    logger.debug(
+      `hunt_coordinator: model resolution failed, running without a model — ${
+        (err as Error).message
+      }`
+    );
+    return undefined;
+  }
+};
 
 export const HUNT_COORDINATOR_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_coordinator` as const;
 
@@ -28,6 +56,11 @@ export const HUNT_COORDINATOR_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_coordinato
  * Runs the two-tier hunt pipeline (Tier 1 + optional Tier 2) for a single report.
  * The coordinator does NOT write feedback — `completed_successfully` on the result
  * tells the caller whether the managed-workflow feedback step should proceed.
+ *
+ * A blocked scope answers 200 with `status: 'blocked'` rather than an error status,
+ * deliberately differing from the standalone `hunt_for_threat` route's 409: this route
+ * chains Tier 1 into Tier 2, so a caller already reads the status field either way, and
+ * `hunt_for_threat` has no such chain to read one from. See elastic/security-team#19741.
  */
 export const registerHuntCoordinatorRoute = ({
   router,
@@ -56,7 +89,7 @@ export const registerHuntCoordinatorRoute = ({
           },
         },
       },
-      async (context, request, response) => {
+      withAlertZeroEnabled(async (context, request, response) => {
         try {
           const core = await context.core;
           const spaceId = getSpaceId(request);
@@ -68,12 +101,7 @@ export const registerHuntCoordinatorRoute = ({
           const reportsEsClient = core.elasticsearch.client.asInternalUser;
           const { getInference, getSearchInferenceEndpoints } = getHuntServices();
 
-          const technologyInput = parseTechnologyInput(request.body.technology);
-          if ('invalid' in technologyInput) {
-            return response.badRequest({
-              body: { message: `Unknown technology "${technologyInput.invalid}".` },
-            });
-          }
+          const indexPatterns = await resolveHuntUniverse(context, logger);
 
           const {
             report_id,
@@ -91,21 +119,26 @@ export const registerHuntCoordinatorRoute = ({
           } = request.body;
 
           // Same Reasoning tier as the standalone hunt_behavior route, so this path (the
-          // one that actually runs Tier 2 in production) resolves the same model. A
-          // `never` run has no use for a model, so it skips resolution entirely.
-          const modelOutcome =
-            tier2_when === 'never'
-              ? undefined
-              : await resolveScopedModel({
-                  inference: getInference(),
-                  searchInferenceEndpoints: getSearchInferenceEndpoints(),
-                  featureId: ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
-                  request,
-                  uiSettingsClient: core.uiSettings.client,
-                  logger,
-                });
-          const model = modelOutcome?.ok ? modelOutcome.model : undefined;
+          // one that actually runs Tier 2 in production) resolves the same model. It is
+          // resolved regardless of `tier2_when`, since resolving a connector spends no
+          // tokens. Tier 2 itself is still gated on `tier2_when` inside the coordinator,
+          // so a `never` run stays `never`.
+          const model = await resolveModelForHunt({
+            resolve: () =>
+              resolveScopedModel({
+                inference: getInference(),
+                searchInferenceEndpoints: getSearchInferenceEndpoints(),
+                featureId: ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+                request,
+                uiSettingsClient: core.uiSettings.client,
+                logger,
+              }),
+            logger,
+          });
 
+          // The Worker fan-out supplies a run id so one sweep's children share it,
+          // which is what the packaging barrier and conclusion dedupe key off. Only
+          // mint one when the caller has no sweep to tie the run to.
           const result = await huntCoordinator({ esClient, reportsEsClient }, model, logger, {
             report_id,
             spaceId,
@@ -119,7 +152,7 @@ export const registerHuntCoordinatorRoute = ({
             tier2_when,
             max_tier2_sample_events,
             trigger,
-            technology: technologyInput.technology,
+            indexPatterns,
             // The Worker fan-out supplies a run id so one sweep's children share it,
             // which is what the packaging barrier and conclusion dedupe key off. Only
             // mint one when the caller has no sweep to tie the run to.
@@ -144,6 +177,6 @@ export const registerHuntCoordinatorRoute = ({
             body: { message: 'Hunt coordinator failed' },
           });
         }
-      }
+      })
     );
 };

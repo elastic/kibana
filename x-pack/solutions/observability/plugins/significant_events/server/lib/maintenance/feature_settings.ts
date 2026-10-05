@@ -19,6 +19,7 @@ import type { SignificantEventsMaintenanceFailure } from '../../../common/mainte
 import type { GetScopedClients } from '../../routes/types';
 import type { MaintenanceAccess } from './maintenance_access';
 import { SCHEDULED_DISCOVERY_WORKFLOW_IDS } from './managed_workflow_targets';
+import { toMessage } from './to_message';
 
 /**
  * Snapshot of feature toggles that Pause turned off so Resume can restore only
@@ -28,9 +29,6 @@ export interface PausedFeatureSettings {
   continuousOnboardingWasEnabled: boolean;
   scheduledDiscoveryEnabledSpaceIds: SpaceId[];
 }
-
-const toMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
 
 /** Failure targets for the settings step. */
 const CONTINUOUS_SETTING_TARGET = 'settings:continuous-onboarding';
@@ -311,6 +309,22 @@ export const createFeatureSettingsController = ({
    * While paused, keep feature settings off if something turned them back on
    * (e.g. a stale client). Does not change the restore snapshot.
    */
+  /** Whether a toggle currently reads on; an unreadable toggle counts as off. */
+  const readsOn = async (client: Pick<IUiSettingsClient, 'get'>, key: string): Promise<boolean> => {
+    try {
+      return Boolean(await client.get<boolean>(key));
+    } catch {
+      return false;
+    }
+  };
+
+  /**
+   * Turn every feature toggle off. Returns the toggles that still read on after
+   * a failed write, in `PausedFeatureSettings` shape, so callers can keep the
+   * matching settings-backed workflows running instead of leaving a toggle on
+   * with its workflow disabled. A failed write on a toggle that was already off
+   * (or cannot be read) is only recorded; keeping activity off wins.
+   */
   const reassertFeatureSettingsOff = async ({
     request,
     spaceIds,
@@ -319,13 +333,21 @@ export const createFeatureSettingsController = ({
     request: KibanaRequest;
     spaceIds: SpaceId[];
     failures: SignificantEventsMaintenanceFailure[];
-  }): Promise<void> => {
+  }): Promise<PausedFeatureSettings> => {
+    const stillOn: PausedFeatureSettings = {
+      continuousOnboardingWasEnabled: false,
+      scheduledDiscoveryEnabledSpaceIds: [],
+    };
     // Re-assert runs without a user request (e.g. after a feature-flag flip).
     const uiSettingsClients = getUiSettingsClients({ request, access: 'system' });
+    let globalClient: IUiSettingsClient | undefined;
     try {
-      const globalClient = await uiSettingsClients.global();
+      globalClient = await uiSettingsClients.global();
       await globalClient.set(OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED, false);
     } catch (error) {
+      stillOn.continuousOnboardingWasEnabled =
+        globalClient !== undefined &&
+        (await readsOn(globalClient, OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED));
       failures.push({
         target: CONTINUOUS_SETTING_TARGET,
         error: `Failed to keep continuous onboarding off while paused: ${toMessage(error)}`,
@@ -333,19 +355,30 @@ export const createFeatureSettingsController = ({
     }
 
     for (const spaceId of spaceIds) {
+      let spaceClient: IUiSettingsClient | undefined;
       try {
-        const spaceClient = await uiSettingsClients.space(spaceId);
+        spaceClient = await uiSettingsClients.space(spaceId);
         await spaceClient.set(
           OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
           false
         );
       } catch (error) {
+        if (
+          spaceClient !== undefined &&
+          (await readsOn(
+            spaceClient,
+            OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED
+          ))
+        ) {
+          stillOn.scheduledDiscoveryEnabledSpaceIds.push(spaceId);
+        }
         failures.push({
           target: scheduledSettingTarget(spaceId),
           error: `Failed to keep scheduled discovery off while paused: ${toMessage(error)}`,
         });
       }
     }
+    return stillOn;
   };
 
   return {

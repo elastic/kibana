@@ -17,7 +17,7 @@ interface JestStepOptions {
   label: string;
   parallelism: number;
   key: 'jest' | 'jest-integration';
-  agentDiskSize: number;
+  agentDiskSize?: number;
   envFromLabels: Record<string, string>;
   dependsOn: string[];
   retryCount: number;
