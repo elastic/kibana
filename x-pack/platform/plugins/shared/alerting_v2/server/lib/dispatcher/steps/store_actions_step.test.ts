@@ -215,7 +215,7 @@ describe('StoreActionsStep', () => {
     });
   });
 
-  it('includes alert_status on notified record for per_episode mode', async () => {
+  it('includes alert_status on notified record for per_alert mode', async () => {
     const mockService = createMockStorageServiceContract();
     const step = new StoreActionsStep(mockService);
 

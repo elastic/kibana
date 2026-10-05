@@ -56,8 +56,62 @@ const buildAllowedEntitySet = (result: HuntCoordinatorCoreResult): Set<string> =
   return values;
 };
 
+/**
+ * A separator-joined identifier (`GHOST-HOST99`, `ghost-host-99`, `10.0.0.5`) that carries a
+ * digit anywhere, or is all-uppercase with none. Plain hyphenated prose (`real-time`,
+ * `well-known`) has neither, so it doesn't match. Same spirit as `report_grounding.ts`'s
+ * `SINGLE_TOKEN` check: a narrow whitelist that only ever chooses which direction to be
+ * wrong in, not a full simulation of every way a model might phrase a name.
+ */
+const SEPARATOR_JOINED = /^[A-Za-z0-9]+([._-][A-Za-z0-9]+)+$/;
+
+/**
+ * The one shape worth carving out of "any digit means entity": a bare number followed by a
+ * single plain-English unit word (`24-hour`, `5-minute`, `2-factor`) is a quantity, not a
+ * name. This codebase's own asset-naming convention always suffixes the digits
+ * (`WIN-ANALYST01`, `GHOST-HOST99`) rather than leading with them, so number-first is a safe
+ * signal — and it stays narrow on purpose: a hostname with its digits in their own segment
+ * anywhere else (`ghost-host-99`, `server-01`, three or more segments) still falls through to
+ * the broad digit check below, rather than being swept into the same exemption. Checked only
+ * once the uppercase case is already ruled out: a quantity phrase's unit word is plain
+ * English prose, never all-caps, so an all-uppercase number-prefixed token (`99-GHOST`) is
+ * never actually a quantity and must not be exempted just because it leads with a number.
+ */
+const isNumericQuantityPhrase = (segments: string[]): boolean =>
+  segments.length === 2 && /^\d+$/.test(segments[0]) && /^[A-Za-z]+$/.test(segments[1]);
+
+const looksLikeEntity = (token: string): boolean => {
+  if (!SEPARATOR_JOINED.test(token)) return false;
+  const segments = token.split(/[._-]/);
+  const bare = segments.join('');
+  if (bare === bare.toUpperCase()) return true;
+  if (isNumericQuantityPhrase(segments)) return false;
+  return /\d/.test(bare);
+};
+
+/**
+ * Entity-shaped tokens in free text, stripped of surrounding sentence punctuation and the
+ * Markdown a model can wrap a name in (`` `GHOST-HOST99` ``, `**GHOST-HOST99**`) — code spans
+ * and emphasis markers would otherwise shield a hallucinated name from `looksLikeEntity`
+ * exactly the way an unlisted `entities_referenced` entry does.
+ */
+const extractEntityLikeTokens = (text: string): string[] =>
+  text
+    .split(/\s+/)
+    .map((token) => token.replace(/^[(["'`*_]+|[)\].,;:!?"'`*_]+$/g, ''))
+    .filter(looksLikeEntity);
+
+/**
+ * `entities_referenced` is the model's own self-report of what a line names, and an empty
+ * list satisfies `.every` on it unconditionally — so a hallucinated host the model simply
+ * forgot (or declined) to list passes for free. The line's own text is checked independently
+ * of that self-report so a line cannot clear grounding just by omitting a name from its own
+ * list; `entities_referenced` still has to agree with `allowed` too, so a line also can't pass
+ * by self-reporting an entity that isn't actually in the allowed set.
+ */
 const isLineGrounded = (line: RecommendationLine, allowed: Set<string>): boolean =>
-  line.entities_referenced.every((value) => allowed.has(value.toLowerCase()));
+  line.entities_referenced.every((value) => allowed.has(value.toLowerCase())) &&
+  extractEntityLikeTokens(line.text).every((token) => allowed.has(token.toLowerCase()));
 
 /** One line per confirmed technique, then a fallback so a confirmed hit never yields nothing. */
 export const templateRecommendations = (result: HuntCoordinatorCoreResult): string[] => {
