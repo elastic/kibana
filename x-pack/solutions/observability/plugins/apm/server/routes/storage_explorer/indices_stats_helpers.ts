@@ -18,12 +18,20 @@ export async function getTotalIndicesStats({
 }) {
   const index = getApmIndicesCombined(apmEventClient);
   const esClient = (await context.core).elasticsearch.client;
-  const totalStats = await esClient.asCurrentUser.indices.stats({
-    index,
-    expand_wildcards: 'all',
-    ignore_unavailable: true,
-  });
-  return totalStats;
+  try {
+    return await esClient.asCurrentUser.indices.stats({
+      index,
+      expand_wildcards: 'all',
+    });
+  } catch (error) {
+    if (isIndexNotFoundError(error)) {
+      return {
+        _all: { total: { store: { size_in_bytes: 0 } } },
+        indices: {},
+      };
+    }
+    throw error;
+  }
 }
 
 export function getEstimatedSizeForDocumentsInIndex({
