@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { omitBy, pick, uniq } from 'lodash';
+import { mapValues, omitBy, pick, uniq } from 'lodash';
 import { z } from '@kbn/zod';
 import { xyConfigSchemaESQL } from '@kbn/lens-embeddable-utils';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -40,26 +40,22 @@ interface ChartSchemaSections {
 const isJsonNode = (value: unknown): value is JsonNode =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
 
-const trimSchemaDescriptions = (node: unknown): unknown => {
-  if (Array.isArray(node)) {
-    return node.map(trimSchemaDescriptions);
-  }
-  if (isJsonNode(node)) {
-    const result: JsonNode = {};
-    for (const [key, value] of Object.entries(node)) {
-      if (
-        key === 'description' &&
-        typeof value === 'string' &&
-        !USEFUL_DESCRIPTION_RE.test(value)
-      ) {
-        continue;
-      }
-      result[key] = trimSchemaDescriptions(value);
-    }
-    return result;
-  }
-  return node;
-};
+/** Copies a JSON schema without the descriptions that carry no constraint or usage info. */
+const trimSchemaDescriptions = <T>(schema: T): T =>
+  JSON.parse(JSON.stringify(schema), (key, value) =>
+    key === 'description' && typeof value === 'string' && !USEFUL_DESCRIPTION_RE.test(value)
+      ? undefined
+      : value
+  );
+
+const UNION_KEYS = ['anyOf', 'oneOf'] as const;
+
+/** Subschemas a node combines under the given keys, e.g. the members of an `anyOf` union. */
+const getSubschemas = (node: JsonNode, keys: readonly string[]): unknown[] =>
+  keys.flatMap((key) => {
+    const subschemas = node[key];
+    return Array.isArray(subschemas) ? subschemas : [];
+  });
 
 const resolveRef = (node: unknown, defs: JsonNode): unknown => {
   let current = node;
@@ -108,9 +104,7 @@ const getFields = (node: unknown, defs: JsonNode, seen = new Set<unknown>()): Js
     return {};
   }
   seen.add(resolved);
-  const variants = [resolved.anyOf, resolved.oneOf, resolved.allOf].flatMap((variant) =>
-    Array.isArray(variant) ? variant : []
-  );
+  const variants = getSubschemas(resolved, [...UNION_KEYS, 'allOf']);
   return [
     isJsonNode(resolved.properties) ? resolved.properties : {},
     ...[resolved.items, ...variants].map((child) => getFields(child, defs, seen)),
@@ -132,10 +126,7 @@ const getEnumValues = (node: unknown, defs: JsonNode): unknown[] => {
   if (resolved.items) {
     return getEnumValues(resolved.items, defs);
   }
-  const variants = [resolved.anyOf, resolved.oneOf].flatMap((variant) =>
-    Array.isArray(variant) ? variant : []
-  );
-  const values = variants.map((variant) => getEnumValues(variant, defs));
+  const values = getSubschemas(resolved, UNION_KEYS).map((variant) => getEnumValues(variant, defs));
   return values.length > 0 && values.every((variantValues) => variantValues.length > 0)
     ? uniq(values.flat())
     : [];
@@ -152,17 +143,22 @@ const describeField = (name: string, node: unknown, defs: JsonNode, maxValues = 
   return values.length > 0 && values.length <= maxValues ? `${name}: ${values.join('|')}` : name;
 };
 
+/** Describes a section field, listing its own fields one level down when it has any. */
+const describeSectionField = (name: string, node: unknown, defs: JsonNode): string => {
+  const subfields = Object.entries(getFields(node, defs)).map(([subname, subnode]) =>
+    describeField(subname, subnode, defs, MAX_NESTED_ENUM_VALUES)
+  );
+  return subfields.length > 0
+    ? `${name} (${subfields.join(', ')})`
+    : describeField(name, node, defs);
+};
+
 // Listing enum values lets the model write fields like `layers[].type` or
 // `styling.values.mode` without loading the section or guessing the values.
 const describeSection = (section: unknown, defs: JsonNode): string => {
-  const fields = Object.entries(getFields(section, defs)).map(([name, child]) => {
-    const subfields = Object.entries(getFields(child, defs)).map(([subname, subchild]) =>
-      describeField(subname, subchild, defs, MAX_NESTED_ENUM_VALUES)
-    );
-    return subfields.length > 0
-      ? `${name} (${subfields.join(', ')})`
-      : describeField(name, child, defs);
-  });
+  const fields = Object.entries(getFields(section, defs)).map(([name, node]) =>
+    describeSectionField(name, node, defs)
+  );
   if (fields.length > 0) {
     return fields.join(', ');
   }
@@ -192,12 +188,9 @@ const xySectionsSchema = xyConfigSchemaESQL.extend({
   layers: z.array(xyDataLayerSchema.omit({ data_source: true })).min(1),
 });
 
-const chartSchemaSections = Object.fromEntries(
-  Object.entries(chartTypeRegistry).map(([chartType, { schema }]) => [
-    chartType,
-    buildSchemaSections(chartType === SupportedChartType.XY ? xySectionsSchema : schema),
-  ])
-) as Record<SupportedChartType, ChartSchemaSections>;
+const chartSchemaSections = mapValues(chartTypeRegistry, ({ schema }, chartType) =>
+  buildSchemaSections(chartType === SupportedChartType.XY ? xySectionsSchema : schema)
+);
 
 /** Names of the sections the config author can load for a chart type. */
 export const getSchemaSectionNames = (chartType: SupportedChartType): string[] =>
