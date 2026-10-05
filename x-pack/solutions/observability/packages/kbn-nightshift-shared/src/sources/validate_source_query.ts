@@ -133,13 +133,14 @@ const resolveIndexType = ({
   matched,
   isTimeSeries,
 }: {
-  matched: SourceType | undefined;
+  // `matchSourceTypes` never returns `unknown`. No match is `undefined`.
+  matched?: Exclude<SourceType, 'unknown'>;
   isTimeSeries: boolean;
 }): SourceType => {
-  if (matched && matched !== 'unknown') {
+  if (matched) {
     return matched;
   }
-  // A TS source is metrics. An index TS reads that is not logs or traces is too.
+  // An unmatched name on TS is metrics. On FROM it stays unknown.
   if (isTimeSeries) {
     return 'metrics';
   }
