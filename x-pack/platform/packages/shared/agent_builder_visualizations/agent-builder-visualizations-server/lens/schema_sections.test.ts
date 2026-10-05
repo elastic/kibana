@@ -11,25 +11,23 @@ import {
   createLoadSchemaSectionsTool,
   getFailingSchemaSections,
   getSchemaSectionIndex,
+  getSchemaSectionNames,
   renderSchemaSections,
 } from './schema_sections';
 
 const DEF_REF_RE = /"\$ref":"#\/\$defs\/([^"]+)"/g;
 
-const getSectionNames = (chartType: SupportedChartType): string[] =>
-  createLoadSchemaSectionsTool(chartType).schema.shape.sections.element.options;
-
 describe('Lens schema sections', () => {
   describe.each(Object.values(SupportedChartType))('%s', (chartType) => {
     it('never offers type or data_source', () => {
-      expect(getSectionNames(chartType)).not.toEqual(
+      expect(getSchemaSectionNames(chartType)).not.toEqual(
         expect.arrayContaining([expect.stringMatching(/^(type|data_source)$/)])
       );
       expect(getSchemaSectionIndex(chartType)).not.toMatch(/^- (type|data_source):/m);
     });
 
     it('lists one index line per section', () => {
-      const names = getSectionNames(chartType);
+      const names = getSchemaSectionNames(chartType);
 
       expect(getSchemaSectionIndex(chartType).split('\n')).toEqual(
         names.map((name) => expect.stringMatching(new RegExp(`^- ${name}: \\S`)))
@@ -37,7 +35,7 @@ describe('Lens schema sections', () => {
     });
 
     it('renders the sections with every definition they reference', () => {
-      const names = getSectionNames(chartType);
+      const names = getSchemaSectionNames(chartType);
       const rendered = renderSchemaSections(chartType, names);
       const { properties, $defs = {} } = JSON.parse(rendered);
       const refs = [...rendered.matchAll(DEF_REF_RE)].map(([, name]) => name);

@@ -199,6 +199,10 @@ const chartSchemaSections = Object.fromEntries(
   ])
 ) as Record<SupportedChartType, ChartSchemaSections>;
 
+/** Names of the sections the config author can load for a chart type. */
+export const getSchemaSectionNames = (chartType: SupportedChartType): string[] =>
+  Object.keys(chartSchemaSections[chartType].sections);
+
 /** Lists the loadable sections of a chart type with the fields each one holds. */
 export const getSchemaSectionIndex = (chartType: SupportedChartType): string =>
   chartSchemaSections[chartType].index;
@@ -240,7 +244,7 @@ export const getFailingSchemaSections = (chartType: SupportedChartType, error: u
 
 /** The bounded tool the config author calls to load schema sections the example does not show. */
 export const createLoadSchemaSectionsTool = (chartType: SupportedChartType) => {
-  const names = Object.keys(chartSchemaSections[chartType].sections);
+  const names = getSchemaSectionNames(chartType);
   return {
     name: LOAD_SCHEMA_SECTIONS_TOOL_NAME,
     description:
