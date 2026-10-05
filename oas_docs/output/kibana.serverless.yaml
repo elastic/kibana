@@ -135840,6 +135840,8 @@ components:
           updated_at: null
           updated_by: null
           version: WzEyLDNd
+          workflowTags:
+            - soc-triage
     Cases_get_case_field_definition_response:
       summary: A reusable field definition.
       value:
@@ -136166,6 +136168,8 @@ components:
             name: template-1
             tags:
               - Template tag 1
+        workflowTags:
+          - soc-triage
     Cases_set_case_configuration_response:
       summary: This is an example response for case settings.
       value:
@@ -136225,6 +136229,8 @@ components:
         updated_at: null
         updated_by: null
         version: WzIwNzMsMV0=
+        workflowTags:
+          - soc-triage
     Cases_template_dry_run_response:
       summary: Dry-run validation succeeded without writing.
       value:
@@ -136270,6 +136276,9 @@ components:
             type: toggle
             required: false
         version: WzExOSw0XQ==
+        workflowTags:
+          - soc-triage
+          - enrichment
     Cases_update_case_configuration_response:
       summary: This is an example response when the case configuration was updated.
       value:
@@ -136320,6 +136329,9 @@ components:
           profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
           username: elastic
         version: WzI2LDNd
+        workflowTags:
+          - soc-triage
+          - enrichment
     Cases_update_case_request:
       summary: Update the case description, tags, and connector.
       value:
