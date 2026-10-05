@@ -541,7 +541,6 @@ function fromAPIMappingToAssignments(
       return {
         rules: fromRulesAPIToLensState(assignment.values),
         color: fromColorDefAPIToLensState(assignment.color),
-        touched: false,
       };
     });
   }
@@ -549,7 +548,6 @@ function fromAPIMappingToAssignments(
     return {
       rules: fromRulesAPIToLensState(assignment.values),
       color: { type: 'gradient' },
-      touched: false,
     };
   });
 }
@@ -576,7 +574,6 @@ export function fromColorMappingAPIToLensState(
       color: colorMapping.unassigned
         ? fromColorDefAPIToLensState(colorMapping.unassigned)
         : { type: 'loop' },
-      touched: false,
     },
   ];
   const assignments = fromAPIMappingToAssignments(colorMapping);
@@ -585,10 +582,7 @@ export function fromColorMappingAPIToLensState(
       ? { type: colorMapping.mode }
       : {
           type: colorMapping.mode,
-          steps: (colorMapping.gradient?.map(fromColorDefAPIToLensState) ?? []).map((step) => ({
-            ...step,
-            touched: false,
-          })),
+          steps: colorMapping.gradient?.map(fromColorDefAPIToLensState) ?? [],
           sort: colorMapping.sort ?? 'asc',
         };
 

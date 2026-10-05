@@ -373,7 +373,7 @@ describe('converter', () => {
           {
             ...baseAssignment,
             rule: {
-              type: 'auto',
+              type: 'auto' as const,
             },
           },
         ],
@@ -388,7 +388,7 @@ describe('converter', () => {
           {
             ...baseAssignment,
             rule: {
-              type: 'other',
+              type: 'other' as const,
             },
           },
         ],

@@ -882,9 +882,7 @@ describe('Color util transforms', () => {
           colorMode: { type: 'categorical' },
           paletteId: SEMANTIC_PALETTE,
           assignments: [],
-          specialAssignments: [
-            { color: { type: 'loop' }, rules: [{ type: 'other' }], touched: false },
-          ],
+          specialAssignments: [{ color: { type: 'loop' }, rules: [{ type: 'other' }] }],
         },
       });
     });
@@ -904,15 +902,12 @@ describe('Color util transforms', () => {
             {
               color: { type: 'loop' },
               rules: [{ type: 'other' }],
-              touched: false,
             },
           ],
           assignments: [],
           colorMode: {
             type: 'gradient',
-            steps: [
-              { type: 'categorical', colorIndex: 1, paletteId: 'no_default', touched: false },
-            ],
+            steps: [{ type: 'categorical', colorIndex: 1, paletteId: 'no_default' }],
             sort: 'desc',
           },
         },
@@ -1193,7 +1188,6 @@ describe('Color util transforms', () => {
                   { type: 'raw', value: 'lowercase_me' },
                 ],
                 color: { type: 'colorCode', colorCode: '#ff0000' },
-                touched: false,
               },
               {
                 rules: [
@@ -1202,12 +1196,9 @@ describe('Color util transforms', () => {
                   { type: 'raw', value: '2500' },
                 ],
                 color: { type: 'colorCode', colorCode: '#00ff00' },
-                touched: false,
               },
             ],
-            specialAssignments: [
-              { color: { type: 'loop' }, rules: [{ type: 'other' }], touched: false },
-            ],
+            specialAssignments: [{ color: { type: 'loop' }, rules: [{ type: 'other' }] }],
             colorMode: { type: 'categorical' },
           },
         });

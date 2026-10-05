@@ -21,7 +21,11 @@ import type { KbnPaletteId, KbnPalettes } from '@kbn/palettes';
 import { getAppendedTag } from '@kbn/palettes';
 import type { RootState } from '../../state/color_mapping';
 import { updatePalette } from '../../state/color_mapping';
-import { updateAssignmentsPalette, updateColorModePalette } from '../../config/assignments';
+import {
+  hasCustomColors,
+  updateAssignmentsPalette,
+  updateColorModePalette,
+} from '../../config/assignments';
 
 export function PaletteSelector({ palettes }: { palettes: KbnPalettes }) {
   const dispatch = useDispatch();
@@ -33,7 +37,7 @@ export function PaletteSelector({ palettes }: { palettes: KbnPalettes }) {
         updatePalette({
           paletteId: selectedPaletteId,
           assignments: updateAssignmentsPalette(
-            model.assignments,
+            model,
             model.colorMode,
             selectedPaletteId,
             palettes,
@@ -47,7 +51,7 @@ export function PaletteSelector({ palettes }: { palettes: KbnPalettes }) {
         })
       );
     },
-    [dispatch, model.assignments, model.colorMode, palettes]
+    [dispatch, model, palettes]
   );
 
   const [preserveModalPaletteId, setPreserveModalPaletteId] = useState<KbnPaletteId | null>(null);
@@ -119,10 +123,7 @@ export function PaletteSelector({ palettes }: { palettes: KbnPalettes }) {
             }))}
           onChange={(selectedPaletteId) => {
             const paletteId = selectedPaletteId as KbnPaletteId;
-            const hasChanges = model.assignments.some((a) => a.touched);
-            const hasGradientChanges =
-              model.colorMode.type === 'gradient' && model.colorMode.steps.some((a) => a.touched);
-            if (hasChanges || hasGradientChanges) {
+            if (hasCustomColors(model, palettes)) {
               setPreserveModalPaletteId(paletteId);
             } else {
               switchPaletteFn(paletteId, false);

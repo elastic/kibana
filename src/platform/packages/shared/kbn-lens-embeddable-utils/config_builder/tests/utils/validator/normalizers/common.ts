@@ -60,13 +60,6 @@ const COMMON_STATE_IGNORE_PATHS = [
   'state.datasourceStates.formBased.currentIndexPatternId',
   // Will be unskipped after the fix for https://github.com/elastic/kibana/issues/283574
   'state.datasourceStates.formBased.layers.*.columns.*.params.orderAgg.params.sortField',
-  // TODO: check missing/different properties on colorMapping
-  'state.visualization.columns.*.colorMapping.assignments.*.touched', // dropped at state -> API and only applied from API -> State, hardcoded to false by transform
-  'state.visualization.columns.*.colorMapping.specialAssignments.*.touched',
-  'state.visualization.layers.*.colorMapping.assignments.*.touched',
-  'state.visualization.layers.*.colorMapping.specialAssignments.*.touched',
-  'state.visualization.layers.*.colorMapping.colorMode.steps.*.touched',
-  'state.visualization.colorMapping.colorMode.steps.*.touched',
 ];
 
 export const DEFAULT_LAYER_ID = 'layer_0';
@@ -1641,6 +1634,8 @@ export function getPaletteNormalizer<T extends LensAttributes>(
  * - `match` with `matchEntireWord: true` becomes a `raw` rule.
  * - `match` with `matchEntireWord: false`, `regex`, and `range` rules are
  *   runtime-dead (`getKey` returns `null`) and are stripped.
+ *
+ * Also deletes the deprecated `touched` flag, which no reader uses and the transform no longer emits.
  */
 export function getColorMappingNormalizer<T extends LensAttributes>(
   colorMappingPath: string
@@ -1651,6 +1646,8 @@ export function getColorMappingNormalizer<T extends LensAttributes>(
 
       configs.forEach((config) => {
         for (const assignment of config.assignments) {
+          // Custom color assignments are now detected at runtime from the color itself (see `hasCustomColors`).
+          delete assignment.touched;
           assignment.rules = assignment.rules.flatMap((rule): ColorMapping.ColorRule[] => {
             if (rule.type === 'raw') return [rule];
             if (rule.type === 'match' && rule.matchEntireWord === true) {
@@ -1659,6 +1656,16 @@ export function getColorMappingNormalizer<T extends LensAttributes>(
             }
             return [];
           });
+        }
+        for (const specialAssignment of config.specialAssignments ?? []) {
+          // Custom color assignments are now detected at runtime from the color itself (see `hasCustomColors`).
+          delete specialAssignment.touched;
+        }
+        if (config.colorMode?.type === 'gradient') {
+          for (const step of config.colorMode.steps) {
+            // Custom color assignments are now detected at runtime from the color itself (see `hasCustomColors`).
+            delete step.touched;
+          }
         }
       });
 
