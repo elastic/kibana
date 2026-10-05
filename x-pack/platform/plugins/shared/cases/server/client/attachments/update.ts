@@ -7,25 +7,18 @@
 
 import Boom from '@hapi/boom';
 
-import { UnifiedAttachmentPatchRequestRt } from '../../../common/types/api';
+import { UnifiedAttachmentPutRequestRt } from '../../../common/types/api';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
-import { isCommentRequestTypeExternalReference } from '../../../common/utils/attachments';
 import type { Case } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasesClientArgs } from '..';
-import { decodeCommentRequestV2 } from '../utils';
 import { Operations } from '../../authorization';
 import type { UpdateArgs } from './types';
 import { validateMaxUserActions } from '../../common/validators';
-import { validateRegisteredAttachments } from './validators';
+import { validateUnifiedAttachments } from './validators';
 
-/**
- * Update an attachment.
- *
- * @ignore
- */
 export async function update(
   { caseID, updateRequest: queryParams }: UpdateArgs,
   clientArgs: CasesClientArgs
@@ -38,12 +31,10 @@ export async function update(
   } = clientArgs;
 
   try {
-    const {
-      id: queryCommentId,
-      version: queryCommentVersion,
-      ...queryRestAttributes
-    } = decodeWithExcessOrThrow(UnifiedAttachmentPatchRequestRt)(queryParams);
-    decodeCommentRequestV2(queryRestAttributes, unifiedAttachmentTypeRegistry);
+    const { id: queryCommentId, ...putRequest } = queryParams;
+    const { version: queryCommentVersion, ...queryRestAttributes } = decodeWithExcessOrThrow(
+      UnifiedAttachmentPutRequestRt
+    )(putRequest);
 
     await validateMaxUserActions({
       caseId: caseID,
@@ -51,10 +42,7 @@ export async function update(
       userActionsToAdd: 1,
     });
 
-    // Also enforce registry registration and the unified zod schema for
-    // migrated legacy subtypes (e.g. `.files`); mirrors the add/bulk_create
-    // paths so PATCH stays in sync with POST.
-    validateRegisteredAttachments({
+    validateUnifiedAttachments({
       query: queryRestAttributes,
       unifiedAttachmentTypeRegistry,
     });
@@ -80,15 +68,6 @@ export async function update(
 
     if (myComment.attributes.owner !== queryRestAttributes.owner) {
       throw Boom.badRequest(`You cannot change the owner of the comment.`);
-    }
-
-    if (
-      isCommentRequestTypeExternalReference(myComment.attributes) &&
-      isCommentRequestTypeExternalReference(queryRestAttributes) &&
-      myComment.attributes.externalReferenceStorage.type !==
-        queryRestAttributes.externalReferenceStorage.type
-    ) {
-      throw Boom.badRequest(`You cannot change the storage type of an external reference comment.`);
     }
 
     const caseRef = myComment.references.find((c) => c.type === CASE_SAVED_OBJECT);
@@ -119,7 +98,7 @@ export async function update(
     return await updatedModel.encodeWithComments();
   } catch (error) {
     throw createCaseError({
-      message: `Failed to patch comment case id: ${caseID}: ${error}`,
+      message: `Failed to replace attachment case id: ${caseID}: ${error}`,
       error,
       logger,
     });

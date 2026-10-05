@@ -9,7 +9,7 @@ import type {
   CreateActionPolicyData,
   ActionPolicyResponse,
   PolicyMatcher,
-  UpdateActionPolicyBody,
+  UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import { needsInterval } from '@kbn/alerting-v2-schemas';
 import { DEFAULT_STRATEGY_FOR_MODE } from './constants';
@@ -36,7 +36,6 @@ export const toFormState = (response: ActionPolicyResponse): ActionPolicyFormSta
   return {
     name: response.name,
     description: response.description,
-    tags: response.tags ?? [],
     matcher: response.matcher ?? null,
     groupingMode,
     groupBy: response.group_by ?? [],
@@ -53,7 +52,6 @@ export const toCreatePayload = (state: ActionPolicyFormState): CreateActionPolic
     name: state.name,
     description: state.description,
     grouping_mode: state.groupingMode,
-    ...(state.tags.length > 0 ? { tags: state.tags } : {}),
     ...(matcher ? { matcher } : {}),
     ...(state.groupingMode === 'per_field' && state.groupBy.length > 0
       ? { group_by: state.groupBy }
@@ -63,16 +61,11 @@ export const toCreatePayload = (state: ActionPolicyFormState): CreateActionPolic
   };
 };
 
-export const toUpdatePayload = (
-  state: ActionPolicyFormState,
-  version: string
-): UpdateActionPolicyBody => {
+export const toUpdatePayload = (state: ActionPolicyFormState): UpdateActionPolicyData => {
   return {
-    version,
     name: state.name,
     description: state.description,
     grouping_mode: state.groupingMode,
-    tags: state.tags.length > 0 ? state.tags : null,
     matcher: normalizeMatcher(state.matcher),
     group_by: state.groupingMode === 'per_field' && state.groupBy.length > 0 ? state.groupBy : null,
     throttle: buildThrottle(state),

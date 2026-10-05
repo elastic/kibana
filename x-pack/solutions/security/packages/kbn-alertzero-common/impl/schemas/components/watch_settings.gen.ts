@@ -16,7 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { Lifecycle, WatchRunAction, WatchCallableRef } from './watch.gen';
+import { Lifecycle, WatchCallableRef } from './watch.gen';
 
 /**
  * Autonomy dial levels per programme decision D15 (2026-07-28). Manual is the MVP default. There is deliberately no mapping from the legacy 1–5 AutonomyLevel scale — see https://github.com/elastic/security-team/issues/18718.
@@ -46,262 +46,49 @@ export type WorkerRunStateEnum = typeof WorkerRunState.enum;
 export const WorkerRunStateEnum = WorkerRunState.enum;
 
 /**
- * A worker in the global worker catalog.
+ * Worker-specific settings owned by the Worker's Watch team. The wire schema is open so the shared read/update path stays generic; each Worker declares a closed schema for its own extras (see the Watch-owned `*_watch_settings.schema.yaml` files) and the server validates against that declaration, rejecting unknown or missing fields by name.
  */
-export const WatchWorker = lazySchema(() =>
-  z.object({
-    /**
-     * Copy key — the UI resolves name and description from this id. Unique among workers only; Containment and Case assembly each exist as both a worker and a skill.
-     */
-    id: z
-      .string()
-      .describe(
-        'Copy key — the UI resolves name and description from this id. Unique among workers only; Containment and Case assembly each exist as both a worker and a skill.'
-      ),
-    /**
-     * Watches this worker is attached to
-     */
-    watchIds: z.array(z.string()).describe('Watches this worker is attached to'),
-    /**
-     * ISO 8601 timestamp of last invocation, or null when never run or not running
-     */
-    lastRun: z
-      .string()
-      .nullable()
-      .describe('ISO 8601 timestamp of last invocation, or null when never run or not running'),
-    /**
-     * Global flag. Effective enablement is this AND the per-watch attachment flag.
-     */
-    enabled: z
-      .boolean()
-      .describe('Global flag. Effective enablement is this AND the per-watch attachment flag.'),
-    state: WorkerRunState,
-    /**
-     * Why the worker is not in the ok state, e.g. which dependency is unavailable. Free prose rather than a copy key because it names runtime specifics, like WatchLedgerEntry.event.
-     */
-    stateReason: z
-      .string()
-      .optional()
-      .describe(
-        'Why the worker is not in the ok state, e.g. which dependency is unavailable. Free prose rather than a copy key because it names runtime specifics, like WatchLedgerEntry.event.'
-      ),
-    /**
-     * Omitted for generally available workers; badge shown otherwise
-     */
-    lifecycle: Lifecycle.optional().describe(
-      'Omitted for generally available workers; badge shown otherwise'
-    ),
-  })
-);
-export type WatchWorker = z.infer<typeof WatchWorker>;
+export const WorkerSettingsExtras = lazySchema(() => z.object({}).catchall(z.unknown()));
+export type WorkerSettingsExtras = z.infer<typeof WorkerSettingsExtras>;
 
 /**
- * A skill in the global skill catalog.
- */
-export const WatchSkill = lazySchema(() =>
-  z.object({
-    /**
-     * Copy key — the UI resolves name and description from this id. Unique among skills only.
-     */
-    id: z
-      .string()
-      .describe(
-        'Copy key — the UI resolves name and description from this id. Unique among skills only.'
-      ),
-    /**
-     * Display name resolved from the Agent Builder registry at projection time.
-     */
-    name: z
-      .string()
-      .optional()
-      .describe('Display name resolved from the Agent Builder registry at projection time.'),
-    /**
-     * Watches whose workers may call this skill
-     */
-    watchIds: z.array(z.string()).describe('Watches whose workers may call this skill'),
-    /**
-     * Summary of the skill's purpose
-     */
-    summary: z.string().optional().describe("Summary of the skill's purpose"),
-    /**
-     * ISO 8601 timestamp of last invocation, or null when never invoked
-     */
-    lastRun: z
-      .string()
-      .nullable()
-      .describe('ISO 8601 timestamp of last invocation, or null when never invoked'),
-    /**
-     * Omitted for generally available skills; badge shown otherwise
-     */
-    lifecycle: Lifecycle.optional().describe(
-      'Omitted for generally available skills; badge shown otherwise'
-    ),
-  })
-);
-export type WatchSkill = z.infer<typeof WatchSkill>;
-
-/**
- * Per-watch enablement of a worker, ANDed with the worker's global flag
- */
-export const WatchWorkerAttachment = lazySchema(() =>
-  z.object({
-    workerId: z.string(),
-    enabled: z.boolean(),
-  })
-);
-export type WatchWorkerAttachment = z.infer<typeof WatchWorkerAttachment>;
-
-/**
- * Per-watch enablement of a skill, ANDed with the skill's global flag
- */
-export const WatchSkillAttachment = lazySchema(() =>
-  z.object({
-    skillId: z.string(),
-    enabled: z.boolean(),
-  })
-);
-export type WatchSkillAttachment = z.infer<typeof WatchSkillAttachment>;
-
-/**
- * A single-choice setting. Both ids resolve to copy in the UI.
- */
-export const WatchSelectSetting = lazySchema(() =>
-  z.object({
-    optionIds: z.array(z.string()),
-    selectedId: z.string(),
-  })
-);
-export type WatchSelectSetting = z.infer<typeof WatchSelectSetting>;
-
-export const WatchTriggersSettings = lazySchema(() =>
-  z.object({
-    /**
-     * Renders the "Shared with Attack Discovery" callout. Mocked — not wired to the real Attack Discovery API. Contested in the field, see programme decision D12.
-     */
-    sharedWithAttackDiscovery: z
-      .boolean()
-      .describe(
-        'Renders the "Shared with Attack Discovery" callout. Mocked — not wired to the real Attack Discovery API. Contested in the field, see programme decision D12.'
-      ),
-    schedule: WatchSelectSetting,
-    allowManualRun: z.boolean(),
-  })
-);
-export type WatchTriggersSettings = z.infer<typeof WatchTriggersSettings>;
-
-/**
- * The data-boundary chips the design shows in this section are rendered from the watch's own `scopes`, which already carry a name and an access level, so they are not duplicated here.
- */
-export const WatchScopeRoutingSettings = lazySchema(() =>
-  z.object({
-    dataSources: WatchSelectSetting,
-    assigneeQueue: WatchSelectSetting,
-    escalationContact: WatchSelectSetting,
-  })
-);
-export type WatchScopeRoutingSettings = z.infer<typeof WatchScopeRoutingSettings>;
-
-/**
- * always and high-impact require a named approver; in-scope is informational (the action has no side effects and runs within the watch's scope)
- */
-export const ApprovalRequirement = lazySchema(() => z.enum(['always', 'high-impact', 'in-scope']));
-export type ApprovalRequirement = z.infer<typeof ApprovalRequirement>;
-export type ApprovalRequirementEnum = typeof ApprovalRequirement.enum;
-export const ApprovalRequirementEnum = ApprovalRequirement.enum;
-
-export const WatchApprovalGate = lazySchema(() =>
-  z.object({
-    /**
-     * Copy key for the action type and its qualifier line
-     */
-    id: z.string().describe('Copy key for the action type and its qualifier line'),
-    requirement: ApprovalRequirement,
-    /**
-     * True renders static text instead of a select — consequential actions always gate
-     */
-    requirementLocked: z
-      .boolean()
-      .describe('True renders static text instead of a select — consequential actions always gate'),
-    /**
-     * Null renders an em dash, used for gates that need no approver
-     */
-    approverRoleId: z
-      .string()
-      .nullable()
-      .describe('Null renders an em dash, used for gates that need no approver'),
-    /**
-     * Omitted when approverRoleId is null
-     */
-    approverRoleOptionIds: z
-      .array(z.string())
-      .optional()
-      .describe('Omitted when approverRoleId is null'),
-  })
-);
-export type WatchApprovalGate = z.infer<typeof WatchApprovalGate>;
-
-export const WatchRunOutcome = lazySchema(() =>
-  z.enum(['awaiting-review', 'accepted', 'dismissed', 'executed', 'completed'])
-);
-export type WatchRunOutcome = z.infer<typeof WatchRunOutcome>;
-export type WatchRunOutcomeEnum = typeof WatchRunOutcome.enum;
-export const WatchRunOutcomeEnum = WatchRunOutcome.enum;
-
-/**
- * One row of the per-watch run ledger
- */
-export const WatchLedgerEntry = lazySchema(() =>
-  z.object({
-    id: z.string(),
-    /**
-     * ISO 8601 timestamp
-     */
-    time: z.string().describe('ISO 8601 timestamp'),
-    /**
-     * Copy key for the workflow or skill that ran
-     */
-    callableId: z.string().describe('Copy key for the workflow or skill that ran'),
-    action: WatchRunAction,
-    /**
-     * Run-generated headline, e.g. "Drafted a case — mailbox rules are good". Free prose rather than a copy key because it is produced per run, matching WatchRecentRun.summary.
-     */
-    event: z
-      .string()
-      .describe(
-        'Run-generated headline, e.g. "Drafted a case — mailbox rules are good". Free prose rather than a copy key because it is produced per run, matching WatchRecentRun.summary.'
-      ),
-    outcome: WatchRunOutcome,
-  })
-);
-export type WatchLedgerEntry = z.infer<typeof WatchLedgerEntry>;
-
-/**
- * Legacy per-watch settings projection. Watches are grouping-only; durable settings live on WorkerSettings. Kept so unused mock fixtures continue to parse.
- */
-export const WatchSettings = lazySchema(() =>
-  z.object({
-    watchId: z.string(),
-    autonomy: WatchAutonomyLevel,
-  })
-);
-export type WatchSettings = z.infer<typeof WatchSettings>;
-
-/**
- * Durable per-Worker settings stored as managed template values.
+ * Durable per-Worker settings stored as managed template values. Shared fields sit at the top level; Worker-specific fields live under `extras`. Unknown top-level keys are rejected.
  */
 export const WorkerSettings = lazySchema(() =>
-  z.object({
-    workerId: z.string(),
-    autonomy: WatchAutonomyLevel,
-    /**
-     * Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to render the interval control.
-     */
-    scheduleInterval: WorkerScheduleInterval.optional().describe(
-      'Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to render the interval control.'
-    ),
-  })
+  z
+    .object({
+      workerId: z.string(),
+      autonomy: WatchAutonomyLevel,
+      /**
+       * Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to render the interval control.
+       */
+      scheduleInterval: WorkerScheduleInterval.optional().describe(
+        'Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to render the interval control.'
+      ),
+      /**
+       * Omitted for Workers that declare no Worker-specific settings.
+       */
+      extras: WorkerSettingsExtras.optional().describe(
+        'Omitted for Workers that declare no Worker-specific settings.'
+      ),
+    })
+    .strict()
 );
 export type WorkerSettings = z.infer<typeof WorkerSettings>;
+
+/**
+ * Settings patch; the editable subset of WorkerSettings with the same names and nesting. Shared fields are per-field: omitted keeps the stored value, supplied replaces it. `extras` is whole-object: omitted keeps the stored extras, supplied must be the complete valid object for this Worker and replaces the stored one. There is no deep merge and `null` has no special meaning.
+ */
+export const WorkerSettingsWrite = lazySchema(() =>
+  z
+    .object({
+      autonomy: WatchAutonomyLevel.optional(),
+      scheduleInterval: WorkerScheduleInterval.optional(),
+      extras: WorkerSettingsExtras.optional(),
+    })
+    .strict()
+);
+export type WorkerSettingsWrite = z.infer<typeof WorkerSettingsWrite>;
 
 /**
  * A live registered Worker with Watch membership and durable settings.
@@ -332,6 +119,15 @@ export const Worker = lazySchema(() =>
       .nullable()
       .describe(
         'Logical workflow version for best-effort stale settings detection. Null when the per-space managed Worker has not been installed yet.'
+      ),
+    /**
+     * Id of this Worker's installed per-space workflow. Null when that workflow has not been installed yet. The client uses it to open the workflow's Executions tab and does not derive it from the Worker id.
+     */
+    workflowId: z
+      .string()
+      .nullable()
+      .describe(
+        "Id of this Worker's installed per-space workflow. Null when that workflow has not been installed yet. The client uses it to open the workflow's Executions tab and does not derive it from the Worker id."
       ),
     skills: z.array(WatchCallableRef).optional(),
   })

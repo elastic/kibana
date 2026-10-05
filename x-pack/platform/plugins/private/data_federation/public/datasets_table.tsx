@@ -8,81 +8,52 @@
 import type { FunctionComponent } from 'react';
 import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiInMemoryTable,
-  EuiLink,
-  EuiSelect,
-  EuiSpacer,
-} from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { EuiButton, EuiInMemoryTable, EuiSpacer, EuiTextBlockTruncate } from '@elastic/eui';
+import { useHistory } from 'react-router-dom';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import type { DataSetWithName, DataSource } from '../common';
+import { CREATE_DATASET_PATH, getEditDatasetPath } from './app_paths';
 import { getDataSourceTypeVerbose } from './get_data_source_type_label';
 import { mainTranslations } from './main_i18n';
-import type { DataFederationKibanaServices } from './types';
 
 /** Data set row in the table; `type` is resolved from the linked data source. */
 export type DataSetListRow = DataSetWithName & { type?: DataSource['type'] };
 
 export interface DatasetsTableProps {
-  filteredItems: DataSetListRow[];
+  items: DataSetListRow[];
   selectedItems: DataSetListRow[];
-  dataSourceFilterOptions: Array<{ value: string; text: string }>;
-  dataSourceFilter: string;
-  isCreateDisabled: boolean;
+  dataSourceNames: string[];
   onSelectionChange: (next: DataSetListRow[]) => void;
-  onDataSourceFilterChange: (next: string) => void;
-  onCreate: () => void;
-  onEdit: (item: DataSetListRow) => void;
   onDelete: (item: DataSetListRow) => void;
   onDeleteSelected: (items: DataSetListRow[]) => void;
 }
 
 export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
-  filteredItems,
+  items,
   selectedItems,
-  dataSourceFilterOptions,
-  dataSourceFilter,
-  isCreateDisabled,
+  dataSourceNames,
   onSelectionChange,
-  onDataSourceFilterChange,
-  onCreate,
-  onEdit,
   onDelete,
   onDeleteSelected,
 }) => {
-  const {
-    services: { docLinks },
-  } = useKibana<DataFederationKibanaServices>();
+  const history = useHistory();
+  const createDatasetNav = reactRouterNavigate(history, CREATE_DATASET_PATH);
 
-  const emptyMessage = useMemo(
-    () => (
-      <>
-        {mainTranslations.columns.dataSets.noItems}{' '}
-        <EuiLink href={docLinks.links.dataFederation.datasets} target="_blank">
-          {mainTranslations.docsLink}
-        </EuiLink>
-      </>
-    ),
-    [docLinks.links.dataFederation.datasets]
-  );
   const columns = useMemo<Array<EuiBasicTableColumn<DataSetListRow>>>(
     () => [
       {
         field: 'name',
         name: mainTranslations.columns.dataSets.name,
         sortable: true,
-        width: '18%',
+        width: '16%',
         'data-test-subj': 'dataSetsSetsColName',
       },
       {
         field: 'data_source',
         name: mainTranslations.columns.dataSets.dataSourceId,
         sortable: true,
-        width: '18%',
+        width: '12%',
         'data-test-subj': 'dataSetsSetsColDataSourceId',
       },
       {
@@ -93,21 +64,26 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
             ? getDataSourceTypeVerbose(type)
             : mainTranslations.columns.dataSets.dataSourceTypeMissing,
         sortable: true,
-        width: '18%',
+        width: '12%',
         'data-test-subj': 'dataSetsSetsColDataSourceType',
       },
       {
         field: 'resource',
         name: mainTranslations.columns.dataSets.resource,
         sortable: true,
-        width: '22%',
+        width: '20%',
         'data-test-subj': 'dataSetsSetsColResource',
       },
       {
         field: 'description',
         name: mainTranslations.columns.dataSets.description,
+        render: (description: DataSetListRow['description']) => (
+          <EuiTextBlockTruncate lines={2} title={description}>
+            {description}
+          </EuiTextBlockTruncate>
+        ),
         sortable: true,
-        truncateText: true,
+        width: '30%',
         'data-test-subj': 'dataSetsSetsColDescription',
       },
       {
@@ -120,7 +96,7 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
             icon: 'pencil',
             type: 'icon',
             onClick: (item) => {
-              onEdit(item);
+              history.push(getEditDatasetPath(item.name));
             },
             'data-test-subj': 'dataSetsSetsEditButton',
           },
@@ -138,17 +114,21 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
         ],
       },
     ],
-    [onDelete, onEdit]
+    [history, onDelete]
   );
 
   return (
     <>
       <EuiSpacer size="m" />
       <EuiInMemoryTable<DataSetListRow>
-        items={filteredItems}
+        items={items}
         itemId="name"
         columns={columns}
         search={{
+          onChange: () => {
+            onSelectionChange([]);
+            return true;
+          },
           box: {
             incremental: true,
             placeholder: mainTranslations.columns.dataSets.searchPlaceholder,
@@ -163,6 +143,16 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
               },
             },
           },
+          filters: [
+            {
+              type: 'field_value_selection',
+              field: 'data_source',
+              name: mainTranslations.filters.allDataSources,
+              multiSelect: 'or',
+              operator: 'exact',
+              options: dataSourceNames.map((name) => ({ value: name })),
+            },
+          ],
           toolsLeft:
             selectedItems.length > 0 ? (
               <EuiButton
@@ -177,28 +167,14 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
               </EuiButton>
             ) : undefined,
           toolsRight: (
-            <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiSelect
-                  data-test-subj="dataSetsSetsDataSourceFilter"
-                  aria-label={mainTranslations.filters.dataSource}
-                  options={dataSourceFilterOptions}
-                  value={dataSourceFilter}
-                  onChange={(e) => onDataSourceFilterChange(e.target.value)}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  color="primary"
-                  data-test-subj="dataSetsSetsCreateButton"
-                  onClick={onCreate}
-                  disabled={isCreateDisabled}
-                >
-                  {mainTranslations.columns.dataSets.addButtonLabel}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiButton
+              fill
+              color="primary"
+              data-test-subj="dataSetsSetsCreateButton"
+              {...createDatasetNav}
+            >
+              {mainTranslations.columns.dataSets.addButtonLabel}
+            </EuiButton>
           ),
         }}
         rowHeader="name"
@@ -213,7 +189,7 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
         }}
         data-test-subj="dataSetsSetsTable"
         tableCaption={mainTranslations.columns.dataSets.caption}
-        noItemsMessage={emptyMessage}
+        noItemsMessage={mainTranslations.columns.dataSets.noItems}
         tableLayout="auto"
         responsiveBreakpoint={false}
       />

@@ -78,6 +78,7 @@ export const riskScoreDynamicInlineToolHandler = async (
         esClient: esClient.asCurrentUser,
         index: riskScoreIndexPattern,
         additionalContext: `${message}\n${defaultMessage}\n${queryExtraContext ?? ''}`,
+        execute: 'data',
       });
 
       if (esqlResponse.error) {

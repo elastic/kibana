@@ -27,3 +27,5 @@ export type * from './managed_otlp_api_key';
 export type * from './remote_synced_integrations';
 export type * from './custom_integrations';
 export type * from './agentless_policy';
+export type * from './iac_provisioner';
+export { IAC_FEDERATED_IDENTITY_WORKFLOW } from './iac_provisioner';

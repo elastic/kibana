@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { ActionSourceTypes } from '../../domain/user_action/source/v1';
 import { UserSchema } from '../user/v1';
 import { UserActionActionsSchema } from './action/v1';
 import { AssigneesUserActionSchema } from './assignees/v1';
@@ -29,16 +30,32 @@ import { TagsUserActionSchema } from './tags/v1';
 import { TitleUserActionSchema } from './title/v1';
 import { CustomFieldsUserActionSchema } from './custom_fields/v1';
 import { ObservablesUserActionSchema } from './observables/v1';
+import { WorkflowUserActionSchema } from './workflow/v1';
 
 export { UserActionTypes, UserActionActions } from './action/v1';
 export { StatusUserActionSchema } from './status/v1';
 export type { UserActionType, UserActionAction } from './action/v1';
+
+const ActionSourceSchema = z.object({
+  type: z.enum([
+    ActionSourceTypes.agent,
+    ActionSourceTypes.workflow,
+    ActionSourceTypes.rule,
+    ActionSourceTypes.attack,
+    ActionSourceTypes.api,
+    ActionSourceTypes.user,
+  ]),
+  id: z.string(),
+  name: z.string().optional(),
+  run_id: z.string().optional(),
+});
 
 const UserActionCommonAttributesSchema = z.object({
   created_at: z.string(),
   created_by: UserSchema,
   owner: z.string(),
   action: UserActionActionsSchema,
+  source: ActionSourceSchema.nullable().optional(),
 });
 
 export const CaseUserActionInjectedDeprecatedIdsSchema = z.object({
@@ -63,6 +80,7 @@ const BasicUserActionsSchema = z.union([
   CategoryUserActionSchema,
   CustomFieldsUserActionSchema,
   ObservablesUserActionSchema,
+  WorkflowUserActionSchema,
 ]);
 
 const CommonUserActionsWithIdsSchema = z.union([BasicUserActionsSchema, CommentUserActionSchema]);

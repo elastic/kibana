@@ -65,6 +65,7 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
       plugin_ids: configuration.plugin_ids,
       connector_ids: configuration.connector_ids,
       ai_indices: configuration.ai_indices,
+      subagent_ids: configuration.subagent_ids ?? [],
     },
   };
 };
@@ -127,6 +128,7 @@ export const createRequestToEs = ({
       plugin_ids: profile.configuration.plugin_ids,
       connector_ids: profile.configuration.connector_ids,
       ai_indices: profile.configuration.ai_indices,
+      subagent_ids: profile.configuration.subagent_ids,
     },
     created_at: creationDate.toISOString(),
     updated_by_id: user.id,

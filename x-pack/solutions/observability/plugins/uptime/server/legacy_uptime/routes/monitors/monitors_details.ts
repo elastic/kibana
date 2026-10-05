@@ -9,15 +9,21 @@ import { schema } from '@kbn/config-schema';
 import type { UMServerLibs } from '../../lib/lib';
 import type { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../../common/constants';
+import {
+  MAX_DATE_RANGE_LENGTH,
+  MAX_ID_LENGTH,
+  boundedString,
+  optionalBoundedString,
+} from '../schema_limits';
 
 export const createGetMonitorDetailsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
   path: API_URLS.MONITOR_DETAILS,
   validate: {
     query: schema.object({
-      monitorId: schema.string(),
-      dateStart: schema.maybe(schema.string()),
-      dateEnd: schema.maybe(schema.string()),
+      monitorId: boundedString(MAX_ID_LENGTH),
+      dateStart: optionalBoundedString(MAX_DATE_RANGE_LENGTH),
+      dateEnd: optionalBoundedString(MAX_DATE_RANGE_LENGTH),
     }),
   },
   handler: async ({ uptimeEsClient, context, request }): Promise<any> => {

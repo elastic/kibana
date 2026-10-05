@@ -8,10 +8,11 @@
  */
 
 import type { ReactElement } from 'react';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import { EuiDelayRender, EuiProgress, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ApproximationBadge } from '@kbn/esql-browser';
 import type {
   EmbeddableComponentProps,
   LensEmbeddableInput,
@@ -19,6 +20,7 @@ import type {
 } from '@kbn/lens-plugin/public';
 import type { Datatable, DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
+import { apiPublishesEsql } from '@kbn/presentation-publishing';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
@@ -73,6 +75,8 @@ export interface UnifiedHistogramChartProps {
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
+  withLensActions?: boolean;
+  onApiAvailable?: EmbeddableComponentProps['onApiAvailable'];
 }
 
 const RequestStatusError: typeof RequestStatus.ERROR = 2;
@@ -96,6 +100,8 @@ export function UnifiedHistogramChart({
   onBreakdownFieldChange,
   onTotalHitsChange,
   onChartLoad,
+  onApiAvailable: consumerOnApiAvailable,
+  withLensActions = true,
   ...histogramProps
 }: UnifiedHistogramChartProps) {
   const lensVisServiceCurrentSuggestionContext = lensVisServiceState.currentSuggestionContext;
@@ -104,6 +110,25 @@ export function UnifiedHistogramChart({
 
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const [isApproximationApplied, setIsApproximationApplied] = useState(false);
+  const approximationSubscription = useRef<{ unsubscribe: () => void } | undefined>(undefined);
+
+  useEffect(() => {
+    return () => approximationSubscription.current?.unsubscribe();
+  }, []);
+
+  const onApiAvailable = useCallback(
+    (api: unknown) => {
+      approximationSubscription.current?.unsubscribe();
+      if (apiPublishesEsql(api)) {
+        approximationSubscription.current = api.approximationApplied$.subscribe((value) => {
+          setIsApproximationApplied(Boolean(value));
+        });
+      }
+      consumerOnApiAvailable?.(api);
+    },
+    [consumerOnApiAvailable]
+  );
 
   const chartVisible =
     isChartAvailable && !!chart && !chart.hidden && !!visContext && !!visContext?.attributes;
@@ -123,12 +148,11 @@ export function UnifiedHistogramChart({
   }, [visContext?.attributes]);
 
   const {
-    dataView,
+    dataSource,
     query,
     timeRange,
     relativeTimeRange,
     abortController,
-    columns,
     controlsState,
     isESQLQuery: isPlainRecord,
     breakdown,
@@ -182,7 +206,7 @@ export function UnifiedHistogramChart({
       if (response) {
         const newBucketInterval = buildBucketInterval({
           data: services.data,
-          dataView,
+          dataSource,
           timeInterval: chart?.timeInterval,
           timeRange,
           response,
@@ -221,7 +245,7 @@ export function UnifiedHistogramChart({
 
   const onEditVisualization = useEditVisualization({
     services,
-    dataView,
+    dataSource,
     relativeTimeRange,
     lensAttributes: visContext?.attributes,
     isPlainRecord,
@@ -237,10 +261,9 @@ export function UnifiedHistogramChart({
       <div>
         {chartVisible && breakdown && (
           <BreakdownFieldSelector
-            dataView={dataView}
+            dataSource={dataSource}
             breakdown={breakdown}
             onBreakdownFieldChange={onBreakdownFieldChange}
-            esqlColumns={isPlainRecord ? columns : undefined}
           />
         )}
       </div>,
@@ -251,9 +274,8 @@ export function UnifiedHistogramChart({
       onTimeIntervalChange,
       chart,
       breakdown,
-      dataView,
+      dataSource,
       onBreakdownFieldChange,
-      columns,
     ]
   );
 
@@ -281,7 +303,7 @@ export function UnifiedHistogramChart({
 
   const actions: IconButtonGroupProps['buttons'] = [];
 
-  if (canEditVisualizationOnTheFly) {
+  if (withLensActions && canEditVisualizationOnTheFly) {
     const editLabel = i18n.translate('unifiedHistogram.editVisualizationButton', {
       defaultMessage: 'Edit visualization',
     });
@@ -293,7 +315,7 @@ export function UnifiedHistogramChart({
       'data-test-subj': 'unifiedHistogramEditFlyoutVisualization',
       onClick: () => setIsFlyoutVisible(true),
     });
-  } else if (onEditVisualization) {
+  } else if (withLensActions && onEditVisualization) {
     const editLabel = i18n.translate('unifiedHistogram.editVisualizationButton', {
       defaultMessage: 'Edit visualization',
     });
@@ -306,7 +328,7 @@ export function UnifiedHistogramChart({
     });
   }
 
-  if (canSaveVisualization) {
+  if (withLensActions && canSaveVisualization) {
     const saveLabel = i18n.translate('unifiedHistogram.saveVisualizationButton', {
       defaultMessage: 'Save visualization to dashboard',
     });
@@ -328,6 +350,16 @@ export function UnifiedHistogramChart({
           toggleActions: toolbarToggleActions,
           leftSide: toolbarSelectors,
           rightSide: chartVisible ? actions : [],
+          additionalControls: {
+            prependRight: (
+              <span style={{ marginRight: 4 }}>
+                <ApproximationBadge
+                  isApproximationApplied={chartVisible && isApproximationApplied}
+                  data-test-subj="unifiedHistogramApproximationApplied"
+                />
+              </span>
+            ),
+          },
         }}
       >
         {chartVisible && (
@@ -354,7 +386,7 @@ export function UnifiedHistogramChart({
               {lensPropsContext && (
                 <HistogramMemoized
                   services={services}
-                  dataView={dataView}
+                  dataSource={dataSource}
                   chart={chart}
                   bucketInterval={bucketInterval}
                   visContext={visContext}
@@ -362,6 +394,7 @@ export function UnifiedHistogramChart({
                   abortController={abortController}
                   {...histogramProps}
                   {...lensPropsContext}
+                  onApiAvailable={onApiAvailable}
                 />
               )}
             </section>

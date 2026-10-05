@@ -23,6 +23,7 @@ import type { ApiClientFixture, KbnClient, KibanaRole, ScoutLogger } from '@kbn/
 import { syntheticsMonitorSavedObjectType } from '../../../../../common/types/saved_objects';
 import { ConfigKey } from '../../../../../common/runtime_types';
 import {
+  DEFAULT_HTTP_ADVANCED_FIELDS,
   PROFILE_VALUES_ENUM,
   PROFILES_MAP,
 } from '../../../../../common/constants/monitor_defaults';
@@ -247,6 +248,8 @@ apiTest.describe(
       project_id: project,
       username: '',
       password: '',
+      [ConfigKey.KERBEROS]: DEFAULT_HTTP_ADVANCED_FIELDS[ConfigKey.KERBEROS],
+      [ConfigKey.NTLM]: DEFAULT_HTTP_ADVANCED_FIELDS[ConfigKey.NTLM],
       proxy_headers: {},
       'response.include_body': 'always',
       'response.include_headers': false,
@@ -477,8 +480,8 @@ apiTest.describe(
         expect(editedError.body.createdMonitors).toHaveLength(0);
         expect(editedError.body.updatedMonitors).toHaveLength(1);
         expect(editedError.body.failedMonitors).toHaveLength(1);
-        expect(editedError.body.failedMonitors[0].details).toBe(
-          `Invalid locations specified. Private Location(s) 'Test private location 8' not found. Available private locations are '${testPrivateLocationName}'`
+        expect(editedError.body.failedMonitors[0].details).toContain(
+          "Invalid locations specified. Private Location(s) 'Test private location 8' not found."
         );
         expect(editedError.body.failedMonitors[0].reason).toBe(
           "Couldn't save or update monitor because of an invalid configuration."

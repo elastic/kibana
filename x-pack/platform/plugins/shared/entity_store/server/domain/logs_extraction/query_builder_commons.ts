@@ -21,15 +21,13 @@ import { recentData } from '../../../common/domain/definitions/esql';
 import type {
   EntityDefinition,
   FieldValueSchema,
+  GatedEntityDefinition,
   SetFieldsByCondition,
 } from '../../../common/domain/definitions/entity_schema';
 import { escapeEsqlStringLiteral } from '../../../common/esql/strings';
+import { type EntityField } from '../../../common/domain/definitions/entity_schema';
 import {
-  type EntityField,
-  type EntityType,
-} from '../../../common/domain/definitions/entity_schema';
-import {
-  getEuidEsqlDocumentsContainsIdFilter,
+  getEuidEsqlDocumentsContainsIdFilterFromDefinition,
   getFieldEvaluationsEsqlFromDefinition,
 } from '../../../common/domain/euid/esql';
 import { getFieldEvaluationsFromDefinition } from '../../../common/domain/euid/field_evaluations';
@@ -66,7 +64,9 @@ export interface PaginationFields {
 
 export interface LogPageProbeSourceClauseParams {
   indexPatterns: string[];
-  type: EntityType;
+  /** Resolved extraction variant: the probe and the extraction query must share one definition,
+   * so both scan the same document population. */
+  entityDefinition: GatedEntityDefinition;
   fromDateISO: string;
   toDateISO: string;
   /** Inclusive lower bound on @timestamp for log-slice pagination within the time window. */
@@ -79,13 +79,21 @@ export type ExtractionSourceClauseParams = LogPageProbeSourceClauseParams & {
 };
 
 export function buildLogPageProbeSourceClause(params: LogPageProbeSourceClauseParams): string {
-  const { indexPatterns, type, fromDateISO, toDateISO, logsPageCursorStart } = params;
+  const { indexPatterns, entityDefinition, fromDateISO, toDateISO, logsPageCursorStart } = params;
+
+  // Omitted entirely when the definition carries no gate, so a single-process definition renders
+  // the same clause it always has.
+  const extractionGateFilter = entityDefinition.extractionGate
+    ? `\n      AND (${conditionToESQL(entityDefinition.extractionGate)})`
+    : '';
 
   const baseWhere = `FROM ${indexPatterns.join(', ')}
   | WHERE
       ${TIMESTAMP_FIELD} >= TO_DATETIME("${fromDateISO}")
       AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")
-      AND (${getEuidEsqlDocumentsContainsIdFilter(type)})`;
+      AND (${getEuidEsqlDocumentsContainsIdFilterFromDefinition(
+        entityDefinition
+      )})${extractionGateFilter}`;
 
   if (!logsPageCursorStart) {
     return baseWhere;

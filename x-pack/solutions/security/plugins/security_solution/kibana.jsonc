@@ -86,9 +86,11 @@
       "serverless",
       "agentBuilder",
       "llmTasks",
+      "mitreAttack",
       "cps",
       "searchInferenceEndpoints",
-      "esql"
+      "esql",
+      "alertzero"
     ],
     "requiredBundles": [
       "esUiShared",
@@ -98,6 +100,7 @@
       "usageCollection",
       "lists",
       "ml",
+      "mitreAttack",
       "unifiedSearch",
       "esql",
       "agentBuilder",

@@ -15,7 +15,7 @@ export async function fetchProfilingStatus(
   coreRequestContext: CoreRequestHandlerContext,
   infraRequestContext: InfraRequestHandlerContext
 ): Promise<ProfilingStatus> {
-  return await profilingDataAccess.services.getStatus({
+  return await profilingDataAccess.services.universalProfiling.getStatus({
     esClient: coreRequestContext.elasticsearch.client,
     soClient: coreRequestContext.savedObjects.client,
     spaceId: infraRequestContext.spaceId,

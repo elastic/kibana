@@ -7,11 +7,11 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { AsyncStatus, useAsync } from '../hooks/use_async';
 import { useAutoAbortedHttpClient } from '../hooks/use_auto_aborted_http_client';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
-import { AddDataTabs } from '../views/add_data_view';
+import { AddDataTabs } from '../views/add_data_view/types';
 import { useLicenseContext } from './contexts/license/use_license_context';
 import { useProfilingDependencies } from './contexts/profiling_dependencies/use_profiling_dependencies';
 import { LicensePrompt } from './license_prompt';
@@ -26,7 +26,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
   const { setProfilingSetupStatus } = useProfilingSetupStatus();
   const license = useLicenseContext();
   const router = useProfilingRouter();
-  const history = useHistory();
+  const { pathname } = useLocation();
 
   const { docLinks, notifications } = core;
 
@@ -78,7 +78,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
 
   const displaySetupScreen =
     (status === AsyncStatus.Settled &&
-      data?.type !== 'serverless' &&
+      data?.profiling_enabled !== false &&
       data?.has_setup !== true &&
       data?.pre_8_9_1_data === false) ||
     !!error;
@@ -138,17 +138,14 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
           },
         }}
         hideSearchBar
-      >
-        <></>
-      </ProfilingAppPageTemplate>
+      />
     );
   }
 
   if (
     status === AsyncStatus.Settled &&
-    data?.type === 'serverless' &&
     data?.profiling_enabled === false &&
-    history.location.pathname !== '/profiling-not-enabled'
+    pathname !== '/profiling-not-enabled'
   ) {
     router.push('/profiling-not-enabled', {
       path: {},
@@ -157,19 +154,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     return null;
   }
 
-  const displayUi =
-    // Display UI if there's data or if the user is opening one of the setup/disabled pages.
-    // does not use profiling router because that breaks as at this point the route might not have all required params
-    (data?.has_data === true && data?.pre_8_9_1_data === false) ||
-    history.location.pathname === '/add-data-instructions' ||
-    history.location.pathname === '/delete_data_instructions' ||
-    history.location.pathname === '/profiling-not-enabled';
-
-  if (displayUi) {
-    return children;
-  }
-
-  if (data?.pre_8_9_1_data === true) {
+  if (data?.pre_8_9_1_data === true && pathname !== '/delete_data_instructions') {
     // If the cluster still has data pre 8.9.1 version, redirect to deleting instructions
     router.push('/delete_data_instructions', {
       path: {},
@@ -178,13 +163,31 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     return null;
   }
 
-  if (status === AsyncStatus.Settled && data?.has_setup === true && data?.has_data === false) {
+  if (
+    status === AsyncStatus.Settled &&
+    data?.has_setup === true &&
+    data?.has_data === false &&
+    data?.pre_8_9_1_data === false &&
+    pathname !== '/add-data-instructions'
+  ) {
     // when there's no data redirect the user to the add data instructions page
     router.push('/add-data-instructions', {
       path: {},
       query: { selectedTab: AddDataTabs.Kubernetes },
     });
     return null;
+  }
+
+  const displayUi =
+    // Display UI if there's data or if the user is opening one of the setup/disabled pages.
+    // does not use profiling router because that breaks as at this point the route might not have all required params
+    (data?.has_data === true && data?.pre_8_9_1_data === false) ||
+    pathname === '/add-data-instructions' ||
+    pathname === '/delete_data_instructions' ||
+    pathname === '/profiling-not-enabled';
+
+  if (displayUi) {
+    return children;
   }
 
   throw new Error('Invalid state');

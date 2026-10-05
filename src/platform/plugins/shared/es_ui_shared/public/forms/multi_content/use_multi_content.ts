@@ -159,14 +159,17 @@ export function useMultiContent<T extends object>({
     }
 
     const updatedValidation = {} as { [key in keyof T]?: boolean | undefined };
+    let areActiveContentsValid = true;
 
     for (const [id, _content] of Object.entries(contents.current)) {
       const isValid = await (_content as Content).validate();
       (_content as Content).validate = async () => isValid;
       updatedValidation[id as keyof T] = isValid;
+      areActiveContentsValid = areActiveContentsValid && Boolean(isValid);
     }
 
-    return Boolean(updateContentValidity(updatedValidation));
+    updateContentValidity(updatedValidation);
+    return areActiveContentsValid;
   }, [validation.isValid, updateContentValidity]);
 
   /**

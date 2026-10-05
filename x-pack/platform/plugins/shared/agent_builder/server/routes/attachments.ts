@@ -99,6 +99,7 @@ export function registerAttachmentRoutes({
           attachmentsService,
           coreStart,
           spaces: startDeps.spaces,
+          source: 'http_api',
         });
 
         const result = await client.list({ conversationId, includeDeleted });
@@ -155,6 +156,7 @@ export function registerAttachmentRoutes({
           attachmentsService,
           coreStart,
           spaces: startDeps.spaces,
+          source: 'http_api',
         });
 
         try {
@@ -317,6 +319,13 @@ export function registerAttachmentRoutes({
                   meta: { description: 'Whether the attachment should be hidden from the user.' },
                 })
               ),
+              render_inline: schema.boolean({
+                defaultValue: false,
+                meta: {
+                  description:
+                    'When true, the attachment is rendered inline in the UI when the conversation is opened, without the agent referencing it.',
+                },
+              }),
             }),
           },
         },
@@ -336,6 +345,7 @@ export function registerAttachmentRoutes({
           attachmentsService,
           coreStart,
           spaces: startDeps.spaces,
+          source: 'http_api',
         });
 
         try {
@@ -396,6 +406,13 @@ export function registerAttachmentRoutes({
                   meta: { description: 'Optional new description for the attachment.' },
                 })
               ),
+              render_inline: schema.boolean({
+                defaultValue: false,
+                meta: {
+                  description:
+                    'When true, the attachment is rendered inline in the UI when the conversation is opened, without the agent referencing it.',
+                },
+              }),
             }),
           },
         },
@@ -415,6 +432,7 @@ export function registerAttachmentRoutes({
           attachmentsService,
           coreStart,
           spaces: startDeps.spaces,
+          source: 'http_api',
         });
 
         try {
@@ -501,6 +519,7 @@ export function registerAttachmentRoutes({
           attachmentsService,
           coreStart,
           spaces: startDeps.spaces,
+          source: 'http_api',
         });
 
         try {
@@ -595,10 +614,10 @@ export function registerAttachmentRoutes({
         const restored = stateManager.getAttachmentRecord(attachmentId)!;
 
         // Save the updated conversation
-        await client.update({
-          id: conversationId,
-          attachments: stateManager.getAll(),
-        });
+        await client.update(
+          { id: conversationId, attachments: stateManager.getAll() },
+          { access: 'converse' }
+        );
 
         return response.ok<RestoreAttachmentResponse>({
           body: {
@@ -685,10 +704,10 @@ export function registerAttachmentRoutes({
         const renamed = stateManager.getAttachmentRecord(attachmentId)!;
 
         // Save the updated conversation
-        await client.update({
-          id: conversationId,
-          attachments: stateManager.getAll(),
-        });
+        await client.update(
+          { id: conversationId, attachments: stateManager.getAll() },
+          { access: 'converse' }
+        );
 
         return response.ok<RenameAttachmentResponse>({
           body: {
@@ -799,10 +818,10 @@ export function registerAttachmentRoutes({
         const updated = stateManager.getAttachmentRecord(attachmentId)!;
 
         // Save the updated conversation
-        await client.update({
-          id: conversationId,
-          attachments: stateManager.getAll(),
-        });
+        await client.update(
+          { id: conversationId, attachments: stateManager.getAll() },
+          { access: 'converse' }
+        );
 
         return response.ok<UpdateOriginResponse>({
           body: {

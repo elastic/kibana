@@ -17,7 +17,6 @@ import type { RuleDomain, RuleParams } from '../../../application/rule/types';
 import {
   injectReferencesIntoActions,
   injectReferencesIntoArtifacts,
-  addMissingUiamKeyTagIfNeeded,
   API_KEY_ATTRIBUTES_TO_STRIP,
 } from '..';
 import { createNewAPIKeySet, extractReferences, updateMeta } from '../../lib';
@@ -55,6 +54,7 @@ export interface UpdateRuleInMemoryOpts<Params extends RuleParams> {
   skipped: BulkEditActionSkipResult[];
   errors: BulkOperationError[];
   username: string | null;
+  profileUid: string | null;
   updateAttributesFn: (
     opts: UpdateAttributesFnOpts<Params>
   ) => Promise<UpdateAttributesFnResult<Params>>;
@@ -74,6 +74,7 @@ export async function updateRuleInMemory<Params extends RuleParams>(
     skipped,
     errors,
     username,
+    profileUid,
     shouldInvalidateApiKeys,
     shouldIncrementRevision = () => true,
   }: UpdateRuleInMemoryOpts<Params>
@@ -191,7 +192,8 @@ export async function updateRuleInMemory<Params extends RuleParams>(
       apiKeysMap,
       ruleAttributes,
       hasUpdateApiKeyOperation,
-      username
+      username,
+      profileUid
     );
     apiKeyAttributes = preparedApiKeyAttributes;
   }
@@ -203,6 +205,7 @@ export async function updateRuleInMemory<Params extends RuleParams>(
     updatedParams,
     rawAlertActions: ruleAttributes.actions,
     username,
+    profileUid,
   });
 
   rules.push({ ...rule, references, attributes: updatedAttributes });
@@ -215,15 +218,18 @@ async function prepareApiKeys(
   apiKeysMap: ApiKeysMap,
   attributes: RawRule,
   hasUpdateApiKeyOperation: boolean,
-  username: string | null
+  username: string | null,
+  profileUid: string | null
 ): Promise<{ apiKeyAttributes: ApiKeyAttributes }> {
   const apiKeyAttributes = await createNewAPIKeySet(context, {
     id: ruleType.id,
     ruleName: attributes.name,
     username,
+    profileUid,
     shouldUpdateApiKey: attributes.enabled || hasUpdateApiKeyOperation,
     errorMessage: 'Error updating rule: could not create API key',
     apiKeyOwnership: { apiKeyCreatedByUser: rule.attributes.apiKeyCreatedByUser },
+    refresh: false,
   });
 
   // collect generated API keys
@@ -250,6 +256,7 @@ async function updateAttributes({
   updatedParams,
   rawAlertActions,
   username,
+  profileUid,
 }: {
   context: RulesClientContext;
   attributes: RawRule;
@@ -257,6 +264,7 @@ async function updateAttributes({
   updatedParams: RuleParams;
   rawAlertActions: RawRuleAction[];
   username: string | null;
+  profileUid: string | null;
 }): Promise<{
   updatedAttributes: RawRule;
 }> {
@@ -264,14 +272,6 @@ async function updateAttributes({
   const notifyWhen = getRuleNotifyWhenType(
     attributes.notifyWhen ?? null,
     attributes.throttle ?? null
-  );
-
-  const tagsWithUiamCheck = addMissingUiamKeyTagIfNeeded(
-    attributes.tags,
-    apiKeyAttributes?.uiamApiKey,
-    context.isServerless,
-    context.shouldGrantUiam,
-    context.apiKeyType
   );
 
   // TODO (http-versioning) Remove casts when updateMeta has been converted
@@ -282,11 +282,11 @@ async function updateAttributes({
           ...apiKeyAttributes,
         }
       : attributes),
-    tags: tagsWithUiamCheck,
     params: updatedParams,
     actions: rawAlertActions,
     notifyWhen,
     updatedBy: username,
+    updatedByProfileUid: profileUid,
     updatedAt: new Date().toISOString(),
   });
 
