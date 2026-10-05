@@ -64,17 +64,32 @@ apiTest.describe(
       expect([...stored.body.roles].sort()).toStrictEqual(['editor', 'viewer']);
     });
 
-    apiTest('rejects descriptions on Serverless', async ({ apiClient }) => {
-      const response = await apiClient.post('internal/security/service_account', {
+    apiTest('persists a trimmed description in UIAM', async ({ apiClient }) => {
+      const name = `scout-sa-${randomUUID()}`;
+      const created = await apiClient.post('internal/security/service_account', {
         headers,
-        body: { name: `scout-sa-${randomUUID()}`, roles: ['viewer'], description: 'unsupported' },
+        body: { name, roles: ['viewer'], description: '  Relays the nightshift alerts. ' },
         responseType: 'json',
       });
-      accountId = response.body.id;
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.message).toBe(
-        'Service account descriptions are not supported on Serverless.'
+      accountId = created.body.id;
+      expect(created).toHaveStatusCode(200);
+      expect(created.body).toStrictEqual({
+        id: accountId,
+        name,
+        roles: ['viewer'],
+        description: 'Relays the nightshift alerts.',
+      });
+
+      const stored = await apiClient.get(
+        `internal/security/service_account/${encodeURIComponent(created.body.id)}`,
+        { headers, responseType: 'json' }
       );
+      expect(stored).toHaveStatusCode(200);
+      expect(stored.body).toMatchObject({
+        id: accountId,
+        name,
+        description: 'Relays the nightshift alerts.',
+      });
     });
   }
 );

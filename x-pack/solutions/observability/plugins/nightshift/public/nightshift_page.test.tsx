@@ -36,7 +36,7 @@ const getUrlForApp = jest.fn((appId: string, { path }: { path: string }) => {
 });
 const navigateToUrl = jest.fn();
 const navigateToApp = jest.fn();
-const featureFlags = { getBooleanValue: jest.fn() };
+const featureFlags = { useBooleanValue: jest.fn() };
 
 function renderPage() {
   return render(
@@ -52,7 +52,7 @@ describe('NightshiftPage', () => {
   beforeEach(() => {
     navigateToApp.mockClear();
     navigateToUrl.mockClear();
-    featureFlags.getBooleanValue.mockReturnValue(true);
+    featureFlags.useBooleanValue.mockReturnValue(true);
     mockUseSignificantEventsAvailability.mockReturnValue({ isAvailable: true, isLoading: false });
     mockUseKibana.mockReturnValue({
       services: {
@@ -63,6 +63,7 @@ describe('NightshiftPage', () => {
           capabilities: {
             nightshift: {
               [NIGHTSHIFT_UI_PRIVILEGES.show]: true,
+              [NIGHTSHIFT_UI_PRIVILEGES.manage]: true,
               [NIGHTSHIFT_UI_PRIVILEGES.configure]: true,
             },
           },
@@ -114,7 +115,7 @@ describe('NightshiftPage', () => {
     expect(navigateToUrl).toHaveBeenCalledWith('/app/significant_events/streams');
   });
 
-  it('hides the settings link without the Nightshift configure privilege', async () => {
+  it('hides the settings link without both Nightshift manage and configure', async () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: {
@@ -122,7 +123,10 @@ describe('NightshiftPage', () => {
           navigateToUrl,
           navigateToApp,
           capabilities: {
-            nightshift: { [NIGHTSHIFT_UI_PRIVILEGES.show]: true },
+            nightshift: {
+              [NIGHTSHIFT_UI_PRIVILEGES.show]: true,
+              [NIGHTSHIFT_UI_PRIVILEGES.configure]: true,
+            },
           },
         },
         featureFlags,
@@ -209,7 +213,7 @@ describe('NightshiftPage', () => {
     });
 
     it('hides the sandbox secrets link when Nightshift is not enabled', async () => {
-      featureFlags.getBooleanValue.mockReturnValue(false);
+      featureFlags.useBooleanValue.mockReturnValue(false);
       withServices({ nightshiftInvestigations: { investigationsClient: { fetch: jest.fn() } } });
       renderPage();
       await openAppMenuOverflow();

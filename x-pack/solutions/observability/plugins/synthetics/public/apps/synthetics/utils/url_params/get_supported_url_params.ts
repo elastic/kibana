@@ -65,7 +65,7 @@ const { DATE_RANGE_START, DATE_RANGE_END } = CLIENT_DEFAULTS_SYNTHETICS;
  * require further development.
  */
 export const getSupportedUrlParams = (params: {
-  [key: string]: string | string[] | undefined | null;
+  [key: string]: string | Array<string | null> | undefined | null;
 }): SyntheticsUrlParams => {
   const filteredParams: { [key: string]: string | undefined } = {};
   Object.keys(params).forEach((key) => {
