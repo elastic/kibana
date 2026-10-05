@@ -149,8 +149,14 @@ export const usePaginatedFlyout = ({
 
   const openPaginatedFlyout = useCallback(
     (documentIndex: number, explicitStateUpdate?: Partial<ScopedPaginationSlice>): void => {
-      const stateUpdate =
-        explicitStateUpdate ?? resolveDocumentRef.current?.(documentIndex) ?? null;
+      const resolved = explicitStateUpdate ?? resolveDocumentRef.current?.(documentIndex) ?? null;
+      if (resolved === false) {
+        // The resolver determined this index isn't a document at all and handled the
+        // navigation itself (e.g. routed to a different flyout) — leave the paginated
+        // document flyout's state and overlay untouched rather than opening one over it.
+        return;
+      }
+      const stateUpdate = resolved;
 
       storeRef.current.setState({
         flyoutDocumentIndex: documentIndex,

@@ -112,8 +112,15 @@ export interface UsePaginatedFlyoutOptions {
    * `flyoutDocumentIndex`
    * (showing a loading state) and the source's cross-page resolution effect
    * should call `openPaginatedFlyout` again once the fetch completes.
+   *
+   * Returns `false` when the index at that position isn't a document at all
+   * (e.g. it routes to a different flyout) and the resolver has already
+   * handled the navigation itself: the hook leaves the paginated document
+   * flyout's state and overlay untouched rather than opening one over it.
    */
-  readonly resolveDocument?: (documentIndex: number) => Partial<ScopedPaginationSlice> | null;
+  readonly resolveDocument?: (
+    documentIndex: number
+  ) => Partial<ScopedPaginationSlice> | null | false;
   /**
    * Factory that creates the flyout body element. The store is provided to the
    * body via `PaginationStoreProvider` by the hook before opening the flyout.

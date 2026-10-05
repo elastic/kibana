@@ -301,6 +301,41 @@ describe('unified data table', () => {
   );
 
   it(
+    'routes to the attack flyout instead of reopening a document flyout when pagination lands on an attack row',
+    async () => {
+      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+
+      render(<TestComponent events={[mockTimelineData[0], mockAttackTimelineData[0]]} />);
+      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+      fireEvent.click(screen.getAllByTestId('docTableExpandToggleColumn')[0]);
+
+      await waitFor(() => {
+        expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
+      });
+
+      const flyoutBody = mockOpenSystemFlyout.mock.calls[0][0] as React.ReactElement;
+
+      act(() => {
+        flyoutBody.props.value.getSnapshot().openDocumentFlyoutImpl?.(1);
+      });
+
+      await waitFor(() => {
+        expect(flyoutApi.openAttackFlyout).toHaveBeenCalledWith(
+          expect.objectContaining({
+            attackId: 'attack-1',
+            indexName: 'attack-index',
+          })
+        );
+      });
+
+      // The document flyout must not reopen over the attack flyout.
+      expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
+    },
+    SPECIAL_TEST_TIMEOUT
+  );
+
+  it(
     'opens the new document flyout with a cell-action renderer bound to the timeline scope',
     async () => {
       jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);

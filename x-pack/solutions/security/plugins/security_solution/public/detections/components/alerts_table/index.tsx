@@ -368,14 +368,20 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
   const resolveDocument = useCallback(
     (alertIndex: number) => {
       if (reduxItemsPerPage <= 0 || !tableContext) return null;
+      // `tableContext.pageIndex` is what `tableContext.alerts` actually belongs to.
+      // `tablePageIndex` can update (via `onPageIndexChange`) a render ahead of
+      // `onUpdate` replacing `tableContext`, so resolving against `tablePageIndex`
+      // while reading `tableContext.alerts` can pair the new page's offset with
+      // the previous page's rows. Gating on `tableContext.pageIndex` instead
+      // means we return null (stay loading) until the context actually catches up.
       const targetPageIndex = Math.floor(alertIndex / reduxItemsPerPage);
-      const isInPage = targetPageIndex === tablePageIndex;
-      const offset = alertIndex - tablePageIndex * reduxItemsPerPage;
+      const isInPage = targetPageIndex === tableContext.pageIndex;
+      const offset = alertIndex - tableContext.pageIndex * reduxItemsPerPage;
       const alert = isInPage ? (tableContext.alerts?.[offset] as Alert | undefined) : undefined;
       if (!alert) return null;
       return getDocumentIdentity(alert);
     },
-    [reduxItemsPerPage, tableContext, tablePageIndex]
+    [reduxItemsPerPage, tableContext]
   );
 
   const { openDocumentFlyout, slice, setState, openPaginatedFlyout } = usePaginatedFlyout({
@@ -385,7 +391,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     origin: FLYOUT_ORIGIN.ALERTS_TABLE,
   });
 
-  const { flyoutDocumentIndex, pageSize, isFlyoutDocumentLoading } = slice;
+  const { flyoutDocumentIndex, pageSize, isFlyoutDocumentLoading, hasFlyoutQueryError } = slice;
 
   const onUpdate: GetSecurityAlertsTableProp<'onUpdate'> = useCallback(
     (context) => {
@@ -496,8 +502,14 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
       // cross-page effect below before the table ever moved here). Leave it be —
       // re-resolving on every table refetch would repoint the flyout whenever the
       // result set shifts underneath it (e.g. closing an alert removes it from a
-      // table filtered on open alerts).
-      if (!isFlyoutDocumentLoading) return;
+      // table filtered on open alerts). A cross-page error only ever applies to a
+      // page other than this one, so a lingering `hasFlyoutQueryError` from a
+      // previous document must be cleared once pagination lands back on the
+      // table's own page, or the callout outlives the error that caused it.
+      if (!isFlyoutDocumentLoading) {
+        if (hasFlyoutQueryError) setState({ hasFlyoutQueryError: false });
+        return;
+      }
       // A cross-page fetch was in flight and the table caught up to the flyout's
       // target page before it resolved (the user also moved the table's own
       // pagination there). Resolve from the table's own data instead of clearing
@@ -523,6 +535,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     flyoutPageIndex,
     isFetchingFlyoutAlerts,
     isFlyoutDocumentLoading,
+    hasFlyoutQueryError,
     isFlyoutQueryError,
     reduxItemsPerPage,
     resolveDocument,

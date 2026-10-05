@@ -220,7 +220,8 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     //
     // Attack-discovery rows are routed to the attack flyout instead, mirroring the direct-click
     // branch in `handleOnEventDetailPanelOpened` below: they have no document identity this
-    // pagination flow can resolve, so the paginated document flyout is closed first.
+    // pagination flow can resolve, so the paginated document flyout is closed first and `false`
+    // is returned so `openPaginatedFlyout` does not reopen a document flyout over it.
     const resolveDocument = useCallback(
       (documentIndex: number) => {
         const targetRow = tableRows[documentIndex];
@@ -237,7 +238,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             origin: FLYOUT_ORIGIN.TIMELINE,
             attackTitle: getAttackTitleValue(targetRow),
           });
-          return null;
+          return false;
         }
 
         return {

@@ -206,6 +206,19 @@ describe('usePaginatedFlyout', () => {
     expect(result.current.slice.flyoutDocumentIndex).toBe(5);
   });
 
+  it('openPaginatedFlyout does nothing when resolveDocument returns false', () => {
+    const resolveDocument = jest.fn().mockReturnValue(false);
+    const { result } = renderHook(() => usePaginatedFlyout(makeOptions({ resolveDocument })));
+
+    act(() => {
+      result.current.openPaginatedFlyout(5);
+    });
+
+    expect(resolveDocument).toHaveBeenCalledWith(5);
+    expect(result.current.slice.flyoutDocumentIndex).toBeNull();
+    expect(openFlyout).not.toHaveBeenCalled();
+  });
+
   describe('system flyout lifecycle', () => {
     it('opens one instrumented V2 flyout on repeated pagination requests', () => {
       const { result } = renderHook(() => usePaginatedFlyout(makeOptions()));
