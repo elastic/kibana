@@ -1711,7 +1711,7 @@ describe('WorkersService', () => {
         attachment.notAttached.add('new-2');
 
         const result = await service.attachRulesToAlertTriageWorker(
-          { target: 'ids', ruleIds: ['new-1', 'new-2'] },
+          { ruleIds: ['new-1', 'new-2'] },
           SPACE,
           request
         );
@@ -1737,37 +1737,12 @@ describe('WorkersService', () => {
         attachment.notAttached.add('new');
 
         const result = await service.attachRulesToAlertTriageWorker(
-          { target: 'ids', ruleIds: ['old', 'new'] },
+          { ruleIds: ['old', 'new'] },
           SPACE,
           request
         );
 
         expect(result).toEqual({ outcome: 'attached', matched: 2, updated: 1 });
-      });
-
-      it('attaches every unattached rule for the all_unattached target and reports skips', async () => {
-        const harness = createPersistentHarness();
-        const attachment = makeAttachmentService({
-          notAttachedIds: [],
-          pageSize: 2,
-          skippedRuleCount: 3,
-        });
-        const { service } = await enableWorker(harness, attachment);
-        ['a', 'b', 'c', 'd', 'e'].forEach((id) => attachment.notAttached.add(id));
-
-        const result = await service.attachRulesToAlertTriageWorker(
-          { target: 'all_unattached' },
-          SPACE,
-          request
-        );
-
-        expect(result).toEqual({
-          outcome: 'attached',
-          matched: 5,
-          updated: 5,
-          skippedRuleCount: 3,
-        });
-        expect(attachment.notAttached.size).toBe(0);
       });
 
       describe('a disable that lands while the attach is in flight', () => {
@@ -1799,7 +1774,7 @@ describe('WorkersService', () => {
           disableAfterFirstStatusRead(harness);
 
           const result = await service.attachRulesToAlertTriageWorker(
-            { target: 'ids', ruleIds: ['new-1', 'new-2'] },
+            { ruleIds: ['new-1', 'new-2'] },
             SPACE,
             request
           );
@@ -1813,24 +1788,6 @@ describe('WorkersService', () => {
           expect(attachment.attached.size).toBe(0);
         });
 
-        it('detaches every chunk an all_unattached attach added', async () => {
-          const harness = createPersistentHarness();
-          const attachment = makeAttachmentService({ notAttachedIds: [], pageSize: 2 });
-          const { service } = await enableWorker(harness, attachment);
-          ['a', 'b', 'c'].forEach((id) => attachment.notAttached.add(id));
-          disableAfterFirstStatusRead(harness);
-
-          const result = await service.attachRulesToAlertTriageWorker(
-            { target: 'all_unattached' },
-            SPACE,
-            request
-          );
-
-          expect(result).toEqual({ outcome: 'worker_disabled' });
-          expect(attachment.attached.size).toBe(0);
-          expect(attachment.notAttached.size).toBe(3);
-        });
-
         it('leaves the rules attached when the Worker is still enabled afterwards', async () => {
           const harness = createPersistentHarness();
           const attachment = makeAttachmentService({ notAttachedIds: [] });
@@ -1838,7 +1795,7 @@ describe('WorkersService', () => {
           attachment.notAttached.add('new');
 
           const result = await service.attachRulesToAlertTriageWorker(
-            { target: 'ids', ruleIds: ['new'] },
+            { ruleIds: ['new'] },
             SPACE,
             request
           );
@@ -1859,11 +1816,7 @@ describe('WorkersService', () => {
             .mockRejectedValueOnce(new Error('detach failed'));
 
           await expect(
-            service.attachRulesToAlertTriageWorker(
-              { target: 'ids', ruleIds: ['new'] },
-              SPACE,
-              request
-            )
+            service.attachRulesToAlertTriageWorker({ ruleIds: ['new'] }, SPACE, request)
           ).rejects.toThrow('detach failed');
         });
       });
@@ -1878,7 +1831,7 @@ describe('WorkersService', () => {
         attachment.notAttached.add('new');
 
         const result = await made.service.attachRulesToAlertTriageWorker(
-          { target: 'ids', ruleIds: ['new'] },
+          { ruleIds: ['new'] },
           SPACE,
           request
         );
@@ -1893,7 +1846,7 @@ describe('WorkersService', () => {
         const { service } = makeService(harness, attachment);
 
         const result = await service.attachRulesToAlertTriageWorker(
-          { target: 'ids', ruleIds: ['new'] },
+          { ruleIds: ['new'] },
           SPACE,
           request
         );
@@ -1909,7 +1862,7 @@ describe('WorkersService', () => {
         attachment.notAttached.add('new');
 
         const result = await service.attachRulesToAlertTriageWorker(
-          { target: 'ids', ruleIds: ['new'] },
+          { ruleIds: ['new'] },
           'space-b',
           request
         );
@@ -1930,7 +1883,7 @@ describe('WorkersService', () => {
         });
 
         const result = await service.attachRulesToAlertTriageWorker(
-          { target: 'ids', ruleIds: ['new'] },
+          { ruleIds: ['new'] },
           SPACE,
           request
         );
@@ -1946,7 +1899,7 @@ describe('WorkersService', () => {
         const { service } = makeService(harness, null);
 
         const result = await service.attachRulesToAlertTriageWorker(
-          { target: 'ids', ruleIds: ['new'] },
+          { ruleIds: ['new'] },
           SPACE,
           request
         );
@@ -1963,7 +1916,7 @@ describe('WorkersService', () => {
         );
 
         await expect(
-          service.attachRulesToAlertTriageWorker({ target: 'all_unattached' }, SPACE, request)
+          service.attachRulesToAlertTriageWorker({ ruleIds: ['new'] }, SPACE, request)
         ).resolves.toEqual({ outcome: 'worker_unavailable' });
       });
 
@@ -1977,11 +1930,7 @@ describe('WorkersService', () => {
         );
 
         await expect(
-          service.attachRulesToAlertTriageWorker(
-            { target: 'ids', ruleIds: ['new'] },
-            SPACE,
-            request
-          )
+          service.attachRulesToAlertTriageWorker({ ruleIds: ['new'] }, SPACE, request)
         ).rejects.toThrow('status unavailable');
       });
 
@@ -1992,11 +1941,7 @@ describe('WorkersService', () => {
         attachment.updateRuleAttachments.mockRejectedValueOnce(new Error('bulk edit failed'));
 
         await expect(
-          service.attachRulesToAlertTriageWorker(
-            { target: 'ids', ruleIds: ['new'] },
-            SPACE,
-            request
-          )
+          service.attachRulesToAlertTriageWorker({ ruleIds: ['new'] }, SPACE, request)
         ).rejects.toThrow('bulk edit failed');
       });
     });

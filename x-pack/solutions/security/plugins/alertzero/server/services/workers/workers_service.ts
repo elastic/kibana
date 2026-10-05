@@ -522,43 +522,26 @@ export class WorkersService {
       return { outcome: 'worker_unavailable' };
     }
 
-    // What this call attached, in the chunks it attached them in, so a late disable can undo it.
-    const touchedRuleIdChunks: string[][] = [];
-    let result: { matched: number; updated: number; skippedRuleCount?: number };
-    if (body.target === 'ids') {
-      touchedRuleIdChunks.push(body.ruleIds);
-      // The ids come from an event that fired earlier, so a rule deleted since then must not stop
-      // the others being attached.
-      const { matched, updated } = await attachmentService.updateRuleAttachments({
-        attachRuleIds: body.ruleIds,
-        detachRuleIds: [],
-        ignoreMissingRules: true,
-      });
-      result = { matched, updated };
-    } else {
-      let attached = 0;
-      const { skippedRuleCount } = await attachAlertTriageWorkerToAllRules(
-        attachmentService,
-        (ruleIds) => {
-          touchedRuleIdChunks.push(ruleIds);
-          attached += ruleIds.length;
-        }
-      );
-      result = { matched: attached, updated: attached, skippedRuleCount };
-    }
+    // The ids come from an event that fired earlier, so a rule deleted since then must not stop
+    // the others being attached.
+    const { matched, updated } = await attachmentService.updateRuleAttachments({
+      attachRuleIds: body.ruleIds,
+      detachRuleIds: [],
+      ignoreMissingRules: true,
+    });
 
     const statusAfter = await managedWorkflows.getWorkflowStatus(registration.id, {
       spaceId,
       workflowIdSuffix: spaceId,
     });
     if (!statusAfter.installed || !statusAfter.enabled) {
-      await detachRuleIdChunks(attachmentService, touchedRuleIdChunks, {
+      await detachRuleIdChunks(attachmentService, [body.ruleIds], {
         ignoreMissingRules: true,
       });
       return { outcome: 'worker_disabled' };
     }
 
-    return { outcome: 'attached', ...result };
+    return { outcome: 'attached', matched, updated };
   }
 
   /**

@@ -40,7 +40,7 @@ describe('POST attach rules to the Alert Triage Worker', () => {
 
   it("hands the body, the request's space and the request to the service and returns its outcome", async () => {
     const { handler, attachRulesToAlertTriageWorker } = setup();
-    const body = { target: 'ids' as const, ruleIds: ['r1', 'r2'] };
+    const body = { ruleIds: ['r1', 'r2'] };
     attachRulesToAlertTriageWorker.mockResolvedValue({
       outcome: 'attached',
       matched: 2,
@@ -66,7 +66,7 @@ describe('POST attach rules to the Alert Triage Worker', () => {
 
       await handler(
         createRouteContextMock(),
-        httpServerMock.createKibanaRequest({ body: { target: 'all_unattached' } }),
+        httpServerMock.createKibanaRequest({ body: { ruleIds: ['r1'] } }),
         response
       );
 
@@ -93,7 +93,7 @@ describe('POST attach rules to the Alert Triage Worker', () => {
 
       await handler(
         createRouteContextMock(context),
-        httpServerMock.createKibanaRequest({ body: { target: 'ids', ruleIds: ['r1'] } }),
+        httpServerMock.createKibanaRequest({ body: { ruleIds: ['r1'] } }),
         response
       );
 
@@ -111,7 +111,7 @@ describe('POST attach rules to the Alert Triage Worker', () => {
           subscription: 'available',
           hasRequiredDependencies: true,
         }),
-        httpServerMock.createKibanaRequest({ body: { target: 'ids', ruleIds: ['r1'] } }),
+        httpServerMock.createKibanaRequest({ body: { ruleIds: ['r1'] } }),
         httpServerMock.createResponseFactory()
       );
 
@@ -127,7 +127,7 @@ describe('POST attach rules to the Alert Triage Worker', () => {
 
     await handler(
       createRouteContextMock(),
-      httpServerMock.createKibanaRequest({ body: { target: 'all_unattached' } }),
+      httpServerMock.createKibanaRequest({ body: { ruleIds: ['r1'] } }),
       response
     );
 
@@ -140,26 +140,21 @@ describe('POST attach rules to the Alert Triage Worker', () => {
   describe('request validation', () => {
     const isValid = (body: unknown) => AttachAlertTriageRulesRequestBody.safeParse(body).success;
 
-    it('accepts both targets', () => {
-      expect(isValid({ target: 'ids', ruleIds: ['r1'] })).toBe(true);
-      expect(isValid({ target: 'all_unattached' })).toBe(true);
+    it('accepts a list of rule ids', () => {
+      expect(isValid({ ruleIds: ['r1'] })).toBe(true);
     });
 
     it('accepts up to 2,000 ids and rejects more, so a bigger event chunk fails loudly', () => {
       const ids = (n: number) => Array.from({ length: n }, (_, i) => `r${i}`);
-      expect(isValid({ target: 'ids', ruleIds: ids(2000) })).toBe(true);
-      expect(isValid({ target: 'ids', ruleIds: ids(2001) })).toBe(false);
+      expect(isValid({ ruleIds: ids(2000) })).toBe(true);
+      expect(isValid({ ruleIds: ids(2001) })).toBe(false);
     });
 
     it.each([
-      { name: 'an empty id list', body: { target: 'ids', ruleIds: [] } },
-      { name: 'ids without a target', body: { ruleIds: ['r1'] } },
-      { name: 'an unknown target', body: { target: 'everything' } },
-      {
-        name: 'ids on the all_unattached target',
-        body: { target: 'all_unattached', ruleIds: ['r1'] },
-      },
-      { name: 'a 513-character id', body: { target: 'ids', ruleIds: ['x'.repeat(513)] } },
+      { name: 'an empty id list', body: { ruleIds: [] } },
+      { name: 'no ids', body: {} },
+      { name: 'an unknown field', body: { ruleIds: ['r1'], target: 'ids' } },
+      { name: 'a 513-character id', body: { ruleIds: ['x'.repeat(513)] } },
     ])('rejects $name', ({ body }) => {
       expect(isValid(body)).toBe(false);
     });

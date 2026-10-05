@@ -105,7 +105,7 @@ describe('AlertZero route gate coverage', () => {
           const response = httpServerMock.createResponseFactory();
           await handler(
             createRouteContextMock(context),
-            httpServerMock.createKibanaRequest({ body: { target: 'all_unattached' } }),
+            httpServerMock.createKibanaRequest({ body: { ruleIds: ['r1'] } }),
             response
           );
           expect(response.ok).toHaveBeenCalledWith({ body: { outcome: 'worker_unavailable' } });

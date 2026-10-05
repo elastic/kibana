@@ -17,31 +17,18 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 export const AttachAlertTriageRulesRequestBody = lazySchema(() =>
-  z.discriminatedUnion('target', [
-    z
-      .object({
-        target: z.literal('ids'),
-        /**
-         * Saved object ids of the rules to attach.
-         */
-        ruleIds: z
-          .array(z.string().min(1).max(512))
-          .min(1)
-          .max(2000)
-          .describe('Saved object ids of the rules to attach.'),
-      })
-      .strict(),
-    z
-      .object({
-        /**
-         * Attach every rule that does not carry the action yet.
-         */
-        target: z
-          .literal('all_unattached')
-          .describe('Attach every rule that does not carry the action yet.'),
-      })
-      .strict(),
-  ])
+  z
+    .object({
+      /**
+       * Saved object ids of the rules to attach.
+       */
+      ruleIds: z
+        .array(z.string().min(1).max(512))
+        .min(1)
+        .max(2000)
+        .describe('Saved object ids of the rules to attach.'),
+    })
+    .strict()
 );
 export type AttachAlertTriageRulesRequestBody = z.infer<typeof AttachAlertTriageRulesRequestBody>;
 export type AttachAlertTriageRulesRequestBodyInput = z.input<
@@ -63,30 +50,19 @@ export const AttachAlertTriageRulesResponse = lazySchema(() =>
     z.object({
       outcome: z.literal('attached'),
       /**
-       * Rules found: for the ids target, the requested ids that still match a rule (ids of rules deleted since the request was made are ignored), or the unattached rules found for the all_unattached target.
+       * The requested ids that still match a rule (ids of rules deleted since the request was made are ignored).
        */
       matched: z
         .number()
         .int()
         .min(0)
         .describe(
-          'Rules found: for the ids target, the requested ids that still match a rule (ids of rules deleted since the request was made are ignored), or the unattached rules found for the all_unattached target.'
+          'The requested ids that still match a rule (ids of rules deleted since the request was made are ignored).'
         ),
       /**
        * Rules that did not carry the action and now do.
        */
       updated: z.number().int().min(0).describe('Rules that did not carry the action and now do.'),
-      /**
-       * Rules the caller cannot edit (machine learning rules without ML access), left untouched. Only reported for the all_unattached target.
-       */
-      skippedRuleCount: z
-        .number()
-        .int()
-        .min(0)
-        .optional()
-        .describe(
-          'Rules the caller cannot edit (machine learning rules without ML access), left untouched. Only reported for the all_unattached target.'
-        ),
     }),
   ])
 );

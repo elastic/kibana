@@ -23,38 +23,20 @@ paths:
         content:
           application/json:
             schema:
-              oneOf:
-                - type: object
-                  additionalProperties: false
-                  required:
-                    - target
-                    - ruleIds
-                  properties:
-                    target:
-                      type: string
-                      enum:
-                        - ids
-                    ruleIds:
-                      type: array
-                      minItems: 1
-                      maxItems: 2000
-                      description: Saved object ids of the rules to attach.
-                      items:
-                        type: string
-                        minLength: 1
-                        maxLength: 512
-                - type: object
-                  additionalProperties: false
-                  required:
-                    - target
-                  properties:
-                    target:
-                      type: string
-                      enum:
-                        - all_unattached
-                      description: Attach every rule that does not carry the action yet.
-              discriminator:
-                propertyName: target
+              type: object
+              additionalProperties: false
+              required:
+                - ruleIds
+              properties:
+                ruleIds:
+                  type: array
+                  minItems: 1
+                  maxItems: 2000
+                  description: Saved object ids of the rules to attach.
+                  items:
+                    type: string
+                    minLength: 1
+                    maxLength: 512
       responses:
         '200':
           description: Successful response
@@ -88,16 +70,9 @@ paths:
                         type: integer
                         minimum: 0
                         description: >-
-                          Rules found: for the ids target, the requested ids that still match a rule
-                          (ids of rules deleted since the request was made are ignored), or the
-                          unattached rules found for the all_unattached target.
+                          The requested ids that still match a rule (ids of rules deleted since the
+                          request was made are ignored).
                       updated:
                         type: integer
                         minimum: 0
                         description: Rules that did not carry the action and now do.
-                      skippedRuleCount:
-                        type: integer
-                        minimum: 0
-                        description: >-
-                          Rules the caller cannot edit (machine learning rules without ML access),
-                          left untouched. Only reported for the all_unattached target.
