@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import ivm from 'isolated-vm';
+import type ivm from 'isolated-vm';
 import { createCatastrophicError } from './create_catastrophic_error';
 import type { ScriptLogger } from './script_logger';
 
 export const createIsolateWithCatastrophicHandler = ({
+  ivmModule,
   memoryLimitMb,
   logger,
 }: {
+  ivmModule: typeof ivm;
   memoryLimitMb: number;
   logger: ScriptLogger;
 }): {
@@ -26,7 +28,7 @@ export const createIsolateWithCatastrophicHandler = ({
     rejectCatastrophic = reject;
   });
 
-  const isolate = new ivm.Isolate({
+  const isolate = new ivmModule.Isolate({
     memoryLimit: memoryLimitMb,
     onCatastrophicError: (message: string) => {
       const error = createCatastrophicError(message);

@@ -24,27 +24,27 @@ import type ivm from 'isolated-vm';
 //      cannot defeat the sanitizer.
 //   3. Return-value sanitization: strips own keys named __proto__, constructor, or
 //      prototype from any returned object so a downstream deep-merge or path-assign
-//      cannot pollute Object.prototype on the host. Non-plain objects (class
-//      instances) are also scanned and rebuilt as plain objects when they carry
-//      forbidden own keys, because V8's structured-clone strips the prototype but
-//      preserves own data properties.
+//      cannot pollute Object.prototype on the host. Arrays and non-plain objects
+//      with own enumerable keys (class instances) are always rebuilt as fresh plain
+//      values, never mutated in place, so non-writable properties cannot keep
+//      unsanitized children. The stringified result is parsed and sanitized a second
+//      time, so values produced by script-defined toJSON methods are covered too.
 // Cycle detection: tracks the ancestor chain of the current DFS path (not all
 // visited nodes) and throws early when an object appears in its own ancestry.
 // V8's value serializer (used by the copy-out) cannot handle circular references
 // at all; throwing here gives a clear error instead of a cryptic serializer
 // failure. Diamond-shaped graphs (the same object reachable via two paths but
 // forming no cycle) are allowed.
-// Non-plain built-ins (Date, Map, etc.) pass through unchanged when they carry no
-// forbidden own keys; the copy-out preserves their type. A returned Promise still
-// fails the copy-out (async scripts remain unsupported).
+// Non-plain built-ins (Date, Map, etc.) with no own enumerable keys pass through
+// unchanged. A returned Promise is rejected explicitly (async scripts remain unsupported).
 const USER_SCRIPT_RUNNER = `
   const _setHas = Set.prototype.has;
   const _weakSetHas = WeakSet.prototype.has;
   const _weakSetAdd = WeakSet.prototype.add;
   const _weakSetDelete = WeakSet.prototype.delete;
   const _isArray = Array.isArray;
-  const _arrayMap = Array.prototype.map;
-  const _arraySome = Array.prototype.some;
+  const _stringify = JSON.stringify;
+  const _parse = JSON.parse;
   const _objectKeys = Object.keys;
   const _getProto = Object.getPrototypeOf;
   const _objectProto = Object.prototype;
@@ -69,15 +69,15 @@ const USER_SCRIPT_RUNNER = `
     if (_weakSetHas.call(ancestors, value)) throw new Error('Script returned a value containing a circular reference');
     _weakSetAdd.call(ancestors, value);
     if (_isArray(value)) {
-      const result = _arrayMap.call(value, (v) => sanitize(v, ancestors));
+      const result = [];
+      for (let i = 0; i < value.length; i++) {
+        result[i] = sanitize(value[i], ancestors);
+      }
       _weakSetDelete.call(ancestors, value);
       return result;
     }
     const keys = _objectKeys(value);
-    if (!isPlainObject(value) && !_arraySome.call(keys, (k) => _setHas.call(FORBIDDEN_KEYS, k))) {
-      for (let i = 0; i < keys.length; i++) {
-        value[keys[i]] = sanitize(value[keys[i]], ancestors);
-      }
+    if (!isPlainObject(value) && keys.length === 0) {
       _weakSetDelete.call(ancestors, value);
       return value;
     }
@@ -97,7 +97,12 @@ const USER_SCRIPT_RUNNER = `
   }
   // Serialize inside the guest so the copy-out is a flat string bounded by memoryLimit.
   // JSON.stringify(undefined) returns undefined, not a string; ?? 'null' normalizes that.
-  return JSON.stringify(sanitize(functionResult, new WeakSet())) ?? 'null';
+  // JSON.stringify invokes script-defined toJSON methods after sanitize(), and their return
+  // values are unsanitized. So the first pass only produces plain JSON data; that data is
+  // parsed back (no functions or toJSON can survive) and sanitized a second time.
+  const firstPass = _stringify(sanitize(functionResult, new WeakSet()));
+  if (firstPass === undefined) return 'null';
+  return _stringify(sanitize(_parse(firstPass), new WeakSet())) ?? 'null';
 `;
 
 export const runUserScript = async (
