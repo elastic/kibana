@@ -262,3 +262,41 @@ describe('getSchemaAtPath: prototype-chain keys', () => {
     expectZodSchemaEqual(result.schema as z.ZodType, z.number());
   });
 });
+
+describe('getSchemaAtPath: Liquid built-in properties', () => {
+  const schema = z.object({
+    items: z.array(z.object({ name: z.string() })),
+    text: z.string(),
+    label: z.literal('hello'),
+    obj: z.object({ a: z.number() }),
+    withSize: z.object({ size: z.string() }),
+    count: z.number(),
+  });
+
+  it('resolves first and last on an array to its element', () => {
+    expectZodSchemaEqual(
+      getSchemaAtPath(schema, 'items.first.name').schema as z.ZodType,
+      z.string()
+    );
+    expectZodSchemaEqual(
+      getSchemaAtPath(schema, 'items.last.name').schema as z.ZodType,
+      z.string()
+    );
+  });
+
+  it('resolves size on an array, string, string literal or object to a number', () => {
+    for (const path of ['items.size', 'text.size', 'label.size', 'obj.size']) {
+      expectZodSchemaEqual(getSchemaAtPath(schema, path).schema as z.ZodType, z.number());
+    }
+  });
+
+  it('prefers an own size key over the built-in size', () => {
+    expectZodSchemaEqual(getSchemaAtPath(schema, 'withSize.size').schema as z.ZodType, z.string());
+  });
+
+  it('does not resolve built-in properties on types Liquid does not support them for', () => {
+    expect(getSchemaAtPath(schema, 'obj.first').schema).toBeNull();
+    expect(getSchemaAtPath(schema, 'text.first').schema).toBeNull();
+    expect(getSchemaAtPath(schema, 'count.size').schema).toBeNull();
+  });
+});

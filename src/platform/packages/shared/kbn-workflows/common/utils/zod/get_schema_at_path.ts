@@ -16,6 +16,17 @@ import { unwrapSchema } from './unwrap_schema';
  */
 export const LIQUID_DYNAMIC_KEY_SEGMENT = '__liquid_dynamic_key__';
 
+// Liquid built-in properties: `first`/`last` read an array element, and `size` falls back
+// to the length of an array or string, or the key count of an object, when no own key exists.
+const LIQUID_ARRAY_ELEMENT_PROPERTIES = new Set(['first', 'last']);
+const LIQUID_SIZE_PROPERTY = 'size';
+
+const isStringSchema = (schema: z.ZodType): boolean =>
+  schema instanceof z.ZodString ||
+  schema instanceof z.ZodEnum ||
+  (schema instanceof z.ZodLiteral &&
+    [...schema.values].every((value) => typeof value === 'string'));
+
 const unquoteBracketKey = (inner: string): string | null => {
   if (inner.length < 2) {
     return null;
@@ -92,6 +103,8 @@ export function getSchemaAtPath(
             !(catchall instanceof z.ZodAny)
           ) {
             current = catchall;
+          } else if (segment === LIQUID_SIZE_PROPERTY) {
+            current = z.number();
           } else {
             return partial
               ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
@@ -145,8 +158,10 @@ export function getSchemaAtPath(
         }
         current = branchResult.schema;
       } else if (current instanceof z.ZodArray) {
-        if (isDynamicKey) {
+        if (isDynamicKey || LIQUID_ARRAY_ELEMENT_PROPERTIES.has(segment)) {
           current = current.element as z.ZodType;
+        } else if (segment === LIQUID_SIZE_PROPERTY) {
+          current = z.number();
         } else if (!/^\d+$/.test(segment)) {
           return partial
             ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
@@ -189,6 +204,8 @@ export function getSchemaAtPath(
           // This is because we're validating schema paths, not runtime data
           current = current.element as z.ZodType;
         }
+      } else if (segment === LIQUID_SIZE_PROPERTY && isStringSchema(current)) {
+        current = z.number();
       } else if (current instanceof z.ZodAny) {
         // pass through any to preserve the description
         return { schema: current, scopedToPath: segments.slice(0, index).join('.') };

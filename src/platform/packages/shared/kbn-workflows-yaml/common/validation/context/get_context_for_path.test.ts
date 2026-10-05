@@ -512,6 +512,63 @@ describe('getContextSchemaForPath', () => {
     expect((context.shape as any).variables).toBeDefined();
     expect(Object.keys((context.shape as any).steps.shape)).toEqual([]);
   });
+
+  describe('data.set variables', () => {
+    const dataSetDefinition = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const }],
+      consts: { output: { data: { status: 'ok' } } },
+      steps: [
+        { name: 'log', type: 'console', with: { message: 'hi' } },
+        { name: 'fetch', type: 'http', with: { url: 'https://example.com', method: 'GET' } },
+        {
+          name: 'set_vars',
+          type: 'data.set',
+          with: {
+            from_const: '${{ consts.output.data }}',
+            from_step: '${{ steps.log.output }}',
+            from_untyped_step: '${{ steps.fetch.output.data }}',
+            from_unresolvable_path: '${{ steps.missing.output }}',
+            from_expression: '${{ consts.output.data | json }}',
+            rendered: '{{ consts.output.data }}',
+            literal: 42,
+          },
+        },
+        { name: 'use', type: 'console', with: { message: '{{ variables.from_const.status }}' } },
+      ],
+    } as unknown as WorkflowYaml;
+
+    const getVariablesSchemaAt = (variablePath: string) =>
+      getSchemaAtPath(
+        getContextSchemaForPath(
+          emptyRegistry,
+          dataSetDefinition,
+          WorkflowGraph.fromWorkflowDefinition(dataSetDefinition),
+          ['steps', 3, 'with', 'message']
+        ),
+        `variables.${variablePath}`
+      ).schema;
+
+    it('resolves the type of a ${{ }} reference from the context', () => {
+      expect(getVariablesSchemaAt('from_const')).toBeInstanceOf(z.ZodObject);
+      expect(getVariablesSchemaAt('from_const.status')).toBeInstanceOf(z.ZodLiteral);
+      expect(getVariablesSchemaAt('from_step')).toBeInstanceOf(z.ZodString);
+    });
+
+    it('falls back to unknown when a ${{ }} reference cannot be typed statically', () => {
+      expect(getVariablesSchemaAt('from_untyped_step')).toBeInstanceOf(z.ZodUnknown);
+      expect(getVariablesSchemaAt('from_untyped_step.foo')).toBeInstanceOf(z.ZodUnknown);
+      expect(getVariablesSchemaAt('from_unresolvable_path')).toBeInstanceOf(z.ZodUnknown);
+      expect(getVariablesSchemaAt('from_expression')).toBeInstanceOf(z.ZodUnknown);
+    });
+
+    it('keeps {{ }} templates as strings and literals as their own type', () => {
+      expect(getVariablesSchemaAt('rendered')).toBeInstanceOf(z.ZodString);
+      expect(getVariablesSchemaAt('literal')).toBeInstanceOf(z.ZodNumber);
+    });
+  });
 });
 
 describe('getContextSchemaForStep', () => {
