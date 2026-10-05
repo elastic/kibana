@@ -8,6 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { expect } from '@kbn/scout-oblt/api';
 import type { KibanaRole } from '@kbn/scout-oblt';
+import { syntheticsMonitorSavedObjectType } from '../../../../../common/types/saved_objects';
 import {
   apiTest,
   LOCAL_PUBLIC_LOCATION,
@@ -33,6 +34,9 @@ const UPTIME_ALL_IN_DEFAULT_SPACE_ROLE: KibanaRole = {
   },
   kibana: [{ base: [], feature: { uptime: ['all'] }, spaces: ['default'] }],
 };
+
+const filterByMonitorName = (name: string) =>
+  `${syntheticsMonitorSavedObjectType}.attributes.name.keyword: "${name}"`;
 
 apiTest.describe(
   'CreateMonitorBulkAPI',
@@ -114,7 +118,7 @@ apiTest.describe(
         const listed = await listMonitors(
           apiClient,
           editorHeaders,
-          `query=${encodeURIComponent(name)}`
+          `filter=${encodeURIComponent(filterByMonitorName(name))}`
         );
         expect((listed.body as { total: number }).total).toBe(0);
       }
@@ -167,7 +171,7 @@ apiTest.describe(
         const listed = await listMonitors(
           apiClient,
           editorHeaders,
-          `query=${encodeURIComponent(newName)}`
+          `filter=${encodeURIComponent(filterByMonitorName(newName))}`
         );
         expect((listed.body as { total: number }).total).toBe(0);
       }
@@ -201,7 +205,7 @@ apiTest.describe(
         const listed = await listMonitors(
           apiClient,
           editorHeaders,
-          `query=${encodeURIComponent(name)}`,
+          `filter=${encodeURIComponent(filterByMonitorName(name))}`,
           { spaceId }
         );
         expect((listed.body as { total: number }).total).toBe(0);
