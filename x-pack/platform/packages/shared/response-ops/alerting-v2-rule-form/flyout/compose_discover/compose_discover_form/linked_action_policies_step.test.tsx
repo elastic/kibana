@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { LinkedActionPoliciesStep } from './linked_action_policies_step';
@@ -19,8 +20,17 @@ jest.mock('react-hook-form', () => ({
   useWatch: jest.fn().mockReturnValue({ name: '', tags: [] }),
 }));
 
-jest.mock('./use_matched_action_policies');
+jest.mock('./use_matched_action_policies', () => ({
+  ...jest.requireActual('./use_matched_action_policies'),
+  useMatchedActionPolicies: jest.fn(),
+}));
 jest.mock('./use_action_policy_connector_types');
+
+const mockInvalidateQueries = jest.fn();
+
+jest.mock('@kbn/react-query', () => ({
+  useQueryClient: () => ({ invalidateQueries: mockInvalidateQueries }),
+}));
 
 const mockUseMatchedActionPolicies = useMatchedActionPolicies as jest.MockedFunction<
   typeof useMatchedActionPolicies
@@ -45,15 +55,17 @@ const renderComponent = (
 
 describe('LinkedActionPoliciesStep', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     mockUseActionPolicyConnectorTypes.mockReturnValue({
       connectorTypesByPolicy: new Map(),
       isLoading: false,
     });
   });
 
-  it('renders the title and the matching subtext when policies are present', () => {
+  it('renders the title and description when policies are present', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: null,
       items: [
         {
@@ -78,6 +90,7 @@ describe('LinkedActionPoliciesStep', () => {
   it('shows a loading spinner while fetching', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: true,
+      isPreviousData: false,
       error: null,
       items: [],
       evaluatedCount: 0,
@@ -92,6 +105,7 @@ describe('LinkedActionPoliciesStep', () => {
   it('shows an empty state when no policies match', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: null,
       items: [],
       evaluatedCount: 0,
@@ -101,12 +115,76 @@ describe('LinkedActionPoliciesStep', () => {
     renderComponent();
 
     expect(screen.getByTestId('linkedActionPoliciesEmpty')).toBeInTheDocument();
-    expect(screen.getByText('No matching action policies found.')).toBeInTheDocument();
+    expect(screen.getByText('No action policies match yet.')).toBeInTheDocument();
+  });
+
+  it('opens the create action policy flyout and refreshes matches after creation', async () => {
+    const user = userEvent.setup();
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      isPreviousData: false,
+      error: null,
+      items: [],
+      evaluatedCount: 0,
+      isTruncated: false,
+    });
+
+    const CreateActionPolicyFormFlyout = ({
+      onSuccess,
+    }: {
+      onClose: () => void;
+      onSuccess: () => void;
+    }) => (
+      <button type="button" onClick={onSuccess} data-test-subj="actionPolicyFormFlyout">
+        Save action policy
+      </button>
+    );
+
+    renderComponent({ CreateActionPolicyFormFlyout });
+
+    await user.click(screen.getByRole('button', { name: 'Create action policy' }));
+    expect(screen.getByTestId('actionPolicyFormFlyout')).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('actionPolicyFormFlyout'));
+
+    expect(screen.queryByTestId('actionPolicyFormFlyout')).not.toBeInTheDocument();
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['matchedActionPolicies'] });
+  });
+
+  it('disables action policy creation with a keyboard-reachable reason', async () => {
+    const user = userEvent.setup();
+    const disabledReason = 'You do not have permission to create action policies';
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      isPreviousData: false,
+      error: null,
+      items: [],
+      evaluatedCount: 0,
+      isTruncated: false,
+    });
+
+    const CreateActionPolicyFormFlyout = () => <div data-test-subj="actionPolicyFormFlyout" />;
+
+    renderComponent({
+      createActionPolicyDisabledReason: disabledReason,
+      CreateActionPolicyFormFlyout,
+    });
+
+    const createButton = screen.getByRole('button', { name: 'Create action policy' });
+    expect(createButton).toHaveAttribute('aria-disabled', 'true');
+
+    await user.tab();
+    expect(createButton).toHaveFocus();
+    await waitFor(() => expect(createButton).toHaveAccessibleDescription(disabledReason));
+
+    await user.keyboard('{Enter}');
+    expect(screen.queryByTestId('actionPolicyFormFlyout')).not.toBeInTheDocument();
   });
 
   it('renders a catch-all badge for a global policy', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: null,
       items: [
         {
@@ -130,6 +208,7 @@ describe('LinkedActionPoliciesStep', () => {
     mockUseWatch.mockReturnValue({ name: 'My Rule', tags: ['env:prod', 'other'] });
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: null,
       items: [
         {
@@ -159,6 +238,7 @@ describe('LinkedActionPoliciesStep', () => {
     mockUseWatch.mockReturnValue({ name: 'My Rule', tags: ['env:prod'] });
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: null,
       items: [
         {
@@ -186,6 +266,7 @@ describe('LinkedActionPoliciesStep', () => {
 
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: null,
       items: [
         {
@@ -217,6 +298,7 @@ describe('LinkedActionPoliciesStep', () => {
   it('renders connector icons for a policy from the batched connector-types hook', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: null,
       items: [
         {
@@ -248,6 +330,7 @@ describe('LinkedActionPoliciesStep', () => {
   it('does not render a connector-icons row when the policy has no connector types', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: null,
       items: [
         {
@@ -272,6 +355,7 @@ describe('LinkedActionPoliciesStep', () => {
   it('shows an error callout when the fetch fails', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: new Error('Network error'),
       items: [],
       evaluatedCount: 0,
@@ -287,6 +371,7 @@ describe('LinkedActionPoliciesStep', () => {
     mockUseWatch.mockReturnValue({ name: 'My Rule', tags: ['env:prod'] });
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
+      isPreviousData: false,
       error: null,
       items: [],
       evaluatedCount: 0,

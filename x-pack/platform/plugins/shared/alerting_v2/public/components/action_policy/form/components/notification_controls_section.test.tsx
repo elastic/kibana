@@ -75,7 +75,7 @@ describe('NotificationControlsSection', () => {
   });
 
   it('does not render group-by combo-box outside per_field mode', () => {
-    renderSection({ ...DEFAULT_FORM_STATE, groupingMode: 'per_episode' });
+    renderSection({ ...DEFAULT_FORM_STATE, groupingMode: 'per_alert' });
 
     expect(screen.queryByTestId(TEST_SUBJ.groupByInput)).not.toBeInTheDocument();
   });

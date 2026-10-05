@@ -21,6 +21,59 @@ import {
 
 const ROLE_ARN_PLACEHOLDER = 'arn:aws:iam::112233445566:role/elastic-data-federation';
 
+export function CreateDataSourceFlyoutTypeSettingsS3Region({
+  control,
+  unregister,
+  isRequired,
+}: {
+  control: Control<CreateDataSourceFlyoutFormValues, any>;
+  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
+  isRequired: boolean;
+}) {
+  const { field: regionField, fieldState: regionState } = useController({
+    name: 'settings.region',
+    control,
+    rules: isRequired
+      ? {
+          validate: (value?: string) =>
+            value?.trim()
+              ? true
+              : i18n.translate('xpack.dataFederation.createFlyout.s3.fields.regionRequired', {
+                  defaultMessage: 'Region is required.',
+                }),
+        }
+      : undefined,
+  });
+
+  useEffect(() => {
+    return () => {
+      unregister('settings.region');
+    };
+  }, [unregister]);
+
+  return (
+    <EuiFormRow
+      label={i18n.translate('xpack.dataFederation.createFlyout.s3.fields.region', {
+        defaultMessage: 'Region',
+      })}
+      fullWidth
+      isInvalid={Boolean(regionState.error)}
+      error={regionState.error?.message}
+    >
+      <EuiFieldText
+        data-test-subj="createDataSourceFlyoutS3Region"
+        fullWidth
+        autoComplete="off"
+        isInvalid={Boolean(regionState.error)}
+        value={regionField.value ?? ''}
+        onChange={(e) => regionField.onChange(e.target.value)}
+        name={regionField.name}
+        inputRef={regionField.ref}
+      />
+    </EuiFormRow>
+  );
+}
+
 export function CreateDataSourceFlyoutTypeSettingsS3({
   control,
   unregister,
@@ -50,7 +103,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3({
         data-test-subj="createDataSourceFlyoutS3Endpoint"
         fullWidth
         autoComplete="off"
-        value={endpointField.value}
+        value={endpointField.value ?? ''}
         onChange={(e) => endpointField.onChange(e.target.value)}
         name={endpointField.name}
         inputRef={endpointField.ref}
@@ -119,7 +172,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3Credentials({
           fullWidth
           autoComplete="off"
           isInvalid={Boolean(accessKeyState.error)}
-          value={accessKeyField.value}
+          value={accessKeyField.value ?? ''}
           onChange={(e) => accessKeyField.onChange(e.target.value)}
           name={accessKeyField.name}
           inputRef={accessKeyField.ref}
@@ -139,7 +192,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3Credentials({
           fullWidth
           autoComplete="off"
           isInvalid={Boolean(secretKeyState.error)}
-          value={secretKeyField.value}
+          value={secretKeyField.value ?? ''}
           onChange={(e) => secretKeyField.onChange(e.target.value)}
           name={secretKeyField.name}
           inputRef={secretKeyField.ref}
@@ -209,7 +262,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
           autoComplete="off"
           isInvalid={Boolean(roleArnState.error)}
           placeholder={ROLE_ARN_PLACEHOLDER}
-          value={roleArnField.value}
+          value={roleArnField.value ?? ''}
           onChange={(e) => roleArnField.onChange(e.target.value)}
           name={roleArnField.name}
           inputRef={roleArnField.ref}
