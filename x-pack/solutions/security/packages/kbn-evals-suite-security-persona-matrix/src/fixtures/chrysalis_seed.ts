@@ -272,11 +272,7 @@ export async function seedChrysalisAlerts({
             'kibana.alert.risk_score': Math.max(30, 73 - i * 10),
           }));
 
-    await esClient.bulk({
-      index: ALERT_INDEX,
-      refresh: 'wait_for',
-      operations: docs.flatMap((doc) => [{ create: {} }, doc]),
-    });
+    await bulkCreateOrThrow(esClient, ALERT_INDEX, docs);
     log.info(
       `Seeded ${docs.length} Chrysalis alerts into ${ALERT_INDEX} (profile: ${seedProfile})`
     );
@@ -290,37 +286,101 @@ export async function seedChrysalisAlerts({
   }
 }
 
+/**
+ * `bulk` resolves even when individual items are rejected; item-level failures only surface in
+ * `response.errors`. Throw so a partially seeded fixture fails setup instead of scoring on it.
+ * When `idPrefix` is set, docs get deterministic ids so cleanup can remove exactly this run's docs.
+ */
+export async function bulkCreateOrThrow(
+  esClient: EsClient,
+  index: string,
+  docs: Array<Record<string, unknown>>,
+  idPrefix?: string
+): Promise<void> {
+  const response = await esClient.bulk({
+    index,
+    refresh: 'wait_for',
+    operations: docs.flatMap((doc, i) => [
+      { create: idPrefix ? { _id: `${idPrefix}-${i}` } : {} },
+      doc,
+    ]),
+  });
+  if (response.errors) {
+    const failures = response.items
+      .map((item) => item.create?.error)
+      .filter((error) => error !== undefined)
+      .map((error) => `${error?.type}: ${error?.reason}`);
+    throw new Error(
+      `Bulk seed into ${index} failed for ${failures.length}/${docs.length} docs: ${failures
+        .slice(0, 3)
+        .join('; ')}`
+    );
+  }
+}
+
+const SEED_DOC_ID_PREFIX = 'persona-matrix-seed';
+const seedIdPrefix = (index: string) => `${SEED_DOC_ID_PREFIX}-${index}`;
+
+// Resources this run created. Resources that already existed are left in place on cleanup and
+// only the documents seeded by this run are removed from them.
+const createdResources = new Set<string>();
+
+const enrichedSources = (): Array<{ index: string; docs: Array<Record<string, unknown>> }> => [
+  { index: TELEMETRY_INDEX, docs: sysmonEvents },
+  { index: ENTITY_RISK_INDEX, docs: entityRiskDocs },
+  { index: SECURITY_LABS_INDEX, docs: securityLabsDocs },
+];
+
+const isAlreadyExistsError = (err: unknown): boolean =>
+  (err as { meta?: { body?: { error?: { type?: string } } } })?.meta?.body?.error?.type ===
+  'resource_already_exists_exception';
+
 async function seedEnrichedSources(esClient: EsClient, log: ToolingLog): Promise<void> {
-  const groups: Array<{ index: string; docs: Array<Record<string, unknown>> }> = [
-    { index: TELEMETRY_INDEX, docs: sysmonEvents },
-    { index: ENTITY_RISK_INDEX, docs: entityRiskDocs },
-    { index: SECURITY_LABS_INDEX, docs: securityLabsDocs },
-  ];
-  for (const { index, docs } of groups) {
-    try {
-      // logs-* names match the logs index template, which creates data streams only
-      const isDataStream = index.startsWith('logs-');
-      if (isDataStream) {
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await (esClient as any).indices.createDataStream({ name: index });
-        } catch (err) {
-          // already exists — nothing to do
-        }
-      } else {
-        const exists = await esClient.indices.exists({ index });
-        if (!exists) {
-          await esClient.indices.create({ index });
+  for (const { index, docs } of enrichedSources()) {
+    // logs-* names match the logs index template, which creates data streams only
+    if (index.startsWith('logs-')) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (esClient as any).indices.createDataStream({ name: index });
+        createdResources.add(index);
+      } catch (err) {
+        if (!isAlreadyExistsError(err)) {
+          throw err;
         }
       }
-      await esClient.bulk({
-        index,
-        refresh: 'wait_for',
-        operations: docs.flatMap((doc) => [{ create: {} }, doc]),
-      });
-      log.info(`Seeded ${docs.length} docs into ${index}`);
+    } else if (!(await esClient.indices.exists({ index }))) {
+      await esClient.indices.create({ index });
+      createdResources.add(index);
+    }
+    await bulkCreateOrThrow(esClient, index, docs, seedIdPrefix(index));
+    log.info(`Seeded ${docs.length} docs into ${index}`);
+  }
+}
+
+async function cleanupEnrichedSources(esClient: EsClient, log: ToolingLog): Promise<void> {
+  for (const { index, docs } of enrichedSources()) {
+    try {
+      if (createdResources.has(index)) {
+        if (index.startsWith('logs-')) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await (esClient as any).indices.deleteDataStream({ name: index });
+        } else {
+          await esClient.indices.delete({ index });
+        }
+        createdResources.delete(index);
+        log.info(`Deleted enriched resource ${index}`);
+      } else {
+        await esClient.deleteByQuery({
+          index,
+          query: { ids: { values: docs.map((_, i) => `${seedIdPrefix(index)}-${i}`) } },
+          refresh: true,
+          conflicts: 'proceed',
+          ignore_unavailable: true,
+        });
+        log.info(`Removed seeded docs from pre-existing ${index}`);
+      }
     } catch (err) {
-      log.warning(`Failed to seed ${index}: ${err}`);
+      log.warning(`Cleanup warning for ${index}: ${err}`);
     }
   }
 }
@@ -341,16 +401,7 @@ export async function cleanupChrysalisAlerts({
     });
     log.info(`Cleaned up alerts from ${ALERT_INDEX}`);
     if (seedProfile === 'enriched') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (esClient as any).indices.deleteDataStream({ name: TELEMETRY_INDEX }).catch(() => {});
-      for (const index of [ENTITY_RISK_INDEX, SECURITY_LABS_INDEX]) {
-        try {
-          await esClient.indices.delete({ index });
-          log.info(`Deleted enriched index ${index}`);
-        } catch (err) {
-          log.warning(`Cleanup warning for ${index}: ${err}`);
-        }
-      }
+      await cleanupEnrichedSources(esClient, log);
     }
   } catch (err) {
     log.warning(`Cleanup warning: ${err}`);
