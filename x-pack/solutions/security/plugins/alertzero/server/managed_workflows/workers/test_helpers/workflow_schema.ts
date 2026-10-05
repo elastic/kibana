@@ -9,11 +9,10 @@ import { WorkflowSchema } from '@kbn/workflows';
 import { validateWorkflowYaml } from '@kbn/workflows-management-plugin/common/lib/validate_workflow_yaml';
 
 /**
- * Managed install runs the platform validator and stores `valid: false` when it fails, without
- * throwing. A parse that returns success is not that flag: trigger, graph and template checks can
- * still mark the document invalid. Callers must treat a returned string as an install failure.
+ * Errors from validating rendered YAML against the generic `WorkflowSchema`, or undefined. Install
+ * also checks connectors and trigger definitions, so passing here does not prove `valid: true`.
  */
-export const renderedWorkflowInstallFailure = (yaml: string): string | undefined => {
+export const workflowSchemaFailure = (yaml: string): string | undefined => {
   const result = validateWorkflowYaml(yaml, WorkflowSchema);
   if (result.valid) {
     return undefined;

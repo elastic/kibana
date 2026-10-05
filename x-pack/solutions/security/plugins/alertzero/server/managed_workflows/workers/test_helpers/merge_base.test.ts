@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { resolveBaseCommit, type GitRunner } from './merge_base';
+import { readTestHelperFileAt, resolveBaseCommit, type GitRunner } from './merge_base';
 
 const fakeGit =
   (responses: Record<string, string | undefined>): GitRunner =>
@@ -26,8 +26,29 @@ describe('resolveBaseCommit', () => {
 
   it('fails a PR build that has no merge base', () => {
     expect(() => resolveBaseCommit({ GITHUB_PR_NUMBER: '1' }, fakeGit({}))).toThrow(
-      /without GITHUB_PR_MERGE_BASE/
+      /has no GITHUB_PR_MERGE_BASE/
     );
+  });
+
+  it('uses the merge base of a merge-queue build', () => {
+    const git = fakeGit({ 'cat-file -e def^{commit}': '' });
+    expect(
+      resolveBaseCommit({ MERGE_QUEUE_TARGET_BRANCH: 'main', MERGE_QUEUE_MERGE_BASE: 'def' }, git)
+    ).toBe('def');
+  });
+
+  it('fails a merge-queue build that has no merge base', () => {
+    expect(() => resolveBaseCommit({ MERGE_QUEUE_TARGET_BRANCH: 'main' }, fakeGit({}))).toThrow(
+      /has no MERGE_QUEUE_MERGE_BASE/
+    );
+  });
+
+  it('skips the comparison on other CI builds', () => {
+    const git = fakeGit({
+      'merge-base HEAD origin/main': 'head',
+      'rev-list --count head..HEAD': '0',
+    });
+    expect(resolveBaseCommit({ BUILDKITE: 'true' }, git)).toBeUndefined();
   });
 
   it('uses the nearest remote default branch locally', () => {
@@ -43,5 +64,23 @@ describe('resolveBaseCommit', () => {
 
   it('returns undefined locally when no remote branch resolves', () => {
     expect(resolveBaseCommit({}, fakeGit({}))).toBeUndefined();
+  });
+});
+
+describe('readTestHelperFileAt', () => {
+  it('returns undefined when the file did not exist at the commit', () => {
+    expect(readTestHelperFileAt('abc', 'a.json', fakeGit({}))).toBeUndefined();
+  });
+
+  it('returns the file contents at the commit', () => {
+    const git = fakeGit({ 'cat-file -e abc:./a.json': '', 'show abc:./a.json': '{}' });
+    expect(readTestHelperFileAt('abc', 'a.json', git)).toBe('{}');
+  });
+
+  it('throws instead of skipping when git fails on a file that exists', () => {
+    const git = fakeGit({ 'cat-file -e abc:./a.json': '' });
+    expect(() => readTestHelperFileAt('abc', 'a.json', git)).toThrow(
+      /git show abc:\.\/a\.json failed/
+    );
   });
 });

@@ -19,12 +19,7 @@ export interface WorkerSettingsRegistration {
     values: ManagedWorkflowTemplateValues,
     patch: WorkerSettingsWrite
   ): { values: ManagedWorkflowTemplateValues } | { invalid: string };
-  /**
-   * Brings persisted values up to the current declaration: fills schedule and extras keys the
-   * document does not have yet, and lowers an autonomy level the Worker no longer allows to the
-   * nearest allowed level below it. Returns the same object when nothing changes. No other
-   * present value is replaced.
-   */
+  /** `upgradeStoredWorkerSettings` from `@kbn/alertzero-common`, for this Worker's declaration. */
   upgradeStoredValues(values: ManagedWorkflowTemplateValues): ManagedWorkflowTemplateValues;
   /**
    * Parses persisted template values into complete settings, after the same upgrade the startup

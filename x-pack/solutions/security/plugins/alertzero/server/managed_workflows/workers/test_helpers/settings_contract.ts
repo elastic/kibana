@@ -6,13 +6,12 @@
  */
 
 /**
- * Test-only. The Worker settings contract is the input side of each Worker's complete settings
- * schema plus its declaration defaults, committed as `settings_contract.snapshot.json`. A diff is
- * classified as safe for stored documents or breaking for them.
+ * The Worker settings contract is the input side of each Worker's complete settings schema plus
+ * its declaration defaults, committed as `settings_contract.snapshot.json`.
  *
- * JSON Schema keywords this module does not understand fail the build instead of being dropped.
  * Zod refinements (`.refine`, `.superRefine`, which the OpenAPI generator emits for the
  * `nonempty` and `date-math` formats) have no JSON Schema form and are not part of the contract.
+ * Neither is the output side of the pipe into `WorkerSettings`.
  */
 
 import { isEqual } from 'lodash';
@@ -29,20 +28,22 @@ import { z } from '@kbn/zod/v4';
 
 export const MIGRATION_ISSUE = 'https://github.com/elastic/security-team/issues/19312';
 
-export const BREAKING_CHANGE_EXITS = `a migration under ${MIGRATION_ISSUE} (not built yet), or, before customers exist, a coordinated reset (plugin README, "Pre-customer state")`;
+export const BREAKING_CHANGE_REMEDIES = `a migration under ${MIGRATION_ISSUE} (not built yet), or, before customers exist, a coordinated reset (plugin README, "Pre-customer state")`;
 
 export const SETTINGS_CONTRACT_SNAPSHOT_FILE = 'settings_contract.snapshot.json';
 
 export const GENERATE_SETTINGS_CONTRACT_SNAPSHOT =
   'node x-pack/solutions/security/plugins/alertzero/scripts/generate_settings_contract_snapshot.js';
 
-/**
- * Accepts a breaking change and records the issue where the coordinated reset of the affected
- * environments was agreed. #19312 replaces it with a migration check.
- */
+/** Accepts a breaking change and records the issue where the coordinated reset was agreed. */
 export const ACCEPT_BREAKING_CHANGE_FLAG = '--accept-breaking-change';
 
-const ACCEPT_A_BREAKING_CHANGE = `Before customers exist, a breaking change can go in only with a coordinated reset of the affected environments. Agree it with the Common Worker Layer team on an issue, then run:\n${GENERATE_SETTINGS_CONTRACT_SNAPSHOT} ${ACCEPT_BREAKING_CHANGE_FLAG} <issue-url>`;
+export const ACCEPT_BREAKING_CHANGE_COMMAND = `${GENERATE_SETTINGS_CONTRACT_SNAPSHOT} ${ACCEPT_BREAKING_CHANGE_FLAG} <issue-url>`;
+
+const ACCEPT_BREAKING_CHANGE_INSTRUCTIONS = `Before customers exist, a breaking change can go in only with a coordinated reset of the affected environments. Agree it with the Common Worker Layer team on an issue, then run:\n${ACCEPT_BREAKING_CHANGE_COMMAND}`;
+
+const TAKES_EFFECT_ON_NEXT_SAVE =
+  'Scheduled runs pick this up on the next save or enable in each space, because startup rewrites the workflow without rescheduling it.';
 
 const KNOWN_SCHEMA_KEYS = new Set([
   '$schema',
@@ -119,7 +120,7 @@ export interface AcceptedBreakingChange {
 }
 
 export interface SettingsContractSnapshot {
-  /** Append-only. Each entry is one breaking change accepted with a coordinated reset. */
+  /** Append-only; the base-branch check requires the base branch's entries as a prefix. */
   acceptedBreakingChanges: readonly AcceptedBreakingChange[];
   workers: WorkerSettingsContracts;
 }
@@ -131,7 +132,8 @@ export interface ContractChange {
   field?: { change: 'added' | 'removed'; path: string };
   /** A removal or a narrowing, where keeping the stored key and changing only the label may be the fix. */
   mayBeLabelChange?: true;
-  scheduleAdded?: true;
+  /** Printed once under the change list. */
+  note?: string;
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -221,14 +223,68 @@ const normalizeNode = (value: unknown, path: string): SettingsNode => {
   };
 };
 
+export const toInputJsonSchema = (schema: z.ZodType): unknown =>
+  z.toJSONSchema(schema, { io: 'input' });
+
 /** The input side of a settings schema: what a stored document must satisfy to be read. */
 export const normalizeSettingsSchema = (schema: z.ZodType, label: string): SettingsNode =>
-  normalizeNode(z.toJSONSchema(schema, { io: 'input' }), label);
+  normalizeNode(toInputJsonSchema(schema), label);
+
+/** Property paths that carry a JSON Schema `default`, which zod applies on read. */
+const schemaDefaultPaths = (value: unknown, path: readonly string[]): string[][] => {
+  if (!isRecord(value)) {
+    return [];
+  }
+  const own = path.length > 0 && Object.hasOwn(value, 'default') ? [[...path]] : [];
+  const properties = isRecord(value.properties)
+    ? Object.entries(value.properties).flatMap(([key, child]) =>
+        schemaDefaultPaths(child, [...path, key])
+      )
+    : [];
+  const branches = Array.isArray(value.anyOf)
+    ? value.anyOf.flatMap((branch) => (isRecord(branch) ? schemaDefaultPaths(branch, path) : []))
+    : [];
+  return [...own, ...properties, ...branches];
+};
+
+const hasValueAt = (value: unknown, path: readonly string[]): boolean => {
+  let cursor = value;
+  for (const key of path) {
+    if (!isRecord(cursor) || !Object.hasOwn(cursor, key)) {
+      return false;
+    }
+    cursor = cursor[key];
+  }
+  return true;
+};
+
+/** Throws when the schema has a default the declaration lacks: zod would show a value nothing stores. */
+export const assertSchemaDefaultsDeclared = (
+  label: string,
+  jsonSchema: unknown,
+  defaults: Readonly<Record<string, unknown>>
+): void => {
+  const undeclared = schemaDefaultPaths(jsonSchema, []).filter(
+    (path) => !hasValueAt(defaults, path)
+  );
+  if (undeclared.length > 0) {
+    throw new Error(
+      `The settings schema for ${label} has a default for ${undeclared
+        .map((path) => path.join('.'))
+        .join(
+          ', '
+        )} that its declaration does not. Stored documents and the running workflow get declaration defaults only, so add it to the declaration.`
+    );
+  }
+};
 
 export const buildWorkerSettingsContracts = (): WorkerSettingsContracts => {
   const contracts: Record<string, WorkerSettingsContract> = {};
   for (const workerId of [...SYSTEM_SECURITY_WORKER_IDS].sort()) {
-    const schema = normalizeSettingsSchema(getCompleteWorkerSettingsSchema(workerId), workerId);
+    const jsonSchema = toInputJsonSchema(getCompleteWorkerSettingsSchema(workerId));
+    const defaults = { ...createDefaultWorkerSettings(workerId) };
+    assertSchemaDefaultsDeclared(workerId, jsonSchema, defaults);
+    const schema = normalizeNode(jsonSchema, workerId);
     if (schema.kind !== 'object') {
       throw new Error(`Settings schema for ${workerId} did not convert as an object`);
     }
@@ -245,12 +301,12 @@ export const buildWorkerSettingsContracts = (): WorkerSettingsContracts => {
         )}). The contract has to be the input side of the settings schema.`
       );
     }
-    contracts[workerId] = { defaults: { ...createDefaultWorkerSettings(workerId) }, schema };
+    contracts[workerId] = { defaults, schema };
   }
   return contracts;
 };
 
-/** Paths the startup fill writes into a stored document that lacks them. Nothing else is filled. */
+/** Must match the keys `fillMissingSchedule` and `fillMissingExtras` fill in `@kbn/alertzero-common`. */
 const isFilledAtStartup = (path: readonly string[]): boolean =>
   (path.length === 1 && (path[0] === 'scheduleInterval' || path[0] === 'extras')) ||
   (path.length === 2 && path[0] === 'extras');
@@ -324,6 +380,7 @@ const pushRemovedAutonomyLevels = (
             text: `removed ${String(level)} from ${label}. A stored ${String(
               level
             )} is lowered to ${lowered} at startup.`,
+            note: TAKES_EFFECT_ON_NEXT_SAVE,
           }
     );
   }
@@ -440,14 +497,19 @@ const diffNodes = (
     );
   }
   for (const key of Object.keys(previous.fields)) {
-    if (!Object.hasOwn(next.fields, key)) {
-      changes.push({
-        kind: 'breaking',
-        text: `removed ${label}.${key}`,
-        field: { change: 'removed', path: [...path, key].join('.') },
-        mayBeLabelChange: true,
-      });
+    if (Object.hasOwn(next.fields, key)) {
+      continue;
     }
+    const field = { change: 'removed' as const, path: [...path, key].join('.') };
+    changes.push(
+      field.path === 'extras'
+        ? {
+            kind: 'safe',
+            text: `removed ${label}.${key}. Stored extras are dropped at startup.`,
+            field,
+          }
+        : { kind: 'breaking', text: `removed ${label}.${key}`, field, mayBeLabelChange: true }
+    );
   }
   for (const [key, child] of Object.entries(next.fields)) {
     const childLabel = `${label}.${key}`;
@@ -460,7 +522,7 @@ const diffNodes = (
         required && !filled
           ? {
               kind: 'breaking',
-              text: `added required ${childLabel} that the startup fill has no default for`,
+              text: `added required ${childLabel} with no declaration default to fill stored documents from`,
               field: { change: 'added', path: childPath.join('.') },
             }
           : {
@@ -470,7 +532,7 @@ const diffNodes = (
                 : `added optional ${childLabel}`,
               field: { change: 'added', path: childPath.join('.') },
               ...(childPath.join('.') === 'scheduleInterval'
-                ? { scheduleAdded: true as const }
+                ? { note: TAKES_EFFECT_ON_NEXT_SAVE }
                 : {}),
             }
       );
@@ -561,44 +623,126 @@ export const describeContractChanges = (changes: readonly ContractChange[]): str
   ];
   if (breaking) {
     lines.push(
-      `Configured Workers that stored the old shape will show as unavailable. It needs ${BREAKING_CHANGE_EXITS}.`
+      `Configured Workers that stored the old shape will show as unavailable. It needs ${BREAKING_CHANGE_REMEDIES}.`
     );
     if (changes.some((change) => change.kind === 'breaking' && change.mayBeLabelChange)) {
       lines.push('If only the label on the page should change, keep the stored key and value.');
     }
-    lines.push(ACCEPT_A_BREAKING_CHANGE);
+    lines.push(ACCEPT_BREAKING_CHANGE_INSTRUCTIONS);
   } else {
     lines.push(`Update the snapshot with:\n${GENERATE_SETTINGS_CONTRACT_SNAPSHOT}`);
   }
-  if (changes.some((change) => change.scheduleAdded)) {
-    lines.push('A new schedule takes effect on the next save or enable in each space.');
-  }
+  lines.push(...new Set(changes.flatMap((change) => (change.note ? [change.note] : []))));
   return lines.join('\n');
 };
+
+const keepsBaseEntries = (
+  base: SettingsContractSnapshot,
+  committed: SettingsContractSnapshot
+): boolean =>
+  isEqual(
+    committed.acceptedBreakingChanges.slice(0, base.acceptedBreakingChanges.length),
+    base.acceptedBreakingChanges
+  );
+
+/** Breaking changes against the base branch that this branch has not accepted yet. */
+const unacceptedAtBase = (
+  base: SettingsContractSnapshot,
+  committed: SettingsContractSnapshot,
+  current: WorkerSettingsContracts
+): ContractChange[] =>
+  committed.acceptedBreakingChanges.length > base.acceptedBreakingChanges.length
+    ? []
+    : breakingChanges(diffWorkerSettingsContracts(base.workers, current));
 
 /**
  * Against the base branch, a breaking diff must come with a newly accepted breaking change.
  * Regenerating the snapshot without the flag does not add one, so the reflexive fix stays red.
  */
-export const unacceptedBreakingChange = (
+export const describeUnacceptedBreakingChanges = (
   base: SettingsContractSnapshot,
   committed: SettingsContractSnapshot,
   current: WorkerSettingsContracts
 ): string | undefined => {
-  const breaking = breakingChanges(diffWorkerSettingsContracts(base.workers, current));
-  if (breaking.length === 0) {
-    return undefined;
+  if (!keepsBaseEntries(base, committed)) {
+    return `acceptedBreakingChanges in ${SETTINGS_CONTRACT_SNAPSHOT_FILE} must start with every entry the base branch has, unchanged. Restore them from the base branch.`;
   }
-  if (committed.acceptedBreakingChanges.length > base.acceptedBreakingChanges.length) {
+  const breaking = unacceptedAtBase(base, committed, current);
+  if (breaking.length === 0) {
     return undefined;
   }
   return [
     'This change breaks Worker settings stored by the base branch, and it was not accepted.',
     ...breaking.map((change) => `- ${change.text}`),
     '',
-    `It needs ${BREAKING_CHANGE_EXITS}.`,
-    ACCEPT_A_BREAKING_CHANGE,
+    `It needs ${BREAKING_CHANGE_REMEDIES}.`,
+    ACCEPT_BREAKING_CHANGE_INSTRUCTIONS,
   ].join('\n');
+};
+
+const ELASTIC_ISSUE_OR_PR_URL = /^https:\/\/github\.com\/elastic\/[\w.-]+\/(issues|pull)\/\d+$/;
+
+/** The issue URL passed with the accept flag, or undefined when the flag is absent. */
+export const parseAcceptedIssue = (argv: readonly string[]): string | undefined => {
+  const index = argv.indexOf(ACCEPT_BREAKING_CHANGE_FLAG);
+  if (index === -1) {
+    return undefined;
+  }
+  const url = argv[index + 1];
+  if (url === undefined || !ELASTIC_ISSUE_OR_PR_URL.test(url)) {
+    throw new Error(
+      `${ACCEPT_BREAKING_CHANGE_FLAG} needs the GitHub issue where the reset was agreed, for example https://github.com/elastic/security-team/issues/12345`
+    );
+  }
+  return url;
+};
+
+/**
+ * The snapshot the generator writes. A breaking change against the committed snapshot is refused
+ * without an accepted issue. The base snapshot matters only while this branch has accepted nothing,
+ * so a branch whose committed snapshot already matches the code can still accept a break of main.
+ */
+export const nextSettingsContractSnapshot = ({
+  committed,
+  current,
+  base,
+  acceptedIssue,
+}: {
+  committed: SettingsContractSnapshot;
+  current: WorkerSettingsContracts;
+  base?: SettingsContractSnapshot;
+  acceptedIssue?: string;
+}): SettingsContractSnapshot => {
+  const breaking = breakingChanges(diffWorkerSettingsContracts(committed.workers, current));
+  if (breaking.length > 0 && acceptedIssue === undefined) {
+    throw new Error(
+      [
+        'Refusing to update the snapshot: this change breaks stored Worker settings.',
+        ...breaking.map((change) => `- ${change.text}`),
+        '',
+        `It needs ${BREAKING_CHANGE_REMEDIES}. For a reset, agree it on an issue and run:`,
+        ACCEPT_BREAKING_CHANGE_COMMAND,
+      ].join('\n')
+    );
+  }
+  const accepted =
+    breaking.length > 0 || base === undefined
+      ? breaking
+      : unacceptedAtBase(base, committed, current);
+  if (acceptedIssue !== undefined && accepted.length === 0) {
+    throw new Error(
+      `${ACCEPT_BREAKING_CHANGE_FLAG} was passed, but nothing in this change breaks stored Worker settings.`
+    );
+  }
+  return {
+    acceptedBreakingChanges: [
+      ...committed.acceptedBreakingChanges,
+      ...(acceptedIssue === undefined
+        ? []
+        : [{ issue: acceptedIssue, changes: accepted.map((change) => change.text) }]),
+    ],
+    workers: current,
+  };
 };
 
 export const parseSettingsContractSnapshot = (text: string): SettingsContractSnapshot => {

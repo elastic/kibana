@@ -30,28 +30,36 @@ const candidateBaseRefs = (git: GitRunner): string[] => {
   return [...new Set([...heads, 'origin/main', 'upstream/main'])];
 };
 
+const requireCommit = (git: GitRunner, name: string, commit: string | undefined): string => {
+  if (!commit) {
+    throw new Error(
+      `This build has no ${name}, so stored Worker settings cannot be compared with the base branch.`
+    );
+  }
+  if (git(['cat-file', '-e', `${commit}^{commit}`]) === undefined) {
+    throw new Error(
+      `${name} ${commit} is not in this checkout, so stored Worker settings cannot be compared with the base branch.`
+    );
+  }
+  return commit;
+};
+
 /**
- * The commit this change is compared against. PR builds use the merge base Buildkite already
- * resolved and fail when it is not available, so the comparison never turns itself off in CI.
- * Locally the nearest remote default branch is used, and `undefined` means there is no base.
+ * The commit to compare against. PR and merge-queue builds throw when theirs is unavailable, so the
+ * check never silently turns off in CI. Other CI builds and runs with no remote return undefined.
  */
 export const resolveBaseCommit = (
   env: NodeJS.ProcessEnv = process.env,
   git: GitRunner = runGit
 ): string | undefined => {
-  const prMergeBase = env.GITHUB_PR_MERGE_BASE;
-  if (prMergeBase) {
-    if (git(['cat-file', '-e', `${prMergeBase}^{commit}`]) === undefined) {
-      throw new Error(
-        `GITHUB_PR_MERGE_BASE ${prMergeBase} is not in this checkout, so stored Worker settings cannot be compared with the base branch.`
-      );
-    }
-    return prMergeBase;
+  if (env.GITHUB_PR_MERGE_BASE || env.GITHUB_PR_NUMBER) {
+    return requireCommit(git, 'GITHUB_PR_MERGE_BASE', env.GITHUB_PR_MERGE_BASE);
   }
-  if (env.GITHUB_PR_NUMBER) {
-    throw new Error(
-      'This is a PR build without GITHUB_PR_MERGE_BASE, so stored Worker settings cannot be compared with the base branch.'
-    );
+  if (env.MERGE_QUEUE_TARGET_BRANCH) {
+    return requireCommit(git, 'MERGE_QUEUE_MERGE_BASE', env.MERGE_QUEUE_MERGE_BASE);
+  }
+  if (env.BUILDKITE === 'true') {
+    return undefined;
   }
 
   let nearest: { commit: string; ahead: number } | undefined;
@@ -76,4 +84,14 @@ export const readTestHelperFileAt = (
   commit: string,
   fileName: string,
   git: GitRunner = runGit
-): string | undefined => git(['show', `${commit}:./${fileName}`]);
+): string | undefined => {
+  const spec = `${commit}:./${fileName}`;
+  if (git(['cat-file', '-e', spec]) === undefined) {
+    return undefined;
+  }
+  const contents = git(['show', spec]);
+  if (contents === undefined) {
+    throw new Error(`git show ${spec} failed although the file exists at that commit.`);
+  }
+  return contents;
+};

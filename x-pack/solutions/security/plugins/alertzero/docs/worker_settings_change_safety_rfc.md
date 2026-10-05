@@ -165,10 +165,15 @@ ready, bound to the document version it read so a concurrent save is not overwri
 each change:
 
 ```text
-Reinstalled AlertZero worker "system-security-detection-rule-tuning-default" in space "default"
-with its stored settings upgraded to the current declaration, autonomy lowered from "supervised"
-to "assisted" because the Worker no longer allows it
+Requested a reinstall of AlertZero worker "system-security-detection-rule-tuning-default" in space
+"default" with its stored settings upgraded to the current declaration, lowering autonomy from
+"supervised" to "assisted" because the Worker no longer allows it. The write is skipped if the
+document changed since it was read.
 ```
+
+The startup pass writes the workflow document but does not reschedule its Task Manager task, so a
+Worker whose trigger depends on the level keeps its old schedule until the next save or enable in
+that space. The contract message says so.
 
 After startup the page, the stored document and the running workflow all hold the same level, with
 no manual step and no reset. A test covers every Worker and every level it does not allow: the read
@@ -203,11 +208,14 @@ For every fixture, `worker_settings_compat.test.ts` checks that it:
 1. reads without error,
 2. renders YAML with no `undefined` and no leftover `__WORKER_…__` placeholder,
 3. renders every line in its `.expected.txt`,
-4. would install as a valid workflow (managed install stores an invalid workflow with
-   `valid: false` instead of throwing, so this is checked explicitly),
-5. reads back exactly as stored, which catches any read that rewrites a value.
+4. renders a workflow that passes the generic workflow schema (managed install stores an invalid
+   workflow with `valid: false` instead of throwing; install also checks connectors and trigger
+   definitions, which this does not),
+5. reads back exactly as stored, which catches any read that rewrites a value,
+6. changes the rendered YAML when any single stored key changes, so every stored setting reaches
+   the workflow.
 
-A registered Worker with no fixture folder fails with a message naming the two files to add.
+A registered Worker without `current.json` fails with a message naming the two files to add.
 Adding a Worker never means editing the test file.
 
 ### 3. The settings contract snapshot
@@ -253,7 +261,8 @@ The test compares the live code with this file. Each difference is labelled:
 | Loosened bound, widened enum, allowed `null` | Safe | Every stored value still passes |
 | Changed default | Safe | Stored documents keep their value; the new default reaches fresh installs only |
 | New schedule on an existing Worker | Safe | It starts on the next save or enable in each space |
-| Removed autonomy level that has a lower allowed level | Safe | The startup pass lowers stored documents to the nearest allowed level |
+| Removed autonomy level that has a lower allowed level | Safe | The startup pass lowers stored documents to the nearest allowed level; scheduled runs pick it up on the next save or enable |
+| Removed `extras` from a Worker | Safe | The startup pass drops stored extras |
 | Removed lowest autonomy level | Breaking | There is no lower level to move stored documents to |
 | Removed, renamed or retyped field | Breaking | Stored documents hold a key or type the schema rejects |
 | Tightened bound or array size, narrowed enum (other than autonomy), free string turned into an enum, dropped `null` | Breaking | Stored values may fall outside |
@@ -270,7 +279,8 @@ Update the snapshot with:
 node x-pack/solutions/security/plugins/alertzero/scripts/generate_settings_contract_snapshot.js
 ```
 
-A breaking change says so, lists the exits, and the generator refuses to write:
+A breaking change fails the test with this message, and the generator refuses to write the
+snapshot without the flag:
 
 ```text
 This change breaks stored Worker settings.
@@ -287,7 +297,9 @@ node x-pack/solutions/security/plugins/alertzero/scripts/generate_settings_contr
 
 JSON Schema keywords the classifier does not understand fail the build with "Unclassified … Teach
 the Worker settings contract check about it", instead of being silently dropped. When a Watch team
-first uses, say, a date-time format, CWL extends the classifier.
+first uses, say, a date-time format, CWL extends the classifier. A schema `default` that the
+Worker's declaration does not also have fails too: zod would apply it on read, while stored
+documents and the running workflow only ever get declaration defaults.
 
 ### 4. Breaking changes before customers
 
@@ -313,6 +325,11 @@ that hold old documents, which is only possible while AlertZero has no customers
 4. The entry shows up in the PR diff for review.
 5. After merge, the affected environments are reset.
 
+The list is append-only: the base-branch check fails when an entry the base branch has is dropped
+or edited. If the committed snapshot already matches the code (after a merge conflict, say) but
+the base branch's does not, the generator still accepts the flag and records the break against
+the base branch.
+
 Once customers store settings, a reset is not an option. The PR that lands the migration flow
 replaces this flag with a machine check: a breaking change must come with a settings version bump
 and a migration step for it. Until then, a breaking change with customers stays red.
@@ -325,17 +342,20 @@ on the base branch, and requires a new `acceptedBreakingChanges` entry for any b
 
 The test does not check out another branch. Git keeps every version of every file, and
 `git show <commit>:<path>` prints a file as it was at that commit, from the local `.git`. A PR's
-history always contains the commit where it branched off, and Buildkite exports that commit to every
-PR step as `GITHUB_PR_MERGE_BASE`:
+history always contains the commit where it branched off. Buildkite exports that commit to every
+PR step as `GITHUB_PR_MERGE_BASE`, and to every merge-queue step as `MERGE_QUEUE_MERGE_BASE`:
 
 ```ts
 const base = process.env.GITHUB_PR_MERGE_BASE;
-const baseSnapshot = git(['show', `${base}:./settings_contract.snapshot.json`]);
+git(['cat-file', '-e', `${base}:./settings_contract.snapshot.json`]); // absent at base: skip
+const baseSnapshot = git(['show', `${base}:./settings_contract.snapshot.json`]); // failure: throw
 ```
 
-A PR build fails loudly if the merge base is missing or not in the checkout, so the check cannot
-switch itself off. Locally it uses the nearest remote default branch, and is skipped if there is
-none. It takes effect once the snapshot exists on `main`.
+PR and merge-queue builds fail loudly if their merge base is missing or not in the checkout, and a
+git failure on a file that exists throws, so the check cannot switch itself off. Other CI builds
+(on-merge builds of `main`, where the base is the commit itself) skip it. Locally it uses the
+nearest remote default branch, and is skipped if there is none. It takes effect once the snapshot
+exists on `main`.
 
 ### Considered and dropped: a render fingerprint
 
@@ -351,7 +371,7 @@ states that a render-helper change needs a definition version bump.
 
 | Goal | How |
 |---|---|
-| 1. Breaking changes cannot ship by mistake | The contract test classifies every change. The generator refuses a breaking one without `--accept-breaking-change`. The base-branch comparison keeps a deleted-and-regenerated snapshot red. CODEOWNERS routes `test_helpers/` and `worker_settings_compat.test.ts` to `@elastic/alertzero-common-layer`, so an accepted breaking change needs that team's review |
+| 1. Breaking changes cannot ship by mistake | The contract test classifies every change. The generator refuses a breaking one without `--accept-breaking-change`. The base-branch comparison keeps a deleted-and-regenerated snapshot red. CODEOWNERS routes `fixtures/`, `test_helpers/` and `worker_settings_compat.test.ts` to `@elastic/alertzero-common-layer`; once that team has write access to the repository, an accepted breaking change needs its review |
 | 2. Does not depend on documentation | The tests fire on the change itself, and each message names the next command |
 | 3. Customers are never affected | The guard is unit tests only. Test helpers and snapshots live in `test_helpers/`, which the distributable build excludes. The one runtime change moves a narrowed autonomy level to the nearest allowed level below it, never above, so page and workflow agree |
 | 4. Adding a setting never strands configured Workers | Defaults are filled at startup (already on `main`). An added field with a default, including a boolean or an array, produces only a `[safe]` line |
@@ -410,6 +430,13 @@ contain, then run the generator. The contract test reports `[safe] added Worker 
 - **Zod refinements are not in the contract.** The OpenAPI generator emits the `nonempty` and
   `date-math` formats as `.superRefine`, which JSON Schema cannot express, so tightening one is not
   caught. No settings field uses them today.
+- **Only the input side of the pipe is in the contract.** Each Worker's schema is piped into the
+  generated `WorkerSettings`. Tightening `WorkerSettings` itself fails stored documents with no
+  snapshot diff; type coupling catches most enum narrowing, not added bounds or patterns.
+- **Scheduled tasks are not re-synced at startup.** Lowering autonomy rewrites the workflow
+  document only; a trigger that depends on the level changes on the next save or enable.
+- **The startup pass reads at most 1000 managed workflow documents across spaces**, the same
+  platform limit every definition upgrade has. Documents past it heal on their next save.
 - **Render-helper edits** without a definition version bump are not caught, as described above.
 - **Rollback.** An older Kibana reading a document written by a newer one rejects unknown keys and
   shows the Worker as unavailable, leaving the stored values untouched. That is the MVP behaviour

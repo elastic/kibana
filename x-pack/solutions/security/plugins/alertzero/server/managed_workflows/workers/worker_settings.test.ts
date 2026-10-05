@@ -357,6 +357,17 @@ describe('createWorkerSettingsRegistration', () => {
       });
     });
 
+    it('saves the lowered level for a stored level this Worker no longer allows', () => {
+      expect(
+        registration.applyPatch(
+          { ...storedDefaults, autonomyLevel: 'supervised' },
+          { scheduleInterval: '6h' }
+        )
+      ).toEqual({
+        values: { ...storedDefaults, autonomyLevel: 'assisted', scheduleInterval: '6h' },
+      });
+    });
+
     it('replaces extras whole when the patch supplies them', () => {
       // Seeded at a level this Worker allows (manual/assisted); the assertion is about extras.
       expect(

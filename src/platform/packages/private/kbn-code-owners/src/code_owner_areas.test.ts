@@ -79,6 +79,7 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/streams-ui',
   ],
   security: [
+    'elastic/alertzero-common-layer',
     'elastic/contextual-security-apps',
     'elastic/core-analysis',
     'elastic/siem-conduit',

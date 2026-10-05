@@ -15,46 +15,39 @@ import {
   nearestLowerAutonomyLevel,
 } from '@kbn/alertzero-common';
 import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
-import { renderedWorkflowInstallFailure } from '../test_utils';
 import { readTestHelperFileAt, resolveBaseCommit } from './test_helpers/merge_base';
 import {
-  BREAKING_CHANGE_EXITS,
+  BREAKING_CHANGE_REMEDIES,
   SETTINGS_CONTRACT_SNAPSHOT_FILE,
   buildWorkerSettingsContracts,
   describeContractChanges,
+  describeUnacceptedBreakingChanges,
   diffWorkerSettingsContracts,
   parseSettingsContractSnapshot,
-  unacceptedBreakingChange,
 } from './test_helpers/settings_contract';
+import { workflowSchemaFailure } from './test_helpers/workflow_schema';
 import { createWorkerSettingsRegistration, toTemplateValues } from './worker_settings';
 
 type RegisteredWorkerId = (typeof SYSTEM_SECURITY_WORKER_IDS)[number];
 
 const TEST_HELPERS_DIR = resolve(__dirname, 'test_helpers');
 
-const BASE_COMMIT = resolveBaseCommit();
-
-const readAtBase = (fileName: string): string | undefined =>
-  BASE_COMMIT === undefined ? undefined : readTestHelperFileAt(BASE_COMMIT, fileName);
-
 /** Matches the `__SCREAMING_SNAKE__` placeholders that yamlTemplate definitions substitute. */
 const UNREPLACED_TOKEN_PATTERN = /__[A-Z][A-Z0-9_]*__/g;
 
-const FIXTURE_FAILURE_HINT = `Each fixture is a document a configured Worker stores. A change that stops one from reading needs ${BREAKING_CHANGE_EXITS}, recorded through the settings contract snapshot. Edit the fixture only after a reset, because the old shape then no longer exists.`;
+const FIXTURE_FAILURE_HINT = `Each fixture is a document a configured Worker stores. A change that stops one from reading needs ${BREAKING_CHANGE_REMEDIES}, recorded through the settings contract snapshot. Edit the fixture only after a reset, because the old shape then no longer exists.`;
 
-const VERSION_TRIPWIRE_HINT = `A settings version bump breaks every stored document of that Worker. It needs ${BREAKING_CHANGE_EXITS}.`;
+const SETTINGS_VERSION_BUMP_HINT = `A settings version bump breaks every stored document of that Worker. It needs ${BREAKING_CHANGE_REMEDIES}.`;
 
-const STORED_VALUE_EXITS = `A read must leave a stored value as it was. Keep the stored value and change only the label, or it needs ${BREAKING_CHANGE_EXITS}.`;
+const STORED_VALUE_CHANGED_HINT = `A read must leave a stored value as it was. Keep the stored value and change only the label, or it needs ${BREAKING_CHANGE_REMEDIES}.`;
 
 interface StoredFixture {
   workerId: RegisteredWorkerId;
   name: string;
   values: Record<string, unknown>;
   /**
-   * Lines of `<name>.expected.txt`: text the rendered YAML must contain, for values the fixture
-   * stores. Literals, not values imported from the defaults module: a renderer and a read path that
-   * are both wrong in the same way would still agree. Filled defaults are left out, because changing
-   * a default is safe.
+   * Lines of `<name>.expected.txt`. Literals, not imported defaults, so a renderer and read path
+   * wrong in the same way still fail.
    */
   expectedInRender: readonly string[] | undefined;
 }
@@ -234,18 +227,18 @@ const withStoredKeyChanged = (
 
 describe('stored Worker settings compatibility', () => {
   it.each([...SYSTEM_SECURITY_WORKER_IDS])(
-    '%s has a stored fixture with expected rendered values',
+    '%s has a current.json fixture with expected rendered values',
     (workerId) => {
-      const dir = `fixtures/${workerId.replaceAll('-', '_')}`;
-      const fixtures = loadFixtures(workerId);
-      if (fixtures.length === 0) {
+      const dir = fixtureDirectory(workerId);
+      const current = loadFixtures(workerId).find(({ name }) => name === 'current.json');
+      if (current === undefined) {
         throw new Error(
-          `Worker "${workerId}" has no stored-shape fixture. Add ${dir}/current.json with the settings a configured space stores for it, and ${dir}/current${EXPECTED_SUFFIX} with lines its rendered workflow must contain (plugin README, "Changing Worker settings safely").`
+          `Worker "${workerId}" has no current.json fixture. Add ${dir}/current.json with the settings a configured space stores for it today, and ${dir}/current${EXPECTED_SUFFIX} with lines its rendered workflow must contain (plugin README, "Changing Worker settings safely").`
         );
       }
-      if (fixtures.every(({ expectedInRender }) => expectedInRender === undefined)) {
+      if (current.expectedInRender === undefined) {
         throw new Error(
-          `No fixture of Worker "${workerId}" has expected rendered values. Add ${dir}/current${EXPECTED_SUFFIX} with lines its rendered workflow must contain, such as autonomy: "assisted".`
+          `Worker "${workerId}" has no ${dir}/current${EXPECTED_SUFFIX}. Add lines its rendered workflow must contain, such as autonomy: "assisted".`
         );
       }
     }
@@ -306,7 +299,6 @@ describe('stored Worker settings compatibility', () => {
       }
 
       if (expectedInRender) {
-        // A stored level the Worker no longer allows runs at the lower level it is moved to.
         const { autonomyLevel: runsAt } = expectedAfterUpgrade(workerId, values);
         const expected = expectedInRender.map((literal) =>
           literal === `autonomy: "${String(values.autonomyLevel)}"`
@@ -326,14 +318,14 @@ describe('stored Worker settings compatibility', () => {
   );
 
   it.each(ALL_FIXTURES)(
-    '$workerId $name would install as a valid workflow',
+    '$workerId $name renders a workflow that passes the workflow schema',
     ({ workerId, name, values }) => {
       const registration = createWorkerSettingsRegistration(workerId);
       const rendered = getYamlTemplate(workerId)(registration.upgradeStoredValues(values));
-      const invalid = renderedWorkflowInstallFailure(rendered);
+      const invalid = workflowSchemaFailure(rendered);
       if (invalid) {
         throw new Error(
-          `This stored shape would install as an invalid workflow (${workerId} ${name}): ${invalid}\n\n${FIXTURE_FAILURE_HINT}`
+          `This stored shape renders a workflow that fails the workflow schema (${workerId} ${name}): ${invalid}\n\n${FIXTURE_FAILURE_HINT}`
         );
       }
     }
@@ -355,7 +347,7 @@ describe('stored Worker settings compatibility', () => {
             .map((path) => path.join('.'))
             .join(
               ', '
-            )} on "${workerId}" fixture "${name}" left the rendered YAML unchanged. Skipping a startup fill when the document version moved is safe only when every stored key reaches the YAML.`
+            )} on "${workerId}" fixture "${name}" left the rendered YAML unchanged. When a settings save lands between the startup read and its rewrite, the rewrite is skipped, so the save's rendered YAML must carry every stored key. Forward the key in the Worker's yamlTemplate and bump the definition version, or stop storing it.`
         );
       }
     }
@@ -382,13 +374,12 @@ describe('stored Worker settings compatibility', () => {
         throw new Error(
           `Reading "${workerId}" document "${name}" changed a stored value: ${changed.join(
             '; '
-          )}.\n\n${STORED_VALUE_EXITS}`
+          )}.\n\n${STORED_VALUE_CHANGED_HINT}`
         );
       }
     }
   );
 
-  /** Every level on the shared scale a Worker does not allow, stored on its current.json. */
   const DISALLOWED_LEVEL_DOCUMENTS = SYSTEM_SECURITY_WORKER_IDS.flatMap((workerId) => {
     const current = ALL_FIXTURES.find(
       (fixture) => fixture.workerId === workerId && fixture.name === 'current.json'
@@ -441,11 +432,15 @@ describe('stored Worker settings compatibility', () => {
     });
 
     it('records a decision for any change that breaks documents stored by the base branch', () => {
-      const baseText = readAtBase(SETTINGS_CONTRACT_SNAPSHOT_FILE);
+      const baseCommit = resolveBaseCommit();
+      const baseText =
+        baseCommit === undefined
+          ? undefined
+          : readTestHelperFileAt(baseCommit, SETTINGS_CONTRACT_SNAPSHOT_FILE);
       if (baseText === undefined) {
         return;
       }
-      const failure = unacceptedBreakingChange(
+      const failure = describeUnacceptedBreakingChanges(
         parseSettingsContractSnapshot(baseText),
         committed,
         current
@@ -464,7 +459,7 @@ describe('stored Worker settings compatibility', () => {
         throw new Error(
           `Worker "${workerId}" settings version is ${String(
             settingsVersion
-          )}, not 1. ${VERSION_TRIPWIRE_HINT}`
+          )}, not 1. ${SETTINGS_VERSION_BUMP_HINT}`
         );
       }
     }

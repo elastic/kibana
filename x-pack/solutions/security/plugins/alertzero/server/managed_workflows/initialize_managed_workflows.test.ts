@@ -258,7 +258,7 @@ describe('initializeManagedWorkflows', () => {
         expectedDocumentVersion: 9,
       });
       expect(logger.info).toHaveBeenCalledWith(
-        expect.stringContaining('autonomy lowered from "supervised" to "assisted"')
+        expect.stringContaining('lowering autonomy from "supervised" to "assisted"')
       );
       const upgradeOrder = client.install.mock.invocationCallOrder.at(-1) ?? 0;
       expect(upgradeOrder).toBeLessThan(client.ready.mock.invocationCallOrder[0] ?? 0);

@@ -17,10 +17,7 @@ const isWatchAutonomyLevel = (value: unknown): value is WatchAutonomyLevel =>
 
 const rank = (level: WatchAutonomyLevel): number => WATCH_AUTONOMY_LEVELS.indexOf(level);
 
-/**
- * The most autonomous level in `allowed` that is strictly less autonomous than `level`, or
- * undefined when there is none. Never goes up: an unattended Worker is never made more autonomous.
- */
+/** The most autonomous level in `allowed` strictly below `level`, or undefined. */
 export const nearestLowerAutonomyLevel = (
   allowed: readonly WatchAutonomyLevel[],
   level: WatchAutonomyLevel
@@ -49,8 +46,7 @@ const fillMissingExtras = (
 ): Record<string, unknown> => {
   const defaults = declaration.extras?.defaultValue;
   if (defaults === undefined) {
-    // The Worker no longer declares extras (e.g. a dial was retired): drop a stale stored
-    // value rather than let it fail the Worker's now-narrower complete schema.
+    // Drop stale extras so the narrower complete schema does not reject them.
     if (!Object.hasOwn(stored, 'extras')) {
       return stored;
     }
@@ -68,7 +64,6 @@ const fillMissingExtras = (
   if (missing.length === 0) {
     return stored;
   }
-  // Stored keys win, including a present value that is out of range.
   return { ...stored, extras: { ...defaults, ...extras } };
 };
 
@@ -89,10 +84,8 @@ const lowerDisallowedAutonomy = (
 };
 
 /**
- * Brings an installed document up to the current declaration without replacing what it chose:
- * fills schedule and extras keys it does not have yet, drops `extras` when the Worker declares
- * none, and lowers an autonomy level the Worker no longer allows to the nearest allowed level
- * below it. Returns the same object when nothing changes, so a caller can skip a rewrite.
+ * Brings a stored document up to the current declaration without replacing what it chose; returns
+ * the same object when nothing changes, so a caller can skip a rewrite.
  */
 export const upgradeStoredWorkerSettings = (
   declaration: WorkerSettingsDeclaration,

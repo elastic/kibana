@@ -201,7 +201,7 @@ Two different version fields:
 | YAML `version: "1"` | Top of each Worker `*.yaml` | Workflow document schema / format version (stays `"1"` until the YAML language changes). |
 | Definition `version: N` | The Worker's module under `managed/definitions/alertzero/` | **Managed reconciliation counter** for `@kbn/workflows/managed`. Bump when you need install/`ready()` to re-apply the definition (`versionStrategy: 'auto'`). |
 
-Start a new definition at `1` and increment it for intentional definition changes. This counter is not product SemVer; once a definition has been published, do not reset it without an explicit managed-document migration decision. A render-helper change needs a definition version bump.
+Start a new definition at `1` and increment it for intentional definition changes. This counter is not product SemVer; once a definition has been published, do not reset it without an explicit managed-document migration decision. A change to a render helper in `src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/worker_template_values.ts` needs a definition version bump too; no test catches a missing one.
 
 ### Central AlertZero Worker registry guide
 
@@ -289,25 +289,30 @@ Hard Worker dependencies (`WORKER_DEPENDENCIES`) are judged client-side against 
 
 Every configured space stores its own copy of a Worker's settings, and that copy must keep reading after your change. `worker_settings_compat.test.ts` enforces this; you do not need to remember any of it.
 
-- **Settings contract.** `server/managed_workflows/workers/test_helpers/settings_contract.snapshot.json` records each Worker's settings schema and defaults. When they change, the test says whether the change is safe for stored documents and gives the command that updates the snapshot. For a breaking change, that command refuses to run until you pass `--accept-breaking-change <issue-url>`, naming the issue where the reset of the affected environments was agreed with the Common Worker Layer team. That URL is written into the snapshot. A PR that breaks the base branch's contract without a newly accepted breaking change stays red. The flag exists only while AlertZero has no customers; [security-team#19312](https://github.com/elastic/security-team/issues/19312) replaces it with a migration check.
-- **Stored fixtures.** `fixtures/<worker_id_in_snake_case>/*.json` are documents configured Workers store. Every fixture must read, render, install as a valid workflow, and read back unchanged. Next to a fixture, `<name>.expected.txt` lists lines its rendered workflow must contain, such as `autonomy: "assisted"`; list only values the fixture stores. A new Worker needs `current.json` and `current.expected.txt`.
+- **Settings contract.** `server/managed_workflows/workers/test_helpers/settings_contract.snapshot.json` records each Worker's settings schema and defaults. When they change, the test says whether the change is safe for stored documents. Update the snapshot with `node x-pack/solutions/security/plugins/alertzero/scripts/generate_settings_contract_snapshot.js`. For a breaking change, that command refuses to run until you pass `--accept-breaking-change <issue-url>`, naming the issue where the reset of the affected environments was agreed with the Common Worker Layer team. That URL is written into the snapshot. A PR that breaks the base branch's contract without a newly accepted breaking change stays red. The flag exists only while AlertZero has no customers; [security-team#19312](https://github.com/elastic/security-team/issues/19312) replaces it with a migration check.
+- **Stored fixtures.** `fixtures/<worker_id_in_snake_case>/*.json` are documents configured Workers store; `current.json` is the shape a space stores today. Every fixture must read, render a workflow that passes the workflow schema, and read back unchanged. Every stored setting must reach the rendered workflow; a setting the YAML does not use fails. Next to a fixture, `<name>.expected.txt` lists lines its rendered workflow must contain, such as `autonomy: "assisted"`; list only values the fixture stores. A new Worker needs `current.json` and `current.expected.txt`.
+- **Unclassified schema features.** A failure saying "Unclassified … Teach the Worker settings contract check about it" means the schema uses a JSON Schema construct the classifier does not know. Ask the Common Worker Layer team to extend `test_helpers/settings_contract.ts`; do not work around it.
 
 Workflow versioning is separate: a YAML edit needs a definition `version` bump, which `managed_workflow_definitions.test.ts` already enforces.
 
 | Change | Result | What to do |
 |---|---|---|
-| New setting with a default, loosened bound, added allowed value | Safe | Run the snapshot command. Bump the definition version when the YAML changes. |
+| New setting with a default, loosened bound, added allowed value, new Worker | Safe | Run the snapshot command. Bump the definition version when the YAML changes. |
 | New schedule on an existing Worker | Safe | As above. The schedule starts on the next save or enable in each space. |
 | Changed default | Safe | Run the snapshot command. It reaches fresh installs only; stored values are not rewritten. |
-| YAML or render-helper edit | Not a settings change | Bump the definition version. |
-| Removed autonomy level that has a lower allowed level (for example `supervised` when `assisted` stays) | Safe | Run the snapshot command. Stored documents holding the removed level are lowered to the nearest allowed level at startup. |
-| Renamed, removed or retyped setting; tightened bound; removed allowed value (autonomy: the lowest allowed level); new setting without a default; settings version bump | Breaking | Prefer keeping the stored key and changing only the label. Otherwise, before customers, a coordinated reset recorded with `--accept-breaking-change <issue-url>`; after that, a migration ([security-team#19312](https://github.com/elastic/security-team/issues/19312)). |
+| YAML edit | Not a settings change | Bump the definition version (enforced). |
+| Render-helper edit (`src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/worker_template_values.ts`) | Not a settings change | Bump the definition version yourself; no test catches a missing bump. |
+| Removed autonomy level that has a lower allowed level (for example `supervised` when `assisted` stays) | Safe | Run the snapshot command. Stored documents holding the removed level are lowered to the nearest allowed level at startup; scheduled runs pick that up on the next save or enable in each space. |
+| Removed `extras` from a Worker | Safe | Run the snapshot command. Stored extras are dropped at startup. |
+| Renamed, removed or retyped setting; tightened bound; removed allowed value (autonomy: the lowest allowed level); new setting without a default, including a required key inside a nested object; removed Worker; settings version bump | Breaking | Prefer keeping the stored key and changing only the label. Otherwise, before customers, a coordinated reset recorded with `--accept-breaking-change <issue-url>`; after that, a migration ([security-team#19312](https://github.com/elastic/security-team/issues/19312)). |
 
-The contract covers what JSON Schema can express. A zod refinement (`.refine`, `.superRefine`, which the OpenAPI generator emits for the `nonempty` and `date-math` formats) is not part of it, so tightening one is not caught.
+`Safe` means safe on upgrade. While a rollout or rollback mixes versions, a Kibana that predates an added field shows that Worker as unavailable and rejects settings saves until every node runs the same version.
+
+The contract covers what JSON Schema can express on the input side of each Worker's schema. A zod refinement (`.refine`, `.superRefine`, which the OpenAPI generator emits for the `nonempty` and `date-math` formats) is not part of it, and neither is the generated `WorkerSettings` schema the input is piped into, so tightening either is not caught.
 
 ### Pre-customer state
 
-AlertZero is not live. A new required extra or schedule key that has a default is filled when it is absent. Renames, type changes, and other breaking shape changes still have no compatibility path. A deliberate breaking change needs a migration under [security-team#19312](https://github.com/elastic/security-team/issues/19312) or a reset decision. When documents from earlier development builds do not validate, the fix is a clean reset of the affected per-space Worker documents, coordinated with the Watch teams.
+AlertZero is not live. A new required extra or schedule key that has a default is filled when it is absent. Renames, type changes, and other breaking shape changes still have no compatibility path. A deliberate breaking change needs a migration under [security-team#19312](https://github.com/elastic/security-team/issues/19312) or a reset decision. When documents from earlier development builds do not validate, the fix is a clean reset of the affected per-space Worker documents, agreed with the Common Worker Layer team on an issue and recorded with `--accept-breaking-change <issue-url>` (see [Changing Worker settings safely](#changing-worker-settings-safely)).
 
 ## Working-group contribution map
 

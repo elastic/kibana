@@ -3220,6 +3220,7 @@ x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule
 x-pack/solutions/security/plugins/security_solution/server/workflows/alert_analysis_workflow @elastic/security-investigations
 
 # AlertZero Worker settings contract
+/x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/fixtures @elastic/alertzero-common-layer
 /x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/test_helpers @elastic/alertzero-common-layer
 /x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/worker_settings_compat.test.ts @elastic/alertzero-common-layer
 

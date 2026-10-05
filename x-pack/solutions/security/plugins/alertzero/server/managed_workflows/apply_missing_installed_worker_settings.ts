@@ -10,13 +10,8 @@ import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/type
 import { installRegisteredWorker, workerRegistry } from './worker_registry';
 
 /**
- * Rewrites installed Worker documents that are behind the current declaration: missing extras or
- * schedule keys are filled from the current defaults, and an autonomy level the Worker no longer
- * allows is lowered to the nearest allowed level below it. Reconciliation re-renders from the
- * stored values and does neither, so this has to run before `ready()` or the upgrade keeps the old
- * shape and the running workflow keeps the old level. A document that is still invalid afterwards
- * is left alone. The install is bound to the listed document version, so a settings save that
- * landed after the list is not overwritten.
+ * Must run before `ready()`: reconciliation re-renders from stored values without upgrading them.
+ * Each rewrite is bound to the listed document version so a later settings save is not overwritten.
  */
 export const applyMissingInstalledWorkerSettings = async (
   client: PluginScopedManagedWorkflowsApi,
@@ -64,14 +59,14 @@ export const applyMissingInstalledWorkerSettings = async (
         values: upgraded,
         expectedDocumentVersion: state.documentVersion,
       });
-      const lowered =
+      const autonomyLoweredNote =
         upgraded.autonomyLevel !== state.templateValues.autonomyLevel
-          ? `, autonomy lowered from "${String(state.templateValues.autonomyLevel)}" to "${String(
+          ? `, lowering autonomy from "${String(state.templateValues.autonomyLevel)}" to "${String(
               upgraded.autonomyLevel
             )}" because the Worker no longer allows it`
           : '';
       logger.info(
-        `Reinstalled AlertZero worker "${state.workflowId}" in space "${state.spaceId}" with its stored settings upgraded to the current declaration${lowered}`
+        `Requested a reinstall of AlertZero worker "${state.workflowId}" in space "${state.spaceId}" with its stored settings upgraded to the current declaration${autonomyLoweredNote}. The write is skipped if the document changed since it was read.`
       );
     } catch (error) {
       logger.warn(

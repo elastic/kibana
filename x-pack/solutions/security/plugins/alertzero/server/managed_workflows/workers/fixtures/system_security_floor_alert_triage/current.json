@@ -1,4 +1,7 @@
 {
   "settingsVersion": 1,
-  "autonomyLevel": "assisted"
+  "autonomyLevel": "supervised",
+  "extras": {
+    "autoCloseConfidenceScoreMinThreshold": 0.9
+  }
 }

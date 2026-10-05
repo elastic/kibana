@@ -32,12 +32,8 @@ type RegisteredWorkerId =
   | typeof SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID;
 
 const WORKER_SETTINGS_VERSIONS: Record<RegisteredWorkerId, number> = {
-  // Stays at 1: the narrowed `allowedAutonomyLevels` (assisted dropped) and the new
-  // `extras.autoCloseConfidenceScoreMinThreshold` field are both handled by
-  // `upgradeStoredWorkerSettings`, which lowers a stored `assisted` to `manual` and backfills the
-  // field onto documents that predate it. A version
-  // bump here would reject every already-installed v1 document outright — the version check in
-  // `parseWorkerValues` runs after those defaults are filled but rejects on the mismatch anyway.
+  // A bump makes `parseWorkerValues` reject every document stored at the previous version, even
+  // after `upgradeStoredWorkerSettings`.
   [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: 1,
   [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: 1,
   [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: 1,
