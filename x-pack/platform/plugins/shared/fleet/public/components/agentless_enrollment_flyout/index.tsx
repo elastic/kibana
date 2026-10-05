@@ -26,6 +26,7 @@ import { AGENTS_PREFIX, FLEET_CONNECTORS_PACKAGE, MAX_FLYOUT_WIDTH } from '../..
 import { useGetAgentsQuery, useGetPackageInfoByKeyQuery, useStartServices } from '../../hooks';
 import { buildPolicyBaseIdWithFallbackKuery } from '../../../common/services';
 
+import { getComponentAlertLevel } from '../agentless_status_details_flyout/component_health';
 import { AgentlessStepConfirmEnrollment } from './step_confirm_enrollment';
 import { AgentlessStepConfirmData } from './step_confirm_data';
 import { AgentlessStepConfigureConnector } from './step_configure_connector';
@@ -53,6 +54,7 @@ export const AgentlessEnrollmentFlyout = ({
   packageInfo,
   selectedInput,
   agentPolicy,
+  packagePolicy,
   connectors,
 }: AgentlessEnrollmentFlyoutProps) => {
   const { notifications } = useStartServices();
@@ -69,7 +71,9 @@ export const AgentlessEnrollmentFlyout = ({
   );
   const { data: agentsData, error: agentsError } = useGetAgentsQuery(
     { kuery: agentKuery },
-    { refetchInterval: agentOnline ? false : REFRESH_INTERVAL_MS }
+    // Keep polling after the agent is online when component health is displayed, so the
+    // diagnostics reflect recoveries and later failures. Step statuses stay latched.
+    { refetchInterval: agentOnline && !packagePolicy ? false : REFRESH_INTERVAL_MS }
   );
   const agentData = agentsData?.data?.items?.[0];
 
@@ -100,6 +104,10 @@ export const AgentlessEnrollmentFlyout = ({
       setConfirmDataStatus('disabled');
     }
   }, [agentData, agentsError, notifications.toasts]);
+
+  // An online agent with a failed component is not a successful deployment.
+  const hasFailedComponents =
+    !!agentData && !!packagePolicy && getComponentAlertLevel(agentData, packagePolicy) === 'failed';
 
   // Calculate integration title from the base package info
   const { data: packageInfoData } = useGetPackageInfoByKeyQuery(
@@ -151,10 +159,12 @@ export const AgentlessEnrollmentFlyout = ({
                 <AgentlessStepConfirmEnrollment
                   agent={agentData}
                   agentPolicy={agentPolicy}
+                  packagePolicy={packagePolicy}
+                  policyName={policyName}
                   integrationTitle={integrationTitle}
                 />
               ),
-              status: confirmEnrollmentStatus,
+              status: hasFailedComponents ? 'danger' : confirmEnrollmentStatus,
             },
             {
               title: isConnector
