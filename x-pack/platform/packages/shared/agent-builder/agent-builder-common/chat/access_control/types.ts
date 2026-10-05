@@ -43,3 +43,46 @@ export const normalizeConversationAccessControl = (
     entries: accessControl?.entries ?? defaults.entries,
   };
 };
+
+/** True when this conversation is readable by any user with access to its agent. */
+export const isPublicConversation = (
+  accessControl: Partial<ConversationAccessControl> | undefined
+): boolean =>
+  normalizeConversationAccessControl(accessControl).access_mode ===
+  ConversationAccessControlMode.Public;
+
+/** True when this conversation is shared with specific users rather than with everyone. */
+export const isPrivatelySharedConversation = (
+  accessControl: Partial<ConversationAccessControl> | undefined
+): boolean => {
+  const { access_mode: accessMode, entries } = normalizeConversationAccessControl(accessControl);
+
+  return accessMode === ConversationAccessControlMode.Private && entries.length > 0;
+};
+
+/** True when someone other than the owner can read and converse in this conversation. */
+export const isSharedConversation = (
+  accessControl: Partial<ConversationAccessControl> | undefined
+): boolean => isPublicConversation(accessControl) || isPrivatelySharedConversation(accessControl);
+
+/** An access-control entry without the server-assigned `added_at` timestamp, for write operations. */
+export type ConversationAccessControlEntryInput = Omit<ConversationAccessControlEntry, 'added_at'>;
+
+/** Access-control shape for write operations. `entries` is optional and defaults to `[]` server-side. */
+export interface ConversationAccessControlInput {
+  access_mode: ConversationAccessControlMode;
+  entries?: ConversationAccessControlEntryInput[];
+}
+
+export const CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES = 100;
+
+export const CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH = 1024;
+
+const CONVERSATION_ACCESS_CONTROL_ROLES: readonly string[] = Object.values(
+  ConversationAccessControlRole
+);
+
+export const isConversationAccessControlRole = (
+  value: unknown
+): value is ConversationAccessControlRole =>
+  typeof value === 'string' && CONVERSATION_ACCESS_CONTROL_ROLES.includes(value);

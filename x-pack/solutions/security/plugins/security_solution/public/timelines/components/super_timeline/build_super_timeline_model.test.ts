@@ -57,7 +57,7 @@ const makeTimeline = (overrides: Partial<TimelineModel>): TimelineModel => ({
 describe('buildSuperTimelineModel', () => {
   describe('basic structure', () => {
     it('returns a model with isSuperTimeline: true and SUPER_TIMELINE_TITLE', () => {
-      const { model } = buildSuperTimelineModel([makeTimeline({})], deps);
+      const model = buildSuperTimelineModel([makeTimeline({})], deps);
       expect(model.isSuperTimeline).toBe(true);
       expect(model.title).toBe(SUPER_TIMELINE_TITLE);
     });
@@ -65,12 +65,12 @@ describe('buildSuperTimelineModel', () => {
     it('carries the source savedObjectIds in superTimelineSourceIds', () => {
       const t1 = makeTimeline({ savedObjectId: 'id-a' });
       const t2 = makeTimeline({ savedObjectId: 'id-b' });
-      const { model } = buildSuperTimelineModel([t1, t2], deps);
+      const model = buildSuperTimelineModel([t1, t2], deps);
       expect(model.superTimelineSourceIds).toEqual(['id-a', 'id-b']);
     });
 
     it('sets savedObjectId to null (transient, never persisted)', () => {
-      const { model } = buildSuperTimelineModel([makeTimeline({})], deps);
+      const model = buildSuperTimelineModel([makeTimeline({})], deps);
       expect(model.savedObjectId).toBeNull();
     });
 
@@ -93,16 +93,15 @@ describe('buildSuperTimelineModel', () => {
           },
         },
       });
-      const { model } = buildSuperTimelineModel([t], deps);
+      const model = buildSuperTimelineModel([t], deps);
       expect(model.dataProviders).toEqual([]);
       expect(model.kqlQuery.filterQuery).toBeNull();
     });
 
     it('returns an empty model when no timelines are provided', () => {
-      const { model, skippedQueryTimelines } = buildSuperTimelineModel([], deps);
+      const model = buildSuperTimelineModel([], deps);
       expect(model.isSuperTimeline).toBe(true);
       expect(model.superTimelineSourceIds).toEqual([]);
-      expect(skippedQueryTimelines).toEqual([]);
       // dateRange must be the safe default, not empty strings that break the time-range picker
       expect(model.dateRange).toEqual(timelineDefaults.dateRange);
     });
@@ -112,7 +111,7 @@ describe('buildSuperTimelineModel', () => {
     it('unions pinned events across timelines', () => {
       const t1 = makeTimeline({ pinnedEventIds: { 'event-a': true, 'event-b': true } });
       const t2 = makeTimeline({ pinnedEventIds: { 'event-c': true } });
-      const { model } = buildSuperTimelineModel([t1, t2], deps);
+      const model = buildSuperTimelineModel([t1, t2], deps);
       expect(model.pinnedEventIds).toEqual({
         'event-a': true,
         'event-b': true,
@@ -123,7 +122,7 @@ describe('buildSuperTimelineModel', () => {
     it('deduplicates overlapping pinned events without duplicating the entry', () => {
       const t1 = makeTimeline({ pinnedEventIds: { 'event-shared': true } });
       const t2 = makeTimeline({ pinnedEventIds: { 'event-shared': true } });
-      const { model } = buildSuperTimelineModel([t1, t2], deps);
+      const model = buildSuperTimelineModel([t1, t2], deps);
       // Record deduplication: key exists once
       expect(Object.keys(model.pinnedEventIds)).toHaveLength(1);
       expect(model.pinnedEventIds['event-shared']).toBe(true);
@@ -134,7 +133,7 @@ describe('buildSuperTimelineModel', () => {
     it('unions noteIds across timelines without duplicating shared notes', () => {
       const t1 = makeTimeline({ noteIds: ['note-1', 'note-shared'] });
       const t2 = makeTimeline({ noteIds: ['note-2', 'note-shared'] });
-      const { model } = buildSuperTimelineModel([t1, t2], deps);
+      const model = buildSuperTimelineModel([t1, t2], deps);
       // note-shared appears once
       expect(model.noteIds).toEqual(['note-1', 'note-shared', 'note-2']);
     });
@@ -142,7 +141,7 @@ describe('buildSuperTimelineModel', () => {
     it('merges eventIdToNoteIds without duplicating note references on shared events', () => {
       const t1 = makeTimeline({ eventIdToNoteIds: { 'event-x': ['note-1', 'note-shared'] } });
       const t2 = makeTimeline({ eventIdToNoteIds: { 'event-x': ['note-2', 'note-shared'] } });
-      const { model } = buildSuperTimelineModel([t1, t2], deps);
+      const model = buildSuperTimelineModel([t1, t2], deps);
       const notes = model.eventIdToNoteIds['event-x'];
       expect(notes).toContain('note-1');
       expect(notes).toContain('note-2');
@@ -154,7 +153,7 @@ describe('buildSuperTimelineModel', () => {
     it('combines eventIdToNoteIds from separate events', () => {
       const t1 = makeTimeline({ eventIdToNoteIds: { 'event-a': ['note-1'] } });
       const t2 = makeTimeline({ eventIdToNoteIds: { 'event-b': ['note-2'] } });
-      const { model } = buildSuperTimelineModel([t1, t2], deps);
+      const model = buildSuperTimelineModel([t1, t2], deps);
       expect(model.eventIdToNoteIds['event-a']).toEqual(['note-1']);
       expect(model.eventIdToNoteIds['event-b']).toEqual(['note-2']);
     });
@@ -171,7 +170,7 @@ describe('buildSuperTimelineModel', () => {
       const t3 = makeTimeline({
         dateRange: { start: '2024-01-02T00:00:00.000Z', end: '2024-01-06T00:00:00.000Z' },
       });
-      const { model } = buildSuperTimelineModel([t1, t2, t3], deps);
+      const model = buildSuperTimelineModel([t1, t2, t3], deps);
       expect(model.dateRange.start).toBe('2024-01-01T00:00:00.000Z');
       expect(model.dateRange.end).toBe('2024-01-07T00:00:00.000Z');
     });
@@ -181,7 +180,7 @@ describe('buildSuperTimelineModel', () => {
       // false by char code, but now-7d is actually an earlier point in time than now-24h.
       const t1 = makeTimeline({ dateRange: { start: 'now-24h', end: 'now' } });
       const t2 = makeTimeline({ dateRange: { start: 'now-7d', end: 'now' } });
-      const { model } = buildSuperTimelineModel([t1, t2], deps);
+      const model = buildSuperTimelineModel([t1, t2], deps);
       // now-7d is earlier, so it should win as the start
       expect(model.dateRange.start).toBe('now-7d');
       expect(model.dateRange.end).toBe('now');
@@ -194,7 +193,7 @@ describe('buildSuperTimelineModel', () => {
         dateRange: { start: '2020-01-01T00:00:00.000Z', end: '2021-01-01T00:00:00.000Z' },
       });
       const t2 = makeTimeline({ dateRange: { start: 'now-7d', end: 'now' } });
-      const { model } = buildSuperTimelineModel([t1, t2], deps);
+      const model = buildSuperTimelineModel([t1, t2], deps);
       expect(model.dateRange.start).toBe('2020-01-01T00:00:00.000Z');
       expect(model.dateRange.end).toBe('now');
     });
@@ -218,7 +217,7 @@ describe('buildSuperTimelineModel', () => {
         },
       });
       // t1 has the earlier start, t2 has the later end
-      const { model } = buildSuperTimelineModel([t1, t2], deps);
+      const model = buildSuperTimelineModel([t1, t2], deps);
       expect(model.dateRange.start).toBe(EPOCH_JAN_2022 as unknown as string);
       expect(model.dateRange.end).toBe(EPOCH_JAN_2024 as unknown as string);
     });
@@ -234,13 +233,13 @@ describe('buildSuperTimelineModel', () => {
     it('unions columns in first-seen order without duplicates', () => {
       const t1 = makeTimeline({ columns: [col('@timestamp'), col('host.name')] });
       const t2 = makeTimeline({ columns: [col('host.name'), col('user.name')] });
-      const { model } = buildSuperTimelineModel([t1, t2], deps);
+      const model = buildSuperTimelineModel([t1, t2], deps);
       expect(model.columns.map((c) => c.id)).toEqual(['@timestamp', 'host.name', 'user.name']);
     });
 
     it('falls back to defaultColumns when all source timelines have no columns', () => {
       const t1 = makeTimeline({ columns: [] });
-      const { model } = buildSuperTimelineModel([t1], deps);
+      const model = buildSuperTimelineModel([t1], deps);
       expect(model.columns).toEqual(timelineDefaults.defaultColumns);
     });
   });
@@ -282,9 +281,8 @@ describe('buildSuperTimelineModel', () => {
         ],
       });
 
-      const { model, skippedQueryTimelines } = buildSuperTimelineModel([t1, t2], deps);
+      const model = buildSuperTimelineModel([t1, t2], deps);
 
-      expect(skippedQueryTimelines).toHaveLength(0);
       expect(model.filters).toHaveLength(1);
       const combinedRaw = model.filters![0];
       expect(isCombinedFilter(combinedRaw)).toBe(true);
@@ -332,7 +330,7 @@ describe('buildSuperTimelineModel', () => {
         ],
       });
 
-      const { model } = buildSuperTimelineModel([t1, t2], deps);
+      const model = buildSuperTimelineModel([t1, t2], deps);
 
       const combined = model.filters![0];
       // One sub-filter per source timeline
@@ -341,15 +339,13 @@ describe('buildSuperTimelineModel', () => {
 
     it('produces no filters when all timelines have empty queries', () => {
       const t1 = makeTimeline({ dataProviders: [], kqlQuery: { filterQuery: null }, filters: [] });
-      const { model, skippedQueryTimelines } = buildSuperTimelineModel([t1], deps);
+      const model = buildSuperTimelineModel([t1], deps);
       expect(model.filters).toHaveLength(0);
-      expect(skippedQueryTimelines).toHaveLength(0);
     });
 
-    it('reports reason "unknown" when combineQueries produces non-plain-object JSON', () => {
-      // WHY: combineQueries may (theoretically) return a serialized JSON array or primitive in edge
-      // cases. The old code set reason: 'eql', which would misidentify a KQL timeline as EQL in the
-      // warning toast and confuse the user. 'unknown' is accurate and non-misleading.
+    it('produces no filter clause when combineQueries returns non-plain-object JSON (internal edge case)', () => {
+      // WHY: combineQueries may (theoretically) serialize to a JSON array or primitive in edge cases.
+      // The timeline is still included (pins/notes/dateRange), but the malformed filter is dropped silently.
       const spy = jest.spyOn(kuery, 'combineQueries').mockReturnValueOnce({
         filterQuery: JSON.stringify([1, 2, 3]),
         kqlError: undefined,
@@ -360,18 +356,19 @@ describe('buildSuperTimelineModel', () => {
         title: 'Bad Serialize',
         filters: [],
       });
-      const { model, skippedQueryTimelines } = buildSuperTimelineModel([t], deps);
-      expect(skippedQueryTimelines).toHaveLength(1);
-      expect(skippedQueryTimelines[0].reason).toBe('unknown');
+      const model = buildSuperTimelineModel([t], deps);
       expect(model.filters).toHaveLength(0);
       spy.mockRestore();
     });
   });
 
-  describe('EQL / ESQL handling', () => {
-    it('reports an EQL-only timeline in skippedQueryTimelines and still aggregates its pins/notes', () => {
+  describe('EQL / ESQL handling — queries are disregarded, Query-tab state is used', () => {
+    it('an EQL timeline with an empty Query tab contributes no query clause but still merges its pins and notes', () => {
+      // WHY: the product requirement is to "utilize the main timeline query" and disregard EQL/ES|QL.
+      // An EQL timeline with no Query-tab content should produce no filter clause — same as a KQL
+      // timeline with an empty Query tab — but its pinned events and notes must still aggregate.
       const eqlTimeline = makeTimeline({
-        savedObjectId: 'eql-timeline',
+        savedObjectId: 'eql-empty-query-tab',
         title: 'EQL Investigation',
         eqlOptions: {
           eventCategoryField: 'event.category',
@@ -386,32 +383,20 @@ describe('buildSuperTimelineModel', () => {
         noteIds: ['note-from-eql'],
       });
 
-      const { model, skippedQueryTimelines } = buildSuperTimelineModel([eqlTimeline], deps);
+      const model = buildSuperTimelineModel([eqlTimeline], deps);
 
-      expect(skippedQueryTimelines).toHaveLength(1);
-      expect(skippedQueryTimelines[0]).toMatchObject({
-        id: 'eql-timeline',
-        title: 'EQL Investigation',
-        reason: 'eql',
-      });
-      // Pinned events and notes still aggregate
+      // No query clause contributed (empty Query tab)
+      expect(model.filters).toHaveLength(0);
+      // Pins and notes still aggregate
       expect(model.pinnedEventIds['pinned-from-eql']).toBe(true);
       expect(model.noteIds).toContain('note-from-eql');
-      // But no query filter from this timeline
-      expect(model.filters).toHaveLength(0);
     });
 
-    it('reports an ESQL-only timeline in skippedQueryTimelines and still aggregates its pins/notes', () => {
+    it('an ES|QL timeline with an empty Query tab contributes no query clause but still merges its pins and notes', () => {
       const esqlTimeline = makeTimeline({
-        savedObjectId: 'esql-timeline',
+        savedObjectId: 'esql-empty-query-tab',
         title: 'ESQL Investigation',
         savedSearchId: 'some-saved-search-id',
-        eqlOptions: {
-          eventCategoryField: 'event.category',
-          timestampField: '@timestamp',
-          query: '',
-          size: 100,
-        },
         dataProviders: [],
         kqlQuery: { filterQuery: null },
         filters: [],
@@ -419,20 +404,78 @@ describe('buildSuperTimelineModel', () => {
         noteIds: ['note-from-esql'],
       });
 
-      const { model, skippedQueryTimelines } = buildSuperTimelineModel([esqlTimeline], deps);
+      const model = buildSuperTimelineModel([esqlTimeline], deps);
 
-      expect(skippedQueryTimelines).toHaveLength(1);
-      expect(skippedQueryTimelines[0]).toMatchObject({
-        id: 'esql-timeline',
-        title: 'ESQL Investigation',
-        reason: 'esql',
-      });
+      expect(model.filters).toHaveLength(0);
       expect(model.pinnedEventIds['pinned-from-esql']).toBe(true);
       expect(model.noteIds).toContain('note-from-esql');
-      expect(model.filters).toHaveLength(0);
     });
 
-    it('merges KQL timelines and skips EQL/ESQL timelines in one call', () => {
+    it('an EQL timeline WITH a populated Query tab merges that KQL query into the OR filter', () => {
+      // WHY: "utilize the main timeline query" — if an EQL-mode timeline also has a Query-tab
+      // filter, that filter must be merged. The EQL expression itself is never surfaced.
+      const eqlWithKqlFilter = makeTimeline({
+        savedObjectId: 'eql-with-query-tab',
+        title: 'EQL + Query tab',
+        eqlOptions: {
+          eventCategoryField: 'event.category',
+          timestampField: '@timestamp',
+          query: 'process where process.name == "cmd.exe"',
+          size: 100,
+        },
+        filters: [
+          {
+            meta: {
+              alias: null,
+              negate: false,
+              disabled: false,
+              type: 'phrase',
+              key: 'host.name',
+              params: { query: 'web' },
+            },
+            query: { match_phrase: { 'host.name': 'web' } },
+          },
+        ],
+      });
+
+      const model = buildSuperTimelineModel([eqlWithKqlFilter], deps);
+
+      // Query-tab filter merged
+      expect(model.filters).toHaveLength(1);
+      expect(isCombinedFilter(model.filters![0])).toBe(true);
+      // The EQL expression must not appear anywhere in the filter
+      expect(JSON.stringify(model.filters)).not.toContain('process.name');
+      expect(JSON.stringify(model.filters)).not.toContain('cmd.exe');
+    });
+
+    it('an ES|QL timeline WITH a populated Query tab merges that KQL query into the OR filter', () => {
+      const esqlWithKqlFilter = makeTimeline({
+        savedObjectId: 'esql-with-query-tab',
+        title: 'ES|QL + Query tab',
+        savedSearchId: 'some-saved-search-id',
+        filters: [
+          {
+            meta: {
+              alias: null,
+              negate: false,
+              disabled: false,
+              type: 'phrase',
+              key: 'event.category',
+              params: { query: 'process' },
+            },
+            query: { match_phrase: { 'event.category': 'process' } },
+          },
+        ],
+      });
+
+      const model = buildSuperTimelineModel([esqlWithKqlFilter], deps);
+
+      expect(model.filters).toHaveLength(1);
+      // savedSearchId must not leak into the merged model
+      expect(model.savedSearchId).toBeNull();
+    });
+
+    it('mixes a KQL timeline and an EQL timeline with empty Query tab — only KQL contributes a clause', () => {
       const kqlTimeline = makeTimeline({
         savedObjectId: 'kql-tl',
         title: 'KQL Timeline',
@@ -464,72 +507,79 @@ describe('buildSuperTimelineModel', () => {
         filters: [],
       });
 
-      const { model, skippedQueryTimelines } = buildSuperTimelineModel(
-        [kqlTimeline, eqlTimeline],
-        deps
-      );
+      const model = buildSuperTimelineModel([kqlTimeline, eqlTimeline], deps);
 
-      // KQL timeline contributes a sub-filter
+      // Only the KQL timeline produces a sub-filter; EQL's empty Query tab contributes nothing
       expect(model.filters).toHaveLength(1);
       expect(isCombinedFilter(model.filters![0])).toBe(true);
       expect((model.filters![0].meta.params as unknown[]).length).toBe(1);
-      // EQL timeline is skipped
-      expect(skippedQueryTimelines).toHaveLength(1);
-      expect(skippedQueryTimelines[0].title).toBe('EQL Timeline');
+      // EQL expression must not appear in the filter
+      expect(JSON.stringify(model.filters)).not.toContain('any where true');
     });
 
-    it('skips an EQL timeline that has stale KQL filters from a prior query-tab visit', () => {
-      // Detection keys off eqlOptions.query (persisted), not activeTab (runtime-only).
-      // A timeline saved in EQL mode may still carry KQL filters from when the user
-      // previously visited the Query tab. Stale filters must not be merged.
-      const eqlWithStaleFilters = makeTimeline({
-        savedObjectId: 'eql-stale',
-        title: 'EQL with stale filters',
+    it('an all-EQL selection produces an empty filter (same as a fresh timeline with no query)', () => {
+      // WHY: when every selected timeline is EQL/ES|QL with an empty Query tab, the merged
+      // filter is empty. That is accepted — it degenerates to "all events in the merged date
+      // range", the same state a plain timeline with no query has today.
+      const eql1 = makeTimeline({
+        savedObjectId: 'eql-1',
         eqlOptions: {
           eventCategoryField: 'event.category',
           timestampField: '@timestamp',
-          query: 'process where process.name == "cmd.exe"',
+          query: 'process where true',
           size: 100,
         },
-        filters: [
-          {
-            meta: { alias: null, negate: false, disabled: false, type: 'phrase', key: 'host.name' },
-            query: { match_phrase: { 'host.name': 'stale-host' } },
-          },
-        ],
+        dataProviders: [],
+        kqlQuery: { filterQuery: null },
+        filters: [],
+      });
+      const eql2 = makeTimeline({
+        savedObjectId: 'eql-2',
+        eqlOptions: {
+          eventCategoryField: 'event.category',
+          timestampField: '@timestamp',
+          query: 'network where true',
+          size: 100,
+        },
+        dataProviders: [],
+        kqlQuery: { filterQuery: null },
+        filters: [],
       });
 
-      const { model, skippedQueryTimelines } = buildSuperTimelineModel([eqlWithStaleFilters], deps);
+      const model = buildSuperTimelineModel([eql1, eql2], deps);
 
-      // Must be reported as skipped — stale filters must not be merged
-      expect(skippedQueryTimelines).toHaveLength(1);
-      expect(skippedQueryTimelines[0].reason).toBe('eql');
       expect(model.filters).toHaveLength(0);
+      expect(model.isSuperTimeline).toBe(true);
     });
 
-    it('does NOT skip a timeline that has activeTab=eql but an empty eqlOptions.query', () => {
-      // activeTab is runtime-only and resets to TimelineTabs.query after formatTimelineResponseToModel.
-      // A timeline that was opened in EQL mode but has no saved eqlOptions.query should be treated
-      // as a KQL timeline (fall through to the query merge path).
-      const kqlTimeline = makeTimeline({
-        savedObjectId: 'kql-was-eql-tab',
-        title: 'KQL (no EQL query saved)',
+    it('neither eqlOptions.query nor savedSearchId appears in the built Super Timeline model', () => {
+      // WHY: EQL and ES|QL query text must not leak into the Super Timeline — it would open
+      // the wrong tab or fire the wrong query type in the timeline modal.
+      const eqlTimeline = makeTimeline({
+        eqlOptions: {
+          eventCategoryField: 'event.category',
+          timestampField: '@timestamp',
+          query: 'process where process.name == "secret.exe"',
+          size: 100,
+        },
+        savedSearchId: null,
+      });
+      const esqlTimeline = makeTimeline({
+        savedSearchId: 'super-secret-saved-search',
         eqlOptions: {
           eventCategoryField: 'event.category',
           timestampField: '@timestamp',
           query: '',
           size: 100,
         },
-        filters: [
-          {
-            meta: { alias: null, negate: false, disabled: false, type: 'phrase', key: 'host.name' },
-            query: { match_phrase: { 'host.name': 'some-host' } },
-          },
-        ],
       });
 
-      const { skippedQueryTimelines } = buildSuperTimelineModel([kqlTimeline], deps);
-      expect(skippedQueryTimelines).toHaveLength(0);
+      const model = buildSuperTimelineModel([eqlTimeline, esqlTimeline], deps);
+
+      expect(model.savedSearchId).toBeNull();
+      const modelJson = JSON.stringify(model);
+      expect(modelJson).not.toContain('secret.exe');
+      expect(modelJson).not.toContain('super-secret-saved-search');
     });
   });
 });

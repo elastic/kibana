@@ -37,10 +37,10 @@ const applyI18nDeprecations = (settings: Record<string, any> = {}) => {
 
 describe('i18n config', () => {
   describe('schema', () => {
-    it('defaults to the five bundled locales and English defaultLocale', () => {
+    it('defaults to the six bundled locales and English defaultLocale', () => {
       const validated = config.schema.validate({});
       expect(validated).toEqual({
-        locales: ['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE'],
+        locales: ['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE', 'pt-BR'],
         defaultLocale: 'en',
         allowLocaleCookie: true,
       });

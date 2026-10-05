@@ -290,6 +290,7 @@ export function jobsProvider(
 
       if (serverless.cpsEnabled && hasDatafeed) {
         tempJob.projectRouting = job.datafeed_config.project_routing ?? null;
+        tempJob.isUiamEnabled = job.datafeed_config.authorization?.cloud_api_key?.id !== undefined;
       }
 
       if (jobIds.find((j) => j === tempJob.id)) {

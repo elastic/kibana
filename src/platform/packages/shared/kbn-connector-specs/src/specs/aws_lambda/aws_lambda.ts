@@ -24,6 +24,11 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 
+// AWS Lambda API limits: function name/ARN (incl. qualifier) 170, qualifier 128.
+const FUNCTION_NAME_MAX_LENGTH = 170;
+const QUALIFIER_MAX_LENGTH = 128;
+const MARKER_MAX_LENGTH = 2048;
+
 interface LambdaApiResponse {
   data: unknown;
   status: number;
@@ -145,15 +150,26 @@ export const AwsLambdaConnector: ConnectorSpec = {
   actions: {
     invoke: {
       isTool: true,
+      scope: 'destroy',
+      description:
+        'Invoke a Lambda function by name or ARN with an optional JSON payload. Use RequestResponse to wait for and return the function result (plus the tail of its execution log), Event to trigger it asynchronously, or DryRun to validate permissions without running it.',
       input: lazySchema(() =>
         z.object({
-          functionName: z.string().min(1).describe('Lambda function name or ARN'),
+          functionName: z
+            .string()
+            .min(1)
+            .max(FUNCTION_NAME_MAX_LENGTH)
+            .describe('Lambda function name or ARN'),
           payload: z.unknown().optional().describe('JSON payload to send to the function'),
           invocationType: z
             .enum(['RequestResponse', 'Event', 'DryRun'])
             .default('RequestResponse')
             .describe('Invocation type: RequestResponse (sync), Event (async), or DryRun'),
-          qualifier: z.string().optional().describe('Function version or alias to invoke'),
+          qualifier: z
+            .string()
+            .max(QUALIFIER_MAX_LENGTH)
+            .optional()
+            .describe('Function version or alias to invoke'),
         })
       ),
       handler: async (ctx, input) => {
@@ -213,13 +229,20 @@ export const AwsLambdaConnector: ConnectorSpec = {
 
     listFunctions: {
       isTool: true,
+      scope: 'read',
+      description:
+        'List Lambda functions in the configured region with their name, ARN, runtime, handler, memory, timeout, and last-modified date. Use this to discover function names before calling getFunction or invoke; pass nextMarker from the response as marker to fetch the next page.',
       input: lazySchema(() =>
         z.object({
           maxItems: z
             .number()
             .optional()
             .describe('Maximum number of functions to return (1-10000)'),
-          marker: z.string().optional().describe('Pagination token from a previous response'),
+          marker: z
+            .string()
+            .max(MARKER_MAX_LENGTH)
+            .optional()
+            .describe('Pagination token from a previous response'),
         })
       ),
       handler: async (ctx, input) => {
@@ -259,10 +282,21 @@ export const AwsLambdaConnector: ConnectorSpec = {
 
     getFunction: {
       isTool: true,
+      scope: 'read',
+      description:
+        'Get the configuration of a single Lambda function (ARN, runtime, execution role, handler, timeout, memory, state, and last update status). Use this to inspect a function before invoking it or to check whether a deployment finished.',
       input: lazySchema(() =>
         z.object({
-          functionName: z.string().min(1).describe('Lambda function name or ARN'),
-          qualifier: z.string().optional().describe('Function version or alias'),
+          functionName: z
+            .string()
+            .min(1)
+            .max(FUNCTION_NAME_MAX_LENGTH)
+            .describe('Lambda function name or ARN'),
+          qualifier: z
+            .string()
+            .max(QUALIFIER_MAX_LENGTH)
+            .optional()
+            .describe('Function version or alias'),
         })
       ),
       handler: async (ctx, input) => {

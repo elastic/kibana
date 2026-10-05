@@ -59,6 +59,10 @@ const mockKibana = {
   isServerless: false,
 };
 
+jest.mock('../../../../../hooks/use_streams_privileges', () => ({
+  useStreamsPrivileges: jest.fn(() => ({ features: { canvas: { enabled: false } } })),
+}));
+
 jest.mock('../../../../../hooks/use_kibana', () => ({
   useKibana: () => mockKibana,
 }));

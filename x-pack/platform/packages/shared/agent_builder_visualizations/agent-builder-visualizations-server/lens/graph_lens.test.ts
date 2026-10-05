@@ -17,19 +17,18 @@ jest.mock('@kbn/agent-builder-genai-utils', () => ({
   generateEsql: jest.fn(),
 }));
 
+const mockSchemaParse = jest.fn((config: unknown) => config);
+
 jest.mock('./chart_type_registry', () => ({
   chartTypeRegistry: new Proxy(
     {},
     {
       get: () => ({
         schema: {
-          parse: (config: unknown) => config,
+          parse: (config: unknown) => mockSchemaParse(config),
         },
         prompt: {
-          selection: {
-            description: 'Mock chart description',
-            guideline: 'Mock chart guideline',
-          },
+          selection: 'Mock chart description',
         },
       }),
     }
@@ -57,7 +56,7 @@ describe('createVisualizationGraph', () => {
   const esClient = { asCurrentUser: {} } as IScopedClusterClient;
 
   // Returns a ModelProvider-shaped mock. `createVisualizationGraph` resolves the default model
-  // via `getDefaultModel()` for the config / time-range nodes; the ES|QL node resolves the
+  // via `getDefaultModel()` for the config node; the ES|QL node resolves the
   // low-effort model via `selectModel()`. Both resolve to the same connector so the
   // default-model fallback in `generateVisualizationEsql` stays out of these tests.
   const createMockModel = (invokeResult: string = asAuthoringResponse({ type: 'metric' })) => {
@@ -67,7 +66,6 @@ describe('createVisualizationGraph', () => {
         // invoke resolves to a message-like object; graph_lens reads `.content` via
         // extractTextFromMessage.
         invoke: jest.fn().mockResolvedValue({ content: invokeResult }),
-        withStructuredOutput: jest.fn(),
       },
     };
     return {
@@ -85,8 +83,7 @@ describe('createVisualizationGraph', () => {
       createMockModel() as never,
       logger,
       events,
-      esClient,
-      false
+      esClient
     );
     const esqlQuery = 'FROM logs-* | WHERE response.code != 503 | STATS count = COUNT(*)';
 
@@ -119,8 +116,7 @@ describe('createVisualizationGraph', () => {
       ) as never,
       logger,
       events,
-      esClient,
-      false
+      esClient
     );
     const esqlQuery = 'FROM logs-* | STATS count = COUNT(*)';
 
@@ -152,8 +148,7 @@ describe('createVisualizationGraph', () => {
       ) as never,
       logger,
       events,
-      esClient,
-      false
+      esClient
     );
     const esqlQuery = 'FROM logs-* | STATS count = COUNT(*)';
 
@@ -178,18 +173,13 @@ describe('createVisualizationGraph', () => {
     expect(finalState.authoringNote).toBeNull();
   });
 
-  it('regenerates esql for edits and includes the existing query as context', async () => {
+  it.each([false, true])('applyChartRules=%s edits regenerate ES|QL', async (applyChartRules) => {
     mockedGenerateEsql.mockResolvedValue({
       query: 'FROM logs-* | WHERE response.code != 503 | STATS count = COUNT(*)',
     } as Awaited<ReturnType<typeof generateEsql>>);
 
-    const graph = await createVisualizationGraph(
-      createMockModel() as never,
-      logger,
-      events,
-      esClient,
-      false
-    );
+    const model = createMockModel();
+    const graph = await createVisualizationGraph(model as never, logger, events, esClient);
     const parsedExistingConfig = {
       type: 'metric',
       data_source: {
@@ -205,6 +195,7 @@ describe('createVisualizationGraph', () => {
       schema: {},
       existingConfig: JSON.stringify(parsedExistingConfig),
       parsedExistingConfig,
+      applyChartRules,
       esqlQuery: '',
       currentAttempt: 0,
       actions: [],
@@ -222,6 +213,22 @@ describe('createVisualizationGraph', () => {
     expect(finalState.esqlQuery).toBe(
       'FROM logs-* | WHERE response.code != 503 | STATS count = COUNT(*)'
     );
+    const { chatModel } = await model.getDefaultModel();
+    expect(chatModel.invoke).toHaveBeenCalledWith(
+      expect.arrayContaining([['human', expect.stringContaining(finalState.esqlQuery)]])
+    );
+    expect(chatModel.invoke).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        [
+          'system',
+          expect.stringContaining(
+            applyChartRules
+              ? 'Reauthor the presentation.'
+              : 'preserve unrelated presentation settings'
+          ),
+        ],
+      ])
+    );
   });
 
   it('finalizes with the esql error without generating a config when esql generation fails', async () => {
@@ -230,7 +237,7 @@ describe('createVisualizationGraph', () => {
     } as Awaited<ReturnType<typeof generateEsql>>);
 
     const model = createMockModel();
-    const graph = await createVisualizationGraph(model as never, logger, events, esClient, false);
+    const graph = await createVisualizationGraph(model as never, logger, events, esClient);
 
     const finalState = await graph.invoke({
       nlQuery: '5-minute load average',
@@ -267,8 +274,7 @@ describe('createVisualizationGraph', () => {
       createMockModel(corruptedConfig) as never,
       logger,
       events,
-      esClient,
-      false
+      esClient
     );
 
     const finalState = await graph.invoke({
@@ -299,8 +305,7 @@ describe('createVisualizationGraph', () => {
       createMockModel(configWithoutDataSource) as never,
       logger,
       events,
-      esClient,
-      false
+      esClient
     );
 
     const finalState = await graph.invoke({
@@ -335,8 +340,7 @@ describe('createVisualizationGraph', () => {
       createMockModel(xyConfigWithoutDataSource) as never,
       logger,
       events,
-      esClient,
-      false
+      esClient
     );
 
     const finalState = await graph.invoke({
@@ -360,5 +364,151 @@ describe('createVisualizationGraph', () => {
     for (const layer of validated.layers ?? []) {
       expect(layer.data_source).toEqual({ type: 'esql', query: canonicalQuery });
     }
+  });
+
+  it.each([false, true])('applyChartRules=%s preserves layer queries', async (applyChartRules) => {
+    const firstQuery = 'FROM logs-* | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, 1h)';
+    const secondQuery = 'FROM metrics-* | STATS cpu = AVG(cpu) BY bucket = BUCKET(@timestamp, 1h)';
+    const parsedExistingConfig = {
+      type: 'xy',
+      layers: [
+        { type: 'series', data_source: { type: 'esql', query: firstQuery } },
+        { type: 'series', data_source: { type: 'esql', query: secondQuery } },
+      ],
+    } as unknown as VisualizationConfig;
+    const restyledConfig = asAuthoringResponse({
+      type: 'xy',
+      legend: { position: 'bottom' },
+      layers: [{ type: 'series' }, { type: 'series' }],
+    });
+
+    const model = createMockModel(restyledConfig);
+    const graph = await createVisualizationGraph(model as never, logger, events, esClient);
+
+    const finalState = await graph.invoke({
+      nlQuery: 'Move the legend below the plot',
+      index: undefined,
+      chartType: SupportedChartType.XY,
+      schema: {},
+      existingConfig: JSON.stringify(parsedExistingConfig),
+      parsedExistingConfig,
+      preserveESQL: true,
+      applyChartRules,
+      esqlQuery: firstQuery,
+      currentAttempt: 0,
+      actions: [],
+      validatedConfig: null,
+      error: null,
+    });
+
+    expect(mockedGenerateEsql).not.toHaveBeenCalled();
+    const validated = finalState.validatedConfig as {
+      layers?: Array<{ data_source?: { type: string; query: string } }>;
+    };
+    expect(validated.layers?.map((layer) => layer.data_source?.query)).toEqual([
+      firstQuery,
+      secondQuery,
+    ]);
+    const { chatModel } = await model.getDefaultModel();
+    expect(chatModel.invoke).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        ['human', expect.stringContaining(JSON.stringify(parsedExistingConfig))],
+      ])
+    );
+  });
+
+  describe('retries', () => {
+    const esqlQuery = 'FROM logs-* | STATS count = COUNT(*)';
+
+    const runGraph = async (model: ReturnType<typeof createMockModel>) => {
+      const graph = await createVisualizationGraph(model as never, logger, events, esClient);
+      return graph.invoke({
+        nlQuery: 'Show the total log count',
+        index: 'logs-*',
+        chartType: SupportedChartType.Metric,
+        schema: {},
+        existingConfig: undefined,
+        parsedExistingConfig: null,
+        esqlQuery,
+        currentAttempt: 0,
+        actions: [],
+        validatedConfig: null,
+        error: null,
+      });
+    };
+
+    it('replays the failed response and its validation error so the model can repair it', async () => {
+      const failedResponse = asAuthoringResponse({ type: 'metric', metrics: 'count' });
+      const repairedResponse = asAuthoringResponse({
+        type: 'metric',
+        metrics: [{ column: 'count' }],
+      });
+      const model = createMockModel();
+      const { chatModel } = await model.getDefaultModel();
+      chatModel.invoke
+        .mockResolvedValueOnce({ content: failedResponse })
+        .mockResolvedValueOnce({ content: repairedResponse });
+      mockSchemaParse.mockImplementationOnce(() => {
+        throw new Error('metrics: Expected array, received string');
+      });
+
+      const finalState = await runGraph(model);
+
+      expect(chatModel.invoke).toHaveBeenCalledTimes(2);
+      const [[firstPrompt], [retryPrompt]] = chatModel.invoke.mock.calls;
+      // The original prompt is unchanged; the failed attempt is appended as a conversation.
+      // The replayed response is the raw model output, so it has no injected data_source.
+      expect(retryPrompt).toEqual([
+        ...firstPrompt,
+        ['ai', failedResponse],
+        ['human', expect.stringContaining('metrics: Expected array, received string')],
+      ]);
+      expect(finalState.error).toBeNull();
+      expect(finalState.validatedConfig).toEqual({
+        type: 'metric',
+        metrics: [{ column: 'count' }],
+        data_source: { type: 'esql', query: esqlQuery },
+      });
+    });
+
+    it('replays an unparsable response so the model can repair it', async () => {
+      const model = createMockModel();
+      const { chatModel } = await model.getDefaultModel();
+      chatModel.invoke.mockResolvedValueOnce({ content: 'not json at all' });
+
+      const finalState = await runGraph(model);
+
+      expect(chatModel.invoke).toHaveBeenCalledTimes(2);
+      const [, [retryPrompt]] = chatModel.invoke.mock.calls;
+      expect(retryPrompt.slice(-2)).toEqual([
+        ['ai', 'not json at all'],
+        ['human', expect.stringMatching(/JSON/)],
+      ]);
+      expect(finalState.error).toBeNull();
+    });
+
+    it('does not replay an attempt whose model call failed', async () => {
+      const model = createMockModel();
+      const { chatModel } = await model.getDefaultModel();
+      chatModel.invoke.mockRejectedValueOnce(new Error('connector timeout'));
+
+      const finalState = await runGraph(model);
+
+      expect(chatModel.invoke).toHaveBeenCalledTimes(2);
+      const [[firstPrompt], [retryPrompt]] = chatModel.invoke.mock.calls;
+      expect(retryPrompt).toEqual(firstPrompt);
+      expect(finalState.error).toBeNull();
+    });
+
+    it('gives up after the retry budget and reports the generation error', async () => {
+      const model = createMockModel('still not json');
+      const { chatModel } = await model.getDefaultModel();
+
+      const finalState = await runGraph(model);
+
+      expect(chatModel.invoke).toHaveBeenCalledTimes(3);
+      expect(finalState.validatedConfig).toBeNull();
+      expect(finalState.error).toMatch(/JSON/);
+    });
   });
 });

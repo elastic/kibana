@@ -7,11 +7,13 @@
 
 import { EuiComboBox } from '@elastic/eui';
 import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 
 export interface WorkflowComboBoxOption {
   id: string;
   name: string;
+  enabled?: boolean;
 }
 
 export interface WorkflowComboBoxProps
@@ -25,6 +27,18 @@ export interface WorkflowComboBoxProps
   singleSelection?: boolean;
 }
 
+const toOption = (workflow: WorkflowComboBoxOption): EuiComboBoxOptionOption<string> => ({
+  key: workflow.id,
+  label:
+    workflow.enabled === false
+      ? i18n.translate('xpack.agentBuilder.workflowComboBox.disabledOptionLabel', {
+          defaultMessage: '{name} (disabled)',
+          values: { name: workflow.name },
+        })
+      : workflow.name,
+  value: workflow.id,
+});
+
 export const WorkflowComboBox: React.FC<WorkflowComboBoxProps> = ({
   workflows,
   value,
@@ -33,15 +47,12 @@ export const WorkflowComboBox: React.FC<WorkflowComboBoxProps> = ({
   'data-test-subj': dataTestSubj = 'workflowComboBox',
   ...comboBoxProps
 }) => {
-  const toOption = (workflow: WorkflowComboBoxOption): EuiComboBoxOptionOption<string> => ({
-    key: workflow.id,
-    label: workflow.name,
-    value: workflow.id,
-  });
-
   const options: Array<EuiComboBoxOptionOption<string>> = useMemo(
-    () => workflows.map(toOption),
-    [workflows]
+    () =>
+      workflows
+        .filter((workflow) => workflow.enabled !== false || value.includes(workflow.id))
+        .map(toOption),
+    [workflows, value]
   );
 
   const workflowsById = useMemo(

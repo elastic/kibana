@@ -16,6 +16,16 @@ import {
 } from '../../shared/components/test_ids';
 import { useGetFlyoutLink } from '../../../flyout/document_details/right/hooks/use_get_flyout_link';
 
+jest.mock('../../shared/components/flyout_header_actions', () => ({
+  FlyoutHeaderActions: ({ children }: { children?: React.ReactNode }) => (
+    <div data-test-subj="mockFlyoutHeaderActions">{children}</div>
+  ),
+}));
+
+jest.mock('../../session_context', () => ({
+  useFlyoutSessionContext: jest.fn(),
+}));
+
 jest.mock('../../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
@@ -252,5 +262,11 @@ describe('<DocumentHeader />', () => {
     const { queryByTestId } = renderHeader({ hit: eventHit });
 
     expect(queryByTestId(DOCUMENT_FLYOUT_HEADER_SHARE_BUTTON_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should render the flyout header actions', () => {
+    const { getByTestId } = renderHeader({ hit: alertHit });
+
+    expect(getByTestId('mockFlyoutHeaderActions')).toBeInTheDocument();
   });
 });

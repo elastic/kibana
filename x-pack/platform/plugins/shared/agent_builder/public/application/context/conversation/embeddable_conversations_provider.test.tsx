@@ -5,169 +5,249 @@
  * 2.0.
  */
 
+import '@testing-library/jest-dom';
+import { coreMock } from '@kbn/core/public/mocks';
 import React from 'react';
-import { act, render } from '@testing-library/react';
-import { BehaviorSubject } from 'rxjs';
-import type {
-  AttachmentInput,
-  ConversationAttachment,
-} from '@kbn/agent-builder-common/attachments';
-import type { CoreStart } from '@kbn/core/public';
-import type { AgentBuilderInternalService } from '../../../services';
-import type { AgentBuilderStartDependencies } from '../../../types';
-import { EmbeddableConversationsProvider } from './embeddable_conversations_provider';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import type { EmbeddableConversationCallbacks } from '../../../embeddable/types';
+import type { AgentBuilderInternalService } from '../../../services/types';
+import { storageKeys } from '../../storage_keys';
+import type { ConversationContext } from './conversation_context';
 import { useConversationContext } from './conversation_context';
+import {
+  EmbeddableConversationsProvider,
+  PinnedConversationProvider,
+} from './embeddable_conversations_provider';
 
-jest.mock('@kbn/react-query', () => ({
-  QueryClient: jest.fn().mockImplementation(() => ({})),
-  QueryClientProvider: ({ children }: { children: React.ReactNode }) => children,
+const mockUseEffectiveSpaceDefaultAgent = jest.fn();
+jest.mock('../../hooks/use_space_default_agent', () => ({
+  useEffectiveSpaceDefaultAgent: () => mockUseEffectiveSpaceDefaultAgent(),
 }));
-
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  KibanaContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+jest.mock('./use_conversation_actions', () => ({
+  useConversationActions: () => ({
+    invalidateConversation: jest.fn(),
+    onExecutionStarted: jest.fn(),
+    onExecutionTerminated: jest.fn(),
+    refetchConversation: jest.fn(),
+    deleteConversation: jest.fn(),
+    renameConversation: jest.fn(),
+  }),
 }));
-
-jest.mock('@kbn/i18n-react', () => ({
-  I18nProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-
 jest.mock('../streaming/streaming_context', () => ({
   StreamingProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
-
-jest.mock('./conversation_change_notifier', () => ({
-  ConversationChangeNotifier: () => null,
+jest.mock('../../../services/events', () => ({
+  ConversationStreamService: class ConversationStreamService {},
+}));
+// Rendered by the component but irrelevant here (it has its own dependencies).
+jest.mock('./conversation_change_notifier', () => ({ ConversationChangeNotifier: () => null }));
+// Render the spinner as a marker so we can assert the isReady gate.
+jest.mock('../../components/redirects/redirect_loading', () => ({
+  RedirectLoading: () => <div>loading-spinner</div>,
 }));
 
-jest.mock('../../hooks/use_persisted_conversation_id', () => ({
-  usePersistedConversationId: jest.fn(() => ({
-    persistedConversationId: undefined,
-    updatePersistedConversationId: jest.fn(),
-  })),
-}));
+const INITIAL_MESSAGE = 'Suggest an automation for this AI index.';
+const AGENT_ID = 'context-engine-setup';
+const TAG_A = 'context-engine-ai-index:default:index-a';
+const TAG_B = 'context-engine-ai-index:default:index-b';
 
-jest.mock('./use_conversation_actions', () => ({
-  useConversationActions: jest.fn(() => ({
-    invalidateConversation: jest.fn(),
-    addOptimisticRound: jest.fn().mockResolvedValue(undefined),
-    removeOptimisticRound: jest.fn(),
-    clearLastRoundResponse: jest.fn(),
-    addReasoningStep: jest.fn(),
-    addToolCall: jest.fn(),
-    setToolCallProgress: jest.fn(),
-    setToolCallResult: jest.fn(),
-    setAssistantMessage: jest.fn(),
-    addAssistantMessageChunk: jest.fn(),
-    clearAssistantMessage: jest.fn(),
-    setTimeToFirstToken: jest.fn(),
-    addPendingPrompt: jest.fn(),
-    clearPendingPrompts: jest.fn(),
-    setAskUserQuestionAnswers: jest.fn(),
-    onConversationCreated: jest.fn(),
-    addBackgroundExecutionCompleteStep: jest.fn(),
-    addOrUpdateTodosStep: jest.fn(),
-    setAttachments: jest.fn(),
-    addCompactionStep: jest.fn(),
-    setCompactionStepComplete: jest.fn(),
-    deleteConversation: jest.fn().mockResolvedValue(undefined),
-    renameConversation: jest.fn().mockResolvedValue(undefined),
-    onRoundComplete: jest.fn(),
-  })),
-}));
+const AgentIdConsumer = () => {
+  const { agentId } = useConversationContext();
+  return <div>{`agent:${agentId}`}</div>;
+};
 
-const createMockCoreStart = (): CoreStart =>
-  ({
-    application: { currentAppId$: new BehaviorSubject<string | null>(null) },
-    analytics: { reportEvent: jest.fn() },
-  } as unknown as CoreStart);
+const ContextSpy = () => {
+  const { conversationId, initialMessage, autoSendInitialMessage, setConversationId } =
+    useConversationContext();
+  return (
+    <>
+      <div>{`conversationId:${conversationId ?? 'none'}`}</div>
+      <div>{`initialMessage:${initialMessage ?? 'none'}`}</div>
+      <div>{`autoSend:${autoSendInitialMessage}`}</div>
+      <button type="button" onClick={() => setConversationId?.(undefined)}>
+        new-chat
+      </button>
+    </>
+  );
+};
 
-const createMockServices = (): AgentBuilderInternalService =>
-  ({
+const seedPersistedConversation = (sessionTag: string, conversationId: string) => {
+  localStorage.setItem(
+    storageKeys.getLastConversationKey(sessionTag, AGENT_ID),
+    JSON.stringify(conversationId)
+  );
+};
+
+const renderEmbeddableProvider = ({
+  sessionTag = TAG_A,
+  getConversation = jest.fn().mockResolvedValue({ id: 'conversation-a' }),
+}: {
+  sessionTag?: string;
+  getConversation?: jest.Mock;
+} = {}) => {
+  let callbacks: EmbeddableConversationCallbacks | undefined;
+  const coreStart = coreMock.createStart();
+
+  const services = {
     agentService: { list: jest.fn().mockResolvedValue([]) },
-    conversationsService: { get: jest.fn().mockRejectedValue(new Error('not found')) },
-    startDependencies: {} as AgentBuilderStartDependencies,
-  } as unknown as AgentBuilderInternalService);
+    conversationsService: { get: getConversation },
+    eventsService: {},
+    startDependencies: {},
+  } as unknown as AgentBuilderInternalService;
 
-const createMockAttachment = (overrides: Partial<AttachmentInput> = {}): AttachmentInput => ({
-  type: 'test.attachment',
-  data: { content: 'test content' },
-  ...overrides,
-});
+  render(
+    <EmbeddableConversationsProvider
+      coreStart={coreStart}
+      services={services}
+      ariaLabelledBy="test-chat"
+      agentId={AGENT_ID}
+      sessionTag={sessionTag}
+      initialMessage={INITIAL_MESSAGE}
+      autoSendInitialMessage
+      onRegisterCallbacks={(registered) => {
+        callbacks = registered;
+      }}
+    >
+      <ContextSpy />
+    </EmbeddableConversationsProvider>
+  );
 
-interface ContextCapture {
-  attachments: ConversationAttachment[] | undefined;
-  resetAttachments: (() => void) | undefined;
-}
-
-const AttachmentsReader: React.FC<{
-  storeRef: React.MutableRefObject<ConversationAttachment[] | undefined>;
-}> = ({ storeRef }) => {
-  const { attachments } = useConversationContext();
-  storeRef.current = attachments;
-  return null;
+  return {
+    getConversation,
+    reopenWith: (nextSessionTag: string) => {
+      act(() => {
+        callbacks?.updateProps({
+          agentId: AGENT_ID,
+          sessionTag: nextSessionTag,
+          initialMessage: INITIAL_MESSAGE,
+          autoSendInitialMessage: true,
+        });
+      });
+    },
+  };
 };
 
-const ContextReader: React.FC<{ capture: ContextCapture }> = ({ capture }) => {
-  const ctx = useConversationContext();
-  capture.attachments = ctx.attachments;
-  capture.resetAttachments = ctx.resetAttachments;
-  return null;
-};
+// Minimal base context value; only `agentId` matters for these assertions.
+const baseValue = { agentId: 'elastic-ai-agent' } as NonNullable<
+  React.ContextType<typeof ConversationContext>
+>;
 
-describe('EmbeddableConversationsProvider', () => {
-  it('should preserve initial attachments when newConversation is true and setConversationId is called during initialization', async () => {
-    // Given
-    const mockAttachment = createMockAttachment();
-    const capturedRef: React.MutableRefObject<ConversationAttachment[] | undefined> = {
-      current: undefined,
-    };
-
-    // When
-    render(
-      <EmbeddableConversationsProvider
-        coreStart={createMockCoreStart()}
-        services={createMockServices()}
-        ariaLabelledBy="test-aria"
-        newConversation={true}
-        attachments={[mockAttachment]}
-      >
-        <AttachmentsReader storeRef={capturedRef} />
-      </EmbeddableConversationsProvider>
-    );
-
-    // Flush async effects (analytics reporting)
-    await act(async () => {});
-
-    // Then — setConversationId(undefined) called by the init effect must NOT clear attachments
-    expect(capturedRef.current).toEqual([mockAttachment]);
+describe('PinnedConversationProvider', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('should clear attachments when resetAttachments is called', async () => {
-    // Given — sidebar opens with a pre-staged attachment
-    const mockAttachment = createMockAttachment();
-    const capture: ContextCapture = { attachments: undefined, resetAttachments: undefined };
-
-    render(
-      <EmbeddableConversationsProvider
-        coreStart={createMockCoreStart()}
-        services={createMockServices()}
-        ariaLabelledBy="test-aria"
-        attachments={[mockAttachment]}
-      >
-        <ContextReader capture={capture} />
-      </EmbeddableConversationsProvider>
-    );
-
-    await act(async () => {});
-
-    expect(capture.attachments).toEqual([mockAttachment]);
-
-    // When — user starts a new conversation or sends the round (both call resetAttachments)
-    act(() => {
-      capture.resetAttachments?.();
+  it('pins a restricted user to the effective space default agent', () => {
+    mockUseEffectiveSpaceDefaultAgent.mockReturnValue({
+      effectiveDefaultAgentId: 'siemens-agent',
+      isRestricted: true,
+      isReady: true,
     });
 
-    // Then — staged attachments are gone
-    expect(capture.attachments).toBeUndefined();
+    render(
+      <PinnedConversationProvider baseValue={baseValue}>
+        <AgentIdConsumer />
+      </PinnedConversationProvider>
+    );
+
+    expect(screen.getByText('agent:siemens-agent')).toBeInTheDocument();
+  });
+
+  it('leaves the base agent for admins / unconfigured spaces', () => {
+    mockUseEffectiveSpaceDefaultAgent.mockReturnValue({
+      effectiveDefaultAgentId: 'siemens-agent',
+      isRestricted: false,
+      isReady: true,
+    });
+
+    render(
+      <PinnedConversationProvider baseValue={baseValue}>
+        <AgentIdConsumer />
+      </PinnedConversationProvider>
+    );
+
+    expect(screen.getByText('agent:elastic-ai-agent')).toBeInTheDocument();
+  });
+
+  it('withholds the chat (spinner) until the effective default is ready', () => {
+    mockUseEffectiveSpaceDefaultAgent.mockReturnValue({
+      effectiveDefaultAgentId: null,
+      isRestricted: false,
+      isReady: false,
+    });
+
+    render(
+      <PinnedConversationProvider baseValue={baseValue}>
+        <AgentIdConsumer />
+      </PinnedConversationProvider>
+    );
+
+    expect(screen.getByText('loading-spinner')).toBeInTheDocument();
+    expect(screen.queryByText(/^agent:/)).not.toBeInTheDocument();
+  });
+});
+
+describe('EmbeddableConversationsProvider initial message', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    localStorage.clear();
+    mockUseEffectiveSpaceDefaultAgent.mockReturnValue({
+      effectiveDefaultAgentId: null,
+      isRestricted: false,
+      isReady: true,
+    });
+  });
+
+  it('keeps the initial message when there is no conversation to continue', async () => {
+    renderEmbeddableProvider();
+
+    expect(await screen.findByText('conversationId:none')).toBeInTheDocument();
+    expect(screen.getByText(`initialMessage:${INITIAL_MESSAGE}`)).toBeInTheDocument();
+    expect(screen.getByText('autoSend:true')).toBeInTheDocument();
+  });
+
+  it('drops the initial message once a persisted conversation is restored', async () => {
+    seedPersistedConversation(TAG_A, 'conversation-a');
+
+    renderEmbeddableProvider();
+
+    expect(await screen.findByText('initialMessage:none')).toBeInTheDocument();
+    expect(screen.getByText('conversationId:conversation-a')).toBeInTheDocument();
+    expect(screen.getByText('autoSend:false')).toBeInTheDocument();
+  });
+
+  it('does not replay the initial message when a restored thread is followed by New chat', async () => {
+    seedPersistedConversation(TAG_A, 'conversation-a');
+
+    renderEmbeddableProvider();
+    expect(await screen.findByText('initialMessage:none')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('new-chat'));
+
+    expect(await screen.findByText('conversationId:none')).toBeInTheDocument();
+    expect(screen.getByText('initialMessage:none')).toBeInTheDocument();
+    expect(screen.getByText('autoSend:false')).toBeInTheDocument();
+  });
+
+  it('drops the initial message when an open sidebar is re-opened on a session with a thread', async () => {
+    seedPersistedConversation(TAG_B, 'conversation-b');
+
+    const { reopenWith } = renderEmbeddableProvider({ sessionTag: TAG_A });
+    expect(await screen.findByText('conversationId:none')).toBeInTheDocument();
+
+    reopenWith(TAG_B);
+
+    expect(await screen.findByText('initialMessage:none')).toBeInTheDocument();
+    expect(screen.getByText('conversationId:conversation-b')).toBeInTheDocument();
+  });
+
+  it('keeps the initial message when an open sidebar is re-opened on a session with no thread', async () => {
+    const { reopenWith } = renderEmbeddableProvider({ sessionTag: TAG_A });
+    expect(await screen.findByText('conversationId:none')).toBeInTheDocument();
+
+    reopenWith(TAG_B);
+
+    expect(await screen.findByText(`initialMessage:${INITIAL_MESSAGE}`)).toBeInTheDocument();
+    expect(screen.getByText('conversationId:none')).toBeInTheDocument();
   });
 });

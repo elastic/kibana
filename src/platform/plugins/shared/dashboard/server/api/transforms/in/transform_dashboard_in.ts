@@ -12,7 +12,7 @@ import { uniqBy } from 'lodash';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { RequestTiming } from '@kbn/core-http-server';
 import { toStoredTags } from '@kbn/as-code-shared-transforms';
-import type { DashboardState } from '../../types';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import { transformPanelsIn } from './transform_panels_in';
 import { transformPinnedPanelsIn } from './transform_pinned_panels_in';
@@ -22,8 +22,7 @@ import { transformOptionsIn } from './transform_options_in';
 export const transformDashboardIn = (
   dashboardState: Partial<DashboardState>,
   isDashboardAppRequest: boolean = false,
-  serverTiming?: RequestTiming,
-  useGASchemas?: boolean
+  serverTiming?: RequestTiming
 ): {
   attributes: DashboardSavedObjectAttributes;
   references: SavedObjectReference[];
@@ -52,7 +51,7 @@ export const transformDashboardIn = (
       sections,
       references: panelReferences,
     } = panels
-      ? transformPanelsIn(panels, isDashboardAppRequest, useGASchemas)
+      ? transformPanelsIn(panels, isDashboardAppRequest)
       : {
           panelsJSON: '',
           sections: undefined,
@@ -65,8 +64,7 @@ export const transformDashboardIn = (
     );
 
     const { pinnedPanels, references: controlGroupReferences } = transformPinnedPanelsIn(
-      pinned_panels ?? [],
-      useGASchemas
+      pinned_panels ?? []
     );
 
     const attributes = {

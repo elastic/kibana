@@ -196,6 +196,7 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
     width: fit-content;
   }
 
+  /* Reserve room for Timeline's absolutely positioned fullscreen control */
   .udtTimeline .euiDataGrid__rightControls {
     padding-right: 30px;
   }

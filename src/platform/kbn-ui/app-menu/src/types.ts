@@ -7,6 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/*
+ * This contract is declarative on purpose: apps describe what to show (text, options, callbacks),
+ * and the menu decides how it looks. Do not add `ReactNode`, `ReactElement`, JSX, or render-prop
+ * fields here. They let every app paint its own UI, and the menu stops looking like one component.
+ * The renderer also coerces text to plain strings and drops undeclared keys, see "Strict props" in
+ * this package's README.
+ *
+ * When the existing props cannot express something, add a new declarative field for it rather
+ * than a slot for arbitrary content.
+ */
+
 import type { EuiHideForProps, EuiSwitchProps, IconType } from '@elastic/eui';
 import type { SplitButtonWithNotificationProps } from './components/split_button_with_notification';
 
@@ -113,6 +124,12 @@ interface AppMenuItemBase {
    * The text label for the item.
    */
   label: string;
+  /**
+   * Optional supporting text rendered below the label. Only shown when the item is rendered
+   * inside a popover menu (sub-items, static items, and items moved to the "More" menu);
+   * ignored for inline top-level buttons and for the primary action button.
+   */
+  description?: string;
   /**
    * The icon type for the item.
    */
@@ -309,7 +326,7 @@ export type AppMenuPopoverItem = Omit<
 export interface AppMenuSwitch {
   id: string;
   label: string;
-  labelProps: EuiSwitchProps['labelProps'];
+  labelProps?: Omit<NonNullable<EuiSwitchProps['labelProps']>, 'css'>;
   checked: boolean;
   onChange: (checked: boolean) => void;
   disabled?: boolean;
@@ -389,4 +406,17 @@ export interface AppMenuConfig {
    * and it is rendered to the left of the menu items.
    */
   switch?: AppMenuSwitch;
+  /**
+   * Displays history buttons to the left of the menu items.
+   */
+  historyConfig?: {
+    undo?: {
+      onClick: () => void;
+      disabled?: boolean;
+    };
+    redo?: {
+      onClick: () => void;
+      disabled?: boolean;
+    };
+  };
 }

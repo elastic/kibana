@@ -6,8 +6,11 @@
  */
 
 import { render, screen } from '@testing-library/react';
+import { matchers } from '@emotion/jest';
 import React from 'react';
 import { CuratedCategorySection } from './curated_category';
+
+expect.extend(matchers);
 
 describe('CuratedCategorySection', () => {
   it('renders the label, children, and accessible-name wiring without any context providers', () => {
@@ -23,5 +26,17 @@ describe('CuratedCategorySection', () => {
     const heading = screen.getByRole('heading', { level: 4, name: 'Cloud' });
     const section = heading.closest('section');
     expect(section).toHaveAttribute('aria-labelledby', heading.id);
+  });
+
+  it('styles the label subdued and uppercase, matching the Add Data page category headings', () => {
+    render(
+      <CuratedCategorySection id="cloud" label="Cloud">
+        <div />
+      </CuratedCategorySection>
+    );
+
+    const heading = screen.getByRole('heading', { level: 4, name: 'Cloud' });
+    expect(heading).toHaveStyleRule('text-transform', 'uppercase');
+    expect(heading).toHaveStyleRule('color', /^#[0-9a-f]{6}$/i);
   });
 });

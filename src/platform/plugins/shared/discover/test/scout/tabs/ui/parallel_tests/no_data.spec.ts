@@ -109,7 +109,7 @@ spaceTest.describe(
         await page.testSubj.locator('tryESQLLink').click();
         await discover.waitUntilTabIsLoaded();
 
-        expect(await discover.getEsqlQueryValue()).toBe('FROM logs*');
+        expect(await discover.getEsqlQueryValue()).toBe('FROM logs* | SORT @timestamp DESC');
         expect(await dataGrid.getDocTableRowCount()).toBeGreaterThan(0);
         expect(await unifiedTabs.isTabsBarVisible()).toBe(true);
       }

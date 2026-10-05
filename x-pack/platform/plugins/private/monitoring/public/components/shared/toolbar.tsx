@@ -6,7 +6,7 @@
  */
 
 import type { OnRefreshChangeProps } from '@elastic/eui';
-import { EuiPageHeader, EuiSuperDatePicker } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
 import React, { useContext, useCallback, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
@@ -14,8 +14,8 @@ import { useMonitoringTimeContainerContext } from '../../application/hooks/use_m
 import { GlobalStateContext } from '../../application/contexts/global_state_context';
 import { Legacy } from '../../legacy_shims';
 import type { MonitoringStartServices } from '../../types';
+
 interface MonitoringToolbarProps {
-  pageTitle?: string;
   onRefresh?: () => void;
 }
 
@@ -25,7 +25,7 @@ interface TimePickerQuickRange {
   display: string;
 }
 
-export const MonitoringToolbar: React.FC<MonitoringToolbarProps> = ({ pageTitle, onRefresh }) => {
+export const MonitoringToolbar: React.FC<MonitoringToolbarProps> = ({ onRefresh }) => {
   const { services } = useKibana<MonitoringStartServices>();
 
   const timePickerQuickRanges = services.uiSettings.get<TimePickerQuickRange[]>(
@@ -78,9 +78,8 @@ export const MonitoringToolbar: React.FC<MonitoringToolbarProps> = ({ pageTitle,
   );
 
   return (
-    <EuiPageHeader
-      pageTitle={pageTitle}
-      rightSideItems={[
+    <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+      <EuiFlexItem grow={false}>
         <EuiSuperDatePicker
           isDisabled={isDisabled}
           start={currentTimerange.from}
@@ -91,8 +90,8 @@ export const MonitoringToolbar: React.FC<MonitoringToolbarProps> = ({ pageTitle,
           refreshInterval={refreshInterval}
           onRefreshChange={onRefreshChange}
           commonlyUsedRanges={commonlyUsedRanges}
-        />,
-      ]}
-    />
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

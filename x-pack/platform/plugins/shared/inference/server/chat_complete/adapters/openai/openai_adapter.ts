@@ -23,6 +23,7 @@ import {
   handleConnectorStreamResponse,
   handleConnectorDataResponse,
   ensureToolsWhenHistoryHasToolUse,
+  pickConnectorTelemetryForConnector,
 } from '../../utils';
 import type { OpenAIRequest } from './types';
 import { messagesToOpenAI, toolsToOpenAI, toolChoiceToOpenAI } from './to_openai';
@@ -100,7 +101,9 @@ export const openAIAdapter: InferenceConnectorAdapter = {
           signal: abortSignal,
           stream,
           ...(metadata?.connectorTelemetry
-            ? { telemetryMetadata: metadata.connectorTelemetry }
+            ? {
+                telemetryMetadata: pickConnectorTelemetryForConnector(metadata.connectorTelemetry),
+              }
             : {}),
           ...(typeof timeout === 'number' && isFinite(timeout) ? { timeout } : {}),
           ...(typeof maxContentLength === 'number' && isFinite(maxContentLength)
@@ -117,7 +120,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
       return connectorResult$.pipe(
         handleConnectorStreamResponse({ processStream: eventSourceStreamIntoObservable }),
         processOpenAIStream(),
-        emitTokenCountEstimateIfMissing({ request }),
+        emitTokenCountEstimateIfMissing({ request, logger }),
         useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : passThrough
       );
     } else {
@@ -126,7 +129,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
           parseData: (data) => data as OpenAI.ChatCompletion,
         }),
         processOpenAIResponse(),
-        emitTokenCountEstimateIfMissing({ request }),
+        emitTokenCountEstimateIfMissing({ request, logger }),
         useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : passThrough
       );
     }

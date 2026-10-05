@@ -7,18 +7,10 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiPanel, EuiSpacer, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Handle, Position, type NodeProps } from '@xyflow/react';
+import { Position, type NodeProps } from '@xyflow/react';
+import { ConnectionHandle } from './connection_handle';
 import type { DestinationNode as DestinationNodeType } from '../types';
 import { DESTINATION_NODE_WIDTH } from '../canvas_constants';
 import { getNodeCardStyles } from './node_card_styles';
@@ -29,10 +21,17 @@ const processingLabel = i18n.translate('xpack.streams.canvas.destinationNode.pro
 
 export function DestinationNode({ data, selected, dragging }: NodeProps<DestinationNodeType>) {
   const { euiTheme } = useEuiTheme();
+  const isUnconfigured = Boolean(data.unconfiguredNodeId);
+  const streamName = data.streamName;
 
   return (
     <>
-      <Handle type="target" position={Position.Left} isConnectable={false} />
+      <ConnectionHandle
+        type="target"
+        position={Position.Left}
+        isConnectable={Boolean(data.destinationId)}
+        destinationId={data.destinationId}
+      />
       <EuiPanel
         // `nokey` stops React Flow from arming a marquee when a Shift+drag starts
         // on the card, so Shift+click multi-select stays stable.
@@ -40,41 +39,63 @@ export function DestinationNode({ data, selected, dragging }: NodeProps<Destinat
         hasShadow={false}
         hasBorder
         paddingSize="m"
-        data-test-subj="streamsCanvasDestinationNode"
-        css={getNodeCardStyles(euiTheme, { width: DESTINATION_NODE_WIDTH, selected, dragging })}
+        data-test-subj={
+          isUnconfigured
+            ? 'streamsCanvasUnconfiguredDestinationNode'
+            : 'streamsCanvasDestinationNode'
+        }
+        css={getNodeCardStyles(euiTheme, {
+          width: isUnconfigured || data.destinationId ? 220 : DESTINATION_NODE_WIDTH,
+          selected,
+          dragging,
+          danger: isUnconfigured,
+        })}
       >
-        <EuiText size="xs">
-          <strong>{data.title}</strong>
-        </EuiText>
-        {data.hasProcessing && (
+        <div
+          css={css`
+            display: flex;
+            align-items: flex-start;
+            gap: ${euiTheme.size.s};
+          `}
+        >
+          <div
+            css={css`
+              flex: 1 1 auto;
+              min-width: 0;
+              overflow-wrap: anywhere;
+            `}
+          >
+            <EuiText size="m">
+              <strong>{data.title}</strong>
+            </EuiText>
+            {data.subtitle && (
+              <EuiText size="s" color="subdued">
+                {data.subtitle}
+              </EuiText>
+            )}
+          </div>
+          {data.hasProcessing && streamName && (
+            <EuiToolTip content={processingLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="processor"
+                size="xs"
+                color="text"
+                aria-label={processingLabel}
+                data-test-subj="streamsCanvasProcessingButton"
+                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+                  event.stopPropagation();
+                  data.onProcessingClick?.(streamName);
+                }}
+              />
+            </EuiToolTip>
+          )}
+        </div>
+        {isUnconfigured && data.configurationLabel && (
           <>
-            <EuiSpacer size="xs" />
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content={processingLabel}>
-                  <EuiPanel
-                    hasShadow={false}
-                    hasBorder
-                    paddingSize="none"
-                    color="subdued"
-                    data-test-subj="streamsCanvasProcessingGlyph"
-                    css={css`
-                      display: flex;
-                      align-items: center;
-                      justify-content: center;
-                      padding: ${euiTheme.size.xxs};
-                    `}
-                  >
-                    <EuiIcon type="processor" size="s" aria-label={processingLabel} />
-                  </EuiPanel>
-                </EuiToolTip>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {processingLabel}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="danger">
+              {data.configurationLabel}
+            </EuiText>
           </>
         )}
       </EuiPanel>

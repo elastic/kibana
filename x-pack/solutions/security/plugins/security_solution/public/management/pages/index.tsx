@@ -26,6 +26,7 @@ import {
   MANAGEMENT_ROUTING_SCRIPT_LIBRARY_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_TRUSTED_DEVICES_PATH,
+  MANAGEMENT_ROUTING_CUSTOM_YARA_SIGNATURES_PATH,
 } from '../common/constants';
 import { NotFoundPage } from '../../app/404';
 import { EndpointsContainer } from './endpoint_hosts';
@@ -76,6 +77,9 @@ const Notes = () => (
 
 export const ManagementContainer = memo(() => {
   const trustedDevicesEnabled = useIsExperimentalFeatureEnabled('trustedDevices');
+  const customYaraSignaturesEnabled = useIsExperimentalFeatureEnabled(
+    'customYaraSignaturesEnabled'
+  );
   const endpointExceptionsMovedUnderManagement = useIsExperimentalFeatureEnabled(
     'endpointExceptionsMovedUnderManagement'
   );
@@ -87,6 +91,7 @@ export const ManagementContainer = memo(() => {
     loading,
     canReadPolicyManagement,
     canReadBlocklist,
+    canReadCustomYaraSignatures,
     canReadTrustedApplications,
     canReadTrustedDevices,
     canReadEventFilters,
@@ -170,6 +175,14 @@ export const ManagementContainer = memo(() => {
         hasPrivilege={canReadBlocklist}
         exact
       />
+      {customYaraSignaturesEnabled && (
+        <PrivilegedRoute
+          path={MANAGEMENT_ROUTING_CUSTOM_YARA_SIGNATURES_PATH}
+          component={ArtifactsPage}
+          hasPrivilege={canReadCustomYaraSignatures}
+          exact
+        />
+      )}
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH}
         component={ResponseActionsTelemetry}

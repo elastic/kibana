@@ -11,7 +11,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -26,6 +25,7 @@ import {
   EuiCodeBlock,
   EuiText,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { Error } from '../../../../../shared_imports';
@@ -217,11 +217,9 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
       <Fragment>
         {isManagedRepository ? (
           <Fragment>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount={false}
               size="s"
-              color="warning"
-              iconType="info"
               title={
                 <FormattedMessage
                   id="xpack.snapshotRestore.repositoryDetails.managedRepositoryWarningTitle"

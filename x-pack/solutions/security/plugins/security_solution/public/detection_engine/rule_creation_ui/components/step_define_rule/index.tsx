@@ -420,7 +420,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 idSelected={dataSourceType}
                 onChange={onChangeDataSource}
                 options={dataViewIndexPatternToggleButtonOptions}
-                color="primary"
               />
             </RuleTypeEuiFormRow>
           </EuiFlexItem>

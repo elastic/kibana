@@ -38,7 +38,10 @@ import {
 } from '../common';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { getConnectorType } from './fixtures';
-import { USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE } from './constants/saved_objects';
+import {
+  CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+  USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+} from './constants/saved_objects';
 import { LeasePool } from './lib';
 
 function getConfig(overrides = {}) {
@@ -77,6 +80,7 @@ function getConfig(overrides = {}) {
     inboundEvents: {
       enabled: false,
       maxBodyBytes: new ByteSizeValue(1024 * 1024),
+      maxEmitted: 25,
     },
     ...overrides,
   };
@@ -139,6 +143,7 @@ describe('Actions Plugin', () => {
         inboundEvents: {
           enabled: false,
           maxBodyBytes: new ByteSizeValue(1024 * 1024),
+          maxEmitted: 25,
         },
       });
       plugin = new ActionsPlugin(context);
@@ -182,12 +187,32 @@ describe('Actions Plugin', () => {
       );
     });
 
+    it('should always register connector_ingress_credential without encryption', async () => {
+      await plugin.setup(coreSetup, pluginsSetup);
+      expect(coreSetup.savedObjects.registerType).toHaveBeenCalledWith(
+        expect.objectContaining({ name: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE })
+      );
+      expect(pluginsSetup.encryptedSavedObjects.registerType).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE })
+      );
+    });
+
     it('should expose the same client lease pool before start', async () => {
       const setupContract = await plugin.setup(coreSetup, pluginsSetup);
 
       const clientLeasePool = setupContract.getClientLeasePool();
       expect(clientLeasePool).toBeInstanceOf(LeasePool);
       expect(setupContract.getClientLeasePool()).toBe(clientLeasePool);
+    });
+
+    it('allows only one connector event emitter registration', async () => {
+      const setupContract = await plugin.setup(coreSetup, pluginsSetup);
+      const emitter = { emit: jest.fn() };
+
+      setupContract.registerConnectorEventEmitter(emitter);
+      expect(() => setupContract.registerConnectorEventEmitter({ emit: jest.fn() })).toThrow(
+        /only one emitter is supported/
+      );
     });
 
     describe('routeHandlerContext.getActionsClient()', () => {
@@ -563,6 +588,7 @@ describe('Actions Plugin', () => {
         inboundEvents: {
           enabled: false,
           maxBodyBytes: new ByteSizeValue(1024 * 1024),
+          maxEmitted: 25,
         },
       });
       plugin = new ActionsPlugin(context);
@@ -920,6 +946,53 @@ describe('Actions Plugin', () => {
           expect(pluginStart.inMemoryConnectors[1].id).toBe(newDynamicConnector.id);
           expect(pluginStart.inMemoryConnectors[1].isPreconfigured).toBe(true);
           expect(pluginStart.inMemoryConnectors[1].isDynamic).toBe(true);
+        });
+        it('drops inbound events on a dynamic connector when inbound events are disabled', () => {
+          const newDynamicConnector: InMemoryConnector = {
+            id: 'dynamic-slack',
+            actionTypeId: '.slack2',
+            name: 'Slack',
+            config: {},
+            secrets: {},
+            isPreconfigured: true,
+            isDeprecated: false,
+            isSystemAction: false,
+            isConnectorTypeDeprecated: false,
+            isInboundEventsEnabled: true,
+          };
+          expect(pluginStart.registerDynamicConnector(newDynamicConnector)).toEqual(true);
+
+          expect(pluginStart.inMemoryConnectors[1]).not.toHaveProperty('isInboundEventsEnabled');
+        });
+        it('keeps inbound events on a dynamic connector when inbound events are enabled', async () => {
+          setup(
+            getConfig({
+              inboundEvents: {
+                enabled: true,
+                maxBodyBytes: new ByteSizeValue(1024 * 1024),
+                maxEmitted: 25,
+              },
+            })
+          );
+          const enabledPluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+          enabledPluginSetup.registerType(serverLogConnectorType);
+          const enabledPluginStart = await plugin.start(coreStart, pluginsStart);
+          const newDynamicConnector: InMemoryConnector = {
+            id: 'dynamic-slack',
+            actionTypeId: '.slack2',
+            name: 'Slack',
+            config: {},
+            secrets: {},
+            isPreconfigured: true,
+            isDeprecated: false,
+            isSystemAction: false,
+            isConnectorTypeDeprecated: false,
+            isInboundEventsEnabled: true,
+          };
+
+          expect(enabledPluginStart.registerDynamicConnector(newDynamicConnector)).toEqual(true);
+
+          expect(enabledPluginStart.inMemoryConnectors[1].isInboundEventsEnabled).toBe(true);
         });
         it('should not allow adding a dynamic connector for an existing connector id', () => {
           const existingConnector = pluginStart.inMemoryConnectors[0];

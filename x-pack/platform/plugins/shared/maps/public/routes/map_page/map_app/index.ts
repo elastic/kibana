@@ -19,6 +19,7 @@ import {
   getQueryableUniqueIndexPatternIds,
   getTimeFilters,
   hasDirtyState,
+  isMapLoading,
 } from '../../../selectors/map_selectors';
 import { setQuery, setExecutionContext, enableFullScreen, openMapSettings } from '../../../actions';
 import { FLYOUT_STATE } from '../../../reducers/ui';
@@ -27,6 +28,7 @@ import type { MapStoreState } from '../../../reducers/store';
 
 function mapStateToProps(state: MapStoreState) {
   return {
+    isMapLoading: isMapLoading(state),
     isFullScreen: getIsFullScreen(state),
     isOpenSettingsDisabled: getFlyoutDisplay(state) !== FLYOUT_STATE.NONE,
     isSaveDisabled: hasDirtyState(state),

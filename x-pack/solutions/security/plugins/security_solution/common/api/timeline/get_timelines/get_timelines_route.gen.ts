@@ -28,35 +28,60 @@ export const GetTimelinesRequestQuery = lazySchema(() =>
     /**
      * If `true`, only Timelines that the current user has marked as favorite are returned.
      */
-    only_user_favorite: z.enum(['true', 'false']).nullable().optional(),
+    only_user_favorite: z
+      .enum(['true', 'false'])
+      .nullable()
+      .optional()
+      .describe(
+        'If `true`, only Timelines that the current user has marked as favorite are returned.'
+      ),
     /**
      * Restrict results to `default` investigation timelines or `template` timeline templates.
      */
-    timeline_type: TimelineType.nullable().optional(),
+    timeline_type: TimelineType.nullable()
+      .optional()
+      .describe(
+        'Restrict results to `default` investigation timelines or `template` timeline templates.'
+      ),
     /**
      * Field used to sort the list (`title`, `description`, `updated`, or `created`).
      */
-    sort_field: SortFieldTimeline.optional(),
+    sort_field: SortFieldTimeline.optional().describe(
+      'Field used to sort the list (`title`, `description`, `updated`, or `created`).'
+    ),
     /**
      * Whether to sort the results `ascending` or `descending`
      */
-    sort_order: z.enum(['asc', 'desc']).optional(),
+    sort_order: z
+      .enum(['asc', 'desc'])
+      .optional()
+      .describe('Whether to sort the results `ascending` or `descending`'),
     /**
      * How many results should returned at once
      */
-    page_size: z.string().nullable().optional(),
+    page_size: z
+      .string()
+      .nullable()
+      .optional()
+      .describe('How many results should returned at once'),
     /**
      * How many pages should be skipped
      */
-    page_index: z.string().nullable().optional(),
+    page_index: z.string().nullable().optional().describe('How many pages should be skipped'),
     /**
      * Allows to search for timelines by their title
      */
-    search: z.string().nullable().optional(),
+    search: z
+      .string()
+      .nullable()
+      .optional()
+      .describe('Allows to search for timelines by their title'),
     /**
      * Filter by timeline lifecycle state (`active`, `draft`, or `immutable`).
      */
-    status: TimelineStatus.nullable().optional(),
+    status: TimelineStatus.nullable()
+      .optional()
+      .describe('Filter by timeline lifecycle state (`active`, `draft`, or `immutable`).'),
   })
 );
 export type GetTimelinesRequestQuery = z.infer<typeof GetTimelinesRequestQuery>;
@@ -68,27 +93,39 @@ export const GetTimelinesResponse = lazySchema(() =>
     /**
      * The total amount of results
      */
-    totalCount: z.number(),
+    totalCount: z.number().describe('The total amount of results'),
     /**
      * The amount of `default` type Timelines in the results
      */
-    defaultTimelineCount: z.number().optional(),
+    defaultTimelineCount: z
+      .number()
+      .optional()
+      .describe('The amount of `default` type Timelines in the results'),
     /**
      * The amount of Timeline templates in the results
      */
-    templateTimelineCount: z.number().optional(),
+    templateTimelineCount: z
+      .number()
+      .optional()
+      .describe('The amount of Timeline templates in the results'),
     /**
      * The amount of favorited Timelines
      */
-    favoriteCount: z.number().optional(),
+    favoriteCount: z.number().optional().describe('The amount of favorited Timelines'),
     /**
      * The amount of Elastic's Timeline templates in the results
      */
-    elasticTemplateTimelineCount: z.number().optional(),
+    elasticTemplateTimelineCount: z
+      .number()
+      .optional()
+      .describe("The amount of Elastic's Timeline templates in the results"),
     /**
      * The amount of custom Timeline templates in the results
      */
-    customTemplateTimelineCount: z.number().optional(),
+    customTemplateTimelineCount: z
+      .number()
+      .optional()
+      .describe('The amount of custom Timeline templates in the results'),
   })
 );
 export type GetTimelinesResponse = z.infer<typeof GetTimelinesResponse>;

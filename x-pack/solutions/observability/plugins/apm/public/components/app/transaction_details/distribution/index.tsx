@@ -60,6 +60,20 @@ export function TransactionDistribution({
 
   const { serviceName } = useApmServiceContext();
 
+  const traceSamples = traceSamplesFetchResult.data?.traceSamples;
+
+  // Derive the selected sample from the URL so the pagination index stays in
+  // sync with browser back/forward navigation. Passing `selectedSample` (even
+  // as `null`) puts `WaterfallWithSummary` into its controlled mode, where the
+  // index is derived from the URL instead of from local click-only state.
+  const selectedSample = useMemo(
+    () =>
+      traceSamples?.find(
+        (sample) => sample.traceId === traceId && sample.transactionId === transactionId
+      ) ?? null,
+    [traceSamples, traceId, transactionId]
+  );
+
   const unifiedWaterfallFetchResult = useUnifiedWaterfallFetcher({
     start,
     end,
@@ -202,7 +216,8 @@ export function TransactionDistribution({
           waterfallItemId={waterfallItemId}
           detailTab={detailTab as TransactionTab | undefined}
           traceSamplesFetchStatus={traceSamplesFetchResult.status}
-          traceSamples={traceSamplesFetchResult.data?.traceSamples}
+          traceSamples={traceSamples}
+          selectedSample={selectedSample}
           showCriticalPath={showCriticalPath}
           onShowCriticalPathChange={onShowCriticalPathChange}
           logsTableConfig={logsTableConfig}

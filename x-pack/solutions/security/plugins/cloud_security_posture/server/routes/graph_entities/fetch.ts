@@ -6,14 +6,13 @@
  */
 
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
-import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import {
   GRAPH_ACTOR_ENTITY_FIELDS,
   GRAPH_TARGET_ENTITY_FIELDS,
 } from '@kbn/cloud-security-posture-common/constants';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import { SECURITY_ALERTS_PARTIAL_IDENTIFIER } from '../../../common/constants';
-import { generateFieldHintCases, checkIfEntitiesIndexExists } from '../graph/utils';
+import { generateFieldHintCases, resolveEntitiesIndexName } from '../graph/utils';
 import type { EntityRecord } from './types';
 
 interface FetchEntitiesParams {
@@ -40,18 +39,16 @@ export const fetchEntities = async ({
   spaceId,
   indexPatterns,
 }: FetchEntitiesParams): Promise<EsqlToRecords<EntityRecord>> => {
-  const lookupIndexName = getEntitiesLatestIndexName(spaceId);
   const resolvedIndexPatterns = indexPatterns ?? [
     `${SECURITY_ALERTS_PARTIAL_IDENTIFIER}${spaceId}`,
     'logs-*',
   ];
 
-  const entityStoreIndexExists = await checkIfEntitiesIndexExists(esClient, logger, spaceId);
+  const lookupIndexName = await resolveEntitiesIndexName(esClient, logger, spaceId);
 
   const query = buildEntitiesEsqlQuery({
     indexPatterns: resolvedIndexPatterns,
     lookupIndexName,
-    entityStoreIndexExists,
     entityCount: entityIds.length,
   });
 
@@ -97,15 +94,14 @@ const buildDslFilter = (entityIds: string[], start: string | number, end: string
 
 interface BuildEntitiesQueryParams {
   indexPatterns: string[];
-  lookupIndexName: string;
-  entityStoreIndexExists: boolean;
+  /** Resolved concrete entities index for LOOKUP JOIN, or null when none is live. */
+  lookupIndexName: string | null;
   entityCount: number;
 }
 
 const buildEntitiesEsqlQuery = ({
   indexPatterns,
   lookupIndexName,
-  entityStoreIndexExists,
   entityCount,
 }: BuildEntitiesQueryParams): string => {
   const entityIdParams = Array.from({ length: entityCount }, (_, idx) => `?entity_id${idx}`).join(
@@ -130,7 +126,7 @@ ${entityFieldHintCases},
 | EVAL timestamp = TO_STRING(\`@timestamp\`)
 | EVAL sourceIps = source.ip
 | EVAL sourceCountryCodes = source.geo.country_iso_code
-${buildSingleEntityEnrichment(entityStoreIndexExists, lookupIndexName)}
+${buildSingleEntityEnrichment(lookupIndexName)}
 | STATS ecsParentField = MIN(ecsParentField),
   entityName = MIN(entityName),
   entityType = MIN(entityType),
@@ -148,11 +144,8 @@ ${buildSingleEntityEnrichment(entityStoreIndexExists, lookupIndexName)}
  * Unlike buildEntityEnrichment (which enriches actor + target pairs),
  * this enriches a single entityId field.
  */
-const buildSingleEntityEnrichment = (
-  entityStoreIndexExists: boolean,
-  lookupIndexName: string
-): string => {
-  if (entityStoreIndexExists) {
+const buildSingleEntityEnrichment = (lookupIndexName: string | null): string => {
+  if (lookupIndexName != null) {
     return `// Drop existing entity.id from source docs before LOOKUP JOIN to avoid conflicts
 | DROP entity.id
 | EVAL entity.id = entityId

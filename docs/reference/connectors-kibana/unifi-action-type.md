@@ -11,14 +11,18 @@ applies_to:
 
 The UniFi connector reads and controls a Ubiquiti UniFi console — a Dream Machine, Cloud Gateway, or UNVR — through both applications it hosts. It lets a workflow or agent inventory sites, devices, clients, networks, and WAN uplinks from UniFi Network, inspect cameras, sensors, lights, and the NVR from UniFi Protect, and act on what it finds by restarting a device, power-cycling a PoE port, authorizing a guest, or repositioning a PTZ camera.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Overview
 
-This is a **custom connector** that talks to the UniFi Network and UniFi Protect integration APIs. Both applications run on the same console behind separate reverse-proxy prefixes and share one API key, so a single connector covers both:
+The UniFi connector talks to the UniFi Network and UniFi Protect integration APIs. Both applications run on the same console behind separate reverse-proxy prefixes and share one API key, so a single connector covers both:
 
 * `{console URL}/proxy/network/integration/v1/…` — UniFi Network
 * `{console URL}/proxy/protect/integration/v1/…` — UniFi Protect
 
 You configure the console URL and an API key when creating the connector; every action then runs under that key's account and permissions.
+
+All [UniFi actions](#unifi-available-actions), across both UniFi Network and UniFi Protect, are available as a tool for Agent Builder agents and as a sub-action on a UniFi workflow step.
 
 The two APIs do not share conventions beyond authentication and host. UniFi Network is site-scoped and paginated: list actions accept `offset`, `limit`, and `filter`, and return an envelope of `offset`, `limit`, `count`, `totalCount`, and `data`. UniFi Protect is console-scoped and unpaginated: list actions return a plain array.
 

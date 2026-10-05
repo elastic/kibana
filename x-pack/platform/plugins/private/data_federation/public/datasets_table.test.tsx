@@ -7,11 +7,32 @@
 
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
-import { fireEvent, render } from '@testing-library/react';
+import { act, fireEvent, render } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Router } from '@kbn/shared-ux-router';
 import type { DataSetWithName } from '../common';
+import { CREATE_DATASET_PATH, getEditDatasetPath } from './app_paths';
 import type { DataSetListRow } from './datasets_table';
 import { DatasetsTable } from './datasets_table';
+
+const docLinksMock = {
+  links: {
+    dataFederation: {
+      overview: '',
+      quickstart: '',
+      dataSources: '',
+      datasets: '',
+      datasetSettings: '',
+      authentication: '',
+      staticCredentials: '',
+      federatedIdentity: '',
+      querying: '',
+      security: '',
+    },
+  },
+};
 
 const createDataSetRow = ({
   name,
@@ -39,121 +60,108 @@ describe('DatasetsTable', () => {
     consoleWarnSpy.mockRestore();
   });
 
-  it('disables create when isCreateDisabled is true', async () => {
-    const onCreate = jest.fn();
-
-    const { getByTestId } = render(
+  const renderTable = (props: Partial<React.ComponentProps<typeof DatasetsTable>> = {}) => {
+    const history = createMemoryHistory({ initialEntries: ['/datasets'] });
+    const view = render(
       <EuiProvider>
-        <DatasetsTable
-          filteredItems={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
-          selectedItems={[]}
-          dataSourceFilterOptions={[
-            { value: '', text: 'All' },
-            { value: 'ds1', text: 'ds1' },
-          ]}
-          dataSourceFilter=""
-          isCreateDisabled={true}
-          onSelectionChange={jest.fn()}
-          onDataSourceFilterChange={jest.fn()}
-          onCreate={onCreate}
-          onEdit={jest.fn()}
-          onDelete={jest.fn()}
-          onDeleteSelected={jest.fn()}
-        />
+        <Router history={history}>
+          <KibanaContextProvider services={{ docLinks: docLinksMock }}>
+            <DatasetsTable
+              items={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
+              selectedItems={[]}
+              dataSourceNames={['ds1']}
+              onSelectionChange={jest.fn()}
+              onDelete={jest.fn()}
+              onDeleteSelected={jest.fn()}
+              {...props}
+            />
+          </KibanaContextProvider>
+        </Router>
       </EuiProvider>
     );
+    return { ...view, history };
+  };
 
-    const createButton = getByTestId('dataSetsSetsCreateButton');
-    expect(createButton).toBeDisabled();
-
-    fireEvent.click(createButton);
-    expect(onCreate).not.toHaveBeenCalled();
-  });
-
-  it('calls onCreate when create is enabled and clicked', async () => {
-    const onCreate = jest.fn();
-
-    const { getByTestId } = render(
-      <EuiProvider>
-        <DatasetsTable
-          filteredItems={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
-          selectedItems={[]}
-          dataSourceFilterOptions={[
-            { value: '', text: 'All' },
-            { value: 'ds1', text: 'ds1' },
-          ]}
-          dataSourceFilter=""
-          isCreateDisabled={false}
-          onSelectionChange={jest.fn()}
-          onDataSourceFilterChange={jest.fn()}
-          onCreate={onCreate}
-          onEdit={jest.fn()}
-          onDelete={jest.fn()}
-          onDeleteSelected={jest.fn()}
-        />
-      </EuiProvider>
-    );
+  it('links the add dataset button to the create wizard', async () => {
+    const { getByTestId, history } = renderTable();
 
     fireEvent.click(getByTestId('dataSetsSetsCreateButton'));
-    expect(onCreate).toHaveBeenCalledTimes(1);
+    expect(history.location.pathname).toBe(CREATE_DATASET_PATH);
   });
 
-  it('calls onDataSourceFilterChange when the filter changes', async () => {
-    const onDataSourceFilterChange = jest.fn();
+  it('keeps the add dataset button enabled when there are no data sources', async () => {
+    const { getByTestId, history } = renderTable({ items: [], dataSourceNames: [] });
 
-    const { getByTestId } = render(
-      <EuiProvider>
-        <DatasetsTable
-          filteredItems={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
-          selectedItems={[]}
-          dataSourceFilterOptions={[
-            { value: '', text: 'All' },
-            { value: 'ds1', text: 'ds1' },
-          ]}
-          dataSourceFilter=""
-          isCreateDisabled={false}
-          onSelectionChange={jest.fn()}
-          onDataSourceFilterChange={onDataSourceFilterChange}
-          onCreate={jest.fn()}
-          onEdit={jest.fn()}
-          onDelete={jest.fn()}
-          onDeleteSelected={jest.fn()}
-        />
-      </EuiProvider>
-    );
+    const createButton = getByTestId('dataSetsSetsCreateButton');
+    expect(createButton).toBeEnabled();
 
-    fireEvent.change(getByTestId('dataSetsSetsDataSourceFilter'), { target: { value: 'ds1' } });
-    expect(onDataSourceFilterChange).toHaveBeenCalledTimes(1);
-    expect(onDataSourceFilterChange).toHaveBeenCalledWith('ds1');
+    fireEvent.click(createButton);
+    expect(history.location.pathname).toBe(CREATE_DATASET_PATH);
   });
 
-  it('calls onEdit and onDelete for row actions', async () => {
-    const onEdit = jest.fn();
+  it('filters rows by the selected data sources', async () => {
+    const { getByRole, findByRole, queryByText } = renderTable({
+      items: [
+        createDataSetRow({ name: 'set1', dataSource: 'ds1' }),
+        createDataSetRow({ name: 'set2', dataSource: 'ds10' }),
+        createDataSetRow({ name: 'set3', dataSource: 'ds2' }),
+      ],
+      dataSourceNames: ['ds1', 'ds10', 'ds2'],
+    });
+
+    await act(async () => {
+      fireEvent.click(getByRole('button', { name: /Data sources/ }));
+    });
+    const ds1Option = await findByRole('option', { name: 'ds1' });
+    await act(async () => {
+      fireEvent.click(ds1Option);
+    });
+
+    expect(queryByText('set1')).toBeInTheDocument();
+    expect(queryByText('set2')).not.toBeInTheDocument();
+    expect(queryByText('set3')).not.toBeInTheDocument();
+
+    const ds2Option = await findByRole('option', { name: 'ds2' });
+    await act(async () => {
+      fireEvent.click(ds2Option);
+    });
+
+    expect(queryByText('set1')).toBeInTheDocument();
+    expect(queryByText('set2')).not.toBeInTheDocument();
+    expect(queryByText('set3')).toBeInTheDocument();
+  });
+
+  it('clears the selection when the data source filter changes', async () => {
+    const onSelectionChange = jest.fn();
+    const selectedItems = [createDataSetRow({ name: 'set1', dataSource: 'ds1' })];
+
+    const { getByRole, findByRole } = renderTable({
+      items: [...selectedItems, createDataSetRow({ name: 'set2', dataSource: 'ds2' })],
+      selectedItems,
+      dataSourceNames: ['ds1', 'ds2'],
+      onSelectionChange,
+    });
+
+    await act(async () => {
+      fireEvent.click(getByRole('button', { name: /Data sources/ }));
+    });
+    const option = await findByRole('option', { name: 'ds2' });
+    await act(async () => {
+      fireEvent.click(option);
+    });
+
+    expect(onSelectionChange).toHaveBeenCalledWith([]);
+  });
+
+  it('navigates to the edit wizard and calls onDelete for row actions', async () => {
     const onDelete = jest.fn();
-
-    const { getAllByTestId } = render(
-      <EuiProvider>
-        <DatasetsTable
-          filteredItems={[
-            createDataSetRow({ name: 'set1', dataSource: 'ds1' }),
-            createDataSetRow({ name: 'set2', dataSource: 'ds1' }),
-          ]}
-          selectedItems={[]}
-          dataSourceFilterOptions={[
-            { value: '', text: 'All' },
-            { value: 'ds1', text: 'ds1' },
-          ]}
-          dataSourceFilter=""
-          isCreateDisabled={false}
-          onSelectionChange={jest.fn()}
-          onDataSourceFilterChange={jest.fn()}
-          onCreate={jest.fn()}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          onDeleteSelected={jest.fn()}
-        />
-      </EuiProvider>
-    );
+    const { getAllByTestId, history } = renderTable({
+      items: [
+        createDataSetRow({ name: 'set1', dataSource: 'ds1' }),
+        createDataSetRow({ name: 'set2', dataSource: 'ds1' }),
+      ],
+      onDelete,
+    });
 
     const editButtons = getAllByTestId('dataSetsSetsEditButton');
     const deleteButtons = getAllByTestId('dataSetsSetsDeleteIconButton');
@@ -161,8 +169,7 @@ describe('DatasetsTable', () => {
     expect(deleteButtons).toHaveLength(2);
 
     fireEvent.click(editButtons[0]);
-    expect(onEdit).toHaveBeenCalledTimes(1);
-    expect(onEdit).toHaveBeenCalledWith(expect.objectContaining({ name: 'set1' }));
+    expect(history.location.pathname).toBe(getEditDatasetPath('set1'));
 
     fireEvent.click(deleteButtons[1]);
     expect(onDelete).toHaveBeenCalledTimes(1);
@@ -172,27 +179,11 @@ describe('DatasetsTable', () => {
   it('shows bulk delete when selection is non-empty and calls onDeleteSelected', async () => {
     const onDeleteSelected = jest.fn();
     const selectedItems = [createDataSetRow({ name: 'set1', dataSource: 'ds1' })];
-
-    const { getByTestId } = render(
-      <EuiProvider>
-        <DatasetsTable
-          filteredItems={[...selectedItems, createDataSetRow({ name: 'set2', dataSource: 'ds1' })]}
-          selectedItems={selectedItems}
-          dataSourceFilterOptions={[
-            { value: '', text: 'All' },
-            { value: 'ds1', text: 'ds1' },
-          ]}
-          dataSourceFilter=""
-          isCreateDisabled={false}
-          onSelectionChange={jest.fn()}
-          onDataSourceFilterChange={jest.fn()}
-          onCreate={jest.fn()}
-          onEdit={jest.fn()}
-          onDelete={jest.fn()}
-          onDeleteSelected={onDeleteSelected}
-        />
-      </EuiProvider>
-    );
+    const { getByTestId } = renderTable({
+      items: [...selectedItems, createDataSetRow({ name: 'set2', dataSource: 'ds1' })],
+      selectedItems,
+      onDeleteSelected,
+    });
 
     fireEvent.click(getByTestId('dataSetsSetsDeleteButton'));
     expect(onDeleteSelected).toHaveBeenCalledTimes(1);

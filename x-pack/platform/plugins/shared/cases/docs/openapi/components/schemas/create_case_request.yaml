@@ -50,6 +50,8 @@ properties:
         - value
       properties:
         $ref: 'case_customfields.yaml'
+  extended_fields:
+    $ref: 'case_extended_fields.yaml'
   template:
     type: object
     nullable: true

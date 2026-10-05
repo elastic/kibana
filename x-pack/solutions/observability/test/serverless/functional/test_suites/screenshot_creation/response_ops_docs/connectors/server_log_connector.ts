@@ -12,9 +12,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const screenshotDirectories = ['response_ops_docs', 'observability_connectors'];
   const pageObjects = getPageObjects(['common', 'header', 'svlCommonPage']);
   const testSubjects = getService('testSubjects');
+  const actions = getService('actions');
 
-  // Failing: See https://github.com/elastic/kibana/issues/283730
-  describe.skip('server log connector', function () {
+  describe('server log connector', function () {
     beforeEach(async () => {
       await pageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
@@ -22,8 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('server log connector screenshots', async () => {
       await pageObjects.common.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.click('createConnectorButton');
-      await testSubjects.click(`.server-log-card`);
+      await actions.common.openNewConnectorForm('server-log');
       await testSubjects.setValue('nameInput', 'Server log test connector');
       await svlCommonScreenshots.takeScreenshot('serverlog-connector', screenshotDirectories);
       const saveTestButton = await testSubjects.find('create-connector-flyout-save-test-btn');

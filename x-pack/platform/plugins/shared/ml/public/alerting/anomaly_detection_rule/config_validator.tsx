@@ -9,7 +9,8 @@ import type { FC } from 'react';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { parseInterval } from '@kbn/ml-parse-interval';
 import { type CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import { type MlAnomalyDetectionAlertParams } from '@kbn/ml-common-types/alerts';
@@ -68,7 +69,7 @@ export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
         <EuiSpacer size={'m'} />
         {configContainsIssues ? (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
               title={
                 <FormattedMessage
@@ -76,7 +77,6 @@ export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
                   defaultMessage="Alert condition contains the following issues:"
                 />
               }
-              color="warning"
               size={'s'}
             >
               <ul>
@@ -105,13 +105,13 @@ export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
                   </li>
                 ) : null}
               </ul>
-            </EuiCallOut>
+            </KbnWarningCallout>
             <EuiSpacer size={'m'} />
           </>
         ) : null}
         {notifyWhenWarning ? (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
               title={
                 <FormattedMessage
@@ -120,7 +120,6 @@ export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
                   values={{ notificationDuration }}
                 />
               }
-              color="warning"
               size={'s'}
             />
             <EuiSpacer size={'m'} />

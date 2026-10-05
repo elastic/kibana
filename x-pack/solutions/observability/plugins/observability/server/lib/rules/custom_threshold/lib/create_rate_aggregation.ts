@@ -22,7 +22,9 @@ export const createRateAggsBucketScript = (
           first: `${id}_first_bucket.maxValue`,
           second: `${id}_second_bucket.maxValue`,
         },
-        script: `params.second > 0.0 && params.first > 0.0 && params.second > params.first ? (params.second - params.first) / ${intervalInSeconds}: 0`,
+        // Allow previous max of 0 (e.g. counter 0 → N). Reject missing values and non-increases
+        // (counter resets) so rate is only computed when both windows have a max and it rose.
+        script: `params.first != null && params.second != null && params.second > params.first ? (params.second - params.first) / ${intervalInSeconds} : 0`,
       },
     },
   };

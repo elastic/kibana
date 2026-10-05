@@ -11,10 +11,10 @@ import { ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import type { IKbnUrlStateStorage, Storage } from '@kbn/kibana-utils-plugin/public';
 import { isPlainObject } from 'lodash';
 import { ALERTING_V2_EPISODES_APP_ID, ALERTING_V2_SECTION_ID } from '@kbn/alerting-v2-constants';
-/** Namespace for episodes table config inside the `_a` app-state blob */
-export const EPISODES_TABLE_APP_STATE_KEY = 'episodesTable' as const;
+/** Namespace for alerts table config inside the `_a` app-state blob */
+export const ALERTS_TABLE_APP_STATE_KEY = 'alertsTable' as const;
 
-/** localStorage key for all episodes table display options */
+/** localStorage key for all alerts table display options (composed from the renamed APP_ID). */
 export const EPISODES_TABLE_CONFIG_STORAGE_KEY =
   `${ALERTING_V2_SECTION_ID}.${ALERTING_V2_EPISODES_APP_ID}.tableConfiguration` as const;
 
@@ -52,6 +52,7 @@ export const DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS: string[] = [
   'rule.id',
   'duration',
   'tags',
+  'rule_tags',
   'assignees',
 ];
 
@@ -75,7 +76,7 @@ export const DEFAULT_EPISODES_TABLE_CONFIG: EpisodesTableConfig = {
 };
 
 type AppStateRecord = Record<string, unknown> & {
-  [EPISODES_TABLE_APP_STATE_KEY]?: unknown;
+  [ALERTS_TABLE_APP_STATE_KEY]?: unknown;
 };
 
 type EpisodesTableConfigKey = keyof EpisodesTableConfig;
@@ -153,7 +154,7 @@ export const writeEpisodesTableConfigToStorage = (
 export const readEpisodesTableConfigFromUrl = (
   urlStateStorage: IKbnUrlStateStorage
 ): Partial<EpisodesTableConfig> | undefined => {
-  const raw = urlStateStorage.get<AppStateRecord>('_a')?.[EPISODES_TABLE_APP_STATE_KEY];
+  const raw = urlStateStorage.get<AppStateRecord>('_a')?.[ALERTS_TABLE_APP_STATE_KEY];
   return decodeEpisodesTableConfig(raw) ?? undefined;
 };
 
@@ -163,15 +164,13 @@ export const writeEpisodesTableConfigToUrl = async (
 ): Promise<void> => {
   const serialized = encodeEpisodesTableConfig(config);
   const appState = urlStateStorage.get<AppStateRecord>('_a') ?? {};
-  const {
-    [EPISODES_TABLE_APP_STATE_KEY]: _ignoredEpisodesTableState,
-    ...appStateWithoutEpisodesTable
-  } = appState;
+  const { [ALERTS_TABLE_APP_STATE_KEY]: _ignoredAlertsTableState, ...appStateWithoutAlertsTable } =
+    appState;
 
   const nextAppState: AppStateRecord =
     serialized === null
-      ? appStateWithoutEpisodesTable
-      : { ...appStateWithoutEpisodesTable, [EPISODES_TABLE_APP_STATE_KEY]: serialized };
+      ? appStateWithoutAlertsTable
+      : { ...appStateWithoutAlertsTable, [ALERTS_TABLE_APP_STATE_KEY]: serialized };
 
   // Use replace: true so display tweaks (especially column resizes) don't spam browser history
   await urlStateStorage.set('_a', nextAppState, { replace: true });

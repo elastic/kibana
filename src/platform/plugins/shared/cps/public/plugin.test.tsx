@@ -28,7 +28,7 @@ describe('CpsPlugin (public)', () => {
         .spyOn(coreStart.pricing, 'isFeatureAvailable')
         .mockReturnValue(true);
 
-      const start = plugin.start(coreStart);
+      const start = plugin.start(coreStart, {});
 
       expect(isFeatureAvailableSpy).toHaveBeenCalledWith(CPS_TIER_ELIGIBLE_FEATURE_ID);
       expect(start.isTierEligible).toBe(true);
@@ -41,7 +41,7 @@ describe('CpsPlugin (public)', () => {
       const coreStart = coreMock.createStart();
       jest.spyOn(coreStart.pricing, 'isFeatureAvailable').mockReturnValue(false);
 
-      const start = plugin.start(coreStart);
+      const start = plugin.start(coreStart, {});
 
       expect(start.isTierEligible).toBe(false);
     });
@@ -53,7 +53,7 @@ describe('CpsPlugin (public)', () => {
       const coreStart = coreMock.createStart();
       jest.spyOn(coreStart.pricing, 'isFeatureAvailable').mockReturnValue(true);
 
-      const start = plugin.start(coreStart);
+      const start = plugin.start(coreStart, {});
 
       expect(start.cpsManager).toBeUndefined();
       expect(start.isTierEligible).toBe(true);

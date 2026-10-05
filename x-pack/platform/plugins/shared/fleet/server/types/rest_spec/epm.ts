@@ -667,6 +667,7 @@ export const GetBulkAssetsResponseSchema = schema.object(
           service: schema.maybe(schema.string()),
           title: schema.maybe(schema.string()),
           description: schema.maybe(schema.string()),
+          engine: schema.maybe(schema.oneOf([schema.literal('v1'), schema.literal('v2')])),
         }),
       }),
       { maxSize: 10000 }

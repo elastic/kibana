@@ -76,6 +76,7 @@ export class SyntheticsEsClient {
   uiSettingsClient?: IUiSettingsClient;
   savedObjectsClient: SavedObjectsClientContract;
   heartbeatIndices: string;
+  projectRouting?: string;
   private excludedDataTiers?: Promise<DataTier[]>;
 
   constructor(
@@ -87,6 +88,7 @@ export class SyntheticsEsClient {
       uiSettingsClient?: IUiSettingsClient;
       request?: KibanaRequest;
       heartbeatIndices?: string;
+      projectRouting?: string;
     }
   ) {
     const {
@@ -95,6 +97,7 @@ export class SyntheticsEsClient {
       uiSettingsClient,
       request,
       heartbeatIndices,
+      projectRouting,
     } = options ?? {};
     this.uiSettings = uiSettings;
     // Alerting rule executors only have access to a plain `IUiSettingsClient`,
@@ -106,8 +109,16 @@ export class SyntheticsEsClient {
     this.request = request;
     this.isDev = isDev;
     this.heartbeatIndices = heartbeatIndices ?? SYNTHETICS_INDEX_PATTERN;
+    this.projectRouting = projectRouting;
     this.inspectableEsQueries = [];
     this.getInspectEnabled().catch(() => {});
+  }
+
+  private withProjectRouting<T extends object>(params: T): T {
+    if (!this.projectRouting) {
+      return params;
+    }
+    return { ...params, project_routing: this.projectRouting };
   }
 
   async getExcludedDataTiers(): Promise<DataTier[]> {
@@ -131,7 +142,11 @@ export class SyntheticsEsClient {
     let res: any;
     let esError: any;
 
-    const esParams = { index: this.heartbeatIndices, ignore_unavailable: true, ...params };
+    const esParams = this.withProjectRouting({
+      index: this.heartbeatIndices,
+      ignore_unavailable: true,
+      ...params,
+    });
     const excludedDataTiers = await this.getExcludedDataTiers();
     if (excludedDataTiers.length) {
       esParams.query = applyExcludedDataTiersToQuery(esParams.query, excludedDataTiers);
@@ -201,9 +216,9 @@ export class SyntheticsEsClient {
 
     try {
       res = await this.baseESClient.msearch(
-        {
+        this.withProjectRouting({
           searches,
-        },
+        }),
         { meta: true }
       );
     } catch (e) {
@@ -246,8 +261,16 @@ export class SyntheticsEsClient {
     let res: any;
     let esError: any;
 
-    const esParams: { index: string; ignore_unavailable: boolean; query?: QueryDslQueryContainer } =
-      { index: this.heartbeatIndices, ignore_unavailable: true, ...params };
+    const esParams: {
+      index: string;
+      ignore_unavailable: boolean;
+      query?: QueryDslQueryContainer;
+      project_routing?: string;
+    } = this.withProjectRouting({
+      index: this.heartbeatIndices,
+      ignore_unavailable: true,
+      ...params,
+    });
     const excludedDataTiers = await this.getExcludedDataTiers();
     if (excludedDataTiers.length) {
       esParams.query = applyExcludedDataTiersToQuery(esParams.query, excludedDataTiers);

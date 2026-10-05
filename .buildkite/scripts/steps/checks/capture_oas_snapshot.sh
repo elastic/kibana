@@ -12,6 +12,7 @@ cmd="node scripts/capture_oas_snapshot\
   --include-path /api/status \
   --include-path /api/alerting/rule/ \
   --include-path /api/alerting/rules \
+  --include-path /api/alerting/v2/ \
   --include-path /api/actions \
   --include-path /api/security/role \
   --include-path /api/spaces \
@@ -20,13 +21,15 @@ cmd="node scripts/capture_oas_snapshot\
   --include-path /api/saved_objects \
   --include-path /api/maintenance_window \
   --include-path /api/agent_builder \
+  --include-path /api/context_engine \
   --include-path /api/workflows \
   --include-path /api/dashboards \
   --include-path /api/visualizations \
   --include-path /api/markdowns \
   --include-path /api/links \
   --include-path /api/tags \
-  --include-path /api/security/entity_store"
+  --include-path /api/security/entity_store \
+  --include-path /api/profiling"
 
 run_check() {
   eval "$cmd"

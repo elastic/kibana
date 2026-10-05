@@ -11,6 +11,5 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
   describe('Stateful Observability - Deployment-agnostic API integration tests', () => {
     // load new oblt (except APM) deployment-agnostic tests here
     loadTestFile(require.resolve('../../apis/alerting'));
-    loadTestFile(require.resolve('../../apis/dataset_quality'));
   });
 }

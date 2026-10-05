@@ -60,6 +60,40 @@ describe('Embeddable helpers', () => {
       expect(services.attributeService.loadFromLibrary).toHaveBeenCalledWith('123');
     });
 
+    it('should drop a legacy aggregate slot value from by-value attributes (self-heal)', async () => {
+      const services = getServices();
+      const legacyDoc = {
+        ...defaultDoc,
+        state: {
+          ...defaultDoc.state,
+          // legacy dual-written copy — dead data, ignored at read time
+          query: { esql: 'FROM index | LIMIT 10' },
+          datasourceStates: {
+            textBased: {
+              layers: { layer1: { query: { esql: 'FROM index | LIMIT 10' }, columns: [] } },
+            },
+          },
+        },
+      } as unknown as typeof defaultDoc;
+      const runtimeState = await deserializeState(services, { attributes: legacyDoc });
+      expect(runtimeState.attributes.state.query).toBeUndefined();
+      // the layer query stays authoritative
+      expect(runtimeState.attributes.state.datasourceStates).toEqual(
+        legacyDoc.state.datasourceStates
+      );
+    });
+
+    it('should keep the chart-scoped KQL filter of by-value attributes', async () => {
+      const services = getServices();
+      const kqlQuery = { query: 'bytes > 100', language: 'kuery' };
+      const doc = {
+        ...defaultDoc,
+        state: { ...defaultDoc.state, query: kqlQuery },
+      } as unknown as typeof defaultDoc;
+      const runtimeState = await deserializeState(services, { attributes: doc });
+      expect(runtimeState.attributes.state.query).toEqual(kqlQuery);
+    });
+
     it('should fallback to an empty Lens doc if the saved object is not found', async () => {
       const services = getServices();
       services.attributeService.loadFromLibrary = jest

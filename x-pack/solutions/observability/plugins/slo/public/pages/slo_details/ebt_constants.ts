@@ -7,9 +7,11 @@
 
 export const SLO_DETAILS_EBT_ACTIONS = {
   VIEW_GOOD_VS_BAD_EVENTS: 'viewGoodVsBadEvents',
+  VIEW_PROJECT_SCOPE: 'viewProjectScope',
 } as const;
 
 export const SLO_DETAILS_EBT_ELEMENTS = {
   SLI_CHART: 'sliChart',
   GOOD_VS_BAD_EVENTS_CHART: 'goodVsBadEventsChart',
+  PROJECT_SCOPE_ROW: 'projectScopeRow',
 } as const;

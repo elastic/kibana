@@ -23,8 +23,6 @@ import {
 } from '../common/investigation_progress_status';
 import {
   getInvestigationStatusLabel,
-  getLatestInvestigation,
-  getRememberedInvestigationTerminalFailure,
   isEventInvestigated,
 } from '../event/significant_event_status';
 import { nightshiftReducedMotionStyles } from '../common/transition';
@@ -227,6 +225,54 @@ function InvestigationCompleteStatus({
   );
 }
 
+function InvestigationFailedStatus({
+  label,
+  testSubj,
+}: {
+  label: string;
+  testSubj?: string;
+}): React.ReactElement {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <span
+      data-test-subj={testSubj}
+      css={css`
+        align-items: center;
+        color: ${euiTheme.colors.textDanger};
+        display: inline-flex;
+        font-weight: ${euiTheme.font.weight.semiBold};
+        gap: ${euiTheme.size.s};
+      `}
+    >
+      <span
+        aria-hidden={true}
+        css={css`
+          align-items: center;
+          background: ${euiTheme.colors.backgroundFilledDanger};
+          border-radius: 50%;
+          display: inline-flex;
+          flex-shrink: 0;
+          height: ${COMPLETE_STATUS_CIRCLE_SIZE_PX}px;
+          justify-content: center;
+          width: ${COMPLETE_STATUS_CIRCLE_SIZE_PX}px;
+        `}
+      >
+        <EuiIcon
+          type="cross"
+          color="ghost"
+          css={css`
+            height: ${COMPLETE_STATUS_CHECK_SIZE_PX}px;
+            width: ${COMPLETE_STATUS_CHECK_SIZE_PX}px;
+          `}
+          aria-hidden={true}
+        />
+      </span>
+      {label}
+    </span>
+  );
+}
+
 function InvestigationGradientLabel({
   children,
   testSubj,
@@ -315,8 +361,11 @@ function InvestigationTerminalFailureStatus({ label }: { label: string }) {
   return (
     <EuiBadge
       color="hollow"
+      iconType="cross"
+      iconSide="left"
+      data-test-subj="nightshiftInvestigationFailedStatus"
       css={css`
-        color: ${euiTheme.colors.textSubdued};
+        color: ${euiTheme.colors.textDanger};
       `}
     >
       {label}
@@ -335,32 +384,27 @@ export function InvestigationStatusBadge({
   investigationStatus,
 }: {
   event: Pick<SignificantEvent, 'investigations'>;
-  investigationStatus?: InvestigationStatus;
+  investigationStatus?: InvestigationStatus | null;
 }): React.ReactElement | null {
+  if (investigationStatus === null) {
+    return null;
+  }
+
   const hasInvestigation = investigationStatus != null || (event.investigations?.length ?? 0) > 0;
   if (!hasInvestigation) {
     return null;
   }
 
-  const latestInvestigation = getLatestInvestigation(event);
-  const rememberedTerminalFailure =
-    investigationStatus == null && latestInvestigation != null
-      ? getRememberedInvestigationTerminalFailure(latestInvestigation.workflow_execution_id)
-      : undefined;
-
   const isInvestigated =
     investigationStatus != null
       ? isInvestigationInvestigated(investigationStatus)
-      : rememberedTerminalFailure == null && isEventInvestigated(event);
+      : isEventInvestigated(event);
   const label =
     investigationStatus != null
       ? getInvestigationWorkflowStatusLabel(investigationStatus)
-      : rememberedTerminalFailure != null
-      ? getInvestigationWorkflowStatusLabel(rememberedTerminalFailure)
       : getInvestigationStatusLabel(event);
   const isTerminalFailure =
-    (investigationStatus != null && isInvestigationTerminalFailure(investigationStatus)) ||
-    rememberedTerminalFailure != null;
+    investigationStatus != null && isInvestigationTerminalFailure(investigationStatus);
 
   if (isInvestigated) {
     return <InvestigatedStatus label={label} />;
@@ -377,6 +421,7 @@ export {
   GradientOutlinedStatusBadge,
   InvestigationCompleteCheckIcon,
   InvestigationCompleteStatus,
+  InvestigationFailedStatus,
   InvestigationGradientLabel,
   InvestigatingStatusDots,
 };

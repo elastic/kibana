@@ -54,6 +54,9 @@ const getCollapsibleNavStyles = (euiThemeContext: UseEuiTheme) => {
         overflowY: 'auto',
       },
     }),
+    navListGroupCss: css({
+      gap: euiTheme.size.xs,
+    }),
     navRecentsListGroupCss: [
       css({ maxHeight: `calc(${euiTheme.size.base} * 10)`, marginRight: `-${euiTheme.size.s}` }),
       _euiYScroll,
@@ -214,6 +217,7 @@ export function CollapsibleNav({
                     }),
                   ]}
                   maxWidth="none"
+                  css={styles.navListGroupCss}
                 />
               </EuiThemeProvider>
             </EuiCollapsibleNavGroup>
@@ -254,6 +258,7 @@ export function CollapsibleNav({
             ]}
             maxWidth="none"
             color="text"
+            css={styles.navListGroupCss}
           />
         </EuiCollapsibleNavGroup>
       </EuiFlexItem>
@@ -298,7 +303,7 @@ export function CollapsibleNav({
             })}
             maxWidth="none"
             color="subdued"
-            css={styles.navRecentsListGroupCss}
+            css={[styles.navListGroupCss, styles.navRecentsListGroupCss]}
           />
         </EuiCollapsibleNavGroup>
       )}
@@ -348,6 +353,7 @@ export function CollapsibleNav({
                 listItems={allCategorizedLinks[categoryName].map((link) => readyForEUI(link))}
                 maxWidth="none"
                 color="subdued"
+                css={styles.navListGroupCss}
               />
             </EuiCollapsibleNavGroup>
           );
@@ -356,7 +362,7 @@ export function CollapsibleNav({
         {/* Things with no category (largely for custom plugins) */}
         {unknowns.map((link, i) => (
           <EuiCollapsibleNavGroup data-test-subj={`collapsibleNavGroup-noCategory`} key={i}>
-            <EuiListGroup>
+            <EuiListGroup css={styles.navListGroupCss}>
               <EuiListGroupItem color="text" {...readyForEUI(link, true)} />
             </EuiListGroup>
           </EuiCollapsibleNavGroup>

@@ -54,7 +54,7 @@ describe('getIsExperimentalFeatureEnabled', () => {
 
     expect(result).toEqual(true);
 
-    expect(() => getIsExperimentalFeatureEnabled('doesNotExist' as any)).toThrowError(
+    expect(() => getIsExperimentalFeatureEnabled('doesNotExist' as any)).toThrow(
       `Invalid enable value doesNotExist. Allowed values are: ${allowedExperimentalValueKeys.join(
         ', '
       )}`

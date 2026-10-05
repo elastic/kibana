@@ -15,9 +15,9 @@ import type { InvestigationStatus } from '@kbn/investigation-output';
 import { EventInvestigation } from './event_investigation';
 
 const mockOpenChat = jest.fn();
-const mockGetRedirectUrl = jest.fn<string | undefined, [unknown]>();
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
   useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
 }));
 
@@ -25,9 +25,6 @@ jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       agentBuilder: { openChat: mockOpenChat },
-      share: {
-        url: { locators: { get: () => ({ getRedirectUrl: mockGetRedirectUrl }) } },
-      },
     },
   }),
 }));
@@ -35,12 +32,11 @@ jest.mock('../hooks/use_kibana', () => ({
 const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-07-10T12:00:00Z',
   event_id: 'evt-001',
-  event_uuid: 'evt-uuid-001',
-  status: 'open',
+  status: 'active',
   stream_names: ['logs.web-frontend'],
   title: 'Latency spike on web-frontend',
   summary: 'Summary',
-  severity: '60-high',
+  severity: 'high',
   confidence: 0.9,
   causal_features: [],
   ...overrides,
@@ -55,12 +51,14 @@ const completeState: InvestigationState = {
       status: 'confirmed',
     },
   ],
-  conclusion: `# Conclusion
-Checkout deploy introduced a regression.
-
-## Next Steps
-- Roll back checkout deployment · Revert commit abc123 and monitor error rate.`,
-  gaps_found: ['Missing trace coverage · No spans for payment gateway calls.'],
+  conclusion: 'Checkout deploy introduced a regression.',
+  recommendations: [
+    {
+      title: 'Roll back checkout deployment',
+      confidence: 0.95,
+      description: 'Revert commit abc123 and monitor error rate.',
+    },
+  ],
 };
 
 const renderInvestigation = (
@@ -97,8 +95,6 @@ const renderInvestigation = (
 describe('EventInvestigation', () => {
   beforeEach(() => {
     mockOpenChat.mockClear();
-    mockGetRedirectUrl.mockReset();
-    mockGetRedirectUrl.mockReturnValue(undefined);
   });
 
   it('renders the empty state when there is no investigation', () => {
@@ -148,6 +144,9 @@ describe('EventInvestigation', () => {
       'aria-selected',
       'true'
     );
+    expect(screen.getByText('95%')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationFlyoutTab-hypotheses'));
+    expect(screen.getByText('92%')).toBeInTheDocument();
 
     const chatButton = screen.getByTestId('nightshiftInvestigationFlyoutChatButton');
     expect(chatButton).toHaveAttribute('data-ebt-action', 'openInChat');
@@ -205,7 +204,7 @@ describe('EventInvestigation', () => {
     );
   });
 
-  it('shows the evidence behind a hypothesis, unlinked when Discover is unavailable', () => {
+  it('shows the markdown evidence and chart behind a hypothesis', () => {
     renderInvestigation(mockEvent(), {
       investigation: {
         workflow_execution_id: 'exec-latest',
@@ -220,9 +219,22 @@ describe('EventInvestigation', () => {
             reason: 'Pool utilization jumped to 100% at the deploy timestamp.',
             evidence: [
               {
-                description: 'Pool utilization saturates at the deploy timestamp.',
-                esql_query: 'FROM metrics-* | STATS max = MAX(pool.utilization)',
-                time_range: { from: '2026-07-10T11:30:00Z', to: '2026-07-10T12:30:00Z' },
+                description: 'Pool utilization saturates at the **deploy** timestamp.',
+                chart: {
+                  type: 'line',
+                  title: 'Pool utilization',
+                  x_axis: { type: 'time' },
+                  y_axis: { unit: 'percent' },
+                  series: [
+                    {
+                      name: 'orders-api',
+                      points: [
+                        { x: '2026-07-10T11:55:00Z', y: 40 },
+                        { x: '2026-07-10T12:00:00Z', y: 100 },
+                      ],
+                    },
+                  ],
+                },
               },
             ],
           },
@@ -234,57 +246,8 @@ describe('EventInvestigation', () => {
     fireEvent.click(screen.getByTestId('nightshiftInvestigationFlyoutTab-hypotheses'));
     fireEvent.click(screen.getByTestId('nightshiftInvestigationFlyoutHypothesis-0Toggle'));
 
-    expect(
-      screen.getByText('Pool utilization saturates at the deploy timestamp.')
-    ).toBeInTheDocument();
-    // The locator mock resolves to nothing, so the query renders read-only rather than breaking.
-    expect(screen.queryByTestId('investigationEvidenceQueryLink')).not.toBeInTheDocument();
-    expect(
-      screen.getByText('FROM metrics-* | STATS max = MAX(pool.utilization)')
-    ).toBeInTheDocument();
-  });
-
-  it('links a hypothesis to the Discover view its evidence came from', () => {
-    const discoverUrl = 'http://localhost:5601/app/discover#/?_a=(query:(esql:...))';
-
-    mockGetRedirectUrl.mockReturnValue(discoverUrl);
-
-    renderInvestigation(mockEvent(), {
-      investigation: {
-        workflow_execution_id: 'exec-latest',
-        started_at: '2026-07-10T12:00:00Z',
-        completed_at: '2026-07-10T12:05:00Z',
-      },
-      state: {
-        ...completeState,
-        hypotheses: [
-          {
-            ...completeState.hypotheses[0],
-            evidence: [
-              {
-                description: 'Pool utilization saturates at the deploy timestamp.',
-                esql_query: 'FROM metrics-* | STATS max = MAX(pool.utilization)',
-                time_range: { from: '2026-07-10T11:30:00Z', to: '2026-07-10T12:30:00Z' },
-              },
-            ],
-          },
-        ],
-      },
-    });
-
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationShowDetailsButton'));
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationFlyoutTab-hypotheses'));
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationFlyoutHypothesis-0Toggle'));
-
-    expect(screen.getByTestId('investigationEvidenceQueryLink')).toHaveAttribute(
-      'href',
-      discoverUrl
-    );
-    expect(mockGetRedirectUrl).toHaveBeenCalledWith({
-      query: { esql: 'FROM metrics-* | STATS max = MAX(pool.utilization)' },
-      timeRange: { from: '2026-07-10T11:30:00Z', to: '2026-07-10T12:30:00Z' },
-      interval: 'auto',
-    });
+    expect(screen.getByText('deploy').tagName).toBe('STRONG');
+    expect(screen.getByTestId('investigationEvidenceChart')).toHaveTextContent('Pool utilization');
   });
 
   it('shows ongoing investigation content when the hook reports running status', () => {
@@ -307,7 +270,7 @@ describe('EventInvestigation', () => {
       conversationId: undefined,
     });
 
-    expect(screen.getByText('Investigating')).toBeInTheDocument();
+    expect(screen.getByText('In progress')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftInvestigationGoalPreview')).toHaveTextContent(
       'Determine whether the deploy caused the spike.'
     );
@@ -358,7 +321,7 @@ describe('EventInvestigation', () => {
       },
       state: {
         ...completeState,
-        conclusion: `# Conclusion\n${longConclusionBody}`,
+        conclusion: longConclusionBody,
       },
     });
 
@@ -385,11 +348,13 @@ describe('EventInvestigation', () => {
       },
       state: {
         ...completeState,
-        conclusion: `# Conclusion
-Checkout deploy introduced a regression.
-
-## Next Steps
-- Roll back checkout deployment · ${longRecommendationDescription}`,
+        recommendations: [
+          {
+            title: 'Roll back checkout deployment',
+            confidence: 0.95,
+            description: longRecommendationDescription,
+          },
+        ],
       },
     });
 
@@ -412,5 +377,48 @@ Checkout deploy introduced a regression.
     });
 
     expect(screen.getByTestId('nightshiftInvestigationMissingWorkflowCallout')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('nightshiftInvestigationShowDetailsButton')
+    ).not.toBeInTheDocument();
+  });
+
+  it.each<InvestigationStatus>(['running', 'loading', 'failed', 'unavailable'])(
+    'does not offer the investigation flyout when the status is %s',
+    (status) => {
+      renderInvestigation(mockEvent(), {
+        investigation: {
+          workflow_execution_id: 'exec-latest',
+          started_at: '2026-07-10T12:00:00Z',
+          completed_at: '2026-07-10T12:05:00Z',
+        },
+        status,
+      });
+
+      expect(
+        screen.queryByTestId('nightshiftInvestigationShowDetailsButton')
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftInvestigationFlyout')).not.toBeInTheDocument();
+    }
+  );
+
+  it.each<[InvestigationStatus, string]>([
+    ['failed', 'Failed'],
+    ['unavailable', 'Unavailable'],
+  ])('marks a %s investigation with its terminal status and error detail', (status, label) => {
+    renderInvestigation(mockEvent(), {
+      investigation: {
+        workflow_execution_id: 'exec-latest',
+        started_at: '2026-07-10T12:00:00Z',
+        completed_at: '2026-07-10T12:05:00Z',
+      },
+      status,
+      error: 'The investigation did not complete.',
+    });
+
+    expect(screen.getByTestId('nightshiftInvestigationFailedStatusIcon')).toHaveTextContent(label);
+    expect(screen.getByTestId('nightshiftInvestigationError')).toHaveTextContent(
+      'The investigation did not complete.'
+    );
+    expect(screen.queryByTestId('nightshiftInvestigationStatusIcon')).not.toBeInTheDocument();
   });
 });

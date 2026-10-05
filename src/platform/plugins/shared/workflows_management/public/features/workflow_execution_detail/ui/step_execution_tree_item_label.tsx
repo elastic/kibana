@@ -13,8 +13,9 @@ import { css } from '@emotion/react';
 import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
-import type { WorkflowTokenUsage } from '@kbn/workflows';
+import type { SerializedError, WorkflowTokenUsage } from '@kbn/workflows';
 import { ExecutionStatus, isDangerousStatus } from '@kbn/workflows';
+import { FailedStepErrorPanel } from './failed_step_error_panel';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations';
 import { TokenUsageBadge } from '../../../shared/ui/token_usage_badge/token_usage_badge';
@@ -24,82 +25,139 @@ const actionRequiredLabel = i18n.translate(
   { defaultMessage: 'Action is required' }
 );
 
+const notRunLabel = i18n.translate('workflowsManagement.stepExecutionTreeItemLabel.notRun', {
+  defaultMessage: 'Not run',
+});
+
 export interface StepExecutionTreeItemLabelProps {
   stepId: string;
+  stepType?: string;
   status?: ExecutionStatus;
   executionTimeMs: number | null;
   usage?: WorkflowTokenUsage;
+  usageCallCount?: number;
   selected: boolean;
   onClick?: React.MouseEventHandler;
+  attemptNumber?: number;
+  /** When set, renders the inline "Why this step failed" panel under the row. */
+  error?: SerializedError | string | null;
+  onViewFailedStepInput?: () => void;
+  errorPanelExpanded?: boolean;
 }
 
 export function StepExecutionTreeItemLabel({
   stepId,
+  stepType,
   status,
   executionTimeMs,
   usage,
+  usageCallCount,
   selected,
   onClick,
+  attemptNumber,
+  error,
+  onViewFailedStepInput,
+  errorPanelExpanded,
 }: StepExecutionTreeItemLabelProps) {
   const styles = useMemoCss(componentStyles);
   // Trigger pseudo-steps are not real steps, they are used to display the trigger context
-  const isTriggerPseudoStep = stepId === 'trigger';
+  const isTriggerPseudoStep = stepId === 'trigger' || (stepType?.startsWith('trigger_') ?? false);
   const isOverviewPseudoStep = stepId === 'Overview';
   const isDangerous = status && isDangerousStatus(status);
   const isInactiveStatus = status === ExecutionStatus.SKIPPED || status === ExecutionStatus.PENDING;
+  const showNotRun = isInactiveStatus && !isTriggerPseudoStep && !isOverviewPseudoStep;
 
   return (
-    <EuiFlexGroup
-      alignItems="baseline"
-      gutterSize="xs"
-      justifyContent="spaceBetween"
-      responsive={false}
-      css={styles.label}
-      onClick={onClick}
-    >
-      <EuiFlexItem
-        css={[
-          styles.stepName,
-          selected && styles.selectedStepName,
-          isDangerous && styles.dangerousStepName,
-          isInactiveStatus && styles.inactiveStepName,
-        ]}
+    <div css={{ width: '100%', minWidth: 0 }}>
+      <EuiFlexGroup
+        alignItems="baseline"
+        gutterSize="xs"
+        justifyContent="spaceBetween"
+        responsive={false}
+        css={styles.label}
+        onClick={onClick}
       >
-        <span data-test-subj="workflowStepName">{stepId}</span>
-        {status === ExecutionStatus.SKIPPED && (
-          <>
-            {' '}
-            <span>{`(${getStatusLabel(status).toLowerCase()})`}</span>
-          </>
-        )}
-      </EuiFlexItem>
-      {status === ExecutionStatus.WAITING_FOR_INPUT && !isOverviewPseudoStep && (
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="warning" data-test-subj="actionRequiredBadge">
-            {actionRequiredLabel}
-          </EuiBadge>
+        <EuiFlexItem
+          css={[
+            styles.stepName,
+            selected && styles.selectedStepName,
+            isDangerous && styles.dangerousStepName,
+            isInactiveStatus && styles.inactiveStepName,
+          ]}
+        >
+          <span data-test-subj="workflowStepName">
+            {attemptNumber !== undefined && (
+              <span
+                css={[
+                  styles.attemptNumber,
+                  selected && styles.selectedStepName,
+                  isDangerous && styles.dangerousStepName,
+                ]}
+              >
+                {`#${attemptNumber} `}
+              </span>
+            )}
+            {stepId}
+          </span>
+          {status === ExecutionStatus.SKIPPED && !showNotRun && (
+            <>
+              {' '}
+              <span>{`(${getStatusLabel(status).toLowerCase()})`}</span>
+            </>
+          )}
         </EuiFlexItem>
-      )}
-      {usage && !isTriggerPseudoStep && (
-        <EuiFlexItem grow={false}>
-          <TokenUsageBadge usage={usage} compact data-test-subj="workflowStepTreeTokenUsage" />
-        </EuiFlexItem>
-      )}
-      {executionTimeMs != null &&
-        Number.isFinite(executionTimeMs) &&
-        executionTimeMs >= 0 &&
-        status !== ExecutionStatus.WAITING_FOR_INPUT &&
-        !isTriggerPseudoStep && (
-          <EuiFlexItem
-            grow={false}
-            css={[styles.duration, isDangerous && styles.durationDangerous]}
-          >
-            <EuiText size="xs" color="subdued">
-              {formatDuration(executionTimeMs)}
-            </EuiText>
+        {status === ExecutionStatus.WAITING_FOR_INPUT && !isOverviewPseudoStep && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="warning" data-test-subj="actionRequiredBadge">
+              {actionRequiredLabel}
+            </EuiBadge>
           </EuiFlexItem>
         )}
-    </EuiFlexGroup>
+        {usage && usage.totalTokens > 0 && (
+          <EuiFlexItem grow={false}>
+            <TokenUsageBadge
+              usage={usage}
+              compact
+              callCount={usageCallCount}
+              data-test-subj="workflowStepTreeTokenUsage"
+            />
+          </EuiFlexItem>
+        )}
+        {showNotRun ? (
+          <EuiFlexItem grow={false} css={styles.duration}>
+            <EuiText size="xs" color="subdued">
+              {notRunLabel}
+            </EuiText>
+          </EuiFlexItem>
+        ) : (
+          executionTimeMs != null &&
+          Number.isFinite(executionTimeMs) &&
+          executionTimeMs >= 0 &&
+          status !== ExecutionStatus.WAITING_FOR_INPUT &&
+          !isTriggerPseudoStep && (
+            <EuiFlexItem
+              grow={false}
+              css={[styles.duration, isDangerous && styles.durationDangerous]}
+            >
+              <EuiText size="xs" color="subdued">
+                {formatDuration(executionTimeMs)}
+              </EuiText>
+            </EuiFlexItem>
+          )
+        )}
+      </EuiFlexGroup>
+      {isDangerous && error && onViewFailedStepInput && (
+        <FailedStepErrorPanel
+          error={error}
+          stepType={stepType}
+          onViewInput={onViewFailedStepInput}
+          ariaLabel={i18n.translate('workflows.executionFlyout.failedStep.regionLabel', {
+            defaultMessage: 'Error details for {stepName}',
+            values: { stepName: stepId },
+          })}
+        />
+      )}
+    </div>
   );
 }
 
@@ -140,10 +198,9 @@ const componentStyles = {
     css({
       color: euiTheme.colors.textDanger,
     }),
-  executionIndex: ({ euiTheme }: UseEuiTheme) =>
+  attemptNumber: ({ euiTheme }: UseEuiTheme) =>
     css({
-      color: euiTheme.colors.textDisabled,
-      display: 'inline-block',
-      marginLeft: euiTheme.size.xs,
+      color: euiTheme.colors.textSubdued,
+      fontVariantNumeric: 'tabular-nums',
     }),
 };

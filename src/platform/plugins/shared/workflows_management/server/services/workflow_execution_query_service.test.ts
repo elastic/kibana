@@ -11,15 +11,31 @@ import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ExecutionType } from '@kbn/workflows';
-import type { IWorkflowEventLoggerService } from '@kbn/workflows-execution-engine/server';
+import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
+import type {
+  IWorkflowLogsQueryService,
+  StepExecutionsDataClient,
+  WorkflowExecutionsDataClient,
+} from '@kbn/workflows-execution-engine/server';
+import {
+  createMockGetExecutionsByIdsResponse,
+  createMockStepDataClient,
+  createMockWorkflowDataClient,
+} from '@kbn/workflows-execution-engine/server/mocks';
 
 import { WorkflowExecutionQueryService } from './workflow_execution_query_service';
-import { WORKFLOWS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
+import {
+  WORKFLOWS_EXECUTIONS_INDEX,
+  WORKFLOWS_INDEX,
+  WORKFLOWS_STEP_EXECUTIONS_INDEX,
+} from '../../common';
 
 describe('WorkflowExecutionQueryService', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockWorkflowDataClient: jest.Mocked<WorkflowExecutionsDataClient>;
+  let mockStepDataClient: jest.Mocked<StepExecutionsDataClient>;
   let mockLogger: ReturnType<typeof loggerMock.create>;
-  let mockEventLoggerService: jest.Mocked<IWorkflowEventLoggerService>;
+  let mockEventLoggerService: jest.Mocked<IWorkflowLogsQueryService>;
   let service: WorkflowExecutionQueryService;
 
   beforeEach(() => {
@@ -29,6 +45,18 @@ describe('WorkflowExecutionQueryService', () => {
       mget: jest.fn(),
       update: jest.fn(),
     } as any;
+    mockWorkflowDataClient = {
+      ...createMockWorkflowDataClient(),
+      search: jest.fn((request) =>
+        mockEsClient.search({ index: WORKFLOWS_EXECUTIONS_INDEX, ...request })
+      ),
+    };
+    mockStepDataClient = {
+      ...createMockStepDataClient(),
+      search: jest.fn((request) =>
+        mockEsClient.search({ index: WORKFLOWS_STEP_EXECUTIONS_INDEX, ...request })
+      ),
+    };
     mockLogger = loggerMock.create();
     mockEventLoggerService = {
       getExecutionLogs: jest.fn().mockResolvedValue({ results: [], total: 0 }),
@@ -38,6 +66,8 @@ describe('WorkflowExecutionQueryService', () => {
     service = new WorkflowExecutionQueryService({
       logger: mockLogger,
       esClient: mockEsClient,
+      workflowExecutionsDataClient: mockWorkflowDataClient,
+      stepExecutionsDataClient: mockStepDataClient,
       workflowEventLoggerService: mockEventLoggerService,
     });
   });
@@ -229,7 +259,7 @@ describe('WorkflowExecutionQueryService', () => {
       await service.getWorkflowExecutions({ workflowId: 'wf-1' }, 'default');
 
       const call = mockEsClient.search.mock.calls[0][0] as any;
-      expect(call.sort).toEqual([{ createdAt: 'desc' }]);
+      expect(call.sort).toEqual([{ createdAt: 'desc' }, { id: 'desc' }]);
     });
 
     it('uses explicit execution sort when provided', async () => {
@@ -241,7 +271,7 @@ describe('WorkflowExecutionQueryService', () => {
       );
 
       const call = mockEsClient.search.mock.calls[0][0] as any;
-      expect(call.sort).toEqual([{ finishedAt: { order: 'desc' } }]);
+      expect(call.sort).toEqual([{ finishedAt: { order: 'desc' } }, { id: 'desc' }]);
     });
 
     it('uses default page size and page 1 when not specified', async () => {
@@ -399,6 +429,65 @@ describe('WorkflowExecutionQueryService', () => {
 
       const call = mockEsClient.search.mock.calls[0][0] as any;
       expect(call.query.bool.must.some((clause: any) => clause.range?.startedAt)).toBe(true);
+    });
+
+    it('restricts the search to the given workflow execution ids', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } } as any);
+
+      await service.searchStepExecutions(
+        { workflowId: 'wf-1', workflowExecutionIds: ['exec-1', 'exec-2'] },
+        'default'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      expect(call.query.bool.must).toContainEqual({
+        terms: { workflowRunId: ['exec-1', 'exec-2'] },
+      });
+    });
+
+    it('does not filter by workflow execution id when none are given', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } } as any);
+
+      await service.searchStepExecutions({ workflowId: 'wf-1' }, 'default');
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      expect(call.query.bool.must.some((clause: any) => clause.terms?.workflowRunId)).toBe(false);
+    });
+
+    it('matches nothing when an explicitly empty id list is given', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } } as any);
+
+      await service.searchStepExecutions(
+        { workflowId: 'wf-1', workflowExecutionIds: [] },
+        'default'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      expect(call.query.bool.must).toContainEqual({ terms: { workflowRunId: [] } });
+    });
+
+    it('restricts the search to a single step type', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } } as any);
+
+      await service.searchStepExecutions(
+        { workflowId: 'wf-1', stepId: 'investigate', stepType: 'ai.agent' },
+        'default'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      expect(call.query.bool.must).toContainEqual({ term: { stepType: 'ai.agent' } });
+    });
+
+    it('returns only the requested source paths when sourceIncludes is set', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } } as any);
+
+      await service.searchStepExecutions(
+        { workflowId: 'wf-1', sourceIncludes: ['workflowRunId', 'output.structured_output'] },
+        'default'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      expect(call._source).toEqual({ includes: ['workflowRunId', 'output.structured_output'] });
     });
   });
 
@@ -1238,6 +1327,72 @@ describe('WorkflowExecutionQueryService', () => {
   });
 
   describe('getWaitingStepExecutionId', () => {
+    const mockParent = (stepExecutionIds?: string[], spaceId = 'default') => {
+      mockWorkflowDataClient.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([{ spaceId, stepExecutionIds } as EsWorkflowExecution])
+      );
+    };
+    const waitingStep = {
+      id: 'step-1',
+      spaceId: 'default',
+      workflowRunId: 'run-1',
+      stepType: 'waitForInput',
+      status: 'waiting_for_input',
+    } as EsWorkflowStepExecution;
+
+    beforeEach(() => mockParent());
+
+    it('finds a waiting step by its saved ID before search refreshes', async () => {
+      mockParent(['step-1']);
+      mockStepDataClient.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([waitingStep])
+      );
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+        took: 0,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, failed: 0 },
+      });
+
+      expect(await service.getWaitingStepExecutionId('run-1', 'default')).toBe('step-1');
+      expect(mockStepDataClient.search).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      { status: 'completed' },
+      { finishedAt: '2026-09-22T00:00:00Z' },
+      { spaceId: 'another-space' },
+      { workflowRunId: 'another-run' },
+      { stepType: 'wait' },
+    ] as Partial<EsWorkflowStepExecution>[])(
+      'does not select an ineligible step: %s',
+      async (overrides) => {
+        mockParent(['step-1']);
+        mockStepDataClient.getByIds.mockResolvedValue(
+          createMockGetExecutionsByIdsResponse([{ ...waitingStep, ...overrides }])
+        );
+        expect(await service.getWaitingStepExecutionId('run-1', 'default')).toBeNull();
+        expect(mockStepDataClient.search).not.toHaveBeenCalled();
+      }
+    );
+
+    it('does not read steps from a run in another space', async () => {
+      mockParent(['step-1'], 'another-space');
+      expect(await service.getWaitingStepExecutionId('run-1', 'default')).toBeNull();
+      expect(mockStepDataClient.getByIds).not.toHaveBeenCalled();
+    });
+
+    it('selects the latest waiting step and leaves claim arbitration to the update', async () => {
+      mockParent(['step-1', 'step-2']);
+      mockStepDataClient.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([
+          waitingStep,
+          { ...waitingStep, id: 'step-2', hitl: { respondedAt: '2026-09-22T00:00:00Z' } },
+        ])
+      );
+      expect(await service.getWaitingStepExecutionId('run-1', 'default')).toBe('step-2');
+    });
+
     it('resolves the only claimable waitForInput step for the run', async () => {
       mockEsClient.search.mockResolvedValueOnce({
         hits: { hits: [{ _id: 'step-exec-7', _source: { id: 'step-exec-7' } }] },
@@ -1262,22 +1417,33 @@ describe('WorkflowExecutionQueryService', () => {
         expect.arrayContaining([
           { term: { workflowRunId: 'run-1' } },
           { term: { spaceId: 'default' } },
-          { term: { stepType: 'waitForInput' } },
+          { terms: { stepType: ['waitForInput', 'waitForApproval'] } },
           { term: { status: 'waiting_for_input' } },
         ])
       );
-      expect(args.query.bool.must_not).toEqual(
-        expect.arrayContaining([
-          { exists: { field: 'finishedAt' } },
-          { exists: { field: 'hitl.respondedAt' } },
-        ])
-      );
+      // Already-claimed steps are intentionally NOT excluded: the loser of a
+      // concurrent resume must still land on the step so the atomic claim can
+      // reject it, keeping `markStepAsResponded` the single first-writer-wins gate.
+      expect(args.query.bool.must_not).toEqual([{ exists: { field: 'finishedAt' } }]);
     });
 
     it('returns null when no claimable step is found', async () => {
       mockEsClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
 
       expect(await service.getWaitingStepExecutionId('run-1', 'default')).toBeNull();
+    });
+
+    it('uses the legacy lookup when the saved step ID list is empty', async () => {
+      mockParent([]);
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [{ _index: 'steps', _id: 'step-1', _source: { id: 'step-1' } }] },
+        took: 0,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, failed: 0 },
+      });
+
+      expect(await service.getWaitingStepExecutionId('run-1', 'default')).toBe('step-1');
+      expect(mockStepDataClient.getByIds).not.toHaveBeenCalled();
     });
 
     it('returns null (not throws) when the step-executions index does not exist yet', async () => {
@@ -1303,33 +1469,27 @@ describe('WorkflowExecutionQueryService', () => {
     };
 
     it('issues a scripted partial update guarded on spaceId with refresh: wait_for', async () => {
-      (mockEsClient.update as jest.Mock).mockResolvedValueOnce({ result: 'updated' });
+      mockStepDataClient.scriptUpdate.mockResolvedValueOnce({ result: 'updated' });
 
       const ok = await service.markStepAsResponded('step-exec-1', audit, 'default');
 
       expect(ok).toBe(true);
-      const args = (mockEsClient.update as jest.Mock).mock.calls[0][0] as {
-        index: string;
-        id: string;
-        refresh: string;
-        retry_on_conflict: number;
-        script: { source: string; lang: string; params: Record<string, unknown> };
-      };
-      expect(args.index).toBe(WORKFLOWS_STEP_EXECUTIONS_INDEX);
+      const args = mockStepDataClient.scriptUpdate.mock.calls[0][0];
       expect(args.id).toBe('step-exec-1');
       expect(args.refresh).toBe('wait_for');
-      expect(args.retry_on_conflict).toBeGreaterThan(0);
-      expect(args.script.lang).toBe('painless');
-      expect(args.script.source).toContain('ctx._source.spaceId != params.spaceId');
-      expect(args.script.source).toContain('ctx._source.finishedAt != null');
-      expect(args.script.source).toContain('params.settledStatuses.contains(ctx._source.status)');
-      expect(args.script.source).toContain('ctx._source.hitl.respondedAt != null');
-      expect(args.script.source).toContain('ctx._source.hitl.respondedBy = params.respondedBy');
-      expect(args.script.source).toContain('ctx._source.hitl.respondedAt = params.respondedAt');
-      expect(args.script.source).toContain('ctx._source.hitl.channel = params.channel');
-      expect(args.script.source).toContain('ctx._source.input.remove(params.tokenHashField)');
-      expect(args.script.source).toContain('ctx._source.input.remove(params.tokenExpiresAtField)');
-      expect(args.script.params).toEqual({
+      expect(args.retryOnConflict).toBeGreaterThan(0);
+      expect(args.script).toContain('ctx._source.spaceId != params.spaceId');
+      expect(args.script).toContain('ctx._source.finishedAt != null');
+      expect(args.script).toContain('params.settledStatuses.contains(ctx._source.status)');
+      expect(args.script).toContain('ctx._source.hitl.respondedAt != null');
+      expect(args.script).toContain('ctx._source.hitl.respondedBy = params.respondedBy');
+      expect(args.script).toContain('ctx._source.hitl.respondedAt = params.respondedAt');
+      expect(args.script).toContain(
+        'if (params.channel != null) { ctx._source.hitl.channel = params.channel; }'
+      );
+      expect(args.script).toContain('ctx._source.input.remove(params.tokenHashField)');
+      expect(args.script).toContain('ctx._source.input.remove(params.tokenExpiresAtField)');
+      expect(args.params).toEqual({
         spaceId: 'default',
         ...audit,
         settledStatuses: expect.arrayContaining([
@@ -1348,23 +1508,17 @@ describe('WorkflowExecutionQueryService', () => {
       // A noop means either the space guard failed or another responder
       // already set hitl.respondedAt. The provider treats both as a conflict
       // and does not schedule a second resume.
-      (mockEsClient.update as jest.Mock).mockResolvedValueOnce({ result: 'noop' });
+      mockStepDataClient.scriptUpdate.mockResolvedValueOnce({ result: 'noop' });
 
       const ok = await service.markStepAsResponded('step-exec-1', audit, 'default');
 
       expect(ok).toBe(false);
     });
 
-    it('returns false (not throws) when the step doc is gone', async () => {
-      (mockEsClient.update as jest.Mock).mockRejectedValueOnce(
-        new errors.ResponseError({
-          statusCode: 404,
-          body: { error: { type: 'document_missing_exception' } },
-          headers: {},
-          meta: {} as any,
-          warnings: [],
-        })
-      );
+    it('returns false when the step doc is gone (not_found result)', async () => {
+      // The data client converts 404 errors to { result: 'not_found' } so this
+      // surfaces as a normal response, not a thrown error.
+      mockStepDataClient.scriptUpdate.mockResolvedValueOnce({ result: 'not_found' });
 
       const ok = await service.markStepAsResponded('step-exec-gone', audit, 'default');
 
@@ -1372,7 +1526,7 @@ describe('WorkflowExecutionQueryService', () => {
     });
 
     it('logs and rethrows on any other ES failure so the caller can decide', async () => {
-      (mockEsClient.update as jest.Mock).mockRejectedValueOnce(new Error('boom'));
+      mockStepDataClient.scriptUpdate.mockRejectedValueOnce(new Error('boom'));
 
       await expect(service.markStepAsResponded('step-exec-1', audit, 'default')).rejects.toThrow(
         'boom'

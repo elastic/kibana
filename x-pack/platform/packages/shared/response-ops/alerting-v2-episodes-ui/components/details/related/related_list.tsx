@@ -12,13 +12,15 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
+import { css } from '@emotion/react';
 import {
   RelatedAlertEpisode,
   type RelatedAlertEpisodeProps,
 } from '../../related/related_alert_episode';
 import { isRuleLoaded, type RuleState } from '../../../types/rule_state';
 import { useAlertingEpisodeSourceDataView } from '../../../hooks/use_alerting_episode_source_data_view';
-import { getRelatedEpisodeMissingRuleTitle } from './translations';
+import { CopyableShortId } from '../../copyable_short_id';
+import * as i18n from './translations';
 
 interface RelatedAlertEpisodesListServices {
   http: HttpStart;
@@ -41,13 +43,32 @@ export interface RelatedAlertEpisodesListProps {
 const getRuleDisplayFromState = (ruleState: RuleState, episodeId: string | undefined) => {
   if (isRuleLoaded(ruleState)) {
     return {
-      ruleName: ruleState.rule.metadata.name,
+      title: ruleState.rule.metadata.name,
       groupingFields: ruleState.rule.grouping?.fields ?? [],
     };
   }
 
+  // No rule name to show, so fall back to the episode's own short id.
   return {
-    ruleName: episodeId ? getRelatedEpisodeMissingRuleTitle(episodeId) : '',
+    title: episodeId ? (
+      // nowrap so the id chip stays on the same line as the label
+      <span
+        css={css`
+          white-space: nowrap;
+        `}
+      >
+        {i18n.RELATED_EPISODE_LABEL}{' '}
+        <CopyableShortId
+          id={episodeId}
+          copyTooltip={i18n.getCopyEpisodeIdTooltip(episodeId)}
+          copiedTooltip={i18n.EPISODE_ID_COPIED}
+          disableCopy
+          data-test-subj="relatedAlertEpisodeShortId"
+        />
+      </span>
+    ) : (
+      ''
+    ),
     groupingFields: [],
   };
 };
@@ -80,12 +101,12 @@ export function RelatedAlertEpisodesList({
       {rows.map((row) => {
         const relatedId = row['episode.id'];
         const relatedGroupHash = row.group_hash;
-        const { ruleName, groupingFields } = getRuleDisplayFromState(ruleState, relatedId);
+        const { title, groupingFields } = getRuleDisplayFromState(ruleState, relatedId);
         return (
           <RelatedAlertEpisode
             key={relatedId}
             episode={row}
-            ruleName={ruleName}
+            title={title}
             groupingFields={groupingFields}
             groupingDataView={sourceDataView}
             episodeAction={getEpisodeAction(relatedId)}

@@ -118,7 +118,7 @@ describe('resolve_index route', () => {
       }
     `);
 
-    expect(mockResponse.ok).toBeCalled();
+    expect(mockResponse.ok).toHaveBeenCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toEqual({ body: mockResponseIndices });
   });
 
@@ -153,7 +153,7 @@ describe('resolve_index route', () => {
       }
     `);
 
-    expect(mockResponse.ok).toBeCalled();
+    expect(mockResponse.ok).toHaveBeenCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toEqual({ body: mockResponseEmpty });
   });
 
@@ -189,7 +189,7 @@ describe('resolve_index route', () => {
       }
     `);
 
-    expect(mockResponse.notFound).toBeCalled();
+    expect(mockResponse.notFound).toHaveBeenCalled();
     expect(mockResponse.notFound.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
         "body": Object {
@@ -231,7 +231,7 @@ describe('resolve_index route', () => {
       }
     `);
 
-    expect(mockResponse.notFound).toBeCalled();
+    expect(mockResponse.notFound).toHaveBeenCalled();
     expect(mockResponse.notFound.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
         "body": Object {

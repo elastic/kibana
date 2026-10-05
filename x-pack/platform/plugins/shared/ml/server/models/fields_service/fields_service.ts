@@ -55,6 +55,9 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       {
         index,
         fields: fieldNames,
+        ...(datafeedConfig?.project_routing
+          ? { project_routing: datafeedConfig.project_routing }
+          : {}),
       },
       { maxRetries: 0 }
     );

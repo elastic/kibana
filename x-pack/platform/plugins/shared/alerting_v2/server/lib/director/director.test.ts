@@ -75,6 +75,7 @@ describe('DirectorService', () => {
   describe('run', () => {
     it('returns empty array and zero stats when no alert events provided', async () => {
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [],
@@ -92,12 +93,13 @@ describe('DirectorService', () => {
         group_hash: 'hash-1',
         status: 'breached',
         type: 'alert',
-        episode: undefined,
+        alert: undefined,
       });
 
       mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([]));
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
@@ -110,19 +112,20 @@ describe('DirectorService', () => {
       const alertEvent = createAlertEvent({
         group_hash: 'hash-1',
         status: 'breached',
-        episode: undefined,
+        alert: undefined,
       });
 
       mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([]));
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
       expect(result.alertEvents).toHaveLength(1);
-      expect(result.alertEvents[0].episode).toEqual({
+      expect(result.alertEvents[0].alert).toEqual({
         id: 'mocked-uuid',
         status: alertEpisodeStatus.pending,
       });
@@ -133,7 +136,7 @@ describe('DirectorService', () => {
       const alertEvent = createAlertEvent({
         group_hash: 'hash-1',
         status: 'breached',
-        episode: undefined,
+        alert: undefined,
       });
 
       mockEsClient.esql.query.mockResolvedValue(
@@ -150,13 +153,14 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
       expect(result.alertEvents).toHaveLength(1);
-      expect(result.alertEvents[0].episode).toEqual({
+      expect(result.alertEvents[0].alert).toEqual({
         id: 'mocked-uuid',
         status: alertEpisodeStatus.pending,
       });
@@ -167,7 +171,7 @@ describe('DirectorService', () => {
       const alertEvent = createAlertEvent({
         group_hash: 'hash-1',
         status: 'breached',
-        episode: undefined,
+        alert: undefined,
       });
 
       mockEsClient.esql.query.mockResolvedValue(
@@ -184,12 +188,13 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
-      expect(result.alertEvents[0].episode).toEqual({
+      expect(result.alertEvents[0].alert).toEqual({
         id: 'mocked-uuid',
         status: alertEpisodeStatus.pending,
       });
@@ -200,7 +205,7 @@ describe('DirectorService', () => {
       const alertEvent = createAlertEvent({
         group_hash: 'hash-1',
         status: 'breached',
-        episode: undefined,
+        alert: undefined,
       });
 
       mockEsClient.esql.query.mockResolvedValue(
@@ -217,12 +222,13 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
-      expect(result.alertEvents[0].episode).toEqual({
+      expect(result.alertEvents[0].alert).toEqual({
         id: 'existing-episode',
         status: alertEpisodeStatus.active,
       });
@@ -233,7 +239,7 @@ describe('DirectorService', () => {
       const alertEvent = createAlertEvent({
         group_hash: 'hash-1',
         status: 'recovered',
-        episode: undefined,
+        alert: undefined,
       });
 
       mockEsClient.esql.query.mockResolvedValue(
@@ -250,12 +256,13 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
-      expect(result.alertEvents[0].episode).toEqual({
+      expect(result.alertEvents[0].alert).toEqual({
         id: 'existing-episode',
         status: alertEpisodeStatus.recovering,
       });
@@ -266,7 +273,7 @@ describe('DirectorService', () => {
       const alertEvent = createAlertEvent({
         group_hash: 'hash-1',
         status: 'recovered',
-        episode: undefined,
+        alert: undefined,
       });
 
       mockEsClient.esql.query.mockResolvedValue(
@@ -283,24 +290,25 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
-      expect(result.alertEvents[0].episode).toEqual({
+      expect(result.alertEvents[0].alert).toEqual({
         id: 'existing-episode',
         status: alertEpisodeStatus.inactive,
       });
       expect(result.stats.newEpisodeIds).toHaveLength(0);
     });
 
-    it("sets the episode status to active on a no_data event when no_data_strategy is 'emit'", async () => {
-      const ruleWithEmit = createRuleResponse({ no_data_strategy: 'emit' });
+    it("sets the episode status to active on a no_data event when no_data.strategy is 'alert'", async () => {
+      const ruleWithEmit = createRuleResponse({ no_data: { strategy: 'alert' } });
       const alertEvent = createAlertEvent({
         group_hash: 'hash-1',
         status: 'no_data',
-        episode: undefined,
+        alert: undefined,
       });
 
       mockEsClient.esql.query.mockResolvedValue(
@@ -317,23 +325,24 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule: ruleWithEmit,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
-      expect(result.alertEvents[0].episode).toEqual({
+      expect(result.alertEvents[0].alert).toEqual({
         id: 'existing-episode',
         status: alertEpisodeStatus.active,
       });
     });
 
-    it("preserves the prior episode status on a no_data event when no_data_strategy is 'last_known_status'", async () => {
-      const ruleWithLastKnown = createRuleResponse({ no_data_strategy: 'last_known_status' });
+    it("preserves the prior episode status on a no_data event when no_data.strategy is 'keep_last'", async () => {
+      const ruleWithLastKnown = createRuleResponse({ no_data: { strategy: 'keep_last' } });
       const alertEvent = createAlertEvent({
         group_hash: 'hash-1',
         status: 'no_data',
-        episode: undefined,
+        alert: undefined,
       });
 
       mockEsClient.esql.query.mockResolvedValue(
@@ -350,12 +359,13 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule: ruleWithLastKnown,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
-      expect(result.alertEvents[0].episode).toEqual({
+      expect(result.alertEvents[0].alert).toEqual({
         id: 'existing-episode',
         status: alertEpisodeStatus.recovering,
       });
@@ -363,8 +373,8 @@ describe('DirectorService', () => {
 
     it('processes multiple alert events correctly', async () => {
       const alertEvents = [
-        createAlertEvent({ group_hash: 'hash-1', status: 'breached', episode: undefined }),
-        createAlertEvent({ group_hash: 'hash-2', status: 'recovered', episode: undefined }),
+        createAlertEvent({ group_hash: 'hash-1', status: 'breached', alert: undefined }),
+        createAlertEvent({ group_hash: 'hash-2', status: 'recovered', alert: undefined }),
       ];
 
       mockEsClient.esql.query.mockResolvedValue(
@@ -389,17 +399,18 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents,
       });
 
       expect(result.alertEvents).toHaveLength(2);
-      expect(result.alertEvents[0].episode).toEqual({
+      expect(result.alertEvents[0].alert).toEqual({
         id: 'episode-1',
         status: alertEpisodeStatus.active,
       });
-      expect(result.alertEvents[1].episode).toEqual({
+      expect(result.alertEvents[1].alert).toEqual({
         id: 'episode-2',
         status: alertEpisodeStatus.recovering,
       });
@@ -410,7 +421,7 @@ describe('DirectorService', () => {
       const alertEvent = createAlertEvent({
         group_hash: 'hash-1',
         status: 'breached',
-        episode: undefined,
+        alert: undefined,
       });
 
       mockEsClient.esql.query.mockResolvedValue(
@@ -427,12 +438,13 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
-      expect(result.alertEvents[0].episode?.id).toBe('mocked-uuid');
+      expect(result.alertEvents[0].alert?.id).toBe('mocked-uuid');
       expect(result.stats.newEpisodeIds).toHaveLength(1);
     });
 
@@ -440,7 +452,7 @@ describe('DirectorService', () => {
       const alertEvent = createAlertEvent({
         group_hash: 'hash-1',
         status: 'breached',
-        episode: undefined,
+        alert: undefined,
       });
 
       mockEsClient.esql.query.mockResolvedValue(
@@ -457,12 +469,13 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
-      expect(result.alertEvents[0].episode?.id).toBe('existing-episode');
+      expect(result.alertEvents[0].alert?.id).toBe('existing-episode');
       expect(result.stats.newEpisodeIds).toHaveLength(0);
     });
 
@@ -475,6 +488,7 @@ describe('DirectorService', () => {
 
       await expect(
         directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: abortedContext,
           alertEvents: [alertEvent],
@@ -490,6 +504,7 @@ describe('DirectorService', () => {
 
       await expect(
         directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: testExecutionContext,
           alertEvents: [alertEvent],
@@ -499,13 +514,13 @@ describe('DirectorService', () => {
 
     it('includes status_count in episode when strategy returns one', async () => {
       const ruleWithTransition = createRuleResponse({
-        state_transition: { pending_count: 3 },
+        state_transition: { pending: { count: 3 } },
       });
 
       const alertEvent = createAlertEvent({
         group_hash: 'hash-1',
         status: 'breached',
-        episode: undefined,
+        alert: undefined,
       });
 
       mockEsClient.esql.query.mockResolvedValue(
@@ -522,12 +537,13 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule: ruleWithTransition,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
-      expect(result.alertEvents[0].episode).toEqual({
+      expect(result.alertEvents[0].alert).toEqual({
         id: 'episode-1',
         status: alertEpisodeStatus.pending,
         status_count: 2,
@@ -536,13 +552,13 @@ describe('DirectorService', () => {
 
     it('transitions to active when count threshold is met', async () => {
       const ruleWithTransition = createRuleResponse({
-        state_transition: { pending_count: 3 },
+        state_transition: { pending: { count: 3 } },
       });
 
       const alertEvent = createAlertEvent({
         group_hash: 'hash-1',
         status: 'breached',
-        episode: undefined,
+        alert: undefined,
       });
 
       mockEsClient.esql.query.mockResolvedValue(
@@ -552,29 +568,75 @@ describe('DirectorService', () => {
             last_status: 'breached',
             last_episode_id: 'episode-1',
             last_episode_status: 'pending',
-            last_episode_status_count: 2,
+            last_episode_status_count: 3,
             group_hash: 'hash-1',
           },
         ])
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule: ruleWithTransition,
         executionContext: testExecutionContext,
         alertEvents: [alertEvent],
       });
 
-      expect(result.alertEvents[0].episode).toEqual({
+      expect(result.alertEvents[0].alert).toEqual({
         id: 'episode-1',
         status: alertEpisodeStatus.active,
       });
     });
 
+    it('evaluates timeframe thresholds against the director clock, not the event', async () => {
+      // Incoming events carry no `@timestamp` (ES sets it at ingest), so the
+      // elapsed time must come from the director run time.
+      jest.useFakeTimers().setSystemTime(new Date('2026-01-01T00:10:00.000Z'));
+
+      try {
+        const ruleWithTransition = createRuleResponse({
+          state_transition: { pending: { timeframe: '5m' } },
+        });
+
+        const { '@timestamp': ignoredTimestamp, ...alertEvent } = createAlertEvent({
+          group_hash: 'hash-1',
+          status: 'breached',
+          alert: undefined,
+        });
+
+        mockEsClient.esql.query.mockResolvedValue(
+          createLatestAlertEventStateResponse([
+            {
+              last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+              last_status: 'breached',
+              last_episode_id: 'episode-1',
+              last_episode_status: 'pending',
+              last_episode_status_count: 1,
+              group_hash: 'hash-1',
+            },
+          ])
+        );
+
+        const result = await directorService.run({
+          spaceId: 'default',
+          rule: ruleWithTransition,
+          executionContext: testExecutionContext,
+          alertEvents: [alertEvent],
+        });
+
+        expect(result.alertEvents[0].alert).toEqual({
+          id: 'episode-1',
+          status: alertEpisodeStatus.active,
+        });
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
     it('aggregates newEpisodeCount only for fresh episodes across a mixed batch', async () => {
       const alertEvents = [
-        createAlertEvent({ group_hash: 'hash-new', status: 'breached', episode: undefined }),
-        createAlertEvent({ group_hash: 'hash-existing', status: 'breached', episode: undefined }),
-        createAlertEvent({ group_hash: 'hash-inactive', status: 'breached', episode: undefined }),
+        createAlertEvent({ group_hash: 'hash-new', status: 'breached', alert: undefined }),
+        createAlertEvent({ group_hash: 'hash-existing', status: 'breached', alert: undefined }),
+        createAlertEvent({ group_hash: 'hash-inactive', status: 'breached', alert: undefined }),
       ];
 
       mockEsClient.esql.query.mockResolvedValue(
@@ -599,6 +661,7 @@ describe('DirectorService', () => {
       );
 
       const result = await directorService.run({
+        spaceId: 'default',
         rule,
         executionContext: testExecutionContext,
         alertEvents,
@@ -622,7 +685,7 @@ describe('DirectorService', () => {
         const alertEvent = createAlertEvent({
           group_hash: 'hash-1',
           status: 'recovered',
-          episode: undefined,
+          alert: undefined,
         });
 
         mockEsClient.esql.query.mockResolvedValue(
@@ -640,6 +703,7 @@ describe('DirectorService', () => {
         );
 
         const result = await directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: testExecutionContext,
           alertEvents: [alertEvent],
@@ -647,7 +711,7 @@ describe('DirectorService', () => {
 
         expect(result.alertEvents).toHaveLength(1);
         expect(result.alertEvents[0].status).toBe('recovered');
-        expect(result.alertEvents[0].episode).toEqual({
+        expect(result.alertEvents[0].alert).toEqual({
           id: 'user-activated-episode',
           status: alertEpisodeStatus.active,
         });
@@ -660,7 +724,7 @@ describe('DirectorService', () => {
         const alertEvent = createAlertEvent({
           group_hash: 'hash-1',
           status: 'breached',
-          episode: undefined,
+          alert: undefined,
         });
 
         mockEsClient.esql.query.mockResolvedValue(
@@ -678,13 +742,14 @@ describe('DirectorService', () => {
         );
 
         const result = await directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: testExecutionContext,
           alertEvents: [alertEvent],
         });
 
         expect(result.alertEvents[0].status).toBe('breached');
-        expect(result.alertEvents[0].episode).toEqual({
+        expect(result.alertEvents[0].alert).toEqual({
           id: 'user-activated-episode',
           status: alertEpisodeStatus.active,
         });
@@ -696,13 +761,13 @@ describe('DirectorService', () => {
         // BasicTransitionStrategy and CountTimeframeStrategy which never
         // emit status_count on the → active edge.
         const ruleWithTransition = createRuleResponse({
-          state_transition: { pending_count: 3 },
+          state_transition: { pending: { count: 3 } },
         });
 
         const alertEvent = createAlertEvent({
           group_hash: 'hash-1',
           status: 'recovered',
-          episode: undefined,
+          alert: undefined,
         });
 
         mockEsClient.esql.query.mockResolvedValue(
@@ -720,16 +785,17 @@ describe('DirectorService', () => {
         );
 
         const result = await directorService.run({
+          spaceId: 'default',
           rule: ruleWithTransition,
           executionContext: testExecutionContext,
           alertEvents: [alertEvent],
         });
 
-        expect(result.alertEvents[0].episode).toEqual({
+        expect(result.alertEvents[0].alert).toEqual({
           id: 'user-activated-episode',
           status: alertEpisodeStatus.active,
         });
-        expect(result.alertEvents[0].episode?.status_count).toBeUndefined();
+        expect(result.alertEvents[0].alert?.status_count).toBeUndefined();
       });
 
       it('does not lock when the last lifecycle action is deactivate — strategy owns transitions', async () => {
@@ -741,7 +807,7 @@ describe('DirectorService', () => {
         const alertEvent = createAlertEvent({
           group_hash: 'hash-1',
           status: 'breached',
-          episode: undefined,
+          alert: undefined,
         });
 
         mockEsClient.esql.query.mockResolvedValue(
@@ -759,12 +825,13 @@ describe('DirectorService', () => {
         );
 
         const result = await directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: testExecutionContext,
           alertEvents: [alertEvent],
         });
 
-        expect(result.alertEvents[0].episode).toEqual({
+        expect(result.alertEvents[0].alert).toEqual({
           id: 'mocked-uuid',
           status: alertEpisodeStatus.pending,
         });
@@ -777,7 +844,7 @@ describe('DirectorService', () => {
         const alertEvent = createAlertEvent({
           group_hash: 'hash-1',
           status: 'recovered',
-          episode: undefined,
+          alert: undefined,
         });
 
         mockEsClient.esql.query.mockResolvedValue(
@@ -795,12 +862,13 @@ describe('DirectorService', () => {
         );
 
         const result = await directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: testExecutionContext,
           alertEvents: [alertEvent],
         });
 
-        expect(result.alertEvents[0].episode).toEqual({
+        expect(result.alertEvents[0].alert).toEqual({
           id: 'engine-episode',
           status: alertEpisodeStatus.recovering,
         });
@@ -814,7 +882,7 @@ describe('DirectorService', () => {
         const alertEvent = createAlertEvent({
           group_hash: 'hash-1',
           status: 'breached',
-          episode: undefined,
+          alert: undefined,
         });
 
         mockEsClient.esql.query.mockResolvedValue(
@@ -832,12 +900,13 @@ describe('DirectorService', () => {
         );
 
         const result = await directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: testExecutionContext,
           alertEvents: [alertEvent],
         });
 
-        expect(result.alertEvents[0].episode).toEqual({
+        expect(result.alertEvents[0].alert).toEqual({
           id: 'mocked-uuid',
           status: alertEpisodeStatus.pending,
         });
@@ -847,11 +916,11 @@ describe('DirectorService', () => {
         // The lock is per-group_hash. Groups without an activate stay
         // under strategy control.
         const alertEvents = [
-          createAlertEvent({ group_hash: 'locked-group', status: 'recovered', episode: undefined }),
+          createAlertEvent({ group_hash: 'locked-group', status: 'recovered', alert: undefined }),
           createAlertEvent({
             group_hash: 'engine-group',
             status: 'recovered',
-            episode: undefined,
+            alert: undefined,
           }),
         ];
 
@@ -879,16 +948,17 @@ describe('DirectorService', () => {
         );
 
         const result = await directorService.run({
+          spaceId: 'default',
           rule,
           executionContext: testExecutionContext,
           alertEvents,
         });
 
-        expect(result.alertEvents[0].episode).toEqual({
+        expect(result.alertEvents[0].alert).toEqual({
           id: 'locked-episode',
           status: alertEpisodeStatus.active,
         });
-        expect(result.alertEvents[1].episode).toEqual({
+        expect(result.alertEvents[1].alert).toEqual({
           id: 'engine-episode',
           status: alertEpisodeStatus.recovering,
         });

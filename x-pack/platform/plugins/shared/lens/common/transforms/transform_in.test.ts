@@ -5,39 +5,40 @@
  * 2.0.
  */
 
+import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import { getTransformIn } from './transform_in';
-import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
-import type { LensTransformIn } from './types';
 
-describe('duration schema transformIn', () => {
-  const transformDrilldownsIn = jest.fn(<T extends { drilldowns?: unknown }>(state: T) => ({
-    state,
+const esql = 'FROM index | LIMIT 10';
+
+const getTextBasedByValueConfig = () => ({
+  attributes: {
+    title: 'my chart',
+    visualizationType: 'lnsXY',
     references: [],
-  }));
+    state: {
+      query: undefined,
+      filters: [],
+      datasourceStates: {
+        textBased: {
+          layers: { layer1: { query: { esql }, columns: [] } },
+        },
+      },
+      visualization: {},
+    },
+  },
+});
 
-  const durationConfig = {
-    type: 'metric',
-    layers: [{ metrics: [{ format: { type: 'duration', from: 'm', to: 'humanize' } }] }],
-  } as unknown as Parameters<LensTransformIn>[0];
+const transformDrilldownsIn = (state: unknown) => ({ state, references: [] });
 
-  it('rejects legacy duration units when GA schemas are active', () => {
-    const builder = new LensConfigBuilder(undefined, true);
-    const transformIn = getTransformIn(builder, transformDrilldownsIn, true);
+describe('getTransformIn', () => {
+  it('mirrors the ES|QL layer query into the legacy slot on the dashboard-app by-value path (builder disabled)', () => {
+    const builder = { isEnabled: false } as LensConfigBuilder;
+    const transformIn = getTransformIn(builder, transformDrilldownsIn as never, true);
 
-    expect(() => transformIn(durationConfig, true)).toThrow(/GA unit names/);
-  });
+    const { state } = transformIn(getTextBasedByValueConfig() as never) as {
+      state: { attributes: { state: { query: unknown } } };
+    };
 
-  it('accepts legacy duration units when GA schemas are disabled', () => {
-    const builder = new LensConfigBuilder(undefined, true);
-    const transformIn = getTransformIn(builder, transformDrilldownsIn, true);
-
-    let thrownError: Error | undefined;
-    try {
-      transformIn(durationConfig, false);
-    } catch (e) {
-      thrownError = e as Error;
-    }
-
-    expect(thrownError?.message).not.toMatch(/GA unit names/);
+    expect(state.attributes.state.query).toEqual({ esql });
   });
 });

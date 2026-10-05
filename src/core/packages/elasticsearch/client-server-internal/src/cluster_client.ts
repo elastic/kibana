@@ -24,7 +24,11 @@ import type {
   ElasticsearchClientConfig,
   AsScopedOptions,
 } from '@kbn/core-elasticsearch-server';
-import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
+import {
+  HTTPAuthorizationHeader,
+  isExternalUiamCredential,
+  isUiamBearerCredential,
+} from '@kbn/core-security-server';
 import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
 import { configureClient } from './configure_client';
 import { ScopedClusterClient } from './scoped_cluster_client';
@@ -208,6 +212,7 @@ export class ClusterClient implements ICustomClusterClient {
   private getScopedHeaders(request: ScopeableRequest): Headers {
     let scopedHeaders: Headers;
     let requestHeaders: Headers | undefined;
+    let isExternalCredential = false;
     if (isRealRequest(request)) {
       requestHeaders = ensureRawRequest(request).headers ?? {};
       const requestIdHeaders = isKibanaRequest(request) ? { 'x-opaque-id': request.id } : {};
@@ -219,35 +224,54 @@ export class ClusterClient implements ICustomClusterClient {
         ...authHeaders,
       };
     } else {
+      // Fake requests carrying a user-created (external) UIAM API key are marked by their
+      // builder: UIAM rejects external keys presented with client authentication, so the shared
+      // secret must not be attached to them. The marker is bound to the request object rather than
+      // its headers, so it cannot reach Elasticsearch or be supplied by an inbound request.
+      isExternalCredential = isKibanaRequest(request) && isExternalUiamCredential(request);
       scopedHeaders = filterHeaders(request?.headers ?? {}, this.config.requestHeadersWhitelist);
     }
 
     // The effective credential is whatever ends up in `scopedHeaders`: for real requests the auth
-    // provider's post-authentication headers override the one that came in on the wire. If the
-    // credential is an internal UIAM credential, it might require client authentication.
-    let clientAuthentication: string | undefined | null;
+    // provider's post-authentication headers override the one that came in on the wire. The client
+    // authentication that travels with it is read from the same object, so a secret the request
+    // already carries is relayed rather than replaced.
+    let clientAuthentication: string | string[] | undefined;
     if (this.security?.uiam) {
       const credential = HTTPAuthorizationHeader.parseFromRequest({ headers: scopedHeaders });
-      clientAuthentication =
-        credential &&
-        this.security.uiam.getElasticsearchClientAuthentication(
+      if (credential) {
+        clientAuthentication = this.security.uiam.getElasticsearchClientAuthentication(
           requestHeaders
-            ? { credentialSource: 'inbound', credential, requestHeaders }
-            : { credentialSource: 'internal', credential }
+            ? {
+                credentialSource: 'inbound',
+                credential,
+                relayedClientAuthentication: scopedHeaders[ES_CLIENT_AUTHENTICATION_HEADER],
+                requestHeaders,
+              }
+            : {
+                credentialSource: isExternalCredential ? 'external' : 'internal',
+                credential,
+              }
         );
+      }
     }
 
     return {
       ...getDefaultHeaders(this.kibanaVersion),
       ...this.config.customHeaders,
       ...scopedHeaders,
-      ...(clientAuthentication ? { [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication } : {}),
+      ...(clientAuthentication !== undefined
+        ? { [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication }
+        : {}),
     };
   }
 
   private getSecondaryAuthHeaders(request: ScopeableRequest): Headers {
+    const authHeaders = isRealRequest(request)
+      ? this.authHeaders?.get(request) ?? {}
+      : request.headers;
     const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest({
-      headers: isRealRequest(request) ? this.authHeaders?.get(request) ?? {} : request.headers,
+      headers: authHeaders,
     });
     if (!authorizationHeader) {
       throw new Error(
@@ -255,21 +279,35 @@ export class ClusterClient implements ICustomClusterClient {
       );
     }
 
-    // If the credential is an internal UIAM credential, it might require client authentication.
-    // Use `internal` regardless of the request shape: unlike `getScopedHeaders`, this never reads a
-    // credential off the wire. For a real request it takes the auth provider's post-authentication
-    // headers (Kibana already vouched for that credential), and for a fake one the credential was
-    // minted by Kibana itself, so neither needs an attestation to be trusted.
-    const clientAuthentication = this.security?.uiam?.getElasticsearchClientAuthentication({
-      credentialSource: 'internal',
-      credential: authorizationHeader,
-    });
+    // Unlike `getScopedHeaders`, this path never reads the wire. `authHeaders` is the
+    // authentication provider's post-authentication output, so the credential has already been
+    // through `_authenticate` and Kibana can vouch for it without an attestation. A UIAM bearer
+    // token on a real request is the exception: it may be bound to another client, so it keeps
+    // the client authentication the provider resolved for it, and only an attestation Kibana
+    // could have minted itself earns Kibana's own secret.
+    const isExternalCredential =
+      !isRealRequest(request) && isKibanaRequest(request) && isExternalUiamCredential(request);
+    const clientAuthentication = this.security?.uiam?.getElasticsearchClientAuthentication(
+      isRealRequest(request) && isUiamBearerCredential(authorizationHeader)
+        ? {
+            credentialSource: 'inbound',
+            credential: authorizationHeader,
+            relayedClientAuthentication: authHeaders[ES_CLIENT_AUTHENTICATION_HEADER],
+            requestHeaders: ensureRawRequest(request).headers ?? {},
+          }
+        : {
+            credentialSource: isExternalCredential ? 'external' : 'internal',
+            credential: authorizationHeader,
+          }
+    );
 
     return {
       ...getDefaultHeaders(this.kibanaVersion),
       ...this.config.customHeaders,
       [ES_SECONDARY_AUTH_HEADER]: authorizationHeader.toString(),
-      ...(clientAuthentication ? { [ES_SECONDARY_CLIENT_AUTH_HEADER]: clientAuthentication } : {}),
+      ...(clientAuthentication !== undefined
+        ? { [ES_SECONDARY_CLIENT_AUTH_HEADER]: clientAuthentication }
+        : {}),
     };
   }
 }

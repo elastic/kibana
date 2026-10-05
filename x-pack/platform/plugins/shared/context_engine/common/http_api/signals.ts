@@ -15,6 +15,11 @@ export const buildSignalsIndexName = (spaceId: string): string =>
 /** The set of signal types; `tool_call` is the first. */
 export type SignalType = 'tool_call';
 
+/** The classification labels a signal may carry, assigned by `classify`. */
+export const SIGNAL_TAGS = ['query_error', 'empty_retrieval', 'coverage_gap'] as const;
+
+export type SignalTag = (typeof SIGNAL_TAGS)[number];
+
 /** Common envelope shared by every signal. `signal_id` is the ES `_id`, so re-processing overwrites rather than duplicates. */
 export interface SignalEnvelope {
   signal_id: string;
@@ -22,7 +27,7 @@ export interface SignalEnvelope {
   trace_ids?: string[];
   signal_type: SignalType;
   /** Classification labels; empty for a clean signal. */
-  tags: string[];
+  tags: SignalTag[];
   /** Per-type observation; opaque at the envelope level. */
   data: Record<string, unknown>;
 }
@@ -40,9 +45,12 @@ export interface EsqlToolCallSignal extends SignalEnvelope {
     producer: string;
     span_id: string;
     conversation_id?: string;
-    agent: { id: string; name: string; class: 'user' | 'management' };
+    agent: { id: string; name: string };
     query?: string;
-    returned: { columns: string[]; row_count: number };
+    // `columns` is optional because the paginated list read strips it from `_source`
+    // (`SIGNAL_SOURCE_EXCLUDES` in server/signals/read.ts) — only `row_count` is needed there.
+    // The write path (server/tasks/transform.ts) still populates a concrete array.
+    returned: { columns?: string[]; row_count: number };
     error?: string;
     duration_ms: number;
     round_signals: { esql_count: number; raw_query_count: number; ki_retrieval_count: number };
@@ -50,3 +58,23 @@ export interface EsqlToolCallSignal extends SignalEnvelope {
 }
 
 export type Signal = EsqlToolCallSignal;
+
+/** A single row of the preaggregated grouped-by-tag Signals list. */
+export interface SignalGroup {
+  tag: SignalTag;
+  /** Number of signals carrying this tag across the whole signals store. */
+  count: number;
+}
+
+/** Response of the grouped Signals list: a terms aggregation over the `tags` keyword field. */
+export interface ListSignalGroupsResponse {
+  groups: SignalGroup[];
+}
+
+/** Response of the per-group Signals fetch (paginated). */
+export interface ListSignalsResponse {
+  /** The individual signals carrying the requested tag. */
+  signals: Signal[];
+  /** Total number of signals carrying the tag (for pagination). */
+  total: number;
+}

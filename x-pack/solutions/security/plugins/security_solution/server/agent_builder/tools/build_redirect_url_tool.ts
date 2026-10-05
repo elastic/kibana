@@ -98,6 +98,13 @@ Returns a single \`url\`. Render it in your reply as a markdown link \`[title](u
 This tool only builds a link; it performs no action.`,
   schema: buildRedirectUrlSchema,
   tags: ['security', 'navigation', 'ui'],
+  annotations: {
+    title: 'Build Redirect URL',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   handler: async ({ path, flyout }, { spaceId, logger, savedObjectsClient }) => {
     if (!path.startsWith('/') || path.startsWith('//')) {
       return {

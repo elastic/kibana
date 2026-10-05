@@ -7,6 +7,7 @@
 
 import type {
   FormBasedPrivateState,
+  TextBasedPersistedState,
   TypedLensSerializedState,
   DatasourceStates,
   IndexPattern,
@@ -227,10 +228,95 @@ describe('convertFormBasedToTextBasedLayer', () => {
 
     expect(result).toBeDefined();
     expect(result?.state.datasourceStates.textBased).toBeDefined();
-    // Conversion formats the query with the composer before adding to state
-    expect(result?.state.query).toEqual({
+    // The ES|QL query lives exclusively on the converted text-based layer;
+    // the top-level slot keeps only the chart-scoped KQL/Lucene filter
+    expect(result?.state.query).toEqual({ query: '', language: 'kuery' });
+    const convertedLayers = Object.values(
+      (result?.state.datasourceStates.textBased as TextBasedPersistedState).layers
+    );
+    // Layer queries are stored pretty-printed with line-wrapping
+    expect(convertedLayers[0]?.query).toEqual({
       esql: esql(defaultConvertibleLayers[0].query).print('wrapping'),
     });
+  });
+
+  it('preserves non-convertible annotation layers in the form-based datasource', () => {
+    const annotationLayerId = 'annotation-layer';
+    const annotationLayer = {
+      ...mockFormBasedLayer,
+      columnOrder: ['annotation-col'],
+      columns: {
+        'annotation-col': {
+          operationType: 'count',
+          sourceField: 'records',
+          label: 'Annotation',
+          dataType: 'number',
+          isBucketed: false,
+          scale: 'ratio',
+        },
+      },
+    };
+    const formBasedState = {
+      ...mockFormBasedState,
+      layers: {
+        [layerId]: mockFormBasedLayer,
+        [annotationLayerId]: annotationLayer,
+      },
+    } as unknown as FormBasedPrivateState;
+    const datasourceStates: DatasourceStates = {
+      formBased: { state: formBasedState, isLoading: false },
+    };
+    const attributes = {
+      ...mockAttributes,
+      state: {
+        ...mockAttributes.state,
+        datasourceStates: { formBased: formBasedState },
+      },
+    } as TypedLensSerializedState['attributes'];
+    const annotationConversion: ConvertibleLayer = {
+      id: annotationLayerId,
+      icon: 'layers',
+      name: 'Annotation layer',
+      type: 'annotations',
+      query: '',
+      isConvertibleToEsql: false,
+      conversionData: { esAggsIdMap: {}, partialRows: false },
+    };
+
+    const result = convertFormBasedToTextBasedLayer({
+      layersToConvert: [...defaultConvertibleLayers, annotationConversion],
+      attributes,
+      visualizationState: mockVisualizationState,
+      datasourceStates,
+      framePublicAPI: createFrameAPI(),
+    });
+
+    expect(result?.state.datasourceStates.textBased?.layers).toHaveProperty(layerId);
+    expect(result?.state.datasourceStates.formBased?.layers).toEqual({
+      [annotationLayerId]: annotationLayer,
+    });
+  });
+
+  it('returns undefined instead of parsing an empty query for non-convertible layers', () => {
+    const annotationConversion: ConvertibleLayer = {
+      id: 'annotation-layer',
+      icon: 'layers',
+      name: 'Annotation layer',
+      type: 'annotations',
+      query: '',
+      isConvertibleToEsql: false,
+      conversionData: { esAggsIdMap: {}, partialRows: false },
+    };
+
+    expect(
+      convertFormBasedToTextBasedLayer({
+        layersToConvert: [annotationConversion],
+        attributes: mockAttributes,
+        visualizationState: mockVisualizationState,
+        datasourceStates: mockDatasourceStates,
+        framePublicAPI: createFrameAPI(),
+      })
+    ).toBeUndefined();
   });
 
   it('preserves original column IDs in visualization state', () => {
@@ -257,6 +343,69 @@ describe('convertFormBasedToTextBasedLayer', () => {
         fieldName: '@timestamp',
         label: '@timestamp',
         meta: { type: 'date' },
+      },
+    ]);
+  });
+
+  it('creates one column per original column when several share one ES|QL column', () => {
+    // A primary and a secondary metric that are both "Average of bytes" collapse to a single
+    // ES|QL column, but each Lens dimension still needs its own column to reference.
+    const duplicateMetricColumn = {
+      operationType: 'average',
+      sourceField: 'bytes',
+      label: 'Average of bytes',
+      dataType: 'number',
+      isBucketed: false,
+      scale: 'ratio',
+    };
+    const duplicateMetricState = {
+      layers: {
+        [layerId]: {
+          indexPatternId: 'test-index-pattern',
+          columnOrder: ['col1', 'col2'],
+          columns: { col1: duplicateMetricColumn, col2: duplicateMetricColumn },
+        },
+      },
+      currentIndexPatternId: 'test-index-pattern',
+    } as unknown as FormBasedPrivateState;
+
+    const result = convertFormBasedToTextBasedLayer({
+      layersToConvert: [
+        createConvertibleLayer('FROM test-index | STATS AVG(bytes)', {
+          'AVG(bytes)': [
+            ...createColumnMapping('col1', 'Primary', 'number', {
+              operationType: 'average',
+              sourceField: 'bytes',
+              customLabel: true,
+            }),
+            ...createColumnMapping('col2', 'Secondary', 'number', {
+              operationType: 'average',
+              sourceField: 'bytes',
+              customLabel: true,
+            }),
+          ],
+        }),
+      ],
+      attributes: mockAttributes,
+      visualizationState: { layerId, layerType: 'data', metricAccessor: 'col1' },
+      datasourceStates: { formBased: { state: duplicateMetricState, isLoading: false } },
+      framePublicAPI: createFrameAPI(),
+    });
+
+    expect(result?.state.datasourceStates.textBased?.layers[layerId]?.columns).toEqual([
+      {
+        columnId: 'col1',
+        customLabel: true,
+        fieldName: 'AVG(bytes)',
+        label: 'Primary',
+        meta: { type: 'number' },
+      },
+      {
+        columnId: 'col2',
+        customLabel: true,
+        fieldName: 'AVG(bytes)',
+        label: 'Secondary',
+        meta: { type: 'number' },
       },
     ]);
   });
