@@ -21,14 +21,16 @@ const POPOVER_BODY =
   'Execution history lives in Managed workflows, which is turned off for this space.';
 const REQUIRED_TOOLTIP =
   'Requires Managed workflows. Ask an admin to enable it in Advanced Settings.';
-const ADVANCED_SETTINGS_HREF = `/app/management/kibana/settings?query=${WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID}`;
+const ADVANCED_SETTINGS_HREF = `/app/management/kibana/settings?query=${encodeURIComponent(
+  WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID
+)}`;
 
 const renderLink = ({
   showManagedWorkflows,
   canChangeAdvancedSettings,
 }: {
   showManagedWorkflows: boolean;
-  canChangeAdvancedSettings: boolean;
+  canChangeAdvancedSettings?: boolean;
 }) => {
   const core = coreMock.createStart();
   core.application.getUrlForApp.mockImplementation(
@@ -36,10 +38,18 @@ const renderLink = ({
   );
   core.settings.client.get.mockReturnValue(showManagedWorkflows);
   core.settings.client.get$.mockReturnValue(of(showManagedWorkflows));
-  core.application.capabilities = {
-    ...core.application.capabilities,
-    advancedSettings: { show: true, save: canChangeAdvancedSettings },
-  };
+  if (canChangeAdvancedSettings === undefined) {
+    // A space can grant no advancedSettings capability at all, which the component
+    // deliberately folds into the "cannot change it" branch via `!== true`.
+    const withoutAdvancedSettings = { ...core.application.capabilities };
+    delete (withoutAdvancedSettings as { advancedSettings?: unknown }).advancedSettings;
+    core.application.capabilities = withoutAdvancedSettings;
+  } else {
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      advancedSettings: { show: true, save: canChangeAdvancedSettings },
+    };
+  }
 
   render(
     <KibanaContextProvider services={core}>
@@ -80,7 +90,9 @@ describe('ViewExecutionsLink', () => {
     expect(screen.getByText('Not now')).toBeInTheDocument();
     expect(screen.getByText('Open Advanced Settings')).toBeInTheDocument();
     expect(core.application.getUrlForApp).toHaveBeenCalledWith('management', {
-      path: `/kibana/settings?query=${WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID}`,
+      path: `/kibana/settings?query=${encodeURIComponent(
+        WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID
+      )}`,
     });
     expect(screen.getByTestId(`${LINK_TEST_SUBJ}-open-advanced-settings`)).toHaveAttribute(
       'href',
@@ -112,5 +124,26 @@ describe('ViewExecutionsLink', () => {
     fireEvent.mouseOver(link);
 
     expect(await screen.findByText(REQUIRED_TOOLTIP)).toBeInTheDocument();
+  });
+
+  it('disables the link when the space grants no advancedSettings capability at all', async () => {
+    renderLink({ showManagedWorkflows: false, canChangeAdvancedSettings: undefined });
+
+    const link = screen.getByTestId(LINK_TEST_SUBJ);
+    expect(link).toBeDisabled();
+    expect(link).not.toHaveAttribute('href');
+
+    fireEvent.mouseOver(link);
+
+    expect(await screen.findByText(REQUIRED_TOOLTIP)).toBeInTheDocument();
+  });
+
+  it('keeps linking to executions when the setting is on, even without permission to change it', () => {
+    renderLink({ showManagedWorkflows: true, canChangeAdvancedSettings: false });
+
+    const link = screen.getByTestId(LINK_TEST_SUBJ);
+    expect(link).not.toBeDisabled();
+    expect(link).toHaveAttribute('href', EXECUTIONS_HREF);
+    expect(link).toHaveAttribute('target', '_blank');
   });
 });

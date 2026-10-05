@@ -76,15 +76,20 @@ export const ViewExecutionsLink: FC<ViewExecutionsLinkProps> = ({
   if (application.capabilities.advancedSettings?.save !== true) {
     return (
       <EuiToolTip content={settingsI18n.MANAGED_WORKFLOWS_REQUIRED_TOOLTIP}>
-        <EuiButtonEmpty {...linkProps} isDisabled>
-          {settingsI18n.VIEW_EXECUTIONS}
-        </EuiButtonEmpty>
+        {/* EuiToolTip needs a focusable anchor; a disabled button cannot receive focus. */}
+        <span tabIndex={0}>
+          <EuiButtonEmpty {...linkProps} isDisabled>
+            {settingsI18n.VIEW_EXECUTIONS}
+          </EuiButtonEmpty>
+        </span>
       </EuiToolTip>
     );
   }
 
   const advancedSettingsHref = application.getUrlForApp('management', {
-    path: `/kibana/settings?query=${WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID}`,
+    path: `/kibana/settings?query=${encodeURIComponent(
+      WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID
+    )}`,
   });
 
   return (

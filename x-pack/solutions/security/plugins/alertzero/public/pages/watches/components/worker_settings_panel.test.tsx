@@ -128,7 +128,9 @@ describe('WorkerSettingsPanel view executions link', () => {
         screen.getByTestId(`alertZeroWorkerViewExecutions-${WORKER_ID}-open-advanced-settings`)
       ).toHaveAttribute(
         'href',
-        `/app/management/kibana/settings?query=${WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID}`
+        `/app/management/kibana/settings?query=${encodeURIComponent(
+          WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID
+        )}`
       );
     }
   );

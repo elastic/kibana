@@ -87,6 +87,7 @@ export const MANAGED_WORKFLOWS_REQUIRED_TOOLTIP = i18n.translate(
     defaultMessage: 'Requires Managed workflows. Ask an admin to enable it in Advanced Settings.',
   }
 );
+
 export const SAVE_WATCH_SETTINGS = i18n.translate(
   'xpack.alertzero.watches.settings.saveWatchSettings',
   { defaultMessage: 'Save' }
