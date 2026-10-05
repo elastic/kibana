@@ -31,6 +31,7 @@ import { FlyoutMetadataCard } from '../../../../components/flyout_components/fly
 import { FlyoutToolbarHeader } from '../../../../components/flyout_components/flyout_toolbar_header';
 import { InfoPanel } from '../../../../components/info_panel';
 import { useFetchDetectionHistory } from '../../../../hooks/use_fetch_detections';
+import { useSourcesById } from '../../../../hooks/use_sources_by_id';
 import { formatTimestamp } from '../../../../util/formatters';
 import { changeTypeLabel } from '../shared/translations';
 
@@ -60,6 +61,7 @@ interface DetectionFlyoutProps {
 
 export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) => {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'detectionFlyoutTitle' });
+  const { getSourceTitle } = useSourcesById();
   const { data: historyData, isLoading: isHistoryLoading } = useFetchDetectionHistory(
     detection.rule_uuid
   );
@@ -142,8 +144,8 @@ export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) =>
           {detection.stream_name && (
             <EuiFlexItem>
               <FlyoutMetadataCard title={STREAM_LABEL}>
-                <EuiBadge color="hollow" iconType="productStreamsClassic" iconSide="left">
-                  {detection.stream_name}
+                <EuiBadge color="hollow" iconType="database" iconSide="left">
+                  {getSourceTitle(detection.stream_name)}
                 </EuiBadge>
               </FlyoutMetadataCard>
             </EuiFlexItem>
@@ -249,9 +251,10 @@ const STATUS_TOOLTIP = i18n.translate('xpack.significantEventsApp.detectionFlyou
   defaultMessage: 'Whether the discovery pipeline has ingested this detection.',
 });
 
-const STREAM_LABEL = i18n.translate('xpack.significantEventsApp.detectionFlyout.streamLabel', {
-  defaultMessage: 'Stream',
-});
+const STREAM_LABEL = i18n.translate(
+  'xpack.significantEventsApp.sources.detectionFlyout.sourceLabel',
+  { defaultMessage: 'Source' }
+);
 
 const TIMESTAMP_LABEL = i18n.translate(
   'xpack.significantEventsApp.detectionFlyout.timestampLabel',

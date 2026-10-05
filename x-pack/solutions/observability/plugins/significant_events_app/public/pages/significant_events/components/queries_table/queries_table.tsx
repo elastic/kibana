@@ -41,6 +41,7 @@ import {
   useFetchDiscoveryQueriesOccurrences,
 } from '../../../../hooks/use_fetch_discovery_queries_occurrences';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useSourcesById } from '../../../../hooks/use_sources_by_id';
 import { useQueriesApi } from '../../../../hooks/use_queries_api';
 import { getFormattedError } from '../../../../util/errors';
 import { AssetImage } from '../../../../components/asset_image';
@@ -108,6 +109,7 @@ export function QueriesTable() {
   const canManage = getNightshiftCapabilities(nightshift).canManage;
   const { timeState } = useTimefilter();
   const isCpsMultiProject = useIsCpsMultiProject(cps?.cpsManager);
+  const { getSourceTitle } = useSourcesById();
   const [searchQuery, setSearchQuery] = useState('');
 
   const [pagination, setPagination] = useState<{
@@ -325,7 +327,7 @@ export function QueriesTable() {
         name: STREAM_COLUMN,
         width: '130px',
         render: (_: unknown, item: SignificantEventQueryRow) => (
-          <EuiBadge color="hollow">{item.stream_name}</EuiBadge>
+          <EuiBadge color="hollow">{getSourceTitle(item.stream_name)}</EuiBadge>
         ),
       },
       {
@@ -349,7 +351,7 @@ export function QueriesTable() {
         ],
       },
     ];
-  }, [share.url.locators, timeState, selectedQuery, handleSelectQuery]);
+  }, [share.url.locators, timeState, selectedQuery, handleSelectQuery, getSourceTitle]);
 
   const isLoading = queriesLoading;
   if (isLoading) {

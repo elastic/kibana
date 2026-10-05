@@ -10,7 +10,6 @@ import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RunQuotaGroup } from '@kbn/significant-events-plugin/common';
 import { useRunQuotas } from '../../../hooks/use_significant_events_run_quotas';
-import { useSignificantEventsAppRouter } from '../../../hooks/use_significant_events_app_router';
 import { isFiniteRunLimit, RUN_QUOTA_GROUPS, type RunLimitDraft } from './settings/run_limit_draft';
 import { RUN_QUOTA_GROUP_LABELS } from './settings/run_limit_row';
 
@@ -100,8 +99,12 @@ export const RunQuotaExhaustionCallout = ({
   );
 };
 
-export const RunLimitsBanner = () => {
-  const router = useSignificantEventsAppRouter();
+interface RunLimitsBannerProps {
+  /** Settings link built by the page, so Settings knows where Back should return. */
+  manageHref: string;
+}
+
+export const RunLimitsBanner = ({ manageHref }: RunLimitsBannerProps) => {
   const { data } = useRunQuotas();
 
   if (
@@ -122,7 +125,7 @@ export const RunLimitsBanner = () => {
         limits={data.limits}
         counts={data.counts}
         canManage={data.canManage}
-        manageHref={router.link('/settings')}
+        manageHref={manageHref}
       />
       <EuiSpacer />
     </>

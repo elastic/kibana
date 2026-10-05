@@ -108,7 +108,7 @@ export type ProfilingLinkId = 'stacktraces' | 'flamegraphs' | 'functions';
 
 export type StreamsLinkId = 'overview';
 
-export type SignificantEventsLinkId = 'knowledge_indicators' | 'events' | 'rules';
+export type SignificantEventsLinkId = 'sources' | 'knowledge_indicators' | 'events' | 'rules';
 
 export type ObservabilityAlertingLinkId =
   | 'inbox'

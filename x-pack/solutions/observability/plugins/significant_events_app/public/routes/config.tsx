@@ -29,10 +29,16 @@ const significantEventsAppRoutes = {
     ),
     children: {
       '/': {
-        element: <RedirectTo path="/{tab}" params={{ path: { tab: 'streams' } }} />,
+        element: <RedirectTo path="/{tab}" params={{ path: { tab: 'sources' } }} />,
       },
       '/settings': {
         element: <SettingsPage />,
+        params: t.partial({
+          query: t.partial({
+            // The Management tab Settings was opened from; without it, Back goes to Nightshift.
+            fromTab: t.string,
+          }),
+        }),
       },
       '/{tab}': {
         element: (
@@ -55,6 +61,8 @@ const significantEventsAppRoutes = {
               severity: t.union([t.string, t.array(t.string)]),
               type: t.union([t.string, t.array(t.string)]),
               subtype: t.union([t.string, t.array(t.string)]),
+              source: t.union([t.string, t.array(t.string)]),
+              // Old name of `source`, still read so earlier links keep their filter.
               stream: t.union([t.string, t.array(t.string)]),
               service: t.union([t.string, t.array(t.string)]),
               showComputed: t.string,

@@ -507,10 +507,10 @@ export function SettingsTab() {
                           }
                         )
                       : i18n.translate(
-                          'xpack.significantEventsApp.settings.continuousKiOnboardingHelp',
+                          'xpack.significantEventsApp.sources.settings.continuousKiOnboardingHelp',
                           {
                             defaultMessage:
-                              'When enabled, knowledge indicator onboarding runs automatically on managed streams at the configured interval.',
+                              'When enabled, knowledge indicator onboarding runs automatically on enabled sources at the configured interval.',
                           }
                         )}
                   </EuiText>
@@ -544,9 +544,10 @@ export function SettingsTab() {
                       <EuiText color="subdued" size="xs">
                         <p>
                           {i18n.translate(
-                            'xpack.significantEventsApp.settings.continuousKiOnboardingScopeHelp',
+                            'xpack.significantEventsApp.sources.settings.continuousKiOnboardingScopeHelp',
                             {
-                              defaultMessage: 'Onboards the managed streams of this space.',
+                              defaultMessage:
+                                'Onboards the enabled sources of this space. Manage them in the Sources tab.',
                             }
                           )}
                         </p>
@@ -558,10 +559,10 @@ export function SettingsTab() {
                         { defaultMessage: 'Onboarding interval (hours)' }
                       )}
                       helpText={i18n.translate(
-                        'xpack.significantEventsApp.settings.onboardingIntervalHelp',
+                        'xpack.significantEventsApp.sources.settings.onboardingIntervalHelp',
                         {
                           defaultMessage:
-                            'Minimum period in hours between onboarding runs for a given stream. Set to 0 for no cooldown between runs.',
+                            'Minimum period in hours between onboarding runs for a given source. Set to 0 for no cooldown between runs.',
                         }
                       )}
                     >

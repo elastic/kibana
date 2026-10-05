@@ -7,7 +7,8 @@
 
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 
-export const getKnowledgeIndicatorStreamName = (knowledgeIndicator: KnowledgeIndicator): string =>
+/** Id of the source a knowledge indicator belongs to. The wire field is still `stream_name`. */
+export const getKnowledgeIndicatorSourceId = (knowledgeIndicator: KnowledgeIndicator): string =>
   knowledgeIndicator.kind === 'feature'
     ? knowledgeIndicator.feature.stream_name
     : knowledgeIndicator.stream_name;

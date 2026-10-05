@@ -7,7 +7,7 @@
 
 import useObservable from 'react-use/lib/useObservable';
 import { isEmpty } from 'lodash';
-import { STREAMS_TIERED_AI_FEATURE } from '@kbn/streams-plugin/common';
+import { SIGNIFICANT_EVENTS_TIERED_FEATURE } from '@kbn/significant-events-plugin/common';
 import { useKibana } from './use_kibana';
 import { useGenAIConnectors, type UseGenAIConnectorsResult } from './use_genai_connectors';
 
@@ -26,7 +26,9 @@ export function useAIFeatures(): AIFeatures | null {
     core,
   } = useKibana();
 
-  const isAIAvailableForTier = core.pricing.isFeatureAvailable(STREAMS_TIERED_AI_FEATURE.id);
+  const isAIAvailableForTier = core.pricing.isFeatureAvailable(
+    SIGNIFICANT_EVENTS_TIERED_FEATURE.id
+  );
 
   const genAiConnectors = useGenAIConnectors();
   const license = useObservable(licensing.license$);

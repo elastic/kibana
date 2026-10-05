@@ -14,14 +14,14 @@ import { useFetchDiscoveryQueries } from '../../../../hooks/use_fetch_discovery_
 const ACTIVE_DRAFT_STATUS = ['active', 'draft'] as const;
 
 interface QueriesColumnProps {
-  streamName: string;
+  sourceId: string;
   streamOnboardingResult?: SignificantEventsWorkflowStatusResult;
 }
 
-export function QueriesColumn({ streamName, streamOnboardingResult }: QueriesColumnProps) {
+export function QueriesColumn({ sourceId, streamOnboardingResult }: QueriesColumnProps) {
   const queriesFetchState = useFetchDiscoveryQueries(
     {
-      name: streamName,
+      name: sourceId,
       query: '',
       page: 1,
       perPage: 1,

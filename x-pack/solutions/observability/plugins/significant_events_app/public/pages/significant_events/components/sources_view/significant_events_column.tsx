@@ -25,13 +25,13 @@ const CHART_WIDTH = '100px';
 const EMPTY_COUNT_SYMBOL = '—';
 
 interface SignificantEventsColumnProps {
-  streamName: string;
+  sourceId: string;
 }
 
-export function SignificantEventsColumn({ streamName }: SignificantEventsColumnProps) {
+export function SignificantEventsColumn({ sourceId }: SignificantEventsColumnProps) {
   const { euiTheme } = useEuiTheme();
   const significantEventsFetchState = useFetchQueryOccurrenceStats({
-    name: streamName,
+    name: sourceId,
   });
 
   if (significantEventsFetchState.isLoading) {
@@ -55,7 +55,7 @@ export function SignificantEventsColumn({ streamName }: SignificantEventsColumnP
       <EventsCount count={significantEventsFetchState.data.total_occurrences} />
       <EuiFlexItem grow={false} css={{ width: CHART_WIDTH, flexShrink: 0 }}>
         <SparkPlot
-          id={`significant-events-histogram-${streamName}`}
+          id={`significant-events-histogram-${sourceId}`}
           name={i18n.translate(
             'xpack.significantEventsApp.significantEventsTable.histogramSeriesTitle',
             {

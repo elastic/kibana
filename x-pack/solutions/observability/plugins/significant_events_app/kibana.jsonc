@@ -17,11 +17,10 @@
       "nightshiftSources",
       "share",
       "significantEvents",
-      "streams",
       "unifiedSearch",
     ],
     "optionalPlugins": ["agentBuilder", "cloud", "cps", "nightshiftInvestigations", "spaces"],
-    "requiredBundles": ["kibanaReact", "stackConnectors"],
+    "requiredBundles": ["esql", "kibanaReact", "stackConnectors"],
     "extraPublicDirs": ["common"],
   },
 }

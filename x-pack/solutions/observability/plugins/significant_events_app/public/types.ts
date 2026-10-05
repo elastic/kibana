@@ -17,7 +17,6 @@ import type { NightshiftSourcesPublicPluginStart } from '@kbn/nightshift-sources
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SignificantEventsPublicPluginStart } from '@kbn/significant-events-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 export interface SignificantEventsAppSetupDependencies {
@@ -37,7 +36,6 @@ export interface SignificantEventsAppStartDependencies {
   share: SharePluginStart;
   significantEvents: SignificantEventsPublicPluginStart;
   spaces?: SpacesPluginStart;
-  streams: StreamsPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 

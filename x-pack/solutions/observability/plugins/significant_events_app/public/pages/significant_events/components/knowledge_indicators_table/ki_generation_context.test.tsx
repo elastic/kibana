@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import type { NightshiftSource } from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_DEFAULT_MODELS } from '@kbn/significant-events-schema';
 import { KiGenerationProvider, useKiGeneration } from './ki_generation_context';
 
@@ -21,9 +22,30 @@ const mockBulkOnboarding = {
   processStatusUpdateQueue: jest.fn().mockResolvedValue(undefined),
 };
 
-jest.mock('../../hooks/use_fetch_streams', () => ({
-  useFetchStreams: () => ({ data: { streams: [] }, isLoading: false }),
+let mockSources: NightshiftSource[] = [];
+
+jest.mock('../../../../hooks/use_fetch_sources', () => ({
+  useFetchSources: () => ({
+    data: mockSources,
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  }),
 }));
+
+const createSource = (esqlUpdatedAt: string): NightshiftSource => ({
+  id: 'source-1',
+  title: 'Nginx errors',
+  tags: [],
+  esql: 'FROM logs-nginx-*',
+  slug: 'nginx-errors',
+  view_name: '$.nightshift.sources.default.nginx-errors',
+  enabled: true,
+  created_by: 'marco',
+  created_at: '2026-09-01T00:00:00.000Z',
+  updated_at: esqlUpdatedAt,
+  esql_updated_at: esqlUpdatedAt,
+});
 
 jest.mock('../../hooks/use_bulk_onboarding', () => ({
   useBulkOnboarding: () => mockBulkOnboarding,
@@ -60,5 +82,27 @@ describe('KiGenerationProvider model defaults', () => {
     });
     expect(screen.getByTestId('features-loading')).toHaveTextContent('false');
     expect(screen.getByTestId('queries-loading')).toHaveTextContent('false');
+  });
+});
+
+describe('KiGenerationProvider status polling', () => {
+  beforeEach(() => {
+    mockBulkOnboarding.onboardingStatusUpdateQueue.add.mockClear();
+    mockSources = [];
+  });
+
+  it('enqueues a source once and again only when its query version changes', () => {
+    mockSources = [createSource('2026-09-01T00:00:00.000Z')];
+    const { rerender } = render(<KiGenerationProvider>{null}</KiGenerationProvider>);
+    expect(mockBulkOnboarding.onboardingStatusUpdateQueue.add).toHaveBeenCalledTimes(1);
+
+    mockSources = [createSource('2026-09-01T00:00:00.000Z')];
+    rerender(<KiGenerationProvider>{null}</KiGenerationProvider>);
+    expect(mockBulkOnboarding.onboardingStatusUpdateQueue.add).toHaveBeenCalledTimes(1);
+
+    mockSources = [createSource('2026-09-02T00:00:00.000Z')];
+    rerender(<KiGenerationProvider>{null}</KiGenerationProvider>);
+    expect(mockBulkOnboarding.onboardingStatusUpdateQueue.add).toHaveBeenCalledTimes(2);
+    expect(mockBulkOnboarding.onboardingStatusUpdateQueue.add).toHaveBeenLastCalledWith('source-1');
   });
 });

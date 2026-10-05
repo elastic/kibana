@@ -13,9 +13,6 @@ import { useRunQuotas } from '../../../hooks/use_significant_events_run_quotas';
 import { RunLimitsBanner } from './run_limits_banner';
 
 jest.mock('../../../hooks/use_significant_events_run_quotas');
-jest.mock('../../../hooks/use_significant_events_app_router', () => ({
-  useSignificantEventsAppRouter: () => ({ link: jest.fn().mockReturnValue('#settings') }),
-}));
 
 const mockUseRunQuotas = useRunQuotas as jest.MockedFunction<typeof useRunQuotas>;
 
@@ -52,7 +49,7 @@ describe('RunLimitsBanner', () => {
 
     render(
       <I18nProvider>
-        <RunLimitsBanner />
+        <RunLimitsBanner manageHref="#settings" />
       </I18nProvider>
     );
 
@@ -74,7 +71,7 @@ describe('RunLimitsBanner', () => {
     setResponse(response());
     const { rerender } = render(
       <I18nProvider>
-        <RunLimitsBanner />
+        <RunLimitsBanner manageHref="#settings" />
       </I18nProvider>
     );
     expect(screen.getByTestId('significantEventsRunLimitsBanner')).toBeInTheDocument();
@@ -86,7 +83,7 @@ describe('RunLimitsBanner', () => {
     );
     rerender(
       <I18nProvider>
-        <RunLimitsBanner />
+        <RunLimitsBanner manageHref="#settings" />
       </I18nProvider>
     );
     expect(screen.queryByTestId('significantEventsRunLimitsBanner')).not.toBeInTheDocument();
@@ -94,7 +91,7 @@ describe('RunLimitsBanner', () => {
     setResponse(response({ enabled: false }));
     rerender(
       <I18nProvider>
-        <RunLimitsBanner />
+        <RunLimitsBanner manageHref="#settings" />
       </I18nProvider>
     );
     expect(screen.queryByTestId('significantEventsRunLimitsBanner')).not.toBeInTheDocument();
