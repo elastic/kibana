@@ -1,0 +1,150 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import Boom from '@hapi/boom';
+import type { SavedObjectsClientContract, SavedObjectsServiceStart } from '@kbn/core/server';
+import { CoreStart, Request } from '@kbn/core-di-server';
+import { PluginStart, type CoreDiServiceStart } from '@kbn/core-di';
+import { Global } from '@kbn/core-di-internal';
+import { MAX_BULK_ITEMS, entityIdSchema } from '@kbn/alerting-v2-schemas';
+import { brandSpaceId, type SpaceId } from '@kbn/core-spaces-common';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { inject, injectable } from 'inversify';
+import { partition } from 'lodash';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import type { AlertingServerStartDependencies, InternalRulesClientApi } from '../../types';
+import type { BulkByIdsParams, BulkResponse } from '../rules_client';
+import { RulesClient } from '../rules_client';
+import { toBulkError } from '../rules_client/utils';
+import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
+import {
+  RuleSavedObjectsClientToken,
+  RulesSavedObjectServiceInternalToken,
+} from '../services/rules_saved_object_service/tokens';
+import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
+import { savedObjectNamespacesToSpaceId, spaceIdToNamespace } from '../space_id_to_namespace';
+import { createInternalUserRequest } from './internal_user_request';
+
+// Any non-empty list works: the lookup only needs `id` and `namespaces`, which are always
+// returned, and an empty list would return every attribute.
+const LOOKUP_FIELDS = ['enabled'];
+
+/**
+ * Rules client for system work with no user request. It only disables rules.
+ *
+ * Rule ids are unique across spaces, so it finds each rule's space and disables every
+ * space's rules through that space's regular {@link RulesClient}, run as the internal user.
+ * Each rule is therefore read twice: once to find its space, once by the space's client.
+ */
+@injectable()
+export class InternalRulesClient implements InternalRulesClientApi {
+  private readonly internalSavedObjectsClient: SavedObjectsClientContract;
+
+  constructor(
+    @inject(CoreStart('injection')) private readonly injection: CoreDiServiceStart,
+    @inject(CoreStart('savedObjects')) savedObjects: SavedObjectsServiceStart,
+    @inject(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
+    private readonly spaces: SpacesPluginStart,
+    /** Must search every namespace, i.e. be backed by an internal repository. */
+    @inject(RulesSavedObjectServiceInternalToken)
+    private readonly rulesSavedObjectService: RulesSavedObjectServiceContract
+  ) {
+    this.internalSavedObjectsClient = savedObjects.getUnsafeInternalClient({
+      includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
+    });
+  }
+
+  public async bulkDisableRules({ ids }: BulkByIdsParams): Promise<BulkResponse> {
+    const uniqueIds = [...new Set(ids)];
+    if (uniqueIds.length > MAX_BULK_ITEMS) {
+      throw Boom.badRequest(
+        `Received ${uniqueIds.length} rule ids, exceeding the maximum of ${MAX_BULK_ITEMS} per request. Split the operation into multiple requests.`
+      );
+    }
+
+    // The ids are interpolated into the lookup query, so only look up ids the HTTP API accepts.
+    const [validIds, invalidIds] = partition(
+      uniqueIds,
+      (id) => entityIdSchema.safeParse(id).success
+    );
+
+    const found = await this.rulesSavedObjectService.findByIds(validIds, {
+      fields: LOOKUP_FIELDS,
+    });
+
+    const idsBySpace = new Map<SpaceId, string[]>();
+    for (const { id, namespaces } of found) {
+      const spaceId = brandSpaceId(savedObjectNamespacesToSpaceId(namespaces));
+      const spaceRuleIds = idsBySpace.get(spaceId) ?? [];
+      spaceRuleIds.push(id);
+      idsBySpace.set(spaceId, spaceRuleIds);
+    }
+
+    let affectedCount = 0;
+    const errors: BulkResponse['errors'] = [];
+    for (const [spaceId, spaceRuleIds] of idsBySpace) {
+      try {
+        const response = await this.withRulesClientInSpace(spaceId, (client) =>
+          client.bulkDisableRules({ ids: spaceRuleIds })
+        );
+        affectedCount += response.affected_count;
+        errors.push(...response.errors);
+      } catch (error) {
+        // One failing space must not stop the others from being disabled.
+        const failure = {
+          statusCode: Boom.isBoom(error) ? error.output.statusCode : 500,
+          message: error instanceof Error ? error.message : String(error),
+        };
+        errors.push(...spaceRuleIds.map((id) => toBulkError(id, failure)));
+      }
+    }
+
+    const foundIds = new Set(found.map(({ id }) => id));
+    for (const id of validIds.filter((ruleId) => !foundIds.has(ruleId))) {
+      errors.push(toBulkError(id, { statusCode: 404, message: `Rule ${id} not found` }));
+    }
+    for (const id of invalidIds) {
+      errors.push(
+        toBulkError(id, { statusCode: 400, message: `Rule id "${id}" is not a valid rule id` })
+      );
+    }
+
+    return { affected_count: affectedCount, errors };
+  }
+
+  /**
+   * Lends the regular rules client of a space, running as the internal user: a credential-less
+   * request bound to the space and a rules saved objects client that is not tied to a user.
+   * The scope is released once `fn` settles, so the client must not be used after it.
+   */
+  private async withRulesClientInSpace<T>(
+    spaceId: SpaceId,
+    fn: (client: RulesClient) => Promise<T>
+  ): Promise<T> {
+    const scope = this.injection.fork();
+    try {
+      scope.bind(Request).toConstantValue(createInternalUserRequest(spaceId));
+      scope.bind(Global).toConstantValue(Request);
+      scope.bind(RequestSpaceIdToken).toConstantValue(spaceId);
+      scope.bind(Global).toConstantValue(RequestSpaceIdToken);
+
+      const namespace = spaceIdToNamespace(this.spaces, spaceId);
+      scope
+        .bind(RuleSavedObjectsClientToken)
+        .toConstantValue(
+          namespace
+            ? this.internalSavedObjectsClient.asScopedToNamespace(namespace)
+            : this.internalSavedObjectsClient
+        );
+      scope.bind(Global).toConstantValue(RuleSavedObjectsClientToken);
+
+      return await fn(scope.get(RulesClient));
+    } finally {
+      await scope.unbindAllAsync();
+    }
+  }
+}

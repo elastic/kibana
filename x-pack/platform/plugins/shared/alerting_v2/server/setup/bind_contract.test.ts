@@ -8,25 +8,14 @@
 import { Container, ContainerModule } from 'inversify';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ServiceToken } from '@kbn/core-di';
-import { PluginStart, Setup, Start } from '@kbn/core-di';
+import { Setup, Start } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
-import { coreMock } from '@kbn/core/server/mocks';
-import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { RulesClient } from '../lib/rules_client';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { AlertEventsClient } from '../lib/alert_events_client';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
-import {
-  RuleSavedObjectsClientToken,
-  RulesSavedObjectServiceInternalToken,
-} from '../lib/services/rules_saved_object_service/tokens';
-import { isInternalUserRequest } from '../lib/internal_user_request';
-import { createRuleSoAttributes } from '../lib/test_utils';
-import {
-  createRulesSavedObjectServiceMock,
-  type RulesSavedObjectServiceMock,
-} from '../lib/services/rules_saved_object_service/rules_saved_object_service.mock';
+import { InternalRulesClient } from '../lib/internal_rules_client';
 import type { AlertingServerSetup, AlertingServerStart } from '../types';
 import { bindContract } from './bind_contract';
 import { asSpaceId } from '@kbn/core-spaces-common';
@@ -41,9 +30,7 @@ describe('bindContract', () => {
   let mockActionPolicyClient: Partial<ActionPolicyClient>;
   let mockAlertEventsClient: Partial<AlertEventsClient>;
   let fork: jest.Mock;
-  let savedObjects: ReturnType<typeof coreMock.createStart>['savedObjects'];
-  let spaces: ReturnType<typeof spacesMock.createStart>;
-  let findByIds: RulesSavedObjectServiceMock['findByIds'];
+  let mockInternalRulesClient: Partial<InternalRulesClient>;
 
   beforeEach(() => {
     container = new Container();
@@ -64,19 +51,10 @@ describe('bindContract', () => {
       getContainer: jest.fn(() => container),
     } as never);
     container.bind(ArtifactTypeRegistry).toSelf().inSingletonScope();
-    savedObjects = coreMock.createStart().savedObjects;
-    spaces = spacesMock.createStart();
-    spaces.spacesService.spaceIdToNamespace.mockImplementation((spaceId: string) =>
-      spaceId === 'default' ? undefined : spaceId
-    );
-    container.bind(CoreStart('savedObjects')).toConstantValue(savedObjects);
-    container.bind(PluginStart('spaces')).toConstantValue(spaces);
-    const rulesSavedObjectServiceInternal = createRulesSavedObjectServiceMock();
-    findByIds = rulesSavedObjectServiceInternal.findByIds;
-    findByIds.mockResolvedValue([]);
+    mockInternalRulesClient = { bulkDisableRules: jest.fn() };
     container
-      .bind(RulesSavedObjectServiceInternalToken)
-      .toConstantValue(rulesSavedObjectServiceInternal);
+      .bind(InternalRulesClient)
+      .toConstantValue(mockInternalRulesClient as InternalRulesClient);
 
     container.load(new ContainerModule((options) => bindContract(options)));
   });
@@ -158,53 +136,12 @@ describe('bindContract', () => {
     expect(scope.get(Request)).toBe(fakeRequest);
   });
 
-  describe('getUnsafeInternalRulesClient', () => {
-    const findRulesIn = (namespaces: string[]) =>
-      findByIds.mockResolvedValue([
-        { id: 'rule-1', namespaces, attributes: createRuleSoAttributes() },
-      ]);
+  it('returns the singleton InternalRulesClient when getUnsafeInternalRulesClient is called', async () => {
+    const start = container.get(AlertingStartToken);
 
-    it('only exposes bulkDisableRules', async () => {
-      const start = container.get(AlertingStartToken);
+    const client = await start.getUnsafeInternalRulesClient();
 
-      const client = await start.getUnsafeInternalRulesClient();
-
-      expect(Object.keys(client)).toEqual(['bulkDisableRules']);
-    });
-
-    it("disables a rule through an internal-user rules SO client bound to the rule's space", async () => {
-      findRulesIn(['my-space']);
-      const internalClient = savedObjects.getUnsafeInternalClient();
-      const namespacedClient = savedObjects.getUnsafeInternalClient();
-      jest.mocked(internalClient.asScopedToNamespace).mockReturnValue(namespacedClient);
-      savedObjects.getUnsafeInternalClient.mockReturnValue(internalClient);
-      const start = container.get(AlertingStartToken);
-
-      const client = await start.getUnsafeInternalRulesClient();
-      await client.bulkDisableRules({ ids: ['rule-1'] });
-
-      expect(findByIds).toHaveBeenCalledWith(['rule-1'], { fields: expect.any(Array) });
-      expect(mockRulesClient.bulkDisableRules).toHaveBeenCalledWith({ ids: ['rule-1'] });
-      expect(savedObjects.getUnsafeInternalClient).toHaveBeenCalledWith({
-        includedHiddenTypes: ['alerting_rule'],
-      });
-      expect(internalClient.asScopedToNamespace).toHaveBeenCalledWith('my-space');
-      expect(scope.get(RuleSavedObjectsClientToken)).toBe(namespacedClient);
-      expect(scope.get(RequestSpaceIdToken)).toBe('my-space');
-      expect(isInternalUserRequest(scope.get(Request))).toBe(true);
-    });
-
-    it('uses the internal client as-is for rules in the default space', async () => {
-      findRulesIn(['default']);
-      const internalClient = savedObjects.getUnsafeInternalClient();
-      savedObjects.getUnsafeInternalClient.mockReturnValue(internalClient);
-      const start = container.get(AlertingStartToken);
-
-      const client = await start.getUnsafeInternalRulesClient();
-      await client.bulkDisableRules({ ids: ['rule-1'] });
-
-      expect(internalClient.asScopedToNamespace).not.toHaveBeenCalled();
-      expect(scope.get(RuleSavedObjectsClientToken)).toBe(internalClient);
-    });
+    expect(client).toBe(mockInternalRulesClient);
+    expect(fork).not.toHaveBeenCalled();
   });
 });

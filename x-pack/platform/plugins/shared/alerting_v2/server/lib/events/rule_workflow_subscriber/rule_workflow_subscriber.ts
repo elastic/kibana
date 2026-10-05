@@ -7,7 +7,7 @@
 
 import { inject, injectable } from 'inversify';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
-import { isInternalUserRequest } from '../../internal_user_request';
+import { isInternalUserRequest } from '../../internal_rules_client/internal_user_request';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
