@@ -281,7 +281,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, reserve
             })
           : i18n.translate('xpack.dataFederation.mappingEditor.fieldMappingsSubheading', {
               defaultMessage:
-                'Map at least one field, unmapped fields will not be inferred at query time, so nothing will be available to query until you add mappings.',
+                'Map at least one field to continue. Unmapped fields will not be available to query.',
             })}
       </EuiText>
       <EuiSpacer size="m" />

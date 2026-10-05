@@ -440,7 +440,7 @@ export const stateTransitionSchema = z
   .object({
     pending: stateTransitionPhaseSchema({
       countDescription:
-        'Consecutive matches required before the alert episode becomes `active`. Set to `0` to open it on the first match.',
+        'Consecutive matches the alert episode spends in `pending` before it becomes `active` on the next match. For example, `2` opens it on the third consecutive match. Set to `0` to open it on the first match.',
       timeframeDescription:
         'Duration the condition must hold, for example `5m`. Combine with `count` using `operator`.',
       metaId: 'alerting_rule_state_transition_pending',
@@ -449,7 +449,7 @@ export const stateTransitionSchema = z
       .describe('Delay before a match opens an alert episode.'),
     recovering: stateTransitionPhaseSchema({
       countDescription:
-        'Consecutive recoveries required before the alert episode becomes `inactive`. Set to `0` to close it on the first recovery.',
+        'Consecutive recoveries the alert episode spends in `recovering` before it becomes `inactive` on the next recovery. For example, `2` closes it on the third consecutive recovery. Set to `0` to close it on the first recovery.',
       timeframeDescription:
         'Duration the condition must hold, for example `5m`. Combine with `count` using `operator`.',
       metaId: 'alerting_rule_state_transition_recovering',
@@ -781,7 +781,7 @@ export const updateRuleDataSchema = z
       .max(MAX_FIELD_NAME_LENGTH)
       .optional()
       .describe(TIME_FIELD_UPDATE_DESCRIPTION),
-    schedule: scheduleSchema.partial().optional().nullable(),
+    schedule: scheduleSchema.partial().optional(),
     query: querySchema.optional(),
     recovery: recoverySchema.optional(),
     no_data: noDataSchema.optional(),
@@ -933,7 +933,7 @@ export type BulkCreateRuleItem = z.infer<typeof bulkCreateRuleItemSchema>;
  */
 export const bulkCreateRulesRequestSchema = z
   .object({
-    rules: z
+    items: z
       .array(bulkCreateRuleItemSchema)
       .min(1)
       .max(MAX_BULK_ITEMS)
@@ -942,12 +942,12 @@ export const bulkCreateRulesRequestSchema = z
   .strict()
   .refine(
     (data) => {
-      const ids = data.rules
+      const ids = data.items
         .map((rule) => rule.id)
         .filter((id): id is string => id != null && id.length > 0);
       return new Set(ids).size === ids.length;
     },
-    { message: 'Duplicate rule identifiers in the request.', path: ['rules'] }
+    { message: 'Duplicate rule identifiers in the request.', path: ['items'] }
   )
   .meta({ id: 'alerting_bulk_create_rules_request' });
 

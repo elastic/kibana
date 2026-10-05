@@ -83,7 +83,7 @@ const createMinimalSetupDeps = (alertzero?: {
     taskManager: {} as SecuritySolutionServerlessPluginSetupDeps['taskManager'],
     cloud: {} as SecuritySolutionServerlessPluginSetupDeps['cloud'],
     actions: {} as SecuritySolutionServerlessPluginSetupDeps['actions'],
-    alertzero,
+    alertzero: alertzero ? { ...alertzero, setServerlessTierAvailable: jest.fn() } : undefined,
   } as unknown as SecuritySolutionServerlessPluginSetupDeps);
 
 describe('SecuritySolutionServerlessPlugin', () => {

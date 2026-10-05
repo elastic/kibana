@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/291469
+issues:
+- https://github.com/elastic/kibana/issues/291275
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+title: Bridge local Windows user entities to Active Directory by SID
+description: Automated entity resolution now links local Windows and CrowdStrike endpoint user entities to the matching Active Directory user by SID. The CrowdStrike-namespace SID bridge and the Microsoft 365 UPN bridge are off by default.

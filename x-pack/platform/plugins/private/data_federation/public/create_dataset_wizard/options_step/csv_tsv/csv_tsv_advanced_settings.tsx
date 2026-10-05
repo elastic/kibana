@@ -22,6 +22,7 @@ import {
   type DatasetFormatFormValue,
 } from '../../create_dataset_form_state';
 import { FormRowLabelWithInfo } from '../../components/form_row_label_with_info';
+import { useComboBoxSelectionValidity } from '../../components/combo_box_selection_validity';
 import { TrimSpaces } from './fields/trim_spaces';
 
 export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
@@ -46,7 +47,11 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
     },
   });
   const { field: columnPrefixField } = useController({ name: 'settings.column_prefix', control });
-  const { field: trimSpacesField } = useController({ name: 'settings.trim_spaces', control });
+  const {
+    field: trimSpacesField,
+    fieldState: trimSpacesState,
+    onChange: onTrimSpacesChange,
+  } = useComboBoxSelectionValidity({ name: 'settings.trim_spaces', flag: 'trimSpacesIsValid' });
 
   return (
     <div data-test-subj="createDatasetCsvTsvAdvancedSettings">
@@ -59,7 +64,7 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
                 id="xpack.dataFederation.createDatasetWizard.additionalSettings.quoteCharacter.descriptionTextWithNone"
                 defaultMessage="Character that surrounds field values. Enter {none} to turn off quoting. Overrides {quoteMode} in {commonSettings}."
                 values={{
-                  none: <EuiCode>{CSV_CHARACTER_NONE}</EuiCode>,
+                  none: `'${CSV_CHARACTER_NONE}'`,
                   quoteMode: <strong>{createDatasetWizardStrings.settingsModeLabel}</strong>,
                   commonSettings: (
                     <strong>{createDatasetWizardStrings.commonSettingsReference}</strong>
@@ -109,7 +114,7 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
                 id="xpack.dataFederation.createDatasetWizard.additionalSettings.escapeCharacter.descriptionTextWithNone"
                 defaultMessage="Character used to escape special characters. Enter {none} to turn off escaping. Overrides {quoteMode} in {commonSettings}."
                 values={{
-                  none: <EuiCode>{CSV_CHARACTER_NONE}</EuiCode>,
+                  none: `'${CSV_CHARACTER_NONE}'`,
                   quoteMode: <strong>{createDatasetWizardStrings.settingsModeLabel}</strong>,
                   commonSettings: (
                     <strong>{createDatasetWizardStrings.commonSettingsReference}</strong>
@@ -191,11 +196,14 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
           />
         }
         fullWidth
+        isInvalid={Boolean(trimSpacesState.error)}
+        error={trimSpacesState.error?.message}
       >
         <TrimSpaces
           value={trimSpacesField.value}
-          onChange={(next) => trimSpacesField.onChange(next)}
+          onChange={onTrimSpacesChange}
           onBlur={trimSpacesField.onBlur}
+          isInvalid={Boolean(trimSpacesState.error)}
         />
       </EuiFormRow>
     </div>
