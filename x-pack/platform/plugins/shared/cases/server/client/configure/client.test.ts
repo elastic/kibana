@@ -1157,6 +1157,89 @@ describe('client', () => {
             },
           });
         });
+
+        describe('when the request omits templates', () => {
+          const storedTemplate = {
+            key: 'template_1',
+            name: 'template 1',
+            description: 'this is test description',
+            caseFields: {
+              customFields: [
+                {
+                  key: 'custom_field_key_1',
+                  type: CustomFieldTypes.TEXT,
+                  value: 'custom field value 1',
+                },
+              ],
+            },
+          };
+
+          beforeEach(() => {
+            clientArgs.services.caseConfigureService.get.mockResolvedValue({
+              attributes: {
+                connector: {
+                  id: 'none',
+                  name: 'none',
+                  type: ConnectorTypes.none,
+                  fields: null,
+                },
+                customFields: [
+                  {
+                    key: 'custom_field_key_1',
+                    label: 'text label',
+                    type: CustomFieldTypes.TEXT,
+                    required: false,
+                  },
+                ],
+                templates: [storedTemplate],
+                closure_type: 'close-by-user',
+                owner: 'cases',
+                extractObservables: true,
+              },
+              id: 'test-id',
+              version: 'test-version',
+            } as never);
+          });
+
+          it('does not overwrite the stored templates when customFields are omitted too', async () => {
+            await update(
+              'test-id',
+              { version: 'test-version', workflowTags: ['tag-1'] },
+              clientArgs,
+              casesClientInternal
+            );
+
+            expect(clientArgs.services.caseConfigureService.patch).toHaveBeenCalledWith(
+              expect.objectContaining({
+                updatedAttributes: {
+                  workflowTags: ['tag-1'],
+                  updated_at: expect.anything(),
+                  updated_by: expect.anything(),
+                },
+              })
+            );
+          });
+
+          it('removes deleted custom fields from the stored templates', async () => {
+            await update(
+              'test-id',
+              { version: 'test-version', customFields: [] },
+              clientArgs,
+              casesClientInternal
+            );
+
+            expect(clientArgs.services.caseConfigureService.patch).toHaveBeenCalledWith(
+              expect.objectContaining({
+                updatedAttributes: {
+                  customFields: [],
+                  templates: [{ ...storedTemplate, caseFields: { customFields: [] } }],
+                  updated_at: expect.anything(),
+                  updated_by: expect.anything(),
+                },
+              })
+            );
+          });
+        });
       });
 
       describe('assignees', () => {

@@ -184,6 +184,34 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(persisted.workflowTags).to.eql(['soc-triage']);
     });
 
+    it('should preserve templates when patching only workflowTags', async () => {
+      const templates = [
+        {
+          key: 'test_template_1',
+          name: 'First test template',
+          description: 'This is a first test template',
+          tags: ['foo'],
+          caseFields: { title: 'Case from template', tags: ['sample'] },
+        },
+      ];
+
+      const configuration = await createConfiguration(
+        supertest,
+        getConfigurationRequest({
+          overrides: { templates: templates as ConfigurationPatchRequest['templates'] },
+        })
+      );
+
+      await updateConfiguration(supertest, configuration.id, {
+        version: configuration.version,
+        workflowTags: ['soc-triage'],
+      });
+
+      const [persisted] = await getConfiguration({ supertest });
+      expect(persisted.workflowTags).to.eql(['soc-triage']);
+      expect(persisted.templates).to.eql(configuration.templates);
+    });
+
     it('should clear workflowTags when patched with an empty array', async () => {
       const configuration = await createConfiguration(
         supertest,
