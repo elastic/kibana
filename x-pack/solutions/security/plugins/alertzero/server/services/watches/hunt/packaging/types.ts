@@ -72,8 +72,14 @@ export interface CurrentRunState {
   titles: string[];
   /** Short evidence lines for the closure summary. */
   evidenceLines: string[];
-  /** Technique ids from current-run SKIs (`type: technique`). */
+  /** Technique ids from current-run SKIs (`type: technique`), proposed or corroborated. */
   techniques: string[];
+  /**
+   * Subset of `techniques` this run actually corroborated (the SSE entry naming it carried
+   * `corroborated_technique_id`), as opposed to one merely named on the report-scoped
+   * fallback entry's indicator list. Only this subset may claim a confirmed hit.
+   */
+  corroboratedTechniques: string[];
   hosts: CurrentRunHost[];
   /**
    * Process selectors already rehydrated from current-run alerts/events.

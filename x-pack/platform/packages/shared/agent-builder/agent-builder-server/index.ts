@@ -69,6 +69,7 @@ export type {
 export {
   getToolResultId,
   createErrorResult,
+  createNonInteractiveDeclinedResult,
   createOtherResult,
   isToolResultId,
   isToolHandlerStandardReturn,
@@ -87,6 +88,8 @@ export type {
   AgentEventEmitterFn,
   RunAgentOnEventFn,
   ExperimentalFeatures,
+  DeploymentContext,
+  DeploymentEnvironment,
   SubAgentExecutor,
   SubAgentExecution,
   ConversationClient,
