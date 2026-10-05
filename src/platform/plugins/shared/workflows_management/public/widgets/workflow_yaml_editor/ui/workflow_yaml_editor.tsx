@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { css } from '@emotion/react';
 import classnames from 'classnames';
 import throttle from 'lodash/throttle';
@@ -178,6 +178,11 @@ export interface WorkflowYAMLEditorProps {
    * control bar (e.g. WorkflowDetailBottomBar) already owns those buttons.
    */
   hideEditorTools?: boolean;
+  /**
+   * Reports the height (px) of the validation panel docked below the editor, so an overlay
+   * floating over the editor (e.g. WorkflowDetailBottomBar) can sit above it.
+   */
+  onValidationPanelHeightChange?: (height: number) => void;
 }
 
 export const WorkflowYAMLEditor = ({
@@ -188,6 +193,7 @@ export const WorkflowYAMLEditor = ({
   openActionsRef,
   onToggleEditorMode,
   hideEditorTools = false,
+  onValidationPanelHeightChange,
 }: WorkflowYAMLEditorProps) => {
   const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
     WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
@@ -272,6 +278,12 @@ export const WorkflowYAMLEditor = ({
   const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
   const focusedStepInfoRef = useRef<StepInfo | undefined>(focusedStepInfo);
   focusedStepInfoRef.current = focusedStepInfo;
+  const [validationPanel, setValidationPanel] = useState<HTMLDivElement | null>(null);
+  const { height: validationPanelHeight } = useResizeObserver(validationPanel);
+  useEffect(() => {
+    onValidationPanelHeightChange?.(validationPanel ? validationPanelHeight : 0);
+  }, [onValidationPanelHeightChange, validationPanel, validationPanelHeight]);
+
   const [insertedStepRange, setInsertedStepRange] = useState<StepLineRange | null>(null);
 
   const highlightedStepId = useSelector(selectHighlightedStepId);
@@ -953,7 +965,7 @@ export const WorkflowYAMLEditor = ({
         </div>
       </div>
       {isActive && (
-        <div css={styles.validationErrorsContainer}>
+        <div css={styles.validationErrorsContainer} ref={setValidationPanel}>
           <WorkflowYamlValidationAccordion
             isMounted={isEditorMounted}
             isLoading={isLoadingValidation}

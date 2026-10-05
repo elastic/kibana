@@ -71,6 +71,7 @@ const WorkflowYAMLEditorMock = ({
   onStepRun,
   editorRef,
   onToggleEditorMode,
+  onValidationPanelHeightChange,
 }: any) => {
   if (editorRef) {
     editorRef.current = { getPosition: () => ({ lineNumber: 4 }) };
@@ -84,6 +85,13 @@ const WorkflowYAMLEditorMock = ({
         onClick={() => onToggleEditorMode?.()}
       >
         {'Toggle Editor Mode'}
+      </button>
+      <button
+        type="button"
+        data-test-subj="report-validation-panel-height"
+        onClick={() => onValidationPanelHeightChange?.(48)}
+      >
+        {'Report validation panel height'}
       </button>
       <button
         type="button"
@@ -539,6 +547,32 @@ describe('WorkflowDetailEditor', () => {
 
       expect(mockMutateAsync).not.toHaveBeenCalled();
       expect(store?.getState().detail.testStepModalOpenStepId).toBeUndefined();
+    });
+  });
+
+  describe('bottom bar placement', () => {
+    const getBottomBarOffset = (getByTestId: (id: string) => HTMLElement) =>
+      getComputedStyle(getByTestId('workflowDetailBottomBar')).bottom;
+
+    it('floats above the validation panel docked under the YAML editor', () => {
+      const { getByTestId } = renderEditor();
+      expect(getBottomBarOffset(getByTestId)).toBe('12px');
+
+      fireEvent.click(getByTestId('report-validation-panel-height'));
+
+      expect(getBottomBarOffset(getByTestId)).toBe('60px');
+    });
+
+    it('ignores the validation panel height in graph view', () => {
+      mockUseWorkflowUrlState.mockReturnValue({
+        ...mockUseWorkflowUrlState(),
+        editorView: 'graph',
+      });
+      const { getByTestId } = renderEditor();
+
+      fireEvent.click(getByTestId('report-validation-panel-height'));
+
+      expect(getBottomBarOffset(getByTestId)).toBe('12px');
     });
   });
 

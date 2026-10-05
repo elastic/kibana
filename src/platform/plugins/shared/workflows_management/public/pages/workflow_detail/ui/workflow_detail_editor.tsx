@@ -349,6 +349,8 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
   // Keep the graph mounted for a moment after switching to YAML so the
   // cross-fade animation can play out before unmounting it.
   const [renderGraph, setRenderGraph] = useState(showGraph);
+  // The floating bottom bar would otherwise cover the validation panel docked under the YAML editor.
+  const [validationPanelHeight, setValidationPanelHeight] = useState(0);
   useEffect(() => {
     if (showGraph) {
       setRenderGraph(true);
@@ -381,6 +383,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
                 editorRef={editorRef}
                 isActive={!showGraph}
                 hideEditorTools
+                onValidationPanelHeightChange={setValidationPanelHeight}
                 openActionsRef={openActionsRef}
                 onToggleEditorMode={() => handleEditorViewChange(showGraph ? 'yaml' : 'graph')}
               />
@@ -420,6 +423,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
             testWorkflowButton={testWorkflowButton}
             testWorkflowButtonCompact={testWorkflowButtonCompact}
             disableAutoCollapse={!hideControlsMenu}
+            bottomOffset={showGraph ? 0 : validationPanelHeight}
           />
         </EuiFlexItem>
         {isExecutionGraphEnabled && (
