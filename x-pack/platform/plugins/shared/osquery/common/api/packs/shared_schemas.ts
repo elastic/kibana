@@ -8,6 +8,7 @@
 import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
 import { NonEmptyString } from '../model/non_empty_string';
+import { OSQUERY_VERSION_REGEX } from '../../utils/osquery_version';
 
 // String-length cap on string fields. Defense at the API edge against
 // blob-sized payloads (RRULE, splay, dates) — SO `unknowns: 'allow'` would
@@ -65,12 +66,41 @@ export const resultTypeRt = t.union([
 export const MIN_OSQUERY_VERSION_MAX_LENGTH = 64;
 export const PLATFORM_MAX_LENGTH = 256;
 
+// Accepts "" (no constraint) or a numeric version string matching the osquery
+// versionAtLeast format. Non-numeric values like "latest" or "5.x" silently
+// disable queries on the agent, so we reject them at the API edge.
+export const osqueryVersionString = new t.Type<string, string, unknown>(
+  'OsqueryVersionString',
+  (u): u is string => typeof u === 'string',
+  (u, c) => {
+    if (typeof u !== 'string') return t.failure(u, c, 'expected string');
+    if (u.length > MIN_OSQUERY_VERSION_MAX_LENGTH)
+      return t.failure(u, c, `string must not exceed ${MIN_OSQUERY_VERSION_MAX_LENGTH} characters`);
+    if (u !== '' && !OSQUERY_VERSION_REGEX.test(u)) {
+      // Drop io-ts intersection/union branch indices so the path reads `queries.q1.version`.
+      const path = c
+        .map(({ key }) => key)
+        .filter((key) => key && !/^\d+$/.test(key))
+        .join('.');
+
+      return t.failure(
+        u,
+        c,
+        `${path}: "${u}" must be empty or a numeric version string (e.g. "5.19.0")`
+      );
+    }
+
+    return t.success(u);
+  },
+  t.identity
+);
+
 const basePackQueryFields = {
   interval: toNumberRt,
   snapshot: t.boolean,
   removed: t.boolean,
   platform: t.string,
-  version: t.string,
+  version: osqueryVersionString,
   ecs_mapping: t.record(
     t.string,
     t.type({

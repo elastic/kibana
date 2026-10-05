@@ -7,12 +7,13 @@
 
 import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
+import { NonEmptyString } from '../model/non_empty_string';
 import {
   packQueryRecordPartialRt,
   resultTypeRt,
   rruleScheduleConfigPartialRt,
   nonEmptyBoundedString,
-  MIN_OSQUERY_VERSION_MAX_LENGTH,
+  osqueryVersionString,
   PLATFORM_MAX_LENGTH,
 } from './shared_schemas';
 
@@ -27,7 +28,7 @@ export const updatePacksRequestBodySchema = t.partial({
   interval: t.union([toNumberRt, t.null]),
   rrule_schedule: t.union([rruleScheduleConfigPartialRt, t.null]),
   // V5: pack-level execution defaults (nullable to allow explicit clear)
-  min_osquery_version: t.union([nonEmptyBoundedString(MIN_OSQUERY_VERSION_MAX_LENGTH), t.null]),
+  min_osquery_version: t.union([t.intersection([NonEmptyString, osqueryVersionString]), t.null]),
   result_type: t.union([resultTypeRt, t.null]),
   platform: t.union([nonEmptyBoundedString(PLATFORM_MAX_LENGTH), t.null]),
 });

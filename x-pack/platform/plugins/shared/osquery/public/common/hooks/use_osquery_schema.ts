@@ -60,10 +60,13 @@ export const useOsquerySchema = () => {
     [query.data?.version]
   );
 
+  const pkgVersion = useMemo(() => query.data?.pkgVersion, [query.data?.pkgVersion]);
+
   return {
     data,
     isLoading: query.isLoading,
     isError: query.isError,
     osqueryVersion,
+    pkgVersion,
   };
 };

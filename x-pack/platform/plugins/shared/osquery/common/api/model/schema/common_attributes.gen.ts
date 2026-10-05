@@ -424,9 +424,15 @@ export const ResultTypeOrUndefined = lazySchema(() => ResultType.nullable());
 export type ResultTypeOrUndefined = z.infer<typeof ResultTypeOrUndefined>;
 
 /**
- * Minimum osquery version required to run this pack or query. Formatted as a semver string, e.g. `"5.10.0"`.
+ * Minimum osquery version required to run this pack or query. Formatted as a numeric version string, e.g. `"5.10.0"`. Non-numeric values (e.g. `"latest"`) are rejected.
  */
-export const MinOsqueryVersion = lazySchema(() => z.string().min(1).max(64));
+export const MinOsqueryVersion = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(64)
+    .regex(/^\d+(\.\d+){0,2}$/)
+);
 export type MinOsqueryVersion = z.infer<typeof MinOsqueryVersion>;
 
 export const MinOsqueryVersionOrUndefined = lazySchema(() => MinOsqueryVersion.nullable());

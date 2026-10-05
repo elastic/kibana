@@ -423,10 +423,11 @@ components:
       nullable: true
 
     MinOsqueryVersion:
-      description: 'Minimum osquery version required to run this pack or query. Formatted as a semver string, e.g. `"5.10.0"`.'
+      description: 'Minimum osquery version required to run this pack or query. Formatted as a numeric version string, e.g. `"5.10.0"`. Non-numeric values (e.g. `"latest"`) are rejected.'
       type: string
       minLength: 1
       maxLength: 64
+      pattern: '^\d+(\.\d+){0,2}$'
       example: '5.10.0'
 
     MinOsqueryVersionOrUndefined:

@@ -88,6 +88,22 @@ jest.mock('../use_update_pack', () => ({
   }),
 }));
 
+// Mock the version options hook so tests don't need a live schema endpoint.
+const MOCK_PACK_VERSION_OPTIONS = [
+  { label: '5.23.1' },
+  { label: '5.23.0' },
+  { label: '5.0.1' },
+  { label: '5.0.0' },
+];
+jest.mock('../queries/use_osquery_version_options', () => ({
+  useOsqueryVersionOptions: () => ({
+    options: MOCK_PACK_VERSION_OPTIONS,
+    osqueryVersion: '5.23.1',
+    pkgVersion: undefined,
+    helpText: 'osquery agent version, not the integration version. Detected: 5.23.1',
+  }),
+}));
+
 const renderWithContext = (Element: React.ReactElement) =>
   render(
     <EuiProvider>
@@ -1338,6 +1354,36 @@ describe('PackForm', () => {
       } finally {
         getItemSpy.mockRestore();
       }
+    });
+
+    it('version picker shows options from the mocked schema version (5.23.1 at top)', async () => {
+      const { getByTestId } = renderWithContext(<PackForm editMode={false} />);
+
+      fireEvent.click(within(getByTestId('pack-version-field')).getByTestId('comboBoxSearchInput'));
+
+      // First option is the live version from the mock
+      const list = getByTestId('comboBoxOptionsList pack-version-field-optionsList');
+      expect(within(list).getByText('5.23.1')).toBeInTheDocument();
+    });
+
+    it('typing an invalid version in pack version field shows an error', async () => {
+      const { getByTestId, getByText } = renderWithContext(<PackForm editMode={false} />);
+
+      const comboBox = within(getByTestId('pack-version-field')).getByTestId('comboBoxSearchInput');
+      fireEvent.change(comboBox, { target: { value: 'latest' } });
+      fireEvent.keyDown(comboBox, { key: 'Enter', code: 'Enter' });
+
+      await waitFor(() => {
+        expect(getByText(/Version must be a numeric string/)).toBeInTheDocument();
+      });
+    });
+
+    it('shows help text with detected osquery version', () => {
+      const { getByText } = renderWithContext(<PackForm editMode={false} />);
+
+      expect(
+        getByText('osquery agent version, not the integration version. Detected: 5.23.1')
+      ).toBeInTheDocument();
     });
   });
 });
