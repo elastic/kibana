@@ -413,9 +413,7 @@ export class AlertZeroPublicPlugin
             renderAssignees,
             renderStatus: canManageInvestigations ? renderStatus : undefined,
             renderCloseInvestigationModal,
-            // In the chat the flyout sits over the chat's own URL, which already names the
-            // conversation, so that is the link to share.
-            onCopyLink: () => copyLink(core.notifications.toasts, window.location.href),
+            onCopyLink: (url) => copyLink(core.notifications.toasts, url),
             renderEscalationModal: canManageEscalations
               ? (props) =>
                   React.createElement(

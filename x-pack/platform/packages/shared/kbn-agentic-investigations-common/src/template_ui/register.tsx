@@ -79,11 +79,11 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    */
   renderCloseInvestigationModal?: import('./slots').FooterSlotProps['onCloseInvestigation'];
   /**
-   * Called by the in-chat flyout's "Copy link" button. Supplied by the caller, which decides
-   * what to copy. Returns whether it was copied: the button's tooltip confirms success, so the
+   * Called by the in-chat flyout's "Copy link" button with the conversation's Agent Builder URL,
+   * which Agent Builder builds. Supplied by the caller, which does the copying. Returns whether it was copied: the button's tooltip confirms success, so the
    * caller only reports a failure.
    */
-  onCopyLink: () => boolean;
+  onCopyLink: (url: string) => boolean;
 }
 
 /**
@@ -124,12 +124,22 @@ export const registerAgenticInvestigationTemplateUI = ({
 
   conversationTemplates.registerTemplateUIDefinition(
     templateId,
-    ({ openFullscreenConversation }) => ({
+    ({ openFullscreenConversation, getConversationUrl }) => ({
       name,
       icon,
       tabs: [overviewTabId],
       detailsFlyout: {
-        trailingActions: () => [getCopyLinkFlyoutAction(onCopyLink)],
+        trailingActions: ({ conversation }) => [
+          getCopyLinkFlyoutAction(() =>
+            onCopyLink(
+              getConversationUrl({
+                conversationId: conversation.id,
+                agentId: conversation.agent_id,
+                openDetails: true,
+              })
+            )
+          ),
+        ],
         header: function InvestigationFlyoutHeader({ conversation, refetchConversation }) {
           return (
             // Agent Builder points the flyout's `aria-labelledby` at the header, so it must not

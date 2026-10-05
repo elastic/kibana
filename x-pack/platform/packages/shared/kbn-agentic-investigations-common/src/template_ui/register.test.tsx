@@ -55,10 +55,15 @@ const createFakeService = () => {
   const tabs = new Map<string, ConversationTemplateTabDefinition>();
   const templates = new Map<string, ConversationTemplateUIDefinition>();
   const openFullscreenConversation = jest.fn();
+  const getConversationUrl = jest.fn(
+    ({ conversationId, agentId }: { conversationId: string; agentId: string }) =>
+      `http://localhost/app/agent_builder/agents/${agentId}/conversations/${conversationId}?openConversationDetails=true`
+  );
   const context: ConversationTemplateUIContext = {
     attachmentsService,
     openSidebarConversation: jest.fn(),
     openFullscreenConversation,
+    getConversationUrl,
   };
 
   const contract: ConversationTemplateServiceStartContract = {
@@ -182,7 +187,9 @@ describe('registerAgenticInvestigationTemplateUI', () => {
 
     expect(action).toMatchObject({ iconType: 'link', 'aria-label': 'Copy link' });
     action.onClick?.({} as never);
-    expect(onCopyLink).toHaveBeenCalledTimes(1);
+    expect(onCopyLink).toHaveBeenCalledWith(
+      'http://localhost/app/agent_builder/agents/agent/conversations/conversation-1?openConversationDetails=true'
+    );
   });
 
   it('gives each solution its own tab ids, so a second one does not collide', () => {
