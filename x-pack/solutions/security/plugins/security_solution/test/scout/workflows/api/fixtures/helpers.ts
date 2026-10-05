@@ -101,7 +101,7 @@ export const waitForExecution = async (
 
 /**
  * Waits for the run an event-driven workflow started for the rule with this id: a workflow can run
- * for other rules created in the meantime, so a run is matched by the id it recorded.
+ * for other rules created in the meantime, so a run is matched by the ids in the event that started it.
  */
 export const waitForExecutionForRule = async (
   apiClient: ApiClient,
@@ -120,7 +120,8 @@ export const waitForExecutionForRule = async (
     const { results } = list.body as { results: Array<{ id: string }> };
     for (const { id } of results) {
       const execution = await waitForExecution(apiClient, headers, id, timeoutMs);
-      if (JSON.stringify(execution.stepExecutions).includes(ruleId)) {
+      const { ids } = (execution.context?.event ?? {}) as { ids?: string[] };
+      if (ids?.includes(ruleId)) {
         return execution;
       }
     }
