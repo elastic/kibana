@@ -14,6 +14,7 @@ import type {
 } from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry, DataFormat, DeploymentMethod } from './aws_service_matrix';
+import { applyDeploymentMethodView } from './aws_service_matrix';
 import { useAwsServiceMatrix } from './use_aws_service_matrix';
 import { useDefaultDataFormat } from './use_default_data_format';
 import { getOnboardingSessionKey } from './onboarding_session_storage';
@@ -92,6 +93,10 @@ interface PersistedAuthenticateAndDeployStep {
   authMethod?: CloudOnboardingDeploymentAuthMethod;
   accessKeyId?: string;
   deploymentMethod?: DeploymentMethod;
+  // Deployment method the user had selected when they last continued from Step 2. Lives here (not
+  // in the service-settings session key) because this provider stays mounted: react-use's
+  // useSessionStorage persists in an effect, which is lost when Step 2 unmounts on navigation.
+  serviceSettingsMethod?: DeploymentMethod;
   // Agent-based deploy fields — persisted so Back/Next round trips preserve state.
   // Note: agentPolicyId presence doubles as the durable "deploy succeeded" flag (no separate bool).
   agentHostsMode?: 'new' | 'existing';
@@ -159,6 +164,9 @@ interface OnboardingFlowState {
   agentBasedDeployment: AgentBasedDeploymentState;
   deploymentMethod: DeploymentMethod;
   setDeploymentMethod: (method: DeploymentMethod) => void;
+  /** Method Step 2's settings were last confirmed under; undefined until Step 2 is continued. */
+  serviceSettingsMethod: DeploymentMethod | undefined;
+  setServiceSettingsMethod: (method: DeploymentMethod) => void;
   servicesStep: ServicesStepState;
   setSelectedServiceIds: (ids: string[]) => void;
   setDataFormat: (format: DataFormat) => void;
@@ -459,10 +467,21 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
   );
 
   const {
-    matrix: awsServiceMatrix,
+    matrix: rawAwsServiceMatrix,
     isError: awsServiceMatrixError,
     refetch: refetchAwsServiceMatrix,
   } = useAwsServiceMatrix();
+
+  const deploymentMethod: DeploymentMethod =
+    persistedAuthenticateAndDeployStep?.deploymentMethod ?? DEFAULT_DEPLOYMENT_METHOD;
+
+  // Service settings depend on the selected deployment method: ECF needs only the trigger ARN,
+  // agent-based needs the package's own vars. Every step reads the matrix through the context, so
+  // applying the method view here keeps Step 2, the Step 3 gates and the deploy builders consistent.
+  const awsServiceMatrix = useMemo(
+    () => rawAwsServiceMatrix?.map((s) => applyDeploymentMethodView(s, deploymentMethod)),
+    [rawAwsServiceMatrix, deploymentMethod]
+  );
   const awsServicesMap = useMemo(
     () => (awsServiceMatrix ? new Map(awsServiceMatrix.map((s) => [s.id, s])) : undefined),
     [awsServiceMatrix]
@@ -489,9 +508,6 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     () => ({ selectedServiceIds, dataFormat }),
     [selectedServiceIds, dataFormat]
   );
-
-  const deploymentMethod: DeploymentMethod =
-    persistedAuthenticateAndDeployStep?.deploymentMethod ?? DEFAULT_DEPLOYMENT_METHOD;
 
   const setDeploymentMethod = useCallback(
     (method: DeploymentMethod) => {
@@ -527,6 +543,15 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
       });
     },
     [setPersistedAuthenticateAndDeployStep, setDetectAndReviewStep]
+  );
+
+  const setServiceSettingsMethod = useCallback(
+    (method: DeploymentMethod) => {
+      const next = { ...persistedAuthStepRef.current, serviceSettingsMethod: method };
+      persistedAuthStepRef.current = next;
+      setPersistedAuthenticateAndDeployStep(next);
+    },
+    [setPersistedAuthenticateAndDeployStep]
   );
 
   const authenticateAndDeployStep: AuthenticateAndDeployStepState = {
@@ -569,6 +594,8 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         agentBasedDeployment,
         deploymentMethod,
         setDeploymentMethod,
+        serviceSettingsMethod: persistedAuthenticateAndDeployStep?.serviceSettingsMethod,
+        setServiceSettingsMethod,
         servicesStep,
         setSelectedServiceIds,
         setDataFormat,
