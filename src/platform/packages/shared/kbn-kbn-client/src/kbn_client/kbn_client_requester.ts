@@ -128,7 +128,7 @@ const FETCH_CONNECT_TIMEOUT_MS = 60_000;
 // calls on local Scout stacks can run well past that, dying at the transport
 // before any application-level budget applies. Give plain-http requests the
 // same generous budget we already allow for the https path's connect timeout.
-const PLAIN_HTTP_TIMEOUT_MS = 900_000; // 15m: self-hosted LLM converse calls on local
+const PLAIN_HTTP_TIMEOUT_MS = 900_000;
 
 export class KbnClientRequester {
   // `url` retains any `user:pass@` from the original config - `resolveUrl()` is
