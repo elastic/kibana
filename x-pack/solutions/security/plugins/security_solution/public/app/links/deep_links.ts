@@ -6,7 +6,7 @@
  */
 
 import type { Subject, Subscription } from 'rxjs';
-import { combineLatestWith, debounceTime } from 'rxjs';
+import { combineLatestWith, debounceTime, filter } from 'rxjs';
 import type { AppDeepLink, AppUpdater, AppDeepLinkLocations } from '@kbn/core/public';
 import type { SecurityPageName } from '@kbn/deeplinks-security';
 import type {
@@ -154,7 +154,14 @@ export const registerDeepLinksUpdater = (
 ): Subscription => {
   return navigationTree$
     .pipe(
-      combineLatestWith(applicationLinksUpdater.links$, applicationLinksUpdater.normalizedLinks$),
+      combineLatestWith(
+        applicationLinksUpdater.links$,
+        applicationLinksUpdater.normalizedLinks$,
+        applicationLinksUpdater.initialized$
+      ),
+      // The links observables start with empty placeholder values, registering deepLinks from
+      // them would publish an empty set that consumers cannot tell apart from the real one.
+      filter(([, , , initialized]) => initialized),
       debounceTime(100) // Debounce to avoid too many updates
     )
     .subscribe(([navigationTree, appLinks, normalizedLinks]) => {
