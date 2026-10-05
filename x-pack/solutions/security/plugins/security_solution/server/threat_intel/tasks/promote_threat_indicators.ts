@@ -122,9 +122,16 @@ interface ReportHit {
     content?: { title?: string };
     severity?: { level?: string };
     extracted?: {
-      iocs?: Array<{ type?: string; value?: string; reference?: string; tier?: string }>;
+      iocs?: Array<{
+        type?: string;
+        value?: string;
+        reference?: string;
+        tier?: string;
+        deferred_unreviewed?: boolean;
+      }>;
+      gate?: { is_intelligence?: boolean };
     };
-    lineage?: { extracted_at?: string };
+    lineage?: { extracted_at?: string; extraction_method?: string };
   };
 }
 
@@ -373,9 +380,20 @@ const ecsIndicatorPayload = (type: IocType, rawValue: string): Record<string, un
   return { type: 'file', file: { hash: { [hashField]: rawValue.toLowerCase() } } };
 };
 
+/**
+ * A rejected report (relevance gate said no, or the workflow marked it rejected
+ * outright) never reaches semantic review, so any tier on its IOCs is a heuristic
+ * guess. Skipping the whole report keeps a partially-enriched-then-rejected report
+ * from promoting anything new; it does not retract citations promoted before the
+ * rejection (tracked separately, see the retraction follow-up).
+ */
+const isRejectedReport = (report: ReportHit): boolean =>
+  report._source?.extracted?.gate?.is_intelligence === false ||
+  report._source?.lineage?.extraction_method === 'workflow_v4_rejected';
+
 const buildBulkOps = (reports: ReportHit[], now: string): IocIndicatorOp[] => {
   const ops: IocIndicatorOp[] = [];
-  for (const report of reports) {
+  for (const report of reports.filter((entry) => !isRejectedReport(entry))) {
     const reportId = report._id;
     // Reports carry space_id (seeded/global rows use GLOBAL_SPACE_ID). It scopes
     // the indicator _id below so a value cited in two spaces never collapses into
@@ -388,17 +406,20 @@ const buildBulkOps = (reports: ReportHit[], now: string): IocIndicatorOp[] => {
     const trailLabel = report._source?.content?.title ?? null;
     const firstSeen = report._source?.lineage?.extracted_at ?? now;
 
-    // Two filters. The type/value check is defensive on the indexer boundary so
+    // Three filters. The type/value check is defensive on the indexer boundary so
     // a single malformed row never poisons the bulk write. The tier check is the
     // vetting gate: only IOCs the extractor did not already classify as noise
-    // become live Indicator Match rows.
+    // become live Indicator Match rows. `deferred_unreviewed` means semantic
+    // review never ran on this IOC (batch/overflow budget) — its tier is a kept
+    // heuristic, not a verdict, so it stays out until a later run reviews it.
     const usableIocs = iocs.filter(
       (ioc): ioc is typeof ioc & { type: IocType; value: string; tier: string } =>
         typeof ioc.value === 'string' &&
         ioc.value.length > 0 &&
         isIocType(ioc.type) &&
         isWellFormedForType(ioc.type, ioc.value) &&
-        isPromotableTier(ioc.tier)
+        isPromotableTier(ioc.tier) &&
+        ioc.deferred_unreviewed !== true
     );
     for (const ioc of usableIocs) {
       const id = indicatorId(spaceId, ioc.type, ioc.value);
@@ -664,7 +685,9 @@ export const registerPromoteThreatIndicatorsTask = ({
                       'content.title',
                       'severity.level',
                       'extracted.iocs',
+                      'extracted.gate.is_intelligence',
                       'lineage.extracted_at',
+                      'lineage.extraction_method',
                     ],
                     query: {
                       bool: {

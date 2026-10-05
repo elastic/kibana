@@ -17,12 +17,17 @@ project:
   owner: '@elastic/security-solution'
   sourceRoot: x-pack/solutions/security/plugins/alertzero
 dependsOn:
+  - '@kbn/security-plugin-types-server'
+  - '@kbn/security-plugin'
   - '@kbn/agentic-investigations-common'
   - '@kbn/core'
   - '@kbn/config-schema'
   - '@kbn/datemath'
   - '@kbn/logging'
   - '@kbn/features-plugin'
+  - '@kbn/licensing-plugin'
+  - '@kbn/licensing-types'
+  - '@kbn/cloud-plugin'
   - '@kbn/kibana-react-plugin'
   - '@kbn/alertzero-common'
   - '@kbn/agentic-investigations-plugin'
@@ -70,10 +75,12 @@ dependsOn:
   - '@kbn/security-mitre-attack-server'
   - '@kbn/security-mitre-attack-common'
   - '@kbn/inference-plugin'
+  - '@kbn/fleet-plugin'
   - '@kbn/management-settings-ids'
-  - '@kbn/ui-callout'
+  - '@kbn/proposals-ui'
   - '@kbn/core-chrome-browser-context-mocks'
   - '@kbn/core-chrome-browser-mocks'
+  - '@kbn/context-engine-plugin'
 tags:
   - plugin
   - prod

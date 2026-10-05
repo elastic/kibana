@@ -45,13 +45,12 @@ const TIME_RANGE = {
 
 const baseEvent: SignificantEvent = {
   '@timestamp': '2026-06-11T15:03:00.000Z',
-  event_uuid: 'evt-1',
   event_id: 'checkout-outage',
-  status: 'open',
+  status: 'active',
   stream_names: ['logs.checkout'],
   title: 'Checkout outage',
   summary: 'Payment processing is failing.',
-  severity: '60-high',
+  severity: 'high',
   confidence: 0.9,
   signals: [],
   causal_features: [],

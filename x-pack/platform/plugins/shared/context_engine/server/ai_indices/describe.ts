@@ -60,9 +60,9 @@ const tagCountsSection = (counts: AiIndexTagCount[]): string[] =>
     counts.map(({ tag, count }) => [tag, count])
   );
 
-const exampleQueriesSection = (target: string): string[] => [
+const exampleQueriesSection = (dest: AiIndexHttpItem['dest']): string[] => [
   'Example queries (adapt field names for non-canonical indices)',
-  ...buildExampleQueries(target).flatMap(({ title, esql }) => ['', title, esql]),
+  ...buildExampleQueries(dest).flatMap(({ title, esql }) => ['', title, esql]),
 ];
 
 /** One item per line; sections separated by a blank line; empty sections dropped. */
@@ -88,7 +88,7 @@ export const describeAiIndex = async ({
   });
   const { kiTypeCounts, tagCounts } = await describeAiIndexAggregations({
     esClient,
-    target,
+    dest: aiIndex.dest,
     spaceId,
     fields: allFields,
   });
@@ -99,6 +99,6 @@ export const describeAiIndex = async ({
     semanticFieldsSection(semanticFields),
     kiTypeCountsSection(kiTypeCounts),
     tagCountsSection(tagCounts),
-    exampleQueriesSection(target),
+    exampleQueriesSection(aiIndex.dest),
   ]);
 };

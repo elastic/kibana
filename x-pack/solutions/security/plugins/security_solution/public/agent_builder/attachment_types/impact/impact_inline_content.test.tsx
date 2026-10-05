@@ -58,6 +58,29 @@ describe('ImpactInlineContent', () => {
     expect(screen.getByText('User')).toBeInTheDocument();
   });
 
+  it('replaces the __missing__ sentinel with a readable entity label', () => {
+    renderContent({
+      entities: [
+        {
+          entity_type: 'host',
+          name: '__missing__',
+          alert_count: 2,
+          verdicts: { true_positive: 1, false_positive: 1, inconclusive: 0 },
+        },
+        {
+          entity_type: 'user',
+          name: '__missing__',
+          alert_count: 1,
+          verdicts: { true_positive: 0, false_positive: 1, inconclusive: 0 },
+        },
+      ],
+    });
+
+    expect(screen.getByText('No host name')).toBeInTheDocument();
+    expect(screen.getByText('No user name')).toBeInTheDocument();
+    expect(screen.queryByText('__missing__')).not.toBeInTheDocument();
+  });
+
   it('renders column headers', () => {
     renderContent({ entities: [hostRow] });
 

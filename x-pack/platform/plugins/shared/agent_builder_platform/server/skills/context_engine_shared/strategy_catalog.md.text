@@ -58,7 +58,7 @@ Say which of the three answers is wrong.
 ## The corpus filter
 
 Every automation runs over a filtered slice of its source, not the whole thing: a time window
-(last 90 days), a status condition (resolved cases only), or a numeric cap (at most 1,000 KIs).
+(last 90 days), a status condition (resolved cases only), or a numeric cap within the KI budget below.
 The filter is part of the third choice — how units are found — and it is agreed before an
 automation is drafted. Running without one risks cost and index bloat, and the Context Engine is a
 cache — generating over an entire corpus eagerly defeats the point.
@@ -76,5 +76,11 @@ Every generated automation carries its own cap on the KIs one run writes: at mos
 onboarding. It counts KIs, not source rows, so a strategy that writes several KIs per document, or
 one per index across many indices, spends it faster than the row count suggests. The cap lives in
 the template's own bound (`max_units`, `max_documents`) rather than in the Context Engine, which
-does not enforce one. It is guidance for the automation rather than a figure to put to the user,
-and it can be raised once the output has been reviewed and trusted.
+does not enforce one. A custom workflow has no template to carry the bound, so it carries its own:
+where one document yields several KIs, as atomic facts do (one KI per claim), bound that count
+with `maxItems` on the array in the `ai.prompt` output schema, ask for "up to N" in the prompt to
+match, and set the workflow's own `max_documents` const to 100 ÷ N, rounded down. A response with
+more items than `maxItems` fails the step rather than being cut short, so the prompt and the schema
+must agree. The budget is guidance for the automation: tell the user how many KIs a
+run will write, but do not present the budget itself as a limit or a policy. It can be raised once
+the output has been reviewed and trusted.

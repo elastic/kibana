@@ -11,24 +11,36 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
-import { openLazyFlyout } from '@kbn/presentation-util';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { FilterStateStore } from '@kbn/es-query';
 import { BehaviorSubject, of } from 'rxjs';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
-import { apiPublishesEsql, type ViewMode } from '@kbn/presentation-publishing';
+import {
+  apiPublishesEsql,
+  apiPublishesWritableUnifiedSearch,
+  type ViewMode,
+} from '@kbn/presentation-publishing';
 import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { VegaParser } from '../data_model/vega_parser';
-import type { VegaVisualizationDependencies } from '../plugin';
+import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from '../plugin';
 import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../../common/constants';
 import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaEvent, VegaEventHandler } from '../types';
+import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { reportVegaRender } from '../lib/vega_render_telemetry';
+import { setDataViews } from '../services';
 import type { VegaByValueState } from '../../server';
+import { openVegaEditor } from './open_vega_editor';
 import { vegaEmbeddableFactory } from './vega_embeddable';
 
-jest.mock('@kbn/presentation-util', () => ({ openLazyFlyout: jest.fn() }));
+jest.mock('./open_vega_editor', () => ({
+  openVegaEditor: jest.fn(),
+}));
 jest.mock('../lib/vega_render_telemetry', () => ({ reportVegaRender: jest.fn() }));
 jest.mock('../lib/extract_index_pattern', () => ({
   extractIndexPatternsFromSpec: jest.fn(async (): Promise<never[]> => []),
@@ -56,8 +68,16 @@ jest.mock('../async_services', () => ({
   },
 }));
 
-const mockOpenLazyFlyout = jest.mocked(openLazyFlyout);
+const mockOpenVegaEditor = jest.mocked(openVegaEditor);
 const mockReportVegaRender = jest.mocked(reportVegaRender);
+const mockExtractIndexPatterns = jest.mocked(extractIndexPatternsFromSpec);
+
+jest.mock('@kbn/embeddable-plugin/public/kibana_services', () => ({
+  core: {
+    notifications: { toasts: { addError: jest.fn() } },
+    overlays: { openSystemFlyout: jest.fn() },
+  },
+}));
 
 describe('vegaEmbeddableFactory', () => {
   const executeTriggerActions = jest.fn();
@@ -118,20 +138,27 @@ describe('vegaEmbeddableFactory', () => {
 
   const buildEmbeddable = async ({
     standaloneEmbeddableEnabled = false,
-  }: { standaloneEmbeddableEnabled?: boolean } = {}) => {
+    spec = { format: 'hjson' as const, value: '{ mark: point }' },
+    filters,
+  }: {
+    standaloneEmbeddableEnabled?: boolean;
+    spec?: VegaByValueState['spec'];
+    filters?: VegaByValueState['filters'];
+  } = {}) => {
     const coreStart = coreMock.createStart();
     coreStart.featureFlags.getBooleanValue$.mockImplementation((key, fallback) =>
       of(key === VEGA_STANDALONE_EMBEDDABLE_FLAG ? standaloneEmbeddableEnabled : fallback)
     );
     const factory = vegaEmbeddableFactory(coreStart, {
       uiActions: { executeTriggerActions },
+      SearchBar: (() => null) as VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar'],
       visualizationDependencies,
     });
     const uuid = 'vega-panel';
 
     return factory.buildEmbeddable({
       initializeDrilldownsManager,
-      initialState: { spec: { format: 'hjson', value: '{ mark: point }' }, title: 'Initial title' },
+      initialState: { spec, filters, title: 'Initial title' },
       finalizeApi: (api) => ({
         ...api,
         uuid,
@@ -151,13 +178,46 @@ describe('vegaEmbeddableFactory', () => {
   beforeEach(() => {
     ({ query$, filters$, timeRange$, timeslice$, esqlVariables$, reload$, viewMode$, parentApi } =
       createParent());
+    const dataViews = dataViewPluginMocks.createStartContract();
+    dataViews.getDefault = jest.fn(async (): Promise<DataView | null> => null);
+    setDataViews(dataViews);
+    mockExtractIndexPatterns.mockReset();
+    mockExtractIndexPatterns.mockResolvedValue([]);
     executeTriggerActions.mockReset();
-    mockOpenLazyFlyout.mockReset();
+    mockOpenVegaEditor.mockReset();
     mockReportVegaRender.mockReset();
     mockCreateVegaRequestHandler.mockClear();
     mockVegaRequestHandler.mockReset();
     mockVegaRequestHandler.mockResolvedValue(visData);
     mockVegaVisComponentProps = undefined;
+  });
+
+  it('does not publish the default data view when the spec has none', async () => {
+    const dataViews = dataViewPluginMocks.createStartContract();
+    dataViews.getDefault = jest.fn(async () => ({ id: 'default-view' } as DataView));
+    setDataViews(dataViews);
+
+    const { api } = await buildEmbeddable({
+      spec: { format: 'json', value: { mark: 'point' } },
+    });
+
+    await waitFor(() => expect(api.dataViews$.getValue()).toEqual([]));
+    expect(dataViews.getDefault).not.toHaveBeenCalled();
+  });
+
+  it('keeps data views named by the spec', async () => {
+    const fromSpec = [{ id: 'spec-view' }] as DataView[];
+    mockExtractIndexPatterns.mockResolvedValue(fromSpec);
+    const dataViews = dataViewPluginMocks.createStartContract();
+    dataViews.getDefault = jest.fn(async () => ({ id: 'default-view' } as DataView));
+    setDataViews(dataViews);
+
+    const { api } = await buildEmbeddable({
+      spec: { format: 'json', value: { data: { url: { index: 'logs-*' } } } },
+    });
+
+    await waitFor(() => expect(api.dataViews$.getValue()).toEqual(fromSpec));
+    expect(dataViews.getDefault).not.toHaveBeenCalled();
   });
 
   it('serializes and applies its state', async () => {
@@ -184,6 +244,28 @@ describe('vegaEmbeddableFactory', () => {
         },
       })
     );
+  });
+
+  it('gives stored panel filters an app state store so the filter editor can update them', async () => {
+    const panelFilter: NonNullable<VegaByValueState['filters']>[number] = {
+      type: 'condition',
+      condition: { field: 'status', operator: 'is', value: 'active' },
+    };
+    const { api } = await buildEmbeddable({ filters: [panelFilter] });
+
+    expect(api.filters$.getValue()).toEqual([
+      expect.objectContaining({ $state: { store: FilterStateStore.APP_STATE } }),
+    ]);
+
+    api.applySerializedState({
+      spec: { format: 'hjson', value: '{ mark: point }' },
+      filters: [panelFilter],
+    });
+
+    expect(api.filters$.getValue()).toEqual([
+      expect.objectContaining({ $state: { store: FilterStateStore.APP_STATE } }),
+    ]);
+    expect(api.serializeState().filters).toEqual([panelFilter]);
   });
 
   it.each([
@@ -279,7 +361,7 @@ describe('vegaEmbeddableFactory', () => {
     query$.next({ language: 'kuery', query: 'response: 200' });
     await waitFor(() => {
       expect(mockVegaRequestHandler).toHaveBeenLastCalledWith(
-        expect.objectContaining({ query: { language: 'kuery', query: 'response: 200' } })
+        expect.objectContaining({ query: [{ language: 'kuery', query: 'response: 200' }] })
       );
     });
     expect(abortSignalFor(0).aborted).toBe(true);
@@ -319,6 +401,70 @@ describe('vegaEmbeddableFactory', () => {
     expect(mockVegaVisComponentProps).toBeUndefined();
   });
 
+  it('cancels the in-flight request without surfacing an error', async () => {
+    let rejectRequest: (error: Error) => void = () => {};
+    mockVegaRequestHandler.mockImplementation(
+      () =>
+        new Promise((_resolve, reject) => {
+          rejectRequest = reject;
+        })
+    );
+    const { api, Component: PanelComponent } = await buildEmbeddable();
+    render(<PanelComponent />);
+    await waitFor(() => expect(mockVegaRequestHandler).toHaveBeenCalledTimes(1));
+
+    api.cancelRequests(AbortReason.CANCELED);
+    expect(abortSignalFor(0).reason).toBe(AbortReason.CANCELED);
+    rejectRequest(new Error('Request aborted'));
+
+    await waitFor(() => expect(api.dataLoading$.getValue()).toBe(false));
+    expect(api.blockingError$.getValue()).toBeUndefined();
+    expect(api.rendered$.getValue()).toBe(true);
+  });
+
+  it('renders partial results returned after a cancel', async () => {
+    const partialVisData = { isVegaLite: true, useMap: false } as unknown as VegaParser;
+    let resolveRequest: (data: VegaParser) => void = () => {};
+    mockVegaRequestHandler.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveRequest = resolve;
+        })
+    );
+    const { api, Component: PanelComponent } = await buildEmbeddable();
+    render(<PanelComponent />);
+    await waitFor(() => expect(mockVegaRequestHandler).toHaveBeenCalledTimes(1));
+
+    api.cancelRequests(AbortReason.CANCELED);
+    resolveRequest(partialVisData);
+
+    await waitFor(() => expect(mockVegaVisComponentProps?.visData).toBe(partialVisData));
+    expect(api.dataLoading$.getValue()).toBe(false);
+  });
+
+  it('drops partial results from a cancelled request once a newer fetch starts', async () => {
+    const resolvers: Array<(data: VegaParser) => void> = [];
+    mockVegaRequestHandler.mockImplementation(
+      () => new Promise((resolve) => resolvers.push(resolve))
+    );
+    const { api, Component: PanelComponent } = await buildEmbeddable();
+    render(<PanelComponent />);
+    await waitFor(() => expect(mockVegaRequestHandler).toHaveBeenCalledTimes(1));
+
+    api.cancelRequests(AbortReason.CANCELED);
+    reload$.next();
+    await waitFor(() => expect(mockVegaRequestHandler).toHaveBeenCalledTimes(2));
+    resolvers[0]({ isVegaLite: false, useMap: false } as unknown as VegaParser);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(mockVegaVisComponentProps).toBeUndefined();
+    expect(api.dataLoading$.getValue()).toBe(true);
+
+    resolvers[1](visData);
+    await waitFor(() => expect(mockVegaVisComponentProps?.visData).toBe(visData));
+    expect(api.dataLoading$.getValue()).toBe(false);
+  });
+
   it('routes filter events through ON_APPLY_FILTER', async () => {
     const { api, Component: PanelComponent } = await buildEmbeddable();
     render(<PanelComponent />);
@@ -355,45 +501,51 @@ describe('vegaEmbeddableFactory', () => {
     const { api } = await buildEmbeddable();
     const returnFocus = jest.fn();
 
-    api.onEdit({ isNewPanel: true, returnFocus });
-    expect(mockOpenLazyFlyout.mock.calls[0][0]).toEqual(
+    await api.onEdit({ isNewPanel: true, returnFocus });
+    expect(mockOpenVegaEditor).toHaveBeenCalledWith(
       expect.objectContaining({
+        core: expect.anything(),
+        parentApi,
         returnFocus,
-        flyoutProps: expect.objectContaining({ focusedPanelId: api.uuid }),
+        focusedPanelId: api.uuid,
+        isNewPanel: true,
       })
     );
   });
 
-  it('restores the original spec when editing is cancelled', async () => {
+  it('restores the original spec, query, and filters when editing is cancelled', async () => {
     const { api } = await buildEmbeddable();
-    const closeFlyout = jest.fn();
-
-    api.onEdit();
-    const flyout = mockOpenLazyFlyout.mock.calls[0][0];
-    const content = (await flyout.loadContent({
-      ariaLabelledBy: 'vega-flyout-title',
-      closeFlyout,
+    api.setQuery({ language: 'kuery', query: 'bytes > 1000' });
+    api.setFilters([{ meta: { alias: 'panel filter' }, query: { match: { status: 200 } } }]);
+    const content = (await api.getEditPanel?.({
+      ariaLabelledBy: 'vegaEditorTitle',
     })) as React.ReactElement<{
       onRevert: () => void;
       onPreview: (spec: VegaByValueState['spec']) => void;
     }>;
 
     content.props.onPreview({ format: 'hjson', value: '{ mark: bar }' });
+    api.setQuery({ language: 'kuery', query: 'bytes > 2000' });
+    api.setFilters([{ meta: { alias: 'changed filter' }, query: { match: { status: 500 } } }]);
+
     expect(api.serializeState().spec).toEqual({ format: 'hjson', value: '{ mark: bar }' });
     content.props.onRevert();
     expect(api.serializeState().spec).toEqual({ format: 'hjson', value: '{ mark: point }' });
+    expect(api.query$.getValue()).toEqual({ language: 'kuery', query: 'bytes > 1000' });
+    expect(api.filters$.getValue()).toEqual([
+      { meta: { alias: 'panel filter' }, query: { match: { status: 200 } } },
+    ]);
     expect(jest.mocked(parentApi.removePanel)).not.toHaveBeenCalled();
   });
 
   it('removes the panel when editing is cancelled on a brand-new one', async () => {
     const { api } = await buildEmbeddable();
-
-    api.onEdit({ isNewPanel: true });
-    const flyout = mockOpenLazyFlyout.mock.calls[0][0];
-    const content = (await flyout.loadContent({
-      ariaLabelledBy: 'vega-flyout-title',
-      closeFlyout: jest.fn(),
-    })) as React.ReactElement<{ onRevert: () => void }>;
+    const content = (await api.getEditPanel?.({
+      ariaLabelledBy: 'vegaEditorTitle',
+      isNewPanel: true,
+    })) as React.ReactElement<{
+      onRevert: () => void;
+    }>;
 
     // A new panel has no spec worth reverting to, so cancelling drops it from the dashboard.
     content.props.onRevert();
@@ -401,16 +553,27 @@ describe('vegaEmbeddableFactory', () => {
     expect(jest.mocked(parentApi.removePanel)).toHaveBeenCalledWith(api.uuid);
   });
 
+  it('gives the editor the default data view', async () => {
+    const defaultDataView = { id: 'default-view' } as DataView;
+    const dataViews = dataViewPluginMocks.createStartContract();
+    dataViews.getDefault = jest.fn(async () => defaultDataView);
+    setDataViews(dataViews);
+
+    const { api } = await buildEmbeddable();
+    const content = (await api.getEditPanel?.({
+      ariaLabelledBy: 'vegaEditorTitle',
+    })) as React.ReactElement<{ defaultDataView?: DataView }>;
+
+    expect(content.props.defaultDataView).toBe(defaultDataView);
+  });
+
   it('keeps the edited spec when saving', async () => {
     const { api } = await buildEmbeddable();
-    const closeFlyout = jest.fn();
-
-    api.onEdit();
-    const flyout = mockOpenLazyFlyout.mock.calls[0][0];
-    const content = (await flyout.loadContent({
-      ariaLabelledBy: 'vega-flyout-title',
-      closeFlyout,
-    })) as React.ReactElement<{ onSave: (spec: VegaByValueState['spec']) => void }>;
+    const content = (await api.getEditPanel?.({
+      ariaLabelledBy: 'vegaEditorTitle',
+    })) as React.ReactElement<{
+      onSave: (spec: VegaByValueState['spec']) => void;
+    }>;
 
     content.props.onSave({ format: 'hjson', value: '{ mark: bar }' });
 
@@ -446,6 +609,50 @@ describe('vegaEmbeddableFactory', () => {
         expect.objectContaining({ esqlVariables: updated })
       );
     });
+  });
+
+  it('merges a panel query and filters into the request without changing esql$', async () => {
+    const esql = 'FROM logs-* | WHERE machine.os.keyword == ?fizzbuzz';
+    const panelFilter = { meta: { alias: 'panel filter' }, query: { match: { status: 200 } } };
+    const { api, Component: PanelComponent } = await buildEmbeddable();
+    render(<PanelComponent />);
+
+    api.applySerializedState({
+      spec: {
+        format: 'hjson',
+        value: `{ data: { url: { "%type%": "esql", "%context%": true, query: "${esql}" } } }`,
+      },
+      title: 'Initial title',
+    });
+    await waitFor(() => expect(mockVegaRequestHandler).toHaveBeenCalled());
+
+    query$.next({ language: 'kuery', query: 'response: 200' });
+    filters$.next([{ meta: { alias: 'dashboard filter' }, query: { match: { host: 'a' } } }]);
+    api.setQuery({ language: 'kuery', query: 'bytes > 1000' });
+    api.setFilters([panelFilter]);
+
+    await waitFor(() => {
+      expect(mockVegaRequestHandler).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          query: [
+            { language: 'kuery', query: 'response: 200' },
+            { language: 'kuery', query: 'bytes > 1000' },
+          ],
+          filters: [
+            { meta: { alias: 'dashboard filter' }, query: { match: { host: 'a' } } },
+            panelFilter,
+          ],
+        })
+      );
+    });
+    expect(api.esql$.getValue()).toEqual([{ esql }]);
+    expect(apiPublishesWritableUnifiedSearch(api)).toBe(true);
+    expect(api.serializeState()).toEqual(
+      expect.objectContaining({
+        query: { language: 'kql', expression: 'bytes > 1000' },
+        filters: expect.any(Array),
+      })
+    );
   });
 
   it('publishes ES|QL queries via esql$ for a single-source spec', async () => {

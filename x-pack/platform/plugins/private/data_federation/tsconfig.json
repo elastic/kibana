@@ -24,6 +24,11 @@
     "@kbn/core-doc-links-browser",
     "@kbn/ui-callout",
     "@kbn/storybook",
+    "@kbn/i18n-react",
+    "@kbn/utility-types",
+    "@kbn/licensing-plugin",
+    "@kbn/licensing-types",
+    "@kbn/license-api-guard-plugin"
   ],
   "exclude": [
     "target/**/*",

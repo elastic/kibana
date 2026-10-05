@@ -8,13 +8,14 @@
 import type { FunctionComponent } from 'react';
 import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButton, EuiInMemoryTable, EuiLink, EuiSpacer } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { EuiButton, EuiInMemoryTable, EuiSpacer, EuiTextBlockTruncate } from '@elastic/eui';
+import { useHistory } from 'react-router-dom';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import type { DataSetWithName, DataSource } from '../common';
+import { CREATE_DATASET_PATH, getEditDatasetPath } from './app_paths';
 import { getDataSourceTypeVerbose } from './get_data_source_type_label';
 import { mainTranslations } from './main_i18n';
-import type { DataFederationKibanaServices } from './types';
 
 /** Data set row in the table; `type` is resolved from the linked data source. */
 export type DataSetListRow = DataSetWithName & { type?: DataSource['type'] };
@@ -23,10 +24,7 @@ export interface DatasetsTableProps {
   items: DataSetListRow[];
   selectedItems: DataSetListRow[];
   dataSourceNames: string[];
-  isCreateDisabled: boolean;
   onSelectionChange: (next: DataSetListRow[]) => void;
-  onCreate: () => void;
-  onEdit: (item: DataSetListRow) => void;
   onDelete: (item: DataSetListRow) => void;
   onDeleteSelected: (items: DataSetListRow[]) => void;
 }
@@ -35,42 +33,27 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
   items,
   selectedItems,
   dataSourceNames,
-  isCreateDisabled,
   onSelectionChange,
-  onCreate,
-  onEdit,
   onDelete,
   onDeleteSelected,
 }) => {
-  const {
-    services: { docLinks },
-  } = useKibana<DataFederationKibanaServices>();
+  const history = useHistory();
+  const createDatasetNav = reactRouterNavigate(history, CREATE_DATASET_PATH);
 
-  const emptyMessage = useMemo(
-    () => (
-      <>
-        {mainTranslations.columns.dataSets.noItems}{' '}
-        <EuiLink href={docLinks.links.dataFederation.datasets} target="_blank">
-          {mainTranslations.docsLink}
-        </EuiLink>
-      </>
-    ),
-    [docLinks.links.dataFederation.datasets]
-  );
   const columns = useMemo<Array<EuiBasicTableColumn<DataSetListRow>>>(
     () => [
       {
         field: 'name',
         name: mainTranslations.columns.dataSets.name,
         sortable: true,
-        width: '18%',
+        width: '16%',
         'data-test-subj': 'dataSetsSetsColName',
       },
       {
         field: 'data_source',
         name: mainTranslations.columns.dataSets.dataSourceId,
         sortable: true,
-        width: '18%',
+        width: '12%',
         'data-test-subj': 'dataSetsSetsColDataSourceId',
       },
       {
@@ -81,21 +64,26 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
             ? getDataSourceTypeVerbose(type)
             : mainTranslations.columns.dataSets.dataSourceTypeMissing,
         sortable: true,
-        width: '18%',
+        width: '12%',
         'data-test-subj': 'dataSetsSetsColDataSourceType',
       },
       {
         field: 'resource',
         name: mainTranslations.columns.dataSets.resource,
         sortable: true,
-        width: '22%',
+        width: '20%',
         'data-test-subj': 'dataSetsSetsColResource',
       },
       {
         field: 'description',
         name: mainTranslations.columns.dataSets.description,
+        render: (description: DataSetListRow['description']) => (
+          <EuiTextBlockTruncate lines={2} title={description}>
+            {description}
+          </EuiTextBlockTruncate>
+        ),
         sortable: true,
-        truncateText: true,
+        width: '30%',
         'data-test-subj': 'dataSetsSetsColDescription',
       },
       {
@@ -108,7 +96,7 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
             icon: 'pencil',
             type: 'icon',
             onClick: (item) => {
-              onEdit(item);
+              history.push(getEditDatasetPath(item.name));
             },
             'data-test-subj': 'dataSetsSetsEditButton',
           },
@@ -126,7 +114,7 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
         ],
       },
     ],
-    [onDelete, onEdit]
+    [history, onDelete]
   );
 
   return (
@@ -183,8 +171,7 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
               fill
               color="primary"
               data-test-subj="dataSetsSetsCreateButton"
-              onClick={onCreate}
-              disabled={isCreateDisabled}
+              {...createDatasetNav}
             >
               {mainTranslations.columns.dataSets.addButtonLabel}
             </EuiButton>
@@ -202,7 +189,7 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
         }}
         data-test-subj="dataSetsSetsTable"
         tableCaption={mainTranslations.columns.dataSets.caption}
-        noItemsMessage={emptyMessage}
+        noItemsMessage={mainTranslations.columns.dataSets.noItems}
         tableLayout="auto"
         responsiveBreakpoint={false}
       />

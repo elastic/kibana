@@ -45,12 +45,16 @@ describe('isActionPolicyPayloadPathInSchema', () => {
     expect(isActionPolicyPayloadPathInSchema(relativePath)).toBe(true);
   });
 
-  it.each(['foo', 'episodes[0].bogus', 'episodes.foo', 'policy_id', 'policyId.anything'])(
-    'rejects %s',
-    (relativePath) => {
-      expect(isActionPolicyPayloadPathInSchema(relativePath)).toBe(false);
-    }
-  );
+  it.each([
+    'foo',
+    'episodes[0].bogus',
+    'episodes.foo',
+    'policy_id',
+    'policyId.anything',
+    'rules[ep.rule_id].nmae',
+  ])('rejects %s', (relativePath) => {
+    expect(isActionPolicyPayloadPathInSchema(relativePath)).toBe(false);
+  });
 });
 
 describe('assertActionPolicyWorkflowLiquid', () => {

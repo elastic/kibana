@@ -176,12 +176,17 @@ export type {
 } from './plugin_contract';
 export type {
   AttachmentPublicClient,
+  AttachmentWriteAccess,
   ListAttachmentsResult,
   CreateAttachmentArgs,
   GetAttachmentArgs,
   UpdateAttachmentArgs,
   DeleteAttachmentArgs,
   ListAttachmentsArgs,
+  BulkCreateAttachmentInput,
+  BulkCreateAttachmentError,
+  BulkCreateAttachmentsResult,
+  BulkCreateAttachmentsArgs,
 } from './attachments';
 export type {
   ConversationPublicClient,

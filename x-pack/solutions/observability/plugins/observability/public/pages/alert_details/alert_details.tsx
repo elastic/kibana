@@ -370,7 +370,12 @@ export function AlertDetails() {
         </EuiFlexGroup>
       </>
     ) : (
-      <EuiPanel hasShadow={false} data-test-subj="overviewTabPanel" paddingSize="none">
+      <EuiPanel
+        hasShadow={false}
+        hasBorder={false}
+        data-test-subj="overviewTabPanel"
+        paddingSize="none"
+      >
         <EuiSpacer size="l" />
         <ProximalAlertsCallout
           alertDetail={alertDetail}
@@ -391,7 +396,12 @@ export function AlertDetails() {
   );
 
   const metadataTab = alertDetail?.raw && (
-    <EuiPanel hasShadow={false} data-test-subj="metadataTabPanel" paddingSize="none">
+    <EuiPanel
+      hasShadow={false}
+      hasBorder={false}
+      data-test-subj="metadataTabPanel"
+      paddingSize="none"
+    >
       <EuiSpacer size="l" />
       <AlertFieldsTable alert={alertDetail.raw} />
     </EuiPanel>

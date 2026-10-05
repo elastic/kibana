@@ -60,7 +60,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response.body.created_at).toBe(created.created_at);
       expect(response.body.created_by).toStrictEqual(created.created_by);
       expect(response.body.updated_at).not.toBe(created.updated_at);
-      expect(response.body.metadata.version).toBe(created.metadata.version + 1);
+      expect(response.body.version).toBe(created.version + 1);
     }
   );
 
@@ -121,10 +121,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.query).toStrictEqual({ base: 'FROM new-index-* | LIMIT 100' });
-      expect(response.body.metadata).toStrictEqual({
-        ...created.metadata,
-        version: created.metadata.version + 1,
-      });
+      expect(response.body.metadata).toStrictEqual(created.metadata);
       expect(response.body.schedule).toStrictEqual(created.schedule);
     }
   );
@@ -306,28 +303,6 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         breach: { segment: 'WHERE max_val >= 10' },
       });
       expect(response.body.schedule).toStrictEqual(created.schedule);
-    }
-  );
-
-  apiTest(
-    'update: should return 409 when the request body version is stale',
-    async ({ apiClient, apiServices }) => {
-      const created = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'rule-stale-version' } })
-      );
-      const firstUpdate = await apiClient.patch(getRuleUrl(created.id), {
-        headers: writerHeaders,
-        body: { metadata: { name: 'first-rename' } },
-      });
-      expect(firstUpdate).toHaveStatusCode(200);
-      expect(firstUpdate.body.version).not.toBe(created.version);
-
-      const staleUpdate = await apiClient.patch(getRuleUrl(created.id), {
-        headers: writerHeaders,
-        body: { version: created.version, metadata: { name: 'second-rename' } },
-      });
-      expect(staleUpdate).toHaveStatusCode(409);
-      expect(staleUpdate.body.code).toBe('RULE_VERSION_CONFLICT');
     }
   );
 
