@@ -124,6 +124,78 @@ describe('useServiceSettings — incompleteInstances', () => {
   });
 });
 
+// --- namespace ---
+
+describe('useServiceSettings — namespace', () => {
+  const svcWithRequired = makeEntry('svc_a', {
+    signalTypes: ['logs'],
+    dataStreams: ['svc_a'],
+    inputs: ['aws-s3'],
+    defaultEnabledInputs: ['aws-s3'],
+    requiredConfig: ['bucket_arn'],
+    varDefsByInput: { 'aws-s3': { bucket_arn: makeTextVarDef('bucket_arn') } },
+    varDefsByDataStream: {
+      svc_a: {
+        inputs: ['aws-s3'],
+        defaultEnabledInputs: ['aws-s3'],
+        varDefsByInput: { 'aws-s3': { bucket_arn: makeTextVarDef('bucket_arn') } },
+        requiredConfig: ['bucket_arn'],
+      },
+    },
+  });
+  const filledVars = {
+    svc_a: {
+      enabledInputs: ['aws-s3'],
+      varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::my-bucket' } },
+    },
+  };
+
+  beforeEach(() => {
+    mockUseSessionStorage.mockImplementation((_key: string, initial: unknown) => useState(initial));
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: ['svc_a'] },
+      removeDeployInstance: jest.fn(),
+      awsServicesMap: new Map([['svc_a', svcWithRequired]]),
+    } as unknown as ReturnType<typeof useOnboardingFlow>);
+  });
+
+  it('persists the namespace alongside the instance vars', () => {
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    act(() => result.current.setServiceFieldsAndInputs('svc_a', filledVars, ['svc_a'], 'prod'));
+    expect(result.current.getServiceVars('svc_a').namespace).toBe('prod');
+  });
+
+  it('copies the source namespace onto a duplicate when none is given', () => {
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    act(() => result.current.setServiceFieldsAndInputs('svc_a', filledVars, ['svc_a'], 'prod'));
+    act(() => result.current.addDuplicate('svc_a', 'svc_a [Duplicate]', {}, []));
+    expect(result.current.getServiceVars('svc_a__dup-1').namespace).toBe('prod');
+  });
+
+  it('uses the namespace given for a duplicate over the source one', () => {
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    act(() => result.current.setServiceFieldsAndInputs('svc_a', filledVars, ['svc_a'], 'prod'));
+    act(() => result.current.addDuplicate('svc_a', 'svc_a [Duplicate]', {}, [], 'staging'));
+    expect(result.current.getServiceVars('svc_a__dup-1').namespace).toBe('staging');
+  });
+
+  it('marks an instance incomplete when its namespace is invalid', () => {
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    act(() => result.current.setGlobalRegion('us-east-1'));
+    act(() => result.current.setServiceFieldsAndInputs('svc_a', filledVars, ['svc_a'], 'Prod'));
+    expect(result.current.incompleteInstanceIds.has('svc_a')).toBe(true);
+    expect(result.current.isReady).toBe(false);
+  });
+
+  it('keeps an instance complete when its namespace is empty', () => {
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    act(() => result.current.setGlobalRegion('us-east-1'));
+    act(() => result.current.setServiceFieldsAndInputs('svc_a', filledVars, ['svc_a'], ''));
+    expect(result.current.incompleteInstances).toHaveLength(0);
+    expect(result.current.isReady).toBe(true);
+  });
+});
+
 // --- signal filter ---
 
 describe('useServiceSettings — signal filter', () => {

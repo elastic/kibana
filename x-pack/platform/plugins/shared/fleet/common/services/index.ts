@@ -30,6 +30,7 @@ export { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from './limite
 export {
   isValidDataset,
   isValidDataStreamType,
+  isValidDataStreamIndexPattern,
   isValidNamespace,
   INVALID_NAMESPACE_CHARACTERS,
   VALID_DATA_STREAM_TYPES,

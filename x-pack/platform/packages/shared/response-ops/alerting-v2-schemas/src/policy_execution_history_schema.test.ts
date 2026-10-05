@@ -28,7 +28,7 @@ const validItem = {
   dispatched_at: '2026-06-01T00:00:00.000Z',
   policy: { id: 'policy-1', name: 'My policy' },
   outcome: 'success' as const,
-  episode_count: 2,
+  alert_count: 2,
   action_group_count: 1,
   rules: [{ id: 'rule-1', name: 'Rule 1' }],
   total_rule_count: 1,
@@ -114,7 +114,7 @@ describe('policy_execution_history_schema', () => {
         const parsed = listPolicyExecutionHistoryRequestSchema.parse({});
         expect(parsed).not.toHaveProperty('search');
         expect(parsed).not.toHaveProperty('rule_ids');
-        expect(parsed).not.toHaveProperty('episode_ids');
+        expect(parsed).not.toHaveProperty('alert_ids');
         expect(parsed).not.toHaveProperty('outcomes');
         expect(parsed).not.toHaveProperty('from');
         expect(parsed).not.toHaveProperty('to');
@@ -222,21 +222,21 @@ describe('policy_execution_history_schema', () => {
       });
     });
 
-    describe('episode_ids', () => {
+    describe('alert_ids', () => {
       it('accepts a single string and coerces it to an array', () => {
-        const parsed = listPolicyExecutionHistoryRequestSchema.parse({ episode_ids: 'episode-x' });
-        expect(parsed.episode_ids).toEqual(['episode-x']);
+        const parsed = listPolicyExecutionHistoryRequestSchema.parse({ alert_ids: 'episode-x' });
+        expect(parsed.alert_ids).toEqual(['episode-x']);
       });
 
-      it('accepts an array of valid episode ids', () => {
+      it('accepts an array of valid alert ids', () => {
         const parsed = listPolicyExecutionHistoryRequestSchema.parse({
-          episode_ids: ['episode-x', 'episode-y'],
+          alert_ids: ['episode-x', 'episode-y'],
         });
-        expect(parsed.episode_ids).toEqual(['episode-x', 'episode-y']);
+        expect(parsed.alert_ids).toEqual(['episode-x', 'episode-y']);
       });
 
       it('rejects an empty array', () => {
-        expect(listPolicyExecutionHistoryRequestSchema.safeParse({ episode_ids: [] }).success).toBe(
+        expect(listPolicyExecutionHistoryRequestSchema.safeParse({ alert_ids: [] }).success).toBe(
           false
         );
       });
@@ -244,7 +244,7 @@ describe('policy_execution_history_schema', () => {
       it(`rejects an entry longer than ID_MAX_LENGTH (${ID_MAX_LENGTH}) chars`, () => {
         expect(
           listPolicyExecutionHistoryRequestSchema.safeParse({
-            episode_ids: ['episode-x', 'a'.repeat(ID_MAX_LENGTH + 1)],
+            alert_ids: ['episode-x', 'a'.repeat(ID_MAX_LENGTH + 1)],
           }).success
         ).toBe(false);
       });
@@ -433,7 +433,7 @@ describe('policy_execution_history_schema', () => {
         per_page: 25,
         from: '2026-06-01T00:00:00Z',
         to: '2026-06-02T00:00:00Z',
-        episode_ids: ['episode-x', 'episode-y'],
+        alert_ids: ['episode-x', 'episode-y'],
         sort_field: 'dispatched_at' as const,
         sort_order: 'asc' as const,
         search: 'db outage',

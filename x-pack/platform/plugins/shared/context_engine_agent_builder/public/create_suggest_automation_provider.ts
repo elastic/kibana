@@ -30,7 +30,8 @@ const AUTOMATION_REFRESH_TOOL_IDS: ReadonlySet<string> = new Set([
 
 /**
  * The user reads this message in the conversation, so it says what they asked for and nothing more.
- * Which skills to load and how to work is carried by the `ai_index` attachment instead.
+ * Which skills to load and how to work are in the Context Engine agent's instructions; the
+ * `ai_index` attachment carries the index itself.
  */
 const SUGGEST_AUTOMATION_INITIAL_MESSAGE = i18n.translate(
   'xpack.contextEngine.aiIndexDetail.automations.suggestAutomationInitialMessage',

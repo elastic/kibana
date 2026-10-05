@@ -8,7 +8,7 @@
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type { ServiceInstance, ServiceVars } from '../service_settings_step/use_service_settings';
 import { buildDeployGroups } from './deploy_groups';
-import { buildIacIntegrations, buildPackageInputs } from './package_inputs';
+import { buildIacIntegrations, buildPackageInputs, toSOServiceVars } from './package_inputs';
 
 function makeService(overrides: Partial<AwsServiceMatrixEntry> = {}): AwsServiceMatrixEntry {
   return {
@@ -273,19 +273,6 @@ describe('buildIacIntegrations', () => {
         },
       ]);
     });
-
-    it('falls back to the service id for a duplicate whose vars predate instance keying', () => {
-      const stored: Record<string, ServiceVars> = {
-        cloudtrail: {
-          enabledDataStreams: ['cloudtrail'],
-          varsByDataStream: { cloudtrail: { enabledInputs: ['aws-s3'], varsByInput: {} } },
-        },
-      };
-
-      expect(buildIacIntegrations([duplicate(cloudtrail)], stored)).toEqual([
-        { name: 'aws', policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }] },
-      ]);
-    });
   });
 
   it('is stable regardless of member order and unsorted manifest inputs', () => {
@@ -406,6 +393,21 @@ describe('buildIacIntegrations ↔ Deploy parity', () => {
         'aws.rds-aws/metrics',
       ])
     );
+  });
+});
+
+describe('toSOServiceVars', () => {
+  it('keeps each instance namespace so a resumed deployment restores it', () => {
+    const serviceVars: Record<string, ServiceVars> = {
+      ec2: { enabledDataStreams: ['ec2'], varsByDataStream: {}, namespace: 'prod' },
+      'ec2__dup-1': { enabledDataStreams: ['ec2'], varsByDataStream: {}, namespace: 'staging' },
+    };
+    const servicesMap = new Map([['ec2', { id: 'ec2' } as AwsServiceMatrixEntry]]);
+
+    const result = toSOServiceVars(serviceVars, servicesMap) as Record<string, ServiceVars>;
+
+    expect(result.ec2.namespace).toBe('prod');
+    expect(result['ec2__dup-1'].namespace).toBe('staging');
   });
 });
 

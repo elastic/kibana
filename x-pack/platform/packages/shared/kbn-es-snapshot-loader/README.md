@@ -405,7 +405,7 @@ await repository.register({ esClient, log, repoName, verify: true });
 3. Restore indices to temporary locations (prefixed with `snapshot-loader-temp-`)
 4. Query restored indices to find the latest `@timestamp` in the data
 5. Create an ingest pipeline that transforms `@timestamp` fields:
-   - The latest timestamp from the data becomes "now"
+   - The latest timestamp from the data becomes "now" (read once per replay, so all documents shift equally)
    - All other timestamps are adjusted by the same offset, preserving relative timing
 6. Create each destination data stream and copy the TSDB metric field mappings (counters, gauges,
    histograms) of its restored indices onto it, so those types survive the reindex; a stream that cannot be
