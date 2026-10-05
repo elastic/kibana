@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { deletePackagePolicyRoute, getConfigIdFromPackagePolicy } from './delete_integration';
 
@@ -32,7 +33,15 @@ describe('getConfigIdFromPackagePolicy', () => {
 });
 
 describe('deletePackagePolicyRoute', () => {
-  const setup = ({ policy, total }: { policy: PackagePolicy | null; total: number }) => {
+  const setup = ({
+    policy,
+    total = 0,
+    getError,
+  }: {
+    policy?: PackagePolicy;
+    total?: number;
+    getError?: Error;
+  }) => {
     const find = jest.fn().mockResolvedValue({ total, saved_objects: [] });
     const fleetDelete = jest.fn().mockResolvedValue([{ id: 'policy-1', success: true }]);
     const response = { conflict: jest.fn((args) => ({ status: 409, ...args })) };
@@ -45,7 +54,9 @@ describe('deletePackagePolicyRoute', () => {
         coreStart: { savedObjects: { createInternalRepository: () => ({ find }) } },
         fleet: {
           packagePolicyService: {
-            get: jest.fn().mockResolvedValue(policy),
+            get: getError
+              ? jest.fn().mockRejectedValue(getError)
+              : jest.fn().mockResolvedValue(policy),
             delete: fleetDelete,
           },
         },
@@ -85,5 +96,41 @@ describe('deletePackagePolicyRoute', () => {
     expect(fleetDelete).toHaveBeenCalledWith(expect.anything(), expect.anything(), ['policy-1'], {
       force: true,
     });
+  });
+
+  it('deletes without looking for a monitor when the policy has no config_id', async () => {
+    const { run, find, fleetDelete, response } = setup({ policy: buildPolicy() });
+
+    await run();
+
+    expect(find).not.toHaveBeenCalled();
+    expect(response.conflict).not.toHaveBeenCalled();
+    expect(fleetDelete).toHaveBeenCalledWith(expect.anything(), expect.anything(), ['policy-1'], {
+      force: true,
+    });
+  });
+
+  it('still delegates to the delete call when the policy is already gone', async () => {
+    const { run, find, fleetDelete, response } = setup({
+      getError: SavedObjectsErrorHelpers.createGenericNotFoundError(
+        'ingest-package-policies',
+        'policy-1'
+      ),
+    });
+
+    await run();
+
+    expect(find).not.toHaveBeenCalled();
+    expect(response.conflict).not.toHaveBeenCalled();
+    expect(fleetDelete).toHaveBeenCalledWith(expect.anything(), expect.anything(), ['policy-1'], {
+      force: true,
+    });
+  });
+
+  it('rethrows unexpected errors from reading the policy instead of deleting', async () => {
+    const { run, fleetDelete } = setup({ getError: new Error('es unavailable') });
+
+    await expect(run()).rejects.toThrow('es unavailable');
+    expect(fleetDelete).not.toHaveBeenCalled();
   });
 });

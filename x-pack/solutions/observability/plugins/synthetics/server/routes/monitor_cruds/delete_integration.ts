@@ -7,7 +7,9 @@
 import { z } from '@kbn/zod';
 import { i18n } from '@kbn/i18n';
 import { escapeQuotes } from '@kbn/es-query';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { routeId } from '../zod_query';
 import type { SyntheticsRestApiRouteFactory } from '../types';
@@ -50,6 +52,26 @@ const monitorExistsInAnySpace = async (server: SyntheticsServerSetup, configId: 
   return total > 0;
 };
 
+/**
+ * `packagePolicyService.get` throws a not-found error for a missing policy; that
+ * is left to the delete call below, as before the monitor guard existed.
+ */
+const getPackagePolicyIfExists = async (
+  server: SyntheticsServerSetup,
+  savedObjectsClient: SavedObjectsClientContract,
+  packagePolicyId: string
+): Promise<PackagePolicy | undefined> => {
+  try {
+    return (
+      (await server.fleet.packagePolicyService.get(savedObjectsClient, packagePolicyId)) ??
+      undefined
+    );
+  } catch (e) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(e)) return undefined;
+    throw e;
+  }
+};
+
 export const deletePackagePolicyRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'DELETE',
   path: SYNTHETICS_API_URLS.DELETE_PACKAGE_POLICY,
@@ -67,7 +89,8 @@ export const deletePackagePolicyRoute: SyntheticsRestApiRouteFactory = () => ({
   }): Promise<any> => {
     const { packagePolicyId } = request.params;
 
-    const packagePolicy = await server.fleet.packagePolicyService.get(
+    const packagePolicy = await getPackagePolicyIfExists(
+      server,
       savedObjectsClient,
       packagePolicyId
     );
