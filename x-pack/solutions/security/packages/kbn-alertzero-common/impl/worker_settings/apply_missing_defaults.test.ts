@@ -7,6 +7,7 @@
 
 import { ATTACK_DISCOVERY_SETTINGS } from './floor_watch';
 import { RULE_TUNING_DEFAULT_EXTRAS, RULE_TUNING_SETTINGS } from './detection_watch';
+import { CONTINUOUS_THREAT_HUNT_SETTINGS } from './hunt_watch';
 import { applyMissingWorkerSettingDefaults } from './apply_missing_defaults';
 
 describe('applyMissingWorkerSettingDefaults', () => {
@@ -57,5 +58,17 @@ describe('applyMissingWorkerSettingDefaults', () => {
       ...withoutInterval,
       scheduleInterval: '24h',
     });
+  });
+
+  it('drops a stored extras value once the declaration no longer declares any', () => {
+    const staleExtras = { ...stored, extras: { tier2When: 'always', candidateLimit: 10 } };
+
+    expect(applyMissingWorkerSettingDefaults(CONTINUOUS_THREAT_HUNT_SETTINGS, staleExtras)).toEqual(
+      stored
+    );
+  });
+
+  it('leaves a document with no extras alone when the declaration declares none', () => {
+    expect(applyMissingWorkerSettingDefaults(CONTINUOUS_THREAT_HUNT_SETTINGS, stored)).toBe(stored);
   });
 });
