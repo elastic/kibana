@@ -1,5 +1,5 @@
 {
-  "sha1": "422e692cfb96892afe75e7c75e2dcb0199148d20",
+  "sha1": "3f3f9a61f2ae4ce4f46fd9fd32b3a967b5ce5402",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
-        "line": 216,
-        "column": 16
+        "line": 275,
+        "column": 5
       }
     },
     {
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
-        "line": 236,
-        "column": 27
+        "line": 295,
+        "column": 9
       }
     },
     {
@@ -42,13 +42,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
-        "line": 249,
+        "line": 312,
         "column": 12
       }
     },
     {
-      "id": "720459cc95e188a-76fe8eb6bba0c12",
-      "title": "context engine AI index describe API counts types and tags for KIs visible in the current space",
+      "id": "720459cc95e188a-d8d9d60acb48f6b",
+      "title": "context engine AI index describe API counts types and tags for active KIs visible in the current space",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -56,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
-        "line": 261,
-        "column": 12
+        "line": 328,
+        "column": 60
       }
     },
     {
@@ -70,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
-        "line": 275,
-        "column": 40
+        "line": 343,
+        "column": 12
       }
     },
     {
@@ -84,13 +84,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
-        "line": 321,
-        "column": 64
+        "line": 390,
+        "column": 23
       }
     },
     {
-      "id": "720459cc95e188a-1e728eac23b9d23",
-      "title": "context engine AI index describe API returns Elasticsearch 403 when the caller lacks view_index_metadata",
+      "id": "720459cc95e188a-43de1b1299ef94f",
+      "title": "context engine AI index describe API returns Elasticsearch 403 when the caller lacks view_index_metadata privilege",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -98,13 +98,27 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
-        "line": 404,
+        "line": 401,
+        "column": 16
+      }
+    },
+    {
+      "id": "720459cc95e188a-ad2a6a73ede7a57",
+      "title": "context engine AI index describe API returns Elasticsearch 403 when the caller lacks read privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
+        "line": 486,
         "column": 27
       }
     },
     {
-      "id": "720459cc95e188a-811f80c3307aa36",
-      "title": "context engine AI index describe API omits counts, not the whole block, when the caller lacks read",
+      "id": "720459cc95e188a-769b8b3aafce445",
+      "title": "context engine AI index describe API returns 403 when the caller holds no privilege on the backing index",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -112,7 +126,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
-        "line": 416,
+        "line": 498,
+        "column": 27
+      }
+    },
+    {
+      "id": "720459cc95e188a-9bc3aaebf531966",
+      "title": "context engine AI index describe API describes an entry whose backing index does not exist yet",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
+        "line": 509,
         "column": 27
       }
     },
@@ -688,6 +716,118 @@
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
         "line": 789,
         "column": 38
+      }
+    },
+    {
+      "id": "01ef9b7d0fce753-b030cc73eecac6a",
+      "title": "context engine KI lifecycle filter returns only active, unexpired KIs from a registered index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
+        "line": 162,
+        "column": 27
+      }
+    },
+    {
+      "id": "01ef9b7d0fce753-33d34c52c26d21a",
+      "title": "context engine KI lifecycle filter keeps KIs that share an id across targets",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
+        "line": 176,
+        "column": 5
+      }
+    },
+    {
+      "id": "01ef9b7d0fce753-d407f8d092e7a99",
+      "title": "context engine KI lifecycle filter drops governance unless the query names it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
+        "line": 197,
+        "column": 12
+      }
+    },
+    {
+      "id": "01ef9b7d0fce753-a50299d0ff3d165",
+      "title": "context engine KI lifecycle filter applies the filter through a pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
+        "line": 211,
+        "column": 73
+      }
+    },
+    {
+      "id": "01ef9b7d0fce753-789005564fe7037",
+      "title": "context engine KI lifecycle filter returns only the latest revision of each KI from a data stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
+        "line": 220,
+        "column": 73
+      }
+    },
+    {
+      "id": "01ef9b7d0fce753-88fc1c544be307e",
+      "title": "context engine KI lifecycle filter scores a full text match after the revision collapse",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
+        "line": 341,
+        "column": 27
+      }
+    },
+    {
+      "id": "01ef9b7d0fce753-830f9ae3aded205",
+      "title": "context engine KI lifecycle filter describe counts only the newest active revisions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
+        "line": 350,
+        "column": 27
+      }
+    },
+    {
+      "id": "01ef9b7d0fce753-54b821a6f31f7ed",
+      "title": "context engine KI lifecycle filter reads an unregistered index as-is",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
+        "line": 361,
+        "column": 27
       }
     }
   ]

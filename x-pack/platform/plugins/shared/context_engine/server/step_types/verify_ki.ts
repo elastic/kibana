@@ -102,6 +102,7 @@ export const createVerifyKi = ({
         parent,
         spaceId,
         workflowsManagement,
+        request: fakeRequest,
       });
       if (verifierChain.length > MAX_KI_VERIFIER_WORKFLOW_DEPTH) {
         throw new ExecutionError({

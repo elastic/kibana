@@ -30,7 +30,9 @@ const createDeps = (
   logger: LoggerServiceContract = createLogger() as unknown as LoggerServiceContract
 ): ManageActionPolicyToolDeps => ({
   logger,
-  getWorkflow: jest.fn().mockResolvedValue({ id: 'wf-1', name: 'My Workflow' }),
+  getWorkflowClient: jest.fn(() => ({
+    getWorkflow: jest.fn().mockResolvedValue({ id: 'wf-1', name: 'My Workflow' }),
+  })),
   getAvailableConnectors: jest.fn().mockResolvedValue({ connectorTypes: {} }),
 });
 
@@ -68,6 +70,7 @@ describe('manageActionPolicyTool', () => {
         ctx
       );
 
+      expect(deps.getWorkflowClient).toHaveBeenCalledWith(ctx.request);
       expect(ctx.attachments.add).toHaveBeenCalledTimes(1);
       expect(ctx.attachments.update).not.toHaveBeenCalled();
       const { results } = result as {
@@ -202,11 +205,13 @@ describe('manageActionPolicyTool', () => {
 
     it('returns an error when the destination workflow has no manual trigger', async () => {
       const deps = createDeps();
-      deps.getWorkflow = jest.fn().mockResolvedValue({
-        id: 'wf-1',
-        name: 'Alert-only workflow',
-        yaml: 'name: notify\ntriggers:\n  - type: alert\n',
-      });
+      deps.getWorkflowClient = jest.fn(() => ({
+        getWorkflow: jest.fn().mockResolvedValue({
+          id: 'wf-1',
+          name: 'Alert-only workflow',
+          yaml: 'name: notify\ntriggers:\n  - type: alert\n',
+        }),
+      }));
       const tool = manageActionPolicyTool(deps);
       const ctx = createContext();
 
@@ -231,11 +236,13 @@ describe('manageActionPolicyTool', () => {
 
     it('surfaces a workflowDiagnostics warning when inputs.payload has no $ref, without failing the call', async () => {
       const deps = createDeps();
-      deps.getWorkflow = jest.fn().mockResolvedValue({
-        id: 'wf-1',
-        name: 'Missing payload ref',
-        yaml: 'name: notify\ntriggers:\n  - type: manual\n',
-      });
+      deps.getWorkflowClient = jest.fn(() => ({
+        getWorkflow: jest.fn().mockResolvedValue({
+          id: 'wf-1',
+          name: 'Missing payload ref',
+          yaml: 'name: notify\ntriggers:\n  - type: manual\n',
+        }),
+      }));
       const tool = manageActionPolicyTool(deps);
       const ctx = createContext();
 
@@ -269,19 +276,21 @@ describe('manageActionPolicyTool', () => {
 
     it('surfaces variable-ref errors from validateWorkflow as workflowDiagnostics warnings', async () => {
       const deps = createDeps();
-      deps.getWorkflow = jest.fn().mockResolvedValue({
-        id: 'wf-1',
-        name: 'Typo in payload ref',
-        yaml: [
-          'name: notify',
-          'triggers:',
-          '  - type: manual',
-          '    inputs:',
-          '      properties:',
-          '        payload:',
-          "          $ref: '#/kibana/definitions/alertingV2NotificationGroup'",
-        ].join('\n'),
-      });
+      deps.getWorkflowClient = jest.fn(() => ({
+        getWorkflow: jest.fn().mockResolvedValue({
+          id: 'wf-1',
+          name: 'Typo in payload ref',
+          yaml: [
+            'name: notify',
+            'triggers:',
+            '  - type: manual',
+            '    inputs:',
+            '      properties:',
+            '        payload:',
+            "          $ref: '#/kibana/definitions/alertingV2NotificationGroup'",
+          ].join('\n'),
+        }),
+      }));
       deps.validateWorkflow = jest.fn().mockResolvedValue({
         valid: false,
         diagnostics: [
@@ -330,19 +339,21 @@ describe('manageActionPolicyTool', () => {
 
     it('omits workflowDiagnostics entirely when the destination workflow is fully valid', async () => {
       const deps = createDeps();
-      deps.getWorkflow = jest.fn().mockResolvedValue({
-        id: 'wf-1',
-        name: 'Fully valid workflow',
-        yaml: [
-          'name: notify',
-          'triggers:',
-          '  - type: manual',
-          '    inputs:',
-          '      properties:',
-          '        payload:',
-          "          $ref: '#/kibana/definitions/alertingV2NotificationGroup'",
-        ].join('\n'),
-      });
+      deps.getWorkflowClient = jest.fn(() => ({
+        getWorkflow: jest.fn().mockResolvedValue({
+          id: 'wf-1',
+          name: 'Fully valid workflow',
+          yaml: [
+            'name: notify',
+            'triggers:',
+            '  - type: manual',
+            '    inputs:',
+            '      properties:',
+            '        payload:',
+            "          $ref: '#/kibana/definitions/alertingV2NotificationGroup'",
+          ].join('\n'),
+        }),
+      }));
       deps.validateWorkflow = jest.fn().mockResolvedValue({ valid: true, diagnostics: [] });
       const tool = manageActionPolicyTool(deps);
       const ctx = createContext();

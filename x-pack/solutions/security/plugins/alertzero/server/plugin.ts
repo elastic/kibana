@@ -16,6 +16,9 @@ import {
 } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { AgentService } from '@kbn/fleet-plugin/server';
+import { SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED } from '@kbn/management-settings-ids';
+import { getSubscriptionAvailability } from '../common/availability';
 import {
   ALERTZERO_API_PRIVILEGE_READ,
   ALERTZERO_API_PRIVILEGE_WRITE,
@@ -24,6 +27,8 @@ import {
 } from '../common/constants';
 import type { AlertZeroConfig } from './config';
 import type {
+  AlertZeroRequestHandlerContext,
+  AlertTriageAttachmentServiceProvider,
   AlertZeroPluginSetup,
   AlertZeroPluginStart,
   AlertZeroSetupDependencies,
@@ -38,11 +43,17 @@ import { WatchesService } from './services/watches/watches_service';
 import { WorkersService } from './services/workers/workers_service';
 import { ConversationProposalsService } from './services/conversation_proposals/conversation_proposals_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
+import { ScanFailuresService } from './services/scan_failures/scan_failures_service';
 import { ActionsService } from './services/actions/actions_service';
+import type { HuntServices } from './services/watches/hunt';
 import { listActionsTool } from './agent_builder_tools/list_actions_tool';
-import { reviseProposalTool } from './agent_builder_tools/revise_proposal_tool';
+import { createAssertAlertZeroAccess } from './agent_builder_tools/assert_alertzero_access';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
+import { createActionDiscoverySkill } from './agent_builder/skills/action_discovery';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
+import { registerStepDefinitions } from './step_types';
+import { makeIsContextEngineEnabled } from './step_types/is_context_engine_enabled';
+import { makeScopedResolveHostEnrollment } from './services/fleet/resolve_host_enrollment';
 
 export class AlertZeroPlugin
   implements
@@ -55,6 +66,12 @@ export class AlertZeroPlugin
 {
   private readonly logger: Logger;
   private readonly config: AlertZeroConfig;
+  private readonly isServerless: boolean;
+  private serverlessTierAvailable = false;
+
+  private readonly setServerlessTierAvailable = (available: boolean): void => {
+    this.serverlessTierAvailable = available;
+  };
   private spaces?: AlertZeroStartDependencies['spaces'];
   private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
 
@@ -64,18 +81,39 @@ export class AlertZeroPlugin
   private workersService?: WorkersService;
   private conversationProposalsService?: ConversationProposalsService;
   private proposals?: AlertZeroStartDependencies['proposals'];
-  private agentBuilderConversations?: AlertZeroStartDependencies['agentBuilder']['conversations'];
+  private agentBuilderConversations?: NonNullable<
+    AlertZeroStartDependencies['agentBuilder']
+  >['conversations'];
+  private huntServices?: HuntServices;
+  private fleetAgentService?: AgentService;
+  private coreStart?: CoreStart;
+  private scanFailuresService?: ScanFailuresService;
+
+  /**
+   * Set by whichever optional consumer's `start()` calls `registerAlertTriageAttachmentServiceProvider`
+   * (see `AlertZeroPluginStart`). May still be unset when `WorkersService` is constructed below,
+   * since that consumer starts after this plugin; `WorkersService` reads it lazily per call.
+   */
+  private alertTriageAttachmentServiceProvider?: AlertTriageAttachmentServiceProvider;
 
   constructor(context: PluginInitializerContext<AlertZeroConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
   }
+
+  private readonly registerAlertTriageAttachmentServiceProvider = (
+    provider: AlertTriageAttachmentServiceProvider
+  ): void => {
+    this.alertTriageAttachmentServiceProvider = provider;
+  };
 
   setup(
     coreSetup: CoreSetup<AlertZeroStartDependencies, AlertZeroPluginStart>,
     {
       agentBuilder,
-      proposals: _proposalsSetup,
+      proposals,
+      agenticInvestigations,
       features,
       searchInferenceEndpoints,
       workflowsExtensions,
@@ -84,7 +122,7 @@ export class AlertZeroPlugin
   ): AlertZeroPluginSetup {
     if (!this.config.enabled) {
       this.logger.info('AlertZero plugin is disabled');
-      return { isEnabled: false };
+      return { isEnabled: false, setServerlessTierAvailable: this.setServerlessTierAvailable };
     }
 
     this.logger.info('Setting up AlertZero plugin');
@@ -95,34 +133,56 @@ export class AlertZeroPlugin
 
     this.workflowsManagementApi = workflowsManagement.management;
 
+    // Missing runtime dependencies must not make installed workflows eligible for orphan cleanup.
     registerOwner({ workflowsExtensions });
-    registerAgentType(agentBuilder);
-    registerAttachments(agentBuilder);
+    if (agentBuilder && proposals && agenticInvestigations) {
+      const assertAlertZeroAccess = createAssertAlertZeroAccess(async () => {
+        const [core, { security }] = await coreSetup.getStartServices();
+        return { core, security };
+      });
+      registerAgentType(agentBuilder);
+      registerAttachments(agentBuilder);
+      // Registered in setup so the builtin tool is available to Agent Builder before
+      // the first agent run; the handler resolves the service lazily like the routes do.
+      agentBuilder.tools.register({
+        ...listActionsTool(() => this.requireActionsService(), assertAlertZeroAccess),
+      });
+      agentBuilder.skills.register(createActionDiscoverySkill(assertAlertZeroAccess));
+    }
+
     registerAlertZeroInferenceFeatures(searchInferenceEndpoints, this.logger.get('inference'));
-    // Registered in setup so the builtin tool is available to Agent Builder before
-    // the first agent run; the handler resolves the service lazily like the routes do.
-    agentBuilder.tools.register({
-      ...listActionsTool(() => this.requireActionsService()),
-    });
-    agentBuilder.tools.register({
-      ...reviseProposalTool(() => this.requireProposals()),
+    // Steps register during setup but only run after start; deps resolve lazily.
+    const stepsLogger = this.logger.get('steps');
+    registerStepDefinitions({
+      workflowsExtensions,
+      getActionsService: () => this.requireActionsService(),
+      getConversations: () => this.requireAgentBuilderConversations(),
+      getHuntServices: () => this.requireHuntServices(),
+      getResolveHostEnrollment: makeScopedResolveHostEnrollment(
+        () => this.fleetAgentService,
+        stepsLogger
+      ),
+      isContextEngineEnabled: makeIsContextEngineEnabled(() => this.requireCoreStart()),
+      logger: stepsLogger,
     });
 
     features.registerKibanaFeature({
       id: ALERTZERO_FEATURE_ID,
       name: ALERTZERO_PLUGIN_NAME,
       order: 1101,
+      minimumLicense: 'enterprise',
       category: DEFAULT_APP_CATEGORIES.security,
-      app: ['kibana', ALERTZERO_FEATURE_ID],
+      // Keep the app mountable for upgrade and access-denied screens; APIs enforce privileges.
+      app: ['kibana'],
       privileges: {
         all: {
-          app: ['kibana', ALERTZERO_FEATURE_ID],
+          app: ['kibana'],
           api: [ALERTZERO_API_PRIVILEGE_READ, ALERTZERO_API_PRIVILEGE_WRITE],
           savedObject: { all: [], read: [] },
           ui: ['show', 'write'],
         },
         read: {
-          app: ['kibana', ALERTZERO_FEATURE_ID],
+          app: ['kibana'],
           api: [ALERTZERO_API_PRIVILEGE_READ],
           savedObject: { all: [], read: [] },
           ui: ['show'],
@@ -130,7 +190,18 @@ export class AlertZeroPlugin
       },
     });
 
-    const router = coreSetup.http.createRouter();
+    coreSetup.http.registerRouteHandlerContext<AlertZeroRequestHandlerContext, 'alertzero'>(
+      'alertzero',
+      async (context) => ({
+        hasRequiredDependencies: Boolean(agentBuilder && proposals && agenticInvestigations),
+        subscription: getSubscriptionAvailability({
+          isServerless: this.isServerless,
+          serverlessTierAvailable: this.serverlessTierAvailable,
+          license: this.isServerless ? undefined : (await context.licensing).license,
+        }),
+      })
+    );
+    const router = coreSetup.http.createRouter<AlertZeroRequestHandlerContext>();
 
     registerRoutes({
       router,
@@ -141,25 +212,36 @@ export class AlertZeroPlugin
       getConversationProposalsService: () => this.requireConversationProposalsService(),
       getActionsService: () => this.requireActionsService(),
       getAgentBuilderConversations: () => this.requireAgentBuilderConversations(),
+      getHuntServices: () => this.requireHuntServices(),
+      getScanFailuresService: () => this.requireScanFailuresService(),
     });
 
-    return { isEnabled: true };
+    return { isEnabled: true, setServerlessTierAvailable: this.setServerlessTierAvailable };
   }
 
-  start(_core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
+  start(core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
     this.spaces = plugins.spaces;
+    this.coreStart = core;
+    this.fleetAgentService = plugins.fleet?.agentService;
     this.proposals = plugins.proposals;
     this.agentBuilderConversations = plugins.agentBuilder?.conversations;
 
     if (!this.config.enabled) {
-      return {};
+      return {
+        registerAlertTriageAttachmentServiceProvider:
+          this.registerAlertTriageAttachmentServiceProvider,
+      };
     }
 
-    void ensureAgentSafe({
-      agentBuilder: plugins.agentBuilder,
-      spaceId: DEFAULT_SPACE_ID,
-      logger: this.logger,
-    });
+    const { agentBuilder, agenticInvestigations, proposals } = plugins;
+    // Optional dependencies allow the upgrade shell to load without starting feature work.
+    if (!agentBuilder || !proposals || !agenticInvestigations) {
+      return {
+        registerAlertTriageAttachmentServiceProvider:
+          this.registerAlertTriageAttachmentServiceProvider,
+      };
+    }
+    void ensureAgentSafe({ agentBuilder, spaceId: DEFAULT_SPACE_ID, logger: this.logger });
 
     const management = this.workflowsManagementApi
       ? new WatchWorkflowsManagementClientImpl(this.workflowsManagementApi)
@@ -167,9 +249,7 @@ export class AlertZeroPlugin
     const managedWorkflows = initializeManagedWorkflows({
       workflowsExtensions: plugins.workflowsExtensions,
       logger: this.logger,
-      ensureAgentForSpace: plugins.agentBuilder
-        ? (spaceId) => ensureAgent({ agentBuilder: plugins.agentBuilder!, spaceId })
-        : undefined,
+      ensureAgentForSpace: (spaceId) => ensureAgent({ agentBuilder, spaceId }),
     }).catch((error) => {
       this.logger.error(
         `AlertZero managed workflow initialization failed: ${
@@ -180,10 +260,10 @@ export class AlertZeroPlugin
     });
 
     this.conversationProposalsService = new ConversationProposalsService(
-      plugins.proposals.getProposalsService(),
-      plugins.agentBuilder,
+      proposals.getProposalsService(),
+      agentBuilder,
       this.logger,
-      plugins.agenticInvestigations.getImpactClient
+      agenticInvestigations.getImpactClient
     );
 
     this.watchesService = new WatchesService();
@@ -194,62 +274,91 @@ export class AlertZeroPlugin
           : undefined,
       this.logger
     );
-    this.workersService = new WorkersService(management, managedWorkflows, this.logger, {
-      ensureAgentForSpace: plugins.agentBuilder
-        ? (spaceId) =>
-            ensureAgentSafe({ agentBuilder: plugins.agentBuilder!, spaceId, logger: this.logger })
-        : undefined,
-      agentBuilder: plugins.agentBuilder,
-      agentTypes: [agentType],
-    });
+    this.workersService = new WorkersService(
+      management,
+      managedWorkflows,
+      this.logger,
+      {
+        ensureAgentForSpace: (spaceId) =>
+          ensureAgentSafe({ agentBuilder, spaceId, logger: this.logger }),
+        agentBuilder,
+        agentTypes: [agentType],
+      },
+      {
+        // Reads whatever was registered via `registerAlertTriageAttachmentServiceProvider` at
+        // call time, not at construction time — a consumer may register after this plugin has
+        // started, since this plugin's optional consumers necessarily start after it does.
+        getAttachmentService: (request, workflowId) =>
+          this.alertTriageAttachmentServiceProvider
+            ? this.alertTriageAttachmentServiceProvider(request, workflowId)
+            : Promise.resolve(undefined),
+        // Read per request: the setting is space-scoped, so a Worker enabled in one space
+        // says nothing about another. Resolved here rather than in WorkersService because
+        // the setting belongs to security_solution.
+        isAlertAnalysisRuntimeEnabled: async (request) =>
+          core.uiSettings
+            .asScopedToClient(core.savedObjects.getScopedClient(request))
+            .get<boolean>(SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED),
+      }
+    );
 
-    return {};
+    this.scanFailuresService = new ScanFailuresService(management, this.logger);
+
+    this.huntServices = {
+      getProposalsService: () => this.requireProposals().getProposalsService(),
+      getInference: () => plugins.inference,
+      getSearchInferenceEndpoints: () => plugins.searchInferenceEndpoints,
+    };
+
+    return {
+      registerAlertTriageAttachmentServiceProvider:
+        this.registerAlertTriageAttachmentServiceProvider,
+    };
+  }
+
+  private requireStarted<T>(value: T | undefined, name: string): T {
+    if (!value) {
+      throw new Error(`${name} is not available until the AlertZero plugin has started`);
+    }
+    return value;
   }
 
   private requireWatchesService(): WatchesService {
-    if (!this.watchesService) {
-      throw new Error('Watches service is not available until the AlertZero plugin has started');
-    }
-    return this.watchesService;
+    return this.requireStarted(this.watchesService, 'Watches service');
   }
 
   private requireActionsService(): ActionsService {
-    if (!this.actionsService) {
-      throw new Error('Actions service is not available until the AlertZero plugin has started');
-    }
-    return this.actionsService;
+    return this.requireStarted(this.actionsService, 'Actions service');
   }
-  private requireProposals(): AlertZeroStartDependencies['proposals'] {
-    if (!this.proposals) {
-      throw new Error(
-        'proposals plugin start contract is not available until the AlertZero plugin has started'
-      );
-    }
-    return this.proposals;
+
+  private requireProposals(): NonNullable<AlertZeroStartDependencies['proposals']> {
+    return this.requireStarted(this.proposals, 'proposals plugin start contract');
   }
+
   private requireWorkersService(): WorkersService {
-    if (!this.workersService) {
-      throw new Error('Workers service is not available until the AlertZero plugin has started');
-    }
-    return this.workersService;
+    return this.requireStarted(this.workersService, 'Workers service');
   }
 
   private requireConversationProposalsService(): ConversationProposalsService {
-    if (!this.conversationProposalsService) {
-      throw new Error(
-        'ConversationProposalsService is not available until the AlertZero plugin has started'
-      );
-    }
-    return this.conversationProposalsService;
+    return this.requireStarted(this.conversationProposalsService, 'ConversationProposalsService');
   }
 
-  private requireAgentBuilderConversations(): AlertZeroStartDependencies['agentBuilder']['conversations'] {
-    if (!this.agentBuilderConversations) {
-      throw new Error(
-        'agentBuilder.conversations is not available until the AlertZero plugin has started'
-      );
-    }
-    return this.agentBuilderConversations;
+  private requireAgentBuilderConversations(): NonNullable<
+    AlertZeroStartDependencies['agentBuilder']
+  >['conversations'] {
+    return this.requireStarted(this.agentBuilderConversations, 'agentBuilder.conversations');
+  }
+
+  private requireHuntServices(): HuntServices {
+    return this.requireStarted(this.huntServices, 'Hunt services');
+  }
+
+  private requireCoreStart(): CoreStart {
+    return this.requireStarted(this.coreStart, 'CoreStart');
+  }
+
+  private requireScanFailuresService(): ScanFailuresService {
+    return this.requireStarted(this.scanFailuresService, 'Scan failures service');
   }
 
   private getSpaceId(request: KibanaRequest): string {

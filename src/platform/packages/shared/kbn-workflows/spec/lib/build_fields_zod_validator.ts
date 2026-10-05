@@ -12,15 +12,49 @@ import { z } from '@kbn/zod/v4';
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 import { resolveRef } from './field_conversion';
 
-const hasNamedProperties = (jsonSchema: JSONSchema7): boolean =>
-  jsonSchema.properties != null && Object.keys(jsonSchema.properties).length > 0;
+const schemaTypeList = (jsonSchema: JSONSchema7): string[] => {
+  if (Array.isArray(jsonSchema.type)) {
+    return jsonSchema.type;
+  }
+  return typeof jsonSchema.type === 'string' ? [jsonSchema.type] : [];
+};
+
+/**
+ * `fromJSONSchema` only compiles a single `type`. A type array becomes `z.unknown()`,
+ * so a typed map on that node has to be rebuilt as a union of one branch per type.
+ */
+const compileTypedMapBranch = (jsonSchema: JSONSchema7, valueSchema: z.ZodType): z.ZodType => {
+  const compiled = fromJSONSchema({ ...jsonSchema, type: 'object' } as Record<string, unknown>);
+  return compiled instanceof z.ZodObject
+    ? compiled.catchall(valueSchema)
+    : z.object({}).catchall(valueSchema);
+};
+
+const compileScalarBranch = (jsonSchema: JSONSchema7, type: string): z.ZodType | null => {
+  const compiled = fromJSONSchema({ ...jsonSchema, type } as Record<string, unknown>);
+  if (compiled === undefined || compiled instanceof z.ZodUnknown) {
+    return null;
+  }
+  return compiled;
+};
+
+const unionBranches = (branches: z.ZodType[]): z.ZodType => {
+  if (branches.length === 1) {
+    return branches[0];
+  }
+  return z.union(branches as [z.ZodType, z.ZodType, ...z.ZodType[]]);
+};
 
 /**
  * Applies `additionalProperties` that fromJSONSchema does not preserve at this wrapper layer.
  *
  * - `false` → `.strict()` so extra keys are rejected
- * - a schema object → `z.record` (no named properties) or `.catchall` (named + extras), so
- *   `getSchemaAtPath` can walk unknown keys into the value shape
+ * - a schema object on a compiled object → `.catchall`, so `getSchemaAtPath` walks unknown keys
+ *   into the value shape (including map-only objects such as `rules`)
+ * - a type array that includes `object` → that catchall object unioned with each other type
+ *
+ * `anyOf` / `oneOf` results are left as compiled. Replacing them with a record drops the
+ * composition.
  *
  * Limitation: this only applies at the schema node passed directly to the converter
  * mainly for maintaining backwards compatibility with legacy flat inputs.
@@ -37,18 +71,33 @@ function applyAdditionalProperties(
   }
 
   const additional = jsonSchema.additionalProperties;
-  if (convertValue && additional && typeof additional === 'object') {
-    const valueSchema = convertValue(additional as JSONSchema7);
-    if (!hasNamedProperties(jsonSchema)) {
-      return z.record(z.string(), valueSchema);
-    }
-    if (zodResult instanceof z.ZodObject) {
-      return zodResult.catchall(valueSchema);
-    }
-    if (zodResult instanceof z.ZodRecord) {
-      return zodResult;
-    }
-    return z.record(z.string(), valueSchema);
+  if (
+    !(convertValue && additional && typeof additional === 'object' && !Array.isArray(additional))
+  ) {
+    return zodResult;
+  }
+
+  const valueSchema = convertValue(additional as JSONSchema7);
+  if (zodResult instanceof z.ZodObject) {
+    return zodResult.catchall(valueSchema);
+  }
+  if (zodResult instanceof z.ZodRecord) {
+    return zodResult;
+  }
+
+  const types = schemaTypeList(jsonSchema);
+  const impliedObject =
+    types.includes('object') ||
+    (types.length === 0 && (!!jsonSchema.properties || !!jsonSchema.additionalProperties));
+  if (zodResult instanceof z.ZodUnknown && impliedObject) {
+    const branches = [
+      compileTypedMapBranch(jsonSchema, valueSchema),
+      ...types
+        .filter((type) => type !== 'object')
+        .map((type) => compileScalarBranch(jsonSchema, type))
+        .filter((branch): branch is z.ZodType => branch !== null),
+    ];
+    return unionBranches(branches);
   }
 
   return zodResult;
@@ -138,12 +187,22 @@ export function convertJsonSchemaToZodWithRefs(
 export function buildFieldsZodValidator(
   schema: RootSchemaType | null | undefined
 ): z.ZodType<Record<string, unknown>> {
-  if (!schema?.properties || typeof schema.properties !== 'object') {
+  const jsonRoot = schema as JSONSchema7 | null | undefined;
+  const hasProperties =
+    !!jsonRoot?.properties &&
+    typeof jsonRoot.properties === 'object' &&
+    !Array.isArray(jsonRoot.properties);
+  const hasTypedAdditionalProperties =
+    !!jsonRoot?.additionalProperties &&
+    typeof jsonRoot.additionalProperties === 'object' &&
+    !Array.isArray(jsonRoot.additionalProperties);
+
+  if (!schema || (!hasProperties && !hasTypedAdditionalProperties)) {
     return z.object({});
   }
 
   const shape: Record<string, z.ZodType> = {};
-  for (const [propertyName, propertySchema] of Object.entries(schema.properties)) {
+  for (const [propertyName, propertySchema] of Object.entries(jsonRoot?.properties ?? {})) {
     if (propertySchema && typeof propertySchema === 'object') {
       const jsonSchema = propertySchema as JSONSchema7;
       const resolvedSchema = jsonSchema.$ref
@@ -160,6 +219,16 @@ export function buildFieldsZodValidator(
       shape[propertyName] = zodSchema;
     }
   }
+
+  if (schema.required && hasTypedAdditionalProperties && jsonRoot) {
+    const additionalSchema = jsonRoot.additionalProperties as JSONSchema7;
+    for (const requiredKey of schema.required) {
+      if (!Object.hasOwn(shape, requiredKey)) {
+        shape[requiredKey] = convertJsonSchemaToZodWithRefs(additionalSchema, schema);
+      }
+    }
+  }
+
   return enrichZodSchema(schema as JSONSchema7, z.object(shape), (valueSchema) =>
     convertJsonSchemaToZodWithRefs(valueSchema, schema)
   ) as z.ZodType<Record<string, unknown>>;

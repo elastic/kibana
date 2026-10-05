@@ -22,7 +22,6 @@ interface ContextOverrides {
   hasEnterpriseLicense?: boolean;
   workflowsExtensionsPlugin?: boolean;
   workflowsManagementPlugin?: boolean;
-  inferencePlugin?: boolean;
   agentBuilderPlugin?: boolean;
 }
 
@@ -34,7 +33,6 @@ const buildArgs = (overrides: ContextOverrides = {}) => {
     hasEnterpriseLicense = true,
     workflowsExtensionsPlugin = true,
     workflowsManagementPlugin = true,
-    inferencePlugin = true,
     agentBuilderPlugin = true,
   } = overrides;
 
@@ -46,7 +44,6 @@ const buildArgs = (overrides: ContextOverrides = {}) => {
     cloud: projectType && { isServerlessEnabled: true, serverless: { projectType } },
     workflowsExtensions: workflowsExtensionsPlugin ? {} : undefined,
     workflowsManagement: workflowsManagementPlugin ? {} : undefined,
-    searchInferenceEndpoints: inferencePlugin ? {} : undefined,
     agentBuilder: agentBuilderPlugin ? {} : undefined,
   };
 
@@ -63,13 +60,28 @@ const buildArgs = (overrides: ContextOverrides = {}) => {
 };
 
 describe('assertSignificantEventsAccess', () => {
-  it('resolves when all requirements are met', async () => {
+  it('resolves without the retired search inference endpoints dependency', async () => {
     await expect(assertSignificantEventsAccess(buildArgs())).resolves.toBeUndefined();
   });
 
   it('throws a FeatureNotEnabledError (403) when the feature flag is disabled', async () => {
     await expect(
       assertSignificantEventsAccess(buildArgs({ featureFlagAvailable: false }))
+    ).rejects.toBeInstanceOf(FeatureNotEnabledError);
+  });
+
+  it('skips ignored requirements but still enforces the rest', async () => {
+    await expect(
+      assertSignificantEventsAccess({
+        ...buildArgs({ featureFlagAvailable: false }),
+        ignore: ['feature_flag'],
+      })
+    ).resolves.toBeUndefined();
+    await expect(
+      assertSignificantEventsAccess({
+        ...buildArgs({ featureFlagAvailable: false, hasEnterpriseLicense: false }),
+        ignore: ['feature_flag'],
+      })
     ).rejects.toBeInstanceOf(FeatureNotEnabledError);
   });
 
@@ -125,12 +137,6 @@ describe('assertSignificantEventsAccess', () => {
     ).rejects.toBeInstanceOf(MissingDependencyError);
   });
 
-  it('throws a MissingDependencyError (409) when inference endpoints are unavailable', async () => {
-    await expect(
-      assertSignificantEventsAccess(buildArgs({ inferencePlugin: false }))
-    ).rejects.toBeInstanceOf(MissingDependencyError);
-  });
-
   it('throws a MissingDependencyError (409) when agent builder is unavailable', async () => {
     await expect(
       assertSignificantEventsAccess(buildArgs({ agentBuilderPlugin: false }))
@@ -145,10 +151,10 @@ describe('getSignificantEventsAvailability', () => {
     });
   });
 
-  it('returns the unmet reason id', async () => {
+  it('returns the unmet plugin reason id', async () => {
     await expect(
-      getSignificantEventsAvailability(buildArgs({ inferencePlugin: false }))
-    ).resolves.toEqual({ available: false, reason: 'searchInferenceEndpoints' });
+      getSignificantEventsAvailability(buildArgs({ agentBuilderPlugin: false }))
+    ).resolves.toEqual({ available: false, reason: 'agentBuilder' });
   });
 
   it('returns the feature_flag reason when the flag is off', async () => {

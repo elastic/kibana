@@ -1,5 +1,5 @@
 {
-  "sha1": "611e3a5158a077d009d276b48943d750516019dd",
+  "sha1": "316037f98d4ea57505e4a2c630a94b3c645d1ef8",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
-        "line": 109,
-        "column": 11
+        "line": 118,
+        "column": 20
       }
     },
     {
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
-        "line": 196,
-        "column": 24
+        "line": 215,
+        "column": 23
       }
     },
     {
@@ -42,8 +42,162 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
-        "line": 337,
-        "column": 11
+        "line": 369,
+        "column": 8
+      }
+    },
+    {
+      "id": "bf49e6d67d9de6a-1fa71fd1e9b5e47",
+      "title": "Onboarding Authenticate and Deploy step — AWS identity federation flag OFF offers only access keys as an authentication method",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_aws_identity_federation_disabled.spec.ts",
+        "line": 39,
+        "column": 7
+      }
+    },
+    {
+      "id": "f15e544ef42c485-d507e5e70302bb3",
+      "title": "Onboarding Authenticate and Deploy step — AWS identity federation flag ON offers identity federation as an authentication method",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_aws_identity_federation_enabled.spec.ts",
+        "line": 39,
+        "column": 7
+      }
+    },
+    {
+      "id": "3f477dd4cf67746-50a28b810a92189",
+      "title": "Onboarding drift detection and redeploy — agent-based agent-based dirty redeploy: service-var drift triggers package policy PUT and SO update",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_drift_agent_based.spec.ts",
+        "line": 80,
+        "column": 24
+      }
+    },
+    {
+      "id": "3f477dd4cf67746-b506817b066e04d",
+      "title": "Onboarding drift detection and redeploy — agent-based agent-based clean return: no drift callout shown and Next enabled when session matches SO",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_drift_agent_based.spec.ts",
+        "line": 316,
+        "column": 7
+      }
+    },
+    {
+      "id": "3f477dd4cf67746-7f05a389cd1e2a0",
+      "title": "Onboarding drift detection and redeploy — agent-based agent-based policy-selection drift: changed selectedAgentPolicyIds triggers callout and PUT carries new policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_drift_agent_based.spec.ts",
+        "line": 455,
+        "column": 18
+      }
+    },
+    {
+      "id": "53a0338406a915f-da3974de9fdccf3",
+      "title": "Onboarding drift detection and redeploy — error handling drift check error: SO GET failure shows error callout, Retry re-fetches and recovers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_drift_error.spec.ts",
+        "line": 96,
+        "column": 7
+      }
+    },
+    {
+      "id": "3c6258c20d07baa-ddd157bc7d95bca",
+      "title": "Onboarding drift detection and redeploy — managed integrations service-var drift: callout shown and dirty redeploy fires PUT even when SO serviceVars was empty",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_drift_mi.spec.ts",
+        "line": 114,
+        "column": 26
+      }
+    },
+    {
+      "id": "3c6258c20d07baa-809ece244e79d6d",
+      "title": "Onboarding drift detection and redeploy — managed integrations no drift on clean return: no callout shown, Next enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_drift_mi.spec.ts",
+        "line": 260,
+        "column": 13
+      }
+    },
+    {
+      "id": "3c6258c20d07baa-09fe40170377f69",
+      "title": "Onboarding drift detection and redeploy — managed integrations removing a deployed service does not trigger false drift",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_drift_mi.spec.ts",
+        "line": 320,
+        "column": 16
+      }
+    },
+    {
+      "id": "3c6258c20d07baa-523282a35128e2d",
+      "title": "Onboarding drift detection and redeploy — managed integrations static-key replacement marks dirty immediately without SO re-fetch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_drift_mi.spec.ts",
+        "line": 366,
+        "column": 25
+      }
+    },
+    {
+      "id": "3c6258c20d07baa-dfd5e9b298881b5",
+      "title": "Onboarding drift detection and redeploy — managed integrations failed dirty redeploy keeps Retry visible and blocks Next",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_drift_mi.spec.ts",
+        "line": 534,
+        "column": 23
       }
     },
     {
@@ -126,7 +280,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_ff_enabled.spec.ts",
-        "line": 35,
+        "line": 36,
         "column": 23
       }
     },
@@ -379,7 +533,21 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
         "line": 514,
-        "column": 100
+        "column": 93
+      }
+    },
+    {
+      "id": "f11cb343b6e8637-adcc1c2a7e5b675",
+      "title": "Onboarding Service Settings step duplicate keeps its own namespace across reloads",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
+        "line": 553,
+        "column": 11
       }
     },
     {
@@ -392,8 +560,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 548,
-        "column": 24
+        "line": 593,
+        "column": 20
       }
     },
     {
@@ -406,8 +574,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 576,
-        "column": 17
+        "line": 622,
+        "column": 7
       }
     },
     {
@@ -420,8 +588,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 640,
-        "column": 11
+        "line": 687,
+        "column": 24
       }
     },
     {
@@ -434,7 +602,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 715,
+        "line": 758,
         "column": 24
       }
     },
@@ -448,7 +616,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 743,
+        "line": 786,
         "column": 24
       }
     },
@@ -462,8 +630,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
-        "line": 38,
-        "column": 52
+        "line": 17,
+        "column": 14
       }
     },
     {
@@ -476,8 +644,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
-        "line": 49,
-        "column": 79
+        "line": 30,
+        "column": 24
       }
     },
     {
@@ -490,8 +658,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
-        "line": 61,
-        "column": 11
+        "line": 36,
+        "column": 74
       }
     },
     {
@@ -504,8 +672,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
-        "line": 77,
-        "column": 11
+        "line": 52,
+        "column": 23
       }
     },
     {
@@ -518,8 +686,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
-        "line": 85,
-        "column": 5
+        "line": 62,
+        "column": 11
       }
     },
     {
@@ -546,8 +714,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_so_persist.spec.ts",
-        "line": 145,
-        "column": 9
+        "line": 163,
+        "column": 22
       }
     },
     {
@@ -560,8 +728,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_so_persist.spec.ts",
-        "line": 180,
-        "column": 5
+        "line": 198,
+        "column": 24
       }
     },
     {
@@ -574,7 +742,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_step_invalidation.spec.ts",
-        "line": 62,
+        "line": 63,
         "column": 8
       }
     },

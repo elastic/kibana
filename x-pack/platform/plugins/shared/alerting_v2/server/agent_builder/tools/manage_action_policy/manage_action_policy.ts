@@ -6,14 +6,15 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { z } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core/server';
+import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
 import type { ActionPolicyAttachmentData } from '@kbn/alerting-v2-schemas';
+import type { WorkflowsManagementClient } from '@kbn/workflows-management-plugin/server';
 import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import type { ValidateWorkflowResponseDto } from '@kbn/workflows';
 import {
@@ -37,14 +38,7 @@ const manageActionPolicySchema = z.object({
 
 export interface ManageActionPolicyToolDeps {
   logger: LoggerServiceContract;
-  getWorkflow: (
-    id: string,
-    spaceId: string
-  ) => Promise<{
-    id: string;
-    name?: string;
-    yaml?: string;
-  } | null>;
+  getWorkflowClient: (request: KibanaRequest) => Pick<WorkflowsManagementClient, 'getWorkflow'>;
   getAvailableConnectors: (
     spaceId: string,
     request: KibanaRequest
@@ -66,7 +60,7 @@ export interface ManageActionPolicyToolDeps {
 
 export const manageActionPolicyTool = ({
   logger,
-  getWorkflow,
+  getWorkflowClient,
   getAvailableConnectors,
   validateWorkflow,
 }: ManageActionPolicyToolDeps): BuiltinSkillBoundedTool<typeof manageActionPolicySchema> => ({
@@ -81,7 +75,7 @@ user to the "Create policy" or "Update Policy" button in the rendered attachment
 Use operations[] to:
 1. set_metadata — set name and description
 2. set_destinations — set workflow destinations (type: 'workflow', id: '<workflow-id>')
-3. set_matcher — set matcher \`tags\` (string[]) to match by rule tags, or a KQL \`expression\` over episode context fields, or null for catch-all. To target one specific rule, put a shared link tag on both the rule (via manage_rule \`set_metadata\`) and \`matcher.tags\`.
+3. set_matcher — set matcher \`tags\` (string[]) to match by rule tags, or a KQL \`expression\` over alert context fields, or null for catch-all. To target one specific rule, put a shared link tag on both the rule (via manage_rule \`set_metadata\`) and \`matcher.tags\`.
 4. set_grouping — set groupingMode (per_episode | all | per_field) and groupBy fields
 5. set_throttle — set throttle strategy and optional interval
 6. validate — validate the accumulated policy against the API request schema; throws if not ready to save`,
@@ -138,7 +132,7 @@ Use operations[] to:
 
         const destinationResult = await validateDestinations(updatedData.destinations, {
           attachments,
-          workflowLookup: { getWorkflow },
+          workflowLookup: getWorkflowClient(request),
           connectorLookup: { findConnectorById },
           spaceId,
           validateWorkflow,

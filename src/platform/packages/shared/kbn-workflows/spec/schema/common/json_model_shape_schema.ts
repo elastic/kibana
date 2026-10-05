@@ -85,6 +85,14 @@ export interface JsonSchema {
   uniqueItems?: boolean;
 }
 
+/** True when `additionalProperties` is a value schema rather than a boolean. */
+export const isSchemaValuedAdditionalProperties = (
+  additionalProperties: unknown
+): additionalProperties is JsonSchema =>
+  typeof additionalProperties === 'object' &&
+  additionalProperties !== null &&
+  !Array.isArray(additionalProperties);
+
 /**
  * JSON Schema property keywords available for autocomplete.
  * Derived from JsonSchema type – the `satisfies` clause ensures

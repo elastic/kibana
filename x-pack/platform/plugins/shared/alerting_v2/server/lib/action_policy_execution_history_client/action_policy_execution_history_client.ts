@@ -143,7 +143,7 @@ export class ActionPolicyExecutionHistoryClient {
       episodeIds,
     });
 
-    const nameMaps = await this.resolveNames(result.events, spaceId);
+    const nameMaps = await this.resolveNames(result.events, spaceId, request);
     const items = result.events
       .map((event) =>
         buildExecutionHistoryItem(
@@ -201,13 +201,17 @@ export class ActionPolicyExecutionHistoryClient {
     };
   }
 
-  private async resolveNames(events: IValidatedEvent[], spaceId: string): Promise<NameMaps> {
+  private async resolveNames(
+    events: IValidatedEvent[],
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<NameMaps> {
     const { policyIds, ruleIds, workflowIds } = collectIdsFromEvents(events);
 
     const [policiesRes, rulesRes, workflowsRes] = await Promise.allSettled([
       this.actionPolicyClient.getActionPolicies({ ids: policyIds }),
       this.lookupRulesByIds(ruleIds),
-      this.workflowsManagement.getWorkflowsByIds(workflowIds, spaceId),
+      this.workflowsManagement.getClient(request).getWorkflowsByIds(workflowIds, spaceId),
     ]);
 
     const policies = this.unwrapArray(
