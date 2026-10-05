@@ -16,6 +16,7 @@ import type { AppHeaderTab } from '@kbn/app-header';
 import {
   OBSERVABILITY_ALERTING_APP_ID,
   OBSERVABILITY_ALERTING_BASE_PATH,
+  createObservabilityAlertingV2Host,
 } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
@@ -47,14 +48,7 @@ const useObservabilityHostApp = (
   createAlertingV2HostApp: AlertingV2PublicStart['createAlertingV2HostApp']
 ): AlertingV2HostApp =>
   useMemo(
-    () =>
-      createAlertingV2HostApp(OBSERVABILITY_ALERTING_APP_ID, {
-        rules: OBSERVABILITY_ALERTING_RULES_V2_PATH,
-        ruleLibrary: OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
-        alerts: OBSERVABILITY_ALERTING_ALERTS_PATH,
-        actionPolicies: OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
-        executionHistory: OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
-      }),
+    () => createObservabilityAlertingV2Host(createAlertingV2HostApp),
     [createAlertingV2HostApp]
   );
 
