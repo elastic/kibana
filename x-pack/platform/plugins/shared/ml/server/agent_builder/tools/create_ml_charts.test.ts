@@ -68,13 +68,14 @@ describe('createMlChartsTool', () => {
 
   it('stores anomaly_charts severity_threshold as an open-ended floor', async () => {
     const attachmentsAdd = jest.fn().mockResolvedValue({ id: 'att-1', current_version: 1 });
+    const getJobs = jest.fn().mockResolvedValue({ jobs: [{ job_id: 'job-1' }] });
     const result = await createMlChartsToolInstance.handler(
       {
         chart_type: 'anomaly_charts',
         job_ids: ['job-1'],
         severity_threshold: 30,
       },
-      createContext(attachmentsAdd)
+      createContext(attachmentsAdd, getJobs)
     );
 
     expect(attachmentsAdd).toHaveBeenCalledWith({

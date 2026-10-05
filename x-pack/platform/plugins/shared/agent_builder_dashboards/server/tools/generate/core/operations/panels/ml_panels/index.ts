@@ -16,7 +16,7 @@ import {
 } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
 import { singleMetricViewerEmbeddableStateSchema } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
 import { z } from '@kbn/zod/v4';
-import { definePanelType, type ConfigEditValidation } from '../panel_type';
+import type { ConfigPanelTypeDefinition } from '../config_panel_type';
 
 /**
  * ML anomaly detection panel logic.
@@ -35,16 +35,6 @@ import { definePanelType, type ConfigEditValidation } from '../panel_type';
  */
 
 const panelIdSchema = z.string().max(256);
-
-const validateSameEmbeddableType =
-  (embeddableType: string, kind: string) =>
-  (existingPanel: { id: string; type: string }): ConfigEditValidation =>
-    existingPanel.type === embeddableType
-      ? { ok: true }
-      : {
-          ok: false,
-          error: `Panel "${existingPanel.id}" with type "${existingPanel.type}" cannot be edited as ${kind}.`,
-        };
 
 // ─── Anomaly Charts ───────────────────────────────────────────────────────────
 
@@ -86,22 +76,19 @@ export const editAnomalyChartsPanelConfigInputSchema = anomalyChartsPanelConfigI
     ),
   });
 
-export const anomalyChartsPanelDefinition = definePanelType({
+export const anomalyChartsPanelDefinition: ConfigPanelTypeDefinition = {
   embeddableType: 'ml_anomaly_charts',
-  buildPanelContent: (config) => {
+  label: 'anomaly charts',
+  toEmbeddableConfig: (config) => {
     const { severity_threshold: severityThreshold, ...rest } = config;
     const normalizedThreshold =
       typeof severityThreshold === 'number' ? [{ min: severityThreshold }] : severityThreshold;
     return {
-      type: 'ml_anomaly_charts',
-      config: {
-        ...rest,
-        ...(normalizedThreshold != null ? { severity_threshold: normalizedThreshold } : {}),
-      },
+      ...rest,
+      ...(normalizedThreshold != null ? { severity_threshold: normalizedThreshold } : {}),
     };
   },
-  validateConfigEdit: validateSameEmbeddableType('ml_anomaly_charts', 'anomaly charts'),
-});
+};
 
 // ─── Anomaly Swim Lane ────────────────────────────────────────────────────────
 
@@ -131,10 +118,10 @@ export const editAnomalySwimlaneConfigInputSchema = anomalySwimlaneConfigInputSc
     ),
   });
 
-export const anomalySwimlaneDefinition = definePanelType({
+export const anomalySwimlaneDefinition: ConfigPanelTypeDefinition = {
   embeddableType: 'ml_anomaly_swimlane',
-  validateConfigEdit: validateSameEmbeddableType('ml_anomaly_swimlane', 'anomaly swim lane'),
-});
+  label: 'anomaly swim lane',
+};
 
 // ─── Single Metric Viewer ─────────────────────────────────────────────────────
 
@@ -166,7 +153,7 @@ export const editSingleMetricViewerConfigInputSchema = singleMetricViewerConfigI
     ),
   });
 
-export const singleMetricViewerPanelDefinition = definePanelType({
+export const singleMetricViewerPanelDefinition: ConfigPanelTypeDefinition = {
   embeddableType: 'ml_single_metric_viewer',
-  validateConfigEdit: validateSameEmbeddableType('ml_single_metric_viewer', 'single metric viewer'),
-});
+  label: 'single metric viewer',
+};

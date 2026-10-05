@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/293802
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- AI and machine Learning
+title: "Enable Elastic Authentication Redirect Service OAuth for connectors by default"
+description: "Turns on the Elastic Authentication Redirect Service OAuth flow for connectors by default when a service URL is configured."

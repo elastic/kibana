@@ -1402,7 +1402,6 @@ x-pack/solutions/search/plugins/search_assistant @elastic/search-ml-ux
 x-pack/solutions/search/plugins/search_getting_started @elastic/search-ml-ux
 x-pack/solutions/search/plugins/search_homepage @elastic/search-ml-ux
 x-pack/solutions/search/plugins/search_navigation @elastic/search-ml-ux
-x-pack/solutions/search/plugins/search_notebooks @elastic/search-ml-ux
 x-pack/solutions/search/plugins/search_query_rules @elastic/search-ml-ux
 x-pack/solutions/search/plugins/search_synonyms @elastic/search-ml-ux
 x-pack/solutions/search/plugins/serverless_search @elastic/search-ml-ux
@@ -1559,6 +1558,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/watchlist-entity-source @elastic/security-entity-analytics
 
 # Data Discovery
+/src/platform/packages/shared/kbn-scout/src/playwright/ui_components/esql_editor @elastic/kibana-discover @elastic/appex-qa
 /x-pack/platform/test/api_integration/services/data_view_api.ts @elastic/kibana-discover
 /src/platform/test/functional/page_objects/unified_field_list.ts @elastic/kibana-discover
 /src/platform/test/functional/page_objects/unified_tabs.ts @elastic/kibana-discover
@@ -2647,6 +2647,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/alienvault_otx/** @el
 src/platform/packages/shared/kbn-connector-specs/src/specs/amazon_s3/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/atlassian/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_cloudwatch/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/aws_eks/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_lambda/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_x_ray/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/azure_aks/** @elastic/nightshift-context-and-research-team
@@ -2675,6 +2676,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/google_cloud_monitori
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_cloud_storage/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_docs/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_drive/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/google_gke/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_threat_intelligence/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/graphql/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/greynoise/** @elastic/workflows-eng
@@ -3720,12 +3722,8 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 
 # Shared UX
 /src/core/packages/chrome @elastic/appex-sharedux
+/src/platform/kbn-ui/* @elastic/appex-sharedux
 /src/platform/kbn-ui/_tooling @elastic/appex-sharedux
-/src/platform/kbn-ui/app-header @elastic/appex-sharedux
-/src/platform/kbn-ui/app-menu @elastic/appex-sharedux
-/src/platform/kbn-ui/chrome-layout @elastic/appex-sharedux
-/src/platform/kbn-ui/favorite-button @elastic/appex-sharedux
-/src/platform/kbn-ui/side-navigation @elastic/appex-sharedux
 /x-pack/platform/test/serverless/api_integration/test_suites/favorites @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200985
 /src/platform/test/api_integration/apis/short_url/**/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files#r1846654156
 /src/platform/test/api_integration/apis/unused_urls_task/**/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/220138
@@ -3852,6 +3850,11 @@ src/platform/packages/shared/kbn-apm-ui-shared/src/components/genai @elastic/obs
 /.agents/skills/kibana-privilege-deprecation/** @elastic/kibana-security
 /.agents/skills/encrypted-saved-objects/** @elastic/kibana-security
 
+# Agent Builder tool review
+/.agents/skills/agent-builder-tool-review/** @elastic/workchat-eng
+/.github/skills/agent-builder-tool-review/** @elastic/workchat-eng
+/.libra/specialists/agent-builder-tools.md @elastic/workchat-eng
+
 # Kibana accessibility
 /.agents/skills/accessibility/** @elastic/kibana-accessibility
 
@@ -3908,8 +3911,8 @@ src/platform/packages/shared/kbn-apm-ui-shared/src/components/genai @elastic/obs
 /.buildkite/scripts/steps/code_generation/security_solution_codegen.sh @elastic/security-detection-engineering
 /.buildkite/scripts/steps/code_generation/cases_codegen.sh @elastic/security-investigations
 /.buildkite/scripts/steps/security @elastic/kibana-security
-/.buildkite/scripts/steps/entity_store_performance @elastic/contextual-security
-/.buildkite/pipelines/build_pr_and_test_entity_store_performance.yml @elastic/contextual-security
+/.buildkite/scripts/steps/entity_store_performance @elastic/security-entity-analytics
+/.buildkite/pipelines/build_pr_and_test_entity_store_performance.yml @elastic/security-entity-analytics
 /.buildkite/scripts/steps/test/scout/ @elastic/appex-qa @elastic/kibana-operations
 /.buildkite/scout_ci_config.yml @elastic/appex-qa
 /.buildkite/pipelines/security_solution/scout_edr_real_fleet.yml @elastic/security-defend-workflows
