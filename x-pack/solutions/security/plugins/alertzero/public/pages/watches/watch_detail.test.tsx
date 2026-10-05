@@ -162,6 +162,11 @@ const huntWorker = createWorker({
   id: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   name: 'Continuous Threat Hunt',
   watchIds: [SYSTEM_SECURITY_WATCH_HUNT_ID],
+  settings: {
+    workerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+    autonomy: 'manual',
+    scheduleInterval: '4h',
+  },
 });
 
 /** Complete Rule Tuning extras; cases vary the window and keep the FP thresholds at default. */
@@ -193,7 +198,7 @@ const detectionWorkers: Worker[] = [
   }),
 ];
 
-const renderWatch = (watchId: string, workers: Worker[]) => {
+const renderWatch = (watchId: string, workers: Worker[], canModifyWorkers?: boolean) => {
   mockUseWatch.mockReturnValue({
     data: { watch: createCatalogWatchPlaceholder(watchId as CatalogWatchId) },
     isLoading: false,
@@ -201,7 +206,10 @@ const renderWatch = (watchId: string, workers: Worker[]) => {
     refetch: jest.fn(),
   } as never);
   mockUseWorkers.mockReturnValue({
-    data: { workers },
+    data: {
+      workers,
+      ...(canModifyWorkers === undefined ? {} : { canModifyWorkers }),
+    },
     isLoading: false,
     error: null,
     refetch: jest.fn(),
@@ -942,6 +950,18 @@ describe('WatchDetailPage', () => {
         settingsRevision: null,
       },
     });
+  });
+
+  it('locks worker settings when the caller lacks manage_security', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers, false);
+
+    expect(screen.getByTestId('alertZeroReadOnlyCallout')).toBeInTheDocument();
+    expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeDisabled();
+    expect(
+      screen.getByTestId(
+        `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+      )
+    ).toBeDisabled();
   });
 
   it('locks worker settings and disables save/discard with a tooltip when the user cannot write', () => {
