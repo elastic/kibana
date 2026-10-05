@@ -25,6 +25,9 @@ jest.mock('./use_matched_action_policies', () => ({
   useMatchedActionPolicies: jest.fn(),
 }));
 jest.mock('./use_action_policy_connector_types');
+jest.mock('../../../form/fields/routing_tags_field', () => ({
+  RoutingTagsField: () => <div data-test-subj="ruleRoutingTagsField" />,
+}));
 
 const mockInvalidateQueries = jest.fn();
 
@@ -82,9 +85,12 @@ describe('LinkedActionPoliciesStep', () => {
     expect(screen.getByText('Action policies')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'These policies match this rule by catch-all or tag. Policies with a query condition may also match at dispatch time based on alert data.'
+        'Routing tags determine which action policies apply. Catch-all action policies match all alerts.'
       )
     ).toBeInTheDocument();
+    expect(screen.getByTestId('ruleRoutingTagsField')).toBeInTheDocument();
+    expect(screen.getByText('Applied policies')).toBeInTheDocument();
+    expect(screen.getByTestId('linkedActionPoliciesCount')).toHaveTextContent('1');
   });
 
   it('shows a loading spinner while fetching', () => {

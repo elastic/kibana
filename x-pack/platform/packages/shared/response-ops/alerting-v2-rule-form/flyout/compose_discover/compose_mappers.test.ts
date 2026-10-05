@@ -348,9 +348,9 @@ describe('composeFormToUpdateRequest', () => {
     expect(result.metadata?.routing_tags).toEqual(['sre']);
   });
 
-  it('omits empty routing tags so the stored value is preserved', () => {
+  it('nullifies routing tags when empty (clear all routing tags on a partial update)', () => {
     const result = composeFormToUpdateRequest(baseFormValues);
-    expect(result.metadata).not.toHaveProperty('routing_tags');
+    expect(result.metadata?.routing_tags).toBeNull();
   });
 
   it('preserves grouping when present', () => {

@@ -67,15 +67,14 @@ export const composeFormToUpdateRequest = (
   return {
     ...rest,
     metadata: {
-      /*
-       * `routing_tags` stays omitted when empty, which preserves the stored value:
-       * the YAML editor does not carry routing tags, so clearing here would wipe them.
-       */
       ...metadata,
       builder_type: metadata.builder_type ?? null,
       // Empty tags must be sent as an explicit `null` to clear them; omitting
       // the key would preserve the existing tags on a partial update.
       tags: formValues.metadata.tags?.length ? formValues.metadata.tags : null,
+      routing_tags: formValues.metadata.routingTags?.length
+        ? formValues.metadata.routingTags
+        : null,
     },
     grouping: grouping ?? null,
     state_transition: state_transition ?? null,
