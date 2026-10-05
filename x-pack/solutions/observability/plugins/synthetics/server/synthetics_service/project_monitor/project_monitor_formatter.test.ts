@@ -274,12 +274,13 @@ describe('ProjectMonitorFormatter', () => {
     expect(logger.error).not.toHaveBeenCalled();
   });
 
-  it('catches errors from bulk edit method', async () => {
+  it('does not synchronize project monitors when bulk Saved Object creation has no successes', async () => {
     soClient.bulkCreate.mockImplementation(async () => {
       return {
         saved_objects: [],
       };
     });
+    const addMonitors = jest.spyOn(monitorClient, 'addMonitors');
 
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
@@ -299,18 +300,15 @@ describe('ProjectMonitorFormatter', () => {
     }).toEqual({
       createdMonitors: [],
       updatedMonitors: [],
-      failedMonitors: [
-        {
-          details: "Cannot read properties of undefined (reading 'buildPackagePolicyFromPackage')",
-          payload: payloadData,
-          reason: 'Failed to create 2 monitors',
-        },
-      ],
+      failedMonitors: [],
     });
+    expect(addMonitors).not.toHaveBeenCalled();
+    addMonitors.mockRestore();
   });
 
-  it('configures project monitors when there are errors', async () => {
+  it('does not report project monitors as created when the repository returns no Saved Objects', async () => {
     soClient.bulkCreate = jest.fn().mockResolvedValue({ saved_objects: [] });
+    const addMonitors = jest.spyOn(monitorClient, 'addMonitors');
 
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
@@ -330,18 +328,25 @@ describe('ProjectMonitorFormatter', () => {
     }).toEqual({
       createdMonitors: [],
       updatedMonitors: [],
-      failedMonitors: [
-        {
-          details: "Cannot read properties of undefined (reading 'buildPackagePolicyFromPackage')",
-          payload: payloadData,
-          reason: 'Failed to create 2 monitors',
-        },
-      ],
+      failedMonitors: [],
     });
+    expect(addMonitors).not.toHaveBeenCalled();
+    addMonitors.mockRestore();
   });
 
   it('shows errors thrown by fleet api', async () => {
-    soClient.bulkCreate = jest.fn().mockResolvedValue({ saved_objects: soResult });
+    soClient.bulkCreate = jest
+      .fn()
+      .mockImplementation(
+        (monitors: Array<{ id: string; type: string; attributes: Record<string, unknown> }>) => ({
+          saved_objects: monitors.map((monitor) => ({
+            id: monitor.id,
+            type: monitor.type,
+            attributes: monitor.attributes,
+          })),
+        })
+      );
+    monitorClient.addMonitors = jest.fn().mockRejectedValue(new Error('Fleet sync failed'));
 
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
@@ -363,7 +368,7 @@ describe('ProjectMonitorFormatter', () => {
       updatedMonitors: [],
       failedMonitors: [
         {
-          details: "Cannot read properties of undefined (reading 'buildPackagePolicyFromPackage')",
+          details: 'Fleet sync failed',
           reason: 'Failed to create 2 monitors',
           payload: payloadData,
         },
@@ -371,7 +376,7 @@ describe('ProjectMonitorFormatter', () => {
     });
   });
 
-  it('creates project monitors when no errors', async () => {
+  it('preserves an explicitly configured project monitor namespace when creating monitors', async () => {
     soClient.bulkCreate = jest.fn().mockResolvedValue({ saved_objects: soResult });
 
     monitorClient.addMonitors = jest.fn().mockReturnValue([]);
@@ -383,7 +388,7 @@ describe('ProjectMonitorFormatter', () => {
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
       spaceId: 'default-space',
-      monitors: testMonitors,
+      monitors: [{ ...testMonitors[0], namespace: 'default' }, testMonitors[1]],
       routeContext,
     });
 
@@ -397,6 +402,7 @@ describe('ProjectMonitorFormatter', () => {
           ...soData[0],
           attributes: {
             ...soData[0].attributes,
+            [ConfigKey.NAMESPACE]: 'default',
             [ConfigKey.MONITOR_QUERY_ID]: expect.any(String),
             [ConfigKey.CONFIG_ID]: expect.any(String),
           },

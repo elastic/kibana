@@ -875,6 +875,22 @@ describe('MonitorConfigRepository', () => {
 
       expect(soClient.search).not.toHaveBeenCalled();
     });
+
+    it('does not infer a monitor name when Elasticsearch returns a hit without stored fields', async () => {
+      soClient.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, failed: 0 },
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          hits: [{ _index: '.kibana', _id: 'monitor-id', fields: {} }],
+        },
+      });
+
+      await expect(
+        repository.findExistingMonitorName(['Requested monitor'], 'default')
+      ).resolves.toBeUndefined();
+    });
   });
 
   describe('findDecryptedMonitors', () => {

@@ -392,7 +392,7 @@ export class MonitorConfigRepository {
     const existingName = nameFields
       .map((field) => hits.hits[0]?.fields?.[field]?.[0])
       .find((value): value is string => typeof value === 'string');
-    return existingName ?? (hits.hits.length > 0 ? names[0] : undefined);
+    return existingName;
   }
 
   async findDecryptedMonitors({ spaceId, filter }: { spaceId: string; filter?: string }) {

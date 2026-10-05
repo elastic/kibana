@@ -7,8 +7,14 @@
 
 import { ConfigKey } from '../../../../common/runtime_types';
 import type { RouteContext } from '../../types';
+import { AddEditMonitorAPI } from '../add_monitor/add_monitor_api';
 import { CreateMonitorBulkAPI } from './create_monitor_bulk_api';
 import type { BulkCreatePreprocessResult } from './create_monitor_bulk_api';
+
+jest.mock('../monitor_validation', () => ({
+  ...jest.requireActual('../monitor_validation'),
+  validateMonitor: jest.fn(),
+}));
 
 jest.mock('../edit_monitor', () => ({
   validatePermissions: jest.fn(),
@@ -180,5 +186,36 @@ describe('CreateMonitorBulkAPI.prepare helpers', () => {
     ).resolves.toEqual([[]]);
 
     expect(createInternalRepository).not.toHaveBeenCalled();
+  });
+
+  it('identifies the monitor when monitor validation fails', async () => {
+    const normalizeMonitor = jest
+      .spyOn(AddEditMonitorAPI.prototype, 'normalizeMonitor')
+      .mockResolvedValue({} as any);
+    const validateMonitor = jest.requireMock('../monitor_validation').validateMonitor;
+    validateMonitor.mockReturnValue({
+      valid: false,
+      reason: 'Invalid value supplied to schedule',
+      details: 'schedule must be a positive integer',
+    });
+    const routeContext = {
+      ...mockRouteContext(),
+      server: { cloud: { isServerlessEnabled: false } },
+    } as unknown as RouteContext;
+
+    await expect(
+      (new CreateMonitorBulkAPI(routeContext) as any).normalizeMonitors(
+        [{ [ConfigKey.NAME]: 'Checkout journey' }],
+        [],
+        [[]]
+      )
+    ).rejects.toMatchObject({
+      result: {
+        reason: 'Invalid monitor "Checkout journey": Invalid value supplied to schedule',
+        details: 'schedule must be a positive integer',
+      },
+    });
+
+    normalizeMonitor.mockRestore();
   });
 });

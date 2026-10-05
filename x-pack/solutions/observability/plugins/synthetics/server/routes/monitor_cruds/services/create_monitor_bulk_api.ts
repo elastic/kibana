@@ -184,7 +184,10 @@ export class CreateMonitorBulkAPI {
         this.routeContext.server.cloud?.isServerlessEnabled
       );
       if (!validation.valid || !validation.decodedMonitor) {
-        throw bulkCreateValidationError(validation.reason, validation.details);
+        throw bulkCreateValidationError(
+          `Invalid monitor "${monitor[ConfigKey.NAME]}": ${validation.reason}`,
+          validation.details
+        );
       }
       normalizedMonitors.push(validation.decodedMonitor);
     }

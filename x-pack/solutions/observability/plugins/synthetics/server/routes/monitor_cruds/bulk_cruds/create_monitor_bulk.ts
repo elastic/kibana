@@ -88,6 +88,7 @@ export const createSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
         privateLocations,
         maintenanceWindows,
         spaceId,
+        hydrateNamespace: true,
       });
 
       const failedMonitorsById = new Map(
@@ -99,10 +100,7 @@ export const createSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
           return {
             id: monitor.id,
             created: false,
-            error:
-              syncError instanceof Error
-                ? syncError.message
-                : 'Failed to sync monitor to private location',
+            error: getPrivateLocationSyncErrorMessage(syncError),
           };
         }
         if (isSavedObjectErrorResult(monitor)) {
@@ -144,3 +142,16 @@ export const createSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
     }
   },
 });
+
+const getPrivateLocationSyncErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (error && typeof error === 'object' && 'message' in error) {
+    const { message } = error as { message?: unknown };
+    if (typeof message === 'string') {
+      return message;
+    }
+  }
+  return 'Failed to sync monitor to private location';
+};

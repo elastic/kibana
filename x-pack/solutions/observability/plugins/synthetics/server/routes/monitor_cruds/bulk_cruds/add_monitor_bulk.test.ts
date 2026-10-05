@@ -163,6 +163,7 @@ describe('syncNewMonitorBulk', () => {
       normalizedMonitors,
       privateLocations: [],
       spaceId: 'marketing',
+      hydrateNamespace: true,
     });
 
     expect(mockMonitorConfigRepository.createBulk).toHaveBeenCalledWith(
@@ -183,6 +184,38 @@ describe('syncNewMonitorBulk', () => {
       [],
       'marketing',
       undefined
+    );
+  });
+
+  it('preserves an explicitly normalized project namespace without public-route hydration', async () => {
+    mockRouteContext.spaceId = 'marketing';
+    const normalizedMonitors = [
+      {
+        name: 'Project monitor',
+        [ConfigKey.NAMESPACE]: 'default',
+        [ConfigKey.LOCATIONS]: [{ id: 'public-location', isServiceManaged: true }],
+      },
+    ] as any;
+    mockMonitorConfigRepository.createBulk.mockResolvedValue([
+      { id: 'monitor-1', attributes: { name: 'Project monitor' } },
+    ]);
+    mockSyntheticsMonitorClient.addMonitors.mockResolvedValue([{ created: [], failed: [] }, []]);
+
+    await syncNewMonitorBulk({
+      routeContext: mockRouteContext,
+      normalizedMonitors,
+      privateLocations: [],
+      spaceId: 'marketing',
+    });
+
+    expect(mockMonitorConfigRepository.createBulk).toHaveBeenCalledWith(
+      expect.objectContaining({
+        monitors: [
+          expect.objectContaining({
+            monitor: expect.objectContaining({ [ConfigKey.NAMESPACE]: 'default' }),
+          }),
+        ],
+      })
     );
   });
 
@@ -282,5 +315,46 @@ describe('syncNewMonitorBulk', () => {
     expect(result.failedMonitors).toEqual([
       expect.objectContaining({ monitor: expect.objectContaining({ id: 'monitor-1' }) }),
     ]);
+  });
+
+  it('does not roll back monitors when Fleet reports an existing package policy conflict', async () => {
+    const normalizedMonitors = [
+      {
+        name: 'Monitor with an existing policy',
+        [ConfigKey.NAMESPACE]: 'default',
+        [ConfigKey.LOCATIONS]: [{ id: 'loc-1', isServiceManaged: false }],
+      },
+    ] as any;
+    mockMonitorConfigRepository.createBulk.mockResolvedValue([
+      { id: 'monitor-1', attributes: { [ConfigKey.CONFIG_ID]: 'monitor-1' } },
+    ]);
+    mockSyntheticsMonitorClient.addMonitors.mockResolvedValue([
+      {
+        failed: [
+          {
+            packagePolicy: {
+              inputs: [
+                {
+                  enabled: true,
+                  streams: [{ vars: { [ConfigKey.CONFIG_ID]: { value: 'monitor-1' } } }],
+                },
+              ],
+            },
+            error: { statusCode: 409, error: 'Conflict', message: 'Policy already exists' },
+          },
+        ],
+      },
+      [],
+    ]);
+
+    const result = await syncNewMonitorBulk({
+      routeContext: mockRouteContext,
+      normalizedMonitors,
+      privateLocations: [],
+      spaceId: 'default',
+    });
+
+    expect(result.failedMonitors).toEqual([]);
+    expect(mockMonitorConfigRepository.get).not.toHaveBeenCalled();
   });
 });

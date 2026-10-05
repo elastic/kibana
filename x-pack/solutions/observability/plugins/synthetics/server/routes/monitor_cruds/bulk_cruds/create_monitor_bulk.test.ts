@@ -127,6 +127,7 @@ describe('createSyntheticsMonitorBulkRoute', () => {
       privateLocations: [],
       maintenanceWindows: [],
       spaceId: 'default',
+      hydrateNamespace: true,
     });
     expect(result).toEqual({
       result: [
@@ -190,6 +191,33 @@ describe('createSyntheticsMonitorBulkRoute', () => {
       result: [
         { id: 'monitor-1', created: false, error: 'Failed to sync monitor to private location' },
       ],
+    });
+  });
+
+  it('reports the message from a plain Saved Object synchronization error', async () => {
+    const normalizedMonitors = [
+      { locations: [{ id: 'private-location', isServiceManaged: false }], spaces: ['default'] },
+    ];
+    installPreprocessResult({ normalizedMonitors, privateLocations: [], maintenanceWindows: [] });
+    installSyncResult({
+      newMonitors: [{ id: 'monitor-1' }],
+      failedMonitors: [
+        {
+          monitor: { id: 'monitor-1' },
+          error: {
+            statusCode: 500,
+            error: 'Internal Server Error',
+            message: 'Policy write failed',
+          },
+        },
+      ],
+      errors: [],
+    });
+
+    const result = await route.handler(mockRouteContext());
+
+    expect(result).toEqual({
+      result: [{ id: 'monitor-1', created: false, error: 'Policy write failed' }],
     });
   });
 

@@ -24,7 +24,7 @@ import type {
 } from '../../../../common/runtime_types';
 import { ConfigKey, type SyntheticsPrivateLocations } from '../../../../common/runtime_types';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';
-import { AddEditMonitorAPI } from '../add_monitor/add_monitor_api';
+import { AddEditMonitorAPI, isPackagePolicyConflictFailure } from '../add_monitor/add_monitor_api';
 
 type MonitorSavedObject = SavedObject<EncryptedSyntheticsMonitorAttributes>;
 
@@ -37,12 +37,14 @@ export const syncNewMonitorBulk = async ({
   privateLocations,
   maintenanceWindows,
   spaceId,
+  hydrateNamespace = false,
 }: {
   routeContext: RouteContext;
   normalizedMonitors: SyntheticsMonitor[];
   privateLocations: SyntheticsPrivateLocations;
   maintenanceWindows?: MaintenanceWindow[];
   spaceId: string;
+  hydrateNamespace?: boolean;
 }) => {
   const { server, syntheticsMonitorClient, monitorConfigRepository, request } = routeContext;
   const { query } = request;
@@ -51,10 +53,17 @@ export const syncNewMonitorBulk = async ({
   const packagePolicySoType = await getPackagePolicySavedObjectType();
   const monitorsToCreate = normalizedMonitors.map((monitor) => {
     const monitorSavedObjectId = uuidV4();
-    const monitorWithNamespace = new AddEditMonitorAPI(routeContext).hydrateMonitorFields({
-      normalizedMonitor: monitor,
-      newMonitorId: monitorSavedObjectId,
-    });
+    const monitorWithIds = {
+      ...monitor,
+      [ConfigKey.MONITOR_QUERY_ID]: monitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitorSavedObjectId,
+      [ConfigKey.CONFIG_ID]: monitorSavedObjectId,
+    } as SyntheticsMonitor;
+    const monitorWithNamespace = hydrateNamespace
+      ? new AddEditMonitorAPI(routeContext).hydrateMonitorFields({
+          normalizedMonitor: monitor,
+          newMonitorId: monitorSavedObjectId,
+        })
+      : monitorWithIds;
     const monitorPrivateLocations = monitorWithNamespace[ConfigKey.LOCATIONS].filter(
       (loc) => !loc.isServiceManaged
     );
@@ -99,8 +108,15 @@ export const syncNewMonitorBulk = async ({
 
     newMonitors = createdMonitors;
 
-    if (failedPolicies && failedPolicies?.length > 0 && newMonitors) {
-      failedMonitors = await handlePrivateConfigErrors(routeContext, newMonitors, failedPolicies);
+    const nonConflictFailedPolicies = failedPolicies?.filter(
+      ({ error }) => !isPackagePolicyConflictFailure(error)
+    );
+    if (nonConflictFailedPolicies && nonConflictFailedPolicies.length > 0 && newMonitors) {
+      failedMonitors = await handlePrivateConfigErrors(
+        routeContext,
+        newMonitors,
+        nonConflictFailedPolicies
+      );
     }
 
     sendNewMonitorTelemetry(
