@@ -6,7 +6,7 @@
  */
 
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { TestProviders } from '../../../common/mock';
+import { createReactQueryWrapper } from '../../../common/mock/create_react_query_wrapper';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { useCalculateEntityRiskScore } from './use_calculate_entity_risk_score';
 
@@ -40,7 +40,7 @@ describe('useCalculateEntityRiskScore', () => {
 
   it('calls calculateEntityRiskScoreV2 when the callback is invoked', async () => {
     const { result } = renderHook(() => useCalculateEntityRiskScore(params), {
-      wrapper: TestProviders,
+      wrapper: createReactQueryWrapper(),
     });
 
     act(() => {
@@ -60,7 +60,7 @@ describe('useCalculateEntityRiskScore', () => {
   it('displays a toast error when the API returns an error', async () => {
     mockCalculateEntityRiskScoreV2.mockRejectedValue({});
     const { result } = renderHook(() => useCalculateEntityRiskScore(params), {
-      wrapper: TestProviders,
+      wrapper: createReactQueryWrapper(),
     });
 
     act(() => {
@@ -73,7 +73,7 @@ describe('useCalculateEntityRiskScore', () => {
   it('forwards entityId to the V2 API call', async () => {
     const entityId = 'test-euid';
     const { result } = renderHook(() => useCalculateEntityRiskScore({ ...params, entityId }), {
-      wrapper: TestProviders,
+      wrapper: createReactQueryWrapper(),
     });
 
     act(() => {
