@@ -48,21 +48,24 @@ export const ConnectorPublicKeys = ({
   ];
   return (
     <>
-      <EuiCallOut
-        size="s"
-        title={i18n.translate('xpack.triggersActionsUI.publicKeys.requiredTitle', {
-          defaultMessage: 'Kibana manages the signing key',
-        })}
-      >
-        {i18n.translate('xpack.triggersActionsUI.publicKeys.publishingDescription', {
-          defaultMessage:
-            'Kibana creates and stores the signing key. Receivers can read its public key without signing in. Save the connector to get its URLs.',
-        })}
-      </EuiCallOut>
+      {!connectorId && (
+        <EuiCallOut
+          announceOnMount
+          size="s"
+          title={i18n.translate('xpack.triggersActionsUI.publicKeys.requiredTitle', {
+            defaultMessage: 'Kibana manages the signing key',
+          })}
+        >
+          {i18n.translate('xpack.triggersActionsUI.publicKeys.publishingDescription', {
+            defaultMessage:
+              'Kibana creates and stores the signing key. Receivers can read its public key without signing in. Save the connector to get its URLs.',
+          })}
+        </EuiCallOut>
+      )}
       {fields.map(({ label, value }) =>
         value ? (
           <EuiFormRow key={label} label={label} fullWidth>
-            <EuiCopy textToCopy={value}>
+            <EuiCopy textToCopy={value} tooltipProps={{ display: 'block' }}>
               {(copy) => (
                 <EuiFieldText
                   fullWidth
