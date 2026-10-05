@@ -21,17 +21,22 @@ common/
   constants.ts           umbrella: plugin id, API version, route base
   user.ts                who acted, shared by every entity
   index.ts               umbrella barrel, re-exports each entity barrel
+  evidence/              evidence schema (Markdown + static chart), shared by every entity
+  investigation_attachments/  base types of by-reference investigation attachment documents
   impact/                constants, schemas, step definitions, attachment type id
   escalations/           constants and schemas
 server/
   plugin.ts config.ts types.ts
   features.ts            umbrella feature and its privileges
   services/              user resolution, shared by every entity
-  impact/                routes, service, storage, step handlers, Agent Builder attachment
+  investigation_attachments/  `defineInvestigationAttachment` factory and the agent tool helper
+  impact/                routes, service, storage, step handlers, Agent Builder attachment, agent tool
   escalations/           routes and service
 public/
   plugin.ts index.ts types.ts
   impact/                browser step definitions and flyout attachment UI
+  evidence/              evidence renderer (Markdown + line/bar chart), exported as `LazyEvidenceView`
+  investigation_attachments/  attachment renderer registration helper
   escalations/           browser hooks
   user_profiles/         browser hooks
   conversation_templates/  investigation and escalation conversation template UI
@@ -66,16 +71,33 @@ The shared `POST /internal/investigations/_suggest_user_profiles` route accepts 
 
 Proposals privileges are **not** here. They belong to the `proposals` feature, registered by the `proposals` plugin.
 
+## By-reference investigation attachments
+
+Entities an agent records on an investigation (impact today; subjects and hypotheses next) are **by-reference Agent Builder attachments backed by a hidden index**. `server/investigation_attachments/defineInvestigationAttachment` gives each one:
+
+- **Storage**: a `StorageIndexAdapter` index (`.kibana-investigation-<entity>`, see [Index naming](#index-naming)) with keyword `spaceId` and `conversationId`, read and written as the internal user. Callers authorize first and pass the request's space. Mapping changes must stay additive.
+- **Service** (`InvestigationAttachmentDocService`): `get` (space-checked), `upsert` (read-modify-write under `if_seq_no`/`if_primary_term`, retried on a lost race, then a conflict error), `revert`, `listByConversationIds` (≤ 1000), `searchConversationIds(filter)` for list filters that start from the index, and `deleteByConversationIds` / `deleteAllInSpace` for maintenance. Document ids are a hash of their key parts (`hashInvestigationAttachmentId`). Every read goes through `withTransientSearchRetry`: on a fresh cluster the hidden index may not exist yet (reads as empty) or may have no allocated shard for a moment after the first write created it (`no_shard_available_action_exception`, or an all-shards-failed 503 `search_phase_execution_exception`), which is retried after 200, 400, and 800 ms before the error is rethrown.
+- **Agent Builder type**: `isReadonly`, so the generic attachment tools cannot edit it. `validate` accepts every stored document shape (it runs whenever data is passed), `resolve` loads the document by origin, `isStale` compares the attachment with the index ignoring `updatedAt`, and `format` gives the LLM a compact text. The type id must be on `AGENT_BUILDER_BUILTIN_ATTACHMENTS` in `@kbn/agent-builder-server`.
+- **Two write paths**, both index first:
+  - Routes and workflow steps (`writeAndAttach` / `attachWithPublicClient`): owner check on the conversation, index write, then create or update the attachment through the public attachment client from a fresh read. A user-removed (inactive) attachment is left removed. A failed attachment write reverts the index write.
+  - Agent tools (`writeFromTool` / `attachFromTool`): index write, then add or update the attachment through the run's attachment state manager. Agent Builder persists that state when the round ends, so the index is the source of truth if the round fails first. A user-removed attachment is not re-added.
+- **Hidden in the chat** (`hiddenInConversation: true`): both write paths write the conversation attachment with Agent Builder's `hidden` flag. The model still gets the attachment, but the chat shows no input pill, no "Added" reference, no inline card and no timeline event for it, and Agent Builder records no attachment change event (so no `ai.attachmentAdded` / `ai.attachmentUpdated` workflow trigger fires for it). The investigation overview, which reads the index, still shows it. The attachment is hidden when it is created; updates send only its data.
+- **Agent tools** are owned by each entity and built with `createInvestigationTool`: availability and every call check the privilege, the conversation id comes from the run stack (a standalone run is refused), and errors become tool error results. Tool ids must be on `AGENT_BUILDER_BUILTIN_TOOLS`.
+- **Renderers** register with `registerInvestigationAttachmentRenderer` (public): one lazily loaded content component for the inline chat render and the conversation details flyout. A hidden type keeps its inline renderer as a fallback, for a `<render_attachment>` tag a model emits anyway.
+
+Readers start from the index, never from `conversation.attachments`.
+
 ## Impact
 
-An **Impact** record is the set of entities (users, hosts, services) an investigation is about. It lives in `.kibana-investigation-impact`, one document per space and conversation, and is the source for both the AlertZero landing-page pills and the investigation flyout. Nightshift writes the same document: `id` is the filter key, and `name`, `type`, `featureId`, and `streamName` carry the fields on its existing `InvestigationImpactEntity`.
+An **Impact** record is what an investigation found was affected: a `summary`, its `evidence`, and the `entities` (users, hosts, services) involved. It lives in `.kibana-investigation-impact`, one document per space and conversation, and is the source for both the AlertZero landing-page pills and the investigation flyout. `id` is the entity filter key; `name`, `type`, `featureId`, and `streamName` carry the fields Nightshift reports.
 
-- AlertZero may attach `{ id }` only. The pill label stays the id until Entity Store hydration. Nightshift attaches `{ id, name, type?, featureId?, streamName? }`.
-- Writes are **upsert/merge**: attaching more entities unions them by `id` onto the existing document rather than appending a new one. A later attach fills in fields the first write omitted. That is load-bearing for hydrate-by-conversationId plus filtering on `entities.id`. The document `_id` is a hash of `(spaceId, conversationId)`. Attach reads that id and retries the union when a concurrent create or update wins the version check, so both writers' entities land on the one record.
-- Evidence is not on this document. Nightshift's current evidence shape cannot represent non-local data, and that format is still open.
+- **Evidence** is `{ description?: Markdown, chart?: { type: line|bar, title, x_axis, y_axis, stacked?, series[1..5], annotations[≤5] } }` (`common/evidence`). It can sit on the impact (`evidence`) or on each entity (`entities[].evidence`). It is stored but not indexed. The browser renders it with `LazyEvidenceView`.
+- Every field but the ids and `createdAt` is optional on the stored document. Documents written before summary and evidence existed (entities only) still validate.
+- **Route and step writes** union entities by `id` onto the existing document rather than appending a new one. A later attach fills in fields the first write omitted, and per-entity evidence a later write sends replaces the earlier one. Summary and evidence are kept. AlertZero may attach `{ id }` only; the pill label stays the id until Entity Store hydration. The document `_id` is a hash of `(spaceId, conversationId)`. Attach reads that id and retries the union when a concurrent create or update wins the version check, so both writers' entities land on the one record.
+- **The agent tool `investigations.set_impact`** writes a partial snapshot: each field it sends (`summary`, `evidence`, `entities`) replaces the stored one, and fields it leaves out are kept. `entities` replaces the whole list (deduped by id, `id` defaults to the name, at most 10), and `entities: []` removes them; `summary: null` and `evidence: null` remove those. Because the list is replaced, an agent call that sends `entities` also replaces entities a route or step attached. It warns the agent, without failing, when a single entity carries evidence (use the summary and top-level evidence instead) and when the stored impact has both top-level evidence and entities (remove one with `evidence: null` or `entities: []`). It requires `manage_investigations`, writes the index immediately, and adds or updates the `investigation_impact` attachment through the run's attachment state.
 - HTTP: `POST /internal/investigations/impact` and `GET ...?conversationId=` both require `manage_investigations`. Bulk hydrate is in-process via `getImpactClient(request).listByConversationIds()`, which checks that same privilege and uses the request's space. The raw service stays internal to the routes.
-- Workflow steps: `investigations.attachImpact` and `investigations.getImpact` both require `manage_investigations` and fail the step when it is missing. `getImpact` also fails if none is attached. Same fail-closed privilege check as proposal steps.
-- Agent Builder attachment type `investigation_impact` (`isReadonly: true`) is registered for the investigation flyout (and allow-listed in `@kbn/agent-builder-server`). Attach HTTP and `investigations.attachImpact` call `attachImpactToInvestigation`, which checks conversation owner access, writes the impact document, then puts a by-reference attachment (`origin` = Impact document id). A failed attachment write reverts that index write. `resolve()` loads the current document through `ImpactService`, so a later merge does not leave the flyout on a stale snapshot.
+- Workflow steps: `investigations.attachImpact` and `investigations.getImpact` both require `manage_investigations` and fail the step when it is missing. `getImpact` also fails if none is attached, and returns `entities: []` for an impact recorded as a summary only. Same fail-closed privilege check as proposal steps.
+- Agent Builder attachment type `investigation_impact` (`isReadonly: true`, hidden in the chat) is registered for the investigation flyout (and allow-listed in `@kbn/agent-builder-server`). The attach HTTP route and `investigations.attachImpact` call `attachImpactToInvestigation`, the route path above; the attachment `origin` is the Impact document id. `resolve()` loads the current document, so a later merge does not leave the flyout on a stale snapshot. The renderer shows the summary (Markdown), the evidence chart, and the entities; the details flyout also shows each entity's evidence.
 - `scripts/seed_impact_attachment.sh` creates an investigation conversation, attaches entities through the internal API, and checks that the conversation has one `investigation_impact` attachment.
 
 ## Template UI and gating

@@ -34,3 +34,11 @@ export const MAX_ENTITY_ID_LENGTH = 256;
 /** Matches the title bound on Nightshift's investigation impact entity name. */
 export const MAX_ENTITY_NAME_LENGTH = 512;
 export const MAX_ENTITY_IDS = 100;
+/**
+ * Entities the agent may report through `investigations.set_impact`. The entity form is for a
+ * handful of entities affected in different ways; more than this belongs in the summary.
+ */
+export const MAX_IMPACT_TOOL_ENTITIES = 10;
+
+/** Agent Builder builtin tool that records an investigation's impact. */
+export const SET_IMPACT_TOOL_ID = 'investigations.set_impact' as const;
