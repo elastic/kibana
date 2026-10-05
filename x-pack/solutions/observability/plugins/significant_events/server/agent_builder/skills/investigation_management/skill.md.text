@@ -67,7 +67,7 @@ When the user wants to investigate a Significant Event, gather the event's metad
 **2. Build the workflow inputs from the event:**
 - `message`: `"{title}\n\n{summary}"`
 - `title`: the event's title
-- `source_ids`: the event's `Sources`
+- `source_ids`: the ids on the event's `Sources` line. Copy them as they are; they are source ids, not slugs.
 - `concurrency_key`: the event's `Event ID` — this de-duplicates with the investigation that the significant-events discovery automatically launches for promoted events (so a chat-initiated investigation supersedes an in-flight automatic one rather than running twice).
 - `context`: a structured object with the event metadata you can read from the attachment.
 

@@ -23,7 +23,7 @@ import {
   type UpdateSourceRequest,
 } from '@kbn/nightshift-shared';
 import { z } from '@kbn/zod/v4';
-import { badRequest, notFound } from '@hapi/boom';
+import { badRequest, boomify, notFound } from '@hapi/boom';
 import { v4 as uuidv4 } from 'uuid';
 import {
   NIGHTSHIFT_SOURCE_SO_TYPE,
@@ -191,7 +191,10 @@ export class SourcesClient {
     return { source, health: await this.getHealth(source) };
   }
 
-  /** Saved-object catalog. View health is `get()`; list does not fetch views. */
+  /**
+   * Saved-object catalog. View health is `get()`; list does not fetch views.
+   * `ids` looks those sources up directly. Search, enabled, and paging then apply to the ones that exist.
+   */
   async list({
     page,
     perPage,
@@ -206,7 +209,7 @@ export class SourcesClient {
     ids?: string[];
   }): Promise<ListSourcesResponse> {
     if (ids) {
-      return this.listByIds(ids);
+      return this.listByIds({ ids, page, perPage, search, enabled });
     }
 
     const filters: string[] = [];
@@ -236,22 +239,58 @@ export class SourcesClient {
     };
   }
 
-  /** Ids that match no source are left out, so a deleted source never fails the whole lookup. */
-  private async listByIds(ids: string[]): Promise<ListSourcesResponse> {
+  /**
+   * Ids that match no source are left out, so a deleted source never fails the whole lookup.
+   * Any other bulkGet failure is thrown: a 403 or 5xx is not "this source does not exist".
+   */
+  private async listByIds({
+    ids,
+    page,
+    perPage,
+    search,
+    enabled,
+  }: {
+    ids: string[];
+    page: number;
+    perPage: number;
+    search?: string;
+    enabled?: boolean;
+  }): Promise<ListSourcesResponse> {
     const uniqueIds = [...new Set(ids)];
     const { saved_objects: savedObjects } =
       await this.deps.soClient.bulkGet<NightshiftSourceAttributes>(
         uniqueIds.map((id) => ({ type: NIGHTSHIFT_SOURCE_SO_TYPE, id }))
       );
     const sources = savedObjects
-      .flatMap((savedObject) =>
-        isSavedObjectErrorResult(savedObject)
-          ? []
-          : [toSource(savedObject.id, savedObject.attributes)]
-      )
+      .flatMap((savedObject) => {
+        if (!isSavedObjectErrorResult(savedObject)) {
+          return [toSource(savedObject.id, savedObject.attributes)];
+        }
+        if (savedObject.error.statusCode === 404) {
+          return [];
+        }
+        throw boomify(new Error(savedObject.error.message), {
+          statusCode: savedObject.error.statusCode,
+        });
+      })
+      .filter((source) => {
+        if (enabled !== undefined && source.enabled !== enabled) {
+          return false;
+        }
+        if (search !== undefined && !source.title.startsWith(search)) {
+          return false;
+        }
+        return true;
+      })
       .sort((a, b) => a.title.localeCompare(b.title));
 
-    return { sources, total: sources.length, page: 1, per_page: uniqueIds.length };
+    const start = (page - 1) * perPage;
+    return {
+      sources: sources.slice(start, start + perPage),
+      total: sources.length,
+      page,
+      per_page: perPage,
+    };
   }
 
   async delete(id: string): Promise<void> {

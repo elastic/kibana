@@ -82,7 +82,7 @@ export interface IRulesManagementClient {
    * orphan-rule cleanup can reach sources whose rules outlived all of their
    * knowledge indicators.
    */
-  findStreamNamesWithOwnedRules(): Promise<string[]>;
+  findSourceIdsWithOwnedRules(): Promise<string[]>;
 
   /** Every rule id carrying a tag that starts with `prefix`, in the client's space. */
   findRuleIdsByTagPrefix(prefix: RuleOwnershipTagPrefix): Promise<string[]>;

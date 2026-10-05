@@ -40,7 +40,7 @@ export async function generateKIQueries(
 
   logger.debug(`Using connector ${connectorId} for query generation`);
 
-  const { [source.id]: existingLinks } = await kiClient.getStreamToQueryLinksMap([source.id]);
+  const { [source.id]: existingLinks } = await kiClient.getSourceToQueryLinksMap([source.id]);
   const existingQueries = existingLinks.map(({ query }) => ({
     id: query.id,
     title: query.title,

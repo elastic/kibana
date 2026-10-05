@@ -22,8 +22,9 @@ import { assertNotPaused } from '../../../utils/assert_not_paused';
 import { FeatureNotEnabledError } from '../../../../lib/errors/feature_not_enabled_error';
 import { StatusError } from '../../../../lib/errors/status_error';
 import { listAllSources } from '../../../utils/list_all_sources';
+import { sourceIdsArraySchema } from '../../../utils/resolve_source_ids';
 import {
-  MAX_STREAMS_PER_QUERY,
+  MAX_SOURCES_PER_QUERY,
   type SignificantEventsKIsOnboardingInputs,
 } from '../../../../lib/workflows/onboarding_workflow_client';
 
@@ -241,7 +242,7 @@ const onboardingBulkStatusRoute = createServerRoute({
   },
   params: z.object({
     body: z.object({
-      sourceIds: z.array(z.string().max(MAX_ID_LENGTH)).min(1).max(MAX_STREAMS_PER_QUERY),
+      sourceIds: sourceIdsArraySchema({ min: 1, max: MAX_SOURCES_PER_QUERY }),
     }),
   }),
   handler: async ({

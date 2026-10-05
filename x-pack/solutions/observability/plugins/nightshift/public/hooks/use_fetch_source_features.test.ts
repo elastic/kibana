@@ -6,7 +6,7 @@
  */
 
 import type { Feature } from '@kbn/significant-events-schema';
-import { collectStreamFeatures } from './use_fetch_stream_features';
+import { collectSourceFeatures } from './use_fetch_source_features';
 
 const mockFeature = (id: string, sourceId: string): Feature => ({
   uuid: `uuid-${id}`,
@@ -30,13 +30,13 @@ const unreachable = (reason: Error): PromiseSettledResult<Feature[]> => ({
   reason,
 });
 
-describe('collectStreamFeatures', () => {
+describe('collectSourceFeatures', () => {
   it('reports no failures when every source resolves', () => {
     const checkout = mockFeature('checkout-api', 'logs.checkout');
     const payments = mockFeature('payments-api', 'logs.payments');
 
     expect(
-      collectStreamFeatures(
+      collectSourceFeatures(
         ['logs.checkout', 'logs.payments'],
         [loaded([checkout]), loaded([payments])]
       )
@@ -48,7 +48,7 @@ describe('collectStreamFeatures', () => {
     const checkout = mockFeature('checkout-api', 'logs.checkout');
 
     expect(
-      collectStreamFeatures(
+      collectSourceFeatures(
         ['logs.checkout', 'logs.payments', 'logs.orders'],
         [loaded([checkout]), unreachable(new Error('gateway timeout')), loaded([])]
       )
@@ -59,7 +59,7 @@ describe('collectStreamFeatures', () => {
     const firstFailure = new Error('gateway timeout');
 
     expect(() =>
-      collectStreamFeatures(
+      collectSourceFeatures(
         ['logs.checkout', 'logs.payments'],
         [unreachable(firstFailure), unreachable(new Error('connection refused'))]
       )
@@ -67,6 +67,6 @@ describe('collectStreamFeatures', () => {
   });
 
   it('returns nothing rather than throwing when there are no sources to load', () => {
-    expect(collectStreamFeatures([], [])).toEqual({ features: [], failedSourceIds: [] });
+    expect(collectSourceFeatures([], [])).toEqual({ features: [], failedSourceIds: [] });
   });
 });

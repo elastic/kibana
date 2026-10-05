@@ -90,6 +90,7 @@ describe('cleanupStaleEvents', () => {
       closed: 1,
       kept: 1,
       skipped: 1,
+      failed: 0,
     });
 
     expect(rulesClient.findExistingRuleIds).toHaveBeenCalledWith(['deleted-rule', 'live-rule']);
@@ -237,24 +238,30 @@ describe('cleanupStaleEvents', () => {
       );
     });
 
-    it('returns success even when updateSignificantEventStatus rejects (error not swallowed by cleanup)', async () => {
-      // Note: cleanupStaleEvents does NOT suppress errors from updateSignificantEventStatus —
-      // that suppression happens inside updateSignificantEventStatus itself for the .rule-events write.
-      // This test verifies the propagation contract: alertEventsClient reaches each update call.
+    it('counts a rejected close as failed and keeps going', async () => {
       const stale1 = createEvent('stale-1', ['deleted-rule']);
       const stale2 = createEvent('stale-2', ['deleted-rule']);
       const eventClient = createEventClient([[stale1, stale2]]);
       const rulesClient = createRulesClient([]);
       const alertEventsClient = makeAlertEventsClient();
       const logger = makeLogger();
+      updateStatusMock.mockImplementation(async ({ eventId }) => {
+        if (eventId === 'stale-1') {
+          throw new Error('write failed');
+        }
+        return { updated: 1, ignored: 0, status: 'inactive' as const };
+      });
 
-      await cleanupStaleEvents({ eventClient, rulesClient, alertEventsClient, logger });
-
-      // Both stale events should have received the alertEventsClient
-      expect(updateStatusMock).toHaveBeenCalledTimes(2);
-      for (const call of updateStatusMock.mock.calls) {
-        expect(call[0]).toMatchObject({ alertEventsClient, logger });
-      }
+      await expect(
+        cleanupStaleEvents({ eventClient, rulesClient, alertEventsClient, logger })
+      ).resolves.toEqual({
+        scanned: 2,
+        closed: 1,
+        kept: 0,
+        skipped: 0,
+        failed: 1,
+      });
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('stale-1'));
     });
   });
 });

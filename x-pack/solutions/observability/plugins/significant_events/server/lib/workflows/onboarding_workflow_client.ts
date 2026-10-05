@@ -195,7 +195,7 @@ export const parseSourceSlugFromConcurrencyKey = (key: string): string | null =>
   return key.slice(CONCURRENCY_KEY_PREFIX.length);
 };
 
-export const MAX_STREAMS_PER_QUERY = 10000;
+export const MAX_SOURCES_PER_QUERY = 10000;
 /**
  * Client that wraps the workflows management API to provide a stream-centric
  * interface for running, querying, and canceling KI onboarding workflows.
@@ -416,7 +416,7 @@ export class SignificantEventsKIsOnboardingClient {
     request: KibanaRequest;
   }): Promise<WorkflowExecutionListItemDto[]> {
     const { results } = await this.workflowExecutionService.getExecutions(
-      { statuses: [...NonTerminalExecutionStatuses], size: MAX_STREAMS_PER_QUERY },
+      { statuses: [...NonTerminalExecutionStatuses], size: MAX_SOURCES_PER_QUERY },
       request.spaceId,
       request
     );
@@ -431,7 +431,7 @@ export class SignificantEventsKIsOnboardingClient {
    */
   async cancelAllRunning({ request }: { request: KibanaRequest }): Promise<number> {
     const { results } = await this.workflowExecutionService.getExecutions(
-      { statuses: [...NonTerminalExecutionStatuses], size: MAX_STREAMS_PER_QUERY },
+      { statuses: [...NonTerminalExecutionStatuses], size: MAX_SOURCES_PER_QUERY },
       request.spaceId,
       request
     );
@@ -454,19 +454,19 @@ export class SignificantEventsKIsOnboardingClient {
   }
 
   /**
-   * Returns the latest onboarding execution per stream, collapsed by
-   * concurrency group key. At most {@link MAX_STREAMS_PER_QUERY} streams
+   * Returns the latest onboarding execution per source, collapsed by
+   * concurrency group key. At most {@link MAX_SOURCES_PER_QUERY} sources
    * are returned (one execution each), sorted by createdAt date descending.
    *
    * We sort by createdAt (not finishedAt) so the most recently *started*
-   * execution wins per stream: a currently running execution has no
+   * execution wins per source: a currently running execution has no
    * finishedAt, and sorting by finishedAt would hide it behind an older
    * completed run, breaking the "already running" classification.
    */
   async getRecentExecutions(request: KibanaRequest): Promise<WorkflowExecutionListItemDto[]> {
     const { results } = await this.workflowExecutionService.getExecutions(
       {
-        size: MAX_STREAMS_PER_QUERY,
+        size: MAX_SOURCES_PER_QUERY,
         sortField: 'createdAt',
         sortOrder: 'desc',
         collapse: 'concurrencyGroupKey',

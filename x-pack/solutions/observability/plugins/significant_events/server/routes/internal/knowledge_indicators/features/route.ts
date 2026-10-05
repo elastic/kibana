@@ -120,10 +120,10 @@ const deleteFeatureRoute = createServerRoute({
     ]);
 
     try {
-      await kiClient.reconcileStream(params.path.sourceId);
+      await kiClient.reconcileSource(params.path.sourceId);
     } catch (err) {
       logger.warn(
-        `reconcileStream after feature delete failed for source "${params.path.sourceId}": ${
+        `reconcileSource after feature delete failed for source "${params.path.sourceId}": ${
           err instanceof Error ? err.message : String(err)
         }`
       );
@@ -308,10 +308,10 @@ const bulkFeaturesRoute = createServerRoute({
     const hasShrinkingOp = operations.some((op) => 'delete' in op || 'exclude' in op);
     if (hasShrinkingOp) {
       try {
-        await kiClient.reconcileStream(sourceId);
+        await kiClient.reconcileSource(sourceId);
       } catch (err) {
         logger.warn(
-          `reconcileStream after bulk feature ops failed for source "${sourceId}": ${
+          `reconcileSource after bulk feature ops failed for source "${sourceId}": ${
             err instanceof Error ? err.message : String(err)
           }`
         );
@@ -425,10 +425,10 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     for (const sourceId of sourcesWithShrinkingOps) {
       try {
         await sourcesClient.get(sourceId);
-        await kiClient.reconcileStream(sourceId);
+        await kiClient.reconcileSource(sourceId);
       } catch (err) {
         logger.warn(
-          `reconcileStream after bulk cross-source feature ops failed for source "${sourceId}": ${
+          `reconcileSource after bulk cross-source feature ops failed for source "${sourceId}": ${
             err instanceof Error ? err.message : String(err)
           }`
         );

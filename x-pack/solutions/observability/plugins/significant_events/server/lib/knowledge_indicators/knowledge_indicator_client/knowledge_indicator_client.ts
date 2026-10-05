@@ -159,11 +159,11 @@ export class KnowledgeIndicatorClient {
     return this.reader.getQueryLinks(sourceIds, filters);
   }
 
-  getStreamToQueryLinksMap(
+  getSourceToQueryLinksMap(
     sourceIds: string[],
     options?: { includeExpired?: boolean }
   ): Promise<Record<string, QueryLink[]>> {
-    return this.reader.getStreamToQueryLinksMap(sourceIds, options);
+    return this.reader.getSourceToQueryLinksMap(sourceIds, options);
   }
 
   bulkGetQueriesByIds(
@@ -186,8 +186,8 @@ export class KnowledgeIndicatorClient {
     return this.reader.findFeaturesByIds(ids);
   }
 
-  getStreamNamesWithKnowledgeIndicators(): Promise<string[]> {
-    return this.reader.getStreamNamesWithKnowledgeIndicators();
+  getSourceIdsWithKnowledgeIndicators(): Promise<string[]> {
+    return this.reader.getSourceIdsWithKnowledgeIndicators();
   }
 
   /**
@@ -196,17 +196,17 @@ export class KnowledgeIndicatorClient {
    * set alone misses sources whose rules outlived all of their KIs — the very
    * orphan-rule case the sweep exists to catch.
    */
-  async getStreamNamesToReconcile(): Promise<string[]> {
+  async getSourceIdsToReconcile(): Promise<string[]> {
     const [withIndicators, withOwnedRules] = await Promise.all([
-      this.reader.getStreamNamesWithKnowledgeIndicators(),
-      this.orchestrator.findStreamNamesWithOwnedRules(),
+      this.reader.getSourceIdsWithKnowledgeIndicators(),
+      this.orchestrator.findSourceIdsWithOwnedRules(),
     ]);
     return [...new Set([...withIndicators, ...withOwnedRules])];
   }
 
   /** Source ids that still have a Nightshift-owned rule. One tag-prefix lookup. */
-  findStreamNamesWithOwnedRules(): Promise<string[]> {
-    return this.orchestrator.findStreamNamesWithOwnedRules();
+  findSourceIdsWithOwnedRules(): Promise<string[]> {
+    return this.orchestrator.findSourceIdsWithOwnedRules();
   }
 
   findOwnedRuleIds(sourceId: string): Promise<string[]> {
@@ -268,11 +268,11 @@ export class KnowledgeIndicatorClient {
     return this.orchestrator.syncQueries(sourceId, queries, options);
   }
 
-  async replaceStreamQueries(
+  async replaceSourceQueries(
     sourceId: string,
     getNextQueries: (currentLinks: QueryLink[]) => StreamQuery[]
   ): Promise<void> {
-    const { [sourceId]: currentLinks } = await this.getStreamToQueryLinksMap([sourceId]);
+    const { [sourceId]: currentLinks } = await this.getSourceToQueryLinksMap([sourceId]);
     await this.syncQueries(sourceId, getNextQueries(currentLinks), { currentLinks });
   }
 
@@ -316,7 +316,7 @@ export class KnowledgeIndicatorClient {
     return this.orchestrator.demoteQueries(sourceId, queryIds);
   }
 
-  reconcileStream(sourceId: string): Promise<{ tombstoned: number; orphanRulesDeleted: number }> {
-    return this.orchestrator.reconcileStream(sourceId);
+  reconcileSource(sourceId: string): Promise<{ tombstoned: number; orphanRulesDeleted: number }> {
+    return this.orchestrator.reconcileSource(sourceId);
   }
 }

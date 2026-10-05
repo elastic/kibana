@@ -59,7 +59,7 @@ const makeRulesClient = (): jest.Mocked<IRulesManagementClient> => ({
   setRulesEnabled: jest.fn().mockResolvedValue(undefined),
   findExistingRuleIds: jest.fn().mockResolvedValue([]),
   findOwnedRuleIds: jest.fn().mockResolvedValue([]),
-  findStreamNamesWithOwnedRules: jest.fn().mockResolvedValue([]),
+  findSourceIdsWithOwnedRules: jest.fn().mockResolvedValue([]),
   findRuleIdsByTagPrefix: jest.fn().mockResolvedValue([]),
 });
 

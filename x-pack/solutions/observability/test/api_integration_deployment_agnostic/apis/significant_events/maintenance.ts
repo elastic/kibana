@@ -176,7 +176,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               filter: [
                 { term: { id: 'reset-orphan-query' } },
                 { term: { type: 'query' } },
-                { term: { 'stream.name': ORPHAN_RULE_STREAM_NAME } },
+                { term: { 'source.id': ORPHAN_RULE_STREAM_NAME } },
               ],
             },
           },

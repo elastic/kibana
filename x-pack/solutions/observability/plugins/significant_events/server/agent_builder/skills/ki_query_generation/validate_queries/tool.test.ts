@@ -34,13 +34,13 @@ describe('ki_queries_validate tool', () => {
   const logger = loggingSystemMock.createLogger();
   const streamDataEsClient = { esql: { query: jest.fn() } };
   const getFeatures = jest.fn();
-  const getStreamToQueryLinksMap = jest.fn();
+  const getSourceToQueryLinksMap = jest.fn();
   const getScopedClients = jest.fn(async () => {
     return {
       sourcesClient: mockSourcesClient(['logs.test']),
       getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
         getFeatures,
-        getStreamToQueryLinksMap,
+        getSourceToQueryLinksMap,
       }),
       streamDataEsClient,
       tuningConfig: { query_validation_timeout_ms: 12_000 },
@@ -73,7 +73,7 @@ describe('ki_queries_validate tool', () => {
     getFeatures.mockResolvedValue({
       hits: [{ id: 'feature-1', run_id: 'run-1', type: 'entity' }],
     });
-    getStreamToQueryLinksMap.mockResolvedValue({
+    getSourceToQueryLinksMap.mockResolvedValue({
       'logs.test': [
         {
           query: {
@@ -228,7 +228,7 @@ describe('ki_queries_validate tool', () => {
     }
 
     expect(getFeatures).not.toHaveBeenCalled();
-    expect(getStreamToQueryLinksMap).not.toHaveBeenCalled();
+    expect(getSourceToQueryLinksMap).not.toHaveBeenCalled();
     expect(result.results).toEqual([
       {
         type: 'other',

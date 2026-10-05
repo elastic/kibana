@@ -12,9 +12,9 @@ import { isComputedFeature, type Feature } from '@kbn/significant-events-schema'
 import { useKibana } from './use_kibana';
 
 const NO_FEATURES: Feature[] = [];
-const NO_STREAM_NAMES: string[] = [];
+const NO_SOURCE_IDS: string[] = [];
 
-export interface StreamFeaturesQueryData {
+export interface SourceFeaturesQueryData {
   features: Feature[];
   failedSourceIds: string[];
 }
@@ -26,10 +26,10 @@ export interface StreamFeaturesQueryData {
  * failure returns what loaded and names the rest. A total failure rethrows instead: an empty
  * impact list would otherwise read as "nothing was impacted".
  */
-export const collectStreamFeatures = (
+export const collectSourceFeatures = (
   sourceIds: string[],
   settled: Array<PromiseSettledResult<Feature[]>>
-): StreamFeaturesQueryData => {
+): SourceFeaturesQueryData => {
   const failedSourceIds = sourceIds.filter((_, index) => settled[index].status === 'rejected');
   if (sourceIds.length > 0 && failedSourceIds.length === sourceIds.length) {
     throw (settled[0] as PromiseRejectedResult).reason;
@@ -41,7 +41,7 @@ export const collectStreamFeatures = (
   };
 };
 
-export interface StreamFeaturesResult {
+export interface SourceFeaturesResult {
   features: Feature[];
   /**
    * Sources that could not be reached. Their services are missing from `features`, so a caller
@@ -57,7 +57,7 @@ export interface StreamFeaturesResult {
   refetch: () => void;
 }
 
-const fetchStreamFeatures = async (
+const fetchSourceFeatures = async (
   significantEventsRepositoryClient: SignificantEventsRepositoryClient,
   sourceId: string,
   signal: AbortSignal | undefined
@@ -80,10 +80,10 @@ const fetchStreamFeatures = async (
 
 /**
  * Loads every source's knowledge indicators under a single cache entry so the returned array keeps
- * a stable identity across renders — callers memoize impacted entities on it, and a fresh array
+ * a stable identity across renders. Callers memoize impacted entities on it, and a fresh array
  * each render would retrigger their effects.
  */
-export const useFetchStreamFeatures = (sourceIds: string[]): StreamFeaturesResult => {
+export const useFetchSourceFeatures = (sourceIds: string[]): SourceFeaturesResult => {
   const {
     application,
     significantEvents: { significantEventsRepositoryClient },
@@ -92,17 +92,17 @@ export const useFetchStreamFeatures = (sourceIds: string[]): StreamFeaturesResul
   const uniqueSourceIds = [...new Set(sourceIds)].sort();
 
   const { data, isInitialLoading, isFetching, isError, refetch } = useQuery<
-    StreamFeaturesQueryData,
+    SourceFeaturesQueryData,
     Error
   >({
-    queryKey: ['nightshift.streamFeatures', uniqueSourceIds],
+    queryKey: ['nightshift.sourceFeatures', uniqueSourceIds],
     enabled: canShow && uniqueSourceIds.length > 0,
     queryFn: async ({ signal }) =>
-      collectStreamFeatures(
+      collectSourceFeatures(
         uniqueSourceIds,
         await Promise.allSettled(
           uniqueSourceIds.map((sourceId) =>
-            fetchStreamFeatures(significantEventsRepositoryClient, sourceId, signal)
+            fetchSourceFeatures(significantEventsRepositoryClient, sourceId, signal)
           )
         )
       ),
@@ -110,7 +110,7 @@ export const useFetchStreamFeatures = (sourceIds: string[]): StreamFeaturesResul
 
   return {
     features: data?.features ?? NO_FEATURES,
-    failedSourceIds: data?.failedSourceIds ?? NO_STREAM_NAMES,
+    failedSourceIds: data?.failedSourceIds ?? NO_SOURCE_IDS,
     isInitialLoading,
     isFetching,
     isError,

@@ -47,6 +47,8 @@ import { assertSourceEnabled } from '../../../utils/assert_source_enabled';
 import {
   MAX_SOURCE_IDS_PER_REQUEST,
   requestedOrAllSourceIds,
+  sourceIdsArraySchema,
+  sourceIdsQuerySchema,
 } from '../../../utils/resolve_source_ids';
 import { listAllSources } from '../../../utils/list_all_sources';
 import type { PersistQueriesResult } from '../../../../lib/significant_events/persist_queries';
@@ -60,9 +62,9 @@ import { cleanupStaleEvents } from '../../../../lib/significant_events/events/cl
 import { QueryNotFoundError } from '../../../../lib/errors/query_not_found_error';
 import { validateEsqlQueryForSourceOrThrow } from '../../../../lib/significant_events/validate_esql_query';
 
-const RECONCILE_STREAM_CONCURRENCY = 3;
+const RECONCILE_SOURCE_CONCURRENCY = 3;
 // Manual repair endpoint: keep each request small so operators batch large migrations explicitly.
-const RECONCILE_MAX_STREAMS = 10;
+const RECONCILE_MAX_SOURCES = 10;
 
 const dateFromString = makeIsoDateFromString('ISO 8601 datetime');
 
@@ -79,13 +81,9 @@ const baseRequestParamsSchema = z.object({
     .max(MAX_TEXT_LENGTH)
     .optional()
     .describe('Query string to filter significant events queries'),
-  sourceIds: z
-    .preprocess(
-      (val) => (typeof val === 'string' ? [val] : val),
-      z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_SOURCE_IDS_PER_REQUEST)
-    )
-    .optional()
-    .describe('Source ids to filter significant events'),
+  sourceIds: sourceIdsQuerySchema(MAX_SOURCE_IDS_PER_REQUEST).describe(
+    'Source ids to filter queries'
+  ),
 });
 
 const requestParamsSchema = baseRequestParamsSchema.extend({
@@ -185,13 +183,13 @@ const demoteBackedQueriesRoute = createServerRoute({
     });
 
     const bySource = toDemote.reduce<Record<string, string[]>>((acc, link) => {
-      const stream = link.source_id;
+      const sourceId = link.source_id;
 
-      if (!acc[stream]) {
-        acc[stream] = [];
+      if (!acc[sourceId]) {
+        acc[sourceId] = [];
       }
 
-      acc[stream].push(link.query.id);
+      acc[sourceId].push(link.query.id);
       return acc;
     }, {});
 
@@ -353,7 +351,7 @@ const reconcileQueriesRoute = createServerRoute({
   },
   params: z.object({
     body: z.object({
-      sourceIds: z.array(z.string().max(MAX_ID_LENGTH)).min(1).max(RECONCILE_MAX_STREAMS),
+      sourceIds: sourceIdsArraySchema({ min: 1, max: RECONCILE_MAX_SOURCES }),
     }),
   }),
   handler: async ({
@@ -389,7 +387,7 @@ const reconcileQueriesRoute = createServerRoute({
     const sourceResults = await Promise.allSettled(
       sourceIds.map((sourceId) => sourcesClient.get(sourceId))
     );
-    const limiter = pLimit(RECONCILE_STREAM_CONCURRENCY);
+    const limiter = pLimit(RECONCILE_SOURCE_CONCURRENCY);
 
     const sources = await Promise.all(
       sourceResults.map((result, index) =>
@@ -405,7 +403,7 @@ const reconcileQueriesRoute = createServerRoute({
           const sourceId = result.value.source.id;
           let reconciledQueries = 0;
           try {
-            await kiClient.replaceStreamQueries(sourceId, (currentLinks) => {
+            await kiClient.replaceSourceQueries(sourceId, (currentLinks) => {
               reconciledQueries = currentLinks.filter((link) => link.rule_backed).length;
               return currentLinks.map(queryFromLink);
             });

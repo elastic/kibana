@@ -12,11 +12,14 @@ import {
   resolveImpactedServices,
   type ResolvedImpactedService,
 } from '../common/impacted_services';
-import { useFetchStreamFeatures } from './use_fetch_stream_features';
+import { useFetchSourceFeatures } from './use_fetch_source_features';
 
 export interface ImpactedServicesResult {
   services: ResolvedImpactedService[];
   isInitialLoading: boolean;
+  failedSourceIds: string[];
+  isError: boolean;
+  refetch: () => void;
 }
 
 /**
@@ -25,8 +28,9 @@ export interface ImpactedServicesResult {
  */
 export const useImpactedServices = (event: SignificantEvent): ImpactedServicesResult => {
   const sourceIds = useMemo(() => getImpactedServiceSourceIds([event]), [event]);
-  const { features, isInitialLoading } = useFetchStreamFeatures(sourceIds);
+  const { features, failedSourceIds, isInitialLoading, isError, refetch } =
+    useFetchSourceFeatures(sourceIds);
   const services = useMemo(() => resolveImpactedServices(event, features), [event, features]);
 
-  return { services, isInitialLoading };
+  return { services, isInitialLoading, failedSourceIds, isError, refetch };
 };

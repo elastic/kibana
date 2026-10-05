@@ -27,8 +27,8 @@ const mockOpenChat = jest.fn();
 
 const mockStreamFeatures = jest.fn();
 
-jest.mock('../hooks/use_fetch_stream_features', () => ({
-  useFetchStreamFeatures: () => mockStreamFeatures(),
+jest.mock('../hooks/use_fetch_source_features', () => ({
+  useFetchSourceFeatures: () => mockStreamFeatures(),
 }));
 
 jest.mock('./change_point_lens_chart', () => ({
@@ -272,7 +272,7 @@ describe('DetectionFlyout', () => {
     expect(screen.queryByText('Impacted services')).not.toBeInTheDocument();
   });
 
-  it('includes resolved services from causal features without failure UI', () => {
+  it('includes resolved services and says when some sources failed to load', () => {
     const paymentsFeature = {
       ...webFrontendFeature,
       uuid: 'feat-payments',
@@ -308,8 +308,27 @@ describe('DetectionFlyout', () => {
         .getAllByTestId('nightshiftDetectionFlyoutEntityChip')
         .map(({ textContent }) => textContent)
     ).toEqual(['web-frontend', 'payments-api']);
-    expect(screen.queryByText(/could not be loaded/i)).not.toBeInTheDocument();
+    expect(
+      screen.getByText('Some sources could not be loaded, so this list may be incomplete.')
+    ).toBeInTheDocument();
     expect(screen.queryByText('Retry')).not.toBeInTheDocument();
+  });
+
+  it('says when every source failed and offers a retry', () => {
+    const refetch = jest.fn();
+    mockStreamFeatures.mockReturnValue({
+      features: [],
+      failedSourceIds: [],
+      isInitialLoading: false,
+      isFetching: false,
+      isError: true,
+      refetch,
+    });
+    renderFlyout();
+
+    expect(screen.getByText('Impacted services could not be loaded.')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('nightshiftDetectionFlyoutImpactedServicesRetry'));
+    expect(refetch).toHaveBeenCalledTimes(1);
   });
 
   it('renders the Lens occurrence chart in the trend section', () => {

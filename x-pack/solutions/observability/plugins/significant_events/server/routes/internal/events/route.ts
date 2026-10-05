@@ -36,7 +36,7 @@ import type { PaginatedResponse } from '../../../lib/significant_events/query_ut
 import { createServerRoute } from '../../create_server_route';
 import { assertNotPaused } from '../../utils/assert_not_paused';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
-import { MAX_SOURCE_IDS_PER_REQUEST } from '../../utils/resolve_source_ids';
+import { MAX_SOURCE_IDS_PER_REQUEST, sourceIdsQuerySchema } from '../../utils/resolve_source_ids';
 
 const toArray = <T extends string>(val: T | T[] | undefined): T[] | undefined =>
   val === undefined ? undefined : Array.isArray(val) ? val : [val];
@@ -101,13 +101,9 @@ const eventsSearchRoute = createServerRoute({
           z.array(significantEventStatusSchema).max(SIGNIFICANT_EVENT_STATUS_OPTIONS.length),
         ])
         .optional(),
-      source_id: z
-        .union([
-          z.string().max(MAX_ID_LENGTH),
-          z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_SOURCE_IDS_PER_REQUEST),
-        ])
-        .optional()
-        .describe('Source id(s) to filter events by'),
+      source_id: sourceIdsQuerySchema(MAX_SOURCE_IDS_PER_REQUEST).describe(
+        'Source ids to filter events by. One id or a repeated list.'
+      ),
       search: z.string().max(500).optional(),
       event_id: z.string().max(255).optional(),
       severity: z.union([severitySchema, z.array(severitySchema).max(4)]).optional(),

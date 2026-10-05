@@ -15,6 +15,7 @@ import { assertValidDateRange, makeIsoDateFromString } from '../../../utils/iso_
 import {
   MAX_SOURCE_IDS_PER_REQUEST,
   requestedOrAllSourceIds,
+  sourceIdsQuerySchema,
 } from '../../../utils/resolve_source_ids';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
@@ -33,16 +34,9 @@ const readQueryOccurrencesRoute = createServerRoute({
         .regex(BUCKET_SIZE_PATTERN)
         .describe('Size of time buckets for aggregation'),
       query: z.string().max(4096).optional().describe('Query string to filter source queries'),
-      sourceIds: z
-        .union([
-          z
-            .string()
-            .max(MAX_ID_LENGTH)
-            .transform((val) => [val]),
-          z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_SOURCE_IDS_PER_REQUEST),
-        ])
-        .optional()
-        .describe('Source ids to filter results by'),
+      sourceIds: sourceIdsQuerySchema(MAX_SOURCE_IDS_PER_REQUEST).describe(
+        'Source ids to filter results by'
+      ),
       rule_uuid: z
         .union([
           z

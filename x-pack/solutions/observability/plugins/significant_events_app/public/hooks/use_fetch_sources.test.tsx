@@ -87,4 +87,21 @@ describe('useFetchSources', () => {
     await waitFor(() => expect(result.current.data).toHaveLength(MAX_SOURCES_PER_PAGE));
     expect(fetch).toHaveBeenCalledTimes(1);
   });
+
+  it('toasts once when several callers see the same failed fetch', async () => {
+    const addError = jest.fn();
+    mockUseKibana.mockReturnValue({
+      core: { notifications: { toasts: { addError } } },
+      dependencies: {
+        start: { nightshiftSources: { getClient: jest.fn().mockResolvedValue({ fetch }) } },
+      },
+    } as never);
+    fetch.mockRejectedValue(new Error('sources unavailable'));
+
+    const { result } = renderHook(() => [useFetchSources(), useFetchSources()], { wrapper });
+
+    await waitFor(() => expect(result.current[0].isError).toBe(true));
+    expect(result.current[1].isError).toBe(true);
+    expect(addError).toHaveBeenCalledTimes(1);
+  });
 });

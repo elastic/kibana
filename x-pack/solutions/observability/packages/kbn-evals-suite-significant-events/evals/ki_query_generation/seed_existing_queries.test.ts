@@ -39,7 +39,7 @@ describe('seedExistingQueries', () => {
         index: KNOWLEDGE_INDICATORS_DATA_STREAM,
         query: {
           bool: {
-            filter: [{ term: { type: 'query' } }, { term: { 'stream.name': 'logs.test' } }],
+            filter: [{ term: { type: 'query' } }, { term: { 'source.id': 'logs.test' } }],
           },
         },
       })
@@ -52,7 +52,7 @@ describe('seedExistingQueries', () => {
           id: 'seed-query',
           type: 'query',
           title: 'Existing failure',
-          'stream.name': 'logs.test',
+          'source.id': 'logs.test',
           query: {
             esql: 'FROM logs | WHERE message:"failure"',
             query_type: 'match',

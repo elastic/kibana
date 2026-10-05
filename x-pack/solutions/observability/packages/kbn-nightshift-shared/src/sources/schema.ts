@@ -122,7 +122,7 @@ export const listSourcesQuerySchema = z.object({
     ])
     .optional()
     .describe(
-      'Return only the sources with these ids. Ids that match no source are left out, and paging and the other filters do not apply.'
+      'Return only the sources with these ids. Ids that match no source are left out. Search, enabled, and paging apply to the sources that were found.'
     ),
 });
 

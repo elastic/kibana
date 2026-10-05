@@ -84,7 +84,7 @@ Topology-fallback request:
 }
 ```
 
-Response (`source_ids` and nested `source_id` show source slugs, which `slugs` and signal `source_id` accept):
+Response (`source_ids` and nested `source_id` are source ids. `slugs` and signal `source_id` still accept an id or a slug):
 ```json
 {
   "view": "compact",
@@ -101,7 +101,7 @@ Response (`source_ids` and nested `source_id` show source slugs, which `slugs` a
       "status": "...",
       "severity": "...",
       "confidence": 0.7,
-      "source_ids": ["nginx-errors"],
+      "source_ids": ["3f6c1c2e-8a4b-4d57-9a53-1d2b7c9e0a11"],
       "causal_features": [],
       "blast_radius": [],
       "signal_rule_uuids": ["..."],

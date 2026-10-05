@@ -6,12 +6,7 @@
  */
 
 import { nightshiftSourceSlugsField } from '@kbn/nightshift-shared';
-import {
-  findSource,
-  presentSlug,
-  resolveSourcesBySlug,
-  type SourceCatalog,
-} from './resolve_source_slugs';
+import { findSource, resolveSourcesBySlug, type SourceCatalog } from './resolve_source_slugs';
 
 /** Tool input for the stored `source_ids` field. Values are source slugs. */
 export const sourceSlugsSchema = nightshiftSourceSlugsField('Disabled sources are accepted.');
@@ -22,13 +17,6 @@ interface NestedSourceId {
 
 interface SlugScopedEvent {
   slugs: readonly string[];
-  signals?: ReadonlyArray<NestedSourceId>;
-  causal_features?: ReadonlyArray<NestedSourceId>;
-  blast_radius?: ReadonlyArray<NestedSourceId>;
-}
-
-interface StoredSourceIds {
-  source_ids: readonly string[];
   signals?: ReadonlyArray<NestedSourceId>;
   causal_features?: ReadonlyArray<NestedSourceId>;
   blast_radius?: ReadonlyArray<NestedSourceId>;
@@ -62,24 +50,5 @@ export function assignStoredSourceIds<T extends SlugScopedEvent>(
     ...(item.signals ? { signals: rewriteNested(item.signals, idOf) } : {}),
     ...(item.causal_features ? { causal_features: rewriteNested(item.causal_features, idOf) } : {}),
     ...(item.blast_radius ? { blast_radius: rewriteNested(item.blast_radius, idOf) } : {}),
-  };
-}
-
-/**
- * Tool output shape: stored source ids shown as slugs on `source_ids` and nested `source_id`. The
- * keys keep their stored names because tool inputs accept a slug or an id there. An id missing
- * from the catalog is left unchanged.
- */
-export function presentStoredSourceFields<T extends StoredSourceIds>(
-  catalog: SourceCatalog,
-  item: T
-): T {
-  const show = (storedId: string) => presentSlug(catalog, storedId);
-  return {
-    ...item,
-    source_ids: item.source_ids.map(show),
-    ...(item.signals ? { signals: rewriteNested(item.signals, show) } : {}),
-    ...(item.causal_features ? { causal_features: rewriteNested(item.causal_features, show) } : {}),
-    ...(item.blast_radius ? { blast_radius: rewriteNested(item.blast_radius, show) } : {}),
   };
 }

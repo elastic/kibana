@@ -137,11 +137,11 @@ function normalizeParams(params: SearchKnowledgeIndicatorsInput): NormalizedPara
   };
 }
 
-async function resolveStreamNames(
+async function resolveSourceIds(
   params: SearchKnowledgeIndicatorsInput,
-  getStreamNames: () => Promise<string[]>
+  getSourceIds: () => Promise<string[]>
 ): Promise<string[]> {
-  const accessible = await getStreamNames();
+  const accessible = await getSourceIds();
   const requested = params.source_ids?.length
     ? intersection(uniq(params.source_ids), accessible)
     : accessible;
@@ -251,14 +251,14 @@ function sortIndicators(
 }
 
 export async function searchKnowledgeIndicators({
-  getStreamNames,
+  getSourceIds,
   getSourceSlug,
   getFeatures,
   getQueries,
   onFeatureFetchError,
   params,
 }: {
-  getStreamNames(): Promise<string[]>;
+  getSourceIds(): Promise<string[]>;
   /** Slug of a source id, used to order results. Ids sort as is when it is omitted. */
   getSourceSlug?(sourceId: string): string | undefined;
   getFeatures(
@@ -286,7 +286,7 @@ export async function searchKnowledgeIndicators({
   const normalized = normalizeParams(params);
 
   // Step 2: Resolve sources (requested ∩ accessible).
-  const sourceIds = await resolveStreamNames(params, getStreamNames);
+  const sourceIds = await resolveSourceIds(params, getSourceIds);
   const hasRequestedSourceIds = Array.isArray(params.source_ids) && params.source_ids.length > 0;
   // Handle the case where no sources are accessible and sources were requested.
   if (hasRequestedSourceIds && sourceIds.length === 0) {

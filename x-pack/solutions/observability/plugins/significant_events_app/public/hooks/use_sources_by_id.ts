@@ -27,13 +27,13 @@ const toSourcesLookup = (sources: NightshiftSource[]): SourcesLookup => {
 const EMPTY_SOURCES_LOOKUP = toSourcesLookup([]);
 
 /**
- * Looks sources up by id. `getSourceTitle` falls back to the raw value, because detections and
- * events written before the source cutover still carry stream names.
+ * Looks sources up by id. `getSourceTitle` falls back to the raw value when the id is not in the
+ * catalog, including a source that has been deleted.
  */
-export function useSourcesById(): SourcesLookup {
-  const { data = EMPTY_SOURCES_LOOKUP } = useFetchSources({
+export function useSourcesById(): SourcesLookup & { isError: boolean } {
+  const { data = EMPTY_SOURCES_LOOKUP, isError } = useFetchSources({
     select: toSourcesLookup,
-    showErrorToast: false,
+    showErrorToast: true,
   });
-  return data;
+  return { ...data, isError };
 }

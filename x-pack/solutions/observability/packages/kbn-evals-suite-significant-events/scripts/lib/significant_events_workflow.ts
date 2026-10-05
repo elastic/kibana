@@ -243,7 +243,7 @@ export async function persistKnowledgeIndicatorsForSnapshot(
     readRawDataStreamDocs(
       sysClient,
       KNOWLEDGE_INDICATORS_DATA_STREAM,
-      { term: { 'stream.name': streamName } },
+      { term: { 'source.id': streamName } },
       'knowledge indicator(s)'
     )
   );

@@ -652,7 +652,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         return response.persistedQueries[0].id as string;
       }
 
-      it('reconcileStream still tombstones a persist-created query once its feature is gone', async () => {
+      it('reconcileSource still tombstones a persist-created query once its feature is gone', async () => {
         // Regression: rewriting other queries used to drop expires_at on this survivor,
         // making it durable and immune to the reconciliation below.
         const { uuid: featureUuid } = await upsertFeature(apiClient, STREAM_NAME, testFeature);

@@ -57,7 +57,7 @@ const discoveryOccurrencesRoute =
 const bulkDeleteRoute = internalKIQueriesRoutes['POST /internal/streams/queries/_bulk_delete'];
 const upsertQueryRoute =
   internalKIQueriesRoutes['PUT /internal/significant_events/queries/{queryId}'];
-const RECONCILE_MAX_STREAMS = 10;
+const RECONCILE_MAX_SOURCES = 10;
 
 type HandlerParams = Parameters<typeof route.handler>[0];
 type DiscoveryHandlerParams = Parameters<typeof discoveryQueriesRoute.handler>[0];
@@ -109,16 +109,16 @@ describe('reconcileQueriesRoute', () => {
     expect(
       route.params.safeParse({
         body: {
-          sourceIds: Array.from({ length: RECONCILE_MAX_STREAMS + 1 }, (_, i) => `logs.${i}`),
+          sourceIds: Array.from({ length: RECONCILE_MAX_SOURCES + 1 }, (_, i) => `logs.${i}`),
         },
       }).success
     ).toBe(false);
     expect(route.params.safeParse({ body: { sourceIds: ['logs.test'] } }).success).toBe(true);
   });
 
-  it('replays current stream queries through replaceStreamQueries', async () => {
+  it('replays current stream queries through replaceSourceQueries', async () => {
     const currentLinks = [makeQueryLink('critical', 80), makeQueryLink('default', 60)];
-    const replaceStreamQueries = jest
+    const replaceSourceQueries = jest
       .fn()
       .mockImplementation(async (_definition, getNextQueries) => {
         expect(getNextQueries(currentLinks)).toEqual(currentLinks.map((link) => link.query));
@@ -132,7 +132,7 @@ describe('reconcileQueriesRoute', () => {
         },
         licensing: {},
         uiSettingsClient: {},
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ replaceStreamQueries }),
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ replaceSourceQueries }),
       }),
       server: makeServer(),
       maintenanceService: makeMaintenanceService(),
@@ -141,7 +141,7 @@ describe('reconcileQueriesRoute', () => {
 
     const result = await route.handler(handlerParams);
 
-    expect(replaceStreamQueries).toHaveBeenCalledWith('logs.test', expect.any(Function));
+    expect(replaceSourceQueries).toHaveBeenCalledWith('logs.test', expect.any(Function));
     expect(result).toEqual({
       reconciled: 1,
       failed: 0,
@@ -150,7 +150,7 @@ describe('reconcileQueriesRoute', () => {
   });
 
   it('continues when one stream fails to reconcile', async () => {
-    const replaceStreamQueries = jest
+    const replaceSourceQueries = jest
       .fn()
       .mockResolvedValueOnce(undefined)
       .mockRejectedValueOnce(new Error('rules unavailable'));
@@ -166,7 +166,7 @@ describe('reconcileQueriesRoute', () => {
         },
         licensing: {},
         uiSettingsClient: {},
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ replaceStreamQueries }),
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ replaceSourceQueries }),
       }),
       server: makeServer(),
       maintenanceService: makeMaintenanceService(),

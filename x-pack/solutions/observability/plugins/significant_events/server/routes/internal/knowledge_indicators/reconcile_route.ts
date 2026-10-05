@@ -36,7 +36,7 @@ const reconcileKnowledgeIndicatorsRoute = createServerRoute({
 
     const { source } = await sourcesClient.get(params.path.sourceId);
     const kiClient = await getKnowledgeIndicatorClient();
-    return kiClient.reconcileStream(source.id);
+    return kiClient.reconcileSource(source.id);
   },
 });
 

@@ -280,7 +280,7 @@ describe('selectedEvent deep link', () => {
     openEventId: event.event_id,
     statusFilter: ['active'],
     severityFilter: ['critical', 'high'],
-    streamFilter: [],
+    sourceFilter: [],
     serviceFilter: [],
     setFilters: jest.fn(),
     resetFilters: jest.fn(),
@@ -427,7 +427,7 @@ describe('selectedEvent deep link', () => {
       {
         status: [event.status],
         severity: [event.severity],
-        stream: event.source_ids,
+        source: event.source_ids,
         service: [],
       },
       { keepSelectedEvent: true }
@@ -441,7 +441,7 @@ describe('selectedEvent deep link', () => {
       openEventId: undefined,
       statusFilter: ['inactive'],
       severityFilter: ['low'],
-      streamFilter: ['logs.test'],
+      sourceFilter: ['logs.test'],
       serviceFilter: ['svc-checkout'],
     });
 
@@ -555,7 +555,7 @@ describe('selectedEvent deep link', () => {
       openEventId: undefined,
       statusFilter: [event.status],
       severityFilter: [event.severity],
-      streamFilter: event.source_ids,
+      sourceFilter: event.source_ids,
     });
     rerender(<SignificantEventsTab />);
 

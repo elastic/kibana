@@ -203,7 +203,7 @@ describe('event_search tool', () => {
             view_name: '$.nightshift.sources.default.nginx-errors',
           },
         ],
-        events: [expect.objectContaining({ source_ids: ['nginx-errors'] })],
+        events: [expect.objectContaining({ source_ids: ['source-uuid'] })],
       })
     );
   });

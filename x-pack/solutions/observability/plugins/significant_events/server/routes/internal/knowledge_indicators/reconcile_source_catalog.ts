@@ -26,8 +26,8 @@ interface OnboardingClient {
 type CatalogKiClient = Pick<
   KnowledgeIndicatorClient,
   | 'setSourceRulesEnabled'
-  | 'findStreamNamesWithOwnedRules'
-  | 'getStreamNamesToReconcile'
+  | 'findSourceIdsWithOwnedRules'
+  | 'getSourceIdsToReconcile'
   | 'deleteOwnedRules'
   | 'deleteAllQueries'
   | 'deleteIndicators'
@@ -231,7 +231,7 @@ export async function reconcileSourceCatalog({
 }): Promise<{ sources: NightshiftSource[]; reconcileIds: string[] }> {
   const [sources, ownedRuleIds, maintenanceState, runningSourceSlugs] = await Promise.all([
     listAllSources(sourcesClient),
-    kiClient.findStreamNamesWithOwnedRules(),
+    kiClient.findSourceIdsWithOwnedRules(),
     maintenanceService.getState({ request }),
     loadRunningSourceSlugs(onboardingClient, request),
   ]);
@@ -274,7 +274,7 @@ export async function reconcileSourceCatalog({
     }
   }
 
-  const reconcileIds = await kiClient.getStreamNamesToReconcile();
+  const reconcileIds = await kiClient.getSourceIdsToReconcile();
   const survivingReconcileIds: string[] = [];
   for (const sourceId of reconcileIds) {
     if (catalogIds.has(sourceId)) {

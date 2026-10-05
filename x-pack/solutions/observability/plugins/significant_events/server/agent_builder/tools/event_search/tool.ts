@@ -36,7 +36,7 @@ import {
   toSourceRef,
   type SourceCatalog,
 } from '../../utils/resolve_source_slugs';
-import { presentStoredSourceFields, sourceSlugsSchema } from '../../utils/stored_source_fields';
+import { sourceSlugsSchema } from '../../utils/stored_source_fields';
 
 export const SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID = platformSignificantEventsTools.searchEvent;
 
@@ -289,12 +289,10 @@ export function createSearchEventsTool({
                 sources: sourcesForSearchResult(catalog, filterSources, data.events).map(
                   toSourceRef
                 ),
-                events: data.events.map((event) =>
-                  presentStoredSourceFields(catalog, {
-                    ...event,
-                    source_ids: event.source_ids ?? [],
-                  })
-                ),
+                events: data.events.map((event) => ({
+                  ...event,
+                  source_ids: event.source_ids ?? [],
+                })),
               },
             },
           ],

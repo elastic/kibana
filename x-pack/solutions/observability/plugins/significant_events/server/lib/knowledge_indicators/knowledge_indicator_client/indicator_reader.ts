@@ -225,7 +225,7 @@ export class IndicatorReader {
     return docs.filter(isStoredQueryKnowledgeIndicator).map(fromStoredQuery);
   }
 
-  async getStreamToQueryLinksMap(
+  async getSourceToQueryLinksMap(
     sourceIds: string[],
     options: { includeExpired?: boolean } = {}
   ): Promise<Record<string, QueryLink[]>> {
@@ -311,7 +311,7 @@ export class IndicatorReader {
   /**
    * Returns distinct source ids that have at least one active (non-deleted) KI revision.
    */
-  async getStreamNamesWithKnowledgeIndicators(): Promise<string[]> {
+  async getSourceIdsWithKnowledgeIndicators(): Promise<string[]> {
     const where = inPredicate(TYPE, [KI_TYPE_FEATURE, KI_TYPE_QUERY]);
     return this.revisionReader.fetchDistinctStreamNames(where, IS_NOT_DELETED);
   }

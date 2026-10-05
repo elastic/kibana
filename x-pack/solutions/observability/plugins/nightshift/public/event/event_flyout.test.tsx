@@ -36,8 +36,8 @@ jest.mock('../hooks/use_fetch_investigation_statuses', () => ({
 
 let mockInvestigationRunStatuses: Record<string, InvestigationRunStatus> | undefined;
 
-jest.mock('../hooks/use_fetch_stream_features', () => ({
-  useFetchStreamFeatures: () => ({
+jest.mock('../hooks/use_fetch_source_features', () => ({
+  useFetchSourceFeatures: () => ({
     features: [],
     failedSourceIds: [],
     isInitialLoading: false,

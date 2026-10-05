@@ -58,7 +58,7 @@ function createOrchestrator({
   } as unknown as jest.Mocked<IndicatorWriter>;
 
   const reader = {
-    getStreamToQueryLinksMap: jest.fn().mockResolvedValue({ [SOURCE]: currentLinks }),
+    getSourceToQueryLinksMap: jest.fn().mockResolvedValue({ [SOURCE]: currentLinks }),
   } as unknown as jest.Mocked<IndicatorReader>;
 
   const logger = loggerMock.create();
@@ -455,7 +455,7 @@ describe('QueryRuleOrchestrator', () => {
 
       const result = await orchestrator.demoteQueries(SOURCE, ['expired-1']);
 
-      expect(reader.getStreamToQueryLinksMap).toHaveBeenCalledWith(
+      expect(reader.getSourceToQueryLinksMap).toHaveBeenCalledWith(
         [SOURCE],
         expect.objectContaining({ includeExpired: true })
       );
@@ -465,7 +465,7 @@ describe('QueryRuleOrchestrator', () => {
     });
   });
 
-  describe('reconcileStream', () => {
+  describe('reconcileSource', () => {
     function makeReconcileLink(overrides: Partial<QueryLink> = {}): QueryLink {
       return {
         source_id: SOURCE,
@@ -518,7 +518,7 @@ describe('QueryRuleOrchestrator', () => {
         setRulesEnabled: jest.fn().mockResolvedValue(undefined),
         findExistingRuleIds: jest.fn().mockResolvedValue([]),
         findOwnedRuleIds: jest.fn().mockResolvedValue([]),
-        findStreamNamesWithOwnedRules: jest.fn().mockResolvedValue([]),
+        findSourceIdsWithOwnedRules: jest.fn().mockResolvedValue([]),
         findRuleIdsByTagPrefix: jest.fn().mockResolvedValue([]),
       };
     }
@@ -545,14 +545,14 @@ describe('QueryRuleOrchestrator', () => {
       const rulesClient = makeReconcileRulesClient();
       const orchestrator = makeReconcileOrchestrator({ rulesClient, isEnabled: false });
 
-      const summary = await orchestrator.reconcileStream(SOURCE);
+      const summary = await orchestrator.reconcileSource(SOURCE);
 
       expect(summary).toEqual({ tombstoned: 0, orphanRulesDeleted: 0 });
       expect(rulesClient.findOwnedRuleIds).not.toHaveBeenCalled();
     });
 
     it('is a no-op when there are no links, rules, or features', async () => {
-      const summary = await makeReconcileOrchestrator().reconcileStream(SOURCE);
+      const summary = await makeReconcileOrchestrator().reconcileSource(SOURCE);
       expect(summary).toEqual({ tombstoned: 0, orphanRulesDeleted: 0 });
     });
 
@@ -566,7 +566,7 @@ describe('QueryRuleOrchestrator', () => {
       const reader = makeReconcileReader({ links: [link], features: [] }); // feat-1 gone
       const orchestrator = makeReconcileOrchestrator({ rulesClient, writer, reader });
 
-      const summary = await orchestrator.reconcileStream(SOURCE);
+      const summary = await orchestrator.reconcileSource(SOURCE);
 
       expect(rulesClient.bulkDeleteRules).toHaveBeenCalledWith(['rule-1']);
       expect(writer.bulk).toHaveBeenCalledWith(
@@ -586,7 +586,7 @@ describe('QueryRuleOrchestrator', () => {
       const reader = makeReconcileReader({ links: [link], features: [makeFeature('feat-1')] });
       const orchestrator = makeReconcileOrchestrator({ rulesClient, writer, reader });
 
-      const summary = await orchestrator.reconcileStream(SOURCE);
+      const summary = await orchestrator.reconcileSource(SOURCE);
 
       expect(writer.bulk).not.toHaveBeenCalled();
       expect(rulesClient.bulkDeleteRules).not.toHaveBeenCalled();
@@ -606,7 +606,7 @@ describe('QueryRuleOrchestrator', () => {
       const reader = makeReconcileReader({ links: [link], features: [] });
       const orchestrator = makeReconcileOrchestrator({ rulesClient, writer, reader });
 
-      const summary = await orchestrator.reconcileStream(SOURCE);
+      const summary = await orchestrator.reconcileSource(SOURCE);
 
       expect(rulesClient.bulkDeleteRules).toHaveBeenCalledWith(['rule-1']);
       expect(writer.bulk).toHaveBeenCalledWith(
@@ -626,7 +626,7 @@ describe('QueryRuleOrchestrator', () => {
       const reader = makeReconcileReader({ links: [link], features: [] });
       const orchestrator = makeReconcileOrchestrator({ rulesClient, writer, reader });
 
-      const summary = await orchestrator.reconcileStream(SOURCE);
+      const summary = await orchestrator.reconcileSource(SOURCE);
 
       expect(writer.bulk).not.toHaveBeenCalled();
       expect(summary.tombstoned).toBe(0);
@@ -636,7 +636,7 @@ describe('QueryRuleOrchestrator', () => {
       const reader = makeReconcileReader();
       const orchestrator = makeReconcileOrchestrator({ reader });
 
-      await orchestrator.reconcileStream(SOURCE);
+      await orchestrator.reconcileSource(SOURCE);
 
       expect(reader.getQueryLinks).toHaveBeenCalledWith(
         [SOURCE],
@@ -656,7 +656,7 @@ describe('QueryRuleOrchestrator', () => {
       const reader = makeReconcileReader({ links: [link], features: [] });
       const orchestrator = makeReconcileOrchestrator({ writer, reader });
 
-      const summary = await orchestrator.reconcileStream(SOURCE);
+      const summary = await orchestrator.reconcileSource(SOURCE);
 
       expect(writer.bulk).toHaveBeenCalledWith(
         SOURCE,
@@ -672,7 +672,7 @@ describe('QueryRuleOrchestrator', () => {
       const reader = makeReconcileReader({ links: [] });
       const orchestrator = makeReconcileOrchestrator({ rulesClient, reader, logger });
 
-      const summary = await orchestrator.reconcileStream(SOURCE);
+      const summary = await orchestrator.reconcileSource(SOURCE);
 
       expect(rulesClient.bulkDeleteRules).not.toHaveBeenCalled();
       expect(summary.orphanRulesDeleted).toBe(0);
@@ -687,7 +687,7 @@ describe('QueryRuleOrchestrator', () => {
       const reader = makeReconcileReader({ links: [], features: [makeFeature('feat-1')] });
       const orchestrator = makeReconcileOrchestrator({ rulesClient, reader });
 
-      const summary = await orchestrator.reconcileStream(SOURCE);
+      const summary = await orchestrator.reconcileSource(SOURCE);
 
       const chunks = rulesClient.bulkDeleteRules.mock.calls.map(([ids]) => ids);
       expect(chunks.map((ids) => ids.length)).toEqual([100, 51, 50]);
@@ -706,7 +706,7 @@ describe('QueryRuleOrchestrator', () => {
       const reader = makeReconcileReader({ links: [link], features: [makeFeature('feat-1')] });
       const orchestrator = makeReconcileOrchestrator({ rulesClient, writer, reader });
 
-      const summary = await orchestrator.reconcileStream(SOURCE);
+      const summary = await orchestrator.reconcileSource(SOURCE);
 
       // No live rule to enumerate as an orphan; the seam tombstones the query instead.
       expect(writer.bulk).toHaveBeenCalledWith(
@@ -727,7 +727,7 @@ describe('QueryRuleOrchestrator', () => {
       const reader = makeReconcileReader({ links: [link], features: [makeFeature('feat-1')] });
       const orchestrator = makeReconcileOrchestrator({ rulesClient, writer, reader });
 
-      const summary = await orchestrator.reconcileStream(SOURCE);
+      const summary = await orchestrator.reconcileSource(SOURCE);
 
       expect(writer.bulk).not.toHaveBeenCalled();
       expect(summary.tombstoned).toBe(0);
@@ -744,7 +744,7 @@ describe('QueryRuleOrchestrator', () => {
       const reader = makeReconcileReader({ links: [link], features: [makeFeature('feat-1')] });
       const orchestrator = makeReconcileOrchestrator({ rulesClient, writer, reader });
 
-      const summary = await orchestrator.reconcileStream(SOURCE);
+      const summary = await orchestrator.reconcileSource(SOURCE);
 
       expect(writer.bulk).toHaveBeenCalledTimes(1);
       expect(writer.bulk).toHaveBeenCalledWith(SOURCE, [{ delete: { type: 'query', id: 'q-1' } }]);

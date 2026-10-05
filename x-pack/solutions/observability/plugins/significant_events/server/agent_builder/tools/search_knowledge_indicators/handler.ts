@@ -270,7 +270,7 @@ export async function searchKnowledgeIndicatorsToolHandler({
         error instanceof Error ? error.stack || error.message : String(error ?? 'Unknown error');
       logger.warn(`ki_search: failed to fetch features for source "${sourceId}": ${errorMessage}`);
     },
-    getStreamNames: async () => [...catalog.byId.keys()],
+    getSourceIds: async () => [...catalog.byId.keys()],
     getSourceSlug: (sourceId) => catalog.byId.get(sourceId)?.slug,
     getFeatures: async (sourceId, { searchText, featureTypes, featureIds }) => {
       if (searchText) {

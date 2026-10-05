@@ -19,7 +19,7 @@ export const DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER: Severity[] = ['critical'
 export interface SignificantEventsFilters {
   status: SignificantEventStatus[];
   severity: Severity[];
-  stream: string[];
+  source: string[];
   /** Service Knowledge Indicator feature ids. */
   service: string[];
 }
@@ -92,7 +92,7 @@ export const useSignificantEventsUrlState = () => {
   );
   // `stream` is the name this param had before sources; locator links and bookmarks still carry it.
   // Writes always use `source`, so the old name leaves the URL on the first filter edit.
-  const streamFilter = useMemo(
+  const sourceFilter = useMemo(
     () => parseValuesParam(query?.source ?? query?.stream),
     [query?.source, query?.stream]
   );
@@ -123,7 +123,7 @@ export const useSignificantEventsUrlState = () => {
    */
   const setFilters = useCallback(
     (
-      { status, severity, stream, service }: Partial<SignificantEventsFilters>,
+      { status, severity, source, service }: Partial<SignificantEventsFilters>,
       { keepSelectedEvent = false } = {}
     ) => {
       const {
@@ -132,13 +132,13 @@ export const useSignificantEventsUrlState = () => {
         service: currentService,
         ...rest
       } = keepSelectedEvent ? queryRef.current ?? {} : omitSelectedEvent(queryRef.current);
-      const nextStream = stream ?? parseValuesParam(currentSource ?? legacyStream);
+      const nextSource = source ?? parseValuesParam(currentSource ?? legacyStream);
       const nextService = service ?? parseValuesParam(currentService);
       write('replace', {
         ...rest,
         ...(status ? { status: encodeListParam(status) } : {}),
         ...(severity ? { severity: encodeListParam(severity) } : {}),
-        ...(nextStream.length ? { source: nextStream } : {}),
+        ...(nextSource.length ? { source: nextSource } : {}),
         ...(nextService.length ? { service: nextService } : {}),
       });
     },
@@ -206,7 +206,7 @@ export const useSignificantEventsUrlState = () => {
     openEventId,
     statusFilter,
     severityFilter,
-    streamFilter,
+    sourceFilter,
     serviceFilter,
     setFilters,
     resetFilters,
