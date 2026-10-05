@@ -18,6 +18,9 @@ const ENDPOINT_COMMAND = '/opt/Elastic/Endpoint/elastic-endpoint';
 const KILL_SLEEP_SECONDS = 617;
 const SUSPEND_SLEEP_SECONDS = 619;
 const SLEEP_LIST_ATTEMPTS = 3;
+
+/** The processes action reports the executable path, such as `/usr/bin/sleep`, with no arguments. */
+const isSleepProcess = (command: string): boolean => command.split('/').pop() === 'sleep';
 /**
  * One process list, then up to three lists plus kill, then the same for suspend.
  * Each action waits up to 120s, so the worst case is 18 minutes.
@@ -32,17 +35,11 @@ const parsePid = (pid: string): number => {
   return parsed;
 };
 
-const findNewSleepPid = (
+const findNewSleepProcesses = (
   knownPids: ReadonlySet<string>,
-  entries: ProcessesEntry[],
-  seconds: number
-): number | undefined => {
-  const command = `sleep ${seconds}`;
-  const sleep = entries.find(
-    (entry) => !knownPids.has(entry.pid) && entry.command.includes(command)
-  );
-  return sleep ? parsePid(sleep.pid) : undefined;
-};
+  entries: ProcessesEntry[]
+): ProcessesEntry[] =>
+  entries.filter((entry) => !knownPids.has(entry.pid) && isSleepProcess(entry.command));
 
 const waitForNewSleepPid = async (
   kbnClient: KbnClient,
@@ -50,21 +47,37 @@ const waitForNewSleepPid = async (
   knownPids: ReadonlySet<string>,
   seconds: number
 ): Promise<number> => {
-  let listedCommands: string[] = [];
+  let lastEntries: ProcessesEntry[] = [];
 
   for (let attempt = 0; attempt < SLEEP_LIST_ATTEMPTS; attempt++) {
     const entries = await listRunningProcesses(kbnClient, agentId);
-    listedCommands = entries.map((entry) => entry.command);
-    const pid = findNewSleepPid(knownPids, entries, seconds);
-    if (pid !== undefined) {
-      return pid;
+    lastEntries = entries;
+    const matches = findNewSleepProcesses(knownPids, entries);
+    const [match] = matches;
+    if (matches.length === 1 && match) {
+      return parsePid(match.pid);
+    }
+    if (matches.length > 1) {
+      throw new Error(
+        `Expected one new sleep process after starting "sleep ${seconds}", found ${matches
+          .map((entry) => `${entry.pid} ${entry.command}`)
+          .join(', ')}`
+      );
     }
   }
 
+  const sleepEntries = lastEntries.filter((entry) => isSleepProcess(entry.command));
+  const listed = sleepEntries.length
+    ? sleepEntries
+        .map(
+          (entry) =>
+            `${entry.pid} ${entry.command}${knownPids.has(entry.pid) ? ' (already known)' : ''}`
+        )
+        .join(' | ')
+    : 'none';
+
   throw new Error(
-    `No new "sleep ${seconds}" process in the running process list. Commands: ${listedCommands
-      .slice(0, 20)
-      .join(' | ')}`
+    `No new sleep process after starting "sleep ${seconds}". Sleep entries: ${listed}`
   );
 };
 

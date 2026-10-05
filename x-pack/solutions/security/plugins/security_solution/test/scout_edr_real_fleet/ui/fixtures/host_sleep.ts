@@ -15,8 +15,9 @@ import { getHostVmClient } from '../../../../scripts/endpoint/common/vm_services
  * run on the guest. `systemd-run` returns immediately; a bare `sleep` would
  * block `exec` for the whole interval.
  *
- * `seconds` is part of the command line (`sleep 617`) so a caller can tell this
- * process from other sleeps. Do not add short flags to the command.
+ * `seconds` controls how long the process stays alive. Callers tell sleeps apart
+ * by the new PID, because the processes action reports the executable path with
+ * no arguments. Do not add short flags to the command.
  */
 export const startLongRunningSleep = async (hostname: string, seconds = 600): Promise<void> => {
   if (!Number.isInteger(seconds) || seconds < 1) {
