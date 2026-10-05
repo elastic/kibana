@@ -50,9 +50,7 @@ async function distributeScoutTestsByModule() {
   }
 }
 
-type SingleConfigSetLaneInfo = { label: string; loadIDs: string[] };
-// Combined lane: runner restarts the server for each group; SCOUT_TEST_SERVER_CONFIG_SET is not set on the step.
-type CombinedLaneInfo = { label: string; loadGroups: Array<{ configSet: string; loadIDs: string[] }> };
+type LaneInfo = { label: string; loadGroups: Array<{ configSet: string; loadIDs: string[] }> };
 
 type LanePair = {
   testTarget: ScoutTestTrack['metadata']['testTarget'];
@@ -68,7 +66,7 @@ async function distributeScoutTestsOnLanes() {
   }
 
   const steps: BuildkiteCommandStep[] = [];
-  const loadInfoByStepKey: Record<string, SingleConfigSetLaneInfo | CombinedLaneInfo> = {};
+  const loadInfoByStepKey: Record<string, LaneInfo> = {};
   const testLaneLoadsFilePath = path.relative(getKibanaDir(), SCOUT_TEST_LANE_LOADS_PATH);
 
   const targetRuntimeMs =
@@ -94,25 +92,32 @@ async function distributeScoutTestsOnLanes() {
     ...collectEnvFromLabels(),
   };
 
-  const addRegularLaneStep = ({ testTarget, server, lane }: LanePair) => {
+  const addLaneStep = (
+    testTarget: LanePair['testTarget'],
+    agentQueue: string,
+    groups: LaneInfo['loadGroups']
+  ) => {
     const effectiveLaneNumber = steps.length + 1;
     const stepKey = `scout_test_lane_${effectiveLaneNumber}`;
     // `lane.number` is only accurate relative to its originating track; use the global counter instead
-    const stepLabel = `Scout Lane #${effectiveLaneNumber} - ${testTarget.arch}-${testTarget.domain} / ${server.configSet}`;
+    const configSetLabel =
+      groups.length === 1
+        ? groups[0].configSet
+        : `combined [${groups.map((g) => g.configSet).join('+')}]`;
+    const stepLabel = `Scout Lane #${effectiveLaneNumber} - ${testTarget.arch}-${testTarget.domain} / ${configSetLabel}`;
 
     steps.push({
       key: stepKey,
       label: stepLabel,
       command: '.buildkite/scripts/steps/test/scout/run_test_lane.sh',
       timeout_in_minutes: 60,
-      agents: expandAgentQueue(lane.metadata.buildkite.agentQueue),
+      agents: expandAgentQueue(agentQueue),
       env: {
         SCOUT_TEST_LANE_LOADS_PATH: testLaneLoadsFilePath,
         SCOUT_TEST_LANE_NUMBER: `${effectiveLaneNumber}`,
         SCOUT_TEST_TARGET_LOCATION: testTarget.location,
         SCOUT_TEST_TARGET_ARCH: testTarget.arch,
         SCOUT_TEST_TARGET_DOMAIN: testTarget.domain,
-        SCOUT_TEST_SERVER_CONFIG_SET: server.configSet,
         ...sharedEnv,
       },
       retry: {
@@ -123,10 +128,14 @@ async function distributeScoutTestsOnLanes() {
       },
     });
 
-    loadInfoByStepKey[stepKey] = { label: stepLabel, loadIDs: lane.loads };
+    loadInfoByStepKey[stepKey] = { label: stepLabel, loadGroups: groups };
   };
 
-  regularPairs.forEach(addRegularLaneStep);
+  regularPairs.forEach(({ testTarget, server, lane }) => {
+    addLaneStep(testTarget, lane.metadata.buildkite.agentQueue, [
+      { configSet: server.configSet, loadIDs: lane.loads },
+    ]);
+  });
 
   // Pack compact lanes: group by testTarget then greedy bin-pack into combined Buildkite steps.
   if (compactPairs.length > 0) {
@@ -142,7 +151,7 @@ async function distributeScoutTestsOnLanes() {
       testTarget: LanePair['testTarget'];
       agentQueue: string;
       usedMs: number;
-      groups: CombinedLaneInfo['loadGroups'];
+      groups: LaneInfo['loadGroups'];
     };
 
     for (const [, pairs] of compactByTarget) {
@@ -163,37 +172,8 @@ async function distributeScoutTestsOnLanes() {
         slot.usedMs += lane.runtimeEstimate;
       }
 
-      for (const { testTarget, agentQueue, usedMs, groups } of combinedSlots) {
-        const effectiveLaneNumber = steps.length + 1;
-        const stepKey = `scout_test_lane_${effectiveLaneNumber}`;
-        const configSetNames = groups.map((g) => g.configSet).join('+');
-        const stepLabel = `Scout Lane #${effectiveLaneNumber} - ${testTarget.arch}-${testTarget.domain} / combined [${configSetNames}]`;
-
-        steps.push({
-          key: stepKey,
-          label: stepLabel,
-          command: '.buildkite/scripts/steps/test/scout/run_test_lane.sh',
-          // Combined lanes restart the server per configSet group; allow extra wall-clock time
-          timeout_in_minutes: Math.ceil(usedMs / 60000) + 30,
-          agents: expandAgentQueue(agentQueue),
-          env: {
-            SCOUT_TEST_LANE_LOADS_PATH: testLaneLoadsFilePath,
-            SCOUT_TEST_LANE_NUMBER: `${effectiveLaneNumber}`,
-            SCOUT_TEST_TARGET_LOCATION: testTarget.location,
-            SCOUT_TEST_TARGET_ARCH: testTarget.arch,
-            SCOUT_TEST_TARGET_DOMAIN: testTarget.domain,
-            // SCOUT_TEST_SERVER_CONFIG_SET intentionally omitted — runner reads it per group from loadGroups
-            ...sharedEnv,
-          },
-          retry: {
-            automatic: [
-              { exit_status: '-1', limit: 3 },
-              { exit_status: '*', limit: 1 },
-            ],
-          },
-        });
-
-        loadInfoByStepKey[stepKey] = { label: stepLabel, loadGroups: groups };
+      for (const { testTarget, agentQueue, groups } of combinedSlots) {
+        addLaneStep(testTarget, agentQueue, groups);
       }
     }
   }

@@ -173,7 +173,7 @@ describe('scoutTestDistributionStrategies', () => {
       expect(uploadedGroup.steps[1].key).toBe('scout_test_lane_2');
     });
 
-    it('step env includes correct target and server config vars', async () => {
+    it('step env includes correct target vars and loads file has configSet in loadGroups', async () => {
       const track = createMockTrack('local', 'serverless', 'search', 'custom_config', [
         createMockLane(1, 'n2-8-spot', ['config-a.ts']),
       ]);
@@ -187,7 +187,13 @@ describe('scoutTestDistributionStrategies', () => {
       expect(step.env.SCOUT_TEST_TARGET_LOCATION).toBe('local');
       expect(step.env.SCOUT_TEST_TARGET_ARCH).toBe('serverless');
       expect(step.env.SCOUT_TEST_TARGET_DOMAIN).toBe('search');
-      expect(step.env.SCOUT_TEST_SERVER_CONFIG_SET).toBe('custom_config');
+      // configSet is not in step env — runner reads it from loadGroups at runtime
+      expect(step.env.SCOUT_TEST_SERVER_CONFIG_SET).toBeUndefined();
+
+      const written = JSON.parse(writeFileSyncSpy.mock.calls[0][1] as string);
+      expect(written['scout_test_lane_1'].loadGroups).toEqual([
+        { configSet: 'custom_config', loadIDs: ['config-a.ts'] },
+      ]);
     });
 
     it('uses default dependency when SCOUT_TEST_LANES_GROUP_DEPS is not set', async () => {
@@ -301,7 +307,7 @@ describe('scoutTestDistributionStrategies', () => {
         ]);
       });
 
-      it('keeps lanes at or above threshold as individual steps with loadIDs', async () => {
+      it('keeps lanes at or above threshold as individual steps, all using loadGroups format', async () => {
         const regular = createMockTrack('local', 'stateful', 'classic', 'default', [
           createMockLane(1, 'n2-4-spot', ['big.ts'], LONG_RUNTIME),
         ]);
@@ -317,14 +323,19 @@ describe('scoutTestDistributionStrategies', () => {
         await scoutTestDistributionStrategies.lanes();
 
         const { steps } = mockUploadSteps.mock.calls[0][0][0];
-        // Regular lane step + one combined step for the single compact lane
+        // Regular lane step + one combined step for the single compact lane; neither sets configSet in env
         expect(steps).toHaveLength(2);
-        expect(steps[0].env.SCOUT_TEST_SERVER_CONFIG_SET).toBe('default');
+        expect(steps[0].env.SCOUT_TEST_SERVER_CONFIG_SET).toBeUndefined();
         expect(steps[1].env.SCOUT_TEST_SERVER_CONFIG_SET).toBeUndefined();
 
         const written = JSON.parse(writeFileSyncSpy.mock.calls[0][1] as string);
-        expect(written['scout_test_lane_1']).toHaveProperty('loadIDs');
-        expect(written['scout_test_lane_2']).toHaveProperty('loadGroups');
+        // All lanes use loadGroups; regular lanes have a single-element array
+        expect(written['scout_test_lane_1'].loadGroups).toEqual([
+          { configSet: 'default', loadIDs: ['big.ts'] },
+        ]);
+        expect(written['scout_test_lane_2'].loadGroups).toEqual([
+          { configSet: 'custom', loadIDs: ['small.ts'] },
+        ]);
       });
 
       it('does not combine compact lanes from different testTargets', async () => {

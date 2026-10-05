@@ -138,28 +138,9 @@ mark_index_passed() {
   buildkite-agent meta-data set "$PASSED_LOAD_INDICES_META_KEY" "$PASSED_INDICES"
 }
 
-# Extract the load IDs (Scout test config paths) assigned to this lane from the loads file
-read_load_ids() {
-  mapfile -t LOAD_IDS < <(jq -r --arg key "$BUILDKITE_STEP_KEY" '.[$key].loadIDs[]' "$SCOUT_TEST_LANE_LOADS_PATH")
-
-  if [[ ${#LOAD_IDS[@]} -eq 0 ]]; then
-    echo "No test lane load IDs found for step key '$BUILDKITE_STEP_KEY'"
-    exit 1
-  fi
-
-  echo "Found ${#LOAD_IDS[@]} test lane load(s) for step key '$BUILDKITE_STEP_KEY'"
-}
-
-# Returns true when the loads file uses loadGroups (combined multi-configSet lane)
-is_combined_lane() {
-  local result
-  result=$(jq -r --arg key "$BUILDKITE_STEP_KEY" '.[$key] | has("loadGroups")' "$SCOUT_TEST_LANE_LOADS_PATH")
-  [[ "$result" == "true" ]]
-}
-
-# Run a combined lane: iterate over configSet groups, restarting the server for each.
+# Run the lane: iterate over configSet groups, restarting the server for each.
 # Uses a flat index across all groups so the existing pass-tracking metadata remains compatible.
-run_combined_lane() {
+run_lane() {
   local num_groups flat_idx=0
   num_groups=$(jq -r --arg key "$BUILDKITE_STEP_KEY" '.[$key].loadGroups | length' "$SCOUT_TEST_LANE_LOADS_PATH")
 
@@ -167,10 +148,12 @@ run_combined_lane() {
     local config_set
     config_set=$(jq -r --arg key "$BUILDKITE_STEP_KEY" --argjson g "$g" \
       '.[$key].loadGroups[$g].configSet' "$SCOUT_TEST_LANE_LOADS_PATH")
+    PROCESSED_CONFIG_SETS+=("$config_set")
 
     local group_loads
     mapfile -t group_loads < <(jq -r --arg key "$BUILDKITE_STEP_KEY" --argjson g "$g" \
       '.[$key].loadGroups[$g].loadIDs[]' "$SCOUT_TEST_LANE_LOADS_PATH")
+    ALL_LOADS+=("${group_loads[@]}")
 
     # On retry, skip server startup for groups whose loads all already passed
     local all_passed=true temp_idx=$flat_idx
@@ -389,15 +372,15 @@ get_config_status() {
 }
 
 display_test_load_ids_in_order_of_execution() {
-  local load_count=${#LOAD_IDS[@]}
+  local load_count=${#ALL_LOADS[@]}
   local idx_width=${#load_count}
   local idx_sep
   idx_sep=$(printf '%*s' "$idx_width" '' | tr ' ' '-')
   printf '  %*s  %-7s  %s\n' "$idx_width" "#" "Status" "Config"
   printf '  %*s  %-7s  %s\n' "$idx_width" "$idx_sep" "-------" "------"
   local i
-  for i in "${!LOAD_IDS[@]}"; do
-    local config="${LOAD_IDS[$i]}"
+  for i in "${!ALL_LOADS[@]}"; do
+    local config="${ALL_LOADS[$i]}"
     local status
     status=$(get_config_status "$config")
     printf '  %*d  %-7s  %s\n' "$idx_width" "$((i+1))" "$status" "$config"
@@ -410,7 +393,7 @@ print_summary() {
   echo "Test server configuration:"
   echo "  Arch: $SCOUT_TEST_TARGET_ARCH"
   echo "  Domain: $SCOUT_TEST_TARGET_DOMAIN"
-  echo "  Server config set: $SCOUT_TEST_SERVER_CONFIG_SET"
+  echo "  Config set(s): ${PROCESSED_CONFIG_SETS[*]}"
   echo ""
   echo "Test count by status:"
   if [[ ${#PASSED[@]} -gt 0 ]]; then
@@ -430,8 +413,6 @@ print_summary() {
 #
 # MAIN SCRIPT WORKFLOW
 #
-# SCOUT_TEST_SERVER_CONFIG_SET is required for regular lanes but not for combined lanes
-# (which read the configSet per group from loadGroups). Check it after detecting the lane type.
 check_required_env_vars \
   BUILDKITE_STEP_KEY \
   SCOUT_TEST_LANE_LOADS_PATH \
@@ -445,30 +426,15 @@ PASSED_LOAD_INDICES_META_KEY="${BUILDKITE_STEP_KEY}_passed"
 PLAYWRIGHT_GREP_TAG="@${SCOUT_TEST_TARGET_LOCATION}-${SCOUT_TEST_TARGET_ARCH}-${SCOUT_TEST_TARGET_DOMAIN}"
 PLAYWRIGHT_PROJECT="local"
 
+# Populated by run_lane: ALL_LOADS tracks every config in flat execution order (for summary/display),
+# PROCESSED_CONFIG_SETS records each configSet group started.
+ALL_LOADS=()
+PROCESSED_CONFIG_SETS=()
+
 download_test_lane_loads
 load_passed_indices
-
-if is_combined_lane; then
-  trap stop_server EXIT
-  run_combined_lane
-else
-  check_required_env_vars SCOUT_TEST_SERVER_CONFIG_SET
-  read_load_ids
-  trap stop_server EXIT
-  start_server "$SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS"
-
-  for i in "${!LOAD_IDS[@]}"; do
-    config_path="${LOAD_IDS[$i]}"
-
-    if has_load_index_passed "$i"; then
-      SKIPPED+=("$config_path")
-      echo "~~~ Skipping (already passed): $config_path"
-      continue
-    fi
-
-    run_scout_tests "$i" "$config_path"
-  done
-fi
+trap stop_server EXIT
+run_lane
 
 print_summary
 
