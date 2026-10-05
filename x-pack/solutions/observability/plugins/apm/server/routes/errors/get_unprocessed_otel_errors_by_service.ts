@@ -57,6 +57,7 @@ export async function getUnprocessedOtelErrorsByService({
   kuery,
   start,
   end,
+  maxRows = MAX_UNPROCESSED_OTEL_ERRORS,
 }: {
   logsClient: LogsClient;
   serviceName: string;
@@ -64,9 +65,10 @@ export async function getUnprocessedOtelErrorsByService({
   kuery: string;
   start: number;
   end: number;
+  maxRows?: number;
 }): Promise<UnprocessedOtelErrorsByServiceResponse> {
   // Over-fetch by one to detect truncation without a separate count phase.
-  const fetchSize = MAX_UNPROCESSED_OTEL_ERRORS + 1;
+  const fetchSize = maxRows + 1;
 
   const response = await logsClient.search({
     query: unprocessedOtelExceptionQuery([
@@ -81,9 +83,9 @@ export async function getUnprocessedOtelErrorsByService({
   });
 
   const hits = response.hits.hits;
-  const maxCountExceeded = hits.length > MAX_UNPROCESSED_OTEL_ERRORS;
+  const maxCountExceeded = hits.length > maxRows;
   // Slice to the cap; the over-fetched extra is only used to detect truncation.
-  const cappedHits = maxCountExceeded ? hits.slice(0, MAX_UNPROCESSED_OTEL_ERRORS) : hits;
+  const cappedHits = maxCountExceeded ? hits.slice(0, maxRows) : hits;
 
   const unprocessedOtelErrors = compactMap(cappedHits, (hit) => toUnprocessedOtelError(hit));
 

@@ -26,7 +26,18 @@ export const unprocessedOtelErrorsRoute = defineRoute<UnprocessedOtelErrorsRespo
   params: lazySchema(() =>
     z.object({
       path: z.object({ serviceName: z.string().max(MAX_SERVICE_NAME_LENGTH) }),
-      query: z.object({}).merge(environmentSchema).merge(kuerySchema).merge(rangeSchema),
+      query: z
+        .object({
+          /**
+           * When provided, caps the result to this many rows instead of the default
+           * MAX_UNPROCESSED_OTEL_ERRORS. Use in compact/preview contexts (e.g. Service Overview)
+           * to avoid fetching 500+ rows that will never be rendered.
+           */
+          maxRows: z.number().int().min(1).optional(),
+        })
+        .merge(environmentSchema)
+        .merge(kuerySchema)
+        .merge(rangeSchema),
     })
   ),
 });
