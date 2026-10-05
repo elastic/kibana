@@ -86,6 +86,7 @@ jest.mock('../../../../hooks/use_fetch_significant_events', () => ({
   useFetchSignificantEvents: jest.fn(),
 }));
 jest.mock('./use_significant_events_url_state', () => ({
+  ...jest.requireActual('./use_significant_events_url_state'),
   useSignificantEventsUrlState: jest.fn(),
 }));
 jest.mock('../../../../hooks/use_timefilter', () => ({
@@ -101,6 +102,25 @@ jest.mock('../../../../hooks/use_time_range_update', () => ({
 }));
 jest.mock('../../hooks/use_fetch_streams', () => ({
   useFetchStreams: jest.fn(() => ({ data: { streams: [] } })),
+}));
+jest.mock('../../../../hooks/use_fetch_features', () => ({
+  useFetchFeatures: jest.fn(() => ({
+    data: {
+      features: [
+        { id: 'svc-checkout', type: 'entity', subtype: 'service', title: 'checkout' },
+        // Same slug seen in another stream: must collapse into one option.
+        {
+          id: 'svc-checkout',
+          type: 'entity',
+          subtype: 'service',
+          title: 'checkout',
+          stream_name: 'logs.other',
+        },
+        { id: 'svc-excluded', type: 'entity', subtype: 'service', excluded: true },
+        { id: 'dep-redis', type: 'dependency', subtype: 'cache', title: 'redis' },
+      ],
+    },
+  })),
 }));
 jest.mock('../../context/significant_events_page_context', () => ({
   useSignificantEventsPageContext: jest.fn(() => ({
@@ -119,19 +139,39 @@ jest.mock('../streams_view/find_significant_events_button', () => ({
   FindSignificantEventsButton: () => null,
 }));
 jest.mock('./filter_popover', () => ({
-  FilterPopover: () => null,
+  // Renders one button per filter that selects every option, so tests can drive onChange.
+  FilterPopover: ({
+    label,
+    options,
+    onChange,
+  }: {
+    label: string;
+    options: Array<{ key?: string; label: string; checked?: 'on' }>;
+    onChange: (opts: Array<{ key?: string; label: string; checked?: 'on' }>) => void;
+  }) => (
+    <>
+      <button
+        type="button"
+        aria-label={`filter-${label}`}
+        data-test-subj={`filterPopover-${label}`}
+        onClick={() => onChange(options.map((o) => ({ ...o, checked: 'on' as const })))}
+      />
+      <span data-test-subj={`filterPopoverOptions-${label}`}>
+        {options.map((o) => o.label).join(',')}
+      </span>
+    </>
+  ),
 }));
 
 const event: SignificantEventResponse = {
   '@timestamp': '2026-01-02T00:00:00.000Z',
   created_at: '2026-01-01T00:00:00.000Z',
-  event_uuid: 'version-2',
   event_id: 'event-1',
-  status: 'open',
+  status: 'active',
   stream_names: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
-  severity: '40-medium',
+  severity: 'medium',
   confidence: 0.8,
 };
 
@@ -145,32 +185,67 @@ describe('Significant Events timestamp rendering', () => {
     );
   });
 
+  it('shows the latest version timestamp as the Last updated column', () => {
+    const columns = getSignificantEventTableColumns({
+      onToggleEvent: jest.fn(),
+    });
+    expect(columns.find((column) => 'field' in column && column.field === '@timestamp')).toEqual(
+      expect.objectContaining({ field: '@timestamp', name: 'Last updated' })
+    );
+  });
+
   it('renders the lineage creation timestamp in general information', () => {
     render(<SignificantEventFlyout event={event} onClose={jest.fn()} />);
 
     expect(screen.getByText(`formatted:${event.created_at}`)).toBeInTheDocument();
     expect(screen.queryByText(`formatted:${event['@timestamp']}`)).not.toBeInTheDocument();
   });
+
+  it('renders the canonical severity value', () => {
+    render(<SignificantEventFlyout event={{ ...event, severity: 'high' }} onClose={jest.fn()} />);
+
+    expect(screen.getByText('High')).toBeInTheDocument();
+  });
 });
 
 describe('SignificantEventFlyout actions menu', () => {
-  it('shows Dismiss and Close for an open event and opens the dismiss modal', () => {
+  const { useFetchSignificantEventLifecycle: lifecycleMock } = jest.requireMock(
+    '../../../../hooks/use_fetch_significant_event_lifecycle'
+  ) as { useFetchSignificantEventLifecycle: jest.Mock };
+
+  afterEach(() => {
+    // Restore the default (no lifecycle) so other describe blocks are unaffected.
+    lifecycleMock.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isSuccess: false,
+      isError: false,
+      refetch: jest.fn(),
+    });
+  });
+
+  it('shows Dismiss and Close for an active event and opens the dismiss modal', () => {
+    // Use mockReturnValue (not Once) so re-renders triggered by fireEvent keep the same value.
+    lifecycleMock.mockReturnValue({
+      data: { events: [event], detections: [] },
+      isLoading: false,
+      isSuccess: true,
+      isError: false,
+      refetch: jest.fn(),
+    });
     render(<SignificantEventFlyout event={event} onClose={jest.fn()} />);
 
     fireEvent.click(screen.getByTestId('sigEventFlyoutActionsButton'));
 
-    expect(screen.getByText('Dismiss significant event')).toBeInTheDocument();
-    expect(screen.getByTestId('sigEventCloseButton')).toBeInTheDocument();
+    expect(screen.getByText('Mark significant event inactive')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByText('Dismiss significant event'));
+    fireEvent.click(screen.getByText('Mark significant event inactive'));
 
     expect(screen.getByTestId('sigEventDismissModal')).toBeInTheDocument();
   });
 
-  it('does not expose actions for an already dismissed event', () => {
-    render(
-      <SignificantEventFlyout event={{ ...event, status: 'dismissed' }} onClose={jest.fn()} />
-    );
+  it('does not expose actions for an inactive event', () => {
+    render(<SignificantEventFlyout event={{ ...event, status: 'inactive' }} onClose={jest.fn()} />);
 
     expect(screen.queryByTestId('sigEventFlyoutActionsButton')).not.toBeInTheDocument();
   });
@@ -198,6 +273,12 @@ describe('selectedEvent deep link', () => {
   const defaultUrlState = {
     selectedEventId: event.event_id,
     openEventId: event.event_id,
+    statusFilter: ['active'],
+    severityFilter: ['critical', 'high'],
+    streamFilter: [],
+    serviceFilter: [],
+    setFilters: jest.fn(),
+    resetFilters: jest.fn(),
     openEvent: jest.fn(),
     closeEvent: jest.fn(),
     clearSelectedEvent: jest.fn(),
@@ -206,6 +287,8 @@ describe('selectedEvent deep link', () => {
 
   beforeEach(() => {
     mockUseFetchSignificantEvents.mockClear();
+    defaultUrlState.setFilters.mockClear();
+    defaultUrlState.resetFilters.mockClear();
     mockUseFetchSignificantEvents.mockReturnValue(emptyListResult);
     mockUseSignificantEventsUrlState.mockReturnValue(defaultUrlState);
   });
@@ -326,7 +409,7 @@ describe('selectedEvent deep link', () => {
   });
 
   it('adapts status/severity/stream filters to the linked event once it resolves', () => {
-    // event is status:open, severity:40-medium, stream:logs.test
+    // event is status:active, severity:medium, stream:logs.test
     mockUseFetchSignificantEvents.mockReturnValue({
       ...emptyListResult,
       data: { hits: [event], total: 1 },
@@ -334,10 +417,82 @@ describe('selectedEvent deep link', () => {
 
     render(<SignificantEventsTab />);
 
-    // After adaptation the fetch should use the event's own properties
-    expect(lastFetchArgs().status).toEqual([event.status]);
-    expect(lastFetchArgs().severity).toEqual([event.severity]);
-    expect(lastFetchArgs().stream).toEqual(event.stream_names);
+    // Adaptation writes the event's own properties to the URL without dropping the deep link
+    expect(defaultUrlState.setFilters).toHaveBeenCalledWith(
+      {
+        status: [event.status],
+        severity: [event.severity],
+        stream: event.stream_names,
+        service: [],
+      },
+      { keepSelectedEvent: true }
+    );
+  });
+
+  it('passes the URL filters to the list fetch', () => {
+    mockUseSignificantEventsUrlState.mockReturnValue({
+      ...defaultUrlState,
+      selectedEventId: undefined,
+      openEventId: undefined,
+      statusFilter: ['inactive'],
+      severityFilter: ['low'],
+      streamFilter: ['logs.test'],
+      serviceFilter: ['svc-checkout'],
+    });
+
+    render(<SignificantEventsTab />);
+
+    expect(lastFetchArgs().status).toEqual(['inactive']);
+    expect(lastFetchArgs().severity).toEqual(['low']);
+    expect(lastFetchArgs().stream).toEqual(['logs.test']);
+    expect(lastFetchArgs().topologyFeatureIds).toEqual(['svc-checkout']);
+    expect(screen.getByTestId('significantEventsAppSignificantEventsTabButton')).toBeEnabled();
+  });
+
+  it('disables reset while the URL filters are at their defaults', () => {
+    mockUseSignificantEventsUrlState.mockReturnValue({
+      ...defaultUrlState,
+      selectedEventId: undefined,
+      openEventId: undefined,
+    });
+
+    render(<SignificantEventsTab />);
+
+    expect(screen.getByTestId('significantEventsAppSignificantEventsTabButton')).toBeDisabled();
+  });
+
+  it('offers only active service KIs and writes the selection to the URL', () => {
+    mockUseSignificantEventsUrlState.mockReturnValue({
+      ...defaultUrlState,
+      selectedEventId: undefined,
+      openEventId: undefined,
+    });
+
+    render(<SignificantEventsTab />);
+
+    const serviceOptions = screen.getByTestId('filterPopoverOptions-Service');
+    expect(serviceOptions).toHaveTextContent('checkout');
+    expect(serviceOptions).not.toHaveTextContent('redis');
+    expect(serviceOptions).not.toHaveTextContent('svc-excluded');
+    expect(lastFetchArgs().topologyFeatureIds).toBeUndefined();
+
+    fireEvent.click(screen.getByTestId('filterPopover-Service'));
+
+    expect(defaultUrlState.setFilters).toHaveBeenCalledWith({ service: ['svc-checkout'] });
+  });
+
+  it('lists each service slug once and keeps a selected id that is not among the options', () => {
+    mockUseSignificantEventsUrlState.mockReturnValue({
+      ...defaultUrlState,
+      selectedEventId: undefined,
+      openEventId: undefined,
+      serviceFilter: ['svc-ghost'],
+    });
+
+    render(<SignificantEventsTab />);
+
+    const options = screen.getByTestId('filterPopoverOptions-Service').textContent ?? '';
+    expect(options.split(',')).toEqual(['checkout', 'svc-ghost']);
   });
 
   it('adapts the date range to the linked event lineage window', () => {
@@ -358,11 +513,11 @@ describe('selectedEvent deep link', () => {
 
   it('restores the prior date range when filters are reset', () => {
     const updateTimeRange = jest.fn();
-    const clearSelectedEvent = jest.fn();
+    const resetFilters = jest.fn();
     (useTimeRangeUpdate as jest.Mock).mockReturnValue({ updateTimeRange });
     mockUseSignificantEventsUrlState.mockReturnValue({
       ...defaultUrlState,
-      clearSelectedEvent,
+      resetFilters,
     });
     mockUseFetchSignificantEvents.mockReturnValue({
       ...emptyListResult,
@@ -372,7 +527,7 @@ describe('selectedEvent deep link', () => {
     render(<SignificantEventsTab />);
     fireEvent.click(screen.getByText('Reset filters'));
 
-    expect(clearSelectedEvent).toHaveBeenCalledTimes(1);
+    expect(resetFilters).toHaveBeenCalledTimes(1);
     expect(updateTimeRange).toHaveBeenCalledWith({
       from: '2026-01-01T00:00:00.000Z',
       to: '2026-01-03T00:00:00.000Z',
@@ -380,11 +535,6 @@ describe('selectedEvent deep link', () => {
   });
 
   it('retains adapted filters after selectedEvent is cleared (no jarring reset)', () => {
-    const clearSelectedEvent = jest.fn();
-    mockUseSignificantEventsUrlState.mockReturnValue({
-      ...defaultUrlState,
-      clearSelectedEvent,
-    });
     mockUseFetchSignificantEvents.mockReturnValue({
       ...emptyListResult,
       data: { hits: [event], total: 1 },
@@ -392,12 +542,15 @@ describe('selectedEvent deep link', () => {
 
     const { rerender } = render(<SignificantEventsTab />);
 
-    // Simulate URL settling after clear
+    // Simulate the URL settling after clear: selectedEvent is gone but the adapted filter
+    // params written by setFilters remain.
     mockUseSignificantEventsUrlState.mockReturnValue({
       ...defaultUrlState,
       selectedEventId: undefined,
       openEventId: undefined,
-      clearSelectedEvent,
+      statusFilter: [event.status],
+      severityFilter: [event.severity],
+      streamFilter: event.stream_names,
     });
     rerender(<SignificantEventsTab />);
 
@@ -405,6 +558,7 @@ describe('selectedEvent deep link', () => {
     expect(lastFetchArgs().eventId).toBeUndefined();
     expect(lastFetchArgs().status).toEqual([event.status]);
     expect(lastFetchArgs().severity).toEqual([event.severity]);
+    expect(lastFetchArgs().stream).toEqual(event.stream_names);
   });
 
   describe('openEvent (row click)', () => {

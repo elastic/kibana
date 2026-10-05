@@ -41,17 +41,18 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
 } as const satisfies ManagedWorkflowDefinition;
 
 /**
- * The version carries the switch from the `run_fp_tp_analysis` console stub to the
- * FP/TP analysis workflow below. Without the bump an existing install keeps calling
- * the stub and takes its verdict from a `stub_verdict` input this version no longer
- * declares.
+ * The version carries the `resolve_display_text` step, which reads the discovery from
+ * the Attack Discovery find API so the Investigation title, its summary, the journal
+ * and the proposal's title and comment show its text with field tokens rendered and
+ * original values restored. Bumped as a deliberate rollout signal for that step; the YAML
+ * change alone already rolls out through `definitionHash`.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
   billable: false,
   id: ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 5,
+  version: 7,
   yaml: ATTACK_DISCOVERY_REVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -61,16 +62,17 @@ export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
  * uses the internal-workflow management profile: enablement is enforced rather
  * than restorable.
  *
- * The version carries the YAML's new `discoveries_generated` output. Without the
- * bump an existing install keeps the old definition and the runner's
- * `attacks_generated` reads nothing.
+ * The version carries the YAML's switch to a per-batch ES|QL retrieval, which lets
+ * each batch persist the replacements its discoveries use. Bumped as a deliberate
+ * rollout signal for that switch; the YAML change alone already rolls out through
+ * `definitionHash`.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW = {
   billable: false,
   id: ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 2,
+  version: 3,
   yaml: ATTACK_DISCOVERY_BATCHED_GENERATION_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 

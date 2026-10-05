@@ -261,6 +261,7 @@ export class WorkflowsService {
       workflowsExtensions: this.workflowsExtensions,
       getActionsClient: this.getActionsClient,
       getActionsClientWithRequest: this.getActionsClientWithRequest,
+      getCoreStart: () => this.coreStart,
     });
 
     const { workflowExecutionsDataClient, stepExecutionsDataClient } =
@@ -285,6 +286,7 @@ export class WorkflowsService {
     await this.initializeChangeHistoryService(coreStart);
 
     this.crudService = new WorkflowCrudService({
+      authz: this.pluginsStart.security?.authz,
       getSpaceId: (request) => this.plugins.spaces.spacesService.getSpaceId(request),
       getServiceAccountBindings: () => this.workflowsExecutionEngine.serviceAccountBindings,
       logger: this.logger,

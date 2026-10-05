@@ -31,6 +31,31 @@ describe('ActionPoliciesApi', () => {
     });
   });
 
+  describe('listActionPolicies', () => {
+    it('sends the filter and search query params to the internal list path', async () => {
+      await api.listActionPolicies({ page: 2, filter: 'enabled: true', search: 'cpu' });
+
+      expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/action_policies', {
+        query: {
+          page: 2,
+          per_page: undefined,
+          filter: 'enabled: true',
+          search: 'cpu',
+          sort_field: undefined,
+          sort_order: undefined,
+        },
+      });
+    });
+
+    it('omits empty filter and search values', async () => {
+      await api.listActionPolicies({ filter: '', search: '' });
+
+      expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/action_policies', {
+        query: expect.objectContaining({ filter: undefined, search: undefined }),
+      });
+    });
+  });
+
   describe('createActionPolicy', () => {
     it('sends a POST request', async () => {
       const payload = { name: 'Test', description: '', destinations: [] } as any;

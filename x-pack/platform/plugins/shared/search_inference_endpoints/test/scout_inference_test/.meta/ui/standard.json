@@ -1,5 +1,5 @@
 {
-  "sha1": "d57e7b58938eee598bc1d32a2bc3ec74ce12e2fd",
+  "sha1": "9de419bf82511e702a4d5146c382249e0d6dca92",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -98,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 83,
-        "column": 7
+        "line": 86,
+        "column": 94
       }
     },
     {
@@ -112,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 91,
-        "column": 13
+        "line": 98,
+        "column": 11
       }
     },
     {
@@ -126,7 +126,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 117,
+        "line": 123,
         "column": 7
       }
     },
@@ -1181,8 +1181,8 @@
       }
     },
     {
-      "id": "68d451451493487-d9ec89911c25293",
-      "title": "Model Detail Flyout flyout shows geo region badges for a model with regions",
+      "id": "68d451451493487-ae4d31bccda2ff1",
+      "title": "Model Detail Flyout flyout shows region options for a model with regions",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1195,8 +1195,8 @@
       }
     },
     {
-      "id": "68d451451493487-2f74859428dda31",
-      "title": "Model Detail Flyout flyout shows no region badges for a model without regions",
+      "id": "68d451451493487-2788e0efcd92de3",
+      "title": "Model Detail Flyout flyout shows region options for ELSER",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1204,13 +1204,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 156,
-        "column": 11
+        "line": 152,
+        "column": 5
       }
     },
     {
-      "id": "68d451451493487-d4d7f98a3ba2a5e",
-      "title": "Model Detail Flyout flyout shows correct region badges for ELSER v2",
+      "id": "68d451451493487-8d357ac3677cdab",
+      "title": "Model Detail Flyout flyout says region options are not available when the model has no regions",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1218,8 +1218,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 168,
-        "column": 7
+        "line": 167,
+        "column": 13
       }
     },
     {
@@ -1232,7 +1232,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 184,
+        "line": 176,
         "column": 13
       }
     },
@@ -1246,8 +1246,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 208,
-        "column": 8
+        "line": 203,
+        "column": 13
       }
     },
     {
@@ -1260,8 +1260,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 229,
-        "column": 38
+        "line": 237,
+        "column": 7
       }
     },
     {
@@ -1274,8 +1274,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 269,
-        "column": 28
+        "line": 273,
+        "column": 81
       }
     },
     {
@@ -1288,7 +1288,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 286,
+        "line": 297,
         "column": 7
       }
     },
@@ -1302,7 +1302,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 297,
+        "line": 308,
         "column": 13
       }
     }
