@@ -8,10 +8,12 @@
  */
 
 import {
+  ATTRIBUTE_GEN_AI_COMPLETION,
   ATTRIBUTE_GEN_AI_CONVERSATION_ID,
   ATTRIBUTE_GEN_AI_INPUT_MESSAGES,
   ATTRIBUTE_GEN_AI_OPERATION_NAME,
   ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES,
+  ATTRIBUTE_GEN_AI_PROMPT,
   ATTRIBUTE_GEN_AI_PROVIDER_NAME,
   ATTRIBUTE_GEN_AI_REQUEST_MAX_TOKENS,
   ATTRIBUTE_GEN_AI_REQUEST_MODEL,
@@ -228,6 +230,38 @@ function parseSystemInstructions(raw: unknown): string | undefined {
   return stringifyFallback(raw);
 }
 
+// Tries OTel standard first, then falls back to OpenRouter's gen_ai.prompt field.
+// OpenRouter shape: {"messages":[{"role":"...","content":"..."},...]}
+function getInputMessages(metadata: Record<string, unknown>): GenAiMessage[] {
+  const otel = allValues<string>(metadata, ATTRIBUTE_GEN_AI_INPUT_MESSAGES);
+  if (otel && otel.length > 0) return parseGenAiMessages(otel);
+
+  const raw = first<unknown>(metadata, ATTRIBUTE_GEN_AI_PROMPT);
+  const parsed = parseJsonValue(raw);
+  if (parsed != null && typeof parsed === 'object' && Array.isArray((parsed as any).messages)) {
+    return (parsed as any).messages as GenAiMessage[];
+  }
+  return [];
+}
+
+// Tries OTel standard first, then falls back to OpenRouter's gen_ai.completion field.
+// OpenRouter shape: {"completion":"...","reasoning":"...","rawRequest":{...}}
+function getOutputMessages(metadata: Record<string, unknown>): GenAiMessage[] {
+  const otel = allValues<string>(metadata, ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES);
+  if (otel && otel.length > 0) return parseGenAiMessages(otel);
+
+  const raw = first<unknown>(metadata, ATTRIBUTE_GEN_AI_COMPLETION);
+  const parsed = parseJsonValue(raw);
+  if (
+    parsed != null &&
+    typeof parsed === 'object' &&
+    typeof (parsed as any).completion === 'string'
+  ) {
+    return [{ role: 'assistant', content: (parsed as any).completion }];
+  }
+  return [];
+}
+
 export function getGenAiFields(metadata: Record<string, unknown>): GenAiFields {
   const f = (key: string) => first(metadata, key);
   const toolDefinitionsValue = rawValue(metadata, ATTRIBUTE_GEN_AI_TOOL_DEFINITIONS);
@@ -262,10 +296,8 @@ export function getGenAiFields(metadata: Record<string, unknown>): GenAiFields {
       // Multi-valued: one finish reason per choice — keep every element.
       finish_reasons: allValues<string>(metadata, ATTRIBUTE_GEN_AI_RESPONSE_FINISH_REASONS),
     },
-    inputMessages: parseGenAiMessages(allValues<string>(metadata, ATTRIBUTE_GEN_AI_INPUT_MESSAGES)),
-    outputMessages: parseGenAiMessages(
-      allValues<string>(metadata, ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES)
-    ),
+    inputMessages: getInputMessages(metadata),
+    outputMessages: getOutputMessages(metadata),
     systemInstructions: parseSystemInstructions(f(ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS)),
     toolDefinitions,
     toolName: f(ATTRIBUTE_GEN_AI_TOOL_NAME) as string | undefined,
