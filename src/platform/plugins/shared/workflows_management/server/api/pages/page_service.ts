@@ -29,62 +29,61 @@ export interface PageSubmitter {
 
 export interface ResolvedPage {
   workflow: WorkflowDetailDto;
+  pageKey: string;
   trigger: PageTrigger;
   inputsSchema: JsonModelSchemaType | undefined;
 }
 
-type GetWorkflow = (workflowId: string, spaceId: string) => Promise<WorkflowDetailDto | null>;
-
-/** The counter the URL secret is derived from. A workflow that never rotated is at 0. */
-export const getPageGeneration = (workflow: Pick<WorkflowDetailDto, 'pageGeneration'>): number =>
-  workflow.pageGeneration ?? 0;
+type GetWorkflowByPageKey = (pageKey: string, spaceId: string) => Promise<WorkflowDetailDto | null>;
 
 /**
  * Loads the workflow behind a page URL and checks the URL secret against it.
  *
- * The lookup is a direct get by id. The secret is checked before anything about the
- * workflow is revealed, and every miss raises the same non-exposed error, so a caller
- * cannot tell "no such workflow" from "wrong secret" from "page offline". Disabling the
- * workflow or removing its page trigger takes the page offline with nothing to clean up.
+ * The URL carries the opaque `pageKey`, never the workflow id. The secret is checked
+ * before anything about the workflow is revealed, and every miss raises the same
+ * non-exposed error, so a caller cannot tell "no such page" from "wrong secret" from
+ * "page offline". Disabling the workflow or removing its page trigger takes the page
+ * offline with nothing to clean up.
  */
 export const resolvePage = async (
-  getWorkflow: GetWorkflow,
+  getWorkflowByPageKey: GetWorkflowByPageKey,
   {
     signingKey,
     spaceId,
-    workflowId,
+    pageKey,
     secret,
-  }: { signingKey: string; spaceId: string; workflowId: string; secret: string }
+  }: { signingKey: string; spaceId: string; pageKey: string; secret: string }
 ): Promise<ResolvedPage> => {
   const notFound = new ExternalResumeError('Page not found', 404);
-  const workflow = await getWorkflow(workflowId, spaceId);
-  if (!workflow) {
+  if (!verifyPageSecret(signingKey, { spaceId, pageKey }, secret)) {
     throw notFound;
   }
-  const generation = getPageGeneration(workflow);
-  if (!verifyPageSecret(signingKey, { spaceId, workflowId, generation }, secret)) {
-    throw notFound;
-  }
-  if (!workflow.enabled || !workflow.valid || !workflow.definition) {
+  const workflow = await getWorkflowByPageKey(pageKey, spaceId);
+  if (!workflow?.enabled || !workflow.valid || !workflow.definition) {
     throw notFound;
   }
   const trigger = workflow.definition.triggers.find(isPageTrigger);
   if (!trigger) {
     throw notFound;
   }
-  return { workflow, trigger, inputsSchema: trigger.inputs as JsonModelSchemaType | undefined };
+  return {
+    workflow,
+    pageKey,
+    trigger,
+    inputsSchema: trigger.inputs as JsonModelSchemaType | undefined,
+  };
 };
 
 export const buildPageUrl = ({
   basePath,
-  workflowId,
+  pageKey,
   secret,
 }: {
   basePath: string;
-  workflowId: string;
+  pageKey: string;
   secret: string;
 }): string =>
-  `${basePath}${PAGE_FORM_API_PATH.replace('{workflowId}', encodeURIComponent(workflowId)).replace(
+  `${basePath}${PAGE_FORM_API_PATH.replace('{pageKey}', encodeURIComponent(pageKey)).replace(
     '{secret}',
     encodeURIComponent(secret)
   )}`;
@@ -100,7 +99,7 @@ export const renderPageForm = ({
 }): string =>
   renderExternalResumeFormPage({
     message: page.trigger.description ?? page.trigger.title,
-    formActionUrl: buildPageUrl({ basePath, workflowId: page.workflow.id, secret }),
+    formActionUrl: buildPageUrl({ basePath, pageKey: page.pageKey, secret }),
     fieldsHtml: buildExternalResumeFormFieldsHtml(page.inputsSchema),
   });
 

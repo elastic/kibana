@@ -14,11 +14,12 @@ import { ExternalResumeError } from '../external_resume/external_resume_error';
 
 const KEY = 'k'.repeat(32);
 const SPACE_ID = 'default';
-const WORKFLOW_ID = 'report-incident';
+const PAGE_KEY = '0b5f3c1e-8d2a-4f6b-9c7e-1a2b3c4d5e6f';
 
 const pageWorkflow = (overrides: Partial<WorkflowDetailDto> = {}) =>
   ({
-    id: WORKFLOW_ID,
+    id: 'report-incident',
+    pageKey: PAGE_KEY,
     enabled: true,
     valid: true,
     definition: {
@@ -34,14 +35,13 @@ const pageWorkflow = (overrides: Partial<WorkflowDetailDto> = {}) =>
     ...overrides,
   } as unknown as WorkflowDetailDto);
 
-const secretFor = (generation: number) =>
-  computePageSecret(KEY, { spaceId: SPACE_ID, workflowId: WORKFLOW_ID, generation });
+const secretFor = (pageKey: string) => computePageSecret(KEY, { spaceId: SPACE_ID, pageKey });
 
-const resolve = (workflow: WorkflowDetailDto | null, secret: string) =>
+const resolve = (workflow: WorkflowDetailDto | null, secret: string, pageKey = PAGE_KEY) =>
   resolvePage(jest.fn().mockResolvedValue(workflow), {
     signingKey: KEY,
     spaceId: SPACE_ID,
-    workflowId: WORKFLOW_ID,
+    pageKey,
     secret,
   });
 
@@ -49,40 +49,51 @@ const expectHiddenNotFound = (promise: Promise<unknown>) =>
   expect(promise).rejects.toEqual(expect.objectContaining({ statusCode: 404, expose: false }));
 
 describe('resolvePage', () => {
-  it('loads the workflow by id and returns its page trigger', async () => {
-    const getWorkflow = jest.fn().mockResolvedValue(pageWorkflow());
+  it('looks the workflow up by page key and returns its page trigger', async () => {
+    const getWorkflowByPageKey = jest.fn().mockResolvedValue(pageWorkflow());
 
-    const page = await resolvePage(getWorkflow, {
+    const page = await resolvePage(getWorkflowByPageKey, {
       signingKey: KEY,
       spaceId: SPACE_ID,
-      workflowId: WORKFLOW_ID,
-      secret: secretFor(0),
+      pageKey: PAGE_KEY,
+      secret: secretFor(PAGE_KEY),
     });
 
-    expect(getWorkflow).toHaveBeenCalledWith(WORKFLOW_ID, SPACE_ID);
+    expect(getWorkflowByPageKey).toHaveBeenCalledWith(PAGE_KEY, SPACE_ID);
+    expect(page.pageKey).toBe(PAGE_KEY);
     expect(page.trigger.title).toBe('Report an incident');
   });
 
-  it('accepts the secret of the current generation only', async () => {
-    const rotated = pageWorkflow({ pageGeneration: 2 });
+  it('checks the secret before any lookup', async () => {
+    const getWorkflowByPageKey = jest.fn();
 
-    await expect(resolve(rotated, secretFor(2))).resolves.toBeDefined();
-    await expectHiddenNotFound(resolve(rotated, secretFor(1)));
+    await expectHiddenNotFound(
+      resolvePage(getWorkflowByPageKey, {
+        signingKey: KEY,
+        spaceId: SPACE_ID,
+        pageKey: PAGE_KEY,
+        secret: 'wrong',
+      })
+    );
+    expect(getWorkflowByPageKey).not.toHaveBeenCalled();
+  });
+
+  it('rejects the secret of a rotated-away page key', async () => {
+    await expectHiddenNotFound(resolve(pageWorkflow(), secretFor('previous-key')));
   });
 
   it('hides why a request failed', async () => {
-    await expectHiddenNotFound(resolve(null, secretFor(0)));
-    await expectHiddenNotFound(resolve(pageWorkflow(), 'wrong'));
-    await expectHiddenNotFound(resolve(pageWorkflow({ enabled: false }), secretFor(0)));
+    await expectHiddenNotFound(resolve(null, secretFor(PAGE_KEY)));
+    await expectHiddenNotFound(resolve(pageWorkflow({ enabled: false }), secretFor(PAGE_KEY)));
     await expectHiddenNotFound(
-      resolve(pageWorkflow({ valid: false, definition: null }), secretFor(0))
+      resolve(pageWorkflow({ valid: false, definition: null }), secretFor(PAGE_KEY))
     );
     await expectHiddenNotFound(
       resolve(
         pageWorkflow({
           definition: { triggers: [{ type: 'manual' }] },
         } as unknown as Partial<WorkflowDetailDto>),
-        secretFor(0)
+        secretFor(PAGE_KEY)
       )
     );
   });

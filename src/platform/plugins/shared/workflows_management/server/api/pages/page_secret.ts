@@ -16,23 +16,20 @@ export const PAGE_SECRET_LENGTH = 64;
 /**
  * Derives the secret part of a page URL from the deployment signing key.
  *
- * Nothing secret is stored and nothing page-related lives in the workflow YAML.
- * The secret binds the space, the workflow id, and `pageGeneration`, a counter on
- * the workflow document. Rotating the page increments the counter, which retires
- * the old URL. Binding the space stops a URL from being replayed in another space.
+ * Nothing secret is stored and nothing page-related lives in the workflow YAML. The
+ * secret binds the space and the opaque `pageKey` stored on the workflow document.
+ * Rotating the page assigns a new `pageKey`, which retires the old URL. Binding the
+ * space stops a URL from being replayed in another space.
  */
 export const computePageSecret = (
   signingKey: string,
-  { spaceId, workflowId, generation }: PageSecretInput
+  { spaceId, pageKey }: PageSecretInput
 ): string =>
-  createHmac('sha256', signingKey)
-    .update(`workflow-page|${spaceId}|${workflowId}|${generation}`)
-    .digest('hex');
+  createHmac('sha256', signingKey).update(`workflow-page|${spaceId}|${pageKey}`).digest('hex');
 
 export interface PageSecretInput {
   spaceId: string;
-  workflowId: string;
-  generation: number;
+  pageKey: string;
 }
 
 /** Constant-time check so a wrong secret leaks no timing signal. */
