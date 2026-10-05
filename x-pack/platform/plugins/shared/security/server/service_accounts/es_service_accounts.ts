@@ -67,6 +67,13 @@ const getUndeletedTokensWarning = (id: string, name: string, tokenNames: string[
     values: { id, name, tokenNames: tokenNames.join(', ') },
   });
 
+const getAccessTokensWarning = (id: string): string =>
+  i18n.translate('xpack.security.serviceAccounts.delete.accessTokensNotInvalidatedWarning', {
+    defaultMessage:
+      'Service account [{id}] was deleted, but the access tokens it was issued could not be invalidated. They stay valid until they expire.',
+    values: { id },
+  });
+
 /** How many of an account's tokens are deleted at once. */
 const TOKEN_DELETE_CONCURRENCY = 10;
 
@@ -423,8 +430,9 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
    * warning. When every token is gone the account delete stays unforced, so a token minted in the
    * meantime makes Elasticsearch refuse rather than leave it behind with no warning.
    *
-   * An account that is already gone is a 404, unless tokens are left over from it. Those are
-   * deleted, so a retry can finish what a forced delete left behind.
+   * An account that is already gone is a 404, unless something is left over from it: service
+   * tokens, or access tokens it was issued. Those are cleaned up, so a retry can finish what an
+   * earlier delete, or a forced one, left behind.
    */
   async delete(request: KibanaRequest, id: string): Promise<DeleteServiceAccountResponse> {
     if (!this.license.isEnabled()) {
@@ -495,14 +503,8 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       warnings.push(getUndeletedTokensWarning(id, name, undeletedTokens));
     }
 
-    if (!(await this.invalidateAccessTokens(esClient, id))) {
-      warnings.push(
-        i18n.translate('xpack.security.serviceAccounts.delete.accessTokensNotInvalidatedWarning', {
-          defaultMessage:
-            'Service account [{id}] was deleted, but the access tokens it was issued could not be invalidated. They stay valid until they expire.',
-          values: { id },
-        })
-      );
+    if ((await this.invalidateAccessTokens(esClient, id)) === null) {
+      warnings.push(getAccessTokensWarning(id));
     }
 
     // While Kibana's token is left, Elasticsearch refuses to create an account with this name, so
@@ -525,9 +527,15 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
 
   /**
    * Cleans up after an account that is already gone. A forced delete leaves its tokens behind,
-   * and Elasticsearch can delete them without the account. The credential is left alone: the next
-   * create overwrites it and nothing reports it for an account that does not exist, while deleting
-   * it here could remove one a concurrent create just wrote.
+   * and Elasticsearch can delete them without the account. Deleting the account does not
+   * invalidate the access tokens it was issued either, so a retry after a failed invalidation, or
+   * an account deleted straight through Elasticsearch, still has those to clean up. A create of
+   * the same name that lands in between would lose its access tokens too, which only costs it a
+   * fresh exchange.
+   *
+   * The credential is left alone: the next create overwrites it and nothing reports it for an
+   * account that does not exist, while deleting it here could remove one a concurrent create just
+   * wrote.
    */
   private async deleteLeftoverTokens(
     esClient: ElasticsearchClient,
@@ -535,36 +543,45 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
   ): Promise<DeleteServiceAccountResponse> {
     const id = `${namespace}/${name}`;
     const tokenNames = await this.readTokenNames(esClient, namespace, name);
-    if (tokenNames.length === 0) {
+    const undeletedTokens =
+      tokenNames.length > 0 ? await this.deleteTokens(esClient, namespace, name, tokenNames) : [];
+    const invalidated = await this.invalidateAccessTokens(esClient, id);
+
+    if (tokenNames.length === 0 && invalidated === 0) {
       throw Boom.notFound(`Service account [${id}] was not found`);
     }
 
     this.logger.debug(
-      `Service account [${id}] is already gone, so only the tokens left over from it are deleted`
+      `Service account [${id}] was already gone, so only what it left behind was cleaned up`
     );
-    const undeletedTokens = await this.deleteTokens(esClient, namespace, name, tokenNames);
-    return {
-      warnings:
-        undeletedTokens.length > 0 ? [getUndeletedTokensWarning(id, name, undeletedTokens)] : [],
-    };
+    const warnings: string[] = [];
+    if (undeletedTokens.length > 0) {
+      warnings.push(getUndeletedTokensWarning(id, name, undeletedTokens));
+    }
+    if (invalidated === null) {
+      warnings.push(getAccessTokensWarning(id));
+    }
+    return { warnings };
   }
 
   /**
    * Invalidates the access tokens the account was issued through the token grant, which would
-   * otherwise stay valid until they expire. Best effort, resolving whether it succeeded.
+   * otherwise stay valid until they expire. Best effort, resolving how many it invalidated, or
+   * `null` when it could not finish.
    */
   private async invalidateAccessTokens(
     esClient: ElasticsearchClient,
     serviceAccountId: string
-  ): Promise<boolean> {
+  ): Promise<number | null> {
     try {
-      const { error_count: errorCount = 0 } = await esClient.security.invalidateToken(
-        { username: serviceAccountId, realm_name: SERVICE_ACCOUNT_REALM_NAME },
-        // Elasticsearch answers 404 when there is nothing to invalidate.
-        { ignore: [404] }
-      );
+      const { invalidated_tokens: invalidated = 0, error_count: errorCount = 0 } =
+        await esClient.security.invalidateToken(
+          { username: serviceAccountId, realm_name: SERVICE_ACCOUNT_REALM_NAME },
+          // Elasticsearch answers 404 when there is nothing to invalidate.
+          { ignore: [404] }
+        );
       if (errorCount === 0) {
-        return true;
+        return invalidated;
       }
       this.logger.warn(
         `Failed to invalidate ${errorCount} access tokens of deleted service account [${serviceAccountId}]`
@@ -576,7 +593,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
         )}`
       );
     }
-    return false;
+    return null;
   }
 
   /**

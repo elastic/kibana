@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ApiClientFixture } from '@kbn/scout';
+import type { ApiClientFixture, EsClient } from '@kbn/scout';
 import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
@@ -338,27 +338,35 @@ apiTest.describe(
       }
     );
 
+    /**
+     * Issues an access token for the account through the token grant, from a service token minted
+     * straight through Elasticsearch, and returns a check of who it authenticates as.
+     */
+    const issueAccessToken = async (esClient: EsClient, account: ServiceAccountPrincipal) => {
+      const { token } = await esClient.security.createServiceToken({
+        namespace: account.namespace,
+        service: account.name,
+        name: OPERATOR_TOKEN_NAME,
+      });
+      const { access_token: accessToken } = await esClient.transport.request<{
+        access_token: string;
+      }>({
+        method: 'POST',
+        path: '/_security/oauth2/token',
+        body: { grant_type: '_user_managed_service_account', service_account_token: token.value },
+      });
+      return () =>
+        esClient.transport.request(
+          { method: 'GET', path: '/_security/_authenticate' },
+          { headers: { authorization: `Bearer ${accessToken}` }, ignore: [401] }
+        );
+    };
+
     apiTest(
       'stops access tokens issued before the delete from authenticating',
       async ({ apiClient, esClient }) => {
         const account = await createAccount(apiClient);
-        const { token } = await esClient.security.createServiceToken({
-          namespace: account.namespace,
-          service: account.name,
-          name: OPERATOR_TOKEN_NAME,
-        });
-        const { access_token: accessToken } = await esClient.transport.request<{
-          access_token: string;
-        }>({
-          method: 'POST',
-          path: '/_security/oauth2/token',
-          body: { grant_type: '_user_managed_service_account', service_account_token: token.value },
-        });
-        const authenticate = () =>
-          esClient.transport.request(
-            { method: 'GET', path: '/_security/_authenticate' },
-            { headers: { authorization: `Bearer ${accessToken}` }, ignore: [401] }
-          );
+        const authenticate = await issueAccessToken(esClient, account);
         expect(await authenticate()).toMatchObject({ username: idOf(account) });
 
         const deleted = await apiClient.delete(accountPath(idOf(account)), {
@@ -367,6 +375,31 @@ apiTest.describe(
         });
         expect(deleted).toHaveStatusCode(200);
         expect(deleted.body).toStrictEqual({ warnings: [] });
+
+        expect(await authenticate()).not.toMatchObject({ username: idOf(account) });
+      }
+    );
+
+    apiTest(
+      'invalidates the access tokens of an account deleted straight through Elasticsearch',
+      async ({ apiClient, esClient }) => {
+        const account = await createAccount(apiClient);
+        const authenticate = await issueAccessToken(esClient, account);
+        await esClient.transport.request({
+          method: 'DELETE',
+          path: `/_security/service/${account.namespace}/${account.name}`,
+          querystring: { force: 'true' },
+        });
+
+        // Deleting the account does not invalidate what it was issued.
+        expect(await authenticate()).toMatchObject({ username: idOf(account) });
+
+        const cleaned = await apiClient.delete(accountPath(idOf(account)), {
+          headers: adminHeaders,
+          responseType: 'json',
+        });
+        expect(cleaned).toHaveStatusCode(200);
+        expect(cleaned.body).toStrictEqual({ warnings: [] });
 
         expect(await authenticate()).not.toMatchObject({ username: idOf(account) });
       }

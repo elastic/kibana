@@ -1365,10 +1365,49 @@ describe('EsServiceAccounts', () => {
       );
       // A concurrent create may already have written a credential under this id.
       expect(credentialStore.delete).not.toHaveBeenCalled();
+      expect(esClient.asCurrentUser.security.invalidateToken).toHaveBeenCalledWith(
+        { username: ACCOUNT_ID, realm_name: '_service_account' },
+        { ignore: [404] }
+      );
     });
 
-    it('rejects with a 404 when the account is gone and left no tokens', async () => {
+    it('invalidates access tokens left over from an account that is already gone', async () => {
       mockElasticsearch({ account: {}, tokenNames: [] });
+      esClient.asCurrentUser.security.invalidateToken.mockResolvedValue({
+        invalidated_tokens: 2,
+        previously_invalidated_tokens: 0,
+        error_count: 0,
+      });
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).resolves.toEqual({ warnings: [] });
+      expect(credentialStore.delete).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['with leftover tokens', ['operator-token']],
+      ['without leftover tokens', []],
+    ])(
+      'warns when an account that is already gone keeps its access tokens, %s',
+      async (_, tokenNames) => {
+        mockElasticsearch({ account: {}, tokenNames });
+        esClient.asCurrentUser.security.invalidateToken.mockRejectedValue(new Error('unavailable'));
+
+        await expect(serviceAccounts.delete(request, ACCOUNT_ID)).resolves.toEqual({
+          warnings: [
+            `Service account [${ACCOUNT_ID}] was deleted, but the access tokens it was issued ` +
+              'could not be invalidated. They stay valid until they expire.',
+          ],
+        });
+      }
+    );
+
+    it('rejects with a 404 when the account is gone and left nothing behind', async () => {
+      mockElasticsearch({ account: {}, tokenNames: [] });
+      esClient.asCurrentUser.security.invalidateToken.mockResolvedValue({
+        invalidated_tokens: 0,
+        previously_invalidated_tokens: 0,
+        error_count: 0,
+      });
       credentialStore.findExisting.mockResolvedValue(new Set([ACCOUNT_ID]));
 
       await expect(serviceAccounts.delete(request, ACCOUNT_ID)).rejects.toMatchObject({
