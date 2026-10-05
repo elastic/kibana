@@ -83,6 +83,8 @@ export {
   getContextMenuItemsFromActions,
 } from './services/get_context_menu_items_from_actions';
 
+export { hasObservabilityCapabilities } from './services/update_global_navigation';
+
 export {
   observabilityFeatureId,
   observabilityAppId,

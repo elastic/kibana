@@ -56,6 +56,55 @@ describe('ApprovalContent', () => {
     expect(screen.getByText('Needs review')).toBeInTheDocument();
   });
 
+  it.each<Partial<ApprovalProposal>>([
+    { status: 'superseded' },
+    { status: 'failed', decision: 'approved', supersededBy: 'successor' },
+    { status: 'expired', supersededBy: 'successor' },
+  ])(
+    'keeps a replaced proposal visible without pending or outcome instructions: %j',
+    (overrides) => {
+      renderContent({
+        proposal: {
+          ...baseProposal,
+          category: 'configure',
+          previousExecutionError: 'Prior failure',
+          ...overrides,
+        },
+        onDismiss: jest.fn(),
+      });
+      expect(screen.getByText('Block IP 10.0.0.4')).toBeInTheDocument();
+      expect(screen.getByText('Configure')).toBeInTheDocument();
+      expect(screen.getByText('Isolate the compromised host.')).toBeInTheDocument();
+      expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('approvalContent-outcome')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('approvalContent-previous-failure')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('approvalContent-expired')).not.toBeInTheDocument();
+      expect(screen.getByTestId('approvalContent-confirm')).toBeDisabled();
+      expect(screen.getByTestId('approvalContent-dismiss')).toBeDisabled();
+    }
+  );
+
+  it('restores the comment and disables decisions when replaced during dismissal', () => {
+    const onDismiss = jest.fn();
+    const { rerender } = renderContent({ onDismiss });
+    fireEvent.click(screen.getByTestId('approvalContent-dismiss'));
+    expect(screen.getByTestId('approvalContent-decline-form')).toBeInTheDocument();
+
+    rerender(
+      <ApprovalContent
+        {...baseProps}
+        proposal={{ ...baseProposal, status: 'superseded', supersededBy: 'successor' }}
+        onDismiss={onDismiss}
+      />
+    );
+
+    expect(screen.queryByTestId('approvalContent-decline-form')).not.toBeInTheDocument();
+    expect(screen.getByText('Isolate the compromised host.')).toBeInTheDocument();
+    expect(screen.getByTestId('approvalContent-confirm')).toBeDisabled();
+    expect(screen.getByTestId('approvalContent-dismiss')).toBeDisabled();
+    expect(onDismiss).not.toHaveBeenCalled();
+  });
+
   it('renders a caption derived from the proposal, e.g. category, reversibility and impact', () => {
     renderContent({
       proposal: {

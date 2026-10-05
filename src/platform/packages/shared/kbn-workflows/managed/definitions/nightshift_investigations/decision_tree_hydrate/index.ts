@@ -15,7 +15,7 @@ export const NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID =
 
 /**
  * Pre-execution workflow that writes the stored decision trees into
- * /workspace/decision-trees before every reinforcement round.
+ * /workspace/decision-trees once per round, skipping HITL resumes.
  *
  * `enablement: 'enforced'` — a disabled workflow makes the beforeAgent hook
  * throw, which aborts the reinforcement round.
@@ -23,7 +23,7 @@ export const NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID =
 export const NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW = {
   id: NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
-  version: 1,
+  version: 2,
   billable: false,
   yaml: DECISION_TREE_HYDRATE_WORKFLOW_YAML,
   management: {

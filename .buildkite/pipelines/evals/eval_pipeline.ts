@@ -22,16 +22,24 @@ export interface EvalsSuiteShard {
   specFiles: string[];
 }
 
+export interface EvalsSuiteSpecModelGroup {
+  files: string[];
+  models?: string[];
+}
+
 export interface EvalsSuiteMetadataEntry {
   id: string;
   name?: string;
   ciLabels?: string[];
   configPath?: string;
   serverConfigSet?: string;
+  scoutArch?: string;
+  scoutDomain?: string;
   weeklyEisModelGroups?: string[];
   defaultModelGroups?: string[] | null;
   shards?: EvalsSuiteShard[];
   stepTimeoutInMinutes?: number;
+  specModelGroups?: EvalsSuiteSpecModelGroup[];
 }
 
 function pathExistsInGitTree(repoRelativePath: string): boolean {
@@ -205,6 +213,14 @@ function buildEvalsYaml({
       const evalServerConfigSetEnv = suite.serverConfigSet
         ? `          EVAL_SERVER_CONFIG_SET: ${toBuildkiteYamlString(suite.serverConfigSet)}`
         : null;
+      const evalScoutTargetEnv = [
+        ...(suite.scoutArch
+          ? [`          EVAL_SCOUT_ARCH: ${toBuildkiteYamlString(suite.scoutArch)}`]
+          : []),
+        ...(suite.scoutDomain
+          ? [`          EVAL_SCOUT_DOMAIN: ${toBuildkiteYamlString(suite.scoutDomain)}`]
+          : []),
+      ];
       return [
         `      - label: ${toBuildkiteYamlString(label)}`,
         `        key: ${key}`,
@@ -218,6 +234,7 @@ function buildEvalsYaml({
         ...(includeEisModelsEnv ? [includeEisModelsEnv] : []),
         ...(modelGroupsEnv ? [modelGroupsEnv] : []),
         ...(evalServerConfigSetEnv ? [evalServerConfigSetEnv] : []),
+        ...evalScoutTargetEnv,
         `        timeout_in_minutes: 60`,
         `        agents:`,
         `          image: family/kibana-ubuntu-2404`,
