@@ -70,11 +70,7 @@ const BASE64 = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$
 /** The base64 of the three bytes every JPEG starts with (FF D8 FF, the start-of-image marker). */
 const JPEG_BASE64_START = '/9j/';
 
-/**
- * A screenshot as created: with its image, which only reads leave out (see
- * `NewSnapshot`). Comments are never deleted, so one without an image, or with
- * one that is not the JPEG it claims to be, could never be shown.
- */
+/** A screenshot as created, image included (see `NewSnapshot`): comments are never deleted, so one whose image is not the JPEG it claims could never be shown. */
 const newSnapshotSchema = schema.object({
   mimeType: schema.literal('image/jpeg'),
   width: schema.number({ min: 1, max: 10_000 }),
@@ -110,9 +106,14 @@ export const newCommentSchema = schema.object({
   replies: schema.arrayOf(replySchema, { maxSize: REPLIES_MAX }),
   route: routeSchema,
   anchor: anchorSchema,
-  trail: schema.arrayOf(schema.object({ anchor: anchorSchema, label: nameSchema }), {
-    maxSize: 25,
-  }),
+  trail: schema.arrayOf(
+    schema.object({
+      anchor: anchorSchema,
+      label: nameSchema,
+      kind: schema.maybe(schema.oneOf([schema.literal('click'), schema.literal('hover')])),
+    }),
+    { maxSize: 25 }
+  ),
   snapshot: schema.maybe(newSnapshotSchema),
 });
 

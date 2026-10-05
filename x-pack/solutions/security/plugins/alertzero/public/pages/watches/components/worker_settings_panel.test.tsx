@@ -67,6 +67,7 @@ const renderPanel = (
         onToggle={jest.fn()}
         enabled
         settings={createWorker(workflowId).settings}
+        warningReasons={[]}
         settingsLocked={false}
         isSaving={false}
         canWrite

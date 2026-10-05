@@ -9,7 +9,11 @@ import React from 'react';
 import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import type { InventoryTsvbType, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type {
+  InventoryTsvbType,
+  InventoryItemType,
+  DataSchemaFormat,
+} from '@kbn/metrics-data-access-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { NodeDetailsMetricDataResponseRT } from '../../../../../common/http_api/node_details_api';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
@@ -32,6 +36,7 @@ interface Props {
   sourceId: string;
   timeRange: MetricsTimeInput;
   metadataLoading: boolean;
+  schema?: DataSchemaFormat;
   isAutoReloading: boolean;
   refreshInterval: number;
   sideNav: NavItem[];
@@ -65,6 +70,7 @@ export const NodeDetailsPage = (props: Props) => {
           timerange: parseRange(props.timeRange),
           cloudId: props.cloudId,
           sourceId: props.sourceId,
+          ...(props.schema === 'semconv' ? { schema: props.schema } : {}),
         }),
       });
 
@@ -75,6 +81,7 @@ export const NodeDetailsPage = (props: Props) => {
       props.nodeId,
       props.nodeType,
       props.requiredTsvb,
+      props.schema,
       props.sourceId,
       props.timeRange,
     ]

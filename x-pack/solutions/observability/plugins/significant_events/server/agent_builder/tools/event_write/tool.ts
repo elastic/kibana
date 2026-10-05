@@ -66,7 +66,6 @@ export const eventsWriteItemSchema = significantEventSchema
           stream name. If found, the write is skipped and the existing event_id is returned
           (written: false, reason: existing_active_event). Otherwise a new event is created with
           a generated event_id.
-          Otherwise a new event is created with a generated event_id.
         `
       ),
   })
@@ -108,15 +107,15 @@ export const eventsWriteItemSchema = significantEventSchema
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message:
-          'A confirms item cannot include not_checked signals; emit each not_checked detection as its own dismissed item.',
+          'A confirms item cannot include not_checked signals; emit each not_checked detection as its own inactive item.',
       });
     }
     // Continuations inherit prior severity; this cycle's signals may be
     // inconclusive (telemetry gap, errored query) without a new confirms.
     if (
       item.event_id === undefined &&
-      item.status === 'open' &&
-      (item.severity === '60-high' || item.severity === '80-critical') &&
+      item.status === 'active' &&
+      (item.severity === 'high' || item.severity === 'critical') &&
       grounded.length > 0 &&
       !hasConfirms &&
       !hasOffTopicObservedError
@@ -124,7 +123,7 @@ export const eventsWriteItemSchema = significantEventSchema
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message:
-          'An open event at "60-high" or above whose signals carry query evidence requires at least one confirms or off_topic (observed-error) signal; without confirmed or observed-error evidence use a lower severity or a non-open status.',
+          'An active event at "high" or above whose signals carry query evidence requires at least one confirms or off_topic (observed-error) signal; without confirmed or observed-error evidence use a lower severity or a non-active status.',
       });
     }
   });
@@ -290,7 +289,7 @@ export function createEventsWriteTool({
       Signals and topology are merged with prior versions. No-op if severity and status are
       unchanged (written: false, reason: unchanged_outcome). For Discovery writes, a completed
       investigation makes the stored severity authoritative. It is preserved unless Discovery
-      closes or dismisses the event, reopens a closed or dismissed event, or submits a confirmed
+      marks the event inactive, reactivates an inactive event, or submits a confirmed
       rule UUID absent from the current event. When no new rule UUIDs are introduced, title and
       symptom_hypothesis are frozen to the stored values and narrative_preserved: true is returned.
 
@@ -312,10 +311,15 @@ export function createEventsWriteTool({
     handler: async (toolParams, context) => {
       const { request } = context;
       try {
-        const { getEventClient, getKnowledgeIndicatorClient, getAlertEventsClient, licensing } =
-          await getScopedClients({
-            request,
-          });
+        const {
+          getEventClient,
+          getEventSearchClient,
+          getKnowledgeIndicatorClient,
+          getAlertEventsClient,
+          licensing,
+        } = await getScopedClients({
+          request,
+        });
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
         const items = await enrichCausalFeatures(
@@ -326,6 +330,7 @@ export function createEventsWriteTool({
 
         const data = await eventsWriteBulkHandler({
           eventClient: await getEventClient(),
+          eventSearchClient: await getEventSearchClient(),
           inputs: items,
           source: toolParams.source,
           alertEventsClient: await getAlertEventsClient(),

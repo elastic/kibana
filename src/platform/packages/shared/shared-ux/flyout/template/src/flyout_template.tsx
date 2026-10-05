@@ -63,9 +63,9 @@ const FlyoutTemplateResolved = ({
   children,
   size = 'm',
   session = 'start',
-  paddingSize,
   flyoutMenuProps,
   tabs: tabsProp,
+  tabBarProps,
   defaultSelectedTabId,
   selectedTabId: controlledSelectedTabId,
   onTabChange,
@@ -172,8 +172,8 @@ const FlyoutTemplateResolved = ({
   );
 
   const tabsContextValue = useMemo<FlyoutTabsState>(
-    () => ({ tabs, selectedTabId, selectTab }),
-    [tabs, selectedTabId, selectTab]
+    () => ({ tabs, tabBarProps, selectedTabId, selectTab }),
+    [tabs, tabBarProps, selectedTabId, selectTab]
   );
 
   const collapseState = useHeaderCollapse({ enabled: !headerAttrs?.collapsed });
@@ -183,14 +183,14 @@ const FlyoutTemplateResolved = ({
       {...euiFlyoutProps}
       size={size}
       session={session}
-      paddingSize={paddingSize}
+      paddingSize="m"
       data-test-subj={dataTestSubj}
       flyoutMenuDisplayMode="auto"
       flyoutMenuProps={hasMenuProps ? mergedMenuProps : undefined}
       aria-label={flyoutAriaLabel}
       aria-labelledby={flyoutAriaLabelledBy}
     >
-      <FlyoutTemplateConfigProvider value={{ dataTestSubj, paddingSize }}>
+      <FlyoutTemplateConfigProvider value={{ dataTestSubj }}>
         <FlyoutTabsProvider value={tabsContextValue}>
           <FlyoutHeaderCollapseProvider value={collapseState}>
             {headerItem && (

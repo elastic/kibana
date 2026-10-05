@@ -26,7 +26,13 @@ const fillMissingExtras = (
 ): Record<string, unknown> => {
   const defaults = declaration.extras?.defaultValue;
   if (defaults === undefined) {
-    return stored;
+    // The Worker no longer declares extras (e.g. a dial was retired): drop a stale stored
+    // value rather than let it fail the Worker's now-narrower complete schema.
+    if (!Object.hasOwn(stored, 'extras')) {
+      return stored;
+    }
+    const { extras: _extras, ...rest } = stored;
+    return rest;
   }
   const { extras } = stored;
   if (extras === undefined) {

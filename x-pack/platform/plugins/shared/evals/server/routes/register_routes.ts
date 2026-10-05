@@ -49,6 +49,7 @@ import { registerDeleteEvaluatorRoute } from './evaluators/delete_evaluator';
 import { registerEvaluateRoute } from './evaluators/evaluate';
 import { registerResolveInstrumentationRoute } from './evaluators/resolve_instrumentation';
 import { registerValidateRoute } from './evaluators/validate';
+import { registerTestEvaluatorRoute } from './evaluators/test_evaluator';
 import { registerRunExperimentRoute } from './experiments/run_experiment';
 import { registerSaveExperimentWorkflowRoute } from './experiments/save_experiment_workflow';
 import { registerPreviewExperimentRoute } from './experiments/preview_experiment';
@@ -106,6 +107,7 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerEvaluateRoute(dependencies);
   registerResolveInstrumentationRoute(dependencies);
   registerValidateRoute(dependencies);
+  registerTestEvaluatorRoute(dependencies);
   registerGetEvaluatorRoute(dependencies);
   registerUpdateEvaluatorRoute(dependencies);
   registerDeleteEvaluatorRoute(dependencies);

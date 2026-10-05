@@ -165,7 +165,7 @@ describe('InvestigationStatusService.setStatus — expected_proposal_ids', () =>
     await expect(
       service.setStatus(request, 'conv-1', {
         status: 'closed',
-        dismiss_reason: 'wrong',
+        dismiss_reason: 'no_reason',
         expected_proposal_ids: ['p-1'],
       })
     ).rejects.toBeInstanceOf(CloseTargetsChangedError);
@@ -177,7 +177,7 @@ describe('InvestigationStatusService.setStatus — expected_proposal_ids', () =>
     await expect(
       service.setStatus(request, 'conv-1', {
         status: 'closed',
-        dismiss_reason: 'wrong',
+        dismiss_reason: 'no_reason',
         expected_proposal_ids: ['p-1', 'p-2'],
       })
     ).resolves.not.toThrow();
@@ -189,7 +189,7 @@ describe('InvestigationStatusService.setStatus — expected_proposal_ids', () =>
     await expect(
       service.setStatus(request, 'conv-1', {
         status: 'closed',
-        dismiss_reason: 'wrong',
+        dismiss_reason: 'no_reason',
       })
     ).resolves.not.toThrow();
   });
@@ -207,7 +207,7 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
     /** First call outcome: 'success' | Error to throw */
     releaseGateSideEffect: 'success' | Error;
     /** What proposalsService.get returns (for the conflict re-read path) */
-    getProposalResult?: { decision?: string; status: string; expired: boolean } | Error;
+    getProposalResult?: { decision?: string; status: string } | Error;
   }) => {
     const releaseGate = jest
       .fn()
@@ -220,8 +220,7 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
       .mockResolvedValue({});
 
     const get = jest.fn().mockImplementation(() => {
-      if (!getProposalResult)
-        return Promise.resolve({ decision: 'dismissed', status: 'decided', expired: false });
+      if (!getProposalResult) return Promise.resolve({ decision: 'dismissed', status: 'decided' });
       if (getProposalResult instanceof Error) return Promise.reject(getProposalResult);
       return Promise.resolve(getProposalResult);
     });
@@ -257,12 +256,12 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
     });
     const { service, releaseGate, patchMetadata } = makeDismissService({
       releaseGateSideEffect: conflictErr,
-      getProposalResult: { decision: 'approved', status: 'decided', expired: false },
+      getProposalResult: { decision: 'approved', status: 'decided' },
     });
 
     const result = await service.setStatus(request, 'conv-1', {
       status: 'closed',
-      dismiss_reason: 'wrong',
+      dismiss_reason: 'no_reason',
     });
 
     // Conflict → re-read shows decided → skip, close succeeds.
@@ -277,12 +276,12 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
     const { service, releaseGate, get, patchMetadata } = makeDismissService({
       releaseGateSideEffect: conflictErr,
       // Re-read: still pending.
-      getProposalResult: { decision: undefined, status: 'pending', expired: false },
+      getProposalResult: { decision: undefined, status: 'pending' },
     });
 
     const result = await service.setStatus(request, 'conv-1', {
       status: 'closed',
-      dismiss_reason: 'wrong',
+      dismiss_reason: 'no_reason',
     });
 
     // First call failed → re-read says still pending → retry → success.
@@ -299,7 +298,7 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
     const proposalsService = {
       list: jest.fn().mockResolvedValue({ proposals: [{ id: 'p-1' }], total: 1 }),
       releaseGate: jest.fn().mockRejectedValueOnce(conflictErr).mockRejectedValueOnce(retryErr),
-      get: jest.fn().mockResolvedValue({ decision: undefined, status: 'pending', expired: false }),
+      get: jest.fn().mockResolvedValue({ decision: undefined, status: 'pending' }),
     };
     const proposals = {
       getProposalsService: () => proposalsService,
@@ -321,26 +320,9 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
 
     // Throws ProposalDismissFailedError; patchMetadata is never called.
     await expect(
-      service.setStatus(request, 'conv-1', { status: 'closed', dismiss_reason: 'wrong' })
+      service.setStatus(request, 'conv-1', { status: 'closed', dismiss_reason: 'no_reason' })
     ).rejects.toBeInstanceOf(ProposalDismissFailedError);
     expect(client.patchMetadata).not.toHaveBeenCalled();
-  });
-
-  it('skips ProposalExpiredError directly without re-reading', async () => {
-    const expiredErr = Object.assign(new Error('expired'), { name: 'ProposalExpiredError' });
-    const { service, releaseGate, patchMetadata } = makeDismissService({
-      releaseGateSideEffect: expiredErr,
-    });
-
-    const result = await service.setStatus(request, 'conv-1', {
-      status: 'closed',
-      dismiss_reason: 'wrong',
-    });
-
-    expect(releaseGate).toHaveBeenCalledTimes(1);
-    expect(patchMetadata).toHaveBeenCalled();
-    expect(result.dismissed_proposal_ids).toHaveLength(0);
-    expect(result.failed_proposal_ids).toHaveLength(0);
   });
 
   it('skips ProposalNotFoundError directly without re-reading', async () => {
@@ -351,7 +333,7 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
 
     const result = await service.setStatus(request, 'conv-1', {
       status: 'closed',
-      dismiss_reason: 'wrong',
+      dismiss_reason: 'no_reason',
     });
 
     expect(releaseGate).toHaveBeenCalledTimes(1);

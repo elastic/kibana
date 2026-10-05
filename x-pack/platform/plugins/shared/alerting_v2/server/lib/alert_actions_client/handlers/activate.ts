@@ -44,8 +44,8 @@ const assertEpisodeIsActivatable = (alertEvent: AlertEventRecord): void => {
     code: ALERTING_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
     details: {
       group_hash: alertEvent.group_hash,
-      episode_id: alertEvent.episode_id,
-      episode_status: status,
+      alert_id: alertEvent.episode_id,
+      alert_status: status,
       action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
     },
   });
@@ -55,8 +55,8 @@ const assertEpisodeIsActivatable = (alertEvent: AlertEventRecord): void => {
  * Handler for the user-initiated activate (reopen) action. Produces:
  *
  * 1. A synthetic `.rule-events` document that forces the episode to
- *    `active` (`status: breached`, `episode.status: active`,
- *    `@timestamp: now`), so the next read sees the reopened state
+ *    `active` (`status: breached`, `episode.status: active`, with
+ *    `@timestamp` set by ES at ingest), so the next read sees the reopened state
  *    without waiting for the next rule run. The episode keeps its
  *    original `episode_id` — activate is incident continuity, not a
  *    new firing.
@@ -82,7 +82,6 @@ export const activateHandler: ActionHandler<ActivateAlertActionBody> = {
     assertEpisodeIsActivatable(alertEvent);
 
     const ruleEvent = buildRuleEventDocument({
-      '@timestamp': new Date().toISOString(),
       rule:
         alertEvent.rule_id != null
           ? { id: alertEvent.rule_id, version: alertEvent.rule_version ?? 1 }
@@ -93,7 +92,7 @@ export const activateHandler: ActionHandler<ActivateAlertActionBody> = {
       source: alertEvent.source,
       type: alertEventType.alert,
       space_id: alertEvent.space_id,
-      episode: { id: alertEvent.episode_id, status: alertEpisodeStatus.active },
+      alert: { id: alertEvent.episode_id, status: alertEpisodeStatus.active },
       severity: alertEvent.severity ?? undefined,
     });
 
