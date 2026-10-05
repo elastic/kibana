@@ -11,7 +11,14 @@ import { parse } from 'yaml';
 import FLOOR_ALERT_TRIAGE_YAML from './floor_alert_triage.yaml';
 import FLOOR_ALERT_TRIAGE_REVIEW_YAML from './floor_alert_triage_review.yaml';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
+import { convertToWorkflowGraph } from '../../../graph/build_execution_graph/build_execution_graph';
+import type { WorkflowYaml } from '../../../spec/schema';
+import {
+  DEFAULT_PARALLEL_MAX_CONCURRENCY,
+  DEFAULT_PARALLEL_MAX_FAN_OUT,
+} from '../../../spec/schema';
 import { ExecutionStatus } from '../../../types/latest';
+import ALERT_ANALYSIS_WORKFLOW_YAML from '../alert_analysis/alert_analysis_workflow.yaml';
 
 interface YamlStep {
   name: string;
@@ -461,10 +468,181 @@ describe('floor_alert_triage — if-conditions', () => {
 });
 
 // ---------------------------------------------------------------------------
+// az: tags — written in bulk and in chunks, never one call per alert
+// ---------------------------------------------------------------------------
+const AZ_TAG_WRITES = [
+  {
+    step: 'set_az_true_positive_tags',
+    idsVariable: 'az_true_positive_ids',
+    tagToAdd: 'az:true_positive',
+  },
+  {
+    step: 'set_az_false_positive_tags',
+    idsVariable: 'az_false_positive_ids',
+    tagToAdd: 'az:false_positive',
+  },
+  {
+    step: 'set_az_inconclusive_tags',
+    idsVariable: 'az_inconclusive_ids',
+    tagToAdd: 'az:inconclusive',
+  },
+] as const;
+
+const AZ_TAG_STEPS = AZ_TAG_WRITES.map(({ step }) => step);
+
+describe('floor_alert_triage — az: tags', () => {
+  const idsStep = stepByName('compute_az_tag_ids');
+
+  const verdicts = [
+    { alert_id: 'tp-1', classification: 'true_positive' },
+    { alert_id: 'fp-1', classification: 'false_positive' },
+    { alert_id: 'fp-2', classification: 'false_positive' },
+    { alert_id: 'inc-1', classification: 'inconclusive' },
+  ];
+
+  const computeIds = (batch: typeof verdicts): Record<string, unknown> => {
+    const context = { steps: { classify_alerts: { output: { verdicts: batch } } } };
+    return Object.fromEntries(
+      Object.entries(idsStep?.with ?? {}).map(([key, expr]) => [
+        key,
+        evalExpr(expr as string, context),
+      ])
+    );
+  };
+
+  const loopOf = (name: string) => stepByName(name) as YamlStep;
+  const callOf = (name: string) => loopOf(name).steps?.[0];
+
+  const makeIds = (count: number): string[] =>
+    Array.from({ length: count }, (_, i) => `alert-${i + 1}`);
+
+  const renderChunks = (name: string, idsVariable: string, ids: string[]): string[][] =>
+    JSON.parse(
+      renderString((loopOf(name).foreach ?? '').replace(/^\$\{\{/, '{{').trim(), {
+        variables: { [idsVariable]: ids },
+      })
+    );
+
+  const chunkSizeOf = (name: string): number =>
+    Number(/chunk: (\d+)/.exec(loopOf(name).foreach ?? '')?.[1]);
+
+  it('walks each id list in chunks, with one SetAlertTags call per chunk', () => {
+    AZ_TAG_WRITES.forEach(({ step }) => {
+      expect(loopOf(step).type).toBe('foreach');
+      expect(loopOf(step).foreach).toContain('| chunk:');
+      expect(loopOf(step).steps).toHaveLength(1);
+      expect(callOf(step)?.type).toBe('kibana.SetAlertTags');
+      expect(callOf(step)?.name).toBe(`${step}_call`);
+      expect(callOf(step)?.with?.ids).toBe('${{ foreach.item }}');
+    });
+  });
+
+  it('partitions the alert ids by classification, every id landing in exactly one class', () => {
+    expect(computeIds(verdicts)).toEqual({
+      az_true_positive_ids: ['tp-1'],
+      az_false_positive_ids: ['fp-1', 'fp-2'],
+      az_inconclusive_ids: ['inc-1'],
+    });
+  });
+
+  it('chunks each list at the size the closure review re-tags with', () => {
+    const reviewChunkSize = Number(/chunk: (\d+)/.exec(FLOOR_ALERT_TRIAGE_REVIEW_YAML)?.[1]);
+    expect(reviewChunkSize).toBeGreaterThan(0);
+    AZ_TAG_STEPS.forEach((step) => expect(chunkSizeOf(step)).toBe(reviewChunkSize));
+  });
+
+  it.each(AZ_TAG_WRITES)(
+    '"$step" splits a large list into bounded chunks that keep every id exactly once',
+    ({ step, idsVariable }) => {
+      const size = chunkSizeOf(step);
+      const ids = makeIds(size * 2 + 200);
+      const chunks = renderChunks(step, idsVariable, ids);
+      expect(chunks.map((chunk) => chunk.length)).toEqual([size, size, 200]);
+      expect(chunks.flat()).toEqual(ids);
+    }
+  );
+
+  it('sends a single call when the list fits in one chunk', () => {
+    AZ_TAG_WRITES.forEach(({ step, idsVariable }) => {
+      expect(renderChunks(step, idsVariable, makeIds(3))).toEqual([makeIds(3)]);
+    });
+  });
+
+  it('makes a bounded number of calls for a large batch, not one per alert', () => {
+    const alertCount = 1200;
+    const ids = makeIds(alertCount);
+    // Every alert is a false positive: only the false-positive write has any chunks.
+    const calls = AZ_TAG_WRITES.map(({ step, idsVariable }) => {
+      const list = step === 'set_az_false_positive_tags' ? ids : [];
+      return renderChunks(step, idsVariable, list).length;
+    });
+    expect(calls).toEqual([0, 3, 0]);
+    expect(calls.reduce((sum, count) => sum + count, 0)).toBeLessThan(alertCount);
+  });
+
+  it('never sends an empty `ids`, since a list with no ids chunks to no calls', () => {
+    AZ_TAG_WRITES.forEach(({ step, idsVariable }) => {
+      expect(renderChunks(step, idsVariable, [])).toEqual([]);
+    });
+    const ids = computeIds([]);
+    expect(Object.values(ids)).toEqual([[], [], []]);
+  });
+
+  it('only writes a class tag for the alerts of that class', () => {
+    const ids = computeIds([{ alert_id: 'fp-1', classification: 'false_positive' }]);
+    const chunksFor = (variable: string, step: string) =>
+      renderChunks(step, variable, ids[variable] as string[]);
+    expect(chunksFor('az_false_positive_ids', 'set_az_false_positive_tags')).toEqual([['fp-1']]);
+    expect(chunksFor('az_true_positive_ids', 'set_az_true_positive_tags')).toEqual([]);
+    expect(chunksFor('az_inconclusive_ids', 'set_az_inconclusive_tags')).toEqual([]);
+  });
+
+  // The three writes run in order and the last one wins, so an alert id in two classes would end
+  // with the last class's tag. The sub-workflow rules that out by failing on duplicate ids.
+  it('relies on the analysis sub-workflow failing the run on duplicate alert ids', () => {
+    const { steps } = parse(ALERT_ANALYSIS_WORKFLOW_YAML) as { steps: YamlStep[] };
+    const reject = flatten(steps).find(({ name }) => name === 'fail_duplicate_caller_alert_ids');
+    expect(reject?.type).toBe('workflow.fail');
+  });
+
+  it('reads each loop from the list its tag belongs to', () => {
+    AZ_TAG_WRITES.forEach(({ step, idsVariable }) => {
+      expect(loopOf(step).foreach).toContain(`variables.${idsVariable} `);
+    });
+  });
+
+  it('adds its own class tag and removes the other two in the same call, never the one it adds', () => {
+    const all = ['az:true_positive', 'az:false_positive', 'az:inconclusive'];
+    AZ_TAG_WRITES.forEach(({ step, tagToAdd }) => {
+      const { tags } = callOf(step)?.with as {
+        tags: { tags_to_remove: string[]; tags_to_add: string[] };
+      };
+      expect(tags.tags_to_add).toEqual([tagToAdd]);
+      expect([...tags.tags_to_remove, ...tags.tags_to_add].sort()).toEqual([...all].sort());
+    });
+  });
+
+  it('retries each write and fails the run when one still fails', () => {
+    AZ_TAG_STEPS.forEach((step) => {
+      expect(callOf(step)?.['on-failure']?.retry?.['max-attempts']).toBe(3);
+      expect(callOf(step)?.['on-failure']?.continue).toBeUndefined();
+    });
+  });
+
+  it('runs before the verdict notes and the review dispatch', () => {
+    const names = parsed.steps.map((step) => step.name);
+    expect(names.indexOf('compute_az_tag_ids')).toBeLessThan(names.indexOf(AZ_TAG_STEPS[0]));
+    AZ_TAG_STEPS.forEach((step) => {
+      expect(names.indexOf(step)).toBeLessThan(names.indexOf('add_verdict_notes'));
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
 // add_verdict_notes — the only verdict note on the Worker path
 // ---------------------------------------------------------------------------
 describe('floor_alert_triage — add_verdict_notes', () => {
-  const noteTemplate = (stepByName('add_verdict_notes')?.with?.body as { note: { note: string } })
+  const noteTemplate = (stepByName('add_verdict_note')?.with?.body as { note: { note: string } })
     .note.note;
 
   const renderNote = (contributingFactors: string[]) =>
@@ -499,6 +677,182 @@ describe('floor_alert_triage — add_verdict_notes', () => {
   it('tells the sub-workflow it is called by the Worker, which suppresses its own note', () => {
     const inputs = stepByName('classify_alerts')?.with?.inputs as Record<string, unknown>;
     expect(inputs.calledByWorker).toBe(true);
+  });
+
+  describe('writing the notes in parallel chunks', () => {
+    const loop = stepByName('add_verdict_notes') as YamlStep & {
+      concurrency?: { max: number };
+      mode?: string;
+    };
+    const parallel = stepByName('write_note_chunk') as YamlStep & {
+      concurrency?: { max: number };
+      mode?: string;
+    };
+    const verdicts = (count: number) =>
+      Array.from({ length: count }, (_, i) => ({
+        alert_id: `alert-${i + 1}`,
+        classification: 'false_positive',
+      }));
+
+    const renderChunks = (count: number): Array<Array<{ alert_id: string }>> =>
+      JSON.parse(
+        renderString((loop.foreach ?? '').replace(/^\$\{\{/, '{{').trim(), {
+          steps: { classify_alerts: { output: { verdicts: verdicts(count) } } },
+        })
+      );
+
+    it('loops over chunks of verdicts and fans each chunk out in a parallel step', () => {
+      expect(loop.type).toBe('foreach');
+      expect(loop.foreach).toContain('chunk: 20');
+      expect(parallel.type).toBe('parallel');
+      expect(parallel.steps?.map((step) => step.name)).toEqual(['add_verdict_note']);
+    });
+
+    it('splits the verdicts into chunks that keep every alert exactly once', () => {
+      const chunks = renderChunks(45);
+      expect(chunks.map((chunk) => chunk.length)).toEqual([20, 20, 5]);
+      expect(chunks.flat().map(({ alert_id: id }) => id)).toEqual(
+        verdicts(45).map(({ alert_id: id }) => id)
+      );
+    });
+
+    it('writes no notes for a run without verdicts', () => {
+      expect(renderChunks(0)).toEqual([]);
+    });
+
+    // A fan-out that is no larger than the concurrency finishes in one tick; a larger one runs in
+    // waves, and every wave reloads the execution state.
+    it('keeps each chunk within the concurrency so it finishes in one tick', () => {
+      const chunkSize = Number(/chunk: (\d+)/.exec(loop.foreach ?? '')?.[1]);
+      expect(parallel.concurrency?.max).toBeGreaterThanOrEqual(chunkSize);
+      // The schema ceilings for a parallel step.
+      expect(parallel.concurrency?.max).toBeLessThanOrEqual(DEFAULT_PARALLEL_MAX_CONCURRENCY);
+      expect(chunkSize).toBeLessThanOrEqual(DEFAULT_PARALLEL_MAX_FAN_OUT);
+    });
+
+    // The schema accepts a branch with `on-failure` or `if`; only building the graph rejects it,
+    // and in the engine that rejection would be a failed run rather than a failed test.
+    it('builds an execution graph, which rejects flow control inside a branch', () => {
+      expect(() => convertToWorkflowGraph(parsed as unknown as WorkflowYaml)).not.toThrow();
+    });
+
+    it('lets every note in a chunk run even when one fails', () => {
+      expect(parallel.mode).toBe('settled');
+    });
+
+    it('reads the verdicts for the fan-out from a step output, not from the chunk scope', () => {
+      expect(stepByName('current_note_chunk')?.with?.verdicts).toBe('${{ foreach.item }}');
+      expect(parallel.foreach).toBe('${{ steps.current_note_chunk.output.verdicts }}');
+    });
+
+    // A parallel branch is a straight line of atomic steps: flow control, including `on-failure`
+    // and `if`, is rejected when the graph is built.
+    it('keeps the branch body free of flow control', () => {
+      (parallel.steps ?? []).forEach((step) => {
+        expect(step['on-failure']).toBeUndefined();
+        expect(step.if).toBeUndefined();
+        expect(step.foreach).toBeUndefined();
+      });
+    });
+
+    describe('retrying the notes that did not complete', () => {
+      const collectExpr = stepByName('collect_chunk_failed_notes')?.with
+        ?.chunk_failed_verdicts as string;
+      const recordExpr = stepByName('record_failed_verdict_notes')?.with
+        ?.failed_note_verdicts as string;
+      const retry = stepByName('retry_failed_verdict_notes');
+
+      const failedVerdictsOf = (results: unknown[]): unknown =>
+        evalExpr(collectExpr, { steps: { write_note_chunk: { output: { results } } } });
+
+      it('collects the verdict of every branch that did not complete', () => {
+        const [a, b, c, d] = verdicts(4);
+        expect(
+          failedVerdictsOf([
+            { index: 0, key: a, status: 'completed' },
+            { index: 1, key: b, status: 'failed' },
+            { index: 2, key: c, status: 'completed' },
+            { index: 3, key: d, status: 'timed_out' },
+          ])
+        ).toEqual([b, d]);
+      });
+
+      it('collects nothing when every note completed', () => {
+        const [a, b] = verdicts(2);
+        expect(
+          failedVerdictsOf([
+            { index: 0, key: a, status: 'completed' },
+            { index: 1, key: b, status: 'completed' },
+          ])
+        ).toEqual([]);
+      });
+
+      const accumulate = (
+        accumulated: unknown[],
+        chunkFailed: unknown[],
+        staleVariable: unknown[] = []
+      ): unknown =>
+        evalExpr(recordExpr, {
+          variables: { failed_note_verdicts: accumulated, chunk_failed_verdicts: staleVariable },
+          steps: { collect_chunk_failed_notes: { output: { chunk_failed_verdicts: chunkFailed } } },
+        });
+
+      it('accumulates the failures across chunks', () => {
+        const [a, b, c] = verdicts(3);
+        expect(accumulate([a], [b, c])).toEqual([a, b, c]);
+        expect(accumulate([a], [])).toEqual([a]);
+      });
+
+      // `variables` is a merge of every data.set output in run order, and an empty value does not
+      // reliably shadow the previous chunk's, so a clean chunk after a failed one must not
+      // re-add the failed one: the step output is what the accumulator has to read.
+      it('does not re-add the failures of an earlier chunk when a later chunk is clean', () => {
+        const [a, b] = verdicts(2);
+        const afterFailedChunk = accumulate([a], [b]);
+        expect(afterFailedChunk).toEqual([a, b]);
+        expect(accumulate(afterFailedChunk as unknown[], [], [b])).toEqual([a, b]);
+      });
+
+      it('reads the failures from the collecting step, not from a variable', () => {
+        expect(recordExpr).toContain(
+          'steps.collect_chunk_failed_notes.output.chunk_failed_verdicts'
+        );
+        expect(recordExpr).not.toContain('variables.chunk_failed_verdicts');
+      });
+
+      it('starts the accumulator empty before the first chunk', () => {
+        const names = parsed.steps.map((step) => step.name);
+        expect(stepByName('init_failed_verdict_notes')?.with?.failed_note_verdicts).toEqual([]);
+        expect(names.indexOf('init_failed_verdict_notes')).toBeLessThan(
+          names.indexOf('add_verdict_notes')
+        );
+      });
+
+      it('retries each failed note serially, with the retry the notes always had', () => {
+        const retryStep = stepByName('retry_verdict_note');
+        expect(retry?.type).toBe('foreach');
+        expect(retry?.foreach).toContain('variables.failed_note_verdicts');
+        expect(retryStep?.['on-failure']?.retry?.['max-attempts']).toBe(3);
+        // A note that still fails fails the run, as it did before the notes ran in parallel.
+        expect(retryStep?.['on-failure']?.continue).toBeUndefined();
+      });
+
+      it('runs after the notes and before the review is started', () => {
+        const names = parsed.steps.map((step) => step.name);
+        expect(names.indexOf('retry_failed_verdict_notes')).toBeGreaterThan(
+          names.indexOf('add_verdict_notes')
+        );
+        expect(names.indexOf('gate_fp_close')).toBeGreaterThan(
+          names.indexOf('retry_failed_verdict_notes')
+        );
+      });
+
+      it('writes the same note as the first attempt', () => {
+        expect(stepByName('retry_verdict_note')?.with).toEqual(
+          stepByName('add_verdict_note')?.with
+        );
+      });
+    });
   });
 });
 
@@ -557,7 +911,7 @@ describe('floor_alert_triage — closure review hand-off', () => {
 
   it('starts the review after every alert has its az: tag and its note', () => {
     const gate = stepIndex('gate_fp_close');
-    expect(gate).toBeGreaterThan(stepIndex('set_az_tags'));
+    AZ_TAG_STEPS.forEach((name) => expect(gate).toBeGreaterThan(stepIndex(name)));
     expect(gate).toBeGreaterThan(stepIndex('add_verdict_notes'));
   });
 

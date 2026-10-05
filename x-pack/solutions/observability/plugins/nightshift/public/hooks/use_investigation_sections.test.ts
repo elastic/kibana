@@ -57,10 +57,10 @@ describe('useInvestigationSections', () => {
       if (statuses.includes('pending')) {
         return sectionResult({ total: 2, status: 'pending' });
       }
-      if (severities?.[0] === '80-critical') {
+      if (severities?.[0] === 'critical') {
         return sectionResult({ total: 3, status: 'completed' });
       }
-      if (severities?.[0] === '60-high') {
+      if (severities?.[0] === 'high') {
         return sectionResult({ total: 1 });
       }
       return sectionResult();
@@ -84,22 +84,22 @@ describe('useInvestigationSections', () => {
       },
       {
         statuses: ['completed'] satisfies InvestigationStatus[],
-        severities: ['80-critical'] satisfies Severity[],
+        severities: ['critical'] satisfies Severity[],
         query: 'checkout',
       },
       {
         statuses: ['completed'] satisfies InvestigationStatus[],
-        severities: ['60-high'] satisfies Severity[],
+        severities: ['high'] satisfies Severity[],
         query: 'checkout',
       },
       {
         statuses: ['completed'] satisfies InvestigationStatus[],
-        severities: ['40-medium'] satisfies Severity[],
+        severities: ['medium'] satisfies Severity[],
         query: 'checkout',
       },
       {
         statuses: ['completed'] satisfies InvestigationStatus[],
-        severities: ['20-low'] satisfies Severity[],
+        severities: ['low'] satisfies Severity[],
         query: 'checkout',
       },
       {
@@ -110,10 +110,10 @@ describe('useInvestigationSections', () => {
     ]);
     expect(result.current.sections.map((section) => section.id)).toEqual([
       'in-progress',
-      '80-critical',
-      '60-high',
-      '40-medium',
-      '20-low',
+      'critical',
+      'high',
+      'medium',
+      'low',
       'failed',
     ]);
   });
@@ -134,10 +134,10 @@ describe('useInvestigationSections', () => {
     const { result } = renderHook(() => useInvestigationSections());
 
     expect(result.current.severityCounts).toEqual({
-      '80-critical': 3,
-      '60-high': 1,
-      '40-medium': 0,
-      '20-low': 0,
+      critical: 3,
+      high: 1,
+      medium: 0,
+      low: 0,
     });
   });
 
@@ -183,7 +183,7 @@ describe('useInvestigationSections', () => {
       if (statuses.includes('failed')) {
         return { ...sectionResult({ total: 1, status: 'failed' }), refetch: refetchFailed };
       }
-      if (severities?.[0] === '80-critical') {
+      if (severities?.[0] === 'critical') {
         return { ...sectionResult({ total: 3 }), refetch: refetchCritical };
       }
       return sectionResult();
@@ -272,7 +272,7 @@ describe('useInvestigationSections', () => {
       if (statuses.includes('failed')) {
         return { ...sectionResult({ total: 1, status: 'failed' }), refetch: refetchFailed };
       }
-      if (severities?.[0] === '80-critical') {
+      if (severities?.[0] === 'critical') {
         return { ...sectionResult({ total: 3 }), refetch: refetchCritical };
       }
       return sectionResult();
