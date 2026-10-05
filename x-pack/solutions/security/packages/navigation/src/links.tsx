@@ -167,7 +167,7 @@ export const securityLink = (pageName: SecurityPageName): AppDeepLinkId => {
 
 /**
  * Link id for a page on the AlertZero app. Same registry of page names as `securityLink`, different app
- * prefix — which is what distinguishes e.g. AlertZero's alerts page from the Security UI's.
+ * prefix — which is what distinguishes AlertZero's page from a Security UI page of the same name.
  */
 export const alertZeroLink = (pageName?: SecurityPageName): AppDeepLinkId =>
   (pageName ? `${ALERTZERO_APP_ID}:${pageName}` : ALERTZERO_APP_ID) as AppDeepLinkId;

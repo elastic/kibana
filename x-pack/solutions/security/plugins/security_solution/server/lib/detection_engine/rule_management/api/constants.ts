@@ -15,14 +15,9 @@ export const RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS = 3600000 as const;
 export const RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS = 3600000 as const;
 
 /**
- * Default import batch size: outer chunk (find/validate/KQL) and inner
- * `bulkCreateRules` `batchSize`. Same value so each outer batch is one
- * alerting bulk request.
+ * Import batch size: route outer chunk (find/validate/KQL) and inner
+ * `bulkCreateRules` / `bulkUpdateRules` `batchSize`. Same value so each
+ * outer chunk is one alerting bulk request. Leftover chunks still pass
+ * this constant, not the leftover count (alerting requires 10–500).
  */
-export const RULE_IMPORT_BULK_CREATE_BATCH_SIZE = 200;
-
-/**
- * `pMap` concurrency for the per-rule overwrite branch during import
- * (existing `rule_id`s are updated one-by-one via `rulesClient.update`).
- */
-export const RULE_IMPORT_BULK_UPDATE_CONCURRENCY = 50;
+export const RULE_IMPORT_BATCH_SIZE = 200;

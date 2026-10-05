@@ -43,6 +43,14 @@ triggers:
           maximum: 10
           default: 2
           description: Number of rule runs the rule-creation backtest simulates.
+        autonomy_level:
+          type: string
+          enum: [manual, assisted]
+          maxLength: 16
+          default: manual
+          description: >-
+            Detection Watch autonomy level of the dispatching worker. Carried for the
+            manual-autonomy entry gate, which is not implemented yet.
       required: [ki_id, ai_index_id]
       additionalProperties: false
 outputs:

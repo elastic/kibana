@@ -50,29 +50,30 @@ export function NLInput({
   }, []);
 
   return (
-    <EuiTextArea
-      inputRef={textareaRef}
-      compressed
-      fullWidth
-      resize="none"
-      rows={1}
-      placeholder={placeholder}
-      value={value}
-      disabled={disabled}
-      onChange={(e) => {
-        onChange(e.target.value);
-        updateHeight();
-      }}
-      onFocus={updateHeight}
-      onBlur={resetHeight}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          onSubmit();
-        }
-      }}
-      data-test-subj="esqlVisorNLQueryInput"
-      css={inputStyles}
-    />
+    <div css={inputStyles}>
+      <EuiTextArea
+        inputRef={textareaRef}
+        compressed
+        fullWidth
+        resize="none"
+        rows={1}
+        placeholder={placeholder}
+        value={value}
+        disabled={disabled}
+        onChange={(e) => {
+          onChange(e.target.value);
+          updateHeight();
+        }}
+        onFocus={updateHeight}
+        onBlur={resetHeight}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            onSubmit();
+          }
+        }}
+        data-test-subj="esqlVisorNLQueryInput"
+      />
+    </div>
   );
 }

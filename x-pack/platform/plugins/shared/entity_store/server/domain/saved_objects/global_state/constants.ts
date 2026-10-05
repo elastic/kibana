@@ -136,16 +136,20 @@ export const LATEST_LOG_EXTRACTION_DEFAULTS: LogExtractionConfig = LogExtraction
 export type HistorySnapshotStatus = z.infer<typeof HistorySnapshotStatus>;
 export const HistorySnapshotStatus = z.enum(['started', 'stopped']);
 
+/** User-settable fields with no defaults — use this for HTTP request body schemas. */
+export type HistorySnapshotParams = z.infer<typeof HistorySnapshotParams>;
+export const HistorySnapshotParams = z.object({
+  frequency: durationString,
+  retentionDays: z.number().int().min(1).max(MAX_HISTORY_SNAPSHOT_RETENTION_DAYS),
+});
+
 export type HistorySnapshotState = z.infer<typeof HistorySnapshotState>;
 export const HistorySnapshotState = z.object({
   status: HistorySnapshotStatus.default('started'),
-  frequency: durationString.default(DEFAULT_HISTORY_SNAPSHOT_FREQUENCY),
-  retentionDays: z
-    .number()
-    .int()
-    .min(1)
-    .max(MAX_HISTORY_SNAPSHOT_RETENTION_DAYS)
-    .default(DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS),
+  frequency: HistorySnapshotParams.shape.frequency.default(DEFAULT_HISTORY_SNAPSHOT_FREQUENCY),
+  retentionDays: HistorySnapshotParams.shape.retentionDays.default(
+    DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS
+  ),
   lastExecutionTimestamp: z.string().max(MAX_TIMESTAMP_STRING_LENGTH).optional(),
   lastError: z
     .object({
