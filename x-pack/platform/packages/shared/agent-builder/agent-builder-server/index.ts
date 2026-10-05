@@ -87,6 +87,8 @@ export type {
   AgentEventEmitterFn,
   RunAgentOnEventFn,
   ExperimentalFeatures,
+  DeploymentContext,
+  DeploymentEnvironment,
   SubAgentExecutor,
   SubAgentExecution,
   ConversationClient,
