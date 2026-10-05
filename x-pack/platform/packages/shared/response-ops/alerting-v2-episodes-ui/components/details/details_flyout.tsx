@@ -6,14 +6,7 @@
  */
 
 import React, { useMemo, useRef, useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiLink,
-  EuiPanel,
-  EuiSkeletonTitle,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiLink, EuiPanel, EuiSkeletonTitle, EuiToolTip } from '@elastic/eui';
 import { css, Global } from '@emotion/react';
 import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import { FlyoutTemplate } from '@kbn/flyout-template';
@@ -45,6 +38,7 @@ import { EpisodeFooterActionMenu } from './footer_action_menu';
 import { EMPTY_VALUE } from '../../constants';
 import { formatDateTime } from '../../utils/format_date_time';
 import { formatMetadataListDuration } from './translations';
+import { useAlertDetailsFlyoutWidth } from './use_alert_details_flyout_width';
 import type { EpisodeAction } from '../../actions/types';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
@@ -52,14 +46,6 @@ import * as flappingI18n from '../flapping/translations';
 import { FlappingPopover } from '../flapping/flapping_badge';
 
 type TabId = 'overview' | 'timeline' | 'metadata';
-
-/**
- * Mirrors `FLYOUT_MIN_CELL_WIDTH` and `FLYOUT_MAX_GRID_COLUMNS` in
- * `@kbn/flyout-info-blocks`, to estimate an initial width that allows 4 info blocks
- * to be displayed in one line
- */
-const INFO_BLOCKS_MIN_CELL_WIDTH = 140;
-const INFO_BLOCKS_COLUMNS = 4;
 
 /** Matches the `paddingSize` passed to the flyout, which EUI resolves to a theme size. */
 const FLYOUT_PADDING_SIZE = 'm';
@@ -174,7 +160,6 @@ export const AlertEpisodeDetailsFlyout = ({
   getRuleDetailsHref,
   getEpisodeDetailsHref,
 }: AlertEpisodeDetailsFlyoutProps) => {
-  const { euiTheme } = useEuiTheme();
   const [tab, setTab] = useState<TabId>('overview');
   const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
 
@@ -196,8 +181,7 @@ export const AlertEpisodeDetailsFlyout = ({
     [actions, episodes]
   );
 
-  // Narrowest width that keeps the header's four info blocks on one row
-  const initialWidth = INFO_BLOCKS_COLUMNS * INFO_BLOCKS_MIN_CELL_WIDTH + euiTheme.base * 2;
+  const initialWidth = useAlertDetailsFlyoutWidth();
 
   // Footer "Take action" popover anchor, captured from the PrimaryAction button's onClick.
   const menuAnchorRef = useRef<HTMLButtonElement | null>(null);

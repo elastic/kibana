@@ -14,32 +14,21 @@ import { ClassicAlertDetailsFlyout } from './classic_alert_details_flyout';
 
 jest.mock('@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_alert_by_id');
 
-// Surface flyout chrome props that EUI does not expose as queryable DOM attributes.
+const mockEuiFlyout = jest.fn();
+
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
-  const MockEuiFlyout = ({
-    children,
-    type,
-    ownFocus,
-    resizable,
-    'data-test-subj': testSubj,
-    'aria-labelledby': ariaLabelledBy,
-  }: React.ComponentProps<typeof actual.EuiFlyout> & {
-    'data-test-subj'?: string;
-    'aria-labelledby'?: string;
-  }) => (
-    <div
-      data-test-subj={testSubj}
-      data-type={type}
-      data-own-focus={String(ownFocus)}
-      data-resizable={String(Boolean(resizable))}
-      aria-labelledby={ariaLabelledBy}
-    >
-      {children}
-    </div>
-  );
-  return { ...actual, EuiFlyout: MockEuiFlyout };
+  const react = jest.requireActual('react');
+  return {
+    ...actual,
+    EuiFlyout: (props: Record<string, unknown>) => {
+      mockEuiFlyout(props);
+      return react.createElement(actual.EuiFlyout, props);
+    },
+  };
 });
+
+const forwardedFlyoutProps = () => mockEuiFlyout.mock.calls[mockEuiFlyout.mock.calls.length - 1][0];
 
 const mockFetchClassicAlertById = jest.mocked(fetchClassicAlertById);
 
@@ -79,10 +68,11 @@ describe('ClassicAlertDetailsFlyout', () => {
 
     renderFlyout();
 
-    const flyout = screen.getByTestId('classicAlertEpisodeDetailsFlyout');
-    expect(flyout).toHaveAttribute('data-type', 'overlay');
-    expect(flyout).toHaveAttribute('data-own-focus', 'false');
-    expect(flyout).toHaveAttribute('data-resizable', 'true');
+    expect(forwardedFlyoutProps()).toMatchObject({
+      type: 'overlay',
+      ownFocus: false,
+      resizable: true,
+    });
   });
 
   it('shows a loading spinner while the classic alert is being fetched', () => {

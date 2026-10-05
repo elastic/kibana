@@ -26,7 +26,6 @@ import {
   EuiTabs,
   EuiTitle,
   EuiToolTip,
-  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -37,6 +36,7 @@ import {
   FLYOUT_TAKE_ACTION,
   formatMetadataListDuration,
 } from '@kbn/alerting-v2-episodes-ui/components/details/translations';
+import { useAlertDetailsFlyoutWidth } from '@kbn/alerting-v2-episodes-ui/components/details/use_alert_details_flyout_width';
 import {
   ALERT_DURATION,
   ALERT_REASON,
@@ -73,12 +73,6 @@ const toAlertFieldsTableAlert = (fields: ClassicAlertFields): AlertFieldsTableAl
   fields as unknown as AlertFieldsTableAlert;
 
 type TabId = 'overview' | 'fields';
-
-/**
- * Mirrors the v2 episode flyout initial width (four info-block columns + base padding).
- */
-const INFO_BLOCKS_MIN_CELL_WIDTH = 140;
-const INFO_BLOCKS_COLUMNS = 4;
 
 export interface ClassicAlertDetailsFlyoutProps {
   alertId: string;
@@ -152,13 +146,11 @@ export const ClassicAlertDetailsFlyout = ({
   actions,
   onSuccess,
 }: ClassicAlertDetailsFlyoutProps) => {
-  const { euiTheme } = useEuiTheme();
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'classicAlertDetailsFlyout' });
   const [selectedTabId, setSelectedTabId] = useState<TabId>('overview');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuAnchorRef = useRef<HTMLButtonElement | null>(null);
-  // Same initial width as the v2 episode flyout
-  const initialWidth = INFO_BLOCKS_COLUMNS * INFO_BLOCKS_MIN_CELL_WIDTH + euiTheme.base * 2;
+  const initialWidth = useAlertDetailsFlyoutWidth();
 
   const {
     data: alert,
@@ -245,8 +237,6 @@ export const ClassicAlertDetailsFlyout = ({
   const flyout = (
     <EuiFlyout
       type="overlay"
-      // Overlay without a mask, matching the v2 episode flyout so the table stays
-      // visible and clickable behind the flyout.
       ownFocus={false}
       resizable
       hasAnimation
