@@ -5,33 +5,21 @@
  * 2.0.
  */
 
-import {
-  EuiConfirmModal,
-  EuiSkeletonLoading,
-  EuiSkeletonText,
-  EuiSwitch,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiConfirmModal, EuiSwitch, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useState } from 'react';
-import type { IngestStream } from '@kbn/streams-schema';
-import type { Pipeline } from '@kbn/ingest-pipelines-plugin/common/types';
+import React, { useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
-import {
-  loadProcessing,
-  type ProcessingPersistenceAdapter,
-} from '../stream_management/data_management/stream_detail_pipeline_processing/processing_persistence_adapter';
-import { StreamDetailEnrichmentContentProvider } from '../stream_management/data_management/stream_detail_pipeline_processing/page_content';
+import { loadProcessing } from '../stream_management/data_management/stream_detail_pipeline_processing/processing_persistence_adapter';
 
 export function StreamRemoveProcessingConfirmationModal({
-  name,
   refresh,
+  name,
   onClose,
   onConfirm,
 }: {
-  name: string;
   refresh: () => void;
+  name: string;
   onClose: () => void;
   onConfirm: () => void;
 }) {
@@ -45,7 +33,7 @@ export function StreamRemoveProcessingConfirmationModal({
   } = useKibana();
   const {
     value,
-    loading,
+    loading: loadingRequest,
     refresh: refreshProcessing,
   } = useStreamsAppFetch(
     ({ signal }) =>
@@ -57,80 +45,6 @@ export function StreamRemoveProcessingConfirmationModal({
       }),
     [core, name, streamsRepositoryClient]
   );
-
-  const modalTitleId = useGeneratedHtmlId();
-
-  const refreshAll = useCallback(() => {
-    refreshProcessing();
-    refresh();
-  }, [refresh, refreshProcessing]);
-
-  if (loading || !value) {
-    return (
-      <EuiConfirmModal
-        aria-labelledby={modalTitleId}
-        title={i18n.translate('xpack.streams.flyout.processingRemovalConfirmModal.deleteLabel', {
-          defaultMessage: 'Remove processing?',
-        })}
-        titleProps={{ id: modalTitleId }}
-        cancelButtonText={i18n.translate(
-          'xpack.streams.flyout.processingRemovalConfirmModal.cancelLabel',
-          {
-            defaultMessage: 'Cancel',
-          }
-        )}
-        confirmButtonText={i18n.translate(
-          'xpack.streams.flyout.processingRemovalConfirmModal.confirmRemoval',
-          {
-            defaultMessage: 'Confirm removal',
-          }
-        )}
-        confirmButtonDisabled
-        onCancel={onClose}
-      >
-        <EuiSkeletonLoading
-          isLoading={loading}
-          loadingContent={<EuiSkeletonText lines={2} />}
-          loadedContent={<></>}
-        />
-      </EuiConfirmModal>
-    );
-  }
-
-  return (
-    <StreamDetailEnrichmentContentProvider
-      definition={value.definition}
-      pipeline={value.pipeline}
-      processingPersistenceAdapter={value.processingPersistenceAdapter}
-      refreshDefinition={refresh}
-    >
-      <StreamRemoveProcessingConfirmationModalInner
-        refresh={refreshAll}
-        definition={value.definition}
-        pipeline={value.pipeline}
-        processingAdapter={value.processingPersistenceAdapter}
-        onClose={onClose}
-        onConfirm={onConfirm}
-      />
-    </StreamDetailEnrichmentContentProvider>
-  );
-}
-
-function StreamRemoveProcessingConfirmationModalInner({
-  refresh,
-  definition,
-  pipeline,
-  processingAdapter,
-  onClose,
-  onConfirm,
-}: {
-  refresh: () => void;
-  definition: IngestStream.all.GetResponse;
-  pipeline: Pipeline;
-  processingAdapter: ProcessingPersistenceAdapter;
-  onClose: () => void;
-  onConfirm: () => void;
-}) {
   const modalTitleId = useGeneratedHtmlId();
   const [loading, setLoading] = useState(false);
   const [confirmation, setConfirmation] = useState(false);
@@ -154,23 +68,25 @@ function StreamRemoveProcessingConfirmationModalInner({
           defaultMessage: 'Confirm removal',
         }
       )}
-      isLoading={loading}
-      confirmButtonDisabled={!confirmation}
+      isLoading={loadingRequest || loading}
+      confirmButtonDisabled={loadingRequest || !confirmation}
       onCancel={onClose}
       onConfirm={() => {
         // Hackiest thing, but it allows me to reset the state right down to nothing, and
         // have that change committed to state, so that it can be wiped in one go.
-        // TODO: Better way to reset the state to nothing.
         setLoading(true);
-        void processingAdapter
-          .saveProcessing({
-            definition,
-            pipeline,
-            pipelineDefinition: { steps: [] },
-          })
-          .then(onConfirm)
-          .then(onClose)
-          .then(refresh);
+        if (value) {
+          void value.processingPersistenceAdapter
+            .saveProcessing({
+              definition: value.definition,
+              pipeline: value.pipeline,
+              pipelineDefinition: { steps: [] },
+            })
+            .then(onConfirm)
+            .then(onClose)
+            .then(refreshProcessing)
+            .then(refresh);
+        }
       }}
     >
       <>
