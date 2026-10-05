@@ -314,6 +314,27 @@ describe('huntBehavior', () => {
     expect(additionalContext).toContain('the report body');
   });
 
+  it('bounds the sample-events section in aggregate at the schema max of 50 events', async () => {
+    // Each event is independently capped at 2048 chars by the schema (`max_tier2_sample_events`'s
+    // own ceiling); unbounded in aggregate, 50 of them is ~100 KB repeated into every one of up
+    // to 20 behaviors' `generateEsql` calls.
+    const sampleEvents = Array.from({ length: 50 }, (_, i) => `event-${i}-`.padEnd(2048, 'x'));
+    await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      { text: REPORT_TEXT, article_context: { sample_events: sampleEvents } },
+      esClient
+    );
+    const { additionalContext } = generateEsqlMock.mock.calls[0][0];
+    expect(additionalContext).toBeDefined();
+    // Generous ceiling covering every section (sample events + IOCs + report text + headers),
+    // but an order of magnitude below the ~100 KB the unbounded array would have produced.
+    expect(additionalContext?.length).toBeLessThan(20000);
+    // The cap keeps whole events rather than truncating mid-event: the first event, which
+    // always fits, must still be intact.
+    expect(additionalContext).toContain(sampleEvents[0]);
+  });
+
   it('returns the generated query under the grounded header as the proposed rule', async () => {
     const result = await huntBehavior(
       buildMockModel([t1078Candidate]),
