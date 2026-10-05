@@ -149,6 +149,14 @@ const buildGroundedEsqlHeader = (b: {
 
 const MAX_ESQL_PROMPT_IOCS = 30;
 const MAX_ESQL_PROMPT_TEXT_CHARS = 6000;
+/**
+ * Aggregate budget for the sample-events section, alongside `summarizeHit`'s own per-event
+ * cap. `max_tier2_sample_events` (up to 50) bounds the array length but not its total size, so
+ * without this a full page of events is ~100 KB repeated once per behavior (up to 20 calls),
+ * either a large token bill or a context-limit failure — which surfaces as the retryable
+ * `generation_failed`, so the run comes back and does it again.
+ */
+const MAX_ESQL_PROMPT_SAMPLE_EVENTS_CHARS = 8000;
 /** Concurrent `generateEsql` calls; each one is a multi-step LLM graph plus mapping lookups. */
 const ESQL_GENERATION_CONCURRENCY = 3;
 /**
@@ -365,6 +373,24 @@ const resolveGenerationIndex = (allowedIndices: string[]): string => {
   return positives.length > 0 ? positives.join(',') : DEFAULT_GENERATION_INDEX;
 };
 
+/**
+ * Caps the joined sample-events section to `maxChars` by keeping as many whole events,
+ * in order, as fit the budget — always at least the first, even if it alone exceeds it,
+ * so one oversized event cannot empty the section. Bounding by whole events rather than
+ * slicing the joined string keeps every kept event complete instead of cut off mid-line.
+ */
+const boundSampleEvents = (events: string[], maxChars: number): string[] => {
+  const kept: string[] = [];
+  let total = 0;
+  for (const event of events) {
+    const next = total + event.length + 1; // +1 for the joining newline
+    if (kept.length > 0 && next > maxChars) break;
+    kept.push(event);
+    total = next;
+  }
+  return kept;
+};
+
 /** Report-level grounding shared by every per-behavior generation call. */
 const buildGenerationContext = ({
   text,
@@ -377,8 +403,12 @@ const buildGenerationContext = ({
 }): string => {
   const sections: string[] = [];
   if (articleContext?.sample_events?.length) {
+    const boundedEvents = boundSampleEvents(
+      articleContext.sample_events,
+      MAX_ESQL_PROMPT_SAMPLE_EVENTS_CHARS
+    );
     sections.push(
-      `--- SAMPLE MATCHED ENVIRONMENT EVENTS ---\n${articleContext.sample_events
+      `--- SAMPLE MATCHED ENVIRONMENT EVENTS ---\n${boundedEvents
         .map((evt) => `- ${evt}`)
         .join('\n')}`
     );

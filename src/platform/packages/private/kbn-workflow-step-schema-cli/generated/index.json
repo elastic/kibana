@@ -944,15 +944,15 @@
     "ai.attachmentUpdated",
     "ai.conversation.metadataUpdated",
     "alert",
-    "alerting.episodeAcked",
-    "alerting.episodeActivated",
-    "alerting.episodeAssigned",
-    "alerting.episodeDeactivated",
-    "alerting.episodeSnoozed",
-    "alerting.episodeTagged",
-    "alerting.episodeUnacked",
-    "alerting.episodeUnassigned",
-    "alerting.episodeUnsnoozed",
+    "alerting.actions.alertAcked",
+    "alerting.actions.alertActivated",
+    "alerting.actions.alertAssigned",
+    "alerting.actions.alertDeactivated",
+    "alerting.actions.alertSnoozed",
+    "alerting.actions.alertTagged",
+    "alerting.actions.alertUnacked",
+    "alerting.actions.alertUnassigned",
+    "alerting.actions.alertUnsnoozed",
     "alerting.ruleCreated",
     "alerting.ruleDeleted",
     "alerting.ruleDisabled",
@@ -990,11 +990,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "40bbb6f5901fd62b507bda9630ba71555551b627cb440ece5a1d7450d8576053"
+      "sha256": "a5986c542db3d0aeb56fe6c589fe72115576954a755efde3f788477262055371"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "ce2c0b87f902b3b4a981a2280971c4c99b580560120f59a101099e2f3202ed5e"
+      "sha256": "c7c3260738082b8fb03ddeea86a324c3fe6b6994385b2d80d2eda7bbdbbcc786"
     }
   }
 }
