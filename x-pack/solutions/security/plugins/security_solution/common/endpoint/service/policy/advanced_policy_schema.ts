@@ -1077,7 +1077,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'mac.advanced.memory_protection.enable_shared_dirty_scan',
-    first_supported_version: '8.14',
+    first_supported_version: '9.6',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.memory_protection.enable_shared_dirty_scan',
       {
