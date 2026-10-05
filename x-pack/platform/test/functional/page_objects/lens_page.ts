@@ -955,9 +955,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
 
       await find.clickByCssSelector('button[data-test-subj="style"]');
-      await retry.try(async () => {
-        await find.byCssSelector('#lnsDimensionContainerTitle');
-      });
+      await testSubjects.existOrFail('lnsStyleSettingsFlyout');
     },
 
     async openLegendSettingsFlyout() {
@@ -973,15 +971,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       if (await this.hasLegendToolbarButton()) {
         const button = await find.byCssSelector('button[data-test-subj="legend"]');
         await button.click();
+        await testSubjects.existOrFail('lnsLegendSettingsFlyout');
       }
     },
     /**
-     * Opens the layer settings flyout and waits for its open animation to finish, so the
-     * following interaction is not dispatched at coordinates the sliding panel has left behind.
+     * Opens the layer settings flyout and waits for it to be present in the DOM.
      */
     async openLayerSettings() {
       await testSubjects.click('lnsLayerSettings');
-      await testSubjects.existOrFail('lnsLayerSettingsContainer-ready', { timeout: 30_000 });
+      await testSubjects.existOrFail('lnsLayerSettingsFlyout');
     },
 
     async closeFlyoutWithBackButton() {
