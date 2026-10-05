@@ -154,7 +154,15 @@ describe('DataRetentionValue', () => {
   it('renders "Not applicable" for a lookup data stream instead of the retention period', () => {
     const dataStream = createDataStream({
       indexMode: 'lookup',
-      indices: [{ name: 'index-000001', uuid: 'uuid-1', preferILM: false, managedBy: 'Unmanaged' }],
+      indices: [
+        {
+          name: 'index-000001',
+          uuid: 'uuid-1',
+          preferILM: false,
+          managedBy: 'Unmanaged',
+          indexMode: 'lookup',
+        },
+      ],
       lifecycle: { enabled: true, data_retention: '7d' } as DataStream['lifecycle'],
     });
 
@@ -169,7 +177,15 @@ describe('DataRetentionValue', () => {
 
     const dataStream = createDataStream({
       indexMode: 'lookup',
-      indices: [{ name: 'index-000001', uuid: 'uuid-1', preferILM: false, managedBy: 'Unmanaged' }],
+      indices: [
+        {
+          name: 'index-000001',
+          uuid: 'uuid-1',
+          preferILM: false,
+          managedBy: 'Unmanaged',
+          indexMode: 'lookup',
+        },
+      ],
       nextGenerationManagedBy: 'Index Lifecycle Management',
       ilmPolicyName: 'my_policy',
       lifecycle: undefined,

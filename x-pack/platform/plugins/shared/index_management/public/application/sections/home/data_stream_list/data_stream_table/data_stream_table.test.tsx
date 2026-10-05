@@ -513,7 +513,15 @@ describe('DataStreamTable', () => {
     const dataStream = createDataStream({
       name: 'ds-lookup',
       indexMode: 'lookup',
-      indices: [{ name: 'index-000001', uuid: 'uuid-1', preferILM: false, managedBy: 'Unmanaged' }],
+      indices: [
+        {
+          name: 'index-000001',
+          uuid: 'uuid-1',
+          preferILM: false,
+          managedBy: 'Unmanaged',
+          indexMode: 'lookup',
+        },
+      ],
       lifecycle: {
         enabled: true,
         data_retention: '7d',
@@ -604,7 +612,7 @@ describe('DataStreamTable', () => {
           uuid: 'uuid-1',
           preferILM: false,
           managedBy: 'Unmanaged',
-          indexMode: 'standard',
+          indexMode: 'lookup',
         },
       ],
       lifecycle: {

@@ -569,12 +569,10 @@ export const useEditDataLifecycle = ({
 
           // ES ignores lifecycle settings on lookup indices but persists them, so a lookup stream
           // must not carry a stream-level ILM override or a policy on its lookup generations.
-          // Backing indices whose mode is unknown (omitted by the Get Data Streams API) are
-          // treated as ineligible: only indices explicitly known to be non-lookup are updated.
           const isLookup = isLookupIndexMode(dataStream);
           const ilmEligibleIndices = isLookup
             ? dataStream.indices.filter(
-                ({ indexMode }) => indexMode !== undefined && indexMode !== LOOKUP_INDEX_MODE
+                ({ indexMode }) => indexMode === undefined || indexMode !== LOOKUP_INDEX_MODE
               )
             : dataStream.indices;
 

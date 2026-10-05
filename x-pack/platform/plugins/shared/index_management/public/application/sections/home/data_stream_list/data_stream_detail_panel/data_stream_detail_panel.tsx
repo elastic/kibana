@@ -46,7 +46,7 @@ import { useResolvedDataStreamLifecycle, useEditDataLifecycle } from './lifecycl
 import { DataStreamDetailSummary } from './data_stream_detail_summary';
 import {
   getIlmPolicyNameForSummary,
-  isLookupLifecycleEditingNotApplicable,
+  isLookupLifecycleNotApplicable,
 } from '../../../../lib/data_streams';
 
 interface Props {
@@ -180,7 +180,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
     setActionsPopOverOpen(false);
   };
 
-  const isSuccessfulDataLifecycleNotApplicable = isLookupLifecycleEditingNotApplicable(dataStream);
+  const isSuccessfulDataLifecycleNotApplicable = isLookupLifecycleNotApplicable(dataStream);
 
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(() => {
     const items: NonNullable<EuiContextMenuPanelDescriptor['items']> = [];

@@ -938,13 +938,11 @@ describe('DataStreamDetailPanel', () => {
       expect(mockUpdateIndexSettings).not.toHaveBeenCalledWith('lookup-index', expect.anything());
     });
 
-    it('does not write ILM settings to backing indices with an omitted index mode on a lookup stream', async () => {
+    it('writes ILM settings to backing indices with an omitted index mode on a lookup stream', async () => {
       const dataStream = createMockDataStream({
         indexMode: 'lookup',
         indices: [
           {
-            // The Get Data Streams API omitted this index's mode, so it may be a lookup
-            // generation and must not receive `index.lifecycle.*` settings.
             name: 'unknown-mode-index',
             uuid: 'unknown-mode-index-id',
             preferILM: true,
@@ -1028,7 +1026,14 @@ describe('DataStreamDetailPanel', () => {
           'index.lifecycle.prefer_ilm': null,
         })
       );
-      expect(mockUpdateIndexSettings).not.toHaveBeenCalled();
+      expect(mockUpdateIndexSettings).toHaveBeenCalledTimes(1);
+      expect(mockUpdateIndexSettings).toHaveBeenCalledWith(
+        'unknown-mode-index',
+        expect.objectContaining({
+          'index.lifecycle.name': 'template-policy',
+          'index.lifecycle.prefer_ilm': true,
+        })
+      );
     });
 
     const mockLookupTemplateIlmRequests = ({
@@ -2479,7 +2484,13 @@ describe('DataStreamDetailPanel', () => {
         data: createMockDataStream({
           indexMode: 'lookup',
           indices: [
-            { name: 'indexName', uuid: 'indexId', preferILM: false, managedBy: 'Unmanaged' },
+            {
+              name: 'indexName',
+              uuid: 'indexId',
+              preferILM: false,
+              managedBy: 'Unmanaged',
+              indexMode: 'lookup',
+            },
           ],
         }),
         isLoading: false,

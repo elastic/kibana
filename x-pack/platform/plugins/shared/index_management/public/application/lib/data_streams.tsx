@@ -162,29 +162,20 @@ export const getIlmPolicyNameForSummary = (dataStream?: DataStream | null): stri
   return policyNames.length === 1 ? policyNames[0] : undefined;
 };
 
-// A lookup-mode stream can still contain older lifecycle-managed backing indices with another mode.
-// The failure store lifecycle also remains applicable because failure indices do not inherit lookup mode.
-export const isLookupLifecycleNotApplicable = (dataStream?: DataStream | null): boolean => {
-  return (
-    isLookupIndexMode(dataStream) &&
-    !hasIlmManagedBackingIndex(dataStream) &&
-    !hasDslManagedBackingIndex(dataStream)
-  );
-};
-
 const hasDslEligibleUnmanagedBackingIndex = (dataStream?: DataStream | null): boolean => {
   return Boolean(
     dataStream?.indices.some(
       ({ indexMode, managedBy, ilmPolicyName, preferILM }) =>
-        indexMode !== undefined &&
-        indexMode !== LOOKUP_INDEX_MODE &&
+        (indexMode === undefined || indexMode !== LOOKUP_INDEX_MODE) &&
         managedBy?.toLowerCase() === 'unmanaged' &&
         (ilmPolicyName === undefined || !preferILM)
     )
   );
 };
 
-export const isLookupLifecycleEditingNotApplicable = (dataStream?: DataStream | null): boolean => {
+// A lookup-mode stream can still contain older lifecycle-managed backing indices with another mode.
+// The failure store lifecycle also remains applicable because failure indices do not inherit lookup mode.
+export const isLookupLifecycleNotApplicable = (dataStream?: DataStream | null): boolean => {
   return (
     isLookupIndexMode(dataStream) &&
     !hasIlmManagedBackingIndex(dataStream) &&

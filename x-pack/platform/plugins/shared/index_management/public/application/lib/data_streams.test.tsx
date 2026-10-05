@@ -13,7 +13,7 @@ import {
   countDlmDataPhases,
   resolveLifecycleForSummary,
   getIlmPolicyNameForSummary,
-  isLookupLifecycleEditingNotApplicable,
+  isLookupLifecycleNotApplicable,
 } from './data_streams';
 import { createMockDataStream } from '../sections/home/data_stream_list/data_stream_detail_panel/data_stream_detail_panel.test_helpers';
 
@@ -47,9 +47,9 @@ describe('Data stream helpers', () => {
       ).toBe('historical-policy');
     });
 
-    it('keeps lifecycle editing applicable for an unmanaged DSL-eligible historical index', () => {
+    it('keeps lifecycle applicable for an unmanaged DSL-eligible historical index', () => {
       expect(
-        isLookupLifecycleEditingNotApplicable(
+        isLookupLifecycleNotApplicable(
           createMockDataStream({
             indexMode: 'lookup',
             indices: [
