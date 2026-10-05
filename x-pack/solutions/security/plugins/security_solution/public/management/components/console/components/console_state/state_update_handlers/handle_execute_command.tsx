@@ -159,6 +159,22 @@ export const handleExecuteCommand: ConsoleStoreReducer<
     argState: enteredCommand?.argState,
     commandDefinition,
   };
+
+  // No support currently for positional parameters
+  if (parsedInput.params.length > 0) {
+    return updateStateWithNewCommandHistoryItem(
+      state,
+      createCommandHistoryEntry(
+        cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+        createCommandExecutionState({
+          errorMessage: executionTranslations.unsupportedPositionalArguments(
+            parsedInput.params.join(', ')
+          ),
+        }),
+        false
+      )
+    );
+  }
   const requiredArgs = getRequiredArguments(commandDefinition.args);
   const exclusiveOrArgs = getExclusiveOrArgNames(commandDefinition);
 

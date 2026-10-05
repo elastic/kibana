@@ -10,6 +10,8 @@
 import type { Locator } from '../../../..';
 import { expect } from '../..';
 import { resolveSelector } from '../../utils';
+import { euiSelectors } from '../../eui_components';
+import type { EsqlControlOptions } from '../../ui_components';
 import { type DataViewOptions } from './base';
 import { SaveMixin } from './save';
 
@@ -282,6 +284,12 @@ export abstract class LayoutMixin extends SaveMixin {
 
   // ── Runtime field / field editor helpers ───────────────────────────────────
 
+  /** Opens the field editor from the sidebar's "Add a field" button, which is gated on `canEditDataView`. */
+  async openAddFieldEditorFromSidebar() {
+    await this.page.testSubj.click('dataView-add-field_btn');
+    await this.page.testSubj.locator('fieldEditor').waitFor({ state: 'visible' });
+  }
+
   async createRuntimeField({
     fieldName,
     script,
@@ -425,69 +433,13 @@ export abstract class LayoutMixin extends SaveMixin {
    * picks "Create control" from the suggestion widget and saves the flyout. Returns once
    * the control group is rendered.
    */
-  async createEsqlControl(
-    query: string,
-    {
-      variableName,
-      label,
-      values,
-    }: { variableName?: string; label?: string; values?: string[] } = {}
-  ) {
+  async createEsqlControl(query: string, options: EsqlControlOptions = {}) {
     // Monaco registers its text model only once the editor has mounted, and the ES|QL
     // editor can still be mounting after the tab reports loaded, for instance right after
-    // adding a new Discover panel. Setting a value or triggering suggestions before then
-    // has no model to act on.
-    await this.codeEditor.waitCodeEditorReady('ESQLEditor');
-    await this.codeEditor.setCodeEditorValue(query);
-    await this.codeEditor.triggerSuggest(query);
-
-    const suggestionWidget = this.codeEditor.getCodeEditorSuggestWidget();
-    await suggestionWidget.waitFor({ state: 'visible' });
-    await suggestionWidget.locator('.monaco-list-row', { hasText: 'Create control' }).click();
-
-    const flyout = this.page.testSubj.locator('create_esql_control_flyout');
-    await flyout.waitFor({ state: 'visible' });
-
-    if (variableName !== undefined) {
-      await this.page.testSubj.fill('esqlVariableName', variableName);
-    }
-    if (label !== undefined) {
-      await this.page.testSubj.fill('esqlControlLabel', label);
-    }
-    if (values) {
-      await this.page.testSubj.locator('esqlControlTypeDropdown').click();
-      await this.page.testSubj.locator('staticValues').click();
-      const valuesComboBox = this.page.components.comboBox('esqlValuesOptions');
-      for (const value of values) {
-        await valuesComboBox.setCustomSelectedOptions([value]);
-      }
-    }
-
-    // Save stays disabled until `available_options` is populated (see `formIsInvalid` in
-    // esql/public/triggers/esql_controls/control_flyout/index.tsx), and the click waits for
-    // it to become enabled. That means waiting on the control's own ES|QL query rather than
-    // on rendering, so query latency sets the budget.
-    await this.page.testSubj.locator('saveEsqlControlsFlyoutButton').click({ timeout: 30_000 });
-    await flyout.waitFor({ state: 'hidden' });
+    // adding a new Discover panel. `createControlFromEditorSuggestion` waits for that before typing.
+    await this.esqlEditor.createControlFromEditorSuggestion(query, options);
     await this.page.testSubj.locator('controls-group-wrapper').waitFor({ state: 'visible' });
   }
-
-  public readonly controls = {
-    getControlFrame: (controlId: string): Locator =>
-      this.page.locator(`[data-test-subj='control-frame']:has([data-control-id='${controlId}'])`),
-    getControlFrameSelectedValue: (controlId: string, value: string): Locator =>
-      this.controls.getControlFrame(controlId).getByText(value),
-    /**
-     * Locator for an options-list control's selected-values label, e.g. `AE` for a
-     * single selection or `AE, CN` for multiple. Unlike
-     * {@link getControlFrameSelectedValue} this matches the whole label, so it can
-     * assert that a value is the *only* selection.
-     */
-    getSelectionsLocator: (controlId: string): Locator =>
-      this.page.testSubj
-        .locator(`optionsList-control-${controlId}`)
-        .getByTestId('optionsListSelections'),
-  };
 
   // ── Sidebar ────────────────────────────────────────────────────────────────
 
@@ -708,14 +660,19 @@ export abstract class LayoutMixin extends SaveMixin {
     return (await button.getAttribute('data-selected-value')) || '';
   }
 
-  /**
-   * Pick a histogram chart interval (e.g. `"Day"`).
-   */
-  async setChartInterval(intervalTitle: string) {
+  /** Opens the histogram's interval selector popover without picking an option. */
+  async openChartIntervalSelector() {
     await this.page.testSubj.click('unifiedHistogramTimeIntervalSelectorButton');
     await this.page.testSubj.waitForSelector('unifiedHistogramTimeIntervalSelectorSelectable', {
       state: 'visible',
     });
+  }
+
+  /**
+   * Pick a histogram chart interval (e.g. `"Day"`).
+   */
+  async setChartInterval(intervalTitle: string) {
+    await this.openChartIntervalSelector();
     await this.page
       .locator(
         `[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"] .euiSelectableListItem span[title="${intervalTitle}"]`
@@ -795,6 +752,41 @@ export abstract class LayoutMixin extends SaveMixin {
   async openLensEditFlyout() {
     await this.page.testSubj.locator('unifiedHistogramEditFlyoutVisualization').click();
     await this.getLensEditFlyout().waitFor({ state: 'visible' });
+  }
+
+  async changeVisualizationShape(seriesType: string) {
+    await this.openLensEditFlyout();
+    const chartSwitch = this.page.testSubj.locator('lnsChartSwitchPopover');
+    await chartSwitch.click();
+    await this.page.testSubj.fill('lnsChartSwitchSearch', seriesType);
+    await this.page.testSubj.locator(`lnsChartSwitchPopover_${seriesType.toLowerCase()}`).click();
+    await chartSwitch.getByText(seriesType, { exact: true }).waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('applyFlyoutButton').scrollIntoViewIfNeeded();
+    await this.page.testSubj.click('applyFlyoutButton');
+    await this.page.testSubj.locator('customizeLens').waitFor({ state: 'hidden' });
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  async chooseVisualizationSuggestion(suggestionType: string) {
+    await this.openLensEditFlyout();
+    await this.page.testSubj.click('lensSuggestionsPanelToggleButton');
+    const suggestion = this.page.testSubj.locator(`lnsSuggestion-${suggestionType}`);
+    await suggestion.waitFor({ state: 'visible' });
+    await suggestion.click();
+    await suggestion
+      .locator('[data-test-subj="lnsSuggestion"]')
+      .and(this.page.locator('[aria-current="true"]'))
+      .waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('applyFlyoutButton').scrollIntoViewIfNeeded();
+    await this.page.testSubj.click('applyFlyoutButton');
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  async getVisualizationTitle(): Promise<string> {
+    await this.openLensEditFlyout();
+    const title = await this.page.testSubj.innerText('lnsChartSwitchPopover');
+    await this.page.testSubj.click('cancelFlyoutButton');
+    return title;
   }
 
   getLensEditFlyout(): Locator {
@@ -880,8 +872,9 @@ export abstract class LayoutMixin extends SaveMixin {
   }
 
   getDocHeaderLabels(): Locator {
+    const headerCell = euiSelectors.dataGrid.HEADER_CELL_SELECTOR;
     return this.page.locator(
-      '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__content'
+      `${headerCell}:not(${headerCell}--controlColumn) ${headerCell}__content`
     );
   }
 
@@ -1013,10 +1006,14 @@ export abstract class LayoutMixin extends SaveMixin {
     }
   }
 
+  /** Switches to the Field statistics view and waits for its content to mount. */
   async selectFieldStatisticsView() {
     await this.page.testSubj.click('dscViewModeToggleButton');
     await this.page.testSubj.locator('dscViewModeToggleSelectable').waitFor({ state: 'visible' });
     await this.page.testSubj.click('dscViewModeFieldStatsOption');
+    // The Documents view stays mounted until the stats table renders, so callers
+    // need this gate to avoid acting on the previous view.
+    await this.page.testSubj.locator('dscFieldStatsEmbeddedContent').waitFor({ state: 'visible' });
   }
 
   async getFirstViewLensButtonFromFieldStatistics(): Promise<Locator> {

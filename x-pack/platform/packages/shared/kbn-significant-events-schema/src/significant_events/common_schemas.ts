@@ -290,46 +290,44 @@ export const signalEntrySchema = z.discriminatedUnion('type', [detectionSignalSc
 export type SignalEntry = z.infer<typeof signalEntrySchema>;
 
 /** Canonical severity values in descending severity order (critical → low). */
-export const SEVERITY_OPTIONS = ['80-critical', '60-high', '40-medium', '20-low'] as const;
+export const SEVERITY_OPTIONS = ['critical', 'high', 'medium', 'low'] as const;
 
 /**
  * Severity field contract — single source of truth for schema `.describe()` and eval judges.
  * Order of `SEVERITY_OPTIONS` is part of this contract (most-severe first).
  */
 export const SEVERITY_CONTRACT_RULE = dedent`
-    Sortable severity keyword. Choose the tier from confirmed grounding rows: whether the affected operation fails, degrades, or still completes on the verified path, and how broad that impact is. A concrete non-benign error in a found off-topic row directly evidences its separate observed-error event even though the source rule signal remains \`confirmed: false\`; assess that event only from the row’s error signature and impact.
+    Severity keyword. Choose the tier from confirmed grounding rows: whether the affected operation fails, degrades, or still completes on the verified path, and how broad that impact is. A concrete non-benign error in a found off-topic row directly evidences its separate observed-error event even though the source rule signal remains \`confirmed: false\`; assess that event only from the row’s error signature and impact.
 
     Decide in order — stop at the first match:
-    1. "80-critical" when ANY of these hold:
+    1. "critical" when ANY of these hold:
       - a site-wide/global outage affecting all or most customers;
       - multiple current rows confirming blocked paths for distinct core operations (for example balance, history, and payment together);
-      - a confirmed failure that fully blocks a mandatory service, job, or platform-critical operation end-to-end so the component can no longer perform its primary function, even when no downstream customer journey is mapped in topology — unless the block is confined to a single endpoint or lookup path affecting only that one operation, which stays at "60-high";
+      - a confirmed failure that fully blocks a mandatory service, job, or platform-critical operation end-to-end so the component can no longer perform its primary function, even when no downstream customer journey is mapped in topology — unless the block is confined to a single endpoint or lookup path affecting only that one operation, which stays at "high";
       - or confirmed active exposure of PII, PCI DSS, SSN, credentials, secrets, or tokens.
-    2. "60-high" when grounding confirms the rule's target operation fails or is blocked on the verified path, or is broadly degraded / intermittent / partially failing for a significant subset — and no "80-critical" criterion above holds. A single endpoint or lookup path that blocks only that operation (even for every caller who reaches it) stays here.
-    3. "40-medium" when grounding shows only minor confirmed degradation with limited reach, or has not confirmed whether the affected operation fails versus only slows.
-    4. "20-low" for recovery, noise, false alarm, or non-issue.
-
-    Known-ongoing exception: may cap an otherwise higher tier at "40-medium" only when current grounding confirms the exact mechanism documented as a known ongoing or transient background condition in memory, at its documented background rate. The cap does not apply to a different mechanism on the same component, nor when current rate evidence shows the documented mechanism newly elevated over that baseline — a clear rate step-up lifts the cap and the ordinary tier applies.
+    2. "high" when grounding confirms the rule's target operation fails or is blocked on the verified path, or is broadly degraded / intermittent / partially failing for a significant subset — and no "critical" criterion above holds. A single endpoint or lookup path that blocks only that operation (even for every caller who reaches it) stays here.
+    3. "medium" when grounding shows only minor confirmed degradation with limited reach, or has not confirmed whether the affected operation fails versus only slows.
+    4. "low" for recovery, noise, false alarm, or non-issue.
 
     Tie-break: when two adjacent tiers both match the same grounding evidence, choose the lower only when rows leave whether the operation still completes on the affected path genuinely unresolved.
   `;
 
-/** Canonical sortable severity used by storage, APIs, and tools. */
+/** Canonical severity used by storage, APIs, and tools. */
 export const severitySchema = z.enum(SEVERITY_OPTIONS).describe(SEVERITY_CONTRACT_RULE);
 
 export type Severity = z.infer<typeof severitySchema>;
 
 const SEVERITY_LABELS: Record<Severity, string> = {
-  '20-low': i18n.translate('xpack.significantEvents.severity.lowLabel', {
+  low: i18n.translate('xpack.significantEvents.severity.lowLabel', {
     defaultMessage: 'Low',
   }),
-  '40-medium': i18n.translate('xpack.significantEvents.severity.mediumLabel', {
+  medium: i18n.translate('xpack.significantEvents.severity.mediumLabel', {
     defaultMessage: 'Medium',
   }),
-  '60-high': i18n.translate('xpack.significantEvents.severity.highLabel', {
+  high: i18n.translate('xpack.significantEvents.severity.highLabel', {
     defaultMessage: 'High',
   }),
-  '80-critical': i18n.translate('xpack.significantEvents.severity.criticalLabel', {
+  critical: i18n.translate('xpack.significantEvents.severity.criticalLabel', {
     defaultMessage: 'Critical',
   }),
 };
@@ -340,6 +338,7 @@ export const getSeverityLabel = (severity: Severity): string => SEVERITY_LABELS[
 export const significantEventBaseSchema = z.object({
   event_id: z
     .string()
+    .min(1)
     .max(MAX_ID_LENGTH)
     .describe(
       'Stable incident key shared across all documents that belong to the same event. Auto-generated when creating a new event. Must be preserved unchanged across all subsequent writes for the same incident.'

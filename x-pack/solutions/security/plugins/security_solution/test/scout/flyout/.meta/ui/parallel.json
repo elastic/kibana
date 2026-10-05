@@ -1,5 +1,5 @@
 {
-  "sha1": "09007b918917af3580591e7c8b91c2d531194a25",
+  "sha1": "f053d586e1dd9980fef7895166664b144d355111",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -18,7 +18,7 @@
     {
       "id": "8e7d3ac6b5df63c-3916e4686fbd655",
       "title": "Expandable flyout state sync should test flyout url sync",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -27,8 +27,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/alert_details_url_sync.spec.ts",
-        "line": 26,
-        "column": 7
+        "line": 31,
+        "column": 15
       }
     },
     {
@@ -139,8 +139,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ui/parallel_tests/flyout_v2/document/tools/correlations.spec.ts",
-        "line": 32,
-        "column": 45
+        "line": 37,
+        "column": 15
       }
     },
     {

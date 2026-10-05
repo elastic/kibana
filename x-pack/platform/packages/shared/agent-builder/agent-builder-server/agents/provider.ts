@@ -15,6 +15,7 @@ import type {
   ChatAgentEvent,
   AgentConfigurationOverrides,
   AgentExecutionMode,
+  AutoApprovedApi,
   ChatEvent,
   ExecutionStatus,
   InteractivityConfig,
@@ -36,6 +37,7 @@ import type {
   SkillsService,
   PluginsService,
   RenderersService,
+  ConversationEventTypesService,
   ToolManager,
   TodoStateManager,
   IFilesystemService,
@@ -96,6 +98,7 @@ export interface ExecuteSubAgentParams {
   parentExecutionId: string;
   prompt: string;
   connectorId?: string;
+  autoApprovedApis?: AutoApprovedApi[];
   abortSignal?: AbortSignal;
 }
 
@@ -110,6 +113,7 @@ export interface CreateSubAgentParams {
   conversationId: string;
   prompt: string;
   connectorId?: string;
+  autoApprovedApis?: AutoApprovedApi[];
   abortSignal?: AbortSignal;
 }
 
@@ -157,18 +161,14 @@ export interface ExperimentalFeatures {
   aiIndices: boolean;
   /** Whether context-aware skill filtering is enabled */
   relevantSkills: boolean;
-  /** Whether the sub-agent execution feature is enabled */
-  subagents: boolean;
   /** Whether the todo list tool and task-management prompt are enabled */
   todos: boolean;
   /** Whether external ES|QL datasets are surfaced to data-source tools */
   datasets: boolean;
-  /** Whether the ask_user_question HITL tool is enabled */
-  askUserQuestion: boolean;
   /** Whether the bash tool (and the just-bash runtime) is enabled */
   bash: boolean;
-  /** Whether the HTTP API introspection tools (discover/describe/execute) are enabled */
-  apiTools: boolean;
+  /** Whether the `discover_apis` tool is enabled. */
+  apiDiscovery: boolean;
 }
 
 export interface AgentHandlerContext {
@@ -227,6 +227,13 @@ export interface AgentHandlerContext {
    * runner (treated as no renderers).
    */
   renderers?: RenderersService;
+  /**
+   * Conversation event types service, giving read access to the custom conversation
+   * event types registered in agent builder (used to format stored events for the LLM).
+   * Optional: absent when the context is constructed outside agentBuilder's runner
+   * (custom events are then omitted from the agent context).
+   */
+  conversationEvents?: ConversationEventTypesService;
   /**
    * Skills service to interact with skills.
    */

@@ -6,9 +6,8 @@
  */
 import qs from 'query-string';
 import { useHistory, useLocation } from 'react-router-dom';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { useProfilingDependencies } from '../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { getParsedDate } from '../utils/get_next_time_range';
+import { useDefaultTimeRange } from './use_default_time_range';
 
 export function useDateRangeRedirect() {
   const history = useHistory();
@@ -19,15 +18,7 @@ export function useDateRangeRedirect() {
   const validatedRangeFrom = getParsedDate(rangeFrom?.toString());
   const validatedRangeTo = getParsedDate(rangeTo?.toString());
 
-  const {
-    start: { core, data },
-  } = useProfilingDependencies();
-
-  const timePickerTimeDefaults = core.uiSettings.get<{ from: string; to: string }>(
-    UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
-  );
-
-  const timePickerSharedState = data.query.timefilter.timefilter.getTime();
+  const { from: defaultRangeFrom, to: defaultRangeTo } = useDefaultTimeRange();
 
   const isDateRangeSet = rangeFrom && rangeTo;
 
@@ -39,8 +30,8 @@ export function useDateRangeRedirect() {
   const redirect = () => {
     const nextQuery = {
       ...query,
-      rangeFrom: timePickerSharedState.from ?? timePickerTimeDefaults.from,
-      rangeTo: timePickerSharedState.to ?? timePickerTimeDefaults.to,
+      rangeFrom: defaultRangeFrom,
+      rangeTo: defaultRangeTo,
     };
 
     history.replace({

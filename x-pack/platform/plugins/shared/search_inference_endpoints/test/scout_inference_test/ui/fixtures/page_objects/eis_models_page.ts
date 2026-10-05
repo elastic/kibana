@@ -25,10 +25,17 @@ export class EisModelsPage {
   readonly flyout: Locator;
   readonly flyoutTaskBadges: Locator;
   readonly flyoutModelDetails: Locator;
-  readonly flyoutRegionBadges: Locator;
+  readonly flyoutRegionOptions: Locator;
+  readonly flyoutRegionOptionsUnavailable: Locator;
   readonly flyoutAddEndpointButton: Locator;
   readonly flyoutCloseButton: Locator;
   readonly flyoutRegionUnavailableCallout: Locator;
+  readonly flyoutEditRegionPreferencesButton: Locator;
+  readonly flyoutViewDetailsButton: Locator;
+  readonly flyoutEolCallout: Locator;
+  readonly flyoutEolViewDetailsButton: Locator;
+  readonly flyoutEolDescription: Locator;
+  readonly flyoutPreviewCallout: Locator;
   readonly allEndpointRows: Locator;
 
   // Add/View Endpoint Modal
@@ -72,6 +79,12 @@ export class EisModelsPage {
   readonly confirmDeleteRegionPolicyCancelButton: Locator;
   readonly confirmDeleteRegionPolicyAcknowledge: Locator;
 
+  readonly displayOptionsButton: Locator;
+  readonly displayOptionsApplyButton: Locator;
+  readonly endOfLifeModelsShowButton: Locator;
+  readonly outsideRegionPreferencesShowButton: Locator;
+  readonly previewModelsShowButton: Locator;
+
   constructor(private readonly page: ScoutPage) {
     // Header
     this.pageHeader = this.page.testSubj.locator('appHeaderTitle');
@@ -95,12 +108,25 @@ export class EisModelsPage {
     this.flyout = this.page.testSubj.locator('modelDetailFlyout');
     this.flyoutTaskBadges = this.page.testSubj.locator('flyoutTaskBadges');
     this.flyoutModelDetails = this.page.testSubj.locator('flyoutModelDetails');
-    this.flyoutRegionBadges = this.page.testSubj.locator('flyoutRegionBadges');
+    this.flyoutRegionOptions = this.page.testSubj.locator('flyoutRegionOptions');
+    this.flyoutRegionOptionsUnavailable = this.page.testSubj.locator(
+      'flyoutRegionOptionsUnavailable'
+    );
     this.flyoutAddEndpointButton = this.page.testSubj.locator('modelDetailFlyoutAddEndpointButton');
     this.flyoutCloseButton = this.page.testSubj.locator('modelDetailFlyoutCloseButton');
     this.flyoutRegionUnavailableCallout = this.page.testSubj.locator(
       'modelDetailFlyoutRegionUnavailableCallout'
     );
+    this.flyoutEditRegionPreferencesButton = this.page.testSubj.locator(
+      'modelDetailFlyoutEditRegionPreferencesButton'
+    );
+    this.flyoutViewDetailsButton = this.page.testSubj.locator('modelDetailFlyoutViewDetailsButton');
+    this.flyoutEolCallout = this.page.testSubj.locator('modelDetailFlyoutEolCallout');
+    this.flyoutEolViewDetailsButton = this.page.testSubj.locator(
+      'modelDetailFlyoutEolViewDetailsButton'
+    );
+    this.flyoutEolDescription = this.page.testSubj.locator('modelDetailFlyoutEolDescription');
+    this.flyoutPreviewCallout = this.page.testSubj.locator('modelDetailFlyoutPreviewCallout');
     this.allEndpointRows = this.page.testSubj
       .locator('modelDetailFlyout')
       .locator('[data-test-subj^="endpoint-row-"]');
@@ -168,6 +194,16 @@ export class EisModelsPage {
     this.confirmDeleteRegionPolicyCancelButton = this.confirmDeleteRegionPolicyModal.locator(
       '[data-test-subj="confirmModalCancelButton"]'
     );
+
+    this.displayOptionsButton = this.page.testSubj.locator('eisDisplayOptionsButton');
+    this.displayOptionsApplyButton = this.page.testSubj.locator('eisDisplayOptionsApplyButton');
+    this.endOfLifeModelsShowButton = this.page.testSubj.locator(
+      'eisDisplayOptionsEndOfLifeModelsShow'
+    );
+    this.outsideRegionPreferencesShowButton = this.page.testSubj.locator(
+      'eisDisplayOptionsOutsideRegionPreferencesShow'
+    );
+    this.previewModelsShowButton = this.page.testSubj.locator('eisDisplayOptionsPreviewModelsShow');
   }
 
   // --- Navigation ---
@@ -193,14 +229,36 @@ export class EisModelsPage {
     await this.search('');
   }
 
+  public async showEndOfLifeModels() {
+    await this.displayOptionsButton.click();
+    await this.endOfLifeModelsShowButton.click();
+    await this.displayOptionsApplyButton.click();
+  }
+
+  public async showModelsOutsideRegionPreferences() {
+    await this.displayOptionsButton.click();
+    await this.outsideRegionPreferencesShowButton.click();
+    await this.displayOptionsApplyButton.click();
+  }
+
+  public async showPreviewModels() {
+    await this.displayOptionsButton.click();
+    await this.previewModelsShowButton.click();
+    await this.displayOptionsApplyButton.click();
+  }
+
   // --- Parameterized Locators ---
 
   public modelCard(modelName: string): Locator {
     return this.page.testSubj.locator(`eisModelCard-${modelName}`);
   }
 
-  public taskTypeFilter(category: string): Locator {
-    return this.page.testSubj.locator(`eisTaskTypeFilter-${category}`);
+  public modelCardMeta(modelName: string): Locator {
+    return this.page.testSubj.locator(`eisModelCardMeta-${modelName}`);
+  }
+
+  public flyoutRegionOption(key: string): Locator {
+    return this.page.testSubj.locator(`flyoutRegionOption-${key}`);
   }
 
   public endpointRow(inferenceId: string): Locator {
@@ -235,10 +293,6 @@ export class EisModelsPage {
     return this.page.testSubj.locator(`manageRegionsCheckbox-${cspRegionKey}`);
   }
 
-  public flyoutRegionBadge(geo: string): Locator {
-    return this.page.testSubj.locator(`flyoutRegionBadge-${geo}`);
-  }
-
   public modelStatusBadge(id: string, kind: 'preview' | 'deprecated' | 'eol'): Locator {
     let prefix: string;
     switch (kind) {
@@ -253,5 +307,9 @@ export class EisModelsPage {
         break;
     }
     return this.page.testSubj.locator(`${prefix}-${id}`);
+  }
+
+  public modelBlockedBadge(modelName: string): Locator {
+    return this.page.testSubj.locator(`modelBlockedBadge-${modelName}`);
   }
 }

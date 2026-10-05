@@ -15,6 +15,7 @@ import { createMockEndpointAppContextService } from '../../../../endpoint/mocks'
 import { createToolHandlerContext } from '../../../__mocks__/test_helpers';
 import { hashPolicyConfig } from '../domain/hash_policy_config';
 import { normalize } from '../domain/normalize_policy_config';
+import type { EndpointPolicyBaseline } from '../domain/normalized_endpoint_policy';
 import type { EndpointPolicyManagementService } from '../services/endpoint_policy_management_service';
 import type { EndpointPolicyRead } from '../services/read_policy';
 import { createPolicyTool } from './create_policy_tool';
@@ -30,13 +31,16 @@ const getStartServices = jest.fn() as unknown as StartServicesAccessor;
 const mockedCreatePolicyTool = jest.mocked(createPolicyTool);
 const mockService = {
   getPolicy: jest.fn(),
+  getPolicyBaseline: jest.fn(),
 } as unknown as EndpointPolicyManagementService;
 const mockedGetPolicy = jest.mocked(mockService.getPolicy);
+const mockedGetPolicyBaseline = jest.mocked(mockService.getPolicyBaseline);
 
 const createPolicyRead = (overrides: Partial<EndpointPolicyRead> = {}): EndpointPolicyRead => {
   const storedConfig = policyFactory();
   const normalizedConfig = normalize(storedConfig);
   return {
+    kind: 'policy',
     policy: {
       id: 'policy-1',
       name: 'Endpoint Policy',
@@ -62,16 +66,56 @@ const createContext = () =>
     { spaceId: SPACE_ID }
   );
 
-const getResult = async (idOrName: string) => {
+const getResult = async (reference: { idOrName?: string; preset?: 'EDRComplete' }) => {
   const tool = createGetPolicyTool({
     endpointAppContextService: createMockEndpointAppContextService(),
     getStartServices,
   });
-  const result = await tool.handler({ idOrName }, createContext());
+  const result = await tool.handler(reference, createContext());
   if (!('results' in result)) {
     throw new Error('expected a standard tool result');
   }
   return result.results[0];
+};
+
+const createBaseline = (
+  overrides: Partial<EndpointPolicyBaseline> = {}
+): EndpointPolicyBaseline => {
+  const normalizedConfig = normalize(policyFactory());
+  return {
+    kind: 'baseline',
+    preset: 'EDRComplete',
+    environment: { license: 'enterprise', cloud: false, telemetryOptedIn: false },
+    normalizedConfig,
+    normalizedHash: hashPolicyConfig(normalizedConfig),
+    summary: {
+      windowsProtectionModes: {
+        malware: 'prevent',
+        ransomware: 'prevent',
+        memoryThreat: 'prevent',
+        behavior: 'prevent',
+      },
+      macProtectionModes: { malware: 'prevent', behavior: 'prevent' },
+      linuxProtectionModes: { malware: 'prevent', behavior: 'prevent' },
+      globalTelemetryEnabled: false,
+    },
+    ...overrides,
+  };
+};
+
+const buildHugeNormalizedConfig = () => {
+  const hugeConfig = normalize(policyFactory());
+  const windows = hugeConfig.windows as { advanced?: Record<string, unknown> };
+  const advanced: Record<string, unknown> = {
+    ...(windows.advanced ?? {}),
+    long_string: 'Y'.repeat(10_000),
+    huge_array: Array.from({ length: 80 }, (_, index) => `item-${index}`),
+  };
+  for (let index = 0; index < 50; index += 1) {
+    advanced[`k${String(index).padStart(2, '0')}`] = 'N'.repeat(512);
+  }
+  windows.advanced = advanced;
+  return { hugeConfig, serviceHash: hashPolicyConfig(hugeConfig) };
 };
 
 describe('createGetPolicyTool', () => {
@@ -83,10 +127,11 @@ describe('createGetPolicyTool', () => {
       schema: options.schema,
       maxResultTokens: options.maxResultTokens,
       handler: async (params) => ({
-        results: [createOtherResult(await options.run(params, mockService))],
+        results: [createOtherResult(await options.run(params, mockService, createContext()))],
       }),
     }));
     mockedGetPolicy.mockReset();
+    mockedGetPolicyBaseline.mockReset();
   });
 
   it('registers the approved id, schema, and 12000-token budget without wrapper authorization', () => {
@@ -110,7 +155,7 @@ describe('createGetPolicyTool', () => {
     const read = createPolicyRead();
     mockedGetPolicy.mockResolvedValue(read);
 
-    const result = await getResult('policy-1');
+    const result = await getResult({ idOrName: 'policy-1' });
     const dto = result.data as {
       policy: { id: string };
       normalizedHash: string;
@@ -123,18 +168,7 @@ describe('createGetPolicyTool', () => {
   });
 
   it('keeps identity and a compact digest for one enormous policy under 12000 tokens', async () => {
-    const hugeConfig = normalize(policyFactory());
-    const windows = hugeConfig.windows as { advanced?: Record<string, unknown> };
-    const advanced: Record<string, unknown> = {
-      ...(windows.advanced ?? {}),
-      long_string: 'Y'.repeat(10_000),
-      huge_array: Array.from({ length: 80 }, (_, index) => `item-${index}`),
-    };
-    for (let index = 0; index < 50; index += 1) {
-      advanced[`k${String(index).padStart(2, '0')}`] = 'N'.repeat(512);
-    }
-    windows.advanced = advanced;
-    const serviceHash = hashPolicyConfig(hugeConfig);
+    const { hugeConfig, serviceHash } = buildHugeNormalizedConfig();
     mockedGetPolicy.mockResolvedValue(
       createPolicyRead({
         normalizedConfig: hugeConfig,
@@ -142,7 +176,7 @@ describe('createGetPolicyTool', () => {
       })
     );
 
-    const result = await getResult('policy-1');
+    const result = await getResult({ idOrName: 'policy-1' });
     const dto = result.data as {
       policy: { id: string; name: string; version: string };
       normalizedHash: string;
@@ -164,5 +198,30 @@ describe('createGetPolicyTool', () => {
     expect(serialized).toContain('policy-1');
     expect(serialized).not.toContain('Y'.repeat(10_000));
     expect(estimateGuardedEnvelopeTokens(dto)).toBeLessThanOrEqual(12_000);
+  });
+
+  it('presents a preset baseline with its environment, summary, and normalized config', async () => {
+    const baseline = createBaseline();
+    mockedGetPolicyBaseline.mockResolvedValue(baseline);
+
+    const result = await getResult({ preset: 'EDRComplete' });
+    const dto = result.data as {
+      baseline: { type: string; preset: string; environment: unknown };
+      normalizedHash: string;
+      summary: unknown;
+      config: unknown;
+    };
+
+    expect(mockedGetPolicy).not.toHaveBeenCalled();
+    expect(mockedGetPolicyBaseline).toHaveBeenCalledWith('EDRComplete');
+    expect(dto.baseline).toEqual({
+      type: 'baseline',
+      preset: 'EDRComplete',
+      environment: baseline.environment,
+    });
+    expect(dto.normalizedHash).toBe(toPresentationHash(baseline.normalizedHash));
+    expect(dto.summary).toEqual(baseline.summary);
+    expect(dto.config).toEqual(baseline.normalizedConfig);
+    expect(result.data).not.toHaveProperty('policy');
   });
 });

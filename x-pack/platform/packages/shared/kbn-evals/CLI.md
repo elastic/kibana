@@ -14,7 +14,7 @@ start  -->  [iterate: start again]  -->  stop
 logs (tail background service output)
 ```
 
-`start` is the only command you need. On first run it auto-detects missing config and connectors, prompting you through setup before starting the stack. Use `init` separately only if you want to run setup in isolation (e.g. exporting `KIBANA_TESTING_AI_CONNECTORS` for use across terminals). Pass `--skip-init` to bypass these checks.
+`start` is the only command you need. On first run it auto-detects missing config and connectors, prompting you through setup before starting the stack. Use `init` separately only if you want to run setup in isolation (e.g. exporting `KIBANA_TESTING_INFERENCE_ENDPOINTS` for use across terminals). Pass `--skip-init` to bypass these checks.
 
 EDOT and Scout run as **persistent background daemons**. They survive between `start` runs so you can iterate on eval suites without waiting for ES/Kibana to restart each time.
 
@@ -24,13 +24,15 @@ EDOT and Scout run as **persistent background daemons**. They survive between `s
 
 Interactive wizard that creates a custom config file and discovers EIS models or validates existing connectors. Running `init` separately is **optional** -- `start` auto-triggers setup when config or connectors are missing.
 
-Use `init` when you want to create a config file for a bespoke (non-golden-cluster, non-local) setup, or to export `KIBANA_TESTING_AI_CONNECTORS` to your shell.
+Use `init` when you want to create a config file for a bespoke (non-golden-cluster, non-local) setup, or to export `KIBANA_TESTING_INFERENCE_ENDPOINTS` to your shell.
 
 ```bash
 node scripts/evals init
 ```
 
 EIS connector discovery is automatically skipped when a valid cache exists at `~/.elastic/eis-connectors-cache.json` (7-day TTL). To force re-discovery, delete the cache file and run `init` again.
+
+Discovered EIS models and generated OpenRouter entries are emitted as **inference endpoint definitions** (flat `{ name, inferenceId, provider, taskType, providerConfig, secrets }` entries), not stack connectors: EIS ids bind to endpoints provisioned by EIS/CCM, and OpenRouter endpoints are created on demand during the run. Legacy `.gen-ai` definitions are no longer treated as LLM definitions and silently fall back to a deprecated stack connector, see [Connector definitions and inference endpoints](./README.md#connector-definitions-and-inference-endpoints).
 
 #### `init config` -- Create a custom config file
 
@@ -82,8 +84,11 @@ node scripts/evals start --skip-init --suite agent-builder
 | `--export-profile <name>`        |           | Override export settings (sets `TRACING_ES_URL`, `TRACING_EXPORTERS`)           |
 | `--grep <pattern>`               |           | Filter tests by name (passed to Playwright `--grep`)                            |
 | `--repetitions <n>`              |           | Number of times to repeat each example                                          |
+| `--concurrency <n>`              |           | Examples each experiment runs at once (default 5; a spec's own value wins)      |
 | `--space-ids <ids>`              |           | Comma-separated spaces to assign datasets and scores to (see [Spaces](#spaces)) |
 | `--skip-server`                  |           | Skip EDOT/Scout/EIS startup (use existing services)                             |
+| `--scout-arch <arch>`            |           | Scout `--arch` (`stateful`/`serverless`); defaults to the suite's `scoutArch`  |
+| `--scout-domain <domain>`        |           | Scout `--domain` (e.g. `observability_complete`); defaults to the suite's      |
 | `--skip-init`                    |           | Skip automatic config and connector setup                                       |
 | `--dry-run`                      |           | Print configuration and exit without running                                    |
 
@@ -146,10 +151,11 @@ node scripts/evals logs --service edot --from-start
 
 ### `scout` -- Start Scout standalone
 
-Convenience wrapper around `node scripts/scout.js start-server` with evals defaults (`--arch stateful --domain classic --serverConfigSet evals_tracing`). Extra flags are forwarded to Scout.
+Convenience wrapper around `node scripts/scout.js start-server` with evals defaults (`--arch stateful --domain classic --serverConfigSet evals_tracing`). `--suite` uses a suite's `serverConfigSet` and `scoutArch` / `scoutDomain`, and runs its `scoutHook` on the `--profile` config; `--serverConfigSet`, `--arch` and `--domain` override them. Positional arguments are forwarded to Scout.
 
 ```bash
 node scripts/evals scout
+node scripts/evals scout --suite nightshift-investigations --profile dev-vault
 ```
 
 Use this when you want to manage Scout separately from the `start` workflow.
@@ -172,6 +178,7 @@ node scripts/evals run --suite streams --dry-run
 | `--evaluation-connector-id <id>`  | `--judge` | Connector for LLM-as-a-judge evaluators                                         |
 | `--grep <pattern>`                |           | Filter tests by name (passed to Playwright `--grep`)                            |
 | `--repetitions <n>`               |           | Repeat each example N times                                                     |
+| `--concurrency <n>`               |           | Examples each experiment runs at once (default 5; a spec's own value wins)      |
 | `--space-ids <ids>`               |           | Comma-separated spaces to assign datasets and scores to (see [Spaces](#spaces)) |
 | `--profile <name>`                |           | Load both dataset + export settings from `config.<name>.json`                   |
 | `--datasets-profile <name>`       |           | Load dataset settings from `config.<name>.json`                                 |

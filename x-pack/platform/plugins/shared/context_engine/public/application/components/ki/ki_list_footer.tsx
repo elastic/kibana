@@ -6,10 +6,12 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { MAX_KI_PAGE_SIZE } from '../../../../common/constants';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 
 interface KiListFooterProps {
   loadedCount: number;
@@ -48,6 +50,10 @@ export const KiListFooter = ({
                 onClick={onLoadMore}
                 isLoading={isLoading}
                 data-test-subj="contextKiListLoadMoreButton"
+                {...getEbtProps({
+                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageKiListPanel,
+                  action: CONTEXT_ENGINE_UI_EBT.action.kiList.LOAD_MORE,
+                })}
               >
                 {i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.loadMoreButton', {
                   defaultMessage: 'Load more',
@@ -75,6 +81,10 @@ export const KiListFooter = ({
                         target="_blank"
                         rel="noopener noreferrer"
                         data-test-subj="contextKiListCapReachedDiscoverLink"
+                        {...getEbtProps({
+                          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageKiListPanel,
+                          action: CONTEXT_ENGINE_UI_EBT.action.kiList.DISCOVER_CAP_REACHED,
+                        })}
                       >
                         <FormattedMessage
                           id="xpack.contextEngine.aiIndexDetail.kiList.capReachedDiscoverLink"

@@ -127,32 +127,32 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
   });
 
   describe('retrieval', () => {
-    const retrieve = () => step('retrieve_alerts');
+    const retrieve = () => step('retrieve_alert_ids');
+    const query = () => String(retrieve().with?.query);
 
-    it('uses the Attack Discovery retrieval step, which anonymizes the alerts', () => {
-      expect(retrieve().type).toBe('security.attack-discovery.defaultAlertRetrieval');
+    it('retrieves ids only, leaving anonymization to each batch', () => {
+      expect(retrieve().type).toBe('elasticsearch.esql.query');
+      expect(query()).toMatch(/\| KEEP _id$/);
     });
 
     it('sorts by @timestamp so batches are contiguous in time', () => {
-      expect(retrieve().with?.esql_query).toContain('SORT @timestamp ASC');
+      expect(query()).toContain('SORT @timestamp ASC');
     });
 
     it('retrieves only open and acknowledged alerts', () => {
-      expect(retrieve().with?.esql_query).toContain(
-        'kibana.alert.workflow_status IN ("open", "acknowledged")'
-      );
+      expect(query()).toContain('kibana.alert.workflow_status IN ("open", "acknowledged")');
     });
 
     // `!=` alone is null-valued, and so false, for an alert with no closing
     // reason — dropping the `IS NULL` arm would exclude every untriaged alert.
     it('excludes alerts closed as false positives without dropping untriaged ones', () => {
-      expect(retrieve().with?.esql_query).toContain(
+      expect(query()).toContain(
         'WHERE kibana.alert.workflow_reason IS NULL OR kibana.alert.workflow_reason != "false_positive"'
       );
     });
 
     it('keeps the false-positive clause in its own WHERE pipe', () => {
-      const clauses = String(retrieve().with?.esql_query)
+      const clauses = query()
         .split('|')
         .map((clause) => clause.trim())
         .filter((clause) => clause.startsWith('WHERE'));
@@ -162,24 +162,12 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       );
     });
 
-    it('preserves METADATA _id, which the pipeline requires to resolve alerts', () => {
-      expect(retrieve().with?.esql_query).toContain('METADATA _id');
+    it('selects METADATA _id, which is all the batches need', () => {
+      expect(query()).toContain('METADATA _id');
     });
 
     it('derives the LIMIT from batch_size so the fan-out cap cannot be exceeded', () => {
-      expect(retrieve().with?.esql_query).toContain(
-        'LIMIT {{ inputs.batch_size | times: 100 | at_most: 10000 }}'
-      );
-    });
-
-    // Required by DefaultAlertRetrievalInputSchema even though the ES|QL path
-    // ignores it, so it is kept equal to the query's LIMIT.
-    it('passes the required size, matching the derived LIMIT', () => {
-      expect(retrieve().with?.size).toBe('${{ inputs.batch_size | times: 100 | at_most: 10000 }}');
-    });
-
-    it('lets the step fetch the space anonymization config by passing none', () => {
-      expect(retrieve().with?.anonymization_fields).toEqual([]);
+      expect(query()).toContain('LIMIT {{ inputs.batch_size | times: 100 | at_most: 10000 }}');
     });
   });
 
@@ -226,37 +214,79 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       expect(fanOut().steps?.[0].type).toBe('security.attack-discovery.run');
     });
 
+    it('has each batch retrieve its own alerts rather than take pre-built alert strings', () => {
+      expect(fanOut().steps?.[0].with?.alert_retrieval_mode).toBe('esql');
+      expect(fanOut().steps?.[0].with).not.toHaveProperty('alerts');
+    });
+
     // The offsets and the per-branch slice are a matched pair — an off-by-one
     // in either silently drops or double-counts alerts — so they are evaluated
     // together against the engine rather than asserted as strings.
     describe('batch coverage', () => {
       const engine = createWorkflowLiquidEngine({ strictFilters: true });
 
-      const cover = async (count: number, batchSize: number) => {
-        const context = {
-          inputs: { batch_size: batchSize },
-          steps: {
-            retrieve_alerts: {
-              output: { alerts: Array.from({ length: count }, (_, i) => `alert-${i}`) },
-            },
+      const getContext = (count: number, batchSize: number) => ({
+        inputs: { batch_size: batchSize },
+        steps: {
+          // ES|QL returns each row as an array of its columns: `[_id]`.
+          retrieve_alert_ids: {
+            output: { values: Array.from({ length: count }, (_, i) => [`alert-${i}`]) },
           },
-        };
+        },
+        workflow: { spaceId: 'default' },
+      });
+
+      const renderQuery = (context: ReturnType<typeof getContext>, item: number) =>
+        engine.parseAndRender(String(fanOut().steps?.[0].with?.esql_query), {
+          ...context,
+          foreach: { item },
+        });
+
+      // The ids a rendered query names, read from the `IN` list of the given field.
+      const getInList = (query: string, field: string): string[] =>
+        JSON.parse(`[${new RegExp(`WHERE ${field} IN \\(([^)]*)\\)`).exec(query)?.[1] ?? ''}]`);
+      const getQueryIds = (query: string): string[] => getInList(query, '_id');
+
+      const cover = async (count: number, batchSize: number) => {
+        const context = getContext(count, batchSize);
         const offsets: number[] = JSON.parse(
           await engine.parseAndRender(String(fanOut().foreach), context)
         );
-        // `${{ ... }}` returns a typed value at runtime; render it as JSON here
-        // so the same expression can be evaluated through the string engine.
-        const sliceExpr = String(fanOut().steps?.[0].with?.alerts)
-          .replace(/^\$\{\{/, '{{')
-          .replace(/\}\}$/, '| json }}');
         const seen: string[] = [];
         for (const item of offsets) {
-          seen.push(
-            ...JSON.parse(await engine.parseAndRender(sliceExpr, { ...context, foreach: { item } }))
-          );
+          seen.push(...getQueryIds(await renderQuery(context, item)));
         }
         return { offsets, seen };
       };
+
+      it("renders each batch's query over exactly its slice of the ids", async () => {
+        expect(await renderQuery(getContext(5, 2), 2)).toBe(
+          [
+            'FROM .alerts-security.alerts-default METADATA _id',
+            '  | WHERE kibana.alert.uuid IN ("alert-2", "alert-3")',
+            '  | WHERE _id IN ("alert-2", "alert-3")',
+            '  | SORT @timestamp ASC',
+            '  | LIMIT 2',
+          ].join('\n')
+        );
+      });
+
+      it('filters on the pushable kibana.alert.uuid with the same ids as _id', async () => {
+        const query = await renderQuery(getContext(5, 2), 2);
+
+        expect(getInList(query, 'kibana.alert.uuid')).toEqual(getQueryIds(query));
+      });
+
+      it('sorts each batch by @timestamp before limiting it', async () => {
+        const query = await renderQuery(getContext(5, 2), 0);
+
+        expect(query.indexOf('| SORT @timestamp ASC')).toBeGreaterThan(-1);
+        expect(query.indexOf('| SORT @timestamp ASC')).toBeLessThan(query.indexOf('| LIMIT'));
+      });
+
+      it('renders a short last batch with only the remaining ids', async () => {
+        expect(getQueryIds(await renderQuery(getContext(5, 2), 4))).toEqual(['alert-4']);
+      });
 
       it.each([
         [700, 100],
@@ -339,8 +369,32 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
         'batches_failed',
         'batches_succeeded',
         'batches_total',
+        'discoveries_generated',
         'execution_uuids',
       ]);
+    });
+
+    // The pre-persist count the runner's telemetry reads.
+    //
+    // `attack_discoveries` is the read-back of what survived de-duplication, so this
+    // is the only value that can disagree with it — and the AD Worker runner reports
+    // the two as separate numbers.
+    it('sums the generated count across batches rather than taking one batch', () => {
+      expect(step('aggregate').with?.discoveries_generated).toContain(
+        'for result in steps.generate_batches.output.results'
+      );
+    });
+
+    it('sums the run step discovery_count, which survives include_attack_discoveries: false', () => {
+      expect(step('aggregate').with?.discoveries_generated).toContain(
+        'result.output.discovery_count'
+      );
+    });
+
+    it('coerces the counted string back to a number', () => {
+      expect(step('emit_result').with?.discoveries_generated).toBe(
+        '${{ steps.aggregate.output.discoveries_generated | plus: 0 }}'
+      );
     });
 
     // A legacy array-typed output is validated as an array of scalars

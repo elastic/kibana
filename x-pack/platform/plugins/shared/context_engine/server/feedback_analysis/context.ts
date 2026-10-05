@@ -50,7 +50,7 @@ export const buildFeedbackContext = async (
       signalFilter: feedbackAnalysis?.signal_filter,
       ...(now ? { now } : {}),
     }),
-    getKis(esClient, { destValue: aiIndex.dest.value, size: KI_SUMMARY_PAGE_SIZE }),
+    getKis(esClient, { dest: aiIndex.dest, size: KI_SUMMARY_PAGE_SIZE }),
     improvementsService.historySummaryFor(aiIndexId),
   ]);
 

@@ -37,6 +37,7 @@ import {
   selectTab,
   selectTabCombinedFilters,
   useAppStateSelector,
+  useCurrentDataSource,
   useCurrentDataView,
   useCurrentTabAction,
   useCurrentTabSelector,
@@ -96,6 +97,7 @@ export const DiscoverTopNav = ({
 
   const { savedDataViews, adHocDataViews } = useDataViewsForPicker();
   const dataView = useCurrentDataView();
+  const currentDataSource = useCurrentDataSource();
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
@@ -104,8 +106,9 @@ export const DiscoverTopNav = ({
     if (dataView.type === DataViewType.ROLLUP) {
       return false;
     }
-    return { disabled: !dataView.isTimeBased() };
-  }, [dataView]);
+    const isTimeBased = currentDataSource?.isTimeBased() ?? dataView.isTimeBased();
+    return { disabled: !isTimeBased };
+  }, [dataView, currentDataSource]);
 
   const closeFieldEditor = useRef<() => void | undefined>();
 

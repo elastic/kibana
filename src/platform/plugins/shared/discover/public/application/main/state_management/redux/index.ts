@@ -17,6 +17,7 @@ export {
   type TabStateGlobalState,
   type RecentlyClosedTabState,
   type DiscoverAppState,
+  type ExpandedDocCascadePath,
   type InternalStateDataRequestParams,
   type CascadedDocumentsState,
   type ProfileAppStateDefaultField,
@@ -105,6 +106,7 @@ export {
   RuntimeStateManagerProvider,
   useRuntimeStateManager,
   useCurrentDataView,
+  useCurrentDataSource,
   useAdHocDataViews,
 } from './runtime_state';
 

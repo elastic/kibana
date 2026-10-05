@@ -62,6 +62,12 @@ jest.mock('./mitre/components/mitre_attack_chain', () => ({
   ),
 }));
 
+jest.mock('./mitre/components/mitre_attack_chain_placeholder', () => ({
+  MitreAttackChainPlaceholder: ({ children }: { children?: React.ReactNode }) => (
+    <div data-test-subj="mock-mitre-attack-chain-placeholder">{children}</div>
+  ),
+}));
+
 jest.mock('./table/anomaly_job_name', () => ({
   AnomalyJobName: ({
     jobId,

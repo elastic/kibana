@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type {
-  AlertEpisodeStatus,
-  AlertEventSeverity,
-} from '../../resources/datastreams/alert_events';
+import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
+import type { AlertEpisodeStatus } from '../../resources/datastreams/alert_events';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import type {
   DispatchOutcome,
@@ -43,7 +41,8 @@ export interface AlertEpisode {
   data?: AlertEpisodeData;
 }
 
-export interface AlertEpisodeSuppression {
+/** Suppression fact read from `.alert-actions`; a null `episode_id` means series-scoped. */
+export interface SuppressionRow {
   rule_id: RuleId | null;
   source: string | null;
   space_id: string | null;
@@ -54,6 +53,17 @@ export interface AlertEpisodeSuppression {
   last_deactivate_action?: string | null;
   last_snooze_action?: string | null;
 }
+
+/** Row of the episode suppressions query: ack and deactivate state of one episode. */
+export type EpisodeSuppressionRow = Omit<SuppressionRow, 'episode_id' | 'last_snooze_action'> & {
+  episode_id: string;
+};
+
+/** Row of the series suppressions query: snooze state of a series, so it carries no `episode_id`. */
+export type SeriesSuppressionRow = Omit<
+  SuppressionRow,
+  'episode_id' | 'last_ack_action' | 'last_deactivate_action'
+>;
 
 export interface DispatcherExecutionParams {
   eventWatermark?: Date;
@@ -201,7 +211,11 @@ export interface DispatcherPipelineState {
   readonly outcome?: DispatchOutcome;
 }
 
-export type DispatcherHaltReason = 'no_episodes' | 'no_actions' | 'aborted';
+export type DispatcherHaltReason =
+  | 'no_episodes'
+  | 'no_actions'
+  | 'aborted'
+  | 'inline_stats_too_large';
 
 export type DispatcherStepOutput =
   | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input'>> }

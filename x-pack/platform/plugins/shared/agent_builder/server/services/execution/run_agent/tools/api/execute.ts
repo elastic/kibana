@@ -35,8 +35,8 @@ const executeSchema = z.object({
   api: z
     .string()
     .describe(
-      `The API identifier returned by the ${internalTools.discoverApis} tool, formed from the namespace ` +
-        'and name (e.g. "indices.create", "bulk", "cluster.health").'
+      'The API identifier, formed from the namespace and name (e.g. "indices.create", "bulk", ' +
+        '"cluster.health").'
     ),
   params: z
     .record(z.string(), z.unknown())
@@ -50,16 +50,24 @@ const executeSchema = z.object({
 
 export const createExecuteApiTool = ({
   selfClient,
+  discoveryEnabled,
 }: {
   selfClient: HttpSelfService;
+  discoveryEnabled: boolean;
 }): InternalBuiltinToolDefinition<typeof executeSchema> => {
+  const identifierGuidance = discoveryEnabled
+    ? `- Use \`${internalTools.discoverApis}\` to find the \`api\` identifier, then
+  \`${internalTools.describeApi}\` to see the \`params\` it accepts.`
+    : `- The \`api\` identifier comes from the instruction you are following, or from what you already
+  know the target exposes. Call \`${internalTools.describeApi}\` first to confirm it exists and to
+  see the \`params\` it accepts, rather than guessing params here.`;
+
   return {
     id: internalTools.executeApi,
     type: ToolType.builtin,
     description: `Execute an HTTP API call on behalf of the current user.
 
-- Use \`${internalTools.discoverApis}\` to find the \`api\` identifier, then
-  \`${internalTools.describeApi}\` to see the \`params\` it accepts.
+${identifierGuidance}
 - Responses are not summarized, and many of these APIs return very large payloads. Prefer params
   that narrow the response (a filter, a \`size\`/\`per_page\` limit, a \`page\`/\`from\` offset, or an
   explicit field selection) over fetching everything, because an oversized result is truncated
@@ -80,6 +88,7 @@ The response is the raw API response body.`,
               target,
               api,
               logger,
+              discoveryEnabled,
             }),
           ],
         };

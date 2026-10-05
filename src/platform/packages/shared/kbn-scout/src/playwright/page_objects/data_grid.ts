@@ -10,6 +10,7 @@
 import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
 import { expect } from '..';
+import { euiSelectors } from '../eui_components';
 
 const IN_TABLE_SEARCH_BUTTON_TEST_SUBJ = 'startInTableSearchButton';
 const IN_TABLE_SEARCH_INPUT_TEST_SUBJ = 'inTableSearchInput';
@@ -31,8 +32,9 @@ export class DataGrid {
   }
 
   private async readHeaderLabels(scope: Locator, limit: number): Promise<string[]> {
+    const headerCell = euiSelectors.dataGrid.HEADER_CELL_SELECTOR;
     const headerCellContent = scope.locator(
-      '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__content'
+      `${headerCell}:not(${headerCell}--controlColumn) ${headerCell}__content`
     );
 
     const labels = await headerCellContent.allInnerTexts();
@@ -118,9 +120,26 @@ export class DataGrid {
 
   async expandCell({ rowIndex, columnId }: { rowIndex: number; columnId: string }) {
     const cell = this.getCell(rowIndex, columnId);
-    await cell.hover();
-    await cell.locator('[data-test-subj="euiDataGridCellExpandButton"]').click();
-    await this.page.testSubj.waitForSelector('euiDataGridExpansionPopover', { state: 'visible' });
+    const expansionPopover = this.page.testSubj.locator('euiDataGridExpansionPopover');
+    // The popover is portaled and not tied to a cell, so close one left open by an earlier
+    // action; any popover seen below is then this cell's.
+    if (await expansionPopover.isVisible()) {
+      await this.page.keyboard.press('Escape');
+      await expect(expansionPopover).toBeHidden();
+    }
+    const expandButton = cell.locator('[data-test-subj="euiDataGridCellExpandButton"]');
+    // A refetch can remount the cell (e.g. a grid embedded in a dashboard). The remounted
+    // node gets no mouseenter under a stationary cursor, so its expand button stays hidden
+    // and a pending click waits on a detached element; a remount right after the click takes
+    // the popover with it. Re-hover and re-click until the popover is open. A click that times
+    // out on actionability was never dispatched, and an open popover is never clicked again
+    // (the expand button toggles it), so retrying is safe.
+    await expect(async () => {
+      if (await expansionPopover.isVisible()) return;
+      await cell.hover();
+      await expandButton.click({ timeout: 2_000 });
+      await expect(expansionPopover).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 20_000 });
   }
 
   async filterCell({
@@ -345,7 +364,9 @@ export class DataGrid {
 
   async getNumberOfSelectedRowsOnCurrentPage(): Promise<number> {
     return this.page
-      .locator('.euiDataGridRow [data-gridcell-column-id="select"] input[type="checkbox"]:checked')
+      .locator(
+        `${euiSelectors.dataGrid.ROW_SELECTOR} [data-gridcell-column-id="select"] input[type="checkbox"]:checked`
+      )
       .count();
   }
 
@@ -543,13 +564,14 @@ export class DataGrid {
   }
 
   async openColumnMenuByField(field: string) {
-    await expect(async () => {
-      await this.page.testSubj.hover(`dataGridHeaderCell-${field}`);
-      await this.page.testSubj.click(`dataGridHeaderCellActionButton-${field}`);
-      await this.page.testSubj.locator(`dataGridHeaderCellActionGroup-${field}`).waitFor({
-        state: 'visible',
-      });
-    }).toPass();
+    const actionButton = this.page.testSubj.locator(`dataGridHeaderCellActionButton-${field}`);
+
+    await this.page.testSubj.hover(`dataGridHeaderCell-${field}`);
+    await actionButton.click();
+
+    await this.page.testSubj.locator(`dataGridHeaderCellActionGroup-${field}`).waitFor({
+      state: 'visible',
+    });
   }
 
   async openDocumentDetails({ rowIndex }: { rowIndex: number }) {
@@ -577,6 +599,12 @@ export class DataGrid {
 
     await displayButton.click();
     await expandedButton.waitFor({ state: 'visible' });
+  }
+
+  /** Opens the grid toolbar's column-sorting popover. */
+  async openSortPopover() {
+    await this.page.testSubj.click('dataGridColumnSortingButton');
+    await this.page.testSubj.locator('dataGridColumnSortingPopover').waitFor({ state: 'visible' });
   }
 
   async openInTableSearch() {

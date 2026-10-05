@@ -252,6 +252,7 @@ export async function runPlaywrightTestCheck(log: ToolingLog) {
     SCOUT_TARGET_LOCATION: 'local',
     SCOUT_TARGET_ARCH: 'stateful',
     SCOUT_TARGET_DOMAIN: 'classic',
+    SCOUT_REPORTER_ENABLED: 'false',
   };
 
   await withProcRunner(log, async (procs) => {

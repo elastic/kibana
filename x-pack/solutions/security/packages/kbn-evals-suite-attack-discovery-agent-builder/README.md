@@ -4,12 +4,13 @@ Isolated evaluation suite for the Attack Discovery 2.0 Agent Builder integration
 
 ## Eval profiles and CI cadence
 
-This package ships **two eval cohorts** plus a documented third profile that is not automated here yet.
+This package ships **three eval cohorts** plus a documented fourth profile that is not automated here yet.
 
 | Profile | Spec | Seed data | CI cadence | Primary question |
 | --- | --- | --- | --- | --- |
 | **Golden-path** | `evals/attack_discovery_agent_builder.spec.ts` | `src/fixtures.ts` — 2 marker alerts | **Weekly** (`llm_evals.yml` sets `EVAL_GREP`) | Does the default agent **route**, **call AD tools**, and **complete the workflow**? |
 | **Clean profile** | `evals/clean_profile_provided_alerts.spec.ts` | `src/scenario_registry/` — 4 chains, 16 alerts + raw events | **On-demand** (full suite or `--grep "clean profile"`) | On realistic multi-stage chains, does AD produce **quality discoveries** with context gathering? |
+| **Dense profile** | `evals/dense_profile_live_retrieval.spec.ts` | `src/scenario_registry/` — the 4 clean chains + background noise, 95 alerts | **On-demand** (full suite or `--grep "dense profile"`) | At a realistic alert volume, does AD **retrieve and correlate** the real chains out of a crowded index, live, without being handed the alerts? |
 | **Full profile** | — (not in this package) | External noise generator (~150+ distractor alerts) | Manual / future follow-up | With ~150+ distractor alerts, does AD find real chains **without noise false positives**? |
 
 ### Golden-path (`fixtures.ts`)
@@ -37,8 +38,48 @@ Kibana-native scenario definitions for multi-stage attack chains. All seeding is
 | `linux-curl` | `web-prod-07` | nginx exploit → curl pipe bash → cron → SUID bash |
 | `wmi-lateral` | `wks-karen-06` | rundll32 → certutil → WMI subscription → remote schtasks |
 
-- **Seed label:** `ad-scenario-registry-2026-07`
+- **Seed label:** `ad-scenario-registry-2026-07` — the prefix of the per-run marker each
+  seeding run stamps (`<label>-<suffix>`) on the documents it writes, on its retrieval
+  scope and on its cleanup predicate, so two concurrent runs never reach each other's fixture.
 - One provided-alerts eval per chain; rubric/criteria are chain-specific.
+
+#### The target/noise invariant
+
+The dense profile measures whether AD **correlates** the real chains out of a crowded
+index, so no observable may separate target from noise on its own — otherwise a model
+solves the population with one `GROUP BY` and never reads the alerts. Every observable
+that the reference chains and the background share has to OVERLAP on both sides:
+
+| Observable | Why it cannot separate the sides |
+| --- | --- |
+| `_id` | Opaque digests (`ids.ts`); the scenario key is never spelled out |
+| `rule.name` | Occurrences suffix their own names, so both sides span 1–4 |
+| `process.name` | Same — occurrence 1 keeps the literal, later ones suffix |
+| `user.name` | Per-occurrence users; a user maps to exactly one host |
+| chain length | Some background chains are 4 steps, matching the reference chains |
+| `raw` backing | `bg-endpoint-inventory` is `raw: true`, so source-event existence does not discriminate |
+| severity / `risk_score` | `bg-vendor-update` carries high/critical, so severity alone does not discriminate |
+| host / agent id | Occurrence-local; a host never appears on both sides |
+| host aggregates | `bg-endpoint-inventory`'s per-host min/max/sum of risk score, message length, and command-line length all sit INSIDE the reference band |
+
+`dense_scenarios.test.ts` pins each of these. When adding a background template, check
+every field it emits against the reference chains: if the value (or its frequency)
+appears on one side only, the profile is solvable without reasoning.
+
+Two rules that are easy to miss, both learned by breaking them:
+
+1. **A conjunction is as good as a field.** `COUNT(*) = 4 AND MIN(risk_score) >= 72`
+   recovers the reference hosts exactly even though neither predicate does alone, and
+   it took four rounds of single-field fixes to surface. The pinning test therefore
+   sweeps every candidate threshold over every host aggregate and asserts that no
+   single predicate **and no pair** isolates the reference cohort. Any background
+   chain that is the unique holder of a host-level extremum is a key.
+2. **A constant background profile is a single point.** Repeating one chain with only
+   host/rule/process suffixes gives every host the SAME aggregate value, and any
+   threshold that point falls outside of isolates it. Moving the constant does not
+   close the hole — it relocates the key (raising the background minimum risk above
+   the reference maximum simply inverts it). The values have to sit inside the
+   reference band, which means varying them per occurrence.
 
 ### Full profile (out of scope for this package)
 
@@ -72,7 +113,14 @@ node scripts/evals run --suite attack-discovery-agent-builder \
   --grep "clean profile"
 ```
 
-Full package (golden-path + clean profile):
+Dense profile (on-demand):
+
+```bash
+node scripts/evals run --suite attack-discovery-agent-builder \
+  --grep "dense profile"
+```
+
+Full package (golden-path + clean profile + dense profile):
 
 ```bash
 node scripts/evals run --suite attack-discovery-agent-builder
