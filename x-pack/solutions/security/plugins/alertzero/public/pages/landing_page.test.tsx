@@ -46,9 +46,6 @@ jest.mock('../components/scan_failure_callout/scan_failure_callout', () => ({
   ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
 }));
 jest.mock('../hooks/use_alertzero_doc_title', () => ({ useAlertZeroDocTitle: jest.fn() }));
-jest.mock('../hooks/use_current_user', () => ({
-  useCurrentUser: jest.fn().mockReturnValue(undefined),
-}));
 
 const mockUseWorkers = useWorkers as jest.Mock;
 const mockUseInvestigationsCount = useInvestigationsCount as jest.Mock;
@@ -292,16 +289,14 @@ describe('LandingPage', () => {
 
     expect(screen.getByText('AlertZero in 90 seconds')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
-    expect(screen.getByText('Enable your workers')).toBeInTheDocument();
+    expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
 
     // Start the save — this calls onSavingChange(true) in LandingPage.
-    fireEvent.click(screen.getByRole('button', { name: 'Enable and continue' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
 
     // Wait until all five PATCHes are in-flight (button becomes disabled).
     await waitFor(() =>
-      expect(screen.getByRole('button', { name: 'Enable and continue' })).toHaveAttribute(
-        'disabled'
-      )
+      expect(screen.getByRole('button', { name: 'Enable and run' })).toHaveAttribute('disabled')
     );
     expect(httpPatch).toHaveBeenCalledTimes(5);
 
@@ -318,7 +313,7 @@ describe('LandingPage', () => {
 
     // LandingPage must not unmount OnboardingPage while savingInProgress=true, even
     // though showQueue would otherwise be true.
-    expect(screen.getByText('Enable your workers')).toBeInTheDocument();
+    expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
     expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
 
     // Settle the fan-out with a mixed outcome: 4 succeed, 1 fails.
@@ -329,15 +324,13 @@ describe('LandingPage', () => {
 
     // Wait for the save to settle (isSaving clears, button re-enables).
     await waitFor(() =>
-      expect(screen.getByRole('button', { name: 'Enable and continue' })).not.toHaveAttribute(
-        'disabled'
-      )
+      expect(screen.getByRole('button', { name: 'Enable and run' })).not.toHaveAttribute('disabled')
     );
 
     // Partial failure must keep onboarding mounted: the parent save lock is not
     // released, so the partially-committed server state (one enabled worker) cannot
     // transition the page to the queue.
-    expect(screen.getByText('Enable your workers')).toBeInTheDocument();
+    expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
     expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
   });
 
@@ -385,9 +378,9 @@ describe('LandingPage', () => {
     const { rerender } = render(makeUI());
     expect(screen.getByText('AlertZero in 90 seconds')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
-    expect(screen.getByText('Enable your workers')).toBeInTheDocument();
+    expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Enable and continue' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
 
     // Wait for all PATCHes to be in-flight.
     await waitFor(() => expect(httpPatch).toHaveBeenCalledTimes(5));
@@ -397,9 +390,7 @@ describe('LandingPage', () => {
 
     // Wait for the save to settle (button re-enables).
     await waitFor(() =>
-      expect(screen.getByRole('button', { name: 'Enable and continue' })).not.toHaveAttribute(
-        'disabled'
-      )
+      expect(screen.getByRole('button', { name: 'Enable and run' })).not.toHaveAttribute('disabled')
     );
 
     // On total failure, onSavingChange(false) must be called, releasing the lock.
