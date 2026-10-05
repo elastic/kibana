@@ -142,7 +142,9 @@ export function registerChatApiRoutes({
       access: 'public',
       summary: 'Send a message and get the answer',
       description:
-        'Send one message to an agent and wait for its text answer. This synchronous endpoint is meant for scripts and command-line tools: it returns the answer and the conversation ID alone, never a stream or an event timeline. Pass the returned `conversation_id` on the next call to continue the conversation. The agent runs without a user to answer it, so any prompt it raises (tool confirmation, question, destructive API approval) is declined on its behalf and reported in `declined_prompts`; attachments are not supported. Requires the `agentBuilder:experimentalFeatures` advanced setting to be enabled; the endpoint answers 404 otherwise.',
+        'Send a message to an agent and get its text answer. Use this synchronous endpoint in scripts and command-line tools. The response contains only the answer and the conversation ID. To continue the conversation, include the returned `conversation_id` in the next request.\n\n' +
+        'The agent runs without a user, so the endpoint declines every prompt that the agent raises, such as a tool confirmation, a question, or a destructive API approval. The `declined_prompts` property lists these prompts. This endpoint does not support attachments.\n\n' +
+        'The `agentBuilder:experimentalFeatures` advanced setting must be enabled. If it is disabled, the endpoint returns a 404 response.',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,
