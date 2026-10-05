@@ -79,7 +79,7 @@ function generateDefaultTemplate(
     description: i18n.translate('xpack.graph.settings.drillDowns.defaultUrlTemplateTitle', {
       defaultMessage: 'Raw documents',
     }),
-    encoder: outlinkEncoders[0],
+    encoderId: outlinkEncoders[0].id,
     isDefault: true,
     icon: null,
   };

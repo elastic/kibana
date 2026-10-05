@@ -215,7 +215,7 @@ describe('deserialize', () => {
     const { urlTemplates } = callSavedWorkspaceToAppState();
 
     expect(urlTemplates[0].description).toBe('Template');
-    expect(urlTemplates[0].encoder).toBe(outlinkEncoders[0]);
+    expect(urlTemplates[0].encoderId).toBe(outlinkEncoders[0].id);
   });
 
   it('should deserialize nodes and edges', () => {

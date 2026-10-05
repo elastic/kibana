@@ -169,3 +169,6 @@ export const outlinkEncoders: OutlinkEncoder[] = [
     type: 'lucene',
   },
 ];
+
+export const getOutlinkEncoder = (encoderId: string): OutlinkEncoder | undefined =>
+  outlinkEncoders.find(({ id }) => id === encoderId);

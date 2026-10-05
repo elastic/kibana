@@ -20,7 +20,7 @@ import type {
   RuntimeGraph,
   SerializedField,
 } from '../../types';
-import { outlinkEncoders } from '../../helpers/outlink_encoders';
+import { getOutlinkEncoder } from '../../helpers/outlink_encoders';
 import { getSuitableIcon, colorChoices, getIcon } from '../../helpers/style_choices';
 
 const defaultAdvancedSettings: AdvancedSettings = {
@@ -36,14 +36,13 @@ function deserializeUrlTemplate({
   iconClass,
   ...serializableProps
 }: SerializedUrlTemplate) {
-  const encoder = outlinkEncoders.find((outlinkEncoder) => outlinkEncoder.id === encoderID);
-  if (!encoder) {
+  if (!getOutlinkEncoder(encoderID)) {
     return;
   }
 
   const template: UrlTemplate = {
     ...serializableProps,
-    encoder,
+    encoderId: encoderID,
     icon: null,
   };
 
