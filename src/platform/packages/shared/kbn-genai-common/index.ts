@@ -8,5 +8,5 @@
  */
 
 export * from './src/genai/constants';
-export * from './src/genai/types';
+export type * from './src/genai/types';
 export * from './src/genai/get_genai_fields';
