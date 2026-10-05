@@ -11,6 +11,7 @@ import { Request } from '@kbn/core-di-server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
+import { EventOriginToken, type EventOrigin } from '../event_origin/token';
 import { RulesClient } from '../rules_client';
 import type { BulkResponse } from '../rules_client';
 import { createRulesClient } from '../rules_client/rules_client.mock';
@@ -19,7 +20,6 @@ import type { RulesFindAllResultItem } from '../services/rules_saved_object_serv
 import { RuleSavedObjectsClientToken } from '../services/rules_saved_object_service/tokens';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
 import { createRuleSoAttributes } from '../test_utils';
-import { isInternalUserRequest } from './internal_user_request';
 import { InternalRulesClient } from './internal_rules_client';
 
 const foundRule = (id: string, namespaces?: string[]): RulesFindAllResultItem => ({
@@ -30,7 +30,8 @@ const foundRule = (id: string, namespaces?: string[]): RulesFindAllResultItem =>
 
 interface ScopeSnapshot {
   spaceId: string;
-  isInternalUser: boolean;
+  origin: EventOrigin;
+  headers: Record<string, unknown>;
   soClient: unknown;
 }
 
@@ -67,7 +68,8 @@ const setup = (
         const spaceId = get(RequestSpaceIdToken);
         snapshots.push({
           spaceId,
-          isInternalUser: isInternalUserRequest(get(Request)),
+          origin: get(EventOriginToken),
+          headers: get(Request).headers,
           soClient: get(RuleSavedObjectsClientToken),
         });
         const { rulesClient } = createRulesClient();
@@ -120,8 +122,8 @@ describe('InternalRulesClient', () => {
       expect(bulkDisableRules).toHaveBeenCalledWith('default', ['rule-1', 'rule-3']);
       expect(bulkDisableRules).toHaveBeenCalledWith('space-a', ['rule-2']);
       expect(snapshots).toEqual([
-        { spaceId: 'default', isInternalUser: true, soClient: internalSoClient },
-        { spaceId: 'space-a', isInternalUser: true, soClient: namespacedSoClient },
+        { spaceId: 'default', origin: 'internal', headers: {}, soClient: internalSoClient },
+        { spaceId: 'space-a', origin: 'internal', headers: {}, soClient: namespacedSoClient },
       ]);
       expect(scopes).toHaveLength(2);
       for (const scope of scopes) {

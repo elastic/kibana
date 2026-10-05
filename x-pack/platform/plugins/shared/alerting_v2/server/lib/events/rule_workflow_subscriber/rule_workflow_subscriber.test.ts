@@ -7,9 +7,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import { asSpaceId } from '@kbn/core-spaces-common';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
-import { createInternalUserRequest } from '../../internal_rules_client/internal_user_request';
 import type { LoggerService } from '../../services/logger_service/logger_service';
 import type { WorkflowService } from '../../services/workflow_service/workflow_service';
 import { RULE_CREATED_EVENT_TYPE, type RuleCreatedEvent } from '../rule_event_publisher/events';
@@ -75,7 +73,8 @@ describe('RuleWorkflowSubscriber', () => {
       subscriber.start();
 
       await handlerFor(bus, RULE_CREATED_EVENT_TYPE)(ruleCreatedEvent, {
-        request: createInternalUserRequest(asSpaceId('my-space')),
+        request,
+        origin: 'internal',
       });
 
       expect(workflowsExtensions.getClient).not.toHaveBeenCalled();

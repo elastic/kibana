@@ -17,6 +17,7 @@ import { inject, injectable } from 'inversify';
 import { partition } from 'lodash';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { AlertingServerStartDependencies, InternalRulesClientApi } from '../../types';
+import { EventOriginToken } from '../event_origin/token';
 import type { BulkByIdsParams, BulkResponse } from '../rules_client';
 import { RulesClient } from '../rules_client';
 import { toBulkError } from '../rules_client/utils';
@@ -131,6 +132,8 @@ export class InternalRulesClient implements InternalRulesClientApi {
       scope.bind(Global).toConstantValue(Request);
       scope.bind(RequestSpaceIdToken).toConstantValue(spaceId);
       scope.bind(Global).toConstantValue(RequestSpaceIdToken);
+      scope.bind(EventOriginToken).toConstantValue('internal');
+      scope.bind(Global).toConstantValue(EventOriginToken);
 
       const namespace = spaceIdToNamespace(this.spaces, spaceId);
       scope
