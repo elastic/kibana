@@ -75,10 +75,6 @@ export interface UnifiedHistogramChartProps {
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
-  /**
-   * Border on the panel shown while the histogram chart is loading.
-   * Omit to keep the default panel border.
-   */
   showBorder?: EmbeddableComponentProps['showBorder'];
   withLensActions?: boolean;
   onApiAvailable?: EmbeddableComponentProps['onApiAvailable'];
