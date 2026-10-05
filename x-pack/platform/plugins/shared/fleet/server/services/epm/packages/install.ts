@@ -997,8 +997,11 @@ async function installPackageByUpload({
       paths,
       archiveIterator,
     };
-    // update the timestamp of latest installation
-    setLastUploadInstallCache();
+    // update the timestamp of latest installation, unless this install is exempt
+    // from the rate limit check — it must not push back the deadline for uploads
+    if (!skipRateLimitCheck) {
+      setLastUploadInstallCache();
+    }
 
     return await installPackageWithStateMachine({
       packageInstallContext,

@@ -101,6 +101,7 @@ export interface FooterSlotProps extends InvestigationSlotProps {
   isOpenedFromChat: boolean;
   onOpenChat: () => void;
   onOpenEscalation?: ConversationDetailsFlyoutFooterProps['onOpenEscalation'];
+  wrapEscalationButton?: ConversationDetailsFlyoutFooterProps['wrapEscalationButton'];
   onCloseInvestigation?: ConversationDetailsFlyoutFooterProps['onCloseInvestigation'];
 }
 
@@ -109,6 +110,7 @@ export const FooterSlot = ({
   conversation,
   onOpenChat,
   onOpenEscalation,
+  wrapEscalationButton,
   onCloseInvestigation,
 }: FooterSlotProps) => (
   <ConversationDetailsFlyoutFooter
@@ -116,6 +118,7 @@ export const FooterSlot = ({
     isOpenedFromChat={isOpenedFromChat}
     onOpenChat={onOpenChat}
     onOpenEscalation={onOpenEscalation}
+    wrapEscalationButton={wrapEscalationButton}
     onCloseInvestigation={onCloseInvestigation}
   />
 );

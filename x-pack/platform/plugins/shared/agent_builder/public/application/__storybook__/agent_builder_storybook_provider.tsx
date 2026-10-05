@@ -27,6 +27,7 @@ const defaultQueryClient = new QueryClient({
 const storybookStreamService = new ConversationStreamService({
   getChatEvents$: () => NEVER,
   getStreamEnded$: () => NEVER,
+  getStreamStarted$: () => NEVER,
 });
 
 export interface AgentBuilderStorybookProviderProps {
