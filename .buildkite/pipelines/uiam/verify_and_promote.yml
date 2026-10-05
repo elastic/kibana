@@ -55,7 +55,7 @@ steps:
   - wait: ~
 
   - label: ':arrow_up::key::arrow_up: Promote UIAM docker image'
-    command: .buildkite/scripts/steps/uiam/promote_image.sh $UIAM_IMAGE
+    command: .buildkite/scripts/steps/uiam/promote_image.sh "$$UIAM_IMAGE"
     key: promote-uiam-image
     if: "build.branch == 'main' || build.env('FORCE_PROMOTE') == 'true'"
     retry:
