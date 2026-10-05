@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
+jest.mock('@kbn/esql-browser', () => ({
+  ...jest.requireActual('@kbn/esql-browser'),
   esqlApproximationStorage: { get: jest.fn(), set: jest.fn() },
 }));
 
@@ -20,7 +20,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { esqlApproximationStorage } from '@kbn/esql-utils';
+import { esqlApproximationStorage } from '@kbn/esql-browser';
 import { EsqlApproximationToggle } from './esql_approximation_toggle';
 
 const startMock = coreMock.createStart();

@@ -11,6 +11,7 @@ import type { EuiFlyoutProps } from '@elastic/eui';
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
 import { asyncForEach } from '@kbn/std';
 
+import { esqlApproximationStorage } from '@kbn/esql-browser';
 import { getLastSavedState } from '../../../common/default_dashboard_state';
 import { dashboardClient } from '../../dashboard_client';
 import { getPlacementHints } from '../../panel_placement/get_placement_hints';
@@ -93,6 +94,9 @@ export async function loadDashboardApi({
     panelFlyoutType,
     incomingEmbeddables,
     initialState: {
+      // Seed Fast mode from the user's last-used preference; overridden by the saved object,
+      // session backup, and URL state so it only applies when no value has been explicitly set.
+      esql_approximation: esqlApproximationStorage.get(),
       ...getLastSavedState(readResult),
       ...unsavedChanges,
       ...overrideState,

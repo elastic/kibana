@@ -11,12 +11,9 @@ import type { StateComparators } from '@kbn/presentation-publishing';
 import { diffComparators } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatestWith, debounceTime, map, skip, startWith } from 'rxjs';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
-import { esqlApproximationStorage } from '@kbn/esql-utils';
 
 export function initializeApproximationManager(initialState: DashboardState) {
-  const isApproximate$ = new BehaviorSubject<boolean | undefined>(
-    initialState.esql_approximation ?? esqlApproximationStorage.get()
-  );
+  const isApproximate$ = new BehaviorSubject<boolean | undefined>(initialState.esql_approximation);
 
   function setEsqlApproximation(value: boolean) {
     if (value !== isApproximate$.value) {

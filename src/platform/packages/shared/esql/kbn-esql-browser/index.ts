@@ -9,3 +9,4 @@
 
 export { ESQLValuesPreview } from './src/esql_values_preview';
 export { ApproximationBadge } from './src/approximation_badge';
+export { esqlApproximationStorage } from './src/esql_approximation_storage';
