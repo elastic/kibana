@@ -56,6 +56,7 @@ const parityTests = {
   require_kbn_fs: () => require('../require_kbn_fs.test.js'),
   require_kibana_feature_privileges_naming: () =>
     require('../require_kibana_feature_privileges_naming.test.js'),
+  require_lazy_zod_schema: () => require('../require_lazy_zod_schema.test.js'),
   scout_expect_import: () => require('../scout_expect_import.test.js'),
   scout_max_one_describe: () => require('../scout_max_one_describe.test.js'),
   scout_no_at_in_test_titles: () => require('../scout_no_at_in_test_titles.test.js'),
