@@ -11,6 +11,11 @@ import { compressToEncodedURIComponent } from 'lz-string';
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
+// A line dense with trigger characters can need many retries to land the Enter.
+const NEWLINE_RETRY_TIMEOUT_MS = 20_000;
+const SCROLL_OUTPUT_TIMEOUT_MS = 10_000;
+const MARGIN_CLICK_TIMEOUT_MS = 3_000;
+
 export class ConsolePage {
   public readonly inputEditor: Locator;
   public readonly outputEditor: Locator;
@@ -87,8 +92,8 @@ export class ConsolePage {
   public readonly completeTourButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.inputEditor = this.page.testSubj.locator('consoleMonacoEditor');
-    this.outputEditor = this.page.testSubj.locator('consoleMonacoOutput');
+    this.inputEditor = this.page.getByTestId('consoleMonacoEditor');
+    this.outputEditor = this.page.getByTestId('consoleMonacoOutput');
     this.inputEditorLines = this.inputEditor.locator('.view-lines');
     this.outputEditorContent = this.outputEditor.locator('.monaco-scrollable-element');
     this.editorTextArea = this.inputEditor.locator('textarea');
@@ -99,84 +104,82 @@ export class ConsolePage {
     this.suggestionLabels = this.suggestWidget.locator('.monaco-list-row .label-name');
     this.detectedLinks = this.inputEditor.locator('.detected-link');
 
-    this.sendRequestButton = this.page.testSubj.locator('sendRequestButton');
-    this.copyOutputButton = this.page.testSubj.locator('copyOutputButton');
-    this.responseStatusBadge = this.page.testSubj.locator('consoleResponseStatusBadge');
-    this.clearInputButton = this.page.testSubj.locator('clearConsoleInput');
-    this.clearOutputButton = this.page.testSubj.locator('clearConsoleOutput');
-    this.outputPanelEmptyState = this.page.testSubj.locator('consoleOutputPanelEmptyState');
-    this.requestInProgressBadge = this.page.testSubj.locator('consoleRequestInProgressBadge');
-    this.editorContentSpinner = this.page.testSubj.locator('consoleEditorContentSpinner');
+    this.sendRequestButton = this.page.getByTestId('sendRequestButton');
+    this.copyOutputButton = this.page.getByTestId('copyOutputButton');
+    this.responseStatusBadge = this.page.getByTestId('consoleResponseStatusBadge');
+    this.clearInputButton = this.page.getByTestId('clearConsoleInput');
+    this.clearOutputButton = this.page.getByTestId('clearConsoleOutput');
+    this.outputPanelEmptyState = this.page.getByTestId('consoleOutputPanelEmptyState');
+    this.requestInProgressBadge = this.page.getByTestId('consoleRequestInProgressBadge');
+    this.editorContentSpinner = this.page.getByTestId('consoleEditorContentSpinner');
 
-    this.shellTabButton = this.page.testSubj.locator('consoleShellButton');
-    this.configTabButton = this.page.testSubj.locator('consoleConfigButton');
-    this.historyTabButton = this.page.testSubj.locator('consoleHistoryButton');
-    this.shellPanel = this.page.testSubj.locator('consoleEditorContainer');
-    this.configPanel = this.page.testSubj.locator('consoleConfigPanel');
-    this.historyPanel = this.page.testSubj.locator('consoleHistoryPanel');
+    this.shellTabButton = this.page.getByTestId('consoleShellButton');
+    this.configTabButton = this.page.getByTestId('consoleConfigButton');
+    this.historyTabButton = this.page.getByTestId('consoleHistoryButton');
+    this.shellPanel = this.page.getByTestId('consoleEditorContainer');
+    this.configPanel = this.page.getByTestId('consoleConfigPanel');
+    this.historyPanel = this.page.getByTestId('consoleHistoryPanel');
 
-    this.skipTourButton = this.page.testSubj.locator('consoleSkipTourButton');
-    this.a11yOverlay = this.page.testSubj.locator('codeEditorAccessibilityOverlay');
-    this.a11yOverlaySwitch = this.page.testSubj.locator('enableA11yOverlay');
-    this.fontSizeInput = this.page.testSubj.locator('setting-font-size-input');
-    this.helpButton = this.page.testSubj.locator('consoleHelpButton');
+    this.skipTourButton = this.page.getByTestId('consoleSkipTourButton');
+    this.a11yOverlay = this.page.getByTestId('codeEditorAccessibilityOverlay');
+    this.a11yOverlaySwitch = this.page.getByTestId('enableA11yOverlay');
+    this.fontSizeInput = this.page.getByTestId('setting-font-size-input');
+    this.helpButton = this.page.getByTestId('consoleHelpButton');
     // The popover has no test subj of its own; this button only exists while it is open.
-    this.helpPopoverContent = this.page.testSubj.locator('consoleRunTourButton');
+    this.helpPopoverContent = this.page.getByTestId('consoleRunTourButton');
 
-    this.outputFilterButton = this.page.testSubj.locator('consoleOutputFilterButton');
+    this.outputFilterButton = this.page.getByTestId('consoleOutputFilterButton');
     // The filter input carries either test subj depending on the selected filter language.
-    this.outputFilterInput = this.page.locator(
-      '[data-test-subj="filterJq"], [data-test-subj="filterRegex"]'
-    );
-    this.outputFilterApplyButton = this.page.testSubj.locator('consoleOutputFilterApply');
-    this.outputFilterActiveIndicator = this.page.testSubj.locator(
-      'consoleOutputFilterActiveIndicator'
-    );
+    this.outputFilterInput = this.page
+      .getByTestId('filterJq')
+      .or(this.page.getByTestId('filterRegex'));
+    this.outputFilterApplyButton = this.page.getByTestId('consoleOutputFilterApply');
+    this.outputFilterActiveIndicator = this.page.getByTestId('consoleOutputFilterActiveIndicator');
 
-    this.historyItems = this.page.testSubj.locator('historyItemFieldset');
-    this.clearHistoryButton = this.page.testSubj.locator('consoleClearHistoryButton');
-    this.historyApplyButton = this.page.testSubj.locator('consoleHistoryApplyButton');
-    this.historyAddAndRunButton = this.page.testSubj.locator('consoleHistoryAddAndRunButton');
+    this.historyItems = this.page.getByTestId('historyItemFieldset');
+    this.clearHistoryButton = this.page.getByTestId('consoleClearHistoryButton');
+    this.historyApplyButton = this.page.getByTestId('consoleHistoryApplyButton');
+    this.historyAddAndRunButton = this.page.getByTestId('consoleHistoryAddAndRunButton');
 
-    this.contextMenuButton = this.page.testSubj.locator('toggleConsoleMenu');
-    this.contextMenu = this.page.testSubj.locator('consoleMenu');
-    this.copyAsMenuItem = this.page.testSubj.locator('consoleMenuCopyAsButton');
-    this.selectLanguageMenuItem = this.page.testSubj.locator('consoleMenuSelectLanguage');
-    this.openDocsMenuItem = this.page.testSubj.locator('consoleMenuOpenDocs');
-    this.autoIndentMenuItem = this.page.testSubj.locator('consoleMenuAutoIndent');
-    this.autoIndentShortcutBadge = this.page.testSubj.locator('consoleMenuAutoIndentShortcut');
-    this.openDocsShortcutBadge = this.page.testSubj.locator('consoleMenuOpenDocsShortcut');
-    this.setAsDefaultLanguageButton = this.page.testSubj.locator('setAsDefaultLanguage');
-    this.copyAsLanguageSubmitButton = this.page.testSubj.locator('copyAsLanguageSubmit');
-    this.closeCopyAsModalButton = this.page.testSubj.locator('closeCopyAsModal');
+    this.contextMenuButton = this.page.getByTestId('toggleConsoleMenu');
+    this.contextMenu = this.page.getByTestId('consoleMenu');
+    this.copyAsMenuItem = this.page.getByTestId('consoleMenuCopyAsButton');
+    this.selectLanguageMenuItem = this.page.getByTestId('consoleMenuSelectLanguage');
+    this.openDocsMenuItem = this.page.getByTestId('consoleMenuOpenDocs');
+    this.autoIndentMenuItem = this.page.getByTestId('consoleMenuAutoIndent');
+    this.autoIndentShortcutBadge = this.page.getByTestId('consoleMenuAutoIndentShortcut');
+    this.openDocsShortcutBadge = this.page.getByTestId('consoleMenuOpenDocsShortcut');
+    this.setAsDefaultLanguageButton = this.page.getByTestId('setAsDefaultLanguage');
+    this.copyAsLanguageSubmitButton = this.page.getByTestId('copyAsLanguageSubmit');
+    this.closeCopyAsModalButton = this.page.getByTestId('closeCopyAsModal');
 
-    this.shortcutsButton = this.page.testSubj.locator('consoleShortcutsButton');
+    this.shortcutsButton = this.page.getByTestId('consoleShortcutsButton');
     // The popover has no test subj of its own; this section title only exists while it is open.
     this.shortcutsPopoverContent = this.page.getByText('Navigation shortcuts');
-    this.keyboardShortcutsSwitch = this.page.testSubj.locator('enableKeyboardShortcuts');
+    this.keyboardShortcutsSwitch = this.page.getByTestId('enableKeyboardShortcuts');
 
-    this.exportButton = this.page.testSubj.locator('consoleExportButton');
+    this.exportButton = this.page.getByTestId('consoleExportButton');
     this.importFileInput = this.page.locator('#importConsoleFile');
-    this.confirmImportButton = this.page.testSubj.locator('confirmModalConfirmButton');
+    this.confirmImportButton = this.page.getByTestId('confirmModalConfirmButton');
 
-    this.variablesAddButton = this.page.testSubj.locator('variablesAddButton');
-    this.variableNameField = this.page.testSubj.locator('nameField');
-    this.variableValueField = this.page.testSubj.locator('valueField');
-    this.addNewVariableButton = this.page.testSubj.locator('addNewVariableButton');
-    this.confirmModalConfirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
-    this.variablesTable = this.page.testSubj.locator('variablesTable');
-    this.variableNameCells = this.page.testSubj.locator('variableNameCell');
+    this.variablesAddButton = this.page.getByTestId('variablesAddButton');
+    this.variableNameField = this.page.getByTestId('nameField');
+    this.variableValueField = this.page.getByTestId('valueField');
+    this.addNewVariableButton = this.page.getByTestId('addNewVariableButton');
+    this.confirmModalConfirmButton = this.page.getByTestId('confirmModalConfirmButton');
+    this.variablesTable = this.page.getByTestId('variablesTable');
+    this.variableNameCells = this.page.getByTestId('variableNameCell');
 
-    this.runTourButton = this.page.testSubj.locator('consoleRunTourButton');
-    this.completeTourButton = this.page.testSubj.locator('consoleCompleteTourButton');
+    this.runTourButton = this.page.getByTestId('consoleRunTourButton');
+    this.completeTourButton = this.page.getByTestId('consoleCompleteTourButton');
   }
 
   languageOption(language: string) {
-    return this.page.testSubj.locator(`languageOption-${language}`);
+    return this.page.getByTestId(`languageOption-${language}`);
   }
 
   variableCopyButton(name: string) {
-    return this.page.testSubj.locator(`variableCopyButton-${name}`);
+    return this.page.getByTestId(`variableCopyButton-${name}`);
   }
 
   /**
@@ -307,8 +310,7 @@ export class ConsolePage {
           }
           return this.getModelLineCount();
         },
-        // A line dense with trigger characters can need many retries to land the Enter.
-        { timeout: 20000 }
+        { timeout: NEWLINE_RETRY_TIMEOUT_MS }
       )
       .toBeGreaterThanOrEqual(expectedMinLineCount);
   }
@@ -348,8 +350,12 @@ export class ConsolePage {
    * to exercise autocomplete; the delay and retried newlines are needed for the same
    * reasons as there.
    */
-  async typeText(text: string) {
+  async typeText(text: string, { atEnd = false }: { atEnd?: boolean } = {}) {
     await this.focusInputEditor();
+    if (atEnd) {
+      // `Control`, not `ControlOrMeta`: see `pressShortcut`.
+      await this.editorTextArea.press('Control+End');
+    }
     const lines = text.split('\n');
     const startingLineCount = await this.getModelLineCount();
     for (const [index, line] of lines.entries()) {
@@ -373,6 +379,16 @@ export class ConsolePage {
   async getEditorText() {
     // Monaco renders spaces as non-breaking; normalize them back.
     return (await this.inputEditorLines.innerText()).replace(/\u00A0/g, ' ').trim();
+  }
+
+  async getModelText(): Promise<string> {
+    const modelText = await this.inputEditor.evaluate((editorNode) => {
+      const editor = window.MonacoEnvironment?.monaco?.editor
+        .getEditors()
+        .find((e) => editorNode.contains(e.getContainerDomNode()));
+      return editor?.getModel()?.getValue() ?? '';
+    });
+    return modelText.replace(/\r\n/g, '\n');
   }
 
   async getOutputText() {
@@ -486,7 +502,7 @@ export class ConsolePage {
       await this.page.mouse.wheel(0, 5000);
       const after = await this.outputEditorContent.evaluate((el) => el.scrollTop);
       expect(after).toBe(before);
-    }).toPass({ timeout: 10_000 });
+    }).toPass({ timeout: SCROLL_OUTPUT_TIMEOUT_MS });
   }
 
   /**
@@ -585,7 +601,7 @@ export class ConsolePage {
   }
 
   async loadRequestFromHistory(index: number, andExecute: boolean = false) {
-    await this.page.testSubj.locator(`historyItem-${index}`).click();
+    await this.page.getByTestId(`historyItem-${index}`).click();
     if (andExecute) {
       await this.historyAddAndRunButton.click();
     } else {
@@ -747,8 +763,8 @@ export class ConsolePage {
   }
 
   async removeVariable(name: string) {
-    const row = this.variablesTable.locator('tr', { hasText: `\${${name}}` });
-    await row.locator('[data-test-subj="variablesRemoveButton"]').click();
+    const row = this.variablesTable.getByRole('row').filter({ hasText: `\${${name}}` });
+    await row.getByTestId('variablesRemoveButton').click();
     await this.confirmModalConfirmButton.click();
   }
 
@@ -777,9 +793,9 @@ export class ConsolePage {
   private async focusEditor(editor: Locator) {
     const margin = editor.locator('.margin-view-overlays');
     try {
-      await margin.click({ timeout: 3000 });
+      await margin.click({ timeout: MARGIN_CLICK_TIMEOUT_MS });
     } catch {
-      await editor.locator('[data-test-subj="codeEditorHint"]').click();
+      await editor.getByTestId('codeEditorHint').click();
       await margin.click();
     }
   }

@@ -75,9 +75,12 @@ spaceTest.describe('Console editor robustness', { tag: tags.deploymentAgnostic }
     await pageObjects.console.importFile('console_import_large_input', LARGE_INPUT);
     await expect.poll(() => pageObjects.console.getEditorText()).not.toBe('');
 
-    await pageObjects.console.typeText('\nGET _search\n{\n"query": {\n');
+    await pageObjects.console.typeText('\nGET _search\n{\n"query": {\n', { atEnd: true });
 
     await expect(pageObjects.console.suggestWidget).toBeVisible();
+    const modelText = await pageObjects.console.getModelText();
+    expect(modelText.slice(0, LARGE_INPUT.length)).toBe(LARGE_INPUT);
+    expect(modelText.slice(LARGE_INPUT.length)).toContain('GET _search');
   });
 
   spaceTest(
@@ -88,9 +91,12 @@ spaceTest.describe('Console editor robustness', { tag: tags.deploymentAgnostic }
       await pageObjects.console.importFile('console_import_quote_heavy_input', QUOTE_HEAVY_INPUT);
       await expect.poll(() => pageObjects.console.getEditorText()).not.toBe('');
 
-      await pageObjects.console.typeText('\nGET _search\n{\n"query": {\n');
+      await pageObjects.console.typeText('\nGET _search\n{\n"query": {\n', { atEnd: true });
 
       await expect(pageObjects.console.suggestWidget).toBeVisible();
+      const modelText = await pageObjects.console.getModelText();
+      expect(modelText.slice(0, QUOTE_HEAVY_INPUT.length)).toBe(QUOTE_HEAVY_INPUT);
+      expect(modelText.slice(QUOTE_HEAVY_INPUT.length)).toContain('GET _search');
     }
   );
 });

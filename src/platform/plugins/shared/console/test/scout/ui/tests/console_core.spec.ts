@@ -12,10 +12,14 @@ import { expect } from '@kbn/scout/ui';
 import { DEFAULT_INPUT_VALUE } from '../../../../common/constants';
 import { test } from '../fixtures';
 
+const SCROLL_ATTEMPT_TIMEOUT_MS = 1_000;
+
 const stripWhitespace = (value: string) => value.replace(/\s/g, '');
 
 // Unique per worker so parallel workers cannot collide on the index name.
 const multiRequestIndexName = (workerIndex: number) => `console-core-multi-request-${workerIndex}`;
+const defaultRequestsIndexName = (workerIndex: number) =>
+  `console-core-default-requests-${workerIndex}`;
 
 test.describe('Console core', { tag: tags.deploymentAgnostic }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -24,15 +28,14 @@ test.describe('Console core', { tag: tags.deploymentAgnostic }, () => {
     await pageObjects.console.skipTourIfExists();
   });
 
-  // The default welcome script (`DEFAULT_INPUT_VALUE`) creates `my-index` under a fixed
-  // name, so it can't be made worker-unique — delete it even if a test failed partway,
-  // or a later bare `GET /_search` picks up the leftover doc. The multi-request index is
-  // deleted for the same reason: an interrupted run must not leave it behind, or the next
-  // run's PUT would return a non-200 response.
+  // A leftover index would make the next run's PUT fail.
   test.afterEach(async ({ esClient }, testInfo) => {
     await esClient.indices.delete(
       {
-        index: ['my-index', multiRequestIndexName(testInfo.workerIndex)],
+        index: [
+          defaultRequestsIndexName(testInfo.workerIndex),
+          multiRequestIndexName(testInfo.workerIndex),
+        ],
         ignore_unavailable: true,
       },
       { ignore: [404] }
@@ -66,11 +69,20 @@ test.describe('Console core', { tag: tags.deploymentAgnostic }, () => {
   });
 
   test('runs the default requests and leaves the empty state behind', async ({ pageObjects }) => {
+    await pageObjects.console.clearEditorText();
+    await pageObjects.console.enterText(
+      DEFAULT_INPUT_VALUE.replaceAll('my-index', defaultRequestsIndexName(test.info().workerIndex))
+    );
     await pageObjects.console.selectAllRequests();
     await pageObjects.console.sendRequest();
-    await pageObjects.console.scrollOutputToBottom();
 
-    await expect(pageObjects.console.outputEditorContent).toContainText('"timed_out": false');
+    // Console can scroll the output back to the top as the later responses land.
+    await expect(async () => {
+      await pageObjects.console.scrollOutputToBottom();
+      await expect(pageObjects.console.outputEditorContent).toContainText('"timed_out": false', {
+        timeout: SCROLL_ATTEMPT_TIMEOUT_MS,
+      });
+    }).toPass();
     await expect(pageObjects.console.outputPanelEmptyState).toBeHidden();
   });
 
