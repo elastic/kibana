@@ -33,7 +33,7 @@ spaceTest.describe(
       async ({ page, pageObjects }) => {
         await pageObjects.discover.selectClassicMode();
 
-        await expect(page.testSubj.locator('ESQLEditor')).toBeHidden();
+        await expect(pageObjects.esqlEditor.editor).toBeHidden();
         await expect(page.testSubj.locator('queryInput')).toBeVisible();
       }
     );
@@ -49,7 +49,7 @@ spaceTest.describe(
 
         await discover.selectClassicMode();
 
-        await expect(page.testSubj.locator('ESQLEditor')).toBeHidden();
+        await expect(pageObjects.esqlEditor.editor).toBeHidden();
         await expect(page.testSubj.locator('queryInput')).toBeVisible();
       }
     );
@@ -67,7 +67,7 @@ spaceTest.describe(
         await page.reload();
         await discover.waitUntilTabIsLoaded();
         // ES|QL mode survives the reload, so the switch below is a real transition.
-        await expect(page.testSubj.locator('ESQLEditor')).toBeVisible();
+        await expect(pageObjects.esqlEditor.editor).toBeVisible();
 
         await discover.selectClassicMode();
         // Switching from ES|QL cancels the async query, which can race the first classic
