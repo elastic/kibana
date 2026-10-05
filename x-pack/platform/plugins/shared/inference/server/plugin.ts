@@ -13,10 +13,9 @@ import type {
   InferenceClient,
   AnonymizationRule,
   ChatCompleteAnonymizationTarget,
-  AnonymizationSettings,
   AnonymizationFailureMode,
 } from '@kbn/inference-common';
-import { aiAnonymizationSettings, refreshBuiltInAnonymizationRules } from '@kbn/inference-common';
+import { aiAnonymizationSettings } from '@kbn/inference-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import {
@@ -48,45 +47,10 @@ import { getInferenceEndpointById } from './util/get_inference_endpoint_by_id';
 import { InferenceEndpointIdCache } from './util/inference_endpoint_id_cache';
 import { TokenUsageLogger } from './token_usage';
 import { installTokenUsageDashboard } from './dashboard';
-
-const parseLegacyAnonymizationSettings = (value: unknown): AnonymizationSettings | undefined => {
-  let parsed: unknown = value;
-
-  if (typeof value === 'string') {
-    try {
-      parsed = JSON.parse(value);
-    } catch {
-      return undefined;
-    }
-  }
-
-  if (
-    !parsed ||
-    typeof parsed !== 'object' ||
-    !Array.isArray((parsed as AnonymizationSettings).rules)
-  ) {
-    return undefined;
-  }
-
-  return parsed as AnonymizationSettings;
-};
-
-const parseLegacyAnonymizationRules = (value: unknown): AnonymizationRule[] => {
-  const settings = parseLegacyAnonymizationSettings(value);
-  if (!settings) {
-    return [];
-  }
-
-  // Master switch: when masking is disabled, no rule should run at all.
-  if (settings.maskingEnabled === false) {
-    return [];
-  }
-
-  return refreshBuiltInAnonymizationRules(settings.rules).filter((rule) => rule.enabled);
-};
-
-const parseLegacyOnFailureMode = (value: unknown): AnonymizationFailureMode =>
-  parseLegacyAnonymizationSettings(value)?.onFailure ?? 'block';
+import {
+  parseLegacyAnonymizationRules,
+  parseLegacyOnFailureMode,
+} from './chat_complete/anonymization/legacy_settings';
 
 export const resolveReplacementsEncryptionKey = async ({
   namespace,

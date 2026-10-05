@@ -105,7 +105,11 @@ export type {
   AnonymizationResponseMetadata,
   DeanonymizedMessageData,
 } from './anonymization';
-export { DEFAULT_BUILTIN_REGEX_RULES, refreshBuiltInAnonymizationRules } from './anonymization';
+export {
+  DEFAULT_BUILTIN_REGEX_RULES,
+  refreshBuiltInAnonymizationRules,
+  isAnonymizationMaskingEnabled,
+} from './anonymization';
 
 export type {
   InferenceCallbacks,
