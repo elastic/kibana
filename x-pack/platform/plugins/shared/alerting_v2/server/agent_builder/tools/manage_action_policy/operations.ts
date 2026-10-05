@@ -115,7 +115,7 @@ export class ActionPolicyOperationValidationError extends Error {
 
 function validateThrottleGroupingCompat(
   groupingMode: string | undefined | null,
-  strategy: string | undefined | null,
+  strategy: string | undefined,
   interval: string | null | undefined
 ): void {
   if (!strategy) return;
@@ -184,7 +184,7 @@ export const executeActionPolicyOperations = (
           ...next,
           throttle: {
             ...next.throttle,
-            strategy: op.strategy ?? next.throttle?.strategy ?? null,
+            ...(op.strategy !== undefined ? { strategy: op.strategy } : {}),
             ...(op.interval !== undefined ? { interval: op.interval ?? null } : { interval: null }),
           },
         };

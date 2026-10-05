@@ -31,9 +31,7 @@ export const actionPolicyResponseSchema = z
       .describe('The grouping mode for alert notifications.'),
     throttle: z
       .object({
-        strategy: throttleStrategySchema
-          .nullable()
-          .describe('The throttle strategy, or null when none is set.'),
+        strategy: throttleStrategySchema.optional().describe('The throttle strategy.'),
         interval: durationSchema
           .nullable()
           .describe(

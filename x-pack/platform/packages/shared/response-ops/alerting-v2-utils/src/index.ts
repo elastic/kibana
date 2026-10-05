@@ -24,7 +24,4 @@ export {
 } from './alert_mappers';
 export { resolveAlertLabel, type ResolveAlertLabelParams } from './resolve_alert_label';
 export { buildRulePayload } from './rule_mappers';
-export {
-  attachmentDataToActionPolicyPayload,
-  throttleResponseToRequest,
-} from './action_policy_mappers';
+export { attachmentDataToActionPolicyPayload } from './action_policy_mappers';

@@ -5,22 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ActionPolicyAttachmentData,
-  ActionPolicyResponse,
-  CreateActionPolicyData,
-} from '@kbn/alerting-v2-schemas';
-
-/**
- * Converts a response `throttle` to the request shape, which omits an unset strategy instead of sending null.
- */
-export const throttleResponseToRequest = (
-  throttle: ActionPolicyResponse['throttle'] | undefined
-): CreateActionPolicyData['throttle'] => {
-  if (throttle == null) return undefined;
-  const { strategy, interval } = throttle;
-  return { ...(strategy != null && { strategy }), interval };
-};
+import type { ActionPolicyAttachmentData, CreateActionPolicyData } from '@kbn/alerting-v2-schemas';
 
 /**
  * Maps partial action policy attachment data to the API request payload,
@@ -36,5 +21,5 @@ export const attachmentDataToActionPolicyPayload = (
   ...(data.matcher !== undefined ? { matcher: data.matcher ?? undefined } : {}),
   ...(data.group_by !== undefined ? { group_by: data.group_by ?? undefined } : {}),
   ...(data.grouping_mode !== undefined ? { grouping_mode: data.grouping_mode ?? undefined } : {}),
-  ...(data.throttle !== undefined ? { throttle: throttleResponseToRequest(data.throttle) } : {}),
+  ...(data.throttle !== undefined ? { throttle: data.throttle ?? undefined } : {}),
 });

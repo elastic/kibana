@@ -47,7 +47,7 @@ export const getGroupingModeLabel = (mode: GroupingMode | null | undefined): str
 };
 
 interface ThrottleInput {
-  strategy?: ThrottleStrategy | null;
+  strategy?: ThrottleStrategy;
   interval?: string | null;
 }
 
