@@ -7,7 +7,6 @@
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { z, lazySchema } from '@kbn/zod/v4';
-import type { StartServicesAccessor } from '@kbn/core/server';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import type { PolicyDiffEntry } from '../domain/diff_policy_config';
 import { describePathWritability } from '../domain/field_registry';
@@ -265,14 +264,11 @@ const presentComparePolicies = (
 
 export const createComparePoliciesTool = ({
   endpointAppContextService,
-  getStartServices,
 }: {
   endpointAppContextService: EndpointAppContextService;
-  getStartServices: StartServicesAccessor;
 }): BuiltinSkillBoundedTool<typeof comparePoliciesSchema> =>
   createPolicyTool({
     endpointAppContextService,
-    getStartServices,
     id: COMPARE_POLICIES_TOOL_ID,
     description:
       'Compare two Elastic Defend policy sides in the current space. ' +

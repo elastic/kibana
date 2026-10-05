@@ -6,7 +6,6 @@
  */
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import type { StartServicesAccessor } from '@kbn/core/server';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import {
@@ -71,14 +70,11 @@ export const getPolicyFieldReferenceSchema = lazySchema(() => {
 
 export const createGetPolicyFieldReferenceTool = ({
   endpointAppContextService,
-  getStartServices,
 }: {
   endpointAppContextService: EndpointAppContextService;
-  getStartServices: StartServicesAccessor;
 }): BuiltinSkillBoundedTool<typeof getPolicyFieldReferenceSchema> =>
   createPolicyTool({
     endpointAppContextService,
-    getStartServices,
     id: GET_POLICY_FIELD_REFERENCE_TOOL_ID,
     description:
       'Look up Elastic Defend policy settings. Pass exactly one required selector object. ' +

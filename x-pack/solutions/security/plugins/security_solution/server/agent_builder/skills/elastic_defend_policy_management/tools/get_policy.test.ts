@@ -7,7 +7,6 @@
 
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { createOtherResult } from '@kbn/agent-builder-server';
-import type { StartServicesAccessor } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { policyFactory } from '../../../../../common/endpoint/models/policy_config';
@@ -28,7 +27,6 @@ jest.mock('./create_policy_tool', () => ({
 }));
 
 const SPACE_ID = 'space-marketing';
-const getStartServices = jest.fn() as unknown as StartServicesAccessor;
 const mockedCreatePolicyTool = jest.mocked(createPolicyTool);
 const mockService = {
   getPolicy: jest.fn(),
@@ -70,7 +68,6 @@ const createContext = () =>
 const getResult = async (reference: z.infer<typeof getPolicySchema>) => {
   const tool = createGetPolicyTool({
     endpointAppContextService: createMockEndpointAppContextService(),
-    getStartServices,
   });
   const result = await tool.handler(reference, createContext());
   if (!('results' in result)) {
@@ -160,12 +157,10 @@ describe('createGetPolicyTool', () => {
   it('registers the approved id, schema, and 12000-token budget without wrapper authorization', () => {
     createGetPolicyTool({
       endpointAppContextService: createMockEndpointAppContextService(),
-      getStartServices,
     });
 
     expect(mockedCreatePolicyTool).toHaveBeenCalledWith({
       endpointAppContextService: expect.anything(),
-      getStartServices,
       id: GET_POLICY_TOOL_ID,
       description: expect.any(String),
       schema: getPolicySchema,

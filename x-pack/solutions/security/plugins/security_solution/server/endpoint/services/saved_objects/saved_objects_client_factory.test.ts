@@ -7,85 +7,83 @@
 
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import type { StartServicesAccessor } from '@kbn/core/server';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import {
-  PolicyReadonlySoClientMethodNotAllowedError,
-  createRequestScopedSoClient,
-} from './create_request_scoped_so_client';
+  StrictReadonlySoClientMethodNotAllowedError,
+  SavedObjectsClientFactory,
+} from './saved_objects_client_factory';
 
 const BLOCKED_METHODS = ['create', 'createPointInTimeFinder'] as const;
 
 const createDeps = () => {
   const request = httpServerMock.createKibanaRequest();
   const scopedClient = savedObjectsClientMock.create();
-  const getScopedClient = jest.fn().mockReturnValue(scopedClient);
-  const getStartServices = jest.fn(async () => [
-    { savedObjects: { getScopedClient } },
-  ]) as unknown as StartServicesAccessor;
+  const savedObjectsServiceStart = savedObjectsServiceMock.createStartContract();
+  savedObjectsServiceStart.getScopedClient.mockReturnValue(scopedClient);
+  const factory = new SavedObjectsClientFactory(savedObjectsServiceStart);
 
-  return { request, scopedClient, getScopedClient, getStartServices };
+  return { request, scopedClient, savedObjectsServiceStart, factory };
 };
 
-describe('createRequestScopedSoClient', () => {
-  it('passes the identical request and Security-only exclusion to Core', async () => {
-    const { request, getScopedClient, getStartServices } = createDeps();
+describe('SavedObjectsClientFactory.createRequestScopedSoClient', () => {
+  it('passes the identical request and Security-only exclusion to Core', () => {
+    const { request, savedObjectsServiceStart, factory } = createDeps();
 
-    await createRequestScopedSoClient({ getStartServices, request, readonly: true });
+    factory.createRequestScopedSoClient({ request, readonly: true });
 
-    expect(getStartServices).toHaveBeenCalledTimes(1);
-    expect(getScopedClient).toHaveBeenCalledTimes(1);
-    expect(getScopedClient.mock.calls[0][0]).toBe(request);
-    expect(getScopedClient.mock.calls[0][1]).toEqual({
+    expect(savedObjectsServiceStart.getScopedClient).toHaveBeenCalledTimes(1);
+    expect(savedObjectsServiceStart.getScopedClient.mock.calls[0][0]).toBe(request);
+    expect(savedObjectsServiceStart.getScopedClient.mock.calls[0][1]).toEqual({
       excludedExtensions: [SECURITY_EXTENSION_ID],
     });
-    expect(getScopedClient.mock.calls[0][1]?.excludedExtensions).not.toContain(SPACES_EXTENSION_ID);
-    expect(getScopedClient.mock.calls[0][1]).not.toHaveProperty('includedHiddenTypes');
+    expect(
+      savedObjectsServiceStart.getScopedClient.mock.calls[0][1]?.excludedExtensions
+    ).not.toContain(SPACES_EXTENSION_ID);
+    expect(savedObjectsServiceStart.getScopedClient.mock.calls[0][1]).not.toHaveProperty(
+      'includedHiddenTypes'
+    );
   });
 
-  it('returns the request-scoped client unwrapped for write access', async () => {
-    const { request, scopedClient, getStartServices } = createDeps();
+  it('returns the request-scoped client unwrapped for write access', () => {
+    const { request, scopedClient, factory } = createDeps();
 
-    await expect(
-      createRequestScopedSoClient({ getStartServices, request, readonly: false })
-    ).resolves.toBe(scopedClient);
+    expect(factory.createRequestScopedSoClient({ request, readonly: false })).toBe(scopedClient);
   });
 
-  it.each(BLOCKED_METHODS)('throws the local error when accessing %s', async (methodName) => {
-    const { request, getStartServices } = createDeps();
-    const client = await createRequestScopedSoClient({
-      getStartServices,
+  it.each(BLOCKED_METHODS)('throws the local error when accessing %s', (methodName) => {
+    const { request, factory } = createDeps();
+    const client = factory.createRequestScopedSoClient({
       request,
       readonly: true,
     });
 
-    expect(() => client[methodName]).toThrow(PolicyReadonlySoClientMethodNotAllowedError);
+    expect(() => client[methodName]).toThrow(StrictReadonlySoClientMethodNotAllowedError);
     expect(() => client[methodName]).toThrow(
       `Method [${methodName}] not allowed on readonly SO client`
     );
   });
 
-  it('keeps namespace-scoped clients readonly recursively', async () => {
-    const { request, scopedClient, getStartServices } = createDeps();
+  it('keeps namespace-scoped clients readonly recursively', () => {
+    const { request, scopedClient, factory } = createDeps();
     const namespacedClient = savedObjectsClientMock.create();
     scopedClient.asScopedToNamespace.mockReturnValue(namespacedClient);
 
-    const client = await createRequestScopedSoClient({
-      getStartServices,
+    const client = factory.createRequestScopedSoClient({
       request,
       readonly: true,
     });
     const scoped = client.asScopedToNamespace('space-b');
 
     expect(scopedClient.asScopedToNamespace).toHaveBeenCalledWith('space-b');
-    expect(() => scoped.create).toThrow(PolicyReadonlySoClientMethodNotAllowedError);
+    expect(() => scoped.create).toThrow(StrictReadonlySoClientMethodNotAllowedError);
     expect(() => scoped.asScopedToNamespace('space-c').delete).toThrow(
-      PolicyReadonlySoClientMethodNotAllowedError
+      StrictReadonlySoClientMethodNotAllowedError
     );
   });
 
   it('delegates get and find to the Core client unchanged', async () => {
-    const { request, scopedClient, getStartServices } = createDeps();
+    const { request, scopedClient, factory } = createDeps();
     const savedObject = {
       id: 'policy-1',
       type: 'fleet-package-policies',
@@ -101,8 +99,7 @@ describe('createRequestScopedSoClient', () => {
     scopedClient.get.mockResolvedValue(savedObject);
     scopedClient.find.mockResolvedValue(findResponse);
 
-    const client = await createRequestScopedSoClient({
-      getStartServices,
+    const client = factory.createRequestScopedSoClient({
       request,
       readonly: true,
     });
