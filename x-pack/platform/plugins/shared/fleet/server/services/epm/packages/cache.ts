@@ -17,13 +17,17 @@ import type { PackageInfo } from '../../../../common';
 
 const cacheStore = new AsyncLocalStorage<CacheSession>();
 
+type PackageInfoCacheEntry =
+  | { status: 'fulfilled'; packageInfo: PackageInfo }
+  | { status: 'rejected'; error: unknown };
+
 const PACKAGE_INFO_CACHE_SIZE = 20;
 const PACKAGE_ASSETS_MAP_CACHE_SIZE = 1;
 const AGENT_TEMPLATE_ASSETS_MAP_CACHE_SIZE = 5;
 const HANDLEBARS_COMPILE_TEMPLATE_CACHE_SIZE = 200;
 
 class CacheSession {
-  private _packageInfoCache?: LRUCache<string, PackageInfo>;
+  private _packageInfoCache?: LRUCache<string, PackageInfoCacheEntry>;
 
   private _packageAssetsMap?: LRUCache<string, AssetsMap>;
 
@@ -35,7 +39,7 @@ class CacheSession {
 
   getPackageInfoCache() {
     if (!this._packageInfoCache) {
-      this._packageInfoCache = new LRUCache<string, PackageInfo>({
+      this._packageInfoCache = new LRUCache<string, PackageInfoCacheEntry>({
         max: PACKAGE_INFO_CACHE_SIZE,
       });
     }
@@ -80,12 +84,41 @@ class CacheSession {
   }
 }
 
+const packageInfoCacheKey = (pkgName: string, pkgVersion: string) => `${pkgName}:${pkgVersion}`;
+
 export function getPackageInfoCache(pkgName: string, pkgVersion: string) {
-  return cacheStore.getStore()?.getPackageInfoCache()?.get(`${pkgName}:${pkgVersion}`);
+  const entry = cacheStore
+    .getStore()
+    ?.getPackageInfoCache()
+    ?.get(packageInfoCacheKey(pkgName, pkgVersion));
+  if (entry?.status === 'fulfilled') {
+    return entry.packageInfo;
+  }
+}
+
+/** A failed lookup stored for this cache session. Absent when the key was never fetched. */
+export function getPackageInfoCacheError(pkgName: string, pkgVersion: string): unknown {
+  const entry = cacheStore
+    .getStore()
+    ?.getPackageInfoCache()
+    ?.get(packageInfoCacheKey(pkgName, pkgVersion));
+  if (entry?.status === 'rejected') {
+    return entry.error;
+  }
 }
 
 export function setPackageInfoCache(pkgName: string, pkgVersion: string, packageInfo: PackageInfo) {
-  return cacheStore.getStore()?.getPackageInfoCache()?.set(`${pkgName}:${pkgVersion}`, packageInfo);
+  return cacheStore
+    .getStore()
+    ?.getPackageInfoCache()
+    ?.set(packageInfoCacheKey(pkgName, pkgVersion), { status: 'fulfilled', packageInfo });
+}
+
+export function setPackageInfoCacheError(pkgName: string, pkgVersion: string, error: unknown) {
+  return cacheStore
+    .getStore()
+    ?.getPackageInfoCache()
+    ?.set(packageInfoCacheKey(pkgName, pkgVersion), { status: 'rejected', error });
 }
 
 export function getPackageAssetsMapCache(pkgName: string, pkgVersion: string) {
@@ -135,7 +168,11 @@ export function setHandlebarsCompiledTemplateCache(tplStr: string, tpl: Template
 }
 
 export async function runWithCache<T = any>(cb: () => Promise<T>): Promise<T> {
-  const cache = new CacheSession();
+  // A nested call must keep the outer session. AsyncLocalStorage.run would replace it,
+  // so the inner lookup would miss the outer cache and be discarded on return.
+  if (cacheStore.getStore()) {
+    return cb();
+  }
 
-  return cacheStore.run(cache, cb);
+  return cacheStore.run(new CacheSession(), cb);
 }

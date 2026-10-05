@@ -92,7 +92,9 @@ import {
   getPackageAssetsMapCache,
   setPackageAssetsMapCache,
   getPackageInfoCache,
+  getPackageInfoCacheError,
   setPackageInfoCache,
+  setPackageInfoCacheError,
   getAgentTemplateAssetsMapCache,
   setAgentTemplateAssetsMapCache,
 } from './cache';
@@ -521,6 +523,43 @@ export async function getPackageInfo({
   if (cacheResult) {
     return cacheResult;
   }
+  const cachedError = getPackageInfoCacheError(pkgName, pkgVersion);
+  if (cachedError !== undefined) {
+    throw cachedError;
+  }
+
+  try {
+    return await loadPackageInfo({
+      savedObjectsClient,
+      pkgName,
+      pkgVersion,
+      skipArchive,
+      ignoreUnverified,
+      prerelease,
+    });
+  } catch (error) {
+    // Remember the failure for this request so a missing package is not fetched again
+    // for every package policy in the same cache session.
+    setPackageInfoCacheError(pkgName, pkgVersion, error);
+    throw error;
+  }
+}
+
+async function loadPackageInfo({
+  savedObjectsClient,
+  pkgName,
+  pkgVersion,
+  skipArchive = false,
+  ignoreUnverified = false,
+  prerelease,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+  pkgVersion: string;
+  skipArchive?: boolean;
+  ignoreUnverified?: boolean;
+  prerelease?: boolean;
+}): Promise<PackageInfo> {
   const [savedObject, latestPackage] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
     Registry.fetchFindLatestPackageOrUndefined(pkgName, { prerelease }),
