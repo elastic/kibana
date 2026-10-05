@@ -119,8 +119,8 @@ describe('ViewExecutionsLink', () => {
     expect(link).toBeDisabled();
     expect(link).not.toHaveAttribute('href');
 
-    // `EuiToolTip` reveals its content on hover only, and wraps the disabled button so the
-    // anchor still receives the pointer event.
+    // `EuiToolTip` reveals its content on hover or focus; the wrapper span is what makes
+    // that reachable, because a disabled button cannot receive focus itself.
     fireEvent.mouseOver(link);
 
     expect(await screen.findByText(REQUIRED_TOOLTIP)).toBeInTheDocument();
@@ -145,5 +145,18 @@ describe('ViewExecutionsLink', () => {
     expect(link).not.toBeDisabled();
     expect(link).toHaveAttribute('href', EXECUTIONS_HREF);
     expect(link).toHaveAttribute('target', '_blank');
+  });
+
+  it('focusably wraps the disabled link so the reason is not pointer-only', () => {
+    renderLink({ showManagedWorkflows: false, canChangeAdvancedSettings: false });
+
+    const link = screen.getByTestId(LINK_TEST_SUBJ);
+    expect(link).toBeDisabled();
+
+    // A disabled button cannot take focus, so the tooltip's anchor is a wrapper span.
+    // Removing that wrapper is what would make the reason hover-only again.
+    const anchor = link.closest('[tabindex="0"]');
+    expect(anchor).not.toBeNull();
+    expect(anchor).toContainElement(link);
   });
 });
