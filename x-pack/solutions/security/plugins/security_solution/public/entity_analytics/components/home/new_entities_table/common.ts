@@ -7,8 +7,6 @@
 
 import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
 import {
-  getFieldEvaluationsEsql,
-  getEuidEsqlEvaluation,
   getEuidNamespaceSourceFields,
   getEuidSourceFields,
 } from '@kbn/entity-store/common/domain/euid';
@@ -18,6 +16,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { lastValueFrom } from 'rxjs';
+import { getEuidEsqlEvaluation, getFieldEvaluationsEsql } from './euid_esql';
 import { isAbortError } from '../../../../common/utils/exceptions';
 
 // ── constants ────────────────────────────────────────────────────────────────
