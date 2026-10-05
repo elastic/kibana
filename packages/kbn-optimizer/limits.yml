@@ -46,7 +46,7 @@ pageLoadAssetSize:
   dataViewFieldEditor: 26024
   dataViewManagement: 6250
   dataViews: 66000
-  dataVisualizer: 32727
+  dataVisualizer: 33244
   developerToolbar: 6043
   devTools: 8107
   discover: 32000
@@ -62,7 +62,7 @@ pageLoadAssetSize:
   entityStore: 17200
   esql: 29469
   esqlDataGrid: 10209
-  esUiShared: 101220
+  esUiShared: 102387
   evals: 6117
   eventAnnotation: 22334
   eventAnnotationListing: 13164
@@ -82,7 +82,7 @@ pageLoadAssetSize:
   files: 6037
   filesManagement: 5208
   fileUpload: 22957
-  fleet: 235000
+  fleet: 235470
   genAiSettings: 6342
   globalSearch: 6890
   globalSearchBar: 31212
@@ -130,7 +130,7 @@ pageLoadAssetSize:
   newsfeed: 11110
   noDataPage: 1749
   notificationCenter: 1791
-  observability: 107797
+  observability: 108732
   observabilityAgentBuilder: 10178
   observabilityAIAssistant: 67295
   observabilityAIAssistantApp: 17100
@@ -164,7 +164,7 @@ pageLoadAssetSize:
   searchHomepage: 9005
   searchInferenceEndpoints: 9765
   searchNavigation: 8900
-  searchNotebooks: 18826
+  searchNotebooks: 20151
   searchPlayground: 12122
   searchprofiler: 6509
   searchQueryRules: 6689
