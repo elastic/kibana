@@ -161,6 +161,7 @@ describe('ConversationsActionsGroup', () => {
           investigation={makeInvestigation()}
           onClickAction={onClickAction}
           onOpenChat={jest.fn()}
+          onCopyLink={jest.fn()}
           canCloseInvestigation={true}
         />
       );
