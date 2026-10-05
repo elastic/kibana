@@ -621,7 +621,7 @@ export class RulesClient {
     });
 
     await this.validateSchedule([
-      { updatedEvery: prepared.attrs.schedule.every, checkLimit: true },
+      { updatedEvery: prepared.attrs.schedule.every, checkLimit: prepared.enabled },
     ]);
 
     const { created, errors } = await this.persistPreparedRules([prepared]);

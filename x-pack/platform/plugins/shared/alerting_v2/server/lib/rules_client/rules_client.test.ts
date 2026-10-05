@@ -4436,6 +4436,18 @@ describe('RulesClient', () => {
         expect(rulesSavedObjectService.bulkCreate).not.toHaveBeenCalled();
       });
 
+      it('allows creating a disabled rule even when the limit is already reached', async () => {
+        const client = createClient({ maxScheduledPerMinute: 1 });
+        rulesSavedObjectService.getTotalScheduledPerMinute.mockResolvedValueOnce(1);
+
+        await expect(
+          client.createRule({ data: baseCreateData, options: { enabled: false } })
+        ).resolves.toBeDefined();
+
+        expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalled();
+        expect(rulesSavedObjectService.getTotalScheduledPerMinute).not.toHaveBeenCalled();
+      });
+
       it('allows creating a rule when there is remaining capacity', async () => {
         const client = createClient({ maxScheduledPerMinute: 400 });
         rulesSavedObjectService.getTotalScheduledPerMinute.mockResolvedValueOnce(10);
