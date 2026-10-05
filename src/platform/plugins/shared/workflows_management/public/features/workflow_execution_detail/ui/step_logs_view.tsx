@@ -18,6 +18,9 @@ import {
 } from '@kbn/workflows/types/latest';
 import type { StepLogEntry, StepLogsApi, StepLogsConfig } from '@kbn/workflows-extensions/public';
 
+const INITIAL_POLL_INTERVAL_MS = 500;
+const MAX_POLL_INTERVAL_MS = 5000;
+
 const terminalContainerCss = css`
   font-family: monospace;
   font-size: 12px;
@@ -183,6 +186,7 @@ export const StepLogsView: React.FC<StepLogsViewProps> = ({ stepExecution, confi
 
   useEffect(() => {
     let cancelled = false;
+    let delay = INITIAL_POLL_INTERVAL_MS;
 
     const fetchOnce = (): Promise<StepLogEntry[]> => {
       const { getLogs } = configRef.current;
@@ -212,7 +216,9 @@ export const StepLogsView: React.FC<StepLogsViewProps> = ({ stepExecution, confi
         !cancelled &&
         !TerminalExecutionStatuses.includes(stepExecutionRef.current.status as ExecutionStatus)
       ) {
-        setTimeout(poll, 500);
+        // Back off gradually so long-running steps do not poll at full rate forever.
+        delay = Math.min(delay * 1.5, MAX_POLL_INTERVAL_MS);
+        setTimeout(poll, delay);
       }
     };
 

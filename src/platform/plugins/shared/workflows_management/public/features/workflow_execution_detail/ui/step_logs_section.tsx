@@ -38,12 +38,16 @@ export const StepLogsSection = React.memo<StepLogsSectionProps>(
       [stepExecution.stepType, workflowsExtensions]
     );
 
-    const logsApi = useMemo<StepLogsApi>(
-      () => ({
+    const logsApi = useMemo<StepLogsApi>(() => {
+      // Logs are sorted ascending, so full pages already fetched never change.
+      // Each call resumes from the last (possibly partial) page instead of re-downloading everything.
+      const cachedLogs: Awaited<ReturnType<typeof api.getExecutionLogs>>['logs'] = [];
+      return {
         fetchLogs: async () => {
           if (!stepExecution.id) return [];
-          const allLogs: Awaited<ReturnType<typeof api.getExecutionLogs>>['logs'] = [];
-          for (let page = 1; page <= MAX_LOG_PAGES; page++) {
+          const startPage = Math.floor(cachedLogs.length / LOGS_PAGE_SIZE) + 1;
+          const allLogs = cachedLogs.slice(0, (startPage - 1) * LOGS_PAGE_SIZE);
+          for (let page = startPage; page <= MAX_LOG_PAGES; page++) {
             const response = await api.getExecutionLogs(workflowExecutionId, {
               stepExecutionId: stepExecution.id,
               sortOrder: 'asc',
@@ -53,11 +57,11 @@ export const StepLogsSection = React.memo<StepLogsSectionProps>(
             allLogs.push(...response.logs);
             if (response.logs.length === 0 || allLogs.length >= response.total) break;
           }
+          cachedLogs.splice(0, cachedLogs.length, ...allLogs);
           return allLogs;
         },
-      }),
-      [api, workflowExecutionId, stepExecution.id]
-    );
+      };
+    }, [api, workflowExecutionId, stepExecution.id]);
 
     if (!logsConfig?.enabled) {
       return null;
