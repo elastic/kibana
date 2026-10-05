@@ -10,7 +10,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { JsonObject } from '@kbn/utility-types';
 import type { EsWorkflow } from '@kbn/workflows';
-import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
+import { getInheritedChildMetadata, toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { WorkflowExecutionRepository } from '../../../repositories/workflow_execution_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../../types';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
@@ -47,6 +47,7 @@ export class WorkflowExecuteAsyncStrategy {
           parentWorkflowExecutionId: workflowExecution.id,
           parentStepId: this.stepExecutionRuntime.node.stepId,
           parentDepth,
+          ...getInheritedChildMetadata(workflowExecution.metadata),
         },
         request
       );

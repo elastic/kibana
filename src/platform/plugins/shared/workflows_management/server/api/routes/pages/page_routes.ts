@@ -9,7 +9,11 @@
 
 import { schema } from '@kbn/config-schema';
 import type { WorkflowDetailDto } from '@kbn/workflows';
-import { isPageTrigger, toWorkflowExecutionEngineModel } from '@kbn/workflows';
+import {
+  isPageTrigger,
+  toWorkflowExecutionEngineModel,
+  UNTRUSTED_INPUTS_METADATA_KEY,
+} from '@kbn/workflows';
 import {
   PAGE_FORM_API_PATH,
   PAGE_KEY_MAX_LENGTH,
@@ -144,7 +148,13 @@ export function registerPageSubmitRoute(deps: RouteDependencies, runAsApiKey: st
             inputs,
             request: buildPageRunRequest(runAsApiKey),
             preprocessingContext: context,
-            metadata: { submittedVia: 'page', pageKey, submitter },
+            // The visitor is anonymous: its values must stay data, never expressions.
+            metadata: {
+              submittedVia: 'page',
+              pageKey,
+              submitter,
+              [UNTRUSTED_INPUTS_METADATA_KEY]: true,
+            },
           });
 
           audit.logWorkflowRun(request, { workflowId, executionId: workflowExecutionId });

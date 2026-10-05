@@ -157,6 +157,28 @@ describe('WorkflowExecuteSyncStrategy', () => {
       );
     });
 
+    it('marks the child as untrusted when the parent has untrusted inputs', async () => {
+      (mockStepRuntime.workflowExecution as any).metadata = {
+        submittedVia: 'page',
+        untrustedInputs: true,
+      };
+
+      await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
+
+      // Only the flag is inherited, not the rest of the parent's metadata.
+      expect(mockEngine.executeWorkflow).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({ metadata: { untrustedInputs: true } }),
+        mockRequest
+      );
+    });
+
+    it('passes no metadata to the child when the parent inputs are trusted', async () => {
+      await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
+
+      expect(mockEngine.executeWorkflow.mock.calls[0][1]).not.toHaveProperty('metadata');
+    });
+
     it('should return failed when engine throws', async () => {
       mockEngine.executeWorkflow.mockRejectedValue(new Error('Engine failed'));
 

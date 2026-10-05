@@ -9,7 +9,7 @@
 
 import { isDeepStrictEqual } from 'node:util';
 import type { CoreStart, Logger } from '@kbn/core/server';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, hasUntrustedInputs } from '@kbn/workflows';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import {
   applyInputDefaults,
@@ -56,9 +56,12 @@ export const validateWorkflowInputs = async (
 
   // Caller-provided values are data. Evaluate only the explicit whole-expression
   // form and preserve ordinary strings that happen to resemble Liquid templates.
+  // Untrusted callers (an anonymous page visitor) never get expressions evaluated:
+  // an expression could read `consts` and the rest of the render context.
+  const evaluatesExpressions = !hasUntrustedInputs(renderContext.metadata);
   const renderProvidedValue = (value: unknown): unknown => {
     if (typeof value === 'string') {
-      return value.startsWith('${{') && value.endsWith('}}')
+      return evaluatesExpressions && value.startsWith('${{') && value.endsWith('}}')
         ? templateEngine.render(value, renderContext)
         : value;
     }
