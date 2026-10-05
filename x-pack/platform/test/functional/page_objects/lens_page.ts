@@ -166,6 +166,37 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
     },
 
+    /**
+     * Selects a combobox option and waits for the choice to be committed to the Lens state,
+     * re-selecting when the option click never landed.
+     *
+     * @param testTargetId - the selector of the combobox, which must also carry `committedAttribute`
+     * @param committedAttribute - the attribute holding the committed option label
+     * @param name - the option label to select
+     */
+    async selectCommittedOptionFromComboBox(
+      testTargetId: string,
+      committedAttribute: string,
+      name: string
+    ) {
+      // EUI drops the option click under load, and the filter text setElement leaves behind makes
+      // the input read back as `name` either way. Match case-insensitively, as comboBox itself does.
+      const expected = name.trim().toLowerCase();
+      await retry.tryWithRetries(
+        `select [${name}] from [${testTargetId}]`,
+        async () => {
+          await this.selectOptionFromComboBox(testTargetId, name);
+          await retry.waitForWithTimeout(`[${name}] selection to commit`, 10_000, async () => {
+            const combo = await testSubjects.find(testTargetId);
+            const committed = (await combo.getAttribute(committedAttribute)) ?? '';
+            return committed.trim().toLowerCase() === expected;
+          });
+        },
+        { retryCount: 3, timeout: 60_000 },
+        async () => comboBox.clearInputField(testTargetId)
+      );
+    },
+
     async configureQueryAnnotation(opts: {
       queryString: string;
       timeField: string;
@@ -298,15 +329,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       isPreviousIncompatible?: boolean;
     }) {
       if (opts.operation) {
-        await this.selectOptionFromComboBox(
-          'indexPattern-subFunction-selection-row',
+        await this.selectCommittedOptionFromComboBox(
+          'indexPattern-subFunction-selection-row > indexPattern-reference-function',
+          'data-selected-function',
           opts.operation
         );
       }
 
       if (opts.field) {
-        await this.selectOptionFromComboBox(
-          'indexPattern-reference-field-selection-row',
+        await this.selectCommittedOptionFromComboBox(
+          'indexPattern-reference-field-selection-row > indexPattern-dimension-field',
+          'data-selected-field',
           opts.field
         );
       }
@@ -1604,6 +1637,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
     async getMetricTiles() {
       return findService.allByCssSelector('[data-test-subj="mtrVis"] .echChart li');
+    },
+
+    /**
+     * Number of columns the rendered metric grid is laid out with, which reflects the
+     * "Layout columns" (`maxCols`) setting once it has been committed to the Lens state.
+     */
+    async getMetricGridColumnCount() {
+      const grid = await findService.byCssSelector('[data-test-subj="mtrVis"] .echMetricContainer');
+      const columns = await grid.getComputedStyle('grid-template-columns');
+      return columns.trim().split(/\s+/).length;
     },
 
     async getMetricElementIfExists(

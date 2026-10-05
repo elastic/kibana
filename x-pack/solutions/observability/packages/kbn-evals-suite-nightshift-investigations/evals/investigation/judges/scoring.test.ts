@@ -7,14 +7,19 @@
 
 import type { InvestigationStructuredOutput } from '@kbn/nightshift-investigations-plugin/common';
 import {
+  clampDecisionTreeHelpfulnessScore,
   clampGoalScore,
+  clampTruthfulnessScore,
   clampUnitScore,
   composeAnswerText,
+  composeDecisionTreesText,
   composeEvidenceText,
+  composeTrajectoryText,
   extractReferenceAnswer,
   goalScorePassed,
-  hasLeakageIndicators,
+  normalizeDecisionTreeHelpfulnessScore,
   normalizeGoalScore,
+  normalizeTruthfulnessScore,
 } from './scoring';
 
 describe('goal score helpers', () => {
@@ -45,6 +50,61 @@ describe('goal score helpers', () => {
   });
 });
 
+describe('truthfulness score helpers', () => {
+  it.each([
+    [1, 0],
+    [2, 0.25],
+    [3, 0.5],
+    [4, 0.75],
+    [5, 1],
+  ])('normalizes raw truthfulness score %d to %d', (raw, expected) => {
+    expect(normalizeTruthfulnessScore(raw)).toBeCloseTo(expected, 5);
+  });
+
+  it('clamps and rounds out-of-range or fractional raw scores', () => {
+    expect(clampTruthfulnessScore(0)).toBe(1);
+    expect(clampTruthfulnessScore(9)).toBe(5);
+    expect(clampTruthfulnessScore(3.4)).toBe(3);
+    expect(clampTruthfulnessScore(4.6)).toBe(5);
+    expect(clampTruthfulnessScore(NaN)).toBe(1);
+  });
+});
+
+describe('decision tree helpfulness score helpers', () => {
+  it.each([
+    [1, 0],
+    [2, 0.25],
+    [3, 0.5],
+    [4, 0.75],
+    [5, 1],
+  ])('normalizes raw helpfulness score %d to %d', (raw, expected) => {
+    expect(normalizeDecisionTreeHelpfulnessScore(raw)).toBeCloseTo(expected, 5);
+  });
+
+  it('clamps and rounds out-of-range or fractional raw scores', () => {
+    expect(clampDecisionTreeHelpfulnessScore(0)).toBe(1);
+    expect(clampDecisionTreeHelpfulnessScore(9)).toBe(5);
+    expect(clampDecisionTreeHelpfulnessScore(3.4)).toBe(3);
+    expect(clampDecisionTreeHelpfulnessScore(NaN)).toBe(1);
+  });
+});
+
+describe('composeDecisionTreesText', () => {
+  it('returns an empty string when no tree was accessed', () => {
+    expect(composeDecisionTreesText(undefined)).toBe('');
+    expect(composeDecisionTreesText([])).toBe('');
+  });
+
+  it('renders each accessed tree under its id, with a placeholder for missing content', () => {
+    const text = composeDecisionTreesText([
+      { tree_id: 'symptom:kafka-consumer-lag', content: '1. Check consumer group lag.' },
+      { tree_id: 'symptom:high-cpu', content: '' },
+    ]);
+    expect(text).toContain('### symptom:kafka-consumer-lag\n1. Check consumer group lag.');
+    expect(text).toContain('### symptom:high-cpu\n(opened, no readable content captured)');
+  });
+});
+
 describe('clampUnitScore', () => {
   it('bounds values into [0, 1] and defaults non-finite input to 0', () => {
     expect(clampUnitScore(0.42)).toBe(0.42);
@@ -70,29 +130,16 @@ describe('extractReferenceAnswer', () => {
   });
 });
 
-describe('hasLeakageIndicators', () => {
-  it('flags post-incident resolution language', () => {
-    expect(hasLeakageIndicators('The incident resolved after rollback completed.')).toBe(true);
-    expect(hasLeakageIndicators('This was a post-incident note.')).toBe(true);
-    expect(hasLeakageIndicators('PEV-123 was later mitigated.')).toBe(true);
-  });
-
-  it('does not flag ordinary investigation prose', () => {
-    expect(hasLeakageIndicators('Error rate rose after the deploy at 18:00 UTC.')).toBe(false);
-    expect(hasLeakageIndicators('')).toBe(false);
-  });
-});
-
 describe('composeAnswerText', () => {
   const report: InvestigationStructuredOutput = {
     summary: 'Kafka lag grew.',
     conclusion: 'Index throttling caused consumer lag.',
-    severity: '60-high',
+    severity: 'high',
     hypotheses: [
       { candidate: 'throttling', confidence: 0.9, status: 'confirmed', reason: 'latency spiked' },
-      { candidate: 'network', confidence: 0.2, status: 'rejected' },
+      { candidate: 'network', confidence: 0.2, status: 'dismissed' },
     ],
-  } as InvestigationStructuredOutput;
+  };
 
   it('leads with the conclusion and includes confidence-sorted hypotheses', () => {
     const text = composeAnswerText(report);
@@ -108,21 +155,67 @@ describe('composeAnswerText', () => {
 });
 
 describe('composeEvidenceText', () => {
-  it('renders hypothesis evidence and recommendations', () => {
+  it('renders hypothesis evidence and recommendations, tagged with their hypothesis', () => {
     const report = {
       hypotheses: [
         {
           candidate: 'throttling',
           confidence: 0.9,
           status: 'confirmed',
-          evidence: [{ description: 'ES rejected bulk writes', esql_query: 'FROM logs-*' }],
+          evidence: [
+            {
+              description: 'ES rejected bulk writes',
+              chart: {
+                type: 'line',
+                title: 'Rejected bulk writes',
+                x_axis: { type: 'time' },
+                y_axis: {},
+                series: [{ name: 'rejections', points: [{ x: '2024-01-01T00:00:00Z', y: 12 }] }],
+              },
+            },
+          ],
+        },
+        {
+          candidate: 'network',
+          confidence: 0.1,
+          status: 'rejected',
+          evidence: [{ description: 'packet loss briefly spiked' }],
         },
       ],
       recommendations: [{ title: 'Raise write queue size', confidence: 0.8 }],
     } as unknown as InvestigationStructuredOutput;
     const text = composeEvidenceText(report);
-    expect(text).toContain('ES rejected bulk writes');
-    expect(text).toContain('esql: FROM logs-*');
+    expect(text).toContain('[confirmed] throttling: ES rejected bulk writes');
+    expect(text).toContain('chart: Rejected bulk writes');
+    expect(text).toContain('[rejected] network: packet loss briefly spiked');
     expect(text).toContain('recommendation: Raise write queue size');
+  });
+});
+
+describe('composeTrajectoryText', () => {
+  it('returns an empty string when there is no trajectory', () => {
+    expect(composeTrajectoryText(undefined)).toBe('');
+    expect(composeTrajectoryText([])).toBe('');
+  });
+
+  it('numbers each step with its tool id, params and result, in order', () => {
+    const text = composeTrajectoryText([
+      {
+        tool_id: 'nightshift_sandbox_view_file',
+        params: { file_path: 'decision-trees/decision_tree_high-cpu.md' },
+        result: '## Symptom: high CPU',
+      },
+      {
+        tool_id: 'nightshift_sandbox_bash',
+        params: { command: 'esql ...' },
+        result: 'exit_code: 0',
+      },
+    ]);
+    expect(text.indexOf('1. nightshift_sandbox_view_file')).toBeLessThan(
+      text.indexOf('2. nightshift_sandbox_bash')
+    );
+    expect(text).toContain('decision_tree_high-cpu.md');
+    expect(text).toContain('## Symptom: high CPU');
+    expect(text).toContain('exit_code: 0');
   });
 });

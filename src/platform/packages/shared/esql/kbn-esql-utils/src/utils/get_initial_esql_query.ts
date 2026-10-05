@@ -53,8 +53,9 @@ const hasOverlyBroadIndexPattern = (indexPattern: string): boolean =>
  * When a timeFieldName exists, a SORT DESC clause on the dataView timeFieldName is appended.
  */
 export function getInitialESQLQuery(dataView: DataView, query?: Query, filters?: Filter[]): string {
-  const hasAtTimestampField = dataView?.fields?.getByName?.('@timestamp')?.type === 'date';
   const timeFieldName = dataView?.timeFieldName;
+  const hasAtTimestampField =
+    dataView?.fields?.getByName?.('@timestamp')?.type === 'date' || timeFieldName === '@timestamp';
   const filterByTimeParams =
     !hasAtTimestampField && timeFieldName
       ? `${timeFieldName} >= ?_tstart AND ${timeFieldName} <= ?_tend`

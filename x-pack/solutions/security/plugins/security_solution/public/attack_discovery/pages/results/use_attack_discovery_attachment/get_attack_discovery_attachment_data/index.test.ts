@@ -77,6 +77,12 @@ describe('getAttackDiscoveryAttachmentData', () => {
     expect(result.mitre_attack_tactics).toEqual(['Initial Access', 'Execution']);
   });
 
+  it('sends the discovery timestamp', () => {
+    const result = getAttackDiscoveryAttachmentData({ attackDiscovery, replacements });
+
+    expect(result.timestamp).toBe(attackDiscovery.timestamp);
+  });
+
   it('omits the replacements when there are none', () => {
     const result = getAttackDiscoveryAttachmentData({ attackDiscovery, replacements: undefined });
 
@@ -87,6 +93,7 @@ describe('getAttackDiscoveryAttachmentData', () => {
       id: attackDiscovery.id,
       mitre_attack_tactics: attackDiscovery.mitreAttackTactics,
       summary_markdown: attackDiscovery.summaryMarkdown,
+      timestamp: attackDiscovery.timestamp,
       title: attackDiscovery.title,
     });
   });

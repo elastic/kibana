@@ -13,7 +13,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { ExecutionType } from '@kbn/workflows';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import type {
-  IWorkflowEventLoggerService,
+  IWorkflowLogsQueryService,
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
 } from '@kbn/workflows-execution-engine/server';
@@ -35,7 +35,7 @@ describe('WorkflowExecutionQueryService', () => {
   let mockWorkflowDataClient: jest.Mocked<WorkflowExecutionsDataClient>;
   let mockStepDataClient: jest.Mocked<StepExecutionsDataClient>;
   let mockLogger: ReturnType<typeof loggerMock.create>;
-  let mockEventLoggerService: jest.Mocked<IWorkflowEventLoggerService>;
+  let mockEventLoggerService: jest.Mocked<IWorkflowLogsQueryService>;
   let service: WorkflowExecutionQueryService;
 
   beforeEach(() => {

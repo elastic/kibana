@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import moment from 'moment';
+import { of } from 'rxjs';
 import { act, waitFor } from '@testing-library/react';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
@@ -341,6 +343,97 @@ describe('When on the policy list page', () => {
         perPage: 10,
         withAgentCount: true,
       });
+    });
+  });
+
+  describe('deployed version and outdated manifests callout', () => {
+    const formatManifestDate = (version: string) =>
+      moment.utc(version, 'YYYY-MM-DD').format('MMMM DD, YYYY');
+
+    // Same manifest ages as the deleted Cypress spec. This test checks the rendered
+    // date text only. The outdated count for these ages is asserted in the search strategy test.
+    const manifestAges = () => {
+      const monthAgo = moment.utc().subtract(1, 'months').format('YYYY-MM-DD');
+      const threeDaysAgo = moment.utc().subtract(3, 'days').format('YYYY-MM-DD');
+      const eighteenMonthsAgo = moment
+        .utc()
+        .subtract(18, 'months')
+        .add(1, 'day')
+        .format('YYYY-MM-DD');
+
+      return { monthAgo, threeDaysAgo, eighteenMonthsAgo };
+    };
+
+    const setManifestVersion = (
+      policies: GetPolicyListResponse,
+      index: number,
+      version: string
+    ) => {
+      const policyValue = policies.items[index].inputs[0]?.config?.policy.value;
+      if (!policyValue) {
+        throw new Error('Mock endpoint policy is missing policy config');
+      }
+      policyValue.global_manifest_version = version;
+    };
+
+    const mockOutdatedManifestsCount = (outdatedManifestsCount: number) => {
+      (mockedContext.startServices.data.search.search as jest.Mock).mockReturnValue(
+        of({
+          rawResponse: { outdatedManifestsCount },
+          isRunning: false,
+          isPartial: false,
+        })
+      );
+    };
+
+    const waitForOutdatedManifestsCount = () =>
+      waitFor(() => {
+        expect(
+          mockedContext.queryClient.getQueryState(['endpointPackagePoliciesStatsStrategy'])?.status
+        ).toBe('success');
+      });
+
+    it('hides the callout and shows latest when the policy manifest is current', async () => {
+      getPackagePolicies.mockResolvedValue(
+        sendGetEndpointSpecificPackagePoliciesMock({ count: 1 })
+      );
+      mockOutdatedManifestsCount(0);
+      render();
+
+      await waitFor(() => {
+        expect(renderResult.getAllByTestId('policyDeployedVersion')).toHaveLength(1);
+      });
+      expect(renderResult.getByTestId('policyDeployedVersion')).toHaveTextContent('latest');
+      await waitForOutdatedManifestsCount();
+      expect(
+        renderResult.queryByTestId('policy-list-outdated-manifests-call-out')
+      ).not.toBeInTheDocument();
+    });
+
+    it('shows the callout and deployed versions for mixed manifest ages', async () => {
+      const { monthAgo, threeDaysAgo, eighteenMonthsAgo } = manifestAges();
+      const policies = sendGetEndpointSpecificPackagePoliciesMock({ count: 4 });
+      [monthAgo, threeDaysAgo, eighteenMonthsAgo].forEach((version, index) => {
+        setManifestVersion(policies, index, version);
+      });
+      getPackagePolicies.mockResolvedValue(policies);
+      mockOutdatedManifestsCount(2);
+      render();
+
+      await waitFor(() => {
+        expect(
+          renderResult.getByTestId('policy-list-outdated-manifests-call-out')
+        ).toHaveTextContent('Updates available for 2 policies');
+      });
+
+      const deployedVersions = renderResult.getAllByTestId('policyDeployedVersion');
+      expect(deployedVersions).toHaveLength(4);
+      expect(deployedVersions.map((version) => version.textContent)).toEqual([
+        formatManifestDate(monthAgo),
+        formatManifestDate(threeDaysAgo),
+        formatManifestDate(eighteenMonthsAgo),
+        'latest',
+      ]);
     });
   });
 });

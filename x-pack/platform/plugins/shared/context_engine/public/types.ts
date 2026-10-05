@@ -47,6 +47,7 @@ export type { ContextEngineAppChromeAdapter } from './app_chrome_adapter';
 
 export interface SuggestAutomationParams {
   aiIndex: GetAiIndexResponse;
+  spaceId: string;
   onSaved: () => void;
 }
 

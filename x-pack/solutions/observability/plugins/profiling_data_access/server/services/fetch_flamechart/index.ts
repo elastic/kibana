@@ -25,6 +25,7 @@ export interface FetchFlamechartParams {
   stacktraceIdsField?: string;
   query: QueryDslQueryContainer;
   totalSeconds: number;
+  abortSignal?: AbortSignal;
 }
 
 const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
@@ -37,6 +38,7 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
     stacktraceIdsField,
     query,
     totalSeconds,
+    abortSignal,
   }: FetchFlamechartParams) => {
     const [
       co2PerKWH,
@@ -56,7 +58,7 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
       core.uiSettings.client.get<number>(profilingAzureCostDiscountRate),
     ]);
 
-    const profilingEsClient = createProfilingEsClient({ esClient });
+    const profilingEsClient = createProfilingEsClient({ esClient, abortSignal });
 
     const flamegraph = await profilingEsClient.profilingFlamegraph({
       query,
