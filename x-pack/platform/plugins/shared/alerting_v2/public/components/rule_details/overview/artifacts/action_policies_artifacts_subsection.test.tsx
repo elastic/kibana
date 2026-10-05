@@ -90,7 +90,7 @@ const buildItem = (
     destinations: [{ type: 'workflow', id: 'workflow-1' }],
     matcher: null,
     group_by: null,
-    grouping_mode: 'per_episode',
+    grouping_mode: 'per_alert',
     throttle: null,
     snoozed_until: null,
     created_by: { profile_uid: 'u_user' },
