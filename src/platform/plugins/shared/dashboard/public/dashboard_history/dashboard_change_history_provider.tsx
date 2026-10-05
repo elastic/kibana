@@ -20,6 +20,8 @@ import { DASHBOARD_APP_ID, DashboardRenderer } from '..';
 import { coreServices, unifiedSearchService } from '../services/kibana_services';
 import { createDashboardChangeHistoryAdapter } from './dashboard_change_history_adapter';
 import { renderDashboardChangeHistoryBadge } from './dashboard_change_history_badge';
+import { toStoredFilters } from '@kbn/as-code-filters-transforms';
+import { css } from '@emotion/react';
 
 export interface DashboardChangeHistoryProviderProps {
   dashboardId: string;
@@ -85,14 +87,11 @@ export const DashboardChangeHistoryProvider = ({
 // };
 
 const DashboardPreview: ChangeHistoryPreviewRenderFn = ({ change, compareSpec, diffTelemetry }) => {
-  console.log({ change, compareSpec, diffTelemetry });
-
   const initialState = useRef<DashboardInitializationState>({
     ...change,
     viewMode: 'view' as const,
   });
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
-  const [filters, setFilters] = useState<Filter[]>([]);
 
   useEffect(() => {
     if (!dashboardApi) return;
@@ -100,15 +99,6 @@ const DashboardPreview: ChangeHistoryPreviewRenderFn = ({ change, compareSpec, d
       ...(change.snapshot as DashboardState),
     });
   }, [change, dashboardApi]);
-
-  useEffect(() => {
-    const filtersSubscription = dashboardApi?.filters$.subscribe((newFilters) =>
-      setFilters(newFilters ?? [])
-    );
-    return () => {
-      filtersSubscription?.unsubscribe();
-    };
-  }, [dashboardApi]);
 
   const memoized = useMemo(() => {
     /** Prevent dashboard renderer from remounting with every history item selection; instead, we will call `setState` on the API */
@@ -132,9 +122,16 @@ const DashboardPreview: ChangeHistoryPreviewRenderFn = ({ change, compareSpec, d
   }, []);
 
   return (
-    <>
-      <unifiedSearchService.ui.SearchBar appName={DASHBOARD_APP_ID} filters={filters} />
+    <div
+      css={css`
+        overflow: scroll;
+      `}
+    >
+      <unifiedSearchService.ui.SearchBar
+        appName={DASHBOARD_APP_ID}
+        filters={toStoredFilters((change.snapshot as DashboardState).filters)}
+      />
       {memoized}
-    </>
+    </div>
   );
 };
