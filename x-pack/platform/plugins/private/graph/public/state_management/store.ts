@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Action, Dispatch, Store } from 'redux';
+import type { Action, Dispatch } from 'redux';
 import { combineReducers } from 'redux';
 import {
   configureStore,
@@ -14,13 +14,9 @@ import {
 } from '@reduxjs/toolkit';
 import type { ChromeStart, CoreStart } from '@kbn/core/public';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
-import type { FieldsState } from './fields';
 import { fieldsReducer, registerFieldsListeners } from './fields';
-import type { UrlTemplatesState } from './url_templates';
 import { urlTemplatesReducer } from './url_templates';
-import type { AdvancedSettingsState } from './advanced_settings';
 import { advancedSettingsReducer } from './advanced_settings';
-import type { DatasourceState } from './datasource';
 import { datasourceReducer } from './datasource';
 import { registerDatasourceListeners } from './datasource_listeners';
 import type {
@@ -35,19 +31,10 @@ import type {
   WorkspaceLayoutController,
 } from '../types';
 import { registerPersistenceListeners } from './persistence';
-import type { MetaDataState } from './meta_data';
 import { metaDataReducer, registerMetaDataListeners } from './meta_data';
-import type { WorkspaceState } from './workspace';
 import { registerWorkspaceListeners, workspaceReducer } from './workspace';
 
-export interface GraphState {
-  fields: FieldsState;
-  urlTemplates: UrlTemplatesState;
-  advancedSettings: AdvancedSettingsState;
-  datasource: DatasourceState;
-  metaData: MetaDataState;
-  workspace: WorkspaceState;
-}
+export type GraphState = ReturnType<ReturnType<typeof createRootReducer>>;
 
 export interface GraphStoreDependencies
   extends Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme' | 'userProfile'> {
@@ -70,7 +57,10 @@ export interface GraphStoreDependencies
   mergeRuntimeGraph: (runtimeGraph: RuntimeGraph, graph: GraphData) => void;
 }
 
-export type StartGraphListening = TypedStartListening<GraphState, GraphDispatch>;
+type GraphAction = Action<string>;
+type GraphListenerDispatch = Dispatch<GraphAction>;
+
+export type StartGraphListening = TypedStartListening<GraphState, GraphListenerDispatch>;
 
 export function createRootReducer(addBasePath: (url: string) => string) {
   return combineReducers({
@@ -95,8 +85,8 @@ export const registerGraphListeners = (
   registerWorkspaceListeners(startListening, deps);
 };
 
-export const createGraphStore = (deps: GraphStoreDependencies): Store => {
-  const listenerMiddleware = createListenerMiddleware<GraphState, GraphDispatch>();
+export const createGraphStore = (deps: GraphStoreDependencies) => {
+  const listenerMiddleware = createListenerMiddleware<GraphState, GraphListenerDispatch>();
   const rootReducer = createRootReducer(deps.addBasePath);
 
   const store = configureStore({
@@ -113,5 +103,5 @@ export const createGraphStore = (deps: GraphStoreDependencies): Store => {
   return store;
 };
 
-export type GraphStore = Store<GraphState, Action<string>>;
-export type GraphDispatch = Dispatch<Action<string>>;
+export type GraphStore = ReturnType<typeof createGraphStore>;
+export type GraphDispatch = GraphStore['dispatch'];
