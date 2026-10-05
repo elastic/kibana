@@ -91,28 +91,24 @@ async function attachToolsToDefaultAgent({
   log,
   toolIds,
 }: SeedToolsOptions & { toolIds: string[] }): Promise<void> {
-  try {
-    const agent = (await kbnClient.request({
-      method: 'GET',
-      path: AGENT_TOOLS_PATH,
-      headers: AGENT_BUILDER_TOOLS_HEADERS,
-    })) as unknown as {
-      name?: string;
-      description?: string;
-      access_control?: { access_mode: string };
-      configuration?: { tools?: Array<{ tool_ids?: string[] }> } & Record<string, unknown>;
-    };
-    const existing = agent?.configuration?.tools as Array<Record<string, unknown>> | undefined;
-    const currentIds = new Set(existing?.flatMap((s) => s.tool_ids ?? []) ?? []);
-    const merged = [...(existing ?? [])];
-    if (currentIds.size === 0) {
-      merged.push({ tool_ids: [...toolIds] });
-    } else {
-      const missing = toolIds.filter((id) => !currentIds.has(id));
-      if (missing.length > 0) {
-        merged[0] = { tool_ids: [...currentIds, ...missing] };
-      }
-    }
+  const agent = (await kbnClient.request({
+    method: 'GET',
+    path: AGENT_TOOLS_PATH,
+    headers: AGENT_BUILDER_TOOLS_HEADERS,
+  })) as unknown as {
+    name?: string;
+    description?: string;
+    access_control?: { access_mode: string };
+    configuration?: { tools?: Array<{ tool_ids?: string[] }> } & Record<string, unknown>;
+  };
+  const existing = agent?.configuration?.tools as Array<Record<string, unknown>> | undefined;
+  const currentIds = new Set(existing?.flatMap((s) => s.tool_ids ?? []) ?? []);
+  const missing = toolIds.filter((id) => !currentIds.has(id));
+  if (missing.length > 0) {
+    // Append the missing ids as a NEW selection entry. Never rebuild existing
+    // entries: selections can carry more keys than tool_ids (type, mcp_server_id,
+    // ...) and collapsing them silently mutates user config.
+    const merged = [...(existing ?? []), { tool_ids: missing }];
     await kbnClient.request({
       method: 'PUT',
       path: AGENT_TOOLS_PATH,
@@ -124,9 +120,9 @@ async function attachToolsToDefaultAgent({
         configuration: { ...agent?.configuration, tools: merged },
       },
     });
-    log.info(`[persona-matrix] attached tools to default agent: ${toolIds.join(', ')}`);
-  } catch (error) {
-    log.warning(`[persona-matrix] failed to attach tools to default agent: ${error}`);
+    log.info(`[persona-matrix] attached tools to default agent: ${missing.join(', ')}`);
+  } else {
+    log.info(`[persona-matrix] default agent already has all seeded tools`);
   }
 }
 
