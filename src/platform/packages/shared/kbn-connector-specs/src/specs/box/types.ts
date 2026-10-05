@@ -9,6 +9,9 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+// https://developer.box.com/reference/get-search/
+const BOX_SEARCH_MAX_OFFSET = 10_000;
+
 // =============================================================================
 // Action input schemas & inferred types
 // =============================================================================
@@ -40,9 +43,10 @@ export const SearchFilesKeywordInputSchema = lazySchema(() =>
       .number()
       .int()
       .min(0)
+      .max(BOX_SEARCH_MAX_OFFSET)
       .optional()
       .describe(
-        'Pagination offset. Pass the next offset from a previous response to get subsequent pages.'
+        `Pagination offset (0–${BOX_SEARCH_MAX_OFFSET}). Pass the next offset from a previous response to get subsequent pages.`
       ),
     folderId: z
       .string()

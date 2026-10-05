@@ -137,7 +137,7 @@ Restore a message from Trash. Rolls back a `trashMessage` call. Only effective w
 Send an email from the authenticated user's Gmail account. Irreversible once accepted by the receiving mail server. Supports plain-text and HTML bodies, bare addr-spec recipients only, and no attachments in v1. Available in Workflows only. Requires OAuth 2.0 authorization code auth.
 
 `to`
-:   (Required) Recipient email addresses (bare addr-spec, for example `["user@example.com"]`).
+:   (Required) Recipient email addresses (bare addr-spec, for example `["user@example.com"]`). `to`, `cc`, and `bcc` together can hold up to 500 addresses, the Gmail API limit per message.
 
 `subject`
 :   (Required) Email subject line.

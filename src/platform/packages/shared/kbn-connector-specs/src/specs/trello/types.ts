@@ -9,6 +9,8 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+const MAX_SEARCH_QUERY_LENGTH = 16384;
+
 const trelloId = (label: string) =>
   z
     .string()
@@ -51,7 +53,7 @@ export const SearchInputSchema = lazySchema(() =>
     query: z
       .string()
       .min(1)
-      .max(2000)
+      .max(MAX_SEARCH_QUERY_LENGTH)
       .describe(
         'Trello search query. Supports keywords plus operators like board:"Board Name", list:"List Name", ' +
           'due:day|week|month|overdue, label:red, member:username, and is:open|archived. ' +

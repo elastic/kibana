@@ -358,11 +358,17 @@ describe('GoogleDocsConnector', () => {
       expect(() => parse('updateDoc', { document_id: DOC_ID, requests: [] })).toThrow();
     });
 
-    it('rejects more than 100 requests', () => {
-      const requests = Array.from({ length: 101 }, () => ({
-        replaceAllText: { containsText: { text: 'a' }, replaceText: 'b' },
-      }));
-      expect(() => parse('updateDoc', { document_id: DOC_ID, requests })).toThrow();
+    it('accepts 10,000 requests and rejects more', () => {
+      const buildRequests = (length: number) =>
+        Array.from({ length }, () => ({
+          replaceAllText: { containsText: { text: 'a' }, replaceText: 'b' },
+        }));
+      expect(() =>
+        parse('updateDoc', { document_id: DOC_ID, requests: buildRequests(10_000) })
+      ).not.toThrow();
+      expect(() =>
+        parse('updateDoc', { document_id: DOC_ID, requests: buildRequests(10_001) })
+      ).toThrow();
     });
 
     it('rejects missing document_id', () => {
@@ -387,18 +393,23 @@ describe('GoogleDocsConnector', () => {
       ).toThrow('exactly one operation key');
     });
 
-    it('rejects requests whose total serialized size exceeds 100 KB', () => {
+    it('rejects requests whose total serialized size exceeds 10 MB', () => {
       const requests = [
-        { replaceAllText: { containsText: { text: 'a'.repeat(103_000) }, replaceText: 'b' } },
+        {
+          replaceAllText: {
+            containsText: { text: 'a'.repeat(10 * 1024 * 1024) },
+            replaceText: 'b',
+          },
+        },
       ];
       expect(() => parse('updateDoc', { document_id: DOC_ID, requests })).toThrow(
-        'Total size of requests must not exceed 100 KB'
+        'Total size of requests must not exceed 10 MB'
       );
     });
 
-    it('accepts requests whose total serialized size is just under 100 KB', () => {
-      // 102,400 bytes limit; build a payload just below it
-      const text = 'a'.repeat(100_000);
+    it('accepts requests whose total serialized size is just under 10 MB', () => {
+      // 10,485,760 bytes limit; build a payload just below it
+      const text = 'a'.repeat(10 * 1024 * 1024 - 1_000);
       const requests = [{ replaceAllText: { containsText: { text }, replaceText: 'b' } }];
       expect(() => parse('updateDoc', { document_id: DOC_ID, requests })).not.toThrow();
     });

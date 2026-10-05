@@ -202,6 +202,41 @@ describe('TavilyConnector', () => {
     });
   });
 
+  describe('numeric input bounds', () => {
+    const { actions } = TavilyConnector;
+
+    it.each([
+      [1, true],
+      [20, true],
+      [21, false],
+      [0, false],
+      [1.5, false],
+    ])('tavilySearch max_results %d valid=%s', (maxResults, expected) => {
+      expect(
+        actions.tavilySearch.input.safeParse({ query: 'kibana', max_results: maxResults }).success
+      ).toBe(expected);
+    });
+
+    describe.each(['tavilyCrawl', 'tavilyMap'] as const)('%s', (action) => {
+      it.each([
+        ['max_depth', 1, true],
+        ['max_depth', 5, true],
+        ['max_depth', 6, false],
+        ['max_depth', 0, false],
+        ['max_depth', 1.5, false],
+        ['max_breadth', 1, true],
+        ['max_breadth', 500, true],
+        ['max_breadth', 501, false],
+        ['max_breadth', 0, false],
+        ['max_breadth', 1.5, false],
+      ])('%s %d valid=%s', (field, value, expected) => {
+        expect(
+          actions[action].input.safeParse({ url: 'https://example.com', [field]: value }).success
+        ).toBe(expected);
+      });
+    });
+  });
+
   describe('listTools action', () => {
     it('returns the list of available tools', async () => {
       const result = await TavilyConnector.actions.listTools.handler(mockContext, {});

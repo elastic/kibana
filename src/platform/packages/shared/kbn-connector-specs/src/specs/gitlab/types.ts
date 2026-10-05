@@ -9,6 +9,20 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+// https://docs.gitlab.com/development/issuable-like-models/#important-text-fields
+const GITLAB_TITLE_MAX_LENGTH = 255;
+// Default of the `description_and_note_max_size` setting, enforced in bytes: https://docs.gitlab.com/api/settings/
+const GITLAB_DESCRIPTION_MAX_BYTES = 1048576;
+// https://docs.gitlab.com/api/notes/; notes are also subject to `description_and_note_max_size`.
+const GITLAB_NOTE_MAX_LENGTH = 1000000;
+// `Issuable::MAX_NUMBER_OF_ASSIGNEES_OR_REVIEWERS` in app/models/concerns/issuable.rb
+const GITLAB_MAX_ASSIGNEES_OR_REVIEWERS = 200;
+// https://docs.gitlab.com/ci/variables/
+const GITLAB_CI_VARIABLE_VALUE_MAX_LENGTH = 10000;
+// GitLab documents no limit on the number of pipeline variables or on commit message length.
+const GITLAB_MAX_PIPELINE_VARIABLES = 1000;
+const COMMIT_MESSAGE_MAX_LENGTH = 65536;
+
 // =============================================================================
 // Shared field helpers
 // =============================================================================
@@ -39,6 +53,24 @@ const mrIidField = () =>
     .describe(
       'The merge request IID as a string (project-internal number shown in the UI, e.g. "15"). Not the global MR ID.'
     );
+
+const descriptionField = () =>
+  z
+    .string()
+    .max(GITLAB_DESCRIPTION_MAX_BYTES)
+    .refine((v) => Buffer.byteLength(v, 'utf8') <= GITLAB_DESCRIPTION_MAX_BYTES, {
+      message: `description must be at most ${GITLAB_DESCRIPTION_MAX_BYTES} bytes`,
+    });
+
+const noteBodyField = () =>
+  z
+    .string()
+    .min(1)
+    .max(GITLAB_NOTE_MAX_LENGTH)
+    .refine((v) => Buffer.byteLength(v, 'utf8') <= GITLAB_DESCRIPTION_MAX_BYTES, {
+      message: `body must be at most ${GITLAB_DESCRIPTION_MAX_BYTES} bytes`,
+    })
+    .describe('The comment body in Markdown format.');
 
 const pageField = () =>
   z
@@ -284,8 +316,8 @@ export type ListPipelinesInput = z.infer<typeof ListPipelinesInputSchema>;
 export const CreateIssueInputSchema = lazySchema(() =>
   z.object({
     projectId: projectIdField(),
-    title: z.string().min(1).max(500).describe('Issue title.'),
-    description: z.string().max(65536).optional().describe('Issue description in Markdown format.'),
+    title: z.string().min(1).max(GITLAB_TITLE_MAX_LENGTH).describe('Issue title.'),
+    description: descriptionField().optional().describe('Issue description in Markdown format.'),
     labels: z
       .string()
       .max(2000)
@@ -293,7 +325,7 @@ export const CreateIssueInputSchema = lazySchema(() =>
       .describe('Comma-separated list of label names to apply. Example: "bug,priority::high".'),
     assigneeIds: z
       .array(z.number().int().positive())
-      .max(20)
+      .max(GITLAB_MAX_ASSIGNEES_OR_REVIEWERS)
       .optional()
       .describe('Array of user IDs to assign to this issue. Use searchUsers to find user IDs.'),
     milestoneId: z
@@ -315,7 +347,7 @@ export const AddIssueNoteInputSchema = lazySchema(() =>
   z.object({
     projectId: projectIdField(),
     issueIid: issueIidField(),
-    body: z.string().min(1).max(65536).describe('The comment body in Markdown format.'),
+    body: noteBodyField(),
   })
 );
 export type AddIssueNoteInput = z.infer<typeof AddIssueNoteInputSchema>;
@@ -329,15 +361,13 @@ export const CreateMergeRequestInputSchema = lazySchema(() =>
       .max(200)
       .describe('The branch containing the changes to merge. Example: "feature/my-branch".'),
     targetBranch: z.string().min(1).max(200).describe('The branch to merge into. Example: "main".'),
-    title: z.string().min(1).max(500).describe('The merge request title.'),
-    description: z
-      .string()
-      .max(65536)
+    title: z.string().min(1).max(GITLAB_TITLE_MAX_LENGTH).describe('The merge request title.'),
+    description: descriptionField()
       .optional()
       .describe('The merge request description in Markdown format.'),
     assigneeIds: z
       .array(z.number().int().positive())
-      .max(20)
+      .max(GITLAB_MAX_ASSIGNEES_OR_REVIEWERS)
       .optional()
       .describe(
         'Array of user IDs to assign to this merge request. Use searchUsers to find user IDs.'
@@ -388,14 +418,14 @@ export const TriggerPipelineInputSchema = lazySchema(() =>
       .array(
         z.object({
           key: z.string().min(1).max(200).describe('Variable name.'),
-          value: z.string().max(2000).describe('Variable value.'),
+          value: z.string().max(GITLAB_CI_VARIABLE_VALUE_MAX_LENGTH).describe('Variable value.'),
           variableType: z
             .enum(['env_var', 'file'])
             .optional()
             .describe('Variable type: "env_var" (default) or "file".'),
         })
       )
-      .max(50)
+      .max(GITLAB_MAX_PIPELINE_VARIABLES)
       .optional()
       .describe('Pipeline variables to pass to the triggered run.'),
   })
@@ -411,8 +441,8 @@ export const UpdateIssueInputSchema = lazySchema(() =>
     .object({
       projectId: projectIdField(),
       issueIid: issueIidField(),
-      title: z.string().min(1).max(500).optional().describe('New issue title.'),
-      description: z.string().max(65536).optional().describe('New issue description in Markdown.'),
+      title: z.string().min(1).max(GITLAB_TITLE_MAX_LENGTH).optional().describe('New issue title.'),
+      description: descriptionField().optional().describe('New issue description in Markdown.'),
       stateEvent: z
         .enum(['close', 'reopen'])
         .optional()
@@ -426,7 +456,7 @@ export const UpdateIssueInputSchema = lazySchema(() =>
         ),
       assigneeIds: z
         .array(z.number().int().positive())
-        .max(20)
+        .max(GITLAB_MAX_ASSIGNEES_OR_REVIEWERS)
         .optional()
         .describe(
           'Array of user IDs to set as assignees (replaces all existing assignees). Use an empty array to clear.'
@@ -463,8 +493,8 @@ export const UpdateMergeRequestInputSchema = lazySchema(() =>
     .object({
       projectId: projectIdField(),
       mrIid: mrIidField(),
-      title: z.string().min(1).max(500).optional().describe('New MR title.'),
-      description: z.string().max(65536).optional().describe('New MR description in Markdown.'),
+      title: z.string().min(1).max(GITLAB_TITLE_MAX_LENGTH).optional().describe('New MR title.'),
+      description: descriptionField().optional().describe('New MR description in Markdown.'),
       stateEvent: z
         .enum(['close', 'reopen'])
         .optional()
@@ -483,7 +513,7 @@ export const UpdateMergeRequestInputSchema = lazySchema(() =>
         ),
       assigneeIds: z
         .array(z.number().int().positive())
-        .max(20)
+        .max(GITLAB_MAX_ASSIGNEES_OR_REVIEWERS)
         .optional()
         .describe(
           'Array of user IDs to set as assignees (replaces existing). Use an empty array to clear.'
@@ -525,7 +555,7 @@ export const AcceptMergeRequestInputSchema = lazySchema(() =>
       ),
     mergeCommitMessage: z
       .string()
-      .max(2000)
+      .max(COMMIT_MESSAGE_MAX_LENGTH)
       .optional()
       .describe('Custom commit message for the merge commit.'),
     squash: z
@@ -544,7 +574,7 @@ export const AddMergeRequestNoteInputSchema = lazySchema(() =>
   z.object({
     projectId: projectIdField(),
     mrIid: mrIidField(),
-    body: z.string().min(1).max(65536).describe('The comment body in Markdown format.'),
+    body: noteBodyField(),
   })
 );
 export type AddMergeRequestNoteInput = z.infer<typeof AddMergeRequestNoteInputSchema>;
@@ -556,7 +586,7 @@ export const RequestMergeRequestReviewInputSchema = lazySchema(() =>
     reviewerIds: z
       .array(z.number().int().positive())
       .min(1)
-      .max(20)
+      .max(GITLAB_MAX_ASSIGNEES_OR_REVIEWERS)
       .describe(
         'Array of user IDs to set as reviewers (replaces existing reviewers). Use searchUsers to find user IDs.'
       ),
@@ -625,7 +655,11 @@ export const DeleteFileInputSchema = lazySchema(() =>
       .max(1024)
       .describe('Path to the file to delete. Example: "config/old.yaml".'),
     branch: z.string().min(1).max(200).describe('Branch to commit the deletion on.'),
-    commitMessage: z.string().min(1).max(2000).describe('Commit message for the deletion.'),
+    commitMessage: z
+      .string()
+      .min(1)
+      .max(COMMIT_MESSAGE_MAX_LENGTH)
+      .describe('Commit message for the deletion.'),
     lastCommitId: z
       .string()
       .max(200)
@@ -862,7 +896,11 @@ export const CreateOrUpdateFileInputSchema = lazySchema(() =>
       .describe(
         'File content as plain text by default, or Base64-encoded when encoding is "base64".'
       ),
-    commitMessage: z.string().min(1).max(2000).describe('Commit message for this file change.'),
+    commitMessage: z
+      .string()
+      .min(1)
+      .max(COMMIT_MESSAGE_MAX_LENGTH)
+      .describe('Commit message for this file change.'),
     encoding: z
       .enum(['text', 'base64'])
       .optional()

@@ -9,6 +9,9 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+// SearchV2Arg.query in https://github.com/dropbox/dropbox-api-spec/blob/main/files.stone
+const DROPBOX_SEARCH_QUERY_MAX_LENGTH = 1000;
+
 // =============================================================================
 // Action input schemas & inferred types
 // =============================================================================
@@ -24,9 +27,9 @@ export const SearchInputSchema = lazySchema(() =>
     query: z
       .string()
       .min(1)
-      .max(2000)
+      .max(DROPBOX_SEARCH_QUERY_MAX_LENGTH)
       .describe(
-        'Full-text search query across file names and content. Example: "Q3 budget report" or "product roadmap"'
+        `Full-text search query across file names and content (up to ${DROPBOX_SEARCH_QUERY_MAX_LENGTH} characters). Example: "Q3 budget report" or "product roadmap"`
       ),
     path: z
       .string()

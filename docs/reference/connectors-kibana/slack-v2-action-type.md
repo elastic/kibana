@@ -101,7 +101,7 @@ List channels
     - `types` (optional): Conversation types to include: `public_channel`, `private_channel`, `im`, `mpim`. Defaults to `public_channel` only. If you pass an empty array, it defaults to `public_channel`.
     - `excludeArchived` (optional): Exclude archived conversations. Defaults to `true`.
     - `cursor` (optional): Pagination cursor from a previous **List channels** response (`nextCursor`). Omit for the first page.
-    - `limit` (optional): Conversations per page (1 to 1000). Defaults to `1000`.
+    - `limit` (optional): Conversations per page (1 to 999). Defaults to `999`.
     - `raw` (optional): If `true`, returns the full raw Slack API response instead of a compact result. Defaults to `false`.
 
 Resolve channel ID
@@ -111,7 +111,7 @@ Resolve channel ID
     - `match` (optional): `exact` (default) or `contains`.
     - `excludeArchived` (optional): Exclude archived channels. Defaults to `true`.
     - `cursor` (optional): Pagination cursor to resume a previous scan.
-    - `limit` (optional): Channels per page (1 to 1000). Defaults to `1000`.
+    - `limit` (optional): Channels per page (1 to 999). Defaults to `999`.
     - `maxPages` (optional): Maximum pages to scan before giving up. Defaults to `10`.
 
 Get conversation history
@@ -120,7 +120,7 @@ Get conversation history
     - `oldest` (optional): Only messages after this Unix timestamp (string form, for example `1234567890.123456`).
     - `latest` (optional): Only messages before this Unix timestamp (string form).
     - `inclusive` (optional): Include messages with the `oldest` or `latest` timestamps in results.
-    - `limit` (optional): Messages per page (1 to 1000). Defaults to `100`.
+    - `limit` (optional): Messages per page (1 to 999). Defaults to `100`.
     - `cursor` (optional): Pagination cursor from a previous response (`nextCursor`). Omit for the first page.
     - `raw` (optional): If `true`, returns the full raw Slack response. Defaults to `false`.
 
@@ -138,7 +138,7 @@ Look up user by email
 
 List users
 :   List Slack workspace users (one page per call) using Slack `users.list`. When the response includes `hasMore: true`, call **List users** again with `nextCursor` from the previous response.
-    - `limit` (optional): Users per page (1 to 1000). Defaults to `200`.
+    - `limit` (optional): Users per page (1 to 999). Defaults to `200`.
     - `cursor` (optional): Pagination cursor from a previous response.
     - `includeLocale` (optional): Set to `true` to include the user locale.
     - `raw` (optional): If `true`, returns the full raw Slack response.
@@ -168,7 +168,7 @@ List user conversations
     - `user` (optional): User ID (for example, `U...`) whose conversations to list.
     - `types` (optional): Conversation types to list (`public_channel`, `private_channel`, `im`, `mpim`). Defaults to all four — DMs and private channels are usually the more interesting answer for a per-user query.
     - `excludeArchived` (optional): Exclude archived channels. Defaults to `true`.
-    - `limit` (optional): Channels per page (1 to 1000). Defaults to `1000`.
+    - `limit` (optional): Channels per page (1 to 999). Defaults to `999`.
     - `cursor` (optional): Pagination cursor from a previous response.
     - `raw` (optional): If `true`, returns the full raw Slack response.
 

@@ -14,13 +14,14 @@ import { z, lazySchema } from '@kbn/zod/v4';
 // opaque tokens. Page tokens are opaque cursor strings from the API; kept generous.
 // Addresses follow RFC 5321 (max 320 chars). Header values follow RFC 5322's
 // 998-octet line limit. Body cap maps to ~137 KB base64-encoded, well within
-// Gmail's 25 MB message limit.
+// Gmail's 25 MB message limit. The Gmail API accepts at most 500 To + Cc + Bcc
+// addresses per message.
 export const GMAIL_MAX_ID_LENGTH = 200;
 export const GMAIL_MAX_QUERY_LENGTH = 2000;
 export const GMAIL_MAX_PAGE_TOKEN_LENGTH = 2048;
 export const GMAIL_MAX_LABEL_IDS = 50;
 export const GMAIL_MAX_EMAIL_LENGTH = 320; // RFC 5321
-export const GMAIL_MAX_RECIPIENTS = 50;
+export const GMAIL_API_MAX_RECIPIENTS_PER_MESSAGE = 500;
 export const GMAIL_MAX_SUBJECT_LENGTH = 998; // RFC 5322 line limit
 export const GMAIL_MAX_BODY_LENGTH = 100_000;
 export const DEFAULT_MAX_RESULTS = 10;
@@ -172,54 +173,64 @@ export const MessageIdInputSchema = lazySchema(() =>
 export type MessageIdInput = z.infer<typeof MessageIdInputSchema>;
 
 export const SendMessageInputSchema = lazySchema(() =>
-  z.object({
-    to: z
-      .array(
-        z.string().max(GMAIL_MAX_EMAIL_LENGTH).regex(GMAIL_EMAIL_REGEX, {
-          message: 'Invalid email address (bare addr-spec required, e.g. user@example.com)',
-        })
-      )
-      .min(1, { message: 'At least one recipient is required' })
-      .max(GMAIL_MAX_RECIPIENTS)
-      .describe('Recipient email addresses (bare addr-spec, e.g. "user@example.com").'),
-    subject: z
-      .string()
-      .max(GMAIL_MAX_SUBJECT_LENGTH)
-      .regex(/^[^\r\n]*$/, { message: 'Subject must not contain line breaks.' })
-      .describe('Email subject line.'),
-    body: z
-      .string()
-      .min(1, { message: 'body is required' })
-      .max(GMAIL_MAX_BODY_LENGTH)
-      .describe('Email body content.'),
-    bodyType: z
-      .enum(['text', 'html'])
-      .optional()
-      .default('text')
-      .describe('Content type of the body: "text" (default) for plain text or "html" for HTML.'),
-    cc: z
-      .array(
-        z
-          .string()
-          .max(GMAIL_MAX_EMAIL_LENGTH)
-          .regex(GMAIL_EMAIL_REGEX, { message: 'Invalid email address' })
-      )
-      .max(GMAIL_MAX_RECIPIENTS)
-      .optional()
-      .describe('CC recipient email addresses.'),
-    bcc: z
-      .array(
-        z
-          .string()
-          .max(GMAIL_MAX_EMAIL_LENGTH)
-          .regex(GMAIL_EMAIL_REGEX, { message: 'Invalid email address' })
-      )
-      .max(GMAIL_MAX_RECIPIENTS)
-      .optional()
-      .describe(
-        'BCC recipient email addresses. Gmail honours a Bcc header in raw messages and strips it from delivered copies.'
-      ),
-  })
+  z
+    .object({
+      to: z
+        .array(
+          z.string().max(GMAIL_MAX_EMAIL_LENGTH).regex(GMAIL_EMAIL_REGEX, {
+            message: 'Invalid email address (bare addr-spec required, e.g. user@example.com)',
+          })
+        )
+        .min(1, { message: 'At least one recipient is required' })
+        .max(GMAIL_API_MAX_RECIPIENTS_PER_MESSAGE)
+        .describe(
+          `Recipient email addresses (bare addr-spec, e.g. "user@example.com"). To, cc, and bcc together may hold up to ${GMAIL_API_MAX_RECIPIENTS_PER_MESSAGE} addresses.`
+        ),
+      subject: z
+        .string()
+        .max(GMAIL_MAX_SUBJECT_LENGTH)
+        .regex(/^[^\r\n]*$/, { message: 'Subject must not contain line breaks.' })
+        .describe('Email subject line.'),
+      body: z
+        .string()
+        .min(1, { message: 'body is required' })
+        .max(GMAIL_MAX_BODY_LENGTH)
+        .describe('Email body content.'),
+      bodyType: z
+        .enum(['text', 'html'])
+        .optional()
+        .default('text')
+        .describe('Content type of the body: "text" (default) for plain text or "html" for HTML.'),
+      cc: z
+        .array(
+          z
+            .string()
+            .max(GMAIL_MAX_EMAIL_LENGTH)
+            .regex(GMAIL_EMAIL_REGEX, { message: 'Invalid email address' })
+        )
+        .max(GMAIL_API_MAX_RECIPIENTS_PER_MESSAGE)
+        .optional()
+        .describe('CC recipient email addresses.'),
+      bcc: z
+        .array(
+          z
+            .string()
+            .max(GMAIL_MAX_EMAIL_LENGTH)
+            .regex(GMAIL_EMAIL_REGEX, { message: 'Invalid email address' })
+        )
+        .max(GMAIL_API_MAX_RECIPIENTS_PER_MESSAGE)
+        .optional()
+        .describe(
+          'BCC recipient email addresses. Gmail honours a Bcc header in raw messages and strips it from delivered copies.'
+        ),
+    })
+    .refine(
+      ({ to, cc = [], bcc = [] }) =>
+        to.length + cc.length + bcc.length <= GMAIL_API_MAX_RECIPIENTS_PER_MESSAGE,
+      {
+        message: `to, cc, and bcc together must not exceed ${GMAIL_API_MAX_RECIPIENTS_PER_MESSAGE} recipients`,
+      }
+    )
 );
 export type SendMessageInput = z.infer<typeof SendMessageInputSchema>;
 
@@ -258,7 +269,7 @@ export const ReplyMessageInputSchema = lazySchema(() =>
           .regex(GMAIL_EMAIL_REGEX, { message: 'Invalid email address' })
       )
       .min(1)
-      .max(GMAIL_MAX_RECIPIENTS)
+      .max(GMAIL_API_MAX_RECIPIENTS_PER_MESSAGE)
       .optional()
       .describe(
         'Override recipient addresses. Defaults to the Reply-To address of the original message, falling back to From.'

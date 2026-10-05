@@ -13,6 +13,9 @@ const MAX_QUERY_LENGTH = 400;
 const MAX_URL_LENGTH = 2048;
 const MAX_EXTRACT_URLS = 20;
 const MAX_INSTRUCTIONS_LENGTH = 2000;
+const MAX_SEARCH_RESULTS = 20;
+const MAX_CRAWL_DEPTH = 5;
+const MAX_CRAWL_BREADTH = 500;
 
 // =============================================================================
 // Action input schemas & inferred types
@@ -32,10 +35,13 @@ export const SearchInputSchema = lazySchema(() =>
       ),
     max_results: z
       .number()
+      .int()
+      .min(1)
+      .max(MAX_SEARCH_RESULTS)
       .optional()
       .default(10)
       .describe(
-        'Maximum number of search results to return. Defaults to 10. Increase for broader coverage; decrease for faster, more focused results.'
+        `Maximum number of search results to return (1-${MAX_SEARCH_RESULTS}). Defaults to 10. Increase for broader coverage; decrease for faster, more focused results.`
       ),
     search_depth: z
       .enum(['basic', 'advanced', 'fast', 'ultra-fast'])
@@ -93,20 +99,28 @@ export const CrawlInputSchema = lazySchema(() =>
       ),
     max_depth: z
       .number()
+      .int()
+      .min(1)
+      .max(MAX_CRAWL_DEPTH)
       .optional()
       .default(1)
       .describe(
-        'Maximum depth of the crawl tree from the root URL. Depth 1 means only pages directly linked from the root; depth 2 includes pages linked from those; and so on. Defaults to 1. Higher values increase coverage but also time and cost.'
+        `Maximum depth of the crawl tree from the root URL. Depth 1 means only pages directly linked from the root; depth 2 includes pages linked from those; and so on. Defaults to 1, maximum ${MAX_CRAWL_DEPTH}. Higher values increase coverage but also time and cost.`
       ),
     max_breadth: z
       .number()
+      .int()
+      .min(1)
+      .max(MAX_CRAWL_BREADTH)
       .optional()
       .default(20)
       .describe(
-        'Maximum number of links to follow per page (per level of the tree). Defaults to 20. Lower values narrow the crawl to the most prominent links on each page.'
+        `Maximum number of links to follow per page (per level of the tree) (1-${MAX_CRAWL_BREADTH}). Defaults to 20. Lower values narrow the crawl to the most prominent links on each page.`
       ),
     limit: z
       .number()
+      .int()
+      .min(1)
       .optional()
       .default(50)
       .describe(
@@ -141,20 +155,28 @@ export const MapInputSchema = lazySchema(() =>
       ),
     max_depth: z
       .number()
+      .int()
+      .min(1)
+      .max(MAX_CRAWL_DEPTH)
       .optional()
       .default(1)
       .describe(
-        'Maximum depth of link traversal from the root URL. Depth 1 returns only URLs directly linked from the root page; depth 2 adds URLs linked from those; and so on. Defaults to 1.'
+        `Maximum depth of link traversal from the root URL. Depth 1 returns only URLs directly linked from the root page; depth 2 adds URLs linked from those; and so on. Defaults to 1, maximum ${MAX_CRAWL_DEPTH}.`
       ),
     max_breadth: z
       .number()
+      .int()
+      .min(1)
+      .max(MAX_CRAWL_BREADTH)
       .optional()
       .default(20)
       .describe(
-        'Maximum number of links to follow per page (per level of the tree). Defaults to 20. Lower values focus on the most prominent links on each page.'
+        `Maximum number of links to follow per page (per level of the tree) (1-${MAX_CRAWL_BREADTH}). Defaults to 20. Lower values focus on the most prominent links on each page.`
       ),
     limit: z
       .number()
+      .int()
+      .min(1)
       .optional()
       .default(50)
       .describe(

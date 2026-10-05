@@ -24,6 +24,9 @@ const DEFAULT_COUNT = 10;
 const DEFAULT_OFFSET = 0;
 // Brave Search API limit: queries are at most 400 characters and 50 words.
 const QUERY_MAX_LENGTH = 400;
+const QUERY_MAX_WORDS = 50;
+const MAX_COUNT = 20;
+const MAX_OFFSET = 9;
 
 export const BraveSearchConnector: ConnectorSpec = {
   metadata: {
@@ -49,22 +52,36 @@ export const BraveSearchConnector: ConnectorSpec = {
         'Search the web using Brave Search. Returns a list of results with titles, URLs, and descriptions for a given query. Supports pagination via count and offset parameters.',
       input: lazySchema(() =>
         z.object({
-          q: z.string().max(QUERY_MAX_LENGTH).describe('Search query (max 400 characters)'),
+          q: z
+            .string()
+            .max(QUERY_MAX_LENGTH)
+            .refine(
+              (value) => value.trim().split(/\s+/).filter(Boolean).length <= QUERY_MAX_WORDS,
+              {
+                message: `Search query must be at most ${QUERY_MAX_WORDS} words`,
+              }
+            )
+            .describe(
+              `Search query (max ${QUERY_MAX_LENGTH} characters and ${QUERY_MAX_WORDS} words)`
+            ),
           count: z
             .number()
             .int()
             .min(1)
-            .max(20)
+            .max(MAX_COUNT)
             .optional()
             .default(DEFAULT_COUNT)
-            .describe('Number of results to return (max 20)'),
+            .describe(`Number of results to return (max ${MAX_COUNT})`),
           offset: z
             .number()
             .int()
             .min(0)
+            .max(MAX_OFFSET)
             .optional()
             .default(DEFAULT_OFFSET)
-            .describe('Result offset for pagination'),
+            .describe(
+              `Zero-based page offset for pagination, in pages of count results (0-${MAX_OFFSET})`
+            ),
         })
       ),
       output: lazySchema(() =>
