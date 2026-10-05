@@ -426,6 +426,27 @@ describe('AlertAnalysisWorkflowPage', () => {
       expect(putCalls()).toHaveLength(0);
     });
 
+    it('warns that rules still carry the Worker action when some could not be detached', async () => {
+      renderComponent({
+        alertTriageWorkerEnabled: true,
+        putResponseExtra: { alertTriageWorkerDisabled: true, alertTriageWorkerSkippedRuleCount: 2 },
+      });
+
+      await turnOffAndSave();
+      fireEvent.click(await screen.findByText('Turn off both'));
+
+      await waitFor(() =>
+        expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledWith(
+          expect.objectContaining({
+            text: expect.stringContaining('2 machine learning rules still have'),
+          })
+        )
+      );
+      expect(coreStart.notifications.toasts.addSuccess).not.toHaveBeenCalledWith(
+        expect.objectContaining({ text: expect.stringContaining('was turned off because') })
+      );
+    });
+
     it('saves only after the user confirms', async () => {
       renderComponent({
         alertTriageWorkerEnabled: true,

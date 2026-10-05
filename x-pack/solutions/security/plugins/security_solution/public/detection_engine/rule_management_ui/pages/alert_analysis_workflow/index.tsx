@@ -155,7 +155,17 @@ const AlertAnalysisWorkflowContent: React.FC = () => {
             ? previous?.alertTriageWorkerEnabled
             : !response.alertTriageWorkerDisabled,
       });
-      if (response.alertTriageWorkerDisabled === true) {
+      if (
+        response.alertTriageWorkerDisabled === true &&
+        response.alertTriageWorkerSkippedRuleCount
+      ) {
+        notifications.toasts.addWarning({
+          title: translations.SAVE_SUCCESS_MESSAGE,
+          text: translations.saveWorkerRulesLeftAttachedMessage(
+            response.alertTriageWorkerSkippedRuleCount
+          ),
+        });
+      } else if (response.alertTriageWorkerDisabled === true) {
         notifications.toasts.addSuccess({
           title: translations.SAVE_SUCCESS_MESSAGE,
           text: translations.SAVE_SUCCESS_WORKER_DISABLED_MESSAGE,

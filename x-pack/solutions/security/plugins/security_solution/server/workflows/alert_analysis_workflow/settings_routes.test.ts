@@ -340,6 +340,24 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
         });
       });
 
+      it('reports rules that still carry the Worker action after it was turned off', async () => {
+        useAlertzero({
+          isAlertTriageWorkerEnabled: jest.fn().mockResolvedValue(true),
+          disableAlertTriageWorker: jest
+            .fn()
+            .mockResolvedValue({ disabled: true, skippedRuleCount: 2 }),
+        });
+
+        await putHandler()(createContext(), createRequest(off), mockResponse);
+
+        expect(mockResponse.ok).toHaveBeenCalledWith({
+          body: expect.objectContaining({
+            alertTriageWorkerDisabled: true,
+            alertTriageWorkerSkippedRuleCount: 2,
+          }),
+        });
+      });
+
       it('leaves the response untouched when the Worker is not enabled', async () => {
         const disableAlertTriageWorker = jest.fn();
         useAlertzero({

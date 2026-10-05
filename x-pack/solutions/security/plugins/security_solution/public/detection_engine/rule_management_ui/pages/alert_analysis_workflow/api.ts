@@ -55,6 +55,8 @@ export interface AlertAnalysisWorkflowSettingsWithConnectorResponse {
   alertTriageWorkerEnabled?: boolean;
   /** PUT only, present when the Worker was on: whether it was turned off along with alert analysis. */
   alertTriageWorkerDisabled?: boolean;
+  /** PUT only: rules still carrying the Worker's action because the caller cannot edit them. */
+  alertTriageWorkerSkippedRuleCount?: number;
 }
 
 export const fetchAlertAnalysisWorkflowSettings = ({

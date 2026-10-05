@@ -277,13 +277,15 @@ export const registerAlertAnalysisWorkflowSettingsRoutes = (
           // with it. Done after the settings are saved and never fails the request: the
           // setting is already persisted, and the response reports whether the Worker is off.
           let alertTriageWorkerDisabled: boolean | undefined;
+          let alertTriageWorkerSkippedRuleCount: number | undefined;
           const { alertzero } = startPlugins;
           if (!settings.workflowEnabled && alertzero) {
             try {
               if (await alertzero.isAlertTriageWorkerEnabled(request)) {
-                ({ disabled: alertTriageWorkerDisabled } = await alertzero.disableAlertTriageWorker(
-                  request
-                ));
+                ({
+                  disabled: alertTriageWorkerDisabled,
+                  skippedRuleCount: alertTriageWorkerSkippedRuleCount,
+                } = await alertzero.disableAlertTriageWorker(request));
               }
             } catch (workerError) {
               logger.warn('Failed to disable the Alert Triage Worker', { error: workerError });
@@ -296,6 +298,7 @@ export const registerAlertAnalysisWorkflowSettingsRoutes = (
               settings,
               workflowId: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
               ...(alertTriageWorkerDisabled !== undefined ? { alertTriageWorkerDisabled } : {}),
+              ...(alertTriageWorkerSkippedRuleCount ? { alertTriageWorkerSkippedRuleCount } : {}),
             },
           });
         } catch (error) {

@@ -99,9 +99,12 @@ export interface AlertZeroPluginStart {
    * invalidates it, e.g. turning off alert analysis. The caller must hold the privileges the
    * Workers update route requires, since this bypasses that route. `disabled` is true when the
    * Worker is off afterwards, including when it already was, and false when it is still on
-   * because the caller lacks privileges or the update failed.
+   * because the caller lacks privileges or the update failed. `skippedRuleCount` is set when
+   * the Worker is off but some rules still carry its action because the caller cannot edit them.
    */
-  disableAlertTriageWorker: (request: KibanaRequest) => Promise<{ disabled: boolean }>;
+  disableAlertTriageWorker: (
+    request: KibanaRequest
+  ) => Promise<{ disabled: boolean; skippedRuleCount?: number }>;
 }
 
 export interface AlertZeroSetupDependencies {

@@ -379,7 +379,7 @@ export class AlertZeroPlugin
     core: CoreStart,
     security: AlertZeroStartDependencies['security'],
     request: KibanaRequest
-  ): Promise<{ disabled: boolean }> {
+  ): Promise<{ disabled: boolean; skippedRuleCount?: number }> {
     if (!this.workersService) return { disabled: true };
     try {
       await assertAlertZeroEnabled(core, request);
@@ -418,7 +418,9 @@ export class AlertZeroPlugin
         spaceId,
         request
       );
-      return { disabled: result.outcome === 'updated' };
+      if (result.outcome !== 'updated') return { disabled: false };
+      const { skippedRuleCount } = result.response;
+      return { disabled: true, ...(skippedRuleCount ? { skippedRuleCount } : {}) };
     } catch (error) {
       this.logger.warn(
         `Failed to disable the Alert Triage Worker: ${

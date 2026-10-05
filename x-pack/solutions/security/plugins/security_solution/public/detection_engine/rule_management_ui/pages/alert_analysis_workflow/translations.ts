@@ -43,6 +43,16 @@ export const SAVE_SUCCESS_WORKER_DISABLED_MESSAGE = i18n.translate(
   }
 );
 
+export const saveWorkerRulesLeftAttachedMessage = (count: number): string =>
+  i18n.translate(
+    'xpack.securitySolution.alertAnalysisWorkflow.saveWorkerRulesLeftAttachedMessage',
+    {
+      defaultMessage:
+        'The Alert Triage Worker was turned off, but {count, plural, one {# machine learning rule still has} other {# machine learning rules still have}} its action attached because you do not have the machine learning permissions needed to edit {count, plural, one {it} other {them}}. Someone with machine learning permissions must turn the Worker off again on the AlertZero Watches page to detach {count, plural, one {it} other {them}}.',
+      values: { count },
+    }
+  );
+
 export const SAVE_WORKER_STILL_ENABLED_MESSAGE = i18n.translate(
   'xpack.securitySolution.alertAnalysisWorkflow.saveWorkerStillEnabledMessage',
   {

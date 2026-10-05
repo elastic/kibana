@@ -494,7 +494,7 @@ describe('AlertZeroPlugin Alert Triage Worker start contract', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (WorkersService as jest.Mock).mockImplementation(() => ({ isWorkerEnabled, update }));
-    update.mockResolvedValue({ outcome: 'updated' });
+    update.mockResolvedValue({ outcome: 'updated', response: {} });
   });
 
   it('reports the worker as not enabled when AlertZero is off for the space', async () => {
@@ -551,6 +551,19 @@ describe('AlertZeroPlugin Alert Triage Worker start contract', () => {
     await expect(contract.disableAlertTriageWorker(request)).resolves.toEqual({ disabled: true });
 
     expect(update).not.toHaveBeenCalled();
+  });
+
+  // The caller may lack permission to edit some attached ML rules; the settings page must be
+  // able to tell them the Worker is off but still referenced by those rules.
+  it('reports how many rules still carry the action when the disable skipped some', async () => {
+    isWorkerEnabled.mockResolvedValue(true);
+    update.mockResolvedValue({ outcome: 'updated', response: { skippedRuleCount: 3 } });
+    const { contract } = startPlugin();
+
+    await expect(contract.disableAlertTriageWorker(request)).resolves.toEqual({
+      disabled: true,
+      skippedRuleCount: 3,
+    });
   });
 
   it('reports the worker as still on when the update fails', async () => {
