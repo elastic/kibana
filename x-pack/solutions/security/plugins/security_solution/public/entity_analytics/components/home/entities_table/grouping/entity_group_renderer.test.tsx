@@ -141,6 +141,27 @@ describe('createGroupPanelRenderer', () => {
       expect(queryByText(/Entity ID:/)).not.toBeInTheDocument();
     });
 
+    it('truncates the entity name when truncateTitle is set', () => {
+      const metadata: TargetMetadataMap = new Map([
+        [
+          'user:james@example.com',
+          { name: 'james-hue', type: EntityType.user, riskScore: null, individualRiskScore: null },
+        ],
+      ]);
+      const bucket = createMockBucket({
+        key: 'user:james@example.com',
+        key_as_string: 'user:james@example.com',
+      });
+      const renderer = createGroupPanelRenderer(metadata, undefined, { truncateTitle: true });
+      const element = renderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
+
+      const { getByText } = render(<>{element}</>);
+      const name = getByText('james-hue');
+
+      expect(name).toHaveAttribute('title', 'james-hue');
+      expect(name).toHaveStyle({ textOverflow: 'ellipsis', whiteSpace: 'nowrap' });
+    });
+
     it('does not render entity id subtitle when falling back to entity id as name', () => {
       const bucket = createMockBucket({
         key: 'fallback-entity-id',

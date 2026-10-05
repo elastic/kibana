@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiButtonColor } from '@elastic/eui';
+import type { EuiButtonColor, IconType } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import React, { memo, useCallback } from 'react';
@@ -37,6 +37,8 @@ export interface NewAgentBuilderAttachmentProps {
    * Telemetry data for tracking "Add to Chat" clicks
    */
   telemetry?: AgentBuilderAddToChatTelemetry;
+  /** Icon shown on the button. Defaults to the agent product mark. */
+  iconType?: IconType;
 }
 
 /**
@@ -49,6 +51,7 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
   size = 'm',
   disabled = false,
   telemetry: telemetryData,
+  iconType = 'productAgent',
 }: NewAgentBuilderAttachmentProps) {
   const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled, hasValidAgentBuilderLicense } =
     useAgentBuilderAvailability();
@@ -78,7 +81,7 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
       data-test-subj="newAgentBuilderAttachment"
       onClick={handleClick}
       size={size}
-      iconType="productAgent"
+      iconType={iconType}
       isDisabled={isDisabled}
     >
       {i18n.ADD_TO_CHAT}

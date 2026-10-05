@@ -229,6 +229,42 @@ const INITIAL_GROUPINGS = {
   },
 };
 
+/**
+ * Resolution groups on a narrow row: the accordion title shrinks so the entity
+ * name ellipsizes, leaving 24px before Entities / Risk score / Criticality.
+ */
+const resolutionGroupHeaderCss = css`
+  .groupingAccordionForm.groupingAccordionForm,
+  .groupingAccordionFormLevel.groupingAccordionFormLevel {
+    min-width: 0;
+  }
+
+  .euiAccordion__triggerWrapper {
+    min-width: 0;
+  }
+
+  .euiAccordion__button {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .euiAccordion__buttonContent {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .groupingAccordionForm .groupingPanelRenderer,
+  .groupingAccordionFormLevel .groupingPanelRenderer {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    padding-right: 24px;
+    width: 100%;
+  }
+`;
+
 /** Group by / Rows menus use EuiContextMenu items with a bottom border; drop it in v.8. */
 const groupingMenuWithoutDividers = css`
   [data-test-subj='groupByContextMenu'] .euiContextMenuItem,
@@ -1612,8 +1648,10 @@ export const ResolvedEntitiesGrid: React.FC<ResolvedEntitiesGridProps> = ({
     () =>
       createGroupPanelRenderer(targetMetadata as TargetMetadataMap, ENTITY_ANALYTICS_TABLE_ID, {
         hideEntityId: true,
+        // Raw records grouped by resolution: the entity name yields to the stats.
+        truncateTitle: !isResolvedView,
       }),
-    [targetMetadata]
+    [isResolvedView, targetMetadata]
   );
   const groupStatsRenderer = useMemo(
     () => createFaceliftGroupStatsRenderer(targetMetadata),
@@ -1945,7 +1983,12 @@ export const ResolvedEntitiesGrid: React.FC<ResolvedEntitiesGridProps> = ({
     <>
       <Global styles={groupingMenuWithoutDividers} />
       {isGrouped ? (
-        <div data-test-subj={gridTestSubj}>{getLevel(0, selectedGroups[0], rows)}</div>
+        <div
+          css={!isResolvedView ? resolutionGroupHeaderCss : undefined}
+          data-test-subj={gridTestSubj}
+        >
+          {getLevel(0, selectedGroups[0], rows)}
+        </div>
       ) : (
         <FaceliftEntitiesDataGrid
           rows={rows}

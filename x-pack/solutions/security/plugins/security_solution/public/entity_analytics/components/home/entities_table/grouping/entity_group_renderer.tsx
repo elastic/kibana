@@ -55,11 +55,14 @@ const ResolutionGroupPanel = ({
   targetMetadata,
   tableId,
   hideEntityId = false,
+  truncateTitle = false,
 }: {
   bucket: RawBucket<EntitiesGroupingAggregation>;
   targetMetadata: TargetMetadataMap;
   tableId: string;
   hideEntityId?: boolean;
+  /** Ellipsize the entity name so it stays clear of the group stats. */
+  truncateTitle?: boolean;
 }) => {
   const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openFlyout } = useExpandableFlyoutApi();
@@ -103,7 +106,19 @@ const ResolutionGroupPanel = ({
   );
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="s"
+      responsive={false}
+      css={
+        truncateTitle
+          ? css`
+              min-width: 0;
+              width: 100%;
+            `
+          : undefined
+      }
+    >
       {canOpenFlyout && (
         <EuiFlexItem grow={false}>
           <EuiToolTip content={openEntityFlyoutLabel} disableScreenReaderOutput>
@@ -117,8 +132,33 @@ const ResolutionGroupPanel = ({
           </EuiToolTip>
         </EuiFlexItem>
       )}
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">{displayName}</EuiText>
+      <EuiFlexItem
+        grow={!truncateTitle ? false : undefined}
+        css={
+          truncateTitle
+            ? css`
+                min-width: 0;
+              `
+            : undefined
+        }
+      >
+        <EuiText size="s">
+          <span
+            title={truncateTitle ? displayName : undefined}
+            css={
+              truncateTitle
+                ? css`
+                    display: block;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                  `
+                : undefined
+            }
+          >
+            {displayName}
+          </span>
+        </EuiText>
         {targetEntityName && !hideEntityId && (
           <EuiText size="xs" color="subdued">
             {i18n.translate('xpack.securitySolution.entityAnalytics.entitiesTable.group.entityId', {
@@ -135,7 +175,10 @@ const ResolutionGroupPanel = ({
 export const createGroupPanelRenderer = (
   targetMetadata: TargetMetadataMap,
   tableId: string = ENTITY_ANALYTICS_TABLE_ID,
-  { hideEntityId = false }: { hideEntityId?: boolean } = {}
+  {
+    hideEntityId = false,
+    truncateTitle = false,
+  }: { hideEntityId?: boolean; truncateTitle?: boolean } = {}
 ) => {
   const GroupPanelRenderer = (
     selectedGroup: string,
@@ -149,6 +192,7 @@ export const createGroupPanelRenderer = (
           targetMetadata={targetMetadata}
           tableId={tableId}
           hideEntityId={hideEntityId}
+          truncateTitle={truncateTitle}
         />
       );
     }

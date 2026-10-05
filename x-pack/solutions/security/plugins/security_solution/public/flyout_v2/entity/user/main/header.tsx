@@ -27,9 +27,13 @@ import type { FirstLastSeenData } from '../../shared/components/observed_entity/
 import type { ManagedUserData } from '../../../../flyout/entity_details/shared/hooks/use_managed_user';
 import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
+import { useActiveFaceliftVersion } from '../../../../entity_analytics/components/home/facelift/active_version';
 import { EntitySourceBadge } from '../../../../flyout/entity_details/shared/components/entity_source_badge';
 import { RiskLevelBadge } from '../../../../flyout/entity_details/shared/components/risk_level_badge';
-import { ResolvedRecordsBadge } from '../../../../flyout/entity_details/shared/components/resolved_records_badge';
+import {
+  ResolvedRecordsBadge,
+  useResolvedRawRecordCount,
+} from '../../../../flyout/entity_details/shared/components/resolved_records_badge';
 
 export interface HeaderProps {
   /** User name displayed as the flyout title. */
@@ -70,6 +74,10 @@ export const Header = ({
   const isLoading = lastSeen?.isLoading ?? false;
 
   const isManaged = !!oktaTimestamp || !!entraTimestamp;
+  const [faceliftVersion] = useActiveFaceliftVersion();
+  const resolvedRawRecordCount = useResolvedRawRecordCount(entityId);
+  // v.8 resolved identities show "Resolved from N records" where "Entity Store" was.
+  const replaceSourceWithResolved = faceliftVersion === 'v8' && resolvedRawRecordCount != null;
   const lastSeenDate = useMemo(
     () =>
       max(
@@ -150,11 +158,15 @@ export const Header = ({
                 </EuiBadge>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EntitySourceBadge
-                  isEntityInStore={!!isEntityInStore}
-                  hasLastSeenDate={!!observedUserLastSeenDate}
-                  data-test-subj="user-panel-header-observed-badge"
-                />
+                {replaceSourceWithResolved ? (
+                  <ResolvedRecordsBadge entityId={entityId} />
+                ) : (
+                  <EntitySourceBadge
+                    isEntityInStore={!!isEntityInStore}
+                    hasLastSeenDate={!!observedUserLastSeenDate}
+                    data-test-subj="user-panel-header-observed-badge"
+                  />
+                )}
               </EuiFlexItem>
               {isManaged && (
                 <EuiFlexItem grow={false}>
@@ -171,7 +183,7 @@ export const Header = ({
                   <RiskLevelBadge riskLevel={riskLevel} />
                 </EuiFlexItem>
               )}
-              {isEntityInStore && (
+              {isEntityInStore && !replaceSourceWithResolved && (
                 <EuiFlexItem grow={false}>
                   <ResolvedRecordsBadge entityId={entityId} />
                 </EuiFlexItem>

@@ -23,9 +23,13 @@ import { FlyoutTitle } from '../../../shared/components/flyout_title';
 import type { FirstLastSeenData } from '../../shared/components/observed_entity/types';
 import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
+import { useActiveFaceliftVersion } from '../../../../entity_analytics/components/home/facelift/active_version';
 import { EntitySourceBadge } from '../../../../flyout/entity_details/shared/components/entity_source_badge';
 import { RiskLevelBadge } from '../../../../flyout/entity_details/shared/components/risk_level_badge';
-import { ResolvedRecordsBadge } from '../../../../flyout/entity_details/shared/components/resolved_records_badge';
+import {
+  ResolvedRecordsBadge,
+  useResolvedRawRecordCount,
+} from '../../../../flyout/entity_details/shared/components/resolved_records_badge';
 
 export interface HeaderProps {
   /** Host name displayed as the flyout title. */
@@ -62,6 +66,10 @@ export const Header = ({
     () => lastSeenDate && new Date(lastSeenDate),
     [lastSeenDate]
   );
+  const [faceliftVersion] = useActiveFaceliftVersion();
+  const resolvedRawRecordCount = useResolvedRawRecordCount(entityId);
+  // v.8 resolved identities show "Resolved from N records" where "Entity Store" was.
+  const replaceSourceWithResolved = faceliftVersion === 'v8' && resolvedRawRecordCount != null;
   return (
     <div data-test-subj="host-panel-header">
       <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
@@ -133,18 +141,22 @@ export const Header = ({
                 </EuiBadge>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EntitySourceBadge
-                  isEntityInStore={!!isEntityInStore}
-                  hasLastSeenDate={!!lastSeenDateFormatted}
-                  data-test-subj="host-panel-header-observed-badge"
-                />
+                {replaceSourceWithResolved ? (
+                  <ResolvedRecordsBadge entityId={entityId} />
+                ) : (
+                  <EntitySourceBadge
+                    isEntityInStore={!!isEntityInStore}
+                    hasLastSeenDate={!!lastSeenDateFormatted}
+                    data-test-subj="host-panel-header-observed-badge"
+                  />
+                )}
               </EuiFlexItem>
               {isEntityInStore && riskLevel && (
                 <EuiFlexItem grow={false}>
                   <RiskLevelBadge riskLevel={riskLevel} />
                 </EuiFlexItem>
               )}
-              {isEntityInStore && (
+              {isEntityInStore && !replaceSourceWithResolved && (
                 <EuiFlexItem grow={false}>
                   <ResolvedRecordsBadge entityId={entityId} />
                 </EuiFlexItem>
