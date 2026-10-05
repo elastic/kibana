@@ -29,9 +29,7 @@ describe('getPackagePoliciesCountByPackageName', () => {
 
     await getPackagePoliciesCountByPackageName(soClient);
 
-    expect(soClient.find).toHaveBeenCalledWith(
-      expect.objectContaining({ namespaces: ['*'] })
-    );
+    expect(soClient.find).toHaveBeenCalledWith(expect.objectContaining({ namespaces: ['*'] }));
   });
 
   it('uses NOT latest_revision:false filter so policies without the field are included', async () => {
