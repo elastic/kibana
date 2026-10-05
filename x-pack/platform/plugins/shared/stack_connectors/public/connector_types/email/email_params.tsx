@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiComboBox, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, EuiButtonEmpty, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KbnInfoCallout } from '@kbn/ui-callout';
 import { TEST_MESSAGE } from '@kbn/connector-schemas/email/constants';
@@ -345,6 +345,7 @@ export const EmailParamsFields = ({
           />
         </EuiFormRow>
       ) : null}
+      {isTestMode && <EuiSpacer size="m" />}
       {isTestMode ? (
         <KbnInfoCallout
           announceOnMount
