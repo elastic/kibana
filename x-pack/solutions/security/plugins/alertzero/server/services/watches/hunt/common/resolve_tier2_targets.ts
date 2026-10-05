@@ -10,7 +10,6 @@ import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { HuntForThreatResult } from '@kbn/alertzero-common';
 import { boundTargetPatterns, collapseIndexName } from './classify_actionable_indices';
 import type { DiscoveredDataset } from './discover_hunt_datasets';
-import { buildMatchesRequired } from './matches_required';
 import { matchDatasetsWithModel } from './match_hunt_datasets';
 import type { HuntScopeReportContext } from './match_hunt_datasets';
 import type { ResolvedHuntScope } from './resolve_index_scope';
@@ -39,14 +38,17 @@ const isExclusion = (pattern: string): boolean => pattern.startsWith('-');
 const literalPrefix = (pattern: string): string => pattern.split('*')[0];
 
 /**
- * Maps each dataset's own `search_patterns` entries back to the dataset they came
- * from, so a pattern the universe refuses can be traded for that same dataset's
- * backing streams — already resolved against the universe, so narrower than the
- * refused pattern and incapable of straddling what it excluded.
+ * Maps each dataset's own `search_patterns` entries, and its generalized
+ * `index_pattern`, back to the dataset they came from, so a pattern the universe
+ * refuses — whether discovery's own output or `boundTargetPatterns`'s later
+ * dataset-collapse, which reconstructs that same `index_pattern` shape — can be
+ * traded for that dataset's backing streams, already resolved against the universe
+ * and so incapable of straddling what it excluded.
  */
 const indexDatasetsByPattern = (datasets: DiscoveredDataset[]): Map<string, DiscoveredDataset> => {
   const byPattern = new Map<string, DiscoveredDataset>();
   for (const dataset of datasets) {
+    byPattern.set(dataset.index_pattern, dataset);
     for (const pattern of dataset.search_patterns) byPattern.set(pattern, dataset);
   }
   return byPattern;
@@ -56,23 +58,37 @@ const indexDatasetsByPattern = (datasets: DiscoveredDataset[]): Map<string, Disc
  * Whether a derived `*`-suffixed target pattern is safe to send as-is: a universe
  * positive pattern has to cover it, and no universe exclusion may reach into it.
  *
- * This is deliberately narrower than `isIndexPatternAllowed`'s exclusion check, which
- * treats any wildcard candidate as overlapping a `*`-prefixed exclusion (an empty
- * literal prefix cannot rule anything out) — the right call for a model-authored
- * ESQL source, where a false refusal costs nothing but a retry. Here a false refusal
- * silently drops a legitimate deterministic target with no retry, so only an
- * exclusion whose own literal prefix shares a stem with the candidate's — `-logs-
- * okta.system-prod*` against `logs-okta.system-*`, not a vendor-agnostic `-*elastic-
- * cloud-logs-*` — counts as reaching into it.
+ * Every index pattern this codebase hands a hunt is either exact or carries a
+ * single trailing `*` (`classify_actionable_indices.ts`'s `collapseIndexName` and
+ * this module's own callers only ever produce that shape), so containment and
+ * overlap both reduce to literal-prefix comparison: a wildcard positive covers a
+ * candidate whose prefix extends its own; an exact positive covers only a
+ * candidate naming that same stream. Testing a single synthetic probe string
+ * (substituting `*` for a literal character) was tried first and dropped — it
+ * returns the wrong answer whenever a positive's own prefix happens to extend the
+ * candidate's by exactly that character, and an exact positive can never match a
+ * probe that appends anything, including the trailing `*` every candidate here
+ * carries.
+ *
+ * The exclusion side stays conservative only up to a point: an exclusion whose own
+ * literal prefix shares a stem with the candidate's — `-logs-okta.system-prod*`
+ * against `logs-okta.system-*` — counts as reaching into it. One with no literal
+ * prefix at all (`-*elastic-cloud-logs-*`) is not checked here; treating it as
+ * reaching everywhere would narrow or drop every generalized pattern regardless of
+ * dataset, which is tracked separately as a follow-up rather than folded in here.
  */
 const staysInsideUniverse = (pattern: string, indexPatterns: string[]): boolean => {
   const positives = indexPatterns.filter((p) => !isExclusion(p));
   const exclusions = indexPatterns.filter(isExclusion).map((p) => p.slice(1));
-  const probe = pattern.replace(/\*/g, 'x');
-  const covered = positives.includes(pattern) || buildMatchesRequired(positives)(probe);
+  const patternPrefix = literalPrefix(pattern);
+
+  const covered = positives.some((positive) =>
+    positive.includes('*')
+      ? patternPrefix.startsWith(literalPrefix(positive))
+      : patternPrefix === positive
+  );
   if (!covered) return false;
 
-  const patternPrefix = literalPrefix(pattern);
   return !exclusions.some((exclusion) => {
     const exclusionPrefix = literalPrefix(exclusion);
     return (
@@ -199,8 +215,18 @@ export const resolveTier2Targets = async ({
     );
   }
 
+  // `collapsed` means bounding reconstructed new pattern strings — one per dataset,
+  // which is the exact `{type}-{dataset}-*` shape discovery itself generalizes to —
+  // rather than passing the union through untouched. That reconstruction can
+  // re-widen a pattern already narrowed above, or a `tier1_hits`/`actionable` pattern
+  // that was stream-level going in, so re-run the check on it rather than trust
+  // bounding preserved what came in. An uncollapsed union is exactly what was
+  // already checked (or, for `tier1_hits`/`actionable`, never needed checking), so
+  // there is nothing new to re-verify.
+  const finalTargets = bounded.collapsed ? constrainToUniverse(bounded.patterns) : bounded.patterns;
+
   return {
-    tier2_targets: bounded.patterns,
+    tier2_targets: finalTargets,
     tier2_target_sources: contributing.map(([source]) => source),
     degraded: modelMatches.length > 0 || bounded.collapsed || universeNarrowed,
   };

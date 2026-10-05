@@ -293,6 +293,79 @@ describe('resolveTier2Targets', () => {
       expect(result.tier2_targets).toEqual(['logs-okta.system-*']);
       expect(result.degraded).toBe(false);
     });
+
+    it('does not accept a generalized pattern merely because a narrower positive happens to extend its prefix', async () => {
+      const result = await resolveTier2Targets({
+        scope: {
+          ...emptyScope,
+          report_matches: ['logs-okta.system-*'],
+          // Narrower than the generalized candidate's own prefix — a single synthetic
+          // probe character used to wrongly accept this before the prefix rewrite.
+          index_patterns: ['logs-okta.system-x*'],
+        },
+        tier1: hits(),
+        logger,
+      });
+
+      // oktaDataset's only backing stream is 'logs-okta.system-default', which does not
+      // stay inside 'logs-okta.system-x*' either, so there is nothing safe to narrow to.
+      expect(result.tier2_targets).toEqual([]);
+      expect(result.degraded).toBe(true);
+    });
+
+    it('accepts a narrowed pattern against an exact, non-wildcard universe entry', async () => {
+      const result = await resolveTier2Targets({
+        scope: {
+          ...emptyScope,
+          report_matches: ['logs-okta.system-*'],
+          index_patterns: ['logs-okta.system-default'],
+        },
+        tier1: hits(),
+        logger,
+      });
+
+      expect(result.tier2_targets).toEqual(['logs-okta.system-default*']);
+      expect(result.degraded).toBe(true);
+    });
+  });
+
+  describe('re-checking after the request-path bound', () => {
+    it('narrows a dataset-collapsed pattern that the bound re-widened past an exclusion', async () => {
+      const vendorDatasetCount = MAX_SCOPE_TARGETS / 2;
+      const vendorMatches = Array.from({ length: vendorDatasetCount }, (_, index) => [
+        `logs-vendor${index}.stream-default*`,
+        `logs-vendor${index}.stream-prod*`,
+        `logs-vendor${index}.stream-staging*`,
+      ]).flat();
+
+      // Only the 'default' stream was ever discovered — the universe excludes 'prod'.
+      const oktaNoProd: DiscoveredDataset = {
+        index_pattern: 'logs-okta.system-*',
+        dataset: 'okta.system',
+        vendor: 'okta',
+        data_streams: ['logs-okta.system-default'],
+        search_patterns: ['logs-okta.system-default*'],
+      };
+
+      const result = await resolveTier2Targets({
+        scope: {
+          ...emptyScope,
+          report_matches: [...vendorMatches, 'logs-okta.system-default*'],
+          discovered: [oktaNoProd],
+          index_patterns: ['logs-*', '-logs-okta.system-prod*'],
+        },
+        tier1: hits(),
+        logger,
+      });
+
+      // `boundTargetPatterns` collapses the oversized union onto one pattern per
+      // dataset, reconstructing the generalized 'logs-okta.system-*' from the safe,
+      // narrow 'logs-okta.system-default*' it was given. The final check has to undo
+      // that re-widening rather than let it ship as the Tier 2 target and allowlist.
+      expect(result.tier2_targets).toContain('logs-okta.system-default*');
+      expect(result.tier2_targets).not.toContain('logs-okta.system-*');
+      expect(result.degraded).toBe(true);
+    });
   });
 
   it('returns empty, not degraded, when every signal is empty', async () => {
