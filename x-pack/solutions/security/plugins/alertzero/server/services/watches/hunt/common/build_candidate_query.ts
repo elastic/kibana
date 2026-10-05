@@ -265,7 +265,11 @@ export const buildCandidateQuery = async (
     );
   }
 
-  const truncated = ids.length < total - skipped.length;
+  // Only reports the search returned were ever counted in `total`, so only those can be
+  // subtracted from it. A named id that matched nothing was never in there to begin with.
+  const examinedIds = new Set(examined);
+  const skippedFromSearch = skipped.filter(({ id }) => examinedIds.has(id)).length;
+  const truncated = ids.length < total - skippedFromSearch;
 
   logger.debug(
     `build_candidate_query: trigger=${trigger} space=${spaceId} ids=${ids.length} skipped=${skipped.length} total=${total} truncated=${truncated}`
