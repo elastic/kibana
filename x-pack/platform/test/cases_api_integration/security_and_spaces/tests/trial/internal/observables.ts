@@ -7,7 +7,8 @@
 
 import expect from '@kbn/expect';
 
-import { OBSERVABLE_TYPE_IPV4 } from '@kbn/cases-plugin/common/constants';
+import { MAX_OBSERVABLES_PER_CASE, OBSERVABLE_TYPE_IPV4 } from '@kbn/cases-plugin/common/constants';
+import { UserActionTypes } from '@kbn/cases-plugin/common/types/domain';
 import { secOnly } from '../../../../common/lib/authentication/users';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
 import {
@@ -16,7 +17,9 @@ import {
   addObservable,
   updateObservable,
   deleteObservable,
+  bulkDeleteObservables,
   getCase,
+  findCaseUserActions,
 } from '../../../../common/lib/api';
 
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -148,6 +151,133 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
           observableId: observable.id as string,
           expectedHttpCode: 400,
+        });
+      });
+    });
+
+    describe('bulk delete observables', () => {
+      const addIpv4Observable = async (caseId: string, value: string) => {
+        const updatedCase = await addObservable({
+          supertest,
+          caseId,
+          params: {
+            observable: {
+              value,
+              typeKey: OBSERVABLE_TYPE_IPV4.key,
+              description: '',
+            },
+          },
+        });
+
+        return updatedCase.observables[updatedCase.observables.length - 1].id as string;
+      };
+
+      it('deletes multiple observables on a case', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+
+        const observableId1 = await addIpv4Observable(postedCase.id, '127.0.0.1');
+        const observableId2 = await addIpv4Observable(postedCase.id, '127.0.0.2');
+        await addIpv4Observable(postedCase.id, '127.0.0.3');
+
+        const updatedCase = await bulkDeleteObservables({
+          supertest,
+          caseId: postedCase.id,
+          ids: [observableId1, observableId2],
+        });
+
+        expect(updatedCase.observables.length).to.be(1);
+        expect(updatedCase.observables[0].value).to.be('127.0.0.3');
+      });
+
+      it('deletes existing ids and ignores missing ids', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+        const observableId = await addIpv4Observable(postedCase.id, '127.0.0.1');
+
+        const updatedCase = await bulkDeleteObservables({
+          supertest,
+          caseId: postedCase.id,
+          ids: [observableId, 'missing-observable-id'],
+        });
+
+        expect(updatedCase.observables.length).to.be(0);
+      });
+
+      it('returns 404 when none of the requested ids exist', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+        await addIpv4Observable(postedCase.id, '127.0.0.1');
+
+        await bulkDeleteObservables({
+          supertest,
+          caseId: postedCase.id,
+          ids: ['missing-id-1', 'missing-id-2'],
+          expectedHttpCode: 404,
+        });
+      });
+
+      it('returns 400 when ids is an empty array', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+
+        await bulkDeleteObservables({
+          supertest,
+          caseId: postedCase.id,
+          ids: [],
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('returns 400 when ids exceeds MAX_OBSERVABLES_PER_CASE', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+        const ids = Array.from({ length: MAX_OBSERVABLES_PER_CASE + 1 }, (_, index) =>
+          index.toString()
+        );
+
+        await bulkDeleteObservables({
+          supertest,
+          caseId: postedCase.id,
+          ids,
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('creates one observables user action with the removed count', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+        const observableId1 = await addIpv4Observable(postedCase.id, '127.0.0.1');
+        const observableId2 = await addIpv4Observable(postedCase.id, '127.0.0.2');
+
+        await bulkDeleteObservables({
+          supertest,
+          caseId: postedCase.id,
+          ids: [observableId1, observableId2],
+        });
+
+        const { userActions } = await findCaseUserActions({
+          supertest,
+          caseID: postedCase.id,
+        });
+
+        const deleteUserActions = userActions.filter(
+          (userAction) =>
+            userAction.type === UserActionTypes.observables &&
+            userAction.payload?.observables?.actionType === 'delete'
+        );
+
+        expect(deleteUserActions.length).to.be.greaterThan(0);
+        expect(deleteUserActions[deleteUserActions.length - 1].payload?.observables?.count).to.be(
+          2
+        );
+      });
+
+      it('should not allow bulk deleting observables without permissions', async () => {
+        const supertestWithoutAuth = getService('supertestWithoutAuth');
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+        const observableId = await addIpv4Observable(postedCase.id, '127.0.0.1');
+
+        await bulkDeleteObservables({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          ids: [observableId],
+          auth: { user: secOnly, space: null },
+          expectedHttpCode: 403,
         });
       });
     });

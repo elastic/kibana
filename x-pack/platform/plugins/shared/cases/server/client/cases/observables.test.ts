@@ -693,8 +693,7 @@ describe('bulkDeleteObservables', () => {
         caseId: caseSO.id,
         observableIds: [mockObservable.id, mockObservable2.id],
       },
-      mockClientArgs,
-      mockCasesClient
+      mockClientArgs
     );
 
     expect(mockLicensingService.notifyUsage).toHaveBeenCalledWith(
@@ -719,8 +718,7 @@ describe('bulkDeleteObservables', () => {
         caseId: caseSO.id,
         observableIds: [mockObservable.id, 'missing-observable-id'],
       },
-      mockClientArgs,
-      mockCasesClient
+      mockClientArgs
     );
 
     expect(mockCaseService.patchCase).toHaveBeenCalledWith(
@@ -742,8 +740,7 @@ describe('bulkDeleteObservables', () => {
           caseId: caseSO.id,
           observableIds: ['missing-id-1', 'missing-id-2'],
         },
-        mockClientArgs,
-        mockCasesClient
+        mockClientArgs
       )
     ).rejects.toThrow(
       Boom.notFound('Failed to bulk delete observables: none of the requested ids were found')
@@ -762,8 +759,7 @@ describe('bulkDeleteObservables', () => {
           caseId: caseSO.id,
           observableIds: [mockObservable.id],
         },
-        mockClientArgs,
-        mockCasesClient
+        mockClientArgs
       )
     ).rejects.toThrow(
       Boom.forbidden(
@@ -782,8 +778,7 @@ describe('bulkDeleteObservables', () => {
           caseId: caseSO.id,
           observableIds: [mockObservable.id],
         },
-        mockClientArgs,
-        mockCasesClient
+        mockClientArgs
       )
     ).rejects.toThrow('Unauthorized');
 
@@ -798,8 +793,7 @@ describe('bulkDeleteObservables', () => {
         caseId: caseSO.id,
         observableIds: [mockObservable.id, 'missing-observable-id'],
       },
-      mockClientArgs,
-      mockCasesClient
+      mockClientArgs
     );
 
     expect(mockUserActionService.creator.createUserAction).toHaveBeenCalledWith({

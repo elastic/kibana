@@ -270,8 +270,7 @@ export const createCasesSubClient = (
     bulkDeleteObservables: withUsageCounter(
       usageCounterByMethod.bulkDeleteObservables,
       clientArgs,
-      (params: BulkDeleteObservablesRequest) =>
-        bulkDeleteObservables(params, clientArgs, casesClient)
+      (params: BulkDeleteObservablesRequest) => bulkDeleteObservables(params, clientArgs)
     ),
     getApplicableFields: (params: GetApplicableFieldsParams) =>
       getApplicableFields(params, clientArgs),
