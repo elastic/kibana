@@ -88,13 +88,12 @@ export interface QueryArgs {
   concreteEntityIndexName: string;
   /**
    * Lucene-pushable search bar predicates (KQL / filter pills / group filters).
-   * Native / group_size inner: `| WHERE …`.
-   * Other foreign sorts: `| WHERE entity.id IN (FROM entities | WHERE … | KEEP entity.id)`.
+   * Applied as `| WHERE …` on entity docs: the entities in view, or group members.
    */
   searchExpression?: string;
   /**
-   * LOOKUP-safe predicates (URL entity filters, tile id IN-lists).
-   * Always applied as `| WHERE …` (after LOOKUP on foreign sorts).
+   * Entity doc predicates (URL entity filters, tile id IN-lists).
+   * Applied as `| WHERE …` on entity docs: the entities in view, or after the group join.
    */
   entityExpression?: string;
   /** Extra native entity-doc fields from Fields (not catalog / not enrich). */
@@ -214,21 +213,6 @@ export const buildCombinedFilterClause = (
 export const buildLookupJoinClause = (concreteEntityIndexName: string): string =>
   `| LOOKUP JOIN ${concreteEntityIndexName} ON \`entity.id\``;
 
-/**
- * Constrain foreign-sort rows to entities matching searchFilters.
- * `KQL` / `:` are illegal after `STATS` (including in `LOOKUP JOIN ON`), so run them in an
- * independent entities subquery via `IN` (ES|QL IN-subquery, preview since 9.5).
- */
-export const buildSearchIdInClause = (
-  entityIndexPattern: string,
-  searchExpression?: string
-): string[] =>
-  searchExpression
-    ? [
-        `| WHERE \`entity.id\` IN (FROM ${entityIndexPattern} | WHERE ${searchExpression} | KEEP \`entity.id\`)`,
-      ]
-    : [];
-
 export const toRows = ({
   columns,
   values,
@@ -334,55 +318,97 @@ export const buildSortSuffix = (field: string, dir: SortDir, pageSize: number): 
 
 export const ENTITY_TYPE_FILTER = `${ENTITY_TYPE_FIELD} IN (${toList(ALLOWED_ENTITY_TYPES)})`;
 
+// ── entities in view ─────────────────────────────────────────────────────────
+
+/** Conditions on entity docs that make them rows of the grid (rows mode and filters). */
+export const buildEntitiesInViewConditions = ({
+  rowsMode,
+  searchExpression,
+  entityExpression,
+}: QueryArgs): string[] => [
+  ENTITY_TYPE_FILTER,
+  ...(rowsMode === 'resolved' ? [`${RESOLVED_TO_FIELD} IS NULL`] : []),
+  ...(searchExpression ? [searchExpression] : []),
+  ...(entityExpression ? [entityExpression] : []),
+];
+
+/** Entity docs that are rows of the grid for the current rows mode and filters. */
+export const buildEntitiesInViewSteps = (args: QueryArgs): string[] => [
+  `FROM ${entityAliasOf(args.namespace)}`,
+  ...buildEntitiesInViewConditions(args).map((condition) => `| WHERE ${condition}`),
+];
+
+/** Number of grid rows: every sort except group size lists exactly the entities in view. */
+export const buildEntitiesInViewCountQuery = (args: QueryArgs): string =>
+  [...buildEntitiesInViewSteps(args), `| STATS total = COUNT(*)`].join('\n');
+
+/** Marks rows that come from the entities in view rather than from the foreign index. */
+export const IN_VIEW_FIELD = '_in_view';
+
 // ── foreign sorts ────────────────────────────────────────────────────────────
 
 /**
- * Joins entity docs onto `STATS … BY entity.id` rows and applies the grid filters.
- * The search expression runs in an entities subquery: ES|QL rejects KQL after STATS.
- * The entity expression runs after the join, so it can use any entity doc field.
+ * Page rows of a foreign sort, after the merge produced one row per entity in view with
+ * the sort value (null or 0 when the foreign index has nothing for it). Sorting and
+ * limiting before the join keeps the join to the page rows: it runs after STATS, on the
+ * coordinator, so joining every merged row is what made foreign sorts slow.
  */
-export const buildForeignSortFilterSteps = (
-  { namespace, rowsMode, concreteEntityIndexName, searchExpression, entityExpression }: QueryArgs,
-  entityCondition: string = ENTITY_TYPE_FILTER
-): string[] => [
-  ...buildSearchIdInClause(entityAliasOf(namespace), searchExpression),
-  buildLookupJoinClause(concreteEntityIndexName),
-  `| WHERE ${entityCondition}`,
-  ...buildResolvedRowsFilter(rowsMode),
-  ...buildFilterClause(entityExpression),
+export const buildForeignSortPageSteps = (args: QueryArgs, sortField: string): string[] => [
+  ...buildCursorClause(args.cursor),
+  buildSortSuffix(sortField, args.sort.direction, args.pageSize),
+  buildLookupJoinClause(args.concreteEntityIndexName),
+  buildKeepClause(args, sortField),
+  // LOOKUP JOIN may not keep the input order.
+  buildSortSuffix(sortField, args.sort.direction, args.pageSize),
 ];
 
-interface ForeignSortQueryOptions {
-  /** Pipeline that ends in `STATS <sortField> = … BY entity.id`. */
-  baseQuery: string;
-  sortField: string;
+interface MergedForeignSortOptions {
   /** Statements that go before the query, for example `SET …;`. */
   settings?: readonly string[];
+  /** Pipeline over the foreign index that ends in `STATS … BY entity.id`. */
+  foreignRows: readonly string[];
+  /** Entity doc fields the merge needs besides `entity.id`. */
+  entityFields?: readonly string[];
+  /** Merge aggregations that carry the foreign columns, e.g. `x = MAX(x)`. */
+  mergeAggregations: readonly string[];
+  /** Steps after the merge that compute the sort column. */
+  afterMerge?: readonly string[];
+  sortField: string;
 }
 
-/** Sort and count queries for a foreign sort. */
-export const buildForeignSortQueries = (
+/**
+ * Sort query for a foreign column that keeps every entity in view: the foreign
+ * aggregation and the entities in view are read side by side and merged by `entity.id`,
+ * so entities without foreign data stay as rows, sorted last. Filters apply to the
+ * entities side, so the result matches the native sorts' rows and their count.
+ */
+export const buildMergedForeignSortQuery = (
   args: QueryArgs,
-  { baseQuery, sortField, settings = [] }: ForeignSortQueryOptions
-): { sort: string; count: string } => {
-  const filtered = [baseQuery, ...buildForeignSortFilterSteps(args)];
-  const page = [...filtered, buildKeepClause(args, sortField), ...buildCursorClause(args.cursor)];
-  return {
-    sort: [
-      ...settings,
-      'FROM (',
-      page.join('\n'),
-      ')',
-      buildSortSuffix(sortField, args.sort.direction, args.pageSize),
-    ].join('\n'),
-    count: [
-      ...settings,
-      ...filtered,
-      `| KEEP \`${ENTITY_ID_FIELD}\``,
-      '| STATS total = COUNT(*)',
-    ].join('\n'),
-  };
-};
+  {
+    settings = [],
+    foreignRows,
+    entityFields = [],
+    mergeAggregations,
+    afterMerge = [],
+    sortField,
+  }: MergedForeignSortOptions
+): string =>
+  [
+    ...settings,
+    'FROM (',
+    ...foreignRows,
+    '), (',
+    ...buildEntitiesInViewSteps(args),
+    `| EVAL ${IN_VIEW_FIELD} = 1`,
+    `| KEEP ${[`\`${ENTITY_ID_FIELD}\``, IN_VIEW_FIELD, ...entityFields].join(', ')}`,
+    ')',
+    `| STATS ${[...mergeAggregations, `${IN_VIEW_FIELD} = MAX(${IN_VIEW_FIELD})`].join(
+      ', '
+    )} BY \`${ENTITY_ID_FIELD}\``,
+    `| WHERE ${IN_VIEW_FIELD} == 1`,
+    ...afterMerge,
+    ...buildForeignSortPageSteps(args, sortField),
+  ].join('\n');
 
 // ── EUID query pipeline builders ─────────────────────────────────────────────
 
@@ -438,6 +464,10 @@ export interface AlertEuidPipelineOptions {
    * conjunct: nested inside the clause's parentheses, ES|QL does not push it down.
    */
   unstampedIdentityPrefilter?: string;
+  /** Condition both alert branches add, when the FROM also reads other indices. */
+  alertBranchCondition?: string;
+  /** Steps of an extra FORK branch, which must emit `_ea_entity_id` like the alert branches. */
+  extraBranch?: readonly string[];
 }
 
 /**
@@ -448,12 +478,19 @@ export interface AlertEuidPipelineOptions {
  * `entity.id` single-value for STATS and LOOKUP JOIN.
  */
 export const buildAlertEuidPipeline = (options: AlertEuidPipelineOptions = {}): string[] => {
-  const { stampedEntityIds, unstampedIdentityClause, unstampedIdentityPrefilter } = options;
+  const {
+    stampedEntityIds,
+    unstampedIdentityClause,
+    unstampedIdentityPrefilter,
+    alertBranchCondition,
+    extraBranch,
+  } = options;
+  const guard = alertBranchCondition ? [`(${alertBranchCondition})`] : [];
   const idsList = stampedEntityIds?.length ? toList(stampedEntityIds) : undefined;
   const keepCols = ['`@timestamp`', '`kibana.alert.severity`', '_ea_entity_id'].join(', ');
 
   const stampedSteps = [
-    'WHERE `kibana.alert.entity.id` IS NOT NULL',
+    `WHERE ${[...guard, '`kibana.alert.entity.id` IS NOT NULL'].join(' AND ')}`,
     ...(idsList ? [`| WHERE \`kibana.alert.entity.id\` IN (${idsList})`] : []),
     '| EVAL _ea_entity_id = `kibana.alert.entity.id`',
     `| KEEP ${keepCols}`,
@@ -472,13 +509,14 @@ export const buildAlertEuidPipeline = (options: AlertEuidPipelineOptions = {}): 
     unstampedWhere = 'WHERE false';
   } else if (unstampedIdentityClause != null) {
     const conjuncts = [
+      ...guard,
       '`kibana.alert.entity.id` IS NULL',
       ...(unstampedIdentityPrefilter ? [`(${unstampedIdentityPrefilter})`] : []),
       `(${unstampedIdentityClause})`,
     ];
     unstampedWhere = `WHERE ${conjuncts.join(' AND ')}`;
   } else {
-    unstampedWhere = 'WHERE `kibana.alert.entity.id` IS NULL';
+    unstampedWhere = `WHERE ${[...guard, '`kibana.alert.entity.id` IS NULL'].join(' AND ')}`;
   }
 
   const unstampedSteps = [unstampedWhere, ...unstampedEvals, `| KEEP ${keepCols}`];
@@ -490,6 +528,7 @@ export const buildAlertEuidPipeline = (options: AlertEuidPipelineOptions = {}): 
     '  (',
     indentForkBranch(unstampedSteps.join('\n')),
     '  )',
+    ...(extraBranch ? ['  (', indentForkBranch(extraBranch.join('\n')), '  )'] : []),
   ].join('\n');
 
   return [

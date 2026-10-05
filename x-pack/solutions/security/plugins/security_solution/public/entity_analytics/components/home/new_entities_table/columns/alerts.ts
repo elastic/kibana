@@ -16,7 +16,11 @@ import {
   LAST_SEEN_ALERT_FIELD,
   alertsIndexOf,
   buildAlertEuidPipeline,
-  buildForeignSortQueries,
+  buildEntitiesInViewConditions,
+  buildEntitiesInViewCountQuery,
+  buildForeignSortPageSteps,
+  entityAliasOf,
+  IN_VIEW_FIELD,
   lookbackCutoff,
   nullOnFailure,
   toList,
@@ -72,37 +76,36 @@ const buildUnstampedIdentityFilters = (pageRows: Row[]): UnstampedIdentityFilter
 
 // ── sort queries ──────────────────────────────────────────────────────────────
 
-/** Open alerts in the time range, one row per alert and entity id. */
-const buildOpenAlertEntityRows = ({ namespace, timeRange }: QueryArgs): string[] => [
-  `FROM ${alertsIndexOf(namespace)}`,
-  `| WHERE \`@timestamp\` >= "${lookbackCutoff(timeRange)}"`,
-  `| WHERE ${ALERT_OPEN_STATUS_FILTER}`,
-  ...buildAlertEuidPipeline(),
-];
-
-const buildAlertCountBaseQuery = (args: QueryArgs): string =>
-  [
-    ...buildOpenAlertEntityRows(args),
-    `| STATS ${ALERT_COUNT_FIELD} = COUNT(*) BY \`entity.id\``,
+/**
+ * Sort query over open alerts that keeps every entity in view. FORK can't run inside a
+ * FROM subquery, so instead of the subquery merge the alerts and the entity index share
+ * one FROM: alert docs go through the stamped/unstamped branches, entity docs in view
+ * through a third branch, and the merge by `entity.id` keeps entities without alerts.
+ */
+const buildAlertSortQuery = (args: QueryArgs, sortField: string, aggregation: string): string => {
+  const { namespace, timeRange, concreteEntityIndexName } = args;
+  const isEntityDoc = `_index == "${concreteEntityIndexName}"`;
+  const entityConditions = buildEntitiesInViewConditions(args).map((c) => `(${c})`);
+  return [
+    `FROM ${alertsIndexOf(namespace)}, ${entityAliasOf(namespace)} METADATA _index`,
+    `| WHERE (NOT ${isEntityDoc} AND \`@timestamp\` >= "${lookbackCutoff(
+      timeRange
+    )}" AND (${ALERT_OPEN_STATUS_FILTER})) OR (${[isEntityDoc, ...entityConditions].join(
+      ' AND '
+    )})`,
+    ...buildAlertEuidPipeline({
+      alertBranchCondition: `NOT ${isEntityDoc}`,
+      extraBranch: [
+        `WHERE ${isEntityDoc}`,
+        `| EVAL _ea_entity_id = \`entity.id\`, ${IN_VIEW_FIELD} = 1`,
+        `| KEEP _ea_entity_id, ${IN_VIEW_FIELD}`,
+      ],
+    }),
+    `| STATS ${sortField} = ${aggregation} WHERE ${IN_VIEW_FIELD} IS NULL, ${IN_VIEW_FIELD} = MAX(${IN_VIEW_FIELD}) BY \`entity.id\``,
+    `| WHERE ${IN_VIEW_FIELD} == 1`,
+    ...buildForeignSortPageSteps(args, sortField),
   ].join('\n');
-
-const buildLastSeenAlertBaseQuery = (args: QueryArgs): string =>
-  [
-    ...buildOpenAlertEntityRows(args),
-    `| STATS ${LAST_SEEN_ALERT_FIELD} = MAX(\`@timestamp\`) BY \`entity.id\``,
-  ].join('\n');
-
-const buildAlertCountQueries = (args: QueryArgs) =>
-  buildForeignSortQueries(args, {
-    baseQuery: buildAlertCountBaseQuery(args),
-    sortField: ALERT_COUNT_FIELD,
-  });
-
-const buildLastSeenAlertQueries = (args: QueryArgs) =>
-  buildForeignSortQueries(args, {
-    baseQuery: buildLastSeenAlertBaseQuery(args),
-    sortField: LAST_SEEN_ALERT_FIELD,
-  });
+};
 
 // ── enrichment ────────────────────────────────────────────────────────────────
 
@@ -166,8 +169,9 @@ export const alertCountColumn = {
   isSortable: true,
   sortKind: 'foreign',
   isExpandable: false,
-  buildSortQuery: (args) => buildAlertCountQueries(args).sort,
-  buildCountQuery: (args) => buildAlertCountQueries(args).count,
+  // Entities without alerts count 0, so they sort first in ascending order.
+  buildSortQuery: (args) => buildAlertSortQuery(args, ALERT_COUNT_FIELD, 'COUNT(*)'),
+  buildCountQuery: buildEntitiesInViewCountQuery,
   enrichPage: enrichAlerts,
 } as const satisfies ColumnDescriptor;
 
@@ -178,8 +182,8 @@ export const lastSeenAlertColumn = {
   isSortable: true,
   sortKind: 'foreign',
   isExpandable: false,
-  buildSortQuery: (args) => buildLastSeenAlertQueries(args).sort,
-  buildCountQuery: (args) => buildLastSeenAlertQueries(args).count,
+  buildSortQuery: (args) => buildAlertSortQuery(args, LAST_SEEN_ALERT_FIELD, 'MAX(`@timestamp`)'),
+  buildCountQuery: buildEntitiesInViewCountQuery,
   // No enrichPage: enrichAlerts on alertCountColumn also fills this field.
   // The registry runs each enrichPage function once.
 } as const satisfies ColumnDescriptor;

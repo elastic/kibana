@@ -10,17 +10,14 @@ import {
   getEntityId,
   getNumber,
   getString,
-  ENTITY_TYPE_FILTER,
   RISK_SCORE_CHANGE_FIELD,
   RISK_SCORE_NORM_FIELD,
   TIME_RANGE_DAYS,
-  buildForeignSortFilterSteps,
-  buildKeepClause,
+  buildEntitiesInViewCountQuery,
+  buildMergedForeignSortQuery,
   nullOnFailure,
   riskScoreIndexOf,
   toList,
-  buildSortSuffix,
-  buildCursorClause,
 } from '../common';
 import type { QueryArgs, RunContext, Row, ColumnDescriptor } from '../common';
 
@@ -41,29 +38,23 @@ const buildReferenceScoreDocs = ({ namespace, timeRange }: QueryArgs): string[] 
 
 // ── sort queries ──────────────────────────────────────────────────────────────
 
-const buildRiskScoreChangeBaseQuery = (args: QueryArgs): string =>
-  [
-    ...buildReferenceScoreDocs(args),
-    `| WHERE ${RISK_ID_FIELD_COALESCE} == "entity.id"`,
-    `| EVAL \`entity.id\` = ${RISK_ID_VALUE_COALESCE}, score = ${RISK_SCORE_NORM_COALESCE}`,
-    `| STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\``,
-    ...buildForeignSortFilterSteps(
-      args,
-      `${ENTITY_TYPE_FILTER} AND ${RISK_SCORE_NORM_FIELD} IS NOT NULL`
-    ),
-    `| EVAL ${RISK_SCORE_CHANGE_FIELD} = ${RISK_SCORE_NORM_FIELD} - reference_score`,
-    buildKeepClause(args, RISK_SCORE_CHANGE_FIELD),
-  ].join('\n');
-
+/** Entities without a reference or a current score have no change and sort last. */
 const buildRiskScoreChangeSortQuery = (args: QueryArgs): string =>
-  [
-    buildRiskScoreChangeBaseQuery(args),
-    ...buildCursorClause(args.cursor),
-    buildSortSuffix(RISK_SCORE_CHANGE_FIELD, args.sort.direction, args.pageSize),
-  ].join('\n');
-
-const buildRiskScoreChangeCountQuery = (args: QueryArgs): string =>
-  [buildRiskScoreChangeBaseQuery(args), `| STATS total = COUNT(*)`].join('\n');
+  buildMergedForeignSortQuery(args, {
+    foreignRows: [
+      ...buildReferenceScoreDocs(args),
+      `| WHERE ${RISK_ID_FIELD_COALESCE} == "entity.id"`,
+      `| EVAL \`entity.id\` = ${RISK_ID_VALUE_COALESCE}, score = ${RISK_SCORE_NORM_COALESCE}`,
+      `| STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\``,
+    ],
+    entityFields: [RISK_SCORE_NORM_FIELD],
+    mergeAggregations: [
+      'reference_score = MAX(reference_score)',
+      `current_score = MAX(${RISK_SCORE_NORM_FIELD})`,
+    ],
+    afterMerge: [`| EVAL ${RISK_SCORE_CHANGE_FIELD} = current_score - reference_score`],
+    sortField: RISK_SCORE_CHANGE_FIELD,
+  });
 
 // ── enrichment ────────────────────────────────────────────────────────────────
 
@@ -115,6 +106,6 @@ export const riskScoreChangeColumn = {
   sortKind: 'foreign',
   isExpandable: false,
   buildSortQuery: buildRiskScoreChangeSortQuery,
-  buildCountQuery: buildRiskScoreChangeCountQuery,
+  buildCountQuery: buildEntitiesInViewCountQuery,
   enrichPage: enrichRiskScoreChange,
 } as const satisfies ColumnDescriptor;

@@ -52,15 +52,17 @@ interface GridQueryScope {
 }
 
 /**
- * Query keys of the grid. The count key has no sort direction, page or cursor,
- * so the total is fetched once per sort field and filters.
+ * Query keys of the grid. The count is keyed by its query text: every sort except group
+ * size counts the entities in view, so they share one cached total per filter set. Count
+ * queries must not embed time-dependent values, or the key would change on every render.
  */
 const entityGridKeys = {
   shell: (
     scope: GridQueryScope,
     page: { sortDirection: SortDir; pageIndex: number; pageSize: number; keepFieldsKey: string }
   ) => ['entity-grid', 'shell', { ...scope, ...page }] as const,
-  count: (scope: GridQueryScope) => ['entity-grid', 'count', scope] as const,
+  count: (spaceId: string, countQuery: string | null) =>
+    ['entity-grid', 'count', { spaceId, countQuery }] as const,
   enrich: (
     scope: GridQueryScope,
     page: { sortDirection: SortDir; entityIdsKey: string; shellUpdatedAt: number }
@@ -227,21 +229,21 @@ export const useEntityGridData = ({
     }
   );
 
-  const countQuery = useQuery(
-    entityGridKeys.count(scope),
-    async ({ signal }): Promise<number> => {
-      if (!concreteEntityIndexName) throw new Error('entity store index not resolved');
-      if (!sortColumn) throw new Error(`Column ${sortField} is not sortable`);
+  const countEsql =
+    concreteEntityIndexName && sortColumn
+      ? sortColumn.buildCountQuery(buildArgs(concreteEntityIndexName, null))
+      : null;
 
-      const args = buildArgs(concreteEntityIndexName, null);
-      const [countRow] = await createEsqlRunner(
-        searchService,
-        signal
-      )(sortColumn.buildCountQuery(args));
+  const countQuery = useQuery(
+    entityGridKeys.count(spaceId, countEsql),
+    async ({ signal }): Promise<number> => {
+      if (!countEsql) throw new Error(`Column ${sortField} is not sortable`);
+
+      const [countRow] = await createEsqlRunner(searchService, signal)(countEsql);
       return (countRow && getNumber(countRow, 'total')) ?? 0;
     },
     {
-      enabled: !!concreteEntityIndexName,
+      enabled: countEsql != null,
       // No keepPreviousData: a stale unfiltered total invents phantom pages after a
       // tile/filter. `total` below falls back to the painted page so rowCount does
       // not snap to 0 and collapse the grid.

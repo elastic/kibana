@@ -13,7 +13,8 @@ import {
   ANOMALY_COUNT_FIELD,
   ML_ANOMALY_INDICES,
   buildEuidStages,
-  buildForeignSortQueries,
+  buildEntitiesInViewCountQuery,
+  buildMergedForeignSortQuery,
   lookbackCutoff,
   nullOnFailure,
   toList,
@@ -37,17 +38,16 @@ const buildAnomalyEntityRows = ({ timeRange }: QueryArgs, identityPrefilter?: st
 
 // ── sort queries ──────────────────────────────────────────────────────────────
 
-const buildAnomalyCountBaseQuery = (args: QueryArgs): string =>
-  [
-    ...buildAnomalyEntityRows(args),
-    `| STATS ${ANOMALY_COUNT_FIELD} = COUNT(*) BY \`entity.id\``,
-  ].join('\n');
-
-const buildAnomalyCountQueries = (args: QueryArgs) =>
-  buildForeignSortQueries(args, {
-    baseQuery: buildAnomalyCountBaseQuery(args),
-    sortField: ANOMALY_COUNT_FIELD,
+/** Entities without anomalies have no count and sort last. */
+const buildAnomalyCountSortQuery = (args: QueryArgs): string =>
+  buildMergedForeignSortQuery(args, {
     settings: [SET_UNMAPPED_NULLIFY],
+    foreignRows: [
+      ...buildAnomalyEntityRows(args),
+      `| STATS ${ANOMALY_COUNT_FIELD} = COUNT(*) BY \`entity.id\``,
+    ],
+    mergeAggregations: [`${ANOMALY_COUNT_FIELD} = MAX(${ANOMALY_COUNT_FIELD})`],
+    sortField: ANOMALY_COUNT_FIELD,
   });
 
 // ── enrichment ────────────────────────────────────────────────────────────────
@@ -88,7 +88,7 @@ export const anomalyCountColumn = {
   isSortable: true,
   sortKind: 'foreign',
   isExpandable: false,
-  buildSortQuery: (args) => buildAnomalyCountQueries(args).sort,
-  buildCountQuery: (args) => buildAnomalyCountQueries(args).count,
+  buildSortQuery: buildAnomalyCountSortQuery,
+  buildCountQuery: buildEntitiesInViewCountQuery,
   enrichPage: enrichAnomalyCount,
 } as const satisfies ColumnDescriptor;

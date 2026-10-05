@@ -6,6 +6,7 @@
  */
 
 import {
+  buildEntitiesInViewCountQuery,
   entityAliasOf,
   buildKeepClause,
   buildCursorClause,
@@ -38,20 +39,6 @@ const buildNativeEntitySortQuery = (args: QueryArgs): string => {
   ].join('\n');
 };
 
-const buildNativeEntityCountQuery = ({
-  namespace,
-  rowsMode,
-  searchExpression,
-  entityExpression,
-}: QueryArgs): string =>
-  [
-    `FROM ${entityAliasOf(namespace)}`,
-    `| WHERE ${ENTITY_TYPE_FILTER}`,
-    ...buildResolvedRowsFilter(rowsMode),
-    ...buildCombinedFilterClause(searchExpression, entityExpression),
-    `| STATS total = COUNT(*)`,
-  ].join('\n');
-
 export const entityNameColumn = {
   id: 'entity.name',
   displayAsText: 'Entity name',
@@ -60,7 +47,7 @@ export const entityNameColumn = {
   sortKind: 'native',
   isExpandable: false,
   buildSortQuery: buildNativeEntitySortQuery,
-  buildCountQuery: buildNativeEntityCountQuery,
+  buildCountQuery: buildEntitiesInViewCountQuery,
 } as const satisfies ColumnDescriptor;
 
 export const resolvedToColumn = {
@@ -79,7 +66,7 @@ export const entityTypeColumn = {
   sortKind: 'native',
   isExpandable: false,
   buildSortQuery: buildNativeEntitySortQuery,
-  buildCountQuery: buildNativeEntityCountQuery,
+  buildCountQuery: buildEntitiesInViewCountQuery,
 } as const satisfies ColumnDescriptor;
 
 export const riskScoreColumn = {
@@ -90,7 +77,7 @@ export const riskScoreColumn = {
   sortKind: 'native',
   isExpandable: false,
   buildSortQuery: buildNativeEntitySortQuery,
-  buildCountQuery: buildNativeEntityCountQuery,
+  buildCountQuery: buildEntitiesInViewCountQuery,
 } as const satisfies ColumnDescriptor;
 
 export const criticalityColumn = {
@@ -101,7 +88,7 @@ export const criticalityColumn = {
   sortKind: 'native',
   isExpandable: false,
   buildSortQuery: buildNativeEntitySortQuery,
-  buildCountQuery: buildNativeEntityCountQuery,
+  buildCountQuery: buildEntitiesInViewCountQuery,
 } as const satisfies ColumnDescriptor;
 
 export const sourceColumn = {
@@ -128,7 +115,7 @@ export const firstSeenColumn = {
   sortKind: 'native',
   isExpandable: false,
   buildSortQuery: buildNativeEntitySortQuery,
-  buildCountQuery: buildNativeEntityCountQuery,
+  buildCountQuery: buildEntitiesInViewCountQuery,
 } as const satisfies ColumnDescriptor;
 
 export const lastSeenColumn = {
@@ -139,5 +126,5 @@ export const lastSeenColumn = {
   sortKind: 'native',
   isExpandable: false,
   buildSortQuery: buildNativeEntitySortQuery,
-  buildCountQuery: buildNativeEntityCountQuery,
+  buildCountQuery: buildEntitiesInViewCountQuery,
 } as const satisfies ColumnDescriptor;
