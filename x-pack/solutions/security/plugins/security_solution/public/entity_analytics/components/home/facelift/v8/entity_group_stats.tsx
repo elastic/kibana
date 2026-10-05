@@ -6,9 +6,8 @@
  */
 
 /**
- * v.8 resolution-group stats: the shared Entities + Risk score (with change
- * beside the badge), then Asset criticality, Alerts (count badge), and
- * Anomalies.
+ * v.8 resolution-group stats: Asset criticality, Risk score (with change
+ * beside the badge), Entities, Alerts (count badge), and Anomalies.
  */
 
 import React from 'react';
@@ -153,11 +152,15 @@ export const createFaceliftGroupStatsRenderer = (targetMetadata: FaceliftTargetM
       );
     }
 
-    stats.push(
+    const entitiesStat = stats.find((stat) => stat.badge != null);
+
+    return [
       {
         title: assetCriticalityLabel,
         component: <GroupAssetCriticality criticality={metadata.criticality} />,
       },
+      ...(riskScoreStat ? [riskScoreStat] : []),
+      ...(entitiesStat ? [entitiesStat] : []),
       {
         title: alertsLabel,
         badge: { value: metadata.alerts, width: 50 },
@@ -165,9 +168,7 @@ export const createFaceliftGroupStatsRenderer = (targetMetadata: FaceliftTargetM
       {
         title: anomaliesLabel,
         badge: { value: metadata.anomalies, width: 50 },
-      }
-    );
-
-    return stats;
+      },
+    ];
   };
 };

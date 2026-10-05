@@ -36,18 +36,19 @@ const resolutionBucket = {
 } as RawBucket<EntitiesGroupingAggregation>;
 
 describe('createFaceliftGroupStatsRenderer', () => {
-  it('puts risk change beside the risk score and appends remaining extras', () => {
+  it('orders criticality, risk score with change, entities, alerts, anomalies', () => {
     const renderer = createFaceliftGroupStatsRenderer(metadata);
     const stats = renderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, resolutionBucket);
 
     expect(stats.map((stat) => stat.title)).toEqual([
-      'Entities:',
-      'Risk score:',
       'Asset criticality:',
+      'Risk score:',
+      'Entities:',
       'Alerts:',
       'Anomalies:',
     ]);
     expect(stats[1].component).toBeDefined();
+    expect(stats[2].badge).toEqual({ value: 3, width: 50 });
     expect(stats[3].badge).toEqual({ value: 7, width: 50 });
     expect(stats[4].badge).toEqual({ value: 2, width: 50 });
   });

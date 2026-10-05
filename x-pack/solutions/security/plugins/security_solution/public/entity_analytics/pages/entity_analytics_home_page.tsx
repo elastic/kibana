@@ -99,6 +99,9 @@ const ADD_INTEGRATIONS_BUTTON_LABEL = i18n.translate(
 
 const UEBA_INTEGRATIONS_PATH = '/app/integrations/browse/security/advanced_analytics_ueba';
 
+const ENTITY_ANALYTICS_DOC_LINK =
+  'https://www.elastic.co/docs/solutions/security/advanced-entity-analytics';
+
 export const EntityAnalyticsHomePage = () => {
   const riskEngineReadPrivileges = useMissingRiskEnginePrivileges({ readonly: true });
   const entityEnginePrivilegesQuery = useEntityEnginePrivileges();
@@ -148,8 +151,7 @@ const EntityAnalyticsHomePageContent = () => {
   const spaceId = useSpaceId();
   const { dataView, isLoading: dataViewLoading } = useEntityStoreDataView(spaceId);
   const [faceliftVersion] = useActiveFaceliftVersion();
-  const { chrome, docLinks, http } = useKibana().services;
-  const entityAnalyticsDocLink = docLinks.links.securitySolution.entityAnalytics.entityRiskScoring;
+  const { chrome, http } = useKibana().services;
   const uebaIntegrationsHref = http.basePath.prepend(UEBA_INTEGRATIONS_PATH);
 
   /**
@@ -355,7 +357,7 @@ const EntityAnalyticsHomePageContent = () => {
         <AppHeader
           title={PAGE_TITLE}
           menu={faceliftAppMenu}
-          {...(faceliftVersion === 'v8' ? { docLink: entityAnalyticsDocLink } : {})}
+          {...(faceliftVersion === 'v8' ? { docLink: ENTITY_ANALYTICS_DOC_LINK } : {})}
         />
       ) : (
         <HeaderPage
