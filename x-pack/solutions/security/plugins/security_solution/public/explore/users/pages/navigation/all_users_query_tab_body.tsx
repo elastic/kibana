@@ -14,6 +14,10 @@ import type { UsersComponentsQueryProps } from './types';
 import { manageQuery } from '../../../../common/components/page/manage_query';
 import { UsersTable } from '../../components/all_users';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 import { UsersQueries } from '../../../../../common/search_strategy/security_solution/users';
 import * as i18n from './translations';
 import { generateTablePaginationOptions } from '../../../components/paginated_table/helpers';
@@ -26,6 +30,11 @@ import { useAllEntityStoreUsers } from '../../containers/users/use_all_entity_st
 const UsersTableManage = manageQuery(UsersTable);
 
 const QUERY_ID = 'UsersTable';
+
+const USERS_ALL_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_USERS_PAGE,
+  'users_all'
+);
 
 export const AllUsersQueryTabBody = ({
   endDate,
@@ -73,6 +82,7 @@ export const AllUsersQueryTabBody = ({
     },
     errorMessage: i18n.ERROR_FETCHING_USERS_DATA,
     abort: querySkip || entityStoreV2Enabled,
+    executionContext: USERS_ALL_CONTEXT,
   });
 
   const [entityStoreLoading, entityStoreUsersArgs] = useAllEntityStoreUsers({
