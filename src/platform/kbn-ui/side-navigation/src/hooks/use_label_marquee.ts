@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
-import type { CSSProperties, RefObject } from 'react';
+import { useLayoutEffect, useMemo, useState } from 'react';
+import type { CSSProperties, RefCallback } from 'react';
 import { euiCanAnimate, useEuiTheme } from '@elastic/eui';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
@@ -27,13 +27,13 @@ interface LabelMarquee {
   isOverflowing: boolean;
   /** Props for the clipping element; it fills the available width. */
   labelProps: {
-    ref: RefObject<HTMLSpanElement>;
+    ref: RefCallback<HTMLSpanElement>;
     css: Array<SerializedStyles | false>;
     style?: CSSProperties;
   };
   /** Props for the element wrapping the label text; it slides inside the clipping element. */
   trackProps: {
-    ref: RefObject<HTMLSpanElement>;
+    ref: RefCallback<HTMLSpanElement>;
     css: SerializedStyles;
   };
 }
@@ -163,13 +163,13 @@ export const useLabelMarquee = ({
 }: LabelMarqueeOptions): LabelMarquee => {
   const { euiTheme } = useEuiTheme();
   const styles = useMemo(() => getStyles(euiTheme, gutter), [euiTheme, gutter]);
-  const labelRef = useRef<HTMLSpanElement>(null);
-  const trackRef = useRef<HTMLSpanElement>(null);
+  // State instead of refs so a remounted label, e.g. when the item switches to the
+  // highlighted button, is measured and observed again.
+  const [label, setLabel] = useState<HTMLSpanElement | null>(null);
+  const [track, setTrack] = useState<HTMLSpanElement | null>(null);
   const [overflowWidth, setOverflowWidth] = useState(0);
 
   useLayoutEffect(() => {
-    const label = labelRef.current;
-    const track = trackRef.current;
     if (!label || !track) return;
 
     // Compare against the content box: the gutter padding is not space for the text at rest.
@@ -185,14 +185,14 @@ export const useLabelMarquee = ({
     observer.observe(label);
     observer.observe(track);
     return () => observer.disconnect();
-  }, []);
+  }, [label, track]);
 
   const isOverflowing = overflowWidth > 0;
 
   return {
     isOverflowing,
     labelProps: {
-      ref: labelRef,
+      ref: setLabel,
       css: [
         styles.label,
         isOverflowing && styles.labelOverflowing,
@@ -203,6 +203,6 @@ export const useLabelMarquee = ({
         ? ({ '--label-overflow-width': overflowWidth } as CSSProperties)
         : undefined,
     },
-    trackProps: { ref: trackRef, css: styles.track },
+    trackProps: { ref: setTrack, css: styles.track },
   };
 };
