@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { EuiEmptyPrompt, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiCallOut, EuiEmptyPrompt, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -42,8 +42,15 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
 
   const canWrite = Boolean(application.capabilities[ALERTZERO_FEATURE_ID]?.write);
 
-  const { workers, serverWorkers, availableWorkerIds, workerEnabled, enabledCount, toggleWorker } =
-    useWorkerSelection();
+  const {
+    workers,
+    serverWorkers,
+    availableWorkerIds,
+    workerEnabled,
+    enabledCount,
+    canModifyWorkers,
+    toggleWorker,
+  } = useWorkerSelection();
   const { handleEnableAndContinue, isSaving } = useEnableWorkers(
     availableWorkerIds,
     workerEnabled,
@@ -103,12 +110,27 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
 
         <ScanFailureCallout />
 
+        {canModifyWorkers ? null : (
+          <>
+            <EuiCallOut
+              announceOnMount
+              color="warning"
+              iconType="lock"
+              data-test-subj="alertZeroOnboardingModifyForbidden"
+            >
+              {i18n.ONBOARDING_MODIFY_FORBIDDEN}
+            </EuiCallOut>
+            <EuiSpacer size="l" />
+          </>
+        )}
+
         <WorkerSelectionList
           workers={workers}
           serverWorkers={serverWorkers}
           workerEnabled={workerEnabled}
           enabledCount={enabledCount}
           isSaving={isSaving}
+          canModifyWorkers={canModifyWorkers}
           onToggle={toggleWorker}
         />
       </div>
@@ -117,7 +139,9 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
         selectedCount={enabledCount}
         totalCount={availableWorkerIds.length}
         isSaving={isSaving}
-        isEnableDisabled={availableWorkerIds.length === 0 || enabledCount === 0}
+        isEnableDisabled={
+          availableWorkerIds.length === 0 || enabledCount === 0 || !canModifyWorkers
+        }
         onEnable={handleEnableAndContinue}
         onBack={() => application.navigateToApp(SECURITY_APP_ID)}
       />

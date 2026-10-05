@@ -88,6 +88,14 @@ export const ATTACK_DISCOVERY_WORKFLOWS_NOTE = i18n.translate(
   }
 );
 
+export const ONBOARDING_MODIFY_FORBIDDEN = i18n.translate(
+  'xpack.alertzero.onboarding.modifyForbiddenCallout',
+  {
+    defaultMessage:
+      'You need the manage_security cluster privilege to enable workers. Ask an administrator.',
+  }
+);
+
 export const ONBOARDING_READ_ONLY_BODY = i18n.translate('xpack.alertzero.onboarding.readOnlyBody', {
   defaultMessage:
     'AlertZero automatically investigates security alerts and proposes actions. Ask an administrator to enable a Watch worker to start receiving investigations.',

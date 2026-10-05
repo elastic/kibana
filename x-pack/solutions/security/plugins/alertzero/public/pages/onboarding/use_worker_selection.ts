@@ -26,6 +26,7 @@ export const useWorkerSelection = () => {
   // Intersect the server-returned worker list with the catalog so skill-gated workers
   // absent from the response are not shown as toggles (or counted toward the minimum).
   const { data: workersData } = useWorkers();
+  const canModifyWorkers = workersData?.canModifyWorkers !== false;
   const serverWorkers = useMemo(
     () => new Map((workersData?.workers ?? []).map((w) => [w.id, w])),
     [workersData]
@@ -45,5 +46,13 @@ export const useWorkerSelection = () => {
     setWorkerEnabled((prev) => ({ ...prev, [workerId]: checked }));
   };
 
-  return { workers, serverWorkers, availableWorkerIds, workerEnabled, enabledCount, toggleWorker };
+  return {
+    workers,
+    serverWorkers,
+    availableWorkerIds,
+    workerEnabled,
+    enabledCount,
+    canModifyWorkers,
+    toggleWorker,
+  };
 };

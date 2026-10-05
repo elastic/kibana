@@ -65,6 +65,7 @@ const renderPage = ({
   httpPatch?: jest.Mock;
   serverWorkers?: {
     workers: Array<{ id: string; enabled: boolean; settings?: { scheduleInterval?: string } }>;
+    canModifyWorkers?: boolean;
   };
 } = {}) => {
   const coreStart = coreMock.createStart();
@@ -189,6 +190,21 @@ describe('OnboardingPage', () => {
   it('mounts the scan-failure callout', () => {
     renderPage();
     expect(screen.getByTestId('alertZeroScanFailureCallout')).toBeInTheDocument();
+  });
+
+  it('disables worker toggles and Enable and run without manage_security', () => {
+    renderPage({
+      canWrite: true,
+      serverWorkers: { ...ALL_WORKERS_RESPONSE, canModifyWorkers: false },
+    });
+
+    expect(screen.getByTestId('alertZeroOnboardingModifyForbidden')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Enable and run' })).toBeDisabled();
+    expect(
+      screen.getByTestId(
+        `alertZeroOnboardingWorkerToggle-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
+      )
+    ).toBeDisabled();
   });
 
   it('renders the title', () => {
