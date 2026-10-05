@@ -1,5 +1,5 @@
 {
-  "sha1": "504af76b1b9e8453ab5ccd5360db85c119aac6d0",
+  "sha1": "85134ca656632b14653fc1e530a14e4ddd138b34",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,7 +13,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 54,
+        "line": 55,
         "column": 1
       }
     },
@@ -26,7 +26,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 90,
+        "line": 91,
         "column": 14
       }
     },
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 108,
+        "line": 109,
         "column": 38
       }
     },
@@ -52,7 +52,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 130,
+        "line": 131,
         "column": 18
       }
     },
@@ -65,7 +65,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 155,
+        "line": 156,
         "column": 50
       }
     },
@@ -78,7 +78,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 175,
+        "line": 176,
         "column": 14
       }
     },
@@ -91,8 +91,47 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 197,
+        "line": 198,
         "column": 15
+      }
+    },
+    {
+      "id": "9c74fe5c346746e-dff63d0b79a2a8c",
+      "title": "Create Elasticsearch service accounts stores a trimmed description with the account and reports it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 225,
+        "column": 9
+      }
+    },
+    {
+      "id": "9c74fe5c346746e-7c2b0ebc8b4b18f",
+      "title": "Create Elasticsearch service accounts creates the account without a description when the one sent is blank",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 247,
+        "column": 39
+      }
+    },
+    {
+      "id": "9c74fe5c346746e-a25dc2231f9d8da",
+      "title": "Create Elasticsearch service accounts refuses a description longer than 1000 characters without writing anything",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
+        "line": 271,
+        "column": 9
       }
     },
     {
@@ -104,7 +143,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 224,
+        "line": 294,
         "column": 9
       }
     },
@@ -117,8 +156,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 245,
-        "column": 21
+        "line": 321,
+        "column": 57
       }
     },
     {
@@ -130,8 +169,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 282,
-        "column": 55
+        "line": 370,
+        "column": 38
       }
     },
     {
@@ -143,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
-        "line": 318,
-        "column": 18
+        "line": 404,
+        "column": 23
       }
     },
     {
@@ -161,8 +200,8 @@
       }
     },
     {
-      "id": "8787fdb38dae7c3-026c73e4916e641",
-      "title": "Create Serverless service accounts rejects descriptions on Serverless",
+      "id": "8787fdb38dae7c3-e7c91c7f25ad75c",
+      "title": "Create Serverless service accounts persists a trimmed description in UIAM",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search"
@@ -170,7 +209,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_uiam_service_account.spec.ts",
         "line": 70,
-        "column": 15
+        "column": 16
       }
     },
     {
@@ -273,7 +312,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 127,
+        "line": 128,
         "column": 1
       }
     },
@@ -286,7 +325,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 148,
+        "line": 149,
         "column": 24
       }
     },
@@ -299,7 +338,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 178,
+        "line": 179,
         "column": 7
       }
     },
@@ -312,7 +351,20 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 184,
+        "line": 185,
+        "column": 22
+      }
+    },
+    {
+      "id": "99ae9153aa6c845-f0c584bc6328dfe",
+      "title": "List and get Elasticsearch service accounts reports the description of an account, whether Kibana or Elasticsearch wrote it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
+        "line": 199,
         "column": 22
       }
     },
@@ -325,8 +377,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 198,
-        "column": 22
+        "line": 252,
+        "column": 14
       }
     },
     {
@@ -338,8 +390,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 257,
-        "column": 15
+        "line": 316,
+        "column": 25
       }
     },
     {
@@ -351,7 +403,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 272,
+        "line": 325,
         "column": 9
       }
     },
@@ -364,8 +416,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 281,
-        "column": 18
+        "line": 339,
+        "column": 20
       }
     },
     {
@@ -377,8 +429,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
-        "line": 335,
-        "column": 40
+        "line": 389,
+        "column": 23
       }
     },
     {

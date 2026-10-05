@@ -383,8 +383,8 @@ importers:
         specifier: 9.3.0
         version: 9.3.0
       '@elastic/elasticsearch':
-        specifier: 9.5.0
-        version: 9.5.0(apache-arrow@21.2.0)(supports-color@10.2.2)
+        specifier: 9.5.1
+        version: 9.5.1(apache-arrow@21.2.0)(supports-color@10.2.2)
       '@elastic/ems-client':
         specifier: 8.7.0
         version: 8.7.0
@@ -10925,8 +10925,8 @@ packages:
     resolution: {integrity: sha512-LMJCju/+AZkDlJArd/MYABWTDrHi4U7j3qGTKi1hYC7+67SaiYmYFItiueACQVrj2j3ECPMcguZ+7WrZeB+Z5g==}
     engines: {node: '>=20'}
 
-  '@elastic/elasticsearch@9.5.0':
-    resolution: {integrity: sha512-6PApbQaAgVHpOvZJrAUSMrU+Nm2PznuIuTUoV29jCezL9Yze1keptiTvtsMqBsnw8v8wvfN6e4L1RTlwa5624A==}
+  '@elastic/elasticsearch@9.5.1':
+    resolution: {integrity: sha512-2ZZqCmgGPjSYn+OphFRYm9g46KVINA0i8fRmlPHJC60RvJeFB6NSHO0nKKOOYhm3WRXyGkLu1xkdXe724fnmnA==}
     engines: {node: '>=22'}
     peerDependencies:
       apache-arrow: 20.x - 21.x
@@ -27755,7 +27755,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@elastic/elasticsearch@9.5.0(apache-arrow@21.2.0)(supports-color@10.2.2)':
+  '@elastic/elasticsearch@9.5.1(apache-arrow@21.2.0)(supports-color@10.2.2)':
     dependencies:
       '@elastic/transport': 9.4.0(supports-color@10.2.2)
       tslib: 2.8.1

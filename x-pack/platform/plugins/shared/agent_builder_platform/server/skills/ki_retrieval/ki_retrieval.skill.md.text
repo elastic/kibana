@@ -9,29 +9,34 @@ This skill is not about generating these KIs, that is a separate skill.
 
 ## What a KI index looks like
 
-Each AI index is queried through the ES|QL target listed for it: its backing index or data stream,
-matching `ai-index-*` for AI indices created in Kibana and `.ai-index-*` for the ones Elastic
+Each AI Index is queried through the ES|QL target listed for it: its backing index or data stream,
+matching `ai-index-*` for AI Indices created in Kibana and `.ai-index-*` for the ones Elastic
 manages.
 
-The AI INDICES section of your instructions lists the targets available to this agent. When that
-section is absent, `platform.context_engine.list_ai_indices` returns the AI indices you can read
-in this space, each with its target as `esql_target`. Where a template below says `<targets>`,
-list the `esql_target` of every AI index in the AI INDICES section, comma-separated, for example
-`ai-index-idx-runbooks, .ai-index-idx-elastic-index`. `ai-index-*` alone misses the AI indices
-Elastic manages.
+The AI INDICES section of your instructions lists the AI Indices assigned to this agent, with
+their targets. Search those. Call `platform.context_engine.list_ai_indices` only when that section
+gives no target you can use, or when the user asks for an AI Index it does not name. It returns
+the AI Indices you can read in this space, each with its target as `esql_target`; keep to entries
+with `assigned_to_agent: true` unless the user asked for another. Where a template below says
+`<targets>`, list the targets of every AI Index you are searching, comma-separated, for example `ai-index-idx-runbooks, .ai-index-idx-elastic-index`. `ai-index-*`
+alone misses the AI Indices Elastic manages.
 
 Start every query with `FROM <targets> METADATA _id, _index, _score`: `SORT _score DESC`, the `:`
 match operators and `FUSE` need those fields.
 
 ### Field reference
 
+These are the canonical KI fields. Fields differ between AI Indices, so check them with
+`platform.context_engine.describe_ai_index` before filtering on one, and adapt the templates
+below when an index does not use these names.
+
 | Field | ES\|QL type | Purpose |
 |---|---|---|
-| `type` | keyword | Categorization — e.g. `"index_metadata"`, `"document"`, `"entity_profile"` |
+| `type` | keyword | Categorization — e.g. `"index_metadata"`, `"document"`, `"entity"` |
 | `title` | text | Short name of the KI or its backing entity; semantic via `title.semantic` |
 | `content` | text | Full text: purpose, questions answered, access patterns; semantic via `content.semantic` |
 | `description` | text | Short description of this KI; semantic via `description.semantic` |
-| `tags` | keyword | Filter facets |
+| `tags` | keyword | Filter facets. Multi-valued |
 | `attributes` | flattened | Structured keyword-queryable metadata (status, themes, entity names, etc.). `attributes.esql` is the canonical location for a KI's runnable ES\|QL — see below. |
 
 Semantic sub-fields use **dot notation**: `content.semantic`, `title.semantic`, `description.semantic`.
@@ -66,11 +71,10 @@ need per-query filtering.
 
 ### Space scoping
 
-A KI may be restricted to Kibana spaces through a nested privileges field that ES|QL cannot
-reference as a column. Run every AI-index query below through
-`platform.context_engine.query_ai_indices`, which applies the current space's scoping
-server-side, and never through `platform.core.execute_esql`, which applies none. Never write a
-space condition in ES|QL: it does not replace the server's scoping and can silently match nothing.
+A KI may be restricted to Kibana spaces. Run every AI-index query below through
+`platform.context_engine.query_ai_indices`, which returns only the KIs visible from the current
+space, and never through `platform.core.execute_esql`, which does not. Never write a space
+condition in ES|QL: it can silently match nothing.
 
 ### Lifecycle
 
@@ -137,9 +141,9 @@ Then re-run the retrieval query with the most relevant tag added as a filter.
 
 ## ES|QL query
 
-Use FORK+FUSE hybrid search. It runs keyword and semantic branches in parallel and combines
-them with reciprocal rank fusion, so documents matching both branches score higher than
-documents matching only one.
+Use FORK+FUSE hybrid search. It runs a keyword search and a semantic search side by side, takes
+the top 20 results from each, and merges the two lists. KIs found in both lists rank first. A KI
+that matches a search but is not in its top 20 counts as not found by that search.
 
 ```esql
 FROM <targets> METADATA _id, _index, _score
@@ -198,7 +202,25 @@ FROM <targets> METADATA _id, _index, _score
 | LIMIT <n>
 ```
 
-Replace `type == "index_metadata"` with any combination of `type` or `tags` filters.
+To scope by tag, filter `tags` with `:`, not `==`: it is multi-valued, and `==` skips every KI
+that carries more than one tag.
+
+```esql
+FROM <targets> METADATA _id, _index, _score
+| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"
+| WHERE expires_at IS NULL OR expires_at > NOW()
+| WHERE tags:"<tag>"
+| FORK
+    ( WHERE content:"<query>" OR title:"<query>" OR description:"<query>"          | SORT _score DESC | LIMIT 20 )
+    ( WHERE content.semantic:"<query>" OR title.semantic:"<query>" OR description.semantic:"<query>" | SORT _score DESC | LIMIT 20 )
+| FUSE
+| SORT _score DESC, _id ASC
+| KEEP title, description, content, type, tags
+| LIMIT <n>
+```
+
+Combine `type` and `tags` filters in the same `WHERE` as needed, for example
+`WHERE type == "index_metadata" AND tags:"<tag>"`.
 
 ---
 
@@ -215,8 +237,8 @@ Replace `type == "index_metadata"` with any combination of `type` or `tags` filt
 
 ## Suggested retrieval flow
 
-1. **Discover** — read the AI INDICES section of your instructions for the targets available to
-   this agent, or call `platform.context_engine.list_ai_indices` when there is none.
+1. **Discover** — search the AI Indices assigned to you, as described above. If none fits the
+   question, continue with other data or tools.
 2. **Orient** — `platform.context_engine.describe_ai_index` returns an index's fields, type and
    tag counts, and example queries. Across several targets, run `STATS ki_count = COUNT(*) BY type`
    instead. Sample a few KIs (`WHERE type == "..." | LIMIT 2`) only when type names are ambiguous.
