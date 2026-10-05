@@ -13,6 +13,7 @@ import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflow } from '@kbn/workflows';
 import {
   ExecutionStatus,
+  getInheritedChildMetadata,
   isTerminalStatus,
   toWorkflowExecutionEngineModel,
   WORKFLOW_STEP_TRIGGER_SOURCE,
@@ -135,6 +136,7 @@ export class WorkflowExecuteSyncStrategy {
           ...buildChildLineageContext({ invocation: 'sync', parent: workflowExecution }),
           ...buildChildEventChainContext(workflowExecution),
           ...(inheritParentIdentity ? { inheritParentIdentity: true, parentStepName } : {}),
+          ...getInheritedChildMetadata(workflowExecution.metadata),
         },
         request
       );
