@@ -15,8 +15,14 @@ export class CaseViewPage {
 
   async openAttachedAlert(caseId: string, commentId: string): Promise<void> {
     await this.page.gotoApp(`security/cases/${caseId}`);
-    // The tab bar renders after the case fetch, so it is the page-ready signal.
-    await this.page.testSubj.locator('case-view-tabs').waitFor({ state: 'visible' });
-    await this.page.testSubj.locator(`comment-action-show-alert-${commentId}`).click();
+    // Cold navigation stays on case-view-loading until the case fetch returns.
+    // The default 10s action timeout is too short for that on a busy serverless agent.
+    await this.page.testSubj
+      .locator('case-view-tabs')
+      .waitFor({ state: 'visible', timeout: 30_000 });
+    // The alert row is a second request. Wait for the control this method clicks.
+    await this.page.testSubj
+      .locator(`comment-action-show-alert-${commentId}`)
+      .click({ timeout: 30_000 });
   }
 }
