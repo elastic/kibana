@@ -202,6 +202,14 @@ describe('getSourceCommandQueryFromESQLQuery', () => {
     expect(getIndexPatternFromESQLQuery(sourceQuery)).toBe('metrics-*');
   });
 
+  it('uses the names of a quoted PROMQL index list', () => {
+    expect(
+      getSourceCommandQueryFromESQLQuery(
+        'PROMQL index="metrics-a","metrics-b" step=1m start=?_tstart end=?_tend (avg(cpu_usage))'
+      )
+    ).toBe('FROM "metrics-a,metrics-b"');
+  });
+
   it('returns an empty string without a FROM or TS command', () => {
     expect(getSourceCommandQueryFromESQLQuery('')).toBe('');
     expect(getSourceCommandQueryFromESQLQuery(undefined)).toBe('');
