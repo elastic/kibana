@@ -11,7 +11,6 @@ import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyDetailsFlyoutContainer } from './action_policy_details_flyout_container';
-import { AlertingV2ActionPoliciesLocatorDefinition } from '../../../locators';
 
 const mockNavigateSync = jest.fn();
 const mockUseFetchActionPolicy = jest.fn();
@@ -245,7 +244,7 @@ const buildPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolic
     name: 'My Policy',
     description: 'desc',
     destinations: [{ type: 'connector', id: 'c-1' }],
-    grouping_mode: 'per_episode',
+    grouping_mode: 'per_alert',
     enabled: true,
     matcher: undefined,
     group_by: undefined,
@@ -360,20 +359,6 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 
-  it('edit navigateSync params resolve to management action policy edit URL', async () => {
-    mockUseFetchActionPolicy.mockReturnValue({ data: buildPolicy() });
-    renderContainer();
-
-    await userEvent.click(screen.getByTestId('flyout-edit'));
-
-    const [params] = mockNavigateSync.mock.calls[0];
-    const location = await AlertingV2ActionPoliciesLocatorDefinition.getLocation(params);
-    expect(location).toMatchObject({
-      app: 'management',
-      path: '/alertingV2/action_policies/edit/policy-1',
-    });
-  });
-
   it('clones the policy with a "[clone]" suffix and closes the flyout', async () => {
     mockUseFetchActionPolicy.mockReturnValue({ data: buildPolicy() });
     renderContainer();
@@ -384,7 +369,7 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
       expect.objectContaining({
         name: 'My Policy [clone]',
         description: 'desc',
-        grouping_mode: 'per_episode',
+        grouping_mode: 'per_alert',
       })
     );
     expect(mockOnClose).toHaveBeenCalledTimes(1);

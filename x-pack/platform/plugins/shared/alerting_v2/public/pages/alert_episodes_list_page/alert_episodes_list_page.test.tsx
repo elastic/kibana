@@ -591,7 +591,7 @@ describe('privilege gating', () => {
     id: OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
     order: 50,
     displayName: 'Open in Discover',
-    iconType: 'discoverApp',
+    iconType: 'productDiscover',
     isCompatible: () => true,
     execute: jest.fn(async () => {}),
   };
