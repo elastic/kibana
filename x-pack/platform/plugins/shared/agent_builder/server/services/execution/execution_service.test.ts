@@ -231,6 +231,31 @@ describe('AgentExecutionService', () => {
     });
   });
 
+  describe('owner attribution', () => {
+    it('pins a service account owner with its principal type on the execution', async () => {
+      conversationClient.getUser.mockReturnValueOnce({
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        type: 'service_account',
+        isAdmin: true,
+      });
+      const request = httpServerMock.createKibanaRequest();
+
+      await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request,
+        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+        useTaskManager: true,
+      });
+
+      expect(mockExecutionClient.create.mock.calls[0][0].owner).toEqual({
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        type: 'service_account',
+      });
+    });
+  });
+
   describe('executeAgent with a caller-provided executionId', () => {
     it('throws when an execution with the same id already exists, regardless of its status', async () => {
       mockExecutionClient.create.mockRejectedValueOnce(conflictError());

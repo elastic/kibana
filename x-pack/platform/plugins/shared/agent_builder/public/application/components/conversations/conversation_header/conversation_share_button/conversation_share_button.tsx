@@ -178,7 +178,14 @@ const ConversationSharePopover: React.FC<ConversationSharePopoverProps> = ({ con
   };
 
   const isPublic = accessMode === ConversationAccessControlMode.Public;
-  const ownerProfile = ownerId ? profileByUid.get(ownerId) : undefined;
+  const ownerProfile =
+    (ownerId ? profileByUid.get(ownerId) : undefined) ??
+    (conversation.user.username
+      ? {
+          uid: ownerId ?? conversation.user.username,
+          user: { username: conversation.user.username },
+        }
+      : undefined);
   const memberProfiles = memberIds
     .map((memberId) => {
       return profileByUid.get(memberId);

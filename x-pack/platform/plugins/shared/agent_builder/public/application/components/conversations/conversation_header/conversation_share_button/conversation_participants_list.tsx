@@ -26,8 +26,12 @@ import { authorLabel, removeMemberLabel } from './conversation_share_i18n';
 
 const MEMBER_ROW_MIN_HEIGHT = 50;
 
+/** An owner without a user profile (e.g. a service account) is rendered from its username alone. */
+export type ParticipantProfile = Pick<UserProfileWithAvatar, 'uid' | 'user'> &
+  Partial<Pick<UserProfileWithAvatar, 'data'>>;
+
 interface UserAccessRowProps {
-  profile: UserProfileWithAvatar;
+  profile: ParticipantProfile;
   badge?: string;
   onRemove?: () => void;
   isDisabled?: boolean;
@@ -96,7 +100,7 @@ const UserAccessRow: React.FC<UserAccessRowProps> = ({
 };
 
 interface ConversationParticipantsListProps {
-  ownerProfile?: UserProfileWithAvatar;
+  ownerProfile?: ParticipantProfile;
   memberProfiles: UserProfileWithAvatar[];
   isSaving: boolean;
   onRemoveUser: (id: string) => void;

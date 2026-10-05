@@ -1100,7 +1100,11 @@ describe('ConversationClient', () => {
   // in application code inside `getDocument`. These tests lock in that guarantee, which used to
   // come for free from the DSL `createSpaceDslFilter`.
   describe('getAuthor', () => {
-    const createClientForUser = (user: { id?: string; username: string }) =>
+    const createClientForUser = (user: {
+      id?: string;
+      username: string;
+      type?: 'user' | 'service_account';
+    }) =>
       createClient({
         space: testSpace,
         logger: loggerMock.create(),
@@ -1122,6 +1126,16 @@ describe('ConversationClient', () => {
 
     it('assigns no author when the user has no profile id', () => {
       expect(createClientForUser({ username: 'test-user' }).getAuthor()).toBeUndefined();
+    });
+
+    it('types a service account author', () => {
+      const serviceAccount = {
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        type: 'service_account' as const,
+      };
+
+      expect(createClientForUser(serviceAccount).getAuthor()).toEqual(serviceAccount);
     });
   });
 
@@ -4054,6 +4068,133 @@ describe('ConversationClient', () => {
       expect(result[0].type).toBe('text_note');
       expect(result[0].actor.type).toBe(EventActorType.user);
       expect(result[0].actor.id).toBe('user-1');
+      expect(result[0].actor).not.toHaveProperty('principal_type');
+    });
+
+    it('attributes events a service account adds to a public conversation to it', async () => {
+      const serviceAccountClient = createClient({
+        space: testSpace,
+        logger: loggerMock.create(),
+        esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        conversationEvents: mockConversationEvents,
+        user: {
+          id: 'service_account:kibana/automation',
+          username: 'kibana/automation',
+          type: 'service_account',
+          isAdmin: false,
+        },
+      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          schemaVersion: 1,
+          events: [],
+          accessMode: ConversationAccessControlMode.Public,
+        })
+      );
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+
+      const result = await serviceAccountClient.addCustomEvents({
+        id: 'conversation-1',
+        events: [{ type: 'text_note', data: { text: 'hello' } }],
+      });
+
+      expect(result[0].actor).toEqual({
+        type: EventActorType.user,
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        principal_type: 'service_account',
+      });
+    });
+  });
+
+  describe('onConversationCreated', () => {
+    beforeEach(() => {
+      mockEsClient.index.mockResolvedValue({ result: 'created', _seq_no: 0, _primary_term: 1 });
+      mockGetDocumentResponse(createConversationDocument());
+    });
+
+    it('reports a created conversation to the listener', async () => {
+      const onConversationCreated = jest.fn();
+      const notifyingClient = createClient({
+        space: testSpace,
+        logger: loggerMock.create(),
+        esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        conversationEvents: mockConversationEvents,
+        user: { id: 'user-1', username: 'test-user', isAdmin: false },
+        onConversationCreated,
+      });
+
+      await notifyingClient.create({
+        id: 'conversation-1',
+        agent_id: 'agent-1',
+        title: 'T',
+        rounds: [],
+      });
+
+      expect(onConversationCreated).toHaveBeenCalledWith({
+        conversationId: 'conversation-1',
+        agentId: 'agent-1',
+        user: { id: 'user-1', username: 'test-user', type: undefined },
+      });
+    });
+
+    it('reports a refused creation with the error', async () => {
+      const onConversationCreated = jest.fn();
+      const notifyingClient = createClient({
+        space: testSpace,
+        logger: loggerMock.create(),
+        esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        conversationEvents: mockConversationEvents,
+        user: { id: 'user-1', username: 'test-user', isAdmin: false },
+        onConversationCreated,
+      });
+      mockEsClient.index.mockRejectedValueOnce(
+        Object.assign(new Error('conflict'), { meta: { statusCode: 409 } })
+      );
+
+      await expect(
+        notifyingClient.create({
+          id: 'conversation-1',
+          agent_id: 'agent-1',
+          title: 'T',
+          rounds: [],
+        })
+      ).rejects.toThrow();
+
+      expect(onConversationCreated).toHaveBeenCalledWith(
+        expect.objectContaining({
+          conversationId: 'conversation-1',
+          agentId: 'agent-1',
+          error: expect.any(Error),
+        })
+      );
+    });
+
+    it('does not fail the write when the listener throws', async () => {
+      const onConversationCreated = jest.fn(() => {
+        throw new Error('audit unavailable');
+      });
+      const notifyingClient = createClient({
+        space: testSpace,
+        logger: loggerMock.create(),
+        esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        conversationEvents: mockConversationEvents,
+        user: { id: 'user-1', username: 'test-user', isAdmin: false },
+        onConversationCreated,
+      });
+
+      await expect(
+        notifyingClient.create({
+          id: 'conversation-1',
+          agent_id: 'agent-1',
+          title: 'T',
+          rounds: [],
+        })
+      ).resolves.toBeDefined();
     });
   });
 });

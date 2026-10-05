@@ -6,7 +6,7 @@
  */
 
 import type { JsonObject } from '@kbn/utility-types';
-import type { UserIdAndName } from '../base/users';
+import type { UserIdAndName, UserPrincipalType } from '../base/users';
 import type { ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
 import type { ExecutionStatus, SerializedExecutionError } from '../agents/execution_status';
@@ -585,10 +585,13 @@ export interface ConversationRoundAuthor {
   username?: string;
   /** Optional display name. */
   full_name?: string;
+  /** The kind of Kibana principal. Absent for external authors and for pre-existing rounds. */
+  type?: UserPrincipalType;
 }
 
+/** Display name for a round author or timeline event actor: full name, else username. */
 export const getConversationRoundAuthorDisplayName = (
-  author?: ConversationRoundAuthor
+  author?: Pick<ConversationRoundAuthor, 'id' | 'username' | 'full_name'>
 ): string | undefined => {
   if (!author) {
     return undefined;

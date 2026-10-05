@@ -168,7 +168,10 @@ interface BaseAgentExecution {
   agentId: string;
   /** Id of the space the execution was performed in. */
   spaceId: string;
-  /** The user the request that created this execution authenticated as. */
+  /**
+   * The user the request that created this execution authenticated as. Carries the principal
+   * `type`, since a Task Manager run's derived credential no longer reports a service account.
+   */
   owner?: UserIdAndName;
   /** Error details, present when status is 'failed'. */
   error?: SerializedExecutionError;
