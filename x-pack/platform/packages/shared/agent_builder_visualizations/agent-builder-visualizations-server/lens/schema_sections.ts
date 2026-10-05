@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mapValues, omit, pick, uniq } from 'lodash';
+import { memoize, omit, pick, uniq } from 'lodash';
 import { z } from '@kbn/zod';
 import { xyConfigSchemaESQL } from '@kbn/lens-embeddable-utils';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -17,13 +17,6 @@ export const LOAD_SCHEMA_SECTIONS_TOOL_NAME = 'load_schema_sections';
 
 /** `type` is set by every example, and the system injects `data_source`. */
 const EXCLUDED_KEYS = ['type', 'data_source'] as const;
-
-interface ChartSchemaSections {
-  /** The top-level config keys the model can load. */
-  schema: z.ZodObject;
-  /** One line per section that lists the fields it holds. */
-  index: string;
-}
 
 /** Rebuilds a chart config schema with only the top-level keys the model can load. */
 const toSectionsSchema = ({ shape }: z.ZodObject): z.ZodObject =>
@@ -38,31 +31,30 @@ const xySectionsSchema = toSectionsSchema(xyConfigSchemaESQL).extend({
   layers: z.array(xyDataLayerSchema.omit({ data_source: true })).min(1),
 });
 
-const buildSchemaSections = (schema: z.ZodObject): ChartSchemaSections => {
-  const { properties = {}, $defs = {} } = toJsonSchema(schema);
-  return { schema, index: buildSchemaSectionIndex(properties, $defs) };
-};
-
-const chartSchemaSections = mapValues(chartTypeRegistry, ({ schema }, chartType) =>
-  buildSchemaSections(
-    chartType === SupportedChartType.XY ? xySectionsSchema : toSectionsSchema(schema)
-  )
+/** The top-level config keys the model can load for a chart type. */
+const getSectionsSchema = memoize(
+  (chartType: SupportedChartType): z.ZodObject =>
+    chartType === SupportedChartType.XY
+      ? xySectionsSchema
+      : toSectionsSchema(chartTypeRegistry[chartType].schema)
 );
 
 /** Names of the sections the config author can load for a chart type. */
 export const getSchemaSectionNames = (chartType: SupportedChartType): string[] =>
-  Object.keys(chartSchemaSections[chartType].schema.shape);
+  Object.keys(getSectionsSchema(chartType).shape);
 
 /** Lists the loadable sections of a chart type with the fields each one holds. */
-export const getSchemaSectionIndex = (chartType: SupportedChartType): string =>
-  chartSchemaSections[chartType].index;
+export const getSchemaSectionIndex = memoize((chartType: SupportedChartType): string => {
+  const { properties = {}, $defs = {} } = toJsonSchema(getSectionsSchema(chartType));
+  return buildSchemaSectionIndex(properties, $defs);
+});
 
 /** Renders the JSON schema of the given sections, with the definitions they reference. */
 export const renderSchemaSections = (
   chartType: SupportedChartType,
   sectionNames: readonly string[]
 ): string => {
-  const { shape } = chartSchemaSections[chartType].schema;
+  const { shape } = getSectionsSchema(chartType);
   const { properties, $defs } = toJsonSchema(z.object(pick(shape, sectionNames)));
   return JSON.stringify({ properties, ...($defs ? { $defs } : {}) });
 };
@@ -72,7 +64,7 @@ export const filterSchemaSections = (
   chartType: SupportedChartType,
   names: readonly unknown[]
 ): string[] => {
-  const { shape } = chartSchemaSections[chartType].schema;
+  const { shape } = getSectionsSchema(chartType);
   return uniq(names).filter(
     (name): name is string => typeof name === 'string' && Object.hasOwn(shape, name)
   );
