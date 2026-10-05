@@ -14,7 +14,7 @@ const p = (...segments: string[]) => Path.resolve(Path.sep, ...segments);
 
 describe('getWatchOptions', () => {
   it('ignores test files when the compiler sets no ignored pattern', () => {
-    const matches = getWatchOptions(undefined).ignored as (filePath: string) => boolean;
+    const matches = getWatchOptions(undefined).ignored as unknown as (filePath: string) => boolean;
     expect(matches(p('repo', 'pkg', 'src', 'foo.test.ts'))).toBe(true);
     expect(matches(p('repo', 'pkg', 'src', 'foo.ts'))).toBe(false);
   });

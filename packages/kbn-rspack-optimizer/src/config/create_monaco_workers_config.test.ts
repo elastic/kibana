@@ -17,7 +17,12 @@ describe('createMonacoWorkersConfig', () => {
   it('builds the workers declared by @kbn/monaco', () => {
     const { monacoPackageRoot } = resolveSharedAssetPaths(REPO_ROOT);
     const { entry } = createMonacoWorkersConfig({ repoRoot: REPO_ROOT });
-    if (entry == null || typeof entry === 'function' || Array.isArray(entry)) {
+    if (
+      entry == null ||
+      typeof entry === 'function' ||
+      typeof entry === 'string' ||
+      Array.isArray(entry)
+    ) {
       throw new Error('expected a worker entry map');
     }
 
