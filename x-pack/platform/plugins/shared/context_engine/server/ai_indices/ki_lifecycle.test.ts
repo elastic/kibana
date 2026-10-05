@@ -149,7 +149,7 @@ describe('applyKiLifecycle', () => {
     );
   });
 
-  it('keeps the filters when a lifecycle field is only displayed, sorted or computed on', () => {
+  it('keeps the filters when a lifecycle field is only displayed', () => {
     expect(
       flat(applyKiLifecycle('FROM ai-index-idx-support | KEEP title, expires_at', dests))
     ).toBe(`FROM ai-index-idx-support | ${LIFECYCLE} | KEEP title, expires_at`);
@@ -181,14 +181,16 @@ describe('applyKiLifecycle', () => {
     );
   });
 
-  it('switches off a default for a WHERE inside a FORK branch', () => {
-    const result = applyKiLifecycle(
-      'FROM ai-index-idx-support | FORK (WHERE expires_at < NOW()) (WHERE title == "x")',
-      dests
+  it('keeps the filters for a WHERE inside a FORK branch', () => {
+    const result = flat(
+      applyKiLifecycle(
+        'FROM ai-index-idx-support | FORK (WHERE expires_at < NOW()) (WHERE title == "x")',
+        dests
+      )
     );
 
-    expect(flat(result)).toContain(STATUS);
-    expect(flat(result)).not.toContain(EXPIRY);
+    expect(result).toContain(STATUS);
+    expect(result).toContain(EXPIRY);
     expect(Parser.parse(result).errors).toEqual([]);
   });
 

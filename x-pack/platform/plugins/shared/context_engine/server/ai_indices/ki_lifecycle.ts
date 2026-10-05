@@ -45,29 +45,22 @@ const globToRegExp = (pattern: string): RegExp =>
 const overlaps = (source: string, dest: string): boolean =>
   globToRegExp(source).test(dest) || globToRegExp(dest).test(source);
 
-/**
- * Lifecycle fields the query handles itself. A `WHERE` on `expires_at` or on
- * `governance.lifecycle.status` switches off that filter; naming any `governance.*` field anywhere
- * keeps `governance` in the result.
- */
+/** Which defaults the query already handles: a top-level `WHERE` per filter, any `governance.*` for the drop. */
 const namedLifecycleFields = (root: ESQLAstQueryExpression) => {
   const named = { status: false, expiry: false, governance: false };
   Walker.walk(root, {
     visitColumn: ({ parts }) => {
       named.governance ||= parts[0] === GOVERNANCE_FIELD;
     },
-    visitCommand: (command) => {
-      if (command.name !== 'where') {
-        return;
-      }
-      Walker.walk(command, {
-        visitColumn: ({ parts }) => {
-          named.status ||= parts.join('.') === KI_LIFECYCLE_STATUS_FIELD;
-          named.expiry ||= parts[0] === KI_EXPIRES_AT_FIELD;
-        },
-      });
-    },
   });
+  for (const command of mutate.commands.where.list(root)) {
+    Walker.walk(command, {
+      visitColumn: ({ parts }) => {
+        named.status ||= parts.join('.') === KI_LIFECYCLE_STATUS_FIELD;
+        named.expiry ||= parts[0] === KI_EXPIRES_AT_FIELD;
+      },
+    });
+  }
   return named;
 };
 
@@ -91,8 +84,8 @@ const latestRevisionByTarget = (streams: string[]): string[] => [
 
 /**
  * Inserts the lifecycle pipeline after `FROM` when the query reads a registered AI index dest.
- * A `WHERE` on a lifecycle field switches off that field's filter; a data stream dest always
- * gets the revision collapse. A query the parser rejects is returned unchanged.
+ * A top-level `WHERE` on a lifecycle field replaces that filter. Data streams always get the
+ * revision collapse. A query the parser rejects is returned unchanged.
  */
 export const applyKiLifecycle = (query: string, dests: AiIndexDest[]): string => {
   const { root, errors } = Parser.parse(query);

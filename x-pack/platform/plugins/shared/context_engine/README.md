@@ -72,11 +72,12 @@ and cannot be overridden:
   knowledge indicator lifecycle pipeline inserted after `FROM`: only
   indicators whose `governance.lifecycle.status` is unset or `active` and
   whose `expires_at` is unset or in the future are returned, and
-  `governance.*` is dropped from the result. A `WHERE` on a lifecycle field
-  switches off that filter: `WHERE expires_at < NOW()` the expiry filter,
-  `WHERE governance.lifecycle.status == "deleted"` the status filter. Naming
-  a lifecycle field in `KEEP`, `SORT` or `EVAL` leaves both filters on, and
-  naming any `governance.*` field keeps `governance` in the result. When a
+  `governance.*` is dropped from the result. A top-level `WHERE` command on a
+  lifecycle field switches off that filter: `WHERE expires_at < NOW()` the
+  expiry filter, `WHERE governance.lifecycle.status == "deleted"` the status
+  filter. Naming a lifecycle field in `KEEP`, `SORT` or `EVAL`, or in a
+  `WHERE` inside a `FORK` branch, leaves both filters on, and naming any
+  `governance.*` field keeps `governance` in the result. When a
   data stream is read, only the newest revision of each `id` per
   target is considered in every case (`METADATA _id, _index` are added when
   missing). An index outside the registry is read as-is on its own; in a query
