@@ -1,5 +1,5 @@
 {
-  "sha1": "e80ee480cdf342fbd590c6ca49cd4fceb6b6953a",
+  "sha1": "8f0fe0de597862701dc9c1beb1e9edc42b726e9e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,66 +13,6 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/global.setup.ts",
         "line": 7,
         "column": 1
-      }
-    },
-    {
-      "id": "785a7d29d403cfa-999d6b2fa1eed6c",
-      "title": "Discover inline data view editing keeps unchanged edits clean after confirmation and reload",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/adhoc_data_view_editing.spec.ts",
-        "line": 38,
-        "column": 88
-      }
-    },
-    {
-      "id": "785a7d29d403cfa-66af52657e98f78",
-      "title": "Discover inline data view editing discards field edits without changing the shared inline view",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/adhoc_data_view_editing.spec.ts",
-        "line": 53,
-        "column": 22
-      }
-    },
-    {
-      "id": "785a7d29d403cfa-b375f0fa9863fb6",
-      "title": "Discover inline data view editing keeps filters editable after changing the view and saving",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/adhoc_data_view_editing.spec.ts",
-        "line": 79,
-        "column": 22
       }
     },
     {
@@ -196,8 +136,8 @@
       }
     },
     {
-      "id": "2f48d220f697ecb-30df8366fc8fea6",
-      "title": "Discover — adhoc data views saving a copy preserves the inline view until edited, without changing the original",
+      "id": "2f48d220f697ecb-3d33fa3bb06795d",
+      "title": "Discover — adhoc data views saving and reloading preserve the stored data view ID but saving as copy generates a new ID",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -231,8 +171,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/adhoc_data_views.spec.ts",
-        "line": 220,
-        "column": 62
+        "line": 196,
+        "column": 16
       }
     },
     {
@@ -251,30 +191,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/adhoc_data_views.spec.ts",
-        "line": 300,
-        "column": 36
-      }
-    },
-    {
-      "id": "9fe511bf888e3af-e0881fbe9bb7018",
-      "title": "API-created Discover session on Dashboard loads an ID-less inline session through CM and preserves its own filter after reload",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-serverless-observability_logs_essentials",
-        "@cloud-serverless-observability_logs_essentials"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/api_discover_session_dashboard.spec.ts",
-        "line": 23,
-        "column": 7
+        "line": 275,
+        "column": 32
       }
     },
     {
@@ -551,8 +469,8 @@
       }
     },
     {
-      "id": "bd77256838a819d-01aa9a7368c0a8c",
-      "title": "Discover session panels on Dashboard preserves a cell-action filter across panels sharing an inline view after dashboard reload",
+      "id": "bd77256838a819d-9aa607b80d4bd6c",
+      "title": "Discover session panels on Dashboard shares one inline data view across API-created tabs after saving in Discover and reloading the dashboard",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -590,8 +508,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/discover_session_dashboard_reload.spec.ts",
-        "line": 140,
-        "column": 6
+        "line": 141,
+        "column": 27
       }
     },
     {
@@ -1087,6 +1005,28 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/inspector_stats.spec.ts",
         "line": 25,
         "column": 29
+      }
+    },
+    {
+      "id": "fbaefbc433ed14f-bf453897dc4933a",
+      "title": "Internal Discover session on Dashboard loads an internally saved session through Content Management in a linked dashboard panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/internal_discover_session_dashboard.spec.ts",
+        "line": 26,
+        "column": 7
       }
     },
     {
@@ -1618,7 +1558,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/request_counts_esql.spec.ts",
-        "line": 103,
+        "line": 101,
         "column": 29
       }
     },

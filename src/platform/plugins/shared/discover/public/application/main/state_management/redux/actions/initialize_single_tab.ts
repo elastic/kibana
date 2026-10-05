@@ -200,7 +200,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       resolveEsqlSource({
         esql,
         services,
-        esqlVariables: initialEsqlVariables.length ? initialEsqlVariables : undefined,
+        esqlVariables: initialEsqlVariables,
         timeRange:
           urlGlobalState?.time ??
           tabInitialGlobalState?.timeRange ??

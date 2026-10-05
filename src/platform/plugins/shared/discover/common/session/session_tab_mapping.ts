@@ -97,27 +97,16 @@ export const fromStoredSessionSettings = (
     }),
 });
 
-/**
- * Adds saved type settings to a session API tab, rejecting Metrics settings on a non-ES|QL tab.
- * Panels map the same settings with `fromStoredTabTypeState` and fall back to a default tab.
- */
+/** Adds saved type settings, ignoring Metrics settings on non-ES|QL tabs. */
 export const applySessionTabTypeState = (
   apiTab: TabWithoutTypeState,
   tabTypeState: DiscoverSessionTabAttributes['tabTypeState']
 ): DiscoverSessionApiTab => {
-  const apiTabTypeState = fromStoredTabTypeState(tabTypeState);
-
-  if (apiTabTypeState.type === DiscoverTabType.Default) {
-    return { ...apiTab, ...apiTabTypeState };
-  }
-
   if (!isDiscoverSessionEsqlTab(apiTab)) {
-    throw new Error(
-      `Metrics tab "${apiTab.label}" with ID "${apiTab.id}" requires an ES|QL data source.`
-    );
+    return { ...apiTab, type: DiscoverTabType.Default };
   }
 
-  return { ...apiTab, ...apiTabTypeState };
+  return { ...apiTab, ...fromStoredTabTypeState(tabTypeState) };
 };
 
 /**

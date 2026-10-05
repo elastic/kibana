@@ -20,7 +20,6 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
-
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import { isAgentBasedOnly } from '../aws_service_matrix';
 import type { AwsServiceMatrixEntry } from '../aws_service_matrix';
@@ -28,6 +27,7 @@ import { DeploymentMethodCard } from './authenticate_and_deploy_step/deployment_
 import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
 import { buildIacIntegrations } from './authenticate_and_deploy_step/package_inputs';
 import { useDeploy, toSOServiceVars } from './authenticate_and_deploy_step/use_deploy';
+import { useOnboardingDriftDetection } from './authenticate_and_deploy_step/use_onboarding_drift_detection';
 import { useAgentBasedDeploy } from './authenticate_and_deploy_step/use_agent_based_deploy';
 import { AgentBasedSection } from './authenticate_and_deploy_step/agent_based_section';
 import { useOnboardingSO } from './authenticate_and_deploy_step/use_onboarding_so';
@@ -60,6 +60,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     awsServicesMap,
     deploymentMethod,
     setDeploymentMethod,
+    authenticateAndDeployStep,
+    agentBasedDeployment: agentBasedDeploymentFromFlow,
     detectAndReviewStep,
     updateDetectAndReviewStep,
     removeDeployInstances,
@@ -120,6 +122,23 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   );
   const { globalRegion, serviceVars } = serviceSettings ?? DEFAULT_SERVICE_SETTINGS;
 
+  // ── Drift detection ───────────────────────────────────────────────────────────
+  const { onboardingDeploymentId, policyIdsByInstance } = detectAndReviewStep;
+  const { connectorId } = authenticateAndDeployStep ?? {};
+  const isDirty = detectAndReviewStep.isDirty ?? false;
+  const { driftSettled, driftCheckError, retryDriftCheck, handleReplaceFormDirtyChange } =
+    useOnboardingDriftDetection({
+      onboardingDeploymentId,
+      policyIdsByInstance,
+      awsServicesMap,
+      deploymentMethod,
+      connectorId,
+      agentBasedDeployment: agentBasedDeploymentFromFlow,
+      serviceSettings,
+      isDirty,
+      updateDetectAndReviewStep,
+    });
+
   const otlpEndpoint = services.cloud?.managedOtlp?.url;
 
   // ECF instances: prefer session-storage instances because they carry duplicate-instance ARNs
@@ -148,12 +167,19 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     onContinue: () => {},
   });
   const [deployAttempted, setDeployAttempted] = useState(false);
-  const isMiDone =
-    isAlreadyDeployed || (deployAttempted && !isDeploying && failedInstances.length === 0);
-  // hasFailed is NOT gated on deployAttempted: if the hook is seeded with persisted failures on
-  // remount (after navigating Back/Next), the callout and Retry must still appear even though no
-  // deploy was attempted in this component lifetime.
+  // hasFailed not gated on deployAttempted: persisted failures on Back/Next remount must still
+  // show the callout even without a new deploy attempt.
   const hasFailed = !isDeploying && failedInstances.length > 0;
+  // hasFailed checked in isAlreadyDeployed: a partial dirty-redeploy (one PUT fails) leaves
+  // failedInstances set — reverting settings clears isDirty but failedInstances persists.
+  const isMiDone =
+    driftSettled &&
+    // The already-deployed arm must check !isDeploying and failedInstances independently:
+    // !hasFailed collapses to (isDeploying || failedInstances.length === 0), so when Retry
+    // starts isDeploying=true makes !hasFailed true and isMiDone flips true mid-retry, enabling
+    // Next before the Retry PUT has finished.
+    ((isAlreadyDeployed && !isDirty && !isDeploying && failedInstances.length === 0) ||
+      (deployAttempted && !isDeploying && failedInstances.length === 0 && !isDirty));
 
   const handleDeployClick = useCallback(() => {
     setDeployAttempted(true);
@@ -188,14 +214,15 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
   const [agentDeployAttempted, setAgentDeployAttempted] = useState(false);
   const [isAgentNextReady, setIsAgentNextReady] = useState(false);
+  // isDirty is checked in both branches so that Next doesn't short-circuit when drift has been
+  // detected on an already-deployed agent setup — the dirty-redeploy path in useAgentBasedDeploy
+  // must run before navigation is allowed. driftSettled gates both for the same reason as isMiDone.
   const isAgentDone =
-    isAgentAlreadyDeployed ||
-    (agentDeployAttempted && !isAgentDeploying && agentFailedInstances.length === 0);
-  // Unlike MI's hasFailed, this IS gated on agentDeployAttempted. failedInstances is a single
-  // shared session key that the MI path also writes, so an un-gated check would surface a stale
-  // MI failure (or one from a previous session) as an agent-based "Deployment failed" callout.
-  // The agent-based path has no equivalent of MI's "persisted failure must survive remount"
-  // requirement, because agentPolicyId is its durable success flag.
+    driftSettled &&
+    ((isAgentAlreadyDeployed && !isDirty) ||
+      (agentDeployAttempted && !isAgentDeploying && agentFailedInstances.length === 0 && !isDirty));
+  // Gated on agentDeployAttempted (unlike MI): failedInstances is shared with MI, so an
+  // un-gated check would surface stale MI failures as agent-based errors.
   const agentHasFailed =
     agentDeployAttempted && !isAgentDeploying && agentFailedInstances.length > 0;
 
@@ -532,7 +559,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     (hasAnyEcf && !isEcfDone) ||
     isSavingSO ||
     (showAgentSection && isAgentDeploying) ||
-    (showAgentSection && !isAgentDone && !isAgentNextReady);
+    (showAgentSection && !isAgentDone && !(driftSettled && isAgentNextReady));
 
   return (
     <div data-test-subj="onboardingStep-authenticate-and-deploy">
@@ -606,6 +633,73 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
       {showMiSection && <EuiHorizontalRule margin="l" />}
 
+      {driftCheckError && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            title={
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.driftCheckErrorCallout.title"
+                defaultMessage="Could not check for settings changes"
+              />
+            }
+            color="warning"
+            iconType="warning"
+            data-test-subj="authenticateAndDeployStep-driftCheckErrorCallout"
+          >
+            <FormattedMessage
+              id="xpack.ingestHub.authenticateAndDeployStep.driftCheckErrorCallout.body"
+              defaultMessage="Unable to reach the deployment record. Check your connection and try again."
+            />
+            <EuiSpacer size="s" />
+            <EuiButton
+              size="s"
+              color="warning"
+              onClick={retryDriftCheck}
+              data-test-subj="authenticateAndDeployStep-driftCheckRetryButton"
+            >
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.driftCheckErrorCallout.retryButton"
+                defaultMessage="Retry"
+              />
+            </EuiButton>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
+
+      {(showMiSection || showAgentSection) &&
+        isDirty &&
+        (deployGroups.length > 0 || agentTargets.length > 0) && (
+          <>
+            <EuiCallOut
+              announceOnMount
+              title={
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.title"
+                  defaultMessage="Settings changed since last deployment"
+                />
+              }
+              color="warning"
+              iconType="warning"
+              data-test-subj="authenticateAndDeployStep-driftCallout"
+            >
+              {showAgentSection ? (
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.bodyAgentBased"
+                  defaultMessage="Settings have changed since last deployment. Click Next to apply the updated configuration."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.body"
+                  defaultMessage="Settings have changed since last deployment. Click Deploy to apply the updated configuration."
+                />
+              )}
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
+
       {showMiSection && (
         <ManagedIntegrationsSection
           serviceCount={miServiceIds.length}
@@ -616,6 +710,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           isDone={isMiDone}
           hasFailed={hasFailed}
           isCleanupOnly={isCleanupOnly}
+          isDirty={isDirty}
+          onReplaceFormDirtyChange={handleReplaceFormDirtyChange}
         />
       )}
 

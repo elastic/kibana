@@ -1333,6 +1333,27 @@ describe('UiamService', () => {
       });
     });
 
+    it('forwards a description as part of the request body', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ id: 'service-account-id' }) });
+
+      await uiamService.createServiceAccount(
+        new HTTPAuthorizationHeader('Bearer', 'access-token'),
+        { ...body, description: 'Relays the nightshift alerts.' }
+      );
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/service-accounts',
+        expect.objectContaining({
+          body: JSON.stringify({
+            ...body,
+            description: 'Relays the nightshift alerts.',
+            type: 'organization',
+            scope: 'project',
+          }),
+        })
+      );
+    });
+
     it.each([false, true])(
       'authenticates API keys with client authentication withheld=%s',
       async (withheld) => {

@@ -97,7 +97,7 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'saves and reloads an editable copy of the profile data view without unsaved changes',
+      'saves and reloads an unmanaged copy of the profile data view without unsaved changes',
       async ({ page, pageObjects }) => {
         const { dataGrid, discover, unifiedFieldList } = pageObjects;
 

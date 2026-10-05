@@ -18,9 +18,10 @@ import { BASE_HEADERS } from '../fixtures/constants';
 const REPORT_GENERATION_TIMEOUT = 120_000;
 
 apiTest.describe('Discover inline session CSV export', { tag: tags.deploymentAgnostic }, () => {
+  // Reporting runs asynchronously; allow time for the job plus setup and assertions.
   apiTest.setTimeout(REPORT_GENERATION_TIMEOUT + 30_000);
 
-  const indexName = `scout-discover-inline-csv-${randomUUID()}`;
+  const indexName = `logstash-scout-discover-inline-csv-${randomUUID()}`;
   let credentials: RoleApiCredentials;
   let sessionId: string | undefined;
   let reportId: string | undefined;
@@ -48,18 +49,17 @@ apiTest.describe('Discover inline session CSV export', { tag: tags.deploymentAgn
   });
 
   apiTest.afterAll(async ({ apiClient, esClient, kbnClient }) => {
-    if (reportId) {
-      const response = await apiClient.delete(`/api/reporting/jobs/delete/${reportId}`, {
-        headers: { ...BASE_HEADERS, ...credentials.apiKeyHeader },
-      });
-      expect(response).toHaveStatusCode(200);
-    }
-
     if (sessionId) {
       await kbnClient.savedObjects.delete({ type: 'search', id: sessionId });
     }
 
     await esClient.indices.delete({ index: indexName, ignore_unavailable: true });
+
+    if (reportId) {
+      await apiClient.delete(`/api/reporting/jobs/delete/${reportId}`, {
+        headers: { ...BASE_HEADERS, ...credentials.apiKeyHeader },
+      });
+    }
   });
 
   apiTest(
@@ -110,10 +110,10 @@ apiTest.describe('Discover inline session CSV export', { tag: tags.deploymentAgn
 
       await expect
         .poll(
-          async () =>
-            (
-              await apiClient.get(downloadPath, { headers, responseType: 'text' })
-            ).statusCode,
+          async () => {
+            const response = await apiClient.get(downloadPath, { headers, responseType: 'text' });
+            return response.statusCode;
+          },
           { timeout: REPORT_GENERATION_TIMEOUT, intervals: [1000] }
         )
         .toBe(200);

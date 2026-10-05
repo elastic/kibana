@@ -1,5 +1,5 @@
 {
-  "sha1": "bdce623c603e04ecf8653d4215e132ed7239068c",
+  "sha1": "42e451aa97e829c8ed3aa4dcc0f3bbd29bbf1067",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -142,26 +142,6 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/delete_discover_session.spec.ts",
         "line": 64,
         "column": 92
-      }
-    },
-    {
-      "id": "4068991cd85d6af-ac437fae51c32fa",
-      "title": "Discover inline session CSV export exports the stored inline definition and own filter without first saving in Discover",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/discover_session_csv.spec.ts",
-        "line": 67,
-        "column": 25
       }
     },
     {
@@ -397,6 +377,86 @@
       }
     },
     {
+      "id": "cad7639c5abd8e9-4a2b230213f807a",
+      "title": "Internal Discover session write permissions forbids creating a session as a read-only user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/internal_discover_session_permissions.spec.ts",
+        "line": 72,
+        "column": 65
+      }
+    },
+    {
+      "id": "cad7639c5abd8e9-29097f6ce93a739",
+      "title": "Internal Discover session write permissions forbids creating a missing session through PUT as a read-only user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/internal_discover_session_permissions.spec.ts",
+        "line": 79,
+        "column": 26
+      }
+    },
+    {
+      "id": "cad7639c5abd8e9-2ee5aa7af57e95a",
+      "title": "Internal Discover session write permissions creates a missing session through PUT and preserves its inline Data View ID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/internal_discover_session_permissions.spec.ts",
+        "line": 99,
+        "column": 16
+      }
+    },
+    {
+      "id": "cad7639c5abd8e9-2bd68bd2e0359d0",
+      "title": "Internal Discover session write permissions forbids replacing an existing session and leaves it unchanged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/internal_discover_session_permissions.spec.ts",
+        "line": 132,
+        "column": 69
+      }
+    },
+    {
       "id": "03a22c2667bebc5-44abdd371c3ee56",
       "title": "GET /api/discover_sessions returns paginated Discover session summaries",
       "expectedStatus": "passed",
@@ -617,8 +677,8 @@
       }
     },
     {
-      "id": "68e22b03ba9cb36-d9ca776234dd71c",
-      "title": "PUT /api/discover_sessions/{id} replaces a legacy inline ID with implicit own filter references through GET and PUT",
+      "id": "68e22b03ba9cb36-c28c1c1ad2159ee",
+      "title": "PUT /api/discover_sessions/{id} preserves the stored inline ID and filter references through GET and PUT",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -632,8 +692,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/upsert_discover_session.spec.ts",
-        "line": 284,
-        "column": 41
+        "line": 285,
+        "column": 26
       }
     },
     {
@@ -652,8 +712,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/upsert_discover_session.spec.ts",
-        "line": 376,
-        "column": 23
+        "line": 371,
+        "column": 26
       }
     },
     {
@@ -672,8 +732,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/upsert_discover_session.spec.ts",
-        "line": 485,
-        "column": 23
+        "line": 482,
+        "column": 21
       }
     },
     {
@@ -692,8 +752,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/upsert_discover_session.spec.ts",
-        "line": 541,
-        "column": 23
+        "line": 535,
+        "column": 79
       }
     },
     {
@@ -712,8 +772,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/upsert_discover_session.spec.ts",
-        "line": 665,
-        "column": 11
+        "line": 660,
+        "column": 22
       }
     },
     {
@@ -732,8 +792,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/upsert_discover_session.spec.ts",
-        "line": 683,
-        "column": 3
+        "line": 669,
+        "column": 24
       }
     }
   ]
