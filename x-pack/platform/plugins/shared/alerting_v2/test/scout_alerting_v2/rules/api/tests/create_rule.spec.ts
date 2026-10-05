@@ -260,6 +260,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
     });
     expect(response).toHaveStatusCode(400);
     expect(response.body.code).toBe('BAD_REQUEST');
+    expect(response.body.message).toContain('metadata.routing_tags');
   });
 
   apiTest(
