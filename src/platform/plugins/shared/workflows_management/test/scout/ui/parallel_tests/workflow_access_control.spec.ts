@@ -25,8 +25,11 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
     workflowId = undefined;
   });
 
-  test.afterEach(async ({ apiClient, scoutSpace }) => {
+  test.afterEach(async ({ apiClient, scoutSpace, esClient }) => {
     if (workflowId) {
+      await esClient.indices.refresh({
+        index: ['.workflows-executions', '.workflows-step-executions'],
+      });
       const response = await apiClient.delete(
         `s/${scoutSpace.id}/api/workflows/workflow/${workflowId}?force=true&acknowledgeAclLoss=true`,
         {
@@ -59,12 +62,14 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
     await browserAuth.loginAsPrivilegedUser();
     const editor = pageObjects.workflowEditor;
     await editor.gotoNewWorkflow();
+    await expect(page.testSubj.locator('~shareTopNavButton')).toHaveCount(0);
     await editor.setYamlEditorValue(getDummyWorkflowYaml('Shared access form'));
     await editor.saveWorkflow();
     workflowId = new URL(page.url()).pathname.split('/').at(-1);
     if (!workflowId || workflowId === 'create') throw new Error('Workflow was not created');
     await editor.gotoWorkflow(workflowId);
     await editor.openAccessDialog();
+    await expect(page.getByRole('heading', { name: 'Access control', exact: true })).toBeVisible();
     await expect(editor.accessMode).toContainText('Public');
     await expect(page.getByText('Owner (you)', { exact: true })).toBeVisible();
     await expect(page.getByText('test editor', { exact: true })).toBeVisible();
@@ -132,9 +137,11 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
       await editor.gotoWorkflow(workflowId);
       await expect(editor.saveButton).toBeDisabled();
       await editor.hoverDisabledAccessButton();
-      await expect(page.testSubj.locator('workflowAccessButton')).toBeDisabled();
+      await expect(page.testSubj.locator('~shareTopNavButton')).toBeDisabled();
       await expect(
-        page.getByText('Only the workflow owner can manage access.', { exact: true })
+        page.getByText('Only the workflow owner and administrators can manage access.', {
+          exact: true,
+        })
       ).toBeVisible();
       await page.keyboard.press('Escape');
       await expect(page.testSubj.locator('workflowBottomBarRunButton')).toBeEnabled();

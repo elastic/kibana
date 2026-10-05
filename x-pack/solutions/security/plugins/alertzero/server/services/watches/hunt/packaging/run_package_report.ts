@@ -146,7 +146,7 @@ export const runPackageReport = async ({
       // techniques -- the one piece of "we looked" this run can honestly claim is the reportId.
       const subjects = deriveCoverageSubjects({
         spaceId,
-        state: { reportId, techniques: [], hasConfirmedHit: false },
+        state: { reportId, techniques: [], hasConfirmedHit: false, corroboratedTechniques: [] },
         investigationConversationId,
       });
       const coverage = await deps.writeCoverageKis(subjects);
