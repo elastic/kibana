@@ -123,7 +123,8 @@ const assignEpisodeActionSchema = z
       .describe('Assigns an alert to a user, or clears the assignee when null.'),
     assignee_uid: z
       .string()
-      .max(256)
+      .min(1)
+      .max(ID_MAX_LENGTH)
       .nullable()
       .describe('User profile UID of the assignee, or null to remove the assignee from the alert.'),
   })
@@ -163,7 +164,7 @@ export type SeriesAlertActionParams = z.infer<typeof seriesAlertActionParamsSche
 
 export const episodeAlertActionParamsSchema = z
   .object({
-    alert_id: z
+    id: z
       .string()
       .min(1)
       .max(ID_MAX_LENGTH)
