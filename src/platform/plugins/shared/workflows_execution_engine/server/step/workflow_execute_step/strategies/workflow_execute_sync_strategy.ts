@@ -11,7 +11,12 @@ import { omit } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflow } from '@kbn/workflows';
-import { ExecutionStatus, isTerminalStatus, toWorkflowExecutionEngineModel } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  getInheritedChildMetadata,
+  isTerminalStatus,
+  toWorkflowExecutionEngineModel,
+} from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
 import type {
   EsWorkflowExecution,
@@ -126,6 +131,7 @@ export class WorkflowExecuteSyncStrategy {
           parentStepId: this.stepExecutionRuntime.node.stepId,
           parentDepth,
           ...(inheritParentIdentity ? { inheritParentIdentity: true, parentStepName } : {}),
+          ...getInheritedChildMetadata(workflowExecution.metadata),
         },
         request
       );

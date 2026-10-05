@@ -325,6 +325,50 @@ describe('validateWorkflowInputs', () => {
     });
   });
 
+  it('should not evaluate expressions in inputs from an untrusted caller', async () => {
+    setInputsSchema({
+      properties: { summary: { type: 'string' } },
+      required: ['summary'],
+    });
+
+    const inputs = { summary: '${{ consts.api_token }}' };
+    const workflowExecution = createWorkflowExecution(
+      { inputs },
+      {
+        metadata: { submittedVia: 'page', untrustedInputs: true },
+        workflowDefinition: {
+          ...stubWorkflowExecution.workflowDefinition,
+          consts: { api_token: 'secret-value' },
+        },
+      }
+    );
+
+    const result = await callValidate(workflowExecution);
+
+    expect(result).toBe(true);
+    expect(workflowExecution.context.inputs).toEqual(inputs);
+    expect(mockRepository.updateWorkflowExecution).not.toHaveBeenCalled();
+  });
+
+  it('should keep evaluating expressions when the untrusted flag is not exactly true', async () => {
+    setInputsSchema({ properties: { summary: { type: 'string' } } });
+
+    const workflowExecution = createWorkflowExecution(
+      { inputs: { summary: '${{ consts.label }}' } },
+      {
+        metadata: { untrustedInputs: 'false' },
+        workflowDefinition: {
+          ...stubWorkflowExecution.workflowDefinition,
+          consts: { label: 'evaluated' },
+        },
+      }
+    );
+
+    await callValidate(workflowExecution);
+
+    expect(workflowExecution.context.inputs).toEqual({ summary: 'evaluated' });
+  });
+
   it('should preserve provided values that resemble Liquid templates', async () => {
     setInputsSchema({
       properties: {
