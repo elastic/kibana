@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { GEN_AI_LONG_MESSAGE_FIELDS } from '@kbn/ai-observability-common';
 import {
-  GEN_AI_LONG_MESSAGE_FIELDS,
   getFieldFromSource,
   getGenAiFields,
   hasGenAiData,

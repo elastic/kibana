@@ -15,7 +15,7 @@ export {
   type GenAiFields,
   type GenAiMessage,
 } from './get_genai_fields';
-export { getFieldFromSource, GEN_AI_LONG_MESSAGE_FIELDS } from './get_field_from_source';
+export { getFieldFromSource } from './get_field_from_source';
 export { GENAI_EBT_CLICK_ACTIONS } from './ebt_constants';
 export {
   GenAiTabImpression,

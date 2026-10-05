@@ -610,6 +610,9 @@ importers:
       '@kbn/ai-assistant-management-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/ai_assistant_management/selection
+      '@kbn/ai-observability-common':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-ai-observability-common
       '@kbn/ai-security-labs-content':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/ai-security-labs-content
@@ -7883,6 +7886,8 @@ importers:
   src/platform/packages/shared/kbn-actions-types: {}
 
   src/platform/packages/shared/kbn-actions-utils: {}
+
+  src/platform/packages/shared/kbn-ai-observability-common: {}
 
   src/platform/packages/shared/kbn-aiops-utils: {}
 

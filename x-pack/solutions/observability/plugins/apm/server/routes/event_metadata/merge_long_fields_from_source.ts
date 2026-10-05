@@ -13,7 +13,7 @@ import {
   ATTRIBUTE_GEN_AI_TOOL_CALL_ARGUMENTS,
   ATTRIBUTE_GEN_AI_TOOL_CALL_RESULT,
   ATTRIBUTE_GEN_AI_TOOL_DEFINITIONS,
-} from '@kbn/apm-types/es_fields';
+} from '@kbn/ai-observability-common';
 import { getFieldFromSource } from './get_field_from_source';
 
 // Fields stored under the OTel flattened `attributes` mapping (ignore_above: 1024)
@@ -22,8 +22,6 @@ import { getFieldFromSource } from './get_field_from_source';
 // survive in _source, so we fetch them there and merge as a fallback.
 // Only the OTel `attributes.*` shape is covered here; the other key shapes the
 // UI can read (`gen_ai.*`, `labels.gen_ai_*`) have no _source fallback.
-// Keep in sync with the client-side twin `GEN_AI_LONG_MESSAGE_FIELDS` in
-// `@kbn/apm-ui-shared` — that browser package cannot be imported here.
 export const LONG_FIELDS_SOURCE_FALLBACK = [
   ATTRIBUTE_GEN_AI_INPUT_MESSAGES,
   ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES,

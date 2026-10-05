@@ -30,7 +30,7 @@ import {
   ATTRIBUTE_GEN_AI_TOOL_NAME,
   ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS,
   ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS,
-} from '@kbn/apm-types/es_fields';
+} from '@kbn/ai-observability-common';
 
 export interface GenAiMessage {
   role: string;

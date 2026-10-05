@@ -230,6 +230,7 @@
     "@kbn/ai-assistant-cta": "workspace:*",
     "@kbn/ai-assistant-icon": "workspace:*",
     "@kbn/ai-assistant-management-plugin": "workspace:*",
+    "@kbn/ai-observability-common": "workspace:*",
     "@kbn/ai-security-labs-content": "workspace:*",
     "@kbn/ai-tools": "workspace:*",
     "@kbn/aiops-change-point-detection": "workspace:*",

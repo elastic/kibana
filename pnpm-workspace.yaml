@@ -721,6 +721,7 @@ packages:
   - 'src/platform/packages/shared/home/sample_data_types'
   - 'src/platform/packages/shared/kbn-actions-types'
   - 'src/platform/packages/shared/kbn-actions-utils'
+  - 'src/platform/packages/shared/kbn-ai-observability-common'
   - 'src/platform/packages/shared/kbn-aiops-utils'
   - 'src/platform/packages/shared/kbn-alerting-types'
   - 'src/platform/packages/shared/kbn-alerts-as-data-utils'
