@@ -8,7 +8,7 @@
  */
 
 import type { GenAiMessage } from './get_genai_fields';
-import { parseNestedJson, unwrapToolResponse } from './parse_genai_value';
+import { isRecord, parseNestedJson, unwrapToolResponse } from './parse_genai_value';
 
 export interface GenAiTextBlock {
   type: 'text';
@@ -38,9 +38,6 @@ export type GenAiMessageBlock =
   | GenAiToolCallBlock
   | GenAiToolResponseBlock
   | GenAiUnknownBlock;
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  value != null && typeof value === 'object' && !Array.isArray(value);
 
 const asString = (value: unknown): string | undefined =>
   typeof value === 'string' && value.length > 0 ? value : undefined;

@@ -95,8 +95,8 @@ describe('GenAiMessages', () => {
       { role: 'user', content: 'Hi' },
       { role: 'assistant', content: 'Hello' },
     ]);
-    expect(screen.getByTestId('genAiRoleBadge-user')).toHaveTextContent('Human');
-    expect(screen.getByTestId('genAiRoleBadge-assistant')).toHaveTextContent('AI');
+    expect(screen.getByTestId('genAiRoleBadge-user')).toHaveTextContent('User');
+    expect(screen.getByTestId('genAiRoleBadge-assistant')).toHaveTextContent('Assistant');
   });
 
   it('renders assistant tool calls as cards with the tool name, call ID and arguments', () => {

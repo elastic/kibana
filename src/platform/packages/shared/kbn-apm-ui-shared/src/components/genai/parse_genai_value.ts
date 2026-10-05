@@ -14,7 +14,8 @@ const MAX_STRING_PARSE_DEPTH = 4;
 // nested closing tag) so the model can tell retrieved content from instructions.
 const TOOL_RESULT_ENVELOPE = /^\s*<tool_result>([\s\S]*)<\/tool_result>\s*$/;
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
+/** Returns true for plain (non-array) objects. */
+export const isRecord = (value: unknown): value is Record<string, unknown> =>
   value != null && typeof value === 'object' && !Array.isArray(value);
 
 const tryParseJson = (value: string): unknown => {

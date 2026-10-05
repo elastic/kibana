@@ -39,11 +39,13 @@ const ROLE_DISPLAY: Record<string, RoleDisplay> = {
     iconType: 'gear',
   },
   user: {
-    label: i18n.translate('apmUiShared.genAi.messages.role.user', { defaultMessage: 'Human' }),
+    label: i18n.translate('apmUiShared.genAi.messages.role.user', { defaultMessage: 'User' }),
     iconType: 'user',
   },
   assistant: {
-    label: i18n.translate('apmUiShared.genAi.messages.role.assistant', { defaultMessage: 'AI' }),
+    label: i18n.translate('apmUiShared.genAi.messages.role.assistant', {
+      defaultMessage: 'Assistant',
+    }),
     iconType: 'sparkles',
   },
   tool: {
