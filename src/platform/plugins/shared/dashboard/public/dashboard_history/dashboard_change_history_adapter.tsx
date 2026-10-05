@@ -12,7 +12,6 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ChangeDetailsResponse } from '../../server/change_history/register_details_route';
 import type { HistoryListResponse } from '../../server/change_history/register_list_route';
 import type { DashboardApi } from '../dashboard_api/types';
-import { dashboardClient } from '../dashboard_client';
 
 const BASE_HISTORY_PATH = `/internal/dashboard/change_history` as const;
 

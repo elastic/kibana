@@ -7,18 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ChangeHistoryPreviewRenderFn } from '@kbn/change-history-ui';
-import {
-  type ChangeHistoryHttpClient,
-  ChangeHistoryModal,
-  ChangeHistoryProvider,
-  createChangeHistoryHttpAdapter,
-} from '@kbn/change-history-ui';
-import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import type { ChangeHistoryPreviewRenderFn } from '@kbn/change-history-ui';
+import { ChangeHistoryModal, ChangeHistoryProvider } from '@kbn/change-history-ui';
+import type { Filter } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+
 import type { DashboardApi, DashboardInitializationState } from '..';
-import { DashboardRenderer } from '..';
-import { coreServices } from '../services/kibana_services';
+import { DASHBOARD_APP_ID, DashboardRenderer } from '..';
+import { coreServices, unifiedSearchService } from '../services/kibana_services';
 import { createDashboardChangeHistoryAdapter } from './dashboard_change_history_adapter';
 import { renderDashboardChangeHistoryBadge } from './dashboard_change_history_badge';
 
@@ -92,31 +91,50 @@ const DashboardPreview: ChangeHistoryPreviewRenderFn = ({ change, compareSpec, d
     ...change,
     viewMode: 'view' as const,
   });
-
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
+  const [filters, setFilters] = useState<Filter[]>([]);
 
   useEffect(() => {
     if (!dashboardApi) return;
     dashboardApi.setState({
-      ...change.snapshot,
+      ...(change.snapshot as DashboardState),
     });
   }, [change, dashboardApi]);
 
+  useEffect(() => {
+    const filtersSubscription = dashboardApi?.filters$.subscribe((newFilters) =>
+      setFilters(newFilters ?? [])
+    );
+    return () => {
+      filtersSubscription?.unsubscribe();
+    };
+  }, [dashboardApi]);
+
+  const memoized = useMemo(() => {
+    /** Prevent dashboard renderer from remounting with every history item selection; instead, we will call `setState` on the API */
+    return (
+      <DashboardRenderer
+        getCreationOptions={() =>
+          Promise.resolve({
+            getInitialInput: () => initialState.current,
+          })
+        }
+        onApiAvailable={setDashboardApi}
+        // getCreationOptions={async () => ({
+        //   useSessionStorageIntegration: false,
+        //   getInitialInput: () => ({
+        //     ...(compareSpec ? compareSpec.target.snapshot : change.snapshot),
+        //     viewMode: 'view',
+        //   }),
+        // })}
+      />
+    );
+  }, []);
+
   return (
-    <DashboardRenderer
-      getCreationOptions={() =>
-        Promise.resolve({
-          getInitialInput: () => initialState.current,
-        })
-      }
-      onApiAvailable={setDashboardApi}
-      // getCreationOptions={async () => ({
-      //   useSessionStorageIntegration: false,
-      //   getInitialInput: () => ({
-      //     ...(compareSpec ? compareSpec.target.snapshot : change.snapshot),
-      //     viewMode: 'view',
-      //   }),
-      // })}
-    />
+    <>
+      <unifiedSearchService.ui.SearchBar appName={DASHBOARD_APP_ID} filters={filters} />
+      {memoized}
+    </>
   );
 };
