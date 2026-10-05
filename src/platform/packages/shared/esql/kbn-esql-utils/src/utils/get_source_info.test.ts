@@ -87,13 +87,23 @@ describe('getESQLSourceInfo', () => {
     expect(cacheKey).toBe(withoutMeta.cacheKey);
   });
 
-  it('reuses the in-flight request for the same cache key', async () => {
+  it.each([{ variables: undefined }, { variables: [] }])(
+    'normalizes absent or empty variables ($variables)',
+    ({ variables }) => {
+      expect(buildEsqlSourceCacheKey('FROM logs-*', undefined, variables)).toEqual({
+        cacheKey: JSON.stringify(['FROM logs-*', null, null]),
+        cleanVariables: undefined,
+      });
+    }
+  );
+
+  it('reuses the in-flight request for absent and empty variables', async () => {
     const http = createHttp();
     const query = 'FROM logs-source-info-cache-*';
 
     const [first, second] = await Promise.all([
       getESQLSourceInfo({ query, http }),
-      getESQLSourceInfo({ query, http }),
+      getESQLSourceInfo({ query, http, esqlVariables: [] }),
     ]);
 
     expect(first).toBe(second);

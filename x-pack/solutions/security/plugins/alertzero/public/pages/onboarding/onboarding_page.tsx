@@ -33,6 +33,7 @@ import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useCurrentUser } from '../../hooks/use_current_user';
 import { useWorkers } from '../../hooks/use_workers_api';
 import { workerName } from '../watches/workers/translations';
+import { OnboardingIntro } from './onboarding_intro';
 import { useEnableWorkers } from './use_enable_workers';
 import * as i18n from './translations';
 
@@ -60,6 +61,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
   // Intersect the server-returned worker list with the catalog so skill-gated workers
   // absent from the response are not shown as toggles (or counted toward the minimum).
   const { data: workersData } = useWorkers();
+  const canModifyWorkers = workersData?.canModifyWorkers !== false;
   const serverWorkerIds = useMemo(
     () => new Set((workersData?.workers ?? []).map((w) => w.id)),
     [workersData]
@@ -74,6 +76,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
   );
 
   const history = useHistory();
+  const [step, setStep] = useState<'intro' | 'workers'>('intro');
   const [workerEnabled, setWorkerEnabled] = useState<WorkerToggleState>(initialToggleState);
   const { handleEnableAndContinue, isSaving } = useEnableWorkers(
     availableWorkerIds,
@@ -88,6 +91,10 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
     if (!checked && enabledCount <= 1) return;
     setWorkerEnabled((prev) => ({ ...prev, [workerId]: checked }));
   };
+
+  if (step === 'intro') {
+    return <OnboardingIntro onContinue={() => setStep('workers')} />;
+  }
 
   if (!canWrite) {
     return (
@@ -170,7 +177,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
                         label={workerName(id, name)}
                         showLabel={false}
                         checked={checked}
-                        disabled={isLastEnabled || isSaving}
+                        disabled={isLastEnabled || isSaving || !canModifyWorkers}
                         onChange={(e) => handleToggle(id, e.target.checked)}
                         data-test-subj={`alertZeroOnboardingWorkerToggle-${id}`}
                         aria-describedby={
@@ -216,12 +223,26 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
 
       <EuiSpacer size="l" />
 
+      {canModifyWorkers === false ? (
+        <>
+          <EuiCallOut
+            announceOnMount
+            color="warning"
+            iconType="lock"
+            data-test-subj="alertZeroOnboardingModifyForbidden"
+          >
+            {i18n.ONBOARDING_MODIFY_FORBIDDEN}
+          </EuiCallOut>
+          <EuiSpacer size="l" />
+        </>
+      ) : null}
+
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
             isLoading={isSaving}
-            disabled={availableWorkerIds.length === 0 || enabledCount === 0}
+            disabled={availableWorkerIds.length === 0 || enabledCount === 0 || !canModifyWorkers}
             onClick={handleEnableAndContinue}
             data-test-subj="alertZeroOnboardingEnableButton"
           >
