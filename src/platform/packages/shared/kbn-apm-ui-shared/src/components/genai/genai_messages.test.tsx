@@ -116,6 +116,27 @@ describe('GenAiMessages', () => {
     expect(screen.getByText('Let me search')).toBeInTheDocument();
   });
 
+  it('renders a copy button on each tool call and tool result card', () => {
+    renderMessages([
+      {
+        role: 'assistant',
+        parts: [{ type: 'tool_call', id: 'call-1', name: 'search', arguments: '{}' }],
+      },
+      {
+        role: 'user',
+        parts: [{ type: 'tool_call_response', id: 'call-1', response: 'done' }],
+      },
+    ]);
+    expect(screen.getByTestId('genAiToolCallPartCopy')).toHaveAttribute(
+      'aria-label',
+      'Copy tool call'
+    );
+    expect(screen.getByTestId('genAiToolResponsePartCopy')).toHaveAttribute(
+      'aria-label',
+      'Copy tool output'
+    );
+  });
+
   it('omits the arguments body for tool calls without arguments', () => {
     renderMessages([
       {
@@ -177,7 +198,9 @@ describe('GenAiMessages', () => {
     expect(message).not.toHaveTextContent('tool_result');
     expect(message).not.toHaveTextContent('\\n');
     expect(message).toHaveTextContent('type: other');
-    expect(screen.getByText('line 1\nline 2', { normalizer: (text) => text })).toBeInTheDocument();
+    expect(screen.getByTestId('genAiStructuredValue').textContent).toContain(
+      'text: |\n        line 1\n        line 2'
+    );
   });
 
   it('renders tool responses inside non-tool messages as tool result cards', () => {

@@ -8,12 +8,15 @@
  */
 
 import {
+  EuiButtonIcon,
+  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -29,6 +32,9 @@ interface ToolCardProps {
   iconType: string;
   name?: string;
   id?: string;
+  /** Text copied by the card's copy button; the button is hidden when omitted. */
+  copyText?: string;
+  copyLabel?: string;
   children?: React.ReactNode;
   'data-test-subj'?: string;
 }
@@ -38,6 +44,8 @@ export function GenAiToolCard({
   iconType,
   name,
   id,
+  copyText,
+  copyLabel,
   children,
   'data-test-subj': dataTestSubj,
 }: ToolCardProps) {
@@ -83,6 +91,24 @@ export function GenAiToolCard({
             </EuiText>
           </EuiFlexItem>
         )}
+        {copyText != null && copyLabel && (
+          <EuiFlexItem grow={false} css={id ? undefined : { marginLeft: 'auto' }}>
+            <EuiCopy textToCopy={copyText}>
+              {(copy) => (
+                <EuiToolTip content={copyLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="copy"
+                    color="text"
+                    size="xs"
+                    aria-label={copyLabel}
+                    data-test-subj={dataTestSubj ? `${dataTestSubj}Copy` : undefined}
+                    onClick={copy}
+                  />
+                </EuiToolTip>
+              )}
+            </EuiCopy>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       {children != null && (
         <div
@@ -110,6 +136,16 @@ export function GenAiToolValue({ value }: { value: unknown }) {
   return <GenAiFieldValue value={value ?? ''} />;
 }
 
+const toCopyJson = (value: Record<string, unknown>): string => JSON.stringify(value, null, 2);
+
+const COPY_TOOL_CALL_LABEL = i18n.translate('apmUiShared.genAi.messages.copyToolCall', {
+  defaultMessage: 'Copy tool call',
+});
+
+const COPY_TOOL_OUTPUT_LABEL = i18n.translate('apmUiShared.genAi.messages.copyToolOutput', {
+  defaultMessage: 'Copy tool output',
+});
+
 interface BlockProps {
   block: GenAiMessageBlock;
   role: string;
@@ -126,24 +162,30 @@ function GenAiMessageBlockContent({ block, role, toolNamesById }: BlockProps) {
           iconType="wrench"
           name={block.name}
           id={block.id}
+          copyText={toCopyJson({ id: block.id, name: block.name, arguments: block.arguments })}
+          copyLabel={COPY_TOOL_CALL_LABEL}
           data-test-subj="genAiToolCallPart"
         >
           {hasArguments(block.arguments) ? <GenAiToolValue value={block.arguments} /> : undefined}
         </GenAiToolCard>
       );
-    case 'tool_call_response':
+    case 'tool_call_response': {
       // In a tool message the header already names the tool, so render the output directly.
       if (role === 'tool') return <GenAiToolValue value={block.response} />;
+      const name = block.id ? toolNamesById.get(block.id) : undefined;
       return (
         <GenAiToolCard
           iconType="returnKey"
-          name={block.id ? toolNamesById.get(block.id) : undefined}
+          name={name}
           id={block.id}
+          copyText={toCopyJson({ id: block.id, name, response: block.response })}
+          copyLabel={COPY_TOOL_OUTPUT_LABEL}
           data-test-subj="genAiToolResponsePart"
         >
           <GenAiToolValue value={block.response} />
         </GenAiToolCard>
       );
+    }
     default:
       return <GenAiFieldValue value={block.value} />;
   }
