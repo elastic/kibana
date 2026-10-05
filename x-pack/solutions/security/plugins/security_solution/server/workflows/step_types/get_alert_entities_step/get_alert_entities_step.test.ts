@@ -82,18 +82,32 @@ describe('getAlertEntitiesStepDefinition', () => {
     );
   });
 
-  // The engine renders templates but does not validate the input. `${{ }}` delivers a number;
-  // a `{{ }}` template or a quoted literal delivers a string.
-  it('applies the defaults and coerces a quoted cap itself', async () => {
-    const search = jest.fn().mockResolvedValue({});
+  // The engine renders templates but does not validate the input.
+  it('applies the defaults and coerces a templated cap itself', async () => {
+    const buckets = Array.from({ length: 10 }, (_, i) => ({
+      doc_count: 10 - i,
+      key: `host:${i}`,
+      latest: { hits: { hits: [] } },
+    }));
+    const search = jest.fn().mockResolvedValue({
+      aggregations: {
+        host_count: { value: 10 },
+        host_entities: { buckets },
+        user_count: { value: 0 },
+        user_entities: { buckets: [] },
+      },
+    });
     const context = createMockContext({ alert_ids: ['x'], max_entities: '7' }, search);
 
-    await getAlertEntitiesStepDefinition.handler(context as never);
+    const result = await getAlertEntitiesStepDefinition.handler(context as never);
 
     const request = search.mock.calls[0][0];
 
     expect(Object.keys(request.runtime_mappings)).toEqual(['entity_host', 'entity_user']);
-    expect(request.aggs.host_entities.terms.size).toBe(7);
+    expect(result).toEqual({
+      output: expect.objectContaining({ total: 10, truncated: true }),
+    });
+    expect((result as { output: { entities: unknown[] } }).output.entities).toHaveLength(7);
   });
 
   it.each([

@@ -39,8 +39,8 @@ export const getAlertEntities = async ({
 }) => {
   const index = `${DEFAULT_ALERTS_INDEX}-${asSpaceId(spaceId)}`;
   const { aggs, runtime_mappings: runtimeMappings } = buildEntityAggs({
+    alertCount: alertIds.length,
     entityTypes,
-    maxEntities,
   });
 
   // No `ignore_unavailable`: it would turn an alerts index the principal may not read into an

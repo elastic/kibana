@@ -142,6 +142,22 @@ describe('getAlertEntities', () => {
     expect(search.mock.calls[0][0]).not.toHaveProperty('ignore_unavailable');
   });
 
+  // A smaller `size` would let Elasticsearch drop an entity from a shard's candidate list when
+  // the alerts span several backing indices, and the cap could then keep the wrong entities.
+  it('counts every entity the alerts reference, and caps only after ranking', async () => {
+    const { client, search } = createClient();
+
+    await getAlertEntities({
+      alertIds: ['a', 'b', 'c'],
+      entityTypes: ['host'],
+      esClient: client,
+      maxEntities: 1,
+      spaceId: 'default',
+    });
+
+    expect(search.mock.calls[0][0].aggs.host_entities.terms.size).toBe(3);
+  });
+
   // A space where detection has never written an alert has no alerts index yet.
   it('is empty when the space has no alerts index', async () => {
     const search = jest.fn().mockRejectedValue(responseError(404, 'index_not_found_exception'));

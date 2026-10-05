@@ -10,8 +10,8 @@ import { buildEntityAggs } from './build_entity_aggs';
 
 describe('buildEntityAggs', () => {
   const { aggs, runtime_mappings: runtimeMappings } = buildEntityAggs({
+    alertCount: 20,
     entityTypes: ['host', 'user'],
-    maxEntities: 20,
   });
 
   it('derives one id per requested type with the Entity Store generator, as the Attack Discovery badges do', () => {
@@ -26,7 +26,7 @@ describe('buildEntityAggs', () => {
     expect(Object.keys(aggs).filter((name) => name.startsWith('service'))).toEqual([]);
   });
 
-  it('ranks each type by alert count, ties broken by id, capped', () => {
+  it('ranks every entity of each type by alert count, ties broken by id', () => {
     expect(aggs.host_entities).toEqual(
       expect.objectContaining({
         terms: {

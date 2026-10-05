@@ -30,13 +30,18 @@ export const LATEST_AGG_NAME = 'latest';
  *
  * Entities are ranked by alert count, ties broken by id. Each bucket also returns the fields of
  * its most recent alert, which is where its display name comes from.
+ *
+ * Every entity the alerts reference is returned, not just the top `max_entities`: the terms `size`
+ * is the number of alerts, which no type's entity count can exceed. Each shard's candidate list
+ * then holds every entity on it, so the counts and the ranking are exact even when the alerts
+ * span several backing indices, and the caller applies the cap afterwards.
  */
 export const buildEntityAggs = ({
+  alertCount,
   entityTypes,
-  maxEntities,
 }: {
+  alertCount: number;
   entityTypes: readonly AlertEntityType[];
-  maxEntities: number;
 }): {
   aggs: Record<string, estypes.AggregationsAggregationContainer>;
   runtime_mappings: Record<string, estypes.MappingRuntimeField>;
@@ -59,7 +64,7 @@ export const buildEntityAggs = ({
           terms: {
             field: runtimeFieldName(entityType),
             order: [{ _count: 'desc' as const }, { _key: 'asc' as const }],
-            size: maxEntities,
+            size: alertCount,
           },
         },
       ],
