@@ -12,7 +12,10 @@ import { useDispatch } from 'react-redux-v7';
 import { v4 } from 'uuid';
 import type { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
+import {
+  WORKFLOW_YAML_ATTACHMENT_TYPE,
+  type WorkflowEditorReadOnlyReason,
+} from '@kbn/workflows/common/constants';
 import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { setAiAssisted } from '../../../../entities/workflows/store/workflow_detail/slice';
 import {
@@ -36,6 +39,8 @@ interface UseAgentBuilderIntegrationParams {
   workflowId?: string;
   workflowName?: string;
   validationErrors?: YamlValidationResult[] | null;
+  /** Why the editor cannot apply changes; undefined when the user can edit. */
+  readOnlyReason?: WorkflowEditorReadOnlyReason;
 }
 
 export interface OpenAgentChatOptions {
@@ -71,6 +76,7 @@ export const useAgentBuilderIntegration = ({
   workflowId,
   workflowName,
   validationErrors,
+  readOnlyReason,
 }: UseAgentBuilderIntegrationParams): UseAgentBuilderIntegrationReturn => {
   const { workflowsManagement, application } = useKibana().services;
   const agentBuilder = workflowsManagement?.agentBuilder;
@@ -87,6 +93,9 @@ export const useAgentBuilderIntegration = ({
   const attachmentTargetResolvedRef = useRef(true);
   const validationErrorsRef = useRef(validationErrors);
   validationErrorsRef.current = validationErrors;
+  const readOnlyReasonRef = useRef(readOnlyReason);
+  readOnlyReasonRef.current = readOnlyReason;
+  const syncAttachmentRef = useRef<((yaml: string) => void) | null>(null);
   const chatRefHandle = useRef<{ close: () => void } | null>(null);
   const hasAutoOpenedRef = useRef(false);
   const unsavedWorkflowIdRef = useRef<string>(v4());
@@ -257,6 +266,7 @@ export const useAgentBuilderIntegration = ({
         workflowId,
         workflowName: workflowNameRef.current,
         diagnostics: serializeClientDiagnostics(validationErrorsRef.current),
+        readOnlyReason: readOnlyReasonRef.current,
       });
 
     const unsubAllResolved = tracker.onAllResolved(() => {
@@ -276,6 +286,7 @@ export const useAgentBuilderIntegration = ({
       });
       agentBuilder.addAttachment(attachment);
     };
+    syncAttachmentRef.current = syncAttachment;
 
     // The sidebar restores this session's last conversation, which may already
     // hold the attachment to write into. Adding one before it loads makes a
@@ -372,6 +383,7 @@ export const useAgentBuilderIntegration = ({
         clearTimeout(debounceTimer);
       }
       modelListener?.dispose();
+      syncAttachmentRef.current = null;
       activeConversationSub.unsubscribe();
       // Don't close the sidebar here — this runs on every deps change
       // (including the workflowId flip after Save). Close lives in the
@@ -428,6 +440,7 @@ export const useAgentBuilderIntegration = ({
                 workflowId,
                 workflowName,
                 diagnostics: serializeClientDiagnostics(validationErrors),
+                readOnlyReason,
               }),
             ]
           : [],
@@ -456,9 +469,20 @@ export const useAgentBuilderIntegration = ({
       workflowId,
       workflowName,
       validationErrors,
+      readOnlyReason,
       telemetry,
     ]
   );
+
+  // Switching tabs does not always change the YAML, so the model listener can
+  // miss it. Re-sync so the agent sees the current read-only state.
+  const syncedReadOnlyReasonRef = useRef(readOnlyReason);
+  useEffect(() => {
+    if (syncedReadOnlyReasonRef.current === readOnlyReason) return;
+    syncedReadOnlyReasonRef.current = readOnlyReason;
+    const yaml = editorRef.current?.getModel()?.getValue();
+    if (yaml !== undefined) syncAttachmentRef.current?.(yaml);
+  }, [readOnlyReason, editorRef]);
 
   // Auto-open only on /workflows/create, or on a saved workflow whose sidebar
   // the save thunk requested we restore. Never on an existing workflow the
@@ -517,12 +541,14 @@ const buildWorkflowAttachment = ({
   workflowId,
   workflowName,
   diagnostics,
+  readOnlyReason,
 }: {
   yaml: string;
   attachmentId: string;
   workflowId?: string;
   workflowName?: string;
   diagnostics: ReturnType<typeof serializeClientDiagnostics>;
+  readOnlyReason?: WorkflowEditorReadOnlyReason;
 }) => ({
   id: attachmentId,
   type: WORKFLOW_YAML_ATTACHMENT_TYPE,
@@ -534,5 +560,6 @@ const buildWorkflowAttachment = ({
     workflowId,
     name: workflowName,
     clientDiagnostics: diagnostics,
+    readOnlyReason,
   },
 });

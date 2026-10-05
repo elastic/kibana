@@ -85,7 +85,7 @@ import { useMonacoMarkersChangedInterceptor } from '../../../features/validate_w
 import { useYamlValidation } from '../../../features/validate_workflow_yaml/lib/use_yaml_validation';
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useWorkflowEditorReadOnly } from '../../../hooks/use_workflow_editor_read_only';
+import { useWorkflowEditorReadOnlyReason } from '../../../hooks/use_workflow_editor_read_only';
 import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
 import { triggerSchemas } from '../../../trigger_schemas';
@@ -213,7 +213,8 @@ export const WorkflowYAMLEditor = ({
   const dispatch = useDispatch();
   const workflow = useSelector(selectWorkflow);
   const isExecutionYaml = useSelector(selectIsExecutionsTab);
-  const isReadOnlyYaml = useWorkflowEditorReadOnly();
+  const readOnlyReason = useWorkflowEditorReadOnlyReason();
+  const isReadOnlyYaml = readOnlyReason !== undefined;
   const isReadOnlyYamlRef = useRef(isReadOnlyYaml);
   isReadOnlyYamlRef.current = isReadOnlyYaml;
   const onChange = useCallback(
@@ -376,6 +377,7 @@ export const WorkflowYAMLEditor = ({
     workflowId: workflow?.id,
     workflowName: getWorkflowName(workflow, workflowDefinition),
     validationErrors,
+    readOnlyReason,
   });
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {

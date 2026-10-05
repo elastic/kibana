@@ -1371,4 +1371,40 @@ describe('useAgentBuilderIntegration', () => {
       );
     });
   });
+
+  describe('read-only editor', () => {
+    it('sends the read-only reason and re-syncs it when the reason changes', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editorRef = { current: createMockEditor(mockModel) };
+
+      const { rerender } = renderHook((props) => useAgentBuilderIntegration(props), {
+        initialProps: {
+          editorRef,
+          isEditorMounted: true,
+          workflowId: 'workflow-a',
+          readOnlyReason: 'executions_tab' as const,
+        } as Parameters<typeof useAgentBuilderIntegration>[0],
+      });
+      await flushChatAccessCheck();
+
+      expect(agentBuilder.addAttachment).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ readOnlyReason: 'executions_tab' }),
+        })
+      );
+
+      agentBuilder.addAttachment.mockClear();
+      rerender({
+        editorRef,
+        isEditorMounted: true,
+        workflowId: 'workflow-a',
+        readOnlyReason: undefined,
+      });
+
+      expect(agentBuilder.addAttachment).toHaveBeenCalledTimes(1);
+      expect(agentBuilder.addAttachment.mock.calls[0][0].data.readOnlyReason).toBeUndefined();
+    });
+
+  });
 });

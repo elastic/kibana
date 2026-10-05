@@ -97,6 +97,17 @@ export const WORKFLOW_YAML_ATTACHMENT_TYPE = 'workflow.yaml';
 export const WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE = 'workflow.yaml.diff';
 
 /**
+ * Why the workflow editor cannot apply changes. The editor sends it on the
+ * `workflow.yaml` attachment so the agent does not offer edits the user cannot save.
+ */
+export const WORKFLOW_EDITOR_READ_ONLY_REASONS = [
+  'executions_tab',
+  'managed',
+  'no_permission',
+] as const;
+export type WorkflowEditorReadOnlyReason = (typeof WORKFLOW_EDITOR_READ_ONLY_REASONS)[number];
+
+/**
  * UI event broadcast on the agent builder events bus when a workflow YAML
  * attachment is created or modified by an agent tool.
  */
