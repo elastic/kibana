@@ -61,6 +61,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
   // Intersect the server-returned worker list with the catalog so skill-gated workers
   // absent from the response are not shown as toggles (or counted toward the minimum).
   const { data: workersData } = useWorkers();
+  const canModifyWorkers = workersData?.canModifyWorkers !== false;
   const serverWorkerIds = useMemo(
     () => new Set((workersData?.workers ?? []).map((w) => w.id)),
     [workersData]
@@ -176,7 +177,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
                         label={workerName(id, name)}
                         showLabel={false}
                         checked={checked}
-                        disabled={isLastEnabled || isSaving}
+                        disabled={isLastEnabled || isSaving || !canModifyWorkers}
                         onChange={(e) => handleToggle(id, e.target.checked)}
                         data-test-subj={`alertZeroOnboardingWorkerToggle-${id}`}
                         aria-describedby={
@@ -222,12 +223,26 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
 
       <EuiSpacer size="l" />
 
+      {canModifyWorkers === false ? (
+        <>
+          <EuiCallOut
+            announceOnMount
+            color="warning"
+            iconType="lock"
+            data-test-subj="alertZeroOnboardingModifyForbidden"
+          >
+            {i18n.ONBOARDING_MODIFY_FORBIDDEN}
+          </EuiCallOut>
+          <EuiSpacer size="l" />
+        </>
+      ) : null}
+
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
             isLoading={isSaving}
-            disabled={availableWorkerIds.length === 0 || enabledCount === 0}
+            disabled={availableWorkerIds.length === 0 || enabledCount === 0 || !canModifyWorkers}
             onClick={handleEnableAndContinue}
             data-test-subj="alertZeroOnboardingEnableButton"
           >
