@@ -184,7 +184,7 @@ describe('add to timeline', () => {
 
       fireEvent.click(getButton());
 
-      expect(mockStartDragToTimeline).toBeCalled();
+      expect(mockStartDragToTimeline).toHaveBeenCalled();
     });
 
     test('it does NOT start dragging to timeline when a `draggableId` is NOT provided', () => {
@@ -196,7 +196,7 @@ describe('add to timeline', () => {
 
       fireEvent.click(getButton());
 
-      expect(mockStartDragToTimeline).not.toBeCalled();
+      expect(mockStartDragToTimeline).not.toHaveBeenCalled();
     });
 
     test('it dispatches a single `addProviderToTimeline` action when a single, non-array `dataProvider` is provided', () => {
@@ -285,7 +285,7 @@ describe('add to timeline', () => {
 
       fireEvent.click(getButton());
 
-      expect(onClick).toBeCalled();
+      expect(onClick).toHaveBeenCalled();
     });
   });
 
@@ -354,7 +354,7 @@ describe('add to timeline', () => {
           );
         });
 
-        expect(mockStartDragToTimeline).toBeCalled();
+        expect(mockStartDragToTimeline).toHaveBeenCalled();
       });
     });
 
@@ -422,7 +422,7 @@ describe('add to timeline', () => {
           );
         });
 
-        expect(mockStartDragToTimeline).not.toBeCalled();
+        expect(mockStartDragToTimeline).not.toHaveBeenCalled();
       });
     });
   });

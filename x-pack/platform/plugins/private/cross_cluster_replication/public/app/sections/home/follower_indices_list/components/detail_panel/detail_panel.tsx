@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCodeBlock,
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -29,6 +28,7 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import { getIndexListUri } from '@kbn/index-management-plugin/public';
 import type { ApiStatus, FollowerIndexWithPausedStatus } from '../../../../../../../common/types';
@@ -170,7 +170,7 @@ const FollowerIndexDetails = ({ followerIndex, isPollingStatus }: FollowerIndexD
             <EuiSpacer size="s" />
 
             {isPaused ? (
-              <EuiCallOut
+              <KbnInfoCallout
                 announceOnMount
                 size="s"
                 title={

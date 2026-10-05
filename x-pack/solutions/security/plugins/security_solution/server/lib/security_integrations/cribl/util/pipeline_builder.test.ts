@@ -19,7 +19,7 @@ describe('Put cribl routing pipeline tests', () => {
 
     req.processors?.forEach(function (processor, i) {
       expect(routeEntries[i].datastream).toContain(processor.reroute?.dataset);
-      expect(processor.reroute?.if).toContain(routeEntries[i].dataId);
+      expect(processor.reroute?.if).toEqual(`ctx['_dataId'] == '${routeEntries[i].dataId}'`);
     });
   });
 

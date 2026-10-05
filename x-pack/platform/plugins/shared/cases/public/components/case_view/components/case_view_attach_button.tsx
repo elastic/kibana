@@ -17,6 +17,7 @@ import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useTimelineContext } from '../../timeline_context/use_timeline_context';
 import { useCasesConfig, KibanaServices } from '../../../common/lib/kibana';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
+import { useCasesToast } from '../../../common/use_cases_toast';
 import { useRefreshCaseViewPage } from '../use_on_refresh_case_view_page';
 import type { AttachLocation } from '../../../analytics/use_attach_button_ebt';
 import {
@@ -43,6 +44,7 @@ const CaseViewAttachButtonComponent: React.FC<CaseViewAttachButtonProps> = ({
   const SelectTimelineModal = timelineContext?.components?.SelectTimelineModal;
   const { attachmentsEnabled } = useCasesConfig();
   const { mutate: createAttachments } = useCreateAttachments();
+  const { showSuccessToast } = useCasesToast();
   const refreshCaseViewPage = useRefreshCaseViewPage();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -90,10 +92,15 @@ const CaseViewAttachButtonComponent: React.FC<CaseViewAttachButtonProps> = ({
             },
           ],
         },
-        { onSuccess: refreshCaseViewPage }
+        {
+          onSuccess: () => {
+            showSuccessToast(i18n.ATTACH_TIMELINE_SUCCESS_TITLE(title));
+            refreshCaseViewPage();
+          },
+        }
       );
     },
-    [caseData.id, closeModal, createAttachments, owner, refreshCaseViewPage]
+    [caseData.id, closeModal, createAttachments, owner, refreshCaseViewPage, showSuccessToast]
   );
 
   const openSavedObject = useCallback(() => {

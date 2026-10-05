@@ -31,7 +31,7 @@ const meta: Meta<DateRangePickerProps> = {
   argTypes: {
     locale: {
       control: 'select',
-      options: ['en', 'de-DE', 'fr-FR', 'ja-JP', 'zh-CN'],
+      options: ['en', 'de-DE', 'fr-FR', 'ja-JP', 'zh-CN', 'pt-BR'],
       description: 'English input always parses, whichever locale is active.',
     },
   },
@@ -90,6 +90,11 @@ const LOCALIZED_PRESETS: Record<string, TimeRangeBoundsOption[]> = {
     { start: 'now-7d', end: 'now', label: '最近 7 天' },
     { start: 'now/d', end: 'now/d', label: '今天' },
   ],
+  'pt-BR': [
+    { start: 'now-15m', end: 'now', label: 'Últimos 15 minutos' },
+    { start: 'now-7d', end: 'now', label: 'Últimos 7 dias' },
+    { start: 'now/d', end: 'now/d', label: 'Hoje' },
+  ],
 };
 
 /**
@@ -118,7 +123,8 @@ export const Presets: Story = {
     presets: [
       { start: 'now-15m', end: 'now', label: 'Last 15 minutes' },
       { start: 'now-1h', end: 'now', label: 'Last 1 hour' },
-      { start: 'now/d', end: 'now/d', label: 'Today' },
+      { start: 'now/d', end: 'now/d', label: 'Today', isEditable: false },
+      { start: 'now-3M/y+3M', end: 'now', label: 'Financial Year to Date', isEditable: false },
     ],
     timeZone: 'Europe/Amsterdam',
     onPresetSave: action('onPresetSave'),
@@ -192,7 +198,7 @@ function StatefulDateRangePicker(props: DateRangePickerProps) {
       onPresetSave?.(option);
       setPresets((prev) => {
         const deduped = prev.filter((p) => timeRangeKey(p) !== timeRangeKey(option));
-        return [...deduped, option];
+        return [option, ...deduped];
       });
     },
     [onPresetSave]

@@ -12,9 +12,7 @@ import type { EndpointManagementPageMap } from './page_reference';
 import { getEndpointManagementPageMap } from './page_reference';
 import type { UserAuthzAccessLevel } from './types';
 import { getNoPrivilegesPage } from './common';
-import { loadPage, waitForPageToBeLoaded } from '../tasks/common';
-import { APP_PATH } from '../../../../common';
-import { getEndpointDetailsPath } from '../../common/routing';
+import { waitForPageToBeLoaded } from '../tasks/common';
 
 interface ListRowOptions {
   endpointId?: string;
@@ -94,13 +92,6 @@ export const getConsoleActionMenuItem = (): Cypress.Chainable => {
   return cy.getByTestSubj('tableRowActionsMenuPanel').findByTestSubj('console');
 };
 
-export const navigateToEndpointPolicyResponse = (endpointAgentId: string): void => {
-  loadPage(
-    APP_PATH +
-      getEndpointDetailsPath({ name: 'endpointPolicyResponse', selected_endpoint: endpointAgentId })
-  );
-};
-
 /**
  * Navigate to the Endpoint List page without reloading the entire page (thus perservind in memory state through out app)
  */
@@ -108,6 +99,7 @@ export const navigateToEndpointList = (
   /** If defined, we'll wait until that host name appears on the list (assumes its on page 1) */
   endpointHostName?: string
 ): void => {
+  cy.getByTestSubj('kbnChromeHeader-searchButton').click();
   cy.getByTestSubj('nav-search-input').type('endpoints');
   cy.getByTestSubj('nav-search-option', { timeout: 20000 })
     .parent()

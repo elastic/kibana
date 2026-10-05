@@ -10,12 +10,17 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import type { HttpSetup } from '@kbn/core/public';
 import { API_BASE_PATH } from '../../common/constants';
 import type { ClusterDetails } from '../types';
+import { toAutoOpsDeploymentUrl } from '../lib/autoops_url';
 
 export interface UseCloudConnectStatusResult {
   isCloudConnected: boolean;
   isCloudConnectEisEnabled: boolean;
   isCloudConnectAutoopsEnabled: boolean;
-  /** The URL to the AutoOps service page for this cluster, from `metadata.service_url`. */
+  /**
+   * The URL to the AutoOps service page for this cluster. On ECE this is rewritten to a
+   * deployment-scoped URL using `cloud.deploymentId`; on self-managed clusters it is the raw
+   * `metadata.service_url` from the Cloud Connect API response.
+   */
   autoOpsServiceUrl?: string;
   /** The URL to the AutoOps documentation, from `metadata.documentation_url`. */
   autoOpsDocsUrl?: string;
@@ -27,8 +32,12 @@ export type UseCloudConnectStatusHook = () => UseCloudConnectStatusResult;
 
 export const createUseCloudConnectStatusHook = ({
   http,
+  deploymentId,
 }: {
   http: HttpSetup;
+  /** The ECE deployment id (`cloud.deploymentId`). When present the AutoOps link is rewritten
+   * from the cluster-scoped `/clusters/{id}/cluster` path to `/deployments/{id}/deployment`. */
+  deploymentId?: string;
 }): UseCloudConnectStatusHook => {
   return () => {
     const [{ error, loading, value }, load] = useAsyncFn(async () => {
@@ -51,7 +60,10 @@ export const createUseCloudConnectStatusHook = ({
       isCloudConnected: value != null,
       isCloudConnectEisEnabled: value?.services?.eis?.enabled ?? false,
       isCloudConnectAutoopsEnabled: value?.services?.auto_ops?.enabled ?? false,
-      autoOpsServiceUrl: value?.services?.auto_ops?.metadata?.service_url,
+      autoOpsServiceUrl: toAutoOpsDeploymentUrl(
+        value?.services?.auto_ops?.metadata?.service_url,
+        deploymentId
+      ),
       autoOpsDocsUrl: value?.services?.auto_ops?.metadata?.documentation_url,
       isLoading: loading,
       error: error ?? null,

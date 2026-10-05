@@ -42,15 +42,3 @@ export const SEARCH_ON_PAGE_LOAD_SETTING = 'discover:searchOnPageLoad';
 export const SHOW_FIELD_STATISTICS = 'discover:showFieldStatistics';
 export const SHOW_MULTIFIELDS = 'discover:showMultiFields';
 export const SORT_DEFAULT_ORDER_SETTING = 'discover:sort:defaultOrder';
-export enum DataGridDensity {
-  COMPACT = 'compact',
-  EXPANDED = 'expanded',
-  NORMAL = 'normal',
-}
-
-export enum UnifiedHistogramSuggestionType {
-  unsupported = 'unsupported',
-  lensSuggestion = 'lensSuggestion',
-  histogramForESQL = 'histogramForESQL',
-  histogramForDataView = 'histogramForDataView',
-}

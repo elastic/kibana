@@ -93,6 +93,22 @@ describe('Utils', () => {
       });
     });
 
+    it('serializes the field_representations_conflict attributes into a 400 body', () => {
+      const error = createTypedApiError({
+        statusCode: 400,
+        message: 'The request supplies conflicting values for the linked field "Priority".',
+        attributes: { code: 'field_representations_conflict', fields: ['Priority'] },
+      });
+
+      const res = wrapError(error);
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toEqual({
+        message: 'The request supplies conflicting values for the linked field "Priority".',
+        attributes: { code: 'field_representations_conflict', fields: ['Priority'] },
+      });
+    });
+
     it('does not attach attributes for a plain boom with unrelated data', () => {
       const error = boomify(new Error('Something happened'), { statusCode: 400 });
       error.data = { some: 'unrelated' };

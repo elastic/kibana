@@ -16,7 +16,15 @@ export interface IntegrationTileData {
   description: string;
   logo: SupportedLogo;
   darkLogo?: SupportedLogo;
+  /** Internal onboarding-app route the tile opens. */
   route?: string;
+  /** EPR package whose integrations detail page the tile opens. */
+  eprPackage?: string;
+  /** Optional policy template selected on the detail page, appended as ?integration=. */
+  eprIntegration?: string;
+  /** Fleet integration group whose chooser this tile opens instead of navigating,
+   * falling back to its normal navigation when Fleet has no card for the group. */
+  collectionGroup?: string;
 }
 
 export interface IntegrationCategory {
@@ -44,17 +52,6 @@ export const INTEGRATION_TILES: readonly IntegrationCategory[] = [
         logo: 'aws',
       },
       {
-        id: 'gcp',
-        title: i18n.translate('xpack.observability_onboarding.integrationsGrid.tile.gcp.title', {
-          defaultMessage: 'Google Cloud Platform',
-        }),
-        description: i18n.translate(
-          'xpack.observability_onboarding.integrationsGrid.tile.gcp.description',
-          { defaultMessage: 'Monitor Google Cloud operations and resources.' }
-        ),
-        logo: 'gcp',
-      },
-      {
         id: 'azure',
         title: i18n.translate('xpack.observability_onboarding.integrationsGrid.tile.azure.title', {
           defaultMessage: 'Azure',
@@ -64,6 +61,19 @@ export const INTEGRATION_TILES: readonly IntegrationCategory[] = [
           { defaultMessage: 'Centralize Azure monitoring and alerting.' }
         ),
         logo: 'azure',
+        eprPackage: 'azure',
+      },
+      {
+        id: 'gcp',
+        title: i18n.translate('xpack.observability_onboarding.integrationsGrid.tile.gcp.title', {
+          defaultMessage: 'Google Cloud Platform',
+        }),
+        description: i18n.translate(
+          'xpack.observability_onboarding.integrationsGrid.tile.gcp.description',
+          { defaultMessage: 'Monitor Google Cloud operations and resources.' }
+        ),
+        logo: 'gcp',
+        eprPackage: 'gcp',
       },
     ],
   },
@@ -97,6 +107,8 @@ export const INTEGRATION_TILES: readonly IntegrationCategory[] = [
           { defaultMessage: 'Collect container logs and metrics.' }
         ),
         logo: 'docker',
+        eprPackage: 'docker',
+        collectionGroup: 'docker',
       },
       {
         id: 'aws_ecs',
@@ -108,6 +120,8 @@ export const INTEGRATION_TILES: readonly IntegrationCategory[] = [
           { defaultMessage: 'Track ECS and Fargate task metrics.' }
         ),
         logo: 'aws_ecs',
+        eprPackage: 'aws',
+        eprIntegration: 'ecs',
       },
     ],
   },
@@ -177,28 +191,27 @@ export const INTEGRATION_TILES: readonly IntegrationCategory[] = [
         logo: 'opentelemetry',
       },
       {
-        id: 'prometheus',
-        title: i18n.translate(
-          'xpack.observability_onboarding.integrationsGrid.tile.prometheus.title',
-          { defaultMessage: 'Prometheus' }
-        ),
+        id: 'apm',
+        title: i18n.translate('xpack.observability_onboarding.integrationsGrid.tile.apm.title', {
+          defaultMessage: 'APM',
+        }),
         description: i18n.translate(
-          'xpack.observability_onboarding.integrationsGrid.tile.prometheus.description',
-          { defaultMessage: 'Scrape and visualize Prometheus metrics.' }
+          'xpack.observability_onboarding.integrationsGrid.tile.apm.description',
+          { defaultMessage: 'Monitor application performance with distributed tracing.' }
         ),
-        logo: 'prometheus',
+        logo: 'apm',
       },
       {
-        id: 'fluentbit',
+        id: 'synthetic_monitor',
         title: i18n.translate(
-          'xpack.observability_onboarding.integrationsGrid.tile.fluentbit.title',
-          { defaultMessage: 'Fluent Bit' }
+          'xpack.observability_onboarding.integrationsGrid.tile.syntheticMonitor.title',
+          { defaultMessage: 'Synthetic monitor' }
         ),
         description: i18n.translate(
-          'xpack.observability_onboarding.integrationsGrid.tile.fluentbit.description',
-          { defaultMessage: 'Forward logs from any source via Fluent Bit.' }
+          'xpack.observability_onboarding.integrationsGrid.tile.syntheticMonitor.description',
+          { defaultMessage: 'Check the availability of endpoints and user journeys.' }
         ),
-        logo: 'fluentbit',
+        logo: 'synthetics',
       },
     ],
   },

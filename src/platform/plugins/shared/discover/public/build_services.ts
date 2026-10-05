@@ -33,6 +33,7 @@ import type {
   DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { DataSourceService } from '@kbn/data-source';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -76,11 +77,16 @@ import type { ProfilesManager } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
 import {
   CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY,
-  EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY,
   IS_ESQL_DEFAULT_FEATURE_FLAG_KEY,
+  SESSION_HTTP_API_ENABLED_FEATURE_FLAG_KEY,
 } from './constants';
 import { EmbeddableEditorService } from './plugin_imports/embeddable_editor_service';
 import { InitialTabStateService } from './plugin_imports/initial_tab_state_service';
+import {
+  createDiscoverSessionClient,
+  createDiscoverSessionService,
+  type DiscoverSessionService,
+} from './session';
 
 /**
  * Location state of internal Discover history instance
@@ -98,7 +104,6 @@ export interface UrlTracker {
 export interface DiscoverFeatureFlags {
   getCascadeLayoutEnabled: () => boolean;
   getIsEsqlDefault: () => boolean;
-  getEmbeddableTransformsEnabled: () => boolean;
 }
 
 export interface DiscoverServices {
@@ -116,6 +121,7 @@ export interface DiscoverServices {
   data: DataPublicPluginStart;
   discoverShared: DiscoverSharedPublicStart;
   discoverFeatureFlags: DiscoverFeatureFlags;
+  discoverSessionService: DiscoverSessionService;
   docLinks: DocLinksStart;
   embeddable: EmbeddableStart;
   history: History<HistoryLocationState>;
@@ -127,6 +133,7 @@ export interface DiscoverServices {
   filterManager: FilterManager;
   fieldFormats: FieldFormatsStart;
   dataViews: DataViewsContract;
+  dataSourceService: DataSourceService;
   inspector: InspectorPublicPluginStart;
   metadata: { branch: string; version: string };
   navigation: NavigationPublicPluginStart;
@@ -168,7 +175,22 @@ export interface DiscoverServices {
   cps?: CPSPluginStart;
   embeddableEditor: EmbeddableEditorService;
   logger: Logger;
+  feedback?: DiscoverStartPlugins['feedback'];
 }
+
+/**
+ * The getters stay synchronous. `getBooleanValue$` emits the current evaluation as soon as it is subscribed.
+ */
+const readBooleanFlag = (core: CoreStart, flagName: string, fallback: boolean): boolean => {
+  let value = fallback;
+  core.featureFlags
+    .getBooleanValue$(flagName, fallback)
+    .subscribe((next) => {
+      value = next;
+    })
+    .unsubscribe();
+  return value;
+};
 
 export const buildServices = ({
   core,
@@ -201,6 +223,11 @@ export const buildServices = ({
 }): DiscoverServices => {
   const { usageCollection } = plugins;
   const storage = new Storage(localStorage);
+  const discoverSessionService = createDiscoverSessionService({
+    apiClient: createDiscoverSessionClient(core.http),
+    legacyClient: plugins.savedSearch,
+    useHttpApi: readBooleanFlag(core, SESSION_HTTP_API_ENABLED_FEATURE_FLAG_KEY, false),
+  });
 
   return {
     agentBuilder: plugins.agentBuilder,
@@ -216,13 +243,11 @@ export const buildServices = ({
     data: plugins.data,
     dataVisualizer: plugins.dataVisualizer,
     discoverShared: plugins.discoverShared,
+    discoverSessionService,
     discoverFeatureFlags: {
       getCascadeLayoutEnabled: () =>
-        core.featureFlags.getBooleanValue(CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY, true),
-      getIsEsqlDefault: () =>
-        core.featureFlags.getBooleanValue(IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, false),
-      getEmbeddableTransformsEnabled: () =>
-        core.featureFlags.getBooleanValue(EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY, true),
+        readBooleanFlag(core, CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY, true),
+      getIsEsqlDefault: () => readBooleanFlag(core, IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, false),
     },
     docLinks: core.docLinks,
     embeddable: plugins.embeddable,
@@ -236,6 +261,7 @@ export const buildServices = ({
     initialTabStateService: new InitialTabStateService(),
     setHeaderActionMenu,
     dataViews: plugins.data.dataViews,
+    dataSourceService: new DataSourceService(plugins.data.dataViews),
     inspector: plugins.inspector,
     metadata: {
       branch: context.env.packageInfo.branch,
@@ -282,5 +308,6 @@ export const buildServices = ({
       core.application
     ),
     logger: context.logger.get(),
+    feedback: plugins.feedback,
   };
 };

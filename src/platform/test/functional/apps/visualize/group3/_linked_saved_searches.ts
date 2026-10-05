@@ -103,7 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return data[0][0] === '707';
         });
         // The filter on the saved search should now be in the editor
-        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
+        await filterBar.expectFilter('extension.raw', 'jpg');
 
         // Disabling this filter should now result in different values, since
         // the visualization should not be linked anymore with the saved search.

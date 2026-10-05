@@ -15,6 +15,7 @@ import type {
 import { assertNever } from '@kbn/std';
 import type { RecursivePartial } from '@kbn/utility-types';
 import { cloneDeep } from 'lodash';
+import { toPickerProjectRouting } from '../../../../common/project_routings';
 import { toDuration, toMinutes } from '../../../utils/slo/duration';
 import {
   APM_AVAILABILITY_DEFAULT_VALUES,
@@ -59,7 +60,13 @@ export function transformSloResponseToFormState(
     tags: values.tags,
     settings: {
       preventInitialBackfill: values.settings?.preventInitialBackfill ?? false,
-      preventCrossProjectSearch: values.settings?.preventCrossProjectSearch ?? false,
+      ...(values.settings?.preventCrossProjectSearch !== undefined && {
+        preventCrossProjectSearch: values.settings.preventCrossProjectSearch,
+      }),
+      projectRoutings: toPickerProjectRouting(
+        values.settings?.projectRoutings,
+        values.settings?.preventCrossProjectSearch
+      ),
       syncDelay: values.settings?.syncDelay
         ? toMinutes(toDuration(values.settings.syncDelay))
         : SETTINGS_DEFAULT_VALUES.syncDelay,
@@ -99,7 +106,9 @@ export function transformCreateSLOFormToCreateSLOInput(values: CreateSLOForm): C
     groupBy: [values.groupBy].flat(),
     settings: {
       preventInitialBackfill: values.settings.preventInitialBackfill,
-      preventCrossProjectSearch: values.settings.preventCrossProjectSearch,
+      ...(values.settings.projectRoutings !== undefined && {
+        projectRoutings: values.settings.projectRoutings,
+      }),
       syncDelay: `${values.settings.syncDelay ?? SETTINGS_DEFAULT_VALUES.syncDelay}m`,
       frequency: `${values.settings.frequency ?? SETTINGS_DEFAULT_VALUES.frequency}m`,
       syncField: values.settings.syncField,
@@ -135,7 +144,12 @@ export function transformValuesToUpdateSLOInput(values: CreateSLOForm): UpdateSL
     groupBy: [values.groupBy].flat(),
     settings: {
       preventInitialBackfill: values.settings.preventInitialBackfill,
-      preventCrossProjectSearch: values.settings.preventCrossProjectSearch,
+      ...(values.settings.preventCrossProjectSearch !== undefined && {
+        preventCrossProjectSearch: values.settings.preventCrossProjectSearch,
+      }),
+      ...(values.settings.projectRoutings !== undefined && {
+        projectRoutings: values.settings.projectRoutings,
+      }),
       syncDelay: `${values.settings.syncDelay ?? SETTINGS_DEFAULT_VALUES.syncDelay}m`,
       frequency: `${values.settings.frequency ?? SETTINGS_DEFAULT_VALUES.frequency}m`,
       syncField: values.settings.syncField,
@@ -261,6 +275,9 @@ export function transformPartialSLODataToFormState(
     }
     if (values.settings.preventCrossProjectSearch !== undefined) {
       state.settings.preventCrossProjectSearch = values.settings.preventCrossProjectSearch;
+    }
+    if (values.settings.projectRoutings !== undefined) {
+      state.settings.projectRoutings = values.settings.projectRoutings;
     }
     if (values.settings.syncDelay) {
       state.settings.syncDelay = toMinutes(toDuration(values.settings.syncDelay));

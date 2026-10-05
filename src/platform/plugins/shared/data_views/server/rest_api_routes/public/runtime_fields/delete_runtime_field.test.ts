@@ -31,6 +31,6 @@ describe('delete runtime field', () => {
       id: 'dataViewId',
       name: 'fieldName',
     });
-    expect(usageCollection.incrementCounter).toBeCalledTimes(1);
+    expect(usageCollection.incrementCounter).toHaveBeenCalledTimes(1);
   });
 });

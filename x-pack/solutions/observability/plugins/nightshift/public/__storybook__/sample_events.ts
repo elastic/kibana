@@ -20,17 +20,18 @@ export const checkoutEvent: SignificantEventResponse = {
   '@timestamp': '2026-07-24T09:42:00.000Z',
   created_at: '2026-07-24T09:42:00.000Z',
   event_id: 'checkout-latency',
-  event_uuid: 'checkout-latency-v1',
-  status: 'open',
+  status: 'active',
   stream_names: ['logs.checkout-api'],
   title: 'Checkout latency increased after deployment',
   summary:
     'Checkout requests are taking longer than expected. The `checkout-api` P95 latency rose from 420 ms to 2.8 s shortly after version `2026.07.24-1` was deployed. Error rates and payment retries increased during the same interval.',
-  severity: '80-critical',
+  severity: 'critical',
   confidence: 0.94,
   causal_features: [
     {
       feature_id: 'checkout-api',
+      type: 'entity',
+      subtype: 'service',
       name: 'checkout-api',
       stream_name: 'logs.checkout-api',
     },
@@ -38,6 +39,7 @@ export const checkoutEvent: SignificantEventResponse = {
   blast_radius: [
     {
       type: 'entity',
+      subtype: 'service',
       feature_id: 'checkout-api',
       name: 'checkout-api',
       stream_name: 'logs.checkout-api',
@@ -45,6 +47,7 @@ export const checkoutEvent: SignificantEventResponse = {
     // Spans a second stream so one event alone can show a partial knowledge-indicator failure.
     {
       type: 'entity',
+      subtype: 'service',
       feature_id: 'inventory-service',
       name: 'inventory-service',
       stream_name: 'logs.inventory-service',
@@ -55,17 +58,18 @@ export const checkoutEvent: SignificantEventResponse = {
 export const inventoryEvent: SignificantEvent = {
   '@timestamp': '2026-07-24T08:16:00.000Z',
   event_id: 'inventory-errors',
-  event_uuid: 'inventory-errors-v1',
-  status: 'open',
+  status: 'active',
   stream_names: ['logs.inventory-service'],
   title: 'Inventory service error rate is elevated',
   summary:
     'The inventory service is returning more `503` responses while refreshing product availability.',
-  severity: '60-high',
+  severity: 'high',
   confidence: 0.86,
   causal_features: [
     {
       feature_id: 'inventory-service',
+      type: 'entity',
+      subtype: 'service',
       name: 'inventory-service',
       stream_name: 'logs.inventory-service',
     },
@@ -73,6 +77,7 @@ export const inventoryEvent: SignificantEvent = {
   blast_radius: [
     {
       type: 'entity',
+      subtype: 'service',
       feature_id: 'inventory-service',
       name: 'inventory-service',
       stream_name: 'logs.inventory-service',
@@ -83,12 +88,11 @@ export const inventoryEvent: SignificantEvent = {
 export const resolvedPaymentEvent: SignificantEvent = {
   '@timestamp': '2026-07-23T22:05:00.000Z',
   event_id: 'payment-timeouts',
-  event_uuid: 'payment-timeouts-v2',
-  status: 'closed',
+  status: 'inactive',
   stream_names: ['logs.payment-gateway'],
   title: 'Payment gateway timeouts',
   summary: 'Payment gateway timeout rates returned to their expected baseline.',
-  severity: '40-medium',
+  severity: 'medium',
   confidence: 0.78,
   investigations: [
     {
@@ -99,15 +103,14 @@ export const resolvedPaymentEvent: SignificantEvent = {
   ],
 };
 
-export const dismissedShippingEvent: SignificantEvent = {
+export const inactiveShippingEvent: SignificantEvent = {
   '@timestamp': '2026-07-23T19:20:00.000Z',
   event_id: 'shipping-queue-depth',
-  event_uuid: 'shipping-queue-depth-v1',
-  status: 'dismissed',
+  status: 'inactive',
   stream_names: ['logs.shipping-service'],
   title: 'Shipping queue depth briefly increased',
   summary: 'The queue increase was caused by a planned batch import and requires no action.',
-  severity: '20-low',
+  severity: 'low',
   confidence: 0.65,
 };
 
@@ -122,6 +125,7 @@ export const checkoutDetectionSignal: SignalEntry = {
   stream_name: 'logs.checkout-api',
   description:
     'P95 latency for `checkout-api` rose from 420 ms to 2.8 s immediately after the latest deployment.',
+  verdict: 'confirms',
   evidence: {
     esql_query:
       'FROM logs.checkout-api\n| STATS p95_latency = PERCENTILE(transaction.duration, 95) BY DATE_TRUNC(5 minutes, @timestamp)',
@@ -237,15 +241,19 @@ export const completedInvestigationState: InvestigationState = {
       reason: 'Payment gateway response times remained within their normal range.',
     },
   ],
-  conclusion: `# Conclusion
-The latest checkout deployment introduced a synchronous inventory lookup that increased request latency.
-
-## Next Steps
-- Roll back the checkout deployment · Revert version 2026.07.24-1 and monitor P95 latency.
-- Add a deployment guardrail · Block releases when checkout latency exceeds the service baseline.`,
-  gaps_found: [
-    'Missing database spans · The slow inventory query is not represented in distributed traces.',
-    'Limited deployment metadata · Commit identifiers are not included in checkout logs.',
+  conclusion:
+    'The latest checkout deployment introduced a synchronous inventory lookup that increased request latency.',
+  recommendations: [
+    {
+      title: 'Roll back the checkout deployment',
+      confidence: 0.95,
+      description: 'Revert version 2026.07.24-1 and monitor P95 latency.',
+    },
+    {
+      title: 'Add a deployment guardrail',
+      confidence: 0.75,
+      description: 'Block releases when checkout latency exceeds the service baseline.',
+    },
   ],
 };
 

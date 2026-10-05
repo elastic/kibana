@@ -152,7 +152,7 @@ describe('#setupSavedObjects', () => {
         setupContract().getDecryptedAsInternalUser(mockSavedObject.type, mockSavedObject.id, {
           namespace: 'some-ns',
         })
-      ).rejects.toThrowError(`Type 'not-known-type' is not registered as an encrypted type`);
+      ).rejects.toThrow(`Type 'not-known-type' is not registered as an encrypted type`);
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         'getDecryptedAsInternalUser called with non-encrypted type: not-known-type'

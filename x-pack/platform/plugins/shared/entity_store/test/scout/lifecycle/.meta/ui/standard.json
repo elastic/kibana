@@ -1,0 +1,56 @@
+{
+  "sha1": "3aeeb738b88fddc0ed58068fd8f72f9414cd2f19",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "4257c8cd3b7982a-b693a2a4b92c356",
+      "title": "Entity Store v1 migration auto-install auto-installs the entity store when visiting a Security page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/ui/tests/entity_store_auto_install.spec.ts",
+        "line": 109,
+        "column": 7
+      }
+    },
+    {
+      "id": "4257c8cd3b7982a-ea84baa3446d442",
+      "title": "Entity Store v1 migration auto-install does not auto-install after stopping",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/ui/tests/entity_store_auto_install.spec.ts",
+        "line": 123,
+        "column": 13
+      }
+    },
+    {
+      "id": "4257c8cd3b7982a-cf6ac24bc92ed17",
+      "title": "Entity Store v1 migration auto-install does not auto-install after uninstalling",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/ui/tests/entity_store_auto_install.spec.ts",
+        "line": 143,
+        "column": 15
+      }
+    }
+  ]
+}

@@ -7,11 +7,11 @@ source .buildkite/scripts/common/util.sh
 is_test_execution_step
 
 run_bootstrap() {
-    echo "Running yarn kbn bootstrap --force-install"
-    yarn kbn bootstrap --force-install
+    echo "Running pnpm kbn bootstrap --force-install"
+    pnpm kbn bootstrap --force-install
 }
 
-echo "--- yarn install and boostrap"
+echo "--- pnpm install and boostrap"
 if ! run_bootstrap; then
   echo "--- bootstrap failed, trying again in 15 seconds"
   sleep 15
@@ -24,7 +24,7 @@ if ! run_bootstrap; then
 fi
 
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
-  check_for_changed_files 'yarn kbn bootstrap'
+  check_for_changed_files 'pnpm kbn bootstrap'
 fi
 
 # These tests are running on static workers so we have to make sure we delete previous build of Kibana
@@ -36,20 +36,13 @@ echo '--- Cleaning ports used by performance tests'
 # 6104 is the package registry running in docker
 force_clean_ports 6104
 
-if [ "$BUILDKITE_PIPELINE_SLUG" == "kibana-performance-data-set-extraction" ]; then
-  # 'performance-data-set-extraction' uses 'n2-2-spot' agent, performance metrics don't matter
-  # and we skip warmup phase for each test
-  echo "--- Running single user journeys"
-  node scripts/run_performance.js --kibana-install-dir "$KIBANA_BUILD_LOCATION" --skip-warmup
+# pipeline should use bare metal static worker
+if [[ -z "${JOURNEYS_GROUP+x}" ]]; then
+  echo "--- Running performance tests"
+  node scripts/run_performance.js --kibana-install-dir "$KIBANA_BUILD_LOCATION"
 else
-  # pipeline should use bare metal static worker
-  if [[ -z "${JOURNEYS_GROUP+x}" ]]; then
-    echo "--- Running performance tests"
-    node scripts/run_performance.js --kibana-install-dir "$KIBANA_BUILD_LOCATION"
-  else
-    echo "--- Running performance tests: '$JOURNEYS_GROUP' group"
-    node scripts/run_performance.js --kibana-install-dir "$KIBANA_BUILD_LOCATION" --group "$JOURNEYS_GROUP"
-  fi
+  echo "--- Running performance tests: '$JOURNEYS_GROUP' group"
+  node scripts/run_performance.js --kibana-install-dir "$KIBANA_BUILD_LOCATION" --group "$JOURNEYS_GROUP"
 fi
 
 echo "--- Upload journey step screenshots"

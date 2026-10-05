@@ -27,7 +27,9 @@ export type ApplicationConnectionsViewMode = 'grouped' | 'list';
 
 export type ApplicationConnectionsEntityKind = 'application' | 'connection';
 
-export interface RevokeApplicationConnectionsModalConnection {
+export type ApplicationConnectionsActionMode = 'revoke' | 'delete';
+
+export interface ApplicationConnectionsModalConnection {
   connectionId: string;
   connectionName?: string;
   userId?: string;
@@ -35,7 +37,7 @@ export interface RevokeApplicationConnectionsModalConnection {
   client: OAuthClient;
 }
 
-export interface RevokedApplicationConnection {
+export interface ApplicationConnectionTarget {
   clientId: string;
   connectionId: string;
 }

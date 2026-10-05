@@ -132,29 +132,49 @@ export const BulkActionBase = lazySchema(() =>
     /**
      * Query to filter rules.
      */
-    query: z.string().optional(),
+    query: z.string().optional().describe('Query to filter rules.'),
     /**
       * Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
 Only valid when query property is undefined.
 
       */
-    ids: z.array(z.string()).min(1).optional(),
+    ids: z
+      .array(z.string())
+      .min(1)
+      .optional()
+      .describe(
+        "Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.\nOnly valid when query property is undefined.\n"
+      ),
     /**
      * Gaps range start, valid only when query is provided
      */
-    gaps_range_start: z.string().optional(),
+    gaps_range_start: z
+      .string()
+      .optional()
+      .describe('Gaps range start, valid only when query is provided'),
     /**
      * Gaps range end, valid only when query is provided
      */
-    gaps_range_end: z.string().optional(),
+    gaps_range_end: z
+      .string()
+      .optional()
+      .describe('Gaps range end, valid only when query is provided'),
     /**
      * Gap fill statuses to filter rules with gaps by status (used together with gaps_range_*).
      */
-    gap_fill_statuses: z.array(GapFillStatus).optional(),
+    gap_fill_statuses: z
+      .array(GapFillStatus)
+      .optional()
+      .describe(
+        'Gap fill statuses to filter rules with gaps by status (used together with gaps_range_*).'
+      ),
     /**
      * Gap auto fill scheduler ID used to determine gap fill status for rules
      */
-    gap_auto_fill_scheduler_id: z.string().optional(),
+    gap_auto_fill_scheduler_id: z
+      .string()
+      .optional()
+      .describe('Gap auto fill scheduler ID used to determine gap fill status for rules'),
   })
 );
 export type BulkActionBase = z.infer<typeof BulkActionBase>;
@@ -207,13 +227,18 @@ export const BulkDuplicateRules = lazySchema(() =>
           /**
            * Whether to copy exceptions from the original rule
            */
-          include_exceptions: z.boolean(),
+          include_exceptions: z
+            .boolean()
+            .describe('Whether to copy exceptions from the original rule'),
           /**
            * Whether to copy expired exceptions from the original rule
            */
-          include_expired_exceptions: z.boolean(),
+          include_expired_exceptions: z
+            .boolean()
+            .describe('Whether to copy expired exceptions from the original rule'),
         })
-        .optional(),
+        .optional()
+        .describe('Duplicate object that describes applying an update action.'),
     })
   )
 );
@@ -226,16 +251,18 @@ export const BulkManualRuleRun = lazySchema(() =>
       /**
        * Object that describes applying a manual rule run action.
        */
-      run: z.object({
-        /**
-         * Start date of the manual rule run
-         */
-        start_date: z.string(),
-        /**
-         * End date of the manual rule run
-         */
-        end_date: z.string(),
-      }),
+      run: z
+        .object({
+          /**
+           * Start date of the manual rule run
+           */
+          start_date: z.string().describe('Start date of the manual rule run'),
+          /**
+           * End date of the manual rule run
+           */
+          end_date: z.string().describe('End date of the manual rule run'),
+        })
+        .describe('Object that describes applying a manual rule run action.'),
     })
   )
 );
@@ -248,16 +275,20 @@ export const BulkManualRuleFillGaps = lazySchema(() =>
       /**
        * Object that describes applying a manual gap fill action for the specified time range.
        */
-      fill_gaps: z.object({
-        /**
-         * Start date of the manual gap fill
-         */
-        start_date: z.string(),
-        /**
-         * End date of the manual gap fill
-         */
-        end_date: z.string(),
-      }),
+      fill_gaps: z
+        .object({
+          /**
+           * Start date of the manual gap fill
+           */
+          start_date: z.string().describe('Start date of the manual gap fill'),
+          /**
+           * End date of the manual gap fill
+           */
+          end_date: z.string().describe('End date of the manual gap fill'),
+        })
+        .describe(
+          'Object that describes applying a manual gap fill action for the specified time range.'
+        ),
     })
   )
 );
@@ -352,14 +383,24 @@ export const BulkActionEditPayloadSchedule = lazySchema(() =>
       /**
        * Interval in which the rule runs. For example, `"1h"` means the rule runs every hour.
        */
-      interval: z.string().regex(/^[1-9]\d*[smh]$/),
+      interval: z
+        .string()
+        .regex(/^[1-9]\d*[smh]$/)
+        .describe(
+          'Interval in which the rule runs. For example, `"1h"` means the rule runs every hour.'
+        ),
       /**
       * Lookback time for the rules.
 
 Additional look-back time that the rule analyzes. For example, "10m" means the rule analyzes the last 10 minutes of data in addition to the frequency interval.
 
       */
-      lookback: z.string().regex(/^[1-9]\d*[smh]$/),
+      lookback: z
+        .string()
+        .regex(/^[1-9]\d*[smh]$/)
+        .describe(
+          'Lookback time for the rules.\n\nAdditional look-back time that the rule analyzes. For example, "10m" means the rule analyzes the last 10 minutes of data in addition to the frequency interval.\n'
+        ),
     }),
   })
 );
@@ -380,7 +421,7 @@ export const BulkActionEditPayloadIndexPatterns = lazySchema(() =>
     /**
      * Resets the data view for the rule.
      */
-    overwrite_data_views: z.boolean().optional(),
+    overwrite_data_views: z.boolean().optional().describe('Resets the data view for the rule.'),
   })
 );
 export type BulkActionEditPayloadIndexPatterns = z.infer<typeof BulkActionEditPayloadIndexPatterns>;
@@ -506,7 +547,10 @@ export const BulkEditRules = lazySchema(() =>
       /**
        * Array of objects containing the edit operations
        */
-      edit: z.array(BulkActionEditPayload).min(1),
+      edit: z
+        .array(BulkActionEditPayload)
+        .min(1)
+        .describe('Array of objects containing the edit operations'),
     })
   )
 );
@@ -524,7 +568,9 @@ To enable dry run mode on a request, add the query parameter `dry_run=true` to t
 > Dry run mode is not supported for the `export` bulk action. A 400 error will be returned in the request response.
 
       */
-    dry_run: BooleanFromString.optional(),
+    dry_run: BooleanFromString.optional().describe(
+      'Enables dry run mode for the request call.\n\nEnable dry run mode to verify that bulk actions can be applied to specified rules. Certain rules, such as prebuilt Elastic rules on a Basic subscription, can’t be edited and will return errors in the request response. Error details will contain an explanation, the rule name and/or ID, and additional troubleshooting information.\n\nTo enable dry run mode on a request, add the query parameter `dry_run=true` to the end of the request URL. Rules specified in the request will be temporarily updated. These updates won’t be written to Elasticsearch.\n> info\n> Dry run mode is not supported for the `export` bulk action. A 400 error will be returned in the request response.\n'
+    ),
   })
 );
 export type PerformRulesBulkActionRequestQuery = z.infer<typeof PerformRulesBulkActionRequestQuery>;

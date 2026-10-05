@@ -217,7 +217,6 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
                       tooltipProps={{ disableScreenReaderOutput: true }}
                     >
                       {(copy: () => void) => (
-                        /* eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap */
                         <EuiButtonIcon
                           onClick={copy}
                           iconType="copy"

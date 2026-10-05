@@ -39,6 +39,8 @@ import {
   ConfigurationPartialAttributesRt,
   ConfigurationTransformedAttributesRt,
 } from '../../common/types/configure';
+import { OWNER_INFO } from '../../../common/constants/owners';
+import type { Owner } from '../../../common/constants/types';
 
 export class CaseConfigureService {
   constructor(private readonly log: Logger) {}
@@ -162,6 +164,11 @@ export class CaseConfigureService {
           {
             references: esUpdateInfo.referenceHandler.build(originalConfiguration.references),
             refresh,
+            // OCC: the caller already re-checked `originalConfiguration.version` against the
+            // request right before this write (see configure/client.ts), but that check and this
+            // write are not atomic — passing the version here closes the race window between
+            // them instead of relying solely on last-write-wins.
+            version: originalConfiguration.version,
           }
         );
 
@@ -237,6 +244,11 @@ function transformToExternalModel(
     : (configuration.attributes
         .observableTypes as ConfigurationTransformedAttributes['observableTypes']);
 
+  const ownerAutoExtractDefault =
+    OWNER_INFO[configuration.attributes.owner as Owner]?.features.observables.autoExtractDefault ??
+    false;
+  const extractObservables = configuration.attributes.extractObservables ?? ownerAutoExtractDefault;
+
   return {
     ...configuration,
     attributes: {
@@ -245,6 +257,7 @@ function transformToExternalModel(
       customFields,
       templates,
       observableTypes,
+      extractObservables,
     },
   };
 }

@@ -1,0 +1,1074 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { apiTest } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
+import {
+  PUBLIC_HEADERS,
+  INTERNAL_HEADERS,
+  ENTITY_STORE_ROUTES,
+  ENTITY_STORE_TAGS,
+  LATEST_ALIAS,
+  LATEST_INDEX,
+  UPDATES_INDEX,
+} from '../../../common/fixtures/constants';
+import { FF_ENABLE_ENTITY_STORE_V2, RESOLUTION_RULE_IDS } from '../../../../../common';
+import { hashEuid } from '../../../../../common/domain/euid';
+import {
+  clearEntityStoreIndices,
+  clearResolutionRuleOverrides,
+  seedUserEntity,
+  waitForResolution,
+  assertResolutionGroup,
+  assertNotResolved,
+  assertSidRuleWatermarked,
+  triggerMaintainerRun,
+  ingestDoc,
+  forceLogExtraction,
+  normalizeKeywordList,
+  setupLogsTestDataStream,
+  teardownLogsTestDataStream,
+} from '../../../common/fixtures/helpers';
+
+apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_TAGS }, () => {
+  let defaultHeaders: Record<string, string>;
+  let internalHeaders: Record<string, string>;
+
+  apiTest.beforeAll(async ({ apiClient, esClient, kbnClient, samlAuth }) => {
+    const credentials = await samlAuth.asInteractiveUser('admin');
+    defaultHeaders = {
+      ...credentials.cookieHeader,
+      ...PUBLIC_HEADERS,
+    };
+    internalHeaders = {
+      ...credentials.cookieHeader,
+      ...INTERNAL_HEADERS,
+    };
+
+    await kbnClient.uiSettings.update({
+      [FF_ENABLE_ENTITY_STORE_V2]: true,
+    });
+    await clearResolutionRuleOverrides(kbnClient);
+
+    await esClient.indices.delete({
+      index: [LATEST_INDEX, UPDATES_INDEX],
+      ignore_unavailable: true,
+    });
+
+    const installResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {},
+    });
+    expect([200, 201]).toContain(installResponse.statusCode);
+
+    const initResponse = await apiClient.post(
+      ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,
+      {
+        headers: internalHeaders,
+        responseType: 'json',
+        body: {},
+      }
+    );
+    expect([200, 201]).toContain(initResponse.statusCode);
+  });
+
+  apiTest.beforeEach(async ({ esClient }) => {
+    // Clean up all entities from the LATEST index so tests are independent
+    await esClient.deleteByQuery({
+      index: LATEST_ALIAS,
+      refresh: true,
+      query: { match_all: {} },
+      ignore_unavailable: true,
+    });
+  });
+
+  apiTest.afterAll(async ({ apiClient, esClient, kbnClient }) => {
+    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {},
+    });
+    expect(response.statusCode).toBe(200);
+    await clearResolutionRuleOverrides(kbnClient);
+    await clearEntityStoreIndices(esClient);
+  });
+
+  apiTest(
+    'Basic email matching — two entities with same email',
+    async ({ apiClient, esClient }) => {
+      const email = 'test1-basic@co.com';
+      const oktaEntity = 'test1-okta-user';
+      const entraEntity = 'test1-entra-user';
+
+      await seedUserEntity(esClient, { entityId: oktaEntity, namespace: 'okta', email });
+      await seedUserEntity(esClient, { entityId: entraEntity, namespace: 'entra_id', email });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, entraEntity, oktaEntity);
+
+      const groupResponse = await apiClient.get(
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${oktaEntity}&apiVersion=2`,
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+
+      expect(groupResponse.statusCode).toBe(200);
+      expect(groupResponse.body.group_size).toBe(2);
+      expect(groupResponse.body.target.entity.id).toBe(oktaEntity);
+      expect(groupResponse.body.aliases).toHaveLength(1);
+      expect(groupResponse.body.aliases[0].entity.id).toBe(entraEntity);
+    }
+  );
+
+  apiTest(
+    'Namespace priority — AD entity selected as target over Okta and Entra',
+    async ({ apiClient, esClient }) => {
+      const email = 'test2-ns-priority@co.com';
+      const adEntity = 'test2-ad-user';
+      const oktaEntity = 'test2-okta-user';
+      const entraEntity = 'test2-entra-user';
+
+      await seedUserEntity(esClient, {
+        entityId: adEntity,
+        namespace: 'active_directory',
+        email,
+      });
+      await seedUserEntity(esClient, { entityId: oktaEntity, namespace: 'okta', email });
+      await seedUserEntity(esClient, { entityId: entraEntity, namespace: 'entra_id', email });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, oktaEntity, adEntity);
+      await waitForResolution(esClient, entraEntity, adEntity);
+
+      const groupResponse = await apiClient.get(
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${adEntity}&apiVersion=2`,
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+
+      expect(groupResponse.statusCode).toBe(200);
+      expect(groupResponse.body.group_size).toBe(3);
+      expect(groupResponse.body.target.entity.id).toBe(adEntity);
+
+      const aliasIds = groupResponse.body.aliases.map((a: any) => a.entity.id);
+      expect(aliasIds).toStrictEqual(expect.arrayContaining([oktaEntity, entraEntity]));
+    }
+  );
+
+  apiTest(
+    'Alphabetical fallback — unknown namespaces use entity ID tiebreaker',
+    async ({ apiClient, esClient }) => {
+      const email = 'test3-alpha@co.com';
+      const entityA = 'test3-a-user';
+      const entityB = 'test3-b-user';
+
+      await seedUserEntity(esClient, { entityId: entityB, namespace: 'github', email });
+      await seedUserEntity(esClient, { entityId: entityA, namespace: 'slack', email });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, entityB, entityA);
+
+      const groupResponse = await apiClient.get(
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${entityA}&apiVersion=2`,
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+
+      expect(groupResponse.statusCode).toBe(200);
+      expect(groupResponse.body.group_size).toBe(2);
+      expect(groupResponse.body.target.entity.id).toBe(entityA);
+    }
+  );
+
+  apiTest(
+    'Extend existing group — new entity with matching email joins pre-existing resolution group',
+    async ({ apiClient, esClient }) => {
+      const email = 'test4-extend@co.com';
+      const targetEntity = 'test4-target';
+      const aliasEntity = 'test4-alias';
+      const newEntity = 'test4-new';
+
+      await seedUserEntity(esClient, { entityId: targetEntity, namespace: 'okta', email });
+      await seedUserEntity(esClient, { entityId: aliasEntity, namespace: 'entra_id', email });
+
+      // Manually link first
+      const linkResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { target_id: targetEntity, entity_ids: [aliasEntity] },
+      });
+      expect(linkResponse.statusCode).toBe(200);
+
+      // Seed 3rd entity with the same email
+      await seedUserEntity(esClient, { entityId: newEntity, namespace: 'entra_id', email });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, newEntity, targetEntity);
+
+      const groupResponse = await apiClient.get(
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${targetEntity}&apiVersion=2`,
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+
+      expect(groupResponse.statusCode).toBe(200);
+      expect(groupResponse.body.group_size).toBe(3);
+      expect(groupResponse.body.target.entity.id).toBe(targetEntity);
+
+      const aliasIds = groupResponse.body.aliases.map((a: any) => a.entity.id);
+      expect(aliasIds).toStrictEqual(expect.arrayContaining([aliasEntity, newEntity]));
+    }
+  );
+
+  apiTest(
+    'Incremental pickup — watermark advances; second run processes only new entities',
+    async ({ apiClient, esClient }) => {
+      const emailA = 'test5-batch-a@co.com';
+      const emailB = 'test5-batch-b@co.com';
+
+      const entityA1 = 'test5-a1';
+      const entityA2 = 'test5-a2';
+      const entityB1 = 'test5-b1';
+      const entityB2 = 'test5-b2';
+
+      // First batch — email A (uses current timestamp by default)
+      await seedUserEntity(esClient, { entityId: entityA1, namespace: 'okta', email: emailA });
+      await seedUserEntity(esClient, {
+        entityId: entityA2,
+        namespace: 'entra_id',
+        email: emailA,
+      });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, entityA2, entityA1);
+
+      // Second batch — email B (naturally gets a later timestamp since time has passed)
+      await seedUserEntity(esClient, { entityId: entityB1, namespace: 'okta', email: emailB });
+      await seedUserEntity(esClient, {
+        entityId: entityB2,
+        namespace: 'entra_id',
+        email: emailB,
+      });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, entityB2, entityB1);
+
+      // Verify both groups exist independently
+      const groupA = await apiClient.get(
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${entityA1}&apiVersion=2`,
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+      expect(groupA.statusCode).toBe(200);
+      expect(groupA.body.group_size).toBe(2);
+      expect(groupA.body.target.entity.id).toBe(entityA1);
+
+      const groupB = await apiClient.get(
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${entityB1}&apiVersion=2`,
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+      expect(groupB.statusCode).toBe(200);
+      expect(groupB.body.group_size).toBe(2);
+      expect(groupB.body.target.entity.id).toBe(entityB1);
+    }
+  );
+
+  apiTest(
+    'Multi-value email excluded — entity with array user.email is not matched',
+    async ({ apiClient, esClient }) => {
+      const sharedEmail = 'test6-multi@co.com';
+      const multiValueEntity = 'test6-multi-value';
+      const singleA = 'test6-single-a';
+      const singleB = 'test6-single-b';
+
+      // Entity with multi-value email — should be excluded by painless size() == 1 filter
+      await seedUserEntity(esClient, {
+        entityId: multiValueEntity,
+        namespace: 'okta',
+        email: [sharedEmail, 'test6-other@co.com'],
+      });
+
+      await seedUserEntity(esClient, {
+        entityId: singleA,
+        namespace: 'entra_id',
+        email: sharedEmail,
+      });
+      await seedUserEntity(esClient, {
+        entityId: singleB,
+        namespace: 'active_directory',
+        email: sharedEmail,
+      });
+
+      await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
+        sync: true,
+      });
+
+      // B+A should be resolved (AD wins as target)
+      await waitForResolution(esClient, singleA, singleB);
+
+      // Multi-value entity should NOT be resolved
+      await assertNotResolved(esClient, multiValueEntity);
+
+      // Verify group: only singleA and singleB, not multi-value entity
+      const groupResponse = await apiClient.get(
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${singleB}&apiVersion=2`,
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+      expect(groupResponse.statusCode).toBe(200);
+      expect(groupResponse.body.group_size).toBe(2);
+      expect(groupResponse.body.target.entity.id).toBe(singleB);
+    }
+  );
+
+  apiTest(
+    'Cascade merges two existing groups that share a match value',
+    async ({ apiClient, esClient }) => {
+      const email = 'test7-cascade@co.com';
+      const e1 = 'test7-e1';
+      const t1 = 'test7-t1';
+      const e2 = 'test7-e2';
+      const t2 = 'test7-t2';
+      const e3 = 'test7-unresolved';
+
+      await seedUserEntity(esClient, { entityId: t1, namespace: 'okta', email });
+      await seedUserEntity(esClient, { entityId: e1, namespace: 'entra_id', email });
+      await seedUserEntity(esClient, { entityId: t2, namespace: 'active_directory', email });
+      await seedUserEntity(esClient, { entityId: e2, namespace: 'github', email });
+      await seedUserEntity(esClient, { entityId: e3, namespace: 'slack', email });
+
+      const link1 = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { target_id: t1, entity_ids: [e1] },
+      });
+      expect(link1.statusCode).toBe(200);
+
+      const link2 = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { target_id: t2, entity_ids: [e2] },
+      });
+      expect(link2.statusCode).toBe(200);
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+
+      await waitForResolution(esClient, e3, t2);
+      await waitForResolution(esClient, t1, t2);
+      await waitForResolution(esClient, e1, t2);
+
+      const groupResponse = await apiClient.get(
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${t2}&apiVersion=2`,
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+      expect(groupResponse.statusCode).toBe(200);
+      expect(groupResponse.body.group_size).toBe(5);
+      expect(groupResponse.body.target.entity.id).toBe(t2);
+    }
+  );
+
+  apiTest(
+    'Manual override preserved — manually linked entity not re-resolved; new entity extends group',
+    async ({ apiClient, esClient }) => {
+      const email = 'test8-override@co.com';
+      const entityA = 'test8-a';
+      const entityB = 'test8-b';
+      const entityC = 'test8-c';
+
+      await seedUserEntity(esClient, { entityId: entityA, namespace: 'entra_id', email });
+      await seedUserEntity(esClient, { entityId: entityB, namespace: 'okta', email });
+
+      // Manually link A → B (B is target)
+      const linkResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { target_id: entityB, entity_ids: [entityA] },
+      });
+      expect(linkResponse.statusCode).toBe(200);
+
+      // Seed C (unresolved, same email)
+      await seedUserEntity(esClient, { entityId: entityC, namespace: 'entra_id', email });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+
+      // C should resolve to B (existing target in the group)
+      await waitForResolution(esClient, entityC, entityB);
+
+      // A should still be linked to B (manual override preserved)
+      await waitForResolution(esClient, entityA, entityB);
+
+      const groupResponse = await apiClient.get(
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${entityB}&apiVersion=2`,
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+
+      expect(groupResponse.statusCode).toBe(200);
+      expect(groupResponse.body.group_size).toBe(3);
+      expect(groupResponse.body.target.entity.id).toBe(entityB);
+
+      const aliasIds = groupResponse.body.aliases.map((a: any) => a.entity.id);
+      expect(aliasIds).toStrictEqual(expect.arrayContaining([entityA, entityC]));
+    }
+  );
+
+  apiTest(
+    'Manually unlinked entity not re-resolved after new activity updates timestamp',
+    async ({ apiClient, esClient }) => {
+      const email = 'test9-unlink@co.com';
+      const entityA = 'test9-a';
+      const entityB = 'test9-b';
+
+      // Seed entities with current timestamps (default) so they pass
+      // any watermark advanced by previous tests
+      await seedUserEntity(esClient, {
+        entityId: entityA,
+        namespace: 'entra_id',
+        email,
+      });
+      await seedUserEntity(esClient, {
+        entityId: entityB,
+        namespace: 'okta',
+        email,
+      });
+
+      // Auto-resolve: maintainer links A → B (okta wins as target)
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, entityA, entityB);
+
+      // Manual unlink: analyst removes A from B's group
+      const unlinkResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_UNLINK, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { entity_ids: [entityA] },
+      });
+      expect(unlinkResponse.statusCode).toBe(200);
+      expect(unlinkResponse.body.unlinked).toContain(entityA);
+
+      // Simulate new activity: update A's last_seen to a future timestamp.
+      // With the first_seen watermark fix, this should NOT cause re-entry
+      // because first_seen is immutable and stays behind the watermark.
+      const futureTimestamp = new Date(Date.now() + 3600_000).toISOString();
+      await esClient.update({
+        index: LATEST_INDEX,
+        id: hashEuid(entityA),
+        refresh: 'wait_for',
+        doc: {
+          entity: { lifecycle: { last_seen: futureTimestamp } },
+        },
+      });
+
+      // Run maintainer again — A should NOT be re-linked
+      await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
+        sync: true,
+      });
+
+      // A should stay unresolved (first_seen is behind watermark, so not collected)
+      await assertNotResolved(esClient, entityA);
+    }
+  );
+
+  apiTest('Email matching is case-insensitive', async ({ apiClient, esClient }) => {
+    const oktaEntity = 'test10-okta-user';
+    const entraEntity = 'test10-entra-user';
+
+    await seedUserEntity(esClient, {
+      entityId: oktaEntity,
+      namespace: 'okta',
+      email: 'Alice@Corp.com',
+    });
+    await seedUserEntity(esClient, {
+      entityId: entraEntity,
+      namespace: 'entra_id',
+      email: 'alice@corp.com',
+    });
+
+    await triggerMaintainerRun(apiClient, internalHeaders);
+    await waitForResolution(esClient, entraEntity, oktaEntity);
+  });
+
+  apiTest(
+    'Email links local entities on several hosts together with Okta onto the Active Directory user',
+    async ({ apiClient, esClient }) => {
+      const email = 'john.smith@email-local.example';
+      const localA = 'user:john.smith@host-a@local';
+      const localB = 'user:john.smith@host-b@local';
+      const adEntity = 'user:john.smith@active_directory';
+      const oktaEntity = 'user:john.smith@okta';
+
+      for (const [entityId, namespace] of [
+        [localA, 'local'],
+        [localB, 'local'],
+        [adEntity, 'active_directory'],
+        [oktaEntity, 'okta'],
+      ]) {
+        await seedUserEntity(esClient, { entityId, namespace, email, userName: 'john.smith' });
+      }
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, localA, adEntity);
+      await waitForResolution(esClient, localB, adEntity);
+      await waitForResolution(esClient, oktaEntity, adEntity);
+
+      await assertResolutionGroup(apiClient, defaultHeaders, {
+        targetId: adEntity,
+        aliasIds: [localA, localB, oktaEntity],
+      });
+    }
+  );
+
+  apiTest(
+    'Email declines two Active Directory users sharing a mailbox, even next to local users',
+    async ({ apiClient, esClient }) => {
+      const sharedEmail = 'helpdesk@email-ambiguous.example';
+      const declined = [
+        ['test-ambiguous-ad-a', 'active_directory'],
+        ['test-ambiguous-ad-b', 'active_directory'],
+        ['test-ambiguous-okta', 'okta'],
+        ['user:helpdesk@host-a@local', 'local'],
+        ['user:helpdesk@host-b@local', 'local'],
+      ];
+      for (const [entityId, namespace] of declined) {
+        await seedUserEntity(esClient, { entityId, namespace, email: sharedEmail });
+      }
+
+      // A clean pair in the same run: once it links, the run has processed the declined group.
+      const runCompletedProbeEmail = 'probe@email-ambiguous.example';
+      const runCompletedProbeOkta = 'test-ambiguous-probe-okta';
+      const runCompletedProbeEntra = 'test-ambiguous-probe-entra';
+      await seedUserEntity(esClient, {
+        entityId: runCompletedProbeOkta,
+        namespace: 'okta',
+        email: runCompletedProbeEmail,
+      });
+      await seedUserEntity(esClient, {
+        entityId: runCompletedProbeEntra,
+        namespace: 'entra_id',
+        email: runCompletedProbeEmail,
+      });
+
+      await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
+        sync: true,
+      });
+      await waitForResolution(esClient, runCompletedProbeEntra, runCompletedProbeOkta);
+
+      // The run already finished, so each entity after the first needs only a short check.
+      const settledRunCheckMs = 1_000;
+      const [[firstEntityId], ...rest] = declined;
+      await assertNotResolved(esClient, firstEntityId);
+      for (const [entityId] of rest) {
+        await assertNotResolved(esClient, entityId, settledRunCheckMs);
+      }
+    }
+  );
+
+  apiTest(
+    'Email links local entities before the Active Directory user arrives, then retargets onto it',
+    async ({ apiClient, esClient }) => {
+      const email = 'jane.pre-ad@email-local.example';
+      const localA = 'user:jane.pre-ad@host-a@local';
+      const localB = 'user:jane.pre-ad@host-b@local';
+      const adEntity = 'user:jane.pre-ad@active_directory';
+
+      await seedUserEntity(esClient, { entityId: localA, namespace: 'local', email });
+      await seedUserEntity(esClient, { entityId: localB, namespace: 'local', email });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, localB, localA);
+
+      await seedUserEntity(esClient, { entityId: adEntity, namespace: 'active_directory', email });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, localA, adEntity);
+      await waitForResolution(esClient, localB, adEntity);
+
+      await assertResolutionGroup(apiClient, defaultHeaders, {
+        targetId: adEntity,
+        aliasIds: [localA, localB],
+      });
+    }
+  );
+
+  apiTest(
+    'Windows SID bridge links system account-management (IAM) entities to Active Directory',
+    async ({ apiClient, esClient }) => {
+      const sid = 'S-1-5-21-111-222-333-1001';
+      const windowsEntity = 'test11-windows';
+      const adEntity = 'test11-ad';
+
+      await seedUserEntity(esClient, {
+        entityId: windowsEntity,
+        namespace: 'windows',
+        email: 'test11-windows@sid.example',
+        userId: sid,
+      });
+      await seedUserEntity(esClient, {
+        entityId: adEntity,
+        namespace: 'active_directory',
+        email: 'test11-ad@sid.example',
+        userId: sid,
+      });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, windowsEntity, adEntity);
+    }
+  );
+
+  apiTest(
+    'Windows SID bridge links several local entities on different hosts to Active Directory',
+    async ({ apiClient, esClient }) => {
+      const sid = 'S-1-5-21-111-222-333-1104';
+      const localA = 'user:jane@host-a@local';
+      const localB = 'user:jane@host-b@local';
+      const adEntity = 'user:jane@active_directory';
+
+      await seedUserEntity(esClient, {
+        entityId: localA,
+        namespace: 'local',
+        email: 'test-local-a@sid.example',
+        userId: sid,
+        userName: 'jane',
+      });
+      await seedUserEntity(esClient, {
+        entityId: localB,
+        namespace: 'local',
+        email: 'test-local-b@sid.example',
+        userId: sid,
+        userName: 'jane',
+      });
+      await seedUserEntity(esClient, {
+        entityId: adEntity,
+        namespace: 'active_directory',
+        email: 'test-ad@sid.example',
+        userId: sid,
+        userName: 'jane',
+      });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, localA, adEntity);
+      await waitForResolution(esClient, localB, adEntity);
+
+      const groupResponse = await apiClient.get(
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${adEntity}&apiVersion=2`,
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+      expect(groupResponse.statusCode).toBe(200);
+      expect(groupResponse.body.group_size).toBe(3);
+      expect(groupResponse.body.target.entity.id).toBe(adEntity);
+      const aliasIds = groupResponse.body.aliases.map(
+        (a: { entity: { id: string } }) => a.entity.id
+      );
+      expect(aliasIds).toStrictEqual(expect.arrayContaining([localA, localB]));
+    }
+  );
+
+  apiTest(
+    'Windows SID bridge links two local entities sharing a domain SID before the Active Directory user arrives',
+    async ({ apiClient, esClient }) => {
+      const sid = 'S-1-5-21-111-222-333-1105';
+      const localA = 'user:jane-pre-ad@host-a@local';
+      const localB = 'user:jane-pre-ad@host-b@local';
+      const adEntity = 'user:jane-pre-ad@active_directory';
+
+      await seedUserEntity(esClient, {
+        entityId: localA,
+        namespace: 'local',
+        email: 'test-pre-ad-a@sid.example',
+        userId: sid,
+        userName: 'jane-pre-ad',
+      });
+      await seedUserEntity(esClient, {
+        entityId: localB,
+        namespace: 'local',
+        email: 'test-pre-ad-b@sid.example',
+        userId: sid,
+        userName: 'jane-pre-ad',
+      });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, localB, localA);
+
+      const localGroup = await apiClient.get(
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${localA}&apiVersion=2`,
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+      expect(localGroup.statusCode).toBe(200);
+      expect(localGroup.body.group_size).toBe(2);
+      expect(localGroup.body.target.entity.id).toBe(localA);
+      expect(localGroup.body.aliases).toHaveLength(1);
+      expect(localGroup.body.aliases[0].entity.id).toBe(localB);
+
+      await seedUserEntity(esClient, {
+        entityId: adEntity,
+        namespace: 'active_directory',
+        email: 'test-pre-ad-ad@sid.example',
+        userId: sid,
+        userName: 'jane-pre-ad',
+      });
+
+      await triggerMaintainerRun(apiClient, internalHeaders);
+      await waitForResolution(esClient, localA, adEntity);
+      await waitForResolution(esClient, localB, adEntity);
+
+      const adGroup = await apiClient.get(
+        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${adEntity}&apiVersion=2`,
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+      expect(adGroup.statusCode).toBe(200);
+      expect(adGroup.body.group_size).toBe(3);
+      expect(adGroup.body.target.entity.id).toBe(adEntity);
+      const aliasIds = adGroup.body.aliases.map((a: { entity: { id: string } }) => a.entity.id);
+      expect(aliasIds).toStrictEqual(expect.arrayContaining([localA, localB]));
+    }
+  );
+
+  apiTest('Entra GUID bridge links Defender to Entra ID', async ({ apiClient, esClient }) => {
+    const guid = 'aa534e49-edfd-4541-8256-8bbf34f122b4';
+    const defenderEntity = 'test12-defender';
+    const entraEntity = 'test12-entra';
+
+    await seedUserEntity(esClient, {
+      entityId: defenderEntity,
+      namespace: 'm365_defender',
+      email: 'test12-defender@guid.example',
+      userId: guid,
+    });
+    await seedUserEntity(esClient, {
+      entityId: entraEntity,
+      namespace: 'entra_id',
+      email: 'test12-entra@guid.example',
+      userId: guid,
+    });
+
+    await triggerMaintainerRun(apiClient, internalHeaders);
+    await waitForResolution(esClient, defenderEntity, entraEntity);
+  });
+
+  apiTest(
+    'CrowdStrike SID bridge does not link leftover crowdstrike-namespace entities when left at the default (disabled)',
+    async ({ apiClient, esClient }) => {
+      const sid = 'S-1-5-21-444-555-666-2002';
+      const csEntity = 'test13-crowdstrike';
+      const adEntity = 'test13-ad';
+
+      await seedUserEntity(esClient, {
+        entityId: csEntity,
+        namespace: 'crowdstrike',
+        email: 'test13-cs@sid.example',
+        userId: sid,
+      });
+      await seedUserEntity(esClient, {
+        entityId: adEntity,
+        namespace: 'active_directory',
+        email: 'test13-ad@sid.example',
+        userId: sid,
+      });
+
+      await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
+        sync: true,
+      });
+      await assertNotResolved(esClient, csEntity);
+    }
+  );
+
+  apiTest(
+    'CrowdStrike SID bridge links leftover crowdstrike-namespace entities to Active Directory when enabled',
+    async ({ apiClient, esClient }) => {
+      const enable = await apiClient.put(
+        ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_ENABLE(
+          RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE
+        ),
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+      expect(enable.statusCode).toBe(200);
+
+      try {
+        const sid = 'S-1-5-21-444-555-666-2003';
+        const csEntity = 'test13-crowdstrike-enabled';
+        const adEntity = 'test13-ad-enabled';
+
+        await seedUserEntity(esClient, {
+          entityId: csEntity,
+          namespace: 'crowdstrike',
+          email: 'test13-cs-enabled@sid.example',
+          userId: sid,
+        });
+        await seedUserEntity(esClient, {
+          entityId: adEntity,
+          namespace: 'active_directory',
+          email: 'test13-ad-enabled@sid.example',
+          userId: sid,
+        });
+
+        await triggerMaintainerRun(apiClient, internalHeaders);
+        await waitForResolution(esClient, csEntity, adEntity);
+      } finally {
+        const disable = await apiClient.put(
+          ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_DISABLE(
+            RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE
+          ),
+          { headers: defaultHeaders, responseType: 'json' }
+        );
+        expect(disable.statusCode).toBe(200);
+      }
+    }
+  );
+
+  apiTest(
+    'UPN cross-field bridge does not link when left at the default (disabled)',
+    async ({ apiClient, esClient }) => {
+      const upn = 'admin-disabled@tenant.onmicrosoft.com';
+      const m365Entity = 'test14-m365-disabled';
+      const entraEntity = 'test14-entra-disabled';
+
+      await seedUserEntity(esClient, {
+        entityId: m365Entity,
+        namespace: 'microsoft_365',
+        email: 'test14-m365-disabled@upn.example',
+        userId: upn,
+      });
+      await seedUserEntity(esClient, {
+        entityId: entraEntity,
+        namespace: 'entra_id',
+        email: 'test14-entra-disabled@upn.example',
+        userName: upn,
+      });
+
+      await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
+        sync: true,
+      });
+      await assertNotResolved(esClient, m365Entity);
+    }
+  );
+
+  apiTest(
+    'UPN cross-field bridge links microsoft_365 user.id to entra_id user.name when enabled',
+    async ({ apiClient, esClient }) => {
+      const enable = await apiClient.put(
+        ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_ENABLE(
+          RESOLUTION_RULE_IDS.UPN_CROSS_FIELD_BRIDGE
+        ),
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+      expect(enable.statusCode).toBe(200);
+
+      try {
+        const upn = 'admin@tenant.onmicrosoft.com';
+        const m365Entity = 'test14-m365';
+        const entraEntity = 'test14-entra';
+
+        await seedUserEntity(esClient, {
+          entityId: m365Entity,
+          namespace: 'microsoft_365',
+          email: 'test14-m365@upn.example',
+          userId: upn,
+        });
+        await seedUserEntity(esClient, {
+          entityId: entraEntity,
+          namespace: 'entra_id',
+          email: 'test14-entra@upn.example',
+          userName: upn,
+        });
+
+        await triggerMaintainerRun(apiClient, internalHeaders);
+        await waitForResolution(esClient, m365Entity, entraEntity);
+      } finally {
+        const disable = await apiClient.put(
+          ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_DISABLE(
+            RESOLUTION_RULE_IDS.UPN_CROSS_FIELD_BRIDGE
+          ),
+          { headers: defaultHeaders, responseType: 'json' }
+        );
+        expect(disable.statusCode).toBe(200);
+      }
+    }
+  );
+
+  apiTest('Well-known Windows SIDs are not bridged', async ({ apiClient, esClient }) => {
+    const sid = 'S-1-5-18';
+    const windowsEntity = 'test15-windows-system';
+    const adEntity = 'test15-ad-system';
+
+    await seedUserEntity(esClient, {
+      entityId: windowsEntity,
+      namespace: 'windows',
+      email: 'test15-windows@sid.example',
+      userId: sid,
+    });
+    await seedUserEntity(esClient, {
+      entityId: adEntity,
+      namespace: 'active_directory',
+      email: 'test15-ad@sid.example',
+      userId: sid,
+    });
+
+    await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
+      sync: true,
+    });
+    await assertSidRuleWatermarked(apiClient, internalHeaders, esClient);
+    await assertNotResolved(esClient, windowsEntity);
+  });
+
+  apiTest('Well-known SIDs on local entities are not bridged', async ({ apiClient, esClient }) => {
+    const sid = 'S-1-5-18';
+    const localEntity = 'user:system@host-wk@local';
+    const adEntity = 'test15b-ad-system';
+
+    await seedUserEntity(esClient, {
+      entityId: localEntity,
+      namespace: 'local',
+      email: 'test15b-local@sid.example',
+      userId: sid,
+      userName: 'system',
+    });
+    await seedUserEntity(esClient, {
+      entityId: adEntity,
+      namespace: 'active_directory',
+      email: 'test15b-ad@sid.example',
+      userId: sid,
+    });
+
+    await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
+      sync: true,
+    });
+    await assertSidRuleWatermarked(apiClient, internalHeaders, esClient);
+    await assertNotResolved(esClient, localEntity);
+    await assertNotResolved(esClient, adEntity);
+  });
+
+  apiTest(
+    'Linux UID values on local entities do not enter the SID match',
+    async ({ apiClient, esClient }) => {
+      const uid = '1000';
+      const localA = 'user:linuxuser@host-linux-a@local';
+      const localB = 'user:linuxuser@host-linux-b@local';
+
+      await seedUserEntity(esClient, {
+        entityId: localA,
+        namespace: 'local',
+        email: 'test-linux-a@uid.example',
+        userId: uid,
+        userName: 'linuxuser',
+      });
+      await seedUserEntity(esClient, {
+        entityId: localB,
+        namespace: 'local',
+        email: 'test-linux-b@uid.example',
+        userId: uid,
+        userName: 'linuxuser',
+      });
+
+      await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
+        sync: true,
+      });
+      await assertSidRuleWatermarked(apiClient, internalHeaders, esClient);
+      await assertNotResolved(esClient, localB);
+    }
+  );
+
+  apiTest(
+    'SID bridge links a local entity created by extraction to Active Directory',
+    async ({ apiClient, esClient }) => {
+      // Own stream/template, name outside logs-entity-store-tests-* so this
+      // cannot overlap history_snapshot's default template at the same priority
+      // (including a leftover wildcard from an older run).
+      const sidExtractionLogs = {
+        index: 'logs-entity-store-sid-extraction-default',
+        template: 'entity-store-test-logs-override-sid-extraction',
+      };
+      await setupLogsTestDataStream(esClient, sidExtractionLogs);
+      try {
+        const sid = 'S-1-5-21-111-222-333-1104';
+        const userName = 'sidjane';
+        const hostId = 'sidhosta';
+        const localEntity = `user:${userName}@${hostId}@local`;
+        const adEntity = `user:${userName}@active_directory`;
+        const timestamp = new Date().toISOString();
+
+        await ingestDoc(
+          esClient,
+          {
+            '@timestamp': timestamp,
+            event: { kind: 'event', category: ['authentication'], module: 'system' },
+            user: { name: userName, id: sid },
+            host: { id: hostId, name: 'sid-workstation' },
+          },
+          sidExtractionLogs.index
+        );
+
+        const fromDateISO = new Date(Date.now() - 60_000).toISOString();
+        const toDateISO = new Date(Date.now() + 60_000).toISOString();
+        const extraction = await forceLogExtraction(
+          apiClient,
+          internalHeaders,
+          'user',
+          fromDateISO,
+          toDateISO
+        );
+        expect(extraction.statusCode).toBe(200);
+
+        let extractedSource:
+          | { entity?: { namespace?: string }; user?: { id?: unknown } }
+          | undefined;
+
+        await expect
+          .poll(
+            async () => {
+              const response = await esClient.search({
+                index: LATEST_ALIAS,
+                query: { term: { 'entity.id': localEntity } },
+                size: 1,
+              });
+              extractedSource = response.hits.hits[0]?._source as typeof extractedSource;
+              return extractedSource;
+            },
+            { timeout: 30_000, intervals: [200] }
+          )
+          .toBeDefined();
+
+        expect(extractedSource?.entity?.namespace).toBe('local');
+        expect(normalizeKeywordList(extractedSource?.user?.id)).toStrictEqual([sid]);
+
+        await seedUserEntity(esClient, {
+          entityId: adEntity,
+          namespace: 'active_directory',
+          email: `${userName}@corp.example`,
+          userId: sid,
+          userName,
+        });
+
+        await triggerMaintainerRun(apiClient, internalHeaders);
+        await waitForResolution(esClient, localEntity, adEntity);
+      } finally {
+        await teardownLogsTestDataStream(esClient, sidExtractionLogs);
+      }
+    }
+  );
+
+  apiTest('Disabling the email rule stops it producing links', async ({ apiClient, esClient }) => {
+    const disable = await apiClient.put(
+      ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_DISABLE(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH),
+      { headers: defaultHeaders, responseType: 'json' }
+    );
+    expect(disable.statusCode).toBe(200);
+
+    try {
+      const email = 'test16-disabled@co.com';
+      const oktaEntity = 'test16-okta';
+      const entraEntity = 'test16-entra';
+
+      await seedUserEntity(esClient, { entityId: oktaEntity, namespace: 'okta', email });
+      await seedUserEntity(esClient, { entityId: entraEntity, namespace: 'entra_id', email });
+
+      await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
+        sync: true,
+      });
+      await assertNotResolved(esClient, entraEntity);
+      await assertNotResolved(esClient, oktaEntity);
+    } finally {
+      const enable = await apiClient.put(
+        ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_ENABLE(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH),
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+      expect(enable.statusCode).toBe(200);
+    }
+  });
+});

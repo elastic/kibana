@@ -9,13 +9,7 @@ import { renderHook, act } from '@testing-library/react';
 import type { OpenTimelineResult } from './types';
 import { useSuperTimelineGate } from './use_super_timeline_gate';
 import { MAX_SUPER_TIMELINE_COUNT } from '../super_timeline/use_open_super_timeline';
-import {
-  SUPER_TIMELINE_TOO_FEW,
-  SUPER_TIMELINE_TOO_MANY,
-  SUPER_TIMELINE_UNSUPPORTED_QUERY_TYPES,
-  ESQL_QUERY_TYPE_LABEL,
-  EQL_QUERY_TYPE_LABEL,
-} from '../super_timeline/translations';
+import { SUPER_TIMELINE_TOO_FEW, SUPER_TIMELINE_TOO_MANY } from '../super_timeline/translations';
 
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
@@ -48,8 +42,8 @@ const makeEsqlItem = (id: string): OpenTimelineResult =>
 const makeEqlItem = (id: string): OpenTimelineResult =>
   makeItem(id, { queryType: { hasQuery: false, hasEql: true } });
 
-const renderGate = (selectedItems: OpenTimelineResult[], searchResults?: OpenTimelineResult[]) =>
-  renderHook(() => useSuperTimelineGate({ selectedItems, searchResults }));
+const renderGate = (selectedItems: OpenTimelineResult[]) =>
+  renderHook(() => useSuperTimelineGate({ selectedItems }));
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
@@ -92,24 +86,28 @@ describe('useSuperTimelineGate', () => {
       expect(result.current.isEnabled).toBe(false);
     });
 
-    it('is false when the selection contains an ES|QL timeline', () => {
+    it('is true when the selection contains an ES|QL timeline — its EQL/ES|QL query is disregarded', () => {
+      // WHY: EQL/ES|QL timelines may now be selected; their queries are simply not merged.
+      // The gate must not block based on query type.
       const { result } = renderGate([makeItem('kql'), makeEsqlItem('esql')]);
-      expect(result.current.isEnabled).toBe(false);
+      expect(result.current.isEnabled).toBe(true);
     });
 
-    it('is false when the selection contains an EQL timeline', () => {
+    it('is true when the selection contains an EQL timeline', () => {
       const { result } = renderGate([makeItem('kql'), makeEqlItem('eql')]);
-      expect(result.current.isEnabled).toBe(false);
+      expect(result.current.isEnabled).toBe(true);
     });
 
-    it('is false when all selected timelines are ES|QL', () => {
+    it('is true when ALL selected timelines are ES|QL', () => {
+      // WHY: an all-ES|QL selection is allowed; it degenerates to "all events in the merged
+      // date range" — the same state a plain timeline with no query has today.
       const { result } = renderGate([makeEsqlItem('esql-1'), makeEsqlItem('esql-2')]);
-      expect(result.current.isEnabled).toBe(false);
+      expect(result.current.isEnabled).toBe(true);
     });
 
-    it('is false when all selected timelines are EQL', () => {
+    it('is true when ALL selected timelines are EQL', () => {
       const { result } = renderGate([makeEqlItem('eql-1'), makeEqlItem('eql-2')]);
-      expect(result.current.isEnabled).toBe(false);
+      expect(result.current.isEnabled).toBe(true);
     });
 
     it('is true for an all-KQL selection within count limits', () => {
@@ -124,17 +122,6 @@ describe('useSuperTimelineGate', () => {
       });
       const { result } = renderGate([makeItem('a'), makeItem('b')]);
       expect(result.current.isEnabled).toBe(false);
-    });
-
-    it('re-enables when the offending ES|QL timeline is deselected', () => {
-      const { result, rerender } = renderHook(
-        ({ items }: { items: OpenTimelineResult[] }) =>
-          useSuperTimelineGate({ selectedItems: items }),
-        { initialProps: { items: [makeItem('kql'), makeEsqlItem('esql')] } }
-      );
-      expect(result.current.isEnabled).toBe(false);
-      rerender({ items: [makeItem('kql'), makeItem('kql-2')] });
-      expect(result.current.isEnabled).toBe(true);
     });
   });
 
@@ -157,30 +144,18 @@ describe('useSuperTimelineGate', () => {
       expect(result.current.tooltip).toBe(SUPER_TIMELINE_TOO_MANY(MAX_SUPER_TIMELINE_COUNT));
     });
 
-    it('names the offending ES|QL timeline and its type so the user can deselect it', () => {
-      // The title AND type must both appear — knowing just the title is insufficient for recovery
-      // because the user may have multiple timelines with similar names.
-      const { result } = renderGate([makeItem('kql-1'), makeEsqlItem('esql-1')]);
-      expect(result.current.tooltip).toBe(
-        SUPER_TIMELINE_UNSUPPORTED_QUERY_TYPES(`Timeline esql-1 (${ESQL_QUERY_TYPE_LABEL})`)
-      );
-    });
-
-    it('names the offending EQL timeline and its type', () => {
-      const { result } = renderGate([makeItem('kql-1'), makeEqlItem('eql-1')]);
-      expect(result.current.tooltip).toBe(
-        SUPER_TIMELINE_UNSUPPORTED_QUERY_TYPES(`Timeline eql-1 (${EQL_QUERY_TYPE_LABEL})`)
-      );
-    });
-
-    it('lists multiple offending timelines separated by a comma', () => {
-      const { result } = renderGate([makeEsqlItem('esql-1'), makeEsqlItem('esql-2')]);
-      expect(result.current.tooltip).toContain('Timeline esql-1');
-      expect(result.current.tooltip).toContain('Timeline esql-2');
-    });
-
     it('returns undefined when the action is enabled', () => {
       const { result } = renderGate([makeItem('a'), makeItem('b')]);
+      expect(result.current.tooltip).toBeUndefined();
+    });
+
+    it('returns undefined for a mixed KQL + EQL selection (EQL no longer blocks)', () => {
+      const { result } = renderGate([makeItem('kql-1'), makeEqlItem('eql-1')]);
+      expect(result.current.tooltip).toBeUndefined();
+    });
+
+    it('returns undefined for an all-ES|QL selection (not a count error)', () => {
+      const { result } = renderGate([makeEsqlItem('esql-1'), makeEsqlItem('esql-2')]);
       expect(result.current.tooltip).toBeUndefined();
     });
   });
@@ -201,23 +176,6 @@ describe('useSuperTimelineGate', () => {
         result.current.handleOpen(closePopover);
       });
       expect(closePopover).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('searchResults deduplication', () => {
-    it('uses fresh data from searchResults to classify a stale selectedItem', () => {
-      // selectedItems has a plain KQL item, but searchResults reveals it now has a savedSearchId
-      // (e.g. the user saved an ES|QL query after the list was last fetched). The gate must use
-      // the fresher data to prevent an empty Query tab in the Super Timeline.
-      const staleItem = makeItem('id-1');
-      const freshItem = makeEsqlItem('id-1');
-      const { result } = renderHook(() =>
-        useSuperTimelineGate({
-          selectedItems: [staleItem, makeItem('id-2')],
-          searchResults: [freshItem, makeItem('id-2')],
-        })
-      );
-      expect(result.current.isEnabled).toBe(false);
     });
   });
 });

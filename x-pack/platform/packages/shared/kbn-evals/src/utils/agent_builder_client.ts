@@ -7,6 +7,7 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import pRetry from 'p-retry';
 
 export interface ConverseStep {
@@ -53,12 +54,26 @@ export interface AgentBuilderClientResponse {
    * or `confirmation`). Empty when the agent did not ask any prompts.
    */
   prompts: unknown[];
+  /** Token counts for this round, summed across all LLM calls. */
+  tokensUsed?: ChatCompletionTokenCount;
+}
+
+export interface CreateAgentBuilderConversationParams {
+  agentId: string;
+  title: string;
+}
+
+interface RoundModelUsage {
+  input_tokens: number;
+  output_tokens: number;
+  cached_input_tokens?: number;
 }
 
 interface AgentBuilderConverseApiResponse {
   conversation_id?: string;
   trace_id?: string;
   steps?: ConverseStep[];
+  model_usage?: RoundModelUsage;
   response?: { message?: string; structured_output?: unknown; prompts?: unknown[] };
 }
 
@@ -66,6 +81,7 @@ const RETRIES = 2;
 const MIN_TIMEOUT_MS = 2000;
 
 export interface AgentBuilderClient {
+  createConversation(params: CreateAgentBuilderConversationParams): Promise<{ id: string }>;
   converse(params: AgentBuilderConverseParams): Promise<AgentBuilderClientResponse>;
   /**
    * Loads a persisted conversation by id. Useful for evaluators that need the
@@ -127,6 +143,7 @@ export function createAgentBuilderClient({
         }),
       });
 
+      const { model_usage } = response;
       return {
         message: response.response?.message ?? '',
         steps: response.steps ?? [],
@@ -134,10 +151,35 @@ export function createAgentBuilderClient({
         conversationId: response.conversation_id,
         traceId: response.trace_id,
         prompts: response.response?.prompts ?? [],
+        tokensUsed: model_usage
+          ? {
+              prompt: model_usage.input_tokens,
+              completion: model_usage.output_tokens,
+              total: model_usage.input_tokens + model_usage.output_tokens,
+              cached: model_usage.cached_input_tokens,
+            }
+          : undefined,
       };
     };
 
     return retryOnFail(`converse(${agentId})`, call);
+  };
+
+  const createConversation = ({
+    agentId,
+    title,
+  }: CreateAgentBuilderConversationParams): Promise<{ id: string }> => {
+    return retryOnFail(`createConversation(${agentId})`, () =>
+      fetch<{ id: string }>('/api/agent_builder/conversations', {
+        method: 'POST',
+        version: '2023-10-31',
+        body: JSON.stringify({
+          agent_id: agentId,
+          title,
+          access_control: { access_mode: 'private' },
+        }),
+      })
+    );
   };
 
   const getConversation = <T = unknown>(conversationId: string): Promise<T> => {
@@ -149,5 +191,5 @@ export function createAgentBuilderClient({
     });
   };
 
-  return { converse, getConversation };
+  return { createConversation, converse, getConversation };
 }

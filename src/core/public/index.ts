@@ -61,8 +61,6 @@ export type {
   ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuCustomLink,
   ChromeHelpExtensionMenuDocumentationLink,
-  ChromeNavControl,
-  ChromeNavControls,
   ChromeNavLink,
   ChromeNavLinks,
   ChromeDocTitle,
@@ -227,6 +225,9 @@ export type {
   SecurityServiceSetup,
   SecurityServiceStart,
   CoreAuthenticationService,
+  CoreServiceAccountsService,
+  ServiceAccount,
+  CreateServiceAccountParams,
   CoreSecurityDelegateContract,
 } from '@kbn/core-security-browser';
 

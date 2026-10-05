@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { buildEpisodesKpisQuery, buildEpisodesHistogramQuery } from './episodes_query';
+import {
+  buildEpisodesKpisQuery,
+  buildEpisodesHistogramQuery,
+  isSourceEpisode,
+  type AlertEpisode,
+} from './episodes_query';
 
 describe('buildEpisodesKpisQuery', () => {
   const SPACE = 'default';
@@ -55,15 +60,15 @@ describe('buildEpisodesKpisQuery', () => {
     expect(output).toContain('last_ack_action == "ack"');
   });
 
-  it('counts indefinitely snoozed episodes (snooze_expiry IS NULL) as snoozed', () => {
+  it('counts indefinitely snoozed episodes (snoozed_until IS NULL) as snoozed', () => {
     const output = buildEpisodesKpisQuery(SPACE, UID);
     expect(output).toContain('last_snooze_action == "snooze"');
-    expect(output).toContain('snooze_expiry IS NULL');
+    expect(output).toContain('snoozed_until IS NULL');
   });
 
-  it('excludes expired snoozes (snooze_expiry in the past) from the snoozed count', () => {
+  it('excludes expired snoozes (snoozed_until in the past) from the snoozed count', () => {
     const output = buildEpisodesKpisQuery(SPACE, UID);
-    expect(output).toContain('TO_DATETIME(snooze_expiry) > NOW()');
+    expect(output).toContain('TO_DATETIME(snoozed_until) > NOW()');
   });
 
   it('applies queryString filter when provided', () => {
@@ -82,9 +87,16 @@ describe('buildEpisodesKpisQuery', () => {
     expect(output).toMatch(/\| WHERE `episode\.status` == "active"/);
   });
 
-  it('applies ruleId filter when provided', () => {
+  it('applies ruleId filter on both rule.id and rule_id before the aggregations', () => {
     const output = buildEpisodesKpisQuery(SPACE, UID, { ruleId: 'rule-xyz' });
-    expect(output).toContain('WHERE rule.id == "rule-xyz"');
+    expect(output).toContain('WHERE rule.id == "rule-xyz" OR rule_id == "rule-xyz"');
+    expect(output.indexOf('WHERE rule.id ==')).toBeLessThan(output.indexOf('INLINE STATS'));
+  });
+
+  it('applies groupHash filter before the aggregations', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID, { groupHash: 'abc123' });
+    expect(output).toContain('WHERE group_hash == "abc123"');
+    expect(output.indexOf('WHERE group_hash ==')).toBeLessThan(output.indexOf('INLINE STATS'));
   });
 });
 
@@ -116,9 +128,16 @@ describe('buildEpisodesHistogramQuery', () => {
     expect(output).toMatch(/\| WHERE `episode\.status` == "active"/);
   });
 
-  it('includes the ruleId filter when filterState.ruleId is provided', () => {
+  it('includes the ruleId filter on both rule.id and rule_id before the aggregations', () => {
     const output = buildEpisodesHistogramQuery('default', { ruleId: 'rule-abc' }).print('basic');
-    expect(output).toContain('rule-abc');
+    expect(output).toContain('WHERE rule.id == "rule-abc" OR rule_id == "rule-abc"');
+    expect(output.indexOf('WHERE rule.id ==')).toBeLessThan(output.indexOf('INLINE STATS'));
+  });
+
+  it('includes the groupHash filter before the aggregations', () => {
+    const output = buildEpisodesHistogramQuery('default', { groupHash: 'abc123' }).print('basic');
+    expect(output).toContain('WHERE group_hash == "abc123"');
+    expect(output.indexOf('WHERE group_hash ==')).toBeLessThan(output.indexOf('INLINE STATS'));
   });
 
   it('includes the tags filter when filterState.tags is provided', () => {
@@ -134,5 +153,17 @@ describe('buildEpisodesHistogramQuery', () => {
       'basic'
     );
     expect(output).toContain('user-xyz');
+  });
+});
+
+describe('isSourceEpisode', () => {
+  const nativeEpisode = { 'episode.id': 'ep-1' } as AlertEpisode;
+
+  it('is true when source_id is set', () => {
+    expect(isSourceEpisode({ ...nativeEpisode, source_id: 'classic-alerts' })).toBe(true);
+  });
+
+  it('is false for native v2 episodes', () => {
+    expect(isSourceEpisode(nativeEpisode)).toBe(false);
   });
 });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { connectorIngressCredentialModelVersions } from './connector_ingress_credential_model_versions';
 export { connectorModelVersions } from './connector_model_versions';
 export { connectorTokenModelVersions } from './connector_token_model_versions';
 

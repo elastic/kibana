@@ -17,15 +17,15 @@ import {
   type PayloadActionCreator,
   type SerializableStateInvariantMiddlewareOptions,
   type ThunkAction,
-  type ThunkDispatch,
   type TypedStartListening,
+  type UnknownAction,
   type ListenerEffect,
   configureStore,
   createSlice,
   createListenerMiddleware,
   createAction,
   isAnyOf,
-} from 'redux-toolkit-v1';
+} from '@reduxjs/toolkit';
 import { dismissFlyouts, DiscoverFlyouts } from '@kbn/discover-utils';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -36,17 +36,14 @@ import type { UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import type { ContextAwarenessToolkit } from '../../../../context_awareness/toolkit';
-import {
-  type RuntimeStateManager,
-  selectTabRuntimeInternalState,
-  selectTabRuntimeState,
-} from './runtime_state';
+import { type RuntimeStateManager, selectTabRuntimeInternalState } from './runtime_state';
 import { createContextAwarenessToolkit } from './context_awareness_toolkit';
 import {
   PROFILE_APP_STATE_DEFAULT_FIELDS,
   TabsBarVisibility,
   type ProfileAppStateDefaultField,
   type DiscoverInternalState,
+  type ExpandedDocCascadePath,
   type ProfileAppStateSnapshot,
   type TabState,
   type RecentlyClosedTabState,
@@ -71,7 +68,7 @@ const MIDDLEWARE_THROTTLE_MS = 300;
 const MIDDLEWARE_THROTTLE_OPTIONS = { leading: false, trailing: true };
 
 const initialState: DiscoverInternalState = {
-  initializationState: { hasESData: false, hasUserDataView: false },
+  initializationState: { hasESData: false, hasDataView: false },
   userId: undefined,
   spaceId: undefined,
   persistedDiscoverSession: undefined,
@@ -146,7 +143,7 @@ const syncProfileAppStateSnapshot = (
   profileAppStateSnapshots[profileId] = profileAppStateSnapshot;
 };
 
-export const internalStateSlice = createSlice({
+const internalStateSliceDef = createSlice({
   name: 'internalState',
   initialState,
   reducers: {
@@ -205,9 +202,22 @@ export const internalStateSlice = createSlice({
         tab.forceFetchOnSelect = action.payload.forceFetchOnSelect;
       }),
 
+    setSkipInitialFetch: (state, action: TabAction<Pick<TabState, 'skipInitialFetch'>>) =>
+      withTab(state, action.payload, (tab) => {
+        tab.skipInitialFetch = action.payload.skipInitialFetch;
+      }),
+
     setIsDataViewLoading: (state, action: TabAction<Pick<TabState, 'isDataViewLoading'>>) =>
       withTab(state, action.payload, (tab) => {
         tab.isDataViewLoading = action.payload.isDataViewLoading;
+      }),
+
+    setIsWarningCalloutDismissed: (
+      state,
+      action: TabAction<Pick<TabState, 'isWarningCalloutDismissed'>>
+    ) =>
+      withTab(state, action.payload, (tab) => {
+        tab.isWarningCalloutDismissed = action.payload.isWarningCalloutDismissed;
       }),
 
     setDefaultProfileAdHocDataViewIds: (state, action: PayloadAction<string[]>) => {
@@ -241,6 +251,7 @@ export const internalStateSlice = createSlice({
       action: TabAction<{
         expandedDoc: DataTableRecord | undefined;
         expandedDocOwner?: string;
+        expandedDocCascadePath?: ExpandedDocCascadePath;
         initialDocViewerTabId?: string;
         initialDocViewerTabState?: object;
       }>
@@ -262,6 +273,9 @@ export const internalStateSlice = createSlice({
 
         tab.expandedDoc = action.payload.expandedDoc;
         tab.expandedDocOwner = nextExpandedDocOwner;
+        tab.expandedDocCascadePath = action.payload.expandedDoc
+          ? action.payload.expandedDocCascadePath
+          : undefined;
         tab.initialDocViewerTabId = action.payload.initialDocViewerTabId;
 
         if (action.payload.initialDocViewerTabId && action.payload.initialDocViewerTabState) {
@@ -437,6 +451,7 @@ export const internalStateSlice = createSlice({
         tab.overriddenVisContextAfterInvalidation = undefined;
         tab.expandedDoc = undefined;
         tab.expandedDocOwner = undefined;
+        tab.expandedDocCascadePath = undefined;
         tab.renderDocumentViewMeta = undefined;
         tab.initialDocViewerTabId = undefined;
         tab.uiState.docViewer = {};
@@ -596,6 +611,17 @@ export const internalStateSlice = createSlice({
   },
 });
 
+/**
+ * immer 11.1.3+ resolves case reducer `state` params to `WritableNonArrayDraft`, which it doesn't
+ * export, so declaration emit inlines the full state per reducer and fails (TS4023/TS7056). The
+ * export must therefore shed every member reaching the case reducers: `caseReducers` and
+ * `injectInto` directly (both unused here), and `actions` via the unresolved `CaseReducerActions`
+ * mapped type, which the spread resolves. Collapse to a plain exported `createSlice` once
+ * https://github.com/immerjs/immer/pull/1197 is fixed.
+ */
+const { caseReducers, injectInto, ...rest } = internalStateSliceDef;
+export const internalStateSlice = { ...rest, actions: { ...internalStateSliceDef.actions } };
+
 export const syncLocallyPersistedTabState = createAction<TabActionPayload>(
   'internalState/syncLocallyPersistedTabState'
 );
@@ -672,19 +698,6 @@ const createMiddleware = (options: InternalStateDependencies) => {
     actionCreator: discardFlyoutsOnTabChange,
     effect: () => {
       dismissFlyouts([DiscoverFlyouts.lensEdit]);
-    },
-  });
-
-  startListening({
-    actionCreator: internalStateSlice.actions.resetOnSavedSearchChange,
-    effect: (action, listenerApi) => {
-      const { runtimeStateManager } = listenerApi.extra;
-      const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, action.payload.tabId);
-      const dataStateContainer = tabRuntimeState?.dataStateContainer$.getValue();
-
-      if (dataStateContainer?.cleanupEsql) {
-        dataStateContainer.cleanupEsql();
-      }
     },
   });
 
@@ -766,9 +779,9 @@ export type InternalStateDispatch = InternalStateStore['dispatch'];
 
 export type InternalStateThunkAction<TReturn = void> = ThunkAction<
   TReturn,
-  InternalStateDispatch extends ThunkDispatch<infer TState, never, never> ? TState : never,
-  InternalStateDispatch extends ThunkDispatch<never, infer TExtra, never> ? TExtra : never,
-  InternalStateDispatch extends ThunkDispatch<never, never, infer TAction> ? TAction : never
+  DiscoverInternalState,
+  InternalStateDependencies,
+  UnknownAction
 >;
 
 export type InternalStateThunkActionCreator<TArgs extends unknown[] = [], TReturn = void> = (

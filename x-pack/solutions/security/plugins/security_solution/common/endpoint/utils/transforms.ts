@@ -114,6 +114,21 @@ async function waitForTransformsToBeCreated(
   return { currentTransformId: undefined, unitedTransformId: undefined };
 }
 
+const isTransformAlreadyStartedError = (err: unknown): boolean => {
+  if (typeof err !== 'object' || err === null) {
+    return false;
+  }
+
+  const error = err as {
+    statusCode?: number;
+    body?: { error?: { type?: string } };
+  };
+
+  return (
+    error.statusCode === 409 || error.body?.error?.type === 'resource_already_exists_exception'
+  );
+};
+
 async function startTransformWithRetry(
   esClient: Client,
   transformId: string,
@@ -126,8 +141,10 @@ async function startTransformWithRetry(
       await esClient.transform.startTransform({ transform_id: transformId });
       return;
     } catch (err) {
-      // 409: transform already started — not an error
-      if (err.statusCode === 409) {
+      // 409: transform already started.
+      // resource_already_exists_exception: a parallel caller created this transform's
+      // task in the same moment. The task id is the transform id, so it is starting.
+      if (isTransformAlreadyStartedError(err)) {
         return;
       }
 
@@ -179,10 +196,13 @@ async function getMetadataTransformIds(
 
 async function areMetadataTransformsReady(esClient: Client, version: string): Promise<boolean> {
   const transforms = await getMetadataTransformStats(esClient, version);
-  return !transforms.some(
-    // TODO TransformGetTransformStatsTransformStats type needs to be updated to include health
-    (transform: TransformGetTransformStatsTransformStats & { health?: { status: string } }) =>
-      transform?.health?.status !== 'green'
+  return (
+    transforms.length > 0 &&
+    !transforms.some(
+      // TODO TransformGetTransformStatsTransformStats type needs to be updated to include health
+      (transform: TransformGetTransformStatsTransformStats & { health?: { status: string } }) =>
+        transform?.health?.status !== 'green'
+    )
   );
 }
 
@@ -202,35 +222,41 @@ async function waitForCurrentMetdataDocs(esClient: Client, agentIds: string[]) {
     : {
         match_all: {},
       };
-  const size = agentIds.length ?? 1;
-  await waitFor(
-    async () =>
-      (
-        await esClient.search({
-          index: metadataCurrentIndexPattern,
-          query,
-          size,
-          rest_total_hits_as_int: true,
-        })
-      ).hits.total === size
-  );
+  const size = agentIds.length || 1;
+  const areCurrentDocsReady = async (): Promise<boolean> =>
+    (
+      await esClient.search({
+        index: metadataCurrentIndexPattern,
+        query,
+        size,
+        rest_total_hits_as_int: true,
+      })
+    ).hits.total === size;
+
+  const isReady = await waitFor(areCurrentDocsReady);
+  if (!isReady) {
+    throw new Error(
+      `Timed out waiting for ${size} current endpoint metadata docs${
+        agentIds.length ? ` for agent ids [${agentIds.join(', ')}]` : ''
+      }`
+    );
+  }
 }
 
 async function waitFor(
   cb: () => Promise<boolean>,
   interval: number = 20000,
   maxAttempts = 6
-): Promise<void> {
-  let attempts = 0;
-  let isReady = false;
+): Promise<boolean> {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    if (await cb()) {
+      return true;
+    }
 
-  while (!isReady) {
-    await new Promise((res) => setTimeout(() => res(''), interval));
-    isReady = await cb();
-    attempts++;
-
-    if (attempts > maxAttempts) {
-      return;
+    if (attempt < maxAttempts - 1) {
+      await new Promise((res) => setTimeout(res, interval));
     }
   }
+
+  return false;
 }

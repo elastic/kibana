@@ -11,7 +11,7 @@ import Fs from 'fs';
 import Path from 'path';
 
 import dedent from 'dedent';
-import Yaml from 'js-yaml';
+import { parse, stringify } from 'yaml';
 import { createFailError } from '@kbn/dev-cli-errors';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { CiStatsMetric } from '@kbn/ci-stats-reporter';
@@ -37,7 +37,7 @@ export function readLimits(path: string): Limits {
     }
   }
 
-  return yaml ? (Yaml.load(yaml) as Limits) : {};
+  return yaml ? (parse(yaml) as Limits) : {};
 }
 
 export function validateLimitsForAllBundles(
@@ -68,11 +68,11 @@ export function validateLimitsForAllBundles(
 
         To automatically update the limits file locally run:
 
-          node scripts/build_rspack_bundles --update-limits
+          node scripts/build_kibana_platform_plugins --update-limits
 
         To validate your changes locally run:
 
-          node scripts/build_rspack_bundles --validate-limits
+          node scripts/build_kibana_platform_plugins --validate-limits
       ` + '\n'
     );
   }
@@ -90,11 +90,11 @@ export function validateLimitsForAllBundles(
 
         Please sort the keys alphabetically or, to automatically update the limits file locally run:
 
-          node scripts/build_rspack_bundles --update-limits
+          node scripts/build_kibana_platform_plugins --update-limits
 
         To validate your changes locally run:
 
-          node scripts/build_rspack_bundles --validate-limits
+          node scripts/build_kibana_platform_plugins --validate-limits
       ` + '\n'
     );
   }
@@ -116,10 +116,10 @@ export interface UpdateBundleLimitsOptions {
  * Read metrics.json from the build output, compute limits (110% of measured size),
  * and write a sorted limits.yml file.
  *
- * Unlike legacy's `dropMissing` parameter, this always starts from an empty
- * object because `--update-limits` always runs a full dist build with all
- * plugins included. Stale entries for removed plugins are cleaned out
- * automatically since only plugins present in metrics.json get entries.
+ * Always starts from an empty object because `--update-limits` always runs a
+ * full dist build with all plugins included. Stale entries for removed plugins
+ * are cleaned out automatically since only plugins present in metrics.json get
+ * entries.
  */
 export function updateBundleLimits(
   log: ToolingLog,
@@ -203,7 +203,7 @@ export function updateBundleLimits(
 
           To update the limits anyway, run a full dist build locally:
 
-            node scripts/build_rspack_bundles --update-limits
+            node scripts/build_kibana_platform_plugins --update-limits
         ` + '\n'
       );
     }
@@ -218,6 +218,6 @@ export function updateBundleLimits(
     pageLoadAssetSize: sortedPageLoadAssetSize,
   };
 
-  Fs.writeFileSync(limitsPath, Yaml.dump(newLimits));
+  Fs.writeFileSync(limitsPath, stringify(newLimits));
   log.success(`wrote updated limits to ${limitsPath}`);
 }

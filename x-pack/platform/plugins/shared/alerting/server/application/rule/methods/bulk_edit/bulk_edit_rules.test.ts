@@ -283,6 +283,61 @@ describe('bulkEdit()', () => {
             attributes: expect.objectContaining({
               tags: ['foo', 'test-1'],
               revision: 1,
+              updatedByProfileUid: null,
+            }),
+          }),
+        ],
+        { overwrite: true }
+      );
+    });
+
+    test('stamps updatedByProfileUid when the actor has a profile uid', async () => {
+      rulesClientParams.getProfileUid.mockResolvedValueOnce('u_profile_1');
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {
+              enabled: true,
+              tags: ['foo', 'test-1'],
+              alertTypeId: 'myType',
+              schedule: { interval: '1m' },
+              consumer: 'myApp',
+              scheduledTaskId: 'task-123',
+              executionStatus: {
+                lastExecutionDate: '2019-02-12T21:01:22.479Z',
+                status: 'pending',
+              },
+              params: {},
+              throttle: null,
+              notifyWhen: null,
+              actions: [],
+              revision: 1,
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'tags',
+            operation: 'add',
+            value: ['test-1'],
+          },
+        ],
+      });
+
+      expect(rulesClientParams.getProfileUid).toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            attributes: expect.objectContaining({
+              updatedByProfileUid: 'u_profile_1',
             }),
           }),
         ],
@@ -628,6 +683,7 @@ describe('bulkEdit()', () => {
               ],
               apiKey: null,
               apiKeyOwner: null,
+              apiKeyOwnerProfileUid: null,
               apiKeyCreatedByUser: null,
               isSnoozedUntil: null,
               meta: { versionApiKeyLastmodified: 'v8.2.0' },
@@ -635,6 +691,7 @@ describe('bulkEdit()', () => {
               enabled: false,
               updatedAt: '2019-02-12T21:01:22.479Z',
               updatedBy: 'elastic',
+              updatedByProfileUid: null,
               tags: ['foo'],
               revision: 1,
             },
@@ -854,6 +911,7 @@ describe('bulkEdit()', () => {
               ],
               apiKey: null,
               apiKeyOwner: null,
+              apiKeyOwnerProfileUid: null,
               apiKeyCreatedByUser: null,
               isSnoozedUntil: null,
               meta: { versionApiKeyLastmodified: 'v8.2.0' },
@@ -861,6 +919,7 @@ describe('bulkEdit()', () => {
               enabled: false,
               updatedAt: '2019-02-12T21:01:22.479Z',
               updatedBy: 'elastic',
+              updatedByProfileUid: null,
               tags: ['foo'],
               revision: 1,
             },
@@ -1003,6 +1062,7 @@ describe('bulkEdit()', () => {
               ],
               apiKey: null,
               apiKeyOwner: null,
+              apiKeyOwnerProfileUid: null,
               apiKeyCreatedByUser: null,
               isSnoozedUntil: null,
               meta: { versionApiKeyLastmodified: 'v8.2.0' },
@@ -1010,6 +1070,7 @@ describe('bulkEdit()', () => {
               enabled: false,
               updatedAt: '2019-02-12T21:01:22.479Z',
               updatedBy: 'elastic',
+              updatedByProfileUid: null,
               tags: ['foo'],
               revision: 1,
             },
@@ -1176,6 +1237,7 @@ describe('bulkEdit()', () => {
               },
               apiKey: null,
               apiKeyOwner: null,
+              apiKeyOwnerProfileUid: null,
               apiKeyCreatedByUser: null,
               isSnoozedUntil: null,
               meta: { versionApiKeyLastmodified: 'v8.2.0' },
@@ -1183,6 +1245,7 @@ describe('bulkEdit()', () => {
               enabled: false,
               updatedAt: '2019-02-12T21:01:22.479Z',
               updatedBy: 'elastic',
+              updatedByProfileUid: null,
               tags: ['foo'],
               revision: 1,
             },
@@ -2825,7 +2888,10 @@ describe('bulkEdit()', () => {
           },
         ],
       });
-      expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/my rule name');
+      expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith(
+        'Alerting: myType/my rule name',
+        false
+      );
     });
 
     describe('set by the user when authenticated using api keys', () => {
@@ -3009,6 +3075,51 @@ describe('bulkEdit()', () => {
       );
       expect(result.errors[0]).toHaveProperty('rule.id', '1');
       expect(result.errors[0]).toHaveProperty('rule.name', 'my rule name');
+    });
+
+    test('runs the rule type params authorizer', async () => {
+      // The generic bulk-edit path authorizes params; a throwing authorizer surfaces
+      // as an error for the rule.
+      ruleTypeRegistry.get.mockReturnValue({
+        id: '123',
+        name: 'Test',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        recoveryActionGroup: RecoveredActionGroup,
+        validate: {
+          params: schema.object({}, { unknowns: 'allow' }),
+        },
+        authorize: {
+          params: {
+            authorize: async () => {
+              throw new Error('Not authorized to edit params');
+            },
+          },
+        },
+        async executor() {
+          return { state: {} };
+        },
+        producer: 'alerts',
+        solution: 'stack',
+        category: 'test',
+        validLegacyConsumers: [],
+      });
+
+      const result = await rulesClient.bulkEdit({
+        filter: 'alert.attributes.tags: "APM"',
+        operations: [
+          {
+            field: 'tags',
+            operation: 'add',
+            value: ['test-1'],
+          },
+        ],
+      });
+
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]).toHaveProperty('message', 'Not authorized to edit params');
     });
 
     test('should validate mutatedParams for rules', async () => {

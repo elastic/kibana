@@ -47,13 +47,8 @@ import {
   startEndpointHost,
   stopEndpointHost,
 } from '../../../../scripts/endpoint/common/endpoint_host_services';
-import type { IndexedEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_endpoint_policy_response';
-import {
-  deleteIndexedEndpointPolicyResponse,
-  indexEndpointPolicyResponse,
-} from '../../../../common/endpoint/data_loaders/index_endpoint_policy_response';
-import type { ActionDetails, HostPolicyResponse } from '../../../../common/endpoint/types';
 import type {
+  HostActionResponse,
   IndexEndpointHostsCyTaskOptions,
   LoadUserAndRoleCyTaskOptions,
   CreateUserAndRoleCyTaskOptions,
@@ -282,31 +277,17 @@ export const dataLoaders = (
       return deleteIndexedEndpointRuleAlerts(esClient, data, log);
     },
 
-    indexEndpointPolicyResponse: async (
-      policyResponse: HostPolicyResponse
-    ): Promise<IndexedEndpointPolicyResponse> => {
-      const { esClient } = await stackServicesPromise;
-      return indexEndpointPolicyResponse(esClient, policyResponse);
-    },
-
-    deleteIndexedEndpointPolicyResponse: async (
-      indexedData: IndexedEndpointPolicyResponse
-    ): Promise<null> => {
-      const { esClient } = await stackServicesPromise;
-      return deleteIndexedEndpointPolicyResponse(esClient, indexedData).then(() => null);
-    },
-
-    sendHostActionResponse: async (data: {
-      action: ActionDetails;
-      state: { state?: 'success' | 'failure' };
-    }): Promise<null> => {
+    sendHostActionResponse: async (data: HostActionResponse): Promise<null> => {
       const { esClient } = await stackServicesPromise;
       const fleetResponse = await sendFleetActionResponse(esClient, data.action, {
         state: data.state.state,
       });
 
       if (!fleetResponse.error) {
-        await sendEndpointActionResponse(esClient, data.action, { state: data.state.state });
+        await sendEndpointActionResponse(esClient, data.action, {
+          state: data.state.state,
+          responseCode: data.responseCode,
+        });
       }
 
       return null;

@@ -16,10 +16,13 @@ import {
   createDispatcherPipelineInput,
   createDispatcherPipelineState,
   createRule,
+  createStepLogger,
 } from '../fixtures/test_utils';
 import type { ActionPolicy, ActionPolicyId, DispatchFailure, Rule, RuleId } from '../types';
 import { StoreExecutionHistoryStep } from './store_execution_history_step';
 import { DISPATCH_FAILURE_REASONS } from './constants';
+
+const logger = createStepLogger();
 
 describe('StoreExecutionHistoryStep', () => {
   let eventLogger: ReturnType<typeof eventLoggerMock.create>;
@@ -68,7 +71,8 @@ describe('StoreExecutionHistoryStep', () => {
           ['group-1', ['exec-a']],
           ['group-2', ['exec-b']],
         ]),
-      })
+      }),
+      logger
     );
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
@@ -126,7 +130,8 @@ describe('StoreExecutionHistoryStep', () => {
           [policyA.id, policyA],
           [policyB.id, policyB],
         ]),
-      })
+      }),
+      logger
     );
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
@@ -153,7 +158,8 @@ describe('StoreExecutionHistoryStep', () => {
         dispatchable: [episode],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
         policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-      })
+      }),
+      logger
     );
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
@@ -186,7 +192,8 @@ describe('StoreExecutionHistoryStep', () => {
           [ruleA.id, ruleA],
           [ruleB.id, ruleB],
         ]),
-      })
+      }),
+      logger
     );
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
@@ -234,7 +241,8 @@ describe('StoreExecutionHistoryStep', () => {
         dispatchable: [dispatched, throttledEp, unmatchedEp],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
         policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-      })
+      }),
+      logger
     );
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
@@ -262,7 +270,8 @@ describe('StoreExecutionHistoryStep', () => {
         dispatchable: [dispatched, throttledEp, unmatchedEp],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
         policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-      })
+      }),
+      logger
     );
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
@@ -273,7 +282,7 @@ describe('StoreExecutionHistoryStep', () => {
   });
 
   it('short-circuits when there is nothing to record', async () => {
-    const result = await step.execute(createDispatcherPipelineState({}));
+    const result = await step.execute(createDispatcherPipelineState({}), logger);
 
     expect(result).toEqual({ type: 'continue' });
     expect(eventLogger.logEvent).not.toHaveBeenCalled();
@@ -297,7 +306,8 @@ describe('StoreExecutionHistoryStep', () => {
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
         policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
         dispatchedExecutions: new Map([['group-1', ['exec-a']]]),
-      })
+      }),
+      logger
     );
 
     const actions = eventLogger.logEvent.mock.calls.map(([event]) => event?.event?.action);
@@ -327,7 +337,8 @@ describe('StoreExecutionHistoryStep', () => {
           [ruleA.id, ruleA],
           [ruleB.id, ruleB],
         ]),
-      })
+      }),
+      logger
     );
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
@@ -382,10 +393,25 @@ describe('StoreExecutionHistoryStep', () => {
       message: 'boom',
     };
 
-    await step.execute(createDispatcherPipelineState({ dispatchFailures: [failure] }));
+    await step.execute(createDispatcherPipelineState({ dispatchFailures: [failure] }), logger);
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls[0][0]?.event?.action).toBe('dispatch_failed');
+  });
+
+  it('emits a dispatch_failed event with the license_not_supported reason', async () => {
+    const failure = createDispatchFailure({
+      reason: DISPATCH_FAILURE_REASONS.LICENSE_NOT_SUPPORTED,
+      message: 'license not supported',
+    });
+
+    await step.execute(createDispatcherPipelineState({ dispatchFailures: [failure] }), logger);
+
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+    const [[event]] = eventLogger.logEvent.mock.calls;
+    expect(event?.event).toEqual({ action: 'dispatch_failed', outcome: 'failure' });
+    expect(event?.error?.message).toBe('license not supported');
+    expect(event?.kibana?.alerting_v2?.dispatcher?.failure_reason).toBe('license_not_supported');
   });
 
   it('sets namespace and space_ids on dispatch_failed events for non-default spaces', async () => {
@@ -404,7 +430,8 @@ describe('StoreExecutionHistoryStep', () => {
       createDispatcherPipelineState({
         dispatchFailures: [failure],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
-      })
+      }),
+      logger
     );
 
     const [[event]] = eventLogger.logEvent.mock.calls;
@@ -428,7 +455,10 @@ describe('StoreExecutionHistoryStep', () => {
       message: 'boom',
     };
 
-    await step.execute(createDispatcherPipelineState({ dispatchFailures: [failure], rules }));
+    await step.execute(
+      createDispatcherPipelineState({ dispatchFailures: [failure], rules }),
+      logger
+    );
 
     const [[event]] = eventLogger.logEvent.mock.calls;
     const refs = event?.kibana?.saved_objects ?? [];
@@ -454,7 +484,8 @@ describe('StoreExecutionHistoryStep', () => {
         dispatchable: [episode],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
         policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-      })
+      }),
+      logger
     );
 
     const [[event]] = eventLogger.logEvent.mock.calls;
@@ -492,7 +523,8 @@ describe('StoreExecutionHistoryStep', () => {
         dispatchable: [episode],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
         policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-      })
+      }),
+      logger
     );
 
     const [[event]] = eventLogger.logEvent.mock.calls;
@@ -507,11 +539,12 @@ describe('StoreExecutionHistoryStep', () => {
       createDispatcherPipelineState({
         input: createDispatcherPipelineInput({
           startedAt: new Date('2027-06-01T12:34:56.789Z'),
-          previousStartedAt: new Date('2027-06-01T12:00:00.000Z'),
+          eventWatermark: new Date('2027-06-01T12:00:00.000Z'),
         }),
         dispatchable: [episode],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
-      })
+      }),
+      logger
     );
 
     const [[event]] = eventLogger.logEvent.mock.calls;
@@ -539,7 +572,8 @@ describe('StoreExecutionHistoryStep', () => {
         dispatchable: episodes,
         rules,
         policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-      })
+      }),
+      logger
     );
 
     const [[event]] = eventLogger.logEvent.mock.calls;
@@ -569,7 +603,8 @@ describe('StoreExecutionHistoryStep', () => {
         dispatchable: [episode],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
         policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-      })
+      }),
+      logger
     );
 
     const [[event]] = eventLogger.logEvent.mock.calls;
@@ -607,7 +642,8 @@ describe('StoreExecutionHistoryStep', () => {
           dispatchFailures: [failure],
           rules: new Map<RuleId, Rule>([[rule.id, rule]]),
           policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-        })
+        }),
+        logger
       );
 
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
@@ -647,7 +683,8 @@ describe('StoreExecutionHistoryStep', () => {
           dispatchable: [episode],
           dispatchFailures: failures,
           rules: new Map<RuleId, Rule>([[rule.id, rule]]),
-        })
+        }),
+        logger
       );
 
       const actions = eventLogger.logEvent.mock.calls.map(([event]) => event?.event?.action);
@@ -690,7 +727,8 @@ describe('StoreExecutionHistoryStep', () => {
           dispatchFailures: [failure],
           rules: new Map<RuleId, Rule>([[rule.id, rule]]),
           policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-        })
+        }),
+        logger
       );
 
       const calls = eventLogger.logEvent.mock.calls;
@@ -736,7 +774,8 @@ describe('StoreExecutionHistoryStep', () => {
           dispatchFailures: [failure],
           rules: new Map<RuleId, Rule>([[rule.id, rule]]),
           policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-        })
+        }),
+        logger
       );
 
       const calls = eventLogger.logEvent.mock.calls;
@@ -782,7 +821,8 @@ describe('StoreExecutionHistoryStep', () => {
           dispatchFailures: [failure],
           rules: new Map<RuleId, Rule>([[rule.id, rule]]),
           policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
-        })
+        }),
+        logger
       );
 
       const calls = eventLogger.logEvent.mock.calls;
@@ -813,7 +853,8 @@ describe('StoreExecutionHistoryStep', () => {
       await step.execute(
         createDispatcherPipelineState({
           dispatchable: [pdEpisode, ddEpisode],
-        })
+        }),
+        logger
       );
 
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
@@ -836,7 +877,7 @@ describe('StoreExecutionHistoryStep', () => {
         })
       );
 
-      await step.execute(createDispatcherPipelineState({ dispatchable: episodes }));
+      await step.execute(createDispatcherPipelineState({ dispatchable: episodes }), logger);
 
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
       const spaces = eventLogger.logEvent.mock.calls.map(([event]) => event?.kibana?.space_ids);
@@ -854,7 +895,8 @@ describe('StoreExecutionHistoryStep', () => {
       await step.execute(
         createDispatcherPipelineState({
           dispatchable: [pdEpisode],
-        })
+        }),
+        logger
       );
 
       const [[event]] = eventLogger.logEvent.mock.calls;

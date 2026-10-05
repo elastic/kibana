@@ -126,7 +126,7 @@ describe('criticalScoutFilesTouched', () => {
 
   it('returns true for top-level dependency files', () => {
     expect(criticalScoutFilesTouched(['package.json'])).toBe(true);
-    expect(criticalScoutFilesTouched(['yarn.lock'])).toBe(true);
+    expect(criticalScoutFilesTouched(['pnpm-lock.yaml'])).toBe(true);
   });
 
   it('returns true for buildkite Scout step changes', () => {

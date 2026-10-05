@@ -30,7 +30,7 @@ const createAction = (overrides: Partial<AlertAction> = {}): AlertAction => ({
   episode_id: 'episode-1',
   rule_id: 'rule-1',
   space_id: 'default',
-  actor: 'actor-uid-1',
+  actor: { type: 'user', profile_uid: 'actor-uid-1' },
   action_type: 'assign',
   assignee_uid: 'user-uid-1',
   last_series_event_timestamp: '2025-01-01T00:00:00.000Z',
@@ -246,10 +246,32 @@ describe('AlertActionEventPublisher', () => {
       );
     });
 
-    it('preserves a null actor on the envelope (internal / system actor case)', () => {
-      publisher.emitEpisodeActions(request, [createAction({ action_type: 'ack', actor: null })]);
+    it('sets a null actorUid on the envelope for an internal actor', () => {
+      publisher.emitEpisodeActions(request, [
+        createAction({ action_type: 'ack', actor: { type: 'internal' } }),
+      ]);
 
       expect(eventBus.publish).toHaveBeenCalledWith(expect.objectContaining({ actorUid: null }), {
+        request,
+      });
+    });
+
+    it('sets a null actorUid on the envelope for a user actor without a profile uid', () => {
+      publisher.emitEpisodeActions(request, [
+        createAction({ action_type: 'ack', actor: { type: 'user' } }),
+      ]);
+
+      expect(eventBus.publish).toHaveBeenCalledWith(expect.objectContaining({ actorUid: null }), {
+        request,
+      });
+    });
+
+    it('preserves a null episode_id on the envelope (series-level action case)', () => {
+      publisher.emitEpisodeActions(request, [
+        createAction({ action_type: 'snooze', episode_id: null }),
+      ]);
+
+      expect(eventBus.publish).toHaveBeenCalledWith(expect.objectContaining({ episodeId: null }), {
         request,
       });
     });

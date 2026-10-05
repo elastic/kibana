@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
 import { StateGraph, Annotation } from '@langchain/langgraph';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
@@ -12,19 +11,18 @@ import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { extractTextFromMessage } from '../utils/extract_text_from_message';
 import { generateVisualizationEsql } from '../shared/generate_visualization_esql';
+import { formatRepairMessages } from '../shared/repair_messages';
 import { chartTypeRegistry } from './chart_type_registry';
 import type { VisualizationConfig } from './chart_type_registry';
 import {
   GENERATE_ESQL_NODE,
   GENERATE_CONFIG_NODE,
   VALIDATE_CONFIG_NODE,
-  GENERATE_TIME_RANGE_NODE,
   MAX_RETRY_ATTEMPTS,
   type Action,
   type GenerateEsqlAction,
   type GenerateConfigAction,
   type ValidateConfigAction,
-  type GenerateTimeRangeAction,
   isGenerateEsqlAction,
   isGenerateConfigAction,
   isValidateConfigAction,
@@ -33,6 +31,9 @@ import { createGenerateConfigPrompt } from './prompts';
 
 // Regex to extract JSON from markdown code blocks
 const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
+
+const REPAIR_INSTRUCTIONS =
+  'Return the complete corrected response in the same JSON format ("authoring_note" and "config"). Change only what is needed to fix the error.';
 
 const parseConfigAuthoringResponse = (
   responseText: string
@@ -87,7 +88,7 @@ export const getEsqlDataSourceCarriers = (config: unknown): EsqlDataSourceCarrie
  * Handles both single-dataset configs (metric, gauge, tagcloud) and layers-based configs (XY).
  * For XY charts with multiple layers, returns all unique ESQL queries.
  */
-function getExistingEsqlQueries(config: VisualizationConfig | null): string[] {
+export function getExistingEsqlQueries(config: VisualizationConfig | null): string[] {
   if (!config) return [];
 
   const queries: string[] = [];
@@ -109,6 +110,12 @@ const VisualizationStateAnnotation = Annotation.Root({
   schema: Annotation<object>(),
   existingConfig: Annotation<string | undefined>(),
   parsedExistingConfig: Annotation<VisualizationConfig | null>(),
+  /**
+   * Preserve the existing ES|QL queries. Each layer keeps its existing
+   * `data_source` instead of receiving the single resolved query.
+   */
+  preserveESQL: Annotation<boolean>(),
+  applyChartRules: Annotation<boolean>(),
   // internal
   esqlQuery: Annotation<string>(),
   currentAttempt: Annotation<number>({ reducer: (_, newValue) => newValue, default: () => 0 }),
@@ -119,7 +126,6 @@ const VisualizationStateAnnotation = Annotation.Root({
   // outputs
   validatedConfig: Annotation<VisualizationConfig | null>(),
   authoringNote: Annotation<string | null>(),
-  timeRange: Annotation<{ from: string; to: string } | null>(),
   error: Annotation<string | null>(),
 });
 
@@ -129,9 +135,7 @@ export const createVisualizationGraph = async (
   modelProvider: ModelProvider,
   logger: Logger,
   events: ToolEventEmitter,
-  esClient: IScopedClusterClient,
-  includeTimeRange = true,
-  additionalChartConfigInstructions?: string
+  esClient: IScopedClusterClient
 ) => {
   const defaultModel = await modelProvider.getDefaultModel();
 
@@ -197,59 +201,54 @@ export const createVisualizationGraph = async (
       .pop();
     const esqlQuery = lastGenerateEsqlAction?.query || state.esqlQuery;
 
-    // Build context from previous actions for retry attempts
-    const previousActionContext = state.actions
-      .filter((action) => isGenerateConfigAction(action) || isValidateConfigAction(action))
-      .map((action) => {
-        if (isGenerateConfigAction(action)) {
-          return `Previous generation attempt ${action.attempt}: ${
-            action.success ? 'SUCCESS' : `FAILED - ${action.error}`
-          }`;
-        }
-        if (isValidateConfigAction(action)) {
-          return `Validation attempt ${action.attempt}: ${
-            action.success ? 'SUCCESS' : `FAILED - ${action.error}`
-          }`;
-        }
-        return '';
-      })
-      .filter(Boolean)
-      .join('\n');
-
-    const additionalContext = previousActionContext
-      ? `Previous attempts:\n${previousActionContext}\n\nPlease fix the issues mentioned above.`
-      : undefined;
-
-    const prompt = createGenerateConfigPrompt({
-      nlQuery: state.nlQuery,
-      esqlQuery,
-      chartType: state.chartType,
-      schema: state.schema,
-      existingConfig: state.existingConfig,
-      additionalChartConfigInstructions,
-      additionalContext,
-    });
+    // On retries, replay the raw failed responses (without the injected data_source) and their errors.
+    const prompt = [
+      ...createGenerateConfigPrompt({
+        nlQuery: state.nlQuery,
+        esqlQuery,
+        chartType: state.chartType,
+        schema: state.schema,
+        existingConfig: state.existingConfig,
+        parsedExistingConfig: state.parsedExistingConfig,
+        preserveESQL: state.preserveESQL,
+        applyChartRules: state.applyChartRules,
+      }),
+      ...formatRepairMessages({
+        authored: state.actions.filter(isGenerateConfigAction),
+        validated: state.actions.filter(isValidateConfigAction),
+        instructions: REPAIR_INSTRUCTIONS,
+      }),
+    ];
 
     let action: GenerateConfigAction;
+    let responseText: string | undefined;
     try {
       // Invoke model without schema validation
       const response = await defaultModel.chatModel.invoke(prompt);
-      const responseText = extractTextFromMessage(response);
+      responseText = extractTextFromMessage(response);
       const { config: configResponse, authoringNote } = parseConfigAuthoringResponse(responseText);
 
-      // Pin the validated ES|QL query before config validation. ES|QL generation owns the query;
-      // config generation only binds columns from it.
-      if (esqlQuery) {
-        for (const carrier of getEsqlDataSourceCarriers(configResponse)) {
+      // Pin the ES|QL query before config validation. ES|QL generation owns the query,
+      // and config generation only binds columns from it. Preserving ES|QL keeps
+      // each layer's existing data_source instead, so layers with different queries keep them.
+      const existingCarriers = state.preserveESQL
+        ? getEsqlDataSourceCarriers(state.parsedExistingConfig)
+        : [];
+      getEsqlDataSourceCarriers(configResponse).forEach((carrier, index) => {
+        const existingDataSource = (existingCarriers[index] ?? existingCarriers[0])?.data_source;
+        if (existingDataSource) {
+          carrier.data_source = existingDataSource;
+        } else if (esqlQuery) {
           carrier.data_source = { type: 'esql', query: esqlQuery };
         }
-      }
+      });
 
       action = {
         type: 'generate_config',
         success: true,
         config: configResponse,
         authoringNote,
+        response: responseText,
         attempt,
       };
     } catch (error) {
@@ -262,6 +261,7 @@ export const createVisualizationGraph = async (
       action = {
         type: 'generate_config',
         success: false,
+        response: responseText,
         attempt,
         error: errorMessage,
       };
@@ -286,7 +286,8 @@ export const createVisualizationGraph = async (
         type: 'validate_config',
         success: false,
         attempt,
-        error: 'No configuration found to validate',
+        // Surface why generation failed (e.g. unparsable JSON) instead of a generic message.
+        error: lastGenerateAction?.error ?? 'No configuration found to validate',
       };
       return {
         actions: [action],
@@ -336,88 +337,10 @@ export const createVisualizationGraph = async (
     };
   };
 
-  // Node: Generate time range - ask the LLM to determine the appropriate time range
-  const generateTimeRangeNode = async (state: VisualizationState) => {
-    logger.debug('Generating time range for visualization');
-
-    const lastGenerateEsqlAction = [...state.actions]
-      .reverse()
-      .find((action): action is GenerateEsqlAction => action.type === 'generate_esql');
-    const esqlQuery = lastGenerateEsqlAction?.query || state.esqlQuery;
-
-    let action: GenerateTimeRangeAction;
-    try {
-      const timeRangeModel = defaultModel.chatModel.withStructuredOutput(
-        z.object({
-          from: z
-            .string()
-            .describe(
-              'Start of the time range in Elasticsearch date math format (e.g., "now-24h", "now-7d", "now-1M")'
-            ),
-          to: z
-            .string()
-            .describe('End of the time range in Elasticsearch date math format (e.g., "now")'),
-        }),
-        { name: 'determine_time_range' }
-      );
-
-      const result = await timeRangeModel.invoke([
-        [
-          'system',
-          `You are an expert at determining appropriate time ranges for Elasticsearch visualizations.
-Given a user's natural language query and the ES|QL query that was generated, determine the most appropriate time range for the visualization.
-
-Use Elasticsearch date math expressions for both "from" and "to" values:
-- "now-15m" for last 15 minutes
-- "now-1h" for last hour
-- "now-24h" for last 24 hours
-- "now-7d" for last 7 days
-- "now-30d" for last 30 days
-- "now-1y" for last year
-- "now" for the current time
-
-The "to" value should almost always be "now" unless the user specifies a specific end time.
-Choose a "from" value that best matches the intent of the query. If unsure, default to "now-24h".`,
-        ],
-        [
-          'human',
-          `User query: ${state.nlQuery}
-
-ES|QL query: ${esqlQuery}
-
-What is the most appropriate time range for this visualization?`,
-        ],
-      ]);
-
-      logger.debug(`Generated time range: ${result.from} to ${result.to}`);
-      action = {
-        type: 'generate_time_range',
-        success: true,
-        timeRange: { from: result.from, to: result.to },
-      };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.warn(`Failed to generate time range, defaulting to now-24h: ${errorMessage}`);
-      action = {
-        type: 'generate_time_range',
-        success: false,
-        timeRange: { from: 'now-24h', to: 'now' },
-        error: errorMessage,
-      };
-    }
-
-    return {
-      actions: [action],
-    };
-  };
-
   // Node: Finalize - extract outputs from actions
   const finalizeNode = async (state: VisualizationState) => {
     const lastValidateAction = [...state.actions].reverse().find(isValidateConfigAction);
     const lastGenerateEsqlAction = [...state.actions].reverse().find(isGenerateEsqlAction);
-    const lastTimeRangeAction = [...state.actions]
-      .reverse()
-      .find((action): action is GenerateTimeRangeAction => action.type === 'generate_time_range');
 
     // Surface an ES|QL resolution failure (a query that was never generated, so
     // no config was attempted) so the caller gets the real root cause.
@@ -433,7 +356,6 @@ What is the most appropriate time range for this visualization?`,
       authoringNote: lastValidateAction?.success ? lastValidateAction.authoringNote ?? null : null,
       error: lastValidateAction?.success ? null : lastValidateAction?.error || esqlError,
       esqlQuery: lastGenerateEsqlAction?.query || state.esqlQuery,
-      timeRange: lastTimeRangeAction?.timeRange ?? null,
     };
   };
 
@@ -441,14 +363,8 @@ What is the most appropriate time range for this visualization?`,
   const shouldRetryRouter = (state: VisualizationState): string => {
     const lastValidateAction = [...state.actions].reverse().find(isValidateConfigAction);
 
-    // Success case - optionally generate a time range before finalizing
     if (lastValidateAction?.success) {
-      if (includeTimeRange) {
-        logger.debug('Configuration validated successfully, generating time range');
-        return GENERATE_TIME_RANGE_NODE;
-      }
-
-      logger.debug('Configuration validated successfully, skipping time range generation');
+      logger.debug('Configuration validated successfully, finalizing');
       return 'finalize';
     }
 
@@ -497,7 +413,6 @@ What is the most appropriate time range for this visualization?`,
     .addNode(GENERATE_ESQL_NODE, generateESQLNode)
     .addNode(GENERATE_CONFIG_NODE, generateConfigNode)
     .addNode(VALIDATE_CONFIG_NODE, validateConfigNode)
-    .addNode(GENERATE_TIME_RANGE_NODE, generateTimeRangeNode)
     .addNode('finalize', finalizeNode)
     // Add edges
     .addConditionalEdges('__start__', shouldGenerateESQLRouter, {
@@ -511,10 +426,8 @@ What is the most appropriate time range for this visualization?`,
     .addEdge(GENERATE_CONFIG_NODE, VALIDATE_CONFIG_NODE)
     .addConditionalEdges(VALIDATE_CONFIG_NODE, shouldRetryRouter, {
       [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,
-      [GENERATE_TIME_RANGE_NODE]: GENERATE_TIME_RANGE_NODE,
       finalize: 'finalize',
     })
-    .addEdge(GENERATE_TIME_RANGE_NODE, 'finalize')
     .addEdge('finalize', '__end__')
     .compile();
 

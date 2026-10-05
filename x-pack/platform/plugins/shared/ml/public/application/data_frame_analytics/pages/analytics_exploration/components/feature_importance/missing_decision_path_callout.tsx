@@ -6,16 +6,18 @@
  */
 
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 export const MissingDecisionPathCallout = () => {
   return (
-    <EuiCallOut color={'warning'}>
-      <FormattedMessage
-        id="xpack.ml.dataframe.analytics.explorationResults.regressionDecisionPathDataMissingCallout"
-        defaultMessage="No decision path data available."
-      />
-    </EuiCallOut>
+    <KbnWarningCallout
+      title={
+        <FormattedMessage
+          id="xpack.ml.dataframe.analytics.explorationResults.regressionDecisionPathDataMissingCallout"
+          defaultMessage="No decision path data available."
+        />
+      }
+    />
   );
 };

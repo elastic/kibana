@@ -19,3 +19,8 @@ export const MAX_VALIDATION_FIELDS = 100;
  * Bound on the number of concurrent backend queries fanned out per validation request.
  */
 export const MAX_CONCURRENT_INDEX_QUERIES = 10;
+
+/**
+ * Maximum length of the project routing string accepted by the log analysis validation APIs.
+ */
+export const MAX_PROJECT_ROUTING_LENGTH = 1024;

@@ -30,6 +30,12 @@ import type {
  */
 const MAX_DOWNLOAD_FILE_SIZE_BYTES = 128 * 1024;
 
+// S3 limits: bucket names are 3-63 characters, object keys up to 1024 bytes.
+const BUCKET_NAME_MAX_LENGTH = 63;
+const OBJECT_KEY_MAX_LENGTH = 1024;
+const REGION_MAX_LENGTH = 64;
+const CONTINUATION_TOKEN_MAX_LENGTH = 2048;
+
 export const AmazonS3: ConnectorSpec = {
   metadata: {
     id: '.amazon_s3',
@@ -65,18 +71,21 @@ export const AmazonS3: ConnectorSpec = {
   actions: {
     listBuckets: {
       isTool: true,
+      scope: 'read',
       description:
         'List available Amazon S3 buckets. Use this to discover which buckets exist before listing objects or downloading files.',
       input: lazySchema(() =>
         z.object({
           region: z
             .string()
+            .max(REGION_MAX_LENGTH)
             .optional()
             .describe(
               'The AWS region to list buckets from. If not specified, buckets from the default region in the authorization credentials will be listed. Example: "us-east-1".'
             ),
           prefix: z
             .string()
+            .max(BUCKET_NAME_MAX_LENGTH)
             .optional()
             .describe(
               'An optional prefix to filter bucket names. Only buckets whose names start with this prefix will be returned. Example: "my-app-" to find "my-app-logs" and "my-app-data".'
@@ -110,6 +119,7 @@ export const AmazonS3: ConnectorSpec = {
 
     listBucketObjects: {
       isTool: true,
+      scope: 'read',
       description:
         'List objects (files and folders) in an Amazon S3 bucket. Supports filtering by prefix and pagination via continuation tokens.',
       input: lazySchema(() =>
@@ -117,21 +127,25 @@ export const AmazonS3: ConnectorSpec = {
           bucket: z
             .string()
             .min(1)
+            .max(BUCKET_NAME_MAX_LENGTH)
             .describe('The name of the S3 bucket to list objects from. Example: "my-app-data".'),
           region: z
             .string()
+            .max(REGION_MAX_LENGTH)
             .optional()
             .describe(
               'The region of the S3 bucket. If not specified, will attempt to auto-detect. Example: "us-west-2".'
             ),
           prefix: z
             .string()
+            .max(OBJECT_KEY_MAX_LENGTH)
             .optional()
             .describe(
               'An optional prefix to filter object keys (file paths) in the bucket. Use this to list objects under a specific folder path. Example: "logs/2024/" to list only objects in that path.'
             ),
           continuationToken: z
             .string()
+            .max(CONTINUATION_TOKEN_MAX_LENGTH)
             .optional()
             .describe(
               'The continuation token for retrieving the next page of results. Obtain this from the "nextContinuationToken" field of a previous response when "isTruncated" is true. Omit on the first request.'
@@ -161,6 +175,7 @@ export const AmazonS3: ConnectorSpec = {
 
     downloadFile: {
       isTool: true,
+      scope: 'read',
       description:
         'Download a file from an Amazon S3 bucket. If the file content is small enough, returns the file content directly. If the file exceeds the size limit, returns a pre-signed URL for direct download from S3 instead.',
       input: lazySchema(() =>
@@ -168,12 +183,14 @@ export const AmazonS3: ConnectorSpec = {
           bucket: z
             .string()
             .min(1)
+            .max(BUCKET_NAME_MAX_LENGTH)
             .describe(
               'The name of the S3 bucket containing the file to download. Example: "my-app-data".'
             ),
           key: z
             .string()
             .min(1)
+            .max(OBJECT_KEY_MAX_LENGTH)
             .describe(
               'The key (full path) of the file to download from the S3 bucket. Example: "reports/2024/summary.pdf".'
             ),

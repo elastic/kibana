@@ -9,55 +9,29 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { TestProviders } from '../../common/mock';
-import { KibanaServices } from '../../common/lib/kibana';
 import { CasesPageLayout } from './cases_page_layout';
 import { CasesPageBody } from './cases_page_body';
 
+const renderBody = (pathname: string) =>
+  render(
+    <TestProviders>
+      <MemoryRouter initialEntries={[pathname]}>
+        <CasesPageLayout basePath="/cases">
+          <CasesPageBody>{'Cases body'}</CasesPageBody>
+        </CasesPageLayout>
+      </MemoryRouter>
+    </TestProviders>
+  );
+
 describe('CasesPageBody', () => {
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
-  it('renders compact body padding when the route redesign is enabled', () => {
-    jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
-      casesRedesign: {
-        list: true,
-        details: false,
-        settings: false,
-      },
-    } as ReturnType<typeof KibanaServices.getConfig>);
-
-    render(
-      <TestProviders>
-        <MemoryRouter initialEntries={['/cases']}>
-          <CasesPageLayout basePath="/cases">
-            <CasesPageBody>{'Cases body'}</CasesPageBody>
-          </CasesPageLayout>
-        </MemoryRouter>
-      </TestProviders>
-    );
+  it('renders compact body padding on a standard cases route', () => {
+    renderBody('/cases');
 
     expect(screen.getByTestId('casesPageBody')).toBeInTheDocument();
   });
 
-  it('does not add a body wrapper for legacy routes', () => {
-    jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
-      casesRedesign: {
-        list: false,
-        details: false,
-        settings: false,
-      },
-    } as ReturnType<typeof KibanaServices.getConfig>);
-
-    render(
-      <TestProviders>
-        <MemoryRouter initialEntries={['/cases']}>
-          <CasesPageLayout basePath="/cases">
-            <CasesPageBody>{'Cases body'}</CasesPageBody>
-          </CasesPageLayout>
-        </MemoryRouter>
-      </TestProviders>
-    );
+  it('does not add a body wrapper for full height routes', () => {
+    renderBody('/cases/configure/templates/create');
 
     expect(screen.queryByTestId('casesPageBody')).not.toBeInTheDocument();
     expect(screen.getByText('Cases body')).toBeInTheDocument();

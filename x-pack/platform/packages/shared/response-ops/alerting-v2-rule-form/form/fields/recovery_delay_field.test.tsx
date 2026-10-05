@@ -160,6 +160,7 @@ describe('RecoveryDelayField', () => {
       {
         wrapper: createFormWrapper({
           kind: 'alert',
+          recovery: { strategy: 'no_breach' },
           stateTransitionAlertDelayMode: 'breaches',
           stateTransitionRecoveryDelayMode: 'recoveries',
           stateTransition: {
@@ -182,8 +183,40 @@ describe('RecoveryDelayField', () => {
     expect(values.stateTransition?.pendingCount).toBe(2);
 
     expect(mapFormValuesToUpdateRequest(values).state_transition).toEqual({
-      pending_count: 2,
-      recovering_count: 0,
+      pending: { count: 2 },
+      recovering: { count: 0 },
     });
+  });
+
+  it('clears a recovering operator when the recovery delay mode drops a threshold', () => {
+    getFormValues = undefined;
+    render(
+      <>
+        <CaptureFormGetValues />
+        <RecoveryDelayField />
+      </>,
+      {
+        wrapper: createFormWrapper({
+          kind: 'alert',
+          recovery: { strategy: 'no_breach' },
+          stateTransitionRecoveryDelayMode: 'duration',
+          stateTransition: {
+            pendingCount: 3,
+            pendingTimeframe: '5m',
+            pendingOperator: 'and',
+            recoveringCount: 4,
+            recoveringTimeframe: '20m',
+            recoveringOperator: 'or',
+          },
+        }),
+      }
+    );
+
+    fireEvent.click(within(screen.getByTestId('recoveryDelayFormRow')).getByText('Recoveries'));
+
+    const values = getFormValues!();
+    expect(values.stateTransition?.recoveringOperator).toBeNull();
+    expect(values.stateTransition?.recoveringTimeframe).toBeNull();
+    expect(values.stateTransition?.pendingOperator).toBe('and');
   });
 });
