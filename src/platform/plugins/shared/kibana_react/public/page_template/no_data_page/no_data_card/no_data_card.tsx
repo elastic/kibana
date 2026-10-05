@@ -32,14 +32,6 @@ export const NoDataCard: FunctionComponent<NoDataPageActions> = ({
 }) => {
   const hasAction = href !== undefined || onClick !== undefined;
 
-  // A string `button`, or no `button` at all when there's an href/onClick to wire up (the
-  // card's `title` is used as the label), renders a real EuiButton in the footer, so
-  // href/onClick/isDisabled/target/rel live on it instead of the card. A custom `button` node
-  // is rendered as-is and owns its own interactivity, so none of those props reach the card
-  // either way: a card-level href/onClick alongside a footer control would make the whole card
-  // an interactive wrapper around it, which is invalid, doubly-focusable nesting
-  // (@elastic/eui/no-nested-interactive-element). With no `button` and no action, there's
-  // nothing to wire up a control for, so the card stays purely informational.
   const footer =
     typeof button !== 'string' && typeof button !== 'undefined' ? (
       button
