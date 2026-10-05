@@ -23,7 +23,7 @@ xpack.features.overrides:
   ### hidden via config/serverless.yml and are granted through Dashboard.
   visualize.hidden: true
   maps.hidden: true
-  ### Alerting V2 features are hidden in Role management since ES|QL alerting is Observability-only.
+  ### Alerting V2 is Observability-only, so its features are hidden in Role management.
   alerting_v2_rules.hidden: true
   alerting_v2_alerts.hidden: true
   alerting_v2_action_policies.hidden: true

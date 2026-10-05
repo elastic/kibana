@@ -60,7 +60,7 @@ xpack.features.overrides:
   ml.category: "management"
   ### Stack Rules feature is moved from Analytics category to the Search one.
   stackAlerts.category: "enterpriseSearch"
-  ### Alerting V2 features are hidden in Role management since ES|QL alerting is Observability-only.
+  ### Alerting V2 is Observability-only, so its features are hidden in Role management.
   alerting_v2_rules.hidden: true
   alerting_v2_alerts.hidden: true
   alerting_v2_action_policies.hidden: true
