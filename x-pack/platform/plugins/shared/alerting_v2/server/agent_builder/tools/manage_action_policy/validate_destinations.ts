@@ -9,6 +9,8 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ActionPolicyDestination } from '@kbn/alerting-v2-schemas';
 import type { ValidateWorkflowResponseDto } from '@kbn/workflows';
+import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
+import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 import {
   ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
   KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX,
@@ -65,6 +67,8 @@ export interface ValidateDestinationsDeps {
     request: KibanaRequest
   ) => Promise<ValidateWorkflowResponseDto>;
   request?: KibanaRequest;
+  /** Used to make workflow-validation-service failures observable; optional for tests. */
+  logger?: LoggerServiceContract;
 }
 
 export interface WorkflowDestinationDiagnostic {
@@ -78,17 +82,16 @@ export interface ValidateDestinationsResult {
   diagnostics: WorkflowDestinationDiagnostic[];
 }
 
-function extractTriggersFromYaml(yaml: string): ParsedTrigger[] | undefined {
+function findManualTrigger(yaml: string): ParsedTrigger | undefined {
   const parsed = parseYamlToJSONWithoutValidation(yaml);
   if (!parsed.success) {
     return undefined;
   }
   const triggers = (parsed.json as { triggers?: unknown } | undefined)?.triggers;
-  return Array.isArray(triggers) ? (triggers as ParsedTrigger[]) : undefined;
-}
-
-function hasManualTrigger(triggers: ParsedTrigger[] | undefined): boolean {
-  return Boolean(triggers?.some((trigger) => trigger.type === 'manual'));
+  if (!Array.isArray(triggers)) {
+    return undefined;
+  }
+  return (triggers as ParsedTrigger[]).find((trigger) => trigger.type === 'manual');
 }
 
 /**
@@ -100,9 +103,8 @@ function hasManualTrigger(triggers: ParsedTrigger[] | undefined): boolean {
  * validator has no schema to check `{{ inputs.payload.* }}` Liquid
  * expressions against, so typos like `episodez` would go undetected.
  */
-function manualTriggerDeclaresPayloadInputRef(triggers: ParsedTrigger[] | undefined): boolean {
-  const manualTrigger = triggers?.find((trigger) => trigger.type === 'manual');
-  const inputs = manualTrigger?.inputs as { properties?: Record<string, unknown> } | undefined;
+function manualTriggerDeclaresPayloadInputRef(manualTrigger: ParsedTrigger): boolean {
+  const inputs = manualTrigger.inputs as { properties?: Record<string, unknown> } | undefined;
   const payload = inputs?.properties?.payload;
   if (!payload) return false;
   const resolved = getOrResolveObject(payload, KIBANA_DEFINITIONS_ROOT);
@@ -123,11 +125,16 @@ function manualTriggerDeclaresPayloadInputRef(triggers: ParsedTrigger[] | undefi
 async function collectWorkflowDiagnostics(
   destinationId: string,
   yaml: string,
-  { validateWorkflow, request, spaceId }: ValidateDestinationsDeps
+  {
+    validateWorkflow,
+    request,
+    spaceId,
+    logger,
+  }: Pick<ValidateDestinationsDeps, 'validateWorkflow' | 'request' | 'spaceId' | 'logger'>
 ): Promise<WorkflowDestinationDiagnostic[]> {
-  const triggers = extractTriggersFromYaml(yaml);
+  const manualTrigger = findManualTrigger(yaml);
 
-  if (!hasManualTrigger(triggers)) {
+  if (!manualTrigger) {
     throw new ActionPolicyOperationValidationError(
       `Destination workflow "${destinationId}" does not have a "manual" trigger. ` +
         `Action policy destinations must declare \`triggers: - type: manual\` to receive dispatches.`
@@ -136,7 +143,7 @@ async function collectWorkflowDiagnostics(
 
   const diagnostics: WorkflowDestinationDiagnostic[] = [];
 
-  if (!manualTriggerDeclaresPayloadInputRef(triggers)) {
+  if (!manualTriggerDeclaresPayloadInputRef(manualTrigger)) {
     diagnostics.push({
       destinationId,
       severity: 'warning',
@@ -162,9 +169,16 @@ async function collectWorkflowDiagnostics(
           }`,
         });
       }
-    } catch {
+    } catch (error) {
       // Best-effort: the workflow validation service being unavailable should
-      // not block composing the action policy.
+      // not block composing the action policy, but the failure is still
+      // worth surfacing for debugging.
+      logger?.warn({
+        message: `Workflow validation service call failed for destination "${destinationId}"`,
+        code: ALERTING_LOG_CODES.AGENT_BUILDER_ACTION_POLICY_WORKFLOW_VALIDATION_FAILED,
+        labels: { space_id: spaceId },
+        error,
+      });
     }
   }
 
@@ -205,13 +219,15 @@ export async function validateDestinations(
   }
 
   const diagnostics: WorkflowDestinationDiagnostic[] = [];
+  const collectDiagnosticsIfYaml = async (destinationId: string, yaml: string | undefined) => {
+    if (yaml) {
+      diagnostics.push(...(await collectWorkflowDiagnostics(destinationId, yaml, deps)));
+    }
+  };
 
   for (const dest of destinations) {
     if (workflowIds.has(dest.id)) {
-      const yaml = workflowIdToYaml.get(dest.id);
-      if (yaml) {
-        diagnostics.push(...(await collectWorkflowDiagnostics(dest.id, yaml, deps)));
-      }
+      await collectDiagnosticsIfYaml(dest.id, workflowIdToYaml.get(dest.id));
       continue;
     }
 
@@ -229,9 +245,7 @@ export async function validateDestinations(
 
     const workflow = await workflowLookup.getWorkflow(dest.id, spaceId);
     if (workflow) {
-      if (workflow.yaml) {
-        diagnostics.push(...(await collectWorkflowDiagnostics(dest.id, workflow.yaml, deps)));
-      }
+      await collectDiagnosticsIfYaml(dest.id, workflow.yaml);
       continue;
     }
 

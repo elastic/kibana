@@ -22,7 +22,7 @@ import {
   executeActionPolicyOperations,
   ActionPolicyOperationValidationError,
 } from './operations';
-import { validateDestinations } from './validate_destinations';
+import { validateDestinations, type WorkflowDestinationDiagnostic } from './validate_destinations';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 
@@ -107,12 +107,7 @@ Use operations[] to:
       // Prefer persisted origin; fall back to draft / pre-assigned id (also in tool result).
       policyId = policyId ?? updatedData.id;
 
-      let workflowDiagnostics: Array<{
-        destinationId: string;
-        severity: 'warning';
-        source: 'structural' | 'workflow-validation';
-        message: string;
-      }> = [];
+      let workflowDiagnostics: WorkflowDestinationDiagnostic[] = [];
 
       if (updatedData.destinations?.length) {
         const findConnectorById = async (
@@ -137,6 +132,7 @@ Use operations[] to:
           spaceId,
           validateWorkflow,
           request,
+          logger,
         });
         workflowDiagnostics = destinationResult.diagnostics;
       }
