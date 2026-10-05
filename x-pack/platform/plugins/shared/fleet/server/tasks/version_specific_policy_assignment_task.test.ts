@@ -748,7 +748,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       expect(mockedGetAgentsByKuery).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
-        expect.objectContaining({ kuery })
+        expect.objectContaining({ kuery, includeStatusRuntimeField: false })
       );
     });
 

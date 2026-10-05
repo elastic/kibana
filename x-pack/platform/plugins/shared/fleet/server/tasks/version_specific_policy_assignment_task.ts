@@ -863,6 +863,10 @@ export class VersionSpecificPolicyAssignmentTask {
           kuery: variantAgentsKuery,
           showInactive: true,
           perPage: 0,
+          // The default `NOT status:unenrolled` filter queries a runtime field, which Elasticsearch
+          // rejects when `search.allow_expensive_queries` is false. The stored `active:true` filter
+          // used instead excludes unenrolled agents just the same.
+          includeStatusRuntimeField: false,
         });
         if (remaining > 0) {
           this.logger.warn(

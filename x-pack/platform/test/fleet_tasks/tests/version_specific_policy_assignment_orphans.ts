@@ -60,6 +60,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
     }
 
     before(async () => {
+      await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
       await es.cluster.putSettings({
         persistent: { 'search.allow_expensive_queries': false },
       });
