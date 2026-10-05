@@ -12845,7 +12845,7 @@ paths:
             format: date-time
             pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
             type: string
-        - description: Alert filter. Narrows events to those referencing at least one of the provided alert ids.
+        - description: Alert filter. Narrows events to those referencing at least one of the provided alert IDs.
           in: query
           name: alert_ids
           required: false
@@ -12884,7 +12884,7 @@ paths:
             maxLength: 256
             minLength: 1
             type: string
-        - description: Explicit rule filter. Narrows events to those referencing at least one of the provided rule ids. Also unions with the search filter if both are provided.
+        - description: Explicit rule filter. Narrows events to those referencing at least one of the provided rule IDs. Also unions with the search filter if both are provided.
           in: query
           name: rule_ids
           required: false
@@ -151430,10 +151430,8 @@ components:
                   enum:
                     - every_time
                   type: string
-              description: The throttle strategy that controls how often notifications are sent.
-              nullable: true
+              description: The throttle strategy.
           required:
-            - strategy
             - interval
         updated_at:
           description: The ISO datetime when the action policy was last updated.
@@ -152105,7 +152103,7 @@ components:
         alert_count:
           type: number
         alerts:
-          description: Alert ids referenced by this event, bounded to 50. Empty when the event references no alerts. Use `alert_count` for the true total.
+          description: Alert IDs referenced by this event, bounded to 50. Empty when the event references no alerts. Use `alert_count` for the true total.
           items:
             type: object
             properties:
@@ -152158,7 +152156,7 @@ components:
           required:
             - id
         rule_count:
-          description: Number of rules referenced by this event after search / rule-filter narrowing. Unlike `total` on a list response this is an exact count, and it may exceed `rules.length` when the embedded array is truncated to the cap.
+          description: Number of rules referenced by this event after search or rule-filter narrowing. Unlike `total` on a list response, this is an exact count and it can exceed `rules.length` when the embedded array is truncated to the cap.
           type: number
         rules:
           description: Rules referenced by this event, bounded to 20. When a search or rule filter narrows the match, this array is intersected with the matched subset server-side. Use `rule_count` for the full count.
