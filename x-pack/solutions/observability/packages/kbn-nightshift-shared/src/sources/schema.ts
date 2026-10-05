@@ -14,6 +14,7 @@ export const MAX_SOURCE_ESQL_LENGTH = 10_000;
 export const MAX_SOURCE_TAGS = 20;
 export const MAX_SOURCE_TAG_LENGTH = 64;
 export const MAX_SOURCES_PER_PAGE = 100;
+const MAX_SOURCE_ID_LENGTH = 255;
 const DEFAULT_SOURCES_PER_PAGE = 25;
 
 export type SourceHealth = 'ok' | 'view_missing' | 'view_drift' | 'unresolvable' | 'unknown';
@@ -110,6 +111,19 @@ export const listSourcesQuerySchema = z.object({
     .default(DEFAULT_SOURCES_PER_PAGE),
   search: z.string().max(MAX_SOURCE_TITLE_LENGTH).optional(),
   enabled: z.stringbool().optional(),
+  ids: z
+    .union([
+      z
+        .string()
+        .min(1)
+        .max(MAX_SOURCE_ID_LENGTH)
+        .transform((id) => [id]),
+      z.array(z.string().min(1).max(MAX_SOURCE_ID_LENGTH)).min(1).max(MAX_SOURCES_PER_PAGE),
+    ])
+    .optional()
+    .describe(
+      'Return only the sources with these ids. Ids that match no source are left out, and paging and the other filters do not apply.'
+    ),
 });
 
 export interface ListSourcesResponse {

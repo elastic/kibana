@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { escapeKuery } from '@kbn/es-query';
 import { hasSameEsql } from '@kbn/streams-schema';
 import {
@@ -197,12 +197,18 @@ export class SourcesClient {
     perPage,
     search,
     enabled,
+    ids,
   }: {
     page: number;
     perPage: number;
     search?: string;
     enabled?: boolean;
+    ids?: string[];
   }): Promise<ListSourcesResponse> {
+    if (ids) {
+      return this.listByIds(ids);
+    }
+
     const filters: string[] = [];
     if (search) {
       filters.push(`${NIGHTSHIFT_SOURCE_SO_TYPE}.attributes.title: ${escapeKuery(search)}*`);
@@ -228,6 +234,24 @@ export class SourcesClient {
       page,
       per_page: perPage,
     };
+  }
+
+  /** Ids that match no source are left out, so a deleted source never fails the whole lookup. */
+  private async listByIds(ids: string[]): Promise<ListSourcesResponse> {
+    const uniqueIds = [...new Set(ids)];
+    const { saved_objects: savedObjects } =
+      await this.deps.soClient.bulkGet<NightshiftSourceAttributes>(
+        uniqueIds.map((id) => ({ type: NIGHTSHIFT_SOURCE_SO_TYPE, id }))
+      );
+    const sources = savedObjects
+      .flatMap((savedObject) =>
+        isSavedObjectErrorResult(savedObject)
+          ? []
+          : [toSource(savedObject.id, savedObject.attributes)]
+      )
+      .sort((a, b) => a.title.localeCompare(b.title));
+
+    return { sources, total: sources.length, page: 1, per_page: uniqueIds.length };
   }
 
   async delete(id: string): Promise<void> {

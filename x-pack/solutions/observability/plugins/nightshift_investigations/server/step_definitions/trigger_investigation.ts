@@ -46,7 +46,7 @@ const inputSchema = z.object({
     .array(z.string().max(MAX_ID_LENGTH))
     .max(MAX_ARRAY_LENGTH)
     .optional()
-    .describe('Nightshift source ids (or slugs) to scope the investigation'),
+    .describe('Nightshift source ids to scope the investigation'),
   concurrency_key: z
     .string()
     .optional()

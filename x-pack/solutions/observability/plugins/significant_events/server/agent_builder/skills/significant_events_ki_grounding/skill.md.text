@@ -39,7 +39,7 @@ Response shape: `{ "knowledge_indicators": [...], "sources": [{ "slug": "...", "
 Example: platform_core_execute_esql call (with required modifications applied)
 ```json
 {
-  "query": "FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <KI predicate> | SORT @timestamp ASC | LIMIT 5",
+  "query": "FROM <view_name> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <KI predicate> | SORT @timestamp ASC | LIMIT 5",
   "time_range": { "from": "<detection @timestamp - 15m>", "to": "now" }
 }
 ```
@@ -108,12 +108,12 @@ Dispatch primary checks in **mandatory parallel waves of up to 10 calls**. In on
 5. If the KI's `query.esql.query` starts with `FROM $.<name>`, copy that `FROM` verbatim. Otherwise copy into `FROM` the `view_name` of the response `sources` entry whose `slug` equals the KI's `source_id`. Do not assemble the view name, and do not strip a `$.` prefix.
 
 KI query (original):
-  FROM <source> METADATA _id, _source | WHERE <KI predicate> | LIMIT <existing lower cap>
+  FROM <view_name> METADATA _id, _source | WHERE <KI predicate> | LIMIT <existing lower cap>
 
 Executed form (sent to platform_core_execute_esql):
 ```json
 {
-  "query": "FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <KI predicate> | SORT @timestamp ASC | LIMIT 5",
+  "query": "FROM <view_name> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <KI predicate> | SORT @timestamp ASC | LIMIT 5",
   "time_range": { "from": "<detection @timestamp - 15m>", "to": "now" }
 }
 ```
@@ -121,7 +121,7 @@ Executed form (sent to platform_core_execute_esql):
 Stored form (written to evidence.esql_query — no executed ordering/limit tail):
 ```json
 {
-  "esql_query": "FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <KI predicate>",
+  "esql_query": "FROM <view_name> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <KI predicate>",
   "time_range": { "from": "<detection @timestamp - 15m>", "to": "now" }
 }
 ```

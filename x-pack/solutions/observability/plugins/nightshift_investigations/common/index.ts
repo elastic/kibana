@@ -71,7 +71,7 @@ export interface StartInvestigationRequest {
    */
   message?: string;
   /**
-   * Nightshift source ids (or slugs) the investigation should scope its queries to. The
+   * Nightshift source ids the investigation should scope its queries to. The
    * investigation workflow resolves them to slug and ES|QL view.
    */
   source_ids?: string[];

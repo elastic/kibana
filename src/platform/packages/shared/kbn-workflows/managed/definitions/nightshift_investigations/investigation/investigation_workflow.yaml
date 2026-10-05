@@ -30,11 +30,13 @@ triggers:
             alert rule name). Never an ID or UUID.
         source_ids:
           type: array
+          maxItems: 100
           items:
             type: string
+            maxLength: 255
           description: >
-            Optional Nightshift source ids (slugs also match) to scope observability queries. The
-            workflow resolves them to slug and ES|QL view for the investigator.
+            Optional Nightshift source ids to scope observability queries. The workflow resolves
+            them to slug and ES|QL view for the investigator.
         context:
           type: object
           additionalProperties: true
@@ -95,47 +97,23 @@ steps:
     on-failure:
       continue: true
 
-  # Resolves the requested source ids (or slugs) to their slug and ES|QL view. The list endpoint
-  # returns at most one page_size page, so this pages until a short page comes back. Nothing is
-  # listed when no sources were requested, and a failed page ends the loop with what was collected so
-  # far: a missing source list must not block the investigation. max-iterations bounds the catalog
-  # at 10,000 sources.
-  - name: init_nightshift_sources
-    type: data.set
+  # Resolves the requested source ids to their slug and ES|QL view in one request. A failed request
+  # leaves the list empty: a missing source list must not block the investigation.
+  - name: list_investigation_sources
+    type: kibana.request
+    if: '${{ (inputs.source_ids | size | default: 0) > 0 }}'
     with:
-      nightshift_sources: []
-      nightshift_sources_page: 1
-      nightshift_sources_page_size: 100
-      nightshift_sources_exhausted: '${{ (inputs.source_ids | size | default: 0) == 0 }}'
-
-  - name: list_nightshift_sources
-    type: while
-    condition: '${{ variables.nightshift_sources_exhausted == false }}'
-    max-iterations: 100
-    steps:
-      - name: fetch_nightshift_sources_page
-        type: kibana.request
-        with:
-          method: GET
-          path: '/s/{{ workflow.spaceId }}/internal/nightshift/sources?per_page={{ variables.nightshift_sources_page_size }}&page={{ variables.nightshift_sources_page }}'
-          headers:
-            x-elastic-internal-origin: 'kibana'
-        on-failure:
-          continue: true
-
-      - name: add_nightshift_sources_page
-        type: data.set
-        with:
-          nightshift_sources: '${{ variables.nightshift_sources | concat: steps.fetch_nightshift_sources_page.output.sources }}'
-          nightshift_sources_page: '${{ variables.nightshift_sources_page | plus: 1 }}'
-          nightshift_sources_exhausted: '${{ steps.fetch_nightshift_sources_page.output.sources.size != variables.nightshift_sources_page_size }}'
+      method: GET
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/sources?{% for id in inputs.source_ids %}ids={{ id | url_encode }}{% unless forloop.last %}&{% endunless %}{% endfor %}'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+    on-failure:
+      continue: true
 
   - name: resolve_investigation_sources
     type: data.set
     with:
-      investigation_sources: >-
-        ${{ variables.nightshift_sources
-          | where_exp: 'source', 'inputs.source_ids contains source.id or inputs.source_ids contains source.slug' }}
+      investigation_sources: '${{ steps.list_investigation_sources.output.sources | default: [] }}'
 
   - name: investigate
     type: ai.agent

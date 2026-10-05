@@ -350,7 +350,7 @@ FROM logs | WHERE <filtering_expression>
 FROM logs | STATS <aggregations> BY bucket = BUCKET(@timestamp, 1 minute) | EVAL metric_value = <computed> | KEEP bucket, metric_value
 ```
 
-Always use `FROM logs` as the source clause. The system will automatically replace it with the correct sources and metadata for the target source.
+Always use `FROM logs` as the FROM clause. The system replaces `logs` with the ES|QL view of the target source and adds any metadata it needs.
 
 Match-type queries MUST follow the `FROM ... | WHERE ...` structure only. Do NOT include `SORT`, `LIMIT`, or `KEEP` in any query. `STATS`, `EVAL`, and `BUCKET`/`TBUCKET` are reserved for stats-type queries (see STATS section below).
 
@@ -455,7 +455,7 @@ Most queries that parse, execute and then match nothing come from over-reading `
 
 Match queries are **cause-based** — they detect specific error patterns in individual events. STATS queries are **symptom-based metric series** — they emit a continuous per-minute numeric series (error rate, latency, volume) for change-point detection. Together they answer both WHAT broke and THAT something is wrong.
 
-**Structure:** `FROM <source> | STATS <aggregations> BY bucket = BUCKET(@timestamp, 1 minute) | EVAL metric_value = <computed> | KEEP bucket, metric_value`.
+**Structure:** `FROM logs | STATS <aggregations> BY bucket = BUCKET(@timestamp, 1 minute) | EVAL metric_value = <computed> | KEEP bucket, metric_value`.
 
 **Required final columns:** exactly `bucket` (1-minute UTC) and `metric_value` (number). Do not use names like `error_rate` or `p95` as the final metric column — always `metric_value`. Do **not** add post-STATS `WHERE` that drops buckets (thresholds or sample-size floors). Emit a point for every bucket; use `CASE` for safe division (e.g. `CASE(total > 0, errors * 100.0 / total, 0)`).
 
@@ -488,7 +488,7 @@ When `log_patterns` contain error keywords (error, fail, timeout, exception, cra
 
 **[error-rate]** and **[http-error-rate]** share a structure:
 ```
-FROM <source>
+FROM logs
 | STATS errors = COUNT(*) WHERE <error_filter>,
         total = COUNT(*) WHERE <field> IS NOT NULL
   BY bucket = BUCKET(@timestamp, 1 minute)
@@ -507,7 +507,7 @@ Do not add entity or error-type `BY` dimensions in v0. Scope a component with `W
 
 **[latency-degradation]:**
 ```
-FROM <source>
+FROM logs
 | STATS metric_value = PERCENTILE(<duration_field>, 95)
   BY bucket = BUCKET(@timestamp, 1 minute)
 | KEEP bucket, metric_value
@@ -516,7 +516,7 @@ Express the percentile in the field's native unit (ns, µs, ms).
 
 **[traffic-drop]** / **[traffic-spike]** — one template, both directions; change-point detects either:
 ```
-FROM <source>
+FROM logs
 | STATS metric_value = COUNT(*)
   BY bucket = BUCKET(@timestamp, 1 minute)
 | KEEP bucket, metric_value
@@ -525,7 +525,7 @@ Only for sources with ≥50 events/bucket typical. Don't satisfy the field-evide
 
 **[auth-failure-rate]:**
 ```
-FROM <source>
+FROM logs
 | STATS failures = COUNT(*) WHERE <outcome_field> == "failure",
         attempts = COUNT(*) WHERE <outcome_field> IN ("success", "failure")
   BY bucket = BUCKET(@timestamp, 1 minute)
@@ -535,7 +535,7 @@ FROM <source>
 
 **[cardinality-spike]** (field with 10–500 distinct values):
 ```
-FROM <source>
+FROM logs
 | STATS metric_value = COUNT_DISTINCT(<target_field>)
   BY bucket = BUCKET(@timestamp, 1 minute)
 | KEEP bucket, metric_value
