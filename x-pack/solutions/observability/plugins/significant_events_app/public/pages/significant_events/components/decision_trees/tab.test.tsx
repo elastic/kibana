@@ -13,6 +13,15 @@ import { useDecisionTrees } from './use_decision_trees';
 import type { ListDecisionTreesResponse } from './types';
 
 jest.mock('./use_decision_trees');
+jest.mock('./tree_view', () => ({
+  TreeView: ({ symptom }: { symptom: string }) => (
+    <div data-test-subj="mockTreeView">{symptom}</div>
+  ),
+}));
+const mockQuery: { selectedItem?: string } = {};
+jest.mock('../../../../hooks/use_significant_events_app_params', () => ({
+  useSignificantEventsAppParams: () => ({ query: mockQuery }),
+}));
 
 const mockUseDecisionTrees = useDecisionTrees as jest.MockedFunction<typeof useDecisionTrees>;
 
@@ -81,5 +90,16 @@ describe('DecisionTreesTab', () => {
     expect(
       screen.getByTestId('nightshiftDecisionTreeCard-checkout-high-latency')
     ).toBeInTheDocument();
+  });
+
+  it('opens the tree named in selectedItem', () => {
+    mockQuery.selectedItem = 'checkout-high-latency';
+    mockUseDecisionTrees.mockReturnValue(asQueryResult({ data: response([]) }));
+    try {
+      renderTab();
+      expect(screen.getByTestId('mockTreeView')).toHaveTextContent('checkout-high-latency');
+    } finally {
+      delete mockQuery.selectedItem;
+    }
   });
 });

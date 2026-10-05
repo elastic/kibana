@@ -135,6 +135,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   'nightshift_record_system_learning',
   'nightshift_record_tool_learning',
   'nightshift_record_remediation',
+  'nightshift_attach_decision_tree',
 
   // Platform – Agentic Investigations
   'investigations.set_impact',
@@ -438,6 +439,9 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'investigation_timeline',
   'investigation_component_diagram',
   'investigation_trace',
+
+  // Nightshift – Decision trees
+  'nightshift.decision_tree',
 ] as const;
 
 export type AgentBuilderBuiltinAttachment = (typeof AGENT_BUILDER_BUILTIN_ATTACHMENTS)[number];

@@ -8,6 +8,8 @@
   "kbn_references": [
     "@kbn/share-plugin",
     "@kbn/deeplinks-observability",
+    "@kbn/agent-builder-browser",
+    "@kbn/agentic-investigations-common",
     "@kbn/nightshift-decision-trees",
     "@kbn/config-schema",
     "@kbn/core",

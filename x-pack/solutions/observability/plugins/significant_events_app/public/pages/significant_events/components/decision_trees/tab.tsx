@@ -21,12 +21,18 @@ import { DecisionTreeSidebar, type DecisionTreeSidebarSelection } from './sideba
 import { TreeView } from './tree_view';
 import type { DecisionTreeStatusFilter } from './types';
 import { useDecisionTrees } from './use_decision_trees';
+import { useSignificantEventsAppParams } from '../../../../hooks/use_significant_events_app_params';
 
 export function DecisionTreesTab() {
   const { euiTheme } = useEuiTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<DecisionTreeStatusFilter>('all');
-  const [selection, setSelection] = useState<DecisionTreeSidebarSelection>({ kind: 'home' });
+  // `selectedItem` names a tree's symptom, so links from elsewhere (an investigation that followed
+  // the tree) open it directly.
+  const { query } = useSignificantEventsAppParams('/{tab}');
+  const [selection, setSelection] = useState<DecisionTreeSidebarSelection>(() =>
+    query?.selectedItem ? { kind: 'tree', symptom: query.selectedItem } : { kind: 'home' }
+  );
   const { data, isLoading, isError } = useDecisionTrees();
 
   if (isLoading) {

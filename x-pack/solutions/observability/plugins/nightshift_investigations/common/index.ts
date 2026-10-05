@@ -141,7 +141,10 @@ export {
 export {
   DECISION_TREE_AI_INDEX_ID,
   DECISION_TREE_AI_INDEX_DEST,
+  DECISION_TREE_ATTACHMENT_TYPE,
   DECISION_TREE_DOC_TYPES,
+  DECISION_TREE_TAG,
+  type DecisionTreeAttachmentData,
   type DecisionTreeDocType,
   type DecisionTreeStatus,
   type DecisionTreeSummary,

@@ -28,6 +28,7 @@ import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../../tools/sandbox_bash/str_replace_tool';
 import { SANDBOX_WRITE_FILE_TOOL_ID } from '../../tools/sandbox_bash/write_file_tool';
+import { ATTACH_DECISION_TREE_TOOL_ID } from '../../tools/decision_tree/attach_decision_tree_tool';
 
 export { NIGHTSHIFT_INVESTIGATION_AGENT_ID };
 export const NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID = 'platform.nightshift.investigation-type';
@@ -124,6 +125,7 @@ export const getInvestigationAgentType = ({
           ...(investigationToolsEnabled ? [...INVESTIGATION_TOOL_IDS] : []),
           ...(proposalsEnabled ? [PROPOSALS_CREATE_TOOL_ID] : []),
           ...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []),
+          ...(sandboxEnabled && decisionTreesEnabled ? [ATTACH_DECISION_TREE_TOOL_ID] : []),
         ],
       },
     ],

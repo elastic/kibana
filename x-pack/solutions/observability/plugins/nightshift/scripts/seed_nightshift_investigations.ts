@@ -75,7 +75,13 @@ import type {
   TraceStep,
   User,
 } from '@kbn/agentic-investigations-plugin/common';
-import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '@kbn/nightshift-investigations-plugin/common';
+import {
+  DECISION_TREE_AI_INDEX_DEST,
+  DECISION_TREE_ATTACHMENT_TYPE,
+  DECISION_TREE_TAG,
+  NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+  type DecisionTreeAttachmentData,
+} from '@kbn/nightshift-investigations-plugin/common';
 import {
   PROPOSALS_API_VERSION,
   PROPOSALS_INDEX_NAME,
@@ -111,6 +117,16 @@ type SeedComponentDiagram = Pick<
   InvestigationComponentDiagram,
   'title' | 'mermaid' | 'problemNodeIds' | 'description'
 >;
+/** A decision tree the scenario followed: stored as the tree's head and attached by value. */
+interface SeedDecisionTree {
+  symptom: string;
+  title: string;
+  summary: string;
+  mermaid: string;
+  nodeCount: number;
+  edgeCount: number;
+}
+
 interface SeedTrace {
   steps: TraceStep[];
   decisionTree?: string;
@@ -138,6 +154,7 @@ interface Scenario {
   timeline?: TimelineEvent[];
   componentDiagram?: SeedComponentDiagram;
   trace?: SeedTrace;
+  decisionTrees?: SeedDecisionTree[];
   proposals: SeedProposal[];
   createdMinutesAgo: number;
   updatedMinutesAgo: number;
@@ -293,6 +310,7 @@ const completed = ({
   timeline,
   componentDiagram,
   trace,
+  decisionTrees,
 }: {
   severity: InvestigationSeverity;
   title: string;
@@ -309,6 +327,7 @@ const completed = ({
   timeline?: TimelineEvent[];
   componentDiagram?: SeedComponentDiagram;
   trace?: SeedTrace;
+  decisionTrees?: SeedDecisionTree[];
 }): Scenario => ({
   title,
   status,
@@ -322,6 +341,7 @@ const completed = ({
   timeline,
   componentDiagram,
   trace,
+  decisionTrees,
   proposals: recommendations,
   createdMinutesAgo: minutesAgo + durationMinutes,
   updatedMinutesAgo: minutesAgo,
@@ -557,7 +577,7 @@ const SCENARIOS: Scenario[] = [
         'The v2.8.1 `authMiddleware` looks the session up in **sessions-db synchronously** on every request instead of reading the Redis session cache. The blocked event loop delays every route api-gateway fronts, so web-frontend login and browse slow down even though catalog-service and user-service are healthy.',
     },
     trace: {
-      decisionTree: 'frontend-latency.md',
+      decisionTree: 'decision_tree_frontend-latency.md',
       steps: [
         {
           type: 'symptom',
@@ -616,10 +636,31 @@ const SCENARIOS: Scenario[] = [
         {
           type: 'end',
           label: 'Root cause: synchronous session lookup in the v2.8.1 auth middleware',
-          decision_tree_node: 'R2',
+          decision_tree_node: 'X2',
         },
       ],
     },
+    decisionTrees: [
+      {
+        symptom: 'frontend-latency',
+        title: 'Frontend Latency',
+        summary: 'Seeded: frontend latency, split by route, then by recent changes.',
+        nodeCount: 9,
+        edgeCount: 9,
+        mermaid: [
+          'flowchart TD',
+          '  S1([Frontend latency high]) --> E1[Latency by route and upstream]',
+          '  E1 --> D1{{Which routes are slow?}}',
+          '  D1 -->|static assets too| X1((CDN or network issue))',
+          '  D1 -->|only API routes| E2[Recent changes on the gateway]',
+          '  E2 --> D2{{Change before the shift?}}',
+          '  D2 -->|yes| E3[Gateway logs and event loop lag]',
+          '  D2 -->|no| E4[Database pool and query latency]',
+          '  E3 --> X2((Blocking code in the gateway))',
+          '  E4 --> X3((Database saturation))',
+        ].join('\n'),
+      },
+    ],
   }),
   completed({
     severity: 'critical',
@@ -1246,6 +1287,9 @@ const hypothesesDocumentId = (conversationId: string): string =>
   hashDocumentId(HYPOTHESES_ATTACHMENT_TYPE, SPACE_ID, conversationId);
 const impactDocumentId = (conversationId: string): string =>
   hashDocumentId(SPACE_ID, conversationId);
+const decisionTreeHeadId = (symptom: string): string => `${SPACE_ID}:dtree_${symptom}`;
+const decisionTreeMarkdown = ({ title, mermaid }: SeedDecisionTree): string =>
+  `# ${title}\n\n\`\`\`mermaid\n${mermaid}\n\`\`\`\n`;
 const timelineDocumentId = (conversationId: string): string =>
   hashDocumentId(TIMELINE_ATTACHMENT_TYPE, SPACE_ID, conversationId);
 const componentDiagramDocumentId = (conversationId: string): string =>
@@ -1474,6 +1518,7 @@ class SeedClient {
       esUrl: string;
       kibanaHeaders: Record<string, string>;
       kibanaSystemAuth: string;
+      userAuth: string;
     }
   ) {}
 
@@ -1520,6 +1565,17 @@ class SeedClient {
       `${this.options.esUrl}${path}`,
       method,
       { Authorization: basicAuth(this.options.kibanaSystemAuth) },
+      body,
+      okStatuses
+    );
+  }
+
+  /** Elasticsearch as the seeding user, as Nightshift writes its decision trees. */
+  esAsUser<TBody>(method: string, path: string, body?: JsonBody, okStatuses: number[] = []) {
+    return sendJson<TBody>(
+      `${this.options.esUrl}${path}`,
+      method,
+      { Authorization: basicAuth(this.options.userAuth) },
       body,
       okStatuses
     );
@@ -1673,6 +1729,14 @@ const cleanSeeds = async (client: SeedClient, log: ToolingLog): Promise<void> =>
       [404]
     );
   }
+  for (const tree of SCENARIOS.flatMap(({ decisionTrees = [] }) => decisionTrees)) {
+    await client.esAsUser(
+      'DELETE',
+      `/${DECISION_TREE_AI_INDEX_DEST}/_doc/${decisionTreeHeadId(tree.symptom)}?refresh=true`,
+      undefined,
+      [404]
+    );
+  }
   log.success(`Removed the ${conversationIds.length} seeded investigations`);
 };
 
@@ -1705,6 +1769,57 @@ const attachDocument = async (
     data: document,
     hidden: true,
     ...(description !== undefined && { description }),
+  });
+};
+
+/**
+ * Stores a decision tree as its head document, the way the reinforcement agent's first commit
+ * leaves it, and attaches it to the investigation the way `nightshift_attach_decision_tree` does.
+ */
+const seedDecisionTree = async (
+  client: SeedClient,
+  conversationId: string,
+  tree: SeedDecisionTree
+): Promise<void> => {
+  const treeId = `symptom:${tree.symptom}`;
+  const markdown = decisionTreeMarkdown(tree);
+  await client.esAsUser(
+    'PUT',
+    `/${DECISION_TREE_AI_INDEX_DEST}/_doc/${decisionTreeHeadId(tree.symptom)}?refresh=wait_for`,
+    {
+      '@timestamp': new Date(now).toISOString(),
+      type: 'decision_tree',
+      title: tree.title,
+      content: markdown,
+      tags: [DECISION_TREE_TAG],
+      attributes: {
+        tree_id: treeId,
+        symptom: tree.symptom,
+        version: 1,
+        status: 'established',
+        author: 'seed',
+        summary: tree.summary,
+        reinforced: false,
+        node_count: tree.nodeCount,
+        edge_count: tree.edgeCount,
+        space_id: SPACE_ID,
+      },
+      learnings: [],
+      evidence_gatherer_metadata: [],
+    }
+  );
+  const data: DecisionTreeAttachmentData = {
+    tree_id: treeId,
+    symptom: tree.symptom,
+    title: tree.title,
+    version: 1,
+    markdown,
+  };
+  await client.publicApi('POST', `/api/agent_builder/conversations/${conversationId}/attachments`, {
+    id: `nightshift-decision-tree-${tree.symptom}`,
+    type: DECISION_TREE_ATTACHMENT_TYPE,
+    data,
+    description: `Decision tree: ${tree.title}`,
   });
 };
 
@@ -1859,6 +1974,10 @@ const seedScenario = async (
     );
   }
 
+  for (const tree of scenario.decisionTrees ?? []) {
+    await seedDecisionTree(client, conversationId, tree);
+  }
+
   await createProposals(client, conversationId, scenario.proposals);
 
   if (scenario.status === 'closed') {
@@ -1895,6 +2014,7 @@ run(
       esUrl: String(flags['es-url']).replace(/\/$/, ''),
       kibanaHeaders: await loginHeaders(kibanaUrl, auth, log),
       kibanaSystemAuth: String(flags['kibana-system-auth']),
+      userAuth: auth,
     });
 
     await cleanSeeds(client, log);

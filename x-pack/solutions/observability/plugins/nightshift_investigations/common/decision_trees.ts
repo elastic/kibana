@@ -143,3 +143,23 @@ export interface GetDecisionTreeVersionResponse {
 export interface GetDecisionTreesAvailabilityResponse {
   enabled: boolean;
 }
+
+/** Agent Builder attachment type of a decision tree the investigation followed, by value. */
+export const DECISION_TREE_ATTACHMENT_TYPE = 'nightshift.decision_tree' as const;
+
+/**
+ * A decision tree as the investigation read it: the raw markdown of the version it followed, so
+ * the attachment keeps showing that version after the tree is reinforced.
+ */
+export interface DecisionTreeAttachmentData {
+  tree_id: string;
+  symptom: string;
+  title: string;
+  version: number;
+  /** The tree's markdown file, Mermaid flowchart included. */
+  markdown: string;
+}
+
+/** Path of a tree in the Nightshift management app, relative to the significant events app. */
+export const decisionTreeManagementPath = (symptom: string): string =>
+  `/decision_trees?tree=${encodeURIComponent(symptom)}`;

@@ -44,6 +44,9 @@ const LazyTrace = React.lazy(() =>
   }))
 );
 
+/** Caps the "fill" size so the artifact stays readable on very wide screens. */
+const MAX_ARTIFACT_FLYOUT_WIDTH = 1200;
+
 type AnalysisArtifact = 'timeline' | 'component_diagram' | 'trace';
 
 export type InvestigationAnalysis = Pick<Investigation, 'timeline' | 'component_diagram' | 'trace'>;
@@ -118,7 +121,9 @@ const ArtifactFlyout = ({ row, onClose }: { row: ArtifactRow; onClose: () => voi
     <EuiFlyout
       session="inherit"
       onClose={onClose}
-      size="m"
+      // The widest a child flyout may be next to the small details flyout: EUI refuses "l" there.
+      size="fill"
+      maxWidth={MAX_ARTIFACT_FLYOUT_WIDTH}
       type="push"
       aria-labelledby={titleId}
       flyoutMenuProps={{ title: row.typeName }}

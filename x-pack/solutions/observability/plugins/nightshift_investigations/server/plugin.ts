@@ -50,7 +50,6 @@ import { decisionTreePrepareStepDefinition } from './step_definitions/decision_t
 import { memoryOptimizeStepDefinition } from './step_definitions/memory_optimize';
 import { createCortexStore, registerCortexAiIndex } from './cortex/register_cortex';
 import { registerCortexTelemetryEvents } from './telemetry';
-import { createDecisionTreeStore } from './decision_trees/store';
 import { registerDecisionTreeAiIndex } from './decision_trees/register_decision_trees';
 import { createMemoryService, type MemoryService } from './memory/internal_client';
 import { setupNightshiftTelemetry } from './telemetry';
@@ -59,6 +58,9 @@ import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/reg
 import { registerInvestigationAgentType } from './agents/investigation';
 import { registerDecisionTreeReinforcementAgentType } from './agents/decision_tree_reinforcement';
 import { createDecisionTreeTools } from './tools/decision_tree';
+import { createAttachDecisionTreeTool } from './tools/decision_tree/attach_decision_tree_tool';
+import { decisionTreeAttachmentType } from './attachments/decision_tree_attachment_type';
+import { createDecisionTreeStore } from './decision_trees/store';
 import { createSandboxBashTool } from './tools/sandbox_bash/tool';
 import { createSandboxViewFileTool } from './tools/sandbox_bash/view_file_tool';
 import { createSandboxStrReplaceTool } from './tools/sandbox_bash/str_replace_tool';
@@ -281,6 +283,24 @@ export class NightshiftInvestigationsPlugin
           })) {
             plugins.agentBuilder.tools.register(tool);
           }
+          // The investigator attaches the trees it followed, so the flyout can link to them.
+          // The registry is typed for the erased definition, so the narrowed one needs a cast.
+          plugins.agentBuilder.attachments.registerType(
+            decisionTreeAttachmentType as Parameters<
+              typeof plugins.agentBuilder.attachments.registerType
+            >[0]
+          );
+          plugins.agentBuilder.tools.register(
+            createAttachDecisionTreeTool({
+              getStore: (esClient, request) =>
+                createDecisionTreeStore({
+                  esClient,
+                  logger: decisionTreeLogger,
+                  spaceId: getSpaceId(request),
+                }),
+              logger: decisionTreeLogger,
+            })
+          );
         }
       }
     }
