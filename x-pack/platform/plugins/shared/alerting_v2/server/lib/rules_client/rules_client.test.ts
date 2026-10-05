@@ -4511,6 +4511,32 @@ describe('RulesClient', () => {
 
         expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
       });
+
+      it('rejects enabling a disabled rule via PUT at an unchanged interval when the limit is already reached', async () => {
+        const client = createClient({ maxScheduledPerMinute: 1 });
+        // The disabled rule's stored 1m schedule is not actually running, so
+        // the cluster is already full from other rules alone.
+        rulesSavedObjectService.getTotalScheduledPerMinute.mockResolvedValueOnce(1);
+
+        const existingDoc = {
+          id: 'rule-id-1',
+          attributes: { ...baseSoAttrs, enabled: false },
+          version: 'WzEsMV0=',
+        };
+        rulesSavedObjectService.get
+          .mockResolvedValueOnce(existingDoc)
+          .mockResolvedValueOnce(existingDoc);
+
+        // Same 1m interval as before — only `enabled` changes to true.
+        await expect(
+          client.upsertRule({ id: 'rule-id-1', data: { ...baseCreateData, enabled: true } })
+        ).rejects.toMatchObject({
+          output: { statusCode: 400 },
+          data: { code: 'MAX_SCHEDULES_PER_MINUTE_EXCEEDED' },
+        });
+
+        expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+      });
     });
   });
 });

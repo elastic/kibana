@@ -1796,7 +1796,10 @@ export class RulesClient {
     await this.validateSchedule([
       {
         updatedEvery: nextAttrs.schedule.every,
-        prevEvery: existingAttrs.schedule.every,
+        // A disabled rule has no running task, so its stored schedule is not
+        // consuming capacity — only count it as "previous" when it was
+        // actually enabled, same as `enableRule`.
+        prevEvery: wasEnabled ? existingAttrs.schedule.every : undefined,
         checkLimit: nextEnabled,
       },
     ]);
