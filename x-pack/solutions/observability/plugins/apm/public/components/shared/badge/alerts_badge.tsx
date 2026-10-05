@@ -47,7 +47,15 @@ function getDisplayTooltip(count: number) {
   });
 }
 
-function getAriaLabel(count: number, serviceName: string) {
+function getAriaLabel(count: number, serviceName: string, transactionName?: string) {
+  if (transactionName) {
+    return i18n.translate('xpack.apm.alertsBadge.ariaLabel.transaction', {
+      defaultMessage:
+        '{count, plural, one {# active alert} other {# active alerts}} for {transactionName} of {serviceName}',
+      values: { count, transactionName, serviceName },
+    });
+  }
+
   return i18n.translate('xpack.apm.alertsBadge.ariaLabel', {
     defaultMessage:
       '{count, plural, one {# active alert} other {# active alerts}} for {serviceName}',
@@ -68,6 +76,11 @@ export interface AlertsBadgeProps {
   count: number;
   /** Used to build the accessible label (e.g. "3 active alerts for opbeans-java"). */
   serviceName: string;
+  /**
+   * When set, the accessible name scopes the count to this transaction
+   * (e.g. "3 active alerts for GET /api of checkout").
+   */
+  transactionName?: string;
   /**
    * Explicit link target. Prefer this when the caller already has a URL (e.g. from
    * `SERVICE_ALERTS_LOCATOR`). Takes precedence over `navigationProps`.
@@ -102,6 +115,7 @@ export interface AlertsBadgeProps {
 export function AlertsBadge({
   count,
   serviceName,
+  transactionName,
   href: hrefProp,
   navigationProps,
   onClick,
@@ -109,7 +123,7 @@ export function AlertsBadge({
   ebt,
   'data-test-subj': dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
 }: AlertsBadgeProps) {
-  const ariaLabel = getAriaLabel(count, serviceName);
+  const ariaLabel = getAriaLabel(count, serviceName, transactionName);
 
   const href =
     hrefProp ??

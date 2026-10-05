@@ -9,6 +9,7 @@ import {
   SERVICE_ALERTS_LOCATOR_ID,
   type ServiceAlertsLocatorParams,
 } from '@kbn/deeplinks-observability';
+import { getEnvironmentKuery } from '@kbn/apm-types';
 import { useMemo } from 'react';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import { useTransactionDetailFlyoutContext } from '../transaction_detail_flyout_context';
@@ -25,13 +26,12 @@ export interface TransactionDetailFlyoutAlertsBadge {
  * Resolves visibility and navigation for the transaction detail flyout alerts badge.
  *
  * Count comes from the parent (transactions table). The badge is hidden when the count is
- * missing/zero, the user cannot read alerts, or the schema is OTel (no transaction-based alerts UI).
+ * missing/zero, the user cannot read alerts, or there is no transaction name to scope alerts to.
  */
 export function useTransactionDetailFlyoutAlertsBadge(): TransactionDetailFlyoutAlertsBadge {
   const {
     deps: { core, share },
-    filters: { serviceName, transactionName, transactionType, rangeFrom, rangeTo },
-    schema,
+    filters: { serviceName, transactionName, transactionType, environment, start, end },
     alertsCount,
   } = useTransactionDetailFlyoutContext();
 
@@ -39,11 +39,13 @@ export function useTransactionDetailFlyoutAlertsBadge(): TransactionDetailFlyout
 
   return useMemo(() => {
     const count = alertsCount ?? 0;
-    const show = canReadAlerts && schema !== 'otel' && count > 0;
+    const show = canReadAlerts && Boolean(transactionName) && count > 0;
 
     if (!show) {
       return { show: false, count: 0 };
     }
+
+    const environmentKuery = getEnvironmentKuery(environment)?.trim() || undefined;
 
     const href = share?.url?.locators
       ?.get<ServiceAlertsLocatorParams>(SERVICE_ALERTS_LOCATOR_ID)
@@ -51,20 +53,22 @@ export function useTransactionDetailFlyoutAlertsBadge(): TransactionDetailFlyout
         serviceName,
         transactionName,
         transactionType,
-        rangeFrom,
-        rangeTo,
+        // Prefer absolute bounds so the alerts page matches the flyout window.
+        rangeFrom: start,
+        rangeTo: end,
+        ...(environmentKuery ? { kuery: environmentKuery } : {}),
       });
 
     return { show: true, count, href };
   }, [
     alertsCount,
     canReadAlerts,
-    schema,
     share,
     serviceName,
     transactionName,
     transactionType,
-    rangeFrom,
-    rangeTo,
+    environment,
+    start,
+    end,
   ]);
 }

@@ -16,17 +16,23 @@ jest.mock('../transaction_detail_flyout_context', () => ({
 
 function setupContext({
   alertsCount,
-  schema = 'ecs',
   canReadAlerts = true,
   href = '/app/apm/services/checkout/alerts?kuery=transaction.name:%20%22GET%22',
   share,
+  transactionName = 'GET /api/orders',
+  environment = 'production',
+  start = '2026-01-01T00:00:00.000Z',
+  end = '2026-01-01T00:15:00.000Z',
 }: {
   alertsCount?: number;
-  schema?: 'ecs' | 'otel' | 'unknown';
   canReadAlerts?: boolean;
-  href?: string | undefined;
+  href?: string;
   /** Pass `null` to simulate a host without share/locators. */
   share?: unknown | null;
+  transactionName?: string;
+  environment?: string;
+  start?: string;
+  end?: string;
 } = {}) {
   const getRedirectUrl = jest.fn().mockReturnValue(href);
   const getLocator = jest.fn().mockReturnValue({ getRedirectUrl });
@@ -51,15 +57,14 @@ function setupContext({
     },
     filters: {
       serviceName: 'checkout',
-      transactionName: 'GET /api/orders',
+      transactionName,
       transactionType: 'request',
-      environment: 'production',
+      environment,
       rangeFrom: 'now-15m',
       rangeTo: 'now',
-      start: '2026-01-01T00:00:00.000Z',
-      end: '2026-01-01T00:15:00.000Z',
+      start,
+      end,
     },
-    schema,
     alertsCount,
     refreshToken: 0,
     openFullTraceFlyout: jest.fn(),
@@ -88,8 +93,26 @@ describe('useTransactionDetailFlyoutAlertsBadge', () => {
       serviceName: 'checkout',
       transactionName: 'GET /api/orders',
       transactionType: 'request',
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
+      rangeFrom: '2026-01-01T00:00:00.000Z',
+      rangeTo: '2026-01-01T00:15:00.000Z',
+      kuery: 'service.environment: production',
+    });
+  });
+
+  it('omits environment kuery when environment is ENVIRONMENT_ALL', () => {
+    const { getRedirectUrl } = setupContext({
+      alertsCount: 2,
+      environment: 'ENVIRONMENT_ALL',
+    });
+
+    renderHook(() => useTransactionDetailFlyoutAlertsBadge());
+
+    expect(getRedirectUrl).toHaveBeenCalledWith({
+      serviceName: 'checkout',
+      transactionName: 'GET /api/orders',
+      transactionType: 'request',
+      rangeFrom: '2026-01-01T00:00:00.000Z',
+      rangeTo: '2026-01-01T00:15:00.000Z',
     });
   });
 
@@ -117,8 +140,8 @@ describe('useTransactionDetailFlyoutAlertsBadge', () => {
     expect(result.current).toEqual({ show: false, count: 0 });
   });
 
-  it('hides the badge for otel schema', () => {
-    setupContext({ alertsCount: 4, schema: 'otel' });
+  it('hides the badge when transaction name is missing', () => {
+    setupContext({ alertsCount: 4, transactionName: '' });
 
     const { result } = renderHook(() => useTransactionDetailFlyoutAlertsBadge());
 

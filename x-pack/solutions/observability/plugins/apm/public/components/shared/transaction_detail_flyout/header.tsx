@@ -87,6 +87,7 @@ export function TransactionDetailFlyoutHeader({
             <AlertsBadge
               count={alertsCount}
               serviceName={serviceName}
+              transactionName={transactionName}
               href={alertsHref}
               data-test-subj="transactionDetailFlyoutAlertsBadge"
               ebt={{

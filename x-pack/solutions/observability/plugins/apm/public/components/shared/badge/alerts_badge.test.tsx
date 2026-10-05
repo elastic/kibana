@@ -24,6 +24,22 @@ describe('AlertsBadge', () => {
     expect(screen.getByTestId('apmAlertsBadge')).toHaveTextContent('4');
   });
 
+  it('uses a service-scoped accessible name by default', () => {
+    renderBadge({ count: 4, serviceName: 'checkout' });
+    expect(screen.getByLabelText('4 active alerts for checkout')).toBeInTheDocument();
+  });
+
+  it('uses a transaction-scoped accessible name when transactionName is set', () => {
+    renderBadge({
+      count: 3,
+      serviceName: 'checkout',
+      transactionName: 'GET /api/orders',
+    });
+    expect(
+      screen.getByLabelText('3 active alerts for GET /api/orders of checkout')
+    ).toBeInTheDocument();
+  });
+
   it('uses a custom data-test-subj when provided', () => {
     renderBadge({ count: 1, serviceName: 'svc', 'data-test-subj': 'customBadge' });
     expect(screen.getByTestId('customBadge')).toBeInTheDocument();
