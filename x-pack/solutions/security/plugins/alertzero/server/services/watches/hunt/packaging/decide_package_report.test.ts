@@ -5,449 +5,248 @@
  * 2.0.
  */
 
-import type { ActionCatalogEntry } from '@kbn/alertzero-common';
+import { ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { HUNT_COVERAGE_AI_INDEX_ID } from '../../../../../common/step_types/package_report';
 import {
+  HUNT_HANDOFF_ACTION_WORKFLOW_ID,
+  HUNT_HANDOFF_CLASSIFICATION,
+  HUNT_HANDOFF_PRODUCER,
+  HUNT_HANDOFF_WATCH_ID,
+  MAX_HANDOFF_HOST_NAME_LENGTH,
+  buildHandoffSubjectId,
   buildProposalSubjectKey,
-  canFillRespondAction,
   decidePackageReport,
 } from './decide_package_report';
 import type { CurrentRunState } from './types';
 
-const isolateHost: ActionCatalogEntry = {
-  workflowId: 'system-security-action-isolate-host',
-  name: 'Isolate host',
-  category: 'respond',
-  impact: 'high',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      endpoint_ids: { type: 'array', items: { type: 'string' } },
-    },
-    required: ['endpoint_ids'],
-  },
-};
-
-const killProcess: ActionCatalogEntry = {
-  workflowId: 'system-security-action-kill-process',
-  name: 'Kill process',
-  category: 'respond',
-  impact: 'high',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      endpoint_ids: { type: 'array', items: { type: 'string' } },
-      parameters: { type: 'object' },
-    },
-    required: ['endpoint_ids', 'parameters'],
-  },
-};
-
-const suspendProcess: ActionCatalogEntry = {
-  workflowId: 'system-security-action-suspend-process',
-  name: 'Suspend process',
-  category: 'respond',
-  impact: 'high',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      endpoint_ids: { type: 'array', items: { type: 'string' } },
-      parameters: { type: 'object' },
-    },
-    required: ['endpoint_ids', 'parameters'],
-  },
-};
-
-/** Required field `buildActionInput` has no way to supply — neither endpoint_ids nor parameters. */
-const quarantineFileWithJustification: ActionCatalogEntry = {
-  workflowId: 'system-security-action-quarantine-file',
-  name: 'Quarantine file',
-  category: 'respond',
-  impact: 'medium',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      endpoint_ids: { type: 'array', items: { type: 'string' } },
-      justification: { type: 'string' },
-    },
-    required: ['endpoint_ids', 'justification'],
-  },
-};
-
-const configureAction: ActionCatalogEntry = {
-  workflowId: 'system-security-action-configure-something',
-  name: 'Configure',
-  category: 'configure',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      endpoint_ids: { type: 'array', items: { type: 'string' } },
-    },
-    required: ['endpoint_ids'],
-  },
-};
+const conversationId = 'conv-1';
+const spaceId = 'default';
+const reportId = 'rpt-1';
+const runId = 'run-1';
 
 const baseHitState = (overrides: Partial<CurrentRunState> = {}): CurrentRunState => ({
-  runId: 'run-1',
-  reportId: 'rpt-1',
+  runId,
+  reportId,
   hasConfirmedHit: true,
   titles: ['Shadow admin AssumeRole'],
   evidenceLines: ['Tier 1 hits in cloudtrail'],
   techniques: ['T1078.004'],
   corroboratedTechniques: ['T1078.004'],
-  hosts: [{ name: 'host-a', enrolled: true, agentId: 'agent-a' }],
-  processSelectors: [],
-  // Fully-covered defaults: no recommendation trigger fires unless a test overrides one.
+  hosts: [{ name: 'host-a' }],
+  // Fully host-scoped defaults: no recommendation trigger fires unless a test overrides one.
   hasNonHostEntity: false,
   hasIocIndicator: false,
-  allEventsActionable: true,
-  hasProcessBearingEvent: false,
   manualRemediation: [],
   evidence: { tier1HitCount: 4, tier2Confirmed: [] },
+  huntWindow: { from: '2026-09-25T00:00:00.000Z', to: '2026-10-25T00:00:00.000Z' },
   ...overrides,
 });
 
-describe('decidePackageReport', () => {
-  const conversationId = 'conv-1';
+const decide = (state: CurrentRunState) =>
+  decidePackageReport({ conversationId, spaceId, reportId, runId, state });
 
+/** The keys `action_handoff_to_forensics.yaml` declares under `actionInput.properties`. */
+const HANDOFF_ACTION_INPUT_KEYS = [
+  'ai_index_id',
+  'classification',
+  'context',
+  'host_name',
+  'investigation_id',
+  'producer',
+  'report_id',
+  'subject_id',
+  'watch_id',
+  'workflow_execution_id',
+];
+
+describe('decidePackageReport', () => {
   it('dismisses a clean run with no proposals', () => {
-    const result = decidePackageReport({
-      conversationId,
-      state: baseHitState({ hasConfirmedHit: false, hosts: [] }),
-      catalog: { ok: true, actions: [isolateHost] },
-    });
+    const result = decide(baseHitState({ hasConfirmedHit: false, hosts: [] }));
+
     expect(result.dismiss).toBe(true);
     expect(result.proposals).toEqual([]);
     expect(result.closureSummary).toContain('No confirmed hits');
   });
 
-  it('mints one proposal per eligible host × fillable respond action', () => {
-    const result = decidePackageReport({
-      conversationId,
-      state: baseHitState({
-        hosts: [
-          { name: 'host-a', enrolled: true, agentId: 'agent-a' },
-          { name: 'host-b', enrolled: true, agentId: 'agent-b' },
-        ],
-      }),
-      catalog: { ok: true, actions: [isolateHost, configureAction] },
-    });
+  it('mints exactly one Forensics handoff per confirmed host', () => {
+    const result = decide(baseHitState({ hosts: [{ name: 'host-a' }, { name: 'host-b' }] }));
+
     expect(result.dismiss).toBe(false);
-    expect(result.proposals).toHaveLength(2);
-    expect(result.proposals.map((p) => p.actionWorkflowId).sort()).toEqual([
-      isolateHost.workflowId,
-      isolateHost.workflowId,
+    expect(result.proposals.map((p) => p.hostName)).toEqual(['host-a', 'host-b']);
+    for (const proposal of result.proposals) {
+      expect(proposal.actionWorkflowId).toBe(HUNT_HANDOFF_ACTION_WORKFLOW_ID);
+      expect(proposal.category).toBe('investigate');
+      expect(proposal.impact).toBe('high');
+      expect(proposal.title).toBe(`Run a deep forensics investigation on ${proposal.hostName}`);
+    }
+  });
+
+  // The same action the Attack Discovery review hands off through, so Forensics Watch's
+  // sweep sees one indicator shape whichever Watch produced it.
+  it('hands off through the shared forensics handoff action', () => {
+    expect(HUNT_HANDOFF_ACTION_WORKFLOW_ID).toBe(ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID);
+  });
+
+  // The handoff action closes `actionInput` to additional properties, so an extra key here is
+  // a validation failure at approval time, and a missing required one a proposal that can
+  // never run. Pinned to the declared key set, not a loose `toMatchObject`.
+  it('fills exactly the keys the handoff action declares, and never a Defend endpoint id', () => {
+    const [proposal] = decide(baseHitState()).proposals;
+
+    expect(Object.keys(proposal.actionInput ?? {}).sort()).toEqual(HANDOFF_ACTION_INPUT_KEYS);
+    expect(proposal.actionInput).toMatchObject({
+      ai_index_id: HUNT_COVERAGE_AI_INDEX_ID,
+      host_name: 'host-a',
+      report_id: reportId,
+      investigation_id: conversationId,
+      classification: HUNT_HANDOFF_CLASSIFICATION,
+      workflow_execution_id: runId,
+      producer: HUNT_HANDOFF_PRODUCER,
+      watch_id: HUNT_HANDOFF_WATCH_ID,
+      subject_id: buildHandoffSubjectId({ spaceId, reportId, hostName: 'host-a' }),
+    });
+    expect(proposal.actionInput).not.toHaveProperty('endpoint_ids');
+    expect(proposal.actionInput).not.toHaveProperty('parameters');
+    expect(proposal.actionInput).not.toHaveProperty('attack_discovery_id');
+  });
+
+  it('gives the forensic agent plain-text context naming the host, report, and window', () => {
+    const [proposal] = decide(baseHitState()).proposals;
+    const context = String(proposal.actionInput?.context);
+
+    expect(context).toContain('host-a');
+    expect(context).toContain(reportId);
+    expect(context).toContain('2026-09-25T00:00:00.000Z');
+    expect(context).toContain('T1078.004');
+    expect(context).not.toContain('*');
+    expect(context.length).toBeLessThanOrEqual(2000);
+  });
+
+  it('dedupes a host the SSEs named more than once', () => {
+    const result = decide(baseHitState({ hosts: [{ name: 'host-a' }, { name: 'host-a' }] }));
+
+    expect(result.proposals.map((p) => p.hostName)).toEqual(['host-a']);
+  });
+
+  it('mints a recommendation instead of a handoff when the hit is hostless', () => {
+    const result = decide(baseHitState({ hosts: [] }));
+
+    expect(result.dismiss).toBe(false);
+    expect(result.proposals).toHaveLength(1);
+    const [recommendation] = result.proposals;
+    expect(recommendation.title).toBe('Analyst recommendation');
+    expect(recommendation.actionWorkflowId).toBeUndefined();
+    expect(recommendation.actionInput).toBeUndefined();
+    expect(recommendation.comment).toContain('nothing to hand to Forensics Watch');
+  });
+
+  it.each([
+    ['a non-host entity', { hasNonHostEntity: true }],
+    ['an IOC indicator', { hasIocIndicator: true }],
+  ])('mints the handoffs plus a recommendation when the evidence carries %s', (_case, flags) => {
+    const result = decide(baseHitState(flags));
+
+    expect(result.proposals.map((p) => p.title)).toEqual([
+      'Run a deep forensics investigation on host-a',
+      'Analyst recommendation',
     ]);
-    expect(result.proposals.every((p) => p.actionInput?.endpoint_ids)).toBe(true);
-    expect(new Set(result.proposals.map((p) => p.subjectKey)).size).toBe(2);
-    expect(result.proposals.map((p) => p.title).sort()).toEqual([
-      'Isolate host host-a',
-      'Isolate host host-b',
+    expect(result.proposals[1].comment).toContain('not host-scoped');
+    expect(result.proposals[1].comment).not.toContain('nothing to hand to Forensics Watch');
+  });
+
+  // An SSE entity value may be 2048 characters; the action's `host_name` is bounded at 256,
+  // and a Proposal whose approval fails validation is worse than no Proposal.
+  it('leaves a host whose name exceeds the handoff bound to the recommendation', () => {
+    const tooLong = 'h'.repeat(MAX_HANDOFF_HOST_NAME_LENGTH + 1);
+    const result = decide(baseHitState({ hosts: [{ name: 'host-a' }, { name: tooLong }] }));
+
+    expect(result.proposals.map((p) => p.title)).toEqual([
+      'Run a deep forensics investigation on host-a',
+      'Analyst recommendation',
+    ]);
+    expect(result.proposals[1].comment).toContain('longer than a handoff accepts');
+    expect(result.proposals[1].comment).not.toContain('nothing to hand to Forensics Watch');
+  });
+
+  it('mints no recommendation when every finding is host-scoped', () => {
+    const result = decide(baseHitState());
+
+    expect(result.proposals.map((p) => p.title)).toEqual([
+      'Run a deep forensics investigation on host-a',
     ]);
   });
 
-  it('does not drop or duplicate subject keys when catalog order changes', () => {
-    const state = baseHitState({
-      processSelectors: [
-        { pid: 4242, processKey: 'pid:4242', hostName: 'host-a', processName: 'proc.exe' },
-      ],
-    });
-    const a = decidePackageReport({
-      conversationId,
-      state,
-      catalog: { ok: true, actions: [isolateHost, killProcess] },
-    });
-    const b = decidePackageReport({
-      conversationId,
-      state,
-      catalog: { ok: true, actions: [killProcess, isolateHost] },
-    });
-    expect(a.proposals.map((p) => p.subjectKey).sort()).toEqual(
-      b.proposals.map((p) => p.subjectKey).sort()
+  it('never mints a Defend response action', () => {
+    const result = decide(
+      baseHitState({ hosts: [{ name: 'host-a' }, { name: 'host-b' }], hasIocIndicator: true })
     );
-    expect(new Set(a.proposals.map((p) => p.subjectKey)).size).toBe(a.proposals.length);
-  });
 
-  it('mints a recommendation instead of an executable proposal when the hit is hostless', () => {
-    const result = decidePackageReport({
-      conversationId,
-      state: baseHitState({ hosts: [] }),
-      catalog: { ok: true, actions: [isolateHost] },
-    });
-    expect(result.dismiss).toBe(false);
-    expect(result.proposals).toHaveLength(1);
-    expect(result.proposals[0].actionWorkflowId).toBeUndefined();
-    expect(result.proposals[0].title).toBe('Analyst recommendation');
-    expect(result.proposals[0].confidence).toBe('medium');
-    expect(result.proposals[0].comment).toContain('No respond action could be filled');
-  });
-
-  it('mints a recommendation naming unenrolled hosts', () => {
-    const result = decidePackageReport({
-      conversationId,
-      state: baseHitState({
-        hosts: [{ name: 'ghost', enrolled: false }],
-      }),
-      catalog: { ok: true, actions: [isolateHost] },
-    });
-    expect(result.proposals).toHaveLength(1);
-    expect(result.proposals[0].title).toBe('Analyst recommendation');
-    expect(result.proposals[0].comment).toContain('ghost');
-  });
-
-  it('mints executable plus a recommendation when some hosts are unenrolled (trigger: partial enrollment)', () => {
-    const result = decidePackageReport({
-      conversationId,
-      state: baseHitState({
-        hosts: [
-          { name: 'host-a', enrolled: true, agentId: 'agent-a' },
-          { name: 'ghost', enrolled: false },
-        ],
-      }),
-      catalog: { ok: true, actions: [isolateHost] },
-    });
-    expect(result.proposals).toHaveLength(2);
-    expect(result.proposals.some((p) => p.actionWorkflowId === isolateHost.workflowId)).toBe(true);
-    expect(result.proposals.some((p) => p.title === 'Isolate host host-a')).toBe(true);
-    const recommendation = result.proposals.find((p) => p.title === 'Analyst recommendation');
-    expect(recommendation).toBeDefined();
-    expect(recommendation?.comment).toContain('ghost');
-    expect(recommendation?.comment).toContain('not enrolled');
-  });
-
-  it('mints a recommendation when the catalog errors (trigger: no executable proposal at all)', () => {
-    const result = decidePackageReport({
-      conversationId,
-      state: baseHitState(),
-      catalog: { ok: false, reason: 'catalog_error' },
-    });
-    expect(result.proposals).toHaveLength(1);
-    expect(result.proposals[0].title).toBe('Analyst recommendation');
-  });
-
-  it('mints a recommendation when zero respond actions are installed (trigger: no executable proposal at all)', () => {
-    const result = decidePackageReport({
-      conversationId,
-      state: baseHitState(),
-      catalog: { ok: true, actions: [configureAction] },
-    });
-    expect(result.proposals).toHaveLength(1);
-    expect(result.proposals[0].title).toBe('Analyst recommendation');
-  });
-
-  it('mints a recommendation when process fields are absent for the only fillable actions (trigger: no executable proposal at all)', () => {
-    const result = decidePackageReport({
-      conversationId,
-      state: baseHitState({ processSelectors: [] }),
-      catalog: { ok: true, actions: [killProcess, suspendProcess] },
-    });
-    expect(result.proposals).toHaveLength(1);
-    expect(result.proposals[0].title).toBe('Analyst recommendation');
-  });
-
-  it('treats a required field the builder cannot supply as unfillable', () => {
-    // `canFillRespondAction` only checked `parameters`; a schema requiring anything else
-    // (here `justification`) used to mint as executable anyway and fail after approval.
-    expect(canFillRespondAction({ entry: quarantineFileWithJustification })).toBe(false);
-  });
-
-  it('mints a recommendation instead of an executable proposal when a required field cannot be filled (trigger: no executable proposal at all)', () => {
-    const result = decidePackageReport({
-      conversationId,
-      state: baseHitState(),
-      catalog: { ok: true, actions: [quarantineFileWithJustification] },
-    });
-    expect(result.proposals).toHaveLength(1);
-    expect(result.proposals[0].title).toBe('Analyst recommendation');
-  });
-
-  it('mints executable isolate-host plus a recommendation when a process-bearing finding has no selector (trigger: process uncovered)', () => {
-    const result = decidePackageReport({
-      conversationId,
-      state: baseHitState({ hasProcessBearingEvent: true, processSelectors: [] }),
-      catalog: { ok: true, actions: [isolateHost] },
-    });
-    expect(result.proposals).toHaveLength(2);
-    expect(result.proposals.some((p) => p.actionWorkflowId === isolateHost.workflowId)).toBe(true);
-    const recommendation = result.proposals.find((p) => p.title === 'Analyst recommendation');
-    expect(recommendation?.comment).toContain('could not be resolved to a live process');
-  });
-
-  it('mints executable plus a recommendation when evidence fell outside the actionable indices', () => {
-    const result = decidePackageReport({
-      conversationId,
-      state: baseHitState({ allEventsActionable: false }),
-      catalog: { ok: true, actions: [isolateHost] },
-    });
-    expect(result.proposals).toHaveLength(2);
-    const recommendation = result.proposals.find((p) => p.title === 'Analyst recommendation');
-    // Names what was observed; an empty actionable set is also what a degraded mapping
-    // classifier leaves behind, so the line must not conclude the finding is not host-scoped.
-    expect(recommendation?.comment).toContain('not known to carry a process identity');
-    expect(recommendation?.comment).not.toContain('is not host-scoped');
-  });
-
-  it('mints executable plus a recommendation when evidence really is not host-scoped', () => {
-    const result = decidePackageReport({
-      conversationId,
-      state: baseHitState({ hasNonHostEntity: true }),
-      catalog: { ok: true, actions: [isolateHost] },
-    });
-    expect(result.proposals).toHaveLength(2);
-    const recommendation = result.proposals.find((p) => p.title === 'Analyst recommendation');
-    expect(recommendation?.comment).toContain('not host-scoped');
-  });
-
-  it('mints no recommendation when every host is enrolled, covered, and host-scoped', () => {
-    const result = decidePackageReport({
-      conversationId,
-      state: baseHitState(),
-      catalog: { ok: true, actions: [isolateHost] },
-    });
-    expect(result.proposals).toHaveLength(1);
-    expect(result.proposals[0].actionWorkflowId).toBe(isolateHost.workflowId);
-    expect(result.proposals.some((p) => p.title === 'Analyst recommendation')).toBe(false);
+    for (const proposal of result.proposals) {
+      // Either the handoff, or the no-action recommendation; never a Defend action id.
+      expect(proposal.actionWorkflowId ?? HUNT_HANDOFF_ACTION_WORKFLOW_ID).toBe(
+        HUNT_HANDOFF_ACTION_WORKFLOW_ID
+      );
+      expect(proposal.actionWorkflowId ?? '').not.toMatch(/isolate|kill|suspend/);
+    }
   });
 
   it('lifts manual_remediation lines into the recommendation comment', () => {
-    const result = decidePackageReport({
-      conversationId,
-      state: baseHitState({ hosts: [], manualRemediation: ['Rotate credentials for role X.'] }),
-      catalog: { ok: true, actions: [isolateHost] },
-    });
+    const result = decide(
+      baseHitState({ hosts: [], manualRemediation: ['Rotate credentials for role X.'] })
+    );
+
     expect(result.proposals[0].comment).toContain('Rotate credentials for role X.');
   });
 
   it('mints the same recommendation subject key on a rerun of the same conversation', () => {
-    const a = decidePackageReport({
-      conversationId,
-      state: baseHitState({ hosts: [] }),
-      catalog: { ok: true, actions: [isolateHost] },
-    });
-    const b = decidePackageReport({
-      conversationId,
-      state: baseHitState({ hosts: [] }),
-      catalog: { ok: true, actions: [isolateHost] },
-    });
-    expect(a.proposals[0].subjectKey).toBe(b.proposals[0].subjectKey);
+    const first = decide(baseHitState({ hosts: [] }));
+    const second = decide(baseHitState({ hosts: [], runId: 'run-2' }));
+
+    expect(first.proposals[0].subjectKey).toBe(second.proposals[0].subjectKey);
   });
 
-  it('treats a bare pid, without entity_id, as unfillable for a process-scoped action', () => {
-    expect(
-      canFillRespondAction({
-        entry: killProcess,
-        processSelector: {
-          pid: 100,
-          processKey: 'pid:100',
-          hostName: 'host-a',
-          processName: 'a.exe',
-        },
-      })
-    ).toBe(false);
+  it('names the hosts it handed off in the closure summary', () => {
+    const result = decide(baseHitState({ hosts: [{ name: 'host-a' }, { name: 'host-b' }] }));
+
+    expect(result.closureSummary).toContain('Hosts handed to Forensics Watch: host-a, host-b');
+  });
+});
+
+describe('buildProposalSubjectKey', () => {
+  it('is stable for the same conversation, host, and action', () => {
+    const input = { conversationId, hostName: 'host-a', actionWorkflowId: 'wf' };
+
+    expect(buildProposalSubjectKey(input)).toBe(buildProposalSubjectKey({ ...input }));
   });
 
-  it('treats entity_id as fillable for a process-scoped action', () => {
-    expect(
-      canFillRespondAction({
-        entry: killProcess,
-        processSelector: {
-          entityId: 'ent-9',
-          processKey: 'entity:ent-9',
-          hostName: 'host-a',
-          processName: 'b.exe',
-        },
-      })
-    ).toBe(true);
-  });
+  it('differs by host and by conversation', () => {
+    const base = { conversationId, hostName: 'host-a', actionWorkflowId: 'wf' };
 
-  it('mints an executable kill action only for the selector carrying entity_id, not the bare-pid one', () => {
-    // A bare pid is reused by the OS, so it can't safely back an executable action by the
-    // time an analyst approves it (the gate's decision window is measured in days);
-    // entity_id is Endpoint's durable per-process identity and doesn't have that problem.
-    const result = decidePackageReport({
-      conversationId,
-      state: baseHitState({
-        processSelectors: [
-          { pid: 100, processKey: 'pid:100', hostName: 'host-a', processName: 'a.exe' },
-          {
-            entityId: 'ent-9',
-            processKey: 'entity:ent-9',
-            hostName: 'host-a',
-            processName: 'b.exe',
-          },
-        ],
-      }),
-      catalog: { ok: true, actions: [killProcess] },
-    });
-    const executable = result.proposals.filter(
-      (p) => p.actionWorkflowId === killProcess.workflowId
+    expect(buildProposalSubjectKey(base)).not.toBe(
+      buildProposalSubjectKey({ ...base, hostName: 'host-b' })
     );
-    expect(executable).toHaveLength(1);
-    expect(executable[0].actionInput?.parameters).toEqual({ entity_id: 'ent-9' });
-    expect(executable[0].title).toBe('Kill b.exe on host-a');
-    expect(executable[0].comment).toContain('b.exe');
+    expect(buildProposalSubjectKey(base)).not.toBe(
+      buildProposalSubjectKey({ ...base, conversationId: 'conv-2' })
+    );
+  });
+});
+
+describe('buildHandoffSubjectId', () => {
+  it('is stable per (space, report, host) so a re-approved handoff replaces its indicator', () => {
+    const input = { spaceId, reportId, hostName: 'host-a' };
+
+    expect(buildHandoffSubjectId(input)).toBe(buildHandoffSubjectId({ ...input }));
+    expect(buildHandoffSubjectId(input)).toMatch(/^hunt-rpt-1-[0-9a-f]{16}$/);
   });
 
-  it('does not mint an executable action from a bare pid, even when it is the only process selector found (trigger: process uncovered, PID reuse)', () => {
-    const result = decidePackageReport({
-      conversationId,
-      state: baseHitState({
-        hasProcessBearingEvent: true,
-        processSelectors: [
-          { pid: 100, processKey: 'pid:100', hostName: 'host-a', processName: 'a.exe' },
-        ],
-      }),
-      catalog: { ok: true, actions: [isolateHost] },
-    });
-    expect(result.proposals).toHaveLength(2);
-    expect(
-      result.proposals.some((p) => p.actionWorkflowId === 'system-security-action-kill-process')
-    ).toBe(false);
-    expect(result.proposals.some((p) => p.actionWorkflowId === isolateHost.workflowId)).toBe(true);
-    const recommendation = result.proposals.find((p) => p.title === 'Analyst recommendation');
-    expect(recommendation?.comment).toContain('could not be resolved to a live process');
-  });
+  it('differs by host and by space, since every space shares one indicator index', () => {
+    const base = { spaceId, reportId, hostName: 'host-a' };
 
-  it('never applies a process selector observed on one host to a different host', () => {
-    const result = decidePackageReport({
-      conversationId,
-      state: baseHitState({
-        hosts: [
-          { name: 'host-a', enrolled: true, agentId: 'agent-a' },
-          { name: 'host-b', enrolled: true, agentId: 'agent-b' },
-        ],
-        processSelectors: [
-          {
-            entityId: 'ent-1',
-            processKey: 'entity:ent-1',
-            hostName: 'host-a',
-            processName: 'a.exe',
-          },
-        ],
-      }),
-      catalog: { ok: true, actions: [killProcess] },
-    });
-    // host-a fills kill-process from its own selector; host-b, with no selector of its own,
-    // mints nothing rather than borrowing host-a's.
-    expect(result.proposals).toHaveLength(1);
-    expect(result.proposals[0].hostName).toBe('host-a');
-    expect(result.proposals[0].actionInput?.parameters).toEqual({ entity_id: 'ent-1' });
-  });
-
-  it('builds stable subject keys for the same host × action × process', () => {
-    expect(
-      buildProposalSubjectKey({
-        conversationId: 'c',
-        endpointId: 'e',
-        actionWorkflowId: 'a',
-        processKey: 'p',
-      })
-    ).toBe(
-      buildProposalSubjectKey({
-        conversationId: 'c',
-        endpointId: 'e',
-        actionWorkflowId: 'a',
-        processKey: 'p',
-      })
+    expect(buildHandoffSubjectId(base)).not.toBe(
+      buildHandoffSubjectId({ ...base, hostName: 'host-b' })
+    );
+    expect(buildHandoffSubjectId(base)).not.toBe(
+      buildHandoffSubjectId({ ...base, spaceId: 'other' })
     );
   });
 });

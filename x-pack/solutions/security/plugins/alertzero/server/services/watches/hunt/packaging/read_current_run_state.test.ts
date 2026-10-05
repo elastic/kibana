@@ -12,8 +12,6 @@ const reportId = 'rpt-package-1';
 const runId = 'run-abc';
 
 const sseAttachment = ({
-  actionableIndices,
-  events,
   attachmentId = 'sse-1',
   title = 'Test SSE',
   evidenceFor = ['Tier 1 hit'],
@@ -21,9 +19,10 @@ const sseAttachment = ({
   tier2Behaviors = [],
   techniqueIds = ['T1078.004'],
   corroboratedTechniqueId,
+  entities = [{ field: 'host.name', value: 'host-a' }],
+  indicatorTypes,
+  timeRange = { from: '2026-09-25T00:00:00.000Z', to: '2026-09-25T01:00:00.000Z' },
 }: {
-  actionableIndices?: string[];
-  events?: Array<{ event_id: string; source_index: string }>;
   attachmentId?: string;
   title?: string;
   evidenceFor?: string[];
@@ -41,7 +40,11 @@ const sseAttachment = ({
    * technique the run actually corroborated, never on the report-scoped fallback entry.
    */
   corroboratedTechniqueId?: string;
-}): VersionedAttachment => ({
+  entities?: Array<{ field: string; value: string }>;
+  /** Extra indicator entries beyond the technique ones, e.g. an IOC. */
+  indicatorTypes?: Array<{ type: 'ioc'; value: string; ioc: { type: 'ip'; value: string } }>;
+  timeRange?: { from: string; to: string };
+} = {}): VersionedAttachment => ({
   id: attachmentId,
   type: 'security.significant_security_event',
   current_version: 1,
@@ -60,13 +63,16 @@ const sseAttachment = ({
         run_id: runId,
         report_id: reportId,
         ...(corroboratedTechniqueId ? { corroborated_technique_id: corroboratedTechniqueId } : {}),
-        security_knowledge_indicators: techniqueIds.map((techniqueId) => ({
-          type: 'technique' as const,
-          value: techniqueId,
-          technique_id: techniqueId,
-        })),
-        entities: [{ field: 'host.name', value: 'host-a' }],
-        events: events ?? [
+        security_knowledge_indicators: [
+          ...techniqueIds.map((techniqueId) => ({
+            type: 'technique' as const,
+            value: techniqueId,
+            technique_id: techniqueId,
+          })),
+          ...(indicatorTypes ?? []),
+        ],
+        entities,
+        events: [
           {
             event_id: 'evt-1',
             source_index: '.ds-logs-endpoint.events.process-default-2026.09.25-000001',
@@ -80,10 +86,7 @@ const sseAttachment = ({
         hunt_result: {
           has_confirmed_hit: true,
           hit_sources: ['tier1'],
-          time_range: {
-            from: '2026-09-25T00:00:00.000Z',
-            to: '2026-09-25T01:00:00.000Z',
-          },
+          time_range: timeRange,
           tier1: {
             status: 'environment_hits_found',
             counts: {
@@ -120,9 +123,7 @@ const sseAttachment = ({
                 },
               }
             : {}),
-          ...(actionableIndices !== undefined
-            ? { actionable_indices: actionableIndices }
-            : { actionable_indices: ['logs-endpoint.events.process-*'] }),
+          actionable_indices: ['logs-endpoint.events.process-*'],
         },
       },
     },
@@ -130,116 +131,104 @@ const sseAttachment = ({
 });
 
 describe('readCurrentRunState', () => {
-  const resolveHostEnrollment = async () => ({ enrolled: true as const, agentId: 'agent-1' });
-  const rehydrateProcessSelectors = async () => [];
+  it('returns undefined when no current-run SSE exists', () => {
+    expect(readCurrentRunState({ attachments: [], reportId, runId })).toBeUndefined();
+  });
 
-  it('matches a .ds- backing event index against a *-suffixed actionable pattern', async () => {
-    const state = await readCurrentRunState({
+  it('ignores an SSE from another run or another report', () => {
+    const otherRun = sseAttachment({ attachmentId: 'sse-other' });
+    (otherRun.versions[0].data as { run_id: string }).run_id = 'run-other';
+
+    expect(readCurrentRunState({ attachments: [otherRun], reportId, runId })).toBeUndefined();
+    expect(
+      readCurrentRunState({ attachments: [sseAttachment()], reportId: 'rpt-other', runId })
+    ).toBeUndefined();
+  });
+
+  it('collects every host named by host.name or host.hostname, deduped by name', () => {
+    const state = readCurrentRunState({
       attachments: [
         sseAttachment({
-          actionableIndices: ['logs-endpoint.events.process-*'],
-          events: [
-            {
-              event_id: 'evt-1',
-              source_index: '.ds-logs-endpoint.events.process-default-2026.09.25-000001',
-            },
+          attachmentId: 'sse-1',
+          entities: [
+            { field: 'host.name', value: 'host-a' },
+            { field: 'host.hostname', value: 'host-b' },
+          ],
+        }),
+        sseAttachment({
+          attachmentId: 'sse-2',
+          entities: [
+            { field: 'host.hostname', value: 'host-a' },
+            { field: 'host.name', value: 'host-c' },
           ],
         }),
       ],
       reportId,
       runId,
-      resolveHostEnrollment,
-      rehydrateProcessSelectors,
     });
 
-    expect(state?.allEventsActionable).toBe(true);
-    expect(state?.hasProcessBearingEvent).toBe(true);
+    expect(state?.hosts).toEqual([{ name: 'host-a' }, { name: 'host-b' }, { name: 'host-c' }]);
+    expect(state?.hasNonHostEntity).toBe(false);
   });
 
-  it('treats an empty actionable list as not host-scoped when events exist', async () => {
-    const state = await readCurrentRunState({
+  it('flags a user or service entity as evidence a host handoff cannot cover', () => {
+    const state = readCurrentRunState({
       attachments: [
         sseAttachment({
-          actionableIndices: [],
-          events: [
-            {
-              event_id: 'evt-1',
-              source_index: '.ds-logs-endpoint.events.process-default-2026.09.25-000001',
-            },
+          entities: [
+            { field: 'host.name', value: 'host-a' },
+            { field: 'user.name', value: 'svc-deploy' },
           ],
         }),
       ],
       reportId,
       runId,
-      resolveHostEnrollment,
-      rehydrateProcessSelectors,
     });
 
-    expect(state?.allEventsActionable).toBe(false);
-    expect(state?.hasProcessBearingEvent).toBe(false);
+    expect(state?.hosts).toEqual([{ name: 'host-a' }]);
+    expect(state?.hasNonHostEntity).toBe(true);
   });
 
-  it('unions actionable_indices across current-run SSEs', async () => {
-    const state = await readCurrentRunState({
+  it('flags an IOC-typed indicator', () => {
+    const state = readCurrentRunState({
       attachments: [
         sseAttachment({
-          attachmentId: 'sse-aws',
-          actionableIndices: ['logs-aws.cloudtrail-*'],
-          events: [
-            {
-              event_id: 'evt-aws',
-              source_index: '.ds-logs-aws.cloudtrail-default-2026.09.25-000001',
-            },
-          ],
-        }),
-        sseAttachment({
-          attachmentId: 'sse-endpoint',
-          actionableIndices: ['logs-endpoint.events.process-*'],
-          events: [
-            {
-              event_id: 'evt-endpoint',
-              source_index: '.ds-logs-endpoint.events.process-default-2026.09.25-000001',
-            },
+          indicatorTypes: [
+            { type: 'ioc', value: '203.0.113.9', ioc: { type: 'ip', value: '203.0.113.9' } },
           ],
         }),
       ],
       reportId,
       runId,
-      resolveHostEnrollment,
-      rehydrateProcessSelectors,
     });
 
-    expect(state?.allEventsActionable).toBe(true);
-    expect(state?.hasProcessBearingEvent).toBe(true);
+    expect(state?.hasIocIndicator).toBe(true);
   });
 
-  it('is host-scoped when there are no event refs', async () => {
-    const state = await readCurrentRunState({
-      attachments: [sseAttachment({ actionableIndices: [], events: [] })],
+  it('takes the union of the hunt windows across current-run SSEs', () => {
+    const state = readCurrentRunState({
+      attachments: [
+        sseAttachment({
+          attachmentId: 'sse-1',
+          timeRange: { from: '2026-09-25T00:00:00.000Z', to: '2026-09-25T01:00:00.000Z' },
+        }),
+        sseAttachment({
+          attachmentId: 'sse-2',
+          timeRange: { from: '2026-09-24T00:00:00.000Z', to: '2026-09-25T00:30:00.000Z' },
+        }),
+      ],
       reportId,
       runId,
-      resolveHostEnrollment,
-      rehydrateProcessSelectors,
     });
 
-    expect(state?.allEventsActionable).toBe(true);
-    expect(state?.hasProcessBearingEvent).toBe(false);
-  });
-
-  it('returns undefined when no current-run SSE exists', async () => {
-    const state = await readCurrentRunState({
-      attachments: [],
-      reportId,
-      runId,
-      resolveHostEnrollment,
-      rehydrateProcessSelectors,
+    expect(state?.huntWindow).toEqual({
+      from: '2026-09-24T00:00:00.000Z',
+      to: '2026-09-25T01:00:00.000Z',
     });
-
-    expect(state).toBeUndefined();
   });
 
-  it('dedupes identical titles and evidence lines across current-run SSEs', async () => {
-    const state = await readCurrentRunState({
+  it('dedupes identical titles and evidence lines across current-run SSEs', () => {
+    const state = readCurrentRunState({
       attachments: [
         sseAttachment({ attachmentId: 'sse-1', title: 'Same finding', evidenceFor: ['Same line'] }),
         sseAttachment({ attachmentId: 'sse-2', title: 'Same finding', evidenceFor: ['Same line'] }),
@@ -247,31 +236,27 @@ describe('readCurrentRunState', () => {
       ],
       reportId,
       runId,
-      resolveHostEnrollment,
-      rehydrateProcessSelectors,
     });
 
     expect(state?.titles).toEqual(['Same finding']);
     expect(state?.evidenceLines).toEqual(['Same line']);
   });
 
-  it('takes the max Tier 1 total hits across current-run SSEs', async () => {
-    const state = await readCurrentRunState({
+  it('takes the max Tier 1 total hits across current-run SSEs', () => {
+    const state = readCurrentRunState({
       attachments: [
         sseAttachment({ attachmentId: 'sse-1', tier1TotalHits: 2 }),
         sseAttachment({ attachmentId: 'sse-2', tier1TotalHits: 4 }),
       ],
       reportId,
       runId,
-      resolveHostEnrollment,
-      rehydrateProcessSelectors,
     });
 
     expect(state?.evidence.tier1HitCount).toBe(4);
   });
 
-  it('unions confirmed Tier 2 behaviors by technique_id, ignoring non-hit behaviors', async () => {
-    const state = await readCurrentRunState({
+  it('unions confirmed Tier 2 behaviors by technique_id, ignoring non-hit behaviors', () => {
+    const state = readCurrentRunState({
       attachments: [
         sseAttachment({
           attachmentId: 'sse-1',
@@ -287,8 +272,6 @@ describe('readCurrentRunState', () => {
       ],
       reportId,
       runId,
-      resolveHostEnrollment,
-      rehydrateProcessSelectors,
     });
 
     expect(state?.evidence.tier2Confirmed).toEqual([
@@ -297,22 +280,20 @@ describe('readCurrentRunState', () => {
     ]);
   });
 
-  it('collects every technique seen but only the ones an entry corroborated', async () => {
+  it('collects every technique seen but only the ones an entry corroborated', () => {
     // The report-scoped fallback entry: lists both proposed techniques, corroborates neither.
-    const state = await readCurrentRunState({
+    const state = readCurrentRunState({
       attachments: [sseAttachment({ techniqueIds: ['T1078.004', 'T1021.001'] })],
       reportId,
       runId,
-      resolveHostEnrollment,
-      rehydrateProcessSelectors,
     });
 
     expect(state?.techniques.sort()).toEqual(['T1021.001', 'T1078.004']);
     expect(state?.corroboratedTechniques).toEqual([]);
   });
 
-  it('marks a technique corroborated only when its own entry says so', async () => {
-    const state = await readCurrentRunState({
+  it('marks a technique corroborated only when its own entry says so', () => {
+    const state = readCurrentRunState({
       attachments: [
         sseAttachment({
           techniqueIds: ['T1078.004'],
@@ -321,16 +302,14 @@ describe('readCurrentRunState', () => {
       ],
       reportId,
       runId,
-      resolveHostEnrollment,
-      rehydrateProcessSelectors,
     });
 
     expect(state?.techniques).toEqual(['T1078.004']);
     expect(state?.corroboratedTechniques).toEqual(['T1078.004']);
   });
 
-  it('does not let one corroborated entry vouch for another entry’s uncorroborated technique', async () => {
-    const state = await readCurrentRunState({
+  it('does not let one corroborated entry vouch for another entry’s uncorroborated technique', () => {
+    const state = readCurrentRunState({
       attachments: [
         sseAttachment({
           attachmentId: 'sse-1',
@@ -341,8 +320,6 @@ describe('readCurrentRunState', () => {
       ],
       reportId,
       runId,
-      resolveHostEnrollment,
-      rehydrateProcessSelectors,
     });
 
     expect(state?.techniques.sort()).toEqual(['T1021.001', 'T1078.004']);

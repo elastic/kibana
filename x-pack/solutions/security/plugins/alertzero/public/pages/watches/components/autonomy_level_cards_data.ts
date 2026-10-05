@@ -324,7 +324,8 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
         who: i18n.translate(
           'xpack.alertzero.watches.settings.autonomyCards.threatHunt.supervised.who',
           {
-            defaultMessage: 'Hunts and acts on its own. You review afterwards.',
+            defaultMessage:
+              'Hunts on its own and hands confirmed hosts to Forensics Watch without waiting. You review afterwards.',
           }
         ),
         facts: [
@@ -345,7 +346,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
             ),
             value: factValue(
               'xpack.alertzero.watches.settings.autonomyCards.threatHunt.supervised.proposalsValue',
-              '<worker> answers them automatically — reversible by <you>. Every action is recorded.'
+              '<worker> approves forensics handoffs automatically; Forensics Watch still asks <you> before any response action. Every handoff is recorded.'
             ),
           },
         ],

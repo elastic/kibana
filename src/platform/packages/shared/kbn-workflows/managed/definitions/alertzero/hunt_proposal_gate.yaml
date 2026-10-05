@@ -1,11 +1,12 @@
 version: "1"
 name: Hunt Watch - proposal gate
 description: >
-  Creates one Proposal and waits for an analyst to approve or reject it. Once
-  every Proposal on the Investigation has been decided, closes the
-  Investigation. Continues rather than failing if it can't confirm the
-  Investigation's state afterward, since leaving the Investigation open for
-  someone to check is safer than closing it incorrectly.
+  Creates one Proposal for a finding the hunt packaged (a "Run a deep forensics
+  investigation" handoff for a confirmed host, or an analyst recommendation),
+  waits for the decision, and records the outcome on the Investigation. Never
+  closes the Investigation: an approved handoff leaves it open for the forensic
+  report Forensics Watch writes into it, and a dismissed or expired one leaves
+  it open for an analyst to close.
 enabled: true
 tags:
   - security
@@ -24,8 +25,8 @@ settings:
   # expire first and lose a decision the child had already reached (the same reasoning
   # create_proposal.yaml gives for being strictly longer than `52w`). Hence the same
   # 176h as every other human-gated AlertZero parent — attack_discovery_review,
-  # coverage_review, rule_creation, rule_tuning_review. The two requery/close steps
-  # after the wrap are near-instant, so the margin is all decision time.
+  # coverage_review, rule_creation, rule_tuning_review. The decision read and the
+  # journal note after the wrap are near-instant, so the margin is all decision time.
   #
   # Not to be confused with the `53w` on system-create-alertzero-proposal, the bridge
   # this child actually executes: that is a deliberate sentinel, not a decision window.
@@ -61,24 +62,29 @@ triggers:
           description: Grouping axis for the decision queue; always set by the packaging child's mint payload.
         investigationConversationId:
           type: string
-          description: Investigation conversation id this gate closes on settlement.
+          description: Investigation conversation id this gate records its outcome on.
         runId:
           type: string
           description: Run id the Worker's fan-out minted for this sweep.
-        closureSummary:
+        hostName:
           type: string
-          description: Precomputed closure summary from the packaging child, written on close.
-        expectedProposalCount:
-          type: number
-          description: The creation barrier this gate checks (created >= this) before closing the Investigation.
+          description: >-
+            Host the Proposal is about, named in the journal note. Absent on the
+            analyst recommendation, which is not scoped to one host.
+        autonomy:
+          type: string
+          description: >-
+            Worker autonomy level, which decides whether the handoff needs an analyst
+            gate: `supervised` auto-approves it, `manual` and `assisted` gate it. The
+            same rule the Attack Discovery review applies to the same handoff. Defaults
+            to `manual`. The bridge still forces a gate when it had to reopen a closed
+            Investigation, whatever this says.
       required:
         - conversationId
         - comment
         - category
         - investigationConversationId
         - runId
-        - closureSummary
-        - expectedProposalCount
       additionalProperties: false
 outputs:
   - name: proposalStatus
@@ -87,18 +93,33 @@ outputs:
     type: string
   - name: expired
     type: boolean
+consts:
+  journal_note: system-alertzero-journal-note
+  default_autonomy: manual
 steps:
+  # Liquid cannot compare the result of a filter chain in one expression, so the
+  # defaulted level is resolved first and the comparison reads it from here.
+  - name: resolve_context
+    type: data.set
+    with:
+      autonomy: "{{ inputs.autonomy | default: consts.default_autonomy }}"
+
+  - name: resolve_auto_approve
+    type: data.set
+    with:
+      value: "${{ steps.resolve_context.output.autonomy == 'supervised' }}"
+
   # The gate child adds no second gate: this is a single sync wrap of
   # system-create-alertzero-proposal's own waitForApproval.
   # Goes through the bridge, not straight to system-create-proposal, so this
   # child's Proposals are stamped origin: alertzero like every other AlertZero
-  # caller's. on-failure: continue rather than a fallback ending in
-  # workflow.output, since this is this workflow's own terminal concern, not a
-  # stage a Worker branch depends on continuing past (that rule applies to the
-  # Worker's parallel branch specifically) -- but continuing here still
-  # lets the requery/close steps below run their own best-effort cleanup
-  # rather than aborting the whole execution if the wrap itself never resolves
-  # normally.
+  # caller's, and so a Proposal landing on a closed Investigation reopens it
+  # (and is never auto-approved when it did). on-failure: continue rather than
+  # a fallback ending in workflow.output, since this is this workflow's own
+  # terminal concern, not a stage a Worker branch depends on continuing past --
+  # but continuing here still lets the journal note below say that the Proposal
+  # could not be created, rather than the finding vanishing silently
+  # (elastic/security-team#19849's first direction).
   - name: create_and_gate_proposal
     type: workflow.execute
     with:
@@ -112,180 +133,88 @@ steps:
         impact: "${{ inputs.impact }}"
         confidence: "${{ inputs.confidence }}"
         category: "${{ inputs.category }}"
+        autoApprove: "${{ steps.resolve_auto_approve.output.value }}"
     on-failure:
       continue: true
 
-  - name: resolve_gate_wrapper_output
+  # The gate's own output already says WHAT was decided. This recovers the prose
+  # that goes with it -- `decidedBy`, `dismissReason`, `rationale` -- which the gate
+  # does not carry, for the journal note. Best effort: a failed read only costs the
+  # note its names.
+  - name: read_proposal_decision
+    type: kibana.request
+    if: "${{ steps.create_and_gate_proposal.output.proposalId != blank }}"
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/proposals/{{ steps.create_and_gate_proposal.output.proposalId }}"
+      headers:
+        elastic-api-version: "1"
+    on-failure:
+      continue: true
+
+  # `approved` reads `succeeded`, not the decision alone: an approved handoff whose
+  # action failed is re-parked by the bridge and decided again, and only a run
+  # whose action actually wrote the forensics request counts as handed off.
+  - name: record_decision
     type: data.set
     with:
-      proposal_status: "{{ steps.create_and_gate_proposal.output.status }}"
-      proposal_decision: "{{ steps.create_and_gate_proposal.output.decision }}"
-      proposal_expired: "${{ steps.create_and_gate_proposal.output.status == 'expired' }}"
+      created: "${{ steps.create_and_gate_proposal.output.proposalId != blank }}"
+      approved: >-
+        ${{ steps.create_and_gate_proposal.output.decision == 'approved'
+          and steps.create_and_gate_proposal.output.status == 'succeeded' }}
+      declined: "${{ steps.create_and_gate_proposal.output.decision == 'dismissed' }}"
+      expired: "${{ steps.create_and_gate_proposal.output.status == 'expired' }}"
+      # The analyst recommendation has no action, so approving it settles `no_action`:
+      # an acknowledgement, not a handoff.
+      acknowledged: >-
+        ${{ steps.create_and_gate_proposal.output.decision == 'approved'
+          and steps.create_and_gate_proposal.output.status == 'no_action' }}
 
-  # Two calls, not a conditional retry: `!= filter chain -> comparison` in one
-  # expression is illegal in this engine, so an "only requery again if the first
-  # read looks stale" branch would need the same split this avoids entirely.
-  # Bounded (exactly one retry, always run) rather than unbounded: a
-  # just-created Proposal has to become visible, and
-  # a second immediate read after the wrap has already returned is enough
-  # margin for the common case. The later read is preferred and the first is its
-  # fallback (see resolve_settlement_counts), so the pair can only ever see more
-  # than a single call would -- never less.
-  #
-  # Three independently-scoped pairs rather than one unfiltered requery: `size`
-  # on this route caps at 100 and only bounds the returned `proposals` array, so
-  # counting pending/executing by filtering that array (the previous approach)
-  # silently undercounted past 100 Proposals on an Investigation. `total` is the
-  # server's own hit count for whatever filter was sent -- accurate at any
-  # volume regardless of `size` -- so each pair asks the question it actually
-  # needs answered (all Proposals / only pending / only executing) and reads
-  # `total` rather than paging through results this gate has no use for.
-  # `size: 1` on every pair: the only thing any of them reads is `total`.
-  #
-  # Accepted residual gap: three independent reads are three independent instants, not one
-  # atomic snapshot, so a Proposal that transitions executing -> failed -> re-parked pending
-  # (`managed/definitions/proposals/create_proposal.yaml`'s own retry/clone path) exactly
-  # between the pending pair and the executing pair could read as absent from both --
-  # genuinely pending, but invisible to this settlement check. The single-snapshot requery
-  # this replaced didn't have this gap, but paid for it with the `size: 100` undercount this
-  # change exists to fix; this engine's status filter is single-valued (no "status in
-  # [pending, executing]" query), so there is no way to read a status-agnostic "any Proposal
-  # still open" total without either that undercount or a real bucketed aggregation. The
-  # window itself is narrow -- it needs a failure-and-reclone cycle to land inside a few
-  # back-to-back, near-instant reads -- and elastic/security-team#19855 (a per-status
-  # aggregate route, proposed independently in review) closes it for good by reading every
-  # status from one snapshot instead of several; not worth a more complex workaround here
-  # against the existing single-status-filter API for a window this narrow.
-  - name: requery_created
-    type: kibana.request
+  # The one message this gate writes: what happened to the Proposal, and that the
+  # Investigation stays open either way. Literal block scalar; block tags use `-%}`
+  # only so line breaks survive.
+  - name: journal_decision
+    type: workflow.execute
     with:
-      method: GET
-      path: "/s/{{ workflow.spaceId }}/internal/proposals"
-      headers:
-        elastic-api-version: "1"
-      query:
-        conversationId: "{{ inputs.investigationConversationId }}"
-        size: 1
+      workflow-id: "{{ consts.journal_note }}"
+      inputs:
+        conversation_id: "{{ inputs.investigationConversationId }}"
+        message: |-
+          {% if steps.record_decision.output.created != true -%}
+          Hunt Watch could not create the Proposal{% if inputs.hostName != blank %} for `{{ inputs.hostName }}`{% endif %}: {{ steps.create_and_gate_proposal.error.message | default: 'the proposal workflow returned no proposal id' }}. The finding is still recorded on this Investigation; a manual run of report `{{ inputs.runId }}`'s subject retries it.
+          {% elsif steps.record_decision.output.approved == true -%}
+          Approved the forensics handoff{% if inputs.hostName != blank %} for `{{ inputs.hostName }}`{% endif %}{% if steps.read_proposal_decision.output.decidedBy.username != blank %} ({{ steps.read_proposal_decision.output.decidedBy.username }}){% endif %}. Forensics Watch picks the host up on its next sweep and writes its report here. This Investigation stays open for that report.
+          {% elsif steps.record_decision.output.acknowledged == true -%}
+          Acknowledged the analyst recommendation{% if steps.read_proposal_decision.output.decidedBy.username != blank %} ({{ steps.read_proposal_decision.output.decidedBy.username }}){% endif %}. No automated action was attached to it. This Investigation stays open until an analyst closes it.
+          {% elsif steps.record_decision.output.declined == true -%}
+          Dismissed the Proposal{% if inputs.hostName != blank %} for `{{ inputs.hostName }}`{% endif %} as "{{ steps.read_proposal_decision.output.dismissReason | default: 'unspecified' }}". {{ steps.read_proposal_decision.output.rationale }} This Investigation stays open until an analyst closes it.
+          {% elsif steps.record_decision.output.expired == true -%}
+          The Proposal{% if inputs.hostName != blank %} for `{{ inputs.hostName }}`{% endif %} expired with no decision. This Investigation stays open until an analyst closes it.
+          {% else -%}
+          The Proposal{% if inputs.hostName != blank %} for `{{ inputs.hostName }}`{% endif %} ended with status `{{ steps.create_and_gate_proposal.output.status }}` (decision `{{ steps.create_and_gate_proposal.output.decision }}`). This Investigation stays open until an analyst closes it.
+          {% endif -%}
     on-failure:
       continue: true
 
-  - name: requery_created_retry
-    type: kibana.request
-    with:
-      method: GET
-      path: "/s/{{ workflow.spaceId }}/internal/proposals"
-      headers:
-        elastic-api-version: "1"
-      query:
-        conversationId: "{{ inputs.investigationConversationId }}"
-        size: 1
-    on-failure:
-      continue: true
-
-  - name: requery_pending
-    type: kibana.request
-    with:
-      method: GET
-      path: "/s/{{ workflow.spaceId }}/internal/proposals"
-      headers:
-        elastic-api-version: "1"
-      query:
-        conversationId: "{{ inputs.investigationConversationId }}"
-        status: pending
-        size: 1
-    on-failure:
-      continue: true
-
-  - name: requery_pending_retry
-    type: kibana.request
-    with:
-      method: GET
-      path: "/s/{{ workflow.spaceId }}/internal/proposals"
-      headers:
-        elastic-api-version: "1"
-      query:
-        conversationId: "{{ inputs.investigationConversationId }}"
-        status: pending
-        size: 1
-    on-failure:
-      continue: true
-
-  - name: requery_executing
-    type: kibana.request
-    with:
-      method: GET
-      path: "/s/{{ workflow.spaceId }}/internal/proposals"
-      headers:
-        elastic-api-version: "1"
-      query:
-        conversationId: "{{ inputs.investigationConversationId }}"
-        status: executing
-        size: 1
-    on-failure:
-      continue: true
-
-  - name: requery_executing_retry
-    type: kibana.request
-    with:
-      method: GET
-      path: "/s/{{ workflow.spaceId }}/internal/proposals"
-      headers:
-        elastic-api-version: "1"
-      query:
-        conversationId: "{{ inputs.investigationConversationId }}"
-        status: executing
-        size: 1
-    on-failure:
-      continue: true
-
-  # Reads the later requery and falls back to the first one, rather than reading
-  # the retry alone: both calls swallow their own failure, so a transient failure
-  # on the second read would otherwise discard a first read that had succeeded.
-  # The retry exists to see *more* than the first read, so it must never be able
-  # to see less. `| default:` against another step's output is this package's
-  # existing idiom for that (forensics_run_endpoint_analysis.yaml's host_name
-  # chains two step outputs and a literal the same way).
-  #
-  # created_count's trailing `default: 0` is fail-safe on its own: a 0 created
-  # count almost never clears `>= expectedProposalCount`, so a failed pair of
-  # creation reads blocks settlement same as before this requery was split into
-  # three independently-scoped pairs. pending_count/executing_count are the
-  # opposite case -- those gate on being *zero*, so a failed pair collapsing to
-  # literal `0` would read as "nothing pending/executing" and let `resolve_settled`
-  # close the Investigation while a real pending or executing Proposal sits
-  # unobserved because this specific read failed, not because it doesn't exist.
-  # `default: 1` keeps them fail-closed: a failed pair can never look like "none
-  # outstanding," only like "at least one," which is always safe to NOT-close on.
-  - name: resolve_settlement_counts
-    type: data.set
-    with:
-      created_count: "${{ steps.requery_created_retry.output.total | default: steps.requery_created.output.total | default: 0 }}"
-      pending_count: "${{ steps.requery_pending_retry.output.total | default: steps.requery_pending.output.total | default: 1 }}"
-      executing_count: "${{ steps.requery_executing_retry.output.total | default: steps.requery_executing.output.total | default: 1 }}"
-
-  # Three-term `and` chain with no `or` mixed in, which associates left-to-right
-  # and so avoids the mixed and/or precedence hazard create_proposal.yaml warns
-  # about (that warning is about mixing and/or, not chaining multiple ands).
-  # This is the full settlement predicate: enough Proposals created, none still
-  # pending, none still executing.
-  - name: resolve_settled
-    type: data.set
-    with:
-      settled: "${{ variables.created_count >= inputs.expectedProposalCount and variables.pending_count == 0 and variables.executing_count == 0 }}"
-
-  # Idempotent close (a second close on an already-closed Investigation is a
-  # no-op returning closed: true, per the client's own patchMetadata contract);
-  # accepted unrecoverable case on failure: the Investigation stays open with
-  # its pending state visible, and recovery is manual.
-  - name: close_if_settled
+  # Keeps the Investigation open on approval, explicitly: Forensics Watch writes its
+  # findings into this conversation, so closing it would put the report where nobody
+  # is looking. Only `status` is written; `verdict` carries the handoff note the way
+  # the Attack Discovery review records the same event. Nothing in this workflow ever
+  # patches `status: closed` -- a dismissed or expired handoff is an analyst's to
+  # close, not this gate's, since the same Investigation may carry other handoffs
+  # still awaiting a decision.
+  - name: record_forensics_handoff
     type: ai.conversation.metadata.patch
-    if: "${{ variables.settled == true }}"
+    if: "${{ steps.record_decision.output.approved == true }}"
     with:
       conversation_id: "{{ inputs.investigationConversationId }}"
       updates:
-        status: closed
-        close_reason: resolved
-        summary: "{{ inputs.closureSummary }}"
+        status: open
+        verdict: >-
+          Handed off{% if inputs.hostName != blank %} `{{ inputs.hostName }}`{% endif %} to
+          Forensics Watch, approved by
+          {{ steps.read_proposal_decision.output.decidedBy.username | default: 'the worker' }}.
+          This Investigation stays open for the forensics report.
     on-failure:
       continue: true
 
@@ -293,6 +222,6 @@ steps:
     type: workflow.output
     status: completed
     with:
-      proposalStatus: "{{ variables.proposal_status }}"
-      decision: "{{ variables.proposal_decision }}"
-      expired: "${{ variables.proposal_expired }}"
+      proposalStatus: "{{ steps.create_and_gate_proposal.output.status }}"
+      decision: "{{ steps.create_and_gate_proposal.output.decision }}"
+      expired: "${{ steps.record_decision.output.expired == true }}"

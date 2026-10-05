@@ -5,21 +5,20 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import { v5 as uuidv5 } from 'uuid';
-import type { ActionCatalogEntry } from '@kbn/alertzero-common';
-import type { JsonSchema } from '@kbn/workflows';
-import type { PackageReportMintPayload } from '../../../../../common/step_types/package_report';
+import { ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import {
-  buildProposalComment,
-  buildProposalTitle,
+  HUNT_COVERAGE_AI_INDEX_ID,
+  type PackageReportMintPayload,
+} from '../../../../../common/step_types/package_report';
+import {
+  buildHandoffComment,
+  buildHandoffContext,
+  buildHandoffTitle,
   buildRecommendationComment,
 } from './proposal_copy';
-import type {
-  CurrentRunHost,
-  CurrentRunState,
-  DecidePackageReportResult,
-  ProcessSelector,
-} from './types';
+import type { CurrentRunHost, CurrentRunState, DecidePackageReportResult } from './types';
 
 /**
  * Fixed namespace for Same-Investigation Proposal subject keys. Frozen: changing
@@ -27,135 +26,62 @@ import type {
  */
 const HUNT_PROPOSAL_SUBJECT_UUID_NAMESPACE = 'a3c7e91f-4b2d-5e68-9c1a-8f0d6b3e5a72';
 
+/**
+ * The one action Hunt packaging mints. Everything a host needs done is Forensics Watch's
+ * call once it has reconstructed what happened there; Hunt only names the host.
+ */
+export const HUNT_HANDOFF_ACTION_WORKFLOW_ID = ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID;
+
+/**
+ * `host_name.maxLength` on the handoff action's input schema. An SSE entity value may be up to
+ * 2048 characters, so a host past this bound would mint a Proposal whose approval fails trigger
+ * validation after the analyst said yes; it is left to the recommendation instead.
+ */
+export const MAX_HANDOFF_HOST_NAME_LENGTH = 256;
+
+/** `attributes.producer` on the knowledge indicator the handoff writes. */
+export const HUNT_HANDOFF_PRODUCER = 'hunt.packageReport.handoff_to_forensics.v1';
+/** `watch:` tag and `attributes.watch_id` on that indicator. */
+export const HUNT_HANDOFF_WATCH_ID = 'hunt';
+/**
+ * `classification` the handoff carries. The Attack Discovery review sends its FP/TP
+ * verdict here; a hunt has no verdict step, so it names the one bar it did clear.
+ */
+export const HUNT_HANDOFF_CLASSIFICATION = 'hunt_confirmed';
+
 export const buildProposalSubjectKey = ({
   conversationId,
-  endpointId,
+  hostName,
   actionWorkflowId,
-  processKey,
 }: {
   conversationId: string;
-  endpointId: string;
+  hostName: string;
   actionWorkflowId: string;
-  processKey?: string;
-}): string => {
-  const material = processKey
-    ? `${conversationId}|${endpointId}|${actionWorkflowId}|${processKey}`
-    : `${conversationId}|${endpointId}|${actionWorkflowId}`;
-  return uuidv5(material, HUNT_PROPOSAL_SUBJECT_UUID_NAMESPACE);
-};
+}): string =>
+  uuidv5(`${conversationId}|${hostName}|${actionWorkflowId}`, HUNT_PROPOSAL_SUBJECT_UUID_NAMESPACE);
 
 /** One per run: a rerun of the same report must settle onto the same recommendation, not mint a second one. */
 const buildRecommendationSubjectKey = (conversationId: string): string =>
   uuidv5(`${conversationId}|recommendation`, HUNT_PROPOSAL_SUBJECT_UUID_NAMESPACE);
 
-const schemaRequires = (schema: JsonSchema | undefined, key: string): boolean => {
-  if (!schema || typeof schema !== 'object') {
-    return false;
-  }
-  const required = (schema as { required?: unknown }).required;
-  return Array.isArray(required) && required.includes(key);
-};
-
-const schemaHasProperty = (schema: JsonSchema | undefined, key: string): boolean => {
-  if (!schema || typeof schema !== 'object') {
-    return false;
-  }
-  const properties = (schema as { properties?: Record<string, unknown> }).properties;
-  return properties !== undefined && key in properties;
-};
-
-const actionInputSchema = (entry: ActionCatalogEntry): JsonSchema | undefined => {
-  const schema = entry.inputSchema;
-  if (!schema || typeof schema !== 'object') {
-    return undefined;
-  }
-  const nested = (schema as { properties?: Record<string, JsonSchema> }).properties?.actionInput;
-  // Catalog entries publish the manual-trigger inputs object; some wrap under actionInput.
-  if (nested && schemaHasProperty(schema, 'actionInput')) {
-    return nested;
-  }
-  return schema;
-};
-
-const needsProcessParameters = (schema: JsonSchema | undefined): boolean =>
-  !!schema && (schemaRequires(schema, 'parameters') || schemaHasProperty(schema, 'parameters'));
-
-/** Every field name `buildActionInput` below actually knows how to supply. */
-const FILLABLE_FIELDS = new Set(['endpoint_ids', 'parameters']);
-
-const requiredFields = (schema: JsonSchema | undefined): string[] => {
-  if (!schema || typeof schema !== 'object') {
-    return [];
-  }
-  const required = (schema as { required?: unknown }).required;
-  return Array.isArray(required)
-    ? required.filter((field): field is string => typeof field === 'string')
-    : [];
-};
-
 /**
- * True when the catalog entry's inputSchema can be fully filled from the given
- * host + optional process selector. Entries without inputSchema are unfillable.
- *
- * Checks the schema's `required` list as a whole, not only `endpoint_ids`/`parameters` in
- * isolation: `buildActionInput` below only ever supplies those two fields, so a schema
- * requiring anything else can never be filled regardless of host/process data, and offering
- * it as executable would mint a proposal that fails after an analyst has already approved it.
- * This also means a catalog action gaining a new required field in the future falls back to a
- * recommendation automatically, rather than silently minting an unfillable proposal.
- *
- * A process-scoped action requires `processSelector.entityId` specifically, not a bare
- * `pid`: PIDs are reused by the OS, and between minting and an analyst's approval (the
- * gate's decision window is measured in days) a bare PID can come to belong to an
- * unrelated process. `entity_id` is Endpoint's durable per-process identity and doesn't
- * have that failure mode. A selector with only a `pid` still surfaces for the
- * recommendation path (see `decidePackageReport`'s `processUncovered`) — it just can't
- * back an executable kill/suspend.
+ * The `subject_id` the handoff action keys its knowledge indicator on
+ * (`analyze-endpoint-{subject_id}`), stable per (space, report, host) so a re-approved
+ * handoff for the same host replaces the indicator instead of appending one. The report
+ * id stays readable; the host is hashed because hostnames carry characters an id should
+ * not, and the space is folded in because every space's indicators share one index.
  */
-export const canFillRespondAction = ({
-  entry,
-  processSelector,
+export const buildHandoffSubjectId = ({
+  spaceId,
+  reportId,
+  hostName,
 }: {
-  entry: ActionCatalogEntry;
-  processSelector?: ProcessSelector;
-}): boolean => {
-  if (entry.category === 'configure') {
-    return false;
-  }
-  const schema = actionInputSchema(entry);
-  if (!schema) {
-    return false;
-  }
-  if (!requiredFields(schema).every((field) => FILLABLE_FIELDS.has(field))) {
-    return false;
-  }
-  if (needsProcessParameters(schema)) {
-    return processSelector?.entityId !== undefined;
-  }
-  return true;
-};
-
-export const buildActionInput = ({
-  entry,
-  agentId,
-  processSelector,
-}: {
-  entry: ActionCatalogEntry;
-  agentId: string;
-  processSelector?: ProcessSelector;
-}): Record<string, unknown> | undefined => {
-  if (!canFillRespondAction({ entry, processSelector })) {
-    return undefined;
-  }
-  const schema = actionInputSchema(entry);
-  const actionInput: Record<string, unknown> = {
-    endpoint_ids: [agentId],
-  };
-  if (needsProcessParameters(schema)) {
-    // `canFillRespondAction` above already guarantees `processSelector.entityId` is set.
-    actionInput.parameters = { entity_id: processSelector!.entityId };
-  }
-  return actionInput;
+  spaceId: string;
+  reportId: string;
+  hostName: string;
+}): string => {
+  const hostHash = createHash('sha256').update(`${spaceId}|${hostName}`).digest('hex');
+  return `hunt-${reportId}-${hostHash.slice(0, 16)}`;
 };
 
 const buildClosureSummary = (state: CurrentRunState): string => {
@@ -169,54 +95,42 @@ const buildClosureSummary = (state: CurrentRunState): string => {
   }
   const hostPart =
     state.hosts.length > 0
-      ? ` Hosts: ${state.hosts.map((h) => h.name).join(', ')}.`
-      : ' No eligible hosts.';
+      ? ` Hosts handed to Forensics Watch: ${state.hosts.map((h) => h.name).join(', ')}.`
+      : ' No host to hand to Forensics Watch.';
   return `${title}. Confirmed hit.${hostPart}${evidence}`;
 };
 
 /** Why the recommendation fired, one line per reason that actually held. */
 const buildRecommendationReasonLines = ({
-  hasExecutable,
-  unenrolledHosts,
+  hasHandoff,
   nonHostEvidence,
-  evidenceOutsideActionable,
-  processUncovered,
+  unhandedHosts,
 }: {
-  hasExecutable: boolean;
-  unenrolledHosts: CurrentRunHost[];
+  hasHandoff: boolean;
   nonHostEvidence: boolean;
-  evidenceOutsideActionable: boolean;
-  processUncovered: boolean;
+  unhandedHosts: CurrentRunHost[];
 }): string[] => {
   const lines: string[] = [];
-  if (!hasExecutable) {
-    lines.push('No respond action could be filled for this finding.');
-  }
-  if (unenrolledHosts.length > 0) {
+  if (!hasHandoff) {
     lines.push(
-      `${unenrolledHosts.length === 1 ? 'Host' : 'Hosts'} ${unenrolledHosts
-        .map((h) => h.name)
-        .join(', ')} ${
-        unenrolledHosts.length === 1 ? 'is' : 'are'
-      } not enrolled, so no Defend action reaches ${unenrolledHosts.length === 1 ? 'it' : 'them'}.`
+      'No host was observed in this finding, so there is nothing to hand to Forensics Watch.'
     );
   }
   if (nonHostEvidence) {
     lines.push(
-      'Part of the evidence for this finding is not host-scoped, so a host action would not close it.'
+      'Part of the evidence for this finding is not host-scoped, so a forensic run on the hosts alone would not close it.'
     );
   }
-  // Says what was observed -- an event whose index is not among the run's `actionable_indices` --
-  // rather than concluding the finding is not host-scoped. An empty actionable set also means
-  // the mapping classifier was degraded, and the run cannot tell that apart from a customer
-  // with no process telemetry; neither reading would justify the stronger claim.
-  if (evidenceOutsideActionable) {
+  if (unhandedHosts.length > 0) {
     lines.push(
-      'Some evidence came from indices not known to carry a process identity to act on, so a host action would not close it on its own.'
+      `${
+        unhandedHosts.length === 1 ? 'A host name' : `${unhandedHosts.length} host names`
+      } in this finding ${
+        unhandedHosts.length === 1 ? 'is' : 'are'
+      } longer than a handoff accepts (${MAX_HANDOFF_HOST_NAME_LENGTH} characters), so Forensics Watch was not asked about ${
+        unhandedHosts.length === 1 ? 'it' : 'them'
+      }.`
     );
-  }
-  if (processUncovered) {
-    lines.push('A process was implicated but could not be resolved to a live process to act on.');
   }
   return lines;
 };
@@ -232,8 +146,8 @@ const buildRecommendationProposal = ({
 }): PackageReportMintPayload => ({
   subjectKey: buildRecommendationSubjectKey(conversationId),
   conversationId,
-  // Fixed, not per-host/per-action like buildProposalTitle below: this Proposal isn't scoped
-  // to one host or action, so there's no single subject to name in a dynamic title.
+  // Fixed, not per-host like buildHandoffTitle: this Proposal isn't scoped to one host,
+  // so there's no single subject to name in a dynamic title.
   title: 'Analyst recommendation',
   comment: buildRecommendationComment({
     reasonLines,
@@ -246,17 +160,70 @@ const buildRecommendationProposal = ({
   confidence: 'medium',
 });
 
+const buildHandoffProposal = ({
+  conversationId,
+  spaceId,
+  reportId,
+  runId,
+  host,
+  state,
+}: {
+  conversationId: string;
+  spaceId: string;
+  reportId: string;
+  runId: string;
+  host: CurrentRunHost;
+  state: CurrentRunState;
+}): PackageReportMintPayload => ({
+  subjectKey: buildProposalSubjectKey({
+    conversationId,
+    hostName: host.name,
+    actionWorkflowId: HUNT_HANDOFF_ACTION_WORKFLOW_ID,
+  }),
+  conversationId,
+  title: buildHandoffTitle({ host }),
+  comment: buildHandoffComment({ host, state, reportId }),
+  // The Attack Discovery review's own values for the same handoff, so the queue groups
+  // and ranks both producers' handoffs alike.
+  category: 'investigate',
+  impact: 'high',
+  confidence: 'medium',
+  actionWorkflowId: HUNT_HANDOFF_ACTION_WORKFLOW_ID,
+  // Exactly the shape `system-alertzero-action-handoff-to-forensics` declares: that action
+  // closes `actionInput` to additional properties, so an extra key here fails at approval
+  // time rather than being ignored. Ids and provenance only; the evidence stays on the
+  // Investigation, which `investigation_id` points Forensics at.
+  actionInput: {
+    ai_index_id: HUNT_COVERAGE_AI_INDEX_ID,
+    subject_id: buildHandoffSubjectId({ spaceId, reportId, hostName: host.name }),
+    host_name: host.name,
+    report_id: reportId,
+    investigation_id: conversationId,
+    classification: HUNT_HANDOFF_CLASSIFICATION,
+    workflow_execution_id: runId,
+    producer: HUNT_HANDOFF_PRODUCER,
+    watch_id: HUNT_HANDOFF_WATCH_ID,
+    context: buildHandoffContext({ host, state, reportId }),
+  },
+  hostName: host.name,
+});
+
 /**
- * Respond-action fan-out plus the analyst-recommendation mint rule. Pure: no I/O.
+ * One Forensics handoff per confirmed host, plus the analyst-recommendation mint rule for
+ * what a host handoff cannot cover. Pure: no I/O.
  */
 export const decidePackageReport = ({
   conversationId,
+  spaceId,
+  reportId,
+  runId,
   state,
-  catalog,
 }: {
   conversationId: string;
+  spaceId: string;
+  reportId: string;
+  runId: string;
   state: CurrentRunState;
-  catalog: { ok: true; actions: ActionCatalogEntry[] } | { ok: false; reason: 'catalog_error' };
 }): DecidePackageReportResult => {
   const closureSummary = buildClosureSummary(state);
 
@@ -264,111 +231,37 @@ export const decidePackageReport = ({
     return { dismiss: true, proposals: [], closureSummary };
   }
 
-  const eligible = state.hosts.filter((h) => h.enrolled && h.agentId);
-  const unenrolled = state.hosts.filter((h) => !h.enrolled || !h.agentId);
-  const respondActions = catalog.ok ? catalog.actions.filter((a) => a.category === 'respond') : [];
-
   const proposals: PackageReportMintPayload[] = [];
   const seenSubjectKeys = new Set<string>();
-
-  if (catalog.ok && respondActions.length > 0 && eligible.length > 0) {
-    for (const host of eligible) {
-      const agentId = host.agentId!;
-      // A selector's `hostName` names the host it was actually observed on; applying it to
-      // every enrolled host would mint a kill-process proposal against the wrong agent.
-      const hostProcessSelectors = state.processSelectors.filter(
-        (selector) => selector.hostName === host.name
-      );
-      for (const entry of respondActions) {
-        const schema = actionInputSchema(entry);
-        const processScoped = needsProcessParameters(schema);
-
-        if (processScoped) {
-          for (const processSelector of hostProcessSelectors) {
-            const actionInput = buildActionInput({ entry, agentId, processSelector });
-            if (!actionInput) {
-              continue;
-            }
-            const subjectKey = buildProposalSubjectKey({
-              conversationId,
-              endpointId: agentId,
-              actionWorkflowId: entry.workflowId,
-              processKey: processSelector.processKey,
-            });
-            if (seenSubjectKeys.has(subjectKey)) {
-              continue;
-            }
-            seenSubjectKeys.add(subjectKey);
-            proposals.push({
-              subjectKey,
-              conversationId,
-              // Per-process title so two process-scoped proposals on the same host (e.g.
-              // kill-process for two different pids) read as distinct, not duplicates.
-              title: buildProposalTitle({ entry, host, processSelector }),
-              comment: buildProposalComment({ entry, host, state, processSelector }),
-              category: entry.category ?? 'respond',
-              impact: entry.impact,
-              actionWorkflowId: entry.workflowId,
-              actionInput,
-              hostName: host.name,
-            });
-          }
-          continue;
-        }
-
-        const actionInput = buildActionInput({ entry, agentId });
-        if (!actionInput) {
-          continue;
-        }
-        const subjectKey = buildProposalSubjectKey({
-          conversationId,
-          endpointId: agentId,
-          actionWorkflowId: entry.workflowId,
-        });
-        if (seenSubjectKeys.has(subjectKey)) {
-          continue;
-        }
-        seenSubjectKeys.add(subjectKey);
-        proposals.push({
-          subjectKey,
-          conversationId,
-          title: buildProposalTitle({ entry, host }),
-          comment: buildProposalComment({ entry, host, state }),
-          category: entry.category ?? 'respond',
-          impact: entry.impact,
-          actionWorkflowId: entry.workflowId,
-          actionInput,
-          hostName: host.name,
-        });
-      }
+  const unhandedHosts = state.hosts.filter(
+    (host) => host.name.length > MAX_HANDOFF_HOST_NAME_LENGTH
+  );
+  for (const host of state.hosts) {
+    if (host.name.length > MAX_HANDOFF_HOST_NAME_LENGTH) {
+      continue;
     }
+    const proposal = buildHandoffProposal({
+      conversationId,
+      spaceId,
+      reportId,
+      runId,
+      host,
+      state,
+    });
+    if (seenSubjectKeys.has(proposal.subjectKey)) {
+      continue;
+    }
+    seenSubjectKeys.add(proposal.subjectKey);
+    proposals.push(proposal);
   }
 
-  const hasExecutable = proposals.length > 0;
-  const notHostScoped =
-    state.hasNonHostEntity || state.hasIocIndicator || !state.allEventsActionable;
-  // Covers both "no process selector was found at all" and "a selector was found but only
-  // as a bare pid" (no `entityId`): `canFillRespondAction` above refuses to back an
-  // executable action with a bare pid, since PID reuse can point it at the wrong process by
-  // the time an analyst approves it, so both shapes land here as process evidence that could
-  // not back an action. Only worth flagging once something else did mint for a host with
-  // process evidence; "nothing minted at all" is already covered by `!hasExecutable` above.
-  const hasDurableProcessIdentity = state.processSelectors.some((s) => s.entityId !== undefined);
-  const processUncovered =
-    hasExecutable &&
-    state.hasProcessBearingEvent &&
-    !hasDurableProcessIdentity &&
-    !proposals.some((p) => p.actionInput?.parameters !== undefined);
-  const needsRecommendation =
-    !hasExecutable || unenrolled.length > 0 || notHostScoped || processUncovered;
-
-  if (needsRecommendation) {
+  const hasHandoff = proposals.length > 0;
+  const nonHostEvidence = state.hasNonHostEntity || state.hasIocIndicator;
+  if (!hasHandoff || nonHostEvidence || unhandedHosts.length > 0) {
     const reasonLines = buildRecommendationReasonLines({
-      hasExecutable,
-      unenrolledHosts: unenrolled,
-      nonHostEvidence: state.hasNonHostEntity || state.hasIocIndicator,
-      evidenceOutsideActionable: !state.allEventsActionable,
-      processUncovered,
+      hasHandoff,
+      nonHostEvidence,
+      unhandedHosts,
     });
     proposals.push(buildRecommendationProposal({ conversationId, state, reasonLines }));
   }

@@ -11,6 +11,7 @@ import { parse } from 'yaml';
 import {
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW,
   ALERTZERO_ACTION_ENABLE_RULE_WORKFLOW,
+  ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW,
   ALERTZERO_ACTION_INSTALL_PREBUILT_RULE_WORKFLOW,
   ALERTZERO_ACTION_WORKFLOW_IDS,
 } from '..';
@@ -241,6 +242,96 @@ describe('AlertZero action workflows', () => {
       const names = yaml.steps.map(({ name }) => name);
       expect(names.indexOf('outcome')).toBeLessThan(names.indexOf('fail_not_applied'));
       expect(names.indexOf('fail_not_applied')).toBeLessThan(names.indexOf('emit_result'));
+    });
+  });
+
+  // Two producers share this handoff. The Attack Discovery review names the subject by
+  // `attack_discovery_id`; Hunt Watch names a host directly and keys the indicator with its
+  // own `subject_id`. The schema can only make the shared fields required, so the
+  // either-or is a step that fails the action before any indicator is written.
+  describe('handoff to forensics', () => {
+    const yaml = parsed(ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW.yaml);
+    const actionInput = yaml.triggers?.[0]?.inputs?.properties?.actionInput;
+
+    it('requires only the fields both producers share', () => {
+      expect(actionInput?.required).toEqual([
+        'ai_index_id',
+        'investigation_id',
+        'classification',
+        'workflow_execution_id',
+      ]);
+      expect(actionInput?.additionalProperties).toBe(false);
+    });
+
+    it('declares both subject forms', () => {
+      expect(Object.keys(actionInput?.properties ?? {})).toEqual(
+        expect.arrayContaining([
+          'attack_discovery_id',
+          'subject_id',
+          'host_name',
+          'report_id',
+          'producer',
+          'watch_id',
+          'context',
+        ])
+      );
+    });
+
+    it.each([
+      ['an attack', { attack_discovery_id: 'ad-1' }, false],
+      ['a host with a subject id', { subject_id: 'hunt-rpt-1-abc', host_name: 'h1' }, false],
+      ['a subject id without a host', { subject_id: 'hunt-rpt-1-abc' }, true],
+      ['a host without a subject id', { host_name: 'h1' }, true],
+      ['nothing', {}, true],
+    ])('fails the action for %s: %s', (_case, input, fails) => {
+      const resolve = stepByName(yaml, 'resolve_subject')?.with as Record<string, string>;
+      const hasHostSubject = evaluateExpression(resolve.has_host_subject, {
+        inputs: { actionInput: input },
+      });
+      const fail = stepByName(yaml, 'fail_without_subject');
+
+      expect(fail?.type).toBe('workflow.fail');
+      expect(
+        evaluateExpression(String(fail?.if), {
+          inputs: { actionInput: input },
+          steps: { resolve_subject: { output: { has_host_subject: hasHostSubject } } },
+        })
+      ).toBe(fails);
+    });
+
+    it('keys the indicator on the attack id when there is one, else the subject id', () => {
+      const resolve = stepByName(yaml, 'resolve_subject')?.with as Record<string, string>;
+      const render = (input: Record<string, string>) =>
+        createWorkflowLiquidEngine().parseAndRenderSync(resolve.ki_subject, {
+          inputs: { actionInput: input },
+        });
+
+      expect(render({ attack_discovery_id: 'ad-1', subject_id: 'ignored' })).toBe('ad-1');
+      expect(render({ subject_id: 'hunt-rpt-1-abc', host_name: 'h1' })).toBe('hunt-rpt-1-abc');
+
+      const write = stepByName(yaml, 'write_analyze_endpoint_ki');
+      expect(write?.with?.ki_id).toBe(
+        'analyze-endpoint-{{ steps.resolve_subject.output.ki_subject }}'
+      );
+    });
+
+    it("writes the consumer's host and context attributes, defaulting the producer stamps", () => {
+      const write = stepByName(yaml, 'write_analyze_endpoint_ki');
+      const ki = write?.with?.ki as { tags: string[]; attributes: Record<string, string> };
+
+      expect(ki.attributes.host_name).toBe("{{ inputs.actionInput.host_name | default: '' }}");
+      expect(ki.attributes.context).toBe("{{ inputs.actionInput.context | default: '' }}");
+      expect(ki.attributes.attack_discovery_alert_id).toBe(
+        "{{ inputs.actionInput.attack_discovery_id | default: '' }}"
+      );
+      expect(ki.attributes.producer).toContain(
+        "default: 'alertzero.ad_review.handoff_to_forensics.v1'"
+      );
+      expect(ki.attributes.watch_id).toContain("default: 'floor'");
+      expect(ki.tags).toEqual([
+        'consumer:forensics',
+        "watch:{{ inputs.actionInput.watch_id | default: 'floor' }}",
+      ]);
     });
   });
 });

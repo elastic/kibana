@@ -1549,13 +1549,19 @@ describe('Attack Discovery worker chain', () => {
 
     // The action closes `actionInput` to additional properties, so a key the review
     // sends that the action does not declare fails validation at approval time —
-    // after an analyst has already said yes. An exact match is the only safe shape.
-    it('sends exactly the keys the action declares', () => {
-      const actionInput = forensicsAction.triggers?.[0]?.inputs?.properties?.actionInput;
+    // after an analyst has already said yes. The action is shared with Hunt Watch, which
+    // names its subject differently, so the declared key set is wider than what this
+    // review sends: every key sent must be declared, and every required key must be sent.
+    it('sends only keys the action declares, and every key it requires', () => {
+      const actionInput = forensicsAction.triggers?.[0]?.inputs?.properties?.actionInput as
+        | { properties?: Record<string, unknown>; required?: string[] }
+        | undefined;
+      const sent = Object.keys(resolve?.with?.action_input as Record<string, unknown>);
+      const declared = Object.keys(actionInput?.properties ?? {});
 
-      expect(Object.keys(resolve?.with?.action_input as Record<string, unknown>).sort()).toEqual(
-        Object.keys(actionInput?.properties ?? {}).sort()
-      );
+      expect(sent.filter((key) => !declared.includes(key))).toEqual([]);
+      expect((actionInput?.required ?? []).filter((key) => !sent.includes(key))).toEqual([]);
+      expect(sent).toContain('attack_discovery_id');
     });
 
     it('closes the action input against keys the action would reject', () => {
@@ -1625,15 +1631,24 @@ describe('Attack Discovery worker chain', () => {
       // rather than wrong — kibana-q0t5 made that id a pure function of this one —
       // but it would reach the same place through a second derivation, and only for
       // as long as that stays true.
+      // The action also serves Hunt Watch, which has no attack and keys on its own
+      // `subject_id`; `resolve_subject` picks the attack id whenever this review supplies
+      // one, so the indicator id this review produces is unchanged.
       it('keys the knowledge indicator on the attack', () => {
         expect(ki?.with?.ki_id).toBe(
-          'analyze-endpoint-{{ inputs.actionInput.attack_discovery_id }}'
+          'analyze-endpoint-{{ steps.resolve_subject.output.ki_subject }}'
         );
+        const resolveSubject = stepIn(flatten(forensicsAction.steps), 'resolve_subject');
+        const subject = createWorkflowLiquidEngine().parseAndRenderSync(
+          String((resolveSubject?.with as Record<string, string>).ki_subject),
+          { inputs: { actionInput: { attack_discovery_id: 'ad-1' } } }
+        );
+        expect(subject).toBe('ad-1');
       });
 
       it('carries the Attack Discovery alert id the consumer dereferences', () => {
         expect(fields.attributes?.attack_discovery_alert_id).toBe(
-          '{{ inputs.actionInput.attack_discovery_id }}'
+          "{{ inputs.actionInput.attack_discovery_id | default: '' }}"
         );
       });
 

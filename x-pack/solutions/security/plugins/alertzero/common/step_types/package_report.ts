@@ -12,7 +12,11 @@ import { z } from '@kbn/zod/v4';
 
 export const PACKAGE_REPORT_STEP_ID = 'hunt.packageReport' as const;
 
-/** AI index Detection Watch's coverage sweep polls. Must stay in lockstep with coverage_worker.yaml. */
+/**
+ * AI index Detection Watch's coverage sweep polls, and the one Forensics Watch's sweep
+ * polls for `security.analyze_endpoint` handoffs. Must stay in lockstep with
+ * coverage_worker.yaml and forensics_endpoint_analysis.yaml.
+ */
 export const HUNT_COVERAGE_AI_INDEX_ID = 'security-investigations' as const;
 
 const boundedId = z.string().trim().min(1).max(256);
@@ -56,7 +60,7 @@ const coverageSkippedSchema = z.object({
 });
 
 export const packageReportMintPayloadSchema = z.object({
-  /** Idempotency key: uuidv5(conversationId, endpointId, actionWorkflowId[, processKey]). */
+  /** Idempotency key: uuidv5(conversationId, hostName, actionWorkflowId) for a handoff; uuidv5(conversationId, 'recommendation') otherwise. */
   subjectKey: z.string(),
   conversationId: z.string(),
   /** Short plain-text label naming what is proposed; omitting it falls back to the action's own name. */
@@ -81,7 +85,6 @@ export const packageReportOutputSchema = z.discriminatedUnion('status', [
     proposals: z.array(packageReportMintPayloadSchema),
     dismiss: z.boolean(),
     closureSummary: z.string(),
-    expectedProposalCount: z.number().int().min(0),
     /**
      * `none` unless this run found something mint-worthy and `proposals` was forced empty rather
      * than minting a second, unrelated chain for what may be the same finding -- a conservative
@@ -97,6 +100,15 @@ export const packageReportOutputSchema = z.discriminatedUnion('status', [
      * for real instead of suppressing wholesale.
      */
     mintSuppression: z.enum(['none', 'existing_proposals', 'check_failed']),
+    /**
+     * `none` unless this run found no hit and would have closed the Investigation as benign, but
+     * left it open instead because the Investigation already carries a Proposal from an earlier
+     * run (`existing_proposals`), or because that lookup failed (`check_failed`). An Investigation
+     * that ever had a finding is an analyst's to close: a handoff approved on an earlier run may
+     * still have Forensics Watch writing into it, and a manual replay that comes back clean says
+     * nothing about that. Only the clean-run close reads this; `dismiss` is already false then.
+     */
+    dismissSuppression: z.enum(['none', 'existing_proposals', 'check_failed']),
   }),
   z.object({
     status: z.literal('run_incomplete'),
@@ -118,7 +130,7 @@ export const packageReportStepCommonDefinition: CommonStepDefinition<
   }),
   description: i18n.translate('xpack.alertzero.workflows.steps.packageReport.description', {
     defaultMessage:
-      'Decide mint-versus-dismiss for a Hunt Investigation run, write coverage KIs, and return gate mint payloads.',
+      'Decide mint-versus-dismiss for a Hunt Investigation run, write coverage KIs, and return the Forensics Watch handoff payloads for its gates.',
   }),
   category: StepCategory.KibanaSecurity,
   stability: 'tech_preview',
@@ -128,9 +140,9 @@ export const packageReportStepCommonDefinition: CommonStepDefinition<
     details: i18n.translate('xpack.alertzero.workflows.steps.packageReport.documentation.details', {
       defaultMessage:
         'Reads current-run SSE state from the Investigation, owns the mint-versus-dismiss decision table, ' +
-        'writes pending security.coverage KIs (no-reset), resolves every fillable category:respond catalog ' +
-        'action, and returns mint payloads (including expectedProposalCount, the settlement barrier the ' +
-        'packaging child threads into each gate) for the packaging child to dispatch as gate executions. ' +
+        'writes pending security.coverage KIs (no-reset), and returns one "Run a deep forensics ' +
+        'investigation" mint payload per confirmed host (plus an analyst recommendation for evidence a ' +
+        'host handoff cannot cover) for the packaging child to dispatch as gate executions. ' +
         'A completed hunt that confirmed no hit leaves no current-run SSE attachment, so it packages as a ' +
         'dismissal off huntStatus and hasConfirmedHit. A hunt that did not complete returns run_incomplete ' +
         'instead, because its report may still be hunted again into this same Investigation. ' +

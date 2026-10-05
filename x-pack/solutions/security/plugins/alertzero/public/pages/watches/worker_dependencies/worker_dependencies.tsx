@@ -96,6 +96,37 @@ export const WORKER_DEPENDENCIES: readonly WorkerDependency[] = [
         }
       ),
   },
+  {
+    // Hunt's only action on a confirmed host is handing it to Endpoint analysis; with that
+    // Worker off, approved handoffs sit as pending `security.analyze_endpoint` records.
+    providerId: SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+    dependentId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+    disableBody: ({ providerName, dependentName }) => (
+      <FormattedMessage
+        id="xpack.alertzero.watches.workerDependencies.endpointAnalysisToHunt.disableBody"
+        defaultMessage="<strong>{dependentName}</strong> is enabled and hands every confirmed host to this Worker. While {providerName} is off, approved handoffs wait and no forensic analysis runs."
+        values={{ providerName, dependentName, strong }}
+      />
+    ),
+    providerHeaderReason: ({ dependentName }) =>
+      i18n.translate(
+        'xpack.alertzero.watches.workerDependencies.endpointAnalysisToHunt.providerReason',
+        {
+          defaultMessage:
+            '{dependentName} is enabled but its approved handoffs wait while this Worker is off.',
+          values: { dependentName },
+        }
+      ),
+    dependentHeaderReason: ({ providerName }) =>
+      i18n.translate(
+        'xpack.alertzero.watches.workerDependencies.endpointAnalysisToHunt.dependentReason',
+        {
+          defaultMessage:
+            '{providerName} is disabled — approved handoffs wait and no forensic analysis runs.',
+          values: { providerName },
+        }
+      ),
+  },
 ];
 
 export type WorkerEnabledById = ReadonlyMap<string, boolean>;

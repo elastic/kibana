@@ -342,14 +342,19 @@ describe('Endpoint analysis run', () => {
   // a missing indicator leaves every operand undefined. Whether that reads as false or
   // throws is a property of Liquid, not of the string.
   describe('the expressions that decide the outcome', () => {
-    const hasRequest = (attributes: Record<string, string> | null): unknown =>
-      evaluate(String(stepByName('resolve_request')?.with?.has_request), {
-        steps: {
-          read_ki: {
-            output: { hits: { hits: attributes === null ? [] : [{ _source: { attributes } }] } },
-          },
-        },
+    // `has_request` reads `resolve_subject`'s result rather than re-deriving it, so the two
+    // steps are evaluated in sequence the way the engine runs them.
+    const hasRequest = (attributes: Record<string, string> | null): unknown => {
+      const readKi = {
+        output: { hits: { hits: attributes === null ? [] : [{ _source: { attributes } }] } },
+      };
+      const hasSubject = evaluate(String(stepByName('resolve_subject')?.with?.has_subject), {
+        steps: { read_ki: readKi },
       });
+      return evaluate(String(stepByName('resolve_request')?.with?.has_request), {
+        steps: { read_ki: readKi, resolve_subject: { output: { has_subject: hasSubject } } },
+      });
+    };
 
     it('treats an indicator naming both an alert and an investigation as a request', () => {
       expect(
@@ -360,11 +365,110 @@ describe('Endpoint analysis run', () => {
       ).toBe(true);
     });
 
+    // Hunt Watch's handoff names the host outright and carries no alert.
+    it('treats an indicator naming a host and an investigation as a request', () => {
+      expect(
+        hasRequest({
+          attack_discovery_alert_id: '',
+          host_name: 'WIN-ANALYST01',
+          investigation_id: 'an-investigation',
+        })
+      ).toBe(true);
+    });
+
     it.each([
       ['names no investigation', { attack_discovery_alert_id: 'an-alert', investigation_id: '' }],
-      ['names no alert', { attack_discovery_alert_id: '', investigation_id: 'an-investigation' }],
+      [
+        'names a host but no investigation',
+        { attack_discovery_alert_id: '', host_name: 'WIN-ANALYST01', investigation_id: '' },
+      ],
+      [
+        'names neither an alert nor a host',
+        { attack_discovery_alert_id: '', host_name: '', investigation_id: 'an-investigation' },
+      ],
     ])('rejects an indicator that %s', (_case, attributes) => {
       expect(hasRequest(attributes)).toBe(false);
+    });
+
+    describe('a host-named indicator', () => {
+      const render = (field: string, attributes: Record<string, string>) =>
+        liquid.parseAndRenderSync(String(stepByName('resolve_request')?.with?.[field]), {
+          steps: { read_ki: { output: { hits: { hits: [{ _source: { attributes } }] } } } },
+        });
+
+      it('skips the Attack Discovery alert lookup it has nothing to look up', () => {
+        expect(stepByName('fetch_attack_discovery_alert')?.if).toBe(
+          '${{ steps.resolve_request.output.attack_discovery_alert_id != blank }}'
+        );
+        expect(stepByName('journal_fetch_alert_problem')?.if).toContain(
+          'steps.resolve_request.output.attack_discovery_alert_id != blank'
+        );
+      });
+
+      it('resolves the host from the indicator before any alert lookup', () => {
+        const hostName = String(stepByName('resolve_host')?.with?.host_name);
+        expect(hostName.indexOf('steps.resolve_request.output.host_name_hint')).toBeLessThan(
+          hostName.indexOf('steps.fetch_attack_discovery_alert.output')
+        );
+
+        const resolved = liquid.parseAndRenderSync(hostName, {
+          steps: {
+            resolve_request: { output: { host_name_hint: 'WIN-ANALYST01' } },
+            fetch_attack_discovery_alert: { output: undefined },
+            extract_host_from_ad_constituent_alerts: { output: undefined },
+          },
+        });
+        expect(resolved).toBe('WIN-ANALYST01');
+      });
+
+      it('still resolves the host from the alert when the indicator names none', () => {
+        const resolved = liquid.parseAndRenderSync(
+          String(stepByName('resolve_host')?.with?.host_name),
+          {
+            steps: {
+              resolve_request: { output: { host_name_hint: '' } },
+              fetch_attack_discovery_alert: {
+                output: { hits: { hits: [{ _source: { host: { name: 'from-alert' } } }] } },
+              },
+            },
+          }
+        );
+        expect(resolved).toBe('from-alert');
+      });
+
+      it('reads the producer host and context off the indicator', () => {
+        const attributes = {
+          host_name: 'WIN-ANALYST01',
+          context: 'Hunt Watch confirmed activity on WIN-ANALYST01.',
+        };
+        expect(render('host_name_hint', attributes)).toBe('WIN-ANALYST01');
+        expect(render('context_hint', attributes)).toBe(attributes.context);
+        expect(render('host_name_hint', {})).toBe('');
+        expect(render('context_hint', {})).toBe('');
+      });
+
+      it("hands the agent the producer's context in place of the alert framing", () => {
+        const message = String(
+          (stepByName('forensic_analysis')?.with as { message?: string } | undefined)?.message
+        );
+        const withContext = liquid.parseAndRenderSync(message, {
+          steps: {
+            resolve_request: { output: { context_hint: 'Hunt Watch confirmed activity on h1.' } },
+            resolve_host: { output: { host_name: 'h1' } },
+          },
+        });
+        const withoutContext = liquid.parseAndRenderSync(message, {
+          steps: {
+            resolve_request: { output: { context_hint: '' } },
+            resolve_host: { output: { host_name: 'h1' } },
+          },
+        });
+
+        expect(withContext).toContain('Hunt Watch confirmed activity on h1.');
+        expect(withContext).not.toContain('I have an alert on');
+        expect(withoutContext).toContain('I have an alert on h1.');
+        expect(withContext).toContain('Perform forensic analysis of h1');
+      });
     });
 
     // `read_ki` continues past zero hits instead of failing, so on a deleted indicator
@@ -568,17 +672,25 @@ describe('Endpoint analysis run', () => {
     // causes, and the one that blames the host is wrong about a discovery that was
     // never found, so the run has to pick exactly one.
     it('narrates a short-circuit once, naming the cause it actually hit', () => {
-      const whenAlertIs = (hits: Array<{ _id: string }>) => ({
-        steps: { fetch_attack_discovery_alert: { output: { hits: { hits } } } },
+      const whenAlertIs = (hits: Array<{ _id: string }>, alertId = 'ad-1') => ({
+        steps: {
+          resolve_request: { output: { attack_discovery_alert_id: alertId } },
+          fetch_attack_discovery_alert: { output: { hits: { hits } } },
+        },
       });
-      const fires = (step: string, hits: Array<{ _id: string }>): unknown =>
-        evaluate(String(stepByName(step)?.if), whenAlertIs(hits));
+      const fires = (step: string, hits: Array<{ _id: string }>, alertId?: string): unknown =>
+        evaluate(String(stepByName(step)?.if), whenAlertIs(hits, alertId));
 
       expect(fires('journal_fetch_alert_problem', [])).toBe(true);
       expect(fires('journal_no_host', [])).toBe(false);
 
       expect(fires('journal_fetch_alert_problem', [{ _id: 'ad-1' }])).toBe(false);
       expect(fires('journal_no_host', [{ _id: 'ad-1' }])).toBe(true);
+
+      // A host-named indicator never looked an alert up, so there is no missing alert
+      // to narrate: neither note fires.
+      expect(fires('journal_fetch_alert_problem', [], '')).toBe(false);
+      expect(fires('journal_no_host', [], '')).toBe(false);
     });
 
     // Silencing the second note must not change which indicators retire: a discovery
@@ -1240,7 +1352,8 @@ describe('Endpoint analysis run', () => {
         ki: {
           attributes: {
             status: 'invalid',
-            invalid_reason: 'Missing attack_discovery_alert_id or investigation_id',
+            invalid_reason:
+              'Missing investigation_id, or neither attack_discovery_alert_id nor host_name',
           },
         },
       });

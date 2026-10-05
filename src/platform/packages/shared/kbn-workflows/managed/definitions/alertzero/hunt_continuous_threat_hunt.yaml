@@ -159,6 +159,9 @@ steps:
             # having no output at all.
             huntStatus: "{{ steps.hunt.output.status | default: 'failed' }}"
             hasConfirmedHit: "${{ steps.hunt.output.hit == true }}"
+            # Decides whether a forensics handoff this run mints waits for an analyst:
+            # `supervised` auto-approves it, the way the Attack Discovery Worker's does.
+            autonomy: "{{ consts.worker_settings.autonomy }}"
 
       # Outcome derivation: find_or_create failing means no Investigation ever
       # existed, so no conclusion is possible (handled by
@@ -215,7 +218,7 @@ steps:
               - **Report:** `{{ foreach.item }}`
               - **Hunt:** {{ steps.hunt.output.headline }}. {{ steps.hunt.output.reason }}
               - **Packaging:** {% if steps.package_report.output.status == 'run_incomplete' %}did not complete. {{ steps.package_report.output.reason }}.{% else %}{{ steps.package_report.output.summary | strip }}{% endif %}
-              - **What this means:** the findings above are real, but part of the search did not run. Whether this report gets hunted again is stated in the hunt reason above: a gap that may clear keeps it eligible for a later sweep, while a gap that reproduces retires it having never been fully searched. The Investigation closes once every proposal from this run has been decided; a later sweep reopens it if it finds more.
+              - **What this means:** the findings above are real, but part of the search did not run. Whether this report gets hunted again is stated in the hunt reason above: a gap that may clear keeps it eligible for a later sweep, while a gap that reproduces retires it having never been fully searched. Approving a forensics handoff keeps this Investigation open for Forensics Watch's report; nothing closes it automatically.
               {% elsif steps.resolve_run_outcome.output.outcome == 'partial' -%}
               ### Hunt Watch run partial: packaging did not complete
               - **Report:** `{{ foreach.item }}`
