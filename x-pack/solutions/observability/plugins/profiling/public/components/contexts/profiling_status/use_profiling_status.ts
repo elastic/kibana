@@ -6,12 +6,12 @@
  */
 
 import { useContext } from 'react';
-import { ProfilingSetupStatusContext } from './profiling_setup_status_context';
+import { ProfilingStatusContext } from './profiling_status_context';
 
-export function useProfilingSetupStatus() {
-  const context = useContext(ProfilingSetupStatusContext);
+export function useProfilingStatus() {
+  const context = useContext(ProfilingStatusContext);
   if (!context) {
-    throw new Error('ProfilingSetupStatusContext not found');
+    throw new Error('ProfilingStatusContext not found');
   }
   return context;
 }
