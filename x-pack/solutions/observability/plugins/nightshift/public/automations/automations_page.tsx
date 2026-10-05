@@ -20,6 +20,7 @@ import {
   useCreateAutomation,
   useCurrentUsername,
   useDeleteAutomation,
+  useRefreshAutomations,
   useFetchAutomations,
   type Automation,
 } from './hooks/use_automations';
@@ -45,6 +46,7 @@ export const AutomationsPage = (): React.ReactElement => {
   ).canManage;
   const { data, error, isInitialLoading, refetch } = useFetchAutomations();
   const deleteAutomation = useDeleteAutomation();
+  const refreshAutomations = useRefreshAutomations();
   const createAutomation = useCreateAutomation();
   const currentUsername = useCurrentUsername();
   const [isCreateFlyoutOpen, setIsCreateFlyoutOpen] = useState(false);
@@ -128,6 +130,10 @@ export const AutomationsPage = (): React.ReactElement => {
             onFilterChange={setFilter}
             onClearFilters={clearFilters}
             onRangeChange={setRange}
+            onRefresh={(nextRange) => {
+              setRange(nextRange);
+              refreshAutomations();
+            }}
             onCreate={openCreateFlyout}
           />
         </>

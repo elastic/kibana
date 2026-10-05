@@ -9,9 +9,9 @@ import React from 'react';
 import { EuiProgress, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export const AutomationUsageCell = ({ used, limit }: { used: number; limit?: number }) => {
+export const AutomationUsageCell = ({ used, limit }: { used?: number; limit?: number }) => {
   const { euiTheme } = useEuiTheme();
-  if (limit === undefined) return <>—</>;
+  if (limit === undefined || used === undefined) return <>—</>;
 
   const color = used >= limit ? 'danger' : 'success';
   return (

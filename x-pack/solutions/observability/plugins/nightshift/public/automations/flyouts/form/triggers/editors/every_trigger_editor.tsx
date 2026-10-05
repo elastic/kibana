@@ -62,7 +62,8 @@ export const EveryTriggerEditor = ({
         label={triggerLabels.startTime}
         value={trigger.startTime}
         disabled={readOnly}
-        onChange={(startTime) => onChange({ ...trigger, startTime })}
+        step={3600}
+        onChange={(startTime) => onChange({ ...trigger, startTime: `${startTime.slice(0, 2)}:00` })}
       />
     )}
     {trigger.unit === 'hour' && trigger.betweenHours && (
@@ -73,7 +74,8 @@ export const EveryTriggerEditor = ({
         label={triggerLabels.endTime}
         value={trigger.endTime}
         disabled={readOnly}
-        onChange={(endTime) => onChange({ ...trigger, endTime })}
+        step={3600}
+        onChange={(endTime) => onChange({ ...trigger, endTime: `${endTime.slice(0, 2)}:00` })}
       />
     )}
     {trigger.unit === 'week' && <EuiText size="s">{triggerLabels.on}</EuiText>}

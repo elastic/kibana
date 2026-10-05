@@ -15,6 +15,7 @@ import {
   useCreateAutomation,
   useDeleteAutomation,
   useFetchAutomations,
+  useRefreshAutomations,
   useToggleAutomation,
 } from './use_automations';
 
@@ -45,6 +46,16 @@ describe('use_automations', () => {
         nightshiftInvestigations: { investigationsClient: { fetch: investigationsFetch } },
       },
     });
+  });
+
+  it('refreshes every automation query', () => {
+    const { result, invalidateQueries } = renderWithClient(() => useRefreshAutomations());
+
+    act(() => {
+      result.current();
+    });
+
+    expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: AUTOMATIONS_QUERY_KEY });
   });
 
   it('lists automations', async () => {

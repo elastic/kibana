@@ -36,7 +36,7 @@ export function NightshiftPage(): React.ReactElement | null {
   } = useKibana().services;
   const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
   const { pathname } = useLocation();
-  const { canConfigure, canManage } = getNightshiftCapabilities(
+  const { canManage, canManageAndConfigure } = getNightshiftCapabilities(
     application.capabilities.nightshift
   );
   const settingsHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
@@ -140,8 +140,8 @@ export function NightshiftPage(): React.ReactElement | null {
       <NightshiftAppHeader
         onManagementClick={navigateToManagement}
         managementHref={managementHref}
-        onSettingsClick={canConfigure ? navigateToSettings : undefined}
-        settingsHref={canConfigure ? settingsHref : undefined}
+        onSettingsClick={canManageAndConfigure ? navigateToSettings : undefined}
+        settingsHref={canManageAndConfigure ? settingsHref : undefined}
         onSandboxSecretsClick={canManageSandboxSecrets ? openSandboxSecretsFlyout : undefined}
         onAutomationsClick={canUseAutomations ? navigateToInvestigations : undefined}
         investigationsHref={canUseAutomations ? investigationsHref : undefined}

@@ -29,19 +29,26 @@ const getTodayRange = (): RunRange => {
 
 const useRunTotals = (ids: string[], { startedAfter, startedBefore }: RunRange) => {
   const queries = useAutomationsRunsInRange(ids, startedAfter, startedBefore);
-  return new Map(ids.map((id, index) => [id, queries[index]?.data?.total ?? 0]));
+  return new Map(
+    ids.flatMap((id, index) => {
+      const total = queries[index]?.data?.total;
+      return total === undefined ? [] : [[id, total] as const];
+    })
+  );
 };
 
 export const useAutomationUsage = (automations: Automation[], range: TimeRange) => {
   const ids = automations.map(({ id }) => id);
-  const runRange = useMemo(
+  const { runRange, today } = useMemo(
     () => ({
-      startedAfter: datemath.parse(range.start)?.toISOString() ?? range.start,
-      startedBefore: datemath.parse(range.end, { roundUp: true })?.toISOString() ?? range.end,
+      runRange: {
+        startedAfter: datemath.parse(range.start)?.toISOString() ?? range.start,
+        startedBefore: datemath.parse(range.end, { roundUp: true })?.toISOString() ?? range.end,
+      },
+      today: getTodayRange(),
     }),
     [range]
   );
-  const today = useMemo(getTodayRange, []);
 
   return {
     runRange,

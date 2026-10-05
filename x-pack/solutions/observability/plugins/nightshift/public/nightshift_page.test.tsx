@@ -71,6 +71,7 @@ describe('NightshiftPage', () => {
           capabilities: {
             nightshift: {
               [NIGHTSHIFT_UI_PRIVILEGES.show]: true,
+              [NIGHTSHIFT_UI_PRIVILEGES.manage]: true,
               [NIGHTSHIFT_UI_PRIVILEGES.configure]: true,
             },
           },
@@ -122,7 +123,7 @@ describe('NightshiftPage', () => {
     expect(navigateToUrl).toHaveBeenCalledWith('/app/significant_events/streams');
   });
 
-  it('hides the settings link without the Nightshift configure privilege', async () => {
+  it('hides the settings link without both Nightshift manage and configure', async () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: {
@@ -130,7 +131,10 @@ describe('NightshiftPage', () => {
           navigateToUrl,
           navigateToApp,
           capabilities: {
-            nightshift: { [NIGHTSHIFT_UI_PRIVILEGES.show]: true },
+            nightshift: {
+              [NIGHTSHIFT_UI_PRIVILEGES.show]: true,
+              [NIGHTSHIFT_UI_PRIVILEGES.configure]: true,
+            },
           },
         },
         featureFlags,

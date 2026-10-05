@@ -14,12 +14,14 @@ export const TimeField = ({
   onChange,
   disabled = false,
   readOnly = false,
+  step,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;
   readOnly?: boolean;
+  step?: number;
 }) => (
   <EuiFieldText
     data-test-subj="nightshiftTimeFieldFieldText"
@@ -29,6 +31,7 @@ export const TimeField = ({
     value={value}
     disabled={disabled}
     readOnly={readOnly}
+    step={step}
     onChange={(event) => event.target.value && onChange(event.target.value)}
   />
 );

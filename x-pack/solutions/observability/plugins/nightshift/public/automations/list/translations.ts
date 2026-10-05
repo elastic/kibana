@@ -38,6 +38,9 @@ export const listLabels = {
   viewRuns: i18n.translate('xpack.nightshift.automations.viewRuns', {
     defaultMessage: 'View runs',
   }),
+  runsLoadError: i18n.translate('xpack.nightshift.automations.runsLoadError', {
+    defaultMessage: "Couldn't load runs. Refresh to try again.",
+  }),
   limitReached: i18n.translate('xpack.nightshift.automations.limitReached', {
     defaultMessage: 'Daily trigger limit reached for today',
   }),

@@ -113,6 +113,11 @@ export const useAutomationRunsInRange = (
   );
 };
 
+export const useRefreshAutomations = () => {
+  const queryClient = useQueryClient();
+  return () => queryClient.invalidateQueries({ queryKey: AUTOMATIONS_QUERY_KEY });
+};
+
 export const useAutomationsRunsInRange = (
   ids: string[],
   startedAfter: string,

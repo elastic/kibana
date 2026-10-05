@@ -32,6 +32,7 @@ jest.mock('./hooks/use_automations', () => ({
   useCurrentUsername: jest.fn(),
   useDeleteAutomation: jest.fn(),
   useFetchAutomations: jest.fn(),
+  useRefreshAutomations: jest.fn(() => jest.fn()),
   useToggleAutomation: jest.fn(),
   useUpdateAutomation: jest.fn(),
 }));

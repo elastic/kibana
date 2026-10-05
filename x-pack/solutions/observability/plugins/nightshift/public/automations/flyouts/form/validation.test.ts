@@ -59,6 +59,14 @@ describe('automation validation', () => {
     expect(isTriggerValid({ kind: 'cron', cronExpression: 'bad', timezone: 'UTC' })).toBe(false);
   });
 
+  it('requires the hourly window to start before it ends', () => {
+    const window = (startTime: string, endTime: string) =>
+      everyTrigger({ unit: 'hour', betweenHours: true, startTime, endTime });
+    expect(isTriggerValid(window('09:00', '17:00'))).toBe(true);
+    expect(isTriggerValid(window('17:00', '09:00'))).toBe(false);
+    expect(isTriggerValid(window('09:00', '09:00'))).toBe(false);
+  });
+
   describe('getSaveBlocker', () => {
     const values = createAutomationFormValues();
 

@@ -10,6 +10,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AutomationTriggerSection } from './trigger_section';
 import type { TriggerFormValues } from '../automation_form_values';
+import { toEveryCron } from '../to_automation_request';
 
 const onTriggerChange = jest.fn();
 
@@ -108,6 +109,23 @@ describe('AutomationTriggerSection', () => {
 
     fireEvent.click(screen.getByText('Active'));
     expect(lastTrigger()).toMatchObject({ alertStatus: 'any' });
+  });
+
+  it('keeps the hourly window on whole hours', async () => {
+    render(<TriggerSection />);
+    await selectTrigger('automationAddTrigger', 'Every…');
+    fireEvent.click(screen.getByLabelText('between hours'));
+
+    const start = screen.getByLabelText('Start time');
+    const end = screen.getByLabelText('End time');
+    fireEvent.change(start, { target: { value: '09:30' } });
+    fireEvent.change(end, { target: { value: '17:45' } });
+
+    expect(start).toHaveAttribute('step', '3600');
+    expect(end).toHaveAttribute('step', '3600');
+    expect(start).toHaveValue('09:00');
+    expect(end).toHaveValue('17:00');
+    expect(toEveryCron(lastTrigger())).toBe('0 9-17 * * *');
   });
 
   it('configures a weekly schedule', async () => {

@@ -44,6 +44,7 @@ export const AutomationsToolbar = ({
   onFilterChange,
   onClearFilters,
   onRangeChange,
+  onRefresh,
   onCreate,
 }: {
   filters: AutomationFilters;
@@ -55,6 +56,7 @@ export const AutomationsToolbar = ({
   onFilterChange: <K extends keyof AutomationFilters>(key: K, value: AutomationFilters[K]) => void;
   onClearFilters: () => void;
   onRangeChange: (range: TimeRange) => void;
+  onRefresh: (range: TimeRange) => void;
   onCreate?: () => void;
 }) => (
   <>
@@ -122,7 +124,7 @@ export const AutomationsToolbar = ({
             { start: 'now-30d', end: 'now', label: 'Last 30 days' },
           ]}
           onTimeChange={({ start, end }) => onRangeChange({ start, end })}
-          onRefresh={({ start, end }) => onRangeChange({ start, end })}
+          onRefresh={({ start, end }) => onRefresh({ start, end })}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

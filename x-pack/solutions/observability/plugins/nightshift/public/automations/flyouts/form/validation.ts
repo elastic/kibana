@@ -27,6 +27,8 @@ export const isValidCron = (expression: string): boolean => {
   return fields.length === 5 && fields.every((field) => CRON_FIELD.test(field));
 };
 
+const getHour = (time: string): number => Number(time.split(':')[0]);
+
 export const isValidDailyLimit = (value: string): boolean => {
   const limit = Number(value);
   return value.trim() !== '' && Number.isInteger(limit) && limit >= 1 && limit <= 200;
@@ -39,6 +41,9 @@ export const isTriggerValid = (trigger?: TriggerFormValues): trigger is TriggerF
   if (!trigger) return false;
   if (trigger.kind === 'cron') return isValidCron(trigger.cronExpression);
   if (trigger.kind === 'every' && trigger.unit === 'week') return trigger.daysOfWeek.length > 0;
+  if (trigger.kind === 'every' && trigger.unit === 'hour' && trigger.betweenHours) {
+    return getHour(trigger.startTime) < getHour(trigger.endTime);
+  }
   return true;
 };
 

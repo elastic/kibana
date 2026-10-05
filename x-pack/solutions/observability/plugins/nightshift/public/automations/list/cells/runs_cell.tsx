@@ -9,6 +9,7 @@ import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiLink,
   EuiLoadingSpinner,
   EuiText,
@@ -27,10 +28,18 @@ export const AutomationRunsCell = ({
   startedAfter: string;
   startedBefore: string;
 }) => {
-  const { data, isInitialLoading } = useAutomationRunsInRange(id, startedAfter, startedBefore);
+  const { data, isInitialLoading, isError } = useAutomationRunsInRange(
+    id,
+    startedAfter,
+    startedBefore
+  );
 
   if (isInitialLoading) {
     return <EuiLoadingSpinner size="s" />;
+  }
+
+  if (isError) {
+    return <EuiIconTip type="warning" color="warning" content={listLabels.runsLoadError} />;
   }
 
   if (!data?.total) {
