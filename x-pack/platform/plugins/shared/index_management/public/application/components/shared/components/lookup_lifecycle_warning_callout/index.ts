@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-export { createImpactAttachmentDefinition } from './impact_attachment';
-export type {
-  ImpactAttachment,
-  ImpactAttachmentData,
-  ImpactedEntity,
-  ImpactVerdictCounts,
-} from './types';
+export { LookupLifecycleWarningCallout } from './lookup_lifecycle_warning_callout';
