@@ -153,4 +153,19 @@ describe('executeRegexRulesTask', () => {
       expect(match.matchValue).toMatch(/a+/); // Should be sequences of 'a's
     });
   });
+
+  it('throws, naming the rule, when a pattern does not compile instead of silently skipping it', () => {
+    const brokenRule: RegexAnonymizationRule = {
+      type: 'RegExp',
+      enabled: true,
+      id: 'custom-1',
+      name: 'Broken pattern',
+      entityClass: 'MISC',
+      pattern: '(unclosed',
+    };
+
+    expect(() =>
+      executeRegexRulesTask({ rules: [emailRule, brokenRule], records: [{ content: 'a@b.com' }] })
+    ).toThrow(/"Broken pattern" has an invalid regular expression/);
+  });
 });
