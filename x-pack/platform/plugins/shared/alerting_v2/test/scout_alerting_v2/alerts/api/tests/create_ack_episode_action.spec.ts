@@ -13,6 +13,7 @@ import {
   apiTest,
   buildAlertEvent,
   getAckEpisodeActionUrl,
+  getUnackEpisodeActionUrl,
   NO_ACCESS_ROLE,
   testData,
 } from '../fixtures';
@@ -119,6 +120,80 @@ apiTest.describe('Create ack episode action API', { tag: '@local-stateful-classi
       });
     }
   );
+
+  apiTest(
+    'ack: a repeated ack returns 409 and writes no second action',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'ack-no-op-rule';
+      const groupHash = 'ack-no-op-group';
+      const episodeId = 'ack-no-op-episode';
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          alert: { id: episodeId, status: 'active' },
+        }),
+      ]);
+      const firstResponse = await apiClient.post(getAckEpisodeActionUrl(episodeId), {
+        headers: writerHeaders,
+        body: {},
+      });
+      expect(firstResponse).toHaveStatusCode(204);
+
+      const response = await apiClient.post(getAckEpisodeActionUrl(episodeId), {
+        headers: writerHeaders,
+        body: {},
+      });
+      expect(response).toHaveStatusCode(409);
+      expect(response.body.code).toBe('INVALID_ALERT_STATE_TRANSITION');
+      expect(response.body.details).toMatchObject({
+        alert_id: episodeId,
+        group_hash: groupHash,
+        action_type: 'ack',
+      });
+
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId,
+        actionTypes: ['ack'],
+      });
+      expect(actions).toHaveLength(1);
+    }
+  );
+
+  apiTest('ack: acking again after an unack returns 204', async ({ apiClient, apiServices }) => {
+    const ruleId = 'ack-re-ack-rule';
+    const groupHash = 'ack-re-ack-group';
+    const episodeId = 'ack-re-ack-episode';
+    await apiServices.alertingV2.ruleEvents.seed([
+      buildAlertEvent({
+        rule: { id: ruleId, version: 1 },
+        group_hash: groupHash,
+        alert: { id: episodeId, status: 'active' },
+      }),
+    ]);
+    const firstResponse = await apiClient.post(getAckEpisodeActionUrl(episodeId), {
+      headers: writerHeaders,
+      body: {},
+    });
+    expect(firstResponse).toHaveStatusCode(204);
+    const unackResponse = await apiClient.post(getUnackEpisodeActionUrl(episodeId), {
+      headers: writerHeaders,
+      body: {},
+    });
+    expect(unackResponse).toHaveStatusCode(204);
+
+    const response = await apiClient.post(getAckEpisodeActionUrl(episodeId), {
+      headers: writerHeaders,
+      body: {},
+    });
+    expect(response).toHaveStatusCode(204);
+
+    const actions = await apiServices.alertingV2.alertActionsEvents.find({
+      ruleId,
+      actionTypes: ['ack'],
+    });
+    expect(actions).toHaveLength(2);
+  });
 
   apiTest('schema: rejects alert_id in the body (strict mode) with 400', async ({ apiClient }) => {
     // The alert id moved to the path; the ack body must be empty.

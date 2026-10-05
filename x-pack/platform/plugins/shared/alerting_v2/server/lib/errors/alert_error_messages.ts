@@ -19,3 +19,20 @@ export const getCannotActivateEpisodeMessage = (episodeId: string): string =>
 
 export const getCannotDeactivateEpisodeMessage = (episodeId: string): string =>
   `Cannot deactivate alert [${episodeId}]. It is already inactive`;
+
+export const getAlertAlreadyAcknowledgedMessage = (episodeId: string): string =>
+  `Cannot acknowledge alert [${episodeId}]. It is already acknowledged`;
+
+export const getAlertNotAcknowledgedMessage = (episodeId: string): string =>
+  `Cannot remove the acknowledgement from alert [${episodeId}]. It is not acknowledged`;
+
+export const getAssigneeUnchangedMessage = (
+  episodeId: string,
+  assigneeUid: string | null
+): string =>
+  assigneeUid == null
+    ? `Cannot unassign alert [${episodeId}]. It has no assignee`
+    : `Cannot assign alert [${episodeId}]. It is already assigned to [${assigneeUid}]`;
+
+export const getTagsUnchangedMessage = (episodeId: string): string =>
+  `Cannot tag alert [${episodeId}]. It already carries the requested tags`;

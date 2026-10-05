@@ -51,9 +51,14 @@ import {
   loadLatestAlertEventsByEpisodeId,
   loadLatestAlertEventsByGroupHash,
 } from './context_loaders/load_latest_alert_events';
+import {
+  EMPTY_ALERT_ACTION_STATE,
+  loadAlertActionStatesByEpisodeId,
+  type AlertActionState,
+} from './context_loaders/load_alert_action_states';
 import type { AlertEventRecord } from './types';
 import type { PreparedAction } from './handler';
-import { ACTION_HANDLERS, prepareWithHandler } from './handlers';
+import { ACTION_HANDLERS, prepareWithHandler, requiresActionState } from './handlers';
 
 /** A single per-item error in a bulk create alert actions response. */
 type BulkAlertActionError = BulkResponse['errors'][number];
@@ -133,7 +138,7 @@ export class AlertActionsClient {
   ) {}
 
   /**
-   * Creates a series-level action (`tag` / `snooze` / `unsnooze`) for the
+   * Creates a series-level action (`snooze` / `unsnooze`) for the
    * series identified by `groupHash`. The series' latest event is still
    * resolved — it fills `rule_id`, `source` and `last_series_event_timestamp`
    * on the audit doc — but both the persisted `.alert-actions` document and
@@ -155,7 +160,14 @@ export class AlertActionsClient {
       }),
     ]);
 
-    const prepared = this.prepareAction({ action, alertEvent, userProfileUid, docEpisodeId: null });
+    const prepared = this.prepareAction({
+      action,
+      alertEvent,
+      userProfileUid,
+      docEpisodeId: null,
+      // Series actions carry no precondition, so no state is loaded for them.
+      actionState: EMPTY_ALERT_ACTION_STATE,
+    });
 
     await this.persistPreparedActions([prepared]);
     this.eventPublisher.emitEpisodeActions(this.request, [prepared.alertActionDoc]);
@@ -177,13 +189,14 @@ export class AlertActionsClient {
   }): Promise<void> {
     const { episodeId, action } = params;
 
-    const [userProfileUid, alertEvent] = await Promise.all([
+    const [userProfileUid, alertEvent, actionStates] = await Promise.all([
       this.userService.getCurrentUserProfileUid(),
       loadLastEpisodeAlertEventOrThrow({
         queryService: this.queryService,
         spaceId: this.spaceId,
         episodeId,
       }),
+      this.loadActionStates(requiresActionState(action.action_type) ? [episodeId] : []),
     ]);
 
     if (isLifecycleActionType(action.action_type)) {
@@ -206,10 +219,24 @@ export class AlertActionsClient {
       alertEvent,
       userProfileUid,
       docEpisodeId: alertEvent.episode_id,
+      actionState: actionStates.get(episodeId) ?? EMPTY_ALERT_ACTION_STATE,
     });
 
     await this.persistPreparedActions([prepared]);
     this.eventPublisher.emitEpisodeActions(this.request, [prepared.alertActionDoc]);
+  }
+
+  /**
+   * Resolves the ack / assignee / tags of the alerts whose actions are
+   * preconditioned. Issued alongside the alert-event lookups rather than
+   * after them: both only need the ids the caller already supplied.
+   */
+  private loadActionStates(episodeIds: readonly string[]): Promise<Map<string, AlertActionState>> {
+    return loadAlertActionStatesByEpisodeId({
+      queryService: this.queryService,
+      spaceId: this.spaceId,
+      episodeIds,
+    });
   }
 
   /**
@@ -235,8 +262,10 @@ export class AlertActionsClient {
      * id for episode-scoped actions, `null` for series-scoped actions.
      */
     docEpisodeId: string | null;
+    /** Current state of the targeted alert, for the preconditioned actions. */
+    actionState: AlertActionState;
   }): PreparedAction {
-    const { action, alertEvent, userProfileUid, docEpisodeId } = params;
+    const { action, alertEvent, userProfileUid, docEpisodeId, actionState } = params;
     const alertActionDoc = this.buildAlertActionDocument({
       action,
       alertEvent,
@@ -244,7 +273,7 @@ export class AlertActionsClient {
       docEpisodeId,
     });
 
-    return prepareWithHandler({ action, alertEvent, alertActionDoc }, ACTION_HANDLERS);
+    return prepareWithHandler({ action, alertEvent, alertActionDoc, actionState }, ACTION_HANDLERS);
   }
 
   /**
@@ -322,6 +351,7 @@ export class AlertActionsClient {
             alertEvent,
             userProfileUid,
             docEpisodeId: null,
+            actionState: EMPTY_ALERT_ACTION_STATE,
           })
         );
       } catch (error) {
@@ -346,21 +376,25 @@ export class AlertActionsClient {
 
   /**
    * Bulk equivalent of {@link AlertActionsClient.createEpisodeAction}: one
-   * latest-event query for every episode referenced in the batch, plus — for
-   * lifecycle items only — one latest-event query over their series to
-   * enforce the latest-episode guard. Missing or superseded episodes are
-   * reported per item; the rest of the batch still runs.
+   * latest-event query for every episode referenced in the batch, one
+   * action-state query for the preconditioned items, plus — for lifecycle
+   * items only — one latest-event query over their series to enforce the
+   * latest-episode guard. Missing or superseded episodes and failed
+   * preconditions are reported per item; the rest of the batch still runs.
    */
   public async createBulkEpisodeActions(
     items: BulkCreateEpisodeAlertActionItemBody[]
   ): Promise<BulkResponse> {
-    const [userProfileUid, episodeEvents] = await Promise.all([
+    const [userProfileUid, episodeEvents, actionStates] = await Promise.all([
       this.userService.getCurrentUserProfileUid(),
       loadLatestAlertEventsByEpisodeId({
         queryService: this.queryService,
         spaceId: this.spaceId,
         episodeIds: items.map((item) => item.alert_id),
       }),
+      this.loadActionStates(
+        items.filter((item) => requiresActionState(item.action_type)).map((item) => item.alert_id)
+      ),
     ]);
 
     const eventByEpisodeId = new Map(episodeEvents.map((event) => [event.episode_id, event]));
@@ -417,6 +451,7 @@ export class AlertActionsClient {
             alertEvent,
             userProfileUid,
             docEpisodeId: alertEvent.episode_id,
+            actionState: actionStates.get(item.alert_id) ?? EMPTY_ALERT_ACTION_STATE,
           })
         );
       } catch (error) {

@@ -71,3 +71,73 @@ export const getEmptyESQLResponse = (): EsqlQueryResponse => ({
   columns: [],
   values: [],
 });
+
+/**
+ * Column order of the action-state projection in
+ * `context_loaders/load_alert_action_states.ts`.
+ */
+const ALERT_ACTION_STATE_COLUMNS: ReadonlyArray<{ name: string; type: string }> = [
+  { name: 'episode_id', type: 'keyword' },
+  { name: 'last_ack_action', type: 'keyword' },
+  { name: 'last_assign_at', type: 'date' },
+  { name: 'last_assignee_at', type: 'date' },
+  { name: 'last_assignee_uid', type: 'keyword' },
+  { name: 'last_tag_at', type: 'date' },
+  { name: 'last_tagged_at', type: 'date' },
+  { name: 'last_tags', type: 'keyword' },
+];
+
+/**
+ * One action-state row as the loader reads it. `assignee_uid` / `tags` are
+ * the values Elasticsearch returns, which is why clearing them is expressed
+ * through the paired `*_at` timestamps rather than a null value.
+ */
+export interface AlertActionStateRowOverrides {
+  episode_id?: string;
+  last_ack_action?: 'ack' | 'unack' | null;
+  last_assign_at?: string | null;
+  last_assignee_at?: string | null;
+  last_assignee_uid?: string | null;
+  last_tag_at?: string | null;
+  last_tagged_at?: string | null;
+  last_tags?: string | string[] | null;
+}
+
+const ACTION_STATE_TIMESTAMP = '2025-01-01T00:00:00.000Z';
+
+/**
+ * `FieldValue` has no array variant, but a multi-valued ES|QL column does
+ * come back as a nested array — which is what `last_tags` carries.
+ */
+type EsqlCell = FieldValue | FieldValue[];
+
+/**
+ * Mocks the action-state ES|QL response. Defaults describe an alert whose
+ * assignee and tags were last *set* (both `*_at` pairs agree), so a test
+ * only has to say what the alert currently carries; a cleared value is
+ * expressed by advancing `last_assign_at` / `last_tag_at` past its pair.
+ */
+const toAlertActionStateRow = (row: AlertActionStateRowOverrides): EsqlCell[] => {
+  const assigneeUid = row.last_assignee_uid === undefined ? null : row.last_assignee_uid;
+  const tags = row.last_tags === undefined ? null : row.last_tags;
+  const assignAt = assigneeUid == null ? null : ACTION_STATE_TIMESTAMP;
+  const tagAt = tags == null ? null : ACTION_STATE_TIMESTAMP;
+
+  return [
+    row.episode_id ?? 'episode-1',
+    row.last_ack_action === undefined ? null : row.last_ack_action,
+    row.last_assign_at === undefined ? assignAt : row.last_assign_at,
+    row.last_assignee_at === undefined ? assignAt : row.last_assignee_at,
+    assigneeUid,
+    row.last_tag_at === undefined ? tagAt : row.last_tag_at,
+    row.last_tagged_at === undefined ? tagAt : row.last_tagged_at,
+    tags,
+  ];
+};
+
+export const getAlertActionStateESQLResponse = (
+  rows: readonly AlertActionStateRowOverrides[] = []
+): EsqlQueryResponse => ({
+  columns: [...ALERT_ACTION_STATE_COLUMNS],
+  values: rows.map(toAlertActionStateRow) as EsqlQueryResponse['values'],
+});

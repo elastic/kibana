@@ -172,6 +172,12 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       }),
     ]);
 
+    const ackResponse = await apiClient.post(BULK_ACK_EPISODE_ACTION_URL, {
+      headers: writerHeaders,
+      body: { items: [{ alert_id: episodeId }] },
+    });
+    expect(ackResponse).toHaveStatusCode(200);
+
     const response = await apiClient.post(BULK_UNACK_EPISODE_ACTION_URL, {
       headers: writerHeaders,
       body: { items: [{ alert_id: episodeId }] },
@@ -641,6 +647,54 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
         episode_id: olderEpisodeId,
         rule_id: ruleId,
       });
+    }
+  );
+
+  apiTest(
+    'precondition: reports INVALID_ALERT_STATE_TRANSITION for an already acknowledged item',
+    async ({ apiClient, apiServices }) => {
+      // The honest bulk answer for a no-op: the item is counted as an error
+      // rather than silently inflating affected_count with a duplicate doc.
+      const ruleId = 'bulk-ack-no-op-rule';
+      const acknowledgedEpisodeId = 'bulk-ack-no-op-acknowledged-episode';
+      const freshEpisodeId = 'bulk-ack-no-op-fresh-episode';
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: buildGroupHash('bulk-ack-no-op-acknowledged-group'),
+          alert: { id: acknowledgedEpisodeId, status: 'active' },
+        }),
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: buildGroupHash('bulk-ack-no-op-fresh-group'),
+          alert: { id: freshEpisodeId, status: 'active' },
+        }),
+      ]);
+
+      const firstResponse = await apiClient.post(BULK_ACK_EPISODE_ACTION_URL, {
+        headers: writerHeaders,
+        body: { items: [{ alert_id: acknowledgedEpisodeId }] },
+      });
+      expect(firstResponse).toHaveStatusCode(200);
+
+      const response = await apiClient.post(BULK_ACK_EPISODE_ACTION_URL, {
+        headers: writerHeaders,
+        body: { items: [{ alert_id: acknowledgedEpisodeId }, { alert_id: freshEpisodeId }] },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.affected_count).toBe(1);
+      expect(response.body.errors).toHaveLength(1);
+      expect(response.body.errors[0].id).toBe(acknowledgedEpisodeId);
+      expect(response.body.errors[0].error.code).toBe('INVALID_ALERT_STATE_TRANSITION');
+
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId,
+        actionTypes: ['ack'],
+      });
+      expect(actions).toHaveLength(2);
+      expect(actions.filter((doc) => doc.episode_id === acknowledgedEpisodeId)).toHaveLength(1);
     }
   );
 
