@@ -82,6 +82,13 @@ export const parseHost = (host: string): { hostname: string; port: number } => {
   return { hostname: host.slice(0, lastColon), port };
 };
 
+const shellQuote = (value: string): string => `'${value.replace(/'/g, `'\\''`)}'`;
+
+const withoutSshAgent = (env: NodeJS.ProcessEnv): NodeJS.ProcessEnv => {
+  const { SSH_AUTH_SOCK: _agentSocket, ...rest } = env;
+  return rest;
+};
+
 const sshDestination = (username: string, hostname: string): string => `${username}@${hostname}`;
 
 const scpDestination = (username: string, hostname: string, remotePath: string): string => {
@@ -176,7 +183,7 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
           ...ssh.prefixArgs,
           ...this.getTransportArgs('-p', port, authArgs),
           sshDestination(username, hostname),
-          `wc -c < ${JSON.stringify(remotePath)}`,
+          `wc -c < ${shellQuote(remotePath)}`,
         ],
         env
       );
@@ -231,7 +238,7 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
             ...ssh.prefixArgs,
             ...this.getTransportArgs('-p', port, authArgs),
             sshDestination(username, hostname),
-            `mkdir -p -- ${JSON.stringify(remoteDir)}`,
+            `mkdir -p -- ${shellQuote(remoteDir)}`,
           ],
           env
         );
@@ -274,8 +281,17 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
         return {
           ssh: { bin: 'sshpass', prefixArgs: ['-e', 'ssh'] },
           scp: { bin: 'sshpass', prefixArgs: ['-e', 'scp'] },
-          authArgs: ['-o', 'PasswordAuthentication=yes'],
-          env: { ...process.env, SSHPASS: password },
+          authArgs: [
+            '-o',
+            'PreferredAuthentications=password,keyboard-interactive',
+            '-o',
+            'PasswordAuthentication=yes',
+            '-o',
+            'PubkeyAuthentication=no',
+            '-o',
+            'IdentityAgent=none',
+          ],
+          env: { ...withoutSshAgent(process.env), SSHPASS: password },
           cleanup: () => {},
         };
       }
@@ -298,8 +314,21 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
         return {
           ssh: { bin: 'ssh', prefixArgs: [] },
           scp: { bin: 'scp', prefixArgs: [] },
-          authArgs: ['-i', tempKeyPath, '-o', 'PasswordAuthentication=no'],
-          env: process.env,
+          authArgs: [
+            '-i',
+            tempKeyPath,
+            '-o',
+            'IdentitiesOnly=yes',
+            '-o',
+            'IdentityAgent=none',
+            '-o',
+            'PreferredAuthentications=publickey',
+            '-o',
+            'PasswordAuthentication=no',
+            '-o',
+            'KbdInteractiveAuthentication=no',
+          ],
+          env: withoutSshAgent(process.env),
           cleanup: () => {
             rmSync(tempDir, { recursive: true, force: true });
           },
@@ -356,6 +385,15 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
   private assertHostAllowed(): void {
     const { hostname } = parseHost(this.config.host);
     this.configurationUtilities.ensureHostnameAllowed(hostname);
+
+    // A leading '-' would make ssh/scp parse the destination as a local option.
+    const { username } = this.secrets;
+    if (username.startsWith('-') || /\s/.test(username)) {
+      throw new Error('Invalid SSH username');
+    }
+    if (hostname.startsWith('-')) {
+      throw new Error('Invalid SSH host');
+    }
   }
 
   private getHostKeyArgs(): string[] {

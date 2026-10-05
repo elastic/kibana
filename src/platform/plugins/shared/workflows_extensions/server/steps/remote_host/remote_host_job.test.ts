@@ -74,7 +74,13 @@ describe('wrapUserScript', () => {
   });
 
   it('cds into cwd before the user command', () => {
-    expect(wrapUserScript('echo hi', false, '/opt/app')).toContain('cd "/opt/app" || exit 1');
+    expect(wrapUserScript('echo hi', false, '/opt/app')).toContain("cd '/opt/app' || exit 1");
+  });
+
+  it('single-quotes cwd so it is never expanded by the remote shell', () => {
+    const wrapped = wrapUserScript('echo hi', false, "$(touch /tmp/pwn)'`id`");
+
+    expect(wrapped).toContain("cd '$(touch /tmp/pwn)'\\''`id`' || exit 1");
   });
 });
 
@@ -165,11 +171,23 @@ describe('parseJobStatus', () => {
 });
 
 describe('startJob', () => {
+  const REMOTE_ROOT = '/tmp/wf_remote_host_1000';
+  const launcherScript = (): string =>
+    mockedExecScript.mock.calls.map(([, script]) => script).find((s) => s.includes('TIMEOUT=20')) ??
+    '';
+
+  /** The prepare script creates the job dir and prints the root. Other execs get `result`. */
+  const mockLauncherResult = (result: { stdout: string; stderr: string; code: number }) => {
+    mockedExecScript.mockImplementation(async (_ctx, script) =>
+      script.includes('mkdir -m 700') ? { stdout: `${REMOTE_ROOT}\n`, stderr: '', code: 0 } : result
+    );
+  };
+
   beforeEach(() => {
     mockedUploadFile.mockReset();
     mockedExecScript.mockReset();
     mockedUploadFile.mockResolvedValue(undefined);
-    mockedExecScript.mockResolvedValue({
+    mockLauncherResult({
       stdout: statusJson({ status: 'running' }),
       stderr: '',
       code: 0,
@@ -186,7 +204,7 @@ describe('startJob', () => {
       stderrOffset: 0,
     });
     expect(mockedUploadFile).toHaveBeenCalledWith(ctx, {
-      remotePath: `${getWorkdir(result.jobId)}/script.sh`,
+      remotePath: `${REMOTE_ROOT}/${result.jobId}/script.sh`,
       content: expect.stringContaining('echo hi'),
     });
     expect(mockedExecScript).toHaveBeenCalledWith(ctx, expect.stringContaining('TIMEOUT=20'));
@@ -195,7 +213,7 @@ describe('startJob', () => {
       ctx,
       expect.stringContaining('command -v setsid')
     );
-    const workdir = getWorkdir(result.jobId);
+    const workdir = `${REMOTE_ROOT}/${result.jobId}`;
     expect(mockedExecScript).toHaveBeenCalledWith(
       ctx,
       expect.stringContaining(
@@ -212,13 +230,59 @@ describe('startJob', () => {
 
   it('checks the recorded PID before reading the exit code', async () => {
     const result = await startJob(ctx, 'echo hi');
-    const script = mockedExecScript.mock.calls[0][1];
+    const script = launcherScript();
     const pidCheck = script.indexOf('kill -0 "$PID"');
-    const exitCodeCheck = script.indexOf(`elif [ -f "${getWorkdir(result.jobId)}/code.txt" ]`);
+    const exitCodeCheck = script.indexOf(`elif [ -f "${REMOTE_ROOT}/${result.jobId}/code.txt" ]`);
 
     expect(pidCheck).toBeGreaterThan(-1);
     expect(exitCodeCheck).toBeGreaterThan(pidCheck);
     expect(script).toContain('"status":"lost"');
+  });
+
+  it('creates a private job directory before uploading anything', async () => {
+    await startJob(ctx, 'echo hi', { A: 'b' });
+
+    const prepare = mockedExecScript.mock.calls[0][1];
+    expect(prepare).toContain('umask 077');
+    expect(prepare).toContain('mkdir -m 700');
+    expect(mockedExecScript.mock.invocationCallOrder[0]).toBeLessThan(
+      mockedUploadFile.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('kills the process group of a lost job before removing its workdir', async () => {
+    await startJob(ctx, 'echo hi');
+
+    const script = launcherScript();
+    const lostBranch = script.slice(script.indexOf('LOST_PID=null'));
+    expect(lostBranch.indexOf('kill -9 -"$LOST_PID"')).toBeGreaterThan(-1);
+    expect(lostBranch.indexOf('kill -9 -"$LOST_PID"')).toBeLessThan(lostBranch.indexOf('rm -rf'));
+  });
+
+  it('removes the workdir before exiting when STEP_OUTPUT is too large', async () => {
+    await startJob(ctx, 'echo hi', undefined, undefined, 1024);
+
+    const script = launcherScript();
+    const exitIndex = script.indexOf('exit 2');
+    expect(script.lastIndexOf('rm -rf', exitIndex)).toBeGreaterThan(
+      script.indexOf('STEP_OUTPUT exceeds max-step-size')
+    );
+  });
+
+  it('cleans up the workdir when the upload fails', async () => {
+    mockedUploadFile.mockRejectedValue(new Error('scp failed'));
+
+    await expect(startJob(ctx, 'echo hi')).rejects.toThrow('scp failed');
+
+    const lastScript = mockedExecScript.mock.calls.at(-1)?.[1];
+    expect(lastScript).toContain('rm -rf');
+  });
+
+  it('rejects an unexpected job root from the remote host', async () => {
+    mockedExecScript.mockResolvedValue({ stdout: '/etc\n', stderr: '', code: 0 });
+
+    await expect(startJob(ctx, 'echo hi')).rejects.toThrow('unexpected path');
+    expect(mockedUploadFile).not.toHaveBeenCalled();
   });
 
   it('caps STEP_OUTPUT reads at maxBytes before encoding', async () => {
@@ -240,13 +304,23 @@ describe('startJob', () => {
     );
   });
 
-  it('uploads env.sh with quoted heredoc assignments', async () => {
+  it('uploads env.sh with base64-encoded values', async () => {
     const result = await startJob(ctx, 'echo hi', { APP_DIR: '/opt/app' });
 
+    const encoded = Buffer.from('/opt/app').toString('base64');
     expect(mockedUploadFile).toHaveBeenCalledWith(ctx, {
-      remotePath: `${getWorkdir(result.jobId)}/env.sh`,
-      content: "export APP_DIR=$(cat << 'EOF'\n/opt/app\nEOF\n)",
+      remotePath: `${REMOTE_ROOT}/${result.jobId}/env.sh`,
+      content: `export APP_DIR\nAPP_DIR=$(printf '%s' '${encoded}' | base64 -d; echo x)\nAPP_DIR=\${APP_DIR%x}`,
     });
+  });
+
+  it('never embeds raw env values in env.sh', async () => {
+    const value = 'a\nEOF\ntouch /tmp/pwn';
+    await startJob(ctx, 'echo hi', { APP_DIR: value });
+
+    const { content } = mockedUploadFile.mock.calls[0][1];
+    expect(content).not.toContain('EOF');
+    expect(content).not.toContain('touch /tmp/pwn');
   });
 
   it('throws on invalid env keys', async () => {
@@ -257,7 +331,7 @@ describe('startJob', () => {
   });
 
   it('returns terminated status when the command finishes within 2s', async () => {
-    mockedExecScript.mockResolvedValue({
+    mockLauncherResult({
       stdout: statusJson({
         status: 'terminated',
         stdout: 'hello',
@@ -275,7 +349,7 @@ describe('startJob', () => {
   });
 
   it('throws when the launcher exits non-zero', async () => {
-    mockedExecScript.mockResolvedValue({ stdout: '', stderr: 'boom', code: 1 });
+    mockLauncherResult({ stdout: '', stderr: 'boom', code: 1 });
 
     await expect(startJob(ctx, 'echo hi')).rejects.toThrow('Failed to start remote command: boom');
   });

@@ -92,11 +92,20 @@ describe('createRemoteHostRunCommandStepDefinition', () => {
     };
   };
 
+  /** The first exec of startJob prepares the job dir and returns its root. Everything else gets `result`. */
+  const mockLauncherResult = (result: { stdout: string; stderr: string; code: number }) => {
+    mockedExecScript.mockImplementation(async (_ctx, script) =>
+      script.includes('mkdir -m 700')
+        ? { stdout: '/tmp/wf_remote_host_1000\n', stderr: '', code: 0 }
+        : result
+    );
+  };
+
   beforeEach(() => {
     mockedExecScript.mockReset();
     mockedUploadFile.mockReset();
     mockedUploadFile.mockResolvedValue(undefined);
-    mockedExecScript.mockResolvedValue({
+    mockLauncherResult({
       stdout: statusJson({ status: 'running' }),
       stderr: '',
       code: 0,
@@ -130,7 +139,7 @@ describe('createRemoteHostRunCommandStepDefinition', () => {
         },
       });
       expect(mockedUploadFile).toHaveBeenCalledTimes(1);
-      expect(mockedExecScript).toHaveBeenCalledTimes(1);
+      expect(mockedExecScript).toHaveBeenCalledTimes(2);
       expect(mockedExecScript).toHaveBeenCalledWith(
         expect.anything(),
         expect.stringContaining('-gt 10485760')
@@ -138,7 +147,7 @@ describe('createRemoteHostRunCommandStepDefinition', () => {
     });
 
     it('returns parsed STEP_OUTPUT when the command finishes within 2s', async () => {
-      mockedExecScript.mockResolvedValue({
+      mockLauncherResult({
         stdout: statusJson({
           status: 'terminated',
           stdout: 'logged',
@@ -154,7 +163,7 @@ describe('createRemoteHostRunCommandStepDefinition', () => {
     });
 
     it('throws ScriptExecutionError when a short command exits non-zero', async () => {
-      mockedExecScript.mockResolvedValue({
+      mockLauncherResult({
         stdout: statusJson({
           status: 'terminated',
           exitCode: 2,
@@ -171,7 +180,7 @@ describe('createRemoteHostRunCommandStepDefinition', () => {
     });
 
     it('throws RemoteProcessLost when the process is already gone', async () => {
-      mockedExecScript.mockResolvedValue({
+      mockLauncherResult({
         stdout: statusJson({
           status: 'lost',
           pid: 99,
@@ -327,6 +336,18 @@ describe('createRemoteHostRunCommandStepDefinition', () => {
 
       expect(mockedExecScript).toHaveBeenCalledTimes(1);
       expect(mockedExecScript.mock.calls[0][1]).toContain('pid.txt');
+    });
+
+    it('kills the job with a signal that is not already aborted', async () => {
+      const context = createContext({
+        state: { jobId: 'job-1', stdoutOffset: 0, stderrOffset: 0 },
+      });
+      const controller = new AbortController();
+      controller.abort();
+      await onCancel()({ ...context, abortSignal: controller.signal });
+
+      const [callContext] = mockedExecScript.mock.calls[0];
+      expect(callContext.abortSignal?.aborted).toBe(false);
     });
   });
 });

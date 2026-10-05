@@ -112,14 +112,18 @@ describe('SshHostConnector', () => {
       expect(args).toContain('UserKnownHostsFile=/dev/null');
     });
 
-    it('does not let a metacharacter username reach a shell', async () => {
+    it('rejects a username with whitespace or metacharacters before connecting', async () => {
       const connector = createConnector({ username: 'alice; id' });
-      await connector.exec({ script: 'true' });
 
-      const [bin, args] = mockedExecFile.mock.calls[0];
-      expect(bin).toBe('ssh');
-      expect(args).toContain('alice; id@example.com');
-      expect(typeof args).toBe('object');
+      await expect(connector.exec({ script: 'true' })).rejects.toThrow('Invalid SSH username');
+      expect(mockedExecFile).not.toHaveBeenCalled();
+    });
+
+    it('rejects a username starting with a dash before connecting', async () => {
+      const connector = createConnector({ username: '-oProxyCommand=id' });
+
+      await expect(connector.exec({ script: 'true' })).rejects.toThrow('Invalid SSH username');
+      expect(mockedExecFile).not.toHaveBeenCalled();
     });
 
     it('passes host:port as -p and a destination argv', async () => {
@@ -294,7 +298,7 @@ describe('SshHostConnector', () => {
       expect(mockedExecFile).toHaveBeenCalledTimes(2);
       const [statBin, statArgs] = mockedExecFile.mock.calls[0];
       expect(statBin).toBe('ssh');
-      expect(statArgs).toContain('wc -c < "/var/log/app.log\\"; id; echo \\""');
+      expect(statArgs).toContain(`wc -c < '/var/log/app.log"; id; echo "'`);
 
       const [bin, args] = mockedExecFile.mock.calls[1];
       expect(bin).toBe('scp');
@@ -337,7 +341,7 @@ describe('SshHostConnector', () => {
       expect(mockedExecFile).toHaveBeenCalledTimes(2);
       const [mkdirBin, mkdirArgs] = mockedExecFile.mock.calls[0];
       expect(mkdirBin).toBe('ssh');
-      expect(mkdirArgs).toContain('mkdir -p -- "/opt/app"');
+      expect(mkdirArgs).toContain("mkdir -p -- '/opt/app'");
 
       const [scpBin, scpArgs] = mockedExecFile.mock.calls[1];
       expect(scpBin).toBe('scp');

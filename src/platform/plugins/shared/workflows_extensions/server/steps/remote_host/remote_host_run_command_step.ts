@@ -28,6 +28,8 @@ const StateSchema = z.object({
   stderrOffset: z.number().default(0),
 });
 
+const CANCEL_TIMEOUT_MS = 30000;
+
 interface Deps {
   getActionsStart: () => ActionsPluginStartContract | undefined;
 }
@@ -192,9 +194,23 @@ export const createRemoteHostRunCommandStepDefinition = ({ getActionsStart }: De
         return;
       }
 
-      await killJob(
-        toConnectorContext(context.config['connector-id'], context, getActionsStart),
-        state.jobId
-      );
+      // The step signal has already fired when onCancel runs, so use a fresh one for the kill call.
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), CANCEL_TIMEOUT_MS);
+      try {
+        await killJob(
+          toConnectorContext(
+            context.config['connector-id'],
+            {
+              contextManager: context.contextManager,
+              abortSignal: controller.signal,
+            },
+            getActionsStart
+          ),
+          state.jobId
+        );
+      } finally {
+        clearTimeout(timer);
+      }
     },
   });

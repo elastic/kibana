@@ -11,7 +11,9 @@ import { randomUUID } from 'crypto';
 import type { ConnectorCallContext } from './execute_in_connector';
 import { execScript, uploadFile } from './execute_in_connector';
 
-const REMOTE_HOST_JOB_ROOT = '/tmp/wf_remote_host';
+/** Each SSH login gets its own private root, so connectors using different accounts do not collide. */
+const REMOTE_HOST_JOB_ROOT_PATTERN = /^\/tmp\/wf_remote_host_\d+$/;
+const REMOTE_HOST_JOB_ROOT_EXPRESSION = '/tmp/wf_remote_host_$(id -u)';
 
 /** OpenSSH exits 255 when the client fails. The status script does not. */
 const SSH_CLIENT_FAILURE_CODE = 255;
@@ -53,7 +55,10 @@ interface JobStatusPayload {
 
 const createJobId = (): string => randomUUID();
 
-export const getWorkdir = (jobId: string): string => `${REMOTE_HOST_JOB_ROOT}/${jobId}`;
+/** Shell expression for the job directory. Expands inside double quotes on the remote host. */
+export const getWorkdir = (jobId: string): string => `${REMOTE_HOST_JOB_ROOT_EXPRESSION}/${jobId}`;
+
+const shellQuote = (value: string): string => `'${value.replace(/'/g, `'\\''`)}'`;
 
 export const wrapUserScript = (code: string, hasEnv: boolean, cwd?: string): string =>
   `
@@ -61,7 +66,7 @@ export const wrapUserScript = (code: string, hasEnv: boolean, cwd?: string): str
 export STEP_OUTPUT="$WORKDIR/output.txt"
 touch "$STEP_OUTPUT"
 ${hasEnv ? '. "$WORKDIR/env.sh"' : ''}
-${cwd ? `cd ${JSON.stringify(cwd)} || exit 1` : ''}
+${cwd ? `cd ${shellQuote(cwd)} || exit 1` : ''}
 export FORCE_COLOR=1 TERM=xterm-256color
 ${code}
 `.trim();
@@ -134,6 +139,7 @@ const printTerminatedStatus = (
       ? `OUTPUT_SIZE=$(_fsize "${outputFile}")
   if [ "$OUTPUT_SIZE" -gt ${maxBytes} ]; then
     echo "STEP_OUTPUT exceeds max-step-size ($OUTPUT_SIZE bytes > ${maxBytes} bytes)" >&2
+    rm -rf "${workdir}"
     exit 2
   fi
   `
@@ -181,6 +187,9 @@ case "$PID" in
   ''|*[!0-9]*) LOST_PID=null ;;
   *) LOST_PID=$PID ;;
 esac
+if [ "$LOST_PID" != null ]; then
+  kill -9 -"$LOST_PID" 2>/dev/null || true
+fi
 rm -rf "${workdir}"
 printf '{"status":"lost","exitCode":0,"pid":%s,"stdout":"%s","stderr":"%s","stdoutOffset":%s,"stderrOffset":%s,"output":""}\\n' \\
   "$LOST_PID" "$STDOUT" "$STDERR" "$STDOUT_SIZE" "$STDERR_SIZE"`;
@@ -216,7 +225,6 @@ const buildLauncherScript = (workdir: string, scriptFile: string, maxBytes: numb
 
   return `#!/bin/bash
 ${BASH_STATUS_HELPERS}
-mkdir -p "${workdir}"
 set -m
 if command -v setsid >/dev/null 2>&1; then
   setsid bash -c '${jobCmd}' < /dev/null > /dev/null 2>&1 &
@@ -266,10 +274,37 @@ const createVariableAssignment = (variable: string, value: string): string => {
     throw new Error(`Invalid environment variable name: ${variable}`);
   }
 
-  return `export ${variable}=$(cat << 'EOF'
-${value}
-EOF
-)`;
+  // Base64 keeps the value as data. The trailing "x" preserves trailing newlines through $(...).
+  const encoded = Buffer.from(value, 'utf-8').toString('base64');
+  return `export ${variable}
+${variable}=$(printf '%s' '${encoded}' | base64 -d; echo x)
+${variable}=\${${variable}%x}`;
+};
+
+const buildPrepareScript = (jobId: string): string => `#!/bin/bash
+umask 077
+ROOT="${REMOTE_HOST_JOB_ROOT_EXPRESSION}"
+mkdir -p -m 700 "$ROOT" || exit 1
+if [ -L "$ROOT" ] || [ ! -O "$ROOT" ]; then
+  echo "Unsafe job root $ROOT" >&2
+  exit 1
+fi
+chmod 700 "$ROOT" || exit 1
+mkdir -m 700 "$ROOT/${jobId}" || exit 1
+printf '%s\\n' "$ROOT"
+`;
+
+const prepareWorkdir = async (ctx: ConnectorCallContext, jobId: string): Promise<string> => {
+  const { stdout, stderr, code } = await execScript(ctx, buildPrepareScript(jobId));
+  if (code !== 0) {
+    throw new Error(`Failed to prepare remote job directory: ${stderr}`);
+  }
+
+  const root = stdout.trim().split('\n').at(-1) ?? '';
+  if (!REMOTE_HOST_JOB_ROOT_PATTERN.test(root)) {
+    throw new Error(`Remote job directory has an unexpected path: ${root}`);
+  }
+  return `${root}/${jobId}`;
 };
 
 const envRecordToScript = (env: Record<string, string>): string =>
@@ -285,32 +320,38 @@ export async function startJob(
   maxBytes = 0
 ): Promise<RemoteHostJobStatus & { jobId: string }> {
   const jobId = createJobId();
-  const workdir = getWorkdir(jobId);
-  const scriptFile = `${workdir}/script.sh`;
   const hasEnv = env != null && Object.keys(env).length > 0;
   const outputLimit = Math.max(0, Math.floor(maxBytes));
+  const envScript = hasEnv ? envRecordToScript(env) : undefined;
 
-  if (hasEnv) {
+  // The private (0700) job directory is created first, so uploaded files are never exposed.
+  const workdir = await prepareWorkdir(ctx, jobId);
+  const scriptFile = `${workdir}/script.sh`;
+
+  try {
+    if (envScript !== undefined) {
+      await uploadFile(ctx, { remotePath: `${workdir}/env.sh`, content: envScript });
+    }
+
     await uploadFile(ctx, {
-      remotePath: `${workdir}/env.sh`,
-      content: envRecordToScript(env),
+      remotePath: scriptFile,
+      content: wrapUserScript(script, hasEnv, cwd),
     });
+
+    const { stdout, stderr, code } = await execScript(
+      ctx,
+      buildLauncherScript(workdir, scriptFile, outputLimit)
+    );
+    if (code !== 0) {
+      throw new Error(`Failed to start remote command: ${stderr}`);
+    }
+
+    return { ...parseJobStatus(stdout), jobId };
+  } catch (error) {
+    // Best effort: do not leave env.sh and script.sh behind when the job never started.
+    await killJob(ctx, jobId).catch(() => undefined);
+    throw error;
   }
-
-  await uploadFile(ctx, {
-    remotePath: scriptFile,
-    content: wrapUserScript(script, hasEnv, cwd),
-  });
-
-  const { stdout, stderr, code } = await execScript(
-    ctx,
-    buildLauncherScript(workdir, scriptFile, outputLimit)
-  );
-  if (code !== 0) {
-    throw new Error(`Failed to start remote command: ${stderr}`);
-  }
-
-  return { ...parseJobStatus(stdout), jobId };
 }
 
 export async function pollJob(
