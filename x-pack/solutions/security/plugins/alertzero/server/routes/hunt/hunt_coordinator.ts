@@ -131,6 +131,9 @@ export const registerHuntCoordinatorRoute = ({
             logger,
           });
 
+          // The Worker fan-out supplies a run id so one sweep's children share it,
+          // which is what the packaging barrier and conclusion dedupe key off. Only
+          // mint one when the caller has no sweep to tie the run to.
           const result = await huntCoordinator({ esClient, reportsEsClient }, model, logger, {
             report_id,
             spaceId,
