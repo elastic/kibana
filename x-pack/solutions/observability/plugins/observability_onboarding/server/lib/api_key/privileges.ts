@@ -14,25 +14,25 @@ export const MONITOR_CLUSTER: estypes.SecurityClusterPrivilege = 'monitor';
 
 // https://www.elastic.co/guide/en/fleet/master/grant-access-to-elasticsearch.html#create-api-key-standalone-agent
 export const INDEX_LOGS_AND_METRICS: estypes.SecurityIndicesPrivileges = {
-  names: ['logs-*-*', 'logs', 'logs.*', 'metrics-*-*'],
+  names: ['logs-*-*', 'logs', 'logs.*', 'metrics-*-*', 'exemplars-*-*'],
   privileges: ['auto_configure', 'create_doc'],
 };
 
 // https://www.elastic.co/guide/en/fleet/master/grant-access-to-elasticsearch.html#create-api-key-standalone-agent
 export const INDEX_LOGS_METRICS_AND_TRACES: estypes.SecurityIndicesPrivileges = {
-  names: ['logs-*-*', 'logs', 'logs.*', 'metrics-*-*', 'traces-*-*'],
+  names: ['logs-*-*', 'logs', 'logs.*', 'metrics-*-*', 'traces-*-*', 'exemplars-*-*'],
   privileges: ['auto_configure', 'create_doc'],
 };
 
 // https://www.elastic.co/observability-labs/blog/prometheus-remote-write-elasticsearch
 export const INDEX_PROMETHEUS_REMOTE_WRITE: estypes.SecurityIndicesPrivileges = {
-  names: ['metrics-*'],
+  names: ['metrics-*', 'exemplars-*'],
   privileges: ['auto_configure', 'create_doc'],
 };
 
 // https://www.elastic.co/docs/manage-data/ingest/otlp-endpoint#create-an-api-key
 export const INDEX_OTLP_LOGS_METRICS_AND_TRACES: estypes.SecurityIndicesPrivileges = {
-  names: ['logs-*', 'metrics-*', 'traces-*'],
+  names: ['logs-*', 'metrics-*', 'traces-*', 'exemplars-*'],
   privileges: ['auto_configure', 'create_doc'],
 };
 
