@@ -10,7 +10,26 @@
 import { BehaviorSubject } from 'rxjs';
 import { getSampleDashboardState } from '../mocks';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
-import { initializeApproximationManager } from './approximation_manager';
+import { initializeApproximationManager, getDefaultApproximation } from './approximation_manager';
+
+const mockGet = jest.fn();
+jest.mock('@kbn/esql-browser', () => ({
+  esqlApproximationStorage: { get: mockGet, set: jest.fn() },
+}));
+
+describe('getDefaultApproximation', () => {
+  afterEach(() => jest.resetAllMocks());
+
+  test('returns object with esql_approximation from storage', () => {
+    mockGet.mockReturnValue(true);
+    expect(getDefaultApproximation()).toEqual({ esql_approximation: true });
+  });
+
+  test('returns object with undefined esql_approximation when storage is empty', () => {
+    mockGet.mockReturnValue(undefined);
+    expect(getDefaultApproximation()).toEqual({ esql_approximation: undefined });
+  });
+});
 
 describe('approximationManager', () => {
   const createLastSavedState = (esql_approximation?: boolean) =>

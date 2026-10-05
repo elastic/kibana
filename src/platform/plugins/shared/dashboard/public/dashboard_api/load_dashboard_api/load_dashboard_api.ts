@@ -11,7 +11,6 @@ import type { EuiFlyoutProps } from '@elastic/eui';
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
 import { asyncForEach } from '@kbn/std';
 
-import { esqlApproximationStorage } from '@kbn/esql-browser';
 import { getLastSavedState } from '../../../common/default_dashboard_state';
 import { dashboardClient } from '../../dashboard_client';
 import { getPlacementHints } from '../../panel_placement/get_placement_hints';
@@ -23,6 +22,7 @@ import {
 import { coreServices } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
 import { getDashboardUserActivityService } from '../../services/user_activity_service';
+import { getDefaultApproximation } from '../approximation_manager';
 import { getDashboardApi } from '../get_dashboard_api';
 import { DASHBOARD_DURATION_START_MARK } from '../telemetry/dashboard_duration_start_mark';
 import { startTrackingDashboardLoadTelemetry } from '../telemetry/dashboard_load_telemetry';
@@ -94,9 +94,7 @@ export async function loadDashboardApi({
     panelFlyoutType,
     incomingEmbeddables,
     initialState: {
-      // Seed Fast mode from the user's last-used preference; overridden by the saved object,
-      // session backup, and URL state so it only applies when no value has been explicitly set.
-      esql_approximation: esqlApproximationStorage.get(),
+      ...getDefaultApproximation(),
       ...getLastSavedState(readResult),
       ...unsavedChanges,
       ...overrideState,
