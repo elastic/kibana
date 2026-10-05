@@ -293,6 +293,7 @@ describe('rspack compile integration', () => {
 
         let rawCss: string | undefined;
         const bundle = Fs.readFileSync(Path.join(outputDir, `${pluginId}.plugin.js`), 'utf-8');
+        // a minimal bundle registry lets us read the plugin's exports without starting kibana.
         runInNewContext(
           bundle,
           {
@@ -307,6 +308,7 @@ describe('rspack compile integration', () => {
           { timeout: 1_000 }
         );
 
+        // catch the regression where ?raw returns javascript for injecting styles instead of css.
         expect(rawCss).toBe(css);
       },
       120_000
