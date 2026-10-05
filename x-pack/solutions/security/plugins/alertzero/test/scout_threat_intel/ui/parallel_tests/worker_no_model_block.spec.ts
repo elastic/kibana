@@ -45,8 +45,10 @@ spaceTest.describe('Worker no-model block', { tag: [...tags.stateful.classic] },
     await scoutSpace.uiSettings.set({ [ALERTZERO_ENABLED_SETTING_ID]: true });
   });
 
+  // Changing Workers needs the manage_security cluster privilege, which only admins hold; without
+  // it the whole page is read-only and the no-model lock can't be told apart.
   spaceTest.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsPrivilegedUser();
+    await browserAuth.loginAsAdmin();
   });
 
   spaceTest.afterEach(async ({ apiServices, scoutSpace }) => {
@@ -63,6 +65,7 @@ spaceTest.describe('Worker no-model block', { tag: [...tags.stateful.classic] },
   spaceTest('blocks every Worker while the space has no model', async ({ page, pageObjects }) => {
     const { watchSettings } = pageObjects;
     await watchSettings.goto(SYSTEM_SECURITY_WATCH_FLOOR_ID, FLOOR_WORKER_IDS[0]);
+    await expect(watchSettings.readOnlyCallout).toBeHidden();
 
     for (const workerId of FLOOR_WORKER_IDS) {
       await spaceTest.step(`${workerId} is blocked and says why`, async () => {
@@ -96,6 +99,7 @@ spaceTest.describe('Worker no-model block', { tag: [...tags.stateful.classic] },
       connectorId = connector.id;
 
       await watchSettings.goto(SYSTEM_SECURITY_WATCH_FLOOR_ID, FLOOR_WORKER_IDS[0]);
+      await expect(watchSettings.readOnlyCallout).toBeHidden();
 
       for (const workerId of FLOOR_WORKER_IDS) {
         await spaceTest.step(`${workerId} can be turned on again`, async () => {

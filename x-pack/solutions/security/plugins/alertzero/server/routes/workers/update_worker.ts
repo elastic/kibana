@@ -21,6 +21,7 @@ import { ALERTZERO_API_PRIVILEGE_WRITE } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
 import type { WorkerEnableBlockedReason } from '../../services/workers/workers_service';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
+import { hasManageSecurity } from './has_manage_security';
 
 const WORKER_ENABLE_BLOCKED_MESSAGES: Record<
   WorkerEnableBlockedReason,
@@ -89,8 +90,19 @@ export const registerUpdateWorkerRoute = ({
           },
         },
       },
-      withAlertZeroEnabled(async (_context, request, response) => {
+      withAlertZeroEnabled(async (context, request, response) => {
         try {
+          if (!(await hasManageSecurity(context))) {
+            return response.forbidden({
+              body: {
+                message: i18n.translate('xpack.alertzero.workerModifyForbiddenErrorMessage', {
+                  defaultMessage:
+                    'Modifying a worker requires the manage_security cluster privilege',
+                }),
+              },
+            });
+          }
+
           if (request.body.enabled !== undefined && !hasManagedWorkflowUpdatePrivilege(request)) {
             return response.forbidden({
               body: {

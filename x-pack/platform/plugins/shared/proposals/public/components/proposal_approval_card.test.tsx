@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react';
-import type { ApprovalProposal, DeclineParams } from '@kbn/proposals-ui';
+import { render, fireEvent, waitFor, act } from '@testing-library/react';
+import type { ApprovalAction, ApprovalProposal, DeclineParams } from '@kbn/proposals-ui';
 import { ProposalApprovalCard } from './proposal_approval_card';
 import {
   useProposal,
@@ -32,6 +32,9 @@ jest.mock('@elastic/eui', () => ({
 }));
 
 jest.mock('@kbn/ui-callout', () => ({
+  KbnInfoCallout: ({ title }: { title: string }) => (
+    <div data-test-subj="info-callout">{title}</div>
+  ),
   KbnDangerCallout: ({ title }: { title: string }) => (
     <div data-test-subj="danger-callout">{title}</div>
   ),
@@ -61,6 +64,8 @@ jest.mock('@kbn/proposals-ui', () => {
     ApprovalContent: ({
       proposal,
       onApprove,
+      secondaryActions,
+      readOnly,
       onDismiss,
       isSubmitting,
       currentActorName,
@@ -68,26 +73,47 @@ jest.mock('@kbn/proposals-ui', () => {
     }: {
       proposal: ApprovalProposal;
       onApprove?: () => void | Promise<void>;
+      secondaryActions?: ApprovalAction[];
+      readOnly?: boolean;
       onDismiss?: (params: DeclineParams) => Promise<void>;
       isSubmitting?: 'applying' | 'declining';
       currentActorName?: string;
       'data-test-subj'?: string;
     }) => {
+      const [isDeclining, setIsDeclining] = React.useState(false);
+      const isReplaced = proposal.supersededBy !== undefined || proposal.status === 'superseded';
       latestOnApprove = onApprove;
       latestOnDismiss = onDismiss;
-      const decision = actual.getProposalDecision(proposal);
+      const decision = isReplaced ? undefined : actual.getProposalDecision(proposal);
       const isExpired = actual.isProposalExpired(proposal);
       return (
         <div data-test-subj="approval-content">
           {onApprove && (
             <button
               onClick={onApprove}
-              disabled={isExpired}
+              disabled={isReplaced || isExpired || readOnly}
               data-test-subj={dataTestSubj ? `${dataTestSubj}-confirm` : undefined}
             >
               Approve
             </button>
           )}
+          {secondaryActions?.map((action) => (
+            <button
+              key={action.label}
+              onClick={action.onClick}
+              disabled={action.isDisabled}
+              data-test-subj={action['data-test-subj']}
+            >
+              {action.label}
+            </button>
+          ))}
+          {onDismiss && (
+            <button onClick={() => setIsDeclining(true)} data-test-subj={`${dataTestSubj}-dismiss`}>
+              Dismiss
+            </button>
+          )}
+          {isDeclining && <div data-test-subj="mock-dismiss-form" />}
+          <div data-test-subj="approval-title">{proposal.title}</div>
           {/* Surfaced so the comment and decision are observable: the real component renders
               them off the proposal rather than as separate props. */}
           <div data-test-subj="approval-comment">{proposal.comment}</div>
@@ -103,13 +129,13 @@ jest.mock('@kbn/proposals-ui', () => {
           {isSubmitting && <div data-test-subj="approval-is-submitting">{isSubmitting}</div>}
           {/* Mirrors the real `ApprovalContent`'s own gating: only while still pending, i.e. no
               `decision` yet. */}
-          {!decision && proposal.previousExecutionError && (
+          {!isReplaced && !decision && proposal.previousExecutionError && (
             <div data-test-subj="warning-callout">
               A previous attempt at this action failed
               {proposal.previousExecutionError}
             </div>
           )}
-          {isExpired && <div data-test-subj="warning-callout">Expired</div>}
+          {!isReplaced && isExpired && <div data-test-subj="warning-callout">Expired</div>}
         </div>
       );
     },
@@ -419,77 +445,62 @@ describe('ProposalApprovalCard', () => {
   });
 
   describe('superseded row', () => {
-    it('renders the revision that replaced it, not the superseded row', () => {
-      setupMocks();
-      useProposalMock.mockImplementation(
-        (id: string | undefined) =>
-          ({
-            data:
-              id === 'proposal-1'
-                ? baseProposal({
-                    id: 'proposal-1',
-                    status: 'superseded',
-                    supersededBy: 'proposal-2',
-                  })
-                : baseProposal({ id: 'proposal-2', revision: 2 }),
-            isLoading: false,
-            isError: false,
-          } as unknown as ReturnType<typeof useProposal>)
+    it.each<Partial<ProposalWithMetadata>>([
+      { status: 'superseded', supersededBy: 'proposal-2' },
+      { status: 'failed', decision: 'approved', supersededBy: 'proposal-2' },
+      { status: 'superseded' },
+      { status: 'pending', supersededBy: 'proposal-2' },
+      { status: 'expired', supersededBy: 'proposal-2' },
+    ])('renders its own historical content for %j', (overrides) => {
+      setupMocks(baseProposal({ ...overrides, comment: 'Original recommendation' }));
+      const { container, getByText, queryByText } = render(
+        <ProposalApprovalCard proposalId={PROPOSAL_ID} />
       );
 
-      const { container } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-
-      expect(useProposalMock).toHaveBeenCalledWith('proposal-2');
+      expect(getByText('Original recommendation')).toBeInTheDocument();
+      expect(getByText('This proposal has been replaced.')).toBeInTheDocument();
       expect(
-        container.querySelector('[data-test-subj="proposalCard-proposal-2-confirm"]')
-      ).toBeInTheDocument();
-      expect(container.querySelector('[data-test-subj="proposalCard-proposal-1"]')).toBeNull();
+        container.querySelector('[data-test-subj="proposalCard-proposal-1-confirm"]')
+      ).toBeDisabled();
+      expect(
+        container.querySelector('[data-test-subj="proposalDismiss-proposal-1"]')
+      ).toBeDisabled();
+      expect(queryByText(/No further action is needed/)).not.toBeInTheDocument();
+      expect(container.querySelector('[data-test-subj="approval-decision"]')).toBeNull();
+      expect(container.querySelector('[data-test-subj="approval-is-submitting"]')).toBeNull();
+      expect(queryByText(/The decision deadline has passed/)).not.toBeInTheDocument();
+      expect(useProposalMock.mock.calls.every(([id]) => id === PROPOSAL_ID)).toBe(true);
     });
 
-    it('follows the pointer more than one hop', () => {
+    it('hides an open dismissal form when the proposal is replaced', () => {
       setupMocks();
-      // A three-link chain: reaching the live head takes two redirects, so a
-      // redirect that only ever resolves one level would stop at proposal-2.
-      useProposalMock.mockImplementation((id: string | undefined) => {
-        const askedFor = id ?? PROPOSAL_ID;
-        return {
-          data:
-            askedFor === 'proposal-1'
-              ? baseProposal({ id: askedFor, status: 'superseded', supersededBy: 'proposal-2' })
-              : askedFor === 'proposal-2'
-              ? baseProposal({ id: askedFor, status: 'superseded', supersededBy: 'proposal-3' })
-              : baseProposal({ id: askedFor, revision: 3 }),
-          isLoading: false,
-          isError: false,
-        } as unknown as ReturnType<typeof useProposal>;
-      });
-
+      const proposalUpdater: {
+        current: React.Dispatch<React.SetStateAction<ProposalWithMetadata>>;
+      } = { current: () => undefined };
+      const useMockProposal = (): ReturnType<typeof useProposal> => {
+        const [data, setData] = React.useState(baseProposal());
+        proposalUpdater.current = setData;
+        return { data, isLoading: false, isError: false } as ReturnType<typeof useProposal>;
+      };
+      useProposalMock.mockImplementation(useMockProposal);
       const { container } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+      const dismissButton = container.querySelector(
+        '[data-test-subj="proposalCard-proposal-1-dismiss"]'
+      );
+      expect(dismissButton).toBeInTheDocument();
+      if (dismissButton) {
+        fireEvent.click(dismissButton);
+      }
+      expect(container.querySelector('[data-test-subj="mock-dismiss-form"]')).toBeInTheDocument();
 
-      expect(useProposalMock).toHaveBeenCalledWith('proposal-3');
+      act(() =>
+        proposalUpdater.current(baseProposal({ status: 'superseded', supersededBy: 'proposal-2' }))
+      );
+      expect(container.querySelector('[data-test-subj="mock-dismiss-form"]')).toBeNull();
+      expect(latestOnDismiss).toBeUndefined();
       expect(
-        container.querySelector('[data-test-subj="proposalCard-proposal-3-confirm"]')
-      ).toBeInTheDocument();
-    });
-
-    it('stops instead of looping forever on a chain that points in a circle', () => {
-      setupMocks();
-      useProposalMock.mockImplementation((id: string | undefined) => {
-        const askedFor = id ?? PROPOSAL_ID;
-        return {
-          data: baseProposal({
-            id: askedFor,
-            status: 'superseded',
-            supersededBy: `${askedFor}-next`,
-          }),
-          isLoading: false,
-          isError: false,
-        } as unknown as ReturnType<typeof useProposal>;
-      });
-
-      const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-
-      expect(getByTestId('warning-callout')).toBeInTheDocument();
+        container.querySelector('[data-test-subj="proposalDismiss-proposal-1"]')
+      ).toBeDisabled();
     });
   });
 

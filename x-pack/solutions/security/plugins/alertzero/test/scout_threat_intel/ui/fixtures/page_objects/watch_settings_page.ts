@@ -10,9 +10,11 @@ import { ALERTZERO_APP_ID } from '@kbn/alertzero-common';
 
 export class WatchSettingsPage {
   readonly warningTooltip: Locator;
+  readonly readOnlyCallout: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.warningTooltip = this.page.getByRole('tooltip');
+    this.readOnlyCallout = this.page.testSubj.locator('alertZeroReadOnlyCallout');
   }
 
   /** Opens a Watch and waits until the given Worker's card has rendered from the Workers API. */
