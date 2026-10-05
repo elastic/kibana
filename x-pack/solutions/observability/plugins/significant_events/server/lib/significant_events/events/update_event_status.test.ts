@@ -52,7 +52,7 @@ describe('updateSignificantEventStatus', () => {
       alertEventsClient,
     });
 
-    expect(result).toEqual({ found: true, updated: 1, ignored: 0, status: 'inactive' });
+    expect(result).toEqual({ updated: 1, ignored: 0, status: 'inactive' });
     expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
     expect(alertEventsClient.createAlertEvent.mock.calls[0][0]).toMatchObject({
       fingerprint: existing.event_id,
@@ -124,7 +124,7 @@ describe('updateSignificantEventStatus', () => {
       alertEventsClient,
     });
 
-    expect(result).toEqual({ found: false, updated: 0, ignored: 1, status: 'inactive' });
+    expect(result).toEqual({ updated: 0, ignored: 1, status: 'inactive' });
     expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
   });
 
@@ -139,7 +139,7 @@ describe('updateSignificantEventStatus', () => {
       alertEventsClient,
     });
 
-    expect(result).toEqual({ found: true, updated: 0, ignored: 1, status: 'inactive' });
+    expect(result).toEqual({ updated: 0, ignored: 1, status: 'inactive' });
     expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
   });
 

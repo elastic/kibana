@@ -15,12 +15,14 @@ export async function updateEventStatusToolHandler({
   eventSearchClient,
   eventId,
   status,
+  assessmentNote,
   alertEventsClient,
   emitTrigger,
 }: {
   eventSearchClient: RuleEventsClient;
   eventId: string;
   status: SignificantEventStatus;
+  assessmentNote?: string;
   alertEventsClient: AlertEventsClientApi;
   emitTrigger?: TriggerEmitter;
 }): Promise<{
@@ -33,6 +35,7 @@ export async function updateEventStatusToolHandler({
     eventSearchClient,
     eventId,
     status,
+    assessmentNote,
     alertEventsClient,
     emitTrigger,
   });

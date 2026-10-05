@@ -27,6 +27,7 @@ import {
   type PaginatedResponse,
 } from '../query_utils';
 import {
+  applyLifetimeOverlap,
   applyTimeRange,
   executeCountQuery,
   executeEsqlQuery,
@@ -59,7 +60,7 @@ interface RuleEventSourceRow {
   '@timestamp': string;
   [GROUP_HASH_FIELD]: string;
   severity?: AlertEventSeverity;
-  episode?: { status?: AlertEpisodeStatus };
+  alert?: { status?: AlertEpisodeStatus };
   data_json: string;
 }
 
@@ -83,13 +84,13 @@ const decodeSignificantEvent = (row: RuleEventSourceRow): SignificantEvent => {
     SignificantEvent,
     '@timestamp' | 'status' | 'severity'
   >;
-  const episodeStatus = row.episode?.status ?? ALERT_EPISODE_STATUS.ACTIVE;
+  const alertStatus = row.alert?.status ?? ALERT_EPISODE_STATUS.ACTIVE;
   const severity = row.severity ?? 'medium';
   return {
     ...data,
     stream_names: normalizeStreamNames(data.stream_names),
     '@timestamp': row['@timestamp'],
-    status: isSignificantEventStatus(episodeStatus) ? episodeStatus : 'active',
+    status: isSignificantEventStatus(alertStatus) ? alertStatus : 'active',
     severity: isSignificantEventSeverity(severity) ? severity : 'medium',
   };
 };
@@ -206,25 +207,31 @@ export class RuleEventsClient {
   private buildLatestByCurrentStateQuery(
     options: RuleEventsCurrentStateSearchOptions
   ): ComposerQuery {
-    // `created_at` reflects the earliest (historical) `@timestamp` for the series, so it must be
-    // computed before `applyTimeRange` narrows the row set — otherwise a `from` bound would hide
-    // the series' true creation time.
+    // `created_at` is the earliest `@timestamp` for the series. Compute it across the full lineage
+    // before latest-reduction so a later time bound cannot hide the series' true creation time.
     let query = buildBaseQuery(this.clients.space)
       .pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(GROUP_HASH_FIELD)}`;
 
-    query = applyTimeRange({ query, from: options.from, to: options.to });
+    query = pickLatestPerGroup(query, GROUP_HASH_FIELD);
 
-    // Free-text search runs pre-latest (against the full lineage); status/severity run post-latest
-    // (against only the current state) so a stale revision cannot make a closed series look open.
+    // Free-text, lifetime overlap, and status/severity run on the latest revision. Filtering the
+    // lineage first would promote a matching historical write to the returned current state.
     const searchWhere = buildFreeTextWhere(options.search);
     if (searchWhere) {
       query = query.where`${searchWhere}`;
     }
 
-    query = pickLatestPerGroup(query, GROUP_HASH_FIELD);
+    query = applyLifetimeOverlap({
+      query,
+      from: options.from,
+      to: options.to,
+      activeWhere: esql.exp`${esql.col(
+        'alert.status'
+      )} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map((status) => esql.str(status))})`,
+    });
 
     if (options.status?.length) {
-      query = query.where`${esql.col('episode.status')} IN (${options.status.map((status) =>
+      query = query.where`${esql.col('alert.status')} IN (${options.status.map((status) =>
         esql.str(status)
       )})`;
     }
@@ -331,10 +338,10 @@ export class RuleEventsClient {
   /**
    * Returns the latest version per `group_hash` for all active ("open") events within the given
    * time range, optionally narrowed to candidate stream/rule identities so the scan stays
-   * proportional to the write batch instead of the whole space. Filters on the nested `episode.status` column (via
-   * `SIGNIFICANT_EVENTS_STATUS_MAP`, see `buildLatestByCurrentStateQuery`'s status branch) instead
-   * of a top-level `status` column, and reads `stream_names` / `signals.metadata.rule_uuid`
-   * through `FIELD_EXTRACT` since both live in the flattened `data` column.
+   * proportional to the write batch instead of the whole space. Filters on the persisted
+   * `alert.status` column instead of a top-level `status` column, and reads `stream_names` /
+   * `signals.metadata.rule_uuid` through `FIELD_EXTRACT` since both live in the flattened `data`
+   * column.
    *
    * Capped at MAX_DEDUP_SCAN_LIMIT distinct active events.
    */
@@ -350,7 +357,7 @@ export class RuleEventsClient {
     query = pickLatestPerGroup(query, GROUP_HASH_FIELD);
 
     query = query.where`${esql.col(
-      'episode.status'
+      'alert.status'
     )} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map((status) => esql.str(status))})`;
 
     if (options.streamNames?.length) {
