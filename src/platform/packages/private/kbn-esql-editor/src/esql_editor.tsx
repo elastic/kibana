@@ -62,6 +62,8 @@ import {
   EDITOR_INITIAL_HEIGHT_INLINE_EDITING,
   EDITOR_MAX_HEIGHT,
   RESIZABLE_CONTAINER_INITIAL_HEIGHT,
+  RESIZABLE_CONTAINER_MAX_HEIGHT,
+  RESIZABLE_CONTAINER_MIN_HEIGHT,
   esqlEditorStyles,
 } from './esql_editor.styles';
 import { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
@@ -242,6 +244,18 @@ const ESQLEditorInternal = function ESQLEditor({
   const [resizableContainerHeight, setResizableContainerHeight] = useRestorableState(
     'resizableContainerHeight',
     RESIZABLE_CONTAINER_INITIAL_HEIGHT
+  );
+  const [historyContentHeight, setHistoryContentHeight] = useState<number>();
+  const onHistoryContentHeightChange = useCallback(
+    (nextContentHeight: number) => {
+      const contentHeight = Math.ceil(nextContentHeight);
+      if (contentHeight <= 0) {
+        return;
+      }
+      setHistoryContentHeight((current) => (current === contentHeight ? current : contentHeight));
+      setResizableContainerHeight((current) => Math.min(current, contentHeight));
+    },
+    [setResizableContainerHeight]
   );
   const [measuredEditorWidth, setMeasuredEditorWidth] = useState(0);
 
@@ -448,14 +462,16 @@ const ESQLEditorInternal = function ESQLEditor({
       firstPanelHeight,
       setFirstPanelHeight,
       secondPanelHeight,
-      setSecondPanelHeight
+      setSecondPanelHeight,
+      limits
     ) => {
       onMouseDownResizeHandler(
         mouseDownEvent,
         firstPanelHeight,
         setFirstPanelHeight,
         secondPanelHeight,
-        setSecondPanelHeight
+        setSecondPanelHeight,
+        limits
       );
     },
     []
@@ -467,14 +483,16 @@ const ESQLEditorInternal = function ESQLEditor({
       firstPanelHeight,
       setFirstPanelHeight,
       secondPanelHeight,
-      setSecondPanelHeight
+      setSecondPanelHeight,
+      limits
     ) => {
       onKeyDownResizeHandler(
         keyDownEvent,
         firstPanelHeight,
         setFirstPanelHeight,
         secondPanelHeight,
-        setSecondPanelHeight
+        setSecondPanelHeight,
+        limits
       );
     },
     []
@@ -492,6 +510,48 @@ const ESQLEditorInternal = function ESQLEditor({
       />
     );
   }, [onMouseDownResize, editorHeight, onKeyDownResize, setEditorHeight]);
+
+  const historyResizeButton = useMemo(() => {
+    const contentMax =
+      historyContentHeight === undefined
+        ? RESIZABLE_CONTAINER_MAX_HEIGHT
+        : Math.min(historyContentHeight, RESIZABLE_CONTAINER_MAX_HEIGHT);
+    const limits = {
+      minHeight: Math.min(RESIZABLE_CONTAINER_MIN_HEIGHT, contentMax),
+      maxHeight: contentMax,
+    };
+    return (
+      <ResizableButton
+        dataTestSubj="ESQLEditor-history-resize"
+        onMouseDownResizeHandler={(mouseDownEvent) =>
+          onMouseDownResize(
+            mouseDownEvent,
+            resizableContainerHeight,
+            setResizableContainerHeight,
+            undefined,
+            undefined,
+            limits
+          )
+        }
+        onKeyDownResizeHandler={(keyDownEvent) =>
+          onKeyDownResize(
+            keyDownEvent,
+            resizableContainerHeight,
+            setResizableContainerHeight,
+            undefined,
+            undefined,
+            limits
+          )
+        }
+      />
+    );
+  }, [
+    onKeyDownResize,
+    historyContentHeight,
+    onMouseDownResize,
+    resizableContainerHeight,
+    setResizableContainerHeight,
+  ]);
 
   const {
     esqlFieldsCache,
@@ -997,28 +1057,6 @@ const ESQLEditorInternal = function ESQLEditor({
           onKqlSubmitted={focusEditor}
         />
       )}
-      {(isHistoryOpen || (isLanguageComponentOpen && editorIsInline)) && (
-        <ResizableButton
-          onMouseDownResizeHandler={(mouseDownEvent) => {
-            onMouseDownResize(
-              mouseDownEvent,
-              editorHeight,
-              setEditorHeight,
-              resizableContainerHeight,
-              setResizableContainerHeight
-            );
-          }}
-          onKeyDownResizeHandler={(keyDownEvent) =>
-            onKeyDownResize(
-              keyDownEvent,
-              editorHeight,
-              setEditorHeight,
-              resizableContainerHeight,
-              setResizableContainerHeight
-            )
-          }
-        />
-      )}
       <EditorFooter
         styles={{
           bottomContainer: styles.bottomContainer,
@@ -1034,6 +1072,13 @@ const ESQLEditorInternal = function ESQLEditor({
         setIsLanguageComponentOpen={setIsLanguageComponentOpen}
         measuredContainerWidth={measuredEditorWidth}
         resizableContainerButton={resizableContainerButton}
+        historyResizeButton={
+          historyContentHeight !== undefined &&
+          historyContentHeight > RESIZABLE_CONTAINER_MIN_HEIGHT
+            ? historyResizeButton
+            : undefined
+        }
+        onHistoryContentHeightChange={onHistoryContentHeightChange}
         resizableContainerHeight={resizableContainerHeight}
         displayDocumentationAsFlyout={displayDocumentationAsFlyout}
         dataErrorsControl={dataErrorsControl}

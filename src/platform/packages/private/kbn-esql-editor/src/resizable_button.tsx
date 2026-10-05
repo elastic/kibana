@@ -14,16 +14,18 @@ import { css } from '@emotion/react';
 export function ResizableButton({
   onMouseDownResizeHandler,
   onKeyDownResizeHandler,
+  dataTestSubj = 'ESQLEditor-resize',
 }: {
   onMouseDownResizeHandler: (
     mouseDownEvent: React.MouseEvent<HTMLButtonElement, MouseEvent> | React.TouchEvent
   ) => void;
   onKeyDownResizeHandler: (keyDownEvernt: React.KeyboardEvent) => void;
+  dataTestSubj?: string;
   editorIsInline?: boolean;
 }) {
   return (
     <EuiResizableButton
-      data-test-subj="ESQLEditor-resize"
+      data-test-subj={dataTestSubj}
       onMouseDown={onMouseDownResizeHandler}
       onKeyDown={onKeyDownResizeHandler}
       onTouchStart={onMouseDownResizeHandler}

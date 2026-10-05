@@ -221,12 +221,15 @@ export const onMouseDownResizeHandler = (
   height: number,
   setHeight: (height: number) => void,
   secondPanelHeight?: number,
-  setSecondPanelHeight?: (height: number) => void
+  setSecondPanelHeight?: (height: number) => void,
+  limits?: { minHeight: number; maxHeight: number }
 ) => {
   function isMouseEvent(e: React.TouchEvent | React.MouseEvent): e is React.MouseEvent {
     return e && 'pageY' in e;
   }
 
+  const minHeight = limits?.minHeight ?? EDITOR_MIN_HEIGHT;
+  const maxHeightLimit = limits?.maxHeight ?? EDITOR_MAX_HEIGHT;
   const startSize = height;
   const startPosition = isMouseEvent(mouseDownEvent)
     ? mouseDownEvent?.pageY
@@ -234,7 +237,7 @@ export const onMouseDownResizeHandler = (
 
   function onMouseMove(mouseMoveEvent: MouseEvent) {
     const h = startSize - startPosition + mouseMoveEvent.pageY;
-    const firstPanelHeightValidated = Math.min(Math.max(h, EDITOR_MIN_HEIGHT), EDITOR_MAX_HEIGHT);
+    const firstPanelHeightValidated = Math.min(Math.max(h, minHeight), maxHeightLimit);
     setHeight(firstPanelHeightValidated);
     if (setSecondPanelHeight && secondPanelHeight) {
       const maxHeight = height + secondPanelHeight;
@@ -259,13 +262,16 @@ export const onKeyDownResizeHandler = (
   height: number,
   setHeight: (height: number) => void,
   secondPanelHeight?: number,
-  setSecondPanelHeight?: (height: number) => void
+  setSecondPanelHeight?: (height: number) => void,
+  limits?: { minHeight: number; maxHeight: number }
 ) => {
+  const minHeight = limits?.minHeight ?? EDITOR_MIN_HEIGHT;
+  const maxHeightLimit = limits?.maxHeight ?? EDITOR_MAX_HEIGHT;
   let h = height;
   if (keyDownEvent.keyCode === KEYCODE_ARROW_UP || keyDownEvent.keyCode === KEYCODE_ARROW_DOWN) {
     const step = keyDownEvent.keyCode === KEYCODE_ARROW_UP ? -10 : 10;
     h = h + step;
-    const firstPanelHeightValidated = Math.min(Math.max(h, EDITOR_MIN_HEIGHT), EDITOR_MAX_HEIGHT);
+    const firstPanelHeightValidated = Math.min(Math.max(h, minHeight), maxHeightLimit);
     setHeight(firstPanelHeightValidated);
     if (setSecondPanelHeight && secondPanelHeight) {
       const maxHeight = height + secondPanelHeight;

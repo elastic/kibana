@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect, useMemo, useCallback } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn, CustomItemAction } from '@elastic/eui';
@@ -220,6 +220,7 @@ export function QueryList({
   tableCaption,
   dataTestSubj,
   isStarredTab = false,
+  onContentHeightChange,
 }: {
   listItems: QueryHistoryItem[];
   containerCSS: Interpolation<Theme>;
@@ -230,6 +231,7 @@ export function QueryList({
   tableCaption?: string;
   dataTestSubj?: string;
   isStarredTab?: boolean;
+  onContentHeightChange?: (contentHeight: number) => void;
 }) {
   const theme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(theme);
@@ -350,6 +352,28 @@ export function QueryList({
 
   const { euiTheme } = theme;
   const extraStyling = isOnReducedSpaceLayout ? getReducedSpaceStyling() : '';
+  const listRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const list = listRef.current;
+    if (!list || !onContentHeightChange) {
+      return;
+    }
+
+    const reportContentHeight = () => {
+      onContentHeightChange(list.scrollHeight);
+    };
+
+    reportContentHeight();
+    const content = list.firstElementChild;
+    if (!content) {
+      return;
+    }
+
+    const observer = new ResizeObserver(reportContentHeight);
+    observer.observe(content);
+    return () => observer.disconnect();
+  }, [containerWidth, height, listItems, onContentHeightChange]);
 
   const tableStyling = css`
     .euiTableRowCell {
@@ -358,9 +382,6 @@ export function QueryList({
     }
     border-bottom-left-radius: ${euiTheme.border.radius.medium};
     border-top-left-radius: ${euiTheme.border.radius.medium};
-    max-height: ${height}px;
-    overflow-y: auto;
-    ${scrollBarStyles}
     ${extraStyling}
   `;
 
@@ -371,7 +392,18 @@ export function QueryList({
   });
 
   return (
-    <div data-test-subj={dataTestSubj ?? 'ESQLEditor-queryList'} css={containerCSS}>
+    <div
+      ref={listRef}
+      data-test-subj={dataTestSubj ?? 'ESQLEditor-queryList'}
+      css={[
+        containerCSS,
+        css`
+          max-height: ${height}px;
+          overflow-y: auto;
+          ${scrollBarStyles}
+        `,
+      ]}
+    >
       <EuiInMemoryTable
         tableCaption={
           tableCaption ||
@@ -486,6 +518,7 @@ export function HistoryAndStarredQueriesTabs({
   onClose,
   height,
   starredQueriesService = null,
+  onContentHeightChange,
 }: {
   containerCSS: Interpolation<Theme>;
   containerWidth: number;
@@ -494,6 +527,7 @@ export function HistoryAndStarredQueriesTabs({
   isSpaceReduced?: boolean;
   height: number;
   starredQueriesService: EsqlStarredQueriesService | null;
+  onContentHeightChange?: (contentHeight: number) => void;
 }) {
   const [starredQueries, setStarredQueries] = useState<StarredQueryItem[]>([]);
   const [historyItems, setHistoryItems] = useState<QueryHistoryItem[]>(() =>
@@ -556,6 +590,7 @@ export function HistoryAndStarredQueriesTabs({
           defaultMessage: 'Queries history table',
         })}
         starredQueriesService={starredQueriesService ?? undefined}
+        onContentHeightChange={onContentHeightChange}
       />
     ),
     [
@@ -565,6 +600,7 @@ export function HistoryAndStarredQueriesTabs({
       height,
       filteredHistoryItems,
       starredQueriesService,
+      onContentHeightChange,
     ]
   );
 
@@ -582,6 +618,7 @@ export function HistoryAndStarredQueriesTabs({
         })}
         starredQueriesService={starredQueriesService ?? undefined}
         isStarredTab={true}
+        onContentHeightChange={onContentHeightChange}
       />
     ),
     [
@@ -591,6 +628,7 @@ export function HistoryAndStarredQueriesTabs({
       height,
       filteredStarredQueries,
       starredQueriesService,
+      onContentHeightChange,
     ]
   );
 
