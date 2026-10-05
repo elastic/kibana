@@ -12,7 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const browser = getService('browser');
-  const { common, header, home } = getPageObjects(['common', 'header', 'home']);
+  const { common, header, home, graph } = getPageObjects(['common', 'header', 'home', 'graph']);
 
   describe('Graph app a11y tests', () => {
     before(async () => {
@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Graph settings', () => {
       before(async () => {
-        await testSubjects.click('graphSettingsButton');
+        await graph.clickSettingsButton();
         await testSubjects.existOrFail('advancedSettings');
       });
 

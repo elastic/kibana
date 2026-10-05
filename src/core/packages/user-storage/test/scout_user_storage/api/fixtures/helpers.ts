@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { INTERNAL_HEADERS } from '../fixtures';
+import { INTERNAL_HEADERS } from './constants';
 
 // Mirrors the `register()` call in
 // `src/platform/test/user_storage/plugins/user_storage_test/server/plugin.ts`.
