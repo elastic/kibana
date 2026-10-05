@@ -5,52 +5,46 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiBadge, EuiComboBox, type EuiComboBoxOptionOption } from '@elastic/eui';
+import React from 'react';
 
 import { createDatasetWizardStrings } from '../../../create_dataset_wizard_i18n';
 import type { DatasetBooleanFormValue } from '../../../create_dataset_form_state';
+import type { ComboBoxChange } from '../../../components/combo_box_selection_validity';
+import {
+  EuiComboBoxNoCustomOption,
+  type EuiComboBoxNoCustomOptionOption,
+} from '../../../components/eui_combo_box_no_custom_option';
 
-type TrimSpacesOption = EuiComboBoxOptionOption<string> & { value: DatasetBooleanFormValue };
-
-const OPTIONS: TrimSpacesOption[] = [
-  {
-    value: 'false',
-    label: createDatasetWizardStrings.falseLabel,
-    append: <EuiBadge color="hollow">{createDatasetWizardStrings.defaultBadgeLabel}</EuiBadge>,
-  },
+const OPTIONS: Array<EuiComboBoxNoCustomOptionOption<Exclude<DatasetBooleanFormValue, ''>>> = [
+  { value: 'false', label: createDatasetWizardStrings.falseLabel },
   { value: 'true', label: createDatasetWizardStrings.trueLabel },
 ];
+
+export const getTrimSpacesDisplayLabel = (value: boolean): string =>
+  OPTIONS.find((option) => option.value === String(value))?.label ?? String(value);
 
 export function TrimSpaces({
   value,
   onChange,
   onBlur,
+  isInvalid,
 }: {
   value: DatasetBooleanFormValue;
-  onChange: (next: DatasetBooleanFormValue) => void;
+  onChange: (next: ComboBoxChange<DatasetBooleanFormValue>) => void;
   onBlur: () => void;
+  isInvalid: boolean;
 }) {
-  const selectedOptions = useMemo(() => {
-    const option = OPTIONS.find((o) => o.value === value);
-    return option ? [{ value: option.value, label: option.label }] : [];
-  }, [value]);
-
   return (
-    <EuiComboBox
-      placeholder={createDatasetWizardStrings.settingsTrimSpacesPlaceholder}
-      options={OPTIONS}
-      data-test-subj="createDatasetSettingsTrimSpaces"
-      fullWidth
-      aria-label={createDatasetWizardStrings.settingsTrimSpacesLabel}
-      singleSelection={{ asPlainText: true }}
-      isClearable
-      selectedOptions={selectedOptions}
-      onChange={(nextSelectedOptions) => {
-        const next = nextSelectedOptions?.[0] as TrimSpacesOption | undefined;
-        onChange(next?.value ?? '');
-      }}
+    <EuiComboBoxNoCustomOption
+      value={value}
+      onChange={onChange}
       onBlur={onBlur}
+      options={OPTIONS}
+      defaultValue="false"
+      isInvalid={isInvalid}
+      placeholder={createDatasetWizardStrings.settingsTrimSpacesPlaceholder}
+      aria-label={createDatasetWizardStrings.settingsTrimSpacesLabel}
+      data-test-subj="createDatasetSettingsTrimSpaces"
     />
   );
 }

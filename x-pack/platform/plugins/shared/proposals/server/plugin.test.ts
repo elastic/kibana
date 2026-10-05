@@ -16,6 +16,7 @@ import {
   GetProposalStepId,
   PROPOSALS_UI_CAPABILITY_DECIDE,
   PROPOSALS_UI_CAPABILITY_SHOW,
+  PROPOSALS_REVISE_TOOL_ID,
   SettleIncompleteProposalStepId,
   UpdateProposalStepId,
 } from '@kbn/proposals-common';
@@ -54,6 +55,8 @@ const setupPlugin = () => {
 
   const agentBuilder = {
     attachments: { registerType: jest.fn() },
+    tools: { register: jest.fn() },
+    skills: { register: jest.fn() },
   };
 
   plugin.setup(
@@ -132,6 +135,24 @@ describe('ProposalsPlugin', () => {
       const { agentBuilder } = setupPlugin();
 
       expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(1);
+    });
+
+    it('registers revision tooling without any solution plugin dependencies', () => {
+      const { agentBuilder } = setupPlugin();
+
+      expect(agentBuilder.tools.register).toHaveBeenCalledTimes(1);
+      expect(agentBuilder.tools.register).toHaveBeenCalledWith(
+        expect.objectContaining({ id: PROPOSALS_REVISE_TOOL_ID })
+      );
+      expect(agentBuilder.skills.register).toHaveBeenCalledTimes(1);
+      expect(agentBuilder.skills.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'proposal-management',
+          availability: expect.objectContaining({ cacheMode: 'none' }),
+        })
+      );
+      const [[skill]] = agentBuilder.skills.register.mock.calls;
+      expect(skill.getRegistryTools()).toEqual([PROPOSALS_REVISE_TOOL_ID]);
     });
 
     it('registers as a managed workflow owner, or the startup sweep deletes our workflows', () => {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiFlyoutProps, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBadgeGroup,
@@ -21,7 +21,6 @@ import {
   EuiText,
   EuiTitle,
   useEuiMemoizedStyles,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -59,27 +58,10 @@ export const Header = Object.assign(BaseHeader, {
   MetaBlock: MetaBlockPart,
 });
 
-/** Maps `paddingSize` to the header's horizontal padding; `undefined` follows EuiFlyout's `'l'` default. */
-const resolveHorizontalPadding = (
-  euiTheme: UseEuiTheme['euiTheme'],
-  paddingSize: EuiFlyoutProps['paddingSize']
-): string => {
-  switch (paddingSize) {
-    case 'none':
-      return '0';
-    case 's':
-      return euiTheme.size.s;
-    case 'm':
-      return euiTheme.size.base;
-    case 'l':
-    default:
-      return euiTheme.size.l;
-  }
-};
-
 const dividerStyles = ({ euiTheme }: UseEuiTheme) => ({
   divider: css`
     border-block-end: ${euiTheme.border.thin};
+    margin-inline: -${euiTheme.size.base};
   `,
 });
 
@@ -138,19 +120,13 @@ const collapsibleRegionStyles = ({ euiTheme }: UseEuiTheme) => {
   };
 };
 
-/** Full-width divider: negative horizontal margins bleed it past the header padding to the flyout edges. */
-const FullBleedDivider = ({ horizontalPadding }: { horizontalPadding: string }) => {
+/**
+ * Full-width divider: negative horizontal margins bleed it past the header padding to the flyout
+ * edges. `size.base` is the padding `EuiFlyout` applies for the template's `paddingSize="m"`.
+ */
+const FullBleedDivider = () => {
   const styles = useEuiMemoizedStyles(dividerStyles);
-  return (
-    <div
-      aria-hidden
-      css={styles.divider}
-      style={{
-        marginInlineStart: `-${horizontalPadding}`,
-        marginInlineEnd: `-${horizontalPadding}`,
-      }}
-    />
-  );
+  return <div aria-hidden css={styles.divider} />;
 };
 
 /** Badge counts above `MAX_VISIBLE_BADGES` collapse to `MAX_BADGES_BEFORE_OVERFLOW` plus an overflow badge. */
@@ -236,11 +212,10 @@ export const HeaderZone = ({
   flyoutTitleId,
   'data-test-subj': dataTestSubj,
 }: HeaderZoneProps) => {
-  const { euiTheme } = useEuiTheme();
   const badgeStyles = useEuiMemoizedStyles(badgeGroupStyles);
   const collapseStyles = useEuiMemoizedStyles(collapsibleRegionStyles);
   const { title: titleCss } = useEuiMemoizedStyles(titleStyles);
-  const { dataTestSubj: rootTestSubj, paddingSize } = useFlyoutTemplateConfig();
+  const { dataTestSubj: rootTestSubj } = useFlyoutTemplateConfig();
   const { tabs, tabBarProps, selectedTabId, selectTab } = useFlyoutTabs();
   const items = useMemo(() => headerAssembly.parseChildren(children), [children]);
   const {
@@ -251,7 +226,6 @@ export const HeaderZone = ({
     headerRef,
   } = useFlyoutHeaderCollapse();
   const isCollapsed = collapsed || isScrollCollapsed;
-  const horizontalPadding = resolveHorizontalPadding(euiTheme, paddingSize);
   const titleIconNode = renderTitleIcon(titleIcon, titleTooltip);
   const headerTestSubj = resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Header');
 
@@ -427,7 +401,7 @@ export const HeaderZone = ({
               </EuiTabs>
             )}
 
-            <FullBleedDivider horizontalPadding={horizontalPadding} />
+            <FullBleedDivider />
           </div>
         </KibanaErrorBoundary>
       </EuiFlyoutHeader>

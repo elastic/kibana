@@ -18,6 +18,7 @@ import {
   formatBuildLink,
   formatFailedBranches,
   formatDateRange,
+  formatDay,
   formatFailedBuilds,
   formatFullFailureMessage,
   formatPercent,
@@ -306,32 +307,77 @@ const worstPerKey = <T extends BuildCounts>(
     .map(([, row]) => row);
 };
 
+/** A branch where every setup skips every test of the suite, and when one of them last ran there. */
+interface BranchSkip {
+  lastRanAt?: Date;
+}
+
 /**
  * `🔴 \`main\` | 49 / 509 (10%) | [#12345](…#job) · 2026-09-09 06:12 UTC`, or `✅ \`9.1\` | 0 / 58 |`
- * for a clean row. Reports written before the build was recorded get the time alone.
+ * for a clean row, or `⏭️` with when it last ran for a skipped one. Reports written before the
+ * build was recorded get the time alone.
  */
-const failuresRow = (label: string, { worst, latest }: WorstFailures<BuildCounts>): string[] => [
-  `${worst.failedBuilds > 0 ? '🔴' : '✅'} ${label}`,
-  worst.failedBuilds > 0 ? formatFailedBuilds(worst) : `0 / ${worst.builds}`,
-  latest
+const failuresRow = (
+  label: string,
+  { worst, latest }: WorstFailures<BuildCounts>,
+  skip?: BranchSkip
+): string[] => {
+  const failure = latest
     ? formatBuildLink(
         { buildUrl: latest.lastFailedBuildUrl, jobId: latest.lastFailedJobId },
         latest.lastFailedAt
       )
-    : '',
-];
+    : undefined;
+  const skipped = skip
+    ? skip.lastRanAt
+      ? `skipped, last ran ${formatDay(skip.lastRanAt)}`
+      : 'skipped in every run'
+    : undefined;
+  return [
+    `${skip ? '⏭️' : worst.failedBuilds > 0 ? '🔴' : '✅'} ${label}`,
+    worst.failedBuilds > 0 ? formatFailedBuilds(worst) : `0 / ${worst.builds}`,
+    [failure, skipped].filter((part) => part !== undefined).join(' · '),
+  ];
+};
 
-/** Which branches the suite fails on and which it does not, at a glance. */
+const latestOf = (a: Date | undefined, b: Date | undefined): Date | undefined =>
+  a && b ? (a > b ? a : b) : a ?? b;
+
+/** The branches where every setup skips every test of the suite. */
+const branchSkips = (suite: FlakySuite): Map<string, BranchSkip> => {
+  const byBranch = new Map<string, BranchSkip & { skipped: boolean }>();
+  for (const test of suite.tests) {
+    for (const { branch, skipped, latestExecutionAt } of test.byBranch) {
+      const current = byBranch.get(branch);
+      byBranch.set(branch, {
+        skipped: (current?.skipped ?? true) && skipped === true,
+        lastRanAt: latestOf(current?.lastRanAt, latestExecutionAt),
+      });
+    }
+  }
+  return new Map(
+    [...byBranch]
+      .filter(([, { skipped }]) => skipped)
+      .map(([branch, { lastRanAt }]) => [branch, { lastRanAt }])
+  );
+};
+
+/** Which branches the suite fails on, is skipped on and is clean on, at a glance. */
 const failuresByBranch = (suite: FlakySuite): string | undefined => {
+  const skipped = branchSkips(suite);
+  const group = ({ worst }: WorstFailures<BuildCounts & { branch: string }>): number =>
+    skipped.has(worst.branch) ? 1 : worst.failedBuilds > 0 ? 0 : 2;
   const branches = worstPerKey(
     suite,
     (test) => test.byBranch,
     (stats) => stats.branch
-  );
+  ).sort((a, b) => group(a) - group(b));
   if (branches.length === 0) {
     return undefined;
   }
-  const rows = branches.map((row) => failuresRow(inlineCode(row.worst.branch), row));
+  const rows = branches.map((row) =>
+    failuresRow(inlineCode(row.worst.branch), row, skipped.get(row.worst.branch))
+  );
   return [
     '#### Failures by Branch',
     '',
