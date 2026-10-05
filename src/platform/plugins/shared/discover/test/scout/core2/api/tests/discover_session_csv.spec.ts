@@ -21,7 +21,7 @@ apiTest.describe('Discover inline session CSV export', { tag: tags.deploymentAgn
   // Reporting runs asynchronously; allow time for the job plus setup and assertions.
   apiTest.setTimeout(REPORT_GENERATION_TIMEOUT + 30_000);
 
-  const indexName = `scout-discover-inline-csv-${randomUUID()}`;
+  const indexName = `logstash-scout-discover-inline-csv-${randomUUID()}`;
   let credentials: RoleApiCredentials;
   let sessionId: string | undefined;
   let reportId: string | undefined;

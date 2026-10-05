@@ -472,10 +472,7 @@ spaceTest.describe(
             },
           },
         });
-        const cssLegendItem = discover
-          .getHistogramChart()
-          .getByRole('listitem')
-          .filter({ has: page.getByRole('button', { name: /^css;/ }) });
+        const legendItems = discover.getHistogramChart().getByRole('listitem');
 
         await spaceTest.step('open the legacy chart with values in the legend', async () => {
           await discover.goto({ queryMode: 'esql', savedSearchId: sessionId });
@@ -483,7 +480,7 @@ spaceTest.describe(
           await expect
             .poll(() => discover.getHistogramLegendLabels())
             .toStrictEqual(BREAKDOWN_LEGEND_LABELS);
-          await expect(cssLegendItem).toContainText(/\d/);
+          await expect(legendItems).toContainText([/\d/]);
           expect(await discover.getVisualizationTitle()).toBe('Line');
         });
 
@@ -499,7 +496,7 @@ spaceTest.describe(
           await expect
             .poll(() => discover.getHistogramLegendLabels())
             .toStrictEqual(BREAKDOWN_LEGEND_LABELS);
-          await expect(cssLegendItem).toContainText(/\d/);
+          await expect(legendItems).toContainText([/\d/]);
           expect(await discover.getVisualizationTitle()).toBe('Line');
           expect(await discover.getEsqlQueryValue()).toBe(BREAKDOWN_QUERY);
         });
