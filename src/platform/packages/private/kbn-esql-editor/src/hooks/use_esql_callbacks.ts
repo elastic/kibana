@@ -198,12 +198,21 @@ export const useEsqlCallbacks = ({
     const lifecycleController = lifecycleAbortControllerRef.current;
     const sourcesController = sourcesAbortControllerRef.current;
     return () => {
+      lifecycleController.abort();
+      sourcesController.abort();
+    };
+  }, []);
+
+  // The fields cache is also replaced when the project routing changes: drop its in-flight request
+  // and start the next one with a fresh controller.
+  useEffect(() => {
+    return () => {
       columnsAbortControllerRef.current?.abort();
       if (previousColumnsQueryRef.current) {
         esqlFieldsCache.delete(previousColumnsQueryRef.current);
       }
-      lifecycleController.abort();
-      sourcesController.abort();
+      columnsAbortControllerRef.current = undefined;
+      previousColumnsQueryRef.current = undefined;
     };
   }, [esqlFieldsCache]);
 
