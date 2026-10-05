@@ -17,7 +17,7 @@ import type {
   DispatcherStep,
   DispatcherStepOutput,
 } from '../types';
-import { parseDataJson } from './utils/parse_episode_data';
+import { parseDataJson } from './utils/parse_alert_data';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 
 interface RawEpisodeData {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HydrateEpisodeDataStep } from './hydrate_episode_data_step';
+import { HydrateEpisodeDataStep } from './hydrate_alert_data_step';
 import { createQueryService } from '../../services/query_service/query_service.mock';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createAlertEpisode, createDispatcherPipelineState } from '../fixtures/test_utils';

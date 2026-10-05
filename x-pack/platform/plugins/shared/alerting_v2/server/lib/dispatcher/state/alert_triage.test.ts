@@ -6,7 +6,7 @@
  */
 
 import { createAlertEpisode } from '../fixtures/test_utils';
-import { EpisodeTriage } from './episode_triage';
+import { EpisodeTriage } from './alert_triage';
 
 describe('EpisodeTriage', () => {
   describe('partition', () => {

@@ -6,7 +6,7 @@
  */
 
 import { createAlertEpisode } from '../fixtures/test_utils';
-import { EpisodeScan } from './episode_scan';
+import { EpisodeScan } from './alert_scan';
 
 describe('EpisodeScan', () => {
   describe('empty', () => {

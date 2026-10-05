@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parseDataJson } from './parse_episode_data';
+import { parseDataJson } from './parse_alert_data';
 
 describe('parseDataJson', () => {
   it('parses valid JSON object', () => {

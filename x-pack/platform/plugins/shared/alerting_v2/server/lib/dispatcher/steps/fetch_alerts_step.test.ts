@@ -8,7 +8,7 @@
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
-import { FetchEpisodesStep, parseAlertEpisodes } from './fetch_episodes_step';
+import { FetchEpisodesStep, parseAlertEpisodes } from './fetch_alerts_step';
 import { createQueryService } from '../../services/query_service/query_service.mock';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createDispatchableAlertEventsResponse } from '../fixtures/dispatcher';
