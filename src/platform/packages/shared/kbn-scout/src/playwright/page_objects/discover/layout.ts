@@ -269,7 +269,6 @@ export abstract class DiscoverLayout extends DiscoverSave {
     await this.waitUntilTabIsLoaded();
   }
 
-
   /** Opens the field editor from the sidebar's "Add a field" button, which is gated on `canEditDataView`. */
   // ── Runtime field / field editor helpers ──────────────────────────────────
 
@@ -414,7 +413,6 @@ export abstract class DiscoverLayout extends DiscoverSave {
     await fieldEditor.waitFor({ state: 'hidden' });
   }
 
-
   /**
    * Creates an ES|QL control from the editor: types a query ending in a variable position,
    * picks "Create control" from the suggestion widget and saves the flyout. Returns once
@@ -429,7 +427,6 @@ export abstract class DiscoverLayout extends DiscoverSave {
     await this.esqlEditor.createControlFromEditorSuggestion(query, options);
     await this.page.testSubj.locator('controls-group-wrapper').waitFor({ state: 'visible' });
   }
-
 
   // ── Sidebar ───────────────────────────────────────────────────────────────
 
@@ -501,7 +498,6 @@ export abstract class DiscoverLayout extends DiscoverSave {
     await this.page.testSubj.locator(`fieldPopoverHeader_addBreakdownField-${field}`).click();
     await this.waitUntilSearchingHasFinished();
   }
-
 
   // ── Histogram ─────────────────────────────────────────────────────────────
 
@@ -744,7 +740,6 @@ export abstract class DiscoverLayout extends DiscoverSave {
   async expectXYVisChartVisible() {
     await expect(this.page.testSubj.locator('xyVisChart')).toBeVisible();
   }
-
 
   // ── Document table ────────────────────────────────────────────────────────
 

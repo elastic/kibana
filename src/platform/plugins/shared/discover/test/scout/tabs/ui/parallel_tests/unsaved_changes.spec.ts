@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DiscoverPageObjects } from '../fixtures';
 import { expect } from '@kbn/scout/ui';
+import type { DiscoverPageObjects } from '../fixtures';
 import { spaceTest } from '../fixtures';
 
 const QUERY_IOS = 'machine.os: "ios"';

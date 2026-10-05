@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ScoutParallelTestFixtures,
-  ScoutParallelWorkerFixtures,
-} from '@kbn/scout';
+import type { ScoutParallelTestFixtures, ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
 import type { DiscoverPageObjects } from '../../../common/ui/fixtures';
 import { DiscoverPage } from '../../../common/ui/fixtures';

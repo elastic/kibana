@@ -7,18 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DiscoverPageObjects } from '../fixtures';
 import { expect } from '@kbn/scout/ui';
+import type { DiscoverPageObjects } from '../fixtures';
 import { spaceTest } from '../fixtures';
 
 const DEFAULT_ESQL_QUERY = 'FROM logstash-* | SORT @timestamp DESC';
 
-const expectCleanClassicQueryState = async ({ discover, queryBar }: DiscoverPageObjects, query: string) => {
+const expectCleanClassicQueryState = async (
+  { discover, queryBar }: DiscoverPageObjects,
+  query: string
+) => {
   expect(await queryBar.getQuery()).toBe(query);
   expect(await discover.getQuerySubmitButtonLabel()).toBe('Refresh query');
 };
 
-const expectDirtyClassicQueryState = async ({ discover, queryBar }: DiscoverPageObjects, query: string) => {
+const expectDirtyClassicQueryState = async (
+  { discover, queryBar }: DiscoverPageObjects,
+  query: string
+) => {
   expect(await queryBar.getQuery()).toBe(query);
   expect(await discover.getQuerySubmitButtonLabel()).toBe('Needs updating');
 };

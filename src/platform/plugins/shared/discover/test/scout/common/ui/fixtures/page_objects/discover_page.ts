@@ -16,7 +16,6 @@ const SAVE_MODAL_TIMEOUT = 30_000;
 
 /** Discover plugin page object — extends {@link DiscoverApp} with all Discover-only surface. */
 export class DiscoverPage extends DiscoverApp {
-
   getRefreshDataButton(): Locator {
     return this.page.testSubj.locator('refreshDataButton');
   }
@@ -226,7 +225,6 @@ export class DiscoverPage extends DiscoverApp {
     return await this.getCurrentQueryNameLocator().innerText();
   }
 
-
   private getStoreTimeWithSearchSwitch() {
     return this.page.testSubj.locator('storeTimeWithSearch');
   }
@@ -430,7 +428,6 @@ export class DiscoverPage extends DiscoverApp {
     const [download] = await Promise.all([this.page.waitForEvent('download'), downloadBtn.click()]);
     return download;
   }
-
 
   /**
    * Returns the trimmed display name of the currently selected data view.
@@ -669,7 +666,6 @@ export class DiscoverPage extends DiscoverApp {
     await expect(docTable).toContainText(text);
   }
 
-
   async isShowingDocViewer(): Promise<boolean> {
     try {
       await this.page.testSubj
@@ -709,7 +705,6 @@ export class DiscoverPage extends DiscoverApp {
     const columnLocators = await this.page.testSubj.locator('unifiedDataTableColumnTitle').all();
     return await Promise.all(columnLocators.map((locator) => locator.innerText()));
   }
-
 
   // ── Cascade layout ────────────────────────────────────────────────────────
 

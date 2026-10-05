@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DiscoverPageObjects } from '../fixtures';
 import { expect } from '@kbn/scout/ui';
+import type { DiscoverPageObjects } from '../fixtures';
 import { spaceTest, testData } from '../fixtures';
-
-
 
 const UNTITLED_TAB_LABEL = 'Untitled';
 const FIRST_TAB_LABEL = 'My first tab';
