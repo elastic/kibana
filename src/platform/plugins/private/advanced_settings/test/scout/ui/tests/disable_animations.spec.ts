@@ -44,6 +44,7 @@ test.describe('Advanced settings - disable animations', { tag: tags.stateful.cla
     await expect(probe).toHaveCSS('transition-delay', '1s');
 
     await pageObjects.settings.toggleAdvancedSettingCheckbox(SETTING);
+    // this setting requires a page reload to take effect
     await page.reload();
     await pageObjects.settings.waitForPageLoad();
     await addAnimationProbes(page);
@@ -58,6 +59,7 @@ test.describe('Advanced settings - disable animations', { tag: tags.stateful.cla
       await expect(exemptProbe).toHaveCSS('transition-delay', '1s');
     }
 
+    // disabling animations must not leave code waiting for an animationend event
     await startAnimationProbe(page);
     await expect(probe).toHaveAttribute('data-animation-ended', 'true');
 
