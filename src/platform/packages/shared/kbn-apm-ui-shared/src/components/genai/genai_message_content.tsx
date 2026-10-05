@@ -9,7 +9,7 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import type { GenAiMessage } from './get_genai_fields';
+import type { GenAiMessage } from '@kbn/genai-common';
 import { GenAiFieldValue } from './genai_field_value';
 
 interface Props {

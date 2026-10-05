@@ -32,43 +32,8 @@ import {
   ATTRIBUTE_GEN_AI_TOOL_NAME,
   ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS,
   ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS,
-} from '@kbn/genai-common';
-
-export interface GenAiMessage {
-  role: string;
-  content?: string;
-  parts?: Array<{ type: string; content?: string; [key: string]: unknown }>;
-  [key: string]: unknown;
-}
-
-export interface GenAiFields {
-  operationName?: string;
-  requestModel?: string;
-  responseModel?: string;
-  provider?: string;
-  system?: string;
-  inputTokens?: number;
-  outputTokens?: number;
-  conversationId?: string;
-  requestParams: {
-    temperature?: number;
-    top_p?: number;
-    top_k?: number;
-    max_tokens?: number;
-    seed?: number;
-  };
-  response: {
-    id?: string;
-    finish_reasons?: string[];
-  };
-  inputMessages: GenAiMessage[];
-  outputMessages: GenAiMessage[];
-  systemInstructions?: string;
-  toolDefinitions?: unknown;
-  toolName?: string;
-  toolCallArguments?: unknown;
-  toolCallResult?: unknown;
-}
+} from './constants';
+import type { GenAiFields, GenAiMessage } from './types';
 
 /** Extracts and joins the content of text parts. */
 export function getTextPartsContent(parts: unknown): string | undefined {

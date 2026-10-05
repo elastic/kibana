@@ -21,8 +21,7 @@ import { css } from '@emotion/react';
 import { getEbtProps, type EbtClickAttrsElementOnly } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import type { GenAiMessage } from './get_genai_fields';
-import { getMessageCopyText, getTextPartsContent } from './get_genai_fields';
+import { getMessageCopyText, getTextPartsContent, type GenAiMessage } from '@kbn/genai-common';
 import { GenAiMessageContent } from './genai_message_content';
 import { GENAI_EBT_CLICK_ACTIONS } from './ebt_constants';
 

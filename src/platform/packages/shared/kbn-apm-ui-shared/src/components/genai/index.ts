@@ -14,7 +14,7 @@ export {
   getGenAiFields,
   type GenAiFields,
   type GenAiMessage,
-} from './get_genai_fields';
+} from '@kbn/genai-common';
 export { getFieldFromSource } from './get_field_from_source';
 export { GENAI_EBT_CLICK_ACTIONS } from './ebt_constants';
 export {
