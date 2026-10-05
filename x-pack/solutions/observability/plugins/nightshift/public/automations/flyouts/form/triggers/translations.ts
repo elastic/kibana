@@ -19,7 +19,6 @@ export const triggerLabels = {
     defaultMessage: 'Remove trigger',
   }),
   slackIn: i18n.translate('xpack.nightshift.automations.flyout.slackIn', { defaultMessage: 'in' }),
-  slackTo: i18n.translate('xpack.nightshift.automations.flyout.slackTo', { defaultMessage: 'to' }),
   slackBy: i18n.translate('xpack.nightshift.automations.flyout.slackBy', { defaultMessage: 'by' }),
   selectChannels: i18n.translate('xpack.nightshift.automations.flyout.selectChannels', {
     defaultMessage: 'Select channels',
@@ -145,8 +144,5 @@ export const slackTriggerLeads: Record<SlackTriggerKind, string> = {
   }),
   slack_mention: i18n.translate('xpack.nightshift.automations.flyout.slackMentionLead', {
     defaultMessage: 'Agent mentioned',
-  }),
-  slack_invite: i18n.translate('xpack.nightshift.automations.flyout.slackInviteLead', {
-    defaultMessage: 'Agent invited',
   }),
 };

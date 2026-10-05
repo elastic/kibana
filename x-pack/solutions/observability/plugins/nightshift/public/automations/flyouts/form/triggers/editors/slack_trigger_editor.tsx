@@ -26,9 +26,7 @@ export const SlackTriggerEditor = ({
     <EuiText size="s">
       <strong>{slackTriggerLeads[trigger.kind]}</strong>
     </EuiText>
-    <EuiText size="s">
-      {trigger.kind === 'slack_invite' ? triggerLabels.slackTo : triggerLabels.slackIn}
-    </EuiText>
+    <EuiText size="s">{triggerLabels.slackIn}</EuiText>
     <ListPill
       ariaLabel={triggerLabels.selectChannels}
       emptyLabel={triggerLabels.selectChannels}

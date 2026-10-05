@@ -28,7 +28,6 @@ describe('getTriggerDisplay', () => {
       'Alert triggered',
       'New message in channel',
       'Agent mentioned in channel',
-      'Agent invited to channel',
       'Scheduled',
     ]);
   });
