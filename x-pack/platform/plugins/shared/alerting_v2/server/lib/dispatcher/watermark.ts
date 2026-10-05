@@ -15,7 +15,7 @@ import type { DispatcherPipelineInput, DispatcherPipelineResult } from './types'
  *   inline_stats_too_large (scan query rejected): no advance.
  * - No actions: window fully consumed. Advance to windowEnd.
  * - Truncated (row count === ESQL_QUERY_ROW_LIMIT): advance to the last fetched
- *   episode's timestamp (the truncation edge); the deferred tail is re-read next tick.
+ *   alert's timestamp (the truncation edge); the deferred tail is re-read next tick.
  * - All other outcomes (no_alerts, normal completion): advance to windowEnd.
  *
  * The result is always clamped to `≥ eventWatermark` so the watermark never regresses.
@@ -44,9 +44,9 @@ export const computeNextWatermark = ({
     //     no_alerts path — that would advance to windowEnd on the first hit.
     nextWatermark = eventWatermark;
   } else if (haltReason === 'no_actions') {
-    // All episodes were filtered (e.g. maintenance window) — window fully consumed.
+    // All alerts were filtered (e.g. maintenance window) — window fully consumed.
     // Must be checked before the truncated branch: a truncated batch where all
-    // episodes were filtered still advanced through the full window logically.
+    // alerts were filtered still advanced through the full window logically.
     nextWatermark = windowEnd;
   } else if (finalState.scan?.truncated) {
     // ESQL_QUERY_ROW_LIMIT hit: advance to the truncation edge; the tail will be

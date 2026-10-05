@@ -42,18 +42,18 @@ describe('HydrateAlertDataStep', () => {
     expect(mockEsClient.esql.query).not.toHaveBeenCalled();
   });
 
-  it('attaches data to the matching episode', async () => {
+  it('attaches data to the matching alert', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
     const step = new HydrateAlertDataStep(queryService);
 
-    const episodes = [createAlert({ alert_id: 'ep-1', rule_id: 'r1' })];
+    const alerts = [createAlert({ alert_id: 'ep-1', rule_id: 'r1' })];
 
     mockEsClient.esql.query.mockResolvedValueOnce(
       createAlertDataResponse([{ alert_id: 'ep-1', data_json: '{"host":"server-01","count":3}' }])
     );
 
-    const state = createDispatcherPipelineState({ dispatchable: episodes });
+    const state = createDispatcherPipelineState({ dispatchable: alerts });
     const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
@@ -66,7 +66,7 @@ describe('HydrateAlertDataStep', () => {
     const { loggerService } = createLoggerService();
     const step = new HydrateAlertDataStep(queryService);
 
-    const episodes = [createAlert({ alert_id: 'ep-1' })];
+    const alerts = [createAlert({ alert_id: 'ep-1' })];
 
     mockEsClient.esql.query.mockResolvedValueOnce(
       createAlertDataResponse([
@@ -74,7 +74,7 @@ describe('HydrateAlertDataStep', () => {
       ])
     );
 
-    const state = createDispatcherPipelineState({ dispatchable: episodes });
+    const state = createDispatcherPipelineState({ dispatchable: alerts });
     const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
@@ -89,13 +89,13 @@ describe('HydrateAlertDataStep', () => {
     const { loggerService } = createLoggerService();
     const step = new HydrateAlertDataStep(queryService);
 
-    const episodes = [createAlert({ alert_id: 'ep-1' })];
+    const alerts = [createAlert({ alert_id: 'ep-1' })];
 
     mockEsClient.esql.query.mockResolvedValueOnce(
       createAlertDataResponse([{ alert_id: 'ep-1', data_json: '{}' }])
     );
 
-    const state = createDispatcherPipelineState({ dispatchable: episodes });
+    const state = createDispatcherPipelineState({ dispatchable: alerts });
     const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
@@ -103,16 +103,16 @@ describe('HydrateAlertDataStep', () => {
     expect(result.data?.triage?.dispatchable[0].data).toEqual({});
   });
 
-  it('leaves data undefined when the hydration query returns no row for an episode', async () => {
+  it('leaves data undefined when the hydration query returns no row for an alert', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService, mockLogger } = createLoggerService();
     const step = new HydrateAlertDataStep(queryService);
 
-    const episodes = [createAlert({ alert_id: 'ep-missing' })];
+    const alerts = [createAlert({ alert_id: 'ep-missing' })];
 
     mockEsClient.esql.query.mockResolvedValueOnce(createAlertDataResponse([]));
 
-    const state = createDispatcherPipelineState({ dispatchable: episodes });
+    const state = createDispatcherPipelineState({ dispatchable: alerts });
     const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
@@ -132,13 +132,13 @@ describe('HydrateAlertDataStep', () => {
     const { loggerService } = createLoggerService();
     const step = new HydrateAlertDataStep(queryService);
 
-    const episodes = [createAlert({ alert_id: 'ep-1' })];
+    const alerts = [createAlert({ alert_id: 'ep-1' })];
 
     mockEsClient.esql.query.mockResolvedValueOnce(
       createAlertDataResponse([{ alert_id: 'ep-1', data_json: null }])
     );
 
-    const state = createDispatcherPipelineState({ dispatchable: episodes });
+    const state = createDispatcherPipelineState({ dispatchable: alerts });
     const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
@@ -146,12 +146,12 @@ describe('HydrateAlertDataStep', () => {
     expect(result.data?.triage?.dispatchable[0].data).toBeUndefined();
   });
 
-  it('derives range bounds from min/max last_event_timestamp across all episodes', async () => {
+  it('derives range bounds from min/max last_event_timestamp across all alerts', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
     const step = new HydrateAlertDataStep(queryService);
 
-    const episodes = [
+    const alerts = [
       createAlert({
         alert_id: 'ep-1',
         last_event_timestamp: '2026-01-22T07:05:00.000Z',
@@ -174,7 +174,7 @@ describe('HydrateAlertDataStep', () => {
       ])
     );
 
-    const state = createDispatcherPipelineState({ dispatchable: episodes });
+    const state = createDispatcherPipelineState({ dispatchable: alerts });
     await step.execute(state, loggerService);
 
     const calledQuery: string = mockEsClient.esql.query.mock.calls[0][0].query;
@@ -182,12 +182,12 @@ describe('HydrateAlertDataStep', () => {
     expect(calledQuery).toContain('"2026-01-22T07:10:00.000Z"');
   });
 
-  it('attaches data to each episode independently', async () => {
+  it('attaches data to each alert independently', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
     const step = new HydrateAlertDataStep(queryService);
 
-    const episodes = [
+    const alerts = [
       createAlert({ alert_id: 'ep-1', rule_id: 'r1' }),
       createAlert({ alert_id: 'ep-2', rule_id: 'r2' }),
     ];
@@ -199,7 +199,7 @@ describe('HydrateAlertDataStep', () => {
       ])
     );
 
-    const state = createDispatcherPipelineState({ dispatchable: episodes });
+    const state = createDispatcherPipelineState({ dispatchable: alerts });
     const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
@@ -213,10 +213,10 @@ describe('HydrateAlertDataStep', () => {
     const { loggerService } = createLoggerService();
     const step = new HydrateAlertDataStep(queryService);
 
-    // Two episodes that each end up in different chunks via oversized IDs
+    // Two alerts that each end up in different chunks via oversized IDs
     const longId1 = 'a'.repeat(400_000) + '-1';
     const longId2 = 'b'.repeat(400_000) + '-2';
-    const episodes = [
+    const alerts = [
       createAlert({ alert_id: longId1, last_event_timestamp: '2026-01-22T07:00:00.000Z' }),
       createAlert({ alert_id: longId2, last_event_timestamp: '2026-01-22T07:01:00.000Z' }),
     ];
@@ -227,15 +227,15 @@ describe('HydrateAlertDataStep', () => {
         createAlertDataResponse([{ alert_id: longId2, data_json: '{"d":2}' }])
       );
 
-    const state = createDispatcherPipelineState({ dispatchable: episodes });
+    const state = createDispatcherPipelineState({ dispatchable: alerts });
     const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    const ep1 = result.data?.triage?.dispatchable.find((e) => e.alert_id === longId1);
-    const ep2 = result.data?.triage?.dispatchable.find((e) => e.alert_id === longId2);
-    expect(ep1?.data).toEqual({ c: 1 });
-    expect(ep2?.data).toEqual({ d: 2 });
+    const alert1 = result.data?.triage?.dispatchable.find((e) => e.alert_id === longId1);
+    const alert2 = result.data?.triage?.dispatchable.find((e) => e.alert_id === longId2);
+    expect(alert1?.data).toEqual({ c: 1 });
+    expect(alert2?.data).toEqual({ d: 2 });
     expect(mockEsClient.esql.query).toHaveBeenCalledTimes(2);
   });
 });

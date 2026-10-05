@@ -43,14 +43,14 @@ export class HydrateAlertDataStep implements DispatcherStep {
       return { type: 'continue' };
     }
 
-    const episodeIds = triage.dispatchableAlertIds();
+    const alertIds = triage.dispatchableAlertIds();
 
     const { gte, lte } = computeTimestampBounds(triage.dispatchable);
 
     const { signal } = state.input;
 
     const responses = await Promise.all(
-      getAlertDataQueries(episodeIds, { gte, lte }).map((request) =>
+      getAlertDataQueries(alertIds, { gte, lte }).map((request) =>
         this.queryService.executeQueryRows<RawAlertData>({
           query: request.query,
           abortSignal: signal,
@@ -58,13 +58,13 @@ export class HydrateAlertDataStep implements DispatcherStep {
       )
     );
 
-    const dataByEpisodeId = new Map<string, string | null>();
+    const dataByAlertId = new Map<string, string | null>();
     for (const row of responses.flat()) {
-      dataByEpisodeId.set(row.alert_id, row.data_json);
+      dataByAlertId.set(row.alert_id, row.data_json);
     }
 
-    const hydrated = dataByEpisodeId.size;
-    const requested = episodeIds.length;
+    const hydrated = dataByAlertId.size;
+    const requested = alertIds.length;
     if (hydrated < requested) {
       logger.warn({
         code: ALERTING_LOG_CODES.HYDRATE_ALERT_DATA_STEP_MISSING_RULE_EVENTS_ROW,
@@ -74,23 +74,23 @@ export class HydrateAlertDataStep implements DispatcherStep {
       });
     }
 
-    const hydratedTriage = triage.mapDispatchable((ep) => {
-      const raw = dataByEpisodeId.get(ep.alert_id);
-      if (raw == null) return ep;
-      return { ...ep, data: parseDataJson(raw) };
+    const hydratedTriage = triage.mapDispatchable((alert) => {
+      const raw = dataByAlertId.get(alert.alert_id);
+      if (raw == null) return alert;
+      return { ...alert, data: parseDataJson(raw) };
     });
 
     return { type: 'continue', data: { triage: hydratedTriage } };
   }
 }
 
-function computeTimestampBounds(episodes: readonly Alert[]): { gte: string; lte: string } {
+function computeTimestampBounds(alerts: readonly Alert[]): { gte: string; lte: string } {
   const epoch = new Date(0).toISOString();
   let gte: string | undefined;
   let lte: string | undefined;
 
-  for (const ep of episodes) {
-    const parsed = new Date(ep.last_event_timestamp);
+  for (const alert of alerts) {
+    const parsed = new Date(alert.last_event_timestamp);
     if (Number.isNaN(parsed.getTime())) continue;
 
     const ts = parsed.toISOString();

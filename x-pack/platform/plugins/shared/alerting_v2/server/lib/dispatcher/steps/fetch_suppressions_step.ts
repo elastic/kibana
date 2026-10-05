@@ -45,14 +45,14 @@ export class FetchSuppressionsStep implements DispatcherStep {
 
     const { signal } = state.input;
 
-    const [episodeResponses, seriesResponses] = await Promise.all([
+    const [alertResponses, seriesResponses] = await Promise.all([
       this.runQueries<AlertSuppressionRow>(getAlertSuppressionsQueries(scan.alerts), signal),
       this.runQueries<SeriesSuppressionRow>(getSeriesSuppressionsQueries(scan.alerts), signal),
     ]);
 
     // Both queries return at most one row per chunk literal, so reaching the limit means that
     // invariant broke and rows past it were dropped.
-    const responses = [...episodeResponses, ...seriesResponses];
+    const responses = [...alertResponses, ...seriesResponses];
     const truncatedChunks = responses.filter((rows) => rows.length >= ESQL_QUERY_ROW_LIMIT).length;
     if (truncatedChunks > 0) {
       logger.warn({
@@ -64,7 +64,7 @@ export class FetchSuppressionsStep implements DispatcherStep {
     }
 
     const suppressions: SuppressionRow[] = [
-      ...episodeResponses.flat(),
+      ...alertResponses.flat(),
       ...seriesResponses.flat().map((row) => ({ ...row, alert_id: null })),
     ];
 

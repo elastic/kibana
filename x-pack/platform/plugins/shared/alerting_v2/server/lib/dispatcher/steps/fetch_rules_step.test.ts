@@ -25,7 +25,7 @@ describe('FetchRulesStep', () => {
     ({ rulesSavedObjectService: rulesSoService, mockFindByIds } = createRulesSavedObjectService());
   });
 
-  it('fetches rules for unique rule IDs from active episodes', async () => {
+  it('fetches rules for unique rule IDs from active alerts', async () => {
     mockFindByIds.mockResolvedValue([
       {
         id: 'r1',
@@ -54,7 +54,7 @@ describe('FetchRulesStep', () => {
     expect(mockFindByIds).toHaveBeenCalledWith(['r1']);
   });
 
-  it('returns empty map when no active episodes', async () => {
+  it('returns empty map when no active alerts', async () => {
     const step = new FetchRulesStep(rulesSoService);
 
     const state = createDispatcherPipelineState({ dispatchable: [] });
@@ -138,7 +138,7 @@ describe('FetchRulesStep', () => {
     expect(result.data?.rules?.get('r1')?.spaceId).toBe('default');
   });
 
-  it('excludes episodes with null rule_id from the findByIds call', async () => {
+  it('excludes alerts with null rule_id from the findByIds call', async () => {
     mockFindByIds.mockResolvedValue([
       {
         id: 'r1',
@@ -164,7 +164,7 @@ describe('FetchRulesStep', () => {
     expect(result.data?.rules?.size).toBe(1);
   });
 
-  it('does not call findByIds when all episodes have null rule_id', async () => {
+  it('does not call findByIds when all alerts have null rule_id', async () => {
     const step = new FetchRulesStep(rulesSoService);
     const state = createDispatcherPipelineState({
       dispatchable: [

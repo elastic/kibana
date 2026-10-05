@@ -20,8 +20,8 @@ export class ApplySuppressionStep implements DispatcherStep {
   ): Promise<DispatcherStepOutput> {
     const { scan = AlertScan.empty(), suppressions = SuppressionIndex.empty() } = state;
 
-    const triage = AlertTriage.partition(scan.alerts, (episode) =>
-      suppressions.suppressionReasonFor(episode)
+    const triage = AlertTriage.partition(scan.alerts, (alert) =>
+      suppressions.suppressionReasonFor(alert)
     );
 
     return { type: 'continue', data: { triage } };

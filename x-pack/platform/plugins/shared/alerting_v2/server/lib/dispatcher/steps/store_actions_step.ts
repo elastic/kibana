@@ -48,42 +48,42 @@ export class StoreActionsStep implements DispatcherStep {
 
     const now = new Date();
 
-    // One doc per episode-scoped outcome; their count gates watermark advancement.
-    const episodeActions: AlertActionDocument[] = [
-      ...suppressed.map((episode) =>
+    // One doc per alert-scoped outcome; their count gates watermark advancement.
+    const alertActions: AlertActionDocument[] = [
+      ...suppressed.map((alert) =>
         toAction({
-          episode,
+          alert,
           actionType: 'suppress',
-          reason: episode.reason,
-          spaceId: episode.space_id,
+          reason: alert.reason,
+          spaceId: alert.space_id,
         })
       ),
       ...throttled.flatMap((group) =>
-        group.alerts.map((episode) =>
+        group.alerts.map((alert) =>
           toAction({
-            episode,
+            alert,
             actionType: 'suppress',
             reason: `suppressed by throttled policy ${group.policyId}`,
-            spaceId: episode.space_id,
+            spaceId: alert.space_id,
           })
         )
       ),
       ...toDispatch.flatMap((group) =>
-        group.alerts.map((episode) =>
+        group.alerts.map((alert) =>
           toAction({
-            episode,
+            alert,
             actionType: 'fire',
             reason: `dispatched by policy ${group.policyId}`,
-            spaceId: episode.space_id,
+            spaceId: alert.space_id,
           })
         )
       ),
-      ...unmatched.map((episode) =>
+      ...unmatched.map((alert) =>
         toAction({
-          episode,
+          alert,
           actionType: 'unmatched',
           reason: 'no matching action policy',
-          spaceId: episode.space_id,
+          spaceId: alert.space_id,
         })
       ),
     ];
@@ -92,52 +92,52 @@ export class StoreActionsStep implements DispatcherStep {
     // the recordedAlerts tally.
     const notifiedActions: AlertActionDocument[] = toDispatch.map((group) => {
       const groupingMode = policies.groupingModeOf(group.policyId);
-      const firstEpisode = group.alerts[0];
-      const spaceId = firstEpisode?.space_id ?? 'default';
+      const firstAlert = group.alerts[0];
+      const spaceId = firstAlert?.space_id ?? 'default';
       const action: AlertActionDocument = {
         actor: { type: alertActionActorType.internal },
         action_type: 'notified',
-        rule_id: firstEpisode?.rule_id ?? null,
-        group_hash: firstEpisode?.group_hash ?? 'unknown',
+        rule_id: firstAlert?.rule_id ?? null,
+        group_hash: firstAlert?.group_hash ?? 'unknown',
         last_series_event_timestamp: now.toISOString(),
         action_group_id: group.id,
-        source: firstEpisode?.source,
+        source: firstAlert?.source,
         reason: `notified by policy ${group.policyId}`,
         space_id: spaceId,
       };
       if (groupingMode === 'per_alert') {
-        action.alert_status = firstEpisode?.alert_status;
+        action.alert_status = firstAlert?.alert_status;
       }
       return action;
     });
 
     await this.storageService.bulkIndexDocs<AlertActionDocument>({
       index: ALERT_ACTIONS_DATA_STREAM,
-      docs: [...episodeActions, ...notifiedActions],
+      docs: [...alertActions, ...notifiedActions],
     });
 
-    return { type: 'continue', data: { recordedAlerts: episodeActions.length } };
+    return { type: 'continue', data: { recordedAlerts: alertActions.length } };
   }
 }
 
 export function toAction({
-  episode,
+  alert,
   actionType,
   reason,
   spaceId,
 }: {
-  episode: Alert;
+  alert: Alert;
   actionType: 'suppress' | 'fire' | 'notified' | 'unmatched';
   reason?: string;
   spaceId: string;
 }): AlertActionDocument {
   return {
-    group_hash: episode.group_hash,
-    last_series_event_timestamp: episode.last_event_timestamp,
+    group_hash: alert.group_hash,
+    last_series_event_timestamp: alert.last_event_timestamp,
     actor: { type: alertActionActorType.internal },
     action_type: actionType,
-    rule_id: episode.rule_id,
-    source: episode.source,
+    rule_id: alert.rule_id,
+    source: alert.source,
     reason,
     space_id: spaceId,
   };

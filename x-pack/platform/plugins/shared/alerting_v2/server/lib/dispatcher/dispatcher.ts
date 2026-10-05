@@ -142,7 +142,7 @@ export class DispatcherService implements DispatcherServiceContract {
             `watermark_lag_ms=${watermarkLagMs}`,
             `window_span_ms=${windowSpanMs}`,
             `truncated=${scan.truncated}`,
-            `episode_count=${scan.alerts.length}`,
+            `alert_count=${scan.alerts.length}`,
             `stuck_ticks=${nextStuckTicks}`,
           ].join(' ');
         },
@@ -193,7 +193,7 @@ export class DispatcherService implements DispatcherServiceContract {
 
   /**
    * The watermark has not advanced for STUCK_TICK_LIMIT consecutive ticks:
-   * force-record the blocking episodes as `unmatched` so the `.alert-actions`
+   * force-record the blocking alerts as `unmatched` so the `.alert-actions`
    * dedup mark moves past them, then advance the watermark.
    */
   private async escapeStuckWatermark({
@@ -206,11 +206,11 @@ export class DispatcherService implements DispatcherServiceContract {
     logger: LoggerServiceContract;
   }): Promise<DispatcherExecutionResult> {
     const { startedAt, eventWatermark, windowEnd } = input;
-    const blockingEpisodes = pipelineResult.finalState.scan?.alerts ?? [];
+    const blockingAlerts = pipelineResult.finalState.scan?.alerts ?? [];
     const lagMs = startedAt.getTime() - eventWatermark.getTime();
 
-    if (blockingEpisodes.length === 0) {
-      // No episodes were fetched (aborted before or during FetchAlertsStep, or
+    if (blockingAlerts.length === 0) {
+      // No alerts were fetched (aborted before or during FetchAlertsStep, or
       // the scan query was rejected): nothing to force-record, and advancing
       // would silently drop the window. Hold while lag is within one max scan
       // window so the scan can recover and the overlap re-read still covers the
@@ -220,9 +220,9 @@ export class DispatcherService implements DispatcherServiceContract {
         logger.error({
           code: ALERTING_LOG_CODES.DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE,
           message: () =>
-            `escape hatch triggered with no fetched episodes (halt_reason: ${haltReason}, ` +
+            `escape hatch triggered with no fetched alerts (halt_reason: ${haltReason}, ` +
             `lag: ${lagMs}ms > ${MAX_WINDOW_MINUTES}m). Force-advancing to ` +
-            `${windowEnd.toISOString()}; unread episodes in this window are skipped.`,
+            `${windowEnd.toISOString()}; unread alerts in this window are skipped.`,
           error: new Error(`Pre-fetch watermark stuck at ${eventWatermark.toISOString()}`),
         });
         return { startedAt, nextWatermark: windowEnd, nextStuckTicks: 0, pipelineResult };
@@ -231,7 +231,7 @@ export class DispatcherService implements DispatcherServiceContract {
       logger.warn({
         code: ALERTING_LOG_CODES.DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK,
         message: () =>
-          `escape hatch triggered with no fetched episodes (halt_reason: ${haltReason}, ` +
+          `escape hatch triggered with no fetched alerts (halt_reason: ${haltReason}, ` +
           `lag: ${lagMs}ms). Holding watermark at ${eventWatermark.toISOString()} ` +
           `and resetting stuck counter.`,
       });
@@ -244,8 +244,8 @@ export class DispatcherService implements DispatcherServiceContract {
     // tick stuck) — clamp so the watermark never regresses; progress then comes
     // from the dedup marks written below.
     const truncated = pipelineResult.finalState.scan?.truncated ?? false;
-    const lastEpisode = blockingEpisodes[blockingEpisodes.length - 1];
-    const escapeTarget = truncated ? new Date(lastEpisode.last_event_timestamp) : windowEnd;
+    const lastAlert = blockingAlerts[blockingAlerts.length - 1];
+    const escapeTarget = truncated ? new Date(lastAlert.last_event_timestamp) : windowEnd;
     const clampedEscapeTarget = new Date(
       Math.max(escapeTarget.getTime(), eventWatermark.getTime())
     );
@@ -254,7 +254,7 @@ export class DispatcherService implements DispatcherServiceContract {
       code: ALERTING_LOG_CODES.DISPATCHER_WATERMARK_STUCK,
       message: () =>
         `watermark stuck for ${STUCK_TICK_LIMIT} consecutive ticks ` +
-        `(lag: ${lagMs}ms, blocking episodes: ${blockingEpisodes.length}, ` +
+        `(lag: ${lagMs}ms, blocking alerts: ${blockingAlerts.length}, ` +
         `truncated: ${truncated}). ` +
         `Force-recording as unmatched and advancing to ${clampedEscapeTarget.toISOString()}.`,
       error: new Error(`Watermark stuck at ${eventWatermark.toISOString()}`),
@@ -263,12 +263,12 @@ export class DispatcherService implements DispatcherServiceContract {
     try {
       await this.storageService.bulkIndexDocs({
         index: ALERT_ACTIONS_DATA_STREAM,
-        docs: blockingEpisodes.map((episode) =>
+        docs: blockingAlerts.map((alert) =>
           toAction({
-            episode,
+            alert,
             actionType: 'unmatched',
-            reason: 'watermark-stuck escape hatch; episode force-recorded as unmatched',
-            spaceId: episode.space_id,
+            reason: 'watermark-stuck escape hatch; alert force-recorded as unmatched',
+            spaceId: alert.space_id,
           })
         ),
       });
@@ -279,7 +279,7 @@ export class DispatcherService implements DispatcherServiceContract {
         code: ALERTING_LOG_CODES.DISPATCHER_ESCAPE_HATCH_WRITE_FAILED,
         message: () =>
           `escape hatch bulkIndexDocs failed; holding watermark so ` +
-          `episodes will be retried. ${err.message}`,
+          `alerts will be retried. ${err.message}`,
       });
       // Reset stuckTicks so the hatch does not re-fire (and re-attempt the bulk
       // write) every tick while ES is unavailable.

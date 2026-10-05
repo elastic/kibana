@@ -10,7 +10,7 @@ import { AlertScan } from './alert_scan';
 
 describe('AlertScan', () => {
   describe('empty', () => {
-    it('has no episodes and is not truncated', () => {
+    it('has no alerts and is not truncated', () => {
       const scan = AlertScan.empty();
 
       expect(scan.alerts).toHaveLength(0);
@@ -20,11 +20,11 @@ describe('AlertScan', () => {
   });
 
   describe('of', () => {
-    it('exposes the given episodes and truncation flag', () => {
-      const episodes = [createAlert({ alert_id: 'e1' })];
-      const scan = AlertScan.of({ alerts: episodes, truncated: true });
+    it('exposes the given alerts and truncation flag', () => {
+      const alerts = [createAlert({ alert_id: 'e1' })];
+      const scan = AlertScan.of({ alerts, truncated: true });
 
-      expect(scan.alerts).toBe(episodes);
+      expect(scan.alerts).toBe(alerts);
       expect(scan.truncated).toBe(true);
       expect(scan.isEmpty()).toBe(false);
     });
@@ -35,7 +35,7 @@ describe('AlertScan', () => {
   });
 
   describe('truncationEdge', () => {
-    it('returns the last episode timestamp (rows sorted asc)', () => {
+    it('returns the last alert timestamp (rows sorted asc)', () => {
       const scan = AlertScan.of({
         alerts: [
           createAlert({

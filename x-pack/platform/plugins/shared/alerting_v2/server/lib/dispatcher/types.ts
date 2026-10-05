@@ -109,12 +109,12 @@ export interface ActionPolicy {
   spaceId: string;
   name: string;
   enabled: boolean;
-  /** Structured matcher evaluated against the alert episode context.
-   *  Null or absent means catch-all (matches every episode). */
+  /** Structured matcher evaluated against the alert context.
+   *  Null or absent means catch-all (matches every alert). */
   matcher?: PolicyMatcherAttributes | null;
-  /** data.* fields used to group episodes into a single action group */
+  /** data.* fields used to group alerts into a single action group */
   groupBy: string[];
-  /** How episodes are grouped into action group payloads. Defaulted at hydration (DEFAULT_GROUPING_MODE). */
+  /** How alerts are grouped into action group payloads. Defaulted at hydration (DEFAULT_GROUPING_MODE). */
   groupingMode: 'per_alert' | 'all' | 'per_field';
   /** Throttle configuration controlling action frequency */
   throttle?: {
@@ -122,7 +122,7 @@ export interface ActionPolicy {
     interval?: string | null; // e.g. '1h', '30m', '5m'; null for intervalless strategies
   };
   snoozedUntil?: string | null;
-  /** Target destinations to dispatch matched episodes to */
+  /** Target destinations to dispatch matched alerts to */
   destinations: ActionPolicyDestination[];
   /** Decrypted base64-encoded API key (id:key) for authenticated workflow dispatch */
   apiKey?: string;
@@ -195,13 +195,13 @@ export interface DispatcherPipelineInput {
 
 export interface DispatcherPipelineState {
   readonly input: DispatcherPipelineInput;
-  /** Result of the windowed candidate scan (episodes + truncation flag). */
+  /** Result of the windowed candidate scan (alerts + truncation flag). */
   readonly scan?: AlertScan;
   /** Count of alerts that received an `.alert-actions` record this tick. */
   readonly recordedAlerts?: number;
-  /** Suppression facts from `.alert-actions`, indexed for per-episode lookup. */
+  /** Suppression facts from `.alert-actions`, indexed for per-alert lookup. */
   readonly suppressions?: SuppressionIndex;
-  /** Dispatchable vs suppressed verdict on the scanned episodes. */
+  /** Dispatchable vs suppressed verdict on the scanned alerts. */
   readonly triage?: AlertTriage;
   readonly rules?: RuleCatalog;
   readonly policies?: PolicyCatalog;

@@ -48,11 +48,11 @@ export class EvaluateMatchersStep implements DispatcherStep {
     const matched: MatchedPair[] = [];
     const now = Date.now();
 
-    for (const episode of dispatchable) {
-      if (rules.isOrphanedInternalAlert(episode)) continue;
-      const rule = rules.forAlert(episode);
+    for (const alert of dispatchable) {
+      if (rules.isOrphanedInternalAlert(alert)) continue;
+      const rule = rules.forAlert(alert);
 
-      const spacePolicies = policies.inSpace(episode.space_id);
+      const spacePolicies = policies.inSpace(alert.space_id);
       let context: MatcherContext | undefined;
 
       for (const policy of spacePolicies) {
@@ -61,7 +61,7 @@ export class EvaluateMatchersStep implements DispatcherStep {
 
         const policyMatcher = PolicyMatcher.of(policy.matcher);
         if (policyMatcher.isCatchAll()) {
-          matched.push({ alert: episode, policy });
+          matched.push({ alert, policy });
           continue;
         }
 
@@ -69,11 +69,11 @@ export class EvaluateMatchersStep implements DispatcherStep {
 
         const expression = policyMatcher.expressionKql();
         if (expression === null) {
-          matched.push({ alert: episode, policy });
+          matched.push({ alert, policy });
           continue;
         }
 
-        context ??= createMatcherContext(episode);
+        context ??= createMatcherContext(alert);
         let isMatch = false;
         try {
           isMatch = evaluateKql(expression, context);
@@ -83,16 +83,16 @@ export class EvaluateMatchersStep implements DispatcherStep {
             code: ALERTING_LOG_CODES.POLICY_MATCHER_KQL_INVALID,
             labels: {
               policy_id: policy.id,
-              alert_id: episode.alert_id,
-              rule_id: episode.rule_id ?? undefined,
-              space_id: episode.space_id,
+              alert_id: alert.alert_id,
+              rule_id: alert.rule_id ?? undefined,
+              space_id: alert.space_id,
             },
           });
           continue;
         }
 
         if (isMatch) {
-          matched.push({ alert: episode, policy });
+          matched.push({ alert, policy });
         }
       }
     }

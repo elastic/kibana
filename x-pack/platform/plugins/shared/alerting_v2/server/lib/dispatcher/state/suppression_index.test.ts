@@ -9,7 +9,7 @@ import { createAlert, createSuppressionRow } from '../fixtures/test_utils';
 import { SuppressionIndex } from './suppression_index';
 
 describe('SuppressionIndex', () => {
-  it('suppresses by episode-level match', () => {
+  it('suppresses by alert-level match', () => {
     const index = SuppressionIndex.of([
       createSuppressionRow({
         rule_id: 'r1',
@@ -20,8 +20,8 @@ describe('SuppressionIndex', () => {
       }),
     ]);
 
-    const episode = createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
-    expect(index.suppressionReasonFor(episode)).toBe('ack');
+    const alert = createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
+    expect(index.suppressionReasonFor(alert)).toBe('ack');
   });
 
   it('suppresses by series-level match (null alert_id)', () => {
@@ -35,8 +35,8 @@ describe('SuppressionIndex', () => {
       }),
     ]);
 
-    const episode = createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
-    expect(index.suppressionReasonFor(episode)).toBe('snooze');
+    const alert = createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
+    expect(index.suppressionReasonFor(alert)).toBe('snooze');
   });
 
   it('uses deactivate reason when deactivated', () => {
@@ -50,8 +50,8 @@ describe('SuppressionIndex', () => {
       }),
     ]);
 
-    const episode = createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
-    expect(index.suppressionReasonFor(episode)).toBe('deactivate');
+    const alert = createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
+    expect(index.suppressionReasonFor(alert)).toBe('deactivate');
   });
 
   it('falls back to an unknown reason when no action is recorded', () => {
@@ -64,11 +64,11 @@ describe('SuppressionIndex', () => {
       }),
     ]);
 
-    const episode = createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
-    expect(index.suppressionReasonFor(episode)).toBe('unknown suppression reason');
+    const alert = createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
+    expect(index.suppressionReasonFor(alert)).toBe('unknown suppression reason');
   });
 
-  it('prefers episode-level suppression over series-level', () => {
+  it('prefers alert-level suppression over series-level', () => {
     const index = SuppressionIndex.of([
       createSuppressionRow({
         rule_id: 'r1',
@@ -86,8 +86,8 @@ describe('SuppressionIndex', () => {
       }),
     ]);
 
-    const episode = createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
-    expect(index.suppressionReasonFor(episode)).toBe('ack');
+    const alert = createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
+    expect(index.suppressionReasonFor(alert)).toBe('ack');
   });
 
   it('does not suppress when should_suppress is false', () => {
@@ -100,16 +100,16 @@ describe('SuppressionIndex', () => {
       }),
     ]);
 
-    const episode = createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
-    expect(index.suppressionReasonFor(episode)).toBeUndefined();
+    const alert = createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
+    expect(index.suppressionReasonFor(alert)).toBeUndefined();
   });
 
-  it('returns undefined for every episode when empty', () => {
+  it('returns undefined for every alert when empty', () => {
     expect(SuppressionIndex.empty().suppressionReasonFor(createAlert())).toBeUndefined();
     expect(SuppressionIndex.empty().size).toBe(0);
   });
 
-  it('suppresses external episode when suppression row uses source as key prefix', () => {
+  it('suppresses external alert when suppression row uses source as key prefix', () => {
     const index = SuppressionIndex.of([
       createSuppressionRow({
         source: 'pagerduty',
@@ -121,13 +121,13 @@ describe('SuppressionIndex', () => {
       }),
     ]);
 
-    const episode = createAlert({
+    const alert = createAlert({
       source: 'pagerduty',
       rule_id: null,
       group_hash: 'pd-hash',
       alert_id: 'pd-ep-1',
     });
-    expect(index.suppressionReasonFor(episode)).toBe('ack');
+    expect(index.suppressionReasonFor(alert)).toBe('ack');
   });
 
   it('internal and external suppressions coexist without key collision', () => {
@@ -149,21 +149,21 @@ describe('SuppressionIndex', () => {
       }),
     ]);
 
-    const internalEpisode = createAlert({
+    const internalAlert = createAlert({
       source: 'internal',
       rule_id: 'rule-1',
       group_hash: 'hash-1',
       alert_id: 'ep-internal',
     });
-    const externalEpisode = createAlert({
+    const externalAlert = createAlert({
       source: 'pagerduty',
       rule_id: null,
       group_hash: 'hash-1',
       alert_id: 'ep-external',
     });
 
-    expect(index.suppressionReasonFor(internalEpisode)).toBe('ack');
-    expect(index.suppressionReasonFor(externalEpisode)).toBeUndefined();
+    expect(index.suppressionReasonFor(internalAlert)).toBe('ack');
+    expect(index.suppressionReasonFor(externalAlert)).toBeUndefined();
   });
 
   it('does not leak an external series suppression across spaces', () => {
@@ -181,7 +181,7 @@ describe('SuppressionIndex', () => {
       }),
     ]);
 
-    const externalEpisode = (spaceId: string) =>
+    const externalAlert = (spaceId: string) =>
       createAlert({
         source: 'pagerduty',
         rule_id: null,
@@ -190,11 +190,11 @@ describe('SuppressionIndex', () => {
         alert_id: 'pd-ep-1',
       });
 
-    expect(index.suppressionReasonFor(externalEpisode('space-a'))).toBe('ack');
-    expect(index.suppressionReasonFor(externalEpisode('space-b'))).toBeUndefined();
+    expect(index.suppressionReasonFor(externalAlert('space-a'))).toBe('ack');
+    expect(index.suppressionReasonFor(externalAlert('space-b'))).toBeUndefined();
   });
 
-  it('null-source suppression row (legacy internal) still matches internal episode by rule_id', () => {
+  it('null-source suppression row (legacy internal) still matches internal alert by rule_id', () => {
     // Simulates a pre-existing row where source was not persisted (null)
     const index = SuppressionIndex.of([
       createSuppressionRow({
@@ -207,12 +207,12 @@ describe('SuppressionIndex', () => {
       }),
     ]);
 
-    const episode = createAlert({
+    const alert = createAlert({
       source: 'internal',
       rule_id: 'rule-1',
       group_hash: 'h1',
       alert_id: 'e1',
     });
-    expect(index.suppressionReasonFor(episode)).toBe('ack');
+    expect(index.suppressionReasonFor(alert)).toBe('ack');
   });
 });

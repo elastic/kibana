@@ -124,7 +124,7 @@ describe('getDispatchableAlertEventsQuery', () => {
     expect(query).toContain('RENAME last_alert_status AS alert_status');
   });
 
-  it('computes subject via CASE to group internal and external episodes separately', () => {
+  it('computes subject via CASE to group internal and external alerts separately', () => {
     expect(queryOf()).toContain('subject = CASE(');
   });
 
@@ -170,7 +170,7 @@ describe('getAlertDataQueries', () => {
     expect(getAlertDataQueries([], { gte: GTE, lte: LTE })).toEqual([]);
   });
 
-  it('returns a valid ES|QL request for a single episode id', () => {
+  it('returns a valid ES|QL request for a single alert id', () => {
     const requests = getAlertDataQueries(['ep-1'], { gte: GTE, lte: LTE });
 
     expect(requests).toHaveLength(1);
@@ -263,7 +263,7 @@ describe('getAlertDataQueries', () => {
     }
   });
 
-  it('splits into multiple requests when episode ids exceed the size budget', () => {
+  it('splits into multiple requests when alert ids exceed the size budget', () => {
     // 36-byte UUIDs + 6 bytes overhead = 42 bytes each; ~14_285 per 600 KB chunk.
     const longIds = Array.from({ length: 200 }, (_, i) => 'x'.repeat(4_000) + `-${i}`);
 
@@ -278,7 +278,7 @@ describe('getAlertDataQueries', () => {
     expect(concatenated).toContain(longIds[longIds.length - 1]);
   });
 
-  it('never puts more episode ids in a chunk than the row limit returns', () => {
+  it('never puts more alert ids in a chunk than the row limit returns', () => {
     const ids = Array.from({ length: ESQL_QUERY_ROW_LIMIT + 1 }, (_, i) => `ep-${i}`);
 
     const requests = getAlertDataQueries(ids, { gte: GTE, lte: LTE });
@@ -412,12 +412,12 @@ describe('getSeriesSuppressionsQueries', () => {
   });
 
   it('uses CONCAT + IN to filter by (subject, group_hash) pairs', () => {
-    const episodes = [
+    const alerts = [
       createAlert({ rule_id: 'rule-1', group_hash: 'hash-1' }),
       createAlert({ rule_id: 'rule-2', group_hash: 'hash-2' }),
     ];
 
-    const requests = getSeriesSuppressionsQueries(episodes);
+    const requests = getSeriesSuppressionsQueries(alerts);
 
     expect(requests).toHaveLength(1);
     expect(requests[0].query).toContain('CONCAT(subject, "::", group_hash)');
@@ -425,14 +425,14 @@ describe('getSeriesSuppressionsQueries', () => {
     expect(requests[0].query).toContain('rule-2::hash-2');
   });
 
-  it('deduplicates episodes with the same rule_id and group_hash', () => {
-    const episodes = [
+  it('deduplicates alerts with the same rule_id and group_hash', () => {
+    const alerts = [
       createAlert({ rule_id: 'rule-1', group_hash: 'hash-1', alert_id: 'ep-1' }),
       createAlert({ rule_id: 'rule-1', group_hash: 'hash-1', alert_id: 'ep-2' }),
       createAlert({ rule_id: 'rule-2', group_hash: 'hash-2', alert_id: 'ep-3' }),
     ];
 
-    const requests = getSeriesSuppressionsQueries(episodes);
+    const requests = getSeriesSuppressionsQueries(alerts);
 
     const matches = requests[0].query.match(/rule-1::hash-1/g);
     expect(matches).toHaveLength(1);
@@ -455,12 +455,12 @@ describe('getSeriesSuppressionsQueries', () => {
   });
 
   it('keeps the series filters in their own WHERE so the OR-ed pre-filter stays intact', () => {
-    const episodes = [
+    const alerts = [
       createAlert({ source: 'internal', rule_id: 'rule-1', group_hash: 'hash-1' }),
       createAlert({ source: 'pagerduty', rule_id: null, group_hash: 'hash-pd' }),
     ];
 
-    const { query } = getSeriesSuppressionsQueries(episodes)[0];
+    const { query } = getSeriesSuppressionsQueries(alerts)[0];
 
     expect(query).toMatch(/\| WHERE \(?alert_id IS NULL\)? AND \(?action_type IN/);
     expect(query.indexOf('alert_id IS NULL')).toBeGreaterThan(query.indexOf(' OR '));
@@ -468,12 +468,12 @@ describe('getSeriesSuppressionsQueries', () => {
   });
 
   it('uses the minimum last_event_timestamp for snooze expiry filtering', () => {
-    const episodes = [
+    const alerts = [
       createAlert({ last_event_timestamp: '2026-01-22T10:00:00.000Z' }),
       createAlert({ last_event_timestamp: '2026-01-22T08:00:00.000Z' }),
     ];
 
-    const requests = getSeriesSuppressionsQueries(episodes);
+    const requests = getSeriesSuppressionsQueries(alerts);
 
     expect(requests[0].query).toContain('expiry > "2026-01-22T08:00:00.000Z"::DATETIME');
   });
@@ -497,20 +497,20 @@ describe('getSeriesSuppressionsQueries', () => {
   });
 
   it('falls back to epoch when all timestamps are invalid', () => {
-    const episodes = [createAlert({ last_event_timestamp: 'not-a-date' })];
+    const alerts = [createAlert({ last_event_timestamp: 'not-a-date' })];
 
-    const requests = getSeriesSuppressionsQueries(episodes);
+    const requests = getSeriesSuppressionsQueries(alerts);
 
     expect(requests[0].query).toContain('expiry > "1970-01-01T00:00:00.000Z"::DATETIME');
   });
 
   it('skips invalid timestamps when computing minimum', () => {
-    const episodes = [
+    const alerts = [
       createAlert({ last_event_timestamp: 'not-a-date' }),
       createAlert({ last_event_timestamp: '2026-01-22T09:00:00.000Z' }),
     ];
 
-    const requests = getSeriesSuppressionsQueries(episodes);
+    const requests = getSeriesSuppressionsQueries(alerts);
 
     expect(requests[0].query).toContain('expiry > "2026-01-22T09:00:00.000Z"::DATETIME');
   });
@@ -530,7 +530,7 @@ describe('getSeriesSuppressionsQueries', () => {
     expect(requests[0].query).toContain('rule_id = LAST(rule_id, @timestamp)');
   });
 
-  it('handles a single episode', () => {
+  it('handles a single alert', () => {
     const requests = getSeriesSuppressionsQueries([
       createAlert({ rule_id: 'only-rule', group_hash: 'only-hash' }),
     ]);
@@ -539,12 +539,12 @@ describe('getSeriesSuppressionsQueries', () => {
     expect(requests[0].query).toContain('only-rule::only-hash');
   });
 
-  it('builds successfully with a large number of episodes', () => {
-    const episodes = Array.from({ length: 500 }, (_, i) =>
+  it('builds successfully with a large number of alerts', () => {
+    const alerts = Array.from({ length: 500 }, (_, i) =>
       createAlert({ rule_id: `rule-${i}`, group_hash: `hash-${i}` })
     );
 
-    const requests = getSeriesSuppressionsQueries(episodes);
+    const requests = getSeriesSuppressionsQueries(alerts);
 
     expect(requests).toHaveLength(1);
     expect(requests[0].query).toContain('CONCAT(subject, "::", group_hash)');
@@ -556,11 +556,11 @@ describe('getSeriesSuppressionsQueries', () => {
     // pair key length = 2 * 5_000 + 2 ('::') = 10_002 bytes per literal.
     // ~60 literals per chunk → 200 literals span at least 3 chunks.
     const longSegment = 'x'.repeat(5_000);
-    const episodes = Array.from({ length: 200 }, (_, i) =>
+    const alerts = Array.from({ length: 200 }, (_, i) =>
       createAlert({ rule_id: `${longSegment}-r${i}`, group_hash: `${longSegment}-g${i}` })
     );
 
-    const requests = getSeriesSuppressionsQueries(episodes);
+    const requests = getSeriesSuppressionsQueries(alerts);
 
     expect(requests.length).toBeGreaterThanOrEqual(2);
     for (const request of requests) {
@@ -573,7 +573,7 @@ describe('getSeriesSuppressionsQueries', () => {
 
   it('uses the same minLastEventTimestamp on every chunk', () => {
     const longSegment = 'y'.repeat(5_000);
-    const episodes = Array.from({ length: 200 }, (_, i) =>
+    const alerts = Array.from({ length: 200 }, (_, i) =>
       createAlert({
         rule_id: `${longSegment}-r${i}`,
         group_hash: `${longSegment}-g${i}`,
@@ -581,7 +581,7 @@ describe('getSeriesSuppressionsQueries', () => {
       })
     );
 
-    const requests = getSeriesSuppressionsQueries(episodes);
+    const requests = getSeriesSuppressionsQueries(alerts);
 
     expect(requests.length).toBeGreaterThanOrEqual(2);
     for (const request of requests) {
@@ -589,7 +589,7 @@ describe('getSeriesSuppressionsQueries', () => {
     }
   });
 
-  it('computes subject via CASE to distinguish internal from external episodes', () => {
+  it('computes subject via CASE to distinguish internal from external alerts', () => {
     const requests = getSeriesSuppressionsQueries([createAlert()]);
 
     expect(requests[0].query).toContain(
@@ -635,11 +635,11 @@ describe('getSeriesSuppressionsQueries', () => {
 
   it('ends every chunk with an explicit row limit', () => {
     const longSegment = 'l'.repeat(5_000);
-    const episodes = Array.from({ length: 200 }, (_, i) =>
+    const alerts = Array.from({ length: 200 }, (_, i) =>
       createAlert({ rule_id: `${longSegment}-r${i}`, group_hash: `${longSegment}-g${i}` })
     );
 
-    const requests = getSeriesSuppressionsQueries(episodes);
+    const requests = getSeriesSuppressionsQueries(alerts);
 
     expect(requests.length).toBeGreaterThanOrEqual(2);
     for (const request of requests) {
@@ -647,28 +647,28 @@ describe('getSeriesSuppressionsQueries', () => {
     }
   });
 
-  it('uses alertSubject for pair key construction (internal episode uses rule_id)', () => {
-    const episodes = [
+  it('uses alertSubject for pair key construction (internal alert uses rule_id)', () => {
+    const alerts = [
       createAlert({ source: 'internal', rule_id: 'rule-abc', group_hash: 'hash-abc' }),
     ];
 
-    const requests = getSeriesSuppressionsQueries(episodes);
+    const requests = getSeriesSuppressionsQueries(alerts);
 
-    // For internal episodes, alertSubject returns rule_id
+    // For internal alerts, alertSubject returns rule_id
     expect(requests[0].query).toContain('rule-abc::hash-abc');
   });
 
-  it('uses alertSubject for pair key construction (external episode uses space-scoped source)', () => {
-    const episodes = [createAlert({ source: 'pagerduty', rule_id: null, group_hash: 'hash-pd' })];
+  it('uses alertSubject for pair key construction (external alert uses space-scoped source)', () => {
+    const alerts = [createAlert({ source: 'pagerduty', rule_id: null, group_hash: 'hash-pd' })];
 
-    const requests = getSeriesSuppressionsQueries(episodes);
+    const requests = getSeriesSuppressionsQueries(alerts);
 
-    // For external episodes, alertSubject returns `${space_id}::${source}`
+    // For external alerts, alertSubject returns `${space_id}::${source}`
     expect(requests[0].query).toContain('default::pagerduty::hash-pd');
   });
 
   it('builds distinct pair keys for the same vendor and group_hash in different spaces', () => {
-    const episodes = [
+    const alerts = [
       createAlert({
         source: 'pagerduty',
         rule_id: null,
@@ -683,23 +683,23 @@ describe('getSeriesSuppressionsQueries', () => {
       }),
     ];
 
-    const requests = getSeriesSuppressionsQueries(episodes);
+    const requests = getSeriesSuppressionsQueries(alerts);
 
     expect(requests[0].query).toContain('space-a::pagerduty::hash-pd');
     expect(requests[0].query).toContain('space-b::pagerduty::hash-pd');
   });
 
-  it('pushes a group_hash + rule_id pre-filter before the CONCAT for internal episodes', () => {
-    const episodes = [
+  it('pushes a group_hash + rule_id pre-filter before the CONCAT for internal alerts', () => {
+    const alerts = [
       createAlert({ rule_id: 'rule-1', group_hash: 'hash-1', alert_id: 'ep-1' }),
       createAlert({ rule_id: 'rule-2', group_hash: 'hash-2', alert_id: 'ep-2' }),
     ];
 
-    const { query } = getSeriesSuppressionsQueries(episodes)[0];
+    const { query } = getSeriesSuppressionsQueries(alerts)[0];
 
     expect(query).toContain('group_hash IN ("hash-1", "hash-2")');
     expect(query).toContain('rule_id IN ("rule-1", "rule-2")');
-    // Internal-only episodes need no external branch.
+    // Internal-only alerts need no external branch.
     expect(query).not.toContain('space_id IN (');
     expect(query).not.toContain('source IN (');
   });
@@ -710,8 +710,8 @@ describe('getSeriesSuppressionsQueries', () => {
     expect(query.indexOf('group_hash IN (')).toBeLessThan(query.indexOf('subject = CASE('));
   });
 
-  it('uses a space_id + source pre-filter branch for external episodes (never filters on a null rule_id)', () => {
-    const episodes = [
+  it('uses a space_id + source pre-filter branch for external alerts (never filters on a null rule_id)', () => {
+    const alerts = [
       createAlert({
         source: 'pagerduty',
         rule_id: null,
@@ -720,17 +720,17 @@ describe('getSeriesSuppressionsQueries', () => {
       }),
     ];
 
-    const { query } = getSeriesSuppressionsQueries(episodes)[0];
+    const { query } = getSeriesSuppressionsQueries(alerts)[0];
 
     expect(query).toContain('group_hash IN ("hash-pd")');
     expect(query).toContain('space_id IN ("space-a")');
     expect(query).toContain('source IN ("pagerduty")');
-    // External episodes have a null rule_id, so a rule_id filter would drop them entirely.
+    // External alerts have a null rule_id, so a rule_id filter would drop them entirely.
     expect(query).not.toContain('rule_id IN (');
   });
 
   it('combines internal and external branches with OR, keeping each kind group_hash scoped to its branch', () => {
-    const episodes = [
+    const alerts = [
       createAlert({ source: 'internal', rule_id: 'rule-1', group_hash: 'hash-1' }),
       createAlert({
         source: 'pagerduty',
@@ -741,7 +741,7 @@ describe('getSeriesSuppressionsQueries', () => {
       }),
     ];
 
-    const { query } = getSeriesSuppressionsQueries(episodes)[0];
+    const { query } = getSeriesSuppressionsQueries(alerts)[0];
 
     expect(query).toContain('(group_hash IN ("hash-1")) AND (rule_id IN ("rule-1"))');
     expect(query).toContain('space_id IN ("space-a")');
@@ -757,7 +757,7 @@ describe('getSeriesSuppressionsQueries', () => {
     // pair key length = 2 * 5_000 + 2 ('::') per literal; with the 300 KB suppressions budget and
     // the added pre-filter this spans multiple chunks.
     const longSegment = 'p'.repeat(5_000);
-    const episodes = Array.from({ length: 200 }, (_, i) =>
+    const alerts = Array.from({ length: 200 }, (_, i) =>
       createAlert({
         rule_id: `${longSegment}-r${i}`,
         group_hash: `${longSegment}-g${i}`,
@@ -765,7 +765,7 @@ describe('getSeriesSuppressionsQueries', () => {
       })
     );
 
-    const requests = getSeriesSuppressionsQueries(episodes);
+    const requests = getSeriesSuppressionsQueries(alerts);
 
     expect(requests.length).toBeGreaterThanOrEqual(2);
     for (const request of requests) {
@@ -773,7 +773,7 @@ describe('getSeriesSuppressionsQueries', () => {
       expect(request.query).toContain('group_hash IN (');
       expect(request.query.length).toBeLessThan(1_000_000);
     }
-    // The first chunk must not carry the last episode's rule_id (per-chunk scoping).
+    // The first chunk must not carry the last alert's rule_id (per-chunk scoping).
     expect(requests[0].query).not.toContain(`${longSegment}-r199`);
   });
 });
@@ -789,10 +789,10 @@ describe('getAlertSuppressionsQueries', () => {
     expect(query).toContain('.alert-actions');
   });
 
-  it('filters by the scan episode ids and episode-level action types in the first WHERE', () => {
-    const episodes = [createAlert({ alert_id: 'ep-1' }), createAlert({ alert_id: 'ep-2' })];
+  it('filters by the scan alert ids and alert-level action types in the first WHERE', () => {
+    const alerts = [createAlert({ alert_id: 'ep-1' }), createAlert({ alert_id: 'ep-2' })];
 
-    const { query } = getAlertSuppressionsQueries(episodes)[0];
+    const { query } = getAlertSuppressionsQueries(alerts)[0];
 
     expect(query).toContain('alert_id IN ("ep-1", "ep-2")');
     expect(query).toContain('action_type IN ("ack", "unack", "deactivate", "activate")');
@@ -818,13 +818,13 @@ describe('getAlertSuppressionsQueries', () => {
     expect(query).not.toContain('rule-1::hash-1');
   });
 
-  it('deduplicates episode ids', () => {
-    const episodes = [
+  it('deduplicates alert ids', () => {
+    const alerts = [
       createAlert({ group_hash: 'hash-1', alert_id: 'ep-1' }),
       createAlert({ group_hash: 'hash-2', alert_id: 'ep-1' }),
     ];
 
-    const { query } = getAlertSuppressionsQueries(episodes)[0];
+    const { query } = getAlertSuppressionsQueries(alerts)[0];
 
     expect(query.match(/"ep-1"/g)).toHaveLength(1);
   });
@@ -838,7 +838,7 @@ describe('getAlertSuppressionsQueries', () => {
     expect(query).toContain('WHERE subject IS NOT NULL');
   });
 
-  it('aggregates once per episode, keyed by series too, without INLINE STATS', () => {
+  it('aggregates once per alert, keyed by series too, without INLINE STATS', () => {
     const { query } = getAlertSuppressionsQueries([createAlert()])[0];
 
     expect(query).not.toContain('INLINE STATS');
@@ -870,12 +870,12 @@ describe('getAlertSuppressionsQueries', () => {
     );
   });
 
-  it('never puts more episode ids in a chunk than the row limit returns', () => {
-    const episodes = Array.from({ length: ESQL_QUERY_ROW_LIMIT + 1 }, (_, i) =>
+  it('never puts more alert ids in a chunk than the row limit returns', () => {
+    const alerts = Array.from({ length: ESQL_QUERY_ROW_LIMIT + 1 }, (_, i) =>
       createAlert({ alert_id: `ep-${i}` })
     );
 
-    const requests = getAlertSuppressionsQueries(episodes);
+    const requests = getAlertSuppressionsQueries(alerts);
 
     expect(requests).toHaveLength(2);
     for (const { query } of requests) {
@@ -885,11 +885,11 @@ describe('getAlertSuppressionsQueries', () => {
   });
 
   it('ends every chunk with an explicit row limit', () => {
-    const episodes = Array.from({ length: ESQL_QUERY_ROW_LIMIT + 1 }, (_, i) =>
+    const alerts = Array.from({ length: ESQL_QUERY_ROW_LIMIT + 1 }, (_, i) =>
       createAlert({ alert_id: `ep-${i}` })
     );
 
-    const requests = getAlertSuppressionsQueries(episodes);
+    const requests = getAlertSuppressionsQueries(alerts);
 
     expect(requests.length).toBeGreaterThanOrEqual(2);
     for (const request of requests) {

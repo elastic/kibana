@@ -13,7 +13,7 @@ describe('RuleCatalog', () => {
     new Map([['rule-1', createRule({ id: 'rule-1', spaceId: 'space-a' })]])
   );
 
-  it('resolves rules by id and by episode', () => {
+  it('resolves rules by id and by alert', () => {
     expect(catalog.get('rule-1')?.id).toBe('rule-1');
     expect(catalog.get('missing')).toBeUndefined();
     expect(catalog.forAlert(createAlert({ rule_id: 'rule-1' }))?.id).toBe('rule-1');
@@ -26,15 +26,15 @@ describe('RuleCatalog', () => {
   });
 
   describe('isOrphanedInternalAlert', () => {
-    it('is true for an internal episode whose rule is absent', () => {
+    it('is true for an internal alert whose rule is absent', () => {
       expect(catalog.isOrphanedInternalAlert(createAlert({ rule_id: 'deleted' }))).toBe(true);
     });
 
-    it('is false for an internal episode whose rule exists', () => {
+    it('is false for an internal alert whose rule exists', () => {
       expect(catalog.isOrphanedInternalAlert(createAlert({ rule_id: 'rule-1' }))).toBe(false);
     });
 
-    it('is false for an external episode (null rule_id)', () => {
+    it('is false for an external alert (null rule_id)', () => {
       expect(
         catalog.isOrphanedInternalAlert(createAlert({ rule_id: null, source: 'pagerduty' }))
       ).toBe(false);

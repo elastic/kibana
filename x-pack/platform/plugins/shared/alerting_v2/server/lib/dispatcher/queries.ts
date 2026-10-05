@@ -18,13 +18,13 @@ const ALERT_EVENT_TYPE: AlertEventType = 'alert';
 // See: https://github.com/elastic/elasticsearch/issues/146318
 //
 // This scan is keys-only by design: no METADATA _source, no JSON_EXTRACT, no data_json.
-// Episode `data` is hydrated lazily by HydrateAlertDataStep (getAlertDataQueries) for the
-// surviving dispatchable set only, which is at most 10 000 episodes rather than the entire
+// Alert `data` is hydrated lazily by HydrateAlertDataStep (getAlertDataQueries) for the
+// surviving dispatchable set only, which is at most 10 000 alerts rather than the entire
 // multi-million-row window. See: https://github.com/elastic/rna-program/issues/838
 //
 // Rows with a null subject are dropped here: a doc with source "internal" and no rule is
 // schema-valid and reaches the index, but has no series identity. Deriving its subject in
-// TypeScript throws, which would fail the whole tick and drop every other episode in the batch.
+// TypeScript throws, which would fail the whole tick and drop every other alert in the batch.
 /**
  * Row cap applied as `LIMIT` to every dispatcher ES|QL query. ES|QL silently
  * truncates to 1 000 rows when a query has no LIMIT, and 10 000 is its maximum.
@@ -34,13 +34,13 @@ const ALERT_EVENT_TYPE: AlertEventType = 'alert';
 export const ESQL_QUERY_ROW_LIMIT = 10_000;
 
 /**
- * Keys-only episode scan over `.rule-events` ⨝ `.alert-actions`.
+ * Keys-only alert scan over `.rule-events` ⨝ `.alert-actions`.
  *
  * `gte`/`lte` cap **event** rows only. Action rows (`type IS NULL`) are not
  * window-capped: `StoreActionsStep` stamps `@timestamp` with `now`, which is
  * after `windowEnd` (`startedAt − SETTLE_BUFFER`). If those rows were dropped
  * before `INLINE STATS last_fired`, the overlap re-read would reprocess every
- * already-recorded episode on the next tick.
+ * already-recorded alert on the next tick.
  */
 export const getDispatchableAlertEventsQuery = ({
   gte,
@@ -129,7 +129,7 @@ export const chunkInClauseLiterals = (
   return chunks;
 };
 
-// External episodes have a null rule_id, so they're keyed by space_id + source instead.
+// External alerts have a null rule_id, so they're keyed by space_id + source instead.
 type PairComponents =
   | { kind: 'internal'; groupHash: string; ruleId: string }
   | { kind: 'external'; groupHash: string; spaceId: string; source: string };
@@ -184,9 +184,9 @@ const buildSuppressionsPreFilter = (
 // Returns one request per chunk (see ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES). Safe to concat:
 // STATS keys on alert_id, the same key used for chunking.
 //
-// Ack and deactivate target a single episode, so filtering alert_id on the scan's episode ids
-// reads only the current episodes' actions and a series' past episodes never reach the output.
-// Episode ids are UUIDv4, so there is one row per id and rows per chunk stay within the literal
+// Ack and deactivate target a single alert, so filtering alert_id on the scan's alert ids
+// reads only the current alerts' actions and a series' past alerts never reach the output.
+// Alert ids are UUIDv4, so there is one row per id and rows per chunk stay within the literal
 // cap, below ESQL_QUERY_ROW_LIMIT. subject and group_hash stay in the BY clause so a reused id
 // cannot merge the actions of two series.
 export const getAlertSuppressionsQueries = (alerts: readonly Alert[]): EsqlRequest[] => {
@@ -313,11 +313,11 @@ export const getLastNotifiedTimestampsQueries = (
   });
 };
 
-// Hydration pass for episode `data`: fetches the full `data` blob from `.rule-events` for the
-// surviving dispatchable episodes only (at most 10 000 after the scan-pass LIMIT).
+// Hydration pass for alert `data`: fetches the full `data` blob from `.rule-events` for the
+// surviving dispatchable alerts only (at most 10 000 after the scan-pass LIMIT).
 //
 // Ordering is load-bearing:
-//   - WHERE is the first command so type, episode.id, and the @timestamp range all push down to
+//   - WHERE is the first command so type, alert.id, and the @timestamp range all push down to
 //     Lucene; _source is never fetched for non-matching documents.
 //   - JSON_EXTRACT sits after WHERE so _source is materialised only for the matching rows.
 //   - DROP _source removes it before the STATS buffer.
@@ -326,11 +326,11 @@ export const getLastNotifiedTimestampsQueries = (
 // keeps the same EsqlRequest[] shape as its siblings and the range stays part of the ES|QL plan.
 //
 // LAST(data_json, @timestamp) reproduces the single-pass semantics: the scan pass returns
-// last_event_timestamp = MAX(@timestamp) per episode, so the row LAST() picks here is the same
+// last_event_timestamp = MAX(@timestamp) per alert, so the row LAST() picks here is the same
 // one the old STATS picked when data_json was in the scan.
 //
 // Returns one request per chunk (see ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES). Safe to concat:
-// STATS aggregates by episode_id.
+// STATS aggregates by alert_id.
 export const getAlertDataQueries = (
   alertIds: readonly string[],
   { gte, lte }: { gte: string; lte: string }

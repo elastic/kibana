@@ -39,16 +39,16 @@ describe('FetchAlertsStep', () => {
     expect(new FetchAlertsStep(queryService).name).toBe('fetch_alerts');
   });
 
-  it('returns episodes and continues when episodes are found', async () => {
+  it('returns alerts and continues when alerts are found', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const step = new FetchAlertsStep(queryService);
 
-    const episodes = [
+    const alerts = [
       createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' }),
       createAlert({ rule_id: 'r2', group_hash: 'h2', alert_id: 'e2' }),
     ];
 
-    mockEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse(episodes));
+    mockEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse(alerts));
 
     const state = createDispatcherPipelineState();
     const result = await step.execute(state, logger);
@@ -100,12 +100,10 @@ describe('FetchAlertsStep', () => {
     const { queryService, mockEsClient } = createQueryService();
     const step = new FetchAlertsStep(queryService);
 
-    const maxEpisodes = Array.from({ length: ESQL_QUERY_ROW_LIMIT }, (_, i) =>
+    const maxAlerts = Array.from({ length: ESQL_QUERY_ROW_LIMIT }, (_, i) =>
       createAlert({ alert_id: `ep-${i}`, group_hash: `h-${i}` })
     );
-    mockEsClient.esql.query.mockResolvedValueOnce(
-      createDispatchableAlertEventsResponse(maxEpisodes)
-    );
+    mockEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse(maxAlerts));
 
     const state = createDispatcherPipelineState();
     const result = await step.execute(state, logger);
@@ -119,10 +117,10 @@ describe('FetchAlertsStep', () => {
     const { queryService, mockEsClient } = createQueryService();
     const step = new FetchAlertsStep(queryService);
 
-    const episodes = Array.from({ length: ESQL_QUERY_ROW_LIMIT - 1 }, (_, i) =>
+    const alerts = Array.from({ length: ESQL_QUERY_ROW_LIMIT - 1 }, (_, i) =>
       createAlert({ alert_id: `ep-${i}`, group_hash: `h-${i}` })
     );
-    mockEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse(episodes));
+    mockEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse(alerts));
 
     const state = createDispatcherPipelineState();
     const result = await step.execute(state, logger);
@@ -258,7 +256,7 @@ describe('parseAlerts', () => {
     expect(result[0].severity).toBeUndefined();
   });
 
-  it('passes source, space_id, and null rule_id through for external episodes', () => {
+  it('passes source, space_id, and null rule_id through for external alerts', () => {
     const raw = [
       {
         last_event_timestamp: '2026-01-22T07:10:00.000Z',

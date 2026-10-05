@@ -34,11 +34,11 @@ describe('StoreExecutionHistoryStep', () => {
     step = new StoreExecutionHistoryStep(eventLogService);
   });
 
-  it('emits one dispatched summary per policy with aggregated episode/rule/group counts', async () => {
+  it('emits one dispatched summary per policy with aggregated alert/rule/group counts', async () => {
     const ruleA = createRule({ id: 'rule-a', spaceId: 'default' });
     const ruleB = createRule({ id: 'rule-b', spaceId: 'default' });
     const policy = createActionPolicy({ id: 'policy-1', spaceId: 'default' });
-    const episodes = [
+    const alerts = [
       createAlert({ rule_id: 'rule-a', alert_id: 'ep-1' }),
       createAlert({ rule_id: 'rule-a', alert_id: 'ep-2' }),
       createAlert({ rule_id: 'rule-b', alert_id: 'ep-3' }),
@@ -47,21 +47,21 @@ describe('StoreExecutionHistoryStep', () => {
       id: 'group-1',
       policyId: 'policy-1',
       spaceId: 'default',
-      alerts: [episodes[0], episodes[1]],
+      alerts: [alerts[0], alerts[1]],
       destinations: [{ type: 'workflow', id: 'wf-a' }],
     });
     const group2 = createActionGroup({
       id: 'group-2',
       policyId: 'policy-1',
       spaceId: 'default',
-      alerts: [episodes[2]],
+      alerts: [alerts[2]],
       destinations: [{ type: 'workflow', id: 'wf-b' }],
     });
 
     await step.execute(
       createDispatcherPipelineState({
         dispatch: [group1, group2],
-        dispatchable: episodes,
+        dispatchable: alerts,
         rules: new Map<RuleId, Rule>([
           [ruleA.id, ruleA],
           [ruleB.id, ruleB],
@@ -117,14 +117,14 @@ describe('StoreExecutionHistoryStep', () => {
     const rule = createRule({ id: 'rule-1' });
     const policyA = createActionPolicy({ id: 'policy-a' });
     const policyB = createActionPolicy({ id: 'policy-b' });
-    const episode = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
-    const groupA = createActionGroup({ id: 'g-a', policyId: 'policy-a', alerts: [episode] });
-    const groupB = createActionGroup({ id: 'g-b', policyId: 'policy-b', alerts: [episode] });
+    const alert = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
+    const groupA = createActionGroup({ id: 'g-a', policyId: 'policy-a', alerts: [alert] });
+    const groupB = createActionGroup({ id: 'g-b', policyId: 'policy-b', alerts: [alert] });
 
     await step.execute(
       createDispatcherPipelineState({
         dispatch: [groupA, groupB],
-        dispatchable: [episode],
+        dispatchable: [alert],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
         policies: new Map<ActionPolicyId, ActionPolicy>([
           [policyA.id, policyA],
@@ -144,18 +144,18 @@ describe('StoreExecutionHistoryStep', () => {
   it('emits a throttled summary with the same shape as dispatched', async () => {
     const rule = createRule({ id: 'rule-1' });
     const policy = createActionPolicy({ id: 'policy-1' });
-    const episode = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
+    const alert = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
     const group = createActionGroup({
       id: 'group-1',
       policyId: 'policy-1',
-      alerts: [episode],
+      alerts: [alert],
       destinations: [{ type: 'workflow', id: 'wf-a' }],
     });
 
     await step.execute(
       createDispatcherPipelineState({
         throttled: [group],
-        dispatchable: [episode],
+        dispatchable: [alert],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
         policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
       }),
@@ -227,7 +227,7 @@ describe('StoreExecutionHistoryStep', () => {
     expect(eventB?.kibana?.saved_objects?.[0]?.type_id).toBe('alert');
   });
 
-  it('excludes episodes handled by dispatch or throttled from the unmatched set', async () => {
+  it('excludes alerts handled by dispatch or throttled from the unmatched set', async () => {
     const rule = createRule({ id: 'rule-1' });
     const policy = createActionPolicy({ id: 'policy-1' });
     const dispatched = createAlert({ rule_id: 'rule-1', alert_id: 'ep-dispatched' });
@@ -291,18 +291,18 @@ describe('StoreExecutionHistoryStep', () => {
   it('does not emit dispatch_failed events when all dispatches succeed', async () => {
     const rule = createRule({ id: 'rule-1' });
     const policy = createActionPolicy({ id: 'policy-1' });
-    const episode = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
+    const alert = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
     const group = createActionGroup({
       id: 'group-1',
       policyId: 'policy-1',
-      alerts: [episode],
+      alerts: [alert],
       destinations: [{ type: 'workflow', id: 'wf-a' }],
     });
 
     await step.execute(
       createDispatcherPipelineState({
         dispatch: [group],
-        dispatchable: [episode],
+        dispatchable: [alert],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
         policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
         dispatchedExecutions: new Map([['group-1', ['exec-a']]]),
@@ -471,17 +471,17 @@ describe('StoreExecutionHistoryStep', () => {
   it('sets namespace and space_ids for non-default spaces', async () => {
     const rule = createRule({ id: 'rule-1', spaceId: 'my-space' });
     const policy = createActionPolicy({ id: 'policy-1', spaceId: 'my-space' });
-    const episode = createAlert({ rule_id: 'rule-1' });
+    const alert = createAlert({ rule_id: 'rule-1' });
     const group = createActionGroup({
       policyId: 'policy-1',
       spaceId: 'my-space',
-      alerts: [episode],
+      alerts: [alert],
     });
 
     await step.execute(
       createDispatcherPipelineState({
         dispatch: [group],
-        dispatchable: [episode],
+        dispatchable: [alert],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
         policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
       }),
@@ -497,11 +497,11 @@ describe('StoreExecutionHistoryStep', () => {
   it('deduplicates workflow_ids across an active policy multiple action groups', async () => {
     const rule = createRule({ id: 'rule-1' });
     const policy = createActionPolicy({ id: 'policy-1' });
-    const episode = createAlert({ rule_id: 'rule-1' });
+    const alert = createAlert({ rule_id: 'rule-1' });
     const group1 = createActionGroup({
       id: 'g1',
       policyId: 'policy-1',
-      alerts: [episode],
+      alerts: [alert],
       destinations: [
         { type: 'workflow', id: 'wf-a' },
         { type: 'workflow', id: 'wf-b' },
@@ -510,7 +510,7 @@ describe('StoreExecutionHistoryStep', () => {
     const group2 = createActionGroup({
       id: 'g2',
       policyId: 'policy-1',
-      alerts: [episode],
+      alerts: [alert],
       destinations: [
         { type: 'workflow', id: 'wf-a' },
         { type: 'workflow', id: 'wf-c' },
@@ -520,7 +520,7 @@ describe('StoreExecutionHistoryStep', () => {
     await step.execute(
       createDispatcherPipelineState({
         dispatch: [group1, group2],
-        dispatchable: [episode],
+        dispatchable: [alert],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
         policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
       }),
@@ -533,7 +533,7 @@ describe('StoreExecutionHistoryStep', () => {
 
   it('stamps @timestamp from pipeline input.startedAt', async () => {
     const rule = createRule({ id: 'rule-1' });
-    const episode = createAlert({ rule_id: 'rule-1' });
+    const alert = createAlert({ rule_id: 'rule-1' });
 
     await step.execute(
       createDispatcherPipelineState({
@@ -541,7 +541,7 @@ describe('StoreExecutionHistoryStep', () => {
           startedAt: new Date('2027-06-01T12:34:56.789Z'),
           eventWatermark: new Date('2027-06-01T12:00:00.000Z'),
         }),
-        dispatchable: [episode],
+        dispatchable: [alert],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
       }),
       logger
@@ -557,17 +557,17 @@ describe('StoreExecutionHistoryStep', () => {
     const rules = new Map<RuleId, Rule>(
       ruleIds.map((id) => [id, createRule({ id, spaceId: 'default' })])
     );
-    const episodes = ruleIds.map((rule_id, i) => createAlert({ rule_id, alert_id: `ep-${i}` }));
+    const alerts = ruleIds.map((rule_id, i) => createAlert({ rule_id, alert_id: `ep-${i}` }));
     const group = createActionGroup({
       id: 'big-group',
       policyId: 'policy-1',
-      alerts: episodes,
+      alerts,
     });
 
     await step.execute(
       createDispatcherPipelineState({
         dispatch: [group],
-        dispatchable: episodes,
+        dispatchable: alerts,
         rules,
         policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
       }),
@@ -588,17 +588,17 @@ describe('StoreExecutionHistoryStep', () => {
   it('does not set rule_ids when rule count fits within the SO-ref cap', async () => {
     const rule = createRule({ id: 'rule-1' });
     const policy = createActionPolicy({ id: 'policy-1' });
-    const episode = createAlert({ rule_id: 'rule-1' });
+    const alert = createAlert({ rule_id: 'rule-1' });
     const group = createActionGroup({
       id: 'g1',
       policyId: 'policy-1',
-      alerts: [episode],
+      alerts: [alert],
     });
 
     await step.execute(
       createDispatcherPipelineState({
         dispatch: [group],
-        dispatchable: [episode],
+        dispatchable: [alert],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),
         policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
       }),
@@ -613,11 +613,11 @@ describe('StoreExecutionHistoryStep', () => {
     it('partial group failure: excludes the failed workflow from the dispatched summary', async () => {
       const rule = createRule({ id: 'rule-1' });
       const policy = createActionPolicy({ id: 'policy-1' });
-      const episode = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
+      const alert = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
       const group = createActionGroup({
         id: 'g1',
         policyId: 'policy-1',
-        alerts: [episode],
+        alerts: [alert],
         destinations: [
           { type: 'workflow', id: 'wf-a' },
           { type: 'workflow', id: 'wf-b' },
@@ -627,7 +627,7 @@ describe('StoreExecutionHistoryStep', () => {
         policyId: 'policy-1',
         actionGroupId: 'g1',
         workflowId: 'wf-b',
-        alerts: [episode],
+        alerts: [alert],
         reason: DISPATCH_FAILURE_REASONS.WORKFLOW_DISABLED,
         message: 'Workflow wf-b is disabled',
       });
@@ -635,7 +635,7 @@ describe('StoreExecutionHistoryStep', () => {
       await step.execute(
         createDispatcherPipelineState({
           dispatch: [group],
-          dispatchable: [episode],
+          dispatchable: [alert],
           dispatchedExecutions: new Map([['g1', ['exec-a']]]),
           dispatchFailures: [failure],
           rules: new Map<RuleId, Rule>([[rule.id, rule]]),
@@ -660,25 +660,25 @@ describe('StoreExecutionHistoryStep', () => {
 
     it('total group failure: emits no dispatched event and no unmatched event', async () => {
       const rule = createRule({ id: 'rule-1' });
-      const episode = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
+      const alert = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
       const group = createActionGroup({
         id: 'g1',
         policyId: 'policy-1',
-        alerts: [episode],
+        alerts: [alert],
         destinations: [
           { type: 'workflow', id: 'wf-a' },
           { type: 'workflow', id: 'wf-b' },
         ],
       });
       const failures = [
-        createDispatchFailure({ actionGroupId: 'g1', workflowId: 'wf-a', alerts: [episode] }),
-        createDispatchFailure({ actionGroupId: 'g1', workflowId: 'wf-b', alerts: [episode] }),
+        createDispatchFailure({ actionGroupId: 'g1', workflowId: 'wf-a', alerts: [alert] }),
+        createDispatchFailure({ actionGroupId: 'g1', workflowId: 'wf-b', alerts: [alert] }),
       ];
 
       await step.execute(
         createDispatcherPipelineState({
           dispatch: [group],
-          dispatchable: [episode],
+          dispatchable: [alert],
           dispatchFailures: failures,
           rules: new Map<RuleId, Rule>([[rule.id, rule]]),
         }),
@@ -694,25 +694,25 @@ describe('StoreExecutionHistoryStep', () => {
     it('same workflow in two groups: success for g1 is not suppressed by g2 failure', async () => {
       const rule = createRule({ id: 'rule-1' });
       const policy = createActionPolicy({ id: 'policy-1' });
-      const ep1 = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
-      const ep2 = createAlert({ rule_id: 'rule-1', alert_id: 'ep-2' });
+      const alert1 = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
+      const alert2 = createAlert({ rule_id: 'rule-1', alert_id: 'ep-2' });
       const group1 = createActionGroup({
         id: 'g1',
         policyId: 'policy-1',
-        alerts: [ep1],
+        alerts: [alert1],
         destinations: [{ type: 'workflow', id: 'wf-a' }],
       });
       const group2 = createActionGroup({
         id: 'g2',
         policyId: 'policy-1',
-        alerts: [ep2],
+        alerts: [alert2],
         destinations: [{ type: 'workflow', id: 'wf-a' }],
       });
       const failure = createDispatchFailure({
         policyId: 'policy-1',
         actionGroupId: 'g2',
         workflowId: 'wf-a',
-        alerts: [ep2],
+        alerts: [alert2],
         reason: DISPATCH_FAILURE_REASONS.WORKFLOW_NOT_FOUND,
         message: 'Workflow wf-a not found',
       });
@@ -720,7 +720,7 @@ describe('StoreExecutionHistoryStep', () => {
       await step.execute(
         createDispatcherPipelineState({
           dispatch: [group1, group2],
-          dispatchable: [ep1, ep2],
+          dispatchable: [alert1, alert2],
           dispatchedExecutions: new Map([['g1', ['exec-a']]]),
           dispatchFailures: [failure],
           rules: new Map<RuleId, Rule>([[rule.id, rule]]),
@@ -740,34 +740,34 @@ describe('StoreExecutionHistoryStep', () => {
       });
     });
 
-    it('mixed groups in one policy: fully-failed group episodes excluded from dispatched summary', async () => {
+    it('mixed groups in one policy: fully-failed group alerts excluded from dispatched summary', async () => {
       const rule = createRule({ id: 'rule-1' });
       const policy = createActionPolicy({ id: 'policy-1' });
-      const ep1 = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
-      const ep2 = createAlert({ rule_id: 'rule-1', alert_id: 'ep-2' });
+      const alert1 = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
+      const alert2 = createAlert({ rule_id: 'rule-1', alert_id: 'ep-2' });
       const failedGroup = createActionGroup({
         id: 'g1',
         policyId: 'policy-1',
-        alerts: [ep1],
+        alerts: [alert1],
         destinations: [{ type: 'workflow', id: 'wf-a' }],
       });
       const successGroup = createActionGroup({
         id: 'g2',
         policyId: 'policy-1',
-        alerts: [ep2],
+        alerts: [alert2],
         destinations: [{ type: 'workflow', id: 'wf-b' }],
       });
       const failure = createDispatchFailure({
         policyId: 'policy-1',
         actionGroupId: 'g1',
         workflowId: 'wf-a',
-        alerts: [ep1],
+        alerts: [alert1],
       });
 
       await step.execute(
         createDispatcherPipelineState({
           dispatch: [failedGroup, successGroup],
-          dispatchable: [ep1, ep2],
+          dispatchable: [alert1, alert2],
           dispatchedExecutions: new Map([['g2', ['exec-b']]]),
           dispatchFailures: [failure],
           rules: new Map<RuleId, Rule>([[rule.id, rule]]),
@@ -793,11 +793,11 @@ describe('StoreExecutionHistoryStep', () => {
     it('throttled summary is not affected by dispatch failures referencing the same group id', async () => {
       const rule = createRule({ id: 'rule-1' });
       const policy = createActionPolicy({ id: 'policy-1' });
-      const episode = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
+      const alert = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
       const throttledGroup = createActionGroup({
         id: 'g1',
         policyId: 'policy-1',
-        alerts: [episode],
+        alerts: [alert],
         destinations: [
           { type: 'workflow', id: 'wf-a' },
           { type: 'workflow', id: 'wf-b' },
@@ -809,13 +809,13 @@ describe('StoreExecutionHistoryStep', () => {
         policyId: 'policy-1',
         actionGroupId: 'g1',
         workflowId: 'wf-a',
-        alerts: [episode],
+        alerts: [alert],
       });
 
       await step.execute(
         createDispatcherPipelineState({
           throttled: [throttledGroup],
-          dispatchable: [episode],
+          dispatchable: [alert],
           dispatchFailures: [failure],
           rules: new Map<RuleId, Rule>([[rule.id, rule]]),
           policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
@@ -833,15 +833,15 @@ describe('StoreExecutionHistoryStep', () => {
     });
   });
 
-  describe('external episode handling', () => {
-    it('two external episodes from different vendors produce separate unmatched events', async () => {
-      const pdEpisode = createAlert({
+  describe('external alert handling', () => {
+    it('two external alerts from different vendors produce separate unmatched events', async () => {
+      const pdAlert = createAlert({
         source: 'pagerduty',
         rule_id: null,
         space_id: 'default',
         alert_id: 'pd-1',
       });
-      const ddEpisode = createAlert({
+      const ddAlert = createAlert({
         source: 'datadog',
         rule_id: null,
         space_id: 'default',
@@ -850,7 +850,7 @@ describe('StoreExecutionHistoryStep', () => {
 
       await step.execute(
         createDispatcherPipelineState({
-          dispatchable: [pdEpisode, ddEpisode],
+          dispatchable: [pdAlert, ddAlert],
         }),
         logger
       );
@@ -858,15 +858,15 @@ describe('StoreExecutionHistoryStep', () => {
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
       const actions = eventLogger.logEvent.mock.calls.map(([event]) => event?.event?.action);
       expect(actions).toEqual(['unmatched', 'unmatched']);
-      const episodeSets = eventLogger.logEvent.mock.calls.map(
+      const alertSets = eventLogger.logEvent.mock.calls.map(
         ([event]) => event?.kibana?.alerting_v2?.dispatcher?.episode_ids
       );
-      expect(episodeSets).toContainEqual(['pd-1']);
-      expect(episodeSets).toContainEqual(['dd-1']);
+      expect(alertSets).toContainEqual(['pd-1']);
+      expect(alertSets).toContainEqual(['dd-1']);
     });
 
     it('same vendor in two spaces produces separate unmatched events', async () => {
-      const episodes = ['space-a', 'space-b'].map((spaceId) =>
+      const alerts = ['space-a', 'space-b'].map((spaceId) =>
         createAlert({
           source: 'pagerduty',
           rule_id: null,
@@ -875,15 +875,15 @@ describe('StoreExecutionHistoryStep', () => {
         })
       );
 
-      await step.execute(createDispatcherPipelineState({ dispatchable: episodes }), logger);
+      await step.execute(createDispatcherPipelineState({ dispatchable: alerts }), logger);
 
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
       const spaces = eventLogger.logEvent.mock.calls.map(([event]) => event?.kibana?.space_ids);
       expect(spaces).toEqual([['space-a'], ['space-b']]);
     });
 
-    it('external episode uses episode.space_id for the event space, not a rule space', async () => {
-      const pdEpisode = createAlert({
+    it('external alert uses alert.space_id for the event space, not a rule space', async () => {
+      const pdAlert = createAlert({
         source: 'pagerduty',
         rule_id: null,
         space_id: 'my-space',
@@ -892,7 +892,7 @@ describe('StoreExecutionHistoryStep', () => {
 
       await step.execute(
         createDispatcherPipelineState({
-          dispatchable: [pdEpisode],
+          dispatchable: [pdAlert],
         }),
         logger
       );

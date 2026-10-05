@@ -8,7 +8,7 @@
 import { suppressionAlertKey, suppressionSeriesKey } from './suppression_key';
 
 describe('suppressionAlertKey', () => {
-  it('returns rule_id-prefixed key for internal episodes', () => {
+  it('returns rule_id-prefixed key for internal alerts', () => {
     expect(
       suppressionAlertKey({
         source: 'internal',
@@ -19,7 +19,7 @@ describe('suppressionAlertKey', () => {
     ).toBe('rule-1:h:e');
   });
 
-  it('returns space-scoped source-prefixed key for external episodes', () => {
+  it('returns space-scoped source-prefixed key for external alerts', () => {
     expect(
       suppressionAlertKey({
         source: 'pagerduty',
@@ -31,7 +31,7 @@ describe('suppressionAlertKey', () => {
     ).toBe('default::pagerduty:h:e');
   });
 
-  it('keys the same vendor episode differently per space', () => {
+  it('keys the same vendor alert differently per space', () => {
     const base = { source: 'pagerduty', rule_id: null, group_hash: 'h', alert_id: 'e' };
 
     expect(suppressionAlertKey({ ...base, space_id: 'space-a' })).not.toBe(

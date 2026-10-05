@@ -13,9 +13,7 @@ import type {
   SeriesSuppressionRow,
 } from '../types';
 
-export const createDispatchableAlertEventsResponse = (
-  alertEpisodes: Alert[]
-): EsqlQueryResponse => {
+export const createDispatchableAlertEventsResponse = (alerts: Alert[]): EsqlQueryResponse => {
   return {
     columns: [
       { name: 'last_event_timestamp', type: 'date' },
@@ -27,15 +25,15 @@ export const createDispatchableAlertEventsResponse = (
       { name: 'alert_status', type: 'keyword' },
       { name: 'severity', type: 'keyword' },
     ],
-    values: alertEpisodes.map((alertEpisode) => [
-      alertEpisode.last_event_timestamp,
-      alertEpisode.rule_id,
-      alertEpisode.source,
-      alertEpisode.space_id,
-      alertEpisode.group_hash,
-      alertEpisode.alert_id,
-      alertEpisode.alert_status,
-      alertEpisode.severity ?? null,
+    values: alerts.map((alert) => [
+      alert.last_event_timestamp,
+      alert.rule_id,
+      alert.source,
+      alert.space_id,
+      alert.group_hash,
+      alert.alert_id,
+      alert.alert_status,
+      alert.severity ?? null,
     ]),
   };
 };

@@ -87,13 +87,13 @@ export class FetchAlertsStep implements DispatcherStep {
     // the scan has a defined upper edge to advance to.
     const truncated = result.length === ESQL_QUERY_ROW_LIMIT;
 
-    const episodes = parseAlerts(result);
+    const alerts = parseAlerts(result);
 
-    if (episodes.length === 0) {
+    if (alerts.length === 0) {
       return { type: 'halt', reason: 'no_alerts' };
     }
 
-    return { type: 'continue', data: { scan: AlertScan.of({ alerts: episodes, truncated }) } };
+    return { type: 'continue', data: { scan: AlertScan.of({ alerts, truncated }) } };
   }
 }
 

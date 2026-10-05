@@ -10,7 +10,7 @@ import type { Alert, SuppressionRow } from '../types';
 
 /**
  * Suppression facts loaded from `.alert-actions` (FetchSuppressionsStep),
- * indexed by episode- and series-scoped keys for per-episode lookup.
+ * indexed by alert- and series-scoped keys for per-alert lookup.
  */
 export class SuppressionIndex {
   private static readonly EMPTY = new SuppressionIndex(new Map());
@@ -38,15 +38,15 @@ export class SuppressionIndex {
   }
 
   /**
-   * Reason the episode must not notify, or undefined when it may dispatch.
-   * An episode-scoped suppression wins over a series-scoped one.
+   * Reason the alert must not notify, or undefined when it may dispatch.
+   * An alert-scoped suppression wins over a series-scoped one.
    */
-  public suppressionReasonFor(episode: Alert): string | undefined {
-    const episodeSuppression = this.byKey.get(suppressionAlertKey(episode));
-    if (episodeSuppression?.should_suppress) {
-      return suppressionReason(episodeSuppression);
+  public suppressionReasonFor(alert: Alert): string | undefined {
+    const alertSuppression = this.byKey.get(suppressionAlertKey(alert));
+    if (alertSuppression?.should_suppress) {
+      return suppressionReason(alertSuppression);
     }
-    const seriesSuppression = this.byKey.get(suppressionSeriesKey(episode));
+    const seriesSuppression = this.byKey.get(suppressionSeriesKey(alert));
     if (seriesSuppression?.should_suppress) {
       return suppressionReason(seriesSuppression);
     }

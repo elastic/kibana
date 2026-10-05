@@ -10,12 +10,12 @@ import { AlertTriage } from './alert_triage';
 
 describe('AlertTriage', () => {
   describe('partition', () => {
-    it('splits episodes by the returned reason', () => {
+    it('splits alerts by the returned reason', () => {
       const keep = createAlert({ alert_id: 'keep' });
       const drop = createAlert({ alert_id: 'drop' });
 
-      const triage = AlertTriage.partition([keep, drop], (episode) =>
-        episode.alert_id === 'drop' ? 'ack' : undefined
+      const triage = AlertTriage.partition([keep, drop], (alert) =>
+        alert.alert_id === 'drop' ? 'ack' : undefined
       );
 
       expect(triage.dispatchable).toEqual([keep]);
@@ -24,18 +24,18 @@ describe('AlertTriage', () => {
   });
 
   describe('suppressDispatchableWhere', () => {
-    it('moves newly suppressed episodes after the already-suppressed ones', () => {
+    it('moves newly suppressed alerts after the already-suppressed ones', () => {
       const initial = AlertTriage.partition(
         [
           createAlert({ alert_id: 'e1' }),
           createAlert({ alert_id: 'e2' }),
           createAlert({ alert_id: 'e3' }),
         ],
-        (episode) => (episode.alert_id === 'e1' ? 'snooze' : undefined)
+        (alert) => (alert.alert_id === 'e1' ? 'snooze' : undefined)
       );
 
-      const result = initial.suppressDispatchableWhere((episode) =>
-        episode.alert_id === 'e3' ? 'maintenance_window:mw-1' : undefined
+      const result = initial.suppressDispatchableWhere((alert) =>
+        alert.alert_id === 'e3' ? 'maintenance_window:mw-1' : undefined
       );
 
       expect(result.dispatchable.map((e) => e.alert_id)).toEqual(['e2']);
@@ -56,13 +56,13 @@ describe('AlertTriage', () => {
   });
 
   describe('mapDispatchable', () => {
-    it('replaces dispatchable episodes 1:1 and keeps suppressed intact', () => {
+    it('replaces dispatchable alerts 1:1 and keeps suppressed intact', () => {
       const initial = AlertTriage.partition(
         [createAlert({ alert_id: 'e1' }), createAlert({ alert_id: 'e2' })],
-        (episode) => (episode.alert_id === 'e2' ? 'ack' : undefined)
+        (alert) => (alert.alert_id === 'e2' ? 'ack' : undefined)
       );
 
-      const result = initial.mapDispatchable((episode) => ({ ...episode, data: { a: 1 } }));
+      const result = initial.mapDispatchable((alert) => ({ ...alert, data: { a: 1 } }));
 
       expect(result.dispatchable).toEqual([
         expect.objectContaining({ alert_id: 'e1', data: { a: 1 } }),
@@ -81,7 +81,7 @@ describe('AlertTriage', () => {
       () => undefined
     );
 
-    it('exposes unique dispatchable episode ids', () => {
+    it('exposes unique dispatchable alert ids', () => {
       expect(triage.dispatchableAlertIds()).toEqual(['e1', 'e2']);
     });
 

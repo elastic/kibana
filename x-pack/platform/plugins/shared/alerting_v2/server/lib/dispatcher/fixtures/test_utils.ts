@@ -140,7 +140,7 @@ export function createAlert(overrides: Partial<Alert> = {}): Alert {
     source: 'internal',
     space_id: 'default',
     group_hash: 'hash-1',
-    alert_id: 'episode-1',
+    alert_id: 'alert-1',
     alert_status: 'active',
     ...overrides,
   };
@@ -152,7 +152,7 @@ export function createSuppressionRow(overrides: Partial<SuppressionRow> = {}): S
     source: 'internal',
     space_id: 'default',
     group_hash: 'hash-1',
-    alert_id: 'episode-1',
+    alert_id: 'alert-1',
     should_suppress: false,
     ...overrides,
   };
@@ -166,7 +166,7 @@ export function createAlertSuppressionRow(
     source: 'internal',
     space_id: 'default',
     group_hash: 'hash-1',
-    alert_id: 'episode-1',
+    alert_id: 'alert-1',
     should_suppress: false,
     ...overrides,
   };

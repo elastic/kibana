@@ -32,10 +32,10 @@ type MockEsClient = ReturnType<typeof createQueryService>['mockEsClient'];
 const mockSuppressionQueries = (
   mockEsClient: MockEsClient,
   {
-    episode = () => [],
+    alert = () => [],
     series = () => [],
   }: {
-    episode?: (query: string) => AlertSuppressionRow[];
+    alert?: (query: string) => AlertSuppressionRow[];
     series?: (query: string) => SeriesSuppressionRow[];
   }
 ) => {
@@ -43,12 +43,12 @@ const mockSuppressionQueries = (
     Promise.resolve(
       isSeriesQuery(args.query)
         ? createSeriesSuppressionsResponse(series(args.query))
-        : createAlertSuppressionsResponse(episode(args.query))
+        : createAlertSuppressionsResponse(alert(args.query))
     )
   );
 };
 
-const rowLimitEpisodeRows = (): AlertSuppressionRow[] =>
+const rowLimitAlertRows = (): AlertSuppressionRow[] =>
   Array.from({ length: ESQL_QUERY_ROW_LIMIT }, (_, i) =>
     createAlertSuppressionRow({ rule_id: 'r1', group_hash: 'h1', alert_id: `e${i}` })
   );
@@ -59,12 +59,12 @@ const rowLimitSeriesRows = (): SeriesSuppressionRow[] =>
   );
 
 describe('FetchSuppressionsStep', () => {
-  it('resolves episode-level suppressions by episode', async () => {
+  it('resolves alert-level suppressions by alert', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const step = new FetchSuppressionsStep(queryService);
 
     mockSuppressionQueries(mockEsClient, {
-      episode: () => [
+      alert: () => [
         createAlertSuppressionRow({
           rule_id: 'r1',
           group_hash: 'h1',
@@ -90,7 +90,7 @@ describe('FetchSuppressionsStep', () => {
         createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' })
       )
     ).toBe('ack');
-    // An ack on one episode does not carry over to another episode of the same series.
+    // An ack on one alert does not carry over to another alert of the same series.
     expect(
       suppressions?.suppressionReasonFor(
         createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e2' })
@@ -98,7 +98,7 @@ describe('FetchSuppressionsStep', () => {
     ).toBeUndefined();
   });
 
-  it('resolves series-level rows through the series key for every episode of the series', async () => {
+  it('resolves series-level rows through the series key for every alert of the series', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const step = new FetchSuppressionsStep(queryService);
 
@@ -122,10 +122,10 @@ describe('FetchSuppressionsStep', () => {
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     const { suppressions } = result.data ?? {};
-    for (const episodeId of ['e1', 'e2']) {
+    for (const alertId of ['e1', 'e2']) {
       expect(
         suppressions?.suppressionReasonFor(
-          createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: episodeId })
+          createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: alertId })
         )
       ).toBe('snooze');
     }
@@ -136,12 +136,12 @@ describe('FetchSuppressionsStep', () => {
     ).toBeUndefined();
   });
 
-  it('prefers the episode-level reason when the episode is acked and its series snoozed', async () => {
+  it('prefers the alert-level reason when the alert is acked and its series snoozed', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const step = new FetchSuppressionsStep(queryService);
 
     mockSuppressionQueries(mockEsClient, {
-      episode: () => [
+      alert: () => [
         createAlertSuppressionRow({
           rule_id: 'r1',
           group_hash: 'h1',
@@ -175,12 +175,12 @@ describe('FetchSuppressionsStep', () => {
     ).toBe('ack');
   });
 
-  it('falls back to the series snooze when the episode ack was lifted', async () => {
+  it('falls back to the series snooze when the alert ack was lifted', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const step = new FetchSuppressionsStep(queryService);
 
     mockSuppressionQueries(mockEsClient, {
-      episode: () => [
+      alert: () => [
         createAlertSuppressionRow({
           rule_id: 'r1',
           group_hash: 'h1',
@@ -214,7 +214,7 @@ describe('FetchSuppressionsStep', () => {
     ).toBe('snooze');
   });
 
-  it('runs one episode query and one series query with the tick abort signal', async () => {
+  it('runs one alert query and one series query with the tick abort signal', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const step = new FetchSuppressionsStep(queryService);
     mockSuppressionQueries(mockEsClient, {});
@@ -233,7 +233,7 @@ describe('FetchSuppressionsStep', () => {
     }
   });
 
-  it('returns empty suppressions when no episodes exist', async () => {
+  it('returns empty suppressions when no alerts exist', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const step = new FetchSuppressionsStep(queryService);
 
@@ -246,7 +246,7 @@ describe('FetchSuppressionsStep', () => {
     expect(mockEsClient.esql.query).not.toHaveBeenCalled();
   });
 
-  it('returns empty suppressions when episodes is undefined', async () => {
+  it('returns empty suppressions when alerts is undefined', async () => {
     const { queryService } = createQueryService();
     const step = new FetchSuppressionsStep(queryService);
 
@@ -263,7 +263,7 @@ describe('FetchSuppressionsStep', () => {
     const step = new FetchSuppressionsStep(queryService);
 
     mockSuppressionQueries(mockEsClient, {
-      episode: () => [
+      alert: () => [
         createAlertSuppressionRow({
           rule_id: null,
           source: 'pagerduty',
@@ -275,24 +275,24 @@ describe('FetchSuppressionsStep', () => {
       ],
     });
 
-    const externalEpisode = createAlert({
+    const externalAlert = createAlert({
       source: 'pagerduty',
       rule_id: null,
       group_hash: 'pd-hash',
       alert_id: 'pd-ep-1',
     });
-    const state = createDispatcherPipelineState({ alerts: [externalEpisode] });
+    const state = createDispatcherPipelineState({ alerts: [externalAlert] });
 
     const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     expect(result.data?.suppressions?.size).toBe(1);
-    expect(result.data?.suppressions?.suppressionReasonFor(externalEpisode)).toBe('ack');
+    expect(result.data?.suppressions?.suppressionReasonFor(externalAlert)).toBe('ack');
   });
 
   it.each([
-    ['episode', { episode: () => rowLimitEpisodeRows() }],
+    ['alert', { alert: () => rowLimitAlertRows() }],
     ['series', { series: () => rowLimitSeriesRows() }],
   ] as const)('warns when the %s suppressions query returns the row limit', async (_, rows) => {
     const { queryService, mockEsClient } = createQueryService();
@@ -317,9 +317,7 @@ describe('FetchSuppressionsStep', () => {
     const step = new FetchSuppressionsStep(queryService);
 
     mockSuppressionQueries(mockEsClient, {
-      episode: () => [
-        createAlertSuppressionRow({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' }),
-      ],
+      alert: () => [createAlertSuppressionRow({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' })],
       series: () => [createSeriesSuppressionRow({ rule_id: 'r1', group_hash: 'h1' })],
     });
 
@@ -332,17 +330,17 @@ describe('FetchSuppressionsStep', () => {
     expect(mockLogger.warn).not.toHaveBeenCalled();
   });
 
-  it('concatenates rows across episode chunks when episode ids exceed the row limit', async () => {
+  it('concatenates rows across alert chunks when alert ids exceed the row limit', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const step = new FetchSuppressionsStep(queryService);
 
     const lastIndex = ESQL_QUERY_ROW_LIMIT;
-    const episodes = Array.from({ length: lastIndex + 1 }, (_, i) =>
+    const alerts = Array.from({ length: lastIndex + 1 }, (_, i) =>
       createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: `e${i}` })
     );
 
     mockSuppressionQueries(mockEsClient, {
-      episode: (query) =>
+      alert: (query) =>
         [0, lastIndex]
           .filter((i) => query.includes(`"e${i}"`))
           .map((i) =>
@@ -356,7 +354,7 @@ describe('FetchSuppressionsStep', () => {
           ),
     });
 
-    const state = createDispatcherPipelineState({ alerts: episodes });
+    const state = createDispatcherPipelineState({ alerts });
     const result = await step.execute(state, logger);
 
     const calls = mockEsClient.esql.query.mock.calls;
@@ -381,9 +379,9 @@ describe('FetchSuppressionsStep', () => {
     const step = new FetchSuppressionsStep(queryService);
 
     // pair_key = rule_id::group_hash → ~10 KB per literal forces multiple chunks
-    // for 200 episodes against the 300 KB series budget.
+    // for 200 alerts against the 300 KB series budget.
     const longSegment = 'x'.repeat(5_000);
-    const episodes = Array.from({ length: 200 }, (_, i) =>
+    const alerts = Array.from({ length: 200 }, (_, i) =>
       createAlert({
         rule_id: `${longSegment}-r${i}`,
         group_hash: `${longSegment}-g${i}`,
@@ -405,7 +403,7 @@ describe('FetchSuppressionsStep', () => {
           ),
     });
 
-    const state = createDispatcherPipelineState({ alerts: episodes });
+    const state = createDispatcherPipelineState({ alerts });
     const result = await step.execute(state, logger);
 
     const seriesCalls = mockEsClient.esql.query.mock.calls.filter(([args]) =>

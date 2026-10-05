@@ -10,7 +10,7 @@ import type { ActionGroup, Alert } from '../types';
 
 /**
  * The final delivery decision (ApplyThrottlingStep): action groups eligible to
- * dispatch now, groups held back by throttling, and the dispatchable episodes
+ * dispatch now, groups held back by throttling, and the dispatchable alerts
  * that landed in no group at all.
  */
 export class DispatchPlan {
@@ -19,7 +19,7 @@ export class DispatchPlan {
   private constructor(
     public readonly toDispatch: readonly ActionGroup[],
     public readonly throttled: readonly ActionGroup[],
-    /** Episodes that survived triage but matched no enabled action policy. */
+    /** Alerts that survived triage but matched no enabled action policy. */
     public readonly unmatched: readonly Alert[]
   ) {}
 
@@ -30,7 +30,7 @@ export class DispatchPlan {
   }: {
     toDispatch: readonly ActionGroup[];
     throttled: readonly ActionGroup[];
-    /** Dispatchable episodes the plan was built from; those in no group become `unmatched`. */
+    /** Dispatchable alerts the plan was built from; those in no group become `unmatched`. */
     dispatchable: readonly Alert[];
   }): DispatchPlan {
     return new DispatchPlan(
@@ -61,10 +61,10 @@ function deriveUnmatched(
   const handledAlertKeys = new Set<string>();
   for (const groups of [toDispatch, throttled]) {
     for (const group of groups) {
-      for (const episode of group.alerts) {
-        handledAlertKeys.add(suppressionAlertKey(episode));
+      for (const alert of group.alerts) {
+        handledAlertKeys.add(suppressionAlertKey(alert));
       }
     }
   }
-  return dispatchable.filter((episode) => !handledAlertKeys.has(suppressionAlertKey(episode)));
+  return dispatchable.filter((alert) => !handledAlertKeys.has(suppressionAlertKey(alert)));
 }

@@ -199,7 +199,7 @@ export const ALERTING_LOG_CODES = {
     'HYDRATE_ALERT_DATA_STEP_MISSING_RULE_EVENTS_ROW',
   /**
    * Fetch suppressions step: a suppressions query chunk returned the ES|QL row
-   * limit, so rows past it were dropped. Episodes whose ack, snooze or
+   * limit, so rows past it were dropped. Alerts whose ack, snooze or
    * deactivate state was in the dropped rows may be dispatched.
    */
   FETCH_SUPPRESSIONS_STEP_ROW_LIMIT_REACHED: 'FETCH_SUPPRESSIONS_STEP_ROW_LIMIT_REACHED',
@@ -375,7 +375,7 @@ export const ALERTING_LOG_CODES = {
   /**
    * The watermark has not advanced for STUCK_TICK_LIMIT consecutive ticks.
    * The dispatcher will write terminal `unmatched` records for the blocking
-   * episodes (which will NOT be dispatched) and force-advance the watermark.
+   * alerts (which will NOT be dispatched) and force-advance the watermark.
    */
   DISPATCHER_WATERMARK_STUCK: 'DISPATCHER_WATERMARK_STUCK',
   /**
@@ -384,7 +384,7 @@ export const ALERTING_LOG_CODES = {
    */
   DISPATCHER_INVALID_WATERMARK: 'DISPATCHER_INVALID_WATERMARK',
   /**
-   * The escape hatch fired but no episodes were fetched for the window (the
+   * The escape hatch fired but no alerts were fetched for the window (the
    * pipeline was aborted before or during FetchAlertsStep, or the scan query
    * was rejected, e.g. `inline_stats_too_large`), and watermark lag is still
    * within one max scan window. The watermark is held; the stuck counter is
@@ -393,16 +393,16 @@ export const ALERTING_LOG_CODES = {
    */
   DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK: 'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK',
   /**
-   * The escape hatch fired with no fetched episodes and watermark lag already
+   * The escape hatch fired with no fetched alerts and watermark lag already
    * exceeds one max scan window. The window is force-advanced without knowing
-   * its episodes; unread events in that window are skipped so the dispatcher
+   * its alerts; unread events in that window are skipped so the dispatcher
    * cannot stall indefinitely. The message carries the tick's `halt_reason`.
    */
   DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE:
     'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE',
   /**
    * The escape hatch attempted to write `unmatched` records but the bulkIndexDocs
-   * call failed. The watermark is held so episodes will be retried next tick.
+   * call failed. The watermark is held so alerts will be retried next tick.
    */
   DISPATCHER_ESCAPE_HATCH_WRITE_FAILED: 'DISPATCHER_ESCAPE_HATCH_WRITE_FAILED',
   /**

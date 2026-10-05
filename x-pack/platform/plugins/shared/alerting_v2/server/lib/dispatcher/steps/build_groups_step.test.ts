@@ -55,7 +55,7 @@ describe('BuildGroupsStep', () => {
 });
 
 describe('buildActionGroups', () => {
-  it('creates separate groups for different episodes with no groupBy', () => {
+  it('creates separate groups for different alerts with no groupBy', () => {
     const policy = createActionPolicy({
       id: 'p1',
       destinations: [{ type: 'workflow', id: 'w1' }],
@@ -76,16 +76,13 @@ describe('buildActionGroups', () => {
     expect(groups).toHaveLength(2);
   });
 
-  it('groups episodes from same rule+policy+groupKey into same group', () => {
+  it('groups alerts from same rule+policy+groupKey into same group', () => {
     const policy = createActionPolicy({
       id: 'p1',
       destinations: [{ type: 'workflow', id: 'w1' }],
     });
-    const episode = createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
-    const matched = [
-      createMatchedPair({ alert: episode, policy }),
-      createMatchedPair({ alert: episode, policy }),
-    ];
+    const alert = createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
+    const matched = [createMatchedPair({ alert, policy }), createMatchedPair({ alert, policy })];
 
     const groups = buildActionGroups(matched);
 
@@ -98,15 +95,15 @@ describe('buildActionGroups', () => {
       id: 'p1',
       destinations: [{ type: 'workflow', id: 'w1' }],
     });
-    const episode = createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
+    const alert = createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
 
-    const groups1 = buildActionGroups([createMatchedPair({ alert: episode, policy })]);
-    const groups2 = buildActionGroups([createMatchedPair({ alert: episode, policy })]);
+    const groups1 = buildActionGroups([createMatchedPair({ alert, policy })]);
+    const groups2 = buildActionGroups([createMatchedPair({ alert, policy })]);
 
     expect(groups1[0].id).toBe(groups2[0].id);
   });
 
-  it('groups episodes by a single data field', () => {
+  it('groups alerts by a single data field', () => {
     const policy = createActionPolicy({
       id: 'p1',
       groupBy: ['data.host.name'],
@@ -172,7 +169,7 @@ describe('buildActionGroups', () => {
     expect(groups[1].groupKey).toEqual({ 'data.host.name': 'server-2' });
   });
 
-  it('groups episodes by multiple data fields', () => {
+  it('groups alerts by multiple data fields', () => {
     const policy = createActionPolicy({
       id: 'p1',
       groupBy: ['data.host.name', 'data.env'],
@@ -274,7 +271,7 @@ describe('buildActionGroups', () => {
     expect(groups[0].groupKey).toEqual({});
   });
 
-  it('merges episodes from different rules into one group in all mode', () => {
+  it('merges alerts from different rules into one group in all mode', () => {
     const policy = createActionPolicy({
       id: 'p1',
       groupingMode: 'all',
@@ -299,7 +296,7 @@ describe('buildActionGroups', () => {
     expect(groups[0].alerts[1].rule_id).toBe('r2');
   });
 
-  it('populates rules map from state.rules for episodes in the group', () => {
+  it('populates rules map from state.rules for alerts in the group', () => {
     const policy = createActionPolicy({ id: 'p1', groupingMode: 'all' });
     const rules = new Map([
       ['r1', createRule({ id: 'r1', name: 'CPU spike' })],
@@ -358,7 +355,7 @@ describe('buildActionGroups', () => {
     expect(groups[0].rules).toEqual({});
   });
 
-  it('creates one group per episode for explicit per_alert mode', () => {
+  it('creates one group per alert for explicit per_alert mode', () => {
     const policy = createActionPolicy({
       id: 'p1',
       groupingMode: 'per_alert',
@@ -408,22 +405,22 @@ describe('buildActionGroups', () => {
     expect(groups[0].alerts).toHaveLength(2);
   });
 
-  it('external episode (null rule_id) groups successfully with no rule entry in group.rules', () => {
+  it('external alert (null rule_id) groups successfully with no rule entry in group.rules', () => {
     const policy = createActionPolicy({ id: 'p1', spaceId: 'default' });
-    const episode = createAlert({
+    const alert = createAlert({
       source: 'pagerduty',
       rule_id: null,
       space_id: 'default',
       alert_id: 'pd-ep-1',
       group_hash: 'pd-hash-1',
     });
-    const matched = [createMatchedPair({ alert: episode, policy })];
+    const matched = [createMatchedPair({ alert, policy })];
 
     const groups = buildActionGroups(matched);
 
     expect(groups).toHaveLength(1);
     expect(groups[0].alerts).toHaveLength(1);
-    expect(groups[0].alerts[0]).toBe(episode);
+    expect(groups[0].alerts[0]).toBe(alert);
     expect(groups[0].rules).toEqual({});
   });
 });
