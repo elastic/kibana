@@ -6,6 +6,7 @@
  */
 
 import { ENTITY_ID_FIELD } from '../../../../../common/domain/definitions/common_fields';
+import { USER_ENTITY_NAMESPACE } from '../../../../../common/domain/definitions/user_entity_constants';
 import { escapeEsqlStringLiteral } from '../../../../../common/esql/strings';
 import type { EsqlMatchSpec } from '../rule_registry';
 import {
@@ -134,6 +135,9 @@ export const buildMatchGroupsQuery = ({
     // retargeted. Do not rename this to exclude them.
     `| EVAL unresolved_id = CASE(is_unresolved == 1, ${ENTITY_ID_FIELD}, null)`,
     `| EVAL unresolved_namespace = CASE(is_unresolved == 1, ${ENTITY_NAMESPACE_FIELD}, null)`,
+    `| EVAL is_unresolved_local = CASE(is_unresolved == 1 AND ${ENTITY_NAMESPACE_FIELD} == ${quote(
+      USER_ENTITY_NAMESPACE.Local
+    )}, 1, 0)`,
     // Cap existing_targets with TOP(..., 100), not VALUES(). run.ts skips any
     // group with total_n > 100 before it uses this list, so a truncated target
     // cannot change a link. VALUES() is uncapped and can OOM STATS.
@@ -141,6 +145,7 @@ export const buildMatchGroupsQuery = ({
         ${MATCH_GROUP_COLUMNS.unresolvedNs} = VALUES(unresolved_namespace),
         ${MATCH_GROUP_COLUMNS.existingTargets} = TOP(${RESOLVED_TO_FIELD}, ${GROUP_SIZE_CEILING}, "asc"),
         ${MATCH_GROUP_COLUMNS.unresolvedN} = SUM(is_unresolved),
+        ${MATCH_GROUP_COLUMNS.unresolvedLocalN} = SUM(is_unresolved_local),
         ${MATCH_GROUP_COLUMNS.totalN} = COUNT(*),
         new_n = SUM(is_new)
     BY ${MATCH_GROUP_COLUMNS.matchValue}`,
