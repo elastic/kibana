@@ -8,7 +8,7 @@
 import React, { lazy, useEffect, useMemo } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useHistory } from 'react-router-dom';
-import { getRulesAppDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
+import { getRulesAppDetailsRoute } from '@kbn/rule-data-utils';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
@@ -22,6 +22,7 @@ import { getClassicTabs } from '../rules_page/get_classic_tabs';
 import { getRulesPageMenu } from '../rules_page/get_rules_page_menu';
 import { useRulesPageActions } from '../rules_page/rules_page_actions';
 import { RULES_PAGE_MODE, useRulesPageMode } from '../rules_page/use_rules_page_mode';
+import { useLocators } from '../../locator_context';
 
 const LogsList = lazy(() => import('../rule_details/components/global_rule_event_log_list'));
 
@@ -38,6 +39,7 @@ export const LogsListContainer = () => {
     docLinks,
     setBreadcrumbs,
   } = useKibana().services;
+  const { rules } = useLocators();
   const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
     http,
     toasts,
@@ -49,7 +51,7 @@ export const LogsListContainer = () => {
   const canShowSettings = Boolean(show && (readFlappingSettingsUI || readQueryDelaySettingsUI));
 
   const docLink = docLinks.links.alerting.guide;
-  const rulesListHref = http.basePath.prepend(triggersActionsRoute);
+  const rulesListHref = rules.useUrl({});
   const alertsBackHref = getUrlForApp('observability-overview', { path: '/alerts' });
   const mode = useRulesPageMode();
 

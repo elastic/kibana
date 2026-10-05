@@ -7,8 +7,10 @@
 
 import type { CoreSetup } from '@kbn/core/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { conversationMetadataUpdatedTriggerCommonDefinition } from '../../common/workflows/triggers';
+import {
+  conversationMetadataUpdatedTriggerCommonDefinition,
+  attachmentTriggerCommonDefinitions,
+} from '../../common/workflows/triggers';
 
 export function registerWorkflowSteps(
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup,
@@ -21,43 +23,40 @@ export function registerWorkflowSteps(
     import('./rerank_step').then((m) => m.createRerankStepDefinition(core))
   );
 
-  const ifExperimental = async <T>(valueFn: () => Promise<T>): Promise<T | undefined> => {
-    const [coreStart] = await core.getStartServices();
-    return coreStart.uiSettings.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
-      ? valueFn()
-      : undefined;
-  };
-
   workflowsExtensions.registerStepDefinition(() =>
-    ifExperimental(() =>
-      import('./conversation_metadata').then((m) => m.getConversationMetadataStepDefinition)
-    )
+    import('./conversations').then((m) => m.getConversationMetadataStepDefinition)
   );
   workflowsExtensions.registerStepDefinition(() =>
-    ifExperimental(() =>
-      import('./conversation_metadata').then((m) => m.updateConversationMetadataStepDefinition)
-    )
+    import('./conversations').then((m) => m.updateConversationMetadataStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./conversations').then((m) => m.addConversationEventStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./conversations').then((m) => m.addUserMessageStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./conversations').then((m) => m.createConversationStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./conversation_metadata').then((m) => m.createConversationStepDefinition)
-  );
-
-  workflowsExtensions.registerStepDefinition(() =>
-    ifExperimental(() => import('./attachments').then((m) => m.addAttachmentStepDefinition))
+    import('./attachments').then((m) => m.addAttachmentStepDefinition)
   );
   workflowsExtensions.registerStepDefinition(() =>
-    ifExperimental(() => import('./attachments').then((m) => m.updateAttachmentStepDefinition))
+    import('./attachments').then((m) => m.updateAttachmentStepDefinition)
   );
   workflowsExtensions.registerStepDefinition(() =>
-    ifExperimental(() => import('./attachments').then((m) => m.deleteAttachmentStepDefinition))
+    import('./attachments').then((m) => m.deleteAttachmentStepDefinition)
   );
   workflowsExtensions.registerStepDefinition(() =>
-    ifExperimental(() => import('./attachments').then((m) => m.readAttachmentStepDefinition))
+    import('./attachments').then((m) => m.readAttachmentStepDefinition)
   );
   workflowsExtensions.registerStepDefinition(() =>
-    ifExperimental(() => import('./attachments').then((m) => m.listAttachmentsStepDefinition))
+    import('./attachments').then((m) => m.listAttachmentsStepDefinition)
   );
 
   workflowsExtensions.registerTriggerDefinition(conversationMetadataUpdatedTriggerCommonDefinition);
+  for (const definition of attachmentTriggerCommonDefinitions) {
+    workflowsExtensions.registerTriggerDefinition(definition);
+  }
 }

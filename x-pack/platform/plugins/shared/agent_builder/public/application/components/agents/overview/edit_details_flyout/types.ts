@@ -20,5 +20,6 @@ export interface EditDetailsFormData {
     post_execution_workflow_ids: string[];
     instructions: string;
     ai_indices: string[];
+    subagent_ids: string[];
   };
 }

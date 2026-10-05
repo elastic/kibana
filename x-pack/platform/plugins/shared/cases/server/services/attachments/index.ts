@@ -366,7 +366,7 @@ export class AttachmentService {
         AttachmentType.persistableState,
         AttachmentType.externalReference,
       ];
-      // Files are stored with the migrated unified `file` type (not the legacy
+      // Files are stored with the unified `file` type (not the legacy
       // `.files` externalReference subtype), so excluding `file` from the type
       // list is enough — no subtype filter needed. `externalReferenceAttachmentTypeId`
       // isn't mapped on `cases-attachments`, so filtering on it would 400.
@@ -488,8 +488,8 @@ export class AttachmentService {
         const injectedAttachment = injectAttachmentSOAttributesFromRefs(
           unifiedAttachment as unknown as SavedObject<AttachmentPersistedAttributes>
         );
-        // v2 union accepts both unified- and legacy-shape attributes (some
-        // unmigrated types still pass through legacy-shaped).
+        // v2 union accepts leftover legacy-shaped attributes (unknown
+        // persistable-state subtype ids that toUnifiedAttributes does not fold).
         const validatedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(
           injectedAttachment.attributes
         );

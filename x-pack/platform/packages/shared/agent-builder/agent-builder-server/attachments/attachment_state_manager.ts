@@ -91,6 +91,21 @@ export interface AttachmentSnapshot {
 }
 
 /**
+ * A mutation recorded by the state manager since the last drain. Only mutations that
+ * produce a timeline event are recorded: metadata-only edits, restore and origin updates are not.
+ */
+export type AttachmentChange =
+  | { kind: 'added'; attachment_id: string; attachment_type: string; current_version: number }
+  | {
+      kind: 'updated';
+      attachment_id: string;
+      attachment_type: string;
+      previous_version: number;
+      current_version: number;
+    }
+  | { kind: 'deleted'; attachment_id: string; attachment_type: string; hard_delete: boolean };
+
+/**
  * Interface for managing conversation attachment state.
  * Provides CRUD operations with version tracking.
  */
@@ -146,6 +161,11 @@ export interface AttachmentStateManager {
   /** Clear the accessed refs tracking (call at start of new round) */
   clearAccessTracking(): void;
 
+  /** Return the mutations recorded since the last drain, and clear them. */
+  drainChanges(): AttachmentChange[];
+  /** Discard recorded mutations without returning them (e.g. after replaying legacy history). */
+  clearChanges(): void;
+
   /** Resolve attachment references to their actual data */
   resolveRefs(refs: AttachmentVersionRef[]): ResolvedAttachmentRef[];
   /** Get total estimated tokens for all active attachments */
@@ -172,6 +192,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
   private dirty: boolean = false;
   private readonly options: CreateAttachmentStateManagerOptions;
   private accessedRefs: Map<string, AttachmentVersionRef> = new Map();
+  private changes: AttachmentChange[] = [];
 
   constructor(
     initialAttachments: VersionedAttachment[] = [],
@@ -372,6 +393,12 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
 
     this.attachments.set(id, attachment);
     this.dirty = true;
+    this.recordChange(attachment, {
+      kind: 'added',
+      attachment_id: id,
+      attachment_type: attachment.type,
+      current_version: attachment.current_version,
+    });
     this.recordAccess(id, attachment.current_version, ATTACHMENT_REF_OPERATION.created, actor);
 
     return attachment as VersionedAttachment<TType>;
@@ -431,6 +458,13 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
         attachment.versions.push(newVersion);
         attachment.current_version = newVersionNum;
         this.dirty = true;
+        this.recordChange(attachment, {
+          kind: 'updated',
+          attachment_id: id,
+          attachment_type: attachment.type,
+          previous_version: newVersionNum - 1,
+          current_version: newVersionNum,
+        });
       }
     }
 
@@ -454,6 +488,12 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
 
     attachment.active = false;
     this.dirty = true;
+    this.recordChange(attachment, {
+      kind: 'deleted',
+      attachment_id: id,
+      attachment_type: attachment.type,
+      hard_delete: false,
+    });
     this.recordAccess(id, attachment.current_version, ATTACHMENT_REF_OPERATION.deleted, actor);
     return true;
   }
@@ -484,8 +524,17 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       throw new Error(`Cannot delete screen_context attachment "${id}"`);
     }
 
+    const wasActive = isAttachmentActive(attachment);
     this.attachments.delete(id);
     this.dirty = true;
+    if (wasActive) {
+      this.recordChange(attachment, {
+        kind: 'deleted',
+        attachment_id: id,
+        attachment_type: attachment.type,
+        hard_delete: true,
+      });
+    }
     return true;
   }
 
@@ -525,6 +574,28 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
 
   clearAccessTracking(): void {
     this.accessedRefs.clear();
+  }
+
+  drainChanges(): AttachmentChange[] {
+    const drained = this.changes;
+    this.changes = [];
+    return drained;
+  }
+
+  clearChanges(): void {
+    this.changes = [];
+  }
+
+  /**
+   * Records a change unless the attachment is `hidden`. Hidden attachments are internal artefacts
+   * (e.g. `screen_context`) that users never see, so their lifecycle must not surface as
+   * user-visible timeline events or fire workflow triggers.
+   */
+  private recordChange(attachment: VersionedAttachment, change: AttachmentChange): void {
+    if (attachment.hidden) {
+      return;
+    }
+    this.changes.push(change);
   }
 
   resolveRefs(refs: AttachmentVersionRef[]): ResolvedAttachmentRef[] {

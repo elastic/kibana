@@ -5,163 +5,178 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import { loggerMock } from '@kbn/logging-mocks';
+import type { BaseMessage } from '@langchain/core/messages';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 import {
-  ChatEventType,
-  ConversationRoundStatus,
   ConversationRoundStepType,
+  ToolResultType,
+  createPreExecutionWorkflowStep,
+  isToolCallStep,
 } from '@kbn/agent-builder-common';
-import type { CompactionStructuredData, CompactionSummary } from '@kbn/agent-builder-common';
-import type { AgentEventEmitterFn } from '@kbn/agent-builder-server';
-import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
+import type {
+  CompactionStructuredData,
+  CompactionSummary,
+  ConversationRoundStep,
+  ToolCallStep,
+} from '@kbn/agent-builder-common';
+import { processedCustomEventFixture, timelineFromRounds } from '../../../../test_utils/timeline';
+import { createToolResultStoreMock } from '../../../../test_utils/runner';
+import type { CurrentRun, ToolRenderStateMap } from '../transient_state';
 import type { ProcessedConversation } from './prepare_conversation';
+import type { ProcessedTimelineEvent } from './context_timeline';
 import {
-  roundsOfTimeline,
-  timelineFromRounds,
-  type ProcessedConversationRound,
-} from '../../../../test_utils/timeline';
-import type { ContextBudget } from './context_budget';
-import { compactConversation, extractProgrammaticSummary } from './conversation_compactor';
+  compactContext,
+  extractProgrammaticSummary,
+  type CompactContextDeps,
+  type CompactContextInput,
+} from './conversation_compactor';
 import { serializeCompactionSummary } from './compaction_serialize';
+import type { LlmCompactionOutput } from './compaction_schema';
+import { estimateMessagesTokens } from './estimate_conversation_tokens';
 
-const mockLogger: Logger = {
-  info: jest.fn(),
-  debug: jest.fn(),
-  error: jest.fn(),
-  warn: jest.fn(),
-  trace: jest.fn(),
-  fatal: jest.fn(),
-  log: jest.fn(),
-  get: jest.fn(),
-  isLevelEnabled: jest.fn().mockReturnValue(true),
-} as unknown as Logger;
+const logger = loggerMock.create();
 
-const createMockRound = (
+// ~15k tokens once rendered (4 chars per token)
+const BIG = 60_000;
+
+const call = (
   id: string,
-  messageLength: number = 100,
-  toolResults: number = 0
-): ProcessedConversationRound => {
-  const steps = Array.from({ length: toolResults }, (_, i) => ({
-    type: ConversationRoundStepType.toolCall as const,
-    tool_call_id: `${id}-tc-${i}`,
-    tool_id: `tool-${i}`,
-    params: { indices: ['test-index'], query: 'FROM test-index | LIMIT 10' },
-    results: [
-      {
-        type: 'other' as const,
-        tool_result_id: `result-${i}`,
-        data: { value: 'x'.repeat(200) },
-      },
-    ],
-    progression: [],
-  }));
-
-  return {
-    id,
-    status: ConversationRoundStatus.completed,
-    input: {
-      message: `User message ${id}: ${'x'.repeat(messageLength)}`,
-      attachments: [],
-    },
-    steps,
-    response: { message: `Assistant response ${id}: ${'y'.repeat(messageLength)}` },
-    started_at: new Date().toISOString(),
-    time_to_first_token: 100,
-    time_to_last_token: 200,
-    model_usage: {
-      llm_calls: 1,
-      input_tokens: 100,
-      output_tokens: 50,
-      connector_id: 'test-connector',
-    },
-  };
-};
-
-const createMockConversation = (rounds: ProcessedConversationRound[]): ProcessedConversation => ({
-  timeline: timelineFromRounds(rounds),
-  nextInput: { message: 'current question', attachments: [] },
-  attachmentTypes: [],
-  attachmentStateManager: createAttachmentStateManager([], {
-    getTypeDefinition: () => undefined,
-  } as any),
+  size = 10,
+  params: Record<string, unknown> = { q: id }
+): ToolCallStep => ({
+  type: ConversationRoundStepType.toolCall,
+  tool_call_id: id,
+  tool_id: 'my.tool',
+  tool_call_group_id: `g-${id}`,
+  params,
+  results: [
+    { type: ToolResultType.other, tool_result_id: `r-${id}`, data: { v: 'x'.repeat(size) } },
+  ],
+  progression: [],
 });
 
-// Stand-in for the per-round vector computed upstream by estimatePerRoundTokens.
-const countsFor = (conversation: ProcessedConversation): number[] =>
-  roundsOfTimeline(conversation.timeline).map((round) => estimateTokens(JSON.stringify(round)));
+const conversationOf = (timeline: ProcessedTimelineEvent[]): ProcessedConversation => ({
+  timeline,
+  nextInput: { message: 'CURRENT_REQUEST', attachments: [] },
+  attachmentTypes: [],
+  attachmentStateManager: {} as ProcessedConversation['attachmentStateManager'],
+});
 
-const createMockChatModel = () =>
-  ({
-    withStructuredOutput: jest.fn().mockReturnValue({
-      invoke: jest.fn().mockResolvedValue({
-        discussion_summary: 'Test conversation summary',
-        user_intent: 'Investigate test data',
-        key_topics: ['testing', 'data'],
-        entities: [{ type: 'index', name: 'test-index' }],
-        outcomes_and_decisions: ['Decided to use approach A'],
-        unanswered_questions: [],
-      }),
-    }),
-  } as any);
+/** Rounds `A`, `B`, `C`, one big tool call each. */
+const bigHistory = () =>
+  conversationOf(
+    timelineFromRounds(
+      ['A', 'B', 'C'].map((id) => ({
+        id,
+        input: { message: `hello ${id}`, attachments: [] },
+        steps: [call(id.toLowerCase(), BIG)],
+        response: { message: `answer ${id}` },
+      }))
+    )
+  );
+
+const renderStateOf = (
+  steps: ToolCallStep[],
+  kinds: Record<string, 'server' | 'browser'> = {}
+): ToolRenderStateMap =>
+  Object.fromEntries(
+    steps.map((step, index) => [
+      step.tool_call_id,
+      {
+        toolName: 'my_tool',
+        kind: kinds[step.tool_call_id] ?? 'server',
+        cycle: index + 1,
+        content: JSON.stringify({ results: step.results }),
+      },
+    ])
+  );
+
+const run = (
+  steps: ConversationRoundStep[],
+  {
+    compactionSummary,
+    kinds,
+  }: { compactionSummary?: CompactionSummary; kinds?: Record<string, 'server' | 'browser'> } = {}
+): CurrentRun => ({
+  roundId: 'current',
+  steps,
+  cycleLimit: 30,
+  renderState: renderStateOf(steps.filter(isToolCallStep), kinds),
+  pendingToolCallIds: [],
+  retryNotices: [],
+  compactionSummary,
+});
+
+const llmOutput = (discussion = 'LLM_SUMMARY'): LlmCompactionOutput => ({
+  discussion_summary: discussion,
+  user_intent: 'intent',
+  key_topics: [],
+  entities: [],
+  outcomes_and_decisions: [],
+  unanswered_questions: [],
+});
+
+const structuredData = (
+  overrides: Partial<CompactionStructuredData> = {}
+): CompactionStructuredData => ({
+  ...llmOutput('PRIOR_SUMMARY'),
+  tool_calls_summary: [],
+  agent_actions: [],
+  ...overrides,
+});
+
+const setup = ({ historyBudget = 1_000_000 }: { historyBudget?: number } = {}) => {
+  const invoke = jest.fn().mockResolvedValue(llmOutput());
+  const chatModel = {
+    withStructuredOutput: jest.fn(() => ({ invoke })),
+  } as unknown as InferenceChatModel;
+  const deps: CompactContextDeps = {
+    chatModel,
+    budget: { totalBudget: historyBudget * 2, historyBudget },
+    resultStore: createToolResultStoreMock(),
+    resultTransformer: async (toolCall) => toolCall.results,
+    logger,
+  };
+  return { invoke, deps };
+};
+
+const requestText = (invoke: jest.Mock, index: number) =>
+  JSON.stringify((invoke.mock.calls[index][0] as BaseMessage[]).map((m) => m.content));
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('extractProgrammaticSummary', () => {
-  it('should extract tool calls from round steps', () => {
-    const rounds = [createMockRound('r1', 50, 2), createMockRound('r2', 50, 1)];
-    const result = extractProgrammaticSummary(rounds);
-
-    expect(result.tool_calls_summary).toHaveLength(3);
-    expect(result.tool_calls_summary[0].tool_id).toBe('tool-0');
-    expect(result.tool_calls_summary[0].params_summary).toContain('test-index');
-  });
-
-  it('should not extract entities (delegated to LLM)', () => {
-    const rounds = [createMockRound('r1', 50, 1)];
-    const result = extractProgrammaticSummary(rounds);
-
+  it('lists every tool call with a params summary and an agent action', () => {
+    const result = extractProgrammaticSummary([
+      call('a', 1, { indices: ['test-index'], query: 'FROM test-index' }),
+      call('b', 1, { n: 1 }),
+    ]);
+    expect(result.tool_calls_summary).toEqual([
+      { tool_id: 'my.tool', params_summary: 'indices=[test-index], query=FROM test-index' },
+      { tool_id: 'my.tool', params_summary: 'n=1' },
+    ]);
+    expect(result.agent_actions[0]).toBe(
+      'Called my.tool(indices=[test-index], query=FROM test-index)'
+    );
     expect(result).not.toHaveProperty('entities');
   });
 
-  it('should generate agent_actions for each tool call', () => {
-    const rounds = [createMockRound('r1', 50, 2)];
-    const result = extractProgrammaticSummary(rounds);
-
-    expect(result.agent_actions).toHaveLength(2);
-    expect(result.agent_actions[0]).toContain('Called tool-0');
+  it('returns empty lists without tool calls', () => {
+    expect(extractProgrammaticSummary([])).toEqual({ tool_calls_summary: [], agent_actions: [] });
   });
 
-  it('should handle rounds with no tool calls', () => {
-    const rounds = [createMockRound('r1', 50, 0)];
-    const result = extractProgrammaticSummary(rounds);
-
-    expect(result.tool_calls_summary).toHaveLength(0);
-    expect(result.agent_actions).toHaveLength(0);
-  });
-
-  it('should truncate long params summaries', () => {
-    const round: ProcessedConversationRound = {
-      ...createMockRound('r1', 50, 0),
-      steps: [
-        {
-          type: ConversationRoundStepType.toolCall as const,
-          tool_call_id: 'tc-long',
-          tool_id: 'search',
-          params: { query: 'x'.repeat(200) },
-          results: [],
-          progression: [],
-        },
-      ],
-    };
-
-    const result = extractProgrammaticSummary([round]);
-
+  it('truncates long params summaries', () => {
+    const result = extractProgrammaticSummary([call('a', 1, { query: 'x'.repeat(200) })]);
     expect(result.tool_calls_summary[0].params_summary.length).toBeLessThanOrEqual(121);
   });
 });
 
 describe('serializeCompactionSummary', () => {
-  it('should serialize structured data into readable text', () => {
-    const data: CompactionStructuredData = {
+  it('serializes structured data into readable text', () => {
+    const result = serializeCompactionSummary({
       discussion_summary: 'User investigated slow queries.',
       user_intent: 'Debug query performance',
       key_topics: ['performance', 'queries'],
@@ -170,465 +185,442 @@ describe('serializeCompactionSummary', () => {
       entities: [{ type: 'index', name: 'orders' }],
       unanswered_questions: ['How to optimize further?'],
       tool_calls_summary: [{ tool_id: 'search', params_summary: 'index=orders' }],
-    };
-
-    const result = serializeCompactionSummary(data);
+    });
 
     expect(result).toContain('Conversation Summary');
     expect(result).toContain('Debug query performance');
-    expect(result).toContain('User investigated slow queries');
     expect(result).toContain('performance, queries');
-    expect(result).toContain('orders');
     expect(result).toContain('[search]');
     expect(result).toContain('How to optimize further?');
   });
 
-  it('should omit empty sections', () => {
-    const data: CompactionStructuredData = {
-      discussion_summary: 'Brief summary',
-      user_intent: 'Test intent',
-      key_topics: [],
-      outcomes_and_decisions: [],
-      agent_actions: [],
-      entities: [],
-      unanswered_questions: [],
-      tool_calls_summary: [],
-    };
-
-    const result = serializeCompactionSummary(data);
-
+  it('omits empty sections', () => {
+    const result = serializeCompactionSummary(structuredData());
     expect(result).not.toContain('Key Topics');
     expect(result).not.toContain('Entities');
     expect(result).not.toContain('Tool Call History');
   });
 });
 
-describe('compactConversation', () => {
-  it('should not compact when under threshold', async () => {
-    const rounds = [createMockRound('r1', 50), createMockRound('r2', 50)];
-    const conversation = createMockConversation(rounds);
+describe('compactContext', () => {
+  const compact = (
+    input: Omit<CompactContextInput, 'fallbackOnFailure'> & { fallbackOnFailure?: boolean },
+    deps: CompactContextDeps
+  ) => compactContext({ fallbackOnFailure: false, ...input }, deps);
 
-    const budget: ContextBudget = {
-      totalBudget: 128000,
-      historyBudget: 96000,
-      triggerThreshold: 72000,
-    };
-
-    const result = await compactConversation({
-      processedConversation: conversation,
-      perRoundTokenCounts: countsFor(conversation),
-      chatModel: createMockChatModel(),
-      contextBudget: budget,
-      logger: mockLogger,
-    });
-
-    expect(result.compactionTriggered).toBe(false);
-    expect(result.summary).toBeUndefined();
-    expect(roundsOfTimeline(result.processedConversation.timeline)).toHaveLength(2);
+  it('does nothing when only the current cycle is visible', async () => {
+    const { invoke, deps } = setup();
+    const result = await compact(
+      { conversation: conversationOf([]), run: run([call('x1', BIG * 4)]), tailCapTokens: 1 },
+      deps
+    );
+    expect(result).toBeUndefined();
+    expect(invoke).not.toHaveBeenCalled();
   });
 
-  it('should trigger LLM summarization when over threshold', async () => {
-    const rounds = [
-      createMockRound('r1', 2000, 3),
-      createMockRound('r2', 2000, 3),
-      createMockRound('r3', 2000, 3),
-      createMockRound('r4', 200),
-      createMockRound('r5', 200),
-    ];
-    const conversation = createMockConversation(rounds);
-
-    const budget: ContextBudget = {
-      totalBudget: 500,
-      historyBudget: 375,
-      triggerThreshold: 100,
-    };
-
-    const chatModel = createMockChatModel();
-    const result = await compactConversation({
-      processedConversation: conversation,
-      perRoundTokenCounts: countsFor(conversation),
-      chatModel,
-      contextBudget: budget,
-      logger: mockLogger,
-    });
-
-    expect(result.compactionTriggered).toBe(true);
-    expect(chatModel.withStructuredOutput).toHaveBeenCalled();
-  });
-
-  it('should merge programmatic and LLM fields in the summary', async () => {
-    const rounds = [
-      createMockRound('r1', 2000, 2),
-      createMockRound('r2', 2000, 1),
-      createMockRound('recent-1', 200),
-      createMockRound('recent-2', 200),
-    ];
-    const conversation = createMockConversation(rounds);
-
-    const budget: ContextBudget = {
-      totalBudget: 500,
-      historyBudget: 375,
-      triggerThreshold: 100,
-    };
-
-    const result = await compactConversation({
-      processedConversation: conversation,
-      perRoundTokenCounts: countsFor(conversation),
-      chatModel: createMockChatModel(),
-      contextBudget: budget,
-      logger: mockLogger,
-    });
-
-    expect(result.compactionTriggered).toBe(true);
-    expect(result.summary).toBeDefined();
-
-    const { structured_data: data } = result.summary!;
-
-    // LLM-generated fields
-    expect(data.discussion_summary).toBe('Test conversation summary');
-    expect(data.user_intent).toBe('Investigate test data');
-
-    // LLM-extracted entities
-    expect(data.entities.length).toBeGreaterThan(0);
-    expect(data.entities[0]).toEqual({ type: 'index', name: 'test-index' });
-
-    // Programmatically extracted fields
-    expect(data.tool_calls_summary.length).toBeGreaterThan(0);
-    expect(data.tool_calls_summary[0].tool_id).toBe('tool-0');
-    expect(data.agent_actions.length).toBeGreaterThan(0);
-  });
-
-  it('should reuse existing summary without triggering new compaction when effective tokens are under threshold', async () => {
-    const rounds = [
-      createMockRound('r1', 50),
-      createMockRound('r2', 50),
-      createMockRound('r3', 50),
-    ];
-    const conversation = createMockConversation(rounds);
-
-    const existingSummary: CompactionSummary = {
-      summarized_round_count: 1,
-      created_at: new Date().toISOString(),
-      token_count: 100,
-      structured_data: {
-        discussion_summary: 'Previous summary',
-        user_intent: 'Test',
-        key_topics: [],
-        outcomes_and_decisions: [],
-        agent_actions: [],
-        entities: [],
-        unanswered_questions: [],
-        tool_calls_summary: [],
+  it('does nothing below the token floor', async () => {
+    const { invoke, deps } = setup();
+    const result = await compact(
+      {
+        conversation: conversationOf(
+          timelineFromRounds([{ id: 'A', input: { message: 'hi', attachments: [] } }])
+        ),
+        run: run([call('x1')]),
+        tailCapTokens: 0,
       },
-    };
-
-    // Threshold high enough that summary (100) + non-summarized rounds fit
-    const budget: ContextBudget = {
-      totalBudget: 50000,
-      historyBudget: 37500,
-      triggerThreshold: 5000,
-    };
-
-    const result = await compactConversation({
-      processedConversation: conversation,
-      perRoundTokenCounts: countsFor(conversation),
-      chatModel: createMockChatModel(),
-      contextBudget: budget,
-      existingSummary,
-      logger: mockLogger,
-    });
-
-    // Existing summary is applied but no new compaction event fires
-    expect(result.compactionTriggered).toBe(false);
-    expect(result.summary).toBe(existingSummary);
-    // Round r1 was summarized, only r2 and r3 remain
-    expect(roundsOfTimeline(result.processedConversation.timeline)).toHaveLength(2);
+      deps
+    );
+    expect(result).toBeUndefined();
+    expect(invoke).not.toHaveBeenCalled();
   });
 
-  it('should regenerate summary when effective tokens exceed threshold despite existing summary', async () => {
-    const rounds = [
-      createMockRound('r1', 2000, 2),
-      createMockRound('r2', 2000, 2),
-      createMockRound('r3', 2000, 2),
-      createMockRound('r4', 2000, 2),
-      createMockRound('recent-1', 200),
-      createMockRound('recent-2', 200),
-    ];
-    const conversation = createMockConversation(rounds);
+  it('covers the history cycles beyond the tail cap and keeps the current cycle', async () => {
+    const { invoke, deps } = setup();
+    const result = await compact(
+      { conversation: bigHistory(), run: run([call('x1')]), tailCapTokens: 20_000 },
+      deps
+    );
 
-    // Stale summary that only covered the first round
-    const existingSummary: CompactionSummary = {
-      summarized_round_count: 1,
-      created_at: new Date().toISOString(),
-      token_count: 100,
-      structured_data: {
-        discussion_summary: 'Old summary',
-        user_intent: 'Old intent',
-        key_topics: [],
-        outcomes_and_decisions: [],
-        agent_actions: [],
-        entities: [],
-        unanswered_questions: [],
-        tool_calls_summary: [],
+    expect(result?.summary).toMatchObject({
+      summarized_up_to: { round_id: 'B', tool_call_id: 'b' },
+      covered_round_ids: ['A', 'B'],
+      summarized_round_count: 2,
+      structured_data: expect.objectContaining({
+        discussion_summary: 'LLM_SUMMARY',
+        tool_calls_summary: [
+          { tool_id: 'my.tool', params_summary: 'q=a' },
+          { tool_id: 'my.tool', params_summary: 'q=b' },
+        ],
+      }),
+    });
+    expect(result?.summarizedCycleCount).toBe(2);
+    expect(result?.tokensAfter).toBeLessThan(result?.tokensBefore ?? 0);
+
+    expect(invoke).toHaveBeenCalledTimes(1);
+    const request = requestText(invoke, 0);
+    expect(request).toContain('hello A');
+    expect(request).toContain('hello B');
+    expect(request).not.toContain('hello C');
+    expect(request).toContain('CURRENT_REQUEST');
+  });
+
+  it('summarizes a covered custom event and can anchor the cursor on it', async () => {
+    const { invoke, deps } = setup();
+    const [a, b, c] = ['A', 'B', 'C'].map((id) =>
+      timelineFromRounds([
+        {
+          id,
+          input: { message: `hello ${id}`, attachments: [] },
+          steps: [call(id.toLowerCase(), BIG)],
+          response: { message: `answer ${id}` },
+        },
+      ])
+    );
+    const note = processedCustomEventFixture({
+      id: 'note',
+      created_at: new Date(0).toISOString(),
+      representation: `NOTE_TEXT ${'n'.repeat(BIG)}`,
+    });
+    const result = await compact(
+      {
+        conversation: conversationOf([...a, ...b, note, ...c]),
+        run: run([call('x1')]),
+        tailCapTokens: 20_000,
       },
-    };
+      deps
+    );
 
-    // Threshold low enough that the non-summarized rounds still exceed it
-    const budget: ContextBudget = {
-      totalBudget: 500,
-      historyBudget: 375,
-      triggerThreshold: 100,
-    };
-
-    const chatModel = createMockChatModel();
-    const result = await compactConversation({
-      processedConversation: conversation,
-      perRoundTokenCounts: countsFor(conversation),
-      chatModel,
-      contextBudget: budget,
-      existingSummary,
-      logger: mockLogger,
-    });
-
-    expect(result.compactionTriggered).toBe(true);
-    // New summary should have been generated (not the old one)
-    expect(result.summary).not.toBe(existingSummary);
-    expect(chatModel.withStructuredOutput).toHaveBeenCalled();
+    expect(result?.summary.summarized_up_to).toEqual({ event_id: 'note' });
+    expect(result?.summary.covered_round_ids).toEqual(['A', 'B']);
+    const request = requestText(invoke, 0);
+    expect(request).toContain('NOTE_TEXT');
+    expect(request).not.toContain('hello C');
   });
 
-  it('should preserve the most recent rounds during compaction', async () => {
-    const rounds = [
-      createMockRound('old-1', 2000, 5),
-      createMockRound('old-2', 2000, 5),
-      createMockRound('recent-1', 200),
-      createMockRound('recent-2', 200),
+  it('keeps workflow model context out of summaries, and pinned context out of the tail', async () => {
+    const { invoke, deps } = setup();
+    const conversation = conversationOf(
+      timelineFromRounds([
+        {
+          id: 'A',
+          input: { message: 'hello A', attachments: [] },
+          steps: [createPreExecutionWorkflowStep({ model_context: 'OLD_WF' }), call('a', BIG)],
+          response: { message: 'answer A' },
+        },
+      ])
+    );
+    const steps = [
+      createPreExecutionWorkflowStep({ model_context: `CURRENT_WF ${'w'.repeat(BIG)}` }),
+      call('x1'),
+      call('x2', BIG),
+      call('x3'),
     ];
-    const conversation = createMockConversation(rounds);
+    const result = await compact({ conversation, run: run(steps), tailCapTokens: 20_000 }, deps);
 
-    const budget: ContextBudget = {
-      totalBudget: 500,
-      historyBudget: 375,
-      triggerThreshold: 100,
-    };
-
-    const result = await compactConversation({
-      processedConversation: conversation,
-      perRoundTokenCounts: countsFor(conversation),
-      chatModel: createMockChatModel(),
-      contextBudget: budget,
-      logger: mockLogger,
-    });
-
-    expect(result.compactionTriggered).toBe(true);
-    const roundIds = roundsOfTimeline(result.processedConversation.timeline).map((r) => r.id);
-    expect(roundIds).toContain('recent-1');
-    expect(roundIds).toContain('recent-2');
+    // the first current cycle only weighs its tool call: its workflow context is pinned
+    expect(result?.summary.summarized_up_to).toEqual({ round_id: 'A', tool_call_id: 'a' });
+    const request = requestText(invoke, 0);
+    expect(request).toContain('hello A');
+    expect(request).not.toContain('OLD_WF');
   });
 
-  it('should handle single-round conversations without error', async () => {
-    const rounds = [createMockRound('r1', 50)];
-    const conversation = createMockConversation(rounds);
-
-    const budget: ContextBudget = {
-      totalBudget: 128000,
-      historyBudget: 96000,
-      triggerThreshold: 72000,
-    };
-
-    const result = await compactConversation({
-      processedConversation: conversation,
-      perRoundTokenCounts: countsFor(conversation),
-      chatModel: createMockChatModel(),
-      contextBudget: budget,
-      logger: mockLogger,
-    });
-
-    expect(result.compactionTriggered).toBe(false);
-    expect(roundsOfTimeline(result.processedConversation.timeline)).toHaveLength(1);
-  });
-
-  it('should handle empty conversations', async () => {
-    const conversation = createMockConversation([]);
-
-    const budget: ContextBudget = {
-      totalBudget: 128000,
-      historyBudget: 96000,
-      triggerThreshold: 72000,
-    };
-
-    const result = await compactConversation({
-      processedConversation: conversation,
-      perRoundTokenCounts: countsFor(conversation),
-      chatModel: createMockChatModel(),
-      contextBudget: budget,
-      logger: mockLogger,
-    });
-
-    expect(result.compactionTriggered).toBe(false);
-    expect(roundsOfTimeline(result.processedConversation.timeline)).toHaveLength(0);
-  });
-
-  it('should include token counts when compaction is triggered', async () => {
-    const rounds = [
-      createMockRound('r1', 2000, 2),
-      createMockRound('r2', 2000, 1),
-      createMockRound('recent-1', 200),
-      createMockRound('recent-2', 200),
+  it('keeps the current workflow model context out of summaries once its cycle is covered', async () => {
+    const { invoke, deps } = setup();
+    const steps = [
+      createPreExecutionWorkflowStep({ model_context: 'CURRENT_WF' }),
+      ...['x1', 'x2', 'x3'].map((id) => call(id, BIG)),
     ];
-    const conversation = createMockConversation(rounds);
+    const result = await compact(
+      { conversation: conversationOf([]), run: run(steps), tailCapTokens: 20_000 },
+      deps
+    );
 
-    const budget: ContextBudget = {
-      totalBudget: 500,
-      historyBudget: 375,
-      triggerThreshold: 100,
-    };
-
-    const result = await compactConversation({
-      processedConversation: conversation,
-      perRoundTokenCounts: countsFor(conversation),
-      chatModel: createMockChatModel(),
-      contextBudget: budget,
-      logger: mockLogger,
-    });
-
-    expect(result.compactionTriggered).toBe(true);
-    expect(result.tokensBefore).toBeGreaterThan(0);
-    expect(result.tokensAfter).toBeDefined();
-    expect(result.summarizedRoundCount).toBeGreaterThan(0);
+    expect(result?.summary.summarized_up_to).toEqual({ round_id: 'current', tool_call_id: 'x1' });
+    const request = requestText(invoke, 0);
+    expect(request).toContain('r-x1');
+    expect(request).not.toContain('CURRENT_WF');
   });
 
-  describe('event emission', () => {
-    const compactionBudget: ContextBudget = {
-      totalBudget: 500,
-      historyBudget: 375,
-      triggerThreshold: 100,
+  it('covers cycles of the current run, anchored on their last call', async () => {
+    const { deps } = setup();
+    const steps = ['x1', 'x2', 'x3', 'x4'].map((id) => call(id, BIG));
+    const result = await compact(
+      { conversation: conversationOf([]), run: run(steps), tailCapTokens: 20_000 },
+      deps
+    );
+
+    expect(result?.summary.summarized_up_to).toEqual({ round_id: 'current', tool_call_id: 'x2' });
+    expect(result?.summary.covered_round_ids).toEqual([]);
+    expect(result?.summarizedCycleCount).toBe(2);
+  });
+
+  it('places the current request before the first current-run cycle it summarizes', async () => {
+    const { invoke, deps } = setup();
+    const conversation = conversationOf(
+      timelineFromRounds([
+        {
+          id: 'A',
+          input: { message: 'hello A', attachments: [] },
+          steps: [call('a', BIG)],
+          response: { message: 'answer A' },
+        },
+      ])
+    );
+    const steps = ['x1', 'x2', 'x3'].map((id) => call(id, BIG));
+    const result = await compact({ conversation, run: run(steps), tailCapTokens: 20_000 }, deps);
+
+    expect(result?.summary.summarized_up_to).toEqual({ round_id: 'current', tool_call_id: 'x1' });
+    const request = requestText(invoke, 0);
+    const answerAt = request.indexOf('answer A');
+    const requestAt = request.indexOf('CURRENT_REQUEST');
+    expect(answerAt).toBeGreaterThan(-1);
+    expect(requestAt).toBeGreaterThan(answerAt);
+    expect(request.indexOf('r-x1')).toBeGreaterThan(requestAt);
+  });
+
+  it('stops the covered range at the last cycle with a persisted anchor', async () => {
+    const { invoke, deps } = setup();
+    const steps = ['x1', 'x2', 'x3', 'x4'].map((id) => call(id, BIG));
+    const result = await compact(
+      {
+        conversation: conversationOf([]),
+        run: run(steps, { kinds: { x2: 'browser' } }),
+        tailCapTokens: 20_000,
+      },
+      deps
+    );
+
+    expect(result?.summary.summarized_up_to).toEqual({ round_id: 'current', tool_call_id: 'x1' });
+    expect(result?.summarizedCycleCount).toBe(1);
+    expect(requestText(invoke, 0)).not.toContain('"x2"');
+  });
+
+  it('builds on the existing summary: only the visible cycles are sent and tool calls accumulate', async () => {
+    const { invoke, deps } = setup();
+    const existing: CompactionSummary = {
+      summarized_up_to: { round_id: 'A', tool_call_id: 'a' },
+      summarized_round_count: 1,
+      covered_round_ids: ['A'],
+      created_at: '2026-01-01T00:00:00.000Z',
+      token_count: 10,
+      structured_data: structuredData({
+        tool_calls_summary: [{ tool_id: 'my.tool', params_summary: 'q=a' }],
+        agent_actions: ['Called my.tool(q=a)'],
+      }),
     };
+    const result = await compact(
+      {
+        conversation: bigHistory(),
+        run: run([call('x1')], { compactionSummary: existing }),
+        tailCapTokens: 20_000,
+      },
+      deps
+    );
 
-    const noCompactionBudget: ContextBudget = {
-      totalBudget: 128000,
-      historyBudget: 96000,
-      triggerThreshold: 72000,
+    const request = requestText(invoke, 0);
+    expect(request).toContain('PRIOR_SUMMARY');
+    expect(request).not.toContain('hello A');
+    expect(request).toContain('hello B');
+    expect(result?.summary).toMatchObject({
+      summarized_up_to: { round_id: 'B', tool_call_id: 'b' },
+      covered_round_ids: ['A', 'B'],
+    });
+    expect(result?.summary.structured_data.tool_calls_summary).toEqual([
+      { tool_id: 'my.tool', params_summary: 'q=a' },
+      { tool_id: 'my.tool', params_summary: 'q=b' },
+    ]);
+    expect(result?.summary.structured_data.agent_actions).toEqual([
+      'Called my.tool(q=a)',
+      'Called my.tool(q=b)',
+    ]);
+  });
+
+  it('chunks the covered cycles on the history budget, each request building on the previous output', async () => {
+    const { invoke, deps } = setup({ historyBudget: 20_000 });
+    invoke.mockResolvedValueOnce(llmOutput('FIRST_CHUNK')).mockResolvedValueOnce(llmOutput());
+    const result = await compact(
+      { conversation: bigHistory(), run: run([call('x1')]), tailCapTokens: 20_000 },
+      deps
+    );
+
+    expect(invoke).toHaveBeenCalledTimes(2);
+    const first = requestText(invoke, 0);
+    expect(first).toContain('hello A');
+    expect(first).not.toContain('hello B');
+    const second = requestText(invoke, 1);
+    expect(second).toContain('FIRST_CHUNK');
+    expect(second).toContain('hello B');
+    expect(second).not.toContain('hello A');
+    for (const [messages] of invoke.mock.calls) {
+      expect(estimateMessagesTokens(messages)).toBeLessThanOrEqual(20_000);
+    }
+    expect(result?.summary.structured_data.discussion_summary).toBe('LLM_SUMMARY');
+  });
+
+  it("gives a chunk starting mid-round its round's user message", async () => {
+    const { invoke, deps } = setup({ historyBudget: 20_000 });
+    const conversation = conversationOf(
+      timelineFromRounds([
+        {
+          id: 'A',
+          input: { message: 'hello A', attachments: [] },
+          steps: [call('a1', BIG), call('a2', BIG)],
+          response: { message: 'answer A' },
+        },
+        {
+          id: 'B',
+          input: { message: 'hello B', attachments: [] },
+          steps: [call('b', BIG)],
+          response: { message: 'answer B' },
+        },
+      ])
+    );
+    const result = await compact(
+      { conversation, run: run([call('x1')]), tailCapTokens: 20_000 },
+      deps
+    );
+
+    expect(result?.summary.summarized_up_to).toEqual({ round_id: 'A', tool_call_id: 'a2' });
+    expect(invoke).toHaveBeenCalledTimes(2);
+    const second = requestText(invoke, 1);
+    expect(second).not.toContain('"q":"a1"');
+    expect(second).toContain('hello A');
+  });
+
+  it('still sends a cycle that does not fit the budget alone, with a warning', async () => {
+    const { invoke, deps } = setup({ historyBudget: 5_000 });
+    const result = await compact(
+      { conversation: bigHistory(), run: run([call('x1')]), tailCapTokens: 20_000 },
+      deps
+    );
+
+    expect(invoke).toHaveBeenCalledTimes(2);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('exceeds the history budget'));
+    expect(result?.summary.covered_round_ids).toEqual(['A', 'B']);
+  });
+
+  it('covers the last history cycle at round start when the run has no step yet', async () => {
+    const { deps } = setup();
+    const conversation = conversationOf(
+      timelineFromRounds([
+        {
+          id: 'A',
+          input: { message: 'hello A', attachments: [] },
+          steps: [call('a', BIG * 2)],
+          response: { message: 'answer A' },
+        },
+      ])
+    );
+    const result = await compact({ conversation, run: run([]), tailCapTokens: 20_000 }, deps);
+
+    expect(result?.summary).toMatchObject({
+      summarized_up_to: { round_id: 'A', tool_call_id: 'a' },
+      covered_round_ids: ['A'],
+    });
+    expect(result?.summarizedCycleCount).toBe(1);
+  });
+
+  it('retries a failed summarizer request once', async () => {
+    const { invoke, deps } = setup();
+    invoke.mockRejectedValueOnce(new Error('bad json')).mockResolvedValueOnce(llmOutput('RETRIED'));
+    const result = await compact(
+      { conversation: bigHistory(), run: run([call('x1')]), tailCapTokens: 20_000 },
+      deps
+    );
+
+    expect(invoke).toHaveBeenCalledTimes(2);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('bad json'));
+    expect(result?.summary.structured_data.discussion_summary).toBe('RETRIED');
+  });
+
+  it('skips the compaction when the summarizer keeps failing without fallback', async () => {
+    const { invoke, deps } = setup();
+    invoke.mockRejectedValue(new Error('llm down'));
+    const result = await compact(
+      { conversation: bigHistory(), run: run([call('x1')]), tailCapTokens: 20_000 },
+      deps
+    );
+
+    expect(invoke).toHaveBeenCalledTimes(2);
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('skipping the compaction'));
+    expect(result).toBeUndefined();
+  });
+
+  it('falls back to the programmatic summary when the summarizer keeps failing', async () => {
+    const { invoke, deps } = setup();
+    invoke.mockRejectedValue(new Error('llm down'));
+    const result = await compact(
+      {
+        conversation: bigHistory(),
+        run: run([call('x1')]),
+        tailCapTokens: 20_000,
+        fallbackOnFailure: true,
+      },
+      deps
+    );
+
+    expect(invoke).toHaveBeenCalledTimes(2);
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('llm down'));
+    expect(result?.summary).toMatchObject({
+      summarized_up_to: { round_id: 'B', tool_call_id: 'b' },
+      covered_round_ids: ['A', 'B'],
+      structured_data: expect.objectContaining({
+        user_intent: 'CURRENT_REQUEST',
+        tool_calls_summary: [
+          { tool_id: 'my.tool', params_summary: 'q=a' },
+          { tool_id: 'my.tool', params_summary: 'q=b' },
+        ],
+      }),
+    });
+    expect(result?.tokensAfter).toBeLessThan(result?.tokensBefore ?? 0);
+  });
+
+  it('keeps the semantic fields of the existing summary in the fallback', async () => {
+    const { invoke, deps } = setup();
+    invoke.mockRejectedValue(new Error('llm down'));
+    const existing: CompactionSummary = {
+      summarized_up_to: { round_id: 'A', tool_call_id: 'a' },
+      summarized_round_count: 1,
+      covered_round_ids: ['A'],
+      created_at: '2026-01-01T00:00:00.000Z',
+      token_count: 10,
+      structured_data: structuredData({
+        tool_calls_summary: [{ tool_id: 'my.tool', params_summary: 'q=a' }],
+      }),
     };
+    const result = await compact(
+      {
+        conversation: bigHistory(),
+        run: run([call('x1')], { compactionSummary: existing }),
+        tailCapTokens: 20_000,
+        fallbackOnFailure: true,
+      },
+      deps
+    );
 
-    let mockEventEmitter: jest.MockedFunction<AgentEventEmitterFn>;
-
-    beforeEach(() => {
-      mockEventEmitter = jest.fn();
+    expect(result?.summary.structured_data).toMatchObject({
+      discussion_summary: 'PRIOR_SUMMARY',
+      tool_calls_summary: [
+        { tool_id: 'my.tool', params_summary: 'q=a' },
+        { tool_id: 'my.tool', params_summary: 'q=b' },
+      ],
     });
+    expect(result?.summary.covered_round_ids).toEqual(['A', 'B']);
+  });
 
-    it('should not emit events when compaction is not triggered', async () => {
-      // Empty conversation never triggers compaction
-      const conversation = createMockConversation([]);
-
-      await compactConversation({
-        processedConversation: conversation,
-        perRoundTokenCounts: countsFor(conversation),
-        chatModel: createMockChatModel(),
-        contextBudget: noCompactionBudget,
-        logger: mockLogger,
-        eventEmitter: mockEventEmitter,
-      });
-
-      expect(mockEventEmitter).not.toHaveBeenCalled();
+  it('returns nothing when the run is aborted during summarization', async () => {
+    const { invoke, deps } = setup();
+    const controller = new AbortController();
+    invoke.mockImplementation(async () => {
+      controller.abort();
+      throw new Error('aborted');
     });
+    const result = await compact(
+      { conversation: bigHistory(), run: run([call('x1')]), tailCapTokens: 20_000 },
+      { ...deps, abortSignal: controller.signal }
+    );
 
-    it('should emit compactionStarted before compactionCompleted when compaction is triggered', async () => {
-      const rounds = [
-        createMockRound('r1', 2000, 3),
-        createMockRound('r2', 2000, 3),
-        createMockRound('r3', 2000, 3),
-        createMockRound('recent-1', 200),
-        createMockRound('recent-2', 200),
-      ];
-      const conversation = createMockConversation(rounds);
-
-      await compactConversation({
-        processedConversation: conversation,
-        perRoundTokenCounts: countsFor(conversation),
-        chatModel: createMockChatModel(),
-        contextBudget: compactionBudget,
-        logger: mockLogger,
-        eventEmitter: mockEventEmitter,
-      });
-
-      expect(mockEventEmitter).toHaveBeenCalledTimes(2);
-
-      const [startedCall, completedCall] = mockEventEmitter.mock.calls;
-      expect(startedCall[0].type).toBe(ChatEventType.compactionStarted);
-      expect(completedCall[0].type).toBe(ChatEventType.compactionCompleted);
-
-      // Verify ordering via invocation order
-      const startedOrder = mockEventEmitter.mock.invocationCallOrder[0];
-      const completedOrder = mockEventEmitter.mock.invocationCallOrder[1];
-      expect(startedOrder).toBeLessThan(completedOrder);
-    });
-
-    it('should emit compactionStarted with correct token_count_before', async () => {
-      const rounds = [
-        createMockRound('r1', 2000, 2),
-        createMockRound('r2', 2000, 1),
-        createMockRound('recent-1', 200),
-        createMockRound('recent-2', 200),
-      ];
-      const conversation = createMockConversation(rounds);
-
-      const result = await compactConversation({
-        processedConversation: conversation,
-        perRoundTokenCounts: countsFor(conversation),
-        chatModel: createMockChatModel(),
-        contextBudget: compactionBudget,
-        logger: mockLogger,
-        eventEmitter: mockEventEmitter,
-      });
-
-      const startedEvent = mockEventEmitter.mock.calls[0][0];
-      expect(startedEvent.type).toBe(ChatEventType.compactionStarted);
-      expect((startedEvent as any).data.token_count_before).toBe(result.tokensBefore);
-    });
-
-    it('should emit compactionCompleted with correct token_count_after and summarized_round_count', async () => {
-      const rounds = [
-        createMockRound('r1', 2000, 2),
-        createMockRound('r2', 2000, 1),
-        createMockRound('recent-1', 200),
-        createMockRound('recent-2', 200),
-      ];
-      const conversation = createMockConversation(rounds);
-
-      const result = await compactConversation({
-        processedConversation: conversation,
-        perRoundTokenCounts: countsFor(conversation),
-        chatModel: createMockChatModel(),
-        contextBudget: compactionBudget,
-        logger: mockLogger,
-        eventEmitter: mockEventEmitter,
-      });
-
-      const completedEvent = mockEventEmitter.mock.calls[1][0];
-      expect(completedEvent.type).toBe(ChatEventType.compactionCompleted);
-      expect((completedEvent as any).data.token_count_after).toBe(result.tokensAfter);
-      expect((completedEvent as any).data.summarized_round_count).toBe(result.summarizedRoundCount);
-    });
-
-    it('should not emit events when eventEmitter is not provided', async () => {
-      const rounds = [
-        createMockRound('r1', 2000, 3),
-        createMockRound('r2', 2000, 3),
-        createMockRound('recent-1', 200),
-        createMockRound('recent-2', 200),
-      ];
-      const conversation = createMockConversation(rounds);
-
-      // No eventEmitter passed — should not throw
-      const result = await compactConversation({
-        processedConversation: conversation,
-        perRoundTokenCounts: countsFor(conversation),
-        chatModel: createMockChatModel(),
-        contextBudget: compactionBudget,
-        logger: mockLogger,
-      });
-
-      expect(result.compactionTriggered).toBe(true);
-    });
+    expect(invoke).toHaveBeenCalledTimes(1);
+    expect(result).toBeUndefined();
   });
 });

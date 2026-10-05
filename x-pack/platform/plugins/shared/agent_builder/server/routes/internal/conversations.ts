@@ -6,11 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { FeedbackChipId } from '@kbn/agent-builder-common';
 import {
   CONVERSATION_ID_MAX_LENGTH,
   CONVERSATION_TITLE_MAX_LENGTH,
+  agentIdMaxLength,
 } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
@@ -18,11 +18,17 @@ import type {
   MarkPinnedConversationResponse,
   MarkReadConversationResponse,
   RenameConversationResponse,
+  SearchConversationsResponse,
 } from '../../../common/http_api/conversations';
 import type { ApplyTemplateResponse } from '../../../common/http_api/apply_template';
 import type { PatchConversationMetadataResponse } from '../../../common/http_api/patch_metadata';
 import { apiPrivileges } from '../../../common/features';
-import { internalApiPath } from '../../../common/constants';
+import {
+  internalApiPath,
+  MAX_CONVERSATION_SEARCH_PER_PAGE,
+  MAX_RESULT_WINDOW,
+  CONVERSATION_SEARCH_QUERY_MAX_LENGTH,
+} from '../../../common/constants';
 
 export function registerInternalConversationRoutes({
   router,
@@ -84,21 +90,18 @@ export function registerInternalConversationRoutes({
         authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
     },
-    wrapHandler(
-      async (ctx, request, response) => {
-        const { conversations: conversationsService } = getInternalServices();
-        const { conversation_id: conversationId } = request.params;
-        const { template_id: templateId } = request.body;
+    wrapHandler(async (ctx, request, response) => {
+      const { conversations: conversationsService } = getInternalServices();
+      const { conversation_id: conversationId } = request.params;
+      const { template_id: templateId } = request.body;
 
-        const client = await conversationsService.getScopedClient({ request });
-        const updatedConversation = await client.applyTemplate(conversationId, templateId);
+      const client = await conversationsService.getScopedClient({ request });
+      const updatedConversation = await client.applyTemplate(conversationId, templateId);
 
-        return response.ok<ApplyTemplateResponse>({
-          body: { id: updatedConversation.id },
-        });
-      },
-      { featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID }
-    )
+      return response.ok<ApplyTemplateResponse>({
+        body: { id: updatedConversation.id },
+      });
+    })
   );
 
   router.patch(
@@ -132,27 +135,24 @@ export function registerInternalConversationRoutes({
         authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
     },
-    wrapHandler(
-      async (ctx, request, response) => {
-        const { conversations: conversationsService } = getInternalServices();
-        const { conversation_id: conversationId } = request.params;
-        const { metadata } = request.body;
+    wrapHandler(async (ctx, request, response) => {
+      const { conversations: conversationsService } = getInternalServices();
+      const { conversation_id: conversationId } = request.params;
+      const { metadata } = request.body;
 
-        const client = await conversationsService.getScopedClient({ request });
-        const { conversation: updatedConversation } = await client.patchMetadata(
-          conversationId,
-          metadata
-        );
+      const client = await conversationsService.getScopedClient({ request });
+      const { conversation: updatedConversation } = await client.patchMetadata(
+        conversationId,
+        metadata
+      );
 
-        return response.ok<PatchConversationMetadataResponse>({
-          body: {
-            id: updatedConversation.id,
-            metadata: updatedConversation.metadata ?? {},
-          },
-        });
-      },
-      { featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID }
-    )
+      return response.ok<PatchConversationMetadataResponse>({
+        body: {
+          id: updatedConversation.id,
+          metadata: updatedConversation.metadata ?? {},
+        },
+      });
+    })
   );
 
   router.post(
@@ -264,6 +264,60 @@ export function registerInternalConversationRoutes({
         body: {
           id: updatedConversation.id,
           pinned: updatedConversation.pinned ?? false,
+        },
+      });
+    })
+  );
+
+  router.get(
+    {
+      path: `${internalApiPath}/conversations/_search`,
+      validate: {
+        query: schema.object(
+          {
+            query: schema.string({
+              minLength: 1,
+              maxLength: CONVERSATION_SEARCH_QUERY_MAX_LENGTH,
+              validate: (value) =>
+                value.trim().length === 0 ? 'query must not be blank' : undefined,
+            }),
+            agent_id: schema.maybe(
+              schema.string({
+                maxLength: agentIdMaxLength,
+              })
+            ),
+            page: schema.number({ defaultValue: 1, min: 1 }),
+            per_page: schema.number({
+              defaultValue: MAX_CONVERSATION_SEARCH_PER_PAGE,
+              min: 1,
+              max: MAX_CONVERSATION_SEARCH_PER_PAGE,
+            }),
+          },
+          {
+            validate: ({ page, per_page: perPage }) => {
+              if (page * perPage > MAX_RESULT_WINDOW) {
+                return `page * per_page must not exceed ${MAX_RESULT_WINDOW}; conversations beyond that are not reachable through this API`;
+              }
+            },
+          }
+        ),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { conversations: conversationsService } = getInternalServices();
+      const { query, agent_id: agentId, page, per_page: perPage } = request.query;
+
+      const client = await conversationsService.getScopedClient({ request });
+      const { results, total } = await client.search({ query, agentId, page, perPage });
+
+      return response.ok<SearchConversationsResponse>({
+        body: {
+          pagination: { total, page, per_page: perPage },
+          results,
         },
       });
     })

@@ -16,6 +16,7 @@ import type { Logger } from '@kbn/logging';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
   CHAT_ATTACHMENT_IMAGES_FILE_KIND,
   SUPPORTED_IMAGE_MIME_TYPES,
@@ -59,6 +60,8 @@ import { registerConversationWorkflowEventBridge } from './workflows/triggers/ev
 import { AGENTBUILDER_FEATURE_ID } from '../common/features';
 import { runToolIdBackfill } from './backfills/tool_id_backfill';
 import { RecommendedEndpointsPoller } from './recommended_endpoints_poller';
+import { registerDeductiveAgent } from './services/execution/run_agent/deductive/register_deductive_agent';
+import { getDeploymentInfo } from './utils/deployment_info';
 
 export class AgentBuilderPlugin
   implements
@@ -71,7 +74,9 @@ export class AgentBuilderPlugin
 {
   private logger: Logger;
   private config: AgentBuilderConfig;
+  private readonly env: PluginInitializerContext['env'];
   private serviceManager: ServiceManager;
+  private cloudSetup?: CloudSetup;
   private usageCounter?: UsageCounter;
   private trackingService?: TrackingService;
   private analyticsService?: AnalyticsService;
@@ -84,6 +89,7 @@ export class AgentBuilderPlugin
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
+    this.env = context.env;
     this.serviceManager = new ServiceManager(this.config);
   }
 
@@ -92,6 +98,7 @@ export class AgentBuilderPlugin
     setupDeps: AgentBuilderSetupDependencies
   ): AgentBuilderPluginSetup {
     this.home = setupDeps.home;
+    this.cloudSetup = setupDeps.cloud;
 
     setupDeps.files.registerFileKind({
       id: CHAT_ATTACHMENT_IMAGES_FILE_KIND,
@@ -166,6 +173,14 @@ export class AgentBuilderPlugin
     );
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
+    // External Deductive execution path (agent + Advanced Settings). Self-contained in the
+    // deductive module so the whole temporary integration can be removed by deleting it.
+    registerDeductiveAgent({
+      coreSetup,
+      uiSettings: coreSetup.uiSettings,
+      agents: serviceSetups.agents,
+      register: this.config.deductive?.register ?? false,
+    });
 
     this.isExperimentalEnabled = async (request: KibanaRequest): Promise<boolean> => {
       const [coreStart] = await coreSetup.getStartServices();
@@ -195,7 +210,13 @@ export class AgentBuilderPlugin
         }
         return services.agents.getRegistry({ request });
       },
-      isExperimentalEnabled: this.isExperimentalEnabled,
+      getExecutionService: () => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('Execution service not available — plugin has not started');
+        }
+        return services.execution;
+      },
     });
 
     registerAttachmentWorkflowSteps(setupDeps.workflowsExtensions, {
@@ -211,9 +232,9 @@ export class AgentBuilderPlugin
           attachmentsService: services.attachments,
           coreStart,
           spaces: startDeps.spaces,
+          source: 'workflow',
         });
       },
-      isExperimentalEnabled: this.isExperimentalEnabled,
     });
 
     registerAgentBuilderHandlerContext({ coreSetup });
@@ -297,6 +318,9 @@ export class AgentBuilderPlugin
       renderers: {
         register: serviceSetups.renderers.register.bind(serviceSetups.renderers),
       },
+      conversationEvents: {
+        register: serviceSetups.conversationEvents.register.bind(serviceSetups.conversationEvents),
+      },
       hooks: {
         register: serviceSetups.hooks.register.bind(serviceSetups.hooks),
       },
@@ -320,7 +344,6 @@ export class AgentBuilderPlugin
     void registerTracingExporter({
       core: coreStart,
       tracingConfig: this.config.tracing,
-      logger: this.logger.get('tracing'),
     }).then((teardownTracing) => {
       this.teardownTracing = teardownTracing;
     });
@@ -330,6 +353,7 @@ export class AgentBuilderPlugin
       actions,
       taskManager,
       searchInferenceEndpoints,
+      licensing,
       security: securityPlugin,
     } = startDeps;
     const { elasticsearch, http, security, uiSettings, savedObjects, dataStreams, featureFlags } =
@@ -360,6 +384,13 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
       searchInferenceEndpoints,
+      licensing,
+      deploymentInfo: getDeploymentInfo({
+        cloud: this.cloudSetup,
+        packageInfo: this.env.packageInfo,
+        airgapped: this.env.airgapped,
+      }),
+      deductiveRegister: this.config.deductive?.register ?? false,
       conversationEventBus: this.conversationEventBus,
     });
 
@@ -389,8 +420,6 @@ export class AgentBuilderPlugin
 
     const modelProviderFactory = createModelProviderFactory({
       inference,
-      uiSettings,
-      savedObjects,
       trackingService: this.trackingService,
       searchInferenceEndpoints,
       logger: this.logger.get('model-provider'),
@@ -443,6 +472,7 @@ export class AgentBuilderPlugin
             attachmentsService: attachments,
             coreStart,
             spaces,
+            source: 'server_api',
           }),
       },
       conversationTemplates,

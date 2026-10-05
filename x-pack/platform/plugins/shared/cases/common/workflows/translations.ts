@@ -457,7 +457,7 @@ export const ADD_OBSERVABLES_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.addObservables.documentation.details',
   {
     defaultMessage:
-      'This step adds observables to an existing case using `typeKey`, `value`, and optional description fields.',
+      'This step adds observables to an existing case using `typeKey`, `value`, and optional description fields. If this step is used by a workflow triggered by `cases.observablesAdded`, set `on.workflowEvents: ignore` on the trigger to prevent self-triggered loops.',
   }
 );
 
@@ -603,6 +603,20 @@ export const EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_CHANGED_FIELDS_DESCRIP
   i18n.translate('xpack.cases.workflowTriggers.extendedFieldsUpdated.eventSchema.changedFields', {
     defaultMessage:
       'The extended-field keys whose values changed. Use this field in trigger conditions (e.g. event.changedFields: "priority_as_keyword"). Use a cases.getCase step to read current values.',
+  });
+
+export const OBSERVABLES_ADDED_TRIGGER_EVENT_SCHEMA_OBSERVABLE_IDS_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.observablesAdded.eventSchema.observableIds',
+  {
+    defaultMessage:
+      'IDs of the newly-persisted observables, in insertion order. Use with a cases.getCase step to read values.',
+  }
+);
+
+export const OBSERVABLES_ADDED_TRIGGER_EVENT_SCHEMA_OBSERVABLE_TYPE_KEYS_DESCRIPTION =
+  i18n.translate('xpack.cases.workflowTriggers.observablesAdded.eventSchema.observableTypeKeys', {
+    defaultMessage:
+      'Type keys for the newly-persisted observables, one entry per observable, index-aligned with event.observableIds (e.g. "observable-type-ipv4"). A key may repeat when several observables of the same type are added in one request. Use in trigger conditions: event.observableTypeKeys: "observable-type-ipv4".',
   });
 
 export const CUSTOM_FIELD_CAN_BE_USED_MESSAGE = (fieldName: string) =>

@@ -11,7 +11,7 @@ import { act, waitFor, within } from '@testing-library/react';
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import type { EnrollmentAPIKey } from '../../../../types';
 
-import { TokenActions } from './token_actions';
+import { TokenActions, getTokenActionItems } from './token_actions';
 
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
@@ -59,9 +59,42 @@ async function clickConfirmButton(result: RenderResult) {
   });
 }
 
+describe('getTokenActionItems', () => {
+  const noop = () => {};
+
+  it('revoke item is enabled by default', () => {
+    const items = getTokenActionItems({ onRevoke: noop, onDelete: noop });
+    const revoke = items.find((i) => i.id === 'revoke');
+    expect(revoke?.disabled).toBeFalsy();
+  });
+
+  it('revoke item is disabled when revokeDisabled is true', () => {
+    const items = getTokenActionItems({ onRevoke: noop, onDelete: noop, revokeDisabled: true });
+    const revoke = items.find((i) => i.id === 'revoke');
+    expect(revoke?.disabled).toBe(true);
+  });
+
+  it('delete item is never disabled regardless of revokeDisabled', () => {
+    const items = getTokenActionItems({ onRevoke: noop, onDelete: noop, revokeDisabled: true });
+    const del = items.find((i) => i.id === 'delete');
+    expect(del?.disabled).toBeFalsy();
+  });
+});
+
 describe('TokenActions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('revoke button is disabled for an already-revoked token (active: false)', async () => {
+    const inactiveKey = { ...MOCK_API_KEY, active: false };
+    const testRenderer = createFleetTestRendererMock();
+    const result = testRenderer.render(<TokenActions apiKey={inactiveKey} refresh={jest.fn()} />);
+    const scope = within(result.baseElement);
+    await act(async () => {
+      scope.getByTestId('enrollmentTokenTable.actionsMenu').click();
+    });
+    expect(scope.getByTestId('enrollmentTokenTable.revokeBtn')).toBeDisabled();
   });
 
   it('shows a success toast after revoking a token', async () => {
