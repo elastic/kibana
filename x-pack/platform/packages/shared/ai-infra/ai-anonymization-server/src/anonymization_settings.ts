@@ -9,6 +9,16 @@ import { schema } from '@kbn/config-schema';
 import { DEFAULT_BUILTIN_REGEX_RULES, NER_MODEL_ID } from '@kbn/ai-anonymization-common';
 import type { AnonymizationSettings } from '@kbn/ai-anonymization-common';
 
+const validateRegexPattern = (pattern: string): string | undefined => {
+  try {
+    new RegExp(pattern, 'g');
+  } catch (error) {
+    return `must be a valid regular expression: ${
+      error instanceof Error ? error.message : String(error)
+    }`;
+  }
+};
+
 const baseRuleSchema = schema.object({
   enabled: schema.boolean(),
 });
@@ -17,7 +27,7 @@ const regexRuleSchema = schema.allOf([
   baseRuleSchema,
   schema.object({
     type: schema.literal('RegExp'),
-    pattern: schema.string(),
+    pattern: schema.string({ validate: validateRegexPattern }),
     entityClass: schema.string(),
     id: schema.maybe(schema.string({ maxLength: 100 })),
     name: schema.maybe(schema.string({ maxLength: 200 })),

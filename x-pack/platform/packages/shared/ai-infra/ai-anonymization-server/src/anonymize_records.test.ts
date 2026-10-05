@@ -7,7 +7,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { anonymizeRecords } from './anonymize_records';
-import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
+import type { AnonymizationRule, RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
 import type { MlInferenceResponseResult } from '@elastic/elasticsearch/lib/api/types';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { RegexWorkerService } from './regex_worker_service';
@@ -441,6 +441,46 @@ describe('anonymizeRecords', () => {
     expect(result.records[0].content).toBe('jorge21@gmail.com');
     expect(result.anonymizations).toHaveLength(0);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('regex worker crashed'));
+  });
+
+  describe('a custom rule whose pattern does not compile', () => {
+    const brokenRule: RegexAnonymizationRule = {
+      type: 'RegExp',
+      enabled: true,
+      id: 'custom-broken',
+      name: 'Broken pattern',
+      entityClass: 'MISC',
+      pattern: '(unclosed',
+    };
+    const input = [{ content: 'jorge21@gmail.com' }];
+
+    it('fails the call under onFailure "block" instead of silently leaving data unmasked', async () => {
+      await expect(
+        anonymizeRecords({
+          input,
+          anonymizationRules: [regexRule, brokenRule],
+          regexWorker,
+          esClient: mockEsClient,
+          onFailure: 'block',
+        })
+      ).rejects.toThrow(/"Broken pattern" has an invalid regular expression/);
+    });
+
+    it('proceeds unmasked, and says why, under onFailure "allow_unsafe"', async () => {
+      const result = await anonymizeRecords({
+        input,
+        anonymizationRules: [regexRule, brokenRule],
+        regexWorker,
+        esClient: mockEsClient,
+        onFailure: 'allow_unsafe',
+        logger,
+      });
+
+      expect(result.records[0].content).toBe('jorge21@gmail.com');
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('invalid regular expression')
+      );
+    });
   });
 
   it('applies known replacements before regex processing', async () => {

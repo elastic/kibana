@@ -24,6 +24,20 @@ describe('getAnonymizationUiSettings', () => {
     expect(settings.rules).not.toHaveLength(0);
     expect(settings.maskingEnabled).toBe(false);
   });
+
+  it('rejects a regex rule whose pattern does not compile, so it cannot be saved and silently skipped', () => {
+    const settings: AnonymizationSettings = JSON.parse(String(setting.value));
+    const brokenRule = {
+      type: 'RegExp',
+      enabled: true,
+      entityClass: 'MISC',
+      pattern: '(unclosed',
+    };
+
+    expect(() => setting.schema.validate({ ...settings, rules: [brokenRule] })).toThrow(
+      /valid regular expression/
+    );
+  });
 });
 
 interface RegexRule {
