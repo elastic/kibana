@@ -7,7 +7,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
-import { aiAnonymizationSettings, refreshBuiltInAnonymizationRules } from '@kbn/inference-common';
+import {
+  aiAnonymizationSettings,
+  isAnonymizationMaskingEnabled,
+  refreshBuiltInAnonymizationRules,
+} from '@kbn/inference-common';
 import type {
   AnonymizationFailureMode,
   AnonymizationRule,
@@ -30,7 +34,11 @@ const parseSettings = (raw: unknown): AnonymizationSettings => {
   // The `type: 'json'` uiSetting is already parsed into an object by IUiSettingsClient#get,
   // but be defensive in case a caller ever hands us the raw stored string.
   const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
-  if (!parsed || typeof parsed !== 'object' || !Array.isArray((parsed as any).rules)) {
+  if (
+    !parsed ||
+    typeof parsed !== 'object' ||
+    !Array.isArray((parsed as Partial<AnonymizationSettings>).rules)
+  ) {
     return DEFAULT_SETTINGS;
   }
   const settings = parsed as AnonymizationSettings;
@@ -39,7 +47,13 @@ const parseSettings = (raw: unknown): AnonymizationSettings => {
   // page for an environment that already saved settings once — refresh every built-in rule's
   // definition from current code, keeping only its persisted `enabled` state. See
   // `refreshBuiltInAnonymizationRules`'s doc comment for the full rationale.
-  return { ...settings, rules: refreshBuiltInAnonymizationRules(settings.rules) };
+  return {
+    ...settings,
+    // Same resolution the server uses, so the switch shows what is actually being applied for
+    // settings saved before the master switch existed (which have no `maskingEnabled`).
+    maskingEnabled: isAnonymizationMaskingEnabled(settings),
+    rules: refreshBuiltInAnonymizationRules(settings.rules),
+  };
 };
 
 export interface NewCustomPattern {

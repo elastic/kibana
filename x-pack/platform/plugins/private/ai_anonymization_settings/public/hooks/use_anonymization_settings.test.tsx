@@ -140,4 +140,34 @@ describe('useAnonymizationSettings', () => {
     // The persisted `enabled` state must still be honored even though the pattern was refreshed.
     expect(hostNameRule?.enabled).toBe(false);
   });
+
+  it('shows masking as on and enables no new built-in for settings saved before the master switch existed', async () => {
+    // Shape persisted by earlier releases: no `maskingEnabled`, no `id`/`builtIn`, EMAIL enabled.
+    client = new FakeJsonUiSettingsClient(
+      JSON.stringify({
+        rules: [
+          {
+            type: 'RegExp',
+            entityClass: 'EMAIL',
+            pattern: '([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})',
+            enabled: true,
+          },
+        ],
+      })
+    );
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        settings: { client },
+        notifications: { toasts: { addDanger } },
+      },
+    });
+
+    const { result } = renderHook(() => useAnonymizationSettings());
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    // The server keeps masking for this value, so the switch must not claim it is off.
+    expect(result.current.maskingEnabled).toBe(true);
+    expect(result.current.builtInPatterns).toHaveLength(DEFAULT_BUILTIN_REGEX_RULES.length);
+    expect(result.current.builtInPatterns.filter(({ enabled }) => enabled)).toEqual([]);
+  });
 });
