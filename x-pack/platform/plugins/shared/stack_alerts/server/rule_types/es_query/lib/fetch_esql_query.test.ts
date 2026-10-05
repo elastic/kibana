@@ -141,7 +141,7 @@ describe('fetchEsqlQuery', () => {
         const result = await fetchEsqlQuery({
           ruleId: 'testRuleId',
           alertLimit: 1,
-          params: { ...defaultParams, groupBy },
+          params: { ...defaultParams, groupBy, esqlQuery: { esql: 'from logs-missing' } },
           services: {
             logger,
             scopedClusterClient,
@@ -168,15 +168,24 @@ describe('fetchEsqlQuery', () => {
           link: '/app/r?l=DISCOVER_APP_LOCATOR',
           parsedResults: { results: expectedResults, truncated: false },
         });
-        const warning = 'The target index does not exist. The query returned no results.';
+        const warning =
+          'The target index [logs-missing] does not exist. The query returned no results.';
         expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(warning);
         expect(mockRuleResultService.setLastRunOutcomeMessage).toHaveBeenCalledWith(warning);
+        const debugMessages = jest
+          .mocked(logger.debug)
+          .mock.calls.map(([message]) => (typeof message === 'function' ? message() : message));
+        expect(debugMessages).toContainEqual(
+          expect.stringContaining('Unknown index [logs-missing]')
+        );
       }
     );
 
     it.each([
       ['multiple indices', 'from logs-exists, logs-missing'],
-      ['a subquery', 'from logs-exists | where host.name in (from logs-missing)'],
+      ['a TS source command', 'ts logs-missing'],
+      ['a quoted index', 'from "logs-missing"'],
+      ['a FROM subquery', 'from logs-exists, (from logs-missing)'],
     ])(
       'should return an empty run with a warning when the index is unknown and the query uses %s',
       async (_, esql) => {
@@ -216,8 +225,62 @@ describe('fetchEsqlQuery', () => {
           { count: 0, group: 'all documents', hits: [], sourceFields: {} },
         ]);
         expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(
-          'The target index does not exist. The query returned no results.'
+          'The target index [logs-missing] does not exist. The query returned no results.'
         );
+      }
+    );
+
+    it.each([
+      [
+        'a lookup join',
+        'from logs-exists | lookup join logs-missing on host.name',
+        'Found 1 problem\nline 1:32: Unknown index [logs-missing]',
+      ],
+      [
+        'a WHERE subquery',
+        'from logs-exists | where host.name in (from logs-missing)',
+        'Found 1 problem\nline 1:45: Unknown index [logs-missing]',
+      ],
+      [
+        'a source index and a lookup join',
+        'from logs-missing | lookup join lookup-missing on host.name',
+        'Found 2 problems\nline 1:6: Unknown index [logs-missing]\nline 1:33: Unknown index [lookup-missing]',
+      ],
+    ])(
+      'should throw a user error when the unknown index is not a top-level source and the query uses %s',
+      async (_, esql, reason) => {
+        scopedClusterClient.asCurrentUser.esql.query.mockRejectedValueOnce(
+          createVerificationError(reason)
+        );
+
+        const error = await fetchEsqlQuery({
+          ruleId: 'testRuleId',
+          alertLimit: 1,
+          params: { ...defaultParams, esqlQuery: { esql } },
+          services: {
+            logger,
+            scopedClusterClient,
+            // @ts-expect-error
+            share: {
+              url: {
+                locators: {
+                  get: jest.fn().mockReturnValue({
+                    getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+                  } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
+                },
+              },
+            } as SharePluginStart,
+            ruleResultService: mockRuleResultService,
+          },
+          spacePrefix: '',
+          dateStart: new Date().toISOString(),
+          dateEnd: new Date().toISOString(),
+          sourceFields: [],
+        }).catch((e) => e);
+
+        expect(error).toBeInstanceOf(Error);
+        expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
+        expect(mockRuleResultService.addLastRunWarning).not.toHaveBeenCalled();
       }
     );
 

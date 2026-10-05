@@ -484,7 +484,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it('runs correctly: unknown index returns an empty run with a warning', async () => {
-      const warning = 'The target index does not exist. The query returned no results.';
+      const warning =
+        'The target index [does-not-exist] does not exist. The query returned no results.';
       const ruleId = await createESQLRule(
         supertest,
         objectRemover,
