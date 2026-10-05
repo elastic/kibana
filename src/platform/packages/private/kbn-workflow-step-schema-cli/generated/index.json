@@ -989,11 +989,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "61efe207aa570dd92932071a79a7ecce2643f83e8b5a780e4cb0292101348169"
+      "sha256": "59212037792fb6747a7d7052ea6159c5003ccebf12abee3e4fc2786c92f130f2"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "4200cd6a42c1467431ecdcb7d245633b1c1146de1fba51b332e911eb1d7bf67f"
+      "sha256": "ff2ab28c2f78c0b04cb97f53104d2618c4e2163f477accde130a3b15d6ddda0a"
     }
   }
 }
