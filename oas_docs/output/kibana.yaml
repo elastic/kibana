@@ -133926,6 +133926,7 @@ paths:
                       - $ref: '#/components/schemas/Synthetics_httpMonitorFields'
                       - $ref: '#/components/schemas/Synthetics_icmpMonitorFields'
                       - $ref: '#/components/schemas/Synthetics_tcpMonitorFields'
+                      - $ref: '#/components/schemas/Synthetics_apiMonitorFields'
                   maxItems: 1000
                   minItems: 1
                   type: array
@@ -205426,6 +205427,42 @@ components:
           $ref: '#/components/schemas/SLOs_time_window'
       title: Update SLO request
       type: object
+    Synthetics_apiMonitorFields:
+      allOf:
+        - $ref: '#/components/schemas/Synthetics_commonMonitorFields'
+        - additionalProperties: true
+          type: object
+          properties:
+            certificate_error_spki_allowlist:
+              default: []
+              description: PEM certificates whose public keys (SPKI) are allowlisted so the API request context bypasses certificate errors for matching presented certificates. This does not add a CA to the trust store.
+              items:
+                type: string
+              type: array
+            ignore_https_errors:
+              default: false
+              description: Ignore HTTPS errors.
+              type: boolean
+            inline_script:
+              description: The inline API Journey script.
+              type: string
+            playwright_options:
+              description: Playwright API request context options.
+              type: object
+            synthetics_args:
+              description: Synthetics agent CLI arguments.
+              items:
+                type: string
+              type: array
+            type:
+              description: The monitor type.
+              enum:
+                - api
+              type: string
+          required:
+            - inline_script
+            - type
+      title: API Journey monitor fields
     Synthetics_browserMonitorFields:
       allOf:
         - $ref: '#/components/schemas/Synthetics_commonMonitorFields'
