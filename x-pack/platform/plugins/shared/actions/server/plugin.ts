@@ -97,12 +97,14 @@ import {
 } from './lib/user_connector_token_cleanup_task';
 import {
   CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+  CONNECTOR_SIGNING_KEY_SAVED_OBJECT_TYPE,
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
   USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from './constants/saved_objects';
+import { createConnectorJwtSigner } from './lib/connector_signing_keys';
 import { setupSavedObjects } from './saved_objects';
 import { ACTIONS_FEATURE } from './feature';
 import { ActionsAuthorization } from './authorization/actions_authorization';
@@ -156,6 +158,9 @@ export interface PluginSetupContract {
   getAxiosInstanceWithAuth(opts: GetAxiosInstanceWithAuthFnOpts): Promise<AxiosInstance>;
 
   getCredential(opts: GetCredentialFnOpts): CredentialAccessor;
+
+  /** Signs claims with the Kibana-managed key of a connector whose spec publishes keys. */
+  getConnectorJwtSigner(connectorId: string): (claims: Record<string, unknown>) => Promise<string>;
 
   /**
    * Process-wide pool for reusable, long-lived connector clients. Empty until a client
@@ -278,6 +283,7 @@ export interface ActionsPluginsStart {
 const includedHiddenTypes = [
   ACTION_SAVED_OBJECT_TYPE,
   CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+  CONNECTOR_SIGNING_KEY_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
@@ -523,6 +529,7 @@ export class ActionsPlugin
         }
       : undefined;
     defineRoutes({
+      getSpaceId: (request) => this.spaces?.spacesService.getSpaceId(request) ?? 'default',
       router,
       licenseState: this.licenseState,
       actionsConfigUtils,
@@ -558,6 +565,16 @@ export class ActionsPlugin
         plugins.cloud
       ),
       getCredential: this.getCredentialHelper(actionsConfigUtils),
+      getConnectorJwtSigner: (connectorId: string) =>
+        createConnectorJwtSigner({
+          getEncryptedSavedObjectsClient: async () => {
+            const [, { encryptedSavedObjects }] = await core.getStartServices();
+            return encryptedSavedObjects.getClient({
+              includedHiddenTypes: [CONNECTOR_SIGNING_KEY_SAVED_OBJECT_TYPE],
+            });
+          },
+          connectorId,
+        }),
       getClientLeasePool: () => this.clientLeasePool,
       isPreconfiguredConnector: (connectorId: string): boolean => {
         return !!this.inMemoryConnectors.find(
@@ -656,6 +673,7 @@ export class ActionsPlugin
       spaceId?: string;
     }) => {
       return new ActionsClient({
+        publicBaseUrl: core.http.basePath.publicBaseUrl,
         logger,
         unsecuredSavedObjectsClient,
         actionTypeRegistry: actionTypeRegistry!,
@@ -1105,6 +1123,7 @@ export class ActionsPlugin
           });
 
           return new ActionsClient({
+            publicBaseUrl: coreStart.http.basePath.publicBaseUrl,
             logger,
             unsecuredSavedObjectsClient,
             actionTypeRegistry: actionTypeRegistry!,

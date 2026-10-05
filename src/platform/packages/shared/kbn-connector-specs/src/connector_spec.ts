@@ -66,6 +66,7 @@ export interface ConnectorMetadata {
   docsUrl?: string;
   minimumLicense: LicenseType;
   isTechnicalPreview?: boolean;
+  supportsPublicKeys?: boolean;
   supportedFeatureIds: Array<
     | 'alerting'
     | 'cases'
@@ -310,6 +311,11 @@ export interface ActionContext {
   connectorUsageCollector?: unknown;
   log: Logger;
   secrets?: Record<string, unknown>;
+  /**
+   * Signs claims with the connector's private key and sets `iss` to the connector issuer.
+   * Defined only when `metadata.supportsPublicKeys` is true.
+   */
+  signJwt?: (claims: Record<string, unknown>) => Promise<string>;
   /**
    * Reaches the third party through the Elastic-hosted Relay, for specs whose auth type routes that
    * way. Undefined when the auth type does not use Relay transport or the deployment has no Relay

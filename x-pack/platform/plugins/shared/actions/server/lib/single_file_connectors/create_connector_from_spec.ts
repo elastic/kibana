@@ -85,6 +85,9 @@ export const createConnectorTypeFromSpec = (
         getRelayClient: actions.getRelayClient,
         networkSettings,
         platform,
+        ...(spec.metadata.supportsPublicKeys
+          ? { getJwtSigner: actions.getConnectorJwtSigner }
+          : {}),
       })
     : undefined;
 

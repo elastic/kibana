@@ -101,6 +101,7 @@ import { getAxiosInstance } from '../application/connector/methods/get_axios_ins
 import type { GetAxiosInstanceWithAuthFnOpts } from '../lib/get_axios_instance';
 import { invalidateInboundConnectorEventIdentity } from '../inbound/event_identity';
 import { deleteIngressCredentialForConnector } from '../inbound/ingress_credential';
+import { deleteConnectorSigningKey } from '../lib/connector_signing_keys';
 
 export interface ConstructorOptions {
   logger: Logger;
@@ -128,6 +129,7 @@ export interface ConstructorOptions {
   ) => Promise<AxiosInstance>;
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
+  publicBaseUrl?: string;
   connectorLifecycleListeners?: ConnectorLifecycleListener[];
   getCurrentUserProfileId?: (request: KibanaRequest) => Promise<string | undefined>;
   evictClientPool?: (connectorId: string) => Promise<void>;
@@ -157,6 +159,7 @@ export interface ActionsClientContext {
   ) => Promise<AxiosInstance>;
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
+  publicBaseUrl?: string;
   connectorLifecycleListeners?: ConnectorLifecycleListener[];
   getCurrentUserProfileId?: (request: KibanaRequest) => Promise<string | undefined>;
   evictClientPool?: (connectorId: string) => Promise<void>;
@@ -189,6 +192,7 @@ export class ActionsClient {
     getAxiosInstanceWithAuth,
     spaces,
     isESOCanEncrypt,
+    publicBaseUrl,
     connectorLifecycleListeners,
     getCurrentUserProfileId,
     evictClientPool,
@@ -215,6 +219,7 @@ export class ActionsClient {
       getAxiosInstanceWithAuth,
       spaces,
       isESOCanEncrypt,
+      publicBaseUrl,
       connectorLifecycleListeners,
       getCurrentUserProfileId: getCurrentUserProfileId ?? noop,
       evictClientPool,
@@ -619,6 +624,12 @@ export class ActionsClient {
       unsecuredSavedObjectsClient: this.context.unsecuredSavedObjectsClient,
       connectorId: id,
       logger: this.context.logger,
+    });
+
+    // Not limited to types that publish keys: an import can change the stored actionTypeId.
+    await deleteConnectorSigningKey({
+      unsecuredSavedObjectsClient: this.context.unsecuredSavedObjectsClient,
+      connectorId: id,
     });
 
     const result = await this.context.unsecuredSavedObjectsClient.delete('action', id);

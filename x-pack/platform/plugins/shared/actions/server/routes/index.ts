@@ -30,6 +30,7 @@ import { oauthCancelRoute } from './oauth_cancel';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import { getGlobalExecutionLogRoute } from './get_global_execution_logs';
 import { getGlobalExecutionKPIRoute } from './get_global_execution_kpi';
+import { connectorPublicKeysRoutes } from './connector_public_keys';
 import { inboundEventsRoute } from './inbound_events';
 
 import type { ActionsPluginsStart } from '../plugin';
@@ -37,6 +38,7 @@ import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 import type { InboundEventsClient } from '../inbound/client';
 
 export interface RouteOptions {
+  getSpaceId?: (request: KibanaRequest) => string;
   router: IRouter<ActionsRequestHandlerContext>;
   licenseState: ILicenseState;
   actionsConfigUtils: ActionsConfigurationUtilities;
@@ -62,6 +64,7 @@ export function defineRoutes(opts: RouteOptions) {
     inboundEvents,
   } = opts;
 
+  connectorPublicKeysRoutes(opts);
   createConnectorRoute(router, licenseState, actionsConfigUtils);
   deleteConnectorRoute(router, licenseState);
   getConnectorRoute(router, licenseState, actionsConfigUtils);
