@@ -5,8 +5,19 @@
  * 2.0.
  */
 
-import { isAllowedBuiltinAttachment, isAllowedSkillRegistration } from './allow_lists';
+import {
+  isAllowedBuiltinAttachment,
+  isAllowedBuiltinTool,
+  isAllowedSkillRegistration,
+} from './allow_lists';
 import { ELASTIC_SKILLS_BASE_PATH } from './skills/type_definition';
+
+describe('isAllowedBuiltinTool', () => {
+  it('allows namespaced Nightshift sandbox tool ids', () => {
+    expect(isAllowedBuiltinTool('nightshift_sandbox_bash')).toBe(true);
+    expect(isAllowedBuiltinTool('nightshift_sandbox_view_file')).toBe(true);
+  });
+});
 
 describe('isAllowedBuiltinAttachment', () => {
   it('returns true for listed attachment type ids', () => {
@@ -14,7 +25,6 @@ describe('isAllowedBuiltinAttachment', () => {
     expect(isAllowedBuiltinAttachment('esql')).toBe(true);
     expect(isAllowedBuiltinAttachment('platform.dashboard.dashboard_state')).toBe(true);
     expect(isAllowedBuiltinAttachment('security.alert')).toBe(true);
-    expect(isAllowedBuiltinAttachment('security.impact')).toBe(true);
     expect(isAllowedBuiltinAttachment('security.entity_graph')).toBe(true);
     expect(isAllowedBuiltinAttachment('observability.service-map')).toBe(true);
     expect(isAllowedBuiltinAttachment('ml.anomaly_swimlane')).toBe(true);

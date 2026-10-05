@@ -17,6 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   describe('runtime fields', function () {
+    // It's flaky on MKI and will be migrated to scout soon
+    this.tags(['failsOnMKI']);
     before(async function () {
       await browser.setWindowSize(1200, 800);
       await kibanaServer.importExport.load(

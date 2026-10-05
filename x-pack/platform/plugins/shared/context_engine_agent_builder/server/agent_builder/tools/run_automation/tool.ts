@@ -59,7 +59,8 @@ export const createRunAutomationTool = ({
     Starts execution asynchronously and returns an execution id — the run continues after this
     call returns. Use platform.core.get_workflow_execution_status to check progress.
     A disabled workflow is enabled in order to run, and stays enabled afterwards.
-    Call this after save_automation when the user has asked to run the automation.
+    Call this with the workflowId that install_automation_template or save_automation returned.
+    Its confirmation dialog is where the user decides whether to run; do not ask in chat first.
   `,
   schema: runAutomationSchema,
   availability: aiIndexToolsAvailability,

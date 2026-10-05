@@ -13,7 +13,7 @@ describe('scoreContinuationSeverityStability', () => {
       { producedEventIds: [], producedEvents: [] },
       {
         producedEventIds: ['event-1'],
-        producedEvents: [{ event_id: 'event-1', status: 'open', severity: '60-high' }],
+        producedEvents: [{ event_id: 'event-1', status: 'active', severity: 'high' }],
       },
     ]);
 
@@ -25,11 +25,11 @@ describe('scoreContinuationSeverityStability', () => {
     const result = scoreContinuationSeverityStability([
       {
         producedEventIds: ['event-1'],
-        producedEvents: [{ event_id: 'event-1', status: 'open', severity: '60-high' }],
+        producedEvents: [{ event_id: 'event-1', status: 'active', severity: 'high' }],
       },
       {
         producedEventIds: ['event-2'],
-        producedEvents: [{ event_id: 'event-2', status: 'open', severity: '40-medium' }],
+        producedEvents: [{ event_id: 'event-2', status: 'active', severity: 'medium' }],
         expectReuse: false,
       },
     ]);
@@ -42,11 +42,11 @@ describe('scoreContinuationSeverityStability', () => {
     const result = scoreContinuationSeverityStability([
       {
         producedEventIds: ['event-1'],
-        producedEvents: [{ event_id: 'event-1', status: 'open', severity: '60-high' }],
+        producedEvents: [{ event_id: 'event-1', status: 'active', severity: 'high' }],
       },
       {
         producedEventIds: ['event-1'],
-        producedEvents: [{ event_id: 'event-1', status: 'open', severity: '60-high' }],
+        producedEvents: [{ event_id: 'event-1', status: 'active', severity: 'high' }],
       },
     ]);
 
@@ -59,11 +59,11 @@ describe('scoreContinuationSeverityStability', () => {
     const result = scoreContinuationSeverityStability([
       {
         producedEventIds: ['event-1'],
-        producedEvents: [{ event_id: 'event-1', status: 'open', severity: '60-high' }],
+        producedEvents: [{ event_id: 'event-1', status: 'active', severity: 'high' }],
       },
       {
         producedEventIds: ['event-1'],
-        producedEvents: [{ event_id: 'event-1', status: 'open', severity: '80-critical' }],
+        producedEvents: [{ event_id: 'event-1', status: 'active', severity: 'critical' }],
       },
     ]);
 
@@ -75,11 +75,11 @@ describe('scoreContinuationSeverityStability', () => {
     const result = scoreContinuationSeverityStability([
       {
         producedEventIds: ['event-1'],
-        producedEvents: [{ event_id: 'event-1', status: 'open', severity: '60-high' }],
+        producedEvents: [{ event_id: 'event-1', status: 'active', severity: 'high' }],
       },
       {
         producedEventIds: ['event-1'],
-        producedEvents: [{ event_id: 'event-1', status: 'open', severity: '40-medium' }],
+        producedEvents: [{ event_id: 'event-1', status: 'active', severity: 'medium' }],
       },
     ]);
 
@@ -93,11 +93,11 @@ describe('scoreContinuationSeverityStability', () => {
     const result = scoreContinuationSeverityStability([
       {
         producedEventIds: ['event-1'],
-        producedEvents: [{ event_id: 'event-1', status: 'open', severity: '60-high' }],
+        producedEvents: [{ event_id: 'event-1', status: 'active', severity: 'high' }],
       },
       {
         producedEventIds: ['event-1'],
-        producedEvents: [{ event_id: 'event-1', status: 'open', severity: '20-low' }],
+        producedEvents: [{ event_id: 'event-1', status: 'active', severity: 'low' }],
         expectReuse: false,
       },
     ]);
