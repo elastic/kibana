@@ -104,7 +104,7 @@ steps:
     if: '${{ (inputs.source_ids | size | default: 0) > 0 }}'
     with:
       method: GET
-      path: '/s/{{ workflow.spaceId }}/internal/nightshift/sources?{% for id in inputs.source_ids %}ids={{ id | url_encode }}{% unless forloop.last %}&{% endunless %}{% endfor %}'
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/sources?per_page=100&{% for id in inputs.source_ids %}ids={{ id | url_encode }}{% unless forloop.last %}&{% endunless %}{% endfor %}'
       headers:
         x-elastic-internal-origin: 'kibana'
     on-failure:

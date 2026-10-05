@@ -126,6 +126,10 @@ describe('Nightshift investigation workflow', () => {
     });
   });
 
+  it('loads every requested source on one page', () => {
+    expect(requireStep('list_investigation_sources').with?.path).toContain('per_page=100&');
+  });
+
   it('space-scopes the path of every kibana.request step', () => {
     const requestSteps = collectStepsByType(investigation.steps, 'kibana.request');
     const unscoped = requestSteps.filter(
