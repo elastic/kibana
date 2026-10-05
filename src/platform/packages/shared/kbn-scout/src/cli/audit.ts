@@ -13,7 +13,7 @@ import type { Command } from '@kbn/dev-cli-runner';
 import { findPackageForPath } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
 import ts from 'typescript';
-import { auditConfigSets, KEEP_SEPARATE, type ConfigSetsReport } from './audit_config_sets';
+import { auditConfigSets, MUST_STAY_SEPARATE, type ConfigSetsReport } from './audit_config_sets';
 
 /**
  * Extracts the `PageObjects` fixture keys straight from `createCorePageObjects`'s
@@ -391,7 +391,7 @@ export function formatAuditReportForSlack(report: AuditReport): string {
     `Checked ${census.length} core page objects and ${
       configSets.sets.length
     } config files, skipped ${
-      Object.keys(KEEP_SEPARATE).length
+      Object.keys(MUST_STAY_SEPARATE).length
     } sets kept separate on purpose. Placement rules: https://www.elastic.co/docs/extend/kibana/testing/page-objects#scout-page-objects-placement`
   );
   return lines.join('\n');
