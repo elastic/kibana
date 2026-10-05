@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import {
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
-  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
@@ -90,8 +90,8 @@ export const WORKER_DESCRIPTIONS: Record<string, string> = {
         'Works on false-positive dispositions in Alerts. Without Alert Triage worker enabled it only runs the scheduled sweep on FP alerts processed manually or using other tools.',
     }
   ),
-  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID]: i18n.translate(
-    'xpack.alertzero.watches.workers.detectionRuleCreation.description',
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID]: i18n.translate(
+    'xpack.alertzero.watches.workers.detectionRuleCoverage.description',
     {
       defaultMessage:
         'Acts on coverage gaps from Continuous Threat Hunt. With Hunt Watch disabled it has nothing to act on.',
@@ -123,8 +123,8 @@ export const WORKER_NAMES: Record<string, string> = {
     'xpack.alertzero.watches.workers.detectionRuleTuning.name',
     { defaultMessage: 'Rule Tuning' }
   ),
-  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID]: i18n.translate(
-    'xpack.alertzero.watches.workers.detectionRuleCreation.name',
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID]: i18n.translate(
+    'xpack.alertzero.watches.workers.detectionRuleCoverage.name',
     { defaultMessage: 'Rule Coverage' }
   ),
 };

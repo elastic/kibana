@@ -16,6 +16,7 @@ import type {
 import type { DiscoverSessionWarning } from '../../server';
 import type { DiscoverSessionInternalResponse } from '../../server/api/internal_schema';
 import type { DiscoverSessionClient } from './api_client';
+import { normalizeSessionFilters } from './normalize_session_filters';
 import {
   fromDiscoverSessionApiResponse,
   getDiscoverSessionReferences,
@@ -40,7 +41,7 @@ interface DiscoverSessionLoadResult {
 
 // Keep the legacy save types while callers use the existing save flow.
 // Revisit those types when the legacy path is removed; the session service can remain.
-export interface SessionService {
+export interface DiscoverSessionService {
   get: (id: string) => Promise<DiscoverSessionLoadResult>;
   save: (
     session: SaveDiscoverSessionParams,
@@ -49,7 +50,7 @@ export interface SessionService {
 }
 
 /** Selects the REST or legacy path for loading and saving Discover sessions. */
-export const createSessionService = ({
+export const createDiscoverSessionService = ({
   apiClient,
   legacyClient,
   useHttpApi,
@@ -57,9 +58,9 @@ export const createSessionService = ({
   apiClient: DiscoverSessionClient;
   legacyClient: LegacyDiscoverSessionClient;
   useHttpApi: boolean;
-}): SessionService => {
+}): DiscoverSessionService => {
   if (!useHttpApi) {
-    return createLegacySessionService(legacyClient);
+    return createLegacyDiscoverSessionService(legacyClient);
   }
 
   return {
@@ -93,9 +94,11 @@ export const createSessionService = ({
 };
 
 // Remove this fallback and the flag once Discover uses only HTTP.
-const createLegacySessionService = (legacyClient: LegacyDiscoverSessionClient): SessionService => ({
+const createLegacyDiscoverSessionService = (
+  legacyClient: LegacyDiscoverSessionClient
+): DiscoverSessionService => ({
   get: async (id) => ({
-    session: await legacyClient.getDiscoverSession(id),
+    session: normalizeSessionFilters(await legacyClient.getDiscoverSession(id)),
     warnings: [],
   }),
   save: (session, options) => legacyClient.saveDiscoverSession(session, options),

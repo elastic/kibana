@@ -91,7 +91,7 @@ describe('CreateAlertEventsStep', () => {
 
   it('captures rule.version from the rule version', async () => {
     const input = createRuleExecutionInput();
-    const rule = createRuleResponse({ metadata: { version: 5 } });
+    const rule = createRuleResponse({ version: 5 });
     const esqlRowBatch = [{ 'host.name': 'host-a' }];
 
     const state = createRulePipelineState({ input, rule, esqlRowBatch });

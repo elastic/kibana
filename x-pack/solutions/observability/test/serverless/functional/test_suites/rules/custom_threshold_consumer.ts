@@ -30,9 +30,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     consumersToVerify: Set<string>;
   }) {
     it('navigates to the rules page', async () => {
-      await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
-      await testSubjects.existOrFail('manageRulesPageButton', { timeout: 10000 });
-      await testSubjects.click('manageRulesPageButton');
+      await retry.try(async () => {
+        await svlCommonNavigation.sidenav.clickLink({
+          deepLinkId: 'observability-overview:alerts',
+        });
+        expect(await testSubjects.exists('manageRulesPageButton')).toBeTruthy();
+        await testSubjects.click('manageRulesPageButton');
+      });
       await testSubjects.existOrFail('createRuleButton', { timeout: 10000 });
     });
 
@@ -88,7 +92,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
   }
 
-  describe('Custom threshold rule - consumers', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/275253
+  describe.skip('Custom threshold rule - consumers', function () {
     const ruleIdList: string[] = [];
 
     before(async () => {

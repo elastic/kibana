@@ -7,8 +7,8 @@
 
 /*
  * A policy stored before the macOS ransomware row existed must display the value it holds,
- * not a factory default. macOS ransomware defaults to `off` and Windows to `prevent`, so a
- * row reading the wrong branch would silently misreport the customer's setting.
+ * not a factory default. Windows defaults to `prevent`, so a macOS row reading the wrong branch
+ * or falling back to a default would silently misreport the customer's setting.
  */
 
 import React from 'react';
