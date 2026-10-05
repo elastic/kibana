@@ -20,6 +20,7 @@ import { registerTopNFunctionsAPMTransactionsRoute } from './apm';
 import { registerFlameChartSearchRoute } from './flamechart';
 import { registerTopNFunctionsSearchRoute } from './functions';
 import { registerSetupRoute } from './universal_profiling/setup/route';
+import { registerStatusRoute } from './status/route';
 import { registerStorageExplorerRoute } from './storage_explorer/route';
 import {
   registerTraceEventsTopNContainersSearchRoute,
@@ -61,6 +62,8 @@ export function registerRoutes(params: RouteRegisterParameters) {
   // Setup of Profiling resources, automates the configuration of Universal Profiling
   // and will show instructions on how to add data
   registerSetupRoute(params);
+  // Profiling status across the OTel and Universal Profiling schemas
+  registerStatusRoute(params);
   registerStorageExplorerRoute(params);
   registerTopNFunctionsAPMTransactionsRoute(params);
 }
