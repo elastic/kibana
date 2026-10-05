@@ -2,11 +2,12 @@ version: "1"
 name: Hunt Watch - package report
 description: >
   Reviews a completed hunt's results and decides which findings warrant a
-  Proposal versus which should be dismissed. Resolves every respond action it
-  can actually fill (for example isolating a host), then hands each Proposal
-  off to its own approval workflow. Closes the Investigation when the run was
-  clean. Reports a partial run rather than failing outright, and skips
-  packaging entirely if the Investigation was never created.
+  Proposal versus which should be dismissed. Mints one "Run a deep forensics
+  investigation" handoff per confirmed host (and an analyst recommendation for
+  evidence a host handoff cannot cover), then hands each Proposal off to its
+  own approval workflow. Closes the Investigation only when the run was clean.
+  Reports a partial run rather than failing outright, and skips packaging
+  entirely if the Investigation was never created.
 enabled: true
 # security + continuous-threat-hunt: the per-feature child-grouping pair every
 # other Watch's children carry (detection-rule-creation/detection-rule-tuning/
@@ -65,6 +66,12 @@ triggers:
         hasConfirmedHit:
           type: boolean
           description: Whether the hunt cleared the confirmed-hit bar.
+        autonomy:
+          type: string
+          description: >-
+            Worker autonomy level, forwarded to each gate so a `supervised` Worker's
+            forensics handoff auto-approves the way the Attack Discovery review's
+            does. Defaults to `manual` downstream.
       required:
         - reportId
         - investigationConversationId
@@ -143,8 +150,8 @@ steps:
             actionInput: "${{ foreach.item.actionInput }}"
             investigationConversationId: "{{ inputs.investigationConversationId }}"
             runId: "{{ inputs.runId }}"
-            closureSummary: "{{ steps.decide_and_package.output.closureSummary }}"
-            expectedProposalCount: "${{ steps.decide_and_package.output.expectedProposalCount }}"
+            hostName: "{{ foreach.item.hostName }}"
+            autonomy: "{{ inputs.autonomy }}"
 
   # A scalar `default: 0` is fine in this engine; it is only a bracket array
   # literal that gets silently dropped. Safe when start_proposal_gates was
@@ -208,14 +215,18 @@ steps:
         Packaging did not complete: {{ variables.package_reason }}. No proposals were created and the Investigation stays open for a retry.
         {% elsif packaged.dismiss == true -%}
         No confirmed hits, so packaging closed this Investigation as benign{% if packaged.coverage.written != nil and packaged.coverage.written != empty %} and recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
+        {% elsif packaged.dismissSuppression == 'existing_proposals' -%}
+        No confirmed hits this run, but this Investigation already carries a Proposal from an earlier run, so it was left open rather than closed as benign{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}; recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}. Close it once that earlier finding is settled.
+        {% elsif packaged.dismissSuppression == 'check_failed' -%}
+        No confirmed hits this run, but packaging could not verify whether this Investigation already carries a Proposal, so it was left open rather than closed as benign{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}; recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
         {% elsif packaged.mintSuppression == 'check_failed' -%}
         This run found something mint-worthy, but packaging could not verify whether the Investigation already has a Proposal, so no new one was created this time{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}; recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}. The next scheduled sweep will not retry this report on its own -- this run's hunt already marked it hunted -- so a manual run targeting this reportId is what actually retries it.
         {% elsif packaged.mintSuppression == 'existing_proposals' -%}
         This run found something mint-worthy, but the Investigation already has a Proposal from an earlier run, so no new one was created. Review the existing Proposal{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}; also recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
         {% else -%}
-        Packaging prepared {{ packaged.proposals | size }} proposal{% if packaged.proposals.size != 1 %}s{% endif %} for analyst review and launched an approval gate for each; the gate is what creates the Proposal.{% if variables.dispatch_failed_count > 0 %} {{ variables.dispatch_failed_count }} of the approval gates failed to launch.{% else %} The Investigation stays open until every gate is decided.{% endif %}
+        Packaging prepared {{ packaged.proposals | size }} proposal{% if packaged.proposals.size != 1 %}s{% endif %} for analyst review and launched an approval gate for each; the gate is what creates the Proposal.{% if variables.dispatch_failed_count > 0 %} {{ variables.dispatch_failed_count }} of the approval gates failed to launch.{% endif %} Approving a handoff hands that host to Forensics Watch, which writes its report into this Investigation; the Investigation stays open for it, and until an analyst closes it.
         {% for p in packaged.proposals -%}
-          - **{{ p.title | default: p.category }}**{% if p.hostName != nil and p.hostName != empty %} on `{{ p.hostName }}`{% endif %}{% if p.actionWorkflowId != nil and p.actionWorkflowId != empty %}: runs `{{ p.actionWorkflowId }}` on approval{% else %}: recommendation only{% endif %}
+          - **{{ p.title | default: p.category }}**{% if p.actionWorkflowId != nil and p.actionWorkflowId != empty %}: hands {% if p.hostName != nil and p.hostName != empty %}`{{ p.hostName }}`{% else %}the finding{% endif %} to Forensics Watch on approval{% else %}: recommendation only{% endif %}
         {% endfor -%}
         {% if packaged.coverage.written != nil and packaged.coverage.written != empty -%}
           - Recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch.
@@ -226,7 +237,9 @@ steps:
         {% endif -%}
 
   # Benign close: only when packaging actually ran and decided to dismiss
-  # (clean run, no hits). A packaging failure or skip never reaches `dismiss`
+  # (clean run, no hits, and no Proposal from an earlier run on this
+  # Investigation -- `dismiss` is already false otherwise, see the step's
+  # `dismissSuppression`). A packaging failure or skip never reaches `dismiss`
   # (steps.decide_and_package.output stays nil in both cases), so this cannot
   # close an Investigation packaging never evaluated.
   - name: dismiss_investigation_if_clean

@@ -36,6 +36,7 @@ describe('getDisableConfirmation', () => {
   it.each([
     ['Continuous Threat Hunt', HUNT, RULE_COVERAGE],
     ['Attack Discovery', ATTACK_DISCOVERY, ENDPOINT_ANALYSIS],
+    ['Endpoint Analysis', ENDPOINT_ANALYSIS, HUNT],
   ])('asks before turning off %s while its dependent is enabled', (name, provider, dependent) => {
     const confirmation = getDisableConfirmation(
       provider,
@@ -127,6 +128,29 @@ describe('getWorkerWarningReasons', () => {
     ]);
     expect(messages(getWorkerWarningReasons(ATTACK_DISCOVERY, state))).toEqual([
       'Endpoint Analysis is enabled but has nothing to analyze while this Worker is off.',
+    ]);
+  });
+
+  // Hunt hands every confirmed host to Endpoint Analysis, so it is both a provider (to Rule
+  // Coverage) and a dependent (of Endpoint Analysis); each edge carries its own copy.
+  it('uses the Endpoint Analysis → Continuous Threat Hunt copy', () => {
+    const state = enabledById({ [ENDPOINT_ANALYSIS]: false, [HUNT]: true });
+
+    expect(messages(getWorkerWarningReasons(HUNT, state))).toEqual([
+      'Endpoint Analysis is disabled — approved handoffs wait and no forensic analysis runs.',
+    ]);
+    expect(messages(getWorkerWarningReasons(ENDPOINT_ANALYSIS, state))).toEqual([
+      'Continuous Threat Hunt is enabled but its approved handoffs wait while this Worker is off.',
+    ]);
+  });
+
+  it('warns Continuous Threat Hunt on both of its edges at once', () => {
+    const state = enabledById({ [ENDPOINT_ANALYSIS]: false, [HUNT]: false, [RULE_COVERAGE]: true });
+
+    // Dependent reasons first (what Hunt itself is missing), then provider reasons.
+    expect(messages(getWorkerWarningReasons(HUNT, state))).toEqual([
+      'Endpoint Analysis is disabled — approved handoffs wait and no forensic analysis runs.',
+      'Rule Coverage is enabled but has no gap signals while this Worker is off.',
     ]);
   });
 });

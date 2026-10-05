@@ -8,9 +8,6 @@
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
 import type { significantSecurityEventAttachmentDataSchema } from '../../../../../common/significant_security_event_schema';
 import { significantSecurityEventAttachmentReadSchema } from '../../../../../common/significant_security_event_schema';
-import type { ResolveHostEnrollment } from '../../../fleet/resolve_host_enrollment';
-import { buildMatchesRequired } from '../common/matches_required';
-import type { RehydrateProcessSelectors } from './rehydrate_process_selectors';
 import type {
   CurrentRunHost,
   CurrentRunState,
@@ -19,6 +16,8 @@ import type {
 } from './types';
 
 const SSE_ATTACHMENT_TYPE = 'security.significant_security_event';
+
+type CurrentRunSse = ReturnType<typeof significantSecurityEventAttachmentDataSchema.parse>;
 
 const currentVersionData = (attachment: VersionedAttachment): unknown => {
   const version = attachment.versions.find((v) => v.version === attachment.current_version);
@@ -30,9 +29,7 @@ const currentVersionData = (attachment: VersionedAttachment): unknown => {
  * `hunt_result` rather than quoting each SSE's `evidence_for`/`evidence_against` verbatim
  * (which repeats the same sentence once per SSE).
  */
-const extractEvidenceSummary = (
-  currentRun: Array<ReturnType<typeof significantSecurityEventAttachmentDataSchema.parse>>
-): HuntEvidenceSummary => {
+const extractEvidenceSummary = (currentRun: CurrentRunSse[]): HuntEvidenceSummary => {
   let tier1HitCount: number | undefined;
   const tier2ByTechnique = new Map<string, HuntEvidenceTechnique>();
 
@@ -64,25 +61,36 @@ const extractEvidenceSummary = (
 };
 
 /**
+ * The union of every SSE's hunt window. Each SSE of one run was searched in the same
+ * window, so this is normally that window verbatim; the min/max is only defensive.
+ */
+const extractHuntWindow = (currentRun: CurrentRunSse[]): CurrentRunState['huntWindow'] => {
+  let from: string | undefined;
+  let to: string | undefined;
+  for (const sse of currentRun) {
+    const range = sse.hunt_result?.time_range;
+    if (!range) continue;
+    if (from === undefined || range.from < from) from = range.from;
+    if (to === undefined || range.to > to) to = range.to;
+  }
+  return from !== undefined && to !== undefined ? { from, to } : undefined;
+};
+
+/**
  * Reads current-run SSE attachments from a conversation and builds packaging state.
  * Returns undefined when no current-run SSE is present (run_incomplete).
  */
-export const readCurrentRunState = async ({
+export const readCurrentRunState = ({
   attachments,
   reportId,
   runId,
-  resolveHostEnrollment,
-  rehydrateProcessSelectors,
 }: {
   attachments: VersionedAttachment[] | undefined;
   reportId: string;
   runId: string;
-  resolveHostEnrollment: ResolveHostEnrollment;
-  rehydrateProcessSelectors: RehydrateProcessSelectors;
-}): Promise<CurrentRunState | undefined> => {
+}): CurrentRunState | undefined => {
   const sseAttachments = (attachments ?? []).filter((a) => a.type === SSE_ATTACHMENT_TYPE);
-  const currentRun: Array<ReturnType<typeof significantSecurityEventAttachmentReadSchema.parse>> =
-    [];
+  const currentRun: CurrentRunSse[] = [];
 
   for (const attachment of sseAttachments) {
     const raw = currentVersionData(attachment);
@@ -128,7 +136,7 @@ export const readCurrentRunState = async ({
     ),
   ];
 
-  const hostNames = [
+  const hosts: CurrentRunHost[] = [
     ...new Set(
       currentRun.flatMap((sse) =>
         sse.entities
@@ -136,28 +144,7 @@ export const readCurrentRunState = async ({
           .map((e) => e.value)
       )
     ),
-  ];
-
-  const hosts: CurrentRunHost[] = [];
-  for (const name of hostNames) {
-    const enrollment = await resolveHostEnrollment(name);
-    if (enrollment.enrolled) {
-      hosts.push({ name, enrolled: true, agentId: enrollment.agentId });
-    } else {
-      hosts.push({ name, enrolled: false });
-    }
-  }
-
-  const alertRefs = currentRun.flatMap((sse) => sse.alerts ?? []);
-  const eventRefs = currentRun.flatMap((sse) => sse.events ?? []);
-  const processSelectors = await rehydrateProcessSelectors({
-    alerts: alertRefs.map((a) => ({ alert_id: a.alert_id, index: a.index })),
-    events: eventRefs.map((e) => ({
-      event_id: e.event_id,
-      source_index: e.source_index,
-      ...(e.matched?.technique_id ? { matched: { technique_id: e.matched.technique_id } } : {}),
-    })),
-  });
+  ].map((name) => ({ name }));
 
   const hasNonHostEntity = currentRun.some((sse) =>
     sse.entities.some((e) => e.field !== 'host.name' && e.field !== 'host.hostname')
@@ -165,19 +152,10 @@ export const readCurrentRunState = async ({
   const hasIocIndicator = currentRun.some((sse) =>
     sse.security_knowledge_indicators.some((ski) => ski.type === 'ioc')
   );
-  // The hunt names where a hit can become a response action (`actionable_indices`: mappings
-  // that carry `process.entity_id` or `process.pid`) on each SSE, so packaging reads the
-  // evidence against what the customer's mappings say rather than a seed list. An empty
-  // list means nothing in this run is host-scoped, which is the right reading when the
-  // customer has no process telemetry.
-  const matchesActionable = buildMatchesRequired([
-    ...new Set(currentRun.flatMap((sse) => sse.hunt_result?.actionable_indices ?? [])),
-  ]);
-  const allEventsActionable = eventRefs.every((e) => matchesActionable(e.source_index));
-  const hasProcessBearingEvent = eventRefs.some((e) => matchesActionable(e.source_index));
   const manualRemediation = [
     ...new Set(currentRun.flatMap((sse) => sse.maps_to_proposal?.manual_remediation ?? [])),
   ];
+  const huntWindow = extractHuntWindow(currentRun);
 
   return {
     runId,
@@ -189,11 +167,9 @@ export const readCurrentRunState = async ({
     corroboratedTechniques,
     hasNonHostEntity,
     hasIocIndicator,
-    allEventsActionable,
-    hasProcessBearingEvent,
     manualRemediation,
     hosts,
-    processSelectors,
     evidence,
+    ...(huntWindow ? { huntWindow } : {}),
   };
 };

@@ -105,17 +105,35 @@ steps:
             - term:
                 attributes.status: pending
 
+  # Two subject forms reach this run. Attack Discovery review names an alert
+  # (`attack_discovery_alert_id`), and the host is resolved from it below. Hunt
+  # Watch has no alert and names the host directly (`host_name`); see
+  # `actions/action_handoff_to_forensics.yaml`. Either one is a subject. Resolved
+  # in its own step because `resolve_request` needs the result in an `and`, and
+  # mixing `and` with `or` in one Liquid expression is a precedence hazard
+  # (evaluated right to left, not by parentheses).
+  - name: resolve_subject
+    type: data.set
+    with:
+      has_subject: >-
+        ${{ steps.read_ki.output.hits.hits[0]._source.attributes.attack_discovery_alert_id != blank
+          or steps.read_ki.output.hits.hits[0]._source.attributes.host_name != blank }}
+
   - name: resolve_request
     type: data.set
     with:
       attack_discovery_alert_id: "{{ steps.read_ki.output.hits.hits[0]._source.attributes.attack_discovery_alert_id }}"
       investigation_id: "{{ steps.read_ki.output.hits.hits[0]._source.attributes.investigation_id }}"
+      # A producer-named host, which wins over the alert lookup in `resolve_host`.
+      host_name_hint: "{{ steps.read_ki.output.hits.hits[0]._source.attributes.host_name | default: '' }}"
+      # What the producer observed, handed to the agent in place of the alert framing.
+      context_hint: "{{ steps.read_ki.output.hits.hits[0]._source.attributes.context | default: '' }}"
       # Set by an earlier run of this workflow, before the agent. Blank means this
       # indicator has not been analyzed yet.
       forensic_attempted_at: "{{ steps.read_ki.output.hits.hits[0]._source.attributes.forensic_attempted_at | default: '' }}"
       # Explicitly set whether we have the data we need to continue
       has_request: >-
-        ${{ steps.read_ki.output.hits.hits[0]._source.attributes.attack_discovery_alert_id != blank
+        ${{ steps.resolve_subject.output.has_subject == true
           and steps.read_ki.output.hits.hits[0]._source.attributes.investigation_id != blank }}
 
   # Verify the investigation exists and is readable before proceeding with the run.
@@ -178,6 +196,11 @@ steps:
       # lookups happen before the agent runs.
       - name: fetch_attack_discovery_alert
         type: elasticsearch.search
+        # Only an alert-named subject has anything to fetch. A host-named one skips
+        # the lookup, and every read of this step's output below is `| default:`
+        # or `!= blank` guarded, so a skipped step reads as "no alert" rather than
+        # failing the run.
+        if: "${{ steps.resolve_request.output.attack_discovery_alert_id != blank }}"
         with:
           index: ".alerts-security.attack.discovery.alerts-{{ workflow.spaceId }},.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}"
           ignore_unavailable: true
@@ -218,7 +241,9 @@ steps:
       # This step is before the agent, so that retry is cheap.
       - name: journal_fetch_alert_problem
         type: workflow.execute
-        if: "${{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._id == blank }}"
+        if: >-
+          ${{ steps.resolve_request.output.attack_discovery_alert_id != blank
+            and steps.fetch_attack_discovery_alert.output.hits.hits[0]._id == blank }}
         with:
           workflow-id: "{{ consts.journal_note }}"
           inputs:
@@ -227,13 +252,14 @@ steps:
               No Attack Discovery alert matching `{{ steps.resolve_request.output.attack_discovery_alert_id }}`
               was found, so endpoint analysis could not run.
 
-      # The discovery's own `host.name` first, then the host its constituent alerts agree
-      # on. Blank here means both lookups succeeded and neither named a host, since an
-      # error in either would have failed the run.
+      # The producer's own host first (a hunt names it outright), then the
+      # discovery's `host.name`, then the host its constituent alerts agree on.
+      # Blank here means every lookup succeeded and none named a host, since an
+      # error in either alert lookup would have failed the run.
       - name: resolve_host
         type: data.set
         with:
-          host_name: "{{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source.host.name | default: steps.extract_host_from_ad_constituent_alerts.output.aggregations.host_name.buckets[0].key | default: '' }}"
+          host_name: "{{ steps.resolve_request.output.host_name_hint | default: steps.fetch_attack_discovery_alert.output.hits.hits[0]._source.host.name | default: steps.extract_host_from_ad_constituent_alerts.output.aggregations.host_name.buckets[0].key | default: '' }}"
       - name: when_host_known
         type: if
         condition: "${{ steps.resolve_host.output.host_name != blank }}"
@@ -299,8 +325,8 @@ steps:
                   - tool_ids:
                       - security.alertzero.actions.list
               message: >
-                I have an alert on {{ steps.resolve_host.output.host_name }}.
-                Perform forensic analysis and extract all IoCs.
+                {% if steps.resolve_request.output.context_hint != blank %}{{ steps.resolve_request.output.context_hint }}{% else %}I have an alert on {{ steps.resolve_host.output.host_name }}.{% endif %}
+                Perform forensic analysis of {{ steps.resolve_host.output.host_name }} and extract all IoCs.
                 Write the reconstruction to `timeline.events` and the indicators to `iocs`,
                 matching this step's schema. Use `rationale` only for the assessment:
                 - Whether this is a real incident, which other hosts are affected, what the
@@ -671,7 +697,8 @@ steps:
                   Endpoint analysis was not run.
 
     else:
-      # Malformed indicator that is missing an Attack Discovery alert ID or investigation ID.
+      # Malformed indicator that names no subject (neither an Attack Discovery alert
+      # nor a host) or no investigation ID.
       # A retry won't fix this and leaving it `pending` would cause it to be re-dispatched
       # on every sweep for the rest of the lookback window, so it's explicitly retired here instead.
       - name: journal_invalid_request
@@ -690,8 +717,9 @@ steps:
           inputs:
             conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
             message: >-
-              Indicator `{{ inputs.ki_id }}` names no Attack Discovery alert, so endpoint
-              analysis could not run. The indicator was retired and will not be retried.
+              Indicator `{{ inputs.ki_id }}` names neither an Attack Discovery alert nor a
+              host, so endpoint analysis could not run. The indicator was retired and will
+              not be retried.
 
       # Mark investigation invalid. This is skipped when `read_ki` found nothing:
       # there is no document to retire, and the sweep cannot re-select one that does not
@@ -707,7 +735,7 @@ steps:
           ki:
             attributes:
               status: invalid
-              invalid_reason: "Missing attack_discovery_alert_id or investigation_id"
+              invalid_reason: "Missing investigation_id, or neither attack_discovery_alert_id nor host_name"
 
   # Indicator is well-formed, but its investigation could not be read. Mark
   # `failed` rather than `invalid` since the problem is on the investigation's end.

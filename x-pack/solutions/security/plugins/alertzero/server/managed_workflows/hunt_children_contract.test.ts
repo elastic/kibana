@@ -8,6 +8,8 @@
 import { parse } from 'yaml';
 import {
   getManagedWorkflowDefinition,
+  ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID,
+  ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID,
   ALERTZERO_HUNT_WORKFLOW_ID,
   ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID,
   ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID,
@@ -24,6 +26,10 @@ import {
   SYSTEM_SECURITY_HUNT_PROPOSAL_GATE_ID,
   WRITE_HUNT_EVIDENCE_URL,
 } from '@kbn/alertzero-common';
+import {
+  HUNT_HANDOFF_ACTION_WORKFLOW_ID,
+  decidePackageReport,
+} from '../services/watches/hunt/packaging/decide_package_report';
 
 interface NestedStep {
   name: string;
@@ -38,6 +44,7 @@ interface ParsedWorkflow {
   tags?: string[];
   settings?: { timeout?: string };
   outputs?: Array<{ name: string; type: string }>;
+  triggers?: Array<{ type: string; inputs?: { properties?: Record<string, unknown> } }>;
   steps: NestedStep[];
 }
 
@@ -177,6 +184,18 @@ describe(ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID, () => {
       expect.arrayContaining(['summary'])
     );
   });
+
+  // The settlement barrier is gone with the gate's close step: nothing downstream reads a
+  // count any more, so the packaging child must not pass one either.
+  it('threads autonomy and the host, not a settlement count, to each gate', () => {
+    const workflow = parseChild(ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID);
+    const inputs = stepNamed(workflow, 'dispatch_gate').with?.inputs as Record<string, unknown>;
+
+    expect(inputs.autonomy).toBe('{{ inputs.autonomy }}');
+    expect(inputs.hostName).toBe('{{ foreach.item.hostName }}');
+    expect(inputs).not.toHaveProperty('expectedProposalCount');
+    expect(inputs).not.toHaveProperty('closureSummary');
+  });
 });
 
 describe(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID, () => {
@@ -192,59 +211,50 @@ describe(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID, () => {
     expect(workflow.settings?.timeout).toBe('176h');
   });
 
-  // Each count is read from its own status-scoped pair (elastic/security-team#19773: a
-  // single unfiltered page undercounted past 100 Proposals on an Investigation, since
-  // `total` -- not the returned array -- is the accurate count at any volume, and getting
-  // it per status needs a per-status query). Every pair still swallows its own failure, so
-  // every count has to fall back to its own earlier read -- reading the retry alone means a
-  // transient failure on the second call discards a first call that succeeded.
-  it('falls back to its own first requery for every settlement count', () => {
+  it('creates the Proposal through the AlertZero bridge with the resolved auto-approve', () => {
     const workflow = parseChild(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID);
-    const counts = stepNamed(workflow, 'resolve_settlement_counts').with as Record<string, string>;
+    const create = stepNamed(workflow, 'create_and_gate_proposal');
 
-    const countToRequeryPrefix: Record<string, string> = {
-      created_count: 'created',
-      pending_count: 'pending',
-      executing_count: 'executing',
-    };
-
-    for (const [count, prefix] of Object.entries(countToRequeryPrefix)) {
-      expect(counts[count]).toEqual(
-        expect.stringContaining(`steps.requery_${prefix}_retry.output`)
-      );
-      expect(counts[count]).toEqual(
-        expect.stringContaining(`default: steps.requery_${prefix}.output`)
-      );
-    }
+    expect(create.with?.['workflow-id']).toBe(ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID);
+    expect((create.with?.inputs as Record<string, unknown>).autoApprove).toBe(
+      '${{ steps.resolve_auto_approve.output.value }}'
+    );
+    expect(workflow.triggers?.[0]?.inputs?.properties).toHaveProperty('autonomy');
   });
 
-  // pending_count/executing_count gate on being *zero*, so a failed pair must never
-  // collapse to literal `0` (indistinguishable from "nothing outstanding") -- `1` is the
-  // fail-closed sentinel instead. created_count's own `default: 0` is left alone: a 0
-  // created count essentially never clears `>= expectedProposalCount`, so it is already
-  // fail-safe on its own.
-  it('fails closed on pending/executing, not just created, when both reads for a status fail', () => {
+  // The whole point of the handoff: Forensics Watch writes its report into this
+  // Investigation, so the gate may keep it open but must never close it.
+  it('never closes the Investigation', () => {
     const workflow = parseChild(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID);
-    const counts = stepNamed(workflow, 'resolve_settlement_counts').with as Record<string, string>;
+    const patches = flattenSteps(workflow.steps).filter(
+      (step) => step.type === 'ai.conversation.metadata.patch'
+    );
 
-    expect(counts.created_count).toEqual(expect.stringContaining('default: 0'));
-    expect(counts.pending_count).toEqual(expect.stringContaining('default: 1'));
-    expect(counts.executing_count).toEqual(expect.stringContaining('default: 1'));
+    expect(patches.map((step) => (step.with?.updates as Record<string, unknown>).status)).toEqual([
+      'open',
+    ]);
+    expect(flattenSteps(workflow.steps).map(({ name }) => name)).not.toContain('close_if_settled');
   });
 
-  // The requery for pending/executing has to actually filter by status server-side --
-  // otherwise it is just the unfiltered requery again under a different name, and the
-  // fix above doesn't scope anything.
-  it.each([
-    ['requery_pending', 'pending'],
-    ['requery_pending_retry', 'pending'],
-    ['requery_executing', 'executing'],
-    ['requery_executing_retry', 'executing'],
-  ])('%s filters the requery by status: %s', (stepName, status) => {
+  it('records the handoff on the Investigation only once the action succeeded', () => {
     const workflow = parseChild(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID);
-    const query = stepNamed(workflow, stepName).with?.query as Record<string, unknown>;
+    const record = stepNamed(workflow, 'record_forensics_handoff');
 
-    expect(query.status).toBe(status);
+    expect(record.if).toBe('${{ steps.record_decision.output.approved == true }}');
+    const approved = (stepNamed(workflow, 'record_decision').with as Record<string, string>)
+      .approved;
+    expect(approved).toContain("decision == 'approved'");
+    expect(approved).toContain("status == 'succeeded'");
+  });
+
+  it('reads the decision prose by the id the bridge returned', () => {
+    const workflow = parseChild(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID);
+    const read = stepNamed(workflow, 'read_proposal_decision');
+
+    expect(read.if).toBe('${{ steps.create_and_gate_proposal.output.proposalId != blank }}');
+    expect(read.with?.path).toBe(
+      '/s/{{ workflow.spaceId }}/internal/proposals/{{ steps.create_and_gate_proposal.output.proposalId }}'
+    );
   });
 });
 
@@ -274,6 +284,14 @@ describe(ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID, () => {
     }
   });
 
+  it('threads its autonomy to packaging so a supervised handoff can auto-approve', () => {
+    const inputs = stepNamed(renderWorker(), 'package_report').with?.inputs as Record<
+      string,
+      string
+    >;
+    expect(inputs.autonomy).toBe('{{ consts.worker_settings.autonomy }}');
+  });
+
   it('closes each branch with the hunt headline, the packaging summary, and the execution link', () => {
     const inputs = stepNamed(renderWorker(), 'write_run_conclusion').with?.inputs as Record<
       string,
@@ -284,6 +302,14 @@ describe(ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID, () => {
     expect(inputs.message).toEqual(expect.stringContaining('steps.package_report.output.reason'));
     expect(inputs.message).toEqual(expect.stringContaining('steps.hunt.output.reason'));
     expect(inputs.message).toEqual(expect.stringContaining('execution.url'));
+  });
+
+  it('no longer promises that the Investigation closes once proposals are decided', () => {
+    const inputs = stepNamed(renderWorker(), 'write_run_conclusion').with?.inputs as Record<
+      string,
+      string
+    >;
+    expect(inputs.message).not.toMatch(/Investigation closes once/);
   });
 });
 
@@ -299,6 +325,51 @@ describe('Hunt Watch public exports (kbn-alertzero-common)', () => {
     expect(SYSTEM_SECURITY_HUNT_PROPOSAL_GATE_ID).toBe(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID);
   });
 
+  // Packaging mints the handoff by the action's registered id; a rename on either side
+  // would otherwise only surface when the gate failed to resolve the workflow.
+  it('mints the forensics handoff by its registered action id', () => {
+    expect(HUNT_HANDOFF_ACTION_WORKFLOW_ID).toBe(ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID);
+  });
+
+  // The action closes `actionInput` to additional properties, so a key packaging sends that
+  // the action does not declare fails validation at approval time, after an analyst has
+  // already said yes; a required key packaging omits fails the same way. Checked against the
+  // action's own YAML, the way the Attack Discovery review's call site is.
+  it('fills the handoff action input with declared keys only, and every required one', () => {
+    const action = parseChild(ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID);
+    const actionInput = action.triggers?.[0]?.inputs?.properties?.actionInput as {
+      properties?: Record<string, unknown>;
+      required?: string[];
+    };
+    const declared = Object.keys(actionInput.properties ?? {});
+
+    const { proposals } = decidePackageReport({
+      conversationId: 'conv-1',
+      spaceId: 'default',
+      reportId: 'rpt-1',
+      runId: 'run-1',
+      state: {
+        runId: 'run-1',
+        reportId: 'rpt-1',
+        hasConfirmedHit: true,
+        titles: ['A finding'],
+        evidenceLines: [],
+        techniques: [],
+        corroboratedTechniques: [],
+        hosts: [{ name: 'host-a' }],
+        hasNonHostEntity: false,
+        hasIocIndicator: false,
+        manualRemediation: [],
+        evidence: { tier2Confirmed: [] },
+      },
+    });
+    const sent = Object.keys(proposals[0].actionInput ?? {});
+
+    expect(proposals[0].actionWorkflowId).toBe(ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID);
+    expect(sent.filter((key) => !declared.includes(key))).toEqual([]);
+    expect((actionInput.required ?? []).filter((key) => !sent.includes(key))).toEqual([]);
+  });
+
   // No `kibana.request` step in any of the five hunt YAMLs calls a route path that
   // isn't one of the exported constants above -- a stale or hand-typed path string
   // would otherwise only 404 at runtime, on the first sweep that reaches that step.
@@ -310,8 +381,9 @@ describe('Hunt Watch public exports (kbn-alertzero-common)', () => {
       FIND_OR_CREATE_INVESTIGATION_URL,
       WRITE_HUNT_EVIDENCE_URL,
       // main's own public package, not alertzero's -- Hunt Watch calls it but does not
-      // own it, so it is not one of this package's exports.
-      '/internal/proposals',
+      // own it, so it is not one of this package's exports. The gate reads one Proposal
+      // back by the id the bridge returned.
+      '/internal/proposals/{{ steps.create_and_gate_proposal.output.proposalId }}',
     ]);
     const SPACE_PREFIX = '/s/{{ workflow.spaceId }}';
     const stripSpacePrefix = (path: string): string | undefined =>

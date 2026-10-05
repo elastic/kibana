@@ -15,6 +15,7 @@ import {
   ALERTZERO_HUNT_WORKFLOW,
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW,
 } from '.';
+import { ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID } from './create_proposal';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 
 // Route-path and cross-package id checks (including the SYSTEM_SECURITY_HUNT_*
@@ -46,7 +47,13 @@ interface TriggerInputSchema {
 interface YamlStep {
   name: string;
   type?: string;
-  with?: { 'workflow-id'?: string; inputs?: Record<string, unknown>; path?: string };
+  with?: {
+    'workflow-id'?: string;
+    inputs?: Record<string, unknown>;
+    path?: string;
+    updates?: Record<string, unknown>;
+    [key: string]: unknown;
+  };
   if?: string;
   steps?: YamlStep[];
 }
@@ -81,6 +88,8 @@ const proposalGateSteps = flatten(proposalGate.steps);
 
 const stepIn = (steps: YamlStep[], name: string) => steps.find((step) => step.name === name);
 
+const liquid = createWorkflowLiquidEngine();
+
 // Evaluates a single `${{ }}` expression the way the engine does (same approach as
 // coverage_review.test.ts's evaluateExpression / forensics_run_endpoint_analysis.test.ts's
 // evaluate): strip the delimiters and run the real Liquid engine against a hand-built context.
@@ -89,7 +98,7 @@ const evaluateExpression = (expression: string, context: Record<string, unknown>
   if (!(trimmed.startsWith('${{') && trimmed.endsWith('}}'))) {
     throw new Error(`Expected \${{ }} expression, got: ${expression}`);
   }
-  return createWorkflowLiquidEngine().evalValueSync(trimmed.slice(3, -2).trim(), context);
+  return liquid.evalValueSync(trimmed.slice(3, -2).trim(), context);
 };
 
 describe('Hunt Watch worker chain', () => {
@@ -217,175 +226,163 @@ describe('Hunt Watch worker chain', () => {
     expect(dispatch?.with?.['workflow-id']).toBe(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW.id);
   });
 
-  // The gate's settlement predicate lives entirely in Liquid (resolve_settlement_counts ->
-  // resolve_settled -> close_if_settled's `if`), so it has no TypeScript step handler to unit
-  // test directly -- evaluated here against the real YAML the way the engine would, same
-  // approach coverage_review.test.ts's evaluateMarkProcessed uses for its own chained
-  // data.set -> if. Covers elastic/security-team#19773's two counting bugs: the requery
-  // pagination fix (status-scoped `total` reads replacing a truncated page) and the
-  // pending/executing fail-closed default (a failed status read must never be
-  // indistinguishable from "nothing outstanding").
-  describe('proposal gate settlement predicate', () => {
-    const settlementCounts = stepIn(proposalGateSteps, 'resolve_settlement_counts')?.with as
-      | Record<string, string>
-      | undefined;
-    const settledWith = stepIn(proposalGateSteps, 'resolve_settled')?.with as
-      | Record<string, string>
-      | undefined;
-    const closeIf = stepIn(proposalGateSteps, 'close_if_settled')?.if;
+  // The Worker's autonomy decides whether a forensics handoff waits for an analyst, the
+  // same way the Attack Discovery Worker's does for the same handoff. It travels
+  // Worker -> packaging child -> gate -> the bridge's `autoApprove`, as plain inputs.
+  describe('autonomy reaches the gate', () => {
+    it('is forwarded from the Worker settings to the packaging child', () => {
+      expect(stepIn(workerSteps, 'package_report')?.with?.inputs?.autonomy).toBe(
+        '{{ consts.worker_settings.autonomy }}'
+      );
+    });
 
-    // `undefined` models `on-failure: continue: true` swallowing a failed read: the step
-    // entry exists with an `error`, but no `output` -- never a missing step entry entirely.
-    type RequeryOutcome = { total: number } | undefined;
+    it('is forwarded from the packaging child to every gate', () => {
+      const dispatch = stepIn(
+        flatten(stepIn(packageReportSteps, 'start_proposal_gates')?.steps ?? []),
+        'dispatch_gate'
+      );
 
-    const evaluateSettlement = ({
-      created,
-      createdRetry,
-      pending,
-      pendingRetry,
-      executing,
-      executingRetry,
-      expectedProposalCount,
-    }: {
-      created?: RequeryOutcome;
-      createdRetry?: RequeryOutcome;
-      pending?: RequeryOutcome;
-      pendingRetry?: RequeryOutcome;
-      executing?: RequeryOutcome;
-      executingRetry?: RequeryOutcome;
-      expectedProposalCount: number;
+      expect(dispatch?.with?.inputs?.autonomy).toBe('{{ inputs.autonomy }}');
+      expect(dispatch?.with?.inputs?.hostName).toBe('{{ foreach.item.hostName }}');
+    });
+
+    it.each([
+      ['supervised', true],
+      ['assisted', false],
+      ['manual', false],
+      [undefined, false],
+    ])('auto-approves at %s autonomy: %s', (autonomy, expected) => {
+      const context = stepIn(proposalGateSteps, 'resolve_context')?.with as Record<string, string>;
+      const resolved = liquid.parseAndRenderSync(context.autonomy, {
+        inputs: { autonomy },
+        consts: { default_autonomy: 'manual' },
+      });
+      const autoApprove = stepIn(proposalGateSteps, 'resolve_auto_approve')?.with as Record<
+        string,
+        string
+      >;
+
+      expect(
+        evaluateExpression(autoApprove.value, {
+          steps: { resolve_context: { output: { autonomy: resolved } } },
+        })
+      ).toBe(expected);
+    });
+
+    it('hands the resolved auto-approve to the bridge', () => {
+      const create = stepIn(proposalGateSteps, 'create_and_gate_proposal');
+
+      expect(create?.with?.['workflow-id']).toBe(ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID);
+      expect(create?.with?.inputs?.autoApprove).toBe(
+        '${{ steps.resolve_auto_approve.output.value }}'
+      );
+    });
+  });
+
+  // The gate records the decision and never closes the Investigation: an approved
+  // handoff leaves it open for the report Forensics Watch writes into it, and a
+  // dismissed or expired one is an analyst's to close, since the same Investigation
+  // may carry other handoffs still awaiting a decision. Evaluated against the real YAML
+  // the way the engine would.
+  describe('proposal gate decision recording', () => {
+    const recordDecision = stepIn(proposalGateSteps, 'record_decision')?.with as Record<
+      string,
+      string
+    >;
+
+    const evaluateDecision = (output?: {
+      proposalId?: string;
+      status?: string;
+      decision?: string;
     }) => {
-      const asStepResult = (outcome: RequeryOutcome) =>
-        outcome ? { output: outcome } : { error: { message: 'request failed' } };
-
-      const stepsContext = {
+      const context = {
         steps: {
-          requery_created: asStepResult(created),
-          requery_created_retry: asStepResult(createdRetry),
-          requery_pending: asStepResult(pending),
-          requery_pending_retry: asStepResult(pendingRetry),
-          requery_executing: asStepResult(executing),
-          requery_executing_retry: asStepResult(executingRetry),
+          create_and_gate_proposal: output ? { output } : { error: { message: 'boom' } },
         },
-        inputs: { expectedProposalCount },
       };
-
-      const createdCount = evaluateExpression(settlementCounts!.created_count, stepsContext);
-      const pendingCount = evaluateExpression(settlementCounts!.pending_count, stepsContext);
-      const executingCount = evaluateExpression(settlementCounts!.executing_count, stepsContext);
-
-      const settlementContext = {
-        variables: {
-          created_count: createdCount,
-          pending_count: pendingCount,
-          executing_count: executingCount,
-        },
-        inputs: { expectedProposalCount },
+      return {
+        created: evaluateExpression(recordDecision.created, context),
+        approved: evaluateExpression(recordDecision.approved, context),
+        acknowledged: evaluateExpression(recordDecision.acknowledged, context),
+        declined: evaluateExpression(recordDecision.declined, context),
+        expired: evaluateExpression(recordDecision.expired, context),
       };
-
-      const settled = evaluateExpression(settledWith!.settled, settlementContext);
-      const closes = evaluateExpression(closeIf!, { variables: { settled } });
-
-      return { createdCount, pendingCount, executingCount, settled, closes };
+    };
+    const none = {
+      created: true,
+      approved: false,
+      acknowledged: false,
+      declined: false,
+      expired: false,
     };
 
-    it('settles and closes once every count confirms clean, including a genuine zero', () => {
-      const result = evaluateSettlement({
-        created: { total: 3 },
-        createdRetry: { total: 3 },
-        pending: { total: 0 },
-        pendingRetry: { total: 0 },
-        executing: { total: 0 },
-        executingRetry: { total: 0 },
-        expectedProposalCount: 3,
-      });
+    it('counts a handoff as approved only once its action succeeded', () => {
+      expect(
+        evaluateDecision({ proposalId: 'p1', decision: 'approved', status: 'succeeded' })
+      ).toEqual({ ...none, approved: true });
+    });
 
-      // Pins that a successful `total: 0` stays 0 rather than falling through to the
-      // fail-closed `default: 1` -- only a missing (failed) read should ever do that.
-      expect(result).toEqual({
-        createdCount: 3,
-        pendingCount: 0,
-        executingCount: 0,
-        settled: true,
-        closes: true,
+    it('does not count an approved handoff whose action failed as handed off', () => {
+      expect(
+        evaluateDecision({ proposalId: 'p1', decision: 'approved', status: 'failed' })
+      ).toEqual(none);
+    });
+
+    // The analyst recommendation carries no action, so approving it settles `no_action`.
+    it('records an approved recommendation as acknowledged, not handed off', () => {
+      expect(
+        evaluateDecision({ proposalId: 'p1', decision: 'approved', status: 'no_action' })
+      ).toEqual({ ...none, acknowledged: true });
+      const journal = stepIn(proposalGateSteps, 'journal_decision')?.with as {
+        inputs: { message: string };
+      };
+      expect(journal.inputs.message).toContain('Acknowledged the analyst recommendation');
+    });
+
+    it('records a dismissal', () => {
+      expect(
+        evaluateDecision({ proposalId: 'p1', decision: 'dismissed', status: 'no_action' })
+      ).toEqual({ ...none, declined: true });
+    });
+
+    it('records an expiry', () => {
+      expect(evaluateDecision({ proposalId: 'p1', status: 'expired' })).toEqual({
+        ...none,
+        expired: true,
       });
     });
 
-    it('does not close when a page beyond the first 100 still has a pending Proposal', () => {
-      // The bug this ticket fixes: before the pagination fix, pending/executing were tallied
-      // by filtering a `size: 100` page client-side, which could never see a pending Proposal
-      // past that page. `total` from a status-scoped query is unaffected by page size, so a
-      // large count here still settles correctly only once it is genuinely 0.
-      const result = evaluateSettlement({
-        created: { total: 140 },
-        pending: { total: 1 },
-        executing: { total: 0 },
-        expectedProposalCount: 3,
-      });
-
-      expect(result.pendingCount).toBe(1);
-      expect(result.settled).toBe(false);
-      expect(result.closes).toBe(false);
+    // elastic/security-team#19849's first direction: a Proposal the bridge could not create
+    // is journaled, not silently lost.
+    it('records a creation failure as not created, and journals it', () => {
+      expect(evaluateDecision(undefined)).toEqual({ ...none, created: false });
+      const journal = stepIn(proposalGateSteps, 'journal_decision')?.with as {
+        inputs: { message: string };
+      };
+      expect(journal.inputs.message).toContain('record_decision.output.created != true');
+      expect(journal.inputs.message).toContain('create_and_gate_proposal.error.message');
     });
 
-    it('fails closed, not open, when both pending reads fail', () => {
-      // The regression this guards: before the fail-closed default, a failed pending pair
-      // collapsed to a literal 0 (same as "nothing pending"), and a correctly-read
-      // created_count/executing_count could still satisfy the rest of the predicate --
-      // closing the Investigation over a Proposal this gate simply failed to observe.
-      const result = evaluateSettlement({
-        created: { total: 3 },
-        executing: { total: 0 },
-        expectedProposalCount: 3,
-      });
+    it('keeps the Investigation open on approval, and only then', () => {
+      const record = stepIn(proposalGateSteps, 'record_forensics_handoff');
 
-      expect(result.pendingCount).toBe(1);
-      expect(result.settled).toBe(false);
-      expect(result.closes).toBe(false);
+      expect(record?.type).toBe('ai.conversation.metadata.patch');
+      expect(record?.if).toBe('${{ steps.record_decision.output.approved == true }}');
+      expect(record?.with?.updates?.status).toBe('open');
     });
 
-    it('fails closed, not open, when both executing reads fail', () => {
-      const result = evaluateSettlement({
-        created: { total: 3 },
-        pending: { total: 0 },
-        expectedProposalCount: 3,
-      });
-
-      expect(result.executingCount).toBe(1);
-      expect(result.settled).toBe(false);
-      expect(result.closes).toBe(false);
-    });
-
-    it('does not settle when both creation reads fail, even with nothing pending or executing', () => {
-      // created_count's own `default: 0` needs no fail-closed sentinel: a 0 created count
-      // essentially never clears `>= expectedProposalCount`, so a failed creation pair already
-      // blocks settlement the same way it did before the requery was split into three pairs.
-      const result = evaluateSettlement({
-        pending: { total: 0 },
-        executing: { total: 0 },
-        expectedProposalCount: 3,
-      });
-
-      expect(result.createdCount).toBe(0);
-      expect(result.settled).toBe(false);
-      expect(result.closes).toBe(false);
-    });
-
-    it('falls back to the first read when only the retry fails', () => {
-      const result = evaluateSettlement({
-        created: { total: 3 },
-        pending: { total: 0 },
-        executing: { total: 0 },
-        expectedProposalCount: 3,
-      });
-
-      expect(result).toEqual({
-        createdCount: 3,
-        pendingCount: 0,
-        executingCount: 0,
-        settled: true,
-        closes: true,
-      });
+    it('never closes the Investigation and never counts its Proposals', () => {
+      const closers = proposalGateSteps.filter(
+        (step) =>
+          step.type === 'ai.conversation.metadata.patch' && step.with?.updates?.status === 'closed'
+      );
+      expect(closers).toEqual([]);
+      expect(proposalGateSteps.map(({ name }) => name)).not.toEqual(
+        expect.arrayContaining([expect.stringMatching(/^requery_|^close_if_settled$/)])
+      );
+      expect(proposalGate.triggers?.[0]?.inputs?.properties).not.toHaveProperty(
+        'expectedProposalCount'
+      );
     });
   });
 });

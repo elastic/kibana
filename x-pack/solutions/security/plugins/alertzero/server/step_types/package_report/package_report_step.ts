@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { packageReportStepCommonDefinition } from '../../../common/step_types/package_report';
-import type { ActionsService } from '../../services/actions/actions_service';
 import type { HuntServices } from '../../services/watches/hunt/types';
 import { createExistingProposalsCounter } from '../../services/watches/hunt/packaging/check_existing_proposals';
-import { makeRehydrateProcessSelectors } from '../../services/watches/hunt/packaging/rehydrate_process_selectors';
 import {
   PackageReportIdentityError,
   runPackageReport,
-  type RunPackageReportDeps,
 } from '../../services/watches/hunt/packaging/run_package_report';
 import {
   createCoverageWriter,
@@ -25,7 +22,6 @@ import {
 } from '../../services/watches/hunt/packaging/write_coverage_kis';
 
 export interface PackageReportStepDependencies {
-  getActionsService: () => ActionsService;
   getConversations: () => AgentBuilderPluginStart['conversations'];
   /** For the existing-Proposals dedup guard; see `RunPackageReportDeps['countExistingProposals']`. */
   getHuntServices: () => HuntServices;
@@ -37,26 +33,8 @@ export interface PackageReportStepDependencies {
    * request because the setting is space-scoped and resolved from the request's own space.
    */
   isContextEngineEnabled: (request: KibanaRequest) => Promise<boolean>;
-  /**
-   * Space-scoped per call: hostnames are not unique across spaces, so the Fleet lookup has to be
-   * bound to the space the step runs in. Defaults to treating every host as unenrolled when not
-   * provided (e.g. no Fleet plugin).
-   */
-  getResolveHostEnrollment?: (spaceId: string) => RunPackageReportDeps['resolveHostEnrollment'];
-  /**
-   * Defaults to the real `mget`-backed rehydrator built from the step's own scoped client, so
-   * the calling user's privileges apply. Overridable for tests and Fleet-less deployments.
-   */
-  getRehydrateProcessSelectors?: (
-    esClient: ElasticsearchClient,
-    logger?: Logger
-  ) => RunPackageReportDeps['rehydrateProcessSelectors'];
   logger?: Logger;
 }
-
-const defaultResolveHostEnrollment: RunPackageReportDeps['resolveHostEnrollment'] = async () => ({
-  enrolled: false,
-});
 
 /**
  * Workflow adapter for hunt packaging: validates the step input against the workflow's own
@@ -64,12 +42,9 @@ const defaultResolveHostEnrollment: RunPackageReportDeps['resolveHostEnrollment'
  * Every packaging decision lives behind `runPackageReport` and the services it calls.
  */
 export const getPackageReportStepDefinition = ({
-  getActionsService,
   getConversations,
   getHuntServices,
   isContextEngineEnabled,
-  getResolveHostEnrollment = () => defaultResolveHostEnrollment,
-  getRehydrateProcessSelectors = makeRehydrateProcessSelectors,
   logger,
 }: PackageReportStepDependencies) =>
   createServerStepDefinition({
@@ -92,25 +67,11 @@ export const getPackageReportStepDefinition = ({
         const client = await conversations.getScopedClient({ request });
         const conversation = await client.get(input.investigationConversationId);
 
-        const listRespondActions: RunPackageReportDeps['listRespondActions'] = async (sid) => {
-          try {
-            const listed = await getActionsService().list(sid, request, ['respond']);
-            return { ok: true, actions: listed.actions };
-          } catch {
-            return { ok: false, reason: 'catalog_error' };
-          }
-        };
-
         const writeCoverageKis = createCoverageWriter({
           spaceId,
           getEsClient: () => context.contextManager.getScopedEsClient() as EsCoverageClient,
           isContextEngineEnabled: () => isContextEngineEnabled(request),
         });
-
-        const rehydrateProcessSelectors = getRehydrateProcessSelectors(
-          context.contextManager.getScopedEsClient(),
-          logger
-        );
 
         const countExistingProposals = createExistingProposalsCounter({
           proposalsService: getHuntServices().getProposalsService(),
@@ -128,10 +89,7 @@ export const getPackageReportStepDefinition = ({
           hasConfirmedHit: input.hasConfirmedHit,
           attachments: conversation.attachments,
           deps: {
-            listRespondActions,
             writeCoverageKis,
-            resolveHostEnrollment: getResolveHostEnrollment(spaceId),
-            rehydrateProcessSelectors,
             countExistingProposals,
           },
         });

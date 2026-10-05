@@ -19,8 +19,10 @@ export const ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID = 'system-security-hunt-pr
 /**
  * Child dispatched by Hunt Watch's packaging child (`hunt_package_report.yaml`) via
  * `workflow.executeAsync`, one per minted Proposal. Wraps
- * `system-create-alertzero-proposal`'s single `waitForApproval`, then closes
- * the Investigation on settlement. Tagged `security` + `continuous-threat-hunt`
+ * `system-create-alertzero-proposal`'s single `waitForApproval`, then records the
+ * decision on the Investigation without ever closing it: an approved forensics
+ * handoff leaves it open for the report Forensics Watch writes into it, and a
+ * dismissed or expired one is an analyst's to close. Tagged `security` + `continuous-threat-hunt`
  * (not `watch`/`watch-hunt`, which stays Worker-only) for Workflows-list
  * findability, matching `hunt_package_report.yaml` and every other Watch's
  * own feature children. Owns no trigger of its own, so enablement is
@@ -31,6 +33,6 @@ export const ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW = {
   id: ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
+  version: 2,
   yaml: HUNT_PROPOSAL_GATE_YAML,
 } as const satisfies ManagedWorkflowDefinition;

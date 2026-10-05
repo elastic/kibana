@@ -1,11 +1,13 @@
 version: "1"
 name: Run a deep forensics investigation
 description: >
-  AlertZero action: hands an attack to Forensics Watch by writing a Context Engine
-  knowledge indicator its sweep picks up. Executed by the investigation proposal gate
-  once the proposal is approved — by an analyst under `manual` autonomy, or by the gate
-  itself under `supervised`. Either way the handoff is attributed to whoever approved it
-  and recorded in the proposals index.
+  AlertZero action: hands a subject to Forensics Watch by writing a Context Engine
+  knowledge indicator its sweep picks up. The subject is an Attack Discovery attack
+  (Attack Discovery review) or a host a hunt confirmed activity on (Hunt Watch).
+  Executed by the investigation proposal gate once the proposal is approved — by an
+  analyst under `manual` autonomy, or by the gate itself under `supervised`. Either
+  way the handoff is attributed to whoever approved it and recorded in the proposals
+  index.
 enabled: true
 tags:
   # Generic tag every action workflow carries, so the catalog can be
@@ -19,9 +21,9 @@ consts:
   actionMetadata:
     name: Run a deep forensics investigation
     description: >-
-      Hands this attack to Forensics Watch, which determines the response
-      actions to take. Writes a Context Engine knowledge indicator the
-      Forensics Watch sweep picks up.
+      Hands this attack or host to Forensics Watch, which determines the
+      response actions to take. Writes a Context Engine knowledge indicator
+      the Forensics Watch sweep picks up.
     # Matches the contain / investigate / configure vocabulary the Watch Floor
     # sync settled on. The schema types this as a free string: the workflows
     # package owns no vocabulary.
@@ -46,16 +48,24 @@ triggers:
         actionInput:
           type: object
           description: >
-            The handoff contract: two ids, the classification, and the provenance of
-            the analysis that produced it. Every action workflow takes a single
-            `actionInput` object so the generic gate workflow never needs to know an
-            action's parameter names.
+            The handoff contract: the subject ids, the classification, and the
+            provenance of the analysis that produced it. Every action workflow takes a
+            single `actionInput` object so the generic gate workflow never needs to
+            know an action's parameter names.
 
             IDS AND PROVENANCE ONLY, deliberately. The attack narrative, the alert set,
             the affected hosts and the time window are all reachable from
             `investigation_id` and `attack_discovery_id`, and a second copy here is a
             second copy that can disagree with the first. Forensics dereferences; it is
             not handed a snapshot.
+
+            Two producers share this contract. Attack Discovery review names the
+            subject by `attack_discovery_id`, and Forensics resolves the host from
+            that alert. Hunt Watch has no alert: it names the host directly
+            (`host_name`) and supplies a `subject_id` that keys the knowledge
+            indicator the way `attack_discovery_id` does for an attack. Exactly one
+            of the two subject forms must be present; the step below fails the
+            action when neither is.
           # Every string is bounded, matching the review's own trigger schema. These
           # five flow into a knowledge indicator's title, description and attributes,
           # which are persisted and swept by a consumer, so an unbounded value here is
@@ -100,11 +110,52 @@ triggers:
               type: string
               maxLength: 128
               description: >-
-                Execution id of the review that produced this handoff. The provenance
-                link back to the FP/TP analysis and its report.
+                Execution id of the run that produced this handoff: the review for an
+                attack, the Worker sweep for a hunt. The provenance link back to the
+                analysis and its report.
+            subject_id:
+              type: string
+              maxLength: 512
+              description: >-
+                Producer-chosen stable id for a handoff that has no Attack Discovery
+                alert. Forms the knowledge indicator id the same way
+                `attack_discovery_id` does, so a re-approved handoff for the same
+                subject replaces the indicator rather than appending one. Ignored
+                when `attack_discovery_id` is present.
+            host_name:
+              type: string
+              maxLength: 256
+              description: >-
+                Host the forensic run should analyze, for a producer that has no
+                Attack Discovery alert to resolve one from. Forensics reads it from
+                the indicator before falling back to the alert lookup.
+            report_id:
+              type: string
+              maxLength: 256
+              description: >-
+                Threat report the hunt confirmed this host against. Carried on the
+                indicator as context; the Investigation stays authoritative for the
+                evidence.
+            producer:
+              type: string
+              maxLength: 128
+              description: >-
+                Producer stamp for the indicator's `attributes.producer`. Defaults to
+                the Attack Discovery review's value.
+            watch_id:
+              type: string
+              maxLength: 64
+              description: >-
+                Producing Watch, for the indicator's `watch:` tag and
+                `attributes.watch_id`. Defaults to `floor`.
+            context:
+              type: string
+              maxLength: 2000
+              description: >-
+                One short paragraph the forensic agent is given in place of "I have an
+                alert on this host": what the producer observed and where. Plain text.
           required:
             - ai_index_id
-            - attack_discovery_id
             - investigation_id
             - classification
             - workflow_execution_id
@@ -118,6 +169,26 @@ outputs:
   - name: aiIndexId
     type: string
 steps:
+  # The trigger schema cannot express "one of `attack_discovery_id` or
+  # `subject_id` + `host_name`" without `anyOf`, which the engine's trigger
+  # validation does not evaluate, so the subject check is a step. Failing here,
+  # before the KI write, fails the proposal the same way a KI write failure
+  # does: the gate records it as `failed` and the Investigation stays open.
+  - name: resolve_subject
+    type: data.set
+    with:
+      ki_subject: "{{ inputs.actionInput.attack_discovery_id | default: inputs.actionInput.subject_id }}"
+      has_host_subject: "${{ inputs.actionInput.subject_id != blank and inputs.actionInput.host_name != blank }}"
+
+  - name: fail_without_subject
+    type: workflow.fail
+    if: "${{ inputs.actionInput.attack_discovery_id == blank and steps.resolve_subject.output.has_host_subject != true }}"
+    with:
+      message: >-
+        Forensics handoff refused: the action input names neither an
+        attack_discovery_id nor a subject_id with a host_name, so there is no
+        subject for Forensics Watch to analyze.
+
   # `contextEngine:enabled` is off by default and this step throws
   # `FeatureDisabledError` when it is. That failure still fails the proposal: the
   # fallback journals the error onto the Investigation, then `workflow.fail`
@@ -163,29 +234,43 @@ steps:
   # one index, and both ids above are space-scoped — a consumer that cannot filter on
   # the space cannot resolve either. Provenance is metadata about the writer; this is
   # the routing data a sweep selects on.
+  #
+  # The subject attributes are written whichever producer sent them: an empty
+  # `attack_discovery_alert_id` on a hunt handoff reads as blank on the consumer's
+  # side, which is exactly how its `resolve_request` tells the two subject forms
+  # apart. `host_name` and `context` are the consumer's vocabulary too (see
+  # `forensics_run_endpoint_analysis.yaml`'s `resolve_request` and the agent prompt).
   - name: write_analyze_endpoint_ki
     type: context-engine.createKi
     with:
       ai_index_id: "{{ inputs.actionInput.ai_index_id }}"
-      ki_id: "analyze-endpoint-{{ inputs.actionInput.attack_discovery_id }}"
+      ki_id: "analyze-endpoint-{{ steps.resolve_subject.output.ki_subject }}"
       ki:
         type: security.analyze_endpoint
-        title: "Forensics handoff for Attack Discovery {{ inputs.actionInput.attack_discovery_id }}"
+        title: >-
+          {%- if inputs.actionInput.attack_discovery_id != blank -%}
+          Forensics handoff for Attack Discovery {{ inputs.actionInput.attack_discovery_id }}
+          {%- else -%}
+          Forensics handoff for host {{ inputs.actionInput.host_name }}
+          {%- endif -%}
         description: >-
-          Classified {{ inputs.actionInput.classification }} by review
+          Classified {{ inputs.actionInput.classification }} by run
           {{ inputs.actionInput.workflow_execution_id }}. Investigation
-          {{ inputs.actionInput.investigation_id }} is authoritative for the attack
-          narrative, its correlated alerts, and the FP/TP report.
+          {{ inputs.actionInput.investigation_id }} is authoritative for the
+          narrative, the evidence, and any analysis report.
         tags:
           # The sweep's selector.
           - consumer:forensics
           # The producing tier.
-          - watch:floor
+          - "watch:{{ inputs.actionInput.watch_id | default: 'floor' }}"
         attributes:
           status: pending
-          producer: alertzero.ad_review.handoff_to_forensics.v1
-          watch_id: floor
-          attack_discovery_alert_id: "{{ inputs.actionInput.attack_discovery_id }}"
+          producer: "{{ inputs.actionInput.producer | default: 'alertzero.ad_review.handoff_to_forensics.v1' }}"
+          watch_id: "{{ inputs.actionInput.watch_id | default: 'floor' }}"
+          attack_discovery_alert_id: "{{ inputs.actionInput.attack_discovery_id | default: '' }}"
+          host_name: "{{ inputs.actionInput.host_name | default: '' }}"
+          report_id: "{{ inputs.actionInput.report_id | default: '' }}"
+          context: "{{ inputs.actionInput.context | default: '' }}"
           investigation_id: "{{ inputs.actionInput.investigation_id }}"
           space_id: "{{ workflow.spaceId }}"
           classification: "{{ inputs.actionInput.classification }}"
