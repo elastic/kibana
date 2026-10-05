@@ -125,7 +125,7 @@ apiTest.describe('Match rules API', { tag: '@local-stateful-classic' }, () => {
       for (const body of [
         {},
         { matcher: null },
-        { matcher: { tags: null, expression: null } },
+        { matcher: {} },
         { matcher: { expression: 'data.host.name: "host-1"' } },
       ]) {
         const response = await apiClient.post(MATCH_RULES_URL, { headers: readerHeaders, body });
@@ -150,6 +150,18 @@ apiTest.describe('Match rules API', { tag: '@local-stateful-classic' }, () => {
     expect(response.body.total).toBe(2);
     expect(response.body.page).toBe(2);
     expect(response.body.per_page).toBe(1);
+  });
+
+  apiTest('validation: should return 400 when a matcher field is null', async ({ apiClient }) => {
+    for (const matcher of [{ tags: null }, { expression: null }]) {
+      const response = await apiClient.post(MATCH_RULES_URL, {
+        headers: readerHeaders,
+        body: { matcher },
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
   });
 
   apiTest('validation: should return 400 for unknown top-level keys', async ({ apiClient }) => {
