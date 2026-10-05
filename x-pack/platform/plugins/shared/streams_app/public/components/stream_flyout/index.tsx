@@ -29,6 +29,7 @@ import {
   EuiPopover,
   EuiButtonIcon,
   EuiToolTip,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
 import {
@@ -38,10 +39,12 @@ import {
 import { useKibana } from '../../hooks/use_kibana';
 import { ClassicStreamBadge, LifecycleBadge, WiredStreamBadge } from '../stream_badges';
 import { useDataSetQuality } from '../../hooks/use_data_set_quality';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { StreamAttachments } from './stream_attachments';
 import { StreamQuality } from './stream_quality';
 import { StreamRetention } from './stream_retention';
 import { ViewInDiscoverButton } from './discover_button';
+import { useTimeRange } from '../../hooks/use_time_range';
 import { StreamFlyoutOverview } from './stream_flyout_overview';
 import { StreamDeleteModal } from '../stream_delete_modal';
 import { StreamProcessing } from './stream_processing';
@@ -171,6 +174,8 @@ function StreamFlyoutContent({
 }: StreamFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const { loading, definition, refresh } = useStreamFlyoutDetail();
+  const { push } = useStreamsAppRouter();
+  const { rangeFrom, rangeTo } = useTimeRange();
   const [uncontrolledTab, setUncontrolledTab] = useState<StreamFlyoutTabId>(DEFAULT_TAB);
   const selectTab = onSelectTab ?? setUncontrolledTab;
   const { quality, isQualityLoading } = useDataSetQuality(name, definition);
@@ -342,6 +347,22 @@ function StreamFlyoutContent({
 
   if (definition) {
     customActions.push(
+      <EuiContextMenuItem
+        data-test-subj="canvasFlyoutStreamMenu-openAsPage"
+        key="open-as-page"
+        icon="fullScreen"
+        onClick={() => {
+          push('/{key}', {
+            path: { key: name },
+            query: { rangeFrom, rangeTo },
+          });
+        }}
+      >
+        {i18n.translate('xpack.streams.flyout.tab.goToLink', {
+          defaultMessage: 'Go to page',
+        })}
+      </EuiContextMenuItem>,
+      <EuiHorizontalRule key="separator" margin="none" />,
       <EuiContextMenuItem
         data-test-subj="canvasFlyoutStreamMenu-processingToggle"
         key="processing-toggle"
