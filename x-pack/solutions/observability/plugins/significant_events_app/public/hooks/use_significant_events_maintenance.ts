@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { QueryFunctionContext } from '@kbn/react-query';
-import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import { useIsMutating, useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import {
   stateBlocksNewActivity,
   type SignificantEventsMaintenanceStatus,
@@ -18,6 +18,19 @@ import { useKibana } from './use_kibana';
 import { getFormattedError } from '../util/errors';
 
 const MAINTENANCE_STATUS_QUERY_KEY = ['significantEventsMaintenanceStatus'] as const;
+const MAINTENANCE_MUTATION_KEY = ['significantEventsMaintenance'] as const;
+const RESET_QUERY_KEYS = [
+  ['significantEvents'],
+  ['significantEventLifecycle'],
+  ['detections'],
+  ['detectionHistory'],
+  ['features'],
+  ['discoveryQueries'],
+  ['discoveryQueriesOccurrences'],
+  ['queryOccurrenceStats'],
+  ['streamOnboardingStatus'],
+  ['significant_events_discovery_status'],
+] as const;
 
 const PAUSE_SUCCESS_TOAST_TITLE = i18n.translate(
   'xpack.significantEventsApp.maintenance.pauseSuccessToastTitle',
@@ -37,6 +50,19 @@ const RESUME_SUCCESS_TOAST_TITLE = i18n.translate(
 const RESUME_ERROR_TOAST_TITLE = i18n.translate(
   'xpack.significantEventsApp.maintenance.resumeErrorToastTitle',
   { defaultMessage: 'Failed to resume Significant Events activity' }
+);
+
+const RESET_SUCCESS_TOAST_TITLE = i18n.translate(
+  'xpack.significantEventsApp.maintenance.resetSuccessToastTitle',
+  { defaultMessage: 'Reset Significant Events data' }
+);
+const RESET_ERROR_TOAST_TITLE = i18n.translate(
+  'xpack.significantEventsApp.maintenance.resetErrorToastTitle',
+  { defaultMessage: 'Failed to reset Significant Events data' }
+);
+const RESET_WARNINGS_TOAST_TITLE = i18n.translate(
+  'xpack.significantEventsApp.maintenance.resetWarningsToastTitle',
+  { defaultMessage: 'Reset Significant Events data with warnings' }
 );
 
 const PAUSE_PARTIAL_TOAST_TITLE = i18n.translate(
@@ -104,9 +130,7 @@ export const useBlocksNewActivity = (): {
   return { blocksActivity, isBlocked, isLoading, isError, status, activityBlockTooltip };
 };
 
-/** Pause and resume actions. Each is a single synchronous API call that returns
- * the resulting summary; both invalidate the shared status query so the UI
- * reflects the new state (and re-enables/disables the guarded toggles). */
+/** Maintenance actions share mutation status and invalidate the persisted status query. */
 export const useSignificantEventsMaintenanceActions = () => {
   const {
     core: {
@@ -119,11 +143,13 @@ export const useSignificantEventsMaintenanceActions = () => {
     },
   } = useKibana();
   const queryClient = useQueryClient();
+  const isMutating = useIsMutating({ mutationKey: MAINTENANCE_MUTATION_KEY }) > 0;
 
   const invalidateStatus = () =>
     queryClient.invalidateQueries({ queryKey: MAINTENANCE_STATUS_QUERY_KEY });
 
   const pauseMutation = useMutation<SignificantEventsMaintenanceSummary, Error, void>({
+    mutationKey: MAINTENANCE_MUTATION_KEY,
     mutationFn: () =>
       significantEventsRepositoryClient.fetch(
         'POST /internal/significant_events/maintenance/_pause',
@@ -148,6 +174,7 @@ export const useSignificantEventsMaintenanceActions = () => {
   });
 
   const resumeMutation = useMutation<SignificantEventsMaintenanceSummary, Error, void>({
+    mutationKey: MAINTENANCE_MUTATION_KEY,
     mutationFn: () =>
       significantEventsRepositoryClient.fetch(
         'POST /internal/significant_events/maintenance/_resume',
@@ -173,10 +200,57 @@ export const useSignificantEventsMaintenanceActions = () => {
     onSettled: invalidateStatus,
   });
 
+  const resetMutation = useMutation<SignificantEventsMaintenanceSummary, Error, void>({
+    mutationKey: MAINTENANCE_MUTATION_KEY,
+    mutationFn: () =>
+      significantEventsRepositoryClient.fetch(
+        'POST /internal/significant_events/maintenance/_reset',
+        { signal: null }
+      ),
+    onSuccess: async (summary) => {
+      const { deleted } = summary;
+      const deletedText = deleted
+        ? i18n.translate('xpack.significantEventsApp.maintenance.resetDeletedDescription', {
+            defaultMessage:
+              'Deleted {knowledgeIndicators, number} knowledge indicators, {storedQueries, number} stored queries, {rules, number} rules, and {investigations, number} investigations; wiped {dataStreams, number} data streams.',
+            values: {
+              knowledgeIndicators: deleted.knowledgeIndicators,
+              storedQueries: deleted.storedQueries,
+              rules: deleted.rules,
+              investigations: deleted.investigations,
+              dataStreams: deleted.dataStreams,
+            },
+          })
+        : undefined;
+      if (summary.partialFailures.length > 0) {
+        toasts.addWarning({
+          title: RESET_WARNINGS_TOAST_TITLE,
+          text: [deletedText, partialFailuresText(summary.partialFailures.length)]
+            .filter(Boolean)
+            .join(' '),
+        });
+      } else {
+        toasts.addSuccess({ title: RESET_SUCCESS_TOAST_TITLE, text: deletedText });
+      }
+      await Promise.all(
+        RESET_QUERY_KEYS.map((queryKey) =>
+          queryClient.invalidateQueries({ queryKey, type: 'active' })
+        )
+      );
+    },
+    onError: (error) => {
+      toasts.addError(getFormattedError(error), { title: RESET_ERROR_TOAST_TITLE });
+    },
+    onSettled: invalidateStatus,
+  });
+
   return {
     pause: () => pauseMutation.mutate(),
     resume: () => resumeMutation.mutate(),
+    reset: () => resetMutation.mutate(),
     isPausing: pauseMutation.isLoading,
     isResuming: resumeMutation.isLoading,
+    isResetting: resetMutation.isLoading,
+    isMutating,
   };
 };

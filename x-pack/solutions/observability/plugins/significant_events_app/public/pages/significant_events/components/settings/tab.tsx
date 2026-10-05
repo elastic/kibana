@@ -65,6 +65,7 @@ import {
 import { DeveloperModeBadge } from '../../../../components/developer_mode_badge/developer_mode_badge';
 import { AppsSection } from './apps_section';
 import { MaintenanceSection } from './maintenance_section';
+import { ResetSection } from './reset_section';
 import { StaleEventCleanupSection } from './stale_event_cleanup_section';
 import { RunLimitsSection } from './run_limits_section';
 import { CostEstimate } from './cost_estimate';
@@ -828,6 +829,8 @@ export function SettingsTab() {
 
       {isDeveloperMode && (
         <>
+          <EuiSpacer />
+          <ResetSection canManage={canManageAndConfigure} />
           <EuiSpacer />
           <StaleEventCleanupSection canManage={canManage} />
           <CostEstimate />
