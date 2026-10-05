@@ -127,7 +127,7 @@ public setup(core: CoreSetup, { entityStore }: MyPluginSetupDeps) {
 ```
 
 - Every definition must carry `managedBy: { kind: 'plugin', id: <your plugin id> }`. Other kinds are rejected at setup.
-- Registration is only possible during setup. The registry is frozen when the Entity Store starts, so later calls are logged and ignored.
+- Code registration is only possible during setup. It closes when the Entity Store starts, so later calls are logged and ignored. Definitions managed by integrations or users will arrive through storage later, not through this call.
 - A rejected definition (invalid schema, missing or non-plugin `managedBy`, invalid or duplicate type name) is logged and skipped. Registration never throws, and Kibana keeps starting.
 - Registered definitions are deep-frozen in place (the registry holds the object you pass, not a copy), so neither the registry nor the caller can modify them afterwards. Unknown keys, including `id`, are rejected.
 

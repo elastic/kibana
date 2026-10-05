@@ -193,16 +193,16 @@ describe('EntityDefinitionRegistry', () => {
     });
   });
 
-  describe('freeze', () => {
-    it('rejects registrations after freezing', () => {
+  describe('closeSetupRegistration', () => {
+    it('rejects code registrations after setup has closed', () => {
       registry.register(makeDefinition('before'));
-      registry.freeze();
+      registry.closeSetupRegistration();
 
       expect(registry.register(makeDefinition('after')).ok).toBe(false);
 
       expect(types(registry.list())).toEqual(['before']);
       expect(registry.rejected()).toEqual([
-        { type: 'after', reason: expect.stringContaining('frozen') },
+        { type: 'after', reason: expect.stringContaining('setup has finished') },
       ]);
       expect(logger.error).toHaveBeenCalledTimes(1);
     });

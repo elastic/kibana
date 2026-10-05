@@ -80,7 +80,7 @@ const deepFreeze = <T>(value: T): T => {
 export class EntityDefinitionRegistry {
   private readonly entries = new Map<EntityDefinitionType, RegisteredEntityDefinition>();
   private readonly rejections: RegistrationRejection[] = [];
-  private frozen = false;
+  private setupClosed = false;
 
   constructor(private readonly logger: Logger) {}
 
@@ -98,8 +98,12 @@ export class EntityDefinitionRegistry {
     return { ok: true };
   }
 
-  public freeze(): void {
-    this.frozen = true;
+  /**
+   * Closes code registration. Called when plugin setup has finished. Definitions managed by
+   * integrations or users will arrive later through storage, not through `register`.
+   */
+  public closeSetupRegistration(): void {
+    this.setupClosed = true;
   }
 
   public get(type: EntityDefinitionType): RegisteredEntityDefinition | undefined {
@@ -119,8 +123,8 @@ export class EntityDefinitionRegistry {
   }
 
   private validate(definition: RegistrableEntityDefinition): string | undefined {
-    if (this.frozen) {
-      return 'registry is frozen, registrations are no longer accepted';
+    if (this.setupClosed) {
+      return 'plugin setup has finished, definitions can no longer be registered in code';
     }
 
     const parsed = registrableEntityDefinitionSchema.safeParse(definition);

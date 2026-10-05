@@ -142,8 +142,8 @@ export class EntityStorePlugin
   }
 
   public start(core: CoreStart, plugins: EntityStoreStartPlugins): EntityStoreStartContract {
-    // Kibana starts plugins only after every plugin's setup has finished, so no more registrations.
-    this.entityDefinitionRegistry.freeze();
+    // Kibana starts plugins only after every plugin's setup has finished, so code registration closes here.
+    this.entityDefinitionRegistry.closeSetupRegistration();
     this.logger.info('Initializing plugin');
 
     plugins.taskManager.registerEncryptedSavedObjectsClient(
