@@ -148,7 +148,7 @@ describe('AlertZeroPublicPlugin app registration', () => {
       expect(update?.visibleIn).toEqual(
         canRead ? ['classicSideNav', 'projectSideNav', 'globalSearch'] : []
       );
-      expect(update?.deepLinks?.length).toBe(canRead ? 6 : 0);
+      expect(update?.deepLinks?.length).toBe(canRead ? 2 : 0);
       plugin.stop();
     }
   );
@@ -180,7 +180,7 @@ describe('AlertZeroPublicPlugin app registration', () => {
         visibleIn: license.visible ? ['classicSideNav', 'projectSideNav', 'globalSearch'] : [],
         deepLinks: license.visible ? expect.any(Array) : [],
       });
-      if (license.visible) expect(onUpdate.mock.lastCall?.[0].deepLinks).toHaveLength(6);
+      if (license.visible) expect(onUpdate.mock.lastCall?.[0].deepLinks).toHaveLength(2);
     }
     subscription.unsubscribe();
     plugin.stop();
@@ -209,7 +209,7 @@ describe('AlertZeroPublicPlugin app registration', () => {
       visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
       deepLinks: expect.any(Array),
     });
-    expect(onUpdate.mock.lastCall?.[0].deepLinks).toHaveLength(6);
+    expect(onUpdate.mock.lastCall?.[0].deepLinks).toHaveLength(2);
     contract.setServerlessTierAvailable(false);
     expect(onUpdate).toHaveBeenLastCalledWith({
       status: AppStatus.accessible,

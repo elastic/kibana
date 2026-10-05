@@ -1139,12 +1139,13 @@ paths:
                   type: object
                   properties:
                     access_mode:
-                      description: '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.'
+                      description: 'Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.'
                       enum:
                         - public
                         - shared
                         - private
                       type: string
+                      x-state: Generally available; added in 9.4.0
                   required:
                     - access_mode
                 avatar_color:
@@ -1201,14 +1202,14 @@ paths:
                       maxItems: 100
                       type: array
                     subagent_ids:
-                      description: "**Technical Preview; added in 9.6.0.** Allowlist of subagent IDs this agent may spawn. Missing or empty disables the `run_subagent` tool. Use '_self' to enable self-fork."
+                      description: Allowlist of subagent IDs this agent may spawn. Missing or empty disables the `run_subagent` tool. Use '_self' to enable self-fork.
                       items:
                         description: Agent ID this agent may spawn as a subagent via `run_subagent`. Use '_self' to enable self-fork.
                         maxLength: 64
                         type: string
                       maxItems: 50
                       type: array
-                      x-state: Technical Preview
+                      x-state: Generally available; added in 9.6.0
                     tools:
                       items:
                         additionalProperties: false
@@ -1673,12 +1674,13 @@ paths:
                   type: object
                   properties:
                     access_mode:
-                      description: '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.'
+                      description: 'Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.'
                       enum:
                         - public
                         - shared
                         - private
                       type: string
+                      x-state: Generally available; added in 9.4.0
                   required:
                     - access_mode
                 avatar_color:
@@ -1735,14 +1737,14 @@ paths:
                       maxItems: 100
                       type: array
                     subagent_ids:
-                      description: "**Technical Preview; added in 9.6.0.** Allowlist of subagent IDs this agent may spawn. Missing or empty disables the `run_subagent` tool. Use '_self' to enable self-fork."
+                      description: Allowlist of subagent IDs this agent may spawn. Missing or empty disables the `run_subagent` tool. Use '_self' to enable self-fork.
                       items:
                         description: Agent ID this agent may spawn as a subagent via `run_subagent`. Use '_self' to enable self-fork.
                         maxLength: 64
                         type: string
                       maxItems: 50
                       type: array
-                      x-state: Technical Preview
+                      x-state: Generally available; added in 9.6.0
                     tools:
                       items:
                         additionalProperties: false
@@ -1933,7 +1935,7 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/agent_builder/agents/{id}/access_control
-      x-state: Technical Preview; added in 9.5.0
+      x-state: Generally available; added in 9.5.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -1994,7 +1996,7 @@ paths:
                         maxLength: 1024
                         minLength: 1
                         type: string
-                        x-state: Technical Preview; added in 9.6.0
+                        x-state: Generally available; added in 9.6.0
                       name:
                         description: Case-sensitive Kibana username of the user to grant access to. Still supported, but `id` is preferred for new grants because a username cannot distinguish same-named users across authentication realms.
                         maxLength: 1024
@@ -2094,7 +2096,7 @@ paths:
                 { "type": "user", "id": "u_bob_profile_uid", "role": "user" }
               ]
             }
-      x-state: Technical Preview; added in 9.5.0
+      x-state: Generally available; added in 9.5.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -2647,7 +2649,7 @@ paths:
                 { "type": "text_note", "data": { "text": "A note on this conversation" } }
               ]
             }
-      x-state: Experimental; added in 9.6.0
+      x-state: Technical Preview; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -2821,7 +2823,7 @@ paths:
                 { "type": "user", "id": "u_kd2Wm6QCf9nBBqGGyfxBcQxIrgLLLLxbPHOTNHOTgWM_0", "role": "member" }
               ]
             }
-      x-state: Technical Preview; added in 9.6.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -3566,7 +3568,7 @@ paths:
                       type: string
                   required:
                     - access_mode
-                  x-state: Technical Preview; added in 9.5.0
+                  x-state: Generally available; added in 9.5.0
                 action:
                   deprecated: true
                   description: Deprecated and ignored. The "regenerate" action has been removed; the field is still accepted for backward compatibility.
@@ -4048,7 +4050,7 @@ paths:
                       type: string
                   required:
                     - access_mode
-                  x-state: Technical Preview; added in 9.5.0
+                  x-state: Generally available; added in 9.5.0
                 action:
                   deprecated: true
                   description: Deprecated and ignored. The "regenerate" action has been removed; the field is still accepted for backward compatibility.
@@ -8789,185 +8791,6 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/alerting/v2/action_policies:
-    get:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/action_policies</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Get a paginated list of action policies with optional filtering and sorting.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-action-policies.
-      operationId: get-alerting-v2-action-policies
-      parameters:
-        - description: The page number to return. Defaults to 1.
-          in: query
-          name: page
-          required: false
-          schema:
-            maximum: 10000
-            minimum: 1
-            type: integer
-        - description: The number of action policies to return per page. Defaults to 20.
-          in: query
-          name: per_page
-          required: false
-          schema:
-            maximum: 100
-            minimum: 1
-            type: integer
-        - description: A text string to search across action policy fields.
-          in: query
-          name: search
-          required: false
-          schema:
-            maxLength: 256
-            minLength: 1
-            type: string
-        - description: Filter by enabled status. Accepts the strings true or false.
-          in: query
-          name: enabled
-          required: false
-          schema:
-            enum:
-              - 'true'
-              - 'false'
-            type: string
-        - description: The field to sort action policies by.
-          in: query
-          name: sort_field
-          required: false
-          schema:
-            enum:
-              - name
-              - created_at
-              - updated_at
-            type: string
-        - description: The sort direction.
-          in: query
-          name: sort_order
-          required: false
-          schema:
-            enum:
-              - asc
-              - desc
-            type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                listActionPoliciesResponse:
-                  summary: A page of action policies
-                  value:
-                    items:
-                      - created_at: '2026-01-15T12:00:00.000Z'
-                        created_by:
-                          profile_uid: u_elastic_0
-                        description: Sends notifications for alerts generated by rules with the production tag.
-                        destinations:
-                          - id: workflow-1
-                            type: workflow
-                        enabled: true
-                        group_by: null
-                        grouping_mode: per_episode
-                        id: action-policy-1
-                        matcher:
-                          tags:
-                            - production
-                        name: Notify on production alerts
-                        snoozed_until: null
-                        throttle:
-                          interval: null
-                          strategy: on_status_change
-                        updated_at: '2026-01-15T12:00:00.000Z'
-                        updated_by:
-                          profile_uid: u_elastic_0
-                    page: 1
-                    per_page: 20
-                    total: 1
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_list_response'
-          description: Returns a paginated list of action policies.
-        '400':
-          content:
-            application/json:
-              examples:
-                invalidRequest:
-                  summary: Indicates an invalid schema or parameters.
-                  value:
-                    code: BAD_REQUEST
-                    details:
-                      errors:
-                        errors: []
-                        properties:
-                          page:
-                            errors:
-                              - 'Too small: expected number to be >=1'
-                    error: Bad Request
-                    message: 'page: Too small: expected number to be >=1'
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an invalid schema or parameters.
-        '401':
-          content:
-            application/json:
-              examples:
-                unauthorized:
-                  summary: Request was not authenticated
-                  value:
-                    code: UNAUTHORIZED
-                    error: Unauthorized
-                    message: Authentication required to access this API.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the request was not authenticated.
-        '403':
-          content:
-            application/json:
-              examples:
-                forbidden:
-                  summary: Caller lacks required privileges
-                  value:
-                    code: FORBIDDEN
-                    error: Forbidden
-                    message: The current user does not have the required privileges for this request.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges to perform the request.
-        '500':
-          content:
-            application/json:
-              examples:
-                internalServerError:
-                  summary: Unexpected server-side error
-                  value:
-                    code: INTERNAL_SERVER_ERROR
-                    error: Internal Server Error
-                    message: An unexpected error occurred.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an unexpected server-side error.
-        '503':
-          content:
-            application/json:
-              examples:
-                alertingDisabled:
-                  summary: Alerting V2 is disabled
-                  value:
-                    code: ALERTING_DISABLED
-                    error: Service Unavailable
-                    message: Alerting is disabled.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: List action policies
-      tags:
-        - alerting-v2
-      x-state: Experimental; added in 9.5.0
-      x-metaTags:
-        - content: Kibana
-          name: product_name
     post:
       description: |-
         **Spaces method and path for this operation:**
@@ -8997,7 +8820,7 @@ paths:
                   destinations:
                     - id: workflow-1
                       type: workflow
-                  grouping_mode: per_episode
+                  grouping_mode: per_alert
                   matcher:
                     tags:
                       - production
@@ -9023,7 +8846,7 @@ paths:
                         type: workflow
                     enabled: true
                     group_by: null
-                    grouping_mode: per_episode
+                    grouping_mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -10040,7 +9863,7 @@ paths:
                         type: workflow
                     enabled: true
                     group_by: null
-                    grouping_mode: per_episode
+                    grouping_mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -10205,7 +10028,7 @@ paths:
                         type: workflow
                     enabled: true
                     group_by: null
-                    grouping_mode: per_episode
+                    grouping_mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -10379,7 +10202,7 @@ paths:
                   destinations:
                     - id: workflow-1
                       type: workflow
-                  grouping_mode: per_episode
+                  grouping_mode: per_alert
                   matcher:
                     tags:
                       - production
@@ -10405,7 +10228,7 @@ paths:
                         type: workflow
                     enabled: true
                     group_by: null
-                    grouping_mode: per_episode
+                    grouping_mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -10437,7 +10260,7 @@ paths:
                         type: workflow
                     enabled: true
                     group_by: null
-                    grouping_mode: per_episode
+                    grouping_mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -10603,7 +10426,7 @@ paths:
                         type: workflow
                     enabled: false
                     group_by: null
-                    grouping_mode: per_episode
+                    grouping_mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -10773,7 +10596,7 @@ paths:
                         type: workflow
                     enabled: true
                     group_by: null
-                    grouping_mode: per_episode
+                    grouping_mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -10963,7 +10786,7 @@ paths:
                         type: workflow
                     enabled: true
                     group_by: null
-                    grouping_mode: per_episode
+                    grouping_mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -11133,7 +10956,7 @@ paths:
                         type: workflow
                     enabled: true
                     group_by: null
-                    grouping_mode: per_episode
+                    grouping_mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -11303,7 +11126,7 @@ paths:
                         type: workflow
                     enabled: true
                     group_by: null
-                    grouping_mode: per_episode
+                    grouping_mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -12158,17 +11981,17 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-  /api/alerting/v2/alerts/{alert_id}/_ack:
+  /api/alerting/v2/alerts/{id}/_ack:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{alert_id}/_ack</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{id}/_ack</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-alerts-alert-id-ack
+      operationId: post-alerting-v2-alerts-id-ack
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -12179,7 +12002,7 @@ paths:
             type: string
         - description: Identifier of the alert to apply the action to.
           in: path
-          name: alert_id
+          name: id
           required: true
           schema:
             maxLength: 150
@@ -12202,15 +12025,15 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Path is missing required alert_id
+                  summary: Path is missing required id
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        alert_id:
+                        id:
                           - Required
                     error: Bad Request
-                    message: 'alert_id: Required'
+                    message: 'id: Required'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -12288,17 +12111,17 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-  /api/alerting/v2/alerts/{alert_id}/_activate:
+  /api/alerting/v2/alerts/{id}/_activate:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{alert_id}/_activate</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{id}/_activate</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-alerts-alert-id-activate
+      operationId: post-alerting-v2-alerts-id-activate
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -12309,7 +12132,7 @@ paths:
             type: string
         - description: Identifier of the alert to apply the action to.
           in: path
-          name: alert_id
+          name: id
           required: true
           schema:
             maxLength: 150
@@ -12333,15 +12156,15 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Path is missing required alert_id
+                  summary: Path is missing required id
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        alert_id:
+                        id:
                           - Required
                     error: Bad Request
-                    message: 'alert_id: Required'
+                    message: 'id: Required'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -12435,17 +12258,17 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-  /api/alerting/v2/alerts/{alert_id}/_assign:
+  /api/alerting/v2/alerts/{id}/_assign:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{alert_id}/_assign</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{id}/_assign</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-alerts-alert-id-assign
+      operationId: post-alerting-v2-alerts-id-assign
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -12456,7 +12279,7 @@ paths:
             type: string
         - description: Identifier of the alert to apply the action to.
           in: path
-          name: alert_id
+          name: id
           required: true
           schema:
             maxLength: 150
@@ -12480,15 +12303,15 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Path is missing required alert_id
+                  summary: Path is missing required id
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        alert_id:
+                        id:
                           - Required
                     error: Bad Request
-                    message: 'alert_id: Required'
+                    message: 'id: Required'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -12566,17 +12389,17 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-  /api/alerting/v2/alerts/{alert_id}/_deactivate:
+  /api/alerting/v2/alerts/{id}/_deactivate:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{alert_id}/_deactivate</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{id}/_deactivate</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-alerts-alert-id-deactivate
+      operationId: post-alerting-v2-alerts-id-deactivate
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -12587,7 +12410,7 @@ paths:
             type: string
         - description: Identifier of the alert to apply the action to.
           in: path
-          name: alert_id
+          name: id
           required: true
           schema:
             maxLength: 150
@@ -12611,15 +12434,15 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Path is missing required alert_id
+                  summary: Path is missing required id
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        alert_id:
+                        id:
                           - Required
                     error: Bad Request
-                    message: 'alert_id: Required'
+                    message: 'id: Required'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -12713,17 +12536,17 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-  /api/alerting/v2/alerts/{alert_id}/_tag:
+  /api/alerting/v2/alerts/{id}/_tag:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{alert_id}/_tag</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{id}/_tag</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-alerts-alert-id-tag
+      operationId: post-alerting-v2-alerts-id-tag
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -12734,7 +12557,7 @@ paths:
             type: string
         - description: Identifier of the alert to apply the action to.
           in: path
-          name: alert_id
+          name: id
           required: true
           schema:
             maxLength: 150
@@ -12760,15 +12583,15 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Path is missing required alert_id
+                  summary: Path is missing required id
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        alert_id:
+                        id:
                           - Required
                     error: Bad Request
-                    message: 'alert_id: Required'
+                    message: 'id: Required'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -12846,17 +12669,17 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-  /api/alerting/v2/alerts/{alert_id}/_unack:
+  /api/alerting/v2/alerts/{id}/_unack:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{alert_id}/_unack</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{id}/_unack</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-alerts-alert-id-unack
+      operationId: post-alerting-v2-alerts-id-unack
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -12867,7 +12690,7 @@ paths:
             type: string
         - description: Identifier of the alert to apply the action to.
           in: path
-          name: alert_id
+          name: id
           required: true
           schema:
             maxLength: 150
@@ -12890,15 +12713,15 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Path is missing required alert_id
+                  summary: Path is missing required id
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        alert_id:
+                        id:
                           - Required
                     error: Bad Request
-                    message: 'alert_id: Required'
+                    message: 'id: Required'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -12997,14 +12820,14 @@ paths:
             maximum: 10000
             minimum: 1
             type: integer
-        - description: Number of events per page. Defaults to 20. Pass 0 for a count-only read.
+        - description: Number of events per page. Defaults to 20.
           in: query
           name: per_page
           required: true
           schema:
             default: 20
             maximum: 100
-            minimum: 0
+            minimum: 1
             type: integer
         - description: Inclusive ISO datetime lower bound on the event timestamp; overrides the default 24-hour window. Independent of alert_ids — e.g. set it to an alert’s start time to scope results to that alert’s lifetime.
           in: query
@@ -13022,7 +12845,7 @@ paths:
             format: date-time
             pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
             type: string
-        - description: Alert filter. Narrows events to those referencing at least one of the provided alert ids.
+        - description: Alert filter. Narrows events to those referencing at least one of the provided alert IDs.
           in: query
           name: alert_ids
           required: false
@@ -13061,7 +12884,7 @@ paths:
             maxLength: 256
             minLength: 1
             type: string
-        - description: Explicit rule filter. Narrows events to those referencing at least one of the provided rule ids. Also unions with the search filter if both are provided.
+        - description: Explicit rule filter. Narrows events to those referencing at least one of the provided rule IDs. Also unions with the search filter if both are provided.
           in: query
           name: rule_ids
           required: false
@@ -13106,10 +12929,10 @@ paths:
                         policy:
                           id: action-policy-1
                           name: Notify on production alerts
+                        rule_count: 1
                         rules:
                           - id: rule-1
                             name: Host CPU high
-                        total_rule_count: 1
                         workflows:
                           - id: workflow-1
                             name: Notify oncall
@@ -13278,14 +13101,14 @@ paths:
             maximum: 10000
             minimum: 1
             type: integer
-        - description: Number of results per page. Pass 0 for a count-only read.
+        - description: Number of results per page.
           in: query
           name: per_page
           required: true
           schema:
             default: 20
             maximum: 100
-            minimum: 0
+            minimum: 1
             type: integer
       responses:
         '200':
@@ -13786,7 +13609,7 @@ paths:
               bulkCreateRulesRequest:
                 summary: Create two rules, one of them disabled
                 value:
-                  rules:
+                  items:
                     - grouping:
                         fields:
                           - host.name
@@ -13935,15 +13758,15 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Request body is missing required rules
+                  summary: Request body is missing required items
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        rules:
+                        items:
                           - Required
                     error: Bad Request
-                    message: 'rules: Required'
+                    message: 'items: Required'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -16136,7 +15959,7 @@ paths:
                     code: MAX_SCHEDULES_PER_MINUTE_EXCEEDED
                     details:
                       interval: 1m
-                      maxScheduledPerMinute: 400
+                      max_scheduled_per_minute: 400
                     error: Bad Request
                     message: Rule schedule of "1m" would exceed the limit of 400 rule runs per minute
               schema:
@@ -22825,6 +22648,174 @@ paths:
       tags:
         - cases
       x-state: Technical preview
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/chat/message:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/chat/message</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Send a message to an agent and get its text answer. Use this synchronous endpoint in scripts and command-line tools. The response contains only the answer and the conversation ID. To continue the conversation, include the returned `conversation_id` in the next request.
+
+        The agent runs without a user, so the endpoint declines every prompt that the agent raises, such as a tool confirmation, a question, or a destructive API approval. The `declined_prompts` property lists these prompts. This endpoint does not support attachments.
+
+        The `agentBuilder:experimentalFeatures` advanced setting must be enabled. If it is disabled, the endpoint returns a 404 response.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: post-chat-message
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              messageContinueConversationRequestExample:
+                description: Continue a conversation with the `conversation_id` returned by a previous call
+                value:
+                  agent_id: elastic-ai-agent
+                  conversation_id: 696ccd6d-4bff-4b26-a62e-522ccf2dcd16
+                  message: And how does it differ from Kibana?
+              messageRequestExample:
+                description: Send a message to the default agent and start a new conversation.
+                value:
+                  message: What is Elasticsearch?
+              messageToAgentRequestExample:
+                description: Send a message to a specific agent
+                value:
+                  agent_id: elastic-ai-agent
+                  message: What is Elasticsearch?
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                agent_id:
+                  default: elastic-ai-agent
+                  description: The ID of the agent to send the message to. Defaults to the default Elastic AI agent.
+                  maxLength: 64
+                  minLength: 1
+                  type: string
+                conversation_id:
+                  description: The ID of an existing conversation to continue. Omit it to start a new conversation; the response carries the ID to reuse on the next call.
+                  maxLength: 256
+                  type: string
+                message:
+                  description: The user message to send to the agent.
+                  maxLength: 100000
+                  minLength: 1
+                  type: string
+              required:
+                - message
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                messageDeclinedPromptResponseExample:
+                  description: The agent tried to call a tool that requires user confirmation. There is no user to ask on this endpoint, so the call was declined and the agent answered with what it could
+                  value:
+                    answer: I could not run the reindex because it requires confirmation, which is not available here. You can run it from a conversation in Kibana instead.
+                    conversation_id: 696ccd6d-4bff-4b26-a62e-522ccf2dcd16
+                    declined_prompts:
+                      - message: Agent running in non-interactive mode, user input not available - execution was declined
+                        tool_id: reindex-logs
+                messageResponseExample:
+                  description: The agent's answer and the ID of the conversation it was stored in. `declined_prompts` is absent because the agent asked for nothing.
+                  value:
+                    answer: Elasticsearch is a distributed, RESTful search and analytics engine capable of addressing a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data for lightning fast search, fine‑tuned relevancy, and powerful analytics that scale with ease.
+                    conversation_id: 696ccd6d-4bff-4b26-a62e-522ccf2dcd16
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  answer:
+                    description: The agent's final text answer. Empty when the agent finished without a message.
+                    type: string
+                  conversation_id:
+                    description: 'The conversation the message was added to: the one requested, or the one created for it.'
+                    type: string
+                  declined_prompts:
+                    description: The prompts that the endpoint declined. In an interactive conversation, these prompts pause the agent until the user answers. Examples are tool confirmations, questions to the user, and destructive API approvals. This endpoint has no user, so it declines each prompt and tells the agent why. The property is absent if the agent raised no prompts.
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        message:
+                          description: The explanation the agent received in place of the prompt.
+                          type: string
+                        tool_id:
+                          description: The tool whose call was declined.
+                          type: string
+                      required:
+                        - tool_id
+                        - message
+                    minItems: 1
+                    type: array
+                required:
+                  - conversation_id
+                  - answer
+          description: The agent answered. The response contains the answer and the ID of the conversation that stores the exchange.
+        '400':
+          content:
+            application/json:
+              examples:
+                messageEmptyExample:
+                  description: The `message` is empty
+                  value:
+                    error: Bad Request
+                    message: '[request body.message]: value has length [0] but it must have a minimum length of [1].'
+                    statusCode: 400
+                messageUnexpectedKeyExample:
+                  description: The body carries a key this endpoint does not accept
+                  value:
+                    error: Bad Request
+                    message: "[request body.connector_id]: Additional properties are not allowed ('connector_id' was unexpected)"
+                    statusCode: 400
+          description: 'Bad Request: the request body is not valid. Possible causes are an empty or too long `message`, a `conversation_id` that is not a UUID, or an unsupported property such as `connector_id` or `attachments`.'
+        '404':
+          content:
+            application/json:
+              examples:
+                messageNotFoundExample:
+                  description: The `conversation_id` is unknown, or the `agent_id` is unknown or not usable by the caller
+                  value:
+                    attributes:
+                      trace_id: 8d4f2a3b-1c5e-4a9b-9f0d-2e6c1a3d4f5e
+                    error: Not Found
+                    message: Conversation 696ccd6d-4bff-4b26-a62e-522ccf2dcd16 not found
+                    statusCode: 404
+          description: 'Not Found: the conversation or agent was not found. Possible causes are a `conversation_id` that does not exist, an `agent_id` that the caller cannot use, or a disabled `agentBuilder:experimentalFeatures` advanced setting. If the caller cannot use the agent, the error says that the conversation was not found. This prevents callers from discovering hidden agents.'
+      summary: Send a message and get the answer
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/chat/message" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "message": "What is Elasticsearch?",
+                "agent_id": "elastic-ai-agent"
+              }'
+        - lang: Console
+          source: |
+            POST kbn://api/chat/message
+            {
+              "message": "What is Elasticsearch?",
+              "agent_id": "elastic-ai-agent"
+            }
+      x-state: Experimental; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -65358,6 +65349,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Osquery_API_FindLiveQueryDetailsResponse'
           description: Indicates a successful call.
+        '404':
+          content:
+            application/json:
+              examples:
+                actionNotFound:
+                  summary: The live query does not exist in the current space
+                  value:
+                    message: Action not found
+              schema:
+                type: object
+                properties:
+                  message:
+                    example: Action not found
+                    type: string
+          description: |
+            No live query with this `id` exists in the current space. Live queries issued from another space also return 404.
       summary: Get live query details
       tags:
         - Security Osquery API
@@ -65450,6 +65457,26 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Osquery_API_GetLiveQueryResultsResponse'
           description: Indicates a successful call.
+        '404':
+          content:
+            application/json:
+              examples:
+                actionNotFound:
+                  summary: The live query does not exist in the current space
+                  value:
+                    message: Action not found
+                queryActionNotFound:
+                  summary: The id/actionId pair refers to different queries
+                  value:
+                    message: Live query action not found
+              schema:
+                type: object
+                properties:
+                  message:
+                    example: Action not found
+                    type: string
+          description: |
+            Either no live query with this `id` exists in the current space (`Action not found`; live queries issued from another space also return 404), or it has no query whose `action_id` matches `{actionId}` (`Live query action not found`).
       summary: Get live query results
       tags:
         - Security Osquery API
@@ -80598,7 +80625,7 @@ paths:
                   summary: Managed resolution rules
                   value:
                     rules:
-                      - description: Links user entities that share the same email address, compared case-insensitively, across identity providers. Disable if shared mailboxes or role accounts produce false links.
+                      - description: Links user entities that share the same email address, compared case-insensitively, across identity providers. Several `local` users with that email (one per user name per host) are linked too. Unlinked users in the same identity provider that share an address are left unlinked. Disable if shared mailboxes or role accounts produce false links.
                         enabled: true
                         id: email_exact_match
                         kind: same_field
@@ -133213,7 +133240,7 @@ paths:
                   maxLength: 1000
                   type: string
                 include:
-                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_54___schema0'
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_53___schema0'
                 name:
                   maxLength: 256
                   type: string
@@ -134048,6 +134075,120 @@ paths:
           description: |
             Bad request. For browser monitors, a 400 error is returned if the timeout is less than 30 seconds.
       summary: Create a monitor
+      tags:
+        - synthetics
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/synthetics/monitors/_bulk_create:
+    post:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/monitors/_bulk_create</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create up to 1000 monitors in one request. Every monitor is validated before any monitor is persisted. The API creates the Saved Objects and synchronizes Fleet once for the batch.
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges. If a monitor is shared to additional spaces, you must also have create privileges in each of those spaces.
+        This is a versioned public API (`elastic-api-version: 2023-10-31`).
+      operationId: post-synthetic-monitors-bulk-create
+      requestBody:
+        content:
+          application/json:
+            examples:
+              bulkCreateRequestExample1:
+                summary: Two HTTP monitors
+                value: |-
+                  {
+                    "monitors": [
+                      {
+                        "type": "http",
+                        "name": "Storefront",
+                        "url": "https://example.com",
+                        "locations": ["united_kingdom"]
+                      },
+                      {
+                        "type": "http",
+                        "name": "Documentation",
+                        "url": "https://docs.example.com",
+                        "locations": ["united_kingdom"]
+                      }
+                    ]
+                  }
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                monitors:
+                  description: A non-empty list of monitor configurations, up to 1000 monitors.
+                  items:
+                    discriminator:
+                      propertyName: type
+                    oneOf:
+                      - $ref: '#/components/schemas/Synthetics_browserMonitorFields'
+                      - $ref: '#/components/schemas/Synthetics_httpMonitorFields'
+                      - $ref: '#/components/schemas/Synthetics_icmpMonitorFields'
+                      - $ref: '#/components/schemas/Synthetics_tcpMonitorFields'
+                      - $ref: '#/components/schemas/Synthetics_apiMonitorFields'
+                  maxItems: 1000
+                  minItems: 1
+                  type: array
+              required:
+                - monitors
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                bulkCreateResponseExample1:
+                  value: |-
+                    {
+                      "result": [
+                        {
+                          "id": "monitor1-id",
+                          "created": true
+                        },
+                        {
+                          "id": "monitor2-id",
+                          "created": true
+                        }
+                      ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    description: Optional service-level errors from the bulk sync.
+                    items:
+                      description: A service-level error from the bulk sync.
+                    type: array
+                  result:
+                    items:
+                      type: object
+                      properties:
+                        created:
+                          description: Whether the monitor Saved Object was created.
+                          type: boolean
+                        error:
+                          description: Present when `created` is `false`.
+                          type: string
+                        id:
+                          description: The config ID of the created monitor.
+                          type: string
+                      required:
+                        - id
+                        - created
+                    type: array
+                required:
+                  - result
+          description: |
+            A successful response. `created: false` indicates an individual Saved Object creation or Fleet synchronization failure; see `error`. Batch-level Fleet synchronization errors are returned in `errors`.
+        '400':
+          description: |
+            Bad request. Returned when the batch is empty or too large, a monitor configuration is invalid, or two monitors use the same name.
+      summary: Bulk create monitors
       tags:
         - synthetics
       x-metaTags:
@@ -150931,7 +151072,7 @@ components:
           type: boolean
       required:
         - data_view
-    Kibana_HTTP_APIs__zod_v4_54___schema0:
+    Kibana_HTTP_APIs__zod_v4_53___schema0:
       anyOf:
         - additionalProperties: false
           type: object
@@ -150960,7 +151101,7 @@ components:
                 routing:
                   items:
                     allOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_54___schema0'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_53___schema0'
                       - type: object
                         properties:
                           destination:
@@ -151499,11 +151640,11 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_workflow_action_policy_destination'
     Kibana_HTTP_APIs_alerting_action_policy_grouping_mode:
       anyOf:
-        - description: one notification per alert episode lifecycle (default).
+        - description: one notification per alert lifecycle (default).
           enum:
-            - per_episode
+            - per_alert
           type: string
-        - description: a single notification for all matching episodes.
+        - description: a single notification for all matching alerts.
           enum:
             - all
           type: string
@@ -151511,31 +151652,7 @@ components:
           enum:
             - per_field
           type: string
-      description: 'The grouping mode: per_episode groups by episode lifecycle, all sends a single notification for all alerts, per_field groups by the specified fields.'
-    Kibana_HTTP_APIs_alerting_action_policy_list_response:
-      additionalProperties: false
-      description: Paginated list of action policies.
-      type: object
-      properties:
-        items:
-          description: The list of action policies.
-          items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
-          type: array
-        page:
-          description: The current page number.
-          type: number
-        per_page:
-          description: The number of action policies per page.
-          type: number
-        total:
-          description: 'The number of action policies matching the query. This count is an estimate: results above 10,000 may be reported as 10,000.'
-          type: number
-      required:
-        - items
-        - total
-        - page
-        - per_page
+      description: 'The grouping mode: per_alert groups by alert lifecycle, all sends a single notification for all alerts, per_field groups by the specified fields.'
     Kibana_HTTP_APIs_alerting_action_policy_response:
       additionalProperties: false
       type: object
@@ -151615,7 +151732,7 @@ components:
               type: string
             strategy:
               anyOf:
-                - description: notify only on episode status transitions (default for `per_episode`).
+                - description: notify only on alert status transitions (default for `per_alert`).
                   enum:
                     - on_status_change
                   type: string
@@ -151670,7 +151787,7 @@ components:
           type: string
         strategy:
           anyOf:
-            - description: notify only on episode status transitions (default for `per_episode`).
+            - description: notify only on alert status transitions (default for `per_alert`).
               enum:
                 - on_status_change
               type: string
@@ -151763,7 +151880,8 @@ components:
           type: string
         assignee_uid:
           description: User profile UID of the assignee, or null to remove the assignee from the episode.
-          maxLength: 256
+          maxLength: 150
+          minLength: 1
           nullable: true
           type: string
       required:
@@ -151883,7 +152001,7 @@ components:
       additionalProperties: false
       type: object
       properties:
-        rules:
+        items:
           description: The rules to create. Must contain between 1 and 100 rules.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_create_rule_item'
@@ -151891,7 +152009,7 @@ components:
           minItems: 1
           type: array
       required:
-        - rules
+        - items
     Kibana_HTTP_APIs_alerting_bulk_create_rules_response:
       additionalProperties: false
       type: object
@@ -152211,7 +152329,8 @@ components:
       properties:
         assignee_uid:
           description: User profile UID of the assignee, or null to remove the assignee from the episode.
-          maxLength: 256
+          maxLength: 150
+          minLength: 1
           nullable: true
           type: string
       required:
@@ -152302,7 +152421,7 @@ components:
         alert_count:
           type: number
         alerts:
-          description: Alert ids referenced by this event, bounded to MAX_EMBEDDED_EPISODES_PER_ITEM. Use `alert_count` for the true total.
+          description: Alert IDs referenced by this event, bounded to 50. Empty when the event references no alerts. Use `alert_count` for the true total.
           items:
             type: object
             properties:
@@ -152354,8 +152473,11 @@ components:
               type: string
           required:
             - id
+        rule_count:
+          description: Number of rules referenced by this event after search or rule-filter narrowing. Unlike `total` on a list response, this is an exact count and it can exceed `rules.length` when the embedded array is truncated to the cap.
+          type: number
         rules:
-          description: Rules referenced by this event, bounded to MAX_EMBEDDED_RULES_PER_ITEM. When a search or rule filter narrows the match, this array is intersected with the matched subset server-side. Use `total_rule_count` for the full count.
+          description: Rules referenced by this event, bounded to 20. When a search or rule filter narrows the match, this array is intersected with the matched subset server-side. Use `rule_count` for the full count.
           items:
             type: object
             properties:
@@ -152368,9 +152490,6 @@ components:
               - id
           maxItems: 20
           type: array
-        total_rule_count:
-          description: Total number of rules referenced by this event after search / rule-filter narrowing. May exceed `rules.length` when the embedded array is truncated to the cap.
-          type: number
         workflows:
           items:
             type: object
@@ -152389,9 +152508,10 @@ components:
         - policy
         - outcome
         - alert_count
+        - alerts
         - action_group_count
         - rules
-        - total_rule_count
+        - rule_count
         - workflows
         - error
     Kibana_HTTP_APIs_alerting_policy_execution_history_response:
@@ -152408,7 +152528,7 @@ components:
           type: integer
         per_page:
           maximum: 9007199254740991
-          minimum: 0
+          minimum: 1
           type: integer
         search_matches:
           additionalProperties: false
@@ -152626,7 +152746,7 @@ components:
           type: integer
         per_page:
           maximum: 9007199254740991
-          minimum: 0
+          minimum: 1
           type: integer
         total:
           description: 'The number of rule executions matching the query. This count is an estimate: results above 10,000 may be reported as 10,000.'
@@ -153130,7 +153250,6 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery'
         schedule:
           additionalProperties: false
-          nullable: true
           type: object
           properties:
             every:
@@ -161454,7 +161573,7 @@ components:
                                 type: string
                             description: 'Discover display option: controls table data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".'
                           rows_per_page:
-                            description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".
+                            description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage". Has no effect on ES|QL tabs since Kibana 8.16.
                             maximum: 10000
                             minimum: 1
                             type: number
@@ -161580,7 +161699,7 @@ components:
                                 type: string
                             description: 'Discover display option: controls table data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".'
                           rows_per_page:
-                            description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".
+                            description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage". Has no effect on ES|QL tabs since Kibana 8.16.
                             maximum: 10000
                             minimum: 1
                             type: number
@@ -161724,7 +161843,7 @@ components:
                                 type: string
                             description: 'Discover display option: controls table data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".'
                           rows_per_page:
-                            description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".
+                            description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage". Has no effect on ES|QL tabs since Kibana 8.16.
                             maximum: 10000
                             minimum: 1
                             type: number
@@ -205514,6 +205633,42 @@ components:
           $ref: '#/components/schemas/SLOs_time_window'
       title: Update SLO request
       type: object
+    Synthetics_apiMonitorFields:
+      allOf:
+        - $ref: '#/components/schemas/Synthetics_commonMonitorFields'
+        - additionalProperties: true
+          type: object
+          properties:
+            certificate_error_spki_allowlist:
+              default: []
+              description: PEM certificates whose public keys (SPKI) are allowlisted so the API request context bypasses certificate errors for matching presented certificates. This does not add a CA to the trust store.
+              items:
+                type: string
+              type: array
+            ignore_https_errors:
+              default: false
+              description: Ignore HTTPS errors.
+              type: boolean
+            inline_script:
+              description: The inline API Journey script.
+              type: string
+            playwright_options:
+              description: Playwright API request context options.
+              type: object
+            synthetics_args:
+              description: Synthetics agent CLI arguments.
+              items:
+                type: string
+              type: array
+            type:
+              description: The monitor type.
+              enum:
+                - api
+              type: string
+          required:
+            - inline_script
+            - type
+      title: API Journey monitor fields
     Synthetics_browserMonitorFields:
       allOf:
         - $ref: '#/components/schemas/Synthetics_commonMonitorFields'

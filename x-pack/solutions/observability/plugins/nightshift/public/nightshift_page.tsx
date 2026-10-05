@@ -7,6 +7,8 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
+import { Route, Routes } from '@kbn/shared-ux-router';
+import { useLocation } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -17,7 +19,8 @@ import {
 import { getNightshiftCapabilities, NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_APP_ROUTE } from '../common/constants';
 import { NightshiftApp } from './app/app';
-import { NightshiftAppHeader } from './app/app_header';
+import { NightshiftAppHeader, nightshiftTabs } from './app/app_header';
+import { AutomationsPage } from './automations/automations_page';
 import { useKibana } from './hooks/use_kibana';
 import { useSignificantEventsAvailability } from './hooks/use_significant_events_availability';
 import { SandboxSecretsFlyout } from './sandbox_secrets/sandbox_secrets_flyout';
@@ -32,7 +35,8 @@ export function NightshiftPage(): React.ReactElement | null {
     nightshiftInvestigations,
   } = useKibana().services;
   const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
-  const { canConfigure, canManage } = getNightshiftCapabilities(
+  const { pathname } = useLocation();
+  const { canManage, canManageAndConfigure } = getNightshiftCapabilities(
     application.capabilities.nightshift
   );
   const settingsHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
@@ -40,6 +44,15 @@ export function NightshiftPage(): React.ReactElement | null {
   });
   const managementHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
     path: '/streams',
+  });
+  const nightshiftEnabled = featureFlags.useBooleanValue(NIGHTSHIFT_ENABLED_FLAG, false);
+  const canUseAutomations =
+    nightshiftEnabled && nightshiftInvestigations?.investigationsClient != null;
+  const investigationsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
+    path: '/investigations',
+  });
+  const automationsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
+    path: '/automations',
   });
   const navigateToSettings = useCallback(
     () => application.navigateToUrl(settingsHref),
@@ -49,9 +62,23 @@ export function NightshiftPage(): React.ReactElement | null {
     () => application.navigateToUrl(managementHref),
     [application, managementHref]
   );
+  const navigateToInvestigations = useCallback(
+    () => application.navigateToUrl(investigationsHref),
+    [application, investigationsHref]
+  );
+  const isInvestigationsPage =
+    pathname.startsWith('/investigations') || pathname === '/automations';
+  const canUseInvestigationsPage = canUseAutomations && isInvestigationsPage;
+  const tabs = canUseAutomations
+    ? nightshiftTabs.map((tab) => ({
+        ...tab,
+        isSelected:
+          tab.id === (pathname.endsWith('/automations') ? 'automations' : 'allInvestigations'),
+        href: tab.id === 'automations' ? automationsHref : investigationsHref,
+      }))
+    : undefined;
 
   // The secrets API is disabled (404) unless the nightshift.enabled flag is on.
-  const nightshiftEnabled = featureFlags.useBooleanValue(NIGHTSHIFT_ENABLED_FLAG, false);
   const canManageSandboxSecrets =
     canManage && nightshiftInvestigations?.investigationsClient != null && nightshiftEnabled;
   const [isSandboxSecretsFlyoutOpen, setIsSandboxSecretsFlyoutOpen] = useState(false);
@@ -88,19 +115,39 @@ export function NightshiftPage(): React.ReactElement | null {
       data-test-subj="nightshiftPage"
       restrictWidth={false}
       pageSectionProps={{
-        color: 'subdued',
         paddingSize: 'none',
       }}
     >
       <NightshiftAppHeader
         onManagementClick={navigateToManagement}
         managementHref={managementHref}
-        onSettingsClick={canConfigure ? navigateToSettings : undefined}
-        settingsHref={canConfigure ? settingsHref : undefined}
+        onSettingsClick={canManageAndConfigure ? navigateToSettings : undefined}
+        settingsHref={canManageAndConfigure ? settingsHref : undefined}
         onSandboxSecretsClick={canManageSandboxSecrets ? openSandboxSecretsFlyout : undefined}
+        onAutomationsClick={canUseAutomations ? navigateToInvestigations : undefined}
+        investigationsHref={canUseAutomations ? investigationsHref : undefined}
+        tabs={canUseInvestigationsPage ? tabs : undefined}
+        back={
+          canUseInvestigationsPage
+            ? {
+                href: application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/' }),
+                label: 'Nightshift',
+              }
+            : undefined
+        }
       />
-      <EuiPageTemplate.Section component="div" color="subdued" restrictWidth="900px">
-        <NightshiftApp />
+      <EuiPageTemplate.Section
+        component="div"
+        restrictWidth={pathname.endsWith('/automations') ? false : '900px'}
+      >
+        {canUseInvestigationsPage ? (
+          <Routes>
+            <Route path="/automations" component={AutomationsPage} />
+            <Route path="/investigations" component={() => <div>WIP</div>} />
+          </Routes>
+        ) : (
+          <NightshiftApp />
+        )}
       </EuiPageTemplate.Section>
       {canManageSandboxSecrets && isSandboxSecretsFlyoutOpen && (
         <SandboxSecretsFlyout onClose={closeSandboxSecretsFlyout} />
