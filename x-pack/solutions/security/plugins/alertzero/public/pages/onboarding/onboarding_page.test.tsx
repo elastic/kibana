@@ -54,6 +54,17 @@ const ALL_WORKERS_RESPONSE = {
   })),
 };
 
+const selectServiceAccount = () => {
+  fireEvent.click(screen.getByTestId('alertZeroServiceAccountSelect-onboarding'));
+  fireEvent.click(screen.getByRole('button', { name: 'Select service account' }));
+};
+
+const enabledWorkerBody = JSON.stringify({
+  enabled: true,
+  settings: { serviceAccountId: 'account-a' },
+  settingsRevision: null,
+});
+
 const renderPage = ({
   canWrite = false,
   httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } }),
@@ -79,6 +90,22 @@ const renderPage = ({
   const core = {
     ...coreStart,
     http: { ...coreStart.http, get: httpGet, patch: httpPatch },
+    security: {
+      ...coreStart.security,
+      uiApi: {
+        components: {
+          getServiceAccountPicker: ({
+            onSelect,
+          }: {
+            onSelect: (account: { id: string } | null) => void;
+          }) => (
+            <button type="button" onClick={() => onSelect({ id: 'account-a' })}>
+              Select service account
+            </button>
+          ),
+        },
+      },
+    },
   };
   const history = createMemoryHistory();
   const queryClient = new QueryClient({
@@ -237,6 +264,17 @@ describe('OnboardingPage', () => {
       expect(history.location.pathname).toBe('/watches');
     });
 
+    it('keeps Enable and run unavailable until a service account is selected', () => {
+      renderPage({ canWrite: true });
+
+      expect(screen.getByText(/Workers run as the service account you select/)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Enable and run' })).toBeDisabled();
+
+      selectServiceAccount();
+
+      expect(screen.getByRole('button', { name: 'Enable and run' })).not.toBeDisabled();
+    });
+
     it('recommends keeping all Watches enabled', () => {
       renderPage({ canWrite: true });
       expect(screen.getByText(/We recommend keeping all Watches enabled/)).toBeInTheDocument();
@@ -294,6 +332,7 @@ describe('OnboardingPage', () => {
       const httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } });
       const { history } = renderPage({ canWrite: true, httpPatch });
 
+      selectServiceAccount();
       fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
 
       await waitFor(() => expect(history.location.pathname).toBe('/watches'));
@@ -311,6 +350,7 @@ describe('OnboardingPage', () => {
       );
       renderPage({ canWrite: true, httpPatch });
 
+      selectServiceAccount();
       fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
 
       // While all six PATCHes are pending, the button must be disabled.
@@ -338,6 +378,7 @@ describe('OnboardingPage', () => {
       const httpPatch = jest.fn().mockRejectedValue(new Error('server error'));
       const { history } = renderPage({ canWrite: true, httpPatch });
 
+      selectServiceAccount();
       fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
 
       // Wait for the entire save to settle (button stops loading) before asserting
@@ -376,6 +417,7 @@ describe('OnboardingPage', () => {
       );
       const { application } = renderPage({ canWrite: true, httpPatch });
 
+      selectServiceAccount();
       fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
 
       // While PATCHes are pending the Back button must be disabled.
@@ -414,6 +456,7 @@ describe('OnboardingPage', () => {
       const toggles = screen.getAllByRole('switch');
       fireEvent.click(toggles[1]);
 
+      selectServiceAccount();
       fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
 
       await waitFor(() =>
@@ -424,7 +467,7 @@ describe('OnboardingPage', () => {
       );
       expect(httpPatch).toHaveBeenCalledWith(
         expect.stringContaining(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID),
-        expect.objectContaining({ body: JSON.stringify({ enabled: true }) })
+        expect.objectContaining({ body: enabledWorkerBody })
       );
     });
   });
@@ -462,6 +505,7 @@ describe('OnboardingPage', () => {
       const httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } });
       const { history } = renderPage({ canWrite: true, httpPatch, serverWorkers });
 
+      selectServiceAccount();
       fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
 
       await waitFor(() => expect(history.location.pathname).toBe('/watches'));
@@ -515,7 +559,26 @@ describe('OnboardingPage', () => {
       });
       queryClient.setQueryData(queryKeys.workers.list(), twoWorkers);
       const httpGet = jest.fn().mockResolvedValue(twoWorkers);
-      const core = { ...coreStart, http: { ...coreStart.http, get: httpGet } };
+      const core = {
+        ...coreStart,
+        http: { ...coreStart.http, get: httpGet },
+        security: {
+          ...coreStart.security,
+          uiApi: {
+            components: {
+              getServiceAccountPicker: ({
+                onSelect,
+              }: {
+                onSelect: (account: { id: string } | null) => void;
+              }) => (
+                <button type="button" onClick={() => onSelect({ id: 'account-a' })}>
+                  Select service account
+                </button>
+              ),
+            },
+          },
+        },
+      };
 
       const history = createMemoryHistory();
       const makeUI = () => (
@@ -540,6 +603,7 @@ describe('OnboardingPage', () => {
       // Toggle Alert Triage (B) off — Attack Discovery (A) becomes the sole enabled worker.
       const toggles = screen.getAllByRole('switch');
       fireEvent.click(toggles[0]);
+      selectServiceAccount();
       expect(screen.getByRole('button', { name: 'Enable and run' })).not.toBeDisabled();
 
       // Simulate a background workers refetch that removes the sole checked worker (Attack Discovery).
