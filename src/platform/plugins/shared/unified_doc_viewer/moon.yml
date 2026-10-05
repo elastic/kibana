@@ -65,6 +65,7 @@ dependsOn:
   - '@kbn/ebt-click'
   - '@kbn/apm-shared'
   - '@kbn/ui-callout'
+  - '@kbn/genai-common'
 tags:
   - plugin
   - prod
