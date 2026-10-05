@@ -153282,7 +153282,7 @@ components:
                                 type: string
                             description: 'Discover display option: controls table data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".'
                           rows_per_page:
-                            description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".
+                            description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage". Has no effect on ES|QL tabs since Kibana 8.16.
                             maximum: 10000
                             minimum: 1
                             type: number
@@ -153408,7 +153408,7 @@ components:
                                 type: string
                             description: 'Discover display option: controls table data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".'
                           rows_per_page:
-                            description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".
+                            description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage". Has no effect on ES|QL tabs since Kibana 8.16.
                             maximum: 10000
                             minimum: 1
                             type: number
@@ -153552,7 +153552,7 @@ components:
                                 type: string
                             description: 'Discover display option: controls table data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".'
                           rows_per_page:
-                            description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".
+                            description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage". Has no effect on ES|QL tabs since Kibana 8.16.
                             maximum: 10000
                             minimum: 1
                             type: number
