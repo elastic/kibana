@@ -160,8 +160,9 @@ describe('updateAgentPolicySpaces', () => {
     it('throws when moving the policy to a different space', async () => {
       await expect(
         updateAgentPolicySpaces({
-          agentPolicy: { id: 'policy1', name: 'Policy 1', space_ids: ['test'] },
+          agentPolicyId: 'policy1',
           currentSpaceId: 'default',
+          newSpaceIds: ['test'],
           authorizedSpaces: ['test', 'default'],
         })
       ).rejects.toThrow(
@@ -174,8 +175,9 @@ describe('updateAgentPolicySpaces', () => {
 
     it('allows moving the policy with force', async () => {
       await updateAgentPolicySpaces({
-        agentPolicy: { id: 'policy1', name: 'Policy 1', space_ids: ['test'] },
+        agentPolicyId: 'policy1',
         currentSpaceId: 'default',
+        newSpaceIds: ['test'],
         authorizedSpaces: ['test', 'default'],
         options: { force: true },
       });
@@ -195,8 +197,9 @@ describe('updateAgentPolicySpaces', () => {
 
     it('allows adding a space without removing the existing one', async () => {
       await updateAgentPolicySpaces({
-        agentPolicy: { id: 'policy1', name: 'Policy 1', space_ids: ['default', 'test'] },
+        agentPolicyId: 'policy1',
         currentSpaceId: 'default',
+        newSpaceIds: ['default', 'test'],
         authorizedSpaces: ['test', 'default'],
       });
 
