@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { RuleTagsSelector } from './rule_tags_selector';
+export { RoutingTagsSelector } from './routing_tags_selector';

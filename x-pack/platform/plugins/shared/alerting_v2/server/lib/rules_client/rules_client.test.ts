@@ -2289,6 +2289,23 @@ describe('RulesClient', () => {
     });
   });
 
+  describe('getRoutingTags', () => {
+    it('aggregates routing tags with the search prefix', async () => {
+      const client = createClient();
+
+      rulesSavedObjectService.findTags.mockResolvedValueOnce(['sre']);
+
+      const tags = await client.getRoutingTags({ search: 's' });
+
+      expect(tags).toEqual(['sre']);
+      expect(rulesSavedObjectService.findTags).toHaveBeenCalledWith({
+        search: 's',
+        size: undefined,
+        field: 'routing_tags',
+      });
+    });
+  });
+
   describe('getTags', () => {
     it('returns the aggregated tags without a filter or search', async () => {
       const client = createClient();

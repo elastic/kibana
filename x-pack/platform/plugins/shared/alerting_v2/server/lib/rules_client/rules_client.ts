@@ -1024,6 +1024,15 @@ export class RulesClient {
   }
 
   @withApm
+  public async getRoutingTags(params: { search?: string; size?: number } = {}): Promise<string[]> {
+    return this.rulesSavedObjectService.findTags({
+      search: params.search,
+      size: params.size,
+      field: 'routing_tags',
+    });
+  }
+
+  @withApm
   public async findRules(params: FindRulesArgs = {}): Promise<FindRulesResponse> {
     const page = params.page ?? DEFAULT_PAGE;
     const perPage = params.perPage ?? FIND_DEFAULT_PER_PAGE;
