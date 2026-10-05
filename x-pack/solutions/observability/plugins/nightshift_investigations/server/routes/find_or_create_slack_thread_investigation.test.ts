@@ -37,7 +37,14 @@ it('passes the status message and the delivered event to the client', async () =
     handler({
       request: {},
       getInvestigationsClient,
-      params: { body: { ...BODY, status_message_ts: '1700.0002', event_id: 'Ev1' } },
+      params: {
+        body: {
+          ...BODY,
+          status_message_ts: '1700.0002',
+          event_id: 'Ev1',
+          execution_id: 'exec-1',
+        },
+      },
     } as never)
   ).resolves.toEqual({ investigation_id: 'inv-1', title: 'Checkout errors', duplicate: true });
   expect(findOrCreateSlackThread).toHaveBeenCalledWith({
@@ -47,8 +54,41 @@ it('passes the status message and the delivered event to the client', async () =
     text: undefined,
     create: false,
     statusMessageTs: '1700.0002',
-    eventId: 'Ev1',
+    event: { eventId: 'Ev1', executionId: 'exec-1' },
   });
+});
+
+it('passes a release of the event to the client', async () => {
+  findOrCreateSlackThread.mockResolvedValue({
+    investigation_id: 'inv-1',
+    title: 'Checkout errors',
+  });
+
+  await handler({
+    request: {},
+    getInvestigationsClient,
+    params: {
+      body: { ...BODY, event_id: 'Ev1', execution_id: 'exec-1', release_event: true },
+    },
+  } as never);
+
+  expect(findOrCreateSlackThread).toHaveBeenCalledWith(
+    expect.objectContaining({
+      event: { eventId: 'Ev1', executionId: 'exec-1' },
+      releaseEvent: true,
+    })
+  );
+});
+
+it('requires the execution with the event, and the event with a release', () => {
+  expect(params?.safeParse({ body: { ...BODY, event_id: 'Ev1' } }).success).toBe(false);
+  expect(params?.safeParse({ body: { ...BODY, execution_id: 'exec-1' } }).success).toBe(false);
+  expect(params?.safeParse({ body: { ...BODY, release_event: true } }).success).toBe(false);
+  expect(
+    params?.safeParse({
+      body: { ...BODY, event_id: 'Ev1', execution_id: 'exec-1', release_event: true },
+    }).success
+  ).toBe(true);
 });
 
 it.each([
@@ -57,9 +97,14 @@ it.each([
   ['thread_ts', 65],
   ['status_message_ts', 65],
   ['event_id', 257],
+  ['execution_id', 257],
 ])('bounds %s so the thread key and the recorded event fit the thread subject', (field, length) => {
-  expect(params?.safeParse({ body: BODY }).success).toBe(true);
-  expect(params?.safeParse({ body: { ...BODY, [field]: 'x'.repeat(length) } }).success).toBe(false);
+  const body =
+    field === 'event_id' || field === 'execution_id'
+      ? { ...BODY, event_id: 'Ev1', execution_id: 'exec-1' }
+      : BODY;
+  expect(params?.safeParse({ body }).success).toBe(true);
+  expect(params?.safeParse({ body: { ...body, [field]: 'x'.repeat(length) } }).success).toBe(false);
 });
 
 it('returns an empty body for a thread without an investigation', async () => {

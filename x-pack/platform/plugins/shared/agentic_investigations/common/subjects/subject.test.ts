@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MAX_SLACK_SEEN_EVENT_IDS } from './constants';
+import { MAX_SLACK_SEEN_EVENTS } from './constants';
 import {
   alertSubjectSnapshotSchema,
   investigationSubjectInputSchema,
@@ -84,7 +84,7 @@ describe('investigationSubjectInputSchema', () => {
     ).toBe(false);
   });
 
-  it('bounds the Slack event ids a thread remembers', () => {
+  it('bounds the Slack events a thread remembers', () => {
     const withSeen = (count: number) =>
       investigationSubjectInputSchema.safeParse({
         type: 'slack_thread',
@@ -92,12 +92,25 @@ describe('investigationSubjectInputSchema', () => {
         slack: {
           channel: 'C1',
           thread_ts: '1',
-          seen_event_ids: Array.from({ length: count }, (_, index) => `Ev${index}`),
+          seen_events: Array.from({ length: count }, (_, index) => ({
+            event_id: `Ev${index}`,
+            execution_id: 'exec-1',
+          })),
         },
       }).success;
 
-    expect(withSeen(MAX_SLACK_SEEN_EVENT_IDS)).toBe(true);
-    expect(withSeen(MAX_SLACK_SEEN_EVENT_IDS + 1)).toBe(false);
+    expect(withSeen(MAX_SLACK_SEEN_EVENTS)).toBe(true);
+    expect(withSeen(MAX_SLACK_SEEN_EVENTS + 1)).toBe(false);
+  });
+
+  it('rejects a handled Slack event without the run that handled it', () => {
+    expect(
+      investigationSubjectInputSchema.safeParse({
+        type: 'slack_thread',
+        id: 't',
+        slack: { channel: 'C1', thread_ts: '1', seen_events: [{ event_id: 'Ev1' }] },
+      }).success
+    ).toBe(false);
   });
 
   it('only accepts HTTPS Slack permalinks', () => {
