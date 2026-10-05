@@ -238,7 +238,7 @@ interface LogstashSpaceSetupContext {
   scoutSpace: {
     id: string;
     uiSettings: {
-      set: (values: Record<string, string>) => Promise<void>;
+      set: (values: Record<string, string | number>) => Promise<void>;
       unset: (...keys: string[]) => Promise<unknown>;
     };
     savedObjects: {
