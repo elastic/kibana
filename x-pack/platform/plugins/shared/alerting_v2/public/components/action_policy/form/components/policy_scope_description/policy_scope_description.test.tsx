@@ -76,7 +76,7 @@ describe('PolicyScopeDescription', () => {
 
     expect(
       screen.getByText(
-        'Define which alert episodes this policy applies to. Select rule tags (joined with OR) and/or add a KQL match expression in advanced matching.'
+        'Define which alerts this policy applies to. Select rule tags (joined with OR) and/or add a KQL match expression in advanced matching.'
       )
     ).toBeInTheDocument();
   });

@@ -26,21 +26,24 @@ export default function ({ getService }: FtrProviderContext) {
   const spaces = getService('spaces');
   const osqueryPublicApiVersion = '2023-10-31';
 
+  const actionIndex = '.logs-osquery_manager.actions-default';
   // Live-query action responses are written by osquerybeat to the
   // osquery_manager action.responses data stream. The search strategy only
   // queries this data stream when it actually exists (newDataStreamIndexExists),
   // so the test must create it as a real data stream rather than a plain index.
   const responsesIndex = 'logs-osquery_manager.action.responses-default';
   const indexTemplateName = 'osquery-action-results-space-scoping-it';
-  const actionId = `action-space-scoping-it-${Date.now()}`;
+  const parentActionId = `action-space-scoping-it-${Date.now()}`;
+  const actionId = `query-space-scoping-it-${Date.now()}`;
+  // Responses exist for this id, but no action document does.
+  const orphanActionId = `orphan-space-scoping-it-${Date.now()}`;
 
-  const spaceAAgent = 'action-space-scoping-it-agent-a';
-  const spaceBAgent = 'action-space-scoping-it-agent-b';
-  // Responses whose originating space survived only inside the action `data` blob
-  // that osquerybeat copies onto the document as `action_data`.
-  const actionDataDefaultAgent = 'action-space-scoping-it-agent-c';
-  const actionDataOtherSpaceAgent = 'action-space-scoping-it-agent-d';
   const otherSpaceId = 'action-space-scoping-it-b';
+  const topLevelStampedAgent = 'action-space-scoping-it-agent-a';
+  const actionDataStampedAgent = 'action-space-scoping-it-agent-b';
+  // Indexed before Kibana stamped `action_data.space_id`: no space field at all.
+  const unstampedAgent = 'action-space-scoping-it-agent-c';
+  const orphanAgent = 'action-space-scoping-it-agent-d';
 
   // Install a higher-priority data stream template with the field types the
   // action_results query/aggregation rely on, then (re)create the data stream.
@@ -59,8 +62,6 @@ export default function ({ getService }: FtrProviderContext) {
             'event.ingested': { type: 'date' },
             action_id: { type: 'keyword' },
             space_id: { type: 'keyword' },
-            // Mirrors actionResponsesMapping: the fallback gates a space-isolation
-            // boundary, so it must not depend on dynamic mapping being enabled.
             action_data: { properties: { space_id: { type: 'keyword' } } },
             agent_id: { type: 'keyword' },
             agent: { properties: { id: { type: 'keyword' } } },
@@ -78,6 +79,32 @@ export default function ({ getService }: FtrProviderContext) {
     await es.indices.createDataStream({ name: responsesIndex });
   };
 
+  const seedActionDocument = async () => {
+    await es.index({
+      index: actionIndex,
+      id: parentActionId,
+      refresh: 'wait_for',
+      document: {
+        action_id: parentActionId,
+        type: 'INPUT_ACTION',
+        input_type: 'osquery',
+        '@timestamp': new Date().toISOString(),
+        expiration: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+        agents: [topLevelStampedAgent, actionDataStampedAgent, unstampedAgent],
+        user_id: 'elastic',
+        space_id: otherSpaceId,
+        queries: [
+          {
+            action_id: actionId,
+            id: 'query-1',
+            query: 'select 1;',
+            agents: [topLevelStampedAgent, actionDataStampedAgent, unstampedAgent],
+          },
+        ],
+      },
+    });
+  };
+
   const seedResponses = async () => {
     const timestamp = new Date().toISOString();
     const base = {
@@ -85,43 +112,29 @@ export default function ({ getService }: FtrProviderContext) {
       'event.ingested': timestamp,
       started_at: timestamp,
       completed_at: timestamp,
-      action_id: actionId,
       action_response: { osquery: { count: 1 } },
     };
+    const agentFields = (agentId: string) => ({
+      agent_id: agentId,
+      agent: { id: agentId },
+      elastic_agent: { id: agentId },
+    });
 
     const documents = [
       {
         ...base,
-        space_id: 'default',
-        agent_id: spaceAAgent,
-        agent: { id: spaceAAgent },
-        elastic_agent: { id: spaceAAgent },
-      },
-      {
-        ...base,
+        action_id: actionId,
         space_id: otherSpaceId,
-        agent_id: spaceBAgent,
-        agent: { id: spaceBAgent },
-        elastic_agent: { id: spaceBAgent },
-      },
-      // Kibana's top-level `space_id` on the Fleet action never reaches the agent,
-      // so a real live-query response arrives with the space only in `action_data`.
-      // These two documents are the ones the fallback exists for: the first must be
-      // readable from the default space, the second must never be.
-      {
-        ...base,
-        action_data: { space_id: 'default' },
-        agent_id: actionDataDefaultAgent,
-        agent: { id: actionDataDefaultAgent },
-        elastic_agent: { id: actionDataDefaultAgent },
+        ...agentFields(topLevelStampedAgent),
       },
       {
         ...base,
+        action_id: actionId,
         action_data: { space_id: otherSpaceId },
-        agent_id: actionDataOtherSpaceAgent,
-        agent: { id: actionDataOtherSpaceAgent },
-        elastic_agent: { id: actionDataOtherSpaceAgent },
+        ...agentFields(actionDataStampedAgent),
       },
+      { ...base, action_id: actionId, ...agentFields(unstampedAgent) },
+      { ...base, action_id: orphanActionId, ...agentFields(orphanAgent) },
     ];
 
     for (const document of documents) {
@@ -130,86 +143,65 @@ export default function ({ getService }: FtrProviderContext) {
     }
   };
 
-  const deleteResponses = async () => {
+  const cleanup = async () => {
+    await es.deleteByQuery({
+      index: actionIndex,
+      allow_no_indices: true,
+      ignore_unavailable: true,
+      refresh: true,
+      query: { term: { action_id: parentActionId } },
+    });
     await es.indices.deleteDataStream({ name: responsesIndex }, { ignore: [404] });
     await es.indices.deleteIndexTemplate({ name: indexTemplateName }, { ignore: [404] });
   };
 
-  // `spaceId` omitted reads from the default space; passing one exercises the
-  // named-space path the fallback exists to restore.
-  const fetchActionResults = async (spaceId?: string) => {
+  // `spaceId` omitted reads from the default space.
+  const fetchActionResults = (id: string, spaceId?: string) => {
     const basePath = spaceId ? `/s/${spaceId}` : '';
-    const { body } = await supertest
-      .get(`${basePath}/api/osquery/action_results/${actionId}?page=0&pageSize=100&kuery=`)
-      .set('kbn-xsrf', 'true')
-      .set('elastic-api-version', osqueryPublicApiVersion)
-      .expect(200);
 
-    return body as ActionResultsRows;
+    return supertest
+      .get(`${basePath}/api/osquery/action_results/${id}?page=0&pageSize=100&kuery=`)
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', osqueryPublicApiVersion);
   };
 
   describe('Action results space scoping', () => {
     before(async () => {
       await spaces.create({ id: otherSpaceId, name: otherSpaceId, disabledFeatures: [] });
       await recreateResponsesIndex();
+      await seedActionDocument();
       await seedResponses();
     });
     after(async () => {
-      await deleteResponses();
+      await cleanup();
       await spaces.delete(otherSpaceId);
     });
 
-    it('returns only active-space responses (hits + aggregation)', async () => {
-      const body = await fetchActionResults();
-      const { edges, aggregations } = body;
-      const spaceIds = (edges ?? []).map(
-        (edge) => edge._source?.space_id ?? (edge.fields?.space_id as string[] | undefined)?.[0]
-      );
-
-      // The default-space response is returned; the other-space one is filtered out.
-      expect(spaceIds).not.to.contain(otherSpaceId);
-      expect(JSON.stringify(body)).not.to.contain(spaceBAgent);
-      expect(JSON.stringify(body)).not.to.contain(otherSpaceId);
-      expect(JSON.stringify(body)).to.contain(spaceAAgent);
-
-      // The aggregation is space-scoped too, so its counts match the space-scoped
-      // hits: the top-level-stamped default response plus the action_data one.
-      expect(aggregations?.totalResponded).to.eql(2);
-    });
-
-    // Proves the fallback works against real Elasticsearch rather than only in DSL
-    // shape: the field has to be queryable as a term for the results to come back.
-    it('returns responses whose space survived only in action_data', async () => {
-      const body = await fetchActionResults();
-
-      expect(JSON.stringify(body)).to.contain(actionDataDefaultAgent);
-    });
-
-    // The default space also matches documents with no space_id at all. A response
-    // carrying action_data.space_id is not unstamped, so that allowance must not
-    // pull named-space results into the default space.
-    it('does not leak named-space responses stamped only in action_data', async () => {
-      const body = await fetchActionResults();
-
-      expect(JSON.stringify(body)).not.to.contain(actionDataOtherSpaceAgent);
-    });
-
-    // The regression this PR fixes: read from the named space itself. A named space
-    // has no missing-field allowance, so the action_data term is the only clause
-    // that can return this response — unlike the default-space assertions above,
-    // this one cannot pass with the fallback disabled.
-    it('returns action_data-stamped responses when read from their own named space', async () => {
-      const { edges, aggregations } = await fetchActionResults(otherSpaceId);
+    // The action document is in the active space, so its responses are read by
+    // `action_id` whatever space field they carry, including none.
+    it('returns every response of an action from the action space (hits + aggregation)', async () => {
+      const { body } = await fetchActionResults(actionId, otherSpaceId).expect(200);
+      const { edges, aggregations } = body as ActionResultsRows;
       const serialized = JSON.stringify(edges);
 
-      expect(serialized).to.contain(actionDataOtherSpaceAgent);
-      // The top-level-stamped response for this space is returned too.
-      expect(serialized).to.contain(spaceBAgent);
-      // Default-space responses stay out, on either field.
-      expect(serialized).not.to.contain(spaceAAgent);
-      expect(serialized).not.to.contain(actionDataDefaultAgent);
+      expect(serialized).to.contain(topLevelStampedAgent);
+      expect(serialized).to.contain(actionDataStampedAgent);
+      expect(serialized).to.contain(unstampedAgent);
+      expect(serialized).not.to.contain(orphanAgent);
+      expect(aggregations?.totalResponded).to.eql(3);
+    });
 
-      expect(aggregations?.totalResponded).to.eql(2);
+    // Field-less responses used to match the default space's missing-field
+    // allowance, which exposed another space's results there.
+    it('returns 404 for the action from another space', async () => {
+      const { body } = await fetchActionResults(actionId).expect(404);
+
+      expect(JSON.stringify(body)).not.to.contain(unstampedAgent);
+    });
+
+    it('returns 404 for responses without an action document', async () => {
+      await fetchActionResults(orphanActionId).expect(404);
+      await fetchActionResults(orphanActionId, otherSpaceId).expect(404);
     });
   });
 }
