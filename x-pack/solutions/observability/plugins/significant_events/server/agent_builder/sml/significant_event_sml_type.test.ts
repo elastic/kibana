@@ -36,17 +36,14 @@ const findLatestPaginated = jest.fn();
 const findLatestByEventId = jest.fn();
 const isAvailable = jest.fn().mockResolvedValue(true);
 
-const createGetScopedClients = (
-  events: SignificantEvent[]
-): jest.MockedFunction<GetScopedClients> => {
-  const getEventSearchClient = jest.fn(() => ({
-    findLatestByEventId: jest.fn().mockResolvedValue(events.at(-1)),
-  }));
+const asCurrentUser = {} as never;
 
-  return jest.fn().mockResolvedValue({
-    getEventSearchClient,
+const createGetScopedClients = (
+  _events: SignificantEvent[]
+): jest.MockedFunction<GetScopedClients> =>
+  jest.fn().mockResolvedValue({
+    scopedClusterClient: { asCurrentUser },
   } as unknown as RouteHandlerScopedClients) as jest.MockedFunction<GetScopedClients>;
-};
 
 describe('createSignificantEventSmlType', () => {
   beforeEach(() => {
@@ -158,8 +155,9 @@ describe('createSignificantEventSmlType', () => {
   });
 
   it('converts an SML document into an attachment', async () => {
+    findLatestByEventId.mockResolvedValue(event);
     const smlType = createSignificantEventSmlType({
-      getScopedClients: createGetScopedClients([event]),
+      getScopedClients: createGetScopedClients([]),
       isAvailable,
     });
 
@@ -203,6 +201,10 @@ describe('createSignificantEventSmlType', () => {
       type: SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
       origin: 'payment-outage',
       data: event,
+    });
+    expect(RuleEventsClient).toHaveBeenCalledWith({
+      esClient: asCurrentUser,
+      space: DEFAULT_SPACE_ID,
     });
   });
 });

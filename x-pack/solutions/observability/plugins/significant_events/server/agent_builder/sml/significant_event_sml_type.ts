@@ -116,16 +116,15 @@ export const createSignificantEventSmlType = ({
     getPermissions: () => kibanaPermissions({ kiType: SIGNIFICANT_EVENT_KI_TYPE }),
 
     toAttachment: async (item, context) => {
-      if (!(await isAvailable())) {
-        return undefined;
-      }
-
       const originId = getSmlOriginId(item);
       if (!originId) {
         return undefined;
       }
-      const { getEventSearchClient } = await getScopedClients({ request: context.request });
-      const eventClient = await getEventSearchClient();
+      const { scopedClusterClient } = await getScopedClients({ request: context.request });
+      const eventClient = await getSmlEventClient(scopedClusterClient.asCurrentUser);
+      if (!eventClient) {
+        return undefined;
+      }
       const event = await eventClient.findLatestByEventId(originId);
 
       if (!event) {
