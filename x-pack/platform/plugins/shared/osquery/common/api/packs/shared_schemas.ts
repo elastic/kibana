@@ -66,33 +66,51 @@ export const resultTypeRt = t.union([
 export const MIN_OSQUERY_VERSION_MAX_LENGTH = 64;
 export const PLATFORM_MAX_LENGTH = 256;
 
-// Accepts "" (no constraint) or a numeric version string matching the osquery
-// versionAtLeast format. Non-numeric values like "latest" or "5.x" silently
-// disable queries on the agent, so we reject them at the API edge.
-export const osqueryVersionString = new t.Type<string, string, unknown>(
-  'OsqueryVersionString',
-  (u): u is string => typeof u === 'string',
-  (u, c) => {
-    if (typeof u !== 'string') return t.failure(u, c, 'expected string');
-    if (u.length > MIN_OSQUERY_VERSION_MAX_LENGTH)
-      return t.failure(u, c, `string must not exceed ${MIN_OSQUERY_VERSION_MAX_LENGTH} characters`);
-    if (u !== '' && !OSQUERY_VERSION_REGEX.test(u)) {
-      // Drop io-ts intersection/union branch indices so the path reads `queries.q1.version`.
-      const path = c
-        .map(({ key }) => key)
-        .filter((key) => key && !/^\d+$/.test(key))
-        .join('.');
+// Builds a readable field path (e.g. `queries.q1.version`) from an io-ts context.
+// Keys that are intersection/union branch indices are dropped; record keys are
+// kept even when numeric, so a query with id `1` reads `queries.1.version`.
+const contextPath = (c: t.Context): string =>
+  c
+    .filter(({ key }, i) => {
+      if (!key) return false;
+      const parentType = i > 0 ? c[i - 1].type : undefined;
 
-      return t.failure(
-        u,
-        c,
-        `${path}: "${u}" must be empty or a numeric version string (e.g. "5.19.0")`
-      );
-    }
+      return !(parentType instanceof t.IntersectionType || parentType instanceof t.UnionType);
+    })
+    .map(({ key }) => key)
+    .join('.');
 
-    return t.success(u);
-  },
-  t.identity
+// Numeric version string matching the osquery versionAtLeast format. Non-numeric
+// values like "latest" or "5.x" silently disable queries on the agent, so we
+// reject them at the API edge. `allowEmpty` permits "" (no constraint), which
+// per-query `version` accepts but pack-level `min_osquery_version` does not.
+const makeOsqueryVersionString = (name: string, allowEmpty: boolean) =>
+  new t.Type<string, string, unknown>(
+    name,
+    (u): u is string => typeof u === 'string',
+    (u, c) => {
+      if (typeof u !== 'string') return t.failure(u, c, 'expected string');
+      if (u.length > MIN_OSQUERY_VERSION_MAX_LENGTH)
+        return t.failure(
+          u,
+          c,
+          `string must not exceed ${MIN_OSQUERY_VERSION_MAX_LENGTH} characters`
+        );
+      if ((allowEmpty && u === '') || OSQUERY_VERSION_REGEX.test(u)) return t.success(u);
+
+      const expected = allowEmpty
+        ? 'must be empty or a numeric version string'
+        : 'must be a numeric version string';
+
+      return t.failure(u, c, `${contextPath(c)}: "${u}" ${expected} (e.g. "5.19.0")`);
+    },
+    t.identity
+  );
+
+export const osqueryVersionString = makeOsqueryVersionString('OsqueryVersionString', true);
+export const nonEmptyOsqueryVersionString = makeOsqueryVersionString(
+  'NonEmptyOsqueryVersionString',
+  false
 );
 
 const basePackQueryFields = {

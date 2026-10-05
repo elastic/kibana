@@ -7,11 +7,10 @@
 
 import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
-import { NonEmptyString } from '../model/non_empty_string';
 import {
   PLATFORM_MAX_LENGTH,
   nonEmptyBoundedString,
-  osqueryVersionString,
+  nonEmptyOsqueryVersionString,
   packQueryRecordRt,
   resultTypeRt,
   rruleScheduleConfigRt,
@@ -31,7 +30,7 @@ export const createPackRequestBodySchema = t.intersection([
     interval: toNumberRt,
     rrule_schedule: rruleScheduleConfigRt,
     // V5: pack-level execution defaults
-    min_osquery_version: t.intersection([NonEmptyString, osqueryVersionString]),
+    min_osquery_version: nonEmptyOsqueryVersionString,
     result_type: resultTypeRt,
     platform: nonEmptyBoundedString(PLATFORM_MAX_LENGTH),
   }),

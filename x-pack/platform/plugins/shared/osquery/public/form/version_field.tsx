@@ -24,12 +24,19 @@ interface VersionFieldProps {
   name?: string;
   /** Optional help text rendered below the field. */
   helpText?: React.ReactNode;
+  /**
+   * Skip the stored-value format check. Set when the field shows an inherited
+   * pack default that the serializer drops on save, so an invalid legacy pack
+   * value must not block submitting the query.
+   */
+  skipValidation?: boolean;
 }
 
 const VersionFieldComponent = ({
   euiFieldProps = {},
   name = 'version',
   helpText,
+  skipValidation = false,
 }: VersionFieldProps) => {
   const [createError, setCreateError] = useState<string | null>(null);
   const isSingleSelection = !!euiFieldProps.singleSelection;
@@ -42,7 +49,7 @@ const VersionFieldComponent = ({
     defaultValue: [],
     rules: {
       validate: (v: string[]) => {
-        if (!Array.isArray(v) || v.length === 0) return true;
+        if (skipValidation || !Array.isArray(v) || v.length === 0) return true;
         const invalid = v.find((entry) => !isValidOsqueryVersion(entry));
 
         return invalid
@@ -80,7 +87,7 @@ const VersionFieldComponent = ({
     [onChange]
   );
 
-  const displayError = createError ?? error?.message;
+  const displayError = skipValidation ? undefined : createError ?? error?.message;
   const hasError = useMemo(() => !!displayError, [displayError]);
 
   const selectedOptions = useMemo(

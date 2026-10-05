@@ -6,7 +6,13 @@
  */
 
 import { isLeft, isRight } from 'fp-ts/Either';
-import { osqueryVersionString, packQueryRecordRt } from './shared_schemas';
+import {
+  nonEmptyOsqueryVersionString,
+  osqueryVersionString,
+  packQueryRecordRt,
+} from './shared_schemas';
+import { createPackRequestBodySchema } from './create_pack_route';
+import { updatePacksRequestBodySchema } from './update_packs_route';
 
 describe('osqueryVersionString codec', () => {
   const decode = (v: unknown) => osqueryVersionString.decode(v);
@@ -36,7 +42,44 @@ describe('osqueryVersionString codec', () => {
     );
   });
 
+  it('keeps a numeric query id in the error path', () => {
+    const result = packQueryRecordRt.decode({ '1': { query: 'select 1;', version: '5.x' } });
+    expect(isLeft(result) && result.left[0].message).toBe(
+      '1.version: "5.x" must be empty or a numeric version string (e.g. "5.19.0")'
+    );
+  });
+
   it('rejects strings exceeding 64 characters', () => {
     expect(isRight(decode('5'.repeat(65)))).toBe(false);
+  });
+});
+
+describe('nonEmptyOsqueryVersionString codec', () => {
+  const decode = (v: unknown) => nonEmptyOsqueryVersionString.decode(v);
+
+  it.each(['5', '5.12', '5.19.0'])('accepts valid numeric version %s', (v) => {
+    expect(isRight(decode(v))).toBe(true);
+  });
+
+  it('rejects empty string', () => {
+    expect(isRight(decode(''))).toBe(false);
+  });
+
+  it('does not offer "empty" as a valid alternative in the error message', () => {
+    const result = createPackRequestBodySchema.decode({
+      name: 'p',
+      queries: {},
+      min_osquery_version: 'latest',
+    });
+    expect(isLeft(result) && result.left[0].message).toBe(
+      'min_osquery_version: "latest" must be a numeric version string (e.g. "5.19.0")'
+    );
+  });
+
+  it('names the field inside the nullable update union', () => {
+    const result = updatePacksRequestBodySchema.decode({ min_osquery_version: '' });
+    expect(isLeft(result) && result.left[0].message).toBe(
+      'min_osquery_version: "" must be a numeric version string (e.g. "5.19.0")'
+    );
   });
 });

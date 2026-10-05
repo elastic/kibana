@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getOsqueryVersionOptions } from './osquery_version_options';
+import { getOsqueryVersionOptions, isLiveOsqueryVersion } from './osquery_version_options';
 import { FALLBACK_OSQUERY_VERSION } from '../../../common/constants';
 
 describe('getOsqueryVersionOptions', () => {
@@ -52,11 +52,27 @@ describe('getOsqueryVersionOptions', () => {
     expect(getOsqueryVersionOptions('garbage')[0].label).toBe(FALLBACK_OSQUERY_VERSION);
   });
 
+  it('falls back when given a pre-5 version such as the integration version (1.35.0)', () => {
+    expect(getOsqueryVersionOptions('1.35.0')).toEqual(
+      getOsqueryVersionOptions(FALLBACK_OSQUERY_VERSION)
+    );
+  });
+
   it('sorts 5.10 above 5.9 (numeric order, not lexicographic)', () => {
     const opts = getOsqueryVersionOptions('5.23.1');
     const labels = opts.map((o) => o.label);
     const idx10 = labels.indexOf('5.10.0');
     const idx9 = labels.indexOf('5.9.0');
     expect(idx10).toBeLessThan(idx9);
+  });
+});
+
+describe('isLiveOsqueryVersion', () => {
+  it.each(['5.0.0', '5.23.1', '6.2.0'])('accepts %s', (v) => {
+    expect(isLiveOsqueryVersion(v)).toBe(true);
+  });
+
+  it.each(['1.35.0', '4.9.0', '5.23', 'garbage', ''])('rejects %s', (v) => {
+    expect(isLiveOsqueryVersion(v)).toBe(false);
   });
 });

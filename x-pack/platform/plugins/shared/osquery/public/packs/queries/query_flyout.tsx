@@ -224,6 +224,10 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     [versionOptions, packMinOsqueryVersion, overridePackDefaults]
   );
 
+  // Mirrors the serializer: with the toggle off and a pack version default, the
+  // query's `version` is dropped on save, so the inherited value isn't checked.
+  const isVersionInherited = !overridePackDefaults && !!packMinOsqueryVersion;
+
   const plainVersionFieldProps = useMemo(
     () => ({
       ...PLAIN_VERSION_FIELD_BASE,
@@ -408,7 +412,11 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
               >
                 <EuiFlexGroup>
                   <EuiFlexItem>
-                    <VersionField euiFieldProps={versionFieldProps} helpText={versionHelpText} />
+                    <VersionField
+                      euiFieldProps={versionFieldProps}
+                      helpText={versionHelpText}
+                      skipValidation={isVersionInherited}
+                    />
                     <EuiSpacer />
                     <ResultsTypeField euiFieldProps={disabledFieldProps} />
                   </EuiFlexItem>

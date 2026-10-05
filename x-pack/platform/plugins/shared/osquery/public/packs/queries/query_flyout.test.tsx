@@ -1183,6 +1183,52 @@ describe('QueryFlyout', () => {
       expect(onSave).not.toHaveBeenCalled();
     });
 
+    it('an inherited invalid pack default (latest) does not block submit when override is off', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+      const { getByTestId } = renderFlyout({
+        onSave,
+        uniqueQueryIds: ['q1'],
+        packMinOsqueryVersion: 'latest',
+        defaultValue: {
+          id: 'q1',
+          query: 'select 1;',
+          interval: '3600',
+          shards: {},
+        },
+      });
+
+      fireEvent.click(getByTestId('query-flyout-save-button'));
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+
+      expect(onSave.mock.calls[0][0]).not.toHaveProperty('version');
+      expect(screen.queryByText(/is not a valid format/)).not.toBeInTheDocument();
+    });
+
+    it('a stored invalid query version still blocks submit when the pack has no version default', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+      const { getByTestId } = renderFlyout({
+        onSave,
+        uniqueQueryIds: ['q1'],
+        packResultType: 'differential',
+        defaultValue: {
+          id: 'q1',
+          query: 'select 1;',
+          interval: '3600',
+          version: 'latest',
+          shards: {},
+        },
+      });
+
+      fireEvent.click(getByTestId('query-flyout-save-button'));
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/Stored version "latest" is not a valid format/)
+        ).toBeInTheDocument();
+      });
+      expect(onSave).not.toHaveBeenCalled();
+    });
+
     it('clearing the version stays valid and saves without a version', async () => {
       const onSave = jest.fn().mockResolvedValue(undefined);
       const { getByTestId } = renderFlyout({

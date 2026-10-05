@@ -12,15 +12,33 @@ import { FALLBACK_OSQUERY_VERSION } from '../../../common/constants';
 // This is frozen history — only extended when a new major ships.
 const LAST_KNOWN_MINOR: Record<number, number> = { 5: 23 };
 
+// Oldest major the picker lists. Anything below it can't be a live osquery
+// version (e.g. the integration version `1.35.0` when package metadata is missing).
+const MIN_MAJOR = 5;
+
 const LIVE_VERSION_RE = /^(\d+)\.(\d+)\.(\d+)$/;
+
+const parseLiveVersion = (version: string): { major: number; minor: number } | undefined => {
+  const match = LIVE_VERSION_RE.exec(version);
+  if (!match) return undefined;
+
+  const major = parseInt(match[1], 10);
+  if (major < MIN_MAJOR) return undefined;
+
+  return { major, minor: parseInt(match[2], 10) };
+};
+
+/** True when `version` looks like a real osquery release (`<major>.<minor>.<patch>`, major >= 5). */
+export const isLiveOsqueryVersion = (version: string): boolean => !!parseLiveVersion(version);
 
 export const getOsqueryVersionOptions = (
   liveVersion: string
 ): Array<EuiComboBoxOptionOption<string>> => {
-  const effectiveLive = LIVE_VERSION_RE.test(liveVersion) ? liveVersion : FALLBACK_OSQUERY_VERSION;
-  const [, majorStr, minorStr] = LIVE_VERSION_RE.exec(effectiveLive)!;
-  const liveMajor = parseInt(majorStr, 10);
-  const liveMinor = parseInt(minorStr, 10);
+  const parsed = parseLiveVersion(liveVersion);
+  const effectiveLive = parsed ? liveVersion : FALLBACK_OSQUERY_VERSION;
+  // FALLBACK_OSQUERY_VERSION is a valid live version, so this always resolves.
+  const { major: liveMajor, minor: liveMinor } = parsed ??
+    parseLiveVersion(FALLBACK_OSQUERY_VERSION) ?? { major: MIN_MAJOR, minor: 0 };
 
   const labels: string[] = [effectiveLive];
 
@@ -28,8 +46,8 @@ export const getOsqueryVersionOptions = (
     labels.push(`${liveMajor}.${m}.0`);
   }
 
-  // Older majors down to 5
-  for (let major = liveMajor - 1; major >= 5; major--) {
+  // Older majors down to MIN_MAJOR
+  for (let major = liveMajor - 1; major >= MIN_MAJOR; major--) {
     const lastMinor = LAST_KNOWN_MINOR[major] ?? 0;
     for (let m = lastMinor; m >= 0; m--) {
       labels.push(`${major}.${m}.0`);
