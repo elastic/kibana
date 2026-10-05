@@ -546,7 +546,10 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
           });
 
           expect(breachEvents).toHaveLength(2);
-          expect(breachEvents[0].group_hash).not.toBe(breachEvents[1].group_hash);
+          // An ungrouped rule is a single series: every returned row is a rule
+          // event sharing one group_hash (and one alert.id), while each event
+          // still carries its own row data.
+          expect(breachEvents[0].group_hash).toBe(breachEvents[1].group_hash);
 
           const eventsByHost = groupEventsByHost(breachEvents);
           expect(eventsByHost['host-grouping-fallback-a'].data).toMatchObject({
