@@ -16,6 +16,7 @@ import type { DataSetWithName, DataSource } from '../common';
 import { CREATE_DATASET_PATH, getEditDatasetPath } from './app_paths';
 import { DatasetRowActions } from './dataset_row_actions';
 import { getDataSourceTypeVerbose } from './get_data_source_type_label';
+import { getDatasetEsqlQuery } from './get_dataset_esql_query';
 import { mainTranslations } from './main_i18n';
 import type { DataFederationKibanaServices } from './types';
 
@@ -101,7 +102,10 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
                 disabled={!enabled}
                 onOpenInDiscover={
                   discoverLocator
-                    ? () => discoverLocator.navigateSync({ query: { esql: `FROM "${item.name}"` } })
+                    ? () =>
+                        discoverLocator.navigateSync({
+                          query: { esql: getDatasetEsqlQuery(item.name) },
+                        })
                     : undefined
                 }
                 onEdit={() => history.push(getEditDatasetPath(item.name))}

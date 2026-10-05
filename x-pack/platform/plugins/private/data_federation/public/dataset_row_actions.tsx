@@ -42,6 +42,7 @@ export const DatasetRowActions: FunctionComponent<DatasetRowActionsProps> = ({
           <EuiButtonIcon
             onClick={onOpenInDiscover}
             isDisabled={disabled}
+            hasAriaDisabled
             iconType="productDiscover"
             color="text"
             aria-label={translations.discoverAction}
@@ -57,6 +58,7 @@ export const DatasetRowActions: FunctionComponent<DatasetRowActionsProps> = ({
               iconType="ellipsis"
               color="text"
               isDisabled={disabled}
+              hasAriaDisabled
               aria-label={translations.moreActions}
               onClick={() => setIsMenuOpen((open) => !open)}
               data-test-subj="dataSetsSetsActionsButton"

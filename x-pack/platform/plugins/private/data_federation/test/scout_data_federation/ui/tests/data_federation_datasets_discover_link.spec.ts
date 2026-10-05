@@ -54,7 +54,7 @@ test.describe(
       page,
       pageObjects,
     }) => {
-      const expectedQuery = `FROM "${dataSetName}"`;
+      const expectedQuery = `FROM ${dataSetName}`;
       await browserAuth.loginWithCustomRole(CUSTOM_ROLES.data_federation_manager_with_discover);
       await pageObjects.dataFederation.goto();
       await pageObjects.dataFederation.selectTab('Datasets');

@@ -189,7 +189,18 @@ describe('DatasetsTable', () => {
 
     fireEvent.click(getByTestId('dataSetsSetsDiscoverButton'));
     expect(navigateSync).toHaveBeenCalledTimes(1);
-    expect(navigateSync).toHaveBeenCalledWith({ query: { esql: 'FROM "set1"' } });
+    expect(navigateSync).toHaveBeenCalledWith({ query: { esql: 'FROM set1' } });
+  });
+
+  it('quotes dataset names that need quoting in ES|QL when opening Discover', async () => {
+    const navigateSync = jest.fn();
+    const { getByTestId } = renderTable(
+      { items: [createDataSetRow({ name: 'set=[1]', dataSource: 'ds1' })] },
+      { navigateSync }
+    );
+
+    fireEvent.click(getByTestId('dataSetsSetsDiscoverButton'));
+    expect(navigateSync).toHaveBeenCalledWith({ query: { esql: 'FROM "set=[1]"' } });
   });
 
   it('disables the row actions while rows are selected', async () => {
@@ -197,9 +208,9 @@ describe('DatasetsTable', () => {
     const selectedItems = [createDataSetRow({ name: 'set1', dataSource: 'ds1' })];
     const { getByTestId } = renderTable({ items: selectedItems, selectedItems }, { navigateSync });
 
-    expect(getByTestId('dataSetsSetsActionsButton')).toBeDisabled();
+    expect(getByTestId('dataSetsSetsActionsButton')).toHaveAttribute('aria-disabled', 'true');
     const discoverButton = getByTestId('dataSetsSetsDiscoverButton');
-    expect(discoverButton).toBeDisabled();
+    expect(discoverButton).toHaveAttribute('aria-disabled', 'true');
     fireEvent.click(discoverButton);
     expect(navigateSync).not.toHaveBeenCalled();
   });
