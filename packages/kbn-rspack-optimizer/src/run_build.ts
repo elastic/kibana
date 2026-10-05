@@ -9,7 +9,7 @@
 
 import Path from 'path';
 import Fs from 'fs';
-import type { MultiCompiler, MultiStats, Stats, WatchOptions } from '@rspack/core';
+import type { MultiCompiler, MultiStats, Stats } from '@rspack/core';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
 import type { KibanaGroup } from '@kbn/projects-solutions-groups';
@@ -19,22 +19,9 @@ import { HmrServer } from './hmr/hmr_server';
 import type { ThemeTag } from './types';
 import { BUNDLES_SUBDIR } from './paths';
 import { createMultiCompileConfig, KIBANA_COMPILER } from './config/create_multi_compile_config';
+import { getWatchOptions, IGNORED_WATCH_PATTERNS } from './watch_options';
 
-export const IGNORED_WATCH_PATTERNS: RegExp[] = [
-  /[\\/]node_modules[\\/]/,
-  /[\\/]target[\\/]/,
-  /\.tsbuildinfo$/,
-  /(^|[\\/])tsconfig[^\\/]*\.type_check\.json$/,
-  /\.test\.[jt]sx?$/,
-  /\.spec\.[jt]sx?$/,
-  /\.stories\.[jt]sx?$/,
-  /\.mock\.[jt]sx?$/,
-  /[\\/]__(?:mocks|snapshots|fixtures|jest)__[\\/]/,
-  /[\\/]jest(?:\.integration)?\.config\.[jt]s$/,
-  // Scout/Playwright output (test artifacts, reports, server configs) written
-  // into plugin dirs during test runs; must not trigger watch rebuilds.
-  /[\\/]\.scout[\\/]/,
-];
+export { IGNORED_WATCH_PATTERNS };
 
 export interface BuildOptions {
   repoRoot: string;
@@ -297,172 +284,166 @@ async function runWatchBuild(
       });
     }
 
-    const watchOptions = compiler.compilers.map(({ options }) => ({
-      aggregateTimeout: 50,
-      ...(options.watchOptions ?? {}),
-      ignored:
-        options.watchOptions?.ignored ??
-        (((filePath: string) =>
-          IGNORED_WATCH_PATTERNS.some((re) => re.test(filePath))) as unknown as RegExp),
-    })) satisfies WatchOptions[];
+    const watching = compiler.watch(
+      compiler.compilers.map(({ options }) => getWatchOptions(options.watchOptions)),
+      (err, stats) => {
+        if (isShuttingDown) {
+          log?.debug('Ignoring callback - shutdown in progress');
+          return;
+        }
 
-    const watching = compiler.watch(watchOptions, (err, stats) => {
-      if (isShuttingDown) {
-        log?.debug('Ignoring callback - shutdown in progress');
-        return;
-      }
+        const duration = (Date.now() - startTime) / 1000;
 
-      const duration = (Date.now() - startTime) / 1000;
+        if (err) {
+          log?.error(`Watch error: ${err.message}`);
+          if (isFirstBuild && !hasResolvedFirstBuild) {
+            hasResolvedFirstBuild = true;
+            resolve({
+              success: false,
+              errors: [err.message],
+              duration,
+              close: closeWatcher,
+              done,
+            });
+          }
+          return;
+        }
 
-      if (err) {
-        log?.error(`Watch error: ${err.message}`);
+        if (!stats) {
+          log?.error('No stats returned');
+          if (isFirstBuild && !hasResolvedFirstBuild) {
+            hasResolvedFirstBuild = true;
+            resolve({
+              success: false,
+              errors: ['No stats returned from compilation'],
+              duration,
+              close: closeWatcher,
+              done,
+            });
+          }
+          return;
+        }
+
         if (isFirstBuild && !hasResolvedFirstBuild) {
+          const result = processMultiStats(stats, log, { duration });
           hasResolvedFirstBuild = true;
+          isFirstBuild = false;
+
+          if (result.success) {
+            for (const asset of result.assets ?? []) {
+              previousAssetSizes.set(asset.name, asset.size);
+            }
+            // Seed hashes so a later Kibana-only rebuild is not treated as a shared rebuild.
+            sharedCompilersChanged(childCompilerHashes(stats), previousSharedHashes);
+            log?.debug(`Bundles ready at ${BUNDLES_SUBDIR}/`);
+            const kibanaStats = findKibanaStats(stats);
+            if (kibanaStats.hash && hmrServer) {
+              hmrServer.broadcast(kibanaStats.hash);
+              cleanupStaleHotUpdates(kibanaStats.hash);
+            }
+          } else if (hmrServer && result.errors?.length) {
+            hmrServer.broadcastErrors(result.errors);
+          }
+
           resolve({
-            success: false,
-            errors: [err.message],
-            duration,
+            ...result,
             close: closeWatcher,
             done,
           });
+          return;
         }
-        return;
-      }
 
-      if (!stats) {
-        log?.error('No stats returned');
-        if (isFirstBuild && !hasResolvedFirstBuild) {
-          hasResolvedFirstBuild = true;
-          resolve({
-            success: false,
-            errors: ['No stats returned from compilation'],
-            duration,
-            close: closeWatcher,
-            done,
-          });
-        }
-        return;
-      }
-
-      if (isFirstBuild && !hasResolvedFirstBuild) {
-        const result = processMultiStats(stats, log, { duration });
-        hasResolvedFirstBuild = true;
+        // Subsequent rebuilds
         isFirstBuild = false;
+        const hasErrors = stats.hasErrors();
 
-        if (result.success) {
-          for (const asset of result.assets ?? []) {
-            previousAssetSizes.set(asset.name, asset.size);
+        if (hasErrors) {
+          const timings = stats.stats[0]?.toJson({
+            timings: true,
+            assets: false,
+            errors: false,
+            warnings: false,
+            modules: false,
+            chunks: false,
+          });
+          const rebuildTime = timings?.time ? (timings.time / 1000).toFixed(1) : '?';
+          const result = processMultiStats(stats, log, { quiet: true });
+          if (hmrServer && result.errors?.length) {
+            hmrServer.broadcastErrors(result.errors);
           }
-          // Seed hashes so a later Kibana-only rebuild is not treated as a shared rebuild.
-          sharedCompilersChanged(childCompilerHashes(stats), previousSharedHashes);
-          log?.debug(`Bundles ready at ${BUNDLES_SUBDIR}/`);
+          log?.error(`Rebuild failed in ${rebuildTime}s — waiting for changes to fix errors...`);
+        } else {
           const kibanaStats = findKibanaStats(stats);
-          if (kibanaStats.hash && hmrServer) {
-            hmrServer.broadcast(kibanaStats.hash);
-            cleanupStaleHotUpdates(kibanaStats.hash);
-          }
-        } else if (hmrServer && result.errors?.length) {
-          hmrServer.broadcastErrors(result.errors);
-        }
+          const timings = kibanaStats.toJson({
+            timings: true,
+            assets: false,
+            errors: false,
+            warnings: false,
+            modules: false,
+            chunks: false,
+          });
+          const rebuildTime = timings.time ? (timings.time / 1000).toFixed(1) : '?';
 
-        resolve({
-          ...result,
-          close: closeWatcher,
-          done,
-        });
-        return;
-      }
-
-      // Subsequent rebuilds
-      isFirstBuild = false;
-      const hasErrors = stats.hasErrors();
-
-      if (hasErrors) {
-        const timings = stats.stats[0]?.toJson({
-          timings: true,
-          assets: false,
-          errors: false,
-          warnings: false,
-          modules: false,
-          chunks: false,
-        });
-        const rebuildTime = timings?.time ? (timings.time / 1000).toFixed(1) : '?';
-        const result = processMultiStats(stats, log, { quiet: true });
-        if (hmrServer && result.errors?.length) {
-          hmrServer.broadcastErrors(result.errors);
-        }
-        log?.error(`Rebuild failed in ${rebuildTime}s — waiting for changes to fix errors...`);
-      } else {
-        const kibanaStats = findKibanaStats(stats);
-        const timings = kibanaStats.toJson({
-          timings: true,
-          assets: false,
-          errors: false,
-          warnings: false,
-          modules: false,
-          chunks: false,
-        });
-        const rebuildTime = timings.time ? (timings.time / 1000).toFixed(1) : '?';
-
-        log?.debug(`Bundles ready at ${BUNDLES_SUBDIR}/`);
-        const changedFiles = compiler.compilers.flatMap(({ modifiedFiles }) =>
-          modifiedFiles
-            ? [...modifiedFiles]
-                .filter((file) => /\.\w+$/.test(file))
-                .map((file) => file.replace(repoRoot + '/', ''))
-            : []
-        );
-        const sharedCompilerChanged = sharedCompilersChanged(
-          childCompilerHashes(stats),
-          previousSharedHashes
-        );
-        if (hmrServer) {
-          if (sharedCompilerChanged) {
-            hmrServer.broadcastReload(changedFiles);
-          } else if (kibanaStats.hash) {
-            hmrServer.broadcast(kibanaStats.hash, rebuildTime, changedFiles);
-          }
-        }
-
-        if (kibanaStats.hash) {
-          cleanupStaleHotUpdates(kibanaStats.hash);
-        }
-
-        const isVerbose =
-          typeof log?.getWriters === 'function' &&
-          log
-            .getWriters()
-            .some(
-              (w) =>
-                'level' in w &&
-                (w as { level?: { flags?: { debug?: boolean } } }).level?.flags?.debug
-            );
-
-        if (isVerbose) {
-          const result = processStats(kibanaStats, log, { quiet: true });
-          let changedCount = 0;
-          let changedSize = 0;
-          for (const asset of result.assets ?? []) {
-            const prev = previousAssetSizes.get(asset.name);
-            if (prev === undefined || prev !== asset.size) {
-              changedCount++;
-              changedSize += asset.size;
+          log?.debug(`Bundles ready at ${BUNDLES_SUBDIR}/`);
+          const changedFiles = compiler.compilers.flatMap(({ modifiedFiles }) =>
+            modifiedFiles
+              ? [...modifiedFiles]
+                  .filter((file) => /\.\w+$/.test(file))
+                  .map((file) => file.replace(repoRoot + '/', ''))
+              : []
+          );
+          const sharedCompilerChanged = sharedCompilersChanged(
+            childCompilerHashes(stats),
+            previousSharedHashes
+          );
+          if (hmrServer) {
+            if (sharedCompilerChanged) {
+              hmrServer.broadcastReload(changedFiles);
+            } else if (kibanaStats.hash) {
+              hmrServer.broadcast(kibanaStats.hash, rebuildTime, changedFiles);
             }
           }
-          previousAssetSizes.clear();
-          for (const asset of result.assets ?? []) {
-            previousAssetSizes.set(asset.name, asset.size);
+
+          if (kibanaStats.hash) {
+            cleanupStaleHotUpdates(kibanaStats.hash);
           }
-          log?.debug(
-            `Rebuilt in ${rebuildTime}s (${changedCount} chunks updated, ${formatSize(
-              changedSize
-            )} changed)`
-          );
-        } else {
-          log?.success(`Rebuilt in ${rebuildTime}s`);
+
+          const isVerbose =
+            typeof log?.getWriters === 'function' &&
+            log
+              .getWriters()
+              .some(
+                (w) =>
+                  'level' in w &&
+                  (w as { level?: { flags?: { debug?: boolean } } }).level?.flags?.debug
+              );
+
+          if (isVerbose) {
+            const result = processStats(kibanaStats, log, { quiet: true });
+            let changedCount = 0;
+            let changedSize = 0;
+            for (const asset of result.assets ?? []) {
+              const prev = previousAssetSizes.get(asset.name);
+              if (prev === undefined || prev !== asset.size) {
+                changedCount++;
+                changedSize += asset.size;
+              }
+            }
+            previousAssetSizes.clear();
+            for (const asset of result.assets ?? []) {
+              previousAssetSizes.set(asset.name, asset.size);
+            }
+            log?.debug(
+              `Rebuilt in ${rebuildTime}s (${changedCount} chunks updated, ${formatSize(
+                changedSize
+              )} changed)`
+            );
+          } else {
+            log?.success(`Rebuilt in ${rebuildTime}s`);
+          }
         }
       }
-    });
+    );
   });
 }
 

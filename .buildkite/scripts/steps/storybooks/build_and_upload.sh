@@ -3,7 +3,7 @@
 set -euo pipefail
 
 if [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
-  # Storybooks published from trusted builds use freshly built shared webpack bundles, not remote-cache hits
+  # Shared bundles are built below; skip the moon-cache download.
   export KBN_BOOTSTRAP_NO_PREBUILT=true
   .buildkite/scripts/bootstrap.sh
   pnpm kbn build-shared --no-cache

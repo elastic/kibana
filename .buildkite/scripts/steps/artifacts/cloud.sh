@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-# Release artifacts must not hydrate the shared webpack bundles from the remote cache
+# Skip the moon-cache download; release artifacts must not hydrate it.
 export KBN_BOOTSTRAP_NO_PREBUILT=true
 
 .buildkite/scripts/bootstrap.sh

@@ -6,8 +6,7 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-# All functional/integration test steps run Kibana from the distributable,
-# so dev-mode webpack bundles built during bootstrap are never used.
+# Functional tests run Kibana from the distributable, so skip the moon-cache download.
 export KBN_BOOTSTRAP_NO_PREBUILT=true
 
 # Bootstrap and artifact download are independent — run them in parallel.

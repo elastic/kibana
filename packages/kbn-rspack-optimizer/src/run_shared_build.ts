@@ -11,6 +11,7 @@ import type { MultiCompiler, MultiStats } from '@rspack/core';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createSharedCompileConfigs } from './config/create_multi_compile_config';
 import { rspack } from './rspack_runtime';
+import { getWatchOptions } from './watch_options';
 
 export interface SharedBuildResult {
   success: boolean;
@@ -75,7 +76,7 @@ async function runSharedWatch(
       return closing;
     };
     const watching = compiler.watch(
-      compiler.compilers.map(({ options }) => options.watchOptions ?? {}),
+      compiler.compilers.map(({ options }) => getWatchOptions(options.watchOptions)),
       (error, stats) => {
         const result = getSharedResult(error, stats, log);
         if (initialBuild) {
