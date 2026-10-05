@@ -86,7 +86,7 @@ describe('request validation', () => {
     expect(parseRows([slackRow]).body.trigger?.rows).toEqual([slackRow]);
   });
 
-  it('rejects an unknown Slack event', () => {
-    expect(() => parseRows([{ ...slackRow, event: 'invite' }])).toThrow();
+  it('rejects Slack events other than message', () => {
+    expect(() => parseRows([{ ...slackRow, event: 'mention' }])).toThrow();
   });
 });

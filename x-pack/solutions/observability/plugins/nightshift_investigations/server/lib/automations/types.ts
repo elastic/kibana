@@ -9,7 +9,7 @@ export type AutomationType = 'custom' | 'managed';
 
 export type AlertStatus = 'active' | 'inactive' | 'any';
 export type RuleNameMatchMode = 'substring' | 'regex';
-export type SlackTriggerEvent = 'message' | 'mention';
+export type SlackTriggerEvent = 'message';
 export type SchedulePreset = 'hourly' | 'daily' | 'weekly' | 'custom';
 export type OverlapPolicy = 'drop' | 'cancel_in_progress' | 'queue';
 export type ReasoningMode = 'investigate' | 'observe';

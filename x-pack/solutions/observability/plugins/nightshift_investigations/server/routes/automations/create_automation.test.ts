@@ -83,7 +83,7 @@ it('removes the automation when the workflow cannot be created', async () => {
 describe('request validation', () => {
   const slackRow = {
     kind: 'slack',
-    event: 'mention',
+    event: 'message',
     channels: ['#oncall'],
     users: ['U123'],
     messageFilter: 'outage',
@@ -94,7 +94,7 @@ describe('request validation', () => {
     expect(parseRows([slackRow]).body.trigger.rows).toEqual([slackRow]);
   });
 
-  it('rejects an unknown Slack event', () => {
-    expect(() => parseRows([{ ...slackRow, event: 'invite' }])).toThrow();
+  it('rejects Slack events other than message', () => {
+    expect(() => parseRows([{ ...slackRow, event: 'mention' }])).toThrow();
   });
 });
