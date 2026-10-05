@@ -89,6 +89,7 @@ const renderPage = ({
       id: string;
       enabled: boolean;
       settingsRevision?: number | null;
+      enableBlockedReason?: string;
       settings?: { scheduleInterval?: string; serviceAccountId?: string };
     }>;
     canModifyWorkers?: boolean;
@@ -571,6 +572,86 @@ describe('OnboardingPage', () => {
         expect.stringContaining(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID),
         expect.objectContaining({ body: enabledWorkerBody })
       );
+    });
+  });
+
+  describe('Alert Triage requires alert analysis', () => {
+    const triageToggleId = `alertZeroOnboardingWorkerToggle-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`;
+    const blockedWorkers = {
+      workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({
+        id,
+        enabled: false,
+        ...(id === SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID
+          ? { enableBlockedReason: 'alertAnalysisRuntimeDisabled' }
+          : {}),
+      })),
+    };
+
+    it('shows Alert Triage off and disabled with the reason while alert analysis is unavailable', () => {
+      renderPage({ canWrite: true, serverWorkers: blockedWorkers });
+
+      const toggle = screen.getByTestId(triageToggleId);
+      expect(toggle).not.toBeChecked();
+      expect(toggle).toBeDisabled();
+      expect(
+        screen.getByTestId(
+          `alertZeroOnboardingWorkerBlockedReason-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
+        )
+      ).toHaveTextContent('Requires alert analysis');
+    });
+
+    // Sending enabled: true would fail server-side and surface the generic
+    // "Unable to update the worker" toast this gate exists to avoid.
+    it('enables the other workers without trying to enable Alert Triage', async () => {
+      const httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } });
+      renderPage({ canWrite: true, httpPatch, serverWorkers: blockedWorkers });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+
+      await waitFor(() =>
+        expect(httpPatch).toHaveBeenCalledTimes(ALL_ONBOARDING_WORKER_IDS.length)
+      );
+      // A Worker that stays off must not get a service account set up for it either.
+      expect(mockEnsureWorkerServiceAccounts.mock.calls[0][2]).not.toContain(
+        SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID
+      );
+      expect(httpPatch).toHaveBeenCalledWith(
+        expect.stringContaining(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID),
+        expect.objectContaining({ body: JSON.stringify({ enabled: false }) })
+      );
+      expect(httpPatch).toHaveBeenCalledWith(
+        expect.stringContaining(SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID),
+        expect.objectContaining({ body: expect.stringContaining('"enabled":true') })
+      );
+    });
+
+    it('does not count the blocked worker toward the one-worker minimum', () => {
+      const onlyTriageAndOne = {
+        workers: [
+          {
+            id: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+            enabled: false,
+            enableBlockedReason: 'alertAnalysisWorkflowDisabled',
+          },
+          { id: SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID, enabled: false },
+        ],
+      };
+      renderPage({ canWrite: true, serverWorkers: onlyTriageAndOne });
+
+      // Attack Discovery is the only effectively enabled worker, so it cannot be switched off.
+      expect(
+        screen.getByTestId(
+          `alertZeroOnboardingWorkerToggle-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
+        )
+      ).toBeDisabled();
+    });
+
+    it('leaves Alert Triage switchable when alert analysis is available', () => {
+      renderPage({ canWrite: true });
+
+      const toggle = screen.getByTestId(triageToggleId);
+      expect(toggle).toBeChecked();
+      expect(toggle).not.toBeDisabled();
     });
   });
 

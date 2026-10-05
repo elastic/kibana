@@ -28,12 +28,14 @@ const renderRow = ({
   workerId,
   scheduleInterval,
   checked = true,
+  blocked = false,
   disabled = false,
   onToggle = jest.fn(),
 }: {
   workerId: string;
   scheduleInterval?: string;
   checked?: boolean;
+  blocked?: boolean;
   disabled?: boolean;
   onToggle?: jest.Mock;
 }) => {
@@ -44,6 +46,8 @@ const renderRow = ({
           worker={getWorker(workerId)}
           scheduleInterval={scheduleInterval}
           checked={checked}
+          blocked={blocked}
+          alertAnalysisSettingsUrl="/app/security/rules/alert_analysis_workflow"
           disabled={disabled}
           onToggle={onToggle}
         />
@@ -126,5 +130,29 @@ describe('WorkerSelectionRow', () => {
   it('does not show the workflows note for other workers', () => {
     renderRow({ workerId: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID });
     expect(screen.queryByTestId('alertZeroOnboardingAttackDiscoveryNote')).not.toBeInTheDocument();
+  });
+
+  it('disables the toggle and explains why when the worker is blocked', () => {
+    renderRow({
+      workerId: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+      checked: false,
+      blocked: true,
+    });
+
+    expect(
+      screen.getByTestId(
+        `alertZeroOnboardingWorkerBlockedReason-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId(
+        `alertZeroOnboardingWorkerToggle-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
+      )
+    ).toBeDisabled();
+    expect(
+      screen.getByTestId(
+        `alertZeroOnboardingAlertAnalysisSettingsLink-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
+      )
+    ).toHaveAttribute('href', '/app/security/rules/alert_analysis_workflow');
   });
 });

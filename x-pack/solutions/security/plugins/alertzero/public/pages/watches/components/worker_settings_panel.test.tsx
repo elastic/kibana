@@ -50,10 +50,12 @@ const renderPanel = (
     enabled = true,
     showManagedWorkflows = true,
     canChangeAdvancedSettings = true,
+    enableBlockedReason,
   }: {
     enabled?: boolean;
     showManagedWorkflows?: boolean;
     canChangeAdvancedSettings?: boolean;
+    enableBlockedReason?: Worker['enableBlockedReason'];
   } = {}
 ) => {
   const core = coreMock.createStart();
@@ -76,7 +78,11 @@ const renderPanel = (
     <I18nProvider>
       <KibanaContextProvider services={core}>
         <WorkerSettingsPanel
-          worker={createWorker(workflowId)}
+          worker={{
+            ...createWorker(workflowId),
+            enabled,
+            ...(enableBlockedReason ? { enableBlockedReason } : {}),
+          }}
           isAccordion={isAccordion}
           isExpanded
           onToggle={jest.fn()}
@@ -232,5 +238,40 @@ describe('WorkerSettingsPanel header band title', () => {
       .querySelector('.euiAccordion__button');
 
     expect(accordionButton).toHaveStyleRule('min-width', '0');
+  });
+});
+
+describe('WorkerSettingsPanel enable gating', () => {
+  const switchId = `alertZeroWorkerEnabledSwitch-${WORKER_ID}`;
+
+  it.each(['alertAnalysisRuntimeDisabled', 'alertAnalysisWorkflowDisabled'] as const)(
+    'disables the switch of an off Worker when the server reports %s',
+    (enableBlockedReason) => {
+      renderPanel(WORKFLOW_ID, false, {
+        enabled: false,
+        enableBlockedReason,
+        serviceAccountId: 'kibana/az-worker-1',
+      });
+
+      expect(screen.getByTestId(switchId)).toBeDisabled();
+    }
+  );
+
+  // Gating an already-enabled Worker would trap users who cannot otherwise turn off a
+  // Worker that is running without being able to triage.
+  it('keeps the switch usable and warns when an enabled Worker is blocked', () => {
+    renderPanel(WORKFLOW_ID, false, {
+      enabled: true,
+      enableBlockedReason: 'alertAnalysisRuntimeDisabled',
+    });
+
+    expect(screen.getByTestId(switchId)).not.toBeDisabled();
+    expect(screen.getByTestId(`alertZeroWorkerWarningIcon-${WORKER_ID}`)).toBeInTheDocument();
+  });
+
+  it('leaves the switch usable when no reason is reported', () => {
+    renderPanel(WORKFLOW_ID, false, { enabled: false, serviceAccountId: 'kibana/az-worker-1' });
+
+    expect(screen.getByTestId(switchId)).not.toBeDisabled();
   });
 });

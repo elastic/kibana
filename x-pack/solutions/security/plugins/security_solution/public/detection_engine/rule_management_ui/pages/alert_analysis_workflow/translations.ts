@@ -36,6 +36,50 @@ export const SAVE_SUCCESS_MESSAGE = i18n.translate(
   }
 );
 
+export const SAVE_SUCCESS_WORKER_DISABLED_MESSAGE = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.saveSuccessWorkerDisabledMessage',
+  {
+    defaultMessage: 'The Alert Triage Worker was turned off because it requires alert analysis.',
+  }
+);
+
+export const SAVE_WORKER_STILL_ENABLED_MESSAGE = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.saveWorkerStillEnabledMessage',
+  {
+    defaultMessage:
+      'The Alert Triage Worker could not be turned off and cannot triage alerts while alert analysis is off. Turn it off on the AlertZero Watches page.',
+  }
+);
+
+export const DISABLE_WORKER_CONFIRM_TITLE = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.disableWorkerConfirmTitle',
+  {
+    defaultMessage: 'Turn off alert analysis and the Alert Triage Worker?',
+  }
+);
+
+export const DISABLE_WORKER_CONFIRM_BODY = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.disableWorkerConfirmBody',
+  {
+    defaultMessage:
+      'The AlertZero Alert Triage Worker requires alert analysis. If you continue, the Worker will also be turned off and detached from rules. You can turn it back on from the AlertZero Watches page once alert analysis is on again.',
+  }
+);
+
+export const DISABLE_WORKER_CONFIRM_BUTTON = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.disableWorkerConfirmButton',
+  {
+    defaultMessage: 'Turn off both',
+  }
+);
+
+export const DISABLE_WORKER_CANCEL_BUTTON = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.disableWorkerCancelButton',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
 export const SAVE_ERROR_MESSAGE = i18n.translate(
   'xpack.securitySolution.alertAnalysisWorkflow.saveErrorMessage',
   {

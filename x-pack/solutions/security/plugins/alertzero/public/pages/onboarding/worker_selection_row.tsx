@@ -11,12 +11,14 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiSwitch,
   EuiText,
   tint,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   resolveWatchAccent,
   SYSTEM_SECURITY_WATCH_CATALOG,
@@ -31,6 +33,8 @@ interface Props {
   worker: CatalogWorker;
   scheduleInterval?: string;
   checked: boolean;
+  blocked: boolean;
+  alertAnalysisSettingsUrl: string;
   disabled: boolean;
   onToggle: (workerId: string, checked: boolean) => void;
 }
@@ -39,6 +43,8 @@ export const WorkerSelectionRow: React.FC<Props> = ({
   worker: { id, name, watchId },
   scheduleInterval,
   checked,
+  blocked,
+  alertAnalysisSettingsUrl,
   disabled,
   onToggle,
 }) => {
@@ -50,6 +56,7 @@ export const WorkerSelectionRow: React.FC<Props> = ({
     ? workerScheduleCadenceLabel(scheduleInterval)
     : i18n.onboardingWorkerEventTrigger(id);
   const hasWorkflowsNote = id === SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
+  const hasNote = hasWorkflowsNote || blocked;
 
   return (
     <>
@@ -59,7 +66,7 @@ export const WorkerSelectionRow: React.FC<Props> = ({
         responsive={false}
         css={css`
           padding: ${euiTheme.size.l} ${euiTheme.size.l}
-            ${hasWorkflowsNote ? euiTheme.size.m : euiTheme.size.l};
+            ${hasNote ? euiTheme.size.m : euiTheme.size.l};
         `}
       >
         <EuiFlexItem>
@@ -98,29 +105,61 @@ export const WorkerSelectionRow: React.FC<Props> = ({
             label={workerName(id, name)}
             showLabel={false}
             checked={checked}
-            disabled={disabled}
+            disabled={blocked || disabled}
             onChange={(e) => onToggle(id, e.target.checked)}
             data-test-subj={`alertZeroOnboardingWorkerToggle-${id}`}
             aria-describedby={
-              description ? `alertZeroOnboardingWorkerDescription-${id}` : undefined
+              [
+                description ? `alertZeroOnboardingWorkerDescription-${id}` : undefined,
+                blocked ? `alertZeroOnboardingWorkerBlockedReason-${id}` : undefined,
+              ]
+                .filter(Boolean)
+                .join(' ') || undefined
             }
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {hasWorkflowsNote ? (
+      {hasNote ? (
         <div
           css={css`
             padding: 0 ${euiTheme.size.l} ${euiTheme.size.l};
           `}
         >
-          <EuiCallOut
-            announceOnMount
-            size="s"
-            iconType="info"
-            data-test-subj="alertZeroOnboardingAttackDiscoveryNote"
-          >
-            <p>{i18n.ATTACK_DISCOVERY_WORKFLOWS_NOTE}</p>
-          </EuiCallOut>
+          {hasWorkflowsNote ? (
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              iconType="info"
+              data-test-subj="alertZeroOnboardingAttackDiscoveryNote"
+            >
+              <p>{i18n.ATTACK_DISCOVERY_WORKFLOWS_NOTE}</p>
+            </EuiCallOut>
+          ) : null}
+          {blocked ? (
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              iconType="info"
+              data-test-subj={`alertZeroOnboardingWorkerBlockedReason-${id}`}
+            >
+              <p id={`alertZeroOnboardingWorkerBlockedReason-${id}`}>
+                <FormattedMessage
+                  id="xpack.alertzero.onboarding.workerRequiresAlertAnalysis"
+                  defaultMessage="Requires alert analysis. Turn it on in {settingsLink}, then enable this Worker on Watches."
+                  values={{
+                    settingsLink: (
+                      <EuiLink
+                        href={alertAnalysisSettingsUrl}
+                        data-test-subj={`alertZeroOnboardingAlertAnalysisSettingsLink-${id}`}
+                      >
+                        {i18n.ONBOARDING_ALERT_ANALYSIS_SETTINGS_LINK}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+            </EuiCallOut>
+          ) : null}
         </div>
       ) : null}
     </>

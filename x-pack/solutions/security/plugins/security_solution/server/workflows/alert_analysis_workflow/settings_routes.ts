@@ -118,7 +118,7 @@ export const registerAlertAnalysisWorkflowSettingsRoutes = (
           return response.forbidden({ body: LICENSE_ERROR_MESSAGE });
         }
 
-        const [coreStart] = await getStartServices();
+        const [coreStart, startPlugins] = await getStartServices();
         const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
           coreStart.savedObjects.getScopedClient(request)
         );
@@ -127,10 +127,25 @@ export const registerAlertAnalysisWorkflowSettingsRoutes = (
         // from uiSettings at run time, so there is nothing space-specific to install here.
         const settings = await readSecurityAlertAnalysisWorkflowSettings(uiSettingsClient);
 
+        // Only a hint for the confirm dialog, so an unreadable state omits the field rather than
+        // failing the page; the PUT re-reads it and reports what it could not turn off.
+        let alertTriageWorkerEnabled: boolean | undefined;
+        try {
+          alertTriageWorkerEnabled =
+            (await startPlugins.alertzero?.isAlertTriageWorkerEnabled(request)) ?? false;
+        } catch (workerError) {
+          logger.warn('Failed to read the Alert Triage Worker enabled state', {
+            error: workerError,
+          });
+        }
+
         return response.ok({
           body: {
             settings,
             workflowId: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
+            // Lets the settings page warn before turning alert analysis off under a running
+            // Alert Triage Worker, which depends on it.
+            ...(alertTriageWorkerEnabled !== undefined ? { alertTriageWorkerEnabled } : {}),
           },
         });
       }
@@ -197,7 +212,7 @@ export const registerAlertAnalysisWorkflowSettingsRoutes = (
           return response.forbidden({ body: LICENSE_ERROR_MESSAGE });
         }
 
-        const [coreStart] = await getStartServices();
+        const [coreStart, startPlugins] = await getStartServices();
         const settings = toWorkflowSettings(request.body);
         const securitySolution = await context.securitySolution;
 
@@ -258,10 +273,29 @@ export const registerAlertAnalysisWorkflowSettingsRoutes = (
           });
           reportSettingsUpdatedEvent('success');
 
+          // The Alert Triage Worker cannot triage while alert analysis is off, so turn it off
+          // with it. Done after the settings are saved and never fails the request: the
+          // setting is already persisted, and the response reports whether the Worker is off.
+          let alertTriageWorkerDisabled: boolean | undefined;
+          const { alertzero } = startPlugins;
+          if (!settings.workflowEnabled && alertzero) {
+            try {
+              if (await alertzero.isAlertTriageWorkerEnabled(request)) {
+                ({ disabled: alertTriageWorkerDisabled } = await alertzero.disableAlertTriageWorker(
+                  request
+                ));
+              }
+            } catch (workerError) {
+              logger.warn('Failed to disable the Alert Triage Worker', { error: workerError });
+              alertTriageWorkerDisabled = false;
+            }
+          }
+
           return response.ok({
             body: {
               settings,
               workflowId: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
+              ...(alertTriageWorkerDisabled !== undefined ? { alertTriageWorkerDisabled } : {}),
             },
           });
         } catch (error) {

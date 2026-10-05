@@ -87,6 +87,21 @@ export interface AlertZeroPluginStart {
   registerAlertTriageAttachmentServiceProvider: (
     provider: AlertTriageAttachmentServiceProvider
   ) => void;
+  /**
+   * Whether the Alert Triage Worker is enabled in the request's space. False when AlertZero is
+   * off for the space or has not started, so callers can treat it as "nothing to turn off".
+   * Rejects when the state cannot be read, so callers must not treat that as "off". Reports the
+   * state regardless of the caller's AlertZero privileges; it exposes only this boolean.
+   */
+  isAlertTriageWorkerEnabled: (request: KibanaRequest) => Promise<boolean>;
+  /**
+   * Turns the Alert Triage Worker off (detaching it from rules) for a caller whose own action
+   * invalidates it, e.g. turning off alert analysis. The caller must hold the privileges the
+   * Workers update route requires, since this bypasses that route. `disabled` is true when the
+   * Worker is off afterwards, including when it already was, and false when it is still on
+   * because the caller lacks privileges or the update failed.
+   */
+  disableAlertTriageWorker: (request: KibanaRequest) => Promise<{ disabled: boolean }>;
 }
 
 export interface AlertZeroSetupDependencies {

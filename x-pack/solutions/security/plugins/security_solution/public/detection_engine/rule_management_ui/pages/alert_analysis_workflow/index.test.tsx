@@ -79,9 +79,13 @@ describe('AlertAnalysisWorkflowPage', () => {
     tagPrefix: 'alert-analysis',
   };
 
-  const settingsGetResponse = (settings: Record<string, unknown> = defaultSettings) => ({
+  const settingsGetResponse = (
+    settings: Record<string, unknown> = defaultSettings,
+    extra: Record<string, unknown> = {}
+  ) => ({
     settings,
     workflowId: 'system-security-alert-analysis-default',
+    ...extra,
   });
 
   const renderComponent = ({
@@ -90,12 +94,16 @@ describe('AlertAnalysisWorkflowPage', () => {
     canSaveAdvancedSettings = true,
     isEnterprise = true,
     settingsRequest,
+    alertTriageWorkerEnabled,
+    putResponseExtra,
   }: {
     canEditRules?: boolean;
     canReadRules?: boolean;
     canSaveAdvancedSettings?: boolean;
     isEnterprise?: boolean;
     settingsRequest?: jest.Mock;
+    alertTriageWorkerEnabled?: boolean;
+    putResponseExtra?: Record<string, unknown>;
   } = {}) => {
     (licenseService.isEnterprise as jest.Mock).mockReturnValue(isEnterprise);
     coreStart.application.capabilities = {
@@ -118,8 +126,11 @@ describe('AlertAnalysisWorkflowPage', () => {
           return settingsRequest();
         }
         return options?.method === 'PUT'
-          ? settingsGetResponse(JSON.parse(options.body as string))
-          : settingsGetResponse();
+          ? settingsGetResponse(JSON.parse(options.body as string), putResponseExtra)
+          : settingsGetResponse(
+              defaultSettings,
+              alertTriageWorkerEnabled === undefined ? {} : { alertTriageWorkerEnabled }
+            );
       }
 
       return {
@@ -386,5 +397,115 @@ describe('AlertAnalysisWorkflowPage', () => {
     fireEvent.click(autoCloseSwitch);
 
     expect(saveButton).not.toBeDisabled();
+  });
+
+  describe('turning alert analysis off while the Alert Triage Worker is on', () => {
+    const putCalls = () =>
+      (
+        coreStart.http.fetch.mock.calls as unknown as Array<
+          [string, { method?: string; body: string }]
+        >
+      ).filter(
+        ([path, options]) =>
+          path === ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE && options?.method === 'PUT'
+      );
+
+    const turnOffAndSave = async () => {
+      const workflowSwitch = await screen.findByTestId('alertAnalysisWorkflowEnabled');
+      await waitFor(() => expect(workflowSwitch).toBeChecked());
+      fireEvent.click(workflowSwitch);
+      fireEvent.click(screen.getByTestId('alertAnalysisWorkflowSaveButton'));
+    };
+
+    it('asks for confirmation instead of saving straight away', async () => {
+      renderComponent({ alertTriageWorkerEnabled: true });
+
+      await turnOffAndSave();
+
+      expect(await screen.findByTestId('alertAnalysisWorkflowDisableConfirmModal')).toBeVisible();
+      expect(putCalls()).toHaveLength(0);
+    });
+
+    it('saves only after the user confirms', async () => {
+      renderComponent({
+        alertTriageWorkerEnabled: true,
+        putResponseExtra: { alertTriageWorkerDisabled: true },
+      });
+
+      await turnOffAndSave();
+      fireEvent.click(await screen.findByText('Turn off both'));
+
+      await waitFor(() => expect(putCalls()).toHaveLength(1));
+      expect(JSON.parse(putCalls()[0][1].body).workflowEnabled).toBe(false);
+      await waitFor(() =>
+        expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+          expect.objectContaining({
+            text: 'The Alert Triage Worker was turned off because it requires alert analysis.',
+          })
+        )
+      );
+      expect(
+        screen.queryByTestId('alertAnalysisWorkflowDisableConfirmModal')
+      ).not.toBeInTheDocument();
+    });
+
+    it('does not save when the user cancels', async () => {
+      renderComponent({ alertTriageWorkerEnabled: true });
+
+      await turnOffAndSave();
+      fireEvent.click(await screen.findByText('Cancel'));
+
+      await waitFor(() =>
+        expect(
+          screen.queryByTestId('alertAnalysisWorkflowDisableConfirmModal')
+        ).not.toBeInTheDocument()
+      );
+      expect(putCalls()).toHaveLength(0);
+    });
+
+    it('warns when the Worker could not be turned off', async () => {
+      renderComponent({
+        alertTriageWorkerEnabled: true,
+        putResponseExtra: { alertTriageWorkerDisabled: false },
+      });
+
+      await turnOffAndSave();
+      fireEvent.click(await screen.findByText('Turn off both'));
+
+      await waitFor(() =>
+        expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledWith(
+          expect.objectContaining({
+            text: expect.stringContaining('could not be turned off'),
+          })
+        )
+      );
+    });
+
+    // Without a running Worker the warning would be noise.
+    it.each([
+      { description: 'the Worker is off', alertTriageWorkerEnabled: false },
+      { description: 'the Worker state is unknown', alertTriageWorkerEnabled: undefined },
+    ])('saves without confirmation when $description', async ({ alertTriageWorkerEnabled }) => {
+      renderComponent({ alertTriageWorkerEnabled });
+
+      await turnOffAndSave();
+
+      await waitFor(() => expect(putCalls()).toHaveLength(1));
+      expect(
+        screen.queryByTestId('alertAnalysisWorkflowDisableConfirmModal')
+      ).not.toBeInTheDocument();
+    });
+
+    it('saves without confirmation when alert analysis stays on', async () => {
+      renderComponent({ alertTriageWorkerEnabled: true });
+
+      fireEvent.click(await screen.findByTestId('alertAnalysisWorkflowAutoCloseEnabled'));
+      fireEvent.click(screen.getByTestId('alertAnalysisWorkflowSaveButton'));
+
+      await waitFor(() => expect(putCalls()).toHaveLength(1));
+      expect(
+        screen.queryByTestId('alertAnalysisWorkflowDisableConfirmModal')
+      ).not.toBeInTheDocument();
+    });
   });
 });

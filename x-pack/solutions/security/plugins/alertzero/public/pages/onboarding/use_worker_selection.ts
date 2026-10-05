@@ -37,13 +37,34 @@ export const useWorkerSelection = () => {
   );
   const availableWorkerIds = useMemo(() => workers.map(({ id }) => id), [workers]);
 
-  const [workerEnabled, setWorkerEnabled] = useState<WorkerToggleState>(initialToggleState);
+  // A worker the server says cannot be enabled yet (Alert Triage without alert analysis) is
+  // forced off here instead of being sent a PATCH that fails with a generic toast.
+  const blockedWorkerIds = useMemo(
+    () =>
+      new Set(
+        (workersData?.workers ?? [])
+          .filter((w) => !w.enabled && w.enableBlockedReason)
+          .map((w) => w.id)
+      ),
+    [workersData]
+  );
+
+  const [toggleState, setToggleState] = useState<WorkerToggleState>(initialToggleState);
+  // Derived at render so a blocked worker is off even though toggle state is initialised
+  // before the workers list has loaded.
+  const workerEnabled = useMemo<WorkerToggleState>(
+    () =>
+      Object.fromEntries(
+        Object.entries(toggleState).map(([id, on]) => [id, on && !blockedWorkerIds.has(id)])
+      ),
+    [toggleState, blockedWorkerIds]
+  );
 
   const enabledCount = availableWorkerIds.filter((id) => workerEnabled[id]).length;
 
   const toggleWorker = (workerId: string, checked: boolean) => {
     if (!checked && enabledCount <= 1) return;
-    setWorkerEnabled((prev) => ({ ...prev, [workerId]: checked }));
+    setToggleState((prev) => ({ ...prev, [workerId]: checked }));
   };
 
   return {
@@ -51,6 +72,7 @@ export const useWorkerSelection = () => {
     serverWorkers,
     availableWorkerIds,
     workerEnabled,
+    blockedWorkerIds,
     enabledCount,
     canModifyWorkers,
     toggleWorker,

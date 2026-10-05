@@ -8,6 +8,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
+  EuiConfirmModal,
   EuiDescribedFormGroup,
   EuiEmptyPrompt,
   EuiFieldNumber,
@@ -44,6 +45,7 @@ import {
   fetchAlertAnalysisWorkflowSettings,
   saveAlertAnalysisWorkflowSettings,
   type AlertAnalysisWorkflowSettingsWithConnector,
+  type AlertAnalysisWorkflowSettingsWithConnectorResponse,
 } from './api';
 import { AlertAnalysisWorkflowRuleAttachmentSection } from './rule_attachment_section';
 import { useAlertAnalysisWorkflowAgents } from './use_alert_analysis_workflow_agents';
@@ -107,6 +109,7 @@ const AlertAnalysisWorkflowContent: React.FC = () => {
   const [pageSettings, setPageSettings] = useState<
     AlertAnalysisWorkflowSettingsWithConnector | undefined
   >();
+  const [isDisableConfirmOpen, setIsDisableConfirmOpen] = useState(false);
   const isDirty = !isEqual(pageSettings, savedSettings);
   const isWorkflowEnabled = pageSettings?.workflowEnabled ?? true;
   // The confidence thresholds only apply to auto-close, so their range is only validated (and only
@@ -140,8 +143,31 @@ const AlertAnalysisWorkflowContent: React.FC = () => {
     },
     onSuccess: (response) => {
       setPageSettings(response.settings);
-      queryClient.setQueryData(ALERT_ANALYSIS_WORKFLOW_SETTINGS_QUERY_KEY, response);
-      notifications.toasts.addSuccess(translations.SAVE_SUCCESS_MESSAGE);
+      // The PUT only reports the Worker when it was on, so carry the previous value forward
+      // otherwise; the next page load re-reads it.
+      const previous = queryClient.getQueryData<AlertAnalysisWorkflowSettingsWithConnectorResponse>(
+        ALERT_ANALYSIS_WORKFLOW_SETTINGS_QUERY_KEY
+      );
+      queryClient.setQueryData(ALERT_ANALYSIS_WORKFLOW_SETTINGS_QUERY_KEY, {
+        ...response,
+        alertTriageWorkerEnabled:
+          response.alertTriageWorkerDisabled === undefined
+            ? previous?.alertTriageWorkerEnabled
+            : !response.alertTriageWorkerDisabled,
+      });
+      if (response.alertTriageWorkerDisabled === true) {
+        notifications.toasts.addSuccess({
+          title: translations.SAVE_SUCCESS_MESSAGE,
+          text: translations.SAVE_SUCCESS_WORKER_DISABLED_MESSAGE,
+        });
+      } else if (response.alertTriageWorkerDisabled === false) {
+        notifications.toasts.addWarning({
+          title: translations.SAVE_SUCCESS_MESSAGE,
+          text: translations.SAVE_WORKER_STILL_ENABLED_MESSAGE,
+        });
+      } else {
+        notifications.toasts.addSuccess(translations.SAVE_SUCCESS_MESSAGE);
+      }
     },
     onError: (error: AlertAnalysisWorkflowSettingsError) => {
       notifications.toasts.addDanger({
@@ -519,9 +545,17 @@ const AlertAnalysisWorkflowContent: React.FC = () => {
               disabled={!isDirty || isThresholdRangeInvalid || isTagPrefixInvalid}
               isLoading={saveSettingsMutation.isLoading}
               onClick={() => {
-                if (pageSettings) {
-                  saveSettingsMutation.mutate(pageSettings);
+                if (!pageSettings) return;
+                // The Alert Triage Worker requires alert analysis and is turned off with it, so
+                // confirm first rather than silently switching off a running Worker.
+                const isTurningOff =
+                  (savedSettings?.workflowEnabled ?? true) &&
+                  pageSettings.workflowEnabled === false;
+                if (isTurningOff && savedSettingsResponse?.alertTriageWorkerEnabled) {
+                  setIsDisableConfirmOpen(true);
+                  return;
                 }
+                saveSettingsMutation.mutate(pageSettings);
               }}
             >
               <FormattedMessage
@@ -531,6 +565,24 @@ const AlertAnalysisWorkflowContent: React.FC = () => {
             </EuiButton>
             <EuiSpacer size="l" />
             <AlertAnalysisWorkflowRuleAttachmentSection />
+            {isDisableConfirmOpen ? (
+              <EuiConfirmModal
+                data-test-subj="alertAnalysisWorkflowDisableConfirmModal"
+                aria-label={translations.DISABLE_WORKER_CONFIRM_TITLE}
+                title={translations.DISABLE_WORKER_CONFIRM_TITLE}
+                buttonColor="warning"
+                defaultFocusedButton="cancel"
+                cancelButtonText={translations.DISABLE_WORKER_CANCEL_BUTTON}
+                confirmButtonText={translations.DISABLE_WORKER_CONFIRM_BUTTON}
+                onCancel={() => setIsDisableConfirmOpen(false)}
+                onConfirm={() => {
+                  setIsDisableConfirmOpen(false);
+                  saveSettingsMutation.mutate(pageSettings);
+                }}
+              >
+                <p>{translations.DISABLE_WORKER_CONFIRM_BODY}</p>
+              </EuiConfirmModal>
+            ) : null}
           </>
         )}
       </SecuritySolutionPageWrapper>

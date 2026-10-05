@@ -162,6 +162,13 @@ const ONBOARDING_WORKER_DESCRIPTIONS: Record<string, string> = {
   ),
 };
 
+export const ONBOARDING_ALERT_ANALYSIS_SETTINGS_LINK = i18n.translate(
+  'xpack.alertzero.onboarding.alertAnalysisSettingsLink',
+  {
+    defaultMessage: 'Rules > Alert analysis settings',
+  }
+);
+
 export const onboardingWorkerDescription = (workerId: string): string | undefined =>
   ONBOARDING_WORKER_DESCRIPTIONS[workerId];
 

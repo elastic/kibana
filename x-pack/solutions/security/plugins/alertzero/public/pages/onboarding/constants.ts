@@ -10,3 +10,6 @@
 export const ONBOARDING_READ_MORE_URL_PLACEHOLDER = 'https://www.elastic.co/security';
 
 export const ONBOARDING_CONTENT_MAX_WIDTH = '1000px';
+
+/** Security Solution's Alert analysis settings page, relative to its app root. */
+export const ALERT_ANALYSIS_SETTINGS_PATH = '/rules/alert_analysis_workflow';

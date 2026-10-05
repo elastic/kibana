@@ -51,6 +51,10 @@ export type AlertAnalysisWorkflowSettingsWithConnector = AlertAnalysisWorkflowSe
 export interface AlertAnalysisWorkflowSettingsWithConnectorResponse {
   settings: AlertAnalysisWorkflowSettingsWithConnector;
   workflowId: string;
+  /** GET only: the Alert Triage Worker is on and stops triaging when alert analysis is turned off. */
+  alertTriageWorkerEnabled?: boolean;
+  /** PUT only, present when the Worker was on: whether it was turned off along with alert analysis. */
+  alertTriageWorkerDisabled?: boolean;
 }
 
 export const fetchAlertAnalysisWorkflowSettings = ({

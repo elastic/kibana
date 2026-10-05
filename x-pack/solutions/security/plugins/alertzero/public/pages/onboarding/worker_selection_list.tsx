@@ -16,6 +16,8 @@ interface Props {
   workers: readonly CatalogWorker[];
   serverWorkers: ReadonlyMap<string, ServerWorker>;
   workerEnabled: Readonly<Record<string, boolean>>;
+  blockedWorkerIds: ReadonlySet<string>;
+  alertAnalysisSettingsUrl: string;
   enabledCount: number;
   isSaving: boolean;
   canModifyWorkers: boolean;
@@ -26,6 +28,8 @@ export const WorkerSelectionList: React.FC<Props> = ({
   workers,
   serverWorkers,
   workerEnabled,
+  blockedWorkerIds,
+  alertAnalysisSettingsUrl,
   enabledCount,
   isSaving,
   canModifyWorkers,
@@ -57,6 +61,8 @@ export const WorkerSelectionList: React.FC<Props> = ({
                   worker={worker}
                   scheduleInterval={serverWorkers.get(worker.id)?.settings?.scheduleInterval}
                   checked={checked}
+                  blocked={blockedWorkerIds.has(worker.id)}
+                  alertAnalysisSettingsUrl={alertAnalysisSettingsUrl}
                   disabled={(checked && enabledCount <= 1) || isSaving || !canModifyWorkers}
                   onToggle={onToggle}
                 />

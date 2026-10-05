@@ -152,6 +152,15 @@ export const Worker = lazySchema(() =>
       .describe(
         "Id of this Worker's installed per-space workflow. Null when that workflow has not been installed yet. The client uses it to open the workflow's Executions tab and does not derive it from the Worker id."
       ),
+    /**
+     * Set when a precondition prevents this Worker from being enabled, so the client can disable its toggle up front instead of saving and failing. Only the Alert Triage Worker reports it, and only while alert analysis is unavailable for the space.
+     */
+    enableBlockedReason: z
+      .enum(['alertAnalysisWorkflowDisabled', 'alertAnalysisRuntimeDisabled'])
+      .optional()
+      .describe(
+        'Set when a precondition prevents this Worker from being enabled, so the client can disable its toggle up front instead of saving and failing. Only the Alert Triage Worker reports it, and only while alert analysis is unavailable for the space.'
+      ),
     skills: z.array(WatchCallableRef).optional(),
   })
 );

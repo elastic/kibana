@@ -17,7 +17,7 @@ import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { ScanFailureCallout } from '../../components/scan_failure_callout/scan_failure_callout';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
-import { ONBOARDING_CONTENT_MAX_WIDTH } from './constants';
+import { ALERT_ANALYSIS_SETTINGS_PATH, ONBOARDING_CONTENT_MAX_WIDTH } from './constants';
 import { OnboardingEnableFooter } from './onboarding_enable_footer';
 import { OnboardingIntro } from './onboarding_intro';
 import { useEnableWorkers } from './use_enable_workers';
@@ -41,12 +41,16 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
   useAlertZeroDocTitle(i18n.ONBOARDING_TITLE);
 
   const canWrite = Boolean(application.capabilities[ALERTZERO_FEATURE_ID]?.write);
+  const alertAnalysisSettingsUrl = application.getUrlForApp(SECURITY_APP_ID, {
+    path: ALERT_ANALYSIS_SETTINGS_PATH,
+  });
 
   const {
     workers,
     serverWorkers,
     availableWorkerIds,
     workerEnabled,
+    blockedWorkerIds,
     enabledCount,
     canModifyWorkers,
     toggleWorker,
@@ -128,6 +132,8 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
           workers={workers}
           serverWorkers={serverWorkers}
           workerEnabled={workerEnabled}
+          blockedWorkerIds={blockedWorkerIds}
+          alertAnalysisSettingsUrl={alertAnalysisSettingsUrl}
           enabledCount={enabledCount}
           isSaving={isSaving}
           canModifyWorkers={canModifyWorkers}

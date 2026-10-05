@@ -796,7 +796,13 @@ describe('WorkersService', () => {
     const { workers } = await harness.createService().list(request, SPACE);
     const triage = workers.find((w) => w.id === TRIAGE);
 
-    expect(harness.management.getWorkflow).not.toHaveBeenCalled();
+    // The Alert Triage preflight reads the Alert Analysis workflow; only this Worker's own
+    // (uninstalled) workflow detail must not be loaded.
+    expect(harness.management.getWorkflow).not.toHaveBeenCalledWith(
+      reportedWorkflowId(TRIAGE, SPACE),
+      SPACE,
+      request
+    );
     expect(Array.isArray(triage?.skills)).toBe(true);
   });
 
@@ -1137,6 +1143,48 @@ describe('WorkersService', () => {
 
       expect(result).toEqual({ outcome: 'blocked', reason: 'alertAnalysisWorkflowDisabled' });
       expect(harness.updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    // The client disables the Alert Triage toggle from this field, so a missing reason would
+    // send users back to saving and failing with the generic "Unable to update" toast.
+    describe('enableBlockedReason on projected workers', () => {
+      it('is reported on the Alert Triage worker when the Alert Analysis workflow is disabled', async () => {
+        const harness = createPersistentHarness();
+        (harness.management.getWorkflow as jest.Mock).mockResolvedValue({ enabled: false });
+        const { service } = makeService(harness, makeAttachmentService());
+
+        const worker = await service.get(TRIAGE, request, SPACE);
+
+        expect(worker?.enableBlockedReason).toBe('alertAnalysisWorkflowDisabled');
+      });
+
+      it('is reported when alert analysis is turned off for the space', async () => {
+        const harness = createPersistentHarness();
+        const { service } = makeService(harness, makeAttachmentService(), async () => false);
+
+        const worker = await service.get(TRIAGE, request, SPACE);
+
+        expect(worker?.enableBlockedReason).toBe('alertAnalysisRuntimeDisabled');
+      });
+
+      it('is omitted when alert analysis is available', async () => {
+        const harness = createPersistentHarness();
+        const { service } = makeService(harness, makeAttachmentService(), async () => true);
+
+        const worker = await service.get(TRIAGE, request, SPACE);
+
+        expect(worker).not.toHaveProperty('enableBlockedReason');
+      });
+
+      it('is only reported on the Alert Triage worker', async () => {
+        const harness = createPersistentHarness();
+        const { service } = makeService(harness, makeAttachmentService(), async () => false);
+
+        const { workers } = await service.list(request, SPACE);
+
+        const withReason = workers.filter((w) => w.enableBlockedReason !== undefined);
+        expect(withReason.map((w) => w.id)).toEqual([TRIAGE]);
+      });
     });
 
     it('attachment service unavailable: blocks the enable instead of enabling unwired', async () => {
