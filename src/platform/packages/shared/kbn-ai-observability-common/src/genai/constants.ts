@@ -31,6 +31,12 @@ export const ATTRIBUTE_GEN_AI_TOOL_NAME = 'attributes.gen_ai.tool.name';
 export const ATTRIBUTE_GEN_AI_TOOL_CALL_ARGUMENTS = 'attributes.gen_ai.tool.call.arguments';
 export const ATTRIBUTE_GEN_AI_TOOL_CALL_RESULT = 'attributes.gen_ai.tool.call.result';
 
+// OpenRouter OTel fields — non-standard field names used by the OpenRouter
+// OTel collector (https://openrouter.ai/docs/guides/features/broadcast/otel-collector.md).
+// These differ from the EDOT/OTel semconv `attributes.gen_ai.*` shape.
+export const ATTRIBUTE_GEN_AI_PROMPT = 'attributes.gen_ai.prompt';
+export const ATTRIBUTE_GEN_AI_COMPLETION = 'attributes.gen_ai.completion';
+
 /**
  * GenAI fields whose values regularly exceed the `ignore_above: 1024` limit of
  * the `attributes.*` keyword mappings. The ES fields API omits ignored values
