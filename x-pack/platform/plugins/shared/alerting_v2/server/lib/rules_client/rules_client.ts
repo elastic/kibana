@@ -1804,32 +1804,35 @@ export class RulesClient {
       },
     ]);
 
-    // Mirrors `enableRule`/`disableRule`: an enabled rule always (re)schedules
-    // its executor task (self-heal), while a rule that stays disabled must not
-    // get a task scheduled for it.
-    if (nextEnabled) {
-      await this.scheduleRuleExecutorTask({
-        ruleId: id,
-        spaceId,
-        scheduleEvery: nextAttrs.schedule.every,
-      });
-    } else if (wasEnabled) {
-      const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
-      await this.taskManager.removeIfExists(taskId);
-    }
-
     const references = rebuildArtifactReferences({
       artifacts: nextAttrs.artifacts,
       previousReferences: existingReferences,
       registry: this.artifactTypeRegistry,
     });
 
+    // Write the saved object first: if this throws (e.g. a version conflict),
+    // the task is left untouched, so a disabled rule never loses a task that
+    // the stored (unchanged) attrs still expect to be running.
     await this.writeRuleAttrs({
       id,
       attrs: nextAttrs,
       version: existingVersion,
       references,
     });
+
+    // Self-heal, like `enableRule`/`disableRule`: always reapply the task
+    // state for `nextEnabled`, not just on a transition, so a leftover task
+    // from a prior bug or failed write also gets cleaned up.
+    if (nextEnabled) {
+      await this.scheduleRuleExecutorTask({
+        ruleId: id,
+        spaceId,
+        scheduleEvery: nextAttrs.schedule.every,
+      });
+    } else {
+      const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
+      await this.taskManager.removeIfExists(taskId);
+    }
 
     const rule = this.toRuleApiResponse({
       id,

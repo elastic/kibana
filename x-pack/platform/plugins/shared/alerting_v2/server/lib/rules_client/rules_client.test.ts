@@ -1593,7 +1593,7 @@ describe('RulesClient', () => {
         expect(res.created).toBe(false);
       });
 
-      it('preserves the existing enabled value and does not touch the task when the body omits enabled', async () => {
+      it('preserves the existing enabled value when the body omits enabled, and still self-heals by removing any leftover task', async () => {
         const client = createClient();
         const existingDoc = {
           id: 'rule-id-1',
@@ -1604,6 +1604,7 @@ describe('RulesClient', () => {
           .mockResolvedValueOnce(existingDoc)
           .mockResolvedValueOnce(existingDoc);
         rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-id-1' });
+        getRuleExecutorTaskIdMock.mockReturnValue('task:rule-id-1');
 
         await client.upsertRule({ id: 'rule-id-1', data: baseCreateData });
 
@@ -1611,7 +1612,10 @@ describe('RulesClient', () => {
           expect.objectContaining({ attrs: expect.objectContaining({ enabled: false }) })
         );
         expect(ensureRuleExecutorTaskScheduledMock).not.toHaveBeenCalled();
-        expect(taskManager.removeIfExists).not.toHaveBeenCalled();
+        // Not a transition (it was already disabled), but still removed
+        // unconditionally — same self-heal behavior as `disableRule`, in case
+        // a leftover task exists from a prior bug or failed write.
+        expect(taskManager.removeIfExists).toHaveBeenCalledWith('task:rule-id-1');
       });
 
       it('enables the rule and schedules the task when the body sets enabled=true on a disabled rule', async () => {
@@ -1706,6 +1710,33 @@ describe('RulesClient', () => {
         ).rejects.toMatchObject({
           output: { statusCode: 409 },
         });
+      });
+
+      it('does not touch the executor task when the saved-object write fails on a disable transition', async () => {
+        const client = createClient();
+        const existingDoc = {
+          id: 'rule-id-1',
+          // enabled: true, so this PUT attempts an enabled -> disabled transition.
+          attributes: baseSoAttrs,
+          version: 'WzEsMV0=',
+        };
+        rulesSavedObjectService.get
+          .mockResolvedValueOnce(existingDoc)
+          .mockResolvedValueOnce(existingDoc);
+        rulesSavedObjectService.update.mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, 'rule-id-1')
+        );
+
+        await expect(
+          client.upsertRule({ id: 'rule-id-1', data: { ...baseCreateData, enabled: false } })
+        ).rejects.toMatchObject({
+          output: { statusCode: 409 },
+        });
+
+        // The write failed, so the stored rule is still enabled with its task
+        // in place — removing the task here would have left that task-less
+        // despite the saved object still claiming the rule is enabled.
+        expect(taskManager.removeIfExists).not.toHaveBeenCalled();
       });
 
       it('throws 409 when the request body changes the rule kind', async () => {
