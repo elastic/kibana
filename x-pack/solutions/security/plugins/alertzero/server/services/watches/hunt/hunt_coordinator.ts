@@ -137,7 +137,8 @@ export interface HuntCoordinatorCoreResult {
    */
   completeness: HuntCompleteness;
   /**
-   * Whether the report stays eligible for a later run. Derived from `completeness`,
+   * Whether this run is done with the report and it can be retired: true when
+   * nothing a later sweep would cover is missing. Derived from `completeness`,
    * false only for `incomplete_retryable`. True for `incomplete_final` too, because
    * a deterministic gap recurs identically every run, so keeping the report eligible
    * re-spends the run forever without covering more. A caller that writes "clean"
@@ -145,6 +146,15 @@ export interface HuntCoordinatorCoreResult {
    * it; that is what `completeness` is for.
    */
   completed_successfully: boolean;
+  /**
+   * The coordinator's own coverage gaps — input this run had to truncate, and a Tier 2
+   * that was requested but could not run, or had nothing to run against. Not a copy of
+   * `tier1.incomplete` / `tier2.incomplete`, which the caller already has; this is the
+   * part of `completeness` that would otherwise reach the caller only as an enum (or,
+   * on the `tier1Only` paths, not even that). Absent or empty means the coordinator
+   * itself found nothing to report here.
+   */
+  incomplete?: HuntIncompleteness[];
   /**
    * Up to 8 analyst next-step lines for a confirmed hit, grounded to this run's own SSE-visible
    * entities. Absent when there is no confirmed hit or the run stopped before Tier 2.
@@ -720,17 +730,20 @@ const huntCoordinatorCore = async (
     skipDetail?: string;
     readReportText?: boolean;
   }): HuntCoordinatorCoreResult => {
-    const completeness = huntCompletenessOf([
-      ...runGaps(readReportText),
-      // Tier 2 never ran on any of these paths, so nothing it could have executed
-      // counts towards coverage.
-      ...coordinatorGaps({
-        tier1Status: tier1Raw.status,
-        tier2Executed: false,
-        skipReason: reason,
-        skipDetail,
-      }),
-    ]);
+    // Tier 2 never ran on any of these paths, so nothing it could have executed
+    // counts towards coverage.
+    const skipGaps = coordinatorGaps({
+      tier1Status: tier1Raw.status,
+      tier2Executed: false,
+      skipReason: reason,
+      skipDetail,
+    });
+    const completeness = huntCompletenessOf([...runGaps(readReportText), ...skipGaps]);
+    // The coordinator's own gaps, not a copy of `tier1.incomplete` (which the caller
+    // already has): on this path it's the only place `nothing_searched` and a
+    // requested-but-unavailable Tier 2 reach the wire at all, since `next_step` here
+    // is a fixed string rather than one assembled from the gaps.
+    const coordinatorOwnGaps = [...inputGaps(readReportText), ...skipGaps];
     return {
       status: 'tier1_only',
       report_id: reportId,
@@ -746,6 +759,7 @@ const huntCoordinatorCore = async (
       has_confirmed_hit: tier1Raw.has_confirmed_hit,
       completeness,
       completed_successfully: completedSuccessfully(completeness),
+      ...(coordinatorOwnGaps.length > 0 ? { incomplete: coordinatorOwnGaps } : {}),
     };
   };
 
@@ -770,15 +784,14 @@ const huntCoordinatorCore = async (
   }
 
   if (!text) {
-    const completeness = huntCompletenessOf([
-      // There is no text on this path, so there is no dropped text either.
-      ...runGaps(false),
-      ...coordinatorGaps({
-        tier1Status: tier1Raw.status,
-        tier2Executed: false,
-        skipReason: 'no_report_text',
-      }),
-    ]);
+    // There is no text on this path, so there is no dropped text either.
+    const skipGaps = coordinatorGaps({
+      tier1Status: tier1Raw.status,
+      tier2Executed: false,
+      skipReason: 'no_report_text',
+    });
+    const completeness = huntCompletenessOf([...runGaps(false), ...skipGaps]);
+    const coordinatorOwnGaps = [...inputGaps(false), ...skipGaps];
     return {
       status: 'tier2_only_skipped',
       report_id: reportId,
@@ -795,6 +808,7 @@ const huntCoordinatorCore = async (
       has_confirmed_hit: tier1Raw.has_confirmed_hit,
       completeness,
       completed_successfully: completedSuccessfully(completeness),
+      ...(coordinatorOwnGaps.length > 0 ? { incomplete: coordinatorOwnGaps } : {}),
     };
   }
 
@@ -866,11 +880,11 @@ const huntCoordinatorCore = async (
   // An absent `execution` is a behavior that never reached execute, which queried
   // exactly as much as one that executed and returned nothing: nothing.
   const tier2Executed = tier2Raw.behaviors.some(({ execution }) => execution?.executed === true);
-  const gaps = [
-    ...runGaps(true),
-    ...tier2Gaps,
-    ...coordinatorGaps({ tier1Status: tier1Raw.status, tier2Executed }),
-  ];
+  const ownGaps = coordinatorGaps({ tier1Status: tier1Raw.status, tier2Executed });
+  const gaps = [...runGaps(true), ...tier2Gaps, ...ownGaps];
+  // The coordinator's own gaps, not a copy of `tier1.incomplete` / `tier2.incomplete`
+  // (the caller already has both of those).
+  const coordinatorOwnGaps = [...inputGaps(true), ...ownGaps];
   // Both tiers ran, so `completed_successfully` is no longer a hardcoded `true`: it
   // follows the gaps each tier reported. A deterministic gap still retires the report,
   // because re-running reproduces it exactly and would re-spend the generation budget
@@ -917,6 +931,7 @@ const huntCoordinatorCore = async (
     has_confirmed_hit: hasConfirmedHit,
     completeness,
     completed_successfully: completedSuccessfully(completeness),
+    ...(coordinatorOwnGaps.length > 0 ? { incomplete: coordinatorOwnGaps } : {}),
   };
 
   if (!hasConfirmedHit) {
