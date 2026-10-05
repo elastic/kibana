@@ -116,7 +116,7 @@ export class LensStyle {
     await this.openPalettePanelFlyout();
     const palettePicker = isLegacy ? this.legacyPalettePicker : this.colorMappingPalettePicker;
     await palettePicker.click();
-    const selected = this.page.getByRole('option][aria-selected=true');
+    const selected = this.page.getByRole('option', { selected: true });
     await selected.waitFor({ state: 'visible' });
     const paletteId = await selected.getAttribute('id');
     // Close the open picker list, then the palette flyout.
