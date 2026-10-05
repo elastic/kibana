@@ -23,11 +23,6 @@ xpack.features.overrides:
   ### hidden via config/serverless.yml and are granted through Dashboard.
   visualize.hidden: true
   maps.hidden: true
-  ### Alerting V2 is Observability-only, so its features are hidden in Role management.
-  alerting_v2_rules.hidden: true
-  alerting_v2_alerts.hidden: true
-  alerting_v2_action_policies.hidden: true
-  alerting_v2_execution_history.hidden: true
   ### Machine Learning feature is moved from Analytics category to the Security one as the last item.
   ml:
     category: "security"
