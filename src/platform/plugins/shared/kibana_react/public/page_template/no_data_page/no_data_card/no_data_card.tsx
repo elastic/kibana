@@ -28,20 +28,20 @@ export const NoDataCard: FunctionComponent<NoDataPageActions> = ({
   isDisabled,
   ...cardRest
 }) => {
-  const isButtonLabel = typeof button === 'string';
-
   // A string `button` renders a real EuiButton in the footer, so href/onClick/isDisabled
-  // must live on it instead of the card: a card-level href/onClick would make the whole
-  // card an interactive wrapper around that button, which is invalid, doubly-focusable
-  // nesting (@elastic/eui/no-nested-interactive-element). A custom `button` node or no
-  // button at all keeps the card itself as the sole control, same as before.
-  const footer = isButtonLabel ? (
-    <EuiButton fill href={href} onClick={onClick} isDisabled={isDisabled}>
-      {button || title}
-    </EuiButton>
-  ) : (
-    button
-  );
+  // live on it instead of the card. A custom `button` node is rendered as-is and owns its
+  // own interactivity. Either way, href/onClick are never applied to the card itself: a
+  // card-level href/onClick would make the whole card an interactive wrapper around the
+  // footer's control, which is invalid, doubly-focusable nesting
+  // (@elastic/eui/no-nested-interactive-element).
+  const footer =
+    typeof button === 'string' ? (
+      <EuiButton fill href={href} onClick={onClick} isDisabled={isDisabled}>
+        {button || title}
+      </EuiButton>
+    ) : (
+      button
+    );
 
   return (
     <EuiCard
@@ -56,7 +56,6 @@ export const NoDataCard: FunctionComponent<NoDataPageActions> = ({
       footer={footer}
       layout={layout as 'vertical' | undefined}
       isDisabled={isDisabled}
-      {...(isButtonLabel ? undefined : { href, onClick })}
       {...cardRest}
     />
   );
