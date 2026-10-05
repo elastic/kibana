@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StoredFilter } from '@kbn/as-code-filters-transforms';
+import type { extractFilterReferences } from '@kbn/as-code-filters-transforms';
 import type { VegaByReferenceState, VegaByValueState } from './schema';
 
 type StoredVegaByReferenceState = Omit<VegaByReferenceState, 'ref_id'>;
-/** Panel filters are stored in the saved-filter shape so their data views become references. */
-export type StoredVegaByValueState = Omit<VegaByValueState, 'filters'> & {
-  filters?: StoredFilter[];
-};
+export type StoredVegaByValueState = Omit<VegaByValueState, 'filters'> &
+  Pick<ReturnType<typeof extractFilterReferences>, 'filters'>;
 
 export type StoredVegaEmbeddableState = StoredVegaByReferenceState | StoredVegaByValueState;

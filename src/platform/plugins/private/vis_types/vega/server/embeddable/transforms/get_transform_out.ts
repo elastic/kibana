@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { injectFilterReferences } from '@kbn/as-code-filters-transforms';
 import type { Logger, SavedObjectReference } from '@kbn/core/server';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { VEGA_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { VEGA_SAVED_OBJECT_REF_NAME } from './get_transform_in';
 import type { StoredVegaByValueState, StoredVegaEmbeddableState } from '../types';
-import { transformPanelFiltersOut } from './transform_panel_filters';
 
 export const getTransformOut = (
   transformDrilldownsOut: DrilldownTransforms['transformOut'],
@@ -37,14 +37,21 @@ export const getTransformOut = (
     }
 
     // by value
-    return {
-      ...state,
-      filters: transformPanelFiltersOut(
-        (state as StoredVegaByValueState).filters,
-        panelReferences,
-        logger
-      ),
-    };
+    const { filters: extractedFilters, ...rest } = state as StoredVegaByValueState;
+    if (!extractedFilters) return rest;
+
+    try {
+      return { ...rest, filters: injectFilterReferences(extractedFilters, panelReferences) };
+    } catch (error) {
+      logger?.warn(`Unable to transform filter and query state on read. Error: ${error.message}`);
+      // Keep the filters, without their unresolved data view, rather than failing the whole panel.
+      return {
+        ...rest,
+        filters: extractedFilters.map(
+          ({ data_view_ref_name: dataViewRefName, ...filter }) => filter
+        ),
+      };
+    }
   };
   return transformOut;
 };

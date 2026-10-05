@@ -8,6 +8,7 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
+import { ZodError } from '@kbn/zod';
 import type { StoredVegaLibraryItemState } from '../vega_saved_object';
 import { getVegaCRUResponseBody } from './get_cru_response_body';
 
@@ -28,6 +29,53 @@ describe('getVegaCRUResponseBody', () => {
       id: 'vega-library-item-id',
       data: { ...attributes, tags: [] },
       meta: { managed: false },
+    });
+  });
+
+  describe('when the stored item does not satisfy the response schema', () => {
+    const getSavedObject = (
+      attributes: Partial<StoredVegaLibraryItemState>
+    ): SavedObject<StoredVegaLibraryItemState> => ({
+      id: 'vega-library-item-id',
+      type: 'vega',
+      attributes: attributes as StoredVegaLibraryItemState,
+      references: [],
+    });
+
+    // A plain error, not a ZodError, so that `writeErrorHandler` responds with a 500 instead of a 400.
+    const expectServerError = (savedObject: SavedObject<StoredVegaLibraryItemState>) => {
+      let thrown: unknown;
+      try {
+        getVegaCRUResponseBody(savedObject);
+      } catch (error) {
+        thrown = error;
+      }
+      expect(thrown).toBeInstanceOf(Error);
+      expect(thrown).not.toBeInstanceOf(ZodError);
+      expect((thrown as Error).message).toContain(
+        'Vega library item vega-library-item-id does not match the response schema'
+      );
+    };
+
+    test('throws a server error when the spec is invalid', () => {
+      expectServerError(
+        getSavedObject({ title: 'Vega chart', spec: { format: 'hjson', value: '' } })
+      );
+    });
+
+    test('throws a server error when a filter is invalid', () => {
+      const filterWithUnknownKey = {
+        type: 'condition' as const,
+        condition: { field: 'host', operator: 'exists' as const },
+        unexpected: true,
+      };
+      expectServerError(
+        getSavedObject({
+          title: 'Vega chart',
+          spec: { format: 'hjson', value: '{}' },
+          filters: [filterWithUnknownKey],
+        })
+      );
     });
   });
 });

@@ -13,6 +13,6 @@ import { getTransformIn } from './get_transform_in';
 import { getTransformOut } from './get_transform_out';
 
 export const getTransforms = (drilldownTransforms: DrilldownTransforms, logger?: Logger) => ({
-  transformIn: getTransformIn(drilldownTransforms.transformIn, logger),
+  transformIn: getTransformIn(drilldownTransforms.transformIn),
   transformOut: getTransformOut(drilldownTransforms.transformOut, logger),
 });

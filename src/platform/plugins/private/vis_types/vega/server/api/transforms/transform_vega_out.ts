@@ -11,21 +11,20 @@ import { injectFilterReferences } from '@kbn/as-code-filters-transforms';
 import { toAsCodeTags } from '@kbn/as-code-shared-transforms';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { StoredVegaLibraryItemState } from '../../vega_saved_object';
-import { vegaLibraryItemSchema, type VegaLibraryItemState } from '../schema';
 
 /**
- * Converts Vega library item saved object attributes and references to validated API state.
- * Throws when a filter data view reference is missing or the state does not satisfy the API schema.
+ * Converts Vega library item saved object attributes and references to API state.
+ * Throws when a filter data view reference is missing. The result is not validated against the API schema.
  */
 export const transformVegaOut = (
   attributes: Partial<StoredVegaLibraryItemState>,
   references: SavedObjectReference[] = []
-): VegaLibraryItemState => {
+) => {
   const { filters, ...rest } = attributes;
   const { tags } = toAsCodeTags(references);
-  return vegaLibraryItemSchema.parse({
+  return {
     ...rest,
     tags,
     ...(filters && { filters: injectFilterReferences(filters, references) }),
-  });
+  };
 };

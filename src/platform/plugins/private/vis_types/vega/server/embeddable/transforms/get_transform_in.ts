@@ -7,19 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger, SavedObjectReference } from '@kbn/core/server';
+import { extractFilterReferences } from '@kbn/as-code-filters-transforms';
+import type { SavedObjectReference } from '@kbn/core/server';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { VEGA_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { VegaByReferenceState, VegaByValueState, VegaEmbeddableState } from '../schema';
 import type { StoredVegaEmbeddableState } from '../types';
-import { transformPanelFiltersIn } from './transform_panel_filters';
 
 export const VEGA_SAVED_OBJECT_REF_NAME = 'savedObjectRef';
 
-export const getTransformIn = (
-  transformDrilldownsIn: DrilldownTransforms['transformIn'],
-  logger?: Logger
-) => {
+export const getTransformIn = (transformDrilldownsIn: DrilldownTransforms['transformIn']) => {
   const transformIn = (
     state: VegaEmbeddableState
   ): {
@@ -45,12 +42,11 @@ export const getTransformIn = (
     }
 
     // by value
-    const { filters, references: filterReferences } = transformPanelFiltersIn(
-      (storedState as VegaByValueState).filters,
-      logger
-    );
+    const { filters, ...rest } = storedState as VegaByValueState;
+    const { filters: storedFilters, references: filterReferences } =
+      extractFilterReferences(filters);
     return {
-      state: { ...storedState, filters } as StoredVegaEmbeddableState,
+      state: { ...rest, ...(storedFilters && { filters: storedFilters }) },
       references: [...drilldownReferences, ...filterReferences],
     };
   };

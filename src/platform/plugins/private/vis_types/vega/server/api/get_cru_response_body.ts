@@ -9,7 +9,9 @@
 
 import { getMeta } from '@kbn/as-code-shared-schemas';
 import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
+import { prettifyError } from '@kbn/zod';
 import type { StoredVegaLibraryItemState } from '../vega_saved_object';
+import { vegaLibraryItemSchema } from './schema';
 import { transformVegaOut } from './transforms/transform_vega_out';
 
 // CRU is Create, Read, Update
@@ -18,9 +20,23 @@ export const getVegaCRUResponseBody = (
     | SavedObject<StoredVegaLibraryItemState>
     | SavedObjectsUpdateResponse<StoredVegaLibraryItemState>
 ) => {
+  // Route does not apply defaults to response
+  // Instead, call parse to ensure defaults are applied to response
+  const { success, data, error } = vegaLibraryItemSchema.safeParse(
+    transformVegaOut(savedObject.attributes, savedObject.references)
+  );
+  if (!success) {
+    // The stored item is the problem, not the request. A plain error results in a 500 response.
+    throw new Error(
+      `Vega library item ${savedObject.id} does not match the response schema: ${prettifyError(
+        error
+      )}`
+    );
+  }
+
   return {
     id: savedObject.id,
-    data: transformVegaOut(savedObject.attributes, savedObject.references),
+    data,
     meta: getMeta(savedObject),
   };
 };
