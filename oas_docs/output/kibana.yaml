@@ -152329,7 +152329,8 @@ components:
       properties:
         assignee_uid:
           description: User profile UID of the assignee, or null to remove the assignee from the alert.
-          maxLength: 256
+          maxLength: 150
+          minLength: 1
           nullable: true
           type: string
       required:
