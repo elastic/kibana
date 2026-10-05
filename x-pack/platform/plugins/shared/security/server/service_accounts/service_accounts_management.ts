@@ -27,7 +27,9 @@ const VERIFY_CONCURRENCY = 10;
  */
 export type DeleteServiceAccountResult =
   | { deleted: true; warnings: string[] }
-  | { deleted: false; workloads: ServiceAccountBoundWorkload[] };
+  | { deleted: false; workloads: [ServiceAccountBoundWorkload, ...ServiceAccountBoundWorkload[]] };
+
+const isNonEmpty = <T>(items: T[]): items is [T, ...T[]] => items.length > 0;
 
 export interface DeleteServiceAccountOptions {
   /**
@@ -119,7 +121,7 @@ export class ServiceAccountsManagement implements ServiceAccountsManagementApi {
       await this.authorize(request, 'delete a service account');
 
       const workloads = await this.findBoundWorkloads(serviceAccountId);
-      if (workloads.length > 0) {
+      if (isNonEmpty(workloads)) {
         this.logger.debug(
           `Refused to delete service account [${serviceAccountId}]: it is still bound to ${workloads.length} workloads`
         );

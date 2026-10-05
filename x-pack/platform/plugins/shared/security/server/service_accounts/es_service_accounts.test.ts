@@ -1371,6 +1371,57 @@ describe('EsServiceAccounts', () => {
       );
     });
 
+    it('reads the account again before deleting tokens left over from it', async () => {
+      const order: string[] = [];
+      esClient.asCurrentUser.transport.request.mockImplementation(async (params) => {
+        const { method, path } = params as { method: string; path: string };
+        order.push(`${method} ${path}`);
+        if (method === 'GET' && path === ACCOUNT_PATH) return {};
+        if (method === 'GET') return accountCredentials(['operator-token']);
+        return { found: true };
+      });
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).resolves.toEqual({ warnings: [] });
+
+      expect(order).toEqual([
+        `GET ${ACCOUNT_PATH}`,
+        `GET ${CREDENTIALS_PATH}`,
+        `GET ${ACCOUNT_PATH}`,
+        `DELETE ${CREDENTIALS_PATH}/token/operator-token`,
+      ]);
+    });
+
+    it('deletes an account created again while its leftover tokens were read, as a whole', async () => {
+      const order: string[] = [];
+      credentialStore.delete.mockImplementation(async () => {
+        order.push('credential');
+        return true;
+      });
+      let accountReads = 0;
+      esClient.asCurrentUser.transport.request.mockImplementation(async (params) => {
+        const { method, path } = params as { method: string; path: string };
+        order.push(`${method} ${path}`);
+        if (method === 'GET' && path === ACCOUNT_PATH) {
+          accountReads++;
+          return accountReads === 1 ? {} : accountEntry();
+        }
+        if (method === 'GET') return accountCredentials(['kibana-managed']);
+        return { found: true };
+      });
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).resolves.toEqual({ warnings: [] });
+
+      expect(order).toEqual([
+        `GET ${ACCOUNT_PATH}`,
+        `GET ${CREDENTIALS_PATH}`,
+        `GET ${ACCOUNT_PATH}`,
+        `GET ${CREDENTIALS_PATH}`,
+        `DELETE ${CREDENTIALS_PATH}/token/kibana-managed`,
+        'credential',
+        `DELETE ${ACCOUNT_PATH}`,
+      ]);
+    });
+
     it('invalidates access tokens left over from an account that is already gone', async () => {
       mockElasticsearch({ account: {}, tokenNames: [] });
       esClient.asCurrentUser.security.invalidateToken.mockResolvedValue({

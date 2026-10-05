@@ -25,6 +25,7 @@ import { z } from '@kbn/zod';
 import { bestEffortUserProfileIdResolver, resolveWorkloadBinder } from './bindings';
 import { ensureClusterPrivilege } from './cluster_privilege';
 import { parseCreateServiceAccountParams } from './create_params';
+import { BINDING_CLOCK_SKEW_TOLERANCE_MS } from './credentials';
 import type { ServiceAccountCredentialStore } from './credentials';
 import { toDescriptionField } from './description_field';
 import {
@@ -73,15 +74,6 @@ const getAccessTokensWarning = (id: string): string =>
       'Service account [{id}] was deleted, but the access tokens it was issued could not be invalidated.',
     values: { id },
   });
-
-/**
- * How much later than a workload's binding its account may have been created before the exchange
- * refuses it. The two timestamps come from the clocks of whichever Kibana nodes handled the create
- * and the bind, so a workload bound right after its account was created can look bound before it.
- * The cost is that an account deleted and created again this soon after a bind inherits the
- * binding.
- */
-const BINDING_CLOCK_SKEW_TOLERANCE_MS = 10_000;
 
 /** How many of an account's tokens are deleted at once. */
 const TOKEN_DELETE_CONCURRENCY = 10;
@@ -542,16 +534,30 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
    * the same name that lands in between would lose its access tokens too, which only costs it a
    * fresh exchange.
    *
+   * A create can also land before the tokens are read, and then the tokens are the new account's.
+   * So the account is read again once tokens turn up, and if it exists now, it's deleted as a whole.
+   * Otherwise every token read is a leftover, and Elasticsearch refuses to create an account with
+   * this name until they are all deleted, so a create can't land in the meantime. That only fails
+   * if someone else deletes those tokens first and a create then lands before this delete does.
+   *
    * The credential is left alone: the next create overwrites it and nothing reports it for an
    * account that does not exist, while deleting it here could remove one a concurrent create just
    * wrote.
    */
   private async deleteLeftoverTokens(
     esClient: ElasticsearchClient,
-    { namespace, name }: EsServiceAccountPrincipal
+    principal: EsServiceAccountPrincipal
   ): Promise<DeleteServiceAccountResponse> {
+    const { namespace, name } = principal;
     const id = `${namespace}/${name}`;
     const tokenNames = await this.readTokenNames(esClient, namespace, name);
+    if (tokenNames.length > 0 && (await this.readAccount(esClient, namespace, name))) {
+      this.logger.debug(
+        `Service account [${id}] was created again while its leftover tokens were being read. Deleting the new account.`
+      );
+      return await this.deleteAccountAndCredentials(esClient, principal);
+    }
+
     const undeletedTokens =
       tokenNames.length > 0 ? await this.deleteTokens(esClient, namespace, name, tokenNames) : [];
     const invalidated = await this.invalidateAccessTokens(esClient, id);

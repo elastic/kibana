@@ -12,6 +12,7 @@ import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { ES_SERVICE_ACCOUNT_NAMESPACE } from '../../../../common/service_accounts';
+import { BINDING_CLOCK_SKEW_TOLERANCE_MS } from '../../../../server/service_accounts/credentials';
 import {
   deleteServiceAccounts,
   type ServiceAccountPrincipal,
@@ -19,11 +20,6 @@ import {
 
 const SERVICE_ACCOUNT_ENDPOINT = 'internal/security/service_account';
 const HEADERS = { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'kibana' };
-/**
- * How much later than a workload's binding its account may have been created and still run it,
- * mirroring `BINDING_CLOCK_SKEW_TOLERANCE_MS` on the server.
- */
-const CLOCK_SKEW_TOLERANCE_MS = 10_000;
 /** A token minted straight through Elasticsearch, which Kibana did not create. */
 const OPERATOR_TOKEN_NAME = 'operator-token';
 
@@ -300,7 +296,7 @@ apiTest.describe(
         expect(await runWorkload(apiClient, workloadId)).toHaveStatusCode(200);
 
         // An account created again within the tolerance of a bind still inherits the binding.
-        await setTimeout(CLOCK_SKEW_TOLERANCE_MS + 1_000);
+        await setTimeout(BINDING_CLOCK_SKEW_TOLERANCE_MS + 1_000);
 
         const forced = await apiClient.delete(`${accountPath(idOf(account))}?force=true`, {
           headers: adminHeaders,
