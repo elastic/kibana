@@ -751,6 +751,39 @@ describe('WorkersService', () => {
     expect(worker?.workflowId).toBeNull();
   });
 
+  describe('isWorkerEnabled', () => {
+    it('reports an enabled managed Worker as enabled', async () => {
+      const harness = createPersistentHarness();
+      const service = harness.createService();
+      await service.update(TRIAGE, { enabled: true }, SPACE, request);
+
+      await expect(service.isWorkerEnabled(TRIAGE, SPACE)).resolves.toBe(true);
+    });
+
+    // Turning off alert analysis disables the Worker through `update`; it must never reach a
+    // workflow that merely occupies the Worker's deterministic id.
+    it('does not report a non-managed document on the Worker id as an enabled Worker', async () => {
+      const harness = createPersistentHarness();
+      const service = harness.createService();
+      (harness.managedWorkflows.getWorkflowStatus as jest.Mock).mockResolvedValue({
+        status: 'not_managed',
+        workflowId: 'opaque:foreign-workflow',
+        definitionId: TRIAGE,
+        spaceId: SPACE,
+        installed: true,
+        enabled: true,
+        valid: true,
+        managedBy: null,
+        storedVersion: null,
+        registryVersion: 1,
+        storedHash: null,
+        registryHash: 'registry',
+      });
+
+      await expect(service.isWorkerEnabled(TRIAGE, SPACE)).resolves.toBe(false);
+    });
+  });
+
   it('projects skills from the installed workflow definition when the worker is installed', async () => {
     const harness = createPersistentHarness();
     const service = harness.createService();

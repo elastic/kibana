@@ -250,7 +250,9 @@ export class WorkersService {
       spaceId,
       workflowIdSuffix: spaceId,
     });
-    return Boolean(status.installed && status.enabled);
+    // An unmanaged document squatting on the Worker's id is not the Worker, and `update` must
+    // not be pointed at it.
+    return Boolean(status.installed && status.status !== 'not_managed' && status.enabled);
   }
 
   async update(
