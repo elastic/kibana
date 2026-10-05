@@ -141,10 +141,6 @@ describe('episodeAlertActionParamsSchema', () => {
     expect(() => episodeAlertActionParamsSchema.parse({ id: '' })).toThrow();
   });
 
-  it('rejects the former alert_id key', () => {
-    expect(() => episodeAlertActionParamsSchema.parse({ alert_id: 'episode-1' })).toThrow();
-  });
-
   it('rejects unknown keys (strict mode)', () => {
     expect(() => episodeAlertActionParamsSchema.parse({ id: 'episode-1', foo: 'bar' })).toThrow();
   });
