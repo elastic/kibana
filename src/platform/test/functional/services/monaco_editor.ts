@@ -100,19 +100,6 @@ export class MonacoEditorService extends FtrService {
     );
   }
 
-  public async triggerCodeEditorSuggestions(nthIndex: number = 0) {
-    await this.browser.execute((editorIndex) => {
-      const editors = window.MonacoEnvironment?.monaco?.editor?.getEditors();
-      const editor = editors?.[editorIndex];
-      // editor.action.triggerSuggest does not run while the widget is already open.
-      const suggestController = editor?.getContribution('editor.contrib.suggestController') as
-        | { triggerSuggest: () => void }
-        | null
-        | undefined;
-      suggestController?.triggerSuggest();
-    }, nthIndex);
-  }
-
   public async getScrollTop(nthIndex: number = 0): Promise<number> {
     return await this.browser.execute((editorIndex) => {
       const editors = window.MonacoEnvironment?.monaco?.editor?.getEditors();
