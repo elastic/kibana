@@ -116,7 +116,8 @@ export class LensStyle {
     await this.openPalettePanelFlyout();
     const palettePicker = isLegacy ? this.legacyPalettePicker : this.colorMappingPalettePicker;
     await palettePicker.click();
-    const selected = this.page.getByRole('option', { selected: true });
+    // eslint-disable-next-line playwright/prefer-native-locators, playwright/no-raw-locators -- chained [role][aria-selected] is auto-fixed to an invalid getByRole string; a page-wide getByRole('option', { selected: true }) matches other comboboxes
+    const selected = this.page.locator('[role=option][aria-selected=true]');
     await selected.waitFor({ state: 'visible' });
     const paletteId = await selected.getAttribute('id');
     // Close the open picker list, then the palette flyout.
