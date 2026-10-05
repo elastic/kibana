@@ -277,6 +277,21 @@ export const useDismissProposal = () => {
 };
 
 /**
+ * Tracks a decline that was issued elsewhere — a bulk close of an investigation releases each
+ * pending proposal's gate server-side — until its decision lands. Shares the decline
+ * `mutationKey`, so `useIsDecliningProposal` reads "Declining" for the row while it settles.
+ * Resolves once the decision is recorded or the bounded wait gives up; it never rejects.
+ */
+export const useSettleDeclinedProposal = () => {
+  const { services } = useKibana();
+
+  return useMutation({
+    mutationKey: mutationKeys.proposals.decline,
+    mutationFn: ({ id }: { id: string }): Promise<void> => waitForDecision(services.http!, id),
+  });
+};
+
+/**
  * Whether *this* proposal's approve/decline is currently in flight, read from the shared
  * mutation cache rather than component state — so the answer is the same for the flyout row and
  * the modal alike, and survives the modal being closed and reopened mid-submission (a local

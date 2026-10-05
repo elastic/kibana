@@ -19,6 +19,7 @@ import {
   useDismissProposal,
   useIsApprovingProposal,
   useIsDecliningProposal,
+  useSettleDeclinedProposal,
 } from './use_proposals_api';
 import {
   PROPOSALS_INTERNAL_URL,
@@ -631,5 +632,42 @@ describe('useIsApprovingProposal / useIsDecliningProposal', () => {
     });
 
     await waitFor(() => expect(result.current.isDecliningP1).toBe(false));
+  });
+});
+
+describe('useSettleDeclinedProposal', () => {
+  it('reads as declining for that proposal only until its decision lands', async () => {
+    const http = makeHttp();
+    http.get.mockResolvedValueOnce({ decision: undefined }).mockResolvedValueOnce({
+      decision: 'dismissed',
+    });
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    const { Wrapper } = createWrapper();
+    const { result } = renderHook(
+      () => ({
+        settle: useSettleDeclinedProposal(),
+        isDecliningP1: useIsDecliningProposal('p-1'),
+        isDecliningP2: useIsDecliningProposal('p-2'),
+      }),
+      { wrapper: Wrapper }
+    );
+
+    let settled: Promise<void> | undefined;
+    act(() => {
+      settled = result.current.settle.mutateAsync({ id: 'p-1' });
+    });
+
+    await waitFor(() => expect(result.current.isDecliningP1).toBe(true));
+    expect(result.current.isDecliningP2).toBe(false);
+
+    await act(async () => {
+      await settled;
+    });
+
+    await waitFor(() => expect(result.current.isDecliningP1).toBe(false));
+    expect(http.get).toHaveBeenCalledTimes(2);
   });
 });
