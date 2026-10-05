@@ -23,6 +23,7 @@ import { AddDataTabs } from '../../views/add_data_view/types';
 import { ProfilingSchemaContextProvider } from '../contexts/profiling_schema/profiling_schema_context';
 import { SchemaSelector } from '../schema_selector';
 import { SchemaDataGuard } from '../schema_empty_prompt/schema_data_guard';
+import { useSchemaQueryParam } from '../../hooks/use_schema_query_param';
 
 export function ProfilingAppPageTemplate({
   children,
@@ -68,6 +69,8 @@ export function ProfilingAppPageTemplate({
   const rangeTo = searchParams.get('rangeTo') || defaultRangeTo;
 
   const backTarget = useBackNavigation();
+  // The schema provider is rendered below, so we need to read the current schema from the query param here.
+  const schema = useSchemaQueryParam();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -167,7 +170,9 @@ export function ProfilingAppPageTemplate({
             />
             {!hideSearchBar && (
               <EuiFlexItem grow={false}>
-                {customSearchBar ?? <PrimaryProfilingSearchBar />}
+                {customSearchBar ?? (
+                  <PrimaryProfilingSearchBar schema={showSchemaSelector ? schema : undefined} />
+                )}
               </EuiFlexItem>
             )}
             {showSchemaSelector && (

@@ -14,7 +14,7 @@ jest.mock('../../hooks/use_default_time_range');
 jest.mock('../contexts/profiling_dependencies/use_profiling_dependencies');
 jest.mock('../contexts/back_navigation/use_back_navigation');
 jest.mock('./primary_profiling_search_bar', () => ({
-  PrimaryProfilingSearchBar: () => null,
+  PrimaryProfilingSearchBar: jest.fn(() => null),
 }));
 jest.mock('@kbn/app-header', () => ({
   AppHeader: () => null,
@@ -38,6 +38,7 @@ import { useBackNavigation } from '../contexts/back_navigation/use_back_navigati
 import { ProfilingSchemaContextProvider } from '../contexts/profiling_schema/profiling_schema_context';
 import { SchemaSelector } from '../schema_selector';
 import { SchemaDataGuard } from '../schema_empty_prompt/schema_data_guard';
+import { PrimaryProfilingSearchBar } from './primary_profiling_search_bar';
 import { ProfilingAppPageTemplate } from '.';
 
 describe('ProfilingAppPageTemplate', () => {
@@ -164,6 +165,23 @@ describe('ProfilingAppPageTemplate', () => {
           kuery: '',
         })
       );
+    });
+
+    it('passes the selected schema to the search bar', () => {
+      renderTemplate('?rangeFrom=now-1h&rangeTo=now-10m&schema=otel', {
+        hideSearchBar: false,
+        showSchemaSelector: true,
+      });
+
+      expect(jest.mocked(PrimaryProfilingSearchBar).mock.calls[0][0]).toEqual({ schema: 'otel' });
+    });
+
+    it('does not pass a schema to the search bar of pages without the selector', () => {
+      renderTemplate('?rangeFrom=now-1h&rangeTo=now-10m&schema=otel', { hideSearchBar: false });
+
+      expect(jest.mocked(PrimaryProfilingSearchBar).mock.calls[0][0]).toEqual({
+        schema: undefined,
+      });
     });
 
     it('is not shown by default', () => {
