@@ -7,5 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './data';
-export * from './remote_host';
+export { CONNECTOR_ID, CONNECTOR_NAME, AUTH_TYPE, SUB_ACTION } from './constants';
+export type { AuthType } from './constants';
+
+export {
+  ConfigSchema,
+  SecretsSchema,
+  ExecParamsSchema,
+  DownloadFileParamsSchema,
+  UploadFileParamsSchema,
+} from './schemas/latest';
+
+export type {
+  Config,
+  Secrets,
+  ExecParams,
+  DownloadFileParams,
+  UploadFileParams,
+} from './types/latest';
