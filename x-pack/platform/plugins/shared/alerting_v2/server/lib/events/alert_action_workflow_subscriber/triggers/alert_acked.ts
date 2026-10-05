@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { episodeAckedPayloadSchema } from '../../../../../common/workflows/triggers';
+import type { alertAckedPayloadSchema } from '../../../../../common/workflows/triggers';
 import {
-  EPISODE_ACKED_TRIGGER_ID,
-  episodeAckedTriggerCommonDefinition,
+  ALERT_ACKED_TRIGGER_ID,
+  alertAckedTriggerCommonDefinition,
 } from '../../../../../common/workflows/triggers';
 import {
   EPISODE_ACKED_EVENT_TYPE,
@@ -17,18 +17,18 @@ import {
 import type { AlertActionWorkflowTriggerBinding } from './types';
 import { toEnvelopePayload } from './to_envelope_payload';
 
-export { EPISODE_ACKED_TRIGGER_ID } from '../../../../../common/workflows/triggers';
+export { ALERT_ACKED_TRIGGER_ID } from '../../../../../common/workflows/triggers';
 
 /**
  * Binding from the bus `episode.acked` event to the
- * `alerting.episodeAcked` workflow trigger.
+ * `alerting.actions.alertAcked` workflow trigger.
  */
-export const episodeAckedTrigger: AlertActionWorkflowTriggerBinding<
+export const alertAckedTrigger: AlertActionWorkflowTriggerBinding<
   EpisodeAckedEvent,
-  typeof episodeAckedPayloadSchema
+  typeof alertAckedPayloadSchema
 > = {
   eventType: EPISODE_ACKED_EVENT_TYPE,
-  triggerId: EPISODE_ACKED_TRIGGER_ID,
-  definition: episodeAckedTriggerCommonDefinition,
+  triggerId: ALERT_ACKED_TRIGGER_ID,
+  definition: alertAckedTriggerCommonDefinition,
   toPayload: toEnvelopePayload,
 };

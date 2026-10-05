@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { episodeTaggedPayloadSchema } from '../../../../../common/workflows/triggers';
+import type { alertTaggedPayloadSchema } from '../../../../../common/workflows/triggers';
 import {
-  EPISODE_TAGGED_TRIGGER_ID,
-  episodeTaggedTriggerCommonDefinition,
+  ALERT_TAGGED_TRIGGER_ID,
+  alertTaggedTriggerCommonDefinition,
 } from '../../../../../common/workflows/triggers';
 import {
   EPISODE_TAGGED_EVENT_TYPE,
@@ -17,18 +17,18 @@ import {
 import type { AlertActionWorkflowTriggerBinding } from './types';
 import { toEnvelopePayload } from './to_envelope_payload';
 
-export { EPISODE_TAGGED_TRIGGER_ID } from '../../../../../common/workflows/triggers';
+export { ALERT_TAGGED_TRIGGER_ID } from '../../../../../common/workflows/triggers';
 
 /**
  * Binding from the bus `episode.tagged` event to the
- * `alerting.episodeTagged` workflow trigger.
+ * `alerting.actions.alertTagged` workflow trigger.
  */
-export const episodeTaggedTrigger: AlertActionWorkflowTriggerBinding<
+export const alertTaggedTrigger: AlertActionWorkflowTriggerBinding<
   EpisodeTaggedEvent,
-  typeof episodeTaggedPayloadSchema
+  typeof alertTaggedPayloadSchema
 > = {
   eventType: EPISODE_TAGGED_EVENT_TYPE,
-  triggerId: EPISODE_TAGGED_TRIGGER_ID,
-  definition: episodeTaggedTriggerCommonDefinition,
+  triggerId: ALERT_TAGGED_TRIGGER_ID,
+  definition: alertTaggedTriggerCommonDefinition,
   toPayload: (event) => ({ ...toEnvelopePayload(event), tags: [...event.payload.tags] }),
 };
