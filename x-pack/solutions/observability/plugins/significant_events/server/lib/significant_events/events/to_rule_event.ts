@@ -6,11 +6,7 @@
  */
 
 import type { CreateAlertEventData } from '@kbn/alerting-v2-schemas';
-import {
-  SIGNIFICANT_EVENTS_ALERT_SOURCE,
-  SIGNIFICANT_EVENTS_SEVERITY_MAP,
-  SIGNIFICANT_EVENTS_STATUS_MAP,
-} from '@kbn/significant-events-schema';
+import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
 import type { SignificantEvent } from './data_stream';
 
 /**
@@ -19,9 +15,8 @@ import type { SignificantEvent } from './data_stream';
  *
  * Field placement decisions:
  * - fingerprint = event_id (stable series key; also kept in data for URL/API use)
- * - severity mapped at top level; not duplicated in data
- * - status mapped to alert_status only; closed and dismissed are both inactive by decision
- * - event_uuid / previous_event_uuid dropped (version order = @timestamp within group_hash)
+ * - severity is persisted at top level; not duplicated in data
+ * - status is persisted as the canonical alert_status value
  * - space_id is not set here — the request-scoped client injects it
  */
 export const toRuleEvent = (event: SignificantEvent): CreateAlertEventData => {
@@ -49,8 +44,8 @@ export const toRuleEvent = (event: SignificantEvent): CreateAlertEventData => {
     source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
     fingerprint: event.event_id,
     timestamp: new Date(event['@timestamp']).toISOString(),
-    severity: SIGNIFICANT_EVENTS_SEVERITY_MAP[event.severity],
-    alert_status: SIGNIFICANT_EVENTS_STATUS_MAP[event.status],
+    severity: event.severity,
+    alert_status: event.status,
     data,
   };
 };

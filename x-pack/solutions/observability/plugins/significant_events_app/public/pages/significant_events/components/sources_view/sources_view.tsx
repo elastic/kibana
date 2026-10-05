@@ -251,6 +251,7 @@ export function SourcesView() {
                 loading={isSourcesLoading}
                 searchText={searchText}
                 blocksActivity={blocksActivity}
+                generatingSourceIds={generatingStreamNames}
                 activityBlockTooltip={activityBlockTooltip}
                 canManage={canManage}
                 selection={

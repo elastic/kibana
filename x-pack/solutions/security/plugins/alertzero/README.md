@@ -336,3 +336,17 @@ Measure with:
 node scripts/build_kibana_platform_plugins.js --dist --no-cache
 # inspect target/public/bundles/metrics.json → "page load bundle size" for alertzero
 ```
+
+
+## Discovering actions and revising proposals with Elastic AI
+
+AlertZero registers the `alertzero-action-discovery` skill and
+`security.alertzero.actions.list` tool. The skill exposes the action catalog tool
+when loaded, with availability checked against the caller's AlertZero read
+privilege and the current space's enablement setting. The tool repeats that check
+when invoked.
+
+Proposal revisions are owned by the shared proposals plugin. Its
+`proposal-management` skill exposes `platform.proposals.revise` independently of
+AlertZero. See the [proposal revision guidance](../../../../platform/plugins/shared/proposals/README.md#revising-proposals-with-elastic-ai)
+for behavior and manual validation.

@@ -289,11 +289,11 @@ export async function runDiscovery(
       )})`
     );
   }
-  if (event.status !== 'open') {
+  if (event.status !== 'active') {
     throw new Error(
       `runDiscovery: created event "${event.title ?? 'untitled'}" with status ${
         event.status ?? 'unknown'
-      }, expected open`
+      }, expected active`
     );
   }
 

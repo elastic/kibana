@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSignificantEventsAppParams } from '../../hooks/use_significant_events_app_params';
@@ -50,11 +50,17 @@ const getUrlForApp = jest.fn().mockReturnValue('/app/nightshift');
 const navigateToApp = jest.fn();
 const setBreadcrumbs = jest.fn();
 
-const setCapabilities = (canConfigure: boolean) => {
+const setCapabilities = ({
+  canConfigure,
+  canManage,
+}: {
+  canConfigure: boolean;
+  canManage: boolean;
+}) => {
   mockUseKibana.mockReturnValue({
     core: {
       application: {
-        capabilities: { nightshift: { configure: canConfigure } },
+        capabilities: { nightshift: { configure: canConfigure, manage: canManage } },
         getUrlForApp,
         navigateToApp,
       },
@@ -66,7 +72,7 @@ const setCapabilities = (canConfigure: boolean) => {
 describe('SettingsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    setCapabilities(true);
+    setCapabilities({ canConfigure: true, canManage: true });
     mockUseSignificantEventsAppParams.mockReturnValue({ query: {} } as never);
     mockUseSignificantEventsAvailability.mockReturnValue({
       availability: { available: true },
@@ -75,13 +81,41 @@ describe('SettingsPage', () => {
     } as ReturnType<typeof useSignificantEventsAvailability>);
   });
 
-  it('redirects users without configure permission to Nightshift', async () => {
-    setCapabilities(false);
+  it('redirects users without manage and configure permission to Nightshift', async () => {
+    setCapabilities({ canConfigure: true, canManage: false });
 
     render(<SettingsPage />);
 
     await waitFor(() => {
       expect(navigateToApp).toHaveBeenCalledWith(NIGHTSHIFT_APP_ID);
     });
+  });
+
+  it('returns to the management tab when fromTab is a known tab', () => {
+    mockUseSignificantEventsAppParams.mockReturnValue({ query: { fromTab: 'sources' } } as never);
+
+    render(<SettingsPage />);
+
+    expect(screen.getByTestId('settingsPageBackLink')).toHaveAttribute(
+      'href',
+      '/app/significant_events/sources'
+    );
+    expect(screen.getByTestId('settingsPageBackLink')).toHaveTextContent('Nightshift Management');
+  });
+
+  it('returns to Nightshift when fromTab is absent', () => {
+    render(<SettingsPage />);
+
+    expect(screen.getByTestId('settingsPageBackLink')).toHaveAttribute('href', '/app/nightshift');
+    expect(screen.getByTestId('settingsPageBackLink')).toHaveTextContent(/^Nightshift$/);
+  });
+
+  it('returns to Nightshift when fromTab is not a tab', () => {
+    mockUseSignificantEventsAppParams.mockReturnValue({ query: { fromTab: 'streams' } } as never);
+
+    render(<SettingsPage />);
+
+    expect(screen.getByTestId('settingsPageBackLink')).toHaveAttribute('href', '/app/nightshift');
+    expect(screen.getByTestId('settingsPageBackLink')).toHaveTextContent(/^Nightshift$/);
   });
 });

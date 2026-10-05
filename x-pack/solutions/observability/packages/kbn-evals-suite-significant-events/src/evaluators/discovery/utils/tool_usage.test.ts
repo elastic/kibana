@@ -213,7 +213,7 @@ describe('extractEventSearchCandidateCount', () => {
         type: 'tool_call',
         tool_id: TOOL_ID_EVENT_SEARCH,
         tool_call_id: 'event-search-1',
-        params: { state: 'open', source_ids: ['logs'] },
+        params: { state: 'active', source_ids: ['logs'] },
         results: [{ type: 'other', data: { events: [{ event_id: 'a' }], total: 1 } }],
       },
     ];
@@ -226,7 +226,7 @@ describe('extractEventSearchCandidateCount', () => {
         type: 'tool_call',
         tool_id: TOOL_ID_EVENT_SEARCH,
         tool_call_id: 'event-search-1',
-        params: { state: 'open', source_ids: ['logs'] },
+        params: { state: 'active', source_ids: ['logs'] },
         results: [{ type: 'other', data: { events: [{ event_id: 'a' }, { event_id: 'b' }] } }],
       },
     ];
@@ -239,7 +239,7 @@ describe('extractEventSearchCandidateCount', () => {
         type: 'tool_call',
         tool_id: TOOL_ID_EVENT_SEARCH,
         tool_call_id: 'event-search-1',
-        params: { state: 'open', source_ids: ['logs'] },
+        params: { state: 'active', source_ids: ['logs'] },
         results: [{ type: 'other', data: { events: [], total: 0 } }],
       },
     ];

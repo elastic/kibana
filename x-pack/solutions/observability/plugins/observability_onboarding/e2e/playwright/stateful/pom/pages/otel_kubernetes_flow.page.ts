@@ -63,7 +63,7 @@ export class OtelKubernetesFlowPage {
   public async openClusterOverviewDashboardInNewTab(): Promise<Page> {
     const dashboardURL = await this.page
       .getByTestId(
-        'observabilityOnboardingDataIngestStatusActionLink-kubernetes_otel-cluster-overview'
+        'observabilityOnboardingDataIngestStatusActionLink-kubernetes_otel-fe68e0e9-0506-4ad7-96be-070cf7592a7e'
       )
       .getAttribute('href');
 

@@ -68,7 +68,7 @@ describe('event_search tool', () => {
       tool.schema.parse({ event_ids: ['event-1'], rule_uuids: [] }).rule_uuids
     ).toBeUndefined();
     expect(tool.schema.parse({ query: '  latency  ' }).query).toBe('latency');
-    expect(tool.schema.parse({ rule_uuids: ['rule-uuid-1'] }).status).toBe('open');
+    expect(tool.schema.parse({ rule_uuids: ['rule-uuid-1'] }).status).toBe('active');
     expect(tool.schema.safeParse({ view: 'full', event_ids: ['event-1'] }).success).toBe(true);
     expect(tool.schema.safeParse({ view: 'full', event_ids: ['event-1', 'event-2'] }).success).toBe(
       false
@@ -79,7 +79,7 @@ describe('event_search tool', () => {
     expect(tool.schema.safeParse({}).success).toBe(true);
     expect(tool.schema.parse({})).toEqual(
       expect.objectContaining({
-        status: 'open',
+        status: 'active',
         view: 'compact',
         page: 1,
         per_page: 20,
@@ -119,7 +119,7 @@ describe('event_search tool', () => {
         query: '   ',
         slugs: ['logs.checkout'],
         rule_uuids: ['rule-uuid-1'],
-        status: 'open',
+        status: 'active',
       },
       createMockToolContext()
     );
@@ -143,7 +143,7 @@ describe('event_search tool', () => {
       result_count: 1,
       has_query: false,
       has_source_filter: true,
-      status_filter: 'open',
+      status_filter: 'active',
       view: 'compact',
       page: 1,
     });
@@ -187,7 +187,7 @@ describe('event_search tool', () => {
 
     const result = await invokeHandler(
       tool as never,
-      { query: 'latency', status: 'closed' },
+      { query: 'latency', status: 'inactive' },
       createMockToolContext()
     );
 

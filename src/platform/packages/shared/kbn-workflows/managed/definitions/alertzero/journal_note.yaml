@@ -30,16 +30,15 @@ steps:
   - name: append_note
     type: kibana.request
     with:
-      request:
-        method: POST
-        path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-        headers:
-          kbn-xsrf: "true"
-          elastic-api-version: "2023-10-31"
-          Content-Type: application/json
-        body:
-          conversation_id: "{{ inputs.conversation_id }}"
-          input: "{{ inputs.message }}"
-          trigger_mode: never
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body:
+        conversation_id: "{{ inputs.conversation_id }}"
+        input: "{{ inputs.message }}"
+        trigger_mode: never
     on-failure:
       continue: true
