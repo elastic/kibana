@@ -624,6 +624,28 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     expect(eventClient.bulkCreate).not.toHaveBeenCalled();
   });
 
+  it('does not deduplicate a combined item against separate partial-overlap events', async () => {
+    const confirmedA = makeDetectionSignal({ detection_id: 'det-A', rule_uuid: 'A' });
+    const confirmedB = makeDetectionSignal({ detection_id: 'det-B', rule_uuid: 'B' });
+    const confirmedC = makeDetectionSignal({ detection_id: 'det-C', rule_uuid: 'C' });
+    const eventClient = makeEventClient({
+      findLatestActive: jest.fn().mockResolvedValue({
+        hits: [
+          makeActiveDedupEvent({ event_id: 'event-A', signals: [confirmedA] }),
+          makeActiveDedupEvent({ event_id: 'event-BC', signals: [confirmedB, confirmedC] }),
+        ],
+      }),
+    });
+
+    const results = await eventsWriteBulkHandler({
+      eventClient,
+      inputs: [makeDedupInput({ signals: [confirmedA, confirmedB] })],
+    });
+
+    expect(results[0]).toMatchObject({ written: true });
+    expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
+  });
+
   it.each<DetectionSignal['verdict']>(['refutes', 'off_topic', 'inconclusive'])(
     'creates a new event when the candidate confirms a rule the active event marks as %s',
     async (verdict) => {
@@ -690,6 +712,42 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     expect(eventClient.bulkCreate).not.toHaveBeenCalled();
   });
 
+  it('selects the latest confirming event by instant when timestamps use different offsets', async () => {
+    const confirmedA = makeDetectionSignal({
+      detection_id: 'det-A',
+      rule_uuid: 'A',
+    });
+    const eventClient = makeEventClient({
+      findLatestActive: jest.fn().mockResolvedValue({
+        hits: [
+          makeActiveDedupEvent({
+            '@timestamp': '2024-01-02T00:30:00+01:00',
+            event_id: 'earlier-by-instant',
+            signals: [confirmedA],
+          }),
+          makeActiveDedupEvent({
+            '@timestamp': '2024-01-01T23:45:00Z',
+            event_id: 'latest-by-instant',
+            signals: [confirmedA],
+          }),
+        ],
+      }),
+      bulkCreate: jest.fn(),
+    });
+
+    const results = await eventsWriteBulkHandler({
+      eventClient,
+      inputs: [makeDedupInput({ signals: [confirmedA] })],
+    });
+
+    expect(results[0]).toMatchObject({
+      written: false,
+      reason: 'existing_active_event',
+      existing_event_id: 'latest-by-instant',
+    });
+    expect(eventClient.bulkCreate).not.toHaveBeenCalled();
+  });
+
   it('uses all rules for dedup when the candidate has no confirmed rules', async () => {
     const inconclusiveA = makeDetectionSignal(
       {
@@ -736,7 +794,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
       error: {
         type: 'validation_error',
         reason:
-          'event_id "unknown-event-id" does not exist. Do not resend this id. Resend the item once with the exact event_id of a different active event returned by event_search, or with no event_id to find-or-create.',
+          'event_id "unknown-event-id" does not exist. Do not retry this item in the current run or reuse this id. Leave it unprocessed so the next discovery cycle routes it again from fresh search results.',
         status: 404,
       },
     });

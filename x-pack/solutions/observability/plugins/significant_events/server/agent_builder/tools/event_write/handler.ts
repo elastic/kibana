@@ -206,6 +206,8 @@ const markDuplicateKeys = (
     const key =
       candidate.mode === 'dedup'
         ? [
+            // Confirmed-only and all-verdict identities use different matching semantics.
+            // Keep their keys separate even when their stream and rule sets are identical.
             candidate.confirmedOnly ? 'confirmed' : 'all',
             makeIdentity({
               streamNames: candidate.input.stream_names,
@@ -276,6 +278,9 @@ const fetchActiveEventsForDedup = async (
  *
  * Empty-rule candidates only match empty-rule events to avoid false-matching any event on stream
  * overlap alone.
+ *
+ * Full rule-set coverage is deliberate. A partial overlap can span multiple active events, and
+ * selecting one would silently discard the candidate rules owned by the others.
  */
 const isCoveredByActiveEvent = (
   candidate: DedupCandidate,
@@ -309,7 +314,7 @@ const resolveDedupSkips = (
 ): WriteCandidate[] => {
   const activeStatuses = SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS as readonly string[];
   const sortedActiveEvents = activeEvents.toSorted((a, b) => {
-    const timestampOrder = b['@timestamp'].localeCompare(a['@timestamp']);
+    const timestampOrder = Date.parse(b['@timestamp']) - Date.parse(a['@timestamp']);
     return timestampOrder !== 0
       ? timestampOrder
       : (b.event_id ?? '').localeCompare(a.event_id ?? '');
@@ -594,7 +599,7 @@ export async function eventsWriteBulkHandler({
           type: 'validation_error',
           reason: `event_id ${JSON.stringify(
             candidate.eventId
-          )} does not exist. Do not resend this id. Resend the item once with the exact event_id of a different active event returned by event_search, or with no event_id to find-or-create.`,
+          )} does not exist. Do not retry this item in the current run or reuse this id. Leave it unprocessed so the next discovery cycle routes it again from fresh search results.`,
           status: 404,
         },
       };

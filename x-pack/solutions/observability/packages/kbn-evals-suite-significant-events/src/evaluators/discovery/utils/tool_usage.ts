@@ -103,7 +103,7 @@ const isSchemaOrToolError = (step: ConverseStep): boolean => {
   );
 };
 
-export const RETRYABLE_ITEM_REASONS = ['bulk_error', 'unknown_event_id'] as const;
+export const RETRYABLE_ITEM_REASONS = ['bulk_error'] as const;
 
 type RetryableItemReason = (typeof RETRYABLE_ITEM_REASONS)[number];
 
@@ -162,16 +162,14 @@ const getRetryableFailures = (call: OrderedToolCall): RetryableFailure[] | null 
 
 /**
  * Pairs a retry one-to-one and onto the first call's retryable item failures.
- * Every field except a corrected or omitted unknown event_id must remain unchanged.
+ * Every field in a retryable item must remain unchanged.
  */
 export function pairRetryItems({
   firstCall,
   retryCall,
-  calls,
 }: {
   firstCall: OrderedToolCall;
   retryCall: OrderedToolCall;
-  calls: OrderedToolCall[];
 }): RetryItemPair[] | null {
   if (!isEarlierCallGroup(firstCall, retryCall)) {
     return null;
@@ -217,22 +215,12 @@ export function pairRetryItems({
     return null;
   }
 
-  const rejectedEventIds = new Set(
-    failures.flatMap(({ item, reason }) =>
-      reason === 'unknown_event_id' && typeof item.event_id === 'string' ? [item.event_id] : []
-    )
-  );
-  const availableActiveEventIds = activeEventIdsBefore(calls, retryCall);
   const pairs: RetryItemPair[] = [];
 
   for (const [key, matchingFailures] of failuresByKey) {
     const unmatchedRetries = [...(retriesByKey.get(key) ?? [])];
-    const bulkFailures = matchingFailures.filter(({ reason }) => reason === 'bulk_error');
-    const unknownEventIdFailures = matchingFailures.filter(
-      ({ reason }) => reason === 'unknown_event_id'
-    );
 
-    for (const failure of bulkFailures) {
+    for (const failure of matchingFailures) {
       const retryIndex = unmatchedRetries.findIndex(
         (retryItem) => stableStringify(retryItem) === stableStringify(failure.item)
       );
@@ -240,23 +228,6 @@ export function pairRetryItems({
         return null;
       }
       const [retryItem] = unmatchedRetries.splice(retryIndex, 1);
-      pairs.push({ failure, retryItem });
-    }
-
-    for (const failure of unknownEventIdFailures) {
-      const retryItem = unmatchedRetries.shift();
-      if (retryItem === undefined) {
-        return null;
-      }
-      const retryEventId = retryItem.event_id;
-      const eventIdIsValid =
-        retryEventId === undefined ||
-        (typeof retryEventId === 'string' &&
-          !rejectedEventIds.has(retryEventId) &&
-          availableActiveEventIds.has(retryEventId));
-      if (!eventIdIsValid) {
-        return null;
-      }
       pairs.push({ failure, retryItem });
     }
 
@@ -293,8 +264,7 @@ export function summarizePersistenceCalls(
     return { count: 1, valid: true, retriedPartialFailure: false, retriedSchemaFailure: false };
   }
   const retriedPartialFailure =
-    calls.length === 2 &&
-    pairRetryItems({ firstCall: calls[0], retryCall: calls[1], calls: orderedCalls }) !== null;
+    calls.length === 2 && pairRetryItems({ firstCall: calls[0], retryCall: calls[1] }) !== null;
   const retriedSchemaFailure =
     calls.length === 2 &&
     isEarlierCallGroup(calls[0], calls[1]) &&

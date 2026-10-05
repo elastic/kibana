@@ -287,7 +287,7 @@ describe('scoreToolUsage', () => {
     expect(result).toMatchObject({ score: 1, label: 'correct' });
   });
 
-  it('allows one retry after an unknown event id failure when the id is removed', () => {
+  it('rejects a retry after an unknown event id failure', () => {
     const failedItem = { event_id: 'unknown-id', status: 'active', title: 'Event X' };
     const firstWrite = toolCall(TOOL_ID_EVENTS_WRITE, { items: [failedItem] }, [
       {
@@ -306,8 +306,8 @@ describe('scoreToolUsage', () => {
     ];
 
     expect(scoreToolUsage({ steps, detectionCount: 1 })).toMatchObject({
-      score: 1,
-      label: 'correct',
+      score: 0.75,
+      label: `multiple-${TOOL_ID_EVENTS_WRITE}-calls`,
     });
   });
 
@@ -340,7 +340,7 @@ describe('scoreToolUsage', () => {
     });
   });
 
-  it('allows exact signal-bearing retries without treating cross-call rules as duplicates', () => {
+  it('retries only the bulk error item when another item has an unknown event id', () => {
     const detectionSignal = (ruleUuid: string) => ({
       type: 'detection',
       metadata: { rule_uuid: ruleUuid },
@@ -368,14 +368,7 @@ describe('scoreToolUsage', () => {
       },
     ]);
     const retry = toolCall(TOOL_ID_EVENTS_WRITE, {
-      items: [
-        bulkErrorItem,
-        {
-          status: unknownIdItem.status,
-          title: unknownIdItem.title,
-          signals: unknownIdItem.signals,
-        },
-      ],
+      items: [bulkErrorItem],
     });
     const steps = [
       ...allExpectedTools.filter((step) => step.tool_id !== TOOL_ID_EVENTS_WRITE),

@@ -221,7 +221,7 @@ describe('summarizePersistenceCalls', () => {
     });
   });
 
-  it('accepts an unknown event id retry with the id removed and all other fields unchanged', () => {
+  it('rejects retrying an unknown event id failure with the id removed', () => {
     const signal = { type: 'detection', metadata: { rule_uuid: 'rule-x' } };
     const failedItem = {
       event_id: 'unknown-id',
@@ -240,7 +240,60 @@ describe('summarizePersistenceCalls', () => {
         }),
         writeCall({ id: 'write-2', items: [retryItem] }),
       ])
-    ).toMatchObject({ valid: true, retriedPartialFailure: true });
+    ).toMatchObject({ valid: false, retriedPartialFailure: false });
+  });
+
+  it('rejects removing an id that was available during original routing', () => {
+    const failedItem = { event_id: 'routed-id', status: 'active', title: 'Event X' };
+    const { event_id: _, ...retryItem } = failedItem;
+    const search: ConverseStep = {
+      type: 'tool_call',
+      tool_id: TOOL_ID_EVENT_SEARCH,
+      tool_call_id: 'search-1',
+      tool_call_group_id: 'search-group',
+      results: [{ data: { events: [{ event_id: 'routed-id', status: 'active' }], total: 1 } }],
+    };
+
+    expect(
+      summarize([
+        search,
+        writeCall({
+          id: 'write-1',
+          groupId: 'write-group',
+          items: [failedItem],
+          itemResults: [itemResult(0, 'unknown_event_id')],
+        }),
+        writeCall({ id: 'write-2', groupId: 'retry-group', items: [retryItem] }),
+      ])
+    ).toMatchObject({ valid: false, retriedPartialFailure: false });
+  });
+
+  it('rejects an event id discovered only after the first write', () => {
+    const failedItem = { event_id: 'unknown-id', status: 'active', title: 'Event X' };
+    const search: ConverseStep = {
+      type: 'tool_call',
+      tool_id: TOOL_ID_EVENT_SEARCH,
+      tool_call_id: 'search-1',
+      tool_call_group_id: 'search-group',
+      results: [{ data: { events: [{ event_id: 'late-id', status: 'active' }], total: 1 } }],
+    };
+
+    expect(
+      summarize([
+        writeCall({
+          id: 'write-1',
+          groupId: 'write-group',
+          items: [failedItem],
+          itemResults: [itemResult(0, 'unknown_event_id')],
+        }),
+        search,
+        writeCall({
+          id: 'write-2',
+          groupId: 'retry-group',
+          items: [{ ...failedItem, event_id: 'late-id' }],
+        }),
+      ])
+    ).toMatchObject({ valid: false, retriedPartialFailure: false });
   });
 
   it('rejects retrying a successful item in place of the failed item', () => {
@@ -275,7 +328,7 @@ describe('summarizePersistenceCalls', () => {
     ).toMatchObject({ valid: false, retriedPartialFailure: false });
   });
 
-  it('pairs an unknown event id retry that has no detection rules', () => {
+  it('rejects retrying an unknown event id failure without detection rules', () => {
     const failedItem = { event_id: 'unknown-id', status: 'dismissed', title: 'No rules' };
     const retryItem = { status: 'dismissed', title: 'No rules' };
 
@@ -288,7 +341,7 @@ describe('summarizePersistenceCalls', () => {
         }),
         writeCall({ id: 'write-2', items: [retryItem] }),
       ])
-    ).toMatchObject({ valid: true, retriedPartialFailure: true });
+    ).toMatchObject({ valid: false, retriedPartialFailure: false });
   });
 
   it('rejects a bulk error retry that changes an input field', () => {
@@ -363,10 +416,10 @@ describe('summarizePersistenceCalls', () => {
   });
 
   it.each<[string, string, string, boolean]>([
-    ['an active id from an earlier search group', 'known-active-id', 'retry-group', true],
+    ['an active id from an earlier search group', 'known-active-id', 'retry-group', false],
     ['a freshly invented id', 'invented-id', 'retry-group', false],
     ['an active id from the retry call group', 'known-active-id', 'shared-group', false],
-  ])('handles corrected unknown ids using %s', (_, retryEventId, retryGroupId, expectedValid) => {
+  ])('rejects corrected unknown ids using %s', (_, retryEventId, retryGroupId, expectedValid) => {
     const failedItem = { event_id: 'unknown-id', status: 'active', title: 'Event X' };
     const search: ConverseStep = {
       type: 'tool_call',

@@ -292,9 +292,9 @@ export function createEventsWriteTool({
       \`{ "items": [] }\`. If that missing-items argument error occurs, submit the
       already-completed object once. Do not retry a populated payload rejected for
       ownership or field validation. If a completed item returns \`unknown_event_id\`,
-      resend only that item once. Never reuse any \`event_id\` rejected in the first call.
-      Use a different active \`event_id\` copied exactly from \`event_search\` in this run, or
-      omit \`event_id\` so the handler runs find-or-create.
+      do not retry that item in this run. Do not rerun routing, choose another event, reuse the
+      rejected ID, or omit the ID to turn it into a new event. Discovery must leave its rules
+      unprocessed so the next cycle routes them again from fresh search results.
 
       Discovery calls must set top-level \`source\` to \`"discovery"\`.
 

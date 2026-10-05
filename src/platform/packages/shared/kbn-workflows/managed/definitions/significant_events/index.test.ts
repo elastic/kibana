@@ -102,6 +102,9 @@ describe('significant events persistence workflow contracts', () => {
 
     expect(eventProperties?.reason?.enum).toEqual(nonWrittenReasons);
     expect(properties?.written_rule_uuids?.description).toContain('unknown_event_id');
+    expect(properties?.written_rule_uuids?.description).toContain(
+      'intentionally determined not event-eligible'
+    );
   });
 
   it('bounds and forwards discovery model overrides', () => {
@@ -200,7 +203,7 @@ describe('significant events persistence workflow contracts', () => {
     );
   });
 
-  it('stamps discovery detections only from confirmed write outcomes', () => {
+  it('stamps discovery detections only from reported completed outcomes', () => {
     expect(requireStep(discovery, 'compute_written_rule_uuids').with?.written_rule_uuids).toContain(
       '| default: [] | uniq'
     );
