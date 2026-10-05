@@ -47,6 +47,7 @@ import { getInferenceEndpointById } from './util/get_inference_endpoint_by_id';
 import { InferenceEndpointIdCache } from './util/inference_endpoint_id_cache';
 import { TokenUsageLogger } from './token_usage';
 import { installTokenUsageDashboard } from './dashboard';
+import { createTestWorkerConfig } from './routes/anonymization_test/test_worker_config';
 import {
   parseLegacyAnonymizationRules,
   parseLegacyOnFailureMode,
@@ -82,6 +83,7 @@ export class InferencePlugin
   private logger: Logger;
   private config: InferenceConfig;
   private regexWorker?: RegexWorkerService;
+  private testRegexWorker?: RegexWorkerService;
   private endpointIdCache: InferenceEndpointIdCache;
   private tokenUsageLogger: TokenUsageLogger;
 
@@ -102,7 +104,7 @@ export class InferencePlugin
       router,
       coreSetup,
       logger: this.logger,
-      getRegexWorker: () => this.regexWorker,
+      getTestRegexWorker: () => this.testRegexWorker,
     });
 
     return {};
@@ -145,6 +147,10 @@ export class InferencePlugin
     this.regexWorker = new RegexWorkerService(
       this.config.workers.anonymization,
       this.logger.get('regex_worker')
+    );
+    this.testRegexWorker = new RegexWorkerService(
+      createTestWorkerConfig(this.config.workers.anonymization),
+      this.logger.get('regex_worker_test')
     );
 
     const createAnonymizationRulesPromise = async (request: KibanaRequest) => {
@@ -401,5 +407,6 @@ export class InferencePlugin
 
   async stop() {
     await this.regexWorker?.stop();
+    await this.testRegexWorker?.stop();
   }
 }
