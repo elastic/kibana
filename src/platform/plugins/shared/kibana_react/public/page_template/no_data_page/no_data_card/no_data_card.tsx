@@ -30,22 +30,27 @@ export const NoDataCard: FunctionComponent<NoDataPageActions> = ({
   rel,
   ...cardRest
 }) => {
-  const isButtonLabel = typeof button === 'string';
-
-  // A string `button` renders a real EuiButton in the footer, so href/onClick/isDisabled/
-  // target/rel live on it instead of the card. A custom `button` node is rendered as-is
-  // and owns its own interactivity, so the card gets none of those either — in both cases,
-  // card-level href/onClick alongside a footer control would make the whole card an
-  // interactive wrapper around it, which is invalid, doubly-focusable nesting
-  // (@elastic/eui/no-nested-interactive-element). Only when there is no button at all does
-  // the card remain the sole interactive control, same as before.
-  const footer = isButtonLabel ? (
-    <EuiButton fill href={href} onClick={onClick} isDisabled={isDisabled} target={target} rel={rel}>
-      {button || title}
-    </EuiButton>
-  ) : (
-    button
-  );
+  // A string `button`, or no `button` at all (the card's `title` is used as the label), renders
+  // a real EuiButton in the footer, so href/onClick/isDisabled/target/rel live on it instead of
+  // the card. A custom `button` node is rendered as-is and owns its own interactivity, so none
+  // of those props reach the card either way: a card-level href/onClick alongside a footer
+  // control would make the whole card an interactive wrapper around it, which is invalid,
+  // doubly-focusable nesting (@elastic/eui/no-nested-interactive-element).
+  const footer =
+    typeof button !== 'string' && typeof button !== 'undefined' ? (
+      button
+    ) : (
+      <EuiButton
+        fill
+        href={href}
+        onClick={onClick}
+        isDisabled={isDisabled}
+        target={target}
+        rel={rel}
+      >
+        {button || title}
+      </EuiButton>
+    );
 
   return (
     <EuiCard
@@ -60,7 +65,6 @@ export const NoDataCard: FunctionComponent<NoDataPageActions> = ({
       footer={footer}
       layout={layout as 'vertical' | undefined}
       isDisabled={isDisabled}
-      {...(button == null ? { href, onClick, target, rel } : undefined)}
       {...cardRest}
     />
   );

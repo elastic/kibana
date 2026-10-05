@@ -39,7 +39,7 @@ describe('NoDataCard', () => {
       expect(component).toMatchSnapshot();
     });
 
-    test('href without button keeps the card itself interactive', () => {
+    test('href without button renders a footer button labeled with the title', () => {
       const component = render(
         <NoDataCard href="#" title="Card title" description="Description" />
       );

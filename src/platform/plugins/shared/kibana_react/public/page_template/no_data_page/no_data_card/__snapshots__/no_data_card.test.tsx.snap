@@ -103,9 +103,9 @@ exports[`NoDataCard props href 1`] = `
 </div>
 `;
 
-exports[`NoDataCard props href without button keeps the card itself interactive 1`] = `
+exports[`NoDataCard props href without button renders a footer button labeled with the title 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-euiCard-center"
+  class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-euiCard-center"
 >
   <div
     class="euiCard__main emotion-euiCard__main-vertical"
@@ -117,14 +117,11 @@ exports[`NoDataCard props href without button keeps the card itself interactive 
         class="euiTitle euiCard__title emotion-euiTitle-s"
         id="generated-idTitle"
       >
-        <a
-          aria-describedby="generated-idDescription"
-          class="euiCard__titleAnchor emotion-euiCard__text-center-interactive"
-          href="#"
-          rel="noreferrer"
+        <span
+          class="emotion-euiCard__text-center"
         >
           Card title
-        </a>
+        </span>
       </p>
       <div
         class="euiText emotion-euiText-s-euiCard__description"
@@ -134,6 +131,25 @@ exports[`NoDataCard props href without button keeps the card itself interactive 
           Description
         </p>
       </div>
+    </div>
+    <div
+      class="emotion-euiCard__footer"
+    >
+      <a
+        class="euiButton emotion-euiButtonDisplay-m-fill-primary"
+        href="#"
+        rel="noreferrer"
+      >
+        <span
+          class="emotion-euiButtonDisplayContent"
+        >
+          <span
+            class="eui-textTruncate css-13ifi6d-m"
+          >
+            Card title
+          </span>
+        </span>
+      </a>
     </div>
   </div>
 </div>
@@ -179,6 +195,24 @@ exports[`NoDataCard props recommended 1`] = `
         Recommended
       </span>
     </span>
+    <div
+      class="emotion-euiCard__footer"
+    >
+      <button
+        class="euiButton emotion-euiButtonDisplay-m-fill-primary"
+        type="button"
+      >
+        <span
+          class="emotion-euiButtonDisplayContent"
+        >
+          <span
+            class="eui-textTruncate css-13ifi6d-m"
+          >
+            Card title
+          </span>
+        </span>
+      </button>
+    </div>
   </div>
 </div>
 `;
@@ -264,6 +298,24 @@ exports[`NoDataCard renders 1`] = `
           Description
         </p>
       </div>
+    </div>
+    <div
+      class="emotion-euiCard__footer"
+    >
+      <button
+        class="euiButton emotion-euiButtonDisplay-m-fill-primary"
+        type="button"
+      >
+        <span
+          class="emotion-euiButtonDisplayContent"
+        >
+          <span
+            class="eui-textTruncate css-13ifi6d-m"
+          >
+            Card title
+          </span>
+        </span>
+      </button>
     </div>
   </div>
 </div>
