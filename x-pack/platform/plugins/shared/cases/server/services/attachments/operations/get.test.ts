@@ -235,7 +235,7 @@ describe('AttachmentService getter', () => {
             references: junkTypeAttachment.references,
             error: {
               error: 'Bad Request',
-              message: 'Attachment type "junk" is not recognized.',
+              message: expect.stringMatching(/^Attachment type "junk" failed validation: .+/),
               statusCode: 400,
             },
           },

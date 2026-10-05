@@ -177,10 +177,11 @@ export class AttachmentGetter {
     decodeError?: unknown
   ): OptionalAttributes<AttachmentAttributesV2> {
     const attachmentType = getAttachmentTypeFromAttributes(injectedSo.attributes);
+    const decodeReason = decodeError instanceof Error ? decodeError.message : String(decodeError);
     const reason =
       decodeError === undefined
         ? 'has no unified mapping'
-        : `failed unified decode: ${decodeError}`;
+        : `failed unified decode: ${decodeReason}`;
     this.context.log.warn(
       `Attachment ${injectedSo.id} has attachment type "${attachmentType}" (owner: "${injectedSo.attributes.owner}"), which ${reason}. Returning it as an error instead of a legacy fallback.`
     );
@@ -191,7 +192,10 @@ export class AttachmentGetter {
       references: injectedSo.references,
       error: {
         error: 'Bad Request',
-        message: `Attachment type "${attachmentType}" is not recognized.`,
+        message:
+          decodeError === undefined
+            ? `Attachment type "${attachmentType}" is not recognized.`
+            : `Attachment type "${attachmentType}" failed validation: ${decodeReason}`,
         statusCode: 400,
       },
     };
