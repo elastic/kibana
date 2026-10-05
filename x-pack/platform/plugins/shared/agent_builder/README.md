@@ -283,9 +283,9 @@ After hooks run in reverse order:
 
 ### Chat event hooks
 
-`afterChatEvent` hooks run on the chat events of a round before they reach clients (sync, streaming and callback delivery) and the execution document. A hook can return a replacement for the whole event, for example to add the Slack payload of the reply under `event.projection.slack`. The context carries the round's `origin`, so a hook can act only on rounds from an external system like Slack.
+`afterChatEvent` hooks run on the chat events of a round before they reach clients (sync, streaming and callback delivery) and the execution document. A hook can return a replacement for the whole event, for example to add the Slack payload of the reply under `event.projection.slack`. The context carries the event's `execution`, whose `agentParams.origin` lets a hook act only on rounds from an external system like Slack.
 
-* Each entry must declare the event types it runs on, in `eventTypes`. `message_chunk` can't be subscribed, and execution lifecycle events (`execution_started` and the terminal ones) never go through hooks.
+* Each entry must declare the event types it runs on, in `eventTypes`. Any chat event type can be subscribed except `message_chunk`, which arrives once per token.
 * Only events of subscribed types wait for hooks; every other event goes through without delay. Event order is always kept, so events queue behind one whose hooks are running. Keep these hooks fast: blocking hooks time out after 10 seconds unless they set `timeout`.
 * A failing or timed-out hook is logged and its event goes through unchanged. It never fails the round.
 * Changes reach clients and the execution document, but never the stored conversation.
@@ -297,8 +297,8 @@ agentBuilder.hooks.register({
     [HookLifecycle.afterChatEvent]: {
       mode: HookExecutionMode.blocking,
       eventTypes: [ChatEventType.roundComplete],
-      handler: ({ event, origin }) => {
-        if (origin?.type !== ConversationOriginType.Slack) {
+      handler: ({ event, execution }) => {
+        if (execution.agentParams.origin?.type !== ConversationOriginType.Slack) {
           return;
         }
 

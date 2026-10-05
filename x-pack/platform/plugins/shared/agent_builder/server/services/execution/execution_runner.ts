@@ -407,16 +407,7 @@ const handleConversationExecution = async ({
           // Must stay below the telemetry tap: `resume_execution` carries the unmerged per-execution
           // round that telemetry needs, and is only stripped so it doesn't reach the client.
           map(stripResumeExecution),
-          runAfterChatEventHooks({
-            hooks,
-            request,
-            abortSignal,
-            agentId,
-            conversationId: conversation.id,
-            executionId: execution.executionId,
-            origin: roundOrigin,
-            logger,
-          }),
+          runAfterChatEventHooks({ hooks, request, abortSignal, execution, logger }),
           convertErrors({
             agentId,
             logger,

@@ -15,6 +15,7 @@ import {
   type RoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import { HookLifecycle, type AfterChatEventHookContext } from '@kbn/agent-builder-server';
+import type { ConversationAgentExecution } from '@kbn/agent-builder-server/execution';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createRound } from '../../../test_utils';
 import { createHooksServiceStartMock } from '../../../test_utils/runner';
@@ -37,6 +38,11 @@ const projectedEvent: RoundCompleteEvent = {
   projection: { slack: { text: 'projected', blocks: [{ type: 'markdown', text: 'projected' }] } },
 };
 
+const execution = {
+  executionId: 'execution-1',
+  agentParams: { origin: { type: ConversationOriginType.Slack } },
+} as ConversationAgentExecution;
+
 const setup = ({ abortController = new AbortController() } = {}) => {
   const hooks = createHooksServiceStartMock();
   hooks.handles.mockImplementation(
@@ -51,10 +57,7 @@ const setup = ({ abortController = new AbortController() } = {}) => {
           hooks,
           request: { headers: {} } as never,
           abortSignal: abortController.signal,
-          agentId: 'agent-1',
-          conversationId: 'conversation-1',
-          executionId: 'execution-1',
-          origin: { type: ConversationOriginType.Slack },
+          execution,
           logger,
         }),
         toArray()
@@ -65,7 +68,7 @@ const setup = ({ abortController = new AbortController() } = {}) => {
 };
 
 describe('runAfterChatEventHooks', () => {
-  it('lets execution lifecycle events and unhandled event types through without running hooks', async () => {
+  it('lets event types no hook handles through without running hooks', async () => {
     const { hooks, run } = setup();
 
     const events = await run([executionStartedEvent, messageChunkEvent]);
@@ -74,7 +77,19 @@ describe('runAfterChatEventHooks', () => {
     expect(hooks.run).not.toHaveBeenCalled();
   });
 
-  it('runs hooks with the round context and emits the event they return', async () => {
+  it('runs hooks on execution lifecycle events when a hook handles them', async () => {
+    const { hooks, run } = setup();
+    hooks.handles.mockReturnValue(true);
+
+    await run([executionStartedEvent]);
+
+    expect(hooks.run).toHaveBeenCalledWith(
+      HookLifecycle.afterChatEvent,
+      expect.objectContaining({ event: executionStartedEvent })
+    );
+  });
+
+  it('runs hooks with the event and its execution, and emits the event they return', async () => {
     const { hooks, run } = setup();
     hooks.run.mockImplementation(async (_lifecycle, context) => ({
       ...context,
@@ -86,13 +101,7 @@ describe('runAfterChatEventHooks', () => {
     expect(events).toEqual([projectedEvent]);
     expect(hooks.run).toHaveBeenCalledWith(
       HookLifecycle.afterChatEvent,
-      expect.objectContaining({
-        event: roundCompleteEvent,
-        origin: { type: ConversationOriginType.Slack },
-        conversationId: 'conversation-1',
-        executionId: 'execution-1',
-        agentId: 'agent-1',
-      })
+      expect.objectContaining({ event: roundCompleteEvent, execution })
     );
   });
 

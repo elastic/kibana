@@ -122,8 +122,7 @@ describe('apply_result', () => {
     };
     const baseContext: AfterChatEventHookContext = {
       request: createMockRequest(),
-      conversationId: 'conversation-1',
-      executionId: 'execution-1',
+      execution: { executionId: 'execution-1' } as AfterChatEventHookContext['execution'],
       event,
     };
 
@@ -143,7 +142,7 @@ describe('apply_result', () => {
       const result = applyAfterChatEventResult(baseContext, { event: newEvent });
       expect(result).not.toBe(baseContext);
       expect(result.event).toBe(newEvent);
-      expect(result.executionId).toBe(baseContext.executionId);
+      expect(result.execution).toBe(baseContext.execution);
     });
   });
 });

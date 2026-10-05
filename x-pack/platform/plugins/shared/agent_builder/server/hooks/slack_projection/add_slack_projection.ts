@@ -25,9 +25,12 @@ export const buildSlackPayload = (message: string): SlackPayload => ({
  */
 export const addSlackProjection: HookHandler<HookLifecycle.afterChatEvent> = ({
   event,
-  origin,
+  execution,
 }) => {
-  if (origin?.type !== ConversationOriginType.Slack || !isRoundCompleteEvent(event)) {
+  if (
+    execution.agentParams.origin?.type !== ConversationOriginType.Slack ||
+    !isRoundCompleteEvent(event)
+  ) {
     return;
   }
 

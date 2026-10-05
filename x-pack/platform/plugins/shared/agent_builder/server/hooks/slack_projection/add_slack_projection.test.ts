@@ -25,13 +25,17 @@ const createRoundCompleteEvent = (message: string): RoundCompleteEvent => ({
   data: { round: createRound({ response: { message } }) },
 });
 
+const createExecution = (origin?: { type: ConversationOriginType }) =>
+  ({
+    executionId: 'execution-1',
+    agentParams: { origin },
+  } as AfterChatEventHookContext['execution']);
+
 const createContext = (
   overrides: Partial<AfterChatEventHookContext> = {}
 ): AfterChatEventHookContext => ({
   request: { headers: {} } as AfterChatEventHookContext['request'],
-  conversationId: 'conversation-1',
-  executionId: 'execution-1',
-  origin: { type: ConversationOriginType.Slack },
+  execution: createExecution({ type: ConversationOriginType.Slack }),
   event: createRoundCompleteEvent('Hello'),
   ...overrides,
 });
@@ -58,7 +62,7 @@ describe('addSlackProjection', () => {
   });
 
   it('returns nothing for rounds without a Slack origin', () => {
-    expect(addSlackProjection(createContext({ origin: undefined }))).toBeUndefined();
+    expect(addSlackProjection(createContext({ execution: createExecution() }))).toBeUndefined();
   });
 
   it('returns nothing when the reply is empty', () => {

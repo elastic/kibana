@@ -578,7 +578,7 @@ describe('handleAgentExecution', () => {
       expect(executeAgentMock).toHaveBeenCalledWith(expect.objectContaining({ origin }));
     });
 
-    it('runs afterChatEvent hooks with the round origin and emits the event they return', async () => {
+    it('runs afterChatEvent hooks with the execution and emits the event they return', async () => {
       const { conversationClient, deps } = setup({
         roundCompleteEvent: {
           type: ChatEventType.roundComplete,
@@ -602,16 +602,17 @@ describe('handleAgentExecution', () => {
       expect(hooks.run).toHaveBeenCalledWith(
         HookLifecycle.afterChatEvent,
         expect.objectContaining({
-          origin: { type: ConversationOriginType.Slack },
-          conversationId: 'conversation-from-origin',
-          executionId: 'execution-1',
+          execution: expect.objectContaining({
+            executionId: 'execution-1',
+            agentParams: expect.objectContaining({ origin }),
+          }),
         })
       );
       expect(events.find(isRoundCompleteEvent)?.projection).toEqual(projection);
       expect(JSON.stringify(conversationClient.update.mock.calls)).not.toContain('projection');
     });
 
-    it('passes no origin to afterChatEvent hooks for a round without one', async () => {
+    it('passes an execution without origin to afterChatEvent hooks for a round without one', async () => {
       const { deps } = setup({
         roundCompleteEvent: {
           type: ChatEventType.roundComplete,
@@ -625,7 +626,11 @@ describe('handleAgentExecution', () => {
 
       expect(hooks.run).toHaveBeenCalledWith(
         HookLifecycle.afterChatEvent,
-        expect.objectContaining({ origin: undefined })
+        expect.objectContaining({
+          execution: expect.objectContaining({
+            agentParams: expect.objectContaining({ origin: undefined }),
+          }),
+        })
       );
     });
   });

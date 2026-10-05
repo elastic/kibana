@@ -568,8 +568,7 @@ describe('createHooksRunner', () => {
     };
     const chatEventContext: AfterChatEventHookContext = {
       request: {} as AfterChatEventHookContext['request'],
-      conversationId: 'conversation-1',
-      executionId: 'execution-1',
+      execution: { executionId: 'execution-1' } as AfterChatEventHookContext['execution'],
       event: messageCompleteEvent,
     };
 

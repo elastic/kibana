@@ -12,15 +12,13 @@ import type {
   ChatEvent,
   ChatEventType,
   ConversationRound,
-  ConversationRoundOrigin,
-  ExecutionStartedEvent,
-  ExecutionTerminalEvent,
   PreExecutionWorkflowStepData,
 } from '@kbn/agent-builder-common';
 import type { ProcessedRoundInput } from '../processed_input';
 import type { RunToolReturn } from '../runner';
 import type { ToolCallSource } from '../runner/runner';
 import type { ToolHandlerContext } from '../tools/handler';
+import type { ConversationAgentExecution } from '../execution';
 
 export { HookLifecycle, HookExecutionMode };
 
@@ -67,27 +65,23 @@ export interface AfterExecutionHookContext extends AgentHookContextBase {
 }
 
 /**
- * Chat events `afterChatEvent` hooks can run on. Execution lifecycle events are conversation
- * timeline events, which are persisted, so they never go through hooks.
- */
-export type HookableChatEvent = Exclude<ChatEvent, ExecutionStartedEvent | ExecutionTerminalEvent>;
-
-/**
  * Chat event types an `afterChatEvent` hook can subscribe to. Message chunks are excluded: they
- * arrive hundreds of times per reply, and awaiting each one would stall streaming.
+ * arrive once per token, and awaiting hooks on each one would slow down streaming.
  */
-export type HookableChatEventType = Exclude<HookableChatEvent['type'], ChatEventType.messageChunk>;
+export type HookableChatEventType = Exclude<ChatEvent['type'], ChatEventType.messageChunk>;
 
 /**
  * Context of an `afterChatEvent` hook. `event` is the copy delivered to clients and written to the
  * execution document; the stored conversation never sees changes made to it.
  */
 export interface AfterChatEventHookContext extends AgentHookContextBase {
-  event: HookableChatEvent;
-  /** Origin of the round's input, for example Slack. Absent for rounds sent from Kibana. */
-  origin?: ConversationRoundOrigin;
-  conversationId: string;
-  executionId: string;
+  event: Extract<ChatEvent, { type: HookableChatEventType }>;
+  /**
+   * The conversation execution the event belongs to, including the round's origin in
+   * `agentParams.origin`. `status`, `events` and `eventCount` are a snapshot from when the run
+   * started, not the live state.
+   */
+  execution: Readonly<ConversationAgentExecution>;
 }
 
 export interface HookContextByLifecycle {
@@ -116,7 +110,7 @@ export interface HookHandlerResultByLifecycle {
   };
   [HookLifecycle.afterExecution]: Record<string, never>;
   [HookLifecycle.afterChatEvent]: {
-    event?: HookableChatEvent;
+    event?: AfterChatEventHookContext['event'];
   };
 }
 

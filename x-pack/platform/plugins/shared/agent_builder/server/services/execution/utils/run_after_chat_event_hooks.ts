@@ -8,45 +8,30 @@
 import { catchError, concatMap, from, map, of, type OperatorFunction } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
-import {
-  isExecutionStartedEvent,
-  isExecutionTerminalEvent,
-  type ChatEvent,
-  type ConversationRoundOrigin,
-} from '@kbn/agent-builder-common';
+import { isMessageChunkEvent, type ChatEvent } from '@kbn/agent-builder-common';
 import { HookLifecycle, type HooksServiceStart } from '@kbn/agent-builder-server';
+import type { ConversationAgentExecution } from '@kbn/agent-builder-server/execution';
 
 /**
  * Runs `afterChatEvent` hooks on every event of a type some hook handles, and emits the event they
- * return. Other events, and execution lifecycle events, go through without waiting. Order is
- * always kept. A failing hook is logged and its event goes through unchanged, so hooks never
+ * return. Other events go through without waiting. Order is always kept. A failing hook is logged and its event goes through unchanged, so hooks never
  * break the stream.
  */
 export const runAfterChatEventHooks = ({
   hooks,
   request,
   abortSignal,
-  agentId,
-  conversationId,
-  executionId,
-  origin,
+  execution,
   logger,
 }: {
   hooks: HooksServiceStart;
   request: KibanaRequest;
   abortSignal: AbortSignal;
-  agentId: string;
-  conversationId: string;
-  executionId: string;
-  origin: ConversationRoundOrigin | undefined;
+  execution: ConversationAgentExecution;
   logger: Logger;
 }): OperatorFunction<ChatEvent, ChatEvent> =>
   concatMap((event) => {
-    if (
-      isExecutionStartedEvent(event) ||
-      isExecutionTerminalEvent(event) ||
-      !hooks.handles(HookLifecycle.afterChatEvent, event.type)
-    ) {
+    if (isMessageChunkEvent(event) || !hooks.handles(HookLifecycle.afterChatEvent, event.type)) {
       return of(event);
     }
 
@@ -54,10 +39,7 @@ export const runAfterChatEventHooks = ({
       hooks.run(HookLifecycle.afterChatEvent, {
         request,
         abortSignal,
-        agentId,
-        conversationId,
-        executionId,
-        origin,
+        execution,
         event,
       })
     ).pipe(
