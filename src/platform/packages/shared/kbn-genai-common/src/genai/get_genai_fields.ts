@@ -203,8 +203,9 @@ function getInputMessages(metadata: Record<string, unknown>): GenAiMessage[] {
 
   const raw = first<unknown>(metadata, ATTRIBUTE_GEN_AI_PROMPT);
   const parsed = parseJsonValue(raw);
-  if (parsed != null && typeof parsed === 'object' && Array.isArray((parsed as any).messages)) {
-    return (parsed as any).messages as GenAiMessage[];
+  if (parsed != null && typeof parsed === 'object' && 'messages' in parsed) {
+    const { messages } = parsed;
+    if (Array.isArray(messages)) return messages as GenAiMessage[];
   }
   return [];
 }
@@ -217,12 +218,9 @@ function getOutputMessages(metadata: Record<string, unknown>): GenAiMessage[] {
 
   const raw = first<unknown>(metadata, ATTRIBUTE_GEN_AI_COMPLETION);
   const parsed = parseJsonValue(raw);
-  if (
-    parsed != null &&
-    typeof parsed === 'object' &&
-    typeof (parsed as any).completion === 'string'
-  ) {
-    return [{ role: 'assistant', content: (parsed as any).completion }];
+  if (parsed != null && typeof parsed === 'object' && 'completion' in parsed) {
+    const { completion } = parsed;
+    if (typeof completion === 'string') return [{ role: 'assistant', content: completion }];
   }
   return [];
 }
