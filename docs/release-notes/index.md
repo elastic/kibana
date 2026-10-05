@@ -53,11 +53,11 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 **Data ingestion and {{fleet}}**:
 * Fix deleting a managed integration policy leaving the agent listed as active [#290181]({{kib-pull}}290181).
-* Fix agentless agents enrolled in other {{kib}} spaces appearing in the {{fleet}} **Agents** list [#293142]({{kib-pull}}293142).
+* Fix agents for Elastic managed integrations enrolled in other {{kib}} spaces appearing in the {{fleet}} **Agents** list [#293142]({{kib-pull}}293142).
 * Fix version-specific agent policy assignment failing repeatedly for agent policies in non-default {{kib}} spaces [#293010]({{kib-pull}}293010).
 * Fix the {{fleet}} output edit flyout freezing or showing no counts when thousands of agent policies use the output [#291972]({{kib-pull}}291972).
-* Fix Elastic Agent upgrade and agent policy requests hanging for up to two minutes when {{kib}} can't retrieve the list of available Elastic Agent versions [#292788]({{kib-pull}}292788).
-* Fix integration upgrades failing when a custom analyzer or normalizer was added to a `@custom` component template after the write index was created. {{fleet}} now rolls over the data stream instead [#291813]({{kib-pull}}291813).
+* Fix {{agent}} upgrade and agent policy requests hanging for up to two minutes and failing with a reset connection when {{kib}} can't retrieve the list of available {{agent}} versions [#292788]({{kib-pull}}292788).
+* Fix integration upgrades failing when you add a custom analyzer or normalizer to a `@custom` component template after the write index is created. {{fleet}} now rolls over the data stream instead [#291813]({{kib-pull}}291813).
 * Fix {{fleet}} installing only the first trained model when an integration package includes several [#290145]({{kib-pull}}290145).
 * Fix `ambiguous_conflict` errors on dashboard assets when you install an integration in multiple {{kib}} spaces [#291648]({{kib-pull}}291648).
 * Fix integration policy upgrades and edits failing when a package policy condition is stored as a boolean [#290497]({{kib-pull}}290497).
