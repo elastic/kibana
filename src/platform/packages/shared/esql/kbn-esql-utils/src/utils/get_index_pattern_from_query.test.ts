@@ -177,10 +177,40 @@ describe('getSourceCommandQueryFromESQLQuery', () => {
     ).toBe('FROM logs-*');
   });
 
+  it('reduces subqueries to their source command', () => {
+    expect(
+      getSourceCommandQueryFromESQLQuery(
+        'FROM index1, (FROM index2 METADATA _id | WHERE a > 1 | KEEP a | LIMIT 10) | STATS count()'
+      )
+    ).toBe('FROM index1, (FROM index2 METADATA _id)');
+  });
+
+  it('reduces nested subqueries to their source command', () => {
+    expect(
+      getSourceCommandQueryFromESQLQuery(
+        'FROM index1, (FROM index2, (FROM index3 | KEEP b) | DROP c) | LIMIT 5'
+      )
+    ).toBe('FROM index1, (FROM index2, (FROM index3))');
+  });
+
+  it('uses the index parameter of a PROMQL query, as the ES|QL editor does', () => {
+    const sourceQuery = getSourceCommandQueryFromESQLQuery(
+      'PROMQL index=metrics-* step=1m start=?_tstart end=?_tend (avg(cpu_usage))'
+    );
+
+    expect(sourceQuery).toBe('FROM "metrics-*"');
+    expect(getIndexPatternFromESQLQuery(sourceQuery)).toBe('metrics-*');
+  });
+
   it('returns an empty string without a FROM or TS command', () => {
     expect(getSourceCommandQueryFromESQLQuery('')).toBe('');
     expect(getSourceCommandQueryFromESQLQuery(undefined)).toBe('');
     expect(getSourceCommandQueryFromESQLQuery('ROW a = 1')).toBe('');
+    expect(
+      getSourceCommandQueryFromESQLQuery(
+        'PROMQL step=1m start=?_tstart end=?_tend (avg(cpu_usage))'
+      )
+    ).toBe('');
   });
 });
 
