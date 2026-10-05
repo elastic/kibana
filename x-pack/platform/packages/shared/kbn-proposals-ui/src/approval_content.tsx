@@ -140,6 +140,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
       ? {
           label: APPROVAL_MODAL_TRANSLATIONS.approve,
           onClick: onApprove,
+          color: 'primary',
           isDisabled: isReplaced || isExpired || readOnly,
           'data-test-subj': dataTestSubj ? `${dataTestSubj}-confirm` : undefined,
         }
