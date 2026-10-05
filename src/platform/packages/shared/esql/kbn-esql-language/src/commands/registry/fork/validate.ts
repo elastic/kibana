@@ -35,6 +35,8 @@ export const validate = (
 
   messages.push(...validateCommandArguments(forkCommand, ast, context, callbacks));
 
+  // Allow a FORK in the main query and another in an independent subquery.
+  // Only report an error for consecutive FORKs or a FORK directly inside another FORK.
   const forks: ESQLCommand[] = [];
   Walker.walk(ast, {
     visitCommand: (node) => {
@@ -43,7 +45,6 @@ export const validate = (
       }
     },
     visitParens: (node, parent, walker) => {
-      // Enter FORK branches, but leave independent subqueries to their own validation.
       const isForkBranch = parent?.type === 'command' && parent.name === 'fork';
       if (isSubQuery(node) && !isForkBranch) {
         walker.skipChildren();
