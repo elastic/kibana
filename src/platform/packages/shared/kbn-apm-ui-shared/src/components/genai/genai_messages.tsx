@@ -63,19 +63,30 @@ const ROLE_DISPLAY: Record<string, RoleDisplay> = {
 const getRoleDisplay = (role: string): RoleDisplay =>
   ROLE_DISPLAY[role.toLowerCase()] ?? { label: role, iconType: 'dot' };
 
-/** Names of the tools whose output a tool message carries, resolved via the matching call ID. */
-const getToolMessageNames = (
+interface ToolMessageInfo {
+  names: string[];
+  callIds: string[];
+}
+
+/**
+ * Tool names and call IDs of the results a tool message carries, so the
+ * header pairs each result with the tool call card that requested it.
+ */
+const getToolMessageInfo = (
   message: GenAiMessage,
   toolNamesById: Map<string, string>
-): string[] => {
-  if (message.role !== 'tool') return [];
+): ToolMessageInfo => {
+  if (message.role !== 'tool') return { names: [], callIds: [] };
   const legacyName = typeof message.name === 'string' ? message.name : undefined;
-  const names = getMessageBlocks(message).flatMap((block) => {
-    if (block.type !== 'tool_call_response') return [];
-    const name = (block.id && toolNamesById.get(block.id)) || legacyName;
+  const responses = getMessageBlocks(message).filter(
+    (block) => block.type === 'tool_call_response'
+  );
+  const names = responses.flatMap(({ id }) => {
+    const name = (id && toolNamesById.get(id)) || legacyName;
     return name ? [name] : [];
   });
-  return [...new Set(names)];
+  const callIds = responses.flatMap(({ id }) => (id ? [id] : []));
+  return { names: [...new Set(names)], callIds: [...new Set(callIds)] };
 };
 
 interface Props {
@@ -138,7 +149,7 @@ export function GenAiMessages({ inputMessages, outputMessages, systemInstruction
     >
       {allMessages.map((msg, i) => {
         const { label, iconType } = getRoleDisplay(msg.role);
-        const toolMessageNames = getToolMessageNames(msg, toolNamesById);
+        const toolMessageInfo = getToolMessageInfo(msg, toolNamesById);
         const isHighlighted = hoveredIndex === i;
 
         return (
@@ -172,7 +183,7 @@ export function GenAiMessages({ inputMessages, outputMessages, systemInstruction
                     <strong>{label}</strong>
                   </EuiText>
                 </EuiFlexItem>
-                {toolMessageNames.length > 0 && (
+                {toolMessageInfo.names.length > 0 && (
                   <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
                     <EuiText
                       size="xs"
@@ -183,11 +194,27 @@ export function GenAiMessages({ inputMessages, outputMessages, systemInstruction
                         overflow-wrap: anywhere;
                       `}
                     >
-                      {toolMessageNames.join(', ')}
+                      {toolMessageInfo.names.join(', ')}
                     </EuiText>
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem />
+                {toolMessageInfo.callIds.length > 0 && (
+                  <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+                    <EuiText
+                      size="xs"
+                      color="subdued"
+                      data-test-subj={`genAiToolMessageCallId-${i}`}
+                      css={css`
+                        font-family: ${euiTheme.font.familyCode};
+                        overflow-wrap: anywhere;
+                        text-align: right;
+                      `}
+                    >
+                      {toolMessageInfo.callIds.join(', ')}
+                    </EuiText>
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem grow={false}>
                   <EuiCopy textToCopy={getMessageCopyText(msg)}>
                     {(copy) => (

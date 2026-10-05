@@ -139,6 +139,7 @@ describe('GenAiMessages', () => {
     ]);
     expect(screen.getByTestId('genAiRoleBadge-tool')).toHaveTextContent('Tool');
     expect(screen.getByTestId('genAiToolMessageName-1')).toHaveTextContent('search');
+    expect(screen.getByTestId('genAiToolMessageCallId-1')).toHaveTextContent('call-1');
     expect(screen.getByTestId('genAiMessage-1')).toHaveTextContent('hits: []');
     expect(screen.queryByTestId('genAiToolResponsePart')).toBeNull();
   });
