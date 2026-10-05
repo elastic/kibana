@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -78,7 +78,7 @@ const renderPanel = (
           onToggle={jest.fn()}
           enabled={enabled}
           settings={createWorker(workflowId).settings}
-          warningReasons={getModelWarningReasons(worker)}
+          warningReasons={getModelWarningReasons(worker, { withLink: false })}
           settingsLocked={false}
           isSaving={false}
           canWrite
@@ -180,9 +180,12 @@ describe('WorkerSettingsPanel models and no-model block', () => {
       expect(enabledSwitch).toHaveAttribute('aria-checked', 'false');
 
       fireEvent.mouseOver(screen.getByTestId(`alertZeroWorkerWarningIcon-${WORKER_ID}`));
-      expect(await screen.findByRole('tooltip')).toHaveTextContent(
-        'Some AI-powered steps in this Worker may not be configured. Check Feature settings.'
+      const tooltip = await screen.findByRole('tooltip');
+      expect(tooltip).toHaveTextContent(
+        'Some AI-powered steps in this Worker may not be configured. Check Feature settings below.'
       );
+      // A tooltip closes before the pointer reaches it, so it must not offer a link.
+      expect(within(tooltip).queryByRole('link')).not.toBeInTheDocument();
     }
   );
 

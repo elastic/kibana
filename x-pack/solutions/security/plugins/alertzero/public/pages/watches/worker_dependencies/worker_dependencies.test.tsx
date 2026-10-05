@@ -153,6 +153,17 @@ describe('getWorkerWarningReasons', () => {
     ]);
   });
 
+  it('gives the header a plain-text no-model reason, since its tooltip cannot hold a link', () => {
+    const [noModel] = getWorkerWarningReasons(
+      subject(RULE_COVERAGE, ['no_model']),
+      enabledById({ [RULE_COVERAGE]: false })
+    );
+
+    expect(noModel.message).toBe(
+      'Some AI-powered steps in this Worker may not be configured. Check Feature settings below.'
+    );
+  });
+
   it('uses the Attack Discovery → Endpoint Analysis copy', () => {
     const state = enabledById({ [ATTACK_DISCOVERY]: false, [ENDPOINT_ANALYSIS]: true });
 

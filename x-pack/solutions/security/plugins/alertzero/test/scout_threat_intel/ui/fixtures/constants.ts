@@ -18,7 +18,7 @@ export const FLOOR_WORKER_IDS = [
 export const FEATURE_SETTINGS_APP_URL = '/app/management/modelManagement/model_settings';
 
 export const NO_MODEL_MESSAGE =
-  'Some AI-powered steps in this Worker may not be configured. Check Feature settings.';
+  'Some AI-powered steps in this Worker may not be configured. Check Feature settings below.';
 export const MODELS_ROW_MESSAGE = 'This Worker uses models configured in Feature settings.';
 
 /** Stack connector types the inference plugin lists as chat models. */

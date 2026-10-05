@@ -10,26 +10,35 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { isWorkerEnableBlocked, type Worker } from '@kbn/alertzero-common';
 import { FeatureSettingsLink } from './feature_settings_link';
 import type { WorkerWarningReason } from './worker_warning_content';
+import * as settingsI18n from '../settings_translations';
 
-/** Warning reasons for a Worker the space has no model for. */
+/**
+ * Warning reasons for a Worker the space has no model for. The header icon is a tooltip, which
+ * can't hold a working link, so only interactive surfaces such as the post-save notice get one.
+ */
 export const getModelWarningReasons = (
-  worker: Pick<Worker, 'id' | 'blockingReasons'>
-): WorkerWarningReason[] =>
-  isWorkerEnableBlocked(worker.blockingReasons)
-    ? [
-        {
-          id: 'no_model',
-          message: (
-            <FormattedMessage
-              id="xpack.alertzero.watches.settings.worker.blockingReason.noModel"
-              defaultMessage="Some AI-powered steps in this Worker may not be configured. Check {featureSettingsLink}."
-              values={{
-                featureSettingsLink: (
-                  <FeatureSettingsLink data-test-subj={`alertZeroWorkerNoModelLink-${worker.id}`} />
-                ),
-              }}
-            />
-          ),
-        },
-      ]
-    : [];
+  worker: Pick<Worker, 'id' | 'blockingReasons'>,
+  { withLink }: { withLink: boolean }
+): WorkerWarningReason[] => {
+  if (!isWorkerEnableBlocked(worker.blockingReasons)) {
+    return [];
+  }
+  return [
+    {
+      id: 'no_model',
+      message: withLink ? (
+        <FormattedMessage
+          id="xpack.alertzero.watches.settings.worker.blockingReason.noModel"
+          defaultMessage="Some AI-powered steps in this Worker may not be configured. Check {featureSettingsLink}."
+          values={{
+            featureSettingsLink: (
+              <FeatureSettingsLink data-test-subj={`alertZeroWorkerNoModelLink-${worker.id}`} />
+            ),
+          }}
+        />
+      ) : (
+        settingsI18n.NO_MODEL_REASON_PLAIN
+      ),
+    },
+  ];
+};

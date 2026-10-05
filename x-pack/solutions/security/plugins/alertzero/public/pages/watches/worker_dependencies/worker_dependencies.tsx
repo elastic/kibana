@@ -173,7 +173,7 @@ export const getWorkerWarningReasons = (
   worker: Pick<Worker, 'id' | 'blockingReasons'>,
   enabledById: WorkerEnabledById
 ): WorkerWarningReason[] => [
-  ...getModelWarningReasons(worker),
+  ...getModelWarningReasons(worker, { withLink: false }),
   ...getDisabledProviderReasons(worker.id, enabledById),
   ...getStrandedDependentReasons(worker.id, enabledById),
 ];
@@ -192,7 +192,7 @@ export const getBlockedAfterSaveNotices = (
     .map((worker) => ({
       workerId: worker.id,
       reasons: [
-        ...(worker.enabled ? getModelWarningReasons(worker) : []),
+        ...(worker.enabled ? getModelWarningReasons(worker, { withLink: true }) : []),
         ...(enabledBeforeSave.get(worker.id) === false && enabledAfterSave.get(worker.id) === true
           ? getDisabledProviderReasons(worker.id, enabledAfterSave)
           : []),
