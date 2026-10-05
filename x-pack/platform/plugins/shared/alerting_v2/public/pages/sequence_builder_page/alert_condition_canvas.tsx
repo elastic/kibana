@@ -36,9 +36,9 @@ import type {
   SequenceEdgeType,
 } from '@kbn/alerting-v2-rule-form';
 import { RulesApi } from '../../services/rules_api';
-import { toFindRulesRequest } from '../../hooks/use_fetch_rules';
 import { useCanvasFitView } from './use_canvas_fit_view';
 import { CollapsibleSidePanel } from './collapsible_side_panel';
+import { listSequenceBuilderRules } from './list_sequence_builder_rules';
 
 const nodeTypes = { sequenceStage: SequenceNode };
 const edgeTypes = { sequenceHop: SequenceEdge };
@@ -168,7 +168,6 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
   const { colorMode } = useEuiTheme();
   const rulesApi = useService(RulesApi);
 
-  // TODO: Add pagination or infinite scroll for users with more than 200 rules
   const {
     data: rulesData,
     isLoading: isLoadingRules,
@@ -176,13 +175,13 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
   } = useQuery({
     queryKey: ['sequence-builder-available-rules'],
     refetchOnWindowFocus: false,
-    queryFn: () =>
-      rulesApi.listRules(toFindRulesRequest({ perPage: 200, sortField: 'name', sortOrder: 'asc' })),
+    retry: false,
+    queryFn: () => listSequenceBuilderRules((params) => rulesApi.listRules(params)),
   });
 
   const fetchedRules = useMemo<FetchedRule[]>(
     () =>
-      (rulesData?.items ?? []).map((r) => ({
+      (rulesData ?? []).map((r) => ({
         id: r.id,
         name: r.metadata.name,
         groupingFields: r.grouping?.fields ?? [],
