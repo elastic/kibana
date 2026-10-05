@@ -122,9 +122,6 @@ const services: Partial<KibanaServices> = {
   application: applicationServiceMock.createStartContract(),
   featureFlags: {
     appendContext: () => Promise.resolve(),
-    getBooleanValue: (_flagName, fallback) => fallback,
-    getStringValue: (_flagName, fallback) => fallback,
-    getNumberValue: (_flagName, fallback) => fallback,
     getBooleanValue$: (_flagName, fallback) => of(fallback),
     getStringValue$: (_flagName, fallback) => of(fallback),
     getNumberValue$: (_flagName, fallback) => of(fallback),

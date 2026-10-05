@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
+import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
 import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 import { z } from '@kbn/zod';
@@ -15,6 +16,7 @@ import { z } from '@kbn/zod';
 import { buildAssumableBy } from './assumable_by';
 import { ensureClusterPrivilege } from './cluster_privilege';
 import { parseCreateServiceAccountParams } from './create_params';
+import { toDescriptionField } from './description_field';
 import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
 import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS, ServiceAccountFakeRequests } from './fake_requests';
 import { buildRoleAssignments, readApplicationRoles } from './role_assignments';
@@ -90,11 +92,12 @@ const toCreatedBy = (creator: UiamServiceAccountCreator): ServiceAccountDirector
  */
 const toDirectoryEntry = (
   cloudProjectContext: CloudProjectContext,
-  { id, name, role_assignments: roleAssignments, creator }: UiamServiceAccountDetails
+  { id, name, description, role_assignments: roleAssignments, creator }: UiamServiceAccountDetails
 ): ServiceAccountDirectoryEntry => ({
   id,
   name,
   roles: readApplicationRoles(cloudProjectContext, roleAssignments),
+  ...toDescriptionField(description),
   enabled: true,
   assumable: true,
   createdBy: toCreatedBy(creator),
@@ -213,7 +216,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    const { name, roles } = parseCreateServiceAccountParams(
+    const { name, roles, description } = parseCreateServiceAccountParams(
       params,
       UIAM_SERVICE_ACCOUNT_ROLE_LIMITS
     );
@@ -237,6 +240,9 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
         {
           organization_id: this.cloudProjectContext.organizationId,
           name,
+          ...toDescriptionField(description),
+          project_type: this.cloudProjectContext.projectType,
+          project_id: this.cloudProjectContext.projectId,
           role_assignments: buildRoleAssignments(this.cloudProjectContext, roles),
           assumable_by: buildAssumableBy(this.cloudProjectContext),
         },
@@ -266,7 +272,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
 
     // The roles are echoed from the request rather than read back. UIAM stores them as sent, and
     // the directory reads the same roles out of its role assignments on list and get.
-    return { ...parsed.data, roles };
+    return { ...parsed.data, roles, ...toDescriptionField(result.description) };
   }
 
   async list(
@@ -387,6 +393,11 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
 
   releaseFakeRequest(request: KibanaRequest): void {
     this.fakeRequests.release(request);
+  }
+
+  getFakeRequestPrincipal(request: KibanaRequest): AuthenticatedPrincipal | null {
+    const serviceAccountId = this.fakeRequests.getServiceAccountId(request);
+    return serviceAccountId ? { type: 'service_account', serviceAccountId, variant: 'uiam' } : null;
   }
 
   async reauthenticateFakeRequest(

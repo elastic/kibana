@@ -296,6 +296,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
           </EuiFormRow>
           <EuiFormRow
             label={createDataSourceFlyoutStrings.nameLabel()}
+            helpText={createDataSourceFlyoutStrings.nameDescription()}
             isInvalid={Boolean(errors.name)}
             error={errors.name?.message}
             fullWidth
@@ -312,7 +313,11 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
               readOnly={isEditMode}
             />
           </EuiFormRow>
-          <EuiFormRow label={createDataSourceFlyoutStrings.descriptionLabel()} fullWidth>
+          <EuiFormRow
+            label={createDataSourceFlyoutStrings.descriptionLabel()}
+            helpText={createDataSourceFlyoutStrings.descriptionDescription()}
+            fullWidth
+          >
             <EuiTextArea
               data-test-subj="createDataSourceFlyoutDescription"
               fullWidth

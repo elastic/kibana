@@ -10,7 +10,14 @@ import type {
   RuleToImport,
   ValidatedRuleToImport,
 } from '../../../../../../../../common/api/detection_engine';
+import type { SecurityRuleChangeTracking } from '../../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { RuleLifecycleTelemetryData } from '../../rule_lifecycle_telemetry';
+
+export interface ImportRulesOptions {
+  allowMissingConnectorSecrets?: boolean;
+  changeTracking?: SecurityRuleChangeTracking;
+  batchSize: number;
+}
 
 export interface ImportRuleSuccess {
   rule_id: string;

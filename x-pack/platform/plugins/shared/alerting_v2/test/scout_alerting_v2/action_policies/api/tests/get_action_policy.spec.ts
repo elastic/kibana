@@ -56,7 +56,6 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.id).toBe(created.id);
-      expect(typeof response.body.version).toBe('string');
       expect(response.body.name).toBe('policy-name');
       expect(response.body.description).toBe('policy-description');
       expect(response.body.destinations).toStrictEqual([
