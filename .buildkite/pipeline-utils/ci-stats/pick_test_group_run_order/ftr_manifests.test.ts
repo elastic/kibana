@@ -18,8 +18,13 @@ jest.mock('../../load_buildkite_json.ts', () => ({
 }));
 
 import { readFileSync } from 'node:fs';
+import type * as NodeFs from 'node:fs';
+import * as path from 'node:path';
+import { getKibanaDir } from '../../get_kibana_dir.ts';
 import { ftrManifest } from './ftr_manifests.ts';
 import { ftrTestChannel } from './test_channels.ts';
+
+const { readFileSync: actualReadFileSync } = jest.requireActual<typeof NodeFs>('node:fs');
 
 describe('ftrTestChannel.fromString', () => {
   it('throws for an unknown channel', () => {
@@ -43,5 +48,35 @@ enabled:
 
     expect(entry.queue).toBe('n2-8-spot');
     expect(entry.testChannels).toEqual(new Set(['ci-batch-daily']));
+  });
+});
+
+describe('ftr_base_serverless_configs.yml', () => {
+  // `serverlessProject` value in an FTR config → FTR manifest domain of that solution.
+  const DOMAIN_BY_SERVERLESS_PROJECT: Record<string, string> = {
+    es: 'search',
+    oblt: 'observability',
+    security: 'security',
+    vectordb: 'vectordb',
+    workplaceai: 'workplaceai',
+  };
+
+  it("declares each enabled entry's project as the solution of its serverlessProject", () => {
+    (readFileSync as jest.Mock).mockImplementation(actualReadFileSync);
+    const kibanaDir = getKibanaDir();
+
+    const mismatches = ftrManifest.entries
+      .fromFile(path.resolve(kibanaDir, '.buildkite/ftr-manifests/ftr_base_serverless_configs.yml'))
+      .filter((entry) => entry.enabled)
+      .flatMap((entry) => {
+        const source = actualReadFileSync(path.resolve(kibanaDir, entry.path), 'utf8');
+        const serverlessProject = source.match(/serverlessProject:\s*['"](\w+)['"]/)?.[1];
+        const expected = serverlessProject && DOMAIN_BY_SERVERLESS_PROJECT[serverlessProject];
+        return entry.project !== undefined && entry.project === expected
+          ? []
+          : [`${entry.path}: project=${entry.project}, serverlessProject=${serverlessProject}`];
+      });
+
+    expect(mismatches).toEqual([]);
   });
 });

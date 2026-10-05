@@ -26,7 +26,8 @@ try {
     var manifest = yaml.parse(fs.readFileSync(manifestRelPath, 'utf8'));
     if (manifest.enabled) {
       manifest.enabled.forEach(function (x) {
-        console.log(x);
+        // Object-form entries map the config path to settings, e.g. `path: { project: security }`
+        console.log(typeof x === 'string' ? x : Object.keys(x)[0]);
       });
     } else {
       console.log(`${manifestRelPath} has no enabled FTR configs`);

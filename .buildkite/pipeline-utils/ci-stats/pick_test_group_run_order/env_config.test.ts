@@ -175,6 +175,30 @@ describe('loadRunOrderConfig', () => {
     expect(loadRunOrderConfig().useSelectiveTesting).toBe(false);
   });
 
+  it('applies FTR_DOMAIN_SELECTION on PR builds', () => {
+    process.env.GITHUB_PR_NUMBER = '12345';
+    process.env.FTR_DOMAIN_SELECTION = 'dry-run';
+    expect(loadRunOrderConfig().ftrDomainSelection).toBe('dry-run');
+  });
+
+  it.each([
+    ['on-merge builds', {}],
+    ['merge-queue builds', { BUILDKITE_PIPELINE_SLUG: 'kibana-merge-queue' }],
+    [
+      'PRs with the prevent label',
+      { GITHUB_PR_NUMBER: '12345', GITHUB_PR_LABELS: PREVENT_SELECTIVE_TESTS_LABEL },
+    ],
+  ])('keeps every FTR domain on %s', (_, env) => {
+    Object.assign(process.env, env, { FTR_DOMAIN_SELECTION: 'enabled' });
+    expect(loadRunOrderConfig().ftrDomainSelection).toBe('off');
+  });
+
+  it('rejects unknown FTR_DOMAIN_SELECTION values', () => {
+    process.env.GITHUB_PR_NUMBER = '12345';
+    process.env.FTR_DOMAIN_SELECTION = 'true';
+    expect(() => loadRunOrderConfig()).toThrow('invalid FTR_DOMAIN_SELECTION: true');
+  });
+
   // PR and merge-queue base variables should never be set together.
   it('prefers the PR base when both base variables are set', () => {
     process.env.GITHUB_PR_NUMBER = '99';

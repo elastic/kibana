@@ -21,7 +21,7 @@ const { serverless: serverlessFTRManifestPaths, stateful: statefulFTRManifestPat
 
 export type FTRManifestFileEntry =
   | string
-  | { [configPath: string]: { queue?: string; testChannels?: string[] } };
+  | { [configPath: string]: { queue?: string; testChannels?: string[]; project?: string } };
 
 export interface FTRManifestFileData {
   disabled?: FTRManifestFileEntry[];
@@ -34,6 +34,8 @@ export interface FTRManifestEntry {
   testChannels: Set<FTRTestChannel>;
   arch: string;
   domain: string;
+  /** Solution domain whose serverless project the config boots (used by `base` entries). */
+  project?: string;
   enabled: boolean;
 }
 
@@ -104,6 +106,7 @@ export const ftrManifest: {
               : new Set(configSettings.testChannels.map(ftrTestChannel.fromString)),
           arch: filenameMatch.groups!.arch,
           domain: filenameMatch.groups!.domain,
+          project: configSettings.project,
           enabled,
         };
       };

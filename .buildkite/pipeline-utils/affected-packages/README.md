@@ -140,6 +140,16 @@ Merge-queue builds select Jest unit tests affected by changes since the group's 
 
 Some integration suites boot a full Kibana and snapshot a *global registry* (rule-type params, connector types, task types, …) populated at runtime by downstream publishers that sit **upstream** of the suite's own package. `includeDownstream` expansion never reaches them, so a publisher-only change can silently skip the snapshot. Configs listed in `ALWAYS_RUN_JEST_INTEGRATION_CONFIGS` (`const.ts`) are re-added after affected-filtering so they run on every PR regardless of the graph. Keep the list tiny — it is a deliberate escape hatch.
 
+## PR FTR domain selection
+
+`selective_ftr_domains.ts` (in `pick_test_group_run_order`) narrows FTR on pull request builds to the manifest domains (`ftr_{domain}_{arch}_configs.yml`) a diff can affect. It is controlled by `FTR_DOMAIN_SELECTION` on the PR pick step: `off`, `dry-run` (annotate what would be skipped, run everything), or `enabled`. On-merge and merge-queue builds always keep every domain, and `ci:prevent-selective-testing` turns it off.
+
+- Changed files matching `FTR_IRRELEVANT_PATHS`, and modules in `FTR_EXCLUDED_MODULES`, are ignored.
+- Every module in the downstream `kbn_references` closure of the remaining changed modules contributes its kibana.jsonc `group`: a solution group selects that solution's domain; `platform` selects `platform` and every `base` config.
+- A manifest entry whose config file belongs to a closure module selects its own domain, so platform-located configs in solution manifests are covered.
+- `base` serverless configs declare `project` (the solution of their `serverlessProject`) and also run when that solution is selected. Serverless projects only load `platform` plus their own group's plugins, so other solutions cannot affect them. An entry without `project` always runs.
+- Every domain runs when an `FTR_CRITICAL_PATHS` file, a file outside any module, or a module without a `group` changes, or when detection fails. `LIMIT_SOLUTIONS` takes precedence when set.
+
 ## Scout selective testing: git -> Moon (shadow mode)
 
 `resolve_selective_testing.ts` still uses **git** as the authoritative strategy (written to `.scout/code_changes.json`, no behavior change). In parallel, it runs the **Moon** strategy above for observation only, and writes the result plus a diff of `affectedModules` to `.scout/code_changes.moon_shadow.json` (uploaded as a Buildkite artifact). Mismatches are logged as a warning via `ToolingLog`; a Moon failure is swallowed and logged, never fails the build.
