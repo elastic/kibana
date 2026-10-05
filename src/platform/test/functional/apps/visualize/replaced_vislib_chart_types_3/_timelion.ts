@@ -307,6 +307,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           it('should show field suggestions for metric argument when index pattern set', async () => {
             const expression = '.es(index=logstash-*, timefield=@timestamp, metric=avg:';
+            await monacoEditor.setCodeEditorValue('');
             await typeExpressionTriggeringSuggestions(expression);
             await retry.try(async () => {
               const suggestions = await timelion.getSuggestionItemsText();
