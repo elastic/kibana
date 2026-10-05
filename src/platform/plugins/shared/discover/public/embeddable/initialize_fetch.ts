@@ -207,7 +207,7 @@ export function initializeFetch({
         // These modes fetch their own data from the updated search source.
         if (
           isFieldStatsMode(savedSearch, dataView, discoverServices.uiSettings) ||
-          isPatternAnalysisMode(savedSearch, dataView)
+          (discoverServices.aiops && isPatternAnalysisMode(savedSearch, dataView))
         ) {
           api.fetchContext$.next(fetchContext);
           return;

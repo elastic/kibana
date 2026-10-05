@@ -84,6 +84,7 @@ describe('saved search embeddable', () => {
 
   let runtimeState = getInitialRuntimeState();
   const defaultProfileStateRegistry = discoverServiceMock.profileStateRegistry;
+  const defaultAiopsService = discoverServiceMock.aiops;
 
   beforeEach(() => {
     jest.mocked(deserializeState).mockImplementation(async () => runtimeState);
@@ -96,6 +97,7 @@ describe('saved search embeddable', () => {
 
   afterEach(() => {
     discoverServiceMock.profileStateRegistry = defaultProfileStateRegistry;
+    discoverServiceMock.aiops = defaultAiopsService;
   });
 
   const mockServices = {
@@ -284,6 +286,32 @@ describe('saved search embeddable', () => {
       expect(
         discoverComponent.getByTestId('dscPatternAnalysisEmbeddedContent')
       ).toBeInTheDocument();
+    });
+
+    it('should fetch documents when the optional aiops plugin is unavailable', async () => {
+      const { search, resolveSearch } = createSearchFnMock(0);
+      discoverServiceMock.aiops = undefined;
+      runtimeState = getInitialRuntimeState({
+        searchMock: search,
+        partialState: { viewMode: VIEW_MODE.PATTERN_LEVEL },
+      });
+
+      const { Component } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+      await waitOneTick();
+
+      const discoverComponent = render(<Component />);
+
+      expect(search).toHaveBeenCalled();
+      resolveSearch();
+      await waitOneTick();
+      expect(discoverComponent.queryByTestId('dscPatternAnalysisEmbeddedContent')).toBeNull();
+      expect(discoverComponent.getByTestId('embeddedSavedSearchDocTable')).toBeInTheDocument();
     });
 
     it('should defer to the platform blocking panel when the query fails outside inline editing', async () => {

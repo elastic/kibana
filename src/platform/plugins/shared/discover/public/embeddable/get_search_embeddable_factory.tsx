@@ -415,7 +415,7 @@ export const getSearchEmbeddableFactory = ({
           );
 
           const renderAsPatternAnalysisTable = useMemo(
-            () => isPatternAnalysisMode(savedSearch, dataView),
+            () => Boolean(discoverServices.aiops) && isPatternAnalysisMode(savedSearch, dataView),
             [savedSearch, dataView]
           );
 
