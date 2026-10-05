@@ -159,6 +159,14 @@ const actionSubjectKinds = (entry: ActionCatalogEntry): ActionSubjectKind[] =>
 /**
  * True when the catalog entry acts on the subject's kind and every `required` key of its
  * `actionInput` schema is one that kind can supply. Entries without inputSchema are unfillable.
+ *
+ * A process-scoped action requires `processSelector.entityId` specifically, not a bare
+ * `pid`: PIDs are reused by the OS, and between minting and an analyst's approval (the
+ * gate's decision window is measured in days) a bare PID can come to belong to an
+ * unrelated process. `entity_id` is Endpoint's durable per-process identity and doesn't
+ * have that failure mode. A selector with only a `pid` still surfaces for the
+ * recommendation path (see `decidePackageReport`'s `processUncovered`) — it just can't
+ * back an executable kill/suspend.
  */
 export const canFillRespondAction = ({
   entry,
@@ -182,8 +190,7 @@ export const canFillRespondAction = ({
     return false;
   }
   if (subject.kind === 'process') {
-    const { pid, entityId } = subject.processSelector;
-    return pid !== undefined || entityId !== undefined;
+    return subject.processSelector.entityId !== undefined;
   }
   return true;
 };
@@ -211,8 +218,8 @@ export const buildActionInput = ({
       }
       const actionInput: Record<string, unknown> = { endpoint_ids: [agentId] };
       if (subject.kind === 'process' && needsProcessParameters(schema)) {
-        const { pid, entityId } = subject.processSelector;
-        actionInput.parameters = entityId !== undefined ? { entity_id: entityId } : { pid };
+        // `canFillRespondAction` above already guarantees `processSelector.entityId` is set.
+        actionInput.parameters = { entity_id: subject.processSelector.entityId };
       }
       return actionInput;
     }

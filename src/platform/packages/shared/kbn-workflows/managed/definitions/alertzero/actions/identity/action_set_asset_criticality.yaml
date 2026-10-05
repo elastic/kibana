@@ -157,4 +157,4 @@ steps:
       message: >-
         {{ consts.actionLabel }} for {{ inputs.actionInput.id_field }} {{ inputs.actionInput.id_value }}
         set to {{ steps.dispatch.output.criticality_level }}{% if variables.previous_level != "" %} (was {{ variables.previous_level }}){% endif %}.
-        To revert, DELETE /api/asset_criticality?id_field={{ inputs.actionInput.id_field }}&id_value={{ inputs.actionInput.id_value | url_encode }}{% if variables.previous_level != "" %} or POST the previous level back{% endif %}.
+        {% if variables.previous_level != "" %}To revert, POST the previous level ({{ variables.previous_level }}) back.{% else %}To revert, DELETE /api/asset_criticality?id_field={{ inputs.actionInput.id_field }}&id_value={{ inputs.actionInput.id_value | url_encode }}.{% endif %}

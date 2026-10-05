@@ -536,7 +536,12 @@ describe('decidePackageReport', () => {
       conversationId,
       state: baseHitState({
         processSelectors: [
-          { pid: 4242, processKey: 'pid:4242', hostName: 'host-a', processName: 'proc.exe' },
+          {
+            entityId: 'ent-4242',
+            processKey: 'entity:ent-4242',
+            hostName: 'host-a',
+            processName: 'proc.exe',
+          },
         ],
       }),
       catalog: { ok: true, actions: [isolateHost, killProcess] },
@@ -544,8 +549,8 @@ describe('decidePackageReport', () => {
     const byWorkflow = new Map(result.proposals.map((p) => [p.actionWorkflowId, p.subjectKey]));
     // uuidv5(`conv-1|agent-a|system-security-action-isolate-host`) under the fixed namespace.
     expect(byWorkflow.get(isolateHost.workflowId)).toBe('a1ec6d8b-714e-50a2-8715-d6b9cc4402a1');
-    // uuidv5(`conv-1|agent-a|system-security-action-kill-process|pid:4242`).
-    expect(byWorkflow.get(killProcess.workflowId)).toBe('7bd814ca-d71b-548f-92d2-a22376be89f0');
+    // uuidv5(`conv-1|agent-a|system-security-action-kill-process|entity:ent-4242`).
+    expect(byWorkflow.get(killProcess.workflowId)).toBe('2ece4e12-63c6-5d82-8129-d056e8e7aa8f');
   });
 
   it('builds stable subject keys for the same host × action × process', () => {
@@ -571,7 +576,12 @@ describe('decidePackageReport', () => {
       conversationId,
       state: baseHitState({
         processSelectors: [
-          { pid: 100, processKey: 'pid:100', hostName: 'host-a', processName: 'a.exe' },
+          {
+            entityId: 'ent-100',
+            processKey: 'entity:ent-100',
+            hostName: 'host-a',
+            processName: 'a.exe',
+          },
         ],
       }),
       catalog: { ok: true, actions: [isolateHost, killProcess] },
@@ -594,7 +604,12 @@ describe('decidePackageReport', () => {
         conversationId,
         state: baseHitState({
           processSelectors: [
-            { pid: 100, processKey: 'pid:100', hostName: 'host-a', processName: 'a.exe' },
+            {
+              entityId: 'ent-100',
+              processKey: 'entity:ent-100',
+              hostName: 'host-a',
+              processName: 'a.exe',
+            },
           ],
         }),
         catalog: { ok: true, actions: [isolateHost, killProcess] },
