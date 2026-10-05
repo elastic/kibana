@@ -128,9 +128,9 @@ const serializeStateTransition = (
  * Convert FormValues to YAML-compatible object (snake_case keys for API compatibility).
  *
  * Note: `metadata.enabled` is intentionally NOT serialized. The API's `metadataSchema`
- * is strict and only accepts { name, description?, tags? }; `enabled` lives at
- * the top level of the update/response schemas, never under metadata, and is not part
- * of the create payload at all.
+ * is strict and does not accept it; `enabled` lives at the top level of the
+ * update/response schemas, never under metadata, and is not part of the create
+ * payload at all.
  */
 export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
   const st = serializeStateTransition(values.stateTransition, isRecoveryEnabled(values));

@@ -209,7 +209,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
         buildItem('tags', {
           id: 'policy-match',
           name: 'Tag policy',
-          matcher: { tags: ['prod'] },
+          matcher: { tags: ['sre'] },
         }),
         buildItem('catch_all', { id: 'policy-catch', name: 'Catch-all policy' }),
       ],
@@ -229,7 +229,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
       within(screen.getByTestId('ruleActionPolicyArtifactRow-policy-match')).getByTestId(
         'matchedPolicyReasonTags'
       )
-    ).toBeInTheDocument();
+    ).toHaveAttribute('aria-label', 'Matching routing tags: sre');
     expect(
       screen.queryByTestId('ruleActionPolicyArtifactEditLink-policy-match')
     ).not.toBeInTheDocument();
@@ -261,7 +261,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
     const name = 'Long matching policy for production hosts across every region and cluster';
     mockUseLinkedActionPolicies.mockReturnValue({
       ...idleHookResult,
-      items: [buildItem('tags', { id: 'policy-long', name, matcher: { tags: ['prod'] } })],
+      items: [buildItem('tags', { id: 'policy-long', name, matcher: { tags: ['sre'] } })],
     });
 
     renderSubsection();
@@ -276,7 +276,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
     const name = `${'a'.repeat(27)}😀 and the rest of the policy name`;
     mockUseLinkedActionPolicies.mockReturnValue({
       ...idleHookResult,
-      items: [buildItem('tags', { id: 'policy-emoji', name, matcher: { tags: ['prod'] } })],
+      items: [buildItem('tags', { id: 'policy-emoji', name, matcher: { tags: ['sre'] } })],
     });
 
     renderSubsection();
@@ -294,7 +294,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
         buildItem('tags', {
           id: 'policy-expr',
           name: 'Expression policy',
-          matcher: { tags: ['prod'], expression: 'data.severity: "critical"' },
+          matcher: { tags: ['sre'], expression: 'data.severity: "critical"' },
         }),
       ],
     });
@@ -316,7 +316,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
         buildItem('tags', {
           id: 'policy-match',
           name: 'Tag policy',
-          matcher: { tags: ['prod'] },
+          matcher: { tags: ['sre'] },
         }),
       ],
     });
@@ -402,7 +402,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
           name: 'Quiet policy',
           enabled: false,
           snoozed_until: snoozedUntil,
-          matcher: { tags: ['prod'] },
+          matcher: { tags: ['sre'] },
         }),
       ],
     });
