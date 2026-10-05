@@ -166,7 +166,7 @@ export class AlertActionEventPublisher implements AlertActionEventPublisherContr
       episodeId: action.episode_id ?? null,
       ruleId: action.rule_id,
       spaceId: action.space_id,
-      actorUid: action.actor,
+      actorUid: action.actor.profile_uid ?? null,
     };
   }
 }

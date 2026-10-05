@@ -155,6 +155,8 @@ export class AgenticInvestigationsPlugin
       logger: this.logger,
       getConversationClient: (request) =>
         plugins.agentBuilder.conversations.getScopedClient({ request }),
+      getAttachmentsClient: (request) =>
+        plugins.agentBuilder.attachments.getScopedClient({ request }),
       conversationTemplates: plugins.agentBuilder.conversationTemplates,
       getInvestigationStatusService: () => this.requireInvestigationStatusService(),
     });

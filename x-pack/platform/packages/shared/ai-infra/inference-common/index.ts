@@ -152,6 +152,8 @@ export {
   getModelDefinition,
   getContextWindowSize,
   contextWindowFromModelName,
+  getSupportedReasoningEffortLevels,
+  validateReasoningEffort,
   type InferenceConnector,
   type InferenceConnectorCapabilities,
   type RawConnector,
@@ -163,6 +165,7 @@ export {
   InferenceEndpointProvider,
   elasticModelIds,
   type EisInferenceEndpointMetadata,
+  type EisInferenceEndpointCapabilities,
   type CspRegion,
   type InferenceEndpointRequestBody,
 } from './src/inference_endpoints';

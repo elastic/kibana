@@ -15,6 +15,7 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import {
   WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
+  WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
   WORKFLOWS_MANAGEMENT_FEATURE_ID,
   WORKFLOWS_UI_SETTING_ID,
 } from '@kbn/workflows/common/constants';
@@ -428,6 +429,22 @@ describe('WorkflowsPlugin', () => {
           expect.arrayContaining([
             expect.objectContaining({ id: 'executions', path: '/executions' }),
           ])
+        );
+      });
+
+      it('should include the library deep link by default after startup', () => {
+        setReadCapability(true);
+        setLicenseValid(true);
+        const updates = captureAppUpdates();
+
+        plugin.start(coreStart, startDeps as any);
+
+        expect(coreStart.settings.globalClient.get$).toHaveBeenCalledWith(
+          WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
+          true
+        );
+        expect(updates[updates.length - 1].deepLinks).toEqual(
+          expect.arrayContaining([expect.objectContaining({ id: 'library', path: '/library' })])
         );
       });
     });

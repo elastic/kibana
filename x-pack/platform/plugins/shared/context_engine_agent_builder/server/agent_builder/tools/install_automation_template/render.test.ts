@@ -20,6 +20,7 @@ import {
 
 const unitValues = {
   aiIndexId: 'airline-loyalty',
+  automationName: 'loyalty-province-profile',
   unitIndex: 'airline_loyalty_customer_loyalty_history',
   unitKey: 'Province',
   activityField: 'Enrollment Date',
@@ -32,6 +33,7 @@ describe('automation template rendering', () => {
   it('quotes string consts and leaves numbers bare', () => {
     const yaml = renderDocumentOrchestrationTemplate({
       aiIndexId: 'airline-loyalty',
+      automationName: 'flight-activity-docs',
       sourceIndex: 'loyalty-docs',
       titleField: 'title',
       bodyField: 'body',
@@ -46,11 +48,15 @@ describe('automation template rendering', () => {
     expect(yaml).toContain('body_max_chars: 12000');
     expect(yaml).toContain(AUTOMATION_TEMPLATE_TAGS.document_orchestration);
     expect(yaml).not.toMatch(/__[A-Z0-9_]+__/);
+    expect(yaml).toContain(
+      'ki_id: "{{ consts.automation_name }}/{{ steps.document_context.output.doc_id }}"'
+    );
   });
 
   it('keeps a corpus filter that itself contains underscores', () => {
     const yaml = renderDocumentOrchestrationTemplate({
       aiIndexId: 'airline-loyalty',
+      automationName: 'flight-activity-docs',
       sourceIndex: 'loyalty-docs',
       titleField: 'title',
       bodyField: 'body',
@@ -65,6 +71,7 @@ describe('automation template rendering', () => {
   it('fills the index metadata consts', () => {
     const yaml = renderIndexMetadataTemplate({
       aiIndexId: 'airline-loyalty',
+      automationName: 'loyalty-index-metadata',
       sourceIndex: 'loyalty-docs',
       categoryField: 'tier',
     });
@@ -72,6 +79,7 @@ describe('automation template rendering', () => {
     expect(yaml).toContain('category_field: "tier"');
     expect(yaml).toContain(AUTOMATION_TEMPLATE_TAGS.index_metadata);
     expect(yaml).not.toMatch(/__[A-Z0-9_]+__/);
+    expect(yaml).toContain('ki_id: "{{ consts.automation_name }}"');
   });
 
   it('fills the unit profile consts', () => {
@@ -84,6 +92,7 @@ describe('automation template rendering', () => {
     expect(yaml).toContain('max_units: 25');
     expect(yaml).toContain(AUTOMATION_TEMPLATE_TAGS.unit_profile);
     expect(yaml).not.toMatch(/__[A-Z0-9_]+__/);
+    expect(yaml).toContain('ki_id: "{{ consts.automation_name }}/{{ foreach.item[0] }}"');
   });
 
   it('produces valid YAML for the unit profile', () => {
@@ -109,6 +118,7 @@ describe('automation template rendering', () => {
       () =>
         renderDocumentOrchestrationTemplate({
           aiIndexId: 'airline-loyalty',
+          automationName: 'flight-activity-docs',
           sourceIndex: 'loyalty-docs',
           titleField: 'title',
           bodyField: 'body',
@@ -123,8 +133,17 @@ describe('automation template rendering', () => {
       () =>
         renderIndexMetadataTemplate({
           aiIndexId: 'airline-loyalty',
+          automationName: 'loyalty-index-metadata',
           sourceIndex: 'loyalty-docs',
           categoryField: 'tier',
+        }),
+    ],
+    [
+      'targeted_ki_writer',
+      () =>
+        renderTargetedKiWriterTemplate({
+          aiIndexId: 'airline-loyalty',
+          kis: '- ki_id: test\n  ki:\n    type: constraint\n    title: "T"\n    content: "c"',
         }),
     ],
   ])('renders %s into a definition the workflow schema accepts', (_template, render) => {
@@ -142,6 +161,7 @@ describe('automation template rendering', () => {
     expect(() =>
       renderIndexMetadataTemplate({
         aiIndexId: 'airline-loyalty',
+        automationName: 'loyalty-index-metadata',
         sourceIndex: 'loyalty-docs',
         categoryField: 'tier`',
       })
