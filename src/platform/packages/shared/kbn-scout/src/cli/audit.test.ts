@@ -22,6 +22,7 @@ import {
 } from './audit_config_sets';
 import {
   findDuplicateClassNames,
+  memberOverlap,
   REVIEWED_PAGE_OBJECTS,
   withoutReviewedPageObjects,
   findAllScoutFiles,
@@ -240,6 +241,24 @@ describe('findDuplicateClassNames', () => {
     // `OverviewTab` exists in fake_plugin_a and fake_plugin_b with different members.
     const duplicates = findDuplicateClassNames(FAKE_REPO_ROOT, findAllScoutFiles(FAKE_REPO_ROOT));
     expect(duplicates.map((d) => d.className)).not.toContain('OverviewTab');
+  });
+});
+
+describe('memberOverlap', () => {
+  const set = (...names: string[]) => new Set(names);
+
+  it('divides by the smaller set so a subset copy counts as a full match', () => {
+    expect(memberOverlap(set('a', 'b', 'c'), set('a', 'b', 'c', 'd', 'e', 'f', 'g'))).toBe(1);
+  });
+
+  it('is at the cutoff with four of five members shared and below it with three', () => {
+    expect(memberOverlap(set('a', 'b', 'c', 'd', 'e'), set('a', 'b', 'c', 'd', 'x'))).toBe(0.8);
+    expect(memberOverlap(set('a', 'b', 'c', 'd', 'e'), set('a', 'b', 'c', 'x', 'y'))).toBe(0.6);
+  });
+
+  it('treats two empty classes as a match and an empty one against a filled one as none', () => {
+    expect(memberOverlap(set(), set())).toBe(1);
+    expect(memberOverlap(set(), set('a'))).toBe(0);
   });
 });
 

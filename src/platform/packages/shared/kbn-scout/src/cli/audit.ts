@@ -241,7 +241,7 @@ export interface DuplicateClassName {
 /** Share of the smaller member set that both classes have. Same name alone is not a copy. */
 const MEMBER_OVERLAP_THRESHOLD = 0.8;
 
-const memberOverlap = (a: Set<string>, b: Set<string>): number => {
+export const memberOverlap = (a: Set<string>, b: Set<string>): number => {
   const smaller = Math.min(a.size, b.size);
   if (smaller === 0) return a.size === b.size ? 1 : 0;
   let shared = 0;
