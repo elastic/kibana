@@ -441,7 +441,24 @@ export const casesSchema: CasesTelemetrySchema = {
     main: fieldLibrarySolutionTelemetrySchema,
   },
   workflows: {
-    runs: countSchema,
+    runs: {
+      total: {
+        type: 'long',
+        _meta: { description: 'Total number of workflow runs recorded on cases' },
+      },
+      monthly: {
+        type: 'long',
+        _meta: { description: 'Number of workflow runs recorded on cases in the last month' },
+      },
+      weekly: {
+        type: 'long',
+        _meta: { description: 'Number of workflow runs recorded on cases in the last week' },
+      },
+      daily: {
+        type: 'long',
+        _meta: { description: 'Number of workflow runs recorded on cases in the last day' },
+      },
+    },
     totalCasesWithRuns: {
       type: 'long',
       _meta: { description: 'Number of distinct cases that have had at least one workflow run' },
