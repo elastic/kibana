@@ -62,6 +62,21 @@ describe('EscalationQueue', () => {
     expect(screen.getByText('2')).toBeInTheDocument();
   });
 
+  it('counts the matching rows in the badge while filtered, with "+" when more can load', () => {
+    renderWithKibanaRenderContext(
+      <EscalationQueue
+        status="open"
+        escalations={[openItem]}
+        loadedCount={3}
+        totalItemCount={5}
+        isFiltered
+        renderAssignees={() => <span />}
+      />
+    );
+    expect(screen.getByText('1+')).toBeInTheDocument();
+    expect(screen.queryByText('5')).not.toBeInTheDocument();
+  });
+
   it('renders a card for each escalation', () => {
     renderQueue('open', [openItem, { ...openItem, id: 'esc-3', title: 'Second escalation' }]);
     expect(screen.getByTestId('escalationCard-esc-1')).toBeInTheDocument();
@@ -158,5 +173,23 @@ describe('EscalationQueue', () => {
       />
     );
     expect(screen.getByTestId('escalationQueueLoadMore-open')).toHaveTextContent('2');
+  });
+
+  it('keeps "Show more" available when the filter hides every loaded row', () => {
+    const onLoadMore = jest.fn();
+    renderWithKibanaRenderContext(
+      <EscalationQueue
+        status="closed"
+        escalations={[]}
+        loadedCount={10}
+        totalItemCount={15}
+        isFiltered
+        onLoadMore={onLoadMore}
+        renderAssignees={() => <span />}
+      />
+    );
+    expect(screen.getByText('No escalations match the current filter.')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('escalationQueueLoadMore-closed'));
+    expect(onLoadMore).toHaveBeenCalledTimes(1);
   });
 });

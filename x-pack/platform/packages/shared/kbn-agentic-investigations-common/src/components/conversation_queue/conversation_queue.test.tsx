@@ -52,6 +52,18 @@ describe('ConversationQueue', () => {
     expect(trigger()).toHaveTextContent('42');
   });
 
+  it('counts the matching rows while filtered, as a floor when more can load', () => {
+    renderQueue({ count: 42, isFiltered: true, remaining: 5 });
+
+    expect(trigger()).toHaveTextContent('1+');
+  });
+
+  it('counts the matching rows exactly while filtered with nothing left to load', () => {
+    renderQueue({ count: 42, isFiltered: true, remaining: 0 });
+
+    expect(trigger()).toHaveTextContent(/^Respond1$/);
+  });
+
   it('waits for a count rather than showing 0, which would read as empty', () => {
     renderQueue({ count: undefined });
 
