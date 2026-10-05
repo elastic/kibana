@@ -15,6 +15,7 @@ export enum EsqlSettingNames {
   TIME_ZONE = 'time_zone',
   UNMAPPED_FIELDS = 'unmapped_fields',
   WILDCARDS_MATCH_DATASETS = 'wildcards_match_datasets',
+  WILDCARDS_MATCH_VIEWS = 'wildcards_match_views',
 }
 
 const approximation = {
@@ -85,6 +86,17 @@ const wildcardsMatchDatasets = {
   ignoreAsSuggestion: false,
 };
 
+const wildcardsMatchViews = {
+  name: EsqlSettingNames.WILDCARDS_MATCH_VIEWS,
+  type: ['boolean'],
+  description:
+    'When enabled, a wildcard in `FROM` also matches registered views. Defaults to `false`, so a wildcard does not match a view and a view is reached by its exact name. Other abstractions a wildcard matches are unaffected.\n\nThe default itself is configurable. If a query does not specify a value, the `esql.query.settings.wildcards_match_views` cluster setting supplies it. If that cluster setting is not configured either, the value is `false`. ',
+  serverlessOnly: false,
+  preview: true,
+  snapshotOnly: false,
+  ignoreAsSuggestion: false,
+};
+
 export const settings = [
   approximation,
   columnMetadata,
@@ -92,4 +104,5 @@ export const settings = [
   timeZone,
   unmappedFields,
   wildcardsMatchDatasets,
+  wildcardsMatchViews,
 ];
