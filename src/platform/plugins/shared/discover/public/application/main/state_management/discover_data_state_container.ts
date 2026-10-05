@@ -11,12 +11,16 @@ import type { Observable } from 'rxjs';
 import {
   BehaviorSubject,
   filter,
+  finalize,
+  from,
   map,
   mergeMap,
+  of,
   ReplaySubject,
   share,
   Subject,
   switchMap,
+  takeUntil,
   tap,
 } from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
@@ -154,6 +158,12 @@ export interface DiscoverDataStateContainer {
    * leaves ES|QL. Tests call it to reset column-default state between cases.
    */
   cleanupEsql: () => void;
+  /**
+   * Runs a data source resolution (e.g. the ES|QL time field and schema requests).
+   * Fetches requested while it is pending are held and run once it settles.
+   * `isLatest` tells whether no newer resolution has been started in the meantime.
+   */
+  runSourceResolution: (resolve: (isLatest: () => boolean) => Promise<void>) => Promise<void>;
 }
 
 /**
@@ -281,9 +291,53 @@ export function getDataStateContainer({
   let abortController: AbortController;
   let abortControllerFetchMore: AbortController;
 
+  let latestSourceResolutionId = 0;
+  let pendingSourceResolution: Promise<void> | undefined;
+  let isFetchHeld = false;
+  const cancelHeldFetch$ = new Subject<void>();
+
+  const runSourceResolution: DiscoverDataStateContainer['runSourceResolution'] = (resolve) => {
+    const resolutionId = ++latestSourceResolutionId;
+    const resolution = resolve(() => resolutionId === latestSourceResolutionId);
+    // A failed resolution must not block fetching, the fetch then uses the current source
+    const settled = resolution.then(
+      () => {},
+      () => {}
+    );
+    pendingSourceResolution = settled;
+    settled.then(() => {
+      if (pendingSourceResolution === settled) {
+        pendingSourceResolution = undefined;
+      }
+    });
+    return resolution;
+  };
+
+  const waitForSourceResolution = async () => {
+    // Loop, since a newer resolution might have been started while waiting
+    while (pendingSourceResolution) {
+      await pendingSourceResolution;
+    }
+  };
+
   function subscribe() {
     const subscription = fetch$
       .pipe(
+        // Hold fetches while the data source is resolving, so they don't run with a stale source.
+        // switchMap combines fetches requested in the meantime into a single one.
+        switchMap((value) => {
+          if (!pendingSourceResolution) {
+            return of(value);
+          }
+          isFetchHeld = true;
+          return from(waitForSourceResolution()).pipe(
+            map(() => value),
+            takeUntil(cancelHeldFetch$),
+            finalize(() => {
+              isFetchHeld = false;
+            })
+          );
+        }),
         mergeMap(async ({ options }) => {
           numberOfFetches += 1;
           if (unsubscribeIsRequested) {
@@ -648,6 +702,15 @@ export function getDataStateContainer({
   };
 
   const cancel = (reason: AbortReason = AbortReason.CANCELED) => {
+    if (reason !== AbortReason.REPLACED && isFetchHeld) {
+      cancelHeldFetch$.next();
+      // The held fetch never started a request, so end its loading state here
+      const documents = dataSubjects.documents$.getValue();
+      if (documents.fetchStatus === FetchStatus.LOADING) {
+        dataSubjects.documents$.next({ ...documents, fetchStatus: FetchStatus.COMPLETE });
+      }
+    }
+
     const { cascadedDocumentsFetcher$ } = selectTabRuntimeState(
       runtimeStateManager,
       getCurrentTab().id
@@ -676,5 +739,6 @@ export function getDataStateContainer({
     cancel,
     getAbortController,
     cleanupEsql,
+    runSourceResolution,
   };
 }

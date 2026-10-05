@@ -89,28 +89,38 @@ export const buildStateSubscribe =
       }
     }
 
+    // Fetches requested while the ES|QL source resolves are held until it's done,
+    // so the fetch below is triggered right away to show the loading state
+    let esqlSourceResolution: Promise<void> | undefined;
     if (
       isEsqlMode &&
       queryChanged &&
       isOfAggregateQueryType(nextState.query) &&
       nextState.query.esql.trim() !== ''
     ) {
+      const esql = nextState.query.esql;
       const tabId = getCurrentTab().id;
       const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
       const previousSource = currentDataSource$.getValue();
-      const { dataView } = await resolveEsqlSource({
-        esql: nextState.query.esql,
-        services,
-        esqlVariables: getCurrentTab().esqlVariables,
-        timeRange: services.data.query.timefilter.timefilter.getTime(),
-        previousSourceId: previousSource?.kind === 'esql' ? previousSource.id : undefined,
+      esqlSourceResolution = dataState.runSourceResolution(async (isLatest) => {
+        const { dataView } = await resolveEsqlSource({
+          esql,
+          services,
+          esqlVariables: getCurrentTab().esqlVariables,
+          timeRange: services.data.query.timefilter.timefilter.getTime(),
+          previousSourceId: previousSource?.kind === 'esql' ? previousSource.id : undefined,
+        });
+        if (!isLatest()) {
+          addLog('[appstate] stale ES|QL source resolution ignored', { esql });
+          return;
+        }
+        dispatch(
+          internalStateActions.assignNextDataView({
+            tabId,
+            dataView,
+          })
+        );
       });
-      dispatch(
-        internalStateActions.assignNextDataView({
-          tabId,
-          dataView,
-        })
-      );
     }
 
     const { sampleSize, sort, dataSource, esqlApproximation } = prevState;
@@ -179,12 +189,12 @@ export const buildStateSubscribe =
       // reset() uses getInitialFetchStatus() for the new language. After refresh,
       // skipInitialFetch is gone and empty ES|QL is no longer the current query,
       // so reset() can flip UNINITIALIZED → LOADING without starting a fetch.
-      // Re-read after await resolveEsqlSource: do not overwrite COMPLETE/ERROR
-      // that landed while the source was resolving.
+      // Do not overwrite COMPLETE/ERROR that landed in the meantime.
       const currentStatus = dataState.data$.main$.getValue().fetchStatus;
       if (currentStatus === FetchStatus.LOADING) {
         sendResetMsg(dataState.data$, FetchStatus.UNINITIALIZED);
       }
+      await esqlSourceResolution;
       return;
     }
 
@@ -208,6 +218,7 @@ export const buildStateSubscribe =
         );
 
         dataState.disableNextFetchOnStateChange$.next(false);
+        await esqlSourceResolution;
 
         return;
       }
@@ -224,6 +235,8 @@ export const buildStateSubscribe =
 
       dataState.fetch();
     }
+
+    await esqlSourceResolution;
   };
 
 const logEntry = <T>(changed: boolean, prevState: T, nextState: T) => ({
