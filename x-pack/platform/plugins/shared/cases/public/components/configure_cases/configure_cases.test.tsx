@@ -22,8 +22,10 @@ import { useGetCaseConfiguration } from '../../containers/configure/use_get_case
 import { usePersistConfiguration } from '../../containers/configure/use_persist_configuration';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
+import { useGetWorkflowTags } from '../../containers/configure/use_get_workflow_tags';
 import { useLicense } from '../../common/use_license';
 import { useKibana } from '../../common/lib/kibana';
+import { useAreWorkflowsAvailableForCases } from '../workflows/use_run_case_workflow';
 import {
   useActionTypesResponse,
   useCaseConfigureResponse,
@@ -41,7 +43,12 @@ jest.mock('../../containers/configure/use_get_supported_action_connectors');
 jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../../containers/configure/use_persist_configuration');
 jest.mock('../../containers/configure/use_action_types');
+jest.mock('../../containers/configure/use_get_workflow_tags');
 jest.mock('../../common/use_license');
+jest.mock('../workflows/use_run_case_workflow', () => ({
+  ...jest.requireActual('../workflows/use_run_case_workflow'),
+  useAreWorkflowsAvailableForCases: jest.fn(),
+}));
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
@@ -49,6 +56,8 @@ const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 const usePersistConfigurationMock = usePersistConfiguration as jest.Mock;
 const useGetActionTypesMock = useGetActionTypes as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
+const useGetWorkflowTagsMock = useGetWorkflowTags as jest.Mock;
+const useAreWorkflowsAvailableForCasesMock = useAreWorkflowsAvailableForCases as jest.Mock;
 const getAddConnectorFlyoutMock = jest.fn();
 const getEditConnectorFlyoutMock = jest.fn();
 
@@ -93,6 +102,8 @@ describe('ConfigureCasesRedesign', () => {
       isAtLeastGold: () => true,
       isAtLeastPlatinum: () => true,
     });
+    useAreWorkflowsAvailableForCasesMock.mockReturnValue(false);
+    useGetWorkflowTagsMock.mockReturnValue({ data: ['soc-triage'], isLoading: false });
 
     const { useCasesConfig } = jest.requireMock('../../common/lib/kibana');
     useCasesConfig.mockReturnValue({
@@ -543,6 +554,121 @@ describe('ConfigureCasesRedesign', () => {
     expect(
       screen.queryByTestId('case-configure-update-selected-connector-button')
     ).not.toBeInTheDocument();
+  });
+
+  describe('workflow tags', () => {
+    const configurationWithWorkflowSettings = {
+      ...useCaseConfigureResponse.data,
+      customFields: customFieldsConfigurationMock,
+      templates: templatesConfigurationMock,
+      observableTypes: observableTypesMock,
+      workflowTags: ['existing-tag'],
+    };
+
+    beforeEach(() => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: configurationWithWorkflowSettings,
+      }));
+    });
+
+    it('does not render the workflow tags section when workflows are unavailable for Cases', async () => {
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      await screen.findByTestId('cases-settings-panel');
+
+      expect(screen.queryByTestId('cases-workflow-tags-section')).not.toBeInTheDocument();
+    });
+
+    it('renders the workflow tags section when workflows are available for Cases', async () => {
+      useAreWorkflowsAvailableForCasesMock.mockReturnValue(true);
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      expect(await screen.findByTestId('cases-workflow-tags-section')).toBeInTheDocument();
+      expect(screen.getByText(configureCasesI18n.WORKFLOW_TAGS_TITLE)).toBeInTheDocument();
+    });
+
+    it('persists workflow tag changes with the rest of the configuration', async () => {
+      useAreWorkflowsAvailableForCasesMock.mockReturnValue(true);
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      const workflowTags = await screen.findByTestId('cases-workflow-tags');
+      await userEvent.type(within(workflowTags).getByRole('combobox'), 'soc-triage{enter}');
+
+      expect(persistCaseConfigure).toHaveBeenCalledWith({
+        connector: configurationWithWorkflowSettings.connector,
+        closureType: configurationWithWorkflowSettings.closureType,
+        customFields: customFieldsConfigurationMock,
+        templates: templatesConfigurationMock,
+        observableTypes: observableTypesMock,
+        workflowTags: ['existing-tag', 'soc-triage'],
+        id: configurationWithWorkflowSettings.id,
+        version: configurationWithWorkflowSettings.version,
+      });
+    });
+
+    it('disables workflow tags until the configuration has been fetched', async () => {
+      useAreWorkflowsAvailableForCasesMock.mockReturnValue(true);
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        isLoading: false,
+        isFetching: true,
+        isFetched: false,
+      }));
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      const workflowTags = await screen.findByTestId('cases-workflow-tags');
+      expect(within(workflowTags).getByRole('combobox')).toBeDisabled();
+    });
+
+    it('disables workflow tags when the configuration GET fails', async () => {
+      useAreWorkflowsAvailableForCasesMock.mockReturnValue(true);
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        isLoading: false,
+        isFetching: false,
+        isError: true,
+      }));
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      const workflowTags = await screen.findByTestId('cases-workflow-tags');
+      expect(within(workflowTags).getByRole('combobox')).toBeDisabled();
+    });
+
+    it('keeps workflow tags enabled while a fetched configuration is refetching', async () => {
+      useAreWorkflowsAvailableForCasesMock.mockReturnValue(true);
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: configurationWithWorkflowSettings,
+        isFetching: true,
+      }));
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      const workflowTags = await screen.findByTestId('cases-workflow-tags');
+      expect(within(workflowTags).getByRole('combobox')).toBeEnabled();
+    });
+
+    it('preserves observable types and workflow tags when deleting a custom field', async () => {
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      const list = await screen.findByTestId('custom-fields-list');
+      await userEvent.click(
+        within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
+      );
+      await userEvent.click(await screen.findByText('Delete'));
+
+      expect(persistCaseConfigure).toHaveBeenCalledWith(
+        expect.objectContaining({
+          observableTypes: observableTypesMock,
+          workflowTags: ['existing-tag'],
+        })
+      );
+    });
   });
 
   it('does not render observable types when the observables feature is disabled', async () => {
