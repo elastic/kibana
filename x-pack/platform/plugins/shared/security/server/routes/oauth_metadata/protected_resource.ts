@@ -8,12 +8,9 @@
 import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '..';
+import { resolveProtectedResource } from '../../uiam';
 
-export function defineOAuthProtectedResourceRoute({
-  router,
-  basePath,
-  config,
-}: RouteDefinitionParams) {
+export function defineOAuthProtectedResourceRoute({ router, config }: RouteDefinitionParams) {
   if (!config.mcp?.oauth2) {
     return;
   }
@@ -71,21 +68,23 @@ export function defineOAuthProtectedResourceRoute({
       options: { access: 'public' },
       validate: {
         params: schema.object({
+          // codeql[js/kibana/unbounded-string-in-schema] Discovery only parses the space prefix and matches the configured resource path to construct metadata.
           path: schema.maybe(schema.string()),
         }),
       },
     },
     (_context, request, response) => {
-      const path = request.params.path;
-      const resourceUrl = new URL(metadata.resource);
-      if (path) {
-        resourceUrl.pathname = `/${path}`;
+      const resource = request.params.path
+        ? resolveProtectedResource(metadata.resource, request.params.path)
+        : metadata.resource;
+      if (!resource) {
+        return response.notFound();
       }
 
       return response.ok({
         body: {
           authorization_servers: metadata.authorization_servers,
-          resource: resourceUrl.toString(),
+          resource,
           ...optionalMetadataFields,
         },
         headers: { 'content-type': 'application/json' },

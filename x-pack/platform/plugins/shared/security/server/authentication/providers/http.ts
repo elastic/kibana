@@ -19,6 +19,7 @@ import { BaseAuthenticationProvider } from './base';
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../../common/constants';
 import { getDetailedErrorMessage } from '../../errors';
 import { ROUTE_TAG_ACCEPT_JWT, ROUTE_TAG_ACCEPT_UIAM_OAUTH } from '../../routes/tags';
+import { getRequestSpacePrefix } from '../../uiam';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 
@@ -210,10 +211,9 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
     authorizationHeader: HTTPAuthorizationHeader
   ): Promise<AuthenticationResult> {
     try {
-      const resourcePath = `${this.options.basePath.get(request)}${request.url.pathname}`;
       const ephemeralToken = await this.options.uiam!.exchangeOAuthToken(
         authorizationHeader.credentials,
-        resourcePath
+        getRequestSpacePrefix(this.options.basePath, request)
       );
 
       const authHeaders = this.options.uiam!.getAuthenticationHeaders(ephemeralToken);

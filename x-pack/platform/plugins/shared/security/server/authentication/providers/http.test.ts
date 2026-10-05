@@ -363,7 +363,7 @@ describe('HTTPAuthenticationProvider', () => {
 
         expect(mockOptionsWithUiam.uiam!.exchangeOAuthToken).toHaveBeenCalledWith(
           'essu_oauth_access_token',
-          '/mock-server-basepath/path'
+          ''
         );
 
         expect(mockOptionsWithUiam.client.asScoped).toHaveBeenCalledWith({
@@ -373,6 +373,34 @@ describe('HTTPAuthenticationProvider', () => {
             [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
           },
         });
+      }
+    );
+
+    it.each(['/s/marketing', '/s/default'])(
+      'passes only the literal space prefix %s to the OAuth exchange',
+      async (spacePrefix) => {
+        const { basePath, uiam, client } = mockOptionsWithUiam;
+        if (!uiam) throw new Error('Expected UIAM');
+        (basePath.get as jest.Mock).mockReturnValue(`${basePath.serverBasePath}${spacePrefix}`);
+        uiam.exchangeOAuthToken.mockResolvedValue('essu_ephemeral_token');
+
+        const request = httpServerMock.createKibanaRequest({
+          path: '/api/agent_builder/mcp',
+          headers: { authorization: 'Bearer essu_oauth_access_token' },
+          routeTags: [ROUTE_TAG_ACCEPT_UIAM_OAUTH],
+        });
+        const scopedClient = elasticsearchServiceMock.createScopedClusterClient();
+        scopedClient.asCurrentUser.security.authenticate.mockResponse(mockAuthenticatedUser());
+        client.asScoped.mockReturnValue(scopedClient);
+        const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
+          supportedSchemes: new Set(['bearer']),
+        });
+
+        expect((await provider.authenticate(request)).succeeded()).toBe(true);
+        expect(uiam.exchangeOAuthToken).toHaveBeenCalledWith(
+          'essu_oauth_access_token',
+          spacePrefix
+        );
       }
     );
 
@@ -561,10 +589,7 @@ describe('HTTPAuthenticationProvider', () => {
           supportedSchemes: new Set(['bearer']),
         });
         expect((await provider.authenticate(request)).succeeded()).toBe(true);
-        expect(uiam.exchangeOAuthToken).toHaveBeenCalledWith(
-          'essu_oauth_token',
-          '/mock-server-basepath/path'
-        );
+        expect(uiam.exchangeOAuthToken).toHaveBeenCalledWith('essu_oauth_token', '');
       }
     );
 
@@ -595,10 +620,7 @@ describe('HTTPAuthenticationProvider', () => {
         supportedSchemes: new Set(['bearer']),
       });
       expect((await provider.authenticate(request)).succeeded()).toBe(true);
-      expect(uiam.exchangeOAuthToken).toHaveBeenCalledWith(
-        'essu_oauth_token',
-        '/mock-server-basepath/path'
-      );
+      expect(uiam.exchangeOAuthToken).toHaveBeenCalledWith('essu_oauth_token', '');
     });
     it.each(['upstream-shared-secret', undefined])(
       'preserves client authentication %s for an inbound ephemeral token',

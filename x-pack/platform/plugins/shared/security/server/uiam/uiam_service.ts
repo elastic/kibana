@@ -36,6 +36,7 @@ import {
   type UiamClientAuthentication,
 } from './get_client_authentication';
 import { getUiamCredentialsFromRequest } from './get_uiam_credentials';
+import { getProtectedResource } from './oauth_protected_resource';
 import type {
   ServiceAccountAssumableBy,
   UiamListServiceAccountsResponse,
@@ -244,10 +245,10 @@ export interface UiamServicePublic {
    * Exchanges an OAuth access token for an ephemeral UIAM token. Validates that the audience
    * returned by UIAM matches the expected Kibana server audience and throws if there is a mismatch.
    * @param accessToken The OAuth access token.
-   * @param resourcePath The request path to build a path-aware audience (e.g. `/api/agent_builder/mcp`).
+   * @param spacePrefix The request's space prefix (e.g. `/s/marketing`), or an empty string.
    * @returns The ephemeral token.
    */
-  exchangeOAuthToken(accessToken: string, resourcePath: string): Promise<string>;
+  exchangeOAuthToken(accessToken: string, spacePrefix: string): Promise<string>;
 
   /**
    * Revokes a UIAM API key by its ID. Authenticates the call with the request's own UIAM
@@ -606,10 +607,10 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.exchangeOAuthToken}.
    */
-  async exchangeOAuthToken(accessToken: string, resourcePath: string): Promise<string> {
+  async exchangeOAuthToken(accessToken: string, spacePrefix: string): Promise<string> {
     this.#logger.debug('Attempting to exchange OAuth access token for ephemeral token.');
 
-    const expectedAudience = new URL(resourcePath, this.#kibanaServerResourceURL).toString();
+    const expectedAudience = getProtectedResource(this.#kibanaServerResourceURL, spacePrefix);
     const url = new URL(`${this.#config.url}/uiam/api/v1/authentication/_authenticate`);
     url.searchParams.set('include_token', 'true');
     url.searchParams.set('audience', expectedAudience);

@@ -144,12 +144,12 @@ apiTest.describe(
         const spaceMcpEndpoint = `s/${spaceId}/${MCP_ENDPOINT}`;
         const expectedResource = `${kibanaBaseUrl}/${spaceMcpEndpoint}`;
 
-        await apiServices.spaces.create({ id: spaceId, name: 'OAuth auth-code space' });
-
         const authHeaders = await authenticateAdmin(apiClient, organizationId!, projectType!);
 
         let clientId = '';
         try {
+          await apiServices.spaces.create({ id: spaceId, name: 'OAuth auth-code space' });
+
           await apiTest.step(
             'register client through space-prefixed route and verify resource',
             async () => {

@@ -8,7 +8,11 @@
 import { createClientBodySchema } from './schemas';
 import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
-import { KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE } from '../../uiam';
+import {
+  getProtectedResource,
+  getRequestSpacePrefix,
+  KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE,
+} from '../../uiam';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 export function defineCreateOAuthClientRoute({
@@ -55,12 +59,10 @@ export function defineCreateOAuthClientRoute({
           });
         }
 
-        // Build a space-aware resource URL by injecting the request's space
-        // prefix (e.g. /s/marketing) into the configured resource path.
-        const resourceUrl = new URL(configuredResource);
-        const spaceBasePath = basePath.get(request);
-        resourceUrl.pathname = `${spaceBasePath}${resourceUrl.pathname}`;
-        const resource = resourceUrl.toString();
+        const resource = getProtectedResource(
+          configuredResource,
+          getRequestSpacePrefix(basePath, request)
+        );
 
         if (!serverlessProjectId) {
           return response.notFound({
