@@ -25,13 +25,14 @@ const mockedUploadFile = uploadFile as jest.MockedFunction<typeof uploadFile>;
 const b64 = (value: string): string => Buffer.from(value).toString('base64');
 
 const statusJson = (payload: {
-  status: 'running' | 'terminated';
+  status: 'running' | 'terminated' | 'lost';
   exitCode?: number;
   stdout?: string;
   stderr?: string;
   stdoutOffset?: number;
   stderrOffset?: number;
   output?: string;
+  pid?: number;
 }): string =>
   JSON.stringify({
     status: payload.status,
@@ -41,7 +42,13 @@ const statusJson = (payload: {
     stdoutOffset: payload.stdoutOffset ?? 0,
     stderrOffset: payload.stderrOffset ?? 0,
     output: payload.output ? b64(payload.output) : '',
+    ...(payload.pid != null ? { pid: payload.pid } : {}),
   });
+
+const lostMessage = (pid: number, stderr?: string): string => {
+  const message = `Remote command process ${pid} is no longer running and did not record an exit code. It was likely killed by the operating system or an external signal.`;
+  return stderr ? `${message}\n${stderr}` : message;
+};
 
 describe('createRemoteHostRunCommandStepDefinition', () => {
   const definition = createRemoteHostRunCommandStepDefinition({
@@ -162,6 +169,26 @@ describe('createRemoteHostRunCommandStepDefinition', () => {
         message: 'failed',
       });
     });
+
+    it('throws RemoteProcessLost when the process is already gone', async () => {
+      mockedExecScript.mockResolvedValue({
+        stdout: statusJson({
+          status: 'lost',
+          pid: 99,
+          stderr: 'Killed',
+        }),
+        stderr: '',
+        code: 0,
+      });
+
+      const context = createContext();
+      await expect(start()(context)).rejects.toMatchObject({
+        type: 'RemoteProcessLost',
+        message: lostMessage(99, 'Killed'),
+        details: { pid: 99 },
+      });
+      expect(context.logger.warn).toHaveBeenCalledWith('Killed');
+    });
   });
 
   describe('poll', () => {
@@ -226,6 +253,26 @@ describe('createRemoteHostRunCommandStepDefinition', () => {
       await expect(definition.poll(createContext({ state: runningState }))).rejects.toMatchObject({
         type: 'ScriptExecutionError',
         message: 'failed',
+      });
+    });
+
+    it('throws RemoteProcessLost when the PID is gone and no exit code was recorded', async () => {
+      mockedExecScript.mockResolvedValue({
+        stdout: statusJson({
+          status: 'lost',
+          pid: 99,
+          stderr: 'Killed',
+        }),
+        stderr: '',
+        code: 0,
+      });
+
+      const context = createContext({ state: runningState });
+      await expect(definition.poll(context)).rejects.toThrow(ExecutionError);
+      await expect(definition.poll(context)).rejects.toMatchObject({
+        type: 'RemoteProcessLost',
+        message: lostMessage(99, 'Killed'),
+        details: { pid: 99 },
       });
     });
   });

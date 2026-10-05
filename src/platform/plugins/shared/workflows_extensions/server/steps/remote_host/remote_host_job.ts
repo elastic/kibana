@@ -20,23 +20,25 @@ interface RemoteHostJobState {
 }
 
 export interface RemoteHostJobStatus {
-  status: 'running' | 'terminated';
+  status: 'running' | 'terminated' | 'lost';
   stdout: string;
   stderr: string;
   stdoutOffset: number;
   stderrOffset: number;
   exitCode: number;
   output?: string;
+  pid?: number;
 }
 
 interface JobStatusPayload {
-  status: 'running' | 'terminated';
+  status: 'running' | 'terminated' | 'lost';
   exitCode: number;
   stdout: string;
   stderr: string;
   stdoutOffset: number;
   stderrOffset: number;
   output: string;
+  pid?: number | null;
 }
 
 const createJobId = (): string => randomUUID();
@@ -80,14 +82,22 @@ export const parseJobStatus = (stdout: string): RemoteHostJobStatus => {
     value ? Buffer.from(value, 'base64').toString('utf-8') : '';
 
   const output = decode(payload.output);
+  const status =
+    payload.status === 'terminated' || payload.status === 'lost' ? payload.status : 'running';
+  const pid =
+    typeof payload.pid === 'number' && Number.isFinite(payload.pid) && payload.pid > 0
+      ? payload.pid
+      : undefined;
+
   return {
-    status: payload.status === 'terminated' ? 'terminated' : 'running',
+    status,
     stdout: decode(payload.stdout),
     stderr: decode(payload.stderr),
     stdoutOffset: payload.stdoutOffset,
     stderrOffset: payload.stderrOffset,
     exitCode: payload.exitCode,
     output: output === '' ? undefined : output,
+    ...(pid != null ? { pid } : {}),
   };
 };
 
@@ -149,12 +159,50 @@ printf '{"status":"running","exitCode":0,"stdout":"%s","stderr":"%s","stdoutOffs
   "$STDOUT" "$STDERR" "$STDOUT_SIZE" "$STDERR_SIZE"`;
 };
 
+const printLostStatus = (workdir: string, stdoutOffset: number, stderrOffset: number): string => {
+  const stdoutFile = `${workdir}/stdout.txt`;
+  const stderrFile = `${workdir}/stderr.txt`;
+
+  return `STDOUT=$(_b64_from ${stdoutOffset} "${stdoutFile}")
+STDERR=$(_b64_from ${stderrOffset} "${stderrFile}")
+STDOUT_SIZE=$(_fsize "${stdoutFile}")
+STDERR_SIZE=$(_fsize "${stderrFile}")
+case "$PID" in
+  ''|*[!0-9]*) LOST_PID=null ;;
+  *) LOST_PID=$PID ;;
+esac
+rm -rf "${workdir}"
+printf '{"status":"lost","exitCode":0,"pid":%s,"stdout":"%s","stderr":"%s","stdoutOffset":%s,"stderrOffset":%s,"output":""}\\n' \\
+  "$LOST_PID" "$STDOUT" "$STDERR" "$STDOUT_SIZE" "$STDERR_SIZE"`;
+};
+
+/** PID still alive reports running. A gone PID reads code.txt: present is a normal exit, missing is lost. */
+const buildStatusDecision = (
+  workdir: string,
+  stdoutOffset: number,
+  stderrOffset: number,
+  maxBytes: number
+): string => {
+  const pidFile = `${workdir}/pid.txt`;
+  const codeFile = `${workdir}/code.txt`;
+
+  return `PID=$(cat "${pidFile}" 2>/dev/null || echo '')
+if [ -n "$PID" ] && kill -0 "$PID" 2>/dev/null; then
+${printRunningStatus(workdir, stdoutOffset, stderrOffset)}
+elif [ -f "${codeFile}" ]; then
+${printTerminatedStatus(workdir, stdoutOffset, stderrOffset, maxBytes)}
+else
+${printLostStatus(workdir, stdoutOffset, stderrOffset)}
+fi`;
+};
+
 const buildLauncherScript = (workdir: string, scriptFile: string, maxBytes: number): string => {
   const stdoutFile = `${workdir}/stdout.txt`;
   const stderrFile = `${workdir}/stderr.txt`;
   const codeFile = `${workdir}/code.txt`;
   const pidFile = `${workdir}/pid.txt`;
-  const jobCmd = `WORKDIR="${workdir}" bash "${scriptFile}" < /dev/null > "${stdoutFile}" 2>"${stderrFile}"; echo $? > "${codeFile}"`;
+  // $$ is the wrapper that writes code.txt. $! is the setsid parent, which exits when setsid forks.
+  const jobCmd = `echo $$ > "${pidFile}"; WORKDIR="${workdir}" bash "${scriptFile}" < /dev/null > "${stdoutFile}" 2>"${stderrFile}"; echo $? > "${codeFile}"`;
 
   return `#!/bin/bash
 ${BASH_STATUS_HELPERS}
@@ -165,19 +213,19 @@ if command -v setsid >/dev/null 2>&1; then
 else
   bash -c '${jobCmd}' < /dev/null > /dev/null 2>&1 &
 fi
-PID=$!
-echo $PID > "${pidFile}"
 TIMEOUT=20
 COUNT=0
-while [ ! -f "${codeFile}" ] && [ $COUNT -lt $TIMEOUT ]; do
+while [ $COUNT -lt $TIMEOUT ]; do
+  if [ -f "${pidFile}" ]; then
+    PID=$(cat "${pidFile}")
+    if [ -n "$PID" ] && ! kill -0 "$PID" 2>/dev/null; then
+      break
+    fi
+  fi
   sleep 0.1
   COUNT=$((COUNT + 1))
 done
-if [ -f "${codeFile}" ]; then
-${printTerminatedStatus(workdir, 0, 0, maxBytes)}
-  exit 0
-fi
-printf '{"status":"running","exitCode":0,"stdout":"","stderr":"","stdoutOffset":0,"stderrOffset":0,"output":""}\\n'
+${buildStatusDecision(workdir, 0, 0, maxBytes)}
 `;
 };
 
@@ -187,15 +235,9 @@ const buildStatusScript = (
   stderrOffset: number,
   maxBytes: number
 ): string => {
-  const codeFile = `${workdir}/code.txt`;
-
   return `#!/bin/bash
 ${BASH_STATUS_HELPERS}
-if [ -f "${codeFile}" ]; then
-${printTerminatedStatus(workdir, stdoutOffset, stderrOffset, maxBytes)}
-else
-${printRunningStatus(workdir, stdoutOffset, stderrOffset)}
-fi
+${buildStatusDecision(workdir, stdoutOffset, stderrOffset, maxBytes)}
 `;
 };
 

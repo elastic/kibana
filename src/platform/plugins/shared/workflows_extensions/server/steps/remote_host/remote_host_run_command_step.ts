@@ -34,6 +34,29 @@ const logCommandStreams = (
   if (result.stderr) logger.warn(result.stderr);
 };
 
+const lostProcessMessage = (result: RemoteHostJobStatus): string => {
+  const subject =
+    result.pid != null ? `Remote command process ${result.pid}` : 'Remote command process';
+  const message = `${subject} is no longer running and did not record an exit code. It was likely killed by the operating system or an external signal.`;
+  return result.stderr ? `${message}\n${result.stderr}` : message;
+};
+
+const failIfProcessLost = (
+  logger: { info: (message: string) => void; warn: (message: string) => void },
+  result: RemoteHostJobStatus
+): void => {
+  if (result.status !== 'lost') {
+    return;
+  }
+
+  logCommandStreams(logger, result);
+  throw new ExecutionError({
+    type: 'RemoteProcessLost',
+    message: lostProcessMessage(result),
+    details: result.pid != null ? { pid: result.pid } : undefined,
+  });
+};
+
 const completeCommand = (
   logger: { info: (message: string) => void; warn: (message: string) => void },
   result: RemoteHostJobStatus
@@ -106,6 +129,7 @@ export const createRemoteHostRunCommandStepDefinition = ({ getActionsStart }: De
         };
       }
 
+      failIfProcessLost(context.logger, result);
       return completeCommand(context.logger, result);
     },
     poll: async (context) => {
@@ -135,6 +159,7 @@ export const createRemoteHostRunCommandStepDefinition = ({ getActionsStart }: De
         };
       }
 
+      failIfProcessLost(context.logger, result);
       return completeCommand(context.logger, result);
     },
     onCancel: async (context) => {
