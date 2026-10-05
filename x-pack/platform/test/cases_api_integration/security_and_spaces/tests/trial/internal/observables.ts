@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 
 import { MAX_OBSERVABLES_PER_CASE, OBSERVABLE_TYPE_IPV4 } from '@kbn/cases-plugin/common/constants';
+import type { ObservablesUserAction } from '@kbn/cases-plugin/common/types/domain';
 import { UserActionTypes } from '@kbn/cases-plugin/common/types/domain';
 import { secOnly } from '../../../../common/lib/authentication/users';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
@@ -262,9 +263,10 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         expect(deleteUserActions.length).to.be.greaterThan(0);
-        expect(deleteUserActions[deleteUserActions.length - 1].payload?.observables?.count).to.be(
-          2
-        );
+        const lastDeleteUserAction = deleteUserActions[
+          deleteUserActions.length - 1
+        ] as ObservablesUserAction;
+        expect(lastDeleteUserAction.payload.observables.count).to.be(2);
       });
 
       it('should not allow bulk deleting observables without permissions', async () => {
