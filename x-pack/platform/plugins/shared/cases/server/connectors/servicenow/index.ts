@@ -9,15 +9,20 @@ import { getMapping as getServiceNowITSMMapping } from './itsm_mapping';
 import { format as formatServiceNowITSM } from './itsm_format';
 import { getMapping as getServiceNowSIRMapping } from './sir_mapping';
 import { format as formatServiceNowSIR } from './sir_format';
+import { parseItsmIncident, parseSirIncident } from './parse_incident';
 
 import type { ServiceNowITSMCasesConnector, ServiceNowSIRCasesConnector } from './types';
 
 export const getServiceNowITSMCaseConnector = (): ServiceNowITSMCasesConnector => ({
   getMapping: getServiceNowITSMMapping,
   format: formatServiceNowITSM,
+  parseIncident: parseItsmIncident,
+  freeFormFieldsKey: 'additional_fields',
 });
 
 export const getServiceNowSIRCaseConnector = (): ServiceNowSIRCasesConnector => ({
   getMapping: getServiceNowSIRMapping,
   format: formatServiceNowSIR,
+  parseIncident: parseSirIncident,
+  freeFormFieldsKey: 'additional_fields',
 });

@@ -17,6 +17,7 @@ import {
   observableTypesMock,
   templatesConfigurationMock,
 } from '../../containers/mock';
+import { mappings } from '../../containers/configure/mock';
 import { noCasesSettingsPermission, renderWithTestingProviders } from '../../common/mock';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { usePersistConfiguration } from '../../containers/configure/use_persist_configuration';
@@ -42,6 +43,15 @@ jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../../containers/configure/use_persist_configuration');
 jest.mock('../../containers/configure/use_action_types');
 jest.mock('../../common/use_license');
+jest.mock('./external_field_mapping_table', () => ({
+  ExternalFieldMappingTable: () => <div data-test-subj="external-field-mapping-table" />,
+}));
+jest.mock('./use_get_external_field_catalog', () => ({
+  ...jest.requireActual('./use_get_external_field_catalog'),
+  useGetExternalFieldCatalog: jest
+    .fn()
+    .mockReturnValue({ data: undefined, isLoading: false, isSuccess: false }),
+}));
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
@@ -92,6 +102,7 @@ describe('ConfigureCasesRedesign', () => {
     useLicenseMock.mockReturnValue({
       isAtLeastGold: () => true,
       isAtLeastPlatinum: () => true,
+      isAtLeastEnterprise: () => true,
     });
 
     const { useCasesConfig } = jest.requireMock('../../common/lib/kibana');
@@ -554,5 +565,201 @@ describe('ConfigureCasesRedesign', () => {
 
     expect(screen.queryByTestId('cases-observable-types-section')).not.toBeInTheDocument();
     expect(screen.queryByTestId('add-observable-type')).not.toBeInTheDocument();
+  });
+
+  describe('external sync defaults', () => {
+    const enableExternalSync = (enabled = true) => {
+      const { useCasesConfig } = jest.requireMock('../../common/lib/kibana');
+      useCasesConfig.mockReturnValue({ bidirectionalSyncEnabled: enabled });
+    };
+    const serviceNowConnector = {
+      id: 'servicenow-1',
+      name: 'My SN connector',
+      type: ConnectorTypes.serviceNowITSM,
+      fields: null,
+    };
+    const withConnector = (overrides: Record<string, unknown> = {}) =>
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: {
+          ...useCaseConfigureResponse.data,
+          customFields: customFieldsConfigurationMock,
+          templates: templatesConfigurationMock,
+          connector: serviceNowConnector,
+          mappings,
+          ...overrides,
+        },
+      }));
+
+    it('renders the sync block for the selected connector with a technical preview badge and the defaults', async () => {
+      enableExternalSync();
+      withConnector({ externalSync: { autoPush: true, conflictStrategy: 'kibana' } });
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      expect(await screen.findByTestId('cases-redesign-external-sync-section')).toBeInTheDocument();
+      expect(screen.getByTestId('external-sync-tech-preview-badge')).toBeInTheDocument();
+      expect(
+        within(screen.getByTestId('cases-redesign-external-incident-management-section')).getByRole(
+          'heading',
+          { name: 'Sync with My SN connector' }
+        )
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('connector-auto-push-switch')).toHaveAttribute(
+        'aria-checked',
+        'true'
+      );
+      expect(screen.getByTestId('connector-conflict-strategy-select')).toHaveValue('kibana');
+    });
+
+    it('persists the external sync defaults when a control changes', async () => {
+      enableExternalSync();
+      withConnector();
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      await userEvent.click(await screen.findByTestId('connector-auto-push-switch'));
+
+      expect(persistCaseConfigure).toHaveBeenCalledWith(
+        expect.objectContaining({
+          externalSync: { autoPush: true, conflictStrategy: 'external' },
+          customFields: customFieldsConfigurationMock,
+          templates: templatesConfigurationMock,
+        })
+      );
+    });
+
+    it('disables the controls when the user lacks settings permissions', async () => {
+      enableExternalSync();
+      withConnector();
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />, {
+        wrapperProps: { permissions: noCasesSettingsPermission() },
+      });
+
+      expect(await screen.findByTestId('connector-auto-push-switch')).toBeDisabled();
+      expect(screen.getByTestId('connector-conflict-strategy-select')).toBeDisabled();
+    });
+
+    it('renders the field sync table for the selected connector and hides the legacy mappings', async () => {
+      enableExternalSync();
+      withConnector({
+        externalSyncFields: [{ field: 'title', direction: 'pull', conflictStrategy: 'kibana' }],
+      });
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      expect(await screen.findByTestId('external-sync-field-table')).toBeInTheDocument();
+      expect(screen.getByTestId('external-sync-direction-title')).toHaveValue('pull');
+      expect(screen.getByTestId('external-sync-conflict-title')).toHaveValue('kibana');
+      expect(screen.queryByTestId('field-mapping-text')).not.toBeInTheDocument();
+    });
+
+    it('renders the external field mapping table for a connector with a free-form channel', async () => {
+      enableExternalSync();
+      withConnector();
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      expect(await screen.findByTestId('external-field-mapping-table')).toBeInTheDocument();
+    });
+
+    it('does not render the external field mapping table for other connector types', async () => {
+      enableExternalSync();
+      withConnector({
+        connector: {
+          id: 'resilient-2',
+          name: 'My Resilient connector',
+          type: ConnectorTypes.resilient,
+          fields: null,
+        },
+      });
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      expect(await screen.findByTestId('external-sync-field-table')).toBeInTheDocument();
+      expect(screen.queryByTestId('external-field-mapping-table')).not.toBeInTheDocument();
+    });
+
+    it('persists the field sync rules when a direction changes', async () => {
+      enableExternalSync();
+      withConnector();
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      await userEvent.selectOptions(
+        await screen.findByTestId('external-sync-direction-comments'),
+        'off'
+      );
+
+      expect(persistCaseConfigure).toHaveBeenCalledWith(
+        expect.objectContaining({
+          externalSyncFields: [
+            { field: 'title', direction: 'both' },
+            { field: 'description', direction: 'both' },
+            { field: 'status', direction: 'pull' },
+            { field: 'tags', direction: 'push' },
+            { field: 'comments', direction: 'off' },
+          ],
+          customFields: customFieldsConfigurationMock,
+          templates: templatesConfigurationMock,
+        })
+      );
+    });
+
+    it('replaces the sync controls with a hint when no connector is selected', async () => {
+      enableExternalSync();
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      expect(await screen.findByTestId('external-sync-no-connector')).toBeInTheDocument();
+      expect(screen.queryByTestId('external-sync-field-table')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('connector-auto-push-switch')).not.toBeInTheDocument();
+    });
+
+    it('disables the field sync controls when the user lacks settings permissions', async () => {
+      enableExternalSync();
+      withConnector();
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />, {
+        wrapperProps: { permissions: noCasesSettingsPermission() },
+      });
+
+      expect(await screen.findByTestId('external-sync-direction-title')).toBeDisabled();
+      expect(screen.getByTestId('external-sync-conflict-title')).toBeDisabled();
+    });
+
+    it('keeps the legacy mappings when the feature is off', async () => {
+      enableExternalSync(false);
+      withConnector();
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      expect(await screen.findByTestId('field-mapping-text')).toBeInTheDocument();
+      expect(screen.queryByTestId('external-sync-field-table')).not.toBeInTheDocument();
+    });
+
+    it('does not render the section when the feature is off', async () => {
+      enableExternalSync(false);
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      await screen.findByTestId('cases-redesign-settings-panel');
+      expect(screen.queryByTestId('cases-redesign-external-sync-section')).not.toBeInTheDocument();
+    });
+
+    it('does not render the section below an Enterprise license', async () => {
+      enableExternalSync();
+      useLicenseMock.mockReturnValue({
+        isAtLeastGold: () => true,
+        isAtLeastPlatinum: () => true,
+        isAtLeastEnterprise: () => false,
+      });
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      await screen.findByTestId('cases-redesign-settings-panel');
+      expect(screen.queryByTestId('cases-redesign-external-sync-section')).not.toBeInTheDocument();
+    });
   });
 });

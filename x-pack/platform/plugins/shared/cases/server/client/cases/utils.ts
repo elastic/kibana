@@ -27,6 +27,7 @@ import type {
   ExternalService,
   Observable,
   User,
+  ExternalSyncFieldMappings,
 } from '../../../common/types/domain';
 import type { Template } from '../../../common/types/domain/template/latest';
 import { AttachmentType, CaseStatuses, UserActionTypes } from '../../../common/types/domain';
@@ -40,7 +41,11 @@ import type {
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { isPushedUserAction } from '../../../common/utils/user_actions';
 import type { CasesClientGetAlertsResponse } from '../alerts/types';
-import type { ExternalServiceComment, ExternalServiceIncident } from './types';
+import type {
+  ExternalServiceComment,
+  ExternalServiceIncident,
+  ExternalServiceParams,
+} from './types';
 import type { CasesConnectorsMap } from '../../connectors';
 import { getCaseViewPath } from '../../common/utils';
 import {
@@ -53,6 +58,12 @@ import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import { getFieldSnakeKey } from '../../../common/utils/template_fields';
 import * as i18n from './translations';
+import type { ResolvedExternalSyncFieldRules } from '../../../common/utils/external_sync_fields';
+import {
+  pushesToExternal,
+  resolveExternalSyncFieldRules,
+} from '../../../common/utils/external_sync_fields';
+import { isExternalSyncComment } from '../../../common/utils/external_sync_comments';
 
 interface CreateIncidentArgs {
   theCase: Case;
@@ -63,6 +74,10 @@ interface CreateIncidentArgs {
   spaceId: string;
   userProfiles?: Map<string, UserProfile>;
   publicBaseUrl?: IBasePath['publicBaseUrl'];
+  /** Space-level field directions; defaults push every mapped field. */
+  fieldRules?: ResolvedExternalSyncFieldRules;
+  /** Global case fields carried onto external fields through the connector's free-form channel. */
+  fieldMappings?: ExternalSyncFieldMappings;
 }
 
 export const dedupAssignees = (assignees?: CaseAssignees): CaseAssignees | undefined => {
@@ -206,6 +221,8 @@ export const createIncident = async ({
   userProfiles,
   spaceId,
   publicBaseUrl,
+  fieldRules = resolveExternalSyncFieldRules(),
+  fieldMappings = [],
 }: CreateIncidentArgs): Promise<ExternalServiceIncident> => {
   const latestPushInfo = getLatestPushInfo(connector.id, userActions);
   const externalId = latestPushInfo?.pushedInfo?.external_id ?? null;
@@ -213,7 +230,13 @@ export const createIncident = async ({
   const externalServiceFields =
     casesConnectors.get(connector.actionTypeId)?.format(theCase, alerts) ?? {};
 
-  const connectorMappings = casesConnectors.get(connector.actionTypeId)?.getMapping() ?? [];
+  const connectorMappings = (casesConnectors.get(connector.actionTypeId)?.getMapping() ?? []).map(
+    (mapping) =>
+      (mapping.source === 'title' || mapping.source === 'description') &&
+      !pushesToExternal(fieldRules[mapping.source].direction)
+        ? { ...mapping, target: 'not_mapped' as const }
+        : mapping
+  );
   const descriptionWithKibanaInformation = addKibanaInformationToDescription(
     theCase,
     spaceId,
@@ -221,26 +244,80 @@ export const createIncident = async ({
     publicBaseUrl
   );
 
-  const comments = formatComments({
-    userActions,
-    latestPushInfo,
-    theCase,
-    userProfiles,
-    spaceId,
-    publicBaseUrl,
-  });
+  const comments = pushesToExternal(fieldRules.comments.direction)
+    ? formatComments({
+        userActions,
+        latestPushInfo,
+        theCase,
+        userProfiles,
+        spaceId,
+        publicBaseUrl,
+      })
+    : [];
 
   const mappedIncident = mapCaseFieldsToExternalSystemFields(
     { title: theCase.title, description: descriptionWithKibanaInformation },
     connectorMappings
   );
 
-  const incident = {
+  const incident: ExternalServiceParams = {
     ...mappedIncident,
     ...externalServiceFields,
     externalId,
   };
+
+  // Tags are written by the connector's format(), not the mapping, so they are removed after the fact.
+  const tagsTarget = connectorMappings.find((mapping) => mapping.source === 'tags')?.target;
+  if (
+    tagsTarget != null &&
+    tagsTarget !== 'not_mapped' &&
+    !pushesToExternal(fieldRules.tags.direction)
+  ) {
+    delete incident[tagsTarget];
+  }
+
+  const freeFormFieldsKey = casesConnectors.get(connector.actionTypeId)?.freeFormFieldsKey;
+  const mappedFields = collectMappedFieldsToPush(theCase, fieldMappings);
+  if (freeFormFieldsKey != null && Object.keys(mappedFields).length > 0) {
+    incident[freeFormFieldsKey] = mergeFreeFormFields(incident[freeFormFieldsKey], mappedFields);
+  }
+
   return { incident, comments };
+};
+
+const collectMappedFieldsToPush = (
+  theCase: Case,
+  fieldMappings: ExternalSyncFieldMappings
+): Record<string, string> => {
+  const values: Record<string, string> = {};
+  for (const mapping of fieldMappings) {
+    const value = theCase.extended_fields?.[mapping.caseField];
+    if (pushesToExternal(mapping.direction) && value != null && value !== '') {
+      values[mapping.externalField] = value;
+    }
+  }
+  return values;
+};
+
+/**
+ * The connector fields hold the free-form channel as a JSON string typed by the user; mapped
+ * values are merged on top and the result is kept as a string for the connector schema.
+ */
+export const mergeFreeFormFields = (existing: unknown, extra: Record<string, string>): string => {
+  let base: Record<string, unknown> = {};
+  if (typeof existing === 'string' && existing.trim().length > 0) {
+    try {
+      const parsed: unknown = JSON.parse(existing);
+      if (parsed != null && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        base = parsed as Record<string, unknown>;
+      }
+    } catch {
+      base = {};
+    }
+  } else if (existing != null && typeof existing === 'object' && !Array.isArray(existing)) {
+    base = existing as Record<string, unknown>;
+  }
+  return JSON.stringify({ ...base, ...extra });
 };
 
 export const mapCaseFieldsToExternalSystemFields = (
@@ -287,8 +364,12 @@ export const formatComments = ({
   );
 
   const commentsToBeUpdated = theCase.comments?.filter(
-    // Push only user-authored comments — legacy `user` and unified `comment`.
-    (comment) => isCommentAttachmentType(comment.type) && commentsIdsToBeUpdated.has(comment.id)
+    // Push only user-authored comments — legacy `user` and unified `comment` — and never
+    // send back a comment that was imported from the external incident.
+    (comment) =>
+      isCommentAttachmentType(comment.type) &&
+      commentsIdsToBeUpdated.has(comment.id) &&
+      !isExternalSyncComment(comment)
   );
 
   let comments: ExternalServiceComment[] = [];

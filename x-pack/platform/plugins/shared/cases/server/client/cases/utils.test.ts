@@ -21,6 +21,7 @@ import {
 
 import {
   createIncident,
+  mergeFreeFormFields,
   dedupAssignees,
   getClosedInfoForUpdate,
   getCloseReasonIfValid,
@@ -38,6 +39,7 @@ import {
   processObservables,
   enrichCasesWithFieldLabels,
 } from './utils';
+import { resolveExternalSyncFieldRules } from '../../../common/utils/external_sync_fields';
 
 import type {
   AttachmentV2,
@@ -385,6 +387,114 @@ describe('utils', () => {
         },
         comments: [],
       });
+    });
+
+    it('drops the title and tags from the payload when their directions do not push', async () => {
+      const res = await createIncident({
+        theCase,
+        userActions: [],
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+        fieldRules: resolveExternalSyncFieldRules([
+          { field: 'title', direction: 'pull' },
+          { field: 'tags', direction: 'off' },
+        ]),
+      });
+
+      expect(res.incident).not.toHaveProperty('summary');
+      expect(res.incident).not.toHaveProperty('labels');
+      expect(res.incident.description).toEqual(
+        'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.'
+      );
+    });
+
+    it('pushes mapped global fields through Jira otherFields and keeps the typed ones', async () => {
+      const caseWithFields = {
+        ...flattenCaseSavedObject({
+          savedObject: {
+            ...mockCases[2],
+            attributes: {
+              ...mockCases[2].attributes,
+              connector: {
+                ...mockCases[2].attributes.connector,
+                fields: {
+                  ...(mockCases[2].attributes.connector.fields as JiraFieldsType),
+                  otherFields: '{"customfield_123456":"Blue team"}',
+                },
+              } as CaseConnector,
+              extended_fields: { severity_tier_as_keyword: 'High', region_as_keyword: 'EMEA' },
+            },
+          },
+        }),
+        comments: [],
+        totalComments: 0,
+      };
+
+      const res = await createIncident({
+        theCase: caseWithFields,
+        userActions: [],
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+        fieldMappings: [
+          {
+            externalField: 'priority_label',
+            caseField: 'severity_tier_as_keyword',
+            direction: 'both',
+          },
+          { externalField: 'customfield_777', caseField: 'region_as_keyword', direction: 'pull' },
+          { externalField: 'customfield_888', caseField: 'missing_as_keyword', direction: 'push' },
+        ],
+      });
+
+      expect(JSON.parse(res.incident.otherFields as string)).toEqual({
+        customfield_123456: 'Blue team',
+        priority_label: 'High',
+      });
+    });
+
+    it('does not add free-form fields for connectors without that channel', async () => {
+      const res = await createIncident({
+        theCase: {
+          ...theCase,
+          extended_fields: { severity_tier_as_keyword: 'High' },
+        },
+        userActions: [],
+        connector: { ...connector, actionTypeId: '.resilient' },
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+        fieldMappings: [
+          {
+            externalField: 'severity_code',
+            caseField: 'severity_tier_as_keyword',
+            direction: 'both',
+          },
+        ],
+      });
+
+      expect(res.incident).not.toHaveProperty('otherFields');
+      expect(res.incident).not.toHaveProperty('additional_fields');
+    });
+
+    it('sends no comments when the comments direction is off', async () => {
+      const res = await createIncident({
+        theCase: {
+          ...theCase,
+          comments: [commentObj],
+        },
+        userActions,
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+        fieldRules: resolveExternalSyncFieldRules([{ field: 'comments', direction: 'off' }]),
+      });
+
+      expect(res.comments).toEqual([]);
     });
 
     it('creates comments correctly', async () => {
@@ -785,7 +895,55 @@ describe('utils', () => {
     });
   });
 
+  describe('mergeFreeFormFields', () => {
+    it('merges onto a JSON string and keeps the result a string', () => {
+      expect(JSON.parse(mergeFreeFormFields('{"a":"1"}', { b: '2' }))).toEqual({ a: '1', b: '2' });
+    });
+
+    it('starts from an empty object for null, invalid JSON or arrays', () => {
+      expect(mergeFreeFormFields(null, { b: '2' })).toBe('{"b":"2"}');
+      expect(mergeFreeFormFields('not json', { b: '2' })).toBe('{"b":"2"}');
+      expect(mergeFreeFormFields('[1,2]', { b: '2' })).toBe('{"b":"2"}');
+    });
+
+    it('lets the mapped value win over the typed one', () => {
+      expect(JSON.parse(mergeFreeFormFields({ a: '1' }, { a: '9' }))).toEqual({ a: '9' });
+    });
+  });
+
   describe('formatComments', () => {
+    it('does not push comments that were imported from the external incident', () => {
+      const importedComment = {
+        id: 'comment-user-1',
+        type: 'comment',
+        owner: SECURITY_SOLUTION_OWNER,
+        data: { content: 'From Jira' },
+        metadata: { externalSync: { externalId: '20001', connectorName: 'Jira' } },
+        created_at: '2019-11-25T21:55:00.177Z',
+        created_by: { full_name: 'elastic', email: 'testemail@elastic.co', username: 'elastic' },
+        pushed_at: null,
+        pushed_by: null,
+        updated_at: null,
+        updated_by: null,
+        version: 'WzEsMV0=',
+      };
+      const theCase = {
+        ...flattenCaseSavedObject({ savedObject: mockCases[0] }),
+        comments: [importedComment as unknown as (typeof allComments)[number]],
+        totalComments: 1,
+      };
+
+      expect(
+        formatComments({
+          userActions,
+          theCase,
+          latestPushInfo: getLatestPushInfo('not-exists', userActions),
+          userProfiles: userProfilesMap,
+          spaceId: 'default',
+        })
+      ).toEqual([]);
+    });
+
     it('formats comments correctly', () => {
       const theCase = {
         ...flattenCaseSavedObject({

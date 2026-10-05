@@ -94,6 +94,9 @@ export interface CasesUiConfigType {
   runWorkflows: {
     enabled: boolean;
   };
+  bidirectionalSync: {
+    enabled: boolean;
+  };
 }
 
 export const UserActionTypeAll = 'all' as const;
@@ -171,6 +174,9 @@ export type CasesConfigurationUI = Pick<
   | 'owner'
   | 'observableTypes'
   | 'extractObservables'
+  | 'externalSync'
+  | 'externalSyncFields'
+  | 'externalSyncFieldMappings'
 >;
 
 export type CasesConfigurationUICustomField = CasesConfigurationUI['customFields'][number];

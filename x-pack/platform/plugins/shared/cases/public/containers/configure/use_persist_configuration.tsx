@@ -36,6 +36,9 @@ export const usePersistConfiguration = () => {
       connector,
       observableTypes,
       extractObservables,
+      externalSync,
+      externalSyncFields,
+      externalSyncFieldMappings,
     }: Request) => {
       if (isEmpty(id) || isEmpty(version)) {
         return postCaseConfigure({
@@ -46,6 +49,9 @@ export const usePersistConfiguration = () => {
           owner: owner[0],
           observableTypes,
           extractObservables,
+          externalSync,
+          externalSyncFields,
+          externalSyncFieldMappings,
         });
       }
 
@@ -57,6 +63,9 @@ export const usePersistConfiguration = () => {
         templates: templates ?? [],
         observableTypes,
         extractObservables,
+        externalSync,
+        externalSyncFields,
+        externalSyncFieldMappings,
       });
     },
     {

@@ -156,6 +156,56 @@ describe('configure', () => {
       });
     });
 
+    it('has expected attributes in request with externalSync', () => {
+      const request = {
+        ...defaultRequest,
+        externalSync: { autoPush: true, conflictStrategy: 'kibana' },
+      };
+      const query = ConfigurationRequestRt.decode(request);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: request,
+      });
+    });
+
+    it('rejects an unknown externalSync conflict strategy', () => {
+      const query = ConfigurationRequestRt.decode({
+        ...defaultRequest,
+        externalSync: { autoPush: true, conflictStrategy: 'newest' },
+      });
+
+      expect(query._tag).toBe('Left');
+    });
+
+    it('has expected attributes in request with externalSyncFields', () => {
+      const request = {
+        ...defaultRequest,
+        externalSyncFields: [{ field: 'description', direction: 'push' }],
+      };
+      const query = ConfigurationRequestRt.decode(request);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: request,
+      });
+    });
+
+    it('rejects an unknown externalSyncFields direction or field', () => {
+      expect(
+        ConfigurationRequestRt.decode({
+          ...defaultRequest,
+          externalSyncFields: [{ field: 'title', direction: 'sideways' }],
+        })._tag
+      ).toBe('Left');
+      expect(
+        ConfigurationRequestRt.decode({
+          ...defaultRequest,
+          externalSyncFields: [{ field: 'severity', direction: 'both' }],
+        })._tag
+      ).toBe('Left');
+    });
+
     it(`limits customFields to ${MAX_CUSTOM_FIELDS_PER_CASE}`, () => {
       const customFields = new Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
         key: 'text_custom_field',
@@ -364,6 +414,32 @@ describe('configure', () => {
       const request = {
         ...defaultRequest,
         extractObservables: false,
+      };
+      const query = ConfigurationPatchRequestRt.decode(request);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: request,
+      });
+    });
+
+    it('has expected attributes in request with externalSync', () => {
+      const request = {
+        ...defaultRequest,
+        externalSync: { autoPush: false, conflictStrategy: 'external' },
+      };
+      const query = ConfigurationPatchRequestRt.decode(request);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: request,
+      });
+    });
+
+    it('has expected attributes in request with externalSyncFields', () => {
+      const request = {
+        ...defaultRequest,
+        externalSyncFields: [{ field: 'status', direction: 'off' }],
       };
       const query = ConfigurationPatchRequestRt.decode(request);
 

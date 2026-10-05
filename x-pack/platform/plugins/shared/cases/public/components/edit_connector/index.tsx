@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiSpacer,
   EuiText,
   EuiTitle,
   EuiToolTip,
@@ -21,13 +22,22 @@ import {
 import { isEmpty } from 'lodash/fp';
 
 import type { CaseUI, CaseConnectors } from '../../../common/ui/types';
-import type { ActionConnector, CaseConnector } from '../../../common/types/domain';
+import type {
+  ActionConnector,
+  CaseConnector,
+  ExternalSyncSettings,
+} from '../../../common/types/domain';
+import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 import * as i18n from './translations';
 import { getConnectorById } from '../utils';
 import { usePushToService } from '../use_push_to_service';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
+import { useIsExternalSyncEnabled } from '../../common/use_is_external_sync_enabled';
+import { usePostSyncCase } from '../../containers/use_post_sync_case';
 import { PushButton } from './push_button';
 import { PushCallouts } from './push_callouts';
+import { SyncButton } from './sync_button';
+import { SyncSettings } from './sync_settings';
 import { ConnectorsForm } from './connectors_form';
 import { ConnectorFieldsPreviewForm } from '../connectors/fields_preview_form';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -38,6 +48,8 @@ export interface EditConnectorProps {
   supportedActionConnectors: ActionConnector[];
   isLoading: boolean;
   onSubmit: (connector: CaseConnector) => void;
+  /** Saves `settings.externalSync`; the sync controls are hidden when absent. */
+  onUpdateSettings?: (settings: CaseUI['settings']) => void;
   showHeader?: boolean;
   /**
    * `icon` (default) matches the legacy pencil-icon-in-the-header look. `outlined`
@@ -54,6 +66,7 @@ export const EditConnector = React.memo(
     supportedActionConnectors,
     isLoading,
     onSubmit,
+    onUpdateSettings,
     showHeader = true,
     actionsVariant = 'icon',
   }: EditConnectorProps) => {
@@ -66,6 +79,8 @@ export const EditConnector = React.memo(
     const { actions } = useApplicationCapabilities();
     const { permissions } = useCasesContext();
     const canUseConnectors = permissions.connectors && actions.read;
+    const isExternalSyncEnabled = useIsExternalSyncEnabled();
+    const { isLoading: isSyncing, mutate: syncFromExternalService } = usePostSyncCase();
 
     const onEditClick = useCallback(() => setIsEdit(true), []);
     const onCancelConnector = useCallback(() => setIsEdit(false), []);
@@ -121,6 +136,35 @@ export const EditConnector = React.memo(
     // moved down next to the push button, so skip the divider below it too instead of
     // showing a stray line with an empty row above it.
     const showHeaderDivider = showHeader || (showEditAction && !isOutlined);
+    // Sync needs a saved connector on the case and the same privilege as push.
+    const showSyncControls =
+      isExternalSyncEnabled &&
+      showPushAction &&
+      isValidConnector &&
+      permissions.update &&
+      onUpdateSettings != null;
+
+    const connectorName = connectorWithName.name;
+    const handleSync = useCallback(
+      () => syncFromExternalService({ caseId: caseData.id, connectorName }),
+      [caseData.id, connectorName, syncFromExternalService]
+    );
+    const caseSettings = caseData.settings;
+    const handleSyncSettingsChange = useCallback(
+      (externalSync: ExternalSyncSettings) => onUpdateSettings?.({ ...caseSettings, externalSync }),
+      [caseSettings, onUpdateSettings]
+    );
+
+    const syncButton = showSyncControls ? (
+      <SyncButton
+        hasBeenPushed={hasBeenPushed}
+        disabled={!hasBeenPushed || isSyncing || isLoadingPushToService}
+        isLoading={isSyncing}
+        connectorName={connectorName}
+        onSync={handleSync}
+        variant={isOutlined ? 'outlined' : 'empty'}
+      />
+    ) : null;
 
     return (
       <EuiFlexItem grow={false} data-test-subj="sidebar-connectors">
@@ -174,6 +218,27 @@ export const EditConnector = React.memo(
               fields={caseConnectorFields}
             />
           )}
+          {showSyncControls ? (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs">
+                    <h4>{i18n.SYNC_TITLE}</h4>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <ExperimentalBadge compact data-test-subj="connector-sync-tech-preview-badge" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="s" />
+              <SyncSettings
+                compressed
+                value={caseSettings.externalSync}
+                disabled={isLoading}
+                onChange={handleSyncSettingsChange}
+              />
+            </EuiFlexItem>
+          ) : null}
           {canUseConnectors && isEdit && (
             <ConnectorsForm
               caseData={caseData}
@@ -223,6 +288,11 @@ export const EditConnector = React.memo(
                         </span>
                       </EuiFlexItem>
                     ) : null}
+                    {syncButton ? (
+                      <EuiFlexItem grow={false}>
+                        <span>{syncButton}</span>
+                      </EuiFlexItem>
+                    ) : null}
                   </EuiFlexGroup>
                 </EuiFlexItem>
               )
@@ -238,6 +308,7 @@ export const EditConnector = React.memo(
                       showTooltip={errorsMsg.length > 0 || !needsToBePushed || !hasPushPermissions}
                       connectorName={connectorWithName.name}
                     />
+                    {syncButton}
                   </span>
                 </EuiFlexItem>
               )}

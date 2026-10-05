@@ -13,9 +13,10 @@ import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';
 import type { CreateMappingsArgs } from './types';
 import { casesConnectors } from '../../connectors';
+import { pickConnectorSyncSettings } from './utils';
 
 export const createMappings = async (
-  { connector, owner, refresh }: CreateMappingsArgs,
+  { connector, owner, refresh, sync }: CreateMappingsArgs,
   clientArgs: CasesClientArgs
 ): Promise<ConnectorMappingResponse> => {
   const {
@@ -32,6 +33,7 @@ export const createMappings = async (
       attributes: {
         mappings,
         owner,
+        ...pickConnectorSyncSettings(sync),
       },
       references: [
         {
@@ -47,6 +49,7 @@ export const createMappings = async (
       id: theMapping.id,
       version: theMapping.version,
       mappings: theMapping.attributes.mappings,
+      ...pickConnectorSyncSettings(theMapping.attributes),
     };
 
     return decodeOrThrow(ConnectorMappingResponseRt)(res);

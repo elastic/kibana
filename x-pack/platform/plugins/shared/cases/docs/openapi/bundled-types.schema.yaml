@@ -369,6 +369,18 @@ paths:
                       description: |
                         Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
                       example: true
+                    externalSync:
+                      $ref: '#/components/schemas/external_sync_settings'
+                    externalSyncFields:
+                      type: array
+                      description: Technical preview. Per-field sync directions and conflict rules of the configuration's connector.
+                      items:
+                        $ref: '#/components/schemas/external_sync_field_rule'
+                    externalSyncFieldMappings:
+                      type: array
+                      description: Technical preview. External fields of the configuration's connector carried onto global case fields.
+                      items:
+                        $ref: '#/components/schemas/external_sync_field_mapping'
                     owner:
                       $ref: '#/components/schemas/owner'
                     templates:
@@ -559,6 +571,18 @@ paths:
                     description: |
                       Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
                     example: true
+                  externalSync:
+                    $ref: '#/components/schemas/external_sync_settings'
+                  externalSyncFields:
+                    type: array
+                    description: Technical preview. Per-field sync directions and conflict rules of the configuration's connector.
+                    items:
+                      $ref: '#/components/schemas/external_sync_field_rule'
+                  externalSyncFieldMappings:
+                    type: array
+                    description: Technical preview. External fields of the configuration's connector carried onto global case fields.
+                    items:
+                      $ref: '#/components/schemas/external_sync_field_mapping'
                   owner:
                     $ref: '#/components/schemas/owner'
                   templates:
@@ -751,6 +775,18 @@ paths:
                     description: |
                       Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
                     example: true
+                  externalSync:
+                    $ref: '#/components/schemas/external_sync_settings'
+                  externalSyncFields:
+                    type: array
+                    description: Technical preview. Per-field sync directions and conflict rules of the configuration's connector.
+                    items:
+                      $ref: '#/components/schemas/external_sync_field_rule'
+                  externalSyncFieldMappings:
+                    type: array
+                    description: Technical preview. External fields of the configuration's connector carried onto global case fields.
+                    items:
+                      $ref: '#/components/schemas/external_sync_field_mapping'
                   owner:
                     $ref: '#/components/schemas/owner'
                   templates:
@@ -1973,6 +2009,39 @@ paths:
               examples:
                 response401:
                   $ref: '#/components/examples/response_401'
+  /api/cases/{caseId}/_sync:
+    post:
+      summary: Sync a case from its external incident
+      description: |
+        Technical preview. Fetches the incident the case was last pushed to and applies its title, description, and status to the case. Fields that changed in Kibana since the last push are kept when the case conflict strategy is `kibana`. Requires the `xpack.cases.bidirectionalSync.enabled` setting and an Enterprise license. You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges. You must also have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case.
+      operationId: syncCaseDefaultSpace
+      tags:
+        - cases
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/kbn_xsrf'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/case_response_properties'
+        '400':
+          description: The case has not been pushed, or its connector cannot be synced from.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
   /api/cases/{caseId}/user_actions/_find:
     get:
       summary: Find case activity
@@ -2748,6 +2817,23 @@ components:
         - observability
         - securitySolution
       example: cases
+    external_sync_settings:
+      type: object
+      description: |
+        Technical preview. Controls automatic synchronization between the case and the external incident created by its connector. On a configuration these are the defaults of the configuration's connector and apply to new cases that use it. When `autoPush` is true, changes to the case are pushed to the external system without a manual push. `conflictStrategy` decides which side wins when a field changed on both sides since the last push: `external` applies the external value, `kibana` keeps the case value.
+      required:
+        - autoPush
+        - conflictStrategy
+      properties:
+        autoPush:
+          type: boolean
+          example: true
+        conflictStrategy:
+          type: string
+          enum:
+            - external
+            - kibana
+          example: external
     settings:
       type: object
       description: An object that contains the case settings.
@@ -2763,6 +2849,8 @@ components:
             When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. For owners that do not support observable extraction (currently Observability), an omitted value resolves to `false` regardless of the space configuration.
           type: boolean
           example: true
+        externalSync:
+          $ref: '#/components/schemas/external_sync_settings'
     case_severity:
       type: string
       description: The severity of the case.
@@ -3665,6 +3753,66 @@ components:
         - .servicenow-sir
         - .swimlane
       example: .none
+    external_sync_field_rule:
+      type: object
+      description: |
+        Technical preview. How one case field moves between the case and the external incident. `direction` is `both`, `push` (case to external only), `pull` (external to case only), or `off`. `status` supports only `pull` and `off`. Pulling `tags` and `comments` requires a connector that exposes them (Jira); other connectors leave them unchanged. `conflictStrategy` overrides the case's conflict strategy for this field when both sides changed.
+      required:
+        - field
+        - direction
+      properties:
+        field:
+          type: string
+          enum:
+            - title
+            - description
+            - status
+            - tags
+            - comments
+          example: title
+        direction:
+          type: string
+          enum:
+            - both
+            - push
+            - pull
+            - 'off'
+          example: both
+        conflictStrategy:
+          type: string
+          enum:
+            - external
+            - kibana
+          example: kibana
+    external_sync_field_mapping:
+      type: object
+      description: |
+        Technical preview. Carries one external field of the configuration's connector onto a global case field. `externalField` is the field key as the external system reports it; `caseField` is the storage key of a global field definition. `direction` and `conflictStrategy` behave as for the built-in field rules. Supported for Jira and ServiceNow connectors, up to 20 mappings per connector.
+      required:
+        - externalField
+        - caseField
+        - direction
+      properties:
+        externalField:
+          type: string
+          example: customfield_10021
+        caseField:
+          type: string
+          example: severity_tier_as_keyword
+        direction:
+          type: string
+          enum:
+            - both
+            - push
+            - pull
+            - 'off'
+          example: both
+        conflictStrategy:
+          type: string
+          enum:
+            - external
+            - kibana
+          example: external
     template_tags:
       description: |
         The words and phrases that help categorize templates. It can be an empty array.
@@ -3825,6 +3973,18 @@ components:
           type: boolean
           description: |
             Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. For owners that do not support observable extraction (currently Observability), setting this to `true` has no effect on case creation; new cases for those owners always use `false`.
+        externalSync:
+          $ref: '#/components/schemas/external_sync_settings'
+        externalSyncFields:
+          type: array
+          description: Technical preview. Per-field sync directions and conflict rules of the configuration's connector.
+          items:
+            $ref: '#/components/schemas/external_sync_field_rule'
+        externalSyncFieldMappings:
+          type: array
+          description: Technical preview. External fields of the configuration's connector carried onto global case fields.
+          items:
+            $ref: '#/components/schemas/external_sync_field_mapping'
         owner:
           $ref: '#/components/schemas/owner'
         templates:
@@ -3904,6 +4064,18 @@ components:
           type: boolean
           description: |
             Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
+        externalSync:
+          $ref: '#/components/schemas/external_sync_settings'
+        externalSyncFields:
+          type: array
+          description: Technical preview. Per-field sync directions and conflict rules of the configuration's connector.
+          items:
+            $ref: '#/components/schemas/external_sync_field_rule'
+        externalSyncFieldMappings:
+          type: array
+          description: Technical preview. External fields of the configuration's connector carried onto global case fields.
+          items:
+            $ref: '#/components/schemas/external_sync_field_mapping'
         templates:
           $ref: '#/components/schemas/templates'
         version:
@@ -4946,6 +5118,42 @@ components:
       properties:
         status:
           $ref: '#/components/schemas/case_status'
+    payload_sync:
+      type: object
+      properties:
+        sync:
+          type: object
+          description: Technical preview. The case was reconciled from its external incident.
+          required:
+            - connector_name
+            - external_id
+            - external_title
+            - external_url
+            - updated_fields
+            - conflicted_fields
+          properties:
+            connector_name:
+              type: string
+            external_id:
+              type: string
+            external_title:
+              type: string
+            external_url:
+              type: string
+            updated_fields:
+              description: Case fields updated from the external incident.
+              type: array
+              items:
+                type: string
+            conflicted_fields:
+              description: Case fields kept because they changed in Kibana and the conflict strategy is `kibana`.
+              type: array
+              items:
+                type: string
+            external_updated_at:
+              type: string
+            external_updated_by:
+              type: string
     payload_tags:
       type: object
       properties:
@@ -5145,6 +5353,7 @@ components:
             - $ref: '#/components/schemas/payload_settings'
             - $ref: '#/components/schemas/payload_severity'
             - $ref: '#/components/schemas/payload_status'
+            - $ref: '#/components/schemas/payload_sync'
             - $ref: '#/components/schemas/payload_tags'
             - $ref: '#/components/schemas/payload_title'
             - $ref: '#/components/schemas/payload_user_comment'

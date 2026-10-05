@@ -28,6 +28,11 @@ import {
 } from '../../domain';
 import type { Configurations, Configuration } from '../../domain/configure/v1';
 import { ConfigurationBasicWithoutOwnerRt, ClosureTypeRt } from '../../domain/configure/v1';
+import {
+  ExternalSyncFieldMappingsRt,
+  ExternalSyncFieldRulesRt,
+  ExternalSyncSettingsRt,
+} from '../../domain/external_sync/v1';
 import { CaseConnectorRt } from '../../domain/connector/v1';
 import { CaseBaseOptionalFieldsRequestRt } from '../case/v1';
 import {
@@ -190,6 +195,9 @@ export const ConfigurationRequestRt = rt.intersection([
       templates: TemplatesConfigurationRt,
       observableTypes: ObservableTypesConfigurationRt,
       extractObservables: rt.boolean,
+      externalSync: ExternalSyncSettingsRt,
+      externalSyncFields: ExternalSyncFieldRulesRt,
+      externalSyncFieldMappings: ExternalSyncFieldMappingsRt,
     })
   ),
 ]);
@@ -217,6 +225,9 @@ export const ConfigurationPatchRequestRt = rt.intersection([
       templates: TemplatesConfigurationRt,
       observableTypes: ObservableTypesConfigurationRt,
       extractObservables: ConfigurationBasicWithoutOwnerRt.type.props.extractObservables,
+      externalSync: ExternalSyncSettingsRt,
+      externalSyncFields: ExternalSyncFieldRulesRt,
+      externalSyncFieldMappings: ExternalSyncFieldMappingsRt,
     })
   ),
   rt.strict({ version: rt.string }),

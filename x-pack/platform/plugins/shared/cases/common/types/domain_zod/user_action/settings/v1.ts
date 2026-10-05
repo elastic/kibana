@@ -7,11 +7,13 @@
 
 import { z } from '@kbn/zod/v4';
 import { UserActionTypes } from '../action/v1';
+import { ExternalSyncSettingsSchema } from '../../case/v1';
 
 export const SettingsUserActionPayloadSchema = z.object({
   settings: z.object({
     syncAlerts: z.boolean().optional(),
     extractObservables: z.boolean().optional(),
+    externalSync: ExternalSyncSettingsSchema.optional(),
   }),
 });
 

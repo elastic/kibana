@@ -9,7 +9,13 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
-import type { ActionConnector, ObservableTypeConfiguration } from '../../../common/types/domain';
+import type {
+  ActionConnector,
+  ExternalSyncFieldMappings,
+  ExternalSyncFieldRules,
+  ExternalSyncSettings,
+  ObservableTypeConfiguration,
+} from '../../../common/types/domain';
 import { getNoneConnector } from '../../../common/utils/connectors';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
@@ -22,6 +28,7 @@ import { getConnectorById } from '../utils';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useLicense } from '../../common/use_license';
 import { useCasesFeatures } from '../../common/use_cases_features';
+import { useIsExternalSyncEnabled } from '../../common/use_is_external_sync_enabled';
 import { CommonFlyout } from './flyout';
 import { ObservableTypesForm } from '../observable_types/form';
 import * as i18n from './translations';
@@ -44,6 +51,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
   const license = useLicense();
   const hasMinimumLicensePermissions = license.isAtLeastGold();
   const hasMinimumLicensePermissionsForObservables = license.isAtLeastPlatinum();
+  const isExternalSyncEnabled = useIsExternalSyncEnabled();
   const { isObservablesFeatureEnabled, isExtractObservablesEnabled } = useCasesFeatures();
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
@@ -73,6 +81,9 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     templates,
     observableTypes,
     extractObservables,
+    externalSync,
+    externalSyncFields,
+    externalSyncFieldMappings,
   } = currentConfiguration;
 
   const {
@@ -216,6 +227,75 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
         version: configurationVersion,
         closureType,
         extractObservables: value,
+      });
+    },
+    [
+      configurationId,
+      configurationVersion,
+      closureType,
+      connector,
+      customFields,
+      templates,
+      persistCaseConfigure,
+    ]
+  );
+
+  const onChangeExternalSync = useCallback(
+    (value: ExternalSyncSettings) => {
+      persistCaseConfigure({
+        connector,
+        customFields,
+        templates,
+        id: configurationId,
+        version: configurationVersion,
+        closureType,
+        externalSync: value,
+      });
+    },
+    [
+      configurationId,
+      configurationVersion,
+      closureType,
+      connector,
+      customFields,
+      templates,
+      persistCaseConfigure,
+    ]
+  );
+
+  const onChangeExternalSyncFields = useCallback(
+    (value: ExternalSyncFieldRules) => {
+      persistCaseConfigure({
+        connector,
+        customFields,
+        templates,
+        id: configurationId,
+        version: configurationVersion,
+        closureType,
+        externalSyncFields: value,
+      });
+    },
+    [
+      configurationId,
+      configurationVersion,
+      closureType,
+      connector,
+      customFields,
+      templates,
+      persistCaseConfigure,
+    ]
+  );
+
+  const onChangeExternalSyncFieldMappings = useCallback(
+    (value: ExternalSyncFieldMappings) => {
+      persistCaseConfigure({
+        connector,
+        customFields,
+        templates,
+        id: configurationId,
+        version: configurationVersion,
+        closureType,
+        externalSyncFieldMappings: value,
       });
     },
     [
@@ -381,6 +461,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     hasMinimumLicensePermissionsForObservables,
     isObservablesFeatureEnabled,
     isExtractObservablesEnabled,
+    isExternalSyncEnabled,
     configurationId,
     configurationVersion,
     closureType,
@@ -390,6 +471,9 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     templates,
     observableTypes,
     extractObservables,
+    externalSync,
+    externalSyncFields,
+    externalSyncFieldMappings,
     isPersistingConfiguration,
     isLoadingCaseConfiguration,
     isFetchingCaseConfiguration: isFetchingCaseConfigure,
@@ -408,6 +492,9 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     onChangeConnector,
     onChangeClosureType,
     onChangeExtractObservables,
+    onChangeExternalSync,
+    onChangeExternalSyncFields,
+    onChangeExternalSyncFieldMappings,
     ConnectorAddFlyout,
     ConnectorEditFlyout,
     onEditObservableType,

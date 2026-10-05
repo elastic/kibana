@@ -721,6 +721,22 @@ export const getUserAction = (
         payload: { description: 'a desc' },
         ...overrides,
       };
+    case UserActionTypes.sync:
+      return {
+        ...commonProperties,
+        type: UserActionTypes.sync,
+        payload: {
+          sync: {
+            connectorName: externalService.connectorName,
+            externalId: externalService.externalId,
+            externalTitle: externalService.externalTitle,
+            externalUrl: externalService.externalUrl,
+            updatedFields: ['title', 'status'],
+            conflictedFields: [],
+          },
+        },
+        ...overrides,
+      };
     case UserActionTypes.pushed:
       return {
         ...commonProperties,

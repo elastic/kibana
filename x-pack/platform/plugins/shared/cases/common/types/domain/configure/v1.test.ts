@@ -152,6 +152,22 @@ describe('configure', () => {
       });
     });
 
+    it('does not keep sync settings on the configuration attributes', () => {
+      const query = ConfigurationAttributesRt.decode({
+        ...defaultRequest,
+        externalSync: { autoPush: true, conflictStrategy: 'external' },
+        externalSyncFields: [{ field: 'title', direction: 'pull' }],
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: {
+          ...defaultRequest,
+          customFields: [textCustomField, toggleCustomField, numberCustomField],
+        },
+      });
+    });
+
     it('removes foo:bar attributes from request', () => {
       const query = ConfigurationAttributesRt.decode({ ...defaultRequest, foo: 'bar' });
 
@@ -225,6 +241,17 @@ describe('configure', () => {
       ],
       extractObservables: true,
     };
+
+    it('keeps the connector sync settings on the configuration response', () => {
+      const response = {
+        ...defaultRequest,
+        externalSync: { autoPush: true, conflictStrategy: 'external' },
+        externalSyncFields: [{ field: 'title', direction: 'pull', conflictStrategy: 'kibana' }],
+      };
+      const query = ConfigurationRt.decode(response);
+
+      expect(query).toStrictEqual({ _tag: 'Right', right: response });
+    });
 
     it('has expected attributes in request', () => {
       const query = ConfigurationRt.decode(defaultRequest);

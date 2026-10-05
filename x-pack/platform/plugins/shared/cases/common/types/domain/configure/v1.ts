@@ -14,6 +14,11 @@ import {
   CustomFieldNumberTypeRt,
 } from '../custom_field/v1';
 import { CaseBaseOptionalFieldsRt } from '../case/v1';
+import {
+  ExternalSyncFieldMappingsRt,
+  ExternalSyncFieldRulesRt,
+  ExternalSyncSettingsRt,
+} from '../external_sync/v1';
 import { CaseObservableTypeRt } from '../observable/v1';
 
 export const ClosureTypeRt = rt.union([
@@ -134,6 +139,18 @@ export const ConfigurationBasicWithoutOwnerRt = rt.strict({
   extractObservables: rt.boolean,
 });
 
+/**
+ * Sync settings of the configuration's connector (technical preview). Stored on the
+ * connector mappings, surfaced on the configuration for the settings page.
+ */
+export const ConfigurationOptionalFieldsRt = rt.exact(
+  rt.partial({
+    externalSync: ExternalSyncSettingsRt,
+    externalSyncFields: ExternalSyncFieldRulesRt,
+    externalSyncFieldMappings: ExternalSyncFieldMappingsRt,
+  })
+);
+
 export const CasesConfigureBasicRt = rt.intersection([
   ConfigurationBasicWithoutOwnerRt,
   rt.strict({
@@ -165,6 +182,7 @@ export const ConfigurationRt = rt.intersection([
     owner: rt.string,
     mappings: ConnectorMappingsRt,
   }),
+  ConfigurationOptionalFieldsRt,
 ]);
 
 export const ConfigurationsRt = rt.array(ConfigurationRt);

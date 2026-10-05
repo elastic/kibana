@@ -15,5 +15,7 @@ export default createTestConfig('spaces_only', {
   // The trial suite includes templates / field-definitions coverage that
   // requires the templates feature. Pin it ON explicitly so the suite is
   // deterministic regardless of the plugin default (mirrors `config_trial.ts`).
-  kbnServerArgs: ['--xpack.cases.templates.enabled=true'],
+  kbnServerArgs: [
+    '--xpack.cases.templates.enabled=true',
+  ],
 });

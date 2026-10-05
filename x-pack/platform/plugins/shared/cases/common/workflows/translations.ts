@@ -768,3 +768,23 @@ export const PUSH_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
       'This step pushes a case or multiple cases to their external connector. If no connector is configured on a case, the step will fail. The step returns the updated case objects after the push.',
   }
 );
+
+export const SYNC_CASE_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.syncCase.label', {
+  defaultMessage: 'Cases - Sync case from external incident',
+});
+
+export const SYNC_CASE_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.syncCase.description',
+  {
+    defaultMessage:
+      'Applies the external incident to the case it was pushed to. Technical preview.',
+  }
+);
+
+export const SYNC_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.syncCase.documentation.details',
+  {
+    defaultMessage:
+      'This step reads the external incident linked to a case and applies its title, description and status according to the connector sync rules. Identify the case by its id, or by the external incident id (and connector id) carried by the external system webhook. The step returns the updated cases. Cases that were never pushed are skipped.',
+  }
+);

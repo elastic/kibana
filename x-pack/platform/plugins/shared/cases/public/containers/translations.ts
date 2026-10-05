@@ -100,3 +100,9 @@ export const OBSERVABLE_MAX_REACHED = (maxObservables: number) =>
     defaultMessage:
       "You've reached the maximum number of observables {maxObservables} that can be added to a case. Some observables were not added.",
   });
+
+export const SUCCESS_SYNC_FROM_EXTERNAL_SERVICE = (serviceName: string) =>
+  i18n.translate('xpack.cases.containers.syncFromExternalService', {
+    values: { serviceName },
+    defaultMessage: 'Synced from { serviceName }',
+  });
