@@ -203,17 +203,35 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
       },
     },
     async (requestContext, request, response) => {
-      const { sourceId } = request.params;
+      try {
+        const { sourceId } = request.params;
 
-      const client = createSearchClient(requestContext, framework);
-      const soClient = (await requestContext.core).savedObjects.client;
-      const source = await libs.sources.getSourceConfiguration(soClient, sourceId);
+        // `request` is threaded through so `subscribeToAborted$` cancels the ES
+        // call when the client disconnects.
+        const client = createSearchClient(requestContext, framework, request);
+        const soClient = (await requestContext.core).savedObjects.client;
+        const source = await libs.sources.getSourceConfiguration(soClient, sourceId);
 
-      const results = await hasData(source.configuration.metricAlias, client);
+        const results = await hasData(source.configuration.metricAlias, client);
 
-      return response.ok({
-        body: { hasData: results, configuration: source.configuration },
-      });
+        return response.ok({
+          body: { hasData: results, configuration: source.configuration },
+        });
+      } catch (err) {
+        if (Boom.isBoom(err)) {
+          return response.customError({
+            statusCode: err.output.statusCode,
+            body: { message: err.output.payload.message },
+          });
+        }
+
+        return response.customError({
+          statusCode: err.statusCode ?? 500,
+          body: {
+            message: err.message ?? 'An unexpected error occurred',
+          },
+        });
+      }
     }
   );
 
