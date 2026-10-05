@@ -34,9 +34,10 @@ export function buildEsqlSourceCacheKey(
   projectRouting: string | undefined,
   esqlVariables: ESQLControlVariable[] | undefined
 ): { cacheKey: string; cleanVariables: ESQLControlVariable[] | undefined } {
-  const cleanVariables = esqlVariables?.map(
-    ({ key, value, type }) => ({ key, value, type } as ESQLControlVariable)
-  );
+  // Use one representation for no variables in both source IDs and cache keys.
+  const cleanVariables = esqlVariables?.length
+    ? esqlVariables.map(({ key, value, type }) => ({ key, value, type } as ESQLControlVariable))
+    : undefined;
   return {
     cacheKey: JSON.stringify([query, projectRouting ?? null, cleanVariables ?? null]),
     cleanVariables,

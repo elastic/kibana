@@ -6,7 +6,6 @@
  */
 
 import type {
-  InvestigationBlindSpot,
   InvestigationHypothesis,
   InvestigationImpact,
   InvestigationRecommendation,
@@ -75,6 +74,8 @@ export interface StartInvestigationRequest {
    * Stream names the investigation should scope its signal search to.
    */
   stream_names?: string[];
+  /** Optional chat model connector or inference endpoint id for this run. */
+  connector_id?: string;
   /**
    * Caller-supplied key for concurrency control. Passed to the workflow engine as
    * `concurrency_key`, which maps to `concurrencyGroupKey` in the execution index.
@@ -120,7 +121,6 @@ export interface InvestigationStructuredOutput {
   severity?: Severity;
   hypotheses?: InvestigationHypothesis[];
   recommendations?: InvestigationRecommendation[];
-  blind_spots?: InvestigationBlindSpot[];
   impact?: InvestigationImpact;
 }
 

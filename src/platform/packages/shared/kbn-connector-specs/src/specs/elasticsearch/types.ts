@@ -34,7 +34,7 @@ export const SearchInputSchema = lazySchema(() =>
       .describe('Maximum number of hits to return (0–500).'),
     from: z.number().int().min(0).max(10000).default(0).describe('Offset for pagination.'),
     sort: z
-      .array(z.record(z.string(), z.unknown()))
+      .array(z.record(z.string().max(200), z.unknown()))
       .max(5)
       .optional()
       .describe('Sort clauses, e.g. [{ "@timestamp": { "order": "desc" } }].'),
@@ -54,6 +54,7 @@ export const SearchInputSchema = lazySchema(() =>
       .describe('Runtime field definitions to apply at query time.'),
     timeout: z
       .string()
+      .max(20)
       .regex(/^\d+[smhd]$/)
       .default('30s')
       .describe('ES-side query timeout, e.g. "30s". Partial results are returned on timeout.'),
@@ -75,7 +76,7 @@ export const EsqlInputSchema = lazySchema(() =>
         'ES|QL query string, e.g. "FROM logs-* | WHERE @timestamp > NOW() - 1 hour | STATS count = COUNT(*) BY host.name | SORT count DESC | LIMIT 10". Requires remote ES 8.11+.'
       ),
     params: z
-      .array(z.union([z.string(), z.number(), z.boolean(), z.null()]))
+      .array(z.union([z.string().max(10000), z.number(), z.boolean(), z.null()]))
       .max(100)
       .optional()
       .describe('Positional parameter values for ? placeholders in the query.'),
@@ -147,7 +148,7 @@ export const RequestInputSchema = lazySchema(() =>
         'ES REST API path, starting with /. E.g. "/my-index/_doc/abc123", "/_aliases", "/_cat/health?v". The base cluster URL is prepended automatically — do not repeat it here.'
       ),
     queryParams: z
-      .record(z.string().max(200), z.union([z.string(), z.number(), z.boolean()]))
+      .record(z.string().max(200), z.union([z.string().max(2048), z.number(), z.boolean()]))
       .refine((v) => Object.keys(v).length <= 50, { message: 'At most 50 query parameters.' })
       .optional()
       .describe('Query string parameters as key-value pairs, merged with any params in the path.'),

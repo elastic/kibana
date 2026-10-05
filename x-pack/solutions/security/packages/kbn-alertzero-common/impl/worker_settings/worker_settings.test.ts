@@ -7,10 +7,11 @@
 
 import { z } from '@kbn/zod/v4';
 import {
-  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_IDS,
 } from '../../constants';
@@ -75,6 +76,27 @@ describe('Worker settings declarations', () => {
       extras: { autoCloseConfidenceScoreMinThreshold: 0.85 },
     });
     expect(createDefaultWorkerSettings(ATTACK_DISCOVERY)).not.toHaveProperty('extras');
+  });
+
+  it('gives Continuous Threat Hunt a 4h schedule and no extras: only autonomy and schedule are configurable', () => {
+    expect(
+      createDefaultWorkerSettings(SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID)
+    ).toEqual({
+      workerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+      autonomy: 'manual',
+      scheduleInterval: '4h',
+    });
+  });
+
+  it('rejects an extras field on Continuous Threat Hunt, which owns no dials', () => {
+    expect(
+      issuesOf(SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID, {
+        workerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+        autonomy: 'manual',
+        scheduleInterval: '4h',
+        extras: { tier2When: 'always' },
+      })
+    ).toMatch(/extras/);
   });
 
   it('rejects an unknown top-level key by name', () => {
@@ -211,7 +233,7 @@ describe('allowed autonomy levels', () => {
     expect(getAllowedAutonomyLevels(TRIAGE)).toEqual(['manual', 'supervised']);
     // Review-gated throughout, so no unattended level at all.
     expect(getAllowedAutonomyLevels(RULE_TUNING)).toEqual(['manual', 'assisted']);
-    expect(getAllowedAutonomyLevels(SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID)).toEqual([
+    expect(getAllowedAutonomyLevels(SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID)).toEqual([
       'manual',
       'assisted',
     ]);
