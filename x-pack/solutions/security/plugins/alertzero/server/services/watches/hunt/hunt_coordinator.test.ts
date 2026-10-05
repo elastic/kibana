@@ -2018,4 +2018,187 @@ describe('huntCoordinator', () => {
       expect(result.status).toBe('tier1_and_tier2');
     });
   });
+
+  describe("incomplete — the coordinator's own gaps, not a copy of the tiers'", () => {
+    const mockModel = {} as import('@kbn/agent-builder-server').ScopedModel;
+
+    it('surfaces generation_failed on a tier1Only path, where next_step is a fixed string and would otherwise hide it', async () => {
+      // no_inference is in TIER2_REQUESTED_BUT_UNAVAILABLE, and next_step on this
+      // path is a hardcoded string — no gap reaches the caller at all without this.
+      const result = await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        undefined,
+        logger,
+        {
+          spaceId: 'default',
+          indexPatterns: INDEX_PATTERNS,
+          trigger: 'scheduled',
+          run_id: 'run-incomplete-no-inference',
+          text: 'report text',
+        }
+      );
+
+      expect(result.status).toBe('tier1_only');
+      expect(result.tier2_skipped_reason).toBe('no_inference');
+      expect(result.incomplete).toEqual([expect.objectContaining({ reason: 'generation_failed' })]);
+    });
+
+    it('surfaces generation_failed on the tier2_only_skipped (no report text) path', async () => {
+      const result = await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        mockModel,
+        logger,
+        {
+          spaceId: 'default',
+          indexPatterns: INDEX_PATTERNS,
+          trigger: 'scheduled',
+          run_id: 'run-incomplete-no-text',
+        }
+      );
+
+      expect(result.status).toBe('tier2_only_skipped');
+      expect(result.tier2_skipped_reason).toBe('no_report_text');
+      expect(result.incomplete).toEqual([expect.objectContaining({ reason: 'generation_failed' })]);
+    });
+
+    it('surfaces input_truncated as its own gap on the both-tiers path', async () => {
+      const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
+      const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
+      const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
+      mockLoad.mockResolvedValueOnce({
+        iocs: [{ type: 'ip', value: '192.0.2.30' }],
+        techniques: ['T1078.004'],
+        text: 'report body text',
+        truncated: { iocs: { kept: 100, dropped: 50 } },
+      });
+      mockT1.mockResolvedValueOnce({
+        status: 'no_environment_hits',
+        has_confirmed_hit: false,
+        searched_iocs: 1,
+        searched_techniques: 1,
+        resolved_iocs: [],
+        resolved_techniques: [],
+        time_range: { from: 'now-24h', to: 'now' },
+        counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
+        hits: [],
+        affected_assets: { hosts: [], users: [], services: [] },
+        per_index: [],
+      });
+      mockT2.mockResolvedValueOnce({
+        status: 'behaviors_proposed',
+        behaviors: [],
+        indexed_behaviors: [],
+        has_hit: false,
+        next_step: 'none',
+      });
+
+      const result = await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        mockModel,
+        logger,
+        {
+          spaceId: 'default',
+          indexPatterns: INDEX_PATTERNS,
+          trigger: 'scheduled',
+          run_id: 'run-incomplete-truncated',
+          report_id: 'rpt-1',
+        }
+      );
+
+      expect(result.incomplete).toEqual([expect.objectContaining({ reason: 'input_truncated' })]);
+    });
+
+    it('does not duplicate tier1.incomplete or tier2.incomplete onto the coordinator-level field', async () => {
+      const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
+      const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
+      mockT1.mockResolvedValueOnce({
+        status: 'no_environment_hits',
+        has_confirmed_hit: false,
+        searched_iocs: 1,
+        searched_techniques: 1,
+        resolved_iocs: [],
+        resolved_techniques: [],
+        time_range: { from: 'now-24h', to: 'now' },
+        counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
+        hits: [],
+        affected_assets: { hosts: [], users: [], services: [] },
+        per_index: [],
+        incomplete: [{ reason: 'search_partial', detail: 'shards failed' }],
+      });
+      mockT2.mockResolvedValueOnce({
+        status: 'behaviors_proposed',
+        behaviors: [],
+        indexed_behaviors: [],
+        has_hit: false,
+        next_step: 'none',
+        incomplete: [
+          { reason: 'unknown_technique_id', technique_id: 'T9999', detail: 'not in the catalog' },
+        ],
+      });
+
+      const result = await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        mockModel,
+        logger,
+        {
+          spaceId: 'default',
+          indexPatterns: INDEX_PATTERNS,
+          trigger: 'scheduled',
+          run_id: 'run-incomplete-no-duplication',
+          text: 'report text',
+        }
+      );
+
+      // Both tiers reported gaps of their own, readable via tier1.incomplete /
+      // tier2.incomplete — the coordinator's own field must not echo them back.
+      expect(result.tier1.incomplete).toEqual([
+        expect.objectContaining({ reason: 'search_partial' }),
+      ]);
+      expect(result.tier2?.incomplete).toEqual([
+        expect.objectContaining({ reason: 'unknown_technique_id' }),
+      ]);
+      expect(result.incomplete).toBeUndefined();
+    });
+
+    it('is absent when the coordinator itself has nothing to report', async () => {
+      const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
+      const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
+      mockT1.mockResolvedValueOnce({
+        status: 'no_environment_hits',
+        has_confirmed_hit: false,
+        searched_iocs: 1,
+        searched_techniques: 1,
+        resolved_iocs: [],
+        resolved_techniques: [],
+        time_range: { from: 'now-24h', to: 'now' },
+        counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
+        hits: [],
+        affected_assets: { hosts: [], users: [], services: [] },
+        per_index: [],
+      });
+      mockT2.mockResolvedValueOnce({
+        status: 'behaviors_proposed',
+        behaviors: [],
+        indexed_behaviors: [],
+        has_hit: false,
+        next_step: 'none',
+      });
+
+      const result = await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        mockModel,
+        logger,
+        {
+          spaceId: 'default',
+          indexPatterns: INDEX_PATTERNS,
+          trigger: 'scheduled',
+          run_id: 'run-incomplete-clean',
+          text: 'report text',
+        }
+      );
+
+      expect(result.completeness).toBe('complete');
+      expect(result.incomplete).toBeUndefined();
+    });
+  });
 });
