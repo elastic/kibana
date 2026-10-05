@@ -50,6 +50,12 @@ import type {
 export type AttachmentSavedObjectType =
   | typeof CASE_COMMENT_SAVED_OBJECT
   | typeof CASE_ATTACHMENT_SAVED_OBJECT;
+import type {
+  CreateTaskUserActionPayload,
+  UpdateTaskUserActionPayload,
+  DeleteTaskUserActionPayload,
+  ApplyTaskTemplateUserActionPayload,
+} from '../../../common/types/domain/user_action/task/v1';
 
 export interface BuilderParameters {
   title: {
@@ -128,6 +134,18 @@ export interface BuilderParameters {
   };
   workflow: {
     parameters: { payload: WorkflowUserActionPayload };
+  };
+  create_task: {
+    parameters: { payload: CreateTaskUserActionPayload };
+  };
+  update_task: {
+    parameters: { payload: UpdateTaskUserActionPayload };
+  };
+  delete_task: {
+    parameters: { payload: DeleteTaskUserActionPayload };
+  };
+  apply_task_template: {
+    parameters: { payload: ApplyTaskTemplateUserActionPayload };
   };
 }
 

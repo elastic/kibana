@@ -258,6 +258,28 @@ const PER_TYPE_FIXTURES: {
     },
     { action: 'create' }
   ),
+  create_task: makeUserActionSO('create_task', {
+    task: { id: 'task-1', title: 'Block sender', status: 'open', priority: 'high', assignees: [] },
+  }),
+  update_task: makeUserActionSO(
+    'update_task',
+    {
+      task_id: 'task-1',
+      task_title: 'Block sender',
+      changed_fields: [{ field: 'status', old_value: 'open', new_value: 'completed' }],
+    },
+    { action: 'update' }
+  ),
+  delete_task: makeUserActionSO(
+    'delete_task',
+    { task_id: 'task-1', task_title: 'Block sender', subtasks_deleted: 0 },
+    { action: 'delete' }
+  ),
+  apply_task_template: makeUserActionSO('apply_task_template', {
+    template_id: 'tpl-1',
+    template_name: 'Phishing',
+    tasks_created: 3,
+  }),
 };
 
 // ----- Layer 1: doc-builder output ⊆ activity mapping (per-type) -----

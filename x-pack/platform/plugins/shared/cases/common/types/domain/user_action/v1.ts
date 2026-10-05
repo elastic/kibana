@@ -35,6 +35,12 @@ import { ObservablesUserActionRt } from './observables/v1';
 import { ExtendedFieldsUserActionRt } from './extended_fields/v1';
 import { TemplateUserActionRt } from './template/v1';
 import { WorkflowUserActionRt } from './workflow/v1';
+import {
+  CreateTaskUserActionRt,
+  UpdateTaskUserActionRt,
+  DeleteTaskUserActionRt,
+  ApplyTaskTemplateUserActionRt,
+} from './task/v1';
 export { UserActionTypes, UserActionActions } from './action/v1';
 export { StatusUserActionRt } from './status/v1';
 export { ActionSourceRt, ActionSourceTypes, isActionSource, isHeaderActionSource, toActionSource };
@@ -85,6 +91,10 @@ const BasicUserActionsRt = rt.union([
   ExtendedFieldsUserActionRt,
   TemplateUserActionRt,
   WorkflowUserActionRt,
+  CreateTaskUserActionRt,
+  UpdateTaskUserActionRt,
+  DeleteTaskUserActionRt,
+  ApplyTaskTemplateUserActionRt,
 ]);
 
 const CommonUserActionsWithIdsRt = rt.union([BasicUserActionsRt, CommentUserActionRt]);
@@ -186,3 +196,9 @@ export type TemplateUserAction = UserAction<rt.TypeOf<typeof TemplateUserActionR
 export type WorkflowUserAction = UserAction<rt.TypeOf<typeof WorkflowUserActionRt>>;
 export { WorkflowUserActionRt, WorkflowOriginRt } from './workflow/v1';
 export type { WorkflowPayload, WorkflowOrigin, WorkflowUserActionPayload } from './workflow/v1';
+export type CreateTaskUserAction = UserAction<rt.TypeOf<typeof CreateTaskUserActionRt>>;
+export type UpdateTaskUserAction = UserAction<rt.TypeOf<typeof UpdateTaskUserActionRt>>;
+export type DeleteTaskUserAction = UserAction<rt.TypeOf<typeof DeleteTaskUserActionRt>>;
+export type ApplyTaskTemplateUserAction = UserAction<
+  rt.TypeOf<typeof ApplyTaskTemplateUserActionRt>
+>;

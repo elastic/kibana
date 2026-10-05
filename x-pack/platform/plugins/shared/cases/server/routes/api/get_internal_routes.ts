@@ -33,6 +33,8 @@ import type { ConfigType } from '../../config';
 import { getTemplateRoutes } from './templates';
 import { getFieldDefinitionRoutes } from './field_definitions';
 import { createRunWorkflowRoute } from './internal/run_workflow';
+import { getTaskRoutes } from './tasks';
+import { getTaskTemplateRoutes } from './task_templates';
 
 export const getInternalRoutes = (
   userProfileService: UserProfileService,
@@ -66,4 +68,6 @@ export const getInternalRoutes = (
     ...getTemplateRoutes(config),
     ...getFieldDefinitionRoutes(config),
     ...(workflowRun ? [createRunWorkflowRoute(workflowRun)] : []),
+    ...getTaskRoutes(config),
+    ...getTaskTemplateRoutes(config),
   ] as CaseRoute[];

@@ -15,6 +15,7 @@ import { getPushedTelemetryData } from './queries/push';
 import { getUserActionsTelemetryData } from './queries/user_actions';
 import { getTemplatesTelemetryData } from './queries/templates';
 import { getFieldLibraryTelemetryData } from './queries/field_definitions';
+import { getTasksTelemetryData } from './queries/tasks';
 import type { CasesTelemetry, CollectTelemetryDataParams } from './types';
 
 export const collectTelemetryData = async ({
@@ -33,6 +34,7 @@ export const collectTelemetryData = async ({
       casesSystemAction,
       templates,
       fieldLibrary,
+      tasks,
     ] = await Promise.all([
       getCasesTelemetryData({ savedObjectsClient, logger }),
       getUserActionsTelemetryData({ savedObjectsClient, logger }),
@@ -53,6 +55,11 @@ export const collectTelemetryData = async ({
 
         return undefined;
       }),
+      getTasksTelemetryData({ savedObjectsClient, logger }).catch((err) => {
+        logger.debug('Failed collecting Cases tasks telemetry data');
+        logger.debug(err);
+        return undefined;
+      }),
     ]);
 
     return {
@@ -66,6 +73,7 @@ export const collectTelemetryData = async ({
       casesSystemAction,
       ...(templates !== undefined ? { templates } : {}),
       ...(fieldLibrary !== undefined ? { fieldLibrary } : {}),
+      ...(tasks !== undefined ? { tasks } : {}),
     };
   } catch (err) {
     logger.debug('Failed collecting Cases telemetry data');

@@ -18,6 +18,9 @@ import { caseIdIncrementerSavedObjectType } from './id_incrementer';
 import { createCaseAttachmentSavedObjectType } from './attachments';
 import { caseTemplateSavedObjectType } from './templates';
 import { caseFieldDefinitionSavedObjectType } from './field_definitions';
+import { caseTaskSavedObjectType } from './tasks';
+import { caseTaskTemplateSavedObjectType } from './task_templates';
+import { caseTaskCommentSavedObjectType } from './task_comments';
 import type { ConfigType } from '../config';
 
 interface RegisterSavedObjectsArgs {
@@ -59,4 +62,7 @@ export const registerSavedObjects = ({
   core.savedObjects.registerType(caseTemplateSavedObjectType);
   core.savedObjects.registerType(caseFieldDefinitionSavedObjectType);
   core.savedObjects.registerType(createCaseAttachmentSavedObjectType());
+  core.savedObjects.registerType(caseTaskSavedObjectType);
+  core.savedObjects.registerType(caseTaskTemplateSavedObjectType);
+  core.savedObjects.registerType(caseTaskCommentSavedObjectType);
 };

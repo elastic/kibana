@@ -100,6 +100,45 @@ export const OBSERVABLES = i18n.translate('xpack.cases.caseView.userActions.obse
   defaultMessage: 'Observables',
 });
 
+export const TASK = i18n.translate('xpack.cases.caseView.userActions.task', {
+  defaultMessage: 'Task',
+});
+
+export const TASK_TEMPLATE = i18n.translate('xpack.cases.caseView.userActions.taskTemplate', {
+  defaultMessage: 'Task Template',
+});
+
+export const ADDED_TASK = (title: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.addedTask', {
+    values: { title },
+    defaultMessage: 'added task "{title}"',
+  });
+
+export const UPDATED_TASK = (title: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.updatedTask', {
+    values: { title },
+    defaultMessage: 'updated task "{title}"',
+  });
+
+export const CHANGED_TASK_STATUS = (title: string, status: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.changedTaskStatus', {
+    values: { title, status },
+    defaultMessage: 'marked task "{title}" as {status}',
+  });
+
+export const DELETED_TASK = (title: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.deletedTask', {
+    values: { title },
+    defaultMessage: 'deleted task "{title}"',
+  });
+
+export const APPLIED_TASK_LIST = (name: string, count: number) =>
+  i18n.translate('xpack.cases.caseView.userActions.appliedTaskList', {
+    values: { name, count },
+    defaultMessage:
+      'applied task list "{name}" and added {count, plural, one {# task} other {# tasks}}',
+  });
+
 export const USER_ACTION_EDITED = (type: string) =>
   i18n.translate('xpack.cases.caseView.userActions.edited', {
     values: { type },

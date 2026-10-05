@@ -47,6 +47,9 @@ export const CASE_RULES_SAVED_OBJECT = 'cases-rules' as const;
 export const CASE_ID_INCREMENTER_SAVED_OBJECT = 'cases-incrementing-id' as const;
 export const CASE_TEMPLATE_SAVED_OBJECT = 'cases-templates' as const;
 export const CASE_FIELD_DEFINITION_SAVED_OBJECT = 'cases-field-definition' as const;
+export const CASE_TASK_SAVED_OBJECT = 'cases-tasks' as const;
+export const CASE_TASK_TEMPLATE_SAVED_OBJECT = 'cases-task-templates' as const;
+export const CASE_TASK_COMMENT_SAVED_OBJECT = 'cases-task-comments' as const;
 
 /**
  * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins
@@ -132,6 +135,24 @@ export const INTERNAL_CASE_FIND_USER_ACTIONS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/user_actions/_find` as const;
 export const INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL =
   `${CASES_INTERNAL_URL}/case/attachments/_find_containing_all` as const;
+
+/**
+ * Task routes
+ */
+export const CASES_TASKS_URL = `${CASES_URL}/tasks` as const;
+export const CASE_TASKS_URL = `${CASE_DETAILS_URL}/tasks` as const;
+export const CASE_TASK_DETAILS_URL = `${CASE_TASKS_URL}/{task_id}` as const;
+export const CASE_TASK_COMMENTS_URL = `${CASE_TASK_DETAILS_URL}/comments` as const;
+export const CASE_TASK_COMMENT_DETAILS_URL = `${CASE_TASK_COMMENTS_URL}/{comment_id}` as const;
+export const CASE_TASKS_REORDER_URL = `${CASE_TASKS_URL}/_reorder` as const;
+export const CASE_TASKS_APPLY_TEMPLATE_URL = `${CASE_TASKS_URL}/_apply_template` as const;
+export const CASES_TASKS_FIND_URL = `${CASES_TASKS_URL}/_find` as const;
+
+/**
+ * Task template routes
+ */
+export const CASES_TASK_TEMPLATES_URL = `${CASES_URL}/task_templates` as const;
+export const CASE_TASK_TEMPLATE_DETAILS_URL = `${CASES_TASK_TEMPLATES_URL}/{template_id}` as const;
 
 export const INTERNAL_TEMPLATES_URL = `${CASES_INTERNAL_URL}/templates` as const;
 export const INTERNAL_TEMPLATE_DETAILS_URL = `${INTERNAL_TEMPLATES_URL}/{template_id}` as const;
@@ -405,6 +426,10 @@ export const NO_ASSIGNEES_FILTERING_KEYWORD = 'none';
 export const NO_ACTION_SOURCE_FILTERING_KEYWORD = 'none';
 export const KIBANA_SYSTEM_USERNAME = 'elastic/kibana';
 export const MAX_OBSERVABLES_PER_CASE = 50;
+export const MAX_TASKS_PER_CASE = 100;
+export const MAX_TASK_TEMPLATES_PER_OWNER = 100;
+export const MAX_TASK_LISTS_PER_TEMPLATE = 10;
+export const MAX_COMMENTS_PER_TASK = 100;
 
 /**
  * Delays
