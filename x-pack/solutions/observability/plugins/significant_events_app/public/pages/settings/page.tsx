@@ -53,7 +53,7 @@ export function SettingsPage() {
   } = useKibana();
   const { query } = useSignificantEventsAppParams('/settings');
   const router = useSignificantEventsAppRouter();
-  const { canConfigure } = getNightshiftCapabilities(nightshift);
+  const { canManageAndConfigure } = getNightshiftCapabilities(nightshift);
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
   // Settings opens from both Nightshift and the Management page; Back returns to the one it
   // came from. An unknown fromTab is ignored, so a hand-edited query does not claim to return
@@ -68,18 +68,18 @@ export function SettingsPage() {
   const backLabel = fromTab ? managementLabel : nightshiftLabel;
 
   useEffect(() => {
-    if (!canConfigure) {
+    if (!canManageAndConfigure) {
       void navigateToApp(NIGHTSHIFT_APP_ID);
     }
-  }, [canConfigure, navigateToApp]);
+  }, [canManageAndConfigure, navigateToApp]);
 
   useEffect(() => {
-    if (canConfigure) {
+    if (canManageAndConfigure) {
       chrome.setBreadcrumbs([{ text: backLabel, href: backHref }, { text: settingsTitle }]);
     }
-  }, [canConfigure, chrome, backHref, backLabel]);
+  }, [canManageAndConfigure, chrome, backHref, backLabel]);
 
-  if (!canConfigure) {
+  if (!canManageAndConfigure) {
     return null;
   }
 

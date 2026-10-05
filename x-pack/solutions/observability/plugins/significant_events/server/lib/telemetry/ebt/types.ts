@@ -65,7 +65,12 @@ interface AgentToolEventCreateProps {
 
 interface AgentToolEventStatusUpdateProps {
   success: boolean;
-  event_uuid: string;
+  /**
+   * @deprecated Superseded by `event_id`. Kept optional for schema continuity with events sent by
+   * nodes that have not been upgraded yet.
+   */
+  event_uuid?: string;
+  event_id: string;
   status: SignificantEventStatus;
   error_message?: string;
 }

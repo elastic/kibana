@@ -156,6 +156,10 @@ export const buildTestStatsQuery = (
  * filter keeps it affordable; `LAST` is the expensive part, which is why Playwright attempts are
  * left out and only its per-run `test-outcome` documents are scanned.
  */
+// Skipped Playwright runs may carry no status at all
+const RUN_STATUS =
+  'CASE(test.outcome == "flaky", "flaky", test.outcome == "skipped", "skipped", test.status)';
+
 export const buildBranchStatsQuery = (
   scope: FlakyTestQueryScope,
   frameworks: readonly TestFramework[],
@@ -170,8 +174,7 @@ export const buildBranchStatsQuery = (
     )}`,
     `EVAL is_execution = CASE(${model.executionFilter}, 1, 0),` +
       ` failed = CASE(is_execution == 1 AND ${model.failedExpression} == 1, 1, 0),` +
-      // skipped Playwright runs may carry no status at all
-      ' status = CASE(test.outcome == "flaky", "flaky", test.outcome == "skipped", "skipped", test.status)',
+      ` status = ${RUN_STATUS}`,
     'STATS builds = COUNT_DISTINCT(CASE(is_execution == 1, buildkite.build.id, NULL)),' +
       ' failed_builds = COUNT_DISTINCT(CASE(failed == 1, buildkite.build.id, NULL)),' +
       ' last_failed_at = MAX(CASE(failed == 1, @timestamp, NULL)),' +
@@ -182,6 +185,34 @@ export const buildBranchStatsQuery = (
       ' latest_at = MAX(@timestamp),' +
       ' latest_build_url = LAST(buildkite.build.url, @timestamp),' +
       ' latest_job_id = LAST(buildkite.job_id, @timestamp)' +
+      ' BY test.id, buildkite.branch',
+    'RENAME test.id AS test_id, buildkite.branch AS branch',
+    `LIMIT ${ESQL_ROW_LIMIT}`,
+  ].join(' | ');
+};
+
+/** Per test and branch, how many setups (pipeline, config, target) ran it and skipped it last. */
+export const buildBranchSetupsQuery = (
+  scope: FlakyTestQueryScope,
+  frameworks: readonly TestFramework[],
+  testIds: readonly string[]
+): string => {
+  const [model] = buildExecutionModels(frameworks);
+  const setupParts = [
+    'buildkite.pipeline.slug',
+    'test_run.config.file.path',
+    'test_run.target.mode',
+    'test_run.target.type',
+  ].map((field) => `COALESCE(${field}, "-")`);
+
+  return [
+    `FROM ${SCOUT_TEST_EVENTS_INDEX_PATTERN}`,
+    `WHERE ${[...scopeClauses(scope), model.runFilter, `test.id IN (${inList(testIds)})`].join(
+      ' AND '
+    )}`,
+    `EVAL status = ${RUN_STATUS}, setup = CONCAT(${setupParts.join(', " ", ')})`,
+    'STATS latest_status = LAST(status, @timestamp) BY test.id, buildkite.branch, setup',
+    'STATS setups = COUNT(*), skipped_setups = SUM(CASE(latest_status == "skipped", 1, 0))' +
       ' BY test.id, buildkite.branch',
     'RENAME test.id AS test_id, buildkite.branch AS branch',
     `LIMIT ${ESQL_ROW_LIMIT}`,
@@ -348,8 +379,9 @@ export const fetchTestMetadata = async (
 };
 
 /**
- * Per-branch build counts and latest run for the given tests, most failed builds first. Tests are
- * grouped by execution model so that each one is counted the way its framework requires.
+ * Per-branch build counts, latest run and whether every setup skipped it, for the given tests,
+ * most failed builds first. Tests are grouped by execution model so that each one is counted the
+ * way its framework requires.
  */
 export const fetchBranchStats = async (
   es: ESClient,
@@ -375,6 +407,34 @@ export const fetchBranchStats = async (
     )
   );
 
+  // Setup: pipeline + config + Scout target. Only tests whose latest run is a skip are checked
+  const candidates = new Set(
+    results
+      .flat()
+      .filter((record) => record.branch !== null && record.latest_status === 'skipped')
+      .map((record) => record.test_id)
+  );
+  const setupResults = await Promise.all(
+    groupByExecutionModel(tests.filter(({ testId }) => candidates.has(testId))).map(
+      ({ frameworks, testIds }) =>
+        runEsql<{ test_id: string; branch: string | null; setups: number; skipped_setups: number }>(
+          es,
+          buildBranchSetupsQuery(scope, frameworks, testIds)
+        )
+    )
+  );
+
+  const branchKey = (testId: string, branch: string): string => `${testId}\n${branch}`;
+  const skipped = new Map<string, boolean>();
+  for (const record of setupResults.flat()) {
+    if (record.branch !== null) {
+      skipped.set(
+        branchKey(record.test_id, record.branch),
+        record.setups > 0 && record.skipped_setups === record.setups
+      );
+    }
+  }
+
   const byTest = new Map<string, FlakyTestBranchStats[]>();
   for (const record of results.flat()) {
     if (record.branch === null) continue;
@@ -399,6 +459,9 @@ export const fetchBranchStats = async (
               jobId: record.latest_job_id || undefined,
             }
           : undefined,
+      skipped:
+        record.latest_status === 'skipped' &&
+        skipped.get(branchKey(record.test_id, record.branch)) === true,
     });
     byTest.set(record.test_id, stats);
   }

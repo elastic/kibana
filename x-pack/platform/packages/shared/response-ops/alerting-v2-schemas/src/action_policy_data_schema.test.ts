@@ -14,7 +14,7 @@ import {
   snoozeActionPolicyBodySchema,
   updateActionPolicyDataSchema,
 } from './action_policy_data_schema';
-import { FIND_MAX_RESULT_WINDOW, MAX_BULK_ITEMS } from './constants';
+import { FIND_MAX_RESULT_WINDOW, MAX_BULK_ITEMS, MAX_KQL_LENGTH } from './constants';
 
 const DESTINATIONS = [{ type: 'workflow' as const, id: 'wf-1' }];
 
@@ -451,16 +451,16 @@ describe('findActionPoliciesRequestSchema', () => {
       findActionPoliciesRequestSchema.parse({
         page: 2,
         per_page: 50,
+        filter: 'enabled: true',
         search: 'cpu',
-        enabled: 'true',
         sort_field: 'name',
         sort_order: 'asc',
       })
     ).toEqual({
       page: 2,
       per_page: 50,
+      filter: 'enabled: true',
       search: 'cpu',
-      enabled: true,
       sort_field: 'name',
       sort_order: 'asc',
     });
@@ -468,6 +468,16 @@ describe('findActionPoliciesRequestSchema', () => {
 
   it('rejects unknown keys', () => {
     expect(() => findActionPoliciesRequestSchema.parse({ unknown_field: 'x' })).toThrow();
+  });
+
+  it('rejects a filter over the maximum KQL length', () => {
+    expect(
+      findActionPoliciesRequestSchema.safeParse({ filter: 'a'.repeat(MAX_KQL_LENGTH) }).success
+    ).toBe(true);
+
+    expect(
+      findActionPoliciesRequestSchema.safeParse({ filter: 'a'.repeat(MAX_KQL_LENGTH + 1) }).success
+    ).toBe(false);
   });
 
   it('coerces numeric strings for page and per_page', () => {

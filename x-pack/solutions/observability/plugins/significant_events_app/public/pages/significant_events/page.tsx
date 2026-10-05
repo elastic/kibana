@@ -60,7 +60,7 @@ export function SignificantEventsPage() {
     },
   } = useKibana();
 
-  const { canShow, canManage, canConfigure } = getNightshiftCapabilities(nightshift);
+  const { canShow, canManageAndConfigure } = getNightshiftCapabilities(nightshift);
   const { isDeveloperMode } = useDeveloperMode();
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
@@ -98,7 +98,7 @@ export function SignificantEventsPage() {
 
   const menu = useMemo<AppHeaderMenu | undefined>(
     () =>
-      canConfigure
+      canManageAndConfigure
         ? {
             items: [
               {
@@ -112,7 +112,7 @@ export function SignificantEventsPage() {
             ],
           }
         : undefined,
-    [canConfigure, settingsHref, settingsLabel]
+    [canManageAndConfigure, settingsHref, settingsLabel]
   );
 
   useEffect(() => {
@@ -275,7 +275,7 @@ export function SignificantEventsPage() {
                       'Manual triggers stay disabled until status can be loaded. Open Settings to retry, or refresh the page.',
                   })}
                 </p>
-                {canManage && canConfigure && (
+                {canManageAndConfigure && (
                   <EuiButton
                     href={settingsHref}
                     color="danger"
@@ -303,7 +303,7 @@ export function SignificantEventsPage() {
                 })}
               >
                 <p>
-                  {canManage && canConfigure
+                  {canManageAndConfigure
                     ? i18n.translate('xpack.significantEventsApp.pausedBannerBody', {
                         defaultMessage:
                           'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked until you resume from Settings.',
@@ -321,7 +321,7 @@ export function SignificantEventsPage() {
                     })}
                   </p>
                 )}
-                {canManage && canConfigure && (
+                {canManageAndConfigure && (
                   <EuiButton
                     href={settingsHref}
                     color="warning"

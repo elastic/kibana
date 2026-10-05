@@ -12,6 +12,7 @@ import { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import type {
   ServiceAccountDirectory,
+  ServiceAccountDirectoryError,
   WorkflowServiceAccount,
 } from '../../../../entities/service_accounts';
 
@@ -72,6 +73,27 @@ export const getRunAsValue = (
   };
 };
 
+/** Builds the edit that writes an account's ID into the `run_as` value at `range`. */
+export const createServiceAccountSuggestion = (
+  model: monaco.editor.ITextModel,
+  range: monaco.IRange,
+  account: WorkflowServiceAccount
+): ServiceAccountSuggestion => ({
+  label: account.name,
+  account,
+  kind: monaco.languages.CompletionItemKind.Value,
+  insertText:
+    (model.getLineContent(range.startLineNumber)[range.startColumn - 2] === ':' ? ' ' : '') +
+    JSON.stringify(account.id),
+  range,
+  filterText: `${account.name} ${account.id} "${account.name}" '${account.name}'`,
+  sortText: `a_${account.name}`,
+  detail: i18n.translate('workflows.editor.serviceAccountSuggestionLabel', {
+    defaultMessage: 'Service account',
+  }),
+  documentation: account.id,
+});
+
 export const createServiceAccountEditor = (directory: ServiceAccountDirectory) => {
   const cursors: Array<string | undefined> = [undefined];
   let nextPage: string | undefined;
@@ -81,40 +103,38 @@ export const createServiceAccountEditor = (directory: ServiceAccountDirectory) =
     provideCompletionItems: async (
       model: monaco.editor.ITextModel,
       position: monaco.Position,
-      token: monaco.CancellationToken
-    ): Promise<{ suggestions: ServiceAccountSuggestion[] } | null> => {
+      token: monaco.CancellationToken,
+      refresh = false
+    ): Promise<{
+      suggestions: ServiceAccountSuggestion[];
+      error?: ServiceAccountDirectoryError['error'];
+      loadMoreFailed?: boolean;
+    } | null> => {
       const value = getRunAsValue(model, position);
       if (!value || !directory.isEnabled()) return null;
       const suggestions: ServiceAccountSuggestion[] = [];
       const seen = new Set<string>();
-      for (const cursor of cursors) {
-        const page = await directory.list(cursor);
+      let loadMoreFailed = false;
+      for (const [index, cursor] of cursors.entries()) {
+        const page = await directory.list(cursor, refresh);
         if (token.isCancellationRequested) return { suggestions: [] };
-        if (!page) {
+        if (page && 'error' in page && page.error === 'unavailable' && index > 0) {
+          // Keep the pages already shown; Load more retries the page that failed.
+          cursors.splice(index);
+          nextPage = cursor;
+          loadMoreFailed = true;
+          break;
+        }
+        if (!page || 'error' in page) {
           cursors.splice(1);
           nextPage = undefined;
-          return { suggestions: [] };
+          return { suggestions: [], error: page?.error ?? 'unavailable' };
         }
         nextPage = page.nextPage;
         for (const account of page.serviceAccounts) {
           if (account.enabled && account.assumable && !seen.has(account.id)) {
             seen.add(account.id);
-            suggestions.push({
-              label: account.name,
-              account,
-              kind: monaco.languages.CompletionItemKind.Value,
-              insertText:
-                (model.getLineContent(position.lineNumber)[value.range.startColumn - 2] === ':'
-                  ? ' '
-                  : '') + JSON.stringify(account.id),
-              range: value.range,
-              filterText: `${account.name} ${account.id} "${account.name}" '${account.name}'`,
-              sortText: `a_${account.name}`,
-              detail: i18n.translate('workflows.editor.serviceAccountSuggestionLabel', {
-                defaultMessage: 'Service account',
-              }),
-              documentation: account.id,
-            });
+            suggestions.push(createServiceAccountSuggestion(model, value.range, account));
           }
         }
       }
@@ -138,7 +158,7 @@ export const createServiceAccountEditor = (directory: ServiceAccountDirectory) =
           sortText: 'z_load_more',
         });
       }
-      return { suggestions };
+      return loadMoreFailed ? { suggestions, loadMoreFailed } : { suggestions };
     },
   };
 
