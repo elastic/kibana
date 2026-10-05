@@ -18,6 +18,7 @@ import { useUnifiedHistogram } from './use_unified_histogram';
 import { renderHook, waitFor } from '@testing-library/react';
 import type { ControlPanelState } from '@kbn/control-group-renderer';
 import type { UnifiedHistogramFetchParamsExternal } from '../types';
+import { DataViewSource } from '@kbn/data-source';
 
 describe('useUnifiedHistogram', () => {
   it('should initialize', async () => {
@@ -36,7 +37,7 @@ describe('useUnifiedHistogram', () => {
       } as ControlPanelState<OptionsListESQLControlState>,
     };
     const fetchParamsExternal: UnifiedHistogramFetchParamsExternal = {
-      dataView: dataViewWithTimefieldMock,
+      dataSource: new DataViewSource(dataViewWithTimefieldMock),
       filters: [],
       query: { language: 'kuery', query: '' },
       requestAdapter: new RequestAdapter(),
@@ -85,7 +86,7 @@ describe('useUnifiedHistogram', () => {
 
   it('should trigger fetch$ when fetch is called', async () => {
     const fetchParamsExternal: UnifiedHistogramFetchParamsExternal = {
-      dataView: dataViewWithTimefieldMock,
+      dataSource: new DataViewSource(dataViewWithTimefieldMock),
       filters: [],
       query: { language: 'kuery', query: '' },
       requestAdapter: new RequestAdapter(),
@@ -118,7 +119,7 @@ describe('useUnifiedHistogram', () => {
 
   describe('clearing the lens request adapter when the chart becomes unavailable', () => {
     const fetchParamsExternal: UnifiedHistogramFetchParamsExternal = {
-      dataView: dataViewWithTimefieldMock,
+      dataSource: new DataViewSource(dataViewWithTimefieldMock),
       filters: [],
       query: { language: 'kuery', query: '' },
       requestAdapter: new RequestAdapter(),
@@ -149,7 +150,7 @@ describe('useUnifiedHistogram', () => {
       act(() => {
         result.current.api.fetch({
           ...fetchParamsExternal,
-          dataView: dataViewMock,
+          dataSource: new DataViewSource(dataViewMock),
           searchSessionId: '124',
         });
       });

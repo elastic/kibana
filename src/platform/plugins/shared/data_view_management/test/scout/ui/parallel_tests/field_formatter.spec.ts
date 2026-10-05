@@ -61,7 +61,7 @@ spaceTest.describe('Data view field formatters', { tag: '@local-stateful-classic
   spaceTest(
     'applies text, link and color formats from the field flyout',
     async ({ esClient, apiServices, scoutSpace, page, pageObjects }) => {
-      const { dataViewFieldEditor } = pageObjects;
+      const { dataViewDetail, dataViewFieldEditor } = pageObjects;
       // Index names are unique per space so parallel workers don't share them
       const index = `${ROUND_TRIP_INDEX_PREFIX}_${scoutSpace.id}`.toLowerCase();
       const { dataViewId, documentId } = await createIndexWithDataView(
@@ -77,16 +77,15 @@ spaceTest.describe('Data view field formatters', { tag: '@local-stateful-classic
       );
 
       const editField = async (fieldName: string, format: string) => {
-        await dataViewFieldEditor.gotoDataView(dataViewId);
-        await dataViewFieldEditor.filterFields(fieldName);
-        await dataViewFieldEditor.openEditFieldFlyout(fieldName);
+        await dataViewDetail.goto(dataViewId);
+        await dataViewDetail.openFieldEditorForField(fieldName);
         await dataViewFieldEditor.enableFormatAndSelect(format);
       };
 
       await spaceTest.step('upper-case the text field', async () => {
         await editField('textField', 'string');
         await dataViewFieldEditor.setStringTransform('upper');
-        await dataViewFieldEditor.saveAndWaitForClose();
+        await dataViewDetail.saveFieldEditor();
       });
 
       await spaceTest.step('turn the number field into a link', async () => {
@@ -95,7 +94,7 @@ spaceTest.describe('Data view field formatters', { tag: '@local-stateful-classic
           urlTemplate: 'https://elastic.co/?value={{value}}',
           labelTemplate: 'url label',
         });
-        await dataViewFieldEditor.saveAndWaitForClose();
+        await dataViewDetail.saveFieldEditor();
       });
 
       await spaceTest.step('color the keyword field', async () => {
@@ -105,7 +104,7 @@ spaceTest.describe('Data view field formatters', { tag: '@local-stateful-classic
           textColor: '#ffffff',
           backgroundColor: '#ff0000',
         });
-        await dataViewFieldEditor.saveAndWaitForClose();
+        await dataViewDetail.saveFieldEditor();
       });
 
       await spaceTest.step('check the rendered values in the Discover doc viewer', async () => {

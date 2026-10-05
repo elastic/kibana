@@ -11,9 +11,10 @@ import type { Locator, ScoutPage } from '@kbn/scout';
 import { KibanaCodeEditorWrapper } from '@kbn/scout';
 
 /**
- * Page object for the field editors of a data view's detail page: the runtime field flyout
- * (`data_view_field_editor`) and the scripted field form. Methods perform actions and return
- * state; specs own the assertions.
+ * Page object for what happens inside the field editors of a data view: the runtime field flyout
+ * inputs (type, script, composite subfields, formats) and the scripted field form. Page-level
+ * actions (opening the data view, the fields table, opening, saving, closing and deleting fields)
+ * live in `DataViewDetailPage`. Methods perform actions and return state; specs own the assertions.
  */
 export class DataViewFieldEditor {
   public readonly flyout: Locator;
@@ -32,49 +33,7 @@ export class DataViewFieldEditor {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
   }
 
-  /** Opens the detail page of a data view and waits for its tabs to render. */
-  async gotoDataView(dataViewId: string): Promise<void> {
-    await this.page.gotoApp(`management/kibana/dataViews/dataView/${dataViewId}`);
-    await this.page.testSubj.locator('editIndexPattern').waitFor({ state: 'visible' });
-  }
-
-  /** Types into the fields tab filter. */
-  async filterFields(name: string): Promise<void> {
-    await this.page.testSubj.fill('indexPatternFieldFilter', name);
-  }
-
-  /** Returns the number shown in the "Fields (N)" tab title. */
-  async getFieldsCount(): Promise<number> {
-    return this.getTabCount('tab-indexedFields');
-  }
-
-  /** Returns the number shown in the "Scripted fields (N)" tab title. */
-  async getScriptedFieldsCount(): Promise<number> {
-    return this.getTabCount('tab-scriptedFields');
-  }
-
-  async openScriptedFieldsTab(): Promise<void> {
-    await this.page.testSubj.click('tab-scriptedFields');
-  }
-
   // ── Runtime fields flyout ──────────────────────────────────────────────────
-
-  async openAddFieldFlyout(): Promise<void> {
-    await this.page.testSubj.click('addField');
-    await this.flyout.waitFor({ state: 'visible' });
-  }
-
-  /** Row of the fields table that belongs to the given field. */
-  fieldRow(fieldName: string): Locator {
-    return this.page
-      .locator('tr')
-      .filter({ has: this.page.testSubj.locator(`field-name-${fieldName}`) });
-  }
-
-  async openEditFieldFlyout(fieldName: string): Promise<void> {
-    await this.fieldRow(fieldName).locator('[data-test-subj="editFieldFormat"]').click();
-    await this.flyout.waitFor({ state: 'visible' });
-  }
 
   async setFieldName(name: string): Promise<void> {
     await this.page.testSubj.locator('nameField').locator('input').fill(name);
@@ -157,7 +116,7 @@ export class DataViewFieldEditor {
     await this.pickColor('Select a background color for item 0', backgroundColor);
   }
 
-  async clickSave(): Promise<void> {
+  private async clickSave(): Promise<void> {
     await this.page.testSubj.click('fieldSaveButton');
   }
 
@@ -166,23 +125,6 @@ export class DataViewFieldEditor {
     await this.clickSave();
     await this.page.testSubj.fill('saveModalConfirmText', 'change');
     await this.page.testSubj.click('confirmModalConfirmButton');
-    await this.flyout.waitFor({ state: 'hidden' });
-  }
-
-  async saveAndWaitForClose(): Promise<void> {
-    await this.clickSave();
-    await this.flyout.waitFor({ state: 'hidden' });
-  }
-
-  /** Clicks the delete action of a field and confirms the modal. */
-  async deleteField(fieldName: string): Promise<void> {
-    await this.fieldRow(fieldName).locator('[data-test-subj="deleteField"]').click();
-    await this.page.testSubj.fill('deleteModalConfirmText', 'remove');
-    await this.page.testSubj.click('confirmModalConfirmButton');
-  }
-
-  async closeFlyout(): Promise<void> {
-    await this.page.testSubj.click('closeFlyoutButton');
     await this.flyout.waitFor({ state: 'hidden' });
   }
 
@@ -246,15 +188,5 @@ export class DataViewFieldEditor {
 
   private async toggleRow(rowTestSubj: string): Promise<void> {
     await this.page.testSubj.locator(rowTestSubj).locator('[data-test-subj="toggle"]').click();
-  }
-
-  private async getTabCount(tabTestSubj: string): Promise<number> {
-    const tab = this.page.testSubj.locator(tabTestSubj);
-    // The scripted fields tab only renders once the data view has scripted fields.
-    if ((await tab.count()) === 0) return 0;
-    const text = await tab.innerText();
-    // Filtering turns the title into "Fields (0 / 89)", so read the last number.
-    const match = /(\d+)\)/.exec(text);
-    return match ? Number(match[1]) : 0;
   }
 }

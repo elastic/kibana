@@ -11,19 +11,45 @@ import type {
   PageObjects,
   ScoutParallelTestFixtures,
   ScoutParallelWorkerFixtures,
+  ScoutTestFixtures,
+  ScoutWorkerFixtures,
 } from '@kbn/scout';
-import { createLazyPageObject, spaceTest as spaceBaseTest } from '@kbn/scout';
-import { DataViewFieldEditor } from './page_objects';
+import { test as baseTest, spaceTest as baseSpaceTest } from '@kbn/scout';
+import { DataViewEditorFlyoutPage, DataViewDetailPage, DataViewFieldEditor } from './page_objects';
 
-type DataViewManagementPageObjects = PageObjects & {
+export interface DataViewManagementPageObjects extends PageObjects {
+  dataViewEditorFlyout: DataViewEditorFlyoutPage;
+  dataViewDetail: DataViewDetailPage;
   dataViewFieldEditor: DataViewFieldEditor;
-};
+}
 
-export interface DataViewManagementParallelTestFixtures extends ScoutParallelTestFixtures {
+export interface DataViewManagementTestFixtures extends ScoutTestFixtures {
   pageObjects: DataViewManagementPageObjects;
 }
 
-export const spaceTest = spaceBaseTest.extend<
+export const test = baseTest.extend<DataViewManagementTestFixtures, ScoutWorkerFixtures>({
+  pageObjects: async (
+    { pageObjects, page }: { pageObjects: PageObjects; page: ScoutTestFixtures['page'] },
+    use: (po: DataViewManagementPageObjects) => Promise<void>
+  ) => {
+    await use({
+      ...pageObjects,
+      dataViewEditorFlyout: new DataViewEditorFlyoutPage(page),
+      dataViewDetail: new DataViewDetailPage(page),
+      dataViewFieldEditor: new DataViewFieldEditor(page),
+    });
+  },
+});
+
+interface DataViewManagementParallelTestFixtures extends ScoutParallelTestFixtures {
+  pageObjects: PageObjects & {
+    dataViewEditorFlyout: DataViewEditorFlyoutPage;
+    dataViewDetail: DataViewDetailPage;
+    dataViewFieldEditor: DataViewFieldEditor;
+  };
+}
+
+export const spaceTest = baseSpaceTest.extend<
   DataViewManagementParallelTestFixtures,
   ScoutParallelWorkerFixtures
 >({
@@ -35,11 +61,13 @@ export const spaceTest = spaceBaseTest.extend<
       pageObjects: DataViewManagementParallelTestFixtures['pageObjects'];
       page: DataViewManagementParallelTestFixtures['page'];
     },
-    use: (pageObjects: DataViewManagementParallelTestFixtures['pageObjects']) => Promise<void>
+    use: (po: DataViewManagementParallelTestFixtures['pageObjects']) => Promise<void>
   ) => {
     await use({
       ...pageObjects,
-      dataViewFieldEditor: createLazyPageObject(DataViewFieldEditor, page),
+      dataViewEditorFlyout: new DataViewEditorFlyoutPage(page),
+      dataViewDetail: new DataViewDetailPage(page),
+      dataViewFieldEditor: new DataViewFieldEditor(page),
     });
   },
 });

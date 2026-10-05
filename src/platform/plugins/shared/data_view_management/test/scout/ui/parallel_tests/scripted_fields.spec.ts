@@ -51,11 +51,11 @@ spaceTest.describe('Data view scripted fields', { tag: '@local-stateful-classic'
   // Regression for #33251: saving a scripted field serialised its format so that re-opening it
   // crashed the editor (`field.format.params is not a function`).
   spaceTest('creates a scripted field and re-saves it repeatedly', async ({ pageObjects }) => {
-    const { dataViewFieldEditor } = pageObjects;
+    const { dataViewDetail, dataViewFieldEditor } = pageObjects;
     const fieldName = 'ram_Pain_ui';
 
-    await dataViewFieldEditor.gotoDataView(dataViewId);
-    const startingCount = await dataViewFieldEditor.getScriptedFieldsCount();
+    await dataViewDetail.goto(dataViewId);
+    const startingCount = await dataViewDetail.getScriptedFieldsTabCount();
 
     await spaceTest.step('create the field through the management form', async () => {
       await dataViewFieldEditor.gotoCreateScriptedField(dataViewId);
@@ -70,14 +70,14 @@ spaceTest.describe('Data view scripted fields', { tag: '@local-stateful-classic'
       });
       await dataViewFieldEditor.saveScriptedFieldAndWaitForReturn();
 
-      await dataViewFieldEditor.gotoDataView(dataViewId);
-      await expect.poll(() => dataViewFieldEditor.getScriptedFieldsCount()).toBe(startingCount + 1);
+      await dataViewDetail.goto(dataViewId);
+      await expect.poll(() => dataViewDetail.getScriptedFieldsTabCount()).toBe(startingCount + 1);
     });
 
     await spaceTest.step('open and save the field three times', async () => {
       for (let i = 0; i < 3; i++) {
-        await dataViewFieldEditor.gotoDataView(dataViewId);
-        await dataViewFieldEditor.openScriptedFieldsTab();
+        await dataViewDetail.goto(dataViewId);
+        await dataViewDetail.openScriptedFieldsTab();
         await dataViewFieldEditor.openEditScriptedField(fieldName);
         await dataViewFieldEditor.saveScriptedFieldAndWaitForReturn();
       }

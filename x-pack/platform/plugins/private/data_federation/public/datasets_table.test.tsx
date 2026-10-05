@@ -48,6 +48,10 @@ const createDataSetRow = ({
     description: '',
   } as DataSetWithName);
 
+interface DiscoverLocatorMock {
+  navigateSync: jest.Mock;
+}
+
 describe('DatasetsTable', () => {
   const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: unknown[]) => {
     const [first] = args;
@@ -60,12 +64,15 @@ describe('DatasetsTable', () => {
     consoleWarnSpy.mockRestore();
   });
 
-  const renderTable = (props: Partial<React.ComponentProps<typeof DatasetsTable>> = {}) => {
+  const renderTable = (
+    props: Partial<React.ComponentProps<typeof DatasetsTable>> = {},
+    discoverLocator?: DiscoverLocatorMock
+  ) => {
     const history = createMemoryHistory({ initialEntries: ['/datasets'] });
     const view = render(
       <EuiProvider>
         <Router history={history}>
-          <KibanaContextProvider services={{ docLinks: docLinksMock }}>
+          <KibanaContextProvider services={{ docLinks: docLinksMock, discoverLocator }}>
             <DatasetsTable
               items={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
               selectedItems={[]}
@@ -153,27 +160,65 @@ describe('DatasetsTable', () => {
     expect(onSelectionChange).toHaveBeenCalledWith([]);
   });
 
-  it('navigates to the edit wizard and calls onDelete for row actions', async () => {
-    const onDelete = jest.fn();
-    const { getAllByTestId, history } = renderTable({
-      items: [
-        createDataSetRow({ name: 'set1', dataSource: 'ds1' }),
-        createDataSetRow({ name: 'set2', dataSource: 'ds1' }),
-      ],
-      onDelete,
-    });
+  const twoRows = [
+    createDataSetRow({ name: 'set1', dataSource: 'ds1' }),
+    createDataSetRow({ name: 'set2', dataSource: 'ds1' }),
+  ];
 
-    const editButtons = getAllByTestId('dataSetsSetsEditButton');
-    const deleteButtons = getAllByTestId('dataSetsSetsDeleteIconButton');
-    expect(editButtons).toHaveLength(2);
-    expect(deleteButtons).toHaveLength(2);
+  it('navigates to the edit wizard from the row actions menu', async () => {
+    const { getAllByTestId, getByTestId, history } = renderTable({ items: twoRows });
 
-    fireEvent.click(editButtons[0]);
+    fireEvent.click(getAllByTestId('dataSetsSetsActionsButton')[0]);
+    fireEvent.click(getByTestId('dataSetsSetsEditButton'));
     expect(history.location.pathname).toBe(getEditDatasetPath('set1'));
+  });
 
-    fireEvent.click(deleteButtons[1]);
+  it('calls onDelete from the row actions menu', async () => {
+    const onDelete = jest.fn();
+    const { getAllByTestId, getByTestId } = renderTable({ items: twoRows, onDelete });
+
+    fireEvent.click(getAllByTestId('dataSetsSetsActionsButton')[1]);
+    fireEvent.click(getByTestId('dataSetsSetsDeleteIconButton'));
     expect(onDelete).toHaveBeenCalledTimes(1);
     expect(onDelete).toHaveBeenCalledWith(expect.objectContaining({ name: 'set2' }));
+  });
+
+  it('opens Discover with an ES|QL query for the dataset', async () => {
+    const navigateSync = jest.fn();
+    const { getByTestId } = renderTable({}, { navigateSync });
+
+    fireEvent.click(getByTestId('dataSetsSetsDiscoverButton'));
+    expect(navigateSync).toHaveBeenCalledTimes(1);
+    expect(navigateSync).toHaveBeenCalledWith({ query: { esql: 'FROM set1' } });
+  });
+
+  it('quotes dataset names that need quoting in ES|QL when opening Discover', async () => {
+    const navigateSync = jest.fn();
+    const { getByTestId } = renderTable(
+      { items: [createDataSetRow({ name: 'set=[1]', dataSource: 'ds1' })] },
+      { navigateSync }
+    );
+
+    fireEvent.click(getByTestId('dataSetsSetsDiscoverButton'));
+    expect(navigateSync).toHaveBeenCalledWith({ query: { esql: 'FROM "set=[1]"' } });
+  });
+
+  it('disables the row actions while rows are selected', async () => {
+    const navigateSync = jest.fn();
+    const selectedItems = [createDataSetRow({ name: 'set1', dataSource: 'ds1' })];
+    const { getByTestId } = renderTable({ items: selectedItems, selectedItems }, { navigateSync });
+
+    expect(getByTestId('dataSetsSetsActionsButton')).toHaveAttribute('aria-disabled', 'true');
+    const discoverButton = getByTestId('dataSetsSetsDiscoverButton');
+    expect(discoverButton).toHaveAttribute('aria-disabled', 'true');
+    fireEvent.click(discoverButton);
+    expect(navigateSync).not.toHaveBeenCalled();
+  });
+
+  it('hides the Discover link when Discover is unavailable', async () => {
+    const { queryByTestId } = renderTable();
+
+    expect(queryByTestId('dataSetsSetsDiscoverButton')).not.toBeInTheDocument();
   });
 
   it('shows bulk delete when selection is non-empty and calls onDeleteSelected', async () => {

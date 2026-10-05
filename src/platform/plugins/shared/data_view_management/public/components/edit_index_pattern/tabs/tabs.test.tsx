@@ -9,22 +9,98 @@
 
 import React from 'react';
 import { createMemoryHistory } from 'history';
-import { BehaviorSubject } from 'rxjs';
 import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/public/data_views/data_view.stub';
-import { renderWithI18n } from '@kbn/test-jest-helpers';
-import type { DataViewMgmtState } from '../../../management_app/data_view_management_service';
+import { mockManagementPlugin } from '../../../mocks';
+import { DataViewMgmtService } from '../../../management_app/data_view_management_service';
 import { Tabs } from './tabs';
-import { convertToEuiSelectableOptionsFromArray } from './utils';
 
-const mockServices: Record<string, unknown> = {};
+// Migrated from: src/platform/test/functional/apps/management/group1/_index_pattern_filter.ts
+// and src/platform/test/functional/apps/management/group2/_scripted_fields_filter.ts
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({ services: mockServices }),
-}));
+const indexedFieldsDataView = createStubDataView({
+  spec: {
+    id: 'test-data-view',
+    title: 'test-data-view',
+    fields: {
+      '@message': {
+        name: '@message',
+        type: 'string',
+        esTypes: ['text'],
+        searchable: true,
+        aggregatable: false,
+      },
+      '@message.raw': {
+        name: '@message.raw',
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: true,
+        aggregatable: true,
+      },
+      '@tags': {
+        name: '@tags',
+        type: 'string',
+        esTypes: ['text'],
+        searchable: true,
+        aggregatable: false,
+      },
+      bytes: {
+        name: 'bytes',
+        type: 'number',
+        esTypes: ['long'],
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+  },
+});
+
+const ALL_FIELDS = ['@message', '@message.raw', '@tags', 'bytes'];
+
+const renderTabs = async (dataView: DataView = indexedFieldsDataView) => {
+  const context = mockManagementPlugin.createIndexPatternManagmentContext();
+  context.savedObjectsManagement.getAllowedTypes.mockResolvedValue([]);
+  context.savedObjectsManagement.getRelationships.mockResolvedValue({ relations: [] });
+  context.dataViews.getRollupsEnabled = jest.fn(() => false);
+  context.dataViews.scriptedFieldsEnabled = true;
+
+  const dataViewMgmtService = new DataViewMgmtService({
+    services: {
+      application: context.application,
+      dataViews: context.dataViews,
+      savedObjectsManagement: context.savedObjectsManagement,
+      uiSettings: context.uiSettings,
+    },
+    initialValues: {},
+  });
+  await dataViewMgmtService.setDataView(dataView);
+
+  const history = createMemoryHistory();
+
+  renderWithI18n(
+    <KibanaContextProvider services={{ ...context, dataViewMgmtService }}>
+      <Tabs
+        indexPattern={dataView}
+        fields={dataView.fields.getAll()}
+        saveIndexPattern={jest.fn()}
+        refreshFields={jest.fn()}
+        relationships={[]}
+        allowedTypes={[]}
+        compositeRuntimeFields={{}}
+        refreshIndexPatternClick={jest.fn()}
+        history={history}
+        location={history.location}
+      />
+    </KibanaContextProvider>
+  );
+
+  await screen.findByRole('tab', { name: /Fields/ });
+};
 
 const createScriptedField = ({ name, lang }: { name: string; lang: string }): FieldSpec => ({
   aggregatable: false,
@@ -36,69 +112,76 @@ const createScriptedField = ({ name, lang }: { name: string; lang: string }): Fi
   type: 'number',
 });
 
-const SCRIPTED_FIELDS = [
-  createScriptedField({ name: 'painlessField', lang: 'painless' }),
-  createScriptedField({ name: 'otherPainlessField', lang: 'painless' }),
-  createScriptedField({ name: 'expressionField', lang: 'expression' }),
-];
+const scriptedFieldsDataView = createStubDataView({
+  spec: {
+    id: 'scripted-data-view',
+    title: 'scripted-data-view',
+    fields: Object.fromEntries(
+      [
+        createScriptedField({ name: 'painlessField', lang: 'painless' }),
+        createScriptedField({ name: 'otherPainlessField', lang: 'painless' }),
+        createScriptedField({ name: 'expressionField', lang: 'expression' }),
+      ].map((field) => [field.name, field])
+    ),
+  },
+});
 
-const renderTabs = () => {
-  const history = createMemoryHistory();
-  const indexPattern = createStubDataView({
-    spec: {
-      title: 'test-data-view',
-      fields: Object.fromEntries(SCRIPTED_FIELDS.map((field) => [field.name, field])),
-    },
+const getVisibleFieldNames = () =>
+  ALL_FIELDS.filter((name) => screen.queryByTestId(`field-name-${name}`) !== null);
+
+describe('Tabs field list filters', () => {
+  beforeEach(() => {
+    window.location.hash = '';
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
-  const state$ = new BehaviorSubject<
-    Pick<DataViewMgmtState, 'fields' | 'indexedFieldTypes' | 'scriptedFieldLangs'>
-  >({
-    fields: [] as DataViewField[],
-    indexedFieldTypes: [],
-    scriptedFieldLangs: convertToEuiSelectableOptionsFromArray(['painless', 'expression']),
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
-  Object.assign(mockServices, {
-    uiSettings: { get: jest.fn().mockReturnValue(false) },
-    docLinks: {
-      links: {
-        scriptedFields: { painless: '#' },
-        indexPatterns: { runtimeFields: '#' },
-        query: { queryESQL: '#' },
-      },
-    },
-    dataViewFieldEditor: {
-      openEditor: jest.fn(),
-      DeleteRuntimeFieldProvider: ({
-        children,
-      }: {
-        children: (deleteField: jest.Mock) => React.ReactNode;
-      }) => <>{children(jest.fn())}</>,
-    },
-    overlays: { openModal: jest.fn() },
-    dataViews: { getCanSaveSync: () => false, scriptedFieldsEnabled: true },
-    http: { basePath: {} },
-    application: { capabilities: {} },
-    savedObjectsManagement: {},
-    dataViewMgmtService: { state$, refreshFields: jest.fn() },
+  it('narrows the field list and tab count as the search text is refined', async () => {
+    const user = userEvent.setup();
+    await renderTabs();
+    await screen.findByTestId('field-name-bytes');
+    const search = screen.getByTestId('indexPatternFieldFilter');
+
+    await user.type(search, '@');
+    expect(await screen.findByTestId('tab-indexedFields')).toHaveTextContent('Fields (3 / 4)');
+    expect(getVisibleFieldNames()).toEqual(['@message', '@message.raw', '@tags']);
+
+    await user.type(search, 'message');
+    expect(await screen.findByTestId('tab-indexedFields')).toHaveTextContent('Fields (2 / 4)');
+    expect(getVisibleFieldNames()).toEqual(['@message', '@message.raw']);
   });
 
-  return renderWithI18n(
-    <Tabs
-      indexPattern={indexPattern}
-      fields={[]}
-      saveIndexPattern={async () => {}}
-      refreshFields={jest.fn()}
-      relationships={[]}
-      allowedTypes={[]}
-      compositeRuntimeFields={{}}
-      refreshIndexPatternClick={jest.fn()}
-      history={history}
-      location={history.location}
-    />
-  );
-};
+  it('restores the full field list when the search is cleared', async () => {
+    const user = userEvent.setup();
+    await renderTabs();
+    await screen.findByTestId('field-name-bytes');
+
+    await user.type(screen.getByTestId('indexPatternFieldFilter'), '@message');
+    expect(getVisibleFieldNames()).toEqual(['@message', '@message.raw']);
+
+    await user.click(screen.getByTestId('clearSearchButton'));
+
+    expect(screen.getByTestId('tab-indexedFields')).toHaveTextContent('Fields (4)');
+    expect(getVisibleFieldNames()).toEqual(ALL_FIELDS);
+  });
+
+  it('shows only fields of the selected type in the type filter', async () => {
+    const user = userEvent.setup();
+    await renderTabs();
+    await screen.findByTestId('field-name-bytes');
+
+    await user.click(screen.getByTestId('indexedFieldTypeFilterDropdown'));
+    await user.click(await screen.findByTestId('selectable-option-keyword'));
+    expect(getVisibleFieldNames()).toEqual(['@message.raw']);
+
+    await user.click(screen.getByTestId('selectable-option-keyword'));
+    await user.click(screen.getByTestId('selectable-option-long'));
+    expect(getVisibleFieldNames()).toEqual(['bytes']);
+  });
+});
 
 describe('Tabs scripted fields language filter', () => {
   beforeEach(() => {
@@ -111,22 +194,23 @@ describe('Tabs scripted fields language filter', () => {
   });
 
   it('filters the scripted fields table by the selected language', async () => {
-    renderTabs();
+    const user = userEvent.setup();
+    await renderTabs(scriptedFieldsDataView);
 
-    await userEvent.click(await screen.findByRole('tab', { name: /Scripted fields/ }));
+    await user.click(await screen.findByRole('tab', { name: /Scripted fields/ }));
     expect(screen.getByText('painlessField')).toBeVisible();
     expect(screen.getByText('otherPainlessField')).toBeVisible();
     expect(screen.getByText('expressionField')).toBeVisible();
 
-    await userEvent.click(screen.getByTestId('scriptedFieldLanguageFilterDropdown'));
-    await userEvent.click(screen.getByRole('option', { name: 'painless' }));
+    await user.click(screen.getByTestId('scriptedFieldLanguageFilterDropdown'));
+    await user.click(screen.getByRole('option', { name: 'painless' }));
 
     expect(screen.getByText('painlessField')).toBeVisible();
     expect(screen.getByText('otherPainlessField')).toBeVisible();
     expect(screen.queryByText('expressionField')).not.toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole('option', { name: 'painless' }));
-    await userEvent.click(screen.getByRole('option', { name: 'expression' }));
+    await user.click(screen.getByRole('option', { name: 'painless' }));
+    await user.click(screen.getByRole('option', { name: 'expression' }));
 
     expect(screen.getByText('expressionField')).toBeVisible();
     expect(screen.queryByText('painlessField')).not.toBeInTheDocument();

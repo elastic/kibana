@@ -7,10 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { globalSetupHook } from '@kbn/scout';
-import { ES_ARCHIVE_LOGSTASH_FUNCTIONAL, ES_ARCHIVE_MAKELOGS } from '../fixtures/constants';
+import { globalSetupHook, tags } from '@kbn/scout';
 
-globalSetupHook('Load logstash data for data view management tests', async ({ esArchiver }) => {
-  await esArchiver.loadIfNeeded(ES_ARCHIVE_LOGSTASH_FUNCTIONAL);
-  await esArchiver.loadIfNeeded(ES_ARCHIVE_MAKELOGS);
-});
+const ES_ARCHIVES = {
+  LOGSTASH_FUNCTIONAL: 'src/platform/test/functional/fixtures/es_archiver/logstash_functional',
+  MAKELOGS: 'src/platform/test/functional/fixtures/es_archiver/makelogs',
+  NO_TIMEFIELD: 'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield',
+};
+
+globalSetupHook(
+  'Load ES data for data view management Scout tests',
+  { tag: tags.deploymentAgnostic },
+  async ({ esArchiver, log }) => {
+    log.info('[setup] Loading ES archives for data view management tests...');
+    await esArchiver.loadIfNeeded(ES_ARCHIVES.LOGSTASH_FUNCTIONAL);
+    await esArchiver.loadIfNeeded(ES_ARCHIVES.MAKELOGS);
+    await esArchiver.loadIfNeeded(ES_ARCHIVES.NO_TIMEFIELD);
+    log.info('[setup] ES archives loaded successfully');
+  }
+);

@@ -33,26 +33,25 @@ spaceTest.describe('Data view runtime fields', { tag: tags.deploymentAgnostic },
   });
 
   spaceTest('creates, modifies and deletes a runtime field', async ({ pageObjects }) => {
-    const { dataViewFieldEditor } = pageObjects;
+    const { dataViewDetail, dataViewFieldEditor } = pageObjects;
     const fieldName = 'atest';
 
-    await dataViewFieldEditor.gotoDataView(dataViewId);
-    const startingCount = await dataViewFieldEditor.getFieldsCount();
+    await dataViewDetail.goto(dataViewId);
+    const startingCount = await dataViewDetail.getFieldsTabCount();
 
     await spaceTest.step('create the field and render its preview from real data', async () => {
-      await dataViewFieldEditor.openAddFieldFlyout();
+      await dataViewDetail.openAddFieldFlyout();
       await dataViewFieldEditor.setFieldName(fieldName);
       await dataViewFieldEditor.setFieldType('Keyword');
       await dataViewFieldEditor.setFieldScript("emit('hello world')");
       await expect(dataViewFieldEditor.fieldPreviewItem).not.toHaveCount(0);
 
-      await dataViewFieldEditor.saveAndWaitForClose();
-      await expect.poll(() => dataViewFieldEditor.getFieldsCount()).toBe(startingCount + 1);
+      await dataViewDetail.saveFieldEditor();
+      await expect.poll(() => dataViewDetail.getFieldsTabCount()).toBe(startingCount + 1);
     });
 
     await spaceTest.step('change type, script and format behind the change warning', async () => {
-      await dataViewFieldEditor.filterFields(fieldName);
-      await dataViewFieldEditor.openEditFieldFlyout(fieldName);
+      await dataViewDetail.openFieldEditorForField(fieldName);
       await dataViewFieldEditor.setFieldType('Long');
       await dataViewFieldEditor.replaceFieldScript('emit(6);');
       await dataViewFieldEditor.enableFormatAndSelect('bytes');
@@ -62,55 +61,54 @@ spaceTest.describe('Data view runtime fields', { tag: tags.deploymentAgnostic },
     });
 
     await spaceTest.step('reload the field format from the saved data view', async () => {
-      await dataViewFieldEditor.openEditFieldFlyout(fieldName);
+      await dataViewDetail.openFieldEditorForField(fieldName);
       await expect(dataViewFieldEditor.formatSelect).toHaveValue('bytes');
-      await dataViewFieldEditor.closeFlyout();
+      await dataViewDetail.closeFieldEditor();
     });
 
     await spaceTest.step('delete the field', async () => {
-      await dataViewFieldEditor.deleteField(fieldName);
-      await expect(dataViewFieldEditor.fieldRow(fieldName)).toBeHidden();
-      await expect.poll(() => dataViewFieldEditor.getFieldsCount()).toBe(startingCount);
+      await dataViewDetail.deleteField(fieldName);
+      await expect(dataViewDetail.fieldRow(fieldName)).toBeHidden();
+      await expect.poll(() => dataViewDetail.getFieldsTabCount()).toBe(startingCount);
     });
   });
 
   spaceTest('creates, modifies and deletes a composite runtime field', async ({ pageObjects }) => {
-    const { dataViewFieldEditor } = pageObjects;
+    const { dataViewDetail, dataViewFieldEditor } = pageObjects;
     // Starting with '@' to sort toward start of field list
     const fieldName = '@composite.test';
 
-    await dataViewFieldEditor.gotoDataView(dataViewId);
-    const startingCount = await dataViewFieldEditor.getFieldsCount();
+    await dataViewDetail.goto(dataViewId);
+    const startingCount = await dataViewDetail.getFieldsTabCount();
 
     await spaceTest.step('create a composite field with one subfield', async () => {
-      await dataViewFieldEditor.openAddFieldFlyout();
+      await dataViewDetail.openAddFieldFlyout();
       await dataViewFieldEditor.setFieldName(fieldName);
       await dataViewFieldEditor.setFieldType('Composite');
       await dataViewFieldEditor.setCompositeScript("emit('a.a','hello world')");
       await expect(dataViewFieldEditor.compositeSubfieldType(0)).toBeVisible();
       await expect(dataViewFieldEditor.fieldPreviewItem).not.toHaveCount(0);
 
-      await dataViewFieldEditor.saveAndWaitForClose();
-      await expect.poll(() => dataViewFieldEditor.getFieldsCount()).toBe(startingCount + 1);
+      await dataViewDetail.saveFieldEditor();
+      await expect.poll(() => dataViewDetail.getFieldsTabCount()).toBe(startingCount + 1);
     });
 
     await spaceTest.step('modify the script to emit a second subfield', async () => {
-      await dataViewFieldEditor.filterFields(fieldName);
-      await dataViewFieldEditor.openEditFieldFlyout(fieldName);
+      await dataViewDetail.openFieldEditorForField(fieldName);
       await expect(dataViewFieldEditor.compositeSubfieldType(0)).toBeVisible();
       // Editing before the preview of the saved script has loaded drops the new subfields
       await expect(dataViewFieldEditor.previewField('@composite.test.a.a')).toBeVisible();
       await dataViewFieldEditor.setCompositeScript("emit('a',6);emit('b',10);");
       await expect(dataViewFieldEditor.compositeSubfieldType(1)).toBeVisible();
 
-      await dataViewFieldEditor.saveAndWaitForClose();
-      await expect.poll(() => dataViewFieldEditor.getFieldsCount()).toBe(startingCount + 2);
+      await dataViewDetail.saveFieldEditor();
+      await expect.poll(() => dataViewDetail.getFieldsTabCount()).toBe(startingCount + 2);
     });
 
     await spaceTest.step('delete the composite field and its subfields', async () => {
-      await dataViewFieldEditor.deleteField(fieldName);
-      await expect(dataViewFieldEditor.fieldRow(fieldName)).toBeHidden();
-      await expect.poll(() => dataViewFieldEditor.getFieldsCount()).toBe(startingCount);
+      await dataViewDetail.deleteField(fieldName);
+      await expect(dataViewDetail.fieldRow(fieldName)).toBeHidden();
+      await expect.poll(() => dataViewDetail.getFieldsTabCount()).toBe(startingCount);
     });
   });
 });

@@ -7,4 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { DataViewEditorFlyoutPage } from './data_view_editor_flyout';
+export { DataViewDetailPage } from './data_view_detail_page';
 export { DataViewFieldEditor } from './data_view_field_editor';
