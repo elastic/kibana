@@ -6,7 +6,6 @@
  */
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import type { StartServicesAccessor } from '@kbn/core/server';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import type { PolicyDiffEntry } from '../domain/diff_policy_config';
 import {
@@ -355,14 +354,11 @@ const presentAssessPolicyChange = (dto: AssessPolicyChangeDto): AssessmentPresen
 
 export const createAssessPolicyChangeTool = ({
   endpointAppContextService,
-  getStartServices,
 }: {
   endpointAppContextService: EndpointAppContextService;
-  getStartServices: StartServicesAccessor;
 }): BuiltinSkillBoundedTool<typeof assessPolicyChangeSchema> =>
   createPolicyTool({
     endpointAppContextService,
-    getStartServices,
     id: ASSESS_POLICY_CHANGE_TOOL_ID,
     description:
       'Assess a bounded proposed change to one Elastic Defend endpoint policy in the current space. ' +

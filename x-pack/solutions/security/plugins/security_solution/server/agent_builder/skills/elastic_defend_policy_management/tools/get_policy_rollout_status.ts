@@ -6,7 +6,6 @@
  */
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import type { StartServicesAccessor } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import { policyIdentifierInputSchema } from '../domain/input_schemas';
@@ -90,14 +89,11 @@ const presentPolicyRolloutStatus = (status: PolicyRolloutStatus): PolicyRolloutS
 
 export const createGetPolicyRolloutStatusTool = ({
   endpointAppContextService,
-  getStartServices,
 }: {
   endpointAppContextService: EndpointAppContextService;
-  getStartServices: StartServicesAccessor;
 }): BuiltinSkillBoundedTool<typeof getPolicyRolloutStatusSchema> =>
   createPolicyTool({
     endpointAppContextService,
-    getStartServices,
     id: GET_POLICY_ROLLOUT_STATUS_TOOL_ID,
     description:
       'Get current assigned-versus-applied rollout status for one Elastic Defend endpoint policy by saved-object id or exact name in the current space. ' +

@@ -11,7 +11,6 @@ import type {
   BuiltInToolConfirmationPolicy,
   ToolHandlerContext,
 } from '@kbn/agent-builder-server/tools';
-import type { StartServicesAccessor } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { z } from '@kbn/zod/v4';
@@ -83,11 +82,6 @@ const createContext = (
   );
 };
 
-const createGetStartServices = (): StartServicesAccessor =>
-  jest.fn(async () => [
-    { savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) } },
-  ]) as unknown as StartServicesAccessor;
-
 const mockedCreateEndpointPolicyManagementService = jest.mocked(
   createEndpointPolicyManagementService
 );
@@ -102,7 +96,6 @@ const getHandlerResult = async (
 ) => {
   const logger = options.logger ?? createLogger();
   const endpointAppContextService = createMockEndpointAppContextService();
-  const getStartServices = createGetStartServices();
   const ctx = createContext(logger);
   const mockService = {
     getPolicy: jest.fn(),
@@ -112,7 +105,6 @@ const getHandlerResult = async (
 
   const tool = createPolicyTool({
     endpointAppContextService,
-    getStartServices,
     id: TOOL_ID,
     description: 'Test policy tool',
     schema: testSchema,
@@ -130,7 +122,6 @@ const getHandlerResult = async (
     ctx,
     result: result.results[0],
     endpointAppContextService,
-    getStartServices,
     mockService,
     logger,
   };
@@ -192,7 +183,6 @@ describe('createPolicyTool', () => {
   it('creates a builtin tool and forwards optional maxResultTokens', () => {
     const tool = createPolicyTool({
       endpointAppContextService: createMockEndpointAppContextService(),
-      getStartServices: createGetStartServices(),
       id: TOOL_ID,
       description: 'Test policy tool',
       schema: testSchema,
@@ -207,7 +197,6 @@ describe('createPolicyTool', () => {
   it('omits maxResultTokens and confirmation when the caller does not set them', () => {
     const tool = createPolicyTool({
       endpointAppContextService: createMockEndpointAppContextService(),
-      getStartServices: createGetStartServices(),
       id: TOOL_ID,
       description: 'Test policy tool',
       schema: testSchema,
@@ -236,13 +225,11 @@ describe('createPolicyTool', () => {
 
   it('constructs the request-scoped service from the handler request and spaceId and does not authorize in the wrapper', async () => {
     const run = jest.fn(async () => ({ ok: true }));
-    const { result, ctx, endpointAppContextService, getStartServices, mockService } =
-      await getHandlerResult(run);
+    const { result, ctx, endpointAppContextService, mockService } = await getHandlerResult(run);
 
     expect(mockedCreateEndpointPolicyManagementService).toHaveBeenCalledTimes(1);
     expect(mockedCreateEndpointPolicyManagementService).toHaveBeenCalledWith({
       endpointAppContextService,
-      getStartServices,
       request: ctx.request,
       spaceId: SPACE_ID,
     });
