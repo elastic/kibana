@@ -53,7 +53,7 @@ describe('attach new rules workflow and the attach route', () => {
     const ids = Array.from({ length: count }, (_, i) => `so-${i}`);
     const expression = (attach?.with?.body?.ruleIds ?? '').trim().slice(3, -2).trim();
     const body = {
-      target: attach?.with?.body?.target,
+      ...attach?.with?.body,
       ruleIds: engine.evalValueSync(expression, { event: { ids } }),
     };
 
