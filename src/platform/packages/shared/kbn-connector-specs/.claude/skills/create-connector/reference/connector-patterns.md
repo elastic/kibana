@@ -25,9 +25,33 @@ kbn-connector-specs/src/specs/
     ├── {your_connector}.ts
     ├── {your_connector}.test.ts
     ├── types.ts
+    ├── {helper}.ts             # Optional: helpers moved out of the spec file
+    ├── {helper}.test.ts
     └── icon/
         └── index.tsx
 ```
+
+### Keep the spec file under 500 lines
+
+`{your_connector}.ts` should read as a table of contents: metadata, auth, config schema, and the
+actions, each with a short handler. Aim for under 500 lines, and treat 1000 as a limit you must not
+exceed. When the file grows past 500, move code into sibling files in the connector directory, named
+for what they hold:
+
+- request plumbing (base URL, auth headers, error mapping, pagination and polling loops) — e.g.
+  `client.ts`
+- response shaping and other pure transformations (mapping vendor objects to the returned shape,
+  building a payload) — e.g. `format.ts`, or a name for the domain, like `gmail/mime.ts`
+- token or credential exchanges — e.g. `azure_monitor/azure_ad_token.ts`
+- constants shared by several of those files — `constants.ts`
+- a group of related actions whose handlers stay long even after that, as an exported object of action
+  definitions — e.g. `slack/events.ts`, spread into `actions` in the spec file
+
+Handlers call those functions; they do not re-implement them. Keep one function per job, shared by
+every action that needs it, rather than one copy per handler. Each helper file gets its own
+`{helper}.test.ts` for its edge cases (see `gmail/mime.test.ts`); the spec's test file keeps testing
+the actions end to end. Helper files follow the same rules as the spec: no Node built-ins, typed
+inputs, and schemas stay in `types.ts`.
 
 ## Scaffold Generator
 
@@ -50,7 +74,7 @@ After running the generator, fill in the TODO placeholders.
 
 ```typescript
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import { SearchInputSchema, GetItemInputSchema } from './types';
 import type { SearchInput, GetItemInput } from './types';
@@ -73,22 +97,26 @@ export const YourConnector: ConnectorSpec = {
     types: [{ type: 'bearer' }],     // or 'api_key_header', 'oauth_client_credentials'
   },
 
-  schema: z.object({
-    // Config fields (optional — only if the connector needs user-configured settings)
-  }),
+  schema: lazySchema(() =>
+    z.object({
+      // Config fields (optional — only if the connector needs user-configured settings)
+    })
+  ),
 
   actions: {
     search: {
       isTool: true,
+      scope: 'read',
       description: 'Search items by keyword. Returns a ranked list of matching results with IDs and summaries.',
       input: SearchInputSchema,
       handler: async (ctx, input: SearchInput) => {
-        const response = await ctx.request({ method: 'GET', url: '/search', params: input });
+        const response = await ctx.client.request({ method: 'GET', url: '/search', params: input });
         return response.data;
       },
     },
     getItem: {
       isTool: true,
+      scope: 'read',
       description: 'Retrieve full details for a single item by ID. Use the IDs returned by the search action.',
       input: GetItemInputSchema,
       handler: async (ctx, input: GetItemInput) => {
@@ -96,7 +124,7 @@ export const YourConnector: ConnectorSpec = {
         // path segment — schemas typically only bound length, not character set, so
         // an id/slug containing "/", "?", "#", or a space would otherwise corrupt
         // the request path.
-        const response = await ctx.request({
+        const response = await ctx.client.request({
           method: 'GET',
           url: `/items/${encodeURIComponent(input.id)}`,
         });
@@ -117,7 +145,7 @@ export const YourConnector: ConnectorSpec = {
     enabled: true,
     description: 'Verifies the connection by calling a cheap, read-only endpoint.',
     handler: async (ctx) => {
-      await ctx.request({ method: 'GET', url: '/ping' });
+      await ctx.client.request({ method: 'GET', url: '/ping' });
       return {};
     },
   },
@@ -131,17 +159,21 @@ Define Zod schemas and inferred types in a separate `types.ts` file alongside th
 **Path**: `src/platform/packages/shared/kbn-connector-specs/src/specs/<name>/types.ts`
 
 ```typescript
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-export const SearchInputSchema = z.object({
-  query: z.string().describe('Search query string'),
-  limit: z.number().optional().describe('Maximum results (default: 20)'),
-});
+export const SearchInputSchema = lazySchema(() =>
+  z.object({
+    query: z.string().max(1000).describe('Search query string'),
+    limit: z.number().optional().describe('Maximum results (default: 20)'),
+  })
+);
 export type SearchInput = z.infer<typeof SearchInputSchema>;
 
-export const GetItemInputSchema = z.object({
-  id: z.string().describe('The item ID'),
-});
+export const GetItemInputSchema = lazySchema(() =>
+  z.object({
+    id: z.string().max(255).describe('The item ID'),
+  })
+);
 export type GetItemInput = z.infer<typeof GetItemInputSchema>;
 ```
 
@@ -150,12 +182,23 @@ This pattern (used by ServiceNow, Slack, GitHub connectors):
 - Keeps the main connector file focused on handler logic
 - Gives handlers full autocomplete without inline `as` casts
 
+**Every Zod schema assigned to a variable is wrapped in `lazySchema()`** — not only the exported
+input schemas, but module-level helpers too:
+
+```typescript
+const IpAddressSchema = lazySchema(() => z.union([z.ipv4(), z.ipv6()]));
+```
+
+`lazySchema` defers building the schema until first use, so loading the connector registry does not
+build every connector's schemas at import time. The spec's `schema` and any inline action `input` are
+wrapped the same way.
+
 ## MCP-Native Connector Pattern
 
 For connectors backed by an MCP server. Uses `withMcpClient` from `lib/mcp` to wrap MCP tool calls as typed actions.
 
 ```typescript
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import { withMcpClient } from '../../lib/mcp/with_mcp_client';
 import { UISchemas } from '../../connector_spec_ui';
@@ -176,19 +219,24 @@ export const YourMcpConnector: ConnectorSpec = {
     types: [{ type: 'bearer' }],
   },
 
-  schema: z.object({
-    serverUrl: UISchemas.url('https://mcp.example.com/mcp/')
-      .describe('MCP server URL')
-      .meta({ label: 'Server URL' }),
-  }),
+  schema: lazySchema(() =>
+    z.object({
+      serverUrl: UISchemas.url('https://mcp.example.com/mcp/')
+        .describe('MCP server URL')
+        .meta({ label: 'Server URL' }),
+    })
+  ),
 
   actions: {
     search: {
       isTool: true,
+      scope: 'read',
       description: 'Search Your Service by keyword using the underlying MCP tool.',
-      input: z.object({
-        query: z.string().describe('Keyword or natural-language search query'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          query: z.string().max(1000).describe('Keyword or natural-language search query'),
+        })
+      ),
       handler: withMcpClient(async (client, input) => {
         return client.callTool({ name: 'your_search', arguments: input });
       }),
@@ -196,19 +244,23 @@ export const YourMcpConnector: ConnectorSpec = {
     // Escape hatches for dynamic tool discovery
     listTools: {
       isTool: true,
+      scope: 'read',
       description: 'List all MCP tools exposed by the server. Useful for dynamic discovery.',
-      input: z.object({}),
+      input: lazySchema(() => z.object({})),
       handler: withMcpClient(async (client) => {
         return client.listTools();
       }),
     },
     callTool: {
       isTool: true,
+      scope: 'destroy',
       description: 'Call any MCP tool by name with arbitrary arguments. Use listTools first to discover available tools.',
-      input: z.object({
-        name: z.string().describe('The MCP tool name (from listTools)'),
-        arguments: z.record(z.unknown()).optional().describe('Tool arguments as a key/value map'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          name: z.string().min(1).max(200).describe('The MCP tool name (from listTools)'),
+          arguments: z.record(z.string().max(200), z.unknown()).optional().describe('Tool arguments as a key/value map'),
+        })
+      ),
       handler: withMcpClient(async (client, input) => {
         return client.callTool(input);
       }),
@@ -226,62 +278,232 @@ export const YourMcpConnector: ConnectorSpec = {
 - GitHub: `src/platform/packages/shared/kbn-connector-specs/src/specs/github/github.ts`
 - Tavily: `src/platform/packages/shared/kbn-connector-specs/src/specs/tavily/tavily.ts`
 
+## HTTP Response Handling in Handlers
+
+`ctx.client` is the authenticated `AxiosInstance` (`ActionContext.client` in `src/connector_spec.ts`), and
+three of its defaults are wrong for a connector action. Each one produces a bug that type-checks, lints,
+and passes mocked unit tests — a mock returns whatever you tell it to, so none of these surface until a
+real service responds.
+
+### Do not let a request follow redirects when it carries a credential in a custom header
+
+Axios follows redirects by default and strips only the *standard* authorization headers on a cross-host
+redirect. A credential in a vendor-specific header (`x-functions-key`, `x-api-key`, `private-token`) is
+forwarded to whatever host the redirect names — a live credential leak to a third party.
+
+Set `maxRedirects: 0` on any request that sends a credential in a custom header. `maxRedirects: 0` alone
+is not enough to return the 3xx: Axios's default `validateStatus` rejects it, so the handler throws and
+the caller never sees the `Location`. Accept the 3xx explicitly as well:
+
+```typescript
+const response = await ctx.client.request({
+  method,
+  url: `https://${host}/${path}`,
+  headers: { 'x-functions-key': input.functionKey },
+  maxRedirects: 0,
+  validateStatus: (status: number) => status >= 200 && status < 400,
+});
+```
+
+`jenkins.ts` sets both, for this reason. This is not theoretical: a function app that redirects to its
+identity provider forwards the key there.
+
+### Return the service's HTTP response as a result, not an exception
+
+Axios rejects any non-2xx status, so a service deliberately answering `400`, `409`, or `500` takes the
+`catch` path. An agent then sees a connector error instead of the response it needs to handle, and cannot
+read the status, headers, or error body.
+
+For any action that proxies a call whose non-2xx answers are meaningful, pass a `validateStatus`
+predicate and return `{ status, headers, body }`:
+
+```typescript
+validateStatus: () => true,
+```
+
+**Within such an action, classify on evidence, not on the status code alone.** It is tempting to keep
+`401`/`403` exceptional on the grounds that they mean a bad credential — but a service whose own code
+enforces user authorization returns those statuses too, and the status cannot tell the two apart.
+Excluding them by number makes the service's intended authorization response unreadable. Return every
+HTTP status as a result and say so in the action `description` and the `skill` text ("check the `status`
+field"); reserve exceptions for transport failures, which have no status at all.
+
+This applies only inside an action whose contract is to proxy the service's answer. Everywhere else a
+non-2xx is still an error: an ordinary `GET` that 404s or 401s has failed, and a connectivity `test`
+handler **must** fail when its authentication fails — it exists to report whether the credential works,
+so returning a 401 as a successful result reports a broken connector as healthy. Do not add
+`validateStatus: () => true` to a `test` handler or a plain read.
+
+### Follow the vendor's pagination continuation links
+
+A list action that returns only the first page silently under-reports. An agent that asks "what apps do I
+have?" and acts on a partial inventory is worse off than one that gets an error. Check the vendor's
+response envelope for a continuation field (`nextLink`, `next`, `next_cursor`, a `Link` header) and
+follow it in a helper shared by every list action, including the connectivity `test` handler if it counts
+anything.
+
+**First decide which of the two kinds of continuation the vendor gives you**, because they are submitted
+differently and the wrong treatment silently stops the list after page one:
+
+- **A URL continuation** (`nextLink`, `next`, a `Link` header) is a link. Resolve it and request the
+  resolved URL, as the rest of this section describes.
+- **A cursor token** (`next_cursor`, `nextPageToken`, `continuationToken`) is an opaque string, not a
+  link. Send it back as the parameter the vendor names (`?cursor=...`), together with the original
+  `params` — the filters are not encoded in the token, so dropping them re-queries the whole
+  collection. Never pass a cursor to `new URL()`: a bare token has no path, so resolving it against the
+  request URL produces a sibling path the connector never meant to call, and an origin check on that
+  result passes while the request is wrong.
+
+The remaining three details apply to a **URL** continuation:
+
+- **Check the origin of a continuation URL before requesting it.** A vendor-supplied link is
+  caller-untrusted data, and `ctx.client` carries the connector's credentials. Axios strips a standard
+  authorization header on a cross-host *redirect*, but an explicit new request gets no such protection,
+  so an attacker-influenced `nextLink` sends the credentials to the host it names and can reach an
+  internal address. Stop paginating unless the link's origin matches the request you sent (or an
+  explicitly allowed host).
+
+  Resolve the link against the URL the client actually requested, and request the *resolved* URL.
+  `new URL(nextLink)` alone throws on a relative link (`?page=2`, `/items?page=2`), which a `Link`
+  header commonly carries, so a bare parse both breaks those vendors and reads as if every link were
+  absolute.
+
+  Take the base from `ctx.client.getUri()`, not from `new URL(url, baseURL)`. Axios does not resolve a
+  path the way the `URL` constructor does: it *concatenates* `baseURL` and `url` (`combineURLs`
+  strips the leading slash), so `baseURL: 'https://api.example/v1'` with `url: '/items'` is requested as
+  `https://api.example/v1/items`, while `new URL('/items', 'https://api.example/v1')` gives
+  `https://api.example/items`. Resolving a `?page=2` link against that wrong base silently continues
+  paginating at an endpoint the connector never called:
+
+  ```typescript
+  const requested = new URL(ctx.client.getUri({ url, params }));
+  const next = new URL(nextLink, requested); // resolves '?page=2' against the real request
+  if (next.origin !== requested.origin) {
+    break;
+  }
+  // request next.href, so a query-only link keeps the path it was relative to
+  ```
+
+- A continuation URL already carries the api-version and any skip token, whether the vendor gives it
+  absolute or relative, so do not re-apply your own `params` — that corrupts it. Request the resolved
+  URL as the vendor composed it, once the origin check above passes. This is the opposite of the cursor
+  case above, where the original `params` must be re-sent alongside the token.
+- Cap the number of pages followed, and report the cap in the result (e.g. `truncated: true`) so an agent
+  narrows its query rather than treating a capped list as complete.
+
+**Give every list action the same treatment.** Once one list action follows its continuation, check the
+others in the same file. A list action that can return `hasMore: true` with no way to request the next
+page is the same bug: the Bitbucket connector fixed `listCommits` and shipped `listCommitBuildStatuses`
+without a cursor, so an agent checking statuses before a merge saw only the first page.
+
+**Confirm the continuation kind from a live response, not only from the docs.** Vendors document one
+endpoint's pagination and use another shape elsewhere. Log a real `next` value for each list endpoint
+during live testing and decide URL versus cursor from what it contains.
+
+### Never request a URL taken from a response or from the caller without checking it
+
+The origin check above is not specific to pagination. Any URL the connector did not build itself and then
+requests with `ctx.client` sends the connector's credentials to whatever host it names. That covers:
+
+- **Async operation polling**: a `Location`, `Azure-AsyncOperation`, or `Operation-Location` header, or
+  an operation `selfLink` in a response body. The AKS `runCommand` poller followed `Location` unchecked
+  with the OAuth client, whose default `Authorization` header goes with every request.
+- **Caller-supplied cursors that are full URLs**: a `nextCursor` returned to the agent and passed back as
+  input is caller-controlled. Checking the host is not enough: the Bitbucket `listCommits` cursor passed
+  an `api.bitbucket.org` check while naming another workspace's repository, so the connector's
+  credentials read commits outside its configured workspace.
+
+Resolve the URL against `ctx.client.getUri()` and check the origin, as above. For a caller-supplied URL,
+also check that its path is the endpoint this action calls, for the configured tenant (workspace,
+project, subscription) and the requested resource. Where the vendor's `next` link carries an opaque
+token (`?cursor=...`, `?after=...`), prefer extracting that token and returning only the token to the
+agent. The connector then rebuilds the request from its own path, and the caller never supplies a URL.
+
+### Retry and poll only on transient statuses
+
+A poll or retry loop that swallows every error turns a permanent failure into a timeout. The AKS
+`runCommand` poller ignored every `GET` error, so a 403 on the operation-result endpoint surfaced as
+"timed out after 60 seconds" instead of the missing permission. Retry only what can succeed on a
+second try (a short-lived 404 while an operation is created, 429, 5xx); rethrow 400, 401, and 403
+immediately with the vendor's message.
+
+The same applies to friendly error explanations. A 401 means the credential was rejected; a 403 means it
+was accepted but lacks a permission or scope. Do not give both the same explanation: the Bitbucket
+connectivity test called every bearer 401 "expected for a repository-scoped token", which told a user
+with an expired token that it still worked.
+
+## Handler Context
+
+`ctx.config` holds the connector's non-secret config fields. `ctx.secrets` holds the auth fields,
+**including the `authType` discriminator** for a connector with more than one auth type. Branch on
+`ctx.secrets?.authType`, as `slack.ts` does. The Bitbucket connector read `ctx.config.authType`, which is
+always undefined, and its test passed because it put `authType` in `config` too. Build test contexts in
+the same shape the executor does: config fields in `config`, auth fields and `authType` in `secrets`.
+
+## Action Outputs
+
+### A returned handle must carry everything the follow-up action needs
+
+When an action returns something an agent is expected to pass to another action (an operation ID, a job
+ID, a pipeline UUID, a discovered resource), include every input that follow-up call needs, especially
+any value that overrides a connector default: project, subscription, region, workspace. The GKE
+connector returned `operationId` and `location` but not `projectId`. An agent polling an operation
+started in a non-default project with only those two values polled the default project instead.
+
+The reverse applies to discovery actions. If an action lists subscriptions, projects, or workspaces, the
+actions that operate inside one must accept it as an input override. The AKS connector's
+`listSubscriptions` returned IDs that no other action accepted, since each read the subscription only from
+config, so discovery led nowhere without a user editing the connector.
+
+### Do not present a computed value as a vendor fact
+
+Return what the vendor returned. If a field is derived (a count multiplied by zones, a status inferred
+from two others), name it as what it is (`totalNodeCountEstimate`) and say in its description when it is
+wrong, or leave it out. The GKE connector returned `initialNodeCount × zones` as `totalNodeCount`, which
+is wrong for any autoscaled pool, and a capacity-remediation agent would act on it.
+
+### Build derived blocks from every alternative field
+
+When an output block depends on one of several alternative vendor fields (an IP endpoint or a DNS
+endpoint; a legacy ID or a new one), build it when *any* of them is present. The GKE connector's
+Kubernetes connector hand-off was gated on the IP `endpoint` alone, so DNS-only clusters lost the whole
+block even though the DNS URL was already read.
+
 ## Schema UI Configuration
 
 Schema config fields define the "Connector settings" section of the creation form. Every field in the `schema` object **must** have `.meta()` with at least a `label`, or the field will render as an unlabeled input.
 
 ```typescript
-schema: z.object({
-  instanceUrl: z
-    .string()
-    .url()
-    .describe('ServiceNow instance URL')
-    .meta({
-      label: 'Instance URL',           // REQUIRED - displayed as the field label
-      widget: 'text',                   // Widget type (text, password, select, etc.)
-      placeholder: 'https://your-instance.service-now.com',
-    }),
-}),
+schema: lazySchema(() =>
+  z.object({
+    instanceUrl: z
+      .string()
+      .url()
+      .describe('ServiceNow instance URL')
+      .meta({
+        label: 'Instance URL',           // REQUIRED - displayed as the field label
+        widget: 'text',                   // Widget type (text, password, select, etc.)
+        placeholder: 'https://your-instance.service-now.com',
+      }),
+  })
+),
 ```
 
 Available `.meta()` options: `label`, `widget`, `placeholder`, `helpText`, `hidden`, `sensitive`, `disabled`, `order`.
 
-**There is no widget for `z.number()` config fields — use a regex-validated string instead.** The
-form-generator's widget registry only has `text`, `password`, `select`, `formFieldset`, `hidden`, `object`,
-and `fileUpload`; there is no numeric widget. A config field typed `z.number()` (e.g. `z.int()`)
-throws `Error: No widget found for schema type: ZodNumberFormat. Please specify a widget in the schema
-metadata.` when the connector creation form renders it — and since this is a runtime UI error, not a type
-or lint error, it won't be caught by `node scripts/type_check` or unit tests. If a config value is
-conceptually numeric (an account ID, a port, a numeric tenant ID), define it as a `.regex()`-validated
-string with the `text` widget instead, and coerce it to a number in the handler where the underlying API
-needs a real number:
+**Config fields must use a type the form-generator has a widget for.** The widget registry
+(`x-pack/platform/packages/shared/response-ops/form-generator/src/widgets/registry.ts`) picks a widget
+from the field's Zod type: strings, numbers (`z.number()`, `z.int()`), enums, objects, discriminated
+unions, literals, and URLs. Any other type in the connector-level `config` schema — a `z.boolean()`, a
+`z.array()`, a `z.record()` — throws `Error: No widget found for schema type: ... Please specify a
+widget in the schema metadata.` when the creation form renders it. It is a runtime UI error, so type
+check and unit tests do not catch it. Use a supported type, or set `widget` in `.meta()` explicitly.
 
-```typescript
-schema: z.object({
-  accountId: z
-    .string()
-    .min(1)
-    .max(20)
-    .regex(/^\d+$/, 'Must be a numeric account ID.')
-    .describe('Numeric account ID this connector manages.')
-    .meta({ widget: 'text', label: 'Account ID', placeholder: '1234567' }),
-}),
-```
-
-```typescript
-const getAccountId = (ctx: ActionContext): number => {
-  const raw = ctx.config?.accountId as string | undefined;
-  const accountId = Number(raw);
-  if (!raw || Number.isNaN(accountId)) {
-    throw new Error('Connector is missing the required accountId configuration field.');
-  }
-  return accountId;
-};
-```
+A numeric config field is fine: the MySQL connector's `port` is a `z.number().int()` rendered by the
+number widget.
 
 This only applies to **connector-level `config` fields** (rendered by the form-generator). Action `input`
-schemas are never rendered as a form — `z.number()` is fine there since it's Agent Builder/Workflows that
-supplies the value, not a human typing into a UI widget.
+schemas are never rendered as a form.
 
 **ICU-unsafe characters in translated help text**: `metadata.description` and any `helpText`/label string
 that goes through `i18n.translate()` is parsed as an ICU message. A literal `<placeholder>` (e.g.
@@ -295,11 +517,13 @@ For URL fields, use the `UISchemas.url()` helper from `connector_spec_ui.ts`:
 ```typescript
 import { UISchemas } from '../../connector_spec_ui';
 
-schema: z.object({
-  apiUrl: UISchemas.url('https://api.example.com')
-    .describe('API endpoint URL')
-    .meta({ label: 'API URL' }),
-}),
+schema: lazySchema(() =>
+  z.object({
+    apiUrl: UISchemas.url('https://api.example.com')
+      .describe('API endpoint URL')
+      .meta({ label: 'API URL' }),
+  })
+),
 ```
 
 ## OAuth Auth Configuration
@@ -491,6 +715,65 @@ Set `isTool: true` on actions that should be discoverable by AI agents in Agent 
 
 Set `isTool: false` (or omit it) for actions that exist for completeness but should not be invoked by an agent autonomously — for example, destructive operations, admin-only actions, or low-level helpers that are only useful as building blocks for other actions.
 
+On a first-PR connector with `supportedFeatureIds: ['agentBuilder']`, an `isTool: false` action is not
+reachable from any UI: agents cannot see it and workflows are not enabled yet. It can only be called
+through the `_execute` API. Say so on the docs page rather than listing it alongside the agent actions,
+as the GKE docs did for `createCluster` and `deleteCluster`.
+
+### `scope` — classifying side effects for every `isTool: true` action
+
+Every `isTool: true` action **must** include an explicit `scope` field. This is an advisory signal to the LLM and orchestration layer about what side effects the action may have — it does not enforce access control at runtime.
+
+| Value | When to use |
+|---|---|
+| `'read'` | Action only reads data; no external state is modified. Pure lookups, searches, listings, downloads. |
+| `'write'` | Action creates or appends new data but does not overwrite or delete existing state. Examples: send a message, create a resource, add a comment, post an event. |
+| `'destroy'` | Action may overwrite, update, or delete existing data. Examples: resolve an issue, update a record, delete a resource, patch an entity, scale a workload. Also use for generic escape-hatch actions (`request`, `callTool`, `callRestApi`, `callGraphAPI`) since they can do anything. |
+
+**Decision rule**: if the action only sends GET requests (or equivalent read-only API calls), use `'read'`. If it creates new, distinct records without touching existing ones, use `'write'`. If it can overwrite, update, or remove, use `'destroy'`. When uncertain, prefer `'destroy'` — it's safer to over-classify than under-classify.
+
+**Classify on the HTTP method and the documented side effect, not on the action's name.** A vendor route
+whose name reads like a read can still mutate: `listSyncFunctionTriggers` is a `POST` that
+re-synchronizes an app's deployed trigger metadata, so it is `'destroy'`, not `'read'`. Go through every
+action and ask what the request *does* to the service; a `list`/`get`/`sync` prefix on a `POST` or
+`PATCH` is a signal to re-check, not a reason to trust the name.
+
+A `create`/`post`/`set` prefix is not evidence of `'write'` either. A call that writes under a
+caller-chosen key and replaces whatever is already stored there is an overwrite, so it is `'destroy'`.
+Bitbucket's `createCommitBuildStatus` replaces the previous status with the same `key`, which can turn
+a failing merge gate green; it shipped as `'write'` and had to be reclassified.
+
+**When live testing disproves a vendor's documented behaviour, fix every place that encoded the old
+assumption.** Correcting only the `description` leaves the `scope`, the test mock, the auth `helpText`,
+the `skill` text, and the docs page still asserting something you now know is false. Grep the connector
+directory and the docs page for the disproven claim and change all of them in one pass.
+
+```typescript
+// Read-only lookup
+listIssues: {
+  isTool: true,
+  scope: 'read',
+  description: '...',
+  ...
+},
+
+// Creates a new record
+createIssue: {
+  isTool: true,
+  scope: 'write',
+  description: '...',
+  ...
+},
+
+// Modifies existing state
+resolveIssue: {
+  isTool: true,
+  scope: 'destroy',
+  description: '...',
+  ...
+},
+```
+
 ### Action descriptions
 
 Every action should have a `description` that answers: "What does this do, and when should I call it?"
@@ -523,12 +806,32 @@ Every Zod parameter should have a `.describe()` call that gives the agent the co
   `z.string()`. Apply the same `.max(200)`-style bound to the key type: `z.record(z.string().max(200), z.unknown())`.
   This also applies to string keys inside `z.array(z.record(...))`.
 - **Bound the collection size too, not just the string lengths inside it** — a `z.array()` needs `.max(N)`
-  on the array itself (e.g. `z.array(z.string().max(64)).max(50)` for a list of IDs), and a `z.record()`
+  on the array itself, and a `z.record()`
   needs an entry-count cap via `.refine()` since Zod has no built-in one:
   `z.record(z.string().max(100), z.string().max(200)).refine((v) => Object.keys(v).length <= 50, { message: '...' })`.
   Bounding only the elements' string length still leaves an unbounded *number* of elements/entries as a DoS
   vector, and if the array is later joined into a query string, an oversized array also risks an oversized
   upstream request.
+  Take `N` from the vendor's documented limit (an OpenAPI `maxItems`, an API reference limit, a server
+  constant) and name the constant after it. When the vendor documents none, pick a bound above any
+  realistic valid request and say so in a comment. Do not pick a round number below what the vendor
+  accepts: a `.max(100)` on a list the API takes 250 of rejects valid requests.
+- **Bound a free-form JSON body by its serialized size** — a field typed `z.unknown()`/`z.any()` (a
+  request body forwarded verbatim to the service) has no shape to constrain, but it still gets allocated
+  and serialized on the Kibana server. Bound it in a `.refine()` that serializes the value, and reject a
+  value that cannot be serialized at all (a cycle, a `BigInt`) there rather than letting it fail opaquely
+  inside the HTTP client.
+- **Measure a byte bound in bytes, not in `String.length`** — `JSON.stringify(value).length` counts
+  UTF-16 code units, so a limit advertised as "1 MiB" lets roughly 1 M CJK characters through and sends
+  roughly 3 MiB upstream. Use `Buffer.byteLength(serialized, 'utf8')` when the bound is stated in bytes,
+  and add a non-ASCII boundary test — an ASCII-only test passes either way and proves nothing.
+- **A path/route pattern must be checked in both directions** — a regex that constrains a value
+  interpolated into a URL has two jobs: accept every legitimate value and reject every escape. Test both
+  sets explicitly, because a pattern can fail at both at once. An allowlist like `[A-Za-z0-9._~/-]`
+  rejects a legitimately percent-encoded segment (`api/users/alice%40example.com`) *and* accepts
+  `//evil.com/x`, which a client reads as a protocol-relative URL to another host. Allow the RFC 3986
+  `pchar` set minus `:` plus `%XX` triplets, exclude a leading `//`, and pin the accept and reject cases
+  as table-driven tests. Dropping `:` is what stops `http://evil.com` parsing as a relative path.
 - **Require "at least one of" for optional-only update inputs** — if an action updates a resource and
   every field is `.optional()`, an empty/no-op call is a silent bug. Add `.refine((v) => v.fieldA !== undefined || v.fieldB !== undefined, { message: '...' })`
   to the schema.
@@ -547,15 +850,19 @@ Every Zod parameter should have a `.describe()` call that gives the agent the co
   never exercise the encoding path.
 
 ```typescript
-export const SearchInputSchema = z.object({
-  query: z.string().describe('Keyword or natural-language search query'),
-  limit: z.number().optional().describe('Maximum results to return (1–100, default 20)'),
-  state: z.string().optional().describe('Filter by state: "new", "in_progress", or "resolved"'),
-});
+export const SearchInputSchema = lazySchema(() =>
+  z.object({
+    query: z.string().max(1000).describe('Keyword or natural-language search query'),
+    limit: z.number().optional().describe('Maximum results to return (1–100, default 20)'),
+    state: z.string().max(50).optional().describe('Filter by state: "new", "in_progress", or "resolved"'),
+  })
+);
 
-export const GetItemInputSchema = z.object({
-  id: z.string().describe('The item sys_id, returned by the search action'),
-});
+export const GetItemInputSchema = lazySchema(() =>
+  z.object({
+    id: z.string().max(255).describe('The item sys_id, returned by the search action'),
+  })
+);
 ```
 
 ### `skill` property
@@ -577,6 +884,16 @@ skill: [
 ```
 
 **ServiceNow** (`src/platform/packages/shared/kbn-connector-specs/src/specs/servicenow/`) and **Slack** (`src/platform/packages/shared/kbn-connector-specs/src/specs/slack/`) are the reference connectors for these patterns.
+
+**Trace every recipe to the code.** For each step in a `skill` pattern, name the action that performs
+it and the output field it reads, and confirm both exist. The Bitbucket skill told agents to confirm
+build statuses "via `getPullRequest`", whose output has no status fields, so an agent following the
+merge recipe could not check the policy it was told to check.
+
+**Check that every state an action can create has a way out.** If an action can put a resource into a
+state (draft, stopped, paused, locked), either another action takes it out of that state, or the
+`skill` text says the vendor UI is needed. The Bitbucket connector could create a draft pull request
+but not mark it ready, and a draft cannot be merged.
 
 ## `metadata.description` Quality
 

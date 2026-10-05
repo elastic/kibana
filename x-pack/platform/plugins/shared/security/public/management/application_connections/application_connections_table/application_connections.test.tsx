@@ -9,7 +9,10 @@ import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 import { mockAuthenticatedUser } from '../../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../../mocks';
@@ -58,9 +61,11 @@ function renderPage(coreStart: CoreStartMock) {
   );
   return render(
     coreStart.rendering.addContext(
-      <Providers services={coreStart} authc={authc} history={history}>
-        <ApplicationConnectionsPage http={coreStart.http} />
-      </Providers>
+      <MockAppHeaderProvider>
+        <Providers services={coreStart} authc={authc} history={history}>
+          <ApplicationConnectionsPage http={coreStart.http} />
+        </Providers>
+      </MockAppHeaderProvider>
     )
   );
 }
@@ -116,12 +121,19 @@ describe('ApplicationConnections', () => {
       coreStart.docLinks.links.applicationConnections.oauthClients
     );
 
+    expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+      'Application connections'
+    );
     const manageClientsLink = getByTestId('applicationConnectionsManageClientsLink');
     expect(manageClientsLink).toBeInTheDocument();
     expect(manageClientsLink).toHaveAttribute(
       'href',
       '/mock/app/agent_builder/manage/tools/mcp_clients'
     );
+    fireEvent.click(manageClientsLink);
+    expect(coreStart.application.navigateToApp).toHaveBeenCalledWith('agent_builder', {
+      path: '/manage/tools/mcp_clients',
+    });
 
     expect(getByPlaceholderText('Search')).toBeInTheDocument();
     expect(getByTestId('applicationConnectionsTable')).toBeInTheDocument();
@@ -1059,15 +1071,26 @@ describe('ApplicationConnections', () => {
     });
   });
 
-  it('opens the client details flyout when the client name is clicked in the list view', async () => {
-    const mcpServerUrl = 'https://cluster.example.com/api/agent_builder/mcp';
+  it.each([
+    {
+      resource: 'https://cluster.example.com/api/agent_builder/mcp',
+      spaceId: 'default',
+      mcpServerUrl: 'https://cluster.example.com/api/agent_builder/mcp',
+    },
+    {
+      resource: 'https://cluster.example.com',
+      spaceId: 'engineering',
+      mcpServerUrl: 'https://cluster.example.com/s/engineering/api/agent_builder/mcp',
+    },
+  ])('opens the client details flyout in $spaceId', async ({ resource, spaceId, mcpServerUrl }) => {
+    coreStart.http = { ...coreStart.http, spaceId: asSpaceId(spaceId) };
     setupHttpResponses(coreStart, {
       clients: {
         clients: [
           {
             id: 'client-a',
             client_name: 'My MCP app',
-            resource: mcpServerUrl,
+            resource,
           },
         ],
       },
@@ -1077,7 +1100,7 @@ describe('ApplicationConnections', () => {
             id: 'conn-1',
             client_id: 'client-a',
             name: 'Laptop session',
-            resource: mcpServerUrl,
+            resource,
           },
         ],
       },

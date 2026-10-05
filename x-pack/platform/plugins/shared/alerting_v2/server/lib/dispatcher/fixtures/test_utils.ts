@@ -9,6 +9,8 @@ import type { LoggerServiceContract } from '../../services/logger_service/logger
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { DEFAULT_GROUPING_MODE } from '../constants';
 import {
+  DispatchOutcome,
+  DispatchPlan,
   EpisodeScan,
   EpisodeTriage,
   PolicyCatalog,
@@ -19,18 +21,21 @@ import {
 import { DISPATCH_FAILURE_REASONS } from '../steps/constants';
 import type {
   ActionGroup,
+  ActionGroupId,
   ActionPolicy,
   ActionPolicyId,
   AlertEpisode,
-  AlertEpisodeSuppression,
+  SuppressionRow,
   DispatchFailure,
   DispatcherPipelineInput,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
+  EpisodeSuppressionRow,
   MatchedPair,
   Rule,
   RuleId,
+  SeriesSuppressionRow,
 } from '../types';
 
 export function createStepLogger(): LoggerServiceContract {
@@ -61,22 +66,38 @@ export function createDispatcherPipelineInput(
 export interface DispatcherPipelineStateOverrides
   extends Omit<
     Partial<DispatcherPipelineState>,
-    'input' | 'scan' | 'rules' | 'policies' | 'suppressions' | 'triage'
+    'input' | 'scan' | 'rules' | 'policies' | 'suppressions' | 'triage' | 'plan' | 'outcome'
   > {
   input?: DispatcherPipelineInput;
   episodes?: AlertEpisode[];
-  suppressions?: AlertEpisodeSuppression[];
+  suppressions?: SuppressionRow[];
   dispatchable?: AlertEpisode[];
   suppressed?: SuppressedEpisode[];
   rules?: Map<RuleId, Rule>;
   policies?: Map<ActionPolicyId, ActionPolicy>;
+  dispatch?: ActionGroup[];
+  throttled?: ActionGroup[];
+  dispatchedExecutions?: Map<ActionGroupId, string[]>;
+  dispatchFailures?: DispatchFailure[];
 }
 
 export function createDispatcherPipelineState(
   state: DispatcherPipelineStateOverrides = {}
 ): DispatcherPipelineState {
-  const { episodes, suppressions, dispatchable, suppressed, rules, policies, input, ...rest } =
-    state;
+  const {
+    episodes,
+    suppressions,
+    dispatchable,
+    suppressed,
+    rules,
+    policies,
+    dispatch,
+    throttled,
+    dispatchedExecutions,
+    dispatchFailures,
+    input,
+    ...rest
+  } = state;
   return {
     ...rest,
     ...(episodes ? { scan: EpisodeScan.of({ episodes }) } : {}),
@@ -91,6 +112,23 @@ export function createDispatcherPipelineState(
       : {}),
     ...(rules ? { rules: RuleCatalog.of(rules) } : {}),
     ...(policies ? { policies: PolicyCatalog.of(policies) } : {}),
+    ...(dispatch || throttled || dispatchable
+      ? {
+          plan: DispatchPlan.of({
+            toDispatch: dispatch ?? [],
+            throttled: throttled ?? [],
+            dispatchable: dispatchable ?? [],
+          }),
+        }
+      : {}),
+    ...(dispatchedExecutions || dispatchFailures
+      ? {
+          outcome: DispatchOutcome.of({
+            executionsByGroup: dispatchedExecutions ?? new Map(),
+            failures: dispatchFailures ?? [],
+          }),
+        }
+      : {}),
     input: input ?? createDispatcherPipelineInput(),
   };
 }
@@ -108,15 +146,40 @@ export function createAlertEpisode(overrides: Partial<AlertEpisode> = {}): Alert
   };
 }
 
-export function createAlertEpisodeSuppression(
-  overrides: Partial<AlertEpisodeSuppression> = {}
-): AlertEpisodeSuppression {
+export function createSuppressionRow(overrides: Partial<SuppressionRow> = {}): SuppressionRow {
   return {
     rule_id: 'rule-1',
     source: 'internal',
     space_id: 'default',
     group_hash: 'hash-1',
     episode_id: 'episode-1',
+    should_suppress: false,
+    ...overrides,
+  };
+}
+
+export function createEpisodeSuppressionRow(
+  overrides: Partial<EpisodeSuppressionRow> = {}
+): EpisodeSuppressionRow {
+  return {
+    rule_id: 'rule-1',
+    source: 'internal',
+    space_id: 'default',
+    group_hash: 'hash-1',
+    episode_id: 'episode-1',
+    should_suppress: false,
+    ...overrides,
+  };
+}
+
+export function createSeriesSuppressionRow(
+  overrides: Partial<SeriesSuppressionRow> = {}
+): SeriesSuppressionRow {
+  return {
+    rule_id: 'rule-1',
+    source: 'internal',
+    space_id: 'default',
+    group_hash: 'hash-1',
     should_suppress: false,
     ...overrides,
   };
@@ -140,19 +203,18 @@ export function createActionPolicy(overrides: Partial<ActionPolicy> = {}): Actio
     enabled: true,
     destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
     groupBy: [],
-    tags: [],
     groupingMode: DEFAULT_GROUPING_MODE,
     ...overrides,
   };
 }
 
 export function createRuleScopedActionPolicy(
-  ruleId: string,
+  tag: string,
   overrides: Partial<ActionPolicy> = {}
 ): ActionPolicy {
   return createActionPolicy({
     name: 'Test rule-scoped policy',
-    matcher: `rule.id: "${ruleId}"`,
+    matcher: { tags: [tag] },
     ...overrides,
   });
 }

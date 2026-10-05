@@ -541,8 +541,8 @@ describe('ApplyThrottlingStep', () => {
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     // every_time strategy → all groups dispatch regardless of last_notified.
-    expect(result.data?.dispatch).toHaveLength(200);
-    expect(result.data?.throttled).toHaveLength(0);
+    expect(result.data?.plan?.toDispatch).toHaveLength(200);
+    expect(result.data?.plan?.throttled).toHaveLength(0);
   });
 
   it('returns empty dispatch and throttled when no groups', async () => {
@@ -554,7 +554,7 @@ describe('ApplyThrottlingStep', () => {
     expect(mockEsClient.esql.query).not.toHaveBeenCalled();
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.dispatch).toHaveLength(0);
-    expect(result.data?.throttled).toHaveLength(0);
+    expect(result.data?.plan?.toDispatch).toHaveLength(0);
+    expect(result.data?.plan?.throttled).toHaveLength(0);
   });
 });

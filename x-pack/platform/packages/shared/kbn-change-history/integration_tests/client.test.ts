@@ -13,7 +13,7 @@ import { createTestEsCluster } from '@kbn/test';
 import { FLAGS } from '../src/constants';
 import { ChangeHistoryClient } from '..';
 import { DATA_STREAM_NAME } from '../src/client';
-import type { ObjectChange } from '..';
+import type { LogChangeHistoryOptions, ObjectChange } from '..';
 import { sha256, REDACTED } from '../src/utils';
 import { asKibanaClient } from '../test_utils';
 
@@ -21,12 +21,12 @@ const KIBANA_SPACE = 'default';
 const TEST_MODULE = 'test-module';
 const TEST_DATASET = 'test-dataset';
 
-const defaultLogOpts = {
+const defaultLogOpts: LogChangeHistoryOptions = {
   action: 'rule_create',
   username: 'test-user',
   userProfileId: 'test-user-profile-id',
   spaceId: 'default',
-  refresh: true as const,
+  refresh: true,
 };
 
 describe('ChangeHistoryClient', () => {

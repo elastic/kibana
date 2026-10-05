@@ -122,6 +122,26 @@ export const ALERTING_V2_RULES_READ_ROLE: KibanaRole = {
   ],
 };
 
+/**
+ * Alerting v2 rules read access plus the classic Rules management capability
+ * (`stackAlerts`). Used to assert that the Rules list heading shows both the
+ * V1 and V2 rules tabs when the viewer can read both surfaces.
+ */
+export const ALERTING_V2_RULES_READ_AND_V1_READ_ROLE: KibanaRole = {
+  elasticsearch: READER_ES_PRIVILEGES,
+  kibana: [
+    {
+      base: [],
+      feature: {
+        alerting_v2_rules: ['read'],
+        stackAlerts: ['read'],
+        discover: ['read'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
 export const ALERTING_V2_ALERTS_ALL_ROLE: KibanaRole = {
   elasticsearch: WRITER_ES_PRIVILEGES,
   kibana: [

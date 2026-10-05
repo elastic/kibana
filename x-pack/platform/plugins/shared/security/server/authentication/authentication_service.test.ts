@@ -17,6 +17,8 @@ import type {
   AuthToolkit,
   CustomBrandingSetup,
   ElasticsearchServiceSetup,
+  HttpSelfUnauthorizedErrorHandler,
+  HttpSelfUnauthorizedErrorHandlerToolkit,
   HttpServiceSetup,
   HttpServiceStart,
   IStaticAssets,
@@ -55,8 +57,10 @@ import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
 import { securityMock } from '../mocks';
 import { ROUTE_TAG_ACCEPT_UIAM_OAUTH, ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
+import { serviceAccountsServiceMock } from '../service_accounts/service_accounts_service.mock';
 import type { Session } from '../session_management';
 import { sessionMock } from '../session_management/session.mock';
+import { uiamServiceMock } from '../uiam/uiam_service.mock';
 import { userProfileServiceMock } from '../user_profile/user_profile_service.mock';
 
 describe('AuthenticationService', () => {
@@ -69,6 +73,7 @@ describe('AuthenticationService', () => {
     license: jest.Mocked<SecurityLicense>;
     staticAssets: IStaticAssets;
     customBranding: jest.Mocked<CustomBrandingSetup>;
+    getServiceAccounts: jest.Mock;
   };
   let mockStartAuthenticationParams: {
     audit: jest.Mocked<AuditServiceSetup>;
@@ -103,6 +108,7 @@ describe('AuthenticationService', () => {
       license: licenseMock.create(),
       staticAssets: coreSetupMock.http.staticAssets,
       customBranding: customBrandingServiceMock.createSetupContract(),
+      getServiceAccounts: jest.fn().mockReturnValue(null),
     };
     mockCanRedirectRequest.mockReturnValue(false);
 
@@ -160,6 +166,25 @@ describe('AuthenticationService', () => {
       ).toHaveBeenCalledWith(expect.any(Function));
     });
 
+    it('does not refresh a fake request before authentication is initialized', async () => {
+      service.setup(mockSetupAuthenticationParams);
+      const [handler] =
+        mockSetupAuthenticationParams.elasticsearch.setUnauthorizedErrorHandler.mock.calls[0];
+      const serviceAccounts = serviceAccountsServiceMock.createStart();
+      mockSetupAuthenticationParams.getServiceAccounts.mockReturnValue(serviceAccounts);
+      const toolkit = { notHandled: jest.fn(), retry: jest.fn() };
+      const error = new errors.ResponseError(
+        securityMock.createApiResponse({
+          statusCode: 401,
+          body: { error: { reason: 'token expired' } },
+        })
+      ) as UnauthorizedError;
+      await handler({ error, request: httpServerMock.createFakeKibanaRequest({}) }, toolkit);
+      expect(serviceAccounts.backend.reauthenticateFakeRequest).not.toHaveBeenCalled();
+      expect(toolkit.retry).not.toHaveBeenCalled();
+      expect(toolkit.notHandled).toHaveBeenCalledTimes(1);
+    });
+
     it('properly registers onPreResponse handler', () => {
       service.setup(mockSetupAuthenticationParams);
 
@@ -186,6 +211,52 @@ describe('AuthenticationService', () => {
   describe('#start()', () => {
     beforeEach(() => {
       service.setup(mockSetupAuthenticationParams);
+    });
+
+    describe('system identity', () => {
+      const startWithUiamConfig = (uiam?: Record<string, unknown>) =>
+        service.start({
+          ...mockStartAuthenticationParams,
+          config: createConfig(
+            ConfigSchema.validate(
+              { encryptionKey: 'ab'.repeat(16), ...(uiam ? { uiam } : {}) },
+              { serverless: true }
+            ),
+            loggingSystemMock.create().get(),
+            { isTLSEnabled: false }
+          ),
+          uiam: uiam?.enabled ? uiamServiceMock.create() : undefined,
+        });
+
+      it('is exposed when UIAM is configured with a client certificate', () => {
+        const { systemIdentity } = startWithUiamConfig({
+          enabled: true,
+          url: 'https://uiam.service',
+          sharedSecret: 'secret',
+          ssl: { certificate: '/path/to/cert.pem', key: '/path/to/key.pem' },
+        });
+
+        expect(systemIdentity).toBeDefined();
+      });
+
+      it('is not exposed when UIAM is configured without a client certificate', () => {
+        const { systemIdentity } = startWithUiamConfig({
+          enabled: true,
+          url: 'https://uiam.service',
+          sharedSecret: 'secret',
+        });
+
+        expect(systemIdentity).toBeUndefined();
+        expect(loggingSystemMock.collect(logger).debug).toEqual([
+          [
+            'UIAM is enabled without a client certificate (`xpack.security.uiam.ssl.certificate` and `.key`), so Kibana cannot mint tokens for its own identity.',
+          ],
+        ]);
+      });
+
+      it('is not exposed when UIAM is not enabled', () => {
+        expect(startWithUiamConfig().systemIdentity).toBeUndefined();
+      });
     });
 
     describe('authentication handler', () => {
@@ -405,6 +476,127 @@ describe('AuthenticationService', () => {
       });
     });
 
+    describe('self client unauthorized error handler', () => {
+      let selfClientHandler: HttpSelfUnauthorizedErrorHandler;
+      let toolkit: jest.Mocked<HttpSelfUnauthorizedErrorHandlerToolkit>;
+      let reauthenticate: jest.SpyInstance<Promise<AuthenticationResult>, [KibanaRequest]>;
+      let serviceAccounts: ReturnType<typeof serviceAccountsServiceMock.createStart>;
+      const handlerOptions = (request: KibanaRequest) => ({
+        request,
+        path: '/api/status',
+        responseHeaders: new Headers(),
+      });
+
+      beforeEach(() => {
+        toolkit = { notHandled: jest.fn(), retry: jest.fn() };
+        service.start(mockStartAuthenticationParams);
+        selfClientHandler =
+          mockSetupAuthenticationParams.http.setSelfClientUnauthorizedErrorHandler.mock.calls[0][0];
+        reauthenticate =
+          jest.requireMock('./authenticator').Authenticator.mock.instances[0].reauthenticate;
+        serviceAccounts = serviceAccountsServiceMock.createStart();
+        mockSetupAuthenticationParams.getServiceAccounts.mockReturnValue(serviceAccounts);
+      });
+
+      it('is registered exactly once', () => {
+        expect(
+          mockSetupAuthenticationParams.http.setSelfClientUnauthorizedErrorHandler
+        ).toHaveBeenCalledTimes(1);
+      });
+
+      it('retries with the replaced credential for a service-account-bound fake request', async () => {
+        serviceAccounts.backend.reauthenticateFakeRequest.mockResolvedValue({
+          authorization: 'Bearer essu_fresh_token',
+        });
+        const request = httpServerMock.createFakeKibanaRequest({
+          headers: { authorization: 'Bearer essu_stale_token' },
+        });
+
+        await selfClientHandler(handlerOptions(request), toolkit);
+
+        expect(serviceAccounts.backend.reauthenticateFakeRequest).toHaveBeenCalledTimes(1);
+        expect(serviceAccounts.backend.reauthenticateFakeRequest).toHaveBeenCalledWith(request);
+        expect(toolkit.retry).toHaveBeenCalledWith({
+          authHeaders: { authorization: 'Bearer essu_fresh_token' },
+        });
+        // The self client derives the internal-caller attestation itself, per attempt.
+        expect(toolkit.retry).not.toHaveBeenCalledWith(
+          expect.objectContaining({
+            authHeaders: expect.objectContaining({
+              'x-kbn-uiam-internal-caller-attestation': expect.anything(),
+            }),
+          })
+        );
+        expect(reauthenticate).not.toHaveBeenCalled();
+      });
+
+      it('does not handle a real request, and never touches the session machinery', async () => {
+        await selfClientHandler(handlerOptions(httpServerMock.createKibanaRequest()), toolkit);
+
+        expect(serviceAccounts.backend.reauthenticateFakeRequest).not.toHaveBeenCalled();
+        expect(reauthenticate).not.toHaveBeenCalled();
+        expect(toolkit.notHandled).toHaveBeenCalledTimes(1);
+        expect(toolkit.retry).not.toHaveBeenCalled();
+      });
+
+      it('does not handle a fake request that is not service-account-bound', async () => {
+        serviceAccounts.backend.reauthenticateFakeRequest.mockResolvedValue(null);
+
+        await selfClientHandler(
+          handlerOptions(
+            httpServerMock.createFakeKibanaRequest({
+              headers: { authorization: 'ApiKey essu_task_manager_key' },
+            })
+          ),
+          toolkit
+        );
+
+        expect(toolkit.notHandled).toHaveBeenCalledTimes(1);
+        expect(toolkit.retry).not.toHaveBeenCalled();
+      });
+
+      it('does not handle the error when the credential replacement rejects', async () => {
+        serviceAccounts.backend.reauthenticateFakeRequest.mockRejectedValue(
+          new Error('mint failed')
+        );
+
+        await expect(
+          selfClientHandler(handlerOptions(httpServerMock.createFakeKibanaRequest({})), toolkit)
+        ).resolves.not.toThrow();
+
+        expect(toolkit.notHandled).toHaveBeenCalledTimes(1);
+        expect(toolkit.retry).not.toHaveBeenCalled();
+      });
+
+      it('does not handle the error when the service accounts service is not available', async () => {
+        mockSetupAuthenticationParams.getServiceAccounts.mockReturnValue(null);
+
+        await selfClientHandler(
+          handlerOptions(httpServerMock.createFakeKibanaRequest({})),
+          toolkit
+        );
+
+        expect(toolkit.notHandled).toHaveBeenCalledTimes(1);
+        expect(toolkit.retry).not.toHaveBeenCalled();
+      });
+
+      it.each(['isLicenseAvailable', 'isEnabled'] as const)(
+        'does not refresh when %s is false',
+        async (method) => {
+          mockSetupAuthenticationParams.license[method].mockReturnValue(false);
+
+          await selfClientHandler(
+            handlerOptions(httpServerMock.createFakeKibanaRequest({})),
+            toolkit
+          );
+
+          expect(serviceAccounts.backend.reauthenticateFakeRequest).not.toHaveBeenCalled();
+          expect(toolkit.notHandled).toHaveBeenCalledTimes(1);
+          expect(toolkit.retry).not.toHaveBeenCalled();
+        }
+      );
+    });
+
     describe('unauthorized error handler', () => {
       let unauthorizedErrorHandler: UnauthorizedErrorHandler;
       let reauthenticate: jest.SpyInstance<Promise<AuthenticationResult>, [KibanaRequest]>;
@@ -418,6 +610,163 @@ describe('AuthenticationService', () => {
           mockSetupAuthenticationParams.elasticsearch.setUnauthorizedErrorHandler.mock.calls[0][0];
         reauthenticate =
           jest.requireMock('./authenticator').Authenticator.mock.instances[0].reauthenticate;
+      });
+
+      describe('service-account-bound fake requests', () => {
+        let serviceAccounts: ReturnType<typeof serviceAccountsServiceMock.createStart>;
+        const fakeRequestError = new errors.ResponseError(
+          securityMock.createApiResponse({
+            statusCode: 401,
+            body: { error: { caused_by: { authentication_error_code: '0x7E0116' } } },
+          })
+        ) as UnauthorizedError;
+
+        beforeEach(() => {
+          serviceAccounts = serviceAccountsServiceMock.createStart();
+          mockSetupAuthenticationParams.getServiceAccounts.mockReturnValue(serviceAccounts);
+        });
+
+        it('retries with the replaced credential when the request is service-account-bound', async () => {
+          serviceAccounts.backend.reauthenticateFakeRequest.mockResolvedValue({
+            authorization: 'Bearer essu_fresh_token',
+          });
+          const request = httpServerMock.createFakeKibanaRequest({
+            headers: { authorization: 'Bearer essu_stale_token' },
+          });
+
+          await unauthorizedErrorHandler(
+            { error: fakeRequestError, request },
+            mockUnauthorizedErrorToolkit
+          );
+
+          expect(serviceAccounts.backend.reauthenticateFakeRequest).toHaveBeenCalledTimes(1);
+          expect(serviceAccounts.backend.reauthenticateFakeRequest).toHaveBeenCalledWith(request);
+          // The lowercase `authorization` key is load-bearing for the transport header merge.
+          expect(mockUnauthorizedErrorToolkit.retry).toHaveBeenCalledWith({
+            authHeaders: { authorization: 'Bearer essu_fresh_token' },
+          });
+          // The session machinery must never run for fake requests.
+          expect(reauthenticate).not.toHaveBeenCalled();
+        });
+
+        it('does not handle the error when the request is not service-account-bound', async () => {
+          serviceAccounts.backend.reauthenticateFakeRequest.mockResolvedValue(null);
+          const request = httpServerMock.createFakeKibanaRequest({
+            headers: { authorization: 'ApiKey essu_task_manager_key' },
+          });
+
+          await unauthorizedErrorHandler(
+            { error: fakeRequestError, request },
+            mockUnauthorizedErrorToolkit
+          );
+
+          expect(mockUnauthorizedErrorToolkit.notHandled).toHaveBeenCalledTimes(1);
+          expect(mockUnauthorizedErrorToolkit.retry).not.toHaveBeenCalled();
+          expect(reauthenticate).not.toHaveBeenCalled();
+        });
+
+        it('does not handle the error when the credential replacement rejects', async () => {
+          serviceAccounts.backend.reauthenticateFakeRequest.mockRejectedValue(
+            new Error('mint failed')
+          );
+          const request = httpServerMock.createFakeKibanaRequest({});
+
+          await unauthorizedErrorHandler(
+            { error: fakeRequestError, request },
+            mockUnauthorizedErrorToolkit
+          );
+
+          expect(mockUnauthorizedErrorToolkit.notHandled).toHaveBeenCalledTimes(1);
+          expect(mockUnauthorizedErrorToolkit.retry).not.toHaveBeenCalled();
+        });
+
+        it('does not handle the error when the service accounts service is not available', async () => {
+          mockSetupAuthenticationParams.getServiceAccounts.mockReturnValue(null);
+          const request = httpServerMock.createFakeKibanaRequest({});
+
+          await unauthorizedErrorHandler(
+            { error: fakeRequestError, request },
+            mockUnauthorizedErrorToolkit
+          );
+
+          expect(mockUnauthorizedErrorToolkit.notHandled).toHaveBeenCalledTimes(1);
+          expect(mockUnauthorizedErrorToolkit.retry).not.toHaveBeenCalled();
+          expect(reauthenticate).not.toHaveBeenCalled();
+        });
+
+        it('does not attempt replacement for non-expiry 401 errors', async () => {
+          serviceAccounts.backend.reauthenticateFakeRequest.mockResolvedValue({
+            authorization: 'Bearer essu_fresh_token',
+          });
+          // A 401 that would NOT pass the session path's expired-token classification.
+          const nonExpiredError = new errors.ResponseError(
+            securityMock.createApiResponse({
+              statusCode: 401,
+              body: { error: { reason: 'current license is non-compliant' } },
+            })
+          ) as UnauthorizedError;
+
+          await unauthorizedErrorHandler(
+            { error: nonExpiredError, request: httpServerMock.createFakeKibanaRequest({}) },
+            mockUnauthorizedErrorToolkit
+          );
+
+          expect(mockUnauthorizedErrorToolkit.retry).not.toHaveBeenCalled();
+          expect(serviceAccounts.backend.reauthenticateFakeRequest).not.toHaveBeenCalled();
+          expect(mockUnauthorizedErrorToolkit.notHandled).toHaveBeenCalledTimes(1);
+        });
+
+        it.each(['isLicenseAvailable', 'isEnabled'] as const)(
+          'does not refresh when %s is false',
+          async (method) => {
+            mockSetupAuthenticationParams.license[method].mockReturnValue(false);
+            await unauthorizedErrorHandler(
+              { error: fakeRequestError, request: httpServerMock.createFakeKibanaRequest({}) },
+              mockUnauthorizedErrorToolkit
+            );
+            expect(serviceAccounts.backend.reauthenticateFakeRequest).not.toHaveBeenCalled();
+            expect(reauthenticate).not.toHaveBeenCalled();
+            expect(mockUnauthorizedErrorToolkit.retry).not.toHaveBeenCalled();
+            expect(mockUnauthorizedErrorToolkit.notHandled).toHaveBeenCalledTimes(1);
+          }
+        );
+
+        it('recognizes the native Elasticsearch token expiry reason', async () => {
+          serviceAccounts.backend.reauthenticateFakeRequest.mockResolvedValue({
+            authorization: 'Bearer replacement',
+          });
+          const error = new errors.ResponseError(
+            securityMock.createApiResponse({
+              statusCode: 401,
+              body: { error: { reason: 'token expired' } },
+            })
+          ) as UnauthorizedError;
+          await unauthorizedErrorHandler(
+            { error, request: httpServerMock.createFakeKibanaRequest({}) },
+            mockUnauthorizedErrorToolkit
+          );
+          expect(mockUnauthorizedErrorToolkit.retry).toHaveBeenCalledWith({
+            authHeaders: { authorization: 'Bearer replacement' },
+          });
+          expect(reauthenticate).not.toHaveBeenCalled();
+        });
+
+        it.each([
+          {},
+          { error: { caused_by: { authentication_error_code: '0x3B8626' } } },
+          { error: { caused_by: { authentication_error_code: '0xEDF789' } } },
+        ])('does not mint for an unrecognized or rejected credential: %j', async (body) => {
+          const error = new errors.ResponseError(
+            securityMock.createApiResponse({ statusCode: 401, body })
+          ) as UnauthorizedError;
+          await unauthorizedErrorHandler(
+            { error, request: httpServerMock.createFakeKibanaRequest({}) },
+            mockUnauthorizedErrorToolkit
+          );
+          expect(serviceAccounts.backend.reauthenticateFakeRequest).not.toHaveBeenCalled();
+          expect(mockUnauthorizedErrorToolkit.retry).not.toHaveBeenCalled();
+          expect(reauthenticate).not.toHaveBeenCalled();
+        });
       });
 
       it('does not handle error if license is not available.', async () => {

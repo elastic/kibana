@@ -23,7 +23,7 @@ const receiver = new OtlpLogReceiver();
 /**
  * Asserts the OTel envelope and resource-level fields that are identical across all audit events.
  * The audit appender ships a deliberately minimal resource (includeResources allowlist) carrying
- * only service.name + service.type + project.id — the auto-detected host/OS/process/env attributes
+ * only service.name + service.type — the auto-detected host/OS/process/env attributes
  * are excluded.
  */
 const expectOtelEnvelope = (e: FlatAttributes) => {
@@ -31,28 +31,20 @@ const expectOtelEnvelope = (e: FlatAttributes) => {
   expect(e.severityNumber).toBe(9); // SeverityNumber.INFO
   expect(e.severityText).toBe('INFO');
 
-  // Minimal-resource contract: the resource carries EXACTLY service.name + service.type + project.id.
-  // The exact-key assertion proves the detectors' host/OS/process/env attributes are all filtered
-  // out. project.id arrives as a resource attribute (OTEL_RESOURCE_ATTRIBUTES=project.id=… in the
-  // config, standing in for the APM global label) and is deliberately KEPT in the resource because
-  // the log-delivery pipeline reads it there.
+  // Only service identity belongs in the resource; detected and configured project attributes
+  // must be filtered out after promotion to each record.
   const resource = getResourceAttributes(e);
-  expect(Object.keys(resource).sort()).toStrictEqual([
-    'project.id',
-    'service.name',
-    'service.type',
-  ]);
+  expect(Object.keys(resource).sort()).toStrictEqual(['service.name', 'service.type']);
   expect(resource['service.name']).toBe('serverless-kibana');
   expect(resource['service.type']).toBe('kibana');
-  expect(resource['project.id']).toBe(OTEL_TEST_PROJECT_ID);
+  expect(resource['project.id']).toBeUndefined();
 
   // Per-record guarantees on every audit record.
   expect(e['log.type']).toBe('audit'); // AUDIT_OTEL_FIELD_DEFAULTS
   expect(e['log.logger']).toBeUndefined(); // dropped from per-record attributes
   expect(e['service.version']).toBeUndefined(); // dropped per-record (resource copy filtered too)
-  // project.id is ALSO promoted onto each record (promoteResourceAttributes) — it lives in both the
-  // resource (above) and the per-record attributes. getLogAttributes reads the per-record attributes
-  // specifically (the merged view can't distinguish them since project.id is in both).
+  // project.id arrives through OTEL_RESOURCE_ATTRIBUTES and is promoted before resource filtering.
+  // Read record attributes separately so the merged view cannot hide an incorrect field location.
   expect(getLogAttributes(e)['project.id']).toBe(OTEL_TEST_PROJECT_ID);
 };
 

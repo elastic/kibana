@@ -118,6 +118,7 @@ export const AwsCloudwatch: ConnectorSpec = {
 
     listAlarms: {
       isTool: true,
+      scope: 'read',
       description:
         'List CloudWatch alarms and their current state (ALARM, OK, or INSUFFICIENT_DATA). Filter by name prefix, exact names, or state. Use this to find alarm names before calling enableAlarmActions, disableAlarmActions, setAlarmState, or getAlarmHistory.',
       input: ListAlarmsInputSchema,
@@ -136,6 +137,7 @@ export const AwsCloudwatch: ConnectorSpec = {
 
     enableAlarmActions: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Resume (un-suppress) the notification and auto-scaling actions for one or more alarms, restoring them after a maintenance window. Use listAlarms first to find alarm names.',
       input: AlarmNamesInputSchema,
@@ -150,6 +152,7 @@ export const AwsCloudwatch: ConnectorSpec = {
 
     disableAlarmActions: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Suppress the notification and auto-scaling actions for one or more alarms, without deleting the alarm. Use this to silence a known-noisy monitor during a deploy or maintenance window, then call enableAlarmActions to restore it afterward. Use listAlarms first to find alarm names.',
       input: AlarmNamesInputSchema,
@@ -164,6 +167,7 @@ export const AwsCloudwatch: ConnectorSpec = {
 
     setAlarmState: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Force an alarm into a specific state (OK, ALARM, or INSUFFICIENT_DATA) for testing or to manually close a resolved alarm. The alarm typically returns to its real state within seconds once CloudWatch next evaluates it, so use getAlarmHistory to confirm a lasting change. This triggers any actions configured for the target state (e.g. sends an SNS notification) — use with care.',
       input: SetAlarmStateInputSchema,
@@ -187,6 +191,7 @@ export const AwsCloudwatch: ConnectorSpec = {
 
     getAlarmHistory: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve the state-transition, configuration, and action history for an alarm (or all alarms). Use this to build an incident timeline or measure how long a monitor has been in ALARM. Timestamps in the response are Unix epoch seconds.',
       input: GetAlarmHistoryInputSchema,
@@ -206,6 +211,7 @@ export const AwsCloudwatch: ConnectorSpec = {
 
     putMetricAlarm: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Create a new metric alarm, or completely overwrite an existing one with this exact name. Use this to automate monitor setup or tune a threshold. This is an admin-style operation with side effects on notification wiring — review the alarm definition carefully, since it replaces the full prior configuration when updating.',
       input: PutMetricAlarmInputSchema,
@@ -247,6 +253,7 @@ export const AwsCloudwatch: ConnectorSpec = {
 
     listMetrics: {
       isTool: true,
+      scope: 'read',
       description:
         'Discover available CloudWatch metrics and their dimensions, optionally filtered by namespace, metric name, or dimensions. Use this to resolve the exact namespace/metricName/dimensions to pass to getMetricData or putMetricAlarm before querying or alarming on a metric.',
       input: ListMetricsInputSchema,
@@ -269,6 +276,7 @@ export const AwsCloudwatch: ConnectorSpec = {
 
     getMetricData: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve metric time-series values (and any metric math expression results) for one or more metrics over a time window. Use listMetrics first if you are not sure of the exact namespace/metricName/dimensions. Use this to attach the metric behind an alert to an incident, or to branch a workflow on a threshold.',
       input: GetMetricDataInputSchema,
@@ -288,6 +296,7 @@ export const AwsCloudwatch: ConnectorSpec = {
 
     getMetricWidgetImage: {
       isTool: true,
+      scope: 'read',
       description:
         'Render a snapshot graph of one or more CloudWatch metrics as a PNG image, to attach to an incident ticket or chat message. ' +
         'WARNING: the response contains a large base64-encoded image. Only call this when you have a plan to display or forward the image — do not call it just to inspect metric values (use getMetricData for that).',
@@ -306,6 +315,7 @@ export const AwsCloudwatch: ConnectorSpec = {
 
     listLogGroups: {
       isTool: true,
+      scope: 'read',
       description:
         'List CloudWatch Logs log groups, optionally filtered by name prefix or substring. Use this to resolve which log group(s) to pass to filterLogEvents or startLogsQuery.',
       input: ListLogGroupsInputSchema,
@@ -323,6 +333,7 @@ export const AwsCloudwatch: ConnectorSpec = {
 
     filterLogEvents: {
       isTool: true,
+      scope: 'read',
       description:
         'Search log events in a single log group by filter pattern and/or time range — a fast grep for enrichment without running a full Logs Insights query. For aggregations, joins across log groups, or complex filtering, use startLogsQuery/getLogsQueryResults instead. Use listLogGroups first to find the log group name.',
       input: FilterLogEventsInputSchema,
@@ -345,6 +356,7 @@ export const AwsCloudwatch: ConnectorSpec = {
 
     startLogsQuery: {
       isTool: true,
+      scope: 'write',
       description:
         'Start an asynchronous CloudWatch Logs Insights query over one or more log groups and a time range — the core primitive for pulling the logs behind an alert. Returns a queryId; pass it to getLogsQueryResults to poll for results, since queries run asynchronously and are not complete immediately.',
       input: StartLogsQueryInputSchema,
@@ -364,6 +376,7 @@ export const AwsCloudwatch: ConnectorSpec = {
 
     getLogsQueryResults: {
       isTool: true,
+      scope: 'read',
       description:
         'Poll for the results of a Logs Insights query started by startLogsQuery. Check the "status" field: "Running" or "Scheduled" means the query has not finished yet — call this again after a short delay. "Complete" means "results" contains the final rows.',
       input: GetLogsQueryResultsInputSchema,
@@ -374,6 +387,7 @@ export const AwsCloudwatch: ConnectorSpec = {
 
     listLogAnomalies: {
       isTool: true,
+      scope: 'read',
       description:
         'List anomalies surfaced by CloudWatch Logs anomaly detectors, to feed unexpected log patterns into a triage workflow. Optionally scope to a specific anomaly detector or to only suppressed/unsuppressed anomalies.',
       input: ListLogAnomaliesInputSchema,

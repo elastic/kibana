@@ -58,6 +58,7 @@ export const exportLiveQueryResultsRoute = (
       },
       async (context, request, response) => {
         const { id, actionId } = request.params;
+        const cpsActive = await osqueryContext.isCpsActive(request);
 
         const spaceId = osqueryContext?.service?.getActiveSpace
           ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
@@ -82,7 +83,7 @@ export const exportLiveQueryResultsRoute = (
           const search = await getScopedSearch(
             context,
             request,
-            osqueryContext.cpsEnabled,
+            cpsActive,
             osqueryContext.getStartServices
           );
 

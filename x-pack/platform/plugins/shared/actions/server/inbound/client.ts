@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  IClusterClient,
+  KibanaRequest,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 
-import type { InMemoryConnector } from '../types';
+import type { InMemoryConnector, RawAction } from '../types';
 import type { IngestInboundEventInput, IngestInboundEventResult } from './ingest';
 import { ingestInboundEvent } from './ingest';
 import type { ConnectorEventEmitParams, DispatchConnectorEventsResult } from './types';
@@ -21,8 +26,12 @@ interface InboundEventsClientInternalDeps {
   inboundEventsEnabled: boolean;
   isActionTypeEnabled: (actionTypeId: string) => boolean;
   maxEmitted: number;
+  maxBodyBytes: number;
   emitConnectorEvents: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
   getUnsecuredSavedObjectsClient: (spaceId: string) => Promise<SavedObjectsClientContract>;
+  getDecryptedConnectorAttributes: (connectorId: string, spaceId: string) => Promise<RawAction>;
+  getElasticsearchClient: () => Promise<IClusterClient>;
+  getKibanaRequestAccess: (request: KibanaRequest) => Promise<boolean>;
   inMemoryConnectors: InMemoryConnector[];
 }
 
@@ -43,9 +52,13 @@ export function buildInboundEventsClient(
         inboundEventsEnabled: deps.inboundEventsEnabled,
         isActionTypeEnabled: deps.isActionTypeEnabled,
         maxEmitted: deps.maxEmitted,
+        maxBodyBytes: deps.maxBodyBytes,
         emitConnectorEvents: deps.emitConnectorEvents,
         logger: deps.logger,
         getUnsecuredSavedObjectsClient: deps.getUnsecuredSavedObjectsClient,
+        getDecryptedConnectorAttributes: deps.getDecryptedConnectorAttributes,
+        getElasticsearchClient: deps.getElasticsearchClient,
+        getKibanaRequestAccess: deps.getKibanaRequestAccess,
         inMemoryConnectors: deps.inMemoryConnectors,
       }),
   };

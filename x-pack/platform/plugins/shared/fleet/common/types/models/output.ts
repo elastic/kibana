@@ -215,8 +215,7 @@ export type NewBeatsOutput =
   | NewLogstashOutput
   | KafkaOutput;
 
-// TODO: add `| NewOtlpOutput` when service-layer OTLP CRUD is activated in the follow-up PR
-export type NewOutput = NewBeatsOutput;
+export type NewOutput = NewBeatsOutput | NewOtlpOutput;
 
 export type UpdateOutput =
   | Partial<NewElasticsearchOutput>

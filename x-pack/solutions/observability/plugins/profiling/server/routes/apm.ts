@@ -7,6 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
 import type { RouteRegisterParameters } from '.';
@@ -59,6 +60,7 @@ export function registerTopNFunctionsAPMTransactionsRoute({
         );
 
         const esClient = await getClient(context);
+        const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
         const { timeFrom, timeTo, functionName, serviceNames }: QuerySchemaType = request.query;
         const startSecs = timeFrom / 1000;
@@ -69,6 +71,7 @@ export function registerTopNFunctionsAPMTransactionsRoute({
             const apmFunctions = await profilingDataAccess.services.fetchESFunctions({
               core,
               esClient,
+              abortSignal,
               query: {
                 bool: {
                   filter: [

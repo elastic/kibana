@@ -41,7 +41,6 @@ describe('DefaultAlertService', () => {
         defaultEmail: undefined,
         defaultStatusRuleEnabled: true,
         defaultTLSRuleEnabled: true,
-        rebalancePrivateLocationShardsEnabled: true,
       });
       expect(soClient.get).toHaveBeenCalledTimes(1);
     });
@@ -455,7 +454,7 @@ describe('DefaultAlertService', () => {
       expect(connectors).toEqual({
         actionConnectors: [{ id: 'id', actionTypeId: 'actionTypeId' }],
         settings: {
-          ...DYNAMIC_SETTINGS_DEFAULTS,
+          ...omit(DYNAMIC_SETTINGS_DEFAULTS, 'rebalancePrivateLocationShardsEnabled'),
           defaultStatusRuleEnabled: true,
           defaultTLSRuleEnabled: true,
         },

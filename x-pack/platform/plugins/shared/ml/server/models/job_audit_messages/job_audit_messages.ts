@@ -425,9 +425,6 @@ export function jobAuditMessagesProvider(
             source: 'ctx._source.cleared = true',
             lang: 'painless',
           },
-          ...(serverless.isServerless && serverless.cpsEnabled
-            ? { project_routing: DEFAULT_ML_PROJECT_ROUTING }
-            : {}),
         },
         { maxRetries: 0 }
       ),
@@ -437,9 +434,6 @@ export function jobAuditMessagesProvider(
             index,
             body: newClearedMessage,
             refresh: 'wait_for',
-            ...(serverless.isServerless && serverless.cpsEnabled
-              ? { project_routing: DEFAULT_ML_PROJECT_ROUTING }
-              : {}),
           },
           { maxRetries: 0 }
         )

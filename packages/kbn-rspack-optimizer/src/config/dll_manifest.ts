@@ -21,8 +21,7 @@ import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
  * import time). During distributable builds the DLL is rebuilt by
  * BuildPackages *after* all task modules have been imported, so an
  * eagerly-evaluated constant would capture a stale manifest with wrong
- * module IDs. The legacy optimizer avoids this because it runs webpack
- * inside forked worker processes that start after the DLL rebuild.
+ * module IDs.
  *
  * The manifest is built by webpack's DllPlugin and contains `buildMeta` per
  * module. Rspack's DllReferencePlugin supports `exportsType` and
@@ -56,8 +55,8 @@ import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
  *
  *  - Everything else → strip buildMeta (no named imports expected).
  *
- * NOTE: This can be removed once we delete the legacy optimizer and emit
- * the DLL with rspack directly.
+ * NOTE: This sanitisation can be removed once the DLL is emitted with rspack
+ * directly instead of webpack.
  */
 export function loadDllManifest() {
   const raw = JSON.parse(Fs.readFileSync(UiSharedDepsNpm.dllManifestPath, 'utf8'));

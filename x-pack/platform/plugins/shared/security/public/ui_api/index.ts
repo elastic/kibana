@@ -11,25 +11,29 @@ import type { CoreStart } from '@kbn/core/public';
 
 import type { ChangePasswordProps } from './change_password';
 import { getComponents } from './components';
+import type { CreateServiceAccountProps } from './create_service_account';
 import type { PersonalInfoProps } from './personal_info';
 
-export type { ChangePasswordProps, PersonalInfoProps };
+export type { ChangePasswordProps, CreateServiceAccountProps, PersonalInfoProps };
 
 interface GetUiApiOptions {
   core: CoreStart;
+  isServerless?: boolean;
+  roleManagementEnabled?: boolean;
 }
 
 type LazyComponentFn<T> = (props: T) => ReactElement;
 
 export interface UiApi {
   components: {
+    getCreateServiceAccount: LazyComponentFn<CreateServiceAccountProps>;
     getPersonalInfo: LazyComponentFn<PersonalInfoProps>;
     getChangePassword: LazyComponentFn<ChangePasswordProps>;
   };
 }
 
-export const getUiApi = ({ core }: GetUiApiOptions): UiApi => {
-  const components = getComponents({ core });
+export const getUiApi = ({ core, isServerless, roleManagementEnabled }: GetUiApiOptions): UiApi => {
+  const components = getComponents({ core, isServerless, roleManagementEnabled });
 
   return {
     components,

@@ -6,9 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { lensApiConfigSchemaNoESQL } from '@kbn/lens-embeddable-utils';
 
-import { lensResponseItemSchema } from './common';
+import { lensResponseItemSchema, lensApiConfigLibItemSchemaNoESQL } from './common';
 
 export const lensUpdateRequestParamsSchema = z
   .object({
@@ -18,6 +17,6 @@ export const lensUpdateRequestParamsSchema = z
   })
   .strict();
 
-export const lensUpdateRequestBodySchema = lensApiConfigSchemaNoESQL;
+export const lensUpdateRequestBodySchema = lensApiConfigLibItemSchemaNoESQL;
 
 export const lensUpdateResponseBodySchema = lensResponseItemSchema;

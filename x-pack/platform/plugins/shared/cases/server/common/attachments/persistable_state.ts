@@ -238,7 +238,7 @@ export const persistableStateAttachmentTransformer: AttachmentTypeTransformer<
     return isLegacyPayloadPersistableStateAttachment(attachment);
   },
 
-  isUnifiedPayload(attachment: AttachmentRequestV2): boolean {
+  isUnifiedPayload(attachment: AttachmentRequestV2): attachment is UnifiedAttachmentPayload {
     return isUnifiedPayloadPersistableStateAttachment(attachment);
   },
 

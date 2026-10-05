@@ -8,10 +8,12 @@
 import React, { lazy, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
+import { Redirect, useRouteMatch } from 'react-router-dom';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { RulesListPage } from '../pages/rules_list_page/rules_list_page';
 import { RuleDetailsRoute } from '../routes/rule_details_route';
 import { RequireAlertingPrivilege } from '../components/require_alerting_privilege';
+import { useAlertingV2ExperimentalFeatures } from '../hooks/use_alerting_v2_experimental_features';
 
 const SequenceBuilderPage = lazy(() =>
   import('../pages/sequence_builder_page').then((m) => ({ default: m.SequenceBuilderPage }))
@@ -25,22 +27,29 @@ const SequenceBuilderFallback = () => (
 );
 
 export const RulesApp = () => {
+  const { path } = useRouteMatch();
+  const base = path.endsWith('/') ? path.slice(0, -1) : path;
+  const showExperimentalFeatures = useAlertingV2ExperimentalFeatures();
   return (
     <RequireAlertingPrivilege
       features={['rules']}
       pageName={i18n.translate('xpack.alertingV2.rulesApp.pageName', { defaultMessage: 'Rules' })}
     >
       <Routes>
-        <Route exact path="/sequence/create">
-          <Suspense fallback={<SequenceBuilderFallback />}>
-            <SequenceBuilderPage />
-          </Suspense>
+        <Route exact path={`${base}/sequence/create`}>
+          {showExperimentalFeatures ? (
+            <Suspense fallback={<SequenceBuilderFallback />}>
+              <SequenceBuilderPage />
+            </Suspense>
+          ) : (
+            <Redirect to={base} />
+          )}
         </Route>
 
-        <Route exact path="/:ruleId">
+        <Route exact path={`${base}/:ruleId`}>
           <RuleDetailsRoute />
         </Route>
-        <Route exact path="/">
+        <Route exact path={path}>
           <RulesListPage />
         </Route>
       </Routes>

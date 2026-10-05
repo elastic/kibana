@@ -33,7 +33,7 @@ groups:
           files for them are installed. Set to `[]` to disable language selection
           entirely.
         datatype: list
-        default: '["en", "fr-FR", "ja-JP", "zh-CN", "de-DE"]'
+        default: '["en", "fr-FR", "ja-JP", "zh-CN", "de-DE", "pt-BR"]'
         applies_to:
           stack: beta 9.5+
           ech: beta
@@ -68,6 +68,8 @@ groups:
             description: French
           - option: de-DE
             description: German
+          - option: pt-BR
+            description: Portuguese (Brazil)
         deprecation_details: "Replaced by `i18n.defaultLocale`. {{kib}} continues to honor `i18n.locale` if set, logging a deprecation warning at startup."
         applies_to:
           stack: deprecated 9.5+

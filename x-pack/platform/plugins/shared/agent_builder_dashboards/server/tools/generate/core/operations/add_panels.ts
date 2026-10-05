@@ -10,33 +10,26 @@ import { z } from '@kbn/zod/v4';
 import { appendPanelsToDashboard } from '../dashboard_state';
 import { defineOperation } from './types';
 import { addPanelsItemSchema } from './panels';
-import { createPanelInputMaterializer, applyCustomContentTemplates } from './panel_creation';
+import { createPanelInputMaterializer } from './panel_creation';
 
 export const addPanelsOperation = defineOperation({
   schema: z.object({
     operation: z.literal('add_panels'),
     panels: z.array(addPanelsItemSchema).min(1),
   }),
-  handler: async ({ dashboardData, operation, operationIndex, context }) => {
+  handler: ({ dashboardData, operation, operationIndex, context }) => {
     const materializePanelInput = createPanelInputMaterializer({
       resolvedPanelCreationRequests: context.resolvedPanelCreationRequests,
       operationIndex,
       operationType: operation.operation,
       failures: context.failures,
+      resolveAttachmentPanel: context.resolveAttachmentPanel,
     });
 
     const materialized = operation.panels.map((item, i) => ({
       item,
       panel: materializePanelInput(item, i),
     }));
-
-    if (context.resolveCustomContentTemplate) {
-      await applyCustomContentTemplates(
-        materialized,
-        context.resolveCustomContentTemplate,
-        context.failures
-      );
-    }
 
     let nextDashboardData = dashboardData;
 

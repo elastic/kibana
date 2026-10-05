@@ -20,6 +20,7 @@ import { roleDescriptorsFixture } from '../../worker';
 export interface SecurityBrowserAuthFixture extends BrowserAuthFixture {
   loginAsPlatformEngineer: () => Promise<void>;
   loginAsT1Analyst: () => Promise<void>;
+  loginAsEndpointPolicyManager: () => Promise<void>;
   loginAsSecurityRole: (roleName: string) => Promise<void>;
 }
 
@@ -67,12 +68,14 @@ export const securityBrowserAuthFixture = mergeTests(
 
     const loginAsPlatformEngineer = () => loginAsSecurityRole('platform_engineer');
     const loginAsT1Analyst = () => loginAsSecurityRole('t1_analyst');
+    const loginAsEndpointPolicyManager = () => loginAsSecurityRole('endpoint_policy_manager');
 
     await use({
       ...browserAuth,
       loginWithCustomRole,
       loginAsPlatformEngineer,
       loginAsT1Analyst,
+      loginAsEndpointPolicyManager,
       loginAsSecurityRole,
     });
   },

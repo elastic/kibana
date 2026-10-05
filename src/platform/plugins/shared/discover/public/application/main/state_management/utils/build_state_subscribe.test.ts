@@ -8,6 +8,7 @@
  */
 
 import { buildStateSubscribe } from './build_state_subscribe';
+import * as resolveEsqlSourceModule from '../../data_fetching/resolve_esql_source';
 import { FetchStatus } from '../../../types';
 import { dataViewComplexMock } from '../../../../__mocks__/data_view_complex';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
@@ -15,6 +16,7 @@ import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { createDataViewDataSource, DataSourceType } from '../../../../../common/data_sources';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { internalStateActions, type TabState } from '../redux';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
 
@@ -162,6 +164,85 @@ describe('buildStateSubscribe', () => {
     );
 
     expect(dataState.refetch$.next).not.toHaveBeenCalled();
+  });
+
+  it('should not fetch when switching to ES|QL while uninitialized', async () => {
+    dataState.data$.main$.next({ fetchStatus: FetchStatus.UNINITIALIZED });
+
+    await getSubscribeFn()(
+      getNextState({
+        appState: {
+          dataSource: { type: DataSourceType.Esql },
+          query: { esql: 'FROM logs' },
+        },
+      })
+    );
+
+    expect(dataState.refetch$.next).not.toHaveBeenCalled();
+  });
+
+  it('pauses auto refresh when an ES|QL query switches to an index without a time field', async () => {
+    jest.spyOn(resolveEsqlSourceModule, 'resolveEsqlSource').mockResolvedValue({
+      esqlSource: {} as Awaited<
+        ReturnType<typeof resolveEsqlSourceModule.resolveEsqlSource>
+      >['esqlSource'],
+      dataView: dataViewMock,
+    });
+
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.updateGlobalState)({
+        globalState: { refreshInterval: { pause: false, value: 5000 } },
+      })
+    );
+
+    await getSubscribeFn()(
+      getNextState({
+        appState: {
+          dataSource: { type: DataSourceType.Esql },
+          query: { esql: 'FROM no-time' },
+        },
+      })
+    );
+
+    expect(toolkit.getCurrentTab().globalState.refreshInterval).toEqual({
+      pause: true,
+      value: 5000,
+    });
+  });
+
+  it('should not resolve an empty ES|QL query', async () => {
+    const resolveSpy = jest
+      .spyOn(resolveEsqlSourceModule, 'resolveEsqlSource')
+      .mockResolvedValue(
+        {} as Awaited<ReturnType<typeof resolveEsqlSourceModule.resolveEsqlSource>>
+      );
+
+    await getSubscribeFn()(
+      getNextState({
+        appState: {
+          dataSource: { type: DataSourceType.Esql },
+          query: { esql: '' },
+        },
+      })
+    );
+
+    expect(resolveSpy).not.toHaveBeenCalled();
+    resolveSpy.mockRestore();
+  });
+
+  it('should fetch when switching to ES|QL after data has been loaded', async () => {
+    dataState.data$.main$.next({ fetchStatus: FetchStatus.COMPLETE });
+
+    await getSubscribeFn()(
+      getNextState({
+        appState: {
+          dataSource: { type: DataSourceType.Esql },
+          query: { esql: 'FROM logs' },
+        },
+      })
+    );
+
+    expect(dataState.refetch$.next).toHaveBeenCalled();
   });
 
   it('should not execute setState function if initialFetchStatus is UNINITIALIZED', async () => {

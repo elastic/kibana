@@ -44,7 +44,7 @@ export function getLogsHasDataFetcher(getStartServices: InfraClientStartServices
     const resolvedLogView = await logsShared.logViews.client.getResolvedLogView(DEFAULT_LOG_VIEW);
     const logViewStatus = await logsShared.logViews.client.getResolvedLogViewStatus(
       resolvedLogView,
-      coreStart.uiSettings
+      { uiSettings: coreStart.uiSettings }
     );
 
     const hasData = logViewStatus.index === 'available';

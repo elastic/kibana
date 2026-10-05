@@ -31,6 +31,7 @@ const aiIndex: GetAiIndexResponse = {
   dest: { type: 'index', value: 'ai-index-idx-sample-ki' },
   automations: [],
   sources: [{ type: 'connector', value: 'connector-1' }],
+  traces: [],
   date_created: '2026-01-01T00:00:00.000Z',
   date_modified: '2026-01-01T00:00:00.000Z',
 };
@@ -41,10 +42,11 @@ const SAMPLE_DISCOVER_URL = '/app/discover#/?_a=(query:(esql:FROM%20ai-index-idx
 
 interface RenderOptions {
   discoverShow?: boolean;
+  indexManagementMonitor?: boolean;
 }
 
 const renderWithProviders = (ui: React.ReactElement, options: RenderOptions = {}) => {
-  const { discoverShow = true } = options;
+  const { discoverShow = true, indexManagementMonitor = true } = options;
   const services = {
     ...coreMock.createStart(),
     share: sharePluginMock.createStartContract(),
@@ -52,6 +54,10 @@ const renderWithProviders = (ui: React.ReactElement, options: RenderOptions = {}
   services.application.capabilities = {
     ...services.application.capabilities,
     discover_v2: { show: discoverShow },
+    index_management: {
+      ...services.application.capabilities.index_management,
+      monitor: indexManagementMonitor,
+    },
   };
 
   const indexManagementLocator = sharePluginMock.createLocator();
@@ -131,6 +137,17 @@ describe('KiListPanel', () => {
         SAMPLE_INDEX_MANAGEMENT_URL
       );
     });
+  });
+
+  it('renders the backing index as plain text when the user lacks index management access', async () => {
+    renderWithProviders(<KiListPanel aiIndex={aiIndex} />, { indexManagementMonitor: false });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('contextKiListPanelDest')).toHaveTextContent(
+        'ai-index-idx-sample-ki'
+      );
+    });
+    expect(screen.queryByTestId('contextKiListPanelDestLink')).not.toBeInTheDocument();
   });
 
   it('requests a type filter when a type button is selected', () => {
