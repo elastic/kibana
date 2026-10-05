@@ -16,7 +16,10 @@ import { WorkflowDetailPage } from './workflow_detail_page';
 import { PLUGIN_ID } from '../../../../common';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import { selectYamlString } from '../../../entities/workflows/store/workflow_detail/selectors';
-import { setWorkflow } from '../../../entities/workflows/store/workflow_detail/slice';
+import {
+  setWorkflow,
+  setYamlString,
+} from '../../../entities/workflows/store/workflow_detail/slice';
 import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
 import { createStartServicesMock } from '../../../mocks';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
@@ -195,7 +198,7 @@ describe('WorkflowDetailPage', () => {
       }
     );
 
-    return { ...view, navigateToApp, historyRef };
+    return { ...view, navigateToApp, historyRef, store };
   };
 
   beforeEach(() => {
@@ -227,6 +230,30 @@ describe('WorkflowDetailPage', () => {
 
       expect(mockLoadConnectors).toHaveBeenCalled();
       expect(mockLoadWorkflow).toHaveBeenCalledWith({ id: 'test-workflow-123' });
+    });
+
+    it('stores the replay run mode before opening the modal', () => {
+      const clearReplayExecutionId = jest.fn();
+      mockUseWorkflowUrlState.mockReturnValue({
+        activeTab: 'executions' as const,
+        selectedExecutionId: 'exec-1',
+        replayExecutionId: 'exec-1',
+        replayIsTestRun: true,
+        setSelectedExecution: jest.fn(),
+        setActiveTab: jest.fn(),
+        clearReplayExecutionId,
+      });
+
+      const { store } = renderWithProviders({ id: 'test-workflow-123' }, (s) => {
+        s.dispatch(setWorkflow(mockWorkflow));
+        s.dispatch(setYamlString(mockWorkflow.yaml));
+      });
+
+      expect(store.getState().detail.replay).toEqual(
+        expect.objectContaining({ executionId: 'exec-1', isTestRun: true })
+      );
+      expect(store.getState().detail.isTestModalOpen).toBe(true);
+      expect(clearReplayExecutionId).toHaveBeenCalled();
     });
 
     it('should set default yaml when no id is provided', () => {

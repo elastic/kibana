@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 import { dashboardTools } from '../../../common';
 import type { DashboardGuidanceModule } from '../guidance_module';
@@ -36,7 +37,8 @@ In Kibana, a dashboard request follows three stages: resolve inputs, generate (w
 - Remember the dashboard's \`attachment_id\`. On later updates, pass the same \`attachment_id\` back as \`dashboardAttachmentId\` so generation edits the existing dashboard in place.
 - Use returned panel \`id\` values for future panel removals, and section \`id\` values for future section-targeted changes.
 - Never invent an \`attachment_id\`, panel \`id\`, or \`sectionId\`. Reuse values returned by prior tool results.
-- If the generation result includes \`data.failures\`, explain which panel creations failed and report each returned \`type\`, \`identifier\`, and \`error\`.
+- If the generation result includes panel \`data.failures\`, explain which panel creations failed and report each returned \`type\`, \`identifier\`, and \`error\`.
+- For an \`add_controls\` failure about a field, you may call \`${platformCoreTools.getIndexMapping}\` for that index and retry the control once with a mapped field that clearly fits the same intent. If none fits, tell the user in one sentence which filter could not be added because its field is not available in the data. Do not repeat the raw \`error\`, index names, or field lists.
 
 ## Rendering Edge Cases
 

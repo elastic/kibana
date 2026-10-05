@@ -71,7 +71,6 @@ export const FormWizardNav = ({
                 iconType="chevronSingleLeft"
                 onClick={onBack}
                 data-test-subj="backButton"
-                disabled={isStepValid === false}
               >
                 {labels.back}
               </EuiButtonEmpty>

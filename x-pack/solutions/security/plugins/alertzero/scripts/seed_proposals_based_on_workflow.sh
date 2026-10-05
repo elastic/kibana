@@ -154,18 +154,23 @@ next_seed_id() {
 }
 
 seed_conversation() {
-  local title="$1" summary="$2"
-  CONVERSATION_ID=$(
-    kibana_curl -X POST "${KIBANA_API_BASE}/api/agent_builder/conversations" \
+  local title="$1" summary="$2" response
+  local url="${KIBANA_API_BASE}/api/agent_builder/conversations"
+  if ! response=$(
+    kibana_curl -X POST "$url" \
       -d "$(jq -n --arg title "$title" --arg summary "$summary" \
         '{
           title: $title,
           template_id: "investigation",
           access_control: { access_mode: "public" },
           metadata: { status: "open", summary: $summary }
-        }')" \
-      | jq -r '.id'
-  )
+        }')" 2>&1
+  ); then
+    echo "! seed_conversation failed (POST $url): ${response}" >&2
+    CONVERSATION_ID=""
+    return 1
+  fi
+  CONVERSATION_ID=$(printf '%s' "$response" | jq -r '.id')
 }
 
 # Warns instead of aborting: `security.attack_discovery` is registered by the
@@ -516,7 +521,7 @@ steps:
 
             The investigation traced this alert to a burst of failed
             authentications from a single external address against several
-            accounts, which no existing rule covers. A custom query rule would
+            accounts, which no existing rule covers. An ES|QL rule would
             catch the pattern directly next time rather than leaving it to be
             reconstructed by hand.
 
@@ -526,8 +531,7 @@ steps:
             | Detail | Value |
             | --- | --- |
             | Rule | Repeated failed logons from one source |
-            | Query | `event.category:authentication and event.outcome:failure` |
-            | Index | `logs-*` |
+            | Query | `FROM logs-* \| WHERE event.category == "authentication" AND event.outcome == "failure"` |
             | Severity | Medium |
             | Enabled on creation | No |
 
@@ -548,11 +552,11 @@ steps:
         type: data.set
         with:
           action_input:
+            type: esql
+            language: esql
             name: "Repeated failed logons from one source"
             description: "Detects a burst of failed authentications from a single source address against multiple accounts. Created from a test proposal."
-            query: "event.category:authentication and event.outcome:failure"
-            index:
-              - "{{ consts.default_rule_index }}"
+            query: "FROM logs-* | WHERE event.category == \"authentication\" AND event.outcome == \"failure\""
             severity: medium
             risk_score: 47
 
@@ -574,6 +578,8 @@ steps:
       workflow-id: system-create-proposal
       inputs:
         conversationId: "{{ variables.conversation_id }}"
+        origin: alertzero
+        title: "{{ inputs.conversationTitle }}"
         comment: "{{ variables.comment }}"
         actionWorkflowId: "{{ variables.action_workflow_id }}"
         actionInput: "${{ variables.action_input }}"
@@ -592,18 +598,22 @@ WORKFLOW_YAML
 
 echo "Installing workflow \"${WORKFLOW_ID}\" on ${KIBANA_API_BASE}…"
 
-if kibana_curl -o /dev/null "${KIBANA_API_BASE}/api/workflows/workflow/${WORKFLOW_ID}"; then
-  kibana_curl -X PUT \
+if kibana_curl -o /dev/null "${KIBANA_API_BASE}/api/workflows/workflow/${WORKFLOW_ID}" 2>/dev/null; then
+  if ! response=$(kibana_curl -X PUT \
     "${KIBANA_API_BASE}/api/workflows/workflow/${WORKFLOW_ID}" \
-    -d "$(jq -n --rawfile yaml "$WORKFLOW_YAML_FILE" '{ yaml: $yaml }')" \
-    > /dev/null
-  echo "  already installed — updated in place."
+    -d "$(jq -n --rawfile yaml "$WORKFLOW_YAML_FILE" '{ yaml: $yaml }')" 2>&1); then
+    echo "! workflow update failed: ${response}" >&2
+  else
+    echo "  already installed — updated in place."
+  fi
 else
-  kibana_curl -X POST \
+  if ! response=$(kibana_curl -X POST \
     "${KIBANA_API_BASE}/api/workflows/workflow" \
-    -d "$(jq -n --rawfile yaml "$WORKFLOW_YAML_FILE" --arg id "$WORKFLOW_ID" '{ yaml: $yaml, id: $id }')" \
-    > /dev/null
-  echo "  created."
+    -d "$(jq -n --rawfile yaml "$WORKFLOW_YAML_FILE" --arg id "$WORKFLOW_ID" '{ yaml: $yaml, id: $id }')" 2>&1); then
+    echo "! workflow create failed: ${response}" >&2
+  else
+    echo "  created."
+  fi
 fi
 
 # ---- 2. fire it once per open proposal -------------------------------------
@@ -619,11 +629,11 @@ fi
 # Leaves $CONVERSATION_ID on the new conversation, so the `attach_*` calls that
 # follow each `fire` land on it.
 fire() {
-  local category="$1" title="$2" summary="$3" comment="$4" execution_id
+  local category="$1" title="$2" summary="$3" comment="$4" execution_id response
 
-  seed_conversation "$title" "$summary"
+  seed_conversation "$title" "$summary" || return 1
 
-  execution_id=$(
+  if ! response=$(
     kibana_curl -X POST \
       "${KIBANA_API_BASE}/api/workflows/workflow/${WORKFLOW_ID}/run" \
       -d "$(jq -n \
@@ -638,9 +648,12 @@ fire() {
             comment: $comment,
             category: $category
           }
-        }')" \
-      | jq -r '.workflowExecutionId'
-  )
+        }')" 2>&1
+  ); then
+    echo "! workflow run failed for \"${title}\" [${category}]: ${response}" >&2
+    return 1
+  fi
+  execution_id=$(printf '%s' "$response" | jq -r '.workflowExecutionId')
   echo "  [${category}] ${title}"
   echo "      conversation ${CONVERSATION_ID} · execution ${execution_id}"
 }

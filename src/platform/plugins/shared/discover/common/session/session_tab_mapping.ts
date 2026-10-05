@@ -97,32 +97,21 @@ export const fromStoredSessionSettings = (
     }),
 });
 
-/**
- * Adds saved type settings to a session API tab, rejecting Metrics settings on a non-ES|QL tab.
- * Panels map the same settings with `fromStoredTabTypeState` and fall back to a default tab.
- */
+/** Adds saved type settings, ignoring Metrics settings on non-ES|QL tabs. */
 export const applySessionTabTypeState = (
   apiTab: TabWithoutTypeState,
   tabTypeState: DiscoverSessionTabAttributes['tabTypeState']
 ): DiscoverSessionApiTab => {
-  const apiTabTypeState = fromStoredTabTypeState(tabTypeState);
-
-  if (apiTabTypeState.type === DiscoverTabType.Default) {
-    return { ...apiTab, ...apiTabTypeState };
-  }
-
   if (!isDiscoverSessionEsqlTab(apiTab)) {
-    throw new Error(
-      `Metrics tab "${apiTab.label}" with ID "${apiTab.id}" requires an ES|QL data source.`
-    );
+    return { ...apiTab, type: DiscoverTabType.Default };
   }
 
-  return { ...apiTab, ...apiTabTypeState };
+  return { ...apiTab, ...fromStoredTabTypeState(tabTypeState) };
 };
 
 /**
- * Maps session search and table state to API fields, keeping pinned conditions and omitting
- * inline IDs without changing the original filters.
+ * Maps session search and table state to public API fields, keeping pinned conditions and
+ * omitting inline IDs without changing the original filters.
  */
 export const fromStoredSessionSearchAndTable = (
   tab: DiscoverSessionTab | DiscoverSessionTabAttributes,
@@ -133,12 +122,20 @@ export const fromStoredSessionSearchAndTable = (
   }
 
   const transformedTab = fromStoredSearchAndTable(tab, pinnedFiltersToAppFilters(searchSource));
+  if (isDiscoverSessionEsqlTab(transformedTab)) {
+    return transformedTab;
+  }
+
   const { index } = searchSource;
   const inlineDataViewId = index && typeof index !== 'string' ? index.id : undefined;
-  return omitInlineDataViewIdFromFilters(transformedTab, inlineDataViewId);
+  return {
+    ...transformedTab,
+    filters: omitInlineDataViewIdFromFilters(transformedTab.filters, inlineDataViewId),
+  };
 };
 
-const pinnedFiltersToAppFilters = (searchSource: SerializedSearchSourceFields) => {
+/** Keeps pinned conditions in session exports without changing the original filters. */
+export const pinnedFiltersToAppFilters = (searchSource: SerializedSearchSourceFields) => {
   const { filter: filters } = searchSource;
 
   if (!Array.isArray(filters) || !filters.some(isFilterPinned)) {
@@ -151,15 +148,16 @@ const pinnedFiltersToAppFilters = (searchSource: SerializedSearchSourceFields) =
   };
 };
 
+/** Omits references to the current inline view, leaving references to other views unchanged. */
 const omitInlineDataViewIdFromFilters = (
-  tab: DiscoverSessionApiTabBase,
+  filters: DiscoverSessionApiClassicTab['filters'],
   inlineDataViewId: string | undefined
-): DiscoverSessionApiTabBase => {
-  if (inlineDataViewId === undefined || isDiscoverSessionEsqlTab(tab)) {
-    return tab;
+) => {
+  if (inlineDataViewId === undefined) {
+    return filters;
   }
 
-  const filters = tab.filters.map((filter) => {
+  return filters.map((filter) => {
     if (filter.data_view_id !== inlineDataViewId) {
       return filter;
     }
@@ -167,6 +165,4 @@ const omitInlineDataViewIdFromFilters = (
     const { data_view_id: _inlineDataViewId, ...filterWithoutDataViewId } = filter;
     return filterWithoutDataViewId;
   });
-
-  return { ...tab, filters };
 };
