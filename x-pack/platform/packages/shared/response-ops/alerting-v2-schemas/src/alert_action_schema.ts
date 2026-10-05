@@ -100,7 +100,7 @@ const tagEpisodeActionSchema = z
     tags: tagsSchema.describe("Replaces the episode's tags. Send `[]` to clear."),
   })
   .strict()
-  .meta({ id: 'alerting_tag_episode_action' });
+  .meta({ id: 'alerting_tag_alert_action' });
 
 const ackEpisodeActionSchema = z
   .object({
@@ -109,7 +109,7 @@ const ackEpisodeActionSchema = z
       .describe('Acknowledges an alerting episode.'),
   })
   .strict()
-  .meta({ id: 'alerting_ack_episode_action' });
+  .meta({ id: 'alerting_ack_alert_action' });
 
 const unackEpisodeActionSchema = z
   .object({
@@ -118,7 +118,7 @@ const unackEpisodeActionSchema = z
       .describe('Removes acknowledgement from an alerting episode.'),
   })
   .strict()
-  .meta({ id: 'alerting_unack_episode_action' });
+  .meta({ id: 'alerting_unack_alert_action' });
 
 const assignEpisodeActionSchema = z
   .object({
@@ -134,7 +134,7 @@ const assignEpisodeActionSchema = z
       ),
   })
   .strict()
-  .meta({ id: 'alerting_assign_episode_action' });
+  .meta({ id: 'alerting_assign_alert_action' });
 
 export const createSeriesAlertActionBodySchema = z
   .discriminatedUnion('action_type', [snoozeActionSchema, unsnoozeActionSchema])
@@ -154,7 +154,7 @@ export const createEpisodeAlertActionBodySchema = z
   .describe(
     'Request body for creating an episode-level alert action. One of: tag, ack, unack, assign, activate, deactivate.'
   )
-  .meta({ id: 'alerting_episode_alert_action' });
+  .meta({ id: 'alerting_alert_action' });
 export type CreateEpisodeAlertActionBody = z.infer<typeof createEpisodeAlertActionBodySchema>;
 
 export const seriesAlertActionParamsSchema = z
@@ -197,37 +197,37 @@ export type CreateUnsnoozeSeriesActionBody = z.infer<typeof createUnsnoozeSeries
 export const createTagEpisodeActionBodySchema = tagEpisodeActionSchema
   .omit({ action_type: true })
   .strict()
-  .meta({ id: 'alerting_new_tag_episode_action' });
+  .meta({ id: 'alerting_new_tag_alert_action' });
 export type CreateTagEpisodeActionBody = z.infer<typeof createTagEpisodeActionBodySchema>;
 
 export const createAckEpisodeActionBodySchema = ackEpisodeActionSchema
   .omit({ action_type: true })
   .strict()
-  .meta({ id: 'alerting_new_ack_episode_action' });
+  .meta({ id: 'alerting_new_ack_alert_action' });
 export type CreateAckEpisodeActionBody = z.infer<typeof createAckEpisodeActionBodySchema>;
 
 export const createUnackEpisodeActionBodySchema = unackEpisodeActionSchema
   .omit({ action_type: true })
   .strict()
-  .meta({ id: 'alerting_new_unack_episode_action' });
+  .meta({ id: 'alerting_new_unack_alert_action' });
 export type CreateUnackEpisodeActionBody = z.infer<typeof createUnackEpisodeActionBodySchema>;
 
 export const createAssignEpisodeActionBodySchema = assignEpisodeActionSchema
   .omit({ action_type: true })
   .strict()
-  .meta({ id: 'alerting_new_assign_episode_action' });
+  .meta({ id: 'alerting_new_assign_alert_action' });
 export type CreateAssignEpisodeActionBody = z.infer<typeof createAssignEpisodeActionBodySchema>;
 
 export const createActivateEpisodeActionBodySchema = activateActionSchema
   .omit({ action_type: true })
   .strict()
-  .meta({ id: 'alerting_new_activate_episode_action' });
+  .meta({ id: 'alerting_new_activate_alert_action' });
 export type CreateActivateEpisodeActionBody = z.infer<typeof createActivateEpisodeActionBodySchema>;
 
 export const createDeactivateEpisodeActionBodySchema = deactivateActionSchema
   .omit({ action_type: true })
   .strict()
-  .meta({ id: 'alerting_new_deactivate_episode_action' });
+  .meta({ id: 'alerting_new_deactivate_alert_action' });
 export type CreateDeactivateEpisodeActionBody = z.infer<
   typeof createDeactivateEpisodeActionBodySchema
 >;
@@ -290,78 +290,78 @@ export const bulkTagEpisodeActionItemSchema = tagEpisodeActionSchema
   .omit({ action_type: true })
   .extend({ alert_id: bulkEpisodeIdSchema })
   .strict()
-  .meta({ id: 'alerting_bulk_tag_episodes_item' });
+  .meta({ id: 'alerting_bulk_tag_alerts_item' });
 export type BulkTagEpisodeActionItem = z.infer<typeof bulkTagEpisodeActionItemSchema>;
 
 export const bulkTagEpisodeActionBodySchema = makeBulkActionBodySchema(
   bulkTagEpisodeActionItemSchema,
   'tag'
-).meta({ id: 'alerting_bulk_tag_episodes_request' });
+).meta({ id: 'alerting_bulk_tag_alerts_request' });
 export type BulkTagEpisodeActionBody = z.infer<typeof bulkTagEpisodeActionBodySchema>;
 
 export const bulkAckEpisodeActionItemSchema = ackEpisodeActionSchema
   .omit({ action_type: true })
   .extend({ alert_id: bulkEpisodeIdSchema })
   .strict()
-  .meta({ id: 'alerting_bulk_ack_episodes_item' });
+  .meta({ id: 'alerting_bulk_ack_alerts_item' });
 export type BulkAckEpisodeActionItem = z.infer<typeof bulkAckEpisodeActionItemSchema>;
 
 export const bulkAckEpisodeActionBodySchema = makeBulkActionBodySchema(
   bulkAckEpisodeActionItemSchema,
   'ack'
-).meta({ id: 'alerting_bulk_ack_episodes_request' });
+).meta({ id: 'alerting_bulk_ack_alerts_request' });
 export type BulkAckEpisodeActionBody = z.infer<typeof bulkAckEpisodeActionBodySchema>;
 
 export const bulkUnackEpisodeActionItemSchema = unackEpisodeActionSchema
   .omit({ action_type: true })
   .extend({ alert_id: bulkEpisodeIdSchema })
   .strict()
-  .meta({ id: 'alerting_bulk_unack_episodes_item' });
+  .meta({ id: 'alerting_bulk_unack_alerts_item' });
 export type BulkUnackEpisodeActionItem = z.infer<typeof bulkUnackEpisodeActionItemSchema>;
 
 export const bulkUnackEpisodeActionBodySchema = makeBulkActionBodySchema(
   bulkUnackEpisodeActionItemSchema,
   'unack'
-).meta({ id: 'alerting_bulk_unack_episodes_request' });
+).meta({ id: 'alerting_bulk_unack_alerts_request' });
 export type BulkUnackEpisodeActionBody = z.infer<typeof bulkUnackEpisodeActionBodySchema>;
 
 export const bulkAssignEpisodeActionItemSchema = assignEpisodeActionSchema
   .omit({ action_type: true })
   .extend({ alert_id: bulkEpisodeIdSchema })
   .strict()
-  .meta({ id: 'alerting_bulk_assign_episodes_item' });
+  .meta({ id: 'alerting_bulk_assign_alerts_item' });
 export type BulkAssignEpisodeActionItem = z.infer<typeof bulkAssignEpisodeActionItemSchema>;
 
 export const bulkAssignEpisodeActionBodySchema = makeBulkActionBodySchema(
   bulkAssignEpisodeActionItemSchema,
   'assign'
-).meta({ id: 'alerting_bulk_assign_episodes_request' });
+).meta({ id: 'alerting_bulk_assign_alerts_request' });
 export type BulkAssignEpisodeActionBody = z.infer<typeof bulkAssignEpisodeActionBodySchema>;
 
 export const bulkActivateEpisodeActionItemSchema = activateActionSchema
   .omit({ action_type: true })
   .extend({ alert_id: bulkEpisodeIdSchema })
   .strict()
-  .meta({ id: 'alerting_bulk_activate_episodes_item' });
+  .meta({ id: 'alerting_bulk_activate_alerts_item' });
 export type BulkActivateEpisodeActionItem = z.infer<typeof bulkActivateEpisodeActionItemSchema>;
 
 export const bulkActivateEpisodeActionBodySchema = makeBulkActionBodySchema(
   bulkActivateEpisodeActionItemSchema,
   'activate'
-).meta({ id: 'alerting_bulk_activate_episodes_request' });
+).meta({ id: 'alerting_bulk_activate_alerts_request' });
 export type BulkActivateEpisodeActionBody = z.infer<typeof bulkActivateEpisodeActionBodySchema>;
 
 export const bulkDeactivateEpisodeActionItemSchema = deactivateActionSchema
   .omit({ action_type: true })
   .extend({ alert_id: bulkEpisodeIdSchema })
   .strict()
-  .meta({ id: 'alerting_bulk_deactivate_episodes_item' });
+  .meta({ id: 'alerting_bulk_deactivate_alerts_item' });
 export type BulkDeactivateEpisodeActionItem = z.infer<typeof bulkDeactivateEpisodeActionItemSchema>;
 
 export const bulkDeactivateEpisodeActionBodySchema = makeBulkActionBodySchema(
   bulkDeactivateEpisodeActionItemSchema,
   'deactivate'
-).meta({ id: 'alerting_bulk_deactivate_episodes_request' });
+).meta({ id: 'alerting_bulk_deactivate_alerts_request' });
 export type BulkDeactivateEpisodeActionBody = z.infer<typeof bulkDeactivateEpisodeActionBodySchema>;
 
 /**
