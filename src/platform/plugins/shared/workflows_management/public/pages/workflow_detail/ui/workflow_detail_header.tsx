@@ -410,26 +410,6 @@ export const WorkflowDetailHeader = React.memo(
 
     const appMenu = useMemo<AppMenuConfig>(() => {
       const items: AppMenuItemType[] = [];
-      if (workflowId && !isManagedWorkflow) {
-        items.push({
-          id: 'workflowAccess',
-          overflow: true,
-          label: i18n.translate('workflows.access.openButtonLabel', { defaultMessage: 'Access' }),
-          iconType: 'users',
-          run: () => setIsAccessOpen(true),
-          testId: 'workflowAccessButton',
-          disableButton: !canManageAccess,
-          tooltipContent: !canManageAccess
-            ? workflow?.permissions?.manage === false
-              ? i18n.translate('workflows.access.ownerOnlyTooltip', {
-                  defaultMessage: 'Only the workflow owner can manage access.',
-                })
-              : i18n.translate('workflows.access.updatePrivilegeTooltip', {
-                  defaultMessage: 'You need the Workflows Update privilege to manage access.',
-                })
-            : undefined,
-        });
-      }
       if (workflowId) {
         items.push(executionsToggleItem);
       }
@@ -477,8 +457,6 @@ export const WorkflowDetailHeader = React.memo(
         items,
       };
     }, [
-      canManageAccess,
-      workflow?.permissions?.manage,
       isExecutionsTab,
       workflowId,
       executionsToggleItem,
@@ -500,6 +478,28 @@ export const WorkflowDetailHeader = React.memo(
       runWorkflowTooltipContent,
     ]);
 
+    const share = useMemo(() => {
+      if (!workflowId || isManagedWorkflow) return undefined;
+      return {
+        label: i18n.translate('workflows.access.buttonLabel', { defaultMessage: 'Access control' }),
+        onClick: () => setIsAccessOpen(true),
+        isDisabled: !canManageAccess,
+        tooltip: !canManageAccess
+          ? {
+              content:
+                workflow?.permissions?.manage === false
+                  ? i18n.translate('workflows.access.ownerOnlyTooltip', {
+                      defaultMessage:
+                        'Only the workflow owner and administrators can manage access.',
+                    })
+                  : i18n.translate('workflows.access.updatePrivilegeTooltip', {
+                      defaultMessage: 'You need the Workflows Update privilege to manage access.',
+                    }),
+            }
+          : undefined,
+      };
+    }, [canManageAccess, isManagedWorkflow, workflow?.permissions?.manage, workflowId]);
+
     return (
       <>
         <EuiPageTemplate offset={0} minHeight={0} grow={false} css={styles.pageTemplate}>
@@ -507,6 +507,7 @@ export const WorkflowDetailHeader = React.memo(
             title={name}
             back={back}
             badges={badges}
+            share={share}
             menu={appMenu}
             docLink={WORKFLOWS_DOCUMENTATION_URL}
             spacing="compact"
