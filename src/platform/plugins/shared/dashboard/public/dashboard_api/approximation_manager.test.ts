@@ -90,5 +90,4 @@ describe('approximationManager', () => {
 
     manager.api.setEsqlApproximation(true);
   });
-
 });

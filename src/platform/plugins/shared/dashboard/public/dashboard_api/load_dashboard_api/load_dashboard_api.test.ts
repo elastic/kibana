@@ -139,7 +139,9 @@ describe('loadDashboardApi', () => {
           savedObjectId: '12345',
         });
         // @ts-ignore
-        expect(getDashboardApiMock.mock.calls[0][0].initialState.esql_approximation).toBeUndefined();
+        expect(
+          getDashboardApiMock.mock.calls[0][0].initialState.esql_approximation
+        ).toBeUndefined();
       });
     });
 
