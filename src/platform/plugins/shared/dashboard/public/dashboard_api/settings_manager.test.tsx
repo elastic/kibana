@@ -70,7 +70,7 @@ describe('initializeSettingsManager', () => {
               "auto_apply_filters": true,
               "hide_panel_borders": false,
               "hide_panel_titles": true,
-              "show_hint_bar": true,
+              "show_hint_bar": false,
               "sync_colors": false,
               "sync_cursor": true,
               "sync_tooltips": false,
