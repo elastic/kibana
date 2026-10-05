@@ -145,15 +145,17 @@ export const registerGetSourceInfoRoute = (
         return response.ok({ body: { columns } });
       } catch (error) {
         const statusCode = getErrorStatusCode(error);
-        esqlRouteRequestCounter.add(1, {
-          route: 'source_info',
-          outcome: 'failure',
-          'http.response.status_code': statusCode,
-        });
         const message = error instanceof Error ? error.message : String(error);
         // Errors in the query text (invalid or partial query, unknown index) are expected while
         // typing: answer 200 with no columns and the error, which clients treat as a failure.
-        if (QUERY_ERROR_STATUS_CODES.has(statusCode)) {
+        const isQueryError = QUERY_ERROR_STATUS_CODES.has(statusCode);
+        esqlRouteRequestCounter.add(1, {
+          route: 'source_info',
+          outcome: 'failure',
+          'http.response.status_code': isQueryError ? 200 : statusCode,
+          'error.type': String(statusCode),
+        });
+        if (isQueryError) {
           return response.ok({ body: { columns: [], error: { statusCode, message } } });
         }
         return response.customError({ statusCode, body: { message } });

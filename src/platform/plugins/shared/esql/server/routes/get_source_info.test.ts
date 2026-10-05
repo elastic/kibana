@@ -10,6 +10,12 @@
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { SOURCE_INFO_ROUTE } from '@kbn/esql-types';
 import { registerGetSourceInfoRoute } from './get_source_info';
+import { esqlRouteRequestCounter } from '../metrics';
+
+jest.mock('../metrics', () => ({
+  ...jest.requireActual('../metrics'),
+  esqlRouteRequestCounter: { add: jest.fn() },
+}));
 
 jest.mock('@kbn/esql-utils', () => ({
   getNamedParams: jest.fn().mockReturnValue([]),
@@ -176,6 +182,13 @@ describe('registerGetSourceInfoRoute', () => {
     expect(response.ok).toHaveBeenCalledWith({
       body: { columns: [], error: { statusCode: 400, message: 'Unknown index [lo]' } },
     });
+    // The metric records the status actually returned, and why the query failed.
+    expect(esqlRouteRequestCounter.add).toHaveBeenCalledWith(1, {
+      route: 'source_info',
+      outcome: 'failure',
+      'http.response.status_code': 200,
+      'error.type': '400',
+    });
     expect(response.customError).not.toHaveBeenCalled();
     expect(errorLogger.error).not.toHaveBeenCalled();
   });
@@ -192,6 +205,12 @@ describe('registerGetSourceInfoRoute', () => {
     expect(response.customError).toHaveBeenCalledWith({
       statusCode: 403,
       body: { message: 'unauthorized' },
+    });
+    expect(esqlRouteRequestCounter.add).toHaveBeenCalledWith(1, {
+      route: 'source_info',
+      outcome: 'failure',
+      'http.response.status_code': 403,
+      'error.type': '403',
     });
     expect(response.ok).not.toHaveBeenCalled();
   });
