@@ -23,13 +23,12 @@ export const renameDiscoverSession = createInternalStateAsyncThunk(
   'internalState/renameDiscoverSession',
   async (
     { newTitle }: RenameDiscoverSessionThunkParams,
-    { dispatch, getState, extra: { services, customizationContext, tabsStorageManager } }
+    { dispatch, getState, extra: { services, customizationContext } }
   ) => {
     const { persistedDiscoverSession } = getState();
 
     if (!persistedDiscoverSession) {
       dispatch(internalStateSlice.actions.setDraftSessionTitle(newTitle));
-      tabsStorageManager.updateDraftSessionTitleLocally(newTitle);
       return;
     }
 

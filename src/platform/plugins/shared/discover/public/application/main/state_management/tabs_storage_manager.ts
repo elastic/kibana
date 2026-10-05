@@ -89,7 +89,6 @@ export interface TabsStorageManager {
       'internalState' | 'attributes' | 'appState' | 'globalState' | 'profileState'
     >
   ) => void;
-  updateDraftSessionTitleLocally: (draftSessionTitle: string) => void;
   loadLocally: (props: {
     userId: string;
     spaceId: string;
@@ -427,16 +426,6 @@ export const createTabsStorageManager = ({
     }
   };
 
-  const updateDraftSessionTitleLocally: TabsStorageManager['updateDraftSessionTitleLocally'] = (
-    draftSessionTitle
-  ) => {
-    if (!enabled) {
-      return;
-    }
-
-    storage.set(TABS_LOCAL_STORAGE_KEY, { ...readFromLocalStorage(), draftSessionTitle });
-  };
-
   const loadLocally: TabsStorageManager['loadLocally'] = ({
     userId,
     spaceId,
@@ -608,7 +597,6 @@ export const createTabsStorageManager = ({
     pushSelectedTabIdToUrl,
     persistLocally,
     updateTabStateLocally,
-    updateDraftSessionTitleLocally,
     loadLocally,
     getNRecentlyClosedTabs,
   };

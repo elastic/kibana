@@ -1431,28 +1431,6 @@ describe('TabsStorageManager', () => {
     });
   });
 
-  it('should update the draft session title in local storage', () => {
-    const {
-      services: { storage },
-      tabsStorageManager,
-    } = create();
-    const storedTabsState = {
-      userId: mockUserId,
-      spaceId: mockSpaceId,
-      openTabs: [toStoredTab(mockTab1)],
-      closedTabs: [toStoredTab(mockRecentlyClosedTab)],
-    };
-
-    storage.set(TABS_LOCAL_STORAGE_KEY, storedTabsState);
-
-    tabsStorageManager.updateDraftSessionTitleLocally('My draft');
-
-    expect(storage.get(TABS_LOCAL_STORAGE_KEY)).toEqual({
-      ...storedTabsState,
-      draftSessionTitle: 'My draft',
-    });
-  });
-
   it('should restore the draft session title with the open tabs of the unsaved session', () => {
     const {
       tabsStorageManager,

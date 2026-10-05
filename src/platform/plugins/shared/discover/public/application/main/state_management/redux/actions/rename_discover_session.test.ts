@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { waitFor } from '@testing-library/react';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
@@ -166,7 +167,7 @@ describe('renameDiscoverSession', () => {
   });
 
   it('should keep the title as a draft without saving when the session has never been saved', async () => {
-    const { toolkit, services } = await setup({ isSaved: false, tabsStorageEnabled: true });
+    const { toolkit, services } = await setup({ isSaved: false });
 
     await toolkit.internalState
       .dispatch(internalStateActions.renameDiscoverSession({ newTitle: 'Renamed Session' }))
@@ -175,6 +176,36 @@ describe('renameDiscoverSession', () => {
     expect(services.discoverSessionService.save).not.toHaveBeenCalled();
     expect(toolkit.internalState.getState().persistedDiscoverSession).toBeUndefined();
     expect(toolkit.internalState.getState().draftSessionTitle).toBe('Renamed Session');
-    expect(services.storage.get(TABS_LOCAL_STORAGE_KEY).draftSessionTitle).toBe('Renamed Session');
+  });
+
+  it('should store the draft title together with the tabs of its own session', async () => {
+    const { toolkit, services } = await setup({ isSaved: false, tabsStorageEnabled: true });
+    const { spaceId } = toolkit.internalState.getState();
+    const tabId = toolkit.getCurrentTab().id;
+
+    // Once the session is stored, another Discover window replaces it with its own session
+    await waitFor(() => {
+      expect(services.storage.get(TABS_LOCAL_STORAGE_KEY)?.openTabs).toHaveLength(1);
+    });
+    services.storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: 'other-user',
+      spaceId: 'other-space',
+      openTabs: [{ id: 'other-window-tab', label: 'Other window tab' }],
+      closedTabs: [],
+    });
+
+    await toolkit.internalState
+      .dispatch(internalStateActions.renameDiscoverSession({ newTitle: 'Renamed Session' }))
+      .unwrap();
+
+    await waitFor(() => {
+      expect(services.storage.get(TABS_LOCAL_STORAGE_KEY).draftSessionTitle).toBe(
+        'Renamed Session'
+      );
+    });
+    const storedTabsState = services.storage.get(TABS_LOCAL_STORAGE_KEY);
+    expect(storedTabsState.spaceId).toBe(spaceId);
+    expect(storedTabsState.openTabs).toHaveLength(1);
+    expect(storedTabsState.openTabs[0].id).toBe(tabId);
   });
 });
