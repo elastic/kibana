@@ -12,7 +12,18 @@ import { getSampleDashboardState } from '../mocks';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { initializeApproximationManager } from './approximation_manager';
 
+jest.mock('@kbn/esql-utils', () => ({
+  ...jest.requireActual('@kbn/esql-utils'),
+  esqlApproximationStorage: { get: jest.fn(), set: jest.fn() },
+}));
+
+import { esqlApproximationStorage } from '@kbn/esql-utils';
+
 describe('approximationManager', () => {
+  beforeEach(() => {
+    jest.mocked(esqlApproximationStorage.get).mockReturnValue(undefined);
+  });
+
   const createLastSavedState = (esql_approximation?: boolean) =>
     new BehaviorSubject<DashboardState>({
       ...getSampleDashboardState({ esql_approximation }),
@@ -89,5 +100,26 @@ describe('approximationManager', () => {
     });
 
     manager.api.setEsqlApproximation(true);
+  });
+
+  describe('localStorage fallback', () => {
+    test('uses stored value when initialState.esql_approximation is undefined', () => {
+      jest.mocked(esqlApproximationStorage.get).mockReturnValue(true);
+      const manager = initializeApproximationManager(getSampleDashboardState());
+      expect(manager.api.isApproximate$.value).toBe(true);
+    });
+
+    test('prefers initialState value over stored value', () => {
+      jest.mocked(esqlApproximationStorage.get).mockReturnValue(true);
+      const manager = initializeApproximationManager(
+        getSampleDashboardState({ esql_approximation: false })
+      );
+      expect(manager.api.isApproximate$.value).toBe(false);
+    });
+
+    test('initializes as undefined when initialState is undefined and no stored value', () => {
+      const manager = initializeApproximationManager(getSampleDashboardState());
+      expect(manager.api.isApproximate$.value).toBeUndefined();
+    });
   });
 });
