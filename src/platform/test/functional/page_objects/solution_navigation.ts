@@ -18,6 +18,10 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 const TIMEOUT_CHECK = 3000;
 const MORE_POPOVER = 'side-nav-popover-More';
+// Every primary item renders in the rail until the overflow split into "More" is measured a frame
+// later. The negated match also holds when the attribute is absent.
+const MEASURED_PRIMARY_NAV =
+  '#kbnChromeNav-primaryNavigation:not([data-overflow-measured="false"])';
 
 export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getService'>) {
   const testSubjects = ctx.getService('testSubjects');
@@ -30,10 +34,9 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
     log.debug(
       'SolutionNavigation.sidenav.expandMoreIfNeeded - checking if "More" menu needs to be expanded'
     );
-    // The nav decides which items overflow into More in a layout effect of the same render, so
-    // once the nav root is present the trigger's presence is final. Callers can override the
-    // root's data-test-subj, but its id is fixed.
-    if (!(await find.existsByDisplayedByCssSelector('#kbnChromeNav-root', TIMEOUT_CHECK))) {
+    // Once the overflow split is measured, the trigger's presence is final. Ids are used because
+    // callers can override the nav's data-test-subj.
+    if (!(await find.existsByDisplayedByCssSelector(MEASURED_PRIMARY_NAV, TIMEOUT_CHECK))) {
       throw new Error('Side navigation has not rendered');
     }
     const moreMenuExists = await testSubjects.exists('kbnChromeNav-moreMenuTrigger');
@@ -109,8 +112,12 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
     existsInMore: () => Promise<boolean>;
   }) {
     await retry.waitFor(`${description} to be clickable`, async () => {
-      // The nav renders every item up front and only moves the overflow into "More" a frame
-      // later, so wait for the item rather than deciding from a single instantaneous probe.
+      if (!(await find.existsByDisplayedByCssSelector(MEASURED_PRIMARY_NAV, TIMEOUT_CHECK))) {
+        return false;
+      }
+
+      // Wait for the item rather than deciding from a single instantaneous probe: it may render
+      // after the nav does.
       if (await waitForInNav()) {
         if (await existsInMore()) {
           return true;
