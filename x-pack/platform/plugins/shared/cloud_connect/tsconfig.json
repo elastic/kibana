@@ -13,6 +13,7 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/core",
     "@kbn/i18n",
     "@kbn/management-plugin",

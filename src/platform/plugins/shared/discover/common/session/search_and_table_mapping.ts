@@ -129,9 +129,9 @@ export const fromStoredSearchAndTable = (
   tab: DiscoverSessionTab | DiscoverSessionTabAttributes,
   searchSource: SerializedSearchSourceFields
 ): DiscoverSessionApiTabBase => {
-  const { sort, sampleSize, rowsPerPage, viewMode } = tab;
+  const { sort, sampleSize, viewMode } = tab;
   const apiTab = {
-    ...fromStoredTableSettings(tab),
+    ...fromStoredCommonTableSettings(tab),
     sort: fromStoredSort(sort),
   };
   const { index, query } = searchSource;
@@ -146,7 +146,6 @@ export const fromStoredSearchAndTable = (
     : {
         ...apiTab,
         ...(sampleSize && { sample_size: sampleSize }),
-        ...(rowsPerPage && { rows_per_page: rowsPerPage }),
         ...(query && { query: toAsCodeQuery(query) }),
         filters: fromStoredTabFilters(searchSource),
         data_source: fromStoredDataView(index),
@@ -155,14 +154,13 @@ export const fromStoredSearchAndTable = (
 };
 
 /** Converts the stored table settings that are set to API fields, without adding defaults. */
-export const fromStoredTableSettings = (
+export const fromStoredCommonTableSettings = (
   storedState: Partial<DiscoverSessionTabAttributes>
-): DiscoverSessionApiEmbeddableOverrides => {
+) => {
   const {
     sort,
     columns,
     rowHeight,
-    sampleSize,
     rowsPerPage,
     headerRowHeight,
     density,
@@ -175,7 +173,6 @@ export const fromStoredTableSettings = (
     ...(columns && { column_order: columns }),
     ...(grid?.columns && Object.keys(grid.columns).length > 0 && { column_settings: grid.columns }),
     ...(rowHeight && { row_height: fromStoredRowHeight(rowHeight) }),
-    ...(sampleSize && { sample_size: sampleSize }),
     ...(rowsPerPage && { rows_per_page: rowsPerPage }),
     ...(headerRowHeight && { header_row_height: fromStoredRowHeight(headerRowHeight) }),
     ...(density && { density }),

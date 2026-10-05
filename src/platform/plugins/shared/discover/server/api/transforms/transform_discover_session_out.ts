@@ -19,8 +19,10 @@ import { transformControlPanelsOut } from './transform_control_panels';
 import {
   applySessionTabTypeState,
   fromStoredSessionSearchAndTable,
-  fromStoredSessionSettings,
+  fromStoredClassicSessionSettings,
+  fromStoredEsqlSessionSettings,
 } from '../../../common/session/session_tab_mapping';
+import { isDiscoverSessionEsqlTab } from '../../../common/session/type_guards';
 import { toApiVisContext } from '../../../common/session/vis_context';
 
 interface ConvertedSessionTab {
@@ -61,9 +63,13 @@ const fromStoredSessionTab = (
   references: SavedObjectReference[]
 ): ConvertedSessionTab => {
   const searchSource = readSessionSearchSource(tab, references);
+  const searchAndTableFields = fromStoredSessionSearchAndTable(tab.attributes, searchSource);
+  const sessionSettings = isDiscoverSessionEsqlTab(searchAndTableFields)
+    ? fromStoredEsqlSessionSettings(tab.attributes)
+    : fromStoredClassicSessionSettings(tab.attributes);
   const apiTab = {
-    ...fromStoredSessionSearchAndTable(tab.attributes, searchSource),
-    ...fromStoredSessionSettings(tab.attributes),
+    ...searchAndTableFields,
+    ...sessionSettings,
   };
   const visContext = toApiVisContext(tab.attributes.visContext);
   const { panels: controlPanels, warnings } = transformControlPanelsOut(

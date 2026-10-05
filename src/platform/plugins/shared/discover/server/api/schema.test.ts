@@ -109,7 +109,6 @@ describe('discoverSessionApiDataSchema', () => {
         {
           ...esqlTab,
           rows_per_page: 25,
-          sample_size: 500,
         },
       ],
     });
@@ -119,7 +118,29 @@ describe('discoverSessionApiDataSchema', () => {
     expect(tab.data_source.type).toBe(AS_CODE_ESQL_DATA_SOURCE_TYPE);
     expect(tab.data_source.query).toBe('FROM logs-* | LIMIT 10');
     expect(tab.rows_per_page).toBe(25);
-    expect(tab.sample_size).toBe(500);
+  });
+
+  it.each([
+    ['sample_size', 500],
+    ['hide_aggregated_preview', true],
+    ['chart_interval', 'auto'],
+    ['chart_interval', 'h'],
+  ])('rejects %s on an ES|QL tab', (field, value) => {
+    expect(() =>
+      discoverSessionApiDataSchema.parse({
+        title: 'ES|QL only',
+        tabs: [{ ...esqlTab, [field]: value }],
+      })
+    ).toThrow();
+  });
+
+  it('rejects chart_interval on a metrics tab', () => {
+    expect(() =>
+      discoverSessionApiDataSchema.parse({
+        title: 'Metrics',
+        tabs: [{ ...metricsTab, chart_interval: 'auto' }],
+      })
+    ).toThrow();
   });
 
   it('accepts plain string tab types in the exported TypeScript types', () => {
@@ -829,7 +850,7 @@ describe('discoverSessionApiDataSchema', () => {
           ],
         });
 
-        expect(validated.tabs[0].chart_interval).toBe(chartInterval);
+        expect(validated.tabs[0]).toHaveProperty('chart_interval', chartInterval);
       }
     });
 
