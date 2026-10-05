@@ -19,3 +19,7 @@ export const INVESTIGATIONS_UI_CAPABILITY_MANAGE = 'manageInvestigations' as con
 export const INVESTIGATION_STATUS_URL = `${INVESTIGATIONS_INTERNAL_URL}/{id}/status` as const;
 export const INVESTIGATION_CLOSE_PREVIEW_URL =
   `${INVESTIGATIONS_INTERNAL_URL}/{id}/_close_preview` as const;
+
+/** The caller's investigation and escalation API privileges, so a UI can enable write actions without UI capabilities. */
+export const INVESTIGATIONS_PRIVILEGES_URL =
+  `${AGENTIC_INVESTIGATIONS_INTERNAL_URL}/_privileges` as const;

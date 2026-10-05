@@ -16,6 +16,7 @@ import {
 } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { AgentService } from '@kbn/fleet-plugin/server';
 import { SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED } from '@kbn/management-settings-ids';
 import { getSubscriptionAvailability } from '../common/availability';
 import {
@@ -25,6 +26,14 @@ import {
   ALERTZERO_PLUGIN_NAME,
 } from '../common/constants';
 import type { AlertZeroConfig } from './config';
+
+// The investigation and escalation flyouts and AlertZero's queue use the shared
+// `agenticInvestigations` routes, which require these API privileges. Cross-plugin server imports
+// are forbidden, so they are spelled out here and pinned by the plugin tests.
+const INVESTIGATIONS_API_PRIVILEGE_READ = 'read_investigations';
+const INVESTIGATIONS_API_PRIVILEGE_MANAGE = 'manage_investigations';
+const ESCALATIONS_API_PRIVILEGE_READ = 'read_escalations';
+const ESCALATIONS_API_PRIVILEGE_MANAGE = 'manage_escalations';
 import type {
   AlertZeroRequestHandlerContext,
   AlertTriageAttachmentServiceProvider,
@@ -46,13 +55,13 @@ import { ScanFailuresService } from './services/scan_failures/scan_failures_serv
 import { ActionsService } from './services/actions/actions_service';
 import type { HuntServices } from './services/watches/hunt';
 import { listActionsTool } from './agent_builder_tools/list_actions_tool';
-import {
-  createAssertAlertZeroAccess,
-  assertAlertZeroEnabled,
-} from './agent_builder_tools/assert_alertzero_access';
-import { reviseProposalTool } from './agent_builder_tools/revise_proposal_tool';
+import { createAssertAlertZeroAccess } from './agent_builder_tools/assert_alertzero_access';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
+import { createActionDiscoverySkill } from './agent_builder/skills/action_discovery';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
+import { registerStepDefinitions } from './step_types';
+import { makeIsContextEngineEnabled } from './step_types/is_context_engine_enabled';
+import { makeScopedResolveHostEnrollment } from './services/fleet/resolve_host_enrollment';
 
 export class AlertZeroPlugin
   implements
@@ -84,6 +93,8 @@ export class AlertZeroPlugin
     AlertZeroStartDependencies['agentBuilder']
   >['conversations'];
   private huntServices?: HuntServices;
+  private fleetAgentService?: AgentService;
+  private coreStart?: CoreStart;
   private scanFailuresService?: ScanFailuresService;
 
   /**
@@ -144,18 +155,24 @@ export class AlertZeroPlugin
       agentBuilder.tools.register({
         ...listActionsTool(() => this.requireActionsService(), assertAlertZeroAccess),
       });
-      agentBuilder.tools.register({
-        ...reviseProposalTool(
-          () => this.requireProposals(),
-          async (request) => {
-            const [core] = await coreSetup.getStartServices();
-            await assertAlertZeroEnabled(core, request);
-          }
-        ),
-      });
+      agentBuilder.skills.register(createActionDiscoverySkill(assertAlertZeroAccess));
     }
 
     registerAlertZeroInferenceFeatures(searchInferenceEndpoints, this.logger.get('inference'));
+    // Steps register during setup but only run after start; deps resolve lazily.
+    const stepsLogger = this.logger.get('steps');
+    registerStepDefinitions({
+      workflowsExtensions,
+      getActionsService: () => this.requireActionsService(),
+      getConversations: () => this.requireAgentBuilderConversations(),
+      getHuntServices: () => this.requireHuntServices(),
+      getResolveHostEnrollment: makeScopedResolveHostEnrollment(
+        () => this.fleetAgentService,
+        stepsLogger
+      ),
+      isContextEngineEnabled: makeIsContextEngineEnabled(() => this.requireCoreStart()),
+      logger: stepsLogger,
+    });
 
     features.registerKibanaFeature({
       id: ALERTZERO_FEATURE_ID,
@@ -168,13 +185,24 @@ export class AlertZeroPlugin
       privileges: {
         all: {
           app: ['kibana'],
-          api: [ALERTZERO_API_PRIVILEGE_READ, ALERTZERO_API_PRIVILEGE_WRITE],
+          api: [
+            ALERTZERO_API_PRIVILEGE_READ,
+            ALERTZERO_API_PRIVILEGE_WRITE,
+            INVESTIGATIONS_API_PRIVILEGE_READ,
+            INVESTIGATIONS_API_PRIVILEGE_MANAGE,
+            ESCALATIONS_API_PRIVILEGE_READ,
+            ESCALATIONS_API_PRIVILEGE_MANAGE,
+          ],
           savedObject: { all: [], read: [] },
           ui: ['show', 'write'],
         },
         read: {
           app: ['kibana'],
-          api: [ALERTZERO_API_PRIVILEGE_READ],
+          api: [
+            ALERTZERO_API_PRIVILEGE_READ,
+            INVESTIGATIONS_API_PRIVILEGE_READ,
+            ESCALATIONS_API_PRIVILEGE_READ,
+          ],
           savedObject: { all: [], read: [] },
           ui: ['show'],
         },
@@ -212,6 +240,8 @@ export class AlertZeroPlugin
 
   start(core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
     this.spaces = plugins.spaces;
+    this.coreStart = core;
+    this.fleetAgentService = plugins.fleet?.agentService;
     this.proposals = plugins.proposals;
     this.agentBuilderConversations = plugins.agentBuilder?.conversations;
 
@@ -340,6 +370,10 @@ export class AlertZeroPlugin
 
   private requireHuntServices(): HuntServices {
     return this.requireStarted(this.huntServices, 'Hunt services');
+  }
+
+  private requireCoreStart(): CoreStart {
+    return this.requireStarted(this.coreStart, 'CoreStart');
   }
 
   private requireScanFailuresService(): ScanFailuresService {
