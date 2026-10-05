@@ -31,12 +31,15 @@ interface Props {
   onClose: () => void;
   /** Managed-flyout session. Use `inherit` when this flyout opens on top of another. */
   session?: EuiFlyoutProps['session'];
+  /** Use a size distinct from the parent flyout's when `session` is `inherit`. */
+  size?: EuiFlyoutProps['size'];
 }
 
 export const ActionPolicyDetailsFlyoutContainer = ({
   policyId,
   onClose,
   session = 'start',
+  size = 'm',
 }: Props) => {
   const { actionPolicyLocators } = useAlertingLocators();
   const canWrite = useService(UserCapabilities).canWrite('actionPolicies');
@@ -138,6 +141,7 @@ export const ActionPolicyDetailsFlyoutContainer = ({
           isSnoozeLoading={isSnoozing || isUnsnoozing}
           session={session}
           ownFocus={false}
+          size={size}
         />
       )}
       {policyToDelete && (

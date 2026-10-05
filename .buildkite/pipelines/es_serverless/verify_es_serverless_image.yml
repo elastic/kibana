@@ -72,7 +72,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          diskSizeGb: 130
         key: build_scout_tests
         timeout_in_minutes: 15
         depends_on:
@@ -128,7 +127,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          diskSizeGb: 130
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
@@ -146,7 +144,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          diskSizeGb: 130
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
@@ -223,6 +220,8 @@ steps:
           automatic:
             - exit_status: '-1'
               limit: 1
+            - exit_status: '*'
+              limit: 1
 
       - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine.sh
         label: 'Serverless Detection Engine - Security Solution Cypress Tests'
@@ -284,7 +283,6 @@ steps:
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-highmem-4
-          diskSizeGb: 130
         depends_on: build
         timeout_in_minutes: 75
         parallelism: 12
@@ -301,7 +299,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-highmem-4
-          diskSizeGb: 130
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
@@ -314,8 +311,14 @@ steps:
   - wait: ~
 
   - label: ':arrow_up::elastic::arrow_up: Promote docker image'
-    if: "build.source == 'schedule' || build.creator.teams includes 'kibana-operations'"
-    command: .buildkite/scripts/steps/es_serverless/promote_es_serverless_image.sh "$$ES_SERVERLESS_IMAGE"
+    if: "(build.source == 'schedule' || build.creator.teams includes 'kibana-operations') && (build.env('PUBLISH_DOCKER_TAG') == '1' || build.env('PUBLISH_DOCKER_TAG') == 'true')"
+    trigger: kibana-elasticsearch-serverless-promote
+    build:
+      branch: '${BUILDKITE_BRANCH}'
+      commit: '${BUILDKITE_COMMIT}'
+      env:
+        ES_SERVERLESS_IMAGE: '${ES_SERVERLESS_IMAGE}'
+        PUBLISH_DOCKER_TAG: 'true'
 
   - wait: ~
 

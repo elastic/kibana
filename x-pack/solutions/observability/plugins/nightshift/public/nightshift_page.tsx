@@ -32,7 +32,7 @@ export function NightshiftPage(): React.ReactElement | null {
     nightshiftInvestigations,
   } = useKibana().services;
   const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
-  const { canConfigure, canManage } = getNightshiftCapabilities(
+  const { canManage, canManageAndConfigure } = getNightshiftCapabilities(
     application.capabilities.nightshift
   );
   const settingsHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
@@ -51,10 +51,9 @@ export function NightshiftPage(): React.ReactElement | null {
   );
 
   // The secrets API is disabled (404) unless the nightshift.enabled flag is on.
+  const nightshiftEnabled = featureFlags.useBooleanValue(NIGHTSHIFT_ENABLED_FLAG, false);
   const canManageSandboxSecrets =
-    canManage &&
-    nightshiftInvestigations?.investigationsClient != null &&
-    featureFlags.getBooleanValue(NIGHTSHIFT_ENABLED_FLAG, false);
+    canManage && nightshiftInvestigations?.investigationsClient != null && nightshiftEnabled;
   const [isSandboxSecretsFlyoutOpen, setIsSandboxSecretsFlyoutOpen] = useState(false);
   const openSandboxSecretsFlyout = useCallback(() => setIsSandboxSecretsFlyoutOpen(true), []);
   const closeSandboxSecretsFlyout = useCallback(() => setIsSandboxSecretsFlyoutOpen(false), []);
@@ -96,8 +95,8 @@ export function NightshiftPage(): React.ReactElement | null {
       <NightshiftAppHeader
         onManagementClick={navigateToManagement}
         managementHref={managementHref}
-        onSettingsClick={canConfigure ? navigateToSettings : undefined}
-        settingsHref={canConfigure ? settingsHref : undefined}
+        onSettingsClick={canManageAndConfigure ? navigateToSettings : undefined}
+        settingsHref={canManageAndConfigure ? settingsHref : undefined}
         onSandboxSecretsClick={canManageSandboxSecrets ? openSandboxSecretsFlyout : undefined}
       />
       <EuiPageTemplate.Section component="div" color="subdued" restrictWidth="900px">

@@ -15,6 +15,7 @@ import {
   type InvestigationSubjectType,
 } from '@kbn/nightshift-investigations-plugin/common';
 import { useQuery, useQueryClient } from '@kbn/react-query';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { useKibana } from '../utils/kibana_react';
 import { getInvestigationsClient } from '../services/investigations_client';
 
@@ -55,10 +56,12 @@ export const useInvestigationAvailability = () => {
 
 export const useInvestigateAlert = ({
   alertId,
+  ebtElement,
   enabled = true,
   onInvestigate,
 }: {
   alertId?: string;
+  ebtElement: string;
   enabled?: boolean;
   onInvestigate?: () => void;
 }) => {
@@ -184,8 +187,18 @@ export const useInvestigateAlert = ({
     handleInvestigate,
     isInvestigating,
     investigateActionLabel,
+    investigateEbtProps: getEbtProps({
+      action: EBT_CLICK_ACTIONS.START_INVESTIGATION,
+      element: ebtElement,
+      detail: latestInvestigation ? 'reinvestigation' : undefined,
+    }),
     viewInvestigationUrl,
     viewInvestigationActionLabel,
+    viewInvestigationEbtProps: getEbtProps({
+      action: EBT_CLICK_ACTIONS.VIEW_INVESTIGATION,
+      element: ebtElement,
+      detail: latestStatus,
+    }),
     markInvestigationViewed,
   };
 };

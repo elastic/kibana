@@ -6,7 +6,7 @@ pageLoadAssetSize:
   agentBuilderPlatform: 23882
   agentBuilderSml: 597
   agentBuilderVisualizations: 1551
-  agentBuilderWorkflows: 1029
+  agentBuilderWorkflows: 1152
   agenticInvestigations: 15406
   aiAssistantManagementSelection: 355
   aiops: 586
@@ -26,7 +26,7 @@ pageLoadAssetSize:
   cloudConnect: 5575
   cloudDataMigration: 2042
   cloudDefend: 3030
-  cloudExperiments: 67356
+  cloudExperiments: 137406
   cloudFullStory: 1642
   cloudLinks: 21894
   cloudSecurityPosture: 14802
@@ -143,7 +143,7 @@ pageLoadAssetSize:
   observabilityAIAssistant: 2236
   observabilityAIAssistantApp: 5918
   observabilityAiAssistantManagement: 2280
-  observabilityAlerting: 3500
+  observabilityAlerting: 3883
   observabilityLogsExplorer: 1351
   observabilityOnboarding: 8873
   observabilityShared: 7496
@@ -174,7 +174,6 @@ pageLoadAssetSize:
   searchHomepage: 4290
   searchInferenceEndpoints: 4743
   searchNavigation: 8037
-  searchNotebooks: 3490
   searchprofiler: 2549
   searchQueryRules: 2461
   searchSynonyms: 2233
@@ -194,11 +193,11 @@ pageLoadAssetSize:
   shared-packages: 5513030
   shared-plugins: 13536562
   shared-solution-packages: 347767
-  significantEvents: 3679
+  significantEvents: 4439
   significantEventsApp: 5212
   slo: 19531
   snapshotRestore: 16909
-  spaces: 22966
+  spaces: 25351
   stackAlerts: 1985
   stackConnectors: 63548
   streams: 4563

@@ -30,6 +30,10 @@ jest.mock('../attachments/attachment_references', () => ({
   AttachmentReferences: () => <div data-test-subj="agentBuilderUserMessageAttachments" />,
 }));
 
+jest.mock('../../../../context/conversation/conversation_context', () => ({
+  useConversationContext: jest.fn(() => ({ isEmbeddedContext: false })),
+}));
+
 jest.mock('./user_message_images', () => ({
   UserMessageImages: jest.fn(() => <div data-test-subj="agentBuilderUserMessageImages" />),
 }));
