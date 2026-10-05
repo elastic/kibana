@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/kbn-ai-observability-common'],
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-genai-common'],
 };
