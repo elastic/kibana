@@ -24,19 +24,10 @@ export function getArgValueSuggestions() {
       return;
     }
     const indexPatternTitle = get(indexPatternArg, 'value.text', '');
-    if (!indexPatternTitle) {
-      return;
-    }
 
-    // find() is a simple_query_string search. A title like "logstash-*" is not an exact
-    // lookup, and requesting one hit can return a different data view.
-    const dataViews = await indexPatterns.getIdsWithTitle();
-    const match = dataViews.find(({ title }) => title === indexPatternTitle);
-    if (!match) {
-      return;
-    }
-
-    return indexPatterns.get(match.id);
+    return (await indexPatterns.find(indexPatternTitle, 1)).find(
+      (index) => index.title === indexPatternTitle
+    );
   }
 
   function containsFieldName(partial: string, field: { name: string }) {
