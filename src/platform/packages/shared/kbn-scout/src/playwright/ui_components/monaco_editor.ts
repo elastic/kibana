@@ -66,8 +66,14 @@ export class KibanaCodeEditorWrapper {
       .toBe(true);
   }
 
+  getEditor(container: Locator): Locator {
+    // eslint-disable-next-line playwright/no-raw-locators -- We intentionally use raw locators here
+    return container.locator('.monaco-editor').and(container.getByRole('code'));
+  }
+
   getCodeEditorContent(dataTestSubjId: string = 'ESQLEditor'): Locator {
-    return this.page.getByTestId(dataTestSubjId).locator('.view-lines');
+    // eslint-disable-next-line playwright/no-raw-locators -- We intentionally use raw locators here
+    return this.getEditor(this.page.getByTestId(dataTestSubjId)).locator('.view-lines');
   }
 
   /**
@@ -112,7 +118,7 @@ export class KibanaCodeEditorWrapper {
   }
 
   private async getEditorUri(container: Locator, description: string): Promise<string> {
-    const uri = await container.getByRole('code').getAttribute('data-uri');
+    const uri = await this.getEditor(container).getAttribute('data-uri');
     if (!uri) {
       throw new Error(`Editor data-uri not found for container ${description}`);
     }
@@ -283,9 +289,9 @@ export class KibanaCodeEditorWrapper {
   }
 
   public getCodeEditorSuggestWidget() {
-    return this.page.locator(
-      '[data-test-subj="kbnCodeEditorEditorOverflowWidgetsContainer"] .suggest-widget'
-    );
+    const suggestWidgetSelector =
+      '[data-test-subj="kbnCodeEditorEditorOverflowWidgetsContainer"] .suggest-widget';
+    return this.page.locator(suggestWidgetSelector);
   }
 
   /**
@@ -305,7 +311,8 @@ export class KibanaCodeEditorWrapper {
    * NOT inside the overflow-widgets container (which only holds content widgets).
    */
   public getSuggestDetailsContainer() {
-    return this.page.locator('.suggest-details-container');
+    const suggestDetailsContainerSelector = '.suggest-details-container';
+    return this.page.locator(suggestDetailsContainerSelector);
   }
 
   /**
@@ -520,13 +527,16 @@ export class KibanaCodeEditorWrapper {
    * so we provide an affordance to select the hover popover of interest
    */
   getHoverPopover(matchGlyphHoverWidget?: boolean): Locator {
+    const glyphHoverWidgetSelector =
+      '.monaco-hover[widgetid="editor.contrib.modesGlyphHoverWidget"]';
+
     if (matchGlyphHoverWidget) {
-      return this.page.locator('.monaco-hover[widgetid="editor.contrib.modesGlyphHoverWidget"]');
+      return this.page.locator(glyphHoverWidgetSelector);
     }
 
-    return this.page.locator(
-      '.monaco-hover:not([widgetid="editor.contrib.modesGlyphHoverWidget"])'
-    );
+    const contentHoverWidgetSelector =
+      '.monaco-hover:not([widgetid="editor.contrib.modesGlyphHoverWidget"])';
+    return this.page.locator(contentHoverWidgetSelector);
   }
 
   /**

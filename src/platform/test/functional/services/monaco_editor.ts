@@ -120,7 +120,12 @@ export class MonacoEditorService extends FtrService {
       await this.browser.execute(
         (editorIndex, codeEditorValue) => {
           // The monaco property is guaranteed to exist as it's value is provided in @kbn/monaco for this specific purpose, see {@link src/platform/packages/shared/kbn-monaco/src/register_globals.ts}
-          const editor = window.MonacoEnvironment!.monaco.editor;
+          const editor = window.MonacoEnvironment?.monaco?.editor;
+
+          if (!editor) {
+            throw new Error('Monaco editor not found');
+          }
+
           const textModels = editor.getModels();
 
           if (editorIndex !== undefined && textModels[editorIndex]) {

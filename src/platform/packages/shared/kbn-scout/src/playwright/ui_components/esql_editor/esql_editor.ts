@@ -139,7 +139,7 @@ export class EsqlEditor {
   async selectSuggestion(query: string, label: string): Promise<void> {
     await this.setQuery(query);
 
-    const suggestion = this.getSuggestWidget().locator('.monaco-list-row', { hasText: label });
+    const suggestion = await this.codeEditor.getCodeEditorSuggestionItem(label);
     const deadline = Date.now() + SELECT_SUGGESTION_TIMEOUT_MS;
     for (;;) {
       await this.triggerSuggest(query);

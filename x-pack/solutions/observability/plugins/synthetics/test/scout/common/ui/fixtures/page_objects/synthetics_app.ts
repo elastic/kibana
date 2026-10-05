@@ -202,8 +202,8 @@ export class SyntheticsAppPage {
     await this.createBasicMonitorDetails({ name, apmServiceName, locations });
     if (inlineScript) {
       await this.page.testSubj.click('syntheticsSourceTab__inline');
-      await this.kibanaMonacoEditor.setCodeEditorValueByTestSubj(
-        'codeEditorContainer',
+      await this.kibanaMonacoEditor.setCodeEditorValueByContainer(
+        this.page.getByRole('tabpanel', { name: 'Script editor' }),
         inlineScript
       );
       return;
@@ -231,7 +231,10 @@ export class SyntheticsAppPage {
     await this.selectMonitorType('syntheticsMonitorTypeAPI');
     await this.createBasicMonitorDetails({ name, apmServiceName, locations });
     await this.page.testSubj.click('syntheticsSourceTab__inline');
-    await this.kibanaMonacoEditor.setCodeEditorValueByTestSubj('codeEditorContainer', inlineScript);
+    await this.kibanaMonacoEditor.setCodeEditorValueByContainer(
+      this.page.getByRole('tabpanel', { name: 'Script editor' }),
+      inlineScript
+    );
   }
 
   async createMonitor({
