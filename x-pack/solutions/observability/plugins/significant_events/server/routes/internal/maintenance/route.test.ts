@@ -6,7 +6,6 @@
  */
 
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
-import { STREAMS_API_PRIVILEGES } from '@kbn/streams-plugin/common/constants';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { internalMaintenanceRoutes } from './route';
 
@@ -84,7 +83,7 @@ describe('reset route', () => {
 
   beforeEach(() => jest.clearAllMocks());
 
-  it('requires Streams manage and delegates with the authenticated user', async () => {
+  it('requires Nightshift manage and configure and delegates with the authenticated user', async () => {
     const request = {};
     const licensing = {};
     const reset = jest.fn().mockResolvedValue({ state: 'enabled' });
@@ -104,7 +103,7 @@ describe('reset route', () => {
     } as unknown as Parameters<typeof resetRoute.handler>[0]);
 
     expect(resetRoute.security.authz).toEqual({
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
     });
     expect(assertSignificantEventsAccess).toHaveBeenCalledWith({ server, licensing });
     expect(reset).toHaveBeenCalledWith({ request, updatedBy: 'operator' });
