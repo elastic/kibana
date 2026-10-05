@@ -47,7 +47,11 @@ One Kibana feature, `agenticInvestigations`.
 
 The feature carries `minimumLicense: 'enterprise'`.
 
+Sub-features are registered in this order: **Investigations**, then **Escalations**. That order drives placement in the Roles and Spaces feature pickers.
+
 Impact has no privilege of its own yet. Reads and writes require the investigations sub-feature privilege, `manage_investigations`, which `includeIn: 'all'` joins to the base All level. A dedicated impact privilege can be split out later if read and write need to diverge. Escalation create and update stay `includeIn: 'none'`, so All does not grant them. Escalation view is `includeIn: 'read'`, so base Read and All can list. Follow the sub-feature pattern for any new entity that is not intrinsic to an investigation.
+
+The shared `POST /internal/investigations/_suggest_user_profiles` route accepts either `manage_investigations` or `manage_escalations`, so both investigation and escalation managers can suggest assignees and collaborators without holding the other entity's privilege.
 
 **Note:** `minimal_all` and `minimal_read` are **not** equivalent to `all` and `read`. They only grant sub-features marked `groupType: 'independent'`, and only when the user holds them explicitly.
 
@@ -89,6 +93,8 @@ The `escalations` sub-feature uses a `mutually_exclusive` privilege group, so a 
 | --- | --- | --- |
 | `escalations_all` (`includeIn: 'none'`) | `read_escalations`, `manage_escalations` | `showEscalations`, `manageEscalations` |
 | `escalations_read` (`includeIn: 'read'`) | `read_escalations` | `showEscalations` |
+
+`manage_escalations` also grants access to the shared `POST /internal/investigations/_suggest_user_profiles` route (alongside `manage_investigations`). See the Privileges section above.
 
 ### API
 

@@ -7,7 +7,11 @@
 
 import type { FunctionComponent } from 'react';
 import React, { useMemo, useState } from 'react';
-import type { EuiBasicTableColumn, EuiInMemoryTableProps } from '@elastic/eui';
+import type {
+  EuiBasicTableColumn,
+  EuiInMemoryTableProps,
+  EuiTableSelectionType,
+} from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -92,11 +96,21 @@ const QueryPreview: FunctionComponent<{ query: string; viewName: string }> = ({
   );
 };
 
-const ViewActions: FunctionComponent<{
-  onEdit: (view: EsqlView) => void;
+interface ViewActionsProps {
   view: EsqlView;
-}> = ({ onEdit, view }) => {
+  isEnabled: boolean;
+  onEdit?: (view: EsqlView) => void;
+  onDelete: (views: EsqlView[]) => void;
+}
+
+const ViewActions: FunctionComponent<ViewActionsProps> = ({
+  view,
+  isEnabled,
+  onEdit,
+  onDelete,
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const closePopover = () => setIsPopoverOpen(false);
   const actionsLabel = translations.actionsForViewAriaLabel(view.name);
 
   return (
@@ -110,26 +124,44 @@ const ViewActions: FunctionComponent<{
             color="text"
             data-test-subj="esqlViewsActionsButton"
             iconType="boxesVertical"
+            isDisabled={!isEnabled}
+            hasAriaDisabled={!isEnabled}
             onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
           />
         </EuiToolTip>
       }
-      closePopover={() => setIsPopoverOpen(false)}
+      closePopover={closePopover}
       isOpen={isPopoverOpen}
       panelPaddingSize="none"
     >
       <EuiContextMenuPanel
         items={[
+          ...(onEdit
+            ? [
+                <EuiContextMenuItem
+                  data-test-subj="esqlViewsEditButton"
+                  icon="pencil"
+                  key="edit"
+                  onClick={() => {
+                    closePopover();
+                    onEdit(view);
+                  }}
+                >
+                  {translations.editViewButtonLabel}
+                </EuiContextMenuItem>,
+              ]
+            : []),
           <EuiContextMenuItem
-            data-test-subj="esqlViewsEditButton"
-            icon="pencil"
-            key="edit"
+            data-test-subj="esqlViewsDeleteButton"
+            icon="trash"
+            color="danger"
+            key="delete"
             onClick={() => {
-              setIsPopoverOpen(false);
-              onEdit(view);
+              closePopover();
+              onDelete([view]);
             }}
           >
-            {translations.editViewButtonLabel}
+            {translations.deleteViewButtonLabel}
           </EuiContextMenuItem>,
         ]}
       />
@@ -141,16 +173,26 @@ interface EsqlViewsTableProps {
   views: EsqlView[];
   error?: Error;
   isLoading: boolean;
+  isDiscoverAvailable: boolean;
+  selectedViews: EsqlView[];
+  onSelectionChange: (views: EsqlView[]) => void;
   onEdit?: (view: EsqlView) => void;
   onReload: () => void;
+  onDelete: (views: EsqlView[]) => void;
+  onOpenInDiscover: (view: EsqlView) => void;
 }
 
 export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
   views,
   error,
   isLoading,
+  isDiscoverAvailable,
+  selectedViews,
+  onSelectionChange,
   onEdit,
   onReload,
+  onDelete,
+  onOpenInDiscover,
 }) => {
   const [isSearchActive, setIsSearchActive] = useState(false);
   const columns = useMemo<Array<EuiBasicTableColumn<EsqlView>>>(
@@ -178,22 +220,39 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
         ),
         'data-test-subj': 'esqlViewsQueryColumn',
       },
-      ...(onEdit
-        ? [
-            {
-              name: translations.actionsColumn,
-              actions: [
-                {
-                  render: (view: EsqlView) => <ViewActions onEdit={onEdit} view={view} />,
-                },
-              ],
-              width: '80px',
-              'data-test-subj': 'esqlViewsActionsColumn',
-            },
-          ]
-        : []),
+      {
+        name: translations.actionsColumn,
+        actions: [
+          {
+            name: translations.openInDiscoverButtonLabel,
+            description: translations.openInDiscoverButtonTooltip,
+            type: 'icon',
+            icon: 'discoverApp',
+            color: 'text',
+            enabled: () => isDiscoverAvailable,
+            onClick: onOpenInDiscover,
+            'data-test-subj': 'esqlViewsOpenInDiscoverAction',
+          },
+          {
+            render: (view, isEnabled) => (
+              <ViewActions view={view} isEnabled={isEnabled} onEdit={onEdit} onDelete={onDelete} />
+            ),
+          },
+        ],
+        width: '120px',
+        'data-test-subj': 'esqlViewsActionsColumn',
+      },
     ],
-    [onEdit]
+    [isDiscoverAvailable, onDelete, onEdit, onOpenInDiscover]
+  );
+
+  const selection = useMemo<EuiTableSelectionType<EsqlView>>(
+    () => ({
+      selected: selectedViews,
+      onSelectionChange,
+      selectableMessage: () => translations.selectRowAriaLabel,
+    }),
+    [onSelectionChange, selectedViews]
   );
 
   const search = useMemo<EuiInMemoryTableProps<EsqlView>['search']>(
@@ -218,6 +277,17 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
           },
         },
       },
+      toolsLeft:
+        selectedViews.length > 0 ? (
+          <EuiButton
+            data-test-subj="esqlViewsBulkDeleteButton"
+            color="danger"
+            iconType="trash"
+            onClick={() => onDelete(selectedViews)}
+          >
+            {translations.bulkDeleteButtonLabel(selectedViews.length)}
+          </EuiButton>
+        ) : undefined,
       toolsRight: (
         <EuiButton
           data-test-subj="esqlViewsReloadButton"
@@ -229,7 +299,7 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
         </EuiButton>
       ),
     }),
-    [isLoading, onReload]
+    [isLoading, onDelete, onReload, selectedViews]
   );
 
   return (
@@ -254,6 +324,7 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
         columns={columns}
         loading={isLoading}
         search={search}
+        selection={selection}
         sorting={{
           sort: {
             field: 'name',

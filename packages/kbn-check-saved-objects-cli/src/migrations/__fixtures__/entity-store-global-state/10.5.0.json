@@ -27,7 +27,8 @@
       "excludedUserNames": [],
       "historySnapshot": {
         "status": "stopped",
-        "frequency": "1h"
+        "frequency": "1h",
+        "retentionDays": 60
       },
       "logsExtraction": {
         "additionalIndexPatterns": [],

@@ -8,6 +8,7 @@
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { registerImpactAttachmentTypes } from './impact/attachments';
 import { registerImpactPublicStepDefinitions } from './impact/step_types';
+import { registerInvestigationPublicStepDefinitions } from './investigations/step_types';
 import type {
   AgenticInvestigationsPublicPluginSetup,
   AgenticInvestigationsPublicPluginStart,
@@ -33,6 +34,7 @@ export class AgenticInvestigationsPublicPlugin
     { workflowsExtensions }: AgenticInvestigationsPublicSetupDependencies
   ): AgenticInvestigationsPublicPluginSetup {
     registerImpactPublicStepDefinitions(workflowsExtensions);
+    registerInvestigationPublicStepDefinitions(workflowsExtensions);
     return {};
   }
 

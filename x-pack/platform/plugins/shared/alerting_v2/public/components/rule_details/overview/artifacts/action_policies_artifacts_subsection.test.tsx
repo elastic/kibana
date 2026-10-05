@@ -15,7 +15,18 @@ import {
 } from './action_policies_artifacts_subsection';
 import type { RuleApiResponse } from '../../../../services/rules_api';
 import { createMockLocators, MockLocatorProvider } from '../../../../test_utils/test_providers';
-import { AlertingV2ActionPoliciesLocatorDefinition } from '../../../../locators';
+import {
+  AlertingV2ActionPoliciesLocatorDefinition,
+  createAlertingV2HostApp,
+} from '../../../../locators';
+
+const TEST_HOST = createAlertingV2HostApp('test-app', {
+  rules: '/alerting/rules',
+  ruleLibrary: '/alerting/library',
+  alerts: '/alerting/inbox',
+  actionPolicies: '/alerting/action-policies',
+  executionHistory: '/alerting/execution-history',
+});
 
 const mockLocators = createMockLocators();
 
@@ -36,12 +47,14 @@ jest.mock('../../../action_policy/details_flyout/action_policy_details_flyout_co
     policyId,
     onClose,
     session,
+    size,
   }: {
     policyId: string;
     onClose: () => void;
     session?: string;
+    size?: string;
   }) => (
-    <div data-test-subj="actionPolicyDetailsFlyoutMock" data-session={session}>
+    <div data-test-subj="actionPolicyDetailsFlyoutMock" data-session={session} data-size={size}>
       <span data-test-subj="actionPolicyDetailsFlyoutMockId">{policyId}</span>
       <button type="button" onClick={onClose}>
         close
@@ -54,7 +67,8 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'alert',
   enabled: true,
-  metadata: { name: 'Test Rule', version: 1, tags: ['prod'] },
+  version: 1,
+  metadata: { name: 'Test Rule', tags: ['prod'] },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
   query: { base: 'FROM logs-*' },
@@ -130,7 +144,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
   it('loads linked policies with an empty tag list when the rule has none', () => {
     renderSubsection({
       ...baseRule,
-      metadata: { name: 'Untagged Rule', version: 1 },
+      metadata: { name: 'Untagged Rule' },
     });
     expect(mockUseLinkedActionPolicies).toHaveBeenCalledWith([]);
   });
@@ -324,10 +338,13 @@ describe('ActionPoliciesArtifactsSubsection', () => {
     renderSubsection();
 
     const [params] = jest.mocked(mockLocators.actionPolicyLocators.useUrl).mock.calls[0];
-    const location = await AlertingV2ActionPoliciesLocatorDefinition.getLocation(params);
+    const location = await AlertingV2ActionPoliciesLocatorDefinition.getLocation({
+      ...params,
+      host: TEST_HOST.actionPolicies,
+    });
     expect(location).toMatchObject({
-      app: 'management',
-      path: '/alertingV2/action_policies',
+      app: 'test-app',
+      path: '/alerting/action-policies',
     });
   });
 
@@ -345,6 +362,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
       'data-session',
       'start'
     );
+    expect(screen.getByTestId('actionPolicyDetailsFlyoutMock')).toHaveAttribute('data-size', 'm');
     expect(screen.getByTestId('actionPolicyDetailsFlyoutMockId')).toHaveTextContent('policy-match');
 
     fireEvent.click(screen.getByText('close'));
@@ -367,6 +385,11 @@ describe('ActionPoliciesArtifactsSubsection', () => {
       'data-session',
       'inherit'
     );
+    // Regression test: when nested inside another flyout (e.g. the rule summary
+    // flyout, which renders at size "m"), this flyout must use a different size.
+    // EUI's managed-flyout validation throws "Parent and child flyouts cannot
+    // both be size 'm'" if a child flyout shares its parent's size.
+    expect(screen.getByTestId('actionPolicyDetailsFlyoutMock')).toHaveAttribute('data-size', 's');
   });
 
   it('shows disabled and snoozed badges when the policy would not fire', () => {

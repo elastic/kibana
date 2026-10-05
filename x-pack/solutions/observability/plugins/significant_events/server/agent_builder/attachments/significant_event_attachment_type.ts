@@ -35,7 +35,6 @@ export const formatSignificantEventAsText = (event: SignificantEvent): string =>
   return [
     `Significant Event "${event.title}"`,
     `Event ID: ${event.event_id}`,
-    `Event UUID: ${event.event_uuid}`,
     `Status: ${event.status}`,
     `Severity: ${getSeverityLabel(event.severity)}`,
     `Confidence: ${event.confidence}`,
@@ -58,10 +57,25 @@ export const createSignificantEventAttachmentType = ({
     eventId: string,
     context: AttachmentResolveContext
   ): Promise<SignificantEvent | undefined> => {
-    const { getEventClient } = await getScopedClients({ request: context.request });
-    const eventClient = await getEventClient();
+    const { getEventSearchClient } = await getScopedClients({ request: context.request });
+    const eventClient = await getEventSearchClient();
 
     return eventClient.findLatestByEventId(eventId);
+  };
+
+  /**
+   * Reads the canonical (legacy) event store regardless of the feature flag. Used by `isStale` so
+   * that fire-and-forget `.rule-events` write lag can never cause a stale attachment to appear
+   * fresh — canonical is the authoritative write source.
+   */
+  const fetchCanonicalByEventId = async (
+    eventId: string,
+    context: AttachmentResolveContext
+  ): Promise<SignificantEvent | undefined> => {
+    const { getEventClient } = await getScopedClients({ request: context.request });
+    const canonicalClient = await getEventClient();
+
+    return canonicalClient.findLatestByEventId(eventId);
   };
 
   return {
@@ -98,12 +112,14 @@ export const createSignificantEventAttachmentType = ({
       }
 
       try {
-        const latestEvent = await fetchByEventId(attachment.origin, context);
-        return (
-          !latestEvent ||
-          latestVersion.data.event_uuid !== latestEvent.event_uuid ||
-          latestVersion.data['@timestamp'] !== latestEvent['@timestamp']
-        );
+        const latestEvent = await fetchCanonicalByEventId(attachment.origin, context);
+        // Use the canonical client (not the flag-aware search client) so that fire-and-forget
+        // `.rule-events` write lag cannot cause a stale attachment to appear fresh. Canonical is
+        // the authoritative write source; @timestamp here always reflects the true latest version.
+        // Avoid comparing legacy version identifiers: when SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ
+        // is on, the search client returns group_hash rather than the stored version identity.
+        // @timestamp is sufficient to detect any write since attachment.
+        return !latestEvent || latestVersion.data['@timestamp'] !== latestEvent['@timestamp'];
       } catch (error) {
         logger.warn(
           `Failed to check staleness for significant event attachment "${attachment.origin}": ${error}`

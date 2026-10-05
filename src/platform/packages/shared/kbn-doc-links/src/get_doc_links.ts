@@ -380,6 +380,12 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       indexTemplates: `${ELASTIC_DOCS}manage-data/data-store/templates`,
       mapping: `${ELASTIC_DOCS}manage-data/data-store/mapping`,
       mappingReference: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference`,
+      mappingKeyword: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/keyword`,
+      mappingBoolean: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/boolean`,
+      mappingIp: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/ip`,
+      mappingDate: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/date`,
+      mappingUnsignedLong: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/unsigned-long`,
+      mappingNumber: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/number`,
       mappingAnalyzer: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/analyzer`,
       mappingCoerce: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/coerce`,
       mappingCopyTo: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/copy-to`,
@@ -1124,6 +1130,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     contextEngine: {
       overview: `${ELASTIC_DOCS}explore-analyze/ai-features/context-engine`,
+      aiIndices: `${ELASTIC_DOCS}explore-analyze/ai-features/context-engine/concepts#ai-indices`,
     },
     agentBuilder: {
       agentBuilder: `${ELASTIC_DOCS}explore-analyze/ai-features/elastic-agent-builder`,

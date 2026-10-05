@@ -12,10 +12,15 @@
 export const withTimeout = <T>(
   work: (signal: AbortSignal) => Promise<T>,
   ms: number,
-  message: string
+  message: string,
+  /** The workflow's signal: cancelling the execution aborts the work too. */
+  parentSignal?: AbortSignal
 ): Promise<T> => {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), ms);
+  const onParentAbort = () => controller.abort();
+  if (parentSignal?.aborted) controller.abort();
+  parentSignal?.addEventListener('abort', onParentAbort, { once: true });
 
   const promise = work(controller.signal);
   // Callers that ignore the signal still settle late. Swallow that rejection so it cannot surface
@@ -25,8 +30,15 @@ export const withTimeout = <T>(
   return Promise.race([
     promise,
     new Promise<never>((_, reject) => {
-      const onAbort = () => reject(new Error(message));
-      controller.signal.addEventListener('abort', onAbort, { once: true });
+      const onAbort = () =>
+        reject(
+          new Error(parentSignal?.aborted ? 'Cancelled with the workflow execution' : message)
+        );
+      if (controller.signal.aborted) onAbort();
+      else controller.signal.addEventListener('abort', onAbort, { once: true });
     }),
-  ]).finally(() => clearTimeout(timer));
+  ]).finally(() => {
+    clearTimeout(timer);
+    parentSignal?.removeEventListener('abort', onParentAbort);
+  });
 };
