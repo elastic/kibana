@@ -18,7 +18,7 @@ import {
   BY_REF_SCHEMA_META,
 } from '@kbn/presentation-publishing-schemas';
 import { VEGA_SUPPORTED_TRIGGERS } from '../../common/constants';
-import { vegaSpecSchema } from '../api/schema';
+import { vegaFiltersSchema, vegaQuerySchema, vegaSpecSchema } from '../api/schema';
 
 export const getVegaEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
   return (
@@ -27,6 +27,14 @@ export const getVegaEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchema
         ...serializedTitlesSchema.shape,
         ...serializedTimeRangeSchema.shape,
         ...getDrilldownsSchema(VEGA_SUPPORTED_TRIGGERS).shape,
+        query: vegaQuerySchema.meta({
+          description:
+            'Panel-level KQL or Lucene query. Applied together with the dashboard query to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.',
+        }),
+        filters: vegaFiltersSchema.meta({
+          description:
+            'Panel-level filters. Applied together with the dashboard filters to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.',
+        }),
         spec: vegaSpecSchema,
       })
       // Strip unknown keys for forward-compatible additive changes in this public contract.

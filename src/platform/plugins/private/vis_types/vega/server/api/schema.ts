@@ -37,6 +37,10 @@ export const vegaSpecSchema = z
       'The Vega or Vega-Lite specification. Use `{ "format": "hjson", "value": "<hjson-string>" }` for HJSON (comments and unquoted keys are preserved) or `{ "format": "json", "value": { ... } }` for a JSON object.',
   });
 
+export const vegaQuerySchema = asCodeQuerySchema.optional();
+
+export const vegaFiltersSchema = z.array(asCodeFilterSchema).max(100).optional();
+
 export const vegaLibraryItemSchema = z
   .object({
     title: z
@@ -51,11 +55,11 @@ export const vegaLibraryItemSchema = z
       .meta({ description: 'A short description of the Vega library item.' }),
     spec: vegaSpecSchema,
     tags: getAsCodeTagsSchema().optional(),
-    query: asCodeQuerySchema.optional().meta({
+    query: vegaQuerySchema.meta({
       description:
         'KQL or Lucene query. Applied together with the dashboard query to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.',
     }),
-    filters: z.array(asCodeFilterSchema).max(100).optional().meta({
+    filters: vegaFiltersSchema.meta({
       description:
         'Filters. Applied together with the dashboard filters to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.',
     }),

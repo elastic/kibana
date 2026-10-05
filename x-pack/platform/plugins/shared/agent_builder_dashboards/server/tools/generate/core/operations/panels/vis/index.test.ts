@@ -6,11 +6,15 @@
  */
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { editPanelRequestInputSchema, panelRequestSchema } from '.';
+import {
+  lensEditPanelRequestSchema,
+  lensPanelRequestSchema,
+  vegaEditPanelRequestSchema,
+  vegaPanelRequestSchema,
+} from '.';
 
 const baseCreateRequest = {
   source: 'request' as const,
-  type: 'vis' as const,
   query: 'show total requests',
   grid: { x: 0, y: 0, w: 12, h: 5 },
 };
@@ -18,32 +22,44 @@ const baseCreateRequest = {
 describe('visualization panel request schemas', () => {
   it('requires chartType when creating a Lens panel', () => {
     expect(
-      panelRequestSchema.safeParse({
+      lensPanelRequestSchema.safeParse({
         ...baseCreateRequest,
         chartType: SupportedChartType.Metric,
       }).success
     ).toBe(true);
 
-    expect(panelRequestSchema.safeParse(baseCreateRequest).success).toBe(false);
+    expect(lensPanelRequestSchema.safeParse(baseCreateRequest).success).toBe(false);
   });
 
   it('allows a Vega panel without a chartType hint', () => {
     expect(
-      panelRequestSchema.safeParse({
+      vegaPanelRequestSchema.safeParse({
         ...baseCreateRequest,
         renderer: 'vega',
       }).success
     ).toBe(true);
   });
 
-  it('allows an edit without chartType because the existing panel provides context', () => {
+  it('allows a Lens edit without chartType because the existing panel provides context', () => {
     expect(
-      editPanelRequestInputSchema.safeParse({
+      lensEditPanelRequestSchema.safeParse({
         source: 'request',
-        type: 'vis',
         panelId: 'panel-1',
         query: 'use a clearer title',
       }).success
     ).toBe(true);
+  });
+
+  it('does not accept applyChartRules on a Vega edit', () => {
+    const result = vegaEditPanelRequestSchema.safeParse({
+      source: 'request',
+      renderer: 'vega',
+      panelId: 'panel-1',
+      query: 'use a clearer title',
+      applyChartRules: true,
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.data).not.toHaveProperty('applyChartRules');
   });
 });

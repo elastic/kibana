@@ -44,7 +44,7 @@ export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisType
         );
         embeddable.registerEmbeddableServerDefinition(VEGA_EMBEDDABLE_TYPE, {
           title: 'Vega',
-          getTransforms,
+          getTransforms: (drilldownTransforms) => getTransforms(drilldownTransforms, this.logger),
           getSchema: (getDrilldownsSchema) =>
             standaloneEmbeddableEnabled ? getVegaEmbeddableSchema(getDrilldownsSchema) : undefined,
         });

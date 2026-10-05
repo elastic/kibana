@@ -17,6 +17,7 @@ const createTelemetry = (): jest.Mocked<CortexTelemetry> => ({
 
 describe('applyCortexEdits', () => {
   it('upserts, corroborates, and archives proposed pages', async () => {
+    const logger = loggerMock.create();
     const store: CortexPageStore = {
       list: jest.fn().mockResolvedValue({
         pages: [],
@@ -34,7 +35,7 @@ describe('applyCortexEdits', () => {
     await applyCortexEdits({
       store,
       telemetry,
-      logger: loggerMock.create(),
+      logger,
       edits: [
         {
           action: 'upsert',
@@ -67,6 +68,9 @@ describe('applyCortexEdits', () => {
     );
     expect(store.corroborate).toHaveBeenCalledWith('cortex_service_payments');
     expect(store.archive).toHaveBeenCalledWith('cortex_topic_old-note');
+    expect(logger.info.mock.calls.flat().join('\n')).not.toMatch(
+      /checkout|old-note|cortex_service/i
+    );
     expect(telemetry.reportEditsApplied).toHaveBeenCalledWith([
       { action: 'upsert', entityType: 'service' },
       { action: 'corroborate', entityType: 'service' },
@@ -440,6 +444,59 @@ describe('renderToolCalls', () => {
     expect(line).toContain('"path":"/workspace/a"');
   });
 
+  it('renders a bounded result line under a call whose results are known', () => {
+    const rendered = renderToolCalls([
+      {
+        tool_id: 'nightshift.sandbox_bash',
+        params: { command: 'esql "FROM logs-*"' },
+        results: [{ type: 'other', data: { stdout: `pool exhausted ${'x'.repeat(10_000)}` } }],
+      },
+    ]);
+
+    const [callLine, resultLine] = rendered.split('\n');
+    expect(callLine).toBe('- nightshift.sandbox_bash {"command":"esql \\"FROM logs-*\\""}');
+    expect(resultLine).toMatch(/^ {2}result: stdout: pool exhausted x+$/);
+    expect(resultLine.length).toBeLessThan(2_100);
+  });
+
+  it('renders string result fields raw instead of JSON-escaped', () => {
+    const rendered = renderToolCalls([
+      {
+        tool_id: 'nightshift.sandbox_bash',
+        params: { command: 'esql "FROM logs-*"' },
+        results: [{ type: 'other', data: { stdout: '{\n  "values": [["a"]]\n}', exit_code: 0 } }],
+      },
+    ]);
+
+    expect(rendered).toContain('  result: stdout: {\n  "values": [["a"]]\n}\nexit_code: 0');
+  });
+
+  it('omits results for reads of the Cortex and decision-tree files seeded into the sandbox', () => {
+    const results = [{ type: 'other', data: { text: 'page body' } }];
+    const rendered = renderToolCalls([
+      {
+        tool_id: 'nightshift_sandbox_view_file',
+        params: { file_path: '/workspace/cortex/INDEX.md' },
+        results,
+      },
+      {
+        tool_id: 'nightshift_sandbox_view_file',
+        params: { file_path: 'decision-trees/monitors.md' },
+        results,
+      },
+      {
+        tool_id: 'nightshift_sandbox_view_file',
+        params: { file_path: '/workspace/notes/errors.txt' },
+        results,
+      },
+    ]);
+
+    expect(rendered.match(/result:/g)).toHaveLength(1);
+    expect(rendered).toContain(
+      '- nightshift_sandbox_view_file {"file_path":"/workspace/notes/errors.txt"}\n  result: text: page body'
+    );
+  });
+
   it('marks an empty round explicitly', () => {
     expect(renderToolCalls([])).toBe('(none)');
   });
@@ -518,7 +575,7 @@ describe('optimizeCortex', () => {
 
     const [{ transcript }] = proposeEdits.mock.calls[0];
     expect(transcript).toContain(
-      '## Tool calls (parameters only)\n- nightshift.sandbox_bash {"command":"esql \\"FROM traces-*\\""}'
+      '## Tool calls\n- nightshift.sandbox_bash {"command":"esql \\"FROM traces-*\\""}'
     );
     expect(transcript.indexOf('## User')).toBeLessThan(transcript.indexOf('## Tool calls'));
     expect(transcript.indexOf('## Tool calls')).toBeLessThan(transcript.indexOf('## Assistant'));
