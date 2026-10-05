@@ -46,23 +46,26 @@ export interface SelectRelevantSkillsParams {
   timeoutMs?: number;
 }
 
-const selectionSchema = z
-  .object({
-    skills: z
-      .array(
-        z.object({
-          id: z.string().describe('The id of a relevant skill, copied exactly from the catalog'),
-          relevance_note: z
-            .string()
-            .optional()
-            .describe('One short sentence on why this skill is relevant to the request'),
-        })
-      )
-      .describe(
-        'Skills relevant to the request, most relevant first. Empty when none clearly apply.'
-      ),
-  })
-  .describe('Tool used to report which of the listed skills are relevant to the user request');
+const buildSelectionSchema = (skillIds: [string, ...string[]]) =>
+  z
+    .object({
+      skills: z
+        .array(
+          z.object({
+            id: z
+              .enum(skillIds)
+              .describe('The id of a relevant skill, copied exactly from the catalog'),
+            relevance_note: z
+              .string()
+              .optional()
+              .describe('One short sentence on why this skill is relevant to the request'),
+          })
+        )
+        .describe(
+          'Skills relevant to the request, most relevant first. Empty when none clearly apply.'
+        ),
+    })
+    .describe('Tool used to report which of the listed skills are relevant to the user request');
 
 const toRelevantSkill = (
   skill: InternalSkillDefinition,
@@ -160,6 +163,8 @@ export const selectRelevantSkills = async ({
       { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
       async () => {
         const { chatModel } = await modelProvider.selectModel({ effortLevel: EffortLevels.low });
+        const skillIds = skills.map((s) => s.id) as [string, ...string[]];
+        const selectionSchema = buildSelectionSchema(skillIds);
         const structuredModel = chatModel.withStructuredOutput(selectionSchema, {
           name: 'select_relevant_skills',
         });
