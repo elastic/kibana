@@ -109,6 +109,11 @@ export class CaseCommentModel {
     owner: string;
   }): Promise<CaseCommentModel> {
     try {
+      // The PUT route checks the payload shape, type and owner only, so without this a caller
+      // could attach a legitimate alert, event or attack and then replace its `attachmentId` and
+      // `metadata.index` with a reference the create path would have rejected.
+      await this.ensureIndexedAttachmentsValid([updateRequest]);
+
       const { id, version, ...queryRestAttributes } = updateRequest;
       const options: SavedObjectsUpdateOptions<AttachmentAttributes> = {
         version,
@@ -514,14 +519,18 @@ export class CaseCommentModel {
       await this.params.services.alertsService.ensureDocumentsExist({ alerts: events });
     }
 
-    // An attack discovery is an AAD alert (rule type `attack-discovery`), so the same read
-    // authorization applies: without this a caller could persist an arbitrary id/index pair and
-    // have the status sync write to any index it can reach.
+    // An attack discovery is an AAD alert (rule type `attack-discovery`), so the reference is
+    // authorized for read like an alert, and additionally checked for existence, rule type and
+    // space: without that a caller could persist an arbitrary id/index pair and have the status
+    // sync write to any document it can reach.
     const attackAttachments = attachments.filter((a) => isAttackAttachmentType(a.type));
     const attacks = getAttackInfoFromComments(attackAttachments, true);
 
     if (attacks.length > 0) {
-      await this.params.services.alertsService.ensureAlertsAuthorized({ alerts: attacks });
+      await this.params.services.alertsService.ensureAttacksAuthorized({
+        attacks,
+        spaceId: this.params.spaceId,
+      });
     }
   }
 

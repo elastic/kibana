@@ -6,31 +6,33 @@
  */
 
 import expect from '@kbn/expect';
+import type http from 'http';
 import {
   SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_ATTACK_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common/constants';
 import { CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { ALERT_WORKFLOW_REASON, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
 import {
   bulkCreateAttachments,
   createCase,
+  createCaseWithConnector,
   deleteAllCaseItems,
+  getServiceNowSimulationServer,
+  pushCase,
   updateCase,
 } from '../../../../common/lib/api';
+import {
+  ALERT_INDEX,
+  ATTACK_INDEX,
+  deleteAttackDocuments,
+  indexAttackDocuments,
+} from './attack_documents';
 
 const OWNER = 'securitySolutionFixture';
-
-/**
- * Stand-ins for `alerts-security.attack.discovery.alerts` and
- * `.alerts-security.alerts-default`. The status sync is index-agnostic — it writes to
- * whatever index the attachment's `metadata.index` names — so plain test indices exercise
- * the same code path without depending on the detection engine's index templates.
- */
-const ATTACK_INDEX = 'test-cases-attack-discovery-alerts';
-const ALERT_INDEX = 'test-cases-attack-constituent-alerts';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -65,28 +67,7 @@ export default ({ getService }: FtrProviderContext): void => {
     }));
 
     const indexDetectionDocs = async () => {
-      await Promise.all([
-        es.index({
-          index: ATTACK_INDEX,
-          id: attackId,
-          document: {
-            '@timestamp': new Date().toISOString(),
-            [ALERT_WORKFLOW_STATUS]: 'open',
-          },
-        }),
-        ...alertIds.map((alertId) =>
-          es.index({
-            index: ALERT_INDEX,
-            id: alertId,
-            document: {
-              '@timestamp': new Date().toISOString(),
-              [ALERT_WORKFLOW_STATUS]: 'open',
-            },
-          })
-        ),
-      ]);
-
-      await es.indices.refresh({ index: [ATTACK_INDEX, ALERT_INDEX] });
+      await indexAttackDocuments({ es, attackIds: [attackId], alertIds });
     };
 
     const getWorkflowFields = async (index: string, id: string) => {
@@ -129,10 +110,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     afterEach(async () => {
       await deleteAllCaseItems(es);
-      await es.indices.delete({
-        index: [ATTACK_INDEX, ALERT_INDEX],
-        ignore_unavailable: true,
-      });
+      await deleteAttackDocuments(es);
     });
 
     it('closes the attack document and its attached alerts when the case is closed', async () => {
@@ -346,6 +324,72 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       expect((await getWorkflowFields(ATTACK_INDEX, attackId)).status).to.eql('open');
+    });
+
+    /**
+     * `push.ts` closes a case's detections itself when the configuration closes by pushing, on a
+     * path `updateCase` never touches. Without this an attack would silently stop being closed by
+     * a push and every test above would still be green.
+     */
+    describe('close by pushing', () => {
+      const actionsRemover = new ActionsRemover(supertest);
+      let serviceNowSimulatorURL: string = '';
+      let serviceNowServer: http.Server;
+
+      before(async () => {
+        const { server, url } = await getServiceNowSimulationServer();
+        serviceNowServer = server;
+        serviceNowSimulatorURL = url;
+      });
+
+      after(async () => {
+        serviceNowServer.close();
+      });
+
+      afterEach(async () => {
+        await actionsRemover.removeAll();
+      });
+
+      const pushCaseWithAttack = async (syncAlerts: boolean) => {
+        const { postedCase, connector } = await createCaseWithConnector({
+          supertest,
+          serviceNowSimulatorURL,
+          actionsRemover,
+          configureReq: { closure_type: 'close-by-pushing' },
+          createCaseReq: getPostCaseRequest({
+            owner: OWNER,
+            settings: { syncAlerts, extractObservables: false },
+          }),
+        });
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [attackAttachment, ...alertAttachments],
+        });
+
+        await pushCase({ supertest, caseId: postedCase.id, connectorId: connector.id });
+      };
+
+      it('closes the attack document and its attached alerts when the push closes the case', async () => {
+        await pushCaseWithAttack(true);
+
+        expect((await getWorkflowFields(ATTACK_INDEX, attackId)).status).to.eql('closed');
+
+        for (const alertId of alertIds) {
+          expect((await getWorkflowFields(ALERT_INDEX, alertId)).status).to.eql('closed');
+        }
+      });
+
+      it('does not close the attack document when syncAlerts is off', async () => {
+        await pushCaseWithAttack(false);
+
+        expect((await getWorkflowFields(ATTACK_INDEX, attackId)).status).to.eql('open');
+
+        for (const alertId of alertIds) {
+          expect((await getWorkflowFields(ALERT_INDEX, alertId)).status).to.eql('open');
+        }
+      });
     });
   });
 };

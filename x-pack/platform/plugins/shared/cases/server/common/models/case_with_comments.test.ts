@@ -1146,7 +1146,7 @@ describe('CaseCommentModel', () => {
     });
 
     it('checks attack authorization before persisting the attachment (createComment)', async () => {
-      clientArgs.services.alertsService.ensureAlertsAuthorized.mockRejectedValueOnce(
+      clientArgs.services.alertsService.ensureAttacksAuthorized.mockRejectedValueOnce(
         new Error('not authorized')
       );
 
@@ -1158,14 +1158,15 @@ describe('CaseCommentModel', () => {
         })
       ).rejects.toThrow('not authorized');
 
-      expect(clientArgs.services.alertsService.ensureAlertsAuthorized).toHaveBeenCalledWith({
-        alerts: [{ id: 'attack-id-1', index: '.alerts-security.attack.discovery.alerts-default' }],
+      expect(clientArgs.services.alertsService.ensureAttacksAuthorized).toHaveBeenCalledWith({
+        attacks: [{ id: 'attack-id-1', index: '.alerts-security.attack.discovery.alerts-default' }],
+        spaceId: 'default',
       });
       expect(clientArgs.services.attachmentService.create).not.toHaveBeenCalled();
     });
 
     it('checks attack authorization before persisting the attachment batch (bulkCreate)', async () => {
-      clientArgs.services.alertsService.ensureAlertsAuthorized.mockRejectedValueOnce(
+      clientArgs.services.alertsService.ensureAttacksAuthorized.mockRejectedValueOnce(
         new Error('not authorized')
       );
 
@@ -1176,6 +1177,16 @@ describe('CaseCommentModel', () => {
       ).rejects.toThrow('not authorized');
 
       expect(clientArgs.services.attachmentService.bulkCreate).not.toHaveBeenCalled();
+    });
+
+    it('does not authorize an attack as a plain alert', async () => {
+      await model.createComment({
+        id: 'comment-1',
+        commentReq: unifiedAttackComment,
+        createdDate,
+      });
+
+      expect(clientArgs.services.alertsService.ensureAlertsAuthorized).not.toHaveBeenCalled();
     });
 
     it('does not call ensureDocumentsExist for a batch with no event attachments', async () => {
@@ -1206,6 +1217,70 @@ describe('CaseCommentModel', () => {
       const createOrder = clientArgs.services.attachmentService.create.mock.invocationCallOrder[0];
 
       expect(authorizeOrder).toBeLessThan(createOrder);
+    });
+
+    it('checks attack authorization before persisting the attachment (updateComment)', async () => {
+      clientArgs.services.alertsService.ensureAttacksAuthorized.mockRejectedValueOnce(
+        new Error('not authorized')
+      );
+
+      await expect(
+        model.updateComment({
+          updateRequest: {
+            id: 'comment-id',
+            version: 'comment-version',
+            ...unifiedAttackComment,
+          },
+          updatedAt: createdDate,
+          owner: SECURITY_SOLUTION_OWNER,
+        })
+      ).rejects.toThrow('not authorized');
+
+      expect(clientArgs.services.alertsService.ensureAttacksAuthorized).toHaveBeenCalledWith({
+        attacks: [{ id: 'attack-id-1', index: '.alerts-security.attack.discovery.alerts-default' }],
+        spaceId: 'default',
+      });
+      expect(clientArgs.services.attachmentService.update).not.toHaveBeenCalled();
+    });
+
+    it('checks alert authorization before persisting the attachment (updateComment)', async () => {
+      clientArgs.services.alertsService.ensureAlertsAuthorized.mockRejectedValueOnce(
+        new Error('not authorized')
+      );
+
+      await expect(
+        model.updateComment({
+          updateRequest: {
+            id: 'comment-id',
+            version: 'comment-version',
+            ...unifiedAlertComment,
+          },
+          updatedAt: createdDate,
+          owner: SECURITY_SOLUTION_OWNER,
+        })
+      ).rejects.toThrow('not authorized');
+
+      expect(clientArgs.services.attachmentService.update).not.toHaveBeenCalled();
+    });
+
+    it('checks event existence before persisting the attachment (updateComment)', async () => {
+      clientArgs.services.alertsService.ensureDocumentsExist.mockRejectedValueOnce(
+        new Error('document not found')
+      );
+
+      await expect(
+        model.updateComment({
+          updateRequest: {
+            id: 'comment-id',
+            version: 'comment-version',
+            ...unifiedEventComment,
+          },
+          updatedAt: createdDate,
+          owner: SECURITY_SOLUTION_OWNER,
+        })
+      ).rejects.toThrow('document not found');
+
+      expect(clientArgs.services.attachmentService.update).not.toHaveBeenCalled();
     });
   });
 

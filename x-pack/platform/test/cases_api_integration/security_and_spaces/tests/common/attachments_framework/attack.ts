@@ -17,6 +17,7 @@ import type {
   AttachmentRequestV2,
   BulkCreateAttachmentsRequestV2,
 } from '@kbn/cases-plugin/common/types/api';
+import type { UnifiedAttachmentPayload } from '@kbn/cases-plugin/common/types/domain/attachment/v2';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
 import {
@@ -26,13 +27,28 @@ import {
   createComment,
   deleteAllCaseItems,
   getAllComments,
+  updateAttachmentV2,
 } from '../../../../common/lib/api';
+import {
+  ALERT_INDEX,
+  ATTACK_INDEX,
+  buildAlertDocument,
+  buildAttackDocument,
+  deleteAttackDocuments,
+  indexAttackDocuments,
+} from './attack_documents';
 
 const OWNER = 'securitySolutionFixture';
 const ATTACK_ID = 'attack-doc-1';
-const ATTACK_INDEX = '.alerts-security.attack.discovery.alerts-default';
-const ALERT_INDEX = '.alerts-security.alerts-default';
 const ALERT_IDS = ['attack-alert-1', 'attack-alert-2'];
+
+// Attack↔alert is many-to-many: an alert can belong to several attacks, and both of those attacks
+// can be attached to the same case. The `remove` suite below builds on that.
+const ATTACK_A_ID = 'attack-doc-a';
+const ATTACK_B_ID = 'attack-doc-b';
+const SHARED_ALERT_ID = 'attack-alert-shared';
+const ATTACK_A_ONLY_ALERT_ID = 'attack-alert-a-only';
+const ATTACK_B_ONLY_ALERT_ID = 'attack-alert-b-only';
 
 /**
  * The metadata snapshot the Attacks page takes at attach time. `title`, `alertCount` and
@@ -81,8 +97,19 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
 
   describe('Attack attachments', () => {
+    beforeEach(async () => {
+      // The attack reference is validated before the attachment is persisted, so every attack
+      // these tests attach has to exist as an authorized attack discovery in this space.
+      await indexAttackDocuments({
+        es,
+        attackIds: [ATTACK_ID, ATTACK_A_ID, ATTACK_B_ID],
+        alertIds: [...ALERT_IDS, SHARED_ALERT_ID, ATTACK_A_ONLY_ALERT_ID, ATTACK_B_ONLY_ALERT_ID],
+      });
+    });
+
     afterEach(async () => {
       await deleteAllCaseItems(es);
+      await deleteAttackDocuments(es);
     });
 
     describe('create', () => {
@@ -177,15 +204,6 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('remove', () => {
-      // Attack↔alert is many-to-many: an alert can belong to several attacks, and both of those
-      // attacks can be attached to the same case. Removing one attack must not strip the shared
-      // alert from the other.
-      const SHARED_ALERT_ID = 'attack-alert-shared';
-      const ATTACK_A_ONLY_ALERT_ID = 'attack-alert-a-only';
-      const ATTACK_B_ONLY_ALERT_ID = 'attack-alert-b-only';
-      const ATTACK_A_ID = 'attack-doc-a';
-      const ATTACK_B_ID = 'attack-doc-b';
-
       const attackAlertIds = {
         [ATTACK_A_ID]: [SHARED_ALERT_ID, ATTACK_A_ONLY_ALERT_ID],
         [ATTACK_B_ID]: [SHARED_ALERT_ID, ATTACK_B_ONLY_ALERT_ID],
@@ -421,6 +439,121 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(response.message).to.contain(
           `Invalid attachment payload for type '${SECURITY_ATTACK_ATTACHMENT_TYPE}'`
         );
+      });
+    });
+
+    /**
+     * The reference is what the status sync later writes to, by id and index alone, so it has to
+     * be an attack discovery the caller is allowed to read in this space before the attachment is
+     * persisted. Authorizing it as a plain alert is not enough: the rule-type/consumer check is a
+     * no-op for a document that is missing, is not an alert, or lives in another space.
+     */
+    describe('reference validation', () => {
+      const attachAttack = async (
+        attachment: Record<string, unknown>
+      ): Promise<{ message: string }> => {
+        const postedCase = await createCase(supertest, getPostCaseRequest({ owner: OWNER }));
+
+        return (await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: attachment as unknown as AttachmentRequestV2,
+          expectedHttpCode: 400,
+        })) as unknown as { message: string };
+      };
+
+      it('rejects an attack whose document does not exist', async () => {
+        const response = await attachAttack({
+          ...attackAttachment,
+          attachmentId: 'attack-that-was-never-indexed',
+        });
+
+        expect(response.message).to.contain('Referenced attack(s) not found');
+      });
+
+      it('rejects an attack pointing at a document that is not an alert', async () => {
+        await es.index({
+          index: ATTACK_INDEX,
+          id: 'not-an-alert',
+          document: { '@timestamp': new Date().toISOString(), message: 'just a document' },
+          refresh: true,
+        });
+
+        const response = await attachAttack({
+          ...attackAttachment,
+          attachmentId: 'not-an-alert',
+        });
+
+        expect(response.message).to.contain('are not attack discoveries in space default');
+      });
+
+      it('rejects an attack pointing at an alert of another rule type', async () => {
+        await es.index({
+          index: ATTACK_INDEX,
+          id: 'detection-alert',
+          document: buildAlertDocument(),
+          refresh: true,
+        });
+
+        const response = await attachAttack({
+          ...attackAttachment,
+          attachmentId: 'detection-alert',
+        });
+
+        expect(response.message).to.contain('are not attack discoveries in space default');
+      });
+
+      it('rejects an attack belonging to another space', async () => {
+        await es.index({
+          index: ATTACK_INDEX,
+          id: 'attack-in-space-2',
+          document: buildAttackDocument('space-2'),
+          refresh: true,
+        });
+
+        const response = await attachAttack({
+          ...attackAttachment,
+          attachmentId: 'attack-in-space-2',
+        });
+
+        expect(response.message).to.contain('are not attack discoveries in space default');
+      });
+
+      it('rejects replacing the reference of an existing attack attachment with an unknown document', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest({ owner: OWNER }));
+
+        const withAttack = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: attackAttachment as unknown as AttachmentRequestV2,
+        });
+
+        const attachment = withAttack.comments!.find(
+          (comment) => comment.type === SECURITY_ATTACK_ATTACHMENT_TYPE
+        ) as unknown as { id: string; version: string };
+
+        const response = (await updateAttachmentV2({
+          supertest,
+          caseId: postedCase.id,
+          attachmentId: attachment.id,
+          req: {
+            version: attachment.version,
+            ...attackAttachment,
+            attachmentId: 'attack-that-was-never-indexed',
+          } as unknown as UnifiedAttachmentPayload & { version: string },
+          expectedHttpCode: 400,
+        })) as unknown as { message: string };
+
+        expect(response.message).to.contain('Referenced attack(s) not found');
+
+        // Nothing was written: the attachment still points at the attack it was created with.
+        const comments = (await getAllComments({
+          supertest,
+          caseId: postedCase.id,
+        })) as unknown as Array<{ type: string; attachmentId?: string }>;
+        expect(
+          comments.find((comment) => comment.type === SECURITY_ATTACK_ATTACHMENT_TYPE)?.attachmentId
+        ).to.eql(ATTACK_ID);
       });
     });
   });
