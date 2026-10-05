@@ -31,8 +31,8 @@ export function useLibraryEnabled(): boolean {
   } = useKibana<LibraryEnabledServices>();
   const client = settings?.globalClient;
 
-  const observable = client?.get$<boolean>(WORKFLOWS_LIBRARY_ENABLED_SETTING_ID, false) ?? EMPTY;
-  const defaultValue = client?.get<boolean>(WORKFLOWS_LIBRARY_ENABLED_SETTING_ID, false) ?? false;
+  const observable = client?.get$<boolean>(WORKFLOWS_LIBRARY_ENABLED_SETTING_ID, true) ?? EMPTY;
+  const defaultValue = client?.get<boolean>(WORKFLOWS_LIBRARY_ENABLED_SETTING_ID, true) ?? false;
 
   return useObservable(observable, defaultValue) === true;
 }

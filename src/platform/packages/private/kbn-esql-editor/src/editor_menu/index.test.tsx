@@ -13,6 +13,8 @@ import { act, render, screen } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock, notificationServiceMock } from '@kbn/core/public/mocks';
 import { ESQLMenu } from '.';
+import { EsqlEditorActionsProvider } from '../editor_actions_context';
+import { EsqlEditorActionsRegister } from '../editor_actions_register';
 
 jest.mock('./help_popover', () => {
   const ReactActual = jest.requireActual('react');
@@ -33,23 +35,34 @@ startMock.notifications = notificationServiceMock.createStartContract();
 
 const services = { core: startMock, data: { dataViews: {} } };
 
-const renderMenu = async (props: React.ComponentProps<typeof ESQLMenu> = {}) =>
+const renderMenu = async (
+  props: React.ComponentProps<typeof ESQLMenu> = {},
+  { editorIsInline = false }: { editorIsInline?: boolean } = {}
+) =>
   act(async () => {
     render(
       <KibanaContextProvider services={services as any}>
-        <ESQLMenu {...props} />
+        <EsqlEditorActionsProvider>
+          <EsqlEditorActionsRegister editorIsInline={editorIsInline} />
+          <ESQLMenu {...props} />
+        </EsqlEditorActionsProvider>
       </KibanaContextProvider>
     );
   });
 
 describe('ESQLMenu', () => {
-  it('renders the visor (search) button by default', async () => {
+  it('does not render the visor (search) button by default when the editor is not inline', async () => {
     await renderMenu();
+    expect(screen.queryByTestId('esql-menu-button')).not.toBeInTheDocument();
+  });
+
+  it('renders the visor (search) button when the editor is inline', async () => {
+    await renderMenu({}, { editorIsInline: true });
     expect(screen.getByTestId('esql-menu-button')).toBeInTheDocument();
   });
 
-  it('hides the visor (search) button when hideVisor is set', async () => {
-    await renderMenu({ hideVisor: true });
+  it('hides the visor (search) button when hideVisor is set, even if inline', async () => {
+    await renderMenu({ hideVisor: true }, { editorIsInline: true });
     expect(screen.queryByTestId('esql-menu-button')).not.toBeInTheDocument();
     expect(screen.getByTestId('esql-help-popover-button')).toBeInTheDocument();
   });

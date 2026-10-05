@@ -18,7 +18,6 @@ export const ACTION_POLICY_ATTACHMENT_TYPE = 'platform.alerting.action_policy' a
  *  - User-editable policy attributes (mirrors createActionPolicyData)
  *  - Minimal server-managed fields the attachment actually consumes:
  *      id           — identity for saved policies
- *      version      — optimistic concurrency on canvas updates
  *      enabled      — status badge in formatActionPolicyDescription
  *      snoozed_until — display
  *      updated_at    — staleness check against origin_snapshot_at
@@ -34,7 +33,6 @@ export const ACTION_POLICY_ATTACHMENT_TYPE = 'platform.alerting.action_policy' a
 export const actionPolicyAttachmentDataSchema = actionPolicyResponseSchema
   .pick({
     id: true,
-    version: true,
     name: true,
     description: true,
     destinations: true,

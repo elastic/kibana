@@ -243,17 +243,26 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
       const field = opts.field;
       if (field) {
-        await this.selectOptionFromComboBox('indexPattern-dimension-field', field);
         // Close too early discards the operation→field transition. Do not wait on the
         // combobox input: setElement types `field` as a filter before the option is
         // clicked. data-selected-field is the committed option display name and
         // updates only after insertOrReplaceColumn. Independent of aria-invalid
         // (incompleteOperation / CCS). Compare exactly — labels are case-sensitive.
-        await retry.waitFor('field selection to commit', async () => {
-          const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
-          const committedLabel = (await fieldCombo.getAttribute('data-selected-field')) ?? '';
-          return committedLabel === field;
-        });
+        // Re-select on failure because EUI drops the option click under load, and the filter text
+        // setElement leaves behind makes both its own check and the input read back as `field`.
+        await retry.tryWithRetries(
+          `configureDimension - select field [${field}]`,
+          async () => {
+            await this.selectOptionFromComboBox('indexPattern-dimension-field', field);
+            await retry.waitForWithTimeout('field selection to commit', 10_000, async () => {
+              const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
+              const committedLabel = (await fieldCombo.getAttribute('data-selected-field')) ?? '';
+              return committedLabel === field;
+            });
+          },
+          { retryCount: 3, timeout: 60_000 },
+          async () => comboBox.clearInputField('indexPattern-dimension-field')
+        );
       }
 
       if (opts.formula) {
@@ -1595,6 +1604,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
     async getMetricTiles() {
       return findService.allByCssSelector('[data-test-subj="mtrVis"] .echChart li');
+    },
+
+    /**
+     * Number of columns the rendered metric grid is laid out with, which reflects the
+     * "Layout columns" (`maxCols`) setting once it has been committed to the Lens state.
+     */
+    async getMetricGridColumnCount() {
+      const grid = await findService.byCssSelector('[data-test-subj="mtrVis"] .echMetricContainer');
+      const columns = await grid.getComputedStyle('grid-template-columns');
+      return columns.trim().split(/\s+/).length;
     },
 
     async getMetricElementIfExists(

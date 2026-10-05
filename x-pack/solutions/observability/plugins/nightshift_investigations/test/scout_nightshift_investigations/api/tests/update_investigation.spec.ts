@@ -79,12 +79,12 @@ apiTest.describe(
           { title: 'Add memory alert', confidence: 0.7 },
           { title: 'Restart pod', confidence: 0.95 },
         ],
-        blind_spots: [
-          { title: 'Profiles', confidence: 0.6, description: 'Not available' },
-          { title: 'Network logs', confidence: 0.8, description: 'Not available' },
-        ],
         conversation_id: 'conv-persist-1',
-        impact: { entities: [{ name: 'service-x' }] },
+        impact: {
+          summary: 'Service X returned errors for 20% of requests.',
+          evidence: { description: 'Service X error rate per 5 minutes.' },
+          entities: [{ name: 'service-x' }],
+        },
       });
       expect(response).toHaveStatusCode(200);
       expect(response.body.acknowledged).toBe(true);
@@ -101,12 +101,12 @@ apiTest.describe(
         { title: 'Restart pod', confidence: 0.95 },
         { title: 'Add memory alert', confidence: 0.7 },
       ]);
-      expect(investigationRequest.body.blind_spots).toStrictEqual([
-        { title: 'Network logs', confidence: 0.8, description: 'Not available' },
-        { title: 'Profiles', confidence: 0.6, description: 'Not available' },
-      ]);
       expect(investigationRequest.body.conversation_id).toBe('conv-persist-1');
-      expect(investigationRequest.body.impact).toStrictEqual({ entities: [{ name: 'service-x' }] });
+      expect(investigationRequest.body.impact).toStrictEqual({
+        summary: 'Service X returned errors for 20% of requests.',
+        evidence: { description: 'Service X error rate per 5 minutes.' },
+        entities: [{ name: 'service-x' }],
+      });
       expect(investigationRequest.body.completed_at).toBeDefined();
     });
 

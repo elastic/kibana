@@ -56,12 +56,12 @@ const suggestValues = (
 const buildSeededAlertEvents = () => [
   buildAlertEvent({
     group_hash: 'scout.web-1',
-    episode: { id: 'scout-episode-web', status: 'active' },
+    alert: { id: 'scout-episode-web', status: 'active' },
     data: { host: 'scout-web-1', region: 'scout-us-east' },
   }),
   buildAlertEvent({
     group_hash: 'scoutxweb-2',
-    episode: { id: 'scout-episode-db', status: 'active' },
+    alert: { id: 'scout-episode-db', status: 'active' },
     data: { host: 'scout-db-1' },
   }),
 ];

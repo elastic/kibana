@@ -215,6 +215,42 @@ describe('convertGraphEvents', () => {
     expect(events).toEqual([{ type: ChatEventType.backgroundAgentComplete, data: { execution } }]);
   });
 
+  it('emits substitution_applied for substitution appends, and nothing for a compaction request', async () => {
+    const substitution = {
+      substituted_tool_calls: [{ round_id: 'round-1', tool_call_id: 'c1' }],
+      trigger: 'intra_round' as const,
+      threshold_tokens: 1_000,
+    };
+    const events = await collect([
+      chainEnd(steps.contextManagement, {
+        compactionRequest: { trigger: 'proactive', tailCapTokens: 40_000, tokensBefore: 85_000 },
+      }),
+      chainEnd(steps.contextManagement, {
+        steps: [
+          stepUpdates.append({ type: ConversationRoundStepType.substitution, ...substitution }),
+        ],
+      }),
+      chainEnd(steps.contextManagement, {}),
+    ]);
+    expect(events).toEqual([{ type: ChatEventType.substitutionApplied, data: substitution }]);
+  });
+
+  it('emits compaction_completed from compactContext compaction appends', async () => {
+    const compaction = {
+      summarized_cycle_count: 2,
+      token_count_before: 85_000,
+      token_count_after: 20_000,
+    };
+    const events = await collect([
+      chainEnd(steps.compactContext, {
+        steps: [stepUpdates.append({ type: ConversationRoundStepType.compaction, ...compaction })],
+      }),
+      // a skipped compaction appends nothing
+      chainEnd(steps.compactContext, { compactionRequest: undefined }),
+    ]);
+    expect(events).toEqual([{ type: ChatEventType.compactionCompleted, data: compaction }]);
+  });
+
   it('ignores node on_chain_end events from a nested run of the graph', async () => {
     const output = {
       steps: [
