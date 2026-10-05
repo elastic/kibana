@@ -47,7 +47,6 @@
     "@kbn/security-solution-features",
     "@kbn/kql",
     "@kbn/core-spaces-common",
-    "@kbn/apm-utils"
   ],
   "exclude": ["target/**/*"]
 }
