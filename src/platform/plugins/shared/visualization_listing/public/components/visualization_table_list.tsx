@@ -68,6 +68,9 @@ export const VisualizationTableList = ({
     firstValueFrom(core.application.currentAppId$)
       .then((currentApp) => {
         closeNewVisModal.current = visualizations.showNewVisModal({
+          embeddableState: currentApp
+            ? { originatingApp: currentApp, breadcrumbs: getBreadcrumbs?.(currentApp) }
+            : undefined,
           outsideVisualizeApp: currentApp !== VISUALIZE_APP_NAME,
         });
       })
