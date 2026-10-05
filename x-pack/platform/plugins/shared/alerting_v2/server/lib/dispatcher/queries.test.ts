@@ -62,18 +62,19 @@ describe('getDispatchableAlertEventsQuery', () => {
     );
   });
 
-  it('coalesces rule_id and episode_id from both schemas', () => {
+  it('coalesces rule_id and alert_id from both schemas', () => {
     const query = queryOf();
 
     expect(query).toContain('COALESCE(rule.id, rule_id)');
-    expect(query).toContain('episode_id = COALESCE(alert.id, alert_id)');
+    expect(query).toContain('alert_id = COALESCE(alert.id, alert_id)');
   });
 
-  it('reads the episode status from alert.status rather than the episode.* aliases', () => {
+  it('reads the alert status from alert.status rather than the episode.* aliases', () => {
     const query = queryOf();
 
-    expect(query).toContain('episode_status = alert.status');
-    expect(query).toContain('DROP alert.id, alert_id, rule.id, alert.status');
+    expect(query).toContain('alert_status = alert.status');
+    expect(query).toContain('DROP alert.id, rule.id, alert.status');
+    expect(query).not.toContain('DROP alert.id, alert_id');
     expect(query).not.toContain('episode.id');
     expect(query).not.toContain('episode.status');
   });
@@ -87,12 +88,12 @@ describe('getDispatchableAlertEventsQuery', () => {
     );
   });
 
-  it('aggregates by subject, group_hash, episode_id with episode_status as LAST aggregation', () => {
+  it('aggregates by subject, group_hash, alert_id with alert_status as LAST aggregation', () => {
     const query = queryOf();
 
-    expect(query).toContain('BY subject, group_hash, episode_id');
-    expect(query).not.toContain('BY subject, group_hash, episode_id, episode_status');
-    expect(query).toContain('last_episode_status = LAST(episode_status, @timestamp)');
+    expect(query).toContain('BY subject, group_hash, alert_id');
+    expect(query).not.toContain('BY subject, group_hash, alert_id, alert_status');
+    expect(query).toContain('last_alert_status = LAST(alert_status, @timestamp)');
   });
 
   it('does not request _source metadata (keys-only scan)', () => {
@@ -113,14 +114,14 @@ describe('getDispatchableAlertEventsQuery', () => {
     expect(queryOf()).toContain('severity = LAST(severity, @timestamp) WHERE type IS NOT NULL');
   });
 
-  it('keeps the expected output columns without data_json and renames episode_status', () => {
+  it('keeps the expected output columns without data_json and renames alert_status', () => {
     const query = queryOf();
 
     expect(query).toContain(
-      'KEEP last_event_timestamp, rule_id, source, space_id, group_hash, episode_id, last_episode_status, severity'
+      'KEEP last_event_timestamp, rule_id, source, space_id, group_hash, alert_id, last_alert_status, severity'
     );
     expect(query).not.toContain('data_json');
-    expect(query).toContain('RENAME last_episode_status AS episode_status');
+    expect(query).toContain('RENAME last_alert_status AS alert_status');
   });
 
   it('computes subject via CASE to group internal and external episodes separately', () => {
@@ -141,8 +142,8 @@ describe('getDispatchableAlertEventsQuery', () => {
     expect(query).not.toContain('BY rule_id, group_hash');
   });
 
-  it('groups STATS BY subject, group_hash, episode_id', () => {
-    expect(queryOf()).toContain('BY subject, group_hash, episode_id');
+  it('groups STATS BY subject, group_hash, alert_id', () => {
+    expect(queryOf()).toContain('BY subject, group_hash, alert_id');
   });
 
   it('projects source and space_id via LAST aggregation', () => {
@@ -201,12 +202,13 @@ describe('getEpisodeDataQueries', () => {
     expect(whereIdx).toBeLessThan(extractIdx);
   });
 
-  it('filters by type == "alert", episode.id IN (...), and timestamp range', () => {
+  it('filters by type == "alert", alert.id IN (...), and timestamp range', () => {
     const requests = getEpisodeDataQueries(['ep-1', 'ep-2'], { gte: GTE, lte: LTE });
     const query = requests[0].query;
 
     expect(query).toContain('type == "alert"');
-    expect(query).toContain('episode.id IN');
+    expect(query).toContain('alert.id IN');
+    expect(query).not.toContain('episode.id');
     expect(query).toContain('"ep-1"');
     expect(query).toContain('"ep-2"');
     expect(query).toContain(`"${GTE}"`);
@@ -239,16 +241,16 @@ describe('getEpisodeDataQueries', () => {
     expect(dropIdx).toBeLessThan(statsIdx);
   });
 
-  it('aggregates data_json using LAST by timestamp grouped by episode_id', () => {
+  it('aggregates data_json using LAST by timestamp grouped by alert_id', () => {
     const requests = getEpisodeDataQueries(['ep-1'], { gte: GTE, lte: LTE });
 
-    expect(requests[0].query).toContain('LAST(data_json, @timestamp) BY episode_id');
+    expect(requests[0].query).toContain('LAST(data_json, @timestamp) BY alert_id');
   });
 
-  it('keeps only episode_id and data_json', () => {
+  it('keeps only alert_id and data_json', () => {
     const requests = getEpisodeDataQueries(['ep-1'], { gte: GTE, lte: LTE });
 
-    expect(requests[0].query).toContain('KEEP episode_id, data_json');
+    expect(requests[0].query).toContain('KEEP alert_id, data_json');
   });
 
   it('ends every chunk with an explicit row limit', () => {
@@ -282,7 +284,7 @@ describe('getEpisodeDataQueries', () => {
     const requests = getEpisodeDataQueries(ids, { gte: GTE, lte: LTE });
 
     expect(requests).toHaveLength(2);
-    expect(requests[1].query).toContain(`episode.id IN ("ep-${ESQL_QUERY_ROW_LIMIT}")`);
+    expect(requests[1].query).toContain(`alert.id IN ("ep-${ESQL_QUERY_ROW_LIMIT}")`);
   });
 
   it('applies the same gte/lte bounds on every chunk', () => {
@@ -425,9 +427,9 @@ describe('getSeriesSuppressionsQueries', () => {
 
   it('deduplicates episodes with the same rule_id and group_hash', () => {
     const episodes = [
-      createAlertEpisode({ rule_id: 'rule-1', group_hash: 'hash-1', episode_id: 'ep-1' }),
-      createAlertEpisode({ rule_id: 'rule-1', group_hash: 'hash-1', episode_id: 'ep-2' }),
-      createAlertEpisode({ rule_id: 'rule-2', group_hash: 'hash-2', episode_id: 'ep-3' }),
+      createAlertEpisode({ rule_id: 'rule-1', group_hash: 'hash-1', alert_id: 'ep-1' }),
+      createAlertEpisode({ rule_id: 'rule-1', group_hash: 'hash-1', alert_id: 'ep-2' }),
+      createAlertEpisode({ rule_id: 'rule-2', group_hash: 'hash-2', alert_id: 'ep-3' }),
     ];
 
     const requests = getSeriesSuppressionsQueries(episodes);
@@ -691,8 +693,8 @@ describe('getSeriesSuppressionsQueries', () => {
 
   it('pushes a group_hash + rule_id pre-filter before the CONCAT for internal episodes', () => {
     const episodes = [
-      createAlertEpisode({ rule_id: 'rule-1', group_hash: 'hash-1', episode_id: 'ep-1' }),
-      createAlertEpisode({ rule_id: 'rule-2', group_hash: 'hash-2', episode_id: 'ep-2' }),
+      createAlertEpisode({ rule_id: 'rule-1', group_hash: 'hash-1', alert_id: 'ep-1' }),
+      createAlertEpisode({ rule_id: 'rule-2', group_hash: 'hash-2', alert_id: 'ep-2' }),
     ];
 
     const { query } = getSeriesSuppressionsQueries(episodes)[0];
@@ -737,7 +739,7 @@ describe('getSeriesSuppressionsQueries', () => {
         rule_id: null,
         space_id: 'space-a',
         group_hash: 'hash-pd',
-        episode_id: 'ep-2',
+        alert_id: 'ep-2',
       }),
     ];
 
@@ -761,7 +763,7 @@ describe('getSeriesSuppressionsQueries', () => {
       createAlertEpisode({
         rule_id: `${longSegment}-r${i}`,
         group_hash: `${longSegment}-g${i}`,
-        episode_id: `ep-${i}`,
+        alert_id: `ep-${i}`,
       })
     );
 
@@ -791,8 +793,8 @@ describe('getEpisodeSuppressionsQueries', () => {
 
   it('filters by the scan episode ids and episode-level action types in the first WHERE', () => {
     const episodes = [
-      createAlertEpisode({ episode_id: 'ep-1' }),
-      createAlertEpisode({ episode_id: 'ep-2' }),
+      createAlertEpisode({ alert_id: 'ep-1' }),
+      createAlertEpisode({ alert_id: 'ep-2' }),
     ];
 
     const { query } = getEpisodeSuppressionsQueries(episodes)[0];
@@ -823,8 +825,8 @@ describe('getEpisodeSuppressionsQueries', () => {
 
   it('deduplicates episode ids', () => {
     const episodes = [
-      createAlertEpisode({ group_hash: 'hash-1', episode_id: 'ep-1' }),
-      createAlertEpisode({ group_hash: 'hash-2', episode_id: 'ep-1' }),
+      createAlertEpisode({ group_hash: 'hash-1', alert_id: 'ep-1' }),
+      createAlertEpisode({ group_hash: 'hash-2', alert_id: 'ep-1' }),
     ];
 
     const { query } = getEpisodeSuppressionsQueries(episodes)[0];
@@ -875,7 +877,7 @@ describe('getEpisodeSuppressionsQueries', () => {
 
   it('never puts more episode ids in a chunk than the row limit returns', () => {
     const episodes = Array.from({ length: ESQL_QUERY_ROW_LIMIT + 1 }, (_, i) =>
-      createAlertEpisode({ episode_id: `ep-${i}` })
+      createAlertEpisode({ alert_id: `ep-${i}` })
     );
 
     const requests = getEpisodeSuppressionsQueries(episodes);
@@ -889,7 +891,7 @@ describe('getEpisodeSuppressionsQueries', () => {
 
   it('ends every chunk with an explicit row limit', () => {
     const episodes = Array.from({ length: ESQL_QUERY_ROW_LIMIT + 1 }, (_, i) =>
-      createAlertEpisode({ episode_id: `ep-${i}` })
+      createAlertEpisode({ alert_id: `ep-${i}` })
     );
 
     const requests = getEpisodeSuppressionsQueries(episodes);

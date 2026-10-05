@@ -83,7 +83,7 @@ export class EvaluateMatchersStep implements DispatcherStep {
             code: ALERTING_LOG_CODES.POLICY_MATCHER_KQL_INVALID,
             labels: {
               policy_id: policy.id,
-              episode_id: episode.episode_id,
+              episode_id: episode.alert_id,
               rule_id: episode.rule_id ?? undefined,
               space_id: episode.space_id,
             },

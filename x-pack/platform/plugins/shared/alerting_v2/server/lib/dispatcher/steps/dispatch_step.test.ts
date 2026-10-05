@@ -475,8 +475,8 @@ describe('DispatchStep', () => {
     mockWfm.bulkScheduleWorkflow.mockResolvedValue([scheduled('exec-1')]);
 
     const episode = createAlertEpisode({
-      episode_id: 'ep-1',
-      episode_status: 'recovering',
+      alert_id: 'ep-1',
+      alert_status: 'recovering',
       severity: 'high',
       data: { host: { name: 'web-1' } },
     });
@@ -547,7 +547,7 @@ describe('DispatchStep', () => {
   it('records a missing_api_key failure per destination when the policy has no API key', async () => {
     const step = new DispatchStep(mockWfm, mockLicenseService);
 
-    const episode = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-1' });
+    const episode = createAlertEpisode({ rule_id: 'rule-1', alert_id: 'ep-1' });
     const group = createActionGroup({
       id: 'g1',
       policyId: 'p1',

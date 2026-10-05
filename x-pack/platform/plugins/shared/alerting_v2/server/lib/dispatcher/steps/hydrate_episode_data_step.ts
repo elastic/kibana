@@ -21,7 +21,7 @@ import { parseDataJson } from './utils/parse_episode_data';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 
 interface RawEpisodeData {
-  episode_id: string;
+  alert_id: string;
   data_json: string | null;
 }
 
@@ -60,7 +60,7 @@ export class HydrateEpisodeDataStep implements DispatcherStep {
 
     const dataByEpisodeId = new Map<string, string | null>();
     for (const row of responses.flat()) {
-      dataByEpisodeId.set(row.episode_id, row.data_json);
+      dataByEpisodeId.set(row.alert_id, row.data_json);
     }
 
     const hydrated = dataByEpisodeId.size;
@@ -75,7 +75,7 @@ export class HydrateEpisodeDataStep implements DispatcherStep {
     }
 
     const hydratedTriage = triage.mapDispatchable((ep) => {
-      const raw = dataByEpisodeId.get(ep.episode_id);
+      const raw = dataByEpisodeId.get(ep.alert_id);
       if (raw == null) return ep;
       return { ...ep, data: parseDataJson(raw) };
     });

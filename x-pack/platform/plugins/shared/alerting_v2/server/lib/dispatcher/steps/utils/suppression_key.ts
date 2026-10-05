@@ -15,8 +15,8 @@ import { episodeSubject, type SubjectInput } from './subject';
  * `subject = ${space_id}::${source}` (e.g. "default::pagerduty").
  */
 export const suppressionEpisodeKey = (
-  x: SubjectInput & { group_hash: string; episode_id: string }
-): string => `${episodeSubject(x)}:${x.group_hash}:${x.episode_id}`;
+  x: SubjectInput & { group_hash: string; alert_id: string }
+): string => `${episodeSubject(x)}:${x.group_hash}:${x.alert_id}`;
 
 /**
  * Builds the series-scoped composite suppression key:

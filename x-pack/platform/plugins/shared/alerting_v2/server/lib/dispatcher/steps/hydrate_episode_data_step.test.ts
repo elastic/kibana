@@ -41,11 +41,11 @@ describe('HydrateEpisodeDataStep', () => {
     const { loggerService } = createLoggerService();
     const step = new HydrateEpisodeDataStep(queryService);
 
-    const episodes = [createAlertEpisode({ episode_id: 'ep-1', rule_id: 'r1' })];
+    const episodes = [createAlertEpisode({ alert_id: 'ep-1', rule_id: 'r1' })];
 
     mockEsClient.esql.query.mockResolvedValueOnce(
       createEpisodeDataResponse([
-        { episode_id: 'ep-1', data_json: '{"host":"server-01","count":3}' },
+        { alert_id: 'ep-1', data_json: '{"host":"server-01","count":3}' },
       ])
     );
 
@@ -62,11 +62,11 @@ describe('HydrateEpisodeDataStep', () => {
     const { loggerService } = createLoggerService();
     const step = new HydrateEpisodeDataStep(queryService);
 
-    const episodes = [createAlertEpisode({ episode_id: 'ep-1' })];
+    const episodes = [createAlertEpisode({ alert_id: 'ep-1' })];
 
     mockEsClient.esql.query.mockResolvedValueOnce(
       createEpisodeDataResponse([
-        { episode_id: 'ep-1', data_json: '{"host.name":"srv-01","host.ip":"10.0.0.1"}' },
+        { alert_id: 'ep-1', data_json: '{"host.name":"srv-01","host.ip":"10.0.0.1"}' },
       ])
     );
 
@@ -85,10 +85,10 @@ describe('HydrateEpisodeDataStep', () => {
     const { loggerService } = createLoggerService();
     const step = new HydrateEpisodeDataStep(queryService);
 
-    const episodes = [createAlertEpisode({ episode_id: 'ep-1' })];
+    const episodes = [createAlertEpisode({ alert_id: 'ep-1' })];
 
     mockEsClient.esql.query.mockResolvedValueOnce(
-      createEpisodeDataResponse([{ episode_id: 'ep-1', data_json: '{}' }])
+      createEpisodeDataResponse([{ alert_id: 'ep-1', data_json: '{}' }])
     );
 
     const state = createDispatcherPipelineState({ dispatchable: episodes });
@@ -104,7 +104,7 @@ describe('HydrateEpisodeDataStep', () => {
     const { loggerService, mockLogger } = createLoggerService();
     const step = new HydrateEpisodeDataStep(queryService);
 
-    const episodes = [createAlertEpisode({ episode_id: 'ep-missing' })];
+    const episodes = [createAlertEpisode({ alert_id: 'ep-missing' })];
 
     mockEsClient.esql.query.mockResolvedValueOnce(createEpisodeDataResponse([]));
 
@@ -122,10 +122,10 @@ describe('HydrateEpisodeDataStep', () => {
     const { loggerService } = createLoggerService();
     const step = new HydrateEpisodeDataStep(queryService);
 
-    const episodes = [createAlertEpisode({ episode_id: 'ep-1' })];
+    const episodes = [createAlertEpisode({ alert_id: 'ep-1' })];
 
     mockEsClient.esql.query.mockResolvedValueOnce(
-      createEpisodeDataResponse([{ episode_id: 'ep-1', data_json: null }])
+      createEpisodeDataResponse([{ alert_id: 'ep-1', data_json: null }])
     );
 
     const state = createDispatcherPipelineState({ dispatchable: episodes });
@@ -143,24 +143,24 @@ describe('HydrateEpisodeDataStep', () => {
 
     const episodes = [
       createAlertEpisode({
-        episode_id: 'ep-1',
+        alert_id: 'ep-1',
         last_event_timestamp: '2026-01-22T07:05:00.000Z',
       }),
       createAlertEpisode({
-        episode_id: 'ep-2',
+        alert_id: 'ep-2',
         last_event_timestamp: '2026-01-22T07:10:00.000Z',
       }),
       createAlertEpisode({
-        episode_id: 'ep-3',
+        alert_id: 'ep-3',
         last_event_timestamp: '2026-01-22T07:01:00.000Z',
       }),
     ];
 
     mockEsClient.esql.query.mockResolvedValueOnce(
       createEpisodeDataResponse([
-        { episode_id: 'ep-1', data_json: '{"a":1}' },
-        { episode_id: 'ep-2', data_json: '{"b":2}' },
-        { episode_id: 'ep-3', data_json: '{"c":3}' },
+        { alert_id: 'ep-1', data_json: '{"a":1}' },
+        { alert_id: 'ep-2', data_json: '{"b":2}' },
+        { alert_id: 'ep-3', data_json: '{"c":3}' },
       ])
     );
 
@@ -178,14 +178,14 @@ describe('HydrateEpisodeDataStep', () => {
     const step = new HydrateEpisodeDataStep(queryService);
 
     const episodes = [
-      createAlertEpisode({ episode_id: 'ep-1', rule_id: 'r1' }),
-      createAlertEpisode({ episode_id: 'ep-2', rule_id: 'r2' }),
+      createAlertEpisode({ alert_id: 'ep-1', rule_id: 'r1' }),
+      createAlertEpisode({ alert_id: 'ep-2', rule_id: 'r2' }),
     ];
 
     mockEsClient.esql.query.mockResolvedValueOnce(
       createEpisodeDataResponse([
-        { episode_id: 'ep-1', data_json: '{"x":1}' },
-        { episode_id: 'ep-2', data_json: '{"y":2}' },
+        { alert_id: 'ep-1', data_json: '{"x":1}' },
+        { alert_id: 'ep-2', data_json: '{"y":2}' },
       ])
     );
 
@@ -207,16 +207,16 @@ describe('HydrateEpisodeDataStep', () => {
     const longId1 = 'a'.repeat(400_000) + '-1';
     const longId2 = 'b'.repeat(400_000) + '-2';
     const episodes = [
-      createAlertEpisode({ episode_id: longId1, last_event_timestamp: '2026-01-22T07:00:00.000Z' }),
-      createAlertEpisode({ episode_id: longId2, last_event_timestamp: '2026-01-22T07:01:00.000Z' }),
+      createAlertEpisode({ alert_id: longId1, last_event_timestamp: '2026-01-22T07:00:00.000Z' }),
+      createAlertEpisode({ alert_id: longId2, last_event_timestamp: '2026-01-22T07:01:00.000Z' }),
     ];
 
     mockEsClient.esql.query
       .mockResolvedValueOnce(
-        createEpisodeDataResponse([{ episode_id: longId1, data_json: '{"c":1}' }])
+        createEpisodeDataResponse([{ alert_id: longId1, data_json: '{"c":1}' }])
       )
       .mockResolvedValueOnce(
-        createEpisodeDataResponse([{ episode_id: longId2, data_json: '{"d":2}' }])
+        createEpisodeDataResponse([{ alert_id: longId2, data_json: '{"d":2}' }])
       );
 
     const state = createDispatcherPipelineState({ dispatchable: episodes });
@@ -224,8 +224,8 @@ describe('HydrateEpisodeDataStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    const ep1 = result.data?.triage?.dispatchable.find((e) => e.episode_id === longId1);
-    const ep2 = result.data?.triage?.dispatchable.find((e) => e.episode_id === longId2);
+    const ep1 = result.data?.triage?.dispatchable.find((e) => e.alert_id === longId1);
+    const ep2 = result.data?.triage?.dispatchable.find((e) => e.alert_id === longId2);
     expect(ep1?.data).toEqual({ c: 1 });
     expect(ep2?.data).toEqual({ d: 2 });
     expect(mockEsClient.esql.query).toHaveBeenCalledTimes(2);

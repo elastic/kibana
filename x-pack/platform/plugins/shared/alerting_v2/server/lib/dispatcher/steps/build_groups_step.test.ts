@@ -25,7 +25,7 @@ describe('BuildGroupsStep', () => {
     const state = createDispatcherPipelineState({
       matched: [
         createMatchedPair({
-          episode: createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' }),
+          episode: createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' }),
           policy: createActionPolicy({
             id: 'p1',
             destinations: [{ type: 'workflow', id: 'w1' }],
@@ -62,11 +62,11 @@ describe('buildActionGroups', () => {
     });
     const matched = [
       createMatchedPair({
-        episode: createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' }),
+        episode: createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' }),
         policy,
       }),
       createMatchedPair({
-        episode: createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e2' }),
+        episode: createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e2' }),
         policy,
       }),
     ];
@@ -81,7 +81,7 @@ describe('buildActionGroups', () => {
       id: 'p1',
       destinations: [{ type: 'workflow', id: 'w1' }],
     });
-    const episode = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' });
+    const episode = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
     const matched = [
       createMatchedPair({ episode, policy }),
       createMatchedPair({ episode, policy }),
@@ -98,7 +98,7 @@ describe('buildActionGroups', () => {
       id: 'p1',
       destinations: [{ type: 'workflow', id: 'w1' }],
     });
-    const episode = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' });
+    const episode = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
 
     const groups1 = buildActionGroups([createMatchedPair({ episode, policy })]);
     const groups2 = buildActionGroups([createMatchedPair({ episode, policy })]);
@@ -117,7 +117,7 @@ describe('buildActionGroups', () => {
       createMatchedPair({
         episode: createAlertEpisode({
           rule_id: 'r1',
-          episode_id: 'e1',
+          alert_id: 'e1',
           data: { host: { name: 'server-1' } },
         }),
         policy,
@@ -125,7 +125,7 @@ describe('buildActionGroups', () => {
       createMatchedPair({
         episode: createAlertEpisode({
           rule_id: 'r1',
-          episode_id: 'e2',
+          alert_id: 'e2',
           data: { host: { name: 'server-1' } },
         }),
         policy,
@@ -150,7 +150,7 @@ describe('buildActionGroups', () => {
       createMatchedPair({
         episode: createAlertEpisode({
           rule_id: 'r1',
-          episode_id: 'e1',
+          alert_id: 'e1',
           data: { host: { name: 'server-1' } },
         }),
         policy,
@@ -158,7 +158,7 @@ describe('buildActionGroups', () => {
       createMatchedPair({
         episode: createAlertEpisode({
           rule_id: 'r1',
-          episode_id: 'e2',
+          alert_id: 'e2',
           data: { host: { name: 'server-2' } },
         }),
         policy,
@@ -183,7 +183,7 @@ describe('buildActionGroups', () => {
       createMatchedPair({
         episode: createAlertEpisode({
           rule_id: 'r1',
-          episode_id: 'e1',
+          alert_id: 'e1',
           data: { host: { name: 'server-1' }, env: 'prod' },
         }),
         policy,
@@ -191,7 +191,7 @@ describe('buildActionGroups', () => {
       createMatchedPair({
         episode: createAlertEpisode({
           rule_id: 'r1',
-          episode_id: 'e2',
+          alert_id: 'e2',
           data: { host: { name: 'server-1' }, env: 'prod' },
         }),
         policy,
@@ -199,7 +199,7 @@ describe('buildActionGroups', () => {
       createMatchedPair({
         episode: createAlertEpisode({
           rule_id: 'r1',
-          episode_id: 'e3',
+          alert_id: 'e3',
           data: { host: { name: 'server-1' }, env: 'staging' },
         }),
         policy,
@@ -226,7 +226,7 @@ describe('buildActionGroups', () => {
       createMatchedPair({
         episode: createAlertEpisode({
           rule_id: 'r1',
-          episode_id: 'e1',
+          alert_id: 'e1',
           data: { host: { name: 'server-1' } },
         }),
         policy,
@@ -234,7 +234,7 @@ describe('buildActionGroups', () => {
       createMatchedPair({
         episode: createAlertEpisode({
           rule_id: 'r1',
-          episode_id: 'e2',
+          alert_id: 'e2',
           data: {},
         }),
         policy,
@@ -258,11 +258,11 @@ describe('buildActionGroups', () => {
     });
     const matched = [
       createMatchedPair({
-        episode: createAlertEpisode({ rule_id: 'r1', episode_id: 'e1' }),
+        episode: createAlertEpisode({ rule_id: 'r1', alert_id: 'e1' }),
         policy,
       }),
       createMatchedPair({
-        episode: createAlertEpisode({ rule_id: 'r1', episode_id: 'e2' }),
+        episode: createAlertEpisode({ rule_id: 'r1', alert_id: 'e2' }),
         policy,
       }),
     ];
@@ -282,11 +282,11 @@ describe('buildActionGroups', () => {
     });
     const matched = [
       createMatchedPair({
-        episode: createAlertEpisode({ rule_id: 'r1', episode_id: 'e1' }),
+        episode: createAlertEpisode({ rule_id: 'r1', alert_id: 'e1' }),
         policy,
       }),
       createMatchedPair({
-        episode: createAlertEpisode({ rule_id: 'r2', episode_id: 'e2' }),
+        episode: createAlertEpisode({ rule_id: 'r2', alert_id: 'e2' }),
         policy,
       }),
     ];
@@ -307,11 +307,11 @@ describe('buildActionGroups', () => {
     ]);
     const matched = [
       createMatchedPair({
-        episode: createAlertEpisode({ rule_id: 'r1', episode_id: 'e1' }),
+        episode: createAlertEpisode({ rule_id: 'r1', alert_id: 'e1' }),
         policy,
       }),
       createMatchedPair({
-        episode: createAlertEpisode({ rule_id: 'r2', episode_id: 'e2' }),
+        episode: createAlertEpisode({ rule_id: 'r2', alert_id: 'e2' }),
         policy,
       }),
     ];
@@ -329,11 +329,11 @@ describe('buildActionGroups', () => {
     const rules = new Map([['r1', createRule({ id: 'r1', name: 'CPU spike' })]]);
     const matched = [
       createMatchedPair({
-        episode: createAlertEpisode({ rule_id: 'r1', episode_id: 'e1' }),
+        episode: createAlertEpisode({ rule_id: 'r1', alert_id: 'e1' }),
         policy,
       }),
       createMatchedPair({
-        episode: createAlertEpisode({ rule_id: 'r-missing', episode_id: 'e2' }),
+        episode: createAlertEpisode({ rule_id: 'r-missing', alert_id: 'e2' }),
         policy,
       }),
     ];
@@ -348,7 +348,7 @@ describe('buildActionGroups', () => {
     const policy = createActionPolicy({ id: 'p1' });
     const matched = [
       createMatchedPair({
-        episode: createAlertEpisode({ rule_id: 'r1', episode_id: 'e1' }),
+        episode: createAlertEpisode({ rule_id: 'r1', alert_id: 'e1' }),
         policy,
       }),
     ];
@@ -366,11 +366,11 @@ describe('buildActionGroups', () => {
     });
     const matched = [
       createMatchedPair({
-        episode: createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' }),
+        episode: createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' }),
         policy,
       }),
       createMatchedPair({
-        episode: createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e2' }),
+        episode: createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e2' }),
         policy,
       }),
     ];
@@ -386,7 +386,7 @@ describe('buildActionGroups', () => {
       source: 'pagerduty',
       rule_id: null,
       space_id: 'default',
-      episode_id: 'pd-ep-1',
+      alert_id: 'pd-ep-1',
       group_hash: 'pd-hash-1',
     });
     const matched = [createMatchedPair({ episode, policy })];

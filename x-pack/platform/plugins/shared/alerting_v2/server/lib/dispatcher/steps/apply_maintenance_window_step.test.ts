@@ -209,7 +209,7 @@ describe('ApplyMaintenanceWindowStep', () => {
 
     const ep = createAlertEpisode({ last_event_timestamp: '2026-01-22T07:30:00.000Z' });
     const previouslySuppressed = {
-      ...createAlertEpisode({ episode_id: 'previously-suppressed' }),
+      ...createAlertEpisode({ alert_id: 'previously-suppressed' }),
       reason: 'snooze',
     };
     const state = createDispatcherPipelineState({

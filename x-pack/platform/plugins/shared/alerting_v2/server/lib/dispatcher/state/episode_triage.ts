@@ -69,7 +69,7 @@ export class EpisodeTriage {
   public dispatchableEpisodeIds(): string[] {
     const ids = new Set<string>();
     for (const episode of this.dispatchable) {
-      ids.add(episode.episode_id);
+      ids.add(episode.alert_id);
     }
     return Array.from(ids);
   }

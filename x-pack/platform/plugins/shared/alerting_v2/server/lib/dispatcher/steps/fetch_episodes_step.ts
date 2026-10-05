@@ -29,8 +29,8 @@ interface RawAlertEpisode {
   source: string;
   space_id: string;
   group_hash: string;
-  episode_id: string;
-  episode_status: AlertEpisodeStatus;
+  alert_id: string;
+  alert_status: AlertEpisodeStatus;
   severity: AlertEventSeverity | null;
 }
 

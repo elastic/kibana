@@ -11,11 +11,11 @@ import { EpisodeTriage } from './episode_triage';
 describe('EpisodeTriage', () => {
   describe('partition', () => {
     it('splits episodes by the returned reason', () => {
-      const keep = createAlertEpisode({ episode_id: 'keep' });
-      const drop = createAlertEpisode({ episode_id: 'drop' });
+      const keep = createAlertEpisode({ alert_id: 'keep' });
+      const drop = createAlertEpisode({ alert_id: 'drop' });
 
       const triage = EpisodeTriage.partition([keep, drop], (episode) =>
-        episode.episode_id === 'drop' ? 'ack' : undefined
+        episode.alert_id === 'drop' ? 'ack' : undefined
       );
 
       expect(triage.dispatchable).toEqual([keep]);
@@ -27,19 +27,19 @@ describe('EpisodeTriage', () => {
     it('moves newly suppressed episodes after the already-suppressed ones', () => {
       const initial = EpisodeTriage.partition(
         [
-          createAlertEpisode({ episode_id: 'e1' }),
-          createAlertEpisode({ episode_id: 'e2' }),
-          createAlertEpisode({ episode_id: 'e3' }),
+          createAlertEpisode({ alert_id: 'e1' }),
+          createAlertEpisode({ alert_id: 'e2' }),
+          createAlertEpisode({ alert_id: 'e3' }),
         ],
-        (episode) => (episode.episode_id === 'e1' ? 'snooze' : undefined)
+        (episode) => (episode.alert_id === 'e1' ? 'snooze' : undefined)
       );
 
       const result = initial.suppressDispatchableWhere((episode) =>
-        episode.episode_id === 'e3' ? 'maintenance_window:mw-1' : undefined
+        episode.alert_id === 'e3' ? 'maintenance_window:mw-1' : undefined
       );
 
-      expect(result.dispatchable.map((e) => e.episode_id)).toEqual(['e2']);
-      expect(result.suppressed.map((e) => [e.episode_id, e.reason])).toEqual([
+      expect(result.dispatchable.map((e) => e.alert_id)).toEqual(['e2']);
+      expect(result.suppressed.map((e) => [e.alert_id, e.reason])).toEqual([
         ['e1', 'snooze'],
         ['e3', 'maintenance_window:mw-1'],
       ]);
@@ -50,7 +50,7 @@ describe('EpisodeTriage', () => {
 
     it('returns the same instance when nothing is newly suppressed', () => {
       const initial = EpisodeTriage.partition(
-        [createAlertEpisode({ episode_id: 'e1' })],
+        [createAlertEpisode({ alert_id: 'e1' })],
         () => undefined
       );
 
@@ -61,14 +61,14 @@ describe('EpisodeTriage', () => {
   describe('mapDispatchable', () => {
     it('replaces dispatchable episodes 1:1 and keeps suppressed intact', () => {
       const initial = EpisodeTriage.partition(
-        [createAlertEpisode({ episode_id: 'e1' }), createAlertEpisode({ episode_id: 'e2' })],
-        (episode) => (episode.episode_id === 'e2' ? 'ack' : undefined)
+        [createAlertEpisode({ alert_id: 'e1' }), createAlertEpisode({ alert_id: 'e2' })],
+        (episode) => (episode.alert_id === 'e2' ? 'ack' : undefined)
       );
 
       const result = initial.mapDispatchable((episode) => ({ ...episode, data: { a: 1 } }));
 
       expect(result.dispatchable).toEqual([
-        expect.objectContaining({ episode_id: 'e1', data: { a: 1 } }),
+        expect.objectContaining({ alert_id: 'e1', data: { a: 1 } }),
       ]);
       expect(result.suppressed).toBe(initial.suppressed);
     });
@@ -77,9 +77,9 @@ describe('EpisodeTriage', () => {
   describe('dispatchable accessors', () => {
     const triage = EpisodeTriage.partition(
       [
-        createAlertEpisode({ episode_id: 'e1', rule_id: 'r1' }),
-        createAlertEpisode({ episode_id: 'e1', rule_id: 'r1' }),
-        createAlertEpisode({ episode_id: 'e2', rule_id: null, source: 'pagerduty' }),
+        createAlertEpisode({ alert_id: 'e1', rule_id: 'r1' }),
+        createAlertEpisode({ alert_id: 'e1', rule_id: 'r1' }),
+        createAlertEpisode({ alert_id: 'e2', rule_id: null, source: 'pagerduty' }),
       ],
       () => undefined
     );

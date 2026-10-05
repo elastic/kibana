@@ -54,24 +54,24 @@ export const getDispatchableAlertEventsQuery = ({
       | WHERE type IS NULL OR (@timestamp >= ${gte}::datetime AND @timestamp <= ${lte}::datetime)
       | EVAL
           rule_id = COALESCE(rule.id, rule_id),
-          episode_id = COALESCE(alert.id, alert_id),
-          episode_status = alert.status
+          alert_id = COALESCE(alert.id, alert_id),
+          alert_status = alert.status
       | EVAL ${SUBJECT_EVAL}
       | WHERE subject IS NOT NULL
-      | DROP alert.id, alert_id, rule.id, alert.status
+      | DROP alert.id, rule.id, alert.status
       | INLINE STATS last_fired = max(last_series_event_timestamp) WHERE action_type == "fire" OR action_type == "suppress" OR action_type == "unmatched" BY subject, group_hash
       | WHERE last_fired IS NULL OR last_fired < @timestamp
       | STATS
           last_event_timestamp = MAX(@timestamp) WHERE type IS NOT NULL,
-          last_episode_status = LAST(episode_status, @timestamp) WHERE type IS NOT NULL,
+          last_alert_status = LAST(alert_status, @timestamp) WHERE type IS NOT NULL,
           severity = LAST(severity, @timestamp) WHERE type IS NOT NULL,
           source = LAST(source, @timestamp) WHERE type IS NOT NULL,
           space_id = LAST(space_id, @timestamp) WHERE type IS NOT NULL,
           rule_id = LAST(rule_id, @timestamp) WHERE type IS NOT NULL
-          BY subject, group_hash, episode_id
+          BY subject, group_hash, alert_id
       | WHERE last_event_timestamp IS NOT NULL
-      | KEEP last_event_timestamp, rule_id, source, space_id, group_hash, episode_id, last_episode_status, severity
-      | RENAME last_episode_status AS episode_status
+      | KEEP last_event_timestamp, rule_id, source, space_id, group_hash, alert_id, last_alert_status, severity
+      | RENAME last_alert_status AS alert_status
       | SORT last_event_timestamp asc
       | LIMIT ${ESQL_QUERY_ROW_LIMIT}`.toRequest();
 };
@@ -192,7 +192,7 @@ const buildSuppressionsPreFilter = (
 export const getEpisodeSuppressionsQueries = (
   alertEpisodes: readonly AlertEpisode[]
 ): EsqlRequest[] => {
-  const episodeIds = [...new Set(alertEpisodes.map(({ episode_id: episodeId }) => episodeId))];
+  const episodeIds = [...new Set(alertEpisodes.map(({ alert_id: alertId }) => alertId))];
 
   return chunkInClauseLiterals(episodeIds).map((chunk) => {
     const ids = chunk.map((id) => esql.str(id));
@@ -344,13 +344,13 @@ export const getEpisodeDataQueries = (
 
     return esql`FROM ${ALERT_EVENTS_DATA_STREAM} METADATA _source
         | WHERE type == ${ALERT_EVENT_TYPE}
-            AND episode.id IN (${ids})
+            AND alert.id IN (${ids})
             AND @timestamp >= ${gte}::datetime
             AND @timestamp <= ${lte}::datetime
-        | EVAL episode_id = episode.id, data_json = JSON_EXTRACT(_source, "$.data")
+        | EVAL alert_id = alert.id, data_json = JSON_EXTRACT(_source, "$.data")
         | DROP _source
-        | STATS data_json = LAST(data_json, @timestamp) BY episode_id
-        | KEEP episode_id, data_json
+        | STATS data_json = LAST(data_json, @timestamp) BY alert_id
+        | KEEP alert_id, data_json
         | LIMIT ${ESQL_QUERY_ROW_LIMIT}`.toRequest();
   });
 };

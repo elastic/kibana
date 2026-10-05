@@ -218,8 +218,8 @@ describe('DispatcherService', () => {
           source: 'internal',
           space_id: 'default',
           group_hash: 'hash-1',
-          episode_id: 'episode-1',
-          episode_status: 'active',
+          alert_id: 'episode-1',
+          alert_status: 'active',
         },
         {
           last_event_timestamp: '2026-01-22T07:15:00.000Z',
@@ -227,8 +227,8 @@ describe('DispatcherService', () => {
           source: 'internal',
           space_id: 'default',
           group_hash: 'hash-2',
-          episode_id: 'episode-2',
-          episode_status: 'inactive',
+          alert_id: 'episode-2',
+          alert_status: 'inactive',
         },
       ];
 
@@ -257,8 +257,8 @@ describe('DispatcherService', () => {
         .mockResolvedValueOnce(createSeriesSuppressionsResponse())
         .mockResolvedValueOnce(
           createEpisodeDataResponse([
-            { episode_id: 'episode-1', data_json: null },
-            { episode_id: 'episode-2', data_json: null },
+            { alert_id: 'episode-1', data_json: null },
+            { alert_id: 'episode-2', data_json: null },
           ])
         )
         .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
@@ -354,8 +354,8 @@ describe('DispatcherService', () => {
           source: 'internal',
           space_id: 'default',
           group_hash: 'hash-1',
-          episode_id: 'episode-1',
-          episode_status: 'active',
+          alert_id: 'episode-1',
+          alert_status: 'active',
         },
         {
           last_event_timestamp: '2026-01-22T07:15:00.000Z',
@@ -363,8 +363,8 @@ describe('DispatcherService', () => {
           source: 'internal',
           space_id: 'default',
           group_hash: 'hash-2',
-          episode_id: 'episode-2',
-          episode_status: 'active',
+          alert_id: 'episode-2',
+          alert_status: 'active',
         },
       ];
 
@@ -392,7 +392,7 @@ describe('DispatcherService', () => {
         .mockResolvedValueOnce(createEpisodeSuppressionsResponse(suppressions))
         .mockResolvedValueOnce(createSeriesSuppressionsResponse())
         .mockResolvedValueOnce(
-          createEpisodeDataResponse([{ episode_id: 'episode-2', data_json: null }])
+          createEpisodeDataResponse([{ alert_id: 'episode-2', data_json: null }])
         )
         .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
 
@@ -450,7 +450,7 @@ describe('DispatcherService', () => {
       const secondEpisode = {
         rule_id: 'rule-2',
         group_hash: 'hash-2',
-        episode_id: 'episode-2',
+        alert_id: 'episode-2',
       };
       queryEsClient.esql.query
         .mockResolvedValueOnce(
@@ -468,13 +468,13 @@ describe('DispatcherService', () => {
             createEpisodeSuppressionRow({
               rule_id: secondEpisode.rule_id,
               group_hash: secondEpisode.group_hash,
-              alert_id: secondEpisode.episode_id,
+              alert_id: secondEpisode.alert_id,
             }),
           ])
         )
         .mockResolvedValueOnce(createSeriesSuppressionsResponse())
         .mockResolvedValueOnce(
-          createEpisodeDataResponse([{ episode_id: 'episode-2', data_json: null }])
+          createEpisodeDataResponse([{ alert_id: 'episode-2', data_json: null }])
         )
         .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
 
@@ -580,8 +580,8 @@ describe('DispatcherService', () => {
           source: 'internal',
           space_id: 'default',
           group_hash: 'rule-001-series-1',
-          episode_id: 'rule-001-series-1-episode-1',
-          episode_status: 'active',
+          alert_id: 'rule-001-series-1-episode-1',
+          alert_status: 'active',
         },
         {
           last_event_timestamp: '2026-01-27T16:15:00.000Z',
@@ -589,8 +589,8 @@ describe('DispatcherService', () => {
           source: 'internal',
           space_id: 'default',
           group_hash: 'rule-002-series-1',
-          episode_id: 'rule-002-series-1-episode-1',
-          episode_status: 'active',
+          alert_id: 'rule-002-series-1-episode-1',
+          alert_status: 'active',
         },
         {
           last_event_timestamp: '2026-01-27T16:15:00.000Z',
@@ -598,8 +598,8 @@ describe('DispatcherService', () => {
           source: 'internal',
           space_id: 'default',
           group_hash: 'rule-003-series-1',
-          episode_id: 'rule-003-series-1-episode-1',
-          episode_status: 'active',
+          alert_id: 'rule-003-series-1-episode-1',
+          alert_status: 'active',
         },
         {
           last_event_timestamp: '2026-01-27T16:00:00.000Z',
@@ -607,8 +607,8 @@ describe('DispatcherService', () => {
           source: 'internal',
           space_id: 'default',
           group_hash: 'rule-003-series-2',
-          episode_id: 'rule-003-series-2-episode-1',
-          episode_status: 'active',
+          alert_id: 'rule-003-series-2-episode-1',
+          alert_status: 'active',
         },
         {
           last_event_timestamp: '2026-01-27T16:05:00.000Z',
@@ -616,8 +616,8 @@ describe('DispatcherService', () => {
           source: 'internal',
           space_id: 'default',
           group_hash: 'rule-003-series-2',
-          episode_id: 'rule-003-series-2-episode-1',
-          episode_status: 'inactive',
+          alert_id: 'rule-003-series-2-episode-1',
+          alert_status: 'inactive',
         },
         {
           last_event_timestamp: '2026-01-27T16:15:00.000Z',
@@ -625,8 +625,8 @@ describe('DispatcherService', () => {
           source: 'internal',
           space_id: 'default',
           group_hash: 'rule-003-series-2',
-          episode_id: 'rule-003-series-2-episode-2',
-          episode_status: 'active',
+          alert_id: 'rule-003-series-2-episode-2',
+          alert_status: 'active',
         },
         {
           last_event_timestamp: '2026-01-27T16:15:00.000Z',
@@ -634,8 +634,8 @@ describe('DispatcherService', () => {
           source: 'internal',
           space_id: 'default',
           group_hash: 'rule-004-series-1',
-          episode_id: 'rule-004-series-1-episode-1',
-          episode_status: 'active',
+          alert_id: 'rule-004-series-1-episode-1',
+          alert_status: 'active',
         },
         {
           last_event_timestamp: '2026-01-27T16:15:00.000Z',
@@ -643,8 +643,8 @@ describe('DispatcherService', () => {
           source: 'internal',
           space_id: 'default',
           group_hash: 'rule-004-series-2',
-          episode_id: 'rule-004-series-2-episode-1',
-          episode_status: 'active',
+          alert_id: 'rule-004-series-2-episode-1',
+          alert_status: 'active',
         },
         {
           last_event_timestamp: '2026-01-27T16:15:00.000Z',
@@ -652,8 +652,8 @@ describe('DispatcherService', () => {
           source: 'internal',
           space_id: 'default',
           group_hash: 'rule-005-series-1',
-          episode_id: 'rule-005-series-1-episode-1',
-          episode_status: 'active',
+          alert_id: 'rule-005-series-1-episode-1',
+          alert_status: 'active',
         },
         {
           last_event_timestamp: '2026-01-27T16:15:00.000Z',
@@ -661,8 +661,8 @@ describe('DispatcherService', () => {
           source: 'internal',
           space_id: 'default',
           group_hash: 'rule-005-series-2',
-          episode_id: 'rule-005-series-2-episode-1',
-          episode_status: 'active',
+          alert_id: 'rule-005-series-2-episode-1',
+          alert_status: 'active',
         },
       ];
 
@@ -858,8 +858,8 @@ describe('DispatcherService', () => {
         source: 'pagerduty',
         space_id: spaceId,
         group_hash: 'pd-incident-P1234567',
-        episode_id: 'pd-ep-1',
-        episode_status: 'active',
+        alert_id: 'pd-ep-1',
+        alert_status: 'active',
       });
 
       const suppressions: EpisodeSuppressionRow[] = [
@@ -889,7 +889,7 @@ describe('DispatcherService', () => {
         .mockResolvedValueOnce(createEpisodeSuppressionsResponse(suppressions))
         .mockResolvedValueOnce(createSeriesSuppressionsResponse())
         .mockResolvedValueOnce(
-          createEpisodeDataResponse([{ episode_id: 'pd-ep-1', data_json: null }])
+          createEpisodeDataResponse([{ alert_id: 'pd-ep-1', data_json: null }])
         )
         .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
 
@@ -937,8 +937,8 @@ describe('DispatcherService', () => {
           source: 'internal',
           space_id: 'default',
           group_hash: 'hash-1',
-          episode_id: 'episode-critical',
-          episode_status: 'active',
+          alert_id: 'episode-critical',
+          alert_status: 'active',
         },
         {
           last_event_timestamp: '2026-01-22T07:10:00.000Z',
@@ -946,8 +946,8 @@ describe('DispatcherService', () => {
           source: 'internal',
           space_id: 'default',
           group_hash: 'hash-2',
-          episode_id: 'episode-low',
-          episode_status: 'active',
+          alert_id: 'episode-low',
+          alert_status: 'active',
         },
       ];
 
@@ -976,8 +976,8 @@ describe('DispatcherService', () => {
         .mockResolvedValueOnce(createSeriesSuppressionsResponse())
         .mockResolvedValueOnce(
           createEpisodeDataResponse([
-            { episode_id: 'episode-critical', data_json: JSON.stringify({ severity: 'critical' }) },
-            { episode_id: 'episode-low', data_json: JSON.stringify({ severity: 'low' }) },
+            { alert_id: 'episode-critical', data_json: JSON.stringify({ severity: 'critical' }) },
+            { alert_id: 'episode-low', data_json: JSON.stringify({ severity: 'low' }) },
           ])
         )
         .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
@@ -1090,8 +1090,8 @@ describe('DispatcherService', () => {
       lastEpisodeTs: string
     ): jest.Mocked<DispatcherPipelineContract> {
       const episodes = [
-        createAlertEpisode({ episode_id: 'e1', last_event_timestamp: '2026-01-22T07:21:00.000Z' }),
-        createAlertEpisode({ episode_id: 'e2', last_event_timestamp: lastEpisodeTs }),
+        createAlertEpisode({ alert_id: 'e1', last_event_timestamp: '2026-01-22T07:21:00.000Z' }),
+        createAlertEpisode({ alert_id: 'e2', last_event_timestamp: lastEpisodeTs }),
       ];
       const mockInput = {
         startedAt: new Date('2026-01-22T08:00:00.000Z'),
@@ -1364,7 +1364,7 @@ describe('DispatcherService', () => {
 
       // Stuck pipeline — episodes present but no recordedEpisodes → watermark won't advance
       const mockPipeline = buildStuckPipeline([
-        createAlertEpisode({ episode_id: 'e1', last_event_timestamp: '2026-01-22T07:31:00.000Z' }),
+        createAlertEpisode({ alert_id: 'e1', last_event_timestamp: '2026-01-22T07:31:00.000Z' }),
       ]);
       const service = new DispatcherService(
         mockPipeline,
@@ -1426,7 +1426,7 @@ describe('DispatcherService', () => {
 
       const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
       const blockingEpisode = createAlertEpisode({
-        episode_id: 'blocked-e1',
+        alert_id: 'blocked-e1',
         last_event_timestamp: '2026-01-22T07:31:00.000Z',
         space_id: 'default',
       });
@@ -1475,7 +1475,7 @@ describe('DispatcherService', () => {
       const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
 
       const mockPipeline = buildStuckPipeline([
-        createAlertEpisode({ episode_id: 'e1', last_event_timestamp: '2026-01-22T07:31:00.000Z' }),
+        createAlertEpisode({ alert_id: 'e1', last_event_timestamp: '2026-01-22T07:31:00.000Z' }),
       ]);
       const service = new DispatcherService(mockPipeline, escapeStorage, loggerService);
 

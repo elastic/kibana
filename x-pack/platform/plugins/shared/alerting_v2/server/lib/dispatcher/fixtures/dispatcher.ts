@@ -23,8 +23,8 @@ export const createDispatchableAlertEventsResponse = (
       { name: 'source', type: 'keyword' },
       { name: 'space_id', type: 'keyword' },
       { name: 'group_hash', type: 'keyword' },
-      { name: 'episode_id', type: 'keyword' },
-      { name: 'episode_status', type: 'keyword' },
+      { name: 'alert_id', type: 'keyword' },
+      { name: 'alert_status', type: 'keyword' },
       { name: 'severity', type: 'keyword' },
     ],
     values: alertEpisodes.map((alertEpisode) => [
@@ -33,8 +33,8 @@ export const createDispatchableAlertEventsResponse = (
       alertEpisode.source,
       alertEpisode.space_id,
       alertEpisode.group_hash,
-      alertEpisode.episode_id,
-      alertEpisode.episode_status,
+      alertEpisode.alert_id,
+      alertEpisode.alert_status,
       alertEpisode.severity ?? null,
     ]),
   };
@@ -91,17 +91,17 @@ export const createSeriesSuppressionsResponse = (
 };
 
 export interface EpisodeDataRow {
-  episode_id: string;
+  alert_id: string;
   data_json: string | null;
 }
 
 export const createEpisodeDataResponse = (rows: EpisodeDataRow[]): EsqlQueryResponse => {
   return {
     columns: [
-      { name: 'episode_id', type: 'keyword' },
+      { name: 'alert_id', type: 'keyword' },
       { name: 'data_json', type: 'keyword' },
     ],
-    values: rows.map((row) => [row.episode_id, row.data_json]),
+    values: rows.map((row) => [row.alert_id, row.data_json]),
   };
 };
 

@@ -22,7 +22,7 @@ export class SuppressionIndex {
     for (const suppression of suppressions) {
       const { alert_id: alertId } = suppression;
       const key = alertId
-        ? suppressionEpisodeKey({ ...suppression, episode_id: alertId })
+        ? suppressionEpisodeKey({ ...suppression, alert_id: alertId })
         : suppressionSeriesKey(suppression);
       byKey.set(key, suppression);
     }

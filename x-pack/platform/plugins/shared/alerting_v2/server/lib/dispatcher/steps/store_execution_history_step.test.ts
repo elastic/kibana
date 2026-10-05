@@ -39,9 +39,9 @@ describe('StoreExecutionHistoryStep', () => {
     const ruleB = createRule({ id: 'rule-b', spaceId: 'default' });
     const policy = createActionPolicy({ id: 'policy-1', spaceId: 'default' });
     const episodes = [
-      createAlertEpisode({ rule_id: 'rule-a', episode_id: 'ep-1' }),
-      createAlertEpisode({ rule_id: 'rule-a', episode_id: 'ep-2' }),
-      createAlertEpisode({ rule_id: 'rule-b', episode_id: 'ep-3' }),
+      createAlertEpisode({ rule_id: 'rule-a', alert_id: 'ep-1' }),
+      createAlertEpisode({ rule_id: 'rule-a', alert_id: 'ep-2' }),
+      createAlertEpisode({ rule_id: 'rule-b', alert_id: 'ep-3' }),
     ];
     const group1 = createActionGroup({
       id: 'group-1',
@@ -117,7 +117,7 @@ describe('StoreExecutionHistoryStep', () => {
     const rule = createRule({ id: 'rule-1' });
     const policyA = createActionPolicy({ id: 'policy-a' });
     const policyB = createActionPolicy({ id: 'policy-b' });
-    const episode = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-1' });
+    const episode = createAlertEpisode({ rule_id: 'rule-1', alert_id: 'ep-1' });
     const groupA = createActionGroup({ id: 'g-a', policyId: 'policy-a', episodes: [episode] });
     const groupB = createActionGroup({ id: 'g-b', policyId: 'policy-b', episodes: [episode] });
 
@@ -144,7 +144,7 @@ describe('StoreExecutionHistoryStep', () => {
   it('emits a throttled summary with the same shape as dispatched', async () => {
     const rule = createRule({ id: 'rule-1' });
     const policy = createActionPolicy({ id: 'policy-1' });
-    const episode = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-1' });
+    const episode = createAlertEpisode({ rule_id: 'rule-1', alert_id: 'ep-1' });
     const group = createActionGroup({
       id: 'group-1',
       policyId: 'policy-1',
@@ -181,9 +181,9 @@ describe('StoreExecutionHistoryStep', () => {
   it('emits one unmatched summary per rule with episode_ids for that rule', async () => {
     const ruleA = createRule({ id: 'rule-a' });
     const ruleB = createRule({ id: 'rule-b' });
-    const unmatchedA1 = createAlertEpisode({ rule_id: 'rule-a', episode_id: 'ep-a1' });
-    const unmatchedA2 = createAlertEpisode({ rule_id: 'rule-a', episode_id: 'ep-a2' });
-    const unmatchedB1 = createAlertEpisode({ rule_id: 'rule-b', episode_id: 'ep-b1' });
+    const unmatchedA1 = createAlertEpisode({ rule_id: 'rule-a', alert_id: 'ep-a1' });
+    const unmatchedA2 = createAlertEpisode({ rule_id: 'rule-a', alert_id: 'ep-a2' });
+    const unmatchedB1 = createAlertEpisode({ rule_id: 'rule-b', alert_id: 'ep-b1' });
 
     await step.execute(
       createDispatcherPipelineState({
@@ -230,9 +230,9 @@ describe('StoreExecutionHistoryStep', () => {
   it('excludes episodes handled by dispatch or throttled from the unmatched set', async () => {
     const rule = createRule({ id: 'rule-1' });
     const policy = createActionPolicy({ id: 'policy-1' });
-    const dispatched = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-dispatched' });
-    const throttledEp = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-throttled' });
-    const unmatchedEp = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-unmatched' });
+    const dispatched = createAlertEpisode({ rule_id: 'rule-1', alert_id: 'ep-dispatched' });
+    const throttledEp = createAlertEpisode({ rule_id: 'rule-1', alert_id: 'ep-throttled' });
+    const unmatchedEp = createAlertEpisode({ rule_id: 'rule-1', alert_id: 'ep-unmatched' });
 
     await step.execute(
       createDispatcherPipelineState({
@@ -257,9 +257,9 @@ describe('StoreExecutionHistoryStep', () => {
   it('stamps the same execution.uuid on every event emitted in a single run', async () => {
     const rule = createRule({ id: 'rule-1' });
     const policy = createActionPolicy({ id: 'policy-1' });
-    const dispatched = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-dispatched' });
-    const throttledEp = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-throttled' });
-    const unmatchedEp = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-unmatched' });
+    const dispatched = createAlertEpisode({ rule_id: 'rule-1', alert_id: 'ep-dispatched' });
+    const throttledEp = createAlertEpisode({ rule_id: 'rule-1', alert_id: 'ep-throttled' });
+    const unmatchedEp = createAlertEpisode({ rule_id: 'rule-1', alert_id: 'ep-unmatched' });
     const executionUuid = 'a1b2c3d4-e5f6-4789-9abc-def012345678';
 
     await step.execute(
@@ -291,7 +291,7 @@ describe('StoreExecutionHistoryStep', () => {
   it('does not emit dispatch_failed events when all dispatches succeed', async () => {
     const rule = createRule({ id: 'rule-1' });
     const policy = createActionPolicy({ id: 'policy-1' });
-    const episode = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-1' });
+    const episode = createAlertEpisode({ rule_id: 'rule-1', alert_id: 'ep-1' });
     const group = createActionGroup({
       id: 'group-1',
       policyId: 'policy-1',
@@ -323,8 +323,8 @@ describe('StoreExecutionHistoryStep', () => {
       actionGroupId: 'group-1',
       workflowId: 'wf-a',
       episodes: [
-        createAlertEpisode({ rule_id: 'rule-a', episode_id: 'ep-1' }),
-        createAlertEpisode({ rule_id: 'rule-b', episode_id: 'ep-2' }),
+        createAlertEpisode({ rule_id: 'rule-a', alert_id: 'ep-1' }),
+        createAlertEpisode({ rule_id: 'rule-b', alert_id: 'ep-2' }),
       ],
       reason: DISPATCH_FAILURE_REASONS.WORKFLOW_DISABLED,
       message: 'Workflow wf-a is disabled, enable it to dispatch for group group-1',
@@ -388,7 +388,7 @@ describe('StoreExecutionHistoryStep', () => {
       spaceId: 'default',
       actionGroupId: 'group-1',
       workflowId: 'wf-a',
-      episodes: [createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-1' })],
+      episodes: [createAlertEpisode({ rule_id: 'rule-1', alert_id: 'ep-1' })],
       reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
       message: 'boom',
     };
@@ -421,7 +421,7 @@ describe('StoreExecutionHistoryStep', () => {
       spaceId: 'my-space',
       actionGroupId: 'group-1',
       workflowId: 'wf-a',
-      episodes: [createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-1' })],
+      episodes: [createAlertEpisode({ rule_id: 'rule-1', alert_id: 'ep-1' })],
       reason: DISPATCH_FAILURE_REASONS.WORKFLOW_NOT_FOUND,
       message: 'not found',
     };
@@ -450,7 +450,7 @@ describe('StoreExecutionHistoryStep', () => {
       spaceId: 'default',
       actionGroupId: 'group-1',
       workflowId: 'wf-a',
-      episodes: ruleIds.map((rule_id, i) => createAlertEpisode({ rule_id, episode_id: `ep-${i}` })),
+      episodes: ruleIds.map((rule_id, i) => createAlertEpisode({ rule_id, alert_id: `ep-${i}` })),
       reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
       message: 'boom',
     };
@@ -558,7 +558,7 @@ describe('StoreExecutionHistoryStep', () => {
       ruleIds.map((id) => [id, createRule({ id, spaceId: 'default' })])
     );
     const episodes = ruleIds.map((rule_id, i) =>
-      createAlertEpisode({ rule_id, episode_id: `ep-${i}` })
+      createAlertEpisode({ rule_id, alert_id: `ep-${i}` })
     );
     const group = createActionGroup({
       id: 'big-group',
@@ -615,7 +615,7 @@ describe('StoreExecutionHistoryStep', () => {
     it('partial group failure: excludes the failed workflow from the dispatched summary', async () => {
       const rule = createRule({ id: 'rule-1' });
       const policy = createActionPolicy({ id: 'policy-1' });
-      const episode = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-1' });
+      const episode = createAlertEpisode({ rule_id: 'rule-1', alert_id: 'ep-1' });
       const group = createActionGroup({
         id: 'g1',
         policyId: 'policy-1',
@@ -662,7 +662,7 @@ describe('StoreExecutionHistoryStep', () => {
 
     it('total group failure: emits no dispatched event and no unmatched event', async () => {
       const rule = createRule({ id: 'rule-1' });
-      const episode = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-1' });
+      const episode = createAlertEpisode({ rule_id: 'rule-1', alert_id: 'ep-1' });
       const group = createActionGroup({
         id: 'g1',
         policyId: 'policy-1',
@@ -696,8 +696,8 @@ describe('StoreExecutionHistoryStep', () => {
     it('same workflow in two groups: success for g1 is not suppressed by g2 failure', async () => {
       const rule = createRule({ id: 'rule-1' });
       const policy = createActionPolicy({ id: 'policy-1' });
-      const ep1 = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-1' });
-      const ep2 = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-2' });
+      const ep1 = createAlertEpisode({ rule_id: 'rule-1', alert_id: 'ep-1' });
+      const ep2 = createAlertEpisode({ rule_id: 'rule-1', alert_id: 'ep-2' });
       const group1 = createActionGroup({
         id: 'g1',
         policyId: 'policy-1',
@@ -745,8 +745,8 @@ describe('StoreExecutionHistoryStep', () => {
     it('mixed groups in one policy: fully-failed group episodes excluded from dispatched summary', async () => {
       const rule = createRule({ id: 'rule-1' });
       const policy = createActionPolicy({ id: 'policy-1' });
-      const ep1 = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-1' });
-      const ep2 = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-2' });
+      const ep1 = createAlertEpisode({ rule_id: 'rule-1', alert_id: 'ep-1' });
+      const ep2 = createAlertEpisode({ rule_id: 'rule-1', alert_id: 'ep-2' });
       const failedGroup = createActionGroup({
         id: 'g1',
         policyId: 'policy-1',
@@ -795,7 +795,7 @@ describe('StoreExecutionHistoryStep', () => {
     it('throttled summary is not affected by dispatch failures referencing the same group id', async () => {
       const rule = createRule({ id: 'rule-1' });
       const policy = createActionPolicy({ id: 'policy-1' });
-      const episode = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-1' });
+      const episode = createAlertEpisode({ rule_id: 'rule-1', alert_id: 'ep-1' });
       const throttledGroup = createActionGroup({
         id: 'g1',
         policyId: 'policy-1',
@@ -841,13 +841,13 @@ describe('StoreExecutionHistoryStep', () => {
         source: 'pagerduty',
         rule_id: null,
         space_id: 'default',
-        episode_id: 'pd-1',
+        alert_id: 'pd-1',
       });
       const ddEpisode = createAlertEpisode({
         source: 'datadog',
         rule_id: null,
         space_id: 'default',
-        episode_id: 'dd-1',
+        alert_id: 'dd-1',
       });
 
       await step.execute(
@@ -873,7 +873,7 @@ describe('StoreExecutionHistoryStep', () => {
           source: 'pagerduty',
           rule_id: null,
           space_id: spaceId,
-          episode_id: `pd-${spaceId}`,
+          alert_id: `pd-${spaceId}`,
         })
       );
 
@@ -889,7 +889,7 @@ describe('StoreExecutionHistoryStep', () => {
         source: 'pagerduty',
         rule_id: null,
         space_id: 'my-space',
-        episode_id: 'pd-1',
+        alert_id: 'pd-1',
       });
 
       await step.execute(

@@ -19,8 +19,8 @@ describe('ApplySuppressionStep', () => {
   const step = new ApplySuppressionStep();
 
   it('separates suppressed and active episodes', async () => {
-    const ep1 = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' });
-    const ep2 = createAlertEpisode({ rule_id: 'r2', group_hash: 'h2', episode_id: 'e2' });
+    const ep1 = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
+    const ep2 = createAlertEpisode({ rule_id: 'r2', group_hash: 'h2', alert_id: 'e2' });
 
     const state = createDispatcherPipelineState({
       episodes: [ep1, ep2],
@@ -58,7 +58,7 @@ describe('ApplySuppressionStep', () => {
 
   it('treats all episodes as active when there are no suppressions', async () => {
     const state = createDispatcherPipelineState({
-      episodes: [createAlertEpisode(), createAlertEpisode({ episode_id: 'e2' })],
+      episodes: [createAlertEpisode(), createAlertEpisode({ alert_id: 'e2' })],
       suppressions: [],
     });
 

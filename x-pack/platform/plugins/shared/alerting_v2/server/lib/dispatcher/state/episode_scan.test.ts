@@ -21,7 +21,7 @@ describe('EpisodeScan', () => {
 
   describe('of', () => {
     it('exposes the given episodes and truncation flag', () => {
-      const episodes = [createAlertEpisode({ episode_id: 'e1' })];
+      const episodes = [createAlertEpisode({ alert_id: 'e1' })];
       const scan = EpisodeScan.of({ episodes, truncated: true });
 
       expect(scan.episodes).toBe(episodes);
@@ -39,11 +39,11 @@ describe('EpisodeScan', () => {
       const scan = EpisodeScan.of({
         episodes: [
           createAlertEpisode({
-            episode_id: 'e1',
+            alert_id: 'e1',
             last_event_timestamp: '2026-01-22T07:21:00.000Z',
           }),
           createAlertEpisode({
-            episode_id: 'e2',
+            alert_id: 'e2',
             last_event_timestamp: '2026-01-22T07:33:00.000Z',
           }),
         ],

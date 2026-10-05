@@ -76,7 +76,7 @@ describe('FetchSuppressionsStep', () => {
     });
 
     const state = createDispatcherPipelineState({
-      episodes: [createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' })],
+      episodes: [createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' })],
     });
 
     const result = await step.execute(state, logger);
@@ -87,13 +87,13 @@ describe('FetchSuppressionsStep', () => {
     expect(suppressions?.size).toBe(1);
     expect(
       suppressions?.suppressionReasonFor(
-        createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' })
+        createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' })
       )
     ).toBe('ack');
     // An ack on one episode does not carry over to another episode of the same series.
     expect(
       suppressions?.suppressionReasonFor(
-        createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e2' })
+        createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e2' })
       )
     ).toBeUndefined();
   });
@@ -114,7 +114,7 @@ describe('FetchSuppressionsStep', () => {
     });
 
     const state = createDispatcherPipelineState({
-      episodes: [createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' })],
+      episodes: [createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' })],
     });
 
     const result = await step.execute(state, logger);
@@ -125,13 +125,13 @@ describe('FetchSuppressionsStep', () => {
     for (const episodeId of ['e1', 'e2']) {
       expect(
         suppressions?.suppressionReasonFor(
-          createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: episodeId })
+          createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: episodeId })
         )
       ).toBe('snooze');
     }
     expect(
       suppressions?.suppressionReasonFor(
-        createAlertEpisode({ rule_id: 'r1', group_hash: 'h2', episode_id: 'e1' })
+        createAlertEpisode({ rule_id: 'r1', group_hash: 'h2', alert_id: 'e1' })
       )
     ).toBeUndefined();
   });
@@ -161,7 +161,7 @@ describe('FetchSuppressionsStep', () => {
     });
 
     const state = createDispatcherPipelineState({
-      episodes: [createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' })],
+      episodes: [createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' })],
     });
 
     const result = await step.execute(state, logger);
@@ -170,7 +170,7 @@ describe('FetchSuppressionsStep', () => {
     if (result.type !== 'continue') return;
     expect(
       result.data?.suppressions?.suppressionReasonFor(
-        createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' })
+        createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' })
       )
     ).toBe('ack');
   });
@@ -200,7 +200,7 @@ describe('FetchSuppressionsStep', () => {
     });
 
     const state = createDispatcherPipelineState({
-      episodes: [createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' })],
+      episodes: [createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' })],
     });
 
     const result = await step.execute(state, logger);
@@ -209,7 +209,7 @@ describe('FetchSuppressionsStep', () => {
     if (result.type !== 'continue') return;
     expect(
       result.data?.suppressions?.suppressionReasonFor(
-        createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' })
+        createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' })
       )
     ).toBe('snooze');
   });
@@ -220,7 +220,7 @@ describe('FetchSuppressionsStep', () => {
     mockSuppressionQueries(mockEsClient, {});
 
     const state = createDispatcherPipelineState({
-      episodes: [createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' })],
+      episodes: [createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' })],
     });
 
     await step.execute(state, logger);
@@ -279,7 +279,7 @@ describe('FetchSuppressionsStep', () => {
       source: 'pagerduty',
       rule_id: null,
       group_hash: 'pd-hash',
-      episode_id: 'pd-ep-1',
+      alert_id: 'pd-ep-1',
     });
     const state = createDispatcherPipelineState({ episodes: [externalEpisode] });
 
@@ -301,7 +301,7 @@ describe('FetchSuppressionsStep', () => {
     mockSuppressionQueries(mockEsClient, rows);
 
     const state = createDispatcherPipelineState({
-      episodes: [createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e0' })],
+      episodes: [createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e0' })],
     });
 
     await step.execute(state, loggerService);
@@ -324,7 +324,7 @@ describe('FetchSuppressionsStep', () => {
     });
 
     const state = createDispatcherPipelineState({
-      episodes: [createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' })],
+      episodes: [createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' })],
     });
 
     await step.execute(state, loggerService);
@@ -338,7 +338,7 @@ describe('FetchSuppressionsStep', () => {
 
     const lastIndex = ESQL_QUERY_ROW_LIMIT;
     const episodes = Array.from({ length: lastIndex + 1 }, (_, i) =>
-      createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: `e${i}` })
+      createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: `e${i}` })
     );
 
     mockSuppressionQueries(mockEsClient, {
@@ -370,7 +370,7 @@ describe('FetchSuppressionsStep', () => {
     for (const i of [0, lastIndex]) {
       expect(
         suppressions?.suppressionReasonFor(
-          createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: `e${i}` })
+          createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: `e${i}` })
         )
       ).toBe('ack');
     }
@@ -387,7 +387,7 @@ describe('FetchSuppressionsStep', () => {
       createAlertEpisode({
         rule_id: `${longSegment}-r${i}`,
         group_hash: `${longSegment}-g${i}`,
-        episode_id: `e${i}`,
+        alert_id: `e${i}`,
       })
     );
 
@@ -425,7 +425,7 @@ describe('FetchSuppressionsStep', () => {
         createAlertEpisode({
           rule_id: `${longSegment}-r0`,
           group_hash: `${longSegment}-g0`,
-          episode_id: 'e0',
+          alert_id: 'e0',
         })
       )
     ).toBe('snooze');
@@ -434,7 +434,7 @@ describe('FetchSuppressionsStep', () => {
         createAlertEpisode({
           rule_id: `${longSegment}-r199`,
           group_hash: `${longSegment}-g199`,
-          episode_id: 'e199',
+          alert_id: 'e199',
         })
       )
     ).toBeUndefined();

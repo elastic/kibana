@@ -175,7 +175,7 @@ function shouldDispatch(
   }
 
   // per_alert: always dispatch on status change
-  const statusChanged = lastRecord.episodeStatus !== group.episodes[0]?.episode_status;
+  const statusChanged = lastRecord.episodeStatus !== group.episodes[0]?.alert_status;
   if (statusChanged) return true;
 
   // per_status_interval: also dispatch when interval has elapsed

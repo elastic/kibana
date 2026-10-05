@@ -94,7 +94,7 @@ describe('EvaluateMatchersStep', () => {
       rule_id: null,
       space_id: 'space-a',
       group_hash: 'pd-1',
-      episode_id: 'pd-ep-1',
+      alert_id: 'pd-ep-1',
     });
     const policy = createActionPolicy({ id: 'p1', spaceId: 'space-a' });
 
@@ -106,7 +106,7 @@ describe('EvaluateMatchersStep', () => {
   });
 
   it('does not match when KQL matcher evaluates to false', async () => {
-    const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'inactive' });
+    const episode = createAlertEpisode({ rule_id: 'r1', alert_status: 'inactive' });
     const rule = createRule({ id: 'r1' });
     const policy = createActionPolicy({
       id: 'p1',
@@ -119,7 +119,7 @@ describe('EvaluateMatchersStep', () => {
   });
 
   it('matches when KQL matcher evaluates to true', async () => {
-    const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'active' });
+    const episode = createAlertEpisode({ rule_id: 'r1', alert_status: 'active' });
     const rule = createRule({ id: 'r1' });
     const policy = createActionPolicy({
       id: 'p1',
@@ -140,8 +140,8 @@ describe('EvaluateMatchersStep', () => {
   ])('matches %s against %i alert', async (expression, expectedMatches) => {
     const episode = createAlertEpisode({
       rule_id: 'r1',
-      episode_id: 'alert-1',
-      episode_status: 'active',
+      alert_id: 'alert-1',
+      alert_status: 'active',
     });
     const rule = createRule({ id: 'r1' });
     const policy = createActionPolicy({ id: 'p1', matcher: { expression } });
@@ -154,7 +154,7 @@ describe('EvaluateMatchersStep', () => {
   it('matches with complex KQL using AND operator', async () => {
     const episode = createAlertEpisode({
       rule_id: 'r1',
-      episode_status: 'active',
+      alert_status: 'active',
       group_hash: 'critical-group',
     });
     const rule = createRule({ id: 'r1' });
@@ -169,7 +169,7 @@ describe('EvaluateMatchersStep', () => {
   });
 
   it('matches with complex KQL using OR operator', async () => {
-    const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'recovering' });
+    const episode = createAlertEpisode({ rule_id: 'r1', alert_status: 'recovering' });
     const rule = createRule({ id: 'r1' });
     const policy = createActionPolicy({
       id: 'p1',
@@ -184,7 +184,7 @@ describe('EvaluateMatchersStep', () => {
   it('does not match when AND condition is partially met', async () => {
     const episode = createAlertEpisode({
       rule_id: 'r1',
-      episode_status: 'active',
+      alert_status: 'active',
       group_hash: 'normal-group',
     });
     const rule = createRule({ id: 'r1' });
@@ -254,7 +254,7 @@ describe('EvaluateMatchersStep', () => {
       expect.objectContaining({
         labels: expect.objectContaining({
           policy_id: 'p1',
-          episode_id: episode.episode_id,
+          episode_id: episode.alert_id,
           code: ALERTING_LOG_CODES.POLICY_MATCHER_KQL_INVALID,
         }),
       })
@@ -264,7 +264,7 @@ describe('EvaluateMatchersStep', () => {
   });
 
   it('continues evaluating sibling policies when one matcher throws', async () => {
-    const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'active' });
+    const episode = createAlertEpisode({ rule_id: 'r1', alert_status: 'active' });
     const rule = createRule({ id: 'r1' });
     const badPolicy = createActionPolicy({
       id: 'p-bad',
@@ -290,8 +290,8 @@ describe('EvaluateMatchersStep', () => {
   });
 
   it('continues evaluating subsequent episodes when a matcher throws on a previous episode', async () => {
-    const e1 = createAlertEpisode({ episode_id: 'e1', rule_id: 'r1' });
-    const e2 = createAlertEpisode({ episode_id: 'e2', rule_id: 'r1' });
+    const e1 = createAlertEpisode({ alert_id: 'e1', rule_id: 'r1' });
+    const e2 = createAlertEpisode({ alert_id: 'e2', rule_id: 'r1' });
     const rule = createRule({ id: 'r1' });
     const badPolicy = createActionPolicy({
       id: 'p-bad',
@@ -315,7 +315,7 @@ describe('EvaluateMatchersStep', () => {
   });
 
   it('warn message keeps policy and episode ids in labels and omits the matcher', async () => {
-    const episode = createAlertEpisode({ episode_id: 'ep-42', rule_id: 'r1' });
+    const episode = createAlertEpisode({ alert_id: 'ep-42', rule_id: 'r1' });
     const rule = createRule({ id: 'r1' });
     const policy = createActionPolicy({
       id: 'p-broken',
@@ -363,7 +363,7 @@ describe('EvaluateMatchersStep', () => {
         rule_id: null,
         space_id: 'space-a',
         group_hash: 'pd-1',
-        episode_id: 'pd-ep-1',
+        alert_id: 'pd-ep-1',
       });
       const policy = createActionPolicy({ id: 'p1', spaceId: 'space-a' });
 
@@ -380,7 +380,7 @@ describe('EvaluateMatchersStep', () => {
         rule_id: null,
         space_id: 'space-a',
         group_hash: 'pd-1',
-        episode_id: 'pd-ep-1',
+        alert_id: 'pd-ep-1',
       });
       const policy = createActionPolicy({ id: 'p1', spaceId: 'space-b' });
 
@@ -418,7 +418,7 @@ describe('EvaluateMatchersStep', () => {
     });
 
     it('matches when both tags and expression are satisfied', async () => {
-      const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'active' });
+      const episode = createAlertEpisode({ rule_id: 'r1', alert_status: 'active' });
       const rule = createRule({ id: 'r1', tags: ['production'] });
       const policy = createActionPolicy({
         id: 'p1',
@@ -431,7 +431,7 @@ describe('EvaluateMatchersStep', () => {
     });
 
     it('does not match when tags match but expression does not', async () => {
-      const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'inactive' });
+      const episode = createAlertEpisode({ rule_id: 'r1', alert_status: 'inactive' });
       const rule = createRule({ id: 'r1', tags: ['production'] });
       const policy = createActionPolicy({
         id: 'p1',
@@ -530,7 +530,7 @@ describe('EvaluateMatchersStep', () => {
       const episode = createAlertEpisode({
         rule_id: 'r1',
         data: { severity: 'critical' },
-        episode_status: 'active',
+        alert_status: 'active',
       });
       const rule = createRule({ id: 'r1' });
       const policy = createActionPolicy({
@@ -602,8 +602,8 @@ describe('EvaluateMatchersStep', () => {
 
     it('matches combined severity and episode conditions', async () => {
       const episodes = [
-        createAlertEpisode({ rule_id: 'r1', severity: 'high', episode_status: 'active' }),
-        createAlertEpisode({ rule_id: 'r1', severity: 'low', episode_status: 'active' }),
+        createAlertEpisode({ rule_id: 'r1', severity: 'high', alert_status: 'active' }),
+        createAlertEpisode({ rule_id: 'r1', severity: 'low', alert_status: 'active' }),
       ];
       const rule = createRule({ id: 'r1' });
       const policy = createActionPolicy({

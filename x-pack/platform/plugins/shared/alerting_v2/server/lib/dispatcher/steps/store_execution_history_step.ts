@@ -233,9 +233,9 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
   }): void {
     const ruleIdSet = new Set<string>();
     const episodeIdSet = new Set<string>();
-    for (const { rule_id, episode_id } of failure.episodes) {
+    for (const { rule_id, alert_id } of failure.episodes) {
       if (rule_id != null) ruleIdSet.add(rule_id);
-      episodeIdSet.add(episode_id);
+      episodeIdSet.add(alert_id);
     }
     const ruleIds = Array.from(ruleIdSet);
     const episodeIds = Array.from(episodeIdSet);
@@ -313,7 +313,7 @@ function aggregateByPolicy(
       summary.workflowExecutionIds.add(executionId);
     }
     for (const episode of group.episodes) {
-      summary.episodeIds.add(episode.episode_id);
+      summary.episodeIds.add(episode.alert_id);
       if (episode.rule_id != null) {
         summary.ruleIds.add(episode.rule_id);
       }
@@ -350,7 +350,7 @@ function aggregateUnmatchedBySubject(unmatched: readonly AlertEpisode[]): Unmatc
       };
       bySubject.set(subject, group);
     }
-    group.episodeIds.add(episode.episode_id);
+    group.episodeIds.add(episode.alert_id);
   }
   return [...bySubject.values()];
 }

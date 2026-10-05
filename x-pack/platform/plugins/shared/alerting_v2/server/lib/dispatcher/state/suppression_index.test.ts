@@ -20,7 +20,7 @@ describe('SuppressionIndex', () => {
       }),
     ]);
 
-    const episode = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' });
+    const episode = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
     expect(index.suppressionReasonFor(episode)).toBe('ack');
   });
 
@@ -35,7 +35,7 @@ describe('SuppressionIndex', () => {
       }),
     ]);
 
-    const episode = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' });
+    const episode = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
     expect(index.suppressionReasonFor(episode)).toBe('snooze');
   });
 
@@ -50,7 +50,7 @@ describe('SuppressionIndex', () => {
       }),
     ]);
 
-    const episode = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' });
+    const episode = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
     expect(index.suppressionReasonFor(episode)).toBe('deactivate');
   });
 
@@ -64,7 +64,7 @@ describe('SuppressionIndex', () => {
       }),
     ]);
 
-    const episode = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' });
+    const episode = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
     expect(index.suppressionReasonFor(episode)).toBe('unknown suppression reason');
   });
 
@@ -86,7 +86,7 @@ describe('SuppressionIndex', () => {
       }),
     ]);
 
-    const episode = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' });
+    const episode = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
     expect(index.suppressionReasonFor(episode)).toBe('ack');
   });
 
@@ -100,7 +100,7 @@ describe('SuppressionIndex', () => {
       }),
     ]);
 
-    const episode = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' });
+    const episode = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
     expect(index.suppressionReasonFor(episode)).toBeUndefined();
   });
 
@@ -125,7 +125,7 @@ describe('SuppressionIndex', () => {
       source: 'pagerduty',
       rule_id: null,
       group_hash: 'pd-hash',
-      episode_id: 'pd-ep-1',
+      alert_id: 'pd-ep-1',
     });
     expect(index.suppressionReasonFor(episode)).toBe('ack');
   });
@@ -153,13 +153,13 @@ describe('SuppressionIndex', () => {
       source: 'internal',
       rule_id: 'rule-1',
       group_hash: 'hash-1',
-      episode_id: 'ep-internal',
+      alert_id: 'ep-internal',
     });
     const externalEpisode = createAlertEpisode({
       source: 'pagerduty',
       rule_id: null,
       group_hash: 'hash-1',
-      episode_id: 'ep-external',
+      alert_id: 'ep-external',
     });
 
     expect(index.suppressionReasonFor(internalEpisode)).toBe('ack');
@@ -187,7 +187,7 @@ describe('SuppressionIndex', () => {
         rule_id: null,
         space_id: spaceId,
         group_hash: 'pd-incident-1',
-        episode_id: 'pd-ep-1',
+        alert_id: 'pd-ep-1',
       });
 
     expect(index.suppressionReasonFor(externalEpisode('space-a'))).toBe('ack');
@@ -211,7 +211,7 @@ describe('SuppressionIndex', () => {
       source: 'internal',
       rule_id: 'rule-1',
       group_hash: 'h1',
-      episode_id: 'e1',
+      alert_id: 'e1',
     });
     expect(index.suppressionReasonFor(episode)).toBe('ack');
   });

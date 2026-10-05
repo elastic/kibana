@@ -35,8 +35,8 @@ export interface AlertEpisode {
   source: string;
   space_id: string;
   group_hash: string;
-  episode_id: string;
-  episode_status: AlertEpisodeStatus;
+  alert_id: string;
+  alert_status: AlertEpisodeStatus;
   severity?: AlertEventSeverity;
   data?: AlertEpisodeData;
 }
@@ -145,13 +145,7 @@ export interface ActionGroup {
 
 export type ActionPolicyWorkflowPayloadRule = Pick<Rule, 'name'>;
 
-export type ActionPolicyWorkflowPayloadAlert = Omit<
-  AlertEpisode,
-  'episode_id' | 'episode_status'
-> & {
-  alert_id: string;
-  alert_status: AlertEpisodeStatus;
-};
+export type ActionPolicyWorkflowPayloadAlert = AlertEpisode;
 
 export interface ActionPolicyWorkflowPayload {
   id: ActionGroupId;

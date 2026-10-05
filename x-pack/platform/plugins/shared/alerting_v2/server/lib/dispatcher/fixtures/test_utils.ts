@@ -140,8 +140,8 @@ export function createAlertEpisode(overrides: Partial<AlertEpisode> = {}): Alert
     source: 'internal',
     space_id: 'default',
     group_hash: 'hash-1',
-    episode_id: 'episode-1',
-    episode_status: 'active',
+    alert_id: 'episode-1',
+    alert_status: 'active',
     ...overrides,
   };
 }

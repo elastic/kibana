@@ -14,7 +14,7 @@ describe('suppressionEpisodeKey', () => {
         source: 'internal',
         rule_id: 'rule-1',
         group_hash: 'h',
-        episode_id: 'e',
+        alert_id: 'e',
       })
     ).toBe('rule-1:h:e');
   });
@@ -26,13 +26,13 @@ describe('suppressionEpisodeKey', () => {
         rule_id: null,
         space_id: 'default',
         group_hash: 'h',
-        episode_id: 'e',
+        alert_id: 'e',
       })
     ).toBe('default::pagerduty:h:e');
   });
 
   it('keys the same vendor episode differently per space', () => {
-    const base = { source: 'pagerduty', rule_id: null, group_hash: 'h', episode_id: 'e' };
+    const base = { source: 'pagerduty', rule_id: null, group_hash: 'h', alert_id: 'e' };
 
     expect(suppressionEpisodeKey({ ...base, space_id: 'space-a' })).not.toBe(
       suppressionEpisodeKey({ ...base, space_id: 'space-b' })
@@ -41,7 +41,7 @@ describe('suppressionEpisodeKey', () => {
 
   it('treats null source as internal (uses rule_id)', () => {
     expect(
-      suppressionEpisodeKey({ source: null, rule_id: 'rule-1', group_hash: 'h', episode_id: 'e' })
+      suppressionEpisodeKey({ source: null, rule_id: 'rule-1', group_hash: 'h', alert_id: 'e' })
     ).toBe('rule-1:h:e');
   });
 
@@ -51,7 +51,7 @@ describe('suppressionEpisodeKey', () => {
         source: undefined,
         rule_id: 'rule-1',
         group_hash: 'h',
-        episode_id: 'e',
+        alert_id: 'e',
       })
     ).toBe('rule-1:h:e');
   });

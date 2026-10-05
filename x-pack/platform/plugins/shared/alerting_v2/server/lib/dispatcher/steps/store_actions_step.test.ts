@@ -222,7 +222,7 @@ describe('StoreActionsStep', () => {
     const episode = createAlertEpisode({
       rule_id: 'rule-1',
       group_hash: 'hash-1',
-      episode_status: 'recovering',
+      alert_status: 'recovering',
       last_event_timestamp: '2026-01-22T07:00:00.000Z',
     });
 
@@ -310,21 +310,21 @@ describe('StoreActionsStep', () => {
     const suppressedEpisode = createAlertEpisode({
       rule_id: 'rule-suppressed',
       group_hash: 'hash-suppressed',
-      episode_id: 'ep-suppressed',
+      alert_id: 'ep-suppressed',
       last_event_timestamp: '2026-01-22T07:00:00.000Z',
     });
 
     const throttledEpisode = createAlertEpisode({
       rule_id: 'rule-throttled',
       group_hash: 'hash-throttled',
-      episode_id: 'ep-throttled',
+      alert_id: 'ep-throttled',
       last_event_timestamp: '2026-01-22T07:10:00.000Z',
     });
 
     const dispatchEpisode = createAlertEpisode({
       rule_id: 'rule-dispatch',
       group_hash: 'hash-dispatch',
-      episode_id: 'ep-dispatch',
+      alert_id: 'ep-dispatch',
       last_event_timestamp: '2026-01-22T07:20:00.000Z',
     });
 
@@ -415,7 +415,7 @@ describe('StoreActionsStep', () => {
     const unmatchedEpisode = createAlertEpisode({
       rule_id: 'rule-unmatched',
       group_hash: 'hash-unmatched',
-      episode_id: 'ep-unmatched',
+      alert_id: 'ep-unmatched',
       last_event_timestamp: '2026-01-22T07:00:00.000Z',
     });
 
@@ -455,13 +455,13 @@ describe('StoreActionsStep', () => {
     const episode1 = createAlertEpisode({
       rule_id: 'rule-1',
       group_hash: 'hash-1',
-      episode_id: 'ep-1',
+      alert_id: 'ep-1',
     });
 
     const episode2 = createAlertEpisode({
       rule_id: 'rule-2',
       group_hash: 'hash-2',
-      episode_id: 'ep-2',
+      alert_id: 'ep-2',
     });
 
     const state = createDispatcherPipelineState({
@@ -490,21 +490,21 @@ describe('StoreActionsStep', () => {
     const dispatchedEpisode = createAlertEpisode({
       rule_id: 'rule-dispatch',
       group_hash: 'hash-dispatch',
-      episode_id: 'ep-dispatch',
+      alert_id: 'ep-dispatch',
       last_event_timestamp: '2026-01-22T07:00:00.000Z',
     });
 
     const throttledEpisode = createAlertEpisode({
       rule_id: 'rule-throttled',
       group_hash: 'hash-throttled',
-      episode_id: 'ep-throttled',
+      alert_id: 'ep-throttled',
       last_event_timestamp: '2026-01-22T07:05:00.000Z',
     });
 
     const unmatchedEpisode = createAlertEpisode({
       rule_id: 'rule-unmatched',
       group_hash: 'hash-unmatched',
-      episode_id: 'ep-unmatched',
+      alert_id: 'ep-unmatched',
       last_event_timestamp: '2026-01-22T07:10:00.000Z',
     });
 
@@ -564,14 +564,14 @@ describe('StoreActionsStep', () => {
     const episode1 = createAlertEpisode({
       rule_id: 'rule-1',
       group_hash: 'hash-1',
-      episode_id: 'ep-1',
+      alert_id: 'ep-1',
       last_event_timestamp: '2026-01-22T07:00:00.000Z',
     });
 
     const episode2 = createAlertEpisode({
       rule_id: 'rule-1',
       group_hash: 'hash-2',
-      episode_id: 'ep-2',
+      alert_id: 'ep-2',
       last_event_timestamp: '2026-01-22T07:05:00.000Z',
     });
 
@@ -788,8 +788,8 @@ describe('StoreActionsStep', () => {
 
       const state = createDispatcherPipelineState({
         suppressed: [
-          { ...createAlertEpisode({ episode_id: 'ep-1' }), reason: 'acked' },
-          { ...createAlertEpisode({ episode_id: 'ep-2' }), reason: 'acked' },
+          { ...createAlertEpisode({ alert_id: 'ep-1' }), reason: 'acked' },
+          { ...createAlertEpisode({ alert_id: 'ep-2' }), reason: 'acked' },
         ],
         throttled: [],
         dispatch: [],
@@ -812,11 +812,11 @@ describe('StoreActionsStep', () => {
           createActionGroup({
             id: 'g1',
             episodes: [
-              createAlertEpisode({ episode_id: 'e1' }),
-              createAlertEpisode({ episode_id: 'e2' }),
+              createAlertEpisode({ alert_id: 'e1' }),
+              createAlertEpisode({ alert_id: 'e2' }),
             ],
           }),
-          createActionGroup({ id: 'g2', episodes: [createAlertEpisode({ episode_id: 'e3' })] }),
+          createActionGroup({ id: 'g2', episodes: [createAlertEpisode({ alert_id: 'e3' })] }),
         ],
         dispatch: [],
       });
@@ -839,8 +839,8 @@ describe('StoreActionsStep', () => {
           createActionGroup({
             id: 'g1',
             episodes: [
-              createAlertEpisode({ episode_id: 'e1' }),
-              createAlertEpisode({ episode_id: 'e2' }),
+              createAlertEpisode({ alert_id: 'e1' }),
+              createAlertEpisode({ alert_id: 'e2' }),
             ],
           }),
         ],
@@ -859,9 +859,9 @@ describe('StoreActionsStep', () => {
 
       const state = createDispatcherPipelineState({
         dispatchable: [
-          createAlertEpisode({ episode_id: 'e1' }),
-          createAlertEpisode({ episode_id: 'e2' }),
-          createAlertEpisode({ episode_id: 'e3' }),
+          createAlertEpisode({ alert_id: 'e1' }),
+          createAlertEpisode({ alert_id: 'e2' }),
+          createAlertEpisode({ alert_id: 'e3' }),
         ],
         suppressed: [],
         throttled: [],
@@ -881,21 +881,21 @@ describe('StoreActionsStep', () => {
 
       // 1 suppressed + 1 throttled (in a group) + 1 dispatch (in a group) + 1 unmatched = 4
       const unmatchedEpisode = createAlertEpisode({
-        episode_id: 'ep-unmatched',
+        alert_id: 'ep-unmatched',
         group_hash: 'h-unmatched',
       });
       const dispatchedEpisode = createAlertEpisode({
-        episode_id: 'ep-dispatch',
+        alert_id: 'ep-dispatch',
         group_hash: 'h-dispatch',
       });
       const throttledEpisode = createAlertEpisode({
-        episode_id: 'ep-throttled',
+        alert_id: 'ep-throttled',
         group_hash: 'h-throttled',
       });
 
       const state = createDispatcherPipelineState({
         dispatchable: [dispatchedEpisode, throttledEpisode, unmatchedEpisode],
-        suppressed: [{ ...createAlertEpisode({ episode_id: 'ep-sup' }), reason: 'acked' }],
+        suppressed: [{ ...createAlertEpisode({ alert_id: 'ep-sup' }), reason: 'acked' }],
         throttled: [createActionGroup({ id: 'g-throttle', episodes: [throttledEpisode] })],
         dispatch: [createActionGroup({ id: 'g-dispatch', episodes: [dispatchedEpisode] })],
       });

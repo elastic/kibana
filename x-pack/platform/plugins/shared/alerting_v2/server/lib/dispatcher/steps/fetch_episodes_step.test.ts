@@ -38,8 +38,8 @@ describe('FetchEpisodesStep', () => {
     const step = new FetchEpisodesStep(queryService);
 
     const episodes = [
-      createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' }),
-      createAlertEpisode({ rule_id: 'r2', group_hash: 'h2', episode_id: 'e2' }),
+      createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' }),
+      createAlertEpisode({ rule_id: 'r2', group_hash: 'h2', alert_id: 'e2' }),
     ];
 
     mockEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse(episodes));
@@ -95,7 +95,7 @@ describe('FetchEpisodesStep', () => {
     const step = new FetchEpisodesStep(queryService);
 
     const maxEpisodes = Array.from({ length: ESQL_QUERY_ROW_LIMIT }, (_, i) =>
-      createAlertEpisode({ episode_id: `ep-${i}`, group_hash: `h-${i}` })
+      createAlertEpisode({ alert_id: `ep-${i}`, group_hash: `h-${i}` })
     );
     mockEsClient.esql.query.mockResolvedValueOnce(
       createDispatchableAlertEventsResponse(maxEpisodes)
@@ -114,7 +114,7 @@ describe('FetchEpisodesStep', () => {
     const step = new FetchEpisodesStep(queryService);
 
     const episodes = Array.from({ length: ESQL_QUERY_ROW_LIMIT - 1 }, (_, i) =>
-      createAlertEpisode({ episode_id: `ep-${i}`, group_hash: `h-${i}` })
+      createAlertEpisode({ alert_id: `ep-${i}`, group_hash: `h-${i}` })
     );
     mockEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse(episodes));
 
@@ -196,8 +196,8 @@ describe('parseAlertEpisodes', () => {
         source: 'internal',
         space_id: 'default',
         group_hash: 'h1',
-        episode_id: 'e1',
-        episode_status: 'active' as const,
+        alert_id: 'e1',
+        alert_status: 'active' as const,
         severity: null,
       },
     ];
@@ -207,8 +207,8 @@ describe('parseAlertEpisodes', () => {
     expect(result).toHaveLength(1);
     expect(result[0].rule_id).toBe('r1');
     expect(result[0].group_hash).toBe('h1');
-    expect(result[0].episode_id).toBe('e1');
-    expect(result[0].episode_status).toBe('active');
+    expect(result[0].alert_id).toBe('e1');
+    expect(result[0].alert_status).toBe('active');
     expect(result[0]).not.toHaveProperty('data_json');
   });
 
@@ -220,8 +220,8 @@ describe('parseAlertEpisodes', () => {
         source: 'internal',
         space_id: 'default',
         group_hash: 'h1',
-        episode_id: 'e1',
-        episode_status: 'active' as const,
+        alert_id: 'e1',
+        alert_status: 'active' as const,
         severity: 'medium' as AlertEventSeverity,
       },
     ];
@@ -240,8 +240,8 @@ describe('parseAlertEpisodes', () => {
         source: 'internal',
         space_id: 'default',
         group_hash: 'h1',
-        episode_id: 'e1',
-        episode_status: 'active' as const,
+        alert_id: 'e1',
+        alert_status: 'active' as const,
         severity: null,
       },
     ];
@@ -260,8 +260,8 @@ describe('parseAlertEpisodes', () => {
         source: 'pagerduty',
         space_id: 'space-a',
         group_hash: 'h1',
-        episode_id: 'e1',
-        episode_status: 'active' as const,
+        alert_id: 'e1',
+        alert_status: 'active' as const,
         severity: null,
       },
     ];

@@ -9,9 +9,9 @@ import { createActionGroup, createAlertEpisode } from '../fixtures/test_utils';
 import { DispatchPlan } from './dispatch_plan';
 
 describe('DispatchPlan', () => {
-  const ep1 = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' });
-  const ep2 = createAlertEpisode({ rule_id: 'r2', group_hash: 'h2', episode_id: 'e2' });
-  const ep3 = createAlertEpisode({ rule_id: 'r3', group_hash: 'h3', episode_id: 'e3' });
+  const ep1 = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
+  const ep2 = createAlertEpisode({ rule_id: 'r2', group_hash: 'h2', alert_id: 'e2' });
+  const ep3 = createAlertEpisode({ rule_id: 'r3', group_hash: 'h3', alert_id: 'e3' });
 
   it('reports emptiness', () => {
     const plan = DispatchPlan.of({

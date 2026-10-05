@@ -122,9 +122,9 @@ describe('computeNextWatermark', () => {
   describe('truncated scan', () => {
     it('advances to the last fetched episode timestamp', () => {
       const episodes = [
-        createAlertEpisode({ episode_id: 'e1', last_event_timestamp: '2026-01-22T07:21:00.000Z' }),
-        createAlertEpisode({ episode_id: 'e2', last_event_timestamp: '2026-01-22T07:28:00.000Z' }),
-        createAlertEpisode({ episode_id: 'e3', last_event_timestamp: '2026-01-22T07:33:00.000Z' }),
+        createAlertEpisode({ alert_id: 'e1', last_event_timestamp: '2026-01-22T07:21:00.000Z' }),
+        createAlertEpisode({ alert_id: 'e2', last_event_timestamp: '2026-01-22T07:28:00.000Z' }),
+        createAlertEpisode({ alert_id: 'e3', last_event_timestamp: '2026-01-22T07:33:00.000Z' }),
       ];
 
       const result = computeNextWatermark({
@@ -153,9 +153,9 @@ describe('computeNextWatermark', () => {
 
     it('truncated wins over windowEnd even when last row is older than windowEnd', () => {
       const episodes = [
-        createAlertEpisode({ episode_id: 'e1', last_event_timestamp: '2026-01-22T07:21:00.000Z' }),
+        createAlertEpisode({ alert_id: 'e1', last_event_timestamp: '2026-01-22T07:21:00.000Z' }),
         // last_event_timestamp deliberately before windowEnd (07:35)
-        createAlertEpisode({ episode_id: 'e2', last_event_timestamp: '2026-01-22T07:31:00.000Z' }),
+        createAlertEpisode({ alert_id: 'e2', last_event_timestamp: '2026-01-22T07:31:00.000Z' }),
       ];
 
       const result = computeNextWatermark({
