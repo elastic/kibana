@@ -93,31 +93,28 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
     await apiServices.alertingV2.ruleEvents.cleanUp();
   });
 
-  // `episode_status` is the deprecated matcher name of `alert_status`.
-  for (const field of ['alert_status', 'episode_status']) {
-    apiTest(
-      `${field}: returns a 200 with an array of suggested values for a static field`,
-      async ({ apiClient }) => {
-        // The status is backed by static suggestions, so the result is
-        // deterministic without seeding any alert events or rules.
-        const response = await suggestValues(
-          apiClient,
-          { field, query: '' },
-          { headers: writerHeaders }
-        );
+  apiTest(
+    'alert_status: returns a 200 with an array of suggested values for a static field',
+    async ({ apiClient }) => {
+      // The status is backed by static suggestions, so the result is
+      // deterministic without seeding any alert events or rules.
+      const response = await suggestValues(
+        apiClient,
+        { field: 'alert_status', query: '' },
+        { headers: writerHeaders }
+      );
 
-        expect(response).toHaveStatusCode(200);
-        expect(response.body).toStrictEqual(
-          expect.arrayContaining(['inactive', 'pending', 'active', 'recovering'])
-        );
-      }
-    );
-  }
+      expect(response).toHaveStatusCode(200);
+      expect(response.body).toStrictEqual(
+        expect.arrayContaining(['inactive', 'pending', 'active', 'recovering'])
+      );
+    }
+  );
 
   apiTest('filters static suggestions by the query prefix', async ({ apiClient }) => {
     const response = await suggestValues(
       apiClient,
-      { field: 'episode_status', query: 'a' },
+      { field: 'alert_status', query: 'a' },
       { headers: writerHeaders }
     );
 
@@ -159,24 +156,21 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
     }
   );
 
-  // `episode_id` is the deprecated matcher name of `alert_id`.
-  for (const field of ['alert_id', 'episode_id']) {
-    apiTest(
-      `${field}: aggregates the alert ids stored on the alert events`,
-      async ({ apiClient, apiServices }) => {
-        await apiServices.alertingV2.ruleEvents.seed(buildSeededAlertEvents());
+  apiTest(
+    'alert_id: aggregates the alert ids stored on the alert events',
+    async ({ apiClient, apiServices }) => {
+      await apiServices.alertingV2.ruleEvents.seed(buildSeededAlertEvents());
 
-        const response = await suggestValues(
-          apiClient,
-          { field, query: 'scout-episode-w' },
-          { headers: writerHeaders }
-        );
+      const response = await suggestValues(
+        apiClient,
+        { field: 'alert_id', query: 'scout-episode-w' },
+        { headers: writerHeaders }
+      );
 
-        expect(response).toHaveStatusCode(200);
-        expect(response.body).toStrictEqual(['scout-episode-web']);
-      }
-    );
-  }
+      expect(response).toHaveStatusCode(200);
+      expect(response.body).toStrictEqual(['scout-episode-web']);
+    }
+  );
 
   apiTest(
     'data.*: aggregates the values of a field nested under data',
@@ -210,7 +204,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
     async ({ apiClient }) => {
       const response = await suggestValues(
         apiClient,
-        { field: 'episode_status', query: 'test', unknownField: 'x' },
+        { field: 'alert_status', query: 'test', unknownField: 'x' },
         { headers: writerHeaders }
       );
 
@@ -225,9 +219,9 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
       const response = await suggestValues(
         apiClient,
         {
-          field: 'episode_status',
+          field: 'alert_status',
           query: 'test',
-          fieldMeta: { name: 'episode_status', type: 'string' },
+          fieldMeta: { name: 'alert_status', type: 'string' },
           filters: [],
         },
         { headers: writerHeaders }
@@ -241,7 +235,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
   apiTest('validation: rejects a body without a query', async ({ apiClient }) => {
     const response = await suggestValues(
       apiClient,
-      { field: 'episode_status' },
+      { field: 'alert_status' },
       { headers: writerHeaders }
     );
 
@@ -274,7 +268,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
   apiTest('validation: rejects a query longer than the schema limit', async ({ apiClient }) => {
     const response = await suggestValues(
       apiClient,
-      { field: 'episode_status', query: 'a'.repeat(QUERY_MAX_LENGTH + 1) },
+      { field: 'alert_status', query: 'a'.repeat(QUERY_MAX_LENGTH + 1) },
       { headers: writerHeaders }
     );
 
@@ -289,7 +283,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
 
       const response = await suggestValues(
         apiClient,
-        { field: 'episode_status', query: '' },
+        { field: 'alert_status', query: '' },
         { headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader } }
       );
 
@@ -304,7 +298,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
 
       const response = await suggestValues(
         apiClient,
-        { field: 'episode_status', query: '' },
+        { field: 'alert_status', query: '' },
         { headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader } }
       );
 
@@ -319,7 +313,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
 
       const response = await suggestValues(
         apiClient,
-        { field: 'episode_status', query: '' },
+        { field: 'alert_status', query: '' },
         { headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader } }
       );
 
@@ -334,7 +328,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
 
       const response = await suggestValues(
         apiClient,
-        { field: 'episode_status', query: '' },
+        { field: 'alert_status', query: '' },
         { headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader } }
       );
 

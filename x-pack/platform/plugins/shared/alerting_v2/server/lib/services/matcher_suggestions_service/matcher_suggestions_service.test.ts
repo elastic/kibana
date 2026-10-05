@@ -37,21 +37,23 @@ describe('MatcherSuggestionsService.getSuggestions', () => {
     service = new MatcherSuggestionsService(esClient);
   });
 
-  it.each(['alert_status', 'episode_status'])(
-    'suggests the alert statuses for %s without querying',
-    async (field) => {
-      expect(await service.getSuggestions(field, 'rec')).toEqual(['recovering']);
-      expect(esClient.search).not.toHaveBeenCalled();
-    }
-  );
+  it('suggests the alert statuses for alert_status without querying', async () => {
+    expect(await service.getSuggestions('alert_status', 'rec')).toEqual(['recovering']);
+    expect(esClient.search).not.toHaveBeenCalled();
+  });
 
-  it.each(['alert_id', 'episode_id'])('suggests the alert.id values for %s', async (field) => {
+  it.each(['episode_status', 'episode_id'])('suggests nothing for %s', async (field) => {
+    expect(await service.getSuggestions(field, '')).toEqual([]);
+    expect(esClient.search).not.toHaveBeenCalled();
+  });
+
+  it('suggests the alert.id values for alert_id', async () => {
     esClient.search.mockResolvedValue({
       ...buildSearchResponse([]),
       aggregations: { suggestions: { buckets: [{ key: 'alert-1' }] } },
     } as SearchResponse<unknown>);
 
-    expect(await service.getSuggestions(field, 'al')).toEqual(['alert-1']);
+    expect(await service.getSuggestions('alert_id', 'al')).toEqual(['alert-1']);
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         aggs: { suggestions: { terms: expect.objectContaining({ field: 'alert.id' }) } },

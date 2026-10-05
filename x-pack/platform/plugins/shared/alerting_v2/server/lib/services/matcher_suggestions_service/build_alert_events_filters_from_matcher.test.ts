@@ -49,25 +49,29 @@ describe('buildAlertEventsFiltersFromMatcher', () => {
   });
 
   describe('field translation', () => {
-    it.each(['alert_status', 'episode_status'])('translates %s to alert.status', (field) => {
-      const filters = buildAlertEventsFiltersFromMatcher(`${field} : pending`);
+    it('translates alert_status to alert.status', () => {
+      const filters = buildAlertEventsFiltersFromMatcher('alert_status : pending');
       const json = stringify(filters);
       expect(filters).toHaveLength(1);
       expect(json).toContain('alert.status');
-      expect(json).not.toContain(field);
+      expect(json).not.toContain('alert_status');
     });
 
-    it.each(['alert_id', 'episode_id'])('translates %s to alert.id', (field) => {
-      const filters = buildAlertEventsFiltersFromMatcher(`${field} : "alert-1"`);
+    it('translates alert_id to alert.id', () => {
+      const filters = buildAlertEventsFiltersFromMatcher('alert_id : "alert-1"');
       const json = stringify(filters);
       expect(filters).toHaveLength(1);
       expect(json).toContain('alert.id');
-      expect(json).not.toContain(field);
+      expect(json).not.toContain('alert_id');
       expect(json).toContain('alert-1');
     });
   });
 
   describe('unsupported fields (dropped)', () => {
+    it.each(['episode_status : pending', 'episode_id : "alert-1"'])('drops %s', (matcher) => {
+      expect(buildAlertEventsFiltersFromMatcher(matcher)).toEqual([]);
+    });
+
     it('drops rule.name', () => {
       expect(buildAlertEventsFiltersFromMatcher('rule.name : "my rule"')).toEqual([]);
     });

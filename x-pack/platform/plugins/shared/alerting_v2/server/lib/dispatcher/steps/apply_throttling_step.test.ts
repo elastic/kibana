@@ -575,10 +575,15 @@ describe('ApplyThrottlingStep', () => {
 
     const result = await step.execute(createDispatcherPipelineState({ groups, policies }), logger);
 
-    expect(result.type).toBe('continue');
-    if (result.type !== 'continue') return;
-    expect(result.data?.plan?.toDispatch.map(({ id }) => id)).toEqual(['changed']);
-    expect(result.data?.plan?.throttled.map(({ id }) => id)).toEqual(['unchanged']);
+    expect(result).toMatchObject({
+      type: 'continue',
+      data: {
+        plan: {
+          toDispatch: [expect.objectContaining({ id: 'changed' })],
+          throttled: [expect.objectContaining({ id: 'unchanged' })],
+        },
+      },
+    });
   });
 
   it('returns empty dispatch and throttled when no groups', async () => {

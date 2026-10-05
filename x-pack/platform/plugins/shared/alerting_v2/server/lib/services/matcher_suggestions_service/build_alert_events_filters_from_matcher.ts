@@ -9,12 +9,9 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { DataViewBase, KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
-// `episode_status` and `episode_id` are the deprecated matcher names of `alert_status` and `alert_id`.
 const MATCHER_TO_ES_FIELD: Readonly<Record<string, string>> = {
   alert_status: 'alert.status',
   alert_id: 'alert.id',
-  episode_status: 'alert.status',
-  episode_id: 'alert.id',
 };
 
 const SUPPORTED_MATCHER_FIELDS: ReadonlySet<string> = new Set([
