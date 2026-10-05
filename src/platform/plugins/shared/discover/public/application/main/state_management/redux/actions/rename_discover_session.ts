@@ -33,9 +33,13 @@ export const renameDiscoverSession = createInternalStateAsyncThunk(
       return;
     }
 
-    const { id, description, tabs, tags } = persistedDiscoverSession;
+    const { id } = persistedDiscoverSession;
 
-    // Re-save the persisted tabs instead of the current ones so unsaved tab changes stay unsaved
+    // Rename the latest saved version, so changes saved elsewhere since this session was opened
+    // are kept and the unsaved changes of the current tabs stay unsaved
+    const {
+      session: { description, tabs, tags },
+    } = await services.discoverSessionService.get(id);
     const discoverSession = await services.discoverSessionService.save(
       { id, title: newTitle, description, tabs, tags },
       { copyOnSave: false }
@@ -49,6 +53,11 @@ export const renameDiscoverSession = createInternalStateAsyncThunk(
       rememberDiscoverSession(services.core.http, services.chrome, discoverSession);
     }
 
-    dispatch(internalStateSlice.actions.setPersistedDiscoverSession(discoverSession));
+    dispatch(
+      internalStateSlice.actions.setPersistedDiscoverSession({
+        ...persistedDiscoverSession,
+        title: newTitle,
+      })
+    );
   }
 );

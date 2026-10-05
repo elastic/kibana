@@ -37,6 +37,13 @@ const setup = async ({
   const toolkit = getDiscoverInternalStateMock({ services, persistedDataViews: [dataViewMock] });
   await toolkit.initializeTabs({ persistedDiscoverSession });
 
+  if (persistedDiscoverSession) {
+    // Renaming loads the latest saved version, which is the opened one here
+    jest
+      .mocked(services.discoverSessionService.get)
+      .mockResolvedValue({ session: persistedDiscoverSession, warnings: [] });
+  }
+
   render(
     <DiscoverTestProvider
       services={services}

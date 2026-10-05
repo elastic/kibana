@@ -19,8 +19,9 @@ import { TABS_LOCAL_STORAGE_KEY } from '../../tabs_storage_manager';
 
 const setup = async ({
   isSaved = true,
+  isSavedElsewhere = false,
   tabsStorageEnabled = false,
-}: { isSaved?: boolean; tabsStorageEnabled?: boolean } = {}) => {
+}: { isSaved?: boolean; isSavedElsewhere?: boolean; tabsStorageEnabled?: boolean } = {}) => {
   const services = createDiscoverServicesMock();
   services.storage = new Storage(localStorage);
   const toolkit = getDiscoverInternalStateMock({
@@ -41,10 +42,26 @@ const setup = async ({
   });
   await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
 
+  // The latest saved version, which differs from the opened one when it was saved elsewhere since
+  const latestDiscoverSession: DiscoverSession = isSavedElsewhere
+    ? {
+        ...persistedDiscoverSession,
+        description: 'Description saved elsewhere',
+        tags: ['tag2'],
+        tabs: [
+          ...persistedDiscoverSession.tabs,
+          getPersistedTabMock({ tabId: 'tab-saved-elsewhere', dataView: dataViewMock, services }),
+        ],
+      }
+    : persistedDiscoverSession;
+  jest
+    .mocked(services.discoverSessionService.get)
+    .mockResolvedValue({ session: latestDiscoverSession, warnings: [] });
+
   // Opening the session already remembers it, so only track calls made after setup
   jest.mocked(services.chrome.recentlyAccessed.add).mockClear();
 
-  return { toolkit, services, persistedDiscoverSession };
+  return { toolkit, services, latestDiscoverSession };
 };
 
 describe('renameDiscoverSession', () => {
@@ -53,8 +70,28 @@ describe('renameDiscoverSession', () => {
     localStorage.clear();
   });
 
-  it('should save the new title with the persisted tabs, leaving unsaved tab changes unsaved', async () => {
-    const { toolkit, services, persistedDiscoverSession } = await setup();
+  it('should save the new title with the latest saved version, keeping changes saved elsewhere', async () => {
+    const { toolkit, services, latestDiscoverSession } = await setup({ isSavedElsewhere: true });
+
+    await toolkit.internalState
+      .dispatch(internalStateActions.renameDiscoverSession({ newTitle: 'Renamed Session' }))
+      .unwrap();
+
+    expect(services.discoverSessionService.save).toHaveBeenCalledWith(
+      {
+        id: 'test-session',
+        title: 'Renamed Session',
+        description: 'Description saved elsewhere',
+        tabs: latestDiscoverSession.tabs,
+        tags: ['tag2'],
+      },
+      { copyOnSave: false }
+    );
+  });
+
+  it('should only update the title of the opened session, leaving unsaved tab changes unsaved', async () => {
+    const { toolkit, services } = await setup({ isSavedElsewhere: true });
+    const openedDiscoverSession = toolkit.internalState.getState().persistedDiscoverSession;
     const tabId = toolkit.getCurrentTab().id;
     const comparisonContext = { runtimeStateManager: toolkit.runtimeStateManager, services };
 
@@ -66,16 +103,10 @@ describe('renameDiscoverSession', () => {
       .dispatch(internalStateActions.renameDiscoverSession({ newTitle: 'Renamed Session' }))
       .unwrap();
 
-    expect(services.discoverSessionService.save).toHaveBeenCalledWith(
-      {
-        id: 'test-session',
-        title: 'Renamed Session',
-        description: 'Test Description',
-        tabs: persistedDiscoverSession.tabs,
-        tags: ['tag1'],
-      },
-      { copyOnSave: false }
-    );
+    expect(toolkit.internalState.getState().persistedDiscoverSession).toEqual({
+      ...openedDiscoverSession,
+      title: 'Renamed Session',
+    });
     expect(toolkit.getCurrentTab().appState.columns).toEqual(['message']);
     expect(selectHasUnsavedChanges(toolkit.internalState.getState(), comparisonContext)).toEqual({
       hasUnsavedChanges: true,
@@ -83,24 +114,13 @@ describe('renameDiscoverSession', () => {
     });
   });
 
-  it('should update the persisted session and the recently accessed list', async () => {
-    const { toolkit, services, persistedDiscoverSession } = await setup();
+  it('should add the renamed session to the recently accessed list', async () => {
+    const { toolkit, services } = await setup();
 
     await toolkit.internalState
       .dispatch(internalStateActions.renameDiscoverSession({ newTitle: 'Renamed Session' }))
       .unwrap();
 
-    const expectedDiscoverSession: DiscoverSession = {
-      id: 'test-session',
-      title: 'Renamed Session',
-      description: 'Test Description',
-      tabs: persistedDiscoverSession.tabs,
-      tags: ['tag1'],
-      managed: false,
-    };
-    expect(toolkit.internalState.getState().persistedDiscoverSession).toEqual(
-      expectedDiscoverSession
-    );
     expect(services.chrome.recentlyAccessed.add).toHaveBeenCalledTimes(1);
     expect(services.chrome.recentlyAccessed.add).toHaveBeenCalledWith(
       '/app/discover#/view/test-session',
@@ -125,6 +145,24 @@ describe('renameDiscoverSession', () => {
 
     expect(toolkit.internalState.getState().persistedDiscoverSession).toBe(initialPersisted);
     expect(services.chrome.recentlyAccessed.add).not.toHaveBeenCalled();
+  });
+
+  it('should reject without saving when the latest saved version cannot be loaded', async () => {
+    const { toolkit, services } = await setup();
+    const initialPersisted = toolkit.internalState.getState().persistedDiscoverSession;
+
+    jest
+      .mocked(services.discoverSessionService.get)
+      .mockRejectedValueOnce(new Error('Session not found'));
+
+    await expect(
+      toolkit.internalState
+        .dispatch(internalStateActions.renameDiscoverSession({ newTitle: 'Renamed Session' }))
+        .unwrap()
+    ).rejects.toHaveProperty('message', 'Session not found');
+
+    expect(services.discoverSessionService.save).not.toHaveBeenCalled();
+    expect(toolkit.internalState.getState().persistedDiscoverSession).toBe(initialPersisted);
   });
 
   it('should keep the title as a draft without saving when the session has never been saved', async () => {
