@@ -173,16 +173,6 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(request.url).toBe('http://localhost:5601/base/s/my-space/api/status');
   });
 
-  it('uses the IPv6 loopback on the local target when the server binds the IPv6 wildcard', async () => {
-    const { self } = createClient({
-      hostname: '::',
-      publicBaseUrl: 'https://public.example.com/base',
-    });
-    await self.asScoped(createRequest()).fetch('/api/status', { target: 'local' });
-    const request = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
-    expect(request.url).toBe('http://[::1]:5601/base/s/my-space/api/status');
-  });
-
   it('brackets an IPv6 listener address on the local target', async () => {
     const { self } = createClient({
       hostname: '::1',

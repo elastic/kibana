@@ -368,20 +368,12 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
       throw new Error('Cannot call Kibana self HTTP APIs when the server protocol is "socket".');
     }
 
-    let urlHost: string;
+    const hostname =
+      serverInfo.hostname === '0.0.0.0' || serverInfo.hostname === '::'
+        ? 'localhost'
+        : formatUrlHostname(serverInfo.hostname);
 
-    if (serverInfo.hostname === '0.0.0.0') {
-      // Wildcard bind on v4; map to `localhost` as it's consistent across all operating systems
-      urlHost = 'localhost';
-    } else if (serverInfo.hostname === '::') {
-      // Wildcard bind on v6; map to IPv6 loopback address because `localhost` doesn't universally
-      // resolve to the loopback IPv6 address
-      urlHost = '::1';
-    } else {
-      urlHost = serverInfo.hostname;
-    }
-
-    return new URL(`${serverInfo.protocol}://${formatUrlHostname(urlHost)}:${serverInfo.port}`);
+    return new URL(`${serverInfo.protocol}://${hostname}:${serverInfo.port}`);
   }
 
   private createHeaders<TRequestBody>(
