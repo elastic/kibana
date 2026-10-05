@@ -34,10 +34,11 @@ test.describe(
     test('should display ES|QL statement results on map', async ({ pageObjects }) => {
       await pageObjects.maps.openMapWithId(ESQL_EXAMPLE_MAP_ID);
 
-      const tooltipText = await pageObjects.maps.getLayerTocTooltipMsg('logstash-*');
-      expect(tooltipText).toBe(
-        'logstash-*\nFound 5 rows.\nResults narrowed by global time\nResults narrowed by visible map area'
-      );
+      await expect
+        .poll(() => pageObjects.maps.getLayerTocTooltipMsg('logstash-*'), { timeout: 20_000 })
+        .toBe(
+          'logstash-*\nFound 5 rows.\nResults narrowed by global time\nResults narrowed by visible map area'
+        );
     });
   }
 );
