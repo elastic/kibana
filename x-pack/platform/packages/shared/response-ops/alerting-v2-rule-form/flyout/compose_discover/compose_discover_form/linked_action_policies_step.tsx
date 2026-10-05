@@ -80,12 +80,11 @@ export const LinkedActionPoliciesStep = ({
   CreateActionPolicyFormFlyout,
 }: Props) => {
   const metadata = useWatch<FormValues, 'metadata'>({ name: 'metadata' });
-  const tags = metadata?.tags;
+  const routingTags = metadata?.routingTags;
   const queryClient = useQueryClient();
   const [isCreateFlyoutOpen, setIsCreateFlyoutOpen] = useState(false);
 
-  const { isLoading, error, items } = useMatchedActionPolicies({ http, tags });
-  const ruleTags = tags ?? [];
+  const { isLoading, error, items } = useMatchedActionPolicies({ http, routingTags });
 
   const { connectorTypesByPolicy } = useActionPolicyConnectorTypes(
     items.map(({ action_policy: actionPolicy }) => actionPolicy)
@@ -164,7 +163,7 @@ export const LinkedActionPoliciesStep = ({
                         <MatchedPolicyReason
                           category={category}
                           matcher={actionPolicy.matcher}
-                          ruleTags={ruleTags}
+                          routingTags={routingTags ?? []}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>

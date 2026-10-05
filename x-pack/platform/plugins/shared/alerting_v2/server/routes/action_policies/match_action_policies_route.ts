@@ -69,7 +69,7 @@ export class MatchActionPoliciesRoute extends BaseAlertingRoute {
   protected async execute() {
     const { rule } = this.request.body ?? {};
     const result = await this.actionPolicyClient.matchActionPolicies({
-      ruleTags: rule?.tags,
+      routingTags: rule?.routing_tags,
     });
     return this.ctx.response.ok({ body: result });
   }

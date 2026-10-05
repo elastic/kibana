@@ -17,7 +17,7 @@ import { useActionPolicyConnectorTypes } from './use_action_policy_connector_typ
 
 jest.mock('react-hook-form', () => ({
   ...jest.requireActual('react-hook-form'),
-  useWatch: jest.fn().mockReturnValue({ name: '', tags: [] }),
+  useWatch: jest.fn().mockReturnValue({ name: '', routingTags: [] }),
 }));
 
 jest.mock('./use_matched_action_policies', () => ({
@@ -205,7 +205,7 @@ describe('LinkedActionPoliciesStep', () => {
   });
 
   it('renders a tags badge for a policy matched by tags', () => {
-    mockUseWatch.mockReturnValue({ name: 'My Rule', tags: ['env:prod', 'other'] });
+    mockUseWatch.mockReturnValue({ name: 'My Rule', routingTags: ['env:prod', 'other'] });
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
       isPreviousData: false,
@@ -229,13 +229,13 @@ describe('LinkedActionPoliciesStep', () => {
     expect(screen.getByTestId('matchedPolicyReasonTags')).toBeInTheDocument();
     expect(screen.getByTestId('matchedPolicyReasonTags')).toHaveAttribute(
       'aria-label',
-      'Matching rule tags: env:prod'
+      'Matching routing tags: env:prod'
     );
     expect(screen.queryByTestId('matchedPolicyReasonCatchAll')).not.toBeInTheDocument();
   });
 
   it('renders both tags and expression badges when the matcher has both clauses', () => {
-    mockUseWatch.mockReturnValue({ name: 'My Rule', tags: ['env:prod'] });
+    mockUseWatch.mockReturnValue({ name: 'My Rule', routingTags: ['env:prod'] });
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
       isPreviousData: false,
@@ -367,8 +367,8 @@ describe('LinkedActionPoliciesStep', () => {
     expect(screen.getByTestId('linkedActionPoliciesError')).toBeInTheDocument();
   });
 
-  it('passes the current form tags to the matcher hook so unsaved changes are reflected', () => {
-    mockUseWatch.mockReturnValue({ name: 'My Rule', tags: ['env:prod'] });
+  it('passes the current form routing tags to the matcher hook so unsaved changes are reflected', () => {
+    mockUseWatch.mockReturnValue({ name: 'My Rule', routingTags: ['env:prod'] });
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
       isPreviousData: false,
@@ -381,7 +381,7 @@ describe('LinkedActionPoliciesStep', () => {
     renderComponent();
 
     expect(mockUseMatchedActionPolicies).toHaveBeenCalledWith(
-      expect.objectContaining({ tags: ['env:prod'] })
+      expect.objectContaining({ routingTags: ['env:prod'] })
     );
   });
 });

@@ -40,6 +40,9 @@ export const composeFormToCreateRequest = (
       name: formValues.metadata.name,
       description: formValues.metadata.description,
       ...(formValues.metadata.tags?.length ? { tags: formValues.metadata.tags } : {}),
+      ...(formValues.metadata.routingTags?.length
+        ? { routing_tags: formValues.metadata.routingTags }
+        : {}),
       ...(builderType ? { builder_type: builderType } : {}),
     },
     time_field: formValues.timeField,
@@ -64,6 +67,10 @@ export const composeFormToUpdateRequest = (
   return {
     ...rest,
     metadata: {
+      /*
+       * `routing_tags` stays omitted when empty, which preserves the stored value:
+       * the YAML editor does not carry routing tags, so clearing here would wipe them.
+       */
       ...metadata,
       builder_type: metadata.builder_type ?? null,
       // Empty tags must be sent as an explicit `null` to clear them; omitting
@@ -98,6 +105,7 @@ export const mapRuleToComposeFormValues = (rule: RuleResponse): FormValues => {
       description: rule.metadata.description,
       enabled: rule.enabled,
       tags: rule.metadata.tags,
+      routingTags: rule.metadata.routing_tags,
     },
     timeField: rule.time_field,
     schedule: {

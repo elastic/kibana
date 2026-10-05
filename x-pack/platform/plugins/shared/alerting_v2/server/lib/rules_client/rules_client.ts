@@ -1056,8 +1056,9 @@ export class RulesClient {
   }
 
   /**
-   * Finds the alert rules in scope of a policy matcher: those with at least one of its tags, or every
-   * alert rule when it has no tags. Signal rules never create alerts, so no policy applies to them.
+   * Finds the alert rules in scope of a policy matcher: those with at least one of its tags in
+   * `metadata.routing_tags`, or every alert rule when it has no tags. Signal rules never create
+   * alerts, so no policy applies to them.
    * The matcher expression runs against alerts, so it can't narrow rules down.
    */
   @withApm

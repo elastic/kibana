@@ -2195,7 +2195,7 @@ describe('RulesClient', () => {
 
   describe('findMatchingRules', () => {
     const kindFilter = `${RULE_SAVED_OBJECT_TYPE}.attributes.kind: alert`;
-    const tagsField = `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.tags`;
+    const tagsField = `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.routing_tags`;
 
     it('finds the alert rules with any of the matcher tags, sorted by name', async () => {
       const client = createClient();

@@ -3161,7 +3161,7 @@ describe('ActionPolicyClient', () => {
         )
       );
 
-      const result = await client.matchActionPolicies({ ruleTags: ['prod'] });
+      const result = await client.matchActionPolicies({ routingTags: ['prod'] });
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0].category).toBe('catch_all');
@@ -3189,7 +3189,7 @@ describe('ActionPolicyClient', () => {
         )
       );
 
-      const result = await client.matchActionPolicies({ ruleTags: ['prod'] });
+      const result = await client.matchActionPolicies({ routingTags: ['prod'] });
 
       expect(result.items).toHaveLength(evaluatedCount);
       expect(result).toMatchObject({
@@ -3212,7 +3212,7 @@ describe('ActionPolicyClient', () => {
         makeFindResponse([{ id: 'ap-empty-matcher', attributes: matcherAttr }])
       );
 
-      const result = await client.matchActionPolicies({ ruleTags: ['prod'] });
+      const result = await client.matchActionPolicies({ routingTags: ['prod'] });
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0].category).toBe('catch_all');
@@ -3240,7 +3240,7 @@ describe('ActionPolicyClient', () => {
         makeFindResponse([{ id: 'ap-matcher', attributes: matcherAttr }])
       );
 
-      const result = await client.matchActionPolicies({ ruleTags: ['prod'] });
+      const result = await client.matchActionPolicies({ routingTags: ['prod'] });
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0].category).toBe('tags');
@@ -3257,7 +3257,7 @@ describe('ActionPolicyClient', () => {
         makeFindResponse([{ id: 'ap-no-match', attributes: matcherAttr }])
       );
 
-      const result = await client.matchActionPolicies({ ruleTags: ['prod'] });
+      const result = await client.matchActionPolicies({ routingTags: ['prod'] });
 
       expect(result.items).toHaveLength(0);
     });
@@ -3272,7 +3272,7 @@ describe('ActionPolicyClient', () => {
         makeFindResponse([{ id: 'ap-expression', attributes: matcherAttr }])
       );
 
-      const result = await client.matchActionPolicies({ ruleTags: ['prod'] });
+      const result = await client.matchActionPolicies({ routingTags: ['prod'] });
 
       expect(result.items).toHaveLength(0);
     });
@@ -3287,7 +3287,7 @@ describe('ActionPolicyClient', () => {
         makeFindResponse([{ id: 'ap-combined', attributes: matcherAttr }])
       );
 
-      const result = await client.matchActionPolicies({ ruleTags: ['prod', 'infra'] });
+      const result = await client.matchActionPolicies({ routingTags: ['prod', 'infra'] });
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0].category).toBe('tags');
