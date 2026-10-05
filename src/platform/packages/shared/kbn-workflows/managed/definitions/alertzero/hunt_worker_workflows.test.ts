@@ -1,0 +1,391 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { parse } from 'yaml';
+import {
+  ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW,
+  ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW,
+  ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW,
+  ALERTZERO_HUNT_WORKFLOW,
+  ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW,
+} from '.';
+import { createWorkflowLiquidEngine } from '../../../common/utils';
+
+// Route-path and cross-package id checks (including the SYSTEM_SECURITY_HUNT_*
+// cross-check) live in the alertzero PLUGIN's own hunt_children_contract.test.ts, not
+// here: this package (kbn-workflows) is a generic platform package with no dependency on
+// @kbn/alertzero-common (a security-solution-specific package; no other file in
+// kbn-workflows imports runtime values from it, and adding one here is the wrong
+// direction -- solution packages depend on platform packages, not the reverse). The
+// plugin's test already safely imports both @kbn/workflows/managed and
+// @kbn/alertzero-common, so that is where a real (non-mirrored) check against those
+// constants belongs.
+
+// The raw `parse(yaml)` tree, not WorkflowSchema's parsed output -- see
+// attack_discovery_workflows.test.ts's identical note: the schema types nested step
+// arrays as z.array(BaseStepSchema), which strips `with`/`tags`/`triggers` fields the
+// schema itself doesn't define, so asserting against the schema's output would read
+// `undefined` for everything this file checks.
+interface TriggerInputProperty {
+  type?: string;
+  properties?: Record<string, unknown>;
+}
+
+interface TriggerInputSchema {
+  properties?: Record<string, TriggerInputProperty>;
+  required?: string[];
+  additionalProperties?: boolean;
+}
+
+interface YamlStep {
+  name: string;
+  type?: string;
+  with?: { 'workflow-id'?: string; inputs?: Record<string, unknown>; path?: string };
+  if?: string;
+  steps?: YamlStep[];
+}
+
+interface YamlWorkflow {
+  tags?: string[];
+  triggers?: Array<{ type: string; inputs?: TriggerInputSchema }>;
+  steps: YamlStep[];
+  settings?: { concurrency?: { key?: string; strategy?: string; max?: number } };
+}
+
+const flatten = (steps: YamlStep[]): YamlStep[] =>
+  steps.flatMap((step) => [step, ...flatten(step.steps ?? [])]);
+
+const worker = parse(
+  ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW.yamlTemplate({
+    settingsVersion: 1,
+    autonomyLevel: 'manual',
+    scheduleInterval: '4h',
+  })
+) as YamlWorkflow;
+const findOrCreateInvestigation = parse(
+  ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW.yaml
+) as YamlWorkflow;
+const hunt = parse(ALERTZERO_HUNT_WORKFLOW.yaml) as YamlWorkflow;
+const packageReport = parse(ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW.yaml) as YamlWorkflow;
+const proposalGate = parse(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW.yaml) as YamlWorkflow;
+
+const workerSteps = flatten(worker.steps);
+const packageReportSteps = flatten(packageReport.steps);
+const proposalGateSteps = flatten(proposalGate.steps);
+
+const stepIn = (steps: YamlStep[], name: string) => steps.find((step) => step.name === name);
+
+// Evaluates a single `${{ }}` expression the way the engine does (same approach as
+// coverage_review.test.ts's evaluateExpression / forensics_run_endpoint_analysis.test.ts's
+// evaluate): strip the delimiters and run the real Liquid engine against a hand-built context.
+const evaluateExpression = (expression: string, context: Record<string, unknown>): unknown => {
+  const trimmed = expression.trim();
+  if (!(trimmed.startsWith('${{') && trimmed.endsWith('}}'))) {
+    throw new Error(`Expected \${{ }} expression, got: ${expression}`);
+  }
+  return createWorkflowLiquidEngine().evalValueSync(trimmed.slice(3, -2).trim(), context);
+};
+
+describe('Hunt Watch worker chain', () => {
+  // 1b: the two feature children carry exactly the shared tag pair, and neither the
+  // Worker-only watch tags.
+  it.each([
+    ['hunt_package_report', packageReport],
+    ['hunt_proposal_gate', proposalGate],
+  ])('%s is tagged exactly security + continuous-threat-hunt', (_name, yaml) => {
+    expect(new Set(yaml.tags ?? [])).toEqual(new Set(['security', 'continuous-threat-hunt']));
+  });
+
+  it.each([
+    ['hunt_package_report', packageReport],
+    ['hunt_proposal_gate', proposalGate],
+  ])('%s carries neither watch nor watch-hunt', (_name, yaml) => {
+    expect(yaml.tags ?? []).not.toContain('watch');
+    expect(yaml.tags ?? []).not.toContain('watch-hunt');
+  });
+
+  // Narrows, but does not close, the existing-Proposals guard's race window (see the YAML's own
+  // concurrency comment for why) — queued, not dropped, so a racing run still packages rather
+  // than being silently lost.
+  it('hunt_package_report serializes per Investigation via a queued concurrency key', () => {
+    expect(packageReport.settings?.concurrency).toEqual({
+      key: 'hunt-package-report-{{ inputs.investigationConversationId }}',
+      strategy: 'queue',
+      max: 1,
+    });
+  });
+
+  // 1e: each child's own declared trigger input schema is what the caller's payload is
+  // checked against -- not a hand-typed copy of it that could drift from the real schema.
+  describe('call-site inputs satisfy the declared child schema', () => {
+    const requiredInputsOf = (child: YamlWorkflow): string[] =>
+      child.triggers?.[0]?.inputs?.required ?? [];
+    const declaredPropertiesOf = (child: YamlWorkflow): string[] =>
+      Object.keys(child.triggers?.[0]?.inputs?.properties ?? {});
+    const isClosed = (child: YamlWorkflow): boolean =>
+      child.triggers?.[0]?.inputs?.additionalProperties === false;
+
+    const assertSatisfies = (child: YamlWorkflow, callSiteInputs: Record<string, unknown>) => {
+      const provided = Object.keys(callSiteInputs);
+      const required = requiredInputsOf(child);
+      const declared = declaredPropertiesOf(child);
+
+      expect(required.filter((key) => !provided.includes(key))).toEqual([]);
+      if (isClosed(child)) {
+        expect(provided.filter((key) => !declared.includes(key))).toEqual([]);
+      }
+    };
+
+    it('find_or_create_investigation call site', () => {
+      assertSatisfies(
+        findOrCreateInvestigation,
+        stepIn(workerSteps, 'find_or_create_investigation')?.with?.inputs ?? {}
+      );
+    });
+
+    it('hunt call site', () => {
+      assertSatisfies(hunt, stepIn(workerSteps, 'hunt')?.with?.inputs ?? {});
+    });
+
+    it('package_report call site', () => {
+      assertSatisfies(packageReport, stepIn(workerSteps, 'package_report')?.with?.inputs ?? {});
+    });
+
+    it('proposal_gate call site', () => {
+      const dispatch = stepIn(
+        flatten(stepIn(packageReportSteps, 'start_proposal_gates')?.steps ?? []),
+        'dispatch_gate'
+      );
+
+      assertSatisfies(proposalGate, dispatch?.with?.inputs ?? {});
+    });
+  });
+
+  // 1c/1d: uniqueness and workflow.execute-id resolution across the WHOLE registry are
+  // proven in managed_workflow_definitions.test.ts ("registers all four hunt child ids
+  // exactly once", "resolves every workflow.execute/executeAsync id the Worker's
+  // rendered YAML references"); this just pins the ids these five files actually
+  // resolve to, so a rename on one side (a child's own id constant) without the other
+  // (the caller's workflow-id string) fails here instead of at runtime.
+  it.each([
+    ['find_or_create_investigation', ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW.id],
+    ['hunt', ALERTZERO_HUNT_WORKFLOW.id],
+    ['package_report', ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW.id],
+  ] as const)('the Worker dispatches %s by its registered id', (stepName, id) => {
+    expect(stepIn(workerSteps, stepName)?.with?.['workflow-id']).toBe(id);
+  });
+
+  describe('the sweep gate', () => {
+    const renderedWorker = ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW.yamlTemplate({
+      settingsVersion: 1,
+      autonomyLevel: 'manual',
+      scheduleInterval: '4h',
+    });
+
+    it('renders with no technology placeholder, const, or child input', () => {
+      expect(renderedWorker).not.toMatch(/technolog/i);
+      expect(renderedWorker).not.toMatch(/__WORKER_[A-Z_]+__/);
+      expect(stepIn(workerSteps, 'hunt')?.with?.inputs).not.toHaveProperty('technology');
+      expect(hunt.triggers?.[0]?.inputs?.properties).not.toHaveProperty('technology');
+    });
+
+    it('reads the single scope status, and only ok or degraded lets the sweep proceed', () => {
+      const gate = stepIn(workerSteps, 'resolve_index_scope_gate') as YamlStep & {
+        with: { index_scope_blocked: string };
+      };
+
+      // A missing output (an errored call) matches neither status, so it reads as blocked.
+      expect(gate.with.index_scope_blocked).toBe(
+        "${{ steps.check_index_scope.output.status != 'ok' and steps.check_index_scope.output.status != 'degraded' }}"
+      );
+      expect(stepIn(workerSteps, 'count_index_scope_statuses')).toBeUndefined();
+    });
+  });
+
+  it('the packaging child dispatches the gate by its registered id', () => {
+    const dispatch = stepIn(
+      flatten(stepIn(packageReportSteps, 'start_proposal_gates')?.steps ?? []),
+      'dispatch_gate'
+    );
+
+    expect(dispatch?.with?.['workflow-id']).toBe(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW.id);
+  });
+
+  // The gate's settlement predicate lives entirely in Liquid (resolve_settlement_counts ->
+  // resolve_settled -> close_if_settled's `if`), so it has no TypeScript step handler to unit
+  // test directly -- evaluated here against the real YAML the way the engine would, same
+  // approach coverage_review.test.ts's evaluateMarkProcessed uses for its own chained
+  // data.set -> if. Covers elastic/security-team#19773's two counting bugs: the requery
+  // pagination fix (status-scoped `total` reads replacing a truncated page) and the
+  // pending/executing fail-closed default (a failed status read must never be
+  // indistinguishable from "nothing outstanding").
+  describe('proposal gate settlement predicate', () => {
+    const settlementCounts = stepIn(proposalGateSteps, 'resolve_settlement_counts')?.with as
+      | Record<string, string>
+      | undefined;
+    const settledWith = stepIn(proposalGateSteps, 'resolve_settled')?.with as
+      | Record<string, string>
+      | undefined;
+    const closeIf = stepIn(proposalGateSteps, 'close_if_settled')?.if;
+
+    // `undefined` models `on-failure: continue: true` swallowing a failed read: the step
+    // entry exists with an `error`, but no `output` -- never a missing step entry entirely.
+    type RequeryOutcome = { total: number } | undefined;
+
+    const evaluateSettlement = ({
+      created,
+      createdRetry,
+      pending,
+      pendingRetry,
+      executing,
+      executingRetry,
+      expectedProposalCount,
+    }: {
+      created?: RequeryOutcome;
+      createdRetry?: RequeryOutcome;
+      pending?: RequeryOutcome;
+      pendingRetry?: RequeryOutcome;
+      executing?: RequeryOutcome;
+      executingRetry?: RequeryOutcome;
+      expectedProposalCount: number;
+    }) => {
+      const asStepResult = (outcome: RequeryOutcome) =>
+        outcome ? { output: outcome } : { error: { message: 'request failed' } };
+
+      const stepsContext = {
+        steps: {
+          requery_created: asStepResult(created),
+          requery_created_retry: asStepResult(createdRetry),
+          requery_pending: asStepResult(pending),
+          requery_pending_retry: asStepResult(pendingRetry),
+          requery_executing: asStepResult(executing),
+          requery_executing_retry: asStepResult(executingRetry),
+        },
+        inputs: { expectedProposalCount },
+      };
+
+      const createdCount = evaluateExpression(settlementCounts!.created_count, stepsContext);
+      const pendingCount = evaluateExpression(settlementCounts!.pending_count, stepsContext);
+      const executingCount = evaluateExpression(settlementCounts!.executing_count, stepsContext);
+
+      const settlementContext = {
+        variables: {
+          created_count: createdCount,
+          pending_count: pendingCount,
+          executing_count: executingCount,
+        },
+        inputs: { expectedProposalCount },
+      };
+
+      const settled = evaluateExpression(settledWith!.settled, settlementContext);
+      const closes = evaluateExpression(closeIf!, { variables: { settled } });
+
+      return { createdCount, pendingCount, executingCount, settled, closes };
+    };
+
+    it('settles and closes once every count confirms clean, including a genuine zero', () => {
+      const result = evaluateSettlement({
+        created: { total: 3 },
+        createdRetry: { total: 3 },
+        pending: { total: 0 },
+        pendingRetry: { total: 0 },
+        executing: { total: 0 },
+        executingRetry: { total: 0 },
+        expectedProposalCount: 3,
+      });
+
+      // Pins that a successful `total: 0` stays 0 rather than falling through to the
+      // fail-closed `default: 1` -- only a missing (failed) read should ever do that.
+      expect(result).toEqual({
+        createdCount: 3,
+        pendingCount: 0,
+        executingCount: 0,
+        settled: true,
+        closes: true,
+      });
+    });
+
+    it('does not close when a page beyond the first 100 still has a pending Proposal', () => {
+      // The bug this ticket fixes: before the pagination fix, pending/executing were tallied
+      // by filtering a `size: 100` page client-side, which could never see a pending Proposal
+      // past that page. `total` from a status-scoped query is unaffected by page size, so a
+      // large count here still settles correctly only once it is genuinely 0.
+      const result = evaluateSettlement({
+        created: { total: 140 },
+        pending: { total: 1 },
+        executing: { total: 0 },
+        expectedProposalCount: 3,
+      });
+
+      expect(result.pendingCount).toBe(1);
+      expect(result.settled).toBe(false);
+      expect(result.closes).toBe(false);
+    });
+
+    it('fails closed, not open, when both pending reads fail', () => {
+      // The regression this guards: before the fail-closed default, a failed pending pair
+      // collapsed to a literal 0 (same as "nothing pending"), and a correctly-read
+      // created_count/executing_count could still satisfy the rest of the predicate --
+      // closing the Investigation over a Proposal this gate simply failed to observe.
+      const result = evaluateSettlement({
+        created: { total: 3 },
+        executing: { total: 0 },
+        expectedProposalCount: 3,
+      });
+
+      expect(result.pendingCount).toBe(1);
+      expect(result.settled).toBe(false);
+      expect(result.closes).toBe(false);
+    });
+
+    it('fails closed, not open, when both executing reads fail', () => {
+      const result = evaluateSettlement({
+        created: { total: 3 },
+        pending: { total: 0 },
+        expectedProposalCount: 3,
+      });
+
+      expect(result.executingCount).toBe(1);
+      expect(result.settled).toBe(false);
+      expect(result.closes).toBe(false);
+    });
+
+    it('does not settle when both creation reads fail, even with nothing pending or executing', () => {
+      // created_count's own `default: 0` needs no fail-closed sentinel: a 0 created count
+      // essentially never clears `>= expectedProposalCount`, so a failed creation pair already
+      // blocks settlement the same way it did before the requery was split into three pairs.
+      const result = evaluateSettlement({
+        pending: { total: 0 },
+        executing: { total: 0 },
+        expectedProposalCount: 3,
+      });
+
+      expect(result.createdCount).toBe(0);
+      expect(result.settled).toBe(false);
+      expect(result.closes).toBe(false);
+    });
+
+    it('falls back to the first read when only the retry fails', () => {
+      const result = evaluateSettlement({
+        created: { total: 3 },
+        pending: { total: 0 },
+        executing: { total: 0 },
+        expectedProposalCount: 3,
+      });
+
+      expect(result).toEqual({
+        createdCount: 3,
+        pendingCount: 0,
+        executingCount: 0,
+        settled: true,
+        closes: true,
+      });
+    });
+  });
+});

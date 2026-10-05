@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { IRouter, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { ConversationsStart } from '@kbn/agent-builder-server';
-import type { AlertZeroSpaceIdResolver } from '../types';
+import type { AlertZeroRouter, AlertZeroSpaceIdResolver } from '../types';
 import type { WatchesService } from '../services/watches/watches_service';
 import type { WorkersService } from '../services/workers/workers_service';
 import type { ConversationProposalsService } from '../services/conversation_proposals/conversation_proposals_service';
@@ -26,7 +26,7 @@ import { registerGetScanFailuresRoute } from './scan_failures/get_scan_failures'
 import { registerHuntRoutes } from './hunt/register_hunt_routes';
 
 export interface RouteDependencies {
-  router: IRouter;
+  router: AlertZeroRouter;
   logger: Logger;
   getSpaceId: AlertZeroSpaceIdResolver;
   getWatchesService: () => WatchesService;

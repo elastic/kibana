@@ -14,18 +14,24 @@ import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
+interface AgentPoliciesSelection {
+  agentPoliciesById: Record<string, GetAgentPoliciesResponseItem>;
+  agentPolicies: GetAgentPoliciesResponseItem[];
+}
+
+// Module-level so the reference stays stable: react-query only reuses the
+// memoized selection while `options.select` is identity-equal, and an inline
+// arrow would hand every consumer a fresh `agentPoliciesById` on each render.
+const selectAgentPolicies = (response: GetAgentPoliciesResponseItem[]): AgentPoliciesSelection => ({
+  agentPoliciesById: mapKeys(response, 'id'),
+  agentPolicies: response,
+});
+
 export const useAgentPolicies = () => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useQuery<
-    GetAgentPoliciesResponseItem[],
-    unknown,
-    {
-      agentPoliciesById: Record<string, GetAgentPoliciesResponseItem>;
-      agentPolicies: GetAgentPoliciesResponseItem[];
-    }
-  >(
+  return useQuery<GetAgentPoliciesResponseItem[], unknown, AgentPoliciesSelection>(
     ['agentPolicies'],
     () =>
       http.get('/internal/osquery/fleet_wrapper/agent_policies', {
@@ -34,10 +40,7 @@ export const useAgentPolicies = () => {
     {
       initialData: [],
       keepPreviousData: true,
-      select: (response) => ({
-        agentPoliciesById: mapKeys(response, 'id'),
-        agentPolicies: response,
-      }),
+      select: selectAgentPolicies,
       onSuccess: () => setErrorToast(),
       onError: (error) =>
         setErrorToast(error as Error, {
