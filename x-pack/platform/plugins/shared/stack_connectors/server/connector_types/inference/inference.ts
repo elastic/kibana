@@ -52,12 +52,15 @@ import {
   chunksIntoMessage,
   eventSourceStreamIntoObservable,
   detectandThrowUserError,
+  buildInferenceErrorMessage,
+  truncateUpstreamBody,
 } from './helpers';
 
 export class InferenceConnector extends SubActionConnector<Config, Secrets> {
-  // Not using Axios
+  // Not using Axios for requests, but errors may be Axios-shaped or Elasticsearch client ResponseError-shaped.
+  // Must never throw, otherwise the original (upstream) error is lost.
   protected getResponseErrorMessage(error: AxiosError): string {
-    throw new Error(error.message || 'Method not implemented.');
+    return buildInferenceErrorMessage(error);
   }
 
   private inferenceId;
@@ -224,7 +227,11 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     if (response.statusCode >= 400) {
       const error = await streamToString(response.body as unknown as Readable);
       detectandThrowUserError(error);
-      throw new Error(error);
+      throw new Error(
+        `Inference endpoint [${this.inferenceId}] returned status code ${
+          response.statusCode
+        }: ${truncateUpstreamBody(error)}`
+      );
     }
 
     return response.body;

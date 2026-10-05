@@ -159,3 +159,64 @@ export const detectandThrowUserError = (error: string) => {
     throw createTaskRunError(new Error(error), TaskErrorSource.USER);
   }
 };
+
+export const MAX_UPSTREAM_BODY_LENGTH = 1000;
+
+const stringifyUpstreamBody = (body: unknown): string => {
+  if (body === undefined || body === null) return '';
+  if (typeof body === 'string') return body;
+  if (Buffer.isBuffer(body)) return body.toString('utf8');
+  try {
+    return JSON.stringify(body) ?? '';
+  } catch (e) {
+    return String(body);
+  }
+};
+
+/**
+ * Stringifies an upstream response body and caps its length so that it can safely be
+ * included in an error message.
+ */
+export const truncateUpstreamBody = (
+  body: unknown,
+  maxLength: number = MAX_UPSTREAM_BODY_LENGTH
+): string => {
+  const text = stringifyUpstreamBody(body);
+  return text.length > maxLength ? `${text.slice(0, maxLength)}... [truncated]` : text;
+};
+
+/**
+ * Builds a human readable message out of an error thrown while calling the inference endpoint.
+ * Handles AxiosError-shaped (response.status / response.data) and Elasticsearch client
+ * ResponseError-shaped (statusCode / body / meta) errors, as well as plain errors. Never throws.
+ */
+export const buildInferenceErrorMessage = (error: unknown): string => {
+  try {
+    if (error === undefined || error === null) return 'Unknown error';
+    if (typeof error === 'string') return error;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const err = error as any;
+    const baseMessage: string =
+      typeof err.message === 'string' && err.message.length > 0 ? err.message : '';
+    const statusCode = err.response?.status ?? err.statusCode ?? err.status ?? err.meta?.statusCode;
+    const rawBody = err.response?.data ?? err.body ?? err.data ?? err.meta?.body;
+    const body = truncateUpstreamBody(rawBody);
+
+    const parts: string[] = [];
+    if (baseMessage) parts.push(baseMessage);
+    if (statusCode !== undefined && statusCode !== null && !baseMessage.includes(`${statusCode}`)) {
+      parts.push(`Status code: ${statusCode}`);
+    }
+    // avoid repeating the body when it is already part of the error message
+    if (body && !baseMessage.includes(body)) {
+      parts.push(`Upstream response: ${body}`);
+    }
+    if (parts.length > 0) return parts.join('. ');
+
+    const fallback = truncateUpstreamBody(err);
+    return fallback && fallback !== '{}' ? fallback : 'Unknown error';
+  } catch (e) {
+    return 'Unknown error';
+  }
+};
