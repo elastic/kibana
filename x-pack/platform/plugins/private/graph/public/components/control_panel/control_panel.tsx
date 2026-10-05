@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { connect, useDispatch, useSelector } from 'react-redux';
+import { connect, useDispatch, useSelector, useStore } from 'react-redux';
 import { type UseEuiTheme, useEuiShadow, euiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ControlType, TermIntersect, UrlTemplate, WorkspaceField } from '../../types';
@@ -25,12 +25,15 @@ import {
   type GraphDispatch,
   liveResponseFieldsSelector,
   templatesSelector,
-  workspaceSelector,
 } from '../../state_management';
 import { SelectedNodeItem, type SelectedNodeView } from './selected_node_item';
 import { getIcon } from '../../helpers/style_choices';
 import { gphSidebarHeaderStyles } from '../../styles';
 import { createRuntimeGraphFromState } from '../../services/workspace/sync_runtime_topology';
+import {
+  areControlPanelWorkspacesEqual,
+  controlPanelWorkspaceSelector,
+} from './control_panel_workspace_selector';
 
 export interface TargetOptions {
   toFields: WorkspaceField[];
@@ -61,7 +64,8 @@ const ControlPanelComponent = ({
   selectSelected,
 }: ControlPanelProps & ControlPanelStateProps) => {
   const dispatch = useDispatch<GraphDispatch>();
-  const workspaceState = useSelector(workspaceSelector);
+  const store = useStore<GraphState>();
+  const workspaceState = useSelector(controlPanelWorkspaceSelector, areControlPanelWorkspacesEqual);
   const { nodeIds, nodesById, selectedNodeIds } = workspaceState;
   const childCounts = nodeIds.reduce<Record<string, number>>((counts, nodeId) => {
     const parentId = nodesById[nodeId].parentId;
@@ -83,7 +87,10 @@ const ControlPanelComponent = ({
     const url = template.url;
     const newUrl = url.replace(
       urlTemplateRegex,
-      template.encoder.encode(createRuntimeGraphFromState(workspaceState), selectedNodeIds)
+      template.encoder.encode(
+        createRuntimeGraphFromState(store.getState().workspace),
+        selectedNodeIds
+      )
     );
     window.open(newUrl, '_blank', 'noopener,noreferrer');
   };
