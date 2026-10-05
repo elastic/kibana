@@ -266,11 +266,11 @@ describe('MemoryKeywordTreemap', () => {
     expect(layer().fillLabel!.clipText).toBe(false);
   });
 
-  it('still clips a multi-cell chart, where a long keyword would overrun its cell', () => {
+  it('leaves a keyword that fits no font size to its tooltip rather than chopping it', () => {
     renderTreemap();
 
     expect(partition().data.length).toBeGreaterThan(1);
-    expect(layer().fillLabel!.clipText).toBe(true);
+    expect(layer().fillLabel).toMatchObject({ clipText: false, maximizeFontSize: true });
   });
 
   /**

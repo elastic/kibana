@@ -100,7 +100,9 @@ export function MemoryHome({
   const mostUseful = useMemo(
     () =>
       [...filteredPages]
-        .filter((page) => !page.archived)
+        // A memory with no proven score has nothing to rank it by, so a store of
+        // unsurfaced memories shows no section rather than three arbitrary rows.
+        .filter((page) => !page.archived && page.usefulness * page.confidence > 0)
         .sort((a, b) => b.usefulness * b.confidence - a.usefulness * a.confidence)
         .slice(0, MOST_USEFUL_COUNT),
     [filteredPages]
@@ -201,8 +203,8 @@ export function MemoryHome({
 
       {keywordStatus === 'ready' && mostUseful.length > 0 && (
         <>
-          <EuiSpacer size="m" />
-          <EuiTitle size="xxs">
+          <EuiSpacer size="l" />
+          <EuiTitle size="xs">
             <h3>
               <FormattedMessage
                 id="xpack.significantEventsApp.memory.mostUsefulTitle"
@@ -211,16 +213,16 @@ export function MemoryHome({
             </h3>
           </EuiTitle>
           <EuiSpacer size="s" />
-          {mostUseful.map((page) => (
+          {mostUseful.map((page, index) => (
             <React.Fragment key={page.id}>
+              {index > 0 && <EuiHorizontalRule margin="s" />}
               <MemoryPageRow page={page} onSelectPage={onSelectPage} />
-              <EuiHorizontalRule margin="s" />
             </React.Fragment>
           ))}
         </>
       )}
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       {keywordStatus !== 'ready' ? null : recentlyUpdated.length === 0 ? (
         // With nothing to list, the section heading would be a label with no
         // section under it, so the empty message stands on its own.
@@ -232,7 +234,7 @@ export function MemoryHome({
         </EuiText>
       ) : (
         <>
-          <EuiTitle size="xxs">
+          <EuiTitle size="xs">
             <h3>
               <FormattedMessage
                 id="xpack.significantEventsApp.memory.recentlyUpdatedTitle"

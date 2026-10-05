@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { getMemoryArchiveReasonLabel } from './labels';
 import type { MemorySummary } from './types';
@@ -20,14 +21,21 @@ interface MemoryPageRowProps {
 
 export function MemoryPageRow({ page, onSelectPage }: MemoryPageRowProps) {
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-      <EuiFlexItem>
-        <EuiLink
-          onClick={() => onSelectPage(page.id)}
-          data-test-subj={`nightshiftMemoryRow-${page.id}`}
-        >
-          {page.title}
-        </EuiLink>
+    <EuiFlexGroup gutterSize="m" alignItems="baseline" responsive={false}>
+      <EuiFlexItem
+        className={css`
+          min-width: 0;
+        `}
+      >
+        <EuiText size="s" className="eui-textTruncate">
+          <EuiLink
+            color="text"
+            onClick={() => onSelectPage(page.id)}
+            data-test-subj={`nightshiftMemoryRow-${page.id}`}
+          >
+            {page.title}
+          </EuiLink>
+        </EuiText>
       </EuiFlexItem>
       {page.archived && page.archive_reason !== undefined && (
         <EuiFlexItem grow={false}>
@@ -35,22 +43,19 @@ export function MemoryPageRow({ page, onSelectPage }: MemoryPageRowProps) {
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued">
+        <EuiText size="xs" color="subdued" className="eui-textNoWrap">
           <FormattedMessage
             id="xpack.significantEventsApp.memory.rowUsefulness"
-            defaultMessage="usefulness {usefulness}%"
+            defaultMessage="{usefulness}% useful"
             values={{ usefulness: asPercent(page.usefulness) }}
           />
           {' · '}
           <FormattedMessage
             id="xpack.significantEventsApp.memory.rowConfidence"
-            defaultMessage="confidence {confidence}%"
+            defaultMessage="{confidence}% confidence"
             values={{ confidence: asPercent(page.confidence) }}
           />
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued">
+          {' · '}
           <FormattedRelative value={page.updated_at} />
         </EuiText>
       </EuiFlexItem>

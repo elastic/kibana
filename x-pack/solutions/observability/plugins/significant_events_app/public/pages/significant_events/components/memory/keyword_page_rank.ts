@@ -67,7 +67,7 @@ export const MIN_EDGE_WEIGHT = 0.5 * 0.05;
 export const MAX_RANKED_KEYWORDS = 200;
 
 /** Past this the cells stop being readable, and a treemap that big says nothing. */
-export const MAX_TREEMAP_CELLS = 40;
+export const MAX_TREEMAP_CELLS = 20;
 
 /**
  * Area given to a keyword whose score is zero, so it still has a cell to be

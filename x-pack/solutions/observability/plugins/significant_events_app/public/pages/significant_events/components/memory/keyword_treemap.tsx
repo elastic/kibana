@@ -23,7 +23,9 @@ import {
   EuiSpacer,
   EuiText,
   useEuiPaletteColorBlindBehindText,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import { CrossIcon } from './cross_icon';
@@ -133,17 +135,33 @@ export function MemoryKeywordTreemap({
   const displayNames = useMemo(() => toKeywordDisplayNames(entries), [entries]);
   // Colour-blind safe, and derived through the hook rather than read once at
   // mount, so a theme change re-derives it instead of freezing light-mode
-  // colours into dark mode. Ten colours over forty cells means the palette
+  // colours into dark mode. Ten colours over the cells means the palette
   // repeats, which is fine: a cell's identity is its label.
   const palette = useEuiPaletteColorBlindBehindText();
   const chartBaseTheme = useElasticChartsTheme();
+  const { euiTheme } = useEuiTheme();
+  const chartTheme = useMemo(
+    () => ({
+      partition: {
+        sectorLineWidth: 3,
+        sectorLineStroke: euiTheme.colors.emptyShade,
+      },
+    }),
+    [euiTheme.colors.emptyShade]
+  );
 
   const fillLabel: LayerFillLabel = {
     verticalAlignment: 'middle',
     horizontalAlignment: 'center',
-    clipText: cells.length > 1,
-    fontWeight: 500,
-    minFontSize: 10,
+    clipText: false,
+    fontWeight: 400,
+    // Room between the label and the cell edge, so a keyword reads as sitting
+    // in its cell rather than pressed against the gutter.
+    padding: { top: 4, right: 6, bottom: 4, left: 6 },
+    // Each cell takes the largest font it fits, so the hub keywords read at a
+    // glance; a keyword that fits at no size is left to its tooltip.
+    maximizeFontSize: true,
+    minFontSize: 9,
     maxFontSize: 14,
   };
 
@@ -218,51 +236,55 @@ export function MemoryKeywordTreemap({
           />
         </EuiText>
       ) : (
-        <Chart size={{ width: '100%', height: 240 }}>
-          <Settings
-            baseTheme={chartBaseTheme}
-            // The chart's own legend would list forty keywords; the chart and the
-            // chip row are the only parts that carry meaning here.
-            showLegend={false}
-            onElementClick={onElementClick}
-          />
-          <Partition
-            data={cells}
-            id="nightshift_memory_keyword_treemap"
-            valueAccessor={(cell: KeywordCell) => cell.area}
-            valueFormatter={NO_LABEL_VALUE}
-            layout={PartitionLayout.treemap}
-            layers={[
-              {
-                // One node per keyword, keyed by its canonical form: the
-                // selection stores canonical keys, and the click reports one back.
-                groupByRollup: (cell: KeywordCell) => cell.keyword,
-                shape: {
-                  // `sortIndex` is the cell's place in the value-sorted order the
-                  // chart built from these cells, which is the rank order `cells`
-                  // already sorted into, so the palette needs no lookup of its own.
-                  fillColor: (_key: string, sortIndex: number) =>
-                    palette[sortIndex % palette.length],
+        <div
+          className={css`
+            border-radius: ${euiTheme.border.radius.medium};
+            overflow: hidden;
+          `}
+        >
+          <Chart size={{ width: '100%', height: 220 }}>
+            <Settings
+              baseTheme={chartBaseTheme}
+              theme={chartTheme}
+              // The chart's own legend would list every keyword; the chart and the
+              // chip row are the only parts that carry meaning here.
+              showLegend={false}
+              onElementClick={onElementClick}
+            />
+            <Partition
+              data={cells}
+              id="nightshift_memory_keyword_treemap"
+              valueAccessor={(cell: KeywordCell) => cell.area}
+              valueFormatter={NO_LABEL_VALUE}
+              layout={PartitionLayout.treemap}
+              layers={[
+                {
+                  // One node per keyword, keyed by its canonical form: the
+                  // selection stores canonical keys, and the click reports one back.
+                  groupByRollup: (cell: KeywordCell) => cell.keyword,
+                  shape: {
+                    // `sortIndex` is the cell's place in the value-sorted order the
+                    // chart built from these cells, which is the rank order `cells`
+                    // already sorted into, so the palette needs no lookup of its own.
+                    fillColor: (_key: string, sortIndex: number) =>
+                      palette[sortIndex % palette.length],
+                  },
+                  // `clipText` stays off: the chart only places a label at a size
+                  // that fits its cell, so a keyword that fits at none is left to its
+                  // tooltip rather than chopped mid-word. Clipping also erases the
+                  // label of a one-cell chart, whose clip winds against the cell path
+                  // its previous draw left behind (elastic-charts 73.2.2). The label is
+                  // asked to sit in the middle of its cell, which the pinned chart
+                  // ignores for want of the control; the keys light up on their own
+                  // once Kibana's `@elastic/charts` carries elastic-charts#2912.
+                  fillLabel,
+                  nodeLabel: (key) => cellsByKeyword.get(`${key}`)?.display ?? '',
                 },
-                // `clipText` keeps a long keyword inside its own cell. The label is
-                // asked to sit in the middle of its cell, which the pinned chart
-                // ignores for want of the control; the keys light up on their own
-                // once Kibana's `@elastic/charts` carries elastic-charts#2912.
-                //
-                // A one-cell chart cannot ask for it. The chart builds the label's
-                // clip out of whatever canvas path its previous draw left behind,
-                // and with a single cell that path is the cell itself, so the two
-                // wind against each other and the clip comes out empty: the label
-                // is laid out and then painted nowhere (elastic-charts 73.2.2).
-                // One cell is the whole panel and the chart only places words that
-                // fit inside it, so there is nothing to clip against anyway.
-                fillLabel,
-                nodeLabel: (key) => cellsByKeyword.get(`${key}`)?.display ?? '',
-              },
-            ]}
-          />
-          <Tooltip customTooltip={renderTooltip} />
-        </Chart>
+              ]}
+            />
+            <Tooltip customTooltip={renderTooltip} />
+          </Chart>
+        </div>
       )}
     </div>
   );

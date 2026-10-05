@@ -160,8 +160,8 @@ describe('MemoryTab', () => {
       })
     );
     renderTab();
-    expect(screen.getAllByText(/usefulness 75%/).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/confidence 50%/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/75% useful/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/50% confidence/).length).toBeGreaterThan(0);
   });
 
   it('renders a detail view without offering archive controls for a reader-less surface', () => {
