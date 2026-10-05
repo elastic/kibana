@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { createReactQueryWrapper } from '../../../../../../common/mock/create_react_query_wrapper';
 import { useWatchlistsTableData } from './use_watchlists_table_data';
 
 const mockFetchWatchlists = jest.fn();
@@ -19,16 +18,6 @@ jest.mock('../../../../../api/api', () => ({
     listWatchlistEntitySources: mockListWatchlistEntitySources,
   }),
 }));
-
-const createWrapper = () => {
-  const client = new QueryClient({
-    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
-  });
-  const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <QueryClientProvider client={client}>{children}</QueryClientProvider>
-  );
-  return Wrapper;
-};
 
 describe('useWatchlistsTableData', () => {
   beforeEach(() => {
@@ -64,7 +53,7 @@ describe('useWatchlistsTableData', () => {
 
   it('includes manual assignments in the source label without requesting sources for empty lists', async () => {
     const { result } = renderHook(() => useWatchlistsTableData('default', 0, true), {
-      wrapper: createWrapper(),
+      wrapper: createReactQueryWrapper(),
     });
 
     await waitFor(() => {
@@ -91,7 +80,7 @@ describe('useWatchlistsTableData', () => {
     mockListWatchlistEntitySources.mockRejectedValue(new Error('Request failed'));
 
     const { result } = renderHook(() => useWatchlistsTableData('default', 0, true), {
-      wrapper: createWrapper(),
+      wrapper: createReactQueryWrapper(),
     });
 
     await waitFor(() => {
