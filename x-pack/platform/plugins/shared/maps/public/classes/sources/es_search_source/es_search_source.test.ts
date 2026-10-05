@@ -11,6 +11,9 @@ jest.mock('../../../kibana_services');
 jest.mock('./util/load_index_settings');
 
 import type { SearchSource } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { decode } from '@kbn/rison';
 import { getHttp, getIndexPatternService, getSearchService } from '../../../kibana_services';
 
@@ -288,19 +291,20 @@ describe('ESSearchSource', () => {
             warnings: [],
           },
         });
-        jest.spyOn(esSearchSource, 'getIndexPattern').mockResolvedValue(mockIndexPattern as any);
-        // @ts-expect-error
+        jest
+          .spyOn(esSearchSource, 'getIndexPattern')
+          .mockResolvedValue(mockIndexPattern as unknown as DataView);
         jest.spyOn(esSearchSource, '_getGeoField').mockResolvedValue({
           name: GEO_FIELD_NAME,
           type: ES_GEO_FIELD_TYPE.GEO_POINT,
-        });
+        } as unknown as DataViewField);
 
         const { data } = await esSearchSource.getGeoJsonWithMeta(
           'test',
           topHitsRequestMeta,
           jest.fn(),
           jest.fn(),
-          {} as any
+          {} as unknown as Adapters
         );
         expect(data.features).toHaveLength(10);
       });
@@ -324,19 +328,20 @@ describe('ESSearchSource', () => {
           hits: makeHits(5),
           meta: topHitsMeta,
         });
-        jest.spyOn(esSearchSource, 'getIndexPattern').mockResolvedValue(mockIndexPattern as any);
-        // @ts-expect-error
+        jest
+          .spyOn(esSearchSource, 'getIndexPattern')
+          .mockResolvedValue(mockIndexPattern as unknown as DataView);
         jest.spyOn(esSearchSource, '_getGeoField').mockResolvedValue({
           name: GEO_FIELD_NAME,
           type: ES_GEO_FIELD_TYPE.GEO_POINT,
-        });
+        } as unknown as DataViewField);
 
         const { meta } = await esSearchSource.getGeoJsonWithMeta(
           'test',
           topHitsRequestMeta,
           jest.fn(),
           jest.fn(),
-          {} as any
+          {} as unknown as Adapters
         );
         expect(meta).toEqual(topHitsMeta);
       });
