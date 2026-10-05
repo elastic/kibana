@@ -401,7 +401,7 @@ export const ClassicAlertDetailsFlyout = ({
                   buttonRef={menuAnchorRef}
                   fill
                   iconSide="right"
-                  iconType="chevronSingleDown"
+                  iconType={isMenuOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
                   data-test-subj="alertingV2EpisodeFlyoutTakeActionButton"
                   onClick={() => setIsMenuOpen((open) => !open)}
                 >

@@ -8,20 +8,20 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ALERTZERO_PROPOSAL_ORIGIN } from '../../../../../common/proposals/origin';
-import { createExistingProposalsChecker } from './check_existing_proposals';
+import { createExistingProposalsCounter } from './check_existing_proposals';
 
 const request = {} as KibanaRequest;
 
-describe('createExistingProposalsChecker', () => {
+describe('createExistingProposalsCounter', () => {
   it('scopes the lookup to this conversation, this space, and the alertzero origin', async () => {
     const list = jest.fn().mockResolvedValue({ proposals: [], total: 0 });
-    const checker = createExistingProposalsChecker({
+    const counter = createExistingProposalsCounter({
       proposalsService: { list } as never,
       spaceId: 'test-space',
       request,
     });
 
-    await checker('conv-1');
+    await counter('conv-1');
 
     expect(list).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -37,37 +37,37 @@ describe('createExistingProposalsChecker', () => {
     );
   });
 
-  it('returns true when at least one Proposal exists', async () => {
-    const checker = createExistingProposalsChecker({
+  it('returns the total when at least one Proposal exists', async () => {
+    const counter = createExistingProposalsCounter({
       proposalsService: { list: jest.fn().mockResolvedValue({ proposals: [], total: 3 }) } as never,
       spaceId: 'default',
       request,
     });
 
-    expect(await checker('conv-1')).toBe(true);
+    expect(await counter('conv-1')).toBe(3);
   });
 
-  it('returns false when no Proposal exists', async () => {
-    const checker = createExistingProposalsChecker({
+  it('returns 0 when no Proposal exists', async () => {
+    const counter = createExistingProposalsCounter({
       proposalsService: { list: jest.fn().mockResolvedValue({ proposals: [], total: 0 }) } as never,
       spaceId: 'default',
       request,
     });
 
-    expect(await checker('conv-1')).toBe(false);
+    expect(await counter('conv-1')).toBe(0);
   });
 
   it('logs and rethrows on a lookup failure, rather than swallowing it', async () => {
     const logger = loggingSystemMock.createLogger();
     const error = new Error('proposals index unavailable');
-    const checker = createExistingProposalsChecker({
+    const counter = createExistingProposalsCounter({
       proposalsService: { list: jest.fn().mockRejectedValue(error) } as never,
       spaceId: 'default',
       request,
       logger,
     });
 
-    await expect(checker('conv-1')).rejects.toThrow(error);
+    await expect(counter('conv-1')).rejects.toThrow(error);
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('proposals index unavailable')
     );
