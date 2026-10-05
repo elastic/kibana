@@ -20,6 +20,7 @@ export const ALERT_TRIAGE_DEFAULT_EXTRAS: AlertTriageWorkerExtras = {
 
 export const ALERT_TRIAGE_SETTINGS: WorkerSettingsDeclaration<AlertTriageWorkerExtras> = {
   workerId: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+  settingsVersion: 1,
   // Two levels rather than the shared three, for the same reason as Attack Discovery below:
   // this Worker has exactly one gate — the false-positive closure proposal — so it needs one
   // level that gates it and one that does not. `floor_alert_triage.yaml` decides `autoApprove`
@@ -30,6 +31,7 @@ export const ALERT_TRIAGE_SETTINGS: WorkerSettingsDeclaration<AlertTriageWorkerE
 
 export const ATTACK_DISCOVERY_SETTINGS: WorkerSettingsDeclaration = {
   workerId: SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  settingsVersion: 1,
   // Two levels rather than the shared three: this Worker has exactly one gate — the
   // forensics handoff a true-positive or inconclusive verdict proposes — so it needs
   // one level that gates it and one that does not. `assisted` sits between those and

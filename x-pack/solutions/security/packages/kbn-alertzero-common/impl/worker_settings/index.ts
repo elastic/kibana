@@ -61,7 +61,6 @@ export const createDefaultWorkerSettings = (workerId: string): WorkerSettings =>
 export const getAllowedAutonomyLevels = (workerId: string): readonly WatchAutonomyLevel[] =>
   getContract(workerId).declaration.allowedAutonomyLevels;
 
-export { applyMissingWorkerSettingDefaults } from './apply_missing_defaults';
 export {
   applyWorkerSettingsWrite,
   diffWorkerSettings,
@@ -88,6 +87,8 @@ export {
   RULE_COVERAGE_DEFAULT_EXTRAS,
   RULE_TUNING_DEFAULT_EXTRAS,
 } from './detection_watch';
+export { applyMissingWorkerSettingDefaults } from './apply_missing_defaults';
 export { ALERT_TRIAGE_DEFAULT_EXTRAS } from './floor_watch';
 export { CONTINUOUS_THREAT_HUNT_SETTINGS } from './hunt_watch';
-export type { WorkerSettingsDeclaration } from './types';
+export { migrateStoredTemplateValues, renameStoredField } from './migrate';
+export type { WorkerSettingsDeclaration, WorkerSettingsMigration } from './types';
