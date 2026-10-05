@@ -46,6 +46,11 @@ describe('NoDataCard', () => {
       expect(component).toMatchSnapshot();
     });
 
+    test('no button and no href/onClick renders no footer control', () => {
+      const component = render(<NoDataCard title="Card title" description="Description" />);
+      expect(component).toMatchSnapshot();
+    });
+
     test('target and rel are forwarded to the footer button', () => {
       const component = render(
         <NoDataCard

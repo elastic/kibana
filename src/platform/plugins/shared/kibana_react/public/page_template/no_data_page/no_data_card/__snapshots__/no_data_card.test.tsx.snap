@@ -155,6 +155,39 @@ exports[`NoDataCard props href without button renders a footer button labeled wi
 </div>
 `;
 
+exports[`NoDataCard props no button and no href/onClick renders no footer control 1`] = `
+<div
+  class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-euiCard-center"
+>
+  <div
+    class="euiCard__main emotion-euiCard__main-vertical"
+  >
+    <div
+      class="euiCard__content emotion-euiCard__content-vertical"
+    >
+      <p
+        class="euiTitle euiCard__title emotion-euiTitle-s"
+        id="generated-idTitle"
+      >
+        <span
+          class="emotion-euiCard__text-center"
+        >
+          Card title
+        </span>
+      </p>
+      <div
+        class="euiText emotion-euiText-s-euiCard__description"
+        id="generated-idDescription"
+      >
+        <p>
+          Description
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
 exports[`NoDataCard props recommended 1`] = `
 <div
   class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-euiCard-center-hasBetaBadge"
@@ -195,24 +228,6 @@ exports[`NoDataCard props recommended 1`] = `
         Recommended
       </span>
     </span>
-    <div
-      class="emotion-euiCard__footer"
-    >
-      <button
-        class="euiButton emotion-euiButtonDisplay-m-fill-primary"
-        type="button"
-      >
-        <span
-          class="emotion-euiButtonDisplayContent"
-        >
-          <span
-            class="eui-textTruncate css-13ifi6d-m"
-          >
-            Card title
-          </span>
-        </span>
-      </button>
-    </div>
   </div>
 </div>
 `;
@@ -298,24 +313,6 @@ exports[`NoDataCard renders 1`] = `
           Description
         </p>
       </div>
-    </div>
-    <div
-      class="emotion-euiCard__footer"
-    >
-      <button
-        class="euiButton emotion-euiButtonDisplay-m-fill-primary"
-        type="button"
-      >
-        <span
-          class="emotion-euiButtonDisplayContent"
-        >
-          <span
-            class="eui-textTruncate css-13ifi6d-m"
-          >
-            Card title
-          </span>
-        </span>
-      </button>
     </div>
   </div>
 </div>
