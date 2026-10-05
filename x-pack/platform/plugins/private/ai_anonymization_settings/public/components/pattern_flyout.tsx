@@ -34,6 +34,7 @@ import { CUSTOM_PATTERN_ENTITY_CLASSES } from '../lib/entity_classes';
 import type { CustomPatternEntityClass } from '../lib/entity_classes';
 import type { NewCustomPattern } from '../hooks/use_anonymization_settings';
 import { generateSampleForPattern, toExampleFieldKey } from '../lib/generate_pattern_example';
+import { getRegexPatternError } from '../lib/get_regex_pattern_error';
 import { DEFAULT_EXAMPLE_INPUT_OBJECT, PatternTesterPanel } from './pattern_tester_panel';
 
 interface PatternFlyoutProps {
@@ -81,7 +82,11 @@ export const PatternFlyout: React.FC<PatternFlyoutProps> = ({
   const flyoutTitleId = useGeneratedHtmlId();
   const testerModalTitleId = useGeneratedHtmlId();
 
-  const isValid = name.trim().length > 0 && regexPattern.trim().length > 0;
+  const patternError = useMemo(
+    () => (regexPattern.trim() ? getRegexPatternError(regexPattern.trim()) : undefined),
+    [regexPattern]
+  );
+  const isValid = name.trim().length > 0 && regexPattern.trim().length > 0 && !patternError;
 
   const draftRule: RegexAnonymizationRule = useMemo(
     () => ({
@@ -191,6 +196,8 @@ export const PatternFlyout: React.FC<PatternFlyoutProps> = ({
               defaultMessage:
                 'A regular expression, evaluated with the global flag. Matching is case-sensitive.',
             })}
+            isInvalid={Boolean(patternError)}
+            error={patternError}
           >
             <EuiFieldText
               prepend="/"
@@ -200,6 +207,7 @@ export const PatternFlyout: React.FC<PatternFlyoutProps> = ({
                 { defaultMessage: 'e.g. EMP-\\d+' }
               )}
               value={regexPattern}
+              isInvalid={Boolean(patternError)}
               onChange={(e) => setRegexPattern(e.target.value)}
               data-test-subj="aiAnonymizationSettingsPatternFlyoutPattern"
             />
@@ -221,7 +229,7 @@ export const PatternFlyout: React.FC<PatternFlyoutProps> = ({
             <EuiButton
               iconType="play"
               onClick={() => setIsTesterOpen(true)}
-              isDisabled={!regexPattern.trim()}
+              isDisabled={!regexPattern.trim() || Boolean(patternError)}
               data-test-subj="aiAnonymizationSettingsPatternFlyoutTestButton"
             >
               <FormattedMessage
