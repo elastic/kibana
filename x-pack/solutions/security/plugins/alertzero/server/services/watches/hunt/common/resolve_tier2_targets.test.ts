@@ -327,6 +327,24 @@ describe('resolveTier2Targets', () => {
       expect(result.tier2_targets).toEqual(['logs-okta.system-default*']);
       expect(result.degraded).toBe(true);
     });
+
+    it('grants no coverage from a universe positive with a wildcard in the middle', async () => {
+      const result = await resolveTier2Targets({
+        scope: {
+          ...emptyScope,
+          report_matches: ['logs-okta.system-*'],
+          // Shares a literal prefix with the candidate, but also requires '-default'
+          // later in the name — something a prefix comparison cannot verify, so this
+          // positive must not be trusted to cover a trailing-wildcard candidate.
+          index_patterns: ['logs-*-default*'],
+        },
+        tier1: hits(),
+        logger,
+      });
+
+      expect(result.tier2_targets).toEqual([]);
+      expect(result.degraded).toBe(true);
+    });
   });
 
   describe('re-checking after the request-path bound', () => {
@@ -365,6 +383,42 @@ describe('resolveTier2Targets', () => {
       expect(result.tier2_targets).toContain('logs-okta.system-default*');
       expect(result.tier2_targets).not.toContain('logs-okta.system-*');
       expect(result.degraded).toBe(true);
+    });
+
+    it('drops the result when trading a collapsed pattern back for its streams grows past the request-path limit', async () => {
+      const vendorDatasetCount = MAX_SCOPE_TARGETS / 2;
+      const vendorMatches = Array.from({ length: vendorDatasetCount }, (_, index) => [
+        `logs-vendor${index}.stream-default*`,
+        `logs-vendor${index}.stream-prod*`,
+        `logs-vendor${index}.stream-staging*`,
+      ]).flat();
+
+      // Discovery found 40 namespaces for this dataset — none of them 'prod' — so
+      // narrowing back out of the dataset-wide collapse re-expands to all 40.
+      const manyStreams = Array.from({ length: 40 }, (_, index) => `logs-okta.system-ns${index}`);
+      const oktaManyStreams: DiscoveredDataset = {
+        index_pattern: 'logs-okta.system-*',
+        dataset: 'okta.system',
+        vendor: 'okta',
+        data_streams: manyStreams,
+        search_patterns: manyStreams.map((stream) => `${stream}*`),
+      };
+
+      const result = await resolveTier2Targets({
+        scope: {
+          ...emptyScope,
+          report_matches: [...vendorMatches, 'logs-okta.system-ns0*'],
+          discovered: [oktaManyStreams],
+          index_patterns: ['logs-*', '-logs-okta.system-prod*'],
+        },
+        tier1: hits(),
+        logger,
+      });
+
+      // 32 vendor patterns plus 40 re-expanded okta streams is 72 — over
+      // MAX_SCOPE_TARGETS — so the whole run gets no target rather than a partially
+      // bounded one.
+      expect(result).toEqual({ tier2_targets: [], tier2_target_sources: [], degraded: true });
     });
   });
 

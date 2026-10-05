@@ -13,6 +13,7 @@ import type { DiscoveredDataset } from './discover_hunt_datasets';
 import { matchDatasetsWithModel } from './match_hunt_datasets';
 import type { HuntScopeReportContext } from './match_hunt_datasets';
 import type { ResolvedHuntScope } from './resolve_index_scope';
+import { fitsRequestPath } from './scope_bounds';
 
 /** Which signal put a pattern in `tier2_targets`. */
 export type Tier2TargetSource = 'report_match' | 'tier1_hits' | 'model' | 'actionable';
@@ -38,6 +39,19 @@ const isExclusion = (pattern: string): boolean => pattern.startsWith('-');
 const literalPrefix = (pattern: string): string => pattern.split('*')[0];
 
 /**
+ * True for a pattern this module can reason about by literal prefix alone: exact,
+ * or carrying exactly one `*` at the very end. A universe positive shaped any other
+ * way (`logs-*-default*`) still constrains what comes after its first `*`, which a
+ * prefix comparison cannot see — a trailing-wildcard candidate whose prefix merely
+ * extends that positive's isn't actually guaranteed to satisfy the rest of it, so
+ * such a positive is not trusted to grant coverage at all rather than risk it.
+ */
+const isTrailingWildcardOrExact = (pattern: string): boolean => {
+  const starIndex = pattern.indexOf('*');
+  return starIndex === -1 || starIndex === pattern.length - 1;
+};
+
+/**
  * Maps each dataset's own `search_patterns` entries, and its generalized
  * `index_pattern`, back to the dataset they came from, so a pattern the universe
  * refuses — whether discovery's own output or `boundTargetPatterns`'s later
@@ -58,17 +72,20 @@ const indexDatasetsByPattern = (datasets: DiscoveredDataset[]): Map<string, Disc
  * Whether a derived `*`-suffixed target pattern is safe to send as-is: a universe
  * positive pattern has to cover it, and no universe exclusion may reach into it.
  *
- * Every index pattern this codebase hands a hunt is either exact or carries a
- * single trailing `*` (`classify_actionable_indices.ts`'s `collapseIndexName` and
- * this module's own callers only ever produce that shape), so containment and
- * overlap both reduce to literal-prefix comparison: a wildcard positive covers a
+ * Every candidate this module checks is exact or carries a single trailing `*`
+ * (`classify_actionable_indices.ts`'s `collapseIndexName` and this module's own
+ * callers only ever produce that shape), so containment against a positive shaped
+ * the same way reduces to literal-prefix comparison: a wildcard positive covers a
  * candidate whose prefix extends its own; an exact positive covers only a
- * candidate naming that same stream. Testing a single synthetic probe string
- * (substituting `*` for a literal character) was tried first and dropped — it
- * returns the wrong answer whenever a positive's own prefix happens to extend the
- * candidate's by exactly that character, and an exact positive can never match a
- * probe that appends anything, including the trailing `*` every candidate here
- * carries.
+ * candidate naming that same stream. A universe positive is not guaranteed to be
+ * shaped that way, though (`logs-*-default*` is a legal `defaultIndex` entry), so
+ * `isTrailingWildcardOrExact` gates which positives this fast comparison may use;
+ * one shaped any other way grants no coverage rather than being reasoned about
+ * incorrectly. Testing a single synthetic probe string (substituting `*` for a
+ * literal character) was tried first and dropped — it returns the wrong answer
+ * whenever a positive's own prefix happens to extend the candidate's by exactly
+ * that character, and an exact positive can never match a probe that appends
+ * anything, including the trailing `*` every candidate here carries.
  *
  * The exclusion side stays conservative only up to a point: an exclusion whose own
  * literal prefix shares a stem with the candidate's — `-logs-okta.system-prod*`
@@ -82,10 +99,12 @@ const staysInsideUniverse = (pattern: string, indexPatterns: string[]): boolean 
   const exclusions = indexPatterns.filter(isExclusion).map((p) => p.slice(1));
   const patternPrefix = literalPrefix(pattern);
 
-  const covered = positives.some((positive) =>
-    positive.includes('*')
-      ? patternPrefix.startsWith(literalPrefix(positive))
-      : patternPrefix === positive
+  const covered = positives.some(
+    (positive) =>
+      isTrailingWildcardOrExact(positive) &&
+      (positive.includes('*')
+        ? patternPrefix.startsWith(literalPrefix(positive))
+        : patternPrefix === positive)
   );
   if (!covered) return false;
 
@@ -224,6 +243,18 @@ export const resolveTier2Targets = async ({
   // already checked (or, for `tier1_hits`/`actionable`, never needed checking), so
   // there is nothing new to re-verify.
   const finalTargets = bounded.collapsed ? constrainToUniverse(bounded.patterns) : bounded.patterns;
+
+  // Trading a collapsed dataset-wide pattern back for its backing streams can grow
+  // the list again — a dataset bounding kept as one pattern specifically because its
+  // own namespace count is large is the one case this expansion re-inflates. A list
+  // that no longer fits is dropped rather than sent partially bounded, the same call
+  // `!bounded.fits` above already makes.
+  if (bounded.collapsed && !fitsRequestPath(finalTargets)) {
+    logger?.warn(
+      `Hunt Tier 2 targets narrowed back to ${finalTargets.length} backing stream pattern(s) after the universe check, more than a request may carry; Tier 2 gets no targets this run`
+    );
+    return { tier2_targets: [], tier2_target_sources: [], degraded: true };
+  }
 
   return {
     tier2_targets: finalTargets,
