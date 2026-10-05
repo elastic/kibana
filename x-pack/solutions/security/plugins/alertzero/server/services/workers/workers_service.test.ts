@@ -222,7 +222,7 @@ const createPersistentHarness = () => {
         { agentBuilder },
         { getAttachmentService: async () => attachmentService },
         async (_request, registration, options) => {
-          await managedWorkflows.install(registration.id, options);
+          await install(registration.id, options);
         }
       );
     },
@@ -965,7 +965,7 @@ describe('WorkersService', () => {
           isAlertAnalysisRuntimeEnabled,
         },
         async (_request, registration, options) => {
-          await harness.managedWorkflows.install(registration.id, options);
+          await harness.install(registration.id, options);
         }
       );
       return { service, getAttachmentServiceMock };

@@ -410,7 +410,7 @@ describe('OnboardingPage', () => {
         })),
       });
       const httpGet = jest.fn(async () => list());
-      const httpPatch = jest.fn(async (url: string) => {
+      const httpPatch = jest.fn(async (url: string, _options?: { body?: string }) => {
         if (url.includes(triageId)) {
           throw new Error('blocked');
         }
@@ -432,7 +432,11 @@ describe('OnboardingPage', () => {
 
       fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
       await waitFor(() => expect(attackDiscoveryCalls()).toHaveLength(2));
-      expect(JSON.parse(attackDiscoveryCalls()[1][1].body).settingsRevision).toBe(2);
+      const retry = attackDiscoveryCalls()[1];
+      if (!retry?.[1]?.body) {
+        throw new Error('expected the Attack Discovery retry');
+      }
+      expect(JSON.parse(retry[1].body).settingsRevision).toBe(2);
     });
 
     it('renders the Back button', () => {
