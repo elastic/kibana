@@ -29,7 +29,11 @@ export const buildServerESQLCallbacks = ({
 
   return {
     getSources: async () => {
-      return service.getAllIndices('all');
+      try {
+        return await service.getAllIndices('all');
+      } catch {
+        return service.getAllIndices('local');
+      }
     },
 
     getColumnsFor: async ({ query } = { query: '' }) => {
