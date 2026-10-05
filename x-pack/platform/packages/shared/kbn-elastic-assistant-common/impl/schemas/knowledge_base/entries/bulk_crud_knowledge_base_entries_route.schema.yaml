@@ -42,7 +42,7 @@ paths:
                       "source": "manual",
                       "text": "This is the content of the new entry."
                     }
-                  ]
+                    ]
                 update:
                   type: array
                   items:
@@ -57,7 +57,7 @@ paths:
                       "source": "manual",
                       "text": "Updated content."
                     }
-                  ]
+                    ]
             examples:
               PerformKnowledgeBaseEntryBulkActionRequest:
                 value:
@@ -221,7 +221,7 @@ components:
               "source": "manual",
               "text": "Updated content."
             }
-          ]
+            ]
         created:
           type: array
           items:
@@ -236,7 +236,7 @@ components:
               "source": "manual",
               "text": "This is the content of the new entry."
             }
-          ]
+            ]
         deleted:
           type: array
           items:
@@ -254,7 +254,7 @@ components:
               "name": "Skipped Entry",
               "skip_reason": "KNOWLEDGE_BASE_ENTRY_NOT_MODIFIED"
             }
-          ]
+            ]
       required:
         - updated
         - created
@@ -329,7 +329,7 @@ components:
                     }
                   ]
                 }
-              ]
+                ]
           required:
             - results
             - summary
