@@ -42,7 +42,6 @@ export const CREATE_ACTION_POLICY_REQUEST: CreateActionPolicyDataInput = {
 
 export const ACTION_POLICY_RESPONSE: ActionPolicyResponse = {
   id: SAMPLE_ACTION_POLICY_ID,
-  version: 'WzAsMV0=',
   name: CREATE_ACTION_POLICY_REQUEST.name,
   description: CREATE_ACTION_POLICY_REQUEST.description,
   enabled: true,

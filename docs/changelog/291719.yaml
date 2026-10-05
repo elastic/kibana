@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/291719
+issues:
+- https://github.com/elastic/kibana/issues/291321
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- Alerting and reporting
+title: "Fix \"Read only\" badge shown to users who can manage case templates"

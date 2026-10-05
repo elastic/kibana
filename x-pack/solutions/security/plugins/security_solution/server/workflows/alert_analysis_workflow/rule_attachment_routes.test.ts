@@ -298,6 +298,7 @@ describe('registerAlertAnalysisWorkflowRuleAttachmentRoutes', () => {
         selectable: 1,
         attachedRuleIds: ['rule-1'],
         ruleIds: ['rule-2'],
+        skippedRuleCount: 0,
       },
     });
   });

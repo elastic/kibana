@@ -288,12 +288,11 @@ describe('ActionPolicyFormFlyout', () => {
     );
   });
 
-  it('renders edit mode and submits update payload with optional fields and version', async () => {
+  it('renders edit mode and submits update payload with optional fields', async () => {
     const user = userEvent.setup({ delay: null });
     const onUpdate = jest.fn();
     const initialValues: ActionPolicyResponse = {
       id: 'policy-1',
-      version: 'WzEsMV0=',
       name: 'Critical production alerts',
       description: 'Routes critical alerts',
       enabled: true,
@@ -324,20 +323,16 @@ describe('ActionPolicyFormFlyout', () => {
     await user.click(updateButton);
 
     await waitFor(() => expect(onUpdate).toHaveBeenCalledTimes(1));
-    expect(onUpdate).toHaveBeenCalledWith(
-      'policy-1',
-      {
-        name: 'Critical production alerts',
-        description: 'Routes critical alerts',
-        matcher: { expression: 'data.severity : "critical"' },
-        groupingMode: 'per_field',
-        groupBy: ['host.name', 'service.name'],
-        throttleStrategy: 'time_interval',
-        throttleInterval: '5m',
-        destinations: [{ type: 'workflow', id: 'workflow-2' }],
-        inlineActions: [],
-      },
-      'WzEsMV0='
-    );
+    expect(onUpdate).toHaveBeenCalledWith('policy-1', {
+      name: 'Critical production alerts',
+      description: 'Routes critical alerts',
+      matcher: { expression: 'data.severity : "critical"' },
+      groupingMode: 'per_field',
+      groupBy: ['host.name', 'service.name'],
+      throttleStrategy: 'time_interval',
+      throttleInterval: '5m',
+      destinations: [{ type: 'workflow', id: 'workflow-2' }],
+      inlineActions: [],
+    });
   });
 });

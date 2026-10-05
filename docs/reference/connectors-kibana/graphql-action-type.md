@@ -11,6 +11,10 @@ applies_to:
 
 The GraphQL connector lets AI agents run queries and introspect the schema of any GraphQL API endpoint.
 
+::::{note}
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release. Actions marked _(not yet available)_ are not exposed to agents. Until workflow support is added, you can only run them through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
+::::
+
 ## Create connectors in {{kib}} [define-graphql-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**. For example:
@@ -59,7 +63,7 @@ Query
     - **Variables** (optional): A key/value map of variables to pass to the query. Example: `{ "id": "123" }`.
     - **Operation name** (optional): The name of the operation to execute when the document contains multiple named operations.
 
-Mutation
+Mutation _(not yet available)_
 :   Runs a GraphQL mutation to create, update, or delete data. Not exposed as an agent tool. Returns the `data` field from the GraphQL response. Throws if the server returns any GraphQL `errors`.
     - **Mutation** (required): The GraphQL mutation document string. Example: `mutation CreateUser($name: String!) { createUser(name: $name) { id name } }`.
     - **Variables** (optional): A key/value map of variables to pass to the mutation. Example: `{ "name": "Alice" }`.

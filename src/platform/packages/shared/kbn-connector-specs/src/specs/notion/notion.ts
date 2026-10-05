@@ -10,6 +10,12 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import type * as Notion from './types';
+
+const ID_MAX_LENGTH = 200;
+const QUERY_MAX_LENGTH = 2000;
+const CURSOR_MAX_LENGTH = 2048;
+const FILTER_MAX_LENGTH = 100000;
+
 export const NotionConnector: ConnectorSpec = {
   metadata: {
     id: '.notion',
@@ -56,6 +62,7 @@ export const NotionConnector: ConnectorSpec = {
         z.object({
           query: z
             .string()
+            .max(QUERY_MAX_LENGTH)
             .describe(
               'The text string to search for within page or data source titles. Example: "Engineering roadmap"'
             ),
@@ -66,6 +73,7 @@ export const NotionConnector: ConnectorSpec = {
             ),
           startCursor: z
             .string()
+            .max(CURSOR_MAX_LENGTH)
             .optional()
             .describe(
               'Pagination cursor returned from a previous search response. Pass this to retrieve the next page of results.'
@@ -104,6 +112,7 @@ export const NotionConnector: ConnectorSpec = {
         z.object({
           pageId: z
             .string()
+            .max(ID_MAX_LENGTH)
             .describe(
               'The Notion page ID to retrieve. This is the UUID found in the page URL or returned by searchPageOrDSByTitle. Example: "5b2c3d4e-1234-5678-abcd-ef0123456789"'
             ),
@@ -128,6 +137,7 @@ export const NotionConnector: ConnectorSpec = {
         z.object({
           dataSourceId: z
             .string()
+            .max(ID_MAX_LENGTH)
             .describe(
               'The Notion data source (database) ID to inspect. This is the UUID found in the database URL or returned by searchPageOrDSByTitle. Example: "a1b2c3d4-5678-90ab-cdef-1234567890ab"'
             ),
@@ -152,11 +162,13 @@ export const NotionConnector: ConnectorSpec = {
         z.object({
           dataSourceId: z
             .string()
+            .max(ID_MAX_LENGTH)
             .describe(
               'The Notion data source (database) ID to query. Example: "a1b2c3d4-5678-90ab-cdef-1234567890ab"'
             ),
           filter: z
             .string()
+            .max(FILTER_MAX_LENGTH)
             .optional()
             .describe(
               'Optional filter expressed as a JSON string following the Notion filter format (https://developers.notion.com/reference/filter-data-source-entries). Each filter targets one property by name and applies a type-specific condition. Common patterns:\n' +
@@ -170,6 +182,7 @@ export const NotionConnector: ConnectorSpec = {
             ),
           startCursor: z
             .string()
+            .max(CURSOR_MAX_LENGTH)
             .optional()
             .describe(
               'Pagination cursor returned from a previous queryDataSource response. Pass this to fetch the next page of rows.'

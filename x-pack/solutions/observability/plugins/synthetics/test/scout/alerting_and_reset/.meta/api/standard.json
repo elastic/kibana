@@ -1,5 +1,5 @@
 {
-  "sha1": "950b43bf98b62cd460f85c8a1b35c27ecdccc1a5",
+  "sha1": "3ab13fe430ee37c219e3d7de76e350a6e451b8c5",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/enable_default_alerting.spec.ts",
-        "line": 127,
-        "column": 19
+        "line": 133,
+        "column": 64
       }
     },
     {
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/enable_default_alerting.spec.ts",
-        "line": 139,
-        "column": 14
+        "line": 147,
+        "column": 65
       }
     },
     {
@@ -42,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/enable_default_alerting.spec.ts",
-        "line": 148,
-        "column": 13
+        "line": 154,
+        "column": 29
       }
     },
     {
@@ -56,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/enable_default_alerting.spec.ts",
-        "line": 163,
-        "column": 27
+        "line": 170,
+        "column": 26
       }
     },
     {
@@ -70,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/enable_default_alerting.spec.ts",
-        "line": 222,
-        "column": 80
+        "line": 227,
+        "column": 19
       }
     },
     {

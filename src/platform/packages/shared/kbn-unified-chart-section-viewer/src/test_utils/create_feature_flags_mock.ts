@@ -33,9 +33,6 @@ export const createFeatureFlagsMock = (
   featureFlags.getBooleanValue$.mockImplementation((flagName, fallbackValue) =>
     of(resolve(flagName, fallbackValue))
   );
-  featureFlags.getBooleanValue.mockImplementation((flagName, fallbackValue) =>
-    resolve(flagName, fallbackValue)
-  );
 
   return featureFlags;
 };

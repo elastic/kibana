@@ -26,7 +26,6 @@ const makeProposal = (overrides: Partial<ProposalWithMetadata> = {}): ProposalWi
   category: 'investigate',
   origin: 'alertzero',
   createdAt: '2026-09-01T10:00:00.000Z',
-  expired: false,
   ...overrides,
 });
 

@@ -17,6 +17,13 @@ requestBody:
             logExtraction:
               frequency: null
               delay: null
+        updateHistorySnapshotExample:
+          summary: "Update history snapshot settings"
+          description: "Update the history snapshot interval and retention. Omit a field to leave it unchanged."
+          value:
+            historySnapshot:
+              frequency: "12h"
+              retentionDays: 90
 responses:
   200:
     description: "Indicates a successful response."
@@ -40,6 +47,13 @@ responses:
               statusCode: 400
               error: "Bad Request"
               message: "[request body]: logExtraction.frequency: must be a valid duration of at least 30 seconds (e.g. 1m, 30s)"
+          invalidHistorySnapshotFrequencyExample:
+            summary: "Invalid history snapshot interval"
+            description: "The history snapshot interval must be at least 1 hour."
+            value:
+              statusCode: 400
+              error: "Bad Request"
+              message: "[request body]: historySnapshot.frequency: must be a valid duration of at least 1 hour (e.g. 1h, 24h)"
   404:
     description: "Entity Store not found."
     content:
@@ -67,5 +81,20 @@ x-codeSamples:
           "lookbackPeriod": "6h",
           "frequency": "10m",
           "fieldHistoryLength": 15
+        }
+      }
+  - lang: curl
+    source: |
+      curl -X PUT -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+        -H "Content-Type: application/json" \
+        -d '{"historySnapshot":{"frequency":"12h","retentionDays":90}}' \
+        "${KIBANA_URL}/api/security/entity_store"
+  - lang: Console
+    source: |
+      PUT kbn://api/security/entity_store
+      {
+        "historySnapshot": {
+          "frequency": "12h",
+          "retentionDays": 90
         }
       }
