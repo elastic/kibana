@@ -186,7 +186,7 @@ export function UnifiedSearchBar({
   const { dataView } = useAdHocApmDataView();
   const { urlParams } = useLegacyUrlParams();
   const processorEvent = useProcessorEvent();
-  const { incrementTimeRangeId } = useTimeRangeId();
+  const { incrementTimeRangeId, isAutoRefreshPaused } = useTimeRangeId();
   const searchbarPlaceholder = getSearchBarPlaceholder(placeholder, processorEvent);
 
   const customFilters =
@@ -206,6 +206,7 @@ export function UnifiedSearchBar({
   });
 
   const onRefresh = () => {
+    if (isAutoRefreshPaused) return;
     clearCache();
     incrementTimeRangeId();
     onPageRefreshStart();
