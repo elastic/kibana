@@ -9,9 +9,11 @@
 
 import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock, loggingSystemMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 import {
+  ExecutionStatus,
   type WorkflowDetailDto,
   type WorkflowExecutionEngineModel,
   WorkflowsManagementApiActions,
@@ -36,6 +38,8 @@ import {
   WorkflowsManagementApi,
 } from './workflows_management_api';
 import type { WorkflowsService } from './workflows_management_service';
+import { WorkflowAccessControlService } from '../services/workflow_access_control';
+import { WorkflowAccessDeniedError } from '../services/workflow_access_denied_error';
 
 jest.mock('./external_resume/external_resume_service', () => ({
   ...jest.requireActual('./external_resume/external_resume_service'),
@@ -73,9 +77,42 @@ describe('WorkflowsManagementApi', () => {
     mockWorkflowsExecutionEngine.bulkScheduleWorkflow.mockResolvedValue([]);
     mockPreprocessAlertInputs.mockImplementation(async (inputs) => inputs);
 
+    const access = new WorkflowAccessControlService(coreMock.createStart(), {
+      getWorkflowDocumentWithVersion: jest.fn(),
+      writeWorkflowDocumentWithOcc: jest.fn(),
+    });
+    jest
+      .spyOn(access, 'permissions')
+      .mockResolvedValue({ read: true, execute: true, edit: true, manage: false });
+    jest.spyOn(access, 'update').mockImplementation(jest.fn());
+    jest.spyOn(access, 'assertAccess').mockResolvedValue();
+    jest
+      .spyOn(access, 'checkAccess')
+      .mockImplementation(
+        async (workflow, operation, request) =>
+          (await access.permissions(workflow, request))[operation]
+      );
+    jest.spyOn(access, 'readFilter').mockResolvedValue({ match_all: {} });
+    jest.spyOn(access, 'getProfileId').mockResolvedValue('test-profile');
+    jest.spyOn(access, 'executionFilter').mockResolvedValue({ match_all: {} });
     mockWorkflowsService = {
-      getWorkflow: jest.fn(),
+      getAccessControl: jest.fn().mockResolvedValue(access),
+      getWorkflow: jest.fn().mockResolvedValue({
+        id: 'workflow-123',
+        name: 'Test workflow',
+        enabled: true,
+        yaml: '',
+        valid: true,
+        createdAt: '2026-09-10T00:00:00.000Z',
+        createdBy: 'test-user',
+        lastUpdatedAt: '2026-09-10T00:00:00.000Z',
+        lastUpdatedBy: 'test-user',
+        definition: null,
+      }),
       getWorkflowsByIds: jest.fn(),
+      getWorkflows: jest.fn(),
+      getWorkflowsSourceByIds: jest.fn(),
+      getChildWorkflowExecutions: jest.fn(),
       getWorkflowZodSchema: jest.fn(),
       createWorkflow: jest.fn(),
       updateWorkflow: jest.fn(),
@@ -85,7 +122,12 @@ describe('WorkflowsManagementApi', () => {
       disableAllWorkflows: jest.fn(),
       getHistoryForWorkflow: jest.fn(),
       validateWorkflow: jest.fn(),
-      getWorkflowExecution: jest.fn(),
+      getWorkflowExecution: jest
+        .fn()
+        .mockResolvedValue({ id: 'run-1', workflowId: 'workflow-123' }),
+      getWorkflowExecutions: jest.fn(),
+      getExecutionStepExecutions: jest.fn(),
+      searchStepExecutions: jest.fn(),
       markStepAsResponded: jest.fn(),
       getWaitingStepExecutionId: jest.fn(),
       getWorkflowsExecutionEngine: () => mockWorkflowsExecutionEngine,
@@ -99,6 +141,401 @@ describe('WorkflowsManagementApi', () => {
     mockRequest = httpServerMock.createKibanaRequest();
   });
 
+  describe('workflow history access', () => {
+    const workflow = {
+      id: 'workflow-123',
+      name: 'Test workflow',
+      enabled: true,
+      yaml: '',
+      valid: true,
+      createdAt: '2026-09-17T00:00:00.000Z',
+      createdBy: 'owner',
+      lastUpdatedAt: '2026-09-17T00:00:00.000Z',
+      lastUpdatedBy: 'owner',
+      definition: null,
+      owner_id: 'owner',
+    };
+
+    it.each([
+      { name: 'owner', profileId: 'owner', mode: 'private', allowed: true },
+      { name: 'viewer', profileId: 'viewer', mode: 'private', allowed: true },
+      { name: 'executor', profileId: 'executor', mode: 'private', allowed: true },
+      { name: 'editor', profileId: 'editor', mode: 'private', allowed: true },
+      { name: 'outsider', profileId: 'outsider', mode: 'private', allowed: false },
+      { name: 'missing profile', profileId: null, mode: 'private', allowed: false },
+      { name: 'public', profileId: 'outsider', mode: 'public', allowed: true },
+      { name: 'legacy', profileId: 'outsider', mode: undefined, allowed: true },
+    ] as const)(
+      'checks $name access to soft-deleted workflow history without scanning the space',
+      async ({ profileId, mode, allowed }) => {
+        const core = coreMock.createStart();
+        core.userProfile.getCurrentProfileId.mockResolvedValue(profileId);
+        const access = new WorkflowAccessControlService(core, {
+          getWorkflowDocumentWithVersion: jest.fn(),
+          writeWorkflowDocumentWithOcc: jest.fn(),
+        });
+        mockWorkflowsService.getAccessControl.mockResolvedValue(access);
+        const stored: WorkflowDetailDto = {
+          ...workflow,
+          access_control: mode
+            ? {
+                access_mode: mode,
+                entries: [
+                  { type: 'user', id: 'viewer', role: 'viewer', added_at: '2026-09-17' },
+                  { type: 'user', id: 'executor', role: 'executor', added_at: '2026-09-17' },
+                  { type: 'user', id: 'editor', role: 'editor', added_at: '2026-09-17' },
+                ],
+              }
+            : undefined,
+        };
+        mockWorkflowsService.getWorkflow.mockImplementation(async (_id, _spaceId, options) =>
+          options?.includeDeleted ? stored : null
+        );
+        const params = { workflowId: workflow.id, request: mockRequest, page: 2, size: 10 };
+
+        await api.getWorkflowExecutions(params, 'default');
+
+        expect(mockWorkflowsService.getWorkflow).toHaveBeenCalledWith(workflow.id, 'default', {
+          includeDeleted: true,
+        });
+        expect(mockWorkflowsService.getWorkflowExecutions).toHaveBeenCalledWith(
+          { ...params, accessControlFilter: allowed ? undefined : { match_none: {} } },
+          'default'
+        );
+        expect(core.elasticsearch.client.asInternalUser.openPointInTime).not.toHaveBeenCalled();
+
+        const stepParams = { executionId: 'run-1', page: 1, size: 50 };
+        const steps = api.getExecutionStepExecutions(stepParams, 'default', mockRequest);
+        if (allowed) {
+          await steps;
+          expect(mockWorkflowsService.getExecutionStepExecutions).toHaveBeenCalledWith(
+            stepParams,
+            'default'
+          );
+        } else {
+          await expect(steps).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+          expect(mockWorkflowsService.getExecutionStepExecutions).not.toHaveBeenCalled();
+        }
+
+        const searchParams = { workflowId: workflow.id, request: mockRequest };
+        const history = api.searchStepExecutions(searchParams, 'default');
+        if (allowed) {
+          await history;
+          expect(mockWorkflowsService.searchStepExecutions).toHaveBeenCalledWith(
+            searchParams,
+            'default'
+          );
+        } else {
+          await expect(history).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+          expect(mockWorkflowsService.searchStepExecutions).not.toHaveBeenCalled();
+        }
+
+        const historyOptions = { request: mockRequest, page: 2, perPage: 10 };
+        const historyResponse = { page: 2, perPage: 10, total: 1, items: [] };
+        mockWorkflowsService.getHistoryForWorkflow.mockResolvedValue(historyResponse);
+        const changes = api.getHistoryForWorkflow(workflow.id, 'default', historyOptions);
+        if (allowed) {
+          await expect(changes).resolves.toBe(historyResponse);
+          expect(mockWorkflowsService.getHistoryForWorkflow).toHaveBeenCalledWith(
+            workflow.id,
+            'default',
+            historyOptions
+          );
+        } else {
+          await expect(changes).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+          expect(mockWorkflowsService.getHistoryForWorkflow).not.toHaveBeenCalled();
+        }
+      }
+    );
+
+    it('does not read change history when the workflow document is missing', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue(null);
+
+      await expect(
+        api.getHistoryForWorkflow(workflow.id, 'default', { request: mockRequest })
+      ).rejects.toBeInstanceOf(WorkflowNotFoundError);
+
+      expect(mockWorkflowsService.getHistoryForWorkflow).not.toHaveBeenCalled();
+    });
+
+    it.each(['edit', 'execute'] as const)(
+      'still excludes soft-deleted workflows from %s access',
+      async (operation) => {
+        mockWorkflowsService.getWorkflow.mockImplementation(async (_id, _spaceId, options) =>
+          options?.includeDeleted ? workflow : null
+        );
+
+        await expect(
+          api.assertWorkflowAccess(workflow.id, 'default', operation, mockRequest)
+        ).rejects.toBeInstanceOf(WorkflowNotFoundError);
+      }
+    );
+
+    it('retains history access when the workflow was hard deleted', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue(null);
+      const access = await mockWorkflowsService.getAccessControl();
+      const params = { workflowId: workflow.id, request: mockRequest };
+
+      await api.getWorkflowExecutions(params, 'default');
+
+      expect(mockWorkflowsService.getWorkflowExecutions).toHaveBeenCalledWith(
+        { ...params, accessControlFilter: undefined },
+        'default'
+      );
+      expect(access.executionFilter).not.toHaveBeenCalled();
+      await api.searchStepExecutions(params, 'default');
+      expect(mockWorkflowsService.searchStepExecutions).toHaveBeenCalledWith(params, 'default');
+      expect(access.assertAccess).not.toHaveBeenCalled();
+    });
+
+    it('keeps the space filter for cross-workflow history', async () => {
+      const access = await mockWorkflowsService.getAccessControl();
+      const filter = { bool: { must_not: [{ terms: { workflowId: ['hidden'] } }] } };
+      jest.mocked(access.executionFilter).mockResolvedValue(filter);
+
+      await api.getWorkflowExecutions({ request: mockRequest }, 'default');
+
+      expect(access.executionFilter).toHaveBeenCalledWith('default', mockRequest);
+      expect(mockWorkflowsService.getWorkflow).not.toHaveBeenCalled();
+      expect(mockWorkflowsService.getWorkflowExecutions).toHaveBeenCalledWith(
+        { request: mockRequest, accessControlFilter: filter },
+        'default'
+      );
+    });
+
+    it.each([
+      { entries: [] },
+      {
+        access_mode: 'private',
+        entries: [{ type: 'user', id: 'caller', role: 'invalid', added_at: '2026-09-22' }],
+      },
+      { access_mode: 'public' },
+      null,
+    ])('rejects malformed ACLs before listing execution data: %s', async (accessControl) => {
+      const core = coreMock.createStart();
+      core.userProfile.getCurrentProfileId.mockResolvedValue('caller');
+      const access = new WorkflowAccessControlService(core, {
+        getWorkflowDocumentWithVersion: jest.fn(),
+        writeWorkflowDocumentWithOcc: jest.fn(),
+      });
+      mockWorkflowsService.getAccessControl.mockResolvedValue(access);
+      const client = core.elasticsearch.client.asInternalUser;
+      jest.mocked(client.openPointInTime).mockResolvedValue({
+        id: 'pit',
+        _shards: { total: 1, successful: 1, failed: 0 },
+      });
+      jest.mocked(client.search).mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, failed: 0 },
+        hits: {
+          hits: [
+            { _index: 'workflows', _id: workflow.id, _source: { access_control: accessControl } },
+          ],
+        },
+      });
+
+      await expect(
+        api.getWorkflowExecutions({ request: mockRequest }, 'default')
+      ).rejects.toThrow();
+      expect(mockWorkflowsService.getWorkflowExecutions).not.toHaveBeenCalled();
+      expect(client.closePointInTime).toHaveBeenCalledWith({ id: 'pit' });
+    });
+  });
+
+  it('applies access control in the query that reads the requested workflow fields', async () => {
+    const access = await mockWorkflowsService.getAccessControl();
+    const filter = { term: { 'access_control.access_mode': 'public' } };
+    jest.mocked(access.readFilter).mockResolvedValue(filter);
+    mockWorkflowsService.getWorkflowsSourceByIds.mockResolvedValue([]);
+
+    await expect(
+      api.getWorkflowsSourceByIds(['workflow-123'], 'default', ['yaml'], mockRequest)
+    ).resolves.toEqual([]);
+
+    expect(access.readFilter).toHaveBeenCalledWith(mockRequest);
+    expect(mockWorkflowsService.getWorkflowsSourceByIds).toHaveBeenCalledWith(
+      ['workflow-123'],
+      'default',
+      ['yaml'],
+      { accessControlFilter: filter }
+    );
+    expect(mockWorkflowsService.getWorkflowsByIds).not.toHaveBeenCalled();
+  });
+
+  it.each([false, true])(
+    'redacts reads and bulk overwrite responses for manage=%s',
+    async (manage) => {
+      const workflow = await mockWorkflowsService.getWorkflow('workflow-123', 'default');
+      if (!workflow) throw new Error('Missing workflow fixture');
+      const stored = {
+        ...workflow,
+        description: '',
+        owner_id: 'owner',
+        access_control: {
+          access_mode: 'public' as const,
+          entries: [
+            {
+              type: 'user' as const,
+              id: 'recipient',
+              role: 'viewer' as const,
+              added_at: '2026-09-10',
+            },
+          ],
+        },
+      };
+      const permissions = { read: true, execute: true, edit: true, manage };
+      const access = await mockWorkflowsService.getAccessControl();
+      jest.mocked(access.permissions).mockResolvedValue(permissions);
+      mockWorkflowsService.getWorkflow.mockResolvedValue(stored);
+      mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([stored]);
+      mockWorkflowsService.getWorkflows.mockResolvedValue({
+        results: [stored],
+        total: 1,
+        page: 1,
+        size: 10,
+      });
+      const single = await api.getWorkflow(stored.id, 'default', mockRequest);
+      const batch = await api.getWorkflowsByIds([stored.id], 'default', mockRequest);
+      const list = await api.getWorkflows({ page: 1, size: 10 }, 'default', {
+        request: mockRequest,
+      });
+      mockWorkflowsService.bulkCreateWorkflows.mockResolvedValue({ created: [stored], failed: [] });
+      const bulk = await api.bulkCreateWorkflows(
+        [{ id: stored.id, yaml: stored.yaml }],
+        'default',
+        mockRequest,
+        { overwrite: true }
+      );
+      for (const result of [single, ...batch, ...list.results, ...bulk.created]) {
+        expect(result?.permissions).toEqual(permissions);
+        if (manage) {
+          expect(result?.access_control).toEqual(stored.access_control);
+          expect(result?.owner_id).toBe('owner');
+        } else {
+          expect(result).not.toHaveProperty('access_control');
+          expect(result).not.toHaveProperty('owner_id');
+        }
+      }
+      expect(stored.access_control.entries).toHaveLength(1);
+    }
+  );
+
+  it('includes ACL permissions in workflow list results', async () => {
+    const workflow = await mockWorkflowsService.getWorkflow('workflow-123', 'default');
+    if (!workflow) throw new Error('Missing workflow fixture');
+    const permissions = { read: true, execute: false, edit: false, manage: false };
+    const listItem = { ...workflow, description: '' };
+    const access = await mockWorkflowsService.getAccessControl();
+    jest.mocked(access.permissions).mockResolvedValue(permissions);
+    mockWorkflowsService.getWorkflows.mockResolvedValue({
+      results: [listItem],
+      total: 1,
+      page: 1,
+      size: 10,
+    });
+
+    const result = await api.getWorkflows({ page: 1, size: 10 }, 'default', {
+      request: mockRequest,
+    });
+
+    expect(result.results).toEqual([{ ...listItem, permissions }]);
+    expect(access.permissions).toHaveBeenCalledWith(listItem, mockRequest);
+  });
+
+  it('checks child workflow visibility in one batch', async () => {
+    const workflow = await mockWorkflowsService.getWorkflow('workflow-123', 'default');
+    if (!workflow) throw new Error('Missing workflow fixture');
+    mockWorkflowsService.getWorkflow.mockClear();
+    const children = ['workflow-123', 'private-hidden', 'workflow-123', 'hard-deleted'].map(
+      (workflowId, index) => ({
+        workflowId,
+        executionId: `child-${index}`,
+        parentStepExecutionId: 'parent-step',
+        workflowName: workflowId,
+        status: ExecutionStatus.COMPLETED,
+        stepExecutions: [],
+      })
+    );
+    mockWorkflowsService.getChildWorkflowExecutions.mockResolvedValue(children);
+    mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([
+      workflow,
+      {
+        ...workflow,
+        id: 'private-hidden',
+        access_control: { access_mode: 'private', entries: [] },
+      },
+    ]);
+    const access = await mockWorkflowsService.getAccessControl();
+    jest.mocked(access.permissions).mockImplementation(async ({ access_control }) => ({
+      read: access_control?.access_mode !== 'private',
+      execute: false,
+      edit: false,
+      manage: false,
+    }));
+
+    const result = await api.getChildWorkflowExecutions('parent', 'default', mockRequest);
+
+    expect(mockWorkflowsService.getWorkflowsByIds).toHaveBeenCalledTimes(1);
+    expect(mockWorkflowsService.getWorkflowsByIds).toHaveBeenCalledWith(
+      ['workflow-123', 'private-hidden', 'hard-deleted'],
+      'default',
+      { includeDeleted: true }
+    );
+    expect(mockWorkflowsService.getWorkflow).toHaveBeenCalledTimes(1);
+    expect(result.map(({ executionId }) => executionId)).toEqual(['child-0', 'child-2', 'child-3']);
+  });
+
+  it.each([
+    { mode: 'public', profileId: 'unlisted', visible: true },
+    { mode: 'private', profileId: 'owner', visible: true },
+    { mode: 'private', profileId: 'recipient', visible: true },
+    { mode: 'private', profileId: 'unlisted', visible: false },
+    { mode: 'private', profileId: null, visible: false },
+  ] as const)(
+    'keeps soft-deleted $mode child history visibility=$visible for $profileId',
+    async ({ mode, profileId, visible }) => {
+      const workflow = await mockWorkflowsService.getWorkflow('workflow-123', 'default');
+      if (!workflow) throw new Error('Missing workflow fixture');
+      const childWorkflow: WorkflowDetailDto = {
+        ...workflow,
+        id: 'deleted-child',
+        owner_id: 'owner',
+        access_control: {
+          access_mode: mode,
+          entries: [{ type: 'user', id: 'recipient', role: 'viewer', added_at: '2026-09-10' }],
+        },
+      };
+      const core = coreMock.createStart();
+      core.userProfile.getCurrentProfileId.mockResolvedValue(profileId);
+      mockWorkflowsService.getAccessControl.mockResolvedValue(
+        new WorkflowAccessControlService(core, {
+          getWorkflowDocumentWithVersion: jest.fn(),
+          writeWorkflowDocumentWithOcc: jest.fn(),
+        })
+      );
+      const children = [
+        {
+          workflowId: childWorkflow.id,
+          executionId: 'child-run',
+          parentStepExecutionId: 'parent-step',
+          workflowName: childWorkflow.name,
+          status: ExecutionStatus.COMPLETED,
+          stepExecutions: [],
+        },
+      ];
+      mockWorkflowsService.getChildWorkflowExecutions.mockResolvedValue(children);
+      mockWorkflowsService.getWorkflowsByIds.mockImplementation(async (_ids, _space, options) =>
+        options?.includeDeleted ? [childWorkflow] : []
+      );
+
+      await expect(
+        api.getChildWorkflowExecutions('parent', 'default', mockRequest)
+      ).resolves.toEqual(visible ? children : []);
+      expect(core.userProfile.getCurrentProfileId).toHaveBeenCalledWith({ request: mockRequest });
+    }
+  );
+
   const createMockZodSchema = () => {
     return z.object({
       name: z.string(),
@@ -107,6 +544,14 @@ describe('WorkflowsManagementApi', () => {
       steps: z.array(z.any()).optional(),
     });
   };
+
+  it('returns remaining execution data when hard deletion removed the workflow ACL', async () => {
+    const execution = await mockWorkflowsService.getWorkflowExecution('run-1', 'default');
+    mockWorkflowsService.getWorkflow.mockResolvedValue(null);
+    await expect(
+      api.getWorkflowExecution('run-1', 'default', { request: mockRequest })
+    ).resolves.toBe(execution);
+  });
 
   describe('cloneWorkflow', () => {
     const createMockWorkflow = (overrides: Partial<WorkflowDetailDto> = {}): WorkflowDetailDto => ({
@@ -417,12 +862,13 @@ steps:
         expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
           mockWorkflowYaml,
           spaceId,
-          mockRequest
+          mockRequest,
+          { includeVariableRules: false }
         );
         const engine = await mockWorkflowsService.getWorkflowsExecutionEngine();
         expect(engine.executeWorkflow).toHaveBeenCalledWith(
           expect.objectContaining({
-            id: 'test-workflow',
+            id: 'internal-test-workflow',
             name: 'Test Workflow',
             enabled: true,
             yaml: mockWorkflowYaml,
@@ -494,6 +940,41 @@ steps:
     });
 
     describe('when testing with workflowId parameter', () => {
+      it.each([
+        { workflowYaml: undefined, permission: 'execute', isEphemeral: false },
+        { workflowYaml: mockWorkflowYaml, permission: 'edit', isEphemeral: true },
+      ])(
+        'requires $permission for isEphemeral=$isEphemeral',
+        async ({ workflowYaml, permission, isEphemeral }) => {
+          const privateWorkflow: WorkflowDetailDto = {
+            ...mockWorkflowDetailDto,
+            access_control: { access_mode: 'private', entries: [] },
+          };
+          mockWorkflowsService.getWorkflow.mockResolvedValue(privateWorkflow);
+
+          await api.testWorkflow({
+            workflowId: mockWorkflowDetailDto.id,
+            workflowYaml,
+            inputs,
+            spaceId,
+            request: mockRequest,
+          });
+
+          const access = await mockWorkflowsService.getAccessControl();
+          expect(access.assertAccess).toHaveBeenCalledWith(
+            privateWorkflow,
+            permission,
+            mockRequest,
+            { allowAdminOverride: false }
+          );
+          expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
+            expect.objectContaining({ yaml: mockWorkflowYaml, isTestRun: true, isEphemeral }),
+            expect.any(Object),
+            mockRequest
+          );
+        }
+      );
+
       it('should fetch workflow YAML by ID and execute it', async () => {
         mockWorkflowsService.getWorkflow.mockResolvedValue({
           ...mockWorkflowDetailDto,
@@ -704,9 +1185,52 @@ steps:
         expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
           mockWorkflowYaml,
           spaceId,
-          mockRequest
+          mockRequest,
+          { includeVariableRules: false }
         );
       });
+    });
+  });
+
+  describe('testStep', () => {
+    it('should use the reserved internal ID when testing an unsaved workflow step', async () => {
+      mockWorkflowsService.validateWorkflow.mockResolvedValue({
+        valid: true,
+        diagnostics: [],
+        parsedWorkflow: {
+          version: '1',
+          name: 'Test Workflow',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [{ name: 'step1', type: 'console' }],
+        },
+      });
+      mockWorkflowsExecutionEngine.executeWorkflowStep.mockResolvedValue({
+        workflowExecutionId: 'test-step-exec-id',
+      });
+
+      const result = await api.testStep(
+        'name: Test Workflow',
+        'step1',
+        undefined,
+        undefined,
+        {},
+        'default',
+        mockRequest
+      );
+
+      expect(result).toBe('test-step-exec-id');
+      expect(mockWorkflowsExecutionEngine.executeWorkflowStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'internal-test-workflow',
+          isTestRun: true,
+          isEphemeral: true,
+        }),
+        'step1',
+        undefined,
+        {},
+        mockRequest
+      );
     });
   });
 
@@ -926,7 +1450,8 @@ steps:
       expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
         'name: Test Workflow',
         'default',
-        mockRequest
+        mockRequest,
+        { includeVariableRules: false }
       );
       expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1027,7 +1552,7 @@ steps:
   });
 
   describe('validateWorkflow', () => {
-    it('should delegate to workflowsService.validateWorkflow', async () => {
+    it('should delegate with the variable rules enabled', async () => {
       const expectedResult = { valid: true, diagnostics: [] };
       mockWorkflowsService.validateWorkflow.mockResolvedValue(expectedResult);
 
@@ -1036,7 +1561,8 @@ steps:
       expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
         'name: Test',
         'default',
-        mockRequest
+        mockRequest,
+        { includeVariableRules: true }
       );
       expect(result).toBe(expectedResult);
     });
@@ -1061,7 +1587,8 @@ steps:
       expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
         'invalid: yaml',
         'my-space',
-        mockRequest
+        mockRequest,
+        { includeVariableRules: true }
       );
       expect(result).toEqual(expectedResult);
     });
@@ -1249,6 +1776,33 @@ steps:
       expect(mockWorkflowsService.deleteWorkflows).not.toHaveBeenCalled();
     });
 
+    it.each([
+      ['public', 'edit'],
+      ['private', 'manage'],
+    ] as const)(
+      'checks %s force-delete access with the %s operation',
+      async (accessMode, operation) => {
+        const workflow = createWorkflowDto({
+          access_control: { access_mode: accessMode, entries: [] },
+        });
+        mockWorkflowsService.getWorkflow.mockResolvedValue(workflow);
+        mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([workflow]);
+        mockWorkflowsService.deleteWorkflows.mockResolvedValue({
+          total: 1,
+          deleted: 1,
+          successfulIds: [workflow.id],
+          failures: [],
+        });
+
+        await api.deleteWorkflows([workflow.id], 'default', mockRequest, { force: true });
+
+        const access = await mockWorkflowsService.getAccessControl();
+        expect(access.assertAccess).toHaveBeenCalledWith(workflow, operation, mockRequest, {
+          allowAdminOverride: true,
+        });
+      }
+    );
+
     it('keeps unmanaged workflow deletes unchanged', async () => {
       const deleteResult = {
         total: 1,
@@ -1268,13 +1822,15 @@ steps:
       expect(mockWorkflowsService.deleteWorkflows).toHaveBeenCalledWith(
         ['wf-1'],
         'default',
-        undefined
+        undefined,
+        mockRequest
       );
     });
   });
 
   describe('SML notifications', () => {
     let mockSmlIndex: jest.MockedFunction<SmlIndexAttachmentFn>;
+    const mockSmlDelete = jest.fn();
     let mockSmlLogger: jest.Mocked<Logger>;
 
     const createWorkflowDto = (overrides: Partial<WorkflowDetailDto> = {}): WorkflowDetailDto => ({
@@ -1295,10 +1851,139 @@ steps:
     beforeEach(() => {
       mockSmlIndex = jest.fn().mockResolvedValue(undefined);
       mockSmlLogger = { warn: jest.fn(), debug: jest.fn(), info: jest.fn() } as any;
-      api.setSmlIndexAttachment(mockSmlIndex, mockSmlLogger);
+      mockSmlDelete.mockReset().mockResolvedValue(undefined);
+      api.setSmlClient(
+        { indexAttachment: mockSmlIndex, deleteAttachment: mockSmlDelete },
+        mockSmlLogger
+      );
     });
 
-    it('does not notify SML when setSmlIndexAttachment has not been called', async () => {
+    it('waits for SML deletion before completing a private access update', async () => {
+      const access = await mockWorkflowsService.getAccessControl();
+      const saved = createWorkflowDto({ access_control: { access_mode: 'private', entries: [] } });
+      jest.mocked(access.update).mockResolvedValue(saved);
+      let completeIndex = () => {};
+      const indexing = new Promise<void>((resolve) => {
+        completeIndex = resolve;
+      });
+      mockSmlDelete.mockReturnValue(indexing);
+      let completed = false;
+      const update = api
+        .updateAccessControl('wf-1', 'default', { access_mode: 'private' }, mockRequest)
+        .then((result) => {
+          completed = true;
+          return result;
+        });
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(mockSmlDelete).toHaveBeenCalledWith(
+        expect.objectContaining({ originId: 'wf-1', ingestionMethod: 'all', strict: true })
+      );
+      expect(completed).toBe(false);
+      completeIndex();
+      await expect(update).resolves.toBe(saved);
+    });
+
+    it('waits for all pending public SML writes before deleting private workflow entries', async () => {
+      let completeFirst = () => {};
+      let completeSecond = () => {};
+      mockSmlIndex
+        .mockReturnValueOnce(
+          new Promise<void>((resolve) => {
+            completeFirst = resolve;
+          })
+        )
+        .mockReturnValueOnce(
+          new Promise<void>((resolve) => {
+            completeSecond = resolve;
+          })
+        );
+      await api.updateAccessControl('wf-1', 'default', { access_mode: 'public' }, mockRequest);
+      await api.updateAccessControl('wf-1', 'default', { access_mode: 'public' }, mockRequest);
+
+      const update = api.updateAccessControl(
+        'wf-1',
+        'default',
+        { access_mode: 'private' },
+        mockRequest
+      );
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(mockSmlDelete).not.toHaveBeenCalled();
+      completeSecond();
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(mockSmlDelete).not.toHaveBeenCalled();
+      completeFirst();
+      await update;
+      expect(mockSmlDelete).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([
+      ['wf-2', 'default'],
+      ['wf-1', 'other-space'],
+    ])('does not wait for SML writes for %s in %s', async (id, spaceId) => {
+      let completeIndex = () => {};
+      mockSmlIndex.mockReturnValueOnce(
+        new Promise<void>((resolve) => {
+          completeIndex = resolve;
+        })
+      );
+      await api.updateAccessControl(id, spaceId, { access_mode: 'public' }, mockRequest);
+      try {
+        await api.updateAccessControl('wf-1', 'default', { access_mode: 'private' }, mockRequest);
+        expect(mockSmlDelete).toHaveBeenCalledTimes(1);
+      } finally {
+        completeIndex();
+      }
+    });
+
+    it('still removes SML entries when a pending public write fails', async () => {
+      let failIndex = (_error: Error) => {};
+      mockSmlIndex.mockReturnValueOnce(
+        new Promise<void>((_resolve, reject) => {
+          failIndex = reject;
+        })
+      );
+      await api.updateAccessControl('wf-1', 'default', { access_mode: 'public' }, mockRequest);
+      const update = api.updateAccessControl(
+        'wf-1',
+        'default',
+        { access_mode: 'private' },
+        mockRequest
+      );
+      failIndex(new Error('SML unavailable'));
+      await update;
+      expect(mockSmlDelete).toHaveBeenCalledTimes(1);
+    });
+
+    it('surfaces SML deletion failure during a private access update', async () => {
+      mockSmlDelete.mockRejectedValue(new Error('SML unavailable'));
+      await expect(
+        api.updateAccessControl('wf-1', 'default', { access_mode: 'private' }, mockRequest)
+      ).rejects.toThrow('SML unavailable');
+    });
+
+    it('saves public access when SML indexing fails', async () => {
+      const access = await mockWorkflowsService.getAccessControl();
+      const saved = createWorkflowDto({ access_control: { access_mode: 'public', entries: [] } });
+      jest.mocked(access.update).mockResolvedValue(saved);
+      mockSmlIndex.mockRejectedValue(new Error('SML unavailable'));
+
+      await expect(
+        api.updateAccessControl('wf-1', 'default', { access_mode: 'public' }, mockRequest)
+      ).resolves.toBe(saved);
+
+      expect(mockSmlIndex).toHaveBeenCalledWith({
+        request: mockRequest,
+        originId: 'wf-1',
+        attachmentType: WORKFLOW_KI_TYPE,
+        action: 'update',
+      });
+      expect(mockSmlDelete).not.toHaveBeenCalled();
+      expect(mockSmlLogger.warn).toHaveBeenCalledWith(
+        "Failed to update SML index for workflow 'wf-1': SML unavailable"
+      );
+    });
+
+    it('does not notify SML when setSmlClient has not been called', async () => {
       const freshApi = new WorkflowsManagementApi(mockWorkflowsService, true, logger);
       mockWorkflowsService.createWorkflow.mockResolvedValue(createWorkflowDto());
 
@@ -1440,6 +2125,154 @@ steps:
     });
   });
 
+  it.each([false, true])(
+    'audits explicit reads, but not batch or child filtering (admin=%s)',
+    async (isAdmin) => {
+      const workflow = await mockWorkflowsService.getWorkflow('workflow-123', 'default');
+      if (!workflow) throw new Error('Missing workflow fixture');
+      const core = coreMock.createStart();
+      const authz = securityMock.createStart().authz;
+      authz.checkPrivilegesWithRequest.mockReturnValue({
+        globally: jest.fn().mockResolvedValue({ hasAllRequested: isAdmin }),
+        atSpace: jest.fn(),
+        atSpaces: jest.fn(),
+      });
+      core.userProfile.getCurrentProfileId.mockResolvedValue('outsider');
+      jest
+        .spyOn(core.security.authc, 'getCurrentUser')
+        .mockReturnValue(
+          securityServiceMock.createMockAuthenticatedUser({ roles: isAdmin ? ['superuser'] : [] })
+        );
+      const access = new WorkflowAccessControlService(
+        core,
+        {
+          getWorkflowDocumentWithVersion: jest.fn(),
+          writeWorkflowDocumentWithOcc: jest.fn(),
+        },
+        authz
+      );
+      mockWorkflowsService.getAccessControl.mockResolvedValue(access);
+      const privateWorkflow = {
+        ...workflow,
+        owner_id: 'owner',
+        access_control: { access_mode: 'private' as const, entries: [] },
+      };
+      mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([privateWorkflow]);
+      const children = [
+        {
+          workflowId: workflow.id,
+          executionId: 'child',
+          parentStepExecutionId: 'step',
+          workflowName: 'child',
+          status: ExecutionStatus.COMPLETED,
+          stepExecutions: [],
+        },
+      ];
+      mockWorkflowsService.getChildWorkflowExecutions.mockResolvedValue(children);
+      expect(await api.getWorkflowsByIds([workflow.id], 'default', mockRequest)).toHaveLength(
+        isAdmin ? 1 : 0
+      );
+      expect(await api.getChildWorkflowExecutions('parent', 'default', mockRequest)).toHaveLength(
+        isAdmin ? 1 : 0
+      );
+      expect(core.security.audit.asScoped(mockRequest).log).not.toHaveBeenCalled();
+      mockWorkflowsService.getWorkflow.mockResolvedValue(privateWorkflow);
+      const result = await api.getWorkflow(workflow.id, 'default', mockRequest);
+      expect(Boolean(result)).toBe(isAdmin);
+      expect(core.security.audit.asScoped(mockRequest).log).toHaveBeenCalledTimes(1);
+      expect(core.security.audit.asScoped(mockRequest).log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: `workflow_access_control_${isAdmin ? 'admin_override' : 'denied'}`,
+          }),
+        })
+      );
+    }
+  );
+
+  it('loads shared documents once and checks each caller independently', async () => {
+    const workflow = await mockWorkflowsService.getWorkflow('workflow-123', 'default');
+    if (!workflow) throw new Error('Missing workflow fixture');
+    const owner = httpServerMock.createKibanaRequest();
+    const executor = httpServerMock.createKibanaRequest();
+    const outsider = httpServerMock.createKibanaRequest();
+    const core = coreMock.createStart();
+    const profiles = new Map([
+      [owner, 'owner'],
+      [executor, 'executor'],
+      [outsider, 'outsider'],
+    ]);
+    core.userProfile.getCurrentProfileId.mockImplementation(
+      async ({ request }) => profiles.get(request) ?? null
+    );
+    const access = new WorkflowAccessControlService(core, {
+      getWorkflowDocumentWithVersion: jest.fn(),
+      writeWorkflowDocumentWithOcc: jest.fn(),
+    });
+    mockWorkflowsService.getAccessControl.mockResolvedValue(access);
+    mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([
+      {
+        ...workflow,
+        id: 'private',
+        owner_id: 'owner',
+        access_control: {
+          access_mode: 'private',
+          entries: [{ type: 'user', id: 'executor', role: 'executor', added_at: '2026-09-17' }],
+        },
+      },
+      { ...workflow, id: 'public' },
+    ]);
+    const requests = [owner, executor, outsider];
+    const results = await api.getWorkflowsByIdsForRequests(
+      Array.from({ length: 100 }, (_, i) => ({
+        ids: ['private', 'public'],
+        spaceId: 'default',
+        request: requests[i % requests.length],
+      }))
+    );
+    expect(mockWorkflowsService.getWorkflowsByIds).toHaveBeenCalledTimes(1);
+    expect(mockWorkflowsService.getWorkflowsByIds).toHaveBeenCalledWith(
+      ['private', 'public'],
+      'default'
+    );
+    expect(core.userProfile.getCurrentProfileId).toHaveBeenCalledTimes(3);
+    for (const [index, result] of results.entries()) {
+      expect(result.status).toBe('fulfilled');
+      if (result.status === 'fulfilled') {
+        expect(result.value.map(({ id }) => id)).toEqual(
+          index % 3 === 2 ? ['public'] : ['private', 'public']
+        );
+      }
+    }
+    expect(core.security.audit.asScoped(outsider).log).not.toHaveBeenCalled();
+    const client = api.getClient(executor);
+    await expect(client.getWorkflowsByIds(['private', 'public'], 'default')).resolves.toEqual(
+      results[1].status === 'fulfilled' ? results[1].value : []
+    );
+  });
+
+  it('keeps batch lookup failures in their own space', async () => {
+    const workflow = await mockWorkflowsService.getWorkflow('workflow-123', 'default');
+    if (!workflow) throw new Error('Missing workflow fixture');
+    const error = new Error('lookup failed');
+    mockWorkflowsService.getWorkflowsByIds.mockImplementation(async (_ids, spaceId) => {
+      if (spaceId === 'broken') throw error;
+      return [{ ...workflow, id: 'workflow-1' }];
+    });
+    const result = await api.getWorkflowsByIdsForRequests(
+      ['broken', 'working'].map((spaceId) => ({
+        ids: ['workflow-1'],
+        spaceId,
+        request: mockRequest,
+      }))
+    );
+    expect(result[0]).toEqual({ status: 'rejected', reason: error });
+    expect(result[1]).toEqual({
+      status: 'fulfilled',
+      value: [expect.objectContaining({ id: 'workflow-1' })],
+    });
+  });
+
   describe('delegation', () => {
     it('delegates disableAllWorkflows with spaceId and request', async () => {
       mockWorkflowsService.disableAllWorkflows.mockResolvedValue({
@@ -1462,11 +2295,13 @@ steps:
       mockWorkflowsService.getHistoryForWorkflow.mockResolvedValue(history);
 
       const result = await api.getHistoryForWorkflow('wf-1', 'default', {
+        request: mockRequest,
         page: 2,
         perPage: 10,
       });
 
       expect(mockWorkflowsService.getHistoryForWorkflow).toHaveBeenCalledWith('wf-1', 'default', {
+        request: mockRequest,
         page: 2,
         perPage: 10,
       });

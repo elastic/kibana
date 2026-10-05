@@ -28,11 +28,12 @@ import { useDebounceFn } from '@kbn/react-hooks';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
+import { recoveryStrategy } from '@kbn/alerting-v2-schemas';
 import { inlineEsqlVariables } from '../../utils/esql_rule_utils';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
 import { ConfirmRuleClose } from '../confirm_rule_close';
-import type { FormValues, RecoveryStrategy, RuleQuery } from '../../form/types';
+import type { FormValues, RecoveryStrategy, RuleQuery, RuleRecovery } from '../../form/types';
 import { getBreachQuery } from '../../form/utils/query_helpers';
 import { enterManualSplitQuery, exitManualSplitQuery } from './manual_split_query';
 import { parseYamlToFormValues, serializeFormToYaml } from '../../form/utils/yaml_form_utils';
@@ -72,8 +73,7 @@ import {
 import { useEsqlAutocomplete } from './use_esql_providers';
 import {
   guessRecoveryBlock,
-  discoverQueryToComposed,
-  resolveUnifiedAlertApplyQuery,
+  discoverQueryToRuleQuery,
   splitResultToRuleQuery,
 } from './use_heuristic_split';
 import { useSandboxEditorMounts } from './use_sandbox_editor_mounts';
@@ -280,10 +280,10 @@ const EMPTY_FORM_VALUES: FormValues = {
   metadata: { name: '', enabled: true, description: '', tags: [] },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'composed', base: '', breach: { segment: '' } },
-  recoveryStrategy: 'no_breach',
+  query: { base: '', breach: { segment: '' } },
+  recovery: { strategy: recoveryStrategy.no_breach },
   grouping: undefined,
-  noDataStrategy: DEFAULT_NO_DATA_STRATEGY,
+  noData: { strategy: DEFAULT_NO_DATA_STRATEGY },
   stateTransition: undefined,
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
@@ -321,6 +321,11 @@ export function ComposeDiscoverFlyout({
   const initialMapped = rule ? mapRuleToComposeFormValues(rule) : undefined;
   const initialKind = initialMapped?.kind ?? 'alert';
 
+  /*
+   * Seeds the initial view only. A saved rule the form cannot show opens in
+   * YAML, but the toggle follows the live form state: once the YAML parses
+   * back into a representable shape, the user can return to the form.
+   */
   const forceYamlMode = Boolean(rule && isNonRepresentableRule(rule));
 
   const inlineResult = useMemo(
@@ -331,13 +336,13 @@ export function ComposeDiscoverFlyout({
     [initialQuery, esqlVariables]
   );
 
-  const discoverComposedQuery = useMemo(
-    () => (initialQuery !== undefined ? discoverQueryToComposed(inlineResult.query) : undefined),
+  const discoverSplitQuery = useMemo(
+    () => (initialQuery !== undefined ? discoverQueryToRuleQuery(inlineResult.query) : undefined),
     [initialQuery, inlineResult.query]
   );
 
   const isDiscoverQueryPopulated = Boolean(
-    discoverComposedQuery && getBreachQuery(discoverComposedQuery).trim()
+    discoverSplitQuery && getBreachQuery(discoverSplitQuery).trim()
   );
   const isRuleQueryPopulated = Boolean(
     initialMapped?.query && getBreachQuery(initialMapped.query).trim()
@@ -413,11 +418,11 @@ export function ComposeDiscoverFlyout({
     if (shouldSeedFromDiscover) {
       return {
         ...EMPTY_FORM_VALUES,
-        query: discoverComposedQuery ?? discoverQueryToComposed(''),
+        query: discoverSplitQuery ?? discoverQueryToRuleQuery(''),
       };
     }
     return EMPTY_FORM_VALUES;
-  }, [rule, mode, initialQuery, discoverComposedQuery, builderType, builderParsedFromDiscover]);
+  }, [rule, mode, initialQuery, discoverSplitQuery, builderType, builderParsedFromDiscover]);
 
   const methods = useForm<FormValues>({ mode: 'onBlur', defaultValues });
   const [isConfirmCloseVisible, setIsConfirmCloseVisible] = useState(false);
@@ -504,6 +509,9 @@ export function ComposeDiscoverFlyout({
   }, [uiState.yamlMode, uiState.childOpen]);
 
   const [sandboxQuery, setSandboxQuery] = useState<RuleQuery>(() => methods.getValues('query'));
+  const [sandboxRecovery, setSandboxRecovery] = useState<RuleRecovery | undefined>(() =>
+    methods.getValues('recovery')
+  );
   const [sandboxTimeField, setSandboxTimeField] = useState<string>(() =>
     methods.getValues('timeField')
   );
@@ -524,25 +532,25 @@ export function ComposeDiscoverFlyout({
 
   const isAlert = useWatch({ control: methods.control, name: 'kind' }) === 'alert';
   const watchedQuery = useWatch({ control: methods.control, name: 'query' });
-  const watchedRecoveryStrategy = useWatch({ control: methods.control, name: 'recoveryStrategy' });
-  const hasCustomRecovery = watchedRecoveryStrategy === 'query';
-  const watchedNoDataStrategy = useWatch({ control: methods.control, name: 'noDataStrategy' });
+  const watchedRecovery = useWatch({ control: methods.control, name: 'recovery' });
+  const watchedNoData = useWatch({ control: methods.control, name: 'noData' });
+  const watchedStateTransition = useWatch({ control: methods.control, name: 'stateTransition' });
+  const hasCustomRecovery = watchedRecovery?.strategy === recoveryStrategy.condition;
 
   const isFormStateNonRepresentable = isNonRepresentableFormState({
     kind: isAlert ? 'alert' : 'signal',
-    query: watchedQuery,
-    recoveryStrategy: watchedRecoveryStrategy,
-    noDataStrategy: watchedNoDataStrategy,
+    recovery: watchedRecovery,
+    noData: watchedNoData,
+    stateTransition: watchedStateTransition,
   });
 
   const timeFieldResolutionQuery = useMemo(
     () =>
       getTimeFieldResolutionQuery(
         uiState.childOpen ? sandboxQuery : watchedQuery,
-        isAlert,
         uiState.queryCommitted || uiState.childOpen
       ),
-    [uiState.childOpen, uiState.queryCommitted, sandboxQuery, watchedQuery, isAlert]
+    [uiState.childOpen, uiState.queryCommitted, sandboxQuery, watchedQuery]
   );
 
   const handleResolvedTimeFieldChange = useCallback(
@@ -593,11 +601,11 @@ export function ComposeDiscoverFlyout({
       return;
     }
 
-    const composedQuery = discoverQueryToComposed(inlineResult.query);
-    methods.reset({ ...methods.getValues(), query: composedQuery });
-    setSandboxQuery(composedQuery);
+    const splitQuery = discoverQueryToRuleQuery(inlineResult.query);
+    methods.reset({ ...methods.getValues(), query: splitQuery });
+    setSandboxQuery(splitQuery);
     dispatch({
-      type: getBreachQuery(composedQuery).trim() ? 'COMMIT_QUERY' : 'INVALIDATE_QUERY',
+      type: getBreachQuery(splitQuery).trim() ? 'COMMIT_QUERY' : 'INVALIDATE_QUERY',
     });
   }, [
     initialQuery,
@@ -612,6 +620,7 @@ export function ComposeDiscoverFlyout({
 
   const syncSandbox = useCallback(() => {
     setSandboxQuery(methods.getValues('query'));
+    setSandboxRecovery(methods.getValues('recovery'));
     setSandboxTimeField(methods.getValues('timeField'));
   }, [methods]);
 
@@ -620,6 +629,7 @@ export function ComposeDiscoverFlyout({
       const composed = mapYamlFormValuesToComposeFormValues(parsed);
       methods.reset(composed);
       setSandboxQuery(composed.query);
+      setSandboxRecovery(composed.recovery);
       setSandboxTimeField(composed.timeField);
       return composed;
     },
@@ -631,9 +641,8 @@ export function ComposeDiscoverFlyout({
    * the flyout level so providers survive Sandbox (child) open/close cycles and
    * are immune to React Strict Mode double-mount disposal.
    */
-  const sandboxBase = sandboxQuery.format === 'composed' ? sandboxQuery.base : '';
   const { onAlertEditorMount, onRecoveryEditorMount, onBaseEditorMount, onSingleEditorMount } =
-    useSandboxEditorMounts({ baseQuery: sandboxBase, services: baseServices });
+    useSandboxEditorMounts({ baseQuery: sandboxQuery.base, services: baseServices });
 
   const isAlertRef = useRef(isAlert);
   isAlertRef.current = isAlert;
@@ -663,28 +672,27 @@ export function ComposeDiscoverFlyout({
 
   const handleKindChange = useCallback(
     (kind: 'signal' | 'alert') => {
+      // Assemble from committed query — discards any unapplied sandbox edits cleanly.
+      const assembled = getBreachQuery(methods.getValues('query'));
       if (kind === 'alert') {
-        const full = getBreachQuery(methods.getValues('query'));
-        /*
-         * A query with no alert condition stays composed with an empty breach
-         * segment (rejected at save); a real split yields base + segment.
-         */
-        const alertQuery = splitResultToRuleQuery(full).query;
+        const alertQuery = splitResultToRuleQuery(assembled).query;
         setSandboxQuery(alertQuery);
         methods.setValue('query', alertQuery, { shouldDirty: true });
-        methods.setValue('noDataStrategy', DEFAULT_NO_DATA_STRATEGY, { shouldDirty: true });
-        methods.setValue('recoveryStrategy', 'no_breach', { shouldDirty: true });
+        methods.setValue('noData', { strategy: DEFAULT_NO_DATA_STRATEGY }, { shouldDirty: true });
+        methods.setValue(
+          'recovery',
+          { strategy: recoveryStrategy.no_breach },
+          { shouldDirty: true }
+        );
+        setSandboxRecovery({ strategy: recoveryStrategy.no_breach });
       } else {
-        // Assemble from committed query — discards any unapplied sandbox edits cleanly.
-        const assembled = getBreachQuery(methods.getValues('query'));
-        const standalone: RuleQuery = {
-          format: 'standalone',
-          breach: { query: assembled },
-        };
-        setSandboxQuery(standalone);
-        methods.setValue('query', standalone, { shouldDirty: true });
-        methods.setValue('noDataStrategy', undefined, { shouldDirty: true });
-        methods.setValue('recoveryStrategy', undefined, { shouldDirty: true });
+        // Signal rules carry no breach split and no lifecycle config.
+        const signalQuery: RuleQuery = { base: assembled, breach: { segment: '' } };
+        setSandboxQuery(signalQuery);
+        methods.setValue('query', signalQuery, { shouldDirty: true });
+        methods.setValue('noData', undefined, { shouldDirty: true });
+        methods.setValue('recovery', undefined, { shouldDirty: true });
+        setSandboxRecovery(undefined);
       }
       methods.setValue('kind', kind, { shouldDirty: true });
       dispatch({ type: 'KIND_CHANGE', kind });
@@ -696,6 +704,7 @@ export function ComposeDiscoverFlyout({
     if (!isBuilderMode) return;
     const sub = methods.watch((values) => {
       if (values.query) setSandboxQuery(values.query as RuleQuery);
+      if (values.recovery) setSandboxRecovery(values.recovery as RuleRecovery);
       if (values.timeField) setSandboxTimeField(values.timeField);
     });
     return () => sub.unsubscribe();
@@ -703,63 +712,33 @@ export function ComposeDiscoverFlyout({
 
   const handleRecoveryTypeChange = useCallback(
     (strategy: RecoveryStrategy) => {
-      methods.setValue('recoveryStrategy', strategy, { shouldDirty: true });
-      if (strategy === 'query') {
-        setSandboxQuery((q) => {
-          if (q.format !== 'composed') return q;
-          const current = q.recovery?.segment ?? '';
-          if (current.trim()) return q;
-          if (isBuilderMode) {
-            const formQuery = methods.getValues('query');
-            const builderRecover =
-              formQuery.format === 'composed' ? formQuery.recovery?.segment ?? '' : '';
-            if (builderRecover.trim()) {
-              return { ...q, recovery: { segment: builderRecover } };
-            }
-          }
-          return {
-            ...q,
-            recovery: {
-              segment: guessRecoveryBlock(q.breach.segment),
-            },
-          };
-        });
+      if (strategy === recoveryStrategy.condition) {
+        const committed = methods.getValues('recovery')?.segment ?? '';
+        const seeded = committed.trim()
+          ? committed
+          : guessRecoveryBlock(sandboxQuery.breach.segment);
+        const next: RuleRecovery = { strategy, segment: seeded };
+        methods.setValue('recovery', next, { shouldDirty: true });
+        setSandboxRecovery(next);
         if (!isBuilderMode) {
           dispatch({ type: 'OPEN_CHILD', isAlert, focusedTab: 'recovery' });
         }
       } else {
         /*
-         * (a) Clear recovery from sandbox regardless of mode — prevents stale recovery
-         * query from surviving a type change even when the sandbox is still open.
+         * Drop the condition segment from both the sandbox draft and RHF —
+         * a stale block must not survive a strategy change while the sandbox
+         * is still open.
          */
-        setSandboxQuery((q) => {
-          if (q.format === 'composed') {
-            const { recovery: _recovery, ...rest } = q;
-            return rest;
-          }
-          const { recovery: _recovery, ...rest } = q;
-          return rest;
-        });
-        // Clear recovery from committed RHF state too.
-        if (uiState.queryCommitted) {
-          const current = methods.getValues('query');
-          if (current.format === 'composed' && current.recovery) {
-            const { recovery: _recovery, ...rest } = current;
-            methods.setValue('query', rest, { shouldDirty: true });
-          } else if (current.format === 'standalone' && current.recovery) {
-            const { recovery: _recovery, ...rest } = current;
-            methods.setValue('query', rest, { shouldDirty: true });
-          }
-        }
+        const next: RuleRecovery = { strategy };
+        methods.setValue('recovery', next, { shouldDirty: true });
+        setSandboxRecovery(next);
         if (isBuilderMode && builderState) {
           const { recovery: _, ...rest } = builderState as Record<string, unknown>;
           setBuilderState(rest);
         }
         /*
-         * (b) Close sandbox in non-YAML mode — prevents a pending Apply from
-         * overwriting the recovery type change by writing the stale sandboxQuery back.
-         * Skip syncSandbox here: (a) already set the clean state directly, and
-         * calling syncSandbox when !queryCommitted could re-introduce a stale recovery.
+         * Close sandbox in non-YAML mode — prevents a pending Apply from
+         * overwriting the recovery type change by writing the stale draft back.
          */
         if (uiState.childOpen && !uiState.yamlMode) {
           dispatch({ type: 'CLOSE_CHILD' });
@@ -772,7 +751,7 @@ export function ComposeDiscoverFlyout({
       isAlert,
       isBuilderMode,
       builderState,
-      uiState.queryCommitted,
+      sandboxQuery.breach.segment,
       uiState.childOpen,
       uiState.yamlMode,
     ]
@@ -831,8 +810,6 @@ export function ComposeDiscoverFlyout({
 
   const handleToggleYamlMode = useCallback(
     (enabled: boolean) => {
-      if (forceYamlMode) return;
-
       if (enabled) {
         manualSplitUncommittedRef.current = false;
         if (isDirtyRef.current) {
@@ -885,7 +862,6 @@ export function ComposeDiscoverFlyout({
       yamlText,
       applyYamlValuesToFormAndSandbox,
       dispatch,
-      forceYamlMode,
       builderType,
       uiState.step,
     ]
@@ -905,18 +881,15 @@ export function ComposeDiscoverFlyout({
       isAlert &&
       !uiState.manualSplitEnabled;
 
-    let queryToCommit: RuleQuery = sandboxQuery;
-    if (shouldRunHeuristicSplit) {
-      const split = splitResultToRuleQuery(getBreachQuery(sandboxQuery)).query;
-      queryToCommit = resolveUnifiedAlertApplyQuery(sandboxQuery, split);
-    }
-    /*
-     * Manual split with an empty alert condition stays composed + empty segment —
-     * the request mapper omits the breach block at save; do not coerce to standalone.
-     */
+    const queryToCommit: RuleQuery = shouldRunHeuristicSplit
+      ? splitResultToRuleQuery(getBreachQuery(sandboxQuery)).query
+      : sandboxQuery;
     setSandboxQuery(queryToCommit);
 
     methods.setValue('query', queryToCommit, { shouldDirty: true });
+    if (sandboxRecovery) {
+      methods.setValue('recovery', sandboxRecovery, { shouldDirty: true });
+    }
     methods.setValue('timeField', sandboxTimeField, { shouldDirty: true });
     if (uiState.yamlMode) {
       cancelYamlParse();
@@ -932,6 +905,7 @@ export function ComposeDiscoverFlyout({
     }
   }, [
     sandboxQuery,
+    sandboxRecovery,
     sandboxTimeField,
     currentStep?.id,
     uiState.yamlMode,
@@ -1076,19 +1050,10 @@ export function ComposeDiscoverFlyout({
     }
     /*
      * In YAML mode the sandbox stays open (and is forced open for non-representable
-     * rules). A standalone query can't be represented as base/alert tabs, so it uses
-     * the single unified editor; composed queries keep the split tabs.
+     * rules), always with the split tabs so the base and breach blocks stay editable.
      */
-    if (sandboxQuery.format === 'standalone') return undefined;
     return hasCustomRecovery ? ['base', 'alert', 'recovery'] : ['base', 'alert'];
-  }, [
-    uiState.yamlMode,
-    hasCustomRecovery,
-    uiState.step,
-    uiState.manualSplitEnabled,
-    sandboxQuery.format,
-    isAlert,
-  ]);
+  }, [uiState.yamlMode, hasCustomRecovery, uiState.step, uiState.manualSplitEnabled, isAlert]);
 
   const isAlertConditionStep = currentStep?.id === 'alertCondition';
 
@@ -1198,6 +1163,21 @@ export function ComposeDiscoverFlyout({
     handleDisableManualSplit,
   ]);
 
+  /*
+   * Header row shown above the editor: the helper text plus the Split (gear)
+   * control on the right. The gear lives here — outside the editor toolbar —
+   * because it acts on how the editor(s) below are rendered (single vs split),
+   * so it reads as an outer control rather than part of the editor's own toolbar.
+   * `sandboxHelpText` and `sandboxHeaderActions` share the same gate, so they
+   * appear (or not) together.
+   */
+  const sandboxHelpContent = sandboxHelpText ? (
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem>{sandboxHelpText}</EuiFlexItem>
+      {sandboxHeaderActions && <EuiFlexItem grow={false}>{sandboxHeaderActions}</EuiFlexItem>}
+    </EuiFlexGroup>
+  ) : undefined;
+
   // Freeze the view toggle while the sandbox is open in FORM mode. In YAML mode the
   // sandbox stays open by design, so the toggle remains enabled (#623 gating table).
   const modeToggleSandboxLocked = uiState.childOpen && !uiState.yamlMode;
@@ -1206,10 +1186,10 @@ export function ComposeDiscoverFlyout({
    * form state reached from Form mode must still be able to open YAML to fix it.
    */
   const yamlLockedByFormState = uiState.yamlMode && isFormStateNonRepresentable;
-  const modeToggleDisabled = forceYamlMode || modeToggleSandboxLocked || yamlLockedByFormState;
+  const modeToggleDisabled = modeToggleSandboxLocked || yamlLockedByFormState;
 
   const getModeToggleTooltip = (): string | undefined => {
-    if (forceYamlMode || yamlLockedByFormState) return YAML_ONLY_TOOLTIP;
+    if (yamlLockedByFormState) return YAML_ONLY_TOOLTIP;
     if (modeToggleSandboxLocked) return SANDBOX_OPEN_MODE_TOGGLE_TOOLTIP;
     return undefined;
   };
@@ -1410,6 +1390,8 @@ export function ComposeDiscoverFlyout({
               <QuerySandboxFlyout
                 query={sandboxQuery}
                 onQueryChange={isBuilderMode ? undefined : setSandboxQuery}
+                recovery={sandboxRecovery}
+                onRecoveryChange={isBuilderMode ? undefined : setSandboxRecovery}
                 tabs={sandboxTabs}
                 timeField={sandboxTimeField}
                 onTimeFieldChange={isBuilderMode ? undefined : setSandboxTimeField}
@@ -1424,8 +1406,7 @@ export function ComposeDiscoverFlyout({
                 onBaseEditorMount={onBaseEditorMount}
                 onSingleEditorMount={onSingleEditorMount}
                 onClose={handleSandboxClose}
-                helpText={sandboxHelpText}
-                headerActions={sandboxHeaderActions}
+                helpText={sandboxHelpContent}
                 onApply={isBuilderMode ? undefined : handleSandboxApply}
                 title={getQuerySandboxTitle(isBuilderMode)}
               />

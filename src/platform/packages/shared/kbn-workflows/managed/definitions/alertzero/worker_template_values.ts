@@ -41,11 +41,14 @@ export const renderScheduledWorkerYaml = (
 
 /**
  * Worker-specific settings are stored under `extras`, mirroring the Worker settings API, so a
- * settings save re-renders YAML and the per-space Worker can pass them to the sweep.
+ * settings save re-renders YAML and the per-space Worker can pass them to the sweep. The shape is
+ * declared once, in `RuleTuningWorkerExtras` in `@kbn/alertzero-common`; this mirrors it for typing.
  */
 export interface RuleTuningWorkerTemplateValues extends ScheduledWorkerTemplateValues {
   extras: {
     analysisWindowDays: number;
+    fpCountThreshold: number;
+    fpRateThresholdPct: number;
   };
 }
 
@@ -53,7 +56,91 @@ export const renderRuleTuningWorkerYaml = (
   yaml: string,
   values: RuleTuningWorkerTemplateValues
 ): string =>
+  // JSON is a YAML flow mapping, so the whole object lands under consts in one substitution.
   renderScheduledWorkerYaml(yaml, values).replaceAll(
-    '__WORKER_ANALYSIS_WINDOW_DAYS__',
-    String(values.extras.analysisWindowDays)
+    '__WORKER_EXTRAS__',
+    JSON.stringify(values.extras)
+  );
+
+export type HuntWorkerTemplateValues = ScheduledWorkerTemplateValues;
+
+/**
+ * Hunt Watch Continuous Threat Hunt has no configurable dials: enabled/disabled
+ * (autonomy) and the schedule interval are its only settings. tier2When, candidateLimit,
+ * and fanOutMax are fixed implementation constants.
+ */
+const HUNT_WORKER_DEFAULTS = {
+  tier2When: 'always' as const,
+  candidateLimit: 10,
+  fanOutMax: 10,
+};
+
+/**
+ * The manual trigger's optional `reportIds` input: a manual-bypass
+ * fan-out over named reports, capped at 10 to match `create_proposal.yaml`'s
+ * trigger-input shape and the candidates route's own `report_ids` bound. Present on
+ * every autonomy level's manual trigger, scheduled or not.
+ */
+const MANUAL_TRIGGER_WITH_REPORT_IDS_INPUT = [
+  '  - type: manual',
+  '    inputs:',
+  '      properties:',
+  '        reportIds:',
+  '          type: array',
+  '          items:',
+  '            type: string',
+  '          maxItems: 10',
+].join('\n');
+
+/**
+ * Manual autonomy: manual trigger only. Assisted/supervised: 4h (or configured)
+ * schedule plus manual.
+ */
+export const renderHuntWorkerYaml = (yaml: string, values: HuntWorkerTemplateValues): string => {
+  const triggers =
+    values.autonomyLevel === 'manual'
+      ? MANUAL_TRIGGER_WITH_REPORT_IDS_INPUT
+      : [
+          '  - type: scheduled',
+          '    with:',
+          `      every: ${JSON.stringify(values.scheduleInterval)}`,
+          MANUAL_TRIGGER_WITH_REPORT_IDS_INPUT,
+        ].join('\n');
+
+  return renderScheduledWorkerYaml(yaml, values)
+    .replaceAll('__WORKER_TRIGGERS__', triggers)
+    .replaceAll('__WORKER_TIER2_WHEN__', JSON.stringify(HUNT_WORKER_DEFAULTS.tier2When))
+    .replaceAll('__WORKER_CANDIDATE_LIMIT__', String(HUNT_WORKER_DEFAULTS.candidateLimit))
+    .replaceAll('__WORKER_FAN_OUT_MAX__', String(HUNT_WORKER_DEFAULTS.fanOutMax));
+};
+
+export interface AlertTriageWorkerTemplateValues extends CommonWorkerTemplateValues {
+  extras: {
+    autoCloseConfidenceScoreMinThreshold: number;
+  };
+}
+
+export const renderAlertTriageWorkerYaml = (
+  yaml: string,
+  values: AlertTriageWorkerTemplateValues
+): string =>
+  renderCommonWorkerYaml(yaml, values).replaceAll(
+    '__WORKER_AUTO_CLOSE_CONFIDENCE_MIN_THRESHOLD__',
+    String(values.extras.autoCloseConfidenceScoreMinThreshold)
+  );
+
+export interface RuleCoverageWorkerTemplateValues extends ScheduledWorkerTemplateValues {
+  extras: {
+    lookbackDays: number;
+    maxGapsPerRun: number;
+  };
+}
+
+export const renderRuleCoverageWorkerYaml = (
+  yaml: string,
+  values: RuleCoverageWorkerTemplateValues
+): string =>
+  renderScheduledWorkerYaml(yaml, values).replaceAll(
+    '__WORKER_EXTRAS__',
+    JSON.stringify(values.extras)
   );

@@ -26,6 +26,12 @@ export const INFRA_EBT_ACTIONS = {
   CREATE_METRIC_THRESHOLD_RULE: 'createMetricThresholdRule',
   /** User intends to create a custom threshold rule. */
   CREATE_CUSTOM_THRESHOLD_RULE: 'createCustomThresholdRule',
+  /** User intends to create a log threshold rule. */
+  CREATE_LOG_THRESHOLD_RULE: 'createLogThresholdRule',
+  /** User intends to recreate a logs ML job. */
+  RECREATE_ML_JOB: 'recreateMlJob',
+  /** User intends to open the Machine Learning anomaly explorer. */
+  ANALYZE_IN_ML: 'analyzeInMl',
   /** User intends to manage existing rules. */
   MANAGE_RULES: 'manageRules',
   /** User intends to open Metrics settings. */
@@ -46,5 +52,4 @@ export const INFRA_EBT_DETAILS = {
 export const INFRA_EBT_ELEMENTS = {
   LOG_ANALYSIS_ANOMALIES_RESULTS: 'infraLogAnalysisAnomaliesResults',
   LOG_ANALYSIS_DATASETS_SELECTOR: 'infraLogAnalysisDatasetsSelector',
-  LOG_ANALYSIS_PAGE_HEADER: 'infraLogAnalysisPageHeader',
 } as const;

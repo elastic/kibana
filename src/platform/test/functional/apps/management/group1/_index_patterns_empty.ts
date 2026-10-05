@@ -9,6 +9,12 @@
 
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
+/**
+ * Migration recommendation: MIXED. The empty-state-to-create journey is not covered elsewhere
+ * and should migrate to Scout. The no-read-only-badge assertion is already covered by
+ * data_views_feature_controls_security.spec.ts for an all-privileges user, so delete that FTR
+ * test rather than duplicating it.
+ */
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -38,6 +44,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['index-pattern'] });
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT. The empty Data Views list must react when an
+     * index appears and allow the user to create a data view; the component Jest test only covers
+     * static empty-prompt rendering.
+     */
     // create index pattern and return to verify list
     it(`shows empty views`, async () => {
       await PageObjects.settings.clickKibanaIndexPatterns();
@@ -62,6 +73,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.settings.createIndexPattern('logstash-*', '');
     });
 
+    /**
+     * Migration recommendation: DELETE. This is covered by
+     * src/platform/plugins/shared/data_view_management/test/scout/ui/tests/
+     * data_views_feature_controls_security.spec.ts (the all-privileges user has no badge).
+     */
     it(`doesn't show read-only badge`, async () => {
       await globalNav.badgeMissingOrFail();
     });
