@@ -15,6 +15,7 @@ import {
 } from '../common/escalations/constants';
 import { AttachImpactStepId, GetImpactStepId } from '../common/impact/step_types';
 import { ReopenInvestigationStepId } from '../common/investigations/step_types';
+import { AppendWorkflowExecutionIdStepId } from '../common/workflow_execution/step_types';
 import { registerImpactRoutes } from './impact/routes/register_routes';
 import {
   ESCALATIONS_API_PRIVILEGE_MANAGE,
@@ -178,6 +179,7 @@ describe('AgenticInvestigationsPlugin', () => {
         AttachImpactStepId,
         GetImpactStepId,
         ReopenInvestigationStepId,
+        AppendWorkflowExecutionIdStepId,
       ]);
     });
 

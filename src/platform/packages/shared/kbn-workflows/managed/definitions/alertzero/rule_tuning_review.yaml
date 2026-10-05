@@ -162,7 +162,7 @@ steps:
       metadata:
         status: open
         description: "{{ inputs.fp_count }} false-positive alerts on rule {{ steps.fetch_rule.output.name }} in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days"
-        workflow_execution_id: "{{ execution.id }}"
+        workflow_execution_ids: ["{{ execution.id }}"]
 
   # By-reference security.rule attachment: the framework resolves the rule once
   # from its rule_id and snapshots it, recording the rule as it was when this

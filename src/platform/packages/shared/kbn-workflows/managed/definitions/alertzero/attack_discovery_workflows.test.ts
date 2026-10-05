@@ -860,16 +860,33 @@ describe('Attack Discovery worker chain', () => {
       // recording it here would group nothing and quietly break the telemetry that
       // reads this field.
       it('records the Worker run that produced it, not its own execution', () => {
-        const metadata = open?.with?.metadata as Record<string, string> | undefined;
+        const metadata = open?.with?.metadata as Record<string, string | string[]> | undefined;
 
-        expect(metadata?.workflow_execution_id).toBe('{{ inputs.parent_run_id }}');
+        expect(metadata?.workflow_execution_ids).toEqual(['{{ inputs.parent_run_id }}']);
+      });
+
+      it('appends the runner ID when reusing an investigation without changing its metadata at creation', () => {
+        const append = stepIn(reviewSteps, 'append_workflow_execution');
+        expect(append?.type).toBe('investigations.appendWorkflowExecutionId');
+        expect(append?.if).toBe('${{ inputs.parent_run_id != blank }}');
+        expect(append?.with).toEqual({
+          conversationId: '{{ steps.resolve_investigation_id.output.investigation_id }}',
+          workflowExecutionId: '{{ inputs.parent_run_id }}',
+        });
+        const names = reviewSteps.map(({ name }) => name);
+        expect(names.indexOf('verify_investigation')).toBeLessThan(
+          names.indexOf('append_workflow_execution')
+        );
+        expect(names.indexOf('append_workflow_execution')).toBeLessThan(
+          names.indexOf('run_fp_tp_analysis')
+        );
       });
 
       // #19022 asks for the narrative on the Investigation itself, not only in an
       // attachment, so it is readable without resolving anything.
       // Plain text, because the Investigation list and overview show it as-is.
       it('seeds the attack narrative into summary', () => {
-        const metadata = open?.with?.metadata as Record<string, string> | undefined;
+        const metadata = open?.with?.metadata as Record<string, string | string[]> | undefined;
 
         expect(metadata?.summary).toBe(
           "{{ steps.resolve_display_text.output.data[0].summary_markdown | remove: '`' | default: inputs.summary_markdown | truncate: 8000 }}"

@@ -29,7 +29,7 @@ const INVESTIGATION_METADATA = {
   status: 'open',
   severity: 'high',
   summary: 'Suspicious activity',
-  workflow_execution_id: 'wf-123', // investigation-only; must not reach the escalation
+  workflow_execution_ids: ['wf-123'], // investigation-only; must not reach the escalation
 };
 
 const MOCK_INVESTIGATION = {
@@ -199,7 +199,7 @@ describe('EscalationsService.create', () => {
     ).rejects.toBeInstanceOf(InvalidLinkedInvestigationError);
   });
 
-  it('filters out workflow_execution_id from the copied metadata', async () => {
+  it('filters out workflow_execution_ids from the copied metadata', async () => {
     const { service, client } = makeService();
 
     await service.create(request, {
@@ -209,7 +209,7 @@ describe('EscalationsService.create', () => {
     });
 
     const { metadata } = client.create.mock.calls[0][0];
-    expect(metadata).not.toHaveProperty('workflow_execution_id');
+    expect(metadata).not.toHaveProperty('workflow_execution_ids');
   });
 
   it('sets linked_investigations to [linked_investigation_id] in metadata', async () => {
