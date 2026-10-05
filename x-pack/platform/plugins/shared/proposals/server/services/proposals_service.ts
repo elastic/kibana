@@ -555,7 +555,11 @@ export class ProposalsService {
    * `workflowExecutionId` is the original's, because the gate execution is
    * still running and parked — approving the clone resumes that same execution.
    */
-  async clone({ id, executionError }: CloneProposalParams, spaceId: string): Promise<string> {
+  async clone(
+    { id, executionError }: CloneProposalParams,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<string> {
     const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
 
     // Asserted here rather than left to the caller, because this is reachable
@@ -615,6 +619,8 @@ export class ProposalsService {
     };
 
     await this.writeDocument(id, superseded, { seqNo, primaryTerm });
+
+    await this.attachToConversation(cloneId, document.conversationId, document.title, request);
 
     return cloneId;
   }
@@ -741,6 +747,8 @@ export class ProposalsService {
       }
       throw error;
     }
+
+    await this.attachToConversation(revisionId, document.conversationId, document.title, request);
 
     return { proposalId: revisionId, revision };
   }
