@@ -6,7 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { FEATURE_ID_TO_COST_BUDGET_GROUP } from '../../../../common/cost';
 import type { SignificantEventsServer } from '../../../types';
 import type { PriceResult, PriceService } from '../../../lib/cost/price_service';
@@ -114,7 +114,7 @@ describe('Significant Events cost route', () => {
 
   it('requires Nightshift manage and configure and runs both access assertions', async () => {
     expect(route.security.authz).toEqual({
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     });
     await invoke();
     expect(assertSignificantEventsAccess).toHaveBeenCalledWith({
