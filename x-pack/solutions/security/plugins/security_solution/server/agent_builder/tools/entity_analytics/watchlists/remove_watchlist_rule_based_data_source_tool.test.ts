@@ -57,6 +57,13 @@ jest.mock('../../../../lib/entity_analytics/watchlists/management/watchlist_conf
 
 const mockListFn = jest.fn().mockResolvedValue({ sources: [] });
 const mockDeleteFn = jest.fn().mockResolvedValue(undefined);
+const mockSyncWatchlistInBackgroundFn = jest.fn();
+jest.mock(
+  '../../../../lib/entity_analytics/watchlists/entity_sources/entity_sources_service',
+  () => ({
+    syncWatchlistInBackground: (...args: unknown[]) => mockSyncWatchlistInBackgroundFn(...args),
+  })
+);
 jest.mock('../../../../lib/entity_analytics/watchlists/entity_sources/infra', () => {
   const actual = jest.requireActual(
     '../../../../lib/entity_analytics/watchlists/entity_sources/infra'
@@ -372,15 +379,24 @@ describe('removeWatchlistRuleBasedDataSourceTool', () => {
         mockRemoveEntitySourceReferenceFn.mockImplementationOnce(async () => {
           callOrder.push('unlink');
         });
+        mockSyncWatchlistInBackgroundFn.mockImplementationOnce(() => {
+          callOrder.push('sync');
+        });
 
         const result = (await tool.handler(
           { watchlistId: 'wl-1', type: 'store' },
           ctx
         )) as ToolHandlerStandardReturn;
 
-        expect(callOrder).toEqual(['delete', 'unlink']);
+        expect(callOrder).toEqual(['delete', 'unlink', 'sync']);
         expect(mockDeleteFn).toHaveBeenCalledWith('src-1');
         expect(mockRemoveEntitySourceReferenceFn).toHaveBeenCalledWith('wl-1', source);
+        expect(mockSyncWatchlistInBackgroundFn).toHaveBeenCalledWith(
+          expect.objectContaining({
+            watchlistId: 'wl-1',
+            logContext: SECURITY_REMOVE_WATCHLIST_RULE_BASED_DATA_SOURCE_TOOL_ID,
+          })
+        );
         const other = result.results[0] as OtherResult;
         expect(other.type).toBe(ToolResultType.other);
         expect(other.data).toMatchObject({ watchlistId: 'wl-1', removedSourceId: 'src-1' });
@@ -405,6 +421,7 @@ describe('removeWatchlistRuleBasedDataSourceTool', () => {
         )) as ToolHandlerStandardReturn;
 
         expect(mockRemoveEntitySourceReferenceFn).not.toHaveBeenCalled();
+        expect(mockSyncWatchlistInBackgroundFn).not.toHaveBeenCalled();
         const error = result.results[0] as ErrorResult;
         expect(error.type).toBe(ToolResultType.error);
         expect(error.data.message).toMatch(/ES unavailable/);

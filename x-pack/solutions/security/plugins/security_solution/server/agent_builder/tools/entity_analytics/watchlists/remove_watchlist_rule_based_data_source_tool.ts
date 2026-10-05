@@ -14,6 +14,7 @@ import type { Logger } from '@kbn/logging';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 import { WatchlistConfigClient } from '../../../../lib/entity_analytics/watchlists/management/watchlist_config';
+import { syncWatchlistInBackground } from '../../../../lib/entity_analytics/watchlists/entity_sources/entity_sources_service';
 import {
   RULE_BASED_SOURCE_TYPES,
   RuleBasedSourceType,
@@ -241,6 +242,17 @@ Resolve the watchlist id via \`security.get_watchlist_id\` first when the user n
         // instead of leaving the source and its credential (for `index` type) orphaned but still live and no longer discoverable to retry or revoke.
         await entitySourceClient.delete(existingSource.id);
         await watchlistClient.removeEntitySourceReference(params.watchlistId, existingSource);
+
+        void syncWatchlistInBackground({
+          watchlistId: params.watchlistId,
+          logContext: SECURITY_REMOVE_WATCHLIST_RULE_BASED_DATA_SOURCE_TOOL_ID,
+          esClient: esClient.asCurrentUser,
+          soClient,
+          logger,
+          namespace: spaceId,
+          getStartServices: core.getStartServices,
+          hasEncryptionKey,
+        });
 
         telemetryTracker.recordResultCount(1);
         return {
