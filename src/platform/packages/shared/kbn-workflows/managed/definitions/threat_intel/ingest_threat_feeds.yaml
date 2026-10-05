@@ -13,7 +13,7 @@ tags:
 enabled: false
 settings:
   concurrency:
-    key: "threat-intel-ingest-global"
+    key: "threat-intel-ingest"
     strategy: drop
     max: 1
 triggers:
@@ -79,11 +79,20 @@ steps:
             type: loop.continue
             if: "steps.check_dedup.output.hits.total.value > 0"
 
+          # `.kibana-threat-reports` is plugin-owned and hidden, so this runs as an internal route
+          # (asInternalUser) rather than a plain `elasticsearch.index`, which would run as
+          # whichever identity enabled this workflow and 403 for every non-superuser. No `/s/{id}/`
+          # prefix, resolving to the default space: this workflow is installed once globally, same
+          # as `enrich_threat_report.yaml` (see that file's "calls the enrich routes with no space
+          # prefix" test), and sources/dedup above are deliberately space-blind too.
           - name: write_report
-            type: elasticsearch.index
+            type: kibana.request
             with:
-              index: .kibana-threat-reports
-              op_type: create
-              document: "${{ foreach.item }}"
+              method: POST
+              path: "/internal/threat_intel/ingest_threat_report"
+              headers:
+                elastic-api-version: "1"
+              body:
+                document: "${{ foreach.item }}"
             on-failure:
               continue: true

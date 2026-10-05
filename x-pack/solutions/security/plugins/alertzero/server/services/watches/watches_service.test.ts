@@ -19,7 +19,7 @@ describe('WatchesService', () => {
       expect(floor).toEqual(
         expect.objectContaining({
           id: FLOOR,
-          name: 'Watch Floor',
+          name: 'Triage Watch',
           enabled: false,
           mandate: '',
           description: '',
@@ -40,7 +40,7 @@ describe('WatchesService', () => {
       const body = await new WatchesService().get(FLOOR, SPACE);
 
       expect(body).toEqual({
-        watch: expect.objectContaining({ id: FLOOR, name: 'Watch Floor' }),
+        watch: expect.objectContaining({ id: FLOOR, name: 'Triage Watch' }),
       });
       expect(body).not.toHaveProperty('settings');
       expect(body).not.toHaveProperty('settingsRevision');

@@ -10,11 +10,13 @@
 import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
-import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { useRunWorkflow, useTestWorkflow, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import {
   selectEditorYaml,
   selectIsTestModalOpen,
   selectReplayExecutionId,
+  selectReplayIsTestRun,
+  selectWorkflow,
   selectWorkflowDefinition,
   selectWorkflowId,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
@@ -32,27 +34,80 @@ import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 export const WorkflowDetailTestModal = () => {
   const dispatch = useDispatch();
   const { notifications } = useKibana().services;
-  const { canExecuteWorkflow } = useWorkflowsCapabilities();
+  const { canExecuteWorkflow: hasExecutePrivilege } = useWorkflowsCapabilities();
+  const workflow = useSelector(selectWorkflow);
+  const canExecuteWorkflow = hasExecutePrivilege && workflow?.permissions?.execute !== false;
 
   const { setSelectedExecution } = useWorkflowUrlState();
 
   const isTestModalOpen = useSelector(selectIsTestModalOpen);
   const replayExecutionId = useSelector(selectReplayExecutionId);
+  const replayIsTestRun = useSelector(selectReplayIsTestRun);
   const definition = useSelector(selectWorkflowDefinition);
   const workflowId = useSelector(selectWorkflowId);
   const yamlString = useSelector(selectEditorYaml);
 
   const testWorkflow = useAsyncThunk(testWorkflowThunk);
+  const { mutateAsync: runWorkflow } = useRunWorkflow();
+  const { mutateAsync: testSavedWorkflow } = useTestWorkflow();
+  const isReplay = Boolean(replayExecutionId);
+  // Stored with the replay id at click time. The page store is empty until the
+  // execution loads, which is after a no-input workflow auto-submits.
+  const isProductionReplay = isReplay && !replayIsTestRun;
 
   const handleRunWorkflow = useCallback(
     async (inputs: Record<string, unknown>, triggerTab?: WorkflowTriggerTab) => {
+      if (isReplay) {
+        if (!workflowId) {
+          const missingIdError = new Error(
+            i18n.translate('workflows.detail.testModal.reRunMissingWorkflowId', {
+              defaultMessage: 'Workflow id is missing',
+            })
+          );
+          notifications.toasts.addError(missingIdError, {
+            title: i18n.translate('workflows.detail.testModal.reRunFailed', {
+              defaultMessage: 'Failed to re-run workflow',
+            }),
+            toastLifeTimeMs: 5000,
+          });
+          throw missingIdError;
+        }
+
+        try {
+          const result = replayIsTestRun
+            ? await testSavedWorkflow({ workflowId, inputs })
+            : await runWorkflow({ id: workflowId, inputs });
+          if (result?.workflowExecutionId) {
+            setSelectedExecution(result.workflowExecutionId);
+          }
+        } catch (error) {
+          notifications.toasts.addError(error as Error, {
+            title: i18n.translate('workflows.detail.testModal.reRunFailed', {
+              defaultMessage: 'Failed to re-run workflow',
+            }),
+            toastLifeTimeMs: 5000,
+          });
+          throw error;
+        }
+        return;
+      }
+
       const executionId = await testWorkflow({ inputs, triggerTab });
 
       if (executionId) {
         setSelectedExecution(executionId.workflowExecutionId);
       }
     },
-    [testWorkflow, setSelectedExecution]
+    [
+      isReplay,
+      notifications.toasts,
+      replayIsTestRun,
+      runWorkflow,
+      setSelectedExecution,
+      testSavedWorkflow,
+      testWorkflow,
+      workflowId,
+    ]
   );
 
   const closeModal = useCallback(() => {
@@ -104,7 +159,7 @@ export const WorkflowDetailTestModal = () => {
 
   return (
     <WorkflowExecuteModal
-      isTestRun={true}
+      isTestRun={!isProductionReplay}
       definition={definition}
       workflowId={workflowId}
       yamlString={yamlString}

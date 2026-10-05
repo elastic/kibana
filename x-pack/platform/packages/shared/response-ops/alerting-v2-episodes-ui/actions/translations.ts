@@ -87,3 +87,10 @@ export const getBulkPartialSuccessToast = (processed: number, total: number): st
       '{processed} of {total} {total, plural, one {episode} other {episodes}} updated successfully.',
     values: { processed, total },
   });
+
+export const UNRESOLVE_NOT_AVAILABLE = i18n.translate(
+  'xpack.alertingV2Episodes.actions.unresolveNotAvailable',
+  {
+    defaultMessage: 'Unresolve is not available for classic alerts',
+  }
+);

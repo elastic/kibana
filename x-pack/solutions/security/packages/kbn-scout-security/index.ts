@@ -38,7 +38,14 @@ export {
 export { AddExceptionButtonType } from './src/playwright/fixtures/test/page_objects';
 
 // re-exported test framework from @kbn/scout
-export { lighthouseTest, apiTest, globalSetupHook, globalTeardownHook, tags } from '@kbn/scout';
+export {
+  lighthouseTest,
+  apiTest,
+  globalSetupHook,
+  globalTeardownHook,
+  getPlaywrightTagsFor,
+  tags,
+} from '@kbn/scout';
 
 // re-exported fixtures & configuration from @kbn/scout
 export {
@@ -59,6 +66,9 @@ export * from '@kbn/scout/src/playwright/eui_components';
 
 // re-exported CLI tools from @kbn/scout
 export { cli } from '@kbn/scout';
+
+// re-exported config-set constants from @kbn/scout
+export { ELASTICSEARCH_MAX_RESPONSE_SIZE_BYTES } from '@kbn/scout';
 
 // TYPE EXPORTS
 
@@ -90,7 +100,12 @@ export type {
 } from '@kbn/scout';
 
 // Re-exported fixture types
-export type { ApiServicesFixture, BrowserAuthFixture, SamlAuth } from '@kbn/scout';
+export type {
+  ApiClientFixture,
+  ApiServicesFixture,
+  BrowserAuthFixture,
+  SamlAuth,
+} from '@kbn/scout';
 
 // Re-exported service & configuration types
 export type {

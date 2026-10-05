@@ -14,6 +14,7 @@ import { getConnectorProvider } from '@kbn/inference-common';
 import { getCurrentSpaceId } from '../../../utils/spaces';
 import { withAgentSpan } from '../../../tracing';
 import { createAgentHandler } from '../run_agent/create_handler';
+import { resolveTelemetryOrigin } from '../utils/pending_round';
 import {
   createAgentEventEmitter,
   forkContextForAgentRun,
@@ -21,6 +22,7 @@ import {
   createToolProvider,
   createSkillsService,
   createFilesystemServices,
+  resolveDeploymentContext,
 } from './utils';
 import { createPluginsService } from './utils/plugins';
 import type { RunnerManager } from './runner';
@@ -43,6 +45,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     toolsService,
     attachmentsService,
     renderersService,
+    conversationEventsService,
     resultStore,
     skillsStore,
     attachmentStateManager,
@@ -59,12 +62,21 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     projectRouting,
     conversationTemplates,
     deductive,
+    deploymentInfo,
+    licensing,
   } = manager.deps;
 
   const spaceId = getCurrentSpaceId({ request, spaces });
   const toolRegistry = await toolsService.getRegistry({ request });
   const agentRegistry = await manager.deps.agentsService.getRegistry({ request });
   const conversationClient = await manager.deps.conversationService.getScopedClient({ request });
+  const deployment = await resolveDeploymentContext({
+    deploymentInfo,
+    request,
+    spaces,
+    licensing,
+    logger,
+  });
 
   const { filesystemService, bashService } = await createFilesystemServices({
     manager,
@@ -76,6 +88,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
   return {
     request,
     spaceId,
+    deployment,
     defaultConnectorId: manager.deps.defaultConnectorId,
     logger,
     modelProvider,
@@ -117,6 +130,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
       runner: manager.getRunner(),
     }),
     renderers: renderersService,
+    conversationEvents: conversationEventsService,
     conversationTemplates,
     plugins: createPluginsService({ pluginsServiceStart, request }),
     toolManager,
@@ -156,6 +170,10 @@ export const runAgent = async ({
     agentName: agent.name,
     executionId,
     conversationId: agentParams.conversation?.id,
+    origin: resolveTelemetryOrigin({
+      conversation: agentParams.conversation,
+      requestOrigin: agentParams.origin?.type,
+    }),
   });
   const manager = parentManager.createChild(forkedContext);
 

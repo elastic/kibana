@@ -7,9 +7,16 @@
 
 /* eslint-disable playwright/no-nth-methods */
 
+import { euiSelectors } from '@kbn/scout';
 import moment from 'moment';
-import type { Locator, ScoutPage } from '@kbn/scout';
-import { KibanaCodeEditorWrapper, type EuiDataGridObject } from '@kbn/scout';
+import {
+  AppMenu,
+  EsqlEditor,
+  KibanaCodeEditorWrapper,
+  type EuiDataGridObject,
+  type Locator,
+  type ScoutPage,
+} from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { FieldTypeOption } from '../../../../../../public/components/stream_management/data_management/schema_editor/constants';
 
@@ -33,6 +40,7 @@ export class StreamsApp {
   public readonly previewDataGrid;
   public readonly schemaDataGrid;
   public readonly kibanaMonacoEditor;
+  private readonly esqlEditor: EsqlEditor;
   public readonly saveRoutingRuleButton;
   public readonly concatFieldInput;
   public readonly concatLiteralInput;
@@ -51,6 +59,7 @@ export class StreamsApp {
   public readonly fetchMoreMatchingSamplesButton;
   // Canvas
   public readonly canvasTab;
+  public readonly canvasViewport;
   public readonly canvasZoomControls;
   public readonly canvasZoomIn;
   public readonly canvasZoomOut;
@@ -71,8 +80,10 @@ export class StreamsApp {
   public readonly streamsAddSourceButton;
   public readonly streamsDestinationsTable;
   public readonly streamsDestinationsSearch;
+  private readonly appMenu: AppMenu;
 
   constructor(private readonly page: ScoutPage) {
+    this.appMenu = new AppMenu(page);
     this.processorFieldComboBox = this.page.components.comboBox(
       'streamsAppProcessorFieldSelectorComboFieldText'
     );
@@ -90,6 +101,7 @@ export class StreamsApp {
     this.previewDataGrid = this.page.components.dataGrid('streamsAppPreviewDataGrid');
     this.schemaDataGrid = this.page.components.dataGrid('streamsAppSchemaEditorFieldsTableLoaded');
     this.kibanaMonacoEditor = new KibanaCodeEditorWrapper(this.page);
+    this.esqlEditor = new EsqlEditor(this.page);
     this.saveRoutingRuleButton = this.page.getByTestId('streamsAppStreamDetailRoutingSaveButton');
     this.concatFieldInput = this.page.components.superSelect('streamsAppConcatFieldInput');
     this.concatLiteralInput = this.page.getByTestId('streamsAppConcatLiteralInput');
@@ -116,6 +128,7 @@ export class StreamsApp {
     );
     // Canvas locators
     this.canvasTab = this.page.testSubj.locator('streamsCanvasTab');
+    this.canvasViewport = this.canvasTab.locator('.react-flow__viewport');
     this.canvasZoomControls = this.page.testSubj.locator('streamsCanvasZoomControls');
     this.canvasZoomIn = this.page.testSubj.locator('streamsCanvasZoomIn');
     this.canvasZoomOut = this.page.testSubj.locator('streamsCanvasZoomOut');
@@ -211,6 +224,28 @@ export class StreamsApp {
 
   getCanvasNodeByAriaLabel(ariaLabel: string) {
     return this.page.locator(`.react-flow__node[aria-label="${ariaLabel}"]`);
+  }
+
+  /**
+   * React Flow's viewport transform, which encodes both pan and zoom.
+   */
+  async getCanvasViewportTransform(): Promise<string> {
+    return this.canvasViewport.evaluate((element) => window.getComputedStyle(element).transform);
+  }
+
+  /** Current canvas zoom, read the way React Flow itself reads it (`@xyflow/system`). */
+  async getCanvasZoom(): Promise<number> {
+    return this.canvasViewport.evaluate((element) => {
+      const { transform } = window.getComputedStyle(element);
+      return transform === 'none' ? 1 : new DOMMatrixReadOnly(transform).m22;
+    });
+  }
+
+  /** Zooms in once, resolving when the viewport reflects the higher zoom. */
+  async zoomInCanvas() {
+    const previousZoom = await this.getCanvasZoom();
+    await this.canvasZoomIn.click();
+    await expect.poll(() => this.getCanvasZoom()).toBeGreaterThan(previousZoom);
   }
 
   /**
@@ -1396,14 +1431,14 @@ export class StreamsApp {
 
   async expectAttachmentDetailsFlyoutDescription(description: string) {
     // The description is shown in the first InfoPanel - scope to the flyout
-    const flyout = this.page.locator('.euiFlyout');
+    const flyout = this.page.locator(euiSelectors.flyout.ROOT_SELECTOR);
     const descriptionText = flyout.getByText(description);
     await expect(descriptionText).toBeVisible();
   }
 
   async expectAttachmentDetailsFlyoutType(typeLabel: string) {
     // The type badge is inside the flyout - scope to the flyout to avoid matching table badges
-    const flyout = this.page.locator('.euiFlyout');
+    const flyout = this.page.locator(euiSelectors.flyout.ROOT_SELECTOR);
     const typeBadge = flyout.getByText(typeLabel, { exact: true });
     await expect(typeBadge).toBeVisible();
   }
@@ -1446,8 +1481,7 @@ export class StreamsApp {
   }
 
   async openStreamsSettings() {
-    await this.page.getByTestId('app-menu-overflow-button').click();
-    await this.page.getByTestId('streamsAppSettingsButton').click();
+    await this.appMenu.clickItem('streamsAppSettingsButton');
   }
 
   async clickCreateQueryStreamButton() {
@@ -1484,8 +1518,7 @@ export class StreamsApp {
   }
 
   async clickDeleteQueryStreamButton() {
-    await this.page.testSubj.click('app-menu-overflow-button');
-    await this.page.testSubj.click('streamsDeleteStreamButton');
+    await this.appMenu.clickItem('streamsDeleteStreamButton');
   }
 
   async fillDeleteQueryStreamModalInput(value: string) {
@@ -1541,19 +1574,18 @@ export class StreamsApp {
   async createRootQueryStream(name: string, esqlQuery: string) {
     await this.clickCreateQueryStreamButton();
     await this.fillRoutingRuleName(name);
-    await this.kibanaMonacoEditor.waitCodeEditorReady('streamsEsqlEditor');
-    await this.kibanaMonacoEditor.setCodeEditorValue(esqlQuery);
+    await this.esqlEditor.setQuery(esqlQuery);
     await this.saveFlyoutQueryStreamCreate();
   }
 
   async openCreateChildQueryStreamForm() {
     await this.clickQueryModeCreateQueryStreamButton();
-    await this.kibanaMonacoEditor.waitCodeEditorReady('streamsEsqlEditor');
+    await this.esqlEditor.waitReady();
   }
 
   async fillChildQueryStreamForm(childName: string, esqlQuery: string) {
     await this.fillRoutingRuleName(childName);
-    await this.kibanaMonacoEditor.setCodeEditorValue(esqlQuery);
+    await this.esqlEditor.setQuery(esqlQuery);
   }
 
   async saveChildQueryStream() {

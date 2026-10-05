@@ -718,14 +718,10 @@ describe('Trusted apps form', () => {
       expect(renderResult.getByText(INPUT_ERRORS.name));
     });
 
-    it('should validate invalid Hash value', async () => {
-      const valueField = getConditionValue(getCondition());
-      await act(async () => {
-        await userEvent.clear(valueField);
-        await userEvent.type(valueField, 'someHASH');
-        fireEvent.blur(valueField);
-      });
-      rerenderWithLatestProps();
+    it('should validate invalid Hash value', () => {
+      setTextFieldValue(getConditionValue(getCondition()), 'someHASH');
+      formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-2)[0].item;
+      rerender();
       expect(renderResult.getByText(INPUT_ERRORS.invalidHash(0)));
     });
 

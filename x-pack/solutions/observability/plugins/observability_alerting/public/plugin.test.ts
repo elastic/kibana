@@ -5,19 +5,27 @@
  * 2.0.
  */
 
-import type { App, AppUpdater, AppUpdatableFields } from '@kbn/core/public';
+import type { App, AppUpdater, AppUpdatableFields, Capabilities } from '@kbn/core/public';
 import { AppStatus } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import React from 'react';
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
-import { OBSERVABILITY_ALERTING_APP_ID } from '@kbn/deeplinks-observability';
+import {
+  OBSERVABILITY_ALERTING_APP_ID,
+  OBSERVABILITY_ALERTING_BASE_PATH,
+} from '@kbn/deeplinks-observability';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { ObservabilityAlertingPlugin } from './plugin';
 import {
-  OBSERVABILITY_ALERTING_BASE_PATH,
-  OBSERVABILITY_ALERTING_INBOX_DEEP_LINK_ID,
-  OBSERVABILITY_ALERTING_INBOX_PATH,
+  OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID,
+  OBSERVABILITY_ALERTING_ALERTS_PATH,
+  OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID,
+  OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID,
+  OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID,
+  OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID,
+  OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID,
 } from './constants';
+import { getObservabilityAlertingDeepLinks } from './get_observability_alerting_deep_links';
 
 const APP_STUB: App = {
   id: OBSERVABILITY_ALERTING_APP_ID,
@@ -44,10 +52,18 @@ const readLatestUpdate = async (
 };
 
 describe('ObservabilityAlertingPlugin', () => {
-  const setupWithSetting = (enabled: boolean) => {
+  const setupWithSetting = (
+    enabled: boolean,
+    capabilities: Record<string, Record<string, boolean>> = {}
+  ) => {
     const coreSetup = coreMock.createSetup();
     const coreStart = coreMock.createStart();
     const enabled$ = new BehaviorSubject(enabled);
+
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
+      ...capabilities,
+    } as Capabilities;
 
     coreSetup.getStartServices.mockResolvedValue([
       coreStart,
@@ -61,7 +77,7 @@ describe('ObservabilityAlertingPlugin', () => {
           CreateRuleOptionsFlyout: () => null,
           createAlertingV2HostApp: jest.fn((appId: string, paths: Record<string, string>) =>
             Object.fromEntries(
-              Object.entries(paths).map(([k, v]) => [k, { app: appId, basePath: v }])
+              Object.entries(paths).map(([k, v]) => [k, { app: appId, pathPrefix: v }])
             )
           ),
         },
@@ -92,23 +108,24 @@ describe('ObservabilityAlertingPlugin', () => {
       expect.objectContaining({
         id: OBSERVABILITY_ALERTING_APP_ID,
         appRoute: OBSERVABILITY_ALERTING_BASE_PATH,
+        euiIconType: 'logoObservability',
         status: AppStatus.inaccessible,
         visibleIn: [],
         deepLinks: expect.arrayContaining([
           expect.objectContaining({
-            id: OBSERVABILITY_ALERTING_INBOX_DEEP_LINK_ID,
-            path: OBSERVABILITY_ALERTING_INBOX_PATH,
-            visibleIn: [],
+            id: OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID,
+            path: OBSERVABILITY_ALERTING_ALERTS_PATH,
+            visibleIn: ['globalSearch', 'projectSideNav'],
           }),
           expect.objectContaining({
             id: 'rules-v1',
             path: '/rules/v1',
-            visibleIn: [],
+            visibleIn: ['globalSearch', 'projectSideNav'],
           }),
           expect.objectContaining({
             id: 'rules-v2',
             path: '/rules/v2',
-            visibleIn: [],
+            visibleIn: ['globalSearch', 'projectSideNav'],
           }),
           expect.objectContaining({
             id: 'rule-library',
@@ -118,12 +135,12 @@ describe('ObservabilityAlertingPlugin', () => {
           expect.objectContaining({
             id: 'action-policies',
             path: '/action-policies',
-            visibleIn: [],
+            visibleIn: ['globalSearch', 'projectSideNav'],
           }),
           expect.objectContaining({
             id: 'execution-history',
             path: '/execution-history',
-            visibleIn: [],
+            visibleIn: ['globalSearch', 'projectSideNav'],
           }),
         ]),
       })
@@ -131,11 +148,32 @@ describe('ObservabilityAlertingPlugin', () => {
   });
 
   it('makes the app accessible when alerting v2 is enabled', async () => {
-    const { registered, enabled$ } = setupWithSetting(true);
+    const { registered, enabled$, coreStart } = setupWithSetting(true);
     const update = await readLatestUpdate(registered.updater$, enabled$);
 
     expect(update).toEqual({
       status: AppStatus.accessible,
+      deepLinks: getObservabilityAlertingDeepLinks(coreStart.application.capabilities),
+    });
+  });
+
+  it('hides unauthorized deep links from global search when v2 is enabled', async () => {
+    const { registered, enabled$ } = setupWithSetting(true, {
+      alerting_v2_alerts: { read: true },
+    });
+    const update = await readLatestUpdate(registered.updater$, enabled$);
+
+    const visibilityById = Object.fromEntries(
+      (update?.deepLinks ?? []).map((dl) => [dl.id, dl.visibleIn ?? []])
+    );
+
+    expect(visibilityById).toEqual({
+      [OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]: ['globalSearch', 'projectSideNav'],
+      [OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]: [],
+      [OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID]: [],
+      [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: [],
+      [OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID]: [],
+      [OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID]: [],
     });
   });
 

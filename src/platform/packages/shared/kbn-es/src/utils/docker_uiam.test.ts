@@ -10,6 +10,9 @@
 import { ToolingLog } from '@kbn/tooling-log';
 import { initializeUiamContainers, runUiamContainer, UIAM_CONTAINERS } from './docker_uiam';
 
+// Pin the published loopback addresses, which otherwise follow the host's IPv6 support.
+jest.mock('./has_ipv6_loopback', () => ({ hasIpv6Loopback: () => true }));
+
 jest.mock('timers/promises', () => ({
   setTimeout: jest.fn(() => Promise.resolve()),
 }));
@@ -83,15 +86,19 @@ describe(`#runUiamContainer()`, () => {
             "--net",
             "elastic",
             "--memory",
-            "1g",
+            "1536m",
             "--memory-swap",
-            "1g",
+            "1536m",
             "--volume",
             "/some_path/uiam_cosmosdb.pfx:/scripts/certs/uiam_cosmosdb.pfx:z",
             "-p",
             "127.0.0.1:8081:8081",
             "-p",
+            "[::1]:8081:8081",
+            "-p",
             "127.0.0.1:8082:1234",
+            "-p",
+            "[::1]:8082:1234",
             "--env",
             "AZURE_COSMOS_EMULATOR_PARTITION_COUNT=1",
             "--env",
@@ -171,6 +178,8 @@ describe(`#runUiamContainer()`, () => {
             "/some/path/kibana.crt:/tmp/server.crt:z",
             "-p",
             "127.0.0.1:8443:8443",
+            "-p",
+            "[::1]:8443:8443",
             "--entrypoint",
             "/opt/jboss/container/java/run/run-java-with-custom-ca.sh",
             "--env",
@@ -238,7 +247,7 @@ describe(`#runUiamContainer()`, () => {
             "--env",
             "uiam.cosmos.gateway_connection_mode=true",
             "--env",
-            "uiam.internal.shared.secrets=Dw7eRt5yU2iO9pL3aS4dF6gH8jK0lZ1xC2vB3nM4qW5=",
+            "uiam.internal.shared.secrets=Dw7eRt5yU2iO9pL3aS4dF6gH8jK0lZ1xC2vB3nM4qW5=,3KyUueOHfXAbZbcxM/sL7nfyUFOgX7u8ONBKHbz2AqI=",
             "--env",
             "uiam.tokens.jwt.signature.secrets=MnpT2a582F/LiRbocLHLnSF2SYElqTUdmQvBpVn+51Q=",
             "--env",

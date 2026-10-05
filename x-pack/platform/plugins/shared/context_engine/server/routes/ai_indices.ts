@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import path from 'node:path';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { Type } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type {
   ElasticsearchClient,
   IRouter,
@@ -16,36 +16,23 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
+import { isResponseError } from '@kbn/es-errors';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import type { DeleteWorkflowsApi } from '../types';
 import {
   AI_INDEX_API_VERSION,
   AI_INDEX_INTERNAL_API_VERSION,
-  DEFAULT_FEEDBACK_ANALYSIS_INTERVAL,
-  DEFAULT_FEEDBACK_ANALYSIS_SIGNAL_TIME_RANGE_FROM,
-  MAX_AI_INDEX_AUTOMATION_LENGTH,
-  MAX_AI_INDEX_AUTOMATIONS,
-  MAX_AI_INDEX_DESCRIPTION_LENGTH,
-  MAX_AI_INDEX_DEST_VALUE_LENGTH,
-  MAX_AI_INDEX_FEEDBACK_AGENT_ID_LENGTH,
-  MAX_AI_INDEX_ID_LENGTH,
-  MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
-  MAX_AI_INDEX_SOURCES,
+  MAX_AI_INDEX_DESCRIBE_FIELDS,
+  MAX_AI_INDEX_QUERY_LIMIT,
   MAX_AI_INDICES,
-  MAX_FEEDBACK_ANALYSIS_INTERVAL_LENGTH,
-  MAX_FEEDBACK_ANALYSIS_SIGNAL_FILTER_LENGTH,
-  MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH,
-  MIN_FEEDBACK_ANALYSIS_INTERVAL_MINUTES,
-  aiIndexByIdPath,
-  aiIndexFeedbackAnalysisPath,
-  aiIndexKiByIdPath,
-  aiIndexKiListPath,
-  aiIndexPath,
-  DEFAULT_KI_PAGE_SIZE,
-  MAX_KI_PAGE_SIZE,
-  MAX_KI_TYPE_FILTER_LENGTH,
-  MAX_INDEX_NAME_BYTES,
+  AI_INDEX_BY_ID_PATH,
+  AI_INDEX_DESCRIBE_PATH,
+  AI_INDEX_FEEDBACK_ANALYSIS_PATH,
+  AI_INDEX_KI_BY_ID_PATH,
+  AI_INDEX_KI_LIST_PATH,
+  AI_INDEX_PATH,
+  AI_INDEX_QUERY_PATH,
 } from '../../common/constants';
 import type {
   CreateAiIndexResponse,
@@ -54,28 +41,27 @@ import type {
   ListAiIndexResponse,
   PutAiIndexFeedbackAnalysisResponse,
   PutAiIndexResponse,
+  QueryAiIndicesResponse,
 } from '../../common/http_api/ai_indices';
-import type { ImprovementAction } from '../../common/http_api/improvement_actions';
-import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
 import type { GetKiResponse, ListKisResponse } from '../../common/http_api/knowledge_indicators';
-import { MAX_KI_ID_LENGTH } from '../../common/step_types/ki';
 import { apiPrivileges } from '../../common/features';
-import {
-  validateAbsoluteSignalWindow,
-  validateAiIndexId,
-  validateFeedbackAnalysisInterval,
-  validateRelativeSignalWindow,
-  validateSignalWindowCoversInterval,
-} from '../../common/validation';
 import {
   InvalidAiIndexDestError,
   AiIndexConflictError,
+  AiIndexDescribeResponseTooLargeError,
   AiIndexManagedError,
   AiIndexNotFoundError,
+  AiIndexNotReadableError,
   AiIndexAlreadyExistsError,
+  AiIndexIdConflictError,
+  AiIndexQueryResponseTooLargeError,
+  InvalidAiIndexQueryError,
   InvalidConnectorSourceError,
+  InvalidEsqlSourceError,
+  InvalidAiIndexTraceError,
   KiNotFoundError,
 } from '../ai_indices/errors';
+import type { AiIndexDataReadServiceApi } from '../ai_indices/data_read_service';
 import type { AiIndexService } from '../ai_indices/service';
 import {
   deleteAutomationResources,
@@ -83,11 +69,34 @@ import {
 } from '../ai_indices/delete_resources';
 import type { FeedbackAnalysisScheduleService } from '../feedback_analysis/schedule';
 import type { ImprovementsServiceApi } from '../improvements/service';
+import type { GetAiIndexDataReadServiceParams } from '../types';
 import { getKi } from '../ai_indices/ki_get';
 import { getKis } from '../ai_indices/ki_list';
-import { validateSignalFilter } from '../ai_indices/signal_filter';
 import { validateConnectorSources } from '../ai_indices/validate_connector_sources';
-import { AiIndexAuditAction, aiIndexAuditEvent } from './audit_events';
+import { validateEsqlSources } from '../ai_indices/validate_esql_sources';
+import { validateTraces } from '../ai_indices/validate_traces';
+import { formatErrorMessage } from '../utils/format_es_error';
+import { resolveSpaceId } from '../utils/resolve_space_id';
+import { AiIndexAuditAction, aiIndexAuditEvent } from '../audit/audit_events';
+import {
+  aiIndexHttpItemResponseSchema,
+  aiIndexIdParamsSchema,
+  createAiIndexBodySchema,
+  createAiIndexResponseSchema,
+  deleteAiIndexQuerySchema,
+  deleteAiIndexResponseSchema,
+  describeAiIndexResponseSchema,
+  errorResponseSchema,
+  feedbackAnalysisSchema,
+  getKiQuerySchema,
+  kiIdParamsSchema,
+  listAiIndexResponseSchema,
+  listKisQuerySchema,
+  putAiIndexBodySchema,
+  queryAiIndicesBodySchema,
+  queryAiIndicesResponseSchema,
+  updateAiIndexResponseSchema,
+} from './schemas/ai_indices_schema';
 import { withContextEngineFeatureFlag } from './with_feature_flag';
 
 const READ_SECURITY: RouteSecurity = {
@@ -105,263 +114,96 @@ const DELETE_SECURITY: RouteSecurity = {
   },
 };
 
+const CONTEXT_ENGINE_DISABLED_NOTE =
+  'Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).';
+
+const CONTEXT_ENGINE_DOCS_NOTE =
+  '**For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**';
+
+const CONTEXT_ENGINE_DISABLED_DESCRIPTION = 'Context Engine is turned off in this space.';
+
 const hasWorkflowDeletePrivilege = (request: KibanaRequest): boolean =>
   WorkflowsManagementOperationPrivileges.delete.every(
     (privilege) => request.authzResult?.[privilege] === true
   );
 
-const aiIndexIdSchema = schema.string({
-  minLength: 1,
-  maxLength: MAX_AI_INDEX_ID_LENGTH,
-  validate: validateAiIndexId,
-  meta: { description: 'The unique identifier of the AI index.' },
-});
-
-const aiIndexIdParamsSchema = schema.object({
-  aiIndexId: aiIndexIdSchema,
-});
-
-const signalTimeRangeSchema = schema.oneOf(
-  [
-    schema.object({
-      type: schema.literal('relative'),
-      from: schema.string({
-        maxLength: MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH,
-        validate: validateRelativeSignalWindow,
-        meta: { description: 'Date math relative to now, for example `now-30d`.' },
-      }),
-    }),
-    schema.object({
-      type: schema.literal('absolute'),
-      from: schema.string({
-        maxLength: MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH,
-        validate: validateAbsoluteSignalWindow,
-        meta: { description: 'ISO 8601 date to analyze signals since.' },
-      }),
-    }),
-  ],
-  {
-    defaultValue: {
-      type: 'relative' as const,
-      from: DEFAULT_FEEDBACK_ANALYSIS_SIGNAL_TIME_RANGE_FROM,
-    },
-    meta: { description: 'Which signals the analysis reads. A read filter only.' },
-  }
-);
-
-// Derived from the taxonomy rather than re-listed, so a new action cannot be
-// added to the vocabulary and silently stay unconfigurable here.
-const improvementActionSchema = schema.oneOf(
-  IMPROVEMENT_ACTIONS.map((action) => schema.literal(action)) as [Type<ImprovementAction>]
-);
-
-const feedbackAnalysisSchema = schema.object(
-  {
-    enabled: schema.boolean({
-      meta: {
-        description:
-          'Desired state of the recurring analysis. The scheduler stays authoritative for whether it is actually running.',
-      },
-    }),
-    agent_id: schema.maybe(
-      schema.string({
-        maxLength: MAX_AI_INDEX_FEEDBACK_AGENT_ID_LENGTH,
-        meta: {
-          description: 'Agent Builder agent id that runs this index’s feedback-loop analysis.',
-        },
-      })
-    ),
-    schedule: schema.object(
-      {
-        interval: schema.string({
-          maxLength: MAX_FEEDBACK_ANALYSIS_INTERVAL_LENGTH,
-          validate: validateFeedbackAnalysisInterval,
-          meta: {
-            description: `How often to analyze, for example \`1h\` or \`24h\`. At least ${MIN_FEEDBACK_ANALYSIS_INTERVAL_MINUTES} minutes.`,
-          },
-        }),
-      },
-      { defaultValue: { interval: DEFAULT_FEEDBACK_ANALYSIS_INTERVAL } }
-    ),
-    signal_time_range: signalTimeRangeSchema,
-    signal_filter: schema.maybe(
-      schema.string({
-        maxLength: MAX_FEEDBACK_ANALYSIS_SIGNAL_FILTER_LENGTH,
-        validate: validateSignalFilter,
-        meta: {
-          description:
-            'KQL narrowing which signals this index analyzes, for example `tags: query_error`.',
-        },
-      })
-    ),
-    allowed_actions: schema.arrayOf(improvementActionSchema, {
-      defaultValue: [...IMPROVEMENT_ACTIONS],
-      maxSize: IMPROVEMENT_ACTIONS.length,
-      meta: {
-        description: 'Improvement actions the analysis may propose. An empty list is observe-only.',
-      },
-    }),
-  },
-  {
-    validate: ({ schedule, signal_time_range: signalTimeRange }) =>
-      validateSignalWindowCoversInterval(schedule.interval, signalTimeRange),
-  }
-);
-const kiIdParamsSchema = schema.object({
-  aiIndexId: aiIndexIdSchema,
-  kiId: schema.string({
-    minLength: 1,
-    maxLength: MAX_KI_ID_LENGTH,
-    meta: { description: 'The document id of the Knowledge Indicator.' },
-  }),
-});
-
-const aiIndexPropertiesSchema = {
-  description: schema.maybe(
-    schema.string({
-      maxLength: MAX_AI_INDEX_DESCRIPTION_LENGTH,
-      meta: { description: 'Human-readable description of the AI index.' },
-    })
-  ),
-  feedback_analysis: schema.maybe(feedbackAnalysisSchema),
-  dest: schema.object({
-    type: schema.oneOf([schema.literal('data_stream'), schema.literal('index')], {
-      meta: {
-        description:
-          'The type of the backing store. `data_stream` for a data stream, or `index` for an index or index pattern.',
-      },
-    }),
-    value: schema.string({
-      minLength: 1,
-      maxLength: MAX_AI_INDEX_DEST_VALUE_LENGTH,
-      meta: {
-        description:
-          'The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo*`) the AI index is attached to. Must match `type` and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). System indices are not allowed.',
-      },
-    }),
-  }),
-  automations: schema.arrayOf(
-    schema.object({
-      type: schema.literal('workflow'),
-      value: schema.string({ minLength: 0, maxLength: MAX_AI_INDEX_AUTOMATION_LENGTH }),
-    }),
-    {
-      maxSize: MAX_AI_INDEX_AUTOMATIONS,
-      meta: { description: 'Automations associated with the AI index.' },
-    }
-  ),
-  sources: schema.arrayOf(
-    schema.oneOf([
-      schema.object({
-        type: schema.literal('esql'),
-        value: schema.string({
-          minLength: 0,
-          maxLength: MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
-          meta: { description: 'The source value; an ES|QL query when `type` is `esql`.' },
-        }),
-      }),
-      schema.object({
-        type: schema.literal('connector'),
-        value: schema.string({
-          minLength: 1,
-          maxLength: MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
-          meta: { description: 'The source value; a connector id when `type` is `connector`.' },
-        }),
-      }),
-    ]),
-    {
-      maxSize: MAX_AI_INDEX_SOURCES,
-      meta: { description: 'Additional sources that provide context for the AI index.' },
-    }
-  ),
-};
-
-const createAiIndexBodySchema = schema.object({ id: aiIndexIdSchema, ...aiIndexPropertiesSchema });
-const putAiIndexBodySchema = schema.object(aiIndexPropertiesSchema);
-
-const listKisQuerySchema = schema.object({
-  size: schema.number({
-    min: 0,
-    max: MAX_KI_PAGE_SIZE,
-    defaultValue: DEFAULT_KI_PAGE_SIZE,
-  }),
-  type: schema.maybe(
-    schema.string({
-      minLength: 1,
-      maxLength: MAX_KI_TYPE_FILTER_LENGTH,
-      meta: { description: 'When set, return only KIs of this type.' },
-    })
-  ),
-});
-
-const getKiQuerySchema = schema.object({
-  index: schema.string({
-    minLength: 1,
-    maxLength: MAX_INDEX_NAME_BYTES,
-    meta: { description: 'The Elasticsearch index that stores the Knowledge Indicator.' },
-  }),
-});
-
-const handleAiIndexError = (error: unknown, response: KibanaResponseFactory) => {
-  if (error instanceof InvalidAiIndexDestError || error instanceof InvalidConnectorSourceError) {
+const handleAiIndexError = (error: unknown, response: KibanaResponseFactory, logger: Logger) => {
+  if (
+    error instanceof InvalidAiIndexDestError ||
+    error instanceof InvalidConnectorSourceError ||
+    error instanceof InvalidEsqlSourceError ||
+    error instanceof InvalidAiIndexTraceError ||
+    error instanceof AiIndexQueryResponseTooLargeError ||
+    error instanceof AiIndexDescribeResponseTooLargeError ||
+    error instanceof InvalidAiIndexQueryError
+  ) {
     return response.badRequest({ body: { message: error.message } });
   }
   if (error instanceof AiIndexNotFoundError || error instanceof KiNotFoundError) {
     return response.notFound({ body: { message: error.message } });
   }
+  if (error instanceof AiIndexNotReadableError) {
+    return response.forbidden({ body: { message: error.message } });
+  }
   if (
     error instanceof AiIndexManagedError ||
     error instanceof AiIndexConflictError ||
-    error instanceof AiIndexAlreadyExistsError
+    error instanceof AiIndexAlreadyExistsError ||
+    error instanceof AiIndexIdConflictError
   ) {
     return response.conflict({ body: { message: error.message } });
   }
-  throw error;
+  logger.error(error instanceof Error ? error.stack ?? error.message : String(error));
+  const statusCode = isResponseError(error) ? error.statusCode ?? 500 : 500;
+  return response.customError({
+    statusCode,
+    body: { message: formatErrorMessage(error) },
+  });
 };
 
-const resolveSpaceId = (spaces: SpacesPluginStart | undefined, request: KibanaRequest): string =>
-  spaces?.spacesService.getSpaceId(request) ?? 'default';
-
-const deleteAiIndexQuerySchema = schema.object({
-  delete_knowledge_indicators: schema.boolean({
-    defaultValue: false,
-    meta: {
-      description:
-        'When true, also delete the backing data stream/index, which removes its Knowledge Indicators. Skipped when another AI index still uses the same dest. Defaults to false.',
-    },
-  }),
-  delete_automations: schema.boolean({
-    defaultValue: false,
-    meta: {
-      description: 'When true, also delete the attached workflow automations. Defaults to false.',
-    },
-  }),
-});
+/** Current-user reads: ES 4xx (bad ES|QL, missing privilege) is caller's error. */
+const handleReadError = (error: unknown, response: KibanaResponseFactory, logger: Logger) => {
+  if (isResponseError(error)) {
+    const { statusCode, message } = error;
+    if (statusCode !== undefined && statusCode >= 400 && statusCode < 500) {
+      return response.customError({ statusCode, body: { message } });
+    }
+  }
+  return handleAiIndexError(error, response, logger);
+};
 
 export const registerAiIndexRoutes = ({
   router,
   logger,
   getAiIndexService,
+  getAiIndexDataReadService,
   getImprovementsService,
   getScheduleService,
   getActions,
+  getAgentBuilder,
   getWorkflowsManagementApi,
   getSpaces,
 }: {
   router: IRouter;
   logger: Logger;
   getAiIndexService: () => AiIndexService;
-  getImprovementsService: (esClient: ElasticsearchClient) => ImprovementsServiceApi;
+  getAiIndexDataReadService: (params: GetAiIndexDataReadServiceParams) => AiIndexDataReadServiceApi;
+  getImprovementsService: (
+    esClient: ElasticsearchClient,
+    spaceId: string
+  ) => ImprovementsServiceApi;
   getScheduleService: () => FeedbackAnalysisScheduleService;
   getActions: () => Promise<ActionsPluginStart>;
+  getAgentBuilder: () => Promise<AgentBuilderPluginStart | undefined>;
   getWorkflowsManagementApi: () => Promise<DeleteWorkflowsApi | undefined>;
   getSpaces: () => Promise<SpacesPluginStart | undefined>;
 }) => {
-  const reconcileSchedule = async (aiIndexId: string, request: KibanaRequest) => {
+  const reconcileSchedule = async (aiIndexId: string, spaceId: string, request: KibanaRequest) => {
     try {
-      const aiIndex = await getAiIndexService().get(aiIndexId);
+      const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
       await getScheduleService().reconcile({
         aiIndexId,
+        spaceId,
         ...(aiIndex.feedback_analysis ? { feedbackAnalysis: aiIndex.feedback_analysis } : {}),
         request,
       });
@@ -373,18 +215,21 @@ export const registerAiIndexRoutes = ({
       );
     }
   };
-  // Create an AI index
+  // Create an AI Index
   router.versioned
     .post({
-      path: aiIndexPath,
+      path: AI_INDEX_PATH,
       security: WRITE_SECURITY,
       access: 'public',
-      summary: 'Create an AI index',
-      description:
-        'Creates an AI index record attached to a data stream or index pattern. Fails with a 409 if an AI index with the same id already exists.',
+      summary: 'Create an AI Index',
+      description: [
+        'Creates an AI Index record attached to a data stream or index. Fails with a 409 if an AI Index with the same ID already exists.',
+        CONTEXT_ENGINE_DISABLED_NOTE,
+        CONTEXT_ENGINE_DOCS_NOTE,
+      ].join('\n\n'),
       options: {
         tags: ['oas-tag:context engine'],
-        availability: { stability: 'experimental' },
+        availability: { stability: 'experimental', since: '9.6.0' },
       },
     })
     .addVersion(
@@ -394,41 +239,80 @@ export const registerAiIndexRoutes = ({
           request: {
             body: createAiIndexBodySchema,
           },
+          response: {
+            201: {
+              body: createAiIndexResponseSchema,
+              description: 'The AI Index was created.',
+            },
+            400: {
+              body: errorResponseSchema,
+              description:
+                'The request was invalid, for example a malformed `dest`, an invalid ES|QL source, or an unresolvable connector source or trace.',
+            },
+            403: {
+              body: errorResponseSchema,
+              description:
+                'Elasticsearch denied the `index` trace lookup outright; the caller lacks index privileges for it.',
+            },
+            404: {
+              body: errorResponseSchema,
+              description: CONTEXT_ENGINE_DISABLED_DESCRIPTION,
+            },
+            409: {
+              body: errorResponseSchema,
+              description: 'An AI Index with the same ID already exists, or the write conflicted.',
+            },
+          },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/ai_index_create.yaml'),
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
-        const auditLogger = (await ctx.core).security.audit.logger;
+        const { security, elasticsearch } = await ctx.core;
+        const auditLogger = security.audit.logger;
         const { id, ...properties } = request.body;
         try {
+          await validateEsqlSources(properties.sources);
           await validateConnectorSources({
             sources: properties.sources,
             actions: await getActions(),
             request,
           });
-          await getAiIndexService().create(id, properties);
+          await validateTraces({
+            traces: properties.traces,
+            esClient: elasticsearch.client.asCurrentUser,
+            agents: (await getAgentBuilder())?.agents,
+            request,
+          });
+          const spaceId = resolveSpaceId(await getSpaces(), request);
+          await getAiIndexService().create(id, spaceId, properties);
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.CREATE, id }));
-          await reconcileSchedule(id, request);
+          await reconcileSchedule(id, spaceId, request);
           const body: CreateAiIndexResponse = { status: 'created' };
           return response.created({ body });
         } catch (error) {
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.CREATE, id, error }));
-          return handleAiIndexError(error, response);
+          return handleAiIndexError(error, response, logger);
         }
       })
     );
 
-  // Create or update an AI index
+  // Create or update an AI Index
   router.versioned
     .put({
-      path: aiIndexByIdPath,
+      path: AI_INDEX_BY_ID_PATH,
       security: WRITE_SECURITY,
       access: 'public',
-      summary: 'Create or update an AI index',
-      description:
-        'Creates or updates an AI index record attached to a data stream or index pattern.',
+      summary: 'Create or update an AI Index',
+      description: [
+        'Creates an AI Index with the given ID, or replaces an existing one. The request body replaces the whole record: omitted fields are removed, and omitted arrays become empty. A managed AI Index cannot be replaced and returns a 409.',
+        CONTEXT_ENGINE_DISABLED_NOTE,
+        CONTEXT_ENGINE_DOCS_NOTE,
+      ].join('\n\n'),
       options: {
         tags: ['oas-tag:context engine'],
-        availability: { stability: 'experimental' },
+        availability: { stability: 'experimental', since: '9.6.0' },
       },
     })
     .addVersion(
@@ -439,44 +323,88 @@ export const registerAiIndexRoutes = ({
             params: aiIndexIdParamsSchema,
             body: putAiIndexBodySchema,
           },
+          response: {
+            200: {
+              body: updateAiIndexResponseSchema,
+              description: 'The AI Index was updated.',
+            },
+            201: {
+              body: createAiIndexResponseSchema,
+              description: 'The AI Index was created.',
+            },
+            400: {
+              body: errorResponseSchema,
+              description:
+                'The request was invalid, for example a malformed `dest`, an invalid ES|QL source, or an unresolvable connector source or trace.',
+            },
+            403: {
+              body: errorResponseSchema,
+              description:
+                'Elasticsearch denied the `index` trace lookup outright; the caller lacks index privileges for it.',
+            },
+            404: {
+              body: errorResponseSchema,
+              description: CONTEXT_ENGINE_DISABLED_DESCRIPTION,
+            },
+            409: {
+              body: errorResponseSchema,
+              description: 'The AI Index is managed and immutable, or the write conflicted.',
+            },
+          },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/ai_index_put.yaml'),
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
-        const auditLogger = (await ctx.core).security.audit.logger;
+        const { security, elasticsearch } = await ctx.core;
+        const auditLogger = security.audit.logger;
         const { aiIndexId } = request.params;
         try {
+          await validateEsqlSources(request.body.sources);
           await validateConnectorSources({
             sources: request.body.sources,
             actions: await getActions(),
             request,
           });
-          const status = await getAiIndexService().put(aiIndexId, request.body);
+          await validateTraces({
+            traces: request.body.traces,
+            esClient: elasticsearch.client.asCurrentUser,
+            agents: (await getAgentBuilder())?.agents,
+            request,
+          });
+          const spaceId = resolveSpaceId(await getSpaces(), request);
+          const status = await getAiIndexService().put(aiIndexId, spaceId, request.body);
           const putAction =
             status === 'created' ? AiIndexAuditAction.CREATE : AiIndexAuditAction.UPDATE;
           auditLogger.log(aiIndexAuditEvent({ action: putAction, id: aiIndexId }));
-          await reconcileSchedule(aiIndexId, request);
+          await reconcileSchedule(aiIndexId, spaceId, request);
           const body: PutAiIndexResponse = { status };
           return status === 'created' ? response.created({ body }) : response.ok({ body });
         } catch (error) {
           auditLogger.log(
             aiIndexAuditEvent({ action: AiIndexAuditAction.CREATE_OR_UPDATE, id: aiIndexId, error })
           );
-          return handleAiIndexError(error, response);
+          return handleAiIndexError(error, response, logger);
         }
       })
     );
 
-  // Get an AI index by id
+  // Get an AI Index by id
   router.versioned
     .get({
-      path: aiIndexByIdPath,
+      path: AI_INDEX_BY_ID_PATH,
       security: READ_SECURITY,
       access: 'public',
-      summary: 'Get an AI index',
-      description: 'Fetches an AI index by id.',
+      summary: 'Get an AI Index',
+      description: [
+        'Fetches an AI Index by ID from the current space, including the ES|QL query derived from each trace.',
+        CONTEXT_ENGINE_DISABLED_NOTE,
+        CONTEXT_ENGINE_DOCS_NOTE,
+      ].join('\n\n'),
       options: {
         tags: ['oas-tag:context engine'],
-        availability: { stability: 'experimental' },
+        availability: { stability: 'experimental', since: '9.6.0' },
       },
     })
     .addVersion(
@@ -486,66 +414,229 @@ export const registerAiIndexRoutes = ({
           request: {
             params: aiIndexIdParamsSchema,
           },
+          response: {
+            200: {
+              body: aiIndexHttpItemResponseSchema,
+              description: 'The requested AI Index.',
+            },
+            404: {
+              body: errorResponseSchema,
+              description:
+                'No AI Index with the given ID exists in the current space, or Context Engine is turned off in this space.',
+            },
+          },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/ai_index_get.yaml'),
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId } = request.params;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
         try {
-          const body: GetAiIndexResponse = await getAiIndexService().get(aiIndexId);
+          const body: GetAiIndexResponse = await getAiIndexService().get(aiIndexId, spaceId);
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId }));
           return response.ok({ body });
         } catch (error) {
           auditLogger.log(
             aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId, error })
           );
-          return handleAiIndexError(error, response);
+          return handleAiIndexError(error, response, logger);
         }
       })
     );
 
-  // List AI indices
+  // List AI Indices
   router.versioned
     .get({
-      path: aiIndexPath,
+      path: AI_INDEX_PATH,
       security: READ_SECURITY,
       access: 'public',
-      summary: 'List AI indices',
-      description: `Lists registered AI indices, up to a limit of ${MAX_AI_INDICES}.`,
+      summary: 'List AI Indices',
+      description: [
+        `Lists up to ${MAX_AI_INDICES} AI Indices in the current space that the caller can read. The response omits an AI Index when the caller cannot read its backing index. Empty AI Indices are still included. A caller with no read privilege on any index gets a 403 response.`,
+        'The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. It cannot be specified in any other way.',
+        CONTEXT_ENGINE_DISABLED_NOTE,
+        CONTEXT_ENGINE_DOCS_NOTE,
+      ].join('\n\n'),
       options: {
         tags: ['oas-tag:context engine'],
-        availability: { stability: 'experimental' },
+        availability: { stability: 'experimental', since: '9.6.0' },
       },
     })
     .addVersion(
       {
         version: AI_INDEX_API_VERSION,
-        validate: false,
+        validate: {
+          response: {
+            200: {
+              body: listAiIndexResponseSchema,
+              description: 'The AI Indices available to the caller in the current space.',
+            },
+            403: {
+              body: errorResponseSchema,
+              description:
+                'The caller has no read privilege on any index, so Elasticsearch rejected the request.',
+            },
+            404: {
+              body: errorResponseSchema,
+              description: CONTEXT_ENGINE_DISABLED_DESCRIPTION,
+            },
+          },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/ai_index_list.yaml'),
+        },
       },
-      withContextEngineFeatureFlag(async (ctx, _request, response) => {
-        const auditLogger = (await ctx.core).security.audit.logger;
+      withContextEngineFeatureFlag(async (ctx, request, response) => {
+        const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
         try {
           const body: ListAiIndexResponse = {
-            ai_indices: await getAiIndexService().list(),
+            ai_indices: await getAiIndexDataReadService({ esClient, request }).list(),
           };
-          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST }));
           return response.ok({ body });
         } catch (error) {
-          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, error }));
-          return handleAiIndexError(error, response);
+          return handleReadError(error, response, logger);
         }
       })
     );
 
-  // List Knowledge Indicators for an AI index
+  // Query AI Indices with ES|QL
+  router.versioned
+    .post({
+      path: AI_INDEX_QUERY_PATH,
+      security: READ_SECURITY,
+      access: 'public',
+      summary: 'Query AI Indices',
+      description: [
+        `Runs an ES|QL query as the current user. The server applies a space filter and limits the response to at most ${MAX_AI_INDEX_QUERY_LIMIT} rows.`,
+        'The query determines which indices it reads. Elasticsearch index privileges limit which indices the current user can access.',
+        'The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. The request body cannot change the space or replace the space filter.',
+        CONTEXT_ENGINE_DISABLED_NOTE,
+        CONTEXT_ENGINE_DOCS_NOTE,
+      ].join('\n\n'),
+      options: {
+        tags: ['oas-tag:context engine'],
+        availability: { stability: 'experimental', since: '9.6.0' },
+      },
+    })
+    .addVersion(
+      {
+        version: AI_INDEX_API_VERSION,
+        validate: {
+          request: {
+            body: queryAiIndicesBodySchema,
+          },
+          response: {
+            200: {
+              body: queryAiIndicesResponseSchema,
+              description: 'The columns and rows returned by the ES|QL query.',
+            },
+            400: {
+              body: errorResponseSchema,
+              description: 'The ES|QL query was invalid, or its response exceeded the size limit.',
+            },
+            403: {
+              body: errorResponseSchema,
+              description: 'Elasticsearch rejected the read; the caller lacks index privileges.',
+            },
+            404: {
+              body: errorResponseSchema,
+              description: CONTEXT_ENGINE_DISABLED_DESCRIPTION,
+            },
+          },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/ai_index_query.yaml'),
+        },
+      },
+      withContextEngineFeatureFlag(async (ctx, request, response) => {
+        const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+        try {
+          const body: QueryAiIndicesResponse = await getAiIndexDataReadService({
+            esClient,
+            request,
+          }).query(request.body);
+          return response.ok({ body });
+        } catch (error) {
+          return handleReadError(error, response, logger);
+        }
+      })
+    );
+
+  // Describe an AI Index
   router.versioned
     .get({
-      path: aiIndexKiListPath,
+      path: AI_INDEX_DESCRIBE_PATH,
+      security: READ_SECURITY,
+      access: 'public',
+      summary: 'Describe an AI Index',
+      description: [
+        `Returns a free-form text context block for an agent. The block describes the AI Index and its ES|QL target. It also includes up to ${MAX_AI_INDEX_DESCRIBE_FIELDS} fields exposed by the backing indices, identifies which fields are semantic, provides knowledge item type and tag counts for the current space, and includes example ES|QL queries.`,
+        'The API reads data as the current user. Elasticsearch index privileges limit which indices the current user can access. A caller who cannot read the backing indices gets a 403 response.',
+        'The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. It cannot be specified in any other way.',
+        CONTEXT_ENGINE_DISABLED_NOTE,
+        CONTEXT_ENGINE_DOCS_NOTE,
+      ].join('\n\n'),
+      options: {
+        tags: ['oas-tag:context engine'],
+        availability: { stability: 'experimental', since: '9.6.0' },
+      },
+    })
+    .addVersion(
+      {
+        version: AI_INDEX_API_VERSION,
+        validate: {
+          request: {
+            params: aiIndexIdParamsSchema,
+          },
+          response: {
+            200: {
+              body: describeAiIndexResponseSchema,
+              description: 'A free-form text context block describing the AI Index.',
+            },
+            400: {
+              body: errorResponseSchema,
+              description: 'The description response exceeded the size limit.',
+            },
+            403: {
+              body: errorResponseSchema,
+              description:
+                'The caller cannot read the backing indices. Describing an AI Index requires the `read` and `view_index_metadata` index privileges on them.',
+            },
+            404: {
+              body: errorResponseSchema,
+              description:
+                'No AI Index with the given ID exists in the current space, or Context Engine is turned off in this space.',
+            },
+          },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/ai_index_describe.yaml'),
+        },
+      },
+      withContextEngineFeatureFlag(async (ctx, request, response) => {
+        const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+        const { aiIndexId } = request.params;
+        try {
+          const body = await getAiIndexDataReadService({ esClient, request }).describe(aiIndexId);
+          return response.ok({ body });
+        } catch (error) {
+          return handleReadError(error, response, logger);
+        }
+      })
+    );
+
+  // List Knowledge Indicators for an AI Index
+  router.versioned
+    .get({
+      path: AI_INDEX_KI_LIST_PATH,
       security: READ_SECURITY,
       access: 'internal',
       summary: 'List Knowledge Indicators',
       description:
-        'Returns a paginated list of Knowledge Indicators stored in the AI index destination backing store.',
+        'Returns a paginated list of Knowledge Indicators stored in the AI Index destination backing store.',
     })
     .addVersion(
       {
@@ -561,11 +652,12 @@ export const registerAiIndexRoutes = ({
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId } = request.params;
         const { size, type } = request.query;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
         try {
-          const aiIndex = await getAiIndexService().get(aiIndexId);
+          const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
           const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
           const body: ListKisResponse = await getKis(esClient, {
-            destValue: aiIndex.dest.value,
+            dest: aiIndex.dest,
             size,
             ...(type !== undefined ? { type } : {}),
           });
@@ -575,14 +667,14 @@ export const registerAiIndexRoutes = ({
           auditLogger.log(
             aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, id: aiIndexId, error })
           );
-          return handleAiIndexError(error, response);
+          return handleAiIndexError(error, response, logger);
         }
       })
     );
 
   router.versioned
     .get({
-      path: aiIndexKiByIdPath,
+      path: AI_INDEX_KI_BY_ID_PATH,
       security: READ_SECURITY,
       access: 'internal',
       summary: 'Get a Knowledge Indicator',
@@ -603,12 +695,13 @@ export const registerAiIndexRoutes = ({
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId, kiId } = request.params;
         const { index } = request.query;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
         try {
-          const aiIndex = await getAiIndexService().get(aiIndexId);
+          const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
           const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
           const body: GetKiResponse = await getKi(esClient, {
             aiIndexId,
-            destValue: aiIndex.dest.value,
+            dest: aiIndex.dest,
             index,
             kiId,
           });
@@ -618,20 +711,20 @@ export const registerAiIndexRoutes = ({
           auditLogger.log(
             aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId, error })
           );
-          return handleAiIndexError(error, response);
+          return handleAiIndexError(error, response, logger);
         }
       })
     );
 
-  // Update the feedback analysis configuration of an AI index
+  // Update the feedback analysis configuration of an AI Index
   router.versioned
     .put({
-      path: aiIndexFeedbackAnalysisPath,
+      path: AI_INDEX_FEEDBACK_ANALYSIS_PATH,
       security: WRITE_SECURITY,
       access: 'internal',
-      summary: 'Update AI index feedback analysis configuration',
+      summary: 'Update AI Index feedback analysis configuration',
       description:
-        'Replaces the feedback analysis configuration of an AI index without touching the rest of the entry. Permitted on managed AI indices, whose definition is otherwise immutable.',
+        'Replaces the feedback analysis configuration of an AI Index without touching the rest of the entry. Permitted on managed AI Indices, whose definition is otherwise immutable.',
     })
     .addVersion(
       {
@@ -646,39 +739,43 @@ export const registerAiIndexRoutes = ({
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId } = request.params;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
         try {
           const feedbackAnalysis = await getAiIndexService().setFeedbackAnalysis(
             aiIndexId,
+            spaceId,
             request.body
           );
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.UPDATE, id: aiIndexId }));
-          await reconcileSchedule(aiIndexId, request);
+          await reconcileSchedule(aiIndexId, spaceId, request);
           const body: PutAiIndexFeedbackAnalysisResponse = { feedback_analysis: feedbackAnalysis };
           return response.ok({ body });
         } catch (error) {
           auditLogger.log(
             aiIndexAuditEvent({ action: AiIndexAuditAction.UPDATE, id: aiIndexId, error })
           );
-          return handleAiIndexError(error, response);
+          return handleAiIndexError(error, response, logger);
         }
       })
     );
 
-  // Delete an AI index
+  // Delete an AI Index
   router.versioned
     .delete({
-      path: aiIndexByIdPath,
+      path: AI_INDEX_BY_ID_PATH,
       security: DELETE_SECURITY,
       access: 'public',
-      summary: 'Delete an AI index',
-      description:
-        'Deletes an AI index by id. The backing data stream/index (and therefore its Knowledge ' +
-        'Indicators) and the attached workflow automations are left untouched unless the ' +
-        '`delete_knowledge_indicators`/`delete_automations` query parameters are set to true. ' +
-        'The dest is not deleted when another AI index still uses it.',
+      summary: 'Delete an AI Index',
+      description: [
+        'Deletes an AI Index by ID.',
+        'By default, the API preserves the backing data stream or index, its Knowledge Indicators, and attached workflow automations. Set `delete_knowledge_indicators` to `true` to delete the backing data stream or index and its Knowledge Indicators. Set `delete_automations` to `true` to delete the attached workflow automations.',
+        'The API does not delete the backing data stream or index when another AI Index uses the same destination.',
+        CONTEXT_ENGINE_DISABLED_NOTE,
+        CONTEXT_ENGINE_DOCS_NOTE,
+      ].join('\n\n'),
       options: {
         tags: ['oas-tag:context engine'],
-        availability: { stability: 'experimental' },
+        availability: { stability: 'experimental', since: '9.6.0' },
       },
     })
     .addVersion(
@@ -689,28 +786,48 @@ export const registerAiIndexRoutes = ({
             params: aiIndexIdParamsSchema,
             query: deleteAiIndexQuerySchema,
           },
+          response: {
+            200: {
+              body: deleteAiIndexResponseSchema,
+              description:
+                'The AI Index entry was deleted. `errors` lists any best-effort cleanup failures.',
+            },
+            404: {
+              body: errorResponseSchema,
+              description:
+                'No AI Index with the given ID exists in the current space, or Context Engine is turned off in this space.',
+            },
+            409: {
+              body: errorResponseSchema,
+              description: 'The AI Index is managed and cannot be deleted.',
+            },
+          },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/ai_index_delete.yaml'),
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const core = await ctx.core;
         const auditLogger = core.security.audit.logger;
         const { aiIndexId } = request.params;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
         const {
           delete_knowledge_indicators: deleteKnowledgeIndicators,
           delete_automations: deleteAutomations,
         } = request.query;
         try {
-          const aiIndex = await getAiIndexService().get(aiIndexId);
+          const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
           if (aiIndex.managed) {
             throw new AiIndexManagedError(aiIndexId);
           }
-          await getAiIndexService().delete(aiIndexId);
+          await getAiIndexService().delete(aiIndexId, spaceId);
           // Audited here rather than after the cleanup below: the deletion is done and cannot be
           // undone, so an audit record is owed for it whatever happens next.
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DELETE, id: aiIndexId }));
 
           await getScheduleService()
-            .remove({ aiIndexId })
+            .remove({ aiIndexId, spaceId })
             .catch((error) => {
               logger.warn(
                 `Deleted AI index '${aiIndexId}', but failed to remove its analysis schedule: ${
@@ -729,6 +846,7 @@ export const registerAiIndexRoutes = ({
               dest: aiIndex.dest,
               logger,
               aiIndexId,
+              spaceId,
             });
             if (err) errors.push(err);
           }
@@ -747,7 +865,7 @@ export const registerAiIndexRoutes = ({
               const automationErrors = await deleteAutomationResources({
                 automations: aiIndex.automations,
                 workflowsManagementApi: await getWorkflowsManagementApi(),
-                spaceId: resolveSpaceId(await getSpaces(), request),
+                spaceId,
                 request,
                 logger,
                 aiIndexId,
@@ -767,12 +885,12 @@ export const registerAiIndexRoutes = ({
             );
           }
 
-          // The improvements store is keyed by AI index id, so revisions left behind would
-          // resurface if an AI index were later recreated under the same id. Best-effort: the store
+          // The improvements store is keyed by AI Index id, so revisions left behind would
+          // resurface if an AI Index were later recreated under the same id. Best-effort: the store
           // is a user-owned index and the caller may well have no privileges on it, and reporting a
           // failure for an index that is already gone would only send them to retry a delete that
           // now 404s. What is left behind is inert until an id is reused.
-          await getImprovementsService(core.elasticsearch.client.asCurrentUser)
+          await getImprovementsService(core.elasticsearch.client.asCurrentUser, spaceId)
             .deleteByAiIndex(aiIndexId)
             .catch((error) => {
               logger.warn(
@@ -788,7 +906,7 @@ export const registerAiIndexRoutes = ({
           auditLogger.log(
             aiIndexAuditEvent({ action: AiIndexAuditAction.DELETE, id: aiIndexId, error })
           );
-          return handleAiIndexError(error, response);
+          return handleAiIndexError(error, response, logger);
         }
       })
     );

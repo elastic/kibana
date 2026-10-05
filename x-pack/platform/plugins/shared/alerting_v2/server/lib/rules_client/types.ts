@@ -9,11 +9,14 @@ import type {
   BulkByIdsParams,
   BulkByQueryParams,
   BulkByQueryResult,
+  BulkCreateRulesParams,
+  BulkCreateRulesResponse,
   BulkResponse,
   CreateRuleData,
   DryRunResponse,
   FindRulesResponse,
   FindRulesSortField,
+  PolicyMatcher,
   RuleResponse,
   UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
@@ -25,6 +28,8 @@ export type {
   BulkByIdsParams,
   BulkByQueryParams,
   BulkByQueryResult,
+  BulkCreateRulesParams,
+  BulkCreateRulesResponse,
   BulkResponse,
   CreateRuleData,
   DryRunResponse,
@@ -59,8 +64,13 @@ export interface FindRulesArgs {
   sortOrder?: 'asc' | 'desc';
 }
 
+export interface FindMatchingRulesArgs {
+  matcher?: PolicyMatcher | null;
+  page?: number;
+  perPage?: number;
+}
+
 export interface UpdateRuleParams {
   id: string;
   data: UpdateRuleData;
-  options?: { version?: string };
 }
