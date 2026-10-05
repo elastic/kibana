@@ -25,7 +25,7 @@ The issuer URL is injected by the kibana-controller via `xpack.dataFederation.wo
 
 | Key | Default | Description |
 |-----|---------|-------------|
-| `xpack.dataFederation.enabled` | `false` | Loads the plugin. Enabled per project type in `config/serverless.<project>.yml` |
+| `xpack.dataFederation.enabled` | `true` | Loads the plugin. The management UI is hidden until the `dataFederation:enabled` advanced setting is turned on |
 | `xpack.dataFederation.enableFederatedIdentityAuth` | `false` | Enable federated identity auth option |
 | `xpack.dataFederation.enableGoogleCloudStorageDataSourceType` | `false` | Show GCS as a data source type |
 | `xpack.dataFederation.enableAzureDataSourceType` | `false` | Show Azure Blob as a data source type |
