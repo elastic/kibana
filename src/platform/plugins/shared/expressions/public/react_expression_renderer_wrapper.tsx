@@ -18,7 +18,7 @@ const ReactExpressionRendererComponent = lazy(async () => {
 });
 
 export const ReactExpressionRenderer = (props: ReactExpressionRendererProps) => (
-  <Suspense fallback={<PanelLoader />}>
+  <Suspense fallback={<PanelLoader showBorder={props.showBorder} />}>
     <ReactExpressionRendererComponent {...props} />
   </Suspense>
 );

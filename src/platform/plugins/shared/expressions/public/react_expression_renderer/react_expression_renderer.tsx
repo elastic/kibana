@@ -27,6 +27,11 @@ export interface ReactExpressionRendererProps
   ) => React.ReactElement | React.ReactElement[];
   padding?: 'xs' | 's' | 'm' | 'l' | 'xl';
   paddingTop?: boolean;
+  /**
+   * Border on the loading panel shown until the expression renders.
+   * Omit to keep the default panel border.
+   */
+  showBorder?: boolean;
 }
 
 export type ReactExpressionRendererType = React.ComponentType<ReactExpressionRendererProps>;
@@ -39,6 +44,7 @@ export function ReactExpressionRenderer({
   paddingTop = true,
   renderError,
   abortController,
+  showBorder,
   ...expressionRendererOptions
 }: ReactExpressionRendererProps) {
   const nodeRef = useRef<HTMLDivElement>(null);
@@ -51,7 +57,7 @@ export function ReactExpressionRenderer({
 
   return (
     <div {...dataAttrs} className={className} css={styles}>
-      {isEmpty && <PanelLoader />}
+      {isEmpty && <PanelLoader showBorder={showBorder} />}
       {isLoading && (
         <EuiProgress size="xs" color="accent" position="absolute" css={{ zIndex: 1 }} />
       )}

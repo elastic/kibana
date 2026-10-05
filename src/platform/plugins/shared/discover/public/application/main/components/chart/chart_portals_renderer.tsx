@@ -205,6 +205,7 @@ const UnifiedHistogramWrapper = ({ panelsToggle }: UnifiedHistogramChartProps) =
     <UnifiedHistogramChart
       {...unifiedHistogram.chartProps}
       renderToggleActions={renderToggleActions}
+      showBorder={false}
     />
   );
 };

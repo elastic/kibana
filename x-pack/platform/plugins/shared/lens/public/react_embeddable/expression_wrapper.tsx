@@ -46,6 +46,7 @@ export interface ExpressionWrapperProps {
   noPadding?: boolean;
   paddingTop?: boolean;
   abortController?: AbortController;
+  showBorder?: boolean;
 }
 
 export function ExpressionWrapper({
@@ -73,6 +74,7 @@ export function ExpressionWrapper({
   noPadding,
   paddingTop,
   abortController,
+  showBorder,
 }: ExpressionWrapperProps) {
   const handleRenderError = useCallback<NonNullable<IExpressionLoaderParams['onRenderError']>>(
     (_domNode, error) => {
@@ -115,6 +117,7 @@ export function ExpressionWrapper({
           onEvent={handleEvent}
           hasCompatibleActions={hasCompatibleActions}
           getCompatibleCellValueActions={getCompatibleCellValueActions}
+          showBorder={showBorder}
         />
       </div>
     </>

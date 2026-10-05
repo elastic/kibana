@@ -31,6 +31,7 @@ interface GeneralLensApi {
   isApproximate$: BehaviorSubject<boolean | undefined>;
   hideTitle$: BehaviorSubject<boolean | undefined>;
   reload$: BehaviorSubject<void>;
+  showBorder?: boolean;
 }
 
 export type LensParentApi = SearchApi &

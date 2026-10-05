@@ -71,6 +71,7 @@ export function LensRenderer({
   lastReloadRequestTime,
   titleHighlight,
   onApiAvailable,
+  showBorder,
   ...props
 }: LensRendererProps) {
   // Use the settings interface to store panel settings
@@ -160,6 +161,7 @@ export function LensRenderer({
     return {
       showShadow: false,
       showBadges: false,
+      showBorder,
       titleHighlight,
       getActions: async (triggerId, context) => {
         const actions = withDefaultActions
@@ -169,7 +171,7 @@ export function LensRenderer({
         return (extraActions ?? []).concat(actions || []);
       },
     };
-  }, [withDefaultActions, extraActions, lensApi, titleHighlight]);
+  }, [withDefaultActions, extraActions, lensApi, titleHighlight, showBorder]);
 
   return (
     <EmbeddableRenderer<LensWireAPIConfig, LensApi>
@@ -194,6 +196,7 @@ export function LensRenderer({
           isApproximate$,
           hideTitle$,
           reload$, // trigger a reload (replacement for deprecated searchSessionId)
+          showBorder,
         } satisfies LensParentApi)
       }
       onApiAvailable={handleApiAvailable}
