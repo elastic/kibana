@@ -47,20 +47,22 @@ export const setupConsoleErrorsProvider = (workerProxyService: ConsoleWorkerProx
       })
     );
   };
+
   const onModelAdd = (model: monaco.editor.IModel) => {
     if (model.getLanguageId() !== CONSOLE_LANG_ID) {
       return;
     }
 
-    const { dispose } = model.onDidChangeContent(async () => {
+    const contentChangeListener = model.onDidChangeContent(async () => {
       await updateErrorMarkers(model);
     });
 
     model.onWillDispose(() => {
-      dispose();
+      contentChangeListener.dispose();
     });
 
     updateErrorMarkers(model);
   };
+
   monaco.editor.onDidCreateModel(onModelAdd);
 };
