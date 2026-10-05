@@ -50,8 +50,10 @@ export const useLinkedActionPolicies = (routingTags: string[]): UseLinkedActionP
     http,
     routingTags,
   });
-  // keepPreviousData keeps the last tag query on screen with isLoading false.
-  // Hide those rows until the match for the current routing tags arrives.
+  /*
+   * keepPreviousData keeps the last tag query on screen with isLoading false.
+   * Hide those rows until the match for the current routing tags arrives.
+   */
   const awaitingCurrentMatches = isPreviousData && error == null;
 
   const sortedItems = useMemo(
