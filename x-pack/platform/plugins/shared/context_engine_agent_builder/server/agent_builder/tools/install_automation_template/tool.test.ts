@@ -34,6 +34,12 @@ const createTool = () =>
     },
   });
 
+describe('install_automation_template description', () => {
+  it('carries no migration note about automations installed before names were required', () => {
+    expect(createTool().description).not.toMatch(/pre-name|Document KI automation/);
+  });
+});
+
 describe('install_automation_template schema', () => {
   const schema = createTool().schema;
 

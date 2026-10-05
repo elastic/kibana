@@ -403,7 +403,7 @@ describe('runAutomationHandler', () => {
       expect(result.reason).toMatch(/pilot_size/);
       expect(result.reason).toMatch(/Document, unit-profile and index-metadata automations can/);
       expect(result.reason).not.toMatch(/document_orchestration or unit_profile/);
-      expect(result.reason).toMatch(/reinstalled with the same name/);
+      expect(result.reason).not.toMatch(/before pilot mode existed/);
       expect(result.reason).toMatch(
         /A Targeted KI writer has no pilot: run it with platform\.core\.execute_workflow/
       );

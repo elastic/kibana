@@ -834,10 +834,8 @@ describe('aiIndexAutomationsSkill', () => {
       expect((prose.match(nameRule) ?? []).length).toBeGreaterThanOrEqual(3);
     });
 
-    it('warns that an automation installed before names were required is never replaced', () => {
-      expect(content.replace(/\s+/g, ' ')).toMatch(
-        /An automation installed before names were required, such as "Document KI automation", is never replaced: delete it first/
-      );
+    it('carries no migration note about automations installed before names were required', () => {
+      expect(content).not.toMatch(/installed before names were|Document KI automation/);
     });
   });
 });

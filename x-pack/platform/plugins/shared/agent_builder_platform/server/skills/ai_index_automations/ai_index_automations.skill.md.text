@@ -73,9 +73,7 @@ Whatever the strategy, a generated workflow has to:
 Index metadata, bottom-up document, unit profile and targeted-ki-writer automations are all
 installed by `platform.context_engine.install_automation_template`. Every install takes a `name`:
 installing the same template with the same `name` replaces that automation in place, and a
-different `name` adds another automation to the AI index. An automation installed before names were
-required, such as "Document KI automation", is never replaced: delete it first, then install with a
-descriptive name. `targeted-ki-writer` is installed with
+different `name` adds another automation to the AI index. `targeted-ki-writer` is installed with
 `template: targeted_ki_writer` — the same tool, same pattern as the others.
 
 Two more references are attached and shared with `analyze-and-improve`: `ki_shapes`, the KI
