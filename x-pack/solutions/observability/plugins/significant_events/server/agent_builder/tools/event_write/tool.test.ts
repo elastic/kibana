@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { RunContextStackEntry } from '@kbn/agent-builder-server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
+import { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from '../../agents/discovery/discovery';
 import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
 import { BulkWriteError, MAX_BULK_WRITE_ITEMS } from '../bulk_write';
 import { eventsWriteBulkHandler } from './handler';
@@ -246,6 +248,49 @@ describe('events_write tool', () => {
       false
     );
   });
+
+  it.each<{
+    label: string;
+    stack: RunContextStackEntry[];
+    expected: boolean;
+  }>([
+    {
+      label: 'the discovery agent',
+      stack: [{ type: 'agent', agentId: SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID }],
+      expected: true,
+    },
+    {
+      label: 'a different agent',
+      stack: [{ type: 'agent', agentId: 'another-agent' }],
+      expected: false,
+    },
+    { label: 'no agent', stack: [], expected: false },
+  ])(
+    'sets rejectUnknownEventIds from trusted run context for $label',
+    async ({ stack, expected }) => {
+      (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+        {
+          index: 0,
+          event_uuid: 'uuid-1',
+          event_id: 'event-1',
+          status: 'open',
+          written: true,
+        },
+      ]);
+      const context = createMockToolContext();
+      context.runContext.stack = stack;
+
+      await invokeHandler(
+        createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
+        { source: 'discovery', items: [input] },
+        context
+      );
+
+      expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
+        expect.objectContaining({ source: 'discovery', rejectUnknownEventIds: expected })
+      );
+    }
+  );
 
   it('enriches causal features from their Knowledge Indicators', async () => {
     getFeatures.mockImplementation((_streams, options) => {

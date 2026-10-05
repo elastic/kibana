@@ -33,6 +33,7 @@ import { SavedObjectSaveModal } from './saved_object_save_modal';
 import { VisualizeApp } from './visualize_app';
 import { UnifiedTabs } from './unified_tabs';
 import { ContentListWrapper } from './content_list';
+import { EsqlEditor } from '../ui_components';
 import type { KibanaUrl } from '../../common/services/kibana_url';
 
 export {
@@ -64,6 +65,7 @@ export interface PageObjects {
   dataViewsManagement: DataViewsManagementPage;
   discover: DiscoverApp;
   dashboard: DashboardApp;
+  esqlEditor: EsqlEditor;
   filterBar: FilterBar;
   inspector: InspectorPage;
   listingTable: ListingTable;
@@ -95,6 +97,7 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     dataViewsManagement: createLazyPageObject(DataViewsManagementPage, fixtures.page),
     dashboard: createLazyPageObject(DashboardApp, fixtures.page),
     discover: createLazyPageObject(DiscoverApp, fixtures.page),
+    esqlEditor: createLazyPageObject(EsqlEditor, fixtures.page),
     filterBar: createLazyPageObject(FilterBar, fixtures.page),
     inspector: createLazyPageObject(InspectorPage, fixtures.page),
     listingTable: createLazyPageObject(ListingTable, fixtures.page),
