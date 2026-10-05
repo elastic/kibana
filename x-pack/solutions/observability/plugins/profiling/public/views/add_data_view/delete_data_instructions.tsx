@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 
-export function DeleteDataView() {
+export function DeleteDataInstructions() {
   const {
     start: {
       core: { docLinks },
