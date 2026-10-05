@@ -153,7 +153,7 @@
     "@elastic/charts": "73.2.2",
     "@elastic/datemath": "5.0.3",
     "@elastic/ebt": "1.4.1",
-    "@elastic/ecs": "9.3.0",
+    "@elastic/ecs": "9.5.0",
     "@elastic/elasticsearch": "9.5.1",
     "@elastic/ems-client": "8.7.0",
     "@elastic/esql": "4.28.0",
