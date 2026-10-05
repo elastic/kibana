@@ -17,8 +17,7 @@ import {
   type AfterChatEventHookContext,
 } from '@kbn/agent-builder-server';
 import { createRound } from '../../test_utils';
-import { addSlackProjection } from './add_slack_projection';
-import { registerSlackProjectionHook } from './register_slack_projection_hook';
+import { addSlackProjection, registerSlackHooks } from '.';
 
 const createRoundCompleteEvent = (message: string): RoundCompleteEvent => ({
   type: ChatEventType.roundComplete,
@@ -81,14 +80,14 @@ describe('addSlackProjection', () => {
   });
 });
 
-describe('registerSlackProjectionHook', () => {
-  it('registers a blocking afterChatEvent hook', () => {
+describe('registerSlackHooks', () => {
+  it('registers the Slack bundle with a blocking afterChatEvent hook', () => {
     const register = jest.fn();
 
-    registerSlackProjectionHook({ hooks: { register } } as never);
+    registerSlackHooks({ hooks: { register } } as never);
 
     expect(register).toHaveBeenCalledWith({
-      id: 'slack-projection',
+      id: 'slack',
       hooks: {
         [HookLifecycle.afterChatEvent]: {
           mode: HookExecutionMode.blocking,

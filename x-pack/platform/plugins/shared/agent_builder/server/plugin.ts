@@ -48,7 +48,7 @@ import { registerSampleData } from './register_sample_data';
 import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/register_before_agent_workflows_hook';
 import { registerAfterExecutionWorkflowsHook } from './hooks/agent_workflows/register_after_execution_workflows_hook';
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
-import { registerSlackProjectionHook } from './hooks/slack_projection/register_slack_projection_hook';
+import { registerSlackHooks } from './hooks/slack';
 import { registerTaskDefinitions } from './services/execution';
 import { createModelProviderFactory } from './services/execution/runner/model_provider';
 import { createSmlTools } from './services/tools/builtin/sml';
@@ -276,7 +276,7 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
     });
 
-    registerSlackProjectionHook(serviceSetups);
+    registerSlackHooks(serviceSetups);
 
     const smlTools = createSmlTools({
       getAgentBuilderSml: () => {
