@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
+import { RulesNotFoundError, RulesNotVisibleError } from '@kbn/alerting-plugin/server';
 import { fetchRulesByQueryOrIds, RuleNotFoundError } from './fetch_rules_by_query_or_ids';
 
 describe('fetchRulesByQueryOrIds', () => {
@@ -45,8 +46,17 @@ describe('fetchRulesByQueryOrIds', () => {
     expect(errors[0].error).toEqual(new Error('Error resolving the rule'));
   });
 
-  it('returns a RuleNotFoundError for every id when bulkGetRules finds no rules', async () => {
-    rulesClient.bulkGetRules.mockRejectedValue(Boom.badRequest('No rules found for bulk get'));
+  it('returns a RuleNotFoundError for every id when bulkGetRules throws RulesNotFoundError', async () => {
+    rulesClient.bulkGetRules.mockRejectedValue(new RulesNotFoundError('get'));
+
+    const { errors } = await fetchByIds(['id-1', 'id-2']);
+
+    expect(errors.map(({ item }) => item)).toEqual(['id-1', 'id-2']);
+    errors.forEach(({ error }) => expect(error).toBeInstanceOf(RuleNotFoundError));
+  });
+
+  it('returns a RuleNotFoundError for every id when bulkGetRules throws RulesNotVisibleError', async () => {
+    rulesClient.bulkGetRules.mockRejectedValue(new RulesNotVisibleError('get'));
 
     const { errors } = await fetchByIds(['id-1', 'id-2']);
 

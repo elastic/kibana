@@ -6,6 +6,7 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
+import { RulesNotFoundError, RulesNotVisibleError } from '@kbn/alerting-plugin/server';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { getRuleMock } from '../../../../routes/__mocks__/request_responses';
 import { bulkDeleteRules } from './bulk_delete_rules';
@@ -111,12 +112,8 @@ describe('bulkDeleteRules', () => {
     ]);
   });
 
-  it('treats an entire chunk as skipped when alerting throws "No rules found"', async () => {
-    const boomError = Object.assign(new Error('No rules found for bulk delete'), {
-      isBoom: true,
-      output: { statusCode: 400 },
-    });
-    rulesClient.bulkDeleteRules.mockRejectedValue(boomError);
+  it('treats an entire chunk as skipped when alerting throws RulesNotFoundError', async () => {
+    rulesClient.bulkDeleteRules.mockRejectedValue(new RulesNotFoundError('delete'));
 
     const result = await bulkDeleteRules({ rulesClient, rules: [ruleA, ruleB] });
 
@@ -126,6 +123,13 @@ describe('bulkDeleteRules', () => {
       { id: 'rule-a', name: 'Rule A', skip_reason: 'RULE_NOT_FOUND' },
       { id: 'rule-b', name: 'Rule B', skip_reason: 'RULE_NOT_FOUND' },
     ]);
+  });
+
+  it('rethrows RulesNotVisibleError (rules exist but hidden by auth) without skipping', async () => {
+    const visibleError = new RulesNotVisibleError('delete');
+    rulesClient.bulkDeleteRules.mockRejectedValue(visibleError);
+
+    await expect(bulkDeleteRules({ rulesClient, rules: [ruleA] })).rejects.toThrow(visibleError);
   });
 
   it('accumulates results across multiple chunks', async () => {
