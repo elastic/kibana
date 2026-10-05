@@ -48,7 +48,8 @@ describe('BaseActions copy link', () => {
   it('keeps Copy link on a decided investigation, so the menu is never empty', () => {
     renderWithKibanaRenderContext(
       <BaseActions
-        investigation={{ ...investigation, status: 'closed' }}
+        investigation={{ ...investigation, recommendedAction: 'closed' }}
+        canCloseInvestigation
         onClickAction={jest.fn()}
         onCopyLink={jest.fn()}
         data-test-subj="actions"

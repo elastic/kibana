@@ -55,6 +55,7 @@ const useContextMenuItems = (
               },
             }}
             key={key}
+            role="menuitem"
             icon={icon}
             color={color}
             onClick={(ev) => {
