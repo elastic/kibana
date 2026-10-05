@@ -12,3 +12,13 @@ import type { Decorator } from '@storybook/react';
 const I18nDecorator: Decorator = (storyFn) => <I18nProvider>{storyFn()}</I18nProvider>;
 
 export const decorators = [I18nDecorator];
+
+export const parameters = {
+  backgrounds: {
+    default: 'white',
+    values: [
+      { name: 'white', value: '#fff' },
+      { name: 'body', value: '#f7f8fc' },
+    ],
+  },
+};

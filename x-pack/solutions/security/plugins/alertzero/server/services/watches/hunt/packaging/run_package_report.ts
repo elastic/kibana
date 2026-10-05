@@ -35,23 +35,57 @@ export type WriteCoverageKis = (subjects: CoverageSubject[]) => Promise<Coverage
 type MintSuppression = Extract<PackageReportOutput, { status: 'packaged' }>['mintSuppression'];
 
 /**
- * True when the Investigation already carries at least one Proposal. A rerun that reaches the same
- * Investigation (reopened, or re-hunted after the hunt-once gate clears) would otherwise mint a
- * second, independent chain for what may be the very same finding: `decidePackageReport`'s
- * `subjectKey` is deterministic per finding, but nothing downstream of this step dedupes on it
- * yet, so the guard here is coarse -- it suppresses every new Proposal this run would mint, not
- * only ones that collide with an existing `subjectKey`. See the implementation
+ * Count of Proposals the Investigation already carries (any status, including settled), before
+ * this run's own proposals are minted. Used two ways: greater than zero means a rerun that reaches
+ * the same Investigation (reopened, or re-hunted after the hunt-once gate clears) would otherwise
+ * mint a second, independent chain for what may be the very same finding -- `decidePackageReport`'s
+ * `subjectKey` is deterministic per finding, but nothing downstream of this step dedupes on it yet,
+ * so the guard here is coarse, suppressing every new Proposal this run would mint, not only ones
+ * that collide with an existing `subjectKey`. It is also the baseline `expectedProposalCount` is
+ * built on (see below), so the settlement barrier each gate checks accounts for proposals that
+ * already existed before this run, not just the ones this run mints. See the implementation
  * (`check_existing_proposals.ts`) for which statuses count as "existing" and why.
  */
-export type HasExistingProposals = (investigationConversationId: string) => Promise<boolean>;
+export type CountExistingProposals = (investigationConversationId: string) => Promise<number>;
 
 export interface RunPackageReportDeps {
   listRespondActions: ListRespondActions;
   writeCoverageKis: WriteCoverageKis;
   resolveHostEnrollment: ResolveHostEnrollment;
   rehydrateProcessSelectors: RehydrateProcessSelectors;
-  hasExistingProposals: HasExistingProposals;
+  countExistingProposals: CountExistingProposals;
 }
+
+/**
+ * The settlement barrier threshold each gate checks before closing the Investigation
+ * (`hunt_proposal_gate.yaml`'s `created_count >= expectedProposalCount`). Baselined on
+ * `existingProposalCount` rather than just `newProposalCount`: nothing on a Proposal records
+ * which run minted it, so a gate's `created_count` is always the Investigation's all-time total,
+ * never scoped to a single run. Comparing that all-time total against only this run's new-proposal
+ * count would let the barrier be satisfied by an earlier run's history alone, before this run's
+ * own proposals exist. The baseline makes the barrier track what it actually means: the all-time
+ * total has to reach "everything that existed before this run, plus everything this run adds."
+ *
+ * Exported and kept as a pure function, separate from the suppression decision above, specifically
+ * so it can be tested with `existingProposalCount > 0` and `mintSuppression: 'none'` together --
+ * a combination `runPackageReport` cannot currently produce (the existing-Proposals guard above
+ * suppresses minting entirely whenever any Proposal already exists, so in every case this
+ * actually runs today, `existingProposalCount` is 0 and this collapses to `newProposalCount`).
+ * That makes it dead weight today, but load-bearing for elastic/security-team#19822: once that
+ * phase replaces the coarse guard with real per-finding dedup, a new Proposal minting alongside
+ * an Investigation's older ones becomes exactly the case this formula exists for. Do not simplify
+ * this back to `newProposalCount` because it looks unreachable -- that is the bug this type was
+ * fixing.
+ */
+export const computeExpectedProposalCount = ({
+  mintSuppression,
+  existingProposalCount,
+  newProposalCount,
+}: {
+  mintSuppression: MintSuppression;
+  existingProposalCount: number;
+  newProposalCount: number;
+}): number => (mintSuppression === 'none' ? existingProposalCount + newProposalCount : 0);
 
 /**
  * Orchestrates packaging for one Investigation run. Throws
@@ -107,9 +141,18 @@ export const runPackageReport = async ({
     // later sweep hunts it again. Closing here would have that sweep write its findings --
     // a real hit included -- into an Investigation this run had already closed.
     if (!hasConfirmedHit && huntStatus === 'success') {
+      // No SSE means no technique-level detail either, so this writes the same report-scoped
+      // fallback subject `deriveCoverageSubjects` already emits when a run's SSE names no
+      // techniques -- the one piece of "we looked" this run can honestly claim is the reportId.
+      const subjects = deriveCoverageSubjects({
+        spaceId,
+        state: { reportId, techniques: [], hasConfirmedHit: false, corroboratedTechniques: [] },
+        investigationConversationId,
+      });
+      const coverage = await deps.writeCoverageKis(subjects);
       return {
         status: 'packaged',
-        coverage: { written: [], skipped: [] },
+        coverage,
         proposals: [],
         dismiss: true,
         closureSummary: `Hunt for report ${reportId} found no confirmed hits. Closing: nothing in this environment matched the report at the confirming-index bar.`,
@@ -143,10 +186,11 @@ export const runPackageReport = async ({
   // hit) has no proposals to suppress, and `decidePackageReport` never returns `dismiss: false`
   // with an empty `proposals` (the analyst-recommendation fallback always fills it).
   let mintSuppression: MintSuppression = 'none';
+  let existingProposalCount = 0;
   if (!decided.dismiss) {
     try {
-      const alreadyExists = await deps.hasExistingProposals(investigationConversationId);
-      mintSuppression = alreadyExists ? 'existing_proposals' : 'none';
+      existingProposalCount = await deps.countExistingProposals(investigationConversationId);
+      mintSuppression = existingProposalCount > 0 ? 'existing_proposals' : 'none';
     } catch {
       // Fails closed: the guard's job is to never let a duplicate mint through, so the one case
       // it must not mishandle is the one where it cannot tell. But a lookup failure is not "a
@@ -162,7 +206,11 @@ export const runPackageReport = async ({
   // barrier each gate checks before closing the Investigation. Not persisted to
   // conversation metadata: the platform `investigation` template's schema has no room
   // for it.
-  const expectedProposalCount = proposals.length;
+  const expectedProposalCount = computeExpectedProposalCount({
+    mintSuppression,
+    existingProposalCount,
+    newProposalCount: proposals.length,
+  });
 
   return {
     status: 'packaged',

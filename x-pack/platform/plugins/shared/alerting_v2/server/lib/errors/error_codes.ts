@@ -60,6 +60,8 @@ export const ALERTING_ERROR_CODES = {
   BUILDER_TYPE_NOT_CLEARED: 'BUILDER_TYPE_NOT_CLEARED',
   /** PUT body changed a field flagged as immutable. */
   IMMUTABLE_FIELDS_CHANGED: 'IMMUTABLE_FIELDS_CHANGED',
+  /** Filter expression is not valid KQL. */
+  INVALID_FILTER_SYNTAX: 'INVALID_FILTER_SYNTAX',
   /** Filter expression referenced an unknown field. */
   INVALID_FILTER_FIELD: 'INVALID_FILTER_FIELD',
   /** Filter expression used an unsupported KQL function. */
