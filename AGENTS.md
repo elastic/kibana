@@ -62,6 +62,7 @@ Follow existing patterns in the target area first; below are common defaults.
 `node scripts/eslint --fix $(git diff --name-only)`
 - Never suppress linting errors with `eslint-disable`; fix the root cause.
 - Plugin `server/index.ts` files are checked by `@kbn/eslint/no_sync_import_from_plugin` (see plugin server entry note above).
+- Production `.ts`/`.tsx` files are checked by `@kbn/eslint/require_lazy_zod_schema` (see schema validation note below).
 
 ### Formatting
 - Follow existing formatting in the file; do not reformat unrelated code.
@@ -87,6 +88,7 @@ Follow existing patterns in the target area first; below are common defaults.
 
 ### Schema validation
 - When adding `schema.string()` / `schema.arrayOf()` (`@kbn/config-schema`) or `z.string()` / `z.array()` (`zod`) for HTTP request input, always bound them (`maxLength` / `maxSize` / `.max()`) to prevent unbounded-input DoS.
+- Wrap new module-level Zod schemas in `lazySchema(() => ...)` from `@kbn/zod` so the schema graph is built on first use, not at import. Put derivations (`.extend`, `.optional`, `.array`) inside the factory, not at module scope. `instanceof z.ZodObject` is `false` on the lazy proxy; use `isZod` or structural checks. Enforced as `warn` by `@kbn/eslint/require_lazy_zod_schema` (see [PR #294667](https://github.com/elastic/kibana/pull/294667)).
 
 ## Internationalization (i18n)
 - Guidelines are found in src/platform/packages/shared/kbn-i18n/GUIDELINE.md

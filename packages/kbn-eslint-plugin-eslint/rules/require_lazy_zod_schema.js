@@ -197,20 +197,14 @@ const isLazySchemaCall = (init, state) => {
     return false;
   }
   const callee = unwrapExpression(unwrapped.callee);
-  if (
-    !callee ||
-    callee.type !== esTypes.Identifier ||
-    !state.lazySchemaNames.has(callee.name)
-  ) {
+  if (!callee || callee.type !== esTypes.Identifier || !state.lazySchemaNames.has(callee.name)) {
     return false;
   }
   if (unwrapped.arguments.length !== 1) {
     return false;
   }
   const [arg] = unwrapped.arguments;
-  return (
-    arg.type === esTypes.ArrowFunctionExpression || arg.type === esTypes.FunctionExpression
-  );
+  return arg.type === esTypes.ArrowFunctionExpression || arg.type === esTypes.FunctionExpression;
 };
 
 /**

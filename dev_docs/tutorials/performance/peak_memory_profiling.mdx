@@ -499,7 +499,9 @@ The check never fails your build. If it comments on your PR:
    `postForcedGcHeapUsed` holds the per-pair numbers behind the reported mean.
 2. The usual causes are a new top-level import in server code that pulls in a large
    dependency tree, or a schema (Zod or `@kbn/config-schema`) constructed at module load
-   that could be constructed lazily instead. Check whether a server plugin's
+   that could be constructed lazily instead. For Zod, wrap new module-level schemas in
+   `lazySchema(() => ...)` from `@kbn/zod`; `@kbn/eslint/require_lazy_zod_schema` warns
+   on eager module-scope schemas. Check whether a server plugin's
    `server/index.ts` started eagerly importing `./plugin`.
 3. Use the local probe described above to confirm the growth and find what is retained.
 
