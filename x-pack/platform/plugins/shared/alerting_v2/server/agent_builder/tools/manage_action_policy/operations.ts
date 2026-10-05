@@ -14,7 +14,7 @@ import {
   throttleStrategySchema,
   durationSchema,
   policyMatcherSchema,
-  PER_EPISODE_STRATEGIES,
+  PER_ALERT_STRATEGIES,
   AGGREGATE_STRATEGIES,
   STRATEGIES_REQUIRING_INTERVAL,
 } from '@kbn/alerting-v2-schemas';
@@ -68,7 +68,7 @@ export const setGroupingOperationSchema = z
       .describe('Fields used to group alerts (required when groupingMode is per_field).'),
   })
   .describe(
-    'Use `set_grouping` to batch matched alerts into notifications — one per alert (`per_episode`), one for all matching alerts, or grouped by field.'
+    'Use `set_grouping` to batch matched alerts into notifications — one per alert (`per_alert`), one for all matching alerts, or grouped by field.'
   );
 
 export const setThrottleOperationSchema = z
@@ -120,8 +120,8 @@ function validateThrottleGroupingCompat(
 ): void {
   if (!strategy) return;
 
-  const mode = groupingMode ?? 'per_episode';
-  const allowed = mode === 'per_episode' ? PER_EPISODE_STRATEGIES : AGGREGATE_STRATEGIES;
+  const mode = groupingMode ?? 'per_alert';
+  const allowed = mode === 'per_alert' ? PER_ALERT_STRATEGIES : AGGREGATE_STRATEGIES;
   if (!allowed.has(strategy)) {
     throw new ActionPolicyOperationValidationError(
       `Throttle strategy "${strategy}" is not valid for grouping mode "${mode}". ` +
