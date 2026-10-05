@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { MAX_LENGTH_PER_TAG, MAX_WORKFLOW_TAGS_PER_CONFIGURATION } from '../../../common/constants';
@@ -21,6 +21,9 @@ interface WorkflowTagsProps {
 }
 
 const toOption = (tag: string): EuiComboBoxOptionOption<string> => ({ label: tag });
+
+// Workflows don't bound tag length, but the configuration API does, so longer tags can't be saved.
+const isTagWithinMaxLength = (tag: string): boolean => tag.length <= MAX_LENGTH_PER_TAG;
 
 /**
  * Settings-page combo box for configuring which workflow tags are visible in
@@ -38,7 +41,12 @@ export const WorkflowTags: React.FC<WorkflowTagsProps> = ({
     enabled: !disabled,
   });
 
-  const options = useMemo(() => availableTags.map(toOption), [availableTags]);
+  const [error, setError] = useState<string | null>(null);
+
+  const options = useMemo(
+    () => availableTags.filter(isTagWithinMaxLength).map(toOption),
+    [availableTags]
+  );
   const selectedOptions = useMemo(() => workflowTags.map(toOption), [workflowTags]);
 
   const handleChange = useCallback(
@@ -52,7 +60,10 @@ export const WorkflowTags: React.FC<WorkflowTagsProps> = ({
     (searchValue: string) => {
       const trimmed = searchValue.trim();
       if (!trimmed) return false;
-      if (trimmed.length > MAX_LENGTH_PER_TAG) return false;
+      if (!isTagWithinMaxLength(trimmed)) {
+        setError(i18n.WORKFLOW_TAG_TOO_LONG(MAX_LENGTH_PER_TAG));
+        return false;
+      }
       if (workflowTags.includes(trimmed)) return false;
       if (workflowTags.length >= MAX_WORKFLOW_TAGS_PER_CONFIGURATION) return false;
       onChange([...workflowTags, trimmed]);
@@ -61,10 +72,18 @@ export const WorkflowTags: React.FC<WorkflowTagsProps> = ({
     [onChange, workflowTags]
   );
 
+  const handleSearchChange = useCallback(() => setError(null), []);
+
   return (
-    <EuiFormRow fullWidth label={i18n.WORKFLOW_TAGS_LABEL}>
+    <EuiFormRow
+      fullWidth
+      label={i18n.WORKFLOW_TAGS_LABEL}
+      error={error ?? undefined}
+      isInvalid={error != null}
+    >
       <EuiComboBox
         fullWidth
+        isInvalid={error != null}
         aria-label={i18n.WORKFLOW_TAGS_LABEL}
         data-test-subj="cases-workflow-tags"
         isLoading={isLoading || isLoadingTags}
@@ -74,6 +93,7 @@ export const WorkflowTags: React.FC<WorkflowTagsProps> = ({
         selectedOptions={selectedOptions}
         onChange={handleChange}
         onCreateOption={handleCreateOption}
+        onSearchChange={handleSearchChange}
         customOptionText={i18n.ADD_WORKFLOW_TAG_COMBO_BOX}
       />
     </EuiFormRow>

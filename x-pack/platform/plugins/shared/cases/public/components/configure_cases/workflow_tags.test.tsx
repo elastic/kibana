@@ -84,6 +84,36 @@ describe('WorkflowTags', () => {
     await userEvent.keyboard('{enter}');
 
     expect(onChange).not.toHaveBeenCalled();
+    expect(
+      await screen.findByText(`Tag must be ${MAX_LENGTH_PER_TAG} characters or fewer.`)
+    ).toBeInTheDocument();
+  });
+
+  it('clears the tag length error when the search value changes', async () => {
+    renderWithTestingProviders(<WorkflowTags {...defaultProps} />);
+
+    await userEvent.click(getSearchInput());
+    await userEvent.paste('a'.repeat(MAX_LENGTH_PER_TAG + 1));
+    await userEvent.keyboard('{enter}');
+    await userEvent.keyboard('{backspace}');
+
+    expect(
+      screen.queryByText(`Tag must be ${MAX_LENGTH_PER_TAG} characters or fewer.`)
+    ).not.toBeInTheDocument();
+  });
+
+  it('does not suggest workflow tags longer than the maximum tag length', async () => {
+    const longTag = 'a'.repeat(MAX_LENGTH_PER_TAG + 1);
+    useGetWorkflowTagsMock.mockReturnValue({
+      data: ['enrichment', longTag],
+      isLoading: false,
+    });
+    renderWithTestingProviders(<WorkflowTags {...defaultProps} />);
+
+    await userEvent.click(getSearchInput());
+
+    expect(await screen.findByRole('option', { name: 'enrichment' })).toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: longTag })).not.toBeInTheDocument();
   });
 
   it('does not add a custom tag once the maximum number of tags is configured', async () => {
