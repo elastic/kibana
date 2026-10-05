@@ -19,10 +19,10 @@ set -euo pipefail
 #   3. Fires the workflow against that conversation, so the proposal lands on
 #      the same card.
 #
-# Attachments are seeded by value, never by reference: `security.rule` and
-# `security.attack_discovery` resolve an `origin` against the rules client and
-# the attack-discovery index respectively, and reject ids that do not exist.
-# Passing `data` skips that lookup, so nothing has to be seeded in those indices.
+# Attachments are seeded by value, never by reference: `security.attack_discovery`
+# resolves an `origin` against the attack-discovery index and rejects ids that do
+# not exist. `security.rule` attachments are given real saved-object ids via
+# `attach_rule`, which upserts a disabled test rule so the drill-down flyout works.
 #
 # IMPORTANT — this does not work on an unpatched checkout. The helper reaches the
 # queue through `workflow.execute` on `system-create-proposal`,
@@ -320,20 +320,62 @@ attach_alerts() {
   attach security.alerts "$(printf '%s\n' "${ids[@]}" | jq -R . | jq -s '{ alertIds: . }')"
 }
 
+# Upserts a disabled custom query rule under a stable `rule_id` (slug of the name),
+# then attaches its full saved-object response so `data.text` carries a real `id`.
+# This lets the attachment-summary drill-down open the rule flyout.
+# Falls back to a value-only attachment (no id) on any error rather than aborting.
 attach_rule() {
-  local name="$1" id
-  id="$(next_seed_id)"
-  attach security.rule "$(jq -n --arg name "$name" --arg id "$id" \
-    '{
-      attachmentLabel: $name,
-      text: ({
-        id: $id,
-        rule_id: $id,
-        name: $name,
-        type: "query",
-        query: "event.category:authentication and event.outcome:failure"
-      } | tojson)
-    }')"
+  local name="$1"
+  local slug
+  slug="$(printf '%s' "$name" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/-*$//')"
+  local seed_rule_id="seed-rule-${slug}"
+
+  # Try to fetch an existing rule by signature rule_id.
+  local rule_json
+  rule_json="$(kibana_curl \
+    "${KIBANA_API_BASE}/api/detection_engine/rules?rule_id=${seed_rule_id}" 2>&1)" || rule_json=""
+
+  if [ -z "$rule_json" ] || ! printf '%s' "$rule_json" | jq -e '.id' > /dev/null 2>&1; then
+    # Rule not found — create it (disabled so it never fires).
+    rule_json="$(kibana_curl -X POST \
+      "${KIBANA_API_BASE}/api/detection_engine/rules" \
+      -d "$(jq -n \
+        --arg name "$name" \
+        --arg rule_id "$seed_rule_id" \
+        '{
+          name: $name,
+          description: ("Seeded by seed_proposals_based_on_workflow.sh — " + $name),
+          rule_id: $rule_id,
+          type: "query",
+          query: "event.category:authentication and event.outcome:failure",
+          language: "kuery",
+          index: ["logs-*"],
+          severity: "medium",
+          risk_score: 47,
+          enabled: false
+        }')" 2>&1)" || rule_json=""
+  fi
+
+  if printf '%s' "$rule_json" | jq -e '.id' > /dev/null 2>&1; then
+    attach security.rule "$(jq -n \
+      --arg name "$name" \
+      --argjson rule "$rule_json" \
+      '{
+        attachmentLabel: $name,
+        text: ($rule | tojson)
+      }')"
+  else
+    echo "      ! attach_rule: could not upsert rule \"${name}\", attaching without id" >&2
+    attach security.rule "$(jq -n --arg name "$name" \
+      '{
+        attachmentLabel: $name,
+        text: ({
+          name: $name,
+          type: "query",
+          query: "event.category:authentication and event.outcome:failure"
+        } | tojson)
+      }')"
+  fi
 }
 
 # Without `attachmentLabel` a single entity renders as the literal "Risk Entity".

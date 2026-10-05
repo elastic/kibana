@@ -7,7 +7,7 @@
 
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
-import { toAlertDescriptor } from './to_flyout_descriptor';
+import { toAlertDescriptor, toRuleDescriptor } from './to_flyout_descriptor';
 
 const attachmentOf = (type: string, data: unknown): UnknownAttachment => ({
   id: 'attachment-1',
@@ -18,6 +18,68 @@ const attachmentOf = (type: string, data: unknown): UnknownAttachment => ({
 /** What `stringifyEssentialAlertData` writes: JSON of picked fields, each value an array. */
 const alertAttachment = (fields: Record<string, unknown>) =>
   attachmentOf(SecurityAgentBuilderAttachments.alert, { alert: JSON.stringify(fields) });
+
+const ruleAttachment = (data: unknown, origin?: string): UnknownAttachment => ({
+  id: 'attachment-rule-1',
+  type: SecurityAgentBuilderAttachments.rule,
+  data,
+  ...(origin ? { origin } : {}),
+});
+
+describe('toRuleDescriptor', () => {
+  it('opens the rule flyout for the id in data.text', () => {
+    const descriptor = toRuleDescriptor(
+      ruleAttachment({
+        text: JSON.stringify({ id: 'so-id-abc', rule_id: 'sig-id-abc', name: 'My Rule' }),
+      })
+    );
+    expect(descriptor).toEqual({ kind: 'rule', ruleId: 'so-id-abc' });
+  });
+
+  it('prefers text.id over origin when both are present', () => {
+    const descriptor = toRuleDescriptor(
+      ruleAttachment(
+        { text: JSON.stringify({ id: 'so-id-from-text', rule_id: 'sig-id' }) },
+        'sig-id-from-origin'
+      )
+    );
+    expect(descriptor).toEqual({ kind: 'rule', ruleId: 'so-id-from-text' });
+  });
+
+  it('falls back to origin when text carries no id (browser Add to chat producers)', () => {
+    const descriptor = toRuleDescriptor(
+      ruleAttachment(
+        { text: JSON.stringify({ rule_id: 'sig-id', name: 'My Rule' }) },
+        'so-id-origin'
+      )
+    );
+    expect(descriptor).toEqual({ kind: 'rule', ruleId: 'so-id-origin' });
+  });
+
+  it('returns null for a draft attachment with no id anywhere', () => {
+    expect(
+      toRuleDescriptor(ruleAttachment({ text: JSON.stringify({ rule_id: 'sig', name: 'Draft' }) }))
+    ).toBeNull();
+  });
+
+  it.each([
+    ['text is prose', { text: 'Rule name: X\nError: Y' }],
+    ['text is malformed JSON', { text: '{' }],
+    ['text is a JSON string (not object)', { text: '"just a string"' }],
+    ['text is a JSON array', { text: '[1,2,3]' }],
+    ['text is an empty object {}', { text: '{}' }],
+    ['there is no data.text field', {}],
+  ])('returns null when %s and no origin', (_, data) => {
+    expect(toRuleDescriptor(ruleAttachment(data))).toBeNull();
+  });
+
+  it('uses origin when text is prose', () => {
+    const descriptor = toRuleDescriptor(
+      ruleAttachment({ text: 'Rule name: My Rule\nError: failed' }, 'so-id-fallback')
+    );
+    expect(descriptor).toEqual({ kind: 'rule', ruleId: 'so-id-fallback' });
+  });
+});
 
 describe('toAlertDescriptor', () => {
   it('opens the document flyout for the alert the payload names', () => {
