@@ -702,19 +702,19 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
                 {incompleteSettingsCount > 0 && !isAgentBased ? (
                   <FormattedMessage
                     id="xpack.ingestHub.authenticateAndDeployStep.settingsIncompleteCallout.body"
-                    defaultMessage="Managed deployment needs a supported source for each service. Complete the required settings in Service Settings for {services} to continue."
+                    defaultMessage="Managed deployments need a supported source for each service. Complete the required settings in Service Settings for {services} to continue."
                     values={{ services: calloutServiceNames.join(', ') }}
                   />
                 ) : incompleteSettingsCount > 0 ? (
                   <FormattedMessage
                     id="xpack.ingestHub.authenticateAndDeployStep.settingsChangedCallout.incompleteBody"
-                    defaultMessage="Agent-based deployment requires more settings than managed deployment. Complete the required settings in Service Settings for {services} to continue."
+                    defaultMessage="Agent-based deployments require more settings than managed deployments. Complete the required settings in Service Settings for {services} to continue."
                     values={{ services: calloutServiceNames.join(', ') }}
                   />
                 ) : (
                   <FormattedMessage
                     id="xpack.ingestHub.authenticateAndDeployStep.settingsChangedCallout.body"
-                    defaultMessage="Agent-based deployment uses different settings than managed deployment. Review the settings in Service Settings for {services}."
+                    defaultMessage="Agent-based deployments use different settings than managed deployments. Review the settings in Service Settings for {services}."
                     values={{ services: calloutServiceNames.join(', ') }}
                   />
                 )}
