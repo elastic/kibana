@@ -17,7 +17,6 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiIcon,
-  EuiNotificationBadge,
   EuiText,
   EuiTextTruncate,
   EuiToolTip,
@@ -26,12 +25,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EuiThemeComputed } from '@elastic/eui';
-import {
-  NodeContainer,
-  NodeShapeContainer,
-  NodeButton,
-  HandleStyleOverride,
-} from './styles';
+import { NodeContainer, NodeShapeContainer, NodeButton, HandleStyleOverride } from './styles';
 import { NodeExpandButton } from './node_expand_button';
 import { ENTITY_CARD_HEADER_HEIGHT, NODE_WIDTH } from '../constants';
 import {
@@ -250,25 +244,31 @@ const EntityCardMetadata = styled.div<{ euiTheme: EuiThemeComputed }>`
     `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`};
 `;
 
-/**
- * Circular badge in the top-left corner of a grouped node showing the entity
- * count. Capped at "99+" to keep the badge compact.
- */
-const CountBadge = ({ children, ...props }: React.ComponentPropsWithoutRef<'span'>) => (
-  <EuiNotificationBadge
-    {...props}
-    size="s"
-    color="accent"
-    css={css`
-      flex-shrink: 0;
-      height: 20px;
-      min-width: 20px;
-      border-radius: 10px;
-    `}
-  >
-    {children}
-  </EuiNotificationBadge>
-);
+/** Capsule badge showing the entity count for grouped nodes. Capped at "99+". */
+const CountBadge = ({ children, ...props }: React.ComponentPropsWithoutRef<'span'>) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiBadge
+      {...props}
+      color={euiTheme.colors.backgroundBaseSubdued}
+      css={css`
+        flex-shrink: 0;
+        white-space: nowrap;
+        border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain};
+      `}
+    >
+      <EuiText
+        size="xs"
+        css={css`
+          font-weight: ${euiTheme.font.weight.semiBold};
+          color: ${euiTheme.colors.textSubdued};
+        `}
+      >
+        {children}
+      </EuiText>
+    </EuiBadge>
+  );
+};
 
 /**
  * Single metadata cell — label above value.
