@@ -75,7 +75,7 @@ const investigationCompleted = parse(SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_
 
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
-    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(22);
+    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(23);
     expect(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.version).toBe(4);
   });
 
@@ -138,7 +138,7 @@ describe('significant events persistence workflow contracts', () => {
 
     const renderedMessage = createWorkflowLiquidEngine().parseAndRenderSync(message, {
       steps: {
-        resolve_open_event: {
+        resolve_active_event: {
           output: {
             hits: [
               {
@@ -186,7 +186,7 @@ describe('significant events persistence workflow contracts', () => {
 
   it('does not launch investigations without resolved event details', () => {
     expect(requireStep(discovery, 'guard_resolved_event').condition).toContain(
-      'steps.resolve_open_event.output.hits[0] != null'
+      'steps.resolve_active_event.output.hits[0] != null'
     );
   });
 
@@ -203,7 +203,7 @@ describe('significant events persistence workflow contracts', () => {
     const template = `{% if ${inner} %}true{% else %}false{% endif %}`;
 
     const makeContext = (investigations: unknown[]) => ({
-      steps: { resolve_open_event: { output: { hits: [{ investigations }] } } },
+      steps: { resolve_active_event: { output: { hits: [{ investigations }] } } },
     });
 
     // Empty investigations → condition is true → investigation should be triggered.

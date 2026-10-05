@@ -342,7 +342,7 @@ export const scoreToolUsageContinuation = (cycles: ContinuationCycle[]): ToolUsa
       steps,
       detectionCount: 1,
       // Establishing cycle of a new episode may write topology without a topology search.
-      // A new event after a closed seed (`expectReuse: false`) still requires that search.
+      // A new event after an inactive seed (`expectReuse: false`) still requires that search.
       allowNewEventTopologyWrite: cycleIndex === 0 && cycle.expectReuse !== false,
     });
     if (

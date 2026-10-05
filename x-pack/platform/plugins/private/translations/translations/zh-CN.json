@@ -39149,7 +39149,6 @@
     "xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.tooltip.contentNoDate": "此模型已到达生命周期终止，不再可用。",
     "xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.tooltip.title": "生命周期终止通知",
     "xpack.searchInferenceEndpoints.eisModelCard.previewStatusBadge.content": "预览",
-    "xpack.searchInferenceEndpoints.eisModelCard.supports": "支持 {taskTypes}",
     "xpack.searchInferenceEndpoints.eisModelsPage.cloudUsage.button": "查看云使用情况",
     "xpack.searchInferenceEndpoints.eisModelsPage.description": "管理 Elastic Inference Service 的模型和端点",
     "xpack.searchInferenceEndpoints.eisModelspage.error.body": "在获取模型数据时发生错误。",

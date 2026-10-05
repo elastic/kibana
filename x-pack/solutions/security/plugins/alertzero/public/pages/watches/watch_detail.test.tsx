@@ -162,6 +162,11 @@ const huntWorker = createWorker({
   id: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   name: 'Continuous Threat Hunt',
   watchIds: [SYSTEM_SECURITY_WATCH_HUNT_ID],
+  settings: {
+    workerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+    autonomy: 'manual',
+    scheduleInterval: '4h',
+  },
 });
 
 /** Complete Rule Tuning extras; cases vary the window and keep the FP thresholds at default. */
