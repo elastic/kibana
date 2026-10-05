@@ -943,28 +943,21 @@ FROM entities-latest-default
 `;
 
 exports[`entities grid query builders sort by group_size builds the sort and count queries: count 1`] = `
-"FROM (
-FROM entities-latest-default
-| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
-| EVAL group_key = COALESCE(entity.relationships.resolution.resolved_to, entity.id)
-| STATS _c = COUNT(*) BY group_key
-| RENAME group_key AS \`entity.id\`
-)
-| LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
-| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
+"FROM entities-latest-default
+| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | STATS total = COUNT(*)"
 `;
 
 exports[`entities grid query builders sort by group_size builds the sort and count queries: sort 1`] = `
-"FROM (
-FROM entities-latest-default
+"FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
-| EVAL group_key = COALESCE(entity.relationships.resolution.resolved_to, entity.id)
-| STATS group_size = COUNT(*) BY group_key
+| EVAL group_key = COALESCE(entity.relationships.resolution.resolved_to, entity.id), is_head = CASE(entity.relationships.resolution.resolved_to IS NULL, 1, 0)
+| STATS group_size = COUNT(*), has_head = MAX(is_head) BY group_key
+| WHERE has_head == 1
 | RENAME group_key AS \`entity.id\`
-)
+| SORT group_size DESC NULLS LAST, entity.id ASC
+| LIMIT 26
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
-| WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, host.name, host.hostname, service.name, entity.namespace, group_size
 | SORT group_size DESC NULLS LAST, entity.id ASC
 | LIMIT 26"
