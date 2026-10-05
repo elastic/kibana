@@ -23,7 +23,10 @@ import {
   getServiceAccountRoleLimits,
 } from './schemas';
 import { licenseMock } from '../../../common/licensing/index.mock';
-import { SERVICE_ACCOUNT_NAME_MAX_LENGTH } from '../../../common/service_accounts';
+import {
+  SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH,
+  SERVICE_ACCOUNT_NAME_MAX_LENGTH,
+} from '../../../common/service_accounts';
 import {
   ES_SERVICE_ACCOUNT_ROLE_LIMITS,
   UIAM_SERVICE_ACCOUNT_ROLE_LIMITS,
@@ -222,14 +225,15 @@ describe('Create service account route', () => {
       expect(result.error!.issues.map(({ path }) => path.join('.'))).toContain('roles.0');
     });
 
-    // A 413 carries no field-level message, so the largest body the schema accepts must fit,
-    // even when every role name character is one JSON has to escape.
+    // A 413 carries no field-level message, so the largest body that the schema accepts must fit.
+    // It must fit even when every role name is padded with quotes and every description character
+    // is a control character, which JSON escapes.
     it('fits the largest valid body within the body size limit', () => {
       const { routeConfig } = setup({ serverless });
       const body = {
         name: 'a'.repeat(SERVICE_ACCOUNT_NAME_MAX_LENGTH),
-        description: '\u0000'.repeat(1000),
         roles: Array.from({ length: maxRoles }, (_, i) => `${i}`.padEnd(maxRoleNameLength, '"')),
+        description: '\u0001'.repeat(SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH),
       };
 
       expect(routeConfig.options?.body?.maxBytes).toBe(getCreateServiceAccountMaxBodyBytes(limits));
@@ -351,6 +355,15 @@ describe('Create service account route', () => {
 
     it('accepts a name and roles', () => {
       expect(createServiceAccountBodySchema.parse(requestBody)).toEqual(requestBody);
+    });
+
+    it('accepts a description and trims it', () => {
+      expect(
+        createServiceAccountBodySchema.parse({
+          ...requestBody,
+          description: ' Relays the nightshift alerts. ',
+        })
+      ).toEqual({ ...requestBody, description: 'Relays the nightshift alerts.' });
     });
 
     // Every account is created with explicit roles; there is no "same as me" default.
