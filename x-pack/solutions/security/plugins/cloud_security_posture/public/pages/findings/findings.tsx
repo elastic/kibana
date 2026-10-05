@@ -4,11 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
+import { createHtmlPortalNode, OutPortal } from 'react-reverse-portal';
+import { css } from '@emotion/react';
+import { EuiSpacer, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Redirect, useHistory, useLocation, matchPath } from 'react-router-dom';
+import { Redirect, useHistory, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { findingsNavigation } from '@kbn/cloud-security-posture';
 import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
@@ -18,6 +21,8 @@ import { LOCAL_STORAGE_FINDINGS_LAST_SELECTED_TAB_KEY } from '../../common/const
 import { VULNERABILITIES_INDEX_NAME, FINDINGS_INDEX_NAME } from '../../../common/constants';
 import { getStatusForIndexName } from '../../../common/utils/helpers';
 import { Vulnerabilities } from '../vulnerabilities';
+import { CspAppHeader } from '../../components/csp_app_header';
+import { FindingsSearchBarPortalContext } from '../../common/contexts/findings_search_bar_portal_context';
 
 type FindingsTabKey = 'vuln_mgmt' | 'configurations';
 
@@ -59,6 +64,8 @@ const FindingsTabRedirecter = ({ lastTabSelected }: { lastTabSelected?: Findings
 export const Findings = () => {
   const history = useHistory();
   const location = useLocation();
+  const { euiTheme } = useEuiTheme();
+  const searchBarPortalNode = useMemo(() => createHtmlPortalNode(), []);
 
   // restore the users most recent tab selection
   const [lastTabSelected, setLastTabSelected] = useLocalStorage<FindingsTabKey>(
@@ -74,16 +81,6 @@ export const Findings = () => {
     history.push({ pathname: findingsNavigation.findings_default.path });
   };
 
-  const isResourcesVulnerabilitiesPage = matchPath(location.pathname, {
-    path: findingsNavigation.resource_vulnerabilities.path,
-  })?.isExact;
-
-  const isResourcesFindingsPage = matchPath(location.pathname, {
-    path: findingsNavigation.resource_findings.path,
-  })?.isExact;
-
-  const showHeader = !isResourcesVulnerabilitiesPage && !isResourcesFindingsPage;
-
   const isVulnerabilitiesTabSelected = (pathname: string) => {
     return (
       pathname === findingsNavigation.vulnerabilities.path ||
@@ -92,39 +89,41 @@ export const Findings = () => {
   };
 
   return (
-    <>
-      {showHeader && (
-        <>
-          <EuiTitle size="l">
-            <h1>
-              <FormattedMessage id="xpack.csp.findings.title" defaultMessage="Findings" />
-            </h1>
-          </EuiTitle>
-          <EuiSpacer />
-          <EuiTabs size="l">
-            <EuiTab
-              key="configurations"
-              onClick={navigateToConfigurationsTab}
-              isSelected={!isVulnerabilitiesTabSelected(location.pathname)}
-            >
-              <FormattedMessage
-                id="xpack.csp.findings.tabs.misconfigurations"
-                defaultMessage="Misconfigurations"
-              />
-            </EuiTab>
-            <EuiTab
-              key="vuln_mgmt"
-              onClick={navigateToVulnerabilitiesTab}
-              isSelected={isVulnerabilitiesTabSelected(location.pathname)}
-            >
-              <FormattedMessage
-                id="xpack.csp.findings.tabs.vulnerabilities"
-                defaultMessage="Vulnerabilities"
-              />
-            </EuiTab>
-          </EuiTabs>
-        </>
-      )}
+    <FindingsSearchBarPortalContext.Provider value={searchBarPortalNode}>
+      <CspAppHeader
+        title={i18n.translate('xpack.csp.findings.title', { defaultMessage: 'Findings' })}
+      />
+      {/* The search bar spans the full width of the page, like the app header */}
+      <div
+        css={css`
+          margin-inline: -${euiTheme.size.l};
+        `}
+      >
+        <OutPortal node={searchBarPortalNode} />
+      </div>
+      <EuiSpacer />
+      <EuiTabs size="l">
+        <EuiTab
+          key="configurations"
+          onClick={navigateToConfigurationsTab}
+          isSelected={!isVulnerabilitiesTabSelected(location.pathname)}
+        >
+          <FormattedMessage
+            id="xpack.csp.findings.tabs.misconfigurations"
+            defaultMessage="Misconfigurations"
+          />
+        </EuiTab>
+        <EuiTab
+          key="vuln_mgmt"
+          onClick={navigateToVulnerabilitiesTab}
+          isSelected={isVulnerabilitiesTabSelected(location.pathname)}
+        >
+          <FormattedMessage
+            id="xpack.csp.findings.tabs.vulnerabilities"
+            defaultMessage="Vulnerabilities"
+          />
+        </EuiTab>
+      </EuiTabs>
       <Routes>
         <Route
           exact
@@ -141,6 +140,6 @@ export const Findings = () => {
         {/* Redirect to default findings page if no match */}
         <Route path="*" render={() => <Redirect to={findingsNavigation.findings_default.path} />} />
       </Routes>
-    </>
+    </FindingsSearchBarPortalContext.Provider>
   );
 };
