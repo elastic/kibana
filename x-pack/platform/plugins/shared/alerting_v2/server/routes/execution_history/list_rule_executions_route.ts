@@ -70,14 +70,16 @@ const toRuleExecutionView = ({
   assertAllFieldsMapped(restTimings);
   return {
     id,
-    rule,
+    rule: { id: rule.id, version: rule.version ?? undefined },
     space_id: spaceId,
     started_at: startedAt,
     ended_at: endedAt,
     timings: { duration_ms: duration, scheduled_delay_ms: scheduledDelay },
     outcome,
-    reason,
-    error: error && { message: error.message, stack_trace: error.stackTrace },
+    reason: reason ?? undefined,
+    error: error
+      ? { message: error.message, stack_trace: error.stackTrace ?? undefined }
+      : undefined,
   };
 };
 

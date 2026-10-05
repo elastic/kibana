@@ -90,15 +90,10 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toMatchObject({
-        id: created.id,
-        enabled: true,
-        snoozed_until: null,
-        matcher: null,
-        group_by: null,
-        grouping_mode: null,
-        throttle: null,
-      });
+      expect(response.body).toMatchObject({ id: created.id, enabled: true });
+      for (const field of testData.ACTION_POLICY_UNSET_FIELDS) {
+        expect(response.body[field]).toBeUndefined();
+      }
     }
   );
 

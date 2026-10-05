@@ -131,7 +131,7 @@ export const RuleTagsSelector = ({ matcher, onChange }: RuleTagsSelectorProps) =
         selectedOptions={selectedTags.map((tag) => ({ label: tag, value: tag }))}
         onChange={(selected) => {
           const tags = selected.map((o) => o.value ?? o.label);
-          onChange({ ...matcher, tags: tags.length > 0 ? tags : null });
+          onChange({ ...matcher, tags: tags.length > 0 ? tags : undefined });
         }}
         onSearchChange={setSearch}
         onCreateOption={(newTag) => {

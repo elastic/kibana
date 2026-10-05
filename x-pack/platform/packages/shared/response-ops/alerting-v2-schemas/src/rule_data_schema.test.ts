@@ -692,13 +692,13 @@ describe('createRuleDataSchema', () => {
       expect(result.state_transition).toEqual({});
     });
 
-    it('accepts state_transition set to null', () => {
-      const result = createRuleDataSchema.parse({
+    it('rejects state_transition set to null — there is nothing to clear on create', () => {
+      const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         state_transition: null,
       });
 
-      expect(result.state_transition).toBeNull();
+      expect(result.success).toBe(false);
     });
 
     it('accepts state_transition with only a pending phase', () => {

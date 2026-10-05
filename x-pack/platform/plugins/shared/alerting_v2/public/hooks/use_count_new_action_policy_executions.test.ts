@@ -47,7 +47,6 @@ describe('useCountNewActionPolicyExecutions', () => {
       page: 1,
       per_page: 1,
       total: 7,
-      search_matches: null,
     });
 
     renderHook(
@@ -78,7 +77,6 @@ describe('useCountNewActionPolicyExecutions', () => {
       page: 1,
       per_page: 1,
       total: 42,
-      search_matches: null,
     };
     mockListActionPolicyExecutions.mockResolvedValue(fakeResponse);
 

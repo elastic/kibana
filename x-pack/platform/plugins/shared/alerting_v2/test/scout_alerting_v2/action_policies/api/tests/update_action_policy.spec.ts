@@ -266,14 +266,11 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       });
 
       expect(updated).toHaveStatusCode(200);
-      expect(updated.body.throttle).toStrictEqual({
-        strategy: 'on_status_change',
-        interval: null,
-      });
+      expect(updated.body.throttle).toStrictEqual({ strategy: 'on_status_change' });
 
       // Re-fetch via GET to confirm the persisted value matches the PATCH response.
       const fetched = await apiServices.alertingV2.actionPolicies.get(created.id);
-      expect(fetched.throttle).toStrictEqual({ strategy: 'on_status_change', interval: null });
+      expect(fetched.throttle).toStrictEqual({ strategy: 'on_status_change' });
     }
   );
 
@@ -301,9 +298,9 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.grouping_mode).toBeNull();
-      expect(response.body.group_by).toBeNull();
-      expect(response.body.throttle).toBeNull();
+      expect(response.body.grouping_mode).toBeUndefined();
+      expect(response.body.group_by).toBeUndefined();
+      expect(response.body.throttle).toBeUndefined();
     }
   );
 
@@ -331,9 +328,9 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.matcher).toBeNull();
-      expect(response.body.group_by).toBeNull();
-      expect(response.body.throttle).toBeNull();
+      expect(response.body.matcher).toBeUndefined();
+      expect(response.body.group_by).toBeUndefined();
+      expect(response.body.throttle).toBeUndefined();
       expect(response.body.name).toBe('nullable-policy');
       expect(response.body.destinations).toStrictEqual([
         { type: 'workflow', id: 'nullable-workflow-id' },

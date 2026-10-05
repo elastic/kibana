@@ -88,12 +88,10 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
       description: 'minimal-policy description',
       destinations: [{ type: 'workflow', id: 'minimal-workflow-id' }],
       enabled: true,
-      snoozed_until: null,
-      matcher: null,
-      group_by: null,
-      grouping_mode: null,
-      throttle: null,
     });
+    for (const field of testData.ACTION_POLICY_UNSET_FIELDS) {
+      expect(response.body[field]).toBeUndefined();
+    }
   });
 
   apiTest('create: per_field grouping with time_interval strategy', async ({ apiClient }) => {

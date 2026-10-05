@@ -97,10 +97,8 @@ describe('action policy form utils', () => {
       expect(payload.matcher).toEqual({ expression: 'event.severity: critical' });
     });
 
-    it('omits matcher when only null/empty parts remain (all-null object)', () => {
-      expect(
-        toCreatePayload({ ...state, matcher: { tags: null, expression: null } })
-      ).not.toHaveProperty('matcher');
+    it('omits matcher when only empty parts remain', () => {
+      expect(toCreatePayload({ ...state, matcher: {} })).not.toHaveProperty('matcher');
     });
 
     it('omits matcher when expression is whitespace-only', () => {
@@ -109,10 +107,8 @@ describe('action policy form utils', () => {
       );
     });
 
-    it('omits matcher when tags array is empty and expression is null', () => {
-      expect(
-        toCreatePayload({ ...state, matcher: { tags: [], expression: null } })
-      ).not.toHaveProperty('matcher');
+    it('omits matcher when tags array is empty and expression is unset', () => {
+      expect(toCreatePayload({ ...state, matcher: { tags: [] } })).not.toHaveProperty('matcher');
     });
   });
 
@@ -129,8 +125,8 @@ describe('action policy form utils', () => {
       });
     });
 
-    it('normalizes an all-null matcher object to null', () => {
-      const payload = toUpdatePayload({ ...state, matcher: { tags: null, expression: null } });
+    it('normalizes an empty matcher object to null', () => {
+      const payload = toUpdatePayload({ ...state, matcher: {} });
       expect(payload.matcher).toBeNull();
     });
 
@@ -168,7 +164,6 @@ describe('action policy form utils', () => {
       group_by: ['host.name'],
       grouping_mode: 'per_field',
       throttle: { strategy: 'time_interval', interval: '5m' },
-      snoozed_until: null,
       destinations: [{ type: 'workflow', id: 'workflow-2' }],
       created_by: { profile_uid: 'elastic' },
       created_at: '2026-03-01T10:00:00.000Z',
@@ -190,13 +185,13 @@ describe('action policy form utils', () => {
       });
     });
 
-    it('applies defaults when groupingMode and throttle are null', () => {
+    it('applies defaults when groupingMode and throttle are unset', () => {
       expect(
         toFormState({
           ...baseResponse,
-          grouping_mode: null,
-          throttle: null,
-          group_by: null,
+          grouping_mode: undefined,
+          throttle: undefined,
+          group_by: undefined,
         })
       ).toEqual({
         name: 'Test Policy',

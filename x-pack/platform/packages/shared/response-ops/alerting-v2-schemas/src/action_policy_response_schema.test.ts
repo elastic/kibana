@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createActionPolicyDataSchema } from './action_policy_data_schema';
 import {
   actionPolicyResponseSchema,
   findActionPoliciesResponseSchema,
@@ -19,8 +20,7 @@ const validResponse = {
   matcher: { expression: 'host.name: "server-1"' },
   group_by: ['host.name'],
   grouping_mode: 'per_episode' as const,
-  throttle: { strategy: 'on_status_change' as const, interval: null },
-  snoozed_until: null,
+  throttle: { strategy: 'on_status_change' as const },
   created_by: { profile_uid: 'user-1' },
   created_at: '2026-01-01T00:00:00.000Z',
   updated_by: { profile_uid: 'user-1' },
@@ -33,21 +33,71 @@ describe('actionPolicyResponseSchema', () => {
     expect(result).toEqual(validResponse);
   });
 
-  it('accepts nullable fields as null', () => {
+  it('omits every unset field rather than returning null', () => {
+    const {
+      matcher: _m,
+      group_by: _g,
+      grouping_mode: _gm,
+      throttle: _t,
+      ...withoutOptionals
+    } = validResponse;
+
+    const result = actionPolicyResponseSchema.parse(withoutOptionals);
+
+    expect(result).toEqual(withoutOptionals);
+    for (const key of ['matcher', 'group_by', 'grouping_mode', 'throttle', 'snoozed_until']) {
+      expect(result).not.toHaveProperty(key);
+    }
+  });
+
+  it.each(['matcher', 'group_by', 'grouping_mode', 'throttle', 'snoozed_until'] as const)(
+    'rejects %s set to null — unset is absent on a read',
+    (field) => {
+      expect(
+        actionPolicyResponseSchema.safeParse({ ...validResponse, [field]: null }).success
+      ).toBe(false);
+    }
+  );
+
+  it('rejects a null throttle strategy or interval', () => {
+    expect(
+      actionPolicyResponseSchema.safeParse({ ...validResponse, throttle: { strategy: null } })
+        .success
+    ).toBe(false);
+    expect(
+      actionPolicyResponseSchema.safeParse({
+        ...validResponse,
+        throttle: { strategy: 'time_interval', interval: null },
+      }).success
+    ).toBe(false);
+  });
+
+  it('still carries the actors as null — they are decided with the actor reshape', () => {
     const result = actionPolicyResponseSchema.parse({
       ...validResponse,
-      matcher: null,
-      group_by: null,
-      grouping_mode: null,
-      throttle: null,
-      snoozed_until: null,
       created_by: null,
       updated_by: null,
     });
-    expect(result.matcher).toBeNull();
-    expect(result.group_by).toBeNull();
-    expect(result.grouping_mode).toBeNull();
-    expect(result.throttle).toBeNull();
+    expect(result.created_by).toBeNull();
+    expect(result.updated_by).toBeNull();
+  });
+
+  it('round-trips: what a read returns, minus the server-managed fields, is a valid create body', () => {
+    const {
+      id: _id,
+      enabled: _enabled,
+      snoozed_until: _snoozedUntil,
+      created_by: _createdBy,
+      created_at: _createdAt,
+      updated_by: _updatedBy,
+      updated_at: _updatedAt,
+      ...writable
+    } = actionPolicyResponseSchema.parse({
+      ...validResponse,
+      snoozed_until: '2026-02-01T00:00:00.000Z',
+    });
+
+    expect(createActionPolicyDataSchema.safeParse(writable).success).toBe(true);
   });
 
   it('rejects missing required fields', () => {

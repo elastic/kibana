@@ -97,7 +97,6 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   group_by: ['host.name', 'service.name'],
   grouping_mode: 'per_field',
   throttle: { strategy: 'time_interval', interval: '5m' },
-  snoozed_until: null,
   created_by: ELASTIC_ACTOR,
   created_at: '2026-03-01T10:00:00.000Z',
   updated_by: ELASTIC_ACTOR,
@@ -206,8 +205,8 @@ describe('ActionPolicyDetailsFlyout', () => {
       expect(screen.getByText(/Snoozed until/i)).toBeInTheDocument();
     });
 
-    it('does not render a snoozed-until chip when snoozedUntil is null or in the past', () => {
-      renderFlyout({ canWrite: false, policy: createPolicy({ snoozed_until: null }) });
+    it('does not render a snoozed-until chip when the policy is not snoozed or the snooze expired', () => {
+      renderFlyout({ canWrite: false, policy: createPolicy() });
       expect(screen.queryByText(/Snoozed until/i)).not.toBeInTheDocument();
     });
 
@@ -332,8 +331,8 @@ describe('ActionPolicyDetailsFlyout', () => {
       renderFlyout({
         policy: createPolicy({
           grouping_mode: 'per_episode',
-          group_by: null,
-          throttle: { strategy: 'on_status_change', interval: null },
+          group_by: undefined,
+          throttle: { strategy: 'on_status_change' },
         }),
       });
       expect(screen.queryByTestId('actionPolicyDetailsFlyoutGroupByBlock')).not.toBeInTheDocument();
@@ -353,8 +352,8 @@ describe('ActionPolicyDetailsFlyout', () => {
       expect(screen.getByText('data.severity : "critical"')).toBeInTheDocument();
     });
 
-    it('renders a fallback when the matcher is null', () => {
-      renderFlyout({ policy: createPolicy({ matcher: null }) });
+    it('renders a fallback when the policy has no matcher', () => {
+      renderFlyout({ policy: createPolicy({ matcher: undefined }) });
 
       expect(screen.getByText(/Matches all alerts/i)).toBeInTheDocument();
     });
@@ -372,8 +371,8 @@ describe('ActionPolicyDetailsFlyout', () => {
       renderFlyout({
         policy: createPolicy({
           grouping_mode: 'per_episode',
-          group_by: null,
-          throttle: { strategy: 'on_status_change', interval: null },
+          group_by: undefined,
+          throttle: { strategy: 'on_status_change' },
         }),
       });
 
@@ -437,7 +436,7 @@ describe('ActionPolicyDetailsFlyout', () => {
     });
 
     it.each<[string, ActionPolicyResponse['matcher']]>([
-      ['a catch-all policy', null],
+      ['a catch-all policy', undefined],
       [
         'a policy with a matching query and no rule tags',
         { expression: 'data.severity : "critical"' },

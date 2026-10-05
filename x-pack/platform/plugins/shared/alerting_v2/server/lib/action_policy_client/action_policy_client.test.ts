@@ -27,6 +27,9 @@ import { createMockLicenseService } from '../services/license_service/license_se
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import { ActionPolicyClient } from './action_policy_client';
 
+/** An unset field reaches the client as `undefined`; the HTTP body is where it is truly absent. */
+const serialize = (value: unknown) => JSON.parse(JSON.stringify(value));
+
 describe('ActionPolicyClient', () => {
   let client: ActionPolicyClient;
   let actionPolicySavedObjectService: ActionPolicySavedObjectService;
@@ -143,10 +146,6 @@ describe('ActionPolicyClient', () => {
           description: 'my-policy description',
           enabled: true,
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
-          matcher: null,
-          group_by: null,
-          throttle: null,
-          snoozed_until: null,
           created_by: { profile_uid: 'elastic_profile_uid' },
           updated_by: { profile_uid: 'elastic_profile_uid' },
           created_at: '2025-01-01T00:00:00.000Z',
@@ -388,10 +387,10 @@ describe('ActionPolicyClient', () => {
         'policy-id-get-1',
         undefined
       );
-      expect(res.matcher).toBeNull();
-      expect(res.group_by).toBeNull();
-      expect(res.throttle).toBeNull();
-      expect(res.snoozed_until).toBeNull();
+      expect(serialize(res)).not.toHaveProperty('matcher');
+      expect(serialize(res)).not.toHaveProperty('group_by');
+      expect(serialize(res)).not.toHaveProperty('throttle');
+      expect(serialize(res)).not.toHaveProperty('snoozed_until');
     });
 
     it('throws 404 when action policy is not found', async () => {
@@ -432,7 +431,7 @@ describe('ActionPolicyClient', () => {
 
       const res = await client.getActionPolicy({ id: 'policy-id-get-stale' });
 
-      expect(res.throttle).toEqual({ strategy: 'on_status_change', interval: null });
+      expect(res.throttle).toEqual({ strategy: 'on_status_change' });
     });
   });
 
@@ -651,10 +650,10 @@ describe('ActionPolicyClient', () => {
       const res = await client.findActionPolicies();
 
       expect(res.items).toHaveLength(1);
-      expect(res.items[0].matcher).toBeNull();
-      expect(res.items[0].group_by).toBeNull();
-      expect(res.items[0].throttle).toBeNull();
-      expect(res.items[0].snoozed_until).toBeNull();
+      expect(serialize(res.items[0])).not.toHaveProperty('matcher');
+      expect(serialize(res.items[0])).not.toHaveProperty('group_by');
+      expect(serialize(res.items[0])).not.toHaveProperty('throttle');
+      expect(serialize(res.items[0])).not.toHaveProperty('snoozed_until');
     });
 
     it('uses default pagination when no params provided', async () => {
@@ -896,10 +895,10 @@ describe('ActionPolicyClient', () => {
         }),
         { version: 'WzEsMV0=' }
       );
-      expect(res.matcher).toBeNull();
-      expect(res.group_by).toBeNull();
-      expect(res.throttle).toBeNull();
-      expect(res.snoozed_until).toBeNull();
+      expect(serialize(res)).not.toHaveProperty('matcher');
+      expect(serialize(res)).not.toHaveProperty('group_by');
+      expect(serialize(res)).not.toHaveProperty('throttle');
+      expect(serialize(res)).not.toHaveProperty('snoozed_until');
     });
 
     it('nulls throttle.interval when transitioning to an intervalless strategy', async () => {
@@ -949,7 +948,7 @@ describe('ActionPolicyClient', () => {
         }),
         { version: 'WzEsMV0=' }
       );
-      expect(res.throttle).toEqual({ strategy: 'on_status_change', interval: null });
+      expect(res.throttle).toEqual({ strategy: 'on_status_change' });
     });
 
     it('preserves throttle.interval for interval-requiring strategies', async () => {
@@ -1459,7 +1458,6 @@ describe('ActionPolicyClient', () => {
             id: 'policy-id-upsert-new',
             name: 'upsert-policy',
             enabled: true,
-            snoozed_until: null,
           }),
         });
         expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalled();

@@ -27,7 +27,6 @@ const policy = {
   tags: ['production'],
   grouping_mode: 'per_field',
   throttle: { strategy: 'time_interval', interval: '5m' },
-  snoozed_until: null,
   created_by: { profile_uid: 'alice' },
   created_at: '2026-01-01T00:00:00.000Z',
   updated_by: { profile_uid: 'alice' },

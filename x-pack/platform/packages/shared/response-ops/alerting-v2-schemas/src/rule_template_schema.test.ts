@@ -685,16 +685,9 @@ describe('rule template create-rule schema coupling', () => {
               "$ref": "#/definitions/alerting_rule_schedule",
             },
             "state_transition": Object {
-              "anyOf": Array [
+              "allOf": Array [
                 Object {
-                  "allOf": Array [
-                    Object {
-                      "$ref": "#/definitions/alerting_rule_state_transition",
-                    },
-                  ],
-                },
-                Object {
-                  "type": "null",
+                  "$ref": "#/definitions/alerting_rule_state_transition",
                 },
               ],
             },

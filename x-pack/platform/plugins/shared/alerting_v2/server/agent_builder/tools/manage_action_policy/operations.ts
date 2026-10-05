@@ -162,7 +162,7 @@ export const executeActionPolicyOperations = (
         break;
 
       case 'set_matcher':
-        next = { ...next, matcher: op.matcher };
+        next = { ...next, matcher: op.matcher ?? undefined };
         break;
 
       case 'set_grouping': {
@@ -174,21 +174,22 @@ export const executeActionPolicyOperations = (
         next = {
           ...next,
           ...(op.groupingMode !== undefined ? { grouping_mode: op.groupingMode } : {}),
-          ...(op.groupBy !== undefined ? { group_by: op.groupBy } : {}),
+          ...(op.groupBy !== undefined ? { group_by: op.groupBy ?? undefined } : {}),
         };
         break;
       }
 
-      case 'set_throttle':
+      case 'set_throttle': {
+        const strategy = op.strategy ?? next.throttle?.strategy;
         next = {
           ...next,
           throttle: {
-            ...next.throttle,
-            ...(op.strategy !== undefined ? { strategy: op.strategy } : {}),
-            ...(op.interval !== undefined ? { interval: op.interval ?? null } : { interval: null }),
+            ...(strategy !== undefined ? { strategy } : {}),
+            ...(op.interval !== undefined ? { interval: op.interval } : {}),
           },
         };
         break;
+      }
 
       case 'validate': {
         const payload = attachmentDataToActionPolicyPayload(next);

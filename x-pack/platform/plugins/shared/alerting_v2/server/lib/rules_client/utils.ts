@@ -231,7 +231,7 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     },
     query: data.query,
     ...toStoredLifecycle(data),
-    state_transition: data.state_transition ?? undefined,
+    state_transition: data.state_transition,
     grouping: data.grouping,
     artifacts: data.artifacts,
     ...serverFields,

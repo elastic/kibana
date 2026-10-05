@@ -37,10 +37,8 @@ describe('AdvancedMatchingAccordion', () => {
     expect(screen.getByText('Advanced matching')).toBeInTheDocument();
   });
 
-  it('starts collapsed when matcher.expression is null', () => {
-    renderWithI18n(
-      <AdvancedMatchingAccordion matcher={{ expression: null }} onChange={jest.fn()} />
-    );
+  it('starts collapsed when matcher.expression is unset', () => {
+    renderWithI18n(<AdvancedMatchingAccordion matcher={{}} onChange={jest.fn()} />);
 
     expect(getAccordionButton()).toHaveAttribute('aria-expanded', 'false');
   });
@@ -84,14 +82,14 @@ describe('AdvancedMatchingAccordion', () => {
     );
   });
 
-  it('calls onChange with expression: null when input is cleared', async () => {
+  it('calls onChange with an unset expression when input is cleared', async () => {
     const user = userEvent.setup();
     const onChange = jest.fn();
     renderWithI18n(<AdvancedMatchingAccordion matcher={{ expression: 'x' }} onChange={onChange} />);
 
     await user.clear(screen.getByTestId('matcherInput'));
 
-    expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ expression: null }));
+    expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ expression: undefined }));
   });
 
   it('expands accordion when button is clicked', async () => {

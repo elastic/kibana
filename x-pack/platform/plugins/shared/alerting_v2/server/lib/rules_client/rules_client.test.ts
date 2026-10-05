@@ -2240,7 +2240,7 @@ describe('RulesClient', () => {
     it.each([
       ['no matcher', undefined],
       ['a null matcher', null],
-      ['a catch-all matcher', { tags: null, expression: null }],
+      ['a catch-all matcher', {}],
       ['an expression-only matcher', { tags: [], expression: 'severity: critical' }],
     ])('finds every alert rule for %s', async (_, matcher) => {
       const client = createClient();

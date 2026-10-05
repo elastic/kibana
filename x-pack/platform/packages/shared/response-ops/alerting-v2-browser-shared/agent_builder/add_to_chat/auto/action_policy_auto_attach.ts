@@ -27,12 +27,12 @@ const toAttachmentData = (policy: ActionPolicyResponse): ActionPolicyAttachmentD
   name: policy.name,
   description: policy.description,
   destinations: policy.destinations,
-  matcher: policy.matcher ?? undefined,
-  group_by: policy.group_by ?? undefined,
-  grouping_mode: policy.grouping_mode ?? undefined,
-  throttle: policy.throttle ?? undefined,
+  matcher: policy.matcher,
+  group_by: policy.group_by,
+  grouping_mode: policy.grouping_mode,
+  throttle: policy.throttle,
   enabled: policy.enabled,
-  snoozed_until: policy.snoozed_until ?? undefined,
+  snoozed_until: policy.snoozed_until,
   updated_at: policy.updated_at,
 });
 

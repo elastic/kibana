@@ -14,6 +14,10 @@ import {
 } from './action_policy_data_schema';
 import { POLICY_MATCHER_DESCRIPTION, policyMatcherSchema } from './policy_matcher_schema';
 
+/**
+ * Unset fields are omitted rather than returned as `null`, matching the rule response; `null` means
+ * "clear this field" on PATCH and never appears on a read. The actors are the pending exception.
+ */
 export const actionPolicyResponseSchema = z
   .object({
     id: z.string().describe('The unique identifier for the action policy.'),
@@ -21,29 +25,33 @@ export const actionPolicyResponseSchema = z
     description: z.string().describe('A description of the action policy.'),
     enabled: z.boolean().describe('Whether the action policy is enabled.'),
     destinations: z.array(actionPolicyDestinationSchema).describe('The list of destinations.'),
-    matcher: policyMatcherSchema.nullable().describe(POLICY_MATCHER_DESCRIPTION),
+    matcher: policyMatcherSchema.optional().describe(POLICY_MATCHER_DESCRIPTION),
     group_by: z
       .array(z.string())
-      .nullable()
-      .describe('The fields used to group alerts, or null for no grouping.'),
+      .optional()
+      .describe('The fields used to group alerts. Omitted when the alerts are not grouped.'),
     grouping_mode: groupingModeSchema
-      .nullable()
-      .describe('The grouping mode for alert notifications.'),
+      .optional()
+      .describe('The grouping mode for alert notifications. Omitted when none is set.'),
     throttle: z
       .object({
-        strategy: throttleStrategySchema.optional().describe('The throttle strategy.'),
+        strategy: throttleStrategySchema
+          .optional()
+          .describe('The throttle strategy. Omitted when none is set.'),
         interval: durationSchema
-          .nullable()
+          .optional()
           .describe(
-            'The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.'
+            'The throttle interval duration (e.g. 5m, 1h). Omitted when the strategy is intervalless.'
           ),
       })
-      .nullable()
-      .describe('The throttle configuration for notifications.'),
+      .optional()
+      .describe('The throttle configuration for notifications. Omitted when none is set.'),
     snoozed_until: z
       .string()
-      .nullable()
-      .describe('The ISO datetime until which the policy is snoozed, or null if not snoozed.'),
+      .optional()
+      .describe(
+        'The ISO datetime until which the policy is snoozed. Omitted when the policy is not snoozed.'
+      ),
     created_by: actorSchema.nullable().describe('The actor who created the action policy.'),
     created_at: z.iso.datetime().describe('The ISO datetime when the action policy was created.'),
     updated_by: actorSchema.nullable().describe('The actor who last updated the action policy.'),

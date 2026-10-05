@@ -57,7 +57,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
       expect(response.body.description).toBe(body.description);
       expect(response.body.destinations).toStrictEqual(body.destinations);
       expect(response.body.enabled).toBe(true);
-      expect(response.body.snoozed_until).toBeNull();
+      expect(response.body.snoozed_until).toBeUndefined();
       // On create, updatedAt equals createdAt — there has been no replace yet.
       expect(response.body.updated_at).toBe(response.body.created_at);
       // API key ownership is server-side only and must never be exposed over the wire.
@@ -200,10 +200,10 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
       });
 
       expect(replaced).toHaveStatusCode(200);
-      expect(replaced.body.matcher).toBeNull();
-      expect(replaced.body.group_by).toBeNull();
-      expect(replaced.body.throttle).toBeNull();
-      expect(replaced.body.grouping_mode).toBeNull();
+      expect(replaced.body.matcher).toBeUndefined();
+      expect(replaced.body.group_by).toBeUndefined();
+      expect(replaced.body.throttle).toBeUndefined();
+      expect(replaced.body.grouping_mode).toBeUndefined();
     }
   );
 

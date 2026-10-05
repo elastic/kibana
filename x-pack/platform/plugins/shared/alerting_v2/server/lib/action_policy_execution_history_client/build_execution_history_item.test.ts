@@ -237,7 +237,7 @@ describe('buildExecutionHistoryItem', () => {
     expect(historyItem?.workflows).toEqual([{ id: 'wf-1', name: 'My Workflow' }]);
   });
 
-  it('falls back to null name when id missing from maps', () => {
+  it('omits the name when the id is missing from the maps', () => {
     const event = buildEvent({
       kibana: {
         saved_objects: [
@@ -249,9 +249,10 @@ describe('buildExecutionHistoryItem', () => {
     });
 
     const historyItem = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS);
-    expect(historyItem?.policy.name).toBeNull();
-    expect(historyItem?.rules[0]?.name).toBeNull();
-    expect(historyItem?.workflows[0]?.name).toBeNull();
+    const serialized = JSON.parse(JSON.stringify(historyItem));
+    expect(serialized.policy).not.toHaveProperty('name');
+    expect(serialized.rules[0]).not.toHaveProperty('name');
+    expect(serialized.workflows[0]).not.toHaveProperty('name');
   });
 
   it('projects the stored event action onto the API outcome', () => {

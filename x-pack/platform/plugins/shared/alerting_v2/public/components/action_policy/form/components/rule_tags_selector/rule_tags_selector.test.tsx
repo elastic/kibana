@@ -132,14 +132,14 @@ describe('RuleTagsSelector', () => {
     expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ tags: ['production'] }));
   });
 
-  it('calls onChange with null tags when all tags are cleared', async () => {
+  it('calls onChange with unset tags when all tags are cleared', async () => {
     const onChange = jest.fn();
     renderWithI18n(<RuleTagsSelector matcher={{ tags: ['production'] }} onChange={onChange} />);
 
     const clearButton = screen.getByLabelText('Clear input');
     await user.click(clearButton);
 
-    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ tags: null }));
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ tags: undefined }));
   });
 
   it('shows pre-existing orphaned tags from matcher as selected pills', () => {

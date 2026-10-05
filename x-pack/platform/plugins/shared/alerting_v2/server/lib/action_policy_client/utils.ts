@@ -12,7 +12,7 @@ import type {
   ThrottleStrategy,
   UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
-import { needsInterval, type PolicyMatcher } from '@kbn/alerting-v2-schemas';
+import { needsInterval } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 import type { ActionPolicySavedObjectAttributes } from '../../saved_objects';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
@@ -30,18 +30,11 @@ export function validateDateString(dateString: string): void {
   }
 }
 
-const normalizeNullableField = <T>(value: T | null | undefined): T | null => value ?? null;
-
+/** A PATCH that omits a field keeps the stored value; the saved object encodes unset as `null`. */
 const resolveNextNullableField = <T>(
   value: T | null | undefined,
   existing: T | null | undefined
-): T | null => {
-  if (value !== undefined) {
-    return value;
-  }
-
-  return normalizeNullableField(existing);
-};
+): T | null => (value !== undefined ? value : existing ?? null);
 
 const normalizeThrottle = (
   throttle: { strategy?: ThrottleStrategy; interval?: string | null } | null | undefined
@@ -53,6 +46,22 @@ const normalizeThrottle = (
     strategy,
     interval: keepInterval ? interval ?? null : null,
   };
+};
+
+const toApiThrottle = (
+  throttle: ActionPolicySavedObjectAttributes['throttle']
+): ActionPolicyResponse['throttle'] => {
+  const normalized = normalizeThrottle(throttle);
+  if (normalized == null) return undefined;
+  return { strategy: normalized.strategy, interval: normalized.interval ?? undefined };
+};
+
+/** Policies written before the API dropped `null` can still hold `tags: null` / `expression: null`. */
+const toApiMatcher = (
+  matcher: ActionPolicySavedObjectAttributes['matcher']
+): ActionPolicyResponse['matcher'] => {
+  if (matcher == null) return undefined;
+  return { tags: matcher.tags ?? undefined, expression: matcher.expression ?? undefined };
 };
 
 export const toApiKeyAttributes = (auth: ApiKeyAttributes) => ({
@@ -119,10 +128,10 @@ export const buildUpdateActionPolicyAttributes = ({
     groupBy: resolveNextNullableField(update.group_by, existing.groupBy),
     // Tags are excluded from the PATCH schema; always carry the stored value through.
     // If tags is re-added to updateActionPolicyDataSchema, switch to resolveNextNullableField.
-    tags: normalizeNullableField(existing.tags),
+    tags: existing.tags ?? null,
     groupingMode: resolveNextNullableField(update.grouping_mode, existing.groupingMode),
     throttle: normalizeThrottle(resolveNextNullableField(update.throttle, existing.throttle)),
-    snoozedUntil: normalizeNullableField(existing.snoozedUntil),
+    snoozedUntil: existing.snoozedUntil ?? null,
     ...toApiKeyAttributes(auth),
     createdBy: existing.createdBy,
     updatedBy,
@@ -144,11 +153,11 @@ export const transformActionPolicySoAttributesToApiResponse = ({
     description: attributes.description,
     enabled: attributes.enabled,
     destinations: attributes.destinations,
-    matcher: normalizeNullableField(attributes.matcher) as PolicyMatcher | null,
-    group_by: normalizeNullableField(attributes.groupBy),
-    grouping_mode: normalizeNullableField(attributes.groupingMode),
-    throttle: normalizeThrottle(attributes.throttle),
-    snoozed_until: normalizeNullableField(attributes.snoozedUntil),
+    matcher: toApiMatcher(attributes.matcher),
+    group_by: attributes.groupBy ?? undefined,
+    grouping_mode: attributes.groupingMode ?? undefined,
+    throttle: toApiThrottle(attributes.throttle),
+    snoozed_until: attributes.snoozedUntil ?? undefined,
     created_by: attributes.createdBy,
     created_at: attributes.createdAt,
     updated_by: attributes.updatedBy,

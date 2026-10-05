@@ -103,11 +103,6 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
         description: 'Scout action policy',
         destinations: [{ type: 'workflow', id: 'scout-workflow-id' }],
         enabled: true,
-        matcher: null,
-        group_by: null,
-        grouping_mode: null,
-        throttle: null,
-        snoozed_until: null,
       };
 
       const itemsByName = new Map(

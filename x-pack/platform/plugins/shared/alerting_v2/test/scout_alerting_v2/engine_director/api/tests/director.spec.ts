@@ -412,7 +412,6 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
           query: {
             base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-basic-strategy" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
-          state_transition: null,
         })
       );
 

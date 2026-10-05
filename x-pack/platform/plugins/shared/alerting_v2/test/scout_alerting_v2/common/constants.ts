@@ -18,6 +18,15 @@ export const POLL_INTERVAL_MS = 1_000;
 
 export const ACTION_POLICY_SEARCH_MAX_LENGTH = 256;
 
+/** Action policy response fields that are omitted, not `null`, when unset. */
+export const ACTION_POLICY_UNSET_FIELDS = [
+  'matcher',
+  'group_by',
+  'grouping_mode',
+  'throttle',
+  'snoozed_until',
+] as const;
+
 export {
   MAX_PER_PAGE,
   MAX_PER_PAGE as ACTION_POLICY_PER_PAGE_MAX,

@@ -567,7 +567,7 @@ export const createRuleDataBaseSchema = z
     query: querySchema,
     recovery: recoverySchema.optional(),
     no_data: noDataSchema.optional(),
-    state_transition: stateTransitionSchema.optional().nullable(),
+    state_transition: stateTransitionSchema.optional(),
     grouping: groupingSchema.optional(),
     artifacts: artifactsSchema.optional(),
   })
@@ -801,9 +801,6 @@ export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
  */
 export const ruleResponseSchema = createRuleDataBaseSchema
   .extend({
-    // `null` clears the field on write; the server stores that as absent, so a
-    // response never carries it.
-    state_transition: stateTransitionSchema.optional(),
     id: z.string().describe('Unique rule identifier.'),
     version: z
       .number()

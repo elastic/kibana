@@ -215,7 +215,6 @@ const EXISTING_POLICY: ActionPolicyResponse = {
   group_by: ['host.name', 'service.name'],
   grouping_mode: 'per_field',
   throttle: { strategy: 'time_interval', interval: '5m' },
-  snoozed_until: null,
   destinations: [{ type: 'workflow', id: 'workflow-2' }],
   created_by: { profile_uid: 'elastic' },
   created_at: '2026-03-01T10:00:00.000Z',

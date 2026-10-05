@@ -146,8 +146,8 @@ describe('utils', () => {
       expect(result).not.toHaveProperty('no_data');
     });
 
-    it('normalises a null state_transition to an absent one', () => {
-      const data: CreateRuleData = { ...baseCreateData, state_transition: null };
+    it('stores an omitted state_transition as absent', () => {
+      const data: CreateRuleData = { ...baseCreateData, state_transition: undefined };
 
       const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
 
