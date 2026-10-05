@@ -6,7 +6,6 @@
  */
 
 import pMap from 'p-map';
-import { withSpan } from '@kbn/apm-utils';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
@@ -119,9 +118,7 @@ const deleteListWithItems = async ({
   // (unreachable without a container) and preferable to a half-emptied list
   // that rules still execute against.
   try {
-    await withSpan('exception_lists.bulk_delete.delete_container', async () =>
-      savedObjectsClient.delete(savedObjectType, list.id)
-    );
+    await savedObjectsClient.delete(savedObjectType, list.id);
   } catch (err) {
     const { message, statusCode } = transformError(err);
     return {
@@ -135,13 +132,11 @@ const deleteListWithItems = async ({
   }
 
   try {
-    await withSpan('exception_lists.bulk_delete.delete_items', async () =>
-      deleteExceptionListItemsByListStreamed({
-        listId: list.list_id,
-        namespaceType,
-        savedObjectsClient,
-      })
-    );
+    await deleteExceptionListItemsByListStreamed({
+      listId: list.list_id,
+      namespaceType,
+      savedObjectsClient,
+    });
   } catch (err) {
     const { message, statusCode } = transformError(err);
     return {
@@ -164,13 +159,7 @@ const checkPreDeleteListHook = async (
   let blockedLists: ExceptionListPreDeleteListBlocker[];
 
   try {
-    blockedLists = await withSpan(
-      {
-        labels: { list_count: String(lists.length), strategy: 'aggregation' },
-        name: 'exception_lists.bulk_delete.check_references',
-      },
-      async () => preDeleteListHook(lists)
-    );
+    blockedLists = await preDeleteListHook(lists);
   } catch (err) {
     const { message, statusCode } = transformError(err);
     return {
@@ -228,15 +217,8 @@ export const bulkDeleteExceptionList = async ({
 
   const savedObjectType = getSavedObjectType({ namespaceType });
 
-  const { saved_objects: savedObjects } = await withSpan(
-    {
-      labels: { list_count: String(uniqueIds.length) },
-      name: 'exception_lists.bulk_delete.load_containers',
-    },
-    async () =>
-      savedObjectsClient.bulkGet<ExceptionListSoSchema>(
-        uniqueIds.map((id) => ({ id, type: savedObjectType }))
-      )
+  const { saved_objects: savedObjects } = await savedObjectsClient.bulkGet<ExceptionListSoSchema>(
+    uniqueIds.map((id) => ({ id, type: savedObjectType }))
   );
 
   const validationErrors: BulkDeleteExceptionListError[] = [];

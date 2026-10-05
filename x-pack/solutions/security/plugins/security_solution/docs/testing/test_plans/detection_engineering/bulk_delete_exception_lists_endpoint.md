@@ -2,6 +2,8 @@
 
 **Status**: `in progress`.
 
+**Verification status**: Automation labels below describe existing coverage, not execution results. Focused bulk-delete service and reference-handler unit suites, scoped type checks, and lint passed in the aggregation worktree before cherry-picking. API integration execution for the updated PR branch is pending after push.
+
 ## Summary <!-- omit from toc -->
 
 Test plan for the `delete` action on `POST /api/exception_lists/_bulk_action`, an internal API endpoint that deletes up to 100 exception lists (and their items) in a single request. The endpoint accepts saved object `ids`, cascades item deletion per list, checks for rule references before deleting (blocking linked lists with 409), reports per-list success/failure with a summary, and respects existing exception-list RBAC.
@@ -53,7 +55,7 @@ The existing single-delete endpoint (`DELETE /api/exception_lists`) is **not** c
 ### Assumptions
 
 - All scenarios are executed under a Trial license (complete tier for serverless) unless stated otherwise.
-- The user has the `exceptions-all` Kibana privilege unless the scenario explicitly tests a different role.
+- The user has the `exceptions-all` Kibana privilege and detection rule read access unless the scenario explicitly tests a different role.
 - Exception lists and items are created fresh per scenario and cleaned up after each run.
 - The endpoint is available on both ESS and serverless deployments (internal access).
 - All requests include `"action": "delete"` in the request body unless testing action validation.
@@ -61,9 +63,10 @@ The existing single-delete endpoint (`DELETE /api/exception_lists`) is **not** c
 ### Non-functional requirements
 
 - The endpoint must handle up to 100 lists per request.
-- The rule reference check runs once per request: a single rule search with one count aggregation bucket per list, returning no rule documents.
+- With the Security Solution callback enabled and authorized, the rule reference check runs once for all successfully loaded list containers, before any deletion: a single keyed `filters` aggregation search with `perPage: 0`, returning no rule documents. It is skipped if no requested list passes validation. Counts are used internally only to distinguish referenced from unreferenced lists.
 - Item cascade uses bounded concurrency across lists (currently 10).
 - Item deletion uses PIT streaming (1,000 items per page) to bound memory usage regardless of item count.
+- The route sets a 10-minute idle socket timeout. Bounded concurrency and paging do not guarantee completion within that timeout.
 
 ### Product requirements
 
@@ -75,7 +78,7 @@ Functional requirements derived from [#276458](https://github.com/elastic/kibana
 - Deleting a list cascades to all its exception list items.
 - Lists referenced by detection rules are blocked (409) with an error stating the list is referenced by one or more detection rules. The referencing rules (ids, names, or count) are not returned. The reference check is provided by the Security Solution plugin as an extension point and applies to all list types; endpoint artifact lists are never attached to detection rules so the check is a no-op for them.
 - The response includes `success`, `results`, `errors`, and `summary` (total/succeeded/failed/skipped).
-- One list's failure does not abort other lists in the batch.
+- A list's validation or deletion failure does not abort other lists in the batch. A shared reference-check failure refuses every list submitted to that check, without starting any deletion.
 - Duplicate identifiers in the request are deduplicated (tracked in `summary.skipped`).
 - The endpoint respects space scoping and exception-list RBAC (`exceptions-all` privilege required).
 - Passing an exception list **item** saved object ID is rejected (returns 404 for that entry) without side effects.
@@ -152,7 +155,22 @@ Then the list container is deleted before its items
 
 ### Rule reference checking
 
-> **Implementation note:** The reference check is not built into the Lists plugin. It is provided by the Security Solution plugin via the `exceptionsListPreDeleteList` extension point, which is called once per request with every list that passed validation. If the check cannot complete, every list in that call is refused. When no callback is registered (for example, in tests that run the Lists plugin in isolation), the pre-delete check is skipped and all lists are deleted unconditionally. The check fires only from the bulk delete endpoint; the single-delete endpoint (`DELETE /api/exception_lists`) does **not** invoke it.
+> **Implementation note:** The reference check is not built into the Lists plugin. It is provided by the Security Solution plugin via the `exceptionsListPreDeleteList` extension point, which is called once with every list that passed validation, unless that set is empty. If the check cannot complete, every list in that call is refused. When no callback is registered (for example, in tests that run the Lists plugin in isolation), deletion proceeds without reference protection but remains subject to validation and deletion errors. The check fires only from the bulk delete endpoint; the single-delete endpoint (`DELETE /api/exception_lists`) does **not** invoke it.
+
+#### **Scenario: Check all validated lists before deleting any container**
+
+**Automation**: unit tests in the bulk-delete service, exception-list client, and Security Solution handler.
+
+```Gherkin
+Given a request includes referenced and unreferenced lists, a missing ID, and a duplicate ID
+When the bulk delete service validates the request's unique IDs
+Then only successfully loaded list containers are submitted to the shared reference check
+And the reference check finishes before any container is deleted
+And referenced lists are refused while unreferenced lists proceed to deletion
+And the missing ID retains its validation error and the duplicate counts as skipped
+```
+
+**Notes**: Existing unit tests cover these behaviors separately, not this combined fixture. If no list passes validation, the reference check is not called.
 
 #### **Scenario: Block deletion of a shared exception list linked to rules**
 
@@ -197,7 +215,7 @@ And "results" contains the endpoint list
 And the list is deleted
 ```
 
-**Notes**: The reference check is still performed for endpoint artifact lists. Artifact lists are never referenced by detection rules via the standard `exceptions_list` rule parameter, so the check always returns a zero count and the deletion proceeds.
+**Notes**: The reference check is still performed for endpoint artifact lists. For a caller with detection rule read access, artifact lists have no references via the standard `exceptions_list` rule parameter and deletion proceeds. Missing request context or rule-read authorization still causes a fail-closed refusal.
 
 
 #### **Scenario: Mix of linked and unlinked lists produces partial failure**
@@ -250,7 +268,7 @@ And "summary.failed" is 3
 And both lists still exist (not deleted)
 ```
 
-**Notes**: Fail-closed behavior. Rule search results are silently filtered to types the caller may read. For a caller without detection rule read access, an empty result means "hidden from you", not "no rule is attached". The endpoint refuses rather than trusting an unverifiable empty result. This applies to every non-artifact list in the request, even when no rules reference those lists.
+**Notes**: Fail-closed behavior. Rule search results are silently filtered to types the caller may read. For a caller without detection rule read access, an empty result means "hidden from you", not "no rule is attached". The endpoint refuses rather than trusting an unverifiable empty result. This policy applies to every list type, including endpoint artifact lists, even when no rules reference those lists.
 
 #### **Scenario: A rule referencing several lists blocks each of them**
 
@@ -272,12 +290,14 @@ And both lists still exist
 **Automation**: unit tests.
 
 ```Gherkin
-Given the rule search returns no aggregation, a missing bucket, or a non-integer count
-Or an extension point returns a malformed "blockedLists" value or changes the lists
+Given the rule search returns no aggregation, a missing bucket, or an invalid count
+Or an extension point returns a malformed "blockedLists" value, duplicate or unknown blocker IDs, or changes the list identities or order
 When the bulk delete service runs the reference check
-Then every list in the check is refused with its own error
+Then every list in the check is refused with its own 500 error
 And no list is deleted
 ```
+
+**Notes**: Handler tests cover absent aggregation data, array-shaped buckets, missing buckets, non-numeric counts, and negative counts. Fractional and unsafe-integer counts are rejected by the implementation but do not yet have explicit test cases. A thrown rule-search error also refuses the batch, preserving its transformed status code; missing request context or detection rule read access yields 403. These failure paths are covered with unit tests, not API fault injection.
 
 ### Partial failure and error reporting
 
@@ -341,6 +361,19 @@ And "so-2" is successfully deleted and appears in the "results" array
 ```
 
 ### Response shape
+
+#### **Scenario: Reference-blocking errors omit rule details and counts**
+
+**Automation**: existing unit assertions cover the exact generic error shape; API tests check the generic message and 409 outcome. Explicit API assertions for absent legacy fields remain to be added.
+
+```Gherkin
+Given a list is referenced by one or more detection rules
+When the user attempts to bulk delete it
+Then its error contains only message, status_code, and lists
+And the message states that the list is referenced by one or more detection rules
+And the error contains neither rule_references nor rule_reference_count
+And summary.failed counts failed lists, not referencing rules
+```
 
 #### **Scenario: Successful response includes summary counts**
 
@@ -516,6 +549,8 @@ And "list-1" still exists in the default space
 ```
 
 **Notes**: Space scoping is enforced by the saved objects layer; a list from another space is reported as not found, never deleted.
+
+**Scope limitation**: This tests single-namespace container isolation, not cross-space reference protection for agnostic lists. Rule reference searches use the caller's authorization and current space; a reference in another space does not block deletion of an agnostic list. Cross-space reference checking is outside this change.
 
 ### Authorization / RBAC
 
