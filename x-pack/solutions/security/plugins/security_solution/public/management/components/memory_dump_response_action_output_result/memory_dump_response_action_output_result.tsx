@@ -76,7 +76,11 @@ export const MemoryDumpResponseActionOutputResult = memo<MemoryDumpResponseActio
         );
       } else if (!agentActionState.wasSuccessful) {
         result = (
-          <EndpointActionFailureMessage action={action} data-test-subj={testId('failure')} />
+          <EndpointActionFailureMessage
+            action={action}
+            agentId={agentId}
+            data-test-subj={testId('failure')}
+          />
         );
       } else {
         result = (

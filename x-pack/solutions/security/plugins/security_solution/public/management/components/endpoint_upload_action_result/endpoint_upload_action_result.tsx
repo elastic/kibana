@@ -144,7 +144,7 @@ export const EndpointUploadActionResult = memo<EndpointUploadActionResultProps>(
                 data-test-subj={getTestId('actionFailure')}
                 key={name}
               >
-                <EndpointActionFailureMessage action={action as ActionDetails} />
+                <EndpointActionFailureMessage action={action as ActionDetails} agentId={agentId} />
               </HostUploadResult>
             );
           }
