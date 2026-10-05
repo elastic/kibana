@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { z } from '@kbn/zod';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { KbnPalette, getPalettes } from '@kbn/palettes';
@@ -22,21 +21,11 @@ export type AuthoredLensConfig<T extends SupportedChartType> = ConfigInput<T> ex
   ? Omit<ConfigInput<T>, 'layers'> & { layers: Array<WithoutDataSource<Layer>> }
   : WithoutDataSource<ConfigInput<T>>;
 
-interface ColumnShape {
-  hasDate: boolean;
-  hasCategory: boolean;
-}
-
 export interface LensConfigExample {
   /** The data shape or request the example fits. */
   label: string;
-  /** Whether the example fits the query's result columns. Examples without it always fit. */
-  fits?: (shape: ColumnShape) => boolean;
   config: object;
 }
-
-const DATE_COLUMN_TYPES = new Set(['date', 'date_nanos']);
-const CATEGORY_COLUMN_TYPES = new Set(['keyword', 'text', 'ip', 'boolean', 'version']);
 
 const statusColors = (stepCount: number): string[] =>
   getPalettes(false).get(KbnPalette.Status).colors(stepCount);
@@ -135,7 +124,6 @@ const lensConfigExamples: Record<SupportedChartType, readonly LensConfigExample[
   [SupportedChartType.XY]: [
     {
       label: 'Time series: a date column and one or more measures',
-      fits: ({ hasDate, hasCategory }) => hasDate && !hasCategory,
       config: {
         type: 'xy',
         title: '<Measure> over time',
@@ -154,7 +142,6 @@ const lensConfigExamples: Record<SupportedChartType, readonly LensConfigExample[
     {
       label:
         'Time series with legend statistics, only when the request asks for them (e.g. avg/min/max in the legend)',
-      fits: ({ hasDate, hasCategory }) => hasDate && !hasCategory,
       config: {
         type: 'xy',
         title: '<Measure> over time',
@@ -177,7 +164,6 @@ const lensConfigExamples: Record<SupportedChartType, readonly LensConfigExample[
     },
     {
       label: 'Time series split by a category: a date column, a category column, and a measure',
-      fits: ({ hasDate, hasCategory }) => hasDate && hasCategory,
       config: {
         type: 'xy',
         title: '<Measure> by <category> over time',
@@ -195,7 +181,6 @@ const lensConfigExamples: Record<SupportedChartType, readonly LensConfigExample[
     },
     {
       label: 'Specific colors per category, only when the request asks for them',
-      fits: ({ hasDate, hasCategory }) => hasDate && hasCategory,
       config: {
         type: 'xy',
         title: '<Measure> by <category> over time',
@@ -213,7 +198,6 @@ const lensConfigExamples: Record<SupportedChartType, readonly LensConfigExample[
     },
     {
       label: 'Ranking by category: a category column and a measure, no date',
-      fits: ({ hasDate }) => !hasDate,
       config: {
         type: 'xy',
         title: '<Measure> by <category>',
@@ -230,7 +214,6 @@ const lensConfigExamples: Record<SupportedChartType, readonly LensConfigExample[
     },
     {
       label: 'Time series with a specific series color, only when the request asks for one',
-      fits: ({ hasDate, hasCategory }) => hasDate && !hasCategory,
       config: {
         type: 'xy',
         title: '<Measure> over time',
@@ -248,7 +231,6 @@ const lensConfigExamples: Record<SupportedChartType, readonly LensConfigExample[
     },
     {
       label: 'Ranking with a specific bar color, only when the request asks for one',
-      fits: ({ hasDate }) => !hasDate,
       config: {
         type: 'xy',
         title: '<Measure> by <category>',
@@ -406,24 +388,6 @@ const lensConfigExamples: Record<SupportedChartType, readonly LensConfigExample[
   ],
 };
 
-const getColumnShape = (columns: readonly EsqlEsqlColumnInfo[]): ColumnShape => ({
-  hasDate: columns.some(({ type }) => DATE_COLUMN_TYPES.has(type)),
-  hasCategory: columns.some(({ type }) => CATEGORY_COLUMN_TYPES.has(type)),
-});
-
-/**
- * Returns the examples that fit the query's result columns. Without columns,
- * or when none fits, returns every example for the chart type.
- */
-export const selectConfigExamples = (
-  chartType: SupportedChartType,
-  columns?: readonly EsqlEsqlColumnInfo[]
-): readonly LensConfigExample[] => {
-  const examples = lensConfigExamples[chartType];
-  if (!columns?.length) {
-    return examples;
-  }
-  const shape = getColumnShape(columns);
-  const fitting = examples.filter(({ fits }) => !fits || fits(shape));
-  return fitting.length > 0 ? fitting : examples;
-};
+/** Returns the house-style examples for a chart type. */
+export const getConfigExamples = (chartType: SupportedChartType): readonly LensConfigExample[] =>
+  lensConfigExamples[chartType];

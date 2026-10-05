@@ -260,8 +260,8 @@ export const createVisualizationGraph = async (
   };
 
   // Node: Collect the result columns of a provided or preserved query, so the
-  // config author gets the examples and column types that fit it. The query is
-  // kept as is; when it fails to run, the config is authored without columns.
+  // config author sees their names and types. The query is kept as is; when it
+  // fails to run, the config is authored without columns.
   const resolveColumnsNode = async (state: VisualizationState) => {
     // Preserved layers with different queries have different columns, so one
     // query's columns would mislead the config author.

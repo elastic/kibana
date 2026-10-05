@@ -521,7 +521,6 @@ describe('createVisualizationGraph', () => {
         'human',
         expect.stringContaining('Result columns: "count" (long), "bucket" (date)'),
       ]);
-      expect(prompt).not.toContainEqual(['system', expect.stringContaining('Ranking by category')]);
     });
 
     it('keeps the provided query and authors without columns when the query fails to run', async () => {

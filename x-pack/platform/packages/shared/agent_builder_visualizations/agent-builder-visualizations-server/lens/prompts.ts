@@ -10,7 +10,7 @@ import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getChartTypeConfigPromptContent } from './chart_type_guidance';
 import { getColorConfigPromptContent } from './color_palettes';
-import { selectConfigExamples, type LensConfigExample } from './config_examples';
+import { getConfigExamples, type LensConfigExample } from './config_examples';
 import { getSchemaSectionIndex, LOAD_SCHEMA_SECTIONS_TOOL_NAME } from './schema_sections';
 import type { VisualizationConfig } from './types';
 
@@ -102,7 +102,7 @@ export const createGenerateConfigPrompt = ({
     getChartTypeConfigPromptContent(chartType),
     getColorConfigPromptContent(chartType, parsedExistingConfig),
     getExamplesPromptContent(
-      selectConfigExamples(chartType, columns),
+      getConfigExamples(chartType),
       isFocusedEdit ? FOCUSED_EDIT_EXAMPLES_GUIDANCE : NEW_CHART_EXAMPLES_GUIDANCE
     ),
     getSchemaSectionsPromptContent(chartType, shownIn),

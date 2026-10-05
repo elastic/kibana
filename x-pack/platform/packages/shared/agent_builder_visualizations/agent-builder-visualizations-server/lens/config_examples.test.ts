@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { chartTypeRegistry } from './chart_type_registry';
-import { selectConfigExamples } from './config_examples';
+import { getConfigExamples } from './config_examples';
 import { getEsqlDataSourceCarriers } from './graph_lens';
 
 const withDataSource = (config: object): object => {
@@ -19,13 +18,9 @@ const withDataSource = (config: object): object => {
   return configWithDataSource;
 };
 
-const dateColumn: EsqlEsqlColumnInfo = { name: 'bucket', type: 'date' };
-const categoryColumn: EsqlEsqlColumnInfo = { name: 'host.name', type: 'keyword' };
-const measureColumn: EsqlEsqlColumnInfo = { name: 'Requests', type: 'long' };
-
 describe('Lens config examples', () => {
   describe.each(Object.values(SupportedChartType))('%s', (chartType) => {
-    const examples = selectConfigExamples(chartType);
+    const examples = getConfigExamples(chartType);
 
     it('has at least one example', () => {
       expect(examples.length).toBeGreaterThan(0);
@@ -43,44 +38,6 @@ describe('Lens config examples', () => {
         expect(json).not.toContain('sampling');
         expect(json).not.toContain('ignore_global_filters');
       }
-    );
-  });
-
-  it.each<[string, EsqlEsqlColumnInfo[], string[]]>([
-    [
-      'a date and a measure',
-      [dateColumn, measureColumn],
-      [
-        'Time series: ',
-        'Time series with legend statistics',
-        'Time series with a specific series color',
-      ],
-    ],
-    [
-      'a date, a category, and a measure',
-      [dateColumn, categoryColumn, measureColumn],
-      ['Time series split by a category', 'Specific colors per category'],
-    ],
-    [
-      'a category and a measure',
-      [categoryColumn, measureColumn],
-      ['Ranking by category', 'Ranking with a specific bar color'],
-    ],
-  ])('picks the xy examples that fit %s', (_, columns, labels) => {
-    const examples = selectConfigExamples(SupportedChartType.XY, columns);
-
-    expect(examples.map(({ label }) => label)).toEqual(
-      labels.map((label) => expect.stringContaining(label))
-    );
-  });
-
-  it('offers every xy example when the result columns are unknown', () => {
-    expect(selectConfigExamples(SupportedChartType.XY)).toHaveLength(7);
-  });
-
-  it('keeps examples that fit any result columns', () => {
-    expect(selectConfigExamples(SupportedChartType.Metric, [measureColumn])).toEqual(
-      selectConfigExamples(SupportedChartType.Metric)
     );
   });
 });

@@ -12,11 +12,11 @@ Builder. It builds a visualization config for the renderer chosen by the caller
   every chart type. `color_palettes.ts` adds the color mechanics and palette
   previews for charts with dynamic or categorical coloring.
   `chart_type_guidance.ts` compiles them into the config author's prompt.
-  Instead of the full JSON schema, the author gets a house-style example from
-  `config_examples.ts` (picked from the query's result columns) and an index of
-  the schema sections from `schema_sections.ts`. It can load the sections it
-  needs once with the `load_schema_sections` tool, and a failed validation
-  shows the schema of the failing sections on the retry.
+  Instead of the full JSON schema, the author gets the chart type's house-style
+  examples from `config_examples.ts` and an index of the schema sections from
+  `schema_sections.ts`. It can load the sections it needs once with the
+  `load_schema_sections` tool, and a failed validation shows the schema of the
+  failing sections on the retry.
 - `vega/` — the Vega-Lite engine (`buildVegaConfig`): authors and normalizes a
   Vega-Lite spec for requests Lens cannot express.
 - `shared/` — guidance reused by both engines (e.g. ES|QL authoring instructions).
