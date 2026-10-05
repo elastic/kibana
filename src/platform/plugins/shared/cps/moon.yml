@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/logging'
   - '@kbn/cps-utils'
+  - '@kbn/cps-server-utils'
   - '@kbn/es-query'
   - '@kbn/cps-common'
   - '@kbn/cloud-plugin'

@@ -140,13 +140,14 @@ describe('fetchActionRequestById() utility', () => {
       readEsClientMock = elasticsearchServiceMock.createElasticsearchClient();
       applyActionsEsSearchMock(readEsClientMock);
 
-      endpointServiceMock.isCpsEnabled.mockReturnValue(true);
-      endpointServiceMock.getReadEsClient.mockReturnValue(readEsClientMock);
+      endpointServiceMock.isCpsActive.mockResolvedValue(true);
+      endpointServiceMock.getReadEsClient.mockResolvedValue(readEsClientMock);
     });
 
     it('should read as the request user so the search can fan out to linked projects', async () => {
+      const scoped = await endpointServiceMock.asScoped(request);
       await fetchActionRequestById(endpointServiceMock, 'default', '123', {
-        scoped: endpointServiceMock.asScoped(request),
+        scoped,
       });
 
       expect(endpointServiceMock.getReadEsClient).toHaveBeenCalledWith(request);
@@ -154,8 +155,9 @@ describe('fetchActionRequestById() utility', () => {
     });
 
     it('should validate visibility against originSpaceId rather than through Fleet', async () => {
+      const scoped = await endpointServiceMock.asScoped(request);
       await fetchActionRequestById(endpointServiceMock, 'default', '123', {
-        scoped: endpointServiceMock.asScoped(request),
+        scoped,
       });
 
       expect(
@@ -164,9 +166,10 @@ describe('fetchActionRequestById() utility', () => {
     });
 
     it('should error if the action belongs to another space', async () => {
+      const scoped = await endpointServiceMock.asScoped(request);
       await expect(
         fetchActionRequestById(endpointServiceMock, 'foo', '123', {
-          scoped: endpointServiceMock.asScoped(request),
+          scoped,
         })
       ).rejects.toThrow('Action [123] not found');
     });
@@ -182,9 +185,10 @@ describe('fetchActionRequestById() utility', () => {
         ),
       });
 
+      const scoped = await endpointServiceMock.asScoped(request);
       await expect(
         fetchActionRequestById(endpointServiceMock, 'default', '123', {
-          scoped: endpointServiceMock.asScoped(request),
+          scoped,
         })
       ).rejects.toThrow('Action [123] not found');
     });
@@ -208,9 +212,10 @@ describe('fetchActionRequestById() utility', () => {
         )
       );
 
+      const scoped = await endpointServiceMock.asScoped(request);
       await expect(
         fetchActionRequestById(endpointServiceMock, 'foo', '123', {
-          scoped: endpointServiceMock.asScoped(request),
+          scoped,
         })
       ).resolves.toEqual(
         expect.objectContaining({
@@ -220,9 +225,10 @@ describe('fetchActionRequestById() utility', () => {
     });
 
     it('should not validate against spaces if `bypassSpaceValidation` is true', async () => {
+      const scoped = await endpointServiceMock.asScoped(request);
       await expect(
         fetchActionRequestById(endpointServiceMock, 'foo', '123', {
-          scoped: endpointServiceMock.asScoped(request),
+          scoped,
           bypassSpaceValidation: true,
         })
       ).resolves.toEqual(expect.objectContaining({ originSpaceId: 'default' }));
@@ -233,9 +239,10 @@ describe('fetchActionRequestById() utility', () => {
         endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
       ).mockResolvedValueOnce(undefined);
 
+      const scoped = await endpointServiceMock.asScoped(request);
       await expect(
         fetchActionRequestById(endpointServiceMock, 'other-space', '123', {
-          scoped: endpointServiceMock.asScoped(request),
+          scoped,
         })
       ).resolves.toEqual(expect.objectContaining({ originSpaceId: 'default' }));
 
@@ -248,9 +255,10 @@ describe('fetchActionRequestById() utility', () => {
     });
 
     it('should accept an action whose originSpaceId matches the active space without consulting Fleet', async () => {
+      const scoped = await endpointServiceMock.asScoped(request);
       await expect(
         fetchActionRequestById(endpointServiceMock, 'default', '123', {
-          scoped: endpointServiceMock.asScoped(request),
+          scoped,
         })
       ).resolves.toBeDefined();
 
@@ -264,9 +272,10 @@ describe('fetchActionRequestById() utility', () => {
         endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
       ).mockRejectedValueOnce(new Error('policy not in space'));
 
+      const scoped = await endpointServiceMock.asScoped(request);
       await expect(
         fetchActionRequestById(endpointServiceMock, 'other-space', '123', {
-          scoped: endpointServiceMock.asScoped(request),
+          scoped,
         })
       ).rejects.toThrow('Action [123] not found');
     });

@@ -10,7 +10,6 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 import { useSaveRegionPolicy } from './use_save_region_policy';
 import { useKibana } from './use_kibana';
-import { useRegionPreferencesRedesignEnabled } from './use_region_preferences_redesign_enabled';
 import { APIRoutes } from '../../common/types';
 import {
   INFERENCE_ENDPOINTS_QUERY_KEY,
@@ -19,10 +18,8 @@ import {
 } from '../../common/constants';
 
 jest.mock('./use_kibana');
-jest.mock('./use_region_preferences_redesign_enabled');
 
 const mockUseKibana = useKibana as jest.Mock;
-const mockUseRegionPreferencesRedesignEnabled = jest.mocked(useRegionPreferencesRedesignEnabled);
 
 const createWrapper = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -39,7 +36,6 @@ describe('useSaveRegionPolicy', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseRegionPreferencesRedesignEnabled.mockReturnValue(false);
     mockUseKibana.mockReturnValue({
       services: {
         http: { put: mockPut },
@@ -173,31 +169,7 @@ describe('useSaveRegionPolicy', () => {
     });
   });
 
-  it('still toasts an in-use 409 when the redesign flag is off', async () => {
-    const conflictError = Object.assign(new Error('Conflict'), {
-      response: { status: 409 },
-      body: {
-        message: 'Policy would deny endpoints currently in use.',
-        attributes: {
-          denied_endpoint_ids: ['.elser-2-elastic'],
-          referencing_indexes: ['.elser-2-elastic:my-index'],
-        },
-      },
-    });
-    mockPut.mockRejectedValue(conflictError);
-
-    const { Wrapper } = createWrapper();
-    const { result } = renderHook(() => useSaveRegionPolicy(), { wrapper: Wrapper });
-
-    act(() => {
-      result.current.mutate({ body: { allowed_geos: ['eu'] } });
-    });
-
-    await waitFor(() => expect(mockAddDanger).toHaveBeenCalledTimes(1));
-  });
-
-  it('skips the in-use 409 toast when the redesign flag is on', async () => {
-    mockUseRegionPreferencesRedesignEnabled.mockReturnValue(true);
+  it('skips the in-use 409 toast', async () => {
     const conflictError = Object.assign(new Error('Conflict'), {
       response: { status: 409 },
       body: {
@@ -223,8 +195,7 @@ describe('useSaveRegionPolicy', () => {
     expect(mockAddError).not.toHaveBeenCalled();
   });
 
-  it('toasts a concurrent-update 409 even when the redesign flag is on', async () => {
-    mockUseRegionPreferencesRedesignEnabled.mockReturnValue(true);
+  it('toasts a concurrent-update 409', async () => {
     const conflictError = Object.assign(new Error('Conflict'), {
       response: { status: 409 },
       body: { message: 'Failed to put region policy due to a concurrent update conflict.' },

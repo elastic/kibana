@@ -7,6 +7,7 @@
 
 import type { errors } from '@elastic/elasticsearch';
 import { ErrorCode } from '@modelcontextprotocol/sdk/types.js';
+import url from 'url';
 
 import type { BuildFlavor } from '@kbn/config';
 import type {
@@ -37,6 +38,7 @@ import { Authenticator } from './authenticator';
 import { canRedirectRequest } from './can_redirect_request';
 import type { DeauthenticationResult } from './deauthentication_result';
 import { UiamOAuth } from './oauth';
+import { UiamSystemIdentity } from './system_identity';
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { KIBANA_AUTH_FULL_HEADER, NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
 import { shouldProviderUseLoginForm } from '../../common/model';
@@ -45,19 +47,31 @@ import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { createRedirectHtmlPage } from '../lib/html_page_utils';
 import { ROUTE_TAG_ACCEPT_UIAM_OAUTH, ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
+import type { ServiceAccountsServiceStart } from '../service_accounts';
 import type { Session } from '../session_management';
-import type { UiamServicePublic } from '../uiam';
+import {
+  getProtectedResource,
+  getProtectedResourceMetadataUrl,
+  getRequestSpacePrefix,
+  type UiamServicePublic,
+} from '../uiam';
 import type { UserProfileServiceStartInternal } from '../user_profile';
 
 interface AuthenticationServiceSetupParams {
   http: Pick<
     HttpServiceSetup,
-    'basePath' | 'csp' | 'registerAuth' | 'registerOnPreResponse' | 'staticAssets'
+    | 'basePath'
+    | 'csp'
+    | 'registerAuth'
+    | 'registerOnPreResponse'
+    | 'setSelfClientUnauthorizedErrorHandler'
+    | 'staticAssets'
   >;
   customBranding: CustomBrandingSetup;
   elasticsearch: Pick<ElasticsearchServiceSetup, 'setUnauthorizedErrorHandler'>;
   config: ConfigType;
   license: SecurityLicense;
+  getServiceAccounts: () => ServiceAccountsServiceStart | null;
 }
 
 interface AuthenticationServiceStartParams {
@@ -112,6 +126,7 @@ export class AuthenticationService {
     license,
     elasticsearch,
     customBranding,
+    getServiceAccounts,
   }: AuthenticationServiceSetupParams) {
     this.license = license;
 
@@ -227,10 +242,11 @@ export class AuthenticationService {
         config.mcp?.oauth2 &&
         request.route.options.tags.includes(ROUTE_TAG_ACCEPT_UIAM_OAUTH)
       ) {
-        const baseUrl =
-          http.basePath.publicBaseUrl ??
-          `${request.url.protocol}//${request.url.host}${http.basePath.serverBasePath}`;
-        const resourceMetadataUrl = `${baseUrl}/.well-known/oauth-protected-resource`;
+        const resource = getProtectedResource(
+          config.mcp.oauth2.metadata.resource,
+          getRequestSpacePrefix(http.basePath, request)
+        );
+        const resourceMetadataUrl = getProtectedResourceMetadataUrl(resource);
 
         return toolkit.render({
           body: JSON.stringify({
@@ -330,6 +346,18 @@ export class AuthenticationService {
         `Re-authenticating request due to error: ${getDetailedErrorMessage(error)}`
       );
 
+      // Fake requests never carry a session, so the re-authentication machinery below cannot help
+      // them (and its BWC header-scrubbing must never touch them). The one recoverable case is a
+      // request bound to a service account, whose credential Kibana minted and can mint again;
+      // everything else — API-key fakes from task manager/alerting, external user-created
+      // credentials — is deliberately left to its owner.
+      if (request.isFakeRequest) {
+        const authHeaders = await getServiceAccounts()
+          ?.backend.reauthenticateFakeRequest(request)
+          .catch(() => null);
+        return authHeaders ? toolkit.retry({ authHeaders }) : toolkit.notHandled();
+      }
+
       let authenticationResult;
       const originalHeaders = request.headers;
       try {
@@ -373,6 +401,31 @@ export class AuthenticationService {
       }
 
       return toolkit.notHandled();
+    });
+
+    http.setSelfClientUnauthorizedErrorHandler(async ({ request }, toolkit) => {
+      if (!license.isLicenseAvailable() || !license.isEnabled()) {
+        return toolkit.notHandled();
+      }
+
+      // Core only consults this handler for a 401 raised by the authentication lifecycle, so the
+      // target route handler did not run and replaying the call cannot duplicate a side
+      // effect. Unlike the Elasticsearch path there is no expiry marker to test. Kibana boomifies
+      // the upstream error — so the trigger is ownership instead: only a fake request bound to a
+      // service account, whose credential Kibana minted and can mint again, is recoverable.
+      // A real request's credential would have to be refreshed through the session machinery,
+      // which would mutate the ambient authentication state of a request this call merely borrows.
+      if (!request.isFakeRequest) {
+        return toolkit.notHandled();
+      }
+
+      // It is possible that the request is not bound to a service account.
+      // We do not yet have a great mechanism to detect within the authentication service,
+      // so we rely on the service accounts backend to return null for requests that are not bound to a service account.
+      const authHeaders = await getServiceAccounts()
+        ?.backend.reauthenticateFakeRequest(request)
+        .catch(() => null);
+      return authHeaders ? toolkit.retry({ authHeaders }) : toolkit.notHandled();
     });
   }
 
@@ -423,6 +476,23 @@ export class AuthenticationService {
         })
       : null;
 
+    // UIAM derives Kibana's own identity from the mTLS client certificate alone, so the capability
+    // only exists when that certificate is configured. `xpack.security.uiam.ssl.certificate` and
+    // `.key` are optional, and without them every mint fails with a UIAM 401.
+    const canMintSystemIdentityTokens = Boolean(
+      config.uiam?.ssl.certificate && config.uiam.ssl.key
+    );
+    if (uiam && !canMintSystemIdentityTokens) {
+      this.logger.debug(
+        'UIAM is enabled without a client certificate (`xpack.security.uiam.ssl.certificate` and `.key`), so Kibana cannot mint tokens for its own identity.'
+      );
+    }
+
+    const systemIdentity =
+      uiam && canMintSystemIdentityTokens
+        ? new UiamSystemIdentity({ logger: this.logger.get('system-identity'), uiam })
+        : undefined;
+
     /**
      * Retrieves server protocol name/host name/port and merges it with `xpack.security.public` config
      * to construct a server base URL (deprecated, used by the SAML provider only).
@@ -431,7 +501,15 @@ export class AuthenticationService {
       const { protocol, hostname, port } = http.getServerInfo();
       const serverConfig = { protocol, hostname, port, ...config.public };
 
-      return `${serverConfig.protocol}://${serverConfig.hostname}:${serverConfig.port}`;
+      // `url.format` brackets IPv6 literal hostnames (`::1` -> `[::1]`), without which the
+      // result is not a parseable URL. `slashes` is required because the server protocol is
+      // not always one of the schemes Node treats as slashed (e.g. `socket`).
+      return url.format({
+        protocol: serverConfig.protocol,
+        hostname: serverConfig.hostname,
+        port: serverConfig.port,
+        slashes: true,
+      });
     };
 
     this.session = session;
@@ -475,6 +553,8 @@ export class AuthenticationService {
               convert: uiamAPIKeys.convert.bind(uiamAPIKeys),
               getInternalCallerAttestationHeaders:
                 uiamAPIKeys.getInternalCallerAttestationHeaders.bind(uiamAPIKeys),
+              isOwnClientAuthentication: uiamAPIKeys.isOwnClientAuthentication.bind(uiamAPIKeys),
+              isExternalApiKey: uiamAPIKeys.isExternalApiKey.bind(uiamAPIKeys),
             }
           : null,
       },
@@ -493,6 +573,8 @@ export class AuthenticationService {
             resolveUsers: uiamOAuth.resolveUsers.bind(uiamOAuth),
           }
         : null,
+
+      systemIdentity,
 
       login: async (request: KibanaRequest, attempt: ProviderLoginAttempt) => {
         const providerIdentifier =

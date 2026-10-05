@@ -2,8 +2,7 @@
   "type": "plugin",
   "id": "@kbn/data-plugin",
   "owner": [
-    "@elastic/kibana-visualizations",
-    "@elastic/kibana-data-discovery"
+    "@elastic/kibana-discover"
   ],
   "group": "platform",
   "visibility": "shared",

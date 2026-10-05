@@ -43,6 +43,7 @@ import type {
 } from '@kbn/encrypted-saved-objects-shared';
 import { TaskValidator } from './task_validator';
 import { EsApiKeyStrategy } from './api_key_strategy';
+import { asSpaceId, brandSpaceId } from '@kbn/core-spaces-common';
 
 let mockGetValidatedTaskInstanceFromReading: jest.SpyInstance;
 let mockGetValidatedTaskInstanceForUpdating: jest.SpyInstance;
@@ -334,7 +335,7 @@ describe('TaskStore', () => {
       const mockUserScope = {
         apiKeyId: 'apiKeyId',
         apiKeyCreatedBy: 'testUser',
-        spaceId: 'testSpace',
+        spaceId: brandSpaceId('testSpace'),
       };
 
       const request = httpServerMock.createKibanaRequest();
@@ -717,7 +718,7 @@ describe('TaskStore', () => {
       partition: 237,
       userScope: {
         apiKeyId: 'EJYCtpUBGuyFd3FroZmZ',
-        spaceId: 'default',
+        spaceId: asSpaceId('default'),
         apiKeyCreatedByUser: false,
       },
       ownerId: 'kibana:5b2de169-2785-441b-ae8c-186a1936b17d',
@@ -1443,6 +1444,50 @@ describe('TaskStore', () => {
       });
     });
 
+    test('does not send the credential fields', async () => {
+      const task = {
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        id: 'task:324242',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        attempts: 3,
+        status: 'idle' as TaskStatus,
+        version: '123',
+        ownerId: null,
+        traceparent: 'myTraceparent',
+        credential: {
+          type: 'service_account',
+          workloadType: 'workflow',
+          workloadId: 'workflow-1',
+          spaceId: 'default',
+          expectedServiceAccountId: null,
+        },
+        encryptedCredential: 'encrypted-value',
+      };
+
+      savedObjectsClient.update.mockImplementation(
+        async (type: string, id: string, attributes: SavedObjectAttributes) => {
+          return {
+            id,
+            type,
+            attributes,
+            references: [],
+            version: '123',
+          };
+        }
+      );
+
+      await store.update(task, { validate: false });
+
+      const [[, , attributes]] = savedObjectsClient.update.mock.calls;
+      expect(attributes).not.toHaveProperty('credential');
+      expect(attributes).not.toHaveProperty('encryptedCredential');
+    });
+
     test(`doesn't go through validation process to inject stateVersion when validate:false`, async () => {
       const task = {
         runAt: mockedDate,
@@ -1570,7 +1615,7 @@ describe('TaskStore', () => {
     const mockUserScope = {
       apiKeyId: 'apiKeyId',
       apiKeyCreatedByUser: false,
-      spaceId: 'testSpace',
+      spaceId: brandSpaceId('testSpace'),
     };
 
     beforeEach(() => {
@@ -1885,7 +1930,7 @@ describe('TaskStore', () => {
       const mockUpdatedUserScope = {
         apiKeyId: 'apiKeyIdUpdated',
         apiKeyCreatedByUser: false,
-        spaceId: 'testSpace',
+        spaceId: brandSpaceId('testSpace'),
       };
 
       const apiKeyAndUserScopeMap = new Map();
@@ -1975,7 +2020,7 @@ describe('TaskStore', () => {
       const mockUpdatedUserScope = {
         apiKeyId: 'apiKeyIdUpdated',
         apiKeyCreatedByUser: true,
-        spaceId: 'testSpace',
+        spaceId: brandSpaceId('testSpace'),
       };
 
       const apiKeyAndUserScopeMap = new Map();
@@ -2083,7 +2128,7 @@ describe('TaskStore', () => {
       const mockUpdatedUserScope = {
         apiKeyId: 'apiKeyIdUpdated',
         apiKeyCreatedByUser: false,
-        spaceId: 'testSpace',
+        spaceId: brandSpaceId('testSpace'),
       };
 
       const apiKeyAndUserScopeMap = new Map();
@@ -2376,7 +2421,7 @@ describe('TaskStore', () => {
         apiKeyId: 'apiKeyId',
         uiamApiKeyId: 'uiamApiKeyId',
         apiKeyCreatedByUser: false,
-        spaceId: 'testSpace',
+        spaceId: brandSpaceId('testSpace'),
       };
 
       const mockScopedClient = {
@@ -2428,7 +2473,7 @@ describe('TaskStore', () => {
                 apiKeyId: 'apiKeyId',
                 uiamApiKeyId: 'uiamApiKeyId',
                 apiKeyCreatedByUser: false,
-                spaceId: 'testSpace',
+                spaceId: brandSpaceId('testSpace'),
               },
             },
           ],
@@ -2538,6 +2583,138 @@ describe('TaskStore', () => {
           },
         ],
         { refresh: false }
+      );
+    });
+
+    describe('credential fields', () => {
+      const credentialFields = {
+        credential: {
+          type: 'service_account',
+          workloadType: 'workflow',
+          workloadId: 'workflow-1',
+          spaceId: 'default',
+          expectedServiceAccountId: null,
+        },
+        encryptedCredential: 'encrypted-value',
+      };
+      const credentialTask = { ...bulkUpdateTask, id: 'task:credential', ...credentialFields };
+      const apiKeyTask = { ...bulkUpdateTask, apiKey: mockApiKey, userScope: mockUserScope };
+
+      const toSavedObject = (task: typeof bulkUpdateTask) => ({
+        id: task.id,
+        type: 'task',
+        attributes: { ...task, state: '{"foo":"bar"}', params: '{"hello":"world"}' },
+        references: [],
+        version: '123',
+      });
+
+      test('copies them unchanged when the whole document is replaced', async () => {
+        savedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [toSavedObject(credentialTask)],
+        });
+
+        await store.bulkUpdate([credentialTask], { validate: false, mergeAttributes: false });
+
+        expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+          [
+            {
+              id: credentialTask.id,
+              mergeAttributes: false,
+              type: 'task',
+              version: credentialTask.version,
+              attributes: {
+                ...taskInstanceToAttributes(bulkUpdateTask, credentialTask.id),
+                ...credentialFields,
+              },
+            },
+          ],
+          { refresh: false }
+        );
+      });
+
+      test('does not send them when attributes are merged', async () => {
+        savedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [toSavedObject(credentialTask)],
+        });
+
+        await store.bulkUpdate([credentialTask], { validate: false });
+
+        expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+          [
+            {
+              id: credentialTask.id,
+              mergeAttributes: true,
+              type: 'task',
+              version: credentialTask.version,
+              attributes: taskInstanceToAttributes(bulkUpdateTask, credentialTask.id),
+            },
+          ],
+          { refresh: false }
+        );
+      });
+
+      test('writes them through the plain repository when the batch uses the encryption-aware client', async () => {
+        const mockScopedClient = {
+          bulkUpdate: jest.fn().mockResolvedValue({ saved_objects: [toSavedObject(apiKeyTask)] }),
+        };
+        mockGetScopedClient.mockReturnValue(mockScopedClient);
+        savedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [toSavedObject(credentialTask)],
+        });
+
+        const result = await store.bulkUpdate([apiKeyTask, credentialTask], {
+          validate: false,
+          mergeAttributes: false,
+          options: { request: mockRequest },
+        });
+
+        expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
+          [expect.objectContaining({ id: apiKeyTask.id })],
+          { refresh: false }
+        );
+        expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+          [
+            expect.objectContaining({
+              id: credentialTask.id,
+              attributes: expect.objectContaining(credentialFields),
+            }),
+          ],
+          { refresh: false }
+        );
+        expect(result).toEqual([
+          expect.objectContaining({
+            tag: 'ok',
+            value: expect.objectContaining({ id: apiKeyTask.id }),
+          }),
+          expect.objectContaining({
+            tag: 'ok',
+            value: expect.objectContaining({ id: credentialTask.id }),
+          }),
+        ]);
+      });
+
+      test.each([true, false])(
+        'does not update a task that also has an API key (mergeAttributes: %s)',
+        async (mergeAttributes) => {
+          const credentialTaskWithApiKey = { ...apiKeyTask, ...credentialFields };
+          const mockScopedClient = {
+            bulkUpdate: jest.fn().mockResolvedValue({ saved_objects: [] }),
+          };
+          mockGetScopedClient.mockReturnValue(mockScopedClient);
+
+          const result = await store.bulkUpdate([credentialTaskWithApiKey], {
+            validate: false,
+            mergeAttributes,
+            options: { request: mockRequest },
+          });
+
+          expect(logger.error).toHaveBeenCalledWith(
+            `[TaskStore] An error occured. Task ${credentialTaskWithApiKey.id} will not be updated. Error: Task has both a credential and an API key, which this version of Kibana cannot update`
+          );
+          expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith([], { refresh: false });
+          expect(savedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
+          expect(result).toEqual([]);
+        }
       );
     });
   });
@@ -2686,6 +2863,52 @@ describe('TaskStore', () => {
 
       // New version returned after update
       expect(result).toEqual([asOk({ ...task, version: 'Wzg0LDFd' })]);
+    });
+
+    test(`should not send the credential fields`, async () => {
+      const task = {
+        id: '324242',
+        version: 'WzQsMV0=',
+        attempts: 3,
+        credential: {
+          type: 'service_account',
+          workloadType: 'workflow',
+          workloadId: 'workflow-1',
+          spaceId: 'default',
+          expectedServiceAccountId: null,
+        },
+        encryptedCredential: 'encrypted-value',
+      };
+
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        took: 0,
+        items: [
+          {
+            update: {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _id: 'task:324242',
+              _version: 2,
+              result: 'updated',
+              _shards: { total: 1, successful: 1, failed: 0 },
+              _seq_no: 84,
+              _primary_term: 1,
+              status: 200,
+            },
+          },
+        ],
+      });
+
+      await store.bulkPartialUpdate([task]);
+
+      expect(esClient.bulk).toHaveBeenCalledWith({
+        body: [
+          { update: { _id: 'task:324242', if_primary_term: 1, if_seq_no: 4 } },
+          { doc: { task: { attempts: 3 } } },
+        ],
+        index: 'tasky',
+        refresh: false,
+      });
     });
 
     test(`should perform partial update with no version`, async () => {
@@ -3076,7 +3299,7 @@ describe('TaskStore', () => {
           apiKeyId: 'api-key-id',
           uiamApiKeyId: 'uiam-api-key-id',
           apiKeyCreatedByUser: false,
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
         },
       } as PartialConcreteTaskInstance;
 
@@ -3204,7 +3427,7 @@ describe('TaskStore', () => {
         userScope: {
           apiKeyId: 'apiKeyId',
           apiKeyCreatedBy: 'testUser',
-          spaceId: 'testSpace',
+          spaceId: brandSpaceId('testSpace'),
         },
       },
       references: [],
@@ -3301,7 +3524,7 @@ describe('TaskStore', () => {
         userScope: {
           apiKeyId: 'apiKeyId1',
           apiKeyCreatedBy: 'testUser',
-          spaceId: 'testSpace',
+          spaceId: brandSpaceId('testSpace'),
         },
       },
       references: [],
@@ -3328,7 +3551,7 @@ describe('TaskStore', () => {
         userScope: {
           apiKeyId: 'apiKeyId2',
           apiKeyCreatedBy: 'testUser',
-          spaceId: 'testSpace',
+          spaceId: brandSpaceId('testSpace'),
         },
       },
       references: [],
@@ -3468,7 +3691,7 @@ describe('TaskStore', () => {
             apiKeyId: 'apiKeyId',
             uiamApiKeyId: 'uiamApiKeyId',
             apiKeyCreatedByUser: false,
-            spaceId: 'testSpace',
+            spaceId: brandSpaceId('testSpace'),
           },
         },
         references: [],
@@ -3961,7 +4184,7 @@ describe('TaskStore', () => {
       const mockUserScope = {
         apiKeyId: 'apiKeyId',
         apiKeyCreatedBy: 'testUser',
-        spaceId: 'testSpace',
+        spaceId: brandSpaceId('testSpace'),
       };
 
       const request = httpServerMock.createKibanaRequest();

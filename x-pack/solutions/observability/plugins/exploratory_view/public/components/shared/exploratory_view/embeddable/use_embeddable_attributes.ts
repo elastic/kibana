@@ -22,6 +22,7 @@ export const useEmbeddableAttributes = ({
   reportType,
   reportConfigMap = {},
   dslFilters,
+  annotationLayers,
 }: ExploratoryEmbeddableComponentProps) => {
   const spaceId = useKibanaSpace();
   const { euiTheme } = useEuiTheme();
@@ -44,7 +45,12 @@ export const useEmbeddableAttributes = ({
         const lensAttributes = new HeatMapLensAttributes(layerConfigs, reportType);
         return lensAttributes?.getJSON('lnsHeatmap');
       } else {
-        const lensAttributes = new LensAttributes(layerConfigs, reportType, dslFilters);
+        const lensAttributes = new LensAttributes(
+          layerConfigs,
+          reportType,
+          dslFilters,
+          annotationLayers
+        );
         return lensAttributes?.getJSON();
       }
     } catch (error) {
@@ -54,6 +60,7 @@ export const useEmbeddableAttributes = ({
     attributes,
     dataViewState,
     dslFilters,
+    annotationLayers,
     euiTheme,
     reportConfigMap,
     reportType,

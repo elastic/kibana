@@ -125,7 +125,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     /* Fail the build on CI if you accidentally left test.only in the source code. */
     forbidOnly: !!process.env.CI,
     /* Retries happen immediately, in a fresh worker. See resolveRetries(). */
-    retries: resolveRetries(),
+    retries: options.retries ?? resolveRetries(),
     /* Opt out of parallel tests on CI. */
     workers: options.workers ?? 1,
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
@@ -157,6 +157,10 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       // storageState: './output/reports/state.json', // Store session state (like cookies)
       timezoneId: 'GMT',
       ignoreHTTPSErrors: true,
+      // Chrome needs this even though the agent maps localhost to ::1; see setup_ipv6_only.sh.
+      ...(process.env.KIBANA_TEST_IPV6_ONLY === 'true'
+        ? { launchOptions: { args: ['--host-resolver-rules=MAP localhost [::1]'] } }
+        : {}),
     },
 
     // Timeout for each test, includes test, hooks and fixtures

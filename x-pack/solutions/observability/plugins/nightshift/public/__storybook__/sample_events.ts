@@ -20,13 +20,12 @@ export const checkoutEvent: SignificantEventResponse = {
   '@timestamp': '2026-07-24T09:42:00.000Z',
   created_at: '2026-07-24T09:42:00.000Z',
   event_id: 'checkout-latency',
-  event_uuid: 'checkout-latency-v1',
-  status: 'open',
+  status: 'active',
   stream_names: ['logs.checkout-api'],
   title: 'Checkout latency increased after deployment',
   summary:
     'Checkout requests are taking longer than expected. The `checkout-api` P95 latency rose from 420 ms to 2.8 s shortly after version `2026.07.24-1` was deployed. Error rates and payment retries increased during the same interval.',
-  severity: '80-critical',
+  severity: 'critical',
   confidence: 0.94,
   causal_features: [
     {
@@ -59,13 +58,12 @@ export const checkoutEvent: SignificantEventResponse = {
 export const inventoryEvent: SignificantEvent = {
   '@timestamp': '2026-07-24T08:16:00.000Z',
   event_id: 'inventory-errors',
-  event_uuid: 'inventory-errors-v1',
-  status: 'open',
+  status: 'active',
   stream_names: ['logs.inventory-service'],
   title: 'Inventory service error rate is elevated',
   summary:
     'The inventory service is returning more `503` responses while refreshing product availability.',
-  severity: '60-high',
+  severity: 'high',
   confidence: 0.86,
   causal_features: [
     {
@@ -90,12 +88,11 @@ export const inventoryEvent: SignificantEvent = {
 export const resolvedPaymentEvent: SignificantEvent = {
   '@timestamp': '2026-07-23T22:05:00.000Z',
   event_id: 'payment-timeouts',
-  event_uuid: 'payment-timeouts-v2',
-  status: 'closed',
+  status: 'inactive',
   stream_names: ['logs.payment-gateway'],
   title: 'Payment gateway timeouts',
   summary: 'Payment gateway timeout rates returned to their expected baseline.',
-  severity: '40-medium',
+  severity: 'medium',
   confidence: 0.78,
   investigations: [
     {
@@ -106,15 +103,14 @@ export const resolvedPaymentEvent: SignificantEvent = {
   ],
 };
 
-export const dismissedShippingEvent: SignificantEvent = {
+export const inactiveShippingEvent: SignificantEvent = {
   '@timestamp': '2026-07-23T19:20:00.000Z',
   event_id: 'shipping-queue-depth',
-  event_uuid: 'shipping-queue-depth-v1',
-  status: 'dismissed',
+  status: 'inactive',
   stream_names: ['logs.shipping-service'],
   title: 'Shipping queue depth briefly increased',
   summary: 'The queue increase was caused by a planned batch import and requires no action.',
-  severity: '20-low',
+  severity: 'low',
   confidence: 0.65,
 };
 
@@ -250,21 +246,13 @@ export const completedInvestigationState: InvestigationState = {
   recommendations: [
     {
       title: 'Roll back the checkout deployment',
+      confidence: 0.95,
       description: 'Revert version 2026.07.24-1 and monitor P95 latency.',
     },
     {
       title: 'Add a deployment guardrail',
+      confidence: 0.75,
       description: 'Block releases when checkout latency exceeds the service baseline.',
-    },
-  ],
-  blind_spots: [
-    {
-      title: 'Missing database spans',
-      description: 'The slow inventory query is not represented in distributed traces.',
-    },
-    {
-      title: 'Limited deployment metadata',
-      description: 'Commit identifiers are not included in checkout logs.',
     },
   ],
 };

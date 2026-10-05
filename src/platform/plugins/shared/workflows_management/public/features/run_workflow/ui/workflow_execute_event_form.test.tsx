@@ -7,20 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { I18nProvider } from '@kbn/i18n-react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { QueryClient } from '@kbn/react-query';
 import { useQueryTriggerEvents } from '@kbn/workflows-ui';
 import { testQueryClientConfig } from '@kbn/workflows-ui/src/test_utils';
 import { TIMEPICKER_FALLBACK } from './constants';
 import { MockSearchBar } from './test_utils/workflow_form_test_setup';
 import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
 import { useKibana } from '../../../hooks/use_kibana';
+import { getTestProvider } from '../../../shared/mocks/test_providers';
 
 const mockTheme = themeServiceMock.createSetupContract({ darkMode: false, name: 'borealis' });
 const mockData = dataPluginMock.createStartContract();
@@ -52,19 +51,21 @@ jest.mock('@kbn/workflows-ui', () => {
   };
 });
 
+jest.mock('@kbn/unified-data-table', () => {
+  const actual = jest.requireActual('@kbn/unified-data-table');
+  return {
+    ...actual,
+    UnifiedDataTable: () => <div data-test-subj="unifiedDataTable" />,
+  };
+});
+
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseQueryTriggerEvents = useQueryTriggerEvents as jest.MockedFunction<
   typeof useQueryTriggerEvents
 >;
 const queryClient = new QueryClient(testQueryClientConfig);
 
-const TestWrapper = ({ children }: { children: React.ReactNode }) => (
-  <EuiProvider>
-    <QueryClientProvider client={queryClient}>
-      <I18nProvider>{children}</I18nProvider>
-    </QueryClientProvider>
-  </EuiProvider>
-);
+const TestWrapper = getTestProvider({ queryClient });
 
 const baseDefinition = {
   version: '1',

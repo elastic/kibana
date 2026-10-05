@@ -17,7 +17,10 @@ import {
   ingestEventsRequestParamsSchemaV1,
   ingestEventsRequestQuerySchemaV1,
 } from '../../../common/routes/events/apis/ingest';
-import { ingestEventsResponseSchemaV1 } from '../../../common/routes/events/response';
+import {
+  ingestEventsAckResponseSchemaV1,
+  ingestEventsResponseSchemaV1,
+} from '../../../common/routes/events/response';
 import type { ActionsRequestHandlerContext } from '../../types';
 import {
   INBOUND_EVENTS_API_PATH,
@@ -53,8 +56,11 @@ export function inboundEventsRoute({
       security: INBOUND_EVENTS_SECURITY,
       summary: 'Ingest an external event for a Kibana connector',
       description:
-        'Public ingress for Kibana connector-scoped inbound events. Authenticate with an ingest token (`Authorization: Bearer`, or `token` query parameter as fallback). Registered only when `xpack.actions.inboundEvents.enabled` is true.',
+        'Public ingress for Kibana connector-scoped inbound events. Authenticate with an ingest token (`Authorization: Bearer`, or `token` query parameter as fallback). A successful emit returns 202. A connector HTTP ack returns 200 (`.inboundWebhook` handshake is `{ challenge }`) and does not emit.',
       options: {
+        // External vendors cannot send Kibana session XSRF headers (`kbn-xsrf`).
+        // Auth is the ingest token (Bearer, or `token` query if Authorization is
+        // absent); missing or invalid tokens 404.
         xsrfRequired: false,
         tags: ['oas-tag:connectors'],
         availability: {
@@ -77,6 +83,11 @@ export function inboundEventsRoute({
             body: ingestEventsRequestBodySchemaV1,
           },
           response: {
+            200: {
+              description:
+                'Connector HTTP 200 ack. No event is emitted. `.inboundWebhook` handshake is `{ challenge }`.',
+              body: () => ingestEventsAckResponseSchemaV1,
+            },
             202: {
               description:
                 'The ingress request was accepted. Downstream emit failures may still be partial; see server logs.',
@@ -87,7 +98,7 @@ export function inboundEventsRoute({
                 'Connector, connector type, or ingest token was not found or failed verification.',
             },
             500: {
-              description: 'The connector spoke failed to handle or validate the event.',
+              description: 'The connector failed to handle or validate the event.',
             },
           },
         },

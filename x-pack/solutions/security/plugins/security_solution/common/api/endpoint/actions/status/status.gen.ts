@@ -30,39 +30,47 @@ export const PendingActionsSchema = lazySchema(() =>
       /**
        * Number of pending isolate actions.
        */
-      isolate: PendingActionDataType.optional(),
+      isolate: PendingActionDataType.optional().describe('Number of pending isolate actions.'),
       /**
        * Number of pending unisolate (release) actions.
        */
-      unisolate: PendingActionDataType.optional(),
+      unisolate: PendingActionDataType.optional().describe(
+        'Number of pending unisolate (release) actions.'
+      ),
       /**
        * Number of pending kill-process actions.
        */
-      'kill-process': PendingActionDataType.optional(),
+      'kill-process': PendingActionDataType.optional().describe(
+        'Number of pending kill-process actions.'
+      ),
       /**
        * Number of pending suspend-process actions.
        */
-      'suspend-process': PendingActionDataType.optional(),
+      'suspend-process': PendingActionDataType.optional().describe(
+        'Number of pending suspend-process actions.'
+      ),
       /**
        * Number of pending running-processes (get processes) actions.
        */
-      'running-processes': PendingActionDataType.optional(),
+      'running-processes': PendingActionDataType.optional().describe(
+        'Number of pending running-processes (get processes) actions.'
+      ),
       /**
        * Number of pending get-file actions.
        */
-      'get-file': PendingActionDataType.optional(),
+      'get-file': PendingActionDataType.optional().describe('Number of pending get-file actions.'),
       /**
        * Number of pending execute actions.
        */
-      execute: PendingActionDataType.optional(),
+      execute: PendingActionDataType.optional().describe('Number of pending execute actions.'),
       /**
        * Number of pending upload actions.
        */
-      upload: PendingActionDataType.optional(),
+      upload: PendingActionDataType.optional().describe('Number of pending upload actions.'),
       /**
        * Number of pending scan actions.
        */
-      scan: PendingActionDataType.optional(),
+      scan: PendingActionDataType.optional().describe('Number of pending scan actions.'),
     }),
     z.object({}).catchall(z.unknown()),
   ])
@@ -74,12 +82,14 @@ export const ActionStatusSuccessResponse = lazySchema(() =>
     /**
      * One pending-actions summary entry per requested agent.
      */
-    data: z.array(
-      z.object({
-        agent_id: AgentId,
-        pending_actions: PendingActionsSchema,
-      })
-    ),
+    data: z
+      .array(
+        z.object({
+          agent_id: AgentId,
+          pending_actions: PendingActionsSchema,
+        })
+      )
+      .describe('One pending-actions summary entry per requested agent.'),
   })
 );
 export type ActionStatusSuccessResponse = z.infer<typeof ActionStatusSuccessResponse>;
@@ -89,7 +99,7 @@ export const EndpointGetActionsStatusRequestQuery = lazySchema(() =>
     /**
      * A list of agent IDs to get the action status for.
      */
-    agent_ids: AgentIds,
+    agent_ids: AgentIds.describe('A list of agent IDs to get the action status for.'),
   })
 );
 export type EndpointGetActionsStatusRequestQuery = z.infer<

@@ -11,6 +11,7 @@ import type { ObjectType, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { IntervalSchedule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
 import { isErr, tryAsResult } from './lib/result_type';
 import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
@@ -381,7 +382,7 @@ export type { IntervalSchedule, Rrule, RruleSchedule } from '@kbn/response-ops-s
 export interface TaskUserScope {
   apiKeyId: string;
   uiamApiKeyId?: string;
-  spaceId?: string;
+  spaceId?: SpaceId;
   /**
    * True when the credentials were supplied by the caller (a scheduling request already
    * authenticated with an ES or UIAM API key — not necessarily a human, e.g. a service account)
@@ -400,6 +401,18 @@ export interface TaskUserScope {
   uiamApiKeyExternal?: boolean;
   userProfileId?: string;
   userName?: string;
+}
+
+/**
+ * How a task authenticates when it runs. The fields other than `type` depend on the type: a
+ * `service_account` credential names the workload the task runs as.
+ */
+export interface TaskCredential {
+  type: string;
+  workloadType?: string;
+  workloadId?: string;
+  spaceId?: string;
+  expectedServiceAccountId?: string | null;
 }
 
 /*
@@ -638,6 +651,17 @@ export interface ConcreteTaskInstance extends TaskInstance {
    * Used to break up tasks so each Kibana node can claim tasks on a subset of the partitions
    */
   partition?: number;
+
+  /**
+   * How the task authenticates when it runs. Part of the AAD, so it is only written when the task is created.
+   */
+  credential?: TaskCredential;
+
+  /**
+   * Encrypted secret material for `credential`. For a service account it holds no secret, only a
+   * value whose decryption fails if `credential` was changed. Only written when the task is created.
+   */
+  encryptedCredential?: string;
 }
 
 export type PartialConcreteTaskInstance = Partial<ConcreteTaskInstance> & {
@@ -688,8 +712,7 @@ export interface ApiKeyOptions {
   cloneApiKey?: boolean;
   /**
    * When true with a request, grant only the Elasticsearch API key (skip UIAM). Intended for
-   * tests and narrow internal flows (e.g. exercising UIAM provisioning on tasks that have ES
-   * credentials only).
+   * tests and narrow internal flows that need tasks with ES credentials only.
    */
   onEsKey?: boolean;
 }

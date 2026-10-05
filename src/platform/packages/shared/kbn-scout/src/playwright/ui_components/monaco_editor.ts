@@ -96,6 +96,113 @@ export class KibanaCodeEditorWrapper {
     return result;
   }
 
+  private async getEditorUri(container: Locator, description: string): Promise<string> {
+    const uri = await container.locator('.monaco-editor[data-uri]').getAttribute('data-uri');
+    if (!uri) {
+      throw new Error(`Editor data-uri not found for container ${description}`);
+    }
+    return uri;
+  }
+
+  /**
+   * Returns the index of the Monaco text model backing the editor rendered inside
+   * `container`, for use with the index-based methods of this class. Resolve it right
+   * before use: indexes shift as other editors mount and unmount.
+   */
+  async getModelIndexByContainer(container: Locator): Promise<number> {
+    const uri = await this.getEditorUri(container, container.toString());
+    const index = await this.page.evaluate((modelUri) => {
+      const monacoEnv = (window as any).MonacoEnvironment;
+
+      if (!monacoEnv?.monaco?.editor) {
+        throw new Error('MonacoEnvironment.monaco.editor is not available');
+      }
+
+      return (monacoEnv.monaco.editor.getModels() as MonacoModel[]).findIndex(
+        (model) => model.uri.toString() === modelUri
+      );
+    }, uri);
+
+    if (index === -1) {
+      throw new Error(`No Monaco editor model found for uri "${uri}"`);
+    }
+    return index;
+  }
+
+  /**
+   * Returns the current value of the Monaco editor model inside the given
+   * container `data-test-subj`, resolved by the model's `data-uri` rather than
+   * a global index.
+   */
+  async getCodeEditorValueByTestSubj(dataTestSubjId: string): Promise<string> {
+    return this.getCodeEditorValueByContainer(this.page.getByTestId(dataTestSubjId));
+  }
+
+  /**
+   * Returns the current value of the Monaco editor model rendered inside `container`,
+   * resolved by the model's `data-uri` rather than a global index.
+   */
+  async getCodeEditorValueByContainer(container: Locator): Promise<string> {
+    let result = '';
+
+    await expect(async () => {
+      const uri = await this.getEditorUri(container, container.toString());
+      result = await this.page.evaluate((modelUri) => {
+        const monacoEnv = (window as any).MonacoEnvironment;
+
+        if (!monacoEnv?.monaco?.editor) {
+          throw new Error('MonacoEnvironment.monaco.editor is not available');
+        }
+
+        const model = (monacoEnv.monaco.editor.getModel(modelUri) as MonacoModel | null) ?? null;
+        if (!model) {
+          throw new Error(`No Monaco editor model found for uri "${modelUri}"`);
+        }
+
+        return model.getValue();
+      }, uri);
+    }).toPass({ timeout: 30_000 });
+
+    return result;
+  }
+
+  /**
+   * Sets the value of the Monaco editor model inside the given container
+   * `data-test-subj`, resolved by the model's `data-uri` rather than a global
+   * index, and verifies that the value was applied.
+   */
+  async setCodeEditorValueByTestSubj(dataTestSubjId: string, value: string): Promise<string> {
+    return this.setCodeEditorValueByContainer(this.page.getByTestId(dataTestSubjId), value);
+  }
+
+  /**
+   * Sets the value of the Monaco editor model rendered inside `container`, resolved by
+   * the model's `data-uri` rather than a global index, and returns the applied value.
+   * Throws if that model no longer exists, so no other editor is ever touched.
+   */
+  async setCodeEditorValueByContainer(container: Locator, value: string): Promise<string> {
+    const uri = await this.getEditorUri(container, container.toString());
+    await this.page.evaluate(
+      ({ modelUri, editorValue }) => {
+        const monacoEnv = (window as any).MonacoEnvironment;
+
+        if (!monacoEnv?.monaco?.editor) {
+          throw new Error('MonacoEnvironment.monaco.editor is not available');
+        }
+
+        const model = (monacoEnv.monaco.editor.getModel(modelUri) as MonacoModel | null) ?? null;
+        if (!model) {
+          throw new Error(`No Monaco editor model found for uri "${modelUri}"`);
+        }
+
+        model.setValue(editorValue);
+      },
+      { modelUri: uri, editorValue: value }
+    );
+
+    return await this.getCodeEditorValueByContainer(container);
+  }
+
   /**
    * Sets the value of the Monaco editor model at the given index using the
    * global `MonacoEnvironment`, and verifies that the value was applied.
@@ -301,15 +408,13 @@ export class KibanaCodeEditorWrapper {
   }
 
   /**
-   * Hovers a Monaco inline decoration and clicks the hover-popover row whose
-   * text contains `optionText` (e.g. an "Edit lookup index" action link).
+   * Hovers a Monaco inline decoration (see {@link getDecoration}) and clicks the
+   * hover-popover row whose text contains `optionText` (e.g. an "Edit lookup index"
+   * action link).
    */
-  async selectDecorationHoverOption(
-    decorationClassName: string,
-    optionText: string
-  ): Promise<void> {
+  async selectDecorationHoverOption(decoration: Locator, optionText: string): Promise<void> {
     await this.page.mouse.move(0, 0);
-    await this.getDecoration(decorationClassName).hover();
+    await decoration.hover();
 
     const hover = this.getHoverPopover();
     await hover.waitFor({ state: 'visible' });

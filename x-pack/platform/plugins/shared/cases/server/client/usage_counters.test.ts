@@ -73,7 +73,7 @@ describe('withUsageCounter', () => {
   it('should call incrementCounter for attachmets', async () => {
     await attachmentClient.add({
       caseId: '1',
-      comment: { attachmentId: 'test', type: 'user', owner: 'security' },
+      comment: { type: 'comment', data: { content: 'test' }, owner: 'security' },
     });
     expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
       counterName: 'add_attachment',

@@ -10,6 +10,7 @@ import type {
   ComposeDiscoverMode,
   RuleFormServices,
 } from '@kbn/alerting-v2-rule-form';
+import { ESQLMenu, EsqlEditorActionsProvider, EsqlEditorActionsRegister } from '@kbn/esql/public';
 import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
 import type { RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
@@ -22,24 +23,25 @@ import { i18n } from '@kbn/i18n';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
+import { getMinimumScheduleInterval } from '../kibana_services';
 import type { RuleApiResponse } from '../services/rules_api';
+import { CreateActionPolicyFormFlyout } from '../components/action_policy/form_flyout/create_action_policy_form_flyout';
 import { useBuilderToEsqlTransition } from './use_builder_to_esql_transition';
+import { useCreateActionPolicyDisabledReason } from './use_create_action_policy_disabled_reason';
 import { useCreateRule } from './use_create_rule';
-import { useSetupRuleNotifications } from './use_setup_rule_notifications';
 import { useUpdateRule } from './use_update_rule';
 
 const templateToSyntheticRule = (template: RuleTemplateResponse): RuleApiResponse => ({
   ...template.rule,
+  // `null` is the write-side way to say "no delays"; a rule read back never carries it.
+  state_transition: template.rule.state_transition ?? undefined,
   id: '',
+  version: 1,
   enabled: false,
   created_by: null,
   created_at: new Date().toISOString(),
   updated_by: null,
   updated_at: new Date().toISOString(),
-  metadata: {
-    ...template.rule.metadata,
-    version: 1,
-  },
 });
 
 interface UseComposeDiscoverFlyoutOptions {
@@ -64,6 +66,7 @@ export const useComposeDiscoverFlyout = ({
     | DashboardStart
     | undefined;
   const cps = useService(PluginStart('cps'), { optional: true }) as CPSPluginStart | undefined;
+  const createActionPolicyDisabledReason = useCreateActionPolicyDisabledReason();
 
   const [flyoutOpen, setFlyoutOpen] = useState(false);
   const [flyoutMode, setFlyoutMode] = useState<ComposeDiscoverMode>('create');
@@ -92,7 +95,6 @@ export const useComposeDiscoverFlyout = ({
     });
 
   const createRuleMutation = useCreateRule();
-  const setupNotificationsMutation = useSetupRuleNotifications();
   const updateRuleMutation = useUpdateRule();
   const ruleFormServices = useMemo<RuleFormServices>(
     () => ({
@@ -107,6 +109,12 @@ export const useComposeDiscoverFlyout = ({
       uiActions,
       dashboard,
       cps,
+      minimumScheduleInterval: getMinimumScheduleInterval(),
+      esqlMenu: ESQLMenu,
+      esqlEditorActionsProvider: EsqlEditorActionsProvider,
+      esqlEditorActionsRegister: EsqlEditorActionsRegister,
+      createActionPolicyFormFlyout: CreateActionPolicyFormFlyout,
+      createActionPolicyDisabledReason,
     }),
     [
       http,
@@ -120,6 +128,7 @@ export const useComposeDiscoverFlyout = ({
       uiActions,
       dashboard,
       cps,
+      createActionPolicyDisabledReason,
     ]
   );
 
@@ -227,45 +236,13 @@ export const useComposeDiscoverFlyout = ({
       builderType={builderType ?? undefined}
       initialBuilderState={initialBuilderState}
       onSwitchToEsql={builderType ? requestSwitchToEsql : undefined}
-      onCreateRule={(payload, ruleNotifications) =>
-        createRuleMutation.mutate(
-          { payload },
-          {
-            onSuccess: (rule) => {
-              const actions = ruleNotifications?.workflows ?? [];
-              if (actions.length > 0) {
-                setupNotificationsMutation.mutate(
-                  { rule, actions },
-                  { onSuccess: closeAndRedirect, onError: closeAndRedirect }
-                );
-              } else {
-                closeAndRedirect();
-              }
-            },
-          }
-        )
+      onCreateRule={(payload) =>
+        createRuleMutation.mutate({ payload }, { onSuccess: closeAndRedirect })
       }
-      onUpdateRule={(id, payload, ruleNotifications) =>
-        updateRuleMutation.mutate(
-          { id, payload },
-          {
-            onSuccess: (rule) => {
-              const actions = ruleNotifications?.workflows ?? [];
-              if (actions.length === 0) {
-                closeFlyout();
-                return;
-              }
-              // Only close the flyout once notification setup also succeeds
-              setupNotificationsMutation.mutate({ rule, actions }, { onSuccess: closeFlyout });
-            },
-          }
-        )
+      onUpdateRule={(id, payload) =>
+        updateRuleMutation.mutate({ id, payload }, { onSuccess: closeFlyout })
       }
-      isSaving={
-        createRuleMutation.isLoading ||
-        setupNotificationsMutation.isLoading ||
-        updateRuleMutation.isLoading
-      }
+      isSaving={createRuleMutation.isLoading || updateRuleMutation.isLoading}
     />
   ) : null;
 

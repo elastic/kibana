@@ -48,7 +48,7 @@ Restart the agent runtime after adding the symlink.
 ## Preconditions
 
 - Local Kibana and local Elasticsearch must already be running.
-- The repo dependencies must be installed with `yarn kbn bootstrap`.
+- The repo dependencies must be installed with `pnpm kbn bootstrap`.
 - Use the Kibana repo root as the working directory.
 - Use only local development auth, for example `elastic:changeme` against `localhost` or `127.0.0.1`.
 - Do not accept, request, read, print, or pass cloud credentials, API keys, connector secrets, service tokens, or real usernames/passwords.
@@ -183,7 +183,7 @@ node x-pack/solutions/security/plugins/security_solution/scripts/data/generate_c
 
 Use the generator output first, then consult `x-pack/solutions/security/plugins/security_solution/scripts/data/README.md` if more context is needed. Common issues:
 
-- Missing `@babel` modules means dependencies are incomplete. Run `yarn kbn bootstrap`.
+- Missing `@babel` modules means dependencies are incomplete. Run `pnpm kbn bootstrap`.
 - Missing Security alerts destination means detections are not initialized. Open Security or initialize detections, then rerun.
 - Prebuilt rule install failures usually mean Kibana cannot reach EPR or Fleet is not ready.
 - Data stream template errors usually mean the chosen `--indexPrefix` conflicts with data-stream-only templates.

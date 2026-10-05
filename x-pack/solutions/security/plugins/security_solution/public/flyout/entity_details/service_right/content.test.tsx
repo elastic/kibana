@@ -28,7 +28,7 @@ jest.mock('../shared/components/right/visualizations_section', () => ({
 jest.mock(
   '../../../entity_analytics/components/asset_criticality/asset_criticality_selector',
   () => ({
-    AssetCriticalityAccordion: () => null,
+    AssetCriticalityAccordion: () => <div data-test-subj="assetCriticalityAccordionMock" />,
   })
 );
 jest.mock('../../../flyout_v2/entity/shared/components/observed_entity', () => ({
@@ -49,6 +49,7 @@ const defaultProps = {
   onAssetCriticalityChange: () => {},
   openDetailsPanel: () => {},
   isPreviewMode: false,
+  entityStoreV2Enabled: false,
   entityStoreEntityId: 'service:nginx@okta',
   riskScoreQueryId: 'servicePanelRiskScoreQuery',
 };
@@ -67,5 +68,33 @@ describe('ServicePanelContent — resolution license gating', () => {
     (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
     render(<ServicePanelContent {...defaultProps} />, { wrapper: TestProviders });
     expect(screen.getByTestId(RESOLUTION_SECTION_TEST_ID)).toBeInTheDocument();
+  });
+});
+
+describe('ServicePanelContent — legacy asset criticality accordion gating', () => {
+  beforeEach(() => {
+    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
+  });
+
+  it('renders the legacy accordion when entity store v2 is disabled', () => {
+    render(<ServicePanelContent {...defaultProps} entityStoreV2Enabled={false} />, {
+      wrapper: TestProviders,
+    });
+    expect(screen.getByTestId('assetCriticalityAccordionMock')).toBeInTheDocument();
+  });
+
+  it('does not render the legacy accordion when entity store v2 is enabled', () => {
+    render(<ServicePanelContent {...defaultProps} entityStoreV2Enabled />, {
+      wrapper: TestProviders,
+    });
+    expect(screen.queryByTestId('assetCriticalityAccordionMock')).not.toBeInTheDocument();
+  });
+
+  it('does not render the legacy accordion with entity store v2 enabled and no entity record', () => {
+    render(
+      <ServicePanelContent {...defaultProps} entityStoreV2Enabled entityRecord={undefined} />,
+      { wrapper: TestProviders }
+    );
+    expect(screen.queryByTestId('assetCriticalityAccordionMock')).not.toBeInTheDocument();
   });
 });

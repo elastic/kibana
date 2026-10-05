@@ -85,6 +85,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_explore.sh
@@ -102,6 +104,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
@@ -111,7 +115,6 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
-      diskSizeGb: 130
       preemptible: true
     depends_on:
       - build
@@ -120,6 +123,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management.sh
@@ -129,7 +134,6 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
-      diskSizeGb: 130
       preemptible: true
     depends_on:
       - build
@@ -138,6 +142,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_customization.sh
@@ -155,6 +161,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_installation.sh
@@ -172,6 +180,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_management.sh
@@ -189,6 +199,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_upgrade.sh
@@ -206,6 +218,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
@@ -223,6 +237,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_customization.sh
@@ -240,6 +256,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_installation.sh
@@ -257,6 +275,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_management.sh
@@ -274,6 +294,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_upgrade.sh
@@ -291,6 +313,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine.sh
@@ -308,6 +332,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine_exceptions.sh
@@ -325,6 +351,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine.sh
@@ -342,6 +370,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine_exceptions.sh
@@ -359,6 +389,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_ai_assistant.sh
@@ -376,6 +408,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_ai_assistant.sh
@@ -393,6 +427,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_entity_analytics.sh
@@ -410,6 +446,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_explore.sh
@@ -427,6 +465,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_investigations.sh
@@ -436,7 +476,6 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
-      diskSizeGb: 130
       preemptible: true
     depends_on:
       - build
@@ -445,6 +484,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/osquery_cypress.sh
@@ -454,7 +495,6 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-highmem-4
-      diskSizeGb: 130
       preemptible: true
     depends_on:
       - build
@@ -463,6 +503,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
@@ -472,7 +514,6 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-highmem-4
-      diskSizeGb: 130
       preemptible: true
     depends_on:
       - build
@@ -481,6 +522,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
@@ -491,7 +534,6 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
-      diskSizeGb: 130
     depends_on:
       - build
     timeout_in_minutes: 75
@@ -499,6 +541,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
@@ -509,7 +553,6 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-highmem-4
-      diskSizeGb: 130
     depends_on:
       - build
     timeout_in_minutes: 75
@@ -517,6 +560,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - wait: ~

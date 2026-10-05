@@ -11,16 +11,13 @@ import { WorkflowExecutionAuthorizationError } from '@kbn/discoveries/impl/attac
 import { resolveConnectorDetails } from '../../helpers/resolve_connector_details';
 import { resolveDefaultConnectorId } from '../../helpers/resolve_default_connector_id';
 
-jest.mock('./constants', () => ({
-  ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS: 25,
-}));
-
 const mockIsWorkflowsEnabledForSpace = jest.fn();
 
 jest.mock('../../../lib/is_workflows_enabled_for_space', () => ({
   isWorkflowsEnabledForSpace: (...args: unknown[]) => mockIsWorkflowsEnabledForSpace(...args),
 }));
 
+import { ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS } from './constants';
 import { getRunStepDefinition } from './get_run_step_definition';
 
 const mockExecuteGenerationWorkflow = jest.fn();
@@ -290,11 +287,52 @@ describe('getRunStepDefinition', () => {
       await stepDefinition.handler(contextWithoutConnectorId as never);
 
       expect(mockResolveDefaultConnectorId).toHaveBeenCalledWith({
+        featureId: undefined,
         inference: undefined,
         logger: mockLogger,
         request: { headers: {} },
+        searchInferenceEndpoints: undefined,
         uiSettingsClient: mockUiSettingsClient,
       });
+    });
+
+    it('forwards feature_id so the step can name its tier instead of an endpoint', async () => {
+      const contextWithFeatureId = {
+        ...baseMockContext,
+        input: {
+          alert_retrieval_mode: 'custom_query' as const,
+          alert_retrieval_workflow_ids: [],
+          feature_id: 'alertzero_reasoning',
+          mode: 'sync' as const,
+          validation_workflow_id: '',
+        },
+      };
+
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler(contextWithFeatureId as never);
+
+      expect(mockResolveDefaultConnectorId).toHaveBeenCalledWith(
+        expect.objectContaining({ featureId: 'alertzero_reasoning' })
+      );
+    });
+
+    // `connector_id` stays the top of the resolution order, so a caller that names
+    // an endpoint outright is never overridden by a tier.
+    it('does not resolve a tier when connector_id and feature_id are both provided', async () => {
+      const contextWithBoth = {
+        ...syncMockContext,
+        input: {
+          ...syncMockContext.input,
+          feature_id: 'alertzero_reasoning',
+        },
+      };
+
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler(contextWithBoth as never);
+
+      expect(mockResolveDefaultConnectorId).not.toHaveBeenCalled();
     });
 
     it('uses the resolved default connector id for connector details when connector_id is omitted', async () => {
@@ -441,76 +479,147 @@ describe('getRunStepDefinition', () => {
     });
   });
 
-  describe('soft deadline (sync mode)', () => {
-    it('returns execution_uuid only when the pipeline exceeds the soft deadline', async () => {
-      mockExecuteGenerationWorkflow.mockReturnValue(new Promise(() => {}));
+  describe('sync mode has no soft deadline', () => {
+    // These tests drive fake time past ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS, so a
+    // handler that still raced the pipeline against that deadline would resolve
+    // early with `{ execution_uuid, status: 'pending' }` and fail all three. A delay
+    // shorter than the deadline would pass either way.
+    const pipelineResolvingAfter = (delayMs: number) =>
+      new Promise((resolve) => setTimeout(() => resolve(mockSuccessOutcome), delayMs));
 
-      const stepDefinition = getStepDefinition();
+    const pastTheSoftDeadline = ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS + 1_000;
 
-      const result = await stepDefinition.handler(syncMockContext as never);
-
-      expect(result.output).toEqual({ execution_uuid: 'test-execution-uuid', status: 'pending' });
-    });
-
-    it('returns status pending when the pipeline exceeds the soft deadline', async () => {
-      mockExecuteGenerationWorkflow.mockReturnValue(new Promise(() => {}));
-
-      const stepDefinition = getStepDefinition();
-
-      const result = await stepDefinition.handler(syncMockContext as never);
-
-      expect(result.output?.status).toBe('pending');
-    });
-
-    it('omits attack_discoveries when the pipeline exceeds the soft deadline', async () => {
-      mockExecuteGenerationWorkflow.mockReturnValue(new Promise(() => {}));
-
-      const stepDefinition = getStepDefinition();
-
-      const result = await stepDefinition.handler(syncMockContext as never);
-
-      expect(result.output).not.toHaveProperty('attack_discoveries');
-    });
-
-    it('returns the full sync output when the pipeline finishes before the soft deadline', async () => {
-      mockExecuteGenerationWorkflow.mockResolvedValue(mockSuccessOutcome);
-
-      const stepDefinition = getStepDefinition();
-
-      const result = await stepDefinition.handler(syncMockContext as never);
-
-      expect(result.output?.attack_discoveries).toEqual(handoverDiscoveries);
-    });
-  });
-
-  describe('soft deadline timer cleanup (sync mode)', () => {
     beforeEach(() => {
       jest.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.runOnlyPendingTimers();
       jest.useRealTimers();
     });
 
-    it('clears the soft-deadline timer when the pipeline rejects', async () => {
-      mockExecuteGenerationWorkflow.mockRejectedValue(new Error('Pipeline failed'));
+    it('does not resolve while the pipeline is still running past the soft deadline', async () => {
+      mockExecuteGenerationWorkflow.mockReturnValue(new Promise(() => {}));
+      const settled = jest.fn();
 
-      const stepDefinition = getStepDefinition();
+      void getStepDefinition()
+        .handler(syncMockContext as never)
+        .then(settled);
+      await jest.advanceTimersByTimeAsync(ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS * 2);
 
-      await stepDefinition.handler(syncMockContext as never);
-
-      expect(jest.getTimerCount()).toBe(0);
+      expect(settled).not.toHaveBeenCalled();
     });
 
-    it('clears the soft-deadline timer when the pipeline resolves before the deadline', async () => {
+    it('returns the discoveries when the pipeline finishes after the soft deadline', async () => {
+      mockExecuteGenerationWorkflow.mockReturnValue(pipelineResolvingAfter(pastTheSoftDeadline));
+
+      const handled = getStepDefinition().handler(syncMockContext as never);
+      await jest.advanceTimersByTimeAsync(pastTheSoftDeadline);
+
+      expect((await handled).output?.attack_discoveries).toEqual(handoverDiscoveries);
+    });
+
+    it('reports completed when the pipeline finishes after the soft deadline', async () => {
+      mockExecuteGenerationWorkflow.mockReturnValue(pipelineResolvingAfter(pastTheSoftDeadline));
+
+      const handled = getStepDefinition().handler(syncMockContext as never);
+      await jest.advanceTimersByTimeAsync(pastTheSoftDeadline);
+
+      expect((await handled).output?.status).toBe('completed');
+    });
+  });
+
+  // The discoveries dominate this step's output. A caller that reads them back
+  // from the index instead can opt out, keeping the output small enough to
+  // survive the engine's step-output eviction.
+  describe('include_attack_discoveries', () => {
+    beforeEach(() => {
+      mockExecuteGenerationWorkflow.mockResolvedValue(mockSuccessOutcome);
+    });
+
+    it('returns the discoveries when the input is omitted', async () => {
+      const result = await getStepDefinition().handler(syncMockContext as never);
+
+      expect(result.output?.attack_discoveries).toEqual(handoverDiscoveries);
+    });
+
+    it('omits the key entirely when false, rather than nulling it', async () => {
+      const result = await getStepDefinition().handler({
+        ...syncMockContext,
+        input: { ...syncMockContext.input, include_attack_discoveries: false },
+      } as never);
+
+      expect(result.output).not.toHaveProperty('attack_discoveries');
+    });
+
+    it('still returns the execution_uuid the discoveries can be queried by', async () => {
+      const result = await getStepDefinition().handler({
+        ...syncMockContext,
+        input: { ...syncMockContext.input, include_attack_discoveries: false },
+      } as never);
+
+      expect(result.output?.execution_uuid).toBe(mockSuccessOutcome.generationResult.executionUuid);
+    });
+
+    it('still reports the discovery count when false', async () => {
+      const result = await getStepDefinition().handler({
+        ...syncMockContext,
+        input: { ...syncMockContext.input, include_attack_discoveries: false },
+      } as never);
+
+      expect(result.output?.discovery_count).toBe(
+        mockSuccessOutcome.validationResult.generatedCount
+      );
+    });
+
+    it('omits the key on the validation-failed path too', async () => {
+      mockExecuteGenerationWorkflow.mockResolvedValue({ outcome: 'no_alerts' });
+
+      const result = await getStepDefinition().handler({
+        ...syncMockContext,
+        input: { ...syncMockContext.input, include_attack_discoveries: false },
+      } as never);
+
+      expect(result.output).not.toHaveProperty('attack_discoveries');
+    });
+  });
+
+  // The engine aborts the step's signal when the step (or the enclosing parallel
+  // branch) times out. Without this probe the awaited pipeline keeps making
+  // inference calls after the step has already been marked failed.
+  describe('cancellation', () => {
+    const getShouldStopExecution = (): (() => boolean) =>
+      mockExecuteGenerationWorkflow.mock.calls[0][0].shouldStopExecution;
+
+    it('forwards a stop probe to the pipeline', async () => {
       mockExecuteGenerationWorkflow.mockResolvedValue(mockSuccessOutcome);
 
-      const stepDefinition = getStepDefinition();
+      await getStepDefinition().handler(syncMockContext as never);
 
-      await stepDefinition.handler(syncMockContext as never);
+      expect(typeof getShouldStopExecution()).toBe('function');
+    });
 
-      expect(jest.getTimerCount()).toBe(0);
+    it('reports false while the step is running', async () => {
+      mockExecuteGenerationWorkflow.mockResolvedValue(mockSuccessOutcome);
+
+      await getStepDefinition().handler({
+        ...syncMockContext,
+        abortSignal: new AbortController().signal,
+      } as never);
+
+      expect(getShouldStopExecution()()).toBe(false);
+    });
+
+    it('reports true once the step is aborted', async () => {
+      mockExecuteGenerationWorkflow.mockResolvedValue(mockSuccessOutcome);
+      const controller = new AbortController();
+
+      await getStepDefinition().handler({
+        ...syncMockContext,
+        abortSignal: controller.signal,
+      } as never);
+      controller.abort();
+
+      expect(getShouldStopExecution()()).toBe(true);
     });
   });
 

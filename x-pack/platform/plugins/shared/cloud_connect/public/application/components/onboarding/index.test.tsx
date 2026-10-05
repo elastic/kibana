@@ -7,12 +7,21 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { OnboardingPage } from '.';
 import { useCloudConnectedAppContext } from '../../app_context';
 import type { CloudConnectedAppContextValue } from '../../app_context';
 
 jest.mock('../../app_context');
+jest.mock('@elastic/eui-illustrations', () => ({
+  arrowDeployCloud: {
+    id: 'arrow-deploy-cloud',
+    title: 'Arrow deploy cloud',
+    light: '<svg></svg>',
+    dark: '<svg></svg>',
+  },
+}));
 jest.mock('./connection_wizard', () => ({
   ConnectionWizard: ({ onConnect }: { onConnect: () => void }) => (
     <div data-test-subj="connection-wizard">Connection Wizard Mock</div>
@@ -33,7 +42,7 @@ const mockUseCloudConnectedAppContext = useCloudConnectedAppContext as jest.Mock
 const renderWithIntl = (component: React.ReactElement) => {
   return render(
     <IntlProvider locale="en" messages={{}}>
-      {component}
+      <EuiThemeProvider>{component}</EuiThemeProvider>
     </IntlProvider>
   );
 };

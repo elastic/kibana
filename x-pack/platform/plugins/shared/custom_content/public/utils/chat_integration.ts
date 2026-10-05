@@ -6,8 +6,11 @@
  */
 
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { FetchContext } from '@kbn/presentation-publishing';
 import {
   CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
+  MAX_FETCH_CONTEXT_BYTES,
+  MAX_SHORT_FIELD_LENGTH,
   type CustomContentContextAttachmentData,
 } from '../../common/panel_context_attachment';
 
@@ -19,12 +22,55 @@ import {
 const getCustomContentAttachmentId = (embeddableId: string) =>
   `${CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE}-${embeddableId}`;
 
-export const buildCustomContentContextAttachment = (
-  template: string,
-  esqlQuery: string | undefined,
-  embeddableId: string,
-  panelTitle?: string
-): AttachmentInput<
+export type CustomContentFetchContext = Partial<
+  Pick<
+    FetchContext,
+    'timeRange' | 'esqlVariables' | 'filters' | 'query' | 'isApproximate' | 'projectRouting'
+  >
+>;
+
+export interface BuildCustomContentContextAttachmentParams {
+  template: string;
+  embeddableId: string;
+  esqlQuery?: string;
+  panelTitle?: string;
+  /** The panel's rendered height, so the preview starts at the size it had on the dashboard. */
+  panelHeight?: number;
+  fetchContext?: CustomContentFetchContext;
+}
+
+/** Dropped rather than rejected: an oversized field costs a faithful preview, not the attachment. */
+const withinBudget = <T>(value: T | undefined): T | undefined =>
+  value !== undefined && JSON.stringify(value).length <= MAX_FETCH_CONTEXT_BYTES
+    ? value
+    : undefined;
+
+const buildSnapshotFetchContext = (fetchContext?: CustomContentFetchContext) => {
+  const esqlVariables = fetchContext?.esqlVariables?.length
+    ? withinBudget(fetchContext.esqlVariables)
+    : undefined;
+  const filters = fetchContext?.filters?.length
+    ? withinBudget(fetchContext.filters as unknown as Array<Record<string, unknown>>)
+    : undefined;
+  const query = withinBudget(fetchContext?.query as unknown as Record<string, unknown>);
+
+  return {
+    ...(esqlVariables ? { esql_variables: esqlVariables } : {}),
+    ...(filters ? { filters } : {}),
+    ...(query ? { query } : {}),
+    ...(fetchContext?.isApproximate ? { is_approximate: true } : {}),
+    ...(fetchContext?.projectRouting ? { project_routing: fetchContext.projectRouting } : {}),
+  };
+};
+
+export const buildCustomContentContextAttachment = ({
+  template,
+  embeddableId,
+  esqlQuery,
+  panelTitle,
+  panelHeight,
+  fetchContext,
+}: BuildCustomContentContextAttachmentParams): AttachmentInput<
   typeof CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
   CustomContentContextAttachmentData
 > => ({
@@ -33,7 +79,11 @@ export const buildCustomContentContextAttachment = (
   data: {
     panel_template: template,
     esql_query: esqlQuery,
-    panel_title: panelTitle,
+    // Truncated rather than left to fail validation
+    panel_title: panelTitle?.slice(0, MAX_SHORT_FIELD_LENGTH),
     embeddable_id: embeddableId,
+    ...(panelHeight ? { panel_height: panelHeight } : {}),
+    ...(fetchContext?.timeRange ? { time_range: fetchContext.timeRange } : {}),
+    ...buildSnapshotFetchContext(fetchContext),
   },
 });

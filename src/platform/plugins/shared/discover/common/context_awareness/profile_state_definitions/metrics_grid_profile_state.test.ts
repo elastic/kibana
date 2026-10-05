@@ -39,6 +39,8 @@ describe('METRICS_STATE_DEF', () => {
       histogramPercentile: { type: ProfileStateType.Url },
       sortField: { type: ProfileStateType.Url },
       sortDirection: { type: ProfileStateType.Url },
+      dimensions: { type: ProfileStateType.Url },
+      searchTerm: { type: ProfileStateType.Url },
     });
   });
 
@@ -58,6 +60,8 @@ describe('METRICS_STATE_DEF', () => {
       histogramPercentile: 'p95',
       sortField: 'alphabetically',
       sortDirection: 'asc',
+      dimensions: [],
+      searchTerm: '',
     });
   });
 

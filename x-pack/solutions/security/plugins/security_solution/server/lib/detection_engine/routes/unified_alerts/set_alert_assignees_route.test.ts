@@ -6,6 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import type { RuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
@@ -16,7 +17,10 @@ import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/req
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { setUnifiedAlertsAssigneesRoute } from './set_alert_assignees_route';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
-import { MAX_ALERTS_PER_TRIGGER } from '../../../../../common/workflows/triggers';
+import {
+  MAX_ALERTS_PER_TRIGGER,
+  MAX_ASSIGNEE_UID_LENGTH,
+} from '../../../../../common/workflows/triggers';
 
 const makeSearchResponse = (
   hits: Array<{ _id: string; _index: string; _source?: Record<string, unknown> }>
@@ -236,8 +240,8 @@ describe('set unified alerts assignees', () => {
         expect.anything(),
         expect.objectContaining({
           alertIds: ['alert-1', 'alert-2'],
-          assigneesToAdd: ['user-1'],
-          assigneesToRemove: [],
+          assigneesAdded: ['user-1'],
+          assigneesRemoved: [],
           truncated: false,
         })
       );
@@ -264,8 +268,8 @@ describe('set unified alerts assignees', () => {
         expect.anything(),
         expect.objectContaining({
           attackIds: ['attack-1'],
-          assigneesToAdd: ['user-1'],
-          assigneesToRemove: [],
+          assigneesAdded: ['user-1'],
+          assigneesRemoved: [],
           truncated: false,
         })
       );
@@ -549,6 +553,128 @@ describe('set unified alerts assignees', () => {
       expect(mockEventBus.emitAlertAssigneesChanged).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({ truncated: true })
+      );
+    });
+
+    test('computes actual delta — filters already-present assignees from assigneesAdded', async () => {
+      // Encoding WHY: the event must not report 'existing-uid' as added because alert-1
+      // already has it. Only 'new-uid' is genuinely absent and should appear in assigneesAdded.
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
+        makeSearchResponse([
+          {
+            _id: 'alert-1',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_assignee_ids': ['existing-uid'] },
+          },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL,
+        body: {
+          ids: ['alert-1'],
+          assignees: { add: ['existing-uid', 'new-uid'], remove: [] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ assigneesAdded: ['new-uid'], assigneesRemoved: [] })
+      );
+    });
+
+    test('emits for a detection alert when the only changed assignee is over-length — empty payload and truncated=true', async () => {
+      // Encoding WHY: collectChangedIdsByFamily must use raw request arrays, not allValid*.
+      // An over-length-only change must still trigger the event for the correct family; the
+      // length filter applies only to the schema-bounded payload.
+      const overLengthUid = 'x'.repeat(MAX_ASSIGNEE_UID_LENGTH + 1);
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
+        makeSearchResponse([
+          {
+            _id: 'alert-1',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_assignee_ids': [] },
+          },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL,
+        body: { ids: ['alert-1'], assignees: { add: [overLengthUid], remove: [] } },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ alertIds: ['alert-1'], assigneesAdded: [], truncated: true })
+      );
+      expect(mockEventBus.emitAttackAssigneesChanged).not.toHaveBeenCalled();
+    });
+
+    test('emits for an attack discovery document when the only changed assignee is over-length — empty payload and truncated=true', async () => {
+      const overLengthUid = 'x'.repeat(MAX_ASSIGNEE_UID_LENGTH + 1);
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
+        makeSearchResponse([
+          {
+            _id: 'attack-1',
+            _index: '.alerts-security.attack.discovery.alerts-default',
+            _source: { 'kibana.alert.workflow_assignee_ids': [] },
+          },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL,
+        body: { ids: ['attack-1'], assignees: { add: [overLengthUid], remove: [] } },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAttackAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ attackIds: ['attack-1'], assigneesAdded: [], truncated: true })
+      );
+      expect(mockEventBus.emitAlertAssigneesChanged).not.toHaveBeenCalled();
+    });
+
+    test('mixed-family: computes independent per-family deltas — attack emit and alert emit do not share sources', async () => {
+      // Encoding WHY (regression): a shared delta over all hits causes an assignee already
+      // on every attack doc to be absent from actualAdded when the alert emit should still
+      // report it as added, and vice versa. Each family must use its own sources.
+      const ATTACK_INDEX = `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-default`;
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
+        makeSearchResponse([
+          {
+            _id: 'alert-1',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_assignee_ids': ['alert-uid'] }, // alert already has alert-uid
+          },
+          {
+            _id: 'attack-1',
+            _index: ATTACK_INDEX,
+            _source: { 'kibana.alert.workflow_assignee_ids': ['attack-uid'] }, // attack already has attack-uid
+          },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL,
+        body: {
+          ids: ['alert-1', 'attack-1'],
+          assignees: { add: ['alert-uid', 'attack-uid'], remove: [] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      // alert-1 already has alert-uid → only attack-uid is new for the alert family
+      expect(mockEventBus.emitAlertAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ assigneesAdded: ['attack-uid'], assigneesRemoved: [] })
+      );
+      // attack-1 already has attack-uid → only alert-uid is new for the attack family
+      expect(mockEventBus.emitAttackAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ assigneesAdded: ['alert-uid'], assigneesRemoved: [] })
       );
     });
   });

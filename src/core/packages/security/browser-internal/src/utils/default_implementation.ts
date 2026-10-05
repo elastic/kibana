@@ -18,6 +18,8 @@ export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract
     },
     serviceAccounts: {
       isEnabled: () => false,
+      canCreate: () => false,
+      create: () => Promise.reject(new Error('Service accounts are disabled')),
     },
   };
 };
