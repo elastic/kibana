@@ -859,7 +859,7 @@ export const generateMatcherContextDoc = (): string => {
   const severities = formatEnumValuesList(getSeverityValues());
 
   const formatMatcherFieldType = (path: string, type: string): string => {
-    if (path === 'episode_status') return episodeStatuses;
+    if (path === 'alert_status') return episodeStatuses;
     if (path === 'severity') return severities;
     if (path === 'data') return '`data.*` object';
     return type;

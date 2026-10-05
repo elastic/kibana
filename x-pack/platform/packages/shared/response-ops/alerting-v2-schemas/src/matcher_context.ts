@@ -11,7 +11,11 @@ import type { AlertEventSeverity } from './severity';
 export interface MatcherContext {
   last_event_timestamp: string;
   group_hash: string;
+  alert_id: string;
+  alert_status: AlertEpisodeStatus;
+  /** @deprecated Use `alert_id`. Kept so that saved matchers referencing it keep matching. */
   episode_id: string;
+  /** @deprecated Use `alert_status`. Kept so that saved matchers referencing it keep matching. */
   episode_status: AlertEpisodeStatus;
   severity?: AlertEventSeverity;
   data?: Record<string, unknown>;
@@ -26,14 +30,15 @@ export interface MatcherContextFieldDescriptor {
 
 /**
  * Canonical list of KQL matcher context fields. Source of truth for autocomplete
- * and for Agent Builder skill docs (`generateMatcherContextDoc`).
+ * and for Agent Builder skill docs (`generateMatcherContextDoc`). The deprecated
+ * `episode_id` and `episode_status` are left out so that new matchers use the alert fields.
  */
 export const MATCHER_CONTEXT_FIELDS: MatcherContextFieldDescriptor[] = [
-  { path: 'episode_id', type: 'string', description: 'The episode UUID' },
+  { path: 'alert_id', type: 'string', description: 'The alert UUID' },
   {
-    path: 'episode_status',
+    path: 'alert_status',
     type: 'string',
-    description: 'Episode lifecycle status',
+    description: 'Alert lifecycle status',
   },
   { path: 'group_hash', type: 'string', description: 'Hash of the grouping fields' },
   {
@@ -41,7 +46,7 @@ export const MATCHER_CONTEXT_FIELDS: MatcherContextFieldDescriptor[] = [
     type: 'string',
     description: 'Timestamp of the most recent event',
   },
-  { path: 'severity', type: 'string', description: 'Episode severity when present' },
+  { path: 'severity', type: 'string', description: 'Alert severity when present' },
   {
     path: 'data',
     type: 'object',

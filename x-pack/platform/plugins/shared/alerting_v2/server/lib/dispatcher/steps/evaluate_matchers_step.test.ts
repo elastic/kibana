@@ -133,6 +133,23 @@ describe('EvaluateMatchersStep', () => {
     expect(matched[0].policy).toBe(policy);
   });
 
+  it.each([
+    'alert_id: "alert-1" and alert_status: active',
+    'episode_id: "alert-1" and episode_status: active',
+  ])('matches the alert fields and their deprecated episode names: %s', async (expression) => {
+    const episode = createAlertEpisode({
+      rule_id: 'r1',
+      episode_id: 'alert-1',
+      episode_status: 'active',
+    });
+    const rule = createRule({ id: 'r1' });
+    const policy = createActionPolicy({ id: 'p1', matcher: { expression } });
+
+    const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+    expect(matched).toHaveLength(1);
+  });
+
   it('matches with complex KQL using AND operator', async () => {
     const episode = createAlertEpisode({
       rule_id: 'r1',

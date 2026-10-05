@@ -44,7 +44,7 @@ const suggestValues = (
   );
 
 /*
- * Alert events backing the ES-aggregation branches (`group_hash`, `episode_id`
+ * Alert events backing the ES-aggregation branches (`group_hash`, `alert_id`
  * and the `data.*` prefix). Every value is prefixed with `scout` so the
  * prefix-filtered assertions stay exact even if the rule executor writes its
  * own events into `.rule-events` while a test runs.
@@ -93,23 +93,26 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
     await apiServices.alertingV2.ruleEvents.cleanUp();
   });
 
-  apiTest(
-    'returns a 200 with an array of suggested values for a static field',
-    async ({ apiClient }) => {
-      // `episode_status` is backed by static suggestions, so the result is
-      // deterministic without seeding any alert events or rules.
-      const response = await suggestValues(
-        apiClient,
-        { field: 'episode_status', query: '' },
-        { headers: writerHeaders }
-      );
+  // `episode_status` is the deprecated matcher name of `alert_status`.
+  for (const field of ['alert_status', 'episode_status']) {
+    apiTest(
+      `${field}: returns a 200 with an array of suggested values for a static field`,
+      async ({ apiClient }) => {
+        // The status is backed by static suggestions, so the result is
+        // deterministic without seeding any alert events or rules.
+        const response = await suggestValues(
+          apiClient,
+          { field, query: '' },
+          { headers: writerHeaders }
+        );
 
-      expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual(
-        expect.arrayContaining(['inactive', 'pending', 'active', 'recovering'])
-      );
-    }
-  );
+        expect(response).toHaveStatusCode(200);
+        expect(response.body).toStrictEqual(
+          expect.arrayContaining(['inactive', 'pending', 'active', 'recovering'])
+        );
+      }
+    );
+  }
 
   apiTest('filters static suggestions by the query prefix', async ({ apiClient }) => {
     const response = await suggestValues(
@@ -156,21 +159,24 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
     }
   );
 
-  apiTest(
-    'episode_id: aggregates the episode ids stored on the alert events',
-    async ({ apiClient, apiServices }) => {
-      await apiServices.alertingV2.ruleEvents.seed(buildSeededAlertEvents());
+  // `episode_id` is the deprecated matcher name of `alert_id`.
+  for (const field of ['alert_id', 'episode_id']) {
+    apiTest(
+      `${field}: aggregates the alert ids stored on the alert events`,
+      async ({ apiClient, apiServices }) => {
+        await apiServices.alertingV2.ruleEvents.seed(buildSeededAlertEvents());
 
-      const response = await suggestValues(
-        apiClient,
-        { field: 'episode_id', query: 'scout-episode-w' },
-        { headers: writerHeaders }
-      );
+        const response = await suggestValues(
+          apiClient,
+          { field, query: 'scout-episode-w' },
+          { headers: writerHeaders }
+        );
 
-      expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual(['scout-episode-web']);
-    }
-  );
+        expect(response).toHaveStatusCode(200);
+        expect(response.body).toStrictEqual(['scout-episode-web']);
+      }
+    );
+  }
 
   apiTest(
     'data.*: aggregates the values of a field nested under data',

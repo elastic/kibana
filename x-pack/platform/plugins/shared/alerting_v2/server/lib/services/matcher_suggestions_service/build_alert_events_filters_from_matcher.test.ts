@@ -49,21 +49,21 @@ describe('buildAlertEventsFiltersFromMatcher', () => {
   });
 
   describe('field translation', () => {
-    it('translates episode_status to episode.status', () => {
-      const filters = buildAlertEventsFiltersFromMatcher('episode_status : pending');
+    it.each(['alert_status', 'episode_status'])('translates %s to alert.status', (field) => {
+      const filters = buildAlertEventsFiltersFromMatcher(`${field} : pending`);
       const json = stringify(filters);
       expect(filters).toHaveLength(1);
-      expect(json).toContain('episode.status');
-      expect(json).not.toContain('episode_status');
+      expect(json).toContain('alert.status');
+      expect(json).not.toContain(field);
     });
 
-    it('translates episode_id to episode.id', () => {
-      const filters = buildAlertEventsFiltersFromMatcher('episode_id : "ep-1"');
+    it.each(['alert_id', 'episode_id'])('translates %s to alert.id', (field) => {
+      const filters = buildAlertEventsFiltersFromMatcher(`${field} : "alert-1"`);
       const json = stringify(filters);
       expect(filters).toHaveLength(1);
-      expect(json).toContain('episode.id');
-      expect(json).not.toContain('episode_id');
-      expect(json).toContain('ep-1');
+      expect(json).toContain('alert.id');
+      expect(json).not.toContain(field);
+      expect(json).toContain('alert-1');
     });
   });
 
@@ -124,12 +124,12 @@ describe('buildAlertEventsFiltersFromMatcher', () => {
 
     it('preserves AND across two supported clauses', () => {
       const filters = buildAlertEventsFiltersFromMatcher(
-        'rule.id : "abc" AND episode_status : active'
+        'rule.id : "abc" AND alert_status : active'
       );
       const json = stringify(filters);
       expect(filters).toHaveLength(1);
       expect(json).toContain('rule.id');
-      expect(json).toContain('episode.status');
+      expect(json).toContain('alert.status');
       expect(json).toContain('active');
     });
 

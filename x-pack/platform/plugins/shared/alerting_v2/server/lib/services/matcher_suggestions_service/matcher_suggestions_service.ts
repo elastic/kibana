@@ -20,14 +20,18 @@ const ALERT_EVENTS_LOOKBACK = 'now-24h';
 
 const EPISODE_STATUS_VALUES = Object.values(alertEpisodeStatus);
 
+// `EpisodeStatus` and `EpisodeId` are the deprecated matcher names of `AlertStatus` and `AlertId`.
 enum MatcherField {
+  AlertStatus = 'alert_status',
+  AlertId = 'alert_id',
   EpisodeStatus = 'episode_status',
   EpisodeId = 'episode_id',
   GroupHash = 'group_hash',
 }
 
 const MATCHER_FIELD_TO_ES_FIELD: Partial<Record<MatcherField, string>> = {
-  [MatcherField.EpisodeId]: 'episode.id',
+  [MatcherField.AlertId]: 'alert.id',
+  [MatcherField.EpisodeId]: 'alert.id',
   [MatcherField.GroupHash]: 'group_hash',
 };
 
@@ -56,6 +60,7 @@ export class MatcherSuggestionsService {
     }
 
     switch (field) {
+      case MatcherField.AlertStatus:
       case MatcherField.EpisodeStatus:
         return this.getStaticSuggestions(EPISODE_STATUS_VALUES, query);
 
@@ -81,7 +86,7 @@ export class MatcherSuggestionsService {
               { term: { type: 'alert' } },
               { range: { '@timestamp': { gte: ALERT_EVENTS_LOOKBACK } } },
               { exists: { field: 'data' } },
-              { terms: { 'episode.status': ['pending', 'active', 'recovering'] } },
+              { terms: { 'alert.status': ['pending', 'active', 'recovering'] } },
               ...buildAlertEventsFiltersFromMatcher(matcher ?? ''),
             ],
           },
