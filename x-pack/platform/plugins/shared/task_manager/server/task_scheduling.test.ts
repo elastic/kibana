@@ -10,7 +10,7 @@ import moment from 'moment';
 
 import { TaskScheduling } from './task_scheduling';
 import { asOk } from './lib/result_type';
-import type { ConcreteTaskInstance } from './task';
+import type { ConcreteTaskInstance, TaskInstance, TaskRunAs } from './task';
 import { TaskStatus } from './task';
 import { createInitialMiddleware } from './lib/middleware';
 import { taskStoreMock } from './task_store.mock';
@@ -19,6 +19,7 @@ import { TaskTypeDictionary } from './task_type_dictionary';
 import { taskManagerMock } from './mocks';
 import { omit } from 'lodash';
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { TaskAlreadyRunningError } from './lib/errors';
 import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
 
@@ -440,6 +441,125 @@ describe('TaskScheduling', () => {
       })
     ).rejects.toMatchObject({
       statusCode: 409,
+    });
+  });
+
+  describe('runAs', () => {
+    const runAs: TaskRunAs = {
+      workloadType: 'workflow',
+      workloadId: 'workflow-1',
+      spaceId: 'default',
+      expectedServiceAccountId: 'service-account-1',
+    };
+    const serviceAccountCredential = { type: 'service_account', ...runAs };
+    const middlewareRunAs: TaskRunAs = { ...runAs, workloadId: 'workflow-2' };
+
+    const createTaskSchedulingWithMiddlewareRunAs = () => {
+      const beforeSave = jest.fn(async ({ taskInstance }: { taskInstance: TaskInstance }) => ({
+        taskInstance: { ...taskInstance, runAs: middlewareRunAs },
+      }));
+      const taskScheduling = new TaskScheduling({
+        ...taskSchedulingOpts,
+        middleware: { ...createInitialMiddleware(), beforeSave },
+      });
+      return { beforeSave, taskScheduling };
+    };
+
+    test('schedule keeps the runAs of the caller and hides it from the middleware', async () => {
+      const { beforeSave, taskScheduling } = createTaskSchedulingWithMiddlewareRunAs();
+
+      await taskScheduling.schedule({ taskType: 'foo', params: {}, state: {}, runAs });
+      await taskScheduling.schedule({ taskType: 'foo', params: {}, state: {} });
+
+      expect(beforeSave.mock.calls[0][0].taskInstance).not.toHaveProperty('runAs');
+      expect(mockTaskStore.schedule.mock.calls[0][0].runAs).toEqual(runAs);
+      expect(mockTaskStore.schedule.mock.calls[1][0]).not.toHaveProperty('runAs');
+    });
+
+    test('bulkSchedule keeps the runAs of the caller and hides it from the middleware', async () => {
+      const { beforeSave, taskScheduling } = createTaskSchedulingWithMiddlewareRunAs();
+
+      await taskScheduling.bulkSchedule([
+        { taskType: 'foo', params: {}, state: {}, runAs },
+        { taskType: 'foo', params: {}, state: {} },
+      ]);
+
+      expect(beforeSave.mock.calls[0][0].taskInstance).not.toHaveProperty('runAs');
+      expect(beforeSave.mock.calls[1][0].taskInstance).not.toHaveProperty('runAs');
+      const [[serviceAccountTask, apiKeyTask]] = mockTaskStore.bulkSchedule.mock.calls[0];
+      expect(serviceAccountTask.runAs).toEqual(runAs);
+      expect(apiKeyTask).not.toHaveProperty('runAs');
+    });
+
+    test.each([
+      ['a different runAs', serviceAccountCredential, middlewareRunAs],
+      ['runAs for a task without one', undefined, runAs],
+      ['no runAs for a task with one', serviceAccountCredential, undefined],
+    ])(
+      'ensureScheduled rejects with a conflict when called with %s',
+      async (_, credential, taskRunAs) => {
+        const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+        const bulkUpdateSchedulesSpy = jest.spyOn(taskScheduling, 'bulkUpdateSchedules');
+        mockTaskStore.schedule.mockRejectedValueOnce({ statusCode: 409 });
+        mockTaskStore.getCredential.mockResolvedValueOnce(credential);
+
+        const error = await taskScheduling
+          .ensureScheduled({ ...getTask(), runAs: taskRunAs })
+          .catch((e) => e);
+
+        expect(SavedObjectsErrorHelpers.isConflictError(error)).toBe(true);
+        expect(error.message).toBe(
+          'Task "my-foo-id" exists with a different runAs. Remove it and schedule it again.'
+        );
+        expect(mockTaskStore.getCredential).toHaveBeenCalledWith('my-foo-id');
+        expect(bulkUpdateSchedulesSpy).not.toHaveBeenCalled();
+      }
+    );
+
+    test.each([
+      [
+        'has the same runAs',
+        () => mockTaskStore.getCredential.mockResolvedValueOnce(serviceAccountCredential),
+      ],
+      [
+        'is removed before its credential is read',
+        () =>
+          mockTaskStore.getCredential.mockRejectedValueOnce(
+            SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'my-foo-id')
+          ),
+      ],
+    ])(
+      'ensureScheduled updates the schedule of an existing task that %s',
+      async (_, mockCredential) => {
+        const task = { ...getTask(), runAs };
+        const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+        const bulkUpdateSchedulesSpy = jest
+          .spyOn(taskScheduling, 'bulkUpdateSchedules')
+          .mockResolvedValue({ tasks: [task], errors: [] });
+        mockTaskStore.schedule.mockRejectedValueOnce({ statusCode: 409 });
+        mockCredential();
+
+        const result = await taskScheduling.ensureScheduled(task);
+
+        expect(bulkUpdateSchedulesSpy).toHaveBeenCalledWith(
+          ['my-foo-id'],
+          { interval: '1m' },
+          undefined
+        );
+        expect(result.id).toEqual('my-foo-id');
+      }
+    );
+
+    test('ensureScheduled throws when the credential of the existing task cannot be read', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const bulkUpdateSchedulesSpy = jest.spyOn(taskScheduling, 'bulkUpdateSchedules');
+      mockTaskStore.schedule.mockRejectedValueOnce({ statusCode: 409 });
+      mockTaskStore.getCredential.mockRejectedValueOnce(new Error('Failure'));
+
+      await expect(taskScheduling.ensureScheduled({ ...getTask(), runAs })).rejects.toThrow(
+        'Failure'
+      );
+      expect(bulkUpdateSchedulesSpy).not.toHaveBeenCalled();
     });
   });
 

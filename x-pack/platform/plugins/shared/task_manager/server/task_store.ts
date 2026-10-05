@@ -27,7 +27,9 @@ import type {
   SavedObjectsRawDoc,
   ISavedObjectsRepository,
   ElasticsearchClient,
+  SavedObjectErrorResult,
   SavedObjectsBulkCreateObject,
+  SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateObject,
 } from '@kbn/core/server';
 
@@ -59,6 +61,8 @@ import type {
   PartialConcreteTaskInstance,
   PartialSerializedConcreteTaskInstance,
   ApiKeyOptions,
+  TaskCredential,
+  TaskInstanceWithId,
 } from './task';
 import { TaskStatus, TaskLifecycleResult } from './task';
 
@@ -73,6 +77,10 @@ import { TASK_SO_NAME, INVALIDATE_API_KEY_SO_NAME } from './saved_objects';
 import type { ApiKeyStrategy, ApiKeySOFields, InvalidationTarget } from './api_key_strategy';
 import { getFirstRunAt } from './lib/get_first_run_at';
 import { isInterval } from './lib/intervals';
+import {
+  getServiceAccountCredentialAttributes,
+  SERVICE_ACCOUNT_CREDENTIAL_TYPE,
+} from './lib/service_account_credential';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -127,6 +135,42 @@ export type BulkGetResult = Array<
   Result<ConcreteTaskInstance, { type: string; id: string; error: SavedObjectError }>
 >;
 
+type TaskBulkCreateObject = SavedObjectsBulkCreateObject<SerializedConcreteTaskInstance>;
+type TaskBulkCreateResult =
+  SavedObjectsBulkResponse<SerializedConcreteTaskInstance>['saved_objects'][number];
+
+type ServiceAccountCredentialFields = ReturnType<typeof getServiceAccountCredentialAttributes>;
+
+const BULK_SCHEDULE_WRITE_MODES = ['serviceAccount', 'overwrite', 'create'] as const;
+type BulkScheduleWriteMode = (typeof BULK_SCHEDULE_WRITE_MODES)[number];
+
+type BulkScheduleTask =
+  | { mode: 'conflict'; taskInstance: TaskInstanceWithId; conflict: SavedObjectErrorResult }
+  | {
+      mode: 'serviceAccount';
+      taskInstance: TaskInstanceWithId;
+      credentialFields: ServiceAccountCredentialFields;
+    }
+  | { mode: 'overwrite'; taskInstance: TaskInstanceWithId; version: string }
+  | { mode: 'create'; taskInstance: TaskInstanceWithId };
+
+type BulkScheduleWriteTask = Exclude<BulkScheduleTask, { mode: 'conflict' }>;
+
+// Where each task's result is, so the response keeps the order of the input.
+type BulkSchedulePlacement =
+  | { mode: BulkScheduleWriteMode; index: number }
+  | { conflict: SavedObjectErrorResult };
+
+const getCredentialConflict = (id: string): SavedObjectErrorResult => ({
+  id,
+  type: 'task',
+  error: SavedObjectsErrorHelpers.decorateConflictError(
+    new Error(
+      `Task "${id}" has a credential and can't be overwritten. Remove it and schedule it again.`
+    )
+  ).output.payload,
+});
+
 /**
  * Wraps an elasticsearch connection and provides a task manager-specific
  * interface into the index.
@@ -143,6 +187,7 @@ export class TaskStore {
   private savedObjectsRepository: ISavedObjectsRepository;
   private savedObjectsService: SavedObjectsServiceStart;
   private _invalidationSoClient?: SavedObjectsClientContract;
+  private _serviceAccountSoClient?: SavedObjectsClientContract;
   private serializer: ISavedObjectsSerializer;
   private adHocTaskCounter: AdHocTaskCounter;
   private security: SecurityServiceStart;
@@ -159,6 +204,18 @@ export class TaskStore {
       });
     }
     return this._invalidationSoClient;
+  }
+
+  // Creates tasks that run as a service account. Unlike the internal repository it encrypts
+  // `encryptedCredential`, and it needs no request.
+  private get serviceAccountSoClient(): SavedObjectsClientContract {
+    if (!this._serviceAccountSoClient) {
+      this._serviceAccountSoClient = this.savedObjectsService.getUnsafeInternalClient({
+        includedHiddenTypes: [TASK_SO_NAME],
+        excludedExtensions: [SPACES_EXTENSION_ID],
+      });
+    }
+    return this._serviceAccountSoClient;
   }
 
   /**
@@ -219,6 +276,30 @@ export class TaskStore {
     }
   }
 
+  private getServiceAccountCredentialAttributes(taskInstance: TaskInstance) {
+    const { runAs, taskType } = taskInstance;
+    if (!runAs) {
+      return undefined;
+    }
+    if (!this.security.serviceAccounts.isEnabled()) {
+      throw new Error(
+        'Unable to schedule task(s) with runAs because service accounts are disabled.'
+      );
+    }
+    if (!this.canEncryptSo()) {
+      throw new Error(
+        'Unable to schedule task(s) with runAs because the Encrypted Saved Objects plugin has not been registered or is missing encryption key.'
+      );
+    }
+    const attributes = getServiceAccountCredentialAttributes(runAs);
+    if (!this.definitions.get(taskType)?.runAs?.workloadTypes.includes(runAs.workloadType)) {
+      throw new Error(
+        `Task type "${taskType}" does not allow runAs with workload type "${runAs.workloadType}".`
+      );
+    }
+    return attributes;
+  }
+
   private getSoClientForCreate(options: ApiKeyOptions) {
     if (options.request && this.getIsSecurityEnabled()) {
       return this.savedObjectsService.getScopedClient(options.request, {
@@ -242,7 +323,10 @@ export class TaskStore {
       const docsWithApiKeys: ConcreteTaskInstance[] = [];
 
       docs.forEach((taskInstance) => {
-        if (docHasEncryptedApiKey(taskInstance)) {
+        if (
+          docHasEncryptedApiKey(taskInstance) &&
+          taskInstance.credential?.type !== SERVICE_ACCOUNT_CREDENTIAL_TYPE
+        ) {
           docsWithApiKeys.push(taskInstance);
           const targets = this.apiKeyStrategy.getApiKeyIdsForInvalidation(taskInstance);
           if (targets.length > 0) {
@@ -494,13 +578,18 @@ export class TaskStore {
       throw e;
     }
     this.definitions.ensureHas(taskInstance.taskType);
+    const serviceAccountAttributes = this.getServiceAccountCredentialAttributes(taskInstance);
 
     const apiKeySOFieldsMap =
-      (await this.grantApiKeysFromRequest([taskInstance], options)) || new Map();
+      (serviceAccountAttributes
+        ? null
+        : await this.grantApiKeysFromRequest([taskInstance], options)) || new Map();
     const grantedApiKeyFields = apiKeySOFieldsMap.get(taskInstance.id);
     const apiKeySOFields = grantedApiKeyFields || {};
 
-    const soClient = this.getSoClientForCreate(options || {});
+    const soClient = serviceAccountAttributes
+      ? this.serviceAccountSoClient
+      : this.getSoClientForCreate(options || {});
 
     let savedObject;
     try {
@@ -513,6 +602,7 @@ export class TaskStore {
         {
           ...taskInstanceToAttributes(validatedTaskInstance, id),
           ...apiKeySOFields,
+          ...serviceAccountAttributes,
           runAt: getFirstRunAt({ taskInstance: validatedTaskInstance, logger: this.logger }),
         },
         { id, refresh: false }
@@ -564,104 +654,251 @@ export class TaskStore {
       this.errors$.next(e);
       throw e;
     }
-    // Assign generated ids before granting so every credential remains correlated with the saved
-    // object request and response, including per-item failures.
-    const taskInstancesWithIds = taskInstances.map((taskInstance) => ({
-      ...taskInstance,
-      id: taskInstance.id ?? v4(),
-    }));
-    const apiKeySOFieldsMap =
-      (await this.grantApiKeysFromRequest(taskInstancesWithIds, options)) || new Map();
+    const tasks = await this.planBulkSchedule(taskInstances);
 
-    const soClient = this.getSoClientForCreate(options || {});
+    const taskInstancesToGrant = tasks
+      .filter(({ mode }) => mode === 'overwrite' || mode === 'create')
+      .map(({ taskInstance }) => taskInstance);
+    const apiKeySOFieldsMap: Map<string, ApiKeySOFields> =
+      (taskInstancesToGrant.length
+        ? await this.grantApiKeysFromRequest(taskInstancesToGrant, options)
+        : null) || new Map();
 
-    // Tasks rejected during local preparation never reach `bulkCreate`, so they get no entry in
-    // the bulk response; collect their granted keys here so they are still invalidated below.
-    const omittedTaskApiKeys: Array<ApiKeySOFields | undefined> = [];
-    let savedObjects;
+    let writes;
     try {
-      const objects = taskInstancesWithIds.reduce(
-        (
-          acc: Array<SavedObjectsBulkCreateObject<SerializedConcreteTaskInstance>>,
-          taskInstance
-        ) => {
-          const apiKeySOFields = apiKeySOFieldsMap.get(taskInstance.id) || {};
-          const { id } = taskInstance;
-          this.definitions.ensureHas(taskInstance.taskType);
-
-          try {
-            const validatedTaskInstance =
-              this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
-
-            return [
-              ...acc,
-              {
-                type: 'task',
-                attributes: {
-                  ...taskInstanceToAttributes(validatedTaskInstance, id),
-                  ...apiKeySOFields,
-                  runAt: getFirstRunAt({
-                    taskInstance: validatedTaskInstance,
-                    logger: this.logger,
-                  }),
-                },
-                id,
-              },
-            ];
-          } catch (e) {
-            this.logger.error(
-              `[TaskStore] An error occured. Task ${taskInstance.id} will not be updated. Error: ${e.message}`
-            );
-            omittedTaskApiKeys.push(apiKeySOFieldsMap.get(taskInstance.id));
-            return acc;
-          }
-        },
-        []
-      );
-
-      savedObjects = await soClient.bulkCreate<SerializedConcreteTaskInstance>(objects, {
-        refresh: false,
-        overwrite: true,
-      });
-      this.adHocTaskCounter.increment(
-        taskInstancesWithIds.filter((task) => {
-          return get(task, 'schedule.interval', null) == null;
-        }).length
-      );
+      writes = this.buildBulkScheduleWrites(tasks, apiKeySOFieldsMap);
     } catch (e) {
       await this.invalidateUnpersistedApiKeys([...apiKeySOFieldsMap.values()]);
       this.errors$.next(e);
       throw e;
     }
+    const { objects, placements, omittedTaskApiKeys } = writes;
+
+    const results = await this.executeBulkScheduleWrites(
+      objects,
+      apiKeySOFieldsMap,
+      omittedTaskApiKeys,
+      options
+    );
+
+    this.adHocTaskCounter.increment(
+      tasks.filter(({ taskInstance }) => {
+        return get(taskInstance, 'schedule.interval', null) == null;
+      }).length
+    );
+
+    const savedObjects = placements.map((placement) =>
+      'conflict' in placement ? placement.conflict : results[placement.mode][placement.index]
+    );
 
     if (options?.request && !this.getIsSecurityEnabled()) {
       this.logger.info(
         `Trying to bulk schedule tasks ${JSON.stringify(
-          savedObjects.saved_objects.map((so) => so.id)
+          savedObjects.map((so) => so.id)
         )} with user scope but security is disabled. Tasks will run without user scope.`
       );
     }
 
-    const failedTaskIds = savedObjects.saved_objects
-      .filter(isSavedObjectErrorResult)
-      .map(({ id }) => id);
-
-    const unpersistedApiKeys = [
-      ...omittedTaskApiKeys,
-      ...failedTaskIds.map((taskId) => apiKeySOFieldsMap.get(taskId)),
-    ];
-
-    if (unpersistedApiKeys.length) {
-      await this.invalidateUnpersistedApiKeys(unpersistedApiKeys);
-    }
-
-    return savedObjects.saved_objects.map((so) => {
+    return savedObjects.map((so) => {
       if (isSavedObjectErrorResult(so)) {
         throw so.error;
       }
       const taskInstance = savedObjectToConcreteTaskInstance(so);
       return this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance);
     });
+  }
+
+  // Overwriting an existing id must never replace a task's credential, nor give a task one. Tasks
+  // with `runAs` are always created, and the others only overwrite a task read without a
+  // credential, at the version that was read.
+  private async planBulkSchedule(taskInstances: TaskInstance[]): Promise<BulkScheduleTask[]> {
+    // Assign generated ids before granting so every credential remains correlated with the saved
+    // object request and response, including per-item failures.
+    const taskInstancesWithIds = taskInstances.map((taskInstance) => ({
+      ...taskInstance,
+      id: taskInstance.id ?? v4(),
+    }));
+    const credentialFields = taskInstancesWithIds.map((taskInstance) => {
+      if (!taskInstance.runAs) {
+        return undefined;
+      }
+      this.definitions.ensureHas(taskInstance.taskType);
+      return this.getServiceAccountCredentialAttributes(taskInstance);
+    });
+
+    const existingTasks = await this.getExistingTasksToOverwrite(
+      taskInstancesWithIds
+        .filter((taskInstance, index) => !taskInstance.runAs && taskInstances[index].id)
+        .map(({ id }) => id)
+    );
+
+    return taskInstancesWithIds.map((taskInstance, index): BulkScheduleTask => {
+      const serviceAccountFields = credentialFields[index];
+      if (serviceAccountFields) {
+        return { mode: 'serviceAccount', taskInstance, credentialFields: serviceAccountFields };
+      }
+      const existingTask = existingTasks.get(taskInstance.id);
+      if (existingTask?.hasCredential) {
+        return { mode: 'conflict', taskInstance, conflict: getCredentialConflict(taskInstance.id) };
+      }
+      if (existingTask?.version) {
+        return { mode: 'overwrite', taskInstance, version: existingTask.version };
+      }
+      return { mode: 'create', taskInstance };
+    });
+  }
+
+  private buildBulkScheduleWrites(
+    tasks: BulkScheduleTask[],
+    apiKeySOFieldsMap: Map<string, ApiKeySOFields>
+  ) {
+    const objects: Record<BulkScheduleWriteMode, TaskBulkCreateObject[]> = {
+      serviceAccount: [],
+      overwrite: [],
+      create: [],
+    };
+    const placements: BulkSchedulePlacement[] = [];
+    // Tasks rejected during local preparation never reach `bulkCreate`, so they get no entry in
+    // the bulk response; collect their granted keys here so they are still invalidated.
+    const omittedTaskApiKeys: Array<ApiKeySOFields | undefined> = [];
+
+    for (const task of tasks) {
+      const { taskInstance } = task;
+      this.definitions.ensureHas(taskInstance.taskType);
+
+      if (task.mode === 'conflict') {
+        placements.push({ conflict: task.conflict });
+        continue;
+      }
+
+      const apiKeySOFields = apiKeySOFieldsMap.get(taskInstance.id);
+      try {
+        const index = objects[task.mode].push(this.toBulkCreateObject(task, apiKeySOFields)) - 1;
+        placements.push({ mode: task.mode, index });
+      } catch (e) {
+        this.logger.error(
+          `[TaskStore] An error occured. Task ${taskInstance.id} will not be updated. Error: ${e.message}`
+        );
+        omittedTaskApiKeys.push(task.mode === 'serviceAccount' ? undefined : apiKeySOFields);
+      }
+    }
+
+    return { objects, placements, omittedTaskApiKeys };
+  }
+
+  private toBulkCreateObject(
+    task: BulkScheduleWriteTask,
+    apiKeySOFields?: ApiKeySOFields
+  ): TaskBulkCreateObject {
+    const { taskInstance } = task;
+    const { id } = taskInstance;
+    const validatedTaskInstance =
+      this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
+    const credentialAttributes =
+      task.mode === 'serviceAccount' ? task.credentialFields : apiKeySOFields;
+
+    return {
+      type: 'task',
+      attributes: {
+        ...taskInstanceToAttributes(validatedTaskInstance, id),
+        ...credentialAttributes,
+        runAt: getFirstRunAt({ taskInstance: validatedTaskInstance, logger: this.logger }),
+      },
+      id,
+      ...(task.mode === 'overwrite' ? { version: task.version } : {}),
+    };
+  }
+
+  // Settles every write before cleaning up, so a failed write never invalidates the keys of a
+  // write that persisted.
+  private async executeBulkScheduleWrites(
+    objects: Record<BulkScheduleWriteMode, TaskBulkCreateObject[]>,
+    apiKeySOFieldsMap: Map<string, ApiKeySOFields>,
+    omittedTaskApiKeys: Array<ApiKeySOFields | undefined>,
+    options?: ApiKeyOptions
+  ): Promise<Record<BulkScheduleWriteMode, TaskBulkCreateResult[]>> {
+    const soClient = this.getSoClientForCreate(options || {});
+    const settledWrites = await Promise.allSettled(
+      BULK_SCHEDULE_WRITE_MODES.map(
+        async (mode): Promise<SavedObjectsBulkResponse<SerializedConcreteTaskInstance>> => {
+          if (!objects[mode].length) {
+            return { saved_objects: [] };
+          }
+          const client = mode === 'serviceAccount' ? this.serviceAccountSoClient : soClient;
+          return client.bulkCreate<SerializedConcreteTaskInstance>(objects[mode], {
+            refresh: false,
+            overwrite: mode === 'overwrite',
+          });
+        }
+      )
+    );
+
+    const results: Record<BulkScheduleWriteMode, TaskBulkCreateResult[]> = {
+      serviceAccount: [],
+      overwrite: [],
+      create: [],
+    };
+    const unpersistedApiKeys = [...omittedTaskApiKeys];
+    let writeError: Error | undefined;
+    for (const [index, write] of settledWrites.entries()) {
+      const mode = BULK_SCHEDULE_WRITE_MODES[index];
+      const getGrantedApiKeys = (taskId?: string) =>
+        mode === 'serviceAccount' || !taskId ? undefined : apiKeySOFieldsMap.get(taskId);
+      if (write.status === 'rejected') {
+        writeError = writeError ?? write.reason;
+        unpersistedApiKeys.push(...objects[mode].map(({ id }) => getGrantedApiKeys(id)));
+        continue;
+      }
+      results[mode] = write.value.saved_objects;
+      unpersistedApiKeys.push(
+        ...write.value.saved_objects
+          .filter(isSavedObjectErrorResult)
+          .map(({ id }) => getGrantedApiKeys(id))
+      );
+    }
+
+    if (unpersistedApiKeys.length) {
+      await this.invalidateUnpersistedApiKeys(unpersistedApiKeys);
+    }
+
+    if (writeError) {
+      this.errors$.next(writeError);
+      throw writeError;
+    }
+
+    return results;
+  }
+
+  private async getExistingTasksToOverwrite(
+    ids: string[]
+  ): Promise<Map<string, { version?: string; hasCredential: boolean }>> {
+    const existingTasks = new Map<string, { version?: string; hasCredential: boolean }>();
+    if (!ids.length) {
+      return existingTasks;
+    }
+
+    let result;
+    try {
+      result = await this.savedObjectsRepository.bulkGet<SerializedConcreteTaskInstance>(
+        ids.map((id) => ({ type: 'task', id }))
+      );
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
+
+    // A task that failed to read for another reason than not existing is created without
+    // overwrite, so it fails with a conflict if it does exist.
+    for (const so of result.saved_objects) {
+      if (!isSavedObjectErrorResult(so)) {
+        const { credential, encryptedCredential } = so.attributes;
+        existingTasks.set(so.id, {
+          version: so.version,
+          hasCredential: credential !== undefined || encryptedCredential !== undefined,
+        });
+      }
+    }
+    return existingTasks;
   }
 
   /**
@@ -1123,6 +1360,33 @@ export class TaskStore {
   }
 
   /**
+   * Gets a task's stored credential, without decrypting the task.
+   *
+   * @param {string} id
+   * @returns {Promise<TaskCredential | undefined>}
+   */
+  public async getCredential(id: string): Promise<TaskCredential | undefined> {
+    return this.executionContextRunner.run(() => this._getCredential(id), {
+      id: 'get-credential',
+    });
+  }
+
+  private async _getCredential(id: string): Promise<TaskCredential | undefined> {
+    try {
+      const { attributes } = await this.savedObjectsRepository.get<SerializedConcreteTaskInstance>(
+        'task',
+        id
+      );
+      return attributes.credential;
+    } catch (e) {
+      if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        this.errors$.next(e);
+      }
+      throw e;
+    }
+  }
+
+  /**
    * Gets tasks by ids
    *
    * @param {Array<string>} ids
@@ -1446,7 +1710,8 @@ export function taskInstanceToAttributes(
       'apiKey',
       'uiamApiKey',
       'credential',
-      'encryptedCredential'
+      'encryptedCredential',
+      'runAs'
     ),
     params: JSON.stringify(doc.params || {}),
     state: JSON.stringify(doc.state || {}),
