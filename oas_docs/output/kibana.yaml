@@ -26574,7 +26574,7 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Detections_API_UUID'
+            $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
         - description: The rule's `rule_id` value.
           in: query
           name: rule_id
@@ -26653,7 +26653,7 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Detections_API_UUID'
+            $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
         - description: The rule's `rule_id` value.
           in: query
           name: rule_id
@@ -29288,7 +29288,7 @@ paths:
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_UUID'
+            $ref: '#/components/schemas/Security_Exceptions_API_RuleId'
       requestBody:
         content:
           application/json:
@@ -30912,7 +30912,7 @@ paths:
                     updated_at: '2025-01-01T12:00:00.000Z'
                     updated_by: elastic
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
+                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
           description: Successful response
         '400':
           content:
@@ -31037,7 +31037,7 @@ paths:
                     updated_at: '2025-01-01T12:00:00.000Z'
                     updated_by: elastic
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
+                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
           description: Successful response
         '400':
           content:
@@ -31214,7 +31214,7 @@ paths:
                     updated_at: '2025-01-01T12:00:00.000Z'
                     updated_by: elastic
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
+                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
           description: Successful response
         '400':
           content:
@@ -31383,7 +31383,7 @@ paths:
                     updated_at: '2025-01-15T09:30:00.000Z'
                     updated_by: elastic
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
+                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
           description: Successful response
         '400':
           content:
@@ -31473,7 +31473,7 @@ paths:
           name: filter
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_FindEndpointListItemsFilter'
         - description: The page number to return
           in: query
           name: page
@@ -31543,7 +31543,7 @@ paths:
                   data:
                     description: The list of endpoint exception list items.
                     items:
-                      $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
+                      $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
                     type: array
                   page:
                     description: The current page number.
@@ -36903,7 +36903,7 @@ paths:
           schema:
             default: []
             items:
-              $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+              $ref: '#/components/schemas/Security_Exceptions_API_FindExceptionListItemsFilter'
             type: array
         - description: |
             Determines whether the returned containers are Kibana associated with a Kibana space
@@ -135618,7 +135618,7 @@ paths:
                     title: Escalated case review
                     version: WzE1LDFd
               schema:
-                $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
+                $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
           description: Indicates a successful call.
         '405':
           content:
@@ -135714,7 +135714,7 @@ paths:
                     title: Malware containment
                     version: WzE0LDFd
               schema:
-                $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
+                $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
           description: Indicates a successful call.
         '405':
           content:
@@ -135791,7 +135791,7 @@ paths:
                     title: Copy of investigation
                     version: WzE1LDFd
               schema:
-                $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
+                $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
           description: Indicates a successful call.
       summary: Copies timeline or timeline template
       tags:
@@ -135831,7 +135831,7 @@ paths:
                     title: ''
                     version: WzE0LDFd
               schema:
-                $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
+                $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
           description: Indicates a successful call.
         '403':
           content:
@@ -135918,7 +135918,7 @@ paths:
                     title: ''
                     version: WzE0LDFd
               schema:
-                $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
+                $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
           description: Indicates a successful call.
         '403':
           content:
@@ -155863,19 +155863,19 @@ components:
             allOf:
               - anyOf:
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricUniqueCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricStatsMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricSumMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricLastValue'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricPercentile'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricPercentileRanks'
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricDifferences'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricMovingAverage'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricCumulativeSum'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricCounterRate'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricFormula'
               - additionalProperties: false
                 type: object
                 properties:
@@ -155952,11 +155952,11 @@ components:
           items:
             allOf:
               - anyOf:
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableRowDateHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableRowTerms'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableRowHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableRowRanges'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableRowFilters'
               - additionalProperties: false
                 type: object
                 properties:
@@ -158190,14 +158190,14 @@ components:
           allOf:
             - anyOf:
                 - anyOf:
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricCountMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricUniqueCountMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricStatsMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricSumMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricLastValue'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricPercentile'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricPercentileRanks'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricFormula'
             - additionalProperties: false
               type: object
               properties:
@@ -159274,19 +159274,19 @@ components:
           allOf:
             - anyOf:
                 - anyOf:
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricCountMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricUniqueCountMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricStatsMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricSumMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricLastValue'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricPercentile'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricPercentileRanks'
                 - anyOf:
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricDifferences'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricMovingAverage'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricCumulativeSum'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricCounterRate'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricFormula'
             - additionalProperties: false
               type: object
               properties:
@@ -164122,14 +164122,14 @@ components:
           allOf:
             - anyOf:
                 - anyOf:
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricCountMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricUniqueCountMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricStatsMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricSumMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricLastValue'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricPercentile'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricPercentileRanks'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricFormula'
             - additionalProperties: false
               type: object
               properties:
@@ -165176,11 +165176,11 @@ components:
         breakdown_by:
           allOf:
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricBreakdownDateHistogram'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricBreakdownTerms'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricBreakdownHistogram'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricBreakdownRanges'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricBreakdownFilters'
             - additionalProperties: false
               type: object
               properties:
@@ -165215,19 +165215,19 @@ components:
               - allOf:
                   - anyOf:
                       - anyOf:
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryCountMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryUniqueCountMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryStatsMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimarySumMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryLastValue'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryPercentile'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryPercentileRanks'
                       - anyOf:
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryDifferences'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryMovingAverage'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryCumulativeSum'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryCounterRate'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryFormula'
                   - type: object
                     properties:
                       apply_color_to:
@@ -165258,19 +165258,19 @@ components:
               - allOf:
                   - anyOf:
                       - anyOf:
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryCountMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryUniqueCountMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryStatsMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondarySumMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryLastValue'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryPercentile'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryPercentileRanks'
                       - anyOf:
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryDifferences'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryMovingAverage'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryCumulativeSum'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryCounterRate'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryFormula'
                   - type: object
                     properties:
                       color:
@@ -167701,11 +167701,11 @@ components:
           items:
             allOf:
               - anyOf:
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupBreakdownByDateHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupBreakdownByTerms'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupBreakdownByHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupBreakdownByRanges'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupBreakdownByFilters'
               - type: object
                 properties:
                   collapse_by:
@@ -167718,11 +167718,11 @@ components:
           items:
             allOf:
               - anyOf:
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupByDateHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupByTerms'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupByHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupByRanges'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupByFilters'
               - additionalProperties: false
                 type: object
                 properties:
@@ -167742,19 +167742,19 @@ components:
         metric:
           anyOf:
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricCountMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricUniqueCountMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricStatsMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricSumMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricLastValue'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricPercentile'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricPercentileRanks'
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricDifferences'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricMovingAverage'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricCumulativeSum'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricCounterRate'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricFormula'
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_visFilterSimple'
         sampling:
@@ -172337,11 +172337,11 @@ components:
           items:
             allOf:
               - anyOf:
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieGroupByDateHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieGroupByTerms'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieGroupByHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieGroupByRanges'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieGroupByFilters'
               - type: object
                 properties:
                   collapse_by:
@@ -172363,19 +172363,19 @@ components:
             allOf:
               - anyOf:
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricUniqueCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricStatsMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricSumMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricLastValue'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricPercentile'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricPercentileRanks'
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricDifferences'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricMovingAverage'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricCumulativeSum'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricCounterRate'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricFormula'
               - type: object
                 properties:
                   color:
@@ -172580,11 +172580,11 @@ components:
         region:
           allOf:
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRegionMapRegionDateHistogram'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRegionMapRegionTerms'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRegionMapRegionHistogram'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRegionMapRegionRanges'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRegionMapRegionFilters'
             - additionalProperties: false
               type: object
               properties:
@@ -175569,19 +175569,19 @@ components:
         metric:
           anyOf:
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricCountMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricUniqueCountMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricStatsMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricSumMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricLastValue'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricPercentile'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricPercentileRanks'
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricDifferences'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricMovingAverage'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricCumulativeSum'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricCounterRate'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricFormula'
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_visFilterSimple'
         sampling:
@@ -175595,11 +175595,11 @@ components:
         tag_by:
           allOf:
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudTagDateHistogram'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudTagTerms'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudTagHistogram'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudTagRanges'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudTagFilters'
             - additionalProperties: false
               type: object
               properties:
@@ -175801,11 +175801,11 @@ components:
           items:
             allOf:
               - anyOf:
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapGroupByDateHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapGroupByTerms'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapGroupByHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapGroupByRanges'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapGroupByFilters'
               - type: object
                 properties:
                   collapse_by:
@@ -175827,19 +175827,19 @@ components:
             allOf:
               - anyOf:
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricUniqueCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricStatsMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricSumMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricLastValue'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricPercentile'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricPercentileRanks'
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricDifferences'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricMovingAverage'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricCumulativeSum'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricCounterRate'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricFormula'
               - type: object
                 properties:
                   color:
@@ -177376,7 +177376,7 @@ components:
     Kibana_HTTP_APIs_visApiConfig:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricChart'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricNoESQL'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricChart'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyChart'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeChart'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapChart'
@@ -178376,19 +178376,19 @@ components:
             allOf:
               - anyOf:
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricUniqueCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricStatsMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricSumMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricLastValue'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricPercentile'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricPercentileRanks'
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricDifferences'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricMovingAverage'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricCumulativeSum'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricCounterRate'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricFormula'
               - additionalProperties: false
                 type: object
                 properties:
@@ -178465,11 +178465,11 @@ components:
           items:
             allOf:
               - anyOf:
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableRowDateHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableRowTerms'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableRowHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableRowRanges'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableRowFilters'
               - additionalProperties: false
                 type: object
                 properties:
@@ -179050,14 +179050,14 @@ components:
           allOf:
             - anyOf:
                 - anyOf:
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricCountMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricUniqueCountMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricStatsMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricSumMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricLastValue'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricPercentile'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricPercentileRanks'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeMetricFormula'
             - additionalProperties: false
               type: object
               properties:
@@ -179441,19 +179441,19 @@ components:
           allOf:
             - anyOf:
                 - anyOf:
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricCountMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricUniqueCountMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricStatsMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricSumMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricLastValue'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricPercentile'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricPercentileRanks'
                 - anyOf:
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricDifferences'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricMovingAverage'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricCumulativeSum'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricCounterRate'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapMetricFormula'
             - additionalProperties: false
               type: object
               properties:
@@ -179813,14 +179813,14 @@ components:
           allOf:
             - anyOf:
                 - anyOf:
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricCountMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricUniqueCountMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricStatsMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricSumMetric'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricLastValue'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricPercentile'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricPercentileRanks'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLegacyMetricFormula'
             - additionalProperties: false
               type: object
               properties:
@@ -180305,11 +180305,11 @@ components:
         breakdown_by:
           allOf:
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricBreakdownDateHistogram'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricBreakdownTerms'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricBreakdownHistogram'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricBreakdownRanges'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricBreakdownFilters'
             - additionalProperties: false
               type: object
               properties:
@@ -180344,19 +180344,19 @@ components:
               - allOf:
                   - anyOf:
                       - anyOf:
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryCountMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryUniqueCountMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryStatsMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimarySumMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryLastValue'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryPercentile'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryPercentileRanks'
                       - anyOf:
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryDifferences'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryMovingAverage'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryCumulativeSum'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryCounterRate'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricPrimaryFormula'
                   - type: object
                     properties:
                       apply_color_to:
@@ -180387,19 +180387,19 @@ components:
               - allOf:
                   - anyOf:
                       - anyOf:
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryCountMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryUniqueCountMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryStatsMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondarySumMetric'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryLastValue'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryPercentile'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryPercentileRanks'
                       - anyOf:
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryDifferences'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryMovingAverage'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryCumulativeSum'
+                          - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryCounterRate'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricSecondaryFormula'
                   - type: object
                     properties:
                       color:
@@ -180821,11 +180821,11 @@ components:
           items:
             allOf:
               - anyOf:
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupBreakdownByDateHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupBreakdownByTerms'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupBreakdownByHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupBreakdownByRanges'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupBreakdownByFilters'
               - type: object
                 properties:
                   collapse_by:
@@ -180838,11 +180838,11 @@ components:
           items:
             allOf:
               - anyOf:
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupByDateHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupByTerms'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupByHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupByRanges'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicGroupByFilters'
               - additionalProperties: false
                 type: object
                 properties:
@@ -180862,19 +180862,19 @@ components:
         metric:
           anyOf:
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricCountMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricUniqueCountMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricStatsMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricSumMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricLastValue'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricPercentile'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricPercentileRanks'
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricDifferences'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricMovingAverage'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricCumulativeSum'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricCounterRate'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicMetricFormula'
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_visFilterSimple'
         sampling:
@@ -181261,11 +181261,11 @@ components:
           items:
             allOf:
               - anyOf:
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieGroupByDateHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieGroupByTerms'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieGroupByHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieGroupByRanges'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieGroupByFilters'
               - type: object
                 properties:
                   collapse_by:
@@ -181287,19 +181287,19 @@ components:
             allOf:
               - anyOf:
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricUniqueCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricStatsMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricSumMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricLastValue'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricPercentile'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricPercentileRanks'
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricDifferences'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricMovingAverage'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricCumulativeSum'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricCounterRate'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieMetricFormula'
               - type: object
                 properties:
                   color:
@@ -181566,11 +181566,11 @@ components:
         region:
           allOf:
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRegionMapRegionDateHistogram'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRegionMapRegionTerms'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRegionMapRegionHistogram'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRegionMapRegionRanges'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRegionMapRegionFilters'
             - additionalProperties: false
               type: object
               properties:
@@ -181822,19 +181822,19 @@ components:
         metric:
           anyOf:
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricCountMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricUniqueCountMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricStatsMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricSumMetric'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricLastValue'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricPercentile'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricPercentileRanks'
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricDifferences'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricMovingAverage'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricCumulativeSum'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricCounterRate'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudMetricFormula'
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_visFilterSimple'
         sampling:
@@ -181848,11 +181848,11 @@ components:
         tag_by:
           allOf:
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudTagDateHistogram'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudTagTerms'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudTagHistogram'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudTagRanges'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudTagFilters'
             - additionalProperties: false
               type: object
               properties:
@@ -182011,7 +182011,7 @@ components:
       description: Terms ranked alphabetically.
       properties:
         direction:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_visApiDirection'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByAlphabeticalDirection'
         type:
           enum:
             - alphabetical
@@ -182029,7 +182029,7 @@ components:
       description: Terms ranked by count, either of all documents or of a specific field.
       properties:
         direction:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_visApiDirection'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByCustomDirection'
         field:
           description: Numeric field to be used for the custom operation.
           type: string
@@ -182055,7 +182055,7 @@ components:
       description: Terms ranked by custom operation.
       properties:
         direction:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_visApiDirection'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByCustomDirection'
         field:
           description: Numeric field to be used for the custom operation.
           type: string
@@ -182086,7 +182086,7 @@ components:
       description: Terms ranked by a linked metric.
       properties:
         direction:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_visApiDirection'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByMetricDirection'
         metric_index:
           default: 0
           description: Zero-based index into the metrics array identifying which metric to rank by.
@@ -182109,7 +182109,7 @@ components:
       description: Terms ranked by a percentile of a numeric field, for example the 95th percentile of response time.
       properties:
         direction:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_visApiDirection'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByCustomDirection'
         field:
           description: Numeric field to be used for the custom operation.
           type: string
@@ -182137,7 +182137,7 @@ components:
       description: 'Terms ranked by the percentile rank of a single value: the proportion of field values at or below that value.'
       properties:
         direction:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_visApiDirection'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByCustomDirection'
         field:
           description: Numeric field to be used for the custom operation.
           type: string
@@ -182363,11 +182363,11 @@ components:
           items:
             allOf:
               - anyOf:
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapGroupByDateHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapGroupByTerms'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapGroupByHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapGroupByRanges'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapGroupByFilters'
               - type: object
                 properties:
                   collapse_by:
@@ -182389,19 +182389,19 @@ components:
             allOf:
               - anyOf:
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricUniqueCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricStatsMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricSumMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricLastValue'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricPercentile'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricPercentileRanks'
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricDifferences'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricMovingAverage'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricCumulativeSum'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricCounterRate'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapMetricFormula'
               - type: object
                 properties:
                   color:
@@ -182692,11 +182692,11 @@ components:
           items:
             allOf:
               - anyOf:
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleGroupByDateHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleGroupByTerms'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleGroupByHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleGroupByRanges'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleGroupByFilters'
               - type: object
                 properties:
                   collapse_by:
@@ -182718,19 +182718,19 @@ components:
             allOf:
               - anyOf:
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricUniqueCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricStatsMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricSumMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricLastValue'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricPercentile'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricPercentileRanks'
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricDifferences'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricMovingAverage'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricCumulativeSum'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricCounterRate'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricFormula'
               - type: object
                 properties:
                   color:
@@ -183403,11 +183403,11 @@ components:
         breakdown_by:
           allOf:
             - anyOf:
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyBreakdownDateHistogram'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyBreakdownTerms'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyBreakdownHistogram'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyBreakdownRanges'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyBreakdownFilters'
             - additionalProperties: false
               type: object
               properties:
@@ -183472,30 +183472,30 @@ components:
           description: Chart type for the data layer
         x:
           anyOf:
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyXDateHistogram'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyXTerms'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyXHistogram'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyXRanges'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyXFilters'
         'y':
           description: Array of metrics to display on Y-axis
           items:
             allOf:
               - anyOf:
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyYCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyYUniqueCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyYStatsMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyYSumMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyYLastValue'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyYPercentile'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyYPercentileRanks'
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyYDifferences'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyYMovingAverage'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyYCumulativeSum'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyYCounterRate'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyYFormula'
               - type: object
                 properties:
                   axis:
@@ -184093,15 +184093,15 @@ components:
             allOf:
               - anyOf:
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticOperationDefinition'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyRefLineCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyRefLineUniqueCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyRefLineStatsMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyRefLineSumMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyRefLineLastValue'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyRefLinePercentile'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyRefLinePercentileRanks'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyRefLineStatic'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyRefLineFormula'
               - type: object
                 properties:
                   axis:
@@ -184413,11 +184413,11 @@ components:
           items:
             allOf:
               - anyOf:
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHistogramOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangesOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFiltersOperation'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleGroupByDateHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleGroupByTerms'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleGroupByHistogram'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleGroupByRanges'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleGroupByFilters'
               - type: object
                 properties:
                   collapse_by:
@@ -184439,19 +184439,19 @@ components:
             allOf:
               - anyOf:
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visUniqueCountMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMinMaxAvgMedianStdDevMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visSumMetricOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visLastValueOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPercentileRanksOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricUniqueCountMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricStatsMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricSumMetric'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricLastValue'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricPercentile'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricPercentileRanks'
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricDifferences'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricMovingAverage'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricCumulativeSum'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricCounterRate'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleMetricFormula'
               - type: object
                 properties:
                   color:
@@ -189812,7 +189812,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -189916,7 +189916,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -190284,7 +190284,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -190413,7 +190413,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -190956,7 +190956,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -191076,7 +191076,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -191554,7 +191554,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -191683,7 +191683,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -192201,7 +192201,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -192324,7 +192324,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -192539,7 +192539,7 @@ components:
         execution_summary:
           $ref: '#/components/schemas/Security_Detections_API_RuleExecutionSummary'
         id:
-          $ref: '#/components/schemas/Security_Detections_API_UUID'
+          $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
         immutable:
           $ref: '#/components/schemas/Security_Detections_API_IsRuleImmutable'
         required_fields:
@@ -193456,7 +193456,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -193579,7 +193579,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -194260,7 +194260,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -194392,7 +194392,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -194862,7 +194862,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -194988,7 +194988,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -200529,23 +200529,23 @@ components:
       type: object
       properties:
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
         enabled:
           $ref: '#/components/schemas/Security_Osquery_API_QueryEnabled'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_QueryId'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_Platform'
+          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
         query:
           $ref: '#/components/schemas/Security_Osquery_API_Query'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_Removed'
+          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
         result_type:
           $ref: '#/components/schemas/Security_Osquery_API_ResultType'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_Version'
+          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
     Security_Osquery_API_CopyPacksResponse:
       description: The response for copying a pack.
       example:
@@ -200585,11 +200585,11 @@ components:
             created_by_profile_uid:
               type: string
             description:
-              $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
+              $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
             enabled:
-              $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+              $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
             interval:
-              $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+              $ref: '#/components/schemas/Security_Osquery_API_PackIntervalOrUndefined'
             min_osquery_version:
               $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
             name:
@@ -200597,14 +200597,14 @@ components:
             platform:
               $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
             policy_ids:
-              $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
+              $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
             queries:
               description: 'Pack queries in saved-object storage format (array). Note: the read endpoint returns object format.'
               items:
                 type: object
                 properties:
                   ecs_mapping:
-                    $ref: '#/components/schemas/Security_Osquery_API_ECSMappingArray'
+                    $ref: '#/components/schemas/Security_Osquery_API_ECSMappingArrayOrUndefined'
                   enabled:
                     $ref: '#/components/schemas/Security_Osquery_API_QueryEnabled'
                   id:
@@ -200620,9 +200620,9 @@ components:
                   result_type:
                     $ref: '#/components/schemas/Security_Osquery_API_ResultType'
                   rrule_schedule:
-                    $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+                    $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfigOrUndefined'
                   schedule_type:
-                    $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
+                    $ref: '#/components/schemas/Security_Osquery_API_ScheduleTypeOrUndefined'
                   snapshot:
                     type: boolean
                   timeout:
@@ -200633,12 +200633,12 @@ components:
             result_type:
               $ref: '#/components/schemas/Security_Osquery_API_ResultType'
             rrule_schedule:
-              $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+              $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfigOrUndefined'
             saved_object_id:
               description: The saved object ID of the copied pack.
               type: string
             schedule_type:
-              $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
+              $ref: '#/components/schemas/Security_Osquery_API_ScheduleTypeOrUndefined'
             shards:
               description: Shard configuration as an array of key-value pairs.
               items:
@@ -200699,9 +200699,9 @@ components:
             created_by_profile_uid:
               type: string
             description:
-              $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
+              $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
             ecs_mapping:
-              $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+              $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
             id:
               $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
             interval:
@@ -200709,15 +200709,15 @@ components:
                 - type: integer
                 - type: string
             platform:
-              $ref: '#/components/schemas/Security_Osquery_API_Platform'
+              $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
             query:
               $ref: '#/components/schemas/Security_Osquery_API_Query'
             removed:
-              $ref: '#/components/schemas/Security_Osquery_API_Removed'
+              $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
             saved_object_id:
               type: string
             snapshot:
-              $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+              $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
             timeout:
               type: integer
             updated_at:
@@ -200771,7 +200771,7 @@ components:
             type: string
           type: array
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
         event_ids:
           description: A list of event IDs associated with the live query.
           items:
@@ -200782,13 +200782,13 @@ components:
           nullable: true
           type: object
         pack_id:
-          $ref: '#/components/schemas/Security_Osquery_API_PackId'
+          $ref: '#/components/schemas/Security_Osquery_API_PackIdOrUndefined'
         queries:
           $ref: '#/components/schemas/Security_Osquery_API_ArrayQueries'
         query:
-          $ref: '#/components/schemas/Security_Osquery_API_Query'
+          $ref: '#/components/schemas/Security_Osquery_API_QueryOrUndefined'
         saved_query_id:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryIdOrUndefined'
     Security_Osquery_API_CreateLiveQueryResponse:
       description: The response for creating a live query.
       example:
@@ -200879,7 +200879,7 @@ components:
                       type: string
                     type: array
                   ecs_mapping:
-                    $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+                    $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
                   id:
                     type: string
                   platform:
@@ -200929,9 +200929,9 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
+          $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
         enabled:
-          $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+          $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
         interval:
           $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
         min_osquery_version:
@@ -200941,7 +200941,7 @@ components:
         platform:
           $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
         policy_ids:
-          $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
+          $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
         queries:
           $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
         result_type:
@@ -200997,9 +200997,9 @@ components:
               description: The profile UID of the user who created the pack.
               type: string
             description:
-              $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
+              $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
             enabled:
-              $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+              $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
             interval:
               $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
             min_osquery_version:
@@ -201009,7 +201009,7 @@ components:
             platform:
               $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
             policy_ids:
-              $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
+              $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
             queries:
               $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
             result_type:
@@ -201065,23 +201065,23 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
         interval:
           $ref: '#/components/schemas/Security_Osquery_API_Interval'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_Platform'
+          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
         query:
-          $ref: '#/components/schemas/Security_Osquery_API_Query'
+          $ref: '#/components/schemas/Security_Osquery_API_QueryOrUndefined'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_Removed'
+          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_Version'
+          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
     Security_Osquery_API_CreateSavedQueryResponse:
       description: The response for creating a saved query.
       example:
@@ -201116,9 +201116,9 @@ components:
             created_by_profile_uid:
               type: string
             description:
-              $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
+              $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
             ecs_mapping:
-              $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+              $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
             id:
               $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
             interval:
@@ -201127,19 +201127,19 @@ components:
                 - type: integer
                 - type: string
             platform:
-              $ref: '#/components/schemas/Security_Osquery_API_Platform'
+              $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
             prebuilt:
               description: Whether the saved query is prebuilt.
               type: boolean
             query:
               $ref: '#/components/schemas/Security_Osquery_API_Query'
             removed:
-              $ref: '#/components/schemas/Security_Osquery_API_Removed'
+              $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
             saved_object_id:
               description: The saved object ID of the saved query.
               type: string
             snapshot:
-              $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+              $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
             timeout:
               description: The query timeout in seconds.
               type: integer
@@ -201412,7 +201412,7 @@ components:
                     description: Number of result documents.
                     type: integer
                   ecs_mapping:
-                    $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+                    $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
                   failed:
                     description: Number of failed queries.
                     type: integer
@@ -201517,7 +201517,7 @@ components:
                                 type: string
                               type: array
                             ecs_mapping:
-                              $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+                              $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
                             id:
                               type: string
                             query:
@@ -201584,11 +201584,11 @@ components:
             created_by_profile_uid:
               type: string
             description:
-              $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
+              $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
             enabled:
-              $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+              $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
             interval:
-              $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+              $ref: '#/components/schemas/Security_Osquery_API_PackIntervalOrUndefined'
             min_osquery_version:
               $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
             name:
@@ -201601,7 +201601,7 @@ components:
             platform:
               $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
             policy_ids:
-              $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
+              $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
             queries:
               $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
             read_only:
@@ -201610,12 +201610,12 @@ components:
             result_type:
               $ref: '#/components/schemas/Security_Osquery_API_ResultType'
             rrule_schedule:
-              $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+              $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfigOrUndefined'
             saved_object_id:
               description: The saved object ID of the pack.
               type: string
             schedule_type:
-              $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
+              $ref: '#/components/schemas/Security_Osquery_API_ScheduleTypeOrUndefined'
             shards:
               $ref: '#/components/schemas/Security_Osquery_API_Shards'
             type:
@@ -201680,11 +201680,11 @@ components:
               created_by_profile_uid:
                 type: string
               description:
-                $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
+                $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
               enabled:
-                $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+                $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
               interval:
-                $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+                $ref: '#/components/schemas/Security_Osquery_API_PackIntervalOrUndefined'
               min_osquery_version:
                 $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
               name:
@@ -201692,14 +201692,14 @@ components:
               platform:
                 $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
               policy_ids:
-                $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
+                $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
               queries:
                 description: 'Pack queries in saved-object storage format (array). Note: the read endpoint returns object format.'
                 items:
                   type: object
                   properties:
                     ecs_mapping:
-                      $ref: '#/components/schemas/Security_Osquery_API_ECSMappingArray'
+                      $ref: '#/components/schemas/Security_Osquery_API_ECSMappingArrayOrUndefined'
                     enabled:
                       $ref: '#/components/schemas/Security_Osquery_API_QueryEnabled'
                     id:
@@ -201715,9 +201715,9 @@ components:
                     result_type:
                       $ref: '#/components/schemas/Security_Osquery_API_ResultType'
                     rrule_schedule:
-                      $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+                      $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfigOrUndefined'
                     schedule_type:
-                      $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
+                      $ref: '#/components/schemas/Security_Osquery_API_ScheduleTypeOrUndefined'
                     snapshot:
                       type: boolean
                     timeout:
@@ -201731,12 +201731,12 @@ components:
               result_type:
                 $ref: '#/components/schemas/Security_Osquery_API_ResultType'
               rrule_schedule:
-                $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+                $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfigOrUndefined'
               saved_object_id:
                 description: The saved object ID of the pack.
                 type: string
               schedule_type:
-                $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
+                $ref: '#/components/schemas/Security_Osquery_API_ScheduleTypeOrUndefined'
               updated_at:
                 format: date-time
                 type: string
@@ -201799,9 +201799,9 @@ components:
             created_by_profile_uid:
               type: string
             description:
-              $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
+              $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
             ecs_mapping:
-              $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+              $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
             id:
               $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
             interval:
@@ -201809,17 +201809,17 @@ components:
                 - type: integer
                 - type: string
             platform:
-              $ref: '#/components/schemas/Security_Osquery_API_Platform'
+              $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
             prebuilt:
               type: boolean
             query:
               $ref: '#/components/schemas/Security_Osquery_API_Query'
             removed:
-              $ref: '#/components/schemas/Security_Osquery_API_Removed'
+              $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
             saved_object_id:
               type: string
             snapshot:
-              $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+              $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
             timeout:
               type: integer
             updated_at:
@@ -201879,9 +201879,9 @@ components:
               created_by_profile_uid:
                 type: string
               description:
-                $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
+                $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
               ecs_mapping:
-                $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+                $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
               id:
                 $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
               interval:
@@ -201889,17 +201889,17 @@ components:
                   - type: integer
                   - type: string
               platform:
-                $ref: '#/components/schemas/Security_Osquery_API_Platform'
+                $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
               prebuilt:
                 type: boolean
               query:
                 $ref: '#/components/schemas/Security_Osquery_API_Query'
               removed:
-                $ref: '#/components/schemas/Security_Osquery_API_Removed'
+                $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
               saved_object_id:
                 type: string
               snapshot:
-                $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+                $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
               timeout:
                 type: integer
               updated_at:
@@ -202184,7 +202184,7 @@ components:
       type: object
       properties:
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
         enabled:
           $ref: '#/components/schemas/Security_Osquery_API_QueryEnabled'
         id:
@@ -202195,23 +202195,23 @@ components:
           nullable: true
           type: integer
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_Platform'
+          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
         query:
           $ref: '#/components/schemas/Security_Osquery_API_Query'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_Removed'
+          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
         result_type:
           $ref: '#/components/schemas/Security_Osquery_API_ResultType'
         rrule_schedule:
-          $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+          $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfigOrUndefined'
         saved_query_id:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryIdOrUndefined'
         schedule_type:
-          $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
+          $ref: '#/components/schemas/Security_Osquery_API_ScheduleTypeOrUndefined'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_Version'
+          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
     Security_Osquery_API_PackDescription:
       description: The pack description.
       example: Pack description
@@ -202547,27 +202547,27 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
+          $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
         enabled:
-          $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+          $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
         interval:
-          $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+          $ref: '#/components/schemas/Security_Osquery_API_PackIntervalOrUndefined'
         min_osquery_version:
-          $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
+          $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersionOrUndefined'
         name:
           $ref: '#/components/schemas/Security_Osquery_API_PackName'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
+          $ref: '#/components/schemas/Security_Osquery_API_PackPlatformOrUndefined'
         policy_ids:
-          $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
+          $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
         queries:
           $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
         result_type:
-          $ref: '#/components/schemas/Security_Osquery_API_ResultType'
+          $ref: '#/components/schemas/Security_Osquery_API_ResultTypeOrUndefined'
         rrule_schedule:
-          $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+          $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfigOrUndefined'
         schedule_type:
-          $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
+          $ref: '#/components/schemas/Security_Osquery_API_ScheduleTypeOrUndefined'
         shards:
           $ref: '#/components/schemas/Security_Osquery_API_Shards'
     Security_Osquery_API_UpdatePacksResponse:
@@ -202612,11 +202612,11 @@ components:
             created_by_profile_uid:
               type: string
             description:
-              $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
+              $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
             enabled:
-              $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+              $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
             interval:
-              $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+              $ref: '#/components/schemas/Security_Osquery_API_PackIntervalOrUndefined'
             min_osquery_version:
               $ref: '#/components/schemas/Security_Osquery_API_MinOsqueryVersion'
             name:
@@ -202624,18 +202624,18 @@ components:
             platform:
               $ref: '#/components/schemas/Security_Osquery_API_PackPlatform'
             policy_ids:
-              $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
+              $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
             queries:
               $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
             result_type:
               $ref: '#/components/schemas/Security_Osquery_API_ResultType'
             rrule_schedule:
-              $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+              $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfigOrUndefined'
             saved_object_id:
               description: The saved object ID of the pack.
               type: string
             schedule_type:
-              $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
+              $ref: '#/components/schemas/Security_Osquery_API_ScheduleTypeOrUndefined'
             shards:
               $ref: '#/components/schemas/Security_Osquery_API_Shards'
             updated_at:
@@ -202655,23 +202655,23 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
         interval:
-          $ref: '#/components/schemas/Security_Osquery_API_Interval'
+          $ref: '#/components/schemas/Security_Osquery_API_IntervalOrUndefined'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_Platform'
+          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
         query:
-          $ref: '#/components/schemas/Security_Osquery_API_Query'
+          $ref: '#/components/schemas/Security_Osquery_API_QueryOrUndefined'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_Removed'
+          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_Version'
+          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
     Security_Osquery_API_UpdateSavedQueryResponse:
       description: The response for updating a saved query.
       example:
@@ -202700,9 +202700,9 @@ components:
             created_by_profile_uid:
               type: string
             description:
-              $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
+              $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
             ecs_mapping:
-              $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+              $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
             id:
               $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
             interval:
@@ -202710,17 +202710,17 @@ components:
                 - type: integer
                 - type: string
             platform:
-              $ref: '#/components/schemas/Security_Osquery_API_Platform'
+              $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
             prebuilt:
               type: boolean
             query:
               $ref: '#/components/schemas/Security_Osquery_API_Query'
             removed:
-              $ref: '#/components/schemas/Security_Osquery_API_Removed'
+              $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
             saved_object_id:
               type: string
             snapshot:
-              $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+              $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
             timeout:
               type: integer
             updated_at:
