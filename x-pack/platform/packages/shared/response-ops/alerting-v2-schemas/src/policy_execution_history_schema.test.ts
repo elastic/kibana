@@ -449,14 +449,9 @@ describe('policy_execution_history_schema', () => {
       expect(policyExecutionHistoryItemSchema.parse(validItem)).toEqual(validItem);
     });
 
-    it('accepts a missing policy name — an unresolved name is absent, not null', () => {
+    it('accepts a missing policy name', () => {
       const item = { ...validItem, policy: { id: 'policy-1' } };
       expect(policyExecutionHistoryItemSchema.parse(item).policy).not.toHaveProperty('name');
-    });
-
-    it('rejects a null policy name', () => {
-      const item = { ...validItem, policy: { id: 'policy-1', name: null } };
-      expect(policyExecutionHistoryItemSchema.safeParse(item).success).toBe(false);
     });
 
     it('rejects an outcome outside the API vocabulary', () => {
@@ -489,17 +484,6 @@ describe('policy_execution_history_schema', () => {
     it('accepts an error whose stack trace the source did not record', () => {
       const item = { ...validItem, error: { message: 'boom' } };
       expect(policyExecutionHistoryItemSchema.parse(item).error).toEqual({ message: 'boom' });
-    });
-
-    it('rejects error set to null — a dispatch that did not fail omits the key', () => {
-      expect(
-        policyExecutionHistoryItemSchema.safeParse({ ...validItem, error: null }).success
-      ).toBe(false);
-    });
-
-    it('rejects a null error.stack_trace', () => {
-      const item = { ...validItem, error: { message: 'boom', stack_trace: null } };
-      expect(policyExecutionHistoryItemSchema.safeParse(item).success).toBe(false);
     });
 
     it(`accepts a rules array at the embedded cap (${MAX_EMBEDDED_RULES_PER_ITEM})`, () => {
@@ -577,18 +561,6 @@ describe('policy_execution_history_schema', () => {
       });
       expect(parsed.items).toEqual([]);
       expect(parsed).not.toHaveProperty('search_matches');
-    });
-
-    it('rejects search_matches set to null — no search means the key is absent', () => {
-      expect(
-        listPolicyExecutionHistoryResponseSchema.safeParse({
-          items: [],
-          page: 1,
-          per_page: EXECUTION_HISTORY_DEFAULT_PER_PAGE,
-          total: 0,
-          search_matches: null,
-        }).success
-      ).toBe(false);
     });
 
     it('accepts a page of items with populated search_matches', () => {

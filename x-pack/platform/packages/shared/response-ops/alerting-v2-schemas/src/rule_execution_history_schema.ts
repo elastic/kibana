@@ -77,10 +77,6 @@ export const listRuleExecutionsRequestSchema = z
   });
 export type ListRuleExecutionsRequest = z.infer<typeof listRuleExecutionsRequestSchema>;
 
-/**
- * Unset fields are omitted rather than returned as `null`, the same convention as the rule and
- * action policy responses.
- */
 export const ruleExecutionViewSchema = z
   .object({
     id: z.string(),

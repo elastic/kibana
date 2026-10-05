@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/** Accepts the stored shape too, where a field cleared before the API dropped `null` is still `null`. */
 export const formatMatcher = (matcher: {
   tags?: string[] | null;
   expression?: string | null;

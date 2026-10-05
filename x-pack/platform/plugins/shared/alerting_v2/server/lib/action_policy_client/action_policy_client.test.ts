@@ -27,7 +27,6 @@ import { createMockLicenseService } from '../services/license_service/license_se
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import { ActionPolicyClient } from './action_policy_client';
 
-/** An unset field reaches the client as `undefined`; the HTTP body is where it is truly absent. */
 const serialize = (value: unknown) => JSON.parse(JSON.stringify(value));
 
 describe('ActionPolicyClient', () => {

@@ -29,10 +29,6 @@ export const POLICY_MATCHER_DESCRIPTION =
 export const POLICY_MATCHER_UPDATE_DESCRIPTION =
   'Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are empty, the policy applies to all alerts. <br/><br/> Updating `matcher` replaces it entirely: to change `tags` without dropping `expression`, resend the current `expression` value.';
 
-/**
- * Shared by create, PATCH and the response. `matcher` is replaced wholesale on update, so a `null`
- * inside it would clear nothing — the fields are optional-only in all three directions.
- */
 export const policyMatcherSchema = z.object({
   tags: z
     .array(z.string().min(1).max(POLICY_MATCHER_TAG_MAX_LENGTH))

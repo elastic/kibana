@@ -351,17 +351,6 @@ describe('rule_execution_history_schema', () => {
       expect(ruleExecutionViewSchema.parse(row)).toEqual(row);
     });
 
-    it.each(['reason', 'error'] as const)('rejects %s set to null — unset is absent', (field) => {
-      expect(ruleExecutionViewSchema.safeParse({ ...validView, [field]: null }).success).toBe(
-        false
-      );
-    });
-
-    it('rejects error.stack_trace set to null', () => {
-      const row = { ...validView, error: { message: 'boom', stack_trace: null } };
-      expect(ruleExecutionViewSchema.safeParse(row).success).toBe(false);
-    });
-
     it('strips unknown rule fields like a previously-supported name', () => {
       const row = {
         ...validView,

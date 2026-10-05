@@ -692,7 +692,7 @@ describe('createRuleDataSchema', () => {
       expect(result.state_transition).toEqual({});
     });
 
-    it('rejects state_transition set to null — there is nothing to clear on create', () => {
+    it('rejects state_transition set to null', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         state_transition: null,

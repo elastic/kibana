@@ -14,10 +14,6 @@ import {
 } from './action_policy_data_schema';
 import { POLICY_MATCHER_DESCRIPTION, policyMatcherSchema } from './policy_matcher_schema';
 
-/**
- * Unset fields are omitted rather than returned as `null`, matching the rule response; `null` means
- * "clear this field" on PATCH and never appears on a read. The actors are the pending exception.
- */
 export const actionPolicyResponseSchema = z
   .object({
     id: z.string().describe('The unique identifier for the action policy.'),
