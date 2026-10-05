@@ -13,8 +13,8 @@ import { startLongRunningSleep } from '../fixtures/host_sleep';
 import { killProcess, listRunningProcesses, suspendProcess } from '../fixtures/process_actions';
 import { test } from '../fixtures';
 
-// Elastic Defend's component binary on the enrolled host.
-const ENDPOINT_COMMAND_SUFFIX = '/components/endpoint-security';
+// Command the processes action reports for the installed Elastic Defend binary.
+const ENDPOINT_COMMAND = '/opt/Elastic/Endpoint/elastic-endpoint';
 const KILL_SLEEP_SECONDS = 617;
 const SUSPEND_SLEEP_SECONDS = 619;
 const SLEEP_LIST_ATTEMPTS = 3;
@@ -96,12 +96,12 @@ test.describe('Response console process operations', { tag: ['@local-stateful-cl
       const commands = entries.map((entry) => entry.command);
 
       expect(commands).toStrictEqual(
-        expect.arrayContaining([expect.stringContaining(ENDPOINT_COMMAND_SUFFIX)])
+        expect.arrayContaining([expect.stringContaining(ENDPOINT_COMMAND)])
       );
     });
 
     // This worker shares one enrolled host. Kill and suspend a disposable sleep
-    // from that process list so stopping endpoint-security cannot take the agent down.
+    // from that process list so stopping elastic-endpoint cannot take the agent down.
     await test.step('kill-process completes for a pid from that list', async () => {
       await startLongRunningSleep(hostname, KILL_SLEEP_SECONDS);
       const pid = await waitForNewSleepPid(kbnClient, agentId, knownPids, KILL_SLEEP_SECONDS);
