@@ -28,6 +28,23 @@ import {
 } from '../constants';
 import { DataViewContext } from '..';
 import { esqlResponseToRecords } from '../../../../../common/utils/esql';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../../common/utils/execution_context';
+
+const ENTITIES_TABLE_GROUPED_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.HOME_PAGE,
+  'entities_table_grouped'
+);
+const ENTITIES_TABLE_RESOLUTION_GROUPS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.HOME_PAGE,
+  'entities_table_resolution_groups'
+);
+const ENTITIES_TABLE_RESOLUTION_GROUPS_FILTERED_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.HOME_PAGE,
+  'entities_table_resolution_groups_filtered'
+);
 
 export type EntitiesGroupingQuery = GroupingQuery | SearchRequest;
 
@@ -129,9 +146,12 @@ export const useFetchGroupedData = ({
         searchService.search<
           {},
           IKibanaSearchResponse<SearchResponse<{}, EntitiesRootGroupingAggregation>>
-        >({
-          params: getGroupedEntitiesQuery(query, indexPattern),
-        })
+        >(
+          {
+            params: getGroupedEntitiesQuery(query, indexPattern),
+          },
+          { executionContext: ENTITIES_TABLE_GROUPED_CONTEXT }
+        )
       );
 
       // A successful search against a missing/empty index (e.g. the entity store has been
@@ -284,41 +304,48 @@ export const useFetchUnfilteredResolutionGroupData = ({
           esqlQuery,
           search: searchService.search,
           projectRouting: ESQL_PROJECT_ROUTING,
+          executionContext: ENTITIES_TABLE_RESOLUTION_GROUPS_CONTEXT,
         }),
         // Group count: targets only (each target is one resolution group).
         lastValueFrom(
-          searchService.search<{}, IKibanaSearchResponse<SearchResponse>>({
-            params: {
-              index: indexPattern,
-              project_routing: ESQL_PROJECT_ROUTING,
-              ignore_unavailable: true,
-              size: 0,
-              track_total_hits: true,
-              query: {
-                bool: {
-                  filter: [ENTITY_TYPE_TERMS_CLAUSE],
-                  must_not: [{ exists: { field: ENTITY_FIELDS.RESOLVED_TO } }],
+          searchService.search<{}, IKibanaSearchResponse<SearchResponse>>(
+            {
+              params: {
+                index: indexPattern,
+                project_routing: ESQL_PROJECT_ROUTING,
+                ignore_unavailable: true,
+                size: 0,
+                track_total_hits: true,
+                query: {
+                  bool: {
+                    filter: [ENTITY_TYPE_TERMS_CLAUSE],
+                    must_not: [{ exists: { field: ENTITY_FIELDS.RESOLVED_TO } }],
+                  },
                 },
               },
             },
-          })
+            { executionContext: ENTITIES_TABLE_RESOLUTION_GROUPS_CONTEXT }
+          )
         ),
         // Unit count: all entities (targets + aliases) for the "N entities" label.
         lastValueFrom(
-          searchService.search<{}, IKibanaSearchResponse<SearchResponse>>({
-            params: {
-              index: indexPattern,
-              project_routing: ESQL_PROJECT_ROUTING,
-              ignore_unavailable: true,
-              size: 0,
-              track_total_hits: true,
-              query: {
-                bool: {
-                  filter: [ENTITY_TYPE_TERMS_CLAUSE],
+          searchService.search<{}, IKibanaSearchResponse<SearchResponse>>(
+            {
+              params: {
+                index: indexPattern,
+                project_routing: ESQL_PROJECT_ROUTING,
+                ignore_unavailable: true,
+                size: 0,
+                track_total_hits: true,
+                query: {
+                  bool: {
+                    filter: [ENTITY_TYPE_TERMS_CLAUSE],
+                  },
                 },
               },
             },
-          })
+            { executionContext: ENTITIES_TABLE_RESOLUTION_GROUPS_CONTEXT }
+          )
         ),
       ]);
 
@@ -329,23 +356,26 @@ export const useFetchUnfilteredResolutionGroupData = ({
         .filter((id): id is string => id !== null);
 
       const aliasCountResult = await lastValueFrom(
-        searchService.search<{}, IKibanaSearchResponse<SearchResponse<{}, AliasCountAggregation>>>({
-          params: {
-            index: indexPattern,
-            project_routing: ESQL_PROJECT_ROUTING,
-            ignore_unavailable: true,
-            size: 0,
-            aggs: {
-              aliases_by_target: {
-                terms: {
-                  field: ENTITY_FIELDS.RESOLVED_TO,
-                  include: pageTargetIds,
-                  size: pageSize,
+        searchService.search<{}, IKibanaSearchResponse<SearchResponse<{}, AliasCountAggregation>>>(
+          {
+            params: {
+              index: indexPattern,
+              project_routing: ESQL_PROJECT_ROUTING,
+              ignore_unavailable: true,
+              size: 0,
+              aggs: {
+                aliases_by_target: {
+                  terms: {
+                    field: ENTITY_FIELDS.RESOLVED_TO,
+                    include: pageTargetIds,
+                    size: pageSize,
+                  },
                 },
               },
             },
           },
-        })
+          { executionContext: ENTITIES_TABLE_RESOLUTION_GROUPS_CONTEXT }
+        )
       );
 
       const aliasCounts = new Map<string, number>(
@@ -435,6 +465,7 @@ export const useFetchFilteredResolutionGroupData = ({
           search: searchService.search,
           filter,
           projectRouting: ESQL_PROJECT_ROUTING,
+          executionContext: ENTITIES_TABLE_RESOLUTION_GROUPS_FILTERED_CONTEXT,
         }),
         // Distinct-group count over the filtered set → drives pagination (see buildGroupCountEsql).
         getESQLResults({
@@ -442,23 +473,27 @@ export const useFetchFilteredResolutionGroupData = ({
           search: searchService.search,
           filter,
           projectRouting: ESQL_PROJECT_ROUTING,
+          executionContext: ENTITIES_TABLE_RESOLUTION_GROUPS_FILTERED_CONTEXT,
         }),
         // Unit count: all entities matching the filter for the "N entities" label.
         lastValueFrom(
-          searchService.search<{}, IKibanaSearchResponse<SearchResponse>>({
-            params: {
-              index: indexPattern,
-              project_routing: ESQL_PROJECT_ROUTING,
-              ignore_unavailable: true,
-              size: 0,
-              track_total_hits: true,
-              query: {
-                bool: {
-                  filter: [ENTITY_TYPE_TERMS_CLAUSE, ...(filter ? [filter] : [])],
+          searchService.search<{}, IKibanaSearchResponse<SearchResponse>>(
+            {
+              params: {
+                index: indexPattern,
+                project_routing: ESQL_PROJECT_ROUTING,
+                ignore_unavailable: true,
+                size: 0,
+                track_total_hits: true,
+                query: {
+                  bool: {
+                    filter: [ENTITY_TYPE_TERMS_CLAUSE, ...(filter ? [filter] : [])],
+                  },
                 },
               },
             },
-          })
+            { executionContext: ENTITIES_TABLE_RESOLUTION_GROUPS_FILTERED_CONTEXT }
+          )
         ),
       ]);
 
@@ -467,27 +502,30 @@ export const useFetchFilteredResolutionGroupData = ({
       const pageGroupKeys = pageRows.map((r) => r.group_key).filter((k): k is string => k !== null);
 
       const metadataResult = await lastValueFrom(
-        searchService.search<{}, IKibanaSearchResponse<SearchResponse>>({
-          params: {
-            index: indexPattern,
-            project_routing: ESQL_PROJECT_ROUTING,
-            ignore_unavailable: true,
-            size: pageGroupKeys.length,
-            _source: [
-              ENTITY_FIELDS.ENTITY_ID,
-              ENTITY_FIELDS.ENTITY_NAME,
-              ENTITY_FIELDS.ENTITY_TYPE,
-              ENTITY_FIELDS.ENTITY_RISK,
-              ENTITY_FIELDS.RESOLUTION_RISK_SCORE,
-            ],
-            query: {
-              bool: {
-                filter: [{ terms: { [ENTITY_FIELDS.ENTITY_ID]: pageGroupKeys } }],
-                must_not: [{ exists: { field: ENTITY_FIELDS.RESOLVED_TO } }],
+        searchService.search<{}, IKibanaSearchResponse<SearchResponse>>(
+          {
+            params: {
+              index: indexPattern,
+              project_routing: ESQL_PROJECT_ROUTING,
+              ignore_unavailable: true,
+              size: pageGroupKeys.length,
+              _source: [
+                ENTITY_FIELDS.ENTITY_ID,
+                ENTITY_FIELDS.ENTITY_NAME,
+                ENTITY_FIELDS.ENTITY_TYPE,
+                ENTITY_FIELDS.ENTITY_RISK,
+                ENTITY_FIELDS.RESOLUTION_RISK_SCORE,
+              ],
+              query: {
+                bool: {
+                  filter: [{ terms: { [ENTITY_FIELDS.ENTITY_ID]: pageGroupKeys } }],
+                  must_not: [{ exists: { field: ENTITY_FIELDS.RESOLVED_TO } }],
+                },
               },
             },
           },
-        })
+          { executionContext: ENTITIES_TABLE_RESOLUTION_GROUPS_FILTERED_CONTEXT }
+        )
       );
 
       const targetMetadata = parseTargetMetadataHits(metadataResult.rawResponse.hits.hits);

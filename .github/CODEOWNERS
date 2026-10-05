@@ -890,7 +890,7 @@ src/platform/plugins/shared/cps @elastic/kibana-core @elastic/appex-sharedux
 src/platform/plugins/shared/custom_integrations @elastic/streams-ui
 src/platform/plugins/shared/dashboard @elastic/kibana-dashboards
 src/platform/plugins/shared/dashboard_markdown @elastic/kibana-dashboards
-src/platform/plugins/shared/data @elastic/kibana-dashboards @elastic/kibana-discover
+src/platform/plugins/shared/data @elastic/kibana-discover
 src/platform/plugins/shared/data_view_editor @elastic/kibana-discover
 src/platform/plugins/shared/data_view_field_editor @elastic/kibana-discover
 src/platform/plugins/shared/data_view_management @elastic/kibana-discover
@@ -1558,6 +1558,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/watchlist-entity-source @elastic/security-entity-analytics
 
 # Data Discovery
+/src/platform/packages/shared/kbn-scout/src/playwright/ui_components/esql_editor @elastic/kibana-discover @elastic/appex-qa
 /x-pack/platform/test/api_integration/services/data_view_api.ts @elastic/kibana-discover
 /src/platform/test/functional/page_objects/unified_field_list.ts @elastic/kibana-discover
 /src/platform/test/functional/page_objects/unified_tabs.ts @elastic/kibana-discover
@@ -1612,7 +1613,6 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /src/platform/test/examples/unified_tabs_examples @elastic/kibana-discover
 /src/platform/test/functional/apps/discover @elastic/kibana-discover
 /src/platform/test/functional/apps/management/ccs_compatibility @elastic/kibana-discover
-/src/platform/test/functional/apps/management/group1 @elastic/kibana-discover
 /src/platform/test/functional/apps/management/group2 @elastic/kibana-discover
 /src/platform/test/functional/apps/management/group3 @elastic/kibana-discover
 /src/platform/test/plugin_functional/test_suites/data_plugin @elastic/kibana-discover
@@ -1631,6 +1631,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /x-pack/platform/test/serverless/functional/test_suites/discover @elastic/kibana-discover
 /x-pack/platform/test/serverless/functional/test_suites/discover_ml_uptime/discover @elastic/kibana-discover
 /x-pack/platform/test/serverless/functional/test_suites/management/data_views @elastic/kibana-discover
+/src/platform/plugins/shared/data/**/esaggs* @elastic/kibana-discover @elastic/kibana-dashboards
 
 # Discover session metrics tab schema
 /src/platform/packages/shared/as-code/discover-schema/src/schemas/metrics_tab.ts @elastic/kibana-discover @elastic/obs-signals-metrics-team

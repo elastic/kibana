@@ -6,29 +6,22 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiComboBox, type EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { createDatasetWizardStrings } from '../../../create_dataset_wizard_i18n';
 import type { DatasetErrorModeFormValue } from '../../../create_dataset_form_state';
-import { DescribedOptionDisplay } from '../../../components/described_option_display';
+import type { ComboBoxChange } from '../../../components/combo_box_selection_validity';
+import {
+  EuiComboBoxNoCustomOption,
+  type EuiComboBoxNoCustomOptionOption,
+} from '../../../components/eui_combo_box_no_custom_option';
 
-type ErrorModeOption = EuiComboBoxOptionOption<DatasetErrorModeFormValue> & {
-  value: DatasetErrorModeFormValue;
-  description: string;
-  'data-test-subj': string;
-};
-
-const renderErrorModeOption = (option: EuiComboBoxOptionOption<DatasetErrorModeFormValue>) => {
-  const opt = option as ErrorModeOption;
-  return <DescribedOptionDisplay title={opt.label} description={opt.description} />;
-};
-
-const ERROR_MODE_OPTIONS: ErrorModeOption[] = [
+const ERROR_MODE_OPTIONS: Array<
+  EuiComboBoxNoCustomOptionOption<Exclude<DatasetErrorModeFormValue, ''>>
+> = [
   {
     value: 'fail_fast',
     label: createDatasetWizardStrings.settingsErrorModeFailFast,
     description: createDatasetWizardStrings.settingsErrorModeFailFastDescription,
-    append: <EuiBadge color="hollow">{createDatasetWizardStrings.defaultBadgeLabel}</EuiBadge>,
     'data-test-subj': 'createDatasetSettingsErrorModeOption-fail_fast',
   },
   {
@@ -52,38 +45,24 @@ export function ErrorModeSelect({
   value,
   onChange,
   onBlur,
+  isInvalid,
 }: {
   value: DatasetErrorModeFormValue;
-  onChange: (value: DatasetErrorModeFormValue) => void;
+  onChange: (next: ComboBoxChange<DatasetErrorModeFormValue>) => void;
   onBlur: () => void;
+  isInvalid: boolean;
 }) {
-  const selectedOption = ERROR_MODE_OPTIONS.find((o) => o.value === value);
   return (
-    <EuiComboBox
-      placeholder={createDatasetWizardStrings.settingsErrorModePlaceholder}
-      options={ERROR_MODE_OPTIONS}
-      data-test-subj="createDatasetSettingsErrorMode"
-      fullWidth
-      aria-label={createDatasetWizardStrings.settingsErrorModeLabel}
-      singleSelection={{ asPlainText: true }}
-      isClearable
-      rowHeight="auto"
-      renderOption={renderErrorModeOption}
-      selectedOptions={
-        selectedOption
-          ? [
-              {
-                value: selectedOption.value,
-                label: selectedOption.label,
-              },
-            ]
-          : []
-      }
-      onChange={(nextSelectedOptions) => {
-        const next = nextSelectedOptions?.[0] as ErrorModeOption | undefined;
-        onChange(next?.value ?? '');
-      }}
+    <EuiComboBoxNoCustomOption
+      value={value}
+      onChange={onChange}
       onBlur={onBlur}
+      options={ERROR_MODE_OPTIONS}
+      defaultValue="fail_fast"
+      isInvalid={isInvalid}
+      placeholder={createDatasetWizardStrings.settingsErrorModePlaceholder}
+      aria-label={createDatasetWizardStrings.settingsErrorModeLabel}
+      data-test-subj="createDatasetSettingsErrorMode"
     />
   );
 }

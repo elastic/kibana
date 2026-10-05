@@ -1,5 +1,5 @@
 {
-  "sha1": "37eedccb3e366c2d380d7ec993f021040b2f336c",
+  "sha1": "8f0fe0de597862701dc9c1beb1e9edc42b726e9e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1558,7 +1558,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/request_counts_esql.spec.ts",
-        "line": 103,
+        "line": 101,
         "column": 29
       }
     },

@@ -15,6 +15,7 @@ import {
   ALERTZERO_HUNT_WORKFLOW,
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW,
 } from '.';
+import { createWorkflowLiquidEngine } from '../../../common/utils';
 
 // Route-path and cross-package id checks (including the SYSTEM_SECURITY_HUNT_*
 // cross-check) live in the alertzero PLUGIN's own hunt_children_contract.test.ts, not
@@ -46,6 +47,7 @@ interface YamlStep {
   name: string;
   type?: string;
   with?: { 'workflow-id'?: string; inputs?: Record<string, unknown>; path?: string };
+  if?: string;
   steps?: YamlStep[];
 }
 
@@ -75,8 +77,20 @@ const proposalGate = parse(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW.yaml) as YamlWo
 
 const workerSteps = flatten(worker.steps);
 const packageReportSteps = flatten(packageReport.steps);
+const proposalGateSteps = flatten(proposalGate.steps);
 
 const stepIn = (steps: YamlStep[], name: string) => steps.find((step) => step.name === name);
+
+// Evaluates a single `${{ }}` expression the way the engine does (same approach as
+// coverage_review.test.ts's evaluateExpression / forensics_run_endpoint_analysis.test.ts's
+// evaluate): strip the delimiters and run the real Liquid engine against a hand-built context.
+const evaluateExpression = (expression: string, context: Record<string, unknown>): unknown => {
+  const trimmed = expression.trim();
+  if (!(trimmed.startsWith('${{') && trimmed.endsWith('}}'))) {
+    throw new Error(`Expected \${{ }} expression, got: ${expression}`);
+  }
+  return createWorkflowLiquidEngine().evalValueSync(trimmed.slice(3, -2).trim(), context);
+};
 
 describe('Hunt Watch worker chain', () => {
   // 1b: the two feature children carry exactly the shared tag pair, and neither the
@@ -201,5 +215,177 @@ describe('Hunt Watch worker chain', () => {
     );
 
     expect(dispatch?.with?.['workflow-id']).toBe(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW.id);
+  });
+
+  // The gate's settlement predicate lives entirely in Liquid (resolve_settlement_counts ->
+  // resolve_settled -> close_if_settled's `if`), so it has no TypeScript step handler to unit
+  // test directly -- evaluated here against the real YAML the way the engine would, same
+  // approach coverage_review.test.ts's evaluateMarkProcessed uses for its own chained
+  // data.set -> if. Covers elastic/security-team#19773's two counting bugs: the requery
+  // pagination fix (status-scoped `total` reads replacing a truncated page) and the
+  // pending/executing fail-closed default (a failed status read must never be
+  // indistinguishable from "nothing outstanding").
+  describe('proposal gate settlement predicate', () => {
+    const settlementCounts = stepIn(proposalGateSteps, 'resolve_settlement_counts')?.with as
+      | Record<string, string>
+      | undefined;
+    const settledWith = stepIn(proposalGateSteps, 'resolve_settled')?.with as
+      | Record<string, string>
+      | undefined;
+    const closeIf = stepIn(proposalGateSteps, 'close_if_settled')?.if;
+
+    // `undefined` models `on-failure: continue: true` swallowing a failed read: the step
+    // entry exists with an `error`, but no `output` -- never a missing step entry entirely.
+    type RequeryOutcome = { total: number } | undefined;
+
+    const evaluateSettlement = ({
+      created,
+      createdRetry,
+      pending,
+      pendingRetry,
+      executing,
+      executingRetry,
+      expectedProposalCount,
+    }: {
+      created?: RequeryOutcome;
+      createdRetry?: RequeryOutcome;
+      pending?: RequeryOutcome;
+      pendingRetry?: RequeryOutcome;
+      executing?: RequeryOutcome;
+      executingRetry?: RequeryOutcome;
+      expectedProposalCount: number;
+    }) => {
+      const asStepResult = (outcome: RequeryOutcome) =>
+        outcome ? { output: outcome } : { error: { message: 'request failed' } };
+
+      const stepsContext = {
+        steps: {
+          requery_created: asStepResult(created),
+          requery_created_retry: asStepResult(createdRetry),
+          requery_pending: asStepResult(pending),
+          requery_pending_retry: asStepResult(pendingRetry),
+          requery_executing: asStepResult(executing),
+          requery_executing_retry: asStepResult(executingRetry),
+        },
+        inputs: { expectedProposalCount },
+      };
+
+      const createdCount = evaluateExpression(settlementCounts!.created_count, stepsContext);
+      const pendingCount = evaluateExpression(settlementCounts!.pending_count, stepsContext);
+      const executingCount = evaluateExpression(settlementCounts!.executing_count, stepsContext);
+
+      const settlementContext = {
+        variables: {
+          created_count: createdCount,
+          pending_count: pendingCount,
+          executing_count: executingCount,
+        },
+        inputs: { expectedProposalCount },
+      };
+
+      const settled = evaluateExpression(settledWith!.settled, settlementContext);
+      const closes = evaluateExpression(closeIf!, { variables: { settled } });
+
+      return { createdCount, pendingCount, executingCount, settled, closes };
+    };
+
+    it('settles and closes once every count confirms clean, including a genuine zero', () => {
+      const result = evaluateSettlement({
+        created: { total: 3 },
+        createdRetry: { total: 3 },
+        pending: { total: 0 },
+        pendingRetry: { total: 0 },
+        executing: { total: 0 },
+        executingRetry: { total: 0 },
+        expectedProposalCount: 3,
+      });
+
+      // Pins that a successful `total: 0` stays 0 rather than falling through to the
+      // fail-closed `default: 1` -- only a missing (failed) read should ever do that.
+      expect(result).toEqual({
+        createdCount: 3,
+        pendingCount: 0,
+        executingCount: 0,
+        settled: true,
+        closes: true,
+      });
+    });
+
+    it('does not close when a page beyond the first 100 still has a pending Proposal', () => {
+      // The bug this ticket fixes: before the pagination fix, pending/executing were tallied
+      // by filtering a `size: 100` page client-side, which could never see a pending Proposal
+      // past that page. `total` from a status-scoped query is unaffected by page size, so a
+      // large count here still settles correctly only once it is genuinely 0.
+      const result = evaluateSettlement({
+        created: { total: 140 },
+        pending: { total: 1 },
+        executing: { total: 0 },
+        expectedProposalCount: 3,
+      });
+
+      expect(result.pendingCount).toBe(1);
+      expect(result.settled).toBe(false);
+      expect(result.closes).toBe(false);
+    });
+
+    it('fails closed, not open, when both pending reads fail', () => {
+      // The regression this guards: before the fail-closed default, a failed pending pair
+      // collapsed to a literal 0 (same as "nothing pending"), and a correctly-read
+      // created_count/executing_count could still satisfy the rest of the predicate --
+      // closing the Investigation over a Proposal this gate simply failed to observe.
+      const result = evaluateSettlement({
+        created: { total: 3 },
+        executing: { total: 0 },
+        expectedProposalCount: 3,
+      });
+
+      expect(result.pendingCount).toBe(1);
+      expect(result.settled).toBe(false);
+      expect(result.closes).toBe(false);
+    });
+
+    it('fails closed, not open, when both executing reads fail', () => {
+      const result = evaluateSettlement({
+        created: { total: 3 },
+        pending: { total: 0 },
+        expectedProposalCount: 3,
+      });
+
+      expect(result.executingCount).toBe(1);
+      expect(result.settled).toBe(false);
+      expect(result.closes).toBe(false);
+    });
+
+    it('does not settle when both creation reads fail, even with nothing pending or executing', () => {
+      // created_count's own `default: 0` needs no fail-closed sentinel: a 0 created count
+      // essentially never clears `>= expectedProposalCount`, so a failed creation pair already
+      // blocks settlement the same way it did before the requery was split into three pairs.
+      const result = evaluateSettlement({
+        pending: { total: 0 },
+        executing: { total: 0 },
+        expectedProposalCount: 3,
+      });
+
+      expect(result.createdCount).toBe(0);
+      expect(result.settled).toBe(false);
+      expect(result.closes).toBe(false);
+    });
+
+    it('falls back to the first read when only the retry fails', () => {
+      const result = evaluateSettlement({
+        created: { total: 3 },
+        pending: { total: 0 },
+        executing: { total: 0 },
+        expectedProposalCount: 3,
+      });
+
+      expect(result).toEqual({
+        createdCount: 3,
+        pendingCount: 0,
+        executingCount: 0,
+        settled: true,
+        closes: true,
+      });
+    });
   });
 });
