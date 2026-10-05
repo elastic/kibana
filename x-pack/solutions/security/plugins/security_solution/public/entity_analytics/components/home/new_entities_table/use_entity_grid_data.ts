@@ -281,6 +281,10 @@ export const useEntityGridData = ({
         !shellQuery.isPreviousData &&
         shellRows != null,
       keepPreviousData: true,
+      // Enrich data only goes stale with its shell: a shell refetch changes the key
+      // (shellUpdatedAt) and runs it again. Refetching a cached enrich on mount would
+      // query for the rows the shell refetch is about to replace.
+      staleTime: Infinity,
     }
   );
 
