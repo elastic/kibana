@@ -13,9 +13,11 @@ import {
 } from '@kbn/agent-builder-common';
 import { EscalationsService } from './escalations_service';
 import { InvalidLinkedInvestigationError, NotAnEscalationError } from './errors';
+import { CloseTargetsChangedError } from '../../investigations/services/close_targets_changed_error';
+import { LinkedInvestigationUnavailableError } from './linked_investigation_unavailable_error';
+import { EscalationCloseIncompleteError } from './escalation_close_incomplete_error';
 import {
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
-  ESCALATION_STATUS_FIELD,
   ESCALATION_TEMPLATE_ID,
   INVESTIGATION_TEMPLATE_ID,
 } from '../../../common/escalations/constants';
@@ -101,13 +103,40 @@ const makeService = (clientOverrides: Record<string, jest.Mock> = {}) => {
     list: jest.fn(),
   };
 
+  // Minimal stub — only needed for setStatus / getClosePreview tests.
+  const investigationStatusService = {
+    getPreview: jest.fn().mockResolvedValue({ pending_proposal_count: 0, pending_proposals: [] }),
+    listPendingProposalsForRequest: jest.fn().mockResolvedValue([]),
+    setStatus: jest.fn().mockResolvedValue({
+      conversation_id: '',
+      status: 'closed',
+      dismissed_proposal_ids: [],
+      failed_proposal_ids: [],
+    }),
+  };
+
+  const attachmentsClient = {
+    bulkCreate: jest.fn().mockResolvedValue({ created: [], errors: [] }),
+  };
+  const getAttachmentsClient = jest.fn().mockResolvedValue(attachmentsClient);
+
   const service = new EscalationsService({
     logger,
     getConversationClient,
+    getAttachmentsClient,
     conversationTemplates,
+    getInvestigationStatusService: () => investigationStatusService as never,
   });
 
-  return { service, client, getConversationClient, conversationTemplates };
+  return {
+    service,
+    client,
+    getConversationClient,
+    getAttachmentsClient,
+    attachmentsClient,
+    conversationTemplates,
+    investigationStatusService,
+  };
 };
 
 describe('EscalationsService.create', () => {
@@ -117,7 +146,7 @@ describe('EscalationsService.create', () => {
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     expect(client.create).toHaveBeenCalledWith(
@@ -131,7 +160,7 @@ describe('EscalationsService.create', () => {
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     expect(client.create).toHaveBeenCalledWith(
@@ -147,7 +176,7 @@ describe('EscalationsService.create', () => {
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     expect(applyTemplate).not.toHaveBeenCalled();
@@ -165,7 +194,7 @@ describe('EscalationsService.create', () => {
       service.create(request, {
         linked_investigation_id: 'inv-1',
         visibility: 'public',
-        collaborators: [],
+        assignees: ['user-a'],
       })
     ).rejects.toBeInstanceOf(InvalidLinkedInvestigationError);
   });
@@ -176,7 +205,7 @@ describe('EscalationsService.create', () => {
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     const { metadata } = client.create.mock.calls[0][0];
@@ -189,7 +218,7 @@ describe('EscalationsService.create', () => {
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     const { metadata } = client.create.mock.calls[0][0];
@@ -202,7 +231,7 @@ describe('EscalationsService.create', () => {
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     const { metadata } = client.create.mock.calls[0][0];
@@ -222,7 +251,7 @@ describe('EscalationsService.create', () => {
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     const { metadata } = client.create.mock.calls[0][0];
@@ -236,7 +265,7 @@ describe('EscalationsService.create', () => {
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     const { accessControl } = client.create.mock.calls[0][0];
@@ -244,13 +273,13 @@ describe('EscalationsService.create', () => {
     expect(accessControl).not.toHaveProperty('entries');
   });
 
-  it('sets access_mode: Private with mapped collaborator entries when visibility is "private"', async () => {
+  it('sets access_mode: Private with assignees mapped to ACL entries when visibility is "private"', async () => {
     const { service, client } = makeService();
 
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'private',
-      collaborators: ['user-a', 'user-b'],
+      assignees: ['user-a', 'user-b'],
     });
 
     const { accessControl } = client.create.mock.calls[0][0];
@@ -263,13 +292,44 @@ describe('EscalationsService.create', () => {
     expect(accessControl.entries[0]).not.toHaveProperty('added_at');
   });
 
+  it('deduplicates repeated assignees in both the private ACL entries and metadata', async () => {
+    const { service, client } = makeService();
+
+    await service.create(request, {
+      linked_investigation_id: 'inv-1',
+      visibility: 'private',
+      assignees: ['user-a', 'user-b', 'user-a'],
+    });
+
+    const { accessControl, metadata } = client.create.mock.calls[0][0];
+    expect(accessControl.entries).toEqual([
+      { type: 'user', id: 'user-a', role: ConversationAccessControlRole.Member },
+      { type: 'user', id: 'user-b', role: ConversationAccessControlRole.Member },
+    ]);
+    expect(metadata.assignees).toEqual(['user-a', 'user-b']);
+  });
+
+  it('does not add ACL entries for a public escalation', async () => {
+    const { service, client } = makeService();
+
+    await service.create(request, {
+      linked_investigation_id: 'inv-1',
+      visibility: 'public',
+      assignees: ['user-a'],
+    });
+
+    const { accessControl } = client.create.mock.calls[0][0];
+    expect(accessControl.access_mode).toBe(ConversationAccessControlMode.Public);
+    expect(accessControl.entries).toBeUndefined();
+  });
+
   it('uses the investigation title as the escalation initial title', async () => {
     const { service, client } = makeService();
 
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     const { title } = client.create.mock.calls[0][0];
@@ -283,7 +343,7 @@ describe('EscalationsService.create', () => {
       linked_investigation_id: 'inv-1',
       title: 'Custom escalation title',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     const { title } = client.create.mock.calls[0][0];
@@ -298,41 +358,26 @@ describe('EscalationsService.create', () => {
       service.create(request, {
         linked_investigation_id: 'inv-1',
         visibility: 'public',
-        collaborators: [],
+        assignees: ['user-a'],
       })
     ).rejects.toThrow(/"escalation" not found/);
   });
 
-  it('sets assignees in metadata when provided', async () => {
+  it('always sets assignees in metadata', async () => {
     const { service, client } = makeService();
 
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
       assignees: ['uid-creator'],
     });
 
     const { metadata } = client.create.mock.calls[0][0];
     expect(metadata.assignees).toEqual(['uid-creator']);
   });
-
-  it('does not set assignees in metadata when empty', async () => {
-    const { service, client } = makeService();
-
-    await service.create(request, {
-      linked_investigation_id: 'inv-1',
-      visibility: 'public',
-      collaborators: [],
-      assignees: [],
-    });
-
-    const { metadata } = client.create.mock.calls[0][0];
-    expect(metadata).not.toHaveProperty('assignees');
-  });
 });
 
-describe('EscalationsService.update', () => {
+describe('EscalationsService.link', () => {
   it('throws NotAnEscalationError when target is not an escalation', async () => {
     const { service } = makeService({
       get: jest.fn().mockResolvedValue({
@@ -342,11 +387,11 @@ describe('EscalationsService.update', () => {
     });
 
     await expect(
-      service.update(request, 'not-an-escalation', { title: 'New title' })
+      service.link(request, 'not-an-escalation', { linked_investigations: ['inv-1'] })
     ).rejects.toBeInstanceOf(NotAnEscalationError);
   });
 
-  it('calls patchMetadata when linked_investigations are provided (appends, not replaces)', async () => {
+  it('calls patchMetadata with appended linked_investigations (not replace)', async () => {
     const { service, client } = makeService({
       get: jest.fn().mockResolvedValue({
         id: 'escalation-1',
@@ -355,7 +400,7 @@ describe('EscalationsService.update', () => {
       }),
     });
 
-    await service.update(request, 'escalation-1', {
+    await service.link(request, 'escalation-1', {
       linked_investigations: ['inv-2'],
     });
 
@@ -377,7 +422,7 @@ describe('EscalationsService.update', () => {
       }),
     });
 
-    await service.update(request, 'escalation-1', {
+    await service.link(request, 'escalation-1', {
       linked_investigations: ['inv-2', 'inv-3'],
     });
 
@@ -386,96 +431,7 @@ describe('EscalationsService.update', () => {
     expect(updated).toEqual(['inv-1', 'inv-2', 'inv-3']);
   });
 
-  it('calls client.update when title is provided', async () => {
-    const { service, client } = makeService({
-      get: jest.fn().mockResolvedValue({
-        id: 'escalation-1',
-        template_id: ESCALATION_TEMPLATE_ID,
-        metadata: {},
-      }),
-    });
-
-    await service.update(request, 'escalation-1', { title: 'Renamed' });
-
-    expect(client.update).toHaveBeenCalledWith({ id: 'escalation-1', title: 'Renamed' });
-  });
-
-  it('does not call patchMetadata for a title-only update', async () => {
-    const { service, client } = makeService({
-      get: jest.fn().mockResolvedValue({
-        id: 'escalation-1',
-        template_id: ESCALATION_TEMPLATE_ID,
-        metadata: {},
-      }),
-    });
-
-    await service.update(request, 'escalation-1', { title: 'Renamed' });
-
-    expect(client.patchMetadata).not.toHaveBeenCalled();
-  });
-
-  it('calls patchMetadata with status when status is provided', async () => {
-    const { service, client } = makeService({
-      get: jest.fn().mockResolvedValue({
-        id: 'escalation-1',
-        template_id: ESCALATION_TEMPLATE_ID,
-        metadata: { status: 'open' },
-      }),
-    });
-
-    await service.update(request, 'escalation-1', { status: 'closed' });
-
-    expect(client.patchMetadata).toHaveBeenCalledWith(
-      'escalation-1',
-      expect.objectContaining({ status: 'closed' }),
-      { access: 'converse' }
-    );
-  });
-
-  it('issues exactly one patchMetadata call when linked_investigations and status are both present', async () => {
-    const { service, client } = makeService({
-      get: jest.fn().mockResolvedValue({
-        id: 'escalation-1',
-        template_id: ESCALATION_TEMPLATE_ID,
-        metadata: {
-          [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: [],
-          status: 'open',
-        },
-      }),
-    });
-
-    await service.update(request, 'escalation-1', {
-      linked_investigations: ['inv-1'],
-      status: 'closed',
-    });
-
-    // A single OCC-protected write prevents partial application.
-    expect(client.patchMetadata).toHaveBeenCalledTimes(1);
-    expect(client.patchMetadata).toHaveBeenCalledWith(
-      'escalation-1',
-      expect.objectContaining({
-        [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: expect.arrayContaining(['inv-1']),
-        [ESCALATION_STATUS_FIELD]: 'closed',
-      }),
-      { access: 'converse' }
-    );
-  });
-
-  it('does not call client.update for a status-only update', async () => {
-    const { service, client } = makeService({
-      get: jest.fn().mockResolvedValue({
-        id: 'escalation-1',
-        template_id: ESCALATION_TEMPLATE_ID,
-        metadata: { status: 'open' },
-      }),
-    });
-
-    await service.update(request, 'escalation-1', { status: 'closed' });
-
-    expect(client.update).not.toHaveBeenCalled();
-  });
-
-  it('does not call client.update for a links-only update', async () => {
+  it('does not call client.update', async () => {
     const { service, client } = makeService({
       get: jest.fn().mockResolvedValue({
         id: 'escalation-1',
@@ -484,7 +440,7 @@ describe('EscalationsService.update', () => {
       }),
     });
 
-    await service.update(request, 'escalation-1', {
+    await service.link(request, 'escalation-1', {
       linked_investigations: ['inv-1'],
     });
 
@@ -625,6 +581,361 @@ describe('EscalationsService.list', () => {
 
     expect(client.search).toHaveBeenCalledWith(expect.objectContaining({ query: undefined }));
   });
+
+  it('includes a metadata.linked_investigations filter when linked_investigation_id is set', async () => {
+    const { service, client } = makeService({
+      search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+    });
+
+    await service.list(request, {
+      page: 1,
+      per_page: 50,
+      status: 'open',
+      linked_investigation_id: 'inv-abc',
+    });
+
+    const { filter } = (client.search as jest.Mock).mock.calls[0][0] as { filter: string };
+    expect(filter).toContain('metadata.linked_investigations: "inv-abc"');
+  });
+
+  it('omits the linked_investigation_id clause when it is not set', async () => {
+    const { service, client } = makeService({
+      search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+    });
+
+    await service.list(request, { page: 1, per_page: 50, status: 'open' });
+
+    const { filter } = (client.search as jest.Mock).mock.calls[0][0] as { filter: string };
+    expect(filter).not.toContain('linked_investigations');
+  });
+
+  it('escapes double quotes in linked_investigation_id to prevent KQL injection', async () => {
+    const { service, client } = makeService({
+      search: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+    });
+
+    // Although real conversation IDs are UUIDs, verify the escaping works for safety.
+    await service.list(request, {
+      page: 1,
+      per_page: 50,
+      status: 'open',
+      linked_investigation_id: 'inv-"malicious"',
+    });
+
+    const { filter } = (client.search as jest.Mock).mock.calls[0][0] as { filter: string };
+    expect(filter).toContain('metadata.linked_investigations: "inv-\\"malicious\\""');
+    // Should not leave a bare unescaped double-quote that would break the KQL.
+    expect(filter).not.toMatch(/linked_investigations: "inv-"malicious/);
+  });
+});
+
+describe('EscalationsService.getClosePreview', () => {
+  const ESCALATION_WITH_LINKED = {
+    ...MOCK_ESCALATION,
+    template_id: ESCALATION_TEMPLATE_ID,
+    metadata: { linked_investigations: ['inv-1', 'inv-2'] },
+  };
+
+  it('returns empty open_investigations when there are no linked investigations', async () => {
+    const { service, client } = makeService();
+    client.get.mockResolvedValue({
+      ...MOCK_ESCALATION,
+      template_id: ESCALATION_TEMPLATE_ID,
+      metadata: {},
+    });
+
+    const result = await service.getClosePreview(request, 'escalation-1');
+    expect(result).toEqual({ open_investigations: [], unavailable_investigation_ids: [] });
+  });
+
+  it('includes pending_proposals from the investigation preview', async () => {
+    const { service, client, investigationStatusService } = makeService();
+    client.get.mockResolvedValue(ESCALATION_WITH_LINKED);
+    client.bulkGet.mockImplementation(
+      async (ids: string[]) =>
+        new Map(
+          ids.map((id) => [
+            id,
+            {
+              id,
+              title: `Inv ${id}`,
+              template_id: INVESTIGATION_TEMPLATE_ID,
+              metadata: { status: 'open' },
+            },
+          ])
+        )
+    );
+    investigationStatusService.getPreview.mockResolvedValue({
+      pending_proposal_count: 2,
+      pending_proposals: [
+        { id: 'p-1', action_name: 'Block IP' },
+        { id: 'p-2', action_name: null },
+      ],
+    });
+
+    const result = await service.getClosePreview(request, 'escalation-1');
+
+    expect(result.open_investigations).toHaveLength(2);
+    expect(result.open_investigations[0].pending_proposal_count).toBe(2);
+    expect(result.open_investigations[0].pending_proposals).toEqual([
+      { id: 'p-1', action_name: 'Block IP' },
+      { id: 'p-2', action_name: null },
+    ]);
+  });
+
+  it('excludes already-closed linked investigations', async () => {
+    const { service, client } = makeService();
+    client.get.mockResolvedValue(ESCALATION_WITH_LINKED);
+    client.bulkGet.mockResolvedValue(
+      new Map([
+        [
+          'inv-1',
+          {
+            id: 'inv-1',
+            title: 'Open',
+            template_id: INVESTIGATION_TEMPLATE_ID,
+            metadata: { status: 'open' },
+          },
+        ],
+        [
+          'inv-2',
+          {
+            id: 'inv-2',
+            title: 'Closed',
+            template_id: INVESTIGATION_TEMPLATE_ID,
+            metadata: { status: 'closed' },
+          },
+        ],
+      ])
+    );
+
+    const result = await service.getClosePreview(request, 'escalation-1');
+    expect(result.open_investigations).toHaveLength(1);
+    expect(result.open_investigations[0].id).toBe('inv-1');
+  });
+
+  it('throws NotAnEscalationError when the conversation is not an escalation', async () => {
+    const { service, client } = makeService();
+    client.get.mockResolvedValue({ ...MOCK_INVESTIGATION, template_id: INVESTIGATION_TEMPLATE_ID });
+
+    await expect(service.getClosePreview(request, 'not-an-escalation')).rejects.toBeInstanceOf(
+      NotAnEscalationError
+    );
+  });
+});
+
+describe('EscalationsService.setStatus — pre-flight checks', () => {
+  const OPEN_INV = {
+    id: 'inv-1',
+    title: 'Open',
+    template_id: INVESTIGATION_TEMPLATE_ID,
+    metadata: { status: 'open' },
+  };
+  const ESCALATION_WITH_LINKED = {
+    ...MOCK_ESCALATION,
+    template_id: ESCALATION_TEMPLATE_ID,
+    metadata: { linked_investigations: ['inv-1'] },
+  };
+
+  it('throws CloseTargetsChangedError when an unexpected linked investigation is open', async () => {
+    const { service, client } = makeService();
+    client.get.mockResolvedValue(ESCALATION_WITH_LINKED);
+    client.bulkGet.mockResolvedValue(new Map([['inv-1', OPEN_INV]]));
+
+    await expect(
+      service.setStatus(request, 'escalation-1', {
+        status: 'closed',
+        expected_investigation_ids: ['some-other-id'], // inv-1 is not in this list
+      })
+    ).rejects.toBeInstanceOf(CloseTargetsChangedError);
+  });
+
+  it('throws CloseTargetsChangedError when an unexpected proposal is pending', async () => {
+    const { service, client, investigationStatusService } = makeService();
+    client.get.mockResolvedValue(ESCALATION_WITH_LINKED);
+    client.bulkGet.mockResolvedValue(new Map([['inv-1', OPEN_INV]]));
+    // The service sees proposal p-2 as pending, but the client only told us about p-1.
+    investigationStatusService.listPendingProposalsForRequest.mockResolvedValue([
+      { id: 'p-1', action_name: null },
+      { id: 'p-2', action_name: null },
+    ]);
+
+    await expect(
+      service.setStatus(request, 'escalation-1', {
+        status: 'closed',
+        expected_investigation_ids: ['inv-1'],
+        expected_proposal_ids: ['p-1'], // p-2 is missing → changed
+      })
+    ).rejects.toBeInstanceOf(CloseTargetsChangedError);
+  });
+
+  it('does not throw when an expected proposal is no longer pending (already decided)', async () => {
+    const { service, client, investigationStatusService } = makeService();
+    client.get.mockResolvedValue(ESCALATION_WITH_LINKED);
+    client.bulkGet.mockResolvedValue(new Map([['inv-1', OPEN_INV]]));
+    // p-2 was in the list shown to the user but has since been decided — that is fine.
+    investigationStatusService.listPendingProposalsForRequest.mockResolvedValue([
+      { id: 'p-1', action_name: null },
+    ]);
+    client.patchMetadata.mockResolvedValue({
+      conversation: { ...MOCK_ESCALATION, template_id: ESCALATION_TEMPLATE_ID },
+    });
+
+    await expect(
+      service.setStatus(request, 'escalation-1', {
+        status: 'closed',
+        expected_investigation_ids: ['inv-1'],
+        expected_proposal_ids: ['p-1', 'p-2'], // p-2 is gone but was expected → OK
+      })
+    ).resolves.not.toThrow();
+  });
+
+  it('does not run pre-flight when expected_proposal_ids is absent', async () => {
+    const { service, client, investigationStatusService } = makeService();
+    client.get.mockResolvedValue(ESCALATION_WITH_LINKED);
+    client.bulkGet.mockResolvedValue(new Map([['inv-1', OPEN_INV]]));
+    // Even with proposals present, no pre-flight → no throw.
+    investigationStatusService.listPendingProposalsForRequest.mockResolvedValue([
+      { id: 'p-surprise', action_name: null },
+    ]);
+    client.patchMetadata.mockResolvedValue({
+      conversation: { ...MOCK_ESCALATION, template_id: ESCALATION_TEMPLATE_ID },
+    });
+
+    await expect(
+      service.setStatus(request, 'escalation-1', { status: 'closed' })
+    ).resolves.not.toThrow();
+
+    expect(investigationStatusService.listPendingProposalsForRequest).not.toHaveBeenCalled();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// LinkedInvestigationUnavailableError — unresolvable linked id handling
+// ---------------------------------------------------------------------------
+
+describe('EscalationsService — unresolvable linked investigation', () => {
+  const ESCALATION_WITH_LINKED = {
+    ...MOCK_ESCALATION,
+    template_id: ESCALATION_TEMPLATE_ID,
+    metadata: { linked_investigations: ['inv-1', 'inv-missing'] },
+  };
+
+  it('setStatus throws LinkedInvestigationUnavailableError when a linked id is missing from bulkGet', async () => {
+    const { service, client } = makeService();
+    client.get.mockResolvedValue(ESCALATION_WITH_LINKED);
+    // bulkGet only resolves inv-1; inv-missing is gone / inaccessible.
+    client.bulkGet.mockResolvedValue(
+      new Map([
+        [
+          'inv-1',
+          {
+            id: 'inv-1',
+            title: 'Open',
+            template_id: INVESTIGATION_TEMPLATE_ID,
+            metadata: { status: 'open' },
+          },
+        ],
+      ])
+    );
+
+    await expect(
+      service.setStatus(request, 'escalation-1', { status: 'closed' })
+    ).rejects.toBeInstanceOf(LinkedInvestigationUnavailableError);
+
+    // The escalation must not be patched.
+    expect(client.patchMetadata).not.toHaveBeenCalled();
+  });
+
+  it('getClosePreview returns unavailable_investigation_ids for missing linked ids', async () => {
+    const { service, client, investigationStatusService } = makeService();
+    client.get.mockResolvedValue(ESCALATION_WITH_LINKED);
+    // bulkGet only resolves inv-1.
+    client.bulkGet.mockResolvedValue(
+      new Map([
+        [
+          'inv-1',
+          {
+            id: 'inv-1',
+            title: 'Open',
+            template_id: INVESTIGATION_TEMPLATE_ID,
+            metadata: { status: 'open' },
+          },
+        ],
+      ])
+    );
+    investigationStatusService.getPreview.mockResolvedValue({
+      pending_proposal_count: 0,
+      pending_proposals: [],
+    });
+
+    const result = await service.getClosePreview(request, 'escalation-1');
+
+    expect(result.unavailable_investigation_ids).toEqual(['inv-missing']);
+    // The open investigation still appears normally.
+    expect(result.open_investigations).toHaveLength(1);
+  });
+
+  it('setStatus succeeds when all linked ids resolve', async () => {
+    const { service, client } = makeService();
+    client.get.mockResolvedValue({
+      ...MOCK_ESCALATION,
+      template_id: ESCALATION_TEMPLATE_ID,
+      metadata: { linked_investigations: ['inv-1'] },
+    });
+    client.bulkGet.mockResolvedValue(
+      new Map([
+        [
+          'inv-1',
+          {
+            id: 'inv-1',
+            title: 'Open',
+            template_id: INVESTIGATION_TEMPLATE_ID,
+            metadata: { status: 'closed' }, // already closed — skip, nothing to do
+          },
+        ],
+      ])
+    );
+    client.patchMetadata.mockResolvedValue({
+      conversation: { ...MOCK_ESCALATION, template_id: ESCALATION_TEMPLATE_ID },
+    });
+
+    await expect(
+      service.setStatus(request, 'escalation-1', { status: 'closed' })
+    ).resolves.not.toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// EscalationsService.setStatus — partial close / incomplete cascade
+// ---------------------------------------------------------------------------
+
+describe('EscalationsService.setStatus — partial close leaves escalation open', () => {
+  const OPEN_INV = {
+    id: 'inv-1',
+    title: 'Open',
+    template_id: INVESTIGATION_TEMPLATE_ID,
+    metadata: { status: 'open' },
+  };
+
+  it('throws EscalationCloseIncompleteError and does not patch the escalation', async () => {
+    const { service, client, investigationStatusService } = makeService();
+    client.get.mockResolvedValue({
+      ...MOCK_ESCALATION,
+      template_id: ESCALATION_TEMPLATE_ID,
+      metadata: { linked_investigations: ['inv-1'] },
+    });
+    client.bulkGet.mockResolvedValue(new Map([['inv-1', OPEN_INV]]));
+    // Simulate the investigation close failing.
+    investigationStatusService.setStatus.mockRejectedValueOnce(new Error('storage error'));
+
+    await expect(
+      service.setStatus(request, 'escalation-1', { status: 'closed' })
+    ).rejects.toBeInstanceOf(EscalationCloseIncompleteError);
+
+    // The escalation itself must remain open.
+    expect(client.patchMetadata).not.toHaveBeenCalled();
+  });
 });
 
 describe('EscalationsService.listLinkedInvestigations', () => {
@@ -759,5 +1070,73 @@ describe('EscalationsService.listLinkedInvestigations', () => {
     const result = await service.listLinkedInvestigations(request, 'escalation-1');
 
     expect(result.results.map((r) => r.id)).toEqual(['inv-a']);
+  });
+});
+
+describe('EscalationsService.addAttachments', () => {
+  const MOCK_INVESTIGATION_WITH_ATTACHMENTS = {
+    ...MOCK_INVESTIGATION,
+    attachments: [
+      {
+        id: 'att-1',
+        type: 'text',
+        active: true,
+        current_version: 1,
+        versions: [
+          {
+            version: 1,
+            data: { text: 'hello' },
+            created_at: '2026-01-01T00:00:00.000Z',
+            content_hash: 'h1',
+            estimated_tokens: 2,
+          },
+        ],
+      },
+    ],
+  };
+
+  it('copies attachments from a linked investigation into the escalation', async () => {
+    const { service, attachmentsClient } = makeService({
+      get: jest
+        .fn()
+        .mockResolvedValueOnce(MOCK_ESCALATION)
+        .mockResolvedValueOnce(MOCK_INVESTIGATION_WITH_ATTACHMENTS),
+    });
+    (attachmentsClient.bulkCreate as jest.Mock).mockResolvedValue({
+      created: [MOCK_INVESTIGATION_WITH_ATTACHMENTS.attachments[0]],
+      errors: [],
+    });
+
+    const result = await service.addAttachments(request, 'escalation-1', ['inv-1']);
+
+    expect(result).toEqual({ copied: 1, failed: 0 });
+    expect(attachmentsClient.bulkCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ conversationId: 'escalation-1' })
+    );
+  });
+
+  it('throws NotAnEscalationError when the target is not an escalation', async () => {
+    const { service } = makeService({
+      get: jest.fn().mockResolvedValue(MOCK_INVESTIGATION),
+    });
+
+    await expect(service.addAttachments(request, 'not-an-escalation', ['inv-1'])).rejects.toThrow(
+      NotAnEscalationError
+    );
+  });
+
+  it('skips non-investigation conversations and warns', async () => {
+    const { service, attachmentsClient } = makeService({
+      get: jest
+        .fn()
+        .mockResolvedValueOnce(MOCK_ESCALATION)
+        .mockResolvedValueOnce({ ...MOCK_ESCALATION, id: 'other-conv' }),
+    });
+
+    const result = await service.addAttachments(request, 'escalation-1', ['other-conv']);
+
+    expect(result).toEqual({ copied: 0, failed: 0 });
+    expect(attachmentsClient.bulkCreate).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('non-investigation'));
   });
 });

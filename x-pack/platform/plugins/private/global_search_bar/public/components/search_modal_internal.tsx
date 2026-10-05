@@ -32,7 +32,6 @@ export const SearchModalInternal = ({
   taggingApi,
   navigateToUrl,
   reportEvent,
-  basePathUrl,
   onClose,
 }: SearchModalProps) => {
   const { euiTheme } = useEuiTheme();
@@ -115,11 +114,9 @@ export const SearchModalInternal = ({
         fullWidth: true,
         isClearable: true,
       }}
-      errorMessage={
-        searchCharLimitExceeded ? <CharLimitExceededMessage basePathUrl={basePathUrl} /> : null
-      }
+      errorMessage={searchCharLimitExceeded ? <CharLimitExceededMessage /> : null}
       emptyMessage={<EmptyMessage />}
-      noMatchesMessage={<SearchPlaceholder basePath={basePathUrl} />}
+      noMatchesMessage={<SearchPlaceholder />}
       searchable
     >
       {(list, search) => (

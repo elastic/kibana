@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, act } from '@testing-library/react';
 import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import { OBSERVABILITY_ALERTING_HOST } from '../observability_alerting_host';
 import { ActionPolicyCanvasContent } from './action_policy_canvas_content';
 
 const flushPromises = async () => {
@@ -19,10 +20,9 @@ const flushPromises = async () => {
 const mockUpsertActionPolicy = jest.fn().mockResolvedValue({});
 const mockGetWorkflow = jest.fn().mockResolvedValue({ id: 'wf-1', name: 'Test Workflow' });
 const mockGetRule = jest.fn().mockResolvedValue({ id: 'abc', name: 'Test Rule' });
-const mockNavigateToUrl = jest.fn();
+const mockActionPolicyNavigateSync = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockAddDanger = jest.fn();
-const mockPrepend = (path: string) => `/base${path}`;
 let mockAlertingV2ExperimentalFeaturesEnabled = true;
 
 jest.mock('../../services/action_policies_api', () => ({
@@ -37,8 +37,14 @@ jest.mock('@kbn/workflows-ui', () => ({
   WorkflowApi: 'WorkflowApi',
 }));
 
-const mockApplicationService = { navigateToUrl: (...a: unknown[]) => mockNavigateToUrl(...a) };
-const mockHttpService = { basePath: { prepend: mockPrepend } };
+jest.mock('../../application/bind_locators_to_host', () => ({
+  getAlertingV2Locators: () => ({
+    actionPolicyLocators: {
+      navigateSync: (...args: unknown[]) => mockActionPolicyNavigateSync(...args),
+    },
+  }),
+}));
+
 const mockNotificationsService = {
   toasts: {
     addSuccess: (...a: unknown[]) => mockAddSuccess(...a),
@@ -55,8 +61,6 @@ jest.mock('@kbn/core-di-browser', () => ({
   CoreStart: (key: string) => key,
   useService: (token: unknown) => {
     const services: Record<string, unknown> = {
-      application: mockApplicationService,
-      http: mockHttpService,
       notifications: mockNotificationsService,
       uiSettings: {
         get: (id: string) =>
@@ -215,7 +219,7 @@ describe('ActionPolicyCanvasContent', () => {
     it('registers Update Policy button', async () => {
       const { registerActionButtons } = await renderCanvas({
         origin: 'policy-123',
-        data: { id: 'policy-123', version: 'v1' },
+        data: { id: 'policy-123' },
       });
       const buttons = getLastRegisteredButtons(registerActionButtons);
       expect(buttons.find((b) => b.label === 'Update Policy')).toBeDefined();
@@ -224,7 +228,7 @@ describe('ActionPolicyCanvasContent', () => {
     it('registers View in Policies button', async () => {
       const { registerActionButtons } = await renderCanvas({
         origin: 'policy-123',
-        data: { id: 'policy-123', version: 'v1' },
+        data: { id: 'policy-123' },
       });
       const buttons = getLastRegisteredButtons(registerActionButtons);
       expect(buttons.find((b) => b.label === 'View in Policies')).toBeDefined();
@@ -233,7 +237,7 @@ describe('ActionPolicyCanvasContent', () => {
     it('does not register Create policy button', async () => {
       const { registerActionButtons } = await renderCanvas({
         origin: 'policy-123',
-        data: { id: 'policy-123', version: 'v1' },
+        data: { id: 'policy-123' },
       });
       const buttons = getLastRegisteredButtons(registerActionButtons);
       expect(buttons.find((b) => b.label === 'Create policy')).toBeUndefined();
@@ -242,7 +246,7 @@ describe('ActionPolicyCanvasContent', () => {
     it('Update Policy handler calls upsertActionPolicy with data.id', async () => {
       const { registerActionButtons } = await renderCanvas({
         origin: 'policy-123',
-        data: { id: 'policy-123', version: 'v1' },
+        data: { id: 'policy-123' },
       });
 
       const buttons = getLastRegisteredButtons(registerActionButtons);
@@ -261,7 +265,7 @@ describe('ActionPolicyCanvasContent', () => {
 
       const { registerActionButtons } = await renderCanvas({
         origin: 'policy-123',
-        data: { id: 'policy-123', version: 'v1' },
+        data: { id: 'policy-123' },
       });
 
       const buttons = getLastRegisteredButtons(registerActionButtons);
@@ -272,17 +276,21 @@ describe('ActionPolicyCanvasContent', () => {
       expect(mockAddSuccess).not.toHaveBeenCalled();
     });
 
-    it('View in Policies handler navigates using data.id', async () => {
+    it('View in Policies handler navigates with the observability host', async () => {
       const { registerActionButtons } = await renderCanvas({
         origin: 'policy-123',
-        data: { id: 'policy-123', version: 'v1' },
+        data: { id: 'policy-123' },
       });
 
       const buttons = getLastRegisteredButtons(registerActionButtons);
       const viewButton = buttons.find((b) => b.label === 'View in Policies')!;
       viewButton.handler();
 
-      expect(mockNavigateToUrl).toHaveBeenCalledWith(expect.stringContaining('policy-123'));
+      expect(mockActionPolicyNavigateSync).toHaveBeenCalledWith({
+        page: 'edit',
+        actionPolicyId: 'policy-123',
+        host: OBSERVABILITY_ALERTING_HOST.actionPolicies,
+      });
     });
   });
 

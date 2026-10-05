@@ -27,7 +27,7 @@ export interface ActivateAlertActionParams extends CreateActivateEpisodeActionBo
  */
 export interface AlertActionsApiService {
   /**
-   * Hits `POST /api/alerting/v2/episodes/{episodeId}/_activate`. The route
+   * Hits `POST /api/alerting/v2/alerts/{alertId}/_activate`. The route
    * returns 204 on success.
    */
   activate: (params: ActivateAlertActionParams) => Promise<void>;

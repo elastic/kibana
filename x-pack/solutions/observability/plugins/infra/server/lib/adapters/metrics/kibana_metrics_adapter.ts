@@ -37,7 +37,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     rawRequest: KibanaRequest
   ): Promise<NodeDetailsMetricData[]> {
     const indexPattern = `${options.sourceConfiguration.metricAlias}`;
-    const fields = findInventoryFields(options.nodeType);
+    const fields = findInventoryFields(options.nodeType, options.schema);
     const nodeField = fields.id;
 
     const search = <Aggregation>(searchOptions: object) =>
@@ -125,13 +125,17 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
       max: options.timerange.to,
     };
 
-    const model = createTSVBModel(TIMESTAMP_FIELD, indexPattern, options.timerange.interval);
+    const model = createTSVBModel(TIMESTAMP_FIELD, indexPattern, options.timerange.interval, {
+      schema: options.schema,
+    });
 
     const client = <Hit = {}, Aggregation = undefined>(
       opts: CallWithRequestParams
     ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>> =>
       this.framework.callWithRequest(requestContext, 'search', opts);
 
+    // OTel docs have no metricset.period, so this stays undefined and the
+    // requested interval is kept.
     const calculatedInterval = await calculateMetricInterval(
       client,
       {

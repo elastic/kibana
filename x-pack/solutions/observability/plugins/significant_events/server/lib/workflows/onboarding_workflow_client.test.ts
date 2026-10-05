@@ -18,20 +18,25 @@ import {
   buildConcurrencyKey,
   parseStreamNameFromConcurrencyKey,
 } from './onboarding_workflow_client';
-const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => ({
-  getWorkflow: jest.fn().mockResolvedValue({
-    id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
-    name: 'onboarding',
-    enabled: true,
-    definition: {},
-    yaml: '',
-  }),
-  runWorkflow: jest.fn().mockResolvedValue('execution-id'),
-  getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [], total: 0 }),
-  getWorkflowExecution: jest.fn().mockResolvedValue(null),
-  cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
-  ...overrides,
-});
+const statusRequest = httpServerMock.createKibanaRequest();
+
+const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => {
+  const api = {
+    getWorkflow: jest.fn().mockResolvedValue({
+      id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
+      name: 'onboarding',
+      enabled: true,
+      definition: {},
+      yaml: '',
+    }),
+    runWorkflow: jest.fn().mockResolvedValue('execution-id'),
+    getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+    getWorkflowExecution: jest.fn().mockResolvedValue(null),
+    cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+    ...overrides,
+  };
+  return { ...api, getClient: jest.fn(() => api) };
+};
 
 const createClient = (overrides: Record<string, jest.Mock> = {}) => {
   const managementApi = createMockManagementApi(overrides);
@@ -153,7 +158,7 @@ describe('StreamsKIsOnboardingClient', () => {
     it('returns NotStarted when no executions exist', async () => {
       const { client } = createClient();
 
-      const result = await client.getStatus({ streamName: 'logs.nginx' });
+      const result = await client.getStatus({ request: statusRequest, streamName: 'logs.nginx' });
 
       expect(result).toEqual({
         status: SignificantEventsWorkflowStatus.NotStarted,
@@ -168,7 +173,7 @@ describe('StreamsKIsOnboardingClient', () => {
         }),
       });
 
-      const result = await client.getStatus({ streamName: 'logs.nginx' });
+      const result = await client.getStatus({ request: statusRequest, streamName: 'logs.nginx' });
 
       expect(result).toEqual({
         status: SignificantEventsWorkflowStatus.InProgress,
@@ -197,7 +202,7 @@ describe('StreamsKIsOnboardingClient', () => {
         }),
       });
 
-      const result = await client.getStatus({ streamName: 'logs.nginx' });
+      const result = await client.getStatus({ request: statusRequest, streamName: 'logs.nginx' });
 
       expect(result).toEqual({
         status: SignificantEventsWorkflowStatus.Completed,
@@ -226,7 +231,7 @@ describe('StreamsKIsOnboardingClient', () => {
         getWorkflowExecution: jest.fn().mockResolvedValue(null),
       });
 
-      const result = await client.getStatus({ streamName: 'logs.nginx' });
+      const result = await client.getStatus({ request: statusRequest, streamName: 'logs.nginx' });
 
       expect(result).toEqual({
         status: SignificantEventsWorkflowStatus.Completed,
@@ -260,7 +265,7 @@ describe('StreamsKIsOnboardingClient', () => {
         }),
       });
 
-      const result = await client.getStatus({ streamName: 'logs.nginx' });
+      const result = await client.getStatus({ request: statusRequest, streamName: 'logs.nginx' });
 
       expect(result).toEqual({
         status: SignificantEventsWorkflowStatus.Failed,
@@ -276,7 +281,7 @@ describe('StreamsKIsOnboardingClient', () => {
         }),
       });
 
-      const result = await client.getStatus({ streamName: 'logs.nginx' });
+      const result = await client.getStatus({ request: statusRequest, streamName: 'logs.nginx' });
 
       expect(result).toEqual({
         status: SignificantEventsWorkflowStatus.Failed,
@@ -292,7 +297,7 @@ describe('StreamsKIsOnboardingClient', () => {
         }),
       });
 
-      const result = await client.getStatus({ streamName: 'logs.nginx' });
+      const result = await client.getStatus({ request: statusRequest, streamName: 'logs.nginx' });
 
       expect(result).toEqual({
         status: SignificantEventsWorkflowStatus.Canceled,
@@ -303,7 +308,7 @@ describe('StreamsKIsOnboardingClient', () => {
     it('queries with the correct concurrency group key', async () => {
       const { client, managementApi } = createClient();
 
-      await client.getStatus({ streamName: 'logs.nginx' });
+      await client.getStatus({ request: statusRequest, streamName: 'logs.nginx' });
 
       expect(managementApi.getWorkflowExecutions).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -319,7 +324,7 @@ describe('StreamsKIsOnboardingClient', () => {
     it('returns an empty map and skips the query for no stream names', async () => {
       const { client, managementApi } = createClient();
 
-      const result = await client.getStatuses({ streamNames: [] });
+      const result = await client.getStatuses({ request: statusRequest, streamNames: [] });
 
       expect(result).toEqual({});
       expect(managementApi.getWorkflowExecutions).not.toHaveBeenCalled();
@@ -328,7 +333,10 @@ describe('StreamsKIsOnboardingClient', () => {
     it('fetches executions collapsed by concurrencyGroupKey in a single query', async () => {
       const { client, managementApi } = createClient();
 
-      await client.getStatuses({ streamNames: ['logs.nginx', 'logs.apache'] });
+      await client.getStatuses({
+        request: statusRequest,
+        streamNames: ['logs.nginx', 'logs.apache'],
+      });
 
       expect(managementApi.getWorkflowExecutions).toHaveBeenCalledTimes(1);
       expect(managementApi.getWorkflowExecutions).toHaveBeenCalledWith(
@@ -368,6 +376,7 @@ describe('StreamsKIsOnboardingClient', () => {
       });
 
       const result = await client.getStatuses({
+        request: statusRequest,
         streamNames: ['logs.nginx', 'logs.apache', 'logs.haproxy', 'logs.envoy'],
       });
 
@@ -398,7 +407,10 @@ describe('StreamsKIsOnboardingClient', () => {
         getWorkflowExecution,
       });
 
-      const result = await client.getStatuses({ streamNames: ['logs.nginx'] });
+      const result = await client.getStatuses({
+        request: statusRequest,
+        streamNames: ['logs.nginx'],
+      });
 
       expect(result).toEqual({
         'logs.nginx': { status: SignificantEventsWorkflowStatus.Completed, executionId: 'exec-1' },
@@ -420,7 +432,10 @@ describe('StreamsKIsOnboardingClient', () => {
         }),
       });
 
-      const result = await client.getStatuses({ streamNames: ['logs.nginx'] });
+      const result = await client.getStatuses({
+        request: statusRequest,
+        streamNames: ['logs.nginx'],
+      });
 
       expect(result).toEqual({
         'logs.nginx': { status: SignificantEventsWorkflowStatus.NotStarted, executionId: null },
@@ -501,7 +516,7 @@ describe('StreamsKIsOnboardingClient', () => {
         getWorkflowExecutions: jest.fn().mockResolvedValue({ results: executions }),
       });
 
-      const result = await client.getRecentExecutions();
+      const result = await client.getRecentExecutions(statusRequest);
 
       expect(result).toEqual(executions);
       expect(managementApi.getWorkflowExecutions).toHaveBeenCalledWith(
@@ -518,7 +533,7 @@ describe('StreamsKIsOnboardingClient', () => {
     it('returns empty array when no executions exist', async () => {
       const { client } = createClient();
 
-      const result = await client.getRecentExecutions();
+      const result = await client.getRecentExecutions(statusRequest);
 
       expect(result).toEqual([]);
     });

@@ -7,13 +7,18 @@
 
 import React from 'react';
 import { ApprovalModal } from '@kbn/proposals-ui';
-import type { ApprovalProposal } from '@kbn/proposals-ui';
+import type { ApprovalProposal, DeclineParams } from '@kbn/proposals-ui';
 import type { Investigation } from '../../types';
 import type { CardActionType } from '../actions/base_actions';
 import type { EscalationModalMode } from './escalation_modal/types';
-import { AssignActionModal } from './assign_action_modal';
 import { BaseActionModal } from './base_action_modal';
 import { MODAL_TRANSLATIONS } from './translations';
+
+export interface CloseInvestigationModalRenderProps {
+  /** The investigation being closed. Used to access `conversationId` and `status`. */
+  investigation: Investigation;
+  onClose: () => void;
+}
 
 export interface EscalationModalRenderProps {
   mode: EscalationModalMode;
@@ -45,11 +50,14 @@ export interface InvestigationActionModalsProps<
    * host that opens one with no mutation to call cannot leave it stuck open.
    */
   onConfirmApproval?: (proposal: TProposal) => Promise<void>;
+  readOnly?: boolean;
   /**
-   * Records a dismissal from the approval modal. Omitted by hosts that cannot capture one,
-   * which also hides the Dismiss button rather than leaving it inert.
+   * Records a dismissal from the approval modal, with its structured reason. Awaited by the
+   * modal — same contract as `onConfirmApproval` — so a rejection surfaces in its own error
+   * banner. Omitted by hosts that cannot capture one, which also hides the Decline button rather
+   * than leaving it inert.
    */
-  onDismissApproval?: (proposal: TProposal) => void;
+  onDismissApproval?: (proposal: TProposal, params: DeclineParams) => Promise<void>;
   /**
    * Whether `approvalProposal`'s approve/decline is currently in flight. Sourced from the host's
    * own mutation cache (e.g. `useIsMutating`), so this modal agrees with anything else showing the
@@ -62,10 +70,23 @@ export interface InvestigationActionModalsProps<
    * Replaces the default rationale-only dismiss modal. Supplied when a solution's
    * dismissal captures more than a rationale — a structured reason, say — which changes
    * what the modal renders and what local state it owns, not just what confirming does.
+   * @deprecated Prefer `renderCloseModal`, which receives the full investigation. This
+   * prop is kept for the flyout-footer backward-compat adapter and will be removed once
+   * all callers migrate.
    */
-  renderDismissModal?: (props: { recordId: string; onClose: () => void }) => React.ReactNode;
+  renderDismissModal?: (props: {
+    recordId?: string | null;
+    onClose: () => void;
+  }) => React.ReactNode;
   /**
-   * Renders the escalation modal when a 'createEscalation' or 'addToEscalation' action is
+   * Renders the close-investigation confirmation modal for the 'close' action.
+   * Receives the full investigation so the modal can key on `conversationId` rather than
+   * `recordId` (which is the proposal id and is undefined in the flyout context).
+   * When provided, takes precedence over `renderDismissModal`.
+   */
+  renderCloseModal?: (props: CloseInvestigationModalRenderProps) => React.ReactNode;
+  /**
+   * Renders the escalation modal when a 'createEscalation' or 'attachToEscalation' action is
    * triggered. Provided by the caller so the modal can use Kibana HTTP hooks that are not
    * available in this package.
    */
@@ -81,14 +102,15 @@ export interface InvestigationActionModalsProps<
 export const InvestigationActionModals = <TProposal extends ApprovalProposal = ApprovalProposal>({
   action,
   recordId,
-  initialAssignee,
   investigation,
   approvalProposal,
+  readOnly,
   onCloseAction,
   onCloseApproval,
   onConfirmApproval,
   onDismissApproval,
   renderDismissModal,
+  renderCloseModal,
   renderEscalationModal,
   isSubmitting,
   currentActorName,
@@ -97,6 +119,7 @@ export const InvestigationActionModals = <TProposal extends ApprovalProposal = A
     {approvalProposal ? (
       <ApprovalModal
         proposal={approvalProposal}
+        readOnly={readOnly}
         onConfirm={async () => {
           if (onConfirmApproval) {
             await onConfirmApproval(approvalProposal);
@@ -105,41 +128,37 @@ export const InvestigationActionModals = <TProposal extends ApprovalProposal = A
           }
         }}
         onClose={onCloseApproval}
-        onDismiss={onDismissApproval ? () => onDismissApproval(approvalProposal) : undefined}
+        onDismiss={
+          onDismissApproval ? (params) => onDismissApproval(approvalProposal, params) : undefined
+        }
         isSubmitting={isSubmitting}
         currentActorName={currentActorName}
       />
     ) : null}
 
-    {action === 'assign' && recordId ? (
-      <AssignActionModal
-        recordId={recordId}
-        initialAssignee={initialAssignee}
-        onClose={onCloseAction}
-        // TODO: use assign action API call hook
-        onAssign={onCloseAction}
-      />
-    ) : null}
-
-    {action === 'close' && recordId
-      ? renderDismissModal?.({ recordId, onClose: onCloseAction }) ?? (
-          <BaseActionModal
-            type="dismiss"
-            title={MODAL_TRANSLATIONS.dismiss.title}
-            recordId={recordId}
-            onClose={onCloseAction}
-            rationalePlaceholder={MODAL_TRANSLATIONS.dismiss.rationalePlaceholder}
-            primaryAction={{
-              color: 'danger',
-              label: MODAL_TRANSLATIONS.dismiss.actionButtonLabel,
-              // TODO: use dismiss action API call hook
-              onClick: onCloseAction,
-            }}
-          />
-        )
+    {action === 'close'
+      ? renderCloseModal && investigation
+        ? renderCloseModal({ investigation, onClose: onCloseAction })
+        : recordId
+        ? renderDismissModal?.({ recordId, onClose: onCloseAction }) ?? (
+            <BaseActionModal
+              type="dismiss"
+              title={MODAL_TRANSLATIONS.dismiss.title}
+              recordId={recordId}
+              onClose={onCloseAction}
+              rationalePlaceholder={MODAL_TRANSLATIONS.dismiss.rationalePlaceholder}
+              primaryAction={{
+                color: 'danger',
+                label: MODAL_TRANSLATIONS.dismiss.actionButtonLabel,
+                // TODO: use dismiss action API call hook
+                onClick: onCloseAction,
+              }}
+            />
+          )
+        : null
       : null}
 
-    {(action === 'createEscalation' || action === 'addToEscalation') && investigation
+    {(action === 'createEscalation' || action === 'attachToEscalation') && investigation
       ? renderEscalationModal?.({
           mode: action === 'createEscalation' ? 'create' : 'addToExisting',
           investigation,
