@@ -42,6 +42,11 @@ export interface IndexedEndpointAndFleetActionsForHostResponse {
 export interface IndexEndpointAndFleetActionsForHostOptions {
   numResponseActions?: number;
   alertIds?: string[];
+  /**
+   * When `success`, each action is acknowledged with no error and an endpoint
+   * response is written. The default keeps the unseeded random outcome.
+   */
+  responseState?: 'success';
 }
 
 /**
@@ -67,6 +72,7 @@ export const indexEndpointAndFleetActionsForHost = usageTracker.track(
       endpoints: [endpointHost],
       count: total,
       alertIds: options.alertIds,
+      responseState: options.responseState,
     });
     const response: IndexedEndpointAndFleetActionsForHostResponse = {
       actions: hostActions.actions,
@@ -110,6 +116,7 @@ interface BuildIEndpointAndFleetActionsBulkOperationsOptions {
   count?: number;
   /** List of alerts that should be associated with the action */
   alertIds?: string[];
+  responseState?: IndexEndpointAndFleetActionsForHostOptions['responseState'];
 }
 
 interface BuildIEndpointAndFleetActionsBulkOperationsResponse
@@ -130,6 +137,7 @@ export const buildIEndpointAndFleetActionsBulkOperations = ({
   endpoints,
   count = 1,
   alertIds,
+  responseState,
 }: BuildIEndpointAndFleetActionsBulkOperationsOptions): BuildIEndpointAndFleetActionsBulkOperationsResponse => {
   const bulkOperations: BulkRequest['operations'] = [];
   const response: BuildIEndpointAndFleetActionsBulkOperationsResponse = {
@@ -208,7 +216,8 @@ export const buildIEndpointAndFleetActionsBulkOperations = ({
         logsEndpointActionsBody
       );
 
-      const randomFloat = fleetActionGenerator.randomFloat();
+      // 0.5 is inside the success band: acknowledged, no error, endpoint response written.
+      const randomFloat = responseState === 'success' ? 0.5 : fleetActionGenerator.randomFloat();
       // Create an action response for the above
       const fleetActionResponse: EndpointActionResponse = fleetActionGenerator.generateResponse({
         action_id: logsEndpointAction.EndpointActions.action_id,
@@ -269,7 +278,7 @@ export const buildIEndpointAndFleetActionsBulkOperations = ({
     // -------------------------------------------
     // Add edge case fleet actions (maybe)
     // -------------------------------------------
-    if (fleetActionGenerator.randomFloat() < 0.3) {
+    if (responseState !== 'success' && fleetActionGenerator.randomFloat() < 0.3) {
       const randomFloat = fleetActionGenerator.randomFloat();
 
       const actionStartedAt = {

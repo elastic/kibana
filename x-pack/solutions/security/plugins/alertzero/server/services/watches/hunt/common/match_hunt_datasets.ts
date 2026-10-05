@@ -100,6 +100,9 @@ export const HUNT_VENDOR_ALIASES: Readonly<Record<string, readonly string[]>> = 
   paloaltonetworks: ['panw'],
   f5: ['f5bigip'],
   vmware: ['vsphere'],
+  amazon: ['aws'],
+  amazonwebservices: ['aws'],
+  fortigate: ['fortinetfortigate'],
 };
 
 /** Normalized segments of a dataset vendor token: `cisco_asa` -> ['cisco', 'asa']. */

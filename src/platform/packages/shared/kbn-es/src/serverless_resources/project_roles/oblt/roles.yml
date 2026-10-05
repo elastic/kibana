@@ -2,6 +2,9 @@
 # Copy from internal roles config in elasticsearch-controller
 # -----
 viewer:
+  metadata:
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
     - 'monitor_inference'
@@ -41,6 +44,9 @@ viewer:
         - '*'
   run_as: []
 editor:
+  metadata:
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
     - 'monitor_inference'
@@ -106,6 +112,9 @@ editor:
 
 # admin role defined in elasticsearch controller
 admin:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: ['all']
   indices:
     - names: ['*']

@@ -185,7 +185,8 @@ export class UpdateMonitorAPI {
     // (`editSyntheticsMonitorRoute`). Without this, io-ts `t.exact` in
     // `validateMonitor` would silently strip them instead of failing.
     const { errorMessage: unsupportedKeysError, formattedConfig } = normalizeAPIConfig(
-      merged as CreateMonitorPayLoad
+      merged as CreateMonitorPayLoad,
+      { previousParams: (prevAttrs as MonitorFields)[ConfigKey.PARAMS] }
     );
     if (unsupportedKeysError) {
       this.result.perIdErrors[monitorId] = {

@@ -1,5 +1,5 @@
 {
-  "sha1": "5285735d7dd46b71dcad8199be8d44f96a75a78c",
+  "sha1": "949bff5778f77996473a471e4e31f42258de71aa",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -393,6 +393,46 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_invalidate_session.spec.ts",
         "line": 58,
+        "column": 25
+      }
+    },
+    {
+      "id": "26e841eed7d5649-93028d84c37a40e",
+      "title": "[NON-MKI] Core security.authc.getPrincipal with UIAM credentials classifies a session-authenticated request as a user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_principal.spec.ts",
+        "line": 18,
+        "column": 1
+      }
+    },
+    {
+      "id": "26e841eed7d5649-fb67ddb14300b0f",
+      "title": "[NON-MKI] Core security.authc.getPrincipal with UIAM credentials classifies an external UIAM API key as a UIAM API key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_principal.spec.ts",
+        "line": 46,
         "column": 25
       }
     },

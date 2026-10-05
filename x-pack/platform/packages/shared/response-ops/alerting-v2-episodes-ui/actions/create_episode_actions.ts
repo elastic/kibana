@@ -48,6 +48,8 @@ export interface EpisodeActionsDeps {
   expressions: ExpressionsStart;
   spaces: SpacesPluginStart;
   queryClient: QueryClient;
+  /** Returns whether the referenced rule was successfully resolved. */
+  isRuleAvailable: (ruleId: string) => boolean;
   /** Resolver for "Open in Discover" URL; may be sync or async. Return undefined when not applicable. */
   getDiscoverHref: (args: {
     episodeIsoTimestamp: string;

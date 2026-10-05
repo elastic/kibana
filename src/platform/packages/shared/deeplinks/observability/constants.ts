@@ -49,3 +49,12 @@ export const NIGHTSHIFT_APP_ID = 'nightshift';
 export const OBSERVABILITY_ALERTING_APP_ID = 'observabilityAlerting';
 export const OBSERVABILITY_ALERTING_APP_ROUTE = 'observability/alerting';
 export const OBSERVABILITY_ALERTING_BASE_PATH = `/app/${OBSERVABILITY_ALERTING_APP_ROUTE}`;
+
+/** In-app paths for the Observability Alerting mount. */
+export const OBSERVABILITY_ALERTING_ALERTS_PATH = '/alerts';
+export const OBSERVABILITY_ALERTING_INBOX_PATH = '/inbox';
+export const OBSERVABILITY_ALERTING_RULES_V1_PATH = '/rules/v1';
+export const OBSERVABILITY_ALERTING_RULES_V2_PATH = '/rules/v2';
+export const OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH = '/rule-library';
+export const OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH = '/action-policies';
+export const OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH = '/execution-history';

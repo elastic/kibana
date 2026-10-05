@@ -13,6 +13,7 @@ import {
   MAX_AI_INDEX_QUERY_RESPONSE_BYTES,
 } from '../../common/constants';
 import type {
+  AiIndexDest,
   QueryAiIndicesRequest,
   QueryAiIndicesResponse,
 } from '../../common/http_api/ai_indices';
@@ -20,14 +21,17 @@ import { buildAiIndexSpaceFilter } from '../../common/space_filter';
 import { validateQueryAiIndicesRequest } from '../../common/validation';
 import { applyLimit } from './apply_limit';
 import { AiIndexQueryResponseTooLargeError, InvalidAiIndexQueryError } from './errors';
+import { applyKiLifecycle } from './ki_lifecycle';
 
 export interface QueryAiIndicesParams extends QueryAiIndicesRequest {
   esClient: ElasticsearchClient;
   spaceId: string;
+  /** Registered AI index dests; a query reading one gets the lifecycle pipeline applied. */
+  aiIndexDests?: AiIndexDest[];
 }
 
 /**
- * Runs caller-supplied ES|QL with server-owned space filter and row cap.
+ * Runs caller-supplied ES|QL with server-owned lifecycle filters, space filter and row cap.
  * `allow_partial_results` may silently drop failed shards.
  */
 export const queryAiIndices = async ({
@@ -36,6 +40,7 @@ export const queryAiIndices = async ({
   query,
   params,
   limit,
+  aiIndexDests = [],
 }: QueryAiIndicesParams): Promise<QueryAiIndicesResponse> => {
   const validationError = validateQueryAiIndicesRequest({ query, params, limit });
   if (validationError) {
@@ -49,7 +54,10 @@ export const queryAiIndices = async ({
   try {
     const { columns, values } = await esClient.esql.query(
       {
-        query: applyLimit(query, limit ?? DEFAULT_AI_INDEX_QUERY_LIMIT),
+        query: applyLimit(
+          applyKiLifecycle(query, aiIndexDests),
+          limit ?? DEFAULT_AI_INDEX_QUERY_LIMIT
+        ),
         filter: buildAiIndexSpaceFilter(spaceId),
         drop_null_columns: true,
         allow_partial_results: true,

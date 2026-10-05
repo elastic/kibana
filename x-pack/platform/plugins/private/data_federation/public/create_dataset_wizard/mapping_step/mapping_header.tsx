@@ -33,7 +33,7 @@ export function MappingHeader({ docLinks }: MappingHeaderProps) {
         <p>
           {i18n.translate('xpack.dataFederation.createDatasetWizard.schemaMappingsDescription', {
             defaultMessage:
-              "Optional definition of how documents should be indexed. Elastic infers the schema at query time by default. You can manually map desired fields below, and we'll infer the rest of the schema.",
+              'Choose how to build the schema. Let Elastic infer some or all fields at query time, or define exactly which fields are available to query.',
           })}{' '}
           <EuiLink
             href={datasetMappingsDocLink}

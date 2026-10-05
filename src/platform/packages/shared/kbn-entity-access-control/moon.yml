@@ -18,6 +18,11 @@ project:
   sourceRoot: src/platform/packages/shared/kbn-entity-access-control
 dependsOn:
   - '@kbn/zod'
+  - '@kbn/core-security-server'
+  - '@kbn/core-http-server'
+  - '@kbn/security-plugin-types-server'
+  - '@kbn/core-security-server-mocks'
+  - '@kbn/core-http-server-mocks'
 tags:
   - shared-common
   - package

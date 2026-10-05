@@ -75,13 +75,6 @@ export const DATA_STREAM_API_ROUTES = {
   DEPRECATED_ILM_CHECK_PATTERN: `${INTERNAL_ROOT}/data_streams/deprecated_ilm_check`,
 };
 
-/**
- * Validates a `logs-<dataset>-*` or `metrics-<dataset>-*` wildcard index pattern, as accepted by
- * the `dataStreams` query param of `DATA_STREAM_API_ROUTES.HAS_DATA_PATTERN`. Callers should use
- * this to drop patterns the route would reject before making the request.
- */
-export const DATA_STREAM_INDEX_PATTERN_REGEX = /^(logs|metrics)-[a-z0-9_.]+-\*$/;
-
 // Package policy API routes
 export const PACKAGE_POLICY_API_ROUTES = {
   LIST_PATTERN: `${PACKAGE_POLICY_API_ROOT}`,
@@ -230,6 +223,8 @@ export const AGENT_API_ROUTES = {
   BULK_PRIVILEGE_LEVEL_CHANGE_PATTERN: `${API_ROOT}/agents/bulk_privilege_level_change`,
   ROLLBACK_PATTERN: `${API_ROOT}/agents/{agentId}/rollback`,
   BULK_ROLLBACK_PATTERN: `${API_ROOT}/agents/bulk_rollback`,
+  RESTART_PATTERN: `${API_ROOT}/agents/{agentId}/restart`,
+  BULK_RESTART_PATTERN: `${API_ROOT}/agents/bulk_restart`,
   GENERATE_REPORT_PATTERN: `${INTERNAL_ROOT}/agents/reporting/generate`,
 };
 

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { FlyoutTemplate } from './flyout_template';
 import { FLYOUT_HEADER_CLASS_NAME } from './use_header_collapse';
 
@@ -559,6 +559,26 @@ describe('FlyoutTemplate Header collapsed prop', () => {
     renderCollapsedHeader();
     const heading = screen.getByRole('heading', { name: 'Compact title' });
     expect(heading).toHaveAttribute('title', 'Compact title');
+  });
+
+  it('keeps a link title inside the compact heading, without a title attribute', () => {
+    render(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title={<a href="#compact">Compact title</a>} collapsed />
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    const heading = screen.getByRole('heading', { level: 3, name: 'Compact title' });
+    expect(within(heading).getByRole('link', { name: 'Compact title' })).toHaveAttribute(
+      'href',
+      '#compact'
+    );
+    expect(heading).not.toHaveAttribute('title');
+    expect(heading).toHaveStyleRule('font-weight', 'inherit', { target: / a$/ });
+    expect(heading).toHaveStyleRule('font-weight', 'inherit', { target: / button$/ });
   });
 
   it('keeps a decorative title icon beside the compact title', () => {

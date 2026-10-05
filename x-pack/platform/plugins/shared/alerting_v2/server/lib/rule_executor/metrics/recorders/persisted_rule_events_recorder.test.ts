@@ -33,7 +33,7 @@ describe('PersistedRuleEventsRecorder', () => {
   });
 
   const episodeEvent = (episodeId: string): AlertEvent =>
-    createAlertEvent({ type: 'alert', episode: { id: episodeId, status: 'active' } });
+    createAlertEvent({ type: 'alert', alert: { id: episodeId, status: 'active' } });
 
   beforeEach(() => {
     collector = new MetricCollectorImpl({ executionId: 'e', startedAt });

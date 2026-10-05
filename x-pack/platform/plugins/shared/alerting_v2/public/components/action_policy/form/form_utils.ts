@@ -31,7 +31,7 @@ const buildThrottle = (state: ActionPolicyFormState) => ({
 });
 
 export const toFormState = (response: ActionPolicyResponse): ActionPolicyFormState => {
-  const groupingMode = response.grouping_mode ?? 'per_episode';
+  const groupingMode = response.grouping_mode ?? 'per_alert';
 
   return {
     name: response.name,

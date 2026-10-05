@@ -20,7 +20,6 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { SandboxPluginSetup, SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import type {
@@ -66,7 +65,6 @@ export interface NightshiftInvestigationsStartDeps {
   inference?: InferenceServerStart;
   ruleRegistry?: RuleRegistryPluginStartContract;
   sandbox?: SandboxPluginStart;
-  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   taskManager: TaskManagerStartContract;

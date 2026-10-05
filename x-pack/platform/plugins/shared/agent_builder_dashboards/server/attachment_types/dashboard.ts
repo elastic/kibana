@@ -16,7 +16,6 @@ import {
   attachmentDataToDashboardState,
   dashboardAttachmentDataSchema,
   dashboardStateToAttachmentData,
-  isSection,
   type DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
@@ -119,41 +118,9 @@ export const createDashboardAttachmentType = ({
         return false;
       }
     },
-    format: (attachment) => {
-      return {
-        getRepresentation: () => {
-          return {
-            type: 'text',
-            value: formatDashboardAttachment(attachment.id, attachment.data),
-          };
-        },
-      };
-    },
+    format: () => ({}),
     getAgentDescription: () =>
-      `A dashboard attachment represents a composed dashboard with panels and sections. Rendering it inline displays an interactive dashboard card in the conversation UI that the user can click to open the full dashboard. Summarize the dashboard content (title, description, panel list) in plain text alongside the rendered attachment. To modify this dashboard, load the dashboard-management skill, then call the \`platform.dashboard.generate_dashboard\` tool with this attachment's id as \`dashboardAttachmentId\`; the tool reads and updates this attachment in place.`,
+      `A dashboard attachment represents a composed dashboard with panels and sections. Rendering it inline displays an interactive dashboard card in the conversation UI that the user can click to open the full dashboard. Summarize the dashboard content (title, description, panel list) in plain text alongside the rendered attachment. To modify this dashboard, load the dashboards skill, then call the \`platform.dashboard.generate_dashboard\` tool with this attachment's id as \`dashboardAttachmentId\`; the tool reads and updates this attachment in place.`,
     getTools: () => [],
   };
-};
-
-const formatDashboardAttachment = (attachmentId: string, data: DashboardAttachmentData): string => {
-  // Count panels and sections from the unified panels array
-  let panelCount = 0;
-  let sectionCount = 0;
-
-  for (const widget of data.panels) {
-    if (isSection(widget)) {
-      sectionCount++;
-      panelCount += widget.panels.length;
-    } else {
-      panelCount++;
-    }
-  }
-
-  const sectionInfo =
-    sectionCount > 0 ? `, ${sectionCount} section${sectionCount !== 1 ? 's' : ''}` : '';
-
-  // Include attachment id prominently so the LLM can reference it in subsequent calls
-  return `Dashboard "${data.title}" (dashboardAttachmentId: "${attachmentId}")
-Description: ${data.description}
-Panels: ${panelCount}${sectionInfo}`;
 };

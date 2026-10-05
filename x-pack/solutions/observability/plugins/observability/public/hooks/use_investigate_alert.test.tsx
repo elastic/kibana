@@ -58,7 +58,7 @@ const mockInvestigationsApi = ({
 };
 
 const renderInvestigateAlert = (alertId = 'alert-1') =>
-  renderHook(() => useInvestigateAlert({ alertId }), { wrapper });
+  renderHook(() => useInvestigateAlert({ alertId, ebtElement: 'testElement' }), { wrapper });
 
 describe('useInvestigateAlert', () => {
   beforeEach(() => {
@@ -98,6 +98,10 @@ describe('useInvestigateAlert', () => {
     await waitFor(() => expect(result.current.showInvestigateButton).toBe(true));
     expect(result.current.showViewInvestigation).toBe(false);
     expect(result.current.investigateActionLabel).toBe('Investigate');
+    expect(result.current.investigateEbtProps).toEqual({
+      'data-ebt-action': 'startInvestigation',
+      'data-ebt-element': 'testElement',
+    });
     expect(result.current.isInvestigating).toBe(false);
     expect(fetchMock).toHaveBeenCalledWith(
       'GET /internal/nightshift/investigations',
@@ -211,6 +215,16 @@ describe('useInvestigateAlert', () => {
     expect(result.current.showViewInvestigation).toBe(true);
     expect(result.current.showInvestigateButton).toBe(true);
     expect(result.current.investigateActionLabel).toBe('Re-investigate');
+    expect(result.current.investigateEbtProps).toEqual({
+      'data-ebt-action': 'startInvestigation',
+      'data-ebt-element': 'testElement',
+      'data-ebt-detail': 'reinvestigation',
+    });
+    expect(result.current.viewInvestigationEbtProps).toEqual({
+      'data-ebt-action': 'viewInvestigation',
+      'data-ebt-element': 'testElement',
+      'data-ebt-detail': 'completed',
+    });
     expect(
       JSON.parse(window.localStorage.getItem(VIEWED_INVESTIGATIONS_STORAGE_KEY) || '[]')
     ).toEqual(['inv-completed']);
@@ -360,7 +374,10 @@ describe('useInvestigateAlert', () => {
   });
 
   it('does not fetch alert investigations when enabled is false', async () => {
-    renderHook(() => useInvestigateAlert({ alertId: 'alert-1', enabled: false }), { wrapper });
+    renderHook(
+      () => useInvestigateAlert({ alertId: 'alert-1', ebtElement: 'testElement', enabled: false }),
+      { wrapper }
+    );
 
     expect(fetchMock).not.toHaveBeenCalledWith(
       'GET /internal/nightshift/investigations',

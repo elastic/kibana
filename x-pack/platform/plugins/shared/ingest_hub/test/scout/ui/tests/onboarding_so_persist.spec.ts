@@ -102,13 +102,24 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
     await page.route(
       (url) => /\/api\/fleet\/cloud_onboarding_deployments\/dep-e2e-001$/.test(url.pathname),
       (route) =>
-        route.request().method() === 'PUT'
-          ? route.fulfill({
-              status: 200,
-              contentType: 'application/json',
-              body: JSON.stringify({ item: { id: 'dep-e2e-001' } }),
-            })
-          : route.continue()
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          // GET (post-deploy drift check) must return a clean SO so Next is enabled.
+          body: JSON.stringify({
+            item:
+              route.request().method() === 'GET'
+                ? {
+                    id: 'dep-e2e-001',
+                    provider: 'aws',
+                    connectorId: 'connector-test-123',
+                    mechanisms: ['managed_integration'],
+                    services: ['elb'],
+                    serviceVars: {},
+                  }
+                : { id: 'dep-e2e-001' },
+          }),
+        })
     );
     await page.route(
       (url) => /\/api\/fleet\/managed_integrations$/.test(url.pathname),

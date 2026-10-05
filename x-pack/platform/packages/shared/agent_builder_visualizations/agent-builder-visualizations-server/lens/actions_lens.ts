@@ -19,6 +19,8 @@ export interface GenerateConfigAction {
   success: boolean;
   config?: any; // Can be any shape - gets validated in ValidateConfigAction
   authoringNote?: string;
+  /** Raw model response, kept even when it fails to parse so a retry can repair it. */
+  response?: string;
   attempt: number;
   error?: string;
 }
@@ -52,4 +54,4 @@ export const GENERATE_CONFIG_NODE = 'generate_config';
 export const VALIDATE_CONFIG_NODE = 'validate_config';
 
 // Configuration constants
-export const MAX_RETRY_ATTEMPTS = 5;
+export const MAX_RETRY_ATTEMPTS = 3;

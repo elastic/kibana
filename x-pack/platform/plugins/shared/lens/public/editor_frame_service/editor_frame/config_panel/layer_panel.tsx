@@ -883,6 +883,7 @@ export function LayerPanel(props: LayerPanelProps) {
       {(layerDatasource?.LayerSettingsComponent || activeVisualization?.LayerSettingsComponent) && (
         <FlyoutContainer
           panelRef={(el) => (settingsPanelRef.current = el)}
+          dataTestSubj="lnsLayerSettingsFlyout"
           isFullscreen={false}
           label={i18n.translate('xpack.lens.editorFrame.layerSettingsTitle', {
             defaultMessage: 'Settings',

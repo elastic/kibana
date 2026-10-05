@@ -19,7 +19,6 @@ const baseProposal: ProposalItem = {
   confidence: 'high',
   origin: 'alertzero',
   createdAt: '2026-09-10T10:00:00.000Z',
-  expired: false,
   conversationAssignees: [],
 };
 
@@ -80,18 +79,5 @@ describe('proposalOutcome', () => {
   it('reports expiry rather than a decision, since nobody made one', () => {
     // `expired` rows reach the closed queue with a decidedAt but never a decision.
     expect(proposalOutcome({ ...baseProposal, status: 'expired' })).toBe('Expired');
-    expect(proposalOutcome({ ...baseProposal, expired: true })).toBe('Expired');
-  });
-
-  it('prefers the decision over a lapsed deadline once someone has decided', () => {
-    expect(
-      proposalOutcome({
-        ...baseProposal,
-        expired: true,
-        decision: 'approved',
-        status: 'succeeded',
-        decidedBy: analyst,
-      })
-    ).toBe('Approved by Maya Chen');
   });
 });

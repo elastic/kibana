@@ -53,8 +53,21 @@ import { KeydownScrollZoom } from './keydown_scroll_zoom/keydown_scroll_zoom';
 import { transformRequest } from './transform_request';
 import { boundsToExtent } from '../../classes/util/maplibre_utils';
 
+function getMapExtentState(mapApi: MapApi): MapExtentState {
+  const zoom = mapApi.getZoom();
+  const mbCenter = mapApi.getCenter();
+  const mbBounds = mapApi.getBounds();
+  return {
+    zoom: _.round(zoom, ZOOM_PRECISION),
+    center: {
+      lon: _.round(mbCenter.lng, DECIMAL_DEGREES_PRECISION),
+      lat: _.round(mbCenter.lat, DECIMAL_DEGREES_PRECISION),
+    },
+    extent: boundsToExtent(mbBounds),
+  };
+}
+
 export interface Props {
-  mapApi: MapApi | undefined;
   setMapApi: (mapApi?: MapApi) => void;
   initialMapCenter: MapCenter | null;
   initialMapZoom: number | null;
@@ -79,10 +92,12 @@ export interface Props {
   featureModeActive: boolean;
   filterModeActive: boolean;
   onMapMove?: (lat: number, lon: number, zoom: number) => void;
+  isMapLoading: boolean;
 }
 
 export class MbMap extends Component<Props> {
   private _isMounted: boolean = false;
+  private _mbMap: MapApi | undefined;
   private _containerRef: HTMLDivElement | null = null;
   private _prevCustomIcons?: CustomIcon[];
   private _prevDisableInteractive?: boolean;
@@ -96,21 +111,25 @@ export class MbMap extends Component<Props> {
     this._isMounted = true;
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps: Props) {
     this._debouncedSync();
+    if (this._containerRef && prevProps.isMapLoading !== this.props.isMapLoading) {
+      this._containerRef.dataset.mapLoading = String(this.props.isMapLoading);
+    }
   }
 
   componentWillUnmount() {
     this._isMounted = false;
-    if (this.props.mapApi) {
-      this.props.mapApi.remove();
+    if (this._mbMap) {
+      this._mbMap.remove();
+      this._mbMap = undefined;
       this.props.setMapApi(undefined);
     }
     this.props.onMapDestroyed();
   }
 
   _debouncedSync = _.debounce(() => {
-    if (this._isMounted && this.props.mapApi) {
+    if (this._isMounted && this._mbMap) {
       const hasLayerListChanged = this._prevLayerList !== this.props.layerList; // Comparing re-select memoized instance so no deep equals needed
       const hasTimesliceChanged = !_.isEqual(this._prevTimeslice, this.props.timeslice);
       if (hasLayerListChanged || hasTimesliceChanged) {
@@ -119,23 +138,17 @@ export class MbMap extends Component<Props> {
         this._syncMbMapWithLayerList();
         this._syncMbMapWithInspector();
       }
-      this.props.spatialFiltersLayer.syncLayerWithMB(this.props.mapApi);
+      this.props.spatialFiltersLayer.syncLayerWithMB(this._mbMap);
       this._syncSettings();
     }
   }, 256);
 
-  _getMapExtentState(): MapExtentState {
-    const zoom = this.props.mapApi!.getZoom();
-    const mbCenter = this.props.mapApi!.getCenter();
-    const mbBounds = this.props.mapApi!.getBounds();
-    return {
-      zoom: _.round(zoom, ZOOM_PRECISION),
-      center: {
-        lon: _.round(mbCenter.lng, DECIMAL_DEGREES_PRECISION),
-        lat: _.round(mbCenter.lat, DECIMAL_DEGREES_PRECISION),
-      },
-      extent: boundsToExtent(mbBounds),
-    };
+  _updateViewDataAttributes() {
+    if (!this._containerRef || !this._mbMap) return;
+    const { zoom, center } = getMapExtentState(this._mbMap);
+    this._containerRef.dataset.mapLat = String(center.lat);
+    this._containerRef.dataset.mapLon = String(center.lon);
+    this._containerRef.dataset.mapZoom = String(zoom);
   }
 
   async _createMbMapInstance(initialView: MapCenterAndZoom | null): Promise<MapApi> {
@@ -236,8 +249,10 @@ export class MbMap extends Component<Props> {
       return;
     }
 
+    this._mbMap = mbMap;
     this.props.setMapApi(mbMap);
-    this.props.onMapReady(this._getMapExtentState());
+    this._updateViewDataAttributes();
+    this.props.onMapReady(getMapExtentState(mbMap));
     this._loadMakiSprites(mbMap);
     this._registerMapEventListeners(mbMap);
   }
@@ -249,8 +264,9 @@ export class MbMap extends Component<Props> {
     mbMap.on(
       'moveend',
       _.debounce(() => {
-        if (this._isMounted) {
-          this.props.extentChanged(this._getMapExtentState());
+        if (this._isMounted && this._mbMap) {
+          this._updateViewDataAttributes();
+          this.props.extentChanged(getMapExtentState(this._mbMap));
         }
       }, 100)
     );
@@ -258,8 +274,8 @@ export class MbMap extends Component<Props> {
     // do not update redux state on 'move' event for performance reasons
     // instead, callback provided for cases where consumers need to react to "move" event
     mbMap.on('move', () => {
-      if (this.props.onMapMove) {
-        const { zoom, center } = this._getMapExtentState();
+      if (this.props.onMapMove && this._mbMap) {
+        const { zoom, center } = getMapExtentState(this._mbMap);
         this.props.onMapMove(center.lat, center.lon, zoom);
       }
     });
@@ -318,49 +334,49 @@ export class MbMap extends Component<Props> {
   }
 
   _syncMbMapWithLayerList = () => {
-    if (!this.props.mapApi) {
+    if (!this._mbMap) {
       return;
     }
 
     removeOrphanedSourcesAndLayers(
-      this.props.mapApi,
+      this._mbMap,
       this.props.layerList,
       this.props.spatialFiltersLayer
     );
     this.props.layerList.forEach((layer) =>
-      layer.syncLayerWithMB(this.props.mapApi!, this.props.timeslice)
+      layer.syncLayerWithMB(this._mbMap!, this.props.timeslice)
     );
-    syncLayerOrder(this.props.mapApi, this.props.spatialFiltersLayer, this.props.layerList);
+    syncLayerOrder(this._mbMap, this.props.spatialFiltersLayer, this.props.layerList);
   };
 
   _syncMbMapWithInspector = () => {
-    if (!this.props.inspectorAdapters.map || !this.props.mapApi) {
+    if (!this.props.inspectorAdapters.map || !this._mbMap) {
       return;
     }
 
     const stats = {
-      center: this.props.mapApi.getCenter().toArray(),
-      zoom: this.props.mapApi.getZoom(),
+      center: this._mbMap.getCenter().toArray(),
+      zoom: this._mbMap.getZoom(),
     };
     this.props.inspectorAdapters.map.setMapState({
       stats,
-      style: this.props.mapApi.getStyle(),
+      style: this._mbMap.getStyle(),
     });
   };
 
   _syncSettings() {
-    if (!this.props.mapApi) {
+    if (!this._mbMap) {
       return;
     }
 
     if (this._prevProjection !== this.props.settings.projection) {
       this._prevProjection = this.props.settings.projection;
       if (this.props.settings.projection === 'globeInterpolate') {
-        this.props.mapApi.setProjection({
+        this._mbMap.setProjection({
           type: ['interpolate', ['linear'], ['zoom'], 0, 'globe', 9, 'mercator'],
         });
       } else {
-        this.props.mapApi.setProjection({ type: 'mercator' });
+        this._mbMap.setProjection({ type: 'mercator' });
       }
     }
 
@@ -371,19 +387,19 @@ export class MbMap extends Component<Props> {
     ) {
       this._prevDisableInteractive = this.props.settings.disableInteractive;
       if (this.props.settings.disableInteractive) {
-        this.props.mapApi.boxZoom.disable();
-        this.props.mapApi.doubleClickZoom.disable();
-        this.props.mapApi.dragPan.disable();
+        this._mbMap.boxZoom.disable();
+        this._mbMap.doubleClickZoom.disable();
+        this._mbMap.dragPan.disable();
         try {
-          this.props.mapApi.removeControl(this._navigationControl);
+          this._mbMap.removeControl(this._navigationControl);
         } catch (error) {
           // ignore removeControl errors
         }
       } else {
-        this.props.mapApi.boxZoom.enable();
-        this.props.mapApi.doubleClickZoom.enable();
-        this.props.mapApi.dragPan.enable();
-        this.props.mapApi.addControl(this._navigationControl, 'top-left');
+        this._mbMap.boxZoom.enable();
+        this._mbMap.doubleClickZoom.enable();
+        this._mbMap.dragPan.enable();
+        this._mbMap.addControl(this._navigationControl, 'top-left');
       }
     }
 
@@ -392,7 +408,7 @@ export class MbMap extends Component<Props> {
       !_.isEqual(this._prevCustomIcons, this.props.customIcons)
     ) {
       this._prevCustomIcons = this.props.customIcons;
-      const mbMap = this.props.mapApi;
+      const mbMap = this._mbMap;
       for (const { symbolId, svg, cutoff, radius } of this.props.customIcons) {
         createSdfIcon({ svg, renderSize: CUSTOM_ICON_SIZE, cutoff, radius }).then(
           (imageData: ImageData | null) => {
@@ -411,12 +427,12 @@ export class MbMap extends Component<Props> {
     }
 
     let zoomRangeChanged = false;
-    if (this.props.settings.minZoom !== this.props.mapApi.getMinZoom()) {
-      this.props.mapApi.setMinZoom(this.props.settings.minZoom);
+    if (this.props.settings.minZoom !== this._mbMap.getMinZoom()) {
+      this._mbMap.setMinZoom(this.props.settings.minZoom);
       zoomRangeChanged = true;
     }
-    if (this.props.settings.maxZoom !== this.props.mapApi.getMaxZoom()) {
-      this.props.mapApi.setMaxZoom(this.props.settings.maxZoom);
+    if (this.props.settings.maxZoom !== this._mbMap.getMaxZoom()) {
+      this._mbMap.setMaxZoom(this.props.settings.maxZoom);
       zoomRangeChanged = true;
     }
 
@@ -425,8 +441,9 @@ export class MbMap extends Component<Props> {
     // hack to update extent after zoom update finishes moving map.
     if (zoomRangeChanged) {
       setTimeout(() => {
-        if (this._isMounted) {
-          this.props.extentChanged(this._getMapExtentState());
+        if (this._isMounted && this._mbMap) {
+          this._updateViewDataAttributes();
+          this.props.extentChanged(getMapExtentState(this._mbMap));
         }
       }, 300);
     }
@@ -434,6 +451,9 @@ export class MbMap extends Component<Props> {
 
   _setContainerRef = (element: HTMLDivElement) => {
     this._containerRef = element;
+    if (element) {
+      element.dataset.mapLoading = String(this.props.isMapLoading);
+    }
   };
 
   render() {
@@ -443,17 +463,17 @@ export class MbMap extends Component<Props> {
     let scaleControl;
     let keydownScrollZoomControl;
     let tileStatusTrackerControl;
-    if (this.props.mapApi) {
+    if (this._mbMap) {
       drawFilterControl =
         this.props.addFilters && this.props.filterModeActive ? (
-          <DrawFilterControl mbMap={this.props.mapApi} addFilters={this.props.addFilters} />
+          <DrawFilterControl mbMap={this._mbMap} addFilters={this.props.addFilters} />
         ) : null;
       drawFeatureControl = this.props.featureModeActive ? (
-        <DrawFeatureControl mbMap={this.props.mapApi} />
+        <DrawFeatureControl mbMap={this._mbMap} />
       ) : null;
       tooltipControl = !this.props.settings.disableTooltipControl ? (
         <TooltipControl
-          mbMap={this.props.mapApi}
+          mbMap={this._mbMap}
           addFilters={this.props.addFilters}
           getFilterActions={this.props.getFilterActions}
           getActionContext={this.props.getActionContext}
@@ -462,12 +482,12 @@ export class MbMap extends Component<Props> {
         />
       ) : null;
       scaleControl = this.props.settings.showScaleControl ? (
-        <ScaleControl mbMap={this.props.mapApi} isFullScreen={this.props.isFullScreen} />
+        <ScaleControl mbMap={this._mbMap} isFullScreen={this.props.isFullScreen} />
       ) : null;
       keydownScrollZoomControl = this.props.settings.keydownScrollZoom ? (
-        <KeydownScrollZoom mbMap={this.props.mapApi} />
+        <KeydownScrollZoom mbMap={this._mbMap} />
       ) : null;
-      tileStatusTrackerControl = <TileStatusTracker mbMap={this.props.mapApi} />;
+      tileStatusTrackerControl = <TileStatusTracker mbMap={this._mbMap} />;
     }
     return (
       <div

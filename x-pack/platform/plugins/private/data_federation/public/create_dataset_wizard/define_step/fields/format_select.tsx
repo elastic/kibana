@@ -89,6 +89,9 @@ const FORMAT_OPTION_DEFS: Array<{
   */
 ];
 
+export const getFormatDisplayLabel = (value: string): string =>
+  FORMAT_OPTION_DEFS.find((option) => option.value === value)?.title ?? value;
+
 export function FormatSelect({
   value,
   onChange,

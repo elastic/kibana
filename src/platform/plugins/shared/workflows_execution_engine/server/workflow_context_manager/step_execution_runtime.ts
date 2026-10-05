@@ -191,6 +191,9 @@ export class StepExecutionRuntime {
   public startStep(): void {
     const stepId = this.node.stepId;
     const stepStartedAt = new Date();
+    // Capture before upsert: the write below sets startedAt, so a later read cannot
+    // tell a first start from a durable poll resume of the same step execution.
+    const alreadyStarted = this.stepExecution?.startedAt != null;
 
     this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
@@ -201,7 +204,9 @@ export class StepExecutionRuntime {
       status: ExecutionStatus.RUNNING,
       startedAt: this.stepExecution?.startedAt ?? stepStartedAt.toISOString(),
     });
-    this.logStepStart(stepId, this.stepExecutionId);
+    if (!alreadyStarted) {
+      this.logStepStart(stepId, this.stepExecutionId);
+    }
   }
 
   public setInput(input: Record<string, unknown>): void {

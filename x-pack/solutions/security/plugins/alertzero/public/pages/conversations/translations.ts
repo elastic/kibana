@@ -27,11 +27,12 @@ export const DECISION_ERRORS: Readonly<Record<number | 'default', string>> = Obj
   404: i18n.translate('xpack.alertzero.queue.decisionMissing', {
     defaultMessage: 'This action no longer exists. Reload to see the current queue.',
   }),
+  // Covers every way a decision can be refused once the proposal is no longer `pending` —
+  // already decided, settled as expired, or otherwise superseded — since the route maps all
+  // of those to the same conflict.
   409: i18n.translate('xpack.alertzero.queue.decisionConflict', {
-    defaultMessage: 'This action was already decided. Reload to see the current queue.',
-  }),
-  410: i18n.translate('xpack.alertzero.queue.decisionExpired', {
-    defaultMessage: 'This action expired before it was submitted, so it was not run.',
+    defaultMessage:
+      'This action is no longer available to decide. Reload to see the current queue.',
   }),
   default: i18n.translate('xpack.alertzero.queue.decisionFailed', {
     defaultMessage: 'The decision could not be submitted. Try again.',

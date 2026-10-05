@@ -81,7 +81,10 @@ import { getCaseConnectorsMockResponse } from '../common/mock/connectors';
 import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep, omit } from 'lodash';
 import type { CaseUserActionTypeWithAll } from './types';
-import type { CaseUserActionStatsResponse } from '../../common/types/api';
+import type {
+  CaseUserActionStatsResponse,
+  BulkCreateUnifiedAttachmentsRequest,
+} from '../../common/types/api';
 import {
   CaseSeverity,
   CaseStatuses,
@@ -89,6 +92,10 @@ import {
   AttachmentType,
   CustomFieldTypes,
 } from '../../common/types/domain';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+} from '../../common/constants/attachments';
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
 jest.mock('../common/lib/kibana');
@@ -1057,21 +1064,20 @@ describe('Cases API', () => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(basicCaseSnake);
     });
-    const data = [
+    const data: BulkCreateUnifiedAttachmentsRequest = [
       {
-        comment: 'comment',
+        type: COMMENT_ATTACHMENT_TYPE,
+        data: { content: 'comment' },
         owner: SECURITY_SOLUTION_OWNER,
-        type: AttachmentType.user as const,
       },
       {
-        alertId: 'test-id',
-        index: 'test-index',
-        rule: {
-          id: 'test-rule',
-          name: 'Test',
+        type: SECURITY_ALERT_ATTACHMENT_TYPE,
+        attachmentId: 'test-id',
+        metadata: {
+          index: 'test-index',
+          rule: { id: 'test-rule', name: 'Test' },
         },
         owner: SECURITY_SOLUTION_OWNER,
-        type: AttachmentType.alert as const,
       },
     ];
 

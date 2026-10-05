@@ -6,6 +6,9 @@
  */
 
 export { createThreatReport } from './create_threat_report';
+export { writeAttributionEvidence } from './write_attribution_evidence';
+export { persistReportFields } from './persist_report_fields';
+export { ingestThreatReport } from './ingest_threat_report';
 export { extractIocs } from './extract_iocs';
 export { enrichReportCore } from './enrich_report_core';
 export { extractDiamond } from './extract_diamond';
@@ -15,4 +18,5 @@ export { assessRelevance } from './assess_relevance';
 export { findThreatReports, buildFindReportFilters } from './find_threat_reports';
 export { USABLE_REPORT_FILTER } from '../lib/usable_report_filter';
 export { getThreatReport, ThreatReportNotFoundError } from './get_threat_report';
+export { isReportVisibleInSpace } from './report_visibility';
 export { getThreatIntelReadiness } from './readiness';

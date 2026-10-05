@@ -221,6 +221,19 @@ describe('FlyoutTemplate', () => {
     expect(forwardedProps().flyoutMenuDisplayMode).toBe('auto');
   });
 
+  it('keeps paddingSize template-owned', () => {
+    renderTemplate(
+      // @ts-expect-error paddingSize is not a root prop
+      <FlyoutTemplate onClose={noop} session="never" paddingSize="l">
+        <FlyoutTemplate.Body>
+          <span>body content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(forwardedProps().paddingSize).toBe('m');
+  });
+
   it('does not forward the template-owned tab props to EuiFlyout', () => {
     renderTemplate(
       <FlyoutTemplate

@@ -25,6 +25,8 @@ import type { MappingEditorValue } from './mapping_editor';
 import { DatetimeFormatComboBox } from '../components/datetime_format_combo_box';
 import { DatetimeFormatHelpText } from '../components/datetime_format_help_text';
 import { TIMESTAMP_LOGICAL_FIELD_NAME } from '../constants';
+import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
+import { fieldTypeSelectStrings } from './mapping_editor/field_type_select_i18n';
 
 export interface TimeseriesDataSectionProps {
   isEnabled: boolean;
@@ -49,21 +51,13 @@ export function TimeseriesDataSection({
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
-            <h3>
-              <FormattedMessage
-                id="xpack.dataFederation.createDatasetWizard.timeseriesToggleLabel"
-                defaultMessage="Timeseries data"
-              />
-            </h3>
+            <h3>{createDatasetWizardStrings.timeseriesDataLabel}</h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSwitch
             showLabel={false}
-            label={i18n.translate(
-              'xpack.dataFederation.createDatasetWizard.timeseriesToggleAriaLabel',
-              { defaultMessage: 'Timeseries data' }
-            )}
+            label={createDatasetWizardStrings.timeseriesDataLabel}
             checked={isEnabled}
             onChange={(e) => onToggle(e.target.checked)}
             data-test-subj="createDatasetWizardTimeseriesToggle"
@@ -76,7 +70,7 @@ export function TimeseriesDataSection({
           <>
             <FormattedMessage
               id="xpack.dataFederation.createDatasetWizard.timeseriesToggleEnabledHelp"
-              defaultMessage="Mapping {timestampField} is required so queries and dashboards can filter by time."
+              defaultMessage="Choose the date field to map to {timestampField}."
               values={{ timestampField: <EuiCode>{TIMESTAMP_LOGICAL_FIELD_NAME}</EuiCode> }}
             />
           </>
@@ -84,7 +78,7 @@ export function TimeseriesDataSection({
           <>
             <FormattedMessage
               id="xpack.dataFederation.createDatasetWizard.timeseriesToggleDisabledHelp"
-              defaultMessage="If you have timeseries data, you need to define {timestampField} in order to ensure we process your data correctly."
+              defaultMessage="Queries and dashboards can't filter by time without a field mapped to {timestampField}."
               values={{ timestampField: <EuiCode>{TIMESTAMP_LOGICAL_FIELD_NAME}</EuiCode> }}
             />
           </>
@@ -109,8 +103,8 @@ export function TimeseriesDataSection({
                   fullWidth
                   value={timestampField?.type ?? 'date'}
                   options={[
-                    { value: 'date', text: 'Date' },
-                    { value: 'date_nanos', text: 'Date nanos' },
+                    { value: 'date', text: fieldTypeSelectStrings.dateOption },
+                    { value: 'date_nanos', text: fieldTypeSelectStrings.dateNanosOption },
                   ]}
                   onChange={(e) =>
                     onChangeTimestampField({

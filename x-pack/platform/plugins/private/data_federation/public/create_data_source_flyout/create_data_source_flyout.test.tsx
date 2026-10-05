@@ -180,6 +180,13 @@ describe('CreateDataSourceFlyout', () => {
     );
 
     expect(queryByTestId('createDataSourceFlyoutS3Region')).not.toBeInTheDocument();
+    expect(
+      queryByText(
+        'Unique name for use in datasets. All lowercase, dash, underscore, and numbers are supported.'
+      )
+    ).toBeInTheDocument();
+    expect(queryByText('Description (optional)')).toBeInTheDocument();
+    expect(queryByText('A brief description to identify this data source.')).toBeInTheDocument();
     expect(queryByTestId('createDataSourceFlyoutConnectionSettingsToggle')).not.toBeInTheDocument();
 
     fireEvent.change(getByTestId('createDataSourceFlyoutName'), { target: { value: 'my-ds' } });

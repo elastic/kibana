@@ -14,6 +14,7 @@ import {
   exportVisContext,
   isSuggestionShapeAndVisContextCompatible,
   injectESQLQueryIntoLensLayers,
+  isPreferredEsqlVisCompatibleWithCurrentQuery,
   deriveLensSuggestionFromLensAttributes,
 } from './external_vis_context';
 import type { QueryParams } from './external_vis_context';
@@ -290,6 +291,121 @@ describe('external_vis_context', () => {
           'timestamp every 10 minutes'
         )
       ).toStrictEqual(expectedAttributes);
+    });
+
+    it('should update the layer index when a current data view id is provided', () => {
+      const attributes = {
+        visualizationType: 'lnsXY',
+        state: {
+          visualization: { preferredSeriesType: 'line' },
+          datasourceStates: {
+            textBased: {
+              layers: {
+                layer1: { index: 'esql-old', query: { esql: 'from foo | limit 10' } },
+              },
+            },
+          },
+        },
+      } as unknown as UnifiedHistogramVisContext['attributes'];
+
+      expect(
+        injectESQLQueryIntoLensLayers(
+          attributes,
+          { esql: 'from foo | limit 100' },
+          undefined,
+          'esql-new'
+        )
+      ).toEqual(
+        expect.objectContaining({
+          state: expect.objectContaining({
+            datasourceStates: {
+              textBased: {
+                layers: {
+                  layer1: {
+                    index: 'esql-new',
+                    query: { esql: 'from foo | limit 100' },
+                  },
+                },
+              },
+            },
+          }),
+        })
+      );
+    });
+  });
+
+  describe('isPreferredEsqlVisCompatibleWithCurrentQuery', () => {
+    const getAttributes = (
+      layerQuery: string,
+      timeField?: string
+    ): UnifiedHistogramVisContext['attributes'] =>
+      ({
+        visualizationType: 'lnsXY',
+        state: {
+          visualization: { preferredSeriesType: 'line' },
+          datasourceStates: {
+            textBased: {
+              layers: {
+                layer1: { index: 'esql-old', query: { esql: layerQuery }, timeField },
+              },
+            },
+          },
+        },
+      } as unknown as UnifiedHistogramVisContext['attributes']);
+
+    it('should keep a customized vis when only a compatible query clause changes', () => {
+      expect(
+        isPreferredEsqlVisCompatibleWithCurrentQuery(
+          getAttributes(
+            'from logstash-* | limit 10 | STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 30 minute)',
+            '@timestamp'
+          ),
+          { esql: 'from logstash-* | limit 100' },
+          '@timestamp'
+        )
+      ).toBe(true);
+    });
+
+    it('should drop a customized vis when the index pattern changes', () => {
+      expect(
+        isPreferredEsqlVisCompatibleWithCurrentQuery(
+          getAttributes(
+            'from logstash-* | limit 10 | STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 30 minute)',
+            '@timestamp'
+          ),
+          { esql: 'from logs* | limit 100' },
+          '@timestamp'
+        )
+      ).toBe(false);
+    });
+
+    it('should drop a customized vis when the time field changes', () => {
+      expect(
+        isPreferredEsqlVisCompatibleWithCurrentQuery(
+          getAttributes('from logstash-* | limit 10', '@timestamp'),
+          { esql: 'from logstash-* | limit 10' },
+          'event.created'
+        )
+      ).toBe(false);
+    });
+
+    it('should keep a customized vis when only one side has a time field', () => {
+      expect(
+        isPreferredEsqlVisCompatibleWithCurrentQuery(
+          getAttributes('from logstash-* | limit 10'),
+          { esql: 'from logstash-* | limit 100' },
+          '@timestamp'
+        )
+      ).toBe(true);
+    });
+
+    it('should drop a customized vis when the current query is not ES|QL', () => {
+      expect(
+        isPreferredEsqlVisCompatibleWithCurrentQuery(getAttributes('from logstash-* | limit 10'), {
+          language: 'kuery',
+          query: '*',
+        })
+      ).toBe(false);
     });
   });
 

@@ -9,18 +9,24 @@
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
+const RULE_NAME = 'testRule';
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['settings', 'common']);
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const toasts = getService('toasts');
+  const comboBox = getService('comboBox');
   const retry = getService('retry');
+  const navigateToRules = async () => {
+    await PageObjects.settings.navigateTo();
+    await testSubjects.click('triggersActions');
+  };
 
   describe('Kibana Alerts - rules tab accessibility tests', () => {
     before(async () => {
-      await PageObjects.settings.navigateTo();
-      await testSubjects.click('triggersActions');
+      await navigateToRules();
     });
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -32,41 +38,40 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('a11y test on create rules panel', async () => {
       await testSubjects.click('createFirstRuleButton');
+      await testSubjects.existOrFail('ruleTypeModal');
       await a11y.testAppSnapshot();
-    });
-    // https://github.com/elastic/kibana/issues/144953
-    it.skip('a11y test on inputs on rules panel', async () => {
-      await testSubjects.click('ruleNameInput');
-      await testSubjects.setValue('ruleNameInput', 'testRule');
-      await testSubjects.click('tagsComboBox');
-      await testSubjects.setValue('tagsComboBox', 'ruleTag');
-      await testSubjects.click('intervalFormRow');
-      await testSubjects.click('notifyWhenSelect');
-      await testSubjects.click('onActiveAlert');
-      await testSubjects.click('solutionsFilterButton');
-      await a11y.testAppSnapshot();
-      await testSubjects.click('solutionapmFilterOption');
-      await testSubjects.setValue('solutionsFilterButton', 'solutionapmFilterOption');
-      await testSubjects.click('apm.anomaly-SelectOption');
-      await a11y.testAppSnapshot();
-    });
-    // https://github.com/elastic/kibana/issues/144953
-    it.skip('a11y test on save rule without connectors panel', async () => {
-      await toasts.dismissAll();
-      await testSubjects.click('saveRuleButton');
-      await a11y.testAppSnapshot();
-    });
-    // https://github.com/elastic/kibana/issues/144953
-    it.skip('a11y test on alerts and logs page with one rule populated', async () => {
-      await testSubjects.click('confirmModalConfirmButton');
-      await a11y.testAppSnapshot();
-      await testSubjects.click('checkboxSelectAll');
-      await testSubjects.click('deleteActionHoverButton');
-      await testSubjects.click('confirmModalConfirmButton');
     });
 
-    // uncomment after rules tests a11y violations get fixed
-    it.skip('a11y test on logs tab', async () => {
+    it('a11y test on inputs on rules panel', async () => {
+      await testSubjects.click('apm-LeftSidebarSelectOption');
+      await a11y.testAppSnapshot();
+      await testSubjects.click('apm.anomaly-SelectOption');
+      await testSubjects.existOrFail('ruleForm');
+      await testSubjects.setValue('ruleDetailsNameInput', RULE_NAME);
+      await comboBox.setCustom('ruleDetailsTagsInput', 'ruleTag');
+      await a11y.testAppSnapshot();
+    });
+
+    it('a11y test on save rule without connectors panel', async () => {
+      await toasts.dismissAll();
+      await testSubjects.click('rulePageFooterSaveButton');
+      await testSubjects.existOrFail('confirmCreateRuleModal');
+      await a11y.testAppSnapshot();
+    });
+
+    it('a11y test on alerts and logs page with one rule populated', async () => {
+      await testSubjects.click('confirmCreateRuleModal > confirmModalConfirmButton');
+      // Creating a rule redirects to its details page, so go back to the rules list
+      await navigateToRules();
+      await testSubjects.existOrFail(`rulesListTableRowName-${RULE_NAME}`);
+      await a11y.testAppSnapshot();
+      await testSubjects.click('checkboxSelectAll');
+      await testSubjects.click('showBulkActionButton');
+      await testSubjects.click('bulkDelete');
+      await testSubjects.click('rulesDeleteConfirmation > confirmModalConfirmButton');
+    });
+
+    it('a11y test on logs tab', async () => {
       await testSubjects.click('logsTab');
       await a11y.testAppSnapshot();
     });

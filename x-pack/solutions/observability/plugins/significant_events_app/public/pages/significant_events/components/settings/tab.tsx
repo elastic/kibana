@@ -19,7 +19,6 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiLink,
   EuiSpacer,
   EuiSplitPanel,
   EuiSwitch,
@@ -53,7 +52,6 @@ import {
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useDeveloperMode } from '../../../../hooks/use_developer_mode';
-import { useModelSettingsUrl } from '../../../../hooks/use_model_settings_url';
 import { getFormattedError } from '../../../../util/errors';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
 import { useFetchStreams } from '../../hooks/use_fetch_streams';
@@ -81,7 +79,6 @@ const clampNumber = (value: string, min: number, max: number) => {
 
 export function SettingsTab() {
   const { core } = useKibana();
-  const modelSettingsUrl = useModelSettingsUrl();
 
   // Saving these settings hits Nightshift engine routes and core's UI settings
   // routes used by `core.settings.client` / `globalClient` (require
@@ -90,10 +87,9 @@ export function SettingsTab() {
   const nightshiftCapabilities = getNightshiftCapabilities(
     core.application.capabilities.nightshift
   );
-  const { canManage, canConfigure } = nightshiftCapabilities;
+  const { canManage, canManageAndConfigure } = nightshiftCapabilities;
   const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
-  const canConfigureEngines = canManage && canConfigure;
-  const canEditSettings = canConfigureEngines && canSaveAdvancedSettings;
+  const canEditSettings = canManageAndConfigure && canSaveAdvancedSettings;
   const { isDeveloperMode, setDeveloperMode, isSaving: isDeveloperModeSaving } = useDeveloperMode();
   // Slack app routes are gated on the Streams feature privilege, not Nightshift.
   const canManageSlack = core.application.capabilities.streams?.manage === true;
@@ -326,49 +322,11 @@ export function SettingsTab() {
           <EuiSpacer />
         </>
       )}
-      <MaintenanceSection canManage={canConfigureEngines} />
+      <MaintenanceSection canManage={canManageAndConfigure} />
 
       <EuiSpacer />
 
       <RunLimitsSection />
-
-      <EuiSpacer />
-
-      <EuiSplitPanel.Outer hasBorder hasShadow={false} css={{ flexShrink: 0 }}>
-        <EuiSplitPanel.Inner color="subdued">
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('xpack.significantEventsApp.settings.llmSectionTitle', {
-                defaultMessage: 'LLM selection',
-              })}
-            </h3>
-          </EuiTitle>
-        </EuiSplitPanel.Inner>
-        <EuiSplitPanel.Inner>
-          <EuiText size="s">
-            <p>
-              {i18n.translate('xpack.significantEventsApp.settings.modelSettingsDescription', {
-                defaultMessage:
-                  'LLM models for Significant Events features are managed centrally in the Model Settings page under Stack Management.',
-              })}
-            </p>
-          </EuiText>
-          {modelSettingsUrl && (
-            <>
-              <EuiSpacer size="s" />
-              <EuiLink
-                data-test-subj="significantEventsAppSettingsTabGoToModelSettingsLink"
-                href={modelSettingsUrl}
-                external
-              >
-                {i18n.translate('xpack.significantEventsApp.settings.modelSettingsLink', {
-                  defaultMessage: 'Go to Model Settings',
-                })}
-              </EuiLink>
-            </>
-          )}
-        </EuiSplitPanel.Inner>
-      </EuiSplitPanel.Outer>
 
       <EuiSpacer />
 

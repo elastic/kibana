@@ -5,23 +5,13 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiNotificationBadge,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-} from '@elastic/eui';
-import { getEbtProps } from '@kbn/ebt-click';
+import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+import type { AppHeaderBadge, AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import type { AiIndexCreatedLocationState } from '../ai_index_created_location_state';
-import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
 import {
   AiIndexCreatedCallout,
@@ -37,7 +27,10 @@ import { useAiIndex } from '../hooks/use_ai_index';
 import { useAiIndexOverviewSections } from '../hooks/use_ai_index_overview_sections';
 import { useKiList } from '../hooks/use_ki_list';
 import { useNavigation } from '../hooks/use_navigation';
-import { ContextEngineSubPageHeader } from '../layout/context_engine_page_header';
+import {
+  ContextEngineSubPageHeader,
+  contextEngineBackDestinationLabel,
+} from '../layout/context_engine_page_header';
 import {
   ContextEnginePageSection,
   ContextEnginePageTemplate,
@@ -46,13 +39,20 @@ import { CONTEXT_ENGINE_PATHS } from '../paths';
 
 type DetailTabId = 'overview' | 'knowledge_indicators';
 
-const backToContextLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.backToContext', {
-  defaultMessage: 'Back to Context',
-});
-
 const managedBadgeLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.managedBadge', {
   defaultMessage: 'Managed',
 });
+
+const overviewTabLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.tabs.overview', {
+  defaultMessage: 'Overview',
+});
+
+const knowledgeIndicatorsTabLabel = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.tabs.knowledgeIndicators',
+  {
+    defaultMessage: 'Knowledge Indicators',
+  }
+);
 
 const automationsLockedAriaLabel = i18n.translate(
   'xpack.contextEngine.aiIndexDetail.automations.lockedAriaLabel',
@@ -113,23 +113,55 @@ export const AiIndexDetailPage = () => {
   const pageTitle = aiIndex?.id ?? id ?? '';
   const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
 
-  const pageTitleContent = useMemo(
-    () => (
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <span data-test-subj="contextAiIndexDetailPageTitle">{pageTitle}</span>
-        </EuiFlexItem>
-        {aiIndex?.managed && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow" data-test-subj="contextAiIndexDetailManagedBadge">
-              {managedBadgeLabel}
-            </EuiBadge>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    ),
-    [aiIndex?.managed, pageTitle]
+  const headerBadges = useMemo<AppHeaderBadge[] | undefined>(
+    () =>
+      aiIndex?.managed
+        ? [
+            {
+              label: managedBadgeLabel,
+              color: 'hollow',
+              'data-test-subj': 'contextAiIndexDetailManagedBadge',
+            },
+          ]
+        : undefined,
+    [aiIndex?.managed]
   );
+
+  const headerTabs = useMemo<AppHeaderTab[] | undefined>(() => {
+    if (error) {
+      return undefined;
+    }
+
+    const overviewTab: AppHeaderTab = {
+      id: 'overview',
+      label: overviewTabLabel,
+      isSelected: showKnowledgeIndicatorsTab ? selectedTab === 'overview' : true,
+      onClick: () => setSelectedTab('overview'),
+      'data-test-subj': 'contextAiIndexDetailTab-overview',
+    };
+
+    if (!showKnowledgeIndicatorsTab) {
+      return [overviewTab];
+    }
+
+    return [
+      overviewTab,
+      {
+        id: 'knowledge_indicators',
+        label: knowledgeIndicatorsTabLabel,
+        isSelected: selectedTab === 'knowledge_indicators',
+        onClick: () => setSelectedTab('knowledge_indicators'),
+        badge: summary.total,
+        'data-test-subj': 'contextAiIndexDetailTab-knowledge_indicators',
+      },
+    ];
+  }, [error, selectedTab, showKnowledgeIndicatorsTab, summary.total]);
+
+  useEffect(() => {
+    if (!showKnowledgeIndicatorsTab && selectedTab === 'knowledge_indicators') {
+      setSelectedTab('overview');
+    }
+  }, [showKnowledgeIndicatorsTab, selectedTab]);
 
   const pageContent = error ? (
     <EuiEmptyPrompt
@@ -148,44 +180,6 @@ export const AiIndexDetailPage = () => {
     />
   ) : (
     <>
-      {showKnowledgeIndicatorsTab && (
-        <>
-          <EuiTabs data-test-subj="contextAiIndexDetailTabs">
-            <EuiTab
-              isSelected={selectedTab === 'overview'}
-              onClick={() => setSelectedTab('overview')}
-              data-test-subj="contextAiIndexDetailTab-overview"
-              {...getEbtProps({
-                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
-                action: CONTEXT_ENGINE_UI_EBT.action.aiIndexDetail.TAB_OVERVIEW,
-              })}
-            >
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.tabs.overview"
-                defaultMessage="Overview"
-              />
-            </EuiTab>
-            <EuiTab
-              isSelected={selectedTab === 'knowledge_indicators'}
-              onClick={() => setSelectedTab('knowledge_indicators')}
-              append={<EuiNotificationBadge>{summary.total}</EuiNotificationBadge>}
-              data-test-subj="contextAiIndexDetailTab-knowledge_indicators"
-              {...getEbtProps({
-                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
-                action: CONTEXT_ENGINE_UI_EBT.action.aiIndexDetail.TAB_KNOWLEDGE_INDICATORS,
-              })}
-            >
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.tabs.knowledgeIndicators"
-                defaultMessage="Knowledge Indicators"
-              />
-            </EuiTab>
-          </EuiTabs>
-
-          <EuiSpacer size="m" />
-        </>
-      )}
-
       {(selectedTab === 'overview' || !showKnowledgeIndicatorsTab) && (
         <>
           {showCreatedCallout && (
@@ -262,7 +256,9 @@ export const AiIndexDetailPage = () => {
         </>
       )}
 
-      {selectedTab === 'knowledge_indicators' && aiIndex && <KiListPanel aiIndex={aiIndex} />}
+      {selectedTab === 'knowledge_indicators' && showKnowledgeIndicatorsTab && aiIndex && (
+        <KiListPanel aiIndex={aiIndex} />
+      )}
     </>
   );
 
@@ -272,13 +268,15 @@ export const AiIndexDetailPage = () => {
       breadcrumbPageName={pageTitle || undefined}
     >
       <ContextEngineSubPageHeader
-        backLabel={backToContextLabel}
+        backDestinationLabel={contextEngineBackDestinationLabel}
         backHref={backHref}
         onBackClick={(event) => {
           event.preventDefault();
           navigateToContextEngine(CONTEXT_ENGINE_PATHS.landing);
         }}
-        pageTitle={pageTitleContent}
+        pageTitle={pageTitle}
+        badges={headerBadges}
+        tabs={headerTabs}
       />
       <ContextEnginePageSection>{pageContent}</ContextEnginePageSection>
     </ContextEnginePageTemplate>

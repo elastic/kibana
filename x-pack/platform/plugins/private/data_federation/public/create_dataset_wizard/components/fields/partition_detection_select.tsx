@@ -6,34 +6,22 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiComboBox, type EuiComboBoxOptionOption } from '@elastic/eui';
-import type { Control } from 'react-hook-form';
-import { useController } from 'react-hook-form';
 
 import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
-import type {
-  CreateDatasetFormValues,
-  DatasetPartitionDetectionFormValue,
-} from '../../create_dataset_form_state';
-import { DescribedOptionDisplay } from '../described_option_display';
+import type { DatasetPartitionDetectionFormValue } from '../../create_dataset_form_state';
+import type { ComboBoxChange } from '../combo_box_selection_validity';
+import {
+  EuiComboBoxNoCustomOption,
+  type EuiComboBoxNoCustomOptionOption,
+} from '../eui_combo_box_no_custom_option';
 
-type Option = EuiComboBoxOptionOption<string> & {
-  value: DatasetPartitionDetectionFormValue;
-  description: string;
-  'data-test-subj': string;
-};
-
-const renderPartitionDetectionOption = (option: EuiComboBoxOptionOption<string>) => {
-  const opt = option as Option;
-  return <DescribedOptionDisplay title={opt.label} description={opt.description} />;
-};
-
-const PARTITION_DETECTION_OPTIONS: Option[] = [
+const PARTITION_DETECTION_OPTIONS: Array<
+  EuiComboBoxNoCustomOptionOption<Exclude<DatasetPartitionDetectionFormValue, ''>>
+> = [
   {
     value: 'auto',
     label: createDatasetWizardStrings.settingsPartitionDetectionAuto,
     description: createDatasetWizardStrings.settingsPartitionDetectionAutoDescription,
-    append: <EuiBadge color="hollow">{createDatasetWizardStrings.defaultBadgeLabel}</EuiBadge>,
     'data-test-subj': 'createDatasetSettingsPartitionDetectionOption-auto',
   },
   {
@@ -56,46 +44,31 @@ const PARTITION_DETECTION_OPTIONS: Option[] = [
   },
 ];
 
+export const getPartitionDetectionDisplayLabel = (value: string): string =>
+  PARTITION_DETECTION_OPTIONS.find((option) => option.value === value)?.label ?? value;
+
 export function PartitionDetectionSelect({
-  control,
+  value,
+  onChange,
+  onBlur,
+  isInvalid,
 }: {
-  control: Control<CreateDatasetFormValues>;
+  value: DatasetPartitionDetectionFormValue;
+  onChange: (next: ComboBoxChange<DatasetPartitionDetectionFormValue>) => void;
+  onBlur: () => void;
+  isInvalid: boolean;
 }) {
-  const { field: partitionDetectionField } = useController({
-    name: 'settings.partition_detection',
-    control,
-  });
-
-  const selectedOption = PARTITION_DETECTION_OPTIONS.find(
-    (o) => o.value === partitionDetectionField.value
-  );
-
   return (
-    <EuiComboBox
-      placeholder={createDatasetWizardStrings.settingsPartitionDetectionPlaceholder}
+    <EuiComboBoxNoCustomOption
+      value={value}
+      onChange={onChange}
+      onBlur={onBlur}
       options={PARTITION_DETECTION_OPTIONS}
-      data-test-subj="createDatasetSettingsPartitionDetection"
+      defaultValue="auto"
+      isInvalid={isInvalid}
+      placeholder={createDatasetWizardStrings.settingsPartitionDetectionPlaceholder}
       aria-label={createDatasetWizardStrings.settingsPartitionDetectionLabel}
-      singleSelection={{ asPlainText: true }}
-      isClearable
-      rowHeight="auto"
-      selectedOptions={
-        selectedOption
-          ? [
-              {
-                value: selectedOption.value,
-                label: selectedOption.label,
-              },
-            ]
-          : []
-      }
-      renderOption={renderPartitionDetectionOption}
-      onChange={(nextSelectedOptions) => {
-        const next = nextSelectedOptions?.[0] as Option | undefined;
-        partitionDetectionField.onChange(next?.value ?? '');
-      }}
-      onBlur={partitionDetectionField.onBlur}
-      fullWidth
+      data-test-subj="createDatasetSettingsPartitionDetection"
     />
   );
 }

@@ -15,6 +15,7 @@ jest.mock('@kbn/es-query', () => ({
   ),
   toKqlExpression: (...args: unknown[]) =>
     jest.requireActual('@kbn/es-query').toKqlExpression(...args),
+  KQLSyntaxError: jest.requireActual('@kbn/es-query').KQLSyntaxError,
 }));
 
 const fromKueryExpressionMock = fromKueryExpression as jest.Mock;
@@ -136,6 +137,18 @@ describe('buildRuleSoFilter', () => {
             code: 'INVALID_FILTER_FIELD',
             details: expect.objectContaining({ field: 'unknown_field' }),
           }),
+        })
+      );
+    });
+  });
+
+  describe('syntax validation', () => {
+    it('rejects malformed KQL with INVALID_FILTER_SYNTAX', () => {
+      expect(() => buildRuleSoFilter('kind:')).toThrow(
+        expect.objectContaining({
+          isBoom: true,
+          output: expect.objectContaining({ statusCode: 400 }),
+          data: { code: 'INVALID_FILTER_SYNTAX' },
         })
       );
     });

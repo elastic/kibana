@@ -14,6 +14,7 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiSpacer,
+  EuiTextBlockTruncate,
   EuiToolTip,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -85,8 +86,12 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
       {
         field: 'description',
         name: mainTranslations.columns.dataSources.description,
+        render: (description: DataSource['description']) => (
+          <EuiTextBlockTruncate lines={2} title={description}>
+            {description}
+          </EuiTextBlockTruncate>
+        ),
         sortable: true,
-        truncateText: true,
         'data-test-subj': 'dataSetsColDescription',
       },
       {

@@ -11,7 +11,7 @@
 
 import type { History } from 'history';
 import type { ApplicationStart } from '@kbn/core/public';
-import { stringify } from 'query-string';
+import queryString from 'query-string';
 import { BASE_PATH_REMOTE_CLUSTERS } from '../../../common/constants';
 
 export type QueryParamValue = string | number | boolean | null;
@@ -25,7 +25,7 @@ const queryParamsFromObject = (
     return;
   }
 
-  const paramsStr = stringify(params, { sort: false, encode: encodeParams });
+  const paramsStr = queryString.stringify(params, { sort: false, encode: encodeParams });
   return `?${paramsStr}`;
 };
 

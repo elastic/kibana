@@ -56,14 +56,14 @@ export class WorkflowEditorPage {
   }
 
   async openAccessDialog(): Promise<void> {
-    await this.page.testSubj.click('app-menu-overflow-button');
-    await this.page.testSubj.click('workflowAccessButton');
+    await this.page.testSubj.locator('appHeader').hover();
+    await this.page.testSubj.click('~shareTopNavButton');
     await this.accessMode.waitFor({ state: 'visible' });
   }
 
   async hoverDisabledAccessButton(): Promise<void> {
-    await this.page.testSubj.click('app-menu-overflow-button');
-    await this.page.testSubj.locator('workflowAccessButton').hover({ force: true });
+    await this.page.testSubj.locator('appHeader').hover();
+    await this.page.testSubj.locator('~shareTopNavButton').hover({ force: true });
   }
 
   async setAccessMode(mode: 'private' | 'public'): Promise<void> {
@@ -362,7 +362,7 @@ export class WorkflowEditorPage {
     return this.serviceAccountPopup.getByRole('option', { name, exact: true });
   }
 
-  async openServiceAccountPicker(
+  async focusServiceAccountSetting(
     yaml: string,
     format: 'block' | 'inline' = 'block'
   ): Promise<void> {
@@ -375,7 +375,72 @@ export class WorkflowEditorPage {
       await this.page.keyboard.press('End');
     }
     await this.page.keyboard.press('Control+Space');
+  }
+
+  async openServiceAccountPicker(
+    yaml: string,
+    format: 'block' | 'inline' = 'block'
+  ): Promise<void> {
+    await this.focusServiceAccountSetting(yaml, format);
     await this.serviceAccountPopup.getByRole('listbox', { name: 'Service accounts' }).waitFor();
+  }
+
+  async openCreateServiceAccount(): Promise<void> {
+    await this.serviceAccountPopup.getByRole('button', { name: 'Create account' }).click();
+    await this.page.testSubj.locator('createServiceAccountFlyout').waitFor();
+  }
+
+  async openServiceAccountRoles(): Promise<void> {
+    await this.page.testSubj.locator('serviceAccountRolesSelector').click();
+  }
+
+  async closeServiceAccountRoles(): Promise<void> {
+    await this.page.getByRole('listbox', { name: 'Select roles' }).press('Escape');
+    await this.page.getByRole('listbox', { name: 'Select roles' }).waitFor({ state: 'hidden' });
+  }
+
+  async fillServiceAccount(name: string, description: string): Promise<void> {
+    const flyout = this.page.testSubj.locator('createServiceAccountFlyout');
+    await this.page.testSubj.locator('serviceAccountNameInput').fill(name);
+    await this.page.testSubj.locator('createServiceAccountDescription').fill(description);
+    await flyout.getByRole('button', { name: 'Set privileges' }).click();
+    await this.page.getByRole('listbox', { name: 'Select roles' }).press('End');
+    await this.page.testSubj.locator('roleOption-viewer').click();
+    await this.closeServiceAccountRoles();
+  }
+
+  async submitServiceAccount(): Promise<void> {
+    await this.page.testSubj.locator('createServiceAccountSubmit').click();
+  }
+
+  async waitForCreateServiceAccountClosed(): Promise<void> {
+    await this.page.testSubj.locator('createServiceAccountFlyout').waitFor({ state: 'hidden' });
+  }
+
+  async cancelCreateServiceAccount(): Promise<void> {
+    await this.page.testSubj
+      .locator('createServiceAccountFlyout')
+      .getByRole('button', { name: 'Cancel' })
+      .click();
+  }
+
+  async focusServiceAccountControls(): Promise<void> {
+    await this.page.keyboard.press('Shift+Tab');
+  }
+
+  async retryServiceAccounts(): Promise<void> {
+    await this.serviceAccountPopup.getByRole('button', { name: 'Try again' }).click();
+  }
+
+  async clickServiceAccountPlaceholder(): Promise<void> {
+    const activateEditor = this.yamlEditor.getByRole('button', {
+      name: 'Code Editor, activate edit mode',
+    });
+    if (await activateEditor.isVisible()) {
+      await activateEditor.focus();
+      await this.page.keyboard.press('Enter');
+    }
+    await this.yamlEditor.getByText('Select service account', { exact: true }).click();
   }
 
   async openExistingServiceAccountPicker(id: string): Promise<void> {

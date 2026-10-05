@@ -11,6 +11,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { EsqlSource } from '@kbn/data-source';
 import { SORT_DEFAULT_ORDER_SETTING, getSortArray } from '@kbn/discover-utils';
 import { useBatchedPublishingSubjects, type FetchContext } from '@kbn/presentation-publishing';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
@@ -61,6 +62,7 @@ interface SavedSearchEmbeddableComponentProps {
     abortSignal$: BehaviorSubject<AbortSignal | undefined>;
   };
   dataView: DataView;
+  esqlSource$?: BehaviorSubject<EsqlSource | undefined>;
   onAddFilter?: DocViewFilterFn;
   enableDocumentViewer: boolean;
   inlineEditing: InlineEditing;
@@ -76,6 +78,7 @@ const DiscoverGridEmbeddableMemoized = React.memo(DiscoverGridEmbeddable);
 export function SearchEmbeddableGridComponent({
   api,
   dataView,
+  esqlSource$,
   onAddFilter,
   enableDocumentViewer,
   inlineEditing,
@@ -93,6 +96,9 @@ export function SearchEmbeddableGridComponent({
     : undefined;
 
   const [emptyEsqlVariables$] = useState(() => new BehaviorSubject(undefined));
+  const [emptyEsqlSource$] = useState(() => new BehaviorSubject<EsqlSource | undefined>(undefined));
+
+  const kbnDataSource = useObservable(esqlSource$ ?? emptyEsqlSource$, undefined);
 
   const [
     loading,
@@ -358,6 +364,7 @@ export function SearchEmbeddableGridComponent({
       onUpdateSampleSize={isEsql ? undefined : onStateEditedProps.onUpdateSampleSize}
       columns={columns}
       dataView={dataView}
+      dataSource={kbnDataSource}
       interceptedWarnings={interceptedWarnings}
       onFilter={onAddFilter}
       rows={rows}

@@ -33,33 +33,16 @@ import { useLicense } from '../../../../../../../common/hooks/use_license';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../../common/hooks/use_experimental_features';
 import type { PolicyFormComponentCommonProps } from '../../types';
 import { SettingCard } from '../setting_card';
+import {
+  CUSTOM_YARA_SIGNATURES_HINT,
+  CUSTOM_YARA_SIGNATURES_LABEL,
+  CUSTOM_YARA_SIGNATURES_LICENSE_UPSELL,
+} from '../shared_translations';
 
 export const LOCKED_CARD_MEMORY_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.memory',
   {
     defaultMessage: 'Memory Threat',
-  }
-);
-
-const CUSTOM_YARA_SIGNATURES_LABEL = i18n.translate(
-  'xpack.securitySolution.endpoint.policy.protections.customYaraSignaturesLabel',
-  {
-    defaultMessage: 'Apply custom YARA signatures in detection mode',
-  }
-);
-
-const CUSTOM_YARA_SIGNATURES_HINT = i18n.translate(
-  'xpack.securitySolution.endpoint.policyDetailsConfig.customYaraSignaturesTooltip',
-  {
-    defaultMessage:
-      'Endpoints enabled with this policy will apply custom YARA signatures from the custom YARA signatures page.',
-  }
-);
-
-export const CUSTOM_YARA_SIGNATURES_LICENSE_UPSELL = i18n.translate(
-  'xpack.securitySolution.endpoint.policy.protections.customYaraSignaturesLicenseTooltip',
-  {
-    defaultMessage: 'Custom YARA signatures require an Enterprise license.',
   }
 );
 

@@ -13,37 +13,32 @@ import type { EventClient } from '../../../lib/significant_events/events';
 
 export async function updateEventStatusToolHandler({
   eventClient,
-  eventUuid,
+  eventId,
   status,
+  assessmentNote,
   alertEventsClient,
   logger,
 }: {
   eventClient: EventClient;
-  eventUuid: string;
+  eventId: string;
   status: SignificantEventStatus;
+  assessmentNote?: string;
   alertEventsClient?: AlertEventsClientApi;
   logger: Logger;
 }): Promise<{
-  event_uuid?: string;
+  event_id: string;
   updated: number;
   ignored: number;
   status: SignificantEventStatus;
 }> {
-  // This tool's public contract is still keyed on event_uuid (agent-builder tools are out of
-  // scope for github.com/elastic/nightshift-program/issues/1646 — see #1492's phase-3 rename
-  // note). Resolve the version's event_id here — findByEventUuid is an exact match on a unique
-  // field, so it returns at most one hit. On a miss, resolvedEventId falls back to the raw
-  // eventUuid (not a real event_id) — the eventId-keyed findByEventId inside
-  // updateSignificantEventStatus will also find nothing and report `ignored: 1`, so the tool
-  // still degrades safely on a genuine miss.
-  const resolvedEventId =
-    (await eventClient.findByEventUuid(eventUuid)).hits[0]?.event_id ?? eventUuid;
-
-  return updateSignificantEventStatus({
+  const result = await updateSignificantEventStatus({
     eventClient,
-    eventId: resolvedEventId,
+    eventId,
     status,
+    assessmentNote,
     alertEventsClient,
     logger,
   });
+
+  return { event_id: eventId, ...result };
 }

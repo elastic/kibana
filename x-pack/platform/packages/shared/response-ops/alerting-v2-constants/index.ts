@@ -21,17 +21,18 @@ export const ALERTING_V2_EPISODES_LOCATOR = 'ALERTING_V2_EPISODES_LOCATOR';
 export const ALERTING_V2_ACTION_POLICIES_LOCATOR = 'ALERTING_V2_ACTION_POLICIES_LOCATOR';
 export const ALERTING_V2_EXECUTION_HISTORY_LOCATOR = 'ALERTING_V2_EXECUTION_HISTORY_LOCATOR';
 export const ALERTING_V2_ACTION_POLICIES_APP_ID = 'action_policies';
-export const ALERTING_V2_EPISODES_APP_ID = 'episodes';
+export const ALERTING_V2_EPISODES_APP_ID = 'alerts';
 export const ALERTING_V2_EPISODES_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_EPISODES_APP_ID}`;
 export const ALERTING_V2_EXECUTION_HISTORY_APP_ID = 'execution_history';
 
 export const ALERTING_V2_RULE_API_PATH = '/api/alerting/v2/rules' as const;
 export const ALERTING_V2_INTERNAL_RULE_API_PATH = '/internal/alerting/v2/rules' as const;
+export const ALERTING_V2_INTERNAL_RULE_MATCH_API_PATH =
+  `${ALERTING_V2_INTERNAL_RULE_API_PATH}/_match` as const;
 export const ALERTING_V2_INTERNAL_CHANGE_HISTORY_RULES_API_PATH =
   '/internal/alerting/v2/change_history/rules' as const;
-export const ALERTING_V2_ALERT_API_PATH = '/api/alerting/v2/alerts' as const;
 export const ALERTING_V2_INTERNAL_SERIES_API_PATH = '/internal/alerting/v2/series' as const;
-export const ALERTING_V2_EPISODES_API_PATH = '/api/alerting/v2/episodes' as const;
+export const ALERTING_V2_EPISODES_API_PATH = '/api/alerting/v2/alerts' as const;
 export const ALERTING_V2_ACTION_POLICY_API_PATH = '/api/alerting/v2/action_policies' as const;
 export const ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH =
   '/internal/alerting/v2/action_policies' as const;

@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import type { DocLinks } from '@kbn/doc-links';
+import { SecurityAppHeader } from '../../../common/components/app_header';
 import { Wrapper } from '../../components/alerts/wrapper';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { NoApiIntegrationKeyCallOut } from '../../components/callouts/no_api_integration_key_callout';
@@ -22,7 +23,6 @@ import { useSignalHelpers } from '../../hooks/use_signal_helpers';
 import { NeedAdminForUpdateRulesCallOut } from '../../../detection_engine/rule_management/components/callouts/need_admin_for_update_rules_callout';
 import { MissingDetectionsPrivilegesCallOut } from '../../components/callouts/missing_detections_privileges_callout';
 import { NoPrivileges } from '../../../common/components/no_privileges';
-import { HeaderPage } from '../../../common/components/header_page';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 
 export const ALERTS_PAGE_LOADING_TEST_ID = 'alerts-page-loading';
@@ -59,7 +59,7 @@ export const AlertsPage = memo(() => {
   if (loading) {
     return (
       <SecuritySolutionPageWrapper>
-        <HeaderPage border title={i18n.PAGE_TITLE} isLoading={loading} />
+        <SecurityAppHeader title={i18n.PAGE_TITLE} spacing="largeBleed" />
         <EuiFlexGroup justifyContent="center" alignItems="center">
           <EuiLoadingSpinner data-test-subj={ALERTS_PAGE_LOADING_TEST_ID} size="xl" />
         </EuiFlexGroup>
@@ -70,7 +70,7 @@ export const AlertsPage = memo(() => {
   if (userNotAuthenticated) {
     return (
       <SecuritySolutionPageWrapper>
-        <HeaderPage border title={i18n.PAGE_TITLE} />
+        <SecurityAppHeader title={i18n.PAGE_TITLE} spacing="largeBleed" />
         <UserUnauthenticatedEmptyPage />
       </SecuritySolutionPageWrapper>
     );
@@ -79,7 +79,7 @@ export const AlertsPage = memo(() => {
   if (noIndex) {
     return (
       <SecuritySolutionPageWrapper>
-        <HeaderPage border title={i18n.PAGE_TITLE} />
+        <SecurityAppHeader title={i18n.PAGE_TITLE} spacing="largeBleed" />
         <NoIndexEmptyPage
           needsListsIndex={needsListsConfiguration}
           needsSignalsIndex={signalIndexNeedsInit}

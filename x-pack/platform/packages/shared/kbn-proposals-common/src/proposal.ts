@@ -224,10 +224,9 @@ export const proposalSchema = z.object({
 });
 export type Proposal = z.infer<typeof proposalSchema>;
 
-/** Catalog metadata resolved on read, plus the expiry evaluated at request time. */
+/** Catalog metadata resolved on read. */
 export interface ProposalWithMetadata extends Proposal {
   action?: ActionMetadata;
-  expired: boolean;
 }
 
 export const createProposalRequestSchema = z.object({
@@ -409,10 +408,8 @@ export const isProposalSettling = (proposal: Pick<Proposal, 'decision' | 'status
   proposal.decision === 'approved' &&
   (proposal.status === 'pending' || proposal.status === 'executing');
 
-export const isExpired = (proposal: Pick<Proposal, 'expiresAt'>, now = Date.now()): boolean => {
-  if (!proposal.expiresAt) {
-    return false;
-  }
-  const deadline = Date.parse(proposal.expiresAt);
-  return Number.isFinite(deadline) && deadline <= now;
-};
+/** Settled by a deadline rather than a person.
+ * `pending` reads as live even past `expiresAt` until the gate workflow sweeps it,
+ * so this is not a substitute for comparing `expiresAt` to `now`. */
+export const isExpired = (proposal: Pick<Proposal, 'status'>): boolean =>
+  proposal.status === 'expired';

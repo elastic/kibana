@@ -96,9 +96,47 @@ describe('Quick search visor', () => {
     );
   });
 
+  it('should notify the parent after a KQL filter is submitted so it can focus the editor', async () => {
+    const onKqlSubmitted = jest.fn();
+    renderWithI18n(renderESQLVisor({ ...props, onKqlSubmitted }));
+
+    await waitFor(() => expect(kqlMock.QueryStringInput).toHaveBeenCalled());
+
+    const { onSubmit } = (kqlMock.QueryStringInput as jest.Mock).mock.calls.at(-1)[0];
+    act(() => onSubmit({ query: 'hostname:web-01', language: 'kuery' }));
+
+    expect(onKqlSubmitted).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not notify the parent when the KQL submit is ignored', async () => {
+    const onKqlSubmitted = jest.fn();
+    renderWithI18n(renderESQLVisor({ ...props, isDisabled: true, onKqlSubmitted }));
+
+    await waitFor(() => expect(kqlMock.QueryStringInput).toHaveBeenCalled());
+
+    const { onSubmit } = (kqlMock.QueryStringInput as jest.Mock).mock.calls.at(-1)[0];
+    act(() => onSubmit({ query: 'hostname:web-01', language: 'kuery' }));
+
+    expect(onKqlSubmitted).not.toHaveBeenCalled();
+  });
+
   it('should not submit a KQL filter when the editor query has no source', async () => {
     const onUpdateAndSubmitQuery = jest.fn();
     renderWithI18n(renderESQLVisor({ ...props, query: 'ROW x = 1', onUpdateAndSubmitQuery }));
+
+    await waitFor(() => expect(kqlMock.QueryStringInput).toHaveBeenCalled());
+
+    const { onSubmit } = (kqlMock.QueryStringInput as jest.Mock).mock.calls.at(-1)[0];
+    act(() => onSubmit({ query: 'hostname:web-01', language: 'kuery' }));
+
+    expect(onUpdateAndSubmitQuery).not.toHaveBeenCalled();
+  });
+
+  it('should not submit a KQL filter when the submit action is disabled', async () => {
+    const onUpdateAndSubmitQuery = jest.fn();
+    renderWithI18n(
+      renderESQLVisor({ ...props, disableSubmitAction: true, onUpdateAndSubmitQuery })
+    );
 
     await waitFor(() => expect(kqlMock.QueryStringInput).toHaveBeenCalled());
 
@@ -196,6 +234,56 @@ describe('Quick search visor', () => {
       expect(getByTestId('esqlVisorModeKql')).toBeInTheDocument();
       expect(getByTestId('esqlVisorModeKql')).toHaveAttribute('aria-pressed', 'false');
       expect(getByTestId('esqlVisorAskAiButton')).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    it('submits natural language when the editor query is empty and submit action is disabled', async () => {
+      (corePluginMock.http.post as jest.Mock).mockResolvedValue({
+        content: 'FROM logs | LIMIT 10',
+      });
+      const onNlResult = jest.fn();
+      const { getByTestId } = renderWithI18n(
+        renderWithEnterprise({ ...props, query: '', disableSubmitAction: true, onNlResult })
+      );
+
+      await waitFor(() => expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument());
+      await act(async () => {
+        await userEvent.click(getByTestId('esqlVisorAskAiButton'));
+      });
+      await act(async () => {
+        await userEvent.type(getByTestId('esqlVisorNLQueryInput'), 'show me logs{enter}');
+      });
+
+      await waitFor(() => {
+        expect(corePluginMock.http.post).toHaveBeenCalledWith(
+          '/internal/esql/nl_to_esql',
+          expect.objectContaining({
+            body: JSON.stringify({ nlInstruction: 'show me logs', currentQuery: '' }),
+          })
+        );
+      });
+      await waitFor(() => expect(onNlResult).toHaveBeenCalledWith('FROM logs | LIMIT 10'));
+    });
+
+    it.each([
+      ['the submit action is disabled and the editor has a query', { disableSubmitAction: true }],
+      ['the visor is disabled and the editor has a query', { isDisabled: true }],
+      ['the visor is disabled even if the editor query is empty', { isDisabled: true, query: '' }],
+    ])('does not submit natural language when %s', async (_, overrides) => {
+      const onNlResult = jest.fn();
+      const { getByTestId } = renderWithI18n(
+        renderWithEnterprise({ ...props, ...overrides, onNlResult })
+      );
+
+      await waitFor(() => expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument());
+      await act(async () => {
+        await userEvent.click(getByTestId('esqlVisorAskAiButton'));
+      });
+      await act(async () => {
+        await userEvent.type(getByTestId('esqlVisorNLQueryInput'), 'show me logs{enter}');
+      });
+
+      expect(corePluginMock.http.post).not.toHaveBeenCalled();
+      expect(onNlResult).not.toHaveBeenCalled();
     });
 
     it('should show the Stop button while NL generation is in progress', async () => {

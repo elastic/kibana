@@ -118,19 +118,21 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     (instanceId: string) =>
     (
       varsByDataStream: Record<string, import('./use_service_settings').ServiceDataStreamVars>,
-      enabledDataStreams: string[]
+      enabledDataStreams: string[],
+      namespace: string
     ) => {
-      setServiceFieldsAndInputs(instanceId, varsByDataStream, enabledDataStreams);
+      setServiceFieldsAndInputs(instanceId, varsByDataStream, enabledDataStreams, namespace);
       setActiveFlyoutInstanceId(null);
     };
 
   const handleDuplicateAdd = (
     name: string,
     varsByDataStream: Record<string, import('./use_service_settings').ServiceDataStreamVars>,
-    enabledDataStreams: string[]
+    enabledDataStreams: string[],
+    namespace: string
   ) => {
     if (!duplicateSourceInstanceId) return;
-    addDuplicate(duplicateSourceInstanceId, name, varsByDataStream, enabledDataStreams);
+    addDuplicate(duplicateSourceInstanceId, name, varsByDataStream, enabledDataStreams, namespace);
     setDuplicateSourceInstanceId(null);
   };
 
@@ -310,7 +312,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         width: '40px',
         render: (inst: ServiceInstance) => {
           const service = awsServicesMap?.get(inst.serviceId);
-          const isEcfOnly = service?.deploymentMethods.every((dm) => dm.method === 'ecf') ?? false;
+          const isEcfOnly = service?.settingsScope === 'ecf';
           if (isEcfOnly && !inst.isDuplicate) return null;
           const isOpen = openMenuInstanceId === inst.instanceId;
           const actionsLabel = i18n.translate(
@@ -617,6 +619,9 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
           service={activeFlyoutService}
           config={getServiceVars(activeFlyoutInstance.instanceId)}
           globalRegion={globalRegion}
+          isNamespaceLocked={
+            !!detectAndReviewStep.policyIdsByInstance[activeFlyoutInstance.instanceId]
+          }
           onApply={handleFlyoutApply(activeFlyoutInstance.instanceId)}
           onClose={() => setActiveFlyoutInstanceId(null)}
         />

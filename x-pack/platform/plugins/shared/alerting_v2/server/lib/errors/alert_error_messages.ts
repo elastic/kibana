@@ -9,13 +9,13 @@ export const getAlertSeriesNotFoundMessage = (groupHash: string): string =>
   `Alert series with group_hash [${groupHash}] not found`;
 
 export const getAlertEpisodeNotFoundMessage = (episodeId: string): string =>
-  `Alert episode with episode_id [${episodeId}] not found`;
+  `Alert with alert_id [${episodeId}] not found`;
 
 export const getEpisodeNotLatestMessage = (episodeId: string, groupHash: string): string =>
-  `Episode [${episodeId}] is not the latest episode for group [${groupHash}]`;
+  `Alert [${episodeId}] is not the latest alert for group [${groupHash}]`;
 
 export const getCannotActivateEpisodeMessage = (episodeId: string): string =>
-  `Cannot activate episode [${episodeId}]. It is already active`;
+  `Cannot activate alert [${episodeId}]. It is already active`;
 
 export const getCannotDeactivateEpisodeMessage = (episodeId: string): string =>
-  `Cannot deactivate episode [${episodeId}]. It is already inactive`;
+  `Cannot deactivate alert [${episodeId}]. It is already inactive`;

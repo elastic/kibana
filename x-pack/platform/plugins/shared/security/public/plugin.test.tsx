@@ -163,6 +163,7 @@ describe('Security Plugin', () => {
               "getChangePassword": [Function],
               "getCreateServiceAccount": [Function],
               "getPersonalInfo": [Function],
+              "getServiceAccountPicker": [Function],
             },
           },
           "userProfiles": Object {

@@ -124,9 +124,9 @@ export const OpenEventsOnly: Story = {
   },
 };
 
-export const DismissedEventInResolvedSection: Story = {
+export const InactiveEventInResolvedSection: Story = {
   args: {
-    scenario: 'dismissed',
+    scenario: 'inactive',
   },
 };
 

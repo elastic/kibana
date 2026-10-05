@@ -14,9 +14,10 @@ export const TIMELINE_TAB_ID = 'timeline';
 export const BUILTIN_TAB_IDS = [] as const;
 
 /**
- * EUI flyout `historyKey` of the conversation details flyout. A flyout opened from its content
- * with `session: 'start'` and this key stacks on top of it with a Back button; closing either one
- * closes the whole stack.
+ * EUI flyout `historyKey` shared by the conversation details flyout and every other flyout opened
+ * from a full-screen conversation (canvas, trace, tool response, ...). A flyout opened with
+ * `session: 'start'` and this key stacks on top of the current one with a Back button; closing any
+ * of them closes the whole stack.
  */
 export const CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY = Symbol.for(
   'agentBuilder.conversationDetailsFlyout'

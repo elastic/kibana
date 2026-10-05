@@ -470,8 +470,10 @@ describe('mapRuleToComposeFormValues', () => {
     expect(result.stateTransition).toEqual({
       pendingCount: 3,
       pendingTimeframe: '10m',
+      pendingOperator: null,
       recoveringCount: null,
       recoveringTimeframe: null,
+      recoveringOperator: null,
     });
     expect(result.stateTransitionAlertDelayMode).toBe('duration');
     expect(result.stateTransitionRecoveryDelayMode).toBe('immediate');

@@ -24,7 +24,7 @@ const buildSignal = (rule_uuid: string): SignalEntry => ({
 });
 
 const buildEvent = (...ruleUuids: string[]): Partial<SignificantEvent> => ({
-  status: 'open',
+  status: 'active',
   signals: ruleUuids.map((rule_uuid) => buildSignal(rule_uuid)),
 });
 
@@ -61,7 +61,7 @@ describe('groupingCorrectnessEvaluator', () => {
 
   it('ignores valid standalone signals outside the declared expected event universe', async () => {
     const result = await evaluate(
-      [buildEvent('a', 'b'), { ...buildEvent('unrelated-positive'), status: 'dismissed' }],
+      [buildEvent('a', 'b'), { ...buildEvent('unrelated-positive'), status: 'inactive' }],
       [['a', 'b']]
     );
     expect(result.score).toBe(1);

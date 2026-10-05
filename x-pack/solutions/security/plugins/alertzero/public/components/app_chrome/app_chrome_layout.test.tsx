@@ -91,3 +91,36 @@ describe('AppChromeLayout header menu', () => {
     expect(await screen.findByText('Documentation')).toBeInTheDocument();
   });
 });
+
+describe('AppChromeLayout overflow', () => {
+  const renderAt = (pathname: string) =>
+    render(
+      <KibanaContextProvider services={coreStartStub}>
+        <MockChromeContextProvider chrome={makeChromeWithFeedback(jest.fn())}>
+          <EuiProvider>
+            <Router history={createMemoryHistory({ initialEntries: [pathname] })}>
+              <AppChromeLayout>content</AppChromeLayout>
+            </Router>
+          </EuiProvider>
+        </MockChromeContextProvider>
+      </KibanaContextProvider>
+    );
+
+  it.each(['/', '/watches', '/watches/abc'])('lets %s overflow so sticky children work', (path) => {
+    renderAt(path);
+    expect(screen.getByTestId('alertZeroAppChromeLayout')).toHaveStyle({ overflow: 'visible' });
+  });
+
+  it('keeps scrolling inside the shell for other routes', () => {
+    renderAt('/conversations');
+    expect(screen.getByTestId('alertZeroAppChromeLayout')).toHaveStyle({ overflow: 'auto' });
+  });
+
+  it('keeps the app heading on the landing page but hides it on watches', () => {
+    const { unmount } = renderAt('/');
+    expect(screen.getByTestId('appHeaderTitle')).toBeInTheDocument();
+    unmount();
+    renderAt('/watches');
+    expect(screen.queryByTestId('appHeaderTitle')).not.toBeInTheDocument();
+  });
+});

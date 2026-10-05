@@ -107,7 +107,7 @@ export const FILE_HASH_SCHEMA = z
   );
 
 export const IP_ADDRESS_SCHEMA = z
-  .union([z.ipv4(), z.ipv6()])
+  .union([z.ipv4().max(15), z.ipv6().max(45)])
   .describe('IPv4 or IPv6 address to look up, e.g. "8.8.8.8" or "2001:4860:4860::8888"');
 
 export const DOMAIN_SCHEMA = z

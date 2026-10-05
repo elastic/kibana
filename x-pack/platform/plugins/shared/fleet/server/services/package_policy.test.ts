@@ -4215,6 +4215,89 @@ describe('Package policy service', () => {
       expect(result.elasticsearch).toMatchObject({ privileges: { cluster: ['monitor'] } });
     });
 
+    describe('package_agent_version_condition', () => {
+      const updateAndGetAttributes = async ({
+        storedCondition,
+        targetCondition,
+        requestCondition,
+      }: {
+        storedCondition?: string;
+        targetCondition?: string;
+        requestCondition?: string;
+      }) => {
+        const savedObjectsClient = createSavedObjectClientMock();
+        const mockPackagePolicy = createPackagePolicyMock();
+
+        (getPackageInfo as jest.Mock).mockResolvedValue({
+          name: 'endpoint',
+          version: '0.9.0',
+          ...(targetCondition ? { conditions: { agent: { version: targetCondition } } } : {}),
+          policy_templates: [{ name: 'endpoint', inputs: [] }],
+        });
+
+        savedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            {
+              id: 'test',
+              type: 'abcd',
+              references: [],
+              version: 'test',
+              attributes: {
+                ...mockPackagePolicy,
+                inputs: [],
+                ...(storedCondition ? { package_agent_version_condition: storedCondition } : {}),
+              },
+            },
+          ],
+        });
+
+        savedObjectsClient.update.mockImplementation(
+          async (
+            _type: string,
+            _id: string,
+            attrs: any
+          ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
+            savedObjectsClient.bulkGet.mockResolvedValue({
+              saved_objects: [
+                { id: 'test', type: 'abcd', references: [], version: 'test', attributes: attrs },
+              ],
+            });
+            return attrs;
+          }
+        );
+
+        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        await packagePolicyService.update(
+          savedObjectsClient,
+          elasticsearchClient,
+          'the-package-policy-id',
+          {
+            ...mockPackagePolicy,
+            inputs: [],
+            ...(requestCondition ? { package_agent_version_condition: requestCondition } : {}),
+          }
+        );
+        (getPackageInfo as jest.Mock).mockImplementation(mockedGetPackageInfo);
+
+        return savedObjectsClient.update.mock.calls[0][2] as Record<string, unknown>;
+      };
+
+      it('should store the condition from the target package version', async () => {
+        const attributes = await updateAndGetAttributes({ targetCondition: '>=9.3.0' });
+        expect(attributes.package_agent_version_condition).toBe('>=9.3.0');
+      });
+
+      it('should clear a stale condition when the target package has none', async () => {
+        const attributes = await updateAndGetAttributes({ storedCondition: '>=9.3.0' });
+        expect(attributes).toHaveProperty('package_agent_version_condition', '');
+      });
+
+      it('should not add the condition when neither the policy nor the target package has one, ignoring a caller-supplied value', async () => {
+        const attributes = await updateAndGetAttributes({ requestCondition: '>=1.0.0' });
+        expect(attributes).not.toHaveProperty('package_agent_version_condition');
+      });
+    });
+
     it('should not mutate packagePolicyUpdate object when trimming whitespace', async () => {
       const savedObjectsClient = createSavedObjectClientMock();
       const mockPackagePolicy = createPackagePolicyMock();
@@ -6535,6 +6618,166 @@ describe('Package policy service', () => {
         expect(endpointCall?.[3]).toMatchObject({ removeProtection: true });
         expect(nonEndpointCall?.[3]).toMatchObject({ removeProtection: false });
       });
+    });
+
+    it('should store package_agent_version_condition from the target package version', async () => {
+      const savedObjectsClient = createSavedObjectClientMock();
+      const mockPackagePolicy = createPackagePolicyMock();
+
+      (getPackageInfo as jest.Mock).mockResolvedValue({
+        name: 'endpoint',
+        version: '0.9.0',
+        conditions: { agent: { version: '>=9.3.0' } },
+        policy_templates: [{ name: 'endpoint', inputs: [] }],
+      });
+
+      const policyId = mockPackagePolicy.id;
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: policyId,
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            version: 'WzEsMV0=',
+            attributes: { ...mockPackagePolicy, inputs: [] },
+          },
+        ],
+      });
+
+      savedObjectsClient.bulkUpdate.mockImplementation(
+        async (objs: Array<{ type: string; id: string; attributes: any }>) => {
+          const newObjs = objs.map((obj) => ({
+            id: obj.id,
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            version: 'WzIsMV0=',
+            attributes: obj.attributes,
+          }));
+          savedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: newObjs });
+          return { saved_objects: newObjs };
+        }
+      );
+
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await packagePolicyService.bulkUpdate(savedObjectsClient, elasticsearchClient, [
+        { ...mockPackagePolicy, inputs: [] },
+      ]);
+
+      (getPackageInfo as jest.Mock).mockImplementation(mockedGetPackageInfo);
+
+      const updatedAttributes = (savedObjectsClient.bulkUpdate.mock.calls[0][0] as any)[0]
+        .attributes;
+      expect(updatedAttributes.package_agent_version_condition).toBe('>=9.3.0');
+    });
+
+    it('should clear a stale package_agent_version_condition when the target package has none', async () => {
+      const savedObjectsClient = createSavedObjectClientMock();
+      const mockPackagePolicy = createPackagePolicyMock();
+
+      (getPackageInfo as jest.Mock).mockResolvedValue({
+        name: 'endpoint',
+        version: '0.9.0',
+        policy_templates: [{ name: 'endpoint', inputs: [] }],
+      });
+
+      const policyId = mockPackagePolicy.id;
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: policyId,
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            version: 'WzEsMV0=',
+            attributes: {
+              ...mockPackagePolicy,
+              inputs: [],
+              // Stale value from a previous package version that had an agent version condition.
+              package_agent_version_condition: '>=9.3.0',
+            },
+          },
+        ],
+      });
+
+      savedObjectsClient.bulkUpdate.mockImplementation(
+        async (objs: Array<{ type: string; id: string; attributes: any }>) => {
+          const newObjs = objs.map((obj) => ({
+            id: obj.id,
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            version: 'WzIsMV0=',
+            attributes: obj.attributes,
+          }));
+          savedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: newObjs });
+          return { saved_objects: newObjs };
+        }
+      );
+
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await packagePolicyService.bulkUpdate(savedObjectsClient, elasticsearchClient, [
+        { ...mockPackagePolicy, inputs: [] },
+      ]);
+
+      (getPackageInfo as jest.Mock).mockImplementation(mockedGetPackageInfo);
+
+      const updatedAttributes = (savedObjectsClient.bulkUpdate.mock.calls[0][0] as any)[0]
+        .attributes;
+      expect(updatedAttributes).toHaveProperty('package_agent_version_condition', '');
+    });
+
+    it('should not add package_agent_version_condition when neither the policy nor the target package has one, ignoring a caller-supplied value', async () => {
+      const savedObjectsClient = createSavedObjectClientMock();
+      const mockPackagePolicy = createPackagePolicyMock();
+
+      (getPackageInfo as jest.Mock).mockResolvedValue({
+        name: 'endpoint',
+        version: '0.9.0',
+        policy_templates: [{ name: 'endpoint', inputs: [] }],
+      });
+
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: mockPackagePolicy.id,
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            version: 'WzEsMV0=',
+            attributes: { ...mockPackagePolicy, inputs: [] },
+          },
+        ],
+      });
+
+      savedObjectsClient.bulkUpdate.mockImplementation(
+        async (objs: Array<{ type: string; id: string; attributes: any }>) => {
+          const newObjs = objs.map((obj) => ({
+            id: obj.id,
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            version: 'WzIsMV0=',
+            attributes: obj.attributes,
+          }));
+          savedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: newObjs });
+          return { saved_objects: newObjs };
+        }
+      );
+
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const policyWithSuppliedCondition = {
+        ...mockPackagePolicy,
+        inputs: [],
+        package_agent_version_condition: '>=1.0.0',
+      };
+      await packagePolicyService.bulkUpdate(savedObjectsClient, elasticsearchClient, [
+        policyWithSuppliedCondition,
+      ]);
+
+      (getPackageInfo as jest.Mock).mockImplementation(mockedGetPackageInfo);
+
+      const updatedAttributes = (savedObjectsClient.bulkUpdate.mock.calls[0][0] as any)[0]
+        .attributes;
+      expect(updatedAttributes).not.toHaveProperty('package_agent_version_condition');
     });
 
     it('should not persist spaceIds in SO attributes', async () => {

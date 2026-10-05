@@ -55,7 +55,22 @@ const installAutomationTemplateSchema = z
     template: z
       .enum(['document_orchestration', 'index_metadata', 'unit_profile', 'targeted_ki_writer'])
       .describe(
-        'Which automation to install. document_orchestration summarises each document. index_metadata profiles the index. unit_profile writes one profile per recurring unit. targeted_ki_writer writes KIs verbatim from the kis parameter you provide.'
+        dedent`
+          Which automation to install. Required fields per template:
+          document_orchestration → name, sourceIndex, titleField, bodyField
+          index_metadata         → name, sourceIndex, categoryField
+          unit_profile           → name, sourceIndex, unitKey, activityField, breakdownField
+          targeted_ki_writer     → name, kis  (no sourceIndex)
+        `
+      ),
+    name: z
+      .string()
+      .min(1)
+      .max(200)
+      .refine((v) => v.trim().length > 0, { message: 'name must not be blank or whitespace-only' })
+      .refine((v) => !v.includes('/'), { message: 'name must not contain a forward slash' })
+      .describe(
+        'REQUIRED. Human-readable name for this automation within the AI index (e.g. "flight-activity-docs", "loyalty-tier-profile"). No forward slashes. If an automation with this name already exists on the AI index it is replaced in-place; a different name installs an additional copy. Must be provided on every call.'
       ),
     sourceIndex: z
       .string()
@@ -63,58 +78,33 @@ const installAutomationTemplateSchema = z
       .max(MAX_SOURCE_INDEX_LENGTH)
       .optional()
       .describe(
-        'Index or data stream the automation reads. Required for document_orchestration, index_metadata and unit_profile. Not used by targeted_ki_writer.'
+        'REQUIRED for document_orchestration, index_metadata, unit_profile. Not used by targeted_ki_writer. Index or data stream the automation reads.'
       ),
     titleField: z
       .string()
       .min(1)
       .max(MAX_FIELD_NAME_LENGTH)
       .optional()
-      .describe('Document title field. Required for document_orchestration.'),
+      .describe('REQUIRED for document_orchestration. Document title field.'),
     bodyField: z
       .string()
       .min(1)
       .max(MAX_FIELD_NAME_LENGTH)
       .optional()
-      .describe('Document body field. Required for document_orchestration.'),
-    corpusFilter: z
-      .string()
-      .max(MAX_CORPUS_FILTER_LENGTH)
-      .optional()
-      .describe(
-        'ES|QL clause inserted after FROM, such as "| WHERE published_at >= NOW() - 365 days". A WHERE line may omit the leading pipe. Empty reads the whole index. document_orchestration only. Defaults to empty.'
-      ),
-    maxDocuments: z
-      .number()
-      .int()
-      .min(1)
-      .max(MAX_DOCUMENTS_LIMIT)
-      .optional()
-      .describe(
-        'Upper bound on documents summarised in one run. document_orchestration only. Defaults to 50.'
-      ),
-    bodyMaxChars: z
-      .number()
-      .int()
-      .min(1)
-      .max(MAX_BODY_CHARS_LIMIT)
-      .optional()
-      .describe(
-        'Characters of body text sent to the prompt. document_orchestration only. Defaults to 12000.'
-      ),
+      .describe('REQUIRED for document_orchestration. Document body field.'),
     categoryField: z
       .string()
       .min(1)
       .max(MAX_FIELD_NAME_LENGTH)
       .optional()
-      .describe('Keyword field the index profile groups by. Required for index_metadata.'),
+      .describe('REQUIRED for index_metadata. Keyword field the index profile groups by.'),
     unitKey: z
       .string()
       .min(1)
       .max(MAX_FIELD_NAME_LENGTH)
       .optional()
       .describe(
-        'Keyword field holding the unit identity. One profile is written per distinct value. Required for unit_profile.'
+        'REQUIRED for unit_profile. Keyword field holding the unit identity. One profile is written per distinct value.'
       ),
     activityField: z
       .string()
@@ -122,7 +112,7 @@ const installAutomationTemplateSchema = z
       .max(MAX_FIELD_NAME_LENGTH)
       .optional()
       .describe(
-        'Date field in sourceIndex. Its per-unit minimum and maximum bound the unit activity the profile reports. Required for unit_profile.'
+        'REQUIRED for unit_profile. Date field in sourceIndex. Its per-unit minimum and maximum bound the unit activity the profile reports.'
       ),
     breakdownField: z
       .string()
@@ -130,16 +120,7 @@ const installAutomationTemplateSchema = z
       .max(MAX_FIELD_NAME_LENGTH)
       .optional()
       .describe(
-        'Second field whose per-unit distribution characterises the unit. Required for unit_profile.'
-      ),
-    maxUnits: z
-      .number()
-      .int()
-      .min(1)
-      .max(MAX_UNITS_LIMIT)
-      .optional()
-      .describe(
-        'Upper bound on units profiled in one run. Each costs a model call. unit_profile only. Defaults to 25.'
+        'REQUIRED for unit_profile. Second field whose per-unit distribution characterises the unit.'
       ),
     kis: z
       .string()
@@ -148,13 +129,47 @@ const installAutomationTemplateSchema = z
       .optional()
       .describe(
         dedent`
-          Required for targeted_ki_writer. YAML-formatted list of KI entries. Each entry is a
+          REQUIRED for targeted_ki_writer. YAML-formatted list of KI entries. Each entry is a
           "- ki_id: <id>\\n  ki:\\n    type: <type>\\n    ..." block. Derive ki_id from the finding
           (field, index, question class), not from a date. Put any ES|QL the KI recommends in
           attributes.esql so the verifiers run it. Leave attributes.esql out entirely for KIs
           with no runnable query — never pass an empty list. Use trace://, conversation://, and
           index:// URIs in references. Never invent an id.
         `
+      ),
+    corpusFilter: z
+      .string()
+      .max(MAX_CORPUS_FILTER_LENGTH)
+      .optional()
+      .describe(
+        'Optional. ES|QL clause inserted after FROM, such as "| WHERE published_at >= NOW() - 365 days". A WHERE line may omit the leading pipe. Empty reads the whole index. document_orchestration only. Defaults to empty.'
+      ),
+    maxDocuments: z
+      .number()
+      .int()
+      .min(1)
+      .max(MAX_DOCUMENTS_LIMIT)
+      .optional()
+      .describe(
+        'Optional. Upper bound on documents summarised in one run. document_orchestration only. Defaults to 50.'
+      ),
+    bodyMaxChars: z
+      .number()
+      .int()
+      .min(1)
+      .max(MAX_BODY_CHARS_LIMIT)
+      .optional()
+      .describe(
+        'Optional. Characters of body text sent to the prompt. document_orchestration only. Defaults to 12000.'
+      ),
+    maxUnits: z
+      .number()
+      .int()
+      .min(1)
+      .max(MAX_UNITS_LIMIT)
+      .optional()
+      .describe(
+        'Optional. Upper bound on units profiled in one run. Each costs a model call. unit_profile only. Defaults to 100.'
       ),
   })
   .superRefine((value, ctx) => {
@@ -197,11 +212,13 @@ type InstallAutomationTemplateInput = z.infer<typeof installAutomationTemplateSc
 const toInstallParams = (
   input: InstallAutomationTemplateInput
 ): InstallAutomationTemplateParams => {
+  const { name } = input;
+
   if (input.template === 'targeted_ki_writer') {
     if (!input.kis) {
       throw new Error('kis is required for targeted_ki_writer.');
     }
-    return { template: 'targeted_ki_writer', kis: input.kis };
+    return { template: 'targeted_ki_writer', kis: input.kis, name };
   }
 
   if (input.template === 'document_orchestration') {
@@ -218,6 +235,7 @@ const toInstallParams = (
       corpusFilter: input.corpusFilter ?? '',
       maxDocuments: input.maxDocuments ?? 50,
       bodyMaxChars: input.bodyMaxChars ?? 12000,
+      name,
     };
   }
 
@@ -235,6 +253,7 @@ const toInstallParams = (
       breakdownField: input.breakdownField,
       corpusFilter: '',
       maxUnits: input.maxUnits ?? 100,
+      name,
     };
   }
 
@@ -246,6 +265,7 @@ const toInstallParams = (
     template: 'index_metadata',
     sourceIndex: input.sourceIndex,
     categoryField: input.categoryField,
+    name,
   };
 };
 
@@ -273,19 +293,31 @@ export const createInstallAutomationTemplateTool = ({
     openWorldHint: false,
   },
   description: dedent`
-    Install the index-metadata, document-orchestration, unit-profile or targeted-ki-writer
-    automation on the Context Engine AI index attached to this conversation. Arguments fill the
-    workflow consts. Do not pass an AI index id and do not write the YAML yourself. Do not start a
-    subagent for these templates.
-    document_orchestration summarises each document in a bounded corpus into its own KI with
-    verified ES|QL access patterns.
+    Install an automation template on the Context Engine AI index attached to this conversation.
+    Do not pass an AI index id; do not write the YAML yourself; do not start a subagent.
+
+    IMPORTANT: install templates one at a time — never call this tool in parallel for the same AI
+    index. Concurrent calls cause a "modified concurrently" error; always wait for each call to
+    succeed before starting the next.
+
+    Required fields per template (you MUST include all of them or the call will fail):
+      document_orchestration → name, sourceIndex, titleField, bodyField
+      index_metadata         → name, sourceIndex, categoryField
+      unit_profile           → name, sourceIndex, unitKey, activityField, breakdownField
+      targeted_ki_writer     → name, kis  (no sourceIndex)
+
+    name is always required. It identifies this automation within the AI index. Same name → replaces
+    the existing automation in-place. Different name → installs an additional copy.
+    If the AI index has a pre-name automation (installed before this tool required a name, e.g.
+    named "Document KI automation"), it will NOT be replaced automatically. Delete it manually
+    first, then reinstall with a descriptive name.
+
+    document_orchestration summarises each document into its own KI with verified ES|QL access
+    patterns.
+    index_metadata writes one KI profiling the whole index, grouped by categoryField.
     unit_profile writes one KI per distinct unitKey value, grounded in per-unit aggregations.
-    targeted_ki_writer has triggers: manual and takes no dynamic parameters beyond the AI index id.
-    It writes KIs verbatim from a kis array you edit in the installed workflow's consts block, then
-    run with platform.core.execute_workflow. Do not pass sourceIndex.
-    If this template is already installed on the AI index, calling this tool again reinstalls it:
-    the workflow definition is replaced in-place and the same workflow id is kept. At most one
-    automation of each template type exists per AI index — reinstalling never adds a second copy.
+    targeted_ki_writer takes no dynamic parameters beyond name and kis. It writes KIs verbatim from
+    the kis YAML you supply, then the workflow can be run with platform.core.execute_workflow.
   `,
   schema: installAutomationTemplateSchema,
   handler: async (params, { request, spaceId, attachments, logger }) => {

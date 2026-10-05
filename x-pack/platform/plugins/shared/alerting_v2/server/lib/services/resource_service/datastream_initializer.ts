@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { DataStreamClient, type DataStreamDefinition } from '@kbn/data-streams';
 import type { Logger } from '@kbn/logging';
 import { isResponseError } from '@kbn/es-errors';
 import type { ResourceDefinition } from '../../../resources/datastreams/types';
+import { EsConcurrentModificationError } from '../retry_service/es_concurrent_modification_error';
 import { EsUnacknowledgedError } from '../retry_service/es_unacknowledged_error';
 import type { IResourceInitializer } from './resource_manager';
 
@@ -30,7 +32,14 @@ export class DatastreamInitializer implements IResourceInitializer {
     private readonly logger: Logger,
     private readonly esClient: ElasticsearchClient,
     private readonly resourceDefinition: ResourceDefinition
-  ) {}
+  ) {
+    const { dataStreamName, forceReset, version } = resourceDefinition;
+    if (forceReset && forceReset.version >= version) {
+      throw new Error(
+        `Data stream ${dataStreamName}: forceReset.version (${forceReset.version}) must be below version (${version})`
+      );
+    }
+  }
 
   public async initialize(): Promise<void> {
     // The template references the pipeline, so it must exist first.
@@ -59,6 +68,29 @@ export class DatastreamInitializer implements IResourceInitializer {
       },
     };
 
+    await this.resetOutdatedDataStream(dataStreamDefinition);
+
+    try {
+      await this.initializeDataStream(dataStreamDefinition);
+      await this.updateExistingIndicesFinalPipeline();
+    } catch (error) {
+      // Another node that read the data stream before we recreated it may still delete it for
+      // its own reset. Retrying re-runs initialization against the data stream it recreates.
+      if (isResponseError(error) && error.statusCode === 404) {
+        throw new EsConcurrentModificationError(
+          `data stream ${this.resourceDefinition.dataStreamName} was deleted during initialization`,
+          { cause: error }
+        );
+      }
+      throw error;
+    }
+
+    await this.updateExistingIndicesReplicaSettings();
+  }
+
+  private async initializeDataStream(
+    dataStreamDefinition: DataStreamDefinition<ResourceDefinition['mappings']>
+  ): Promise<void> {
     try {
       await DataStreamClient.initialize({
         logger: this.logger,
@@ -72,9 +104,126 @@ export class DatastreamInitializer implements IResourceInitializer {
 
       this.logger.debug(`Data stream already exists: ${this.resourceDefinition.dataStreamName}.`);
     }
+  }
 
-    await this.updateExistingIndicesFinalPipeline();
-    await this.updateExistingIndicesReplicaSettings();
+  /**
+   * Deletes the data stream when it was created from an index template at or below
+   * `forceReset.version`, so `DataStreamClient.initialize` recreates it from the current one.
+   * Elasticsearch copies the template `_meta` into the data stream only at creation, so
+   * installing the current template does not change the outcome of this check.
+   */
+  private async resetOutdatedDataStream(
+    dataStreamDefinition: DataStreamDefinition<ResourceDefinition['mappings']>
+  ): Promise<void> {
+    const { dataStreamName, forceReset, version } = this.resourceDefinition;
+    if (!forceReset) {
+      return;
+    }
+
+    const dataStream = await this.getExistingDataStream();
+    if (!dataStream) {
+      return;
+    }
+
+    const createdFromVersion = dataStream._meta?.version;
+    if (typeof createdFromVersion === 'number' && createdFromVersion > forceReset.version) {
+      return;
+    }
+
+    // Nodes still running an outdated version keep writing, and a write after the delete
+    // recreates the data stream from whichever template is installed at that moment.
+    await this.installCurrentIndexTemplate(dataStreamDefinition);
+
+    const createdFrom = createdFromVersion ?? '(unknown)';
+    this.logger.warn(
+      `Deleting data stream ${dataStreamName} created from index template v${createdFrom}: data streams created from v${forceReset.version} or below are recreated from v${version}. Their documents are lost.`
+    );
+
+    let acknowledged: boolean;
+    try {
+      ({ acknowledged } = await this.esClient.indices.deleteDataStream({ name: dataStreamName }));
+    } catch (error) {
+      if (!isResponseError(error) || error.statusCode !== 404) {
+        throw error;
+      }
+      return;
+    }
+
+    // An unacknowledged delete may still complete later; fail here so the retry re-reads the
+    // data stream instead of initializing against one that may still carry the old mapping.
+    if (!acknowledged) {
+      throw new EsUnacknowledgedError(`delete data stream ${dataStreamName}`);
+    }
+  }
+
+  /**
+   * Installs the current index template while the outdated data stream still exists.
+   * `DataStreamClient.initializeTemplate` then applies the template mappings to the existing
+   * write index, which fails for the changes that require a reset, so the installed template
+   * version decides whether the reset can proceed.
+   */
+  private async installCurrentIndexTemplate(
+    dataStreamDefinition: DataStreamDefinition<ResourceDefinition['mappings']>
+  ): Promise<void> {
+    const { dataStreamName, version } = this.resourceDefinition;
+
+    let installError: Error | undefined;
+    try {
+      await DataStreamClient.initializeTemplate({
+        logger: this.logger,
+        dataStream: dataStreamDefinition,
+        elasticsearchClient: this.esClient,
+      });
+    } catch (error) {
+      installError = error;
+    }
+
+    const installedVersion = await this.getIndexTemplateVersion();
+    if (installedVersion === undefined || installedVersion < version) {
+      throw (
+        installError ??
+        new Error(
+          `Index template ${dataStreamName} is at v${
+            installedVersion ?? '(none)'
+          } instead of v${version}, so its data stream is not reset.`
+        )
+      );
+    }
+
+    if (installError) {
+      this.logger.warn(
+        `Index template ${dataStreamName} v${installedVersion} is installed; ignoring the failure to update the existing data stream: ${installError.message}`
+      );
+    }
+  }
+
+  private async getIndexTemplateVersion(): Promise<number | undefined> {
+    try {
+      const { index_templates: indexTemplates } = await this.esClient.indices.getIndexTemplate({
+        name: this.resourceDefinition.dataStreamName,
+      });
+      const deployedVersion = indexTemplates[0]?.index_template._meta?.version;
+      return typeof deployedVersion === 'number' ? deployedVersion : undefined;
+    } catch (error) {
+      if (isResponseError(error) && error.statusCode === 404) {
+        return undefined;
+      }
+      throw error;
+    }
+  }
+
+  private async getExistingDataStream(): Promise<IndicesDataStream | undefined> {
+    try {
+      const { data_streams: dataStreams } = await this.esClient.indices.getDataStream({
+        name: this.resourceDefinition.dataStreamName,
+      });
+      return dataStreams[0];
+    } catch (error) {
+      if (isResponseError(error) && error.statusCode === 404) {
+        return undefined;
+      }
+      throw error;
+    }
   }
 
   /**

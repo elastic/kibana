@@ -22,6 +22,7 @@ import {
 } from './escalations/constants';
 import { INVESTIGATIONS_API_PRIVILEGE_MANAGE } from './investigations/constants';
 import { registerEscalationRoutes } from './escalations/routes/register_routes';
+import { registerInvestigationRoutes } from './investigations/routes/register_routes';
 import { AgenticInvestigationsPlugin } from './plugin';
 
 jest.mock('./impact/routes/register_routes', () => ({
@@ -30,6 +31,10 @@ jest.mock('./impact/routes/register_routes', () => ({
 
 jest.mock('./escalations/routes/register_routes', () => ({
   registerEscalationRoutes: jest.fn(),
+}));
+
+jest.mock('./investigations/routes/register_routes', () => ({
+  registerInvestigationRoutes: jest.fn(),
 }));
 
 const createContext = () =>
@@ -69,6 +74,8 @@ const startPlugin = (plugin: AgenticInvestigationsPlugin) => {
         list: jest.fn(),
         search: jest.fn(),
         create: jest.fn(),
+        addAccessControlEntries: jest.fn(),
+        removeAccessControlEntries: jest.fn(),
         patchMetadata: jest.fn(),
         update: jest.fn(),
       }),
@@ -194,6 +201,7 @@ describe('AgenticInvestigationsPlugin', () => {
 
       expect(registerImpactRoutes).toHaveBeenCalledTimes(1);
       expect(registerEscalationRoutes).toHaveBeenCalledTimes(1);
+      expect(registerInvestigationRoutes).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -67,7 +67,7 @@ export const getProposalStepCommonDefinition: BaseStepDefinition<
 - name: resolve_dismissal
   type: data.set
   with:
-    recommendation_was_wrong: "\${{ steps.read_proposal.output.dismissReason == 'wrong' }}"`,
+    declined_as_duplicate: "\${{ steps.read_proposal.output.dismissReason == 'duplicate' }}"`,
     ],
   },
 };

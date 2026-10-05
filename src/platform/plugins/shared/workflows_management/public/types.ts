@@ -19,6 +19,7 @@ import type { KqlPluginStart } from '@kbn/kql/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { QueryClient } from '@kbn/react-query';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
@@ -75,6 +76,7 @@ export interface WorkflowsPublicPluginStart {
 }
 
 export interface WorkflowsPublicPluginStartDependencies {
+  security: SecurityPluginStart;
   navigation: NavigationPublicPluginStart;
   serverless?: ServerlessPluginStart;
   dataViews: DataViewsPublicPluginStart;
@@ -91,6 +93,7 @@ export interface WorkflowsPublicPluginStartDependencies {
 }
 
 export interface WorkflowsPublicPluginStartAdditionalServices {
+  securityUi: SecurityPluginStart['uiApi'];
   storage: Storage;
   workflowsManagement: {
     telemetry: TelemetryServiceClient;
@@ -100,5 +103,5 @@ export interface WorkflowsPublicPluginStartAdditionalServices {
 }
 
 export type WorkflowsServices = CoreStart &
-  WorkflowsPublicPluginStartDependencies &
+  Omit<WorkflowsPublicPluginStartDependencies, 'security'> &
   WorkflowsPublicPluginStartAdditionalServices;

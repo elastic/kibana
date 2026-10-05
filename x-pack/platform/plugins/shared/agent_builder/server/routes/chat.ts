@@ -212,7 +212,7 @@ export const conversePayloadSchema = schema.object({
       },
       {
         meta: {
-          availability: { stability: 'tech_preview', since: '9.5.0' },
+          availability: { stability: 'stable', since: '9.5.0' },
           description: 'Optional conversation access control. Defaults to private.',
         },
       }

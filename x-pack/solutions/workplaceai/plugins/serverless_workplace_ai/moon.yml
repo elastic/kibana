@@ -30,6 +30,7 @@ tags:
   - prod
   - group-workplaceai
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - index.ts
@@ -38,4 +39,6 @@ fileGroups:
     - public/**/*.tsx
     - server/**/*.ts
     - '!target/**/*'
+  jest-config:
+    - jest.config.js
 tasks: {}

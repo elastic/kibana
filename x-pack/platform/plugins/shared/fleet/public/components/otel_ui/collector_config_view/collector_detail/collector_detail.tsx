@@ -45,7 +45,7 @@ const COLLECTOR_DETAIL_TABS: Array<{ id: CollectorDetailTabId; name: string }> =
   },
 ];
 
-const getCollectorLabel = (agent: Agent): string => {
+export const getCollectorLabel = (agent: Agent): string => {
   const displayName = agent.non_identifying_attributes?.['elastic.display.name'];
   if (typeof displayName === 'string' && displayName) return displayName;
   const hostname =

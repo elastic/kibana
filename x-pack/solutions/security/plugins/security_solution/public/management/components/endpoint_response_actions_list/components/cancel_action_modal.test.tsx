@@ -11,21 +11,27 @@ import userEvent from '@testing-library/user-event';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
+import { EndpointMetadataGenerator } from '../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useToasts } from '../../../../common/lib/kibana';
 import { useSendCancelRequest as _useSendCancelRequest } from '../../../hooks/response_actions/use_send_cancel_request';
+import { useFetchEndpointList as _useFetchEndpointList } from '../../../hooks/endpoint/use_fetch_endpoint_list';
 import { CancelActionModal } from './cancel_action_modal';
 import { UX_MESSAGES } from '../translations';
-import type { ActionDetails } from '../../../../../common/endpoint/types';
+import type { ActionDetails, MetadataListResponse } from '../../../../../common/endpoint/types';
+import { EndpointSortableField } from '../../../../../common/endpoint/types';
+import type { EndpointCapabilities } from '../../../../../common/endpoint/service/response_actions/constants';
 import type { DeepPartial } from 'utility-types';
 
 jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../hooks/response_actions/use_send_cancel_request');
+jest.mock('../../../hooks/endpoint/use_fetch_endpoint_list');
 
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 const useToastsMock = useToasts as jest.Mock;
 const useSendCancelRequestMock = _useSendCancelRequest as jest.Mock;
+const useFetchEndpointListMock = _useFetchEndpointList as jest.Mock;
 
 const makePendingAgentState = (): ActionDetails['agentState'][string] => ({
   isCompleted: false,
@@ -47,10 +53,33 @@ describe('CancelActionModal', () => {
   let appTestContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let generator: EndpointActionGenerator;
+  let metadataGenerator: EndpointMetadataGenerator;
   let onClose: jest.Mock;
   let setUserPrivileges: ReturnType<AppContextTestRender['getUserPrivilegesMockSetter']>;
   let addSuccess: jest.Mock;
   let mutateAsync: jest.Mock;
+
+  // Build a metadata list API response (as returned by `useFetchEndpointList`) where each host
+  // reports the capabilities defined in `capabilitiesByAgentId`.
+  const buildMetadataListResponse = (
+    capabilitiesByAgentId: Record<string, EndpointCapabilities[]>
+  ): MetadataListResponse => {
+    const data = Object.entries(capabilitiesByAgentId).map(([agentId, capabilities]) => {
+      const hostInfo = metadataGenerator.generateHostInfo();
+      hostInfo.metadata.agent.id = agentId;
+      hostInfo.metadata.Endpoint.capabilities = [...capabilities];
+      return hostInfo;
+    });
+
+    return {
+      data,
+      total: data.length,
+      page: 0,
+      pageSize: data.length,
+      sortField: EndpointSortableField.ENROLLED_AT,
+      sortDirection: 'desc',
+    };
+  };
 
   const buildSingleAgentPendingAction = (
     overrides: DeepPartial<ActionDetails> = {}
@@ -77,6 +106,7 @@ describe('CancelActionModal', () => {
   beforeEach(() => {
     appTestContext = createAppRootMockRenderer();
     generator = new EndpointActionGenerator('test');
+    metadataGenerator = new EndpointMetadataGenerator('test');
     onClose = jest.fn();
     addSuccess = jest.fn();
     mutateAsync = jest.fn().mockResolvedValue({});
@@ -87,6 +117,11 @@ describe('CancelActionModal', () => {
       error: null,
       isLoading: false,
       mutateAsync,
+    });
+    // By default, all requested hosts support `cancel`
+    useFetchEndpointListMock.mockReturnValue({
+      data: buildMetadataListResponse({ 'agent-a': ['cancel'], 'agent-b': ['cancel'] }),
+      isError: false,
     });
   });
 
@@ -370,6 +405,143 @@ describe('CancelActionModal', () => {
       renderModal();
       expect(addSuccess).not.toHaveBeenCalled();
       expect(onClose).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('cancel capability validation', () => {
+    const setCapabilitiesLoading = () => {
+      useFetchEndpointListMock.mockReturnValue({ data: undefined, isError: false });
+    };
+
+    const setCapabilities = (capabilitiesByAgentId: Record<string, EndpointCapabilities[]>) => {
+      useFetchEndpointListMock.mockReturnValue({
+        data: buildMetadataListResponse(capabilitiesByAgentId),
+        isError: false,
+      });
+    };
+
+    it('should query the endpoints list for the pending agent ids', () => {
+      renderModal(buildMultiAgentPendingAction());
+      expect(useFetchEndpointListMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pageSize: 2,
+          kuery: 'united.endpoint.agent.id:"agent-a" or united.endpoint.agent.id:"agent-b"',
+        }),
+        expect.objectContaining({ enabled: true })
+      );
+    });
+
+    it('should show a loader while capabilities data is being retrieved', () => {
+      setCapabilitiesLoading();
+      renderModal();
+      expect(renderResult.getByTestId('test-capabilitiesLoader')).not.toBeNull();
+      expect(renderResult.queryByTestId('test-actionCommand')).toBeNull();
+    });
+
+    it('should disable submit while capabilities data is being retrieved', () => {
+      setCapabilitiesLoading();
+      renderModal();
+      const submitButton = renderResult
+        .getByText(UX_MESSAGES.cancelActionModalSubmitButonLabel)
+        .closest('button');
+      expect(submitButton).toBeDisabled();
+    });
+
+    it('should not enable the query when the user lacks access to the metadata API', () => {
+      setUserPrivileges.set({ canReadSecuritySolution: false });
+      renderModal();
+      expect(useFetchEndpointListMock).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ enabled: false })
+      );
+      // Form is shown (relies on the API to catch unsupported hosts)
+      expect(renderResult.getByTestId('test-actionCommand')).not.toBeNull();
+    });
+
+    it('should not enable the query for non-endpoint agent types', () => {
+      const action = buildSingleAgentPendingAction({ agentType: 'sentinel_one' });
+      renderModal(action);
+      expect(useFetchEndpointListMock).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ enabled: false })
+      );
+      expect(renderResult.getByTestId('test-actionCommand')).not.toBeNull();
+    });
+
+    it('should show the form when the capabilities check fails (rely on the API)', () => {
+      useFetchEndpointListMock.mockReturnValue({ data: undefined, isError: true });
+      renderModal();
+      expect(renderResult.getByTestId('test-actionCommand')).not.toBeNull();
+      expect(renderResult.queryByTestId('test-capabilitiesLoader')).toBeNull();
+    });
+
+    describe('single-agent action', () => {
+      it('should show the all-hosts-unsupported callout when the host does not support cancel', () => {
+        setCapabilities({ 'agent-a': ['isolation'] });
+        renderModal();
+        expect(renderResult.getByTestId('test-allHostsUnsupportedCallout')).not.toBeNull();
+        expect(renderResult.queryByTestId('test-actionCommand')).toBeNull();
+      });
+
+      it('should disable submit when the host does not support cancel', () => {
+        setCapabilities({ 'agent-a': ['isolation'] });
+        renderModal();
+        const submitButton = renderResult
+          .getByText(UX_MESSAGES.cancelActionModalSubmitButonLabel)
+          .closest('button');
+        expect(submitButton).toBeDisabled();
+      });
+
+      it('should show the form and enable submit when the host supports cancel', () => {
+        renderModal();
+        expect(renderResult.getByTestId('test-actionCommand')).not.toBeNull();
+        const submitButton = renderResult
+          .getByText(UX_MESSAGES.cancelActionModalSubmitButonLabel)
+          .closest('button');
+        expect(submitButton).not.toBeDisabled();
+      });
+    });
+
+    describe('multi-agent action', () => {
+      it('should disable the selector option for a host that does not support cancel', () => {
+        setCapabilities({ 'agent-a': ['cancel'], 'agent-b': ['isolation'] });
+        renderModal(buildMultiAgentPendingAction());
+
+        const supportedOption = renderResult.getByText('Host-agent-a').closest('li');
+        const unsupportedOption = renderResult.getByText('Host-agent-b').closest('li');
+
+        expect(supportedOption?.getAttribute('aria-disabled')).not.toEqual('true');
+        expect(unsupportedOption?.getAttribute('aria-disabled')).toEqual('true');
+      });
+
+      it('should not include an unsupported host in the cancel request', async () => {
+        setCapabilities({ 'agent-a': ['cancel'], 'agent-b': ['isolation'] });
+        renderModal(buildMultiAgentPendingAction());
+
+        await userEvent.click(renderResult.getByText('Host-agent-a'));
+        // Clicking the disabled option should have no effect
+        await userEvent.click(renderResult.getByText('Host-agent-b'));
+
+        const submitButton = renderResult
+          .getByText(UX_MESSAGES.cancelActionModalSubmitButonLabel)
+          .closest('button')!;
+        await userEvent.click(submitButton);
+
+        await waitFor(() => {
+          expect(mutateAsync).toHaveBeenCalledWith(
+            expect.objectContaining({ endpoint_ids: ['agent-a'] })
+          );
+        });
+      });
+
+      it('should show the all-hosts-unsupported callout when no host supports cancel', () => {
+        setCapabilities({ 'agent-a': ['isolation'], 'agent-b': ['isolation'] });
+        renderModal(buildMultiAgentPendingAction());
+        expect(renderResult.getByTestId('test-allHostsUnsupportedCallout')).not.toBeNull();
+        expect(
+          renderResult.queryByLabelText(UX_MESSAGES.cancelActionModalAgentSelectorLabel)
+        ).toBeNull();
+      });
     });
   });
 });

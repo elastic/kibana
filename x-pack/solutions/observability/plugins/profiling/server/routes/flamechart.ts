@@ -13,6 +13,7 @@ import { IDLE_SOCKET_TIMEOUT } from '.';
 import { getRoutePaths, MAX_KUERY_LENGTH } from '../../common';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { getClient } from './compat';
+import { PROFILING_API_PRIVILEGE } from '../feature';
 
 export function registerFlameChartSearchRoute({
   router,
@@ -27,7 +28,7 @@ export function registerFlameChartSearchRoute({
       path: paths.Flamechart,
       security: {
         authz: {
-          requiredPrivileges: ['profiling'],
+          requiredPrivileges: [PROFILING_API_PRIVILEGE],
         },
       },
       options: { timeout: { idleSocket: IDLE_SOCKET_TIMEOUT } },

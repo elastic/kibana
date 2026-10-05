@@ -41,7 +41,7 @@ export class ExecutionHistoryApi {
           search: params.search,
           rule_ids: params.rule_ids,
           outcomes: params.outcomes,
-          episode_ids: params.episode_ids,
+          alert_ids: params.alert_ids,
           from: params.from,
           to: params.to,
           sort_field: params.sort_field,

@@ -1,5 +1,5 @@
 {
-  "sha1": "ffe7da7c7eff9c8bac969bfc3acfe73797cf3664",
+  "sha1": "e7f4a3393445afbf472027ab9b1d0b018bc315c3",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -804,7 +804,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
-        "line": 668,
+        "line": 669,
         "column": 29
       }
     },
@@ -818,7 +818,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
-        "line": 783,
+        "line": 784,
         "column": 16
       }
     },
@@ -832,7 +832,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
-        "line": 864,
+        "line": 865,
         "column": 11
       }
     },
@@ -846,7 +846,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
-        "line": 956,
+        "line": 957,
         "column": 62
       }
     },
@@ -860,7 +860,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
-        "line": 1071,
+        "line": 1072,
         "column": 9
       }
     },
@@ -874,7 +874,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
-        "line": 1071,
+        "line": 1072,
         "column": 9
       }
     },
@@ -888,7 +888,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
-        "line": 1071,
+        "line": 1072,
         "column": 9
       }
     },

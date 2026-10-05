@@ -348,7 +348,7 @@ export async function deleteFeature(
 }
 
 // ---------------------------------------------------------------------------
-// Maintenance (pause / resume) helpers
+// Maintenance helpers
 // ---------------------------------------------------------------------------
 
 export async function getMaintenanceStatus(
@@ -377,6 +377,16 @@ export async function resumeMaintenance(
 ) {
   return apiClient
     .fetch('POST /internal/significant_events/maintenance/_resume')
+    .expect(expectStatusCode)
+    .then((response) => response.body);
+}
+
+export async function resetMaintenance(
+  apiClient: SignificantEventsSupertestRepositoryClient,
+  expectStatusCode: number = 200
+) {
+  return apiClient
+    .fetch('POST /internal/significant_events/maintenance/_reset')
     .expect(expectStatusCode)
     .then((response) => response.body);
 }

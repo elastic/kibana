@@ -439,6 +439,11 @@ describe('yaml_form_utils', () => {
       ['a count that is not a number', { pending: { count: '3' } }],
       ['a phase that gates nothing', { pending: {} }],
       ['a misspelt phase', { pendign: { count: 3 } }],
+      ['an operator without both thresholds', { pending: { operator: 'and', count: 2 } }],
+      [
+        'an operator the schema does not accept',
+        { pending: { operator: 'AND', count: 2, timeframe: '5m' } },
+      ],
     ])('reports state_transition with %s instead of erasing it', (_label, stateTransition) => {
       const yaml = stringify({
         kind: 'alert',
@@ -451,7 +456,7 @@ describe('yaml_form_utils', () => {
 
       expect(result.values).toBeNull();
       expect(result.error).toBe(
-        'Invalid state_transition. Set pending or recovering to a block with count and/or timeframe.'
+        'Invalid state_transition. Set pending or recovering to a block with count and/or timeframe. operator must be "and" or "or", and only when both are set.'
       );
     });
 
@@ -693,8 +698,10 @@ describe('yaml_form_utils', () => {
       expect(result.values?.stateTransition).toEqual({
         pendingCount: 3,
         pendingTimeframe: null,
+        pendingOperator: null,
         recoveringCount: null,
         recoveringTimeframe: null,
+        recoveringOperator: null,
       });
       expect(result.values?.stateTransitionAlertDelayMode).toBe('breaches');
       expect(result.values?.stateTransitionRecoveryDelayMode).toBe('immediate');
@@ -730,11 +737,106 @@ describe('yaml_form_utils', () => {
       expect(result.values?.stateTransition).toEqual({
         pendingCount: 2,
         pendingTimeframe: null,
+        pendingOperator: null,
         recoveringCount: null,
         recoveringTimeframe: '15m',
+        recoveringOperator: null,
       });
       expect(result.values?.stateTransitionAlertDelayMode).toBe('breaches');
       expect(result.values?.stateTransitionRecoveryDelayMode).toBe('duration');
+    });
+
+    it.each(['and', 'or'] as const)(
+      'preserves an explicit pending.operator of %s through a YAML round trip',
+      (operator) => {
+        const yaml = stringify({
+          kind: 'alert',
+          metadata: { name: 'Pending operator' },
+          query: { base: 'FROM logs-*' },
+          recovery: { strategy: 'no_breach' },
+          state_transition: { pending: { count: 3, timeframe: '5m', operator } },
+        });
+
+        const parsed = parseYamlToFormValues(yaml);
+
+        expect(parsed.error).toBeNull();
+        expect(parsed.values?.stateTransition?.pendingOperator).toBe(operator);
+        expect(parsed.values?.stateTransition?.pendingCount).toBe(3);
+        expect(parsed.values?.stateTransition?.pendingTimeframe).toBe('5m');
+
+        const serialized = serializeFormToYaml(parsed.values!);
+        const roundTripped = parseYamlToFormValues(serialized);
+
+        expect(roundTripped.error).toBeNull();
+        expect(roundTripped.values?.stateTransition?.pendingOperator).toBe(operator);
+        expect(serialized).toContain(`operator: ${operator}`);
+      }
+    );
+
+    it.each(['and', 'or'] as const)(
+      'preserves an explicit recovering.operator of %s when recovery is automatic',
+      (operator) => {
+        const yaml = stringify({
+          kind: 'alert',
+          metadata: { name: 'Recovering operator' },
+          query: { base: 'FROM logs-*' },
+          recovery: { strategy: 'no_breach' },
+          state_transition: { recovering: { count: 4, timeframe: '20m', operator } },
+        });
+
+        const parsed = parseYamlToFormValues(yaml);
+
+        expect(parsed.error).toBeNull();
+        expect(parsed.values?.stateTransition?.recoveringOperator).toBe(operator);
+
+        const serialized = serializeFormToYaml(parsed.values!);
+        const roundTripped = parseYamlToFormValues(serialized);
+
+        expect(roundTripped.error).toBeNull();
+        expect(roundTripped.values?.stateTransition?.recoveringOperator).toBe(operator);
+        expect(serialized).toContain(`operator: ${operator}`);
+      }
+    );
+
+    it('does not default an operator when a phase sets both thresholds without one', () => {
+      const yaml = stringify({
+        kind: 'alert',
+        metadata: { name: 'Combined without operator' },
+        query: { base: 'FROM logs-*' },
+        recovery: { strategy: 'no_breach' },
+        state_transition: {
+          pending: { count: 3, timeframe: '5m' },
+          recovering: { count: 2, timeframe: '10m' },
+        },
+      });
+
+      const parsed = parseYamlToFormValues(yaml);
+      const serialized = serializeFormToYaml(parsed.values!);
+
+      expect(parsed.values?.stateTransition?.pendingOperator).toBeNull();
+      expect(parsed.values?.stateTransition?.recoveringOperator).toBeNull();
+      expect(serialized).not.toContain('operator:');
+    });
+
+    it('drops a recovering operator when recovery is manual', () => {
+      const formValues: FormValues = {
+        ...defaultTestFormValues,
+        recovery: { strategy: recoveryStrategy.manual },
+        stateTransition: {
+          pendingCount: 2,
+          pendingTimeframe: '5m',
+          pendingOperator: 'and',
+          recoveringCount: 3,
+          recoveringTimeframe: '10m',
+          recoveringOperator: 'or',
+        },
+      };
+
+      const result = formValuesToYamlObject(formValues);
+
+      expect(result.state_transition).toEqual({
+        pending: { count: 2, timeframe: '5m', operator: 'and' },
+      });
     });
 
     it('defaults both modes to immediate when no state_transition is present', () => {

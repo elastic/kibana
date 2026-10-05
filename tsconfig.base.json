@@ -2329,8 +2329,6 @@
       "@kbn/search-inference-endpoints-fixture-plugin/*": ["./x-pack/platform/test/search_inference_endpoints/plugins/search_inference_endpoints_fixture/*"],
       "@kbn/search-navigation": ["./x-pack/solutions/search/plugins/search_navigation"],
       "@kbn/search-navigation/*": ["./x-pack/solutions/search/plugins/search_navigation/*"],
-      "@kbn/search-notebooks": ["./x-pack/solutions/search/plugins/search_notebooks"],
-      "@kbn/search-notebooks/*": ["./x-pack/solutions/search/plugins/search_notebooks/*"],
       "@kbn/search-queries": ["./x-pack/solutions/search/packages/kbn-search-queries"],
       "@kbn/search-queries/*": ["./x-pack/solutions/search/packages/kbn-search-queries/*"],
       "@kbn/search-query-rules": ["./x-pack/solutions/search/plugins/search_query_rules"],

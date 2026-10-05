@@ -98,11 +98,59 @@ describe('buildCommentBody', () => {
     expect(body).toContain('`/components/schemas/Output/properties/name`');
   });
 
+  it('renders report-only changes in their own non-blocking section', () => {
+    const body = buildCommentBody([
+      entry(),
+      entry({
+        path: '/api/cases/{caseId}/user_actions/_find',
+        reason: 'added a variant to the payload oneOf',
+        oasdiffId: 'response-property-one-of-added',
+        reportOnly: true,
+        policyReason: 'Adding a variant to a response oneOf is additive.',
+      }),
+    ]);
+
+    // the demoted change is stable tier, but must not be counted as gating
+    expect(body).toContain('### Stable (GA) (1)');
+    expect(body).toContain('### Reported only — not blocking merge (1)');
+    expect(body).toContain('- Adding a variant to a response oneOf is additive.');
+    expect(body.indexOf('### Stable (GA)')).toBeLessThan(body.indexOf('### Reported only'));
+  });
+
+  it('posts a report-only comment with no gating section', () => {
+    const body = buildCommentBody([
+      entry({ reportOnly: true, policyReason: 'Additive response variant.' }),
+    ]);
+
+    expect(body).not.toContain('### Stable (GA)');
+    expect(body).toContain('### Reported only — not blocking merge (1)');
+  });
+
   it('includes granular suppression guidance in the what-to-do section', () => {
     const body = buildCommentBody([entry()]);
 
     expect(body).toContain('`oasdiffId`');
     expect(body).toContain('`source`');
     expect(body).toContain('scope the allowlist entry');
+  });
+
+  it('keeps the fix-or-allowlist framing when a gating change exists', () => {
+    const body = buildCommentBody([entry(), entry({ reportOnly: true })]);
+
+    expect(body).toContain('were detected across the public OpenAPI surface');
+    expect(body).toContain('**Fix the breaking change**');
+  });
+
+  it('does not ask for a fix or an allowlist entry when nothing gates', () => {
+    const body = buildCommentBody([
+      entry({ reportOnly: true, policyReason: 'Additive response variant.' }),
+      entry({ path: '/api/exp', tier: 'experimental' }),
+    ]);
+
+    expect(body).toContain('No stable or Technical Preview breaking changes were detected');
+    expect(body).toContain('Nothing here blocks merge');
+    expect(body).not.toContain('were detected across the public OpenAPI surface');
+    expect(body).not.toContain('**Fix the breaking change**');
+    expect(body).not.toContain('allowlist.json');
   });
 });

@@ -20,6 +20,7 @@ import { licenseService as licenseServiceMocked } from '../../../../../../common
 import { useLicense as _useLicense } from '../../../../../../common/hooks/use_license';
 import { OS_TITLES } from '../../../../../common/translations';
 import { exactMatchText, expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../mocks';
+import { CUSTOM_YARA_SIGNATURES_LICENSE_UPSELL } from '../components/shared_translations';
 import type { PerOsMemoryProtectionCardProps } from './per_os_memory_protection_card';
 import {
   LOCKED_CARD_MEMORY_TITLE,
@@ -247,6 +248,311 @@ describe('PerOsMemoryProtectionCard', () => {
       expect(renderResult.getByTestId(testSubj.windows.row)).toBeInTheDocument();
       expect(renderResult.getByTestId(testSubj.mac.row)).toBeInTheDocument();
       expect(renderResult.getByTestId(testSubj.linux.row)).toBeInTheDocument();
+    });
+  });
+
+  describe('custom YARA signatures', () => {
+    const OS_LIST = ['windows', 'mac', 'linux'] as const;
+
+    const getCustomYaraSignaturesSwitch = (os: (typeof OS_LIST)[number]) =>
+      renderResult.getByTestId(testSubj[os].customYaraSignaturesEnableDisableSwitch);
+
+    const setMemoryProtectionModeOnAllOses = (nextMode: ProtectionModes) => {
+      for (const os of OS_LIST) {
+        policy[os].memory_protection.mode = nextMode;
+      }
+    };
+
+    describe('and the experimental flag is disabled', () => {
+      it('does not render a custom YARA signatures switch in any row', () => {
+        render();
+
+        for (const os of OS_LIST) {
+          expect(renderResult.queryByTestId(testSubj[os].customYaraSignatures)).toBeNull();
+        }
+      });
+
+      it('leaves custom_yara_signatures untouched when the master toggle turns memory protection off', async () => {
+        delete policy.linux.memory_protection.custom_yara_signatures;
+        render();
+
+        await userEvent.click(renderResult.getByTestId(testSubj.enableDisableSwitch));
+
+        const updatedPolicy = getUpdatedPolicy();
+        expect(updatedPolicy.windows.memory_protection.custom_yara_signatures).toBe(true);
+        expect(updatedPolicy.mac.memory_protection.custom_yara_signatures).toBe(true);
+        expect(updatedPolicy.linux.memory_protection).not.toHaveProperty('custom_yara_signatures');
+      });
+
+      it('leaves custom_yara_signatures untouched when a row changes from Disable to Detect', async () => {
+        policy.windows.memory_protection.mode = ProtectionModes.off;
+        policy.windows.memory_protection.custom_yara_signatures = false;
+        policy.mac.memory_protection.mode = ProtectionModes.off;
+        delete policy.mac.memory_protection.custom_yara_signatures;
+        render();
+
+        await selectOsControlOption(renderResult, testSubj.windows.modeSelect, /^Detect$/);
+        expect(getUpdatedPolicy().windows.memory_protection.custom_yara_signatures).toBe(false);
+
+        await selectOsControlOption(renderResult, testSubj.mac.modeSelect, /^Detect$/);
+        expect(getUpdatedPolicy().mac.memory_protection).not.toHaveProperty(
+          'custom_yara_signatures'
+        );
+      });
+    });
+
+    describe('and the experimental flag is enabled', () => {
+      beforeEach(() => {
+        mockedContext.setExperimentalFlag({ customYaraSignaturesEnabled: true });
+      });
+
+      it("renders each row's switch from that OS's own value", () => {
+        policy.windows.memory_protection.custom_yara_signatures = true;
+        policy.mac.memory_protection.custom_yara_signatures = false;
+        delete policy.linux.memory_protection.custom_yara_signatures;
+        render();
+
+        expect(getCustomYaraSignaturesSwitch('windows')).toHaveAttribute('aria-checked', 'true');
+        expect(getCustomYaraSignaturesSwitch('mac')).toHaveAttribute('aria-checked', 'false');
+        expect(getCustomYaraSignaturesSwitch('linux')).toHaveAttribute('aria-checked', 'false');
+        for (const os of OS_LIST) {
+          expect(getCustomYaraSignaturesSwitch(os)).toBeEnabled();
+        }
+        expect(renderResult.getByTestId(testSubj.windows.customYaraSignatures)).toHaveTextContent(
+          'Apply custom YARA signatures'
+        );
+      });
+
+      it('does not render the switch on a row set to Disable', () => {
+        policy.windows.memory_protection.mode = ProtectionModes.off;
+        render();
+
+        expect(renderResult.queryByTestId(testSubj.windows.customYaraSignatures)).toBeNull();
+        expect(renderResult.getByTestId(testSubj.mac.customYaraSignatures)).toBeInTheDocument();
+        expect(renderResult.getByTestId(testSubj.linux.customYaraSignatures)).toBeInTheDocument();
+      });
+
+      it('toggling the macOS switch leaves windows and linux byte-identical on updatedPolicy', async () => {
+        const windowsBefore = cloneDeep(policy.windows);
+        const linuxBefore = cloneDeep(policy.linux);
+        render();
+
+        await userEvent.click(getCustomYaraSignaturesSwitch('mac'));
+
+        const updatedPolicy = getUpdatedPolicy();
+        expect(updatedPolicy.mac.memory_protection.custom_yara_signatures).toBe(false);
+        expect(updatedPolicy.windows).toEqual(windowsBefore);
+        expect(updatedPolicy.linux).toEqual(linuxBefore);
+      });
+
+      it('renders an absent value as unchecked and enables only that OS when toggled on', async () => {
+        for (const os of OS_LIST) {
+          delete policy[os].memory_protection.custom_yara_signatures;
+        }
+        render();
+
+        expect(getCustomYaraSignaturesSwitch('linux')).toHaveAttribute('aria-checked', 'false');
+
+        await userEvent.click(getCustomYaraSignaturesSwitch('linux'));
+
+        const updatedPolicy = getUpdatedPolicy();
+        expect(updatedPolicy.linux.memory_protection.custom_yara_signatures).toBe(true);
+        expect(updatedPolicy.windows.memory_protection).not.toHaveProperty(
+          'custom_yara_signatures'
+        );
+        expect(updatedPolicy.mac.memory_protection).not.toHaveProperty('custom_yara_signatures');
+      });
+
+      it('master toggle off disables custom YARA signatures on every OS', async () => {
+        render();
+
+        await userEvent.click(renderResult.getByTestId(testSubj.enableDisableSwitch));
+
+        const updatedPolicy = getUpdatedPolicy();
+        for (const os of OS_LIST) {
+          expect(updatedPolicy[os].memory_protection.custom_yara_signatures).toBe(false);
+        }
+      });
+
+      it('master toggle on enables custom YARA signatures on every OS', async () => {
+        setMemoryProtectionModeOnAllOses(ProtectionModes.off);
+        policy.windows.memory_protection.custom_yara_signatures = false;
+        policy.mac.memory_protection.custom_yara_signatures = false;
+        delete policy.linux.memory_protection.custom_yara_signatures;
+        render();
+
+        await userEvent.click(renderResult.getByTestId(testSubj.enableDisableSwitch));
+
+        const updatedPolicy = getUpdatedPolicy();
+        for (const os of OS_LIST) {
+          expect(updatedPolicy[os].memory_protection.custom_yara_signatures).toBe(true);
+        }
+      });
+
+      it('changing a row from Disable to Detect enables custom YARA signatures on that OS only', async () => {
+        policy.mac.memory_protection.mode = ProtectionModes.off;
+        policy.mac.memory_protection.custom_yara_signatures = false;
+        const windowsBefore = cloneDeep(policy.windows);
+        const linuxBefore = cloneDeep(policy.linux);
+        render();
+
+        await selectOsControlOption(renderResult, testSubj.mac.modeSelect, /^Detect$/);
+
+        const updatedPolicy = getUpdatedPolicy();
+        expect(updatedPolicy.mac.memory_protection.custom_yara_signatures).toBe(true);
+        expect(updatedPolicy.windows).toEqual(windowsBefore);
+        expect(updatedPolicy.linux).toEqual(linuxBefore);
+      });
+
+      it('changing a row to Disable disables custom YARA signatures on that OS only', async () => {
+        const windowsBefore = cloneDeep(policy.windows);
+        const linuxBefore = cloneDeep(policy.linux);
+        render();
+
+        await selectOsControlOption(renderResult, testSubj.mac.modeSelect, /^Disable$/);
+
+        const updatedPolicy = getUpdatedPolicy();
+        expect(updatedPolicy.mac.memory_protection.custom_yara_signatures).toBe(false);
+        expect(updatedPolicy.windows).toEqual(windowsBefore);
+        expect(updatedPolicy.linux).toEqual(linuxBefore);
+      });
+
+      it('switching between Detect and Prevent keeps the stored value', async () => {
+        policy.mac.memory_protection.mode = ProtectionModes.detect;
+        policy.mac.memory_protection.custom_yara_signatures = false;
+        policy.linux.memory_protection.mode = ProtectionModes.prevent;
+        policy.linux.memory_protection.custom_yara_signatures = true;
+        render();
+
+        await selectOsControlOption(renderResult, testSubj.mac.modeSelect, /^Detect & prevent$/);
+        expect(getUpdatedPolicy().mac.memory_protection.custom_yara_signatures).toBe(false);
+
+        await selectOsControlOption(renderResult, testSubj.linux.modeSelect, /^Detect$/);
+        expect(getUpdatedPolicy().linux.memory_protection.custom_yara_signatures).toBe(true);
+      });
+
+      describe('and license is lower than Enterprise', () => {
+        beforeEach(() => {
+          const licenseServiceMock = createLicenseServiceMock();
+          licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
+          licenseServiceMock.isEnterprise.mockReturnValue(false);
+
+          useLicenseMock.mockReturnValue(licenseServiceMock);
+        });
+
+        afterEach(() => {
+          useLicenseMock.mockReturnValue(licenseServiceMocked);
+        });
+
+        it('disables the switch and shows an Enterprise license upsell tooltip', async () => {
+          render();
+
+          for (const os of OS_LIST) {
+            expect(getCustomYaraSignaturesSwitch(os)).toBeDisabled();
+          }
+
+          await userEvent.hover(
+            renderResult.getByTestId(testSubj.windows.customYaraSignaturesTooltipIcon)
+          );
+
+          expect(
+            await renderResult.findByText(CUSTOM_YARA_SIGNATURES_LICENSE_UPSELL)
+          ).toBeInTheDocument();
+        });
+
+        it('master toggle on clears a leftover true and keeps an absent value absent', async () => {
+          setMemoryProtectionModeOnAllOses(ProtectionModes.off);
+          policy.windows.memory_protection.custom_yara_signatures = true;
+          policy.mac.memory_protection.custom_yara_signatures = false;
+          delete policy.linux.memory_protection.custom_yara_signatures;
+          render();
+
+          await userEvent.click(renderResult.getByTestId(testSubj.enableDisableSwitch));
+
+          const updatedPolicy = getUpdatedPolicy();
+          expect(updatedPolicy.windows.memory_protection.custom_yara_signatures).toBe(false);
+          expect(updatedPolicy.mac.memory_protection.custom_yara_signatures).toBe(false);
+          expect(updatedPolicy.linux.memory_protection).not.toHaveProperty(
+            'custom_yara_signatures'
+          );
+        });
+
+        it('changing a row from Disable to Detect clears a leftover true and keeps an absent value absent', async () => {
+          policy.windows.memory_protection.mode = ProtectionModes.off;
+          policy.windows.memory_protection.custom_yara_signatures = true;
+          policy.linux.memory_protection.mode = ProtectionModes.off;
+          delete policy.linux.memory_protection.custom_yara_signatures;
+          render();
+
+          await selectOsControlOption(renderResult, testSubj.windows.modeSelect, /^Detect$/);
+          expect(getUpdatedPolicy().windows.memory_protection.custom_yara_signatures).toBe(false);
+
+          await selectOsControlOption(renderResult, testSubj.linux.modeSelect, /^Detect$/);
+          expect(getUpdatedPolicy().linux.memory_protection).not.toHaveProperty(
+            'custom_yara_signatures'
+          );
+        });
+      });
+
+      describe('and a serverless PLI upsell message is present', () => {
+        const pliUpsellMessage =
+          'To apply custom YARA signatures, you must add Endpoint Complete to your project.';
+
+        beforeEach(() => {
+          mockedContext.startServices.upselling.setMessages({
+            endpoint_custom_yara_signatures: pliUpsellMessage,
+          });
+        });
+
+        it('disables the switch and shows the PLI upsell tooltip', async () => {
+          render();
+
+          expect(getCustomYaraSignaturesSwitch('mac')).toBeDisabled();
+
+          await userEvent.hover(
+            renderResult.getByTestId(testSubj.mac.customYaraSignaturesTooltipIcon)
+          );
+
+          expect(await renderResult.findByText(pliUpsellMessage)).toBeInTheDocument();
+        });
+
+        it('leaves custom_yara_signatures untouched when the master toggle turns memory protection on', async () => {
+          setMemoryProtectionModeOnAllOses(ProtectionModes.off);
+          render();
+
+          await userEvent.click(renderResult.getByTestId(testSubj.enableDisableSwitch));
+
+          const updatedPolicy = getUpdatedPolicy();
+          for (const os of OS_LIST) {
+            expect(updatedPolicy[os].memory_protection.custom_yara_signatures).toBe(true);
+          }
+        });
+
+        it('leaves custom_yara_signatures untouched when a row changes to Disable', async () => {
+          render();
+
+          await selectOsControlOption(renderResult, testSubj.windows.modeSelect, /^Disable$/);
+
+          expect(getUpdatedPolicy().windows.memory_protection.custom_yara_signatures).toBe(true);
+        });
+      });
+
+      describe('and displayed in View mode', () => {
+        beforeEach(() => {
+          props.mode = 'view';
+        });
+
+        it("renders each switch as read-only with that OS's stored value", () => {
+          policy.mac.memory_protection.custom_yara_signatures = false;
+          render();
+
+          expectIsViewOnly(renderResult.getByTestId(testSubj.card));
+          expect(getCustomYaraSignaturesSwitch('windows')).toBeDisabled();
+          expect(getCustomYaraSignaturesSwitch('windows')).toHaveAttribute('aria-checked', 'true');
+          expect(getCustomYaraSignaturesSwitch('mac')).toBeDisabled();
+          expect(getCustomYaraSignaturesSwitch('mac')).toHaveAttribute('aria-checked', 'false');
+        });
+      });
     });
   });
 });

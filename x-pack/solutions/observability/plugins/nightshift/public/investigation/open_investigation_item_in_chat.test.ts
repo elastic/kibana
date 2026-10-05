@@ -6,39 +6,11 @@
  */
 
 import {
-  buildBlindSpotChatOptions,
   buildHypothesisChatOptions,
   buildRecommendationChatOptions,
 } from './open_investigation_item_in_chat';
 
 describe('open_investigation_item_in_chat', () => {
-  it('buildBlindSpotChatOptions attaches the blind spot as text', () => {
-    expect(
-      buildBlindSpotChatOptions(
-        {
-          title: 'Missing trace coverage',
-          confidence: 0.8,
-          description: 'No spans for payment gateway calls.',
-        },
-        'blind-spot-1'
-      )
-    ).toEqual({
-      newConversation: true,
-      autoSendInitialMessage: false,
-      initialMessage: 'Tell me about this blind spot: Missing trace coverage',
-      attachments: [
-        {
-          id: 'blind-spot-1',
-          type: 'text',
-          description: '[Blind spot] Missing trace coverage',
-          data: {
-            content: 'Missing trace coverage · No spans for payment gateway calls.',
-          },
-        },
-      ],
-    });
-  });
-
   it('buildRecommendationChatOptions attaches the recommendation as text', () => {
     expect(
       buildRecommendationChatOptions(

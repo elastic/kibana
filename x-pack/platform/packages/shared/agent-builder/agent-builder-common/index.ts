@@ -64,6 +64,8 @@ export {
   type ResourceResult,
   type EsqlResults,
   type OtherResult,
+  NON_INTERACTIVE_DECLINED_REASON,
+  isNonInteractiveDeclinedResult,
   type IndexSearchToolDefinitionWithSchema,
   type BrowserApiToolMetadata,
 } from './tools';

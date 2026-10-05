@@ -33,7 +33,7 @@ spaceTest.describe(
       async ({ page, pageObjects }) => {
         await pageObjects.discover.selectClassicMode();
 
-        await expect(page.testSubj.locator('ESQLEditor')).toBeHidden();
+        await expect(pageObjects.esqlEditor.editor).toBeHidden();
         await expect(page.testSubj.locator('queryInput')).toBeVisible();
       }
     );
@@ -49,8 +49,38 @@ spaceTest.describe(
 
         await discover.selectClassicMode();
 
-        await expect(page.testSubj.locator('ESQLEditor')).toBeHidden();
+        await expect(pageObjects.esqlEditor.editor).toBeHidden();
         await expect(page.testSubj.locator('queryInput')).toBeVisible();
+      }
+    );
+
+    spaceTest(
+      'preserves the time field and sorting when switching to an inline Classic view',
+      async ({ page, pageObjects }) => {
+        const { discover, dataGrid } = pageObjects;
+        // This pattern matches the shared archive, but not the persisted logstash-* view.
+        await discover.writeAndSubmitEsqlQuery('FROM logstash-2015.09.* | LIMIT 10');
+        await discover.selectClassicMode();
+        await discover.submitQuery();
+        await discover.waitUntilSearchingHasFinished();
+
+        await expect.poll(() => discover.getSelectedDataViewName()).toBe('logstash-2015.09.*');
+        expect(await discover.isCurrentDataViewAdHoc()).toBe(true);
+        await expect(page.testSubj.locator('unifiedHistogramChart')).toBeVisible();
+        await expect(dataGrid.getColumnHeader('@timestamp')).toHaveAttribute(
+          'aria-sort',
+          'descending'
+        );
+        const dataViewId = await discover.getCurrentDataViewId();
+
+        await page.reload();
+        await discover.waitUntilTabIsLoaded();
+        await expect.poll(() => discover.getCurrentDataViewId()).toBe(dataViewId);
+        await expect(page.testSubj.locator('unifiedHistogramChart')).toBeVisible();
+        await expect(dataGrid.getColumnHeader('@timestamp')).toHaveAttribute(
+          'aria-sort',
+          'descending'
+        );
       }
     );
 
@@ -67,7 +97,7 @@ spaceTest.describe(
         await page.reload();
         await discover.waitUntilTabIsLoaded();
         // ES|QL mode survives the reload, so the switch below is a real transition.
-        await expect(page.testSubj.locator('ESQLEditor')).toBeVisible();
+        await expect(pageObjects.esqlEditor.editor).toBeVisible();
 
         await discover.selectClassicMode();
         // Switching from ES|QL cancels the async query, which can race the first classic

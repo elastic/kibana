@@ -104,11 +104,6 @@ export const useResumeRoundMutation = ({
       };
       conversationStreamService.recordPromptResponse(vars.conversationId, optimisticResponse);
 
-      // The run owns its live events: hold the stream for its whole lifetime so it is not reclaimed
-      // while the user is looking at another conversation, before or after `execution_started`.
-      const retainedStream = conversationStreamService
-        .getActiveStream$(vars.conversationId)
-        .subscribe();
       let timelineExecutionId: string | undefined;
       let streamEventArrived = false;
 
@@ -177,7 +172,6 @@ export const useResumeRoundMutation = ({
         }
         throw err;
       } finally {
-        retainedStream.unsubscribe();
         clearActiveStream(vars.conversationId);
         if (controllersRef.current.get(vars.conversationId)?.controller === controller) {
           controllersRef.current.delete(vars.conversationId);

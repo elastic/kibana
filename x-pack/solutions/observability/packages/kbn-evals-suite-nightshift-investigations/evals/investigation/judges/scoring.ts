@@ -141,10 +141,11 @@ export const composeEvidenceText = (report: InvestigationStructuredOutput | unde
   const lines: string[] = [];
   for (const hypothesis of report.hypotheses ?? []) {
     for (const evidence of hypothesis.evidence ?? []) {
-      const query = evidence.esql_query ? ` [esql: ${evidence.esql_query}]` : '';
-      lines.push(
-        `- [${hypothesis.status}] ${hypothesis.candidate}: ${evidence.description}${query}`
-      );
+      const parts = [
+        evidence.description,
+        evidence.chart && `[chart: ${evidence.chart.title}]`,
+      ].filter(Boolean);
+      lines.push(`- [${hypothesis.status}] ${hypothesis.candidate}: ${parts.join(' ')}`);
     }
   }
   for (const recommendation of report.recommendations ?? []) {

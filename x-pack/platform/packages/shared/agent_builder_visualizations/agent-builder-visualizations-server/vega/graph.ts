@@ -15,6 +15,7 @@ import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import { buildTimeRangeParams } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
 import { extractTextFromMessage } from '../utils/extract_text_from_message';
 import { generateVisualizationEsql } from '../shared/generate_visualization_esql';
+import { formatRepairMessages } from '../shared/repair_messages';
 import { normalizeVegaSpec } from './normalize_spec';
 import { createAuthorVegaSpecPrompt, vegaEsqlAdditionalInstructions } from './prompts';
 import { buildReferenceExamplesBlock } from './reference_examples';
@@ -36,6 +37,9 @@ import {
 
 // Regex to extract JSON from markdown code blocks.
 const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
+
+const REPAIR_INSTRUCTIONS =
+  'Return the complete corrected response as a single JSON object matching the response schema ("title", "authoring_note", and "spec"). Change only what is needed to fix the error.';
 
 /**
  * Default range used only to bind `?_tstart`/`?_tend` when executing a query
@@ -241,50 +245,50 @@ export const createVegaGraph = async (
     const attempt = state.currentAttempt + 1;
     logger.debug(`Authoring Vega-Lite spec (attempt ${attempt}/${MAX_RETRY_ATTEMPTS})`);
 
-    // Feed back authoring and structural-check failures so the next attempt can fix them.
-    const previousContext = state.actions
-      .filter((action) => isAuthorSpecAction(action) || isValidateSpecAction(action))
-      .map((action) => {
-        if (isAuthorSpecAction(action)) {
-          return action.success
-            ? undefined
-            : `Authoring attempt ${action.attempt} failed: ${action.error}`;
-        }
-        if (!action.success) {
-          return `Validation attempt ${action.attempt} failed: ${action.error}`;
-        }
-        return undefined;
-      })
-      .filter(Boolean)
-      .join('\n');
-
-    const additionalContext = previousContext
-      ? `Previous attempts:\n${previousContext}\n\nPlease fix the errors above and return a single valid JSON object matching the response schema ("title", "authoring_note", and "spec").`
-      : undefined;
-
-    const prompt = createAuthorVegaSpecPrompt({
-      nlQuery: state.nlQuery,
-      esqlQuery: state.esqlQuery,
-      columns: state.columns,
-      existingSpec: state.existingSpec,
-      chartType: state.chartType,
-      referenceExamples: state.referenceExamples,
-      additionalContext,
-    });
+    // On retries, replay the raw failed responses and their errors so the model repairs them.
+    const prompt = [
+      ...createAuthorVegaSpecPrompt({
+        nlQuery: state.nlQuery,
+        esqlQuery: state.esqlQuery,
+        columns: state.columns,
+        existingSpec: state.existingSpec,
+        chartType: state.chartType,
+        referenceExamples: state.referenceExamples,
+      }),
+      ...formatRepairMessages({
+        authored: state.actions.filter(isAuthorSpecAction),
+        validated: state.actions.filter(isValidateSpecAction),
+        instructions: REPAIR_INSTRUCTIONS,
+      }),
+    ];
 
     let action: AuthorSpecAction;
+    let responseText: string | undefined;
     try {
       const response = await defaultModel.chatModel.invoke(prompt);
-      const { spec, title, authoringNote } = parseAuthoringResponse(
-        extractTextFromMessage(response)
-      );
-      action = { type: 'author_spec', success: true, spec, title, authoringNote, attempt };
+      responseText = extractTextFromMessage(response);
+      const { spec, title, authoringNote } = parseAuthoringResponse(responseText);
+      action = {
+        type: 'author_spec',
+        success: true,
+        spec,
+        title,
+        authoringNote,
+        response: responseText,
+        attempt,
+      };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       logger.warn(
         `Vega spec authoring failed (attempt ${attempt}/${MAX_RETRY_ATTEMPTS}): ${message}`
       );
-      action = { type: 'author_spec', success: false, attempt, error: message };
+      action = {
+        type: 'author_spec',
+        success: false,
+        response: responseText,
+        attempt,
+        error: message,
+      };
     }
 
     return {

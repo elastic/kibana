@@ -17,9 +17,12 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { of, throwError } from 'rxjs';
 import { waitFor, renderHook } from '@testing-library/react';
+import { EsqlSource } from '@kbn/data-source';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { SearchSourceSearchOptions } from '@kbn/data-plugin/common';
 import { DataViewType } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataViewSource } from '@kbn/data-source';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { getFetchParamsMock, getFetch$Mock } from '../../../__mocks__/fetch_params';
 
@@ -123,8 +126,13 @@ describe('useTotalHits', () => {
 
   it('should not fetch total hits if isPlainRecord is true', async () => {
     const onTotalHitsChange = jest.fn();
+    EsqlSource.clearCache();
     const fetchParams = getFetchParamsMock({
       query: { esql: 'from test' },
+      dataSource: await EsqlSource.create({
+        query: 'from test',
+        timeFieldName: '@timestamp',
+      }),
     });
     const deps = {
       ...getDeps(),
@@ -216,12 +224,13 @@ describe('useTotalHits', () => {
       .spyOn(searchSourceInstanceMock, 'setOverwriteDataViewType')
       .mockClear();
     const setFieldSpy = jest.spyOn(searchSourceInstanceMock, 'setField').mockClear();
+    const rollupDataView = {
+      ...dataViewWithTimefieldMock,
+      type: DataViewType.ROLLUP,
+    } as DataView;
     const fetchParams = getFetchParamsMock({
       filters: [{ meta: { index: 'test' }, query: { match_all: {} } }],
-      dataView: {
-        ...dataViewWithTimefieldMock,
-        type: DataViewType.ROLLUP,
-      } as any,
+      dataSource: new DataViewSource(rollupDataView),
     });
     const data = dataPluginMock.createStartContract();
     jest

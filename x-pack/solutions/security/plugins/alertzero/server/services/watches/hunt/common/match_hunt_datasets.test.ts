@@ -115,7 +115,27 @@ describe('matchDatasetsDeterministic', () => {
         paloaltonetworks: ['panw'],
         f5: ['f5bigip'],
         vmware: ['vsphere'],
+        amazon: ['aws'],
+        amazonwebservices: ['aws'],
+        fortigate: ['fortinetfortigate'],
       });
+    });
+
+    it('matches the vendor "Amazon" to aws.cloudtrail', () => {
+      expect(matchDatasetsDeterministic({ datasets, vendor: 'Amazon' })).toEqual([awsCloudtrail]);
+    });
+
+    it('matches the vendor "Amazon Web Services" to aws.cloudtrail', () => {
+      expect(matchDatasetsDeterministic({ datasets, vendor: 'Amazon Web Services' })).toEqual([
+        awsCloudtrail,
+      ]);
+    });
+
+    it('matches the product "FortiGate" to fortinet_fortigate.log', () => {
+      const fortigateLog = dataset('fortinet_fortigate.log');
+      expect(
+        matchDatasetsDeterministic({ datasets: [...datasets, fortigateLog], product: 'FortiGate' })
+      ).toEqual([fortigateLog]);
     });
 
     it('matches Palo Alto Networks to panw.panos', () => {

@@ -37,7 +37,7 @@ export const attachEventInvestigationToolHandler = async ({
   completedAt?: string;
   alertEventsClient?: AlertEventsClientApi;
   logger?: Logger;
-}): Promise<{ event_uuid?: string; updated: number; ignored: number }> => {
+}): Promise<{ updated: number; ignored: number }> => {
   const { hits } = await eventClient.findByEventId(eventId);
   if (hits.length === 0) {
     throw new Error(`Significant event "${eventId}" not found`);

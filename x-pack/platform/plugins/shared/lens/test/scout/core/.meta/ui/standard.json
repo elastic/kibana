@@ -1,5 +1,5 @@
 {
-  "sha1": "b128a50c851e096f70bcb5b06fd3a12802c4f673",
+  "sha1": "9077c13f7a85e748bdfe7a72f59646b91bb080a1",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -26,7 +26,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/esql_conversion/enabled.spec.ts",
-        "line": 42,
+        "line": 41,
         "column": 21
       }
     },
@@ -39,8 +39,34 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/esql_conversion/enabled.spec.ts",
-        "line": 94,
-        "column": 21
+        "line": 89,
+        "column": 13
+      }
+    },
+    {
+      "id": "b6cc271e75cf463-e4cbd64875404d1",
+      "title": "Lens Convert to ES|QL converts eligible data layers and preserves annotation and reference layers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/esql_conversion/enabled.spec.ts",
+        "line": 112,
+        "column": 13
+      }
+    },
+    {
+      "id": "b6cc271e75cf463-271977c54caef04",
+      "title": "Lens Convert to ES|QL should disable Convert to ES|QL button when any data layer is unsupported",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/esql_conversion/enabled.spec.ts",
+        "line": 160,
+        "column": 5
       }
     },
     {
@@ -52,8 +78,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/esql_conversion/enabled.spec.ts",
-        "line": 119,
-        "column": 23
+        "line": 168,
+        "column": 16
       }
     },
     {
@@ -65,8 +91,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/esql_conversion/enabled.spec.ts",
-        "line": 138,
-        "column": 46
+        "line": 180,
+        "column": 18
+      }
+    },
+    {
+      "id": "b6cc271e75cf463-eb851498a13608d",
+      "title": "Lens Convert to ES|QL should disable Convert to ES|QL button when the chart has query-based annotations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/esql_conversion/enabled.spec.ts",
+        "line": 186,
+        "column": 23
       }
     },
     {

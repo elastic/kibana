@@ -51,11 +51,12 @@ triggers:
 
 steps:
   - name: loop_kis
-    type: foreach
+    type: parallel
     foreach: "{{ consts.kis | json }}"
-    # One KI whose write fails must not stop the others from being written.
-    iteration-on-failure:
-      continue: true
+    concurrency: 5
+    # One KI whose write fails must not stop the others from being written: `settled` runs every
+    # branch to a terminal state, where the default `fail-fast` stops scheduling on the first failure.
+    mode: settled
     steps:
       # `foreach.item.ki` is the whole document; passed typed so nothing is stringified.
       # `ki_id` comes from the const, so a re-run replaces the KI on an index destination, and
@@ -70,13 +71,3 @@ steps:
             - esql-valid-syntax
             - esql-valid-runtime
 
-      - name: check_verification
-        type: if
-        condition: "steps.create_ki.output.verification.passed : false"
-        steps:
-          - name: log_verification_failure
-            type: console
-            with:
-              message: |
-                KI verification failed for "{{ foreach.item.ki_id }}".
-                Results: {{ steps.create_ki.output.verification.results | json }}

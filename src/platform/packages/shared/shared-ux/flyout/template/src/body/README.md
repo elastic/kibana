@@ -2,7 +2,7 @@
 
 ## Callouts
 
-`Body.Callout` puts a callout in the body's banner, above all other body content. The template renders the callout itself: `level` (`info`, `success`, `warning`, or `danger`) selects one of the `@kbn/ui-callout` components, so nothing but a semantic callout can reach the banner.
+`Body.Callout` puts a callout in the body's banner, above all other body content. The template renders the callout itself. The `level` prop (`info`, `success`, `warning`, or `danger`) picks one of the `@kbn/ui-callout` components, so only a semantic callout can appear in the banner.
 
 ```tsx
 <FlyoutTemplate.Body>
@@ -16,16 +16,16 @@
 </FlyoutTemplate.Body>
 ```
 
-- **Props** — everything `KbnCalloutProps` takes (`title`, `text`, `actionProps`, `onDismiss`, …) except `size`, `heading`, `className`, `css`, and `style`, which the template owns so every banner callout looks the same. The title stays a `<p>`, out of the flyout's heading outline. `id` is the part's identity, unique among sibling callouts, and is generated when omitted.
-- **Visibility** — stays with the consumer: render the callout conditionally, and remove it from `onDismiss`. Give every conditional callout, and the callouts after it, an explicit `id`. A generated `id` follows the callout's position, so removing one callout shifts the generated `id` of each one after it, and those remount.
-- **Placement** — any number of callouts render as one stack in source order, with template-owned spacing, wherever they sit among `Body`'s children. Add no `EuiSpacer` around them. The banner scrolls with the body content.
-- **Tabs** — a callout directly under `Body` is flyout-wide and stays in place across tab switches. A callout inside a `Body.TabPanel` renders nothing; nothing warns about it.
+- **Props** — everything `KbnCalloutProps` takes (`title`, `text`, `actionProps`, `onDismiss`, …) except `size`, `heading`, `className`, `css`, and `style`. The template sets those so every banner callout looks the same. The title is a `<p>`, so it stays out of the flyout's heading outline. `id` identifies the part, must be unique among sibling callouts, and is generated when omitted.
+- **Visibility** — you control it. Render the callout conditionally, and remove it in `onDismiss`. Give every conditional callout, and every callout after it, an explicit `id`. A generated `id` is based on the callout's position, so removing one callout changes the generated `id` of each callout after it, and those callouts remount.
+- **Placement** — all callouts render as one stack, in source order, with template-owned spacing, wherever they appear among `Body`'s children. Do not add `EuiSpacer` around them. The banner scrolls with the body content.
+- **Tabs** — a callout directly under `Body` applies to the whole flyout and stays in place across tab switches. A callout inside a `Body.TabPanel` renders nothing, and nothing warns about it.
 
-The body stays mounted across tab switches, and each callout is memoized, so a switch neither remounts nor re-renders a callout. With uncontrolled tabs (`defaultSelectedTabId`) this holds on its own. With controlled tabs (`selectedTabId` and `onTabChange`) the consumer re-renders on every switch and builds new callout elements, so the callout skips its re-render only while its props are shallowly equal: memoize `actionProps` and handlers such as `onDismiss`, or memoize the `<FlyoutTemplate.Body.Callout>` elements themselves.
+The body stays mounted across tab switches, and each callout is memoized, so switching tabs does not remount or re-render a callout. With uncontrolled tabs (`defaultSelectedTabId`), this works on its own. With controlled tabs (`selectedTabId` and `onTabChange`), your component re-renders on every switch and creates new callout elements. A callout then skips re-rendering only if its props are shallowly equal. Memoize `actionProps` and handlers such as `onDismiss`, or memoize the `<FlyoutTemplate.Body.Callout>` elements themselves.
 
 ## Sections
 
-`Body.Section` and `Body.Accordion` give body content a title and consistent spacing. Pick one style per flyout — mixing sections and accordions in the same body is not supported. Both accept `Subsection` children for a second level.
+`Body.Section` and `Body.Accordion` give body content a title and consistent spacing. Both accept `Subsection` children for a second level. They render the components of `@kbn/flyout-sections`, and its [README](../../../sections/README.md) covers their props, heading levels, and dividers. Use one style per flyout. Mixing sections and accordions in the same body is not supported.
 
 ```tsx
 <FlyoutTemplate.Body>
@@ -41,17 +41,23 @@ The body stays mounted across tab switches, and each callout is memoized, so a s
 </FlyoutTemplate.Body>
 ```
 
-- **`Body.Section`** — takes `title`, and optional `icon`, `tooltip`, `action`, `hasBorder`, `id`, `data-test-subj`. Renders a `<section>` with an `<h4>` title, named by that title so assistive tech exposes it as a region. `id` seeds the section's DOM id and is generated when omitted.
-- **`Body.Accordion`** — the collapsible variant. Same title-row props plus `initialIsOpen`; `id` seeds the toggle's DOM id and is generated when omitted. Its content is always outlined, so it takes no `hasBorder`.
-- **`Subsection`** — reached as `Body.Section.Subsection` or `Body.Accordion.Subsection` (the same component; it is not exposed as `Body.Subsection`). Takes `title`, `id`, `data-test-subj`, and renders an `<h5>`. `id` lands on the wrapper as a link or scroll target; unlike a section, a subsection is not named as its own region.
+- **`Body.Section`** renders a `FlyoutSection` and takes its props, except `borderOnChildren`, which the template sets.
+- **`Body.Accordion`** renders a `FlyoutAccordion` and takes its props, except `hasBorder`. Its content is always outlined.
+- **`Subsection`** renders a `FlyoutSubsection` and takes its props, except `hasBorder`. Use it as `Body.Section.Subsection` or `Body.Accordion.Subsection`. Both names refer to the same component. There is no `Body.Subsection`.
 
-An `id` also doubles as the part's identity within its parent, so it must be unique among sibling parts of the same kind.
+An `id` also identifies the part within its parent, so it must be unique among sibling parts of the same kind.
 
-`Subsection` deliberately has no `hasBorder` prop. The border lands on the innermost container, so the parent decides: with subsections present, the outer section drops its border and each subsection carries one instead. Under `Body.Section` the subsections inherit the section's authored `hasBorder`; under `Body.Accordion` they are always bordered.
+### Borders
+
+The border goes on the innermost container, and the parent decides whether there is one. That is why `Subsection` has no `hasBorder` prop. When a section or accordion has subsections, it drops its own border and each subsection gets one instead. Under `Body.Section`, subsections are bordered when the section's `hasBorder` is set. Under `Body.Accordion`, subsections are always bordered.
+
+### Structure
+
+**Sections and accordions do not nest, and a `Subsection` must be a direct child of its section or accordion.** A `Body.Section` or `Body.Accordion` inside another one is treated as unstructured content and renders nothing. A `Subsection` wrapped in another element also renders nothing, although a Fragment is fine. Nothing warns about either case. Keep the structure flat: sections or accordions directly under `Body`, and subsections directly under those.
 
 ## Unstructured content
 
-The body also takes plain content — a search bar, a filter row, a data grid — with no wrapper part. Callouts belong in the banner, through `Body.Callout`. It renders as-is, in JSX order relative to the sections around it, and gets no title, box, or divider.
+The body also accepts plain content, such as a search bar, a filter row, or a data grid, without any wrapper part. It renders as-is, in JSX order with the sections around it, and gets no title, box, or divider. Callouts go in the banner, through `Body.Callout`.
 
 ```tsx
 <FlyoutTemplate.Body>
@@ -61,8 +67,6 @@ The body also takes plain content — a search bar, a filter row, a data grid �
 </FlyoutTemplate.Body>
 ```
 
-Content the template does not own brings its own spacing, so add an `EuiSpacer` (or equivalent) between blocks and before the first titled section. Sections and accordions accept the same kind of unstructured content alongside subsections.
+The template adds no spacing around content it does not own. Add an `EuiSpacer` (or similar) between blocks and before the first titled section. Sections and accordions accept the same kind of unstructured content alongside subsections.
 
-**Sections and accordions do not nest, and neither takes a `Subsection` at anything other than its immediate top level.** A `Body.Section` or `Body.Accordion` placed inside another one is treated as unstructured content and renders nothing, as does a `Subsection` wrapped in an element rather than sitting directly under its section (a Fragment is fine). Nothing warns about either. Keep the two levels flat: sections or accordions under `Body`, subsections directly under those.
-
-**Sections and passthrough children should not be interleaved.** Source order is always preserved and nothing is dropped, so interleaving renders — but the rule that separates consecutive sections is a CSS adjacent-sibling selector, and any element between two sections breaks the match, silently removing the divider. Nothing detects this. Put passthrough content before or after the run of sections, not between them.
+**Do not put unstructured content between sections.** It still renders in source order, but an element between two sections removes the spacing and divider above the second one (see [Content between sections](../../../sections/README.md#content-between-sections)). Put unstructured content before or after the run of sections.

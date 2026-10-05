@@ -20,7 +20,7 @@ jest.mock('./core', () => ({
   ...jest.requireActual('./core'),
   executeDashboardOperations: jest.fn(),
   hasValidCreateMetadataOperations: jest.fn(),
-  createVisPanelResolver: jest.fn(),
+  createPanelResolver: jest.fn(),
   createAttachmentPanelResolver: jest.fn(),
   createControlFieldCapabilitiesResolver: jest.fn(),
 }));

@@ -135,12 +135,11 @@ async function runWorkflowWithRequest({
     execution.isTestRun && execution.isEphemeral !== false ? 'edit' : 'execute';
   if (
     currentWorkflow &&
-    !(await hasWorkflowAccess(
-      currentWorkflow,
-      fakeRequest,
-      dependencies.coreStart,
-      requiredPermission
-    ))
+    !(await hasWorkflowAccess(currentWorkflow, fakeRequest, dependencies.coreStart, {
+      id: execution.workflowId,
+      spaceId,
+      operation: requiredPermission,
+    }))
   ) {
     await workflowExecutionRepository.updateWorkflowExecution({
       id: workflowRunId,

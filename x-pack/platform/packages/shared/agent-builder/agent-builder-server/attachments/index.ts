@@ -35,10 +35,15 @@ export type { AttachmentChangesToEventsOptions } from './attachment_change_event
 export { attachmentChangesToEvents } from './attachment_change_events';
 export type {
   AttachmentPublicClient,
+  AttachmentWriteAccess,
   ListAttachmentsResult,
   CreateAttachmentArgs,
   GetAttachmentArgs,
   UpdateAttachmentArgs,
   DeleteAttachmentArgs,
   ListAttachmentsArgs,
+  BulkCreateAttachmentInput,
+  BulkCreateAttachmentError,
+  BulkCreateAttachmentsResult,
+  BulkCreateAttachmentsArgs,
 } from './public_client';

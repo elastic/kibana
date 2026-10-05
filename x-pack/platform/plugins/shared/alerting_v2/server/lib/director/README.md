@@ -2,14 +2,14 @@
 
 > **Prerequisite:** Read the [server-level README](../../README.md) first for the plugin-wide architecture and terminology.
 
-The director is the alert lifecycle engine. It takes alert-type rule events from the rule executor, looks up the latest known state for each `group_hash`, chooses a transition strategy, and returns enriched alert events with `episode.*` fields attached.
+The director is the alert lifecycle engine. It takes alert-type rule events from the rule executor, looks up the latest known state for each `group_hash`, chooses a transition strategy, and returns enriched alert events with `alert.*` fields attached.
 
 It runs inside the rule executor as [`DirectorStep`](../rule_executor/steps/director_step.ts). It is not a standalone Task Manager task.
 
 ## What the director owns
 
 - Mapping an incoming alert event plus prior alert state to the next episode state
-- Assigning or reusing `episode.id`
+- Assigning or reusing the episode id (`alert.id`)
 - Encapsulating lifecycle rules behind transition strategies
 
 ## What the director does not own
@@ -36,7 +36,7 @@ DirectorService
         |
         v
 Enriched alert events
-  (same events + episode.id/status/status_count)
+  (same events + alert.id/status/status_count)
 ```
 
 ## How it works
@@ -98,7 +98,7 @@ The director writes one of these episode statuses:
 | `active` | The series is actively alerting. |
 | `recovering` | The series stopped breaching but has not fully closed yet. |
 
-`episode.status_count` tracks consecutive evaluations in the current status when a strategy needs count-based thresholds.
+`alert.status_count` tracks consecutive evaluations in the current status when a strategy needs count-based thresholds.
 
 ## Current strategies
 

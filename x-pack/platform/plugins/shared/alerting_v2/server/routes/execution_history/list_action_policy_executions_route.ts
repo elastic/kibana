@@ -35,7 +35,7 @@ export const toListExecutionHistoryArgs = ({
   search,
   rule_ids: ruleIds,
   outcomes,
-  episode_ids: episodeIds,
+  alert_ids: episodeIds,
   from,
   to,
   sort_field: sortField,

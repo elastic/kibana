@@ -16,6 +16,8 @@ export interface EpisodeActionContext {
 export interface EpisodeActionMenuItemContext extends EpisodeActionContext {
   /** Closes the menu hosting the item, if the surface exposes a way to. */
   closeMenu?: () => void;
+  /** Surface hosting the menu: a table row menu or the details flyout footer menu. */
+  surface?: 'row_menu' | 'details_flyout';
 }
 
 export interface EpisodeActionInlineControlContext extends EpisodeActionContext {

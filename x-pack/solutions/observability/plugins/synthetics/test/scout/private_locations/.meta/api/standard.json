@@ -1,5 +1,5 @@
 {
-  "sha1": "56ad5e969b26ab66e1dbcf5f874a692fd1cbaa37",
+  "sha1": "70d5025706efc19266891b0fc219c0bc7547b910",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -94,8 +94,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/create_monitor_private_location.spec.ts",
-        "line": 84,
+        "line": 85,
         "column": 51
+      }
+    },
+    {
+      "id": "da272c25075079a-bff73455a14ecb2",
+      "title": "PrivateLocationCreateMonitor packages enabled NTLM auth into the Fleet policy as base64 JSON",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/create_monitor_private_location.spec.ts",
+        "line": 152,
+        "column": 17
       }
     },
     {

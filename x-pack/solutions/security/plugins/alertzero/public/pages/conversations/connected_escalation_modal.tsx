@@ -10,6 +10,7 @@ import {
   EuiCheckableCard,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiLink,
   EuiModal,
   EuiModalHeader,
@@ -19,7 +20,7 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { KbnWarningCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { css } from '@emotion/react';
 import { type EscalationModalRenderProps } from '@kbn/agentic-investigations-common';
 import {
@@ -59,7 +60,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
     const { euiTheme } = useEuiTheme();
     const [mode, setMode] = useState(initialMode);
     const [incidentSearch, setIncidentSearch] = useState('');
-    const [collaboratorSearch, setCollaboratorSearch] = useState('');
+    const [assigneeSearch, setAssigneeSearch] = useState('');
     const {
       services: { notifications },
     } = useKibana<CoreStart>();
@@ -82,9 +83,14 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
       [getChatHref, openChat]
     );
 
-    const { data: currentUserProfile } = useCurrentUserProfile();
-    const { data: suggestedCollaborators = [], isFetching: isSearchingCollaborators } =
-      useSuggestUserProfiles(collaboratorSearch);
+    const {
+      data: currentUserProfile,
+      isLoading: isLoadingUserProfile,
+      isError: isUserProfileError,
+      refetch: refetchUserProfile,
+    } = useCurrentUserProfile();
+    const { data: suggestedAssignees = [], isFetching: isSearchingAssignees } =
+      useSuggestUserProfiles(assigneeSearch);
     const {
       data: escalationsData,
       isLoading: isLoadingEscalations,
@@ -213,51 +219,86 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
         </div>
 
         {mode === 'create' ? (
-          <CreateEscalationForm
-            investigationTitle={investigation.title}
-            suggestedCollaborators={suggestedCollaborators}
-            isSearchingCollaborators={isSearchingCollaborators}
-            currentUserUid={currentUserProfile?.uid ?? ''}
-            currentUserName={currentUserProfile ? getUserDisplayName(currentUserProfile.user) : ''}
-            isSubmitting={createEscalation.isLoading}
-            onSearchCollaborators={setCollaboratorSearch}
-            onSubmit={({ title, visibility, collaboratorUids }) =>
-              createEscalation.mutate(
-                {
-                  linked_investigation_id: conversationId,
-                  title,
-                  visibility,
-                  collaborators: collaboratorUids,
-                  // For private escalations collaboratorUids already includes the creator uid.
-                  // For public escalations there are no ACL entries, so add the creator alone.
-                  assignees:
-                    visibility === 'private'
-                      ? collaboratorUids
-                      : [currentUserProfile?.uid].filter(
-                          (uid): uid is string => typeof uid === 'string' && uid.length > 0
-                        ),
-                },
-                {
-                  onSuccess: (escalation) => {
-                    notifications?.toasts.addSuccess({
-                      title: ESCALATION_SUCCESS.createTitle,
-                      actionProps: {
-                        primary: makeViewEscalationPrimary(escalation.id, escalation.agent_id),
+          <>
+            {isLoadingUserProfile && (
+              <EuiFlexGroup justifyContent="center" css={{ padding: euiTheme.size.l }}>
+                <EuiLoadingSpinner size="l" />
+              </EuiFlexGroup>
+            )}
+
+            {!isLoadingUserProfile && isUserProfileError && (
+              <div css={{ padding: `0 ${euiTheme.size.l} ${euiTheme.size.l}` }}>
+                <KbnDangerCallout
+                  announceOnMount
+                  title={ESCALATION_ERRORS.userProfileLoadFailed}
+                  actionProps={{
+                    primary: {
+                      children: ESCALATION_ERRORS.retryButton,
+                      onClick: () => void refetchUserProfile(),
+                    },
+                  }}
+                />
+              </div>
+            )}
+
+            {!isLoadingUserProfile && !isUserProfileError && currentUserProfile === null && (
+              <div css={{ padding: `0 ${euiTheme.size.l} ${euiTheme.size.l}` }}>
+                <KbnWarningCallout
+                  announceOnMount
+                  title={ESCALATION_ERRORS.userProfileUnavailable}
+                />
+              </div>
+            )}
+
+            {!isLoadingUserProfile && !isUserProfileError && !!currentUserProfile && (
+              <CreateEscalationForm
+                investigationTitle={investigation.title}
+                suggestedAssignees={suggestedAssignees}
+                isSearchingAssignees={isSearchingAssignees}
+                currentUser={currentUserProfile}
+                currentUserName={getUserDisplayName(currentUserProfile.user)}
+                isSubmitting={createEscalation.isLoading}
+                onSearchAssignees={setAssigneeSearch}
+                onSubmit={({ title, visibility, assigneeUids }) =>
+                  createEscalation.mutate(
+                    {
+                      linked_investigation_id: conversationId,
+                      title,
+                      visibility,
+                      // For private escalations, assigneeUids already includes the creator uid.
+                      // For public escalations, add the creator alone as the sole assignee.
+                      assignees:
+                        visibility === 'private'
+                          ? assigneeUids
+                          : [currentUserProfile.uid].filter(
+                              (uid): uid is string => typeof uid === 'string' && uid.length > 0
+                            ),
+                    },
+                    {
+                      onSuccess: (escalation) => {
+                        notifications?.toasts.addSuccess({
+                          title: ESCALATION_SUCCESS.createTitle,
+                          actionProps: {
+                            primary: makeViewEscalationPrimary(escalation.id, escalation.agent_id),
+                          },
+                        });
+                        onClose();
                       },
-                    });
-                    onClose();
-                  },
-                  onError: (err) =>
-                    notifications?.toasts.addDanger({
-                      title: ESCALATION_ERRORS.createFailed,
-                      text: apiErrorText(err),
-                    }),
+                      onError: (err) =>
+                        notifications?.toasts.addDanger({
+                          title: ESCALATION_ERRORS.createFailed,
+                          text: apiErrorText(err),
+                        }),
+                    }
+                  )
                 }
-              )
-            }
-            onCancel={onClose}
-          />
-        ) : (
+                onCancel={onClose}
+              />
+            )}
+          </>
+        ) : null}
+
+        {mode === 'addToExisting' ? (
           <AddToExistingEscalationForm
             incidents={incidents}
             isLoading={isLoadingEscalations}
@@ -290,7 +331,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
             isSubmitting={attachToEscalation.isLoading}
             onCancel={onClose}
           />
-        )}
+        ) : null}
       </EuiModal>
     );
   }

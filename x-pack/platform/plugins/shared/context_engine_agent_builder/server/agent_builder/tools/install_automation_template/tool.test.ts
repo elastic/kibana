@@ -27,6 +27,7 @@ describe('install_automation_template schema', () => {
   it('defaults the document bounds and does not ask for an AI index id', () => {
     const parsed = schema.safeParse({
       template: 'document_orchestration',
+      name: 'flight-activity-docs',
       sourceIndex: 'loyalty-docs',
       titleField: 'title',
       bodyField: 'body',
@@ -45,6 +46,7 @@ describe('install_automation_template schema', () => {
   it('rejects index metadata arguments on a document install', () => {
     const parsed = schema.safeParse({
       template: 'document_orchestration',
+      name: 'flight-activity-docs',
       sourceIndex: 'loyalty-docs',
       titleField: 'title',
       bodyField: 'body',
@@ -57,6 +59,7 @@ describe('install_automation_template schema', () => {
   it('rejects document arguments on an index metadata install', () => {
     const parsed = schema.safeParse({
       template: 'index_metadata',
+      name: 'loyalty-index-metadata',
       sourceIndex: 'loyalty-docs',
       categoryField: 'tier',
       corpusFilter: '| WHERE tier == "gold"',
@@ -67,19 +70,80 @@ describe('install_automation_template schema', () => {
 
   it('requires the fields the template fills', () => {
     expect(
-      schema.safeParse({ template: 'document_orchestration', sourceIndex: 'loyalty-docs' }).success
+      schema.safeParse({
+        template: 'document_orchestration',
+        name: 'flight-activity-docs',
+        sourceIndex: 'loyalty-docs',
+      }).success
     ).toBe(false);
     expect(
-      schema.safeParse({ template: 'index_metadata', sourceIndex: 'loyalty-docs' }).success
+      schema.safeParse({
+        template: 'index_metadata',
+        name: 'loyalty-index-metadata',
+        sourceIndex: 'loyalty-docs',
+      }).success
     ).toBe(false);
     expect(
-      schema.safeParse({ template: 'unit_profile', sourceIndex: 'loyalty-history' }).success
+      schema.safeParse({
+        template: 'unit_profile',
+        name: 'loyalty-province-profile',
+        sourceIndex: 'loyalty-history',
+      }).success
+    ).toBe(false);
+  });
+
+  it('rejects a whitespace-only name', () => {
+    expect(
+      schema.safeParse({
+        template: 'document_orchestration',
+        name: '   ',
+        sourceIndex: 'loyalty-docs',
+        titleField: 'title',
+        bodyField: 'body',
+      }).success
+    ).toBe(false);
+  });
+
+  it('rejects a name containing a forward slash', () => {
+    expect(
+      schema.safeParse({
+        template: 'document_orchestration',
+        name: 'flight/activity',
+        sourceIndex: 'loyalty-docs',
+        titleField: 'title',
+        bodyField: 'body',
+      }).success
+    ).toBe(false);
+  });
+
+  it('rejects a call without name on any template', () => {
+    expect(
+      schema.safeParse({
+        template: 'document_orchestration',
+        sourceIndex: 'loyalty-docs',
+        titleField: 'title',
+        bodyField: 'body',
+      }).success
+    ).toBe(false);
+    expect(
+      schema.safeParse({
+        template: 'index_metadata',
+        sourceIndex: 'loyalty-docs',
+        categoryField: 'tier',
+      }).success
+    ).toBe(false);
+    expect(
+      schema.safeParse({
+        template: 'targeted_ki_writer',
+        kis: 'some-yaml',
+      }).success
     ).toBe(false);
   });
 
   it('takes a unit profile install with only the required fields', () => {
     const parsed = schema.safeParse({
       template: 'unit_profile',
+      name: 'loyalty-province-profile',
       sourceIndex: 'loyalty-history',
       unitKey: 'Province',
       activityField: 'Enrollment Date',
@@ -95,6 +159,7 @@ describe('install_automation_template schema', () => {
   it('rejects arguments belonging to either other template on a unit install', () => {
     const base = {
       template: 'unit_profile',
+      name: 'loyalty-province-profile',
       sourceIndex: 'loyalty-history',
       unitKey: 'Province',
       activityField: 'Enrollment Date',
@@ -109,6 +174,7 @@ describe('install_automation_template schema', () => {
     expect(
       schema.safeParse({
         template: 'index_metadata',
+        name: 'loyalty-index-metadata',
         sourceIndex: 'loyalty-docs',
         categoryField: 'tier',
         maxUnits: 10,
@@ -117,6 +183,7 @@ describe('install_automation_template schema', () => {
     expect(
       schema.safeParse({
         template: 'document_orchestration',
+        name: 'flight-activity-docs',
         sourceIndex: 'loyalty-docs',
         titleField: 'title',
         bodyField: 'body',
@@ -128,14 +195,33 @@ describe('install_automation_template schema', () => {
   it('accepts targeted_ki_writer with a kis string', () => {
     const parsed = schema.safeParse({
       template: 'targeted_ki_writer',
+      name: 'loyalty-constraints',
       kis: '- ki_id: foo\n  ki:\n    type: constraint\n    title: "T"\n    description: "D"\n    content: "C"\n    tags:\n      - constraint\n    references:\n      - uri: index://foo\n        relation: derived_from',
     });
 
     expect(parsed.success).toBe(true);
   });
 
+  it('accepts a name on any template and preserves it in the parsed output', () => {
+    const parsed = schema.safeParse({
+      template: 'document_orchestration',
+      sourceIndex: 'loyalty-docs',
+      titleField: 'title',
+      bodyField: 'body',
+      name: 'flight-activity-docs',
+    });
+
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.name).toBe('flight-activity-docs');
+    }
+  });
+
   it('rejects targeted_ki_writer without kis', () => {
-    const parsed = schema.safeParse({ template: 'targeted_ki_writer' });
+    const parsed = schema.safeParse({
+      template: 'targeted_ki_writer',
+      name: 'loyalty-constraints',
+    });
 
     expect(parsed.success).toBe(false);
   });
@@ -143,6 +229,7 @@ describe('install_automation_template schema', () => {
   it('rejects targeted_ki_writer with sourceIndex', () => {
     const parsed = schema.safeParse({
       template: 'targeted_ki_writer',
+      name: 'loyalty-constraints',
       sourceIndex: 'my-index',
       kis: '- ki_id: foo\n  ki:\n    type: constraint\n    title: "T"\n    description: "D"\n    content: "C"\n    tags:\n      - constraint\n    references:\n      - uri: index://foo\n        relation: derived_from',
     });
@@ -153,6 +240,7 @@ describe('install_automation_template schema', () => {
   it('rejects document_orchestration without sourceIndex', () => {
     const parsed = schema.safeParse({
       template: 'document_orchestration',
+      name: 'flight-activity-docs',
       titleField: 'title',
       bodyField: 'body',
     });

@@ -23,6 +23,10 @@ const startInvestigationMessage = {
   message: z.string().min(1).max(MAX_TEXT_LENGTH).optional(),
 };
 
+const startInvestigationModel = {
+  connector_id: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
+};
+
 /** Headline shown in the list and flyout from the moment the record exists. */
 const titleSchema = z.string().min(1).max(MAX_TITLE_LENGTH);
 
@@ -51,6 +55,7 @@ const startInvestigationBodySchema = z.union([
     title: titleSchema.optional(),
     concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
     ...startInvestigationMessage,
+    ...startInvestigationModel,
   }),
   // A manual investigation is defined by its question, so `message` is required and the
   // subject id is optional: there is no entity to point at, only the prompt. The title is
@@ -69,6 +74,7 @@ const startInvestigationBodySchema = z.union([
     concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
     context: freeFormContextSchema.optional(),
     message: z.string().min(1).max(MAX_TEXT_LENGTH),
+    ...startInvestigationModel,
   }),
 ]);
 
@@ -117,6 +123,7 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
           context: { alerts: [snapshot] },
           trigger_type: 'manual',
           message: body.message,
+          ...(body.connector_id ? { connector_id: body.connector_id } : {}),
         });
       }
       return await client.start({

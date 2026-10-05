@@ -12,6 +12,7 @@ import {
   actionPolicySavedObjectAttributesSchemaV2,
   actionPolicySavedObjectAttributesSchemaV3,
   actionPolicySavedObjectAttributesSchemaV4,
+  actionPolicySavedObjectAttributesSchemaV5,
 } from '../schemas/action_policy_saved_object_attributes';
 import type { ActionPolicySavedObjectAttributesV1 } from '../schemas/action_policy_saved_object_attributes';
 import { toActor } from './to_actor';
@@ -172,6 +173,42 @@ export const actionPolicyModelVersions: SavedObjectsModelVersionMap = {
         { unknowns: 'ignore' }
       ),
       create: actionPolicySavedObjectAttributesSchemaV4,
+    },
+  },
+  '5': {
+    /**
+     * v5 renames the `per_episode` grouping mode to `per_alert`. Only
+     * `per_episode` is rewritten; `all`, `per_field`, `null`, and an absent mode
+     * are left alone, so the backfill is idempotent.
+     *
+     * This changes the allowed values of an existing attribute, so it is NOT
+     * rollback-compatible: the v1-v4 schemas only accept `per_episode`, meaning a
+     * node rolled back to v4 fails to read any policy grouped `per_alert`.
+     * Accepted while alerting v2 is in technical preview. The SO migration
+     * fixtures therefore only carry `null`, `all`, or `per_field` grouping modes,
+     * which round-trip through the rollback check; the rename is covered by unit
+     * tests.
+     *
+     * `groupingMode` is neither encrypted nor part of the decryption AAD, so a
+     * plain model version is correct.
+     */
+    changes: [
+      {
+        type: 'data_backfill',
+        backfillFn: (doc) => {
+          const { groupingMode } = doc.attributes as { groupingMode?: unknown };
+          return groupingMode === 'per_episode'
+            ? { attributes: { groupingMode: 'per_alert' } }
+            : { attributes: {} };
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: actionPolicySavedObjectAttributesSchemaV5.extends(
+        {},
+        { unknowns: 'ignore' }
+      ),
+      create: actionPolicySavedObjectAttributesSchemaV5,
     },
   },
 };

@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useEffect } from 'react';
 import { useHistory, type RouteComponentProps } from 'react-router-dom';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import { i18n } from '@kbn/i18n';
 
 import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
@@ -26,7 +26,7 @@ import { Wizard } from './components/wizard';
 type Props = RouteComponentProps<{ savedObjectId?: string }>;
 
 const getInitialTransformFunction = (search: string): TransformFunction => {
-  const { transformFunction } = parse(search, { sort: false });
+  const { transformFunction } = queryString.parse(search, { sort: false });
   return transformFunction === TRANSFORM_FUNCTION.LATEST
     ? TRANSFORM_FUNCTION.LATEST
     : TRANSFORM_FUNCTION.PIVOT;

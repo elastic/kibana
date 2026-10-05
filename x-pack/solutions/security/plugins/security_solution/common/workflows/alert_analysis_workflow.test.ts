@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  MAX_ENTITY_ID_LENGTH,
+  MAX_ENTITY_IDS,
+  MAX_ENTITY_NAME_LENGTH,
+} from '@kbn/agentic-investigations-plugin/common';
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW } from '@kbn/workflows/managed';
 import { parse } from 'yaml';
 import {
@@ -85,6 +90,7 @@ describe('AlertAnalysisWorkflowOutput', () => {
         rationale: 'c2 url',
         contributing_factors: ['external url'],
         host_name: 'ws-1',
+        host_entity_key: 'HW-UUID-1',
         user_name: 'alice',
       },
       {
@@ -94,6 +100,7 @@ describe('AlertAnalysisWorkflowOutput', () => {
         rationale: 'signed installer',
         contributing_factors: ['vendor signature'],
         host_name: 'ws-1',
+        host_entity_key: 'HW-UUID-1',
         user_name: 'bob',
       },
     ],
@@ -105,15 +112,7 @@ describe('AlertAnalysisWorkflowOutput', () => {
     generated_summary: 'Hosts look compromised.',
     connector_id: 'connector-1',
     agent_id: 'elastic-ai-agent',
-    impacted_entities: [
-      {
-        entity_type: 'host' as const,
-        name: 'ws-1',
-        alert_count: 2,
-        verdicts: { true_positive: 1, false_positive: 1, inconclusive: 0 },
-      },
-    ],
-    impacted_entities_truncated: 'false',
+    impacted_entities: [{ id: 'host:ws-1', name: 'ws-1', type: 'host' as const }],
     missing_alert_ids: [] as string[],
   };
 
@@ -148,15 +147,14 @@ describe('AlertAnalysisWorkflowOutput', () => {
     ).toBe(false);
   });
 
-  it('rejects when impacted_entities exceeds 50', () => {
+  it('rejects when impacted_entities exceeds 100', () => {
     expect(
       AlertAnalysisWorkflowOutput.safeParse({
         ...sampleOutput,
-        impacted_entities: Array.from({ length: 51 }, (_, i) => ({
-          entity_type: 'host' as const,
+        impacted_entities: Array.from({ length: 101 }, (_, i) => ({
+          id: `host:host-${i}`,
           name: `host-${i}`,
-          alert_count: 1,
-          verdicts: { true_positive: 1, false_positive: 0, inconclusive: 0 },
+          type: 'host' as const,
         })),
       }).success
     ).toBe(false);
@@ -175,15 +173,6 @@ describe('AlertAnalysisWorkflowOutput', () => {
         true_positive_count: 1,
         false_positive_count: 0,
         inconclusive_count: 0,
-      }).success
-    ).toBe(false);
-  });
-
-  it('rejects non-canonical impacted_entities_truncated values', () => {
-    expect(
-      AlertAnalysisWorkflowOutput.safeParse({
-        ...sampleOutput,
-        impacted_entities_truncated: 'yes',
       }).success
     ).toBe(false);
   });
@@ -218,7 +207,10 @@ describe('AlertAnalysisWorkflowOutput YAML sync', () => {
             maxItems?: number;
             items?: {
               required?: string[];
-              properties?: Record<string, { maxLength?: number; maxItems?: number }>;
+              properties?: Record<
+                string,
+                { maxLength?: number; maxItems?: number; enum?: string[] }
+              >;
             };
             maxLength?: number;
           }
@@ -231,8 +223,13 @@ describe('AlertAnalysisWorkflowOutput YAML sync', () => {
     expect(yamlKeys).toEqual(zodKeys);
     expect([...workflow.outputs.required].sort()).toEqual(zodKeys);
 
-    expect(workflow.outputs.properties.impacted_entities_truncated.enum).toEqual(['true', 'false']);
-    expect(workflow.outputs.properties.impacted_entities.maxItems).toBe(50);
+    // The YAML carries literal values; they must stay on the shared impact limits, or the
+    // output validates while the attachImpact step rejects the same entities.
+    const impactedEntity = workflow.outputs.properties.impacted_entities;
+    expect(impactedEntity.maxItems).toBe(MAX_ENTITY_IDS);
+    expect(impactedEntity.items?.properties?.id?.maxLength).toBe(MAX_ENTITY_ID_LENGTH);
+    expect(impactedEntity.items?.properties?.name?.maxLength).toBe(MAX_ENTITY_NAME_LENGTH);
+    expect(impactedEntity.items?.properties?.type?.enum).toEqual(['host', 'user']);
     expect(workflow.outputs.properties.missing_alert_ids?.maxItems).toBe(1000);
     expect(workflow.outputs.properties.verdicts.items?.properties?.rationale?.maxLength).toBe(500);
     expect(

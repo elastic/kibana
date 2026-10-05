@@ -286,6 +286,7 @@ export class WorkflowsService {
     await this.initializeChangeHistoryService(coreStart);
 
     this.crudService = new WorkflowCrudService({
+      authz: this.pluginsStart.security?.authz,
       getSpaceId: (request) => this.plugins.spaces.spacesService.getSpaceId(request),
       getServiceAccountBindings: () => this.workflowsExecutionEngine.serviceAccountBindings,
       logger: this.logger,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
@@ -46,9 +47,9 @@ describe('registerWorkflowSteps', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     mockGetEventLogIndex.mockResolvedValue('.kibana-event-log-*');
-    mockGetBooleanValue.mockResolvedValue(true);
+    mockGetBooleanValue.mockReturnValue(of(true));
     mockGetStartServices.mockResolvedValue({
-      coreStart: { featureFlags: { getBooleanValue: mockGetBooleanValue } },
+      coreStart: { featureFlags: { getBooleanValue$: mockGetBooleanValue } },
       pluginsStart: {},
     });
   });
@@ -96,7 +97,7 @@ describe('registerWorkflowSteps', () => {
   });
 
   it('skips registration of every step when the feature flag is off', async () => {
-    mockGetBooleanValue.mockResolvedValue(false);
+    mockGetBooleanValue.mockReturnValue(of(false));
 
     registerWorkflowSteps(mockWorkflowsExtensions, defaultArgs);
 

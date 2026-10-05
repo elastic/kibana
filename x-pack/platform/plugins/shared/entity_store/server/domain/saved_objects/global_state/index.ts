@@ -41,9 +41,34 @@ const applyLogExtractionOverrides = (
   return next;
 };
 
-/** Write-path input. Like the persisted overrides, but each log extraction field also accepts `null` to delete it. */
-export type GlobalStateOverridesInput = Omit<EntityStoreGlobalStateOverrides, 'logsExtraction'> & {
+/** Write-path partial for historySnapshot. `undefined` = leave alone; `null` = clear the field. */
+export type HistorySnapshotUpdate = {
+  [K in keyof HistorySnapshotState]?: HistorySnapshotState[K] | null;
+};
+
+/** Write-path input. Log extraction fields accept `null` to delete them. History snapshot fields use HistorySnapshotUpdate: omitted = unchanged, `null` = cleared. */
+export type GlobalStateOverridesInput = Omit<
+  EntityStoreGlobalStateOverrides,
+  'logsExtraction' | 'historySnapshot'
+> & {
   logsExtraction?: LogExtractionOverride;
+  historySnapshot?: HistorySnapshotUpdate;
+};
+
+/** Merges incoming history snapshot fields onto stored state. `undefined` = leave alone; `null` = clear. */
+const applyHistorySnapshotUpdate = (
+  stored: HistorySnapshotState,
+  incoming: HistorySnapshotUpdate = {}
+): HistorySnapshotState => {
+  const next = { ...stored } as Record<string, unknown>;
+  for (const [key, value] of Object.entries(incoming)) {
+    if (value === null) {
+      delete next[key];
+    } else if (value !== undefined) {
+      next[key] = value;
+    }
+  }
+  return next as HistorySnapshotState;
 };
 
 // takes existing config, strips legacy defaults (if exists) and merges with new overrides
@@ -53,10 +78,10 @@ const mergeOverrides = (
 ): EntityStoreGlobalStateOverrides =>
   EntityStoreGlobalStateOverrides.parse({
     defaultsVersion: 'latest',
-    historySnapshot: {
-      ...HistorySnapshotState.parse(raw.historySnapshot ?? {}),
-      ...overrides.historySnapshot,
-    },
+    historySnapshot: applyHistorySnapshotUpdate(
+      HistorySnapshotState.parse(raw.historySnapshot ?? {}),
+      overrides.historySnapshot
+    ),
     logsExtraction: applyLogExtractionOverrides(
       getLogsExtractionOverrides(raw),
       overrides.logsExtraction

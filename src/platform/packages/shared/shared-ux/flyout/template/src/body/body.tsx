@@ -126,9 +126,14 @@ export const BodyZone = ({ children, 'data-test-subj': dataTestSubj }: FlyoutBod
     [scrollContainerRef]
   );
 
+  const bodyTestSubj = resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Body');
+
   // Keyed on `items`, which holds its identity across a tab switch, so `EuiFlyoutBody` receives
   // the same banner element and React skips the subtree.
-  const banner = useMemo(() => renderCalloutBanner(items), [items]);
+  const banner = useMemo(
+    () => renderCalloutBanner(items, resolveZoneTestSubj(undefined, bodyTestSubj, 'Banner')),
+    [items, bodyTestSubj]
+  );
 
   const isTabbedMode = tabs.length > 0;
   const activeTab = isTabbedMode ? tabs.find((tab) => tab.id === selectedTabId) : undefined;
@@ -138,8 +143,6 @@ export const BodyZone = ({ children, 'data-test-subj': dataTestSubj }: FlyoutBod
   useLayoutEffect(() => {
     if (scrollNodeRef.current) scrollNodeRef.current.scrollTop = 0;
   }, [activeTab?.id]);
-
-  const bodyTestSubj = resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Body');
 
   const renderTabbedContent = () => {
     if (!activeTab) return null;

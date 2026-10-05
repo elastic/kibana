@@ -5,102 +5,35 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import {
-  EuiBadge,
   EuiButtonEmpty,
   EuiCode,
-  EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiIconTip,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { useController, useFormContext } from 'react-hook-form';
-
-import type {
-  CreateDatasetFormValues,
-  DatasetSchemaResolutionFormValue,
-} from '../../create_dataset_form_state';
 import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
-import { DescribedOptionDisplay } from '../described_option_display';
-
-interface SchemaResolutionValue {
-  id: Exclude<DatasetSchemaResolutionFormValue, ''>;
-  description: string;
-  isDefault?: boolean;
-}
-
-const DEFAULT_SCHEMA_RESOLUTION: SchemaResolutionValue['id'] = 'first_file_wins';
-
-type SchemaResolutionOption = EuiComboBoxOptionOption<string> & {
-  value: SchemaResolutionValue['id'];
-  description: string;
-  'data-test-subj': string;
-};
-
-const renderSchemaResolutionOption = (option: EuiComboBoxOptionOption<string>) => {
-  const opt = option as SchemaResolutionOption;
-  return (
-    <DescribedOptionDisplay
-      title={opt.label}
-      description={opt.description}
-      testSubj={opt['data-test-subj']}
-    />
-  );
-};
-
-const SCHEMA_RESOLUTION_OPTIONS: SchemaResolutionOption[] = [
-  {
-    value: DEFAULT_SCHEMA_RESOLUTION,
-    label: createDatasetWizardStrings.settingsSchemaResolutionFirstFileWins,
-    description: createDatasetWizardStrings.settingsSchemaResolutionFirstFileWinsDescription,
-    append: <EuiBadge color="hollow">{createDatasetWizardStrings.defaultBadgeLabel}</EuiBadge>,
-    'data-test-subj': 'createDatasetWizardSchemaResolutionOption-first_file_wins',
-  },
-  {
-    value: 'strict',
-    label: createDatasetWizardStrings.settingsSchemaResolutionStrict,
-    description: createDatasetWizardStrings.settingsSchemaResolutionStrictDescription,
-    'data-test-subj': 'createDatasetWizardSchemaResolutionOption-strict',
-  },
-  {
-    value: 'union_by_name',
-    label: createDatasetWizardStrings.settingsSchemaResolutionUnionByName,
-    description: createDatasetWizardStrings.settingsSchemaResolutionUnionByNameDescription,
-    'data-test-subj': 'createDatasetWizardSchemaResolutionOption-union_by_name',
-  },
-];
+import { useComboBoxSelectionValidity } from '../combo_box_selection_validity';
+import { DEFAULT_SCHEMA_RESOLUTION, SchemaResolutionSelect } from './schema_resolution_select';
 
 export const SchemaResolutionField = React.memo(({ isDisabled }: { isDisabled?: boolean }) => {
-  const { control } = useFormContext<CreateDatasetFormValues>();
-  const { field: schemaResolutionField } = useController({
+  const {
+    field: schemaResolutionField,
+    fieldState: schemaResolutionState,
+    onChange: onSchemaResolutionChange,
+    reset: resetSchemaResolutionValidity,
+  } = useComboBoxSelectionValidity({
     name: 'settings.schema_resolution',
-    control,
+    flag: 'schemaResolutionIsValid',
+    // The combo box is disabled outside infer schema mode, where typed text cannot be corrected.
+    isEnforced: ({ mappings }) => mappings.dynamic,
   });
 
   const [isOpen, setIsOpen] = useState(false);
-
-  const selectedOption = schemaResolutionField.value
-    ? SCHEMA_RESOLUTION_OPTIONS.find((o) => o.value === schemaResolutionField.value)
-    : undefined;
-
-  const onSchemaResolutionChange = useCallback(
-    (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-      const nextSelectedId = (selectedOptions?.[0] as SchemaResolutionOption | undefined)?.value;
-
-      // Empty selection means "unset" so the request uses the API default.
-      if (!nextSelectedId) {
-        schemaResolutionField.onChange('');
-        return;
-      }
-
-      schemaResolutionField.onChange(nextSelectedId);
-    },
-    [schemaResolutionField]
-  );
 
   return (
     <div
@@ -122,7 +55,9 @@ export const SchemaResolutionField = React.memo(({ isDisabled }: { isDisabled?: 
         iconSide="right"
         onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
           e.stopPropagation();
-          setIsOpen((open) => !open);
+          // Collapsing unmounts the combo box, discarding any typed text.
+          if (isOpen) resetSchemaResolutionValidity();
+          setIsOpen(!isOpen);
         }}
         data-test-subj="createDatasetWizardSchemaResolutionToggle"
       >
@@ -134,29 +69,19 @@ export const SchemaResolutionField = React.memo(({ isDisabled }: { isDisabled?: 
           <EuiSpacer size="s" />
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem>
-              <EuiComboBox
-                aria-label={createDatasetWizardStrings.settingsSchemaResolutionLabel}
-                placeholder={createDatasetWizardStrings.settingsSchemaResolutionPlaceholder}
-                singleSelection={{ asPlainText: true }}
-                isClearable
-                isDisabled={isDisabled}
-                rowHeight="auto"
+              <EuiFormRow
                 fullWidth
-                options={SCHEMA_RESOLUTION_OPTIONS}
-                renderOption={renderSchemaResolutionOption}
-                selectedOptions={
-                  selectedOption
-                    ? [
-                        {
-                          value: selectedOption.value,
-                          label: selectedOption.label,
-                        },
-                      ]
-                    : []
-                }
-                onChange={onSchemaResolutionChange}
-                data-test-subj="createDatasetWizardSchemaResolution"
-              />
+                isInvalid={Boolean(schemaResolutionState.error)}
+                error={schemaResolutionState.error?.message}
+              >
+                <SchemaResolutionSelect
+                  value={schemaResolutionField.value}
+                  onChange={onSchemaResolutionChange}
+                  onBlur={schemaResolutionField.onBlur}
+                  isInvalid={Boolean(schemaResolutionState.error)}
+                  isDisabled={isDisabled}
+                />
+              </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiIconTip

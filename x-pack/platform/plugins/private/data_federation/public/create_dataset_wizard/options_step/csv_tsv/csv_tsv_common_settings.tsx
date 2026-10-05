@@ -24,6 +24,7 @@ import { DelimiterSelect } from './fields/delimiter_select';
 import { EncodingSelect } from './fields/encoding_select';
 import { HeaderRow } from './fields/header_row';
 import { FormRowLabelWithInfo } from '../../components/form_row_label_with_info';
+import { useComboBoxSelectionValidity } from '../../components/combo_box_selection_validity';
 import { QuoteMode } from './fields/quote_mode';
 import { SkipRowsField } from './fields/skip_rows_field';
 
@@ -37,12 +38,20 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
       deps: ['settings.quote', 'settings.escape'],
     },
   });
-  const { field: modeField } = useController({
+  const {
+    field: modeField,
+    fieldState: modeState,
+    onChange: onModeChange,
+  } = useComboBoxSelectionValidity({
     name: 'settings.mode',
-    control,
-    rules: { deps: ['settings.delimiter', 'settings.quote', 'settings.escape'] },
+    flag: 'modeIsValid',
+    deps: ['settings.delimiter', 'settings.quote', 'settings.escape'],
   });
-  const { field: headerRowField } = useController({ name: 'settings.header_row', control });
+  const {
+    field: headerRowField,
+    fieldState: headerRowState,
+    onChange: onHeaderRowChange,
+  } = useComboBoxSelectionValidity({ name: 'settings.header_row', flag: 'headerRowIsValid' });
   const { field: nullValueField } = useController({ name: 'settings.null_value', control });
 
   return (
@@ -87,11 +96,14 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
           />
         }
         fullWidth
+        isInvalid={Boolean(modeState.error)}
+        error={modeState.error?.message}
       >
         <QuoteMode
           value={modeField.value}
-          onChange={(next) => modeField.onChange(next)}
+          onChange={onModeChange}
           onBlur={modeField.onBlur}
+          isInvalid={Boolean(modeState.error)}
           defaultValue={format === 'tsv' ? 'plain' : 'quoted'}
         />
       </EuiFormRow>
@@ -110,11 +122,14 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
           />
         }
         fullWidth
+        isInvalid={Boolean(headerRowState.error)}
+        error={headerRowState.error?.message}
       >
         <HeaderRow
           value={headerRowField.value}
-          onChange={(next) => headerRowField.onChange(next)}
+          onChange={onHeaderRowChange}
           onBlur={headerRowField.onBlur}
+          isInvalid={Boolean(headerRowState.error)}
         />
       </EuiFormRow>
       <SkipRowsField control={control} />

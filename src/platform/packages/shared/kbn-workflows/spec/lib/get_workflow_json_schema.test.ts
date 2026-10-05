@@ -83,7 +83,7 @@ describe('getWorkflowJsonSchema', () => {
               id: expect.any(Object),
               policyId: expect.any(Object),
               groupKey: expect.any(Object),
-              episodes: expect.any(Object),
+              alerts: expect.any(Object),
             }),
           }),
           securityAlertAnalysisCallerAlerts: expect.objectContaining({

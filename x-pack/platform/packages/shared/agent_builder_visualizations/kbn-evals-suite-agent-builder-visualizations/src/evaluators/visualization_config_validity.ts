@@ -120,6 +120,13 @@ const validateVisualizationConfig = (
   if (renderer === 'vega') {
     return { ...validateVegaSpec(visualization.visualization), renderer };
   }
+  if (renderer === 'custom_content') {
+    return {
+      valid: false,
+      error: 'custom_content renders an HTML template, not a Lens or Vega chart config',
+      renderer,
+    };
+  }
   return { ...validateLensConfig(visualization), renderer };
 };
 

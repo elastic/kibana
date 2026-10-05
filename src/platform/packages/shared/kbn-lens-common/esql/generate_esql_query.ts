@@ -25,6 +25,7 @@ import { AUTO_TARGET_NUMBER_OF_BUCKETS, DEFAULT_STATIC_VALUE } from './constants
 import { convertToAbsoluteDateRange } from './date_range';
 import { resolveTimeShift } from './time_shift';
 import type { EsqlConversionFailureReason } from './to_esql_failure_reasons';
+import { buildOuterTopNFilter } from './build_outer_top_n_filter';
 import { createEsAggsIdMapEntry } from './create_es_aggs_id_map_entry';
 import { getTermsConversionFailure } from './get_terms_conversion_failure';
 import { getToEsqlFn, getEsqlOperationMeta } from './operations/registry';
@@ -148,6 +149,41 @@ const quoteEsqlSortField = (name: string): string => {
   return escapeEsqlColumnName(trimmed);
 };
 
+interface EsqlSortKey {
+  /** SORT expression, already escaped. */
+  expr: string;
+  direction: string;
+}
+
+/**
+ * `STATS` needs an aggregation, but an alphabetically ranked outer dimension only needs the
+ * grouping keys. `KEEP` drops this column before the values reach the enclosing query.
+ */
+const OUTER_TOP_N_GROUPING_ONLY_METRIC = 'COUNT(*)';
+
+/** Sorting twice by the same expression is redundant; the first direction wins. */
+const formatSortKeys = (keys: EsqlSortKey[]): string => {
+  const seenExprs = new Set<string>();
+  const clauses: string[] = [];
+
+  for (const { expr, direction } of keys) {
+    if (seenExprs.has(expr)) {
+      continue;
+    }
+    seenExprs.add(expr);
+    clauses.push(`${expr} ${direction}`);
+  }
+
+  return clauses.join(', ');
+};
+
+/**
+ * Name of the column holding an outer dimension's ranking metric. It must differ from the
+ * metric's own output name, which the leaf `STATS` also produces.
+ */
+const getOuterRankAlias = (sourceField: string): string =>
+  `rank_${sourceField.replace(/[^A-Za-z0-9_]/g, '_')}`;
+
 export function generateEsqlQuery(
   esAggEntries: Array<readonly [string, GenericIndexPatternColumn]>,
   layer: FormBasedLayer,
@@ -175,14 +211,15 @@ export function generateEsqlQuery(
 
   // indexPattern.title is the actual ES pattern
   // ES|QL Composer API docs: https://github.com/elastic/esql-js/blob/main/src/composer/README.md
-  const queryParts: string[] = [`FROM ${esql.src(indexPattern.title)}`];
+  const source = `${esql.src(indexPattern.title)}`;
+  const queryParts: string[] = [`FROM ${source}`];
 
+  let timeFilter: string | undefined;
   if (indexPattern.timeFieldName) {
     const [ESQL_TIME_RANGE_START, ESQL_TIME_RANGE_END] = TIME_SYSTEM_PARAMS;
     const timeField = `${esql.col(indexPattern.timeFieldName)}`;
-    queryParts.push(
-      `WHERE ${timeField} >= ${ESQL_TIME_RANGE_START} AND ${timeField} <= ${ESQL_TIME_RANGE_END}`
-    );
+    timeFilter = `WHERE ${timeField} >= ${ESQL_TIME_RANGE_START} AND ${timeField} <= ${ESQL_TIME_RANGE_END}`;
+    queryParts.push(timeFilter);
   }
 
   const histogramBarsTarget = uiSettings.get<number>(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
@@ -247,6 +284,9 @@ export function generateEsqlQuery(
   // Process metrics (excluding static_value which is handled above)
   // Maps metric column IDs to STATS output names (alias or bare expression) for terms orderBy.
   const metricOutputNamesByColId = new Map<string, string>();
+  // Same keys, but the unaliased STATS expression, so an outer top-N rank can re-aggregate it
+  // under its own alias.
+  const metricExpressionsByColId = new Map<string, string>();
   const metricsResult: EsqlConversion[] = regularMetricEntries.map(([colId, col]) => {
     // Check for specific unsupported operations before general toESQL check
     if (col.operationType === 'formula') {
@@ -326,6 +366,7 @@ export function generateEsqlQuery(
     const esAggsIdMapKey = statsColumnAlias ? statsColumnAlias : fullStatsMetricExpression;
 
     metricOutputNamesByColId.set(colId, esAggsIdMapKey);
+    metricExpressionsByColId.set(colId, fullStatsMetricExpression);
 
     esAggsIdMap[esAggsIdMapKey] = [
       ...(esAggsIdMap[esAggsIdMapKey] ?? []),
@@ -359,15 +400,18 @@ export function generateEsqlQuery(
   }
 
   // Process buckets
+  const termsBuckets = bucketEsAggsEntries.flatMap(([, col], index) =>
+    isColumnOfType<TermsIndexPatternColumn>('terms', col) ? [{ col, index }] : []
+  );
   const resolvedBucketExprs = new Map<number, string>();
   const usedBucketAliases = new Set<string>();
   const bucketAliasesByExpression = new Map<string, string>();
   const bucketsResult: EsqlConversion[] = bucketEsAggsEntries.map(([colId, col], index) => {
     if (isColumnOfType<TermsIndexPatternColumn>('terms', col)) {
-      if (bucketEsAggsEntries.length !== 1) {
-        return getEsqlQueryFailedResult('terms_not_supported');
-      }
-      const termsFailure = getTermsConversionFailure(col, { hasDateHistogram });
+      const termsFailure = getTermsConversionFailure(col, {
+        hasDateHistogram,
+        termsBucketCount: termsBuckets.length,
+      });
       if (termsFailure) {
         return getEsqlQueryFailedResult(termsFailure);
       }
@@ -508,52 +552,145 @@ export function generateEsqlQuery(
   const validMetrics = dedupeFragmentsByOutputName(metricsResult);
   const validBuckets = dedupeFragmentsByOutputName(bucketsResult);
 
-  const singleTermsColumn =
-    bucketEsAggsEntries.length === 1 &&
-    isColumnOfType<TermsIndexPatternColumn>('terms', bucketEsAggsEntries[0][1])
-      ? bucketEsAggsEntries[0][1]
-      : undefined;
+  // Last terms dimension is the innermost Top values (Lens bucket order).
+  const innerTermsBucket = termsBuckets.at(-1);
 
   if (validBuckets.length > 0) {
-    if (validMetrics.length > 0) {
-      // Alias bucket expressions that use named params so column names are stable.
-      // `esql.col()` escapes alias names that are not valid bare identifiers
-      // (e.g. `my-field` -> `` `my-field` ``), matching the raw column name in results.
-      const uniqueBucketsByOutputName = new Map<string, string>();
-      bucketsResult.forEach(({ outputName, esql: expression }) => {
-        if (!uniqueBucketsByOutputName.has(outputName)) {
-          uniqueBucketsByOutputName.set(outputName, expression);
-        }
-      });
-      const aliasedBuckets = Array.from(uniqueBucketsByOutputName, ([outputName, expression]) =>
-        outputName !== expression ? `${esql.col(outputName)} = ${expression}` : expression
-      );
-      const statsBody = `${validMetrics.join(', ')} BY ${aliasedBuckets.join(', ')}`;
-      queryParts.push(`STATS ${statsBody}`);
-    }
+    // Alias bucket expressions that use named params so column names are stable.
+    // `esql.col()` escapes alias names that are not valid bare identifiers
+    // (e.g. `my-field` -> `` `my-field` ``), matching the raw column name in results.
+    const uniqueBucketsByOutputName = new Map<string, string>();
+    bucketsResult.forEach(({ outputName, esql: expression }) => {
+      if (!uniqueBucketsByOutputName.has(outputName)) {
+        uniqueBucketsByOutputName.set(outputName, expression);
+      }
+    });
+    const aliasedBuckets = Array.from(uniqueBucketsByOutputName, ([outputName, expression]) =>
+      outputName !== expression ? `${esql.col(outputName)} = ${expression}` : expression
+    );
+    const buildStatsClause = (leadingGroups: string[] = []): string | undefined =>
+      validMetrics.length > 0
+        ? `STATS ${validMetrics.join(', ')} BY ${[...leadingGroups, ...aliasedBuckets].join(', ')}`
+        : undefined;
 
-    if (singleTermsColumn) {
-      const { orderBy, orderDirection, size } = singleTermsColumn.params;
-      let sortField: string | undefined;
+    if (innerTermsBucket) {
+      // "Rank by" resolves either to the bucket's own field (alphabetical) or to the
+      // STATS output name of the metric it ranks by.
+      const resolveTermsSortKey = (
+        col: TermsIndexPatternColumn,
+        bucketIndex: number
+      ): EsqlSortKey | undefined => {
+        const { orderBy, orderDirection } = col.params;
+        let expr: string | undefined;
 
-      if (orderBy.type === 'alphabetical') {
-        sortField = resolvedBucketExprs.get(0);
-      } else if (orderBy.type === 'column') {
-        sortField = metricOutputNamesByColId.get(orderBy.columnId);
-        if (!sortField) {
-          return getEsqlQueryFailedResult('terms_order_by_not_supported');
+        if (orderBy.type === 'alphabetical') {
+          expr = resolvedBucketExprs.get(bucketIndex);
+        } else if (orderBy.type === 'column') {
+          expr = metricOutputNamesByColId.get(orderBy.columnId);
         }
-      } else {
+
+        return expr
+          ? { expr: quoteEsqlSortField(expr), direction: orderDirection.toUpperCase() }
+          : undefined;
+      };
+
+      const { size } = innerTermsBucket.col.params;
+      const innerSortKey = resolveTermsSortKey(innerTermsBucket.col, innerTermsBucket.index);
+
+      if (!innerSortKey) {
         return getEsqlQueryFailedResult('terms_order_by_not_supported');
       }
 
-      if (!sortField) {
-        return getEsqlQueryFailedResult('terms_not_supported');
+      const outerBuckets = [...resolvedBucketExprs.entries()]
+        .filter(([index]) => index !== innerTermsBucket.index)
+        .sort(([a], [b]) => a - b);
+
+      const outerSortKeys: EsqlSortKey[] = [];
+      const outerTopNFilters: string[] = [];
+      // The leaf STATS holds the ranking metric per (outer, inner) pair, but a metric-ranked
+      // outer dimension is ordered by that metric per outer value, so INLINE STATS computes it
+      // beforehand as a rank column.
+      const outerRankStats: string[] = [];
+      const outerRankAliases: string[] = [];
+
+      for (const [index, bucketExpr] of outerBuckets) {
+        const [, col] = bucketEsAggsEntries[index];
+
+        if (!isColumnOfType<TermsIndexPatternColumn>('terms', col)) {
+          outerSortKeys.push({ expr: quoteEsqlSortField(bucketExpr), direction: 'ASC' });
+          continue;
+        }
+
+        const {
+          orderBy: outerOrderBy,
+          orderDirection: outerDirection,
+          size: outerSize,
+        } = col.params;
+        let outerSortKey: EsqlSortKey | undefined;
+        let scoreFragment: string | undefined;
+
+        if (outerOrderBy.type === 'column') {
+          const metricExpression = metricExpressionsByColId.get(outerOrderBy.columnId);
+          if (metricExpression) {
+            const rankAlias = getOuterRankAlias(col.sourceField);
+            scoreFragment = `${rankAlias} = ${metricExpression}`;
+            outerSortKey = { expr: rankAlias, direction: outerDirection.toUpperCase() };
+            outerRankStats.push(`INLINE STATS ${scoreFragment} BY ${bucketExpr}`);
+            outerRankAliases.push(rankAlias);
+          }
+        } else {
+          outerSortKey = resolveTermsSortKey(col, index);
+          scoreFragment = OUTER_TOP_N_GROUPING_ONLY_METRIC;
+        }
+
+        if (!outerSortKey || !scoreFragment) {
+          return getEsqlQueryFailedResult('terms_order_by_not_supported');
+        }
+        outerSortKeys.push(outerSortKey);
+
+        outerTopNFilters.push(
+          buildOuterTopNFilter({
+            source,
+            timeFilter,
+            groupExpr: bucketExpr,
+            scoreFragment,
+            sortClause: formatSortKeys([outerSortKey]),
+            size: outerSize,
+          })
+        );
       }
 
-      queryParts.push(`SORT ${quoteEsqlSortField(sortField)} ${orderDirection.toUpperCase()}`);
-      queryParts.push(`LIMIT ${size}`);
+      // Filters run before STATS so the aggregation only sees the kept outer values.
+      queryParts.push(...outerTopNFilters, ...outerRankStats);
+      // Rank columns are constant per outer value, so grouping by them keeps the same groups
+      // and only carries them through STATS.
+      const statsClause = buildStatsClause(outerRankAliases);
+      if (statsClause) {
+        queryParts.push(statsClause);
+      }
+
+      // This SORT decides which rows survive LIMIT BY, so it carries the inner ranking only.
+      queryParts.push(`SORT ${formatSortKeys([innerSortKey])}`);
+
+      if (outerBuckets.length === 0) {
+        queryParts.push(`LIMIT ${size}`);
+      } else {
+        queryParts.push(`LIMIT ${size} BY ${outerBuckets.map(([, expr]) => expr).join(', ')}`);
+        // The ranking above is consumed by LIMIT BY, so outer dimensions are ordered
+        // afterwards; the inner key trails it to keep each group internally ranked.
+        queryParts.push(`SORT ${formatSortKeys([...outerSortKeys, innerSortKey])}`);
+
+        // No Lens column reads the rank columns, so the result keeps the chart's columns only.
+        if (outerRankAliases.length > 0) {
+          queryParts.push(`DROP ${outerRankAliases.join(', ')}`);
+        }
+      }
     } else {
+      const statsClause = buildStatsClause();
+      if (statsClause) {
+        queryParts.push(statsClause);
+      }
+
       // Build sort fields, excluding date fields (date_histogram columns).
       // Buckets that resolved to the same expression are a single ES|QL column, so sort once.
       const sortExprs: string[] = [];

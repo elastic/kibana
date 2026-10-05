@@ -485,13 +485,6 @@ Expected one of:
         }),
         type: 'error',
       };
-    case 'forkNotAllowedWithSubqueries':
-      return {
-        message: i18n.translate('kbn-esql-language.esql.validation.forkNotAllowedWithSubqueries', {
-          defaultMessage: '[FORK] Command is not allowed inside a subquery.',
-        }),
-        type: 'error',
-      };
     case 'invalidSettingValue':
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.invalidSettingValue', {
@@ -910,9 +903,6 @@ export const errors = {
 
   forkTooManyBranches: (command: ESQLAstAllCommands): ESQLMessage =>
     errors.byId('forkTooManyBranches', command.location, {}),
-
-  forkNotAllowedWithSubqueries: (command: ESQLAstAllCommands): ESQLMessage =>
-    errors.byId('forkNotAllowedWithSubqueries', command.location, {}),
 };
 
 export const buildSignatureTypes = (sig: Signature) =>

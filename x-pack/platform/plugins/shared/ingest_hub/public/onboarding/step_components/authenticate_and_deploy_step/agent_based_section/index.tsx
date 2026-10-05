@@ -215,6 +215,18 @@ export function AgentBasedSection({
   // ── New-policy mode: policy form state ───────────────────────────────────
   const isPolicyCreated = !!agentPolicyId;
 
+  // Once a new policy is created, switch to 'existing' mode with the created policy selected.
+  // This keeps the credential section visible and shows the policy in a consistent locked state,
+  // whether the user goes Back after a fresh deploy or returns in edit mode.
+  useEffect(() => {
+    if (isPolicyCreated && agentHostsMode === 'new' && agentPolicyId) {
+      setAgentBasedDeployment({
+        agentHostsMode: 'existing',
+        selectedAgentPolicyIds: [agentPolicyId],
+      });
+    }
+  }, [isPolicyCreated, agentHostsMode, agentPolicyId, setAgentBasedDeployment]);
+
   const [newAgentPolicy, setNewAgentPolicy] = useState<Partial<NewAgentPolicy>>({
     name: persistedAgentPolicyName ?? '',
     namespace: 'default',
@@ -252,11 +264,12 @@ export function AgentBasedSection({
   //   (add service after first success) must re-enter credentials.
   // - agentHostsMode === 'existing': user selected an existing policy; credentials always in-memory.
   // - new-policy: credentials must be entered before the flyout runs.
-  const isNextReady = isPolicyCreated
-    ? isCredentialReady
-    : agentHostsMode === 'existing'
-    ? selectedAgentPolicyIds.length > 0 && isCredentialReady
-    : !isPolicyNameLoading && isPolicyFormValid && isCredentialReady;
+  const isNextReady =
+    agentHostsMode === 'existing'
+      ? selectedAgentPolicyIds.length > 0 && isCredentialReady
+      : isPolicyCreated
+      ? isCredentialReady
+      : !isPolicyNameLoading && isPolicyFormValid && isCredentialReady;
 
   const onNextReadyChangeRef = useRef(onNextReadyChange);
   onNextReadyChangeRef.current = onNextReadyChange;
@@ -284,6 +297,7 @@ export function AgentBasedSection({
   const {
     data: policiesData,
     isLoading: isPoliciesLoading,
+    isFetching: isPoliciesFetching,
     isError: isPoliciesError,
   } = useGetAgentPoliciesQuery(
     {
@@ -317,8 +331,12 @@ export function AgentBasedSection({
   // now managed/Fleet-Server policies (deleted between sessions, or policy type changed).
   // Guard on !isPoliciesError: React Query sets isLoading=false on error while policiesData stays
   // undefined, which would produce an empty policyOptions and incorrectly wipe the selection.
+  // Guard on !isPoliciesFetching: during a background refetch (stale data shown, fresh fetch in
+  // flight) the list may not yet include a just-created policy. Reconcile only once the fresh
+  // response has settled, so a newly created policy is not prematurely removed.
   useEffect(() => {
-    if (isPoliciesLoading || isPoliciesError || agentHostsMode !== 'existing') return;
+    if (isPoliciesLoading || isPoliciesFetching || isPoliciesError || agentHostsMode !== 'existing')
+      return;
     const validIds = new Set(policyOptions.map((o) => o.value));
     const reconciled = selectedAgentPolicyIds.filter((id) => validIds.has(id));
     if (reconciled.length !== selectedAgentPolicyIds.length) {
@@ -327,6 +345,7 @@ export function AgentBasedSection({
   }, [
     policyOptions,
     isPoliciesLoading,
+    isPoliciesFetching,
     isPoliciesError,
     agentHostsMode,
     selectedAgentPolicyIds,
@@ -467,6 +486,7 @@ export function AgentBasedSection({
 
           <AgentPolicyPanel
             agentHostsMode={agentHostsMode}
+            isEditMode={isEditMode}
             isPolicyCreated={isPolicyCreated}
             isCredentialReady={isCredentialReady}
             isPolicyNameLoading={isPolicyNameLoading}

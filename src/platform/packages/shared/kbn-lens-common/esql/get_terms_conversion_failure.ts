@@ -12,23 +12,35 @@ import type { EsqlConversionFailureReason } from './to_esql_failure_reasons';
 
 const UNSUPPORTED_ORDER_BY_TYPES = new Set(['rare', 'significant', 'custom']);
 
+/**
+ * `LIMIT n BY <outer>` expresses a single nesting level, so each extra Top values
+ * dimension beyond the outer/inner pair would need its own filtering stage.
+ */
+const MAX_SUPPORTED_TERMS_BUCKETS = 2;
+
 export interface TermsConversionContext {
   hasDateHistogram: boolean;
+  /** Number of terms buckets on the layer, including this column. */
+  termsBucketCount: number;
 }
 
 /**
  * Returns a conversion failure reason when a terms dimension cannot be
  * translated to ES|QL, or `undefined` when the column is eligible.
  *
- * Until terms→ES|QL assembly is implemented for multi-bucket charts, callers
- * must still reject layers with more than one bucket dimension (Phase 1).
+ * Callers may combine eligible terms with other convertible categorical
+ * buckets via `LIMIT n BY` (non-time-series). Date histogram remains unsupported.
  */
 export const getTermsConversionFailure = (
   { params }: TermsIndexPatternColumn,
-  { hasDateHistogram }: TermsConversionContext
+  { hasDateHistogram, termsBucketCount }: TermsConversionContext
 ): EsqlConversionFailureReason | undefined => {
   if (hasDateHistogram) {
     return 'terms_not_supported';
+  }
+
+  if (termsBucketCount > MAX_SUPPORTED_TERMS_BUCKETS) {
+    return 'terms_multi_level_not_supported';
   }
 
   if ((params.secondaryFields?.length ?? 0) > 0) {
@@ -43,12 +55,8 @@ export const getTermsConversionFailure = (
     return 'terms_not_supported';
   }
 
-  // Lens defaults otherBucket to true when unset.
-  // No dedicated missingBucket failure: the UI only enables "Include documents without
-  // the selected field" when Other is on, and toEsAggsFn forces
-  // missingBucket = otherBucket && missingBucket. So Other-off implies missing is off
-  // for real configs; a separate reason would never surface in the happy-path UI.
-  if (params.otherBucket !== false) {
+  // Match UI `Boolean(otherBucket)` and toEsAggsFn: unset/false = Other off.
+  if (params.otherBucket === true) {
     return 'terms_other_bucket_not_supported';
   }
 

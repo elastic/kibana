@@ -8,7 +8,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
@@ -314,9 +314,15 @@ describe('bulkScheduleWorkflow', () => {
     ['executor', true],
     ['viewer', false],
     ['outsider', false],
+    ['admin', false],
     [undefined, false],
   ])('checks current private ACLs for profile %s in the bulk query', async (profileId, allowed) => {
     coreStart.userProfile.getCurrentProfileId.mockResolvedValue(profileId ?? null);
+    jest.spyOn(coreStart.security.authc, 'getCurrentUser').mockReturnValue(
+      securityServiceMock.createMockAuthenticatedUser({
+        roles: profileId === 'admin' ? ['superuser'] : [],
+      })
+    );
     mockGetWorkflowExecutionStates.mockResolvedValue(
       new Map([
         [
@@ -355,6 +361,19 @@ describe('bulkScheduleWorkflow', () => {
     expect(coreStart.userProfile.getCurrentProfileId).toHaveBeenCalledTimes(1);
     expect(coreStart.userProfile.getCurrentProfileId).toHaveBeenCalledWith({ request });
     expect(mockBulkCreateWorkflowExecutions.mock.calls[0][0]).toHaveLength(allowed ? 3 : 1);
+    const audit = coreStart.security.audit.asScoped(request).log;
+    expect(audit).toHaveBeenCalledTimes(allowed ? 0 : 2);
+    if (!allowed) {
+      expect(audit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'workflow_access_control_denied',
+            outcome: 'failure',
+          }),
+          message: expect.stringContaining('"operation":"execute"'),
+        })
+      );
+    }
   });
 
   it('marks a disabled workflow as error and still schedules the rest', async () => {

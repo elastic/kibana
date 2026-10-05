@@ -22,6 +22,7 @@ import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_sta
 import { DEFAULT_EXPANDED_DOC_OWNER, internalStateActions } from '../../state_management/redux';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import type { DiscoverServices } from '../../../../build_services';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { createEsqlDataSource } from '../../../../../common/data_sources';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
 import { DiscoverGrid } from '../../../../components/discover_grid';
@@ -90,7 +91,10 @@ async function mountComponent({
     result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
     ...(isEsqlMode
       ? {
-          esqlQueryColumns: [{ id: 'message', name: 'message', meta: { type: 'string' as const } }],
+          dataSource: createMockEsqlSource(
+            [],
+            [{ id: 'message', name: 'message', meta: { type: 'string' as const } }]
+          ),
         }
       : {}),
   };

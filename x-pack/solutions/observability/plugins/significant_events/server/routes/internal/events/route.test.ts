@@ -140,6 +140,7 @@ describe('GET /internal/significant_events/events', () => {
           status: 'open',
           severity: '40-medium',
           stream: 'logs.test',
+          topology_feature_id: 'checkout-service',
           search: 'noise',
           page: 2,
           perPage: 10,
@@ -160,6 +161,7 @@ describe('GET /internal/significant_events/events', () => {
       status: ['open'],
       severity: ['40-medium'],
       stream: ['logs.test'],
+      topologyFeatureIds: ['checkout-service'],
       search: 'noise',
       page: 2,
       perPage: 10,
@@ -279,8 +281,6 @@ describe('GET /internal/significant_events/events/{id}', () => {
     const older = { ...baseEvent };
     const latest = {
       ...baseEvent,
-      event_uuid: 'version-2',
-      previous_event_uuid: 'version-1',
       assessment_note: 'Known noise',
     };
 
@@ -296,7 +296,7 @@ describe('GET /internal/significant_events/events/{id}', () => {
       server: {},
     } as never);
 
-    expect(response.event_uuid).toBe('version-2');
+    expect(response.event_id).toBe(older.event_id);
     expect(response.assessment_note).toBe('Known noise');
   });
 
@@ -335,32 +335,21 @@ describe('GET /internal/significant_events/events/{id}', () => {
 describe('POST /internal/significant_events/events/{id}/update — body schema', () => {
   const bodySchema = eventsUpdateRoute.params.shape.body;
 
-  it('rejects dismissed status with no assessment_note', () => {
-    const result = bodySchema.safeParse({ status: 'dismissed' });
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues[0].path).toEqual(['assessment_note']);
-    }
+  it('accepts inactive status without assessment_note', () => {
+    const result = bodySchema.safeParse({ status: 'inactive' });
+    expect(result.success).toBe(true);
   });
 
-  it('rejects dismissed status with a blank assessment_note', () => {
-    const result = bodySchema.safeParse({ status: 'dismissed', assessment_note: '   ' });
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues[0].path).toEqual(['assessment_note']);
-    }
-  });
-
-  it('accepts dismissed status with a non-empty assessment_note', () => {
+  it('accepts inactive status with a non-empty assessment_note', () => {
     const result = bodySchema.safeParse({
-      status: 'dismissed',
+      status: 'inactive',
       assessment_note: 'Known noise from nightly batch job',
     });
     expect(result.success).toBe(true);
   });
 
-  it('accepts closed status without assessment_note', () => {
-    const result = bodySchema.safeParse({ status: 'closed' });
+  it('accepts active status without assessment_note', () => {
+    const result = bodySchema.safeParse({ status: 'active' });
     expect(result.success).toBe(true);
   });
 });

@@ -118,8 +118,9 @@ id — never by indexing into the backing store directly.
   document (a revision) carrying the same `id`, and `deleteKi` adds one more whose
   `governance.lifecycle.status` is `deleted`. One KI can therefore be several documents.
 
-To read the current state, take the newest document per `id` and drop the KI when that newest
-document's `governance.lifecycle.status` is `deleted`. A plain `FROM ... | WHERE tags == ...` on a
-data stream returns every revision, deleted ones included. Read AI indices with
-`platform.context_engine.query_ai_indices`, which adds the space filter the backing store does not
-apply on its own.
+The current state is the newest document per `id`, dropped when that newest document's
+`governance.lifecycle.status` is `deleted` or its `expires_at` has passed. Read AI indices with
+`platform.context_engine.query_ai_indices`, which applies that rule and the space filter the
+backing store does not apply on its own, and drops `governance` unless the query names it; a plain
+`FROM ... | WHERE tags == ...` through any other tool returns every revision, deleted ones
+included.

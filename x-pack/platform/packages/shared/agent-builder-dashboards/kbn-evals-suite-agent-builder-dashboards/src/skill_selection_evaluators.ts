@@ -65,9 +65,7 @@ export const getToolIds = (output: DashboardAgentTaskOutput): string[] => {
 };
 
 const didLoadDashboardSkill = (output: DashboardAgentTaskOutput): boolean =>
-  getLowerCaseSkillPaths(output).some(
-    (path) => path.includes('dashboard') || path.includes('dashboard-management')
-  );
+  getLowerCaseSkillPaths(output).some((path) => path.includes('dashboard'));
 
 const didLoadVisualizationSkill = (output: DashboardAgentTaskOutput): boolean =>
   getLowerCaseSkillPaths(output).some(

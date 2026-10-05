@@ -46,8 +46,8 @@ export type FindActionPoliciesSortField = 'name' | 'createdAt' | 'updatedAt';
 export interface FindActionPoliciesArgs {
   page?: number;
   perPage?: number;
+  filter?: string;
   search?: string;
-  enabled?: boolean;
   sortField?: FindActionPoliciesSortField;
   sortOrder?: 'asc' | 'desc';
 }

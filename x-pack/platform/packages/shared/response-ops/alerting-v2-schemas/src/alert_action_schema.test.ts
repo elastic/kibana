@@ -17,6 +17,7 @@ import {
   episodeAlertActionParamsSchema,
   seriesAlertActionParamsSchema,
 } from './alert_action_schema';
+import { ID_MAX_LENGTH } from './constants';
 
 const GROUP_HASH = 'a'.repeat(64);
 const OTHER_GROUP_HASH = 'b'.repeat(64);
@@ -80,11 +81,23 @@ describe('createEpisodeAlertActionBodySchema', () => {
     ).toThrow();
   });
 
-  it('rejects episode_id in the body (strict, the episode is addressed by the path)', () => {
+  it('bounds assignee_uid like the read model (1 to ID_MAX_LENGTH chars)', () => {
+    const assign = (assigneeUid: string) =>
+      createEpisodeAlertActionBodySchema.safeParse({
+        action_type: ALERT_EPISODE_ACTION_TYPE.ASSIGN,
+        assignee_uid: assigneeUid,
+      }).success;
+
+    expect(assign('a'.repeat(ID_MAX_LENGTH))).toBe(true);
+    expect(assign('a'.repeat(ID_MAX_LENGTH + 1))).toBe(false);
+    expect(assign('')).toBe(false);
+  });
+
+  it('rejects alert_id in the body (strict, the alert is addressed by the path)', () => {
     expect(() =>
       createEpisodeAlertActionBodySchema.parse({
         action_type: ALERT_EPISODE_ACTION_TYPE.ACK,
-        episode_id: 'episode-1',
+        alert_id: 'episode-1',
       })
     ).toThrow();
   });
@@ -95,8 +108,8 @@ describe('createAckEpisodeActionBodySchema', () => {
     expect(() => createAckEpisodeActionBodySchema.parse({})).not.toThrow();
   });
 
-  it('rejects episode_id in the body (strict)', () => {
-    expect(() => createAckEpisodeActionBodySchema.parse({ episode_id: 'episode-1' })).toThrow();
+  it('rejects alert_id in the body (strict)', () => {
+    expect(() => createAckEpisodeActionBodySchema.parse({ alert_id: 'episode-1' })).toThrow();
   });
 });
 
@@ -123,22 +136,20 @@ describe('seriesAlertActionParamsSchema', () => {
 });
 
 describe('episodeAlertActionParamsSchema', () => {
-  it('accepts an episode_id and rejects an empty one', () => {
-    expect(() => episodeAlertActionParamsSchema.parse({ episode_id: 'episode-1' })).not.toThrow();
-    expect(() => episodeAlertActionParamsSchema.parse({ episode_id: '' })).toThrow();
+  it('accepts an id and rejects an empty one', () => {
+    expect(() => episodeAlertActionParamsSchema.parse({ id: 'episode-1' })).not.toThrow();
+    expect(() => episodeAlertActionParamsSchema.parse({ id: '' })).toThrow();
   });
 
   it('rejects unknown keys (strict mode)', () => {
-    expect(() =>
-      episodeAlertActionParamsSchema.parse({ episode_id: 'episode-1', foo: 'bar' })
-    ).toThrow();
+    expect(() => episodeAlertActionParamsSchema.parse({ id: 'episode-1', foo: 'bar' })).toThrow();
   });
 });
 
 describe('verb-specific bulk action body schemas', () => {
   it('accepts a valid bulk tag episode envelope', () => {
     expect(() =>
-      bulkTagEpisodeActionBodySchema.parse({ items: [{ episode_id: 'e1', tags: ['p1'] }] })
+      bulkTagEpisodeActionBodySchema.parse({ items: [{ alert_id: 'e1', tags: ['p1'] }] })
     ).not.toThrow();
   });
 
@@ -156,7 +167,7 @@ describe('verb-specific bulk action body schemas', () => {
   it('accepts a valid bulk assign episode envelope', () => {
     expect(() =>
       bulkAssignEpisodeActionBodySchema.parse({
-        items: [{ episode_id: 'e1', assignee_uid: null }],
+        items: [{ alert_id: 'e1', assignee_uid: null }],
       })
     ).not.toThrow();
   });
@@ -164,14 +175,14 @@ describe('verb-specific bulk action body schemas', () => {
   it('accepts a valid bulk activate episode envelope', () => {
     expect(() =>
       bulkActivateEpisodeActionBodySchema.parse({
-        items: [{ episode_id: 'e1', reason: 'reopen' }],
+        items: [{ alert_id: 'e1', reason: 'reopen' }],
       })
     ).not.toThrow();
   });
 
   it('rejects a bare array body (items envelope is required)', () => {
     expect(() =>
-      bulkTagEpisodeActionBodySchema.parse([{ episode_id: 'e1', tags: ['p1'] }])
+      bulkTagEpisodeActionBodySchema.parse([{ alert_id: 'e1', tags: ['p1'] }])
     ).toThrow();
   });
 
@@ -182,7 +193,7 @@ describe('verb-specific bulk action body schemas', () => {
   it('rejects an unknown envelope field (strict mode)', () => {
     expect(() =>
       bulkTagEpisodeActionBodySchema.parse({
-        items: [{ episode_id: 'e1', tags: ['p1'] }],
+        items: [{ alert_id: 'e1', tags: ['p1'] }],
         force: true,
       })
     ).toThrow();
@@ -191,7 +202,7 @@ describe('verb-specific bulk action body schemas', () => {
   it('rejects an item carrying action_type (strict mode, the verb is in the path)', () => {
     expect(() =>
       bulkTagEpisodeActionBodySchema.parse({
-        items: [{ episode_id: 'e1', tags: ['p1'], action_type: ALERT_EPISODE_ACTION_TYPE.TAG }],
+        items: [{ alert_id: 'e1', tags: ['p1'], action_type: ALERT_EPISODE_ACTION_TYPE.TAG }],
       })
     ).toThrow();
   });

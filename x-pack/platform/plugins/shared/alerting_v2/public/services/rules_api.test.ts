@@ -7,7 +7,11 @@
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { RulesApi } from './rules_api';
-import { ALERTING_V2_INTERNAL_RULE_API_PATH, ALERTING_V2_RULE_API_PATH } from '../constants';
+import {
+  ALERTING_V2_INTERNAL_RULE_API_PATH,
+  ALERTING_V2_INTERNAL_RULE_MATCH_API_PATH,
+  ALERTING_V2_RULE_API_PATH,
+} from '../constants';
 
 describe('RulesApi', () => {
   const http = httpServiceMock.createStartContract();
@@ -151,6 +155,19 @@ describe('RulesApi', () => {
         expect.stringContaining('_tags'),
         expect.anything()
       );
+    });
+  });
+
+  describe('matchRules', () => {
+    it('sends a POST request with the policy matcher and pagination in the body', async () => {
+      const body = { matcher: { tags: ['cpu'], expression: null }, page: 2, per_page: 10 };
+      http.post.mockResolvedValue({ items: [], total: 0, page: 2, per_page: 10 });
+
+      await api.matchRules(body);
+
+      expect(http.post).toHaveBeenCalledWith(ALERTING_V2_INTERNAL_RULE_MATCH_API_PATH, {
+        body: JSON.stringify(body),
+      });
     });
   });
 });

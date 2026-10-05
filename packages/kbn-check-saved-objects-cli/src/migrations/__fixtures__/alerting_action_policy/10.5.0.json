@@ -1,0 +1,162 @@
+{
+  "10.4.0": [
+    {
+      "name": "catch-all-policy",
+      "description": "An action policy with an explicitly null matcher",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-1"
+        }
+      ],
+      "matcher": null,
+      "groupBy": null,
+      "tags": null,
+      "groupingMode": null,
+      "throttle": null,
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "auth": {
+        "owner": "elastic",
+        "createdByUser": true
+      },
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "matcher-less-policy",
+      "description": "An action policy without a matcher attribute",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-2"
+        }
+      ],
+      "groupBy": ["host.name"],
+      "tags": ["oncall"],
+      "groupingMode": "per_field",
+      "throttle": {
+        "strategy": "time_interval",
+        "interval": "5m"
+      },
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": false,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "digest-policy",
+      "description": "An action policy that combines all matching alerts into one notification",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-3"
+        }
+      ],
+      "matcher": null,
+      "groupBy": null,
+      "tags": null,
+      "groupingMode": "all",
+      "throttle": {
+        "strategy": "time_interval",
+        "interval": "1h"
+      },
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    }
+  ],
+  "10.5.0": [
+    {
+      "name": "catch-all-policy",
+      "description": "An action policy with an explicitly null matcher",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-1"
+        }
+      ],
+      "matcher": null,
+      "groupBy": null,
+      "tags": null,
+      "groupingMode": null,
+      "throttle": null,
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "auth": {
+        "owner": "elastic",
+        "createdByUser": true
+      },
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "matcher-less-policy",
+      "description": "An action policy without a matcher attribute",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-2"
+        }
+      ],
+      "groupBy": ["host.name"],
+      "tags": ["oncall"],
+      "groupingMode": "per_field",
+      "throttle": {
+        "strategy": "time_interval",
+        "interval": "5m"
+      },
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": false,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "digest-policy",
+      "description": "An action policy that combines all matching alerts into one notification",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-3"
+        }
+      ],
+      "matcher": null,
+      "groupBy": null,
+      "tags": null,
+      "groupingMode": "all",
+      "throttle": {
+        "strategy": "time_interval",
+        "interval": "1h"
+      },
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    }
+  ]
+}

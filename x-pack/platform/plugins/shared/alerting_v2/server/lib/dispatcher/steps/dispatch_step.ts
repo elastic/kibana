@@ -35,6 +35,8 @@ import type {
   ActionGroupId,
   ActionPolicyDestination,
   ActionPolicyWorkflowPayload,
+  ActionPolicyWorkflowPayloadAlert,
+  AlertEpisode,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
@@ -63,6 +65,16 @@ const toError = (err: unknown): Error => (isError(err) ? err : new Error(String(
 
 const workflowDestinations = (group: ActionGroup): ActionPolicyDestination[] =>
   group.destinations.filter((destination) => destination.type === 'workflow');
+
+const toWorkflowPayloadAlert = ({
+  episode_id: alertId,
+  episode_status: alertStatus,
+  ...alert
+}: AlertEpisode): ActionPolicyWorkflowPayloadAlert => ({
+  ...alert,
+  alert_id: alertId,
+  alert_status: alertStatus,
+});
 
 const pushMapList = <K, V>(map: Map<K, V[]>, key: K, value: V): void => {
   const list = map.get(key);
@@ -351,7 +363,7 @@ export class DispatchStep implements DispatcherStep {
       id: group.id,
       policyId: group.policyId,
       groupKey: group.groupKey,
-      episodes: group.episodes,
+      alerts: group.episodes.map(toWorkflowPayloadAlert),
       rules: group.rules,
     };
     const inputs: Record<string, unknown> = { payload };

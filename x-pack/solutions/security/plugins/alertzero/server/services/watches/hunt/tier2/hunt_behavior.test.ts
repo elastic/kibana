@@ -72,7 +72,7 @@ const t1566Candidate = { technique_id: 'T1566', evidence_quote: 'phishing', llm_
 const executeParams = {
   text: REPORT_TEXT,
   window: { from: 'now-30d', to: 'now' },
-  required_indices: ['logs-aws.*'],
+  allowed_indices: ['logs-aws.*'],
   row_limit: 25,
 };
 
@@ -154,10 +154,8 @@ describe('huntBehavior', () => {
       text: REPORT_TEXT,
     });
     expect(generateEsqlMock).not.toHaveBeenCalled();
-    expect(result.behaviors[0].proposed_esql_rule).toContain(
-      'Grounded ES|QL generation unavailable'
-    );
-    expect(result.behaviors[0].proposed_esql_rule).not.toContain('FROM ');
+    expect(result.behaviors[0].validated_esql).toContain('Grounded ES|QL generation unavailable');
+    expect(result.behaviors[0].validated_esql).not.toContain('FROM ');
   });
 
   it('keeps a line break in an evidence quote from ending the comment that makes the placeholder safe', async () => {
@@ -173,7 +171,7 @@ describe('huntBehavior', () => {
       { text: `Incident report: ${injected} was observed.` }
     );
 
-    const rule = result.behaviors[0].proposed_esql_rule;
+    const rule = result.behaviors[0].validated_esql;
     expect(rule).toContain('Grounded ES|QL generation unavailable');
     // The whole placeholder stays commented out, which is the property that makes it
     // non-executable — a single uncommented line would be ES|QL.
@@ -213,95 +211,66 @@ describe('huntBehavior', () => {
     ]);
   });
 
-  it('returns generateEsql targeting only allowlisted matched indices', async () => {
+  it('ignores matched_indices and targets the full allowed_indices union, even when a matched index sits inside it', async () => {
+    // Decided (Q2): one query over the union for the demo. Narrowing to whichever
+    // concrete index Tier 1's per-index buckets happened to hit is exactly what this
+    // must not do — a coincidental IOC match landing in an unrelated dataset that
+    // shares a baseline wildcard must not misdirect the FROM to that dataset alone.
     await huntBehavior(
       buildMockModel([t1078Candidate]),
       logger,
       {
         text: REPORT_TEXT,
-        required_indices: ['logs-aws.*'],
+        allowed_indices: ['logs-aws.*', 'logs-endpoint.events.*'],
+        article_context: {
+          matched_indices: ['.ds-logs-aws.cloudtrail-default-2026.09.01-000001', '.kibana'],
+        },
+      },
+      esClient
+    );
+    expect(generateEsqlMock).toHaveBeenCalledWith(
+      expect.objectContaining({ index: 'logs-aws.*,logs-endpoint.events.*' })
+    );
+  });
+
+  it('ignores matched_indices entirely under a broad scope too, targeting the broad pattern', async () => {
+    await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      {
+        text: REPORT_TEXT,
+        allowed_indices: ['logs-*'],
         article_context: {
           matched_indices: [
             '.ds-logs-aws.cloudtrail-default-2026.09.01-000001',
-            '.kibana',
             'logs-okta.system-default',
           ],
         },
       },
       esClient
     );
-    expect(generateEsqlMock).toHaveBeenCalledWith(
-      expect.objectContaining({ index: 'logs-aws.cloudtrail-default*' })
-    );
+    expect(generateEsqlMock).toHaveBeenCalledWith(expect.objectContaining({ index: 'logs-*' }));
   });
 
-  it('returns generateEsql targeting the integrations that produced Tier 1 hits', async () => {
+  it('strips exclusion entries from allowed_indices before building the FROM target', async () => {
+    // Exclusion entries (`-logs-elastic_agent*`) belong to the search, not to a FROM.
     await huntBehavior(
       buildMockModel([t1078Candidate]),
       logger,
       {
         text: REPORT_TEXT,
-        required_indices: ['logs-*'],
-        article_context: {
-          matched_indices: [
-            '.ds-logs-aws.cloudtrail-default-2026.09.01-000001',
-            '.ds-logs-aws.cloudtrail-default-2026.09.02-000002',
-            'logs-okta.system-default',
-          ],
-        },
+        allowed_indices: ['logs-*', '-logs-elastic_agent*', '-logs-fleet_server*'],
       },
       esClient
     );
-    expect(generateEsqlMock).toHaveBeenCalledWith(
-      expect.objectContaining({ index: 'logs-aws.cloudtrail-default*,logs-okta.system-default*' })
-    );
-  });
-
-  it('does not double the wildcard on matched indices that already carry one', async () => {
-    await huntBehavior(
-      buildMockModel([t1078Candidate]),
-      logger,
-      {
-        text: REPORT_TEXT,
-        required_indices: ['logs-*'],
-        article_context: {
-          // A discovered scope hands over wildcard patterns, not concrete backing indices.
-          matched_indices: ['logs-cisco_asa.log-*', 'logs-aws.*'],
-        },
-      },
-      esClient
-    );
-    expect(generateEsqlMock).toHaveBeenCalledWith(
-      expect.objectContaining({ index: 'logs-cisco_asa.log-*,logs-aws.*' })
-    );
-  });
-
-  it('keeps an exact matched index when wildcarding it would cross a broad-scope exclusion', async () => {
-    // `logs-elastic` is searchable under `logs-*` with `-logs-elastic_agent*`, but
-    // `logs-elastic*` would expand into the excluded agent streams and the gate
-    // would refuse both that wildcard and the `logs-*` fallback.
-    await huntBehavior(
-      buildMockModel([t1078Candidate]),
-      logger,
-      {
-        text: REPORT_TEXT,
-        required_indices: ['logs-*', '-logs-elastic_agent*', '-logs-fleet_server*'],
-        article_context: {
-          matched_indices: ['logs-elastic'],
-        },
-      },
-      esClient
-    );
-    expect(generateEsqlMock).toHaveBeenCalledWith(
-      expect.objectContaining({ index: 'logs-elastic' })
-    );
+    expect(generateEsqlMock).toHaveBeenCalledWith(expect.objectContaining({ index: 'logs-*' }));
   });
 
   it('returns generateEsql targeting the required indices when Tier 1 had no hits', async () => {
     await huntBehavior(
       buildMockModel([t1078Candidate]),
       logger,
-      { text: REPORT_TEXT, required_indices: ['logs-aws.*', 'logs-okta.*'] },
+      { text: REPORT_TEXT, allowed_indices: ['logs-aws.*', 'logs-okta.*'] },
       esClient
     );
     expect(generateEsqlMock).toHaveBeenCalledWith(
@@ -345,16 +314,51 @@ describe('huntBehavior', () => {
     expect(additionalContext).toContain('the report body');
   });
 
+  it('bounds the sample-events section in aggregate at the schema max of 50 events', async () => {
+    // Each event is independently capped at 2048 chars by the schema (`max_tier2_sample_events`'s
+    // own ceiling); unbounded in aggregate, 50 of them is ~100 KB repeated into every one of up
+    // to 20 behaviors' `generateEsql` calls.
+    const sampleEvents = Array.from({ length: 50 }, (_, i) => `event-${i}-`.padEnd(2048, 'x'));
+    await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      { text: REPORT_TEXT, article_context: { sample_events: sampleEvents } },
+      esClient
+    );
+    const { additionalContext } = generateEsqlMock.mock.calls[0][0];
+    expect(additionalContext).toBeDefined();
+    // Generous ceiling covering every section (sample events + IOCs + report text + headers),
+    // but an order of magnitude below the ~100 KB the unbounded array would have produced.
+    expect(additionalContext?.length).toBeLessThan(20000);
+    // The cap keeps whole events rather than truncating mid-event: the first event, which
+    // always fits, must still be intact.
+    expect(additionalContext).toContain(sampleEvents[0]);
+  });
+
   it('returns the generated query under the grounded header as the proposed rule', async () => {
     const result = await huntBehavior(
       buildMockModel([t1078Candidate]),
       logger,
-      { text: REPORT_TEXT },
+      executeParams,
       esClient
     );
-    const rule = result.behaviors[0].proposed_esql_rule;
+    const rule = result.behaviors[0].validated_esql;
     expect(rule.startsWith('// Generated from hunt.hunt_behavior')).toBe(true);
     expect(rule.endsWith(`\n${GROUNDED_ESQL}`)).toBe(true);
+  });
+
+  it('refuses every generated query when allowed_indices is empty', async () => {
+    const result = await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      { text: REPORT_TEXT, allowed_indices: [] },
+      esClient
+    );
+
+    expect(result.behaviors[0].validated_esql).toContain('Grounded ES|QL generation unavailable');
+    expect(result.behaviors[0].validated_esql).not.toContain('FROM ');
+    expect(result.behaviors[0].execution?.executed).toBe(false);
+    expect(executeEsqlMock).not.toHaveBeenCalled();
   });
 
   it('returns a non-executable placeholder when generateEsql reports an error', async () => {
@@ -365,10 +369,8 @@ describe('huntBehavior', () => {
       executeParams,
       esClient
     );
-    expect(result.behaviors[0].proposed_esql_rule).toContain(
-      'Grounded ES|QL generation unavailable'
-    );
-    expect(result.behaviors[0].proposed_esql_rule).not.toContain('FROM ');
+    expect(result.behaviors[0].validated_esql).toContain('Grounded ES|QL generation unavailable');
+    expect(result.behaviors[0].validated_esql).not.toContain('FROM ');
     expect(executeEsqlMock).not.toHaveBeenCalled();
   });
 
@@ -391,10 +393,8 @@ describe('huntBehavior', () => {
       executeParams,
       esClient
     );
-    expect(result.behaviors[0].proposed_esql_rule).toContain(
-      'Grounded ES|QL generation unavailable'
-    );
-    expect(result.behaviors[0].proposed_esql_rule).not.toContain('FROM ');
+    expect(result.behaviors[0].validated_esql).toContain('Grounded ES|QL generation unavailable');
+    expect(result.behaviors[0].validated_esql).not.toContain('FROM ');
     expect(result.status).toBe('behaviors_proposed');
   });
 
@@ -402,7 +402,7 @@ describe('huntBehavior', () => {
     const result = await huntBehavior(
       buildMockModel([t1078Candidate]),
       logger,
-      { text: REPORT_TEXT, required_indices: ['logs-aws.*'], row_limit: 25 },
+      { text: REPORT_TEXT, allowed_indices: ['logs-aws.*'], row_limit: 25 },
       esClient
     );
     expect(result.has_hit).toBe(false);
@@ -412,7 +412,7 @@ describe('huntBehavior', () => {
     const result = await huntBehavior(
       buildMockModel([t1078Candidate]),
       logger,
-      { text: REPORT_TEXT, required_indices: ['logs-aws.*'], row_limit: 25 },
+      { text: REPORT_TEXT, allowed_indices: ['logs-aws.*'], row_limit: 25 },
       esClient
     );
     expect(executeEsqlMock).not.toHaveBeenCalled();
@@ -686,7 +686,7 @@ describe('huntBehavior', () => {
         esClient
       );
 
-      expect(result.behaviors[0].proposed_esql_rule).not.toContain('.kibana-secrets');
+      expect(result.behaviors[0].validated_esql).not.toContain('.kibana-secrets');
       expect(result.behaviors[0].execution?.executed).toBe(false);
       expect(executeEsqlMock).not.toHaveBeenCalled();
     });
@@ -701,7 +701,7 @@ describe('huntBehavior', () => {
         esClient
       );
 
-      expect(result.behaviors[0].proposed_esql_rule).toContain(GROUNDED_ESQL);
+      expect(result.behaviors[0].validated_esql).toContain(GROUNDED_ESQL);
     });
 
     it('gives generateEsql a probe client that refuses an out-of-scope schema probe', async () => {
@@ -751,10 +751,8 @@ describe('huntBehavior', () => {
         esClient
       );
       expect(executeEsqlMock).not.toHaveBeenCalled();
-      expect(result.behaviors[0].proposed_esql_rule).toContain(
-        'Grounded ES|QL generation unavailable'
-      );
-      expect(result.behaviors[0].proposed_esql_rule).not.toContain('FROM ');
+      expect(result.behaviors[0].validated_esql).toContain('Grounded ES|QL generation unavailable');
+      expect(result.behaviors[0].validated_esql).not.toContain('FROM ');
       expect(result.behaviors[0].execution).toEqual({
         executed: false,
         row_count: 0,

@@ -85,6 +85,71 @@ describe('formatFailure', () => {
     expect(output).not.toContain('Informational — not blocking merge');
   });
 
+  it('lists report-only changes separately and excludes them from the count', () => {
+    const output = formatFailure([
+      stableEntry('/api/old'),
+      {
+        ...stableEntry(
+          '/api/cases/{caseId}/user_actions/_find',
+          'added a variant to payload oneOf'
+        ),
+        method: 'get',
+        oasdiffId: 'response-property-one-of-added',
+        reportOnly: true,
+        policyReason: 'Adding a variant to a response oneOf is additive.',
+      },
+    ]);
+
+    expectOutputContains(
+      output,
+      // count reflects only the gating change, even though both are stable tier
+      'Detected 1 breaking change(s) in stable/tech_preview APIs (1 stable, 0 tech_preview)',
+      'Kibana treats as additive',
+      '/api/cases/{caseId}/user_actions/_find',
+      'Why this does not block: Adding a variant to a response oneOf is additive.'
+    );
+  });
+
+  it('omits the report-only section when no rule was demoted', () => {
+    expect(formatFailure([stableEntry('/api/old')])).not.toContain('Kibana treats as additive');
+  });
+
+  describe('when nothing gates', () => {
+    const reportOnlyEntry: ImpactReportEntry = {
+      ...stableEntry('/api/cases/{caseId}/user_actions/_find', 'added a variant to payload oneOf'),
+      oasdiffId: 'response-property-one-of-added',
+      reportOnly: true,
+      policyReason: 'Adding a variant to a response oneOf is additive.',
+    };
+
+    it.each([
+      ['report-only', [reportOnlyEntry]],
+      ['experimental', [experimentalEntry('/api/exp')]],
+    ])('lists %s changes without a failure header or allowlist prompt', (_, entries) => {
+      const output = formatFailure(entries);
+
+      expectOutputContains(
+        output,
+        'API CONTRACT CHANGES REPORTED',
+        'No breaking changes detected in stable/tech_preview APIs',
+        'Nothing here blocks merge',
+        'Need help?',
+        entries[0].path
+      );
+      expect(output).not.toContain('BREAKING CHANGES DETECTED');
+      expect(output).not.toContain('Detected 0 breaking change(s)');
+      expect(output).not.toContain('What to do next:');
+      expect(output).not.toContain('allowlist');
+    });
+
+    it('prints the policy reason for a report-only change', () => {
+      expectOutputContains(
+        formatFailure([reportOnlyEntry]),
+        'Why this does not block: Adding a variant to a response oneOf is additive.'
+      );
+    });
+  });
+
   it('produces deterministic output for the same input', () => {
     const entries = [stableEntry('/api/test')];
 

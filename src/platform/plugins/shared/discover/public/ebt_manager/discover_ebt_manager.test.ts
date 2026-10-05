@@ -102,7 +102,7 @@ describe('DiscoverEBTManager', () => {
             type: 'keyword',
             _meta: {
               description:
-                'The name of the event that is tracked in the metrics i.e. dataTableSelection, dataTableRemoval',
+                'The name of the event that is tracked in the metrics i.e. dataTableSelection, dataTableRemoval, dataTableClearSelectedFields',
             },
           },
           fieldName: {
@@ -110,6 +110,19 @@ describe('DiscoverEBTManager', () => {
             _meta: {
               description:
                 "Field name if it is part of ECS schema. For non ECS compliant fields, there's a <non-ecs> placeholder",
+              optional: true,
+            },
+          },
+          fieldNames: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: {
+                description:
+                  "Field names cleared together when eventName is dataTableClearSelectedFields. For non ECS compliant fields, there's a <non-ecs> placeholder",
+              },
+            },
+            _meta: {
               optional: true,
             },
           },
@@ -468,6 +481,34 @@ describe('DiscoverEBTManager', () => {
       expect(coreSetupMock.analytics.reportEvent).toHaveBeenLastCalledWith('discover_field_usage', {
         eventName: 'dataTableRemoval',
         fieldName: NON_ECS_FIELD, // non-ECS fields would be tracked with a "<non-ecs>" label
+      });
+    });
+
+    it('should track clearing selected fields as one event', async () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      await scopedManager.trackDataTableClearSelectedFields({
+        fieldNames: [],
+        fieldsMetadata,
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).not.toHaveBeenCalled();
+
+      await scopedManager.trackDataTableClearSelectedFields({
+        fieldNames: ['test', 'test2', 'test2'],
+        fieldsMetadata,
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith('discover_field_usage', {
+        eventName: 'dataTableClearSelectedFields',
+        fieldNames: ['test', NON_ECS_FIELD],
       });
     });
 

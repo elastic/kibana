@@ -1,5 +1,5 @@
 {
-  "sha1": "b89a7114e4618cf6968848fce3940b91a4eadfa3",
+  "sha1": "785be450a4e8cf90988bada2442e23c267662d01",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -443,7 +443,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
-        "line": 55,
+        "line": 51,
         "column": 5
       }
     },
@@ -456,7 +456,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
-        "line": 71,
+        "line": 67,
         "column": 13
       }
     },
@@ -469,8 +469,8 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
-        "line": 113,
-        "column": 13
+        "line": 86,
+        "column": 9
       }
     },
     {
@@ -482,7 +482,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
-        "line": 127,
+        "line": 100,
         "column": 8
       }
     },
@@ -495,7 +495,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
-        "line": 143,
+        "line": 116,
         "column": 9
       }
     },
@@ -508,7 +508,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
-        "line": 165,
+        "line": 138,
         "column": 9
       }
     },
@@ -521,8 +521,8 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
-        "line": 205,
-        "column": 13
+        "line": 182,
+        "column": 11
       }
     },
     {
@@ -534,8 +534,8 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
-        "line": 228,
-        "column": 13
+        "line": 201,
+        "column": 18
       }
     },
     {
@@ -547,8 +547,8 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/esql.spec.ts",
-        "line": 267,
-        "column": 7
+        "line": 240,
+        "column": 24
       }
     },
     {

@@ -116,6 +116,27 @@ describe('SalesforceConnector', () => {
 
       expect(mockClient.get).toHaveBeenCalledWith(`${baseUrl}${nextUrl}`, {});
     });
+
+    it.each([
+      '@attacker.example/collect',
+      '//attacker.example/collect',
+      'https://attacker.example/services/data/v66.0/query/01gxx0000001',
+      '/services/data/v66.0/query/01gxx@attacker.example',
+      '/services/data/v66.0/sobjects/User',
+    ])('rejects nextRecordsUrl %s without calling Salesforce', async (nextRecordsUrl) => {
+      await expect(
+        SalesforceConnector.actions.query.handler(mockContext, { soql: '', nextRecordsUrl })
+      ).rejects.toThrow('nextRecordsUrl must be the relative path');
+      expect(mockClient.get).not.toHaveBeenCalled();
+    });
+
+    it('rejects a non-cursor nextRecordsUrl in the input schema', () => {
+      const result = SalesforceConnector.actions.query.input.safeParse({
+        soql: '',
+        nextRecordsUrl: '@attacker.example/collect',
+      });
+      expect(result.success).toBe(false);
+    });
   });
 
   describe('get_record action', () => {
@@ -176,6 +197,17 @@ describe('SalesforceConnector', () => {
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(`${baseUrl}${nextUrl}`, {});
+    });
+
+    it('rejects a nextRecordsUrl that would leave the Salesforce host', async () => {
+      await expect(
+        SalesforceConnector.actions.search.handler(mockContext, {
+          searchTerm: 'test',
+          returning: 'Account',
+          nextRecordsUrl: '@attacker.example/collect',
+        })
+      ).rejects.toThrow('nextRecordsUrl must be the relative path');
+      expect(mockClient.get).not.toHaveBeenCalled();
     });
   });
 
@@ -258,6 +290,16 @@ describe('SalesforceConnector', () => {
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(`${baseUrl}${nextUrl}`, {});
+    });
+
+    it('rejects a nextRecordsUrl that would leave the Salesforce host', async () => {
+      await expect(
+        SalesforceConnector.actions.list_records.handler(mockContext, {
+          sobjectName: 'Account',
+          nextRecordsUrl: '@attacker.example/collect',
+        })
+      ).rejects.toThrow('nextRecordsUrl must be the relative path');
+      expect(mockClient.get).not.toHaveBeenCalled();
     });
 
     it('should throw on invalid sobject name (SOQL injection safety)', async () => {

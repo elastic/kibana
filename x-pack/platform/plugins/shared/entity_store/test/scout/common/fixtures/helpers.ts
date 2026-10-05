@@ -9,6 +9,7 @@ import type { EsClient, KbnClient } from '@kbn/scout';
 import type { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { EntityStoreStatusResponseBody } from '../../../../server/routes/apis/status';
+import type { ResolutionGroup } from '../../../../server/domain/resolution/resolution_client';
 import { hashEuid } from '../../../../common/domain/euid';
 import {
   RESOLUTION_RULE_IDS,
@@ -347,6 +348,25 @@ export const waitForResolution = async (
   }
 
   return matchedSource;
+};
+
+/** Asserts the resolution group headed by `targetId` holds exactly `aliasIds`, in any order. */
+export const assertResolutionGroup = async (
+  apiClient: ForceLogExtractionApiClient,
+  headers: Record<string, string>,
+  { targetId, aliasIds }: { targetId: string; aliasIds: string[] }
+): Promise<void> => {
+  const response = await apiClient.get(
+    `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${targetId}&apiVersion=2`,
+    { headers, responseType: 'json' }
+  );
+  expect(response.statusCode).toBe(200);
+  const group = response.body as ResolutionGroup;
+  expect(getNestedValue(group.target, 'entity.id')).toBe(targetId);
+  expect(group.group_size).toBe(aliasIds.length + 1);
+  expect(group.aliases.map((alias) => getNestedValue(alias, 'entity.id')).sort()).toStrictEqual(
+    [...aliasIds].sort()
+  );
 };
 
 /**

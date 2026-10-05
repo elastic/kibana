@@ -8,8 +8,8 @@
 import { getFrequencyLabel, getGroupingModeLabel } from './labels';
 
 describe('getGroupingModeLabel', () => {
-  it('returns the Episode label for per_episode', () => {
-    expect(getGroupingModeLabel('per_episode')).toBe('Episode');
+  it('returns the Alert label for per_alert', () => {
+    expect(getGroupingModeLabel('per_alert')).toBe('Alert');
   });
 
   it('returns the Group label for per_field', () => {
@@ -27,20 +27,20 @@ describe('getGroupingModeLabel', () => {
 });
 
 describe('getFrequencyLabel', () => {
-  it('returns "On status change" for per_episode + on_status_change', () => {
-    expect(getFrequencyLabel({ strategy: 'on_status_change', interval: null }, 'per_episode')).toBe(
+  it('returns "On status change" for per_alert + on_status_change', () => {
+    expect(getFrequencyLabel({ strategy: 'on_status_change', interval: null }, 'per_alert')).toBe(
       'On status change'
     );
   });
 
-  it('returns "On status change + repeat every N minutes" for per_episode + per_status_interval', () => {
+  it('returns "On status change + repeat every N minutes" for per_alert + per_status_interval', () => {
     expect(
-      getFrequencyLabel({ strategy: 'per_status_interval', interval: '5m' }, 'per_episode')
+      getFrequencyLabel({ strategy: 'per_status_interval', interval: '5m' }, 'per_alert')
     ).toBe('On status change + repeat every 5 minutes');
   });
 
-  it('returns "Every evaluation" for per_episode + every_time', () => {
-    expect(getFrequencyLabel({ strategy: 'every_time', interval: null }, 'per_episode')).toBe(
+  it('returns "Every evaluation" for per_alert + every_time', () => {
+    expect(getFrequencyLabel({ strategy: 'every_time', interval: null }, 'per_alert')).toBe(
       'Every evaluation'
     );
   });
@@ -64,11 +64,11 @@ describe('getFrequencyLabel', () => {
   });
 
   it('returns the fallback for null or undefined strategy', () => {
-    expect(getFrequencyLabel({ strategy: undefined, interval: null }, 'per_episode')).toBe(
+    expect(getFrequencyLabel({ strategy: undefined, interval: null }, 'per_alert')).toBe(
       'Not configured'
     );
     expect(getFrequencyLabel(null, 'all')).toBe('Not configured');
-    expect(getFrequencyLabel(undefined, 'per_episode')).toBe('Not configured');
+    expect(getFrequencyLabel(undefined, 'per_alert')).toBe('Not configured');
   });
 
   it('returns the fallback when mode is null or undefined', () => {
@@ -88,7 +88,7 @@ describe('getFrequencyLabel', () => {
 
   it('returns the fallback when interval is required but missing', () => {
     expect(
-      getFrequencyLabel({ strategy: 'per_status_interval', interval: null }, 'per_episode')
+      getFrequencyLabel({ strategy: 'per_status_interval', interval: null }, 'per_alert')
     ).toBe('Not configured');
     expect(getFrequencyLabel({ strategy: 'time_interval', interval: null }, 'all')).toBe(
       'Not configured'

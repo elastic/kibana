@@ -49,12 +49,12 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHashOne,
-          episode: { id: 'bulk-series-snooze-episode-one', status: 'active' },
+          alert: { id: 'bulk-series-snooze-episode-one', status: 'active' },
         }),
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHashTwo,
-          episode: { id: 'bulk-series-snooze-episode-two', status: 'active' },
+          alert: { id: 'bulk-series-snooze-episode-two', status: 'active' },
         }),
       ]);
 
@@ -107,7 +107,7 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
       buildAlertEvent({
         rule: { id: ruleId, version: 1 },
         group_hash: groupHash,
-        episode: { id: 'bulk-series-unsnooze-episode', status: 'active' },
+        alert: { id: 'bulk-series-unsnooze-episode', status: 'active' },
       }),
     ]);
 
@@ -142,7 +142,7 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: knownGroup,
-          episode: { id: 'bulk-series-partial-known-episode', status: 'active' },
+          alert: { id: 'bulk-series-partial-known-episode', status: 'active' },
         }),
       ]);
 
@@ -271,12 +271,12 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('schema: rejects an item carrying episode_id with 400', async ({ apiClient }) => {
-    // Series items are identified by group_hash only, so episode_id is an
+  apiTest('schema: rejects an item carrying alert_id with 400', async ({ apiClient }) => {
+    // Series items are identified by group_hash only, so alert_id is an
     // unrecognized key for the strict item schema.
     const response = await apiClient.post(BULK_SNOOZE_SERIES_ACTION_URL, {
       headers: writerHeaders,
-      body: { items: [{ group_hash: buildGroupHash('any-group'), episode_id: 'some-episode' }] },
+      body: { items: [{ group_hash: buildGroupHash('any-group'), alert_id: 'some-episode' }] },
     });
 
     expect(response).toHaveStatusCode(400);

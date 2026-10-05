@@ -58,16 +58,19 @@ describe('service account editor badge', () => {
     registration.dispose();
   });
 
-  it.each(['# settings:\n#   run_as: account-a', 'steps:\n  - with:\n      run_as: account-a'])(
-    'ignores comments and non-workflow settings',
-    async (value) => {
-      const { editor, directory } = setup(value);
-      const registration = registerServiceAccountDecorations(editor, directory);
-      await Promise.resolve();
-      expect(directory.get).not.toHaveBeenCalled();
-      registration.dispose();
-    }
-  );
+  it.each([
+    '# settings:\n#   run_as: account-a',
+    'steps:\n  - with:\n      run_as: account-a',
+    'settings:\n  run_as: |-\n\n',
+    'settings:\n  run_as: >-\n\n',
+  ])('ignores comments, non-workflow settings, and multiline scalars', async (value) => {
+    const { editor, directory, decorationsCollection } = setup(value);
+    const registration = registerServiceAccountDecorations(editor, directory);
+    await Promise.resolve();
+    expect(directory.get).not.toHaveBeenCalled();
+    expect(decorationsCollection.set).not.toHaveBeenCalled();
+    registration.dispose();
+  });
 
   it.each([{ enabled: false }, { assumable: false }])(
     'does not mark an unavailable account as connected',
@@ -89,6 +92,43 @@ describe('service account editor badge', () => {
       registration.dispose();
     }
   );
+
+  it.each([
+    'settings:\n  run_as: ',
+    'settings: { run_as: , timezone: UTC }',
+    'settings:\n  run_as: ""',
+  ])('shows an empty-value prompt without changing YAML: %s', async (value) => {
+    const { editor, model, decorationsCollection, directory } = setup(value);
+    const registration = registerServiceAccountDecorations(editor, directory);
+    expect(decorationsCollection.set).toHaveBeenCalledWith([
+      expect.objectContaining({
+        options: expect.objectContaining({
+          before: expect.objectContaining({ content: 'Select service account' }),
+        }),
+      }),
+    ]);
+    expect(directory.get).not.toHaveBeenCalled();
+    expect(model.getValue()).toBe(value);
+    registration.dispose();
+  });
+
+  it.each(['disabled', 'readOnly'])('does not show an empty-value prompt when %s', (mode) => {
+    const { editor, decorationsCollection, directory } = setup('settings:\n  run_as: ');
+    directory.isEnabled.mockReturnValue(mode !== 'disabled');
+    jest.mocked(editor.getOption).mockReturnValue(mode === 'readOnly');
+    const registration = registerServiceAccountDecorations(editor, directory);
+    expect(decorationsCollection.set).not.toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          options: expect.objectContaining({
+            before: expect.objectContaining({ content: 'Select service account' }),
+          }),
+        }),
+      ])
+    );
+    expect(directory.get).not.toHaveBeenCalled();
+    registration.dispose();
+  });
 
   it('leaves a raw ID when the directory is inaccessible', async () => {
     const { editor, decorationsCollection, directory } = setup();

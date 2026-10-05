@@ -24,7 +24,7 @@ import {
 import { UnifiedFieldList } from '@kbn/unified-field-list/test/scout/ui/fixtures/page_objects';
 import { DocViewer } from '@kbn/unified-doc-viewer/test/scout/ui/fixtures/page_objects';
 import { SavedQueryManagementMenu } from '@kbn/unified-search-plugin/test/scout/ui/fixtures/page_objects';
-import { InsightsAndAlerting, LookupIndexEditor } from './page_objects';
+import { InsightsAndAlerting } from './page_objects';
 import * as testData from './constants';
 
 export interface DiscoverScoutSpace extends ScoutSpaceParallelFixture {
@@ -42,7 +42,6 @@ export type DiscoverWorkerFixtures = ScoutParallelWorkerFixtures & {
 
 export type DiscoverPageObjects = PageObjects & {
   unifiedFieldList: UnifiedFieldList;
-  lookupIndexEditor: LookupIndexEditor;
   docViewer: DocViewer;
   savedQueryManagementMenu: SavedQueryManagementMenu;
   insightsAndAlerting: InsightsAndAlerting;
@@ -58,7 +57,6 @@ const extendWithDiscoverPageObjects = (
 ): DiscoverPageObjects => ({
   ...pageObjects,
   unifiedFieldList: createLazyPageObject(UnifiedFieldList, page),
-  lookupIndexEditor: createLazyPageObject(LookupIndexEditor, page, pageObjects.dataGrid),
   docViewer: createLazyPageObject(DocViewer, page),
   savedQueryManagementMenu: createLazyPageObject(SavedQueryManagementMenu, page),
   insightsAndAlerting: createLazyPageObject(InsightsAndAlerting, page),

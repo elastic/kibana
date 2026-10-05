@@ -49,7 +49,7 @@ BannerCallout.displayName = 'FlyoutTemplate.Body.BannerCallout';
  * Renders every `Body.Callout` among the parsed body items as one stack, in source order, for
  * `EuiFlyoutBody`'s `banner`. Returns `undefined` when there are none, so no banner is rendered.
  */
-export const renderCalloutBanner = (items: ParsedItem[]) => {
+export const renderCalloutBanner = (items: ParsedItem[], dataTestSubj = 'flyoutBodyBanner') => {
   const callouts = partsOf(items, CALLOUT_PART_NAME).flatMap((item) => {
     const callout = calloutPart.resolve(item, undefined);
     return callout
@@ -64,7 +64,7 @@ export const renderCalloutBanner = (items: ParsedItem[]) => {
   if (callouts.length === 0) return undefined;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="flyoutBodyBanner">
+    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={dataTestSubj}>
       {callouts}
     </EuiFlexGroup>
   );

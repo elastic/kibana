@@ -5,25 +5,130 @@
  * 2.0.
  */
 
-import { of } from 'rxjs';
-import type { FeatureFlagsStart } from '@kbn/core/server';
+import { Subject, of } from 'rxjs';
+import type { CoreStart, FeatureFlagsStart } from '@kbn/core/server';
+import { loggerMock } from '@kbn/logging-mocks';
 import { FF_MIGRATE_LEGACY_SECURITY_ASSETS } from '../../../common';
-import { isLegacySecurityAssetsMigrationEnabled } from './legacy_security_assets_migration';
+import {
+  getLegacySecurityAssetsMigrationFlag,
+  subscribeToLegacySecurityAssetsMigrationFlag,
+} from './legacy_security_assets_migration';
 
-describe('isLegacySecurityAssetsMigrationEnabled', () => {
-  it('returns false when the feature flag is not enabled', async () => {
+describe('getLegacySecurityAssetsMigrationFlag', () => {
+  it('resolves with the current value without waiting for it to become true', async () => {
     const getBooleanValue$ = jest.fn().mockReturnValue(of(false));
     const featureFlags = { getBooleanValue$ } as unknown as FeatureFlagsStart;
 
-    await expect(isLegacySecurityAssetsMigrationEnabled(featureFlags)).resolves.toBe(false);
+    await expect(getLegacySecurityAssetsMigrationFlag(featureFlags)).resolves.toBe(false);
     expect(getBooleanValue$).toHaveBeenCalledWith(FF_MIGRATE_LEGACY_SECURITY_ASSETS, false);
   });
 
-  it('returns true when the feature flag is enabled', async () => {
+  it('resolves true when the feature flag is enabled', async () => {
     const getBooleanValue$ = jest.fn().mockReturnValue(of(true));
     const featureFlags = { getBooleanValue$ } as unknown as FeatureFlagsStart;
 
-    await expect(isLegacySecurityAssetsMigrationEnabled(featureFlags)).resolves.toBe(true);
-    expect(getBooleanValue$).toHaveBeenCalledWith(FF_MIGRATE_LEGACY_SECURITY_ASSETS, false);
+    await expect(getLegacySecurityAssetsMigrationFlag(featureFlags)).resolves.toBe(true);
   });
 });
+
+describe('subscribeToLegacySecurityAssetsMigrationFlag', () => {
+  let flag$: Subject<boolean>;
+  let stop$: Subject<void>;
+  let scheduleMigration: jest.Mock<Promise<void>, []>;
+  let logger: ReturnType<typeof loggerMock.create>;
+
+  const subscribe = () =>
+    subscribeToLegacySecurityAssetsMigrationFlag({
+      coreStart: {
+        featureFlags: {
+          getBooleanValue$: jest.fn().mockReturnValue(flag$.asObservable()),
+        },
+      } as unknown as CoreStart,
+      logger,
+      stop$,
+      scheduleMigration,
+    });
+
+  beforeEach(() => {
+    flag$ = new Subject<boolean>();
+    stop$ = new Subject<void>();
+    scheduleMigration = jest.fn().mockResolvedValue(undefined);
+    logger = loggerMock.create();
+  });
+
+  afterEach(() => {
+    stop$.next();
+    stop$.complete();
+  });
+
+  it('schedules the migration when the flag becomes enabled', async () => {
+    subscribe();
+
+    flag$.next(false);
+    flag$.next(true);
+    await flushPromises();
+
+    expect(scheduleMigration).toHaveBeenCalledTimes(1);
+  });
+
+  it('serializes repeated enabled emissions', async () => {
+    let resolveFirstMigration: (() => void) | undefined;
+    scheduleMigration
+      .mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveFirstMigration = resolve;
+          })
+      )
+      .mockResolvedValueOnce();
+    subscribe();
+
+    flag$.next(true);
+    flag$.next(false);
+    flag$.next(true);
+    await flushPromises();
+
+    expect(scheduleMigration).toHaveBeenCalledTimes(1);
+
+    resolveFirstMigration?.();
+    await flushPromises();
+
+    expect(scheduleMigration).toHaveBeenCalledTimes(2);
+  });
+
+  it('stops responding to flag updates when the plugin stops', async () => {
+    subscribe();
+
+    stop$.next();
+    flag$.next(true);
+    await flushPromises();
+
+    expect(scheduleMigration).not.toHaveBeenCalled();
+  });
+
+  it('discards a queued migration when the plugin stops', async () => {
+    let resolveFirstMigration: (() => void) | undefined;
+    scheduleMigration
+      .mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveFirstMigration = resolve;
+          })
+      )
+      .mockResolvedValueOnce(undefined);
+    subscribe();
+
+    flag$.next(true);
+    flag$.next(false);
+    flag$.next(true);
+    await flushPromises();
+
+    stop$.next();
+    resolveFirstMigration?.();
+    await flushPromises();
+
+    expect(scheduleMigration).toHaveBeenCalledTimes(1);
+  });
+});
+
+const flushPromises = () => new Promise((resolve) => setImmediate(resolve));

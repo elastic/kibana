@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
+import { firstValueFrom, type Observable } from 'rxjs';
 import {
   DetectionService,
   detectionsDataStream,
@@ -29,9 +30,9 @@ export interface SignificantEventsClients {
   /**
    * Flag-aware accessor for read-only `{id}`/list lookups migrated onto `RuleEventsClient`
    * (currently: `eventsSearchRoute`, `eventsLifecycleRoute`, `eventsGetRoute`,
-   * `eventsTriggerInvestigationRoute`). Honors
-   * `useRuleEventsRead`. Only call this for handlers that exclusively call `findByEventId` (or
-   * the list/search equivalent) — any handler needing `EventClient`-only methods (`bulkCreate`,
+   * `eventsTriggerInvestigationRoute`). Reads the current `useRuleEventsRead$` value on each
+   * call. Only call this for handlers that exclusively call `findByEventId` (or the list/search
+   * equivalent) — any handler needing `EventClient`-only methods (`bulkCreate`,
    * `findByEventUuid`, `findLatestActive`, `emitTrigger`, …) must keep using `getEventClient()`,
    * which always returns `EventClient` regardless of the flag.
    */
@@ -51,15 +52,18 @@ export function createSignificantEventsClients({
   esClient,
   space,
   triggerEmitter,
-  useRuleEventsRead,
+  useRuleEventsRead$,
 }: {
   services: SignificantEventsServices;
   dataStreams: DataStreamsStart;
   esClient: ElasticsearchClient;
   space: string;
   triggerEmitter?: TriggerEmitter;
-  /** Gated by `SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ` (`@kbn/nightshift-shared`). */
-  useRuleEventsRead?: boolean;
+  /**
+   * Current `SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ` value. Read when a search client is created,
+   * so a later flag change applies to the next search.
+   */
+  useRuleEventsRead$?: Observable<boolean>;
 }): SignificantEventsClients {
   const buildEventClientOptions = async () => ({
     dataStreamClient: await dataStreams.initializeClient<typeof eventsMappings, StoredEvent>(
@@ -99,12 +103,18 @@ export function createSignificantEventsClients({
         esClient,
         space,
       }),
-    // Every caller of `getEventClient()` (routes other than `eventsSearchRoute`, agent-builder
-    // tools, workflow triggers) uses the full `EventClient` surface (`bulkCreate`,
+    // Every caller of `getEventClient()` (routes other than the read-only search handlers,
+    // agent-builder tools, workflow triggers) uses the full `EventClient` surface (`bulkCreate`,
     // `findByEventUuid`, `findLatestActive`, `emitTrigger`, …), which `RuleEventsClient`
-    // intentionally does not implement (#1517).
+    // intentionally does not implement (#1517). This accessor always returns `EventClient`,
+    // independent of `useRuleEventsRead$` — the flag only affects `getEventSearchClient()`.
     getEventClient: getSharedEventClient,
     getEventSearchClient: async (): Promise<SignificantEventsReadClient> => {
+      // Safe to read the flag when the client is created: each caller uses the instance for one
+      // read, then drops it. The next call evaluates the stream again.
+      const useRuleEventsRead = useRuleEventsRead$
+        ? await firstValueFrom(useRuleEventsRead$)
+        : false;
       if (!useRuleEventsRead) {
         // Return the shared EventClient so callers can use `readClient === eventClient` to detect
         // that no synthetic-UUID translation is needed.

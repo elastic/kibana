@@ -28,6 +28,7 @@ import { getClient } from './compat';
 import { findDownsampledIndex } from './downsampling';
 import { createCommonFilter } from './query';
 import { searchStackTraces } from './search_stacktraces';
+import { PROFILING_API_PRIVILEGE } from '../feature';
 
 export async function topNElasticSearchQuery({
   client,
@@ -181,7 +182,7 @@ export function queryTopNCommon({
       path: pathName,
       security: {
         authz: {
-          requiredPrivileges: ['profiling'],
+          requiredPrivileges: [PROFILING_API_PRIVILEGE],
         },
       },
       options: { timeout: { idleSocket: IDLE_SOCKET_TIMEOUT } },

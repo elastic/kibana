@@ -9,6 +9,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../fixtures';
+import { cleanupWorkflowsAndRules } from '../fixtures/cleanup';
 import { getInfosecDemoWorkflowYaml, getLargePerfWorkflowYaml } from '../fixtures/workflows';
 
 interface MarkerCallRecord {
@@ -24,6 +25,17 @@ interface EditCycleResult {
   totalMarkerCascadeMs: number;
   totalMarkerWorkMs: number;
   markerCallCount: number;
+}
+
+interface LongFrameEntry {
+  duration: number;
+  blockingDuration: number;
+  scripts: Array<{
+    sourceURL: string;
+    sourceFunctionName: string;
+    invoker: string;
+    duration: number;
+  }>;
 }
 
 const WORKFLOW_CASES = [
@@ -69,19 +81,53 @@ test.describe(
     ],
   },
   () => {
-    test.beforeEach(async ({ browserAuth, pageObjects }) => {
+    test.beforeEach(async ({ browserAuth, page }) => {
       await browserAuth.loginAsPrivilegedUser();
-      await pageObjects.workflowEditor.gotoNewWorkflow();
+
+      // Stub ES|QL network requests — this suite measures client CPU and frame time,
+      // not network latency. Without stubs, infosec_demo triggers ~160 sequential
+      // HTTP round trips per validation run; on Cloud each RTT is 650–900 ms, which
+      // exceeds the 15 s marker deadline. Stubs return the same empty responses as a
+      // local stack (cross-cluster indices don't exist locally either), so the marker
+      // counts and client work the budgets were set on are unchanged.
+      await page.route('**/internal/esql/autocomplete/sources/**', (route) =>
+        route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })
+      );
+      await page.route('**/api/fleet/epm/packages/installed*', (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ items: [] }),
+        })
+      );
+      // 400 causes getEsqlColumns (kbn-esql-utils/src/utils/callbacks/columns.ts:56) to
+      // catch and return [], matching what happens locally when the index doesn't exist.
+      await page.route('**/internal/search/esql_async**', (route) =>
+        route.fulfill({
+          status: 400,
+          contentType: 'application/json',
+          body: JSON.stringify({ error: { type: 'index_not_found_exception' } }),
+        })
+      );
+    });
+
+    test.afterAll(async ({ scoutSpace, apiServices }) => {
+      await cleanupWorkflowsAndRules({ scoutSpace, apiServices });
     });
 
     for (const { name, getYaml } of WORKFLOW_CASES) {
       test(`[${name}] setModelMarkers cascade completes within frame budget after edit`, async ({
+        apiServices,
         pageObjects,
         page,
         log,
       }) => {
+        // Seed via API so useYamlValidation starts with isLoading=true — no stale
+        // settled text from another YAML is ever on screen for waitForValidationToSettle
+        // to match prematurely (R2).
         const yaml = getYaml();
-        await pageObjects.workflowEditor.setYamlEditorValue(yaml);
+        const { id } = await apiServices.workflows.create(yaml);
+        await pageObjects.workflowEditor.gotoWorkflow(id);
         await waitForValidationToSettle(pageObjects.workflowEditor.validationErrorsAccordion);
 
         const quiescenceMs = MARKER_QUIESCENCE_MS;
@@ -326,13 +372,17 @@ test.describe(
         ).toBeLessThan(worstCallCeiling);
       });
 
-      test(`[${name}] editor stays responsive during rapid edits`, async ({
+      test(`[${name}] frame rate stays above threshold during rapid edits`, async ({
+        apiServices,
+        config,
         pageObjects,
         page,
         log,
       }) => {
+        // Seed via API — same reason as the cascade test (R2).
         const yaml = getYaml();
-        await pageObjects.workflowEditor.setYamlEditorValue(yaml);
+        const { id } = await apiServices.workflows.create(yaml);
+        await pageObjects.workflowEditor.gotoWorkflow(id);
         await waitForValidationToSettle(pageObjects.workflowEditor.validationErrorsAccordion);
 
         const settleMs = MARKER_QUIESCENCE_MS;
@@ -351,6 +401,7 @@ test.describe(
               maxMs: number;
               worst5: number[];
               markerCascadesDuringEdits: number;
+              longFrames: LongFrameEntry[];
             }>((resolve) => {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const monacoEnv = (window as any).MonacoEnvironment;
@@ -372,6 +423,59 @@ test.describe(
 
               if (!model || !editor) {
                 throw new Error('Editor model or instance not found');
+              }
+
+              // Observe long-animation-frame entries (R3 attribution). Feature-detected
+              // because the API is not universally available yet. Entries of >= 1 s are
+              // logged to help attribute stalls when the 4000 ms net fires on Cloud.
+              const longFrames: LongFrameEntry[] = [];
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              let loafObserver: any = null;
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const loafSupported = (PerformanceObserver as any).supportedEntryTypes?.includes(
+                'long-animation-frame'
+              );
+              if (typeof PerformanceObserver !== 'undefined' && loafSupported) {
+                loafObserver = new PerformanceObserver((list) => {
+                  for (const entry of list.getEntries()) {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const e = entry as any;
+                    if (e.duration >= 1000) {
+                      const scripts = (
+                        (e.scripts ?? []) as Array<{
+                          sourceURL: string;
+                          sourceFunctionName: string;
+                          invoker: string;
+                          duration: number;
+                        }>
+                      )
+                        .sort(
+                          (a: { duration: number }, b: { duration: number }) =>
+                            b.duration - a.duration
+                        )
+                        .slice(0, 5)
+                        .map(
+                          (s: {
+                            sourceURL: string;
+                            sourceFunctionName: string;
+                            invoker: string;
+                            duration: number;
+                          }) => ({
+                            sourceURL: s.sourceURL ?? '',
+                            sourceFunctionName: s.sourceFunctionName ?? '',
+                            invoker: s.invoker ?? '',
+                            duration: Number((s.duration ?? 0).toFixed(1)),
+                          })
+                        );
+                      longFrames.push({
+                        duration: Number(e.duration.toFixed(1)),
+                        blockingDuration: Number((e.blockingDuration ?? 0).toFixed(1)),
+                        scripts,
+                      });
+                    }
+                  }
+                });
+                loafObserver.observe({ type: 'long-animation-frame' });
               }
 
               let markerCascadesDuringEdits = 0;
@@ -419,6 +523,9 @@ test.describe(
                 }
                 rafRunning = false;
                 monacoEnv.monaco.editor.setModelMarkers = origSetModelMarkers;
+                if (loafObserver) {
+                  loafObserver.disconnect();
+                }
 
                 for (let i = 0; i < EDIT_COUNT; i++) {
                   editor.trigger('perf-test', 'undo', null);
@@ -440,6 +547,7 @@ test.describe(
                     .reverse()
                     .map((d: number) => Number(d.toFixed(1))),
                   markerCascadesDuringEdits,
+                  longFrames,
                 });
               }
 
@@ -473,6 +581,9 @@ test.describe(
         );
 
         log.info(`Frame stats: ${JSON.stringify(frameStats, null, 2)}`);
+        if (frameStats.longFrames.length > 0) {
+          log.info(`Long frames (>= 1s): ${JSON.stringify(frameStats.longFrames, null, 2)}`);
+        }
 
         // Liveness: the page kept rendering and validation ran during the edit burst.
         // These cannot flake on CPU share — they only fail if the editor froze or validation stopped.
@@ -482,12 +593,16 @@ test.describe(
           'setModelMarkers should have been called — validation must run during edits'
         ).toBeGreaterThan(0);
 
-        // Catastrophe net only — a single pathological frame blocking the renderer for > 4s.
-        // This has never fired in practice; it is kept to catch a hang or deadlock.
+        // Catastrophe net only — a single pathological frame blocking the renderer for > N ms.
+        // Cloud CI agents are slower than a developer Mac, so the ceiling is doubled on Cloud
+        // to avoid false failures from CPU contention while still catching hangs and deadlocks.
+        // The old 8692 ms failure was caused by the ES|QL validation backlog (now stubbed);
+        // the remaining budget comfortably fits any Monaco YAML parsing for these fixtures.
+        const maxFrameCeiling = config.isCloud ? 8000 : 4000;
         expect(
           frameStats.maxMs,
-          `Worst frame time (${frameStats.maxMs}ms) should be under 4000ms`
-        ).toBeLessThan(4000);
+          `Worst frame time (${frameStats.maxMs}ms) should be under ${maxFrameCeiling}ms`
+        ).toBeLessThan(maxFrameCeiling);
 
         // p95Ms is deliberately NOT asserted: frame deltas under two parallel Playwright workers
         // are dominated by the browser compositor scheduler, not by the code under test. A single

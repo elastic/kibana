@@ -8,8 +8,9 @@
  */
 
 import { useEffect } from 'react';
-import { isScalar, parseDocument } from 'yaml';
+import { isMap, isScalar, parseDocument } from 'yaml';
 import { monaco } from '@kbn/code-editor';
+import { i18n } from '@kbn/i18n';
 import type {
   ServiceAccountDirectory,
   WorkflowServiceAccount,
@@ -24,8 +25,33 @@ interface ServiceAccountReference {
 const getReference = (model: monaco.editor.ITextModel): ServiceAccountReference | null => {
   const document = parseDocument(model.getValue());
   const value = document.getIn(['settings', 'run_as'], true);
-  if (!isScalar(value) || typeof value.value !== 'string' || !value.value || !value.range)
+  if (!isScalar(value) || value.type === 'BLOCK_LITERAL' || value.type === 'BLOCK_FOLDED')
     return null;
+  if (value.value === null || value.value === '') {
+    const settings = document.getIn(['settings'], true);
+    if (!isMap(settings)) return null;
+    const key = settings.items.find(
+      (pair) => isScalar(pair.key) && pair.key.value === 'run_as'
+    )?.key;
+    if (!isScalar(key) || !key.range) return null;
+    const end = model.getPositionAt(key.range[1]);
+    const separator = model
+      .getLineContent(end.lineNumber)
+      .slice(end.column - 1)
+      .match(/^:[ \t]*/);
+    if (!separator) return null;
+    const column = end.column + separator[0].length;
+    return {
+      id: '',
+      range: {
+        startLineNumber: end.lineNumber,
+        endLineNumber: end.lineNumber,
+        startColumn: column,
+        endColumn: column,
+      },
+    };
+  }
+  if (typeof value.value !== 'string' || !value.range) return null;
   const start = model.getPositionAt(value.range[0]);
   const end = model.getPositionAt(value.range[1]);
   if (start.lineNumber !== end.lineNumber) return null;
@@ -77,6 +103,29 @@ export const registerServiceAccountDecorations = (
     if (reference?.id !== requestedId || !reference) decorations.clear();
     requestedId = reference?.id;
     if (!model || !reference) return;
+    if (!reference.id) {
+      decorations.set(
+        editor.getOption(monaco.editor.EditorOption.readOnly)
+          ? []
+          : [
+              {
+                range: reference.range,
+                options: {
+                  showIfCollapsed: true,
+                  stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+                  before: {
+                    content: i18n.translate('workflows.editor.selectServiceAccountPlaceholder', {
+                      defaultMessage: 'Select service account',
+                    }),
+                    cursorStops: monaco.editor.InjectedTextCursorStops.None,
+                    inlineClassName: 'service-account-placeholder',
+                  },
+                },
+              },
+            ]
+      );
+      return;
+    }
     const version = model.getVersionId();
     const account = await directory.get(reference.id);
     if (
@@ -93,6 +142,7 @@ export const registerServiceAccountDecorations = (
     clearTimeout(timeout);
     timeout = setTimeout(() => void update(), 150);
   };
+  const configurationSubscription = editor.onDidChangeConfiguration(scheduleUpdate);
   const contentSubscription = editor.onDidChangeModelContent(scheduleUpdate);
   const modelSubscription = editor.onDidChangeModel(() => {
     decorations.clear();
@@ -105,6 +155,7 @@ export const registerServiceAccountDecorations = (
     dispose: () => {
       revision++;
       clearTimeout(timeout);
+      configurationSubscription.dispose();
       contentSubscription.dispose();
       modelSubscription.dispose();
       decorations.clear();

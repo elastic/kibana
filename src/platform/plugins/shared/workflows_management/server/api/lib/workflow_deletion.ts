@@ -411,7 +411,7 @@ const deleteBoundWorkflow = async (
   params: Parameters<typeof deleteWorkflows>[0]
 ): Promise<DeleteWorkflowsResponse> => {
   const { id, document } = guarded;
-  params.assertCanDelete?.(document);
+  params.assertCanDelete?.(document, id);
   const isPrivate = document.access_control?.access_mode === 'private';
   if (params.force && isPrivate && !params.acknowledgeAclLoss) {
     throw new WorkflowConflictError(
@@ -506,7 +506,7 @@ export const deleteWorkflows = async (params: {
   spaceId: string;
   force: boolean;
   acknowledgeAclLoss?: boolean;
-  assertCanDelete?: (workflow: WorkflowProperties) => void;
+  assertCanDelete?: (workflow: WorkflowProperties, id: string) => void;
   guardedDelete?: GuardedWorkflowDeletion;
   guardedBatch?: OccWorkflowHit[];
   deferCleanup?: boolean;
@@ -528,7 +528,7 @@ export const deleteWorkflows = async (params: {
       client: params.storage.getClient(),
       hits: params.guardedBatch,
       mutate: (hit) => {
-        params.assertCanDelete?.(hit._source);
+        params.assertCanDelete?.(hit._source, hit._id);
         return { ...hit._source, enabled: false, deleted_at: now };
       },
       maxRetries: 0,
@@ -568,7 +568,10 @@ export const deleteWorkflows = async (params: {
 
   const hits = searchResponse.hits.hits;
   for (const hit of hits) {
-    if (hit._source) params.assertCanDelete?.(hit._source);
+    if (hit._source) {
+      if (!hit._id) throw new Error('Missing workflow ID in deletion result.');
+      params.assertCanDelete?.(hit._source, hit._id);
+    }
   }
 
   if (force) {

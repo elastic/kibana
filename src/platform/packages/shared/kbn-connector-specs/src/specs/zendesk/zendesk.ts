@@ -10,6 +10,10 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
+
+const MAX_TICKET_ID_LENGTH = 200;
+const MAX_INCLUDE_LENGTH = 200;
+
 const buildBaseUrl = (ctx: ActionContext): string =>
   `https://${String((ctx.config?.subdomain as string) ?? '').trim()}.zendesk.com/api/v2`;
 
@@ -87,11 +91,13 @@ export const ZendeskConnector: ConnectorSpec = {
         z.object({
           query: z
             .string()
+            .max(2000)
             .describe(
               'Zendesk query syntax. Supports keywords, field filters (field:value), type filters (type:ticket|user|organization|group), status filters (status:open|pending|solved|closed), assignee filters (assignee:me or assignee:<email>), tags (tags:<tag_name>), date filters (created>YYYY-MM-DD, updated<YYYY-MM-DD), and exact phrases ("exact phrase"). Combine filters with spaces. Examples: "type:ticket status:open assignee:me tags:billing", "crawler", "type:user john".'
             ),
           sortBy: z
             .string()
+            .max(50)
             .optional()
             .describe(
               'Field to sort results by. Valid values: updated_at, created_at, priority, status, ticket_type. Omit to sort by relevance (default).'
@@ -109,6 +115,7 @@ export const ZendeskConnector: ConnectorSpec = {
             ),
           include: z
             .string()
+            .max(MAX_INCLUDE_LENGTH)
             .optional()
             .describe(
               'Sideload related resources using parentheses format with no spaces: type(sideload). The type must match your query type. Examples: tickets(users), tickets(users,groups), users(identities). Use tickets(...) when querying type:ticket, users(...) when querying type:user.'
@@ -145,6 +152,7 @@ export const ZendeskConnector: ConnectorSpec = {
             .describe('Number of tickets per page (max 100). Defaults to 25.'),
           include: z
             .string()
+            .max(MAX_INCLUDE_LENGTH)
             .optional()
             .describe(
               'Comma-separated sideloads with no spaces. Valid options: users, groups, organizations. Examples: "users", "users,groups", "users,groups,organizations".'
@@ -169,7 +177,10 @@ export const ZendeskConnector: ConnectorSpec = {
         'Get the full details of a single Zendesk ticket by ID, including metadata and comment count. Use when you already have a ticket ID and need the complete record.',
       input: lazySchema(() =>
         z.object({
-          ticketId: z.string().describe('The Zendesk ticket ID (numeric, e.g. "12345").'),
+          ticketId: z
+            .string()
+            .max(MAX_TICKET_ID_LENGTH)
+            .describe('The Zendesk ticket ID (numeric, e.g. "12345").'),
         })
       ),
       handler: async (ctx, input) => {
@@ -188,7 +199,10 @@ export const ZendeskConnector: ConnectorSpec = {
         'List comments on a Zendesk ticket (the conversation thread, including both public and private comments). Use when you have a ticket ID and need to read the full discussion.',
       input: lazySchema(() =>
         z.object({
-          ticketId: z.string().describe('The Zendesk ticket ID (numeric, e.g. "12345").'),
+          ticketId: z
+            .string()
+            .max(MAX_TICKET_ID_LENGTH)
+            .describe('The Zendesk ticket ID (numeric, e.g. "12345").'),
           page: z.number().default(1).describe('Page number for pagination. Defaults to 1.'),
           perPage: z
             .number()
@@ -197,6 +211,7 @@ export const ZendeskConnector: ConnectorSpec = {
             .describe('Number of comments per page (max 100). Defaults to 25.'),
           include: z
             .string()
+            .max(MAX_INCLUDE_LENGTH)
             .optional()
             .describe(
               'Comma-separated list of resources to sideload (e.g. "users" to include author details).'

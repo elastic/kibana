@@ -22,8 +22,23 @@ import { storage, store } from '../state';
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
 export const SyntheticsSharedContext: React.FC<
-  React.PropsWithChildren<SyntheticsAppProps & { reload$?: Subject<boolean>; reduxStore?: Store }>
-> = ({ reduxStore, coreStart, setupPlugins, startPlugins, children, darkMode, reload$ }) => {
+  React.PropsWithChildren<
+    SyntheticsAppProps & {
+      reload$?: Subject<boolean>;
+      reduxStore?: Store;
+      onAutoRefresh?: () => void;
+    }
+  >
+> = ({
+  reduxStore,
+  coreStart,
+  setupPlugins,
+  startPlugins,
+  children,
+  darkMode,
+  reload$,
+  onAutoRefresh,
+}) => {
   const queryClient = new QueryClient();
 
   const spacesApi = startPlugins.spaces;
@@ -68,7 +83,7 @@ export const SyntheticsSharedContext: React.FC<
       <EuiThemeProvider darkMode={darkMode}>
         <ReduxProvider store={reduxStore ?? store}>
           <QueryClientProvider client={queryClient}>
-            <SyntheticsRefreshContextProvider reload$={reload$}>
+            <SyntheticsRefreshContextProvider reload$={reload$} onAutoRefresh={onAutoRefresh}>
               <CpsProjectRoutingSync />
               <SyntheticsDataViewContextProvider dataViews={startPlugins.dataViews}>
                 <RedirectAppLinks

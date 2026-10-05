@@ -14,6 +14,17 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { Column } from './types';
 import type { EsqlSource } from './sources/esql_source';
 
+interface RegisteredEsqlDataView {
+  signature: string;
+  dataView: DataView;
+}
+
+/**
+ * Last shim built for an ES|QL id. Histogram fetches reuse it when the schema
+ * still matches, instead of clearing the DataViews cache on every chart request.
+ */
+const esqlDataViewsById = new Map<string, RegisteredEsqlDataView>();
+
 /**
  * Transitional shim. Registers a DataView in the `dataViewsService` cache so that
  * consumers still calling `dataViewsService.get(id)` for ES|QL ids keep resolving
@@ -21,12 +32,14 @@ import type { EsqlSource } from './sources/esql_source';
  *
  * Uses `skipFetchFields: true` — never call `_field_caps`. Fields are copied from
  * `EsqlSource.getColumns()` (LIMIT 0 / source_info). The cache is cleared first so
- * re-registration picks up a new schema or time field.
+ * re-registration picks up a new schema or time field. Histogram fetches should
+ * call {@link getOrRegisterEsqlDataView} so an unchanged schema keeps this instance.
  */
 export async function registerEsqlSourceInDataViewsCache(
   dataViews: DataViewsPublicPluginStart,
   source: EsqlSource
 ): Promise<DataView> {
+  esqlDataViewsById.delete(source.id);
   dataViews.clearInstanceCache(source.id);
   const dataView = await dataViews.create(
     {
@@ -38,14 +51,66 @@ export async function registerEsqlSourceInDataViewsCache(
     },
     true // skipFetchFields — never call _field_caps for ES|QL adapter DVs
   );
+  esqlDataViewsById.set(source.id, {
+    signature: shimSchemaSignature(source),
+    dataView,
+  });
   return dataView;
+}
+
+function getCachedEsqlDataView(source: EsqlSource): DataView | undefined {
+  const cached = esqlDataViewsById.get(source.id);
+  if (cached?.signature === shimSchemaSignature(source)) {
+    return cached.dataView;
+  }
+  return undefined;
+}
+
+/**
+ * DataView shim already registered for this ES|QL source, when the field names
+ * and time field still match. Lens reads this instead of carrying a DataView
+ * next to the data source.
+ */
+export function getRegisteredEsqlDataView(source: EsqlSource): DataView | undefined {
+  return getCachedEsqlDataView(source);
+}
+
+/**
+ * DataView shim for Lens. Reuses the view already registered for this id when
+ * the field names and time field still match. Rebuilds only when the schema or
+ * time field changed, so a chart fetch does not drop the shim the documents
+ * path and the filter editor are using. `withColumns` keeps the same id and
+ * only overlays nullability, which does not rebuild the shim.
+ */
+export async function getOrRegisterEsqlDataView(
+  dataViews: DataViewsPublicPluginStart,
+  source: EsqlSource
+): Promise<DataView> {
+  const cached = getCachedEsqlDataView(source);
+  if (cached) {
+    return cached;
+  }
+  return registerEsqlSourceInDataViewsCache(dataViews, source);
 }
 
 export function unregisterFromDataViewsCache(
   dataViews: DataViewsPublicPluginStart,
   id: string
 ): void {
+  esqlDataViewsById.delete(id);
   dataViews.clearInstanceCache(id);
+}
+
+/**
+ * Field names the shim would contain, plus the time field. Order does not
+ * matter. Nullability is omitted: `withColumns` updates it on the same id.
+ */
+function shimSchemaSignature(source: EsqlSource): string {
+  const names = new Set(source.getColumns().map((column) => column.name));
+  if (source.timeFieldName) {
+    names.add(source.timeFieldName);
+  }
+  return `${source.timeFieldName ?? ''}:${[...names].sort().join('\0')}`;
 }
 
 /**

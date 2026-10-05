@@ -6,6 +6,7 @@
  */
 
 import type { ProfilingSetupOptions } from '@kbn/profiling-data-access-plugin/server';
+import { isServerless } from '@kbn/profiling-data-access-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { RouteRegisterParameters } from '../..';
@@ -19,6 +20,7 @@ import { setupStatusOASOperationObject } from './oas_examples';
 import { setupStatusResponseSchema } from './schemas';
 import { setupCloud } from './setup_cloud';
 import { setupSelfManaged } from './setup_self_managed';
+import { PROFILING_API_PRIVILEGE } from '../../../feature';
 
 const SERVERLESS_ERROR_MESSAGE = 'Universal Profiling is not supported in serverless';
 
@@ -31,7 +33,7 @@ export function registerSetupRoute({
   // Universal Profiling setup is not supported on serverless. Skipping registration keeps these
   // routes out of serverless builds and out of the serverless OAS docs, whose generation
   // force-enables every plugin regardless of `xpack.profiling.enabled`.
-  if (dependencies.buildFlavor === 'serverless') {
+  if (isServerless(dependencies.buildFlavor)) {
     return;
   }
 
@@ -41,7 +43,7 @@ export function registerSetupRoute({
       path: paths.HasSetupESResources,
       security: {
         authz: {
-          requiredPrivileges: ['profiling'],
+          requiredPrivileges: [PROFILING_API_PRIVILEGE],
         },
       },
       options: {
@@ -112,7 +114,7 @@ export function registerSetupRoute({
       path: paths.HasSetupESResources,
       security: {
         authz: {
-          requiredPrivileges: ['profiling'],
+          requiredPrivileges: [PROFILING_API_PRIVILEGE],
         },
       },
       options: {
@@ -261,7 +263,7 @@ export function registerSetupRoute({
       path: paths.SetupDataCollectionInstructions,
       security: {
         authz: {
-          requiredPrivileges: ['profiling'],
+          requiredPrivileges: [PROFILING_API_PRIVILEGE],
         },
       },
       validate: false,

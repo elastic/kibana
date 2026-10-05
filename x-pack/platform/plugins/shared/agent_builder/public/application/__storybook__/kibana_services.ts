@@ -29,6 +29,27 @@ const INFERENCE_CONNECTORS_PATH = '/internal/search_inference_endpoints/connecto
 const getUiSetting = (key: string) =>
   key === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID ? true : undefined;
 
+/** The user the stories act as. Matches the actor id of the user message event factory. */
+export const STORYBOOK_CURRENT_USER_ID = 'user-1';
+
+const createStorybookUserProfile = (uid: string) => {
+  const fullName = uid === STORYBOOK_CURRENT_USER_ID ? 'Test User' : uid;
+  return {
+    uid,
+    enabled: true,
+    user: { username: uid, full_name: fullName },
+    data: {
+      avatar: {
+        initials: fullName
+          .split(' ')
+          .map((word) => word[0])
+          .join('')
+          .toUpperCase(),
+      },
+    },
+  };
+};
+
 export const createStorybookKibanaServices = (): StartServices =>
   ({
     analytics: { reportEvent: noOp },
@@ -86,6 +107,11 @@ export const createStorybookKibanaServices = (): StartServices =>
       navigateToApp: () => Promise.resolve(),
       getUrlForApp: () => '/',
       navigateToUrl: () => Promise.resolve(),
+    },
+    userProfile: {
+      getCurrent: () => Promise.resolve(createStorybookUserProfile(STORYBOOK_CURRENT_USER_ID)),
+      bulkGet: ({ uids }: { uids: Set<string> }) =>
+        Promise.resolve([...uids].map(createStorybookUserProfile)),
     },
     appParams: { history: {} },
     plugins: {

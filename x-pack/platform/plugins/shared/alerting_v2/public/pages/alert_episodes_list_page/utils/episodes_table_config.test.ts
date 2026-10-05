@@ -9,8 +9,8 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createMemoryHistory } from 'history';
 import {
+  ALERTS_TABLE_APP_STATE_KEY,
   DEFAULT_EPISODES_TABLE_CONFIG,
-  EPISODES_TABLE_APP_STATE_KEY,
   EPISODES_TABLE_CONFIG_STORAGE_KEY,
   mergeEpisodesTableConfig,
   readEpisodesTableConfigFromStorage,
@@ -27,17 +27,17 @@ const createMockStorage = (initialValue: unknown = null) => ({
 });
 
 const createKbnTestUrlStorage = async (
-  episodesTablePayload?: unknown
+  alertsTablePayload?: unknown
 ): Promise<IKbnUrlStateStorage> => {
   const storage = createKbnUrlStateStorage({
     history: createMemoryHistory({ initialEntries: ['/'] }),
     useHash: false,
     useHashQuery: false,
   });
-  if (episodesTablePayload !== undefined) {
+  if (alertsTablePayload !== undefined) {
     await storage.set(
       '_a',
-      { [EPISODES_TABLE_APP_STATE_KEY]: episodesTablePayload },
+      { [ALERTS_TABLE_APP_STATE_KEY]: alertsTablePayload },
       { replace: true }
     );
   }
@@ -168,7 +168,7 @@ describe('episodes_table_config', () => {
   });
 
   describe('readEpisodesTableConfigFromUrl', () => {
-    it('returns undefined when _a has no episodesTable sub-key', async () => {
+    it('returns undefined when _a has no alertsTable sub-key', async () => {
       const urlStorage = await createKbnTestUrlStorage();
       expect(readEpisodesTableConfigFromUrl(urlStorage)).toBeUndefined();
     });
@@ -220,30 +220,30 @@ describe('episodes_table_config', () => {
   });
 
   describe('writeEpisodesTableConfigToUrl', () => {
-    it('omits episodesTable sub-key when config equals defaults', async () => {
+    it('omits alertsTable sub-key when config equals defaults', async () => {
       const urlStorage = await createKbnTestUrlStorage({ rowHeight: 1 });
       await writeEpisodesTableConfigToUrl(urlStorage, DEFAULT_EPISODES_TABLE_CONFIG);
       expect(urlStorage.get('_a')).toEqual({});
     });
 
-    it('writes non-default fields to _a.episodesTable', async () => {
+    it('writes non-default fields to _a.alertsTable', async () => {
       const urlStorage = await createKbnTestUrlStorage();
       await writeEpisodesTableConfigToUrl(urlStorage, {
         ...DEFAULT_EPISODES_TABLE_CONFIG,
         rowHeight: -1,
       });
       expect(urlStorage.get('_a')).toEqual({
-        [EPISODES_TABLE_APP_STATE_KEY]: { rowHeight: -1 },
+        [ALERTS_TABLE_APP_STATE_KEY]: { rowHeight: -1 },
       });
     });
 
-    it('preserves other _a sub-keys (e.g. episodesList) when writing', async () => {
+    it('preserves other _a sub-keys (e.g. alertsList) when writing', async () => {
       const urlStorage = createKbnUrlStateStorage({
         history: createMemoryHistory({ initialEntries: ['/'] }),
         useHash: false,
         useHashQuery: false,
       });
-      await urlStorage.set('_a', { episodesList: { status: 'recovering' } }, { replace: true });
+      await urlStorage.set('_a', { alertsList: { status: 'recovering' } }, { replace: true });
 
       await writeEpisodesTableConfigToUrl(urlStorage, {
         ...DEFAULT_EPISODES_TABLE_CONFIG,
@@ -251,8 +251,8 @@ describe('episodes_table_config', () => {
       });
 
       expect(urlStorage.get('_a')).toEqual({
-        episodesList: { status: 'recovering' },
-        [EPISODES_TABLE_APP_STATE_KEY]: { rowHeight: -1 },
+        alertsList: { status: 'recovering' },
+        [ALERTS_TABLE_APP_STATE_KEY]: { rowHeight: -1 },
       });
     });
 

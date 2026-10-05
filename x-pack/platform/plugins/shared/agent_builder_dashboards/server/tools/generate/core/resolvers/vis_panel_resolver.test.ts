@@ -61,7 +61,6 @@ describe('createVisPanelResolver', () => {
     });
 
     const result = await resolveVisPanel({
-      type: 'vis',
       operationType: 'add_panels',
       identifier: 'show total requests',
       nlQuery: 'show total requests',
@@ -101,7 +100,6 @@ describe('createVisPanelResolver', () => {
 
     await expect(
       resolveVisPanel({
-        type: 'vis',
         operationType: 'add_panels',
         identifier: 'show total requests',
         nlQuery: 'show total requests',
@@ -127,7 +125,6 @@ describe('createVisPanelResolver', () => {
     });
 
     await resolveVisPanel({
-      type: 'vis',
       operationType: 'edit_panels',
       identifier: 'panel-1',
       nlQuery: 'change the title',
@@ -163,7 +160,6 @@ describe('createVisPanelResolver', () => {
     const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
 
     const result = await resolveVisPanel({
-      type: 'vis',
       operationType: 'add_panels',
       identifier: 'a small multiples chart',
       nlQuery: 'a small multiples chart',
@@ -191,7 +187,6 @@ describe('createVisPanelResolver', () => {
     const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
 
     const result = await resolveVisPanel({
-      type: 'vis',
       operationType: 'add_panels',
       identifier: 'total requests',
       nlQuery: 'total requests',
@@ -203,7 +198,7 @@ describe('createVisPanelResolver', () => {
     expect(mockedBuildLensConfig).toHaveBeenCalled();
   });
 
-  it('keeps the Vega renderer and reuses the embedded spec when editing a vega panel', async () => {
+  it('reuses the embedded spec when editing a Vega panel', async () => {
     const existingSpec = '{"$schema":"vega-lite","mark":"bar"}';
     const nextSpec = '{"$schema":"vega-lite","mark":"line"}';
     mockedBuildVegaConfig.mockResolvedValue({
@@ -215,13 +210,11 @@ describe('createVisPanelResolver', () => {
     const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
 
     const result = await resolveVisPanel({
-      type: 'vis',
       operationType: 'edit_panels',
       identifier: 'panel-1',
       nlQuery: 'make it a line chart',
       preserveESQL: true,
-      // A stale "lens" request must be ignored: edits keep the existing renderer.
-      renderer: 'lens',
+      renderer: 'vega',
       existingPanel: {
         id: 'panel-1',
         type: VEGA_VIS_TYPE,
@@ -248,10 +241,10 @@ describe('createVisPanelResolver', () => {
     const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
 
     const result = await resolveVisPanel({
-      type: 'vis',
       operationType: 'edit_panels',
       identifier: 'panel-1',
       nlQuery: 'Enhance this panel',
+      renderer: 'vega',
       applyChartRules: true,
       preserveESQL: true,
       existingPanel: {
@@ -268,39 +261,5 @@ describe('createVisPanelResolver', () => {
     });
     expect(mockedBuildVegaConfig).not.toHaveBeenCalled();
     expect(mockedBuildLensConfig).not.toHaveBeenCalled();
-  });
-
-  it('returns a failure when editing a non-Lens panel', async () => {
-    const resolveVisPanel = createVisPanelResolver({
-      logger,
-      modelProvider,
-      events,
-      esClient,
-    });
-
-    const result = await resolveVisPanel({
-      type: 'vis',
-      operationType: 'edit_panels',
-      identifier: 'panel-1',
-      nlQuery: 'refine this analysis',
-      existingPanel: {
-        id: 'panel-1',
-        type: 'aiOpsLogRateAnalysis',
-        config: { seriesType: 'log_rate' },
-        grid: { w: 24, h: 12, x: 0, y: 0 },
-      },
-    });
-
-    expect(result).toEqual({
-      type: 'failure',
-      failure: {
-        type: 'edit_panels',
-        identifier: 'panel-1',
-        error:
-          'Panel "panel-1" with type "aiOpsLogRateAnalysis" is not supported for inline visualization editing.',
-      },
-    });
-    expect(mockedBuildLensConfig).not.toHaveBeenCalled();
-    expect(mockedBuildVegaConfig).not.toHaveBeenCalled();
   });
 });

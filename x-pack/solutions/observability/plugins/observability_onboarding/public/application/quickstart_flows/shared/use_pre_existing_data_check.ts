@@ -19,10 +19,12 @@ type PreExistingDataFlow = keyof typeof FLOW_ENDPOINTS;
 export function usePreExistingDataCheck({
   flow,
   onboardingId,
+  osType,
   enabled = true,
 }: {
   flow: PreExistingDataFlow;
   onboardingId?: string;
+  osType?: string;
   enabled?: boolean;
 }): boolean {
   const endpoint = FLOW_ENDPOINTS[flow];
@@ -36,11 +38,11 @@ export function usePreExistingDataCheck({
       return callApi(`GET ${endpoint}` as Parameters<typeof callApi>[0], {
         params: {
           ...(onboardingId ? { path: { onboardingId } } : {}),
-          query: { start },
+          query: { start, ...(osType ? { osType } : {}) },
         },
       });
     },
-    [endpoint, start, onboardingId, needsOnboardingId, enabled],
+    [endpoint, start, onboardingId, osType, needsOnboardingId, enabled],
     { showToastOnError: false }
   );
 

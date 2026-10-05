@@ -35,7 +35,6 @@ import { captureDiscoveryForScenario } from '../lib/capture_discovery';
 import { sleep } from '../lib/sleep';
 import {
   cleanupExtractedData,
-  configureModelSelectionSettings,
   disableStreams,
   enableLogsNativeStream,
   enableSignificantEvents,
@@ -83,9 +82,10 @@ run(
     if (!connectorId) {
       throw new Error(
         'Required: --connector-id <id>\n' +
-          'Provide the ID of an LLM connector for feature extraction ' +
+          'Provide a chat model connector or inference endpoint ID for KI onboarding ' +
+          'and optional discovery ' +
           '(e.g.: "bedrock-opus-46").\n' +
-          'This connector must be preconfigured in your kibana.dev.yml.'
+          'The model must be available in Kibana.'
       );
     }
 
@@ -206,7 +206,7 @@ run(
         1. Deploys the demo app on minikube
         2. Waits for baseline traffic
         3. Optionally patches a failure scenario and waits
-        4. Enables streams and triggers LLM feature extraction
+        4. Enables streams and runs KI onboarding with the requested model
         5. Snapshots logs + extracted features to GCS
         6. Cleans up and tears down the demo
 
@@ -244,7 +244,7 @@ run(
       boolean: ['dry-run', 'with-discovery'],
       help: `
         --logs-index       Logs index to use (default: logs)
-        --connector-id     (required) LLM connector ID for feature extraction (e.g.: bedrock-opus-46)
+        --connector-id     (required) Chat model connector or inference endpoint ID passed to each KI onboarding and discovery request (e.g.: bedrock-opus-46)
         --run-id           Run identifier used as GCS subfolder (default: today's date in format YYYY-MM-DD)
         --scenario         Process only specific scenario(s) - can be repeated. Omit for all.
         --dry-run          Print what would happen without executing
@@ -303,11 +303,10 @@ async function processScenario(
     await deployDemo({ demoType, log, logsIndex });
     log.info('[2/8] Deployment complete');
 
-    // Step 3 — Configure significant events and the connector. Must run after
+    // Step 3 — Configure significant events. Must run after
     // deployDemo (Step 2) which enables Kibana Streams and its settings APIs.
     log.info('[3/8] Configuring significant events...');
     await enableSignificantEvents(config, log);
-    await configureModelSelectionSettings(config, log, connectorId);
 
     // Step 4 — Accumulate baseline traffic
     log.info('[4/8] Accumulating baseline traffic...');
@@ -326,7 +325,7 @@ async function processScenario(
 
     // Step 6 — Run KI onboarding (persists features for the snapshot)
     log.info(`[6/8] Running KI onboarding (${onboardingSteps.join(', ')})...`);
-    await triggerKIExtraction(config, log, logsIndex, onboardingSteps);
+    await triggerKIExtraction(config, log, connectorId, logsIndex, onboardingSteps);
     await waitForKIExtraction(config, log, logsIndex, extractionTimeoutMs);
     await logExtractedKIFeatures(config, log, logsIndex);
     const featuresResult = await persistKIFeaturesForSnapshot(

@@ -6,7 +6,6 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { ResolvedCustomContentTemplate } from '@kbn/custom-content-server';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { z } from '@kbn/zod/v4';
 import type { ResolvePanelContent } from './panels';
@@ -17,14 +16,6 @@ import type {
   PanelContentAttempt,
 } from '../resolve_panel';
 import type { ResolvedPanelCreationRequest } from './panel_creation';
-
-export type ResolveCustomContentTemplate = (params: {
-  prompt: string;
-  esqlQuery?: string;
-  existingTemplate?: string;
-  /** True when the panel already has an ES|QL query that is not changing, so the resolver can skip re-sampling. */
-  hasExistingQuery?: boolean;
-}) => Promise<ResolvedCustomContentTemplate>;
 
 /**
  * Turns a visualization attachment id into panel content. Injected like the other resolvers so the
@@ -61,7 +52,6 @@ export interface OperationExecutionContext {
   resolvedPanelCreationRequests: Map<number, ResolvedPanelCreationRequest[]>;
   sectionIdsByKey: Map<string, string>;
   resolvePanelContent?: ResolvePanelContent;
-  resolveCustomContentTemplate?: ResolveCustomContentTemplate;
   resolveAttachmentPanel?: ResolveAttachmentPanel;
   resolveControlFieldCapabilities?: ResolveControlFieldCapabilities;
 }

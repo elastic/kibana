@@ -277,6 +277,86 @@
       }
     },
     {
+      "id": "89815b88d825848-36a8096503f4066",
+      "title": "Agent Builder — chat API message (/api/chat/message) answers a new conversation with text only, then continues it with the returned conversation_id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
+        "line": 113,
+        "column": 7
+      }
+    },
+    {
+      "id": "89815b88d825848-a973fe264ad4206",
+      "title": "Agent Builder — chat API message (/api/chat/message) declines a tool confirmation instead of pausing, and reports it next to the answer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
+        "line": 183,
+        "column": 30
+      }
+    },
+    {
+      "id": "89815b88d825848-d40081a38e00ba0",
+      "title": "Agent Builder — chat API message (/api/chat/message) answers 404 for an unknown agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
+        "line": 240,
+        "column": 16
+      }
+    },
+    {
+      "id": "89815b88d825848-1468902586a1963",
+      "title": "Agent Builder — chat API message (/api/chat/message) answers 404 for an unknown conversation_id without creating a conversation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
+        "line": 254,
+        "column": 11
+      }
+    },
+    {
+      "id": "89815b88d825848-851cf3f66c3b61e",
+      "title": "Agent Builder — chat API message (/api/chat/message) rejects requests outside the minimal shape with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
+        "line": 274,
+        "column": 7
+      }
+    },
+    {
       "id": "40bd1ba0cff0864-80b2570c588b8a3",
       "title": "Agent Builder — converse attachments API [local] rejects unknown attachment type",
       "expectedStatus": "passed",

@@ -18,11 +18,7 @@ export interface CommentsButtonProps {
   services: CommentsHostServices;
 }
 
-/**
- * The button that toggles comment mode, and the layer itself. Mount it as the
- * page loads rather than on first use: the clicks that reveal UI are recorded
- * from then on, and a comment made in UI opened earlier would have no trail.
- */
+/** The button that toggles comment mode, and the layer itself. Mount it as the page loads: the clicks that reveal UI are recorded from then on. */
 export const CommentsButton = ({ services }: CommentsButtonProps) => {
   const [controller] = useState(() => createCommentsController(services));
 

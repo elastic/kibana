@@ -62,7 +62,9 @@ triggers:
         title:
           type: string
           maxLength: 1024
-          description: Title of the Attack Discovery under review.
+          description: >-
+            Persisted, anonymized title of the Attack Discovery under review. The
+            fallback when `resolve_display_text` cannot read its display title.
         alert_ids:
           type: array
           maxItems: 1000
@@ -77,7 +79,9 @@ triggers:
         summary_markdown:
           type: string
           maxLength: 8000
-          description: Summary of the Attack Discovery, shown to the analyst and the analysis agent.
+          description: >-
+            Persisted, anonymized summary of the Attack Discovery under review. The
+            fallback when `resolve_display_text` cannot read its display summary.
         autonomy:
           type: string
           enum:
@@ -171,6 +175,42 @@ steps:
         {%- assign attack = inputs.attack_discovery_id -%}
         {{ attack | slice: 0,8 }}-{{ attack | slice: 8,4 }}-8{{ attack | slice: 12,3 }}-8{{ attack | slice: 15,3 }}-{{ attack | slice: 18,12 }}
 
+  # The discovery's title and summary as an analyst should read them. The `title`
+  # and `summary_markdown` inputs are the persisted, anonymized text, with
+  # `{{ field value }}` tokens that only the Attack Discovery renderer understands,
+  # so the Investigation title, its summary, the journal and the proposal comment,
+  # which render plain text or plain markdown, would show both. The public Attack
+  # Discovery find API returns the same discovery with its field values as inline
+  # code and its original values restored, under this workflow's identity and
+  # privileges.
+  #
+  # `on-failure: continue`, and every use falls back to the inputs: text that shows
+  # anonymized values is not a reason to abandon the review. This text is only for
+  # display. The FP/TP analysis loads the discovery itself. `journal_review_started`
+  # records when the fallback was used, because a re-review cannot repair the
+  # Investigation title or summary: its create 409s.
+  #
+  # One retry, because a transient failure here leaves the fallback text in place for
+  # good. The timeout bounds each attempt well below the transport's 300s default.
+  - name: resolve_display_text
+    type: kibana.request
+    timeout: "30s"
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/attack_discovery/_find"
+      # Encoded by the step, so the id cannot add parameters of its own.
+      # `include_all_authors`, so a discovery another identity generated is found.
+      query:
+        ids: "{{ inputs.attack_discovery_id }}"
+        include_all_authors: "true"
+      headers:
+        elastic-api-version: "2023-10-31"
+    on-failure:
+      retry:
+        max-attempts: 1
+        delay: 5s
+      continue: true
+
   #
   # One Investigation per attack, opened before the analysis runs so there is
   # somewhere to attach evidence and somewhere to hang a proposal. `public` access
@@ -197,15 +237,19 @@ steps:
     type: ai.conversation.create
     with:
       conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
-      title: "{{ inputs.title }}"
+      title: "{{ steps.resolve_display_text.output.data[0].title | default: inputs.title }}"
       template_id: investigation
       access_control:
         access_mode: public
       metadata:
         status: open
-        summary: "{{ inputs.summary_markdown }}"
+        # Plain text: the Investigation list and overview show it as-is, so the
+        # inline-code backticks are removed. Original values can be longer than
+        # the anonymized ones, so it is truncated to the discovery's own bound.
+        summary: "{{ steps.resolve_display_text.output.data[0].summary_markdown | remove: '`' | default: inputs.summary_markdown | truncate: 8000 }}"
         description: >-
-          Attack Discovery review of "{{ inputs.title }}" covering
+          Attack Discovery review of
+          "{{ steps.resolve_display_text.output.data[0].title | default: inputs.title }}" covering
           {{ inputs.alert_ids | default: consts.no_alert_ids | size }} detection alert(s).
         # The RUNNER's execution, not this one. This is the only record of which
         # attacks came out of the same Worker run, which is what telemetry and
@@ -238,8 +282,11 @@ steps:
       inputs:
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: >-
-          Review started for "{{ inputs.title }}".
-          {{ inputs.alert_ids | default: consts.no_alert_ids | size }} correlated detection alert(s).
+          Review started for
+          "{{ steps.resolve_display_text.output.data[0].title | default: inputs.title }}".
+          {% if steps.resolve_display_text.output.data[0].title == blank %}Could not read the
+          discovery's display text, so names and values below are shown anonymized.
+          {% endif %}{{ inputs.alert_ids | default: consts.no_alert_ids | size }} correlated detection alert(s).
           Autonomy: {{ inputs.autonomy | default: consts.default_autonomy }}.
           Parent run: {{ inputs.parent_run_id }}.
           This execution: {{ execution.id }}.
@@ -690,8 +737,12 @@ steps:
       # `escalate` above is what restricts this to true_positive and inconclusive, so
       # autonomy is the only axis left to test.
       auto_approve: "${{ steps.resolve_context.output.autonomy == 'supervised' }}"
+      # Rendered as plain markdown, so the discovery text comes from
+      # `resolve_display_text`: field values as inline code, original values
+      # restored. The summary is truncated so the whole comment stays under the
+      # proposal's 8192-character bound, with room for the title and the text below.
       comment: >-
-        ## {{ inputs.title }}
+        ## {{ steps.resolve_display_text.output.data[0].title | default: inputs.title }}
 
 
         FP/TP analysis classified this attack as
@@ -699,7 +750,7 @@ steps:
         {{ inputs.alert_ids | default: consts.no_alert_ids | size }} detection alert(s).
 
 
-        {{ inputs.summary_markdown }}
+        {{ steps.resolve_display_text.output.data[0].summary_markdown | default: inputs.summary_markdown | truncate: 6000 }}
 
 
         **Approve** to **run a deep forensics investigation**: Forensics Watch picks the
@@ -726,7 +777,7 @@ steps:
         # The attack's own name, which `resolve_escalation` already heads the
         # comment with. Truncated because this trigger allows 1024 and the
         # proposal step rejects anything over 256.
-        title: "{{ inputs.title | truncate: 256, '' }}"
+        title: "{{ steps.resolve_display_text.output.data[0].title | default: inputs.title | truncate: 256, '' }}"
         comment: "{{ steps.resolve_escalation.output.comment }}"
         actionWorkflowId: "{{ consts.handoff_to_forensics_action }}"
         actionInput: "${{ steps.resolve_escalation.output.action_input }}"
@@ -905,7 +956,7 @@ steps:
     type: workflow.output
     status: completed
     with:
-      title: "{{ inputs.title }}"
+      title: "{{ steps.resolve_display_text.output.data[0].title | default: inputs.title }}"
       verdict: "{{ steps.resolve_analysis.output.verdict }}"
       attack_discovery_id: "{{ inputs.attack_discovery_id }}"
       investigation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"

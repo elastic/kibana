@@ -56,6 +56,7 @@ const significantEventsAppRoutes = {
               type: t.union([t.string, t.array(t.string)]),
               subtype: t.union([t.string, t.array(t.string)]),
               stream: t.union([t.string, t.array(t.string)]),
+              service: t.union([t.string, t.array(t.string)]),
               showComputed: t.string,
               selectedItem: t.string,
               selectedEvent: t.string,

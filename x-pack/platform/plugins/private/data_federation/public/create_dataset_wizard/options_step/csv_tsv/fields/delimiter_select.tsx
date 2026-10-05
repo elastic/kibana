@@ -15,7 +15,7 @@ import {
   type ComboBoxPresetOption,
 } from '../../../components/eui_combo_box_with_custom_option';
 
-const toDisplayLabel = (value: string): string => {
+export const getDelimiterDisplayLabel = (value: string): string => {
   if (value === ',') return createDatasetWizardStrings.settingsDelimiterOptionComma;
   if (value === '\t') return createDatasetWizardStrings.settingsDelimiterOptionTab;
   if (value === ';') return createDatasetWizardStrings.settingsDelimiterOptionSemicolon;
@@ -75,7 +75,7 @@ export function DelimiterSelect({
       onChange={onChange}
       onBlur={onBlur}
       presetOptions={presetOptions}
-      getCustomLabel={toDisplayLabel}
+      getCustomLabel={getDelimiterDisplayLabel}
       // Don't trim: allow whitespace delimiters (e.g. a single space).
       isValidCustomOption={isValidDelimiter}
       placeholder={createDatasetWizardStrings.settingsDelimiterPlaceholder}

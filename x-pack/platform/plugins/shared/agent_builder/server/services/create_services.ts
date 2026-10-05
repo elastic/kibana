@@ -130,6 +130,8 @@ export class ServiceManager {
     trackingService,
     analyticsService,
     searchInferenceEndpoints,
+    licensing,
+    deploymentInfo,
     deductiveRegister,
     conversationEventBus,
   }: ServicesStartDeps & { conversationEventBus?: ConversationEventBus }): InternalStartServices {
@@ -240,6 +242,8 @@ export class ServiceManager {
       getExecutionService,
       searchInferenceEndpoints,
       conversationTemplates: conversationTemplatesStart,
+      licensing,
+      deploymentInfo,
       deductiveRegister,
     });
     runner = runnerFactory.getRunner();

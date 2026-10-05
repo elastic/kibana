@@ -9,7 +9,7 @@ applies_to:
 
 # Bitbucket connector [bitbucket-action-type]
 
-The Bitbucket connector lets a workflow or agent drive the pull request, branch, and pipeline lifecycle on a Bitbucket Cloud workspace without opening the Bitbucket UI. It can:
+The Bitbucket connector lets an agent drive the pull request, branch, and pipeline lifecycle on a Bitbucket Cloud workspace without opening the Bitbucket UI. It can:
 
 - Open, read, comment on, update, approve, decline, and merge pull requests.
 - Create, read, and delete branches, and read commit metadata.

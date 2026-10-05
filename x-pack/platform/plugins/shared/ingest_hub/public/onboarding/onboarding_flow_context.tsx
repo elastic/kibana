@@ -14,6 +14,7 @@ import type {
 } from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry, DataFormat, DeploymentMethod } from './aws_service_matrix';
+import { applyDeploymentMethodView } from './aws_service_matrix';
 import { useAwsServiceMatrix } from './use_aws_service_matrix';
 import { useDefaultDataFormat } from './use_default_data_format';
 import { getOnboardingSessionKey } from './onboarding_session_storage';
@@ -64,6 +65,24 @@ export interface DetectAndReviewStepState {
    * the instance is already gone from policyIdsByInstance.
    */
   pendingCleanupPolicyIds?: Record<string, string>;
+  /**
+   * True when service settings or auth credentials differ from the last-deployed SO state.
+   * Set at Deploy step mount after a drift check; cleared after a successful redeploy.
+   */
+  isDirty?: boolean;
+  /**
+   * True when the auth method or connector specifically differs from the last-deployed SO state.
+   * Subset of isDirty; used to gate overrideCloudConnector on MI policy updates so that a
+   * service-var-only redeploy does not silently re-attach the wizard's connector over one
+   * reassigned by an operator.
+   */
+  isAuthDirty?: boolean;
+  /**
+   * True when the selected agent policies differ from the last-deployed SO state. Subset of
+   * isDirty; gates overwriting package-policy `policy_ids` so a var-only redeploy does not
+   * detach agent policies attached outside the wizard.
+   */
+  isPolicySelectionDirty?: boolean;
 }
 
 // Only non-sensitive fields are persisted — password values are never written to session storage.
@@ -74,6 +93,10 @@ interface PersistedAuthenticateAndDeployStep {
   authMethod?: CloudOnboardingDeploymentAuthMethod;
   accessKeyId?: string;
   deploymentMethod?: DeploymentMethod;
+  // Deployment method the user had selected when they last continued from Step 2. Lives here (not
+  // in the service-settings session key) because this provider stays mounted: react-use's
+  // useSessionStorage persists in an effect, which is lost when Step 2 unmounts on navigation.
+  serviceSettingsMethod?: DeploymentMethod;
   // Agent-based deploy fields — persisted so Back/Next round trips preserve state.
   // Note: agentPolicyId presence doubles as the durable "deploy succeeded" flag (no separate bool).
   agentHostsMode?: 'new' | 'existing';
@@ -109,6 +132,9 @@ interface PersistedDetectAndReviewStep {
   onboardingDeploymentId?: string;
   ecfStacks?: Array<{ family: string; stackName: string; templateVersion: string }>;
   pendingCleanupPolicyIds?: Record<string, string>;
+  isDirty?: boolean;
+  isAuthDirty?: boolean;
+  isPolicySelectionDirty?: boolean;
 }
 
 const DEFAULT_SELECTED_IDS: string[] = [];
@@ -129,11 +155,18 @@ interface OnboardingFlowState {
   authenticateAndDeployStep: AuthenticateAndDeployStepState;
   setConnectorId: (id: string | undefined, name?: string) => void;
   setStaticKeys: (keys: AwsStaticKeyCredentials | undefined) => void;
+  /** Clear only the in-memory staged credentials without touching persisted authMethod or connectorId. */
+  clearStagedStaticKeys: () => void;
+  /** Update persisted authMethod in place without touching connectorId or staticKeys. */
+  setAuthMethod: (method: CloudOnboardingDeploymentAuthMethod) => void;
   setPendingIacTemplate: (iac: PendingIacTemplate | undefined) => void;
   setAgentBasedDeployment: (state: Partial<AgentBasedDeploymentState>) => void;
   agentBasedDeployment: AgentBasedDeploymentState;
   deploymentMethod: DeploymentMethod;
   setDeploymentMethod: (method: DeploymentMethod) => void;
+  /** Method Step 2's settings were last confirmed under; undefined until Step 2 is continued. */
+  serviceSettingsMethod: DeploymentMethod | undefined;
+  setServiceSettingsMethod: (method: DeploymentMethod) => void;
   servicesStep: ServicesStepState;
   setSelectedServiceIds: (ids: string[]) => void;
   setDataFormat: (format: DataFormat) => void;
@@ -200,6 +233,19 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         authMethod: id ? ('identity_federation' as const) : undefined,
         accessKeyId: undefined,
       };
+      persistedAuthStepRef.current = next;
+      setPersistedAuthenticateAndDeployStep(next);
+    },
+    [setPersistedAuthenticateAndDeployStep]
+  );
+
+  const clearStagedStaticKeys = useCallback(() => {
+    setStaticKeysState(undefined);
+  }, []);
+
+  const setAuthMethod = useCallback(
+    (method: CloudOnboardingDeploymentAuthMethod) => {
+      const next = { ...persistedAuthStepRef.current, authMethod: method };
       persistedAuthStepRef.current = next;
       setPersistedAuthenticateAndDeployStep(next);
     },
@@ -334,6 +380,12 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
             rest.pendingCleanupPolicyIds !== undefined
               ? rest.pendingCleanupPolicyIds
               : prev?.pendingCleanupPolicyIds,
+          isDirty: rest.isDirty !== undefined ? rest.isDirty : prev?.isDirty,
+          isAuthDirty: rest.isAuthDirty !== undefined ? rest.isAuthDirty : prev?.isAuthDirty,
+          isPolicySelectionDirty:
+            rest.isPolicySelectionDirty !== undefined
+              ? rest.isPolicySelectionDirty
+              : prev?.isPolicySelectionDirty,
         });
       }
     },
@@ -362,6 +414,9 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         onboardingDeploymentId: prev?.onboardingDeploymentId,
         ecfStacks: prev?.ecfStacks,
         pendingCleanupPolicyIds: nextPendingCleanup,
+        isDirty: prev?.isDirty,
+        isAuthDirty: prev?.isAuthDirty,
+        isPolicySelectionDirty: prev?.isPolicySelectionDirty,
       });
     },
     [setDetectAndReviewStep]
@@ -398,6 +453,9 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         onboardingDeploymentId: prev?.onboardingDeploymentId,
         ecfStacks: prev?.ecfStacks,
         pendingCleanupPolicyIds: nextPendingCleanup,
+        isDirty: prev?.isDirty,
+        isAuthDirty: prev?.isAuthDirty,
+        isPolicySelectionDirty: prev?.isPolicySelectionDirty,
       });
     },
     [removeDeployInstance, setDetectAndReviewStep]
@@ -409,10 +467,21 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
   );
 
   const {
-    matrix: awsServiceMatrix,
+    matrix: rawAwsServiceMatrix,
     isError: awsServiceMatrixError,
     refetch: refetchAwsServiceMatrix,
   } = useAwsServiceMatrix();
+
+  const deploymentMethod: DeploymentMethod =
+    persistedAuthenticateAndDeployStep?.deploymentMethod ?? DEFAULT_DEPLOYMENT_METHOD;
+
+  // Service settings depend on the selected deployment method: ECF needs only the trigger ARN,
+  // agent-based needs the package's own vars. Every step reads the matrix through the context, so
+  // applying the method view here keeps Step 2, the Step 3 gates and the deploy builders consistent.
+  const awsServiceMatrix = useMemo(
+    () => rawAwsServiceMatrix?.map((s) => applyDeploymentMethodView(s, deploymentMethod)),
+    [rawAwsServiceMatrix, deploymentMethod]
+  );
   const awsServicesMap = useMemo(
     () => (awsServiceMatrix ? new Map(awsServiceMatrix.map((s) => [s.id, s])) : undefined),
     [awsServiceMatrix]
@@ -439,9 +508,6 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     () => ({ selectedServiceIds, dataFormat }),
     [selectedServiceIds, dataFormat]
   );
-
-  const deploymentMethod: DeploymentMethod =
-    persistedAuthenticateAndDeployStep?.deploymentMethod ?? DEFAULT_DEPLOYMENT_METHOD;
 
   const setDeploymentMethod = useCallback(
     (method: DeploymentMethod) => {
@@ -473,9 +539,19 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         policyIdsByInstance: {},
         failedInstances: [],
         deployErrors: {},
+        isDirty: false,
       });
     },
     [setPersistedAuthenticateAndDeployStep, setDetectAndReviewStep]
+  );
+
+  const setServiceSettingsMethod = useCallback(
+    (method: DeploymentMethod) => {
+      const next = { ...persistedAuthStepRef.current, serviceSettingsMethod: method };
+      persistedAuthStepRef.current = next;
+      setPersistedAuthenticateAndDeployStep(next);
+    },
+    [setPersistedAuthenticateAndDeployStep]
   );
 
   const authenticateAndDeployStep: AuthenticateAndDeployStepState = {
@@ -511,11 +587,15 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         authenticateAndDeployStep,
         setConnectorId,
         setStaticKeys,
+        clearStagedStaticKeys,
+        setAuthMethod,
         setPendingIacTemplate,
         setAgentBasedDeployment,
         agentBasedDeployment,
         deploymentMethod,
         setDeploymentMethod,
+        serviceSettingsMethod: persistedAuthenticateAndDeployStep?.serviceSettingsMethod,
+        setServiceSettingsMethod,
         servicesStep,
         setSelectedServiceIds,
         setDataFormat,

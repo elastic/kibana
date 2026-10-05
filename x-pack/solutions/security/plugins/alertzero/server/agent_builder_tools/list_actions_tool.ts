@@ -31,8 +31,8 @@ const listByCategorySchema = z.object({
  * installed action workflows at runtime instead of hard-coding workflow ids.
  *
  * Registered by the AlertZero plugin (setup), reads the catalog through
- * {@link ActionsService} — the same service backing the HTTP API — so the tool
- * and the API can never drift.
+ * {@link ActionsService} — the same service backing the HTTP API — so the tool and
+ * the API resolve the catalog the same way.
  */
 export const listActionsTool = (
   getActionsService: () => Pick<ActionsService, 'list'>,

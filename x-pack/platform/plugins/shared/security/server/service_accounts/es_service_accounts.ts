@@ -24,6 +24,7 @@ import { bestEffortUserProfileIdResolver, resolveWorkloadBinder } from './bindin
 import { ensureClusterPrivilege } from './cluster_privilege';
 import { parseCreateServiceAccountParams } from './create_params';
 import type { ServiceAccountCredentialStore } from './credentials';
+import { toDescriptionField } from './description_field';
 import {
   ES_SERVICE_ACCOUNT_MAX_ROLES,
   ES_SERVICE_ACCOUNT_ROLE_LIMITS,
@@ -43,7 +44,6 @@ import type {
 import {
   ES_SERVICE_ACCOUNT_NAMESPACE,
   ES_SERVICE_ACCOUNT_TOKEN_NAME,
-  SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH,
   SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
   SERVICE_ACCOUNT_NAME_MAX_LENGTH,
   SERVICE_ACCOUNT_NAME_REGEX,
@@ -62,16 +62,17 @@ const userManagedEntrySchema = z.object({ type: z.literal('user_managed') });
  * principal. Parsed separately from the discriminator above, so "this is not Kibana's account"
  * and "Kibana cannot read this account" stay different answers.
  *
- * Bounded by what Elasticsearch allows, the same limits Kibana sends with: an account written
- * outside Kibana can hold that much, and it still has to read as "taken" rather than as
- * unreadable.
+ * The roles are bounded by what Elasticsearch allows, the same limits Kibana sends with. An
+ * account written outside Kibana can hold that much, and it must still read as "taken" rather
+ * than as unreadable. The description is left unbounded for the same reason.
  */
 const accountEntrySchema = z.object({
-  description: z.string().max(SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH).optional(),
   roles: z
     .array(z.string().min(1).max(ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH))
     .max(ES_SERVICE_ACCOUNT_MAX_ROLES),
   enabled: z.boolean(),
+  // codeql[js/kibana/unbounded-string-in-schema] Elasticsearch caps it at 1,000 characters on write.
+  description: z.string().optional(),
 });
 
 /**
@@ -103,9 +104,9 @@ const toDirectoryEntry = (
   id,
   name,
   roles,
+  ...toDescriptionField(description),
   enabled,
   assumable,
-  ...(description !== undefined ? { description } : {}),
 });
 
 export interface EsServiceAccountsOptions {
@@ -238,7 +239,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       await esClient.transport.request({
         method: 'PUT',
         path: `/_security/service/${encodeURIComponent(namespace)}/${encodeURIComponent(name)}`,
-        body: { roles, ...(description !== undefined ? { description } : {}) },
+        body: { roles, ...toDescriptionField(description) },
         querystring: { refresh: 'wait_for' },
       });
     } catch (e) {
@@ -277,7 +278,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       id: serviceAccountId,
       name,
       roles,
-      ...(description !== undefined ? { description } : {}),
+      ...toDescriptionField(description),
     };
   }
 
@@ -604,7 +605,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       namespace,
       roles: parsed.data.roles,
       enabled: parsed.data.enabled,
-      ...(parsed.data.description !== undefined ? { description: parsed.data.description } : {}),
+      ...toDescriptionField(parsed.data.description),
     };
   }
 

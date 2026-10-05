@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiFlyoutProps, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBadgeGroup,
@@ -21,7 +21,6 @@ import {
   EuiText,
   EuiTitle,
   useEuiMemoizedStyles,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -59,27 +58,19 @@ export const Header = Object.assign(BaseHeader, {
   MetaBlock: MetaBlockPart,
 });
 
-/** Maps `paddingSize` to the header's horizontal padding; `undefined` follows EuiFlyout's `'l'` default. */
-const resolveHorizontalPadding = (
-  euiTheme: UseEuiTheme['euiTheme'],
-  paddingSize: EuiFlyoutProps['paddingSize']
-): string => {
-  switch (paddingSize) {
-    case 'none':
-      return '0';
-    case 's':
-      return euiTheme.size.s;
-    case 'm':
-      return euiTheme.size.base;
-    case 'l':
-    default:
-      return euiTheme.size.l;
-  }
-};
-
 const dividerStyles = ({ euiTheme }: UseEuiTheme) => ({
   divider: css`
     border-block-end: ${euiTheme.border.thin};
+    margin-inline: -${euiTheme.size.base};
+  `,
+});
+
+const titleStyles = () => ({
+  title: css`
+    a,
+    button {
+      font-weight: inherit;
+    }
   `,
 });
 
@@ -129,19 +120,13 @@ const collapsibleRegionStyles = ({ euiTheme }: UseEuiTheme) => {
   };
 };
 
-/** Full-width divider: negative horizontal margins bleed it past the header padding to the flyout edges. */
-const FullBleedDivider = ({ horizontalPadding }: { horizontalPadding: string }) => {
+/**
+ * Full-width divider: negative horizontal margins bleed it past the header padding to the flyout
+ * edges. `size.base` is the padding `EuiFlyout` applies for the template's `paddingSize="m"`.
+ */
+const FullBleedDivider = () => {
   const styles = useEuiMemoizedStyles(dividerStyles);
-  return (
-    <div
-      aria-hidden
-      css={styles.divider}
-      style={{
-        marginInlineStart: `-${horizontalPadding}`,
-        marginInlineEnd: `-${horizontalPadding}`,
-      }}
-    />
-  );
+  return <div aria-hidden css={styles.divider} />;
 };
 
 /** Badge counts above `MAX_VISIBLE_BADGES` collapse to `MAX_BADGES_BEFORE_OVERFLOW` plus an overflow badge. */
@@ -227,11 +212,11 @@ export const HeaderZone = ({
   flyoutTitleId,
   'data-test-subj': dataTestSubj,
 }: HeaderZoneProps) => {
-  const { euiTheme } = useEuiTheme();
   const badgeStyles = useEuiMemoizedStyles(badgeGroupStyles);
   const collapseStyles = useEuiMemoizedStyles(collapsibleRegionStyles);
-  const { dataTestSubj: rootTestSubj, paddingSize } = useFlyoutTemplateConfig();
-  const { tabs, selectedTabId, selectTab } = useFlyoutTabs();
+  const { title: titleCss } = useEuiMemoizedStyles(titleStyles);
+  const { dataTestSubj: rootTestSubj } = useFlyoutTemplateConfig();
+  const { tabs, tabBarProps, selectedTabId, selectTab } = useFlyoutTabs();
   const items = useMemo(() => headerAssembly.parseChildren(children), [children]);
   const {
     isCollapsed: isScrollCollapsed,
@@ -241,8 +226,8 @@ export const HeaderZone = ({
     headerRef,
   } = useFlyoutHeaderCollapse();
   const isCollapsed = collapsed || isScrollCollapsed;
-  const horizontalPadding = resolveHorizontalPadding(euiTheme, paddingSize);
   const titleIconNode = renderTitleIcon(titleIcon, titleTooltip);
+  const headerTestSubj = resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Header');
 
   // Every block kind carries its `instanceId` forward as its React key, so reordering or
   // removing one does not make React reuse the wrong element.
@@ -288,7 +273,7 @@ export const HeaderZone = ({
       <EuiFlyoutHeader
         hasBorder={false}
         className={FLYOUT_HEADER_CLASS_NAME}
-        data-test-subj={resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Header')}
+        data-test-subj={headerTestSubj}
       >
         <KibanaErrorBoundary>
           {/* Wraps the header content so the collapse hook can reach the header element for wheel forwarding. */}
@@ -306,7 +291,7 @@ export const HeaderZone = ({
                     <EuiTitle size="xs">
                       <h3
                         id={flyoutTitleId}
-                        css={collapseStyles.collapsedTitle}
+                        css={[titleCss, collapseStyles.collapsedTitle]}
                         title={typeof title === 'string' ? title : undefined}
                       >
                         {title}
@@ -318,7 +303,9 @@ export const HeaderZone = ({
               ) : (
                 renderTitleWithIcon(
                   <EuiTitle size="m">
-                    <h3 id={flyoutTitleId}>{title}</h3>
+                    <h3 id={flyoutTitleId} css={titleCss}>
+                      {title}
+                    </h3>
                   </EuiTitle>,
                   titleIconNode
                 )
@@ -353,7 +340,10 @@ export const HeaderZone = ({
                 {hasMetaBlocks && (
                   <>
                     <EuiSpacer size="xs" />
-                    <MetaBlocks items={metaBlockItems} />
+                    <MetaBlocks
+                      items={metaBlockItems}
+                      data-test-subj={resolveZoneTestSubj(undefined, headerTestSubj, 'MetaBlocks')}
+                    />
                   </>
                 )}
                 {hasBadges && (
@@ -370,7 +360,10 @@ export const HeaderZone = ({
                 {hasInfoBlocks && (
                   <>
                     <EuiSpacer size="m" />
-                    <InfoBlocks items={infoBlockItems} maxColumns="auto" />
+                    <InfoBlocks
+                      items={infoBlockItems}
+                      data-test-subj={resolveZoneTestSubj(undefined, headerTestSubj, 'InfoBlocks')}
+                    />
                   </>
                 )}
               </div>
@@ -383,7 +376,16 @@ export const HeaderZone = ({
 
             {/* Always visible: tab bar. */}
             {showTabs && (
-              <EuiTabs bottomBorder={false} size="m">
+              <EuiTabs
+                {...tabBarProps}
+                data-test-subj={resolveZoneTestSubj(
+                  tabBarProps?.['data-test-subj'],
+                  headerTestSubj,
+                  'Tabs'
+                )}
+                bottomBorder={false}
+                size="m"
+              >
                 {tabs.map(({ id, label, tabDomId, panelDomId, ...tabProps }) => (
                   <EuiTab
                     key={id}
@@ -399,7 +401,7 @@ export const HeaderZone = ({
               </EuiTabs>
             )}
 
-            <FullBleedDivider horizontalPadding={horizontalPadding} />
+            <FullBleedDivider />
           </div>
         </KibanaErrorBoundary>
       </EuiFlyoutHeader>

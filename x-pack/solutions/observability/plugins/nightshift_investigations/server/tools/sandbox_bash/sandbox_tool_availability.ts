@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import type { FeatureFlagsStart } from '@kbn/core/server';
 import type { ToolAvailabilityConfig, ToolAvailabilityResult } from '@kbn/agent-builder-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -25,7 +26,10 @@ export const createSandboxToolAvailability = ({
   cacheMode: 'none',
   handler: async ({ request }) => {
     const { featureFlags, security } = getDeps();
-    if (!(await featureFlags?.getBooleanValue(NIGHTSHIFT_ENABLED_FLAG, false))) {
+    if (
+      !featureFlags ||
+      !(await firstValueFrom(featureFlags.getBooleanValue$(NIGHTSHIFT_ENABLED_FLAG, false)))
+    ) {
       return unavailable('Nightshift is not enabled.');
     }
     // Deny by default: without the security plugin the user's privileges cannot be verified.

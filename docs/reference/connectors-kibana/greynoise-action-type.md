@@ -9,6 +9,8 @@ applies_to:
 
 The GreyNoise connector communicates with the GreyNoise API to detect and classify Internet scanning noise.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-greynoise-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**. For example:

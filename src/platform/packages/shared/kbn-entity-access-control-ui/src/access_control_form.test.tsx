@@ -101,6 +101,42 @@ describe('AccessControlForm', () => {
     expect(screen.getByRole('option', { name: /other/ })).toBeInTheDocument();
   });
 
+  it.each(['admin', undefined])(
+    'warns administrators editing another owner with current profile %s and allows self-grants',
+    async (currentUserId) => {
+      const onChange = jest.fn();
+      render(
+        <EuiProvider>
+          <AccessControlForm
+            value={{ access_mode: 'private', entries: [] }}
+            onChange={onChange}
+            ownerId="owner"
+            currentUserId={currentUserId}
+            canManage
+            profiles={[]}
+            suggestedProfiles={[
+              { uid: 'admin', enabled: true, user: { username: 'admin' }, data: {} },
+              { uid: 'owner', enabled: true, user: { username: 'owner' }, data: {} },
+            ]}
+            onSearch={jest.fn()}
+            roles={roles}
+            publicDescription="Visible in this space"
+          />
+        </EuiProvider>
+      );
+      expect(
+        screen.getByText("You are editing another user's access settings")
+      ).toBeInTheDocument();
+      await userEvent.click(screen.getByRole('combobox', { name: 'Find users' }));
+      expect(screen.queryByRole('option', { name: /owner/ })).not.toBeInTheDocument();
+      await userEvent.click(screen.getByRole('option', { name: /admin/ }));
+      expect(onChange).toHaveBeenCalledWith({
+        access_mode: 'private',
+        entries: [{ type: 'user', id: 'admin', role: 'viewer' }],
+      });
+    }
+  );
+
   it('labels the current owner separately from editable entries', () => {
     render(
       <EuiProvider>
@@ -109,6 +145,7 @@ describe('AccessControlForm', () => {
           onChange={jest.fn()}
           ownerId="current"
           currentUserId="current"
+          canManage
           profiles={[]}
           suggestedProfiles={[]}
           onSearch={jest.fn()}
@@ -118,6 +155,9 @@ describe('AccessControlForm', () => {
       </EuiProvider>
     );
     expect(screen.getByText('Owner (you)')).toBeInTheDocument();
+    expect(
+      screen.queryByText("You are editing another user's access settings")
+    ).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Role for current')).not.toBeInTheDocument();
   });
 

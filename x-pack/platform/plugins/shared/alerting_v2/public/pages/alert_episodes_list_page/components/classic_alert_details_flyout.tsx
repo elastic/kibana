@@ -36,6 +36,7 @@ import {
   FLYOUT_TAKE_ACTION,
   formatMetadataListDuration,
 } from '@kbn/alerting-v2-episodes-ui/components/details/translations';
+import { useAlertDetailsFlyoutWidth } from '@kbn/alerting-v2-episodes-ui/components/details/use_alert_details_flyout_width';
 import {
   ALERT_DURATION,
   ALERT_REASON,
@@ -134,7 +135,7 @@ const formatDurationUs = (value: unknown): string => {
 };
 
 /**
- * Classic alert details flyout. Chrome (push size, header/footer/tabs) matches
+ * Classic alert details flyout. Chrome (overlay, header/footer/tabs) matches
  * the v2 episode flyout so rows in the unified table feel consistent; content stays
  * classic-alert specific (overview fields + fields table).
  */
@@ -149,6 +150,7 @@ export const ClassicAlertDetailsFlyout = ({
   const [selectedTabId, setSelectedTabId] = useState<TabId>('overview');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuAnchorRef = useRef<HTMLButtonElement | null>(null);
+  const initialWidth = useAlertDetailsFlyoutWidth();
 
   const {
     data: alert,
@@ -234,13 +236,14 @@ export const ClassicAlertDetailsFlyout = ({
 
   const flyout = (
     <EuiFlyout
-      type="push"
+      type="overlay"
+      ownFocus={false}
+      resizable
       hasAnimation
       hideCloseButton
       onClose={onClose}
-      pushMinBreakpoint="m"
       paddingSize="none"
-      size="35%"
+      size={initialWidth}
       aria-labelledby={flyoutTitleId}
       data-test-subj="classicAlertEpisodeDetailsFlyout"
     >
@@ -378,11 +381,15 @@ export const ClassicAlertDetailsFlyout = ({
           borderRadius="none"
           color="transparent"
         >
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+          <EuiFlexGroup
+            justifyContent="flexEnd"
+            gutterSize="s"
+            alignItems="center"
+            responsive={false}
+          >
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 onClick={onClose}
-                flush="left"
                 data-test-subj="classicAlertEpisodeDetailsCloseButton"
               >
                 {i18n.CLASSIC_ALERT_DETAILS_CLOSE}
@@ -394,7 +401,7 @@ export const ClassicAlertDetailsFlyout = ({
                   buttonRef={menuAnchorRef}
                   fill
                   iconSide="right"
-                  iconType="chevronSingleDown"
+                  iconType={isMenuOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
                   data-test-subj="alertingV2EpisodeFlyoutTakeActionButton"
                   onClick={() => setIsMenuOpen((open) => !open)}
                 >

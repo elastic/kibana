@@ -9,6 +9,10 @@ import { createServerRouteFactory } from '@kbn/server-route-repository';
 import type { CreateServerRouteFactory } from '@kbn/server-route-repository-utils/src/typings';
 import { badRequest, conflict, forbidden, internal, isBoom, notFound } from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
+import {
+  NightshiftModelBlockedError,
+  NightshiftModelNotFoundError,
+} from '@kbn/significant-events-schema';
 import type { SignificantEventsRouteHandlerResources } from './types';
 import type { StatusError } from '../lib/errors/status_error';
 
@@ -36,6 +40,13 @@ export const createServerRoute: CreateServerRouteFactory<
     },
     handler: (options) => {
       return handler(options).catch((error) => {
+        if (
+          error instanceof NightshiftModelNotFoundError ||
+          error instanceof NightshiftModelBlockedError
+        ) {
+          throw badRequest(error.message);
+        }
+
         if (isStatusErrorLike(error)) {
           switch (error.statusCode) {
             case 400:

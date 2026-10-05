@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
@@ -70,7 +70,7 @@ const createServicesMock = ({
 });
 
 describe('Main', () => {
-  it('defaults to the data sources tab when both lists are empty', async () => {
+  it('stays on the datasets tab when both lists are empty', async () => {
     const services = createServicesMock({ dataSources: [], dataSets: [] });
 
     const { getByRole, getByTestId, queryByTestId } = render(
@@ -85,15 +85,19 @@ describe('Main', () => {
       </EuiProvider>
     );
 
-    // Starts on the sets tab, but should switch to sources once both requests complete.
-    expect(getByTestId('datasetsTabContent')).toBeInTheDocument();
-    expect(queryByTestId('dataSourcesTabContent')).toBeNull();
+    expect(services.dataSourcesClient.get).toHaveBeenCalled();
+    expect(services.datasetsClient.get).toHaveBeenCalled();
 
-    await waitFor(() => {
-      expect(getByTestId('dataSourcesTabContent')).toBeInTheDocument();
+    await act(async () => {
+      await Promise.all([
+        services.dataSourcesClient.get.mock.results[0].value,
+        services.datasetsClient.get.mock.results[0].value,
+      ]);
     });
 
-    expect(getByRole('tab', { name: mainTranslations.tabs.sources })).toHaveAttribute(
+    expect(getByTestId('datasetsTabContent')).toBeInTheDocument();
+    expect(queryByTestId('dataSourcesTabContent')).toBeNull();
+    expect(getByRole('tab', { name: mainTranslations.tabs.sets })).toHaveAttribute(
       'aria-selected',
       'true'
     );

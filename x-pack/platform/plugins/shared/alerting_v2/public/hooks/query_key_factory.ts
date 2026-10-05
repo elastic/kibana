@@ -8,6 +8,7 @@
 import type { WorkflowsSearchParams } from '@kbn/workflows';
 import type { PolicyExecutionOutcomeFilter } from '@kbn/alerting-v2-schemas';
 import type { ListRuleExecutionsUiParams } from './use_fetch_rule_executions';
+import type { MatchRulesUiParams } from './use_fetch_matching_rules';
 
 export const ruleKeys = {
   all: ['rule'] as const,
@@ -20,6 +21,7 @@ export const ruleKeys = {
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
   }) => [...ruleKeys.lists(), filters] as const,
+  matchList: (params: MatchRulesUiParams) => [...ruleKeys.lists(), 'match', params] as const,
   details: () => [...ruleKeys.all, 'details'] as const,
   detail: (id: string) => [...ruleKeys.details(), id] as const,
   allTags: () => [...ruleKeys.all, 'tags'] as const,

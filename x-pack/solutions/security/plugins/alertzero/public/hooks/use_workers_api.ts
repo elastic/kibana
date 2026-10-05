@@ -98,6 +98,7 @@ const replaceWorkerInList = (
     return;
   }
   queryClient.setQueryData<ListWorkersResponse>(queryKey, {
+    ...current,
     workers: current.workers.map((worker) => (worker.id === next.id ? next : worker)),
   });
 };

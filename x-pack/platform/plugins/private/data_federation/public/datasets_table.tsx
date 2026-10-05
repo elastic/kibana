@@ -8,19 +8,15 @@
 import type { FunctionComponent } from 'react';
 import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import {
-  EuiButton,
-  EuiInMemoryTable,
-  EuiLink,
-  EuiSpacer,
-  EuiTextBlockTruncate,
-} from '@elastic/eui';
+import { EuiButton, EuiInMemoryTable, EuiSpacer, EuiTextBlockTruncate } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 
 import type { DataSetWithName, DataSource } from '../common';
 import { CREATE_DATASET_PATH, getEditDatasetPath } from './app_paths';
+import { DatasetRowActions } from './dataset_row_actions';
 import { getDataSourceTypeVerbose } from './get_data_source_type_label';
+import { getDatasetEsqlQuery } from './get_dataset_esql_query';
 import { mainTranslations } from './main_i18n';
 import type { DataFederationKibanaServices } from './types';
 
@@ -45,22 +41,11 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
   onDeleteSelected,
 }) => {
   const {
-    services: { docLinks },
+    services: { discoverLocator },
   } = useKibana<DataFederationKibanaServices>();
   const history = useHistory();
   const createDatasetNav = reactRouterNavigate(history, CREATE_DATASET_PATH);
 
-  const emptyMessage = useMemo(
-    () => (
-      <>
-        {mainTranslations.columns.dataSets.noItems}{' '}
-        <EuiLink href={docLinks.links.dataFederation.datasets} target="_blank">
-          {mainTranslations.docsLink}
-        </EuiLink>
-      </>
-    ),
-    [docLinks.links.dataFederation.datasets]
-  );
   const columns = useMemo<Array<EuiBasicTableColumn<DataSetListRow>>>(
     () => [
       {
@@ -112,30 +97,26 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
         width: '8%',
         actions: [
           {
-            name: mainTranslations.columns.dataSets.editAction,
-            description: mainTranslations.columns.dataSets.editActionDescription,
-            icon: 'pencil',
-            type: 'icon',
-            onClick: (item) => {
-              history.push(getEditDatasetPath(item.name));
-            },
-            'data-test-subj': 'dataSetsSetsEditButton',
-          },
-          {
-            name: mainTranslations.columns.dataSets.deleteAction,
-            description: mainTranslations.columns.dataSets.deleteActionDescription,
-            icon: 'trash',
-            color: 'danger',
-            type: 'icon',
-            onClick: (item) => {
-              onDelete(item);
-            },
-            'data-test-subj': 'dataSetsSetsDeleteIconButton',
+            render: (item, enabled) => (
+              <DatasetRowActions
+                disabled={!enabled}
+                onOpenInDiscover={
+                  discoverLocator
+                    ? () =>
+                        discoverLocator.navigateSync({
+                          query: { esql: getDatasetEsqlQuery(item.name) },
+                        })
+                    : undefined
+                }
+                onEdit={() => history.push(getEditDatasetPath(item.name))}
+                onDelete={() => onDelete(item)}
+              />
+            ),
           },
         ],
       },
     ],
-    [history, onDelete]
+    [discoverLocator, history, onDelete]
   );
 
   return (
@@ -210,7 +191,7 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
         }}
         data-test-subj="dataSetsSetsTable"
         tableCaption={mainTranslations.columns.dataSets.caption}
-        noItemsMessage={emptyMessage}
+        noItemsMessage={mainTranslations.columns.dataSets.noItems}
         tableLayout="auto"
         responsiveBreakpoint={false}
       />

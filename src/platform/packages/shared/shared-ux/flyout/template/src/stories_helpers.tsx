@@ -27,6 +27,7 @@ export interface SharedStoryArgs {
   numPages: number;
   paginationJump: boolean;
   numUnstructuredBlocks: number;
+  titleAsLink: boolean;
   titleIcon: boolean;
   description: boolean;
   numMetaBlocks: number;
@@ -76,14 +77,18 @@ export const TRAILING_ACTIONS: NonNullable<FlyoutTemplateProps['flyoutMenuProps'
 /** Maps shared story args to `FlyoutTemplate` props. Pagination is handled per-story via useState. */
 export const buildFlyoutProps = (
   args: SharedStoryArgs,
+  title: string,
   paginationProps?: FlyoutTemplateProps['flyoutMenuProps']
 ): Omit<FlyoutTemplateProps, 'onClose' | 'children'> => {
-  const { numLeadingActions, numTrailingActions, resizable, type, ownFocus } = args;
+  const { numLeadingActions, numTrailingActions, resizable, type, ownFocus, titleAsLink } = args;
   const leadingActions = LEADING_ACTIONS.slice(0, numLeadingActions);
   const trailingActions = TRAILING_ACTIONS.slice(0, numTrailingActions);
-  const hasMenuContent = leadingActions.length > 0 || trailingActions.length > 0 || paginationProps;
+  const hasMenuContent =
+    titleAsLink || leadingActions.length > 0 || trailingActions.length > 0 || paginationProps;
   const flyoutMenuProps: FlyoutTemplateProps['flyoutMenuProps'] = hasMenuContent
     ? {
+        // EUI re-registers the flyout when its menu title changes, which only a string title can supply.
+        ...(titleAsLink ? { title } : {}),
         ...(leadingActions.length > 0 ? { leadingActions } : {}),
         ...(trailingActions.length > 0 ? { trailingActions } : {}),
         ...paginationProps,
@@ -275,12 +280,20 @@ export const infoBlockItems = (count: number) => INFO_BLOCK_POOL.slice(0, count)
  */
 export const headerZone = (
   args: SharedStoryArgs,
-  title: string,
+  title: React.ReactNode,
   children?: React.ReactNode,
   headerProps?: Partial<React.ComponentProps<typeof FlyoutTemplate.Header>>
 ) => (
   <FlyoutTemplate.Header
-    title={title}
+    title={
+      args.titleAsLink ? (
+        <EuiLink href="#" onClick={(event) => event.preventDefault()}>
+          {title}
+        </EuiLink>
+      ) : (
+        title
+      )
+    }
     {...buildTitleIconProps(args)}
     description={args.description ? HEADER_DESCRIPTION : undefined}
     {...headerProps}

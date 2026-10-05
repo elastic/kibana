@@ -20,7 +20,13 @@
       "significantEvents",
       "unifiedSearch"
     ],
-    "optionalPlugins": ["agentBuilder", "nightshiftInvestigations", "serverless", "spaces"],
+    "optionalPlugins": [
+      "agentBuilder",
+      "agenticInvestigations",
+      "nightshiftInvestigations",
+      "serverless",
+      "spaces"
+    ],
     "requiredBundles": ["kibanaReact", "nightshiftInvestigations"]
   }
 }

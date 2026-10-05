@@ -21,6 +21,14 @@ triggers:
         conversation_id:
           type: string
           description: Conversation id that namespaces the sandbox. Absent for standalone runs.
+        agent_id:
+          type: string
+          description: Agent id forwarded by the beforeAgent hook. Unused by this workflow.
+        round_execution_index:
+          type: integer
+          minimum: 0
+          default: 0
+          description: Zero for the first execution, positive on HITL resume.
       additionalProperties: false
 
 steps:
@@ -28,7 +36,7 @@ steps:
     type: nightshift.decisionTreeHydrate
     # `${{ }}` must render a boolean. A bare conversation id becomes a KQL string
     # and evaluateCondition treats it as a field query, which skips the step.
-    if: '${{ inputs.conversation_id != null }}'
+    if: '${{ inputs.round_execution_index == 0 and inputs.conversation_id != null }}'
     with:
       conversation_id: '{{ inputs.conversation_id }}'
       prompt: '{{ inputs.prompt }}'

@@ -161,7 +161,7 @@ async function validateAst(
     const commandMessages = validateCommand(
       currentCommand,
       references,
-      rootCommands,
+      currentCommand.name === 'fork' ? subquery.commands : rootCommands,
       isTimeseriesSourceCommand(subquery.commands),
       {
         ...callbacks,

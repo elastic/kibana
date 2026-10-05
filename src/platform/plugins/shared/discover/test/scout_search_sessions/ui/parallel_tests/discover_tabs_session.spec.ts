@@ -52,7 +52,7 @@ spaceTest.describe(
     spaceTest('stores a background search from a newly created tab', async ({ pageObjects }) => {
       await pageObjects.unifiedTabs.createNewTab();
       await pageObjects.discover.selectTextBaseLang();
-      await pageObjects.discover.codeEditor.setCodeEditorValue(SLOW_ESQL_QUERY);
+      await pageObjects.esqlEditor.setQuery(SLOW_ESQL_QUERY);
 
       await pageObjects.backgroundSearch.sendToBackground();
 
@@ -67,7 +67,7 @@ spaceTest.describe(
       async ({ pageObjects }) => {
         await pageObjects.unifiedTabs.createNewTab();
         await pageObjects.discover.selectTextBaseLang();
-        await pageObjects.discover.codeEditor.setCodeEditorValue(SLOW_ESQL_QUERY);
+        await pageObjects.esqlEditor.setQuery(SLOW_ESQL_QUERY);
 
         // A third tab, then back to the one holding the slow query.
         await pageObjects.unifiedTabs.createNewTab();

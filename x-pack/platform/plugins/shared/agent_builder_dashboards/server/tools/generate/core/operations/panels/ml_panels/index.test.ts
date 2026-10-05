@@ -6,23 +6,21 @@
  */
 
 import { MAX_STRING_LENGTH } from '@kbn/ml-server-schemas/constants';
+import { buildConfigPanelContent, getConfigPanelEditError } from '..';
 import {
   anomalyChartsPanelConfigSchema,
-  anomalyChartsPanelDefinition,
   anomalySwimlaneConfigSchema,
-  anomalySwimlaneDefinition,
   editAnomalyChartsPanelConfigInputSchema,
   editAnomalySwimlaneConfigInputSchema,
   editSingleMetricViewerConfigInputSchema,
   singleMetricViewerConfigSchema,
-  singleMetricViewerPanelDefinition,
 } from '.';
 
-describe('anomalyChartsPanelDefinition', () => {
-  describe('buildPanelContent', () => {
+describe('ml_anomaly_charts registry entry', () => {
+  describe('buildConfigPanelContent', () => {
     it('maps a numeric severity_threshold to an open-ended floor', () => {
       expect(
-        anomalyChartsPanelDefinition.buildPanelContent({
+        buildConfigPanelContent('ml_anomaly_charts', {
           job_ids: ['job-1'],
           severity_threshold: 30,
         })
@@ -37,7 +35,7 @@ describe('anomalyChartsPanelDefinition', () => {
 
     it('passes through an embeddable severity_threshold range array', () => {
       expect(
-        anomalyChartsPanelDefinition.buildPanelContent({
+        buildConfigPanelContent('ml_anomaly_charts', {
           job_ids: ['job-1'],
           severity_threshold: [{ min: 50 }],
         })
@@ -52,7 +50,7 @@ describe('anomalyChartsPanelDefinition', () => {
 
     it('omits severity_threshold when it is not provided', () => {
       expect(
-        anomalyChartsPanelDefinition.buildPanelContent({
+        buildConfigPanelContent('ml_anomaly_charts', {
           job_ids: ['job-1'],
         })
       ).toEqual({
@@ -65,7 +63,7 @@ describe('anomalyChartsPanelDefinition', () => {
 
     it('preserves title in the embeddable config', () => {
       expect(
-        anomalyChartsPanelDefinition.buildPanelContent({
+        buildConfigPanelContent('ml_anomaly_charts', {
           job_ids: ['job-1'],
           title: 'Anomaly charts of job-1',
         })
@@ -79,28 +77,27 @@ describe('anomalyChartsPanelDefinition', () => {
     });
   });
 
-  describe('validateConfigEdit', () => {
+  describe('getConfigPanelEditError', () => {
     it('accepts editing an anomaly charts panel', () => {
       expect(
-        anomalyChartsPanelDefinition.validateConfigEdit?.({
+        getConfigPanelEditError('ml_anomaly_charts', {
           id: 'panel-1',
           type: 'ml_anomaly_charts',
           config: { job_ids: ['job-1'] },
           grid: { x: 0, y: 0, w: 24, h: 10 },
         })
-      ).toEqual({ ok: true });
+      ).toBeUndefined();
     });
 
     it('rejects editing a non-charts panel', () => {
-      const result = anomalyChartsPanelDefinition.validateConfigEdit?.({
-        id: 'panel-1',
-        type: 'lens',
-        config: {},
-        grid: { x: 0, y: 0, w: 12, h: 5 },
-      });
-
-      expect(result?.ok).toBe(false);
-      expect((result as { ok: false; error: string }).error).toMatch(/panel-1.*lens/);
+      expect(
+        getConfigPanelEditError('ml_anomaly_charts', {
+          id: 'panel-1',
+          type: 'lens',
+          config: {},
+          grid: { x: 0, y: 0, w: 12, h: 5 },
+        })
+      ).toMatch(/panel-1.*lens.*cannot be edited as anomaly charts/);
     });
   });
 });
@@ -176,17 +173,17 @@ describe('anomalySwimlaneConfigSchema', () => {
   });
 });
 
-describe('anomalySwimlaneDefinition', () => {
-  describe('validateConfigEdit', () => {
+describe('ml_anomaly_swimlane registry entry', () => {
+  describe('getConfigPanelEditError', () => {
     it('accepts editing a swim lane panel', () => {
       expect(
-        anomalySwimlaneDefinition.validateConfigEdit?.({
+        getConfigPanelEditError('ml_anomaly_swimlane', {
           id: 'panel-1',
           type: 'ml_anomaly_swimlane',
           config: { job_ids: ['job-1'], swimlane_type: 'overall' },
           grid: { x: 0, y: 0, w: 24, h: 10 },
         })
-      ).toEqual({ ok: true });
+      ).toBeUndefined();
     });
   });
 });
@@ -228,17 +225,17 @@ describe('singleMetricViewerConfigSchema', () => {
   });
 });
 
-describe('singleMetricViewerPanelDefinition', () => {
-  describe('validateConfigEdit', () => {
+describe('ml_single_metric_viewer registry entry', () => {
+  describe('getConfigPanelEditError', () => {
     it('accepts editing a single metric viewer panel', () => {
       expect(
-        singleMetricViewerPanelDefinition.validateConfigEdit?.({
+        getConfigPanelEditError('ml_single_metric_viewer', {
           id: 'panel-1',
           type: 'ml_single_metric_viewer',
           config: { job_ids: ['job-1'] },
           grid: { x: 0, y: 0, w: 24, h: 18 },
         })
-      ).toEqual({ ok: true });
+      ).toBeUndefined();
     });
   });
 });

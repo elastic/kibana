@@ -13,9 +13,9 @@ import useDebounce from 'react-use/lib/useDebounce';
 import {
   AGENTIC_INVESTIGATIONS_API_VERSION,
   ESCALATION_ASSIGN_URL,
+  ESCALATION_LINK_URL,
   ESCALATION_LINKED_INVESTIGATIONS_URL,
   ESCALATIONS_INTERNAL_URL,
-  ESCALATION_BY_ID_URL,
   ESCALATION_STATUS_URL,
   ESCALATION_CLOSE_PREVIEW_URL,
   MAX_ESCALATIONS_PAGE_SIZE,
@@ -133,8 +133,8 @@ export const useAttachToEscalation = () => {
       escalationId: string;
       linkedInvestigationId: string;
     }): Promise<EscalationConversation> =>
-      services.http.patch<EscalationConversation>(
-        ESCALATION_BY_ID_URL.replace('{id}', encodeURIComponent(escalationId)),
+      services.http.post<EscalationConversation>(
+        ESCALATION_LINK_URL.replace('{id}', encodeURIComponent(escalationId)),
         {
           version: AGENTIC_INVESTIGATIONS_API_VERSION,
           body: JSON.stringify({ linked_investigations: [linkedInvestigationId] }),

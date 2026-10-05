@@ -13,9 +13,16 @@ import { z } from '@kbn/zod/v4';
 // Action input schemas & inferred types
 // =============================================================================
 
+// Microsoft Graph message and attachment IDs are opaque base64 strings; attachment
+// IDs embed the message ID, so they routinely exceed 300 characters.
+const OUTLOOK_MAX_ID_LENGTH = 1024;
+const OUTLOOK_MAX_QUERY_LENGTH = 2000;
+const OUTLOOK_MAX_ORDERBY_LENGTH = 100;
+
 export const SearchMessagesInputSchema = z.object({
   query: z
     .string()
+    .max(OUTLOOK_MAX_QUERY_LENGTH)
     .describe(
       'Keyword Query Language (KQL) search query for mail content. Examples: "subject:budget Q4", "from:alice@contoso.com", "hasAttachments:true AND subject:report". Supports standard KQL operators (AND, OR, NOT) and property restrictions (from, subject, body, hasAttachments, sent, received).'
     ),
@@ -36,6 +43,7 @@ export type SearchMessagesInput = z.infer<typeof SearchMessagesInputSchema>;
 export const ListMessagesInputSchema = z.object({
   folderId: z
     .string()
+    .max(OUTLOOK_MAX_ID_LENGTH)
     .optional()
     .describe(
       'The well-known folder name or ID of the mail folder to list messages from. Well-known names: "inbox", "sentitems", "drafts", "deleteditems", "junkemail". Omit to list from all folders via the search API. Use listFolders to discover folder IDs.'
@@ -48,12 +56,14 @@ export const ListMessagesInputSchema = z.object({
     .describe('Maximum number of messages to return (1–100, default 20).'),
   filter: z
     .string()
+    .max(OUTLOOK_MAX_QUERY_LENGTH)
     .optional()
     .describe(
       'OData $filter expression to filter messages. Examples: "isRead eq false", "receivedDateTime ge 2024-01-01T00:00:00Z", "from/emailAddress/address eq \'alice@contoso.com\'". Supports OData filter operators.'
     ),
   orderby: z
     .string()
+    .max(OUTLOOK_MAX_ORDERBY_LENGTH)
     .optional()
     .describe(
       'OData $orderby expression to sort messages. Examples: "receivedDateTime desc" (default), "subject asc". Only one property can be used.'
@@ -64,6 +74,7 @@ export type ListMessagesInput = z.infer<typeof ListMessagesInputSchema>;
 export const GetMessageInputSchema = z.object({
   messageId: z
     .string()
+    .max(OUTLOOK_MAX_ID_LENGTH)
     .describe(
       'The ID of the Outlook message to retrieve. Obtain this from listMessages (the "id" field on each message object) or searchMessages (the resource.id field in hits).'
     ),
@@ -73,11 +84,13 @@ export type GetMessageInput = z.infer<typeof GetMessageInputSchema>;
 export const GetAttachmentInputSchema = z.object({
   messageId: z
     .string()
+    .max(OUTLOOK_MAX_ID_LENGTH)
     .describe(
       'The ID of the Outlook message that contains the attachment. Use listMessages or searchMessages to find message IDs.'
     ),
   attachmentId: z
     .string()
+    .max(OUTLOOK_MAX_ID_LENGTH)
     .describe(
       'The ID of the attachment to retrieve. Use listAttachments to discover attachment IDs for a given message.'
     ),
@@ -87,6 +100,7 @@ export type GetAttachmentInput = z.infer<typeof GetAttachmentInputSchema>;
 export const ListAttachmentsInputSchema = z.object({
   messageId: z
     .string()
+    .max(OUTLOOK_MAX_ID_LENGTH)
     .describe(
       'The ID of the Outlook message whose attachments you want to list. Use listMessages or searchMessages to find message IDs.'
     ),

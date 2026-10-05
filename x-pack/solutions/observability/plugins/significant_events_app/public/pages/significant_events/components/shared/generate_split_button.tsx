@@ -7,6 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import type { InferenceConnector } from '@kbn/inference-common';
+import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY } from '@kbn/management-settings-ids';
 import { useIsCpsMultiProject } from '@kbn/cps-utils';
 import React, { useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
@@ -61,11 +62,16 @@ export const GenerateSplitButton = ({
   size,
 }: GenerateSplitButtonProps) => {
   const {
+    core: { settings },
     dependencies: {
       start: { cps },
     },
   } = useKibana();
   const isCpsMultiProject = useIsCpsMultiProject(cps?.cpsManager);
+  const defaultConnectorOnly = settings.client.get<boolean>(
+    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+    false
+  );
   const featuresConnector = useMemo(
     () => allConnectors.find((c) => c.connectorId === config.connectors.features),
     [allConnectors, config.connectors.features]
@@ -74,6 +80,9 @@ export const GenerateSplitButton = ({
     () => allConnectors.find((c) => c.connectorId === config.connectors.queries),
     [allConnectors, config.connectors.queries]
   );
+  const isFeaturesRunDisabled = isRunDisabled || !featuresConnector;
+  const isQueriesRunDisabled = isRunDisabled || !queriesConnector;
+  const isCombinedRunDisabled = isFeaturesRunDisabled || isQueriesRunDisabled;
 
   const onSelectFeaturesConnector = useCallback(
     (connectorId: string) => {
@@ -105,12 +114,19 @@ export const GenerateSplitButton = ({
               closeMenu();
               onRunFeaturesOnly();
             },
-            disabled: isRunDisabled,
+            disabled: isFeaturesRunDisabled,
             toolTipContent:
-              isRunDisabled && runDisabledTooltip ? runDisabledTooltip : GENERATE_FEATURES_TOOLTIP,
+              isFeaturesRunDisabled && runDisabledTooltip
+                ? runDisabledTooltip
+                : GENERATE_FEATURES_TOOLTIP,
             toolTipProps: { position: 'right' as const },
           },
-          buildConnectorMenuItem({ connector: featuresConnector, panelId: 1 }),
+          buildConnectorMenuItem({
+            connector: featuresConnector,
+            selectedConnectorId: config.connectors.features,
+            resolvedConnectorId: featuresResolvedConnectorId,
+            panelId: 1,
+          }),
           { isSeparator: true as const },
           {
             name: GENERATE_QUERIES_BUTTON_LABEL,
@@ -118,18 +134,26 @@ export const GenerateSplitButton = ({
               closeMenu();
               onRunQueriesOnly();
             },
-            disabled: isRunDisabled,
+            disabled: isQueriesRunDisabled,
             toolTipContent:
-              isRunDisabled && runDisabledTooltip ? runDisabledTooltip : GENERATE_QUERIES_TOOLTIP,
+              isQueriesRunDisabled && runDisabledTooltip
+                ? runDisabledTooltip
+                : GENERATE_QUERIES_TOOLTIP,
             toolTipProps: { position: 'right' as const },
           },
-          buildConnectorMenuItem({ connector: queriesConnector, panelId: 2 }),
+          buildConnectorMenuItem({
+            connector: queriesConnector,
+            selectedConnectorId: config.connectors.queries,
+            resolvedConnectorId: queriesResolvedConnectorId,
+            panelId: 2,
+          }),
         ],
       },
       buildConnectorSelectionPanel({
         connectors: allConnectors,
         resolvedConnectorId: featuresResolvedConnectorId,
         selectedConnectorId: config.connectors.features,
+        defaultConnectorOnly,
         onSelect: (connectorId) => {
           onSelectFeaturesConnector(connectorId);
           resetMenu();
@@ -139,6 +163,7 @@ export const GenerateSplitButton = ({
         connectors: allConnectors,
         resolvedConnectorId: queriesResolvedConnectorId,
         selectedConnectorId: config.connectors.queries,
+        defaultConnectorOnly,
         onSelect: (connectorId) => {
           onSelectQueriesConnector(connectorId);
           resetMenu();
@@ -146,7 +171,8 @@ export const GenerateSplitButton = ({
       }),
     ],
     [
-      isRunDisabled,
+      isFeaturesRunDisabled,
+      isQueriesRunDisabled,
       runDisabledTooltip,
       featuresConnector,
       queriesConnector,
@@ -155,6 +181,7 @@ export const GenerateSplitButton = ({
       queriesResolvedConnectorId,
       config.connectors.features,
       config.connectors.queries,
+      defaultConnectorOnly,
       onSelectFeaturesConnector,
       onSelectQueriesConnector,
       onRunFeaturesOnly,
@@ -170,8 +197,8 @@ export const GenerateSplitButton = ({
           primaryLabel={GENERATE_BUTTON_LABEL}
           primaryIconType="radar"
           onPrimaryClick={onRun}
-          isPrimaryDisabled={isRunDisabled}
-          primaryDisabledTooltip={isRunDisabled ? runDisabledTooltip : undefined}
+          isPrimaryDisabled={isCombinedRunDisabled}
+          primaryDisabledTooltip={isCombinedRunDisabled ? runDisabledTooltip : undefined}
           primaryDataTestSubj="significant_events_onboard_streams_button"
           secondaryAriaLabel={GENERATE_CONFIG_ARIA_LABEL}
           isSecondaryDisabled={isConfigDisabled}

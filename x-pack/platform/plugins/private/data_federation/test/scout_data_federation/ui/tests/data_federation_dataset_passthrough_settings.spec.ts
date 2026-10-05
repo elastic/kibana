@@ -96,7 +96,8 @@ test.describe(
         await pageObjects.dataFederation.selectTab('Datasets');
         const row = pageObjects.dataFederation.getDataSetRow(createdDataSetName);
         await expect(row).toBeVisible();
-        await row.locator('[data-test-subj="dataSetsSetsEditButton"]').click();
+        await pageObjects.dataFederation.openDataSetActionsMenu(createdDataSetName);
+        await pageObjects.dataFederation.clickDataSetActionsMenuItem('Edit');
         await pageObjects.dataFederation.createDatasetWizard.waitFor({ state: 'visible' });
       });
 

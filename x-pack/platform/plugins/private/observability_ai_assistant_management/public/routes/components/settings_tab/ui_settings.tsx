@@ -11,7 +11,6 @@ import {
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { aiAnonymizationSettings } from '@kbn/inference-common';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -32,7 +31,6 @@ export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseR
   const { config } = useAppContext();
 
   const settingsKeys = [
-    aiAnonymizationSettings,
     aiAssistantSimulatedFunctionCalling,
     ...(knowledgeBase.status.value?.enabled ? [aiAssistantSearchConnectorIndexPattern] : []),
   ];

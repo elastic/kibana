@@ -17,13 +17,15 @@ jest.mock('@kbn/agent-builder-genai-utils', () => ({
   generateEsql: jest.fn(),
 }));
 
+const mockSchemaParse = jest.fn((config: unknown) => config);
+
 jest.mock('./chart_type_registry', () => ({
   chartTypeRegistry: new Proxy(
     {},
     {
       get: () => ({
         schema: {
-          parse: (config: unknown) => config,
+          parse: (config: unknown) => mockSchemaParse(config),
         },
         prompt: {
           selection: 'Mock chart description',
@@ -413,5 +415,100 @@ describe('createVisualizationGraph', () => {
         ['human', expect.stringContaining(JSON.stringify(parsedExistingConfig))],
       ])
     );
+  });
+
+  describe('retries', () => {
+    const esqlQuery = 'FROM logs-* | STATS count = COUNT(*)';
+
+    const runGraph = async (model: ReturnType<typeof createMockModel>) => {
+      const graph = await createVisualizationGraph(model as never, logger, events, esClient);
+      return graph.invoke({
+        nlQuery: 'Show the total log count',
+        index: 'logs-*',
+        chartType: SupportedChartType.Metric,
+        schema: {},
+        existingConfig: undefined,
+        parsedExistingConfig: null,
+        esqlQuery,
+        currentAttempt: 0,
+        actions: [],
+        validatedConfig: null,
+        error: null,
+      });
+    };
+
+    it('replays the failed response and its validation error so the model can repair it', async () => {
+      const failedResponse = asAuthoringResponse({ type: 'metric', metrics: 'count' });
+      const repairedResponse = asAuthoringResponse({
+        type: 'metric',
+        metrics: [{ column: 'count' }],
+      });
+      const model = createMockModel();
+      const { chatModel } = await model.getDefaultModel();
+      chatModel.invoke
+        .mockResolvedValueOnce({ content: failedResponse })
+        .mockResolvedValueOnce({ content: repairedResponse });
+      mockSchemaParse.mockImplementationOnce(() => {
+        throw new Error('metrics: Expected array, received string');
+      });
+
+      const finalState = await runGraph(model);
+
+      expect(chatModel.invoke).toHaveBeenCalledTimes(2);
+      const [[firstPrompt], [retryPrompt]] = chatModel.invoke.mock.calls;
+      // The original prompt is unchanged; the failed attempt is appended as a conversation.
+      // The replayed response is the raw model output, so it has no injected data_source.
+      expect(retryPrompt).toEqual([
+        ...firstPrompt,
+        ['ai', failedResponse],
+        ['human', expect.stringContaining('metrics: Expected array, received string')],
+      ]);
+      expect(finalState.error).toBeNull();
+      expect(finalState.validatedConfig).toEqual({
+        type: 'metric',
+        metrics: [{ column: 'count' }],
+        data_source: { type: 'esql', query: esqlQuery },
+      });
+    });
+
+    it('replays an unparsable response so the model can repair it', async () => {
+      const model = createMockModel();
+      const { chatModel } = await model.getDefaultModel();
+      chatModel.invoke.mockResolvedValueOnce({ content: 'not json at all' });
+
+      const finalState = await runGraph(model);
+
+      expect(chatModel.invoke).toHaveBeenCalledTimes(2);
+      const [, [retryPrompt]] = chatModel.invoke.mock.calls;
+      expect(retryPrompt.slice(-2)).toEqual([
+        ['ai', 'not json at all'],
+        ['human', expect.stringMatching(/JSON/)],
+      ]);
+      expect(finalState.error).toBeNull();
+    });
+
+    it('does not replay an attempt whose model call failed', async () => {
+      const model = createMockModel();
+      const { chatModel } = await model.getDefaultModel();
+      chatModel.invoke.mockRejectedValueOnce(new Error('connector timeout'));
+
+      const finalState = await runGraph(model);
+
+      expect(chatModel.invoke).toHaveBeenCalledTimes(2);
+      const [[firstPrompt], [retryPrompt]] = chatModel.invoke.mock.calls;
+      expect(retryPrompt).toEqual(firstPrompt);
+      expect(finalState.error).toBeNull();
+    });
+
+    it('gives up after the retry budget and reports the generation error', async () => {
+      const model = createMockModel('still not json');
+      const { chatModel } = await model.getDefaultModel();
+
+      const finalState = await runGraph(model);
+
+      expect(chatModel.invoke).toHaveBeenCalledTimes(3);
+      expect(finalState.validatedConfig).toBeNull();
+      expect(finalState.error).toMatch(/JSON/);
+    });
   });
 });

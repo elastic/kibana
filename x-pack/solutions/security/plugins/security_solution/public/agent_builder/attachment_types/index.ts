@@ -24,7 +24,6 @@ import type { ExperimentalFeatures } from '../../../common/experimental_features
 import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_embedded_provider';
 import type { SecurityAgentBuilderChrome } from './entity_explore_navigation';
 import type { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
-import { createImpactAttachmentDefinition } from './impact';
 import {
   createAlertSummaryRows,
   createAlertsSummaryRows,
@@ -153,23 +152,6 @@ export const registerInvestigationIocsAttachment = ({
       createInvestigationIocsAttachmentDefinition()
     );
   });
-};
-
-/**
- * Registers the `security.impact` attachment renderer (entity × verdict table summarising
- * alert-analysis results for impacted hosts and users). The definition is registered
- * synchronously so Agent Builder can resolve the type on first render; `ImpactInlineContent`
- * stays behind `React.lazy` inside the definition so the table UI remains code-split.
- */
-export const registerImpactAttachment = ({
-  attachments,
-}: {
-  attachments: AttachmentServiceStartContract;
-}): void => {
-  attachments.addAttachmentType(
-    SecurityAgentBuilderAttachments.impact,
-    createImpactAttachmentDefinition()
-  );
 };
 
 /**
@@ -463,25 +445,28 @@ export const registerRulePreviewAttachment = ({
 
 /**
  * Registers the `security.attack_discovery` attachment renderer (inline summary
- * and details via `AttackDiscoveryMarkdownFormatter`).
+ * and details via `AttackDiscoveryMarkdownFormatter`, and an "Open in Attacks" link
+ * built with `getUrlForApp`).
  *
  * Dynamically imports
  * [./attack_discovery](./attack_discovery) so the markdown field-plugin stack stays
  * off the main `securitySolution` page-load bundle.
  *
  * Race-window: same semantics as {@link registerRuleAttachment} — until the chunk
- * resolves, `security.attack_discovery` attachments are header-only.
+ * resolves, `security.attack_discovery` attachments are not rendered.
  */
 export const registerAttackDiscoveryAttachment = ({
   attachments,
+  getUrlForApp,
 }: {
   attachments: AttachmentServiceStartContract;
+  getUrlForApp: ApplicationStart['getUrlForApp'];
 }): void => {
   void import(
     /* webpackChunkName: "security_attack_discovery_attachment" */
     './attack_discovery'
   ).then(({ registerAttackDiscoveryAttachment: register }) => {
-    register({ attachments });
+    register({ attachments, getUrlForApp });
   });
 };
 
@@ -495,7 +480,7 @@ export const registerAttackDiscoveryAttachment = ({
  * stack stays off the main `securitySolution` page-load bundle.
  *
  * Race-window: same semantics as {@link registerRuleAttachment} — until the chunk
- * resolves, `security.attack_discovery.verdict` attachments are header-only.
+ * resolves, `security.attack_discovery.verdict` attachments are not rendered.
  */
 export const registerAttackDiscoveryVerdictAttachment = ({
   attachments,

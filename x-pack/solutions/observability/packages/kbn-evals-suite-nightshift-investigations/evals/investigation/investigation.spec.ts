@@ -24,7 +24,9 @@ import { INVESTIGATION_TIMEOUT_MS, runInvestigation } from './task';
 import { assertSuccessfulSandboxCommand } from './trace_evidence';
 import type { InvestigationTaskOutput } from './types';
 
-evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.classic }, () => {
+const suiteTags = [...tags.stateful.classic, ...tags.serverless.observability.complete];
+
+evaluate.describe('Nightshift investigations: trace-only', { tag: suiteTags }, () => {
   evaluate(
     'grades investigations with the RCA judges and persists complete agent traces',
     async ({
@@ -34,6 +36,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
       evalsClient,
       traceEsClient,
       repetitions,
+      concurrency: requestedConcurrency,
       log,
       inferenceClient,
       evaluationConnector,
@@ -45,27 +48,21 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
         evaluationConnector,
         log,
       });
-      const concurrency = 16;
+      // The evals_nightshift_investigations config set sizes Task Manager for 16 investigations.
+      const concurrency = Math.min(16, requestedConcurrency);
       evaluate.setTimeout(
         Math.ceil((dataset.examples.length * repetitions) / concurrency) *
           (INVESTIGATION_TIMEOUT_MS + 2 * 60_000) +
           5 * 60_000
       );
-      await fetch('/internal/search_inference_endpoints/settings', {
-        method: 'PUT',
-        headers: { 'elastic-api-version': '1' },
-        body: JSON.stringify({
-          features: [
-            { feature_id: 'significant_events_investigation', endpoints: [{ id: connector.id }] },
-          ],
-        }),
-      });
       await expect
         .poll(
           async () =>
             (
               await fetch<{ available: boolean }>(
-                '/internal/nightshift/investigations/availability'
+                `/internal/nightshift/investigations/availability?connector_id=${encodeURIComponent(
+                  connector.id
+                )}`
               )
             ).available,
           { timeout: 60_000 }
@@ -92,7 +89,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
           trustUpstreamDataset: Boolean(process.env.NIGHTSHIFT_DATASET_NAME),
           concurrency,
           metadata: { concurrency },
-          task: (example) => runInvestigation(fetch, example),
+          task: (example) => runInvestigation(fetch, example, connector),
         },
         judges
       );

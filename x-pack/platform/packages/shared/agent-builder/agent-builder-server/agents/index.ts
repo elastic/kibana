@@ -13,6 +13,8 @@ export type {
   AgentEventEmitter,
   AgentEventEmitterFn,
   ExperimentalFeatures,
+  DeploymentContext,
+  DeploymentEnvironment,
   DeductiveRuntimeConfig,
   SubAgentExecutor,
   SubAgentExecution,

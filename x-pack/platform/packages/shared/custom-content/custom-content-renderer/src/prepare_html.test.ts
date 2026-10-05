@@ -158,6 +158,15 @@ describe('sanitizeHtml', () => {
     expect(result).toContain('hello');
   });
 
+  it('removes image-map links, which would otherwise bypass the <a> ban', () => {
+    const result = sanitizeHtml(
+      '<img usemap="#m" src="x"><map name="m"><area shape="rect" coords="0,0,9,9" href="https://example.com"></map>'
+    );
+    expect(result).not.toContain('<area');
+    expect(result).not.toContain('<map');
+    expect(result).not.toContain('example.com');
+  });
+
   it('leaves safe HTML unchanged', () => {
     const safe = '<div class="card"><p>hello</p></div>';
     expect(sanitizeHtml(safe)).toContain('hello');

@@ -14,6 +14,7 @@ import {
   SERIES_API_PATH,
   EPISODES_API_PATH,
   ACTION_POLICY_API_PATH,
+  INTERNAL_ACTION_POLICY_API_PATH,
   RULE_API_PATH,
   EXECUTION_HISTORY_API_PATH,
   RULE_EXECUTIONS_API_PATH,
@@ -73,7 +74,7 @@ export const getRunRuleUrl = (id: string) => `${getRuleUrl(id)}/_run`;
 export const getListActionPoliciesUrl = (
   query?: Record<string, string | number | string[]>
 ): string => {
-  if (!query) return ACTION_POLICY_API_PATH;
+  if (!query) return INTERNAL_ACTION_POLICY_API_PATH;
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {
     if (Array.isArray(value)) {
@@ -82,7 +83,7 @@ export const getListActionPoliciesUrl = (
       params.set(key, String(value));
     }
   }
-  return `${ACTION_POLICY_API_PATH}?${params.toString()}`;
+  return `${INTERNAL_ACTION_POLICY_API_PATH}?${params.toString()}`;
 };
 
 export const getRuleTemplateUrl = (id: string) =>

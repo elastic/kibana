@@ -53,10 +53,8 @@ const renderWithProviders = (
   );
 };
 
-const EMPTY_FALLBACK = /No agent traces yet/;
-const EMPTY_FALLBACK_MANAGED = /No agent traces configured/;
-const EMPTY_HEADER_DESCRIPTION =
-  /Add traces to identify gaps in the context agents retrieve from this AI index/;
+const EMPTY_PROMPT = /No agent traces configured/;
+const PANEL_DESCRIPTION = /Used to identify gaps in the context agents retrieve from this AI index/;
 
 describe('TracesPanel', () => {
   beforeEach(() => {
@@ -81,10 +79,10 @@ describe('TracesPanel', () => {
     );
 
     expect(screen.getByTestId('contextAiIndexTracesEmpty')).toBeInTheDocument();
-    expect(screen.getByText(EMPTY_FALLBACK)).toBeInTheDocument();
+    expect(screen.getByText(EMPTY_PROMPT)).toBeInTheDocument();
     expect(screen.getByTestId('contextAddTracesButton')).toBeInTheDocument();
     expect(screen.queryByTestId('contextEditTracesButton')).not.toBeInTheDocument();
-    expect(screen.getByText(EMPTY_HEADER_DESCRIPTION)).toBeInTheDocument();
+    expect(screen.getByText(PANEL_DESCRIPTION)).toBeInTheDocument();
   });
 
   it('renders read-only empty fallback for managed AI indexes', () => {
@@ -93,8 +91,8 @@ describe('TracesPanel', () => {
     );
 
     expect(screen.getByTestId('contextAiIndexTracesEmpty')).toBeInTheDocument();
-    expect(screen.getByText(EMPTY_FALLBACK_MANAGED)).toBeInTheDocument();
-    expect(screen.queryByText(EMPTY_FALLBACK)).not.toBeInTheDocument();
+    expect(screen.getByText(EMPTY_PROMPT)).toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddTracesButton')).not.toBeInTheDocument();
   });
 
   it('renders the configured elastic agent trace in read-only mode', () => {
@@ -114,7 +112,7 @@ describe('TracesPanel', () => {
       'Loyalty Support Agent'
     );
     expect(screen.getByTestId('contextSourceTypeBadge')).toHaveTextContent('Elastic agent');
-    expect(screen.queryByText(EMPTY_HEADER_DESCRIPTION)).not.toBeInTheDocument();
+    expect(screen.getByText(PANEL_DESCRIPTION)).toBeInTheDocument();
   });
 
   it('renders the configured data stream trace in read-only mode', () => {
@@ -187,7 +185,7 @@ describe('TracesPanel', () => {
       testServices
     );
 
-    expect(screen.getByText(EMPTY_FALLBACK)).toBeInTheDocument();
+    expect(screen.getByText(EMPTY_PROMPT)).toBeInTheDocument();
     expect(screen.getByTestId('contextAddTracesButton')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('contextAddTracesButton'));

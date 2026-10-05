@@ -169,10 +169,10 @@ const buildItem = (
   dispatched_at: '2026-05-05T10:00:00.000Z',
   policy: { id: 'policy-1', name: 'My Policy' },
   rules: [{ id: 'rule-1', name: 'My Rule' }],
-  total_rule_count: 1,
+  rule_count: 1,
   outcome: 'success',
-  episode_count: 3,
-  episodes: [],
+  alert_count: 3,
+  alerts: [],
   action_group_count: 2,
   workflows: [{ id: 'wf-1', name: 'My Workflow' }],
   error: null,
@@ -209,7 +209,7 @@ const mockFetchResult = (overrides: Partial<MockFetchResult> = {}) => {
 
 const mockNewEventsCount = (total: number) => {
   mockUseCountNewActionPolicyExecutions.mockReturnValue({
-    data: buildResponse({ per_page: 0, total }),
+    data: buildResponse({ per_page: 1, total }),
   });
 };
 

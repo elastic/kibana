@@ -61,7 +61,15 @@ export const initSyntheticsServer = (
       validate,
       options,
     };
-
+    const getVersionedRouteOptions = {
+      availability: options?.availability,
+      excludeFromOAS: options?.excludeFromOAS,
+      excludeFromRateLimiter: options?.excludeFromRateLimiter,
+      httpResource: options?.httpResource,
+      httpResponseLogLevel: options?.httpResponseLogLevel,
+      tags: options?.tags,
+      timeout: options?.timeout && { idleSocket: options.timeout.idleSocket },
+    };
     switch (method) {
       case 'GET':
         router.versioned
@@ -69,6 +77,7 @@ export const initSyntheticsServer = (
             access: 'public',
             security,
             path: routeDefinition.path,
+            options: getVersionedRouteOptions,
           })
           .addVersion(
             {
@@ -84,6 +93,7 @@ export const initSyntheticsServer = (
             access: 'public',
             security,
             path: routeDefinition.path,
+            options,
           })
           .addVersion(
             {
@@ -99,6 +109,7 @@ export const initSyntheticsServer = (
             access: 'public',
             security,
             path: routeDefinition.path,
+            options,
           })
           .addVersion(
             {
@@ -114,9 +125,7 @@ export const initSyntheticsServer = (
             access: 'public',
             path: routeDefinition.path,
             security,
-            options: {
-              tags: options?.tags,
-            },
+            options,
           })
           .addVersion(
             {

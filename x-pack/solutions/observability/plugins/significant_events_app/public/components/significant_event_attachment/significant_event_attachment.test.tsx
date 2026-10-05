@@ -23,13 +23,12 @@ const attachment: SignificantEventAttachment = {
   type: SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
   data: {
     '@timestamp': '2026-01-01T00:00:00.000Z',
-    event_uuid: 'event-1',
     event_id: 'payment-outage',
-    status: 'open',
+    status: 'active',
     stream_names: ['logs.payment'],
     title: 'Payment outage',
     summary: 'Payments are failing.',
-    severity: '60-high',
+    severity: 'high',
     confidence: 0.8,
   },
 };

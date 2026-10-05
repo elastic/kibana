@@ -124,6 +124,7 @@ export const LaunchJobTemplateInputSchema = lazySchema(() =>
       .describe('Override inventory id when the template asks for it.'),
     credentials: z
       .array(z.union([z.number().int(), z.string().max(MAX_STRING_LENGTH)]))
+      .max(MAX_PAGE_SIZE)
       .optional()
       .describe('Credential ids to use for this launch.'),
     scmBranch: z

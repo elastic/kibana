@@ -65,3 +65,6 @@ export const MAX_ESCALATIONS_RESULT_WINDOW = 10_000;
 export const ESCALATION_STATUS_URL = `${ESCALATIONS_INTERNAL_URL}/{id}/status` as const;
 export const ESCALATION_CLOSE_PREVIEW_URL =
   `${ESCALATIONS_INTERNAL_URL}/{id}/_close_preview` as const;
+
+/** URL for linking an investigation to an existing escalation (append-only). */
+export const ESCALATION_LINK_URL = `${ESCALATION_BY_ID_URL}/_link` as const;

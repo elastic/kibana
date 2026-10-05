@@ -120,9 +120,26 @@ export class DataGrid {
 
   async expandCell({ rowIndex, columnId }: { rowIndex: number; columnId: string }) {
     const cell = this.getCell(rowIndex, columnId);
-    await cell.hover();
-    await cell.locator('[data-test-subj="euiDataGridCellExpandButton"]').click();
-    await this.page.testSubj.waitForSelector('euiDataGridExpansionPopover', { state: 'visible' });
+    const expansionPopover = this.page.testSubj.locator('euiDataGridExpansionPopover');
+    // The popover is portaled and not tied to a cell, so close one left open by an earlier
+    // action; any popover seen below is then this cell's.
+    if (await expansionPopover.isVisible()) {
+      await this.page.keyboard.press('Escape');
+      await expect(expansionPopover).toBeHidden();
+    }
+    const expandButton = cell.locator('[data-test-subj="euiDataGridCellExpandButton"]');
+    // A refetch can remount the cell (e.g. a grid embedded in a dashboard). The remounted
+    // node gets no mouseenter under a stationary cursor, so its expand button stays hidden
+    // and a pending click waits on a detached element; a remount right after the click takes
+    // the popover with it. Re-hover and re-click until the popover is open. A click that times
+    // out on actionability was never dispatched, and an open popover is never clicked again
+    // (the expand button toggles it), so retrying is safe.
+    await expect(async () => {
+      if (await expansionPopover.isVisible()) return;
+      await cell.hover();
+      await expandButton.click({ timeout: 2_000 });
+      await expect(expansionPopover).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 20_000 });
   }
 
   async filterCell({

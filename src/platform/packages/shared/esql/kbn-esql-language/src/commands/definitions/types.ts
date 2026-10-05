@@ -486,10 +486,6 @@ export interface ValidationErrors {
     message: string;
     type: {};
   };
-  forkNotAllowedWithSubqueries: {
-    message: string;
-    type: {};
-  };
   joinOnSingleExpression: {
     message: string;
     type: {};

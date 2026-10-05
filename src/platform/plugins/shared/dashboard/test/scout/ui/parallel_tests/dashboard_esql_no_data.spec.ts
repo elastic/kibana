@@ -9,7 +9,6 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { KibanaCodeEditorWrapper } from '@kbn/scout';
 
 spaceTest.describe(
   'No data views: try ES|QL from dashboard',
@@ -49,9 +48,8 @@ spaceTest.describe(
 
         await spaceTest.step('seeds the inline editor with the default ES|QL query', async () => {
           await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-editPanel');
-          const codeEditor = new KibanaCodeEditorWrapper(page);
           await expect
-            .poll(() => codeEditor.getCodeEditorValue())
+            .poll(() => pageObjects.esqlEditor.getQuery())
             .toBe('FROM logs* | SORT @timestamp DESC');
         });
       }

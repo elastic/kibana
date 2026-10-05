@@ -16,6 +16,7 @@ import { z } from '@kbn/zod';
 import { buildAssumableBy } from './assumable_by';
 import { ensureClusterPrivilege } from './cluster_privilege';
 import { parseCreateServiceAccountParams } from './create_params';
+import { toDescriptionField } from './description_field';
 import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
 import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS, ServiceAccountFakeRequests } from './fake_requests';
 import { buildRoleAssignments, readApplicationRoles } from './role_assignments';
@@ -91,11 +92,12 @@ const toCreatedBy = (creator: UiamServiceAccountCreator): ServiceAccountDirector
  */
 const toDirectoryEntry = (
   cloudProjectContext: CloudProjectContext,
-  { id, name, role_assignments: roleAssignments, creator }: UiamServiceAccountDetails
+  { id, name, description, role_assignments: roleAssignments, creator }: UiamServiceAccountDetails
 ): ServiceAccountDirectoryEntry => ({
   id,
   name,
   roles: readApplicationRoles(cloudProjectContext, roleAssignments),
+  ...toDescriptionField(description),
   enabled: true,
   assumable: true,
   createdBy: toCreatedBy(creator),
@@ -214,10 +216,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    if (params.description !== undefined) {
-      throw Boom.badRequest('Service account descriptions are not supported on Serverless.');
-    }
-    const { name, roles } = parseCreateServiceAccountParams(
+    const { name, roles, description } = parseCreateServiceAccountParams(
       params,
       UIAM_SERVICE_ACCOUNT_ROLE_LIMITS
     );
@@ -241,6 +240,9 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
         {
           organization_id: this.cloudProjectContext.organizationId,
           name,
+          ...toDescriptionField(description),
+          project_type: this.cloudProjectContext.projectType,
+          project_id: this.cloudProjectContext.projectId,
           role_assignments: buildRoleAssignments(this.cloudProjectContext, roles),
           assumable_by: buildAssumableBy(this.cloudProjectContext),
         },
@@ -270,7 +272,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
 
     // The roles are echoed from the request rather than read back. UIAM stores them as sent, and
     // the directory reads the same roles out of its role assignments on list and get.
-    return { ...parsed.data, roles };
+    return { ...parsed.data, roles, ...toDescriptionField(result.description) };
   }
 
   async list(

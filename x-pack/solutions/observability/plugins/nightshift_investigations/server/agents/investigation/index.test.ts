@@ -51,8 +51,8 @@ describe('Nightshift investigation agent type', () => {
     expect(base).toMatchObject({
       enable_elastic_capabilities: false,
       skill_ids: [],
-      workflow_ids: ['system-nightshift-cortex-hydrate'],
-      post_execution_workflow_ids: ['system-nightshift-cortex-optimize'],
+      workflow_ids: ['system-nightshift-sandbox-materialize-workspace'],
+      post_execution_workflow_ids: ['system-nightshift-agent-optimize'],
     });
     expect(base.tools?.[0]?.tool_ids).toEqual([
       platformSignificantEventsTools.reportInvestigationProgress,
@@ -70,6 +70,21 @@ describe('Nightshift investigation agent type', () => {
     expect(base.instructions).toContain('FROM <stream-name>, <stream-name>.*');
   });
 
+  it('adds Semantic Memory context and workflows when memory is enabled', () => {
+    const base = staticBase(
+      getInvestigationAgentType({
+        sandboxEnabled: true,
+        cortexEnabled: false,
+        memoryEnabled: true,
+      })
+    );
+
+    expect(base.workflow_ids).toEqual(['system-nightshift-sandbox-materialize-workspace']);
+    expect(base.post_execution_workflow_ids).toEqual(['system-nightshift-agent-optimize']);
+    expect(base.instructions).toContain('/workspace/memories/.index.json');
+    expect(base.instructions).not.toContain('{{semantic_memory_load_step}}');
+  });
+
   it('hydrates and reinforces decision trees when they are enabled', () => {
     const base = staticBase(
       getInvestigationAgentType({
@@ -80,11 +95,11 @@ describe('Nightshift investigation agent type', () => {
     );
 
     expect(base.workflow_ids).toEqual([
-      'system-nightshift-cortex-hydrate',
+      'system-nightshift-sandbox-materialize-workspace',
       'system-nightshift-decision-tree-hydrate',
     ]);
     expect(base.post_execution_workflow_ids).toEqual([
-      'system-nightshift-cortex-optimize',
+      'system-nightshift-agent-optimize',
       'system-nightshift-decision-tree-reinforce',
     ]);
     expect(base.instructions).toContain('/workspace/decision-trees/monitors.md');
@@ -107,7 +122,7 @@ describe('Nightshift investigation agent type', () => {
     );
 
     expect(base.workflow_ids).toBeUndefined();
-    expect(base.post_execution_workflow_ids).toEqual(['system-nightshift-cortex-optimize']);
+    expect(base.post_execution_workflow_ids).toEqual(['system-nightshift-agent-optimize']);
     expect(base.tools?.[0]?.tool_ids).toEqual([
       platformSignificantEventsTools.reportInvestigationProgress,
     ]);

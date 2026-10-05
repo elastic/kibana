@@ -366,7 +366,7 @@ export class AttachmentService {
         AttachmentType.persistableState,
         AttachmentType.externalReference,
       ];
-      // Files are stored with the migrated unified `file` type (not the legacy
+      // Files are stored with the unified `file` type (not the legacy
       // `.files` externalReference subtype), so excluding `file` from the type
       // list is enough — no subtype filter needed. `externalReferenceAttachmentTypeId`
       // isn't mapped on `cases-attachments`, so filtering on it would 400.

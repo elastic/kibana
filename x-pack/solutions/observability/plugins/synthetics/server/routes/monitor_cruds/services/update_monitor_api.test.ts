@@ -977,5 +977,54 @@ describe('UpdateMonitorAPI', () => {
       expect(result.perIdErrors['mon-1'].code).toBe('validation_failed');
       expect(result.perIdErrors['mon-1'].message).toMatch(/Invalid monitor key/i);
     });
+
+    const monitorWithParams = (params: string) => {
+      const monitor = validHttpMonitor();
+      return { ...monitor, attributes: { ...monitor.attributes, [ConfigKey.PARAMS]: params } };
+    };
+
+    it('lets an unrelated patch through when stored params are not a JSON object', async () => {
+      const { routeContext, mocks } = createMockRouteContext();
+      mocks.findDecryptedMonitors.mockResolvedValue([monitorWithParams('["secret"]')]);
+
+      const api = new UpdateMonitorAPI(routeContext);
+      const result = await api.execute({ updates: updatesFor(['mon-1'], { enabled: false }) });
+
+      expect(result.perIdErrors).toEqual({});
+      expect(result.survivors).toHaveLength(1);
+    });
+
+    it.each([[false], [0], [null]])(
+      'rejects a patch that sets params to %p instead of silently clearing stored params',
+      async (params) => {
+        const { routeContext, mocks } = createMockRouteContext();
+        mocks.findDecryptedMonitors.mockResolvedValue([monitorWithParams('{"token":"secret"}')]);
+
+        const api = new UpdateMonitorAPI(routeContext);
+        const result = await api.execute({
+          updates: updatesFor(['mon-1'], { [ConfigKey.PARAMS]: params as unknown as string }),
+        });
+
+        expect(result.survivors).toHaveLength(0);
+        expect(result.perIdErrors['mon-1'].code).toBe('validation_failed');
+        expect(result.perIdErrors['mon-1'].message).toMatch(/^Invalid params: /);
+      }
+    );
+
+    it('rejects a patch that changes params to a value that is not a JSON object', async () => {
+      const { routeContext, mocks } = createMockRouteContext();
+      mocks.findDecryptedMonitors.mockResolvedValue([monitorWithParams('{"token":"secret"}')]);
+
+      const api = new UpdateMonitorAPI(routeContext);
+      const result = await api.execute({
+        updates: updatesFor(['mon-1'], { [ConfigKey.PARAMS]: '["secret"]' }),
+      });
+
+      expect(result.survivors).toHaveLength(0);
+      expect(result.perIdErrors['mon-1']).toEqual({
+        code: 'validation_failed',
+        message: 'Invalid params: Params must be a JSON object.',
+      });
+    });
   });
 });

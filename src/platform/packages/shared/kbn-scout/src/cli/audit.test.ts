@@ -22,6 +22,9 @@ import {
 } from './audit_config_sets';
 import {
   findDuplicateClassNames,
+  memberOverlap,
+  REVIEWED_PAGE_OBJECTS,
+  withoutReviewedPageObjects,
   findAllScoutFiles,
   formatAuditReportForSlack,
   extractPageObjectKeys,
@@ -178,6 +181,8 @@ describe('findScoutTestFiles', () => {
     expect(files).toEqual(
       [
         'src/platform/plugins/shared/fake_plugin_a/test/scout/ui/fixtures/page_objects/fake_solution_page.ts',
+        'src/platform/plugins/shared/fake_plugin_a/test/scout/ui/fixtures/page_objects/overview_tab.ts',
+        'src/platform/plugins/shared/fake_plugin_b/test/scout/ui/fixtures/page_objects/overview_tab.ts',
         'src/platform/plugins/shared/fake_plugin_a/test/scout/ui/fixtures/page_objects/spec_using_property.ts',
         'src/platform/plugins/shared/fake_plugin_b/test/scout/ui/spec_using_destructure.ts',
         'x-pack/solutions/fake/packages/kbn-scout-fake/src/playwright/page_objects/uses_core.ts',
@@ -230,6 +235,48 @@ describe('findDuplicateClassNames', () => {
     expect(duplicates).toEqual([
       { className: 'FakeSolutionPage', modules: ['@kbn/scout-fake', 'fake-plugin-a'] },
     ]);
+  });
+
+  it('does not report classes that only share a name', () => {
+    // `OverviewTab` exists in fake_plugin_a and fake_plugin_b with different members.
+    const duplicates = findDuplicateClassNames(FAKE_REPO_ROOT, findAllScoutFiles(FAKE_REPO_ROOT));
+    expect(duplicates.map((d) => d.className)).not.toContain('OverviewTab');
+  });
+});
+
+describe('memberOverlap', () => {
+  const set = (...names: string[]) => new Set(names);
+
+  it('divides by the smaller set so a subset copy counts as a full match', () => {
+    expect(memberOverlap(set('a', 'b', 'c'), set('a', 'b', 'c', 'd', 'e', 'f', 'g'))).toBe(1);
+  });
+
+  it('is at the cutoff with four of five members shared and below it with three', () => {
+    expect(memberOverlap(set('a', 'b', 'c', 'd', 'e'), set('a', 'b', 'c', 'd', 'x'))).toBe(0.8);
+    expect(memberOverlap(set('a', 'b', 'c', 'd', 'e'), set('a', 'b', 'c', 'x', 'y'))).toBe(0.6);
+  });
+
+  it('treats two empty classes as a match and an empty one against a filled one as none', () => {
+    expect(memberOverlap(set(), set())).toBe(1);
+    expect(memberOverlap(set(), set('a'))).toBe(0);
+  });
+});
+
+describe('reviewed page objects', () => {
+  it('are dropped from the census', () => {
+    const census = [
+      { key: 'listingTable', fileCount: 1, modules: ['a'] },
+      { key: 'dashboard', fileCount: 3, modules: ['a', 'b'] },
+    ];
+    expect(withoutReviewedPageObjects(census, { listingTable: 'reviewed' })).toEqual([
+      { key: 'dashboard', fileCount: 3, modules: ['a', 'b'] },
+    ]);
+  });
+
+  it('only lists keys that exist in the core page objects index', () => {
+    const indexPath = Path.resolve(__dirname, '../playwright/page_objects/index.ts');
+    const keys = extractPageObjectKeysOrThrow(Fs.readFileSync(indexPath, 'utf8'), indexPath);
+    Object.keys(REVIEWED_PAGE_OBJECTS).forEach((key) => expect(keys).toContain(key));
   });
 });
 

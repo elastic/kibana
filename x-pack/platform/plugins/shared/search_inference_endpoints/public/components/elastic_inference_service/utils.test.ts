@@ -48,6 +48,7 @@ describe('utils', () => {
       ['completion', 'LLM'],
       ['text_embedding', 'Embedding'],
       ['sparse_embedding', 'Embedding'],
+      ['embedding', 'Embedding'],
       ['rerank', 'Rerank'],
     ] as const)('%s → %s', (taskType, expectedCategory) => {
       expect(TASK_TYPE_CATEGORY[taskType]).toBe(expectedCategory);

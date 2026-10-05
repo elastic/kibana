@@ -39,6 +39,7 @@ export const listAutomationsRoute = createNightshiftInvestigationsServerRoute({
       automations: result.saved_objects.map((so) => ({
         id: so.id,
         ...so.attributes,
+        author: so.attributes.author ?? 'System',
       })),
       total: result.total,
     };

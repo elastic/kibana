@@ -47,7 +47,7 @@ apiTest.describe('Create snooze series action API', { tag: '@local-stateful-clas
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
-          episode: { id: 'snooze-happy-episode', status: 'active' },
+          alert: { id: 'snooze-happy-episode', status: 'active' },
         }),
       ]);
       const response = await apiClient.post(getSnoozeSeriesActionUrl(groupHash), {
@@ -83,7 +83,7 @@ apiTest.describe('Create snooze series action API', { tag: '@local-stateful-clas
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
-          episode: { id: 'snooze-no-expiry-episode', status: 'active' },
+          alert: { id: 'snooze-no-expiry-episode', status: 'active' },
         }),
       ]);
       const response = await apiClient.post(getSnoozeSeriesActionUrl(groupHash), {

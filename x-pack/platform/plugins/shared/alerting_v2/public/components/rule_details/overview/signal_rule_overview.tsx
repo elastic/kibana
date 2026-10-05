@@ -290,7 +290,7 @@ export const SignalRuleOverview: React.FC = () => {
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="s"
-                iconType="discoverApp"
+                iconType="productDiscover"
                 href={discoverHref}
                 color="text"
                 data-test-subj="signalOverviewOpenInDiscover"

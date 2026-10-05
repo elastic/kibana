@@ -39,6 +39,13 @@ interface PrepareAnonymizationOptions {
   messages: ChatCompleteOptions['messages'];
 }
 
+/**
+ * Anonymizes a request's system prompt and messages. The `resolveEffectivePolicy`, `saltPromise`,
+ * and persistent-replacements (`replacementsId`) inputs belong to the dormant policy-service
+ * implementation (`ANONYMIZATION_FEATURE_ACTIVE = false`, see `plugin.ts`) and are never set in
+ * practice; only the `anonymizationRules` from the `ai:anonymizationSettings` uiSetting are live.
+ * With no enabled rules, nothing is anonymized and the rest of the pipeline is a no-op.
+ */
 export const prepareAnonymization = async ({
   namespace,
   logger,

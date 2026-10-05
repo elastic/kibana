@@ -7,6 +7,7 @@
 
 import { escapeQuotes } from '@kbn/es-query';
 import { NIGHTSHIFT_INVESTIGATION_SO_TYPE } from '../saved_objects';
+import { toStoredSeverity } from './severity';
 import type { FindInvestigationsQuery, InvestigationAttributes } from './types';
 
 const attr = (field: string) => `${NIGHTSHIFT_INVESTIGATION_SO_TYPE}.attributes.${field}`;
@@ -48,7 +49,7 @@ export const buildInvestigationFilter = <Fields extends keyof InvestigationAttri
   }
 
   if (query.severities?.length) {
-    filters.push(orClause('severity', query.severities));
+    filters.push(orClause('severity', query.severities.map(toStoredSeverity)));
   }
 
   return filters.length > 0 ? filters.join(' AND ') : undefined;

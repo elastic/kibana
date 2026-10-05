@@ -555,7 +555,7 @@ export const termsOperation: OperationDefinition<
     const currentColumn = layer.columns[columnId];
 
     const fieldErrorMessage = getErrorMessage(
-      selectedColumn,
+      Boolean(props.incompleteField ?? selectedColumn?.sourceField),
       Boolean(props.incompleteOperation),
       'field',
       props.currentFieldIsInvalid

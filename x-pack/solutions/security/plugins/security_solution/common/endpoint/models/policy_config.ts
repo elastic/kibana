@@ -119,7 +119,7 @@ export const policyFactory = ({
         on_write_scan: true,
       },
       ransomware: {
-        mode: ProtectionModes.off,
+        mode: ProtectionModes.prevent,
         supported: true,
       },
       device_control: {

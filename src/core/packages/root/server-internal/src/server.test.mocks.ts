@@ -105,6 +105,7 @@ jest.doMock('@kbn/core-node-server-internal', () => ({
 
 export const mockMetricsService = metricsServiceMock.create();
 jest.doMock('@kbn/core-metrics-server-internal', () => ({
+  ...jest.requireActual('@kbn/core-metrics-server-internal'),
   MetricsService: jest.fn(() => mockMetricsService),
 }));
 

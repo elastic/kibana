@@ -1,5 +1,6 @@
 **Third-party search**
 
+- [Amazon EKS](/reference/connectors-kibana/aws-eks-action-type.md): Discover EKS clusters and node groups, scale node groups, manage cluster access entries, and mint Kubernetes tokens.
 - [Amazon S3](/reference/connectors-kibana/amazon-s3-action-type.md): List and download content from AWS S3 buckets.
 - [Ansible Control Server](/reference/connectors-kibana/ansible-controller-action-type.md): Launch and monitor Ansible Automation Controller / AWX jobs.
 - [Argo CD](/reference/connectors-kibana/argocd-action-type.md): Manage GitOps applications in Argo CD — sync, inspect health and resources.

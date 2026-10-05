@@ -40,6 +40,14 @@ jest.mock('./policy_cleanup_agent_based', () => ({
   cleanupAgentBasedPolicies: jest.fn(),
 }));
 
+jest.mock('./use_onboarding_so', () => ({
+  useOnboardingSO: jest.fn(() => ({
+    createDeployment: jest.fn().mockResolvedValue(null),
+    updateDeployment: jest.fn().mockResolvedValue(true),
+    persistDeploymentId: jest.fn(),
+  })),
+}));
+
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import {
@@ -736,7 +744,8 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
     expect(mockCleanupAgentBasedPolicies).toHaveBeenCalledTimes(1);
     const cleanupCall = mockCleanupAgentBasedPolicies.mock.calls[0][0];
     expect(cleanupCall.pendingCleanupPolicyIds).toEqual({ instA: 'pkg-policy-A' });
-    expect(cleanupCall.selectedAgentPolicyIds).toEqual(['agent-policy-1']);
+    // Cleanup keeps each policy's current policy_ids (no override).
+    expect(cleanupCall.selectedAgentPolicyIds).toEqual([]);
     // Verify agentCredentials are passed through to cleanup opts.
     expect(cleanupCall).toHaveProperty('agentCredentials');
 

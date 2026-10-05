@@ -10,10 +10,11 @@ import type { Dispatch, SetStateAction } from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { MemoryRouter, useHistory } from 'react-router-dom';
 import type { AppHeaderBack } from '@kbn/app-header';
-import type { ProfilingSetupStatus } from '../../../services';
+import type { ProfilingStatus } from '@kbn/profiling-utils';
+import { AsyncStatus } from '../../../hooks/use_async';
 import type { ProfilingDependencies } from '../profiling_dependencies/profiling_dependencies_context';
 import { ProfilingDependenciesContextProvider } from '../profiling_dependencies/profiling_dependencies_context';
-import { ProfilingSetupStatusContext } from '../profiling_setup_status/profiling_setup_status_context';
+import { ProfilingStatusContext } from '../profiling_status/profiling_status_context';
 import {
   hasBackNavigation,
   ROUTES_WITH_BACK_NAVIGATION,
@@ -43,17 +44,31 @@ const pluginRootTarget: AppHeaderBack = {
 const CONTENT_ROUTES = ['/stacktraces/threads', '/flamegraphs/flamegraph', '/functions/topn', '/'];
 
 // Utility routes that deliberately stay out of ROUTES_WITH_BACK_NAVIGATION.
-const UTILITY_ROUTES = ['/delete_data_instructions', '/profiling-not-enabled'];
+const UTILITY_ROUTES = ['/profiling-not-enabled'];
 
-// Build a valid ProfilingSetupStatus, overriding only what each test case needs.
-const makeStatus = (overrides: Partial<ProfilingSetupStatus>): ProfilingSetupStatus => ({
-  profiling_enabled: true,
-  has_setup: true,
-  has_data: true,
-  pre_8_9_1_data: false,
-  has_required_role: true,
-  ...overrides,
+// Build a valid ProfilingStatus, reporting data in the given schemas.
+const makeStatus = ({
+  otelData = false,
+  universalProfilingData = false,
+  legacyData = false,
+}: {
+  otelData?: boolean;
+  universalProfilingData?: boolean;
+  legacyData?: boolean;
+}): ProfilingStatus => ({
+  isEnabled: true,
+  otel: { isAvailable: true, hasData: otelData },
+  universalProfiling: {
+    isAvailable: true,
+    hasSetup: true,
+    hasData: universalProfilingData,
+    hasLegacyData: legacyData,
+    canSetup: true,
+  },
 });
+
+const withData = makeStatus({ universalProfilingData: true });
+const withoutData = makeStatus({});
 
 // Renders useBackNavigation inside the provider tree. Returns the RTL result plus a `renders`
 // log (every hook return value across all renders) and `updateStatus` to drive status changes
@@ -63,26 +78,30 @@ const renderBackNavigation = ({
   initialStatus,
 }: {
   initialEntry: string;
-  initialStatus?: ProfilingSetupStatus;
+  initialStatus?: ProfilingStatus;
 }) => {
   const renders: Array<AppHeaderBack | undefined> = [];
 
   // Captured during each render of Wrapper; always current after mount.
-  let setStatus: Dispatch<SetStateAction<ProfilingSetupStatus | undefined>> | undefined;
+  let setStatus: Dispatch<SetStateAction<ProfilingStatus | undefined>> | undefined;
 
   const Wrapper = ({ children }: React.PropsWithChildren) => {
-    const [profilingSetupStatus, setProfilingSetupStatus] = useState<
-      ProfilingSetupStatus | undefined
-    >(initialStatus);
-    setStatus = setProfilingSetupStatus;
+    const [profilingStatus, setProfilingStatus] = useState<ProfilingStatus | undefined>(
+      initialStatus
+    );
+    setStatus = setProfilingStatus;
     return (
       <MemoryRouter initialEntries={[initialEntry]}>
         <ProfilingDependenciesContextProvider value={dependencies}>
-          <ProfilingSetupStatusContext.Provider
-            value={{ profilingSetupStatus, setProfilingSetupStatus }}
+          <ProfilingStatusContext.Provider
+            value={{
+              status: profilingStatus ? AsyncStatus.Settled : AsyncStatus.Loading,
+              data: profilingStatus,
+              refresh: jest.fn(),
+            }}
           >
             {children}
-          </ProfilingSetupStatusContext.Provider>
+          </ProfilingStatusContext.Provider>
         </ProfilingDependenciesContextProvider>
       </MemoryRouter>
     );
@@ -98,7 +117,7 @@ const renderBackNavigation = ({
   );
 
   // setStatus is always defined after the first render; the non-null assertion is safe.
-  const updateStatus = (next: ProfilingSetupStatus | undefined) => {
+  const updateStatus = (next: ProfilingStatus | undefined) => {
     act(() => setStatus!(next));
   };
 
@@ -127,7 +146,7 @@ describe('useBackNavigation', () => {
         initialEntry: route,
         // Provide resolved status so an undefined result cannot be attributed to the
         // /add-data-instructions status guard.
-        initialStatus: makeStatus({ has_data: true }),
+        initialStatus: withData,
       });
       expect(result.current.back).toBeUndefined();
     });
@@ -146,8 +165,9 @@ describe('useBackNavigation', () => {
       (route) => {
         const { result } = renderBackNavigation({
           initialEntry: route,
-          // Provide resolved status so /add-data-instructions does not suppress the button.
-          initialStatus: makeStatus({ has_data: true }),
+          // The back button needs a resolved status with profiling enabled, and data for
+          // /add-data-instructions.
+          initialStatus: withData,
         });
         expect(result.current.back).toEqual(pluginRootTarget);
       }
@@ -156,6 +176,7 @@ describe('useBackNavigation', () => {
     it('ignores the query string when matching the route', () => {
       const { result } = renderBackNavigation({
         initialEntry: '/settings?rangeFrom=now-15m&rangeTo=now',
+        initialStatus: withData,
       });
       expect(result.current.back).toEqual(pluginRootTarget);
     });
@@ -163,6 +184,7 @@ describe('useBackNavigation', () => {
     it('always points at the plugin root regardless of the previously visited route', () => {
       const { result } = renderBackNavigation({
         initialEntry: '/flamegraphs/flamegraph?kuery=foo&rangeFrom=now-15m',
+        initialStatus: withData,
       });
       expect(result.current.back).toBeUndefined();
 
@@ -172,7 +194,10 @@ describe('useBackNavigation', () => {
     });
 
     it('drops the back button again when navigating to a content route', () => {
-      const { result } = renderBackNavigation({ initialEntry: '/storage-explorer' });
+      const { result } = renderBackNavigation({
+        initialEntry: '/storage-explorer',
+        initialStatus: withData,
+      });
       expect(result.current.back).toEqual(pluginRootTarget);
 
       act(() => result.current.history.push('/functions/topn'));
@@ -181,34 +206,93 @@ describe('useBackNavigation', () => {
     });
   });
 
+  describe('profiling status guard', () => {
+    const OTHER_BACK_NAVIGATION_ROUTES = ROUTES_WITH_BACK_NAVIGATION.filter(
+      (route) => route !== '/add-data-instructions'
+    );
+
+    it.each(OTHER_BACK_NAVIGATION_ROUTES)(
+      'returns undefined on %s while the status is unresolved',
+      (route) => {
+        const { result } = renderBackNavigation({ initialEntry: route });
+        expect(result.current.back).toBeUndefined();
+      }
+    );
+
+    it.each(OTHER_BACK_NAVIGATION_ROUTES)(
+      'returns undefined on %s when profiling is disabled in Elasticsearch',
+      (route) => {
+        const { result } = renderBackNavigation({
+          initialEntry: route,
+          initialStatus: { isEnabled: false },
+        });
+        expect(result.current.back).toBeUndefined();
+      }
+    );
+
+    it('transitions from undefined to the plugin root once the status resolves as enabled', () => {
+      const { result, updateStatus } = renderBackNavigation({ initialEntry: '/settings' });
+      expect(result.current.back).toBeUndefined();
+
+      updateStatus(withoutData);
+
+      expect(result.current.back).toEqual(pluginRootTarget);
+    });
+  });
+
   describe('/add-data-instructions status guard', () => {
     it('returns undefined while setup status is unresolved — prevents a flash during the loading screen', () => {
-      // On a cold load, profilingSetupStatus is undefined until CheckSetup's fetch settles.
+      // On a cold load, the profiling status is undefined until the provider's fetch settles.
       const { result } = renderBackNavigation({ initialEntry: '/add-data-instructions' });
       expect(result.current.back).toBeUndefined();
     });
 
-    it('stays undefined when status resolves with has_data: false', () => {
+    it('stays undefined when the status resolves without data', () => {
       const { result, renders, updateStatus } = renderBackNavigation({
         initialEntry: '/add-data-instructions',
       });
 
-      updateStatus(makeStatus({ has_data: false }));
+      updateStatus(withoutData);
 
       expect(result.current.back).toBeUndefined();
       // Every render since mount must be undefined — no intermediate back value.
       expect(renders.every((v) => v === undefined)).toBe(true);
     });
 
-    it('returns the plugin root when has_data is true', () => {
+    it('returns the plugin root when there is Universal Profiling data', () => {
       const { result } = renderBackNavigation({
         initialEntry: '/add-data-instructions',
-        initialStatus: makeStatus({ has_data: true }),
+        initialStatus: withData,
       });
       expect(result.current.back).toEqual(pluginRootTarget);
     });
 
-    it('transitions from undefined to the plugin root when has_data becomes true', () => {
+    it('returns the plugin root when there is only OTel data', () => {
+      const { result } = renderBackNavigation({
+        initialEntry: '/add-data-instructions',
+        initialStatus: makeStatus({ otelData: true }),
+      });
+      expect(result.current.back).toEqual(pluginRootTarget);
+    });
+
+    it('returns undefined when profiling is disabled in Elasticsearch', () => {
+      const { result } = renderBackNavigation({
+        initialEntry: '/add-data-instructions',
+        initialStatus: { isEnabled: false },
+      });
+      expect(result.current.back).toBeUndefined();
+    });
+
+    it('returns undefined when there is data from before 8.9.1', () => {
+      // Going back would only be redirected to the deletion instructions on this page again.
+      const { result } = renderBackNavigation({
+        initialEntry: '/add-data-instructions',
+        initialStatus: makeStatus({ universalProfilingData: true, legacyData: true }),
+      });
+      expect(result.current.back).toBeUndefined();
+    });
+
+    it('transitions from undefined to the plugin root when the status resolves with data', () => {
       // A user with data who navigates from the menu to /add-data-instructions should see the
       // back button once the status fetch settles.
       const { result, updateStatus } = renderBackNavigation({
@@ -216,7 +300,7 @@ describe('useBackNavigation', () => {
       });
       expect(result.current.back).toBeUndefined();
 
-      updateStatus(makeStatus({ has_data: true }));
+      updateStatus(withData);
 
       expect(result.current.back).toEqual(pluginRootTarget);
     });
@@ -224,7 +308,7 @@ describe('useBackNavigation', () => {
     it('query params on the URL do not affect the pathname === check', () => {
       const { result } = renderBackNavigation({
         initialEntry: '/add-data-instructions?selectedTab=kubernetes',
-        initialStatus: makeStatus({ has_data: false }),
+        initialStatus: withoutData,
       });
       expect(result.current.back).toBeUndefined();
     });
@@ -232,7 +316,7 @@ describe('useBackNavigation', () => {
     it('does not apply the guard to the other back-button routes', () => {
       const { result } = renderBackNavigation({
         initialEntry: '/settings',
-        initialStatus: makeStatus({ has_data: false }),
+        initialStatus: withoutData,
       });
       expect(result.current.back).toEqual(pluginRootTarget);
     });

@@ -64,7 +64,8 @@ export const registerWorkflowAccessControlRoutes = ({
           request.params.id,
           spaces.getSpaceId(request),
           'manage',
-          request
+          request,
+          { auditOverride: false }
         );
         const { userProfile } = await workflowsService.getCoreStart();
         const { security } = await workflowsService.getPluginsStart();

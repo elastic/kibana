@@ -66,7 +66,13 @@ export const EpisodeFooterActionMenu = ({
     if (action.renderMenuItem) {
       return {
         key: action.id,
-        renderItem: () => action.renderMenuItem!({ episodes, onSuccess, closeMenu: onClose }),
+        renderItem: () =>
+          action.renderMenuItem!({
+            episodes,
+            onSuccess,
+            closeMenu: onClose,
+            surface: 'details_flyout',
+          }),
       };
     }
 

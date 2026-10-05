@@ -156,12 +156,12 @@ function shouldDispatch(
   const { groupingMode } = policy;
   const strategy =
     policy.throttle?.strategy ??
-    (groupingMode === 'per_episode' ? 'on_status_change' : 'time_interval');
+    (groupingMode === 'per_alert' ? 'on_status_change' : 'time_interval');
 
   if (strategy === 'every_time') return true;
 
   // Aggregate modes (per_field, all): throttle by interval only
-  if (groupingMode !== 'per_episode') {
+  if (groupingMode !== 'per_alert') {
     return (
       !policy.throttle?.interval ||
       !isWithinInterval(
@@ -174,7 +174,7 @@ function shouldDispatch(
     );
   }
 
-  // per_episode: always dispatch on status change
+  // per_alert: always dispatch on status change
   const statusChanged = lastRecord.episodeStatus !== group.episodes[0]?.episode_status;
   if (statusChanged) return true;
 

@@ -64,11 +64,21 @@ const INDEX_MATCHES = [
 const createServices = ({
   indices = INDEX_MATCHES,
   indicesError,
+  canReadConnectors = true,
 }: {
   indices?: MatchedItem[];
   indicesError?: Error;
+  canReadConnectors?: boolean;
 } = {}) => {
   const services = coreMock.createStart();
+  services.application.capabilities = {
+    ...services.application.capabilities,
+    actions: {
+      ...services.application.capabilities.actions,
+      show: canReadConnectors,
+      save: canReadConnectors,
+    },
+  };
   const data = dataPluginMock.createStartContract();
   data.dataViews.getIndices = indicesError
     ? jest.fn().mockRejectedValue(indicesError)
@@ -287,6 +297,27 @@ describe('SourcePicker', () => {
 
     await waitFor(() =>
       expect(screen.getByTestId('contextSelectedSource-connector-0')).toHaveTextContent('GitHub')
+    );
+  });
+
+  it('does not fetch connectors for restored connector sources without Actions read', () => {
+    const { services } = renderWithProviders(
+      <Harness
+        initialSources={[
+          {
+            type: 'connector',
+            id: 'connector-github',
+            label: 'connector-github',
+            value: 'connector-github',
+          },
+        ]}
+      />,
+      createServices({ canReadConnectors: false })
+    );
+
+    expect(services.http.get).not.toHaveBeenCalled();
+    expect(screen.getByTestId('contextSelectedSource-connector-0')).toHaveTextContent(
+      'connector-github'
     );
   });
 

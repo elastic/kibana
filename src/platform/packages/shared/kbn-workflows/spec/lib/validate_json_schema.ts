@@ -32,6 +32,7 @@ export function isValidJsonSchema(schema: unknown): schema is JSONSchema7 {
     'const' in schemaObj ||
     'enum' in schemaObj ||
     'properties' in schemaObj ||
+    'additionalProperties' in schemaObj ||
     'items' in schemaObj ||
     'definitions' in schemaObj ||
     '$defs' in schemaObj;

@@ -29,7 +29,10 @@ const MISSING_AI_INDEX_ID = `scout-describe-missing-index-${RUN_ID}`;
 const describePath = (id: string) => `${AI_INDEX_COLLECTION_PATH}/${id}/_describe`;
 const QUERY_PATH = AI_INDEX_QUERY_PATH;
 
-/** KIs in INDEX_A; `other` is scoped to a space tests never use. */
+/**
+ * KIs in INDEX_A; `other` is scoped to a space tests never use, `deleted` and `expired` are
+ * left out by the lifecycle filter.
+ */
 const KI_DOCS = {
   detection: {
     type: 'detection',
@@ -47,6 +50,18 @@ const KI_DOCS = {
     ...spaceScoped('default'),
   },
   plain: { type: 'document', title: 'Plain document', tags: [] },
+  deleted: {
+    type: 'document',
+    title: 'Retired guide',
+    tags: ['billing'],
+    governance: { lifecycle: { status: 'deleted' } },
+  },
+  expired: {
+    type: 'detection',
+    title: 'Stale errors',
+    tags: ['errors'],
+    expires_at: '2000-01-01T00:00:00Z',
+  },
   other: {
     type: 'hidden',
     title: 'Billing secret',
@@ -159,6 +174,10 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
           type: { type: 'keyword' },
           tags: { type: 'keyword' },
           status: { type: 'keyword' },
+          expires_at: { type: 'date' },
+          governance: {
+            properties: { lifecycle: { properties: { status: { type: 'keyword' } } } },
+          },
           permissions: {
             properties: {
               kibana: {
@@ -267,20 +286,23 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     expect(fieldLine(block, '@timestamp')).toMatch(/^@timestamp: date/);
   });
 
-  apiTest('counts types and tags for KIs visible in the current space', async ({ apiClient }) => {
-    const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
-      headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
-      responseType: 'json',
-    });
+  apiTest(
+    'counts types and tags for active KIs visible in the current space',
+    async ({ apiClient }) => {
+      const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
+        headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
+        responseType: 'json',
+      });
 
-    expect(response).toHaveStatusCode(200);
-    const block = blockOf(response.body);
-    expect(sectionLines(block, 'Knowledge item types')).toStrictEqual([
-      '"document": 2',
-      '"detection": 1',
-    ]);
-    expect(sectionLines(block, 'Tags')).toStrictEqual(['"billing": 2', '"errors": 1']);
-  });
+      expect(response).toHaveStatusCode(200);
+      const block = blockOf(response.body);
+      expect(sectionLines(block, 'Knowledge item types')).toStrictEqual([
+        '"document": 2',
+        '"detection": 1',
+      ]);
+      expect(sectionLines(block, 'Tags')).toStrictEqual(['"billing": 2', '"errors": 1']);
+    }
+  );
 
   apiTest('lists example queries that run as-is through _query', async ({ apiClient }) => {
     const described = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
@@ -294,7 +316,11 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     // Semantic branch needs a deployed inference endpoint: checked structurally here, and by the
     // ES|QL parser in unit tests.
     const hybrid = exampleQuery('Full text search, lexical and semantic fused together');
-    expect(hybrid.startsWith(`FROM ${INDEX_A} METADATA _id, _index, _score\n| FORK\n`)).toBe(true);
+    expect(
+      hybrid.startsWith(
+        `FROM ${INDEX_A} METADATA _id, _index, _score\n| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"\n| WHERE expires_at IS NULL OR expires_at > NOW()\n| FORK\n`
+      )
+    ).toBe(true);
     expect(hybrid).toContain('\n| FUSE\n');
 
     const run = async (query: string, params?: Record<string, string>) => {

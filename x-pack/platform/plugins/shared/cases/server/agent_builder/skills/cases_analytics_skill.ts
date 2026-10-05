@@ -170,7 +170,7 @@ Use \`${platformCoreTools.createVisualization}\`. Ground first (confirm the inde
 
 ## Building dashboards
 
-To assemble multiple panels into a dashboard, use the **dashboard-management** skill: create the case panels (as above), then hand off to its dashboard tool to lay them out. Ground the index once and reuse it across panels. The result is an inline dashboard the user can view and, if they choose, save to a real Kibana dashboard from the UI.
+To assemble multiple panels into a dashboard, use the **dashboards** skill: create the case panels (as above), then hand off to its dashboard tool to lay them out. Ground the index once and reuse it across panels. The result is an inline dashboard the user can view and, if they choose, save to a real Kibana dashboard from the UI.
 
 ## Query hygiene
 

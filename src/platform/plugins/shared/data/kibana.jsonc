@@ -2,7 +2,6 @@
   "type": "plugin",
   "id": "@kbn/data-plugin",
   "owner": [
-    "@elastic/kibana-dashboards",
     "@elastic/kibana-discover"
   ],
   "group": "platform",

@@ -10,7 +10,6 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { BulkCreateRulesParams, RulesClient } from '@kbn/alerting-plugin/server';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../../../../common';
-import type { SecurityRuleChangeTracking } from '../../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { RuleObjectId } from '../../../../../../../../common/api/detection_engine';
 import type { RuleParams } from '../../../../../rule_schema';
 import { convertRuleResponseToAlertingRule } from '../../converters/convert_rule_response_to_alerting_rule';
@@ -20,19 +19,14 @@ import type {
   ImportRuleSuccess,
   ImportRuleError,
   ImportableRuleData,
+  ImportRulesOptions,
   ImportRulesResult,
 } from './types';
 
 interface CreateRulesParams {
   rules: ImportableRuleData[];
-  options: CreateRulesOptions;
+  options: ImportRulesOptions;
   deps: CreateRulesDeps;
-}
-
-interface CreateRulesOptions {
-  allowMissingConnectorSecrets?: boolean;
-  changeTracking?: SecurityRuleChangeTracking;
-  batchSize: number;
 }
 
 interface CreateRulesDeps {

@@ -11,6 +11,7 @@ import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { extractTextFromMessage } from '../utils/extract_text_from_message';
 import { generateVisualizationEsql } from '../shared/generate_visualization_esql';
+import { formatRepairMessages } from '../shared/repair_messages';
 import { chartTypeRegistry } from './chart_type_registry';
 import type { VisualizationConfig } from './chart_type_registry';
 import {
@@ -30,6 +31,9 @@ import { createGenerateConfigPrompt } from './prompts';
 
 // Regex to extract JSON from markdown code blocks
 const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
+
+const REPAIR_INSTRUCTIONS =
+  'Return the complete corrected response in the same JSON format ("authoring_note" and "config"). Change only what is needed to fix the error.';
 
 const parseConfigAuthoringResponse = (
   responseText: string
@@ -197,46 +201,31 @@ export const createVisualizationGraph = async (
       .pop();
     const esqlQuery = lastGenerateEsqlAction?.query || state.esqlQuery;
 
-    // Build context from previous actions for retry attempts
-    const previousActionContext = state.actions
-      .filter((action) => isGenerateConfigAction(action) || isValidateConfigAction(action))
-      .map((action) => {
-        if (isGenerateConfigAction(action)) {
-          return `Previous generation attempt ${action.attempt}: ${
-            action.success ? 'SUCCESS' : `FAILED - ${action.error}`
-          }`;
-        }
-        if (isValidateConfigAction(action)) {
-          return `Validation attempt ${action.attempt}: ${
-            action.success ? 'SUCCESS' : `FAILED - ${action.error}`
-          }`;
-        }
-        return '';
-      })
-      .filter(Boolean)
-      .join('\n');
-
-    const additionalContext = previousActionContext
-      ? `Previous attempts:\n${previousActionContext}\n\nPlease fix the issues mentioned above.`
-      : undefined;
-
-    const prompt = createGenerateConfigPrompt({
-      nlQuery: state.nlQuery,
-      esqlQuery,
-      chartType: state.chartType,
-      schema: state.schema,
-      existingConfig: state.existingConfig,
-      parsedExistingConfig: state.parsedExistingConfig,
-      preserveESQL: state.preserveESQL,
-      applyChartRules: state.applyChartRules,
-      additionalContext,
-    });
+    // On retries, replay the raw failed responses (without the injected data_source) and their errors.
+    const prompt = [
+      ...createGenerateConfigPrompt({
+        nlQuery: state.nlQuery,
+        esqlQuery,
+        chartType: state.chartType,
+        schema: state.schema,
+        existingConfig: state.existingConfig,
+        parsedExistingConfig: state.parsedExistingConfig,
+        preserveESQL: state.preserveESQL,
+        applyChartRules: state.applyChartRules,
+      }),
+      ...formatRepairMessages({
+        authored: state.actions.filter(isGenerateConfigAction),
+        validated: state.actions.filter(isValidateConfigAction),
+        instructions: REPAIR_INSTRUCTIONS,
+      }),
+    ];
 
     let action: GenerateConfigAction;
+    let responseText: string | undefined;
     try {
       // Invoke model without schema validation
       const response = await defaultModel.chatModel.invoke(prompt);
-      const responseText = extractTextFromMessage(response);
+      responseText = extractTextFromMessage(response);
       const { config: configResponse, authoringNote } = parseConfigAuthoringResponse(responseText);
 
       // Pin the ES|QL query before config validation. ES|QL generation owns the query,
@@ -259,6 +248,7 @@ export const createVisualizationGraph = async (
         success: true,
         config: configResponse,
         authoringNote,
+        response: responseText,
         attempt,
       };
     } catch (error) {
@@ -271,6 +261,7 @@ export const createVisualizationGraph = async (
       action = {
         type: 'generate_config',
         success: false,
+        response: responseText,
         attempt,
         error: errorMessage,
       };
@@ -295,7 +286,8 @@ export const createVisualizationGraph = async (
         type: 'validate_config',
         success: false,
         attempt,
-        error: 'No configuration found to validate',
+        // Surface why generation failed (e.g. unparsable JSON) instead of a generic message.
+        error: lastGenerateAction?.error ?? 'No configuration found to validate',
       };
       return {
         actions: [action],

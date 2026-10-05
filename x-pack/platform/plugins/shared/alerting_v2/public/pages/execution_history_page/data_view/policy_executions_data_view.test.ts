@@ -18,10 +18,10 @@ const buildItem = (
   dispatched_at: '2026-05-05T10:00:00.000Z',
   policy: { id: 'policy-1', name: 'My Policy' },
   rules: [{ id: 'rule-1', name: 'My Rule' }],
-  total_rule_count: 1,
+  rule_count: 1,
   outcome: 'success',
-  episode_count: 3,
-  episodes: [],
+  alert_count: 3,
+  alerts: [],
   action_group_count: 2,
   workflows: [{ id: 'wf-1', name: 'My Workflow' }],
   error: null,
@@ -53,7 +53,7 @@ describe('policyExecutionToDataTableRecord', () => {
     expect(record.flattened[POLICY_EXECUTION_FIELDS.policy]).toBe(item.policy);
     expect(record.flattened[POLICY_EXECUTION_FIELDS.rules]).toBe(item.rules);
     expect(record.flattened[POLICY_EXECUTION_FIELDS.workflows]).toBe(item.workflows);
-    expect(record.flattened[POLICY_RECORD_EXTRA_FIELDS.totalRuleCount]).toBe(1);
+    expect(record.flattened[POLICY_RECORD_EXTRA_FIELDS.ruleCount]).toBe(1);
     expect(record.flattened[POLICY_RECORD_EXTRA_FIELDS.failureReason]).toBe('workflow_not_found');
     expect(record.flattened[POLICY_RECORD_EXTRA_FIELDS.errorMessage]).toBe('Workflow not found');
   });

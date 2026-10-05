@@ -76,7 +76,11 @@ const huntResult = {
         hit_count: 8,
         required: true,
       },
-      { index: 'logs-endpoint.events.network-default', hit_count: 4, required: false },
+      {
+        index: 'logs-endpoint.events.network-default',
+        hit_count: 4,
+        required: false,
+      },
     ],
     resolved_iocs: [],
   },
@@ -87,7 +91,7 @@ const huntResult = {
         technique_id: 'T1021',
         tactic_ids: ['TA0008'],
         confidence: 0.75,
-        rule_name: 'Lateral movement via RDP',
+        title: 'Lateral movement via RDP',
       },
     ],
   },
@@ -545,7 +549,7 @@ describe('SignificantSecurityEventInlineContent', () => {
         technique_id: 'T1021',
         tactic_ids: ['TA0008'],
         confidence: 0.75,
-        rule_name: 'Lateral movement via RDP',
+        title: 'Lateral movement via RDP',
       };
       renderWithI18n(
         <SignificantSecurityEventInlineContent

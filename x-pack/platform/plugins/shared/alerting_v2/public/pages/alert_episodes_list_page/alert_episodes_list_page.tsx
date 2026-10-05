@@ -400,6 +400,7 @@ const AlertEpisodesListPageContent = () => {
           spaces: services.spaces,
           queryClient,
           additionalDataSource,
+          isRuleAvailable: (ruleId) => Boolean(rulesCache[ruleId]),
           getDiscoverHref: ({ episodeIsoTimestamp, ruleId }) =>
             getDiscoverHrefForRuleAndEpisodeTimestamp({
               share: services.share,
@@ -488,7 +489,11 @@ const AlertEpisodesListPageContent = () => {
           if (action.renderMenuItem) {
             return (
               <Fragment key={action.id}>
-                {action.renderMenuItem({ episodes, onSuccess: invalidateEpisodeQueries })}
+                {action.renderMenuItem({
+                  episodes,
+                  onSuccess: invalidateEpisodeQueries,
+                  surface: 'row_menu',
+                })}
               </Fragment>
             );
           }
@@ -588,7 +593,7 @@ const AlertEpisodesListPageContent = () => {
 
   return (
     <div
-      data-test-subj="alertingV2EpisodesListPage"
+      data-test-subj="alertingV2AlertsListPage"
       css={css`
         display: flex;
         flex-direction: column;

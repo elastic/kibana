@@ -64,9 +64,21 @@ agent prompt's AI-index catalog uses the same rule.
 ## Querying AI Indices
 
 `POST /api/context_engine/ai_index/_query` runs caller-supplied ES|QL as the
-current user. Body: `{ query, params?, limit? }`. Two things are server-owned
+current user. Body: `{ query, params?, limit? }`. Three things are server-owned
 and cannot be overridden:
 
+- **Lifecycle filter.** A query that reads a registered AI Index's backing
+  store (by name, pattern, or as one of several `FROM` targets) gets the
+  knowledge indicator lifecycle pipeline inserted after `FROM`: only
+  indicators whose `governance.lifecycle.status` is unset or `active` and
+  whose `expires_at` is unset or in the future are returned, and
+  `governance.*` is dropped from the result. Each lifecycle field the query
+  names itself switches off one default: `expires_at` the expiry filter,
+  `governance.lifecycle.status` the status filter, any `governance.*` the
+  drop. When a data stream is read, only the newest revision of each `id` per
+  target is considered in every case (`METADATA _id, _index` are added when
+  missing). An index outside the registry is read as-is on its own; in a query
+  that also reads a registered dest, the pipeline applies to every row.
 - **Space filter.** Documents are visible when they carry no
   `permissions.kibana.privileges` element (public), or when one is scoped to
   the request's space or to `*`. The space comes from the request URL
@@ -112,6 +124,8 @@ Example queries (adapt field names for non-canonical indices)
 
 Full text search, lexical and semantic fused together (?query)
 FROM ai-index-idx-sales-knowledge METADATA _id, _index, _score
+| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"
+| WHERE expires_at IS NULL OR expires_at > NOW()
 | FORK
     ( WHERE MATCH(title, ?query) OR ... | SORT _score DESC | LIMIT 20 )
     ( WHERE MATCH(title.semantic, ?query) OR ... | SORT _score DESC | LIMIT 20 )
@@ -136,25 +150,28 @@ Count by type
 - `Semantic fields` lists the searchable `semantic_text` fields among those
   shown, detected from the mapping type. Omitted when there are none.
 - `Knowledge item types` and `Tags` show the top 20 `type` / `tags` values by
-  document count in the current space, one `"value": count` per line. Each
+  document count in the current space, active and unexpired only, one
+  `"value": count` per line. Each
   section is omitted unless its field is an aggregatable `keyword` — always the
   case on canonical KI indices, but a custom index that maps `type` / `tags` as
-  `text`, or inconsistently across a pattern, gets no counts. One `terms`
-  aggregation backs both; it errors rather than return undercounts if a shard
-  fails. Both sections are also omitted when the caller lacks `read` on the
-  backing indices; the rest of the block still renders.
+  `text`, or inconsistently across a pattern, gets no counts. One ES|QL query
+  per field backs both, through the same lifecycle pipeline as `_query`. Both
+  sections are also omitted when the caller lacks `read` on the backing
+  indices; the rest of the block still renders.
 - `Example queries` are three fixed ES|QL shapes written for the canonical KI
   schema (`title`, `description`, `content`, their `.semantic` multi-fields,
-  `type`, `tags`) with only the `FROM` target substituted. They use named
+  `type`, `tags`) with only the `FROM` target substituted. Each opens with the
+  lifecycle pipeline for the dest type, so the filters the query API would add
+  are visible and the same when run elsewhere. They use named
   parameters (`?query`; `?type` and `?tag`) meant for `_query`'s `params`. They
   run as-is on canonical indices; for other mappings the agent adapts field
   names from `Fields`.
 
-Describe runs no ES|QL. It issues `_mapping` and `_field_caps` (both needed:
-`_field_caps` reports `semantic_text` as `text`) plus the one aggregation, all
+Describe issues `_mapping` and `_field_caps` (both needed:
+`_field_caps` reports `semantic_text` as `text`) plus the count queries, all
 as the current user. 404 when the AI Index is not registered; Elasticsearch 4xx
 from `_mapping` / `_field_caps` (missing `view_index_metadata`) is returned
-with its status. The aggregation is the exception: its 403 (missing `read`)
+with its status. The count queries are the exception: their 403 (missing `read`)
 drops the counts sections instead. Each `_mapping` /
 `_field_caps` response is capped at 20 MB before the field cap applies; a
 target broad enough to exceed it returns 400.
@@ -452,8 +469,9 @@ only in the skill because the briefing is the one part of a run that cannot be
 replaced by configuring a different agent.
 
 The `platform.context_engine.ai_index` attachment is not used: it carries the
-`save_automation` tool and instructions to ask the user questions, which belong
-to the interactive setup conversation.
+install and save tools and the authority to write to the index, which belong to
+the interactive setup conversation. How that conversation asks the user is in
+the Context Engine agent's instructions.
 
 The `ai.agent` step runs under the workflow owner's identity — the user who
 turned analysis on. The conversation it creates is private to that user, Agent

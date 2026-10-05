@@ -6,7 +6,12 @@
  */
 
 import { randomUUID } from 'crypto';
-import type { EsClient, KbnClient, ScoutTestConfig } from '@kbn/scout-security';
+import type {
+  EsClient,
+  KbnClient,
+  ScoutTestConfig,
+  SecurityApiServicesFixture,
+} from '@kbn/scout-security';
 import { createSystemIndicesEsClient } from './system_indices_es_client';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import {
@@ -116,15 +121,19 @@ const indexResponseActionHost = ({
   numResponseActions,
   alertIds,
   isServerless,
+  hostNamePrefix = 'history-log',
+  responseState,
 }: Omit<SeedResponseActionsHistoryParams, 'spaceId' | 'config'> & {
   numResponseActions: number;
   alertIds?: string[];
   isServerless: boolean;
+  hostNamePrefix?: string;
+  responseState?: 'success';
 }): Promise<IndexedHostsAndAlertsResponse> => {
   return indexHostsAndAlerts(
     esClient,
     kbnClient,
-    `history-log-${randomUUID()}`,
+    `${hostNamePrefix}-${randomUUID()}`,
     1,
     1,
     METADATA_DATASTREAM,
@@ -139,7 +148,9 @@ const indexResponseActionHost = ({
     true,
     numResponseActions,
     alertIds,
-    isServerless
+    isServerless,
+    undefined,
+    responseState
   );
 };
 
@@ -283,5 +294,184 @@ const assertAutomatedActionRuleId = async (esClient: EsClient, agentId: string):
     throw new Error(
       `Expected the seeded automated response action to reference rule "${SEEDED_AUTOMATED_ACTION_RULE_ID}", got "${ruleId}"`
     );
+  }
+};
+
+export interface SeededAlertFlyoutResponseAction {
+  readonly ruleName: string;
+  cleanup: () => Promise<void>;
+}
+
+const SPACE_ALERTS_INDEX_PREFIX = '.alerts-security.alerts-';
+const ALERT_WAIT_TIMEOUT_MS = 180_000;
+const ALERT_WAIT_INTERVAL_MS = 1_000;
+
+/**
+ * The alerts page only mounts `alertsTableIsLoaded` when the search returns at
+ * least one hit. A document copied into `.alerts-security.alerts-<space>` does
+ * not go through the detection engine, so that search stays empty. Run a query
+ * rule in the worker space and use the alert it writes.
+ */
+const waitForSpaceAlertId = async (
+  esClient: EsClient,
+  spaceId: string,
+  ruleName: string
+): Promise<string> => {
+  const index = `${SPACE_ALERTS_INDEX_PREFIX}${spaceId}`;
+  const deadline = Date.now() + ALERT_WAIT_TIMEOUT_MS;
+
+  while (Date.now() < deadline) {
+    try {
+      await esClient.indices.refresh({ index });
+      const response = await esClient.search({
+        index,
+        size: 1,
+        query: { term: { 'kibana.alert.rule.name': ruleName } },
+      });
+      const alertId = response.hits.hits[0]?._id;
+      if (alertId) {
+        return alertId;
+      }
+    } catch {
+      // The space alerts index is created when the rule first runs.
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, ALERT_WAIT_INTERVAL_MS));
+  }
+
+  throw new Error(`Timed out waiting for an alert from rule "${ruleName}" in space "${spaceId}"`);
+};
+
+/**
+ * Creates one detection alert in the worker space and one successful automated
+ * isolate action for that alert.
+ */
+export const seedAlertFlyoutResponseAction = async ({
+  esClient,
+  kbnClient: rootKbnClient,
+  spaceId,
+  config,
+  detectionRule,
+  detectionAlerts,
+}: SeedResponseActionsHistoryParams &
+  Pick<
+    SecurityApiServicesFixture,
+    'detectionRule' | 'detectionAlerts'
+  >): Promise<SeededAlertFlyoutResponseAction> => {
+  const kbnClient = scopeKbnClientToSpace(rootKbnClient, spaceId);
+  const systemEsClient = await createSystemIndicesEsClient(esClient, config);
+  const sourceIndex = `flyout-results-source-${randomUUID()}`;
+  const ruleId = `flyout-results-${randomUUID()}`;
+  const ruleName = `Flyout results ${ruleId}`;
+  let host: IndexedHostsAndAlertsResponse | undefined;
+  let ruleCreated = false;
+  let cleanupStarted = false;
+
+  const cleanup = async (): Promise<void> => {
+    if (cleanupStarted) {
+      return;
+    }
+    cleanupStarted = true;
+
+    const failures: unknown[] = [];
+    // Stop the rule before deleting its alerts. The query matches every
+    // document, so a run that overlaps teardown can write a new alert.
+    if (ruleCreated) {
+      try {
+        await detectionRule.deleteAll();
+      } catch (error) {
+        failures.push(error);
+      }
+    }
+
+    const deletions: Array<Promise<unknown>> = [];
+    if (host) {
+      deletions.push(deleteIndexedHostsAndAlerts(systemEsClient, kbnClient, host));
+    }
+    deletions.push(detectionAlerts.deleteAll());
+    deletions.push(esClient.indices.delete({ index: sourceIndex, ignore_unavailable: true }));
+
+    const results = await Promise.allSettled(deletions);
+    failures.push(
+      ...results.flatMap((result) => (result.status === 'rejected' ? [result.reason] : []))
+    );
+
+    try {
+      await systemEsClient.close();
+    } catch (error) {
+      failures.push(error);
+    }
+
+    const errors = failures.map((failure) =>
+      failure instanceof Error ? failure : new Error(String(failure))
+    );
+    if (errors.length === 1) {
+      throw errors[0];
+    }
+    if (errors.length > 1) {
+      throw new AggregateError(
+        errors,
+        'Failed to clean up the seeded alert flyout response action'
+      );
+    }
+  };
+
+  try {
+    await esClient.indices.create({
+      index: sourceIndex,
+      mappings: {
+        properties: {
+          '@timestamp': { type: 'date' },
+          message: { type: 'keyword' },
+        },
+      },
+    });
+    await esClient.index({
+      index: sourceIndex,
+      document: {
+        '@timestamp': new Date().toISOString(),
+        message: 'flyout-results',
+      },
+      refresh: 'wait_for',
+    });
+
+    const { id: createdRuleId } = await detectionRule.createCustomQueryRule({
+      index: [sourceIndex],
+      enabled: true,
+      name: ruleName,
+      description: 'Scout alert for the response flyout',
+      risk_score: 1,
+      rule_id: ruleId,
+      severity: 'high',
+      type: 'query',
+      query: '*:*',
+      from: '2019-01-01T00:00:00.000Z',
+      interval: '1m',
+    });
+    ruleCreated = true;
+
+    const alertId = await waitForSpaceAlertId(esClient, spaceId, ruleName);
+    // The alert id is stable for this source document. Disable the rule so a
+    // later run cannot write that alert back after cleanup deletes it.
+    // deleteAll does not cancel an execution that has already started.
+    await detectionRule.disable(createdRuleId);
+
+    host = await indexResponseActionHost({
+      esClient: systemEsClient,
+      kbnClient,
+      numResponseActions: 1,
+      alertIds: [alertId],
+      isServerless: config.serverless,
+      hostNamePrefix: 'flyout-results',
+      responseState: 'success',
+    });
+
+    return {
+      ruleName,
+      cleanup,
+    };
+  } catch (error) {
+    await cleanup().catch(() => undefined);
+    throw error;
   }
 };

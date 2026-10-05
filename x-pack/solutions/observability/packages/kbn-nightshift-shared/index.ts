@@ -13,7 +13,7 @@ export const NIGHTSHIFT_FEATURE_ID = 'nightshift';
  * LaunchDarkly-unreachable deployments stay off during Tech Preview; the controlled rollout is
  * driven from the elastic/kibana-feature-flags repository.
  *
- * Scope is per-deployment, not per-space: it is read through `featureFlags.getBooleanValue`, so the
+ * Scope is per-deployment, not per-space: it is read through `featureFlags.getBooleanValue$`, so the
  * feature is on or off for the whole Kibana instance. This flag supersedes
  * `streams.significantEventsAvailable` and replaces the removed space-scoped
  * `observability:streamsEnableSignificantEvents(Discovery)` Advanced Settings, so there is no longer
@@ -45,6 +45,12 @@ export const NIGHTSHIFT_API_PRIVILEGES = {
   configure: 'configure_nightshift',
 } as const;
 
+/** `requiredPrivileges` for settings routes; `configure` is never checked without `manage`. */
+export const NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES = [
+  NIGHTSHIFT_API_PRIVILEGES.manage,
+  NIGHTSHIFT_API_PRIVILEGES.configure,
+];
+
 /** `capabilities.nightshift.*` keys granted by the feature's `ui:` list. */
 export const NIGHTSHIFT_UI_PRIVILEGES = {
   show: 'show',
@@ -55,16 +61,19 @@ export const NIGHTSHIFT_UI_PRIVILEGES = {
 export interface INightshiftCapabilities {
   canShow: boolean;
   canManage: boolean;
-  canConfigure: boolean;
+  /** Settings routes require both the manage and configure API privileges. */
+  canManageAndConfigure: boolean;
 }
 
 export function getNightshiftCapabilities(
   nightshift: Record<string, unknown> | undefined
 ): INightshiftCapabilities {
+  const canManage = nightshift?.[NIGHTSHIFT_UI_PRIVILEGES.manage] === true;
+  const canConfigure = nightshift?.[NIGHTSHIFT_UI_PRIVILEGES.configure] === true;
   return {
     canShow: nightshift?.[NIGHTSHIFT_UI_PRIVILEGES.show] === true,
-    canManage: nightshift?.[NIGHTSHIFT_UI_PRIVILEGES.manage] === true,
-    canConfigure: nightshift?.[NIGHTSHIFT_UI_PRIVILEGES.configure] === true,
+    canManage,
+    canManageAndConfigure: canManage && canConfigure,
   };
 }
 
@@ -103,3 +112,14 @@ export {
   hasMultipleSourceIndices,
   validateSourceQuery,
 } from './src/sources/validate_source_query';
+
+export {
+  NIGHTSHIFT_USAGE_PARENT_ID,
+  NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
+  NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
+  NIGHTSHIFT_DISCOVERY_USAGE_ID,
+  NIGHTSHIFT_INVESTIGATION_USAGE_ID,
+  NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID,
+  NIGHTSHIFT_KI_EXTRACTION_USAGE_ID,
+  NIGHTSHIFT_KI_QUERY_GENERATION_USAGE_ID,
+} from './src/nightshift_usage_ids';

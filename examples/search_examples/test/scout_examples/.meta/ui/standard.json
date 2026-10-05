@@ -1,5 +1,5 @@
 {
-  "sha1": "8ffcbcd7fc897d9eea5ed139c8f72643472fdfff",
+  "sha1": "9d92bd887c95dce83f7379badbba93e844aa02f0",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -102,7 +102,7 @@
       ],
       "location": {
         "file": "examples/search_examples/test/scout_examples/ui/tests/search_example.spec.ts",
-        "line": 31,
+        "line": 33,
         "column": 7
       }
     },

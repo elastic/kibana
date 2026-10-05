@@ -69,6 +69,21 @@ it('keeps a caller-provided concurrency key', async () => {
   expect(start).toHaveBeenCalledWith(expect.objectContaining({ concurrency_key: 'key-1' }));
 });
 
+it('forwards connector_id for an alert investigation', async () => {
+  await handler({
+    request: {},
+    getInvestigationsClient,
+    getAlertsClient,
+    params: {
+      body: {
+        subject: { type: 'alert', id: 'alert-1' },
+        connector_id: 'custom-model',
+      },
+    },
+  } as never);
+  expect(start).toHaveBeenCalledWith(expect.objectContaining({ connector_id: 'custom-model' }));
+});
+
 it('starts a manual investigation from the question alone', async () => {
   const body = schema.parse({
     subject: { type: 'manual' },
@@ -91,6 +106,23 @@ it('starts a manual investigation from the question alone', async () => {
       trigger_type: 'manual',
     })
   );
+});
+
+it('forwards connector_id for a manual investigation', async () => {
+  const body = schema.parse({
+    subject: { type: 'manual' },
+    message: 'Why did checkout p99 spike?',
+    connector_id: 'custom-model',
+  });
+
+  await handler({
+    request: {},
+    getInvestigationsClient,
+    getAlertsClient,
+    params: { body },
+  } as never);
+
+  expect(start).toHaveBeenCalledWith(expect.objectContaining({ connector_id: 'custom-model' }));
 });
 
 it('collapses a multi-line question into a one-line manual title unless a title is given', async () => {

@@ -32,7 +32,7 @@ export interface BulkEpisodeActionBody<
 > {
   items: Array<
     Omit<Extract<CreateEpisodeAlertActionBody, { action_type: TAction }>, 'action_type'> & {
-      episode_id: string;
+      alert_id: string;
     }
   >;
 }

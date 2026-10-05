@@ -25,15 +25,17 @@ import type {
   ActionPolicy,
   ActionPolicyId,
   AlertEpisode,
-  AlertEpisodeSuppression,
+  SuppressionRow,
   DispatchFailure,
   DispatcherPipelineInput,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
+  EpisodeSuppressionRow,
   MatchedPair,
   Rule,
   RuleId,
+  SeriesSuppressionRow,
 } from '../types';
 
 export function createStepLogger(): LoggerServiceContract {
@@ -68,7 +70,7 @@ export interface DispatcherPipelineStateOverrides
   > {
   input?: DispatcherPipelineInput;
   episodes?: AlertEpisode[];
-  suppressions?: AlertEpisodeSuppression[];
+  suppressions?: SuppressionRow[];
   dispatchable?: AlertEpisode[];
   suppressed?: SuppressedEpisode[];
   rules?: Map<RuleId, Rule>;
@@ -144,15 +146,40 @@ export function createAlertEpisode(overrides: Partial<AlertEpisode> = {}): Alert
   };
 }
 
-export function createAlertEpisodeSuppression(
-  overrides: Partial<AlertEpisodeSuppression> = {}
-): AlertEpisodeSuppression {
+export function createSuppressionRow(overrides: Partial<SuppressionRow> = {}): SuppressionRow {
   return {
     rule_id: 'rule-1',
     source: 'internal',
     space_id: 'default',
     group_hash: 'hash-1',
     episode_id: 'episode-1',
+    should_suppress: false,
+    ...overrides,
+  };
+}
+
+export function createEpisodeSuppressionRow(
+  overrides: Partial<EpisodeSuppressionRow> = {}
+): EpisodeSuppressionRow {
+  return {
+    rule_id: 'rule-1',
+    source: 'internal',
+    space_id: 'default',
+    group_hash: 'hash-1',
+    episode_id: 'episode-1',
+    should_suppress: false,
+    ...overrides,
+  };
+}
+
+export function createSeriesSuppressionRow(
+  overrides: Partial<SeriesSuppressionRow> = {}
+): SeriesSuppressionRow {
+  return {
+    rule_id: 'rule-1',
+    source: 'internal',
+    space_id: 'default',
+    group_hash: 'hash-1',
     should_suppress: false,
     ...overrides,
   };

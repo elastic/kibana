@@ -1,0 +1,22 @@
+{
+  "sha1": "1154ab62368830b2c8d0bbe123670f45b06ec8bb",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "73fb2a3d885141b-898b75c622bf6e0",
+      "title": "Custom content panel Refine with chat applies the agent update to the open panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/custom_content/test/scout/ui/tests/custom_content_refine_with_chat.spec.ts",
+        "line": 54,
+        "column": 11
+      }
+    }
+  ]
+}

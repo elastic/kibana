@@ -94,7 +94,7 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
                 technique_id: 'T1021',
                 tactic_ids: ['TA0008'],
                 confidence: 0.7,
-                rule_name: 'Lateral movement via RDP',
+                title: 'Lateral movement via RDP',
                 execution: { executed: true, row_count: 4, hit: true },
               },
             ],

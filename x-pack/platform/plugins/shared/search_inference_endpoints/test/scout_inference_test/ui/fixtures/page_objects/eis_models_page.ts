@@ -253,6 +253,10 @@ export class EisModelsPage {
     return this.page.testSubj.locator(`eisModelCard-${modelName}`);
   }
 
+  public modelCardMeta(modelName: string): Locator {
+    return this.page.testSubj.locator(`eisModelCardMeta-${modelName}`);
+  }
+
   public flyoutRegionOption(key: string): Locator {
     return this.page.testSubj.locator(`flyoutRegionOption-${key}`);
   }

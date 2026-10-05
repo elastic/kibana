@@ -1,3 +1,4 @@
+@launchdarkly/js-client-sdk
 @eslint-community/eslint-plugin-eslint-comments
 eslint-plugin-n
 @xterm/xterm
@@ -32,7 +33,6 @@ yaml-language-server
 @opentelemetry/api-logs
 @opentelemetry/exporter-logs-otlp-http
 @opentelemetry/sdk-logs
-simple-statistics
 monaco-promql
 json-stable-stringify
 apache-arrow

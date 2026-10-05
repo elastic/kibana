@@ -15,9 +15,6 @@ import { SettingsTab } from './tab';
 
 jest.mock('../../../../hooks/use_kibana');
 jest.mock('../../../../hooks/use_developer_mode');
-jest.mock('../../../../hooks/use_model_settings_url', () => ({
-  useModelSettingsUrl: () => undefined,
-}));
 jest.mock('../../../../hooks/use_significant_events_maintenance', () => ({
   useBlocksNewActivity: () => ({
     blocksActivity: false,

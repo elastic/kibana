@@ -13,8 +13,6 @@ import {
   createWorkflowStepConversationClientMock,
 } from '../../test_utils/workflow_steps';
 
-const isExperimentalEnabled = jest.fn().mockResolvedValue(true);
-
 describe('createConversationStepDefinition', () => {
   const baseInput = { title: 'New conversation' };
 
@@ -36,7 +34,6 @@ describe('createConversationStepDefinition', () => {
       getConversationClient: conv.getConversationClient,
       getAgentRegistry: agents.getAgentRegistry,
       getExecutionService: jest.fn(),
-      isExperimentalEnabled,
     });
     return { conv, agents, definition };
   };
@@ -166,7 +163,6 @@ describe('createConversationStepDefinition', () => {
       getConversationClient: jest.fn(),
       getAgentRegistry: jest.fn(),
       getExecutionService: jest.fn(),
-      isExperimentalEnabled,
     }).inputSchema;
 
     it('accepts an empty body', () => {

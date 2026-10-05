@@ -94,6 +94,10 @@ export const DataFrameAnalyticsOverviewCard: FC = () => {
   ) : (
     <MLEmptyPromptCard
       customCss={overviewPageCardCustomCss}
+      hasBorder
+      hasShadow={false}
+      titleSize="s"
+      paddingSize="m"
       iconSrc={dfaImage}
       iconSize="m"
       iconAlt={i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptTitle', {

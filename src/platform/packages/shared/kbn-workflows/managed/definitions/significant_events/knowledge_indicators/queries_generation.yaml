@@ -34,7 +34,7 @@ triggers:
         description: "The name of the stream to generate queries for."
       - name: connectorId
         type: string
-        description: "Optional connector ID override. When omitted the connector is resolved via the Inference Feature Registry."
+        description: "Optional connector ID override. When omitted the code-owned Nightshift default is used."
       - name: maxExistingQueriesForContext
         type: number
         description: "Max number of existing queries to include as LLM context. When omitted the server-side default is used."

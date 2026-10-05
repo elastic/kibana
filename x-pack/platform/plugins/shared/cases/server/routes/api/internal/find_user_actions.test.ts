@@ -93,8 +93,8 @@ const userActionsMockData = {
 const attachmentsMockData = {
   attachments: [
     {
-      comment: 'Edited first comment',
-      type: 'user',
+      type: 'comment',
+      data: { content: 'Edited first comment' },
       owner: 'cases',
       created_at: '2025-01-07T13:32:01.283Z',
       created_by: {
@@ -116,8 +116,8 @@ const attachmentsMockData = {
       version: 'WzksMV0=',
     },
     {
-      comment: 'Second comment',
-      type: 'user',
+      type: 'comment',
+      data: { content: 'Second comment' },
       owner: 'cases',
       created_at: '2025-01-07T13:32:08.015Z',
       created_by: {
@@ -134,8 +134,8 @@ const attachmentsMockData = {
       version: 'WzYsMV0=',
     },
     {
-      comment: 'Edited first comment',
-      type: 'user',
+      type: 'comment',
+      data: { content: 'Edited first comment' },
       owner: 'cases',
       created_at: '2025-01-07T13:32:01.283Z',
       created_by: {
@@ -200,7 +200,7 @@ describe('findUserActionsRoute', () => {
         body: expect.objectContaining({
           latestAttachments: expect.arrayContaining([
             expect.objectContaining({
-              comment: 'Edited first comment',
+              data: { content: 'Edited first comment' },
               created_at: '2025-01-07T13:32:01.283Z',
               created_by: {
                 email: null,
@@ -212,7 +212,7 @@ describe('findUserActionsRoute', () => {
               owner: 'cases',
               pushed_at: null,
               pushed_by: null,
-              type: 'user',
+              type: 'comment',
               updated_at: '2025-01-07T13:32:18.127Z',
               updated_by: {
                 email: null,
@@ -386,7 +386,7 @@ describe('findUserActionsRoute', () => {
         body: expect.objectContaining({
           latestAttachments: expect.arrayContaining([
             expect.objectContaining({
-              comment: 'Edited first comment',
+              data: { content: 'Edited first comment' },
               created_at: '2025-01-07T13:32:01.283Z',
               created_by: {
                 email: null,
@@ -398,7 +398,7 @@ describe('findUserActionsRoute', () => {
               owner: 'cases',
               pushed_at: null,
               pushed_by: null,
-              type: 'user',
+              type: 'comment',
               updated_at: '2025-01-07T13:32:18.127Z',
               updated_by: {
                 email: null,

@@ -26,7 +26,10 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/workflows'
   - '@kbn/workflows-ui'
-  - '@kbn/utility-types'
+  - '@kbn/charts-theme'
+  - '@kbn/core-ui-settings-browser'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/visualization-utils'
 tags:
   - shared-browser
   - package

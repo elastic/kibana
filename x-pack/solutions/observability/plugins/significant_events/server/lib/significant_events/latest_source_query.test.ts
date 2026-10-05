@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { resolveTimeBound } from './latest_source_query';
+import { esql } from '@elastic/esql';
+import { applyLifetimeOverlap, resolveTimeBound } from './latest_source_query';
 
 describe('resolveTimeBound', () => {
   it('resolves date-math expressions to ISO', () => {
@@ -32,5 +33,54 @@ describe('resolveTimeBound', () => {
     const start = resolveTimeBound('2026-07-23||/d');
     const end = resolveTimeBound('2026-07-23||/d', { roundUp: true });
     expect(new Date(end).getTime() - new Date(start).getTime()).toBe(24 * 60 * 60 * 1000 - 1);
+  });
+});
+
+describe('applyLifetimeOverlap', () => {
+  const activeWhere = esql.exp`${esql.col('status')} IN (${[esql.str('open')]})`;
+
+  const printOverlap = (range: { from?: string; to?: string }) =>
+    applyLifetimeOverlap({ query: esql.from('events'), activeWhere, ...range }).toRequest();
+
+  it('keeps entities created by `to` and still active or updated since `from`', () => {
+    const { query, params } = printOverlap({
+      from: '2026-01-02T00:00:00.000Z',
+      to: '2026-01-02T23:59:59.999Z',
+    });
+
+    expect(query).toBe(
+      'FROM events | WHERE created_at <= TO_DATETIME(?overlapToIso) | WHERE (status IN ("open")) OR @timestamp >= TO_DATETIME(?overlapFromIso)'
+    );
+    expect(params).toEqual([
+      { overlapToIso: '2026-01-02T23:59:59.999Z' },
+      { overlapFromIso: '2026-01-02T00:00:00.000Z' },
+    ]);
+  });
+
+  it('only bounds creation when `from` is omitted', () => {
+    const { query } = printOverlap({ to: '2026-01-02T23:59:59.999Z' });
+
+    expect(query).toBe('FROM events | WHERE created_at <= TO_DATETIME(?overlapToIso)');
+  });
+
+  it('only bounds the last update when `to` is omitted', () => {
+    const { query } = printOverlap({ from: '2026-01-02T00:00:00.000Z' });
+
+    expect(query).toBe(
+      'FROM events | WHERE (status IN ("open")) OR @timestamp >= TO_DATETIME(?overlapFromIso)'
+    );
+  });
+
+  it('leaves the query unchanged without a time range', () => {
+    expect(printOverlap({}).query).toBe('FROM events');
+  });
+
+  it('rounds date-math `to` up and `from` down', () => {
+    const { params } = printOverlap({ from: '2026-01-02||/d', to: '2026-01-02||/d' });
+
+    expect(params).toEqual([
+      { overlapToIso: resolveTimeBound('2026-01-02||/d', { roundUp: true }) },
+      { overlapFromIso: resolveTimeBound('2026-01-02||/d') },
+    ]);
   });
 });

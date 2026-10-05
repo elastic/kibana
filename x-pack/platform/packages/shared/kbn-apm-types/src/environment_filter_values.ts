@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { escapeKuery } from '@kbn/es-query';
+import { escapeKuery, escapeQuotes } from '@kbn/es-query';
 import { SERVICE_ENVIRONMENT } from './es_fields/apm';
 import type { Environment } from './environment_rt';
 
@@ -59,6 +59,26 @@ export function getEnvironmentKuery(environment: string) {
   }
 
   return `${[SERVICE_ENVIRONMENT]}: ${escapeKuery(environment)} `;
+}
+
+/**
+ * KQL for alerts UIs that must match APM `environmentQuery` semantics.
+ *
+ * Unlike {@link getEnvironmentKuery}, "Not defined" matches either the sentinel value or a
+ * missing `service.environment` field — the same documents counted by service/transaction
+ * alert aggregations.
+ */
+export function getAlertsEnvironmentKuery(environment: string): string | undefined {
+  if (!environment || environment === ENVIRONMENT_ALL_VALUE) {
+    return undefined;
+  }
+
+  // Must be checked before the plain field match: the sentinel satisfies isEnvironmentDefined.
+  if (environment === ENVIRONMENT_NOT_DEFINED_VALUE) {
+    return `(${SERVICE_ENVIRONMENT}: "${ENVIRONMENT_NOT_DEFINED_VALUE}" OR NOT ${SERVICE_ENVIRONMENT}: *)`;
+  }
+
+  return `${SERVICE_ENVIRONMENT}: "${escapeQuotes(environment)}"`;
 }
 
 // returns the environment url param that should be used

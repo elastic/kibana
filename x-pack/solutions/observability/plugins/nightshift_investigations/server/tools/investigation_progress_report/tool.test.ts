@@ -21,6 +21,14 @@ const createTool = () =>
     availability,
   });
 
+const chart = {
+  type: 'line' as const,
+  title: 'Checkout errors',
+  x_axis: { type: 'time' as const },
+  y_axis: {},
+  series: [{ name: 'errors', points: [{ x: '2026-07-28T14:00:00Z', y: 3 }] }],
+};
+
 describe('investigation_progress_report tool', () => {
   it('uses the expected tool id', () => {
     const tool = createTool();
@@ -108,6 +116,56 @@ describe('investigation_progress_report tool', () => {
         acknowledged: true,
         warning: expect.stringContaining('More than one hypothesis is "confirmed"'),
       });
+    } else {
+      throw new Error('Expected a standard tool result');
+    }
+  });
+
+  it.each([
+    [
+      'a single entity with evidence',
+      { summary: 'Checkout failed.', entities: [{ name: 'checkout', evidence: { chart } }] },
+      'The impact lists a single entity',
+    ],
+    [
+      'both top-level evidence and entities',
+      {
+        summary: 'Checkout failed.',
+        evidence: { chart },
+        entities: [{ name: 'checkout' }, { name: 'payments' }],
+      },
+      'both a top-level "evidence" and "entities"',
+    ],
+  ])('warns the agent when the impact has %s', async (_label, impact, expected) => {
+    const tool = createTool();
+    const context = agentBuilderMocks.tools.createHandlerContext();
+
+    const result = await tool.handler(
+      { summary: 'Checkout failed.', hypotheses: [], impact },
+      context
+    );
+
+    if ('results' in result) {
+      expect(result.results[0].data).toEqual({
+        acknowledged: true,
+        warning: expect.stringContaining(expected),
+      });
+    } else {
+      throw new Error('Expected a standard tool result');
+    }
+  });
+
+  it('does not warn about a seeded single entity without evidence', async () => {
+    const tool = createTool();
+    const context = agentBuilderMocks.tools.createHandlerContext();
+
+    const result = await tool.handler(
+      { summary: 'Checkout failed.', hypotheses: [], impact: { entities: [{ name: 'checkout' }] } },
+      context
+    );
+
+    if ('results' in result) {
+      expect(result.results[0].data).toEqual({ acknowledged: true });
     } else {
       throw new Error('Expected a standard tool result');
     }

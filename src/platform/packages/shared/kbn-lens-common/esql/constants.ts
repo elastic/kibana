@@ -13,8 +13,8 @@
  * `generate_esql_query.ts` uses the same N with `calculateAuto.near` so the inferred interval
  * matches the bucket width implied by that `BUCKET` call.
  *
- * `N` is 75, not `histogram:barTarget` (default 50), so ES|QL `BUCKET` and the client-side
- * interval match Lens's form-based `auto` date_histogram; the default 50 would not.
+ * `N` is 75, not `histogram:barTarget` (default 100), so ES|QL `BUCKET` and the client-side
+ * interval match Lens's form-based `auto` date_histogram; the default 100 would not.
  */
 export const AUTO_TARGET_NUMBER_OF_BUCKETS = 75;
 

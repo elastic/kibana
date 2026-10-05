@@ -73,7 +73,7 @@ import type { UserServiceContract } from '../services/user_service/user_service'
 import { UserService } from '../services/user_service/user_service';
 import type { PluginConfig } from '../../config';
 import { convertEveryToSchedulesPerMinute, parseDurationToMs } from '../duration';
-import { buildRuleSoFilter } from './build_rule_filter';
+import { buildMatchingRulesFilter, buildRuleSoFilter } from './build_rule_filter';
 import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
 import type {
   BulkByIdsParams,
@@ -85,6 +85,7 @@ import type {
   BulkResponse,
   CreateRuleData,
   CreateRuleParams,
+  FindMatchingRulesArgs,
   FindRulesArgs,
   FindRulesResponse,
   FindRulesSortField,
@@ -295,8 +296,11 @@ export class RulesClient {
         {
           code: ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
           details: isSingle
-            ? { interval: limitItems[0].updatedEvery, maxScheduledPerMinute }
-            : { maxScheduledPerMinute },
+            ? {
+                interval: limitItems[0].updatedEvery,
+                max_scheduled_per_minute: maxScheduledPerMinute,
+              }
+            : { max_scheduled_per_minute: maxScheduledPerMinute },
         }
       );
     }
@@ -316,7 +320,7 @@ export class RulesClient {
         `Rule schedule interval of "${every}" is shorter than the allowed minimum of "${minimumScheduleInterval}"`,
         {
           code: ALERTING_ERROR_CODES.SCHEDULE_INTERVAL_TOO_SHORT,
-          details: { interval: every, minimumScheduleInterval },
+          details: { interval: every, minimum_schedule_interval: minimumScheduleInterval },
         }
       );
     }
@@ -654,7 +658,7 @@ export class RulesClient {
     const errors: BulkOperationError[] = [];
     const prepared: PreparedRule[] = [];
 
-    for (const item of parsed.rules) {
+    for (const item of parsed.items) {
       const { id, enabled, ...data } = item;
       try {
         prepared.push(
@@ -1051,6 +1055,26 @@ export class RulesClient {
       page,
       per_page: perPage,
     };
+  }
+
+  /**
+   * Finds the alert rules in scope of a policy matcher: those with at least one of its tags, or every
+   * alert rule when it has no tags. Signal rules never create alerts, so no policy applies to them.
+   * The matcher expression runs against alerts, so it can't narrow rules down.
+   */
+  @withApm
+  public async findMatchingRules({
+    matcher,
+    page,
+    perPage,
+  }: FindMatchingRulesArgs = {}): Promise<FindRulesResponse> {
+    return this.findRules({
+      page,
+      perPage,
+      filter: buildMatchingRulesFilter(matcher?.tags ?? []),
+      sortField: 'name',
+      sortOrder: 'asc',
+    });
   }
 
   /**

@@ -203,7 +203,7 @@ Step order is defined in `setup/bind_dispatcher_executor.ts`.
 | --- | ---------------------------- | ------------------------------------------------------------------------------------------------ |
 | 1   | `WaitForResourcesStep`       | Block the run until the dispatcher's required plugin resources are ready.                        |
 | 2   | `FetchEpisodesStep`          | Load episodes via a keys-only scan (no `_source`/`data` payload). Halts on empty result.         |
-| 3   | `FetchSuppressionsStep`      | Load alert-action facts needed for suppression decisions.                                        |
+| 3   | `FetchSuppressionsStep`      | Load alert-action facts needed for suppression decisions (see [Suppression queries](#suppression-queries)). |
 | 4   | `ApplySuppressionStep`       | Mark each episode as dispatchable or suppressed, preserving reasons.                             |
 | 5   | `HydrateEpisodeDataStep`     | Fetch `data` payloads for the surviving dispatchable episodes only, via `getEpisodeDataQueries`. |
 | 6   | `FetchRulesStep`             | Load rule metadata for the remaining dispatchable set.                                           |
@@ -215,6 +215,19 @@ Step order is defined in `setup/bind_dispatcher_executor.ts`.
 | 12  | `DispatchStep`               | Perform delivery side effects for eligible groups.                                               |
 | 13  | `StoreActionsStep`           | Persist the execution outcome to `.alert-actions`.                                               |
 | 14  | `StoreExecutionHistoryStep`  | Emit per-policy `dispatched` / `throttled` / `unmatched` / `dispatch_failed` event-log summaries. |
+
+### Suppression queries
+
+`FetchSuppressionsStep` reads `.alert-actions` with two scope-specific queries, run in parallel and merged into one `SuppressionIndex`:
+
+| Query                           | Scope   | Actions                                        | Filter                                  | Grouped by                          |
+| ------------------------------- | ------- | ---------------------------------------------- | --------------------------------------- | ----------------------------------- |
+| `getEpisodeSuppressionsQueries` | episode | `ack` / `unack`, `deactivate` / `activate`     | `episode_id IN (<batch episode ids>)`   | `subject`, `group_hash`, `episode_id` |
+| `getSeriesSuppressionsQueries`  | series  | `snooze` / `unsnooze`                          | `(rule_id \| source, group_hash)` pairs of the batch, `episode_id IS NULL` | `subject`, `group_hash`             |
+
+Neither query has a time bound: an indefinite snooze or an ack stays in effect however old it is. Each query returns at most one row per literal of its `IN` chunk, so result size is bounded by the batch, not by how much history `.alert-actions` has accumulated. Episode ids are chunked up to `ESQL_QUERY_ROW_LIMIT` per request; series pairs are chunked by `SUPPRESSIONS_IN_CLAUSE_LITERAL_BUDGET_BYTES` to stay under the ES|QL statement size cap. Reaching the row limit on any chunk logs `FETCH_SUPPRESSIONS_STEP_ROW_LIMIT_REACHED`, which indicates that invariant broke.
+
+When both an episode-level and a series-level record suppress an episode, `SuppressionIndex` reports the episode-level reason: an acked episode on a snoozed series reports `ack`.
 
 ## Halt reasons
 

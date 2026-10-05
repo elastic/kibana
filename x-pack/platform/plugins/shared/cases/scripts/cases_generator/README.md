@@ -86,7 +86,7 @@ node x-pack/platform/plugins/shared/cases/scripts/generate_cases.js -c 30 --seed
 | `-c, --count` | `10` | Cases per space |
 | `-m, --comments` | `0` | User comments per case |
 | `-a, --alerts` | `0` | Alert attachments per case (indexed into ES) |
-| `-e, --events` | `0` | Event attachments per case (skipped for `observability` owner) |
+| `-e, --events` | `0` | Event attachments per case (`securitySolution` owner only) |
 | `-o, --owners` | all three | `securitySolution`, `observability`, `cases` |
 | `--ownerDistribution` | `''` | Weighted picks, e.g. `securitySolution:60,cases:40` |
 | `-s, --space` | `''` (default) | Single target space |
@@ -112,7 +112,7 @@ Run with `--help` to see the full yargs help output.
 ## Notes
 
 - `--alerts > 0` writes alert docs into `.alerts-security.alerts-<space>` (security/cases owners) or `.alerts-observability.metrics.alerts-<space>` (observability owner). If the target index already contains enough docs to cover the request, the run **reuses** them and skips indexing; if it has some but not enough, the run **tops up** the missing delta. Same policy applies to events (`logs-endpoint.events.process-default`).
-- `--events > 0` writes process events into `logs-endpoint.events.process-default`. Observability-owned cases skip event attachments.
+- `--events > 0` writes process events into `logs-endpoint.events.process-default`. Only `securitySolution`-owned cases get event attachments.
 - `--numSpaces` is **additive**: the default space always participates so a fresh demo dataset shows up in the space users land in first. Setting `--numSpaces 3` generates into the default space + three newly created spaces (four spaces total).
 - `--cleanup` is **global by default**: it discovers every Kibana space via the spaces API and removes anything tagged `--cleanupTag` from each. Pass `--cleanupSpaces "default,analytics-1"` to scope it.
 - `--templateUsagePercent` controls how many cases pick up a template — the rest stay vanilla so the dataset reflects a realistic mix.

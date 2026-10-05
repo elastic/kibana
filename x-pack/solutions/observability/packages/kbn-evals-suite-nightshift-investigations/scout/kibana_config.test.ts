@@ -36,7 +36,7 @@ it('resolves credentials from the environment and preserves other preconfigured 
       existingConfig,
       Path.join(
         REPO_ROOT,
-        'src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_nightshift_investigations/stateful/kibana.tracing.yml'
+        'src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_nightshift_investigations/kibana.tracing.yml'
       ),
       Path.join(__dirname, 'kibana.sandbox.yml'),
       Path.join(__dirname, 'kibana.telemetry.yml'),

@@ -12,7 +12,11 @@ import { hydrateCortexWorkspace } from '../cortex/register_cortex';
 import { cortexHydrateStepDefinition } from './cortex_hydrate';
 
 jest.mock('../cortex/register_cortex', () => ({
-  hydrateCortexWorkspace: jest.fn().mockResolvedValue(undefined),
+  hydrateCortexWorkspace: jest
+    .fn()
+    .mockResolvedValue(
+      'Cortex pages materialized this turn:\n- `/workspace/cortex/services/checkout.md`'
+    ),
 }));
 
 describe('cortexHydrateStepDefinition', () => {
@@ -31,10 +35,14 @@ describe('cortexHydrateStepDefinition', () => {
     getScopedEsClient.mockReturnValue(esClient);
   });
 
-  const createContext = (conversationId: string, spaceId = 'default') =>
+  const createContext = (
+    sandboxId: string | undefined,
+    spaceId = 'default',
+    conversationId?: string
+  ) =>
     ({
-      input: { conversation_id: conversationId },
-      rawInput: { conversation_id: conversationId },
+      input: { sandbox_id: sandboxId, conversation_id: conversationId },
+      rawInput: { sandbox_id: sandboxId, conversation_id: conversationId },
       contextManager: {
         getContext: jest.fn().mockReturnValue({ workflow: { spaceId } }),
         getFakeRequest: jest.fn(),
@@ -56,7 +64,7 @@ describe('cortexHydrateStepDefinition', () => {
       logger: loggerMock.create(),
     });
 
-    const result = await definition.handler(createContext('conv-1'));
+    const result = await definition.handler(createContext('default__conv-1'));
 
     expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith('default', 'conv-1');
     expect(hydrateCortexWorkspace).toHaveBeenCalledWith({
@@ -68,12 +76,16 @@ describe('cortexHydrateStepDefinition', () => {
       conversationId: 'conv-1',
       logger: expect.anything(),
     });
-    expect(result).toEqual({ output: { conversation_id: 'conv-1' } });
+    expect(result).toEqual({
+      output: {
+        sandbox_id: 'default__conv-1',
+        conversation_id: 'conv-1',
+        notification: '',
+      },
+    });
   });
 
-  // The sandbox session is keyed on (spaceId, conversationId); the step passes the workflow
-  // spaceId so the session matches the one the agent tools will resolve from the request.
-  it('scopes the workspace to the space the workflow runs in', async () => {
+  it('uses the obtained sandbox_id without re-scoping it', async () => {
     const sandboxStart = makeSandboxStart();
     const definition = cortexHydrateStepDefinition({
       getSandboxStart: () => sandboxStart,
@@ -81,13 +93,56 @@ describe('cortexHydrateStepDefinition', () => {
       logger: loggerMock.create(),
     });
 
-    const result = await definition.handler(createContext('conv-1', 'marketing'));
+    const result = await definition.handler(createContext('marketing__conv-1', 'marketing'));
 
     expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith('marketing', 'conv-1');
     expect(hydrateCortexWorkspace).toHaveBeenCalledWith(
-      expect.objectContaining({ spaceId: 'marketing' })
+      expect.objectContaining({ spaceId: 'marketing', conversationId: 'conv-1' })
     );
-    expect(result).toEqual({ output: { conversation_id: 'conv-1' } });
+    expect(result).toEqual({
+      output: {
+        sandbox_id: 'marketing__conv-1',
+        conversation_id: 'conv-1',
+        notification: '',
+      },
+    });
+  });
+
+  it('scopes a legacy conversation_id using the workflow Space', async () => {
+    const sandboxStart = makeSandboxStart();
+    const definition = cortexHydrateStepDefinition({
+      getSandboxStart: () => sandboxStart,
+      analytics,
+      logger: loggerMock.create(),
+    });
+
+    const result = await definition.handler(createContext(undefined, 'marketing', 'conv-1'));
+
+    expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith('marketing', 'conv-1');
+    expect(hydrateCortexWorkspace).toHaveBeenCalledWith(
+      expect.objectContaining({ spaceId: 'marketing', conversationId: 'conv-1' })
+    );
+    expect(result).toEqual({
+      output: {
+        sandbox_id: 'marketing__conv-1',
+        conversation_id: 'conv-1',
+        notification: '',
+      },
+    });
+  });
+
+  it('rejects input missing both sandbox_id and conversation_id', async () => {
+    const definition = cortexHydrateStepDefinition({
+      getSandboxStart: () => makeSandboxStart(),
+      analytics,
+      logger: loggerMock.create(),
+    });
+
+    expect(definition.inputSchema.safeParse({}).success).toBe(false);
+    await expect(definition.handler(createContext(undefined))).rejects.toThrow(
+      'Either sandbox_id or conversation_id is required.'
+    );
+    expect(hydrateCortexWorkspace).not.toHaveBeenCalled();
   });
 
   it('throws when the sandbox is not configured', async () => {
@@ -97,9 +152,30 @@ describe('cortexHydrateStepDefinition', () => {
       logger: loggerMock.create(),
     });
 
-    await expect(definition.handler(createContext('conv-1'))).rejects.toThrow(
+    await expect(definition.handler(createContext('default__conv-1'))).rejects.toThrow(
       /sandbox is not configured/
     );
     expect(hydrateCortexWorkspace).not.toHaveBeenCalled();
+  });
+
+  it('skips materialize when the cortex flag is off', async () => {
+    const definition = cortexHydrateStepDefinition({
+      getSandboxStart: () => makeSandboxStart(),
+      analytics,
+      logger: loggerMock.create(),
+      isEnabled: () => false,
+    });
+
+    const result = await definition.handler(createContext('default__conv-1'));
+
+    expect(hydrateCortexWorkspace).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      output: {
+        sandbox_id: 'default__conv-1',
+        conversation_id: 'conv-1',
+        skipped: true,
+        notification: '',
+      },
+    });
   });
 });

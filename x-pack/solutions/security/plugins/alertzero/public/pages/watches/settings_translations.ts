@@ -35,6 +35,12 @@ export const viewExecutionsAriaLabel = (workerName: string) =>
     values: { workerName },
   });
 
+export const workerWarningAriaLabel = (workerName: string): string =>
+  i18n.translate('xpack.alertzero.watches.settings.workerWarningAriaLabel', {
+    defaultMessage: 'Warnings for {workerName}',
+    values: { workerName },
+  });
+
 export const READ_ONLY_CALLOUT_MESSAGE = i18n.translate(
   'xpack.alertzero.watches.settings.readOnlyCalloutMessage',
   {

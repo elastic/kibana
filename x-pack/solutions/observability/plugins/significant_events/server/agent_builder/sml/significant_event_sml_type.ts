@@ -10,24 +10,14 @@ import { getSmlOriginId, kibanaPermissions } from '@kbn/agent-builder-sml-plugin
 import { type SignificantEvent } from '@kbn/significant-events-schema';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import { SIGNIFICANT_EVENT_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '../../../common';
-import {
-  EventService,
-  eventsDataStream,
-  type eventsMappings,
-  type SignificantEventsReadClient,
-  type StoredEvent,
-} from '../../lib/significant_events/events';
+import { RuleEventsClient } from '../../lib/significant_events/events/rule_events_client';
 import type { GetScopedClients } from '../../routes/types';
 
 interface CreateSignificantEventSmlTypeOptions {
   getScopedClients: GetScopedClients;
-  getDataStreams: () => Promise<DataStreamsStart>;
   isAvailable: () => Promise<boolean>;
-  /** Gated by `SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ` (`@kbn/nightshift-shared`). */
-  getUseRuleEventsRead: () => Promise<boolean>;
 }
 
 const PAGE_SIZE = 100;
@@ -48,30 +38,17 @@ const eventToSmlContent = (event: SignificantEvent): string => {
 
 export const createSignificantEventSmlType = ({
   getScopedClients,
-  getDataStreams,
   isAvailable,
-  getUseRuleEventsRead,
 }: CreateSignificantEventSmlTypeOptions): SmlTypeDefinition => {
-  const eventService = new EventService();
   const getSmlEventClient = async (
-    esClient: ElasticsearchClient
-  ): Promise<SignificantEventsReadClient | undefined> => {
+    esClient: ElasticsearchClient,
+    space: string = DEFAULT_SPACE_ID
+  ): Promise<RuleEventsClient | undefined> => {
     if (!(await isAvailable())) {
       return;
     }
 
-    const dataStreams = await getDataStreams();
-    const dataStreamClient = await dataStreams.initializeClient<typeof eventsMappings, StoredEvent>(
-      eventsDataStream.name
-    );
-    const useRuleEventsRead = await getUseRuleEventsRead();
-
-    return eventService.getClient({
-      dataStreamClient,
-      esClient,
-      space: DEFAULT_SPACE_ID,
-      useRuleEventsRead,
-    });
+    return new RuleEventsClient({ esClient, space });
   };
 
   return {
@@ -140,16 +117,18 @@ export const createSignificantEventSmlType = ({
     getPermissions: () => kibanaPermissions({ kiType: SIGNIFICANT_EVENT_KI_TYPE }),
 
     toAttachment: async (item, context) => {
-      if (!(await isAvailable())) {
-        return undefined;
-      }
-
       const originId = getSmlOriginId(item);
       if (!originId) {
         return undefined;
       }
-      const { getEventSearchClient } = await getScopedClients({ request: context.request });
-      const eventClient = await getEventSearchClient();
+      const { scopedClusterClient } = await getScopedClients({ request: context.request });
+      const eventClient = await getSmlEventClient(
+        scopedClusterClient.asCurrentUser,
+        context.spaceId
+      );
+      if (!eventClient) {
+        return undefined;
+      }
       const event = await eventClient.findLatestByEventId(originId);
 
       if (!event) {

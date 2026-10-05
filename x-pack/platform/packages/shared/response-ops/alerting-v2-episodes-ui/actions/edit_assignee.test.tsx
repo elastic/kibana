@@ -120,8 +120,8 @@ describe('createEditAssigneeAction', () => {
       await waitFor(() => expect(onSuccess).toHaveBeenCalled());
       expect(mockBulkCreate).toHaveBeenCalledTimes(1);
       expect(mockBulkCreate).toHaveBeenCalledWith(mockDeps.http, [
-        { episode_id: 'ep-1', assignee_uid: 'uid-picked' },
-        { episode_id: 'ep-2', assignee_uid: 'uid-picked' },
+        { alert_id: 'ep-1', assignee_uid: 'uid-picked' },
+        { alert_id: 'ep-2', assignee_uid: 'uid-picked' },
       ]);
     });
 
@@ -152,7 +152,7 @@ describe('createEditAssigneeAction', () => {
         { assigneeUid: 'uid-joana', episodeCount: 1 }
       );
       expect(mockBulkCreate).toHaveBeenCalledWith(mockDeps.http, [
-        expect.objectContaining({ episode_id: 'ep-1', assignee_uid: 'uid-picked' }),
+        expect.objectContaining({ alert_id: 'ep-1', assignee_uid: 'uid-picked' }),
       ]);
     });
 

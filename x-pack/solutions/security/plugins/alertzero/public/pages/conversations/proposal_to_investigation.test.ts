@@ -20,7 +20,6 @@ const baseProposal: ProposalItem = {
   confidence: 'high',
   origin: 'alertzero',
   createdAt: '2026-09-10T10:00:00.000Z',
-  expired: false,
   conversationAssignees: [],
 };
 
