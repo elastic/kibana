@@ -14,13 +14,6 @@
 # in kbn-dev-utils only carry a `DNS:localhost` SAN. A distinct name such as `ip6-localhost`
 # loses both, and every `hostname === 'localhost'` check in the codebase stops matching.
 
-# `ahosts` goes through getaddrinfo, the same resolution the clients this mode covers use. `hosts`
-# would answer from gethostbyname2, which returns a single family and reports `::1` even where
-# `localhost` still carries an IPv4 address.
-resolves_to_ipv6_loopback() {
-  [[ "$(getent ahosts localhost 2>/dev/null | awk 'NR == 1 { print $1 }')" == "::1" ]]
-}
-
 # Every address `localhost` resolves to, deduplicated onto one line. `getent ahosts` repeats each
 # address once per socket type, which is noise for a log line.
 localhost_addresses() {
@@ -34,22 +27,17 @@ log_localhost_resolution() {
   echo "$1: $(localhost_addresses)"
 }
 
-# A surviving IPv4 address means `localhost` is still reachable over 127.0.0.1, so anything that
-# picks it up reports as a pass without having exercised IPv6. resolves_to_ipv6_loopback only
-# inspects the first address returned, which a dual-stack answer satisfies, so check the rest here.
-warn_if_ipv4_survives() {
-  if [[ "$(localhost_addresses)" == *127.* ]]; then
-    echo "^^^ +++"
-    echo "localhost still resolves to an IPv4 address, so this run is only partly IPv6:"
-    cat /etc/hosts
-  fi
+# `ahosts` goes through getaddrinfo, the same resolution the clients this mode covers use. `hosts`
+# would answer from gethostbyname2, which returns a single family and reports `::1` even where
+# `localhost` still carries an IPv4 address. The whole address set is compared, not just the
+# first entry: a dual-stack answer that prefers IPv6 still leaves 127.0.0.1 reachable.
+resolves_only_to_ipv6_loopback() {
+  [[ "$(localhost_addresses)" == "::1" ]]
 }
 
 if [[ "${AGENT_LOOPBACK_IPV6_ONLY:-}" == "true" ]]; then
-  if resolves_to_ipv6_loopback; then
-    echo "--- localhost already resolves to the IPv6 loopback"
-    log_localhost_resolution "localhost resolves to"
-    warn_if_ipv4_survives
+  if resolves_only_to_ipv6_loopback; then
+    echo "--- localhost already resolves only to the IPv6 loopback"
   elif ! sudo -n true 2>/dev/null; then
     # Dispatch and artifact-upload jobs run on unprivileged k8s pods and never talk to a
     # Kibana or Elasticsearch server, so they have nothing to reach over the loopback.
@@ -92,14 +80,15 @@ if [[ "${AGENT_LOOPBACK_IPV6_ONLY:-}" == "true" ]]; then
     sudo cp "$hosts_ipv6_only" /etc/hosts
     rm -f "$hosts_ipv6_only"
 
-    if ! resolves_to_ipv6_loopback; then
-      echo "localhost still does not resolve to ::1 after rewriting /etc/hosts:"
+    log_localhost_resolution "localhost resolves to (after)"
+
+    # Anything else still answering for localhost would let clients reach the loopback over IPv4
+    # and report a pass without having exercised IPv6.
+    if ! resolves_only_to_ipv6_loopback; then
+      echo "localhost does not resolve only to ::1 after rewriting /etc/hosts:"
       cat /etc/hosts
       exit 1
     fi
-
-    log_localhost_resolution "localhost resolves to (after)"
-    warn_if_ipv4_survives
   fi
 elif [[ "${KIBANA_TEST_IPV6_ONLY:-}" == "true" ]]; then
   # The two are set together or the run is only half IPv6: the browser would be pinned to ::1
