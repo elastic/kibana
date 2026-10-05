@@ -43,6 +43,8 @@ interface PageLinkResponse {
 
 interface WorkflowPageShareModalProps {
   workflowId: string;
+  /** Rotating changes the workflow, so it needs the Workflows Update privilege. */
+  canRotate: boolean;
   onClose: () => void;
 }
 
@@ -57,7 +59,11 @@ const toAbsoluteUrl = (path: string, publicBaseUrl: string | undefined): string 
   `${publicBaseUrl ? new URL(publicBaseUrl).origin : window.location.origin}${path}`;
 
 /** Shows the shareable URL of a workflow page, with copy and rotate. */
-export const WorkflowPageShareModal = ({ workflowId, onClose }: WorkflowPageShareModalProps) => {
+export const WorkflowPageShareModal = ({
+  workflowId,
+  canRotate,
+  onClose,
+}: WorkflowPageShareModalProps) => {
   const { http } = useKibana().services;
   const queryClient = useQueryClient();
   const [isConfirmingRotate, setIsConfirmingRotate] = useState(false);
@@ -203,6 +209,7 @@ export const WorkflowPageShareModal = ({ workflowId, onClose }: WorkflowPageShar
       </EuiModalBody>
       <EuiModalFooter>
         {data &&
+          canRotate &&
           (isConfirmingRotate ? (
             <>
               <EuiButtonEmpty onClick={() => setIsConfirmingRotate(false)} disabled={isRotating}>

@@ -25,11 +25,11 @@ jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({ services: { http: mockHttp } }),
 }));
 
-const renderModal = () =>
+const renderModal = ({ canRotate = true }: { canRotate?: boolean } = {}) =>
   render(
     <TestWrapper store={createMockStore()}>
       <EuiProvider>
-        <WorkflowPageShareModal workflowId="wf 1" onClose={jest.fn()} />
+        <WorkflowPageShareModal workflowId="wf 1" canRotate={canRotate} onClose={jest.fn()} />
       </EuiProvider>
     </TestWrapper>
   );
@@ -56,6 +56,13 @@ describe('WorkflowPageShareModal', () => {
     renderModal();
 
     expect(await screen.findByText('The page is offline')).toBeInTheDocument();
+  });
+
+  it('shows the URL but no rotation to a user without update rights', async () => {
+    renderModal({ canRotate: false });
+
+    expect((await urlField()).value).toBe('https://kibana.example.com/api/workflows/pages/wf/old');
+    expect(screen.queryByTestId('workflowPageShareRotate')).not.toBeInTheDocument();
   });
 
   it('asks before rotating, then shows the new URL', async () => {
