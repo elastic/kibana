@@ -32,6 +32,7 @@ const makeSource = (
   description: '',
   tags: [],
   esql: 'FROM logs-*',
+  type: 'logs',
   slug: `${overrides.id}-slug`,
   view_name: `$.nightshift.sources.default.${overrides.id}`,
   enabled: true,

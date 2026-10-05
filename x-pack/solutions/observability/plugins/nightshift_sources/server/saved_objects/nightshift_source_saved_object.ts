@@ -35,7 +35,19 @@ const nightshiftSourceAttributesSchemaV1 = schema.object({
   esql_updated_at: schema.string(),
 });
 
-export type NightshiftSourceAttributes = TypeOf<typeof nightshiftSourceAttributesSchemaV1>;
+const nightshiftSourceTypeSchema = schema.oneOf([
+  schema.literal('logs'),
+  schema.literal('metrics'),
+  schema.literal('traces'),
+  schema.literal('unknown'),
+]);
+
+const nightshiftSourceAttributesSchemaV2 = nightshiftSourceAttributesSchemaV1.extends({
+  // Derived from `esql` on every write. Not mapped: nothing searches or filters on it.
+  type: nightshiftSourceTypeSchema,
+});
+
+export type NightshiftSourceAttributes = TypeOf<typeof nightshiftSourceAttributesSchemaV2>;
 
 /**
  * Hidden so it stays out of Saved Objects Management. The Nightshift feature grants it:
@@ -66,6 +78,23 @@ export const nightshiftSourceSavedObjectType: SavedObjectsType<NightshiftSourceA
       schemas: {
         create: nightshiftSourceAttributesSchemaV1,
         forwardCompatibility: nightshiftSourceAttributesSchemaV1.extends(
+          {},
+          { unknowns: 'ignore' }
+        ),
+      },
+    },
+    2: {
+      changes: [
+        {
+          type: 'data_backfill',
+          // Constant, not derived: a backfill cannot read log sources or APM indices, and the
+          // next write recomputes `type` from the query.
+          backfillFn: () => ({ attributes: { type: 'unknown' } }),
+        },
+      ],
+      schemas: {
+        create: nightshiftSourceAttributesSchemaV2,
+        forwardCompatibility: nightshiftSourceAttributesSchemaV2.extends(
           {},
           { unknowns: 'ignore' }
         ),

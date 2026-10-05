@@ -19,6 +19,7 @@ import {
   type ListSourcesResponse,
   type NightshiftSource,
   type SourceHealth,
+  type SourceTypePatterns,
   type SourceWithHealth,
   type UpdateSourceRequest,
 } from '@kbn/nightshift-shared';
@@ -54,6 +55,8 @@ interface SourcesClientDependencies {
   spaceId: string;
   /** Called after every committed write, never after a rolled-back one. */
   onChange: (change: SourceChange) => Promise<void>;
+  /** Configured log sources and APM indices, memoized for this client. */
+  getSourceTypePatterns: () => Promise<SourceTypePatterns>;
 }
 
 const toSource = (id: string, attributes: NightshiftSourceAttributes): NightshiftSource => ({
@@ -89,7 +92,10 @@ export class SourcesClient {
   async create(input: CreateSourceRequest): Promise<NightshiftSource> {
     const { soClient, viewsClient, username } = this.deps;
     const parsed = parseSourceWrite(createSourceRequestSchema, input);
-    validateSourceQuery(parsed.esql);
+    const type = validateSourceQuery({
+      esql: parsed.esql,
+      patterns: await this.deps.getSourceTypePatterns(),
+    });
     await assertSourceQueryExecutes({ esClient: this.deps.dataEsClient, esql: parsed.esql });
 
     const slug = await this.allocateSlug(parsed.title);
@@ -97,6 +103,7 @@ export class SourcesClient {
     const now = new Date().toISOString();
     const attributes: NightshiftSourceAttributes = {
       ...parsed,
+      type,
       slug,
       view_name: getNightshiftSourceViewName(this.deps.spaceId, slug),
       enabled: true,
@@ -136,7 +143,10 @@ export class SourcesClient {
     const so = await this.getSavedObject(id);
     const { attributes: previous } = so;
     const esqlChanged = !hasSameEsql(parsed.esql, previous.esql);
-    validateSourceQuery(parsed.esql);
+    const type = validateSourceQuery({
+      esql: parsed.esql,
+      patterns: await this.deps.getSourceTypePatterns(),
+    });
     if (esqlChanged) {
       await assertSourceQueryExecutes({ esClient: this.deps.dataEsClient, esql: parsed.esql });
     }
@@ -150,6 +160,7 @@ export class SourcesClient {
       description: parsed.description,
       tags: parsed.tags,
       esql: parsed.esql,
+      type,
       updated_at: now,
       esql_updated_at: esqlChanged
         ? nextEsqlUpdatedAt(previous.esql_updated_at, now)

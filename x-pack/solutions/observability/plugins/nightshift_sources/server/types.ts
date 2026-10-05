@@ -6,8 +6,17 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { ApmSourcesAccessPluginStart } from '@kbn/apm-sources-access-plugin/server';
+import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
+import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
 import type { SourceChangeListener } from './lib/source_change_emitter';
 import type { SourcesClient } from './lib/sources_client';
+
+export interface NightshiftSourcesServerStartDependencies {
+  features?: FeaturesPluginStart;
+  logsDataAccess?: LogsDataAccessPluginStart;
+  apmSourcesAccess?: ApmSourcesAccessPluginStart;
+}
 
 export type GetSourcesClient = (params: { request: KibanaRequest }) => Promise<SourcesClient>;
 

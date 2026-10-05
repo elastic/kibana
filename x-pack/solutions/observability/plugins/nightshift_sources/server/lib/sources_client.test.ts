@@ -14,7 +14,11 @@ import {
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import { escapeKuery } from '@kbn/es-query';
-import { getNightshiftSourceViewName, type NightshiftSource } from '@kbn/nightshift-shared';
+import {
+  getNightshiftSourceViewName,
+  type NightshiftSource,
+  type SourceTypePatterns,
+} from '@kbn/nightshift-shared';
 import {
   NIGHTSHIFT_SOURCE_SO_TYPE,
   type NightshiftSourceAttributes,
@@ -54,6 +58,7 @@ const makeAttributes = (
   description: undefined,
   tags: ['nginx'],
   esql: 'FROM logs-nginx-* | WHERE status >= 500',
+  type: 'logs',
   slug: 'nginx-errors',
   view_name: NGINX_VIEW_NAME,
   enabled: true,
@@ -87,7 +92,10 @@ const emptyFind = {
   per_page: 1,
 };
 
-const setup = ({ spaceId = SPACE_ID }: { spaceId?: string } = {}) => {
+const setup = ({
+  spaceId = SPACE_ID,
+  patterns = { logs: [], traces: [] },
+}: { spaceId?: string; patterns?: SourceTypePatterns } = {}) => {
   const soClient = savedObjectsClientMock.create();
   const dataEsClient = elasticsearchServiceMock.createElasticsearchClient();
   const viewsClient: jest.Mocked<SourceViewsClient> = {
@@ -106,6 +114,7 @@ const setup = ({ spaceId = SPACE_ID }: { spaceId?: string } = {}) => {
     username: 'marco',
     spaceId,
     onChange,
+    getSourceTypePatterns: jest.fn().mockResolvedValue(patterns),
   });
 
   soClient.find.mockResolvedValue(emptyFind);
@@ -255,6 +264,7 @@ describe('SourcesClient', () => {
       expect(source.enabled).toBe(true);
       expect(source.created_by).toBe('marco');
       expect(source.esql_updated_at).toBe(source.created_at);
+      expect(source.type).toBe('logs');
       expect(soClient.create).toHaveBeenCalledWith(
         NIGHTSHIFT_SOURCE_SO_TYPE,
         expect.objectContaining({ view_name: source.view_name }),
@@ -377,6 +387,46 @@ describe('SourcesClient', () => {
       expect(dataEsClient.esql.query).not.toHaveBeenCalled();
       expect(soClient.create).not.toHaveBeenCalled();
       expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
+    it('rejects a query that mixes types before touching saved objects or ES', async () => {
+      const { client, soClient, viewsClient, dataEsClient } = setup();
+
+      await expect(
+        client.create({ title: 't', tags: [], esql: 'FROM logs-*, traces-*' })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: expect.stringContaining('mixes'),
+      });
+      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
+    it('rejects an index that matches more than one type before touching saved objects or ES', async () => {
+      const { client, soClient, viewsClient, dataEsClient } = setup();
+
+      await expect(
+        client.create({ title: 't', tags: [], esql: 'FROM logs-traces-*' })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: expect.stringContaining('more than one kind'),
+      });
+      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
+    it('stores logs when a configured log source makes every index logs', async () => {
+      const { client } = setup({ patterns: { logs: ['my-app-*'], traces: [] } });
+
+      const source = await client.create({
+        title: 'app',
+        tags: [],
+        esql: 'FROM logs-*, my-app-*',
+      });
+
+      expect(source.type).toBe('logs');
     });
 
     it('rejects an invalid query before touching saved objects or ES', async () => {
@@ -553,6 +603,44 @@ describe('SourcesClient', () => {
       expect(dataEsClient.esql.query).not.toHaveBeenCalled();
       expect(soClient.update).not.toHaveBeenCalled();
       expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
+    it('rejects a query that mixes types without writing', async () => {
+      const { client, soClient, viewsClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      await expect(
+        client.update('source-1', {
+          title: 'nginx errors',
+          tags: ['nginx'],
+          esql: 'FROM logs-*, traces-*',
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: expect.stringContaining('mixes'),
+      });
+      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
+    it('recomputes the type when the query changes', async () => {
+      const { client, soClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      const updated = await client.update('source-1', {
+        title: 'nginx errors',
+        tags: ['nginx'],
+        esql: 'TS metrics-*',
+      });
+
+      expect(updated.type).toBe('metrics');
+      expect(soClient.update).toHaveBeenCalledWith(
+        NIGHTSHIFT_SOURCE_SO_TYPE,
+        'source-1',
+        expect.objectContaining({ type: 'metrics' }),
+        expect.anything()
+      );
     });
 
     it('rejects an unresolvable field without writing', async () => {

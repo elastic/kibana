@@ -5,11 +5,34 @@
  * 2.0.
  */
 
+import type { SourceTypePatterns } from './source_type';
 import {
+  analyzeSourceQuery,
   getSourceCommandQuery,
+  getSourceType,
   hasMultipleSourceIndices,
   validateSourceQuery,
 } from './validate_source_query';
+
+const APM_TRACES: SourceTypePatterns = {
+  logs: [],
+  traces: ['traces-apm*', 'apm-*', 'traces-*.otel-*'],
+};
+
+const CUSTOM_LOGS: SourceTypePatterns = {
+  logs: ['my-app-*'],
+  traces: [],
+};
+
+const expectType = (esql: string, type: string, patterns?: SourceTypePatterns) => {
+  expect(getSourceType({ esql, patterns })).toEqual({ type });
+};
+
+const expectTypeError = (esql: string, messagePart: string, patterns?: SourceTypePatterns) => {
+  expect(getSourceType({ esql, patterns })).toEqual({
+    error: expect.stringContaining(messagePart),
+  });
+};
 
 const expectRejected = (esql: string, messagePart: string) => {
   expect(validateSourceQuery(esql)).toContain(messagePart);
@@ -100,6 +123,48 @@ describe('validateSourceQuery', () => {
       // Requires a hyphen the old `…sources.x` example did not have.
       expectRejected('FROM $.*.sources.*-*', 'found "$.*.sources.*-*"');
       expectRejected('FROM $.*-*', 'found "$.*-*"');
+    });
+  });
+});
+
+describe('getSourceType', () => {
+  it('derives one type when every index matches that type', () => {
+    expectType('FROM logs-*', 'logs');
+    expectType('FROM logs-*, filebeat-*', 'logs');
+    expectType('FROM logs.otel.queries-test', 'logs');
+    expectType('FROM traces-apm*, apm-*', 'traces', APM_TRACES);
+    expectType('FROM metrics-system.cpu-*', 'metrics');
+    expectType('TS metrics-*', 'metrics');
+    expectType('TS my-tsdb-*', 'metrics');
+    expectType('FROM my-a-*, my-b-*', 'unknown');
+    expectType('FROM *', 'unknown');
+    expectType('FROM logs-*, my-app-*', 'logs', CUSTOM_LOGS);
+  });
+
+  it('rejects indices of more than one type', () => {
+    expectTypeError('FROM logs-*, traces-*', 'mixes logs (logs-*) and traces (traces-*)');
+    expectTypeError('FROM logs-*, my-app-*', 'mixes logs (logs-*) and unknown (my-app-*)');
+    expectTypeError('FROM logs-*, my-app-*', 'log sources or APM indices');
+    expectTypeError('TS logs-*', 'mixes logs (logs-*) and metrics');
+  });
+
+  it('rejects one index that matches more than one type', () => {
+    expectTypeError('FROM logs-traces-*', 'matches more than one kind of data (logs, traces)');
+    expectTypeError('FROM metrics-logs-*', 'matches more than one kind of data (logs, metrics)');
+    expectTypeError('TS logs-traces-*', 'matches more than one kind of data (logs, traces)');
+  });
+});
+
+describe('analyzeSourceQuery', () => {
+  it('returns the structural error without classifying', () => {
+    expect(analyzeSourceQuery({ esql: 'ROW a = 1' })).toEqual({
+      error: expect.stringContaining('must start with FROM or TS'),
+    });
+  });
+
+  it('returns the type of a valid query', () => {
+    expect(analyzeSourceQuery({ esql: 'FROM logs-* | WHERE status >= 500' })).toEqual({
+      type: 'logs',
     });
   });
 });

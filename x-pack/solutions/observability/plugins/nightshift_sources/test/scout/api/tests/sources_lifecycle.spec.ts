@@ -68,6 +68,7 @@ apiTest.describe(
         const viewName = source.view_name;
         expect(source).toMatchObject({
           ...body,
+          type: 'unknown',
           slug: source.slug,
           view_name: viewName,
           enabled: true,
@@ -185,10 +186,23 @@ apiTest.describe(
           esql: newEsql,
         });
         expect(requeried).toHaveStatusCode(200);
+        expect(requeried.body.source.type).toBe('unknown');
         expect(requeried.body.source.esql_updated_at).not.toBe(source.esql_updated_at);
         expect(await readView(esClient, source.view_name)).toStrictEqual({
           name: source.view_name,
           query: newEsql,
+        });
+
+        const logsEsql = `FROM ${index}-logs-*`;
+        const retyped = await updateSource(apiClient, manager.cookieHeader, source.id, {
+          ...body,
+          esql: logsEsql,
+        });
+        expect(retyped).toHaveStatusCode(200);
+        expect(retyped.body.source.type).toBe('logs');
+        expect(await readView(esClient, source.view_name)).toStrictEqual({
+          name: source.view_name,
+          query: logsEsql,
         });
 
         await deleteSource(apiClient, manager.cookieHeader, source.id);

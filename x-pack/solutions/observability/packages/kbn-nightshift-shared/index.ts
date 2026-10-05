@@ -114,9 +114,26 @@ export {
 } from './src/sources/schema';
 
 export {
+  DEFAULT_LOGS_BASE_PATTERNS,
+  DEFAULT_METRICS_BASE_PATTERNS,
+  DEFAULT_SOURCE_TYPE_PATTERNS,
+  DEFAULT_TRACES_BASE_PATTERNS,
+  matchSourceTypes,
+  SOURCE_TYPES,
+  sourceTypeSchema,
+  toSourceTypePatternTokens,
+  uniqueSourceTypePatternTokens,
+  type SourceType,
+  type SourceTypePatterns,
+} from './src/sources/source_type';
+
+export {
+  analyzeSourceQuery,
   getSourceCommandQuery,
+  getSourceType,
   hasMultipleSourceIndices,
   validateSourceQuery,
+  type SourceTypeAnalysis,
 } from './src/sources/validate_source_query';
 
 export {

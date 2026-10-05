@@ -32,17 +32,18 @@ import {
   MAX_SOURCE_TAGS,
   MAX_SOURCE_TAG_LENGTH,
   MAX_SOURCE_TITLE_LENGTH,
-  validateSourceQuery,
   type NightshiftSource,
 } from '@kbn/nightshift-shared';
 import { hasSameEsql } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useKibana } from '../../../../../hooks/use_kibana';
+import { useSourceTypePatterns } from '../../../../../hooks/use_source_type_patterns';
 import { useSourcesApi } from '../../../../../hooks/use_sources_api';
 import { getFormattedError } from '../../../../../util/errors';
 import { ConfirmSourceActionModal } from '../confirm_source_action_modal';
 import { SourcePreview } from './source_preview';
+import { validateSourceEsql } from './validate_source_esql';
 
 interface SourceFormValues {
   title: string;
@@ -60,7 +61,7 @@ interface SourceFlyoutProps {
 }
 
 // Title, description and tags limits are checked before sending, so a 400 from the sources
-// API is about the query (parse, allowed commands, or the `LIMIT 0` probe).
+// API is about the query (parse, allowed commands, the one-type check, or the `LIMIT 0` probe).
 const isBadRequest = (error: unknown) => isHttpFetchError(error) && error.response?.status === 400;
 
 export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyoutProps) {
@@ -70,6 +71,7 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
     },
   } = useKibana();
   const { createSource, updateSource } = useSourcesApi();
+  const { getSourceTypePatterns } = useSourceTypePatterns();
   const titleId = useGeneratedHtmlId();
   // Only the query the user ran is previewed, so typing does not search on every keystroke.
   // `runId` changes on every run, so running an unchanged query still refetches it.
@@ -243,7 +245,9 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
                   <Controller
                     name="esql"
                     control={control}
-                    rules={{ validate: (esql) => validateSourceQuery(esql) ?? true }}
+                    rules={{
+                      validate: (esql) => validateSourceEsql({ esql, getSourceTypePatterns }),
+                    }}
                     render={({ field, fieldState }) => (
                       <EuiFormRow
                         label={QUERY_LABEL}
@@ -376,7 +380,8 @@ const QUERY_LABEL = i18n.translate('xpack.significantEventsApp.sources.flyout.qu
 });
 
 const QUERY_HELP_TEXT = i18n.translate('xpack.significantEventsApp.sources.flyout.queryHelpText', {
-  defaultMessage: 'Start with FROM or TS; only WHERE may follow. Run the query to preview it.',
+  defaultMessage:
+    'Start with FROM or TS; only WHERE may follow. Every index must be the same kind of data. Run the query to preview it.',
 });
 
 const RUN_QUERY_LABEL = i18n.translate('xpack.significantEventsApp.sources.flyout.runQueryLabel', {

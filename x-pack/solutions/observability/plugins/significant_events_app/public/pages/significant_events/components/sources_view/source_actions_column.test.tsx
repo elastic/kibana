@@ -16,6 +16,7 @@ const SOURCE: NightshiftSource = {
   title: 'Nginx errors',
   tags: [],
   esql: 'FROM logs-nginx-*',
+  type: 'logs',
   slug: 'nginx-errors',
   view_name: '$.nightshift.sources.default.nginx-errors',
   enabled: true,

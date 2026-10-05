@@ -7,7 +7,9 @@ raw ES|QL, so a source can be edited in one place and every consumer follows.
 
 This plugin owns the `nightshift-source` saved object type, the view lifecycle and the
 `/internal/nightshift/sources` API. It depends on no other Nightshift plugin, so any engine can
-require it without creating a cycle.
+require it without creating a cycle. `logsDataAccess` and `apmSourcesAccess` are optional: when
+they are installed, create and update read the configured log sources and APM trace indices
+through their read-only accessors and use those when classifying the query.
 
 ## API
 
@@ -18,7 +20,7 @@ gated by the Nightshift feature privileges: reads need `read_nightshift`, writes
 | Method | Path | Privilege | Notes |
 | --- | --- | --- | --- |
 | `GET` | `/internal/nightshift/sources?page&per_page&search&enabled` | read | Paginated catalog, sorted by title. Does not fetch views. |
-| `POST` | `/internal/nightshift/sources` | manage | Validates the query, writes the saved object, creates the view |
+| `POST` | `/internal/nightshift/sources` | manage | Validates the query, derives `type`, writes the saved object, creates the view |
 | `GET` | `/internal/nightshift/sources/{sourceId}` | read | Source plus view health, including a `FROM <view> \| LIMIT 0` probe for `unresolvable` |
 | `PUT` | `/internal/nightshift/sources/{sourceId}` | manage | Full replace of `title`, `description`, `tags`, `esql`; always re-puts the view |
 | `DELETE` | `/internal/nightshift/sources/{sourceId}` | manage | Deletes the view (404 ignored), then the saved object |
@@ -30,7 +32,13 @@ overwrites a drifted one.
 
 Wire schemas and types (`NightshiftSource`, `SourceHealth`, request/response shapes) live in
 `@kbn/nightshift-shared` so browser code can import them. A typed repository client is exposed
-on the public start contract through `getClient()`.
+on the public start contract through `getClient()`. `getSourceTypePatterns()` on the same
+contract returns the configured log sources and APM trace indices for the current user, or
+`null` when an installed plugin fails to answer.
+
+`type` (`logs`, `metrics`, `traces` or `unknown`) is stored on the source and returned by
+every read. It is derived from the query on create and on every update, including a title-only
+PUT. Request bodies cannot set it.
 
 ## Engine access
 
@@ -57,7 +65,19 @@ A source is rows only. On create and update the ES|QL must:
 - not use `METADATA`, because ES|QL returns nulls for metadata columns read through a view;
 - not reference a remote cluster (`cluster:index`), because views cannot target remote indices;
 - not `FROM` a Nightshift source view, or a `$` wildcard that would match one (`$.nightshift.sources.*`,
-  `$.nightshift.*`, `$.*`, `$.*.sources.*-*`), or the new view can match itself.
+  `$.nightshift.*`, `$.*`, `$.*.sources.*-*`), or the new view can match itself;
+- target exactly one kind of data. Every index in `FROM` or `TS` must classify as the same
+  value, and `unknown` counts. `FROM logs-*, my-app-*` is rejected unless `my-app-*` is a
+  configured log source. A single name that matches more than one kind (`logs-traces-*`) is
+  rejected too; there is no precedence. A `TS` command is metrics, so `TS logs-*` mixes logs
+  and metrics, while `TS my-tsdb-*` is metrics.
+
+Classification uses the same base names Discover does (`logs`, `filebeat`, `traces`, `metrics`,
+`metricbeat`, and the rest of those lists) plus the configured log sources and APM transaction
+and span indices. A name that matches none of those is `unknown`. Configured tokens match as
+exact strings, not globs, so a log source of `apm-*` does not cover `apm-000001`. The error
+names the kinds and the indices, and when an `unknown` index is involved it points at the log
+sources and APM indices settings.
 
 The view name is `$.nightshift.sources.<spaceId>.<slug>`. `<spaceId>` is the Kibana space that
 owns the saved object. `<slug>` is derived from the title at create (`nginx-errors` from

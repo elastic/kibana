@@ -14,11 +14,11 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
-import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { NIGHTSHIFT_FEATURE_ID } from '@kbn/nightshift-shared';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { EsqlViewsClient } from './lib/esql_views_client';
 import { createSourceChangeEmitter, type SourceChangeEmitter } from './lib/source_change_emitter';
+import { createGetSourceTypePatterns } from './lib/source_type_patterns';
 import { SourcesClient } from './lib/sources_client';
 import { nightshiftSourcesRouteRepository } from './routes';
 import {
@@ -29,13 +29,15 @@ import type {
   GetSourcesClient,
   NightshiftSourcesServerSetup,
   NightshiftSourcesServerStart,
+  NightshiftSourcesServerStartDependencies,
 } from './types';
 
 const createSourcesClient = (
   core: CoreStart,
   request: KibanaRequest,
   logger: Logger,
-  sourceChangeEmitter: SourceChangeEmitter
+  sourceChangeEmitter: SourceChangeEmitter,
+  plugins: NightshiftSourcesServerStartDependencies
 ): SourcesClient => {
   // Hidden types are left out of the scoped client unless named. Nightshift `all` / `read`
   // grant this type, so the security extension authorizes the call and writes the audit event.
@@ -60,11 +62,23 @@ const createSourcesClient = (
     username: core.security.authc.getCurrentUser(request)?.username ?? '<system>',
     spaceId: request.spaceId,
     onChange: (change) => sourceChangeEmitter.emit({ ...change, request }),
+    getSourceTypePatterns: createGetSourceTypePatterns({
+      soClient,
+      logsDataAccess: plugins.logsDataAccess,
+      apmSourcesAccess: plugins.apmSourcesAccess,
+      logger,
+    }),
   });
 };
 
 export class NightshiftSourcesPlugin
-  implements Plugin<NightshiftSourcesServerSetup, NightshiftSourcesServerStart>
+  implements
+    Plugin<
+      NightshiftSourcesServerSetup,
+      NightshiftSourcesServerStart,
+      object,
+      NightshiftSourcesServerStartDependencies
+    >
 {
   private readonly logger: Logger;
   private readonly isDev: boolean;
@@ -76,16 +90,19 @@ export class NightshiftSourcesPlugin
     this.sourceChangeEmitter = createSourceChangeEmitter(this.logger.get('source-changes'));
   }
 
-  public setup(core: CoreSetup): NightshiftSourcesServerSetup {
+  public setup(
+    core: CoreSetup<NightshiftSourcesServerStartDependencies, NightshiftSourcesServerStart>
+  ): NightshiftSourcesServerSetup {
     core.savedObjects.registerType(nightshiftSourceSavedObjectType);
 
     const getSourcesClient: GetSourcesClient = async ({ request }) => {
-      const [coreStart] = await core.getStartServices();
+      const [coreStart, plugins] = await core.getStartServices();
       return createSourcesClient(
         coreStart,
         request,
         this.logger.get('sources'),
-        this.sourceChangeEmitter
+        this.sourceChangeEmitter,
+        plugins
       );
     };
 
@@ -102,7 +119,7 @@ export class NightshiftSourcesPlugin
 
   public start(
     core: CoreStart,
-    plugins: { features?: FeaturesPluginStart }
+    plugins: NightshiftSourcesServerStartDependencies
   ): NightshiftSourcesServerStart {
     if (plugins.features) {
       const hasFeature = plugins.features
@@ -119,7 +136,13 @@ export class NightshiftSourcesPlugin
 
     return {
       getSourcesClient: async ({ request }) =>
-        createSourcesClient(core, request, this.logger.get('sources'), this.sourceChangeEmitter),
+        createSourcesClient(
+          core,
+          request,
+          this.logger.get('sources'),
+          this.sourceChangeEmitter,
+          plugins
+        ),
     };
   }
 

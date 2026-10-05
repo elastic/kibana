@@ -6,6 +6,7 @@
   "include": ["server/**/*", "public/**/*", "test/scout/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/apm-sources-access-plugin",
     "@kbn/config-schema",
     "@kbn/core",
     "@kbn/core-elasticsearch-server-utils",
@@ -14,6 +15,7 @@
     "@kbn/es-errors",
     "@kbn/es-query",
     "@kbn/features-plugin",
+    "@kbn/logs-data-access-plugin",
     "@kbn/nightshift-shared",
     "@kbn/server-route-repository",
     "@kbn/server-route-repository-client",

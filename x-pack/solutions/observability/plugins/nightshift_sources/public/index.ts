@@ -6,11 +6,18 @@
  */
 
 import type { PluginInitializer } from '@kbn/core/public';
-import type { NightshiftSourcesPublicPluginStart } from './plugin';
+import type {
+  NightshiftSourcesPublicPluginStart,
+  NightshiftSourcesPublicStartDependencies,
+} from './plugin';
 import { NightshiftSourcesPublicPlugin } from './plugin';
 
 export type { NightshiftSourcesRepositoryClient } from './api';
-export type { NightshiftSourcesPublicPluginStart };
+export type { NightshiftSourcesPublicPluginStart, NightshiftSourcesPublicStartDependencies };
 
-export const plugin: PluginInitializer<void, NightshiftSourcesPublicPluginStart> = () =>
-  new NightshiftSourcesPublicPlugin();
+export const plugin: PluginInitializer<
+  void,
+  NightshiftSourcesPublicPluginStart,
+  object,
+  NightshiftSourcesPublicStartDependencies
+> = () => new NightshiftSourcesPublicPlugin();

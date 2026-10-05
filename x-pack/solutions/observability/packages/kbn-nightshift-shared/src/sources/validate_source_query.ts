@@ -6,6 +6,12 @@
  */
 
 import { BasicPrettyPrinter, Parser, Walker } from '@elastic/esql';
+import {
+  DEFAULT_SOURCE_TYPE_PATTERNS,
+  matchSourceTypes,
+  type SourceType,
+  type SourceTypePatterns,
+} from './source_type';
 import { NIGHTSHIFT_SOURCE_VIEW_PREFIX } from './view_name';
 
 const SOURCE_COMMANDS = new Set(['from', 'ts']);
@@ -104,6 +110,134 @@ export const validateSourceQuery = (esql: string): string | undefined => {
   }
 
   return undefined;
+};
+
+/** A derived type, or the reason the query cannot be one. */
+export type SourceTypeAnalysis = { type: SourceType } | { error: string };
+
+const SOURCE_TYPE_ORDER = [
+  'logs',
+  'traces',
+  'metrics',
+  'unknown',
+] as const satisfies readonly SourceType[];
+
+const emptyNamesByType = (): Record<SourceType, string[]> => ({
+  logs: [],
+  metrics: [],
+  traces: [],
+  unknown: [],
+});
+
+const resolveIndexType = ({
+  matched,
+  isTimeSeries,
+}: {
+  matched: SourceType | undefined;
+  isTimeSeries: boolean;
+}): SourceType => {
+  if (matched && matched !== 'unknown') {
+    return matched;
+  }
+  // A TS source is metrics. An index TS reads that is not logs or traces is too.
+  if (isTimeSeries) {
+    return 'metrics';
+  }
+  return 'unknown';
+};
+
+const describeType = (type: SourceType, names: readonly string[]): string =>
+  names.length > 0 ? `${type} (${names.join(', ')})` : type;
+
+const joinAnd = (parts: readonly string[]): string => {
+  if (parts.length < 2) {
+    return parts[0] ?? '';
+  }
+  const last = parts[parts.length - 1];
+  return `${parts.slice(0, -1).join(', ')} and ${last}`;
+};
+
+const ambiguousIndexMessage = (name: string, types: readonly string[]): string =>
+  `Index "${name}" matches more than one kind of data (${types.join(
+    ', '
+  )}). A source query must target one kind.`;
+
+const mixedSourceTypesMessage = (
+  namesByType: Record<SourceType, string[]>,
+  present: readonly SourceType[]
+): string => {
+  const described = present.map((type) => describeType(type, namesByType[type]));
+  const unknownHint =
+    namesByType.unknown.length > 0
+      ? ' Add indices that are not logs, metrics or traces to the log sources or APM indices settings.'
+      : '';
+  return `A source query mixes ${joinAnd(
+    described
+  )}. A source query must target one kind of data.${unknownHint}`;
+};
+
+/**
+ * The type of an already valid source query. A name that matches two kinds, or indices of more
+ * than one kind, comes back as `{ error }`. Only safe to call after `validateSourceQuery`
+ * returned `undefined`; {@link analyzeSourceQuery} does both.
+ */
+export const getSourceType = ({
+  esql,
+  patterns = DEFAULT_SOURCE_TYPE_PATTERNS,
+}: {
+  esql: string;
+  patterns?: SourceTypePatterns;
+}): SourceTypeAnalysis => {
+  const { root } = Parser.parse(esql);
+  const [firstCommand] = root.commands;
+  if (!firstCommand) {
+    return { error: 'A source query must start with FROM or TS' };
+  }
+
+  const indexNames = Walker.matchAll(firstCommand, { type: 'source', sourceType: 'index' }).flatMap(
+    (node) => (typeof node.name === 'string' ? [node.name] : [])
+  );
+  const classified = indexNames.map((name) => ({
+    name,
+    matched: matchSourceTypes({ name, patterns }),
+  }));
+  const ambiguous = classified.find(({ matched }) => matched.length > 1);
+  if (ambiguous) {
+    return { error: ambiguousIndexMessage(ambiguous.name, ambiguous.matched) };
+  }
+
+  const isTimeSeries = firstCommand.name === 'ts';
+  const namesByType = emptyNamesByType();
+  for (const { name, matched } of classified) {
+    namesByType[resolveIndexType({ matched: matched[0], isTimeSeries })].push(name);
+  }
+
+  const present = SOURCE_TYPE_ORDER.filter(
+    (type) => namesByType[type].length > 0 || (isTimeSeries && type === 'metrics')
+  );
+  if (present.length > 1) {
+    return { error: mixedSourceTypesMessage(namesByType, present) };
+  }
+
+  return { type: present[0] ?? 'unknown' };
+};
+
+/**
+ * Structural validation, then the one-type check. `{ error }` is either failure.
+ * Browser-safe: does not depend on any server-only module.
+ */
+export const analyzeSourceQuery = ({
+  esql,
+  patterns = DEFAULT_SOURCE_TYPE_PATTERNS,
+}: {
+  esql: string;
+  patterns?: SourceTypePatterns;
+}): SourceTypeAnalysis => {
+  const error = validateSourceQuery(esql);
+  if (error) {
+    return { error };
+  }
+  return getSourceType({ esql, patterns });
 };
 
 /**
