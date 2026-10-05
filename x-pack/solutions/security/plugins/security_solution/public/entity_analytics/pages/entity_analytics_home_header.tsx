@@ -37,6 +37,8 @@ export const EntityAnalyticsHomeHeader = React.memo(() => {
           label: SETTINGS_LABEL,
           iconType: 'gear' as const,
           href: getSecuritySolutionUrl({ deepLinkId: SecurityPageName.entityAnalyticsManagement }),
+          overflow: true,
+          order: 1,
           testId: ENTITY_ANALYTICS_HOME_MANAGEMENT_MENU_ITEM_TEST_ID,
         },
       ],
