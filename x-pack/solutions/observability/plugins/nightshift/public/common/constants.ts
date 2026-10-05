@@ -6,4 +6,4 @@
  */
 
 /** Severity filters for the Nightshift landing page event list. */
-export const NIGHTSHIFT_LANDING_SEVERITIES = ['80-critical', '60-high'] as const;
+export const NIGHTSHIFT_LANDING_SEVERITIES = ['critical', 'high'] as const;

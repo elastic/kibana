@@ -72,7 +72,7 @@ const captureHandlers = () => {
 };
 
 describe('registerChatApiRoutes', () => {
-  it('registers the two /api/chat converse routes as public + experimental', () => {
+  it('registers the two /api/chat converse routes as public + tech preview', () => {
     const postConfigs: Array<{ path: string; access?: string; options?: any }> = [];
     const router = {
       versioned: {
@@ -96,12 +96,18 @@ describe('registerChatApiRoutes', () => {
         path: `${chatApiPath}/converse`,
         access: 'public',
         options: expect.objectContaining({
-          availability: expect.objectContaining({ stability: 'experimental' }),
+          availability: { stability: 'tech_preview', since: '9.6.0' },
         }),
       })
     );
     expect(postConfigs).toContainEqual(
-      expect.objectContaining({ path: `${chatApiPath}/converse/async`, access: 'public' })
+      expect.objectContaining({
+        path: `${chatApiPath}/converse/async`,
+        access: 'public',
+        options: expect.objectContaining({
+          availability: { stability: 'tech_preview', since: '9.6.0' },
+        }),
+      })
     );
   });
 

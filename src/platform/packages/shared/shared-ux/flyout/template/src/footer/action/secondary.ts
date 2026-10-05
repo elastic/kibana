@@ -11,12 +11,20 @@ import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import type { FlyoutFooterSecondaryActionProps } from '../../types';
 import { secondaryActionPart } from './part';
+import { resolveTooltipButtonProps, withTooltip } from './tooltip';
 
 /** Declarative `FlyoutTemplate.Footer.SecondaryAction`. */
 export const SecondaryAction =
   secondaryActionPart.createComponent<FlyoutFooterSecondaryActionProps>({
-    resolve: ({ label, ...buttonProps }) =>
-      React.createElement(EuiButtonEmpty, { ...buttonProps, color: 'primary', size: 'm' }, label),
+    resolve: ({ label, tooltip, ...buttonProps }) =>
+      withTooltip(
+        React.createElement(
+          EuiButtonEmpty,
+          { ...resolveTooltipButtonProps(buttonProps, tooltip), color: 'primary', size: 'm' },
+          label
+        ),
+        tooltip
+      ),
   });
 
 SecondaryAction.displayName = 'FlyoutTemplate.Footer.SecondaryAction';

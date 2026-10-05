@@ -7,35 +7,30 @@
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
-import {
-  MAX_VEGA_SPEC_LENGTH,
-  VEGA_VIS_TYPE,
-  type VisualizationRenderer,
-} from '@kbn/agent-builder-visualizations-common';
-import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
-import { definePanelType } from '../panel_type';
 import type { PanelResolutionRequestBase } from '../../../resolve_panel';
 
 /**
- * Lens visualization panel logic.
+ * Lens and Vega visualization panel requests.
  *
- * A visualization reaches a dashboard via `source: 'attachment'` (an existing
- * visualization attachment, see `../attachment_source.ts`), `source: 'config'`
- * (its already-resolved Lens or Vega config passed by value), or
- * `source: 'request'` (resolved from a natural-language / ES|QL query). This
- * module owns the Lens embeddable identity, the by-value config contract, the vis
- * input schemas (add + edit), and the vis resolution-request contract. The resolver that turns these requests into
- * Lens panel content lives in `core/resolvers/vis_panel_resolver.ts`.
+ * A new visualization is resolved from a natural-language (or ES|QL) query via
+ * `source: 'request'`; an existing one is placed with `source: 'attachment'`.
+ * This module owns the Lens/Vega members of the `renderer`-discriminated request
+ * unions (add + edit) and the vis resolution-request contract. The resolver that
+ * turns these requests into panel content lives in
+ * `core/resolvers/vis_panel_resolver.ts`.
  */
 
 /**
- * Request to resolve a Lens visualization panel from a natural-language / ES|QL
- * query. This is the `vis` member of the panel resolution union; the resolver
- * (see `core/resolvers/vis_panel_resolver.ts`) turns it into Lens panel content.
+ * Request to resolve a Lens or Vega visualization panel from a natural-language /
+ * ES|QL query. This is the vis member of the panel resolution union.
  */
 export interface VisPanelResolutionRequest extends PanelResolutionRequestBase {
-  type: 'vis';
+  /**
+   * Which engine renders the panel; Lens when omitted. On edits, `edit_panels`
+   * sets it from the existing panel, and the resolver trusts it.
+   */
+  renderer?: 'lens' | 'vega';
   /** Natural language description of the desired visualization. */
   nlQuery: string;
   /** Index, alias, or datastream to target; discovered when omitted. */
@@ -44,80 +39,22 @@ export interface VisPanelResolutionRequest extends PanelResolutionRequestBase {
   chartType?: SupportedChartType;
   /** ES|QL query to back the visualization; generated when omitted. */
   esql?: string;
-  /**
-   * Which engine renders the panel. Honored when adding a new panel (defaults to
-   * Lens when omitted); ignored on edits, which keep the existing panel's
-   * renderer.
-   */
-  renderer?: VisualizationRenderer;
   /** Keep the panel's existing ES|QL query and column bindings instead of regenerating them. */
   preserveESQL?: boolean;
   /** Reauthor the presentation from the chart rules instead of applying only the requested changes. */
   applyChartRules?: boolean;
 }
 
-const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).check((ctx) => {
-  const config = ctx.value;
+const esqlField = z
+  .string()
+  .max(4096)
+  .optional()
+  .describe(
+    '(optional) A validated ES|QL query from a prior tool result or explicit user input. Omit this field when composing new visualizations — the tool generates the query from the natural language query. NEVER write or invent an ES|QL query yourself.'
+  );
 
-  if ('visualization' in config) {
-    ctx.issues.push({
-      code: 'custom',
-      message:
-        'config looks like a whole visualization attachment. If it has an attachment id, use source: "attachment" with that id instead. Otherwise pass only its `visualization` field (a Lens API config, or a Vega `{ spec }` config), not the entire attachment.',
-      input: config,
-    });
-    return;
-  }
-
-  // A Vega visualization's `visualization` field is a `{ spec }` config: accept
-  // it by value and bound the serialized spec, matching the attachment schema.
-  if ('spec' in config) {
-    const { spec } = config as { spec?: unknown };
-    if (typeof spec !== 'string' || spec.length === 0) {
-      ctx.issues.push({
-        code: 'custom',
-        message: 'Vega panel config must provide a non-empty `spec` string.',
-        input: config,
-      });
-    } else if (spec.length > MAX_VEGA_SPEC_LENGTH) {
-      ctx.issues.push({
-        code: 'custom',
-        message: `Vega panel \`spec\` must be at most ${MAX_VEGA_SPEC_LENGTH} characters.`,
-        input: config,
-      });
-    }
-    return;
-  }
-
-  if (!('type' in config)) {
-    ctx.issues.push({
-      code: 'custom',
-      message:
-        'config is neither a Lens API config (missing a top-level `type`) nor a Vega config (missing `spec`). To place an existing visualization attachment, use source: "attachment" with its id instead.',
-      input: config,
-    });
-  }
-});
-
-/**
- * The vis variant of a `config`-source panel input, discriminated by
- * `type: 'vis'`.
- */
-export const visPanelConfigInputSchema = z.object({
-  source: z.literal('config'),
-  type: z.literal('vis'),
-  grid: panelGridSchema,
-  config: visPanelConfigSchema.describe(
-    'Already-resolved visualization config, passed by value: either a Lens API config (has a top-level `type`) or a Vega config (`{ spec }`). Accepted, but not preferred: to place a visualization attachment, use source: "attachment" with its id instead of copying its config here. Do not hand-build a config for a new visualization — use source: "request" instead.'
-  ),
-});
-
-const panelRequestBaseSchema = z.object({
+const visPanelRequestBaseSchema = z.object({
   source: z.literal('request'),
-  type: z
-    .literal('vis')
-    .default('vis')
-    .describe('Panel type to resolve. Only "vis" is currently resolvable from a request.'),
   grid: panelGridSchema,
   query: z
     .string()
@@ -130,17 +67,11 @@ const panelRequestBaseSchema = z.object({
     .describe(
       'Exact index, alias, or datastream identified for this panel. Pass it whenever known, because each panel is generated independently without dashboard context. Omit only when the source is unknown and discovery is needed.'
     ),
-  esql: z
-    .string()
-    .max(4096)
-    .optional()
-    .describe(
-      '(optional) A validated ES|QL query from a prior tool result or explicit user input. Omit this field when composing new visualizations — the tool generates the query from the natural language query. NEVER write or invent an ES|QL query yourself.'
-    ),
+  esql: esqlField,
 });
 
 /** A new Lens panel requires the caller to choose its chart type. */
-export const lensPanelRequestSchema = panelRequestBaseSchema.extend({
+export const lensPanelRequestSchema = visPanelRequestBaseSchema.extend({
   renderer: z
     .literal('lens')
     .optional()
@@ -151,7 +82,7 @@ export const lensPanelRequestSchema = panelRequestBaseSchema.extend({
 });
 
 /** A new Vega panel may carry the closest Lens chart type as an authoring hint. */
-export const vegaPanelRequestSchema = panelRequestBaseSchema.extend({
+export const vegaPanelRequestSchema = visPanelRequestBaseSchema.extend({
   renderer: z
     .literal('vega')
     .describe(
@@ -165,61 +96,45 @@ export const vegaPanelRequestSchema = panelRequestBaseSchema.extend({
     ),
 });
 
-/**
- * A `request`-source input creates a Lens or Vega visualization from a
- * natural-language (or ES|QL) query.
- */
-export const panelRequestSchema = z.union([lensPanelRequestSchema, vegaPanelRequestSchema]);
+const visEditPanelRequestBaseSchema = z.object({
+  source: z.literal('request'),
+  panelId: z.string().max(256).describe('Existing Lens or Vega panel id to update.'),
+  query: z
+    .string()
+    .max(2048)
+    .describe('A natural language query describing how to update the panel.'),
+  esql: esqlField,
+  chartType: z
+    .nativeEnum(SupportedChartType)
+    .optional()
+    .describe(
+      '(optional) Change the existing panel to this chart type. Omit it to let the visualization resolver interpret the edit using the existing configuration.'
+    ),
+  preserveESQL: z
+    .boolean()
+    .optional()
+    .describe(
+      '(optional) Set true to keep the existing ES|QL query of the panel instead of regenerating it, e.g. when the edit only changes presentation (title, legend, axes, colors, number formats, thresholds) or chart type. Omit it when the edit changes what the panel measures.'
+    ),
+});
 
-export type PanelRequestInput = z.infer<typeof panelRequestSchema>;
+/** Edits an existing Lens panel by id. */
+export const lensEditPanelRequestSchema = visEditPanelRequestBaseSchema.extend({
+  renderer: z
+    .literal('lens')
+    .optional()
+    .describe(
+      '(optional) The panel is a Lens panel. Lens is the default when renderer is omitted.'
+    ),
+  applyChartRules: z
+    .boolean()
+    .optional()
+    .describe(
+      '(optional) Set true to apply all presentation defaults, replacing custom styling. Omit it to change only the requested settings. Independent of preserveESQL, so enhancement can accompany a query change.'
+    ),
+});
 
-/**
- * The vis variant of an `edit_panels` item targets an existing Lens or Vega
- * panel by id. The existing panel determines the renderer, while chartType is
- * an optional instruction for changing or preserving its visual form.
- */
-export const editPanelRequestInputSchema = panelRequestBaseSchema
-  .omit({ grid: true, index: true })
-  .extend({
-    panelId: z.string().max(256).describe('Existing Lens or Vega panel id to update.'),
-    query: z
-      .string()
-      .max(2048)
-      .describe('A natural language query describing how to update the panel.'),
-    chartType: z
-      .nativeEnum(SupportedChartType)
-      .optional()
-      .describe(
-        '(optional) Change the existing panel to this chart type. Omit it to let the visualization resolver interpret the edit using the existing configuration.'
-      ),
-    preserveESQL: z
-      .boolean()
-      .optional()
-      .describe(
-        '(optional) Set true to keep the existing ES|QL query of the panel instead of regenerating it, e.g. when the edit only changes presentation (title, legend, axes, colors, number formats, thresholds) or chart type. Omit it when the edit changes what the panel measures.'
-      ),
-    applyChartRules: z
-      .boolean()
-      .optional()
-      .describe(
-        '(optional) Lens only. Set true to apply all presentation defaults, replacing custom styling. Omit it to change only the requested settings. Independent of preserveESQL, so enhancement can accompany a query change.'
-      ),
-  });
-
-export type EditPanelRequestInput = z.infer<typeof editPanelRequestInputSchema>;
-
-/**
- * Registry entry for the `vis` panel type. A by-value (`source: 'config'`) vis
- * panel can carry either a Lens API config or a Vega `{ spec }` config, so the
- * embeddable is chosen from the config shape: a `spec` string routes to the Vega
- * embeddable, everything else stays Lens. Vis is not editable via a
- * `source: 'config'` edit (edits go through `source: 'request'`), so
- * `validateConfigEdit` is intentionally omitted.
- */
-export const visPanelDefinition = definePanelType({
-  embeddableType: LENS_EMBEDDABLE_TYPE,
-  buildPanelContent: (config) => {
-    const isVegaConfig = typeof (config as { spec?: unknown })?.spec === 'string';
-    return { type: isVegaConfig ? VEGA_VIS_TYPE : LENS_EMBEDDABLE_TYPE, config };
-  },
+/** Edits an existing Vega panel by id. */
+export const vegaEditPanelRequestSchema = visEditPanelRequestBaseSchema.extend({
+  renderer: z.literal('vega').describe('The panel is a Vega panel.'),
 });

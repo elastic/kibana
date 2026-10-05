@@ -32,53 +32,56 @@ const T = ESCALATION_MODAL_TRANSLATIONS.createForm;
 
 export interface CreateEscalationFormProps {
   investigationTitle: string;
-  suggestedCollaborators: UserProfileWithAvatar[];
-  onSearchCollaborators: (query: string) => void;
-  isSearchingCollaborators: boolean;
+  suggestedAssignees: UserProfileWithAvatar[];
+  onSearchAssignees: (query: string) => void;
+  isSearchingAssignees: boolean;
   onSubmit: (params: {
     title: string;
     visibility: 'public' | 'private';
-    collaboratorUids: string[];
+    assigneeUids: string[];
   }) => void;
   isSubmitting: boolean;
   onCancel: () => void;
-  currentUserUid: string;
+  currentUser: UserProfileWithAvatar;
   currentUserName: string;
 }
 
 export const CreateEscalationForm = memo<CreateEscalationFormProps>(
   ({
     investigationTitle,
-    suggestedCollaborators,
-    onSearchCollaborators,
-    isSearchingCollaborators,
+    suggestedAssignees,
+    onSearchAssignees,
+    isSearchingAssignees,
     onSubmit,
     isSubmitting,
     onCancel,
-    currentUserUid,
+    currentUser,
     currentUserName,
   }) => {
     const { euiTheme } = useEuiTheme();
     const [title, setTitle] = useState(investigationTitle);
     const [isPrivate, setIsPrivate] = useState(false);
-    const [selectedCollaborators, setSelectedCollaborators] = useState<UserProfileWithAvatar[]>([]);
+    const [selectedAssignees, setSelectedAssignees] = useState<UserProfileWithAvatar[]>(() =>
+      currentUser ? [currentUser] : []
+    );
 
     const handleSubmit = useCallback(() => {
       onSubmit({
         title,
         visibility: isPrivate ? 'private' : 'public',
-        // The owner uid is always prepended; filter it from the selected list first so
-        // a user who picked themselves in the picker is not duplicated in the ACL.
-        collaboratorUids: isPrivate
-          ? [
-              currentUserUid,
-              ...selectedCollaborators.filter((p) => p.uid !== currentUserUid).map((p) => p.uid),
-            ]
-          : [],
+        // Submit exactly what the picker shows.
+        // The owner always has access regardless (implicit ACL); they are shown as a
+        // non-removable label above the picker. The caller (connected modal) adds the
+        // creator uid separately for public escalations.
+        assigneeUids: isPrivate ? selectedAssignees.map((a) => a.uid) : [],
       });
-    }, [onSubmit, title, isPrivate, currentUserUid, selectedCollaborators]);
+    }, [onSubmit, title, isPrivate, selectedAssignees]);
 
-    const isSubmitDisabled = isSubmitting || title.trim() === '' || (isPrivate && !currentUserUid);
+    const isSubmitDisabled =
+      isSubmitting ||
+      title.trim() === '' ||
+      // At least one assignee is required for private escalations (API enforces min 1).
+      (isPrivate && selectedAssignees.length === 0);
 
     return (
       <>
@@ -149,13 +152,13 @@ export const CreateEscalationForm = memo<CreateEscalationFormProps>(
               <EuiSpacer size="s" />
 
               <UserProfilesSelectable
-                options={suggestedCollaborators}
-                selectedOptions={selectedCollaborators}
-                onChange={setSelectedCollaborators}
-                onSearchChange={onSearchCollaborators}
-                isLoading={isSearchingCollaborators}
+                options={suggestedAssignees}
+                selectedOptions={selectedAssignees}
+                onChange={setSelectedAssignees}
+                onSearchChange={onSearchAssignees}
+                isLoading={isSearchingAssignees}
                 height={200}
-                data-test-subj="escalationModalCollaboratorPicker"
+                data-test-subj="escalationModalAssigneePicker"
               />
             </>
           )}

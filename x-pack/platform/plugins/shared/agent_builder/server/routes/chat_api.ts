@@ -215,7 +215,7 @@ export function registerChatApiRoutes({
         },
         tags: ['oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
+          stability: 'tech_preview',
           since: '9.6.0',
         },
       },
@@ -267,7 +267,7 @@ export function registerChatApiRoutes({
         },
         tags: ['oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
+          stability: 'tech_preview',
           since: '9.6.0',
         },
       },
