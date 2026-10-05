@@ -12,7 +12,7 @@ import { EuiLink, EuiText } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { DocLinksStart, NotificationsStart } from '@kbn/core/public';
 import type { LatencyAggregationType } from '@kbn/apm-types';
-import { getEnvironmentKuery } from '@kbn/apm-types';
+import { getAlertsEnvironmentKuery } from '@kbn/apm-types';
 import {
   SERVICE_ALERTS_LOCATOR_ID,
   SERVICE_TRANSACTIONS_LOCATOR_ID,
@@ -195,7 +195,7 @@ export function ServiceFlyoutTransactionsSection({
 
   const getAlertsBadgeHref = useCallback(
     (item: TransactionGroup) => {
-      const environmentKuery = getEnvironmentKuery(environment)?.trim() || undefined;
+      const environmentKuery = getAlertsEnvironmentKuery(environment);
       return serviceAlertsLocator?.getRedirectUrl({
         serviceName,
         transactionName: item.name,

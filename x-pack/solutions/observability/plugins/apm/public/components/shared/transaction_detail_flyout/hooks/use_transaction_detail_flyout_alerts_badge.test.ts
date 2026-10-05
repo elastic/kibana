@@ -95,7 +95,7 @@ describe('useTransactionDetailFlyoutAlertsBadge', () => {
       transactionType: 'request',
       rangeFrom: '2026-01-01T00:00:00.000Z',
       rangeTo: '2026-01-01T00:15:00.000Z',
-      kuery: 'service.environment: production',
+      kuery: 'service.environment: "production"',
     });
   });
 
@@ -113,6 +113,24 @@ describe('useTransactionDetailFlyoutAlertsBadge', () => {
       transactionType: 'request',
       rangeFrom: '2026-01-01T00:00:00.000Z',
       rangeTo: '2026-01-01T00:15:00.000Z',
+    });
+  });
+
+  it('matches missing or sentinel environment for ENVIRONMENT_NOT_DEFINED', () => {
+    const { getRedirectUrl } = setupContext({
+      alertsCount: 2,
+      environment: 'ENVIRONMENT_NOT_DEFINED',
+    });
+
+    renderHook(() => useTransactionDetailFlyoutAlertsBadge());
+
+    expect(getRedirectUrl).toHaveBeenCalledWith({
+      serviceName: 'checkout',
+      transactionName: 'GET /api/orders',
+      transactionType: 'request',
+      rangeFrom: '2026-01-01T00:00:00.000Z',
+      rangeTo: '2026-01-01T00:15:00.000Z',
+      kuery: '(service.environment: "ENVIRONMENT_NOT_DEFINED" OR NOT service.environment: *)',
     });
   });
 

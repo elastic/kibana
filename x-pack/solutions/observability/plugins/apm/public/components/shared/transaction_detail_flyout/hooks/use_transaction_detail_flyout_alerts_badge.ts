@@ -9,7 +9,7 @@ import {
   SERVICE_ALERTS_LOCATOR_ID,
   type ServiceAlertsLocatorParams,
 } from '@kbn/deeplinks-observability';
-import { getEnvironmentKuery } from '@kbn/apm-types';
+import { getAlertsEnvironmentKuery } from '@kbn/apm-types';
 import { useMemo } from 'react';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import { useTransactionDetailFlyoutContext } from '../transaction_detail_flyout_context';
@@ -45,7 +45,7 @@ export function useTransactionDetailFlyoutAlertsBadge(): TransactionDetailFlyout
       return { show: false, count: 0 };
     }
 
-    const environmentKuery = getEnvironmentKuery(environment)?.trim() || undefined;
+    const environmentKuery = getAlertsEnvironmentKuery(environment);
 
     const href = share?.url?.locators
       ?.get<ServiceAlertsLocatorParams>(SERVICE_ALERTS_LOCATOR_ID)
