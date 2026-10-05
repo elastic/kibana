@@ -19,13 +19,13 @@ import {
   useAssignEscalation,
   useListEscalations,
   escalationQueryKeys,
+  useOpenInChat,
 } from '@kbn/agentic-investigations-plugin/public';
-import { useAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
 
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { EscalationsPageHeader } from '../../components/escalations_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
-import { useOpenInChat } from '../../hooks/use_open_in_chat';
+import { useAlertZeroInvestigationsCapabilities } from '../../hooks/use_alertzero_investigations_capabilities';
 import { escalationToQueueItem } from './escalation_to_queue_item';
 import { ESCALATIONS_PAGE_INFO } from './translations';
 import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
@@ -35,7 +35,7 @@ export const EscalationsPage: React.FC = () => {
   useAlertZeroDocTitle(ESCALATIONS_PAGE_INFO.pageTitle);
 
   // Capability check: only render the assignee picker when the user can manage escalations.
-  const { manageEscalations: canManage } = useAgenticInvestigationsCapabilities();
+  const { manageEscalations: canManage } = useAlertZeroInvestigationsCapabilities();
 
   // Clicking a row navigates to Agent Builder with the conversation details flyout open.
   // getChatHref is also forwarded so cards render as real links (Cmd-click, URL on hover).
