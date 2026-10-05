@@ -229,7 +229,9 @@ describe('validateDestinations', () => {
   });
 
   it('skips connector lookup when persisted workflow matches', async () => {
-    const persistedWorkflowLookup = createMockPersistedWorkflowLookup(new Map([['wf-1', { id: 'wf-1' }]]));
+    const persistedWorkflowLookup = createMockPersistedWorkflowLookup(
+      new Map([['wf-1', { id: 'wf-1' }]])
+    );
     const connectorLookup = createMockConnectorLookup();
 
     await validateDestinations([{ type: 'workflow', id: 'wf-1' }], {

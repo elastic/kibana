@@ -9,8 +9,6 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ActionPolicyDestination } from '@kbn/alerting-v2-schemas';
 import type { ValidateWorkflowResponseDto } from '@kbn/workflows';
-import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
-import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 import {
   ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
   KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX,
@@ -20,6 +18,8 @@ import {
 } from '@kbn/workflows';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
+import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
+import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import { ActionPolicyOperationValidationError } from './operations';
 
 const ALERTING_V2_NOTIFICATION_GROUP_REF = `${KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX}${ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID}`;
