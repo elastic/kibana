@@ -103,9 +103,8 @@ function TraceMetricsGrid({
     ]
   );
 
-  const indexPattern =
-    dataView?.getIndexPattern() ??
-    (esqlQuery.indices.length > 0 ? esqlQuery.indices.join(',') : undefined);
+  // The source's index pattern, including remote cluster prefixes (`remote:traces-*`).
+  const indexPattern = dataSource.title || undefined;
 
   if (!indexPattern) {
     return undefined;
