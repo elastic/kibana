@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common';
+import {
+  AgentBuilderConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
+} from '@kbn/actions-plugin/common';
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import {
   CONNECTOR_ID,
@@ -24,6 +27,6 @@ export const getSshHostConnectorType = (): SubActionConnectorType<Config, Secret
     config: ConfigSchema,
     secrets: SecretsSchema,
   },
-  supportedFeatureIds: [WorkflowsConnectorFeatureId],
+  supportedFeatureIds: [WorkflowsConnectorFeatureId, AgentBuilderConnectorFeatureId],
   minimumLicenseRequired: 'basic' as const,
 });
