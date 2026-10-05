@@ -26,6 +26,8 @@ export const AUTOMATION_TEMPLATE_TAGS: Record<AutomationTemplateId, string> = {
 
 export interface DocumentOrchestrationTemplateValues {
   aiIndexId: string;
+  /** Injected as `automation_name` in the workflow consts; used as the KI ID prefix. */
+  automationName: string;
   sourceIndex: string;
   titleField: string;
   bodyField: string;
@@ -36,6 +38,8 @@ export interface DocumentOrchestrationTemplateValues {
 
 export interface UnitProfileTemplateValues {
   aiIndexId: string;
+  /** Injected as `automation_name` in the workflow consts; used as the KI ID prefix. */
+  automationName: string;
   unitIndex: string;
   unitKey: string;
   activityField: string;
@@ -47,6 +51,8 @@ export interface UnitProfileTemplateValues {
 
 export interface IndexMetadataTemplateValues {
   aiIndexId: string;
+  /** Injected as `automation_name` in the workflow consts; used as the KI ID. */
+  automationName: string;
   sourceIndex: string;
   categoryField: string;
 }
@@ -94,6 +100,7 @@ export const renderDocumentOrchestrationTemplate = (
 
   return replaceTokens(CONTEXT_ENGINE_DOCUMENT_TEMPLATE, {
     __AI_INDEX_ID__: yamlString(values.aiIndexId),
+    __AUTOMATION_NAME__: yamlString(values.automationName),
     __SOURCE_INDEX__: yamlString(values.sourceIndex),
     __TITLE_FIELD__: yamlString(values.titleField),
     __BODY_FIELD__: yamlString(values.bodyField),
@@ -111,6 +118,7 @@ export const renderUnitProfileTemplate = (values: UnitProfileTemplateValues): st
 
   return replaceTokens(CONTEXT_ENGINE_UNIT_PROFILE_TEMPLATE, {
     __AI_INDEX_ID__: yamlString(values.aiIndexId),
+    __AUTOMATION_NAME__: yamlString(values.automationName),
     __UNIT_INDEX__: yamlString(values.unitIndex),
     __UNIT_KEY__: yamlString(values.unitKey),
     __ACTIVITY_FIELD__: yamlString(values.activityField),
@@ -126,6 +134,7 @@ export const renderIndexMetadataTemplate = (values: IndexMetadataTemplateValues)
 
   return replaceTokens(CONTEXT_ENGINE_INDEX_METADATA_TEMPLATE, {
     __AI_INDEX_ID__: yamlString(values.aiIndexId),
+    __AUTOMATION_NAME__: yamlString(values.automationName),
     __SOURCE_INDEX__: yamlString(values.sourceIndex),
     __CATEGORY_FIELD__: yamlString(values.categoryField),
   });

@@ -38,6 +38,10 @@ triggers:
           type: string
           maxLength: 500
           description: Model used by the investigation round that triggered this workflow.
+        workflow_context:
+          type: object
+          description: Persisted non-model workflow state. Unused by this workflow.
+          additionalProperties: true
         tool_calls:
           type: array
           description: >
@@ -84,8 +88,8 @@ steps:
     type: ai.agent
     agent-id: significant-events.decision-tree-reinforcement
     connector-id: '{{ steps.resolve_model.output.connector_id }}'
-    plugin-id: 'significant_events_decision_tree_reinforce'
-    aggregate-by: 'significant_events'
+    plugin-id: 'nightshift_investigation_memory'
+    aggregate-by: 'nightshift'
     product-solution: 'observability'
     product-feature: 'nightshift'
     create-conversation: true

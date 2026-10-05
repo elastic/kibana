@@ -29,9 +29,9 @@ export const INVALID_SERIES_ACTION_PARAMS_RESPONSE = invalidResponseExample({
 
 /** Shared 400 body for episode-level alert-action routes (missing path params). */
 export const INVALID_EPISODE_ACTION_PARAMS_RESPONSE = invalidResponseExample({
-  summary: 'Path is missing required episode_id',
-  message: 'episode_id: Required',
-  details: { errors: { episode_id: ['Required'] } },
+  summary: 'Path is missing required alert_id',
+  message: 'alert_id: Required',
+  details: { errors: { alert_id: ['Required'] } },
 });
 
 /** Shared 404 body for series-level alert-action routes. */
@@ -51,13 +51,13 @@ export const ALERT_SERIES_NOT_FOUND_RESPONSE: OasExampleEntry = {
 /** Shared 404 body for episode-level alert-action routes. */
 export const ALERT_EPISODE_NOT_FOUND_RESPONSE: OasExampleEntry = {
   name: 'alertEpisodeNotFound',
-  summary: 'No alert episode exists for the given episode_id',
+  summary: 'No alert exists for the given alert_id',
   value: {
     code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_FOUND,
     error: 'Not Found',
     message: getAlertEpisodeNotFoundMessage(SAMPLE_EPISODE_ID),
     details: {
-      episode_id: SAMPLE_EPISODE_ID,
+      alert_id: SAMPLE_EPISODE_ID,
     },
   } satisfies ErrorResponse,
 };
@@ -65,13 +65,13 @@ export const ALERT_EPISODE_NOT_FOUND_RESPONSE: OasExampleEntry = {
 /** Shared 409 body for the lifecycle episode actions, which require the latest episode. */
 export const ALERT_EPISODE_NOT_LATEST_RESPONSE: OasExampleEntry = {
   name: 'alertEpisodeNotLatest',
-  summary: 'The alert episode has been superseded by a newer episode of its series',
+  summary: 'The alert has been superseded by a newer alert of its series',
   value: {
     code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_LATEST,
     error: 'Conflict',
     message: getEpisodeNotLatestMessage(SAMPLE_EPISODE_ID, SAMPLE_GROUP_HASH),
     details: {
-      episode_id: SAMPLE_EPISODE_ID,
+      alert_id: SAMPLE_EPISODE_ID,
       group_hash: SAMPLE_GROUP_HASH,
     },
   } satisfies ErrorResponse,
