@@ -36,7 +36,8 @@ interface ParsedTrigger {
   inputs?: unknown;
 }
 
-export interface WorkflowLookup {
+/** Resolves a destination ID against persisted workflows (saved objects in the space), as opposed to in-memory workflow-YAML attachments in the conversation. */
+export interface PersistedWorkflowLookup {
   getWorkflow: (
     id: string,
     spaceId: string
@@ -53,7 +54,7 @@ export interface ConnectorLookup {
 
 export interface ValidateDestinationsDeps {
   attachments: AttachmentStateManager;
-  workflowLookup: WorkflowLookup;
+  persistedWorkflowLookup: PersistedWorkflowLookup;
   connectorLookup: ConnectorLookup;
   spaceId: string;
   /**
@@ -198,21 +199,23 @@ export async function validateDestinations(
   destinations: ActionPolicyDestination[],
   deps: ValidateDestinationsDeps
 ): Promise<ValidateDestinationsResult> {
-  const { attachments, workflowLookup, connectorLookup, spaceId } = deps;
+  const { attachments, persistedWorkflowLookup, connectorLookup, spaceId } = deps;
   const activeAttachments = attachments.getActive();
 
-  const workflowIds = new Set<string>();
+  // Workflows generated in this conversation (workflow-YAML attachments), not yet
+  // persisted — as opposed to `persistedWorkflowLookup`, which resolves saved objects.
+  const inMemoryWorkflowIds = new Set<string>();
   const attachmentToWorkflowId = new Map<string, string | undefined>();
-  const workflowIdToYaml = new Map<string, string>();
+  const inMemoryWorkflowIdToYaml = new Map<string, string>();
 
   for (const att of activeAttachments) {
     if (att.type !== WORKFLOW_YAML_ATTACHMENT_TYPE) continue;
     const latestVersion = att.versions.at(-1);
     const data = latestVersion?.data as { workflowId?: string; yaml?: string } | undefined;
     if (data?.workflowId) {
-      workflowIds.add(data.workflowId);
+      inMemoryWorkflowIds.add(data.workflowId);
       if (data.yaml) {
-        workflowIdToYaml.set(data.workflowId, data.yaml);
+        inMemoryWorkflowIdToYaml.set(data.workflowId, data.yaml);
       }
     }
     attachmentToWorkflowId.set(att.id, data?.workflowId);
@@ -226,8 +229,8 @@ export async function validateDestinations(
   };
 
   for (const dest of destinations) {
-    if (workflowIds.has(dest.id)) {
-      await collectDiagnosticsIfYaml(dest.id, workflowIdToYaml.get(dest.id));
+    if (inMemoryWorkflowIds.has(dest.id)) {
+      await collectDiagnosticsIfYaml(dest.id, inMemoryWorkflowIdToYaml.get(dest.id));
       continue;
     }
 
@@ -243,7 +246,7 @@ export async function validateDestinations(
       );
     }
 
-    const workflow = await workflowLookup.getWorkflow(dest.id, spaceId);
+    const workflow = await persistedWorkflowLookup.getWorkflow(dest.id, spaceId);
     if (workflow) {
       await collectDiagnosticsIfYaml(dest.id, workflow.yaml);
       continue;

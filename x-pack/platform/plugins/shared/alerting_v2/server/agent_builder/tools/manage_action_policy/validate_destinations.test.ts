@@ -73,7 +73,7 @@ const createMockAttachments = (
     getActive: jest.fn().mockReturnValue(active),
   } as unknown as AttachmentStateManager);
 
-const createMockWorkflowLookup = (
+const createMockPersistedWorkflowLookup = (
   workflows: Map<string, { id: string; name?: string; yaml?: string }> = new Map()
 ) => ({
   getWorkflow: jest.fn(async (id: string) => workflows.get(id) ?? null),
@@ -100,7 +100,7 @@ describe('validateDestinations', () => {
     await expect(
       validateDestinations([{ type: 'workflow', id: 'att-workflow-1' }], {
         attachments,
-        workflowLookup: createMockWorkflowLookup(),
+        persistedWorkflowLookup: createMockPersistedWorkflowLookup(),
         connectorLookup: createMockConnectorLookup(),
         spaceId: 'default',
       })
@@ -109,7 +109,7 @@ describe('validateDestinations', () => {
     await expect(
       validateDestinations([{ type: 'workflow', id: 'att-workflow-1' }], {
         attachments,
-        workflowLookup: createMockWorkflowLookup(),
+        persistedWorkflowLookup: createMockPersistedWorkflowLookup(),
         connectorLookup: createMockConnectorLookup(),
         spaceId: 'default',
       })
@@ -130,7 +130,7 @@ describe('validateDestinations', () => {
     await expect(
       validateDestinations([{ type: 'workflow', id: 'wf-saved-1' }], {
         attachments,
-        workflowLookup: createMockWorkflowLookup(),
+        persistedWorkflowLookup: createMockPersistedWorkflowLookup(),
         connectorLookup: createMockConnectorLookup(),
         spaceId: 'default',
       })
@@ -138,20 +138,20 @@ describe('validateDestinations', () => {
   });
 
   it('passes when destination matches a persisted workflow', async () => {
-    const workflowLookup = createMockWorkflowLookup(
+    const persistedWorkflowLookup = createMockPersistedWorkflowLookup(
       new Map([['persisted-wf-1', { id: 'persisted-wf-1' }]])
     );
 
     await expect(
       validateDestinations([{ type: 'workflow', id: 'persisted-wf-1' }], {
         attachments: createMockAttachments(),
-        workflowLookup,
+        persistedWorkflowLookup,
         connectorLookup: createMockConnectorLookup(),
         spaceId: 'default',
       })
     ).resolves.toEqual({ diagnostics: [] });
 
-    expect(workflowLookup.getWorkflow).toHaveBeenCalledWith('persisted-wf-1', 'default');
+    expect(persistedWorkflowLookup.getWorkflow).toHaveBeenCalledWith('persisted-wf-1', 'default');
   });
 
   it('throws a specific error when the destination ID is a connector', async () => {
@@ -162,7 +162,7 @@ describe('validateDestinations', () => {
     await expect(
       validateDestinations([{ type: 'workflow', id: 'conn-email-1' }], {
         attachments: createMockAttachments(),
-        workflowLookup: createMockWorkflowLookup(),
+        persistedWorkflowLookup: createMockPersistedWorkflowLookup(),
         connectorLookup,
         spaceId: 'default',
       })
@@ -171,7 +171,7 @@ describe('validateDestinations', () => {
     await expect(
       validateDestinations([{ type: 'workflow', id: 'conn-email-1' }], {
         attachments: createMockAttachments(),
-        workflowLookup: createMockWorkflowLookup(),
+        persistedWorkflowLookup: createMockPersistedWorkflowLookup(),
         connectorLookup,
         spaceId: 'default',
       })
@@ -182,7 +182,7 @@ describe('validateDestinations', () => {
     await expect(
       validateDestinations([{ type: 'workflow', id: 'unknown-id-123' }], {
         attachments: createMockAttachments(),
-        workflowLookup: createMockWorkflowLookup(),
+        persistedWorkflowLookup: createMockPersistedWorkflowLookup(),
         connectorLookup: createMockConnectorLookup(),
         spaceId: 'default',
       })
@@ -191,7 +191,7 @@ describe('validateDestinations', () => {
     await expect(
       validateDestinations([{ type: 'workflow', id: 'unknown-id-123' }], {
         attachments: createMockAttachments(),
-        workflowLookup: createMockWorkflowLookup(),
+        persistedWorkflowLookup: createMockPersistedWorkflowLookup(),
         connectorLookup: createMockConnectorLookup(),
         spaceId: 'default',
       })
@@ -214,27 +214,27 @@ describe('validateDestinations', () => {
         ],
       },
     ]);
-    const workflowLookup = createMockWorkflowLookup();
+    const persistedWorkflowLookup = createMockPersistedWorkflowLookup();
     const connectorLookup = createMockConnectorLookup();
 
     await validateDestinations([{ type: 'workflow', id: 'notify-high-cpu' }], {
       attachments,
-      workflowLookup,
+      persistedWorkflowLookup,
       connectorLookup,
       spaceId: 'default',
     });
 
-    expect(workflowLookup.getWorkflow).not.toHaveBeenCalled();
+    expect(persistedWorkflowLookup.getWorkflow).not.toHaveBeenCalled();
     expect(connectorLookup.findConnectorById).not.toHaveBeenCalled();
   });
 
   it('skips connector lookup when persisted workflow matches', async () => {
-    const workflowLookup = createMockWorkflowLookup(new Map([['wf-1', { id: 'wf-1' }]]));
+    const persistedWorkflowLookup = createMockPersistedWorkflowLookup(new Map([['wf-1', { id: 'wf-1' }]]));
     const connectorLookup = createMockConnectorLookup();
 
     await validateDestinations([{ type: 'workflow', id: 'wf-1' }], {
       attachments: createMockAttachments(),
-      workflowLookup,
+      persistedWorkflowLookup,
       connectorLookup,
       spaceId: 'default',
     });
@@ -267,7 +267,7 @@ describe('validateDestinations', () => {
         ],
         {
           attachments,
-          workflowLookup: createMockWorkflowLookup(),
+          persistedWorkflowLookup: createMockPersistedWorkflowLookup(),
           connectorLookup: createMockConnectorLookup(),
           spaceId: 'default',
         }
@@ -287,7 +287,7 @@ describe('validateDestinations', () => {
     await expect(
       validateDestinations([{ type: 'workflow', id: 'some-connector-att' }], {
         attachments,
-        workflowLookup: createMockWorkflowLookup(),
+        persistedWorkflowLookup: createMockPersistedWorkflowLookup(),
         connectorLookup: createMockConnectorLookup(),
         spaceId: 'default',
       })
@@ -307,7 +307,7 @@ describe('validateDestinations', () => {
       await expect(
         validateDestinations([{ type: 'workflow', id: 'wf-alert-only' }], {
           attachments,
-          workflowLookup: createMockWorkflowLookup(),
+          persistedWorkflowLookup: createMockPersistedWorkflowLookup(),
           connectorLookup: createMockConnectorLookup(),
           spaceId: 'default',
         })
@@ -326,7 +326,7 @@ describe('validateDestinations', () => {
       await expect(
         validateDestinations([{ type: 'workflow', id: 'wf-no-triggers' }], {
           attachments,
-          workflowLookup: createMockWorkflowLookup(),
+          persistedWorkflowLookup: createMockPersistedWorkflowLookup(),
           connectorLookup: createMockConnectorLookup(),
           spaceId: 'default',
         })
@@ -345,7 +345,7 @@ describe('validateDestinations', () => {
       await expect(
         validateDestinations([{ type: 'workflow', id: 'wf-broken-yaml' }], {
           attachments,
-          workflowLookup: createMockWorkflowLookup(),
+          persistedWorkflowLookup: createMockPersistedWorkflowLookup(),
           connectorLookup: createMockConnectorLookup(),
           spaceId: 'default',
         })
@@ -353,14 +353,14 @@ describe('validateDestinations', () => {
     });
 
     it('throws when a persisted workflow has no manual trigger', async () => {
-      const workflowLookup = createMockWorkflowLookup(
+      const persistedWorkflowLookup = createMockPersistedWorkflowLookup(
         new Map([['wf-alert-only', { id: 'wf-alert-only', yaml: YAML_ALERT_TRIGGER_ONLY }]])
       );
 
       await expect(
         validateDestinations([{ type: 'workflow', id: 'wf-alert-only' }], {
           attachments: createMockAttachments(),
-          workflowLookup,
+          persistedWorkflowLookup,
           connectorLookup: createMockConnectorLookup(),
           spaceId: 'default',
         })
@@ -368,14 +368,14 @@ describe('validateDestinations', () => {
     });
 
     it('does not throw when a persisted workflow has no yaml available (nothing to check)', async () => {
-      const workflowLookup = createMockWorkflowLookup(
+      const persistedWorkflowLookup = createMockPersistedWorkflowLookup(
         new Map([['wf-no-yaml', { id: 'wf-no-yaml' }]])
       );
 
       await expect(
         validateDestinations([{ type: 'workflow', id: 'wf-no-yaml' }], {
           attachments: createMockAttachments(),
-          workflowLookup,
+          persistedWorkflowLookup,
           connectorLookup: createMockConnectorLookup(),
           spaceId: 'default',
         })
@@ -385,13 +385,13 @@ describe('validateDestinations', () => {
 
   describe('structural checks — inputs.payload ref', () => {
     it('returns a warning diagnostic when the manual trigger declares no inputs at all', async () => {
-      const workflowLookup = createMockWorkflowLookup(
+      const persistedWorkflowLookup = createMockPersistedWorkflowLookup(
         new Map([['wf-1', { id: 'wf-1', yaml: YAML_MANUAL_TRIGGER_NO_PAYLOAD_REF }]])
       );
 
       const result = await validateDestinations([{ type: 'workflow', id: 'wf-1' }], {
         attachments: createMockAttachments(),
-        workflowLookup,
+        persistedWorkflowLookup,
         connectorLookup: createMockConnectorLookup(),
         spaceId: 'default',
       });
@@ -407,13 +407,13 @@ describe('validateDestinations', () => {
     });
 
     it('returns a warning diagnostic when inputs.payload is declared without a $ref', async () => {
-      const workflowLookup = createMockWorkflowLookup(
+      const persistedWorkflowLookup = createMockPersistedWorkflowLookup(
         new Map([['wf-1', { id: 'wf-1', yaml: YAML_MANUAL_TRIGGER_WITH_UNRELATED_PAYLOAD }]])
       );
 
       const result = await validateDestinations([{ type: 'workflow', id: 'wf-1' }], {
         attachments: createMockAttachments(),
-        workflowLookup,
+        persistedWorkflowLookup,
         connectorLookup: createMockConnectorLookup(),
         spaceId: 'default',
       });
@@ -423,13 +423,13 @@ describe('validateDestinations', () => {
     });
 
     it('returns a warning diagnostic when inputs.payload $ref points at an unrelated/unresolvable definition', async () => {
-      const workflowLookup = createMockWorkflowLookup(
+      const persistedWorkflowLookup = createMockPersistedWorkflowLookup(
         new Map([['wf-1', { id: 'wf-1', yaml: YAML_MANUAL_TRIGGER_WITH_WRONG_REF }]])
       );
 
       const result = await validateDestinations([{ type: 'workflow', id: 'wf-1' }], {
         attachments: createMockAttachments(),
-        workflowLookup,
+        persistedWorkflowLookup,
         connectorLookup: createMockConnectorLookup(),
         spaceId: 'default',
       });
@@ -439,13 +439,13 @@ describe('validateDestinations', () => {
     });
 
     it('returns no diagnostics when inputs.payload correctly references alertingV2NotificationGroup', async () => {
-      const workflowLookup = createMockWorkflowLookup(
+      const persistedWorkflowLookup = createMockPersistedWorkflowLookup(
         new Map([['wf-1', { id: 'wf-1', yaml: YAML_MANUAL_TRIGGER_WITH_PAYLOAD_REF }]])
       );
 
       const result = await validateDestinations([{ type: 'workflow', id: 'wf-1' }], {
         attachments: createMockAttachments(),
-        workflowLookup,
+        persistedWorkflowLookup,
         connectorLookup: createMockConnectorLookup(),
         spaceId: 'default',
       });
@@ -456,7 +456,7 @@ describe('validateDestinations', () => {
 
   describe('workflow validation service (variable refs)', () => {
     it('calls validateWorkflow with the resolved yaml and surfaces error diagnostics as warnings', async () => {
-      const workflowLookup = createMockWorkflowLookup(
+      const persistedWorkflowLookup = createMockPersistedWorkflowLookup(
         new Map([['wf-1', { id: 'wf-1', yaml: YAML_MANUAL_TRIGGER_WITH_PAYLOAD_REF }]])
       );
       const validateWorkflow = jest.fn().mockResolvedValue({
@@ -474,7 +474,7 @@ describe('validateDestinations', () => {
 
       const result = await validateDestinations([{ type: 'workflow', id: 'wf-1' }], {
         attachments: createMockAttachments(),
-        workflowLookup,
+        persistedWorkflowLookup,
         connectorLookup: createMockConnectorLookup(),
         spaceId: 'default',
         validateWorkflow,
@@ -498,7 +498,7 @@ describe('validateDestinations', () => {
     });
 
     it('ignores non-error diagnostics returned by validateWorkflow', async () => {
-      const workflowLookup = createMockWorkflowLookup(
+      const persistedWorkflowLookup = createMockPersistedWorkflowLookup(
         new Map([['wf-1', { id: 'wf-1', yaml: YAML_MANUAL_TRIGGER_WITH_PAYLOAD_REF }]])
       );
       const validateWorkflow = jest.fn().mockResolvedValue({
@@ -515,7 +515,7 @@ describe('validateDestinations', () => {
 
       const result = await validateDestinations([{ type: 'workflow', id: 'wf-1' }], {
         attachments: createMockAttachments(),
-        workflowLookup,
+        persistedWorkflowLookup,
         connectorLookup: createMockConnectorLookup(),
         spaceId: 'default',
         validateWorkflow,
@@ -526,13 +526,13 @@ describe('validateDestinations', () => {
     });
 
     it('does not call validateWorkflow when it is not provided', async () => {
-      const workflowLookup = createMockWorkflowLookup(
+      const persistedWorkflowLookup = createMockPersistedWorkflowLookup(
         new Map([['wf-1', { id: 'wf-1', yaml: YAML_MANUAL_TRIGGER_WITH_PAYLOAD_REF }]])
       );
 
       const result = await validateDestinations([{ type: 'workflow', id: 'wf-1' }], {
         attachments: createMockAttachments(),
-        workflowLookup,
+        persistedWorkflowLookup,
         connectorLookup: createMockConnectorLookup(),
         spaceId: 'default',
       });
@@ -541,14 +541,14 @@ describe('validateDestinations', () => {
     });
 
     it('does not call validateWorkflow when request is not provided', async () => {
-      const workflowLookup = createMockWorkflowLookup(
+      const persistedWorkflowLookup = createMockPersistedWorkflowLookup(
         new Map([['wf-1', { id: 'wf-1', yaml: YAML_MANUAL_TRIGGER_WITH_PAYLOAD_REF }]])
       );
       const validateWorkflow = jest.fn().mockResolvedValue({ valid: true, diagnostics: [] });
 
       await validateDestinations([{ type: 'workflow', id: 'wf-1' }], {
         attachments: createMockAttachments(),
-        workflowLookup,
+        persistedWorkflowLookup,
         connectorLookup: createMockConnectorLookup(),
         spaceId: 'default',
         validateWorkflow,
@@ -558,14 +558,14 @@ describe('validateDestinations', () => {
     });
 
     it('does not throw and does not add diagnostics when validateWorkflow rejects', async () => {
-      const workflowLookup = createMockWorkflowLookup(
+      const persistedWorkflowLookup = createMockPersistedWorkflowLookup(
         new Map([['wf-1', { id: 'wf-1', yaml: YAML_MANUAL_TRIGGER_WITH_PAYLOAD_REF }]])
       );
       const validateWorkflow = jest.fn().mockRejectedValue(new Error('service unavailable'));
 
       const result = await validateDestinations([{ type: 'workflow', id: 'wf-1' }], {
         attachments: createMockAttachments(),
-        workflowLookup,
+        persistedWorkflowLookup,
         connectorLookup: createMockConnectorLookup(),
         spaceId: 'default',
         validateWorkflow,
@@ -576,7 +576,7 @@ describe('validateDestinations', () => {
     });
 
     it('combines structural and workflow-validation diagnostics for a doubly-invalid workflow', async () => {
-      const workflowLookup = createMockWorkflowLookup(
+      const persistedWorkflowLookup = createMockPersistedWorkflowLookup(
         new Map([['wf-1', { id: 'wf-1', yaml: YAML_MANUAL_TRIGGER_NO_PAYLOAD_REF }]])
       );
       const validateWorkflow = jest.fn().mockResolvedValue({
@@ -593,7 +593,7 @@ describe('validateDestinations', () => {
 
       const result = await validateDestinations([{ type: 'workflow', id: 'wf-1' }], {
         attachments: createMockAttachments(),
-        workflowLookup,
+        persistedWorkflowLookup,
         connectorLookup: createMockConnectorLookup(),
         spaceId: 'default',
         validateWorkflow,

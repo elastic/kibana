@@ -127,7 +127,7 @@ Use operations[] to:
 
         const destinationResult = await validateDestinations(updatedData.destinations, {
           attachments,
-          workflowLookup: getWorkflowClient(request),
+          persistedWorkflowLookup: getWorkflowClient(request),
           connectorLookup: { findConnectorById },
           spaceId,
           validateWorkflow,
