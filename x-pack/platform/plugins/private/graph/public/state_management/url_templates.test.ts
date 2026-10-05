@@ -29,7 +29,7 @@ describe('url_templates', () => {
         })
       );
       expect(templates.length).toBe(1);
-      expect(templates[0].encoder).toBe(outlinkEncoders[0]);
+      expect(templates[0].encoderId).toBe(outlinkEncoders[0].id);
       expect(templates[0].url).not.toContain('test-pattern');
       expect(templates[0].url).toContain('123456');
       expect(templates[0].isDefault).toBe(true);

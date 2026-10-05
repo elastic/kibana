@@ -38,13 +38,7 @@ describe('settings', () => {
 
   const initialTemplate: UrlTemplate = {
     description: 'template',
-    encoder: {
-      description: 'test encoder description',
-      encode: jest.fn(),
-      id: 'test',
-      title: 'test encoder',
-      type: 'esq',
-    },
+    encoderId: 'kql-loose',
     url: 'http://example.org',
     icon: {
       id: 'test',

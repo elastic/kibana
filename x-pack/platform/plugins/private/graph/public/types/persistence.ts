@@ -48,7 +48,7 @@ export interface SerializedWorkspaceState {
   exploreControls: AdvancedSettings;
 }
 
-export interface SerializedUrlTemplate extends Omit<UrlTemplate, 'encoder' | 'icon'> {
+export interface SerializedUrlTemplate extends Omit<UrlTemplate, 'encoderId' | 'icon'> {
   encoderID: string;
   iconClass?: string;
 }

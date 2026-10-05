@@ -50,12 +50,12 @@ function serializeEdge(
   };
 }
 
-function serializeUrlTemplate({ encoder, icon, url, description, isDefault }: UrlTemplate) {
+function serializeUrlTemplate({ encoderId, icon, url, description, isDefault }: UrlTemplate) {
   const serializedTemplate: SerializedUrlTemplate = {
     url,
     description,
     isDefault,
-    encoderID: encoder.id,
+    encoderID: encoderId,
   };
   if (icon) {
     serializedTemplate.iconClass = icon.id;

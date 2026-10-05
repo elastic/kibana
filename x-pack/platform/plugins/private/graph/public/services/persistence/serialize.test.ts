@@ -66,7 +66,7 @@ describe('serialize', () => {
         {
           id: 'internal-template-id',
           description: 'Template',
-          encoder: outlinkEncoders[0],
+          encoderId: outlinkEncoders[0].id,
           icon: { id: 'd', package: 'eui', label: '', prevName: '' },
           url: 'test-url',
         },

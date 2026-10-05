@@ -28,6 +28,7 @@ import {
 } from '../../state_management';
 import { SelectedNodeItem, type SelectedNodeView } from './selected_node_item';
 import { getIcon } from '../../helpers/style_choices';
+import { getOutlinkEncoder } from '../../helpers/outlink_encoders';
 import { gphSidebarHeaderStyles } from '../../styles';
 import { createRuntimeGraphFromState } from '../../services/workspace/sync_runtime_topology';
 import {
@@ -84,13 +85,14 @@ const ControlPanelComponent = ({
   const selectedNode = selectedNodes.find(({ id }) => id === selectedNodeId);
 
   const openUrlTemplate = (template: UrlTemplate) => {
+    const encoder = getOutlinkEncoder(template.encoderId);
+    if (!encoder) {
+      return;
+    }
     const url = template.url;
     const newUrl = url.replace(
       urlTemplateRegex,
-      template.encoder.encode(
-        createRuntimeGraphFromState(store.getState().workspace),
-        selectedNodeIds
-      )
+      encoder.encode(createRuntimeGraphFromState(store.getState().workspace), selectedNodeIds)
     );
     window.open(newUrl, '_blank', 'noopener,noreferrer');
   };
