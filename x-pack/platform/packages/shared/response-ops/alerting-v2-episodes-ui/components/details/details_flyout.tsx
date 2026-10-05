@@ -61,9 +61,6 @@ type TabId = 'overview' | 'timeline' | 'metadata';
 const INFO_BLOCKS_MIN_CELL_WIDTH = 140;
 const INFO_BLOCKS_COLUMNS = 4;
 
-/** Matches the `paddingSize` passed to the flyout, which EUI resolves to a theme size. */
-const FLYOUT_PADDING_SIZE = 'm';
-
 /**
  * Groups the episode flyout and anything opened from it into one navigation history.
  */
@@ -240,7 +237,7 @@ export const AlertEpisodeDetailsFlyout = ({
   // Header badge data
   const isAcked = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
   const isResolved = episodeAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
-  const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozeExpiry);
+  const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozedUntil);
   const tags = groupAction?.tags ?? [];
 
   // Header title: show skeleton while loading, fall back to generic label if rule not found.
@@ -294,7 +291,6 @@ export const AlertEpisodeDetailsFlyout = ({
         // to reopen quickly on first loads. Setting a constant title keeps the registration stable.
         flyoutMenuProps={{ title: i18n.FLYOUT_ARIA_LABEL }}
         historyKey={FLYOUT_HISTORY_KEY}
-        paddingSize={FLYOUT_PADDING_SIZE}
         size={initialWidth}
         aria-label={i18n.FLYOUT_ARIA_LABEL}
         data-test-subj={FLYOUT_TEST_SUBJ}
@@ -321,7 +317,7 @@ export const AlertEpisodeDetailsFlyout = ({
           {/* Snoozed badge */}
           {isSnoozed && (
             <FlyoutTemplate.Header.Badge iconType="bellSlash">
-              <SnoozedBadgeLabel expiry={groupAction?.snoozeExpiry} dateFormat={dateFormat} />
+              <SnoozedBadgeLabel expiry={groupAction?.snoozedUntil} dateFormat={dateFormat} />
             </FlyoutTemplate.Header.Badge>
           )}
 
@@ -539,7 +535,8 @@ export const AlertEpisodeDetailsFlyout = ({
           />
           <FlyoutTemplate.Footer.PrimaryAction
             label={i18n.FLYOUT_TAKE_ACTION}
-            iconType="chevronSingleDown"
+            iconType={isMenuOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
+            iconSide="right"
             data-test-subj="alertingV2EpisodeFlyoutTakeActionButton"
             onClick={(event) => {
               menuAnchorRef.current = event.currentTarget as HTMLButtonElement;
@@ -559,7 +556,6 @@ export const AlertEpisodeDetailsFlyout = ({
           resizable
           session="start"
           historyKey={FLYOUT_HISTORY_KEY}
-          paddingSize={FLYOUT_PADDING_SIZE}
           size={initialWidth}
           aria-label={i18n.RUNBOOK_FULL_GUIDE_ARIA_LABEL}
           data-test-subj="alertingV2EpisodeRunbookFlyout"

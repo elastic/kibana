@@ -28,7 +28,7 @@ describe('series bulk actions', () => {
 
   it('bulkSnoozeSeriesActions POSTs the items envelope to _bulk_snooze and returns the bulk response', async () => {
     mockHttp.post.mockResolvedValue({ affected_count: 1, errors: [] });
-    const items = [{ group_hash: 'g1', expiry: '2026-05-01T00:00:00Z' }];
+    const items = [{ group_hash: 'g1', snoozed_until: '2026-05-01T00:00:00Z' }];
     const result = await bulkSnoozeSeriesActions(mockHttp, items);
     expect(mockHttp.post).toHaveBeenCalledWith(
       `${ALERTING_V2_INTERNAL_SERIES_API_PATH}/_bulk_snooze`,
@@ -56,7 +56,7 @@ describe('episode bulk actions', () => {
 
   it('bulkTagEpisodeActions POSTs the items envelope to _bulk_tag and returns the bulk response', async () => {
     mockHttp.post.mockResolvedValue({ affected_count: 2, errors: [] });
-    const items = [{ episode_id: 'e1', tags: ['t1'] }];
+    const items = [{ alert_id: 'e1', tags: ['t1'] }];
     const result = await bulkTagEpisodeActions(mockHttp, items);
     expect(mockHttp.post).toHaveBeenCalledWith(`${ALERTING_V2_EPISODES_API_PATH}/_bulk_tag`, {
       body: JSON.stringify({ items }),
@@ -66,7 +66,7 @@ describe('episode bulk actions', () => {
 
   it('bulkAckEpisodeActions POSTs the items envelope to _bulk_ack and returns the bulk response', async () => {
     mockHttp.post.mockResolvedValue({ affected_count: 1, errors: [] });
-    const items = [{ episode_id: 'e1' }];
+    const items = [{ alert_id: 'e1' }];
     const result = await bulkAckEpisodeActions(mockHttp, items);
     expect(mockHttp.post).toHaveBeenCalledWith(`${ALERTING_V2_EPISODES_API_PATH}/_bulk_ack`, {
       body: JSON.stringify({ items }),
@@ -76,7 +76,7 @@ describe('episode bulk actions', () => {
 
   it('bulkUnackEpisodeActions POSTs the items envelope to _bulk_unack and returns the bulk response', async () => {
     mockHttp.post.mockResolvedValue({ affected_count: 1, errors: [] });
-    const items = [{ episode_id: 'e1' }];
+    const items = [{ alert_id: 'e1' }];
     const result = await bulkUnackEpisodeActions(mockHttp, items);
     expect(mockHttp.post).toHaveBeenCalledWith(`${ALERTING_V2_EPISODES_API_PATH}/_bulk_unack`, {
       body: JSON.stringify({ items }),
@@ -86,7 +86,7 @@ describe('episode bulk actions', () => {
 
   it('bulkAssignEpisodeActions POSTs the items envelope to _bulk_assign and returns the bulk response', async () => {
     mockHttp.post.mockResolvedValue({ affected_count: 1, errors: [] });
-    const items = [{ episode_id: 'e1', assignee_uid: null }];
+    const items = [{ alert_id: 'e1', assignee_uid: null }];
     const result = await bulkAssignEpisodeActions(mockHttp, items);
     expect(mockHttp.post).toHaveBeenCalledWith(`${ALERTING_V2_EPISODES_API_PATH}/_bulk_assign`, {
       body: JSON.stringify({ items }),
@@ -96,7 +96,7 @@ describe('episode bulk actions', () => {
 
   it('bulkActivateEpisodeActions POSTs the items envelope to _bulk_activate and returns the bulk response', async () => {
     mockHttp.post.mockResolvedValue({ affected_count: 1, errors: [] });
-    const items = [{ episode_id: 'e1', reason: 'why' }];
+    const items = [{ alert_id: 'e1', reason: 'why' }];
     const result = await bulkActivateEpisodeActions(mockHttp, items);
     expect(mockHttp.post).toHaveBeenCalledWith(`${ALERTING_V2_EPISODES_API_PATH}/_bulk_activate`, {
       body: JSON.stringify({ items }),
@@ -106,7 +106,7 @@ describe('episode bulk actions', () => {
 
   it('bulkDeactivateEpisodeActions POSTs the items envelope to _bulk_deactivate and returns the bulk response', async () => {
     mockHttp.post.mockResolvedValue({ affected_count: 1, errors: [] });
-    const items = [{ episode_id: 'e1', reason: 'why' }];
+    const items = [{ alert_id: 'e1', reason: 'why' }];
     const result = await bulkDeactivateEpisodeActions(mockHttp, items);
     expect(mockHttp.post).toHaveBeenCalledWith(
       `${ALERTING_V2_EPISODES_API_PATH}/_bulk_deactivate`,

@@ -19,14 +19,20 @@ const INDEX_A = `ai-index-idx-scout-describe-${RUN_ID}-a`;
 // Bare index: keeps the built-in `ai-index-idx-*` template mappings.
 const INDEX_B = `ai-index-idx-scout-describe-${RUN_ID}-b`;
 const DATA_STREAM = `ai-index-ds-scout-describe-${RUN_ID}`;
+// Deliberately never created: a just-registered AI Index has no backing store yet.
+const MISSING_INDEX = `ai-index-idx-scout-describe-${RUN_ID}-missing`;
 const SINGLE_AI_INDEX_ID = `scout-describe-single-${RUN_ID}`;
 const TEMPLATE_AI_INDEX_ID = `scout-describe-template-${RUN_ID}`;
 const DATA_STREAM_AI_INDEX_ID = `scout-describe-ds-${RUN_ID}`;
+const MISSING_AI_INDEX_ID = `scout-describe-missing-index-${RUN_ID}`;
 
 const describePath = (id: string) => `${AI_INDEX_COLLECTION_PATH}/${id}/_describe`;
 const QUERY_PATH = AI_INDEX_QUERY_PATH;
 
-/** KIs in INDEX_A; `other` is scoped to a space tests never use. */
+/**
+ * KIs in INDEX_A; `other` is scoped to a space tests never use, `deleted` and `expired` are
+ * left out by the lifecycle filter.
+ */
 const KI_DOCS = {
   detection: {
     type: 'detection',
@@ -44,6 +50,18 @@ const KI_DOCS = {
     ...spaceScoped('default'),
   },
   plain: { type: 'document', title: 'Plain document', tags: [] },
+  deleted: {
+    type: 'document',
+    title: 'Retired guide',
+    tags: ['billing'],
+    governance: { lifecycle: { status: 'deleted' } },
+  },
+  expired: {
+    type: 'detection',
+    title: 'Stale errors',
+    tags: ['errors'],
+    expires_at: '2000-01-01T00:00:00Z',
+  },
   other: {
     type: 'hidden',
     title: 'Billing secret',
@@ -95,11 +113,29 @@ const READ_ONLY_ROLE: KibanaRole = {
   kibana: [CONTEXT_ENGINE_READ],
 };
 
-/** `view_index_metadata` only, no `read`: fields resolve, the counts aggregation is refused. */
+/** `view_index_metadata` only, no `read`: can't list or describe it. */
 const METADATA_ONLY_ROLE: KibanaRole = {
   elasticsearch: {
     cluster: [],
     indices: [{ names: ['ai-index-idx-scout-describe-*'], privileges: ['view_index_metadata'] }],
+  },
+  kibana: [CONTEXT_ENGINE_READ],
+};
+
+/**
+ * `contextEngine:read` in Kibana, but the backing indices are outside the role's index pattern, so
+ * the caller holds no privilege on them at all. Kibana authz lets the request through: only the
+ * AI-Index-level readability check can stop it.
+ */
+const OTHER_INDEX_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+    indices: [
+      {
+        names: [`ai-index-idx-scout-describe-unrelated-${RUN_ID}-*`],
+        privileges: ['read', 'view_index_metadata'],
+      },
+    ],
   },
   kibana: [CONTEXT_ENGINE_READ],
 };
@@ -119,12 +155,14 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
   let describeCredentials: RoleApiCredentials;
   let readOnlyCredentials: RoleApiCredentials;
   let metadataOnlyCredentials: RoleApiCredentials;
+  let otherIndexCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth, esClient, apiClient }) => {
     adminCredentials = await requestAuth.getApiKey('admin');
     describeCredentials = await requestAuth.getApiKeyForCustomRole(DESCRIBE_ROLE);
     readOnlyCredentials = await requestAuth.getApiKeyForCustomRole(READ_ONLY_ROLE);
     metadataOnlyCredentials = await requestAuth.getApiKeyForCustomRole(METADATA_ONLY_ROLE);
+    otherIndexCredentials = await requestAuth.getApiKeyForCustomRole(OTHER_INDEX_ROLE);
 
     await esClient.indices.create({
       index: INDEX_A,
@@ -136,6 +174,10 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
           type: { type: 'keyword' },
           tags: { type: 'keyword' },
           status: { type: 'keyword' },
+          expires_at: { type: 'date' },
+          governance: {
+            properties: { lifecycle: { properties: { status: { type: 'keyword' } } } },
+          },
           permissions: {
             properties: {
               kibana: {
@@ -163,6 +205,7 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
       registerAiIndex(SINGLE_AI_INDEX_ID, { type: 'index', value: INDEX_A }),
       registerAiIndex(TEMPLATE_AI_INDEX_ID, { type: 'index', value: INDEX_B }),
       registerAiIndex(DATA_STREAM_AI_INDEX_ID, { type: 'data_stream', value: DATA_STREAM }),
+      registerAiIndex(MISSING_AI_INDEX_ID, { type: 'index', value: MISSING_INDEX }),
     ]) {
       const response = await apiClient.post(AI_INDEX_COLLECTION_PATH, {
         headers: { ...adminCredentials.apiKeyHeader, ...API_HEADERS },
@@ -174,7 +217,12 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
   });
 
   apiTest.afterAll(async ({ apiClient, esClient }) => {
-    for (const id of [SINGLE_AI_INDEX_ID, TEMPLATE_AI_INDEX_ID, DATA_STREAM_AI_INDEX_ID]) {
+    for (const id of [
+      SINGLE_AI_INDEX_ID,
+      TEMPLATE_AI_INDEX_ID,
+      DATA_STREAM_AI_INDEX_ID,
+      MISSING_AI_INDEX_ID,
+    ]) {
       await apiClient.delete(`${AI_INDEX_COLLECTION_PATH}/${id}`, {
         headers: { ...adminCredentials.apiKeyHeader, ...API_HEADERS },
         responseType: 'json',
@@ -238,20 +286,23 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     expect(fieldLine(block, '@timestamp')).toMatch(/^@timestamp: date/);
   });
 
-  apiTest('counts types and tags for KIs visible in the current space', async ({ apiClient }) => {
-    const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
-      headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
-      responseType: 'json',
-    });
+  apiTest(
+    'counts types and tags for active KIs visible in the current space',
+    async ({ apiClient }) => {
+      const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
+        headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
+        responseType: 'json',
+      });
 
-    expect(response).toHaveStatusCode(200);
-    const block = blockOf(response.body);
-    expect(sectionLines(block, 'Knowledge item types')).toStrictEqual([
-      '"document": 2',
-      '"detection": 1',
-    ]);
-    expect(sectionLines(block, 'Tags')).toStrictEqual(['"billing": 2', '"errors": 1']);
-  });
+      expect(response).toHaveStatusCode(200);
+      const block = blockOf(response.body);
+      expect(sectionLines(block, 'Knowledge item types')).toStrictEqual([
+        '"document": 2',
+        '"detection": 1',
+      ]);
+      expect(sectionLines(block, 'Tags')).toStrictEqual(['"billing": 2', '"errors": 1']);
+    }
+  );
 
   apiTest('lists example queries that run as-is through _query', async ({ apiClient }) => {
     const described = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
@@ -265,7 +316,11 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     // Semantic branch needs a deployed inference endpoint: checked structurally here, and by the
     // ES|QL parser in unit tests.
     const hybrid = exampleQuery('Full text search, lexical and semantic fused together');
-    expect(hybrid.startsWith(`FROM ${INDEX_A} METADATA _id, _index, _score\n| FORK\n`)).toBe(true);
+    expect(
+      hybrid.startsWith(
+        `FROM ${INDEX_A} METADATA _id, _index, _score\n| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"\n| WHERE expires_at IS NULL OR expires_at > NOW()\n| FORK\n`
+      )
+    ).toBe(true);
     expect(hybrid).toContain('\n| FUSE\n');
 
     const run = async (query: string, params?: Record<string, string>) => {
@@ -301,7 +356,7 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
   });
 
   apiTest(
-    'returns Elasticsearch 403 when the caller lacks view_index_metadata',
+    'returns Elasticsearch 403 when the caller lacks view_index_metadata privilege',
     async ({ apiClient }) => {
       const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
         headers: { ...readOnlyCredentials.apiKeyHeader, ...API_HEADERS },
@@ -315,19 +370,41 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
   );
 
   apiTest(
-    'omits counts, not the whole block, when the caller lacks read',
+    'returns Elasticsearch 403 when the caller lacks read privilege',
     async ({ apiClient }) => {
       const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
         headers: { ...metadataOnlyCredentials.apiKeyHeader, ...API_HEADERS },
         responseType: 'json',
       });
 
-      expect(response).toHaveStatusCode(200);
-      const block = blockOf(response.body);
-      expect(fieldLine(block, 'type')).toBe('type: keyword, searchable, aggregatable');
-      expect(sectionLines(block, 'Knowledge item types')).toStrictEqual([]);
-      expect(sectionLines(block, 'Tags')).toStrictEqual([]);
-      expect(block).toContain('\n\nCount by type\n');
+      expect(response).toHaveStatusCode(403);
+      // No `read` anywhere: Elasticsearch refuses the whole readability probe.
+      expect(response.body.message).toMatch(/security_exception|unauthorized/i);
     }
   );
+
+  apiTest(
+    'returns 403 when the caller holds no privilege on the backing index',
+    async ({ apiClient }) => {
+      const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
+        headers: { ...otherIndexCredentials.apiKeyHeader, ...API_HEADERS },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(403);
+      expect(response.body.message).toContain(`AI index '${SINGLE_AI_INDEX_ID}' is not readable`);
+    }
+  );
+
+  apiTest('describes an entry whose backing index does not exist yet', async ({ apiClient }) => {
+    const response = await apiClient.get(describePath(MISSING_AI_INDEX_ID), {
+      headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    const block = blockOf(response.body);
+    expect(block).toContain(`\nQuery with ES|QL against: ${MISSING_INDEX}\n`);
+    expect(sectionLines(block, 'Fields')).toStrictEqual(['(none)']);
+  });
 });

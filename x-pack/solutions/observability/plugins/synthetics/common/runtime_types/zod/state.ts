@@ -5,13 +5,4 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-
-export const MonitorManagementEnablementResultCodec = z.looseObject({
-  isEnabled: z.boolean(),
-  canEnable: z.boolean(),
-  canManageApiKeys: z.boolean(),
-  areApiKeysEnabled: z.boolean(),
-  isValidApiKey: z.boolean(),
-  isServiceAllowed: z.boolean(),
-});
+export { MonitorManagementEnablementResultCodec } from '../monitor_management/state';

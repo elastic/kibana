@@ -24,6 +24,8 @@ import type { ProposalPrivilegesChecker } from './services/check_proposal_privil
 import { createProposalUserResolver } from './services/resolve_proposal_user';
 import type { ResolveProposalUser } from './services/resolve_proposal_user';
 import { registerProposalAttachment } from './attachments';
+import { reviseProposalTool } from './agent_builder/tools/revise_proposal_tool';
+import { createProposalManagementSkill } from './agent_builder/skills/proposal_management';
 import { registerStepDefinitions } from './step_types';
 import { createProposalsStorageClient } from './storage/proposals_storage';
 import type {
@@ -64,7 +66,26 @@ export class ProposalsPlugin
 
     registerFeatures({ features });
 
-    registerProposalAttachment(agentBuilder);
+    const privileges = this.getProposalPrivilegesChecker(coreSetup);
+    agentBuilder.tools.register(
+      reviseProposalTool({
+        getProposalsService: () => this.requireProposalsService(),
+        privileges,
+      })
+    );
+    agentBuilder.skills.register(
+      createProposalManagementSkill((request) => privileges.canManage(request))
+    );
+
+    // The service only exists from start() onwards, but `format()` is never
+    // called before then, so it is resolved lazily rather than captured here.
+    registerProposalAttachment(agentBuilder, {
+      getProposalsService: () => this.requireProposalsService(),
+      // Reads go through the internal user, so the formatter has to check the
+      // caller's privilege itself — same as every other proposal read surface.
+      privileges: this.getProposalPrivilegesChecker(coreSetup),
+      logger: this.logger,
+    });
 
     // Declares ownership of this plugin's managed workflows. Without it the
     // startup orphan sweep treats every workflow we installed as owned by an
@@ -111,6 +132,8 @@ export class ProposalsPlugin
       storage,
       logger: this.logger,
       getWorkflowsApi: () => this.requireWorkflowsApi(),
+      getAttachmentsClient: (request) =>
+        plugins.agentBuilder.attachments.getScopedClient({ request }),
     });
 
     void initializeManagedWorkflows({

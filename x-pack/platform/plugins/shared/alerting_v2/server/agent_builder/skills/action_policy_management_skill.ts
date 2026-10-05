@@ -13,6 +13,7 @@ import {
 } from '@kbn/alerting-v2-constants';
 import { manageActionPolicyTool } from '../tools/manage_action_policy';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
+import { alertingV2ExperimentalAvailability } from './alerting_v2_experimental_availability';
 import {
   generateActionPolicyOperationsDoc,
   generateActionPolicyWorkflowPayloadDoc,
@@ -35,6 +36,7 @@ export const createActionPolicyManagementSkill = (deps: ManageActionPolicyToolDe
       'Compose, discover, and modify Alerting V2 action policies within a conversation. Use when the user wants to set up, change, or inspect how alert notifications are matched, grouped, throttled, and dispatched to workflows ("notify me when this rule fires", "set up email notifications for my alert", "create a notification policy", "change my alert to page via PagerDuty", "list my action policies"). Covers workflow destinations, KQL matchers, grouping, and throttling. For composing or editing the underlying alert rules themselves, load the rule-management skill.',
     experimental: true,
     uiSettingRequired: ALERTING_V2_ENABLED_SETTING_ID,
+    availability: alertingV2ExperimentalAvailability,
     referencedContent: [
       {
         name: 'action-policy-matchers',
@@ -100,7 +102,7 @@ Do **not** use this skill for:
 
 ## Action Policies
 
-An action policy is a **space-scoped saved object** that controls how alert episodes are matched, grouped, throttled, and dispatched to workflow destinations. They are not embedded in rules: one policy can match episodes from many rules.
+An action policy is a **space-scoped saved object** that controls how alerts are matched, grouped, throttled, and dispatched to workflow destinations. They are not embedded in rules: one policy can match alerts from many rules.
 
 ---
 
@@ -214,10 +216,10 @@ When notifying on one specific rule (link via a shared tag on both the rule and 
 When the user wants one policy across several rules, a catch-all, or routing by tag/severity, consult the [action-policy-multi-rule reference](./references/action-policy-multi-rule.md).
 
 ### Matchers
-When the user asks how to match episodes, or which KQL fields are available, consult the [action-policy-matchers reference](./references/action-policy-matchers.md).
+When the user asks how to match alerts, or which KQL fields are available, consult the [action-policy-matchers reference](./references/action-policy-matchers.md).
 
 ### Grouping Modes
-When the user asks how episodes are grouped (per episode, all together, by field), consult the [action-policy-grouping-modes reference](./references/action-policy-grouping-modes.md).
+When the user asks how alerts are grouped (\`per_episode\`, all together, by field), consult the [action-policy-grouping-modes reference](./references/action-policy-grouping-modes.md).
 
 ### Throttle Strategies
 When the user asks how often notifications fire, or to change throttle strategy, consult the [action-policy-throttle-strategies reference](./references/action-policy-throttle-strategies.md).

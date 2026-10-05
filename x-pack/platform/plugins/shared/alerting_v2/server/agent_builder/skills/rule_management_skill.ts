@@ -14,10 +14,11 @@ import {
 } from '@kbn/alerting-v2-constants';
 import type { ManageRuleToolDeps } from '../tools/manage_rule';
 import { manageRuleTool } from '../tools/manage_rule';
+import { alertingV2ExperimentalAvailability } from './alerting_v2_experimental_availability';
 import {
   generateRuleOperationsDoc,
   generateRuleKindDoc,
-  generateEpisodeLifecycleDoc,
+  generateAlertLifecycleDoc,
   generateSeverityDoc,
   generateRecoveryStrategyDoc,
   generateNoDataStrategyDoc,
@@ -33,6 +34,7 @@ export const createRuleManagementSkill = (deps: ManageRuleToolDeps) =>
       'Compose, discover, and modify alerting V2 rules within a conversation. Use when the user wants to be alerted about conditions in their data — metrics, logs, or any index ("create an alert rule that fires when...", "alert me when CPU goes above...", "set up alerting on my data"). Covers threshold, aggregation, and grouped conditions over any Elasticsearch index. For notification / action policy setup, load the action-policy-management skill. Not for Security/SIEM detection rules (threat detection, MITRE ATT&CK) — use the detection-rule-edit skill for those.',
     experimental: true,
     uiSettingRequired: ALERTING_V2_ENABLED_SETTING_ID,
+    availability: alertingV2ExperimentalAvailability,
     referencedContent: [
       {
         name: 'rule-kind',
@@ -40,9 +42,9 @@ export const createRuleManagementSkill = (deps: ManageRuleToolDeps) =>
         content: generateRuleKindDoc(),
       },
       {
-        name: 'episode-lifecycle',
+        name: 'alert-lifecycle',
         relativePath: './references',
-        content: generateEpisodeLifecycleDoc(),
+        content: generateAlertLifecycleDoc(),
       },
       {
         name: 'alert-event-severity',
@@ -98,7 +100,7 @@ Build the request for ${
       ALERTING_TOOL_IDS.manageRule
     } as an ordered \`operations\` array. Operations run in sequence.
 
-For a new rule, start with \`set_metadata\` (name required), then \`set_kind\`, \`set_schedule\`, and \`set_query\`.
+For a new rule, start with \`set_metadata\` (name required), then \`set_kind\`, \`set_schedule\`, \`set_query\`, \`set_recovery\`, and \`set_no_data\`.
 
 For an existing rule, pass the \`ruleAttachmentId\` and only include the operations needed for the changes requested.
 
@@ -108,12 +110,12 @@ ${generateRuleOperationsDoc()}
 
 ## ES|QL Query Guidance
 
-- Every \`set_query\` call **must** include \`format: "composed"\` or \`format: "standalone"\`. Omitting \`format\` will fail validation.
-  - **Composed** shares a \`base\` query with appendable \`breach.segment\` and optional \`recovery.segment\`:
-    \`{ format: "composed", base: "FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name", breach: { segment: "WHERE avg_cpu > 0.9" } }\`
-    Omit \`breach\` to treat every row returned by \`base\` as a breach.
-  - **Standalone** uses independent full queries:
-    \`{ format: "standalone", breach: { query: "FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name | WHERE avg_cpu > 0.9" } }\`
+- A rule defines a \`base\` query plus an optional \`breach\` segment appended to it.
+  \`{ base: "FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name", breach: { segment: "WHERE avg_cpu > 0.9" } }\`
+  Omit \`breach\` to treat every row returned by \`base\` as a breach:
+  \`{ base: "FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name | WHERE avg_cpu > 0.9" }\`
+- \`base\` is the only place a \`FROM\` belongs. A \`breach.segment\` is a bare clause such as \`WHERE avg_cpu > 0.9\`, appended to \`base\`.
+- \`set_query\` defines the ES|QL query only. Use \`set_recovery\` and \`set_no_data\` for lifecycle settings. See the [recovery-strategy reference](./references/recovery-strategy.md) and the [no-data-strategy reference](./references/no-data-strategy.md).
 - The base query must be a valid ES|QL statement.
 - Do **not** include time range filters in the query — the lookback window is applied automatically.
 - The query must return rows for an alert to fire. Use \`| WHERE ...\` to filter for breach conditions.
@@ -141,6 +143,8 @@ After calling ${
 \`\`\`
 <render_attachment id="<ruleAttachment.id>" version="<version>" />
 \`\`\`
+
+The \`version\` attribute is **always required**, even when the version is \`1\`. Omitting it breaks the attachment renderer.
 
 This displays the interactive rule card with Preview and Create/Update buttons.
 
@@ -181,17 +185,17 @@ If the user agrees, load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill via 
 ### Rule Kind
 When the user asks whether a rule should notify, record events only, or about the difference between Alerts and Events, consult the [rule-kind reference](./references/rule-kind.md).
 
-### Episode Lifecycle
-When the user asks what \`active\` / \`pending\` / \`recovering\` / \`inactive\` means, why an alert has not fired yet, or how group state works, consult the [episode-lifecycle reference](./references/episode-lifecycle.md).
+### Alert Lifecycle
+When the user asks what \`active\` / \`pending\` / \`recovering\` / \`inactive\` means, why an alert has not fired yet, or how group state works, consult the [alert-lifecycle reference](./references/alert-lifecycle.md).
 
 ### Severity
 When the user specifies a severity (e.g. "make this a critical alert"), add an \`EVAL severity = "..."\` pipe to the breach query or segment via \`set_query\`. Consult the [alert-event-severity reference](./references/alert-event-severity.md) for valid values, the extraction model, and literal vs conditional patterns.
 
 ### Recovery Strategy
-When the user wants alerts to recover only when a condition is met, to never recover, or asks how recovery is detected, set \`recovery_strategy\` on \`set_query\`. Consult the [recovery-strategy reference](./references/recovery-strategy.md).
+When the user wants alerts to recover only when a condition is met, to never recover, or asks how recovery is detected, use \`set_recovery\`. Consult the [recovery-strategy reference](./references/recovery-strategy.md).
 
 ### No-Data Strategy
-When the user asks what happens if data stops arriving (missing metrics, heartbeat, "keep the last status"), set \`no_data_strategy\` on \`set_query\`. Consult the [no-data-strategy reference](./references/no-data-strategy.md).
+When the user asks what happens if data stops arriving (missing metrics, heartbeat, "keep the last status", "alert me when the data stops"), use \`set_no_data\`. Consult the [no-data-strategy reference](./references/no-data-strategy.md).
 
 ### Notifications
 When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md).`,
