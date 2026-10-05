@@ -134,6 +134,24 @@ test.describe(
       );
     });
 
+    test('Add data stream shows inline errors and does not open the flyout when name and description are empty', async ({
+      page,
+      pageObjects,
+    }) => {
+      const addDataStreamButton = pageObjects.integrationManagement.getAddDataStreamButton();
+
+      await expect(addDataStreamButton).toBeEnabled();
+      await addDataStreamButton.click();
+
+      await expect(page.getByText('Integration name is required')).toBeVisible();
+      await expect(page.getByText('Description is required')).toBeVisible();
+      await expect(pageObjects.integrationManagement.getIntegrationTitleInput()).toHaveAttribute(
+        'aria-invalid',
+        'true'
+      );
+      await expect(pageObjects.integrationManagement.getCreateDataStreamFlyout()).toBeHidden();
+    });
+
     test('Done button is disabled when no data streams have been added', async ({
       pageObjects,
     }) => {

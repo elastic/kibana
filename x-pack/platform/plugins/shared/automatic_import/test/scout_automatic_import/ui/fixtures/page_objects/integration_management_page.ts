@@ -95,4 +95,8 @@ export class IntegrationManagementPage {
   getAnalyzeLogsButton() {
     return this.page.testSubj.locator('analyzeLogsButton');
   }
+
+  getIntegrationDetailsInvalidCallout() {
+    return this.page.testSubj.locator('integrationDetailsInvalidCallout');
+  }
 }
