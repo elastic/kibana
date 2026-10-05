@@ -22,6 +22,7 @@ import type {
   UiamOAuthClientResponse,
   UiamOAuthClientType,
   UiamOAuthConnectionResponse,
+  UiamProjectType,
   UiamResolvedUsersResponse,
   UpdateUiamOAuthClientParams,
   UpdateUiamOAuthConnectionParams,
@@ -56,6 +57,12 @@ interface CreateServiceAccountRequestBody {
   organization_id: string;
   /** A descriptive name for the service account. */
   name: string;
+  /** Free text of 1 to 1,000 characters. UIAM refuses an empty string. */
+  description?: string;
+  /** Type of the project the account belongs to. */
+  project_type: UiamProjectType;
+  /** ID of the project the account belongs to. */
+  project_id: string;
   /** The roles asked for; see {@link UiamRoleAssignments}. */
   role_assignments: UiamRoleAssignments;
   /** Principals allowed to exchange the service account's credentials for a token. */
@@ -799,7 +806,8 @@ export class UiamService implements UiamServicePublic {
           ...this.#getClientAuthenticationHeaders(clientAuthentication),
           Authorization: authorization.toString(),
         },
-        body: JSON.stringify({ ...body, type: 'project' }),
+        // Kibana only creates organization service accounts scoped to its own project.
+        body: JSON.stringify({ ...body, type: 'organization', scope: 'project' }),
         dispatcher: this.#dispatcher,
       };
       const response = await UiamService.#parseUiamResponse(

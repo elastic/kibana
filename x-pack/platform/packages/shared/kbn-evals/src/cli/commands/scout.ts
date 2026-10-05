@@ -7,31 +7,54 @@
 
 import { spawn } from 'child_process';
 import type { Command } from '@kbn/dev-cli-runner';
-import { SCOUT_EVALS_ARGS, parseConnectorsFromEnv } from '../prompts';
-import { envFromDatasetsProfile } from '../profiles';
+import { scoutEvalsArgs, parseConnectorsFromEnv } from '../prompts';
+import { envFromDatasetsProfile, loadVaultConfig } from '../profiles';
+import { ensureSuite } from '../run_helpers';
+import { runScoutHook } from '../scout_hook';
+import { resolveScoutTarget } from '../scout_target';
 
 export const scoutCmd: Command<void> = {
   name: 'scout',
   description: `
-  Start a Scout server pre-configured for evals (stateful/classic, evals_tracing).
+  Start a Scout server pre-configured for evals (stateful/classic, evals_tracing by default).
 
   This is a convenience wrapper around:
     node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet evals_tracing
 
-  Any extra flags are forwarded to Scout.
+  --suite uses the suite's serverConfigSet and scoutArch/scoutDomain from evals.suites.json and
+  runs its scoutHook on the --profile config; --serverConfigSet, --arch and --domain override
+  them. Positional arguments are forwarded to Scout.
 
   Examples:
     node scripts/evals scout
     node scripts/evals scout --serverConfigSet custom_config
+    node scripts/evals scout --suite nightshift-investigations --profile dev-vault
+    node scripts/evals scout --arch serverless --domain observability_complete
   `,
   flags: {
+    string: ['suite', 'serverConfigSet', 'arch', 'domain', 'profile'],
     allowUnexpected: true,
     guessTypesForUnexpectedFlags: true,
   },
   run: async ({ log, flagsReader }) => {
     const repoRoot = process.cwd();
-    const extra = flagsReader.getPositionals();
-    const args = ['scripts/scout.js', ...SCOUT_EVALS_ARGS, ...extra];
+    const suiteId = flagsReader.string('suite');
+    const suite = suiteId ? ensureSuite(suiteId, repoRoot, log) : undefined;
+    const profile = flagsReader.string('profile');
+    const suiteScoutEnv = suite?.scoutHook
+      ? runScoutHook(repoRoot, suite.scoutHook, loadVaultConfig(repoRoot, profile) ?? {})
+      : {};
+
+    const scoutTarget = resolveScoutTarget(suite, {
+      arch: flagsReader.string('arch'),
+      domain: flagsReader.string('domain'),
+    });
+    const serverConfigSet = flagsReader.string('serverConfigSet') ?? suite?.serverConfigSet;
+    const args = [
+      'scripts/scout.js',
+      ...scoutEvalsArgs(serverConfigSet, scoutTarget),
+      ...flagsReader.getPositionals(),
+    ];
 
     const connectors = parseConnectorsFromEnv();
     if (connectors.length === 0) {
@@ -50,7 +73,8 @@ export const scoutCmd: Command<void> = {
     await new Promise<void>((resolve, reject) => {
       const childEnv: Record<string, string> = {
         ...process.env,
-        ...envFromDatasetsProfile(repoRoot),
+        ...envFromDatasetsProfile(repoRoot, profile),
+        ...suiteScoutEnv,
       } as Record<string, string>;
       const child = spawn('node', args, {
         cwd: repoRoot,

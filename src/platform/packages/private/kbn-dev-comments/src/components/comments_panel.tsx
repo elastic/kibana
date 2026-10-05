@@ -44,6 +44,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
+import { isInTooltip } from '../lib/anchor';
 import type { Comment } from '../types';
 import { useComments, useCommentsState } from './comments_context';
 import {
@@ -142,10 +143,7 @@ const ActionsMenu = ({
       closePopover={close}
       panelPaddingSize="none"
       anchorPosition="downRight"
-      // EUI renders the menu outside of the layer's containers; it is marked as the layer's all the same.
-      // Portalled like the threads: clicks in it stay out of the page, whose popovers and
-      // flyouts would close on them as clicks outside. `element`: with an onClick, EuiPanel
-      // would render a button.
+      // Portalled to `body`, the menu is marked as the layer's, and its clicks kept from the page. `element`: EuiPanel would render a button given handlers.
       panelProps={{ ...menuPanelProps, ...containProps, onKeyDown, element: 'div' }}
       panelRef={panelRef}
       zIndex={zIndex}
@@ -201,11 +199,7 @@ const PagePath = ({
   );
 };
 
-/** The comments of a page under its path. */
-/**
- * The comments of a page under its path, which opens and closes them. It opens on
- * its own when it becomes `defaultOpen`: on arriving at its page.
- */
+/** The comments of a page under its path, which opens and closes them; opens on its own on arriving at the page. */
 const PageGroup = ({
   pageKey,
   count,
@@ -260,10 +254,7 @@ const PageGroup = ({
   );
 };
 
-/**
- * A thread in place of the list, screenshot shown: the fallback for a comment
- * whose element cannot be shown, as when the UI has changed since.
- */
+/** A thread in place of the list, screenshot shown: for a comment whose element cannot be shown. */
 const PanelThread = ({ comment, onBack }: { comment: Comment; onBack: () => void }) => {
   const backRef = useRef<HTMLButtonElement>(null);
   const backLabel = i18n.translate('devComments.panel.back', {
@@ -313,11 +304,7 @@ const PanelThread = ({ comment, onBack }: { comment: Comment; onBack: () => void
   );
 };
 
-/**
- * A comment in the list. The whole row takes the reader to the comment: its pin
- * when the element is on screen, the guide to it otherwise. Its actions show on
- * hover, or while it has focus.
- */
+/** A comment in the list; the whole row takes the reader to it (its pin, or the guide). Its actions show on hover or focus. */
 const PanelRow = ({
   comment,
   visible,
@@ -339,8 +326,7 @@ const PanelRow = ({
   const rowRef = useRef<HTMLDivElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // The row of the thread open from a pin comes into view. `scrollIntoView` would
-  // also scroll the page under the panel, where the pin is.
+  // The active row comes into view; `scrollIntoView` would scroll the page under the panel too.
   useEffect(() => {
     const row = rowRef.current;
     const list = row?.parentElement?.closest<HTMLElement>('[data-comments-list]');
@@ -357,13 +343,12 @@ const PanelRow = ({
   }, [active]);
 
   const notVisibleLabel = i18n.translate('devComments.panel.notVisible', {
-    defaultMessage: 'Comment not visible on this page',
+    defaultMessage: 'Comment not visible',
   });
   const replies = comment.replies.length;
 
-  // Resolved, the row may leave the list with focus on its Resolve button: focus then
-  // moves on to the next comment, or the previous one, or the filter that hid it. Where
-  // is decided on the click, while the row is still there to tell its neighbors.
+  // Resolved, the row may leave the list with the focus: it moves on to the next row,
+  // the previous one, or the filter that hid it, decided while the row is still there.
   const focusAfterResolve = useRef<HTMLElement | null>(null);
   const rememberFocusTarget = () => {
     const row = rowRef.current;
@@ -422,6 +407,7 @@ const PanelRow = ({
           flex: 1 1 auto;
           min-width: 0;
           text-align: left;
+          padding-inline-start: ${euiTheme.size.xs};
           /* The whole row is the button's target; the actions sit above it. */
           &::after {
             content: '';
@@ -463,13 +449,12 @@ const PanelRow = ({
                   content={notVisibleLabel}
                   aria-label={notVisibleLabel}
                   disableScreenReaderOutput
-                  // In the row's button, the icon only names it; it is above the button's
-                  // click target, so that it can be hovered.
+                  // Raised above the row button's click target, to be hovered.
                   iconProps={{ tabIndex: -1, 'data-test-subj': 'devCommentsPanelNotVisible' }}
                   anchorProps={{
                     css: css`
                       position: relative;
-                      z-index: 1;
+                      z-index: ${Number(euiTheme.levels.content) + 1};
                     `,
                   }}
                 />
@@ -566,11 +551,9 @@ const HeaderButton = ({
 );
 
 /**
- * Floating list of every comment, grouped by page with the current page first.
- * Selecting a comment opens its pin, or guides to it when its element is not on
- * screen; a thread can also be shown in the panel, in place of the list, for
- * when its element cannot be found. Minimized, only the header with the comment
- * count remains.
+ * Floating list of every comment, grouped by page, the current page first.
+ * Selecting one opens its pin, or guides to it; a thread can also be shown in
+ * the panel, in place of the list. Minimized, only the header remains.
  */
 export const CommentsPanel = () => {
   const controller = useComments();
@@ -587,9 +570,8 @@ export const CommentsPanel = () => {
   const panelThreadId = useCommentsState((state) => state.panelThreadId);
   const panelThread = comments.find((comment) => comment.id === panelThreadId);
 
-  // Back in the list, by Back or Escape, focus returns to the row the thread was shown
-  // from. The row may not be there: its page closed, or the thread resolved meanwhile
-  // and filtered out. Focus then goes to its page, if listed, or to the filter.
+  // Back in the list, focus returns to the row the thread was shown from; failing
+  // that (its page closed, the thread filtered out), to its page or the filter.
   const shownThread = useRef<Comment | null>(null);
   useEffect(() => {
     if (panelThread) {
@@ -640,6 +622,11 @@ export const CommentsPanel = () => {
   const select = (comment: Comment, element: Element | null) => {
     if (!element) {
       void controller.guideTo(comment);
+      return;
+    }
+    // Focusing the pin would blur the element, and a tooltip shown for its focus would go, pin and all.
+    if (isInTooltip(element)) {
+      controller.openThread(comment.id, { focusPin: false });
       return;
     }
     element.scrollIntoView({ block: 'center', inline: 'nearest' });

@@ -71,7 +71,7 @@ import type { UserServiceContract } from '../services/user_service/user_service'
 import { UserService } from '../services/user_service/user_service';
 import type { PluginConfig } from '../../config';
 import { convertEveryToSchedulesPerMinute, parseDurationToMs } from '../duration';
-import { buildRuleSoFilter } from './build_rule_filter';
+import { buildMatchingRulesFilter, buildRuleSoFilter } from './build_rule_filter';
 import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
 import type {
   BulkByIdsParams,
@@ -83,6 +83,7 @@ import type {
   BulkResponse,
   CreateRuleData,
   CreateRuleParams,
+  FindMatchingRulesArgs,
   FindRulesArgs,
   FindRulesResponse,
   FindRulesSortField,
@@ -1049,6 +1050,26 @@ export class RulesClient {
       page,
       per_page: perPage,
     };
+  }
+
+  /**
+   * Finds the alert rules in scope of a policy matcher: those with at least one of its tags, or every
+   * alert rule when it has no tags. Signal rules never create alerts, so no policy applies to them.
+   * The matcher expression runs against alerts, so it can't narrow rules down.
+   */
+  @withApm
+  public async findMatchingRules({
+    matcher,
+    page,
+    perPage,
+  }: FindMatchingRulesArgs = {}): Promise<FindRulesResponse> {
+    return this.findRules({
+      page,
+      perPage,
+      filter: buildMatchingRulesFilter(matcher?.tags ?? []),
+      sortField: 'name',
+      sortOrder: 'asc',
+    });
   }
 
   /**

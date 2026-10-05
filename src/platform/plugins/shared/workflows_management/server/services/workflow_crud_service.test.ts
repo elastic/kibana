@@ -38,6 +38,7 @@ jest.mock('../lib/log_workflow_changes', () => ({
 }));
 
 jest.mock('../api/lib/workflow_disable_all', () => ({
+  ...jest.requireActual('../api/lib/workflow_disable_all'),
   disableAllWorkflows: jest.fn(),
 }));
 
@@ -3017,6 +3018,47 @@ describe('WorkflowCrudService', () => {
 
       expect(taskScheduler.unscheduleWorkflowTasks).toHaveBeenCalledWith('wf-1');
       expect(taskScheduler.updateWorkflowTasks).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('disableWorkflow', () => {
+    it('disables a soft-deleted workflow with OCC and unschedules its triggers', async () => {
+      const taskScheduler = {
+        ...makeTaskScheduler(),
+        bulkUnscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
+      };
+      const { deps, client } = makeDeps(undefined, {
+        getTaskScheduler: () => taskScheduler as any,
+      });
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            occSearchHit(
+              'wf-1',
+              { enabled: true, yaml: 'name: Test Workflow\nenabled: true', deleted_at: new Date() },
+              7,
+              2
+            ),
+          ],
+        },
+      });
+      client.index.mockResolvedValue({ result: 'updated', _seq_no: 8, _primary_term: 2 });
+
+      await new WorkflowCrudService(deps).disableWorkflow('wf-1', 'default');
+
+      expect(JSON.stringify(client.search.mock.calls[0][0])).not.toContain('deleted_at');
+      expect(client.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'wf-1',
+          if_seq_no: 7,
+          if_primary_term: 2,
+          document: expect.objectContaining({
+            enabled: false,
+            yaml: expect.stringContaining('enabled: false'),
+          }),
+        })
+      );
+      expect(taskScheduler.bulkUnscheduleWorkflowTasks).toHaveBeenCalledWith(['wf-1']);
     });
   });
 
