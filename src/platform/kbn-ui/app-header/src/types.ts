@@ -230,6 +230,8 @@ export interface AppHeaderFavoriteAction {
  * Apps own behavior and menu placement; App Header owns title presentation.
  */
 export interface AppHeaderShareAction {
+  /** Accessible label and default tooltip; defaults to Share. */
+  label?: string;
   onClick: (context: { returnFocus: () => void }) => void | Promise<void>;
   isDisabled?: boolean;
   tooltip?: {
