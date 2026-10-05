@@ -87,6 +87,7 @@ export function DashboardRenderer({
   onApiAvailable,
   onApiCleanup,
 }: DashboardRendererProps) {
+  console.log('DASHBOARD RENDERERR');
   const dashboardViewport = useRef(null);
   const dashboardContainerRef = useRef<HTMLElement | null>(null);
   const [dashboard, setDashboard] = useState<

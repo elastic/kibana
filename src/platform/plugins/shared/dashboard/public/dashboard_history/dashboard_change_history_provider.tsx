@@ -35,6 +35,9 @@ export const DashboardChangeHistoryProvider = ({
   children,
 }: DashboardChangeHistoryProviderProps): JSX.Element => {
   const { analytics } = coreServices;
+  const [previewTitle, setPreviewTitle] = useState<string>(
+    dashboardApi?.title$.getValue() ?? dashboardId
+  );
 
   const scope = useMemo(
     () => ({
@@ -49,21 +52,17 @@ export const DashboardChangeHistoryProvider = ({
     return createDashboardChangeHistoryAdapter(coreServices.http, dashboardApi);
   }, [dashboardApi]);
 
-  // if (!isEnabled) {
-  //   return <>{children}</>;
-  // }
-
   return (
     <ChangeHistoryProvider
       objectId={dashboardId}
       adapter={adapter}
-      renderPreview={(props) => <DashboardPreview {...props} />}
+      renderPreview={(props) => <DashboardPreview {...props} setPreviewTitle={setPreviewTitle} />}
       renderBadge={renderDashboardChangeHistoryBadge}
       labels={{
         previewBackLabel: i18n.translate('workflows.changeHistory.backToWorkflow', {
           defaultMessage: 'Back to dashboard',
         }),
-        previewTitle: dashboardId,
+        previewTitle,
       }}
       features={{ compare: false, restore: true }}
       permissions={{ canRestore: true }}
@@ -86,7 +85,9 @@ export const DashboardChangeHistoryProvider = ({
 //   return <ChangeHistoryListGroupItem />;
 // };
 
-const DashboardPreview: ChangeHistoryPreviewRenderFn = ({ change, compareSpec, diffTelemetry }) => {
+const DashboardPreview: ChangeHistoryPreviewRenderFn<{
+  setPreviewTitle: (title: string) => void;
+}> = ({ objectId, change, compareSpec, diffTelemetry, setPreviewTitle }) => {
   const initialState = useRef<DashboardInitializationState>({
     ...change,
     viewMode: 'view' as const,
@@ -95,10 +96,11 @@ const DashboardPreview: ChangeHistoryPreviewRenderFn = ({ change, compareSpec, d
 
   useEffect(() => {
     if (!dashboardApi) return;
+    setPreviewTitle((change.snapshot as DashboardState).title);
     dashboardApi.setState({
       ...(change.snapshot as DashboardState),
     });
-  }, [change, dashboardApi]);
+  }, [change, dashboardApi, setPreviewTitle]);
 
   const memoized = useMemo(() => {
     /** Prevent dashboard renderer from remounting with every history item selection; instead, we will call `setState` on the API */
