@@ -10,6 +10,7 @@ import Boom from '@hapi/boom';
 import type { CreateServiceAccountParams } from '@kbn/core-security-server';
 
 import { parseCreateServiceAccountParams } from './create_params';
+import { SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH } from '../../common/service_accounts';
 
 /** Each backend passes its own limits. Small ones keep the boundary cases readable. */
 const limits = { maxRoles: 3, maxRoleNameLength: 8 };
@@ -134,5 +135,42 @@ describe('parseCreateServiceAccountParams', () => {
 
     expect(error.output.statusCode).toBe(400);
     expect(error.message).toContain('`params`');
+  });
+
+  it('trims the description and passes it along', () => {
+    expect(
+      parseCreateServiceAccountParams(
+        {
+          name: 'nightshift-relay',
+          roles: ['viewer'],
+          description: '  Relays the nightshift alerts. ',
+        },
+        limits
+      )
+    ).toEqual({
+      name: 'nightshift-relay',
+      roles: ['viewer'],
+      description: 'Relays the nightshift alerts.',
+    });
+  });
+
+  it('drops a blank description', () => {
+    const parsed = parseCreateServiceAccountParams(
+      { name: 'nightshift-relay', roles: ['viewer'], description: '   ' },
+      limits
+    );
+
+    expect(parsed.description).toBeUndefined();
+  });
+
+  it(`rejects a description longer than ${SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH} characters`, () => {
+    const error = expectRejection({
+      name: 'nightshift-relay',
+      roles: ['viewer'],
+      description: 'a'.repeat(SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH + 1),
+    });
+
+    expect(error.output.statusCode).toBe(400);
+    expect(error.message).toContain('`description`');
   });
 });

@@ -33,6 +33,7 @@ import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useCurrentUser } from '../../hooks/use_current_user';
 import { useWorkers } from '../../hooks/use_workers_api';
 import { workerName } from '../watches/workers/translations';
+import { OnboardingIntro } from './onboarding_intro';
 import { useEnableWorkers } from './use_enable_workers';
 import * as i18n from './translations';
 
@@ -74,6 +75,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
   );
 
   const history = useHistory();
+  const [step, setStep] = useState<'intro' | 'workers'>('intro');
   const [workerEnabled, setWorkerEnabled] = useState<WorkerToggleState>(initialToggleState);
   const { handleEnableAndContinue, isSaving } = useEnableWorkers(
     availableWorkerIds,
@@ -88,6 +90,10 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
     if (!checked && enabledCount <= 1) return;
     setWorkerEnabled((prev) => ({ ...prev, [workerId]: checked }));
   };
+
+  if (step === 'intro') {
+    return <OnboardingIntro onContinue={() => setStep('workers')} />;
+  }
 
   if (!canWrite) {
     return (
