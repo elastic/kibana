@@ -87,10 +87,9 @@ export function SettingsTab() {
   const nightshiftCapabilities = getNightshiftCapabilities(
     core.application.capabilities.nightshift
   );
-  const { canManage, canConfigure } = nightshiftCapabilities;
+  const { canManage, canManageAndConfigure } = nightshiftCapabilities;
   const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
-  const canConfigureEngines = canManage && canConfigure;
-  const canEditSettings = canConfigureEngines && canSaveAdvancedSettings;
+  const canEditSettings = canManageAndConfigure && canSaveAdvancedSettings;
   const { isDeveloperMode, setDeveloperMode, isSaving: isDeveloperModeSaving } = useDeveloperMode();
   // Slack app routes are gated on the Streams feature privilege, not Nightshift.
   const canManageSlack = core.application.capabilities.streams?.manage === true;
@@ -323,7 +322,7 @@ export function SettingsTab() {
           <EuiSpacer />
         </>
       )}
-      <MaintenanceSection canManage={canConfigureEngines} />
+      <MaintenanceSection canManage={canManageAndConfigure} />
 
       <EuiSpacer />
 
