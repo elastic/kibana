@@ -6,7 +6,7 @@
  */
 
 import { ConversationOriginType, isRoundCompleteEvent } from '@kbn/agent-builder-common';
-import type { OriginAdapter } from './types';
+import type { OriginAdapter } from '../types';
 
 /**
  * Turns the reply of a completed round into a raw Slack payload, keeping the message text as is.

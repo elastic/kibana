@@ -16,7 +16,7 @@ import {
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createRound } from '../../../test_utils';
 import { applyOriginAdapters } from './apply_origin_adapters';
-import { slackAdapter } from './slack_adapter';
+import { slackAdapter } from './slack';
 
 const slackOrigin = { type: ConversationOriginType.Slack };
 

@@ -7,7 +7,7 @@
 
 import type { ConversationOriginType } from '@kbn/agent-builder-common';
 import type { OriginAdapter } from './types';
-import { slackAdapter } from './slack_adapter';
+import { slackAdapter } from './slack';
 
 const originAdapters: ReadonlyMap<ConversationOriginType, OriginAdapter> = new Map<
   ConversationOriginType,

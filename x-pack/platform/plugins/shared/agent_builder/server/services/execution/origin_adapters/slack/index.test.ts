@@ -10,8 +10,8 @@ import {
   type MessageCompleteEvent,
   type RoundCompleteEvent,
 } from '@kbn/agent-builder-common';
-import { createRound } from '../../../test_utils';
-import { slackAdapter } from './slack_adapter';
+import { createRound } from '../../../../test_utils';
+import { slackAdapter } from '.';
 
 const createRoundCompleteEvent = (message: string): RoundCompleteEvent => ({
   type: ChatEventType.roundComplete,
