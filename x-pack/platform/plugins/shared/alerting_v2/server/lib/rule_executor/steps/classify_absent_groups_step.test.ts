@@ -20,7 +20,6 @@ import { createQueryService } from '../../services/query_service/query_service.m
 import { buildGroupHash } from '../build_alert_events';
 import type { AlertEventDocument } from '../../../resources/datastreams/alert_events';
 import type { PipelineStateStream } from '../types';
-import type { RuleResponse } from '../../rules_client';
 import type { PluginConfig } from '../../../config';
 import { ClassifyAbsentGroupsStep } from './classify_absent_groups_step';
 
@@ -265,7 +264,7 @@ describe('ClassifyAbsentGroupsStep', () => {
       const rule = createRuleResponse({
         kind: 'alert',
         recovery: { strategy: 'no_breach' },
-        metadata: { version: 9 },
+        version: 9,
         grouping: { fields: ['host.name'] },
         query: { base: 'FROM m | WHERE breach' },
       });
@@ -417,7 +416,7 @@ describe('ClassifyAbsentGroupsStep', () => {
 
       const abortController = new AbortController();
       const input = createRuleExecutionInput({ abortSignal: abortController.signal });
-      const rule: RuleResponse = createRuleResponse({
+      const rule = createRuleResponse({
         kind: 'alert',
         recovery: { strategy: 'no_breach' },
         no_data: { strategy: 'alert', query: 'FROM m | STATS c BY host.name' },

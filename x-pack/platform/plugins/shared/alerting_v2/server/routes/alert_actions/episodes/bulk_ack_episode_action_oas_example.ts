@@ -12,7 +12,7 @@ import { buildOasOperation, invalidResponseExample } from '../../oas_utils';
 import type { AlertingOasOperationObject } from '../../oas_types';
 
 export const BULK_ACK_EPISODE_ACTION_REQUEST: BulkAckEpisodeActionBody = {
-  items: [{ episode_id: 'episode-1' }, { episode_id: 'episode-2' }],
+  items: [{ alert_id: 'episode-1' }, { alert_id: 'episode-2' }],
 };
 
 export const BULK_ACK_EPISODE_ACTION_RESPONSE: BulkResponse = {

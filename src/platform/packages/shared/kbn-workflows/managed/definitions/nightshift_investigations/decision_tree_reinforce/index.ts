@@ -22,7 +22,7 @@ export const NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW_ID =
 export const NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW = {
   id: NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
-  version: 1,
+  version: 2,
   billable: false,
   yaml: DECISION_TREE_REINFORCE_WORKFLOW_YAML,
   management: {

@@ -373,31 +373,6 @@
 {
   "attributes": {
     "description": "",
-    "layerListJSON": "[{\"id\":\"z52lq\",\"label\":\"logstash\",\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"id\":\"e1a5e1a6-676c-4a89-8ea9-0d91d64b73c6\",\"type\":\"ES_SEARCH\",\"geoField\":\"geo.coordinates\",\"limit\":2048,\"filterByMapBounds\":true,\"showTooltip\":true,\"tooltipProperties\":[],\"applyGlobalQuery\":true,\"scalingType\":\"LIMIT\",\"indexPatternRefName\":\"layer_1_source_index_pattern\"},\"visible\":false,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#e6194b\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}},\"symbolizeAs\":{\"options\":{\"value\":\"circle\"}},\"icon\":{\"type\":\"STATIC\",\"options\":{\"value\":\"marker\"}}},\"previousStyle\":null},\"type\":\"VECTOR\"}]",
-    "mapStateJSON": "{\"zoom\":4.1,\"center\":{\"lon\":-100.61091,\"lat\":33.23887},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-20T01:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000},\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filters\":[],\"settings\":{\"autoFitToDataBounds\":false,\"initialLocation\":\"LAST_SAVED_LOCATION\",\"fixedLocation\":{\"lat\":0,\"lon\":0,\"zoom\":2},\"browserLocation\":{\"zoom\":2},\"maxZoom\":24,\"minZoom\":0,\"showSpatialFilters\":true,\"spatialFiltersAlpa\":0.3,\"spatialFiltersFillColor\":\"#DA8B45\",\"spatialFiltersLineColor\":\"#DA8B45\"}}",
-    "title": "document example hidden",
-    "uiStateJSON": "{\"isLayerTOCOpen\":true,\"openTOCDetails\":[]}"
-  },
-  "coreMigrationVersion": "8.0.0",
-  "id": "2de4de10-cc82-11ea-9b0a-eb2886fc84af",
-  "migrationVersion": {
-    "map": "7.14.0"
-  },
-  "references": [
-    {
-      "id": "c698b940-e149-11e8-a35a-370a8516603a",
-      "name": "layer_1_source_index_pattern",
-      "type": "index-pattern"
-    }
-  ],
-  "type": "map",
-  "updated_at": "2020-07-23T01:16:47.600Z",
-  "version": "WzUwLDJd"
-}
-
-{
-  "attributes": {
-    "description": "",
     "layerListJSON": "[{\"id\":\"frk92\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"id\":\"7d807c75-088a-44b7-920a-e7e47f4fc038\",\"type\":\"ES_SEARCH\",\"geoField\":\"location\",\"limit\":2048,\"filterByMapBounds\":true,\"tooltipProperties\":[],\"indexPatternRefName\":\"layer_0_source_index_pattern\",\"applyGlobalQuery\":true,\"scalingType\":\"LIMIT\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#e6194b\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}},\"symbolizeAs\":{\"options\":{\"value\":\"circle\"}},\"icon\":{\"type\":\"STATIC\",\"options\":{\"value\":\"marker\"}}},\"previousStyle\":null},\"type\":\"VECTOR\"}]",
     "mapStateJSON": "{\"zoom\":8.8,\"center\":{\"lon\":-179.98743,\"lat\":-0.09561},\"timeFilters\":{\"from\":\"now-15m\",\"to\":\"now\",\"mode\":\"quick\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":0},\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"settings\":{\"autoFitToDataBounds\":false}}",
     "title": "antimeridian points example",
