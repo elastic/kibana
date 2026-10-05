@@ -26,12 +26,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EuiThemeComputed } from '@elastic/eui';
-import {
-  NodeContainer,
-  NodeShapeContainer,
-  NodeButton,
-  HandleStyleOverride,
-} from './styles';
+import { NodeContainer, NodeShapeContainer, NodeButton, HandleStyleOverride } from './styles';
 import { NodeExpandButton } from './node_expand_button';
 import { ENTITY_CARD_HEADER_HEIGHT, NODE_WIDTH } from '../constants';
 import {
