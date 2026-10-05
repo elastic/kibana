@@ -99,7 +99,7 @@ describe('FlyoutTemplate header title icon and description', () => {
     expect(screen.getByRole('heading', { level: 3 })).toHaveAttribute('title', 'Alert details');
   });
 
-  it('reveals a node title from the collapsed heading using titleText', () => {
+  it('leaves a node title untitled when collapsed even with titleText, so its own tooltip is not covered', () => {
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never">
         <FlyoutTemplate.Header
@@ -113,7 +113,7 @@ describe('FlyoutTemplate header title icon and description', () => {
       </FlyoutTemplate>
     );
 
-    expect(screen.getByRole('heading', { level: 3 })).toHaveAttribute('title', 'Alert details');
+    expect(screen.getByRole('heading', { level: 3 })).not.toHaveAttribute('title');
   });
 
   it('leaves the collapsed heading untitled when a node title has no titleText', () => {

@@ -49,7 +49,7 @@ All three groups live in the header's collapsible region. They animate away when
 
 ### Scroll behavior
 
-When the user scrolls the flyout body, the header collapses to a compact row that shows only the title and its icon. The title shrinks to an `xs` heading on one line, truncated with an ellipsis. Hovering shows the full text in a tooltip, taken from the title when it is a plain string and from `titleText` otherwise. Pass `titleText` whenever `title` is a `ReactNode`, or a clipped title has no way to be read in full. The description, meta blocks, badges, and info blocks slide away, giving the space to the body. The title row, the tab bar, and the divider stay in place in both states.
+When the user scrolls the flyout body, the header collapses to a compact row that shows only the title and its icon. The title shrinks to an `xs` heading on one line, truncated with an ellipsis. A string title shows its full text in a native tooltip on hover. A `ReactNode` title gets no native tooltip, so its own tooltip is not covered. The description, meta blocks, badges, and info blocks slide away, giving the space to the body. The title row, the tab bar, and the divider stay in place in both states.
 
 Scrolling back to the top restores the full header with the same animation in reverse. With `prefers-reduced-motion`, the change is instant.
 
