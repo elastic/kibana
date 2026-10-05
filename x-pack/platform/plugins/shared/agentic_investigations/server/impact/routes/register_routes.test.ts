@@ -36,10 +36,39 @@ const ANALYST = {
   profileUid: 'analyst-uid',
 };
 
-const registerAndCollect = (service: Partial<ImpactService>) => {
+const ownerConversation = {
+  get: jest.fn().mockResolvedValue({
+    permissions: { update_access_control: true, rename: true, delete: true },
+  }),
+};
+
+/** The stamp reads back the document `attach` indexed. */
+const impactReadsAfterAttach = (attach: jest.Mock) =>
+  jest.fn(async () => {
+    const attached = [...attach.mock.results].reverse().find((entry) => entry.type === 'return');
+    if (!attached) {
+      throw new ImpactNotFoundError('conv-1');
+    }
+    const result = await attached.value;
+    return result.written;
+  });
+
+const registerAndCollect = (
+  service: Partial<ImpactService>,
+  getAttachmentClient: ImpactRouteDependencies['getAttachmentClient'] = async () =>
+    ({
+      create: jest.fn().mockResolvedValue({ id: 'impact-1' }),
+      update: jest.fn(),
+      get: jest.fn(),
+      delete: jest.fn(),
+    } as never),
+  getConversationClient: ImpactRouteDependencies['getConversationClient'] = async () =>
+    ownerConversation as never
+) => {
   const router = httpServiceMock.createRouter();
   const posts: RegisteredRoute[] = [];
   const gets: RegisteredRoute[] = [];
+  const attach = (service.attach ?? jest.fn()) as jest.Mock;
 
   (router.versioned.post as jest.Mock).mockImplementation((config) => ({
     addVersion: (_version: unknown, handler: Handler) => posts.push({ config, handler }),
@@ -51,9 +80,17 @@ const registerAndCollect = (service: Partial<ImpactService>) => {
   registerImpactRoutes({
     router,
     logger: loggingSystemMock.createLogger(),
-    getImpactService: () => service as ImpactService,
+    getImpactService: () =>
+      ({
+        revertAttach: jest.fn().mockResolvedValue(undefined),
+        ...service,
+        attach,
+        getByConversationId: service.getByConversationId ?? impactReadsAfterAttach(attach),
+      } as unknown as ImpactService),
     getSpaceId: () => 'default',
     resolveUser: async () => ANALYST,
+    getAttachmentClient,
+    getConversationClient,
   } as ImpactRouteDependencies);
 
   return { posts, gets };
@@ -80,7 +117,9 @@ describe('investigation impact routes', () => {
   });
 
   it('attaches through the service with the space and the resolved user, never a body actor', async () => {
-    const attach = jest.fn().mockResolvedValue({ id: 'impact-1', entities: [{ id: 'user-1' }] });
+    const attach = jest.fn().mockResolvedValue({
+      written: { id: 'impact-1', conversationId: 'conv-1', entities: [{ id: 'user-1' }] },
+    });
     const { posts } = registerAndCollect({ attach });
     const response = httpServerMock.createResponseFactory();
 
@@ -97,6 +136,96 @@ describe('investigation impact routes', () => {
       { spaceId: 'default', user: ANALYST }
     );
     expect(response.ok).toHaveBeenCalled();
+  });
+
+  it('checks conversation owner access before writing, then attaches the impact', async () => {
+    const impact = {
+      id: 'impact-1',
+      conversationId: 'conv-1',
+      entities: [{ id: 'user-1' }],
+    };
+    const attach = jest.fn().mockResolvedValue({ written: impact });
+    const create = jest.fn().mockResolvedValue({ id: 'impact-1' });
+    const conversations = {
+      get: jest.fn().mockResolvedValue({
+        permissions: { update_access_control: true },
+      }),
+    };
+    const { posts } = registerAndCollect(
+      { attach },
+      async () => ({ create } as never),
+      async () => conversations as never
+    );
+    const response = httpServerMock.createResponseFactory();
+
+    await posts[0].handler(
+      {},
+      httpServerMock.createKibanaRequest({
+        body: { conversationId: 'conv-1', entities: [{ id: 'user-1' }] },
+      }),
+      response
+    );
+
+    expect(conversations.get).toHaveBeenCalledWith('conv-1');
+    expect(conversations.get.mock.invocationCallOrder[0]).toBeLessThan(
+      attach.mock.invocationCallOrder[0]
+    );
+    expect(create).toHaveBeenCalledWith({
+      conversationId: 'conv-1',
+      id: 'impact-1',
+      type: 'investigation_impact',
+      origin: 'impact-1',
+      data: impact,
+    });
+    expect(attach.mock.invocationCallOrder[0]).toBeLessThan(create.mock.invocationCallOrder[0]);
+    expect(response.ok).toHaveBeenCalledWith({ body: impact });
+  });
+
+  it('does not write impact when the caller cannot update the conversation', async () => {
+    const attach = jest.fn();
+    const { posts } = registerAndCollect(
+      { attach },
+      async () => ({ create: jest.fn() } as never),
+      async () =>
+        ({
+          get: jest.fn().mockResolvedValue({
+            permissions: { update_access_control: false },
+          }),
+        } as never)
+    );
+    const response = httpServerMock.createResponseFactory();
+
+    await posts[0].handler(
+      {},
+      httpServerMock.createKibanaRequest({
+        body: { conversationId: 'conv-1', entities: [{ id: 'user-1' }] },
+      }),
+      response
+    );
+
+    expect(attach).not.toHaveBeenCalled();
+    expect(response.notFound).toHaveBeenCalled();
+  });
+
+  it('does not write impact when Agent Builder clients cannot be resolved', async () => {
+    const attach = jest.fn();
+    const { posts } = registerAndCollect({ attach }, async () => {
+      throw new Error(
+        'Agent Builder is not available until the agenticInvestigations plugin has started'
+      );
+    });
+    const response = httpServerMock.createResponseFactory();
+
+    await posts[0].handler(
+      {},
+      httpServerMock.createKibanaRequest({
+        body: { conversationId: 'conv-1', entities: [{ id: 'user-1' }] },
+      }),
+      response
+    );
+
+    expect(attach).not.toHaveBeenCalled();
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
   });
 
   it('maps a missing impact to 404', async () => {

@@ -6,7 +6,7 @@
  */
 
 import { MAX_CHARTS_SUMMARY_BUCKETS } from './constants';
-import { proposalChartsSummaryQuerySchema } from './proposal';
+import { isProposalSettling, proposalChartsSummaryQuerySchema } from './proposal';
 import { reviseProposalResponseSchema } from './revision';
 
 describe('proposalChartsSummaryQuerySchema', () => {
@@ -46,6 +46,30 @@ describe('proposalChartsSummaryQuerySchema', () => {
     expect(proposalChartsSummaryQuerySchema.safeParse({ windowHours, bucketMinutes }).success).toBe(
       true
     );
+  });
+});
+
+describe('isProposalSettling', () => {
+  it('reads true for an approved proposal whose action has not finished running yet', () => {
+    expect(isProposalSettling({ decision: 'approved', status: 'executing' })).toBe(true);
+  });
+
+  it('reads true for an approved proposal still pending while the gate workflow catches up', () => {
+    expect(isProposalSettling({ decision: 'approved', status: 'pending' })).toBe(true);
+  });
+
+  it('reads false once the action has reached a terminal status', () => {
+    expect(isProposalSettling({ decision: 'approved', status: 'succeeded' })).toBe(false);
+    expect(isProposalSettling({ decision: 'approved', status: 'failed' })).toBe(false);
+  });
+
+  it('reads false for a dismissed proposal, which has no action to run', () => {
+    expect(isProposalSettling({ decision: 'dismissed', status: 'pending' })).toBe(false);
+    expect(isProposalSettling({ decision: 'dismissed', status: 'no_action' })).toBe(false);
+  });
+
+  it('reads false for a proposal nobody has decided yet', () => {
+    expect(isProposalSettling({ decision: undefined, status: 'pending' })).toBe(false);
   });
 });
 

@@ -8,8 +8,8 @@
 import {
   actionPolicyResponseSchema,
   errorResponseSchema,
-  updateActionPolicyBodySchema,
-  type UpdateActionPolicyBody,
+  updateActionPolicyDataSchema,
+  type UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
@@ -50,7 +50,7 @@ export class UpdateActionPolicyRoute extends BaseAlertingRoute {
   } as const;
   static schemas = {
     request: {
-      body: updateActionPolicyBodySchema,
+      body: updateActionPolicyDataSchema,
       params: actionPolicyIdParamsSchema,
     },
     response: {
@@ -85,7 +85,7 @@ export class UpdateActionPolicyRoute extends BaseAlertingRoute {
     private readonly request: KibanaRequest<
       z.infer<typeof actionPolicyIdParamsSchema>,
       unknown,
-      UpdateActionPolicyBody
+      UpdateActionPolicyData
     >,
     @inject(ActionPolicyClient)
     private readonly actionPolicyClient: ActionPolicyClient
@@ -94,10 +94,9 @@ export class UpdateActionPolicyRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const { version, ...data } = this.request.body;
     const updated = await this.actionPolicyClient.updateActionPolicy({
-      data,
-      options: { id: this.request.params.id, version },
+      data: this.request.body,
+      options: { id: this.request.params.id },
     });
 
     return this.ctx.response.ok({ body: updated });

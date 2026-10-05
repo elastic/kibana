@@ -8,27 +8,23 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { getStreamTypeFromDefinition } from '@kbn/streams-schema';
-import {
-  SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
-  type SignificantEventsQueriesGenerationResult,
-} from '@kbn/significant-events-schema';
-import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+import type { SignificantEventsQueriesGenerationResult } from '@kbn/significant-events-schema';
 import type { StreamsClient } from '@kbn/streams-plugin/server';
 import type { EbtTelemetryClient } from '../telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
-import { resolveConnectorForFeature } from '../../routes/utils/resolve_connector_for_feature';
 import { executeKIQueryGenerationAgent } from './identify_ki_queries_via_agent';
 
 export interface GenerateKIQueriesParams {
   streamName: string;
   connectorId?: string;
+  runId: string;
 }
 
 export interface GenerateKIQueriesDependencies {
   streamsClient: StreamsClient;
   kiClient: KnowledgeIndicatorClient;
   agentBuilder: AgentBuilderPluginStart;
-  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart | undefined;
+  resolveModel: (requestedId?: string) => Promise<string>;
   request: KibanaRequest;
   logger: Logger;
   signal: AbortSignal;
@@ -39,26 +35,19 @@ export async function generateKIQueries(
   params: GenerateKIQueriesParams,
   deps: GenerateKIQueriesDependencies
 ): Promise<SignificantEventsQueriesGenerationResult & { connectorId: string }> {
-  const { streamName, connectorId: connectorIdOverride } = params;
+  const { streamName, connectorId: connectorIdOverride, runId } = params;
   const {
     streamsClient,
     kiClient,
     agentBuilder,
-    searchInferenceEndpoints,
+    resolveModel,
     request,
     logger,
     signal,
     telemetry,
   } = deps;
 
-  const connectorId =
-    connectorIdOverride ??
-    (await resolveConnectorForFeature({
-      searchInferenceEndpoints,
-      featureId: SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
-      featureName: 'query generation',
-      request,
-    }));
+  const connectorId = await resolveModel(connectorIdOverride);
 
   logger.debug(`Using connector ${connectorId} for query generation`);
 
@@ -80,6 +69,7 @@ export async function generateKIQueries(
     agentBuilder,
     request,
     connectorId,
+    interactionId: runId,
     definition,
     existingQueries,
     signal,

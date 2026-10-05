@@ -8,7 +8,6 @@
 import expect from 'expect';
 import { stringify as yamlStringify } from 'yaml';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
-import { AttachmentType } from '@kbn/cases-plugin/common';
 import {
   CASES_URL,
   CASE_TELEMETRY_SAVED_OBJECT,
@@ -17,7 +16,11 @@ import {
   OBSERVABLE_TYPE_IPV4,
 } from '@kbn/cases-plugin/common/constants';
 import type { CasesTelemetry } from '@kbn/cases-plugin/server/telemetry/types';
-import { getPostCaseRequest, postCommentAlertReq } from '../../../common/lib/mock';
+import {
+  buildUnifiedAlertReq,
+  getPostCaseRequest,
+  postCommentAlertReq,
+} from '../../../common/lib/mock';
 import {
   deleteAllCaseItems,
   deleteFieldDefinitions,
@@ -88,12 +91,10 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest,
         caseId: firstCase.id,
         params: [
-          {
-            ...postCommentAlertReq,
+          buildUnifiedAlertReq('securitySolution', {
             alertId: firstCaseAlerts,
             index: firstCaseAlerts,
-            owner: 'securitySolution',
-          },
+          }),
         ],
         expectedHttpCode: 200,
       });
@@ -102,12 +103,10 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest,
         caseId: firstCase.id,
         params: [
-          {
-            ...postCommentAlertReq,
+          buildUnifiedAlertReq('securitySolution', {
             alertId: secondCaseAlerts,
             index: secondCaseAlerts,
-            owner: 'securitySolution',
-          },
+          }),
         ],
         expectedHttpCode: 200,
       });
@@ -191,13 +190,11 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest,
         caseId: firstCase.id,
         params: [
-          {
-            type: AttachmentType.alert,
+          buildUnifiedAlertReq('securitySolution', {
             alertId: 'alert-telemetry-1',
             index: alertIndex,
             rule: { id: 'rule-1', name: 'Rule 1' },
-            owner: 'securitySolution',
-          },
+          }),
         ],
         auth: { user: superUser, space: 'space1' },
         expectedHttpCode: 200,
@@ -205,13 +202,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
       // 50 auto-extracted observables: one attachment per alert on the second case.
       // This reaches MAX_OBSERVABLES_PER_CASE (50) making totalWithMaxObservables = 1.
-      const secondCaseAttachments = Array.from({ length: 50 }, (_, i) => ({
-        type: AttachmentType.alert as const,
-        alertId: `alert-telemetry-2-${i}`,
-        index: alertIndex,
-        rule: { id: 'rule-2', name: 'Rule 2' },
-        owner: 'securitySolution',
-      }));
+      const secondCaseAttachments = Array.from({ length: 50 }, (_, i) =>
+        buildUnifiedAlertReq('securitySolution', {
+          alertId: `alert-telemetry-2-${i}`,
+          index: alertIndex,
+          rule: { id: 'rule-2', name: 'Rule 2' },
+        })
+      );
       await bulkCreateAttachments({
         supertest,
         caseId: secondCase.id,

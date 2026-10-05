@@ -33,6 +33,8 @@ interface ConversationCardProps {
   chatHref?: string;
   /** When true escalation actions are shown. Requires the manage escalations capability. */
   canManageEscalations?: boolean;
+  /** When true the "Close investigation" action appears. */
+  canCloseInvestigation?: boolean;
   /**
    * Optional: render the assignee picker widget for this investigation. Supplied by the page
    * so that hook calls (profile fetch, mutation) stay outside the package.
@@ -40,6 +42,11 @@ interface ConversationCardProps {
    * trigger the card click.
    */
   renderAssignees: (investigation: Investigation) => React.ReactNode;
+  /**
+   * Optional: render a badge for an approve/decline still being submitted, or nothing otherwise.
+   * Supplied by the page so the mutation state stays outside the package.
+   */
+  renderInFlightStatus?: (investigation: Investigation) => React.ReactNode;
 }
 
 export const ConversationCard = memo<ConversationCardProps>(
@@ -53,7 +60,9 @@ export const ConversationCard = memo<ConversationCardProps>(
     onOpenChat,
     chatHref,
     canManageEscalations,
+    canCloseInvestigation,
     renderAssignees,
+    renderInFlightStatus,
   }) => {
     const { euiTheme } = useEuiTheme();
 
@@ -102,10 +111,13 @@ export const ConversationCard = memo<ConversationCardProps>(
               direction="row"
             >
               <EuiFlexItem grow={false}>
-                <ConversationMetaInfo createdAt={investigation.createdAt} />
+                <ConversationMetaInfo
+                  createdAt={investigation.createdAt}
+                  inFlightStatus={renderInFlightStatus?.(investigation)}
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
                   {/*
                    * Stop propagation so interacting with the assignee picker
                    * (clicking the + button or selecting a user) does not trigger the card click.
@@ -125,6 +137,7 @@ export const ConversationCard = memo<ConversationCardProps>(
                       onOpenChat={() => onOpenChat(investigation.id)}
                       chatHref={chatHref}
                       canManageEscalations={canManageEscalations}
+                      canCloseInvestigation={canCloseInvestigation}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
