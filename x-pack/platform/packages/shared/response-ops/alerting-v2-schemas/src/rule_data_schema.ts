@@ -790,7 +790,6 @@ export const updateRuleDataSchema = z
         // `null` clears all tags (an empty array is rejected by `.min(1)`, and
         // omitting `tags` preserves the existing ones on a partial update).
         tags: tagsSchema.min(1).nullable().optional(),
-        // Same `null`-clears semantics as `tags`.
         routing_tags: tagsSchema.min(1).nullable().optional(),
       })
       .optional(),

@@ -368,8 +368,10 @@ export const executeRuleOperations = async (
       }
 
       case 'set_kind':
-        // An alert draft always carries the alert-only fields and no operation
-        // can remove them, so converting to a signal has to clear them here.
+        /*
+         * No operation can remove the alert-only fields once set, so converting
+         * to a signal has to clear them here.
+         */
         next =
           op.kind === 'signal'
             ? omit({ ...next, kind: op.kind }, [

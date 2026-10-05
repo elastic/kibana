@@ -277,7 +277,6 @@ describe('utils', () => {
       );
 
       expect(result.metadata.routing_tags).toBeUndefined();
-      expect(result.metadata).not.toHaveProperty('routing_tags', null);
     });
 
     it('preserves existing routing tags when update omits them', () => {
