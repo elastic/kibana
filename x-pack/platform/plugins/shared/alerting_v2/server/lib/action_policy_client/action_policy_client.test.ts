@@ -741,28 +741,33 @@ describe('ActionPolicyClient', () => {
       expect(callArgs).not.toHaveProperty('defaultSearchOperator');
     });
 
-    it('builds KQL filter for enabled=true', async () => {
+    it('translates the API filter into a saved object KQL filter', async () => {
       mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindResponse([]));
 
-      await client.findActionPolicies({ enabled: true });
+      await client.findActionPolicies({ filter: 'enabled: false AND name: "my policy"' });
 
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
-          filter: expect.objectContaining({ type: 'function' }),
+          filter: `(${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.enabled: false AND ${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.name: "my policy")`,
         })
       );
     });
 
-    it('builds KQL filter for enabled=false', async () => {
+    it('does not pass a filter when none is provided', async () => {
       mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindResponse([]));
 
-      await client.findActionPolicies({ enabled: false });
+      await client.findActionPolicies();
 
-      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
-        expect.objectContaining({
-          filter: expect.objectContaining({ type: 'function' }),
-        })
-      );
+      expect(mockSavedObjectsClient.find.mock.calls[0][0].filter).toBeUndefined();
+    });
+
+    it('rejects filters that reference unknown fields with INVALID_FILTER_FIELD', async () => {
+      await expect(client.findActionPolicies({ filter: 'tags: "prod"' })).rejects.toMatchObject({
+        isBoom: true,
+        output: expect.objectContaining({ statusCode: 400 }),
+        data: expect.objectContaining({ code: 'INVALID_FILTER_FIELD' }),
+      });
+      expect(mockSavedObjectsClient.find).not.toHaveBeenCalled();
     });
 
     it('maps sort field name to name.keyword', async () => {

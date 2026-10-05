@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -16,10 +16,9 @@ import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import { ACTION_INSPECT_PANEL, type QuickActionIds } from '@kbn/embeddable-plugin/public';
 import {
   DiscoverFlyouts,
-  openAfterDismissingOtherFlyouts,
+  dismissAllFlyoutsExceptFor,
   type MetricsGridSettings,
 } from '@kbn/discover-utils';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { getFieldSearchMatchingHighlight } from '@kbn/field-utils';
 import { stableStringify } from '@kbn/std';
 import type { Dimension, UnifiedMetricsGridProps, ParsedMetricItem } from '../../../types';
@@ -43,7 +42,6 @@ import {
 } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
-import { getEsqlQuery } from './utils/get_esql_query';
 import { useFetchExemplars } from './hooks/use_fetch_exemplars';
 
 const EMPTY_APPLICABLE_DIMENSIONS: Dimension[] = [];
@@ -90,6 +88,7 @@ export type MetricsGridProps = Pick<
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   metricItems: ParsedMetricItem[];
   whereStatements?: string[];
+  userSource?: string;
   getUserMessages?: (metricItem: ParsedMetricItem) => EmbeddableComponentProps['userMessages'];
   getDescription?: (metricItem: ParsedMetricItem) => EmbeddableComponentProps['description'];
   /**
@@ -121,6 +120,7 @@ export const MetricsGrid = ({
   actions,
   dimensions,
   whereStatements,
+  userSource,
   services,
   columns,
   fetchParams,
@@ -138,13 +138,6 @@ export const MetricsGrid = ({
 
   const gridColumns = columns || 1;
   const gridRows = Math.ceil(metricItems.length / gridColumns);
-
-  const userSource = useMemo<string | undefined>(() => {
-    const userEsql = getEsqlQuery(fetchParams.query);
-    if (!userEsql) return undefined;
-    const pattern = getIndexPatternFromESQLQuery(userEsql);
-    return pattern || undefined;
-  }, [fetchParams.query]);
 
   const { focusedCell, handleKeyDown, getRowColFromIndex, handleFocusCell, focusCell } =
     useGridNavigation({
@@ -190,30 +183,16 @@ export const MetricsGrid = ({
     [onFlyoutStateChange]
   );
 
-  const hasFlyoutToOpen = Boolean(flyoutData) && isTabSelected;
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const isFlyoutOpen = Boolean(flyoutData) && isTabSelected;
 
-  // Push flyouts share one inline offset on the app scroll container, so this one only mounts once
-  // the others have unmounted. Keyed on whether a flyout is owed rather than on `flyoutData`, so
-  // switching metrics while the flyout is open does not dismiss and remount it. This covers both
-  // View details and a tab restoring its `flyoutState` when it becomes active.
+  // Keyed on whether the flyout is open rather than on `flyoutData`, so switching metrics while it
+  // is open does not dismiss the other flyouts again. This covers both View details and a tab
+  // restoring its `flyoutState` when it becomes active.
   useEffect(() => {
-    if (!hasFlyoutToOpen) {
-      setIsFlyoutOpen(false);
-      return;
+    if (isFlyoutOpen) {
+      dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
     }
-
-    let isCurrent = true;
-    openAfterDismissingOtherFlyouts(DiscoverFlyouts.metricInsights, () => {
-      if (isCurrent) {
-        setIsFlyoutOpen(true);
-      }
-    });
-
-    return () => {
-      isCurrent = false;
-    };
-  }, [hasFlyoutToOpen]);
+  }, [isFlyoutOpen]);
 
   const handleCloseFlyout = useCallback(() => {
     if (!flyoutState) {
