@@ -41,13 +41,14 @@ export const createSignificantEventSmlType = ({
   isAvailable,
 }: CreateSignificantEventSmlTypeOptions): SmlTypeDefinition => {
   const getSmlEventClient = async (
-    esClient: ElasticsearchClient
+    esClient: ElasticsearchClient,
+    space: string = DEFAULT_SPACE_ID
   ): Promise<RuleEventsClient | undefined> => {
     if (!(await isAvailable())) {
       return;
     }
 
-    return new RuleEventsClient({ esClient, space: DEFAULT_SPACE_ID });
+    return new RuleEventsClient({ esClient, space });
   };
 
   return {
@@ -121,7 +122,10 @@ export const createSignificantEventSmlType = ({
         return undefined;
       }
       const { scopedClusterClient } = await getScopedClients({ request: context.request });
-      const eventClient = await getSmlEventClient(scopedClusterClient.asCurrentUser);
+      const eventClient = await getSmlEventClient(
+        scopedClusterClient.asCurrentUser,
+        context.spaceId
+      );
       if (!eventClient) {
         return undefined;
       }

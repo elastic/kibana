@@ -194,7 +194,7 @@ describe('createSignificantEventSmlType', () => {
         {
           request: {} as KibanaRequest,
           savedObjectsClient: {} as never,
-          spaceId: 'default',
+          spaceId: 'other-space',
         }
       )
     ).resolves.toEqual({
@@ -204,7 +204,7 @@ describe('createSignificantEventSmlType', () => {
     });
     expect(RuleEventsClient).toHaveBeenCalledWith({
       esClient: asCurrentUser,
-      space: DEFAULT_SPACE_ID,
+      space: 'other-space',
     });
   });
 });
