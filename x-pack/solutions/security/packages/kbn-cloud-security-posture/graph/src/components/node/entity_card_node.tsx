@@ -408,6 +408,11 @@ const GEOLOCATION_LABEL = i18n.translate(
   { defaultMessage: 'Geolocation' }
 );
 
+const SUB_TYPE_LABEL = i18n.translate(
+  'securitySolutionPackages.csp.graph.entityNode.metadata.subType',
+  { defaultMessage: 'Sub type' }
+);
+
 const IPS_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
   'securitySolutionPackages.csp.graph.entityNode.metadata.ipsOverflow',
   { defaultMessage: 'Additional IP addresses' }
@@ -603,21 +608,16 @@ const SingleEntityMetadataPanel = memo<{
   ips?: string[];
   countryCodes?: string[];
   sources?: string[];
+  subType?: string;
   assetCriticality?: Array<{ level: string; count: number }>;
   euiTheme: EuiThemeComputed;
   onIpClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-}>(({ ips, countryCodes, sources, assetCriticality, euiTheme, onIpClick }) => (
+}>(({ ips, countryCodes, sources, subType, assetCriticality, euiTheme, onIpClick }) => (
   <>
-    {/* Row 1: Asset Criticality | Source */}
+    {/* Row 1: Sub Type | Source */}
     <MetadataItem euiTheme={euiTheme}>
-      <MetadataLabel>{ASSET_CRITICALITY_LABEL}</MetadataLabel>
-      {assetCriticality?.length ? (
-        <EuiHealth color={getCriticalityColor(assetCriticality[0].level, euiTheme)} textSize="xs">
-          {formatCriticalityLevel(assetCriticality[0].level)}
-        </EuiHealth>
-      ) : (
-        <DashValue euiTheme={euiTheme} />
-      )}
+      <MetadataLabel>{SUB_TYPE_LABEL}</MetadataLabel>
+      {subType ? <EuiText size="xs">{subType}</EuiText> : <DashValue euiTheme={euiTheme} />}
     </MetadataItem>
     <MetadataItem euiTheme={euiTheme}>
       <MetadataLabel>{SOURCE_LABEL}</MetadataLabel>
@@ -637,6 +637,18 @@ const SingleEntityMetadataPanel = memo<{
       <MetadataLabel>{GEOLOCATION_LABEL}</MetadataLabel>
       {countryCodes?.length ? (
         <GeoCell countryCodes={countryCodes} />
+      ) : (
+        <DashValue euiTheme={euiTheme} />
+      )}
+    </MetadataItem>
+
+    {/* Row 3: Asset Criticality */}
+    <MetadataItem euiTheme={euiTheme}>
+      <MetadataLabel>{ASSET_CRITICALITY_LABEL}</MetadataLabel>
+      {assetCriticality?.length ? (
+        <EuiHealth color={getCriticalityColor(assetCriticality[0].level, euiTheme)} textSize="xs">
+          {formatCriticalityLevel(assetCriticality[0].level)}
+        </EuiHealth>
       ) : (
         <DashValue euiTheme={euiTheme} />
       )}
@@ -870,6 +882,7 @@ interface EntityMetadataContentProps {
   ips?: string[];
   countryCodes?: string[];
   sources?: string[];
+  subType?: string;
   assetCriticality?: Array<{ level: string; count: number }>;
   euiTheme: EuiThemeComputed;
   onIpClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
@@ -881,6 +894,7 @@ const EntityMetadataContent: React.FC<EntityMetadataContentProps> = ({
   ips,
   countryCodes,
   sources,
+  subType,
   assetCriticality,
   euiTheme,
   onIpClick,
@@ -899,6 +913,7 @@ const EntityMetadataContent: React.FC<EntityMetadataContentProps> = ({
       ips={ips}
       countryCodes={countryCodes}
       sources={sources}
+      subType={subType}
       assetCriticality={assetCriticality}
       euiTheme={euiTheme}
       onIpClick={onIpClick}
@@ -969,6 +984,9 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
 
   // Risk score: one badge for single nodes, two badges (min + max) for grouped nodes.
   const riskBadges = computeRiskBadges(riskScore, euiTheme);
+
+  // Sub type: taken from the first document's entity (only meaningful for single nodes).
+  const subType = documentsData?.[0]?.entity?.sub_type ?? undefined;
 
   // Sources: aggregate from all documentsData entries (grouped nodes have many), deduped.
   const entitySources = useMemo<string[] | undefined>(() => {
@@ -1057,6 +1075,7 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
                   ips={ips}
                   countryCodes={countryCodes}
                   sources={entitySources}
+                  subType={subType}
                   assetCriticality={assetCriticality}
                   euiTheme={euiTheme}
                   onIpClick={
