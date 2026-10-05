@@ -22157,7 +22157,11 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Send one message to an agent and wait for its text answer. This synchronous endpoint is meant for scripts and command-line tools: it returns the answer and the conversation ID alone, never a stream or an event timeline. Pass the returned `conversation_id` on the next call to continue the conversation. The agent runs without a user to answer it, so any prompt it raises (tool confirmation, question, destructive API approval) is declined on its behalf and reported in `declined_prompts`; attachments are not supported. Requires the `agentBuilder:experimentalFeatures` advanced setting to be enabled; the endpoint answers 404 otherwise.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+        Send a message to an agent and get its text answer. Use this synchronous endpoint in scripts and command-line tools. The response contains only the answer and the conversation ID. To continue the conversation, include the returned `conversation_id` in the next request.
+
+        The agent runs without a user, so the endpoint declines every prompt that the agent raises, such as a tool confirmation, a question, or a destructive API approval. The `declined_prompts` property lists these prompts. This endpoint does not support attachments.
+
+        The `agentBuilder:experimentalFeatures` advanced setting must be enabled. If it is disabled, the endpoint returns a 404 response.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: post-chat-message
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -22178,7 +22182,7 @@ paths:
                   conversation_id: 696ccd6d-4bff-4b26-a62e-522ccf2dcd16
                   message: And how does it differ from Kibana?
               messageRequestExample:
-                description: Send a message to the default agent, starting a new conversation. Requires the `agentBuilder:experimentalFeatures` advanced setting to be enabled.
+                description: Send a message to the default agent and start a new conversation.
                 value:
                   message: What is Elasticsearch?
               messageToAgentRequestExample:
@@ -22255,7 +22259,7 @@ paths:
                 required:
                   - conversation_id
                   - answer
-          description: Indicates a successful response
+          description: The agent answered. The response contains the answer and the ID of the conversation that stores the exchange.
         '400':
           content:
             application/json:
@@ -22272,7 +22276,7 @@ paths:
                     error: Bad Request
                     message: "[request body.connector_id]: Additional properties are not allowed ('connector_id' was unexpected)"
                     statusCode: 400
-          description: Bad Request — the `message` is empty or too long, the `conversation_id` is not a UUID, or the body carries a key this endpoint does not accept (for example `connector_id` or `attachments`).
+          description: 'Bad Request: the request body is not valid. Possible causes are an empty or too long `message`, a `conversation_id` that is not a UUID, or an unsupported property such as `connector_id` or `attachments`.'
         '404':
           content:
             application/json:
@@ -22285,7 +22289,7 @@ paths:
                     error: Not Found
                     message: Conversation 696ccd6d-4bff-4b26-a62e-522ccf2dcd16 not found
                     statusCode: 404
-          description: Not Found — the `conversation_id` does not exist, the `agent_id` does not name an agent the caller can use, or the `agentBuilder:experimentalFeatures` advanced setting is disabled. An unusable agent is reported as a missing conversation, matching the `conversationNotFound` shape of the conversation APIs, so callers cannot probe for hidden agents.
+          description: 'Not Found: the conversation or agent was not found. Possible causes are a `conversation_id` that does not exist, an `agent_id` that the caller cannot use, or a disabled `agentBuilder:experimentalFeatures` advanced setting. If the caller cannot use the agent, the error says that the conversation was not found. This prevents callers from discovering hidden agents.'
       summary: Send a message and get the answer
       tags:
         - agent builder
