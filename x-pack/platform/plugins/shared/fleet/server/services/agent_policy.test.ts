@@ -1221,6 +1221,57 @@ describe('Agent policy', () => {
       );
     });
 
+    it('should fall back to package info when version conditions are missing', async () => {
+      const soClient = getSavedObjectMock({ revision: 1, monitoring_enabled: [] });
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      jest.mocked(getPackageInfo).mockImplementation(async ({ pkgName, pkgVersion }) => {
+        return {
+          name: pkgName,
+          version: pkgVersion,
+          title: 'Apache',
+          conditions: { agent: { version: '>=8.12.0' } },
+        } as any;
+      });
+
+      mockPackagePolicySOs(soClient, [
+        {
+          name: 'apache-1',
+          package: { name: 'apache', title: 'Apache', version: '1.3.2' },
+        },
+        {
+          name: 'apache-2',
+          package: { name: 'apache', title: 'Apache', version: '1.3.2' },
+        },
+      ]);
+
+      try {
+        await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy');
+
+        expect(getPackageInfo).toHaveBeenCalledWith(
+          expect.objectContaining({
+            pkgName: 'apache',
+            pkgVersion: '1.3.2',
+            prerelease: true,
+          })
+        );
+        expect(soClient.update).toHaveBeenCalledWith(
+          expect.anything(),
+          'agent-policy',
+          expect.objectContaining({
+            has_agent_version_conditions: true,
+            min_agent_version: '8.12.0',
+            package_agent_version_conditions: [
+              { name: 'apache', title: 'Apache', version_condition: '>=8.12.0' },
+              { name: 'apache', title: 'Apache', version_condition: '>=8.12.0' },
+            ],
+          })
+        );
+      } finally {
+        jest.mocked(getPackageInfo).mockReset();
+      }
+    });
+
     it('should persist null min_agent_version when no package policies have version conditions', async () => {
       const soClient = getSavedObjectMock({ revision: 1, monitoring_enabled: [] });
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
