@@ -7,7 +7,7 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import type { NotificationsStart, HttpStart, OverlayStart } from '@kbn/core/public';
-import type { Action } from 'redux';
+import type { Action, Dispatch } from 'redux';
 import { configureStore, createListenerMiddleware } from '@reduxjs/toolkit';
 import type { ChromeStart } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -101,7 +101,7 @@ export function createMockGraphStore({
     mergeRuntimeGraph: jest.fn(),
     ...mockedDepsOverwrites,
   };
-  const listenerMiddleware = createListenerMiddleware<GraphState, GraphStore['dispatch']>();
+  const listenerMiddleware = createListenerMiddleware<GraphState, Dispatch<Action<string>>>();
   const rootReducer = createRootReducer(mockedDeps.addBasePath);
   const initializedRootReducer = (state: GraphState | undefined, action: Action<string>) =>
     rootReducer(state || (initialStateOverwrites as GraphState), action);
