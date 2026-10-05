@@ -123,6 +123,15 @@ export function getSchemaAtPath(
         }
       } else if (current instanceof z.ZodUnion) {
         const branches = current.options;
+        // Prefer a branch that resolves the whole remaining path, so a built-in property
+        // (e.g. `size`) in one branch does not hide a real key in another
+        const remainingPath = segments.slice(index).join('.');
+        for (const branch of branches) {
+          const { schema: resolved } = getSchemaAtPath(branch as z.ZodType, remainingPath);
+          if (resolved) {
+            return { schema: resolved, scopedToPath: segments.join('.') };
+          }
+        }
         const validBranch = branches.find(
           (branch) => getSchemaAtPath(branch as z.ZodType, segment).schema !== null
         );

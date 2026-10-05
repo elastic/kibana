@@ -290,6 +290,15 @@ describe('getSchemaAtPath: Liquid built-in properties', () => {
     }
   });
 
+  it('picks the union branch that resolves the whole path over a built-in size', () => {
+    const union = z.union([
+      z.object({ a: z.string() }),
+      z.object({ size: z.object({ unit: z.string() }) }),
+    ]);
+    expectZodSchemaEqual(getSchemaAtPath(union, 'size.unit').schema as z.ZodType, z.string());
+    expectZodSchemaEqual(getSchemaAtPath(union, 'size').schema as z.ZodType, z.number());
+  });
+
   it('prefers an own size key over the built-in size', () => {
     expectZodSchemaEqual(getSchemaAtPath(schema, 'withSize.size').schema as z.ZodType, z.string());
   });

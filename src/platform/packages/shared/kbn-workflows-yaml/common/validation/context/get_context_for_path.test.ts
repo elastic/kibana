@@ -564,6 +564,35 @@ describe('getContextSchemaForPath', () => {
       expect(getVariablesSchemaAt('from_expression')).toBeInstanceOf(z.ZodUnknown);
     });
 
+    it('resolves data.set steps in execution order', () => {
+      const chainedDefinition = {
+        version: '1' as const,
+        name: 'test-workflow',
+        enabled: true,
+        triggers: [{ type: 'manual' as const }],
+        steps: [
+          { name: 'set_source', type: 'data.set', with: { source: { a: 1 }, value: 'text' } },
+          {
+            name: 'set_copy',
+            type: 'data.set',
+            with: { copy: '${{ variables.source }}', value: 42 },
+          },
+          { name: 'use', type: 'console', with: { message: '{{ variables.copy.a }}' } },
+        ],
+      } as unknown as WorkflowYaml;
+      const context = getContextSchemaForPath(
+        emptyRegistry,
+        chainedDefinition,
+        WorkflowGraph.fromWorkflowDefinition(chainedDefinition),
+        ['steps', 2, 'with', 'message']
+      );
+
+      expect(getSchemaAtPath(context, 'variables.copy.a').schema).toBeInstanceOf(z.ZodNumber);
+      expect(getSchemaAtPath(context, 'variables.copy.nope').schema).toBeNull();
+      // The later data.set step overrides the earlier one
+      expect(getSchemaAtPath(context, 'variables.value').schema).toBeInstanceOf(z.ZodNumber);
+    });
+
     it('keeps {{ }} templates as strings and literals as their own type', () => {
       expect(getVariablesSchemaAt('rendered')).toBeInstanceOf(z.ZodString);
       expect(getVariablesSchemaAt('literal')).toBeInstanceOf(z.ZodNumber);

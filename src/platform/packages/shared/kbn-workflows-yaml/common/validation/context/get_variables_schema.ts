@@ -59,6 +59,13 @@ export function getVariablesSchema(
     return EMPTY_VARIABLES_SCHEMA;
   }
 
+  // Predecessors come nearest-first; resolve in execution order so that a step can reference
+  // variables set before it and a later step overrides an earlier one
+  const executionOrder = new Map(
+    workflowExecutionGraph.topologicalOrder.map((nodeId, index) => [nodeId, index])
+  );
+  dataSetSteps.sort((a, b) => (executionOrder.get(a.id) ?? 0) - (executionOrder.get(b.id) ?? 0));
+
   const allFields: Record<string, z.ZodTypeAny> = {};
 
   for (const node of dataSetSteps) {
