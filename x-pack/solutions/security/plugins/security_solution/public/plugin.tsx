@@ -19,6 +19,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { getSpaceIdFromPath } from '@kbn/core-spaces-common';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { Logger } from '@kbn/logging';
 import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
@@ -99,6 +100,10 @@ import {
   registerInvestigationTimelineAttachment,
   registerInvestigationIocsAttachment,
 } from './agent_builder/attachment_types';
+import {
+  registerAlertAttachmentGroupRenderer,
+  registerRuleAttachmentGroupRenderer,
+} from './agent_builder/attachment_group_renderers';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
 import { registerSecurityWorkflowTriggers } from './workflows/triggers';
@@ -367,10 +372,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
       registerAttachmentUiDefinitions({
         attachments: plugins.agentBuilder.attachments,
+      });
+      registerAlertAttachmentGroupRenderer({
         resolveSecurityCanvasContext: () =>
           this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
-        getSpaceId: () => plugins.spaces.getActiveSpace().then((s) => s.id),
-        data: plugins.data,
+        search: plugins.data.search,
+        spaceId: getSpaceIdFromPath(core.http.basePath.get(), core.http.basePath.serverBasePath)
+          .spaceId,
+      });
+      registerRuleAttachmentGroupRenderer({
+        resolveSecurityCanvasContext: () =>
+          this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
       });
       registerAttackDiscoveryAttachment({
         attachments: plugins.agentBuilder.attachments,

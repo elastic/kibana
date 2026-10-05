@@ -19,11 +19,11 @@ import {
   useResizeObserver,
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
-import { attachmentSummaryRowAriaLabel } from './translations';
+import { attachmentRowAriaLabel } from './translations';
 
 const FALLBACK_ICON = 'document';
 
-export interface AttachmentSummaryRowProps {
+export interface AttachmentRowProps {
   /** Human-readable label for this row, e.g. the alert name or entity id. */
   label: string;
   /** Display name of the attachment's kind, e.g. "Alert". Used only for the aria-label. */
@@ -40,8 +40,8 @@ export interface AttachmentSummaryRowProps {
   children?: React.ReactNode;
 }
 
-/** One row in the attachment summary. */
-export const AttachmentSummaryRow = memo<AttachmentSummaryRowProps>(
+/** One row in an attachment group. */
+export const AttachmentRow = memo<AttachmentRowProps>(
   ({ label, typeName, iconType = FALLBACK_ICON, iconColor, iconLabel, onClick, children }) => {
     const { euiTheme } = useEuiTheme();
 
@@ -73,7 +73,7 @@ export const AttachmentSummaryRow = memo<AttachmentSummaryRowProps>(
         type={iconType}
         color={iconColor}
         size="s"
-        data-test-subj="attachmentSummaryRowIcon"
+        data-test-subj="attachmentRowIcon"
         aria-hidden={true}
       />
     ) : (
@@ -84,7 +84,7 @@ export const AttachmentSummaryRow = memo<AttachmentSummaryRowProps>(
         content={iconLabel ?? typeName}
         position="top"
         iconProps={{
-          'data-test-subj': 'attachmentSummaryRowIcon',
+          'data-test-subj': 'attachmentRowIcon',
           'aria-label': iconLabel ?? typeName,
         }}
       />
@@ -104,14 +104,14 @@ export const AttachmentSummaryRow = memo<AttachmentSummaryRowProps>(
               <div
                 ref={setLabelElement}
                 tabIndex={hasDrilldown ? undefined : 0}
-                data-test-subj="attachmentSummaryRowLabel"
+                data-test-subj="attachmentRowLabel"
                 css={labelStyles}
               >
                 {label}
               </div>
             </EuiToolTip>
           ) : (
-            <div ref={setLabelElement} data-test-subj="attachmentSummaryRowLabel" css={labelStyles}>
+            <div ref={setLabelElement} data-test-subj="attachmentRowLabel" css={labelStyles}>
               {label}
             </div>
           )}
@@ -126,7 +126,7 @@ export const AttachmentSummaryRow = memo<AttachmentSummaryRowProps>(
     );
 
     return (
-      <EuiFlexItem component="li" grow={false} data-test-subj="attachmentSummaryRow">
+      <EuiFlexItem component="li" grow={false} data-test-subj="attachmentRow">
         {hasDrilldown ? (
           <EuiPanel
             element="button"
@@ -137,8 +137,8 @@ export const AttachmentSummaryRow = memo<AttachmentSummaryRowProps>(
             color="transparent"
             paddingSize="none"
             onClick={onClick}
-            aria-label={attachmentSummaryRowAriaLabel(typeName, label)}
-            data-test-subj="attachmentSummaryRowButton"
+            aria-label={attachmentRowAriaLabel(typeName, label)}
+            data-test-subj="attachmentRowButton"
             css={css({
               padding,
               '&:hover:not(:focus-visible)': {
@@ -158,4 +158,4 @@ export const AttachmentSummaryRow = memo<AttachmentSummaryRowProps>(
   }
 );
 
-AttachmentSummaryRow.displayName = 'AttachmentSummaryRow';
+AttachmentRow.displayName = 'AttachmentRow';

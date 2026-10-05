@@ -21,6 +21,9 @@ import type { RenderAssignees, RenderStatus, RenderLinkedInvestigations } from '
 const LazyOverviewSlot = lazy(() =>
   import('./slots').then(({ OverviewSlot }) => ({ default: OverviewSlot }))
 );
+const LazyAttachmentsSlot = lazy(() =>
+  import('./slots').then(({ AttachmentsSlot }) => ({ default: AttachmentsSlot }))
+);
 const LazyHeaderSlot = lazy(() =>
   import('./slots').then(({ HeaderSlot }) => ({ default: HeaderSlot }))
 );
@@ -40,6 +43,7 @@ const LazyEscalationOverviewSlot = lazy(() =>
  */
 export const getInvestigationTabIds = (templateId: string): readonly string[] => [
   `${templateId}.overview`,
+  `${templateId}.attachments`,
 ];
 
 export interface RegisterAgenticInvestigationTemplateUIOptions {
@@ -80,8 +84,8 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
 }
 
 /**
- * Registers one solution's agentic investigation flyout UI: the overview tab Agent Builder
- * renders, plus the header and footer of its conversation details flyout.
+ * Registers one solution's agentic investigation flyout UI: the overview and attachments tabs,
+ * plus the header and footer of its conversation details flyout.
  *
  * Call once per solution from the plugin's `start`. Tabs are registered per template rather than
  * shared, so each solution's tab components stay independent.
@@ -97,17 +101,30 @@ export const registerAgenticInvestigationTemplateUI = ({
   renderStatus,
   renderCloseInvestigationModal,
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
-  const [overviewTabId] = getInvestigationTabIds(templateId);
+  const [overviewTabId, attachmentsTabId] = getInvestigationTabIds(templateId);
 
-  conversationTemplates.registerTab(overviewTabId, ({ attachmentsService }) => ({
+  conversationTemplates.registerTab(overviewTabId, () => ({
     label: DETAILS_FLYOUT_LABELS.tabs.overview,
     content: function OverviewTabContent({ conversation }) {
       return (
         <Suspense fallback={<EuiSkeletonText lines={3} />}>
           <LazyOverviewSlot
             conversation={conversation}
-            attachmentsService={attachmentsService}
             renderProposedActions={renderProposedActions}
+          />
+        </Suspense>
+      );
+    },
+  }));
+
+  conversationTemplates.registerTab(attachmentsTabId, ({ attachmentsService }) => ({
+    label: DETAILS_FLYOUT_LABELS.tabs.attachments,
+    content: function AttachmentsTabContent({ conversation }) {
+      return (
+        <Suspense fallback={<EuiSkeletonText lines={3} />}>
+          <LazyAttachmentsSlot
+            conversation={conversation}
+            attachmentsService={attachmentsService}
           />
         </Suspense>
       );
@@ -119,7 +136,7 @@ export const registerAgenticInvestigationTemplateUI = ({
     ({ openFullscreenConversation }) => ({
       name,
       icon,
-      tabs: [overviewTabId],
+      tabs: [overviewTabId, attachmentsTabId],
       detailsFlyout: {
         header: function InvestigationFlyoutHeader({ conversation, refetchConversation }) {
           return (
