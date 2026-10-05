@@ -9,13 +9,10 @@
 // Synthetic entities at version 99.0 are seeded by global.setup.ts so the managed API
 // returns only the fixture set, making assertions independent of real MITRE artifact
 // version bumps.
-// This suite lives under scout_managed_mitre so it gets a dedicated Kibana: the seeded
-// entities must not share a server with other suites because server-side MITRE lookups
-// are cached per process.
+// Seeding at version 99.0 keeps the suite independent of the shared server's real artifact data: the managed route resolves the highest version, and server-side consumers read the data client on every call, so nothing is cached across suites.
 
-import { spaceTest } from '@kbn/scout-security';
+import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
-import { LOCAL_MANAGED_MITRE_TAGS } from '../fixtures/tags';
 import {
   SEEDED_TACTIC_ALPHA,
   SEEDED_TACTIC_BETA,
@@ -31,7 +28,7 @@ const DEFINE_QUERY = 'host.name: *';
 
 spaceTest.describe(
   'Rule creation MITRE picker — managed MITRE source',
-  { tag: LOCAL_MANAGED_MITRE_TAGS },
+  { tag: tags.stateful.classic },
   () => {
     // Clean up any rule left by a previous run before each test so a failed
     // run of one test cannot bleed into the next, then log in. The seeded
