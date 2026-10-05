@@ -9,6 +9,8 @@ import { z } from '@kbn/zod/v4';
 import type { ProposalConfidence, ProposalImpact, ProposalStatus } from '@kbn/proposals-common';
 import type { InvestigationEvidence } from '../evidence/evidence';
 import type { Hypothesis } from '../hypotheses/hypotheses';
+import type { TimelineEvent } from '../timeline/timeline';
+import type { TraceStep } from '../trace/trace';
 import { INVESTIGATION_SUBJECT_TYPES, MAX_SUBJECT_ID_LENGTH } from '../subjects/constants';
 import type {
   AlertSubjectSnapshot,
@@ -145,6 +147,34 @@ export interface InvestigationHypothesesResponse {
   updated_at?: string;
 }
 
+/** The timeline's events, in time order. */
+export interface InvestigationTimelineResponse {
+  events: TimelineEvent[];
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface InvestigationComponentDiagramResponse {
+  title?: string;
+  /** A Mermaid `flowchart` of the components and how they interact. */
+  mermaid: string;
+  /** Ids of the Mermaid nodes where the problem is. */
+  problem_node_ids: string[];
+  /** What the problem is. Markdown. */
+  description?: string;
+  created_at: string;
+  updated_at?: string;
+}
+
+/** The route the investigation took, in the order it took it. */
+export interface InvestigationTraceResponse {
+  steps: TraceStep[];
+  /** The decision tree file the investigation followed, when one matched its symptom. */
+  decision_tree?: string;
+  created_at: string;
+  updated_at?: string;
+}
+
 /** A proposed action on the investigation, without its action input or decision details. */
 export interface InvestigationProposalSummary {
   id: string;
@@ -184,9 +214,12 @@ export interface InvestigationSummary {
   pending_proposal_count?: number;
 }
 
-/** One investigation, with hypotheses and proposed actions. */
+/** One investigation, with hypotheses, timeline, component diagram, trace, and proposed actions. */
 export interface Investigation extends InvestigationSummary {
   hypotheses?: InvestigationHypothesesResponse;
+  timeline?: InvestigationTimelineResponse;
+  component_diagram?: InvestigationComponentDiagramResponse;
+  trace?: InvestigationTraceResponse;
   proposals: InvestigationProposalSummary[];
 }
 

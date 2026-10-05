@@ -20,6 +20,9 @@ import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import { INVESTIGATION_TEMPLATE_ID } from '../../../common/escalations/constants';
 import type { InvestigationHypotheses } from '../../../common/hypotheses/hypotheses';
+import type { InvestigationComponentDiagram } from '../../../common/component_diagram/component_diagram';
+import { sortTimelineEvents, type InvestigationTimeline } from '../../../common/timeline/timeline';
+import type { InvestigationTrace } from '../../../common/trace/trace';
 import type { Impact } from '../../../common/impact/impact';
 import {
   INVESTIGATION_SEVERITIES,
@@ -47,6 +50,9 @@ import type {
 } from '../../../common/subjects/subject';
 import { WrongTemplateError } from '../../assignments/errors';
 import type { HypothesesService } from '../../hypotheses/services/hypotheses_service';
+import type { TimelineService } from '../../timeline/services/timeline_service';
+import type { ComponentDiagramService } from '../../component_diagram/services/component_diagram_service';
+import type { TraceService } from '../../trace/services/trace_service';
 import type { ImpactService } from '../../impact/services/impact_service';
 import type { SubjectsService } from '../../subjects/services/subjects_service';
 import { retryWhileShardUnavailable } from '../../investigation_attachments';
@@ -76,6 +82,9 @@ export interface InvestigationsQueryServiceDeps {
   getImpactService: () => ImpactService;
   getSubjectsService: () => SubjectsService;
   getHypothesesService: () => HypothesesService;
+  getTimelineService: () => TimelineService;
+  getComponentDiagramService: () => ComponentDiagramService;
+  getTraceService: () => TraceService;
   getProposals: () => ProposalsPluginStart | undefined;
   inProgress: InProgressResolver;
   logger: Logger;
@@ -83,7 +92,8 @@ export interface InvestigationsQueryServiceDeps {
 
 /**
  * Reads investigations: Agent Builder conversations on the `investigation` template, joined with
- * the side indexes (subjects, impact, hypotheses), proposals, and the in-progress state.
+ * the side indexes (subjects, impact, hypotheses, timeline, component diagram, trace), proposals,
+ * and the in-progress state.
  *
  * Two phases. The side indexes are read as the internal user, scoped by space, and only yield
  * candidate conversation ids; the conversations are then read as the caller (`bulkGet` or
@@ -107,16 +117,25 @@ export class InvestigationsQueryService {
     }
 
     const spaceId = this.deps.getSpaceId(request);
-    const [subjects, impact, hypotheses, inProgress, proposals] = await Promise.all([
-      this.deps.getSubjectsService().listByConversationIds([id], spaceId),
-      this.deps.getImpactService().findByConversationId(id, spaceId),
-      this.deps.getHypothesesService().findByConversationId(id, spaceId),
-      this.deps.inProgress.isInProgress(request, spaceId, id),
-      this.listProposals(request, id, spaceId),
-    ]);
+    const [subjects, impact, hypotheses, timeline, componentDiagram, trace, inProgress, proposals] =
+      await Promise.all([
+        this.deps.getSubjectsService().listByConversationIds([id], spaceId),
+        this.deps.getImpactService().findByConversationId(id, spaceId),
+        this.deps.getHypothesesService().findByConversationId(id, spaceId),
+        this.deps.getTimelineService().findByConversationId(id, spaceId),
+        this.deps.getComponentDiagramService().findByConversationId(id, spaceId),
+        this.deps.getTraceService().findByConversationId(id, spaceId),
+        this.deps.inProgress.isInProgress(request, spaceId, id),
+        this.listProposals(request, id, spaceId),
+      ]);
 
     const removed = removedAttachmentIds(conversation.attachments);
-    const visibleHypotheses = hypotheses && !removed.has(hypotheses.id) ? hypotheses : undefined;
+    const visible = <T extends { id: string }>(document: T | undefined): T | undefined =>
+      document && !removed.has(document.id) ? document : undefined;
+    const visibleHypotheses = visible(hypotheses);
+    const visibleTimeline = visible(timeline);
+    const visibleComponentDiagram = visible(componentDiagram);
+    const visibleTrace = visible(trace);
     return {
       ...toSummary({
         conversation,
@@ -125,6 +144,11 @@ export class InvestigationsQueryService {
         impact: impact && !removed.has(impact.id) ? impact : undefined,
       }),
       ...(visibleHypotheses && { hypotheses: toHypothesesResponse(visibleHypotheses) }),
+      ...(visibleTimeline && { timeline: toTimelineResponse(visibleTimeline) }),
+      ...(visibleComponentDiagram && {
+        component_diagram: toComponentDiagramResponse(visibleComponentDiagram),
+      }),
+      ...(visibleTrace && { trace: toTraceResponse(visibleTrace) }),
       proposals,
     };
   }
@@ -748,3 +772,34 @@ const groupBy = <T>(items: T[], key: (item: T) => string): Map<string, T[]> => {
 
 const errorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
+
+const toTimelineResponse = (
+  timeline: InvestigationTimeline
+): NonNullable<Investigation['timeline']> => ({
+  events: sortTimelineEvents(timeline.events),
+  created_at: timeline.createdAt,
+  ...(timeline.updatedAt !== undefined && { updated_at: timeline.updatedAt }),
+});
+
+const toComponentDiagramResponse = ({
+  title,
+  mermaid,
+  problemNodeIds,
+  description,
+  createdAt,
+  updatedAt,
+}: InvestigationComponentDiagram): NonNullable<Investigation['component_diagram']> => ({
+  ...(title !== undefined && { title }),
+  mermaid,
+  problem_node_ids: problemNodeIds ?? [],
+  ...(description !== undefined && { description }),
+  created_at: createdAt,
+  ...(updatedAt !== undefined && { updated_at: updatedAt }),
+});
+
+const toTraceResponse = (trace: InvestigationTrace): NonNullable<Investigation['trace']> => ({
+  steps: trace.steps,
+  ...(trace.decisionTree !== undefined && { decision_tree: trace.decisionTree }),
+  created_at: trace.createdAt,
+  ...(trace.updatedAt !== undefined && { updated_at: trace.updatedAt }),
+});

@@ -16,6 +16,9 @@ import { toKqlExpression, type KueryNode } from '@kbn/es-query';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { Impact } from '../../../common/impact/impact';
 import type { InvestigationHypotheses } from '../../../common/hypotheses/hypotheses';
+import type { InvestigationComponentDiagram } from '../../../common/component_diagram/component_diagram';
+import type { InvestigationTimeline } from '../../../common/timeline/timeline';
+import type { InvestigationTrace } from '../../../common/trace/trace';
 import {
   listInvestigationsQuerySchema,
   type ListInvestigationsQueryInput,
@@ -23,6 +26,9 @@ import {
 import type { InvestigationSubject } from '../../../common/subjects/subject';
 import { WrongTemplateError } from '../../assignments/errors';
 import type { HypothesesService } from '../../hypotheses/services/hypotheses_service';
+import type { ComponentDiagramService } from '../../component_diagram/services/component_diagram_service';
+import type { TimelineService } from '../../timeline/services/timeline_service';
+import type { TraceService } from '../../trace/services/trace_service';
 import type { ImpactService } from '../../impact/services/impact_service';
 import { createInMemoryStorage } from '../../investigation_attachments/in_memory_storage.mock';
 import { TRANSIENT_SEARCH_RETRY_DELAYS_MS } from '../../investigation_attachments/search_with_transient_retry';
@@ -86,6 +92,9 @@ const setup = ({
   subjects = [],
   impacts = [],
   hypotheses,
+  timeline,
+  componentDiagram,
+  trace,
   inProgressIds = [],
   proposals,
   attachmentHolders = [],
@@ -95,6 +104,9 @@ const setup = ({
   subjects?: InvestigationSubject[];
   impacts?: Impact[];
   hypotheses?: InvestigationHypotheses;
+  timeline?: InvestigationTimeline;
+  componentDiagram?: InvestigationComponentDiagram;
+  trace?: InvestigationTrace;
   inProgressIds?: string[];
   proposals?: ProposalsPluginStart;
   /** What a search by attachment id returns: conversations that hold such an attachment. */
@@ -146,6 +158,16 @@ const setup = ({
     getImpactService: () => impactService as unknown as ImpactService,
     getSubjectsService: () => subjectsService as unknown as SubjectsService,
     getHypothesesService: () => hypothesesService as unknown as HypothesesService,
+    getTimelineService: () =>
+      ({
+        findByConversationId: jest.fn().mockResolvedValue(timeline),
+      } as unknown as TimelineService),
+    getComponentDiagramService: () =>
+      ({
+        findByConversationId: jest.fn().mockResolvedValue(componentDiagram),
+      } as unknown as ComponentDiagramService),
+    getTraceService: () =>
+      ({ findByConversationId: jest.fn().mockResolvedValue(trace) } as unknown as TraceService),
     getProposals: () => proposals,
     inProgress: inProgress as unknown as InProgressResolver,
     logger: loggerMock.create(),
@@ -228,6 +250,86 @@ describe('InvestigationsQueryService', () => {
         },
         proposals: [],
       });
+    });
+
+    it('returns the timeline in time order, the component diagram, and the trace', async () => {
+      const base = {
+        spaceId: SPACE_ID,
+        conversationId: 'conv-1',
+        createdAt: '2026-01-01T00:00:00.000Z',
+      };
+      const { service, client } = setup({
+        timeline: {
+          ...base,
+          id: 'timeline-conv-1',
+          events: [
+            { timestamp: '2026-01-01T10:05:00.000Z', title: 'Errors rise', type: 'symptom' },
+            { timestamp: '2026-01-01T10:00:00.000Z', title: 'Deploy v2', type: 'change' },
+          ],
+          updatedAt: '2026-01-01T11:00:00.000Z',
+        },
+        componentDiagram: {
+          ...base,
+          id: 'diagram-conv-1',
+          mermaid: 'flowchart LR\nfe-->api',
+          problemNodeIds: ['api'],
+        },
+        trace: {
+          ...base,
+          id: 'trace-conv-1',
+          steps: [{ type: 'symptom', label: 'Checkout errors' }],
+          decisionTree: 'checkout-errors.md',
+        },
+      });
+      client.get.mockResolvedValue({ ...conversation('conv-1'), attachments: [] });
+
+      const investigation = await service.get(request, 'conv-1');
+
+      expect(investigation.timeline).toEqual({
+        events: [
+          { timestamp: '2026-01-01T10:00:00.000Z', title: 'Deploy v2', type: 'change' },
+          { timestamp: '2026-01-01T10:05:00.000Z', title: 'Errors rise', type: 'symptom' },
+        ],
+        created_at: '2026-01-01T00:00:00.000Z',
+        updated_at: '2026-01-01T11:00:00.000Z',
+      });
+      expect(investigation.component_diagram).toEqual({
+        mermaid: 'flowchart LR\nfe-->api',
+        problem_node_ids: ['api'],
+        created_at: '2026-01-01T00:00:00.000Z',
+      });
+      expect(investigation.trace).toEqual({
+        steps: [{ type: 'symptom', label: 'Checkout errors' }],
+        decision_tree: 'checkout-errors.md',
+        created_at: '2026-01-01T00:00:00.000Z',
+      });
+    });
+
+    it('hides a timeline, component diagram, or trace whose attachment the user removed', async () => {
+      const base = {
+        spaceId: SPACE_ID,
+        conversationId: 'conv-1',
+        createdAt: '2026-01-01T00:00:00.000Z',
+      };
+      const { service, client } = setup({
+        timeline: { ...base, id: 'timeline-conv-1', events: [] },
+        componentDiagram: { ...base, id: 'diagram-conv-1', mermaid: 'flowchart LR\na-->b' },
+        trace: { ...base, id: 'trace-conv-1', steps: [] },
+      });
+      client.get.mockResolvedValue({
+        ...conversation('conv-1'),
+        attachments: [
+          { id: 'timeline-conv-1', active: false },
+          { id: 'diagram-conv-1', active: false },
+          { id: 'trace-conv-1', active: false },
+        ],
+      });
+
+      const investigation = await service.get(request, 'conv-1');
+
+      expect(investigation).not.toHaveProperty('timeline');
+      expect(investigation).not.toHaveProperty('component_diagram');
+      expect(investigation).not.toHaveProperty('trace');
     });
 
     it('hides documents whose attachment the user removed', async () => {
@@ -769,6 +871,11 @@ describe('InvestigationsQueryService', () => {
         getSubjectsService: () => subjectsService,
         getHypothesesService: () =>
           ({ findByConversationId: jest.fn() } as unknown as HypothesesService),
+        getTimelineService: () =>
+          ({ findByConversationId: jest.fn() } as unknown as TimelineService),
+        getComponentDiagramService: () =>
+          ({ findByConversationId: jest.fn() } as unknown as ComponentDiagramService),
+        getTraceService: () => ({ findByConversationId: jest.fn() } as unknown as TraceService),
         getProposals: () => undefined,
         inProgress: {
           findInProgressIds: jest.fn().mockResolvedValue(new Set()),

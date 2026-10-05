@@ -11,6 +11,14 @@ progressively, as soon as you have them, so people following the investigation s
 - `investigations.set_impact` — who and what was affected, with evidence.
 - `investigations.set_hypotheses` — every candidate cause with its confidence, status, reason, and
   evidence. Each call replaces the whole list, so always send every hypothesis.
+- `investigations.set_timeline` — the events that matter on a time axis, each with evidence.
+- `investigations.set_component_diagram` — a Mermaid flowchart of the components involved, how they
+  interact, and which of them the problem is in.
+- `investigations.set_trace` — the route you actually took: each step you investigated, how, what
+  it found, and where it led.
+
+The three `set_*` tools above, like `set_hypotheses`, replace what was stored on every call, so
+always send the whole timeline, diagram, or trace.
 - `proposals.create` — one proposed action per call, for a human to decide. Always pass
   `"origin": "nightshift"`.
 - `investigations.get` — the current state of the investigation as recorded so far.
@@ -76,7 +84,9 @@ Follow these steps in order.
    `status: investigating` and an initial `confidence` reflecting how strongly the evidence so far
    points to it; you'll refine this with real evidence in the next step.
 
-   Record: `investigations.set_hypotheses` with the full list, every item `investigating`.
+   Record: `investigations.set_hypotheses` with the full list, every item `investigating`, and
+   `investigations.set_trace` with the steps so far: the `symptom` you started from and the
+   `evidence_gatherer` checks of step 2.
 
 4. **Investigate each hypothesis, one by one.** For each hypothesis in turn, gather the specific
    evidence needed to confirm or dismiss it, then update its confidence and status based on that
@@ -97,7 +107,8 @@ Follow these steps in order.
    Record after finishing each hypothesis: `investigations.set_hypotheses` with the full list —
    the just-finished item's updated `confidence`/`status`/`reason`/`evidence` alongside every other
    hypothesis, touched or not. If the tool answers with a warning, fix what it names in your next
-   call.
+   call. Then append the checks and decisions that settled it to the trace with
+   `investigations.set_trace` — see <trace_timeline_and_diagram>.
 
 5. **Cross-reference and consolidate.** Compare the evidence and outcomes across all hypotheses.
    Exactly one should end up `confirmed` as the root cause — if more than one still looks
@@ -107,6 +118,11 @@ Follow these steps in order.
 
    Record: `investigations.set_hypotheses` with the final list (none left `investigating` unless
    the telemetry needed to check it was unavailable).
+
+5.2. **Timeline and diagram.** Once the root cause (or the leading candidate) is settled, record
+   with `investigations.set_timeline` the events that explain the incident in time order, and with
+   `investigations.set_component_diagram` the components involved and where the problem sits —
+   see <trace_timeline_and_diagram>.
 
 5.5. **Finalize impact.** Settle the impact on what the investigation confirmed, with
    `investigations.set_impact`. Fill in what helps a reader judge the impact, not every field —
@@ -190,6 +206,8 @@ Follow these steps in order.
    - Every hypothesis you checked is `confirmed` or `dismissed` with a `reason` and evidence; at
      most one is `confirmed`.
    - Each concrete action you recommend exists as a proposal (at most 3), and none is a duplicate.
+   - The timeline, the component diagram, and the trace are recorded; the trace ends with an `end`
+     step.
 
    Then end with a short chat message: the verdict in one or two sentences. Do not repeat the
    recorded findings at length.
@@ -437,6 +455,55 @@ reports findings to a colleague:
   `description`s) empty — a summary and a chart are a complete answer.
 
 </tone_and_style>
+
+<trace_timeline_and_diagram>
+## Trace (`investigations.set_trace`)
+
+The route you actually took, in the order you took it, including dead ends — not the route you would
+take in hindsight. It uses the node types of a decision tree, so it can be compared with the tree
+for this symptom and folded into it later:
+
+- `symptom` — the first step: what triggered the investigation.
+- `evidence_gatherer` — a check that collected data. `method` says how (the ES|QL query in a code
+  block, the command, the file or source read), `finding` what it showed, with numbers.
+- `decision` — a question the data answered that chose the next branch ("Errors on all versions or
+  only v2?"). `outcome` is the branch taken, like an edge label ("only v2").
+- `end` — where the route stopped: the root cause, or a dead end you abandoned.
+
+Keep `label` to one line. Give a step `evidence` only when a chart of what it looked at is worth
+showing. When a decision tree from `/workspace/decision-trees/` guided you, pass its file name as
+`decision_tree` and set `decision_tree_node` on each step that followed one of its nodes (the node
+id in the tree's Mermaid source). Aim for 5 to 15 steps.
+
+## Timeline (`investigations.set_timeline`)
+
+The events that explain the incident, each placed in time by evidence: changes (deploys, config
+changes, scaling), the first symptoms, detections (alerts, significant events), actions taken, and
+recoveries. Use the timestamps you measured, ISO 8601. Give each event `evidence`: a one-line
+`description` of what shows it happened then and, where the data exists, a chart of the signal
+around it. Name the affected component in `entity`. Usually 3 to 10 events; leave out events that
+do not help explain what happened.
+
+## Component diagram (`investigations.set_component_diagram`)
+
+A Mermaid `flowchart LR` (no code fences) of the components the investigation was about —
+services, processes, datastores, queues, hosts, external dependencies — and how they interact.
+One node per component (`orders[orders-api]`, `pg[(orders-db)]`, `psp([payment provider])`), one
+edge per interaction labeled with what flows (`orders -->|INSERT order| pg`). Draw the failing or
+degraded interaction as a dotted edge (`-.->`), list the nodes where the problem is in
+`problem_node_ids` (the root cause first), and say in `description`, in two or three sentences,
+what goes wrong and how it spreads. Keep it to the components that matter, at most about 15 nodes.
+If the tool answers with a warning, send a corrected diagram.
+
+```json
+{
+  "title": "Checkout write path",
+  "mermaid": "flowchart LR\n  fe[frontend] -->|POST /checkout| orders[orders-api]\n  orders -.->|INSERT order| pg[(orders-db)]\n  orders -->|charge| psp([payment provider])",
+  "problem_node_ids": ["orders"],
+  "description": "The 14:02 deploy lowered the orders-api connection pool to 20, so inserts into orders-db queue and time out, and checkout requests fail."
+}
+```
+</trace_timeline_and_diagram>
 
 <recording_results>
 ## `summary` (metadata)

@@ -48,6 +48,11 @@ export interface OverviewSections {
   impact?: React.ReactNode;
   /** The conclusion, as markdown. */
   conclusion?: string;
+  /**
+   * The investigation's analysis artifacts (for example its timeline, component diagram, and
+   * trace), shown under the conclusion. Usually rows that open each artifact in a nested flyout.
+   */
+  analysis?: React.ReactNode;
   /** How the investigation got there: hypotheses and their evidence. */
   trace?: React.ReactNode;
 }
@@ -55,7 +60,7 @@ export interface OverviewSections {
 export const OverviewTab = memo<OverviewTabProps>(
   ({ investigation, attachments, attachmentsService, proposedActionsContent, sections = {} }) => {
     const { summary } = investigation;
-    const { subjects, impact, conclusion, trace } = sections;
+    const { subjects, impact, conclusion, analysis, trace } = sections;
     const [expanded, setExpanded] = useState(false);
 
     const isCondensed = summary != null && summary.length > SUMMARY_LIMIT;
@@ -111,6 +116,12 @@ export const OverviewTab = memo<OverviewTabProps>(
             <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.conclusion}>
               <EuiMarkdownFormat textSize="s">{conclusion}</EuiMarkdownFormat>
             </DetailsBlock>
+          </EuiFlexItem>
+        )}
+
+        {analysis && (
+          <EuiFlexItem data-test-subj="investigationOverviewAnalysis">
+            <DetailsBlock title={OVERVIEW_SECTION_LABELS.analysis}>{analysis}</DetailsBlock>
           </EuiFlexItem>
         )}
 

@@ -70,6 +70,9 @@ describe('SignificantEventsMaintenanceService', () => {
             subjectClaims: 3,
             impact: 2,
             hypotheses: 2,
+            timeline: 0,
+            componentDiagram: 0,
+            trace: 0,
           },
         },
       });

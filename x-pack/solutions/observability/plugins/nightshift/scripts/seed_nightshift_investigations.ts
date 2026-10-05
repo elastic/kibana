@@ -18,7 +18,8 @@
  *   `nightshift.investigation` agent, public, owned by the --auth user, with its title and the
  *   `status` / `severity` / `summary` / `verdict` metadata. Its id is derived from the scenario,
  *   so a re-run replaces the same investigations.
- * - Its subject, impact, and hypotheses documents in the agentic investigations side indexes,
+ * - Its subject, impact, hypotheses, timeline, component diagram, and trace documents in the
+ *   agentic investigations side indexes,
  *   each attached to the conversation by reference (hidden, `origin` = document id).
  * - Its proposed actions, created by the proposals gate workflow that `proposals.create` runs.
  *
@@ -35,6 +36,8 @@ import { types } from '@kbn/storage-adapter';
 import type { StorageSchema } from '@kbn/storage-adapter';
 import {
   AGENTIC_INVESTIGATIONS_API_VERSION,
+  COMPONENT_DIAGRAM_ATTACHMENT_TYPE,
+  COMPONENT_DIAGRAM_INDEX_NAME,
   HYPOTHESES_ATTACHMENT_TYPE,
   HYPOTHESES_INDEX_NAME,
   IMPACT_ATTACHMENT_TYPE,
@@ -44,6 +47,10 @@ import {
   INVESTIGATIONS_INTERNAL_URL,
   SUBJECT_ATTACHMENT_TYPE,
   SUBJECT_INDEX_NAME,
+  TIMELINE_ATTACHMENT_TYPE,
+  TIMELINE_INDEX_NAME,
+  TRACE_ATTACHMENT_TYPE,
+  TRACE_INDEX_NAME,
 } from '@kbn/agentic-investigations-plugin/common';
 import type {
   AlertSubjectSnapshot,
@@ -54,13 +61,18 @@ import type {
   Impact,
   ImpactEntity,
   InvestigationEvidence,
+  InvestigationComponentDiagram,
   InvestigationHypotheses,
   InvestigationMetadataStatus,
   InvestigationSeverity,
   InvestigationSubject,
   InvestigationSubjectInput,
   InvestigationSubjectTriggerType,
+  InvestigationTimeline,
+  InvestigationTrace,
   ListInvestigationsResponse,
+  TimelineEvent,
+  TraceStep,
   User,
 } from '@kbn/agentic-investigations-plugin/common';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '@kbn/nightshift-investigations-plugin/common';
@@ -95,6 +107,14 @@ const PUBLIC_API_VERSION = '2023-10-31';
 type ChartUnit = NonNullable<EvidenceChart['y_axis']['unit']>;
 type SeedSubject = Omit<InvestigationSubjectInput, 'triggerType'>;
 type SeedImpact = Pick<Impact, 'summary' | 'evidence' | 'entities'>;
+type SeedComponentDiagram = Pick<
+  InvestigationComponentDiagram,
+  'title' | 'mermaid' | 'problemNodeIds' | 'description'
+>;
+interface SeedTrace {
+  steps: TraceStep[];
+  decisionTree?: string;
+}
 
 /** A proposed action, created like `proposals.create` creates one (`origin: nightshift`). */
 interface SeedProposal {
@@ -115,6 +135,9 @@ interface Scenario {
   triggerType: InvestigationSubjectTriggerType;
   hypotheses?: Hypothesis[];
   impact?: SeedImpact;
+  timeline?: TimelineEvent[];
+  componentDiagram?: SeedComponentDiagram;
+  trace?: SeedTrace;
   proposals: SeedProposal[];
   createdMinutesAgo: number;
   updatedMinutesAgo: number;
@@ -267,6 +290,9 @@ const completed = ({
   hypotheses,
   recommendations = [],
   impact,
+  timeline,
+  componentDiagram,
+  trace,
 }: {
   severity: InvestigationSeverity;
   title: string;
@@ -280,6 +306,9 @@ const completed = ({
   hypotheses?: Hypothesis[];
   recommendations?: SeedProposal[];
   impact: SeedImpact;
+  timeline?: TimelineEvent[];
+  componentDiagram?: SeedComponentDiagram;
+  trace?: SeedTrace;
 }): Scenario => ({
   title,
   status,
@@ -290,6 +319,9 @@ const completed = ({
   triggerType,
   hypotheses,
   impact,
+  timeline,
+  componentDiagram,
+  trace,
   proposals: recommendations,
   createdMinutesAgo: minutesAgo + durationMinutes,
   updatedMinutesAgo: minutesAgo,
@@ -446,6 +478,147 @@ const SCENARIOS: Scenario[] = [
           annotations: [annotation(70, 'api-gateway v2.8.1 rollout')],
         })
       ),
+    },
+    timeline: [
+      {
+        timestamp: iso(72),
+        title: 'api-gateway v2.8.1 rollout starts',
+        type: 'change',
+        entity: 'api-gateway',
+        evidence: evidence(
+          'Deployment `api-gateway` in namespace `edge` moved to image `v2.8.1` (rolling update, 6 replicas).'
+        ),
+      },
+      {
+        timestamp: iso(70),
+        end_timestamp: iso(66),
+        title: 'Event loop lag warnings from authMiddleware',
+        type: 'symptom',
+        entity: 'api-gateway',
+        evidence: evidence(
+          'The first `event loop lag` warnings name `authMiddleware.verifySession`.',
+          timeChart({
+            title: 'Event loop lag warnings on api-gateway',
+            type: 'bar',
+            yLabel: 'Warnings per 5 minutes',
+            unit: 'number',
+            series: [
+              timeSeries('Warnings', 40, [0, 0, 0, 0, 0, 140, 310, 355, 362, 348, 371, 360]),
+            ],
+          })
+        ),
+      },
+      {
+        timestamp: iso(65),
+        title: 'web-frontend P95 latency crosses 800ms',
+        type: 'symptom',
+        entity: 'web-frontend',
+        evidence: evidence(
+          'Latency follows the rollout within ten minutes and stays at about 890ms.',
+          timeChart({
+            title: 'web-frontend P95 latency',
+            yLabel: 'P95 latency',
+            unit: 'ms',
+            series: [
+              timeSeries(
+                'P95 latency',
+                40,
+                [118, 121, 119, 124, 122, 410, 760, 870, 890, 885, 892, 888]
+              ),
+            ],
+            annotations: [annotation(70, 'api-gateway v2.8.1 rollout')],
+          })
+        ),
+      },
+      {
+        timestamp: iso(48),
+        title: 'Significant event: login and browse latency',
+        type: 'detection',
+        entity: 'web-frontend',
+        evidence: evidence('Nightshift detected the latency shift and started this investigation.'),
+      },
+    ],
+    componentDiagram: {
+      title: 'Login and browse request path',
+      mermaid: [
+        'flowchart LR',
+        '  user([Browser]) -->|HTTPS| fe[web-frontend]',
+        '  fe -->|/api/*| gw[api-gateway v2.8.1]',
+        '  subgraph gwproc[api-gateway process]',
+        '    gw -.->|sync session lookup| auth[authMiddleware]',
+        '  end',
+        '  auth -.->|SELECT session| pg[(sessions-db)]',
+        '  gw -->|catalog| catalog[catalog-service]',
+        '  gw -->|login| users[user-service]',
+        '  auth -. bypassed .-> redis[(session cache)]',
+      ].join('\n'),
+      problemNodeIds: ['auth', 'gw'],
+      description:
+        'The v2.8.1 `authMiddleware` looks the session up in **sessions-db synchronously** on every request instead of reading the Redis session cache. The blocked event loop delays every route api-gateway fronts, so web-frontend login and browse slow down even though catalog-service and user-service are healthy.',
+    },
+    trace: {
+      decisionTree: 'frontend-latency.md',
+      steps: [
+        {
+          type: 'symptom',
+          label: 'web-frontend P95 latency rose from 120ms to 890ms',
+          decision_tree_node: 'S1',
+        },
+        {
+          type: 'evidence_gatherer',
+          label: 'Split the latency by route and upstream service',
+          method:
+            '```esql\nFROM traces-*\n| WHERE service.name == "web-frontend"\n| STATS p95 = PERCENTILE(transaction.duration.us, 95) BY url.path, span.destination.service.resource\n```',
+          finding: 'Every slow route goes through **api-gateway**; static assets stayed at 30ms.',
+          outcome: 'only API routes are slow',
+          decision_tree_node: 'E1',
+        },
+        {
+          type: 'decision',
+          label: 'Did a change land on api-gateway before the shift?',
+          finding: 'api-gateway v2.8.1 rolled out two minutes before the first slow requests.',
+          outcome: 'yes, v2.8.1 rollout',
+          decision_tree_node: 'D1',
+        },
+        {
+          type: 'evidence_gatherer',
+          label: 'Check Postgres connection pool utilisation',
+          method:
+            '```esql\nFROM metrics-*\n| WHERE service.name == "api-gateway"\n| STATS MAX(db.pool.utilization) BY BUCKET(@timestamp, 5 minutes)\n```',
+          finding: 'Pool utilisation peaked at 60%, so connections are not the bottleneck.',
+          outcome: 'dead end: pool is healthy',
+        },
+        {
+          type: 'evidence_gatherer',
+          label: 'Read api-gateway logs around the rollout',
+          finding:
+            '`event loop lag` warnings from `authMiddleware.verifySession` start with the rollout, about 360 per 5 minutes.',
+          evidence: evidence(
+            'Warnings per 5 minutes',
+            timeChart({
+              title: 'Event loop lag warnings on api-gateway',
+              type: 'bar',
+              yLabel: 'Warnings per 5 minutes',
+              unit: 'number',
+              series: [
+                timeSeries('Warnings', 40, [0, 0, 0, 0, 0, 140, 310, 355, 362, 348, 371, 360]),
+              ],
+            })
+          ),
+          outcome: 'the event loop is blocked in authMiddleware',
+        },
+        {
+          type: 'evidence_gatherer',
+          label: 'Diff authMiddleware between v2.8.0 and v2.8.1',
+          method: 'Read `src/middleware/auth.ts` through the GitHub connector.',
+          finding: 'v2.8.1 replaced the async Redis session cache with a synchronous `pg` query.',
+        },
+        {
+          type: 'end',
+          label: 'Root cause: synchronous session lookup in the v2.8.1 auth middleware',
+          decision_tree_node: 'R2',
+        },
+      ],
     },
   }),
   completed({
@@ -1073,6 +1246,12 @@ const hypothesesDocumentId = (conversationId: string): string =>
   hashDocumentId(HYPOTHESES_ATTACHMENT_TYPE, SPACE_ID, conversationId);
 const impactDocumentId = (conversationId: string): string =>
   hashDocumentId(SPACE_ID, conversationId);
+const timelineDocumentId = (conversationId: string): string =>
+  hashDocumentId(TIMELINE_ATTACHMENT_TYPE, SPACE_ID, conversationId);
+const componentDiagramDocumentId = (conversationId: string): string =>
+  hashDocumentId(COMPONENT_DIAGRAM_ATTACHMENT_TYPE, SPACE_ID, conversationId);
+const traceDocumentId = (conversationId: string): string =>
+  hashDocumentId(TRACE_ATTACHMENT_TYPE, SPACE_ID, conversationId);
 
 const userMapping = types.object({
   properties: {
@@ -1139,6 +1318,34 @@ const SIDE_INDEX_MAPPINGS: Record<string, StorageSchema['properties']> = {
     updatedAt: types.date({}),
     createdBy: userMapping,
   },
+  [TIMELINE_INDEX_NAME]: {
+    spaceId: types.keyword({}),
+    conversationId: types.keyword({}),
+    events: types.object({ enabled: false }),
+    createdAt: types.date({}),
+    updatedAt: types.date({}),
+    createdBy: userMapping,
+  },
+  [COMPONENT_DIAGRAM_INDEX_NAME]: {
+    spaceId: types.keyword({}),
+    conversationId: types.keyword({}),
+    title: types.keyword({ index: false }),
+    mermaid: types.text({ index: false }),
+    problemNodeIds: types.keyword({ index: false }),
+    description: types.text({ index: false }),
+    createdAt: types.date({}),
+    updatedAt: types.date({}),
+    createdBy: userMapping,
+  },
+  [TRACE_INDEX_NAME]: {
+    spaceId: types.keyword({}),
+    conversationId: types.keyword({}),
+    steps: types.object({ enabled: false }),
+    decisionTree: types.keyword({}),
+    createdAt: types.date({}),
+    updatedAt: types.date({}),
+    createdBy: userMapping,
+  },
 };
 
 /** Indexes a clean removes the seeded investigations' documents from. */
@@ -1146,6 +1353,9 @@ const SEEDED_DOCUMENT_INDEXES = [
   SUBJECT_INDEX_NAME,
   IMPACT_INDEX_NAME,
   HYPOTHESES_INDEX_NAME,
+  TIMELINE_INDEX_NAME,
+  COMPONENT_DIAGRAM_INDEX_NAME,
+  TRACE_INDEX_NAME,
   PROPOSALS_INDEX_NAME,
 ];
 
@@ -1592,6 +1802,60 @@ const seedScenario = async (
       HYPOTHESES_ATTACHMENT_TYPE,
       hypothesesDocument,
       'Hypotheses'
+    );
+  }
+
+  if (scenario.timeline) {
+    const timelineDocument = await indexDocument<Omit<InvestigationTimeline, 'id'>>(
+      client,
+      TIMELINE_INDEX_NAME,
+      timelineDocumentId(conversationId),
+      { ...base, events: scenario.timeline }
+    );
+    await attachDocument(
+      client,
+      conversationId,
+      TIMELINE_ATTACHMENT_TYPE,
+      timelineDocument,
+      'Timeline'
+    );
+  }
+
+  if (scenario.componentDiagram) {
+    const diagramDocument = await indexDocument<Omit<InvestigationComponentDiagram, 'id'>>(
+      client,
+      COMPONENT_DIAGRAM_INDEX_NAME,
+      componentDiagramDocumentId(conversationId),
+      { ...base, ...scenario.componentDiagram }
+    );
+    await attachDocument(
+      client,
+      conversationId,
+      COMPONENT_DIAGRAM_ATTACHMENT_TYPE,
+      diagramDocument,
+      'Component diagram'
+    );
+  }
+
+  if (scenario.trace) {
+    const traceDocument = await indexDocument<Omit<InvestigationTrace, 'id'>>(
+      client,
+      TRACE_INDEX_NAME,
+      traceDocumentId(conversationId),
+      {
+        ...base,
+        steps: scenario.trace.steps,
+        ...(scenario.trace.decisionTree !== undefined && {
+          decisionTree: scenario.trace.decisionTree,
+        }),
+      }
+    );
+    await attachDocument(
+      client,
+      conversationId,
+      TRACE_ATTACHMENT_TYPE,
+      traceDocument,
+      'Investigation trace'
     );
   }
 

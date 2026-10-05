@@ -17,8 +17,11 @@ export const OVERVIEW_SECTION_LABELS = Object.freeze({
   impact: i18n.translate('xpack.alertzero.detailsFlyout.sections.impact', {
     defaultMessage: 'Impact',
   }),
-  trace: i18n.translate('xpack.alertzero.detailsFlyout.sections.trace', {
-    defaultMessage: 'Investigation trace',
+  analysis: i18n.translate('xpack.alertzero.detailsFlyout.sections.analysis', {
+    defaultMessage: 'Analysis',
+  }),
+  trace: i18n.translate('xpack.alertzero.detailsFlyout.sections.hypotheses', {
+    defaultMessage: 'Hypotheses',
   }),
 });
 

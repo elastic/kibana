@@ -10,6 +10,9 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import { registerImpactAttachmentTypes } from './impact/attachments';
 import { registerSubjectAttachmentTypes } from './subjects/attachments';
 import { registerHypothesesAttachmentTypes } from './hypotheses/attachments';
+import { registerTimelineAttachmentTypes } from './timeline/attachments';
+import { registerComponentDiagramAttachmentTypes } from './component_diagram/attachments';
+import { registerTraceAttachmentTypes } from './trace/attachments';
 import { registerImpactPublicStepDefinitions } from './impact/step_types';
 import { registerInvestigationPublicStepDefinitions } from './investigations/step_types';
 import { registerTemplate } from './conversation_templates/registry/register_template';
@@ -40,7 +43,8 @@ const LazyInvestigationCard: AgenticInvestigationsPublicPluginStart['Investigati
   );
 
 /**
- * Registers Impact workflow steps, the impact, subject, and hypotheses attachment UI, and the
+ * Registers Impact workflow steps, the impact, subject, hypotheses, timeline, component diagram,
+ * and trace attachment UI, and the
  * conversation details flyout UI of the `investigation` and `escalation` templates. Escalations,
  * user profiles and the connected investigation components are also consumed directly by a
  * solution's UI.
@@ -78,6 +82,9 @@ export class AgenticInvestigationsPublicPlugin
       registerImpactAttachmentTypes(agentBuilder);
       registerSubjectAttachmentTypes(agentBuilder);
       registerHypothesesAttachmentTypes(agentBuilder);
+      registerTimelineAttachmentTypes(agentBuilder);
+      registerComponentDiagramAttachmentTypes(agentBuilder);
+      registerTraceAttachmentTypes(agentBuilder);
       registerTemplate({
         core,
         startDeps: { ...startDeps, agentBuilder },

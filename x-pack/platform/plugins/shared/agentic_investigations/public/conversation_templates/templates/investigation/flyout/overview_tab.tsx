@@ -17,6 +17,7 @@ import { HypothesesList } from '../../../../hypotheses/attachments/hypotheses_vi
 import { ImpactContent } from '../../../../impact/attachments/impact_view';
 import { SubjectList } from '../../../../subjects/attachments/subject_view';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
+import { AnalysisSection, hasAnalysis } from './analysis_section';
 
 const readMetadataString = (value: unknown): string | undefined =>
   typeof value === 'string' && value.trim().length > 0 ? value : undefined;
@@ -34,6 +35,11 @@ export const toOverviewSections = (
       impact.evidence !== undefined ||
       impact.entities.length > 0);
   const hypotheses = investigation?.hypotheses?.hypotheses ?? [];
+  const analysis = {
+    timeline: investigation?.timeline,
+    component_diagram: investigation?.component_diagram,
+    trace: investigation?.trace,
+  };
 
   return {
     subjects: subjects.length > 0 ? <SubjectList subjects={subjects} /> : undefined,
@@ -46,6 +52,7 @@ export const toOverviewSections = (
       />
     ) : undefined,
     conclusion: readMetadataString(investigation?.metadata.verdict) ?? fallbackVerdict,
+    analysis: hasAnalysis(analysis) ? <AnalysisSection analysis={analysis} /> : undefined,
     trace:
       hypotheses.length > 0 ? (
         <HypothesesList hypotheses={hypotheses} variant="details" />
@@ -55,7 +62,7 @@ export const toOverviewSections = (
 
 /**
  * The investigation template's overview tab: the conversation joined with what the query API
- * knows about it (subjects, impact, hypotheses), read again while an agent works on it. When the
+ * knows about it (subjects, impact, hypotheses, timeline, component diagram, trace), read again while an agent works on it. When the
  * read fails (for example without the read privilege) the tab still shows the conversation.
  */
 export const InvestigationOverview: React.FC<OverviewSlotRenderProps> = ({

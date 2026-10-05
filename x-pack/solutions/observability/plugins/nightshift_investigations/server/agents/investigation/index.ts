@@ -8,8 +8,11 @@
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import {
+  SET_COMPONENT_DIAGRAM_TOOL_ID,
   SET_HYPOTHESES_TOOL_ID,
   SET_IMPACT_TOOL_ID,
+  SET_TIMELINE_TOOL_ID,
+  SET_TRACE_TOOL_ID,
 } from '@kbn/agentic-investigations-plugin/common';
 import { PROPOSALS_CREATE_TOOL_ID } from '@kbn/proposals-common';
 import {
@@ -45,6 +48,9 @@ export const SANDBOX_TOOL_IDS = [
 export const INVESTIGATION_TOOL_IDS = [
   SET_IMPACT_TOOL_ID,
   SET_HYPOTHESES_TOOL_ID,
+  SET_TIMELINE_TOOL_ID,
+  SET_COMPONENT_DIAGRAM_TOOL_ID,
+  SET_TRACE_TOOL_ID,
   'investigations.get',
 ] as const;
 

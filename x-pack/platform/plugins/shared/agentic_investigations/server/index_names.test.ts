@@ -7,6 +7,9 @@
 
 import { hypothesesStorageSettings } from './hypotheses/storage/hypotheses_storage';
 import { impactStorageSettings } from './impact/storage/impact_storage';
+import { timelineStorageSettings } from './timeline/storage/timeline_storage';
+import { componentDiagramStorageSettings } from './component_diagram/storage/component_diagram_storage';
+import { traceStorageSettings } from './trace/storage/trace_storage';
 import {
   subjectClaimStorageSettings,
   subjectStorageSettings,
@@ -17,6 +20,9 @@ const storageNames = [
   subjectStorageSettings.name,
   subjectClaimStorageSettings.name,
   hypothesesStorageSettings.name,
+  timelineStorageSettings.name,
+  componentDiagramStorageSettings.name,
+  traceStorageSettings.name,
 ];
 
 describe('agentic investigations index names', () => {

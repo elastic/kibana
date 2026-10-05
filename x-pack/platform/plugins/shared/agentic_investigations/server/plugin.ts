@@ -35,6 +35,18 @@ import { createSubjectsClient } from './subjects/services/subjects_client';
 import { hypothesesAttachment, registerHypothesesAttachment } from './hypotheses/attachments';
 import { HypothesesService } from './hypotheses/services/hypotheses_service';
 import { createSetHypothesesTool } from './hypotheses/tools/set_hypotheses_tool';
+import { registerTimelineAttachment, timelineAttachment } from './timeline/attachments';
+import { TimelineService } from './timeline/services/timeline_service';
+import { createSetTimelineTool } from './timeline/tools/set_timeline_tool';
+import {
+  componentDiagramAttachment,
+  registerComponentDiagramAttachment,
+} from './component_diagram/attachments';
+import { ComponentDiagramService } from './component_diagram/services/component_diagram_service';
+import { createSetComponentDiagramTool } from './component_diagram/tools/set_component_diagram_tool';
+import { registerTraceAttachment, traceAttachment } from './trace/attachments';
+import { TraceService } from './trace/services/trace_service';
+import { createSetTraceTool } from './trace/tools/set_trace_tool';
 import { EscalationsService } from './escalations/services/escalations_service';
 import { registerEscalationRoutes } from './escalations/routes/register_routes';
 import { AssignmentsService } from './assignments/assignments_service';
@@ -71,6 +83,9 @@ export class AgenticInvestigationsPlugin
   private impactService?: ImpactService;
   private subjectsService?: SubjectsService;
   private hypothesesService?: HypothesesService;
+  private timelineService?: TimelineService;
+  private componentDiagramService?: ComponentDiagramService;
+  private traceService?: TraceService;
   private escalationsService?: EscalationsService;
   private assignmentsService?: AssignmentsService;
   private investigationStatusService?: InvestigationStatusService;
@@ -131,6 +146,24 @@ export class AgenticInvestigationsPlugin
       assertCanReadConversation,
       logger: this.logger,
     });
+    registerTimelineAttachment(agentBuilder, {
+      getTimelineService: () => this.requireTimelineService(),
+      privileges: investigationsPrivileges,
+      assertCanReadConversation,
+      logger: this.logger,
+    });
+    registerComponentDiagramAttachment(agentBuilder, {
+      getComponentDiagramService: () => this.requireComponentDiagramService(),
+      privileges: investigationsPrivileges,
+      assertCanReadConversation,
+      logger: this.logger,
+    });
+    registerTraceAttachment(agentBuilder, {
+      getTraceService: () => this.requireTraceService(),
+      privileges: investigationsPrivileges,
+      assertCanReadConversation,
+      logger: this.logger,
+    });
 
     agentBuilder.tools.register(
       createSetImpactTool({
@@ -143,6 +176,31 @@ export class AgenticInvestigationsPlugin
     agentBuilder.tools.register(
       createSetHypothesesTool({
         getHypothesesService: () => this.requireHypothesesService(),
+        resolveUser: (request) => this.requireUserResolver()(request),
+        privileges: investigationsPrivileges,
+        logger: this.logger,
+      })
+    );
+
+    agentBuilder.tools.register(
+      createSetTimelineTool({
+        getTimelineService: () => this.requireTimelineService(),
+        resolveUser: (request) => this.requireUserResolver()(request),
+        privileges: investigationsPrivileges,
+        logger: this.logger,
+      })
+    );
+    agentBuilder.tools.register(
+      createSetComponentDiagramTool({
+        getComponentDiagramService: () => this.requireComponentDiagramService(),
+        resolveUser: (request) => this.requireUserResolver()(request),
+        privileges: investigationsPrivileges,
+        logger: this.logger,
+      })
+    );
+    agentBuilder.tools.register(
+      createSetTraceTool({
+        getTraceService: () => this.requireTraceService(),
         resolveUser: (request) => this.requireUserResolver()(request),
         privileges: investigationsPrivileges,
         logger: this.logger,
@@ -242,6 +300,15 @@ export class AgenticInvestigationsPlugin
     this.hypothesesService = new HypothesesService({
       documents: hypothesesAttachment.createService({ esClient, logger: this.logger }),
     });
+    this.timelineService = new TimelineService({
+      documents: timelineAttachment.createService({ esClient, logger: this.logger }),
+    });
+    this.componentDiagramService = new ComponentDiagramService({
+      documents: componentDiagramAttachment.createService({ esClient, logger: this.logger }),
+    });
+    this.traceService = new TraceService({
+      documents: traceAttachment.createService({ esClient, logger: this.logger }),
+    });
 
     this.investigationStatusService = new InvestigationStatusService({
       getConversationClient: (request) =>
@@ -257,6 +324,9 @@ export class AgenticInvestigationsPlugin
       getImpactService: () => this.requireImpactService(),
       getSubjectsService: () => this.requireSubjectsService(),
       getHypothesesService: () => this.requireHypothesesService(),
+      getTimelineService: () => this.requireTimelineService(),
+      getComponentDiagramService: () => this.requireComponentDiagramService(),
+      getTraceService: () => this.requireTraceService(),
       getProposals: () => plugins.proposals,
       inProgress: new InProgressResolver({
         getAgentExecutions: () => plugins.agentBuilder.execution,
@@ -314,7 +384,24 @@ export class AgenticInvestigationsPlugin
         const hypotheses = await this.requireHypothesesService()
           .getDocumentService()
           .deleteAllInSpace(spaceId);
-        return { subjects, subjectClaims: claims, impact, hypotheses };
+        const timeline = await this.requireTimelineService()
+          .getDocumentService()
+          .deleteAllInSpace(spaceId);
+        const componentDiagram = await this.requireComponentDiagramService()
+          .getDocumentService()
+          .deleteAllInSpace(spaceId);
+        const trace = await this.requireTraceService()
+          .getDocumentService()
+          .deleteAllInSpace(spaceId);
+        return {
+          subjects,
+          subjectClaims: claims,
+          impact,
+          hypotheses,
+          timeline,
+          componentDiagram,
+          trace,
+        };
       },
     });
 
@@ -328,6 +415,9 @@ export class AgenticInvestigationsPlugin
           subjects: subjects.getDocumentService(),
           impact: this.requireImpactService().getDocumentService(),
           hypotheses: this.requireHypothesesService().getDocumentService(),
+          timeline: this.requireTimelineService().getDocumentService(),
+          componentDiagram: this.requireComponentDiagramService().getDocumentService(),
+          trace: this.requireTraceService().getDocumentService(),
           deleteAllClaims: () => subjects.deleteAllClaimsAcrossSpaces(),
         });
       },
@@ -360,6 +450,33 @@ export class AgenticInvestigationsPlugin
       );
     }
     return this.hypothesesService;
+  }
+
+  private requireTimelineService(): TimelineService {
+    if (!this.timelineService) {
+      throw new Error(
+        'Timeline service is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.timelineService;
+  }
+
+  private requireComponentDiagramService(): ComponentDiagramService {
+    if (!this.componentDiagramService) {
+      throw new Error(
+        'Component diagram service is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.componentDiagramService;
+  }
+
+  private requireTraceService(): TraceService {
+    if (!this.traceService) {
+      throw new Error(
+        'Trace service is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.traceService;
   }
 
   private requireInvestigationsQueryService(): InvestigationsQueryService {

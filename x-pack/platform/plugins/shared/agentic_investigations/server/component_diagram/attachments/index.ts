@@ -1,0 +1,41 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Logger } from '@kbn/core/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { InvestigationsPrivilegesChecker } from '../../investigations/services/check_investigations_privileges';
+import type { AssertCanReadConversation } from '../../investigation_attachments';
+import type { ComponentDiagramService } from '../services/component_diagram_service';
+import { componentDiagramAttachment } from './component_diagram_attachment_type';
+
+/** Registers the readonly investigation_component_diagram type with Agent Builder. */
+export const registerComponentDiagramAttachment = (
+  agentBuilder: AgentBuilderPluginSetup,
+  {
+    getComponentDiagramService,
+    privileges,
+    assertCanReadConversation,
+    logger,
+  }: {
+    getComponentDiagramService: () => ComponentDiagramService;
+    privileges: InvestigationsPrivilegesChecker;
+    assertCanReadConversation: AssertCanReadConversation;
+    logger: Logger;
+  }
+): void => {
+  componentDiagramAttachment.registerAttachmentType(agentBuilder, {
+    getService: () => getComponentDiagramService().getDocumentService(),
+    assertCanRead: (request) => privileges.assertCanRead(request),
+    assertCanReadConversation,
+    logger,
+  });
+};
+
+export {
+  formatComponentDiagramForAgent,
+  componentDiagramAttachment,
+} from './component_diagram_attachment_type';

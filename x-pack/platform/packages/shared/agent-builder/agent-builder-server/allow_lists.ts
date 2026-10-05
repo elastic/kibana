@@ -139,6 +139,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // Platform – Agentic Investigations
   'investigations.set_impact',
   'investigations.set_hypotheses',
+  'investigations.set_timeline',
+  'investigations.set_component_diagram',
+  'investigations.set_trace',
   'investigations.get',
 
   // Platform – Proposals
@@ -432,6 +435,9 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'investigation_impact',
   'investigation_subject',
   'investigation_hypotheses',
+  'investigation_timeline',
+  'investigation_component_diagram',
+  'investigation_trace',
 ] as const;
 
 export type AgentBuilderBuiltinAttachment = (typeof AGENT_BUILDER_BUILTIN_ATTACHMENTS)[number];

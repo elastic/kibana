@@ -29,6 +29,9 @@ const SANDBOX_TOOL_IDS = [
 const INVESTIGATION_TOOL_IDS = [
   'investigations.set_impact',
   'investigations.set_hypotheses',
+  'investigations.set_timeline',
+  'investigations.set_component_diagram',
+  'investigations.set_trace',
   'investigations.get',
 ];
 

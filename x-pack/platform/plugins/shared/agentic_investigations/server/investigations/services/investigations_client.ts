@@ -31,6 +31,9 @@ export interface DeleteInvestigationDataResult {
   subjectClaims: number;
   impact: number;
   hypotheses: number;
+  timeline: number;
+  componentDiagram: number;
+  trace: number;
 }
 
 /**
@@ -45,7 +48,8 @@ export interface InvestigationsClient {
   /** Open investigations holding any of the subjects, most recently updated first. */
   findOpenBySubjects: (subjects: InvestigationSubjectKey[]) => Promise<InvestigationSummary[]>;
   /**
-   * Maintenance: removes every subject, subject claim, impact, and hypotheses document in the
+   * Maintenance: removes every subject, subject claim, impact, hypotheses, timeline, component
+   * diagram, and trace document in the
    * request's space. Conversations belong to Agent Builder and are left alone.
    */
   deleteAllInSpace: () => Promise<DeleteInvestigationDataResult>;

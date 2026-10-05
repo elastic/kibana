@@ -103,6 +103,7 @@ describe('OverviewTab', () => {
           subjects: <span>checkout alert</span>,
           impact: <span>checkout is down</span>,
           conclusion: 'A **bad** deploy.',
+          analysis: <span>timeline</span>,
           trace: <span>hypotheses</span>,
         }}
       />
@@ -115,8 +116,9 @@ describe('OverviewTab', () => {
       'Attachment summary',
       'Impact',
       'Conclusion',
+      'Analysis',
       'Proposed actions',
-      'Investigation trace',
+      'Hypotheses',
     ]);
     expect(screen.getByText('bad')).toBeInTheDocument();
   });
@@ -127,6 +129,7 @@ describe('OverviewTab', () => {
     expect(screen.queryByText('Subject')).not.toBeInTheDocument();
     expect(screen.queryByText('Impact')).not.toBeInTheDocument();
     expect(screen.queryByText('Conclusion')).not.toBeInTheDocument();
-    expect(screen.queryByText('Investigation trace')).not.toBeInTheDocument();
+    expect(screen.queryByText('Analysis')).not.toBeInTheDocument();
+    expect(screen.queryByText('Hypotheses')).not.toBeInTheDocument();
   });
 });

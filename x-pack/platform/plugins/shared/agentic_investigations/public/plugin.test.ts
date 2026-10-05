@@ -60,7 +60,7 @@ describe('AgenticInvestigationsPublicPlugin conversation template UI registratio
     );
   });
 
-  it('registers the impact, subject, and hypotheses attachment renderers', () => {
+  it('registers the investigation attachment renderers', () => {
     const agentBuilder = agentBuilderMocks.createStart();
 
     createPlugin().start(coreMock.createStart(), { agentBuilder });
@@ -70,6 +70,9 @@ describe('AgenticInvestigationsPublicPlugin conversation template UI registratio
       'investigation_impact',
       'investigation_subject',
       'investigation_hypotheses',
+      'investigation_timeline',
+      'investigation_component_diagram',
+      'investigation_trace',
     ]);
   });
 

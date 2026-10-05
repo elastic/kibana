@@ -63,7 +63,7 @@ export {
 
 export type { AttachImpactRequest, GetImpactQuery, Impact, ImpactEntity } from './impact';
 
-// Subjects and hypotheses export constants and types only: this directory is an extra public
+// Subjects, hypotheses, timeline, component diagram, and trace export constants and types only: this directory is an extra public
 // dir, so every value exported here lands in the page load bundle. Their schemas stay in the
 // entity barrels until a consumer outside this plugin needs them.
 export {
@@ -103,6 +103,36 @@ export type {
   HypothesisStatus,
   InvestigationHypotheses,
 } from './hypotheses/hypotheses';
+
+export {
+  MAX_TIMELINE_EVENTS,
+  SET_TIMELINE_TOOL_ID,
+  TIMELINE_ATTACHMENT_TYPE,
+  TIMELINE_EVENT_TYPES,
+  TIMELINE_INDEX_NAME,
+} from './timeline/constants';
+
+export type { InvestigationTimeline, TimelineEvent, TimelineEventType } from './timeline/timeline';
+
+export {
+  COMPONENT_DIAGRAM_ATTACHMENT_TYPE,
+  COMPONENT_DIAGRAM_INDEX_NAME,
+  MAX_COMPONENT_DIAGRAM_MERMAID_LENGTH,
+  MAX_COMPONENT_DIAGRAM_PROBLEM_NODES,
+  SET_COMPONENT_DIAGRAM_TOOL_ID,
+} from './component_diagram/constants';
+
+export type { InvestigationComponentDiagram } from './component_diagram/component_diagram';
+
+export {
+  MAX_TRACE_STEPS,
+  SET_TRACE_TOOL_ID,
+  TRACE_ATTACHMENT_TYPE,
+  TRACE_INDEX_NAME,
+  TRACE_STEP_TYPES,
+} from './trace/constants';
+
+export type { InvestigationTrace, TraceStep, TraceStepType } from './trace/trace';
 
 export {
   ESCALATION_ASSIGNEES_FIELD,
@@ -156,6 +186,7 @@ export type {
   Investigation,
   InvestigationFilters,
   InvestigationFiltersInput,
+  InvestigationComponentDiagramResponse,
   InvestigationHypothesesResponse,
   InvestigationImpactEntityResponse,
   InvestigationImpactResponse,
@@ -168,6 +199,8 @@ export type {
   InvestigationsSortField,
   InvestigationSubjectResponse,
   InvestigationSummary,
+  InvestigationTimelineResponse,
+  InvestigationTraceResponse,
   ListInvestigationsQuery,
   ListInvestigationsQueryInput,
   ListInvestigationsResponse,

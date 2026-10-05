@@ -31,6 +31,9 @@ export interface DeleteInvestigationDataAcrossSpacesDeps {
   >;
   impact: DocumentService;
   hypotheses: DocumentService;
+  timeline: DocumentService;
+  componentDiagram: DocumentService;
+  trace: DocumentService;
   deleteAllClaims: () => Promise<number>;
 }
 
@@ -45,6 +48,9 @@ export const deleteInvestigationDataAcrossSpaces = async ({
   subjects,
   impact,
   hypotheses,
+  timeline,
+  componentDiagram,
+  trace,
   deleteAllClaims,
 }: DeleteInvestigationDataAcrossSpacesDeps): Promise<DeleteInvestigationDataAcrossSpacesResult> => {
   const result: DeleteInvestigationDataAcrossSpacesResult = {
@@ -53,6 +59,9 @@ export const deleteInvestigationDataAcrossSpaces = async ({
     subjectClaims: 0,
     impact: 0,
     hypotheses: 0,
+    timeline: 0,
+    componentDiagram: 0,
+    trace: 0,
   };
 
   for (let round = 0; round < MAX_DELETE_ROUNDS; round++) {
@@ -67,6 +76,9 @@ export const deleteInvestigationDataAcrossSpaces = async ({
       // Subjects last: they are how the next round finds what is left.
       result.impact += await impact.deleteByConversationIds(ids, spaceId);
       result.hypotheses += await hypotheses.deleteByConversationIds(ids, spaceId);
+      result.timeline += await timeline.deleteByConversationIds(ids, spaceId);
+      result.componentDiagram += await componentDiagram.deleteByConversationIds(ids, spaceId);
+      result.trace += await trace.deleteByConversationIds(ids, spaceId);
       result.subjects += await subjects.deleteByConversationIds(ids, spaceId);
     }
   }

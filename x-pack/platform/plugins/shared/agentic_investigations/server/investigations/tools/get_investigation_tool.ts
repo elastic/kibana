@@ -28,13 +28,13 @@ export const getInvestigationToolSchema = z.object({
     .describe('The investigation (conversation) id. Defaults to the current conversation.'),
 });
 
-const DESCRIPTION = `Reads an investigation: its title, metadata (status, severity, summary, verdict), whether it is in progress, its subjects, impact, hypotheses, and proposed actions. Without "id" it reads the investigation this conversation is. Evidence charts are summarized, not returned as raw points.`;
+const DESCRIPTION = `Reads an investigation: its title, metadata (status, severity, summary, verdict), whether it is in progress, its subjects, impact, hypotheses, timeline, component diagram, trace, and proposed actions. Without "id" it reads the investigation this conversation is. Evidence charts are summarized, not returned as raw points.`;
 
 /** The investigation as the agent reads it: evidence as compact text instead of chart points. */
 const toAgentView = (investigation: Investigation) => {
   const evidence = (value: InvestigationEvidence | undefined): string | undefined =>
     value ? formatEvidenceForAgent(value) : undefined;
-  const { impact, hypotheses } = investigation;
+  const { impact, hypotheses, timeline, trace } = investigation;
   return {
     ...investigation,
     ...(impact && {
@@ -54,6 +54,18 @@ const toAgentView = (investigation: Investigation) => {
           ...hypothesis,
           evidence: hypothesis.evidence?.map(formatEvidenceForAgent),
         })),
+      },
+    }),
+    ...(timeline && {
+      timeline: {
+        ...timeline,
+        events: timeline.events.map((event) => ({ ...event, evidence: evidence(event.evidence) })),
+      },
+    }),
+    ...(trace && {
+      trace: {
+        ...trace,
+        steps: trace.steps.map((step) => ({ ...step, evidence: evidence(step.evidence) })),
       },
     }),
   };

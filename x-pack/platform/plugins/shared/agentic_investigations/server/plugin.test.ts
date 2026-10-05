@@ -17,6 +17,12 @@ import { IMPACT_ATTACHMENT_TYPE } from '../common/impact/attachment';
 import { SET_IMPACT_TOOL_ID } from '../common/impact/constants';
 import { SUBJECT_ATTACHMENT_TYPE } from '../common/subjects/constants';
 import { HYPOTHESES_ATTACHMENT_TYPE, SET_HYPOTHESES_TOOL_ID } from '../common/hypotheses/constants';
+import { SET_TIMELINE_TOOL_ID, TIMELINE_ATTACHMENT_TYPE } from '../common/timeline/constants';
+import {
+  COMPONENT_DIAGRAM_ATTACHMENT_TYPE,
+  SET_COMPONENT_DIAGRAM_TOOL_ID,
+} from '../common/component_diagram/constants';
+import { SET_TRACE_TOOL_ID, TRACE_ATTACHMENT_TYPE } from '../common/trace/constants';
 import { AttachImpactStepId, GetImpactStepId } from '../common/impact/step_types';
 import { ReopenInvestigationStepId } from '../common/investigations/step_types';
 import { registerImpactRoutes } from './impact/routes/register_routes';
@@ -201,11 +207,14 @@ describe('AgenticInvestigationsPlugin', () => {
     it('registers the readonly investigation attachment types and workflow steps during setup', () => {
       const { workflowsExtensions, agentBuilder } = setupPlugin();
 
-      expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(3);
+      expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(6);
       for (const id of [
         IMPACT_ATTACHMENT_TYPE,
         SUBJECT_ATTACHMENT_TYPE,
         HYPOTHESES_ATTACHMENT_TYPE,
+        TIMELINE_ATTACHMENT_TYPE,
+        COMPONENT_DIAGRAM_ATTACHMENT_TYPE,
+        TRACE_ATTACHMENT_TYPE,
       ]) {
         expect(agentBuilder.attachments.registerType).toHaveBeenCalledWith(
           expect.objectContaining({ id, isReadonly: true })
@@ -222,19 +231,20 @@ describe('AgenticInvestigationsPlugin', () => {
       ]);
     });
 
-    it('registers the set_impact, set_hypotheses, and get agent tools during setup', () => {
+    it('registers the set_* and get agent tools during setup', () => {
       const { agentBuilder } = setupPlugin();
 
-      expect(agentBuilder.tools.register).toHaveBeenCalledTimes(3);
-      expect(agentBuilder.tools.register).toHaveBeenCalledWith(
-        expect.objectContaining({ id: GET_INVESTIGATION_TOOL_ID })
-      );
-      expect(agentBuilder.tools.register).toHaveBeenCalledWith(
-        expect.objectContaining({ id: SET_IMPACT_TOOL_ID })
-      );
-      expect(agentBuilder.tools.register).toHaveBeenCalledWith(
-        expect.objectContaining({ id: SET_HYPOTHESES_TOOL_ID })
-      );
+      expect(agentBuilder.tools.register).toHaveBeenCalledTimes(6);
+      for (const id of [
+        GET_INVESTIGATION_TOOL_ID,
+        SET_IMPACT_TOOL_ID,
+        SET_HYPOTHESES_TOOL_ID,
+        SET_TIMELINE_TOOL_ID,
+        SET_COMPONENT_DIAGRAM_TOOL_ID,
+        SET_TRACE_TOOL_ID,
+      ]) {
+        expect(agentBuilder.tools.register).toHaveBeenCalledWith(expect.objectContaining({ id }));
+      }
     });
 
     it('does not resolve the authorization service until a step actually runs', () => {

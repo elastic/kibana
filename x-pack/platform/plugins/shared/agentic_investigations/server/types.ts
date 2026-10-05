@@ -30,9 +30,11 @@ export interface AgenticInvestigationsSetupDependencies {
    */
   agentBuilderPlatform: AgentBuilderPlatformPluginSetup;
   /**
-   * Registers the readonly investigation_impact, investigation_subject, and
-   * investigation_hypotheses attachment types and the `investigations.set_impact`,
-   * `investigations.set_hypotheses`, and `investigations.get` tools.
+   * Registers the readonly investigation_impact, investigation_subject, investigation_hypotheses,
+   * investigation_timeline, investigation_component_diagram, and investigation_trace attachment
+   * types and the `investigations.set_impact`, `investigations.set_hypotheses`,
+   * `investigations.set_timeline`, `investigations.set_component_diagram`,
+   * `investigations.set_trace`, and `investigations.get` tools.
    */
   agentBuilder: AgentBuilderPluginSetup;
   /** Registers Impact workflow steps. */
@@ -82,8 +84,8 @@ export interface AgenticInvestigationsPluginStart {
    */
   getInvestigationsClient: (request: KibanaRequest) => InvestigationsClient;
   /**
-   * Maintenance, in every space: removes the subjects, subject claims, impact, and hypotheses of
-   * every investigation that has subjects. Runs as the internal user with no request, so the
+   * Maintenance, in every space: removes the subjects, subject claims, impact, hypotheses,
+   * timeline, component diagram, and trace of every investigation that has subjects. Runs as the internal user with no request, so the
    * caller must authorize this destructive operation. Agent Builder conversations are not
    * deleted.
    */
