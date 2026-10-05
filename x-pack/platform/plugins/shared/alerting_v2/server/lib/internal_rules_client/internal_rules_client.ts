@@ -143,7 +143,6 @@ export class InternalRulesClient implements InternalRulesClientApi {
             ? this.internalSavedObjectsClient.asScopedToNamespace(namespace)
             : this.internalSavedObjectsClient
         );
-      scope.bind(Global).toConstantValue(RuleSavedObjectsClientToken);
 
       return await fn(scope.get(RulesClient));
     } finally {

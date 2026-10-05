@@ -51,8 +51,6 @@ export function bindContract({ bind }: ContainerModuleLoadOptions) {
       return scope;
     };
 
-    const internalRulesClient = get(InternalRulesClient);
-
     const contract: AlertingServerStart = {
       async getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClientApi> {
         return buildScope(request).get(RulesClient);
@@ -64,7 +62,7 @@ export function bindContract({ bind }: ContainerModuleLoadOptions) {
         return buildScope(request, spaceId).get(RulesClient);
       },
       async getUnsafeInternalRulesClient(): Promise<InternalRulesClientApi> {
-        return internalRulesClient;
+        return get(InternalRulesClient);
       },
       async getActionPolicyClientWithRequest(
         request: KibanaRequest
