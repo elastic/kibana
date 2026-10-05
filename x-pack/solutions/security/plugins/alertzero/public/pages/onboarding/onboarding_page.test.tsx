@@ -68,14 +68,21 @@ const enabledWorkerBody = JSON.stringify({
 const renderPage = ({
   canWrite = false,
   httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } }),
+  httpGet,
   serverWorkers = ALL_WORKERS_RESPONSE,
   skipIntro = true,
 }: {
   skipIntro?: boolean;
   canWrite?: boolean;
   httpPatch?: jest.Mock;
+  httpGet?: jest.Mock;
   serverWorkers?: {
-    workers: Array<{ id: string; enabled: boolean; settings?: { scheduleInterval?: string } }>;
+    workers: Array<{
+      id: string;
+      enabled: boolean;
+      settingsRevision?: number | null;
+      settings?: { scheduleInterval?: string };
+    }>;
     canModifyWorkers?: boolean;
   };
 } = {}) => {
@@ -86,10 +93,10 @@ const renderPage = ({
   // Mock http.get so useWorkers() always returns the configured server response
   // (including on background refetches), and http.patch so mutation calls are
   // interceptable per-test.
-  const httpGet = jest.fn().mockResolvedValue(serverWorkers);
+  const resolvedHttpGet = httpGet ?? jest.fn().mockResolvedValue(serverWorkers);
   const core = {
     ...coreStart,
-    http: { ...coreStart.http, get: httpGet, patch: httpPatch },
+    http: { ...coreStart.http, get: resolvedHttpGet, patch: httpPatch },
     security: {
       ...coreStart.security,
       uiApi: {
@@ -390,6 +397,42 @@ describe('OnboardingPage', () => {
         )
       );
       expect(history.location.pathname).toBe('/');
+    });
+
+    it('sends the saved revision when Enable and run is retried after a partial save', async () => {
+      const triageId = SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
+      let savedRevision: number | null = null;
+      const list = () => ({
+        workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({
+          id,
+          enabled: id !== triageId && savedRevision != null,
+          settingsRevision: id === triageId ? null : savedRevision,
+        })),
+      });
+      const httpGet = jest.fn(async () => list());
+      const httpPatch = jest.fn(async (url: string) => {
+        if (url.includes(triageId)) {
+          throw new Error('blocked');
+        }
+        savedRevision = 2;
+        return { worker: { id: 'mock', enabled: true } };
+      });
+      renderPage({ canWrite: true, httpPatch, httpGet, serverWorkers: list() });
+
+      const attackDiscoveryCalls = () =>
+        httpPatch.mock.calls.filter(([url]) =>
+          String(url).includes(SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID)
+        );
+
+      selectServiceAccount();
+      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      await waitFor(() =>
+        expect(screen.getByRole('button', { name: 'Enable and run' })).not.toBeDisabled()
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      await waitFor(() => expect(attackDiscoveryCalls()).toHaveLength(2));
+      expect(JSON.parse(attackDiscoveryCalls()[1][1].body).settingsRevision).toBe(2);
     });
 
     it('renders the Back button', () => {

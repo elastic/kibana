@@ -71,7 +71,6 @@ export const useEnableWorkers = (
         });
       })
     );
-    setIsSaving(false);
 
     let hadFailure = false;
     let hadSuccess = false;
@@ -83,6 +82,16 @@ export const useEnableWorkers = (
         hadSuccess = true;
       }
     });
+
+    if (hadFailure && hadSuccess) {
+      // A successful enable writes settings and bumps settingsRevision. Refresh before the
+      // button can be pressed again, or the retry resends the revision from before this save
+      // and the workers that landed come back as conflicts. This stays after the fan-out:
+      // per-patch cache writes would let LandingPage leave onboarding early.
+      await queryClient.invalidateQueries({ queryKey: queryKeys.workers.list() });
+    }
+
+    setIsSaving(false);
 
     if (hadFailure) {
       if (hadSuccess) {
