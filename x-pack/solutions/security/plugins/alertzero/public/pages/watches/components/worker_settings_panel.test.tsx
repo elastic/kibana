@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
@@ -101,5 +101,102 @@ describe('WorkerSettingsPanel view executions link', () => {
       screen.queryByTestId(`alertZeroWorkerViewExecutions-${WORKER_ID}`)
     ).not.toBeInTheDocument();
     expect(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${WORKER_ID}`)).toBeInTheDocument();
+  });
+});
+
+describe('WorkerSettingsPanel service account', () => {
+  const renderWithAccounts = () => {
+    const onSettingsChange = jest.fn();
+    const core = coreMock.createStart();
+    core.security.serviceAccounts.isEnabled.mockReturnValue(true);
+    core.http.get.mockResolvedValue({
+      serviceAccounts: [
+        { id: 'account-a', name: 'Reader', enabled: true, assumable: true, roles: ['reader'] },
+        { id: 'account-b', name: 'Disabled', enabled: false, assumable: true, roles: ['reader'] },
+      ],
+    });
+
+    render(
+      <KibanaContextProvider services={core}>
+        <WorkerSettingsPanel
+          worker={createWorker(WORKFLOW_ID)}
+          isAccordion={false}
+          isExpanded
+          onToggle={jest.fn()}
+          enabled
+          settings={createWorker(WORKFLOW_ID).settings}
+          settingsLocked={false}
+          isSaving={false}
+          canWrite
+          onEnabledChange={jest.fn()}
+          onSettingsChange={onSettingsChange}
+        />
+      </KibanaContextProvider>
+    );
+
+    return { onSettingsChange };
+  };
+
+  it('hides the control when service accounts are disabled', () => {
+    renderPanel(WORKFLOW_ID, false);
+
+    expect(
+      screen.queryByTestId(`alertZeroServiceAccountSelect-${WORKER_ID}`)
+    ).not.toBeInTheDocument();
+  });
+
+  it('offers the current user and assumable accounts', async () => {
+    renderWithAccounts();
+
+    expect(await screen.findByRole('option', { name: 'Current user' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Reader' })).toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: 'Disabled' })).not.toBeInTheDocument();
+  });
+
+  it('writes the selected account id', async () => {
+    const { onSettingsChange } = renderWithAccounts();
+    const select = await screen.findByTestId(`alertZeroServiceAccountSelect-${WORKER_ID}`);
+
+    fireEvent.change(select, { target: { value: 'account-a' } });
+
+    expect(onSettingsChange).toHaveBeenCalledWith({ serviceAccountId: 'account-a' });
+  });
+
+  it('clears the account when the current user is selected', async () => {
+    const onSettingsChange = jest.fn();
+    const core = coreMock.createStart();
+    core.security.serviceAccounts.isEnabled.mockReturnValue(true);
+    core.http.get.mockResolvedValue({
+      serviceAccounts: [
+        { id: 'account-a', name: 'Reader', enabled: true, assumable: true, roles: ['reader'] },
+      ],
+    });
+    const settings = { ...createWorker(WORKFLOW_ID).settings, serviceAccountId: 'account-a' };
+
+    render(
+      <KibanaContextProvider services={core}>
+        <WorkerSettingsPanel
+          worker={{ ...createWorker(WORKFLOW_ID), settings }}
+          isAccordion={false}
+          isExpanded
+          onToggle={jest.fn()}
+          enabled
+          settings={settings}
+          settingsLocked={false}
+          isSaving={false}
+          canWrite
+          onEnabledChange={jest.fn()}
+          onSettingsChange={onSettingsChange}
+        />
+      </KibanaContextProvider>
+    );
+
+    fireEvent.change(await screen.findByTestId(`alertZeroServiceAccountSelect-${WORKER_ID}`), {
+      target: { value: '' },
+    });
+
+    await waitFor(() => {
+      expect(onSettingsChange).toHaveBeenCalledWith({ serviceAccountId: null });
+    });
   });
 });

@@ -330,6 +330,24 @@ describe('applyWorkerSettingsWrite and diffWorkerSettings', () => {
     expect(applyWorkerSettingsWrite(saved, { extras: {} }).extras).toEqual({});
   });
 
+  it('sets, keeps, and clears a service account', () => {
+    const withAccount = applyWorkerSettingsWrite(saved, { serviceAccountId: 'account-a' });
+    expect(withAccount.serviceAccountId).toBe('account-a');
+    expect(applyWorkerSettingsWrite(withAccount, { autonomy: 'assisted' }).serviceAccountId).toBe(
+      'account-a'
+    );
+    expect(applyWorkerSettingsWrite(withAccount, { serviceAccountId: null })).not.toHaveProperty(
+      'serviceAccountId'
+    );
+  });
+
+  it('emits null when a draft clears a saved service account', () => {
+    const withAccount = { ...saved, serviceAccountId: 'account-a' };
+    expect(diffWorkerSettings(saved, withAccount)).toEqual({ serviceAccountId: 'account-a' });
+    expect(diffWorkerSettings(withAccount, saved)).toEqual({ serviceAccountId: null });
+    expect(diffWorkerSettings(withAccount, withAccount)).toBeUndefined();
+  });
+
   it('emits per-field shared changes and the whole extras object', () => {
     expect(diffWorkerSettings(saved, saved)).toBeUndefined();
     expect(diffWorkerSettings(saved, { ...saved, autonomy: 'assisted' })).toEqual({

@@ -333,6 +333,73 @@ describe('WorkersService', () => {
     ).resolves.toEqual({ outcome: 'failed' });
   });
 
+  it('renders run_as from a saved service account and forwards the save request', async () => {
+    const harness = createPersistentHarness();
+    const service = harness.createService();
+    const enabled = await service.update(ATTACK_DISCOVERY, { enabled: true }, SPACE, request);
+    if (enabled.outcome !== 'updated') throw new Error('Expected enable to succeed');
+
+    const result = await service.update(
+      ATTACK_DISCOVERY,
+      {
+        settings: { serviceAccountId: 'account-a' },
+        settingsRevision: enabled.response.worker.settingsRevision,
+      },
+      SPACE,
+      request
+    );
+
+    expect(result.outcome).toBe('updated');
+    expect(harness.install).toHaveBeenLastCalledWith(
+      ATTACK_DISCOVERY,
+      expect.objectContaining({
+        values: expect.objectContaining({ serviceAccountId: 'account-a' }),
+      }),
+      request
+    );
+    const yaml = harness.documents.get(`${ATTACK_DISCOVERY}-${SPACE}`)?.yaml ?? '';
+    expect(parse(yaml).settings?.run_as).toBe('account-a');
+  });
+
+  it('omits run_as when the service account is cleared', async () => {
+    const harness = createPersistentHarness();
+    const service = harness.createService();
+    const enabled = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+    if (enabled.outcome !== 'updated') throw new Error('Expected enable to succeed');
+    const saved = await service.update(
+      TRIAGE,
+      {
+        settings: { serviceAccountId: 'account-a' },
+        settingsRevision: enabled.response.worker.settingsRevision,
+      },
+      SPACE,
+      request
+    );
+    if (saved.outcome !== 'updated') throw new Error('Expected the account save to succeed');
+
+    const cleared = await service.update(
+      TRIAGE,
+      {
+        settings: { serviceAccountId: null },
+        settingsRevision: saved.response.worker.settingsRevision,
+      },
+      SPACE,
+      request
+    );
+
+    expect(cleared.outcome).toBe('updated');
+    const yaml = harness.documents.get(`${TRIAGE}-${SPACE}`)?.yaml ?? '';
+    expect(yaml).not.toContain('run_as');
+    expect(parse(yaml).settings).toBeUndefined();
+    expect(harness.install).toHaveBeenLastCalledWith(
+      TRIAGE,
+      expect.objectContaining({
+        values: expect.not.objectContaining({ serviceAccountId: expect.anything() }),
+      }),
+      request
+    );
+  });
+
   it('resyncs Task Manager after a settings-only save', async () => {
     const harness = createPersistentHarness();
     const service = harness.createService();
@@ -430,7 +497,8 @@ describe('WorkersService', () => {
     if (result.outcome !== 'updated') throw new Error('Expected disable-on-missing to succeed');
     expect(harness.install).toHaveBeenCalledWith(
       TRIAGE,
-      expect.objectContaining({ workflowIdSuffix: SPACE })
+      expect.objectContaining({ workflowIdSuffix: SPACE }),
+      request
     );
     expect(result.response.worker.enabled).toBe(false);
     expect(harness.documents.has(`${TRIAGE}-${SPACE}`)).toBe(true);
@@ -516,7 +584,8 @@ describe('WorkersService', () => {
 
     expect(harness.install).toHaveBeenCalledWith(
       TRIAGE,
-      expect.objectContaining({ workflowIdSuffix: 'space-a' })
+      expect.objectContaining({ workflowIdSuffix: 'space-a' }),
+      request
     );
     expect(disabled.outcome).toBe('updated');
     if (disabled.outcome !== 'updated') throw new Error('Expected disable to succeed');

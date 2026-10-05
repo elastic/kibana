@@ -97,12 +97,12 @@ export const createManagedWorkflowsSystemApiProvider = (
     );
 
     return {
-      install: async (id, options) => {
+      install: async (id, options, request) => {
         if (!isWorkflowsAvailable) {
           logger.debug('Workflows is not available in this environment. Managed install ignored.');
           return;
         }
-        await workflowsService.installManagedWorkflow(id, options, pluginId);
+        await workflowsService.installManagedWorkflow(id, options, pluginId, request);
       },
       uninstall: async (id, options) => {
         if (!isWorkflowsAvailable) {

@@ -32,6 +32,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AutonomyLevelControl } from './autonomy_level_control';
 import { getAutonomyLevelCards } from './autonomy_level_cards_data';
 import { ScheduleIntervalField } from './schedule_interval_field';
+import { ServiceAccountField } from './service_account_field';
 import { SettingRow } from './setting_row';
 import { getWorkerCustomSettingsComponent } from '../custom_settings/registry';
 import * as settingsI18n from '../settings_translations';
@@ -88,8 +89,9 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
 }: WorkerSettingsPanelProps) {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { application },
+    services: { application, security },
   } = useKibana<CoreStart>();
+  const serviceAccountsEnabled = security.serviceAccounts.isEnabled();
   const name = workerName(worker.id, worker.name);
   const description = workerDescription(worker.id);
   const autonomyLabel = settingsI18n.autonomyLevelName(settings.autonomy);
@@ -296,6 +298,21 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
           onChange={(autonomy) => onSettingsChange({ autonomy })}
         />
       </SettingRow>
+      {serviceAccountsEnabled ? (
+        <SettingRow
+          label={settingsI18n.SERVICE_ACCOUNT_LABEL}
+          labelHelp={settingsI18n.SERVICE_ACCOUNT_HELP}
+          data-test-subj={`alertZeroServiceAccountRow-${worker.id}`}
+        >
+          <ServiceAccountField
+            workerId={worker.id}
+            workerName={name}
+            current={settings.serviceAccountId}
+            isDisabled={controlsDisabled}
+            onChange={(serviceAccountId) => onSettingsChange({ serviceAccountId })}
+          />
+        </SettingRow>
+      ) : null}
       {/* Only schedule-driven Workers project an interval; its presence is the signal. */}
       {settings.scheduleInterval != null ? (
         <SettingRow
