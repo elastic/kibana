@@ -84,7 +84,7 @@ function registerOtelMemoryMetrics(meter: Meter) {
       unit: 'By',
       valueType: ValueType.INT,
     }),
-    heapSizeLimit: meter.createObservableUpDownCounter('process.memory.heap.size_limit', {
+    heapLimit: meter.createObservableUpDownCounter('process.memory.heap.limit', {
       description: 'Process Memory: The maximum amount of memory that can be used for the heap.',
       unit: 'By',
       valueType: ValueType.INT,
@@ -108,7 +108,7 @@ function registerOtelMemoryMetrics(meter: Meter) {
     result.observe(memoryMetrics.arrayBuffers, memoryUsage.arrayBuffers);
     result.observe(memoryMetrics.heapTotal, memoryUsage.heapTotal);
     result.observe(memoryMetrics.heapUsed, memoryUsage.heapUsed);
-    result.observe(memoryMetrics.heapSizeLimit, v8.getHeapStatistics().heap_size_limit);
+    result.observe(memoryMetrics.heapLimit, v8.getHeapStatistics().heap_size_limit);
   }, Object.values(memoryMetrics));
 }
 
