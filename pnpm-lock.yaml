@@ -610,9 +610,6 @@ importers:
       '@kbn/ai-assistant-management-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/ai_assistant_management/selection
-      '@kbn/ai-observability-common':
-        specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-ai-observability-common
       '@kbn/ai-security-labs-content':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/ai-security-labs-content
@@ -2290,6 +2287,9 @@ importers:
       '@kbn/gen-ai-streaming-response-example-plugin':
         specifier: workspace:*
         version: link:x-pack/examples/gen_ai_streaming_response_example
+      '@kbn/genai-common':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-genai-common
       '@kbn/generate-csv':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-generate-csv
@@ -7887,8 +7887,6 @@ importers:
 
   src/platform/packages/shared/kbn-actions-utils: {}
 
-  src/platform/packages/shared/kbn-ai-observability-common: {}
-
   src/platform/packages/shared/kbn-aiops-utils: {}
 
   src/platform/packages/shared/kbn-alerting-types: {}
@@ -8084,6 +8082,8 @@ importers:
   src/platform/packages/shared/kbn-ftr-common-functional-ui-services: {}
 
   src/platform/packages/shared/kbn-ftr-llm-proxy: {}
+
+  src/platform/packages/shared/kbn-genai-common: {}
 
   src/platform/packages/shared/kbn-grok-ui: {}
 

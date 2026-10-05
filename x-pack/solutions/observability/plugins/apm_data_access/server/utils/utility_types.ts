@@ -10,7 +10,7 @@ import {
   ATTRIBUTE_GEN_AI_INPUT_MESSAGES,
   ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES,
   ATTRIBUTE_GEN_AI_RESPONSE_FINISH_REASONS,
-} from '@kbn/ai-observability-common';
+} from '@kbn/genai-common';
 import type { DedotObject } from '@kbn/utility-types';
 import type { ValuesType } from 'utility-types';
 import type { AgentName } from '@kbn/elastic-agent-utils';

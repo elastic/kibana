@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
-  "id": "@kbn/ai-observability-common",
+  "id": "@kbn/genai-common",
   "owner": ["@elastic/obs-signals-ai-o11y"],
   "group": "platform",
   "visibility": "shared"

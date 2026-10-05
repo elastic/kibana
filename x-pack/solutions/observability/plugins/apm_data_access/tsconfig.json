@@ -25,6 +25,6 @@
     "@kbn/apm-sources-access-plugin",
     "@kbn/metrics-data-access-plugin",
     "@kbn/safer-lodash-set",
-    "@kbn/ai-observability-common"
+    "@kbn/genai-common"
   ]
 }

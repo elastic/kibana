@@ -8,7 +8,7 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { GEN_AI_LONG_MESSAGE_FIELDS } from '@kbn/ai-observability-common';
+import { GEN_AI_LONG_MESSAGE_FIELDS } from '@kbn/genai-common';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { of } from 'rxjs';
 import { useGenAiData } from './use_genai_data';

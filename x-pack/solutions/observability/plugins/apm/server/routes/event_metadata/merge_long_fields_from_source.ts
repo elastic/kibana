@@ -6,7 +6,7 @@
  */
 
 import { castArray } from 'lodash';
-import { GEN_AI_LONG_MESSAGE_FIELDS } from '@kbn/ai-observability-common';
+import { GEN_AI_LONG_MESSAGE_FIELDS } from '@kbn/genai-common';
 import { getFieldFromSource } from './get_field_from_source';
 
 export const LONG_FIELDS_SOURCE_FALLBACK = [...GEN_AI_LONG_MESSAGE_FIELDS];

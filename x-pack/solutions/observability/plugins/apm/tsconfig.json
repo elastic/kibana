@@ -182,7 +182,7 @@
     "@kbn/core-chrome-browser-hooks",
     "@kbn/lens-common",
     "@kbn/core-http-browser-mocks",
-    "@kbn/ai-observability-common"
+    "@kbn/genai-common"
   ],
   "exclude": ["target/**/*"]
 }
