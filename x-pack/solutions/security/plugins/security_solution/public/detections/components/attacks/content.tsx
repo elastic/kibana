@@ -6,15 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-  EuiWindowEvent,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { noop } from 'lodash/fp';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -31,16 +23,17 @@ import { AttacksEventTypes } from '../../../common/lib/telemetry';
 import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useAttackDiscoveryControls } from '../../../attack_discovery/pages/use_attack_discovery_controls';
-import { Actions } from '../../../attack_discovery/pages/header/actions';
 import { SCHEDULE_TAB_ID } from '../../../attack_discovery/pages/settings_flyout/constants';
+import { SecurityAppHeader } from '../../../common/components/app_header';
 import { FilterByAssigneesPopover } from '../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover';
 import { useLocalStorage } from '../../../common/components/local_storage';
 import { getSettingKey } from '../../../common/components/local_storage/helpers';
 import { PAGE_TITLE } from '../../pages/attacks/translations';
-import { HeaderPage } from '../../../common/components/header_page';
-import { IconSparkles } from '../../../common/icons/sparkles';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
-import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
+import {
+  useGlobalFullScreen,
+  useHasFullScreenContent,
+} from '../../../common/containers/use_full_screen';
 import { Display } from '../../../explore/hosts/pages/display';
 import { SearchBarSection } from './search_bar/search_bar_section';
 import { TableSection } from './table/table_section';
@@ -54,14 +47,12 @@ import { KPIsSection } from './kpis/kpis_section';
 import { AttacksTour, AttacksTourProvider, WelcomeTourCallout } from './tour';
 import { WorkflowsPromotionCallout } from './workflows_promotion_callout';
 import { GenerationsControlCenterFlyout } from './generations_control_center';
-import { GENERATIONS_BUTTON } from './generations_control_center/translations';
+import { useAttacksHeaderMenu } from './header/use_attacks_header_menu';
 
 import type { SettingsOverrideOptions } from '../../../attack_discovery/pages/results/history/types';
 
 export const CONTENT_TEST_ID = 'attacks-page-content';
 export const SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID = 'attacks-page-security-solution-page-wrapper';
-export const ATTACKS_PAGE_ACTIONS_TEST_ID = 'attacks-page-actions';
-export const ATTACKS_PAGE_GENERATIONS_BUTTON_TEST_ID = 'attacks-page-generations-button';
 export const ATTACKS_PAGE_TYPE_FILTER_TEST_ID = 'attacks-page-type-filter';
 export const ATTACKS_PAGE_ASSIGNEE_FILTER_TEST_ID = 'attacks-page-assignee-filter';
 export const ATTACKS_PAGE_CONNECTOR_FILTER_TEST_ID = 'attacks-page-connector-filter';
@@ -97,12 +88,14 @@ export interface AttacksPageContentProps {
 }
 
 /**
- * Renders the content of the attacks page: search bar, header, filters, KPIs, and table sections.
+ * Renders the attacks page: header, search bar, filters, KPIs, and table.
  */
 export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentProps) => {
   const containerElement = useRef<HTMLDivElement | null>(null);
 
   const { globalFullScreen } = useGlobalFullScreen();
+  // The sticky AppHeader and KQL input stack above EuiDataGrid's own full screen mode.
+  const hasFullScreenContent = useHasFullScreenContent();
   const [selectedTypes, setSelectedTypes] = useLocalStorage<string[]>({
     key: getSettingKey({
       category: FILTER_CATEGORY,
@@ -124,7 +117,6 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
   const {
     services: { settings, telemetry },
   } = useKibana();
-  const { euiTheme } = useEuiTheme();
 
   const { http } = useAssistantContext();
   const { data: aiConnectors } = useLoadConnectors({
@@ -202,6 +194,14 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
     handleOpenFlyout(SCHEDULE_TAB_ID);
   }, [handleOpenFlyout]);
 
+  const headerMenu = useAttacksHeaderMenu({
+    isLoading,
+    isRunDisabled: connectorId == null,
+    onGenerate: handleGenerate,
+    openFlyout: handleOpenFlyout,
+    openControlCenter,
+  });
+
   const [assignees, setAssignees] = useLocalStorage<AssigneesIdsSelection[]>({
     key: getSettingKey({
       category: FILTER_CATEGORY,
@@ -241,53 +241,18 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
     () => (
       <StyledFullHeightContainer data-test-subj={CONTENT_TEST_ID} ref={containerElement}>
         <EuiWindowEvent event="resize" handler={noop} />
-        <SearchBarSection dataView={dataView} />
         <SecuritySolutionPageWrapper
           noPadding={globalFullScreen}
           data-test-subj={SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID}
         >
-          <Display show={!globalFullScreen}>
-            <HeaderPage
-              title={
-                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
-                  <EuiFlexItem grow={false}>{PAGE_TITLE}</EuiFlexItem>
-                  <EuiSpacer size="m" />
-                  <EuiFlexItem
-                    grow={false}
-                    style={{ marginLeft: euiTheme.size.s, marginTop: euiTheme.size.s }}
-                  >
-                    <IconSparkles />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              }
-            >
-              <EuiFlexGroup
-                alignItems="center"
-                gutterSize="m"
-                data-test-subj={ATTACKS_PAGE_ACTIONS_TEST_ID}
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    data-test-subj={ATTACKS_PAGE_GENERATIONS_BUTTON_TEST_ID}
-                    iconType="listBullet"
-                    onClick={openControlCenter}
-                    size="s"
-                  >
-                    {GENERATIONS_BUTTON}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <Actions
-                    isLoading={isLoading}
-                    onGenerate={handleGenerate}
-                    openFlyout={handleOpenFlyout}
-                    isDisabled={connectorId == null}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </HeaderPage>
-            <EuiHorizontalRule margin="none" />
-            <EuiSpacer size="l" />
+          {/* Must stay a direct child of the page wrapper: CSS sticky is confined to its parent's height. */}
+          {!hasFullScreenContent && (
+            <SecurityAppHeader title={PAGE_TITLE} menu={headerMenu} spacing="largeBleed" />
+          )}
+          <Display show={!hasFullScreenContent}>
+            <EuiSpacer size="m" />
+            <SearchBarSection dataView={dataView} />
+            <EuiSpacer size="m" />
             <WorkflowsPromotionCallout />
             <WelcomeTourCallout />
             <AttacksTour />
@@ -375,18 +340,14 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
       aiConnectors,
       assignees,
       closeControlCenter,
-      connectorId,
       dataView,
-      euiTheme.size.s,
       globalFullScreen,
-      handleGenerate,
-      handleOpenFlyout,
+      hasFullScreenContent,
+      headerMenu,
       isControlCenterOpen,
-      isLoading,
       localStorageAttackDiscoveryMaxAlerts,
       onAssigneesSelectionChange,
       onAttackIdsChange,
-      openControlCenter,
       openSchedulesFlyout,
       pageFilters,
       selectedConnectorNames,
