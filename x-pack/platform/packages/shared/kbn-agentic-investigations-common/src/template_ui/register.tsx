@@ -9,6 +9,7 @@ import React, { Suspense, lazy } from 'react';
 import type { IconType } from '@elastic/eui';
 import { EuiSkeletonText } from '@elastic/eui';
 import type { ConversationTemplateServiceStartContract } from '@kbn/agent-builder-browser';
+import { getCopyLinkFlyoutAction } from '../components/actions/copy_link_action';
 import { DETAILS_FLYOUT_LABELS } from '../components/details/translations';
 import { ConversationTitle } from './conversation_title';
 import type { RenderAssignees, RenderStatus, RenderLinkedInvestigations } from './types';
@@ -77,6 +78,11 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    * Supplied by the caller so the modal can use HTTP hooks unavailable in this package.
    */
   renderCloseInvestigationModal?: import('./slots').FooterSlotProps['onCloseInvestigation'];
+  /**
+   * Called by the in-chat flyout's "Copy link" button. Supplied by the caller, which decides
+   * what to copy and how to confirm it.
+   */
+  onCopyLink: () => void;
 }
 
 /**
@@ -96,6 +102,7 @@ export const registerAgenticInvestigationTemplateUI = ({
   renderAssignees,
   renderStatus,
   renderCloseInvestigationModal,
+  onCopyLink,
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
   const [overviewTabId] = getInvestigationTabIds(templateId);
 
@@ -121,6 +128,7 @@ export const registerAgenticInvestigationTemplateUI = ({
       icon,
       tabs: [overviewTabId],
       detailsFlyout: {
+        trailingActions: () => [getCopyLinkFlyoutAction(onCopyLink)],
         header: function InvestigationFlyoutHeader({ conversation, refetchConversation }) {
           return (
             // Agent Builder points the flyout's `aria-labelledby` at the header, so it must not

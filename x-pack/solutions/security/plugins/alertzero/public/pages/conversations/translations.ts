@@ -19,6 +19,15 @@ export const QUEUE_PAGE_INFO = Object.freeze({
   }),
 });
 
+export const COPY_LINK_TOASTS = Object.freeze({
+  copied: i18n.translate('xpack.alertzero.queue.copyLinkCopied', {
+    defaultMessage: 'Link copied',
+  }),
+  failed: i18n.translate('xpack.alertzero.queue.copyLinkFailed', {
+    defaultMessage: 'Could not copy the link',
+  }),
+});
+
 /** Keyed by the HTTP status the proposals route returns for a refused decision. */
 export const DECISION_ERRORS: Readonly<Record<number | 'default', string>> = Object.freeze({
   400: i18n.translate('xpack.alertzero.queue.decisionInvalidInput', {

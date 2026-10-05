@@ -49,6 +49,7 @@ import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useOpenInChat } from '../../hooks/use_open_in_chat';
 import { useConversationsUrlParams } from './conversations_url_params';
 import { useInvestigationDetails } from './use_investigation_details';
+import { useCopyInvestigationLink } from './use_copy_investigation_link';
 import { QUEUE_PAGE_INFO } from './translations';
 import { decisionErrorMessage } from './decision_errors';
 import { ProposalsTrendChartRow } from '../../components/proposals_trend_chart';
@@ -321,9 +322,21 @@ const ConversationsPageContent: React.FC = () => {
   // Agent Builder owns the flyout: it loads the conversation and renders the slots this solution
   // registered for the `investigation` template. Closing it clears the URL, which is what closes
   // the flyout on the next pass — the URL stays the single source of truth.
+  const copyInvestigationLink = useCopyInvestigationLink();
+  // Cards are keyed by proposal id, but the link and the flyout are keyed by its conversation.
+  const copyLinkForProposal = useCallback(
+    (proposalId: Investigation['id']) => {
+      const conversationId = proposalsById.get(proposalId)?.conversationId;
+      if (conversationId) {
+        copyInvestigationLink(conversationId);
+      }
+    },
+    [proposalsById, copyInvestigationLink]
+  );
   useInvestigationDetails({
     conversationId: selectedConversationId,
     onClose: clearSelectedConversation,
+    onCopyLink: copyInvestigationLink,
   });
 
   const actionInvestigation = useMemo(
@@ -436,6 +449,7 @@ const ConversationsPageContent: React.FC = () => {
               getChatHref={getChatHrefForProposal}
               canManageEscalations={canManageEscalations}
               canCloseInvestigation={canManageInvestigations}
+              onCopyLink={copyLinkForProposal}
               renderAssignees={renderAssignees}
               renderInFlightStatus={renderInFlightStatus}
             />

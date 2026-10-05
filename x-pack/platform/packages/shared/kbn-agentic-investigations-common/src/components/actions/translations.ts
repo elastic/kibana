@@ -25,6 +25,9 @@ export const ACTIONS_TRANSLATIONS = Object.freeze({
     attachToEscalation: i18n.translate('xpack.alertzero.baseActions.attachToEscalation', {
       defaultMessage: 'Attach to an escalation',
     }),
+    copyLink: i18n.translate('xpack.alertzero.baseActions.copyLink', {
+      defaultMessage: 'Copy link',
+    }),
     close: i18n.translate('xpack.alertzero.baseActions.closeInvestigation', {
       defaultMessage: 'Close investigation',
     }),

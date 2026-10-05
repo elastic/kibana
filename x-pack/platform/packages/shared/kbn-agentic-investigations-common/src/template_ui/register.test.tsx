@@ -103,6 +103,7 @@ const register = (
     templateId: 'investigation',
     name: 'Investigation',
     icon: 'securitySignalDetected',
+    onCopyLink: jest.fn(),
     ...overrides,
   });
 
@@ -168,6 +169,20 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     expect(definition?.tabs).toEqual(getInvestigationTabIds('investigation'));
     expect(definition?.detailsFlyout?.header).toBeDefined();
     expect(definition?.detailsFlyout?.footer).toBeDefined();
+  });
+
+  it('adds a Copy link flyout action that calls onCopyLink', () => {
+    const onCopyLink = jest.fn();
+    const { contract } = createFakeService();
+    register(contract, { onCopyLink });
+
+    const getActions =
+      contract.getTemplateUIDefinition('investigation')?.detailsFlyout?.trailingActions;
+    const [action] = getActions?.({ conversation }) ?? [];
+
+    expect(action).toMatchObject({ iconType: 'link', 'aria-label': 'Copy link' });
+    action.onClick?.({} as never);
+    expect(onCopyLink).toHaveBeenCalledTimes(1);
   });
 
   it('gives each solution its own tab ids, so a second one does not collide', () => {
