@@ -8,6 +8,7 @@
  */
 
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+import type { DataSource } from '@kbn/data-source';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { FetchStatus } from '../application/types';
 import { getEsqlDatatableFromDocuments } from './get_esql_datatable_from_documents';
@@ -17,18 +18,22 @@ const baseResult = [
   { id: 'r1', raw: { maxB: 100 }, flattened: { maxB: 100 } },
 ] as unknown as DataTableRecord[];
 
+const esqlDataSource = {
+  kind: 'esql' as const,
+  resultColumns: baseColumns,
+} as unknown as DataSource;
+
 const completeMsg = (approximationApplied?: boolean) => ({
   fetchStatus: FetchStatus.COMPLETE,
   result: baseResult,
-  esqlQueryColumns: baseColumns,
+  dataSource: esqlDataSource,
   approximationApplied,
 });
 
 describe('getEsqlDatatableFromDocuments', () => {
-  it('returns undefined table when isEsqlMode is false', () => {
+  it('returns undefined table when dataSource is not esql', () => {
     const { table } = getEsqlDatatableFromDocuments({
-      documentsValue: completeMsg(true),
-      isEsqlMode: false,
+      documentsValue: { fetchStatus: FetchStatus.COMPLETE, result: baseResult },
     });
     expect(table).toBeUndefined();
   });
@@ -36,7 +41,6 @@ describe('getEsqlDatatableFromDocuments', () => {
   it('returns undefined table when fetchStatus is LOADING', () => {
     const { table } = getEsqlDatatableFromDocuments({
       documentsValue: { fetchStatus: FetchStatus.LOADING, result: baseResult },
-      isEsqlMode: true,
     });
     expect(table).toBeUndefined();
   });
@@ -44,7 +48,6 @@ describe('getEsqlDatatableFromDocuments', () => {
   it('returns undefined table when documentsValue is undefined', () => {
     const { table } = getEsqlDatatableFromDocuments({
       documentsValue: undefined,
-      isEsqlMode: true,
     });
     expect(table).toBeUndefined();
   });
@@ -52,7 +55,6 @@ describe('getEsqlDatatableFromDocuments', () => {
   it('sets approximationApplied: true in table meta', () => {
     const { table } = getEsqlDatatableFromDocuments({
       documentsValue: completeMsg(true),
-      isEsqlMode: true,
     });
     expect(table?.meta).toEqual({ type: ESQL_TABLE_TYPE, approximationApplied: true });
   });
@@ -60,7 +62,6 @@ describe('getEsqlDatatableFromDocuments', () => {
   it('sets approximationApplied: false in table meta', () => {
     const { table } = getEsqlDatatableFromDocuments({
       documentsValue: completeMsg(false),
-      isEsqlMode: true,
     });
     expect(table?.meta).toEqual({ type: ESQL_TABLE_TYPE, approximationApplied: false });
   });
@@ -68,7 +69,6 @@ describe('getEsqlDatatableFromDocuments', () => {
   it('sets approximationApplied: undefined when not present in documentsValue', () => {
     const { table } = getEsqlDatatableFromDocuments({
       documentsValue: completeMsg(undefined),
-      isEsqlMode: true,
     });
     expect(table?.meta).toEqual({ type: ESQL_TABLE_TYPE, approximationApplied: undefined });
   });
@@ -76,7 +76,6 @@ describe('getEsqlDatatableFromDocuments', () => {
   it('maps rows from result.raw', () => {
     const { table } = getEsqlDatatableFromDocuments({
       documentsValue: completeMsg(true),
-      isEsqlMode: true,
     });
     expect(table?.rows).toEqual([{ maxB: 100 }]);
   });
@@ -84,7 +83,6 @@ describe('getEsqlDatatableFromDocuments', () => {
   it('uses esqlQueryColumns as table columns', () => {
     const { table } = getEsqlDatatableFromDocuments({
       documentsValue: completeMsg(true),
-      isEsqlMode: true,
     });
     expect(table?.columns).toEqual(baseColumns);
   });
