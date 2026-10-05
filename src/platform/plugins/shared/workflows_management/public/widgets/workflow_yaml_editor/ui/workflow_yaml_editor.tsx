@@ -18,7 +18,7 @@ import type { Document } from 'yaml';
 import { monaco, YAML_LANG_ID } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
-import { isTriggerType, WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
+import { isTriggerType } from '@kbn/workflows';
 import { useWorkflowsMonacoTheme, WORKFLOW_MONACO_LAYOUT_OPTIONS } from '@kbn/workflows-ui';
 import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
@@ -86,7 +86,6 @@ import { useYamlValidation } from '../../../features/validate_workflow_yaml/lib/
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowEditorReadOnly } from '../../../hooks/use_workflow_editor_read_only';
-import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
 import { triggerSchemas } from '../../../trigger_schemas';
 import { interceptMonacoYamlProvider } from '../lib/autocomplete/intercept_monaco_yaml_provider';
@@ -189,12 +188,6 @@ export const WorkflowYAMLEditor = ({
   onToggleEditorMode,
   hideEditorTools = false,
 }: WorkflowYAMLEditorProps) => {
-  const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
-    WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
-    false
-  );
-  // The step minimap ships under the same Workflows experimental-features
-  // Advanced Setting as the graph visualization — use isVisualEditorEnabled directly.
   const { notifications, http } = useKibana().services;
   const euiThemeContext = useEuiTheme();
 
@@ -381,10 +374,10 @@ export const WorkflowYAMLEditor = ({
 
       setPositionStyles({
         top: `${_editor.getTopForLineNumber(stepInfo.lineStart, true) - _editor.getScrollTop()}px`,
-        right: isExecutionYaml || !isVisualEditorEnabled ? '0px' : `${MINIMAP_RESERVE_PX}px`,
+        right: isExecutionYaml ? '0px' : `${MINIMAP_RESERVE_PX}px`,
       });
     },
-    [isExecutionYaml, isVisualEditorEnabled]
+    [isExecutionYaml]
   );
   const { onFixWithAi } = useFixWithAi({
     editorRef,
@@ -749,7 +742,7 @@ export const WorkflowYAMLEditor = ({
         shortcut: [isMac ? '⌘' : 'Ctrl', 'Shift', 'F'],
       },
     ];
-    if (isVisualEditorEnabled && onToggleEditorMode) {
+    if (onToggleEditorMode) {
       cmds.push({
         id: 'toggleEditorMode',
         label: i18n.translate('workflows.yamlEditor.commands.toggleEditorMode', {
@@ -762,7 +755,7 @@ export const WorkflowYAMLEditor = ({
       });
     }
     return cmds;
-  }, [isVisualEditorEnabled, onToggleEditorMode]);
+  }, [onToggleEditorMode]);
 
   const jumpToStepEntries: JumpToStepEntry[] = useMemo(() => {
     if (!workflowLookup) return [];
@@ -822,14 +815,12 @@ export const WorkflowYAMLEditor = ({
       // The step minimap is the primary scroll indicator — hide Monaco's scrollbar so it
       // doesn't visually compete. Programmatic scrolling (revealLineInCenter, etc.) is
       // unaffected; only the draggable track is removed.
-      ...(isVisualEditorEnabled && {
-        scrollbar: {
-          vertical: 'hidden' as const,
-          verticalScrollbarSize: 0,
-        },
-      }),
+      scrollbar: {
+        vertical: 'hidden' as const,
+        verticalScrollbarSize: 0,
+      },
     };
-  }, [isReadOnlyYaml, isVisualEditorEnabled]);
+  }, [isReadOnlyYaml]);
 
   useEffect(() => {
     // Patch setModelMarkers to set initial markers (monaco-react#70) and to intercept/format
@@ -918,8 +909,8 @@ export const WorkflowYAMLEditor = ({
         </div>
       )}
       <div css={styles.editorAreaWrapper}>
-        {/* Step minimap — experimental; hidden with the editor body in graph view. */}
-        {isVisualEditorEnabled && isActive ? (
+        {/* Step minimap — hidden with the editor body in graph view. */}
+        {isActive ? (
           <div css={styles.minimapContainer} ref={minimapContainerRef}>
             <WorkflowStepMinimap
               editor={mountedEditor}
@@ -929,10 +920,7 @@ export const WorkflowYAMLEditor = ({
           </div>
         ) : null}
         <div
-          css={[
-            styles.editorContainer,
-            isVisualEditorEnabled && css({ paddingRight: MINIMAP_RESERVE_PX }),
-          ]}
+          css={[styles.editorContainer, css({ paddingRight: MINIMAP_RESERVE_PX })]}
           className={classnames({ [EXECUTION_YAML_SNAPSHOT_CLASS]: isExecutionYaml })}
         >
           <YamlEditor
