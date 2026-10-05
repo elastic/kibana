@@ -30,6 +30,11 @@ apiTest.describe('vega - search', { tag: tags.deploymentAgnostic }, () => {
       body: { title: 'Search Test Chart Beta', spec: VEGA_SPEC_HJSON },
       responseType: 'json',
     });
+    await apiClient.post(VEGA_API_PATH, {
+      headers: { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+      body: { title: 'Search Test Chart Tagged', spec: VEGA_SPEC_HJSON, tags: ['tag-2'] },
+      responseType: 'json',
+    });
   });
 
   apiTest.afterAll(async ({ kbnClient }) => {
@@ -73,5 +78,29 @@ apiTest.describe('vega - search', { tag: tags.deploymentAgnostic }, () => {
     expect(
       response.body.data.map((item: { data: { title: string } }) => item.data.title)
     ).not.toContain('Search Test Chart Beta');
+  });
+
+  apiTest('should include items by tag', async ({ apiClient }) => {
+    const response = await apiClient.get(`${VEGA_API_PATH}?tags=tag-2`, {
+      headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(
+      response.body.data.map((item: { data: { title: string } }) => item.data.title)
+    ).toStrictEqual(['Search Test Chart Tagged']);
+  });
+
+  apiTest('should exclude items by tag', async ({ apiClient }) => {
+    const response = await apiClient.get(`${VEGA_API_PATH}?excluded_tags=tag-2`, {
+      headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    const titles = response.body.data.map((item: { data: { title: string } }) => item.data.title);
+    expect(titles).toContain('Search Test Chart Alpha');
+    expect(titles).not.toContain('Search Test Chart Tagged');
   });
 });

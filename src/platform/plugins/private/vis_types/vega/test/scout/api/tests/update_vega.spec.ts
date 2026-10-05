@@ -99,6 +99,30 @@ apiTest.describe('vega - update', { tag: tags.deploymentAgnostic }, () => {
     }
   );
 
+  apiTest('should replace, then clear tags', async ({ apiClient }) => {
+    const withTags = await apiClient.put(`${VEGA_API_PATH}/${createdId}`, {
+      headers: { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+      body: { title: 'Tagged Title', spec: VEGA_SPEC_HJSON, tags: ['tag-1'] },
+      responseType: 'json',
+    });
+    expect(withTags).toHaveStatusCode(200);
+    expect(withTags.body.data.tags).toStrictEqual(['tag-1']);
+
+    const replaced = await apiClient.put(`${VEGA_API_PATH}/${createdId}`, {
+      headers: { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+      body: { title: 'Tagged Title', spec: VEGA_SPEC_HJSON, tags: ['tag-2'] },
+      responseType: 'json',
+    });
+    expect(replaced.body.data.tags).toStrictEqual(['tag-2']);
+
+    const cleared = await apiClient.put(`${VEGA_API_PATH}/${createdId}`, {
+      headers: { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+      body: { title: 'Tagged Title', spec: VEGA_SPEC_HJSON },
+      responseType: 'json',
+    });
+    expect(cleared.body.data.tags).toStrictEqual([]);
+  });
+
   apiTest('should create when id does not exist (upsert)', async ({ apiClient }) => {
     const response = await apiClient.put(`${VEGA_API_PATH}/new-id-for-upsert`, {
       headers: { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader },

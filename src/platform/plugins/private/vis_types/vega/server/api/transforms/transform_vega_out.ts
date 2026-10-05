@@ -8,6 +8,7 @@
  */
 
 import { injectFilterReferences } from '@kbn/as-code-filters-transforms';
+import { toAsCodeTags } from '@kbn/as-code-shared-transforms';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { StoredVegaLibraryItemState } from '../../vega_saved_object';
 import { vegaLibraryItemSchema, type VegaLibraryItemState } from '../schema';
@@ -21,8 +22,10 @@ export const transformVegaOut = (
   references: SavedObjectReference[] = []
 ): VegaLibraryItemState => {
   const { filters, ...rest } = attributes;
+  const { tags } = toAsCodeTags(references);
   return vegaLibraryItemSchema.parse({
     ...rest,
+    tags,
     ...(filters && { filters: injectFilterReferences(filters, references) }),
   });
 };

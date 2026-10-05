@@ -26,7 +26,7 @@ describe('getVegaCRUResponseBody', () => {
 
     expect(getVegaCRUResponseBody(savedObject)).toEqual({
       id: 'vega-library-item-id',
-      data: attributes,
+      data: { ...attributes, tags: [] },
       meta: { managed: false },
     });
   });

@@ -9,6 +9,7 @@
 
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { getMeta } from '@kbn/as-code-shared-schemas';
+import { findWithTagFilter } from '@kbn/as-code-utils';
 import { VEGA_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { VegaSearchRequestQuery, VegaSearchResponseBody } from './types';
 import type { StoredVegaLibraryItemState } from '../../vega_saved_object';
@@ -18,15 +19,19 @@ export const search = async (
   searchQuery: VegaSearchRequestQuery
 ): Promise<VegaSearchResponseBody> => {
   const { core } = await requestCtx.resolve(['core']);
-  const soResponse = await core.savedObjects.client.find<StoredVegaLibraryItemState>({
-    type: VEGA_SAVED_OBJECT_TYPE,
-    searchFields: ['title^3', 'description'],
-    fields: ['description', 'title'],
-    search: searchQuery.query,
-    perPage: searchQuery.per_page,
-    page: searchQuery.page ? +searchQuery.page : undefined,
-    defaultSearchOperator: 'AND',
-  });
+  const soResponse = await findWithTagFilter<StoredVegaLibraryItemState>(
+    core.savedObjects.client,
+    {
+      type: VEGA_SAVED_OBJECT_TYPE,
+      searchFields: ['title^3', 'description'],
+      fields: ['description', 'title'],
+      search: searchQuery.query,
+      perPage: searchQuery.per_page,
+      page: searchQuery.page ? +searchQuery.page : undefined,
+      defaultSearchOperator: 'AND',
+    },
+    searchQuery
+  );
 
   return {
     data: soResponse.saved_objects.map((so) => {

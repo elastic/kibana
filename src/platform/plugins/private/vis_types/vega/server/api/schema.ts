@@ -11,6 +11,7 @@ import { z } from '@kbn/zod';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import {
   asCodeQuerySchema,
+  getAsCodeTagsSchema,
   MAX_DESCRIPTION_LENGTH,
   MAX_TITLE_LENGTH,
 } from '@kbn/as-code-shared-schemas';
@@ -49,6 +50,7 @@ export const vegaLibraryItemSchema = z
       .optional()
       .meta({ description: 'A short description of the Vega library item.' }),
     spec: vegaSpecSchema,
+    tags: getAsCodeTagsSchema().optional(),
     query: asCodeQuerySchema.optional().meta({
       description:
         'KQL or Lucene query. Applied together with the dashboard query to Elasticsearch and ES|QL data sources that use `%context%: true`, and to Elasticsearch data sources that use `%dashboard_context-*%` placeholders.',

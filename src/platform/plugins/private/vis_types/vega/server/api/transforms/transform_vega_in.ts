@@ -8,6 +8,7 @@
  */
 
 import { extractFilterReferences } from '@kbn/as-code-filters-transforms';
+import { toStoredTags } from '@kbn/as-code-shared-transforms';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { StoredVegaLibraryItemState } from '../../vega_saved_object';
 import type { VegaLibraryItemState } from '../schema';
@@ -16,10 +17,11 @@ import type { VegaLibraryItemState } from '../schema';
 export const transformVegaIn = (
   state: VegaLibraryItemState
 ): { attributes: StoredVegaLibraryItemState; references: SavedObjectReference[] } => {
-  const { filters, ...rest } = state;
-  const { filters: storedFilters, references } = extractFilterReferences(filters);
+  const { state: stateWithoutTags, references: tagReferences } = toStoredTags(state);
+  const { filters, ...rest } = stateWithoutTags;
+  const { filters: storedFilters, references: filterReferences } = extractFilterReferences(filters);
   return {
     attributes: { ...rest, ...(storedFilters && { filters: storedFilters }) },
-    references,
+    references: [...filterReferences, ...tagReferences],
   };
 };

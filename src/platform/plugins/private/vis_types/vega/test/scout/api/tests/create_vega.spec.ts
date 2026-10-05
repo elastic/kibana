@@ -108,6 +108,35 @@ apiTest.describe('vega - create', { tag: tags.deploymentAgnostic }, () => {
     }
   );
 
+  apiTest('should create a vega library item with tags', async ({ apiClient, kbnClient }) => {
+    const response = await apiClient.post(VEGA_API_PATH, {
+      headers: { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+      body: { title: 'My Tagged Chart', spec: VEGA_SPEC_HJSON, tags: ['tag-1', 'tag-2'] },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(201);
+    expect(response.body.data.tags).toStrictEqual(['tag-1', 'tag-2']);
+
+    const savedObject = await kbnClient.savedObjects.get({ type: 'vega', id: response.body.id });
+    expect(savedObject.attributes.tags).toBeUndefined();
+    expect(savedObject.references).toStrictEqual([
+      { name: 'tag-ref-tag-1', type: 'tag', id: 'tag-1' },
+      { name: 'tag-ref-tag-2', type: 'tag', id: 'tag-2' },
+    ]);
+  });
+
+  apiTest('should return an empty tags array when no tags are provided', async ({ apiClient }) => {
+    const response = await apiClient.post(VEGA_API_PATH, {
+      headers: { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+      body: { title: 'My Untagged Chart', spec: VEGA_SPEC_HJSON },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(201);
+    expect(response.body.data.tags).toStrictEqual([]);
+  });
+
   apiTest('validation - returns 400 for an invalid filter', async ({ apiClient }) => {
     const response = await apiClient.post(VEGA_API_PATH, {
       headers: { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader },

@@ -41,7 +41,7 @@ export const registerSearchRoute = (
       },
       validate: {
         request: {
-          query: asCodeSearchRequestSchema.pick({ page: true, per_page: true, query: true }),
+          query: asCodeSearchRequestSchema,
         },
         response: {
           200: {

@@ -15,6 +15,7 @@ import { transformVegaOut } from './transform_vega_out';
 const state: VegaLibraryItemState = {
   title: 'Vega chart',
   spec: { format: 'hjson', value: '{ mark: point }' },
+  tags: ['tag-1', 'tag-2'],
   query: { expression: 'message:error', language: 'lucene' },
   filters: [
     {
@@ -28,7 +29,7 @@ const state: VegaLibraryItemState = {
 
 describe('Vega library item transforms', () => {
   describe('transformVegaIn', () => {
-    test('stores the API shape and extracts filter data view references', () => {
+    test('stores the API shape and extracts filter data view and tag references', () => {
       expect(transformVegaIn(state)).toEqual({
         attributes: {
           title: 'Vega chart',
@@ -45,12 +46,14 @@ describe('Vega library item transforms', () => {
         },
         references: [
           { name: 'filters[0].data_view_id', type: 'index-pattern', id: 'logs-data-view' },
+          { name: 'tag-ref-tag-1', type: 'tag', id: 'tag-1' },
+          { name: 'tag-ref-tag-2', type: 'tag', id: 'tag-2' },
         ],
       });
     });
 
-    test('does not add filters or references when filters are not provided', () => {
-      const { filters, ...stateWithoutFilters } = state;
+    test('does not add filters or references when filters and tags are not provided', () => {
+      const { filters, tags, ...stateWithoutFilters } = state;
       expect(transformVegaIn(stateWithoutFilters)).toEqual({
         attributes: stateWithoutFilters,
         references: [],
@@ -64,9 +67,12 @@ describe('Vega library item transforms', () => {
       expect(transformVegaOut(attributes, references)).toEqual(state);
     });
 
-    test('returns attributes without filters unchanged', () => {
-      const { filters, ...stateWithoutFilters } = state;
-      expect(transformVegaOut(stateWithoutFilters, [])).toEqual(stateWithoutFilters);
+    test('returns attributes without filters unchanged and defaults tags to an empty array', () => {
+      const { filters, tags, ...stateWithoutFilters } = state;
+      expect(transformVegaOut(stateWithoutFilters, [])).toEqual({
+        ...stateWithoutFilters,
+        tags: [],
+      });
     });
 
     test('throws when the stored spec does not satisfy the API schema', () => {
