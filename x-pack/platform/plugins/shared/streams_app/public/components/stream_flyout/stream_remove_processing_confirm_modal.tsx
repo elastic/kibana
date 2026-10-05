@@ -69,7 +69,7 @@ export function StreamRemoveProcessingConfirmationModal({
         }
       )}
       isLoading={loadingRequest || loading}
-      confirmButtonDisabled={loadingRequest || !confirmation}
+      confirmButtonDisabled={loadingRequest || !value || !confirmation}
       onCancel={onClose}
       onConfirm={() => {
         // Hackiest thing, but it allows me to reset the state right down to nothing, and
@@ -83,9 +83,12 @@ export function StreamRemoveProcessingConfirmationModal({
               pipelineDefinition: { steps: [] },
             })
             .then(onConfirm)
-            .then(onClose)
-            .then(refreshProcessing)
-            .then(refresh);
+            .catch(() => setLoading(false))
+            .finally(() => {
+              onClose();
+              refreshProcessing();
+              refresh();
+            });
         }
       }}
     >
