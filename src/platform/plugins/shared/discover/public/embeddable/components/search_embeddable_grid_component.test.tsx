@@ -31,6 +31,7 @@ import { createDiscoverServicesMock } from '../../__mocks__/services';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
 import { SearchEmbeddableGridComponent } from './search_embeddable_grid_component';
+import type { EsqlSource } from '@kbn/data-source';
 
 const mockDiscoverGridEmbeddableProps = jest.fn();
 
@@ -119,6 +120,7 @@ describe('SearchEmbeddableGridComponent', () => {
     savedObjectId,
     panelFilters,
     services: servicesOverride = services,
+    esqlSource$,
   }: {
     isEsql: boolean;
     expandedDoc?: DataTableRecord;
@@ -127,6 +129,7 @@ describe('SearchEmbeddableGridComponent', () => {
     savedObjectId?: string;
     panelFilters?: Filter[];
     services?: ReturnType<typeof createDiscoverServicesMock>;
+    esqlSource$?: BehaviorSubject<EsqlSource | undefined>;
   }) => {
     const savedSearch = createSavedSearch(isEsql);
     const api = createApi(savedSearch, { savedObjectId, panelFilters });
@@ -146,6 +149,7 @@ describe('SearchEmbeddableGridComponent', () => {
         <SearchEmbeddableGridComponent
           api={api}
           dataView={dataViewMock}
+          esqlSource$={esqlSource$}
           stateManager={stateManager}
           enableDocumentViewer={true}
           inlineEditing={{
@@ -189,6 +193,29 @@ describe('SearchEmbeddableGridComponent', () => {
       const lastCallProps = getLastGridProps();
       expect(lastCallProps?.onUpdateSampleSize).toBeDefined();
       expect(typeof lastCallProps?.onUpdateSampleSize).toBe('function');
+    });
+  });
+
+  describe('dataSource', () => {
+    it('passes the EsqlSource through to DiscoverGrid', async () => {
+      const esqlSource = {
+        kind: 'esql',
+        id: 'esql-test',
+        getColumns: () => [],
+        getColumn: () => undefined,
+      } as unknown as EsqlSource;
+
+      renderComponent({
+        isEsql: true,
+        esqlSource$: new BehaviorSubject<EsqlSource | undefined>(esqlSource),
+      });
+
+      await waitFor(() => {
+        expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
+      });
+
+      const lastCallProps = mockDiscoverGridEmbeddableProps.mock.calls.at(-1)?.[0];
+      expect(lastCallProps?.dataSource).toBe(esqlSource);
     });
   });
 

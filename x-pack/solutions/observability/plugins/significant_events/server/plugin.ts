@@ -24,6 +24,7 @@ import {
   distinctUntilChanged,
   exhaustMap,
   filter,
+  firstValueFrom,
   from,
   of,
   skip,
@@ -59,7 +60,6 @@ import {
 } from './lib/workflows/setup/managed_workflows_installer';
 import { registerFeatureFlags } from './feature_flags';
 import { getSignificantEventsTuningConfig } from './lib/significant_events/helpers/get_significant_events_tuning_config';
-import { deleteLegacyRules } from './lib/significant_events/rules/delete_legacy_rules';
 
 import { createSignificantEventsAlertingContextResolver } from './lib/significant_events/alerting/significant_events_alerting_context';
 import type { SignificantEventsAlertingContext } from './lib/significant_events/alerting/significant_events_alerting_context';
@@ -86,7 +86,7 @@ import { eventsDataStream } from './lib/significant_events/events';
 import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { registerSignificantEventsSkills } from './agent_builder/skills/register_skills';
 import { registerAgentBuilderSmlTypes } from './agent_builder/sml/register_sml_types';
-import { registerSignificantEventsInferenceFeatures } from './register_significant_events_inference_features';
+import { resolveModelStepDefinition } from './step_definitions/resolve_model';
 import {
   createContinuousKiOnboardingWorkflowService,
   type ContinuousKiOnboardingWorkflowService,
@@ -183,11 +183,6 @@ export class SignificantEventsPlugin
 
     this.ebtTelemetryService.setup(core.analytics);
 
-    registerSignificantEventsInferenceFeatures(
-      plugins.searchInferenceEndpoints,
-      this.logger.get('inference-features')
-    );
-
     const significantEventsServices = createSignificantEventsServices();
     const knowledgeIndicatorService = new KnowledgeIndicatorService(core, this.logger);
     const { streams: streamsSetup } = plugins;
@@ -200,7 +195,7 @@ export class SignificantEventsPlugin
       rulesClientOptions?: RulesClientCreateOptions;
     }): Promise<RouteHandlerScopedClients> => {
       const [coreStart, pluginsStart] = await core.getStartServices();
-      const isServerless = plugins.cloud?.isServerlessEnabled ?? false;
+      const cpsEnabled = plugins.cps?.getCpsEnabled() ?? false;
 
       const scopedSoClient = coreStart.savedObjects.getScopedClient(request);
       const uiSettingsClient = coreStart.uiSettings.asScopedToClient(scopedSoClient);
@@ -213,7 +208,7 @@ export class SignificantEventsPlugin
       // they model all data available to a stream - so extraction must always read across every
       // linked project.
       //
-      // Detection matches that all-projects scope on serverless via `withAllProjectsRouting`.
+      // Detection matches that all-projects scope when CPS is enabled via `withAllProjectsRouting`.
       const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
       const streamDataEsClient = coreStart.elasticsearch.client.asScoped(request, {
         projectRouting: 'expression',
@@ -233,17 +228,15 @@ export class SignificantEventsPlugin
 
       const space = pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
-      const useRuleEventsRead = await coreStart.featureFlags.getBooleanValue(
-        SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ,
-        false
-      );
-
       const significantEventsClients = createSignificantEventsClients({
         services: significantEventsServices,
         dataStreams: coreStart.dataStreams,
         esClient: scopedClusterClient.asCurrentUser,
         space,
-        useRuleEventsRead,
+        useRuleEventsRead$: coreStart.featureFlags.getBooleanValue$(
+          SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ,
+          false
+        ),
         triggerEmitter: createTriggerEmitter({
           workflowsExtensions: pluginsStart.workflowsExtensions,
           request,
@@ -269,22 +262,10 @@ export class SignificantEventsPlugin
         return alertEventsClientPromise;
       };
 
-      const deleteLegacyRulesById = async (ruleIds: string[]): Promise<void> => {
-        if (ruleIds.length === 0) {
-          return;
-        }
-        const rulesClient = await pluginsStart.alerting.getRulesClientWithRequestInSpace(
-          request,
-          DEFAULT_SPACE_ID,
-          rulesClientOptions
-        );
-        await deleteLegacyRules(rulesClient, ruleIds);
-      };
-
       const resolveSignificantEventsAlertingContext =
         createSignificantEventsAlertingContextResolver({
           getAlertingV2RulesClient,
-          isServerless,
+          cpsEnabled,
         });
 
       const createKnowledgeIndicatorClient = (context: SignificantEventsAlertingContext) =>
@@ -313,7 +294,6 @@ export class SignificantEventsPlugin
         getSignificantEventsAlertingContext: resolveSignificantEventsAlertingContext,
         getKnowledgeIndicatorClient,
         getAlertEventsClient,
-        deleteLegacyRules: deleteLegacyRulesById,
         ...significantEventsClients,
         inferenceClient,
         fieldsMetadataClient,
@@ -356,9 +336,8 @@ export class SignificantEventsPlugin
         },
         getUseRuleEventsRead: async () => {
           const [coreStart] = await core.getStartServices();
-          return coreStart.featureFlags.getBooleanValue(
-            SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ,
-            false
+          return firstValueFrom(
+            coreStart.featureFlags.getBooleanValue$(SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ, false)
           );
         },
       });
@@ -418,6 +397,14 @@ export class SignificantEventsPlugin
 
     plugins.workflowsExtensions?.registerManagedWorkflowOwner(
       SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER
+    );
+    plugins.workflowsExtensions?.registerStepDefinition(
+      resolveModelStepDefinition({
+        getInference: () => this.server?.inference,
+        getSavedObjects: () => this.server?.core?.savedObjects,
+        getUiSettings: () => this.server?.core?.uiSettings,
+        logger: this.logger.get('resolve_model'),
+      })
     );
 
     // Custom event-driven triggers users can subscribe to from their own workflows.
@@ -502,7 +489,6 @@ export class SignificantEventsPlugin
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
       this.server.inference = plugins.inference;
       this.server.licensing = plugins.licensing;
-      this.server.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
       this.server.spaces = plugins.spaces;
       this.server.workflowsExtensions = plugins.workflowsExtensions;
       this.server.agentBuilder = plugins.agentBuilder;

@@ -24,6 +24,7 @@ import { bestEffortUserProfileIdResolver, resolveWorkloadBinder } from './bindin
 import { ensureClusterPrivilege } from './cluster_privilege';
 import { parseCreateServiceAccountParams } from './create_params';
 import type { ServiceAccountCredentialStore } from './credentials';
+import { toDescriptionField } from './description_field';
 import {
   ES_SERVICE_ACCOUNT_MAX_ROLES,
   ES_SERVICE_ACCOUNT_ROLE_LIMITS,
@@ -61,15 +62,17 @@ const userManagedEntrySchema = z.object({ type: z.literal('user_managed') });
  * principal. Parsed separately from the discriminator above, so "this is not Kibana's account"
  * and "Kibana cannot read this account" stay different answers.
  *
- * Bounded by what Elasticsearch allows, the same limits Kibana sends with: an account written
- * outside Kibana can hold that much, and it still has to read as "taken" rather than as
- * unreadable.
+ * The roles are bounded by what Elasticsearch allows, the same limits Kibana sends with. An
+ * account written outside Kibana can hold that much, and it must still read as "taken" rather
+ * than as unreadable. The description is left unbounded for the same reason.
  */
 const accountEntrySchema = z.object({
   roles: z
     .array(z.string().min(1).max(ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH))
     .max(ES_SERVICE_ACCOUNT_MAX_ROLES),
   enabled: z.boolean(),
+  // codeql[js/kibana/unbounded-string-in-schema] Elasticsearch caps it at 1,000 characters on write.
+  description: z.string().optional(),
 });
 
 /**
@@ -80,6 +83,7 @@ interface QueriedServiceAccount {
   username: string;
   roles: string[];
   enabled: boolean;
+  description?: string;
 }
 
 /** An Elasticsearch user-managed service account, as Elasticsearch reports it. */
@@ -89,16 +93,18 @@ interface ElasticsearchServiceAccount {
   namespace: string;
   roles: string[];
   enabled: boolean;
+  description?: string;
 }
 
 /** Narrows an account to the directory entry. */
 const toDirectoryEntry = (
-  { id, name, roles, enabled }: ElasticsearchServiceAccount,
+  { id, name, roles, enabled, description }: ElasticsearchServiceAccount,
   assumable: boolean
 ): ServiceAccountDirectoryEntry => ({
   id,
   name,
   roles,
+  ...toDescriptionField(description),
   enabled,
   assumable,
 });
@@ -211,7 +217,10 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     }
 
     const namespace = ES_SERVICE_ACCOUNT_NAMESPACE;
-    const { name, roles } = parseCreateServiceAccountParams(params, ES_SERVICE_ACCOUNT_ROLE_LIMITS);
+    const { name, roles, description } = parseCreateServiceAccountParams(
+      params,
+      ES_SERVICE_ACCOUNT_ROLE_LIMITS
+    );
     const serviceAccountId = `${namespace}/${name}`;
 
     const esClient = this.clusterClient.asScoped(request).asCurrentUser;
@@ -230,7 +239,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       await esClient.transport.request({
         method: 'PUT',
         path: `/_security/service/${encodeURIComponent(namespace)}/${encodeURIComponent(name)}`,
-        body: { roles },
+        body: { roles, ...toDescriptionField(description) },
         querystring: { refresh: 'wait_for' },
       });
     } catch (e) {
@@ -265,7 +274,12 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       );
       throw e;
     }
-    return { id: serviceAccountId, name, roles };
+    return {
+      id: serviceAccountId,
+      name,
+      roles,
+      ...toDescriptionField(description),
+    };
   }
 
   /**
@@ -315,17 +329,19 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
 
     // An account whose principal Kibana cannot split is skipped rather than taken as a reason to
     // refuse the page: an oddity in one account must not make the whole directory unreadable.
-    const accounts = rawAccounts.slice(0, limit).flatMap(({ username, roles, enabled }) => {
-      const principal = parseEsServiceAccountId(username);
-      if (!principal) {
-        this.logger.warn(
-          `Skipping service account [${username}], which Elasticsearch reported with an unrecognized principal`
-        );
-        return [];
-      }
+    const accounts = rawAccounts
+      .slice(0, limit)
+      .flatMap(({ username, roles, enabled, description }) => {
+        const principal = parseEsServiceAccountId(username);
+        if (!principal) {
+          this.logger.warn(
+            `Skipping service account [${username}], which Elasticsearch reported with an unrecognized principal`
+          );
+          return [];
+        }
 
-      return [{ id: username, ...principal, roles, enabled }];
-    });
+        return [{ id: username, ...principal, roles, enabled, description }];
+      });
 
     const credentialled = await this.credentialStore.findExisting(accounts.map(({ id }) => id));
 
@@ -589,6 +605,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       namespace,
       roles: parsed.data.roles,
       enabled: parsed.data.enabled,
+      ...toDescriptionField(parsed.data.description),
     };
   }
 
