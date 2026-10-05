@@ -26,6 +26,7 @@ import {
   ConversationOriginType,
   TimelineEventType,
   isRequestAbortedError,
+  isRoundCompleteEvent,
   type ChatAgentEvent,
   type ChatEvent,
   type RoundCompleteEvent,
@@ -571,6 +572,42 @@ describe('handleAgentExecution', () => {
       expect(conversationClient.get).toHaveBeenCalledWith('conversation-from-origin');
       expect(conversationClient.getByOrigin).not.toHaveBeenCalled();
       expect(executeAgentMock).toHaveBeenCalledWith(expect.objectContaining({ origin }));
+    });
+
+    it('adds the Slack output to round_complete for a Slack round without persisting it', async () => {
+      const { conversationClient, deps } = setup({
+        roundCompleteEvent: {
+          type: ChatEventType.roundComplete,
+          data: { round: createRound({}) },
+        },
+      });
+
+      const events = await runExecution({ deps, executionOrigin: origin });
+
+      const roundComplete = events.find(isRoundCompleteEvent);
+      expect(roundComplete?.projection).toEqual({
+        slack: {
+          text: 'assistant response',
+          blocks: [{ type: 'markdown', text: 'assistant response' }],
+        },
+      });
+
+      expect(JSON.stringify(conversationClient.update.mock.calls)).not.toContain('projection');
+    });
+
+    it('does not add a projection to a round without origin in a conversation with one', async () => {
+      const { deps } = setup({
+        roundCompleteEvent: {
+          type: ChatEventType.roundComplete,
+          data: { round: createRound({}) },
+        },
+      });
+
+      const events = await runExecution({ deps });
+
+      const roundComplete = events.find(isRoundCompleteEvent);
+      expect(roundComplete).toBeDefined();
+      expect(roundComplete).not.toHaveProperty('projection');
     });
   });
 

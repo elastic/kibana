@@ -74,6 +74,7 @@ import {
   type ConversationWithOperation,
 } from './utils';
 import { reportRoundTelemetry } from './utils/report_round_telemetry';
+import { applyOriginAdapters } from './origin_adapters';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
 import { getCurrentSpaceId } from '../../utils/spaces';
@@ -398,6 +399,7 @@ const handleConversationExecution = async ({
           // Must stay below the telemetry tap: `resume_execution` carries the unmerged per-execution
           // round that telemetry needs, and is only stripped so it doesn't reach the client.
           map(stripResumeExecution),
+          applyOriginAdapters({ origin: roundOrigin, logger }),
           convertErrors({
             agentId,
             logger,
