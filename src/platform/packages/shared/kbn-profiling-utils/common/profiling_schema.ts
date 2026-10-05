@@ -31,5 +31,4 @@ export const PROFILING_EVENTS_INDEX_BY_SCHEMA: Readonly<Record<ProfilingSchema, 
 
 export interface ProfilingSchemasAvailability {
   schemas: ProfilingSchema[];
-  preferredSchema: ProfilingSchema | null;
 }
