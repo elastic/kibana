@@ -9902,16 +9902,28 @@
             "runs": {
               "properties": {
                 "total": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of workflow runs recorded on cases"
+                  }
                 },
                 "monthly": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of workflow runs recorded on cases in the last month"
+                  }
                 },
                 "weekly": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of workflow runs recorded on cases in the last week"
+                  }
                 },
                 "daily": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of workflow runs recorded on cases in the last day"
+                  }
                 }
               }
             },
