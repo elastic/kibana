@@ -3,7 +3,7 @@ requestBody:
     application/json:
       examples:
         messageRequestExample:
-          description: "Send a message to the default agent, starting a new conversation. Requires the `agentBuilder:experimentalFeatures` advanced setting to be enabled."
+          description: "Send a message to the default agent and start a new conversation."
           value:
             message: "What is Elasticsearch?"
         messageToAgentRequestExample:
