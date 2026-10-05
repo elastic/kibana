@@ -33,6 +33,8 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
   layout,
   category,
   isDisabled,
+  target,
+  rel,
   ...cardRest
 }) => {
   const {
@@ -94,7 +96,14 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
     typeof button !== 'string' && typeof button !== 'undefined' ? (
       button
     ) : (
-      <EuiButton fill href={resolvedHref} onClick={onClick} isDisabled={isDisabled}>
+      <EuiButton
+        fill
+        href={resolvedHref}
+        onClick={onClick}
+        isDisabled={isDisabled}
+        target={target}
+        rel={rel}
+      >
         {button || title || defaultCTAtitle}
       </EuiButton>
     );
