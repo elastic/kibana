@@ -42,6 +42,7 @@ jest.mock('../../../../features/ai_integration', () => ({
     start: jest.fn(),
     stop: jest.fn(),
     setAttachmentId: jest.fn(),
+    applyDeferred: jest.fn(),
   })),
   ProposalManager: jest.fn().mockImplementation(() => ({
     initialize: jest.fn(),
@@ -1406,5 +1407,36 @@ describe('useAgentBuilderIntegration', () => {
       expect(agentBuilder.addAttachment.mock.calls[0][0].data.readOnlyReason).toBeUndefined();
     });
 
+    it('holds proposals while it cannot apply them and shows them once it can', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editorRef = { current: createMockEditor(mockModel) };
+
+      const { rerender } = renderHook((props) => useAgentBuilderIntegration(props), {
+        initialProps: {
+          editorRef,
+          isEditorMounted: true,
+          workflowId: 'workflow-a',
+          canApplyProposals: false,
+        },
+      });
+      await flushChatAccessCheck();
+
+      const bridge = mockAttachmentBridge.mock.results.at(-1)?.value;
+      const startOptions = bridge.start.mock.calls[0][3];
+      expect(startOptions.isReadOnly()).toBe(true);
+
+      expect(bridge.applyDeferred).not.toHaveBeenCalled();
+
+      rerender({
+        editorRef,
+        isEditorMounted: true,
+        workflowId: 'workflow-a',
+        canApplyProposals: true,
+      });
+
+      expect(startOptions.isReadOnly()).toBe(false);
+      expect(bridge.applyDeferred).toHaveBeenCalledTimes(1);
+    });
   });
 });

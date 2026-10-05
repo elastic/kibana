@@ -41,6 +41,11 @@ interface UseAgentBuilderIntegrationParams {
   validationErrors?: YamlValidationResult[] | null;
   /** Why the editor cannot apply changes; undefined when the user can edit. */
   readOnlyReason?: WorkflowEditorReadOnlyReason;
+  /**
+   * False while the editor cannot take agent proposals. Proposals wait until
+   * it turns true. Defaults to true.
+   */
+  canApplyProposals?: boolean;
 }
 
 export interface OpenAgentChatOptions {
@@ -77,6 +82,7 @@ export const useAgentBuilderIntegration = ({
   workflowName,
   validationErrors,
   readOnlyReason,
+  canApplyProposals = true,
 }: UseAgentBuilderIntegrationParams): UseAgentBuilderIntegrationReturn => {
   const { workflowsManagement, application } = useKibana().services;
   const agentBuilder = workflowsManagement?.agentBuilder;
@@ -96,6 +102,8 @@ export const useAgentBuilderIntegration = ({
   const readOnlyReasonRef = useRef(readOnlyReason);
   readOnlyReasonRef.current = readOnlyReason;
   const syncAttachmentRef = useRef<((yaml: string) => void) | null>(null);
+  const canApplyProposalsRef = useRef(canApplyProposals);
+  canApplyProposalsRef.current = canApplyProposals;
   const chatRefHandle = useRef<{ close: () => void } | null>(null);
   const hasAutoOpenedRef = useRef(false);
   const unsavedWorkflowIdRef = useRef<string>(v4());
@@ -234,6 +242,7 @@ export const useAgentBuilderIntegration = ({
       getChatEvents$: agentBuilder.events.getChatEvents$.bind(agentBuilder.events),
       attachmentId,
       workflowId,
+      isReadOnly: () => !canApplyProposalsRef.current,
       onProposalReceived: ({ proposalId, toolId }) => {
         telemetry.reportAiProposalReceived({
           workflowId,
@@ -412,6 +421,10 @@ export const useAgentBuilderIntegration = ({
     telemetry,
     dispatch,
   ]);
+
+  useEffect(() => {
+    if (canApplyProposals) attachmentBridgeRef.current?.applyDeferred();
+  }, [canApplyProposals]);
 
   const openAgentChat = useCallback(
     (options?: OpenAgentChatOptions) => {

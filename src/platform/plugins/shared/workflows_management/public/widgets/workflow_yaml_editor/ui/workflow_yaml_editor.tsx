@@ -378,6 +378,9 @@ export const WorkflowYAMLEditor = ({
     workflowName: getWorkflowName(workflow, workflowDefinition),
     validationErrors,
     readOnlyReason,
+    // The store shows the workflow YAML only after it catches up with the URL
+    // tab, so proposals wait for both.
+    canApplyProposals: !isReadOnlyYaml && !isExecutionYaml,
   });
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
