@@ -115,19 +115,19 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     });
   });
 
-  apiTest('create: per_episode grouping with on_status_change strategy', async ({ apiClient }) => {
+  apiTest('create: per_alert grouping with on_status_change strategy', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
         name: 'per-episode-policy',
-        grouping_mode: 'per_episode',
+        grouping_mode: 'per_alert',
         throttle: { strategy: 'on_status_change' },
       }),
     });
 
     expect(response).toHaveStatusCode(201);
     expect(response.body).toMatchObject({
-      grouping_mode: 'per_episode',
+      grouping_mode: 'per_alert',
       throttle: { strategy: 'on_status_change' },
     });
   });
@@ -423,7 +423,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
       const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: buildCreateActionPolicyData({
-          grouping_mode: 'per_episode',
+          grouping_mode: 'per_alert',
           throttle: { strategy: 'per_status_interval' },
         }),
       });

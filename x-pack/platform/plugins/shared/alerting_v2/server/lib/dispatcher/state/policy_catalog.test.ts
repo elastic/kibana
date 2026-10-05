@@ -27,10 +27,10 @@ describe('PolicyCatalog', () => {
     expect(catalog.inSpace('unknown')).toEqual([]);
   });
 
-  it('falls back to per_episode grouping for absent policies or modes', () => {
-    expect(catalog.groupingModeOf('p1')).toBe('per_episode');
+  it('falls back to per_alert grouping for absent policies or modes', () => {
+    expect(catalog.groupingModeOf('p1')).toBe('per_alert');
     expect(catalog.groupingModeOf('p2')).toBe('all');
-    expect(catalog.groupingModeOf('missing')).toBe('per_episode');
+    expect(catalog.groupingModeOf('missing')).toBe('per_alert');
   });
 
   it('resolves the dispatch api key', () => {

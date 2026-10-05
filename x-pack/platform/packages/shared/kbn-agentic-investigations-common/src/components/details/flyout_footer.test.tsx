@@ -93,4 +93,36 @@ describe('ConversationDetailsFlyoutFooter', () => {
       screen.queryByRole('button', { name: openEscalationButtonName })
     ).not.toBeInTheDocument();
   });
+
+  it('lets wrapEscalationButton hide the escalation button', () => {
+    renderWithKibanaRenderContext(
+      <ConversationDetailsFlyoutFooter
+        investigation={investigation}
+        isOpenedFromChat={false}
+        onOpenChat={jest.fn()}
+        onOpenEscalation={jest.fn(() => null)}
+        wrapEscalationButton={() => null}
+      />
+    );
+
+    expect(
+      screen.queryByRole('button', { name: openEscalationButtonName })
+    ).not.toBeInTheDocument();
+  });
+
+  it('renders the escalation button through wrapEscalationButton', () => {
+    renderWithKibanaRenderContext(
+      <ConversationDetailsFlyoutFooter
+        investigation={investigation}
+        isOpenedFromChat={false}
+        onOpenChat={jest.fn()}
+        onOpenEscalation={jest.fn(() => null)}
+        wrapEscalationButton={(button) => <div data-test-subj="escalationButtonGate">{button}</div>}
+      />
+    );
+
+    expect(screen.getByTestId('escalationButtonGate')).toContainElement(
+      screen.getByRole('button', { name: openEscalationButtonName })
+    );
+  });
 });

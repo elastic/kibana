@@ -3988,6 +3988,12 @@ importers:
       '@kbn/vectordb-onboarding':
         specifier: workspace:*
         version: link:x-pack/solutions/vectordb/packages/kbn-vectordb-onboarding
+      '@kbn/vega-sandbox':
+        specifier: workspace:*
+        version: link:src/platform/packages/private/kbn-vega-sandbox
+      '@kbn/vega-sandbox-example-plugin':
+        specifier: workspace:*
+        version: link:examples/vega_sandbox_example
       '@kbn/vis-default-editor-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/private/vis_default_editor
@@ -4571,8 +4577,8 @@ importers:
         specifier: 4.18.1
         version: 4.18.1
       lru-cache:
-        specifier: 11.5.2
-        version: 11.5.2
+        specifier: 11.5.3
+        version: 11.5.3
       lz-string:
         specifier: 1.5.0
         version: 1.5.0
@@ -6912,6 +6918,8 @@ importers:
 
   examples/v8_profiler_examples: {}
 
+  examples/vega_sandbox_example: {}
+
   examples/workflows_extensions_example: {}
 
   oas_docs: {}
@@ -7725,6 +7733,8 @@ importers:
   src/platform/packages/private/kbn-ui-shared-deps-src: {}
 
   src/platform/packages/private/kbn-validate-oas: {}
+
+  src/platform/packages/private/kbn-vega-sandbox: {}
 
   src/platform/packages/private/kbn-workflow-graph-screenshot-cli: {}
 
@@ -21130,8 +21140,8 @@ packages:
     resolution: {integrity: sha512-ESL2CrkS/2wTPfuend7Zhkzo2u0daGJ/A2VucJOgQ/C48S/zB8MMeMHSGKYpXhIjbPxfuezITkaBH1wqv00DDQ==}
     engines: {node: 20 || >=22}
 
-  lru-cache@11.5.2:
-    resolution: {integrity: sha512-4pfM1Ff0x50o0tQwb5ucw/RzNyD0/YJME6IVcStalZuMWxdt3sR3huStTtxz4PUmvZfRguvDejasvQ2kifR11g==}
+  lru-cache@11.5.3:
+    resolution: {integrity: sha512-U4N8FgzmWxc8k1VH8Kr6lQg18U7Fjvby6wXHVRX/ZZ7IwWbRMgrRbP0Wrb5q5NVinryp4SQampHKdvtecItxUg==}
     engines: {node: 20 || >=22}
 
   lru-cache@5.1.1:
@@ -22417,8 +22427,8 @@ packages:
     resolution: {integrity: sha512-XDF38WCH3z5OV/OVa8GKUNtLAyneuzbCisx7QUCF8Q6Nutx0WnJrQe5O+kOtBlLfRNUws98Y58Lblp+NJG5T4Q==}
     hasBin: true
 
-  pbkdf2@3.1.6:
-    resolution: {integrity: sha512-BT6eelPB1EyGHo8pC0o9Bl6k6SYVhKO1jEbd3lcTrtr7XHdjP8BW1YpfCV3G9Kwkxgattk+S5q2/RvuttCsS1g==}
+  pbkdf2@3.1.7:
+    resolution: {integrity: sha512-nS4mvFgVwUrecPTRdpdseM2fwpdfnX0/HibA8DgBRQtihUAzHQYJFU2l+OlEtiXtpqkrMvCPDwyXMUnASDt6Qw==}
     engines: {node: '>= 0.10'}
 
   pdf-lib@1.17.1:
@@ -35097,7 +35107,7 @@ snapshots:
       diffie-hellman: 5.0.3
       hash-base: 3.0.5
       inherits: 2.0.4
-      pbkdf2: 3.1.6
+      pbkdf2: 3.1.7
       public-encrypt: 4.0.3
       randombytes: 2.1.0
       randomfill: 1.0.4
@@ -39686,7 +39696,7 @@ snapshots:
 
   lru-cache@11.2.6: {}
 
-  lru-cache@11.5.2: {}
+  lru-cache@11.5.3: {}
 
   lru-cache@5.1.1:
     dependencies:
@@ -41238,7 +41248,7 @@ snapshots:
       asn1.js: 4.10.1
       browserify-aes: 1.2.0
       evp_bytestokey: 1.0.3
-      pbkdf2: 3.1.6
+      pbkdf2: 3.1.7
       safe-buffer: 5.2.1
 
   parse-entities@2.0.0:
@@ -41319,7 +41329,7 @@ snapshots:
 
   path-scurry@2.0.2:
     dependencies:
-      lru-cache: 11.5.2
+      lru-cache: 11.5.3
       minipass: 7.1.3
 
   path-to-regexp@0.1.13: {}
@@ -41348,7 +41358,7 @@ snapshots:
       ieee754: 1.2.1
       resolve-protobuf-schema: 2.1.0
 
-  pbkdf2@3.1.6:
+  pbkdf2@3.1.7:
     dependencies:
       create-hash: 1.2.0
       create-hmac: 1.1.7

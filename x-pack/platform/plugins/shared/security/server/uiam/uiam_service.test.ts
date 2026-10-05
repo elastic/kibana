@@ -76,7 +76,8 @@ describe('UiamService', () => {
         { serverless: true }
       ).uiam,
       {
-        kibanaServerResourceURL: 'https://my-project.kb.us-east-1.cloud.es.io:9243',
+        kibanaServerResourceURL:
+          'https://my-project.kb.us-east-1.cloud.es.io:9243/api/agent_builder/mcp',
         elasticsearchUrl: 'https://es.example.com',
         kibanaVersion: '9.0.0',
       }
@@ -653,12 +654,15 @@ describe('UiamService', () => {
       (securityTelemetry.recordOAuthTokenExchangeAttempt as jest.Mock).mockClear();
     });
 
+    const expectedAudience =
+      'https://my-project.kb.us-east-1.cloud.es.io:9243/api/agent_builder/mcp';
+
     it('properly calls UIAM service to exchange an OAuth token for an ephemeral token', async () => {
       const mockResponse = {
         token: 'essu_ephemeral_token_value',
         credentials: {
           oauth: {
-            audience: 'https://my-project.kb.us-east-1.cloud.es.io:9243',
+            audience: expectedAudience,
           },
         },
       };
@@ -668,13 +672,15 @@ describe('UiamService', () => {
         json: async () => mockResponse,
       });
 
-      await expect(uiamService.exchangeOAuthToken('essu_oauth_access_token')).resolves.toBe(
+      await expect(uiamService.exchangeOAuthToken('essu_oauth_access_token', '')).resolves.toBe(
         'essu_ephemeral_token_value'
       );
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith(
-        'https://uiam.service/uiam/api/v1/authentication/_authenticate?include_token=true&audience=https%3A%2F%2Fmy-project.kb.us-east-1.cloud.es.io%3A9243',
+        `https://uiam.service/uiam/api/v1/authentication/_authenticate?include_token=true&audience=${encodeURIComponent(
+          expectedAudience
+        )}`,
         {
           method: 'POST',
           headers: {
@@ -702,7 +708,7 @@ describe('UiamService', () => {
         }),
       });
 
-      await expect(uiamService.exchangeOAuthToken('essu_oauth_access_token')).rejects.toThrow(
+      await expect(uiamService.exchangeOAuthToken('essu_oauth_access_token', '')).rejects.toThrow(
         'OAuth token audience mismatch'
       );
       expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
@@ -715,6 +721,69 @@ describe('UiamService', () => {
       );
     });
 
+    it('rejects when audience has the same host but a different space prefix', async () => {
+      const spaceBExpectedAudience =
+        'https://my-project.kb.us-east-1.cloud.es.io:9243/s/space-b/api/agent_builder/mcp';
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          token: 'essu_ephemeral_token_value',
+          credentials: {
+            oauth: { audience: spaceBExpectedAudience },
+          },
+        }),
+      });
+
+      await expect(
+        uiamService.exchangeOAuthToken('essu_oauth_access_token', '/s/space-a')
+      ).rejects.toThrow('OAuth token audience mismatch');
+    });
+
+    it.each(['marketing', 'default'])(
+      'succeeds when audience matches the literal /s/%s prefix',
+      async (spaceId) => {
+        const spaceAudience = `https://my-project.kb.us-east-1.cloud.es.io:9243/s/${spaceId}/api/agent_builder/mcp`;
+
+        fetchSpy.mockResolvedValue({
+          ok: true,
+          json: async () => ({
+            token: 'essu_space_token',
+            credentials: {
+              oauth: { audience: spaceAudience },
+            },
+          }),
+        });
+
+        await expect(
+          uiamService.exchangeOAuthToken('essu_oauth_access_token', `/s/${spaceId}`)
+        ).resolves.toBe('essu_space_token');
+        expect(fetchSpy).toHaveBeenCalledWith(
+          `https://uiam.service/uiam/api/v1/authentication/_authenticate?include_token=true&audience=${encodeURIComponent(
+            spaceAudience
+          )}`,
+          expect.anything()
+        );
+      }
+    );
+
+    it.each(['/s/marketing', '/s/default'])(
+      'rejects a default-space audience for the explicit space prefix %s',
+      async (spacePrefix) => {
+        fetchSpy.mockResolvedValue({
+          ok: true,
+          json: async () => ({
+            token: 'essu_ephemeral_token_value',
+            credentials: { oauth: { audience: expectedAudience } },
+          }),
+        });
+
+        await expect(
+          uiamService.exchangeOAuthToken('essu_oauth_access_token', spacePrefix)
+        ).rejects.toThrow('OAuth token audience mismatch');
+      }
+    );
+
     it('throws and logs error when UIAM service returns an error', async () => {
       fetchSpy.mockResolvedValue({
         ok: false,
@@ -723,7 +792,7 @@ describe('UiamService', () => {
         headers: new Headers(),
       });
 
-      await expect(uiamService.exchangeOAuthToken('essu_invalid_token')).rejects.toThrow();
+      await expect(uiamService.exchangeOAuthToken('essu_invalid_token', '')).rejects.toThrow();
       expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
         expect.any(Number),
         { outcome: 'failure', oauthErrorType: 'UNKNOWN', oauthErrorCode: undefined }
@@ -746,7 +815,7 @@ describe('UiamService', () => {
         headers: new Headers(),
       });
 
-      await expect(uiamService.exchangeOAuthToken('essu_expired_token')).rejects.toThrow();
+      await expect(uiamService.exchangeOAuthToken('essu_expired_token', '')).rejects.toThrow();
       expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
         expect.any(Number),
         { outcome: 'failure', oauthErrorType: 'AUTHENTICATION.TOKEN', oauthErrorCode: '0x7E0116' }
