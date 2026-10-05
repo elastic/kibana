@@ -119,7 +119,7 @@ describe('resolveConnectorIdStepType', () => {
     ).toBe('http');
   });
 
-  it('maps waitForApproval slack2 channel connector-id to slack2 connector type', () => {
+  it('maps waitForApproval slack2 channel connector-id to slack2.sendMessage', () => {
     const focusedYamlPair = {
       path: ['with', 'channels', 'slack2', 'connector-id'],
     } as StepPropInfo;
@@ -130,7 +130,7 @@ describe('resolveConnectorIdStepType', () => {
         ['steps', 0, ...focusedYamlPair.path],
         focusedYamlPair
       )
-    ).toBe('slack2');
+    ).toBe('slack2.sendMessage');
   });
 });
 

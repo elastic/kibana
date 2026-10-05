@@ -128,7 +128,7 @@ steps:
     expect(result[1].key).toBe('my-slack-api');
     expect(result[1].connectorType).toBe('slack_api');
     expect(result[2].key).toBe('my-slack2');
-    expect(result[2].connectorType).toBe('slack2');
+    expect(result[2].connectorType).toBe('slack2.sendMessage');
   });
 
   it('should resolve connector type for waitForInput notification channel connector-id', () => {
