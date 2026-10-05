@@ -158,6 +158,64 @@ describe('getAlertEntities', () => {
     expect(search.mock.calls[0][0].aggs.host_entities.terms.size).toBe(3);
   });
 
+  // A partial result would be a short entity list reported as complete.
+  it('asks Elasticsearch to reject partial results', async () => {
+    const { client, search } = createClient();
+
+    await getAlertEntities({
+      alertIds: ['a'],
+      entityTypes: ['host'],
+      esClient: client,
+      maxEntities: 5,
+      spaceId: 'default',
+    });
+
+    expect(search).toHaveBeenCalledWith(
+      expect.objectContaining({ allow_partial_search_results: false }),
+      expect.anything()
+    );
+  });
+
+  it.each([
+    ['timed out', { ...response, timed_out: true }],
+    ['had a shard fail', { ...response, _shards: { failed: 1, successful: 1, total: 2 } }],
+  ])(
+    'rejects a response that %s rather than returning partial entities',
+    async (_label, partial) => {
+      const { client } = createClient(partial);
+
+      await expect(
+        getAlertEntities({
+          alertIds: ['a'],
+          entityTypes: ['host', 'user'],
+          esClient: client,
+          maxEntities: 5,
+          spaceId: 'default',
+        })
+      ).rejects.toThrow('Could not read every alert: the search returned partial results');
+    }
+  );
+
+  it('accepts a complete response', async () => {
+    const { client } = createClient({
+      ...response,
+      _shards: { failed: 0, successful: 2, total: 2 },
+      timed_out: false,
+    });
+
+    expect(
+      (
+        await getAlertEntities({
+          alertIds: ['a'],
+          entityTypes: ['host', 'user'],
+          esClient: client,
+          maxEntities: 5,
+          spaceId: 'default',
+        })
+      ).total
+    ).toBe(2);
+  });
+
   // A space where detection has never written an alert has no alerts index yet.
   it('is empty when the space has no alerts index', async () => {
     const search = jest.fn().mockRejectedValue(responseError(404, 'index_not_found_exception'));

@@ -45,10 +45,16 @@ export const getAlertEntities = async ({
 
   // No `ignore_unavailable`: it would turn an alerts index the principal may not read into an
   // empty result. Only a space with no alerts index at all reads as having no entities.
+  //
+  // `allow_partial_search_results: false`: by default Elasticsearch answers a search with a shard
+  // failure or timeout with a 200 and whatever the other shards returned, which here would be a
+  // short entity list reported as complete. Rejecting it lets the caller say the alerts could not
+  // be read instead.
   const response = await esClient
     .search(
       {
         aggs,
+        allow_partial_search_results: false,
         expand_wildcards: ['open', 'hidden'],
         index,
         query: { ids: { values: alertIds } },
@@ -67,6 +73,11 @@ export const getAlertEntities = async ({
 
   if (response == null) {
     return NO_ENTITIES;
+  }
+
+  // A backstop for a partial response that still arrives as a 200.
+  if (response.timed_out || (response._shards?.failed ?? 0) > 0) {
+    throw new Error('Could not read every alert: the search returned partial results');
   }
 
   return boundAlertEntities({
