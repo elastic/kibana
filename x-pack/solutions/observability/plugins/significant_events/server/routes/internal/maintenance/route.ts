@@ -7,7 +7,6 @@
 
 import { z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
-import { STREAMS_API_PRIVILEGES } from '@kbn/streams-plugin/common/constants';
 import type {
   SignificantEventsMaintenanceStatus,
   SignificantEventsMaintenanceSummary,
@@ -117,12 +116,12 @@ const resetRoute = createServerRoute({
     summary: 'Reset Significant Events activity and data',
     description:
       'Cancels Significant Events activity and permanently deletes generated data across every Kibana space. The operation is best-effort, irreversible, and idempotent. ' +
-      'This is a deployment-wide control (agnostic saved object), not per-space. Authorization uses the caller’s space-scoped Streams manage privilege; there is no separate cluster-level privilege today — treat manage as sufficient to reset the whole deployment. As with pause, the workflow and settings sweep covers the spaces visible to the caller. ' +
+      'This is a deployment-wide control (agnostic saved object), not per-space. Authorization requires the caller’s space-scoped Nightshift manage and configure privileges; there is no separate cluster-level privilege today. As with pause, the workflow and settings sweep covers the spaces visible to the caller. ' +
       'Data streams are refreshed and deleted as the calling user and recreated by the Kibana system user, so the caller also needs the Elasticsearch `delete_index` and `maintenance` index privileges on `.significant_events-*`; missing privileges are reported in `partialFailures` rather than as an error status.',
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
     },
   },
   params: z.object({}),

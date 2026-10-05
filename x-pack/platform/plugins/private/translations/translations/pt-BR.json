@@ -39122,7 +39122,6 @@
     "xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.tooltip.contentNoDate": "Este modelo chegou ao fim da vida útil e não está mais disponível.",
     "xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.tooltip.title": "Aviso de fim de vida útil",
     "xpack.searchInferenceEndpoints.eisModelCard.previewStatusBadge.content": "Prévia",
-    "xpack.searchInferenceEndpoints.eisModelCard.supports": "Suporta {taskTypes}",
     "xpack.searchInferenceEndpoints.eisModelsPage.cloudUsage.button": "Visualizar uso da nuvem",
     "xpack.searchInferenceEndpoints.eisModelsPage.description": "Gerenciar modelos e endpoints para o Elastic Inference Service",
     "xpack.searchInferenceEndpoints.eisModelspage.error.body": "Ocorreu um erro ao buscar os dados do modelo.",

@@ -20,15 +20,15 @@ import {
 import { DECISION_TREE_LEARNING_TOOL_IDS } from '../tools/decision_tree';
 import { withToolResults } from './cortex_optimize';
 import { toolCallsSchema, toolResultsSchema } from './tool_calls_schema';
-import { withTimeout } from './with_timeout';
 
 const MAX_INPUT_CHARS = 100_000;
-const REINFORCE_TIMEOUT_MS = 900_000;
 
 export const decisionTreeReinforceStepDefinition = ({
   getAgentBuilder,
+  isEnabled,
 }: {
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
+  isEnabled?: () => boolean;
 }) =>
   createServerStepDefinition({
     id: 'nightshift.decisionTreeReinforce',
@@ -67,8 +67,16 @@ export const decisionTreeReinforceStepDefinition = ({
     }),
     outputSchema: z.object({
       message: z.string().describe("The reinforcement agent's final response."),
+      skipped: z.boolean().optional(),
     }),
     handler: async (context) => {
+      // The combined optimize workflow installs with Cortex or Memory, so this step is registered
+      // even when the tree feature is off.
+      if (isEnabled && !isEnabled()) {
+        context.logger.info('Skipped decision tree reinforcement (flag off)');
+        return { output: { message: '', skipped: true } };
+      }
+
       const agentBuilder = getAgentBuilder();
       if (!agentBuilder) {
         throw new Error('Agent Builder is not available');
@@ -106,31 +114,26 @@ export const decisionTreeReinforceStepDefinition = ({
           ? { tools: [{ tool_ids: [...DECISION_TREE_LEARNING_TOOL_IDS] }] }
           : undefined;
 
-      const { result } = await withTimeout(
-        (signal) =>
-          agentBuilder.agents.runAgent({
-            request: context.contextManager.getFakeRequest(),
-            agentId: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
-            interactive: { enabled: false },
-            defaultConnectorId: connectorId || undefined,
-            abortSignal: signal,
-            telemetryMetadata: {
-              pluginId: 'nightshift_investigation_memory',
-              aggregateBy: 'nightshift',
-              productSolution: 'observability',
-              productFeature: 'nightshift',
-              interactionId: context.contextManager.getContext().execution.id,
-            },
-            agentParams: {
-              conversation,
-              nextInput: { message },
-              ...(configurationOverrides ? { configurationOverrides } : {}),
-            },
-          }),
-        REINFORCE_TIMEOUT_MS,
-        `Decision tree reinforcement timed out after ${REINFORCE_TIMEOUT_MS}ms`,
-        context.abortSignal
-      );
+      // The workflow step's `timeout` bounds the run: its timeout zone aborts this signal.
+      const { result } = await agentBuilder.agents.runAgent({
+        request: context.contextManager.getFakeRequest(),
+        agentId: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
+        interactive: { enabled: false },
+        defaultConnectorId: connectorId || undefined,
+        abortSignal: context.abortSignal,
+        telemetryMetadata: {
+          pluginId: 'nightshift_investigation_memory',
+          aggregateBy: 'nightshift',
+          productSolution: 'observability',
+          productFeature: 'nightshift',
+          interactionId: context.contextManager.getContext().execution.id,
+        },
+        agentParams: {
+          conversation,
+          nextInput: { message },
+          ...(configurationOverrides ? { configurationOverrides } : {}),
+        },
+      });
 
       return { output: { message: result.round.response.message } };
     },
