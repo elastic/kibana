@@ -95,8 +95,7 @@ export const ResponseActionResults = memo<ResponseActionResultsProps>(
                   <KeyValueDisplay name={hostName} value={hostStatusDisplay} />
                   {agentActionState.isCompleted && (
                     <div>
-                      {OUTPUT_MESSAGES.expandSection.completedAt}
-                      &nbsp;
+                      {OUTPUT_MESSAGES.expandSection.completedAt}{' '}
                       <FormattedDate
                         fieldName={i18n.translate(
                           'xpack.securitySolution.responseAction.responseActionResults.hostCompletedAt',

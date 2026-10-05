@@ -100,7 +100,7 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
               </div>
             ) : (
               <>
-                {hostActionOutput ? (
+                {hostActionOutput && command === 'kill-process' ? (
                   <>
                     <EuiSpacer size="s" />
                     <ProcessResult command={command} processResult={hostActionOutput} />
