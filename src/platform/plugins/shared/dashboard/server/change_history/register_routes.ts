@@ -90,7 +90,7 @@ const registerAddToHistoryRoute = (services: SetupDeps, router: IRouter<RequestH
       };
       const spaceId = services.spaces?.spacesService.getSpaceId(req) ?? 'default';
       await client.log(change, {
-        action: 'dashboard_save',
+        action: 'dashboard_update',
         username: user.username,
         userProfileId: user.profile_uid,
         spaceId,

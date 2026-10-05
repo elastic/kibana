@@ -14,6 +14,7 @@ import { dashboardClient } from '../../dashboard_client';
 import { showDashboardSavedToast } from './show_dashboard_saved_toast';
 import type { SaveDashboardProps } from './types';
 import { getDashboardChangeHistoryService } from '../../services/change_history_service';
+import { logDashboardChanges } from '../../dashboard_history';
 
 export const saveDashboard = async ({
   lastSavedId,
@@ -45,7 +46,7 @@ export const saveDashboard = async ({
       }
     }
     console.log({ dashboardState });
-    await getDashboardChangeHistoryService().addToHistory(newId, dashboardState);
+    await logDashboardChanges(newId, dashboardState);
     return { id: newId };
   } catch (error) {
     coreServices.notifications.toasts.addDanger(

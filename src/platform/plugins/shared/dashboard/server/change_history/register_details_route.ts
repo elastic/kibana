@@ -24,6 +24,7 @@ const detailsResponseSchema = z.object({
   }),
   action: z.string(),
   snapshot: getDashboardStateSchema(true),
+  isCurrent: z.boolean(),
 });
 export type ChangeDetailsResponse = z.infer<typeof detailsResponseSchema>;
 
@@ -82,19 +83,25 @@ export const registerChangeDetailsRoute = (
       }
       const spaceId = services.spaces?.spacesService.getSpaceId(req) ?? 'default';
 
-      const { total, items } = await client.getHistory(spaceId, 'dashboard', req.params.id, {
+      const { items } = await client.getHistory(spaceId, 'dashboard', req.params.id, {
         additionalFilters: [{ term: { 'event.id': req.params.changeId } }],
         size: 1,
-      });
-      console.log({
-        total,
-        changeId: req.params.changeId,
-        item: JSON.stringify(items[0], null, 2),
       });
       const item = items[0];
       if (!item) {
         return res.notFound();
       }
+
+      const { items: currentHistoryItem } = await client.getHistory(
+        spaceId,
+        'dashboard',
+        req.params.id,
+        {
+          size: 1,
+        }
+      );
+      const currentHistoryId = currentHistoryItem[0]?.event.id;
+
       return res.ok({
         body: {
           id: req.params.changeId,
@@ -102,6 +109,7 @@ export const registerChangeDetailsRoute = (
           actor: item.user,
           action: item.event.action,
           snapshot: item.object.snapshot,
+          isCurrent: item.event.id === currentHistoryId,
         },
       });
     }

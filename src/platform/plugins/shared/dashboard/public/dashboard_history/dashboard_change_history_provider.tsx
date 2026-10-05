@@ -20,14 +20,17 @@ import type { DashboardApi, DashboardInitializationState } from '..';
 import { DashboardRenderer } from '..';
 import { coreServices } from '../services/kibana_services';
 import { createDashboardChangeHistoryAdapter } from './dashboard_change_history_adapter';
+import { renderDashboardChangeHistoryBadge } from './dashboard_change_history_badge';
 
 export interface DashboardChangeHistoryProviderProps {
   dashboardId: string;
+  dashboardApi: DashboardApi | undefined;
   children: React.ReactNode;
 }
 
 export const DashboardChangeHistoryProvider = ({
   dashboardId,
+  dashboardApi,
   children,
 }: DashboardChangeHistoryProviderProps): JSX.Element => {
   const { analytics } = coreServices;
@@ -42,14 +45,8 @@ export const DashboardChangeHistoryProvider = ({
   );
 
   const adapter = useMemo(() => {
-    return createDashboardChangeHistoryAdapter(coreServices.http);
-    // return createChangeHistoryHttpAdapter({
-    //   http: coreServices.http as ChangeHistoryHttpClient,
-    //   listPath: `/internal/dashboard/change_history/{objectId}`,
-    //   detailPath: `/internal/dashboard/change_history/{objectId}/{eventId}`,
-    //   restorePath: `/internal/dashboard/change_history/{objectId}/{eventId}/restore`, // TODO
-    // });
-  }, []);
+    return createDashboardChangeHistoryAdapter(coreServices.http, dashboardApi);
+  }, [dashboardApi]);
 
   // if (!isEnabled) {
   //   return <>{children}</>;
@@ -60,6 +57,7 @@ export const DashboardChangeHistoryProvider = ({
       objectId={dashboardId}
       adapter={adapter}
       renderPreview={(props) => <DashboardPreview {...props} />}
+      renderBadge={renderDashboardChangeHistoryBadge}
       labels={{
         previewBackLabel: i18n.translate('workflows.changeHistory.backToWorkflow', {
           defaultMessage: 'Back to dashboard',

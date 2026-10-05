@@ -117,6 +117,7 @@ export const registerHistoryListRoute = (
             return {
               id: item.event.id,
               action: item.event.action,
+              isCurrent: (req.query.page ?? 1) === 1 && index === 0,
               timestamp: item['@timestamp'],
               actor: {
                 name: profile?.user.full_name || user.name,

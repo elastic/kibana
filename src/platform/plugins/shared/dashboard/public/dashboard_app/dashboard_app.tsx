@@ -188,7 +188,10 @@ export function DashboardApp({
     <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
   ) : (
     <QueryClientProvider client={dashboardQueryClient}>
-      <DashboardChangeHistoryProvider dashboardId={savedDashboardId ?? 'new-dashboard'}>
+      <DashboardChangeHistoryProvider
+        dashboardApi={dashboardApi}
+        dashboardId={savedDashboardId ?? 'new-dashboard'}
+      >
         {dashboardApi && dashboardInternalApi && (
           <>
             <DashboardTabTitleSetter dashboardApi={dashboardApi} />

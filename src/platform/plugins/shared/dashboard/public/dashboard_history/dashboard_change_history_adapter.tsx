@@ -11,16 +11,27 @@ import { mapChangeHistoryHttpError, type ChangeHistoryAdapter } from '@kbn/chang
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ChangeDetailsResponse } from '../../server/change_history/register_details_route';
 import type { HistoryListResponse } from '../../server/change_history/register_list_route';
+import type { DashboardApi } from '../dashboard_api/types';
+import { dashboardClient } from '../dashboard_client';
 
 const BASE_HISTORY_PATH = `/internal/dashboard/change_history` as const;
 
-export const createDashboardChangeHistoryAdapter = (http: HttpSetup): ChangeHistoryAdapter => ({
+export const createDashboardChangeHistoryAdapter = (
+  http: HttpSetup,
+  dashboardApi: DashboardApi | undefined
+): ChangeHistoryAdapter => ({
   listChanges: async ({ objectId, page, signal }) => {
     try {
       const response = await http.get<HistoryListResponse>(`${BASE_HISTORY_PATH}/${objectId}`, {
         query: { page: page.index + 1, per_page: page.size },
         signal,
       });
+      if (dashboardApi && dashboardApi.hasUnsavedChanges$.getValue()) {
+        response.items[0] = {
+          ...response.items[0],
+          metadata: { unsavedChanges: true },
+        };
+      }
       return response;
     } catch (e) {
       throw mapChangeHistoryHttpError(e);
@@ -34,16 +45,37 @@ export const createDashboardChangeHistoryAdapter = (http: HttpSetup): ChangeHist
           signal,
         }
       );
+      if (response.isCurrent && dashboardApi && dashboardApi.hasUnsavedChanges$.getValue()) {
+        response.snapshot = dashboardApi.getSerializedState().attributes;
+      }
       return response;
     } catch (e) {
       throw mapChangeHistoryHttpError(e);
     }
   },
-  restoreChange: async ({ objectId, changeId, signal }) => {
-    // try {
-    //   await http.post(/* restore route */, { signal });
-    // } catch (error) {
-    //   throw mapChangeHistoryHttpError(error);
-    // }
-  },
+  restoreChange: dashboardApi
+    ? async ({ objectId, changeId, signal }) => {
+        try {
+          const response = await http.get<ChangeDetailsResponse>(
+            `${BASE_HISTORY_PATH}/${objectId}/${changeId}`,
+            {
+              signal,
+            }
+          );
+          console.log({ response });
+          dashboardApi.setState(response.snapshot);
+          dashboardApi.runQuickSave();
+          // const result = await dashboardClient.update(objectId, response.snapshot);
+          // dashboardApi.onSave$.next({
+          //   objectId,
+          //   dashboardId: result?.id ?? objectId,
+          //   dashboardState: response.snapshot,
+          // });
+
+          // console.log({ result });
+        } catch (e) {
+          throw mapChangeHistoryHttpError(e);
+        }
+      }
+    : undefined,
 });
