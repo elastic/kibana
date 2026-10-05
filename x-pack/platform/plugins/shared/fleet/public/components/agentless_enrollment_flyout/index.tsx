@@ -77,7 +77,6 @@ export const AgentlessEnrollmentFlyout = ({
   );
   const agentData = agentsData?.data?.items?.[0];
 
-  // Watches agent data and updates step statuses; stops polling when agent is online
   useEffect(() => {
     if (agentsError) {
       notifications.toasts.addError(agentsError as Error, {
@@ -87,6 +86,13 @@ export const AgentlessEnrollmentFlyout = ({
         ),
       });
     }
+  }, [agentsError, notifications.toasts]);
+
+  // Watches agent data and updates step statuses; stops polling when agent is online.
+  // Once online, ignore subsequent poll results so transient errors or refetchOnWindowFocus
+  // can't reset completed steps back to loading.
+  useEffect(() => {
+    if (agentOnline) return;
     if (agentData) {
       if (agentData.status === 'online') {
         setConfirmEnrollmentStatus('complete');
@@ -103,7 +109,7 @@ export const AgentlessEnrollmentFlyout = ({
       setConfirmEnrollmentStatus('loading');
       setConfirmDataStatus('disabled');
     }
-  }, [agentData, agentsError, notifications.toasts]);
+  }, [agentOnline, agentData]);
 
   // An online agent with a failed component is not a successful deployment.
   const hasFailedComponents =
