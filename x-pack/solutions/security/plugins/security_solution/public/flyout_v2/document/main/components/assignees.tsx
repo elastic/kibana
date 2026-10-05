@@ -21,6 +21,10 @@ import { isNonLocalIndexName } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
+import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
+import { createEditAssigneeAction } from '@kbn/alerting-v2-episodes-ui/actions';
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
+import { useQueryClient } from '@kbn/react-query';
 import { ASSIGNEES_PANEL_WIDTH } from '../../../../common/components/assignees/constants';
 import type { AssigneesApplyPanelProps } from '../../../../common/components/assignees/assignees_apply_panel';
 import { AssigneesApplyPanel } from '../../../../common/components/assignees/assignees_apply_panel';
@@ -34,6 +38,8 @@ import { useAlertsPrivileges } from '../../../../detections/containers/detection
 import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
 import { FLYOUT_ACTION, FLYOUT_HEADER_ITEM, FLYOUT_TYPE } from '../../../../common/lib/telemetry';
 import { FlyoutHeaderBlock } from '../../../shared/components/flyout_header_block';
+import { useKibana } from '../../../../common/lib/kibana';
+import { useEpisodeAssignees } from '../../../../alerts_v2/pages/table/use_episode_assignees';
 import {
   ASSIGNEES_ADD_BUTTON_TEST_ID,
   ASSIGNEES_EMPTY_TEST_ID,
@@ -78,7 +84,55 @@ export interface AssigneesProps {
  * Renders the assignees section in the document flyout header.
  */
 export const Assignees = memo(({ hit, onAlertUpdated, showAssignees = true }: AssigneesProps) => {
+  const { services } = useKibana();
   const eventId = useMemo(() => hit.raw._id ?? '', [hit]);
+  // v2 episodes don't carry the assignee on the row (the view is `FROM .rule-events` only), so we
+  // side-fetch it from `.alert-actions` exactly like the episodes table.
+  const queryClient = useQueryClient();
+  const isEpisode = useMemo(() => getFieldValue(hit, 'episode.id') != null, [hit]);
+  const episodeId = useMemo(() => getFieldValue(hit, 'episode.id') as string | undefined, [hit]);
+  const { assignees: episodeAssignees, refetch: refetchEpisodeAssignees } = useEpisodeAssignees(
+    episodeId ? [episodeId] : []
+  );
+  const episodeAssigneeUid = episodeId ? episodeAssignees.get(episodeId) ?? undefined : undefined;
+
+  // Editing reuses the RnA `assign` action (the same one the table row action uses): it opens the
+  // user picker, posts an `assign` action, then we refetch the side-fetched assignee.
+  const editEpisodeAssigneeAction = useMemo(
+    () =>
+      createEditAssigneeAction({
+        http: services.http,
+        overlays: services.overlays,
+        notifications: services.notifications,
+        rendering: services.rendering,
+        userProfile: services.userProfile,
+        docLinks: services.docLinks,
+        queryClient,
+      }),
+    [services, queryClient]
+  );
+  const onEditEpisodeAssignee = useCallback(() => {
+    if (!episodeId) return;
+    const episode = {
+      group_hash: getFieldValue(hit, 'group_hash'),
+      'episode.id': episodeId,
+      last_assignee_uid: episodeAssigneeUid ?? null,
+    } as unknown as AlertEpisode;
+    void editEpisodeAssigneeAction.execute({
+      episodes: [episode],
+      onSuccess: () => {
+        refetchEpisodeAssignees();
+        onAlertUpdated?.();
+      },
+    });
+  }, [
+    episodeId,
+    hit,
+    episodeAssigneeUid,
+    editEpisodeAssigneeAction,
+    refetchEpisodeAssignees,
+    onAlertUpdated,
+  ]);
   const isRemoteDocument = useMemo(
     () => isNonLocalIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
     [hit]
@@ -222,6 +276,25 @@ export const Assignees = memo(({ hit, onAlertUpdated, showAssignees = true }: As
     >
       {!showAssignees ? (
         <div data-test-subj={ASSIGNEES_EMPTY_TEST_ID}>{getEmptyTagValue()}</div>
+      ) : isEpisode ? (
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <AlertEpisodeAssigneeCell
+              assigneeUid={episodeAssigneeUid}
+              userProfile={services.userProfile}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <UpdateAssigneesButton
+              togglePopover={onEditEpisodeAssignee}
+              isDisabled={false}
+              toolTipMessage={i18n.translate(
+                'xpack.securitySolution.flyout.document.header.assignees.episodePopoverTooltip',
+                { defaultMessage: 'Assign episode' }
+              )}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ) : (
         <EuiFlexGroup gutterSize="none" responsive={false} data-test-subj={ASSIGNEES_TEST_ID}>
           {assignedUsers && (

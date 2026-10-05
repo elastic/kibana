@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { getFieldValue, type DataTableRecord } from '@kbn/discover-utils';
+import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { useFetchGraphData } from '@kbn/cloud-security-posture-graph/src/hooks';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import {
@@ -25,7 +25,9 @@ export const GraphPreviewContainer = memo(
   ({ hit, onShowGraph, showIcon }: GraphPreviewContainerProps) => {
     const { eventIds, timestamp, shouldShowGraph } = useGraphPreview({ hit });
     const isAlert = useMemo(
-      () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+      () =>
+        (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal ||
+        (getFieldValue(hit, 'type') as string) === 'alert',
       [hit]
     );
     const anchor = useMemo(() => timestamp ?? new Date().toISOString(), [timestamp]);

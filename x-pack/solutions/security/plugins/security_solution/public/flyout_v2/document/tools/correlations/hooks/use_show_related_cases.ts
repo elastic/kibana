@@ -23,7 +23,8 @@ export interface UseShowRelatedCasesParams {
  */
 export const useShowRelatedCases = ({ hit }: UseShowRelatedCasesParams): boolean => {
   const { cases } = useKibana().services;
-  const isAlert = getFieldValue(hit, EVENT_KIND) === EventKind.signal;
+  const isAlert =
+    getFieldValue(hit, EVENT_KIND) === EventKind.signal || getFieldValue(hit, 'type') === 'alert';
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
 
   return isAlert && userCasesPermissions.read;

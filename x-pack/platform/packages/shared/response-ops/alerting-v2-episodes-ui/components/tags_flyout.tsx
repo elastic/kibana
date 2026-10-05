@@ -21,6 +21,7 @@ interface TagsFlyoutInnerProps {
   services: { expressions: ExpressionsStart; spaces: SpacesPluginStart };
   onConfirm: (tags: string[]) => void;
   onCancel: () => void;
+  presetTags?: string[];
 }
 
 // `overlays.openFlyout` already provides the outer `EuiFlyout` shell, so we
@@ -31,6 +32,7 @@ export const TagsFlyoutInner = ({
   services,
   onConfirm,
   onCancel,
+  presetTags,
 }: TagsFlyoutInnerProps) => {
   const [additionalSuggestions, setAdditionalSuggestions] = useState<string[]>([]);
 
@@ -48,6 +50,7 @@ export const TagsFlyoutInner = ({
       additionalSuggestions={additionalSuggestions}
       services={services}
       onSave={onConfirm}
+      presetTags={presetTags}
     />
   );
 };
@@ -61,6 +64,8 @@ export const openTagsFlyout = (
     spaces: SpacesPluginStart;
     queryClient: QueryClient;
     fetchAdditionalSuggestions?: () => Promise<string[]>;
+    /** Extra tag options always offered, on top of ES-fetched suggestions (e.g. a preset list). */
+    presetTags?: string[];
   }
 ): Promise<string[] | undefined> => {
   return new Promise<string[] | undefined>((resolve) => {
@@ -75,6 +80,7 @@ export const openTagsFlyout = (
             currentTags={currentTags}
             fetchAdditionalSuggestions={deps.fetchAdditionalSuggestions}
             services={{ expressions: deps.expressions, spaces: deps.spaces }}
+            presetTags={deps.presetTags}
             onConfirm={(tags) => {
               ref.close();
               resolve(tags);

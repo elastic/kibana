@@ -104,7 +104,10 @@ export const DocumentFlyoutWrapper = memo(
     }, [onAlertUpdated, refetchDocument]);
 
     const isAlert = useMemo(
-      () => hit && (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+      () =>
+        hit &&
+        ((getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal ||
+          (getFieldValue(hit, 'type') as string) === 'alert'),
       [hit]
     );
 

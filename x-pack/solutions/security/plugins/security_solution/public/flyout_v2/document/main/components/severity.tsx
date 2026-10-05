@@ -13,6 +13,8 @@ import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { upperFirst } from 'lodash/fp';
 import { EuiBadge, useEuiTheme } from '@elastic/eui';
+import { AlertEpisodeSeverityBadge } from '@kbn/alerting-v2-episodes-ui/components/severity/episode_severity_badge';
+import { isSupportedEpisodeSeverity } from '@kbn/alerting-v2-episodes-ui/components/severity/severity_utils';
 import { SEVERITY_VALUE_TEST_ID } from './test_ids';
 import { useRiskSeverityColors } from '../../../../common/utils/risk_color_palette';
 
@@ -72,6 +74,23 @@ export const DocumentSeverity = memo(({ hit, children }: DocumentSeverityProps) 
         : euiTheme.colors.textSubdued,
     [severity, euiTheme.colors.textSubdued, severityToColorMap]
   );
+
+  // v2 episodes carry a top-level `severity`; render it with the RnA badge so colors/labels match
+  // the platform episodes page. `AlertEpisodeSeverityBadge` returns null for unsupported values, so
+  // we gate the trailing `children` (spacer) the same way v1 gates on a present value.
+  const isEpisode = getFieldValue(hit, 'episode.id') != null;
+  if (isEpisode) {
+    const episodeSeverity = getFieldValue(hit, 'severity') as string | undefined | null;
+    if (!isSupportedEpisodeSeverity(episodeSeverity)) {
+      return null;
+    }
+    return (
+      <>
+        <AlertEpisodeSeverityBadge severity={episodeSeverity} />
+        {children}
+      </>
+    );
+  }
 
   return (
     <>

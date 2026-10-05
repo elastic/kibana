@@ -98,7 +98,9 @@ export const getExploreButtonInfo = (
   hit: DataTableRecord,
   timelinesURL: string
 ): { url: string; label: string } => {
-  const isAlert = (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal;
+  const isAlert =
+    (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal ||
+    (getFieldValue(hit, 'type') as string) === 'alert';
 
   // Returning the url if it exists. This way we can navigate to the alerts page and open the flyout.
   const alertURL = getFieldValue(hit, 'kibana.alert.url') as string | undefined;

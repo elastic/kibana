@@ -68,10 +68,15 @@ export const Header: FC<HeaderProps> = memo(
   ({ hit, renderCellActions = noopCellActionRenderer, onAlertUpdated, onShowNotes }) => {
     const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
     const isAlert = useMemo(
-      () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+      () =>
+        (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal ||
+        (getFieldValue(hit, 'type') as string) === 'alert',
       [hit]
     );
     const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
+    // v2 episodes have no stable `@timestamp` (it tracks the latest rule-event and jumps on
+    // resolve); `first_timestamp` is the stable "triggered" time, matching the episodes table.
+    const isEpisode = useMemo(() => getFieldValue(hit, 'episode.id') != null, [hit]);
 
     const alertDetailsLink = useGetFlyoutLink({
       eventId: hit.raw._id ?? '',
@@ -93,7 +98,7 @@ export const Header: FC<HeaderProps> = memo(
           <EuiSpacer size="s" />
         </DocumentSeverity>
         <EuiText size="s">
-          <Timestamp hit={hit} />
+          <Timestamp hit={hit} field={isEpisode ? 'first_timestamp' : undefined} />
         </EuiText>
         <EuiSpacer size="xs" />
 
