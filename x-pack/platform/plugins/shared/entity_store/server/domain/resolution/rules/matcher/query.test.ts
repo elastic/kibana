@@ -76,6 +76,14 @@ describe('ES|QL matcher query builder', () => {
       );
     });
 
+    it('counts unresolved local members of each group', () => {
+      const query = buildMatchGroupsQuery({ index: INDEX, spec: EMAIL });
+      expect(query).toContain(
+        '| EVAL is_unresolved_local = CASE(is_unresolved == 1 AND entity.namespace == "local", 1, 0)'
+      );
+      expect(query).toContain('unresolved_local_n = SUM(is_unresolved_local)');
+    });
+
     it('quotes the latest-entities index name', () => {
       const query = buildMatchGroupsQuery({ index: INDEX, spec: EMAIL });
       expect(query).toContain(`FROM "${INDEX}"`);
