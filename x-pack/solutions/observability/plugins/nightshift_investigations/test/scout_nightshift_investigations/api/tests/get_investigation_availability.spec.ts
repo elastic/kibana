@@ -35,6 +35,22 @@ apiTest.describe(
     );
 
     apiTest(
+      'returns 200 unavailable for an unknown connector_id',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
+        const response = await apiClient.get(
+          `${AVAILABILITY_PATH}?connector_id=missing-nightshift-model`,
+          {
+            headers: { ...COMMON_HEADERS, ...cookieHeader },
+            responseType: 'json',
+          }
+        );
+        expect(response).toHaveStatusCode(200);
+        expect(response.body).toStrictEqual({ available: false });
+      }
+    );
+
+    apiTest(
       'returns 403 for a user with only agentBuilder:read',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_READ_ROLE);

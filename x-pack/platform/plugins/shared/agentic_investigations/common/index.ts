@@ -40,6 +40,7 @@ export {
   ESCALATION_ASSIGN_URL,
   ESCALATION_BY_ID_URL,
   ESCALATION_CLOSE_PREVIEW_URL,
+  ESCALATION_LINK_URL,
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
   ESCALATION_LINKED_INVESTIGATIONS_URL,
   ESCALATION_STATUS_FIELD,
@@ -55,8 +56,8 @@ export {
   createEscalationRequestSchema,
   escalationStatusSchema,
   escalationVisibilitySchema,
+  linkEscalationRequestSchema,
   listEscalationsQuerySchema,
-  updateEscalationRequestSchema,
 } from './escalations';
 
 export {
@@ -64,9 +65,14 @@ export {
   INVESTIGATION_CLOSE_PREVIEW_URL,
   INVESTIGATION_STATUS_URL,
   INVESTIGATIONS_INTERNAL_URL,
+  INVESTIGATIONS_PRIVILEGES_URL,
   INVESTIGATIONS_UI_CAPABILITY_MANAGE,
   INVESTIGATIONS_UI_CAPABILITY_SHOW,
 } from './investigations/constants';
+export type {
+  InvestigationsPrivilegesResponse,
+  ReadManagePrivileges,
+} from './investigations/privileges';
 
 export {
   setInvestigationStatusRequestSchema,
@@ -95,9 +101,9 @@ export type {
   EscalationConversationSummary,
   EscalationStatus,
   EscalationVisibility,
+  LinkEscalationRequest,
   LinkedInvestigationSummary,
   ListEscalationsQuery,
   ListEscalationsResponse,
   ListLinkedInvestigationsResponse,
-  UpdateEscalationRequest,
 } from './escalations';

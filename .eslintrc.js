@@ -2022,6 +2022,12 @@ module.exports = {
       },
     },
     {
+      files: ['src/platform/packages/shared/kbn-connector-specs/**/*.test.{ts,tsx}'],
+      rules: {
+        'import/no-nodejs-modules': 'off',
+      },
+    },
+    {
       files: ['src/platform/packages/shared/kbn-connector-specs/src/specs/**/icon/*.{ts,tsx}'],
       rules: {
         'import/no-default-export': 'off',

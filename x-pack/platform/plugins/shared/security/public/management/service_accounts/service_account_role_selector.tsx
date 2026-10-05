@@ -213,6 +213,7 @@ export const ServiceAccountRoleSelector = ({
               rel="noopener noreferrer"
               color="text"
               css={css({ textDecoration: 'underline' })}
+              data-test-subj="createServiceAccountRoleLink"
             >
               <FormattedMessage
                 id="xpack.security.management.serviceAccounts.create.createRoleLinkText"

@@ -110,13 +110,15 @@ export const MetricDataQuerySchema = lazySchema(() =>
 );
 export type MetricDataQuery = z.infer<typeof MetricDataQuerySchema>;
 
-const AlarmActionArnSchema = z
-  .string()
-  .min(1)
-  .max(1024)
-  .describe(
-    'An Amazon Resource Name (ARN) to notify or invoke, e.g. an SNS topic ("arn:aws:sns:region:account-id:topic-name") or Lambda function ARN.'
-  );
+const AlarmActionArnSchema = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(1024)
+    .describe(
+      'An Amazon Resource Name (ARN) to notify or invoke, e.g. an SNS topic ("arn:aws:sns:region:account-id:topic-name") or Lambda function ARN.'
+    )
+);
 
 export const MetricDimensionFilterSchema = lazySchema(() =>
   z.object({
