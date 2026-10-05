@@ -50,7 +50,10 @@ async function distributeScoutTestsByModule() {
   }
 }
 
-type LaneInfo = { label: string; loadGroups: Array<{ configSet: string; loadIDs: string[] }> };
+interface LaneInfo {
+  label: string;
+  loadGroups: Array<{ configSet: string; loadIDs: string[] }>;
+}
 
 interface LanePair {
   testTarget: ScoutTestTrack['metadata']['testTarget'];
