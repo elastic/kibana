@@ -67,9 +67,7 @@ export const VisualizationTableList = ({
   const createNewVis = useCallback(() => {
     firstValueFrom(core.application.currentAppId$)
       .then((currentApp) => {
-        const breadcrumbs = currentApp ? getBreadcrumbs?.(currentApp) : undefined;
         closeNewVisModal.current = visualizations.showNewVisModal({
-          breadcrumbs,
           outsideVisualizeApp: currentApp !== VISUALIZE_APP_NAME,
         });
       })
