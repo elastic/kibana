@@ -1771,6 +1771,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
 
+    assertFipsCompatiblePackageOrThrow(
+      { inputs },
+      pkgInfo,
+      options?.force,
+      oldPackagePolicy.inputs
+    );
+
     _validateRestrictedFieldsNotModifiedOrThrow({
       oldPackagePolicy,
       packagePolicyUpdate,
@@ -2262,6 +2269,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         const { pkgInfo, assetsMap } = pkgInfoAndAsset;
         let inputs = getInputsWithIds(restOfPackagePolicy, oldPackagePolicy.id, undefined, pkgInfo);
         inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
+
+        assertFipsCompatiblePackageOrThrow(
+          { inputs },
+          pkgInfo,
+          options?.force,
+          oldPackagePolicy.inputs
+        );
 
         validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
@@ -3929,15 +3943,27 @@ function validateConditionPlacement(packagePolicy: NewPackagePolicy) {
   }
 }
 
+// Same resolution rule as _compilePackagePolicyInput: inputs without a policy template use the first one.
+function resolveInputPolicyTemplateName(
+  input: Pick<PackagePolicyInput, 'policy_template'>,
+  pkgInfo: PackageInfo
+) {
+  return input.policy_template ?? pkgInfo.policy_templates?.[0]?.name;
+}
+
+// When `oldInputs` is passed (update), only inputs that were not already enabled are checked,
+// so existing policies keep working and can still be edited.
 function assertFipsCompatiblePackageOrThrow(
   packagePolicy: Pick<NewPackagePolicy, 'inputs'>,
   pkgInfo: PackageInfo,
-  force?: boolean
+  force?: boolean,
+  oldInputs?: Array<Pick<PackagePolicyInput, 'type' | 'policy_template' | 'enabled'>>
 ) {
   if (force || !appContextService.getIsFipsEnabled()) {
     return;
   }
-  if (isPackageFipsIncompatible(pkgInfo.policy_templates)) {
+  const action = oldInputs ? 'update' : 'create';
+  if (!oldInputs && isPackageFipsIncompatible(pkgInfo.policy_templates)) {
     throw new PackageFipsIncompatibleError(
       `Cannot create a package policy for ${pkgInfo.name}: the integration is not FIPS compatible`
     );
@@ -3947,13 +3973,26 @@ function assertFipsCompatiblePackageOrThrow(
       .filter((template) => template.fips_compatible === false)
       .map((template) => template.name)
   );
-  const nonFipsInput = packagePolicy.inputs.find(
-    (input) =>
-      input.enabled && !!input.policy_template && nonFipsTemplates.has(input.policy_template)
-  );
+  const nonFipsInput = packagePolicy.inputs.find((input) => {
+    const templateName = resolveInputPolicyTemplateName(input, pkgInfo);
+    if (!input.enabled || !templateName || !nonFipsTemplates.has(templateName)) {
+      return false;
+    }
+    return !oldInputs?.some(
+      (oldInput) =>
+        oldInput.enabled &&
+        oldInput.type === input.type &&
+        resolveInputPolicyTemplateName(oldInput, pkgInfo) === templateName
+    );
+  });
   if (nonFipsInput) {
     throw new PackageFipsIncompatibleError(
-      `Cannot create a package policy for ${pkgInfo.name}: the policy template ${nonFipsInput.policy_template} is not FIPS compatible`
+      `Cannot ${action} a package policy for ${
+        pkgInfo.name
+      }: the policy template ${resolveInputPolicyTemplateName(
+        nonFipsInput,
+        pkgInfo
+      )} is not FIPS compatible`
     );
   }
 }
