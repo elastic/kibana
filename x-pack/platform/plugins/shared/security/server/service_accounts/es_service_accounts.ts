@@ -81,7 +81,7 @@ const getAccessTokensWarning = (id: string): string =>
  * The cost is that an account deleted and created again this soon after a bind inherits the
  * binding.
  */
-const BINDING_CLOCK_SKEW_TOLERANCE_MS = 60_000;
+const BINDING_CLOCK_SKEW_TOLERANCE_MS = 10_000;
 
 /** How many of an account's tokens are deleted at once. */
 const TOKEN_DELETE_CONCURRENCY = 10;

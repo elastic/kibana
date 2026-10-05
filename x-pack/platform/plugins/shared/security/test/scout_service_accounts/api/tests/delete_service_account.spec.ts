@@ -23,7 +23,7 @@ const HEADERS = { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'kibana' };
  * How much later than a workload's binding its account may have been created and still run it,
  * mirroring `BINDING_CLOCK_SKEW_TOLERANCE_MS` on the server.
  */
-const CLOCK_SKEW_TOLERANCE_MS = 60_000;
+const CLOCK_SKEW_TOLERANCE_MS = 10_000;
 /** A token minted straight through Elasticsearch, which Kibana did not create. */
 const OPERATOR_TOKEN_NAME = 'operator-token';
 
@@ -294,7 +294,6 @@ apiTest.describe(
     apiTest(
       'does not let an account created again under the same name run the old one’s workloads',
       async ({ apiClient }) => {
-        apiTest.setTimeout(CLOCK_SKEW_TOLERANCE_MS + 60_000);
         const account = await createAccount(apiClient);
         const workloadId = uniqueName();
         await bindWorkload(apiClient, workloadId, account);
@@ -413,6 +412,26 @@ apiTest.describe(
         expect(cleaned.body).toStrictEqual({ warnings: [] });
 
         expect(await authenticate()).not.toMatchObject({ username: idOf(account) });
+      }
+    );
+
+    apiTest(
+      'refuses to create an account while tokens are left over from one with the same name',
+      async ({ apiClient, esClient }) => {
+        const account = await createAccount(apiClient);
+        // Forced straight through Elasticsearch, which leaves Kibana's token behind.
+        await esClient.transport.request({
+          method: 'DELETE',
+          path: `/_security/service/${account.namespace}/${account.name}`,
+          querystring: { force: 'true' },
+        });
+
+        const recreated = await apiClient.post(SERVICE_ACCOUNT_ENDPOINT, {
+          headers: adminHeaders,
+          body: { name: account.name, roles: [workloadRole] },
+          responseType: 'json',
+        });
+        expect(recreated).toHaveStatusCode(400);
       }
     );
   }
