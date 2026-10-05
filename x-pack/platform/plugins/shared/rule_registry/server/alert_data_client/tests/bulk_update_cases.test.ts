@@ -497,7 +497,7 @@ describe('bulkUpdateCases', () => {
     }
   );
 
-  it('authorizes a present document whose authorization fields are nested in _source', async () => {
+  it('preserves nested case ids when authorizing and updating a present document', async () => {
     esClientMock.mget.mockResponse({
       docs: [
         {
@@ -511,7 +511,7 @@ describe('bulkUpdateCases', () => {
                   rule_type_id: 'apm.error_rate',
                   consumer: 'apm',
                 },
-                case_ids: caseIds,
+                case_ids: ['existing-case'],
               },
             },
           },
@@ -528,6 +528,56 @@ describe('bulkUpdateCases', () => {
       operation: 'get',
       ruleTypeId: 'apm.error_rate',
     });
-    expect(esClientMock.bulk).toHaveBeenCalled();
+    expect(esClientMock.bulk).toHaveBeenCalledWith({
+      refresh: 'wait_for',
+      body: [
+        {
+          update: {
+            _index: 'alert-index',
+            _id: 'alert-id',
+          },
+        },
+        {
+          doc: {
+            [ALERT_CASE_IDS]: ['existing-case', 'test-case'],
+          },
+        },
+      ],
+    });
+  });
+
+  it('rejects a nested document that would exceed the case limit', async () => {
+    esClientMock.mget.mockResponse({
+      docs: [
+        {
+          found: true,
+          _id: 'alert-id',
+          _index: 'alert-index',
+          _source: {
+            kibana: {
+              alert: {
+                rule: {
+                  rule_type_id: 'apm.error_rate',
+                  consumer: 'apm',
+                },
+                case_ids: Array.from(
+                  { length: MAX_CASES_PER_ALERT },
+                  (_, index) => `existing-${index}`
+                ),
+              },
+            },
+          },
+        },
+      ],
+    });
+
+    const alertsClient = new AlertsClient(alertsClientParams);
+
+    await expect(
+      alertsClient.bulkUpdateCases({ caseIds, alerts })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"You cannot attach more than 10 cases to an alert"`
+    );
+    expect(esClientMock.bulk).not.toHaveBeenCalled();
   });
 });

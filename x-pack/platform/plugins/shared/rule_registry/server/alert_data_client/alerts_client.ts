@@ -128,6 +128,22 @@ const readAlertSourceField = (source: object, field: string): unknown => {
   return current;
 };
 
+const readAlertCaseIds = (source: object | null | undefined): unknown[] => {
+  if (source == null) {
+    return [];
+  }
+
+  const value = readAlertSourceField(source, ALERT_CASE_IDS);
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  return value == null ? [] : [value];
+};
+
+const hasAlertWorkflowStatus = (source: object | null | undefined): boolean =>
+  source != null && readAlertSourceField(source, ALERT_WORKFLOW_STATUS) != null;
+
 /**
  * Reads an authorization field from an alert hit, preferring the `fields` API (which is
  * populated even when `_source` is disabled) and falling back to `_source` for `mget`
@@ -313,19 +329,19 @@ export class AlertsClient {
     source: ParsedTechnicalFields | undefined,
     status: STATUS_VALUES
   ) {
-    return source?.[ALERT_WORKFLOW_STATUS] == null
-      ? { signal: { status } }
-      : { [ALERT_WORKFLOW_STATUS]: status };
+    return hasAlertWorkflowStatus(source)
+      ? { [ALERT_WORKFLOW_STATUS]: status }
+      : { signal: { status } };
   }
 
   private getAlertCaseIdsFieldUpdate(source: ParsedTechnicalFields | undefined, caseIds: string[]) {
-    const uniqueCaseIds = new Set([...(source?.[ALERT_CASE_IDS] ?? []), ...caseIds]);
+    const uniqueCaseIds = new Set([...readAlertCaseIds(source), ...caseIds]);
 
     return { [ALERT_CASE_IDS]: Array.from(uniqueCaseIds.values()) };
   }
 
   private validateTotalCasesPerAlert(source: ParsedTechnicalFields | undefined, caseIds: string[]) {
-    const currentCaseIds = source?.[ALERT_CASE_IDS] ?? [];
+    const currentCaseIds = readAlertCaseIds(source);
 
     if (currentCaseIds.length + caseIds.length > MAX_CASES_PER_ALERT) {
       throw Boom.badRequest(`You cannot attach more than ${MAX_CASES_PER_ALERT} cases to an alert`);

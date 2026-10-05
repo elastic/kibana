@@ -9,6 +9,7 @@ import {
   ALERT_RULE_CONSUMER,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
+  ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
   ALERT_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
@@ -336,7 +337,7 @@ describe('bulkUpdate()', () => {
                     rule_type_id: 'apm.error_rate',
                     consumer: 'apm',
                   },
-                  status: ALERT_STATUS_ACTIVE,
+                  workflow_status: 'open',
                 },
                 space_ids: [DEFAULT_SPACE],
               },
@@ -372,7 +373,22 @@ describe('bulkUpdate()', () => {
         operation: 'update',
         ruleTypeId: 'apm.error_rate',
       });
-      expect(esClientMock.bulk).toHaveBeenCalled();
+      expect(esClientMock.bulk).toHaveBeenCalledWith({
+        refresh: 'wait_for',
+        body: [
+          {
+            update: {
+              _index: indexName,
+              _id: fakeAlertId,
+            },
+          },
+          {
+            doc: {
+              [ALERT_WORKFLOW_STATUS]: 'closed',
+            },
+          },
+        ],
+      });
     });
 
     test('updates a valid alert when a sibling document is missing', async () => {
