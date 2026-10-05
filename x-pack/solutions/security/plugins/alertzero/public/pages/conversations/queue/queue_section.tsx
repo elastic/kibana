@@ -31,6 +31,7 @@ export interface QueueSectionProps {
   canCloseInvestigation?: boolean;
   /** Optional: render the assignee picker widget for each non-closed card. */
   renderAssignees: (investigation: Investigation) => React.ReactNode;
+  renderInFlightStatus?: (investigation: Investigation) => React.ReactNode;
 }
 
 export const QueueSection = ({
