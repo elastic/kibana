@@ -224,13 +224,12 @@ export class DashboardApp {
    * missing element or attribute means the app never got there and is surfaced as an error
    * rather than a wrong verdict.
    */
-  async getViewMode(): Promise<'view' | 'edit'> {
-    await this.dashboardViewport.waitFor({ state: 'attached', timeout: DEFAULT_VIEWPORT_TIMEOUT });
-    const viewMode = await this.dashboardViewport.getAttribute('data-view-mode');
-    if (viewMode !== 'view' && viewMode !== 'edit') {
-      throw new Error(
-        `The dashboard viewport rendered with an unexpected "data-view-mode" attribute: ${viewMode}`
-      );
+  async getViewMode(): Promise<string> {
+    const viewMode = await this.dashboardViewport.getAttribute('data-view-mode', {
+      timeout: DEFAULT_VIEWPORT_TIMEOUT,
+    });
+    if (!viewMode) {
+      throw new Error('The dashboard viewport rendered without a "data-view-mode" attribute');
     }
     return viewMode;
   }
@@ -246,8 +245,8 @@ export class DashboardApp {
    * Switches the dashboard to edit mode.
    */
   async switchToEditMode() {
-    await this.editModeButton.click();
-    await this.waitForEditModeActive();
+    await this.appMenu.clickItem(this.editModeButton);
+    await this.waitForViewMode('edit');
   }
 
   /**
@@ -257,25 +256,20 @@ export class DashboardApp {
   async openDashboardWithIdInEditMode(id: string) {
     await this.page.gotoApp('dashboards', { hash: `/view/${id}?_a=(viewMode:edit)` });
     await this.waitForRenderComplete();
-    await this.waitForEditModeActive();
+    await this.waitForViewMode('edit');
   }
 
   private async waitForViewMode(mode: 'view' | 'edit') {
-    await expect(this.dashboardViewport).toHaveAttribute('data-view-mode', mode, {
-      timeout: DEFAULT_VIEWPORT_TIMEOUT,
-    });
-  }
-
-  private async waitForEditModeActive() {
-    await this.waitForViewMode('edit');
+    await this.dashboardViewport
+      .and(this.page.locator(`[data-view-mode="${mode}"]`))
+      .waitFor({ state: 'attached' });
   }
 
   /**
    * Clicks the cancel button to exit edit mode without saving.
    */
   async clickCancelOutOfEditMode() {
-    await expect(this.viewOnlyModeButton).toBeVisible();
-    await this.viewOnlyModeButton.click();
+    await this.appMenu.clickItem(this.viewOnlyModeButton);
     await this.waitForViewMode('view');
   }
 
