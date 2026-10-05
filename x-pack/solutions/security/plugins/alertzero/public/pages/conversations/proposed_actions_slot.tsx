@@ -21,6 +21,7 @@ import {
   useIsApprovingProposal,
   useIsDecliningProposal,
 } from '@kbn/proposals-plugin/public';
+import { PROPOSALS_UI_CAPABILITY_DECIDE } from '@kbn/proposals-common';
 import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import { useCurrentUserProfile } from '@kbn/agentic-investigations-plugin/public';
 import { getUserDisplayName } from '@kbn/user-profile-components';
@@ -58,6 +59,10 @@ const ProposedActionRow = ({
   approve,
   dismiss,
 }: ProposedActionRowProps) => {
+  const {
+    services: { application },
+  } = useKibana<CoreStart>();
+  const canDecide = application.capabilities.proposals?.[PROPOSALS_UI_CAPABILITY_DECIDE] === true;
   const isApproving = useIsApprovingProposal(proposal.id);
   const isDeclining = useIsDecliningProposal(proposal.id);
 
@@ -65,6 +70,7 @@ const ProposedActionRow = ({
     <EuiFlexItem>
       <ProposedActionButton
         proposal={proposal}
+        readOnly={!canDecide}
         isSubmitting={isApproving ? 'applying' : isDeclining ? 'declining' : undefined}
         onConfirm={async () => {
           try {

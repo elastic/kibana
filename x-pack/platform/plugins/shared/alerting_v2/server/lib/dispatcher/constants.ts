@@ -50,7 +50,7 @@ export const PRE_FETCH_STUCK_ADVANCE_LAG_MS = MAX_WINDOW_MINUTES * 60_000;
  * once at policy hydration (FetchPoliciesStep); `PolicyCatalog.groupingModeOf`
  * falls back to it only for policies missing from the catalog.
  */
-export const DEFAULT_GROUPING_MODE = 'per_episode' as const;
+export const DEFAULT_GROUPING_MODE = 'per_alert' as const;
 
 /** Task Manager timeout for one dispatcher tick. Also consumed by task_definition.ts. */
 export const DISPATCHER_TASK_TIMEOUT = '1m' as const;
