@@ -742,12 +742,12 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         expect.anything(),
         expect.objectContaining({ kuery })
       );
-      // The post-reassignment recheck uses the same kuery via the fetcher (second call).
+      // The post-reassignment recheck uses the same kuery plus `active:true` (excludes unenrolled agents).
       expect(mockedFetchAllAgentsByKuery).toHaveBeenCalledTimes(2);
       expect(mockedFetchAllAgentsByKuery).toHaveBeenLastCalledWith(
         expect.anything(),
         expect.anything(),
-        expect.objectContaining({ kuery })
+        expect.objectContaining({ kuery: `(${kuery}) and active:true` })
       );
     });
 
