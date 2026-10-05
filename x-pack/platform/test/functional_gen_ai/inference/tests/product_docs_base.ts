@@ -108,6 +108,45 @@ export const productDocsBaseInstallationSuite = ({}: {}, { getService }: FtrProv
     );
   };
 
+  // Update requests return before their task finishes, and that task holds the install lock.
+  // Uninstall (and the next suite) must not start while one is still pending.
+  const waitForProductDocTasksToFinish = async () => {
+    await retry.waitForWithTimeout(
+      'product documentation tasks to finish',
+      40 * 60 * 1000,
+      async () => {
+        const response = await es.search(
+          {
+            index: '.kibana_task_manager',
+            ignore_unavailable: true,
+            size: 20,
+            _source: ['task.taskType', 'task.status'],
+            query: {
+              bool: {
+                filter: [
+                  { term: { type: 'task' } },
+                  { prefix: { 'task.taskType': 'ProductDocBase:' } },
+                  { terms: { 'task.status': ['idle', 'claiming', 'running'] } },
+                ],
+              },
+            },
+          },
+          { ignore: [404] }
+        );
+        const pending = response.hits.hits.map((hit) => {
+          const task = (
+            hit._source as { task?: { taskType?: string; status?: string } } | undefined
+          )?.task;
+          return `${task?.taskType ?? 'unknown'}:${task?.status ?? 'unknown'}`;
+        });
+        if (pending.length > 0) {
+          throw new Error(`still pending: ${pending.join(', ')}`);
+        }
+        return true;
+      }
+    );
+  };
+
   const resetProductDocInstallStatus = async () => {
     // Drop install-status docs directly. The uninstall API waits on a task that can hold the
     // install lock for minutes, which blows the suite hook timeout before any test runs.
@@ -138,11 +177,13 @@ export const productDocsBaseInstallationSuite = ({}: {}, { getService }: FtrProv
 
   describe('product docs base', () => {
     before(async () => {
+      await waitForProductDocTasksToFinish();
       await kibanaServer.savedObjects.cleanStandardList();
       await deleteAllProductDocIndices();
       await resetProductDocInstallStatus();
     });
     after(async () => {
+      await waitForProductDocTasksToFinish();
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
@@ -228,23 +269,8 @@ export const productDocsBaseInstallationSuite = ({}: {}, { getService }: FtrProv
         expect(updatedBody[defaultInferenceEndpoints.JINAv5].installed).to.be(true);
       });
 
-      it('updates the product docs for a specific inferenceId', async () => {
-        const updatedResponse = await supertest
-          .post('/internal/product_doc_base/update_all')
-          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-          .send({
-            forceUpdate: true,
-            inferenceIds: [defaultInferenceEndpoints.ELSER],
-          })
-          .set('kbn-xsrf', 'foo')
-          .expect(200);
-        const updatedBody = updatedResponse.body;
-        expect(updatedBody[defaultInferenceEndpoints.ELSER].installed).to.be(true);
-        expect(updatedBody[defaultInferenceEndpoints.JINAv5]).to.be(undefined);
-      });
-
       it('uninstalls the Jina product docs', async () => {
+        await waitForProductDocTasksToFinish();
         const uninstalledResponse = await uninstallProductDoc(
           supertest,
           defaultInferenceEndpoints.JINAv5
@@ -308,6 +334,24 @@ export const productDocsBaseInstallationSuite = ({}: {}, { getService }: FtrProv
             )}`
           );
         });
+      });
+
+      // After uninstall. forceUpdate reinstalls ELSER and holds the install lock; running it
+      // before uninstall made the Jina uninstall wait until the suite timed out.
+      it('updates the product docs for a specific inferenceId', async () => {
+        const updatedResponse = await supertest
+          .post('/internal/product_doc_base/update_all')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .send({
+            forceUpdate: true,
+            inferenceIds: [defaultInferenceEndpoints.ELSER],
+          })
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+        const updatedBody = updatedResponse.body;
+        expect(updatedBody[defaultInferenceEndpoints.ELSER].installed).to.be(true);
+        expect(updatedBody[defaultInferenceEndpoints.JINAv5]).to.be(undefined);
       });
     });
   });
