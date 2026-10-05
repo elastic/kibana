@@ -17,11 +17,19 @@ export const createExecutionAbortedEvent = (
   id: 'event-3',
   type: TimelineEventType.executionAborted,
   created_at: '2026-09-03T11:18:05.123Z',
-  actor: { type: EventActorType.user, id: 'user-1', username: 'petr' },
+  actor: { type: EventActorType.user, id: 'user-1', username: 'jdoe' },
   execution_id: 'execution-1',
   trigger_event_id: 'event-1',
   data: {
-    aborted_by: { source: 'api', actor: { id: 'user-1', username: 'petr' } },
+    aborted_by: {
+      source: 'api',
+      actor: {
+        type: EventActorType.user,
+        id: 'user-1',
+        username: 'jdoe',
+        full_name: 'Jane Doe',
+      },
+    },
     time_to_last_token: 600,
   },
   ...overrides,

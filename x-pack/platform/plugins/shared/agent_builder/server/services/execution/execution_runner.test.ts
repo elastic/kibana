@@ -24,6 +24,7 @@ import {
   ChatEventType,
   ConversationAccessControlMode,
   ConversationOriginType,
+  EventActorType,
   TimelineEventType,
   isRequestAbortedError,
   type ChatAgentEvent,
@@ -1455,7 +1456,10 @@ describe('handleAgentExecution — interrupted executions', () => {
     const deps = createDeps({ conversationClient }) as { agentService: { getRegistry: jest.Mock } };
     const abortController = new AbortController();
     deps.agentService.getRegistry.mockImplementation(async () => {
-      abortController.abort({ source: 'api', actor: { id: 'u1', username: 'alice' } });
+      abortController.abort({
+        source: 'api',
+        actor: { type: EventActorType.user, id: 'u1', username: 'alice' },
+      });
       throw new Error('AbortError');
     });
 
@@ -1483,7 +1487,10 @@ describe('handleAgentExecution — interrupted executions', () => {
     expect(seen.map((event) => event.type)).toEqual([TimelineEventType.executionAborted]);
     const [write] = conversationClient.replaceRoundEvents.mock.calls[0];
     expect(write.events.at(-1)!.data).toMatchObject({
-      aborted_by: { source: 'api', actor: { id: 'u1', username: 'alice' } },
+      aborted_by: {
+        source: 'api',
+        actor: { type: EventActorType.user, id: 'u1', username: 'alice' },
+      },
     });
   });
 

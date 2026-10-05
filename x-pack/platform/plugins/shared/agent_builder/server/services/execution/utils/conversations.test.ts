@@ -1515,7 +1515,10 @@ describe('conversations utils', () => {
     it('fresh round, aborted: persists the abort reason carried by the error as aborted_by', async () => {
       const conversationClient = createConversationClientMock();
       echoWrite(conversationClient);
-      const abortReason = { source: 'api', actor: { id: 'u1', username: 'alice' } };
+      const abortReason = {
+        source: 'api',
+        actor: { type: EventActorType.user, id: 'u1', username: 'alice' },
+      };
 
       await persistExecutionInterruption({
         ...baseParams(conversationClient),
