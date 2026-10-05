@@ -20,6 +20,9 @@ import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useDefaultTimeRange } from '../../hooks/use_default_time_range';
 import { useBackNavigation } from '../contexts/back_navigation/use_back_navigation';
 import { AddDataTabs } from '../../views/add_data_view/types';
+import { ProfilingSchemaContextProvider } from '../contexts/profiling_schema/profiling_schema_context';
+import { SchemaSelector } from '../schema_selector';
+import { SchemaDataGuard } from '../schema_empty_prompt/schema_data_guard';
 
 export function ProfilingAppPageTemplate({
   children,
@@ -33,6 +36,7 @@ export function ProfilingAppPageTemplate({
   showBetaBadge = false,
   customSearchBar,
   suppressMenu = false,
+  showSchemaSelector = false,
 }: {
   children?: React.ReactElement;
   tabs?: AppHeaderTab[];
@@ -43,6 +47,8 @@ export function ProfilingAppPageTemplate({
   showBetaBadge?: boolean;
   customSearchBar?: React.ReactNode;
   suppressMenu?: boolean;
+  /** Renders schema selector that allows users to choose the profiling schema to query. */
+  showSchemaSelector?: boolean;
 }) {
   const {
     start: { observabilityShared },
@@ -129,38 +135,72 @@ export function ProfilingAppPageTemplate({
           },
         }}
       >
-        <EuiFlexGroup direction="column" style={{ maxWidth: '100%' }}>
-          <AppHeader
-            back={backTarget}
-            spacing="largeBleed"
-            title={pageTitle}
-            tabs={tabs}
-            menu={suppressMenu ? undefined : appHeaderMenu}
-            badges={
-              showBetaBadge
-                ? [
-                    {
-                      label: i18n.translate('xpack.profiling.header.betaBadgeLabel', {
-                        defaultMessage: 'Beta',
-                      }),
-                      color: 'hollow',
-                      tooltip: i18n.translate('xpack.profiling.header.betaBadgeTooltip', {
-                        defaultMessage:
-                          'This module is not GA. Please help us by reporting any bugs.',
-                      }),
-                    },
-                  ]
-                : undefined
-            }
-          />
-          {!hideSearchBar && (
-            <EuiFlexItem grow={false}>
-              {customSearchBar ?? <PrimaryProfilingSearchBar />}
+        <SchemaScope
+          isEnabled={showSchemaSelector}
+          rangeFrom={rangeFrom}
+          rangeTo={rangeTo}
+          kuery={kuery}
+        >
+          <EuiFlexGroup direction="column" style={{ maxWidth: '100%' }}>
+            <AppHeader
+              back={backTarget}
+              spacing="largeBleed"
+              title={pageTitle}
+              tabs={tabs}
+              menu={suppressMenu ? undefined : appHeaderMenu}
+              badges={
+                showBetaBadge
+                  ? [
+                      {
+                        label: i18n.translate('xpack.profiling.header.betaBadgeLabel', {
+                          defaultMessage: 'Beta',
+                        }),
+                        color: 'hollow',
+                        tooltip: i18n.translate('xpack.profiling.header.betaBadgeTooltip', {
+                          defaultMessage:
+                            'This module is not GA. Please help us by reporting any bugs.',
+                        }),
+                      },
+                    ]
+                  : undefined
+              }
+            />
+            {!hideSearchBar && (
+              <EuiFlexItem grow={false}>
+                {customSearchBar ?? <PrimaryProfilingSearchBar />}
+              </EuiFlexItem>
+            )}
+            {showSchemaSelector && (
+              <EuiFlexItem grow={false} css={{ alignSelf: 'flex-start' }}>
+                <SchemaSelector />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem>
+              {showSchemaSelector ? <SchemaDataGuard>{children}</SchemaDataGuard> : children}
             </EuiFlexItem>
-          )}
-          <EuiFlexItem>{children}</EuiFlexItem>
-        </EuiFlexGroup>
+          </EuiFlexGroup>
+        </SchemaScope>
       </ObservabilityPageTemplate>
     </>
+  );
+}
+
+function SchemaScope({
+  isEnabled,
+  children,
+  ...searchParams
+}: {
+  isEnabled: boolean;
+  rangeFrom: string;
+  rangeTo: string;
+  kuery: string;
+  children: React.ReactElement;
+}) {
+  if (!isEnabled) {
+    return children;
+  }
+
+  return (
+    <ProfilingSchemaContextProvider {...searchParams}>{children}</ProfilingSchemaContextProvider>
   );
 }

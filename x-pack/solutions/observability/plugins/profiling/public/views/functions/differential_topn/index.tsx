@@ -18,6 +18,7 @@ import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../../hooks/use_profiling_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
+import { useProfilingSchema } from '../../../components/contexts/profiling_schema/use_profiling_schema';
 
 export function DifferentialTopNFunctionsView() {
   const { onPageReady } = usePerformanceContext();
@@ -58,9 +59,13 @@ export function DifferentialTopNFunctionsView() {
   const {
     services: { fetchTopNFunctions },
   } = useProfilingDependencies();
+  const { schema } = useProfilingSchema();
 
   const state = useTimeRangeAsync(
     ({ http }) => {
+      if (!schema) {
+        return undefined;
+      }
       return fetchTopNFunctions({
         http,
         timeFrom: new Date(timeRange.start).getTime(),
@@ -68,14 +73,15 @@ export function DifferentialTopNFunctionsView() {
         startIndex: 0,
         endIndex: 100000,
         kuery,
+        schema,
       });
     },
-    [fetchTopNFunctions, timeRange.start, timeRange.end, kuery]
+    [fetchTopNFunctions, timeRange.start, timeRange.end, kuery, schema]
   );
 
   const comparisonState = useTimeRangeAsync(
     ({ http }) => {
-      if (!comparisonTimeRange.start || !comparisonTimeRange.end) {
+      if (!comparisonTimeRange.start || !comparisonTimeRange.end || !schema) {
         return undefined;
       }
       return fetchTopNFunctions({
@@ -85,9 +91,16 @@ export function DifferentialTopNFunctionsView() {
         startIndex: 0,
         endIndex: 100000,
         kuery: comparisonKuery,
+        schema,
       });
     },
-    [comparisonTimeRange.start, comparisonTimeRange.end, fetchTopNFunctions, comparisonKuery]
+    [
+      comparisonTimeRange.start,
+      comparisonTimeRange.end,
+      fetchTopNFunctions,
+      comparisonKuery,
+      schema,
+    ]
   );
 
   const profilingRouter = useProfilingRouter();

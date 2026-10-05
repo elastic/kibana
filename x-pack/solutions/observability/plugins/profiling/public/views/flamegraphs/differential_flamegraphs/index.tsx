@@ -20,6 +20,7 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
 import { FramesSummary } from '../../../components/frames_summary';
 import { AsyncStatus } from '../../../hooks/use_async';
+import { useProfilingSchema } from '../../../components/contexts/profiling_schema/use_profiling_schema';
 
 export function DifferentialFlameGraphsView() {
   const {
@@ -55,9 +56,13 @@ export function DifferentialFlameGraphsView() {
   } = useProfilingDependencies();
 
   const showErrorFrames = core.uiSettings.get<boolean>(profilingShowErrorFrames);
+  const { schema } = useProfilingSchema();
 
   const state = useTimeRangeAsync(
     ({ http }) => {
+      if (!schema) {
+        return undefined;
+      }
       return Promise.all([
         fetchElasticFlamechart({
           http,
@@ -65,6 +70,7 @@ export function DifferentialFlameGraphsView() {
           timeTo: new Date(timeRange.end).getTime(),
           kuery,
           showErrorFrames,
+          schema,
         }),
         comparisonTimeRange.start && comparisonTimeRange.end
           ? fetchElasticFlamechart({
@@ -73,6 +79,7 @@ export function DifferentialFlameGraphsView() {
               timeTo: new Date(comparisonTimeRange.end).getTime(),
               kuery: comparisonKuery,
               showErrorFrames,
+              schema,
             })
           : Promise.resolve(undefined),
       ]).then(([primaryFlamegraph, comparisonFlamegraph]) => {
@@ -91,6 +98,7 @@ export function DifferentialFlameGraphsView() {
       comparisonTimeRange.end,
       comparisonKuery,
       showErrorFrames,
+      schema,
     ]
   );
 

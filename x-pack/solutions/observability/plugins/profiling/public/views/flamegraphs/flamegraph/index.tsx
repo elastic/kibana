@@ -17,6 +17,7 @@ import { useProfilingRouter } from '../../../hooks/use_profiling_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
 import { AsyncStatus } from '../../../hooks/use_async';
+import { useProfilingSchema } from '../../../components/contexts/profiling_schema/use_profiling_schema';
 
 export function FlameGraphView() {
   const {
@@ -32,18 +33,23 @@ export function FlameGraphView() {
   } = useProfilingDependencies();
 
   const showErrorFrames = core.uiSettings.get<boolean>(profilingShowErrorFrames);
+  const { schema } = useProfilingSchema();
 
   const state = useTimeRangeAsync(
     ({ http }) => {
+      if (!schema) {
+        return undefined;
+      }
       return fetchElasticFlamechart({
         http,
         timeFrom: new Date(timeRange.start).getTime(),
         timeTo: new Date(timeRange.end).getTime(),
         kuery,
         showErrorFrames,
+        schema,
       });
     },
-    [fetchElasticFlamechart, timeRange.start, timeRange.end, kuery, showErrorFrames]
+    [fetchElasticFlamechart, timeRange.start, timeRange.end, kuery, showErrorFrames, schema]
   );
 
   const { data } = state;

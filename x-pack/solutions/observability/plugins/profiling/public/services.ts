@@ -8,6 +8,7 @@
 import type { HttpFetchQuery } from '@kbn/core/public';
 import { buildPath } from '@kbn/core-http-browser';
 import type {
+  ProfilingSchema,
   ProfilingSchemasAvailability,
   ProfilingStatus,
   TopNFunctions,
@@ -50,6 +51,7 @@ export interface Services {
     startIndex: number;
     endIndex: number;
     kuery: string;
+    schema?: ProfilingSchema;
   }) => Promise<TopNFunctions>;
   fetchElasticFlamechart: (params: {
     http: AutoAbortedHttpService;
@@ -57,6 +59,7 @@ export interface Services {
     timeTo: number;
     kuery: string;
     showErrorFrames: boolean;
+    schema?: ProfilingSchema;
   }) => Promise<ElasticFlameGraph>;
   fetchProfilingStatus: (params: { http: AutoAbortedHttpService }) => Promise<ProfilingStatus>;
   fetchAvailableSchemas: (params: {
@@ -93,6 +96,7 @@ export interface Services {
     timeTo: number;
     functionName: string;
     serviceNames: string[];
+    schema?: ProfilingSchema;
   }) => Promise<APMTransactionsPerService>;
 }
 
@@ -111,22 +115,24 @@ export function getServices(): Services {
       })) as Promise<TopNResponse>;
     },
 
-    fetchTopNFunctions: async ({ http, timeFrom, timeTo, startIndex, endIndex, kuery }) => {
+    fetchTopNFunctions: async ({ http, timeFrom, timeTo, startIndex, endIndex, kuery, schema }) => {
       const query: HttpFetchQuery = {
         timeFrom,
         timeTo,
         startIndex,
         endIndex,
         kuery,
+        schema,
       };
       return (await http.get(paths.TopNFunctions, { query })) as Promise<TopNFunctions>;
     },
 
-    fetchElasticFlamechart: async ({ http, timeFrom, timeTo, kuery, showErrorFrames }) => {
+    fetchElasticFlamechart: async ({ http, timeFrom, timeTo, kuery, showErrorFrames, schema }) => {
       const query: HttpFetchQuery = {
         timeFrom,
         timeTo,
         kuery,
+        schema,
       };
 
       const baseFlamegraph = (await http.get(paths.Flamechart, { query })) as BaseFlameGraph;
@@ -193,12 +199,20 @@ export function getServices(): Services {
       )) as IndicesStorageDetailsAPIResponse;
       return eventsMetricsSizeTimeseries;
     },
-    fetchTopNFunctionAPMTransactions: ({ functionName, http, serviceNames, timeFrom, timeTo }) => {
+    fetchTopNFunctionAPMTransactions: ({
+      functionName,
+      http,
+      serviceNames,
+      timeFrom,
+      timeTo,
+      schema,
+    }) => {
       const query: HttpFetchQuery = {
         timeFrom,
         timeTo,
         functionName,
         serviceNames: JSON.stringify(serviceNames),
+        schema,
       };
       return http.get(paths.APMTransactions, {
         query,

@@ -12,43 +12,38 @@ import { EuiProvider } from '@elastic/eui';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ProfilingSchema } from '@kbn/profiling-utils';
+import type { ProfilingSchemaContextValue } from '../contexts/profiling_schema/profiling_schema_context';
+import { ProfilingSchemaContext } from '../contexts/profiling_schema/profiling_schema_context';
 import { SchemaSelector } from '.';
 
 const OTHER_SCHEMA_HELP_TEXT = 'There is profiling data available in another schema';
 const AVAILABILITY_ERROR_HELP_TEXT = 'Unable to check which schemas have data';
 
-const renderSelector = ({
-  value,
-  schemas,
-  supportedSchemas = [ProfilingSchema.ECS, ProfilingSchema.OTEL],
-  isLoading = false,
-  hasAvailabilityError = false,
-}: {
-  value: ProfilingSchema;
-  schemas: ProfilingSchema[] | undefined;
-  supportedSchemas?: ProfilingSchema[];
-  isLoading?: boolean;
-  hasAvailabilityError?: boolean;
-}) => {
-  const onChange = jest.fn();
+const renderSelector = (
+  context: Pick<ProfilingSchemaContextValue, 'schema' | 'schemas'> &
+    Partial<Pick<ProfilingSchemaContextValue, 'supportedSchemas' | 'isLoading' | 'error'>>
+) => {
+  const onSchemaChange = jest.fn();
 
   render(
     <EuiProvider>
       <I18nProvider>
-        <SchemaSelector
-          value={value}
-          schemas={schemas}
-          supportedSchemas={supportedSchemas}
-          isLoading={isLoading}
-          hasAvailabilityError={hasAvailabilityError}
-          onChange={onChange}
-        />
+        <ProfilingSchemaContext.Provider
+          value={{
+            supportedSchemas: [ProfilingSchema.ECS, ProfilingSchema.OTEL],
+            isLoading: false,
+            onSchemaChange,
+            ...context,
+          }}
+        >
+          <SchemaSelector />
+        </ProfilingSchemaContext.Provider>
       </I18nProvider>
     </EuiProvider>
   );
 
   return {
-    onChange,
+    onSchemaChange,
     openDropdown: async () => {
       await userEvent.click(screen.getByTestId('profilingSchemaSelect'));
       await waitForEuiPopoverOpen();
@@ -60,7 +55,7 @@ const renderSelector = ({
 describe('SchemaSelector', () => {
   it('offers both schemas when both have data', async () => {
     const { openDropdown, getOptionLabels } = renderSelector({
-      value: ProfilingSchema.OTEL,
+      schema: ProfilingSchema.OTEL,
       schemas: [ProfilingSchema.ECS, ProfilingSchema.OTEL],
     });
 
@@ -74,7 +69,7 @@ describe('SchemaSelector', () => {
 
   it('only offers the selected schema when it is the only one with data', async () => {
     const { openDropdown, getOptionLabels } = renderSelector({
-      value: ProfilingSchema.ECS,
+      schema: ProfilingSchema.ECS,
       schemas: [ProfilingSchema.ECS],
     });
 
@@ -88,7 +83,7 @@ describe('SchemaSelector', () => {
 
   it('flags the selected schema when only the other schema has data', async () => {
     const { openDropdown, getOptionLabels } = renderSelector({
-      value: ProfilingSchema.ECS,
+      schema: ProfilingSchema.ECS,
       schemas: [ProfilingSchema.OTEL],
     });
 
@@ -106,7 +101,7 @@ describe('SchemaSelector', () => {
 
   it('shows a placeholder when no schema has data', async () => {
     const { openDropdown, getOptionLabels } = renderSelector({
-      value: ProfilingSchema.OTEL,
+      schema: ProfilingSchema.OTEL,
       schemas: [],
     });
 
@@ -121,7 +116,7 @@ describe('SchemaSelector', () => {
   describe('while the schemas with data are unknown', () => {
     it('offers the supported schemas', async () => {
       const { openDropdown, getOptionLabels } = renderSelector({
-        value: ProfilingSchema.OTEL,
+        schema: ProfilingSchema.OTEL,
         schemas: undefined,
       });
 
@@ -136,7 +131,7 @@ describe('SchemaSelector', () => {
 
     it('does not offer Universal Profiling when the deployment does not support it', async () => {
       const { openDropdown, getOptionLabels } = renderSelector({
-        value: ProfilingSchema.OTEL,
+        schema: ProfilingSchema.OTEL,
         schemas: undefined,
         supportedSchemas: [ProfilingSchema.OTEL],
       });
@@ -148,7 +143,7 @@ describe('SchemaSelector', () => {
 
     it('flags a selected schema the deployment does not support', () => {
       renderSelector({
-        value: ProfilingSchema.ECS,
+        schema: ProfilingSchema.ECS,
         schemas: undefined,
         supportedSchemas: [ProfilingSchema.OTEL],
       });
@@ -158,9 +153,9 @@ describe('SchemaSelector', () => {
 
     it('explains when the schemas with data cannot be checked', () => {
       renderSelector({
-        value: ProfilingSchema.OTEL,
+        schema: ProfilingSchema.OTEL,
         schemas: undefined,
-        hasAvailabilityError: true,
+        error: new Error('Request failed'),
       });
 
       expect(screen.getByText(AVAILABILITY_ERROR_HELP_TEXT)).toBeInTheDocument();
@@ -168,9 +163,16 @@ describe('SchemaSelector', () => {
     });
   });
 
+  it('shows the default schema until one is selected', () => {
+    renderSelector({ schema: undefined, schemas: undefined, isLoading: true });
+
+    expect(screen.getByTestId('profilingSchemaSelect')).toHaveTextContent('OpenTelemetry');
+    expect(screen.getByTestId('profilingSchemaSelect')).toBeDisabled();
+  });
+
   it('cannot be changed while the schemas with data are loading', () => {
     renderSelector({
-      value: ProfilingSchema.OTEL,
+      schema: ProfilingSchema.OTEL,
       schemas: [ProfilingSchema.ECS, ProfilingSchema.OTEL],
       isLoading: true,
     });
@@ -179,26 +181,26 @@ describe('SchemaSelector', () => {
   });
 
   it('selects another schema with data', async () => {
-    const { onChange, openDropdown } = renderSelector({
-      value: ProfilingSchema.ECS,
+    const { onSchemaChange, openDropdown } = renderSelector({
+      schema: ProfilingSchema.ECS,
       schemas: [ProfilingSchema.OTEL],
     });
 
     await openDropdown();
     await userEvent.click(screen.getByRole('option', { name: 'OpenTelemetry' }));
 
-    expect(onChange).toHaveBeenCalledWith(ProfilingSchema.OTEL);
+    expect(onSchemaChange).toHaveBeenCalledWith(ProfilingSchema.OTEL);
   });
 
   it('does not select the placeholder', async () => {
-    const { onChange, openDropdown } = renderSelector({
-      value: ProfilingSchema.OTEL,
+    const { onSchemaChange, openDropdown } = renderSelector({
+      schema: ProfilingSchema.OTEL,
       schemas: [],
     });
 
     await openDropdown();
     await userEvent.click(screen.getByRole('option', { name: 'No schema available' }));
 
-    expect(onChange).not.toHaveBeenCalled();
+    expect(onSchemaChange).not.toHaveBeenCalled();
   });
 });

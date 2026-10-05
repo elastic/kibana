@@ -20,12 +20,24 @@ jest.mock('@kbn/app-header', () => ({
   AppHeader: () => null,
   SuppressChromeBackButton: () => null,
 }));
+jest.mock('../contexts/profiling_schema/profiling_schema_context', () => ({
+  ProfilingSchemaContextProvider: jest.fn(({ children }) => children),
+}));
+jest.mock('../schema_selector', () => ({
+  SchemaSelector: jest.fn(() => null),
+}));
+jest.mock('../schema_empty_prompt/schema_data_guard', () => ({
+  SchemaDataGuard: jest.fn(({ children }) => children),
+}));
 
 import { useLocation } from 'react-router-dom';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useDefaultTimeRange } from '../../hooks/use_default_time_range';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { useBackNavigation } from '../contexts/back_navigation/use_back_navigation';
+import { ProfilingSchemaContextProvider } from '../contexts/profiling_schema/profiling_schema_context';
+import { SchemaSelector } from '../schema_selector';
+import { SchemaDataGuard } from '../schema_empty_prompt/schema_data_guard';
 import { ProfilingAppPageTemplate } from '.';
 
 describe('ProfilingAppPageTemplate', () => {
@@ -63,9 +75,12 @@ describe('ProfilingAppPageTemplate', () => {
     });
   });
 
-  const renderTemplate = (search: string) => {
+  const renderTemplate = (
+    search: string,
+    props: Partial<React.ComponentProps<typeof ProfilingAppPageTemplate>> = {}
+  ) => {
     (useLocation as jest.Mock).mockReturnValue({ search, pathname: '/stacktraces/executables' });
-    render(<ProfilingAppPageTemplate hideSearchBar />);
+    render(<ProfilingAppPageTemplate hideSearchBar {...props} />);
   };
 
   // Finds the query object from the router.link call for the storage-explorer path.
@@ -118,6 +133,45 @@ describe('ProfilingAppPageTemplate', () => {
         rangeFrom: 'now-1h',
         rangeTo: mockDefaultTimeRange.to,
       });
+    });
+  });
+
+  describe('schema selector', () => {
+    it('provides the profiling schema for the search params of the page', () => {
+      renderTemplate('?rangeFrom=now-1h&rangeTo=now-10m&kuery=host.name:my-host', {
+        showSchemaSelector: true,
+        children: <div />,
+      });
+
+      expect(jest.mocked(ProfilingSchemaContextProvider).mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          rangeFrom: 'now-1h',
+          rangeTo: 'now-10m',
+          kuery: 'host.name:my-host',
+        })
+      );
+      expect(SchemaSelector).toHaveBeenCalled();
+      expect(SchemaDataGuard).toHaveBeenCalled();
+    });
+
+    it('provides the default time range when the page has none', () => {
+      renderTemplate('', { showSchemaSelector: true });
+
+      expect(jest.mocked(ProfilingSchemaContextProvider).mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          rangeFrom: mockDefaultTimeRange.from,
+          rangeTo: mockDefaultTimeRange.to,
+          kuery: '',
+        })
+      );
+    });
+
+    it('is not shown by default', () => {
+      renderTemplate('?rangeFrom=now-1h&rangeTo=now-10m', { children: <div /> });
+
+      expect(ProfilingSchemaContextProvider).not.toHaveBeenCalled();
+      expect(SchemaSelector).not.toHaveBeenCalled();
+      expect(SchemaDataGuard).not.toHaveBeenCalled();
     });
   });
 });

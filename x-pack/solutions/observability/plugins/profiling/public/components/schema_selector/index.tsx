@@ -19,7 +19,8 @@ import {
   useEuiFontSize,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ProfilingSchema } from '@kbn/profiling-utils';
+import { DEFAULT_PROFILING_SCHEMA, ProfilingSchema } from '@kbn/profiling-utils';
+import { useProfilingSchema } from '../contexts/profiling_schema/use_profiling_schema';
 
 const SCHEMA_LABEL = i18n.translate('xpack.profiling.schemaSelector.label', {
   defaultMessage: 'Schema',
@@ -108,32 +109,20 @@ const getHelpText = ({
   return undefined;
 };
 
-export function SchemaSelector({
-  value,
-  schemas,
-  supportedSchemas,
-  isLoading,
-  hasAvailabilityError,
-  onChange,
-}: {
-  value: ProfilingSchema;
-  /** Schemas with data, undefined while unknown. */
-  schemas?: ProfilingSchema[];
-  /** Schemas offered while the ones with data are unknown. */
-  supportedSchemas: ProfilingSchema[];
-  isLoading: boolean;
-  hasAvailabilityError: boolean;
-  onChange: (schema: ProfilingSchema) => void;
-}) {
+export function SchemaSelector() {
+  const { schema, schemas, supportedSchemas, isLoading, error, onSchemaChange } =
+    useProfilingSchema();
   const { fontSize } = useEuiFontSize('s');
+
+  const value = schema ?? DEFAULT_PROFILING_SCHEMA;
 
   const offeredSchemas = schemas ?? supportedSchemas;
 
   const options = useMemo<Array<EuiSuperSelectOption<SelectOption>>>(
     () =>
-      offeredSchemas.map((schema) => ({
-        inputDisplay: schemaTranslationMap[schema],
-        value: schema,
+      offeredSchemas.map((offeredSchema) => ({
+        inputDisplay: schemaTranslationMap[offeredSchema],
+        value: offeredSchema,
       })),
     [offeredSchemas]
   );
@@ -170,10 +159,10 @@ export function SchemaSelector({
   const onSelect = useCallback(
     (selectedValue: SelectOption) => {
       if (selectedValue !== UNKNOWN_OPTION) {
-        onChange(selectedValue);
+        onSchemaChange(selectedValue);
       }
     },
-    [onChange]
+    [onSchemaChange]
   );
 
   return (
@@ -182,7 +171,7 @@ export function SchemaSelector({
         defaultMessage: 'Schema selector for profiling data',
       })}
       css={{ minWidth: '300px' }}
-      helpText={getHelpText({ schemas, isInvalid, hasAvailabilityError })}
+      helpText={getHelpText({ schemas, isInvalid, hasAvailabilityError: Boolean(error) })}
     >
       <EuiSuperSelect
         data-test-subj="profilingSchemaSelect"

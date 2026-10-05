@@ -96,6 +96,7 @@ export function StackTracesView() {
     <RouteBreadcrumb title={selectedTab?.label || ''} href={selectedTab?.href || ''}>
       <ProfilingAppPageTemplate
         tabs={tabs}
+        showSchemaSelector
         pageTitle={i18n.translate('xpack.profiling.stackTracesView.pageTitle', {
           defaultMessage: 'Stacktraces',
         })}

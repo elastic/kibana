@@ -71,8 +71,9 @@ export function ProfilingSchemaContextProvider({
     () =>
       Object.values(ProfilingSchema).filter((supportedSchema) =>
         supportedSchema === ProfilingSchema.ECS
-          ? profilingStatus?.universalProfiling.isAvailable
-          : profilingStatus?.otel.isAvailable
+          ? profilingStatus?.universalProfiling.isAvailable &&
+            profilingStatus?.universalProfiling.hasData
+          : profilingStatus?.otel.isAvailable && profilingStatus?.otel.hasData
       ),
     [profilingStatus]
   );
