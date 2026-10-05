@@ -3,8 +3,8 @@
 # modeled after the t1_analyst minus osquery run saved queries privilege, plus endpoint exceptions read
 viewer:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -111,8 +111,8 @@ viewer:
 # modeled after t3_analyst
 editor:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -260,8 +260,8 @@ editor:
 
 t1_analyst:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -371,8 +371,8 @@ t1_analyst:
 
 t2_analyst:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -484,8 +484,8 @@ t2_analyst:
 
 t3_analyst:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -620,8 +620,8 @@ t3_analyst:
 
 threat_intelligence_analyst:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -735,8 +735,8 @@ threat_intelligence_analyst:
 
 rule_author:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -859,8 +859,8 @@ rule_author:
 
 soc_manager:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -997,8 +997,8 @@ soc_manager:
 
 detections_admin:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster: ['manage_index_templates', 'manage_transform', 'read_project_routing']
   indices:
     - names:
@@ -1095,8 +1095,8 @@ detections_admin:
 
 platform_engineer:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - manage
     - 'read_project_routing'
@@ -1222,8 +1222,8 @@ platform_engineer:
 
 endpoint_operations_analyst:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -1358,8 +1358,8 @@ endpoint_operations_analyst:
 
 endpoint_policy_manager:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -1478,6 +1478,9 @@ endpoint_policy_manager:
 
 # admin role defined in elasticsearch controller
 admin:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: ['all']
   indices:
     - names: ['*']
