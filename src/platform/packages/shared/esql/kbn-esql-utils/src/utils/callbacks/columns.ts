@@ -103,7 +103,7 @@ export const getEsqlSourceColumns = async ({
       http,
       projectRouting,
       timeRange: timeRange && { from: timeRange.from, to: timeRange.to },
-      esqlVariables: usedVariables?.length ? usedVariables : undefined,
+      esqlVariables: usedVariables,
       signal,
     });
     return columns.map(({ name, esType, originalTypes }) =>

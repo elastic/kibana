@@ -75,7 +75,7 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
             const { esqlSource, dataView: esqlDataView } = await resolveEsqlSource({
               esql: query.esql,
               services,
-              esqlVariables: esqlVariables.length ? esqlVariables : undefined,
+              esqlVariables,
               timeRange: tab.timeRestore ? tab.timeRange : existingTab?.globalState.timeRange,
               previousSourceId: previousSource?.kind === 'esql' ? previousSource.id : undefined,
             });
