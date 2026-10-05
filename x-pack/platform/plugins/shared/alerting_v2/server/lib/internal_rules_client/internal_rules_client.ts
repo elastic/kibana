@@ -30,10 +30,6 @@ import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
 import { savedObjectNamespacesToSpaceId, spaceIdToNamespace } from '../space_id_to_namespace';
 import { createInternalUserRequest } from './internal_user_request';
 
-// Any non-empty list works: the lookup only needs `id` and `namespaces`, which are always
-// returned, and an empty list would return every attribute.
-const LOOKUP_FIELDS = ['enabled'];
-
 /**
  * Rules client for system work with no user request. It only disables rules.
  *
@@ -73,9 +69,9 @@ export class InternalRulesClient implements InternalRulesClientApi {
       (id) => entityIdSchema.safeParse(id).success
     );
 
-    const found = await this.rulesSavedObjectService.findByIds(validIds, {
-      fields: LOOKUP_FIELDS,
-    });
+    // Any non-empty list works: the lookup only needs `id` and `namespaces`, which are always
+    // returned, and an empty list would return every attribute.
+    const found = await this.rulesSavedObjectService.findByIds(validIds, { fields: ['enabled'] });
 
     const idsBySpace = new Map<SpaceId, string[]>();
     for (const { id, namespaces } of found) {
