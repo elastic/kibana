@@ -16,6 +16,7 @@ import {
   MAX_DESCRIPTION_LENGTH,
   MAX_FIELD_NAME_LENGTH,
   MAX_GROUPING_FIELDS,
+  MAX_KQL_LENGTH,
   MAX_NAME_LENGTH,
   MAX_PER_PAGE,
 } from './constants';
@@ -297,17 +298,19 @@ export const findActionPoliciesRequestSchema = z
     per_page: queryIntSchema({ min: 1, max: MAX_PER_PAGE })
       .optional()
       .describe('The number of action policies to return per page. Defaults to 20.'),
+    filter: z
+      .string()
+      .max(MAX_KQL_LENGTH)
+      .optional()
+      .describe(
+        'A KQL filter to apply to the action policies. Supported fields: id, name, description, enabled.'
+      ),
     search: z
       .string()
       .min(1)
       .max(256)
       .optional()
       .describe('A text string to search across action policy fields.'),
-    enabled: z
-      .enum(['true', 'false'])
-      .transform((v) => v === 'true')
-      .optional()
-      .describe('Filter by enabled status. Accepts the strings true or false.'),
     sort_field: findActionPoliciesSortFieldSchema
       .optional()
       .describe('The field to sort action policies by.'),
