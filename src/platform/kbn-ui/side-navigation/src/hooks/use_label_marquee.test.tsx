@@ -14,7 +14,9 @@ import { useLabelMarquee } from './use_label_marquee';
 
 const GUTTER = 8;
 
-const Label = () => {
+// A new `labelKey` replaces the label elements while the hook stays mounted, like the item
+// switching between `EuiButtonEmpty` and `EuiButton` when it becomes highlighted.
+const Label = ({ labelKey }: { labelKey?: string }) => {
   const { isOverflowing, labelProps, trackProps } = useLabelMarquee({
     gutter: `${GUTTER}px`,
     isLabelFirst: true,
@@ -22,7 +24,7 @@ const Label = () => {
   });
 
   return (
-    <span data-test-subj="label" data-overflowing={isOverflowing} {...labelProps}>
+    <span key={labelKey} data-test-subj="label" data-overflowing={isOverflowing} {...labelProps}>
       <span data-test-subj="track" {...trackProps}>
         A long label
       </span>
@@ -38,8 +40,11 @@ describe('useLabelMarquee', () => {
   const originalResizeObserver = global.ResizeObserver;
   const originalGetComputedStyle = window.getComputedStyle;
 
+  // Detached elements have no size, as in a browser.
   const getWidth = (element: Element) =>
-    widths[element.getAttribute('data-test-subj') as keyof typeof widths] ?? 0;
+    element.isConnected
+      ? widths[element.getAttribute('data-test-subj') as keyof typeof widths] ?? 0
+      : 0;
 
   const getOverflowWidth = () =>
     screen.getByTestId('label').style.getPropertyValue('--label-overflow-width');
@@ -114,5 +119,24 @@ describe('useLabelMarquee', () => {
 
     expect(screen.getByTestId('label')).toHaveAttribute('data-overflowing', 'false');
     expect(getOverflowWidth()).toBe('');
+  });
+
+  it('measures and observes the new elements when the label remounts', () => {
+    widths.track = 150;
+    const { rerender } = render(<Label labelKey="empty" />);
+    const previousLabel = screen.getByTestId('label');
+
+    widths.track = 120;
+    rerender(<Label labelKey="highlighted" />);
+
+    const label = screen.getByTestId('label');
+    expect(label).not.toBe(previousLabel);
+    expect(observed).toEqual(expect.arrayContaining([label, screen.getByTestId('track')]));
+    expect(getOverflowWidth()).toBe(String(120 - (100 - GUTTER * 2)));
+
+    widths.track = 150;
+    act(() => resizeCallback?.([], {} as ResizeObserver));
+
+    expect(getOverflowWidth()).toBe(String(150 - (100 - GUTTER * 2)));
   });
 });
