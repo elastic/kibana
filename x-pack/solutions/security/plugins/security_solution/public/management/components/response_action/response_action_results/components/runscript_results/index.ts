@@ -6,4 +6,4 @@
  */
 
 // TODO:PT move component to this new location and refactor it
-export * from '../../../../runscript_action_result/runscript_action_output';
+export { RunscriptActionResult } from '../../../../runscript_action_result';

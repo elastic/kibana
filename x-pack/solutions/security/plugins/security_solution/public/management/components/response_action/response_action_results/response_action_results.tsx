@@ -13,7 +13,7 @@ import { FormattedDate } from '../../../../common/components/formatted_date';
 import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
 import { MemoryDumpResponseActionOutputResult } from '../../memory_dump_response_action_output_result';
 import { CancelActionResults } from '../../cancel_action_results';
-import { RunscriptOutput } from './components/runscript_results';
+import { RunscriptActionResult } from './components/runscript_results';
 import { ScanResults } from './components/scan_results';
 import { EndpointUploadActionResult } from '../../endpoint_upload_action_result';
 import { GetFileResults } from './components/get_file_results';
@@ -177,7 +177,7 @@ export const ResponseActionResults = memo<ResponseActionResultsProps>(
                   )}
 
                   {isRunScriptAction(action) && (
-                    <RunscriptOutput
+                    <RunscriptActionResult
                       action={action}
                       agentId={hostAgentId}
                       textSize={textSize}

@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import type { EuiTextProps } from '@elastic/eui';
+import { EndpointActionFailureMessage } from '../../../../endpoint_action_failure_message';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type {
   ActionDetails,
@@ -27,23 +28,30 @@ export interface ExecuteResultsProps {
 }
 
 /**
- * DO NOT USE as it is undergoing refactoring. Use `<ResponseActionResults>` component intead
+ * DO NOT USE as it is undergoing refactoring. Use `<ResponseActionResults>` component instead
  * @deprecated
  */
 export const ExecuteResults = memo<ExecuteResultsProps>(
   ({ action, agentId, textSize, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const { wasSuccessful } = agentId ? action.agentState[agentId] : action;
 
     // Component wrapper created only to pass along the `canAccessFileDowloadLink` prop, which after
     // review, it is not necessary in the component at all.
 
-    return (
+    return wasSuccessful ? (
       <ExecuteActionHostResponse
         action={action}
         agentId={agentId}
         textSize={textSize as ExecuteActionHostResponseProps['textSize']}
         data-test-subj={getTestId()}
         canAccessFileDownloadLink={true}
+      />
+    ) : (
+      <EndpointActionFailureMessage
+        action={action}
+        agentId={agentId}
+        data-test-subj={getTestId('outputFailureMessage')}
       />
     );
   }

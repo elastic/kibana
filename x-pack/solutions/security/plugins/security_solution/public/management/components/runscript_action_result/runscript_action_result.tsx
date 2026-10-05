@@ -7,6 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiFlexItem, EuiSpacer, type EuiTextProps } from '@elastic/eui';
+import { EndpointActionFailureMessage } from '../endpoint_action_failure_message';
 import { EndpointHostExecutionResponseOutput } from '../endpoint_host_execution_response_output';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { ResponseActionFileDownloadLink } from '../response_action_file_download_link';
@@ -28,10 +29,12 @@ export interface RunscriptActionResultProps {
   /** Defaults to the first agent on the list if left undefined */
   agentId?: string;
   'data-test-subj'?: string;
-  textSize?: Exclude<EuiTextProps['size'], 'm' | 'relative'>;
+  textSize?: EuiTextProps['size'];
 }
 
 /**
+ * DO NOT USE as it is undergoing refactoring. Use `<ResponseActionResults>` component instead
+ *
  * Represents the result of a run script action rendered as a memoized React component.
  *
  * This component is used to display a downloadable link for a response action file.
@@ -44,10 +47,13 @@ export interface RunscriptActionResultProps {
  * @param {string} [props['data-test-subj']] - An optional data-test subject attribute for testing purposes.
  *
  * @returns {React.Element} A React component that renders a text block with a file download link.
+ *
+ * @deprecated
  */
 export const RunscriptActionResult = memo<RunscriptActionResultProps>(
   ({ action, agentId = action.agents[0], 'data-test-subj': dataTestSubj, textSize = 's' }) => {
     const { canWriteExecuteOperations } = useUserPrivileges().endpointPrivileges;
+    const { wasSuccessful } = agentId ? action.agentState[agentId] : action;
     const showFile = action.agentType !== 'crowdstrike';
     const executionOutput = useMemo(() => {
       if (action.agentType === 'microsoft_defender_endpoint') {
@@ -87,7 +93,7 @@ export const RunscriptActionResult = memo<RunscriptActionResultProps>(
       return null;
     }, [action, agentId, dataTestSubj, textSize]);
 
-    return (
+    return wasSuccessful ? (
       <>
         {showFile && (
           <EuiFlexItem>
@@ -113,6 +119,12 @@ export const RunscriptActionResult = memo<RunscriptActionResultProps>(
           </>
         )}
       </>
+    ) : (
+      <EndpointActionFailureMessage
+        action={action}
+        agentId={agentId}
+        data-test-subj={`${dataTestSubj}-outputFailureMessage`}
+      />
     );
   }
 );

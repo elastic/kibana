@@ -50,7 +50,7 @@ export interface MemoryDumpResponseActionOutputResultProps {
 }
 
 /**
- * DO NOT USE as it is undergoing refactoring. Use `<ResponseActionResults>` component intead
+ * DO NOT USE as it is undergoing refactoring. Use `<ResponseActionResults>` component instead
  * @deprecated
  */
 export const MemoryDumpResponseActionOutputResult = memo<MemoryDumpResponseActionOutputResultProps>(
