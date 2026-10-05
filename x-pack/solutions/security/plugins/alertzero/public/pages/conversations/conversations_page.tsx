@@ -54,6 +54,7 @@ import { decisionErrorMessage } from './decision_errors';
 import { ProposalsTrendChartRow } from '../../components/proposals_trend_chart';
 import { DismissProposalModal } from '../../components/pending_proposals/dismiss_proposal_modal';
 import { EscalationModalBoundary } from './escalation_modal_boundary';
+import { InFlightProposalBadge } from './in_flight_proposal_badge';
 import { useQueueSections } from './queue/use_queue_sections';
 import { useDropDecidedProposal } from './queue/use_drop_decided_proposal';
 import { QueueSection } from './queue/queue_section';
@@ -210,6 +211,11 @@ const ConversationsPageContent: React.FC = () => {
   // ---------------------------------------------------------------------------
 
   const assignInvestigation = useAssignInvestigation();
+
+  const renderInFlightStatus = useCallback(
+    ({ id }: Investigation) => <InFlightProposalBadge proposalId={id} />,
+    []
+  );
 
   const renderAssignees = useQueueAssignees({
     items: conversations,
@@ -431,6 +437,7 @@ const ConversationsPageContent: React.FC = () => {
               canManageEscalations={canManageEscalations}
               canCloseInvestigation={canManageInvestigations}
               renderAssignees={renderAssignees}
+              renderInFlightStatus={renderInFlightStatus}
             />
           </EuiFlexItem>
         ))}

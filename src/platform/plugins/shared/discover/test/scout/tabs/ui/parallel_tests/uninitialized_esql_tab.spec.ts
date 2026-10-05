@@ -64,7 +64,7 @@ spaceTest.describe(
     );
 
     spaceTest('does not open query history on a new ES|QL tab', async ({ pageObjects }) => {
-      const { discover, unifiedTabs } = pageObjects;
+      const { discover, unifiedTabs, esqlEditor } = pageObjects;
       const historyPanel = discover.getEsqlHistoryPanel();
 
       await discover.goto({ queryMode: 'esql' });
@@ -73,8 +73,8 @@ spaceTest.describe(
       await unifiedTabs.createNewTab();
 
       await expect(historyPanel).toBeHidden();
+      await esqlEditor.setQuery(QUERY);
 
-      await discover.codeEditor.setCodeEditorValue(QUERY);
       await discover.submitQuery();
       await discover.waitUntilSearchingHasFinished();
 
@@ -84,15 +84,15 @@ spaceTest.describe(
     spaceTest(
       'keeps manually opened query history open across searches',
       async ({ pageObjects }) => {
-        const { discover } = pageObjects;
-        const historyPanel = discover.getEsqlHistoryPanel();
+        const { discover, esqlEditor } = pageObjects;
+        const historyPanel = esqlEditor.historyPanel;
 
         await discover.goto({ queryMode: 'esql' });
         await discover.waitUntilSearchingHasFinished();
         await expect(historyPanel).toBeHidden();
 
-        await discover.toggleEsqlHistoryPanel();
-        await discover.codeEditor.setCodeEditorValue(QUERY);
+        await esqlEditor.toggleHistoryPanel();
+        await esqlEditor.setQuery(QUERY);
         await discover.submitQuery();
         await discover.waitUntilSearchingHasFinished();
 
@@ -119,7 +119,7 @@ spaceTest.describe(
     spaceTest(
       'shows recommended queries and disables search on an empty ES|QL tab until a query is entered and submitted',
       async ({ pageObjects }) => {
-        const { discover, unifiedTabs } = pageObjects;
+        const { discover, unifiedTabs, esqlEditor } = pageObjects;
 
         await discover.goto({ queryMode: 'esql' });
         await discover.waitUntilSearchingHasFinished();
@@ -128,7 +128,7 @@ spaceTest.describe(
         await expect(discover.getRecommendedQueries()).toBeVisible();
         await expect(discover.getQuerySubmitButton()).toBeDisabled();
 
-        await discover.codeEditor.setCodeEditorValue(QUERY);
+        await esqlEditor.setQuery(QUERY);
 
         await expect(discover.getQuerySubmitButton()).toBeEnabled();
         await expect(discover.getRecommendedQueries()).toBeVisible();

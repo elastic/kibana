@@ -29,7 +29,7 @@ import {
   ESQLLangEditor,
   QuickSearchVisor,
   type ESQLEditorProps,
-  type RestorableStateProviderApi,
+  type ESQLEditorApi,
 } from '@kbn/esql/public';
 import type { EuiFieldText, EuiIconProps, OnRefreshProps, UseEuiTheme } from '@elastic/eui';
 import {
@@ -369,7 +369,9 @@ export const QueryBarTopRow = React.memo(
       }
     }, [props.isLoading]);
 
-    const esqlEditorRef = useRef<RestorableStateProviderApi>(null);
+    const esqlEditorRef = useRef<ESQLEditorApi>(null);
+
+    const focusEsqlEditor = useCallback(() => esqlEditorRef.current?.focus(), []);
 
     const focusEsqlEditor = useCallback(() => {
       setTimeout(() => {

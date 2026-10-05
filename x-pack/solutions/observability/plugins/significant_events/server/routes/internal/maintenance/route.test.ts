@@ -77,6 +77,39 @@ describe('cleanup workflow bootstrap route', () => {
   });
 });
 
+describe('reset route', () => {
+  const resetRoute =
+    internalMaintenanceRoutes['POST /internal/significant_events/maintenance/_reset'];
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('requires Nightshift manage and configure and delegates with the authenticated user', async () => {
+    const request = {};
+    const licensing = {};
+    const reset = jest.fn().mockResolvedValue({ state: 'enabled' });
+    const server = {
+      core: {
+        security: {
+          authc: { getCurrentUser: jest.fn().mockReturnValue({ username: 'operator' }) },
+        },
+      },
+    };
+
+    await resetRoute.handler({
+      request,
+      server,
+      maintenanceService: { reset },
+      getScopedClients: jest.fn().mockResolvedValue({ licensing }),
+    } as unknown as Parameters<typeof resetRoute.handler>[0]);
+
+    expect(resetRoute.security.authz).toEqual({
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
+    });
+    expect(assertSignificantEventsAccess).toHaveBeenCalledWith({ server, licensing });
+    expect(reset).toHaveBeenCalledWith({ request, updatedBy: 'operator' });
+  });
+});
+
 describe('pause, resume, and status routes', () => {
   beforeEach(() => jest.clearAllMocks());
 

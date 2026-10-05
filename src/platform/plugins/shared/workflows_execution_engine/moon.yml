@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/actions-plugin'
   - '@kbn/connector-specs'
   - '@kbn/workflows'
+  - '@kbn/entity-access-control'
   - '@kbn/task-manager-plugin'
   - '@kbn/es-query'
   - '@kbn/eval-kql'

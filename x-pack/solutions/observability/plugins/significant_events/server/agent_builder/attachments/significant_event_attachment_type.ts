@@ -35,7 +35,6 @@ export const formatSignificantEventAsText = (event: SignificantEvent): string =>
   return [
     `Significant Event "${event.title}"`,
     `Event ID: ${event.event_id}`,
-    `Event UUID: ${event.event_uuid}`,
     `Status: ${event.status}`,
     `Severity: ${getSeverityLabel(event.severity)}`,
     `Confidence: ${event.confidence}`,
@@ -117,10 +116,9 @@ export const createSignificantEventAttachmentType = ({
         // Use the canonical client (not the flag-aware search client) so that fire-and-forget
         // `.rule-events` write lag cannot cause a stale attachment to appear fresh. Canonical is
         // the authoritative write source; @timestamp here always reflects the true latest version.
-        // Avoid comparing event_uuid: when SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ is ON,
-        // the search client returns group_hash as event_uuid (synthetic, not a real UUID),
-        // which never matches the real UUID stored in the attachment — causing isStale to
-        // always return true. @timestamp is sufficient to detect any write since attachment.
+        // Avoid comparing legacy version identifiers: when SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ
+        // is on, the search client returns group_hash rather than the stored version identity.
+        // @timestamp is sufficient to detect any write since attachment.
         return !latestEvent || latestVersion.data['@timestamp'] !== latestEvent['@timestamp'];
       } catch (error) {
         logger.warn(
