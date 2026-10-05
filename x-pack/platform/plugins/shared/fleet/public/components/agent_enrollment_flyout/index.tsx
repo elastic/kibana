@@ -61,6 +61,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   isIntegrationFlow,
   installedPackagePolicy,
   hideIncomingDataStep,
+  hideViewAgentsButton,
   onAgentPolicyCreated,
   defaultAgentPolicyName,
   forceCreatePolicy,
@@ -239,7 +240,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
             isIntegrationFlow={isIntegrationFlow}
             selectedApiKeyId={selectedApiKeyId}
             setSelectedAPIKeyId={setSelectedAPIKeyId}
-            onClickViewAgents={onClose}
+            onClickViewAgents={hideViewAgentsButton ? undefined : onClose}
             installedPackagePolicy={installedPackagePolicy}
             hideIncomingDataStep={hideIncomingDataStep}
             onAgentPolicyCreated={onAgentPolicyCreated}

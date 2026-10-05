@@ -63,6 +63,7 @@ export const toApiKeyAttributes = (auth: ApiKeyAttributes) => ({
 
 export const buildCreateActionPolicyAttributes = ({
   data,
+  enabled,
   auth,
   createdBy,
   createdAt,
@@ -70,6 +71,7 @@ export const buildCreateActionPolicyAttributes = ({
   updatedAt,
 }: {
   data: CreateActionPolicyData;
+  enabled: boolean;
   auth: ApiKeyAttributes;
   createdBy: ActionPolicySavedObjectAttributes['createdBy'];
   createdAt: string;
@@ -79,7 +81,7 @@ export const buildCreateActionPolicyAttributes = ({
   return {
     name: data.name,
     description: data.description,
-    enabled: true,
+    enabled,
     destinations: data.destinations,
     matcher: data.matcher ?? null,
     groupBy: data.group_by ?? null,
@@ -131,16 +133,13 @@ export const buildUpdateActionPolicyAttributes = ({
 
 export const transformActionPolicySoAttributesToApiResponse = ({
   id,
-  version,
   attributes,
 }: {
   id: string;
-  version?: string;
   attributes: ActionPolicySavedObjectAttributes;
 }): ActionPolicyResponse => {
   return {
     id,
-    version,
     name: attributes.name,
     description: attributes.description,
     enabled: attributes.enabled,

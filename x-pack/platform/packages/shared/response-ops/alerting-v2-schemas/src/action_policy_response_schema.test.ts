@@ -12,7 +12,6 @@ import {
 
 const validResponse = {
   id: 'np-1',
-  version: 'WzEsMV0=',
   name: 'My Policy',
   description: 'A test policy',
   enabled: true,
@@ -37,7 +36,6 @@ describe('actionPolicyResponseSchema', () => {
   it('accepts nullable fields as null', () => {
     const result = actionPolicyResponseSchema.parse({
       ...validResponse,
-      version: undefined,
       matcher: null,
       group_by: null,
       grouping_mode: null,

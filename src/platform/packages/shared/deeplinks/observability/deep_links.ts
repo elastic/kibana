@@ -111,7 +111,7 @@ export type StreamsLinkId = 'overview';
 export type SignificantEventsLinkId = 'knowledge_indicators' | 'events' | 'rules';
 
 export type ObservabilityAlertingLinkId =
-  | 'inbox'
+  | 'alerts'
   | 'rules-v1'
   | 'rules-v2'
   | 'rule-library'

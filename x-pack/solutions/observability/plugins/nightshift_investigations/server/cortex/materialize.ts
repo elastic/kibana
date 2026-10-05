@@ -15,6 +15,7 @@ import {
   type CortexPageSummary,
 } from '../../common/cortex';
 import type { CortexTelemetry } from '../telemetry';
+import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
 import type { CortexPageStore } from './page_store';
 
 export const CORTEX_WORKSPACE_ROOT = '/workspace/cortex';
@@ -23,7 +24,7 @@ const README_CONTENT = `# Knowledge Cortex
 
 A living wiki of durable, cross-linked knowledge. Read these pages before investigating.
 
-Start here, then open \`INDEX.md\` and follow links with \`nightshift_sandbox_view_file\`.
+Start here, then open \`INDEX.md\` and follow links with \`${SANDBOX_VIEW_FILE_TOOL_ID}\`.
 Do not write Cortex pages yourself — a post-run optimizer updates the wiki from this investigation.
 
 Pages live under \`{type}/{slug}.md\`. Status is established, tentative, or archived.
@@ -36,7 +37,7 @@ const renderIndex = (pages: CortexPageSummary[]): string => {
   const lines = [
     '# Cortex index',
     '',
-    'Open a page with `nightshift_sandbox_view_file` using the path in parentheses.',
+    `Open a page with \`${SANDBOX_VIEW_FILE_TOOL_ID}\` using the path in parentheses.`,
     '',
   ];
 
@@ -121,5 +122,9 @@ export const materializeCortex = async ({
   ]);
 
   telemetry.reportHydrated(fullPages);
-  logger.info(`Materialized ${fullPages.length} Cortex page(s) into sandbox`);
+  logger.info(
+    fullPages.length > 0
+      ? `Materialized ${fullPages.length} Cortex page(s) into sandbox`
+      : 'Materialized 0 Cortex page(s) into sandbox — store.list returned no live pages'
+  );
 };

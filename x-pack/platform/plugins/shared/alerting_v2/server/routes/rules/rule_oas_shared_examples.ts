@@ -35,16 +35,14 @@ const SAMPLE_RULE_DATA = {
   },
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  recovery_strategy: 'no_breach' as const,
   query: {
-    format: 'standalone' as const,
-    breach: {
-      query:
-        'FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name',
-    },
+    base: 'FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name',
+    breach: { segment: 'WHERE avg_cpu > 0.9' },
   },
+  recovery: { strategy: 'no_breach' as const },
+  no_data: { strategy: 'keep_last' as const },
   grouping: { fields: ['host.name'] },
-  state_transition: { pending_count: 1, recovering_count: 1 },
+  state_transition: { pending: { count: 1 }, recovering: { count: 1 } },
 };
 
 export const CREATE_RULE_REQUEST: CreateRuleDataInput = SAMPLE_RULE_DATA;
@@ -52,12 +50,8 @@ export const CREATE_RULE_REQUEST: CreateRuleDataInput = SAMPLE_RULE_DATA;
 export const RULE_RESPONSE: RuleResponse = {
   ...SAMPLE_RULE_DATA,
   id: 'rule-1',
-  version: 'WzAsMV0=',
+  version: 1,
   enabled: true,
-  metadata: {
-    ...SAMPLE_RULE_DATA.metadata,
-    version: 1,
-  },
   created_by: { profile_uid: 'u_elastic_0' },
   created_at: '2026-01-15T12:00:00.000Z',
   updated_by: { profile_uid: 'u_elastic_0' },

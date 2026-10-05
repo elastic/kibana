@@ -13,6 +13,7 @@ const example = {
   input: { question: 'Investigate synthetic timeouts.' },
   metadata: { case_id: 'timeouts' },
 };
+const connector = { id: 'investigation-model' };
 
 it('keeps multi-megabyte conversation evidence out of the persisted score output', async () => {
   const conversation = {
@@ -42,7 +43,7 @@ it('keeps multi-megabyte conversation evidence out of the persisted score output
     })
     .mockResolvedValueOnce(conversation);
 
-  const output = await runInvestigation(fetch, example);
+  const output = await runInvestigation(fetch, example, connector);
 
   expect(output).not.toHaveProperty('conversation');
   expect(output).toMatchObject({
@@ -75,7 +76,7 @@ it('bounds an oversized report and failure message while retaining evidence iden
     .mockRejectedValueOnce(new Error('Workflow unavailable'))
     .mockResolvedValueOnce({ rounds: [{ trace_id: 'partial-trace', steps: [] }] });
 
-  const output = await runInvestigation(fetch, example);
+  const output = await runInvestigation(fetch, example, connector);
 
   expect(output).toMatchObject({
     investigation_id: 'large-report',
@@ -126,11 +127,15 @@ it('executes the manual investigation and preserves the report and references to
     })
     .mockResolvedValueOnce(conversation);
 
-  const result = await runInvestigation(fetch, example);
+  const result = await runInvestigation(fetch, example, connector);
 
   expect(fetch).toHaveBeenNthCalledWith(1, '/internal/nightshift/investigations', {
     method: 'POST',
-    body: JSON.stringify({ subject: { type: 'manual' }, message: example.input.question }),
+    body: JSON.stringify({
+      subject: { type: 'manual' },
+      message: example.input.question,
+      connector_id: connector.id,
+    }),
   });
   expect(result).toMatchObject({
     case_id: 'timeouts',
@@ -163,7 +168,7 @@ it.each([
       })
       .mockRejectedValueOnce(new Error('Workflow details unavailable'))
       .mockResolvedValueOnce(conversation);
-    const output = await runInvestigation(fetch, example);
+    const output = await runInvestigation(fetch, example, connector);
     expect(output).toMatchObject({
       workflow_status: 'failed',
       execution_error: expectedError,
@@ -186,7 +191,8 @@ it.each([
 it('reports an investigation start failure as execution evidence', async () => {
   const output = await runInvestigation(
     jest.fn().mockRejectedValue(new Error('Service unavailable')),
-    example
+    example,
+    connector
   );
   expect(output.execution_error).toBe('Service unavailable');
   expect(output.investigation_id).toBeUndefined();
@@ -195,7 +201,8 @@ it('reports an investigation start failure as execution evidence', async () => {
 it('bounds a start failure even when no investigation was created', async () => {
   const output = await runInvestigation(
     jest.fn().mockRejectedValue(new Error('x'.repeat(6 * 1024 * 1024))),
-    example
+    example,
+    connector
   );
   expect(output.execution_error).toContain('[truncated]');
   expect(Buffer.byteLength(JSON.stringify(output))).toBeLessThan(1024 * 1024);
@@ -207,7 +214,7 @@ it('reports a completed investigation without a conversation as an execution err
     .fn()
     .mockResolvedValueOnce({ investigation_id: 'no-conversation' })
     .mockResolvedValueOnce({ status: 'completed', conclusion: 'Report without trace evidence' });
-  const output = await runInvestigation(fetch, example);
+  const output = await runInvestigation(fetch, example, connector);
   expect(output.execution_error).toBe('Completed investigation has no conversation id');
   expect(output.traceId).toBeUndefined();
 });
@@ -224,7 +231,7 @@ it('retains the latest report and conversation when a later poll fails', async (
     .mockRejectedValueOnce(new Error('Polling failed'))
     .mockRejectedValueOnce(new Error('Workflow details unavailable'))
     .mockResolvedValueOnce({ rounds: [{ trace_id: 'partial-trace', steps: [] }] });
-  expect(await runInvestigation(fetch, example)).toMatchObject({
+  expect(await runInvestigation(fetch, example, connector)).toMatchObject({
     execution_error: 'Polling failed',
     workflow_status: 'running',
     structured_report: { summary: 'Partial report' },
@@ -245,7 +252,7 @@ it('bounds polling and retains partial conversation evidence when an investigati
       .mockResolvedValueOnce({ status: 'running', conversation_id: 'slow-conversation' })
       .mockRejectedValueOnce(new Error('Workflow details unavailable'))
       .mockResolvedValueOnce({ rounds: [{ trace_id: 'partial-trace', steps: [] }] });
-    expect(await runInvestigation(fetch, example)).toMatchObject({
+    expect(await runInvestigation(fetch, example, connector)).toMatchObject({
       investigation_id: 'slow-investigation',
       conversation_id: 'slow-conversation',
       workflow_status: 'running',
