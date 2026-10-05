@@ -88,7 +88,7 @@ export function bindContract({ bind }: ContainerModuleLoadOptions) {
       ): Promise<RulesClientApi> {
         return buildScope(request, spaceId).get(RulesClient);
       },
-      async getInternalRulesClient(): Promise<InternalRulesClientApi> {
+      async getUnsafeInternalRulesClient(): Promise<InternalRulesClientApi> {
         return createInternalRulesClient({
           rulesSavedObjectService: rulesSavedObjectServiceInternal,
           getRulesClientInSpace: (spaceId) => buildInternalScope(spaceId).get(RulesClient),

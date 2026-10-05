@@ -86,6 +86,11 @@ export type BulkCreateResultItem =
       error: SavedObjectError;
     };
 
+export interface FindByIdsOptions {
+  spaceId?: string;
+  fields?: string[];
+}
+
 export interface RulesFindAllResultItem {
   id: string;
   attributes: RuleSavedObjectAttributes;
@@ -120,7 +125,7 @@ export interface RulesSavedObjectServiceContract {
   }): Promise<RuleWriteResult>;
   get(id: string, spaceId?: string): Promise<RuleSavedObjectDoc>;
   bulkGetByIds(ids: string[], spaceId?: string): Promise<RulesSavedObjectsBulkGetResultItem[]>;
-  findByIds(ruleIds: string[], spaceId?: string): Promise<RulesFindAllResultItem[]>;
+  findByIds(ruleIds: string[], options?: FindByIdsOptions): Promise<RulesFindAllResultItem[]>;
   update(params: {
     id: string;
     attrs: RuleSavedObjectAttributes;
@@ -272,7 +277,10 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     });
   }
 
-  public async findByIds(ruleIds: string[], spaceId?: string): Promise<RulesFindAllResultItem[]> {
+  public async findByIds(
+    ruleIds: string[],
+    { spaceId, fields }: FindByIdsOptions = {}
+  ): Promise<RulesFindAllResultItem[]> {
     if (ruleIds.length === 0) {
       return [];
     }
@@ -287,6 +295,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       perPage: 1000,
       namespaces: namespace ? [namespace] : ['*'],
       filter,
+      fields,
     });
 
     const results: RulesFindAllResultItem[] = [];

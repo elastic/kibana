@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BULK_FILTER_MAX_RESOURCES } from '@kbn/alerting-v2-schemas';
+import { MAX_BULK_ITEMS } from '@kbn/alerting-v2-schemas';
 import { asSpaceId, type SpaceId } from '@kbn/core-spaces-common';
 import { ALERTING_ERROR_CODES } from './errors/error_codes';
 import { createInternalRulesClient } from './internal_rules_client';
@@ -21,18 +21,19 @@ const foundRule = (id: string, namespaces?: string[]): RulesFindAllResultItem =>
 
 const setup = (
   found: RulesFindAllResultItem[],
-  spaceErrors: Partial<Record<SpaceId, BulkResponse['errors']>> = {}
+  spaceErrors: Partial<Record<SpaceId, BulkResponse['errors']>> = {},
+  throwingSpaces: SpaceId[] = []
 ) => {
   const findByIds = jest.fn(async (_ids: string[]) => found);
   const bulkDisableRulesBySpace = new Map<SpaceId, jest.Mock>();
   const getRulesClientInSpace = jest.fn((spaceId: SpaceId) => {
     const errors = spaceErrors[spaceId] ?? [];
-    const bulkDisableRules = jest.fn(
-      async ({ ids }: { ids: string[] }): Promise<BulkResponse> => ({
-        affected_count: ids.length - errors.length,
-        errors,
-      })
-    );
+    const bulkDisableRules = jest.fn(async ({ ids }: { ids: string[] }): Promise<BulkResponse> => {
+      if (throwingSpaces.includes(spaceId)) {
+        throw new Error('boom');
+      }
+      return { affected_count: ids.length - errors.length, errors };
+    });
     bulkDisableRulesBySpace.set(spaceId, bulkDisableRules);
     return { bulkDisableRules };
   });
@@ -53,7 +54,9 @@ describe('createInternalRulesClient', () => {
 
     const result = await client.bulkDisableRules({ ids: ['rule-1', 'rule-2', 'rule-3', 'rule-1'] });
 
-    expect(findByIds).toHaveBeenCalledWith(['rule-1', 'rule-2', 'rule-3']);
+    expect(findByIds).toHaveBeenCalledWith(['rule-1', 'rule-2', 'rule-3'], {
+      fields: expect.any(Array),
+    });
     expect(getRulesClientInSpace).toHaveBeenCalledTimes(2);
     expect(bulkDisableRulesBySpace.get(asSpaceId('default'))).toHaveBeenCalledWith({
       ids: ['rule-1', 'rule-3'],
@@ -95,9 +98,27 @@ describe('createInternalRulesClient', () => {
     expect(result.errors).toEqual([conflict]);
   });
 
-  it('rejects more unique ids than BULK_FILTER_MAX_RESOURCES without reading any rule', async () => {
+  it('reports the rules of a space whose client throws as errors without stopping the other spaces', async () => {
+    const { client, bulkDisableRulesBySpace } = setup(
+      [foundRule('rule-1', ['default']), foundRule('rule-2', ['space-a'])],
+      {},
+      [asSpaceId('default')]
+    );
+
+    const result = await client.bulkDisableRules({ ids: ['rule-1', 'rule-2'] });
+
+    expect(bulkDisableRulesBySpace.get(asSpaceId('space-a'))).toHaveBeenCalledWith({
+      ids: ['rule-2'],
+    });
+    expect(result).toEqual({
+      affected_count: 1,
+      errors: [{ id: 'rule-1', error: expect.objectContaining({ message: 'boom' }) }],
+    });
+  });
+
+  it('rejects more unique ids than MAX_BULK_ITEMS without reading any rule', async () => {
     const { client, findByIds } = setup([]);
-    const ids = Array.from({ length: BULK_FILTER_MAX_RESOURCES + 1 }, (_, i) => `rule-${i}`);
+    const ids = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, i) => `rule-${i}`);
 
     await expect(client.bulkDisableRules({ ids })).rejects.toMatchObject({
       output: { statusCode: 400 },
@@ -105,7 +126,7 @@ describe('createInternalRulesClient', () => {
     expect(findByIds).not.toHaveBeenCalled();
   });
 
-  it('reports ids the HTTP API would reject as RULE_NOT_FOUND without looking them up', async () => {
+  it('reports ids the HTTP API would reject as errors without looking them up', async () => {
     const invalidId = 'x" OR alerting_rule.id: * OR alerting_rule.id: "x';
     const { client, findByIds, bulkDisableRulesBySpace } = setup([
       foundRule('rule-1', ['default']),
@@ -113,7 +134,7 @@ describe('createInternalRulesClient', () => {
 
     const result = await client.bulkDisableRules({ ids: ['rule-1', invalidId] });
 
-    expect(findByIds).toHaveBeenCalledWith(['rule-1']);
+    expect(findByIds).toHaveBeenCalledWith(['rule-1'], { fields: expect.any(Array) });
     expect(bulkDisableRulesBySpace.get(asSpaceId('default'))).toHaveBeenCalledWith({
       ids: ['rule-1'],
     });
@@ -122,28 +143,17 @@ describe('createInternalRulesClient', () => {
       errors: [
         {
           id: invalidId,
-          error: expect.objectContaining({ code: ALERTING_ERROR_CODES.RULE_NOT_FOUND }),
+          error: expect.objectContaining({
+            message: `Rule id "${invalidId}" is not a valid rule id`,
+          }),
         },
       ],
     });
   });
 
-  it('looks the ids up in batches of 1000', async () => {
+  it('does not count duplicate ids towards MAX_BULK_ITEMS', async () => {
     const { client, findByIds } = setup([]);
-    const ids = Array.from({ length: 2500 }, (_, i) => `rule-${i}`);
-
-    await client.bulkDisableRules({ ids });
-
-    expect(findByIds.mock.calls.map(([batch]) => batch)).toEqual([
-      ids.slice(0, 1000),
-      ids.slice(1000, 2000),
-      ids.slice(2000),
-    ]);
-  });
-
-  it('does not count duplicate ids towards BULK_FILTER_MAX_RESOURCES', async () => {
-    const { client, findByIds } = setup([]);
-    const uniqueIds = Array.from({ length: BULK_FILTER_MAX_RESOURCES }, (_, i) => `rule-${i}`);
+    const uniqueIds = Array.from({ length: MAX_BULK_ITEMS }, (_, i) => `rule-${i}`);
 
     await client.bulkDisableRules({ ids: [...uniqueIds, 'rule-0'] });
 

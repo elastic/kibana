@@ -93,7 +93,7 @@ describe('bindContract', () => {
     expect(start).toEqual({
       getRulesClientWithRequest: expect.any(Function),
       getRulesClientWithRequestInSpace: expect.any(Function),
-      getInternalRulesClient: expect.any(Function),
+      getUnsafeInternalRulesClient: expect.any(Function),
       getActionPolicyClientWithRequest: expect.any(Function),
       getActionPolicyClientWithRequestInSpace: expect.any(Function),
       getAlertEventsClientWithRequest: expect.any(Function),
@@ -158,7 +158,7 @@ describe('bindContract', () => {
     expect(scope.get(Request)).toBe(fakeRequest);
   });
 
-  describe('getInternalRulesClient', () => {
+  describe('getUnsafeInternalRulesClient', () => {
     const findRulesIn = (namespaces: string[]) =>
       findByIds.mockResolvedValue([
         { id: 'rule-1', namespaces, attributes: createRuleSoAttributes() },
@@ -167,7 +167,7 @@ describe('bindContract', () => {
     it('only exposes bulkDisableRules', async () => {
       const start = container.get(AlertingStartToken);
 
-      const client = await start.getInternalRulesClient();
+      const client = await start.getUnsafeInternalRulesClient();
 
       expect(Object.keys(client)).toEqual(['bulkDisableRules']);
     });
@@ -180,10 +180,10 @@ describe('bindContract', () => {
       savedObjects.getUnsafeInternalClient.mockReturnValue(internalClient);
       const start = container.get(AlertingStartToken);
 
-      const client = await start.getInternalRulesClient();
+      const client = await start.getUnsafeInternalRulesClient();
       await client.bulkDisableRules({ ids: ['rule-1'] });
 
-      expect(findByIds).toHaveBeenCalledWith(['rule-1']);
+      expect(findByIds).toHaveBeenCalledWith(['rule-1'], { fields: expect.any(Array) });
       expect(mockRulesClient.bulkDisableRules).toHaveBeenCalledWith({ ids: ['rule-1'] });
       expect(savedObjects.getUnsafeInternalClient).toHaveBeenCalledWith({
         includedHiddenTypes: ['alerting_rule'],
@@ -200,7 +200,7 @@ describe('bindContract', () => {
       savedObjects.getUnsafeInternalClient.mockReturnValue(internalClient);
       const start = container.get(AlertingStartToken);
 
-      const client = await start.getInternalRulesClient();
+      const client = await start.getUnsafeInternalRulesClient();
       await client.bulkDisableRules({ ids: ['rule-1'] });
 
       expect(internalClient.asScopedToNamespace).not.toHaveBeenCalled();
