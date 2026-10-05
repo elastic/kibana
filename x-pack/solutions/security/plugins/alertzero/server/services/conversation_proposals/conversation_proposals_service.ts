@@ -14,6 +14,7 @@ import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import { ALERTZERO_PROPOSAL_ORIGIN } from '../../../common/proposals/origin';
 import type { ProposalItem, ProposalsPageResponse } from '../../../common/proposals/list';
+import { CLOSED_WINDOW_HOURS } from '../../../common/proposals/list';
 
 type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
 type GetImpactClient = AgenticInvestigationsPluginStart['getImpactClient'];
@@ -33,9 +34,6 @@ const readAssignees = (value: MetadataFieldValue | undefined): string[] => {
   if (Array.isArray(value)) return value;
   return typeof value === 'string' ? [value] : [];
 };
-
-/** Fixed window for the closed-proposals queue: decisions older than this are not shown. */
-const CLOSED_DECIDED_WITHIN_HOURS = 72;
 
 /**
  * Breaks every tie the timestamps leave, so a row cannot move between two offset
@@ -82,7 +80,7 @@ export class ConversationProposalsService {
     return { proposals: await this.decorate(proposals, request), total };
   }
 
-  /** Proposals that stopped awaiting a human in the last 72 h, newest decision first. */
+  /** Proposals that stopped awaiting a human in the last 24 h, newest decision first. */
   async listClosed(
     request: KibanaRequest,
     spaceId: string,
@@ -90,7 +88,7 @@ export class ConversationProposalsService {
   ): Promise<ProposalsPageResponse> {
     const { proposals, total } = await this.proposalsService.list(
       {
-        decidedWithinHours: CLOSED_DECIDED_WITHIN_HOURS,
+        decidedWithinHours: CLOSED_WINDOW_HOURS,
         // The index is shared with every other solution's proposals, and only
         // this filter keeps theirs out of an AlertZero queue.
         origin: ALERTZERO_PROPOSAL_ORIGIN,

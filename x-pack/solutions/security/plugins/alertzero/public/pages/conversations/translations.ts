@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { CLOSED_WINDOW_HOURS } from '../../../common/proposals/list';
 
 export const QUEUE_PAGE_INFO = Object.freeze({
   pageTitle: i18n.translate('xpack.alertzero.queue.pageTitle', {
@@ -17,6 +18,11 @@ export const QUEUE_PAGE_INFO = Object.freeze({
   assignError: i18n.translate('xpack.alertzero.queue.assignError', {
     defaultMessage: 'Could not update assignees',
   }),
+});
+
+export const CLOSED_WINDOW_LABEL = i18n.translate('xpack.alertzero.queue.closedWindowLabel', {
+  defaultMessage: 'Last {hours}h',
+  values: { hours: CLOSED_WINDOW_HOURS },
 });
 
 /** Keyed by the HTTP status the proposals route returns for a refused decision. */

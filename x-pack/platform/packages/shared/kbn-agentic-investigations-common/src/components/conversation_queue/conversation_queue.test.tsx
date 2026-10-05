@@ -52,6 +52,19 @@ describe('ConversationQueue', () => {
     expect(trigger()).toHaveTextContent('42');
   });
 
+  it('shows the window label beside the count when the queue is bounded', () => {
+    renderQueue({ count: 42, windowLabel: 'Last 24h' });
+
+    expect(trigger()).toHaveTextContent('Last 24h');
+    expect(trigger()).toHaveTextContent('42');
+  });
+
+  it('shows no window label by default', () => {
+    renderQueue({ count: 42 });
+
+    expect(screen.queryByTestId('conversationQueueWindow-respond')).not.toBeInTheDocument();
+  });
+
   it('waits for a count rather than showing 0, which would read as empty', () => {
     renderQueue({ count: undefined });
 

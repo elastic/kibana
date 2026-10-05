@@ -19,8 +19,9 @@ import type { ProposalItem, ProposalsPageResponse } from '../../../../common/pro
 import { CLOSED_GROUP_KEY, MAX_QUEUE_REACH } from '../../../../common/proposals/list';
 import { queryKeys } from '../../../query_keys';
 import { proposalToInvestigation } from '../proposal_to_investigation';
+import { CLOSED_WINDOW_LABEL } from '../translations';
 
-/** Category queues open smaller than Closed, which is a 72 h backlog. */
+/** Category queues open smaller than Closed, which is a 24 h backlog. */
 export const CATEGORY_PAGE_SIZE = 10;
 export const CLOSED_PAGE_SIZE = 25;
 
@@ -30,6 +31,8 @@ export const SHOW_MORE_STEP = 10;
 /** One queue accordion: its queries, its open state, its counts. */
 export interface QueueSection {
   id: RecommendedAction;
+  /** Names the time window bounding the queue; absent for queues with no window. */
+  windowLabel?: string;
   /** Bucket size from a count-only read, so a collapsed section knows it too. */
   total: number | undefined;
   proposals: ProposalItem[];
@@ -146,6 +149,7 @@ const useSection = (
 
   return {
     id,
+    windowLabel: id === CLOSED_GROUP_KEY ? CLOSED_WINDOW_LABEL : undefined,
     total,
     proposals,
     investigations,

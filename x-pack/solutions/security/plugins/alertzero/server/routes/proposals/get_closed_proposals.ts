@@ -52,9 +52,9 @@ export const registerGetClosedProposalsRoute = ({
           requiredPrivileges: [ALERTZERO_API_PRIVILEGE_READ, PROPOSALS_API_PRIVILEGE_READ],
         },
       },
-      summary: 'Get proposals decided in the last 72 hours',
+      summary: 'Get proposals decided in the last 24 hours',
       description:
-        'Returns proposals that stopped awaiting a human decision in the last 72 h, including expired ones. Sorted by decidedAt desc.',
+        'Returns proposals that stopped awaiting a human decision in the last 24 h, including expired ones. Sorted by decidedAt desc.',
     })
     .addVersion(
       {
