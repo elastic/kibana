@@ -1092,4 +1092,208 @@ describe('AuthenticateAndDeployStep', () => {
       expect(mockRefetch).toHaveBeenCalledTimes(1);
     });
   });
+  describe('settings changed callout — switching an ECF service to agent-based', () => {
+    const def = (name: string) => ({
+      name,
+      type: 'text',
+      required: true,
+      show_user: true,
+    });
+    // Agent-based view of an ECF-capable service: full manifest vars, `ecfSettings` retained.
+    const ecfCapableService: AwsServiceMatrixEntry = {
+      ...ecfService,
+      dataStreams: ['cloudtrail'],
+      inputs: ['aws-s3'],
+      requiredConfig: ['bucket_arn', 'queue_url'],
+      varDefsByInput: {
+        'aws-s3': { bucket_arn: def('bucket_arn'), queue_url: def('queue_url') } as any,
+      },
+      ecfSettings: {
+        requiredConfig: ['bucket_arn'],
+        dataStreams: ['cloudtrail'],
+        inputs: ['aws-s3'],
+        defaultEnabledInputs: [],
+      },
+    };
+
+    const arrange = ({
+      queueUrl,
+      settingsMethod,
+      service = ecfCapableService,
+    }: {
+      queueUrl?: string;
+      settingsMethod?: 'agent_based' | 'managed_integration';
+      service?: AwsServiceMatrixEntry;
+    }) => {
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['cloudtrail'], dataFormat: 'ecs' },
+        awsServicesMap: new Map([['cloudtrail', service]]),
+        deploymentMethod: 'agent_based',
+        setDeploymentMethod: jest.fn(),
+        serviceSettingsMethod: settingsMethod,
+        agentBasedDeployment: { selectedAgentPolicyIds: [] },
+        detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
+        updateDetectAndReviewStep: jest.fn(),
+        refetchAwsServiceMatrix: jest.fn(),
+      });
+      mockUseSessionStorage.mockReturnValue([
+        {
+          globalRegion: 'us-east-1',
+          instances: [
+            {
+              instanceId: 'cloudtrail',
+              serviceId: 'cloudtrail',
+              name: 'AWS CloudTrail',
+              isDuplicate: false,
+            },
+          ],
+          serviceVars: {
+            cloudtrail: {
+              enabledDataStreams: ['cloudtrail'],
+              varsByDataStream: {
+                cloudtrail: {
+                  enabledInputs: ['aws-s3'],
+                  varsByInput: {
+                    'aws-s3': { bucket_arn: 'arn:aws:s3:::b', queue_url: queueUrl ?? '' },
+                  },
+                },
+              },
+            },
+          },
+        },
+        jest.fn(),
+      ]);
+    };
+
+    it('shows the callout and blocks Next while required agent-based settings are missing', () => {
+      arrange({ settingsMethod: 'managed_integration' });
+      renderStep();
+      expect(screen.getByTestId('authenticateAndDeployStep-settingsChangedCallout')).toBeVisible();
+      expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).toBeDisabled();
+    });
+
+    it('names the services with missing settings after Step 2 was continued under agent-based', () => {
+      // Settings are no longer "out of date" (Step 2 was confirmed under agent-based) but a
+      // required value was removed afterwards: the warning must still say which service.
+      arrange({ settingsMethod: 'agent_based', queueUrl: '' });
+      renderStep();
+      const callout = screen.getByTestId('authenticateAndDeployStep-settingsChangedCallout');
+      expect(callout).toHaveTextContent('AWS CloudTrail');
+      expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).toBeDisabled();
+    });
+
+    it('navigates back to Step 2 from the callout', () => {
+      arrange({ settingsMethod: 'managed_integration' });
+      const onBack = jest.fn();
+      renderStep(jest.fn(), onBack);
+      fireEvent.click(screen.getByTestId('authenticateAndDeployStep-settingsChangedBackButton'));
+      expect(onBack).toHaveBeenCalledTimes(1);
+    });
+
+    it('still shows an advisory callout, without blocking Next, when settings are complete', () => {
+      arrange({ settingsMethod: 'managed_integration', queueUrl: 'https://sqs/queue' });
+      renderStep();
+      expect(screen.getByTestId('authenticateAndDeployStep-settingsChangedCallout')).toBeVisible();
+      expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).not.toBeDisabled();
+    });
+
+    it('hides the callout once Step 2 was continued under agent-based and is complete', () => {
+      arrange({ settingsMethod: 'agent_based', queueUrl: 'https://sqs/queue' });
+      renderStep();
+      expect(
+        screen.queryByTestId('authenticateAndDeployStep-settingsChangedCallout')
+      ).not.toBeInTheDocument();
+    });
+
+    it('does not show the callout for ecfOnly services (OTel twins keep the ECF view)', () => {
+      arrange({
+        settingsMethod: 'managed_integration',
+        service: { ...ecfCapableService, ecfOnly: true },
+      });
+      renderStep();
+      expect(
+        screen.queryByTestId('authenticateAndDeployStep-settingsChangedCallout')
+      ).not.toBeInTheDocument();
+    });
+  });
+  describe('managed deployment — settings with no source ECF can route', () => {
+    // The ECF view of an ECF-only service: the ARN is the required source.
+    const ecfView: AwsServiceMatrixEntry = {
+      ...ecfService,
+      dataStreams: ['cloudtrail'],
+      inputs: ['aws-s3'],
+      settingsScope: 'ecf',
+      requiredConfig: ['bucket_arn'],
+      varDefsByInput: {
+        'aws-s3': {
+          bucket_arn: { name: 'bucket_arn', type: 'text', required: true, show_user: true } as any,
+        },
+      },
+      ecfSettings: {
+        requiredConfig: ['bucket_arn'],
+        dataStreams: ['cloudtrail'],
+        inputs: ['aws-s3'],
+        defaultEnabledInputs: [],
+      },
+    };
+
+    const arrange = (bucketArn: string) => {
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['cloudtrail'], dataFormat: 'ecs' },
+        awsServicesMap: new Map([['cloudtrail', ecfView]]),
+        deploymentMethod: 'managed_integration',
+        setDeploymentMethod: jest.fn(),
+        serviceSettingsMethod: 'managed_integration',
+        agentBasedDeployment: { selectedAgentPolicyIds: [] },
+        detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
+        updateDetectAndReviewStep: jest.fn(),
+        refetchAwsServiceMatrix: jest.fn(),
+      });
+      mockUseSessionStorage.mockReturnValue([
+        {
+          globalRegion: 'us-east-1',
+          instances: [
+            {
+              instanceId: 'cloudtrail',
+              serviceId: 'cloudtrail',
+              name: 'AWS CloudTrail',
+              isDuplicate: false,
+            },
+          ],
+          serviceVars: {
+            cloudtrail: {
+              enabledDataStreams: ['cloudtrail'],
+              varsByDataStream: {
+                cloudtrail: {
+                  enabledInputs: ['aws-s3'],
+                  varsByInput: { 'aws-s3': { bucket_arn: bucketArn } },
+                },
+              },
+            },
+          },
+        },
+        jest.fn(),
+      ]);
+      // ECF "done" so only the settings gate can hold Next back.
+      mockUseEcfDeployment.mockReturnValue(makeEcfReturn({ hasAnyEcf: true, isDone: true }));
+    };
+
+    it('blocks Next and names the service when the ECF source is missing', () => {
+      arrange('');
+      renderStep();
+      const callout = screen.getByTestId('authenticateAndDeployStep-settingsChangedCallout');
+      expect(callout).toHaveTextContent('Service settings are incomplete');
+      expect(callout).toHaveTextContent('AWS CloudTrail');
+      expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).toBeDisabled();
+    });
+
+    it('shows no callout and does not block Next once the source is set', () => {
+      arrange('arn:aws:s3:::bucket');
+      renderStep();
+      expect(
+        screen.queryByTestId('authenticateAndDeployStep-settingsChangedCallout')
+      ).not.toBeInTheDocument();
+      expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).not.toBeDisabled();
+    });
+  });
 });
