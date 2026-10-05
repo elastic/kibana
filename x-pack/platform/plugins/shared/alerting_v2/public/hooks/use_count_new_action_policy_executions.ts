@@ -38,7 +38,7 @@ export const useCountNewActionPolicyExecutions = ({
     queryFn: () =>
       executionHistoryApi.listActionPolicyExecutions({
         from: since,
-        per_page: 0,
+        per_page: 1,
         search,
         rule_ids: ruleIds,
         outcomes,
