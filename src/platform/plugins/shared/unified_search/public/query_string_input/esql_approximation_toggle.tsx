@@ -26,6 +26,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ensureApproximationLicense } from '@kbn/esql-utils';
 import type { IUnifiedSearchPluginServices } from '../types';
+import { esqlApproximationStorage } from './esql_approximation_storage';
 
 const POPOVER_WIDTH = 320;
 
@@ -195,7 +196,10 @@ export const EsqlApproximationToggle = ({
                 <EuiSwitch
                   label={switchLabel}
                   checked={isApproximate}
-                  onChange={(e) => onChange(e.target.checked)}
+                  onChange={(e) => {
+                    esqlApproximationStorage.set(e.target.checked);
+                    onChange(e.target.checked);
+                  }}
                   data-test-subj="esqlApproximationToggleSwitch"
                 />
               </EuiFlexItem>
