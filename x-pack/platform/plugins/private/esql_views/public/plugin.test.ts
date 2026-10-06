@@ -48,8 +48,9 @@ const mountApp = async (capabilities: Record<string, boolean>) => {
     [PLUGIN_ID]: capabilities,
   };
   const management = managementPluginMock.createSetupContract();
+  const data = dataPluginMock.createStartContract();
   const share = sharePluginMock.createStartContract();
-  core.getStartServices.mockResolvedValue([coreStart, { share }, undefined]);
+  core.getStartServices.mockResolvedValue([coreStart, { data, share }, undefined]);
 
   createPlugin(true).setup(core, { management });
 
