@@ -1,5 +1,5 @@
 {
-  "sha1": "ae04d5ea6b5eb0e349d21ac6dc7d88ecf35fe1d0",
+  "sha1": "f26c609726df59a81574cc9a1494283d267aff25",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -263,22 +263,6 @@
     {
       "id": "bd16983193fab33-9f5344bbaf601ff",
       "title": "POST /internal/nightshift/sources validation rejects METADATA with a 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
-        "line": 99,
-        "column": 31
-      }
-    },
-    {
-      "id": "bd16983193fab33-efb0e42f1c1ddb7",
-      "title": "POST /internal/nightshift/sources validation rejects a remote cluster prefix with a 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

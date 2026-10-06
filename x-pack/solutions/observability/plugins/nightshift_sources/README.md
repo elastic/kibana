@@ -68,7 +68,6 @@ A source is rows only. On create and update the ES|QL must:
 - start with `FROM` or `TS`;
 - contain nothing but `WHERE` after the source command (this also rejects subqueries);
 - not use `METADATA`, because ES|QL returns nulls for metadata columns read through a view;
-- not reference a remote cluster (`cluster:index`), because views cannot target remote indices;
 - not `FROM` a Nightshift source view, or a `$` wildcard that would match one (`$.nightshift.sources.*`,
   `$.nightshift.*`, `$.*`, `$.*.sources.*-*`), or the new view can match itself;
 - target exactly one kind of data. Every index in `FROM` or `TS` must classify as the same
@@ -77,7 +76,10 @@ A source is rows only. On create and update the ES|QL must:
   (`logs-traces-*`) is rejected. One `logs`, `metrics` or `traces` segment wins over a dataset
   token, so `metrics-logstash.node-*` is metrics, while `metrics-logs-*` is still a mix.
   A `TS` command is metrics, so `TS logs-*` mixes logs and metrics, while `TS my-tsdb-*` is
-  metrics. An unscoped wildcard (`*`, `*log*`) is rejected. The legacy `apm-*` pattern is on the
+  metrics. An unscoped wildcard (`*`, `*log*`, `cluster:*`) is rejected. A remote cluster
+  prefix is allowed and is not part of the type: `FROM remote:logs-*` and `FROM *:logs-*` are
+  logs, and `FROM remote:logs-*, other:traces-*` is still a mix. An exclusion (`-cluster:*`,
+  `cluster:-index`) is not a target. The legacy `apm-*` pattern is on the
   default APM transaction, error and metric settings, so `FROM apm-*` matches more than one kind.
 
 Classification uses the same base names Discover does (`logs`, `filebeat`, `traces`, `metrics`,

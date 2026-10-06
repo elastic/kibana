@@ -54,11 +54,6 @@ apiTest.describe(
       ['LIMIT', `FROM ${index} | LIMIT 10`, 'Command "LIMIT" is not allowed'],
       ['METADATA', `FROM ${index} METADATA _id`, 'METADATA is not allowed'],
       [
-        'a remote cluster prefix',
-        `FROM remote:${index}`,
-        'Remote cluster references are not allowed',
-      ],
-      [
         'a $ wildcard that matches a hyphenated source view',
         'FROM $.*.sources.*-*',
         'Nightshift source views cannot be used as a source',

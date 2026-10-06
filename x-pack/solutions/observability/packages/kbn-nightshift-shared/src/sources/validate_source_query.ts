@@ -6,6 +6,7 @@
  */
 
 import { BasicPrettyPrinter, Parser, Walker } from '@elastic/esql';
+import type { ESQLCommand, ESQLSource } from '@elastic/esql/types';
 import {
   DEFAULT_SOURCE_TYPE_PATTERNS,
   isUnscopedIndexPattern,
@@ -52,12 +53,52 @@ const esWildcardMatches = (pattern: string, candidate: string): boolean => {
   return new RegExp(`^${regexSource}$`).test(candidate);
 };
 
+/** Index pattern with the cluster prefix removed. `remote:logs-*` is `logs-*`. */
+const indexPatternOf = (source: ESQLSource): string | undefined =>
+  source.index?.valueUnquoted ?? (typeof source.name === 'string' ? source.name : undefined);
+
+/**
+ * `-logs-*`, `-cluster:*` and `cluster:-logs-*` drop indices. They are not targets, so they
+ * do not pick a type and do not count as an unscoped wildcard.
+ */
+const isExcludedIndex = (source: ESQLSource): boolean => {
+  const pattern = indexPatternOf(source);
+  const cluster = source.prefix?.valueUnquoted;
+  return (
+    (pattern !== undefined && pattern.startsWith('-')) ||
+    (cluster !== undefined && cluster.startsWith('-'))
+  );
+};
+
+interface TargetedIndex {
+  /** What the query wrote, including a cluster prefix and selector. */
+  name: string;
+  /** Index pattern used for type checks. */
+  pattern: string;
+}
+
+const isIndexSource = (node: { type: string; sourceType?: string }): node is ESQLSource =>
+  node.type === 'source' && node.sourceType === 'index';
+
+const targetedIndices = (command: ESQLCommand): TargetedIndex[] =>
+  Walker.matchAll(command, { type: 'source', sourceType: 'index' }).flatMap((node) => {
+    if (!isIndexSource(node) || isExcludedIndex(node)) {
+      return [];
+    }
+    const pattern = indexPatternOf(node);
+    if (pattern === undefined || typeof node.name !== 'string') {
+      return [];
+    }
+    return [{ name: node.name, pattern }];
+  });
+
 /**
  * Validates that an ES|QL query is a valid Nightshift source: `FROM` or `TS` (time-series),
  * optionally narrowed by `WHERE`. Anything that reshapes rows belongs to the engines reading
- * the view. `METADATA` is rejected because ES|QL returns nulls for it through a view,
- * remote-cluster prefixes because views cannot reference remote indices, and Nightshift source
- * views (including `$` wildcards that would match them) because a source cannot `FROM` itself.
+ * the view. `METADATA` is rejected because ES|QL returns nulls for it through a view.
+ * A remote cluster prefix (`cluster:index`, `*:index`) is allowed; type checks use the index.
+ * Nightshift source views (including `$` wildcards that would match them) are rejected because
+ * a source cannot `FROM` itself, on this cluster or another.
  *
  * Returns `undefined` when valid, or an error message string when invalid.
  * Browser-safe: does not depend on any server-only module.
@@ -90,21 +131,14 @@ export const validateSourceQuery = (esql: string): string | undefined => {
     return 'METADATA is not allowed in a source query';
   }
 
-  const remoteSource = Walker.find(
-    root,
-    (node) => node.type === 'source' && node.sourceType === 'index' && Boolean(node.prefix)
-  );
-  if (remoteSource) {
-    return `Remote cluster references are not allowed in a source query (found "${remoteSource.name}")`;
-  }
-
   const nightshiftView = Walker.find(
     root,
     (node) =>
       node.type === 'source' &&
       node.sourceType === 'index' &&
+      !isExcludedIndex(node) &&
       typeof node.name === 'string' &&
-      isNightshiftSourceViewPattern(node.name)
+      isNightshiftSourceViewPattern(indexPatternOf(node) ?? node.name)
   );
   if (nightshiftView) {
     return `Nightshift source views cannot be used as a source (found "${nightshiftView.name}")`;
@@ -194,16 +228,14 @@ export const getSourceType = ({
     return { error: 'A source query must start with FROM or TS' };
   }
 
-  const indexNames = Walker.matchAll(firstCommand, { type: 'source', sourceType: 'index' }).flatMap(
-    (node) => (typeof node.name === 'string' ? [node.name] : [])
-  );
-  const unscoped = indexNames.find(isUnscopedIndexPattern);
+  const indices = targetedIndices(firstCommand);
+  const unscoped = indices.find(({ pattern }) => isUnscopedIndexPattern(pattern));
   if (unscoped) {
-    return { error: unscopedWildcardMessage(unscoped) };
+    return { error: unscopedWildcardMessage(unscoped.name) };
   }
-  const classified = indexNames.map((name) => ({
+  const classified = indices.map(({ name, pattern }) => ({
     name,
-    matched: matchSourceTypes({ name, patterns }),
+    matched: matchSourceTypes({ name: pattern, patterns }),
   }));
   const ambiguous = classified.find(({ matched }) => matched.length > 1);
   if (ambiguous) {
@@ -281,5 +313,5 @@ export const hasMultipleSourceIndices = (esql: string): boolean => {
   if (!firstCommand) {
     return false;
   }
-  return Walker.matchAll(firstCommand, { type: 'source', sourceType: 'index' }).length > 1;
+  return targetedIndices(firstCommand).length > 1;
 };
