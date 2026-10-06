@@ -1,0 +1,190 @@
+version: '1'
+name: Nightshift Agent Optimize
+description: >
+  Post-round workflow that reuses the conversation sandbox, runs Cortex and
+  Semantic Memory optimize in parallel, then distills the round into the decision
+  tree. Both writers receive the same sandbox_id obtain produced so they address the
+  workspace hydrate and the bash tools used. Authorization to execute this managed
+  workflow permits its defined Memory operations; the step derives storage tenancy
+  from the trusted current-Space execution context.
+enabled: true
+tags:
+  - observability
+  - nightshift
+  - investigation
+  - cortex
+  - semantic-memory
+  - decision-tree
+
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        prompt:
+          type: string
+          description: The user message that started this round.
+        response:
+          type: string
+          description: The assistant's final response for this round.
+        conversation_id:
+          type: string
+          description: Conversation id for the completed round, when present.
+        round_id:
+          type: string
+          description: Id of the completed conversation round.
+        agent_id:
+          type: string
+          description: Supported agent policy selector; never a storage or Space boundary.
+        connector_id:
+          type: string
+          maxLength: 500
+          description: Optional strict model override for a direct workflow run.
+        round_connector_id:
+          type: string
+          maxLength: 500
+          description: Inference connector the triggering agent used for this round.
+        workflow_context:
+          type: object
+          description: Persisted non-model workflow state for the completed round.
+          properties:
+            nightshift.semantic_memory.recall:
+              type: object
+              properties:
+                version:
+                  type: number
+                data:
+                  type: object
+                  properties:
+                    recalled_ids:
+                      type: array
+                      items:
+                        type: string
+        tool_calls:
+          type: array
+          description: >
+            Tool calls from the completed round (parameters). Shows the Cortex and
+            Semantic Memory optimizers which services, indices, and integrations the
+            investigator queried, and decision-tree reinforcement which
+            decision-tree files the investigator actually opened.
+          items:
+            type: object
+            additionalProperties: true
+        tool_results:
+          type: array
+          description: >
+            Results of the completed round's tool calls, keyed by tool_call_id.
+            Shows the Cortex and Semantic Memory optimizers what each query returned.
+          items:
+            type: object
+            additionalProperties: true
+      additionalProperties: false
+
+steps:
+  - name: obtain_sandbox
+    type: nightshift.obtainSandbox
+    if: '${{ inputs.conversation_id != null }}'
+    timeout: 60s
+    with:
+      conversation_id: '{{ inputs.conversation_id }}'
+      # Optimize still extracts from the transcript when sandbox-api is down.
+      required: false
+  - name: optimize_workspaces
+    type: parallel
+    mode: settled
+    # `timeout` bounds the whole parallel, `branch-timeout` bounds one optimizer. They must not be
+    # equal: the engine measures the step timeout over the parallel, so with both at 120s the zone
+    # trips in the same tick that kills the branch and the parallel step fails outright — `settled`
+    # never reports the branch and the reinforcement tail below never runs.
+    timeout: 150s
+    branch-timeout: 120s
+    branches:
+      - name: cortex
+        steps:
+          - name: optimize_cortex
+            type: nightshift.cortexOptimize
+            with:
+              prompt: '{{ inputs.prompt }}'
+              response: '{{ inputs.response }}'
+              agent_id: '{{ inputs.agent_id }}'
+              connector_id: '{{ inputs.connector_id }}'
+              round_connector_id: '{{ inputs.round_connector_id }}'
+              conversation_id: '{{ inputs.conversation_id }}'
+              round_id: '{{ inputs.round_id }}'
+              sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
+              # ${{ }} keeps the array. Liquid `{{ }}` stringifies it as "[object Object]…".
+              tool_calls: '${{ inputs.tool_calls }}'
+              tool_results: '${{ inputs.tool_results }}'
+      - name: memory
+        steps:
+          - name: optimize_memory
+            type: nightshift.memoryOptimize
+            with:
+              prompt: '{{ inputs.prompt }}'
+              response: '{{ inputs.response }}'
+              agent_id: '{{ inputs.agent_id }}'
+              connector_id: '{{ inputs.connector_id }}'
+              round_connector_id: '{{ inputs.round_connector_id }}'
+              conversation_id: '{{ inputs.conversation_id }}'
+              round_id: '{{ inputs.round_id }}'
+              sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
+              # Preserve the array for the step's bounded Zod schema.
+              recalled_ids: '${{ inputs.workflow_context["nightshift.semantic_memory.recall"].data.recalled_ids }}'
+              # ${{ }} keeps the array. Liquid `{{ }}` stringifies it as "[object Object]…".
+              tool_calls: '${{ inputs.tool_calls }}'
+              tool_results: '${{ inputs.tool_results }}'
+
+  # Decision-tree reinforcement is a sequential phase, not a third branch: it runs an agent
+  # for up to 900s, and a parallel branch has no per-branch timeout of its own — it inherits
+  # the 120s branch-timeout above, which would kill every long reinforcement run. Sequential
+  # also matches today's behavior, where Agent Builder already runs post_execution_workflow_ids
+  # one after another.
+  #
+  # These steps fail loudly on purpose. A post-execution hook that logs a failed execution
+  # cannot abort the investigation, so swallowing a failure here would report a green round
+  # that silently reinforced nothing. The reinforcement agent runs in its own conversation,
+  # so a failure is visible without taking the investigation down with it.
+  - name: prepare_turn
+    type: nightshift.decisionTreePrepare
+    with:
+      response: '{{ inputs.response }}'
+      agent_id: '{{ inputs.agent_id }}'
+      # ${{ }} keeps the array. Liquid `{{ }}` stringifies it as "[object Object]…"
+      # and JSON.parse in preprocess falls back to [], so every round distills from scratch.
+      tool_calls: '${{ inputs.tool_calls }}'
+
+  # Mirrors the investigation and reinforcement workflows: the reinforcement agent runs on
+  # the model the round used, with `connector_id` still the strict override for a manual run.
+  - name: resolve_model
+    type: nightshift.resolveModel
+    if: '${{ steps.prepare_turn.output.skipped == false }}'
+    with:
+      step: investigation
+      connector_id: '{{ inputs.connector_id }}'
+      round_connector_id: '{{ inputs.round_connector_id }}'
+
+  # Only the reinforcement workflow used to ensure this agent, and it no longer runs. Without
+  # this step a feature-disabled install would still try to run an agent that was never
+  # registered, and a trees-enabled install would fail if the agent were ever pruned.
+  - name: ensure_reinforcement_agent
+    type: nightshift.ensureInvestigationAgent
+    if: '${{ steps.prepare_turn.output.skipped == false }}'
+    with:
+      agent_id: significant-events.decision-tree-reinforcement
+
+  # The investigator's round is replayed as conversation history, so the agent sees each tool
+  # call and its result as real tool messages rather than a transcript pasted into one message.
+  # The run gets its own conversation id, so its beforeAgent hook hydrates the trees into that
+  # conversation's sandbox rather than the investigator's.
+  - name: reinforce_decision_trees
+    type: nightshift.decisionTreeReinforce
+    timeout: 900s
+    if: '${{ steps.prepare_turn.output.skipped == false }}'
+    with:
+      prompt: '{{ inputs.prompt }}'
+      response: '{{ inputs.response }}'
+      round_id: '{{ inputs.round_id }}'
+      message: '{{ steps.prepare_turn.output.message }}'
+      turn_kind: '{{ steps.prepare_turn.output.turn_kind }}'
+      connector_id: '{{ steps.resolve_model.output.connector_id }}'
+      tool_calls: '${{ inputs.tool_calls }}'
+      tool_results: '${{ inputs.tool_results }}'

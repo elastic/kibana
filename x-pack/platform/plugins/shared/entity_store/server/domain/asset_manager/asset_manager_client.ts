@@ -143,14 +143,19 @@ export class AssetManagerClient {
     request: KibanaRequest,
     entityTypes: EntityType[],
     logsExtractionParams?: LogExtractionInstallParams,
-    historySnapshotParams?: HistorySnapshotBodyParams
+    historySnapshotParams?: HistorySnapshotBodyParams,
+    excludedUserNames?: string[]
   ) {
     try {
       const historySnapshot = HistorySnapshotState.parse(historySnapshotParams ?? {});
 
       // Phase 1: Install shared ES assets/storage and run independent setup tasks.
       await Promise.all([
-        this.globalStateClient.init({ historySnapshot, logsExtraction: logsExtractionParams }),
+        this.globalStateClient.init({
+          historySnapshot,
+          logsExtraction: logsExtractionParams,
+          excludedUserNames,
+        }),
 
         // V1 cleanup is legacy migration work — run it as the internal user so enabling the
         // entity store does not require the user to hold transform/enrich/index admin on v1 assets.
@@ -421,12 +426,15 @@ export class AssetManagerClient {
 
   public async getStatus(withComponents: boolean = false): Promise<GetStatusResult> {
     try {
-      const [engines, { historySnapshot, logsExtraction: logsExtractionConfig }, globalOverrides] =
-        await Promise.all([
-          this.engineDescriptorClient.getAll(),
-          this.globalStateClient.findOrThrow(),
-          this.globalStateClient.findLogExtractionOverrides(),
-        ]);
+      const [
+        engines,
+        { historySnapshot, logsExtraction: logsExtractionConfig, excludedUserNames },
+        globalOverrides,
+      ] = await Promise.all([
+        this.engineDescriptorClient.getAll(),
+        this.globalStateClient.findOrThrow(),
+        this.globalStateClient.findLogExtractionOverrides(),
+      ]);
 
       const status = this.calculateEntityStoreStatus(engines);
       const logsExtractionConfigByType = Object.fromEntries(
@@ -446,6 +454,7 @@ export class AssetManagerClient {
           historySnapshot,
           logsExtractionConfig,
           logsExtractionConfigByType,
+          excludedUserNames,
         };
       }
 
@@ -455,6 +464,7 @@ export class AssetManagerClient {
         historySnapshot,
         logsExtractionConfig,
         logsExtractionConfigByType,
+        excludedUserNames,
       };
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
