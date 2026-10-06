@@ -10,6 +10,7 @@
 const { RuleTester } = require('eslint');
 const rule = require('..').rules.module_migration;
 const dedent = require('dedent');
+const path = require('path');
 
 const ruleTester = new RuleTester({
   parser: require.resolve('@babel/eslint-parser'),
@@ -34,6 +35,43 @@ ruleTester.run('@kbn/eslint/module-migration', rule, {
           {
             from: 'foo',
             to: 'bar',
+          },
+        ],
+      ],
+    },
+
+    {
+      code: dedent`
+        import "zod"
+      `,
+      filename: path.resolve('src/platform/packages/shared/kbn-zod/index.ts'),
+      options: [
+        [
+          {
+            from: 'zod',
+            to: '@kbn/zod',
+            exclude: [/src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-zod[\/\\]/],
+          },
+        ],
+      ],
+    },
+    {
+      code: dedent`
+        import "zod"
+      `,
+      filename: path.resolve('src/platform/packages/shared/kbn-zod/index.ts'),
+      options: [
+        [
+          {
+            from: 'zod',
+            to: '@kbn/zod',
+            exclude: [
+              {
+                source:
+                  'src[\\/\\\\]platform[\\/\\\\]packages[\\/\\\\]shared[\\/\\\\]kbn-zod[\\/\\\\]',
+                flags: '',
+              },
+            ],
           },
         ],
       ],
@@ -108,7 +146,7 @@ ruleTester.run('@kbn/eslint/module-migration', rule, {
       code: dedent`
         import "x-pack/common/foo"
       `,
-      filename: 'x-pack/common/other/folder/bar.ts',
+      filename: path.resolve('x-pack/common/other/folder/bar.ts'),
       options: [
         [
           {
@@ -144,7 +182,7 @@ ruleTester.run('@kbn/eslint/module-migration', rule, {
       code: dedent`
         import "x-pack/common/foo"
       `,
-      filename: 'x-pack/another/possible/example.ts',
+      filename: path.resolve('x-pack/another/possible/example.ts'),
       options: [
         [
           {
