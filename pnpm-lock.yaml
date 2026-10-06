@@ -16936,10 +16936,6 @@ packages:
     peerDependencies:
       graphql: ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
 
-  graphql@16.11.0:
-    resolution: {integrity: sha512-mS1lbMsxgQj6hge1XZ6p7GPhbrtFwUFYi3wRzXAC/FmYnyXMTvvI3td3rjmQ2u8ewXueaSvRPWaEcgVVOT9Jnw==}
-    engines: {node: ^12.22.0 || ^14.16.0 || ^16.0.0 || >=17.0.0}
-
   graphql@16.14.2:
     resolution: {integrity: sha512-Chq1s4CY7jmh8gO2qvLIJyfCDIN+EHLFW/9iShnp1z8FjBQMoodWP1kDC36VAMXXIvAjj4ARa7ntfAV2BrjsbA==}
     engines: {node: ^12.22.0 || ^14.16.0 || ^16.0.0 || >=17.0.0}
@@ -23468,9 +23464,9 @@ packages:
 
 snapshots:
 
-  '@0no-co/graphql.web@1.1.2(graphql@16.11.0)':
+  '@0no-co/graphql.web@1.1.2(graphql@16.14.2)':
     optionalDependencies:
-      graphql: 16.11.0
+      graphql: 16.14.2
 
   '@aashutoshrathi/word-wrap@1.2.6': {}
 
@@ -30051,9 +30047,9 @@ snapshots:
 
   '@ungap/structured-clone@1.2.0': {}
 
-  '@urql/core@5.1.1(graphql@16.11.0)':
+  '@urql/core@5.1.1(graphql@16.14.2)':
     dependencies:
-      '@0no-co/graphql.web': 1.1.2(graphql@16.11.0)
+      '@0no-co/graphql.web': 1.1.2(graphql@16.14.2)
       wonka: 6.3.5
     transitivePeerDependencies:
       - graphql
@@ -30910,14 +30906,14 @@ snapshots:
   backport@10.2.0(@types/node@24.10.13)(supports-color@8.1.1):
     dependencies:
       '@octokit/rest': 20.1.2
-      '@urql/core': 5.1.1(graphql@16.11.0)
+      '@urql/core': 5.1.1(graphql@16.14.2)
       dedent: 0.7.0
       del: 6.1.1
       dotenv: 16.5.0
       elastic-apm-node: 4.18.0(supports-color@8.1.1)
       find-up: 5.0.0
-      graphql: 16.11.0
-      graphql-tag: 2.12.6(graphql@16.11.0)
+      graphql: 16.14.2
+      graphql-tag: 2.12.6(graphql@16.14.2)
       handlebars: 4.7.9
       inquirer: 8.2.7(@types/node@24.10.13)
       lodash: 4.18.1
@@ -34416,12 +34412,10 @@ snapshots:
     dependencies:
       lodash: 4.18.1
 
-  graphql-tag@2.12.6(graphql@16.11.0):
+  graphql-tag@2.12.6(graphql@16.14.2):
     dependencies:
-      graphql: 16.11.0
+      graphql: 16.14.2
       tslib: 2.8.1
-
-  graphql@16.11.0: {}
 
   graphql@16.14.2: {}
 
