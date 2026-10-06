@@ -16,9 +16,8 @@ import type { PanelResolutionRequestBase } from '../../../resolve_panel';
  * A new visualization is resolved from a natural-language (or ES|QL) query via
  * `source: 'request'`; an existing one is placed with `source: 'attachment'`.
  * This module owns the Lens/Vega members of the `renderer`-discriminated request
- * unions (add + edit) and the vis resolution-request contract. The resolver that
- * turns these requests into panel content lives in
- * `core/resolvers/vis_panel_resolver.ts`.
+ * unions (add + edit) and the vis resolution-request contract. The host provides
+ * the resolver that turns these requests into panel content.
  */
 
 /**

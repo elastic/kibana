@@ -16,9 +16,9 @@ import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import { createPanelFailureResult, type PanelContentAttempt } from '../resolve_panel';
-import { getErrorMessage } from '../utils';
-import type { VisPanelResolutionRequest } from '../operations/panels';
+import { createPanelFailureResult, type PanelContentAttempt } from '@kbn/dashboard-authoring';
+import { getErrorMessage } from '@kbn/dashboard-authoring';
+import type { VisPanelResolutionRequest } from '@kbn/dashboard-authoring';
 
 /** Host plumbing the vis resolver needs to call the visualization builder. */
 export interface VisPanelResolverDeps {

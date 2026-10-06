@@ -19,8 +19,8 @@ import {
   type InlinePanelOperationType,
   type PanelContent,
   type PanelContentAttempt,
-} from '../resolve_panel';
-import { EMBEDDABLE_TYPE_BY_RENDERER } from '../operations/panels';
+} from '@kbn/dashboard-authoring';
+import { EMBEDDABLE_TYPE_BY_RENDERER } from '@kbn/dashboard-authoring';
 
 /** Maps a stored visualization payload onto the embeddable that renders it. */
 const toPanelContent = (data: VisualizationAttachmentData): PanelContent => {

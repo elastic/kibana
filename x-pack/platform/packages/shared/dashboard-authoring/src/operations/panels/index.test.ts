@@ -6,7 +6,7 @@
  */
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
+import { MARKDOWN_EMBEDDABLE_TYPE } from './markdown';
 import {
   addPanelsItemSchema,
   addSectionPanelItemSchema,
