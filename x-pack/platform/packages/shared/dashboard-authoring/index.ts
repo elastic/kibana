@@ -17,7 +17,7 @@ export type {
   ValidatePanelContent,
 } from './src/resolve_panel';
 
-export { EMBEDDABLE_TYPE_BY_RENDERER } from './src/operations/panels';
+export { getRendererEmbeddableType } from './src/operations/panels';
 export type {
   CustomContentPanelAddRequest,
   CustomContentPanelEditRequest,
