@@ -568,63 +568,6 @@ const MetadataLabel = ({ children }: { children: React.ReactNode }) => (
   </EuiText>
 );
 
-/** Metadata panel for grouped entity nodes (count > 1). */
-const GroupedMetadataPanel = memo<{
-  ips?: string[];
-  countryCodes?: string[];
-  sources?: string[];
-  assetCriticality?: Array<{ level: string; count: number }>;
-  euiTheme: EuiThemeComputed;
-  onIpClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-}>(({ ips, countryCodes, sources, assetCriticality, euiTheme, onIpClick }) => {
-  const { entity: opts } = useGraphDisplayOptions();
-  return (
-    <>
-      {/* Asset Criticality — hidden when toggled off */}
-      {opts.assetCriticality && (
-        <MetadataItem euiTheme={euiTheme}>
-          <MetadataLabel>{ASSET_CRITICALITY_LABEL}</MetadataLabel>
-          {assetCriticality?.length ? (
-            <CriticalityDistribution levels={assetCriticality} euiTheme={euiTheme} />
-          ) : (
-            <DashValue euiTheme={euiTheme} />
-          )}
-        </MetadataItem>
-      )}
-      {/* Data Source — hidden when toggled off */}
-      {opts.dataSource && (
-        <MetadataItem euiTheme={euiTheme}>
-          <MetadataLabel>{SOURCE_LABEL}</MetadataLabel>
-          {sources?.length ? <SourcesCell sources={sources} /> : <DashValue euiTheme={euiTheme} />}
-        </MetadataItem>
-      )}
-      {/* IP Address — hidden when toggled off */}
-      {opts.ipAddress && (
-        <MetadataItem euiTheme={euiTheme}>
-          <MetadataLabel>{IP_ADDRESS_LABEL}</MetadataLabel>
-          {ips?.length ? (
-            <IpsCell ips={ips} onIpClick={onIpClick} />
-          ) : (
-            <DashValue euiTheme={euiTheme} />
-          )}
-        </MetadataItem>
-      )}
-      {/* Geolocation — hidden when toggled off */}
-      {opts.geolocation && (
-        <MetadataItem euiTheme={euiTheme}>
-          <MetadataLabel>{GEOLOCATION_LABEL}</MetadataLabel>
-          {countryCodes?.length ? (
-            <GeoCell countryCodes={countryCodes} />
-          ) : (
-            <DashValue euiTheme={euiTheme} />
-          )}
-        </MetadataItem>
-      )}
-    </>
-  );
-});
-GroupedMetadataPanel.displayName = 'GroupedMetadataPanel';
-
 /** Metadata panel for single-entity nodes (full redesign). */
 const SingleEntityMetadataPanel = memo<{
   ips?: string[];
@@ -913,49 +856,6 @@ const ToolbarButtonRow: React.FC<ToolbarButtonRowProps> = ({
   </div>
 );
 
-interface EntityMetadataContentProps {
-  isGrouped: boolean;
-  ips?: string[];
-  countryCodes?: string[];
-  sources?: string[];
-  subType?: string;
-  assetCriticality?: Array<{ level: string; count: number }>;
-  euiTheme: EuiThemeComputed;
-  onIpClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-}
-
-/** Renders the appropriate metadata panel based on whether the node is grouped or single. */
-const EntityMetadataContent: React.FC<EntityMetadataContentProps> = ({
-  isGrouped,
-  ips,
-  countryCodes,
-  sources,
-  subType,
-  assetCriticality,
-  euiTheme,
-  onIpClick,
-}) =>
-  isGrouped ? (
-    <GroupedMetadataPanel
-      ips={ips}
-      countryCodes={countryCodes}
-      sources={sources}
-      assetCriticality={assetCriticality}
-      euiTheme={euiTheme}
-      onIpClick={onIpClick}
-    />
-  ) : (
-    <SingleEntityMetadataPanel
-      ips={ips}
-      countryCodes={countryCodes}
-      sources={sources}
-      subType={subType}
-      assetCriticality={assetCriticality}
-      euiTheme={euiTheme}
-      onIpClick={onIpClick}
-    />
-  );
-
 /**
  * Shared horizontal card node rendered by all entity node shape types
  * (hexagon, pentagon, ellipse, rectangle, diamond). Always renders the full
@@ -1106,8 +1006,7 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
                 data-test-subj={GRAPH_ENTITY_NODE_LAYERS_PANEL_ID}
                 euiTheme={euiTheme}
               >
-                <EntityMetadataContent
-                  isGrouped={isGrouped}
+                <SingleEntityMetadataPanel
                   ips={ips}
                   countryCodes={countryCodes}
                   sources={entitySources}
