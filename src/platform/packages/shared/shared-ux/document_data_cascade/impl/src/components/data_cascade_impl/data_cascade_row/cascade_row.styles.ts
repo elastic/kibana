@@ -47,8 +47,8 @@ export const styles = (
     },
 
     [`[data-row-type="${rootRowAttribute}"] + [data-row-type="${childRowAttribute}"] &:before`]: {
-      borderTopLeftRadius: border.radius.small,
-      borderTopRightRadius: border.radius.small,
+      borderTopLeftRadius: border.radius.inline,
+      borderTopRightRadius: border.radius.inline,
     },
 
     [`[data-row-type="${childRowAttribute}"]:has(+ [data-row-type="${rootRowAttribute}"]) &`]: {
@@ -57,8 +57,8 @@ export const styles = (
 
     [`[data-row-type="${childRowAttribute}"]:has(+ [data-row-type="${rootRowAttribute}"]) &:before`]:
       {
-        borderBottomLeftRadius: border.radius.small,
-        borderBottomRightRadius: border.radius.small,
+        borderBottomLeftRadius: border.radius.inline,
+        borderBottomRightRadius: border.radius.inline,
         borderBottom: `${border.width.thin} solid ${border.color}`,
       },
 
@@ -93,8 +93,8 @@ export const styles = (
 
     [`[data-row-type="${childRowAttribute}"]:not([aria-level="3"]) + [data-row-type="${childRowAttribute}"][aria-level="3"]  &:after`]:
       {
-        borderTopLeftRadius: border.radius.small,
-        borderTopRightRadius: border.radius.small,
+        borderTopLeftRadius: border.radius.inline,
+        borderTopRightRadius: border.radius.inline,
       },
 
     [`[data-row-type="${childRowAttribute}"][aria-level="3"]:has(+ [data-row-type="${rootRowAttribute}"]:not([aria-level="3"]), + [data-row-type="${childRowAttribute}"]:not([aria-level="3"])) & > *:last-child`]:
@@ -105,8 +105,8 @@ export const styles = (
     [`[data-row-type="${childRowAttribute}"][aria-level="3"]:has(+ [data-row-type="${rootRowAttribute}"]:not([aria-level="3"]), + [data-row-type="${childRowAttribute}"]:not([aria-level="3"])) &:after`]:
       {
         height: `calc(100% - ${euiSizing[size]})`,
-        borderBottomLeftRadius: border.radius.small,
-        borderBottomRightRadius: border.radius.small,
+        borderBottomLeftRadius: border.radius.inline,
+        borderBottomRightRadius: border.radius.inline,
         borderBottom: `${border.width.thin} solid ${border.color}`,
       },
   });
@@ -121,14 +121,14 @@ export const styles = (
     [`[data-row-type="${childRowAttribute}"][aria-level="2"]:focus-visible:has(+ [aria-level="2"]) &:before`]:
       {
         borderBottom: `${border.width.thick} solid ${OUTLINE_COLOR}`,
-        borderRadius: border.radius.small,
+        borderRadius: border.radius.inline,
       },
 
     // when a level 2 row is focused and followed by a level 3 row, this implies the focused row is expanded
     [`[data-row-type="${childRowAttribute}"][aria-level="2"]:focus-visible:has(+ [aria-level="3"]) &:before`]:
       {
-        borderTopLeftRadius: border.radius.small,
-        borderTopRightRadius: border.radius.small,
+        borderTopLeftRadius: border.radius.inline,
+        borderTopRightRadius: border.radius.inline,
       },
 
     // when a level 2 row is focused and followed by a level 3 row, which implies the focused row is expanded we select all it's children
@@ -142,21 +142,21 @@ export const styles = (
     [`[data-row-type="${childRowAttribute}"][aria-level="2"]:focus-visible:has(+ [aria-level="3"]) ~ [aria-level="3"]:has(+ [aria-level="2"]) &:before`]:
       {
         borderBottom: `${border.width.thick} solid ${OUTLINE_COLOR}`,
-        borderBottomLeftRadius: border.radius.small,
-        borderBottomRightRadius: border.radius.small,
+        borderBottomLeftRadius: border.radius.inline,
+        borderBottomRightRadius: border.radius.inline,
       },
 
     [`[data-row-type="${childRowAttribute}"][aria-level="3"]:focus-visible &:after`]: {
       borderWidth: border.width.thick,
       borderColor: OUTLINE_COLOR,
-      borderRadius: border.radius.small,
+      borderRadius: border.radius.inline,
     },
 
     // when a level 3 row is focused and preceded by any row, we want to apply a border to the bottom of the row
     [`[data-row-type="${childRowAttribute}"][aria-level="3"]:focus-visible:has(+ [aria-level]) &:after`]:
       {
         borderBottom: `${border.width.thick} solid ${OUTLINE_COLOR}`,
-        borderRadius: border.radius.small,
+        borderRadius: border.radius.inline,
       },
   });
 
@@ -218,8 +218,8 @@ export const styles = (
             borderLeftStyle: 'solid',
             borderWidth: border.width.thick,
             borderColor: OUTLINE_COLOR,
-            borderTopLeftRadius: border.radius.small,
-            borderTopRightRadius: border.radius.small,
+            borderTopLeftRadius: border.radius.inline,
+            borderTopRightRadius: border.radius.inline,
           },
 
           [`& ~ [data-row-type="${childRowAttribute}"]:before`]: {
@@ -233,8 +233,8 @@ export const styles = (
           [`& ~ [data-row-type="${childRowAttribute}"]:has(+ [data-row-type="${rootRowAttribute}"]):before`]:
             {
               borderBottom: `${border.width.thick} solid ${OUTLINE_COLOR}`,
-              borderBottomLeftRadius: border.radius.small,
-              borderBottomRightRadius: border.radius.small,
+              borderBottomLeftRadius: border.radius.inline,
+              borderBottomRightRadius: border.radius.inline,
             },
         },
 
