@@ -79,6 +79,14 @@ export const packageReportOutputSchema = z.discriminatedUnion('status', [
       skipped: z.array(coverageSkippedSchema),
     }),
     proposals: z.array(packageReportMintPayloadSchema),
+    /**
+     * Bounded markdown bullets, one per proposal up to `MAX_SUMMARY_PROPOSAL_BULLETS`, for the run
+     * conclusion's prose. `proposals` itself stays complete because it drives the gate fan-out; this
+     * is only what gets embedded in the journal note, whose `message` is capped at 8,000 characters.
+     */
+    proposalBullets: z.array(z.string()),
+    /** Proposals past the bullet cap that the prose states as a count instead of listing. */
+    omittedProposalCount: z.number().int().min(0),
     dismiss: z.boolean(),
     closureSummary: z.string(),
     expectedProposalCount: z.number().int().min(0),

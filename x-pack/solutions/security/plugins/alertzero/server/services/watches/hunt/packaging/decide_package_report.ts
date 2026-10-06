@@ -158,6 +158,31 @@ export const buildActionInput = ({
   return actionInput;
 };
 
+/**
+ * Upper bound on per-proposal bullets embedded in the run conclusion. The conclusion lands in a
+ * journal note whose `message` is capped at 8,000 characters (`journal_note.yaml`); a bullet is
+ * roughly 250 characters at worst, so this leaves room for the rest of the conclusion. Uncapped,
+ * 50 hosts x 2 actions overflowed it and failed the note's input validation.
+ */
+export const MAX_SUMMARY_PROPOSAL_BULLETS = 20;
+
+/**
+ * Bounded bullet list for the run conclusion. `proposals` stays whole (it drives the gate
+ * fan-out); only this prose view is capped, and the remainder is reported as a count.
+ */
+export const buildProposalSummaryBullets = (
+  proposals: PackageReportMintPayload[]
+): { bullets: string[]; omittedCount: number } => {
+  const bullets = proposals.slice(0, MAX_SUMMARY_PROPOSAL_BULLETS).map((p) => {
+    const host = p.hostName ? ` on \`${p.hostName}\`` : '';
+    const action = p.actionWorkflowId
+      ? `: runs \`${p.actionWorkflowId}\` on approval`
+      : ': recommendation only';
+    return `- **${p.title || p.category}**${host}${action}`;
+  });
+  return { bullets, omittedCount: Math.max(0, proposals.length - bullets.length) };
+};
+
 const buildClosureSummary = (state: CurrentRunState): string => {
   const title = state.titles[0] ?? `Hunt run ${state.runId}`;
   const evidence =

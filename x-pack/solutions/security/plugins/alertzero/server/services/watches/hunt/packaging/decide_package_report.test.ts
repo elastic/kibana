@@ -10,6 +10,8 @@ import {
   buildProposalSubjectKey,
   canFillRespondAction,
   decidePackageReport,
+  buildProposalSummaryBullets,
+  MAX_SUMMARY_PROPOSAL_BULLETS,
 } from './decide_package_report';
 import type { CurrentRunState } from './types';
 
@@ -449,5 +451,52 @@ describe('decidePackageReport', () => {
         processKey: 'p',
       })
     );
+  });
+});
+
+describe('buildProposalSummaryBullets', () => {
+  // journal_note.yaml caps `message` at this; the conclusion embeds the bullets verbatim.
+  const JOURNAL_NOTE_MESSAGE_MAX = 8000;
+
+  it('bounds the bullets for a 50-host, 2-action finding and states how many were omitted', () => {
+    const hosts = Array.from({ length: 50 }, (_, i) => ({
+      name: `a-fairly-long-host-name-number-${i}.corp.example.com`,
+      enrolled: true,
+      agentId: `agent-${i}`,
+    }));
+    const { proposals } = decidePackageReport({
+      conversationId: 'conv-1',
+      state: baseHitState({ hosts }),
+      catalog: {
+        ok: true,
+        actions: [
+          isolateHost,
+          configureAction,
+          { ...isolateHost, workflowId: 'system-security-action-second' },
+        ],
+      },
+    });
+    expect(proposals).toHaveLength(100);
+
+    const { bullets, omittedCount } = buildProposalSummaryBullets(proposals);
+
+    expect(bullets).toHaveLength(MAX_SUMMARY_PROPOSAL_BULLETS);
+    expect(omittedCount).toBe(100 - MAX_SUMMARY_PROPOSAL_BULLETS);
+    expect(bullets.join('\n').length).toBeLessThan(JOURNAL_NOTE_MESSAGE_MAX);
+    expect(bullets[0]).toBe(
+      '- **Isolate host a-fairly-long-host-name-number-0.corp.example.com** on `a-fairly-long-host-name-number-0.corp.example.com`: runs `system-security-action-isolate-host` on approval'
+    );
+  });
+
+  it('lists everything and omits nothing at or under the cap', () => {
+    const { proposals } = decidePackageReport({
+      conversationId: 'conv-1',
+      state: baseHitState(),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+    expect(buildProposalSummaryBullets(proposals)).toEqual({
+      bullets: [expect.stringContaining('`host-a`')],
+      omittedCount: 0,
+    });
   });
 });
