@@ -65,6 +65,7 @@ import {
   assertAlertZeroEnabled,
   createAssertAlertZeroAccess,
 } from './agent_builder_tools/assert_alertzero_access';
+import { hasManageSecurityPrivilege } from './routes/workers/has_manage_security';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 import { createActionDiscoverySkill } from './agent_builder/skills/action_discovery';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
@@ -393,8 +394,8 @@ export class AlertZeroPlugin
         return { disabled: true };
       }
 
-      // Mirrors the Workers update route, which this call bypasses: AlertZero write access plus
-      // update access to managed workflows.
+      // Mirrors the Workers update route, which this call bypasses: AlertZero write access,
+      // update access to managed workflows, and the manage_security cluster privilege.
       if (!security) return { disabled: false };
       const { actions } = security.authz;
       const { hasAllRequested } = await security.authz.checkPrivilegesDynamicallyWithRequest(
@@ -408,6 +409,17 @@ export class AlertZeroPlugin
       if (!hasAllRequested) {
         this.logger.debug(
           'Not disabling the Alert Triage Worker: caller lacks the required privileges'
+        );
+        return { disabled: false };
+      }
+      // Not expressible as a Kibana privilege, so the route checks it against Elasticsearch.
+      if (
+        !(await hasManageSecurityPrivilege(
+          core.elasticsearch.client.asScoped(request).asCurrentUser
+        ))
+      ) {
+        this.logger.debug(
+          'Not disabling the Alert Triage Worker: caller lacks the manage_security cluster privilege'
         );
         return { disabled: false };
       }

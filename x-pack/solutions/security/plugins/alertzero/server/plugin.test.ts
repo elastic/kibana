@@ -464,13 +464,23 @@ describe('AlertZeroPlugin Alert Triage Worker start contract', () => {
   const startPlugin = ({
     alertZeroEnabledInSpace = true,
     hasAllRequested = true,
-  }: { alertZeroEnabledInSpace?: boolean; hasAllRequested?: boolean } = {}) => {
+    hasManageSecurity = true,
+  }: {
+    alertZeroEnabledInSpace?: boolean;
+    hasAllRequested?: boolean;
+    hasManageSecurity?: boolean;
+  } = {}) => {
     const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
     const coreStart = coreMock.createStart();
     // The plugin only builds its Workers service when service accounts are enabled.
     jest.spyOn(coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(true);
     coreStart.uiSettings.asScopedToClient.mockReturnValue({
       get: jest.fn().mockResolvedValue(alertZeroEnabledInSpace),
+    } as never);
+    // The Workers update route also requires the manage_security cluster privilege.
+    const hasPrivileges = jest.fn().mockResolvedValue({ has_all_requested: hasManageSecurity });
+    jest.spyOn(coreStart.elasticsearch.client, 'asScoped').mockReturnValue({
+      asCurrentUser: { security: { hasPrivileges } },
     } as never);
     const checkPrivileges = jest.fn().mockResolvedValue({ hasAllRequested });
     const security = {
@@ -540,6 +550,17 @@ describe('AlertZeroPlugin Alert Triage Worker start contract', () => {
   it('leaves the worker on when the caller lacks the route privileges', async () => {
     isWorkerEnabled.mockResolvedValue(true);
     const { contract } = startPlugin({ hasAllRequested: false });
+
+    await expect(contract.disableAlertTriageWorker(request)).resolves.toEqual({ disabled: false });
+
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  // The Workers update route returns 403 without manage_security, which no Kibana privilege
+  // can express, so the settings PUT must not be a way around it.
+  it('leaves the worker on when the caller lacks the manage_security cluster privilege', async () => {
+    isWorkerEnabled.mockResolvedValue(true);
+    const { contract } = startPlugin({ hasManageSecurity: false });
 
     await expect(contract.disableAlertTriageWorker(request)).resolves.toEqual({ disabled: false });
 
