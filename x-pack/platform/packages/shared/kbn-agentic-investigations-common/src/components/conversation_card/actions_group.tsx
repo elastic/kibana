@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { AiButtonIcon } from '@kbn/ui-ai-components';
 import { type Investigation } from '../../types';
-import { ActionButton, BaseActions, hasAvailableActions, type BaseActionsProps } from '../actions';
+import { BaseActions, type BaseActionsProps } from '../actions';
+import { createCardLinkClickHandler } from '../actions/card_link_click';
 import { ACTIONS_TRANSLATIONS } from '../actions/translations';
 
 export interface ConversationsActionsGroupProps {
@@ -26,6 +28,13 @@ export interface ConversationsActionsGroupProps {
   chatHref?: string;
   /** When true escalation actions are shown. Requires the manage escalations capability. */
   canManageEscalations?: boolean;
+  /**
+   * When true the "Close investigation" action is shown. Should only be true when the
+   * caller supplies a real handler; without it the fallback modal does nothing.
+   */
+  canCloseInvestigation?: boolean;
+  /** Backs the menu's "Copy link" item. The caller owns how the link is built and copied. */
+  onCopyLink: BaseActionsProps['onCopyLink'];
 }
 
 /**
@@ -41,45 +50,49 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
     onOpenChat,
     chatHref,
     canManageEscalations,
+    canCloseInvestigation,
+    onCopyLink,
   }) => {
     const { euiTheme } = useEuiTheme();
+    const handleChatClick = useMemo(() => createCardLinkClickHandler(onOpenChat), [onOpenChat]);
 
     return (
       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive direction="row">
+        <span
+          aria-hidden="true"
+          css={css({
+            width: '1px',
+            height: euiTheme.size.base,
+            background: euiTheme.colors.backgroundLightText,
+            marginLeft: euiTheme.size.s,
+            marginRight: euiTheme.size.xs,
+            [`@media (max-width: ${euiTheme.breakpoint.m}px)`]: {
+              display: 'none',
+            },
+          })}
+        />
         <EuiFlexItem grow={false}>
-          <ActionButton
+          <AiButtonIcon
+            variant="empty"
+            size="s"
             iconType="productAgent"
-            tooltipContent={ACTIONS_TRANSLATIONS.tooltips.openInChat}
-            onClick={onOpenChat}
+            withToolTip
+            aria-label={ACTIONS_TRANSLATIONS.tooltips.openInChat}
             href={chatHref}
+            onClick={handleChatClick}
             data-test-subj="conversationCardOpenInChat"
           />
         </EuiFlexItem>
-        {hasAvailableActions(investigation, canManageEscalations) && (
-          <>
-            <span
-              aria-hidden="true"
-              css={css({
-                width: '1px',
-                height: euiTheme.size.base,
-                background: euiTheme.colors.backgroundLightText,
-                marginLeft: euiTheme.size.s,
-                marginRight: euiTheme.size.xs,
-                [`@media (max-width: ${euiTheme.breakpoint.m}px)`]: {
-                  display: 'none',
-                },
-              })}
-            />
-            <EuiFlexItem grow={false}>
-              <BaseActions
-                investigation={investigation}
-                onClickAction={onClickAction}
-                onClickRecommendedAction={onClickRecommendedAction}
-                canManageEscalations={canManageEscalations}
-              />
-            </EuiFlexItem>
-          </>
-        )}
+        <EuiFlexItem grow={false}>
+          <BaseActions
+            investigation={investigation}
+            onClickAction={onClickAction}
+            onClickRecommendedAction={onClickRecommendedAction}
+            canManageEscalations={canManageEscalations}
+            canCloseInvestigation={canCloseInvestigation}
+            onCopyLink={onCopyLink}
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
   }

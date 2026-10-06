@@ -72,6 +72,21 @@ const UNTITLED_INVESTIGATION = i18n.translate(
  * - `confidence`, `origin`, `dismissReason`, `rationale`, `executionError`,
  *   `workflowExecutionId`, `decidedBy`, `expiresAt` — no destination in Investigation.
  */
+/**
+ * Past-tense label for a proposal whose false-positive close actually ran, identified by the
+ * close action's input contract. Undefined for anything else (dismissed, expired, failed, or
+ * another action) so the caller falls back to the proposal title.
+ */
+const closedActionLabel = (proposal: ProposalItem): string | undefined => {
+  if (proposal.status !== 'succeeded') return undefined;
+  const { alertIds, reason } = proposal.actionInput ?? {};
+  if (!Array.isArray(alertIds) || reason !== 'false_positive') return undefined;
+  return i18n.translate('xpack.alertzero.conversationQueue.alertsClosedAsFalsePositiveLabel', {
+    defaultMessage: '{count, plural, one {# alert} other {# alerts}} closed as false positive',
+    values: { count: alertIds.length },
+  });
+};
+
 export const proposalToInvestigation = (proposal: ProposalItem): Investigation => {
   // Closed detection mirrors groupProposals() server-side: decidedAt wins over category.
   const isClosed = Boolean(proposal.decidedAt);
@@ -109,12 +124,15 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     // The page renders dismiss/assign modals only if modalState.recordId is set.
     recordId: proposal.id,
     conversationId: proposal.conversationId,
-    summary: proposal.comment,
-    primaryActionLabel: proposal.action?.name,
+    // The title, not the comment: the card renders this as plain text, so the
+    // comment's markdown came through as literal asterisks and headings.
+    summary: proposal.title,
+    primaryActionLabel: closedActionLabel(proposal) ?? proposal.title,
     // `conversationAssignees` is an array but `Investigation.assignee` is singular,
     // because the flyout header renders one avatar. First entry wins, as in the
     // conversation adapter.
     assignee: proposal.conversationAssignees[0] ?? null,
+    assignees: proposal.conversationAssignees,
     events: [],
     entityIds: proposal.entityIds,
     // First id feeds the flyout Overview "Compromised" row until that surface

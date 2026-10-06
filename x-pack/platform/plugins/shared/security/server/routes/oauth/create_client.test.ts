@@ -20,7 +20,8 @@ import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
 
-const RESOURCE = 'https://test-project.kb.us-central1.gcp.elastic.cloud/api/agent_builder/mcp';
+const CONFIGURED_RESOURCE =
+  'https://test-project.kb.us-central1.gcp.elastic.cloud/api/agent_builder/mcp';
 const PROJECT_ID = 'mock-project-id';
 const UIAM_PROJECT_TYPE = 'elasticsearch';
 
@@ -29,7 +30,7 @@ const mcpConfig = {
     oauth2: {
       metadata: {
         authorization_servers: ['https://auth.example.com'],
-        resource: RESOURCE,
+        resource: CONFIGURED_RESOURCE,
       },
     },
   },
@@ -97,7 +98,7 @@ describe('Create OAuth Client route', () => {
   it('injects the configured resource, serverless project id and project type and returns the created client on success', async () => {
     const mockClient = {
       id: 'client-1',
-      resource: RESOURCE,
+      resource: CONFIGURED_RESOURCE,
       client_name: 'Test',
     };
     oauthMock.createClient.mockResolvedValue(mockClient);
@@ -112,7 +113,7 @@ describe('Create OAuth Client route', () => {
 
     expect(oauthMock.createClient).toHaveBeenCalledWith(expect.anything(), {
       client_name: 'Test',
-      resource: RESOURCE,
+      resource: CONFIGURED_RESOURCE,
       project_id: PROJECT_ID,
       project_type: UIAM_PROJECT_TYPE,
     });
@@ -122,7 +123,7 @@ describe('Create OAuth Client route', () => {
 
   it('maps the `search` solution to the `elasticsearch` UIAM project type', async () => {
     ({ routeHandler, oauthMock } = setup(mcpConfig, { serverlessProjectType: 'search' }));
-    oauthMock.createClient.mockResolvedValue({ id: 'client-1', resource: RESOURCE });
+    oauthMock.createClient.mockResolvedValue({ id: 'client-1', resource: CONFIGURED_RESOURCE });
 
     await routeHandler(
       getMockContext(),
@@ -138,7 +139,7 @@ describe('Create OAuth Client route', () => {
 
   it('passes through a directly-matching project type unchanged', async () => {
     ({ routeHandler, oauthMock } = setup(mcpConfig, { serverlessProjectType: 'security' }));
-    oauthMock.createClient.mockResolvedValue({ id: 'client-1', resource: RESOURCE });
+    oauthMock.createClient.mockResolvedValue({ id: 'client-1', resource: CONFIGURED_RESOURCE });
 
     await routeHandler(
       getMockContext(),
@@ -208,7 +209,7 @@ describe('Create OAuth Client route', () => {
   });
 
   it('overrides any body-supplied `resource` with the configured value as defense-in-depth', async () => {
-    oauthMock.createClient.mockResolvedValue({ id: 'client-1', resource: RESOURCE });
+    oauthMock.createClient.mockResolvedValue({ id: 'client-1', resource: CONFIGURED_RESOURCE });
 
     // Bypass schema validation by handing the handler an "already validated" body
     // that still contains a `resource` field; the handler must not honor it.
@@ -222,14 +223,14 @@ describe('Create OAuth Client route', () => {
 
     expect(oauthMock.createClient).toHaveBeenCalledWith(expect.anything(), {
       client_name: 'Test',
-      resource: RESOURCE,
+      resource: CONFIGURED_RESOURCE,
       project_id: PROJECT_ID,
       project_type: UIAM_PROJECT_TYPE,
     });
   });
 
   it('overrides any body-supplied `project_id` with the serverless project id as defense-in-depth', async () => {
-    oauthMock.createClient.mockResolvedValue({ id: 'client-1', resource: RESOURCE });
+    oauthMock.createClient.mockResolvedValue({ id: 'client-1', resource: CONFIGURED_RESOURCE });
 
     // Bypass schema validation by handing the handler an "already validated" body
     // that still contains a `project_id` field; the handler must not honor it.
@@ -243,7 +244,7 @@ describe('Create OAuth Client route', () => {
 
     expect(oauthMock.createClient).toHaveBeenCalledWith(expect.anything(), {
       client_name: 'Test',
-      resource: RESOURCE,
+      resource: CONFIGURED_RESOURCE,
       project_id: PROJECT_ID,
       project_type: UIAM_PROJECT_TYPE,
     });
@@ -287,7 +288,7 @@ describe('Create OAuth Client route', () => {
     ['workplaceai', 'workplaceai'],
   ] as const)('maps %s to its UIAM project type', async (solution, projectType) => {
     ({ routeHandler, oauthMock } = setup(mcpConfig, { serverlessProjectType: solution }));
-    oauthMock.createClient.mockResolvedValue({ id: 'client-id', resource: RESOURCE });
+    oauthMock.createClient.mockResolvedValue({ id: 'client-id', resource: CONFIGURED_RESOURCE });
     const response = await routeHandler(
       getMockContext(),
       httpServerMock.createKibanaRequest({ body: { client_name: 'Test' } }),
@@ -327,6 +328,46 @@ describe('Create OAuth Client route', () => {
     expect(response.status).toBe(404);
     expect(oauthMock.createClient).not.toHaveBeenCalled();
   });
+
+  it.each(['marketing', 'default'])(
+    'includes the literal /s/%s prefix in the registered resource',
+    async (spaceId) => {
+      const mockRouteDefinitionParams = routeDefinitionParamsMock.create(mcpConfig, {
+        serverless: true,
+      });
+      mockRouteDefinitionParams.serverlessProjectId = PROJECT_ID;
+
+      const authcMock = authenticationServiceMock.createStart();
+      mockRouteDefinitionParams.getAuthenticationService.mockReturnValue(authcMock);
+
+      const { basePath } = mockRouteDefinitionParams;
+      (basePath.get as jest.Mock).mockReturnValue(`${basePath.serverBasePath}/s/${spaceId}`);
+
+      defineCreateOAuthClientRoute(mockRouteDefinitionParams);
+
+      const [, handler] = mockRouteDefinitionParams.router.post.mock.calls.find(
+        ([{ path }]) => path === '/internal/security/oauth/clients'
+      )!;
+
+      const spaceOauthMock = authcMock.oauth as jest.Mocked<UiamOAuthType>;
+      const expectedSpaceResource = `https://test-project.kb.us-central1.gcp.elastic.cloud/s/${spaceId}/api/agent_builder/mcp`;
+      spaceOauthMock.createClient.mockResolvedValue({
+        id: 'client-space',
+        resource: expectedSpaceResource,
+      });
+
+      await (handler as RequestHandler<any, any, any, any>)(
+        getMockContext(),
+        httpServerMock.createKibanaRequest({ body: { client_name: 'Space Client' } }),
+        kibanaResponseFactory
+      );
+
+      expect(spaceOauthMock.createClient).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ resource: expectedSpaceResource })
+      );
+    }
+  );
 
   it('returns error from service', async () => {
     const error = Boom.badRequest('Invalid resource');

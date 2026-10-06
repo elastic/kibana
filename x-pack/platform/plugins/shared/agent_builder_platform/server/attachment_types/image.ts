@@ -7,9 +7,17 @@
 
 import type { Readable } from 'stream';
 import type { ImageAttachmentData } from '@kbn/agent-builder-common/attachments';
-import { AttachmentType, imageAttachmentDataSchema } from '@kbn/agent-builder-common/attachments';
+import {
+  AttachmentType,
+  CHAT_ATTACHMENT_IMAGES_FILE_KIND,
+  imageAttachmentDataSchema,
+} from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import { FileNotFoundError, type FilesStart } from '@kbn/files-plugin/server';
+import {
+  FileNotFoundError,
+  type FileServiceStart,
+  type FilesStart,
+} from '@kbn/files-plugin/server';
 
 const streamToBuffer = (stream: Readable): Promise<Buffer> =>
   new Promise((resolve, reject) => {
@@ -18,6 +26,17 @@ const streamToBuffer = (stream: Readable): Promise<Buffer> =>
     stream.on('end', () => resolve(Buffer.concat(chunks)));
     stream.on('error', reject);
   });
+
+/**
+ * Get the image and make sure it is of the correct file kind.
+ */
+const getImageFile = async (fileService: FileServiceStart, fileId: string) => {
+  const file = await fileService.getById({ id: fileId });
+  if (file.data.fileKind !== CHAT_ATTACHMENT_IMAGES_FILE_KIND) {
+    throw new FileNotFoundError('image file not found');
+  }
+  return file;
+};
 
 export const createImageAttachmentType = ({
   getFilesPlugin,
@@ -36,7 +55,7 @@ export const createImageAttachmentType = ({
       const filesPlugin = await getFilesPlugin();
       const fileService = filesPlugin.fileServiceFactory.asScoped(context.request);
       try {
-        await fileService.getById({ id: parse.data.file_id });
+        await getImageFile(fileService, parse.data.file_id);
       } catch (e) {
         if (e instanceof FileNotFoundError) {
           return { valid: false, error: 'image file not found' };
@@ -53,7 +72,7 @@ export const createImageAttachmentType = ({
         getBase64: async () => {
           const filesPlugin = await getFilesPlugin();
           const fileService = filesPlugin.fileServiceFactory.asScoped(request);
-          const file = await fileService.getById({ id: attachment.data.file_id });
+          const file = await getImageFile(fileService, attachment.data.file_id);
           const buffer = await streamToBuffer(await file.downloadContent());
           return buffer.toString('base64');
         },

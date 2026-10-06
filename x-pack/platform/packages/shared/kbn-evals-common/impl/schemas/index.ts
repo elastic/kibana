@@ -9,6 +9,8 @@ export * from './common_attributes.gen';
 
 export * from './experiments/get_experiments_route.gen';
 export * from './experiments/get_experiment_route.gen';
+export * from './experiments/get_experiment_runs_route.gen';
+export * from './experiments/get_experiment_traces_route.gen';
 export * from './experiments/get_experiment_scores_route.gen';
 export * from './experiments/get_experiment_dataset_examples_route.gen';
 export * from './experiments/get_experiment_example_details_route.gen';
@@ -42,3 +44,4 @@ export * from './evaluators/delete_evaluator_route.gen';
 export * from './evaluators/evaluate_route.gen';
 export * from './evaluators/resolve_instrumentation_route.gen';
 export * from './evaluators/validate_route.gen';
+export * from './evaluators/test_evaluator_route.gen';

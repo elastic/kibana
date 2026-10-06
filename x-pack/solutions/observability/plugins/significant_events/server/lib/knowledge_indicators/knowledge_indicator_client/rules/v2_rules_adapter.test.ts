@@ -36,9 +36,9 @@ function makeRulesClientMock() {
 
 function makeAdapter(
   mock: ReturnType<typeof makeRulesClientMock>,
-  { isServerless }: Pick<RulesAdapterV2Params, 'isServerless'> = { isServerless: false }
+  { cpsEnabled }: Pick<RulesAdapterV2Params, 'cpsEnabled'> = { cpsEnabled: false }
 ) {
-  return new RulesAdapterV2({ rulesClient: mock, isServerless });
+  return new RulesAdapterV2({ rulesClient: mock, cpsEnabled });
 }
 
 function lastCreateCall(mock: ReturnType<typeof makeRulesClientMock>) {
@@ -95,7 +95,7 @@ describe('RulesAdapterV2', () => {
         time_field: string;
         schedule: { every: string; lookback: string };
         grouping: { fields: string[] };
-        query: { format: string; breach: { query: string } };
+        query: { base: string };
       };
 
       expect(data.kind).toBe('signal');
@@ -109,8 +109,7 @@ describe('RulesAdapterV2', () => {
         lookback: METRIC_SERIES_LOOKBACK,
       });
       expect(data.grouping).toEqual({ fields: ['bucket'] });
-      expect(data.query.format).toBe('standalone');
-      expectMetricSeriesBreach(data.query.breach.query);
+      expectMetricSeriesBreach(data.query.base);
       expect(lastCreateCall(mock).options).toEqual({ id: 'rule-1' });
     });
 
@@ -140,7 +139,7 @@ describe('RulesAdapterV2', () => {
         metadata: { name: string; tags: string[] };
         schedule: { every: string; lookback: string };
         grouping: { fields: string[] };
-        query: { breach: { query: string } };
+        query: { base: string };
       };
 
       expect(data.metadata.name).toBe('Updated title (match count)');
@@ -150,7 +149,7 @@ describe('RulesAdapterV2', () => {
         lookback: METRIC_SERIES_LOOKBACK,
       });
       expect(data.grouping).toEqual({ fields: ['bucket'] });
-      expectMetricSeriesBreach(data.query.breach.query);
+      expectMetricSeriesBreach(data.query.base);
     });
 
     it('forwards timestampField as time_field and into the compiled BUCKET', async () => {
@@ -164,43 +163,43 @@ describe('RulesAdapterV2', () => {
 
       const data = lastUpdateCall(mock).data as {
         time_field: string;
-        query: { breach: { query: string } };
+        query: { base: string };
       };
       expect(data.time_field).toBe('event.ingested');
-      expect(data.query.breach.query).toContain('BUCKET(event.ingested, 1 minute)');
+      expect(data.query.base).toContain('BUCKET(event.ingested, 1 minute)');
     });
   });
 
-  describe('serverless project routing', () => {
+  describe('CPS project routing', () => {
     const SET_DIRECTIVE = `SET project_routing="${PROJECT_ROUTING_ALL}";`;
 
-    it('omits the project routing directive on stateful', async () => {
+    it('omits the project routing directive when CPS is disabled', async () => {
       const mock = makeRulesClientMock();
       mock.createRule.mockResolvedValue({} as never);
-      const adapter = makeAdapter(mock, { isServerless: false });
+      const adapter = makeAdapter(mock, { cpsEnabled: false });
       await adapter.createRule('rule-1', createDefinition);
 
-      expect(lastCreateCall(mock).data.query.breach.query).not.toContain('SET project_routing');
+      expect(lastCreateCall(mock).data.query.base).not.toContain('SET project_routing');
     });
 
-    it('scopes the create breach query across all projects on serverless', async () => {
+    it('scopes the create breach query across all projects when CPS is enabled', async () => {
       const mock = makeRulesClientMock();
       mock.createRule.mockResolvedValue({} as never);
-      const adapter = makeAdapter(mock, { isServerless: true });
+      const adapter = makeAdapter(mock, { cpsEnabled: true });
       await adapter.createRule('rule-1', createDefinition);
 
-      const query = lastCreateCall(mock).data.query.breach.query;
+      const query = lastCreateCall(mock).data.query.base;
       expect(query.startsWith(SET_DIRECTIVE)).toBe(true);
       expectMetricSeriesBreach(query);
     });
 
-    it('scopes the update breach query across all projects on serverless', async () => {
+    it('scopes the update breach query across all projects when CPS is enabled', async () => {
       const mock = makeRulesClientMock();
       mock.updateRule.mockResolvedValue({} as never);
-      const adapter = makeAdapter(mock, { isServerless: true });
+      const adapter = makeAdapter(mock, { cpsEnabled: true });
       await adapter.updateRule('rule-1', updateDefinition);
 
-      const query = lastUpdateCall(mock).data.query.breach.query;
+      const query = lastUpdateCall(mock).data.query.base;
       expect(query.startsWith(SET_DIRECTIVE)).toBe(true);
       expectMetricSeriesBreach(query);
     });
@@ -208,10 +207,10 @@ describe('RulesAdapterV2', () => {
     it('emits a query Alerting v2 rule validation accepts', async () => {
       const mock = makeRulesClientMock();
       mock.createRule.mockResolvedValue({} as never);
-      const adapter = makeAdapter(mock, { isServerless: true });
+      const adapter = makeAdapter(mock, { cpsEnabled: true });
       await adapter.createRule('rule-1', createDefinition);
 
-      expect(Parser.parseErrors(lastCreateCall(mock).data.query.breach.query)).toEqual([]);
+      expect(Parser.parseErrors(lastCreateCall(mock).data.query.base)).toEqual([]);
     });
   });
 
@@ -242,7 +241,7 @@ describe('RulesAdapterV2', () => {
   describe('bulkCreateRules', () => {
     it('creates enabled rules in one v2 request and returns createdIds', async () => {
       const mock = makeRulesClientMock();
-      mock.bulkCreateRules.mockResolvedValue({ rules: [{ id: 'rule-1' }], errors: [] } as never);
+      mock.bulkCreateRules.mockResolvedValue({ items: [{ id: 'rule-1' }], errors: [] } as never);
       const adapter = makeAdapter(mock);
 
       const result = await adapter.bulkCreateRules([
@@ -251,7 +250,7 @@ describe('RulesAdapterV2', () => {
 
       expect(result).toEqual({ createdIds: ['rule-1'] });
       expect(mock.bulkCreateRules).toHaveBeenCalledWith({
-        rules: [
+        items: [
           expect.objectContaining({
             id: 'rule-1',
             enabled: true,
@@ -272,7 +271,7 @@ describe('RulesAdapterV2', () => {
         definition: { ...createDefinition, name: `Rule ${index}` },
       }));
       mock.bulkCreateRules.mockResolvedValue({
-        rules: [],
+        items: [],
         errors: rules.map(({ id }) => ({
           id,
           error: {
@@ -308,7 +307,7 @@ describe('RulesAdapterV2', () => {
     it('skips conflict updates and throws when fatal errors are present', async () => {
       const mock = makeRulesClientMock();
       mock.bulkCreateRules.mockResolvedValue({
-        rules: [{ id: 'rule-created' }],
+        items: [{ id: 'rule-created' }],
         errors: [
           {
             id: 'rule-conflict',
@@ -353,7 +352,7 @@ describe('RulesAdapterV2', () => {
       const mock = makeRulesClientMock();
       const updateError = Boom.serverUnavailable('update failed');
       mock.bulkCreateRules.mockResolvedValue({
-        rules: [{ id: 'rule-created' }],
+        items: [{ id: 'rule-created' }],
         errors: [
           {
             id: 'rule-1',
@@ -387,7 +386,7 @@ describe('RulesAdapterV2', () => {
       const mock = makeRulesClientMock();
       const updateError = Boom.notFound('deleted after conflict');
       mock.bulkCreateRules.mockResolvedValue({
-        rules: [{ id: 'rule-created' }],
+        items: [{ id: 'rule-created' }],
         errors: [
           {
             id: 'rule-conflict',
@@ -446,7 +445,7 @@ describe('RulesAdapterV2', () => {
       });
       mock.bulkCreateRules
         .mockRejectedValueOnce(requestError)
-        .mockResolvedValueOnce({ rules: [{ id: 'rule-new' }], errors: [] } as never);
+        .mockResolvedValueOnce({ items: [{ id: 'rule-new' }], errors: [] } as never);
       mock.ruleExists.mockImplementation(({ id }: { id: string }) =>
         Promise.resolve(id === 'rule-existing')
       );
@@ -461,7 +460,7 @@ describe('RulesAdapterV2', () => {
       ).resolves.toEqual({ createdIds: ['rule-new'] });
 
       expect(mock.bulkCreateRules).toHaveBeenCalledTimes(2);
-      const retryRules = mock.bulkCreateRules.mock.calls[1][0].rules as Array<{ id: string }>;
+      const retryRules = mock.bulkCreateRules.mock.calls[1][0].items as Array<{ id: string }>;
       expect(retryRules.map(({ id }) => id)).toEqual(['rule-new']);
       expect(mock.updateRule).toHaveBeenCalledTimes(1);
       expect(mock.updateRule).toHaveBeenCalledWith({
@@ -478,7 +477,7 @@ describe('RulesAdapterV2', () => {
         code: ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
       });
       mock.bulkCreateRules.mockRejectedValueOnce(requestError).mockResolvedValueOnce({
-        rules: [],
+        items: [],
         errors: [
           {
             id: 'rule-raced',
@@ -514,7 +513,7 @@ describe('RulesAdapterV2', () => {
         code: ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
       });
       mock.bulkCreateRules.mockRejectedValueOnce(requestError).mockResolvedValueOnce({
-        rules: [{ id: 'rule-created' }],
+        items: [{ id: 'rule-created' }],
         errors: [
           {
             id: 'rule-failed',
@@ -555,7 +554,7 @@ describe('RulesAdapterV2', () => {
       const updateError = Boom.notFound('deleted after lookup');
       mock.bulkCreateRules
         .mockRejectedValueOnce(requestError)
-        .mockResolvedValueOnce({ rules: [{ id: 'rule-created' }], errors: [] } as never);
+        .mockResolvedValueOnce({ items: [{ id: 'rule-created' }], errors: [] } as never);
       mock.ruleExists.mockImplementation(({ id }: { id: string }) =>
         Promise.resolve(id === 'rule-existing')
       );

@@ -16,6 +16,7 @@ import {
   getBaseScoreESQL,
   type EuidCompositeAggregation,
 } from '../../calculate_esql_risk_scores';
+import { RISK_SCORING_REQUEST_TIMEOUT } from '../../constants';
 import type { ParsedRiskScore } from './parse_esql_row';
 import { parseEsqlBaseScoreRow } from './parse_esql_row';
 import { applyScoreModifiersFromEntities } from '../../modifiers/apply_modifiers_from_entities';
@@ -24,8 +25,6 @@ import { fetchEntitiesByIds } from '../utils/fetch_entities_by_ids';
 import type { ScopedLogger } from '../utils/with_log_context';
 import { persistScoresToEntityStore, persistScoresToRiskIndex } from './persist_scores';
 import { createMissingEntities as runCreateMissingEntities } from './create_missing_entities';
-
-const BASE_SCORING_REQUEST_TIMEOUT = '5m';
 
 interface ScoreBaseEntitiesParams {
   esClient: ElasticsearchClient;
@@ -296,7 +295,7 @@ const fetchNextEuidPage = async ({
       pageSize,
       afterKey,
     }),
-    { requestTimeout: BASE_SCORING_REQUEST_TIMEOUT }
+    { requestTimeout: RISK_SCORING_REQUEST_TIMEOUT }
   );
 
   const compositeAgg = (
@@ -336,7 +335,7 @@ const scorePageFromAlerts = async ({
       query,
       filter: { bool: { filter: alertFilters } },
     },
-    { requestTimeout: BASE_SCORING_REQUEST_TIMEOUT }
+    { requestTimeout: RISK_SCORING_REQUEST_TIMEOUT }
   );
 
   return (esqlResponse.values ?? []).map(parseEsqlBaseScoreRow(alertsIndex));

@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import { firstValueFrom } from 'rxjs';
+import type {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+} from '@kbn/core/server';
 import type {
   VisTypeVegaPluginSetupDependencies,
   VisTypeVegaPluginSetup,
@@ -18,19 +25,22 @@ import { getVegaEmbeddableSchema } from './embeddable/schema';
 import { getTransforms } from './embeddable/transforms';
 
 export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisTypeVegaPluginStart> {
-  constructor(initializerContext: PluginInitializerContext) {}
+  private readonly logger: Logger;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+  }
 
   public setup(core: CoreSetup, { embeddable }: VisTypeVegaPluginSetupDependencies) {
     core
       .getStartServices()
       .then(async ([{ featureFlags }]) => {
-        const standaloneEmbeddableEnabled = await featureFlags.getBooleanValue(
-          VEGA_STANDALONE_EMBEDDABLE_FLAG,
-          false
+        const standaloneEmbeddableEnabled = await firstValueFrom(
+          featureFlags.getBooleanValue$(VEGA_STANDALONE_EMBEDDABLE_FLAG, false)
         );
         embeddable.registerEmbeddableServerDefinition(VEGA_EMBEDDABLE_TYPE, {
           title: 'Vega',
-          getTransforms,
+          getTransforms: (drilldownTransforms) => getTransforms(drilldownTransforms, this.logger),
           getSchema: (getDrilldownsSchema) =>
             standaloneEmbeddableEnabled ? getVegaEmbeddableSchema(getDrilldownsSchema) : undefined,
         });

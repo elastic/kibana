@@ -65,6 +65,15 @@ export interface EventActor {
 }
 
 /**
+ * Whether a chat request executes the agent. `never` appends the user message to the conversation
+ * and returns, leaving the execution options unused.
+ */
+export enum ChatTriggerMode {
+  Always = 'always',
+  Never = 'never',
+}
+
+/**
  * What caused an agent run to start.
  */
 export enum TimelineTriggerType {
@@ -109,7 +118,7 @@ export interface ServerAssignedEventFields {
  * `TType` is open here; `BaseTimelineEventInput` re-adds the `TimelineEventType` constraint so
  * the closed `TimelineEvent` union and all existing narrowing remain unaffected.
  */
-export interface ConversationEventInput<TType extends string = string, TData = unknown>
+export interface ConversationEventInput<TType extends string = string, TData = object>
   extends Partial<ServerAssignedEventFields> {
   /** The event type discriminator. */
   type: TType;
@@ -124,7 +133,7 @@ export interface ConversationEventInput<TType extends string = string, TData = u
 /** A stored conversation event: producer fields plus server-assigned fields made required. */
 export type ConversationEvent<
   TType extends string = string,
-  TData = unknown
+  TData = object
 > = ConversationEventInput<TType, TData> & ServerAssignedEventFields;
 
 /** The fields a producer supplies for a timeline event. */
@@ -456,6 +465,10 @@ export const ROUND_DERIVED_EVENT_ID_SUFFIXES = {
   promptResponse: '::prompt_response',
 } as const;
 
+/** ID of the `user_message` event derived from a round. */
+export const roundUserMessageEventId = (roundId: string): string =>
+  `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.userMessage}`;
+
 /** ID for a step event. */
 export const roundStepEventId = (roundId: string, sequence: number): string =>
   `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.stepPrefix}${sequence}`;
@@ -542,6 +555,31 @@ export type ValidConversationEventType<T extends string> =
     : T extends BuiltInConversationEventTypeValue
     ? never
     : T;
+
+/**
+ * Validates a conversation event type name at runtime, throwing a descriptive error if invalid.
+ * Enforces the same three naming rules as the server-side registry:
+ *   1. May not contain the id delimiter (`::`)
+ *   2. May not be a reserved type (`execution`, `step`)
+ *   3. May not shadow a built-in timeline event type
+ *
+ * Pair with the compile-time {@link ValidConversationEventType} guard for full coverage.
+ */
+export const assertValidConversationEventType = (type: string): void => {
+  if (type.includes(CONVERSATION_EVENT_ID_DELIMITER)) {
+    throw new Error(
+      `Conversation event type "${type}" must not contain "${CONVERSATION_EVENT_ID_DELIMITER}"`
+    );
+  }
+  if ((RESERVED_CONVERSATION_EVENT_TYPES as readonly string[]).includes(type)) {
+    throw new Error(`Conversation event type "${type}" is reserved and cannot be registered`);
+  }
+  if (isBuiltInConversationEventType(type)) {
+    throw new Error(
+      `Conversation event type "${type}" is a built-in timeline event type and cannot be registered`
+    );
+  }
+};
 
 /** Input event for adding to a conversation. Server assigns id, created_at, and actor. */
 export interface ConversationAddEventInput {
