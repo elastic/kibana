@@ -14,8 +14,6 @@ export const CONTROL_COL_WIDTH = 24;
 export const SELECT_COL_WIDTH = 32;
 export const DEFAULT_COL_WIDTH = 180;
 export const MIN_COL_WIDTH = 60;
-/** Below this width the full action bar is replaced by a single expand icon. */
-export const COMPACT_CELL_ACTIONS_THRESHOLD = 220;
 const RESIZE_HANDLE_WIDTH = 4;
 
 const getHeaderCellBorderRight = (euiTheme: UseEuiTheme['euiTheme']) =>
@@ -437,67 +435,21 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     cursor: 'pointer',
   }),
 
-  // -- Cell actions (mounted on hover/focus; secondary actions clip, expand always stays) --
+  // -- Cell actions (ellipsis morphs into the filter/copy/expand bubble) --
   cellWithActions: css({
     position: 'relative',
     overflow: 'hidden',
-    '&:hover .tsg-compactCellExpand, &:focus-within .tsg-compactCellExpand': {
-      opacity: 1,
-      pointerEvents: 'auto',
+    '&:hover .tsg-cellActions, &:focus-within .tsg-cellActions': {
+      display: 'flex',
     },
-  }),
-
-  cellActions: css({
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    gap: euiTheme.size.xxs,
-    maxWidth: '100%',
-    overflow: 'hidden',
-    color: euiTheme.colors.emptyShade,
-    backgroundColor: euiTheme.colors.primary,
-    border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.primary}`,
-    borderRadius: euiTheme.border.radius.small,
-    paddingInline: euiTheme.size.xxs,
-    zIndex: 1,
-    boxSizing: 'border-box',
-  }),
-
-  // Filter/copy shrink and clip from the leading edge when the cell is narrow.
-  cellActionsClippable: css({
-    display: 'flex',
-    flex: '1 1 auto',
-    justifyContent: 'flex-end',
-    minWidth: 0,
-    overflow: 'hidden',
-    gap: euiTheme.size.xxs,
-  }),
-
-  cellActionsExpand: css({
-    display: 'flex',
-    flexShrink: 0,
-  }),
-
-  // Shown instead of the full action bar when the cell is narrower than COMPACT_CELL_ACTIONS_THRESHOLD.
-  // Hidden by default; revealed by the .tsg-compactCellExpand selector in cellWithActions on hover/focus.
-  compactCellExpand: css({
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    display: 'flex',
-    alignItems: 'flex-start',
-    opacity: 0,
-    pointerEvents: 'none',
-    transition: `opacity ${euiTheme.animation.fast} ease-in`,
-    zIndex: 1,
+    '&.tsg-actionsDismissed .tsg-cellActions, &.tsg-actionsDismissed:hover .tsg-cellActions, &.tsg-actionsDismissed:focus-within .tsg-cellActions':
+      {
+        display: 'none',
+        pointerEvents: 'none',
+      },
   }),
 
   cellActionButton: css({
-    color: 'inherit',
-    borderRadius: 0,
     flexShrink: 0,
   }),
 

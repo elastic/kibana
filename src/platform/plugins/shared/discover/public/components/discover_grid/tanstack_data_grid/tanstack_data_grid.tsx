@@ -42,9 +42,11 @@ import {
   EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiNotificationBadge,
+  EuiPanel,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
+  EuiPortal,
   EuiProgress,
   EuiSwitch,
   EuiTablePagination,
@@ -104,6 +106,7 @@ import {
   type CustomCellRenderer,
   type DataGridCellValueElementProps,
   type DataGridPaginationMode,
+  TanStackCellActionsBubble,
 } from '@kbn/unified-data-table';
 import { uniq } from 'lodash';
 import type { AggregateQuery } from '@kbn/es-query';
@@ -114,7 +117,6 @@ import {
   SELECT_COL_WIDTH,
   DEFAULT_COL_WIDTH,
   MIN_COL_WIDTH,
-  COMPACT_CELL_ACTIONS_THRESHOLD,
 } from './tanstack_data_grid.styles';
 import {
   computeTanStackColumnLayout,
@@ -626,103 +628,6 @@ const parseStatsByColumns = (
 };
 
 // ── Cell popover content (value + filter/copy footer) ──
-const CellPopoverContent = React.memo(function CellPopoverContent({
-  fieldName,
-  value,
-  getFormattedValue,
-  onClose,
-  onFilter,
-  styles,
-}: {
-  fieldName: string;
-  value: unknown;
-  getFormattedValue: () => string;
-  onClose: () => void;
-  onFilter?: UnifiedDataTableProps['onFilter'];
-  styles: ReturnType<typeof getTanStackDataGridStyles>;
-}) {
-  // Computed once when the popover renders, not on every cell render.
-  const formattedValue = getFormattedValue();
-  const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(formattedValue);
-  }, [formattedValue]);
-  const handleFilterIn = useCallback(() => {
-    onFilter?.(fieldName, value, '+');
-    onClose();
-  }, [onFilter, fieldName, value, onClose]);
-  const handleFilterOut = useCallback(() => {
-    onFilter?.(fieldName, value, '-');
-    onClose();
-  }, [onFilter, fieldName, value, onClose]);
-
-  const closeLabel = i18n.translate('discover.grid.tanStack.closePopover', {
-    defaultMessage: 'Close popover',
-  });
-
-  return (
-    <>
-      <EuiFlexGroup
-        gutterSize="none"
-        direction="row"
-        responsive={false}
-        data-test-subj="dataTableExpandCellActionPopover"
-      >
-        <EuiFlexItem>
-          <div
-            className="unifiedDataTable__cellPopoverValue eui-textBreakWord"
-            css={styles.cellPopoverValue}
-            data-test-subj="dataTableExpandCellActionPopoverValue"
-            tabIndex={0}
-          >
-            {formattedValue}
-          </div>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content={closeLabel} disableScreenReaderOutput>
-            <EuiButtonIcon
-              aria-label={closeLabel}
-              data-test-subj="docTableClosePopover"
-              iconSize="s"
-              iconType="cross"
-              size="xs"
-              onClick={onClose}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiPopoverFooter>
-        <EuiFlexGroup gutterSize="s" responsive={false} wrap>
-          {onFilter && (
-            <>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty iconType="plusCircle" size="s" onClick={handleFilterIn}>
-                  {i18n.translate('discover.grid.tanStack.filterForValueButtonLabel', {
-                    defaultMessage: 'Filter for',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty iconType="minusCircle" size="s" onClick={handleFilterOut}>
-                  {i18n.translate('discover.grid.tanStack.filterOutValueButtonLabel', {
-                    defaultMessage: 'Filter out',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </>
-          )}
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="copy" size="s" onClick={handleCopy}>
-              {i18n.translate('discover.grid.tanStack.copyValueButtonLabel', {
-                defaultMessage: 'Copy value',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPopoverFooter>
-    </>
-  );
-});
-
 const TanStackHeaderCellText = React.memo(
   ({
     text,
@@ -903,141 +808,374 @@ const CellActions = React.memo(
     value,
     formattedValue,
     onFilter,
-    isPopoverOpen,
-    openPopover,
-    closePopover,
+    onExpand,
+    onDismiss,
+    anchorCellRef,
     styles,
   }: {
     fieldName: string;
     value: unknown;
     formattedValue: string;
     onFilter?: UnifiedDataTableProps['onFilter'];
-    isPopoverOpen: boolean;
-    openPopover: () => void;
-    closePopover: () => void;
+    onExpand: (cellElement: HTMLElement) => void;
+    onDismiss: () => void;
+    anchorCellRef: React.RefObject<HTMLDivElement | null>;
     styles: ReturnType<typeof getTanStackDataGridStyles>;
   }) => {
     const handleFilterIn = useCallback(
       (e: React.MouseEvent) => {
         e.stopPropagation();
         onFilter?.(fieldName, value, '+');
+        onDismiss();
       },
-      [onFilter, fieldName, value]
+      [onFilter, fieldName, value, onDismiss]
     );
     const handleFilterOut = useCallback(
       (e: React.MouseEvent) => {
         e.stopPropagation();
         onFilter?.(fieldName, value, '-');
+        onDismiss();
       },
-      [onFilter, fieldName, value]
+      [onFilter, fieldName, value, onDismiss]
     );
     const handleCopy = useCallback(
       (e: React.MouseEvent) => {
         e.stopPropagation();
         navigator.clipboard.writeText(formattedValue);
+        onDismiss();
       },
-      [formattedValue]
+      [formattedValue, onDismiss]
     );
     const handleExpand = useCallback(
-      (e: React.MouseEvent) => {
+      (e: React.MouseEvent<HTMLElement>) => {
         e.stopPropagation();
-        openPopover();
+        const cellElement = e.currentTarget.closest<HTMLElement>('[role="gridcell"]');
+        if (cellElement) onExpand(cellElement);
+        onDismiss();
       },
-      [openPopover]
+      [onExpand, onDismiss]
     );
-
-    const expandLabel = i18n.translate('discover.grid.tanStack.expandCellButtonLabel', {
+    const cellActionsLabel = i18n.translate('discover.grid.tanStack.cellActionsButtonAriaLabel', {
+      defaultMessage: 'Cell actions',
+    });
+    const filterForLabel = i18n.translate('discover.grid.tanStack.filterForValueAriaLabel', {
+      defaultMessage: 'Filter for value',
+    });
+    const filterOutLabel = i18n.translate('discover.grid.tanStack.filterOutValueAriaLabel', {
+      defaultMessage: 'Filter out value',
+    });
+    const copyValueLabel = i18n.translate('discover.grid.tanStack.copyCellValueAriaLabel', {
+      defaultMessage: 'Copy value',
+    });
+    const expandCellLabel = i18n.translate('discover.grid.tanStack.expandCellValueAriaLabel', {
       defaultMessage: 'Expand cell',
     });
 
+    const actionButtons = [
+      onFilter ? (
+        <EuiToolTip key="filterIn" content={filterForLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            css={styles.cellActionButton}
+            iconType="plusCircle"
+            aria-label={filterForLabel}
+            size="xs"
+            iconSize="s"
+            color="text"
+            display="empty"
+            onClick={handleFilterIn}
+            data-test-subj="filterForValue"
+          />
+        </EuiToolTip>
+      ) : null,
+      onFilter ? (
+        <EuiToolTip key="filterOut" content={filterOutLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            css={styles.cellActionButton}
+            iconType="minusCircle"
+            aria-label={filterOutLabel}
+            size="xs"
+            iconSize="s"
+            color="text"
+            display="empty"
+            onClick={handleFilterOut}
+            data-test-subj="filterOutValue"
+          />
+        </EuiToolTip>
+      ) : null,
+      <EuiToolTip key="copy" content={copyValueLabel} disableScreenReaderOutput>
+        <EuiButtonIcon
+          css={styles.cellActionButton}
+          iconType="copy"
+          aria-label={copyValueLabel}
+          size="xs"
+          iconSize="s"
+          color="text"
+          display="empty"
+          onClick={handleCopy}
+          data-test-subj="copyCellValue"
+        />
+      </EuiToolTip>,
+      <EuiToolTip key="expand" content={expandCellLabel} disableScreenReaderOutput>
+        <EuiButtonIcon
+          css={styles.cellActionButton}
+          iconType="maximize"
+          aria-label={expandCellLabel}
+          size="xs"
+          iconSize="s"
+          color="text"
+          display="empty"
+          onClick={handleExpand}
+          data-test-subj="expandCellValue"
+        />
+      </EuiToolTip>,
+    ].filter((button): button is React.ReactElement => button != null);
+
     return (
-      <div
-        className="tsg-cellActions"
-        css={styles.cellActions}
-        onClick={(e) => e.stopPropagation()}
-        onKeyDown={(e) => e.stopPropagation()}
-      >
-        <div css={styles.cellActionsClippable}>
-          {onFilter && (
-            <>
-              <EuiToolTip content="Filter for value" disableScreenReaderOutput>
-                <EuiButtonIcon
-                  css={styles.cellActionButton}
-                  iconType="plusCircle"
-                  aria-label="Filter for value"
-                  size="xs"
-                  iconSize="s"
-                  color="text"
-                  onClick={handleFilterIn}
-                  data-test-subj="filterForValue"
-                />
-              </EuiToolTip>
-              <EuiToolTip content="Filter out value" disableScreenReaderOutput>
-                <EuiButtonIcon
-                  css={styles.cellActionButton}
-                  iconType="minusCircle"
-                  aria-label="Filter out value"
-                  size="xs"
-                  iconSize="s"
-                  color="text"
-                  onClick={handleFilterOut}
-                  data-test-subj="filterOutValue"
-                />
-              </EuiToolTip>
-            </>
-          )}
-          <EuiToolTip content="Copy value" disableScreenReaderOutput>
-            <EuiButtonIcon
-              css={styles.cellActionButton}
-              iconType="copy"
-              aria-label="Copy value"
-              size="xs"
-              iconSize="s"
-              color="text"
-              onClick={handleCopy}
-              data-test-subj="copyCellValue"
-            />
-          </EuiToolTip>
-        </div>
-        <div css={styles.cellActionsExpand}>
-          <EuiPopover
-            aria-label={expandLabel}
-            anchorPosition="downLeft"
-            panelPaddingSize="s"
-            repositionOnScroll
-            panelClassName="euiDataGridRowCell__popover unifiedDataTable__cellPopover"
-            data-test-subj="euiDataGridExpansionPopover"
-            isOpen={isPopoverOpen}
-            closePopover={closePopover}
-            button={
-              <EuiToolTip content={expandLabel} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  css={styles.cellActionButton}
-                  iconType="maximize"
-                  aria-label={expandLabel}
-                  size="xs"
-                  iconSize="s"
-                  color="text"
-                  onClick={handleExpand}
-                  data-test-subj="expandCellValue"
-                />
-              </EuiToolTip>
-            }
-          >
-            <CellPopoverContent
-              fieldName={fieldName}
-              value={value}
-              getFormattedValue={() => formattedValue}
-              onClose={closePopover}
-              onFilter={onFilter}
-              styles={styles}
-            />
-          </EuiPopover>
-        </div>
-      </div>
+      <TanStackCellActionsBubble
+        anchorCellRef={anchorCellRef}
+        actionButtons={actionButtons}
+        toolbarAriaLabel={cellActionsLabel}
+      />
     );
   }
 );
+
+// Matches EuiDataGrid cell popover sizing inputs (cell width drives maxInlineSize).
+interface CellPopoverState {
+  fieldName: string;
+  value: unknown;
+  formattedValue: string;
+  cellElement: HTMLElement;
+  cellWidth: number;
+}
+
+type SetCellPopoverState = (state: CellPopoverState | null) => void;
+
+// ── Cell Popover (ported panel — same dimensions as EuiDataGrid) ──
+const CellPopover = React.memo(
+  ({
+    fieldName,
+    value,
+    formattedValue,
+    cellElement,
+    cellWidth,
+    onClose,
+    onFilter,
+    styles,
+  }: CellPopoverState & {
+    onClose: () => void;
+    onFilter?: UnifiedDataTableProps['onFilter'];
+    styles: ReturnType<typeof getTanStackDataGridStyles>;
+  }) => {
+    const isWidePopover = fieldName === SOURCE_COLUMN_ID;
+    const cellRect = cellElement.getBoundingClientRect();
+
+    const maxInlineSize = isWidePopover
+      ? Math.min(window.innerWidth * 0.75, 600)
+      : Math.min(window.innerWidth * 0.75, Math.max(cellWidth, 400));
+    const maxBlockSize = window.innerHeight * 0.5;
+
+    // Prefer below the cell; flip above when there isn't enough room.
+    const spaceBelow = window.innerHeight - cellRect.bottom - 8;
+    const openAbove = spaceBelow < Math.min(160, maxBlockSize) && cellRect.top > spaceBelow;
+    const left = Math.max(8, Math.min(cellRect.left, window.innerWidth - maxInlineSize - 8));
+
+    useEffect(() => {
+      const onKeyDown = (event: KeyboardEvent) => {
+        if (event.key === keys.F2 || event.key === keys.ESCAPE) {
+          event.preventDefault();
+          event.stopPropagation();
+          onClose();
+          requestAnimationFrame(() => cellElement.focus());
+        }
+      };
+      document.addEventListener('keydown', onKeyDown, true);
+      return () => document.removeEventListener('keydown', onKeyDown, true);
+    }, [cellElement, onClose]);
+
+    const handleCopy = useCallback(() => {
+      navigator.clipboard.writeText(formattedValue);
+    }, [formattedValue]);
+
+    const handleFilterIn = useCallback(() => {
+      onFilter?.(fieldName, value, '+');
+      onClose();
+    }, [onFilter, fieldName, value, onClose]);
+
+    const handleFilterOut = useCallback(() => {
+      onFilter?.(fieldName, value, '-');
+      onClose();
+    }, [onFilter, fieldName, value, onClose]);
+
+    const handleBackdropClick = useCallback(
+      (event: React.MouseEvent) => {
+        const cellActions = cellElement.querySelector('.tsg-cellActions');
+        if (cellActions?.contains(event.target as Node)) {
+          return;
+        }
+        onClose();
+      },
+      [cellElement, onClose]
+    );
+
+    const closeLabel = i18n.translate('discover.grid.tanStack.closePopover', {
+      defaultMessage: 'Close popover',
+    });
+
+    const panelStyle = useMemo(
+      () => ({
+        position: 'fixed' as const,
+        left,
+        maxInlineSize,
+        maxBlockSize,
+        width: 'max-content' as const,
+        minWidth: Math.min(cellWidth, maxInlineSize),
+        zIndex: 10000,
+        ...(openAbove
+          ? { bottom: window.innerHeight - cellRect.top, top: 'auto' as const }
+          : { top: cellRect.bottom, bottom: 'auto' as const }),
+      }),
+      [left, maxInlineSize, maxBlockSize, cellWidth, openAbove, cellRect.top, cellRect.bottom]
+    );
+
+    return (
+      <EuiPortal>
+        <div
+          css={styles.cellPopoverBackdrop}
+          onClick={handleBackdropClick}
+          onKeyDown={(event) => {
+            if (event.key === keys.ENTER || event.key === keys.SPACE || event.key === keys.ESCAPE) {
+              event.preventDefault();
+              onClose();
+            }
+          }}
+          role="button"
+          tabIndex={-1}
+          aria-label={closeLabel}
+        />
+        <EuiPanel
+          paddingSize="s"
+          hasShadow
+          data-test-subj="euiDataGridExpansionPopover"
+          className="euiDataGridRowCell__popover unifiedDataTable__cellPopover"
+          css={[styles.cellPopoverPanel, isWidePopover && styles.cellPopoverPanelWide]}
+          style={panelStyle}
+          role="dialog"
+          aria-label={i18n.translate('discover.grid.tanStack.cellPopoverAriaLabel', {
+            defaultMessage: '{fieldName} value',
+            values: { fieldName },
+          })}
+        >
+          <EuiFlexGroup
+            gutterSize="none"
+            direction="row"
+            responsive={false}
+            data-test-subj="dataTableExpandCellActionPopover"
+          >
+            <EuiFlexItem>
+              <div
+                className="unifiedDataTable__cellPopoverValue eui-textBreakWord"
+                css={styles.cellPopoverValue}
+                data-test-subj="dataTableExpandCellActionPopoverValue"
+                tabIndex={0}
+              >
+                {formattedValue}
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={closeLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  aria-label={closeLabel}
+                  data-test-subj="docTableClosePopover"
+                  iconSize="s"
+                  iconType="cross"
+                  size="xs"
+                  onClick={onClose}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiPopoverFooter>
+            <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+              {onFilter && (
+                <>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty iconType="plusCircle" size="s" onClick={handleFilterIn}>
+                      {i18n.translate('discover.grid.tanStack.filterForValueButtonLabel', {
+                        defaultMessage: 'Filter for',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty iconType="minusCircle" size="s" onClick={handleFilterOut}>
+                      {i18n.translate('discover.grid.tanStack.filterOutValueButtonLabel', {
+                        defaultMessage: 'Filter out',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </>
+              )}
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty iconType="copy" size="s" onClick={handleCopy}>
+                  {i18n.translate('discover.grid.tanStack.copyValueButtonLabel', {
+                    defaultMessage: 'Copy value',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPopoverFooter>
+        </EuiPanel>
+      </EuiPortal>
+    );
+  }
+);
+
+/**
+ * Owns cell-popover state so opening/closing it does not re-render the grid.
+ * Parent keeps a stable setPopoverState callback that forwards into this host via ref.
+ */
+const CellPopoverHost = React.memo(function CellPopoverHost({
+  setPopoverStateRef,
+  scrollParentRef,
+  onFilterRef,
+  styles,
+}: {
+  setPopoverStateRef: React.MutableRefObject<SetCellPopoverState>;
+  scrollParentRef: React.RefObject<HTMLDivElement | null>;
+  onFilterRef: React.MutableRefObject<UnifiedDataTableProps['onFilter'] | undefined>;
+  styles: ReturnType<typeof getTanStackDataGridStyles>;
+}) {
+  const [popoverState, setPopoverState] = useState<CellPopoverState | null>(null);
+  const closePopover = useCallback(() => setPopoverState(null), []);
+
+  setPopoverStateRef.current = setPopoverState;
+
+  useEffect(() => {
+    if (!popoverState) return;
+    const scrollEl = scrollParentRef.current;
+    if (!scrollEl) return;
+    const onScroll = () => setPopoverState(null);
+    scrollEl.addEventListener('scroll', onScroll, { passive: true });
+    return () => scrollEl.removeEventListener('scroll', onScroll);
+  }, [popoverState, scrollParentRef]);
+
+  if (!popoverState) {
+    return null;
+  }
+
+  return (
+    <CellPopover
+      fieldName={popoverState.fieldName}
+      value={popoverState.value}
+      formattedValue={popoverState.formattedValue}
+      cellElement={popoverState.cellElement}
+      cellWidth={popoverState.cellWidth}
+      onClose={closePopover}
+      onFilter={onFilterRef.current}
+      styles={styles}
+    />
+  );
+});
 
 const CONTROL_COLUMN_IDS = [SELECT_COLUMN_ID, EXPAND_COLUMN_ID] as const;
 
@@ -1076,6 +1214,7 @@ const VirtualRow = React.memo(
       styles: ReturnType<typeof getTanStackDataGridStyles>;
       focusedColIndex: number | null;
       onFilter?: UnifiedDataTableProps['onFilter'];
+      setPopoverState: SetCellPopoverState;
       findTerm?: string;
       /** Column id of the active find match when it is in this row. */
       findActiveColumnId?: string;
@@ -1093,6 +1232,7 @@ const VirtualRow = React.memo(
       styles,
       focusedColIndex,
       onFilter,
+      setPopoverState,
       findTerm,
       findActiveColumnId,
       getColumnStyle,
@@ -1132,6 +1272,7 @@ const VirtualRow = React.memo(
               isFocused={focusedColIndex === colIdx}
               isAutoHeight={isAutoHeight}
               onFilter={onFilter}
+              setPopoverState={setPopoverState}
               findTerm={findTerm}
               isActiveMatch={findActiveColumnId === cell.column.id}
               getColumnStyle={getColumnStyle}
@@ -1154,6 +1295,7 @@ const VirtualCell = React.memo(
     isFocused,
     isAutoHeight,
     onFilter,
+    setPopoverState,
     findTerm,
     isActiveMatch,
     getColumnStyle,
@@ -1164,6 +1306,7 @@ const VirtualCell = React.memo(
     isFocused: boolean;
     isAutoHeight?: boolean;
     onFilter?: UnifiedDataTableProps['onFilter'];
+    setPopoverState?: (state: CellPopoverState | null) => void;
     findTerm?: string;
     isActiveMatch: boolean;
     getColumnStyle: TanStackColumnLayout['getColumnStyle'];
@@ -1171,24 +1314,25 @@ const VirtualCell = React.memo(
     /** Only used to re-render the control cell, whose content reads the expanded doc from a ref. */
     isRowExpanded: boolean;
   }) => {
-    // Cell actions are only mounted while the cell is hovered or focused to keep the DOM small.
-    const [isHovered, setIsHovered] = useState(false);
-    const [hasFocusWithin, setHasFocusWithin] = useState(false);
-    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-    // EuiPopover only mounts on first open; stays mounted afterward to allow close animation.
-    const [popoverMounted, setPopoverMounted] = useState(false);
-    const openPopover = useCallback(() => {
-      setPopoverMounted(true);
-      setIsPopoverOpen(true);
+    // Visibility follows the pointer (`:hover`). `actionsDismissed` keeps the control hidden
+    // after an action until the pointer actually leaves, even if the cell is still hovered.
+    const [actionsDismissed, setActionsDismissed] = useState(false);
+    const [actionsSession, setActionsSession] = useState(0);
+    const dismissActions = useCallback(() => {
+      setActionsDismissed(true);
+      // Collapse any open bubble so a remount/hover cycle cannot flash action chrome.
+      setActionsSession((session) => session + 1);
+      const active = document.activeElement;
+      if (active instanceof HTMLElement && active.closest('.tsg-cellActions')) {
+        active.blur();
+      }
     }, []);
-    const closePopover = useCallback(() => setIsPopoverOpen(false), []);
-
+    const resetActions = useCallback(() => {
+      setActionsDismissed(false);
+      setActionsSession((session) => session + 1);
+    }, []);
+    const cellRef = useRef<HTMLDivElement>(null);
     const { meta } = cell.column.columnDef;
-    const value = cell.getValue();
-    const getFormattedValue = useCallback(
-      () => meta?.formatValue?.(value) ?? formatCellValue(value),
-      [meta, value]
-    );
     const isControl = meta?.isControl;
     const isSelect = meta?.isSelect;
     const isSummary = meta?.isSummary;
@@ -1229,37 +1373,26 @@ const VirtualCell = React.memo(
     };
 
     if (isSummary) {
-      const expandLabel = i18n.translate('discover.grid.tanStack.expandCellButtonLabel', {
-        defaultMessage: 'Expand cell',
-      });
-      // Computed only when the popover actually opens, not on every render.
-      const getSummaryText = () =>
-        Object.entries(cell.row.original.flattened)
-          .map(([k, v]) => `${k}: ${formatCellValue(v)}`)
-          .join('\n');
-      const expandButton = (
-        <EuiToolTip content={expandLabel} disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="maximize"
-            aria-label={expandLabel}
-            size="xs"
-            iconSize="s"
-            color="text"
-            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-              e.stopPropagation();
-              openPopover();
-            }}
-            data-test-subj="expandCellValue"
-          />
-        </EuiToolTip>
-      );
+      const openSummaryPopover = (cellEl: HTMLElement) => {
+        if (setPopoverState) {
+          const summaryText = Object.entries(cell.row.original.flattened)
+            .map(([k, v]) => `${k}: ${formatCellValue(v)}`)
+            .join('\n');
+          setPopoverState({
+            fieldName: SOURCE_COLUMN_ID,
+            value: summaryText,
+            formattedValue: summaryText,
+            cellElement: cellEl,
+            cellWidth: cellEl.offsetWidth,
+          });
+        }
+      };
 
       return (
         <div
           className={isPinned ? 'tsg-pinnedCell' : undefined}
           css={[
             styles.summaryCell,
-            styles.cellWithActions,
             styles.expandableCell,
             isPinned && styles.pinnedCell,
             isLastLeftPinned && styles.pinnedCellShadow,
@@ -1268,66 +1401,50 @@ const VirtualCell = React.memo(
           role="gridcell"
           style={columnStyle}
           tabIndex={0}
-          onClick={openPopover}
+          onClick={(e) => openSummaryPopover(e.currentTarget)}
           onKeyDown={(e) => {
             if (e.key === keys.ENTER || e.key === keys.SPACE) {
               e.preventDefault();
-              openPopover();
+              openSummaryPopover(e.currentTarget);
             }
           }}
         >
           <div css={isAutoHeight ? styles.summaryCellContentAuto : styles.summaryCellContent}>
             {flexRender(cell.column.columnDef.cell, cell.getContext())}
           </div>
-          <div
-            className="tsg-compactCellExpand"
-            css={styles.compactCellExpand}
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={(e) => e.stopPropagation()}
-          >
-            {popoverMounted ? (
-              <EuiPopover
-                aria-label={expandLabel}
-                anchorPosition="downLeft"
-                panelPaddingSize="s"
-                repositionOnScroll
-                panelClassName="euiDataGridRowCell__popover unifiedDataTable__cellPopover"
-                data-test-subj="euiDataGridExpansionPopover"
-                isOpen={isPopoverOpen}
-                closePopover={closePopover}
-                button={expandButton}
-              >
-                <CellPopoverContent
-                  fieldName={SOURCE_COLUMN_ID}
-                  value={cell.row.original.flattened}
-                  getFormattedValue={getSummaryText}
-                  onClose={closePopover}
-                  onFilter={undefined}
-                  styles={styles}
-                />
-              </EuiPopover>
-            ) : (
-              expandButton
-            )}
-          </div>
         </div>
       );
     }
 
     const fieldName = meta?.fieldName;
-    const showActions = Boolean(fieldName) && (isHovered || hasFocusWithin);
+    const value = cell.getValue();
+    const getFormattedValue = () => meta?.formatValue?.(value) ?? formatCellValue(value);
     // Text formatting is only needed for highlighting and actions; skip it for idle cells.
-    const formatted = findTerm || showActions ? getFormattedValue() : undefined;
+    const formatted = findTerm || fieldName ? getFormattedValue() : undefined;
 
-    const isNarrow = Boolean(fieldName) && cell.column.getSize() <= COMPACT_CELL_ACTIONS_THRESHOLD;
-
-    const expandLabel = i18n.translate('discover.grid.tanStack.expandCellButtonLabel', {
-      defaultMessage: 'Expand cell',
-    });
+    const openCellPopover = (cellEl: HTMLElement) => {
+      if (fieldName && setPopoverState) {
+        setPopoverState({
+          fieldName,
+          value,
+          formattedValue: formatted ?? getFormattedValue(),
+          cellElement: cellEl,
+          cellWidth: cellEl.offsetWidth,
+        });
+      }
+    };
 
     return (
       <div
-        className={isPinned ? 'tsg-pinnedCell' : undefined}
+        ref={cellRef}
+        className={
+          [
+            isPinned ? 'tsg-pinnedCell' : undefined,
+            actionsDismissed ? 'tsg-actionsDismissed' : undefined,
+          ]
+            .filter(Boolean)
+            .join(' ') || undefined
+        }
         css={[
           styles.cell,
           styles.cellWithActions,
@@ -1339,21 +1456,42 @@ const VirtualCell = React.memo(
         style={columnStyle}
         role="gridcell"
         tabIndex={0}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        onFocus={() => setHasFocusWithin(true)}
-        onBlur={(e) => {
-          if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
-            setHasFocusWithin(false);
+        onMouseLeave={(event) => {
+          const next = event.relatedTarget;
+          const leftIntoCell =
+            next instanceof Node &&
+            (next === event.currentTarget || event.currentTarget.contains(next));
+          const rect = event.currentTarget.getBoundingClientRect();
+          const pointerStillInside =
+            event.clientX >= rect.left &&
+            event.clientX <= rect.right &&
+            event.clientY >= rect.top &&
+            event.clientY <= rect.bottom;
+          // Removing the action button fires a leave while the pointer is still
+          // over the cell. Ignore that so the control stays hidden after an action.
+          if (leftIntoCell || pointerStillInside) {
+            return;
+          }
+          resetActions();
+          const active = document.activeElement;
+          if (active instanceof HTMLElement && event.currentTarget.contains(active)) {
+            active.blur();
           }
         }}
-        onClick={() => {
-          if (fieldName) openPopover();
+        onBlur={(event) => {
+          if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
+          if (!event.currentTarget.matches(':hover')) {
+            resetActions();
+          }
         }}
+        onClick={(e) => openCellPopover(e.currentTarget)}
         onKeyDown={(e) => {
           if (e.key === keys.ENTER || e.key === keys.SPACE) {
+            if ((e.target as HTMLElement).closest('.tsg-cellActions')) {
+              return;
+            }
             e.preventDefault();
-            if (fieldName) openPopover();
+            openCellPopover(e.currentTarget);
           }
         }}
       >
@@ -1374,76 +1512,16 @@ const VirtualCell = React.memo(
             flexRender(cell.column.columnDef.cell, cell.getContext())
           )}
         </div>
-        {isNarrow && fieldName && (
-          <div
-            className="tsg-compactCellExpand"
-            css={styles.compactCellExpand}
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={(e) => e.stopPropagation()}
-          >
-            {popoverMounted ? (
-              <EuiPopover
-                aria-label={expandLabel}
-                anchorPosition="downLeft"
-                panelPaddingSize="s"
-                repositionOnScroll
-                panelClassName="euiDataGridRowCell__popover unifiedDataTable__cellPopover"
-                data-test-subj="euiDataGridExpansionPopover"
-                isOpen={isPopoverOpen}
-                closePopover={closePopover}
-                button={
-                  <EuiToolTip content={expandLabel} disableScreenReaderOutput>
-                    <EuiButtonIcon
-                      iconType="maximize"
-                      aria-label={expandLabel}
-                      size="xs"
-                      iconSize="s"
-                      color="text"
-                      onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                        e.stopPropagation();
-                        openPopover();
-                      }}
-                      data-test-subj="expandCellValue"
-                    />
-                  </EuiToolTip>
-                }
-              >
-                <CellPopoverContent
-                  fieldName={fieldName}
-                  value={value}
-                  getFormattedValue={getFormattedValue}
-                  onClose={closePopover}
-                  onFilter={onFilter}
-                  styles={styles}
-                />
-              </EuiPopover>
-            ) : (
-              <EuiToolTip content={expandLabel} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  iconType="maximize"
-                  aria-label={expandLabel}
-                  size="xs"
-                  iconSize="s"
-                  color="text"
-                  onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                    e.stopPropagation();
-                    openPopover();
-                  }}
-                  data-test-subj="expandCellValue"
-                />
-              </EuiToolTip>
-            )}
-          </div>
-        )}
-        {showActions && fieldName && !isNarrow && formatted !== undefined && (
+        {fieldName && formatted !== undefined && (
           <CellActions
+            key={actionsSession}
             fieldName={fieldName}
             value={value}
             formattedValue={formatted}
             onFilter={onFilter}
-            isPopoverOpen={isPopoverOpen}
-            openPopover={openPopover}
-            closePopover={closePopover}
+            onExpand={openCellPopover}
+            onDismiss={dismissActions}
+            anchorCellRef={cellRef}
             styles={styles}
           />
         )}
@@ -1543,6 +1621,7 @@ interface TanStackGridBodyProps {
   getRowIndicator?: UnifiedDataTableProps['getRowIndicator'];
   focusedCell: { row: number; col: number } | null;
   onFilter?: UnifiedDataTableProps['onFilter'];
+  setPopoverState: SetCellPopoverState;
   findTerm: string;
   findActiveMatch: FindMatch | null;
   getColumnStyle: TanStackColumnLayout['getColumnStyle'];
@@ -1570,6 +1649,7 @@ const TanStackGridBody = React.memo(function TanStackGridBody({
   getRowIndicator,
   focusedCell,
   onFilter,
+  setPopoverState,
   findTerm,
   findActiveMatch,
   getColumnStyle,
@@ -1646,6 +1726,7 @@ const TanStackGridBody = React.memo(function TanStackGridBody({
                 styles={styles}
                 focusedColIndex={focusedCell?.row === index ? focusedCell.col : null}
                 onFilter={onFilter}
+                setPopoverState={setPopoverState}
                 findTerm={findTerm}
                 findActiveColumnId={
                   findActiveMatch?.rowIndex === index ? findActiveMatch.fieldName : undefined
@@ -2340,6 +2421,11 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
 
     const onFilterRef = useRef(onFilter);
     onFilterRef.current = onFilter;
+
+    const setPopoverStateRef = useRef<SetCellPopoverState>(() => {});
+    const setPopoverState = useCallback<SetCellPopoverState>((state) => {
+      setPopoverStateRef.current(state);
+    }, []);
 
     const stopPropagation = useCallback((e: React.SyntheticEvent) => e.stopPropagation(), []);
 
@@ -3567,6 +3653,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
               getRowIndicator={getRowIndicator}
               focusedCell={focusedCell}
               onFilter={onFilterRef.current}
+              setPopoverState={setPopoverState}
               findTerm={findTerm}
               findActiveMatch={findActiveMatch}
               getColumnStyle={getColumnStyle}
@@ -3839,6 +3926,13 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
               </span>
             )}
         </div>
+
+        <CellPopoverHost
+          setPopoverStateRef={setPopoverStateRef}
+          scrollParentRef={parentRef}
+          onFilterRef={onFilterRef}
+          styles={styles}
+        />
 
         {shouldShowPagination && (
           <div css={styles.pagination} data-test-subj="tanStackDataGridPagination">

@@ -458,7 +458,6 @@ export const TanStackColumnHeaderActions = React.memo(
               {groupIndex > 0 && <EuiHorizontalRule margin="xs" size="full" />}
               <EuiListGroup
                 listItems={groupItems}
-                gutterSize="none"
                 data-test-subj={`dataGridHeaderCellActionGroup-${columnId}-${groupIndex}`}
               />
             </React.Fragment>
