@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { EuiButtonEmpty, EuiCallOut, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataViewFieldBase } from '@kbn/es-query';
+import useToggle from 'react-use/lib/useToggle';
 import type { RequiredFieldInput } from '../../../../../common/api/detection_engine';
 import { UseArray, useFormData } from '../../../../shared_imports';
 import type { FormHook, ArrayItem } from '../../../../shared_imports';
@@ -165,8 +166,7 @@ const RequiredFieldsList = ({
     Folded rows are still mounted as form fields to keep their values in the form.
     Unfolded rows beyond the first ones render compact until the user focuses them.
   */
-  const [isExpanded, setIsExpanded] = useState(false);
-  const toggleExpanded = useCallback(() => setIsExpanded((value) => !value), []);
+  const [isExpanded, toggleExpanded] = useToggle(false);
   const foldedRowsCount = isExpanded
     ? 0
     : items.filter((item, index) => getRowView({ item, index, isExpanded }) === 'folded').length;

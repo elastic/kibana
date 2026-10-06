@@ -22,7 +22,7 @@ import * as i18n from './translations';
 export function FieldFinalSideHeader(): JSX.Element {
   const { fieldName, hasConflict, rightSideMode, finalDiffableRule, setRuleFieldResolvedValue } =
     useFieldUpgradeContext();
-  const { form, isSubmitting, submit } = useFieldEditFormContext();
+  const { form } = useFieldEditFormContext();
 
   const handleAccept = useCallback(
     () =>
@@ -60,8 +60,8 @@ export function FieldFinalSideHeader(): JSX.Element {
               iconType="checkCircleFill"
               size="s"
               disabled={!form?.isValid}
-              isLoading={isSubmitting}
-              onClick={submit}
+              isLoading={form?.isSubmitting}
+              onClick={form?.submit}
               data-test-subj="prebuilt-rule-upgrade-flyout-field-save"
             >
               {hasConflict ? i18n.SAVE_AND_ACCEPT : i18n.SAVE}

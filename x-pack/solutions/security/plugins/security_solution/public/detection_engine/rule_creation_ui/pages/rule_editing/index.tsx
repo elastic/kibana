@@ -7,10 +7,8 @@
 
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
-  EuiButton,
   EuiCallOut,
   EuiFlexGroup,
-  EuiFlexItem,
   EuiLink,
   EuiResizableContainer,
   EuiSpacer,
@@ -28,7 +26,6 @@ import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../management/h
 import { EndpointExceptionsMovedCallout } from '../../../../exceptions/components/endpoint_exceptions_moved_callout';
 import { useConfirmValidationErrorsModal } from '../../../../common/hooks/use_confirm_validation_errors_modal';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { useAsyncActionWithLoading } from '../../../../common/hooks/use_async_action_with_loading';
 import { isEsqlRule } from '../../../../../common/detection_engine/utils';
 import { RulePreview } from '../../components/rule_preview';
 import type {
@@ -82,6 +79,7 @@ import { AddRuleAttachmentToChatButton } from '../../components/add_rule_attachm
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useAgentBuilderRuleCreation } from '../rule_creation/hooks/use_agent_builder_rule_creation';
 import { RuleCreationEventTypes } from '../../../../common/lib/telemetry/types';
+import { EditRuleFormButtons } from './edit_rule_form_buttons';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { addSuccess } = useAppToasts();
@@ -748,44 +746,3 @@ const EditRulePageWrapper: FC = () => {
 };
 
 export const EditRulePage = memo(EditRulePageWrapper);
-
-interface EditRuleFormButtonsProps {
-  onCancel: (ev: React.SyntheticEvent) => void;
-  onSubmit: () => Promise<void>;
-  isLoading: boolean;
-  isDisabled: boolean;
-}
-
-/* Keeps the submitting state local, so toggling it doesn't re-render the whole page */
-const EditRuleFormButtons = memo(function EditRuleFormButtons({
-  onCancel,
-  onSubmit,
-  isLoading,
-  isDisabled,
-}: EditRuleFormButtonsProps): JSX.Element {
-  const [isSubmitting, submit] = useAsyncActionWithLoading(onSubmit);
-  const isSaving = isSubmitting || isLoading;
-
-  return (
-    <>
-      <EuiFlexItem grow={false}>
-        <EuiButton iconType="cross" onClick={onCancel} isDisabled={isSaving}>
-          {i18n.CANCEL}
-        </EuiButton>
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          data-test-subj="ruleEditSubmitButton"
-          fill
-          onClick={submit}
-          iconType="save"
-          isLoading={isSaving}
-          isDisabled={isDisabled}
-        >
-          {i18n.SAVE_CHANGES}
-        </EuiButton>
-      </EuiFlexItem>
-    </>
-  );
-});

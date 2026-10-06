@@ -52,7 +52,11 @@ export function NameComboBox({
     () =>
       /* Not adding an empty string to the list of selectable field names */
       (value.name ? [value.name] : [])
-        /* Available field names might be read before this row's name changed */
+        /*
+          Available field names are a snapshot taken on focus, so they might be read before this row's name changed
+          and still contain the current name. Filtering it out avoids a duplicated option
+          since the current name is already added as the first option.
+        */
         .concat(availableFieldNames.filter((name) => name !== value.name))
         .map((name) => ({
           label: name,

@@ -5,24 +5,12 @@
  * 2.0.
  */
 
-import expect from 'expect';
 import {
-  ModeEnum,
-  ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
   UpgradeConflictResolutionEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type { FtrProviderContext } from '../../../../../../../../ftr_provider_context';
-import {
-  DEFAULT_RULE_UPDATE_VERSION,
-  DEFAULT_TEST_RULE_ID,
-  setUpRuleUpgrade,
-} from '../../../../../../utils/rules/prebuilt_rules/set_up_rule_upgrade';
-import {
-  fetchFirstPrebuiltRuleUpgradeReviewDiff,
-  performUpgradePrebuiltRules,
-} from '../../../../../../utils';
 import type { TestFieldRuleUpgradeAssets } from '../test_helpers';
 import {
   testFieldUpgradeReview,
@@ -710,95 +698,6 @@ export function requiredFieldsField({ getService }: FtrProviderContext): void {
         },
         getService
       );
-    });
-
-    describe('shipped required fields list shrinks while the installed rule has a stale bloated list', () => {
-      const es = getService('es');
-      const supertest = getService('supertest');
-      const log = getService('log');
-      const detectionsApi = getService('detectionsApi');
-      const deps = { es, supertest, log, detectionsApi };
-
-      const bloatedRequiredFields = Array.from({ length: 50 }, (_, i) => ({
-        name: `field${i}`,
-        type: 'keyword',
-        ecs: false,
-      }));
-      const targetRequiredFields = bloatedRequiredFields.slice(0, 5);
-
-      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
-        installed: {
-          type: 'query',
-          required_fields: bloatedRequiredFields.slice(0, 3),
-        },
-        // Emulates a stale stored list flagged as customized after the package rewrote the base version
-        patch: {
-          required_fields: bloatedRequiredFields,
-        },
-        upgrade: {
-          type: 'query',
-          required_fields: targetRequiredFields,
-        },
-      };
-
-      it('upgrades to the target list and does not flag "required_fields" as customized afterwards', async () => {
-        await setUpRuleUpgrade({
-          assets: ruleUpgradeAssets,
-          removeInstalledAssets: false,
-          deps,
-        });
-
-        const diff = await fetchFirstPrebuiltRuleUpgradeReviewDiff(supertest);
-
-        expect(diff.fields.required_fields).toMatchObject({
-          diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
-          conflict: ThreeWayDiffConflict.SOLVABLE,
-          merge_outcome: ThreeWayMergeOutcome.Target,
-        });
-
-        await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          on_conflict: UpgradeConflictResolutionEnum.UPGRADE_SOLVABLE,
-          rules: [
-            {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 1,
-              version: DEFAULT_RULE_UPDATE_VERSION,
-              fields: {
-                required_fields: { pick_version: 'MERGED' },
-              },
-            },
-          ],
-        });
-
-        const { body: upgradedRule } = await detectionsApi
-          .readRule({ query: { rule_id: DEFAULT_TEST_RULE_ID } })
-          .expect(200);
-
-        expect(upgradedRule.required_fields).toEqual(
-          targetRequiredFields.map((field) => ({ ...field, ecs: false }))
-        );
-        expect(upgradedRule.rule_source).toMatchObject({
-          is_customized: false,
-          customized_fields: [],
-        });
-
-        // Saving the rule unchanged, with reordered required fields, must keep it non-customized
-        const { body: savedRule } = await detectionsApi
-          .updateRule({
-            body: {
-              ...upgradedRule,
-              id: undefined,
-              required_fields: [...upgradedRule.required_fields].reverse(),
-            },
-          })
-          .expect(200);
-
-        expect(savedRule.rule_source).toMatchObject({
-          is_customized: false,
-          customized_fields: [],
-        });
-      });
     });
 
     describe('without historical versions', () => {

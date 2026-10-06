@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { isEmpty, uniqBy } from 'lodash/fp';
 import type { EuiDescriptionListProps } from '@elastic/eui';
 import {
@@ -23,6 +23,7 @@ import type { Filter } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
+import useToggle from 'react-use/lib/useToggle';
 import type {
   AlertSuppressionMissingFieldsStrategy,
   EqlOptionalFields,
@@ -333,8 +334,7 @@ export const RequiredFields = ({ requiredFields }: RequiredFieldsProps) => {
   );
 
   /* Long lists are folded to keep rule details and flyouts compact */
-  const [isExpanded, setIsExpanded] = useState(false);
-  const toggleExpanded = useCallback(() => setIsExpanded((value) => !value), []);
+  const [isExpanded, toggleExpanded] = useToggle(false);
   const foldedFieldsCount = Math.max(uniqueRequiredFields.length - MAX_UNFOLDED_REQUIRED_FIELDS, 0);
   const visibleRequiredFields = isExpanded
     ? uniqueRequiredFields

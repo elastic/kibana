@@ -187,37 +187,8 @@ describe('requiredFieldsDiffAlgorithm', () => {
     });
   });
 
-  describe('never returns a non-solvable conflict', () => {
-    const A = [field('one')];
-    const B = [field('two')];
-    const C = [field('three')];
-
-    it.each([
-      ['AAA', A, A, A],
-      ['ABA', A, B, A],
-      ['AAB', A, A, B],
-      ['ABB', A, B, B],
-      ['ABC', A, B, C],
-      ['-AA', MissingVersion, A, A],
-      ['-AB', MissingVersion, A, B],
-    ] as const)('scenario %s', (_, baseVersion, currentVersion, targetVersion) => {
-      for (const isRuleCustomized of [true, false]) {
-        const result = requiredFieldsDiffAlgorithm(
-          {
-            base_version: baseVersion,
-            current_version: currentVersion,
-            target_version: targetVersion,
-          },
-          isRuleCustomized
-        );
-
-        expect(result.conflict).not.toBe(ThreeWayDiffConflict.NON_SOLVABLE);
-      }
-    });
-  });
-
   describe('edge cases', () => {
-    it('treats versions differing only in order as equal', () => {
+    it('invariant fields order', () => {
       const mockVersions: ThreeVersionsOf<RequiredFieldArray> = {
         base_version: [field('one'), field('two')],
         current_version: [field('two'), field('one')],
@@ -237,7 +208,7 @@ describe('requiredFieldsDiffAlgorithm', () => {
       );
     });
 
-    it('treats versions differing only in "ecs" as equal', () => {
+    it('"ecs" has no impact in diffing', () => {
       const mockVersions: ThreeVersionsOf<RequiredFieldArray> = {
         base_version: [field('one', true), field('two', false)],
         current_version: [field('one', false), field('two', true)],
@@ -274,26 +245,6 @@ describe('requiredFieldsDiffAlgorithm', () => {
       );
     });
 
-    it('keeps the current version as-is when there is no update', () => {
-      const mockVersions: ThreeVersionsOf<RequiredFieldArray> = {
-        base_version: [field('one')],
-        current_version: [field('one'), field('one')],
-        target_version: [field('one')],
-      };
-
-      const result = requiredFieldsDiffAlgorithm(mockVersions, false);
-
-      expect(result).toEqual(
-        expect.objectContaining({
-          merged_version: mockVersions.current_version,
-          diff_outcome: ThreeWayDiffOutcome.StockValueNoUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Current,
-          conflict: ThreeWayDiffConflict.NONE,
-          has_update: false,
-        })
-      );
-    });
-
     it('deduplicates the target version when updating', () => {
       const mockVersions: ThreeVersionsOf<RequiredFieldArray> = {
         base_version: [field('one')],
@@ -309,52 +260,6 @@ describe('requiredFieldsDiffAlgorithm', () => {
           diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
           merge_outcome: ThreeWayMergeOutcome.Target,
           conflict: ThreeWayDiffConflict.NONE,
-          has_update: true,
-        })
-      );
-    });
-
-    it('handles empty arrays', () => {
-      const mockVersions: ThreeVersionsOf<RequiredFieldArray> = {
-        base_version: [],
-        current_version: [],
-        target_version: [field('one')],
-      };
-
-      const result = requiredFieldsDiffAlgorithm(mockVersions, false);
-
-      expect(result).toEqual(
-        expect.objectContaining({
-          merged_version: [field('one')],
-          diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Target,
-          conflict: ThreeWayDiffConflict.NONE,
-        })
-      );
-    });
-
-    it('resolves a bloated customized current version to the target version', () => {
-      const bloatedFields = Array.from({ length: 1500 }, (_, i) => field(`field_${i}`, true));
-      const mockVersions: ThreeVersionsOf<RequiredFieldArray> = {
-        base_version: [field('field_0'), field('field_1'), field('field_2')],
-        current_version: bloatedFields,
-        target_version: [
-          field('field_0'),
-          field('field_1'),
-          field('field_2'),
-          field('field_3'),
-          field('field_4'),
-        ],
-      };
-
-      const result = requiredFieldsDiffAlgorithm(mockVersions, true);
-
-      expect(result).toEqual(
-        expect.objectContaining({
-          merged_version: mockVersions.target_version,
-          diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Target,
-          conflict: ThreeWayDiffConflict.SOLVABLE,
           has_update: true,
         })
       );

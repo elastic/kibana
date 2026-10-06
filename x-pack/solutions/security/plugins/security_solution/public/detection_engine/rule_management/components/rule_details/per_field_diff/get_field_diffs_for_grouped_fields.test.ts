@@ -398,7 +398,7 @@ describe('getFieldDiffsForRuleSchedule', () => {
 });
 
 describe('getFieldDiffsForRequiredFields', () => {
-  it('returns no diff when versions differ only in order and duplicates', () => {
+  it('returns no diff when versions differ only in order', () => {
     const result = getFieldDiffsForRequiredFields({
       current_version: [
         { name: 'host.name', type: 'keyword', ecs: true },
@@ -406,6 +406,17 @@ describe('getFieldDiffsForRequiredFields', () => {
       ],
       target_version: [
         { name: 'custom.field', type: 'keyword', ecs: false },
+        { name: 'host.name', type: 'keyword', ecs: true },
+      ],
+    } as ThreeWayDiff<RequiredFieldArray>);
+
+    expect(result).toEqual([]);
+  });
+
+  it('returns no diff when versions differ only in duplicates', () => {
+    const result = getFieldDiffsForRequiredFields({
+      current_version: [{ name: 'host.name', type: 'keyword', ecs: true }],
+      target_version: [
         { name: 'host.name', type: 'keyword', ecs: true },
         { name: 'host.name', type: 'keyword', ecs: true },
       ],

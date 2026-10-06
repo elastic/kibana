@@ -285,13 +285,19 @@ interface WarningTextProps {
   message: string;
 }
 
-const WarningText = ({ itemId, name, message }: WarningTextProps) => (
-  <EuiTextColor color="warning" id={`warningText-${itemId}`} data-test-subj={`${name}-warningText`}>
-    {message}
-  </EuiTextColor>
-);
+function WarningText({ itemId, name, message }: WarningTextProps): JSX.Element {
+  return (
+    <EuiTextColor
+      color="warning"
+      id={`warningText-${itemId}`}
+      data-test-subj={`${name}-warningText`}
+    >
+      {message}
+    </EuiTextColor>
+  );
+}
 
-const WarningIcon = ({ itemId }: { itemId: string }) => {
+function WarningIcon({ itemId }: { itemId: string }): JSX.Element {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -303,21 +309,23 @@ const WarningIcon = ({ itemId }: { itemId: string }) => {
       aria-labelledby={`warningText-${itemId}`}
     />
   );
-};
+}
 
 interface RemoveButtonProps {
   name: string;
   onRemove: () => void;
 }
 
-const RemoveButton = ({ name, onRemove }: RemoveButtonProps) => (
-  <EuiToolTip content={i18n.REMOVE_REQUIRED_FIELD_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
-    <EuiButtonIcon
-      color="danger"
-      iconType="trash"
-      onClick={onRemove}
-      aria-label={i18n.REMOVE_REQUIRED_FIELD_BUTTON_ARIA_LABEL}
-      data-test-subj={`removeRequiredFieldButton-${name}`}
-    />
-  </EuiToolTip>
-);
+function RemoveButton({ name, onRemove }: RemoveButtonProps): JSX.Element {
+  return (
+    <EuiToolTip content={i18n.REMOVE_REQUIRED_FIELD_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+      <EuiButtonIcon
+        color="danger"
+        iconType="trash"
+        onClick={onRemove}
+        aria-label={i18n.REMOVE_REQUIRED_FIELD_BUTTON_ARIA_LABEL}
+        data-test-subj={`removeRequiredFieldButton-${name}`}
+      />
+    </EuiToolTip>
+  );
+}

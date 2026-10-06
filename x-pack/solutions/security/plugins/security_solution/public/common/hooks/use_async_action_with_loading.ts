@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useState } from 'react';
+import { waitForNextPaint } from '../utils/wait_for_next_paint';
 
 /**
  * Wraps an async action and tracks whether it's running. Lets the browser paint the loading
@@ -30,7 +31,3 @@ export const useAsyncActionWithLoading = (
 
   return [isLoading, run];
 };
-
-/* `requestAnimationFrame` callbacks run right before a paint, `setTimeout` moves past it */
-const waitForNextPaint = (): Promise<void> =>
-  new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));

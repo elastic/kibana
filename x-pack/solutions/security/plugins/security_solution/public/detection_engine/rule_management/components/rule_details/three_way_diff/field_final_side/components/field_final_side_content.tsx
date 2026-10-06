@@ -20,7 +20,7 @@ import * as i18n from './translations';
 
 export function FieldFinalSideContent(): JSX.Element {
   const { rightSideMode, setEditMode, setReadOnlyMode } = useFieldUpgradeContext();
-  const { isSubmitting } = useFieldEditFormContext();
+  const { form } = useFieldEditFormContext();
 
   switch (rightSideMode) {
     case FieldFinalSideMode.Readonly:
@@ -50,7 +50,7 @@ export function FieldFinalSideContent(): JSX.Element {
             <EuiButtonEmpty
               iconType="cross"
               onClick={setReadOnlyMode}
-              isDisabled={isSubmitting}
+              isDisabled={form?.isSubmitting}
               data-test-subj="prebuilt-rule-upgrade-flyout-field-cancel"
             >
               {i18n.CANCEL}
