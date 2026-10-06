@@ -9,5 +9,5 @@ products:
 - product: kibana
 areas:
 - Dashboards and visualizations
-title: ES|QL multi-layer support for XY charts
+title: 'Add multi-layer support for XY charts created with ES|QL queries'
 description: Adds multi-layer support including annotation and reference line layers for XY charts created with ES|QL queries.

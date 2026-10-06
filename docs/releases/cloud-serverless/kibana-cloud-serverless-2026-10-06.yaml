@@ -10,22 +10,22 @@ hide-features:
 entries:
 - file:
     name: 294604.yaml
-    checksum: 6d0f3a9f007d927cad565a30b439f913d9d7c67f
+    checksum: 42859e61e160c9419498e2c673b3bcfc140ef0e6
   type: bug-fix
-  title: Scope single metric viewer entity config radio groups per entity field
+  title: Keep Sort by and Order selections when settings are opened in Single Metric Viewer
   products:
   - product: cloud-serverless
   - product: kibana
-  description: In the Single Metric Viewer, the field configuration popover no longer loses its **Sort by** and **Order** selections when you open the settings for a second split field.
+  description: In the Single Metric Viewer, the field configuration popover no longer loses its Sort by and Order selections when you open the settings for a second split field.
   prs:
   - https://github.com/elastic/kibana/pull/294604
   issues:
   - https://github.com/elastic/kibana/issues/294601
 - file:
     name: 293067.yaml
-    checksum: 6bfc9707c92efe6d9425fb13ee1fa8b6c256bb89
+    checksum: 5e6a308284a9ccd252f626bf084a362d2dc8ec3e
   type: enhancement
-  title: Improve data recognizer page loading
+  title: Reduce the number of times the data recognizer calls the `recognize` API on page load
   products:
   - product: cloud-serverless
   - product: kibana
@@ -73,9 +73,9 @@ entries:
   - https://github.com/elastic/kibana/pull/292319
 - file:
     name: 285350.yaml
-    checksum: 7e468a10f5b439295d82bf4f7e6623ee872fab1f
+    checksum: 9d0f291ba1084c3d9a8d5fe568f5fdff65407fd7
   type: feature
-  title: ES|QL multi-layer support for XY charts
+  title: Add multi-layer support for XY charts created with ES|QL queries
   products:
   - product: cloud-serverless
   - product: kibana
@@ -222,9 +222,9 @@ entries:
   - https://github.com/elastic/kibana/pull/293914
 - file:
     name: 294697.yaml
-    checksum: af081bb9bf0e06bb8a3b2b542ef1b7d7cd0681b9
+    checksum: 135abd80f881985ab9b65f2ccb487fe5209b1704
   type: bug-fix
-  title: Show Data federation plugin only for enterprise
+  title: Show Data federation plugin only for clusters with an Enterprise license
   products:
   - product: cloud-serverless
   - product: kibana
@@ -346,9 +346,9 @@ entries:
   - https://github.com/elastic/kibana/pull/293784
 - file:
     name: 294738.yaml
-    checksum: d4473476e241e494d3e86ff03f4b4ed8db4fad79
+    checksum: a1d05d634c5d06ee5d33b3601d31452589471f2b
   type: feature
-  title: Enable template library by default
+  title: Enable template library by default in Workflows
   products:
   - product: cloud-serverless
   - product: kibana
@@ -372,21 +372,22 @@ entries:
   - https://github.com/elastic/kibana/issues/294496
 - file:
     name: 290872.yaml
-    checksum: fcacf5a3566bd8433929aba2d2fcde52b3822ea6
+    checksum: 0588c038b35d523652c7587db8e3f25db907a988
   type: bug-fix
-  title: Re-run from the execution flyout opens the inputs modal
+  title: Fix Re-run in the Workflows execution flyout starting a run without showing the inputs modal
   products:
   - product: cloud-serverless
   - product: kibana
+  description: Re-run in the execution flyout now opens the inputs modal with the previous run's inputs prefilled, so you can review or change them before starting the run. The flyout switches to the new run after you submit, and closing the modal leaves the current execution open.
   prs:
   - https://github.com/elastic/kibana/pull/290872
   issues:
   - https://github.com/elastic/security-team/issues/19344
 - file:
     name: 295021.yaml
-    checksum: 9305a4242f62760fe4ffb9c69c5d461d4da0d591
+    checksum: 222b54bd122bf4575dba569717a69c39f602fd27
   type: bug-fix
-  title: Announce query rule flyout tooltips in Chrome + VoiceOver
+  title: Announce query rule flyout tooltips when using VoiceOver in Google Chrome
   products:
   - product: cloud-serverless
   - product: kibana
@@ -419,9 +420,9 @@ entries:
   - https://github.com/elastic/security-team/issues/18375
 - file:
     name: 290170.yaml
-    checksum: 5c8b9b1ca394522ca3fe4f5cf7a67d9a6360e41c
+    checksum: d97f61a7286bdddf8fda253737286c6ecfe34062
   type: feature
-  title: Add Observability solution-nav Alerting panel
+  title: Add Alerting panel to Observability solution view
   products:
   - product: cloud-serverless
   - product: kibana
