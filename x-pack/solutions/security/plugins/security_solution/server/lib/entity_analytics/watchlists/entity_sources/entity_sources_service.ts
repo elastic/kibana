@@ -88,6 +88,24 @@ const paginatedSearch = async <T>(
   return results;
 };
 
+const watchlistSyncQueues = new Map<string, Promise<void>>();
+
+/** Chains runs for the same key so two syncs of one watchlist cannot interleave their writes. */
+const runSerialized = (key: string, run: () => Promise<void>): Promise<void> => {
+  const pending = (watchlistSyncQueues.get(key) ?? Promise.resolve()).then(run);
+  const settled = pending.then(
+    () => undefined,
+    () => undefined
+  );
+  watchlistSyncQueues.set(key, settled);
+  void settled.then(() => {
+    if (watchlistSyncQueues.get(key) === settled) {
+      watchlistSyncQueues.delete(key);
+    }
+  });
+  return pending;
+};
+
 export type EntitySourcesService = ReturnType<typeof createEntitySourcesService>;
 
 export const createEntitySourcesService = ({
@@ -298,7 +316,7 @@ export const createEntitySourcesService = ({
     }
   };
 
-  const syncWatchlist = async (watchlistId: string, abortSignal?: AbortSignal) => {
+  const runWatchlistSync = async (watchlistId: string, abortSignal?: AbortSignal) => {
     const watchlist = await watchlistClient.get(watchlistId);
     const sourceIds = await watchlistClient.getEntitySourceIds(watchlistId);
     const meta: WatchlistMeta = {
@@ -370,6 +388,9 @@ export const createEntitySourcesService = ({
 
     logger.info(`[WatchlistSync] Completed sync for watchlist ${watchlistId} (${watchlist.name})`);
   };
+
+  const syncWatchlist = (watchlistId: string, abortSignal?: AbortSignal): Promise<void> =>
+    runSerialized(`${namespace}:${watchlistId}`, () => runWatchlistSync(watchlistId, abortSignal));
 
   const syncAllWatchlists = async ({ abortSignal }: { abortSignal?: AbortSignal } = {}) => {
     const allWatchlists = await watchlistClient.list();
