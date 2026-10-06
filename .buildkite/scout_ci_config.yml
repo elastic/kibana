@@ -110,6 +110,7 @@ plugins:
     - uptime
     - usage_collection
     - ux
+    - vegaSandboxExample
     - vis_types/timeseries
     - vis_types/vega
     - watcher

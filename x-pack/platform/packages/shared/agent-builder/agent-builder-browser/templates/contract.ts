@@ -51,6 +51,12 @@ export interface ConversationTemplateBriefCardRenderProps {
   conversation: ConversationWithoutRoundsWithPermissions;
 }
 
+export interface ConversationLocation {
+  conversationId: string;
+  agentId: string;
+  openDetails?: boolean;
+}
+
 /** Shared capabilities supplied by Agent Builder to all template UI registration callbacks. */
 export interface ConversationTemplateUIContext {
   /** Public service for looking up attachment UI definitions. */
@@ -58,11 +64,9 @@ export interface ConversationTemplateUIContext {
   /** Opens the sidebar using the existing conversation navigation behavior. */
   openSidebarConversation: (conversationId: string) => void;
   /** Closes the sidebar and opens an existing conversation in the Agent Builder app. */
-  openFullscreenConversation: (options: {
-    conversationId: string;
-    agentId: string;
-    openDetails?: boolean;
-  }) => Promise<void>;
+  openFullscreenConversation: (options: ConversationLocation) => Promise<void>;
+  /** Absolute URL of the page `openFullscreenConversation` opens, for sharing. */
+  getConversationUrl: (options: ConversationLocation) => string;
 }
 
 /**

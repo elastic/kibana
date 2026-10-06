@@ -82,6 +82,8 @@ interface ConversationQueueProps {
   canManageEscalations?: boolean;
   /** When true the "Close investigation" action is shown on every card. */
   canCloseInvestigation?: boolean;
+  /** Adds a "Copy link" item to each card's menu. */
+  onCopyLink: BaseActionsProps['onCopyLink'];
   /**
    * Optional: render the assignee picker widget for a non-closed investigation card.
    * Supplied by the page so that hook calls stay outside this package.
@@ -131,6 +133,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     selectedIds,
     canManageEscalations,
     canCloseInvestigation,
+    onCopyLink,
     renderAssignees,
     renderInFlightStatus,
   }) => {
@@ -197,6 +200,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
             chatHref: getChatHref?.(investigation.id),
             canManageEscalations,
             canCloseInvestigation,
+            onCopyLink,
           };
 
           return (

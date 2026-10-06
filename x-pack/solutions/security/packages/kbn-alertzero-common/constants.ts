@@ -28,6 +28,12 @@ export const ALERTZERO_WATCH_URL_TEMPLATE = `${ALERTZERO_WATCHES_URL}/{watchId}`
 export const buildWatchUrl = (watchId: string) =>
   `${ALERTZERO_WATCHES_URL}/${encodeURIComponent(watchId)}`;
 
+/** Security's service-account directory. The id is opaque and may contain `/`. */
+export const SECURITY_SERVICE_ACCOUNT_URL = '/internal/security/service_account' as const;
+
+export const buildServiceAccountUrl = (serviceAccountId: string) =>
+  `${SECURITY_SERVICE_ACCOUNT_URL}/${encodeURIComponent(serviceAccountId)}`;
+
 /** Global worker catalog — shared across watches. */
 export const ALERTZERO_WORKERS_URL = `${ALERTZERO_INTERNAL_URL}/workers` as const;
 
