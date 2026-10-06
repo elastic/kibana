@@ -17,6 +17,11 @@ const REMOTE_HOST_JOB_ROOT_EXPRESSION = '/tmp/wf_remote_host_$(id -u)';
 
 /** OpenSSH exits 255 when the client fails. The status script does not. */
 const SSH_CLIENT_FAILURE_CODE = 255;
+const SSH_PERMANENT_FAILURE_PATTERN =
+  /permission denied|host key verification failed|remote host identification has changed|no matching host key|too many authentication failures|no supported authentication methods/i;
+
+/** Job directories older than this are removed when a new job is prepared. Terminal state is kept until then. */
+const STALE_JOB_DIR_DAYS = 2;
 
 export class RemoteHostUnreachableError extends Error {
   constructor(detail: string) {
@@ -139,7 +144,6 @@ const printTerminatedStatus = (
       ? `OUTPUT_SIZE=$(_fsize "${outputFile}")
   if [ "$OUTPUT_SIZE" -gt ${maxBytes} ]; then
     echo "STEP_OUTPUT exceeds max-step-size ($OUTPUT_SIZE bytes > ${maxBytes} bytes)" >&2
-    rm -rf "${workdir}"
     exit 2
   fi
   `
@@ -154,7 +158,6 @@ OUTPUT=''
 if [ -f "${outputFile}" ]; then
   ${sizeGuard}OUTPUT=$(_b64_from 0 "${outputFile}")
 fi
-rm -rf "${workdir}"
 printf '{"status":"terminated","exitCode":%s,"stdout":"%s","stderr":"%s","stdoutOffset":%s,"stderrOffset":%s,"output":"%s"}\\n' \\
   "$EXIT_CODE" "$STDOUT" "$STDERR" "$STDOUT_SIZE" "$STDERR_SIZE" "$OUTPUT"`;
 };
@@ -190,7 +193,6 @@ esac
 if [ "$LOST_PID" != null ]; then
   kill -9 -"$LOST_PID" 2>/dev/null || true
 fi
-rm -rf "${workdir}"
 printf '{"status":"lost","exitCode":0,"pid":%s,"stdout":"%s","stderr":"%s","stdoutOffset":%s,"stderrOffset":%s,"output":""}\\n' \\
   "$LOST_PID" "$STDOUT" "$STDERR" "$STDOUT_SIZE" "$STDERR_SIZE"`;
 };
@@ -290,6 +292,7 @@ if [ -L "$ROOT" ] || [ ! -O "$ROOT" ]; then
   exit 1
 fi
 chmod 700 "$ROOT" || exit 1
+find "$ROOT" -mindepth 1 -maxdepth 1 -type d -mtime +${STALE_JOB_DIR_DAYS} -exec rm -rf {} + 2>/dev/null || true
 mkdir -m 700 "$ROOT/${jobId}" || exit 1
 printf '%s\\n' "$ROOT"
 `;
@@ -369,6 +372,10 @@ export async function pollJob(
     buildStatusScript(workdir, stdoutOffset, stderrOffset, outputLimit)
   );
   if (code === SSH_CLIENT_FAILURE_CODE) {
+    // Auth and host key refusals are permanent, so retrying them would only hide the real error.
+    if (SSH_PERMANENT_FAILURE_PATTERN.test(stderr)) {
+      throw new Error(`Failed to poll remote command: ${stderr}`);
+    }
     throw new RemoteHostUnreachableError(stderr || 'SSH connection failed');
   }
   if (code !== 0) {

@@ -26,9 +26,25 @@ const StateSchema = z.object({
   jobId: z.string(),
   stdoutOffset: z.number().default(0),
   stderrOffset: z.number().default(0),
+  polls: z.number().default(0),
 });
 
 const CANCEL_TIMEOUT_MS = 30000;
+const MAX_POLL_ATTEMPTS = 20000;
+
+const killJobWithTimeout = async (
+  connectorContext: ConnectorCallContext,
+  jobId: string
+): Promise<void> => {
+  // The step signal may have fired already, so the kill call gets a fresh one.
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), CANCEL_TIMEOUT_MS);
+  try {
+    await killJob({ ...connectorContext, abortSignal: controller.signal }, jobId);
+  } finally {
+    clearTimeout(timer);
+  }
+};
 
 interface Deps {
   getActionsStart: () => ActionsPluginStartContract | undefined;
@@ -106,7 +122,8 @@ export const createRemoteHostRunCommandStepDefinition = ({ getActionsStart }: De
       maxMs: 5000,
     },
     ceilings: {
-      maxAttempts: 20000,
+      // The step enforces MAX_POLL_ATTEMPTS itself and kills the job. This is only a backstop.
+      maxAttempts: MAX_POLL_ATTEMPTS + 10,
       maxWaitMs: 60000,
     },
     start: async (context) => {
@@ -133,6 +150,7 @@ export const createRemoteHostRunCommandStepDefinition = ({ getActionsStart }: De
             jobId: result.jobId,
             stdoutOffset: result.stdoutOffset,
             stderrOffset: result.stderrOffset,
+            polls: 0,
           },
         };
       }
@@ -144,6 +162,20 @@ export const createRemoteHostRunCommandStepDefinition = ({ getActionsStart }: De
       const { config, state } = context;
       if (!state?.jobId) {
         throw new Error('Invalid state for polling remote command execution');
+      }
+
+      const polls = (state.polls ?? 0) + 1;
+      if (polls > MAX_POLL_ATTEMPTS) {
+        await killJobWithTimeout(
+          toConnectorContext(config['connector-id'], context, getActionsStart),
+          state.jobId
+        ).catch((error: Error) => {
+          context.logger.warn(`Failed to clean up remote command: ${error.message}`);
+        });
+        throw new ExecutionError({
+          type: 'RemoteCommandTimeout',
+          message: `Remote command was still running after ${MAX_POLL_ATTEMPTS} status checks. It was terminated.`,
+        });
       }
 
       let result: RemoteHostJobStatus;
@@ -170,6 +202,7 @@ export const createRemoteHostRunCommandStepDefinition = ({ getActionsStart }: De
             jobId: state.jobId,
             stdoutOffset: state.stdoutOffset,
             stderrOffset: state.stderrOffset,
+            polls,
           },
         };
       }
@@ -181,6 +214,7 @@ export const createRemoteHostRunCommandStepDefinition = ({ getActionsStart }: De
             jobId: state.jobId,
             stdoutOffset: result.stdoutOffset,
             stderrOffset: result.stderrOffset,
+            polls,
           },
         };
       }
@@ -194,23 +228,13 @@ export const createRemoteHostRunCommandStepDefinition = ({ getActionsStart }: De
         return;
       }
 
-      // The step signal has already fired when onCancel runs, so use a fresh one for the kill call.
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), CANCEL_TIMEOUT_MS);
-      try {
-        await killJob(
-          toConnectorContext(
-            context.config['connector-id'],
-            {
-              contextManager: context.contextManager,
-              abortSignal: controller.signal,
-            },
-            getActionsStart
-          ),
-          state.jobId
-        );
-      } finally {
-        clearTimeout(timer);
-      }
+      await killJobWithTimeout(
+        toConnectorContext(
+          context.config['connector-id'],
+          { contextManager: context.contextManager, abortSignal: context.abortSignal },
+          getActionsStart
+        ),
+        state.jobId
+      );
     },
   });

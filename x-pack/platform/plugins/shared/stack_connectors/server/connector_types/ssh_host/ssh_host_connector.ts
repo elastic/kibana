@@ -165,18 +165,19 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
       params.maxBytes && params.maxBytes > 0 ? params.maxBytes : DEFAULT_DOWNLOAD_MAX_BYTES;
     const { hostname, port } = parseHost(this.config.host);
     const { username } = this.secrets;
-    const tempDir = mkdtempSync(join(tmpdir(), 'ssh_host_download_'));
-    const tempDownloadPath = join(tempDir, 'file');
     const { ssh, scp, authArgs, env, cleanup } = await this.resolveCredentials();
-
-    const args = [
-      ...scp.prefixArgs,
-      ...this.getTransportArgs('-P', port, authArgs),
-      scpDestination(username, hostname, remotePath),
-      tempDownloadPath,
-    ];
+    let tempDir: string | undefined;
 
     try {
+      tempDir = mkdtempSync(join(tmpdir(), 'ssh_host_download_'));
+      const tempDownloadPath = join(tempDir, 'file');
+      const args = [
+        ...scp.prefixArgs,
+        ...this.getTransportArgs('-P', port, authArgs),
+        scpDestination(username, hostname, remotePath),
+        tempDownloadPath,
+      ];
+
       const remoteStat = await runExecFile(
         ssh.bin,
         [
@@ -210,7 +211,9 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
       return { content: readFileSync(tempDownloadPath).toString('base64'), encoding: 'base64' };
     } finally {
       cleanup();
-      rmSync(tempDir, { recursive: true, force: true });
+      if (tempDir) {
+        rmSync(tempDir, { recursive: true, force: true });
+      }
     }
   }
 
@@ -219,18 +222,22 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
     const { remotePath, content } = params;
     const { hostname, port } = parseHost(this.config.host);
     const { username } = this.secrets;
-    const tempDir = mkdtempSync(join(tmpdir(), 'ssh_host_upload_'));
-    const localPath = join(tempDir, 'payload');
     const { ssh, scp, authArgs, env, cleanup } = await this.resolveCredentials();
-
-    const bytes = Buffer.from(content, 'base64');
-    const fd = openSync(localPath, 'w', 0o600);
-    writeSync(fd, bytes);
-    closeSync(fd);
-
-    const remoteDir = remotePath.substring(0, remotePath.lastIndexOf('/'));
+    let tempDir: string | undefined;
 
     try {
+      tempDir = mkdtempSync(join(tmpdir(), 'ssh_host_upload_'));
+      const localPath = join(tempDir, 'payload');
+      const bytes = Buffer.from(content, 'base64');
+      const fd = openSync(localPath, 'w', 0o600);
+      try {
+        writeSync(fd, bytes);
+      } finally {
+        closeSync(fd);
+      }
+
+      const remoteDir = remotePath.substring(0, remotePath.lastIndexOf('/'));
+
       if (remoteDir) {
         const mkdir = await runExecFile(
           ssh.bin,
@@ -262,7 +269,9 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
       }
     } finally {
       cleanup();
-      rmSync(tempDir, { recursive: true, force: true });
+      if (tempDir) {
+        rmSync(tempDir, { recursive: true, force: true });
+      }
     }
   }
 
@@ -307,9 +316,17 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
         // Strip \r so CRLF-pasted keys don't corrupt OpenSSH parsing; ensure trailing newline.
         const keyContent = `${sshPrivateKey.replace(/\r/g, '').trimEnd()}\n`;
         // Write with restricted permissions (writeFileSync is ESLint-restricted)
-        const fd = openSync(tempKeyPath, 'w', 0o600);
-        writeSync(fd, keyContent);
-        closeSync(fd);
+        try {
+          const fd = openSync(tempKeyPath, 'w', 0o600);
+          try {
+            writeSync(fd, keyContent);
+          } finally {
+            closeSync(fd);
+          }
+        } catch (error) {
+          rmSync(tempDir, { recursive: true, force: true });
+          throw error;
+        }
 
         return {
           ssh: { bin: 'ssh', prefixArgs: [] },

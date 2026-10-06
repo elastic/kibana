@@ -250,23 +250,26 @@ describe('startJob', () => {
     );
   });
 
-  it('kills the process group of a lost job before removing its workdir', async () => {
+  it('kills the process group of a lost job', async () => {
     await startJob(ctx, 'echo hi');
 
     const script = launcherScript();
     const lostBranch = script.slice(script.indexOf('LOST_PID=null'));
     expect(lostBranch.indexOf('kill -9 -"$LOST_PID"')).toBeGreaterThan(-1);
-    expect(lostBranch.indexOf('kill -9 -"$LOST_PID"')).toBeLessThan(lostBranch.indexOf('rm -rf'));
   });
 
-  it('removes the workdir before exiting when STEP_OUTPUT is too large', async () => {
+  it('keeps terminal job state readable instead of deleting it during the status read', async () => {
     await startJob(ctx, 'echo hi', undefined, undefined, 1024);
 
     const script = launcherScript();
-    const exitIndex = script.indexOf('exit 2');
-    expect(script.lastIndexOf('rm -rf', exitIndex)).toBeGreaterThan(
-      script.indexOf('STEP_OUTPUT exceeds max-step-size')
-    );
+    expect(script).not.toContain('rm -rf');
+  });
+
+  it('sweeps stale job directories when preparing a new job', async () => {
+    await startJob(ctx, 'echo hi');
+
+    const prepare = mockedExecScript.mock.calls[0][1];
+    expect(prepare).toContain('-mtime +2');
   });
 
   it('cleans up the workdir when the upload fails', async () => {
@@ -432,6 +435,18 @@ describe('pollJob', () => {
     await expect(
       pollJob(ctx, { jobId: 'job-1', stdoutOffset: 0, stderrOffset: 0 })
     ).rejects.toThrow('Connection timed out');
+  });
+
+  it.each([
+    'user@host: Permission denied (publickey).',
+    'Host key verification failed.',
+    '@@@ WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED! @@@',
+  ])('does not treat a permanent SSH refusal as unreachable: %s', async (stderr) => {
+    mockedExecScript.mockResolvedValue({ stdout: '', stderr, code: 255 });
+
+    const promise = pollJob(ctx, { jobId: 'job-1', stdoutOffset: 0, stderrOffset: 0 });
+    await expect(promise).rejects.toThrow(stderr);
+    await expect(promise).rejects.not.toBeInstanceOf(RemoteHostUnreachableError);
   });
 });
 

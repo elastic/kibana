@@ -58,7 +58,7 @@ describe('createRemoteHostRunCommandStepDefinition', () => {
   const createContext = (
     overrides: {
       input?: { command: string };
-      state?: { jobId: string; stdoutOffset: number; stderrOffset: number };
+      state?: { jobId: string; stdoutOffset: number; stderrOffset: number; polls?: number };
     } = {}
   ): PollHandlerContext<any, any, any> => {
     const input = overrides.input ?? { command: 'echo hi' };
@@ -136,6 +136,7 @@ describe('createRemoteHostRunCommandStepDefinition', () => {
           jobId: expect.any(String),
           stdoutOffset: 0,
           stderrOffset: 0,
+          polls: 0,
         },
       });
       expect(mockedUploadFile).toHaveBeenCalledTimes(1);
@@ -224,8 +225,21 @@ describe('createRemoteHostRunCommandStepDefinition', () => {
       const result = await definition.poll(createContext({ state: runningState }));
 
       expect(result).toEqual({
-        state: { jobId: 'job-1', stdoutOffset: 7, stderrOffset: 0 },
+        state: { jobId: 'job-1', stdoutOffset: 7, stderrOffset: 0, polls: 1 },
       });
+    });
+
+    it('kills the remote job and fails when the poll limit is reached', async () => {
+      mockedExecScript.mockResolvedValue({ stdout: '', stderr: '', code: 0 });
+
+      const context = createContext({ state: { ...runningState, polls: 20000 } });
+      await expect(definition.poll(context)).rejects.toMatchObject({
+        type: 'RemoteCommandTimeout',
+      });
+
+      expect(mockedExecScript).toHaveBeenCalledTimes(1);
+      expect(mockedExecScript.mock.calls[0][1]).toContain('kill -9');
+      expect(mockedExecScript.mock.calls[0][1]).toContain('rm -rf');
     });
 
     it('returns parsed STEP_OUTPUT when the command terminates successfully', async () => {
@@ -278,7 +292,7 @@ describe('createRemoteHostRunCommandStepDefinition', () => {
       const result = await definition.poll(context);
 
       expect(result).toEqual({
-        state: { jobId: 'job-1', stdoutOffset: 4, stderrOffset: 2 },
+        state: { jobId: 'job-1', stdoutOffset: 4, stderrOffset: 2, polls: 1 },
       });
       expect(context.logger.warn).toHaveBeenCalledWith(
         'SSH host is unreachable (Connection reset by peer). The remote command is still running; polling will continue.'
