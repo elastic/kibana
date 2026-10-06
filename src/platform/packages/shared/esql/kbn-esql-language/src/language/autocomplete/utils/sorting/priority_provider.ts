@@ -27,6 +27,7 @@ const CATEGORY_PRIORITIES: Record<SuggestionCategory, number> = {
   [SuggestionCategory.SUBQUERY]: 203, // (FROM ...) after Browse data sources
 
   [SuggestionCategory.CONSTANT_VALUE]: 250, // Prompt text, query text constants
+  [SuggestionCategory.COMMAND_MODIFIER]: 260,
 
   [SuggestionCategory.USER_DEFINED_COLUMN]: 300,
   [SuggestionCategory.RECOMMENDED_FIELD]: 310,
@@ -63,9 +64,17 @@ const CONTEXT_BOOSTS: Partial<Record<Location, Partial<Record<SuggestionCategory
     [SuggestionCategory.USER_DEFINED_COLUMN]: -300, // From 300 to 0
   },
   [Location.HIGHLIGHT]: {
-    // The query text is required while the `prefix = "..."` modifier is optional,
-    // so the optional keyword goes below the query text snippet.
-    [SuggestionCategory.LANGUAGE_KEYWORD]: 201, // From 50 to 251, just after CONSTANT_VALUE
+    // The command is complete without a query or ON, so the keywords that continue it and the
+    // end of the command come after the query suggestions: the query text, the prefix modifier
+    // and the full-text functions.
+    [SuggestionCategory.LANGUAGE_KEYWORD]: 510, // From 50 to 560, just after the functions
+    [SuggestionCategory.NEW_LINE]: 400, // From 199 to 599
+    [SuggestionCategory.PIPE]: 400, // From 200 to 600
+  },
+  // Another ON field is a more likely next step than ending the command, so the comma goes
+  // above the command terminators.
+  [Location.HIGHLIGHT_ON]: {
+    [SuggestionCategory.COMMA]: -3, // From 201 to 198 (just above NEW_LINE)
   },
   // Embedding another field is a more likely next step than ending the command, so the comma
   // goes above the command terminators. Both of the command's field lists get it.

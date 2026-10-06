@@ -346,6 +346,12 @@ export enum Location {
   HIGHLIGHT_QUERY = 'highlight_query',
 
   /**
+   * In the HIGHLIGHT command `ON` field list. Only used to give that list its own suggestion
+   * ordering, which the sorting context keys per option.
+   */
+  HIGHLIGHT_ON = 'highlight_on',
+
+  /**
    * In the DENSE_VECTOR command field list
    */
   DENSE_VECTOR = 'dense_vector',
