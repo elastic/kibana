@@ -235,7 +235,7 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
               apiClient={apiClient}
               labels={labels}
               isReadOnly={!allowCardEditAction}
-              onSuccess={onEnabledChangeSuccess}
+              onRefresh={onEnabledChangeSuccess}
               data-test-subj={getTestId('columnEnabled')}
             />
           ),

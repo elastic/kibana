@@ -248,6 +248,49 @@ describe('When using the ArtifactListPage component', () => {
         expect(queryByTestId('formMock')).not.toBeInTheDocument();
       });
 
+      it('should disable the artifact from the view flyout and refresh the list', async () => {
+        const { getAllByTestId, getByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+          showEnabledColumn: true,
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-columnName')[0]);
+
+        await waitFor(() => {
+          expect(getByTestId('testPage-viewFlyout-enabledSwitch')).toBeEnabled();
+        });
+
+        const listCallsBeforeToggle = mockedApi.responseProvider.trustedAppsList.mock.calls.length;
+
+        await userEvent.click(getByTestId('testPage-viewFlyout-enabledSwitch'));
+
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedAppUpdate).toHaveBeenCalled();
+          expect(mockedApi.responseProvider.trustedAppsList.mock.calls.length).toBeGreaterThan(
+            listCallsBeforeToggle
+          );
+        });
+
+        const updateRequest = mockedApi.responseProvider.trustedAppUpdate.mock.calls[0][0];
+        const updateBody = JSON.parse(updateRequest.body as string);
+
+        expect(updateBody.tags).toEqual(expect.arrayContaining([DISABLED_ARTIFACT_TAG]));
+      });
+
+      it('should show a read-only enabled switch in the view flyout without write privilege', async () => {
+        const { getAllByTestId, getByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+          showEnabledColumn: true,
+          allowCardEditAction: false,
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-columnName')[0]);
+
+        await waitFor(() => {
+          expect(getByTestId('testPage-viewFlyout-enabledSwitch')).toBeDisabled();
+        });
+      });
+
       it('should close the view flyout and clear the view URL params', async () => {
         history.push('somepage?show=view&itemId=123');
 

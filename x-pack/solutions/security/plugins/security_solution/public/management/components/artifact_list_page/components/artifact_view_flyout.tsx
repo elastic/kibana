@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiAvatar,
@@ -29,8 +29,15 @@ import { useGetArtifact } from '../../../hooks/artifacts';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useToasts } from '../../../../common/lib/kibana';
 import type { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
+import type { XOR } from '../../../../../common/utility_types';
 import { ManagementPageLoader } from '../../management_page_loader';
+import { ARTIFACT_ENABLE_DISABLE_ACTION_LABELS } from '../hooks/use_with_artifact_enable_disable';
 import type { ArtifactListPageUrlParams } from '../types';
+import {
+  ARTIFACT_ENABLED_SWITCH_LABELS,
+  ArtifactEnabledSwitch,
+  type ArtifactEnabledSwitchProps,
+} from './artifact_enabled_switch';
 import { ArtifactOperatingSystemBadges } from './artifact_os_badges';
 
 export const ARTIFACT_VIEW_FLYOUT_LABELS = Object.freeze({
@@ -61,24 +68,56 @@ export const ARTIFACT_VIEW_FLYOUT_LABELS = Object.freeze({
     }),
 });
 
-export interface ArtifactViewFlyoutProps {
+type ArtifactViewFlyoutLabels = typeof ARTIFACT_VIEW_FLYOUT_LABELS &
+  ArtifactEnabledSwitchProps['labels'];
+
+interface ArtifactViewFlyoutBaseProps {
   apiClient: ExceptionsListApiClient;
   /** Any label overrides */
-  labels?: Partial<typeof ARTIFACT_VIEW_FLYOUT_LABELS>;
+  labels?: Partial<ArtifactViewFlyoutLabels>;
   onClose: () => void;
   'data-test-subj'?: string;
 }
 
+interface ArtifactViewFlyoutWithoutEnabledColumnProps {
+  /** When omitted, the info block does not include the enable/disable switch. */
+  showEnabledColumn?: false;
+}
+
+interface ArtifactViewFlyoutWithEnabledColumnProps {
+  /**
+   * When true, the info block leads with the same enable/disable switch as the simple table.
+   */
+  showEnabledColumn: true;
+  /** When false, the enabled switch is shown read-only. */
+  allowCardEditAction: boolean;
+  /** Reloads the list after a successful enable/disable or a 409 conflict. */
+  onEnabledChangeRefresh: () => Promise<void>;
+}
+
+export type ArtifactViewFlyoutProps = ArtifactViewFlyoutBaseProps &
+  XOR<ArtifactViewFlyoutWithoutEnabledColumnProps, ArtifactViewFlyoutWithEnabledColumnProps>;
+
 export const ArtifactViewFlyout = memo<ArtifactViewFlyoutProps>(
-  ({ apiClient, labels: _labels, onClose, 'data-test-subj': dataTestSubj }) => {
+  ({
+    apiClient,
+    labels: _labels,
+    showEnabledColumn = false,
+    allowCardEditAction = true,
+    onEnabledChangeRefresh,
+    onClose,
+    'data-test-subj': dataTestSubj,
+  }) => {
     const { euiTheme } = useEuiTheme();
     const getTestId = useTestIdGenerator(dataTestSubj);
     const toasts = useToasts();
     const { urlParams } = useUrlParams<ArtifactListPageUrlParams>();
     const titleId = useGeneratedHtmlId({ prefix: 'artifactViewFlyoutTitle' });
-    const labels = useMemo(
+    const labels: ArtifactViewFlyoutLabels = useMemo(
       () => ({
         ...ARTIFACT_VIEW_FLYOUT_LABELS,
+        ...ARTIFACT_ENABLED_SWITCH_LABELS,
+        ...ARTIFACT_ENABLE_DISABLE_ACTION_LABELS,
         ..._labels,
       }),
       [_labels]
@@ -88,19 +127,28 @@ export const ArtifactViewFlyout = memo<ArtifactViewFlyoutProps>(
       [euiTheme.levels.flyout]
     );
 
-    const { data: item, error } = useGetArtifact(apiClient, urlParams.itemId, undefined, {
+    const {
+      data: item,
+      error,
+      refetch: refetchArtifact,
+    } = useGetArtifact(apiClient, urlParams.itemId, undefined, {
       enabled: Boolean(urlParams.itemId),
       retry: false,
     });
 
+    const handleEnabledChangeRefresh = useCallback(async () => {
+      await Promise.all([refetchArtifact(), onEnabledChangeRefresh?.()]);
+    }, [onEnabledChangeRefresh, refetchArtifact]);
+
     useEffect(() => {
-      if (!error) {
+      // Refetch keeps the previous item and still sets error. Only a failed initial load should close.
+      if (!error || item) {
         return;
       }
 
       toasts.addWarning(labels.viewFlyoutItemLoadFailure(error.body?.message || error.message));
       onClose();
-    }, [error, labels, onClose, toasts]);
+    }, [error, item, labels, onClose, toasts]);
 
     return (
       <EuiFlyout
@@ -125,7 +173,15 @@ export const ArtifactViewFlyout = memo<ArtifactViewFlyoutProps>(
         <EuiFlyoutBody>
           {!item && !error && <ManagementPageLoader data-test-subj={getTestId('loader')} />}
           {item && (
-            <ArtifactViewFlyoutBody item={item} labels={labels} data-test-subj={dataTestSubj} />
+            <ArtifactViewFlyoutBody
+              item={item}
+              apiClient={apiClient}
+              labels={labels}
+              showEnabledColumn={showEnabledColumn}
+              allowCardEditAction={allowCardEditAction}
+              onEnabledChangeRefresh={handleEnabledChangeRefresh}
+              data-test-subj={dataTestSubj}
+            />
           )}
         </EuiFlyoutBody>
       </EuiFlyout>
@@ -178,59 +234,106 @@ ArtifactViewFlyoutHeader.displayName = 'ArtifactViewFlyoutHeader';
 
 const ArtifactViewFlyoutBody = memo<{
   item: ExceptionListItemSchema;
-  labels: typeof ARTIFACT_VIEW_FLYOUT_LABELS;
+  apiClient: ExceptionsListApiClient;
+  labels: ArtifactViewFlyoutLabels;
+  showEnabledColumn: boolean;
+  allowCardEditAction: boolean;
+  onEnabledChangeRefresh?: () => Promise<void>;
   'data-test-subj'?: string;
-}>(({ item, labels, 'data-test-subj': dataTestSubj }) => {
-  const { euiTheme } = useEuiTheme();
-  const getTestId = useTestIdGenerator(dataTestSubj);
-  const description = item.description.trim()
-    ? item.description
-    : labels.viewFlyoutEmptyDescription;
+}>(
+  ({
+    item,
+    apiClient,
+    labels,
+    showEnabledColumn,
+    allowCardEditAction,
+    onEnabledChangeRefresh,
+    'data-test-subj': dataTestSubj,
+  }) => {
+    const { euiTheme } = useEuiTheme();
+    const getTestId = useTestIdGenerator(dataTestSubj);
+    const description = item.description.trim()
+      ? item.description
+      : labels.viewFlyoutEmptyDescription;
 
-  const infoBlockCss = css`
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: ${euiTheme.size.s};
-    padding: ${euiTheme.size.m};
-    border-radius: ${euiTheme.size.xs};
-  `;
+    const infoBlockCss = css`
+      display: grid;
+      grid-template-columns: ${showEnabledColumn
+        ? 'minmax(0, 1fr) auto minmax(0, 1fr)'
+        : 'repeat(2, minmax(0, 1fr))'};
+      column-gap: ${euiTheme.size.s};
+      padding: ${euiTheme.size.m};
+      border-radius: ${euiTheme.size.xs};
+    `;
+    // Stretches the row inside the panel padding, so the line stays off the outer border.
+    const infoBlockDividerCss = css`
+      width: ${euiTheme.border.width.thin};
+      align-self: stretch;
+      background-color: ${euiTheme.border.color};
+    `;
 
-  return (
-    <>
-      <EuiPanel
-        hasBorder
-        hasShadow={false}
-        paddingSize="none"
-        css={infoBlockCss}
-        data-test-subj={getTestId('infoBlock')}
-      >
-        <div>
-          <EuiText size="xs" color="subdued">
-            {labels.viewFlyoutUpdatedByLabel}
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiAvatar
-            name={item.updated_by}
-            size="s"
-            data-test-subj={getTestId('updatedByAvatar')}
-          />
-        </div>
-      </EuiPanel>
+    return (
+      <>
+        <EuiPanel
+          hasBorder
+          hasShadow={false}
+          paddingSize="none"
+          css={infoBlockCss}
+          data-test-subj={getTestId('infoBlock')}
+        >
+          {showEnabledColumn && (
+            <>
+              <div>
+                <EuiText size="xs" color="subdued" data-test-subj={getTestId('enabledLabel')}>
+                  {labels.tableColumnEnabledLabel}
+                </EuiText>
+                <EuiSpacer size="s" />
+                <ArtifactEnabledSwitch
+                  item={item}
+                  apiClient={apiClient}
+                  labels={labels}
+                  isReadOnly={!allowCardEditAction}
+                  onRefresh={onEnabledChangeRefresh}
+                  data-test-subj={getTestId('enabledSwitch')}
+                />
+              </div>
+              <div
+                aria-hidden={true}
+                css={infoBlockDividerCss}
+                data-test-subj={getTestId('infoBlockDivider')}
+              />
+            </>
+          )}
+          <div>
+            <EuiText size="xs" color="subdued">
+              {labels.viewFlyoutUpdatedByLabel}
+            </EuiText>
+            <EuiSpacer size="s" />
+            <EuiAvatar
+              name={item.updated_by}
+              size="s"
+              data-test-subj={getTestId('updatedByAvatar')}
+            />
+          </div>
+        </EuiPanel>
 
-      <EuiSpacer size="l" />
-      <EuiTitle size="xs">
-        <h3 data-test-subj={getTestId('descriptionTitle')}>{labels.viewFlyoutDescriptionTitle}</h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiText size="s" data-test-subj={getTestId('description')}>
-        {description}
-      </EuiText>
+        <EuiSpacer size="l" />
+        <EuiTitle size="xs">
+          <h3 data-test-subj={getTestId('descriptionTitle')}>
+            {labels.viewFlyoutDescriptionTitle}
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText size="s" data-test-subj={getTestId('description')}>
+          {description}
+        </EuiText>
 
-      <EuiSpacer size="l" />
-      <EuiTitle size="xs">
-        <h3 data-test-subj={getTestId('definitionTitle')}>{labels.viewFlyoutDefinitionTitle}</h3>
-      </EuiTitle>
-    </>
-  );
-});
+        <EuiSpacer size="l" />
+        <EuiTitle size="xs">
+          <h3 data-test-subj={getTestId('definitionTitle')}>{labels.viewFlyoutDefinitionTitle}</h3>
+        </EuiTitle>
+      </>
+    );
+  }
+);
 ArtifactViewFlyoutBody.displayName = 'ArtifactViewFlyoutBody';

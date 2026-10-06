@@ -345,7 +345,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       setUrlParams({ show: undefined, itemId: undefined });
     }, [setUrlParams]);
 
-    const handleEnabledChangeSuccess = useCallback(async () => {
+    const handleEnabledChangeRefresh = useCallback(async () => {
       if (isMounted()) {
         await refetchListData();
       }
@@ -461,14 +461,25 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
           onDownload={handleOnDownload}
         />
 
-        {isViewFlyoutOpened && (
-          <ArtifactViewFlyout
-            apiClient={apiClient}
-            labels={labels}
-            onClose={handleArtifactViewFlyoutOnClose}
-            data-test-subj={getTestId('viewFlyout')}
-          />
-        )}
+        {isViewFlyoutOpened &&
+          (showEnabledColumn ? (
+            <ArtifactViewFlyout
+              apiClient={apiClient}
+              labels={labels}
+              showEnabledColumn
+              allowCardEditAction={allowCardEditAction}
+              onEnabledChangeRefresh={handleEnabledChangeRefresh}
+              onClose={handleArtifactViewFlyoutOnClose}
+              data-test-subj={getTestId('viewFlyout')}
+            />
+          ) : (
+            <ArtifactViewFlyout
+              apiClient={apiClient}
+              labels={labels}
+              onClose={handleArtifactViewFlyoutOnClose}
+              data-test-subj={getTestId('viewFlyout')}
+            />
+          ))}
 
         {isCreateOrEditFlyoutOpened && (
           <ArtifactFlyout
@@ -600,7 +611,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
                 allowCardDeleteAction={allowCardDeleteAction}
                 showEnabledColumn={showEnabledColumn}
                 apiClient={apiClient}
-                onEnabledChangeSuccess={handleEnabledChangeSuccess}
+                onEnabledChangeSuccess={handleEnabledChangeRefresh}
                 sortField={sortField}
                 sortOrder={sortOrder}
                 sortableFields={SORTABLE_FIELDS}

@@ -10,6 +10,7 @@ import { ARTIFACT_FLYOUT_LABELS } from './components/artifact_flyout';
 import { ARTIFACT_VIEW_FLYOUT_LABELS } from './components/artifact_view_flyout';
 import { ARTIFACT_DELETE_LABELS } from './components/artifact_delete_modal';
 import { ARTIFACT_DELETE_ACTION_LABELS } from './hooks/use_with_artifact_delete_item';
+import { ARTIFACT_ENABLED_SWITCH_LABELS } from './components/artifact_enabled_switch';
 import { ARTIFACT_ENABLE_DISABLE_ACTION_LABELS } from './hooks/use_with_artifact_enable_disable';
 
 export const artifactListPageLabels = Object.freeze({
@@ -252,24 +253,6 @@ export const artifactListPageLabels = Object.freeze({
       defaultMessage: 'Last updated',
     }
   ),
-  tableColumnEnabledLabel: i18n.translate(
-    'xpack.securitySolution.artifactListPage.table.columnEnabledLabel',
-    {
-      defaultMessage: 'Enabled',
-    }
-  ),
-  tableEnabledStatusLabel: i18n.translate(
-    'xpack.securitySolution.artifactListPage.table.enabledStatusLabel',
-    {
-      defaultMessage: 'Enabled',
-    }
-  ),
-  tableDisabledStatusLabel: i18n.translate(
-    'xpack.securitySolution.artifactListPage.table.disabledStatusLabel',
-    {
-      defaultMessage: 'Disabled',
-    }
-  ),
   tableColumnActionsLabel: i18n.translate(
     'xpack.securitySolution.artifactListPage.table.columnActionsLabel',
     {
@@ -298,6 +281,7 @@ export const artifactListPageLabels = Object.freeze({
   // ------------------------------
   // ARTIFACT ENABLE / DISABLE
   // ------------------------------
+  ...ARTIFACT_ENABLED_SWITCH_LABELS,
   ...ARTIFACT_ENABLE_DISABLE_ACTION_LABELS,
 });
 
