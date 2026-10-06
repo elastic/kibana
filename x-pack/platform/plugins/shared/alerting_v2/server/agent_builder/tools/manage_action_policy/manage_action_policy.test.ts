@@ -275,7 +275,9 @@ describe('manageActionPolicyTool', () => {
       };
       expect(results[0].type).toBe(ToolResultType.other);
       expect(results[0].data?.workflowDiagnostics).toEqual([
-        expect.objectContaining({ message: expect.stringContaining('does not have a "manual" trigger') }),
+        expect.objectContaining({
+          message: expect.stringContaining('does not have a "manual" trigger'),
+        }),
       ]);
     });
 
