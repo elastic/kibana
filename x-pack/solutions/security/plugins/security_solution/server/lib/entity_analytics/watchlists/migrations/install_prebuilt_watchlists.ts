@@ -29,7 +29,8 @@ import {
 import { watchlistConfigTypeName } from '../management/saved_object/watchlist_config_type';
 import type { StartPlugins } from '../../../../plugin';
 import { generateWatchlistEntityIndexMappings } from '../entities/mappings';
-import { ENTITY_ANALYTICS_WATCHLISTS_PREFIX } from '../entities/utils';
+import { ENTITY_ANALYTICS_WATCHLISTS_PREFIX, getIndexForWatchlist } from '../entities/utils';
+import { createOrUpdateIndex } from '../../utils/create_or_update_index';
 
 // Bump this when PREBUILT_WATCHLISTS definitions change
 export const PREBUILT_WATCHLISTS_VERSION = 2;
@@ -144,6 +145,22 @@ export const ensurePrebuiltWatchlists = async ({
     });
 
     if (watchlistId) {
+      // Always ensure the backing ES index exists — even when the watchlist SO was found
+      // rather than created. The index is normally created inside WatchlistConfigClient.create(),
+      // but that path is skipped for existing SOs. Deployments that created the SO before
+      // index-creation was wired (or where a prior attempt failed) end up with a SO but no
+      // index, causing index_not_found_exception on every maintainer run. createOrUpdateIndex
+      // is idempotent: it is a no-op when the index already exists.
+      await createOrUpdateIndex({
+        esClient,
+        logger,
+        options: {
+          index: getIndexForWatchlist(namespace),
+          mappings: generateWatchlistEntityIndexMappings(),
+          settings: { hidden: true, auto_expand_replicas: '0-1' },
+        },
+      });
+
       // Ensure entity sources exist, even if the watchlist was already present
       if (entitySources?.length) {
         await ensureEntitySources({
