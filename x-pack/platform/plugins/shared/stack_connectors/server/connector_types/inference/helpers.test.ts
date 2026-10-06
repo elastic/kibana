@@ -242,4 +242,25 @@ describe('error message boundaries and redaction', () => {
     expect(result).toContain('Incorrect API key provided: [redacted]');
     expect(result).not.toContain('sk-live-abcdef123456');
   });
+
+  it('redacts plain token credentials after the upstream-response prefix', () => {
+    const result = buildInferenceErrorMessage({
+      message: 'Request failed with status code 401',
+      statusCode: 401,
+      body: 'token: abc123',
+    });
+    expect(result).not.toContain('abc123');
+    expect(result).toContain('token: [redacted]');
+  });
+
+  it('redacts the full value of quoted credentials containing whitespace', () => {
+    expect(truncateUpstreamBody('{"password":"my secret"}')).not.toContain('secret');
+    expect(truncateUpstreamBody('token: "abc 123"')).not.toContain('abc');
+    const result = buildInferenceErrorMessage({
+      message: 'auth failed',
+      body: { token: 'abc def ghi' },
+    });
+    expect(result).not.toContain('def');
+    expect(result).toContain('[redacted]');
+  });
 });

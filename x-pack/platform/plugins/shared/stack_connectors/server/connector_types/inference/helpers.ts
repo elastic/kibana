@@ -171,9 +171,12 @@ const redactUpstreamSecrets = (text: string): string =>
       /(authorization["']?\s*[:=]\s*["']?)(?:[A-Za-z][\w-]*\s+)?[^\s"',}]+/gi,
       '$1[redacted]'
     )
-    .replace(/(^|[{},&?;"'])\s*(token["']?\s*[:=]\s*["']?)[^\s"',}]+/gim, '$1$2[redacted]')
     .replace(
-      /\b((?:api[-_ ]?key|password|passwd|(?:[\w-]+_)?secret(?:_key)?|private_key|aws_secret_access_key|credential|(?:access|refresh|id|auth|session|hf|api|bearer|user)_token|accessToken|clientSecret|refreshToken|idToken)["']?\s*[:=]\s*["']?)[^\s"',}]+/gi,
+      /(^|[{},&?;"'])\s*(token["']?\s*[:=]\s*)(?:"[^"]*"|'[^']*'|[^\s"',}]+)/gim,
+      '$1$2[redacted]'
+    )
+    .replace(
+      /\b((?:api[-_ ]?key|password|passwd|(?:[\w-]+_)?secret(?:_key)?|private_key|aws_secret_access_key|credential|(?:access|refresh|id|auth|session|hf|api|bearer|user)_token|accessToken|clientSecret|refreshToken|idToken)["']?\s*[:=]\s*)(?:"[^"]*"|'[^']*'|[^\s"',}]+)/gi,
       '$1[redacted]'
     )
     .replace(
@@ -229,7 +232,10 @@ export const buildInferenceErrorMessage = (error: unknown): string => {
     const baseMessage = typeof err.message === 'string' ? err.message : '';
     const statusCode = err.response?.status ?? err.statusCode ?? err.status ?? err.meta?.statusCode;
     const rawBody = err.response?.data ?? err.body ?? err.data ?? err.meta?.body;
-    const body = stringifyUpstreamBody(rawBody);
+    // redact before assembling the prefixed message: the token pattern is
+    // anchored to line starts / structural delimiters, which the
+    // `Upstream response: ` prefix would otherwise break
+    const body = redactUpstreamSecrets(stringifyUpstreamBody(rawBody));
 
     const parts: string[] = [];
     if (baseMessage) parts.push(baseMessage);
