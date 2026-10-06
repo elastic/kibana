@@ -15,19 +15,22 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
-
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import { isAgentBasedOnly } from '../aws_service_matrix';
 import type { AwsServiceMatrixEntry } from '../aws_service_matrix';
 import { DeploymentMethodCard } from './authenticate_and_deploy_step/deployment_method_card';
 import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
 import { buildIacIntegrations } from './authenticate_and_deploy_step/package_inputs';
+import { getIncompleteInstances } from './service_settings_step/use_service_settings';
 import { useDeploy, toSOServiceVars } from './authenticate_and_deploy_step/use_deploy';
+import { useOnboardingDriftDetection } from './authenticate_and_deploy_step/use_onboarding_drift_detection';
 import { useAgentBasedDeploy } from './authenticate_and_deploy_step/use_agent_based_deploy';
 import { AgentBasedSection } from './authenticate_and_deploy_step/agent_based_section';
 import { useOnboardingSO } from './authenticate_and_deploy_step/use_onboarding_so';
@@ -60,6 +63,9 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     awsServicesMap,
     deploymentMethod,
     setDeploymentMethod,
+    serviceSettingsMethod,
+    authenticateAndDeployStep,
+    agentBasedDeployment: agentBasedDeploymentFromFlow,
     detectAndReviewStep,
     updateDetectAndReviewStep,
     removeDeployInstances,
@@ -120,6 +126,23 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   );
   const { globalRegion, serviceVars } = serviceSettings ?? DEFAULT_SERVICE_SETTINGS;
 
+  // ── Drift detection ───────────────────────────────────────────────────────────
+  const { onboardingDeploymentId, policyIdsByInstance } = detectAndReviewStep;
+  const { connectorId } = authenticateAndDeployStep ?? {};
+  const isDirty = detectAndReviewStep.isDirty ?? false;
+  const { driftSettled, driftCheckError, retryDriftCheck, handleReplaceFormDirtyChange } =
+    useOnboardingDriftDetection({
+      onboardingDeploymentId,
+      policyIdsByInstance,
+      awsServicesMap,
+      deploymentMethod,
+      connectorId,
+      agentBasedDeployment: agentBasedDeploymentFromFlow,
+      serviceSettings,
+      isDirty,
+      updateDetectAndReviewStep,
+    });
+
   const otlpEndpoint = services.cloud?.managedOtlp?.url;
 
   // ECF instances: prefer session-storage instances because they carry duplicate-instance ARNs
@@ -136,6 +159,51 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     });
   }, [serviceSettings?.instances, selectedServiceIds, awsServicesMap]);
 
+  // ── Settings collected for ECF vs. the selected method ───────────────────────
+  // Step 2 collects only the trigger ARN for services ECF can deploy. Under agent-based those
+  // services need the package's own vars, so what Step 2 showed is out of date. `awsServicesMap`
+  // already carries the agent-based view here, so the required set below is the agent-based one.
+  const ecfCapableServiceIds = useMemo(
+    () =>
+      new Set(
+        selectedServiceIds.filter((id) => {
+          const entry = awsServicesMap?.get(id);
+          return !!entry?.ecfSettings && !entry.ecfOnly;
+        })
+      ),
+    [selectedServiceIds, awsServicesMap]
+  );
+  const settingsOutOfDateServiceNames = useMemo(
+    () =>
+      isAgentBased && serviceSettingsMethod !== 'agent_based'
+        ? [...ecfCapableServiceIds].map((id) => awsServicesMap?.get(id)?.name ?? id)
+        : [],
+    [isAgentBased, serviceSettingsMethod, ecfCapableServiceIds, awsServicesMap]
+  );
+  // Checked under both methods: `awsServicesMap` carries the view for the selected one, so a user
+  // who switches back from agent-based to managed is also stopped when the stored settings have no
+  // source ECF can route (e.g. WAF with only CloudWatch enabled).
+  const incompleteSettingsInstances = useMemo(
+    () =>
+      getIncompleteInstances(
+        ecfInstances.filter((inst) => ecfCapableServiceIds.has(inst.serviceId)),
+        serviceVars,
+        awsServicesMap
+      ),
+    [ecfInstances, ecfCapableServiceIds, serviceVars, awsServicesMap]
+  );
+  const incompleteSettingsCount = incompleteSettingsInstances.length;
+  // Name the services that need attention: the incomplete ones while Next is blocked, otherwise
+  // the ones whose settings were collected under the previous method.
+  const calloutServiceNames =
+    incompleteSettingsCount > 0
+      ? [...new Set(incompleteSettingsInstances.map((inst) => inst.name))]
+      : settingsOutOfDateServiceNames;
+  // Warning while required agent-based settings are missing (Next is blocked), info otherwise.
+  const SettingsChangedCallout = incompleteSettingsCount > 0 ? KbnWarningCallout : KbnInfoCallout;
+  const showSettingsChangedCallout =
+    settingsOutOfDateServiceNames.length > 0 || incompleteSettingsCount > 0;
+
   // ── Managed Integrations ──────────────────────────────────────────────────────
   const {
     handleDeploy,
@@ -148,12 +216,19 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     onContinue: () => {},
   });
   const [deployAttempted, setDeployAttempted] = useState(false);
-  const isMiDone =
-    isAlreadyDeployed || (deployAttempted && !isDeploying && failedInstances.length === 0);
-  // hasFailed is NOT gated on deployAttempted: if the hook is seeded with persisted failures on
-  // remount (after navigating Back/Next), the callout and Retry must still appear even though no
-  // deploy was attempted in this component lifetime.
+  // hasFailed not gated on deployAttempted: persisted failures on Back/Next remount must still
+  // show the callout even without a new deploy attempt.
   const hasFailed = !isDeploying && failedInstances.length > 0;
+  // hasFailed checked in isAlreadyDeployed: a partial dirty-redeploy (one PUT fails) leaves
+  // failedInstances set — reverting settings clears isDirty but failedInstances persists.
+  const isMiDone =
+    driftSettled &&
+    // The already-deployed arm must check !isDeploying and failedInstances independently:
+    // !hasFailed collapses to (isDeploying || failedInstances.length === 0), so when Retry
+    // starts isDeploying=true makes !hasFailed true and isMiDone flips true mid-retry, enabling
+    // Next before the Retry PUT has finished.
+    ((isAlreadyDeployed && !isDirty && !isDeploying && failedInstances.length === 0) ||
+      (deployAttempted && !isDeploying && failedInstances.length === 0 && !isDirty));
 
   const handleDeployClick = useCallback(() => {
     setDeployAttempted(true);
@@ -188,14 +263,15 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
   const [agentDeployAttempted, setAgentDeployAttempted] = useState(false);
   const [isAgentNextReady, setIsAgentNextReady] = useState(false);
+  // isDirty is checked in both branches so that Next doesn't short-circuit when drift has been
+  // detected on an already-deployed agent setup — the dirty-redeploy path in useAgentBasedDeploy
+  // must run before navigation is allowed. driftSettled gates both for the same reason as isMiDone.
   const isAgentDone =
-    isAgentAlreadyDeployed ||
-    (agentDeployAttempted && !isAgentDeploying && agentFailedInstances.length === 0);
-  // Unlike MI's hasFailed, this IS gated on agentDeployAttempted. failedInstances is a single
-  // shared session key that the MI path also writes, so an un-gated check would surface a stale
-  // MI failure (or one from a previous session) as an agent-based "Deployment failed" callout.
-  // The agent-based path has no equivalent of MI's "persisted failure must survive remount"
-  // requirement, because agentPolicyId is its durable success flag.
+    driftSettled &&
+    ((isAgentAlreadyDeployed && !isDirty) ||
+      (agentDeployAttempted && !isAgentDeploying && agentFailedInstances.length === 0 && !isDirty));
+  // Gated on agentDeployAttempted (unlike MI): failedInstances is shared with MI, so an
+  // un-gated check would surface stale MI failures as agent-based errors.
   const agentHasFailed =
     agentDeployAttempted && !isAgentDeploying && agentFailedInstances.length > 0;
 
@@ -531,8 +607,9 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     (showMiSection && !isMiDone) ||
     (hasAnyEcf && !isEcfDone) ||
     isSavingSO ||
+    incompleteSettingsCount > 0 ||
     (showAgentSection && isAgentDeploying) ||
-    (showAgentSection && !isAgentDone && !isAgentNextReady);
+    (showAgentSection && !isAgentDone && !(driftSettled && isAgentNextReady));
 
   return (
     <div data-test-subj="onboardingStep-authenticate-and-deploy">
@@ -546,7 +623,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       {hasSelectedManifestError && (
         <>
           <EuiHorizontalRule margin="l" />
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
             title={
               <FormattedMessage
@@ -554,35 +631,33 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
                 defaultMessage="Could not load service details"
               />
             }
-            iconType="warning"
-            color="danger"
+            text={
+              <p>
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.manifestErrorCallout.body"
+                  defaultMessage="One or more integration packages could not be loaded. Retry to continue."
+                />
+              </p>
+            }
+            actionProps={{
+              primary: {
+                children: i18n.translate(
+                  'xpack.ingestHub.authenticateAndDeployStep.manifestErrorCallout.retryButton',
+                  { defaultMessage: 'Retry' }
+                ),
+                onClick: refetchAwsServiceMatrix,
+                'data-test-subj': 'authenticateAndDeployStep-manifestRetryButton',
+              },
+            }}
             data-test-subj="authenticateAndDeployStep-manifestErrorCallout"
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.manifestErrorCallout.body"
-                defaultMessage="One or more integration packages could not be loaded. Retry to continue."
-              />
-            </p>
-            <EuiButton
-              size="s"
-              color="danger"
-              onClick={refetchAwsServiceMatrix}
-              data-test-subj="authenticateAndDeployStep-manifestRetryButton"
-            >
-              <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.manifestErrorCallout.retryButton"
-                defaultMessage="Retry"
-              />
-            </EuiButton>
-          </EuiCallOut>
+          />
         </>
       )}
 
       {isAgentBased && allAgentBasedOnly && (
         <>
           <EuiHorizontalRule margin="l" />
-          <EuiCallOut
+          <KbnInfoCallout
             announceOnMount
             title={
               <FormattedMessage
@@ -590,21 +665,146 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
                 defaultMessage="Self-managed Elastic Agent required"
               />
             }
-            iconType="info"
-            color="primary"
+            text={
+              <p>
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.agentBasedOnlyCallout.body"
+                  defaultMessage="After completing this step, enroll an Elastic Agent that has access to your AWS environment to start collecting data."
+                />
+              </p>
+            }
             data-test-subj="authenticateAndDeployStep-agentBasedOnlyCallout"
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.agentBasedOnlyCallout.body"
-                defaultMessage="After completing this step, enroll an Elastic Agent that has access to your AWS environment to start collecting data."
-              />
-            </p>
-          </EuiCallOut>
+          />
+        </>
+      )}
+
+      {showSettingsChangedCallout && (
+        <>
+          <EuiHorizontalRule margin="l" />
+          <SettingsChangedCallout
+            announceOnMount
+            title={
+              incompleteSettingsCount > 0 && !isAgentBased ? (
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.settingsIncompleteCallout.title"
+                  defaultMessage="Service settings are incomplete"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.settingsChangedCallout.title"
+                  defaultMessage="Service settings have changed"
+                />
+              )
+            }
+            data-test-subj="authenticateAndDeployStep-settingsChangedCallout"
+            text={
+              <p>
+                {incompleteSettingsCount > 0 && !isAgentBased ? (
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.settingsIncompleteCallout.body"
+                    defaultMessage="Managed deployments need a supported source for each service. Complete the required settings in Service Settings for {services} to continue."
+                    values={{ services: calloutServiceNames.join(', ') }}
+                  />
+                ) : incompleteSettingsCount > 0 ? (
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.settingsChangedCallout.incompleteBody"
+                    defaultMessage="Agent-based deployments require more settings than managed deployments. Complete the required settings in Service Settings for {services} to continue."
+                    values={{ services: calloutServiceNames.join(', ') }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.settingsChangedCallout.body"
+                    defaultMessage="Agent-based deployments use different settings than managed deployments. Review the settings in Service Settings for {services}."
+                    values={{ services: calloutServiceNames.join(', ') }}
+                  />
+                )}
+              </p>
+            }
+            actionProps={
+              onBack
+                ? {
+                    primary: {
+                      children: i18n.translate(
+                        'xpack.ingestHub.authenticateAndDeployStep.settingsChangedCallout.backButton',
+                        { defaultMessage: 'Review service settings' }
+                      ),
+                      onClick: onBack,
+                      'data-test-subj': 'authenticateAndDeployStep-settingsChangedBackButton',
+                    },
+                  }
+                : undefined
+            }
+          />
         </>
       )}
 
       {showMiSection && <EuiHorizontalRule margin="l" />}
+
+      {driftCheckError && (
+        <>
+          <KbnWarningCallout
+            announceOnMount
+            title={
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.driftCheckErrorCallout.title"
+                defaultMessage="Could not check for settings changes"
+              />
+            }
+            text={
+              <p>
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.driftCheckErrorCallout.body"
+                  defaultMessage="Unable to reach the deployment record. Check your connection and try again."
+                />
+              </p>
+            }
+            actionProps={{
+              primary: {
+                children: i18n.translate(
+                  'xpack.ingestHub.authenticateAndDeployStep.driftCheckErrorCallout.retryButton',
+                  { defaultMessage: 'Retry' }
+                ),
+                onClick: retryDriftCheck,
+                'data-test-subj': 'authenticateAndDeployStep-driftCheckRetryButton',
+              },
+            }}
+            data-test-subj="authenticateAndDeployStep-driftCheckErrorCallout"
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
+
+      {(showMiSection || showAgentSection) &&
+        isDirty &&
+        (deployGroups.length > 0 || agentTargets.length > 0) && (
+          <>
+            <EuiCallOut
+              announceOnMount
+              title={
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.title"
+                  defaultMessage="Settings changed since last deployment"
+                />
+              }
+              color="warning"
+              iconType="warning"
+              data-test-subj="authenticateAndDeployStep-driftCallout"
+            >
+              {showAgentSection ? (
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.bodyAgentBased"
+                  defaultMessage="Settings have changed since last deployment. Click Next to apply the updated configuration."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.body"
+                  defaultMessage="Settings have changed since last deployment. Click Deploy to apply the updated configuration."
+                />
+              )}
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
 
       {showMiSection && (
         <ManagedIntegrationsSection
@@ -616,6 +816,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           isDone={isMiDone}
           hasFailed={hasFailed}
           isCleanupOnly={isCleanupOnly}
+          isDirty={isDirty}
+          onReplaceFormDirtyChange={handleReplaceFormDirtyChange}
         />
       )}
 

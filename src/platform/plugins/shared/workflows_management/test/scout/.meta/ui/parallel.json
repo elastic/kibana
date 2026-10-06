@@ -1,5 +1,5 @@
 {
-  "sha1": "080315670b049d08c678427deb7dc68161156d6c",
+  "sha1": "5eab15e7429f91a664fed98ac4b98a82b1532380",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -37,6 +37,20 @@
       }
     },
     {
+      "id": "eb10b95e21481ba-5fe0bd1ead1560b",
+      "title": "Workflow administrator sharing grants execution access through Access control and preserves the owner",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_access_control_admin.spec.ts",
+        "line": 43,
+        "column": 54
+      }
+    },
+    {
       "id": "478a0cfe64d4fb9-8627e04223e9fc9",
       "title": "Workflow access dialog saves private and public access through the shared form",
       "expectedStatus": "passed",
@@ -46,8 +60,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_access_control.spec.ts",
-        "line": 39,
-        "column": 8
+        "line": 46,
+        "column": 13
       }
     },
     {
@@ -60,8 +74,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_access_control.spec.ts",
-        "line": 97,
-        "column": 24
+        "line": 109,
+        "column": 18
       }
     },
     {
@@ -74,8 +88,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_access_control.spec.ts",
-        "line": 97,
-        "column": 24
+        "line": 109,
+        "column": 18
       }
     },
     {
@@ -451,13 +465,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 74,
-        "column": 25
+        "line": 114,
+        "column": 58
       }
     },
     {
-      "id": "84b864bf30250b9-426daf58e791802",
-      "title": "Workflow editor: validation performance [large_perf (87 steps, 431 vars)] editor stays responsive during rapid edits",
+      "id": "84b864bf30250b9-bb6c00e207d6b96",
+      "title": "Workflow editor: validation performance [large_perf (87 steps, 431 vars)] frame rate stays above threshold during rapid edits",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -466,8 +480,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 230,
-        "column": 33
+        "line": 315,
+        "column": 20
       }
     },
     {
@@ -481,13 +495,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 74,
-        "column": 25
+        "line": 114,
+        "column": 58
       }
     },
     {
-      "id": "84b864bf30250b9-9672ab6054b564c",
-      "title": "Workflow editor: validation performance [infosec_demo (150 steps, 361 vars)] editor stays responsive during rapid edits",
+      "id": "84b864bf30250b9-c189381fa89f5ce",
+      "title": "Workflow editor: validation performance [infosec_demo (150 steps, 361 vars)] frame rate stays above threshold during rapid edits",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -496,8 +510,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 230,
-        "column": 33
+        "line": 315,
+        "column": 20
       }
     },
     {
