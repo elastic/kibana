@@ -421,10 +421,8 @@ describe('MemoryPageView', () => {
     const { onDeleted } = renderView();
 
     await userEvent.click(screen.getByTestId('nightshiftMemoryDeleteButton'));
-    // The dialog is reachable as a labelled alertdialog, and its close affordance
-    // is an icon button that only screen readers can name.
     const dialog = screen.getByRole('alertdialog', { name: /delete this memory permanently/i });
-    await userEvent.click(within(dialog).getByRole('button', { name: /closes this modal/i }));
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }));
 
     expect(mockDelete).not.toHaveBeenCalled();
     expect(onDeleted).not.toHaveBeenCalled();

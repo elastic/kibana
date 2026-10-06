@@ -378,6 +378,12 @@ export function MemoryPageView({
           onCancel={() => {
             setDeleteTarget(undefined);
           }}
+          cancelButtonText={i18n.translate(
+            'xpack.significantEventsApp.memory.deleteConfirmCancel',
+            {
+              defaultMessage: 'Cancel',
+            }
+          )}
           confirmButtonText={
             <FormattedMessage
               id="xpack.significantEventsApp.memory.deleteConfirmButton"
