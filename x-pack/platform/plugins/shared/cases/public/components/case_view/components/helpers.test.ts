@@ -7,9 +7,16 @@
 
 import { alertComment, eventComment, basicCase, basicComment } from '../../../containers/mock';
 import {
+  DASHBOARD_ATTACHMENT_TYPE,
+  DISCOVER_SESSION_ATTACHMENT_TYPE,
+  LENS_ATTACHMENT_TYPE,
+  MAP_ATTACHMENT_TYPE,
   SECURITY_ALERT_ATTACHMENT_TYPE,
+  SECURITY_ENTITY_ATTACHMENT_TYPE,
   SECURITY_EVENT_ATTACHMENT_TYPE,
+  SECURITY_TIMELINE_ATTACHMENT_TYPE,
 } from '../../../../common/constants/attachments';
+import { FILE_ATTACHMENT_TYPE } from '../../../../common/constants';
 import type { AttachmentUIV2 } from '../../../../common/ui/types';
 import { getManualAlertIds } from '../../../../common/utils/attachments/manual_alert_ids';
 import { filterCaseAttachmentsBySearchTerm, getAttachmentItemCount } from './helpers';
@@ -98,6 +105,27 @@ describe('Case view helpers', () => {
 
     it('counts a basic user comment as 1', () => {
       expect(getAttachmentItemCount(basicComment as unknown as AttachmentUIV2)).toBe(1);
+    });
+
+    it('does not count persistable lens attachments for saved-object tabs', () => {
+      expect(
+        getAttachmentItemCount({
+          ...basicComment,
+          type: LENS_ATTACHMENT_TYPE,
+          data: { state: {} },
+        } as unknown as AttachmentUIV2)
+      ).toBe(0);
+    });
+
+    it('counts saved-object lens attachments', () => {
+      expect(
+        getAttachmentItemCount({
+          ...basicComment,
+          type: LENS_ATTACHMENT_TYPE,
+          attachmentId: 'lens-1',
+          metadata: { title: 'Lens', soType: 'lens' },
+        } as unknown as AttachmentUIV2)
+      ).toBe(1);
     });
   });
 
@@ -203,6 +231,19 @@ describe('Case view helpers', () => {
         expect(result.comments[0]).toEqual({
           ...commentTemplate,
           [fieldName]: [`${type}-123`],
+        });
+      });
+
+      it(`matches ${fieldName} case-insensitively`, () => {
+        const caseData = {
+          ...basicCase,
+          comments: [{ ...commentTemplate, [fieldName]: `${type}-ABC` }],
+        };
+        const result = filterCaseAttachmentsBySearchTerm(caseData, 'abc');
+        expect(result.comments).toHaveLength(1);
+        expect(result.comments[0]).toEqual({
+          ...commentTemplate,
+          [fieldName]: [`${type}-ABC`],
         });
       });
 
@@ -320,7 +361,223 @@ describe('Case view helpers', () => {
       expect(result.comments).toHaveLength(2);
     });
 
-    it('does not apply event-id filtering to non-event unified reference attachments', () => {
+    describe('saved-object attachments', () => {
+      const soComment = (
+        id: string,
+        type: string,
+        attachmentId: string,
+        title: string,
+        soType: string
+      ) =>
+        ({
+          id,
+          type,
+          attachmentId,
+          metadata: { title, soType },
+          owner: basicCase.owner,
+          createdAt: basicCase.createdAt,
+          createdBy: basicCase.createdBy,
+          pushedAt: null,
+          pushedBy: null,
+          updatedAt: null,
+          updatedBy: null,
+          version: 'WzQ3LDFc',
+        } as unknown as AttachmentUIV2);
+
+      it('filters dashboard attachments whose title matches case-insensitively', () => {
+        const caseData = {
+          ...basicCase,
+          comments: [
+            soComment('c1', DASHBOARD_ATTACHMENT_TYPE, 'dash-1', 'Sales Overview', 'dashboard'),
+            soComment('c2', DASHBOARD_ATTACHMENT_TYPE, 'dash-2', 'Inventory', 'dashboard'),
+          ],
+        };
+        const result = filterCaseAttachmentsBySearchTerm(caseData, 'SALES');
+        expect(result.comments).toHaveLength(1);
+        expect(result.comments[0].id).toBe('c1');
+      });
+
+      it('filters dashboard attachments whose attachmentId matches', () => {
+        const caseData = {
+          ...basicCase,
+          comments: [
+            soComment('c1', DASHBOARD_ATTACHMENT_TYPE, 'dash-abc', 'Dashboard A', 'dashboard'),
+            soComment('c2', DASHBOARD_ATTACHMENT_TYPE, 'dash-xyz', 'Dashboard B', 'dashboard'),
+          ],
+        };
+        const result = filterCaseAttachmentsBySearchTerm(caseData, 'xyz');
+        expect(result.comments).toHaveLength(1);
+        expect(result.comments[0].id).toBe('c2');
+      });
+
+      it('drops SO attachments that match neither title nor attachmentId', () => {
+        const caseData = {
+          ...basicCase,
+          comments: [
+            soComment('c1', MAP_ATTACHMENT_TYPE, 'map-1', 'Eastern Region', 'map'),
+            soComment(
+              'c2',
+              DISCOVER_SESSION_ATTACHMENT_TYPE,
+              'search-1',
+              'Login attempts',
+              'search'
+            ),
+          ],
+        };
+        const result = filterCaseAttachmentsBySearchTerm(caseData, 'nothing-matches');
+        expect(result.comments).toHaveLength(0);
+      });
+
+      it('filters mixed SO + alert comments correctly', () => {
+        const caseData = {
+          ...basicCase,
+          comments: [
+            soComment('c1', DASHBOARD_ATTACHMENT_TYPE, 'dash-1', 'Sales Overview', 'dashboard'),
+            soComment('c2', MAP_ATTACHMENT_TYPE, 'map-1', 'Inventory map', 'map'),
+            { ...alertComment, alertId: 'alert-sales-1' },
+          ],
+        };
+        const result = filterCaseAttachmentsBySearchTerm(caseData, 'sales');
+        expect(result.comments).toHaveLength(2);
+        expect(result.comments.map((c) => c.id).sort()).toEqual(['c1', alertComment.id].sort());
+      });
+    });
+
+    const buildTimelineComment = (): AttachmentUIV2 =>
+      ({
+        id: 'timeline-1',
+        type: SECURITY_TIMELINE_ATTACHMENT_TYPE,
+        attachmentId: 'timeline-id-1',
+        metadata: { title: 'My investigation' },
+        owner: basicCase.owner,
+        createdAt: basicCase.createdAt,
+        createdBy: basicCase.createdBy,
+        pushedAt: null,
+        pushedBy: null,
+        updatedAt: null,
+        updatedBy: null,
+        version: 'WzQ3LDFc',
+      } as unknown as AttachmentUIV2);
+
+    it('filters timeline attachments whose cached title matches case-insensitively', () => {
+      const timelineComment = buildTimelineComment();
+      const caseData = {
+        ...basicCase,
+        comments: [timelineComment],
+      };
+
+      const result = filterCaseAttachmentsBySearchTerm(caseData, 'INVESTIGATION');
+
+      expect(result.comments).toHaveLength(1);
+      expect(result.comments[0]).toEqual(timelineComment);
+    });
+
+    it('drops timeline attachments that match neither cached title nor attachmentId', () => {
+      const caseData = {
+        ...basicCase,
+        comments: [buildTimelineComment()],
+      };
+
+      const result = filterCaseAttachmentsBySearchTerm(caseData, 'nothing-matches');
+
+      expect(result.comments).toHaveLength(0);
+    });
+
+    it('keeps file attachments regardless of the search term (searched server-side)', () => {
+      const fileComment = {
+        id: 'file-1',
+        type: FILE_ATTACHMENT_TYPE,
+        attachmentId: 'file-id-1',
+        metadata: { files: [{ name: 'elastic_logo.png' }] },
+        owner: basicCase.owner,
+        createdAt: basicCase.createdAt,
+        createdBy: basicCase.createdBy,
+        pushedAt: null,
+        pushedBy: null,
+        updatedAt: null,
+        updatedBy: null,
+        version: 'WzQ3LDFc',
+      } as unknown as AttachmentUIV2;
+      const caseData = {
+        ...basicCase,
+        comments: [fileComment],
+      };
+
+      const result = filterCaseAttachmentsBySearchTerm(caseData, 'nothing-matches');
+
+      expect(result.comments).toHaveLength(1);
+      expect(result.comments[0]).toEqual(fileComment);
+    });
+
+    describe('security.entity attachment search', () => {
+      const buildEntityAttachment = (
+        overrides: {
+          attachmentId?: string;
+          entityName?: string;
+          entityType?: string;
+          riskLevel?: string;
+        } = {}
+      ) =>
+        ({
+          id: 'entity-1',
+          type: SECURITY_ENTITY_ATTACHMENT_TYPE,
+          attachmentId: overrides.attachmentId ?? 'host:web01',
+          metadata: {
+            entityName: overrides.entityName ?? 'web01',
+            entityType: overrides.entityType ?? 'host',
+            riskLevel: overrides.riskLevel ?? 'Critical',
+          },
+          owner: basicCase.owner,
+          createdAt: basicCase.createdAt,
+          createdBy: basicCase.createdBy,
+          pushedAt: null,
+          pushedBy: null,
+          updatedAt: null,
+          updatedBy: null,
+          version: 'WzQ3LDFc',
+        } as unknown as AttachmentUIV2);
+
+      it('matches on entityName', () => {
+        const caseData = { ...basicCase, comments: [buildEntityAttachment()] };
+        expect(filterCaseAttachmentsBySearchTerm(caseData, 'web01').comments).toHaveLength(1);
+      });
+
+      it('matches on entityType', () => {
+        const caseData = { ...basicCase, comments: [buildEntityAttachment()] };
+        expect(filterCaseAttachmentsBySearchTerm(caseData, 'host').comments).toHaveLength(1);
+      });
+
+      it('matches on riskLevel', () => {
+        const caseData = { ...basicCase, comments: [buildEntityAttachment()] };
+        expect(filterCaseAttachmentsBySearchTerm(caseData, 'critical').comments).toHaveLength(1);
+      });
+
+      it('matches on attachmentId', () => {
+        const caseData = { ...basicCase, comments: [buildEntityAttachment()] };
+        expect(filterCaseAttachmentsBySearchTerm(caseData, 'host:web01').comments).toHaveLength(1);
+      });
+
+      it('matches case-insensitively', () => {
+        const caseData = { ...basicCase, comments: [buildEntityAttachment()] };
+        expect(filterCaseAttachmentsBySearchTerm(caseData, 'WEB01').comments).toHaveLength(1);
+      });
+
+      it('excludes the attachment when nothing matches', () => {
+        const caseData = { ...basicCase, comments: [buildEntityAttachment()] };
+        expect(filterCaseAttachmentsBySearchTerm(caseData, 'nonexistent').comments).toHaveLength(0);
+      });
+
+      it('excludes a malformed entity attachment (no attachmentId)', () => {
+        const malformed = {
+          ...buildEntityAttachment(),
+          attachmentId: undefined,
+        } as unknown as AttachmentUIV2;
+        const caseData = { ...basicCase, comments: [malformed] };
+        expect(filterCaseAttachmentsBySearchTerm(caseData, 'web01').comments).toHaveLength(0);
+      });
+    });
+
+    it('filters non-event unified reference attachments by attachmentId', () => {
       const nonEventUnifiedReferenceComment = {
         id: 'non-event-unified-ref',
         type: 'lens',
@@ -339,10 +596,13 @@ describe('Case view helpers', () => {
         comments: [nonEventUnifiedReferenceComment],
       };
 
-      const result = filterCaseAttachmentsBySearchTerm(caseData, 'missing-id');
+      const result = filterCaseAttachmentsBySearchTerm(caseData, 'ref-1');
 
       expect(result.comments).toHaveLength(1);
-      expect(result.comments[0]).toEqual(nonEventUnifiedReferenceComment);
+      expect(result.comments[0]).toEqual({
+        ...nonEventUnifiedReferenceComment,
+        attachmentId: ['ref-1'],
+      });
     });
   });
 });

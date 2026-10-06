@@ -54,7 +54,7 @@ export const ActionTypeList: React.FC<ActionTypeListProps> = ({
           data-test-subj={`action-option-${actionType.name}`}
           onClick={() => onSelect(actionType)}
         >
-          <EuiIcon size="xl" type={fullAction.iconClass} />
+          <EuiIcon size="xl" type={fullAction.iconClass} aria-hidden={true} />
         </EuiKeyPadMenuItem>
       );
       return (

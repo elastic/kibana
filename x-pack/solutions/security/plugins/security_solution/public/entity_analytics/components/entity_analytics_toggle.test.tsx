@@ -33,7 +33,7 @@ let mockUseToggleReturn: {
   isLoading: boolean;
   isStatusLoading: boolean;
   toggle: jest.Mock;
-  errors: { riskEngine: string[]; entityStore: string[] };
+  errors: { entityStore: string[] };
 };
 
 const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -43,11 +43,6 @@ const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 describe('EntityAnalyticsHealth', () => {
   it('shows On when status is enabled', () => {
     render(<EntityAnalyticsHealth status="enabled" />);
-    expect(screen.getByTestId(ENTITY_ANALYTICS_HEALTH_TEST_ID)).toHaveTextContent('On');
-  });
-
-  it('shows On when status is partially_enabled', () => {
-    render(<EntityAnalyticsHealth status="partially_enabled" />);
     expect(screen.getByTestId(ENTITY_ANALYTICS_HEALTH_TEST_ID)).toHaveTextContent('On');
   });
 
@@ -64,38 +59,21 @@ describe('EntityAnalyticsHealth', () => {
 
 describe('EntityAnalyticsErrorPanel', () => {
   it('renders nothing when there are no errors', () => {
-    const { container } = render(
-      <EntityAnalyticsErrorPanel riskEngineErrors={[]} entityStoreErrors={[]} />
-    );
+    const { container } = render(<EntityAnalyticsErrorPanel entityStoreErrors={[]} />);
     expect(container.firstChild).toBeNull();
   });
 
-  it('renders error callout with risk engine errors', () => {
-    render(
-      <EntityAnalyticsErrorPanel
-        riskEngineErrors={['Risk engine init failed']}
-        entityStoreErrors={[]}
-      />
-    );
+  it('renders error callout with entity store errors', () => {
+    render(<EntityAnalyticsErrorPanel entityStoreErrors={['Entity store install failed']} />);
     expect(screen.getByTestId(ENTITY_ANALYTICS_ERROR_PANEL_TEST_ID)).toBeInTheDocument();
-    expect(screen.getByText('Risk engine init failed')).toBeInTheDocument();
-  });
-
-  it('renders both risk and entity store errors', () => {
-    render(
-      <EntityAnalyticsErrorPanel
-        riskEngineErrors={['Risk error']}
-        entityStoreErrors={['Store error']}
-      />
-    );
-    expect(screen.getByText('Risk error')).toBeInTheDocument();
-    expect(screen.getByText('Store error')).toBeInTheDocument();
+    expect(screen.getByText('Entity store install failed')).toBeInTheDocument();
   });
 });
 
 describe('EntityAnalyticsToggle', () => {
   const defaultProps = {
-    hasAllRequiredPrivileges: true,
+    hasEnablementPrivileges: true,
+    hasStopPrivileges: true,
     isPrivilegesLoading: false,
     selectedSettingsMatchSavedSettings: true,
     onSaveSettings: jest.fn().mockResolvedValue(undefined),
@@ -109,7 +87,7 @@ describe('EntityAnalyticsToggle', () => {
       isLoading: false,
       isStatusLoading: false,
       toggle: mockToggle,
-      errors: { riskEngine: [], entityStore: [] },
+      errors: { entityStore: [] },
     };
   });
 
@@ -121,13 +99,6 @@ describe('EntityAnalyticsToggle', () => {
 
   it('renders a checked switch when status is enabled', () => {
     mockUseToggleReturn.status = 'enabled';
-    render(<EntityAnalyticsToggle {...defaultProps} />, { wrapper: Wrapper });
-    const toggle = screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID);
-    expect(toggle).toBeChecked();
-  });
-
-  it('renders a checked switch when status is partially_enabled', () => {
-    mockUseToggleReturn.status = 'partially_enabled';
     render(<EntityAnalyticsToggle {...defaultProps} />, { wrapper: Wrapper });
     const toggle = screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID);
     expect(toggle).toBeChecked();
@@ -160,10 +131,10 @@ describe('EntityAnalyticsToggle', () => {
     expect(toggle).toBeDisabled();
   });
 
-  it('disables the switch when privileges are missing', () => {
+  it('disables the switch when enablement privileges are missing and the toggle is off', () => {
     const props = {
       ...defaultProps,
-      hasAllRequiredPrivileges: false,
+      hasEnablementPrivileges: false,
     };
 
     render(<EntityAnalyticsToggle {...props} />, { wrapper: Wrapper });
@@ -171,7 +142,39 @@ describe('EntityAnalyticsToggle', () => {
     expect(toggle).toBeDisabled();
   });
 
-  it('disables the switch when privileges are still loading', () => {
+  // OFF only needs SO write on the engine descriptor. Missing that (not full install) disables
+  // the switch when on — otherwise stop fails server-side on the user-scoped SO update.
+  it('disables the switch when stop privileges are missing and the toggle is on', () => {
+    mockUseToggleReturn.status = 'enabled';
+    const props = {
+      ...defaultProps,
+      hasEnablementPrivileges: false,
+      hasStopPrivileges: false,
+    };
+
+    render(<EntityAnalyticsToggle {...props} />, { wrapper: Wrapper });
+    const toggle = screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID);
+    expect(toggle).toBeChecked();
+    expect(toggle).toBeDisabled();
+  });
+
+  it('keeps an enabled switch usable when stop privileges exist but enablement privileges do not', () => {
+    mockUseToggleReturn.status = 'enabled';
+    const props = {
+      ...defaultProps,
+      hasEnablementPrivileges: false,
+      hasStopPrivileges: true,
+    };
+
+    render(<EntityAnalyticsToggle {...props} />, { wrapper: Wrapper });
+    const toggle = screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID);
+    expect(toggle).toBeChecked();
+    expect(toggle).not.toBeDisabled();
+    fireEvent.click(toggle);
+    expect(mockToggle).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables the switch when privileges are still loading and the toggle is off', () => {
     const props = {
       ...defaultProps,
       isPrivilegesLoading: true,
@@ -182,7 +185,7 @@ describe('EntityAnalyticsToggle', () => {
     expect(toggle).toBeDisabled();
   });
 
-  it('renders checked and disabled when enabled but privileges are loading', () => {
+  it('disables an enabled switch while privileges are loading', () => {
     mockUseToggleReturn.status = 'enabled';
     const props = { ...defaultProps, isPrivilegesLoading: true };
     render(<EntityAnalyticsToggle {...props} />, { wrapper: Wrapper });

@@ -6,13 +6,15 @@
  */
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import type { StoryObj, Meta } from '@storybook/react';
-import React from 'react';
+import { createCallApmApiV2 } from '@kbn/apm-api-shared/src/create_call_apm_api';
 import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
+import type { Meta, StoryObj } from '@storybook/react';
+import React from 'react';
 import type { SuggestionsSelectProps } from '.';
 import { SuggestionsSelect } from '.';
+import { setApmInternalServices } from '../../../plugin';
+import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 
 interface Args extends SuggestionsSelectProps {
   allOption: EuiComboBoxOptionOption<string>;
@@ -25,6 +27,9 @@ interface Args extends SuggestionsSelectProps {
 const stories: Meta<Args> = {
   title: 'shared/SuggestionsSelect',
   component: SuggestionsSelect,
+  // This story builds its own providers from `args`; opt out of the global jest decorator
+  // (jest_preview.tsx) so we don't mount the redundant APM route tree.
+  parameters: { skipApmJestDecorator: true },
   decorators: [
     (StoryComponent, { args }) => {
       const { terms } = args;
@@ -42,6 +47,8 @@ const stories: Meta<Args> = {
       const KibanaReactContext = createKibanaReactContext(coreMock);
 
       createCallApmApi(coreMock);
+      const callApmApi = createCallApmApiV2(coreMock, { cpsManager: undefined });
+      setApmInternalServices({ callApmApi });
 
       return (
         <KibanaReactContext.Provider>

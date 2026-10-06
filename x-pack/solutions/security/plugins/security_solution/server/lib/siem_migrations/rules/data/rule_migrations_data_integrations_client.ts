@@ -29,12 +29,19 @@ const MAX_KB_TOKENS = 80_000;
  * for which artifacts are being migrated
  *
  * */
-const EXCLUDED_INTEGRATIONS = ['splunk', 'elastic_security', 'ibm_qradar'];
+const EXCLUDED_INTEGRATIONS = [
+  'splunk',
+  'elastic_security',
+  'ibm_qradar',
+  'microsoft_sentinel',
+  'sentinel_one',
+  'sentinel_one_cloud_funnel',
+];
 
 /* The minimum score required for a integration to be considered correct, might need to change this later */
 const MIN_SCORE = 7 as const;
 /* The number of integrations the RAG will return, sorted by score */
-const RETURNED_INTEGRATIONS = 5 as const;
+const RETURNED_INTEGRATIONS = 7 as const;
 const PACKAGE_METADATA_CONCURRENCY = 30 as const;
 
 export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBaseClient {

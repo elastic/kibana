@@ -12,6 +12,14 @@ import { ConfigKey } from '../../../common/runtime_types';
 import { syntheticsMonitorSavedObjectType } from '../../../common/types/saved_objects';
 import type { RouteContext } from '../types';
 
+interface PrivateLocationSpaceDefinition {
+  spaces?: string[];
+}
+
+type PrivateLocationLookup =
+  | SyntheticsPrivateLocations
+  | ReadonlyMap<string, PrivateLocationSpaceDefinition>;
+
 /**
  * Returns true if a private location's spaces cover every space in the monitor's space list.
  * A private location with '*' (ALL_SPACES_ID) covers all monitor spaces.
@@ -59,7 +67,7 @@ interface ValidationError {
  */
 export const validateMonitorPrivateLocationSpaces = (
   monitor: MonitorFields,
-  allPrivateLocations: SyntheticsPrivateLocations
+  allPrivateLocations: PrivateLocationLookup
 ): ValidationError | null => {
   const monitorSpaces = monitor[ConfigKey.KIBANA_SPACES] ?? [];
   if (monitorSpaces.length === 0) {
@@ -76,9 +84,9 @@ export const validateMonitorPrivateLocationSpaces = (
   const errors: PrivateLocationSpaceError[] = [];
 
   for (const loc of privateLocations) {
-    const matchedLocation = allPrivateLocations.find(
-      (privateLocation) => privateLocation.id === loc.id
-    );
+    const matchedLocation = Array.isArray(allPrivateLocations)
+      ? allPrivateLocations.find((privateLocation) => privateLocation.id === loc.id)
+      : allPrivateLocations.get(loc.id);
     const locationSpaces = matchedLocation?.spaces;
 
     if (!privateLocationCoversAllMonitorSpaces(monitorSpaces, locationSpaces)) {
@@ -114,14 +122,14 @@ export const validateMonitorPrivateLocationSpaces = (
   };
 };
 
-/**
- * Asserts that the current user has bulk_update privileges on the monitor saved object
- * in all the specified spaces. Returns a 403 response if not authorized, or undefined if OK.
- */
-export const assertCanUpdateMonitorInAllSpaces = async (
+type MonitorSavedObjectBulkAction = 'bulk_create' | 'bulk_update' | 'bulk_delete';
+
+/** Asserts that the current user has the requested privileges in all specified spaces. */
+export const assertCanPerformMonitorBulkActionInAllSpaces = async (
   routeContext: RouteContext,
   spaceIds: string[],
-  savedObjectType: string = syntheticsMonitorSavedObjectType
+  savedObjectType: string = syntheticsMonitorSavedObjectType,
+  action: MonitorSavedObjectBulkAction = 'bulk_update'
 ) => {
   const { request, response, server, spaceId } = routeContext;
 
@@ -139,17 +147,29 @@ export const assertCanUpdateMonitorInAllSpaces = async (
     server.security.authz.checkSavedObjectsPrivilegesWithRequest(request);
 
   const { hasAllRequested } = await checkSavedObjectsPrivileges(
-    `saved_object:${savedObjectType}/bulk_update`,
+    `saved_object:${savedObjectType}/${action}`,
     uniqueSpaces
   );
 
   if (!hasAllRequested) {
+    const isDeleteAction = action === 'bulk_delete';
+    const isCreateAction = action === 'bulk_create';
     return response.forbidden({
       body: {
-        message: i18n.translate('xpack.synthetics.validation.multiSpacePermissions', {
-          defaultMessage:
-            'This monitor is shared to spaces where you do not have update permissions. To save changes, either request access to those spaces or remove them from the monitor.',
-        }),
+        message: isDeleteAction
+          ? i18n.translate('xpack.synthetics.validation.multiSpaceDeletePermissions', {
+              defaultMessage:
+                'This monitor is shared to spaces where you do not have delete permissions. To delete it, request access to those spaces.',
+            })
+          : isCreateAction
+          ? i18n.translate('xpack.synthetics.validation.multiSpaceCreatePermissions', {
+              defaultMessage:
+                'You do not have create permissions in all spaces this monitor is shared to. To create it, request access to those spaces or remove them from the monitor.',
+            })
+          : i18n.translate('xpack.synthetics.validation.multiSpacePermissions', {
+              defaultMessage:
+                'This monitor is shared to spaces where you do not have update permissions. To save changes, either request access to those spaces or remove them from the monitor.',
+            }),
       },
     });
   }

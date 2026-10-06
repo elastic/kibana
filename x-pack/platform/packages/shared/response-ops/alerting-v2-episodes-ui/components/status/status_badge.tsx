@@ -6,6 +6,7 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
+import type { EuiBadgeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
@@ -14,51 +15,55 @@ export interface AlertEpisodeStatusBadgeProps {
   status: AlertEpisodeStatus;
 }
 
+/** Colors shared between the status badge and the status filter's dot indicator. */
+export const EPISODE_STATUS_BADGE_COLORS: Record<
+  AlertEpisodeStatus,
+  NonNullable<EuiBadgeProps['color']>
+> = {
+  [ALERT_EPISODE_STATUS.ACTIVE]: 'danger',
+  [ALERT_EPISODE_STATUS.RECOVERING]: 'primary',
+  [ALERT_EPISODE_STATUS.PENDING]: 'warning',
+  [ALERT_EPISODE_STATUS.INACTIVE]: 'success',
+};
+
+const STATUS_LABELS: Record<AlertEpisodeStatus, string> = {
+  [ALERT_EPISODE_STATUS.ACTIVE]: i18n.translate(
+    'xpack.alertingV2EpisodesUi.activeStatusBadgeLabel',
+    {
+      defaultMessage: 'Active',
+    }
+  ),
+  [ALERT_EPISODE_STATUS.RECOVERING]: i18n.translate(
+    'xpack.alertingV2EpisodesUi.recoveringStatusBadgeLabel',
+    {
+      defaultMessage: 'Recovering',
+    }
+  ),
+  [ALERT_EPISODE_STATUS.PENDING]: i18n.translate(
+    'xpack.alertingV2EpisodesUi.pendingStatusBadgeLabel',
+    {
+      defaultMessage: 'Pending',
+    }
+  ),
+  [ALERT_EPISODE_STATUS.INACTIVE]: i18n.translate(
+    'xpack.alertingV2EpisodesUi.inactiveStatusBadgeLabel',
+    {
+      defaultMessage: 'Inactive',
+    }
+  ),
+};
+
+/** Returns the display label for a given episode status, reusing the same i18n strings as the badge component. */
+export const getEpisodeStatusBadgeLabel = (status: AlertEpisodeStatus): string =>
+  STATUS_LABELS[status] ??
+  i18n.translate('xpack.alertingV2EpisodesUi.unknownStatusBadgeLabel', {
+    defaultMessage: 'Unknown',
+  });
+
 /**
  * Renders a badge indicating the status of an alerting episode.
  */
 export function AlertEpisodeStatusBadge({ status }: AlertEpisodeStatusBadgeProps) {
-  if (status === ALERT_EPISODE_STATUS.INACTIVE) {
-    return (
-      <EuiBadge color="success">
-        {i18n.translate('xpack.alertingV2EpisodesUi.inactiveStatusBadgeLabel', {
-          defaultMessage: 'Inactive',
-        })}
-      </EuiBadge>
-    );
-  }
-  if (status === ALERT_EPISODE_STATUS.PENDING) {
-    return (
-      <EuiBadge color="warning">
-        {i18n.translate('xpack.alertingV2EpisodesUi.pendingStatusBadgeLabel', {
-          defaultMessage: 'Pending',
-        })}
-      </EuiBadge>
-    );
-  }
-  if (status === ALERT_EPISODE_STATUS.ACTIVE) {
-    return (
-      <EuiBadge color="danger">
-        {i18n.translate('xpack.alertingV2EpisodesUi.activeStatusBadgeLabel', {
-          defaultMessage: 'Active',
-        })}
-      </EuiBadge>
-    );
-  }
-  if (status === ALERT_EPISODE_STATUS.RECOVERING) {
-    return (
-      <EuiBadge color="primary">
-        {i18n.translate('xpack.alertingV2EpisodesUi.recoveringStatusBadgeLabel', {
-          defaultMessage: 'Recovering',
-        })}
-      </EuiBadge>
-    );
-  }
-  return (
-    <EuiBadge color="hollow">
-      {i18n.translate('xpack.alertingV2EpisodesUi.unknownStatusBadgeLabel', {
-        defaultMessage: 'Unknown',
-      })}
-    </EuiBadge>
-  );
+  const color = EPISODE_STATUS_BADGE_COLORS[status] ?? 'hollow';
+  return <EuiBadge color={color}>{getEpisodeStatusBadgeLabel(status)}</EuiBadge>;
 }

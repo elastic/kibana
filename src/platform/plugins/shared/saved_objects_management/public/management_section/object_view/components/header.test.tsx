@@ -8,88 +8,93 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
-import { I18nProvider } from '@kbn/i18n-react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { Header } from './header';
 
-describe('Intro component', () => {
-  const mountHeader = (props: {
-    canEdit: boolean;
-    canDelete: boolean;
-    canViewInApp: boolean;
-    type: string;
-    viewUrl: string;
-    onDeleteClick: () => void;
-    title?: string;
-  }) =>
-    mount(
-      <I18nProvider>
-        <Header {...props} />
-      </I18nProvider>
-    ).find('Header');
+const createUser = () => userEvent.setup({ pointerEventsCheck: 0, delay: null });
 
-  const defaultProps = {
-    type: 'search',
-    canEdit: true,
-    canDelete: true,
-    canViewInApp: true,
-    viewUrl: '/some-url',
-    onDeleteClick: () => undefined,
-  };
+const defaultProps = {
+  canDelete: true,
+  canViewInApp: true,
+  viewUrl: '/some-url',
+  onDeleteClick: () => undefined,
+  back: { href: '/', label: 'Saved Objects' },
+};
 
-  it('renders correctly', () => {
-    const mounted = mountHeader({
-      ...defaultProps,
-    });
-    expect(mounted.render()).toMatchSnapshot();
+const renderHeader = (props: Partial<React.ComponentProps<typeof Header>> = {}) =>
+  render(
+    <MockAppHeaderProvider>
+      <Header {...defaultProps} {...props} />
+    </MockAppHeaderProvider>
+  );
+
+describe('Header', () => {
+  it('renders the inspect title and back link', () => {
+    renderHeader();
+
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+      'Inspect saved object'
+    );
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute('href', '/');
   });
 
-  it('displays correct title if one is provided', () => {
-    let mounted = mountHeader({ ...defaultProps, title: 'my saved search' });
-    expect(mounted.find('h1').text()).toMatchInlineSnapshot(`"Inspect my saved search"`);
-    mounted = mountHeader({ ...defaultProps, title: 'my other saved search' });
-    expect(mounted.find('h1').text()).toMatchInlineSnapshot(`"Inspect my other saved search"`);
+  it('displays the provided object title', () => {
+    renderHeader({ title: 'my saved search' });
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+      'Inspect my saved search'
+    );
   });
 
-  it('only displays delete button if canDelete is true', () => {
-    let mounted = mountHeader({
-      ...defaultProps,
-      canDelete: true,
-    });
-    expect(mounted.exists(`button[data-test-subj='savedObjectEditDelete']`)).toBe(true);
+  it('only displays delete when canDelete is true', async () => {
+    const { rerender } = renderHeader({ canDelete: true });
 
-    mounted = mountHeader({
-      ...defaultProps,
-      canDelete: false,
+    await waitFor(() => {
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toBeInTheDocument();
     });
-    expect(mounted.exists(`button[data-test-subj='savedObjectEditDelete']`)).toBe(false);
+    await openAppMenuOverflow();
+    expect(screen.getByTestId('savedObjectEditDelete')).toBeInTheDocument();
+
+    rerender(
+      <MockAppHeaderProvider>
+        <Header {...defaultProps} canDelete={false} />
+      </MockAppHeaderProvider>
+    );
+
+    expect(screen.queryByTestId('savedObjectEditDelete')).not.toBeInTheDocument();
   });
 
-  it('calls onDeleteClick when clicking on the delete button', () => {
-    const clickHandler = jest.fn();
+  it('calls onDeleteClick when clicking delete', async () => {
+    const user = createUser();
+    const onDeleteClick = jest.fn();
+    renderHeader({ onDeleteClick });
 
-    const mounted = mountHeader({
-      ...defaultProps,
-      canDelete: true,
-      onDeleteClick: clickHandler,
+    await waitFor(() => {
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toBeInTheDocument();
     });
-    expect(clickHandler).toHaveBeenCalledTimes(0);
 
-    mounted.find(`button[data-test-subj='savedObjectEditDelete']`).simulate('click');
-    expect(clickHandler).toHaveBeenCalledTimes(1);
+    await openAppMenuOverflow(user);
+    await user.click(screen.getByTestId('savedObjectEditDelete'));
+
+    expect(onDeleteClick).toHaveBeenCalledTimes(1);
   });
 
-  it('only displays view button if canViewInApp is true', () => {
-    let mounted = mountHeader({
-      ...defaultProps,
-      canViewInApp: true,
-    });
-    expect(mounted.exists(`a[data-test-subj='savedObjectEditViewInApp']`)).toBe(true);
+  it('only displays view in app when canViewInApp is true', async () => {
+    const { rerender } = renderHeader({ canViewInApp: true });
 
-    mounted = mountHeader({
-      ...defaultProps,
-      canViewInApp: false,
+    await waitFor(() => {
+      expect(screen.getByTestId('savedObjectEditViewInApp')).toHaveAttribute('href', '/some-url');
     });
-    expect(mounted.exists(`a[data-test-subj='savedObjectEditViewInApp']`)).toBe(false);
+
+    rerender(
+      <MockAppHeaderProvider>
+        <Header {...defaultProps} canViewInApp={false} />
+      </MockAppHeaderProvider>
+    );
+
+    expect(screen.queryByTestId('savedObjectEditViewInApp')).not.toBeInTheDocument();
   });
 });

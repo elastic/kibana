@@ -69,24 +69,30 @@ export type FilterLabelStatus =
   | typeof FILTER_ITEM_WARNING
   | typeof FILTER_ITEM_ERROR;
 
-export const FILTER_EDITOR_WIDTH = 1200;
+const FILTER_ITEM_MENU = 'menu';
+const FILTER_ITEM_EDITOR = 'editFilter';
 
-function FilterItemComponent(props: FilterItemProps) {
+// exported for testing only
+export function FilterItemComponent(props: FilterItemProps) {
   const { onCloseFilterPopover, onLocalFilterCreate, onLocalFilterUpdate } = props;
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
-  const [renderedComponent, setRenderedComponent] = useState('menu');
+  const [renderedComponent, setRenderedComponent] = useState(FILTER_ITEM_MENU);
   const { id, filter, indexPatterns, hiddenPanelOptions, readOnly = false, docLinks } = props;
 
   const styles = useMemoCss(filterItemStyles);
 
   const closePopover = useCallback(() => {
-    onCloseFilterPopover([() => setIsPopoverOpen(false)]);
-  }, [onCloseFilterPopover]);
+    if (renderedComponent === FILTER_ITEM_EDITOR) {
+      onCloseFilterPopover([() => setIsPopoverOpen(false)]);
+    } else {
+      setIsPopoverOpen(false);
+    }
+  }, [onCloseFilterPopover, renderedComponent]);
 
   useEffect(() => {
     if (isPopoverOpen) {
-      setRenderedComponent('menu');
+      setRenderedComponent(FILTER_ITEM_MENU);
     }
   }, [isPopoverOpen]);
 
@@ -193,7 +199,7 @@ function FilterItemComponent(props: FilterItemProps) {
         icon: 'pencil',
         'data-test-subj': 'editFilter',
         onClick: () => {
-          setRenderedComponent('editFilter');
+          setRenderedComponent(FILTER_ITEM_EDITOR);
         },
       },
       {
@@ -342,7 +348,7 @@ function FilterItemComponent(props: FilterItemProps) {
     <FilterView {...filterViewProps} />
   ) : (
     <EuiPopover anchorPosition="downLeft" {...popoverProps}>
-      {renderedComponent === 'menu' ? (
+      {renderedComponent === FILTER_ITEM_MENU ? (
         <EuiContextMenu initialPanelId={0} panels={getPanels()} />
       ) : (
         <EuiContextMenuPanel
@@ -372,6 +378,12 @@ function FilterItemComponent(props: FilterItemProps) {
 
 export const FilterItem = withCloseFilterEditorConfirmModal(FilterItemComponent);
 
+export const getFilterItemEditorContainerStyle = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    width: 1200,
+    maxWidth: '100%',
+  });
+
 const filterItemStyles = {
   /** @todo important style should be remove after fixing elastic/eui/issues/6314. */
   popoverDragAndDrop: (euiThemeContext: UseEuiTheme) =>
@@ -382,11 +394,7 @@ const filterItemStyles = {
       filter: none !important;
       ${euiShadowMedium(euiThemeContext)}
     `,
-  filterItemEditorContainer: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      width: FILTER_EDITOR_WIDTH,
-      maxWidth: '100%',
-    }),
+  filterItemEditorContainer: getFilterItemEditorContainerStyle,
   filterItem: ({ euiTheme }: UseEuiTheme) =>
     css({
       lineHeight: euiTheme.size.base,

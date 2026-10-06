@@ -29,6 +29,8 @@ interface MonacoEditorInstance {
   setPosition(pos: unknown): void;
   focus(): void;
   trigger(source: string, handlerId: string, payload: unknown): void;
+  setScrollTop(scrollTop: number): void;
+  getScrollTop(): number;
 }
 
 /**
@@ -47,6 +49,10 @@ export class KibanaCodeEditorWrapper {
   async waitCodeEditorReady(dataTestSubjId: string): Promise<void> {
     const editor = this.page.getByTestId(dataTestSubjId).getByTestId('kibanaCodeEditor');
     await expect(editor).toBeVisible();
+  }
+
+  getCodeEditorContent(dataTestSubjId: string = 'ESQLEditor'): Locator {
+    return this.page.getByTestId(dataTestSubjId).locator('.view-lines');
   }
 
   /**
@@ -88,6 +94,113 @@ export class KibanaCodeEditorWrapper {
     }).toPass({ timeout: 30_000 });
 
     return result;
+  }
+
+  private async getEditorUri(container: Locator, description: string): Promise<string> {
+    const uri = await container.locator('.monaco-editor[data-uri]').getAttribute('data-uri');
+    if (!uri) {
+      throw new Error(`Editor data-uri not found for container ${description}`);
+    }
+    return uri;
+  }
+
+  /**
+   * Returns the index of the Monaco text model backing the editor rendered inside
+   * `container`, for use with the index-based methods of this class. Resolve it right
+   * before use: indexes shift as other editors mount and unmount.
+   */
+  async getModelIndexByContainer(container: Locator): Promise<number> {
+    const uri = await this.getEditorUri(container, container.toString());
+    const index = await this.page.evaluate((modelUri) => {
+      const monacoEnv = (window as any).MonacoEnvironment;
+
+      if (!monacoEnv?.monaco?.editor) {
+        throw new Error('MonacoEnvironment.monaco.editor is not available');
+      }
+
+      return (monacoEnv.monaco.editor.getModels() as MonacoModel[]).findIndex(
+        (model) => model.uri.toString() === modelUri
+      );
+    }, uri);
+
+    if (index === -1) {
+      throw new Error(`No Monaco editor model found for uri "${uri}"`);
+    }
+    return index;
+  }
+
+  /**
+   * Returns the current value of the Monaco editor model inside the given
+   * container `data-test-subj`, resolved by the model's `data-uri` rather than
+   * a global index.
+   */
+  async getCodeEditorValueByTestSubj(dataTestSubjId: string): Promise<string> {
+    return this.getCodeEditorValueByContainer(this.page.getByTestId(dataTestSubjId));
+  }
+
+  /**
+   * Returns the current value of the Monaco editor model rendered inside `container`,
+   * resolved by the model's `data-uri` rather than a global index.
+   */
+  async getCodeEditorValueByContainer(container: Locator): Promise<string> {
+    let result = '';
+
+    await expect(async () => {
+      const uri = await this.getEditorUri(container, container.toString());
+      result = await this.page.evaluate((modelUri) => {
+        const monacoEnv = (window as any).MonacoEnvironment;
+
+        if (!monacoEnv?.monaco?.editor) {
+          throw new Error('MonacoEnvironment.monaco.editor is not available');
+        }
+
+        const model = (monacoEnv.monaco.editor.getModel(modelUri) as MonacoModel | null) ?? null;
+        if (!model) {
+          throw new Error(`No Monaco editor model found for uri "${modelUri}"`);
+        }
+
+        return model.getValue();
+      }, uri);
+    }).toPass({ timeout: 30_000 });
+
+    return result;
+  }
+
+  /**
+   * Sets the value of the Monaco editor model inside the given container
+   * `data-test-subj`, resolved by the model's `data-uri` rather than a global
+   * index, and verifies that the value was applied.
+   */
+  async setCodeEditorValueByTestSubj(dataTestSubjId: string, value: string): Promise<string> {
+    return this.setCodeEditorValueByContainer(this.page.getByTestId(dataTestSubjId), value);
+  }
+
+  /**
+   * Sets the value of the Monaco editor model rendered inside `container`, resolved by
+   * the model's `data-uri` rather than a global index, and returns the applied value.
+   * Throws if that model no longer exists, so no other editor is ever touched.
+   */
+  async setCodeEditorValueByContainer(container: Locator, value: string): Promise<string> {
+    const uri = await this.getEditorUri(container, container.toString());
+    await this.page.evaluate(
+      ({ modelUri, editorValue }) => {
+        const monacoEnv = (window as any).MonacoEnvironment;
+
+        if (!monacoEnv?.monaco?.editor) {
+          throw new Error('MonacoEnvironment.monaco.editor is not available');
+        }
+
+        const model = (monacoEnv.monaco.editor.getModel(modelUri) as MonacoModel | null) ?? null;
+        if (!model) {
+          throw new Error(`No Monaco editor model found for uri "${modelUri}"`);
+        }
+
+        model.setValue(editorValue);
+      },
+      { modelUri: uri, editorValue: value }
+    );
+
+    return await this.getCodeEditorValueByContainer(container);
   }
 
   /**
@@ -230,5 +343,83 @@ export class KibanaCodeEditorWrapper {
       }
       editor.trigger('scout-test', 'toggleSuggestionDetails', {});
     }, editorIndex);
+  }
+
+  async setScrollTop(scrollTop: number, editorIndex: number = 0): Promise<void> {
+    await this.page.evaluate(
+      ({ index, scrollAmount }) => {
+        const monacoEnv = (window as any).MonacoEnvironment;
+        if (!monacoEnv?.monaco?.editor) {
+          throw new Error('MonacoEnvironment.monaco.editor is not available');
+        }
+        const editors = monacoEnv.monaco.editor.getEditors() as MonacoEditorInstance[];
+        const editor = editors[index] ?? editors[0];
+        if (!editor) {
+          throw new Error('No Monaco editor instance found');
+        }
+        editor.setScrollTop(scrollAmount);
+      },
+      { index: editorIndex, scrollAmount: scrollTop }
+    );
+  }
+
+  async getScrollTop(editorIndex: number = 0): Promise<number> {
+    return this.page.evaluate((index) => {
+      const monacoEnv = (window as any).MonacoEnvironment;
+      if (!monacoEnv?.monaco?.editor) {
+        throw new Error('MonacoEnvironment.monaco.editor is not available');
+      }
+      const editors = monacoEnv.monaco.editor.getEditors() as MonacoEditorInstance[];
+      return editors[index]?.getScrollTop() ?? editors[0]?.getScrollTop() ?? 0;
+    }, editorIndex);
+  }
+
+  /**
+   * Locator for a Monaco *inline decoration* rendered via `inlineClassName`
+   * (e.g. the ES|QL editor's lookup-join badges). These are plain `<span>`s
+   * injected by Monaco's decoration API, not React elements, so they can't
+   * carry a `data-test-subj` — a CSS class is the correct way to target them.
+   */
+  getDecoration(decorationClassName: string): Locator {
+    return this.page.locator(`.${decorationClassName}`);
+  }
+
+  private getHoverPopover(): Locator {
+    return this.page.locator('.monaco-hover');
+  }
+
+  /**
+   * Hovers a Monaco inline decoration (see {@link getDecoration}) and returns
+   * the text of its `hoverMessage` tooltip once the popover has rendered.
+   */
+  async getDecorationHoverText(decorationClassName: string): Promise<string> {
+    // Reset the pointer first so a stale hover from a previous action doesn't
+    // mask the popover this call is waiting for.
+    await this.page.mouse.move(0, 0);
+    await this.getDecoration(decorationClassName).hover();
+
+    const hover = this.getHoverPopover();
+    await hover.waitFor({ state: 'visible' });
+    const rows = hover.locator('.hover-row');
+    await rows.waitFor({ state: 'visible' });
+
+    const texts = await rows.allInnerTexts();
+    return texts.join(' ').trim();
+  }
+
+  /**
+   * Hovers a Monaco inline decoration (see {@link getDecoration}) and clicks the
+   * hover-popover row whose text contains `optionText` (e.g. an "Edit lookup index"
+   * action link).
+   */
+  async selectDecorationHoverOption(decoration: Locator, optionText: string): Promise<void> {
+    await this.page.mouse.move(0, 0);
+    await decoration.hover();
+
+    const hover = this.getHoverPopover();
+    await hover.waitFor({ state: 'visible' });
+    const option = hover.locator('.hover-row', { hasText: optionText });
+    await option.waitFor({ state: 'visible' });
+    await option.click();
   }
 }

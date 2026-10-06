@@ -10,7 +10,14 @@ import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import { EuiButtonIcon, EuiPopover, EuiContextMenu, EuiIcon, EuiTextColor } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenu,
+  EuiIcon,
+  EuiPopover,
+  EuiTextColor,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
 import type { Owner } from '../../../../common/constants/types';
@@ -152,19 +159,22 @@ export const FileActionsPopoverButton: React.FC<{ caseId: string; theFile: FileJ
   return (
     <>
       <EuiPopover
+        aria-label={i18n.FILE_ACTIONS_POPOVER_ARIA_LABEL}
         id={`cases-files-popover-${theFile.id}`}
         key={`cases-files-popover-${theFile.id}`}
         data-test-subj={`cases-files-popover-${theFile.id}`}
         button={
-          <EuiButtonIcon
-            onClick={tooglePopover}
-            iconType="boxesVertical"
-            aria-label={i18n.ACTIONS}
-            color="text"
-            key={`cases-files-actions-popover-button-${theFile.id}`}
-            data-test-subj={`cases-files-actions-popover-button-${theFile.id}`}
-            buttonRef={buttonRef}
-          />
+          <EuiToolTip content={i18n.ACTIONS} disableScreenReaderOutput>
+            <EuiButtonIcon
+              onClick={tooglePopover}
+              iconType="boxesVertical"
+              aria-label={i18n.ACTIONS}
+              color="text"
+              key={`cases-files-actions-popover-button-${theFile.id}`}
+              data-test-subj={`cases-files-actions-popover-button-${theFile.id}`}
+              buttonRef={buttonRef}
+            />
+          </EuiToolTip>
         }
         isOpen={isPopoverOpen}
         closePopover={closePopover}

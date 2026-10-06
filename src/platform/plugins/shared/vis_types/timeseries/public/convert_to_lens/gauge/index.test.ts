@@ -97,21 +97,21 @@ describe('convertToLens', () => {
     mockIsValidMetrics.mockReturnValue(null);
     const result = await convertToLens(vis);
     expect(result).toBeNull();
-    expect(mockIsValidMetrics).toBeCalledTimes(1);
+    expect(mockIsValidMetrics).toHaveBeenCalledTimes(1);
   });
 
   test('should return null for invalid or unsupported metrics', async () => {
     mockGetMetricsColumns.mockReturnValue(null);
     const result = await convertToLens(vis);
     expect(result).toBeNull();
-    expect(mockGetMetricsColumns).toBeCalledTimes(1);
+    expect(mockGetMetricsColumns).toHaveBeenCalledTimes(1);
   });
 
   test('should return null for invalid or unsupported buckets', async () => {
     mockGetBucketsColumns.mockReturnValue(null);
     const result = await convertToLens(vis);
     expect(result).toBeNull();
-    expect(mockGetBucketsColumns).toBeCalledTimes(1);
+    expect(mockGetBucketsColumns).toHaveBeenCalledTimes(1);
   });
 
   test('should return null if metric is staticValue', async () => {
@@ -127,7 +127,7 @@ describe('convertToLens', () => {
       },
     } as Vis<Panel>);
     expect(result).toBeNull();
-    expect(mockExtractOrGenerateDatasourceInfo).toBeCalledTimes(0);
+    expect(mockExtractOrGenerateDatasourceInfo).toHaveBeenCalledTimes(0);
   });
 
   test('should return null if only series agg is specified', async () => {

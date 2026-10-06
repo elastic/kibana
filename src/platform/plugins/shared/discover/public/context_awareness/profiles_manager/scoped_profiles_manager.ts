@@ -99,6 +99,13 @@ export class ScopedProfilesManager {
   }
 
   /**
+   * Whether this manager has completed at least one data source profile resolution
+   */
+  public hasResolvedDataSourceProfile() {
+    return this.prevDataSourceProfileParams !== undefined;
+  }
+
+  /**
    * Resolves the data source context profile
    * @param params The data source profile provider parameters
    * @param onBeforeChange An optional callback to be invoked before changing the context
@@ -108,7 +115,7 @@ export class ScopedProfilesManager {
     onBeforeChange?: () => void
   ): Promise<ResolveDataSourceProfileResult> {
     const serializedParams = serializeDataSourceProfileParams(params);
-    const isFirstResolution = this.prevDataSourceProfileParams === undefined;
+    const isFirstResolution = !this.hasResolvedDataSourceProfile();
 
     if (isEqual(this.prevDataSourceProfileParams, serializedParams)) {
       return { didProfileChange: false, isFirstResolution };

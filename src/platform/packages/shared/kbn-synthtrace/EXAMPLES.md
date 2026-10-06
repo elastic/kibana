@@ -376,6 +376,34 @@ Generates data designed to trigger ML anomaly detection.
 node scripts/synthtrace apm_ml_anomalies --live
 ```
 
+#### `apm_anomalies`
+
+Generates APM transactions engineered so that, once APM anomaly-detection ML jobs run, the UI surfaces anomaly badges that exercise multi-detector and multi-environment scoring. Every service exists in both `production` and `development`, and each environment is anomalous at a different time (the trailing anomaly span is split in half: production earlier, development later), so the "all environments" combined chart shows two distinct anomaly clusters each tagged with its environment. Production is the higher (critical) score, so the badge / open-anomalies link still surfaces production.
+
+Services generated:
+
+- `synth-anomaly-detectors` — critical failure-rate anomaly plus a minor latency bump in production (so the badge surfaces failure rate, not latency), and a major failure-rate anomaly in development.
+- `synth-anomaly-environments` — critical latency spike in production, major in development.
+- `synth-anomaly-side-by-side` — the SAME critical latency spike in both environments, optionally offset in time by `sideBySideOffsetMinutes`, so the combined view shows two identical anomalies side by side.
+- `synth-anomaly-throughput` — large throughput spike in production, smaller one in development.
+- `synth-anomaly-all-metrics` — trips all three detectors (latency, failure rate, throughput) on one service in both environments, each in its own sub-window at a different time but with intentional overlaps (failure rate ramps from major to critical). The two environments use shifted windows, so some anomalous times line up across environments and others do not, and some buckets are anomalous on two or three detectors at once (so the badge surfaces the highest-scoring detector).
+
+**Options:**
+
+- `anomalyWindowHours` (number, default: 2): Trailing hours that are anomalous (split in half across the two environments).
+- `baselineRate` (number, default: 10): Transactions per minute during the baseline.
+- `sideBySideOffsetMinutes` (number, default: 15): Time offset applied to the `synth-anomaly-side-by-side` service's development environment relative to production. Both environments get the same anomaly, so the combined view shows identical anomalies side by side; `15` makes them land on the exact same time bucket.
+
+**Do not run with `--live`** (no baseline would exist for ML to learn). Use a fixed past range wider than the anomaly window. After ingesting, create APM ML jobs (APM > Settings > Anomaly detection) for the `production` and `development` environments and run their datafeeds over the ingested range for the badges to appear.
+
+**Usage:**
+
+```sh
+node scripts/synthtrace apm_anomalies --from=now-7d --to=now --clean
+node scripts/synthtrace apm_anomalies --from=now-7d --to=now --clean --scenarioOpts.anomalyWindowHours=4
+node scripts/synthtrace apm_anomalies --from=now-7d --to=now --clean --scenarioOpts.sideBySideOffsetMinutes=30
+```
+
 ### Log Scenarios
 
 #### `simple_logs`
@@ -748,6 +776,47 @@ Generates simple OpenTelemetry traces.
 ```sh
 node scripts/synthtrace otel_simple_trace --live
 ```
+
+#### `genai`
+
+Generates OpenTelemetry GenAI APM traces for testing the GenAI tab in the APM transaction/span flyout and in Discover's document viewer. Uses the OTel APM pipeline.
+
+Root SERVER spans that carry `gen_ai.*` attributes show the GenAI tab immediately in the **transaction** flyout (Services > Traces). Agent and RAG traces also wrap CLIENT GenAI exit spans under a SERVER transaction, so the tab appears in the **span** flyout when you expand the waterfall. `regular-http-service` is a plain HTTP service — the GenAI tab must not appear.
+
+OTel GenAI fields exercised:
+
+- `gen_ai.operation.name`: `chat` | `embeddings`
+- `gen_ai.system`: `openai` | `anthropic` | `aws.bedrock`
+- `gen_ai.request.{model, temperature, top_p, top_k, max_tokens, seed}`
+- `gen_ai.response.{model, id, finish_reasons}`
+- `gen_ai.usage.{input_tokens, output_tokens}`
+- EDOT extensions: `gen_ai.provider.name`, `gen_ai.input.messages` / `gen_ai.output.messages`, `gen_ai.system_instructions`, `gen_ai.conversation.id`
+
+The Elasticsearch flattened `attributes` mapping uses `ignore_above: 1024`. Messages at or under that length are indexed and render from the fields API. Longer values are dropped from the index (`_ignored`) and survive only in `_source`; APM and Discover recover them with a `_source` fallback.
+
+Services generated:
+
+- `genai-chat-service` — multi-turn OpenAI gpt-4o chat with input/output messages.
+- `genai-tool-service` — Anthropic Claude tool/function calling (`tool_calls` plus tool results).
+- `genai-embed-service` — OpenAI embeddings (`operation.name = embeddings`, no conversation).
+- `genai-minimal-service` — Amazon Bedrock Titan with only required `gen_ai.*` fields (optional sections stay hidden).
+- `genai-long-content-service` — longer messages to exercise the View more toggle.
+- `genai-agent-service` — SERVER transaction wrapping three CLIENT GenAI exit spans (plan → search → synthesize).
+- `genai-rag-service` — SERVER root plus embeddings and chat CLIENT spans in one trace.
+- `regular-http-service` — non-GenAI HTTP traffic; the GenAI tab must not appear.
+- `genai-realworld-service` — multi-turn developer assistant conversation with mixed markdown (headers, tables, code blocks) to test rendering fidelity.
+- `genai-maxlen-service` — every message's serialized JSON is exactly 1024 characters, the largest value Elasticsearch still indexes.
+- `genai-overlimit-service` — messages well over 1024 characters. Elasticsearch drops them from the index; only a `_source` fallback can surface the conversation.
+- `genai-partial-service` — mixed short and over-limit messages in the same array. `ignore_above` drops only the long elements, so the indexed value is a non-null **partial** array. Recovery must replace the whole field, not skip it because a value is present.
+
+**Usage:**
+
+```sh
+node scripts/synthtrace genai --live --clean
+node scripts/synthtrace genai --from=now-15m --to=now --clean
+```
+
+After ingesting, open **Observability > APM > Services**, pick a `genai-*` service, and open a trace. For Discover, query APM traces covering these services and open the **GenAI** tab in the document viewer. Over-limit conversations in ES|QL Discover require `METADATA _id, _index` so the tab can fetch `_source`.
 
 #### `apm_service_legacy_to_otel_metrics`
 

@@ -9,6 +9,7 @@
 
 import type { CoreStart } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowContext } from '@kbn/workflows';
+import { pickWorkflowDocumentVersion } from '@kbn/workflows';
 import {
   applyInputDefaults,
   getInputsFromDefinition,
@@ -49,13 +50,16 @@ export function buildInputDefaultRenderContext(
       startedAt: new Date(startedAt),
       url: executionUrl,
       executedBy: workflowExecution.executedBy ?? 'unknown',
+      effectiveIdentity: workflowExecution.effectiveIdentity,
       triggeredBy: workflowExecution.triggeredBy,
+      usage: workflowExecution.usage,
     },
     workflow: {
       id: workflowExecution.workflowId,
       name: workflowExecution.workflowDefinition?.name ?? '',
       enabled: workflowExecution.workflowDefinition?.enabled ?? false,
       spaceId: workflowExecution.spaceId,
+      ...pickWorkflowDocumentVersion(workflowExecution),
     },
     kibanaUrl,
     consts: workflowExecution.workflowDefinition?.consts ?? {},
@@ -87,5 +91,27 @@ export function buildWorkflowContext(
   return {
     ...renderContext,
     inputs: inputsWithDefaults,
+  };
+}
+
+/** Liquid render context with `event.inputs` aliased. Do not persist this object. */
+export function buildWorkflowRenderContext(
+  workflowExecution: EsWorkflowExecution,
+  coreStart?: CoreStart,
+  dependencies?: ContextDependencies
+): WorkflowContext {
+  const context = buildWorkflowContext(workflowExecution, coreStart, dependencies);
+  const rawEvent = context.event as Record<string, unknown> | undefined;
+  const shouldAliasInputs =
+    rawEvent?.type === 'manual' || (!rawEvent && context.inputs !== undefined);
+  const event = (
+    shouldAliasInputs
+      ? { spaceId: workflowExecution.spaceId, ...rawEvent, inputs: context.inputs }
+      : rawEvent
+  ) as WorkflowContext['event'];
+
+  return {
+    ...context,
+    event,
   };
 }

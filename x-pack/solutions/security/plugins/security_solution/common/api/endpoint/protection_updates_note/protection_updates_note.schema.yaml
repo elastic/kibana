@@ -17,6 +17,7 @@ paths:
           description: The package policy ID to retrieve the protection updates note for.
           schema:
             type: string
+            maxLength: 256
       responses:
         '200':
           description: Indicates a successful call.
@@ -41,10 +42,13 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - note
               properties:
                 note:
                   type: string
                   description: The note content.
+                  maxLength: 10000
             examples:
               setNote:
                 summary: Set a new protection updates note
@@ -57,6 +61,7 @@ paths:
           description: The package policy ID to create or update the protection updates note for.
           schema:
             type: string
+            maxLength: 256
       responses:
         '200':
           description: Indicates a successful call.

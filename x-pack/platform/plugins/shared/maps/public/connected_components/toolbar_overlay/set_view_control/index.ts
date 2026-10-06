@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { AnyAction } from 'redux';
-import type { ThunkDispatch } from 'redux-thunk';
-import { connect } from 'react-redux';
+import type { AnyAction } from 'redux-v4';
+import type { ThunkDispatch } from 'redux-thunk-v2';
+import { connect } from 'react-redux-v7';
 import { SetViewControl } from './set_view_control';
-import { setGotoWithCenter } from '../../../actions';
 import { getMapZoom, getMapCenter, getMapSettings } from '../../../selectors/map_selectors';
 import type { MapStoreState } from '../../../reducers/store';
+import { jumpTo } from '../../../reducers/non_serializable_instances';
 
 function mapStateToProps(state: MapStoreState) {
   return {
@@ -24,7 +24,7 @@ function mapStateToProps(state: MapStoreState) {
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
     onSubmit: ({ lat, lon, zoom }: { lat: number; lon: number; zoom: number }) => {
-      dispatch(setGotoWithCenter({ lat, lon, zoom }));
+      dispatch(jumpTo({ lat, lon, zoom }));
     },
   };
 }

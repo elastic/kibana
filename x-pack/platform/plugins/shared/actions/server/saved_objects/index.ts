@@ -15,6 +15,7 @@ import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-obje
 import { getOldestIdleActionTask } from '@kbn/task-manager-plugin/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import {
+  connectorIngressCredentialMappings,
   actionMappings,
   actionTaskParamsMappings,
   connectorTokenMappings,
@@ -33,6 +34,7 @@ import {
 import { transformConnectorsForExport } from './transform_connectors_for_export';
 import type { ActionTypeRegistry } from '../action_type_registry';
 import {
+  CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
@@ -40,12 +42,15 @@ import {
   USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
 import {
+  connectorIngressCredentialModelVersions,
   actionTaskParamsModelVersions,
   connectorTokenModelVersions,
   oauthStateModelVersions,
   userConnectorTokenModelVersions,
 } from './model_versions';
 import { connectorModelVersions } from './model_versions/connector_model_versions';
+import { actionEncryptedRegistrationV3 } from './action_encryption';
+import { userConnectorTokenEncryptedRegistrationV2 } from './user_connector_token_encryption';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
@@ -121,18 +126,25 @@ export function setupSavedObjects(
         };
       },
     },
-    modelVersions: connectorModelVersions,
+    modelVersions: connectorModelVersions(encryptedSavedObjects),
   });
 
   // Encrypted attributes
-  // - `secrets` properties will be encrypted
+  // - `secrets` and inbound last-saver `apiKey` / `uiamApiKey` are encrypted
   // - `config` will be included in AAD
   // - everything else excluded from AAD
-  encryptedSavedObjects.registerType({
-    type: ACTION_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['secrets']),
-    attributesToIncludeInAAD: new Set(['actionTypeId', 'isMissingSecrets', 'config']),
-    enforceRandomId: false,
+  encryptedSavedObjects.registerType(actionEncryptedRegistrationV3);
+
+  savedObjects.registerType({
+    name: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'multiple-isolated',
+    mappings: connectorIngressCredentialMappings,
+    management: {
+      importableAndExportable: false,
+    },
+    modelVersions: connectorIngressCredentialModelVersions,
   });
 
   savedObjects.registerType({
@@ -209,19 +221,7 @@ export function setupSavedObjects(
     modelVersions: userConnectorTokenModelVersions,
   });
 
-  encryptedSavedObjects.registerType({
-    type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['credentials']),
-    attributesToIncludeInAAD: new Set([
-      'profileUid',
-      'connectorId',
-      'credentialType',
-      'expiresAt',
-      'refreshTokenExpiresAt',
-      'createdAt',
-      'updatedAt',
-    ]),
-  });
+  encryptedSavedObjects.registerType(userConnectorTokenEncryptedRegistrationV2);
 
   savedObjects.registerType({
     name: OAUTH_STATE_SAVED_OBJECT_TYPE,

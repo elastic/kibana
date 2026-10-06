@@ -11,18 +11,17 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPageTemplate,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 import { useKibana } from '../../services';
 import { StepRail } from './step_rail';
+import { getWizardTelemetryPrefix } from '../utils/wizard_telemetry_prefix';
 import type { VectorPath, WizardStep } from '../types';
 
 interface StepLayoutProps {
@@ -31,8 +30,6 @@ interface StepLayoutProps {
   step: WizardStep;
   title: string;
   description: React.ReactNode;
-  docsLabel: string;
-  docsHref: string;
   onBack?: () => void;
   onNext?: () => void;
   onComplete?: () => void;
@@ -45,19 +42,16 @@ export const StepLayout = ({
   step,
   title,
   description,
-  docsLabel,
-  docsHref,
   onBack,
   onNext,
   onComplete,
   children,
 }: StepLayoutProps) => {
-  const { euiTheme } = useEuiTheme();
   const {
     services: { notifications },
   } = useKibana();
 
-  const telemetryIdPrefix = `vectordbOnboarding-${path}-${step}`;
+  const telemetryIdPrefix = getWizardTelemetryPrefix(path, step);
 
   return (
     <EuiPageTemplate restrictWidth panelled={false} grow={false}>
@@ -79,22 +73,12 @@ export const StepLayout = ({
         <EuiFlexGroup gutterSize="l" alignItems="flexStart">
           <EuiFlexItem>
             <EuiTitle size="m">
-              <h1>{title}</h1>
+              <h1 data-test-subj={`vectordbWizardStepTitle-${path}-${step}`}>{title}</h1>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <EuiText size="s" color="subdued" css={{ maxWidth: euiTheme.base * 36 }}>
+            <EuiText size="m" color="subdued" grow={false}>
               <p>{description}</p>
             </EuiText>
-            <EuiSpacer size="m" />
-            <EuiLink
-              href={docsHref}
-              external
-              target="_blank"
-              data-test-subj="stepLayoutDocsLink"
-              data-telemetry-id={`${telemetryIdPrefix}-docsLink`}
-            >
-              {docsLabel}
-            </EuiLink>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -123,8 +107,8 @@ export const StepLayout = ({
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size="xl" />
-        <EuiFlexGroup gutterSize="l" alignItems="flexStart">
+        <EuiSpacer size="l" />
+        <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
           <EuiFlexItem grow={true}>{children}</EuiFlexItem>
           <EuiFlexItem grow={false}>
             <StepRail

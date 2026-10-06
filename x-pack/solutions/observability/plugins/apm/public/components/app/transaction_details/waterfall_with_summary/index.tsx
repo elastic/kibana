@@ -17,7 +17,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
 import type { SavedSearchTableConfig } from '@kbn/saved-search-component';
-
+import {
+  getTraceParentChildrenMap,
+  getRootItemOrFallback,
+  getSubtreeIds,
+  TRACE_WATERFALL_EBT_ELEMENTS,
+} from '@kbn/apm-ui-shared';
+import { useTimeRangeId } from '../../../../context/time_range_id/use_time_range_id';
 import { TransactionSummary } from '../../../shared/summary/transaction_summary';
 import { TransactionActionMenu } from '../../../shared/transaction_action_menu/transaction_action_menu';
 import { MaybeViewTraceLink } from './maybe_view_trace_link';
@@ -28,12 +34,7 @@ import { TraceWaterfallFlyout } from './trace_waterfall_flyout';
 import { isNotInitiated, isPending, isSuccess } from '../../../../hooks/use_fetcher';
 import type { UnifiedWaterfallFetcherResult } from '../use_unified_waterfall_fetcher';
 import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
-import {
-  getTraceParentChildrenMap,
-  getRootItemOrFallback,
-  getSubtreeIds,
-} from '../../../shared/trace_waterfall/use_trace_waterfall';
-import { TRACE_WATERFALL_EBT_ELEMENTS } from '../../../shared/trace_waterfall/ebt_constants';
+import { useGetErrorMarkerHrefFromRouter } from './waterfall_container/use_get_error_marker_href_from_router';
 
 interface Props<TSample extends {}> {
   traceSamples?: TSample[];
@@ -76,6 +77,14 @@ export function WaterfallWithSummary<TSample extends {}>({
 }: Props<TSample>) {
   const [sampleActivePage, setSampleActivePage] = useState(0);
   const [isFullTraceFlyoutOpen, setIsFullTraceFlyoutOpen] = useState(false);
+  const getErrorMarkerHref = useGetErrorMarkerHrefFromRouter();
+  const { pauseAutoRefresh, resumeAutoRefresh } = useTimeRangeId();
+
+  useEffect(() => {
+    if (!isFullTraceFlyoutOpen) return;
+    pauseAutoRefresh();
+    return resumeAutoRefresh;
+  }, [isFullTraceFlyoutOpen, pauseAutoRefresh, resumeAutoRefresh]);
 
   const isControlled = selectedSample !== undefined;
 
@@ -254,6 +263,7 @@ export function WaterfallWithSummary<TSample extends {}>({
           isOpen={isFullTraceFlyoutOpen}
           onClose={() => setIsFullTraceFlyoutOpen(false)}
           contextSpanIds={contextSpanIds}
+          getErrorMarkerHref={getErrorMarkerHref}
         />
       )}
     </EuiFlexGroup>

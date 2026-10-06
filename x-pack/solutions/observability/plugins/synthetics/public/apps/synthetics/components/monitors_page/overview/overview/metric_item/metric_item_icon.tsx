@@ -14,17 +14,18 @@ import {
   EuiPopoverTitle,
   EuiPopoverFooter,
   EuiButton,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiSpacer,
   EuiSkeletonText,
   EuiIconTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { useMonitorMWs } from '../../../hooks/use_monitor_mws';
 import { MetricErrorIcon } from './metric_error_icon';
@@ -68,14 +69,17 @@ export const MetricItemIcon = ({
 
   const inProgress = isTestRunning(testNowRun);
 
+  const stateId = latestPing?.state?.id;
   const errorLink = useErrorDetailsLink({
     locationId,
     configId: monitor.configId,
-    stateId: latestPing?.state?.id!,
+    stateId: stateId ?? '',
+    remoteName: monitor.remote?.remoteName,
   });
 
   const formatter = useDateFormat();
   const testTime = formatter(timestamp);
+  const metricItemPopoverTitleId = useGeneratedHtmlId();
 
   if (inProgress) {
     return (
@@ -111,6 +115,21 @@ export const MetricItemIcon = ({
     dispatch(toggleErrorPopoverOpen(null));
   };
 
+  if (status === 'stale') {
+    return (
+      <Container>
+        <EuiIconTip
+          content={STALE_TOOLTIP}
+          type="warning"
+          color="warning"
+          iconProps={{
+            'data-test-subj': 'syntheticsMetricItemStaleIcon',
+          }}
+        />
+      </Container>
+    );
+  }
+
   if (status === 'down') {
     return (
       <Container>
@@ -122,8 +141,9 @@ export const MetricItemIcon = ({
           panelStyle={{
             outline: 'none',
           }}
+          aria-labelledby={metricItemPopoverTitleId}
         >
-          <EuiPopoverTitle>
+          <EuiPopoverTitle id={metricItemPopoverTitleId}>
             <EuiFlexGroup>
               <EuiFlexItem grow>{testTime}</EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -167,7 +187,7 @@ export const MetricItemIcon = ({
                 <EuiSpacer size="s" />
               </>
             )}
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount
               title={
                 latestPing?.error?.message ? (
@@ -176,8 +196,6 @@ export const MetricItemIcon = ({
                   <EuiSkeletonText lines={2} />
                 )
               }
-              color="danger"
-              iconType="warning"
             />
           </div>
           <EuiPopoverFooter>
@@ -186,6 +204,7 @@ export const MetricItemIcon = ({
               fullWidth
               size="s"
               href={errorLink}
+              isDisabled={!stateId}
             >
               {ERROR_DETAILS}
             </EuiButton>
@@ -225,4 +244,9 @@ const ERROR_DETAILS = i18n.translate('xpack.synthetics.errorDetails.label', {
 
 const TEST_IN_PROGRESS = i18n.translate('xpack.synthetics.inProgress.label', {
   defaultMessage: 'Manual test run is in progress.',
+});
+
+const STALE_TOOLTIP = i18n.translate('xpack.synthetics.metricItemIcon.staleTooltip', {
+  defaultMessage:
+    'This monitor has stopped reporting. Its last known status may be stale — worth investigating.',
 });

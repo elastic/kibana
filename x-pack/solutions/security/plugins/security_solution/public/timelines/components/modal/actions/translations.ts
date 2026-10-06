@@ -15,6 +15,13 @@ export const NEW_TIMELINE_BTN = i18n.translate(
   }
 );
 
+export const NEW_TIMELINE_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.timeline.modal.newTimelinePopoverAriaLabel',
+  {
+    defaultMessage: 'New Timeline options',
+  }
+);
+
 export const NEW_TIMELINE = i18n.translate('xpack.securitySolution.timeline.modal.newTimeline', {
   defaultMessage: 'New Timeline',
 });

@@ -50,9 +50,12 @@ import {
   getIndexTemplate,
   createOrUpdateIndexTemplate,
   createConcreteWriteIndex,
+  getAlertSnoozeSnapshot,
   installWithTimeout,
   InstallShutdownError,
+  installResourcesWithLock,
 } from './lib';
+import type { ResourceInstallLockManager } from './lib';
 import type { LegacyAlertsClientParams, AlertRuleData } from '../alerts_client';
 import { AlertsClient } from '../alerts_client';
 import type { IAlertsClient } from '../alerts_client/types';
@@ -62,19 +65,55 @@ import type { ClearAlertFlappingHistoryParams } from './lib/clear_alert_flapping
 import { clearAlertFlappingHistory } from './lib/clear_alert_flapping_history';
 import type { IsExistingAlertParams } from './lib/is_existing_alert';
 import { isExistingAlert } from './lib/is_existing_alert';
-export const TOTAL_FIELDS_LIMIT = 2500;
+import type { GetAlertSnoozeSnapshotParams } from './lib/get_alert_snooze_snapshot';
+
+/**
+ * Default field limit for alerts-as-data (`.alerts-*`) indices, their index
+ * templates and component templates.
+ *
+ * Usage:
+ * - `AlertsService` uses it only as a fallback when `totalFieldsLimit` is not
+ *   provided (e.g. in tests). In production the value comes from
+ *   `xpack.alerting.alertsService.totalFieldsLimit` (see `config.ts`), so keep
+ *   that config default in sync with this constant.
+ * - Re-exported from `@kbn/alerting-plugin/server` and consumed directly by
+ *   `rule_registry` (`resource_installer.ts`) when installing its own
+ *   technical/component templates, and by the AAD integration tests.
+ *
+ * Note: other plugins (alerting_v2, security_solution siem_migrations /
+ * workflow_insights, elastic_assistant, ecs_data_quality_dashboard) define
+ * their own local field-limit constants and are NOT affected by this value.
+ */
+export const TOTAL_FIELDS_LIMIT = 2800;
 const LEGACY_ALERT_CONTEXT = 'legacy-alert';
+// Prefix for the cluster-wide locks that coordinate resource installation across nodes.
+const RESOURCE_INSTALL_LOCK_PREFIX = 'alerting:resource-install';
 export const ECS_CONTEXT = `ecs`;
 export const ECS_COMPONENT_TEMPLATE_NAME = getComponentTemplateName({ name: ECS_CONTEXT });
 interface AlertsServiceParams {
   logger: Logger;
   pluginStop$: Observable<void>;
   kibanaVersion: string;
+  /** Kibana server UUID, included in install-lock wait/error logs. */
+  serverUuid?: string;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
   timeoutMs?: number;
   dataStreamAdapter: DataStreamAdapter;
   elasticsearchAndSOAvailability$: Observable<boolean>;
   isServerless: boolean;
+  /**
+   * When provided, resource installation is coordinated across Kibana nodes with
+   * a cluster-wide lock so only one node installs a given resource set at a time.
+   * Optional: when omitted (e.g. in tests, or when coordination is disabled),
+   * installation runs directly without a lock.
+   */
+  lockManager?: ResourceInstallLockManager;
+  /**
+   * Field limit applied to alerts-as-data indices/templates. Defaults to
+   * `TOTAL_FIELDS_LIMIT` when not provided (e.g. in tests). In production this
+   * is sourced from `xpack.alerting.alertsService.totalFieldsLimit`.
+   */
+  totalFieldsLimit?: number;
 }
 
 export interface CreateAlertsClientParams extends LegacyAlertsClientParams {
@@ -135,6 +174,14 @@ interface IAlertsService {
 export type PublicAlertsService = Pick<IAlertsService, 'getContextInitializationPromise'>;
 export type PublicFrameworkAlertsService = PublicAlertsService & {
   enabled: () => boolean;
+  /**
+   * Field limit applied to alerts-as-data (`.alerts-*`) resources, sourced from
+   * `xpack.alerting.alertsService.totalFieldsLimit`. Consumed by `rule_registry`
+   * so its technical/component templates and indices use the same configurable
+   * limit as the alerting framework. Optional so existing mocks remain valid;
+   * consumers fall back to `TOTAL_FIELDS_LIMIT` when it is not provided.
+   */
+  getTotalFieldsLimit?: () => number;
 };
 
 export class AlertsService implements IAlertsService {
@@ -145,12 +192,14 @@ export class AlertsService implements IAlertsService {
   private registeredContexts: Map<string, IRuleTypeAlerts> = new Map();
   private commonInitPromise: Promise<InitializationPromise>;
   private dataStreamAdapter: DataStreamAdapter;
+  private totalFieldsLimit: number;
 
   constructor(private readonly options: AlertsServiceParams) {
     this.initialized = false;
 
     this.isServerless = options.isServerless;
     this.dataStreamAdapter = options.dataStreamAdapter;
+    this.totalFieldsLimit = options.totalFieldsLimit ?? TOTAL_FIELDS_LIMIT;
 
     // Kick off initialization of common assets and save the promise
     this.commonInitPromise = this.initializeCommon(
@@ -357,7 +406,7 @@ export class AlertsService implements IAlertsService {
             logger: this.options.logger,
             esClient,
             template: getComponentTemplate({ fieldMap: alertFieldMap, includeSettings: true }),
-            totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+            totalFieldsLimit: this.totalFieldsLimit,
           }),
         () =>
           createOrUpdateComponentTemplate({
@@ -368,7 +417,7 @@ export class AlertsService implements IAlertsService {
               name: LEGACY_ALERT_CONTEXT,
               includeSettings: true,
             }),
-            totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+            totalFieldsLimit: this.totalFieldsLimit,
           }),
         () =>
           createOrUpdateComponentTemplate({
@@ -379,21 +428,31 @@ export class AlertsService implements IAlertsService {
               name: ECS_CONTEXT,
               includeSettings: true,
             }),
-            totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+            totalFieldsLimit: this.totalFieldsLimit,
           }),
       ];
 
-      // Install in parallel
-      await Promise.all(
-        initFns.map((fn) =>
-          installWithTimeout({
-            installFn: async () => await fn(),
-            pluginStop$: this.options.pluginStop$,
-            logger: this.options.logger,
-            timeoutMs,
-          })
-        )
-      );
+      // Coordinate across nodes so only one installs the common resources at a
+      // time; the install itself runs its steps in parallel.
+      await installResourcesWithLock({
+        lockManager: this.options.lockManager,
+        lockId: `${RESOURCE_INSTALL_LOCK_PREFIX}:common`,
+        logger: this.options.logger,
+        serverUuid: this.options.serverUuid,
+        pluginStop$: this.options.pluginStop$,
+        installFn: async () => {
+          await Promise.all(
+            initFns.map((fn) =>
+              installWithTimeout({
+                installFn: async () => await fn(),
+                pluginStop$: this.options.pluginStop$,
+                logger: this.options.logger,
+                timeoutMs,
+              })
+            )
+          );
+        },
+      });
 
       this.initialized = true;
       this.isInitializing = false;
@@ -455,7 +514,7 @@ export class AlertsService implements IAlertsService {
             logger: this.options.logger,
             esClient,
             template: componentTemplate,
-            totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+            totalFieldsLimit: this.totalFieldsLimit,
           })
       );
       componentTemplateRefs.push(componentTemplate.name);
@@ -481,7 +540,7 @@ export class AlertsService implements IAlertsService {
             indexPatterns: indexTemplateAndPattern,
             kibanaVersion: this.options.kibanaVersion,
             namespace,
-            totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+            totalFieldsLimit: this.totalFieldsLimit,
             dataStreamAdapter: this.dataStreamAdapter,
           }),
         }),
@@ -489,23 +548,33 @@ export class AlertsService implements IAlertsService {
         await createConcreteWriteIndex({
           logger: this.options.logger,
           esClient,
-          totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+          totalFieldsLimit: this.totalFieldsLimit,
           indexPatterns: indexTemplateAndPattern,
           dataStreamAdapter: this.dataStreamAdapter,
         }),
     ]);
 
-    // We want to install these in sequence and not in parallel because
-    // the concrete index depends on the index template which depends on
+    // Coordinate across nodes so only one installs this context/namespace's
+    // resources at a time. Within the lock we install in sequence (not parallel)
+    // because the concrete index depends on the index template which depends on
     // the component template.
-    for (const fn of initFns) {
-      await installWithTimeout({
-        installFn: async () => await fn(),
-        pluginStop$: this.options.pluginStop$,
-        logger: this.options.logger,
-        timeoutMs,
-      });
-    }
+    await installResourcesWithLock({
+      lockManager: this.options.lockManager,
+      lockId: `${RESOURCE_INSTALL_LOCK_PREFIX}:${context}:${namespace}`,
+      logger: this.options.logger,
+      serverUuid: this.options.serverUuid,
+      pluginStop$: this.options.pluginStop$,
+      installFn: async () => {
+        for (const fn of initFns) {
+          await installWithTimeout({
+            installFn: async () => await fn(),
+            pluginStop$: this.options.pluginStop$,
+            logger: this.options.logger,
+            timeoutMs,
+          });
+        }
+      },
+    });
   }
 
   public async setAlertsToUntracked(opts: SetAlertsToUntrackedParams) {
@@ -526,6 +595,16 @@ export class AlertsService implements IAlertsService {
 
   public async isExistingAlert(params: IsExistingAlertParams): Promise<boolean> {
     return isExistingAlert({
+      logger: this.options.logger,
+      esClient: await this.options.elasticsearchClientPromise,
+      ...params,
+    });
+  }
+
+  public async getAlertSnoozeSnapshot(
+    params: GetAlertSnoozeSnapshotParams
+  ): Promise<Record<string, unknown> | null> {
+    return getAlertSnoozeSnapshot({
       logger: this.options.logger,
       esClient: await this.options.elasticsearchClientPromise,
       ...params,

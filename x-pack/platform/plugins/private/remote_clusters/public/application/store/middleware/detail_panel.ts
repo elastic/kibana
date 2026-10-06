@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Dispatch } from 'redux';
+import type { Dispatch } from 'redux-v4';
 import { getRouter, getUserHasLeftApp } from '../../services';
 import { CLOSE_DETAIL_PANEL } from '../action_types';
 import type { RemoteClustersAction } from '../types';

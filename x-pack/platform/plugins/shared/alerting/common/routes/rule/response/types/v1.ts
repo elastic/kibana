@@ -68,14 +68,18 @@ export interface RuleResponseInternal<Params extends RuleParamsV1 = never> {
   scheduled_task_id?: RuleResponseInternalSchemaType['scheduled_task_id'];
   created_by: RuleResponseInternalSchemaType['created_by'];
   updated_by: RuleResponseInternalSchemaType['updated_by'];
+  created_by_profile_uid?: RuleResponseInternalSchemaType['created_by_profile_uid'];
+  updated_by_profile_uid?: RuleResponseInternalSchemaType['updated_by_profile_uid'];
   created_at: RuleResponseInternalSchemaType['created_at'];
   updated_at: RuleResponseInternalSchemaType['updated_at'];
   api_key_owner: RuleResponseInternalSchemaType['api_key_owner'];
+  api_key_owner_profile_uid?: RuleResponseInternalSchemaType['api_key_owner_profile_uid'];
   api_key_created_by_user?: RuleResponseInternalSchemaType['api_key_created_by_user'];
   throttle?: RuleResponseInternalSchemaType['throttle'];
   mute_all: RuleResponseInternalSchemaType['mute_all'];
   notify_when?: RuleResponseInternalSchemaType['notify_when'];
   muted_alert_ids: RuleResponseInternalSchemaType['muted_alert_ids'];
+  snoozed_alert_instances?: RuleResponseInternalSchemaType['snoozed_alert_instances'];
   execution_status?: RuleResponseInternalSchemaType['execution_status'];
   monitoring?: RuleResponseInternalSchemaType['monitoring'];
   snooze_schedule?: RuleResponseInternalSchemaType['snooze_schedule'];

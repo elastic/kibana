@@ -9,6 +9,8 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiAccordion, EuiSpacer, EuiButton, EuiLink, EuiText } from '@elastic/eui';
 
+import { useStartServices } from '../../../hooks';
+
 import {
   CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ,
   GCP_CLOUD_CONNECTOR_SETUP_INSTRUCTIONS_TEST_SUBJ,
@@ -64,6 +66,7 @@ export const GCPCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   accountType = ORGANIZATION_ACCOUNT,
   iacTemplateUrl,
 }) => {
+  const { docLinks } = useStartServices();
   const cloudConnectorRemoteRoleTemplate = cloud
     ? getCloudConnectorRemoteRoleTemplate({
         cloud,
@@ -131,7 +134,7 @@ export const GCPCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
         data-test-subj={GCP_LAUNCH_CLOUD_CONNECTOR_CLOUD_SHELL_TEST_SUBJ}
         target="_blank"
         iconSide="left"
-        iconType="launch"
+        iconType="rocket"
         href={cloudConnectorRemoteRoleTemplate}
       >
         <FormattedMessage
@@ -174,7 +177,7 @@ export const GCPCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
           values={{
             documentation: (
               <EuiLink
-                href="https://www.elastic.co/docs/solutions/security/cloud/get-started-with-cspm-for-gcp#cspm-gcp-agentless"
+                href={docLinks.links.securitySolution.cspmGcpAgentless}
                 target="_blank"
                 external
               >

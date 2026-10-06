@@ -25,7 +25,6 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
 import { TASK_TYPE_DESCRIPTIONS } from '@kbn/inference-endpoint-ui-common';
 import { docLinks } from '../../../common/doc_links';
@@ -33,24 +32,37 @@ import {
   isInferenceEndpointWithMetadata,
   isInferenceEndpointWithDisplayNameMetadata,
   isInferenceEndpointWithDisplayCreatorMetadata,
+  isReasoningEffortLevel,
 } from '../../../common/type_guards';
 import { getModelId } from '../../utils/get_model_id';
 import { AddEndpointModal } from './add_endpoint_modal';
 import { ModelEndpointRow } from './model_endpoint_row';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { EventType } from '../../analytics/constants';
-import { getModelEOLDate, getModelReleaseDate, getModelStatus } from '../../utils/eis_utils';
+import {
+  getModelEOLDate,
+  getModelReleaseDate,
+  getModelStatus,
+  getRegionOptions,
+} from '../../utils/eis_utils';
+import { isModelUnavailableUnderRegionPolicy } from '../../utils/is_model_unavailable_under_region_policy';
+import { ModelEolCallout } from './model_eol_callout';
+import { ModelInfoCallout } from './model_info_callout';
+import { ModelUnavailableCallout } from './model_unavailable_callout';
+import { RegionOptions } from './region_options';
+import type { EisInferenceEndpoint } from '../../../common/types';
 import { EisModelStatus } from '../../types';
 import { ModelStatusBadge } from '../model_status/model_status_badge';
 
 export interface ModelDetailFlyoutProps {
   modelId: string;
-  allEndpoints: InferenceAPIConfigResponse[];
+  allEndpoints: EisInferenceEndpoint[];
   onClose: () => void;
   onSaveEndpoint: () => void;
-  onDeleteEndpoint?: (endpoint: InferenceAPIConfigResponse) => void;
+  onDeleteEndpoint?: (endpoint: EisInferenceEndpoint) => void;
   onCopyEndpointId: (id: string) => void;
   canManage?: boolean;
+  onManageRegions?: () => void;
 }
 
 export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
@@ -61,10 +73,11 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
   onDeleteEndpoint,
   onCopyEndpointId,
   canManage = true,
+  onManageRegions,
 }) => {
   const flyoutTitleId = useGeneratedHtmlId();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingEndpoint, setEditingEndpoint] = useState<InferenceAPIConfigResponse | undefined>();
+  const [editingEndpoint, setEditingEndpoint] = useState<EisInferenceEndpoint | undefined>();
   const usageTracker = useUsageTracker();
 
   useEffect(() => {
@@ -79,6 +92,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
     modelMetadata,
     modelReleaseDate,
     modelEOLDate,
+    regionOptions,
   } = useMemo(() => {
     const filtered = allEndpoints.filter((ep) => getModelId(ep) === modelId);
 
@@ -98,6 +112,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       modelMetadata: endpointModelMetadata,
       modelReleaseDate: getModelReleaseDate(endpointModelMetadata)?.format('l') ?? '--',
       modelEOLDate: getModelEOLDate(endpointModelMetadata)?.format('l') ?? '--',
+      regionOptions: getRegionOptions(filtered),
     };
   }, [allEndpoints, modelId]);
 
@@ -120,7 +135,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
   }, [usageTracker]);
 
   const handleOpenEditModal = useCallback(
-    (endpoint: InferenceAPIConfigResponse) => {
+    (endpoint: EisInferenceEndpoint) => {
       usageTracker.count([EventType.MODAL_OPENED, `${EventType.MODAL_OPENED}_edit_endpoint`]);
       setEditingEndpoint(endpoint);
       setIsModalOpen(true);
@@ -134,6 +149,18 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
     setIsModalOpen(false);
     setEditingEndpoint(undefined);
   }, [usageTracker, editingEndpoint]);
+
+  const isBlocked = isModelUnavailableUnderRegionPolicy(endpoints, modelId);
+  const canShowLifecycleCallout = !isBlocked;
+  const showEolCallout = canShowLifecycleCallout && modelStatus === EisModelStatus.DeprecatedEOL;
+  const showPreviewCallout = canShowLifecycleCallout && modelStatus === EisModelStatus.Preview;
+  const showLifecycleCallout = showEolCallout || showPreviewCallout;
+  const showCalloutSpacer = isBlocked || showLifecycleCallout;
+
+  const initialReasoningEffort = useMemo(() => {
+    const effort = editingEndpoint?.task_settings?.reasoning?.effort;
+    return isReasoningEffortLevel(effort) ? effort : undefined;
+  }, [editingEndpoint]);
 
   const descriptionListItems = [
     {
@@ -195,6 +222,12 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
+        {isBlocked && (
+          <ModelUnavailableCallout onManageRegions={canManage ? onManageRegions : undefined} />
+        )}
+        {showEolCallout && <ModelEolCallout eolDate={modelEOLDate} />}
+        {showPreviewCallout && <ModelInfoCallout />}
+        {showCalloutSpacer && <EuiSpacer size="m" />}
         <EuiDescriptionList
           type="column"
           compressed
@@ -202,6 +235,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
           listItems={descriptionListItems}
           data-test-subj="flyoutModelDetails"
         />
+        <RegionOptions options={regionOptions} />
 
         <EuiHorizontalRule margin="xxl" />
 
@@ -222,7 +256,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     size="s"
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     color="text"
                     onClick={handleOpenAddModal}
                     disabled={modelStatus === EisModelStatus.DeprecatedEOL}
@@ -274,6 +308,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
           taskTypes={taskTypeOptions}
           initialEndpointId={editingEndpoint?.inference_id}
           initialTaskType={editingEndpoint?.task_type}
+          initialReasoningEffort={initialReasoningEffort}
           onSave={onSaveEndpoint}
           onCancel={handleCloseModal}
         />

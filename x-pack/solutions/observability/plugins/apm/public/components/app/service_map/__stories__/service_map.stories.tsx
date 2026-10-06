@@ -32,6 +32,11 @@ import {
 } from './generate_elements';
 import { transformToReactFlow } from '../../../../../common/service_map/transform_to_react_flow';
 import type { ServiceMapResponse } from '../../../../../common/service_map';
+import {
+  opbeansScenario,
+  toServiceMapResponse,
+  APM_STORY_A11Y,
+} from '../../../../test_helpers/synthtrace_stories';
 
 function getHeight() {
   return window.innerHeight - 50;
@@ -49,17 +54,7 @@ const meta: Meta<typeof ServiceMapGraph> = {
   parameters: {
     routePath: '/service-map?rangeFrom=now-15m&rangeTo=now',
     layout: 'fullscreen',
-    a11y: {
-      config: {
-        rules: [
-          { id: 'color-contrast', enabled: true },
-          { id: 'image-alt', enabled: true },
-          { id: 'aria-required-attr', enabled: true },
-          { id: 'aria-roles', enabled: true },
-          { id: 'region', enabled: false }, // Disabled for Storybook context
-        ],
-      },
-    },
+    a11y: APM_STORY_A11Y,
     docs: {
       description: {
         component:
@@ -85,6 +80,58 @@ export const SimpleExample: Story = {
         kuery=""
         start={defaultTimeRange.start}
         end={defaultTimeRange.end}
+      />
+    );
+  },
+};
+
+/**
+ * **Synthtrace-generated story** — demonstrates the scenario-driven pattern.
+ *
+ * Data comes from the shared `opbeansScenario()` in
+ * `test_helpers/synthtrace_stories/`, not from a hand-crafted fixture or a
+ * random generator. Any APM story can import the same scenario and run it
+ * through a component-specific selector:
+ *
+ * ```
+ * scenario()              ─→  flat ApmFields[]
+ *   └── toServiceMapResponse()  ─→  ServiceMapResponse
+ *         └── transformToReactFlow()  ─→  { nodes, edges }
+ *               └── <ServiceMapGraph nodes edges />
+ * ```
+ *
+ * The `toServiceMapResponse` selector is the in-memory analog of the server's
+ * `fetch_exit_span_samples.ts` — it reconstructs service→service connections
+ * from exit spans and their downstream transaction's `parent.id`, then feeds
+ * the result to the production `transformToReactFlow` function unchanged.
+ *
+ * This story is tagged `autodocs` so the Docs panel shows the component API
+ * and this description together.
+ */
+export const SynthtraceGenerated: Story = {
+  tags: ['autodocs'],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Rendered from in-memory synthtrace data (opbeans scenario). ' +
+          'No Elasticsearch involved — the scenario generates raw APM documents, ' +
+          'a selector reconstructs the service-map connection shape, and the ' +
+          'production `transformToReactFlow` function converts it to React Flow nodes/edges.',
+      },
+    },
+  },
+  render: () => {
+    const { nodes, edges } = transformToReactFlow(toServiceMapResponse(opbeansScenario()));
+    return (
+      <ServiceMapGraph
+        height={getHeight()}
+        nodes={nodes}
+        edges={edges}
+        environment={defaultEnvironment}
+        kuery=""
+        start={new Date('2024-01-15T12:00:00.000Z').toISOString()}
+        end={new Date('2024-01-15T12:15:00.000Z').toISOString()}
       />
     );
   },
@@ -346,6 +393,7 @@ const MapFromJSONTemplate = () => {
       <EuiFlexItem grow={false}>
         <EuiForm isInvalid={error !== undefined} error={error}>
           <EuiFilePicker
+            aria-label="Upload a JSON file"
             display="large"
             fullWidth
             initialPromptText="Upload a JSON file"

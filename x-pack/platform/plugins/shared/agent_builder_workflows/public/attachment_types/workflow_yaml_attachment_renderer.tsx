@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useState } from 'react';
+import { EuiPanel } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Subscription } from 'rxjs';
 import { combineLatest } from 'rxjs';
 import type {
@@ -15,20 +15,22 @@ import type {
   CanvasRenderCallbacks,
 } from '@kbn/agent-builder-browser/attachments';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
-import { CodeEditor } from '@kbn/code-editor';
 import type { ApplicationStart, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { KibanaContextProvider, useKibana } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows/common/constants';
 import {
   useWorkflowsApi,
   useWorkflowsCapabilities,
-  useWorkflowsMonacoTheme,
-  WORKFLOWS_MONACO_EDITOR_THEME,
   type WorkflowApi,
+  type WorkflowsUiServices,
+  WorkflowsUiServicesProvider,
 } from '@kbn/workflows-ui';
 import type { QueryClient } from '@kbn/react-query';
 import { PLUGIN_ID as WORKFLOW_PLUGIN_ID } from '@kbn/workflows-management-plugin/common';
 import type { WorkflowsBaseTelemetry } from '@kbn/workflows-management-plugin/public';
+import { WorkflowInfoStripe } from './workflow_info_stripe';
+import { WorkflowYamlCanvasPreview } from './workflow_yaml_canvas_preview';
 
 interface WorkflowYamlData {
   yaml: string;
@@ -109,30 +111,11 @@ const saveWorkflow = async ({
   }
 };
 
-const READONLY_EDITOR_OPTIONS = {
-  readOnly: true,
-  minimap: { enabled: false },
-  automaticLayout: true,
-  lineNumbers: 'on' as const,
-  scrollBeyondLastLine: false,
-  tabSize: 2,
-  fontSize: 14,
-  lineHeight: 23,
-  renderWhitespace: 'none' as const,
-  wordWrap: 'on' as const,
-  wordWrapColumn: 80,
-  wrappingIndent: 'indent' as const,
-  theme: WORKFLOWS_MONACO_EDITOR_THEME,
-  padding: { top: 24, bottom: 16 },
-  domReadOnly: true,
-  contextmenu: false,
-};
-
 const WorkflowYamlCanvasContent: React.FC<{
   attachment: WorkflowYamlAttachment;
   isSidebar: boolean;
-  registerActionButtons: CanvasRenderCallbacks['registerActionButtons'];
-  updateOrigin: CanvasRenderCallbacks['updateOrigin'];
+  registerActionButtons?: CanvasRenderCallbacks['registerActionButtons'];
+  updateOrigin?: CanvasRenderCallbacks['updateOrigin'];
   application: ApplicationStart;
   isOnWorkflowPage: (workflowId: string) => boolean;
   telemetry: WorkflowsBaseTelemetry;
@@ -147,11 +130,11 @@ const WorkflowYamlCanvasContent: React.FC<{
   telemetry,
   queryClient,
 }) => {
-  useWorkflowsMonacoTheme();
-
   const workflowApi = useWorkflowsApi();
   const { canCreateWorkflow, canUpdateWorkflow, canReadWorkflow } = useWorkflowsCapabilities();
   const { notifications } = useKibana<{ notifications: CoreStart['notifications'] }>().services;
+  // Same gate as the workflow library template page graph preview.
+  const showGraph = useUiSetting<boolean>(WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID, false);
 
   // Defer button registration past the initial mount cycle so the parent
   // flyout's clearing effect (which also fires on mount) doesn't overwrite
@@ -168,151 +151,199 @@ const WorkflowYamlCanvasContent: React.FC<{
   const workflowId = savedWorkflowId ?? attachment.data.workflowId;
 
   const isPersisted = Boolean(attachment.origin);
+  // TODO: replace with /workflows_management/public/entities/workflows/model/use_save_yaml.ts or something along the lines
+  const [savingAction, setSavingAction] = useState<'save' | 'saveAsNew' | null>(null);
 
-  const handleSave = useCallback(async () => {
-    const id = await saveWorkflow({
-      workflowApi,
-      notifications,
-      yaml: attachment.data.yaml,
-      workflowId,
-      isPersisted,
-      updateOrigin,
-      telemetry,
-      queryClient,
-    });
-    if (id && !workflowId) {
-      setSavedWorkflowId(id);
-    }
-  }, [
+  // Stash the latest values in a ref so the handlers below stay referentially
+  // stable across renders. Without this, every YAML stream chunk would rebuild
+  // the handlers and re-run the button-registration effect.
+  const latest = useRef({
     workflowApi,
     notifications,
-    attachment.data.yaml,
+    yaml: attachment.data.yaml,
     workflowId,
     isPersisted,
     updateOrigin,
     telemetry,
     queryClient,
-  ]);
+    application,
+  });
+  latest.current = {
+    workflowApi,
+    notifications,
+    yaml: attachment.data.yaml,
+    workflowId,
+    isPersisted,
+    updateOrigin,
+    telemetry,
+    queryClient,
+    application,
+  };
+
+  const handleSave = useCallback(async () => {
+    const l = latest.current;
+    if (!l.updateOrigin) {
+      return;
+    }
+
+    setSavingAction('save');
+    try {
+      const id = await saveWorkflow({
+        workflowApi: l.workflowApi,
+        notifications: l.notifications,
+        yaml: l.yaml,
+        workflowId: l.workflowId,
+        isPersisted: l.isPersisted,
+        updateOrigin: l.updateOrigin,
+        telemetry: l.telemetry,
+        queryClient: l.queryClient,
+      });
+      if (id && !l.workflowId) {
+        setSavedWorkflowId(id);
+      }
+    } finally {
+      setSavingAction(null);
+    }
+  }, []);
 
   const handleSaveAsNew = useCallback(async () => {
+    const l = latest.current;
+    setSavingAction('saveAsNew');
     try {
-      const result = await workflowApi.createWorkflow({ yaml: attachment.data.yaml });
-      queryClient.invalidateQueries({ queryKey: ['workflows'] });
-      telemetry.reportWorkflowCreated({
+      const result = await l.workflowApi.createWorkflow({ yaml: l.yaml });
+      l.queryClient.invalidateQueries({ queryKey: ['workflows'] });
+      l.telemetry.reportWorkflowCreated({
         workflowId: result.id,
         aiAssisted: true,
       });
-      notifications.toasts.addSuccess(
+      l.notifications.toasts.addSuccess(
         i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.saveAsNewSuccess', {
           defaultMessage: 'Workflow saved as new',
         }),
         { toastLifeTimeMs: 2000 }
       );
-      application.navigateToApp(WORKFLOW_PLUGIN_ID, { path: result.id });
+      l.application.navigateToApp(WORKFLOW_PLUGIN_ID, { path: result.id });
     } catch (error) {
-      notifications.toasts.addDanger({
+      l.notifications.toasts.addDanger({
         title: i18n.translate(
           'workflowsManagement.attachmentRenderers.workflowYaml.saveAsNewError',
           { defaultMessage: 'Failed to save workflow' }
         ),
         text: extractErrorMessage(error),
       });
+    } finally {
+      setSavingAction(null);
     }
-  }, [workflowApi, notifications, application, attachment.data.yaml, telemetry, queryClient]);
+  }, []);
+
+  const labels = useMemo(
+    () => ({
+      saving: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.saving', {
+        defaultMessage: 'Saving...',
+      }),
+      override: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.override', {
+        defaultMessage: 'Override',
+      }),
+      saveAsNew: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.saveAsNew', {
+        defaultMessage: 'Save as new',
+      }),
+      save: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.save', {
+        defaultMessage: 'Save',
+      }),
+      openInEditor: i18n.translate(
+        'workflowsManagement.attachmentRenderers.workflowYaml.openInEditor',
+        { defaultMessage: 'Open in editor' }
+      ),
+    }),
+    []
+  );
+
+  const handleOpenInEditor = useCallback(() => {
+    const l = latest.current;
+    if (l.workflowId) {
+      l.application.navigateToApp(WORKFLOW_PLUGIN_ID, { path: l.workflowId });
+    }
+  }, []);
+
+  const showOpenInEditor =
+    Boolean(workflowId) && isPersisted && !isOnWorkflowPage(workflowId ?? '') && canReadWorkflow;
 
   useEffect(() => {
-    if (!ready) {
+    if (!ready || !registerActionButtons) {
       return;
     }
 
     const buttons: ActionButton[] = [];
 
+    const isSaving = savingAction !== null;
+
     if (workflowId && isPersisted) {
       if (canUpdateWorkflow) {
         buttons.push({
-          label: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.override', {
-            defaultMessage: 'Override',
-          }),
+          label: savingAction === 'save' ? labels.saving : labels.override,
           icon: 'save',
           type: ActionButtonType.PRIMARY,
           handler: handleSave,
+          disabled: isSaving,
         });
       }
       if (canCreateWorkflow) {
         buttons.push({
-          label: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.saveAsNew', {
-            defaultMessage: 'Save as new',
-          }),
+          label: savingAction === 'saveAsNew' ? labels.saving : labels.saveAsNew,
           icon: 'copy',
           type: ActionButtonType.SECONDARY,
           handler: handleSaveAsNew,
+          disabled: isSaving,
         });
       }
     } else if (canCreateWorkflow) {
       buttons.push({
-        label: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.save', {
-          defaultMessage: 'Save',
-        }),
+        label: savingAction === 'save' ? labels.saving : labels.save,
         icon: 'save',
         type: ActionButtonType.PRIMARY,
         handler: handleSave,
+        disabled: isSaving,
       });
     }
 
-    if (workflowId && isPersisted && !isOnWorkflowPage(workflowId) && canReadWorkflow) {
+    if (showOpenInEditor) {
       buttons.push({
-        label: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.openInEditor', {
-          defaultMessage: 'Open in editor',
-        }),
-        icon: 'popout',
+        label: labels.openInEditor,
+        icon: 'external',
         type: ActionButtonType.SECONDARY,
-        handler: () => {
-          application.navigateToApp(WORKFLOW_PLUGIN_ID, { path: workflowId });
-        },
+        handler: handleOpenInEditor,
       });
     }
 
     registerActionButtons(buttons);
   }, [
     ready,
-    isSidebar,
     workflowId,
     isPersisted,
+    savingAction,
+    showOpenInEditor,
     handleSave,
     handleSaveAsNew,
-    isOnWorkflowPage,
-    application,
+    handleOpenInEditor,
     registerActionButtons,
     canCreateWorkflow,
     canUpdateWorkflow,
-    canReadWorkflow,
+    labels,
   ]);
 
-  return (
-    <div
-      css={css`
-        height: 100%;
-        min-height: 400px;
-        width: 100%;
-      `}
-    >
-      <CodeEditor
-        languageId="yaml"
-        value={attachment.data.yaml}
-        options={READONLY_EDITOR_OPTIONS}
-      />
-    </div>
-  );
+  return <WorkflowYamlCanvasPreview yaml={attachment.data.yaml} showGraph={showGraph} />;
 };
 
 export const createWorkflowYamlAttachmentUiDefinition = ({
   core,
   telemetry,
   queryClient,
+  workflowsUiServices,
 }: {
   core: CoreStart;
   telemetry: WorkflowsBaseTelemetry;
   queryClient: QueryClient;
+  workflowsUiServices: WorkflowsUiServices;
 }): AttachmentUIDefinition<WorkflowYamlAttachment> => {
   const { application } = core;
   let currentAppId: string | undefined;
@@ -342,6 +373,8 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
 
     getIcon: () => 'workflowsApp',
 
+    canvasHideTopPadding: true,
+
     getActionButtons: ({ attachment, isCanvas, openCanvas }) => {
       if (isCanvas) return [];
 
@@ -368,7 +401,7 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
             'workflowsManagement.attachmentRenderers.workflowYaml.openInEditor',
             { defaultMessage: 'Open in editor' }
           ),
-          icon: 'popout',
+          icon: 'external',
           type: ActionButtonType.SECONDARY,
           handler: () => {
             application.navigateToApp(WORKFLOW_PLUGIN_ID, { path: attachment.data.workflowId });
@@ -379,18 +412,28 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
       return buttons;
     },
 
+    renderInlineContent: ({ attachment }) => (
+      <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
+        <WorkflowsUiServicesProvider services={workflowsUiServices}>
+          <WorkflowInfoStripe yaml={attachment.data.yaml} showTitle />
+        </WorkflowsUiServicesProvider>
+      </EuiPanel>
+    ),
+
     renderCanvasContent: ({ attachment, isSidebar }, { registerActionButtons, updateOrigin }) => (
       <KibanaContextProvider services={core}>
-        <WorkflowYamlCanvasContent
-          attachment={attachment}
-          isSidebar={isSidebar}
-          registerActionButtons={registerActionButtons}
-          updateOrigin={updateOrigin}
-          application={application}
-          isOnWorkflowPage={isOnWorkflowPage}
-          telemetry={telemetry}
-          queryClient={queryClient}
-        />
+        <WorkflowsUiServicesProvider services={workflowsUiServices}>
+          <WorkflowYamlCanvasContent
+            attachment={attachment}
+            isSidebar={isSidebar}
+            registerActionButtons={registerActionButtons}
+            updateOrigin={updateOrigin}
+            application={application}
+            isOnWorkflowPage={isOnWorkflowPage}
+            telemetry={telemetry}
+            queryClient={queryClient}
+          />
+        </WorkflowsUiServicesProvider>
       </KibanaContextProvider>
     ),
   };

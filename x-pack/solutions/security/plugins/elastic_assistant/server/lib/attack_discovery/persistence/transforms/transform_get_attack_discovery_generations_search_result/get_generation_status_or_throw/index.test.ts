@@ -73,4 +73,58 @@ describe('getGenerationStatusOrThrow', () => {
       `Generation ${executionUuid} is missing ${ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_STARTED} event.action`
     );
   });
+
+  describe('ignoreDismissed', () => {
+    it('returns the underlying "succeeded" status when a dismissed event is present and ignoreDismissed is true', () => {
+      const result = getGenerationStatusOrThrow({
+        executionUuid,
+        eventActions: [
+          ...baseActions,
+          ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_SUCCEEDED,
+          ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_DISMISSED,
+        ],
+        ignoreDismissed: true,
+      });
+
+      expect(result).toBe('succeeded');
+    });
+
+    it('returns the underlying "failed" status when a dismissed event is present and ignoreDismissed is true', () => {
+      const result = getGenerationStatusOrThrow({
+        executionUuid,
+        eventActions: [
+          ...baseActions,
+          ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED,
+          ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_DISMISSED,
+        ],
+        ignoreDismissed: true,
+      });
+
+      expect(result).toBe('failed');
+    });
+
+    it('returns "started" when only started and dismissed events are present and ignoreDismissed is true', () => {
+      const result = getGenerationStatusOrThrow({
+        executionUuid,
+        eventActions: [...baseActions, ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_DISMISSED],
+        ignoreDismissed: true,
+      });
+
+      expect(result).toBe('started');
+    });
+
+    it('still returns "dismissed" when a dismissed event is present and ignoreDismissed is false', () => {
+      const result = getGenerationStatusOrThrow({
+        executionUuid,
+        eventActions: [
+          ...baseActions,
+          ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_SUCCEEDED,
+          ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_DISMISSED,
+        ],
+        ignoreDismissed: false,
+      });
+
+      expect(result).toBe('dismissed');
+    });
+  });
 });

@@ -20,8 +20,46 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
   const toasts = getService('toasts');
   const retry = getService('retry');
   const comboBox = getService('comboBox');
+  const browser = getService('browser');
 
   return {
+    /**
+     * Reveals the legacy custom-fields section on Create Case / Settings / Case Details.
+     * Templates v2 hides it behind a per-owner local-storage switch (default off); flipping
+     * it on keeps legacy custom-field coverage valid regardless of the templates flag. No-op
+     * when templates is off (legacy fields are always shown). Requires the cases app origin
+     * to be loaded first (e.g. after navigating to the app).
+     */
+    async showLegacyCustomFields(owner: string): Promise<void> {
+      await browser.setLocalStorageItem(`${owner}.cases.showLegacyCustomFields`, 'true');
+    },
+
+    /**
+     * Pre-opens the legacy custom-fields accordion on the case view by writing its state
+     * to localStorage before the page loads.  Call this before any navigation that lands
+     * on the case view (goToFirstListedCase, submitCase redirect, etc.).  The accordion
+     * defaults to closed; writing it open avoids the race between a toggle click and the
+     * React re-render that would reveal the custom-field elements.
+     */
+    async openLegacyCustomFieldsAccordion(owner: string): Promise<void> {
+      await browser.setLocalStorageItem(
+        `${owner}.cases.caseView.sidebarAccordions`,
+        JSON.stringify({
+          attributes: true,
+          legacyCustomFields: true,
+          templateFields: true,
+          connectors: true,
+        })
+      );
+    },
+
+    async waitForCaseViewToLoad() {
+      await retry.waitFor('the case view page to load', async () => {
+        if (await testSubjects.exists('create-case-submit')) return false;
+        return testSubjects.exists('appHeaderTitle');
+      });
+    },
+
     /**
      * Opens the create case page pressing the "create case" button.
      *
@@ -39,50 +77,41 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
       await this.openCaseSetStatusDropdown();
       await testSubjects.click(`case-view-status-dropdown-${status}`);
       await header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail(`case-status-badge-popover-button-${status}`);
+      await testSubjects.existOrFail('case-view-status-badge');
     },
 
     async openCaseSetStatusDropdown() {
-      const button = await find.byCssSelector(
-        '[data-test-subj="case-view-status-dropdown"] button'
-      );
-      await button.click();
+      await testSubjects.click('case-view-status-badge');
     },
 
-    async assertRadioGroupValue(testSubject: string, expectedValue: string) {
+    async assertClosureOption(expectedValue: 'close-by-user' | 'close-by-pushing') {
+      await retry.waitFor('assertClosureOption: closure switch to exist', async () => {
+        return testSubjects.exists('automatic-closure-switch');
+      });
       await retry.waitFor(
-        `assertRadioGroupValue: Expected the radio group ${testSubject} to exists`,
+        `assertClosureOption: closure switch to reflect "${expectedValue}"`,
         async () => {
-          return await testSubjects.exists(testSubject);
-        }
-      );
-
-      const assertRadioGroupValue = await testSubjects.find(testSubject);
-
-      await retry.waitFor(
-        `assertRadioGroupValue: Expected the radio group value to equal "${expectedValue}"`,
-        async () => {
-          const input = await assertRadioGroupValue.findByCssSelector(':checked');
-          const selectedOptionId = await input.getAttribute('id');
-          return selectedOptionId === expectedValue;
+          const checked = await testSubjects.getAttribute(
+            'automatic-closure-switch',
+            'aria-checked'
+          );
+          const isPushing = checked === 'true';
+          return expectedValue === 'close-by-pushing' ? isPushing : !isPushing;
         }
       );
     },
 
-    async selectRadioGroupValue(testSubject: string, value: string) {
-      await retry.waitFor(
-        `selectRadioGroupValue: Expected the radio group ${testSubject} to exists`,
-        async () => {
-          return await testSubjects.exists(testSubject);
-        }
-      );
+    async selectClosureOption(value: 'close-by-user' | 'close-by-pushing') {
+      const checked = await testSubjects.getAttribute('automatic-closure-switch', 'aria-checked');
+      const isPushing = checked === 'true';
+      const shouldBePushing = value === 'close-by-pushing';
 
-      const radioGroup = await testSubjects.find(testSubject);
+      if (isPushing !== shouldBePushing) {
+        await testSubjects.click('automatic-closure-switch');
+        await header.waitUntilLoadingHasFinished();
+      }
 
-      const label = await radioGroup.findByCssSelector(`label[for="${value}"]`);
-      await label.click();
-      await header.waitUntilLoadingHasFinished();
-      await this.assertRadioGroupValue(testSubject, value);
+      await this.assertClosureOption(value);
     },
 
     async selectSeverity(severity: CaseSeverity) {
@@ -91,6 +120,7 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
         `case-severity-selection-${severity}`
       );
       await testSubjects.click(`case-severity-selection-${severity}`);
+      await header.waitUntilLoadingHasFinished();
     },
 
     async expectToasterToContain(content: string) {
@@ -112,14 +142,21 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
     },
 
     async setSearchTextInAssigneesPopover(text: string) {
-      await (
-        await (await find.byClassName('euiContextMenuPanel')).findByClassName('euiFieldSearch')
-      ).type(text);
+      const searchInput = await find.byCssSelector('.euiSelectableSearch');
+      await searchInput.type(text);
       await header.waitUntilLoadingHasFinished();
     },
 
     async selectFirstRowInAssigneesPopover() {
       await (await find.byClassName('euiSelectableListItem__content')).click();
+      await header.waitUntilLoadingHasFinished();
+    },
+
+    async selectUserInAssigneesPopover(username: string) {
+      await retry.waitFor(`assignee option for ${username} to appear`, async () => {
+        return testSubjects.exists(`userProfileSelectableOption-${username}`);
+      });
+      await testSubjects.click(`userProfileSelectableOption-${username}`);
       await header.waitUntilLoadingHasFinished();
     },
 
@@ -144,12 +181,38 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
     },
 
     async addMultipleTags(tags: string[]) {
-      await testSubjects.click('tag-list-edit-button');
-
       for (const [index, tag] of tags.entries()) {
-        await comboBox.setCustom('comboBoxInput', `${tag}-${index}`);
+        await comboBox.setCustom('case-tags', `${tag}-${index}`);
+        await header.waitUntilLoadingHasFinished();
       }
+    },
 
+    async editCaseTitle(newTitle: string) {
+      await testSubjects.click('appHeaderTitleButton');
+      await testSubjects.setValue('appHeaderTitleInput', newTitle);
+      await browser.pressKeys(browser.keys.ENTER);
+      await header.waitUntilLoadingHasFinished();
+    },
+
+    async assertCaseTitle(expectedTitle: string) {
+      await retry.tryForTime(5000, async () => {
+        const title = await testSubjects.find('appHeaderTitle');
+        expect(await title.getVisibleText()).equal(expectedTitle);
+      });
+    },
+
+    async addCategory(category: string) {
+      await comboBox.setCustom('categories-list', category);
+      await header.waitUntilLoadingHasFinished();
+    },
+
+    async removeCategory() {
+      await comboBox.clear('categories-list');
+      await header.waitUntilLoadingHasFinished();
+    },
+
+    async addTag(tag: string) {
+      await comboBox.setCustom('case-tags', tag);
       await header.waitUntilLoadingHasFinished();
     },
   };

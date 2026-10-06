@@ -13,7 +13,7 @@ import type {
 import { createAlertEvent } from '../rule_executor/test_utils';
 import { createRuleResponse } from '../test_utils';
 import type { StateTransitionContext } from './strategies/types';
-import type { LatestAlertEventState } from './queries';
+import type { LastLifecycleActionType, LatestAlertEventState } from './queries';
 
 const DEFAULT_TIMESTAMP = '2025-01-01T00:00:00.000Z';
 const DEFAULT_EPISODE_ID = 'episode-1';
@@ -26,6 +26,7 @@ export const buildLatestAlertEvent = ({
   previousTimestamp,
   episodeId = DEFAULT_EPISODE_ID,
   groupHash = DEFAULT_GROUP_HASH,
+  lifecycleActionType = null,
 }: {
   episodeStatus: AlertEpisodeStatus | null;
   eventStatus: AlertEventStatus;
@@ -33,30 +34,41 @@ export const buildLatestAlertEvent = ({
   previousTimestamp?: string | null;
   episodeId?: string;
   groupHash?: string;
+  lifecycleActionType?: LastLifecycleActionType;
 }): LatestAlertEventState => ({
   last_status: eventStatus,
   last_episode_id: episodeId,
   last_episode_status: episodeStatus,
   last_episode_status_count: statusCount ?? null,
   last_episode_timestamp: previousTimestamp ?? DEFAULT_TIMESTAMP,
+  last_lifecycle_action_type: lifecycleActionType,
   group_hash: groupHash,
 });
 
 export const buildStrategyStateTransitionContext = ({
   eventStatus,
   stateTransition,
-  eventTimestamp,
+  noDataStrategy,
+  evaluatedAt = DEFAULT_TIMESTAMP,
   previousEpisode,
 }: {
   eventStatus: AlertEventStatus;
   stateTransition?: RuleResponse['state_transition'];
-  eventTimestamp?: string;
+  noDataStrategy?: NonNullable<RuleResponse['no_data']>['strategy'];
+  evaluatedAt?: string;
   previousEpisode?: LatestAlertEventState;
-}): StateTransitionContext => ({
-  rule: createRuleResponse({ state_transition: stateTransition }),
-  alertEvent: createAlertEvent({
+}): StateTransitionContext => {
+  const { '@timestamp': ignoredTimestamp, ...alertEvent } = createAlertEvent({
     status: eventStatus,
-    '@timestamp': eventTimestamp ?? DEFAULT_TIMESTAMP,
-  }),
-  ...(previousEpisode ? { previousEpisode } : {}),
-});
+  });
+
+  return {
+    rule: createRuleResponse({
+      state_transition: stateTransition,
+      ...(noDataStrategy ? { no_data: { strategy: noDataStrategy } } : {}),
+    }),
+    alertEvent,
+    evaluatedAt,
+    ...(previousEpisode ? { previousEpisode } : {}),
+  };
+};

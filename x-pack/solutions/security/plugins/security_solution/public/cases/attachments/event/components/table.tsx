@@ -23,7 +23,7 @@ import {
 import { type DataView } from '@kbn/data-views-plugin/public';
 import type { DeprecatedRowRenderer } from '@kbn/timelines-plugin/common';
 import React, { type FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 
 import { EuiEmptyPrompt, EuiProgress, useEuiTheme } from '@elastic/eui';
 import { SECURITY_CELL_ACTIONS_CASE_EVENTS } from '@kbn/ui-actions-plugin/common/trigger_ids';

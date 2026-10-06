@@ -24,6 +24,8 @@ import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import { hasWorkflowExecutePrivilege } from '@kbn/agent-builder-tools-base/workflows';
 
 export const WORKFLOW_EXECUTE_STEP_TOOL_ID = 'platform.workflows.workflow_execute_step';
 
@@ -50,7 +52,6 @@ export const SAFE_STEP_TYPES = new Set([
   'kibana.getCase',
   'kibana.streams.list',
   'kibana.streams.get',
-  'kibana.streams.getSignificantEvents',
   'cases.getCase',
   'cases.getCases',
   'cases.findCases',
@@ -327,7 +328,7 @@ const executeAndPollStep = async ({
     request
   );
 
-  const result = await pollExecution(api, executionId, stepName, spaceId);
+  const result = await pollExecution(api, executionId, stepName, spaceId, request);
 
   return { executionId, result };
 };
@@ -493,7 +494,8 @@ const pollExecution = async (
   api: WorkflowsManagementApi,
   executionId: string,
   stepName: string,
-  spaceId: string
+  spaceId: string,
+  request: ToolHandlerContext['request']
 ): Promise<{
   status: string;
   output?: unknown;
@@ -507,6 +509,7 @@ const pollExecution = async (
 
     const execution = await api.getWorkflowExecution(executionId, spaceId, {
       includeOutput: true,
+      request,
     });
 
     if (!execution) {
@@ -535,11 +538,19 @@ const pollExecution = async (
 
 export function registerWorkflowExecuteStepTool(
   agentBuilder: AgentBuilderPluginSetup,
-  api: WorkflowsManagementApi
+  api: WorkflowsManagementApi,
+  getSecurity: () => SecurityPluginStart | undefined
 ): void {
   agentBuilder.tools.register({
     id: WORKFLOW_EXECUTE_STEP_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Execute Workflow Step',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
     description: `Execute a single workflow step against the real environment.
 - Safe steps (data, ES reads, cases reads): executed and output returned with no prompt.
 - Unsafe steps (slack.sendMessage, elasticsearch.indices.delete, ES writes, kibana.request, http, …): execution is gated by a user confirmation dialog. ALWAYS populate \`confirmation_body\` with a Markdown preview describing: (1) resolved inputs (e.g. Slack channel + message text, ES index + operation + approximate doc count), (2) the side effect this step will produce, (3) whether the action is reversible. Without \`confirmation_body\` the dialog falls back to a flat key/value dump, which is a degraded UX.
@@ -549,7 +560,9 @@ export function registerWorkflowExecuteStepTool(
 Provide \`contextOverride\` with mock data when the step references outputs from previous steps.
 Provide \`yaml\` to execute a step without needing a workflow.yaml attachment (useful for field discovery before creating the full workflow).
 
-If the user declines a confirmation, do NOT retry the same step. Acknowledge the cancellation and continue with other unrelated work.`,
+If the user declines a confirmation, do NOT retry the same step. Acknowledge the cancellation and continue with other unrelated work.
+
+API documentation — Workflows guide: https://www.elastic.co/docs/explore-analyze/workflows — Workflows API: https://www.elastic.co/docs/api/doc/kibana/group/endpoint-workflows`,
     schema: z.object({
       stepName: z.string().describe('Name of the step to execute'),
       yaml: z
@@ -572,11 +585,23 @@ If the user declines a confirmation, do NOT retry the same step. Acknowledge the
         ),
     }),
     tags: ['workflows', 'yaml', 'execution', 'testing'],
-    experimental: true,
     handler: async (
       { stepName, yaml: inlineYaml, contextOverride, confirmation_body: confirmationBody },
       context
     ) => {
+      const canExecute = await hasWorkflowExecutePrivilege({
+        security: getSecurity(),
+        request: context.request,
+        spaceId: context.spaceId,
+      });
+      if (!canExecute) {
+        return createToolResult({
+          success: false,
+          error:
+            "Unauthorized to execute workflow step. The 'workflowsManagement' execute privilege is required.",
+        });
+      }
+
       const attachment = inlineYaml ? null : findWorkflowYamlAttachment(context);
       if (!inlineYaml && !attachment) {
         return createToolResult({

@@ -10,10 +10,12 @@ import {
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IUiSettingsClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import type { ServerlessProjectType } from '../../../common/constants/types';
 import { CasesConnector } from './cases_connector';
@@ -43,6 +45,7 @@ import { ATTACK_DISCOVERY_MAX_OPEN_CASES, groupAttackDiscoveryAlerts } from './a
 
 interface GetCasesConnectorTypeArgs {
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
+  getActionsClient: (request: KibanaRequest) => Promise<PublicMethodsOf<ActionsClient>>;
   getUnsecuredSavedObjectsClient: (
     request: KibanaRequest,
     savedObjectTypes: string[]
@@ -51,15 +54,20 @@ interface GetCasesConnectorTypeArgs {
   getSpaceId: (request?: KibanaRequest) => string;
   serverlessProjectType?: string;
   isCasesAttachmentsEnabled: boolean;
+  isTemplatesEnabled: boolean;
+  isAtLeastPlatinum: () => Promise<boolean>;
 }
 
 export const getCasesConnectorType = ({
   getCasesClient,
+  getActionsClient,
   getSpaceId,
   getUnsecuredSavedObjectsClient,
   getUiSettingsClient,
   serverlessProjectType,
   isCasesAttachmentsEnabled,
+  isTemplatesEnabled,
+  isAtLeastPlatinum,
 }: GetCasesConnectorTypeArgs): SubActionConnectorType<
   CasesConnectorConfig,
   CasesConnectorSecrets
@@ -70,10 +78,13 @@ export const getCasesConnectorType = ({
     new CasesConnector({
       casesParams: {
         getCasesClient,
+        getActionsClient,
         getSpaceId,
         getUnsecuredSavedObjectsClient,
         getUiSettingsClient,
         isCasesAttachmentsEnabled,
+        isTemplatesEnabled,
+        isAtLeastPlatinum,
       },
       connectorParams: params,
     }),
@@ -126,13 +137,13 @@ export const getCasesConnectorAdapter = ({
        * We handle attack discovery alerts differently than other alerts and group
        * their building block SIEM alerts that led to each attack separately.
        */
-      let internallyManagedAlerts = false;
+      let source: 'attack' | 'rule' = 'rule';
       let groupedAlerts: CasesGroupedAlerts[] | null = null;
       let maximumCasesToOpen = params.subActionParams.maximumCasesToOpen ?? DEFAULT_MAX_OPEN_CASES;
       if (rule.ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID) {
         try {
           groupedAlerts = groupAttackDiscoveryAlerts(caseAlerts);
-          internallyManagedAlerts = true;
+          source = 'attack';
           maximumCasesToOpen = ATTACK_DISCOVERY_MAX_OPEN_CASES;
         } catch (error) {
           logger.error(
@@ -158,7 +169,8 @@ export const getCasesConnectorAdapter = ({
         timeWindow: params.subActionParams.timeWindow,
         maximumCasesToOpen,
         templateId: params.subActionParams.templateId,
-        internallyManagedAlerts,
+        templateVersion: params.subActionParams.templateVersion,
+        source,
       };
 
       return { subAction: 'run', subActionParams };

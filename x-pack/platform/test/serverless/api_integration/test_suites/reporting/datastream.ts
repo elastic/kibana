@@ -137,6 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
               name: expect.any(String),
               uuid: expect.any(String),
               managedBy: 'Data stream lifecycle',
+              indexMode: 'standard',
               preferILM: true,
             },
           ],
@@ -146,6 +147,7 @@ export default function ({ getService }: FtrProviderContext) {
             delete_index: true,
             manage_data_stream_lifecycle: true,
             read_failure_store: true,
+            manage: true,
           },
           timeStampField: { name: '@timestamp' },
         })

@@ -114,9 +114,11 @@ describe('fromConnectorSpecSchema', () => {
         actions: {
           testAction: {
             input: z.object({}),
+            scope: 'read' as const,
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const serialized = serializeConnectorSpec(testSpec);
@@ -166,9 +168,11 @@ describe('fromConnectorSpecSchema', () => {
         actions: {
           testAction: {
             input: z.object({}),
+            scope: 'read' as const,
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const serialized = serializeConnectorSpec(testSpec);

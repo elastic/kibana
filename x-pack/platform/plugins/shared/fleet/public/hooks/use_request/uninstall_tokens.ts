@@ -15,6 +15,7 @@ import type {
   GetUninstallTokensMetadataRequest,
   GetUninstallTokensMetadataResponse,
   GetUninstallTokenResponse,
+  RotateUninstallTokenResponse,
 } from '../../../common/types/rest_spec/uninstall_token';
 
 import type { RequestError } from './use_request';
@@ -45,6 +46,13 @@ export const sendGetUninstallToken = (uninstallTokenId: string) =>
   sendRequest<GetUninstallTokenResponse>({
     method: 'get',
     path: uninstallTokensRouteService.getInfoPath(uninstallTokenId),
+    version: API_VERSIONS.public.v1,
+  });
+
+export const sendRotateUninstallToken = (agentPolicyId: string) =>
+  sendRequest<RotateUninstallTokenResponse>({
+    method: 'post',
+    path: uninstallTokensRouteService.getRotatePath(agentPolicyId),
     version: API_VERSIONS.public.v1,
   });
 

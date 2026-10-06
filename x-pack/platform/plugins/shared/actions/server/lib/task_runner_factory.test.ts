@@ -6,9 +6,11 @@
  */
 
 import sinon from 'sinon';
+import { isExternalUiamCredential } from '@kbn/core-security-server';
 import { ActionExecutor } from './action_executor';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskErrorSource, TaskStatus } from '@kbn/task-manager-plugin/server';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { TaskRunnerFactory } from './task_runner_factory';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { actionExecutorMock } from './action_executor.mock';
@@ -129,10 +131,7 @@ describe('Task Runner Factory', () => {
       inMemoryMetrics
     );
     expect(() =>
-      factory.create({
-        taskInstance: mockedTaskInstance,
-        abortController: new AbortController(),
-      })
+      factory.create(taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance }))
     ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory not initialized"`);
   });
 
@@ -153,10 +152,9 @@ describe('Task Runner Factory', () => {
   });
 
   test('executes the task by calling the executor with proper parameters, using given actionId when no actionRef in references', async () => {
-    const taskRunner = taskRunnerFactory.create({
-      taskInstance: mockedTaskInstance,
-      abortController: new AbortController(),
-    });
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance })
+    );
 
     mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
     spaceIdToNamespace.mockReturnValueOnce('namespace-test');
@@ -201,11 +199,67 @@ describe('Task Runner Factory', () => {
     });
   });
 
-  test('executes the task by calling the executor with proper parameters, using stored actionId when actionRef is in references', async () => {
-    const taskRunner = taskRunnerFactory.create({
-      taskInstance: mockedTaskInstance,
-      abortController: new AbortController(),
+  test('marks the fake request as carrying an external credential when uiamApiKeyExternal is persisted', async () => {
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance })
+    );
+
+    mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
+    spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '3',
+      type: 'action_task_params',
+      attributes: {
+        actionId: '2',
+        params: { baz: true },
+        executionId: '123abc',
+        apiKey: 'essu_user_created_key',
+        uiamApiKeyExternal: true,
+      },
+      references: [],
     });
+
+    await taskRunner.run();
+
+    const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+    expect(executeParams.request.headers).toEqual({
+      authorization: 'ApiKey essu_user_created_key',
+    });
+    expect(isExternalUiamCredential(executeParams.request)).toBe(true);
+  });
+
+  test('does not mark the fake request when uiamApiKeyExternal is absent', async () => {
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance })
+    );
+
+    mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
+    spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '3',
+      type: 'action_task_params',
+      attributes: {
+        actionId: '2',
+        params: { baz: true },
+        executionId: '123abc',
+        apiKey: 'essu_framework_granted_key',
+      },
+      references: [],
+    });
+
+    await taskRunner.run();
+
+    const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+    expect(executeParams.request.headers).toEqual({
+      authorization: 'ApiKey essu_framework_granted_key',
+    });
+    expect(isExternalUiamCredential(executeParams.request)).toBe(false);
+  });
+
+  test('executes the task by calling the executor with proper parameters, using stored actionId when actionRef is in references', async () => {
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance })
+    );
 
     mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
     spaceIdToNamespace.mockReturnValueOnce('namespace-test');
@@ -257,10 +311,9 @@ describe('Task Runner Factory', () => {
   });
 
   test('executes the task by calling the executor with proper parameters when consumer is provided', async () => {
-    const taskRunner = taskRunnerFactory.create({
-      taskInstance: mockedTaskInstance,
-      abortController: new AbortController(),
-    });
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance })
+    );
 
     mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
     spaceIdToNamespace.mockReturnValueOnce('namespace-test');
@@ -308,10 +361,9 @@ describe('Task Runner Factory', () => {
   });
 
   test('executes the task by calling the executor with proper parameters when saved_object source is provided', async () => {
-    const taskRunner = taskRunnerFactory.create({
-      taskInstance: mockedTaskInstance,
-      abortController: new AbortController(),
-    });
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance })
+    );
 
     mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
     spaceIdToNamespace.mockReturnValueOnce('namespace-test');
@@ -364,10 +416,9 @@ describe('Task Runner Factory', () => {
   });
 
   test('executes the task by calling the executor with proper parameters when notification source is provided', async () => {
-    const taskRunner = taskRunnerFactory.create({
-      taskInstance: mockedTaskInstance,
-      abortController: new AbortController(),
-    });
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance })
+    );
 
     mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
     spaceIdToNamespace.mockReturnValueOnce('namespace-test');
@@ -420,11 +471,10 @@ describe('Task Runner Factory', () => {
   });
 
   test('should pass abort signal to the action executor', async () => {
-    const abortController = new AbortController();
-    const taskRunner = taskRunnerFactory.create({
-      taskInstance: mockedTaskInstance,
-      abortController,
-    });
+    const { signal } = new AbortController();
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance, signal })
+    );
 
     mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
     spaceIdToNamespace.mockReturnValueOnce('namespace-test');
@@ -443,14 +493,39 @@ describe('Task Runner Factory', () => {
     await taskRunner.run();
 
     const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
-    expect(executeParams.signal).toBe(abortController.signal);
+    expect(executeParams.signal).toBe(signal);
+  });
+
+  test('passes executionUuid from RunContext as actionExecutionId to the executor', async () => {
+    const executionUuid = 'test-execution-uuid-from-run-context';
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance, executionUuid })
+    );
+
+    mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
+    spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '3',
+      type: 'action_task_params',
+      attributes: {
+        actionId: '2',
+        params: { baz: true },
+        executionId: '123abc',
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+
+    await taskRunner.run();
+
+    const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+    expect(executeParams.actionExecutionId).toBe(executionUuid);
   });
 
   test('cleans up action_task_params object through the cleanup runner method', async () => {
-    const taskRunner = taskRunnerFactory.create({
-      taskInstance: mockedTaskInstance,
-      abortController: new AbortController(),
-    });
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance })
+    );
 
     await taskRunner.cleanup();
 
@@ -479,10 +554,9 @@ describe('Task Runner Factory', () => {
         },
       ],
     });
-    const taskRunner = taskRunnerFactory.create({
-      taskInstance: mockedTaskInstance,
-      abortController: new AbortController(),
-    });
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance })
+    );
 
     await taskRunner.cancel();
     expect(mockedActionExecutor.logCancellation.mock.calls[0][0].actionId).toBe('2');
@@ -490,15 +564,22 @@ describe('Task Runner Factory', () => {
     expect(mockedActionExecutor.logCancellation.mock.calls.length).toBe(1);
 
     expect(taskRunnerFactoryInitializerParams.logger.debug).toHaveBeenCalledWith(
-      `Cancelling action task for action with id 2 - execution error due to timeout.`
+      `Cancelling action task for action with id 2 - execution error due to timeout.`,
+      {
+        labels: {
+          actionExecutionId: 'test-execution-uuid',
+          actionId: '2',
+          executionId: '123abc',
+          spaceId: 'test',
+        },
+      }
     );
   });
 
   test('cleanup runs successfully when action_task_params cleanup fails and logs the error', async () => {
-    const taskRunner = taskRunnerFactory.create({
-      taskInstance: mockedTaskInstance,
-      abortController: new AbortController(),
-    });
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance })
+    );
 
     taskRunnerFactoryInitializerParams.savedObjectsRepository.delete.mockRejectedValueOnce(
       new Error('Fail')
@@ -512,15 +593,15 @@ describe('Task Runner Factory', () => {
       { refresh: false }
     );
     expect(taskRunnerFactoryInitializerParams.logger.error).toHaveBeenCalledWith(
-      'Failed to cleanup action_task_params object [id="3"]: Fail'
+      'Failed to cleanup action_task_params object [id="3"]: Fail',
+      { labels: { actionExecutionId: 'test-execution-uuid' } }
     );
   });
 
   test('throws an error with suggested retry logic when return status is error', async () => {
-    const taskRunner = taskRunnerFactory.create({
-      taskInstance: mockedTaskInstance,
-      abortController: new AbortController(),
-    });
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance })
+    );
 
     mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '3',
@@ -557,10 +638,9 @@ describe('Task Runner Factory', () => {
   });
 
   test('uses API key when provided', async () => {
-    const taskRunner = taskRunnerFactory.create({
-      taskInstance: mockedTaskInstance,
-      abortController: new AbortController(),
-    });
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance })
+    );
 
     mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
     spaceIdToNamespace.mockReturnValueOnce('namespace-test');
@@ -604,10 +684,9 @@ describe('Task Runner Factory', () => {
   });
 
   test('uses relatedSavedObjects merged with references when provided', async () => {
-    const taskRunner = taskRunnerFactory.create({
-      taskInstance: mockedTaskInstance,
-      abortController: new AbortController(),
-    });
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance })
+    );
 
     mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
     spaceIdToNamespace.mockReturnValueOnce('namespace-test');
@@ -662,10 +741,9 @@ describe('Task Runner Factory', () => {
   });
 
   test('uses relatedSavedObjects as is when references are empty', async () => {
-    const taskRunner = taskRunnerFactory.create({
-      taskInstance: mockedTaskInstance,
-      abortController: new AbortController(),
-    });
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance })
+    );
 
     mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
     spaceIdToNamespace.mockReturnValueOnce('namespace-test');
@@ -716,10 +794,9 @@ describe('Task Runner Factory', () => {
   });
 
   test('sanitizes invalid relatedSavedObjects when provided', async () => {
-    const taskRunner = taskRunnerFactory.create({
-      taskInstance: mockedTaskInstance,
-      abortController: new AbortController(),
-    });
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance })
+    );
 
     mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
     spaceIdToNamespace.mockReturnValueOnce('namespace-test');
@@ -771,10 +848,9 @@ describe('Task Runner Factory', () => {
   test(`doesn't use API key when not provided`, async () => {
     const factory = new TaskRunnerFactory(mockedActionExecutor, inMemoryMetrics);
     factory.initialize(taskRunnerFactoryInitializerParams);
-    const taskRunner = factory.create({
-      taskInstance: mockedTaskInstance,
-      abortController: new AbortController(),
-    });
+    const taskRunner = factory.create(
+      taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance })
+    );
 
     mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
     spaceIdToNamespace.mockReturnValueOnce('namespace-test');
@@ -814,13 +890,9 @@ describe('Task Runner Factory', () => {
   });
 
   test(`throws an error when license doesn't support the action type`, async () => {
-    const taskRunner = taskRunnerFactory.create({
-      taskInstance: {
-        ...mockedTaskInstance,
-        attempts: 1,
-      },
-      abortController: new AbortController(),
-    });
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: { ...mockedTaskInstance, attempts: 1 } })
+    );
 
     mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '3',
@@ -853,13 +925,9 @@ describe('Task Runner Factory', () => {
   });
 
   test(`will throw an error with retry: false if the task is not retryable`, async () => {
-    const taskRunner = taskRunnerFactory.create({
-      taskInstance: {
-        ...mockedTaskInstance,
-        attempts: 0,
-      },
-      abortController: new AbortController(),
-    });
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: { ...mockedTaskInstance, attempts: 0 } })
+    );
 
     mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '3',
@@ -897,19 +965,23 @@ describe('Task Runner Factory', () => {
     expect(isRetryableError(err)).toEqual(false);
     expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
       `Action '2' failed: Error message`,
-      { tags: ['connector-run-failed', 'framework-error'] }
+      {
+        labels: {
+          actionExecutionId: 'test-execution-uuid',
+          actionId: '2',
+          executionId: '123abc',
+          spaceId: 'test',
+        },
+        tags: ['connector-run-failed', 'framework-error'],
+      }
     );
     expect(getErrorSource(err)).toBe(TaskErrorSource.FRAMEWORK);
   });
 
   test(`will throw an error and log the error message with the serviceMessage`, async () => {
-    const taskRunner = taskRunnerFactory.create({
-      taskInstance: {
-        ...mockedTaskInstance,
-        attempts: 0,
-      },
-      abortController: new AbortController(),
-    });
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: { ...mockedTaskInstance, attempts: 0 } })
+    );
 
     mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '3',
@@ -948,18 +1020,22 @@ describe('Task Runner Factory', () => {
     expect(err).toBeDefined();
     expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
       `Action '2' failed: Error message: Service message`,
-      { tags: ['connector-run-failed', 'framework-error'] }
+      {
+        labels: {
+          actionExecutionId: 'test-execution-uuid',
+          actionId: '2',
+          executionId: '123abc',
+          spaceId: 'test',
+        },
+        tags: ['connector-run-failed', 'framework-error'],
+      }
     );
   });
 
   test(`fallbacks to FRAMEWORK error if ActionExecutor does not return any type of source'`, async () => {
-    const taskRunner = taskRunnerFactory.create({
-      taskInstance: {
-        ...mockedTaskInstance,
-        attempts: 0,
-      },
-      abortController: new AbortController(),
-    });
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: { ...mockedTaskInstance, attempts: 0 } })
+    );
 
     mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '3',
@@ -994,13 +1070,9 @@ describe('Task Runner Factory', () => {
   });
 
   test(`Should return USER error for a "not found SO"`, async () => {
-    const taskRunner = taskRunnerFactory.create({
-      taskInstance: {
-        ...mockedTaskInstance,
-        attempts: 0,
-      },
-      abortController: new AbortController(),
-    });
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: { ...mockedTaskInstance, attempts: 0 } })
+    );
 
     mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValue(
       SavedObjectsErrorHelpers.createGenericNotFoundError()
@@ -1014,13 +1086,9 @@ describe('Task Runner Factory', () => {
   });
 
   test('will rethrow the error if the error is thrown instead of returned', async () => {
-    const taskRunner = taskRunnerFactory.create({
-      taskInstance: {
-        ...mockedTaskInstance,
-        attempts: 0,
-      },
-      abortController: new AbortController(),
-    });
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: { ...mockedTaskInstance, attempts: 0 } })
+    );
 
     mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '3',
@@ -1051,17 +1119,24 @@ describe('Task Runner Factory', () => {
     expect(err).toBeDefined();
     expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
       `Action '2' failed: Fail`,
-      { tags: ['connector-run-failed', 'framework-error'] }
+      {
+        labels: {
+          actionExecutionId: 'test-execution-uuid',
+          actionId: '2',
+          executionId: '123abc',
+          spaceId: 'test',
+        },
+        tags: ['connector-run-failed', 'framework-error'],
+      }
     );
     expect(thrownError).toEqual(err);
     expect(getErrorSource(err)).toBe(TaskErrorSource.FRAMEWORK);
   });
 
   test('increments monitoring metrics after execution', async () => {
-    const taskRunner = taskRunnerFactory.create({
-      taskInstance: mockedTaskInstance,
-      abortController: new AbortController(),
-    });
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance })
+    );
 
     mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
     spaceIdToNamespace.mockReturnValueOnce('namespace-test');
@@ -1084,10 +1159,9 @@ describe('Task Runner Factory', () => {
   });
 
   test('increments monitoring metrics after a failed execution', async () => {
-    const taskRunner = taskRunnerFactory.create({
-      taskInstance: mockedTaskInstance,
-      abortController: new AbortController(),
-    });
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance })
+    );
 
     mockedActionExecutor.execute.mockResolvedValueOnce({
       status: 'error',
@@ -1124,10 +1198,9 @@ describe('Task Runner Factory', () => {
   });
 
   test('increments monitoring metrics after a timeout', async () => {
-    const taskRunner = taskRunnerFactory.create({
-      taskInstance: mockedTaskInstance,
-      abortController: new AbortController(),
-    });
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance })
+    );
 
     mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
     spaceIdToNamespace.mockReturnValueOnce('namespace-test');
@@ -1154,10 +1227,9 @@ describe('Task Runner Factory', () => {
     const error = new Error('test');
     mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValueOnce(error);
 
-    const taskRunner = taskRunnerFactory.create({
-      taskInstance: mockedTaskInstance,
-      abortController: new AbortController(),
-    });
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance })
+    );
     spaceIdToNamespace.mockReturnValueOnce('namespace-test');
 
     try {
@@ -1170,7 +1242,12 @@ describe('Task Runner Factory', () => {
 
       expect(taskRunnerFactoryInitializerParams.logger.error).toHaveBeenCalledWith(
         `Failed to load action task params ${mockedTaskInstance.params.actionTaskParamsId}: test`,
-        { tags: ['connector-run-failed', 'framework-error'] }
+        {
+          labels: {
+            spaceId: 'test',
+          },
+          tags: ['connector-run-failed', 'framework-error'],
+        }
       );
     }
   });

@@ -7,44 +7,36 @@
 
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
-import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
-import type { ConversationService } from '../../conversation';
+import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
+import { createAgentNotFoundError } from '@kbn/agent-builder-common';
 import type { AgentsServiceStart } from '../../agents';
-import { resolveSelectedConnectorId } from '../../../utils/resolve_selected_connector_id';
 import { createModelProvider } from '../runner/model_provider';
+import { resolveExecutionConnectorId } from './resolve_execution_connector_id';
 
 export const resolveServices = async ({
   agentId,
   connectorId,
+  telemetryMetadata,
   request,
   logger,
   inference,
-  conversationService,
   agentService,
-  uiSettings,
-  savedObjects,
   searchInferenceEndpoints,
 }: {
   agentId: string;
   connectorId?: string;
+  telemetryMetadata?: ConnectorTelemetryMetadata;
   request: KibanaRequest;
   logger: Logger;
   inference: InferenceServerStart;
-  conversationService: ConversationService;
   agentService: AgentsServiceStart;
-  uiSettings: UiSettingsServiceStart;
-  savedObjects: SavedObjectsServiceStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
 }) => {
-  const selectedConnectorId = await resolveSelectedConnectorId({
-    request,
+  const selectedConnectorId = await resolveExecutionConnectorId({
     connectorId,
-    uiSettings,
-    savedObjects,
-    inference,
+    request,
     searchInferenceEndpoints,
   });
 
@@ -57,23 +49,22 @@ export const resolveServices = async ({
     .then((agentRegistry) => agentRegistry.has(agentId));
 
   if (!hasAgent) {
-    throw new Error(`Agent "${agentId}" not found or not available`);
+    throw createAgentNotFoundError({
+      agentId,
+      customMessage: `Agent "${agentId}" not found or not available`,
+    });
   }
 
   const modelProvider = createModelProvider({
     inference,
     request,
     defaultConnectorId: selectedConnectorId,
+    telemetryMetadata,
     logger,
-    uiSettings,
-    savedObjects,
     searchInferenceEndpoints,
   });
 
-  const conversationClient = await conversationService.getScopedClient({ request });
-
   return {
-    conversationClient,
     modelProvider,
     selectedConnectorId,
   };

@@ -63,14 +63,14 @@ export class FleetPolicyRevisionsCleanupTask {
         timeout: TASK_TIMEOUT,
         createTaskRunner: ({
           taskInstance,
-          abortController,
+          signal,
         }: {
           taskInstance: ConcreteTaskInstance;
-          abortController: AbortController;
+          signal: AbortSignal;
         }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, core, abortController);
+              return this.runTask(taskInstance, core, signal);
             },
             cancel: async () => {},
           };
@@ -120,7 +120,7 @@ export class FleetPolicyRevisionsCleanupTask {
   public runTask = async (
     taskInstance: ConcreteTaskInstance,
     core: CoreSetup,
-    abortController: AbortController
+    signal: AbortSignal
   ) => {
     // Check if the feature flag is enabled
     if (!appContextService.getExperimentalFeatures().enableFleetPolicyRevisionsCleanupTask) {
@@ -150,7 +150,7 @@ export class FleetPolicyRevisionsCleanupTask {
 
     try {
       await cleanupPolicyRevisions(esClient, {
-        abortController,
+        signal,
         logger: this.logger,
         config: {
           maxRevisions: this.maxRevisions,

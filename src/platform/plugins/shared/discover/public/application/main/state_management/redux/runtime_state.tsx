@@ -9,12 +9,18 @@
 
 import React, { type PropsWithChildren, createContext, useContext, useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataSource } from '@kbn/data-source';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
 import { useCurrentTabContext } from './hooks';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
 import type { ConnectedCustomizationService } from '../../../../customizations';
+import {
+  ProfileStateType,
+  type ProfileStateMap,
+  type ProfileStateRegistry,
+} from '../../../../../common/context_awareness';
 import type { ContextAwarenessToolkit, ScopedProfilesManager } from '../../../../context_awareness';
 import type { TabState } from './types';
 import type { ScopedDiscoverEBTManager } from '../../../../ebt_manager';
@@ -42,6 +48,7 @@ interface TabRuntimeState {
   scopedEbtManager: ScopedDiscoverEBTManager;
   cascadedDocumentsFetcher: CascadedDocumentsFetcher;
   currentDataView: DataView;
+  currentDataSource: DataSource;
   unsubscribeFn: (() => void) | undefined;
 }
 
@@ -51,7 +58,10 @@ type ReactiveRuntimeState<TState, TNullable extends keyof TState = never> = {
   >;
 };
 
-export type ReactiveTabRuntimeState = ReactiveRuntimeState<TabRuntimeState, 'currentDataView'>;
+export type ReactiveTabRuntimeState = ReactiveRuntimeState<
+  TabRuntimeState,
+  'currentDataView' | 'currentDataSource'
+>;
 
 export type RuntimeStateManager = ReactiveRuntimeState<DiscoverRuntimeState> & {
   tabs: { byId: Record<string, ReactiveTabRuntimeState> };
@@ -92,10 +102,12 @@ export const createTabRuntimeState = ({
     scopedEbtManager,
     toolkit,
   });
+  const currentDataSource$ = new BehaviorSubject<DataSource | undefined>(undefined);
   const cascadedDocumentsFetcher = new CascadedDocumentsFetcher(
     services,
     scopedProfilesManager,
-    cascadedDocumentsStateManager
+    cascadedDocumentsStateManager,
+    currentDataSource$
   );
 
   return {
@@ -111,6 +123,7 @@ export const createTabRuntimeState = ({
     scopedEbtManager$: new BehaviorSubject(scopedEbtManager),
     cascadedDocumentsFetcher$: new BehaviorSubject(cascadedDocumentsFetcher),
     currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
+    currentDataSource$,
     unsubscribeFn$: new BehaviorSubject<TabRuntimeState['unsubscribeFn']>(undefined),
   };
 };
@@ -128,6 +141,117 @@ export const selectDataSourceProfileId = (
   return selectTabRuntimeState(runtimeStateManager, tabId)
     .scopedProfilesManager$.getValue()
     .getContexts().dataSourceContext.profileId;
+};
+
+export const selectCurrentProfileStateDefinition = (
+  runtimeStateManager: RuntimeStateManager,
+  tabId: string
+) => {
+  return selectTabRuntimeState(runtimeStateManager, tabId)
+    .scopedProfilesManager$.getValue()
+    .getContexts().dataSourceContext.profileState;
+};
+
+export const selectCurrentTabType = (runtimeStateManager: RuntimeStateManager, tabId: string) => {
+  return selectTabRuntimeState(runtimeStateManager, tabId)
+    .scopedProfilesManager$.getValue()
+    .getContexts().dataSourceContext.tabType;
+};
+
+/** Uses the resolved tab type when available, otherwise the inherited type. */
+export const selectTabTypeForPersistence = ({
+  runtimeStateManager,
+  tabState,
+}: {
+  runtimeStateManager: RuntimeStateManager;
+  tabState: TabState;
+}) => {
+  const scopedProfilesManager = selectTabRuntimeState(
+    runtimeStateManager,
+    tabState.id
+  ).scopedProfilesManager$.getValue();
+
+  return scopedProfilesManager.hasResolvedDataSourceProfile()
+    ? selectCurrentTabType(runtimeStateManager, tabState.id)
+    : tabState.initialInternalState?.tabType;
+};
+
+export const selectCurrentProfileUrlState = ({
+  runtimeStateManager,
+  tabId,
+  profileStateMap,
+  profileStateRegistry,
+}: {
+  runtimeStateManager: RuntimeStateManager;
+  tabId: string;
+  profileStateMap: ProfileStateMap;
+  profileStateRegistry: ProfileStateRegistry;
+}): ProfileStateMap | undefined => {
+  return selectCurrentProfileState({
+    runtimeStateManager,
+    tabId,
+    profileStateMap,
+    profileStateRegistry,
+    stateTypes: [ProfileStateType.Url],
+    alwaysIncludeDefaults: false,
+  });
+};
+
+export const selectCurrentProfileLocatorState = ({
+  runtimeStateManager,
+  tabId,
+  profileStateMap,
+  profileStateRegistry,
+}: {
+  runtimeStateManager: RuntimeStateManager;
+  tabId: string;
+  profileStateMap: ProfileStateMap;
+  profileStateRegistry: ProfileStateRegistry;
+}): ProfileStateMap | undefined => {
+  return selectCurrentProfileState({
+    runtimeStateManager,
+    tabId,
+    profileStateMap,
+    profileStateRegistry,
+    stateTypes: [ProfileStateType.Url, ProfileStateType.Persistent],
+    alwaysIncludeDefaults: true,
+  });
+};
+
+const selectCurrentProfileState = ({
+  runtimeStateManager,
+  tabId,
+  profileStateMap,
+  profileStateRegistry,
+  stateTypes,
+  alwaysIncludeDefaults,
+}: {
+  runtimeStateManager: RuntimeStateManager;
+  tabId: string;
+  profileStateMap: ProfileStateMap;
+  profileStateRegistry: ProfileStateRegistry;
+  stateTypes: ProfileStateType[];
+  alwaysIncludeDefaults: boolean;
+}): ProfileStateMap | undefined => {
+  const profileStateDefinition = selectCurrentProfileStateDefinition(runtimeStateManager, tabId);
+
+  if (!profileStateDefinition) {
+    return undefined;
+  }
+
+  const filteredState = profileStateRegistry.filterFieldsByType({
+    profileState: alwaysIncludeDefaults
+      ? {
+          ...profileStateDefinition.defaultState,
+          ...profileStateMap[profileStateDefinition.key],
+        }
+      : profileStateMap[profileStateDefinition.key],
+    stateKey: profileStateDefinition.key,
+    stateTypes,
+    defaultsHandling: 'expand',
+  });
+
+  return filteredState ? { [profileStateDefinition.key]: filteredState } : undefined;
 };
 
 export const selectIsDataViewUsedInMultipleRuntimeTabStates = (
@@ -162,9 +286,11 @@ export const selectTabRuntimeInternalState = ({
     globalState,
     services,
   });
+  const tabType = selectTabTypeForPersistence({ runtimeStateManager, tabState });
 
   return {
     serializedSearchSource: searchSource.getSerializedFields(),
+    ...(tabType ? { tabType } : {}),
     ...(dataRequestParams.isSearchSessionRestored
       ? { searchSessionId: dataRequestParams.searchSessionId }
       : {}),
@@ -215,18 +341,18 @@ export const useCurrentTabDataStateContainer = () => {
   return dataStateContainer;
 };
 
-export type CombinedRuntimeState = DiscoverRuntimeState & Pick<TabRuntimeState, 'currentDataView'>;
+export type CombinedRuntimeState = DiscoverRuntimeState & { currentDataSource: DataSource };
 
 const runtimeStateContext = createContext<CombinedRuntimeState | undefined>(undefined);
 
 export const RuntimeStateProvider = ({
-  currentDataView,
+  currentDataSource,
   adHocDataViews,
   children,
 }: PropsWithChildren<CombinedRuntimeState>) => {
   const runtimeState = useMemo<CombinedRuntimeState>(
-    () => ({ currentDataView, adHocDataViews }),
-    [adHocDataViews, currentDataView]
+    () => ({ currentDataSource, adHocDataViews }),
+    [adHocDataViews, currentDataSource]
   );
 
   return (
@@ -244,7 +370,17 @@ const useRuntimeStateContext = () => {
   return context;
 };
 
-export const useCurrentDataView = () => useRuntimeStateContext().currentDataView;
+export const useCurrentDataSource = () => useRuntimeStateContext().currentDataSource;
+
+/** Returns the underlying DataView for DSL consumers. Use {@link useCurrentDataSource} for rendering. */
+export const useCurrentDataView = (): DataView => {
+  const dataView = useCurrentTabRuntimeState((tab) => tab.currentDataView$);
+  if (!dataView) {
+    throw new Error('currentDataView is not initialized');
+  }
+  return dataView;
+};
+
 export const useAdHocDataViews = () => useRuntimeStateContext().adHocDataViews;
 
 const runtimeStateManagerContext = createContext<RuntimeStateManager | undefined>(undefined);

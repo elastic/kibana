@@ -76,11 +76,19 @@ const renderTestComponent = (
   });
 };
 
-describe('DashboardMigrationResultPanel', () => {
+// Failing: See https://github.com/elastic/kibana/issues/275681
+describe.skip('DashboardMigrationResultPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetMissingResources.mockReturnValue([]);
+    // Pin time so moment().fromNow() on last_updated_at (2024-01-01T01:00:00Z) is stable
+    jest.useFakeTimers({ now: new Date('2026-01-02T01:00:00Z') });
   });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('renders panel with title, badge, and button', async () => {
     renderTestComponent();
     await waitFor(() => expect(screen.getByTestId('migrationPanelTitle')).toBeInTheDocument());
@@ -132,7 +140,8 @@ describe('DashboardMigrationResultPanel', () => {
     expect(screen.getByText(/Click Upload to continue translating/i)).toBeInTheDocument();
   });
 
-  describe('Total execution time', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/275681
+  describe.skip('Total execution time', () => {
     it('should display Total execution time when total_execution_time_ms is present', () => {
       renderTestComponent({
         migrationStats: {

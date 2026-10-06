@@ -19,27 +19,21 @@ export const ONBOARDING_STEPS: OnboardingStepConfig[] = [
     }),
   },
   {
-    id: 'connect',
-    title: i18n.translate('xpack.ingestHub.onboarding.steps.connect.title', {
-      defaultMessage: 'Connect',
+    id: 'service-settings',
+    title: i18n.translate('xpack.ingestHub.onboarding.steps.serviceSettings.title', {
+      defaultMessage: 'Service Settings',
     }),
   },
   {
-    id: 'name-and-scope',
-    title: i18n.translate('xpack.ingestHub.onboarding.steps.nameAndScope.title', {
-      defaultMessage: 'Name & Scope',
+    id: 'authenticate-and-deploy',
+    title: i18n.translate('xpack.ingestHub.onboarding.steps.authenticateAndDeploy.title', {
+      defaultMessage: 'Authenticate & Deploy',
     }),
   },
   {
-    id: 'deployment',
-    title: i18n.translate('xpack.ingestHub.onboarding.steps.deployment.title', {
-      defaultMessage: 'Deployment',
-    }),
-  },
-  {
-    id: 'see-data',
-    title: i18n.translate('xpack.ingestHub.onboarding.steps.seeData.title', {
-      defaultMessage: 'See Data',
+    id: 'detect-and-review',
+    title: i18n.translate('xpack.ingestHub.onboarding.steps.detectAndReview.title', {
+      defaultMessage: 'Detect & Review',
     }),
   },
 ];

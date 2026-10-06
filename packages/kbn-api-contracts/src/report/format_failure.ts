@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BreakingChange } from '../diff/breaking_rules';
-import type { TerraformImpactResult, TerraformImpact } from '../terraform/check_terraform_impact';
+import type { StabilityTier } from '../stability';
+import type { ImpactReportEntry } from './write_impact_report';
 import { ESCALATION_LINK } from './links';
 
 const HEADER = `
@@ -18,76 +18,123 @@ const HEADER = `
 
 `.split('\n');
 
-const TERRAFORM_HEADER = `
-╔════════════════════════════════════════════════════════════════════════════╗
-║                        TERRAFORM PROVIDER IMPACT                           ║
-╚════════════════════════════════════════════════════════════════════════════╝
-
-⚠️  The following breaking changes affect Terraform Provider APIs:
-
-`.split('\n');
-
 const FOOTER = `
 ────────────────────────────────────────────────────────────────────────────
 
 What to do next:
 
 1. Review the breaking changes above
-2. If intentional, add an allowlist entry with approval
-3. If unintentional, revert the changes
+2. If unintentional, revert the change
+3. If intentional, add an approved allowlist entry and coordinate with the owning team
 
 Need help? ${ESCALATION_LINK}
 
 `.split('\n');
-const formatBreakingChange = (change: BreakingChange, idx: number): string[] => {
-  const lines = [`${idx + 1}. ${change.reason}`, `   Path: ${change.path}`];
 
-  if (change.method) {
-    lines.push(`   Method: ${change.method.toUpperCase()}`);
+const INFORMATIONAL_HEADER = `
+╔════════════════════════════════════════════════════════════════════════════╗
+║                API CONTRACT CHANGES REPORTED, NOT BLOCKING                 ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+`.split('\n');
+
+const INFORMATIONAL_FOOTER = `
+────────────────────────────────────────────────────────────────────────────
+
+Nothing here blocks merge. Consider whether a release note is worth adding for
+the listed change(s).
+
+Need help? ${ESCALATION_LINK}
+
+`.split('\n');
+
+const TIER_LABEL: Record<StabilityTier, string> = {
+  stable: 'Stable (GA)',
+  tech_preview: 'Technical Preview',
+  experimental: 'Experimental',
+};
+
+const formatEntry = (entry: ImpactReportEntry, idx: number): string[] => {
+  const lines = [
+    `${idx + 1}. ${entry.reason}`,
+    `   Path: ${entry.path}`,
+    `   Tier: ${TIER_LABEL[entry.tier]}`,
+  ];
+
+  if (entry.method) {
+    lines.push(`   Method: ${entry.method.toUpperCase()}`);
   }
 
-  if (change.details) {
-    lines.push(`   Details: ${JSON.stringify(change.details, null, 2).split('\n').join('\n   ')}`);
+  if (entry.reportOnly && entry.policyReason) {
+    lines.push(`   Why this does not block: ${entry.policyReason}`);
   }
 
   return [...lines, ''];
 };
 
-const formatTerraformImpact = (impact: TerraformImpact): string[] => {
-  const method = impact.change.method ? ` ${impact.change.method.toUpperCase()}` : '';
-  const lines = [
-    `• ${impact.change.path}${method}`,
-    `  Terraform Resource: ${impact.terraformResource}`,
-    `  Reason: ${impact.change.reason}`,
-  ];
-  if (impact.owners.length > 0) {
-    lines.push(`  Owners: ${impact.owners.join(', ')}`);
+const EXPERIMENTAL_HEADING = `
+────────────────────────────────────────────────────────────────────────────
+
+Informational — not blocking merge:
+
+The following breaking change(s) are in experimental APIs, which are allowed to
+break. They are listed for visibility only and do not fail this check.
+
+`.split('\n');
+
+const REPORT_ONLY_HEADING = `
+────────────────────────────────────────────────────────────────────────────
+
+Informational — not blocking merge:
+
+The following change(s) match oasdiff rules Kibana treats as additive, so they
+do not fail this check. They are listed so the owning team can decide whether a
+release note is still worth adding.
+
+`.split('\n');
+
+/**
+ * Format the CI-log summary for detected breaking changes. Gating tiers (stable
+ * first, then tech_preview) lead the report and drive the summary count;
+ * experimental changes and report-only rules, if any, follow in clearly
+ * non-blocking sections. When nothing gates, the same sections are printed under
+ * an informational header with no failure count or allowlist prompt. Entries are
+ * already tier-classified and policy-labeled by check_contracts, so this is
+ * presentation only.
+ */
+export function formatFailure(entries: ImpactReportEntry[]): string {
+  const reportOnly = entries.filter((e) => e.reportOnly);
+  const gatingCandidates = entries.filter((e) => !e.reportOnly);
+  const stable = gatingCandidates.filter((e) => e.tier === 'stable');
+  const techPreview = gatingCandidates.filter((e) => e.tier === 'tech_preview');
+  const experimental = gatingCandidates.filter((e) => e.tier === 'experimental');
+  const gating = [...stable, ...techPreview];
+
+  const experimentalSection =
+    experimental.length > 0 ? [...EXPERIMENTAL_HEADING, ...experimental.flatMap(formatEntry)] : [];
+
+  const reportOnlySection =
+    reportOnly.length > 0 ? [...REPORT_ONLY_HEADING, ...reportOnly.flatMap(formatEntry)] : [];
+
+  if (gating.length === 0) {
+    return [
+      ...INFORMATIONAL_HEADER,
+      'No breaking changes detected in stable/tech_preview APIs.',
+      '',
+      ...experimentalSection,
+      ...reportOnlySection,
+      ...INFORMATIONAL_FOOTER,
+    ].join('\n');
   }
-  lines.push('');
-  return lines;
-};
-
-export function formatFailure(
-  breakingChanges: BreakingChange[],
-  terraformImpact?: TerraformImpactResult
-): string {
-  const breakingSection = breakingChanges.flatMap(formatBreakingChange);
-
-  const terraformSection = terraformImpact?.hasImpact
-    ? [
-        ...TERRAFORM_HEADER,
-        ...terraformImpact.impactedChanges.flatMap(formatTerraformImpact),
-        'Coordinate with @elastic/terraform-provider before merging.',
-        '',
-      ]
-    : [];
 
   return [
     ...HEADER,
-    `Found ${breakingChanges.length} breaking change(s):`,
+    `Detected ${gating.length} breaking change(s) in stable/tech_preview APIs ` +
+      `(${stable.length} stable, ${techPreview.length} tech_preview):`,
     '',
-    ...breakingSection,
-    ...terraformSection,
+    ...gating.flatMap(formatEntry),
+    ...experimentalSection,
+    ...reportOnlySection,
     ...FOOTER,
   ].join('\n');
 }

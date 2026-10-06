@@ -18,7 +18,7 @@ import { modelVersion9 } from './model_versions';
 
 const mockLogger = loggerMock.create();
 const mockCoreSetup = coreMock.createSetup();
-const caseSavedObjectType = createCaseSavedObjectType(mockCoreSetup, mockLogger);
+const caseSavedObjectType = createCaseSavedObjectType(mockCoreSetup, mockLogger, {} as never);
 
 describe('caseSavedObjectType model version transformations', () => {
   let migrator: ModelVersionTestMigrator;
@@ -195,6 +195,22 @@ describe('caseSavedObjectType model version transformations', () => {
       }).attributes;
 
       expect(() => createSchema!.validate(attributes)).not.toThrow();
+    });
+  });
+
+  describe('Model version 9 to 10', () => {
+    it('does not modify existing assignees when migrating from v9 to v10', () => {
+      const caseObj = createCaseSavedObjectResponse({
+        overrides: { assignees: [{ uid: '123' }] },
+      });
+
+      const migrated = migrator.migrate({
+        document: caseObj,
+        fromVersion: 9,
+        toVersion: 10,
+      });
+
+      expect(migrated.attributes).toEqual(expect.objectContaining({ assignees: [{ uid: '123' }] }));
     });
   });
 });

@@ -9,10 +9,16 @@
  * Represents the type of a "searchable" resource in the cluster.
  * Concrete resources are indices, aliases and data streams.
  * `indexPattern` denotes a multi-target or wildcard target resolved via field caps.
+ * `dataset` denotes an external ES|QL dataset (registered via `_query/dataset`), only
+ * queryable through ES|QL `FROM <name>`.
+ * `view` denotes an ES|QL view (registered via `_query/view`), only queryable through
+ * ES|QL `FROM <name>`. Its fields are the view's output columns, not an index mapping.
  */
 export enum EsResourceType {
   index = 'index',
   alias = 'alias',
   dataStream = 'data_stream',
   indexPattern = 'index_pattern',
+  dataset = 'dataset',
+  view = 'view',
 }

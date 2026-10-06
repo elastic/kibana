@@ -68,11 +68,6 @@ describe('getAttackDiscoveryGenerationByIdQuery', () => {
               field: 'kibana.alert.rule.execution.metrics.alert_counts.new',
             },
           },
-          loading_message: {
-            terms: {
-              field: 'kibana.alert.rule.execution.status',
-            },
-          },
           event_actions: {
             terms: {
               field: 'event.action',
@@ -93,6 +88,26 @@ describe('getAttackDiscoveryGenerationByIdQuery', () => {
             min: {
               field: 'event.start',
               format: 'strict_date_optional_time',
+            },
+          },
+          loading_message: {
+            terms: {
+              field: 'kibana.alert.rule.execution.status',
+            },
+          },
+          workflow_id: {
+            terms: {
+              field: 'event.module',
+            },
+          },
+          workflow_reference: {
+            terms: {
+              field: 'event.reference',
+            },
+          },
+          workflow_run_id: {
+            terms: {
+              field: 'event.id',
             },
           },
         },

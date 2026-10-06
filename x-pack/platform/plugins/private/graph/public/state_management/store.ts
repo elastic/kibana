@@ -7,8 +7,9 @@
 
 import type { SagaMiddleware } from 'redux-saga';
 import createSagaMiddleware from 'redux-saga';
-import type { Store, AnyAction, Dispatch } from 'redux';
-import { combineReducers, createStore, applyMiddleware } from 'redux';
+import type { Store, Action, Dispatch } from 'redux';
+import { combineReducers } from 'redux';
+import { configureStore } from '@reduxjs/toolkit';
 import type { ChromeStart } from '@kbn/core/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
@@ -84,12 +85,22 @@ export const createGraphStore = (deps: GraphStoreDependencies): Store => {
 
   const rootReducer = createRootReducer(deps.addBasePath);
 
-  const store = createStore(rootReducer, applyMiddleware(sagaMiddleware));
+  const store = configureStore({
+    reducer: rootReducer,
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({
+        // graph uses sagas instead of thunks
+        thunk: false,
+        // graph state and actions carry non-serializable values (e.g. Workspace instances)
+        serializableCheck: false,
+        immutableCheck: false,
+      }).concat(sagaMiddleware),
+  });
 
   registerSagas(sagaMiddleware, deps);
 
   return store;
 };
 
-export type GraphStore = Store<GraphState, AnyAction>;
-export type GraphDispatch = Dispatch<AnyAction>;
+export type GraphStore = Store<GraphState, Action<string>>;
+export type GraphDispatch = Dispatch<Action<string>>;

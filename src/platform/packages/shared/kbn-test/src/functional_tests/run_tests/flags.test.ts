@@ -48,6 +48,7 @@ describe('parse runTest flags', () => {
         "grep": undefined,
         "installDir": undefined,
         "logsDir": undefined,
+        "retry": 0,
         "suiteFilters": Object {
           "exclude": Array [],
           "include": Array [],

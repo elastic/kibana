@@ -51,7 +51,7 @@ export const AlertTimelineViewAllButton: React.FC<AlertTimelineViewAllButtonProp
         })}
       </EuiSplitButton.ActionPrimary>
       <EuiSplitButton.ActionSecondary
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         aria-label={i18n.translate('xpack.alertingV2.alertTimeline.viewAllMoreOptions', {
           defaultMessage: 'More view options',
         })}
@@ -73,7 +73,7 @@ export const AlertTimelineViewAllButton: React.FC<AlertTimelineViewAllButtonProp
                       name: i18n.translate('xpack.alertingV2.alertTimeline.viewInDiscover', {
                         defaultMessage: 'View in Discover',
                       }),
-                      icon: 'discoverApp',
+                      icon: 'productDiscover',
                       href: discoverHref,
                       'data-test-subj': 'alertTimelineViewInDiscover',
                     },

@@ -8,8 +8,10 @@
  */
 
 import { isEqual, cloneDeep } from 'lodash';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { EsqlSource, type DataSource } from '@kbn/data-source';
 import type {
   TextBasedLayerColumn,
   LensPartitionVisualizationState as PieVisualizationState,
@@ -17,6 +19,11 @@ import type {
   XYVisualizationState,
 } from '@kbn/lens-common';
 import { getDatasourceId } from '@kbn/visualization-utils';
+import {
+  getRepresentativeQuery,
+  getTextBasedLayerQueries,
+  isTextBasedAttributes,
+} from '@kbn/lens-common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { UnifiedHistogramVisContext } from '../types';
 import { UnifiedHistogramSuggestionType } from '../types';
@@ -25,7 +32,7 @@ import { removeTablesFromLensAttributes } from './lens_vis_from_table';
 export const TIMESTAMP_COLUMN = 'timestamp';
 
 export interface QueryParams {
-  dataView: DataView;
+  dataSource: DataSource;
   query?: Query | AggregateQuery;
   filters: Filter[] | undefined;
   isPlainRecord?: boolean;
@@ -124,10 +131,50 @@ const injectIntervalToDateTimeColumn = (
   return columns;
 };
 
+/** True when the saved ES|QL vis still targets the same index pattern and time field as the current query. */
+export const isPreferredEsqlVisCompatibleWithCurrentQuery = (
+  preferredVisAttributes: UnifiedHistogramVisContext['attributes'],
+  query: QueryParams['query'],
+  timeFieldName?: string
+): boolean => {
+  if (!isOfAggregateQueryType(query)) {
+    return false;
+  }
+
+  const currentIndexPattern = getIndexPatternFromESQLQuery(query.esql);
+  if (!currentIndexPattern) {
+    return false;
+  }
+
+  const layers = preferredVisAttributes.state.datasourceStates?.textBased?.layers;
+  if (!layers) {
+    return false;
+  }
+
+  return Object.values(layers).some((layer) => {
+    const layerQuery = layer.query;
+    if (!layerQuery || !isOfAggregateQueryType(layerQuery)) {
+      return false;
+    }
+
+    const layerIndexPattern = getIndexPatternFromESQLQuery(layerQuery.esql);
+    const compareTimeField = Boolean(timeFieldName && layer.timeField);
+
+    return (
+      EsqlSource.getDatasetKey(
+        layerIndexPattern,
+        compareTimeField ? layer.timeField : undefined
+      ) ===
+      EsqlSource.getDatasetKey(currentIndexPattern, compareTimeField ? timeFieldName : undefined)
+    );
+  });
+};
+
 export const injectESQLQueryIntoLensLayers = (
   visAttributes: UnifiedHistogramVisContext['attributes'],
   query: AggregateQuery,
-  dateFieldLabel?: string
+  dateFieldLabel?: string,
+  dataViewId?: string
 ) => {
   const datasourceId = getDatasourceId(visAttributes.state.datasourceStates);
 
@@ -146,6 +193,9 @@ export const injectESQLQueryIntoLensLayers = (
     Object.values(datasourceState.layers).forEach((layer) => {
       if (!isEqual(layer.query, query)) {
         layer.query = query;
+      }
+      if (dataViewId && layer.index !== dataViewId) {
+        layer.index = dataViewId;
       }
       if (dateFieldLabel && layer.columns) {
         const columns = injectIntervalToDateTimeColumn(layer.columns, dateFieldLabel);
@@ -181,8 +231,19 @@ export function deriveLensSuggestionFromLensAttributes({
   try {
     if (externalVisContext.suggestionType === UnifiedHistogramSuggestionType.lensSuggestion) {
       // should be based on same query
-      if (queryParams && !isEqual(externalVisContext.attributes?.state?.query, queryParams.query)) {
-        return undefined;
+      // For text-based (ES|QL) Lens attributes the authoritative queries live
+      // on the layers (`datasourceStates.textBased.layers[id].query`); the
+      // vis context is stale when none of them matches the current query.
+      if (queryParams) {
+        const attributes = externalVisContext.attributes;
+        const isStale = isTextBasedAttributes(attributes)
+          ? !getTextBasedLayerQueries(attributes).some((layerQuery) =>
+              isEqual(layerQuery, queryParams.query)
+            )
+          : !isEqual(getRepresentativeQuery(attributes), queryParams.query);
+        if (isStale) {
+          return undefined;
+        }
       }
 
       // it should be one of 'formBased'/'textBased' and have value

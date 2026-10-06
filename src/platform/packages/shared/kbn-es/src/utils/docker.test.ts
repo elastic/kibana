@@ -9,6 +9,7 @@
 
 import mockFs from 'mock-fs';
 
+import Fs from 'fs';
 import Fsp from 'fs/promises';
 import { basename, join } from 'path';
 
@@ -46,13 +47,24 @@ import {
   SERVERLESS_JWKS_PATH,
   SERVERLESS_IDP_METADATA_PATH,
   SERVERLESS_OPERATOR_PATH,
+  SERVERLESS_SECRETS_DIR,
 } from '../paths';
 import * as waitClusterUtil from './wait_until_cluster_ready';
 import * as waitForSecurityIndexUtil from './wait_for_security_index';
 import * as mockIdpPluginUtil from '@kbn/mock-idp-utils';
 
+/**
+ * This is set to 'true' on CI, and it causes some docker behaviours to differ.
+ * There's a specific test that verifies the cached image is used when set to true.
+ */
+process.env.KBN_ES_SNAPSHOT_USE_CACHED = 'false';
+
+// Pin the published loopback addresses, which otherwise follow the host's IPv6 support.
+jest.mock('./has_ipv6_loopback', () => ({ hasIpv6Loopback: () => true }));
+
 jest.mock('execa');
 const execa = jest.requireMock('execa');
+execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
 jest.mock('./read_string_secrets', () => ({
   readStringSecrets: jest.fn().mockResolvedValue({}),
@@ -243,6 +255,17 @@ describe('resolveDockerImage()', () => {
       If you require this functionality in @kbn/es please contact the Kibana Operations Team."
     `);
   });
+
+  test('should error when the registry only appears later in the image name', () => {
+    expect(() =>
+      resolveDockerImage({
+        repo: defaultRepo,
+        tag,
+        image: 'another.registry.co/docker.elastic.co/es:latest',
+        defaultImg,
+      })
+    ).toThrow('Only verified images from docker.elastic.co are currently allowed.');
+  });
 });
 
 describe('resolvePort()', () => {
@@ -253,6 +276,8 @@ describe('resolvePort()', () => {
       Array [
         "-p",
         "127.0.0.1:9200:9200",
+        "-p",
+        "[::1]:9200:9200",
       ]
     `);
   });
@@ -264,6 +289,8 @@ describe('resolvePort()', () => {
       Array [
         "-p",
         "127.0.0.1:9200:9200",
+        "-p",
+        "[::1]:9200:9200",
         "-p",
         "192.168.25.1:9200:9200",
       ]
@@ -277,6 +304,8 @@ describe('resolvePort()', () => {
       Array [
         "-p",
         "127.0.0.1:9220:9220",
+        "-p",
+        "[::1]:9220:9220",
         "--env",
         "http.port=9220",
       ]
@@ -291,6 +320,8 @@ describe('resolvePort()', () => {
         "-p",
         "127.0.0.1:9220:9220",
         "-p",
+        "[::1]:9220:9220",
+        "-p",
         "192.168.25.1:9220:9220",
         "--env",
         "http.port=9220",
@@ -301,7 +332,7 @@ describe('resolvePort()', () => {
 
 describe('verifyDockerInstalled()', () => {
   test('should call the correct Docker command and log the version', async () => {
-    execa.mockImplementationOnce(() => Promise.resolve({ stdout: 'Docker Version 123' }));
+    execa.mockImplementation(() => Promise.resolve({ stdout: 'Docker Version 123' }));
 
     await verifyDockerInstalled(log);
 
@@ -325,7 +356,7 @@ describe('verifyDockerInstalled()', () => {
   });
 
   test('should reject when Docker is not installed', async () => {
-    execa.mockImplementationOnce(() => Promise.reject({ message: 'Hello World' }));
+    execa.mockImplementation(() => Promise.reject({ message: 'Hello World' }));
 
     await expect(verifyDockerInstalled(log)).rejects.toThrowErrorMatchingInlineSnapshot(`
       "Docker not found locally. Install it from: https://www.docker.com
@@ -337,7 +368,7 @@ describe('verifyDockerInstalled()', () => {
 
 describe('maybeCreateDockerNetwork()', () => {
   test('should call the correct Docker command and create the network if needed', async () => {
-    execa.mockImplementationOnce(() => Promise.resolve({ exitCode: 0 }));
+    execa.mockImplementation(() => Promise.resolve({ exitCode: 0 }));
 
     await maybeCreateDockerNetwork(log);
 
@@ -363,7 +394,7 @@ describe('maybeCreateDockerNetwork()', () => {
   });
 
   test('should use an existing network', async () => {
-    execa.mockImplementationOnce(() =>
+    execa.mockImplementation(() =>
       Promise.reject({ message: 'network with name elastic already exists' })
     );
 
@@ -378,7 +409,7 @@ describe('maybeCreateDockerNetwork()', () => {
   });
 
   test('should reject for any other Docker error', async () => {
-    execa.mockImplementationOnce(() => Promise.reject({ message: 'some error' }));
+    execa.mockImplementation(() => Promise.reject({ message: 'some error' }));
 
     await expect(maybeCreateDockerNetwork(log)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"some error"`
@@ -388,12 +419,42 @@ describe('maybeCreateDockerNetwork()', () => {
 
 describe('maybePullDockerImage()', () => {
   test('should pull the passed image', async () => {
-    execa.mockImplementationOnce(() => Promise.resolve({ exitCode: 0 }));
+    execa.mockImplementation(() => Promise.resolve({ exitCode: 0 }));
 
     await maybePullDockerImage(log, DOCKER_IMG);
 
     expect(execa.mock.calls[0][0]).toEqual('docker');
     expect(execa.mock.calls[0][1]).toEqual(expect.arrayContaining(['pull', DOCKER_IMG]));
+  });
+
+  describe('with KBN_ES_SNAPSHOT_USE_CACHED=true', () => {
+    beforeEach(() => {
+      process.env.KBN_ES_SNAPSHOT_USE_CACHED = 'true';
+    });
+
+    afterEach(() => {
+      process.env.KBN_ES_SNAPSHOT_USE_CACHED = 'false';
+    });
+
+    test('skips pull when the image is available locally', async () => {
+      execa.mockImplementationOnce(() => Promise.resolve({ stdout: 'local-image-id' }));
+
+      await maybePullDockerImage(log, DOCKER_IMG);
+
+      expect(execa.mock.calls).toHaveLength(1);
+      expect(execa.mock.calls[0][1]).toEqual(['images', '-q', DOCKER_IMG]);
+    });
+
+    test('pulls when the image is not available locally', async () => {
+      execa
+        .mockImplementationOnce(() => Promise.resolve({ stdout: '' }))
+        .mockImplementationOnce(() => Promise.resolve({ exitCode: 0 }));
+
+      await maybePullDockerImage(log, DOCKER_IMG);
+
+      expect(execa.mock.calls[0][1]).toEqual(['images', '-q', DOCKER_IMG]);
+      expect(execa.mock.calls[1][1]).toEqual(expect.arrayContaining(['pull', DOCKER_IMG]));
+    });
   });
 });
 
@@ -401,7 +462,7 @@ describe('detectRunningNodes()', () => {
   const nodes = ['es01', 'es02', 'es03'];
 
   test('should not error if no nodes detected', async () => {
-    execa.mockImplementationOnce(() => Promise.resolve({ stdout: '' }));
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
     await detectRunningNodes(log, {});
 
@@ -410,7 +471,7 @@ describe('detectRunningNodes()', () => {
   });
 
   test('should kill nodes if detected and kill passed', async () => {
-    execa.mockImplementationOnce(() =>
+    execa.mockImplementation(() =>
       Promise.resolve({
         stdout: nodes.join('\n'),
       })
@@ -423,7 +484,7 @@ describe('detectRunningNodes()', () => {
   });
 
   test('should error if nodes detected and kill not passed', async () => {
-    execa.mockImplementationOnce(() =>
+    execa.mockImplementation(() =>
       Promise.resolve({
         stdout: nodes.join('\n'),
       })
@@ -665,8 +726,6 @@ describe('resolveEsArgs()', () => {
         "--env",
         "xpack.security.authc.realms.saml.cloud-saml-kibana.private_attributes=http://saml.elastic-cloud.com/attributes/uiam/authentication/access_token,http://saml.elastic-cloud.com/attributes/uiam/authentication/access_token_expires_at,http://saml.elastic-cloud.com/attributes/uiam/authentication/refresh_token,http://saml.elastic-cloud.com/attributes/uiam/authentication/refresh_token_expires_at",
         "--env",
-        "serverless.organization_id=org1234567890",
-        "--env",
         "serverless.project_type=elasticsearch_general_purpose",
         "--env",
         "serverless.project_id=abcdef12345678901234567890123456",
@@ -696,7 +755,6 @@ describe('resolveEsArgs()', () => {
     );
 
     expect(findEnvValue(esArgs, 'serverless.project_id')).toBe(overrideId);
-    expect(findEnvValue(esArgs, 'serverless.organization_id')).toBeDefined();
     expect(findEnvValue(esArgs, 'serverless.universal_iam_service.enabled')).toBe('true');
   });
 
@@ -769,9 +827,7 @@ describe('setupServerlessVolumes()', () => {
     });
 
     await volumeCmdTest(volumeCmd);
-    await expect(
-      Fsp.access(`${serverlessObjectStorePath}/cluster_state/lease`)
-    ).rejects.toThrowError();
+    await expect(Fsp.access(`${serverlessObjectStorePath}/cluster_state/lease`)).rejects.toThrow();
   });
 
   test('should add SSL and IDP metadata volumes when ssl is passed', async () => {
@@ -868,6 +924,9 @@ describe('setupServerlessVolumes()', () => {
     const settings = JSON.parse(
       await Fsp.readFile(join(SERVERLESS_OPERATOR_PATH, 'settings.json'), 'utf-8')
     );
+    expect(settings.state.project.tags).toEqual(
+      expect.objectContaining({ _csp: 'aws', _region: 'eu-west-1' })
+    );
     expect(settings.state.cluster_secrets.string_secrets).toEqual(stringSecretsFixture);
   });
 
@@ -893,6 +952,58 @@ describe('setupServerlessVolumes()', () => {
     );
     expect(settings.state.cluster_secrets.string_secrets).toEqual(stringSecretsFixture);
   });
+
+  test('should mount the bundled secrets file when no secure files are passed', async () => {
+    mockFs(existingObjectStore);
+
+    const volumeCmd = await setupServerlessVolumes(log, { projectType, basePath: baseEsPath });
+
+    expect(volumeCmd).toContain(
+      `${SERVERLESS_SECRETS_PATH}:${SERVERLESS_CONFIG_PATH}secrets/secrets.json:z`
+    );
+    const settings = JSON.parse(
+      await Fsp.readFile(join(SERVERLESS_OPERATOR_PATH, 'settings.json'), 'utf-8')
+    );
+    expect(settings.state.cluster_secrets.file_secrets).toBeUndefined();
+  });
+
+  test('should embed secure files as base64 file_secrets in an owner-only operator directory', async () => {
+    mockFs({
+      ...existingObjectStore,
+      '/creds/gcs.json': '{"type":"service_account"}',
+    });
+
+    const volumeCmd = await setupServerlessVolumes(log, {
+      projectType,
+      basePath: baseEsPath,
+      secureFiles: ['gcs.client.default.credentials_file=/creds/gcs.json'],
+    });
+
+    const encoded = Buffer.from('{"type":"service_account"}').toString('base64');
+    expect(volumeCmd).toContain(
+      `${SERVERLESS_SECRETS_PATH}:${SERVERLESS_CONFIG_PATH}secrets/secrets.json:z`
+    );
+    const settingsPath = join(SERVERLESS_OPERATOR_PATH, 'settings.json');
+    const settings = JSON.parse(await Fsp.readFile(settingsPath, 'utf-8'));
+    expect(settings.state.cluster_secrets.file_secrets).toEqual({
+      'gcs.client.default.credentials_file': encoded,
+    });
+    expect((await Fsp.stat(SERVERLESS_SECRETS_DIR)).mode.toString(8).slice(-3)).toBe('700');
+    // The container's elasticsearch user reads the mounted file directly, so it stays world-readable.
+    expect((await Fsp.stat(settingsPath)).mode.toString(8).slice(-3)).toBe('644');
+  });
+
+  test('should reject a malformed secure file entry', async () => {
+    mockFs(existingObjectStore);
+
+    await expect(
+      setupServerlessVolumes(log, {
+        projectType,
+        basePath: baseEsPath,
+        secureFiles: ['/creds/gcs.json'],
+      })
+    ).rejects.toThrow('Invalid secure file "/creds/gcs.json", expected "setting=/path/to/file"');
+  });
 });
 
 describe('runServerlessEsNode()', () => {
@@ -903,7 +1014,7 @@ describe('runServerlessEsNode()', () => {
   };
 
   test('should call the correct Docker command', async () => {
-    execa.mockImplementationOnce(() => Promise.resolve({ stdout: 'containerId1234' }));
+    execa.mockImplementation(() => Promise.resolve({ stdout: 'containerId1234' }));
 
     await runServerlessEsNode(log, node);
 
@@ -1052,6 +1163,39 @@ describe('runServerlessCluster()', () => {
     });
     expect(waitForSecurityIndexMock).not.toHaveBeenCalled();
   });
+
+  test('should call onReady after the cluster is ready', async () => {
+    waitUntilClusterReadyMock.mockResolvedValue();
+    waitForSecurityIndexMock.mockResolvedValue();
+    mockFs({
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+    const onReady = jest.fn().mockResolvedValue(undefined);
+    await runServerlessCluster(log, {
+      projectType,
+      basePath: baseEsPath,
+      waitForReady: true,
+      onReady,
+    });
+
+    expect(onReady).toHaveBeenCalledTimes(1);
+    expect(waitUntilClusterReadyMock).toHaveBeenCalledTimes(1);
+    expect(waitForSecurityIndexMock).toHaveBeenCalledTimes(1);
+  });
+
+  test('should not call onReady when waitForReady is false', async () => {
+    waitUntilClusterReadyMock.mockResolvedValue();
+    mockFs({
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+    const onReady = jest.fn().mockResolvedValue(undefined);
+    await runServerlessCluster(log, { projectType, basePath: baseEsPath, onReady });
+    expect(onReady).not.toHaveBeenCalled();
+  });
 });
 
 describe('stopServerlessCluster()', () => {
@@ -1065,6 +1209,24 @@ describe('stopServerlessCluster()', () => {
     expect(execa.mock.calls[0][1]).toEqual(
       expect.arrayContaining(['container', 'stop'].concat(nodes))
     );
+  });
+
+  test('should remove the operator secrets directory', async () => {
+    mockFs({ [SERVERLESS_SECRETS_DIR]: { operator: { 'settings.json': '{}' } } });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+    await stopServerlessCluster(log, ['es01']);
+
+    await expect(Fsp.access(SERVERLESS_SECRETS_DIR)).rejects.toThrow();
+  });
+
+  test('should remove the operator secrets directory even when stopping fails', async () => {
+    mockFs({ [SERVERLESS_SECRETS_DIR]: { operator: { 'settings.json': '{}' } } });
+    execa.mockImplementation(() => Promise.reject(new Error('No such container: es01')));
+
+    await expect(stopServerlessCluster(log, ['es01'])).rejects.toThrow('No such container');
+
+    await expect(Fsp.access(SERVERLESS_SECRETS_DIR)).rejects.toThrow();
   });
 });
 
@@ -1109,6 +1271,34 @@ describe('teardownServerlessClusterSync()', () => {
     teardownServerlessClusterSync(log, defaultOptions);
 
     expect(execa.commandSync.mock.calls).toHaveLength(1);
+  });
+
+  test('should remove the operator secrets directory', () => {
+    const rmSync = jest.spyOn(Fs, 'rmSync').mockImplementation(() => {});
+    execa.commandSync.mockImplementation(() => ({ stdout: '' }));
+
+    teardownServerlessClusterSync(log, defaultOptions);
+
+    expect(rmSync).toHaveBeenCalledWith(SERVERLESS_SECRETS_DIR, {
+      recursive: true,
+      force: true,
+    });
+    rmSync.mockRestore();
+  });
+
+  test('should remove the operator secrets directory even when Docker is unavailable', () => {
+    const rmSync = jest.spyOn(Fs, 'rmSync').mockImplementation(() => {});
+    execa.commandSync.mockImplementation(() => {
+      throw new Error('Cannot connect to the Docker daemon');
+    });
+
+    expect(() => teardownServerlessClusterSync(log, defaultOptions)).toThrow('Docker daemon');
+
+    expect(rmSync).toHaveBeenCalledWith(SERVERLESS_SECRETS_DIR, {
+      recursive: true,
+      force: true,
+    });
+    rmSync.mockRestore();
   });
 });
 

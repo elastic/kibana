@@ -30,6 +30,8 @@ interface UseSelectTextPartsOptions {
   initialSelection?: 'none' | 'first' | 'all';
   /** The start and end types used to assign collapsed inputs to the correct side. */
   rangeType?: [DateType, DateType];
+  /** Locale used to recognise the input's parts. @default `i18n.getLocale()` */
+  locale?: string;
   /**
    * Called when ArrowUp/ArrowDown is pressed on a selected part.
    * Return the new full input text, or `undefined` to skip the modification.
@@ -51,6 +53,7 @@ export function useSelectTextPartsWithArrowKeys({
   isActive,
   initialSelection = 'all',
   rangeType,
+  locale,
   onModifyPart,
 }: UseSelectTextPartsOptions) {
   // Stored in a ref so the effect doesn't re-run
@@ -68,7 +71,9 @@ export function useSelectTextPartsWithArrowKeys({
       const inputEl = inputRef.current;
       if (!inputEl) return [];
 
-      const parts = parseInputParts(inputEl.value, rangeType).filter((part) => part.navigable);
+      const parts = parseInputParts(inputEl.value, rangeType, locale).filter(
+        (part) => part.navigable
+      );
       const matchingPartIndex = parts.findIndex(
         (part) => part.start === inputEl.selectionStart && part.end === inputEl.selectionEnd
       );
@@ -120,7 +125,7 @@ export function useSelectTextPartsWithArrowKeys({
 
       if (newText !== undefined) {
         inputEl.value = newText;
-        const updatedParts = parseInputParts(newText, rangeType).filter((p) => p.navigable);
+        const updatedParts = parseInputParts(newText, rangeType, locale).filter((p) => p.navigable);
         selectPart(currentIndex, updatedParts);
       }
 
@@ -207,7 +212,9 @@ export function useSelectTextPartsWithArrowKeys({
         case 'none':
           break;
         case 'first': {
-          const parts = parseInputParts(inputEl.value, rangeType).filter((part) => part.navigable);
+          const parts = parseInputParts(inputEl.value, rangeType, locale).filter(
+            (part) => part.navigable
+          );
           if (parts.length > 0) selectPart(0, parts);
           break;
         }
@@ -223,5 +230,5 @@ export function useSelectTextPartsWithArrowKeys({
       inputEl?.removeEventListener('pointerdown', pointerDownHandler);
       document.removeEventListener('selectionchange', selectionChangeHandler);
     };
-  }, [inputRef, isActive, initialSelection, rangeType]);
+  }, [inputRef, isActive, initialSelection, rangeType, locale]);
 }

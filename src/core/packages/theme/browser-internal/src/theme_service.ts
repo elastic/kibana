@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { of } from 'rxjs';
-import { _setDarkMode } from '@kbn/ui-theme';
+import { BehaviorSubject } from 'rxjs';
+import { _setDarkMode, getEuiThemeVars } from '@kbn/ui-theme';
 import type { InjectedMetadataTheme } from '@kbn/core-injected-metadata-common-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
-import type { CoreTheme, ThemeServiceSetup, ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { CoreTheme } from '@kbn/core-theme-browser';
+import type { InternalThemeServiceStart } from '@kbn/core-theme-browser-internal-types';
 import { systemThemeIsDark, browsersSupportsSystemTheme } from './system_theme';
 import { createStyleSheet } from './utils';
 
@@ -22,11 +23,12 @@ export interface ThemeServiceSetupDeps {
 
 /** @internal */
 export class ThemeService {
-  private contract?: ThemeServiceSetup;
+  private contract?: InternalThemeServiceStart;
   private themeMetadata?: InjectedMetadataTheme;
   private stylesheets: HTMLLinkElement[] = [];
+  private theme$?: BehaviorSubject<CoreTheme>;
 
-  public setup({ injectedMetadata }: ThemeServiceSetupDeps): ThemeServiceSetup {
+  public setup({ injectedMetadata }: ThemeServiceSetupDeps): InternalThemeServiceStart {
     const themeMetadata = injectedMetadata.getTheme();
 
     this.themeMetadata = themeMetadata;
@@ -45,15 +47,27 @@ export class ThemeService {
 
     this.applyTheme(theme);
 
+    const theme$ = new BehaviorSubject<CoreTheme>(theme);
+    this.theme$ = theme$;
+
     this.contract = {
-      getTheme: () => theme,
-      theme$: of(theme),
+      getTheme: () => theme$.getValue(),
+      theme$: theme$.asObservable(),
+      setDarkMode: (nextDarkMode: boolean) => {
+        const current = theme$.getValue();
+        if (current.darkMode === nextDarkMode) {
+          return;
+        }
+        const nextTheme: CoreTheme = { ...current, darkMode: nextDarkMode };
+        this.applyTheme(nextTheme);
+        theme$.next(nextTheme);
+      },
     };
 
     return this.contract;
   }
 
-  public start(): ThemeServiceStart {
+  public start(): InternalThemeServiceStart {
     if (!this.contract) {
       throw new Error('setup must be called before start');
     }
@@ -61,7 +75,9 @@ export class ThemeService {
     return this.contract;
   }
 
-  public stop() {}
+  public stop() {
+    this.theme$?.complete();
+  }
 
   private applyTheme(theme: CoreTheme) {
     const { darkMode } = theme;
@@ -78,9 +94,27 @@ export class ThemeService {
     });
 
     _setDarkMode(darkMode);
+    updateRootBackground(theme);
     updateKbnThemeTag(theme);
   }
 }
+
+// Keeps the root `<html>` background (painted by the server-rendered boot
+// splash) in sync with the active color mode on reload-less theme switches.
+// The splash paints the root background only for the color mode resolved at
+// render time, so on a live switch we recolor the real root element from the
+// reactive EUI page-background token instead of leaving it frozen at the SSR
+// color.
+const updateRootBackground = (theme: CoreTheme) => {
+  if (typeof document === 'undefined') {
+    return;
+  }
+  const { euiPageBackgroundColor } = getEuiThemeVars({
+    name: theme.name,
+    darkMode: theme.darkMode,
+  });
+  document.documentElement.style.backgroundColor = euiPageBackgroundColor;
+};
 
 const updateKbnThemeTag = (theme: CoreTheme) => {
   const globals: any = typeof window === 'undefined' ? {} : window;

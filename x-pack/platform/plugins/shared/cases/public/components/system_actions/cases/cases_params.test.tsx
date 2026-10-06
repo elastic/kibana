@@ -22,11 +22,43 @@ import * as utils from '../../../containers/configure/utils';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 import { MAX_OPEN_CASES_DEFAULT_MAXIMUM } from '../../../../common/constants';
+import { KibanaServices } from '../../../common/lib/kibana/services';
 
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view');
 jest.mock('../../../common/lib/kibana/use_application');
 jest.mock('../../../common/lib/kibana/kibana_react');
 jest.mock('../../../containers/configure/use_get_all_case_configurations');
+jest.mock('../../templates_v2/hooks/use_get_templates', () => ({
+  useGetTemplates: (...args: unknown[]) => mockUseGetTemplates(...args),
+}));
+
+// Mock TemplateSelectorV2 to control its onChange callback in isolation tests.
+// Use requireActual so the real findV2Template implementation is available to cases_params.tsx.
+jest.mock('./template_selector_v2', () => ({
+  ...jest.requireActual('./template_selector_v2'),
+  TemplateSelectorV2: ({
+    onChange,
+    isDisabled,
+    templateId,
+  }: {
+    onChange: (p: { templateId: string | null; templateVersion: string | null }) => void;
+    isDisabled?: boolean;
+    templateId: string | null;
+  }) => (
+    <button
+      type="button"
+      data-test-subj="cases-connector-template-v2-select"
+      disabled={isDisabled}
+      onClick={() => onChange({ templateId: 'tmpl-v2', templateVersion: '1' })}
+    >
+      {`V2 Selector templateId=${templateId}`}
+    </button>
+  ),
+}));
+
+const mockUseGetTemplates = jest
+  .fn()
+  .mockReturnValue({ data: { templates: [] }, isLoading: false });
 
 const useKibanaMock = jest.mocked(useKibana);
 const useAlertsDataViewMock = jest.mocked(useAlertsDataView);
@@ -162,6 +194,7 @@ describe('CasesParamsFields renders', () => {
       reopenClosedCases: false,
       groupingBy: [],
       templateId: null,
+      templateVersion: null,
     });
   });
 
@@ -314,6 +347,20 @@ describe('CasesParamsFields renders', () => {
       await user.type(await screen.findByTestId('comboBoxSearchInput'), 'alert.name{enter}');
 
       expect(editAction.mock.calls[0][1].groupingBy).toEqual(['alert.name']);
+    });
+
+    it('shows an error when the typed grouping by field does not match any field', async () => {
+      render(<CasesParamsFields {...defaultProps} />);
+
+      await user.click(await screen.findByTestId('group-by-alert-field-combobox'));
+
+      await showEuiComboBoxOptions();
+
+      await user.type(await screen.findByTestId('comboBoxSearchInput'), 'foobar');
+
+      expect(
+        await screen.findByText('Invalid field. Select a field from the list.')
+      ).toBeInTheDocument();
     });
 
     it('renders default template correctly', async () => {
@@ -590,6 +637,138 @@ describe('CasesParamsFields renders', () => {
           'Attack Discovery Schedules fully manage Case actions, automatically filling in all fields for new Cases.'
         )
       ).toBeInTheDocument();
+    });
+  });
+
+  describe('Templates v2 (templates.enabled=true)', () => {
+    const enableTemplatesV2 = () =>
+      jest
+        .spyOn(KibanaServices, 'getConfig')
+        .mockReturnValue({ templates: { enabled: true } } as ReturnType<
+          typeof KibanaServices.getConfig
+        >);
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+      mockUseGetTemplates.mockReturnValue({ data: { templates: [] }, isLoading: false });
+    });
+
+    it('renders the v2 template selector when templates.enabled is true', async () => {
+      enableTemplatesV2();
+      render(<CasesParamsFields {...defaultProps} />);
+
+      expect(await screen.findByTestId('cases-connector-template-v2-select')).toBeInTheDocument();
+      expect(screen.queryByTestId('create-case-template-select')).not.toBeInTheDocument();
+    });
+
+    it('does not render auto-push checkbox when v2 template has no connector', async () => {
+      enableTemplatesV2();
+      mockUseGetTemplates.mockReturnValue({
+        data: {
+          templates: [
+            {
+              templateId: 'tmpl-v2',
+              definition: 'title: Test',
+              definitionString: 'title: Test',
+            },
+          ],
+        },
+        isLoading: false,
+      });
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          ...actionParams,
+          subActionParams: { ...actionParams.subActionParams, templateId: 'tmpl-v2' },
+        },
+      };
+      render(<CasesParamsFields {...props} />);
+
+      expect(screen.queryByTestId('auto-push-case')).not.toBeInTheDocument();
+    });
+
+    it('renders auto-push checkbox when v2 template has a connector', async () => {
+      enableTemplatesV2();
+      const definitionString = [
+        'connector:',
+        '  type: .jira',
+        '  id: jira-connector-id',
+        '  fields: null',
+      ].join('\n');
+      mockUseGetTemplates.mockReturnValue({
+        data: {
+          templates: [{ templateId: 'tmpl-v2', definition: definitionString, definitionString }],
+        },
+        isLoading: false,
+      });
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          ...actionParams,
+          subActionParams: { ...actionParams.subActionParams, templateId: 'tmpl-v2' },
+        },
+      };
+      render(<CasesParamsFields {...props} />);
+
+      expect(await screen.findByTestId('auto-push-case')).toBeInTheDocument();
+    });
+
+    it('renders auto-push checkbox for a legacy v1 key bridged to a v2 template with connector', async () => {
+      enableTemplatesV2();
+      const definitionString = [
+        'connector:',
+        '  type: .jira',
+        '  id: jira-connector-id',
+        '  fields: null',
+      ].join('\n');
+      mockUseGetTemplates.mockReturnValue({
+        data: {
+          templates: [
+            {
+              templateId: 'tmpl-v2-uuid',
+              legacyKey: 'legacy-key-1',
+              definition: definitionString,
+              definitionString,
+            },
+          ],
+        },
+        isLoading: false,
+      });
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          ...actionParams,
+          // Rule still stores the pre-migration v1 key, not the v2 UUID
+          subActionParams: { ...actionParams.subActionParams, templateId: 'legacy-key-1' },
+        },
+      };
+      render(<CasesParamsFields {...props} />);
+
+      expect(await screen.findByTestId('auto-push-case')).toBeInTheDocument();
+    });
+
+    it('writes templateId and templateVersion when onChange fires on v2 selector', async () => {
+      enableTemplatesV2();
+      render(<CasesParamsFields {...defaultProps} />);
+
+      await user.click(await screen.findByTestId('cases-connector-template-v2-select'));
+
+      const lastCall = editAction.mock.calls[editAction.mock.calls.length - 1];
+      expect(lastCall[1].templateId).toBe('tmpl-v2');
+      expect(lastCall[1].templateVersion).toBe('1');
+    });
+
+    it('shows v2 selector (disabled) for attack discovery rules when templates.enabled is true', async () => {
+      enableTemplatesV2();
+      const newProps = {
+        ...defaultProps,
+        ruleTypeId: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+      };
+      render(<CasesParamsFields {...newProps} />);
+
+      const templateSelect = await screen.findByTestId('cases-connector-template-v2-select');
+      expect(templateSelect).toBeInTheDocument();
+      expect(templateSelect).toBeDisabled();
     });
   });
 });

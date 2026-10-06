@@ -44,9 +44,9 @@ const defaultValueMetrics: ValueMetrics = {
 };
 
 const defaultProps = {
+  isSample: false as const,
   valueMetrics: defaultValueMetrics,
   attackAlertIds: ['alert-1', 'alert-2', 'alert-3'],
-  isLoading: false,
   from: '2023-01-01T00:00:00.000Z',
   to: '2023-01-31T23:59:59.999Z',
 };
@@ -63,6 +63,7 @@ describe('AlertProcessing', () => {
 
     expect(mockAlertProcessingDonut).toHaveBeenCalledWith(
       {
+        isSample: defaultProps.isSample,
         attackAlertIds: defaultProps.attackAlertIds,
         from: defaultProps.from,
         to: defaultProps.to,
@@ -76,14 +77,12 @@ describe('AlertProcessing', () => {
         escalatedAlerts: defaultValueMetrics.totalAlerts - defaultValueMetrics.filteredAlerts,
         filteredAlertsPerc: '80.00%',
         escalatedAlertsPerc: '20.00%',
-        isLoading: false,
       },
       {}
     );
 
     expect(mockAlertProcessingKeyInsight).toHaveBeenCalledWith(
       {
-        isLoading: false,
         valueMetrics: defaultValueMetrics,
       },
       {}

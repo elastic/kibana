@@ -18,6 +18,12 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/i18n-react",
-    "@kbn/rule-data-utils"
+    "@kbn/rule-data-utils",
+    "@kbn/response-ops-alerts-apis",
+    "@kbn/core-http-browser",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-notifications-browser-mocks",
+    "@kbn/alerts-ui-shared"
   ]
 }

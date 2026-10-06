@@ -35,7 +35,7 @@ import {
   EuiSkeletonRectangle,
 } from '@elastic/eui';
 
-import type { Pipeline } from '../../../../../common/types';
+import type { FieldAccessPattern, Pipeline } from '../../../../../common/types';
 
 import { deprecatedPipelineBadge } from '../table';
 import { PipelineDetailsJsonBlock } from '../details_json_block';
@@ -61,6 +61,11 @@ const useStyles = () => {
     `,
     contextMenu: css`
       width: 150px;
+    `,
+    // Flex children default to min-width: auto, so a long unbreakable string in the
+    // processors JSON would widen the panel past the flyout and push the footer off-screen.
+    detailsPanel: css`
+      min-width: 0;
     `,
     badge: css`
       margin-left: ${euiTheme.size.s};
@@ -138,8 +143,24 @@ export const DetailsPanel: FunctionComponent<Props> = ({
       />
     </EuiToolTip>
   );
+
+  const fieldAccessPatternLabels: Record<FieldAccessPattern, string> = {
+    classic: i18n.translate(
+      'xpack.ingestPipelines.list.pipelineDetails.fieldAccessPatternClassic',
+      {
+        defaultMessage: 'Classic',
+      }
+    ),
+    flexible: i18n.translate(
+      'xpack.ingestPipelines.list.pipelineDetails.fieldAccessPatternFlexible',
+      {
+        defaultMessage: 'Flexible',
+      }
+    ),
+  };
+
   return (
-    <EuiSplitPanel.Inner grow={true} paddingSize="none">
+    <EuiSplitPanel.Inner grow={true} paddingSize="none" css={styles.detailsPanel}>
       <EuiSplitPanel.Outer hasShadow={false} grow={true} css={{ height: '100%' }}>
         <EuiSplitPanel.Inner style={{ overflowY: 'auto' }} paddingSize="l" grow={true}>
           <EuiSkeletonTitle isLoading={isLoading}>
@@ -207,6 +228,34 @@ export const DetailsPanel: FunctionComponent<Props> = ({
                     {pipeline.description}
                   </EuiSkeletonText>
                 </EuiDescriptionListDescription>
+              </>
+            )}
+
+            {/* Field access pattern */}
+            {pipeline.field_access_pattern && (
+              <>
+                <EuiSpacer size="m" />
+                <EuiSkeletonText isLoading={isLoading} lines={1} size="s">
+                  <EuiText size="s" data-test-subj="fieldAccessPatternValue">
+                    <FormattedMessage
+                      id="xpack.ingestPipelines.list.pipelineDetails.fieldAccessPatternTitle"
+                      defaultMessage="{label}: {pattern}"
+                      values={{
+                        label: (
+                          <strong>
+                            <FormattedMessage
+                              id="xpack.ingestPipelines.list.pipelineDetails.fieldAccessPatternLabel"
+                              defaultMessage="Field access pattern"
+                            />
+                          </strong>
+                        ),
+                        pattern: fieldAccessPatternLabels[pipeline.field_access_pattern],
+                      }}
+                    />
+                  </EuiText>
+                </EuiSkeletonText>
+
+                <EuiSpacer size="s" />
               </>
             )}
 

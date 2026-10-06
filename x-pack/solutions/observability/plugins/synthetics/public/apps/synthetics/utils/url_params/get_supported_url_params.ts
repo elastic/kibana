@@ -33,12 +33,13 @@ export interface SyntheticsUrlParams {
   status?: string[];
   // Certificates page quick filters, persisted so a filtered view is shareable.
   browserResourceTypes?: string[];
-  party?: string[];
+  certOrigin?: string[];
   issuers?: string[];
   expiringWithin?: string;
   locationId?: string;
   projects?: string[] | string;
   schedules?: string[] | string;
+  remoteNames?: string[] | string;
   groupBy?: MonitorOverviewState['groupBy']['field'];
   groupOrderBy?: MonitorOverviewState['groupBy']['order'];
   packagePolicyId?: string;
@@ -64,7 +65,7 @@ const { DATE_RANGE_START, DATE_RANGE_END } = CLIENT_DEFAULTS_SYNTHETICS;
  * require further development.
  */
 export const getSupportedUrlParams = (params: {
-  [key: string]: string | string[] | undefined | null;
+  [key: string]: string | Array<string | null> | undefined | null;
 }): SyntheticsUrlParams => {
   const filteredParams: { [key: string]: string | undefined } = {};
   Object.keys(params).forEach((key) => {
@@ -101,6 +102,7 @@ export const getSupportedUrlParams = (params: {
     locationId,
     projects,
     schedules,
+    remoteNames,
     groupBy,
     groupOrderBy,
     packagePolicyId,
@@ -109,7 +111,7 @@ export const getSupportedUrlParams = (params: {
     view,
     remoteName,
     browserResourceTypes,
-    party,
+    certOrigin,
     issuers,
     expiringWithin,
   } = filteredParams;
@@ -143,6 +145,7 @@ export const getSupportedUrlParams = (params: {
     locations: parseFilters(locations),
     projects: parseFilters(projects),
     schedules: parseFilters(schedules),
+    remoteNames: parseFilters(remoteNames),
     locationId: locationId || undefined,
     cloneId: filteredParams.cloneId,
     spaceId: spaceId || undefined,
@@ -150,7 +153,7 @@ export const getSupportedUrlParams = (params: {
     view: view && isOverviewView(view) && view !== DEFAULT_OVERVIEW_VIEW ? view : undefined,
     remoteName: remoteName || undefined,
     browserResourceTypes: parseFilters(browserResourceTypes),
-    party: parseFilters(party),
+    certOrigin: parseFilters(certOrigin),
     issuers: parseFilters(issuers),
     expiringWithin: expiringWithin || undefined,
   };

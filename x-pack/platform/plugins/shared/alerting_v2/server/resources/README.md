@@ -13,49 +13,12 @@ If you change stored document shape, retention behavior, or ES|QL views, this fo
 | Area | Files |
 | --- | --- |
 | Datastream definitions | `datastreams/alert_events.ts`, `datastreams/alert_actions.ts` |
+| Ingest timestamp pipeline | `datastreams/ingest_timestamp_pipeline.ts` |
 | Datastream registration | `datastreams/register.ts` |
 | ES\|QL view definitions | `esql_views/` |
 | Startup initialization | `register_resources.ts` |
 
 `register_resources.ts` registers datastreams and ES|QL views, then asks `ResourceManager` to start initialization during plugin start.
-
-## Temporary reset API (pre-GA only)
-
-While alerting v2 is still pre-GA and breaking resource changes are still expected, Kibana also exposes a temporary internal endpoint that wipes and recreates these resources:
-
-- endpoint: `POST /internal/alerting/v2/_reset_resources`
-- implementation: `server/routes/reset_resources_route.ts`
-- success response: `204 No Content`
-
-What it deletes:
-
-- all documents in `.rule-events`
-- all documents in `.alert-actions`
-- the backing index templates for those two data streams
-- all alerting v2 saved objects of type `alerting_rule`, `alerting_notification_policy`, and `alerting_api_key_pending_invalidation`
-- all per-rule task manager tasks of type `alerting_v2:rule_executor`
-
-What it recreates:
-
-- `.rule-events`
-- `.alert-actions`
-- their ILM policies and index templates
-
-How to call it from Kibana Dev Tools:
-
-```http
-POST kbn:/internal/alerting/v2/_reset_resources
-```
-
-Permissions required:
-
-- The alerting v2 feature privilegs
-- The superuser role to have access to system indices
-
-Notes:
-
-- This endpoint is intentionally destructive and only meant to unblock pre-GA development when resource or saved object schema changes require a clean slate.
-- Remove this section from the README when `server/routes/reset_resources_route.ts` is removed for GA. That cleanup is tracked by `rna-program#426`.
 
 ## Design principles
 
@@ -65,6 +28,7 @@ Notes:
 | Strict mappings | Both data streams use `dynamic: false`. Only declared fields are indexed. |
 | Runtime schema alignment | Zod schemas mirror the intended application-level document shape. |
 | Versioned evolution | Datastream resources carry a version; bump it when template changes require rollover. |
+| ES-owned `@timestamp` | Each stream has a versioned ingest pipeline wired as `index.final_pipeline` that sets `@timestamp` from `_ingest.timestamp` when the document does not carry one. Writers omit `@timestamp`; only the public alert events API passes a caller-supplied value through. |
 | Backward compatibility | Existing fields may not be removed, renamed, or have incompatible type changes. |
 
 ## The two core streams
@@ -77,7 +41,7 @@ This stream is the durable history of rule evaluation.
 
 | Field | ES type | Notes |
 | --- | --- | --- |
-| `@timestamp` | `date` | When the document was written. |
+| `@timestamp` | `date` | When the document was indexed; set by ES via the final pipeline. |
 | `scheduled_timestamp` | `date` | When the rule run was scheduled. |
 | `rule.id` | `keyword` | Rule identifier. |
 | `rule.version` | `long` | Rule version at execution time. |
@@ -86,9 +50,10 @@ This stream is the durable history of rule evaluation.
 | `status` | `keyword` | `breached`, `recovered`, or `no_data`. |
 | `source` | `keyword` | Origin marker. |
 | `type` | `keyword` | `signal` or `alert`. |
-| `episode.id` | `keyword` | Episode id for alert-type events. |
-| `episode.status` | `keyword` | `inactive`, `pending`, `active`, or `recovering`. |
-| `episode.status_count` | `long` | Consecutive count within the current episode status. |
+| `alert.id` | `keyword` | Alert id for alert-type events. |
+| `alert.status` | `keyword` | `inactive`, `pending`, `active`, or `recovering`. |
+| `alert.status_count` | `long` | Consecutive count within the current alert status. |
+| `episode.id`, `episode.status`, `episode.status_count` | `alias` | Aliases of the `alert.*` fields, so queries on the pre-v8 names keep working. Aliases are not stored in `_source` and cannot be written. |
 | `severity` | `keyword` | Optional. Best-effort severity extracted from the ES\|QL `severity` column on breached events. One of `info`, `low`, `medium`, `high`, `critical`. |
 
 Writers:
@@ -111,10 +76,11 @@ This stream is the dispatcher's durable memory and also stores user/system actio
 
 | Field | ES type | Notes |
 | --- | --- | --- |
-| `@timestamp` | `date` | Action time. |
+| `@timestamp` | `date` | Action time; stamped by ES via the final pipeline. |
 | `last_series_event_timestamp` | `date` | Timestamp of the related series event. |
 | `expiry` | `date` | Optional expiry for temporary actions such as snooze. |
-| `actor` | `keyword` | Who performed the action. |
+| `actor.type` | `keyword` | `user`, or `internal` for writes made by Kibana itself (e.g. the dispatcher). |
+| `actor.profile_uid` | `keyword` | User profile uid of a `user` actor. Absent for `internal` actors and for users without a resolvable profile. |
 | `action_type` | `keyword` | `fire`, `suppress`, `notified`, `ack`, `deactivate`, and related values. |
 | `group_hash` | `keyword` | Series identity. |
 | `episode_id` | `keyword` | Optional episode scope. |
@@ -187,6 +153,10 @@ ES|QL views are registered as `optional: true`, which lets Kibana start even on 
 
 Definitions live in `esql_views/`. The richest example is `esql_views/alert_episodes.ts`.
 
+### `$.alert-episodes` cardinality bound
+
+Its `INLINE STATS ... BY episode.id` grows with total episode count, so the definition starts with `WHERE @timestamp > NOW() - 90 days`. Do not remove it: an unbounded scan exceeds the ES|QL sub-plan size limit (~20.4 MB) and returns a non-retryable HTTP 400 (`sub-plan execution results too large`).
+
 ## Changing a datastream schema safely
 
 Schema evolution must be backward compatible.
@@ -210,6 +180,12 @@ Disallowed changes:
 3. Bump the corresponding datastream version constant when the template change requires rollover.
 4. Update writers and readers that need to understand the new field.
 5. Update the relevant README if the field changes the architecture or contributor mental model.
+
+### Mapping changes that cannot be applied in place
+
+Elasticsearch cannot apply some mapping changes to existing backing indices, for example turning a concrete field into an `alias`. For those, set `forceReset: { version }` on the resource definition, where `version` is the last datastream version with the old mapping. On startup, `DatastreamInitializer` installs the current template, then deletes a data stream created from that version or below and recreates it. Installing the template first means that a write from a node still running the previous version recreates the data stream with the current mapping. All of its documents are lost.
+
+`.rule-events` uses `forceReset: { version: 7 }` for the `episode.*` to `alert.*` rename in v8, and `.alert-actions` uses `forceReset: { version: 6 }` for the `actor` keyword to object change in v7. Keep `forceReset.version` unchanged when bumping the datastream versions later.
 
 ## Example: adding a new optional alert event field
 

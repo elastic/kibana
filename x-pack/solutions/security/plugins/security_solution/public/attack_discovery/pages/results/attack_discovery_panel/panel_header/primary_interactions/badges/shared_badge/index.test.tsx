@@ -6,6 +6,7 @@
  */
 
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import type { UserEvent } from '@testing-library/user-event';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -15,39 +16,39 @@ import { TestProviders } from '../../../../../../../../common/mock';
 
 // Local mock for AttackDiscoveryAlert (all required fields for type safety)
 const mockAttackDiscoveryAlert: AttackDiscoveryAlert = {
-  id: 'alert-id-1',
-  users: [{ id: 'user1' }, { id: 'user2' }],
   alertIds: [],
   connectorId: 'connector-id',
   connectorName: 'Connector',
   detailsMarkdown: '',
   generationUuid: 'gen-uuid',
+  id: 'alert-id-1',
   summaryMarkdown: '',
   timestamp: '',
   title: '',
+  users: [{ id: 'user1' }, { id: 'user2' }],
 };
 
 const mockAttackDiscoveryAlertSingleUser: AttackDiscoveryAlert = {
-  id: 'alert-id-2',
-  users: [{ id: 'user1' }],
   alertIds: [],
   connectorId: 'connector-id',
   connectorName: 'Connector',
   detailsMarkdown: '',
   generationUuid: 'gen-uuid',
+  id: 'alert-id-2',
   summaryMarkdown: '',
   timestamp: '',
   title: '',
+  users: [{ id: 'user1' }],
 };
 
 // Use a minimal object for a non-alert, typed as AttackDiscovery (all required fields)
 const mockAttackDiscoveryNotAlert = {
-  id: 'not-alert-id',
   alertIds: [],
   connectorId: 'connector-id',
   connectorName: 'Connector',
   detailsMarkdown: '',
   generationUuid: 'gen-uuid',
+  id: 'not-alert-id',
   summaryMarkdown: '',
   timestamp: '',
   title: '',
@@ -66,7 +67,8 @@ jest.mock('../../../../../../utils/is_attack_discovery_alert', () => ({
 
 describe('SharedBadge', () => {
   const defaultProps = { attackDiscovery: mockAttackDiscoveryAlert };
-  const user = userEvent.setup({ pointerEventsCheck: 0 });
+
+  let user: UserEvent;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -74,6 +76,8 @@ describe('SharedBadge', () => {
     mockIsAttackDiscoveryAlert.mockImplementation(
       (obj) => obj === mockAttackDiscoveryAlert || obj === mockAttackDiscoveryAlertSingleUser
     );
+    // Disable pointer events check to avoid flakiness with EUI popover animations
+    user = userEvent.setup({ pointerEventsCheck: 0 });
   });
 
   it('opens the popover when the badge is clicked', async () => {

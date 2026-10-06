@@ -5,8 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import type { PayloadAction } from '@reduxjs/toolkit';
-import { useDispatch, useSelector } from 'react-redux';
+import type { PayloadAction } from 'redux-toolkit-v1';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { MonitorListSortField } from '../../../../../../../common/runtime_types/monitor_management/sort_field';
@@ -32,6 +32,7 @@ export const SortFields = () => {
         handleSortChange(
           setOverviewPageStateAction({
             sortOrder: 'asc',
+            page: 1,
           })
         );
       },
@@ -44,6 +45,7 @@ export const SortFields = () => {
         handleSortChange(
           setOverviewPageStateAction({
             sortOrder: 'desc',
+            page: 1,
           })
         );
       },
@@ -60,6 +62,7 @@ export const SortFields = () => {
           setOverviewPageStateAction({
             sortField: 'status',
             sortOrder: 'asc',
+            page: 1,
           })
         );
       },
@@ -74,6 +77,7 @@ export const SortFields = () => {
           setOverviewPageStateAction({
             sortField: `${ConfigKey.NAME}.keyword`,
             sortOrder: 'asc',
+            page: 1,
           })
         );
       },
@@ -88,6 +92,7 @@ export const SortFields = () => {
           setOverviewPageStateAction({
             sortField: 'urls',
             sortOrder: 'asc',
+            page: 1,
           })
         );
       },
@@ -102,6 +107,7 @@ export const SortFields = () => {
           setOverviewPageStateAction({
             sortField: `${ConfigKey.MONITOR_TYPE}.keyword`,
             sortOrder: 'asc',
+            page: 1,
           })
         );
       },
@@ -115,6 +121,21 @@ export const SortFields = () => {
         handleSortChange(
           setOverviewPageStateAction({
             sortField: 'updated_at',
+            sortOrder: 'desc',
+            page: 1,
+          })
+        );
+      },
+    },
+    {
+      label: CREATED_LABEL,
+      value: 'created_at',
+      checked: sortField === 'created_at',
+      defaultSortOrder: 'desc',
+      onClick: () => {
+        handleSortChange(
+          setOverviewPageStateAction({
+            sortField: 'created_at',
             sortOrder: 'desc',
           })
         );
@@ -153,6 +174,12 @@ const getOrderContent = (sortField: MonitorListSortField) => {
         asc: SORT_UPDATED_ASC,
         desc: SORT_UPDATED_DESC,
         label: LAST_MODIFIED_LABEL,
+      };
+    case 'created_at':
+      return {
+        asc: SORT_UPDATED_ASC,
+        desc: SORT_UPDATED_DESC,
+        label: CREATED_LABEL,
       };
     case 'status':
       return {
@@ -256,3 +283,7 @@ const LAST_MODIFIED_LABEL = i18n.translate(
     defaultMessage: 'Last modified',
   }
 );
+
+const CREATED_LABEL = i18n.translate('xpack.synthetics.overview.sortPopover.createdLabel', {
+  defaultMessage: 'Created',
+});

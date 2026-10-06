@@ -32,7 +32,6 @@ export const SearchModalInternal = ({
   taggingApi,
   navigateToUrl,
   reportEvent,
-  basePathUrl,
   onClose,
 }: SearchModalProps) => {
   const { euiTheme } = useEuiTheme();
@@ -106,7 +105,8 @@ export const SearchModalInternal = ({
         autoFocus: true,
         value: searchValue,
         onInput: (e: React.UIEvent<HTMLInputElement>) => setSearchValue(e.currentTarget.value),
-        'data-test-subj': `${SEARCH_MODAL_SELECTOR_PREFIX}Input`,
+        // Shared with the legacy search bar so navigation test helpers work in both modes.
+        'data-test-subj': 'nav-search-input',
         inputRef: setSearchRef,
         compressed: false,
         'aria-label': i18nStrings.placeholderText,
@@ -114,11 +114,9 @@ export const SearchModalInternal = ({
         fullWidth: true,
         isClearable: true,
       }}
-      errorMessage={
-        searchCharLimitExceeded ? <CharLimitExceededMessage basePathUrl={basePathUrl} /> : null
-      }
+      errorMessage={searchCharLimitExceeded ? <CharLimitExceededMessage /> : null}
       emptyMessage={<EmptyMessage />}
-      noMatchesMessage={<SearchPlaceholder basePath={basePathUrl} />}
+      noMatchesMessage={<SearchPlaceholder />}
       searchable
     >
       {(list, search) => (

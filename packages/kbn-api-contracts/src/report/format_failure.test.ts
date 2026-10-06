@@ -8,27 +8,25 @@
  */
 
 import { formatFailure } from './format_failure';
-import type { BreakingChange } from '../diff/breaking_rules';
-import type { TerraformImpactResult } from '../terraform/check_terraform_impact';
+import type { ImpactReportEntry } from './write_impact_report';
 
-const pathRemovedBreaking = (path: string, reason = 'Endpoint removed'): BreakingChange => ({
-  type: 'path_removed',
+const stableEntry = (path: string, reason = 'Endpoint removed'): ImpactReportEntry => ({
   path,
   reason,
+  tier: 'stable',
 });
 
-const methodRemovedBreaking = (
+const techPreviewEntry = (
   path: string,
   method: string,
   reason = 'HTTP method removed'
-): BreakingChange => ({ type: 'method_removed', path, method, reason });
+): ImpactReportEntry => ({ path, method, reason, tier: 'tech_preview' });
 
-const operationBreaking = (
-  path: string,
-  method: string,
-  reason: string,
-  details?: unknown
-): BreakingChange => ({ type: 'operation_breaking', path, method, reason, details });
+const experimentalEntry = (path: string, reason = 'Endpoint removed'): ImpactReportEntry => ({
+  path,
+  reason,
+  tier: 'experimental',
+});
 
 const expectOutputContains = (output: string, ...substrings: string[]) => {
   substrings.forEach((substring) => {
@@ -36,132 +34,129 @@ const expectOutputContains = (output: string, ...substrings: string[]) => {
   });
 };
 
-const expectOutputNotContains = (output: string, ...substrings: string[]) => {
-  substrings.forEach((substring) => {
-    expect(output).not.toContain(substring);
-  });
-};
-
 describe('formatFailure', () => {
-  it('formats a single breaking change', () => {
-    const changes = [pathRemovedBreaking('/api/test')];
-    const output = formatFailure(changes);
+  it('formats a single detected change with its tier', () => {
+    const output = formatFailure([stableEntry('/api/test')]);
 
     expectOutputContains(
       output,
       'API CONTRACT BREAKING CHANGES DETECTED',
-      'Found 1 breaking change(s)',
+      'Detected 1 breaking change(s) in stable/tech_preview APIs (1 stable, 0 tech_preview)',
       '1. Endpoint removed',
       'Path: /api/test',
+      'Tier: Stable (GA)',
       'What to do next:'
     );
   });
 
-  it('formats multiple breaking changes', () => {
-    const changes = [
-      pathRemovedBreaking('/api/old'),
-      methodRemovedBreaking('/api/test', 'delete'),
-      operationBreaking('/api/test', 'post', 'requestBody modified', { content: {} }),
-    ];
-    const output = formatFailure(changes);
+  it('orders stable before tech_preview and reports per-tier counts', () => {
+    const output = formatFailure([
+      techPreviewEntry('/api/preview', 'delete'),
+      stableEntry('/api/old'),
+    ]);
 
     expectOutputContains(
       output,
-      'Found 3 breaking change(s)',
-      '1. Endpoint removed',
-      '2. HTTP method removed',
-      '3. requestBody modified',
-      'Method: DELETE',
-      'Method: POST'
+      'Detected 2 breaking change(s) in stable/tech_preview APIs (1 stable, 1 tech_preview)',
+      'Tier: Stable (GA)',
+      'Tier: Technical Preview',
+      'Method: DELETE'
+    );
+    // stable ordered first regardless of input order
+    expect(output.indexOf('/api/old')).toBeLessThan(output.indexOf('/api/preview'));
+  });
+
+  it('lists experimental changes in a non-blocking section and excludes them from the count', () => {
+    const output = formatFailure([stableEntry('/api/old'), experimentalEntry('/api/exp')]);
+
+    expectOutputContains(
+      output,
+      // count reflects only the gating (stable/tech_preview) change
+      'Detected 1 breaking change(s) in stable/tech_preview APIs (1 stable, 0 tech_preview)',
+      'Informational — not blocking merge',
+      'Tier: Experimental',
+      '/api/exp'
     );
   });
 
-  it('includes details when present', () => {
-    const changes = [
-      operationBreaking('/api/test', 'get', 'responses modified', {
-        '200': { description: 'Success' },
-      }),
-    ];
-    const output = formatFailure(changes);
+  it('omits the informational section when there are no experimental changes', () => {
+    const output = formatFailure([stableEntry('/api/old')]);
 
-    expectOutputContains(output, 'Details:', '"200"', '"description": "Success"');
+    expect(output).not.toContain('Informational — not blocking merge');
   });
 
-  it('produces deterministic output for same input', () => {
-    const changes = [pathRemovedBreaking('/api/test')];
+  it('lists report-only changes separately and excludes them from the count', () => {
+    const output = formatFailure([
+      stableEntry('/api/old'),
+      {
+        ...stableEntry(
+          '/api/cases/{caseId}/user_actions/_find',
+          'added a variant to payload oneOf'
+        ),
+        method: 'get',
+        oasdiffId: 'response-property-one-of-added',
+        reportOnly: true,
+        policyReason: 'Adding a variant to a response oneOf is additive.',
+      },
+    ]);
 
-    const output1 = formatFailure(changes);
-    const output2 = formatFailure(changes);
-
-    expect(output1).toEqual(output2);
+    expectOutputContains(
+      output,
+      // count reflects only the gating change, even though both are stable tier
+      'Detected 1 breaking change(s) in stable/tech_preview APIs (1 stable, 0 tech_preview)',
+      'Kibana treats as additive',
+      '/api/cases/{caseId}/user_actions/_find',
+      'Why this does not block: Adding a variant to a response oneOf is additive.'
+    );
   });
 
-  it('includes help links', () => {
-    const changes = [pathRemovedBreaking('/api/test')];
-    const output = formatFailure(changes);
-
-    expectOutputContains(output, 'Need help?');
+  it('omits the report-only section when no rule was demoted', () => {
+    expect(formatFailure([stableEntry('/api/old')])).not.toContain('Kibana treats as additive');
   });
 
-  describe('terraform impact', () => {
-    it('does not show terraform section when no impact', () => {
-      const changes = [pathRemovedBreaking('/api/test')];
-      const terraformImpact: TerraformImpactResult = {
-        hasImpact: false,
-        impactedChanges: [],
-      };
-      const output = formatFailure(changes, terraformImpact);
+  describe('when nothing gates', () => {
+    const reportOnlyEntry: ImpactReportEntry = {
+      ...stableEntry('/api/cases/{caseId}/user_actions/_find', 'added a variant to payload oneOf'),
+      oasdiffId: 'response-property-one-of-added',
+      reportOnly: true,
+      policyReason: 'Adding a variant to a response oneOf is additive.',
+    };
 
-      expectOutputNotContains(output, 'TERRAFORM PROVIDER IMPACT');
-    });
-
-    it('shows terraform section when there is impact', () => {
-      const changes = [pathRemovedBreaking('/api/spaces/space')];
-      const terraformImpact: TerraformImpactResult = {
-        hasImpact: true,
-        impactedChanges: [
-          {
-            change: changes[0],
-            terraformResource: 'elasticstack_kibana_space',
-            owners: ['@elastic/kibana-security'],
-          },
-        ],
-      };
-      const output = formatFailure(changes, terraformImpact);
+    it.each([
+      ['report-only', [reportOnlyEntry]],
+      ['experimental', [experimentalEntry('/api/exp')]],
+    ])('lists %s changes without a failure header or allowlist prompt', (_, entries) => {
+      const output = formatFailure(entries);
 
       expectOutputContains(
         output,
-        'TERRAFORM PROVIDER IMPACT',
-        'elasticstack_kibana_space',
-        '/api/spaces/space',
-        'Owners: @elastic/kibana-security',
-        'Coordinate with @elastic/terraform-provider'
+        'API CONTRACT CHANGES REPORTED',
+        'No breaking changes detected in stable/tech_preview APIs',
+        'Nothing here blocks merge',
+        'Need help?',
+        entries[0].path
+      );
+      expect(output).not.toContain('BREAKING CHANGES DETECTED');
+      expect(output).not.toContain('Detected 0 breaking change(s)');
+      expect(output).not.toContain('What to do next:');
+      expect(output).not.toContain('allowlist');
+    });
+
+    it('prints the policy reason for a report-only change', () => {
+      expectOutputContains(
+        formatFailure([reportOnlyEntry]),
+        'Why this does not block: Adding a variant to a response oneOf is additive.'
       );
     });
+  });
 
-    it('shows multiple terraform impacts', () => {
-      const changes = [
-        pathRemovedBreaking('/api/spaces/space'),
-        methodRemovedBreaking('/api/fleet/agent_policies', 'POST'),
-      ];
-      const terraformImpact: TerraformImpactResult = {
-        hasImpact: true,
-        impactedChanges: [
-          {
-            change: changes[0],
-            terraformResource: 'elasticstack_kibana_space',
-            owners: ['@elastic/kibana-security'],
-          },
-          {
-            change: changes[1],
-            terraformResource: 'elasticstack_fleet_agent_policy',
-            owners: ['@elastic/fleet'],
-          },
-        ],
-      };
-      const output = formatFailure(changes, terraformImpact);
+  it('produces deterministic output for the same input', () => {
+    const entries = [stableEntry('/api/test')];
 
-      expectOutputContains(output, 'elasticstack_kibana_space', 'elasticstack_fleet_agent_policy');
-    });
+    expect(formatFailure(entries)).toEqual(formatFailure(entries));
+  });
+
+  it('includes the help link', () => {
+    expectOutputContains(formatFailure([stableEntry('/api/test')]), 'Need help?');
   });
 });

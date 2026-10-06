@@ -35,9 +35,19 @@ export const fullAgentPolicyToYaml = (
   apiKey?: string
 ): string => {
   const sortYamlKeys = createYamlKeysSorter(POLICY_KEYS_ORDER, yaml);
+  // The assembled policy can reuse the same object by reference (e.g. an ES
+  // privileges object shared between `inputs` and `output_permissions`). With
+  // anchors enabled, the custom key sorter can emit the alias before its anchor,
+  // which makes serialization throw "Unresolved alias". Inline duplicates instead;
+  // anchors/aliases are undesirable in an agent-consumed policy anyway.
   const yamlText = toYaml(
     policy,
-    { sortMapEntries: sortYamlKeys, strict: false, schema: 'yaml-1.1' },
+    {
+      sortMapEntries: sortYamlKeys,
+      strict: false,
+      schema: 'yaml-1.1',
+      aliasDuplicateObjects: false,
+    },
     yaml
   );
   const formattedYml = apiKey ? replaceApiKey(yamlText, apiKey) : yamlText;

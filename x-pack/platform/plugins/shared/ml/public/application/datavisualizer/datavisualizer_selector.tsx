@@ -8,26 +8,17 @@
 import type { FC } from 'react';
 import React, { Fragment, useMemo } from 'react';
 
-import {
-  EuiButton,
-  EuiCard,
-  EuiFlexGroup,
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButton, EuiCard, EuiFlexGrid, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { i18n } from '@kbn/i18n';
 import { isFullLicense } from '../license';
 import { useMlKibana } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
-import { MlPageHeader } from '../components/page_header';
+import { MlAppHeader } from '../components/ml_app_header';
 import { DataVisualizerGrid } from '../overview/data_visualizer_grid';
-import { PageTitle } from '../components/page_title';
 
 function startTrialDescription() {
   return (
@@ -79,29 +70,19 @@ export const DatavisualizerSelector: FC = () => {
   return (
     <>
       <div data-test-subj="mlPageDataVisualizerSelector">
-        <MlPageHeader>
-          <PageTitle
-            title={
-              <FormattedMessage
-                id="xpack.ml.datavisualizer.selector.dataVisualizerTitle"
-                defaultMessage="Data visualizer"
-              />
+        <MlAppHeader
+          title={i18n.translate('xpack.ml.datavisualizer.selector.dataVisualizerTitle', {
+            defaultMessage: 'Data visualizer',
+          })}
+          description={i18n.translate(
+            'xpack.ml.datavisualizer.selector.dataVisualizerDescription',
+            {
+              defaultMessage:
+                'The Machine Learning Data Visualizer tool helps you understand your data by analyzing the metrics and fields in a log file or an existing Elasticsearch index.',
             }
-          />
-        </MlPageHeader>
+          )}
+        />
 
-        <EuiFlexGroup gutterSize="xl">
-          <EuiFlexItem grow={false}>
-            <EuiText color="subdued">
-              <FormattedMessage
-                id="xpack.ml.datavisualizer.selector.dataVisualizerDescription"
-                defaultMessage="The Machine Learning Data Visualizer tool helps you understand your data
-                  by analyzing the metrics and fields in a log file or an existing Elasticsearch index."
-              />
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="xl" />
         <DataVisualizerGrid isEsqlEnabled={isEsqlEnabled} />
         {startTrialVisible === true && (
           <Fragment>

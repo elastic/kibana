@@ -62,6 +62,35 @@ describe('FlyoutFooterWithRetentionWarning', () => {
     expect(screen.getByTestId('flyoutFooter-downsamplingNotAppliedCallout')).toBeInTheDocument();
   });
 
+  it('uses the import-stream warning copy by default', () => {
+    renderWithTheme(
+      <FlyoutFooterWithRetentionWarning onCancel={() => {}} onApply={() => {}} showWarning />
+    );
+
+    const callout = screen.getByTestId('flyoutFooter-downsamplingNotAppliedCallout');
+    expect(callout).toHaveTextContent('Downsampling requires a time series stream');
+    expect(callout).toHaveTextContent(
+      'downsampling steps from the imported lifecycles will be excluded'
+    );
+  });
+
+  it('uses the selected-ILM-policy warning copy when warningType is "ilm_policy"', () => {
+    renderWithTheme(
+      <FlyoutFooterWithRetentionWarning
+        onCancel={() => {}}
+        onApply={() => {}}
+        showWarning
+        warningType="ilm_policy"
+      />
+    );
+
+    const callout = screen.getByTestId('flyoutFooter-downsamplingNotAppliedCallout');
+    expect(callout).toHaveTextContent('Downsampling requires a time series stream');
+    expect(callout).toHaveTextContent(
+      'downsampling steps from the selected ILM policy will be excluded'
+    );
+  });
+
   it('does not show the warning when inheriting lifecycle', () => {
     renderWithTheme(
       <WarningFooter
@@ -96,6 +125,13 @@ describe('FlyoutFooterWithRetentionWarning', () => {
 
     const applyButton = screen.getByRole('button', { name: 'Save changes' });
     expect(applyButton).toBeDisabled();
+  });
+
+  it('renders the action button test subjects', () => {
+    renderWithTheme(<FlyoutFooterWithRetentionWarning onCancel={() => {}} onApply={() => {}} />);
+
+    expect(screen.getByTestId('dataLifecycleFlyoutCancelButton')).toBeInTheDocument();
+    expect(screen.getByTestId('dataLifecycleFlyoutApplyButton')).toBeInTheDocument();
   });
 
   it('shows the downsampling warning when canUseDownsampling becomes false between renders', () => {

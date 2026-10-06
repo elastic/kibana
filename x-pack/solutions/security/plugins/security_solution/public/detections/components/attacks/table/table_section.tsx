@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { isNonLocalIndexName } from '@kbn/es-query';
@@ -22,7 +23,9 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../common/store/inputs';
 import { useKibana } from '../../../../common/lib/kibana';
-import { AttacksEventTypes } from '../../../../common/lib/telemetry';
+import { AttacksEventTypes, FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
+import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { useUserData } from '../../user_info';
 import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
 import {
@@ -43,8 +46,8 @@ import { dsl } from '../utils/dsl';
 import { groupingOptions, groupingSettings } from './grouping_settings/grouping_configs';
 import {
   buildAttacksOnlyFilter,
-  buildConnectorIdFilter,
   buildAttackTypeFilter,
+  buildConnectorIdFilter,
 } from './filtering_configs';
 import type { GroupTakeActionItems } from '../../alerts_table/types';
 import { AttacksGroupTakeActionItems } from './attacks_group_take_action_items';
@@ -56,6 +59,22 @@ import { useLocalStorage } from '../../../../common/components/local_storage';
 
 export const TABLE_SECTION_TEST_ID = 'attacks-page-table-section';
 export const ATTACKS_TABLE_SORT_STORAGE_KEY = 'securitySolution:attacksTableSort';
+
+/**
+ * Scoped override: EUI's accordion button applies `text-decoration: underline` to its
+ * entire content on hover/focus. We strip that off the button and re-apply it only to
+ * the attack title `<h5>` so the underline is limited to the attack name itself.
+ */
+const accordionTitleUnderlineCss = css`
+  .euiAccordion__button:hover,
+  .euiAccordion__button:focus {
+    text-decoration: none;
+  }
+  .euiAccordion__button:hover h5,
+  .euiAccordion__button:focus h5 {
+    text-decoration: underline;
+  }
+`;
 
 export interface TableSectionProps {
   /**
@@ -92,6 +111,13 @@ export interface TableSectionProps {
    * Callback to open the schedules flyout
    */
   openSchedulesFlyout: () => void;
+
+  /**
+   * Optional callback invoked with the attack id group keys whenever the grouped
+   * table results change (`undefined` until the first aggregation resolves).
+   * Used by the page tour to know whether any attacks match the active filters.
+   */
+  onAttackIdsChange?: (attackIds: string[] | undefined) => void;
 }
 
 /**
@@ -106,6 +132,7 @@ export const TableSection = React.memo(
     selectedConnectorNames,
     selectedTypes,
     openSchedulesFlyout,
+    onAttackIdsChange,
   }: TableSectionProps) => {
     const getGlobalFiltersQuerySelector = useMemo(
       () => inputsSelectors.globalFiltersQuerySelector(),
@@ -118,9 +145,9 @@ export const TableSection = React.memo(
 
     const { to, from } = useGlobalTime();
 
-    const {
-      services: { telemetry },
-    } = useKibana();
+    const { telemetry } = useKibana().services;
+    const enableNewFlyout = useIsNewFlyoutEnabled();
+    const { openAttackFlyout } = useFlyoutApi();
 
     const [{ loading: userInfoLoading }] = useUserData();
 
@@ -158,22 +185,31 @@ export const TableSection = React.memo(
       (selectedGroup: string, bucket: RawBucket<AlertsGroupingAggregation>) => {
         const attack = getAttack(selectedGroup, bucket);
         if (attack) {
-          openFlyout({
-            right: {
-              id: AttackDetailsRightPanelKey,
-              params: {
-                attackId: attack.id,
-                indexName: dataView.getIndexPattern(),
+          if (enableNewFlyout) {
+            openAttackFlyout({
+              attackId: attack.id,
+              indexName: dataView.getIndexPattern(),
+              origin: FLYOUT_ORIGIN.ATTACKS_TABLE,
+              attackTitle: attack.title,
+            });
+          } else {
+            openFlyout({
+              right: {
+                id: AttackDetailsRightPanelKey,
+                params: {
+                  attackId: attack.id,
+                  indexName: dataView.getIndexPattern(),
+                },
               },
-            },
-          });
+            });
+          }
           telemetry.reportEvent(AttacksEventTypes.DetailsFlyoutOpened, {
             id: attack.id,
             source: 'attacks_page_table',
           });
         }
       },
-      [dataView, getAttack, openFlyout, telemetry]
+      [dataView, enableNewFlyout, getAttack, openAttackFlyout, openFlyout, telemetry]
     );
 
     const { defaultGroupTitleRenderers } = useGetDefaultGroupTitleRenderers({
@@ -196,8 +232,9 @@ export const TableSection = React.memo(
         );
         const groupKeys = attackIdsGroupBuckets?.flatMap(({ key }) => key);
         setAttackIds(groupKeys);
+        onAttackIdsChange?.(groupKeys);
       },
-      []
+      [onAttackIdsChange]
     );
 
     // AlertsTable manages global filters itself, so not including `filters`
@@ -308,7 +345,7 @@ export const TableSection = React.memo(
     const dslFilter = useMemo(() => dsl.isNotAttack(), []);
 
     return (
-      <div data-test-subj={TABLE_SECTION_TEST_ID}>
+      <div data-test-subj={TABLE_SECTION_TEST_ID} css={accordionTitleUnderlineCss}>
         <GroupedAlertsTable
           accordionButtonContent={defaultGroupTitleRenderers}
           accordionExtraActionGroupStats={accordionExtraActionGroupStats}

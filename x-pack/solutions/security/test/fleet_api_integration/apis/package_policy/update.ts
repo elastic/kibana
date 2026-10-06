@@ -831,7 +831,7 @@ export default function (providerContext: FtrProviderContext) {
         const {
           body: { item },
         } = await supertest
-          .put(`/api/fleet/package_policies/${packagePolicyId}?format=simplified`)
+          .put(`/api/fleet/package_policies/${packagePolicyId3}?format=simplified`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: `update-simplified-package-policy-with_required_variables-${Date.now()}`,
@@ -861,7 +861,7 @@ export default function (providerContext: FtrProviderContext) {
         const {
           body: { item },
         } = await supertest
-          .put(`/api/fleet/package_policies/${packagePolicyId}?format=legacy`)
+          .put(`/api/fleet/package_policies/${packagePolicyId3}?format=legacy`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: `update-simplified-package-policy-with_required_variables-${Date.now()}`,
@@ -889,7 +889,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should return 400 if an invalid format query param is passed', async function () {
         await supertest
-          .put(`/api/fleet/package_policies/${packagePolicyId}?format=foo`)
+          .put(`/api/fleet/package_policies/${packagePolicyId3}?format=foo`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: `update-simplified-package-policy-with_required_variables-${Date.now()}`,

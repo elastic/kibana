@@ -8,7 +8,7 @@
  */
 
 import type { JsonValue } from '@kbn/utility-types';
-import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
+import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
@@ -112,7 +112,7 @@ describe('WorkflowExecutionState', () => {
   });
 
   it('should throw error from upsertStep if id is not provided', () => {
-    expect(() => underTest.upsertStep({})).toThrowError(
+    expect(() => underTest.upsertStep({})).toThrow(
       'WorkflowExecutionState: Step execution must have an ID to be upserted'
     );
   });
@@ -145,6 +145,7 @@ describe('WorkflowExecutionState', () => {
       stepExecutionIndex: 0,
       globalExecutionIndex: 0,
       isTestRun: false,
+      managed: false,
     } as Partial<EsWorkflowStepExecution>);
     expect(stepExecutionRepository.bulkUpsert).not.toHaveBeenCalled();
   });
@@ -177,6 +178,31 @@ describe('WorkflowExecutionState', () => {
         workflowId: 'test-workflow-id',
         isTestRun: true,
       })
+    );
+  });
+
+  it('should set managed on step execution from workflow execution', () => {
+    const state = new WorkflowExecutionState(
+      {
+        id: 'test-workflow-execution-id',
+        workflowId: 'test-workflow-id',
+        status: ExecutionStatus.RUNNING,
+        startedAt: '2025-08-05T20:00:00.000Z',
+        isTestRun: false,
+        managed: true,
+      } as EsWorkflowExecution,
+      workflowExecutionRepository
+    );
+
+    state.upsertStep({
+      id: 'fake-id',
+      stepId: 'test-step',
+      status: ExecutionStatus.RUNNING,
+      startedAt: '2025-08-05T20:00:00.000Z',
+    } as EsWorkflowStepExecution);
+
+    expect(state.getLatestStepExecution('test-step')).toEqual(
+      expect.objectContaining({ managed: true })
     );
   });
 
@@ -274,7 +300,8 @@ describe('WorkflowExecutionState', () => {
       await ioService.flush();
 
       expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
-        updatedWorkflowExecution
+        updatedWorkflowExecution,
+        {}
       );
     });
 
@@ -288,7 +315,8 @@ describe('WorkflowExecutionState', () => {
       expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'test-workflow-execution-id',
-        })
+        }),
+        {}
       );
     });
 
@@ -469,6 +497,87 @@ describe('WorkflowExecutionState', () => {
           stepId: 'testStep',
         })
       );
+    });
+
+    describe('scoped to parallel branches', () => {
+      const branchFrames = (branchIndex: number): StackFrame[] => [
+        {
+          stepId: 'fanOut',
+          nestedScopes: [
+            {
+              nodeId: 'enterParallel_fanOut',
+              nodeType: 'enter-parallel',
+              scopeId: branchIndex.toString(),
+            },
+          ],
+        },
+      ];
+
+      beforeEach(() => {
+        underTest.upsertStep({ id: 'outside', stepId: 'mark', scopeStack: [] });
+        underTest.upsertStep({ id: 'branch-0', stepId: 'mark', scopeStack: branchFrames(0) });
+        underTest.upsertStep({ id: 'branch-1', stepId: 'mark', scopeStack: branchFrames(1) });
+      });
+
+      it('returns the execution from the reader branch, skipping later sibling branches', () => {
+        expect(underTest.getLatestStepExecution('mark', branchFrames(0))?.id).toBe('branch-0');
+      });
+
+      it('falls back to an execution outside the parallel when the branch has none', () => {
+        expect(underTest.getLatestStepExecution('mark', branchFrames(2))?.id).toBe('outside');
+      });
+
+      it('keeps last-write-wins for readers outside any parallel branch', () => {
+        expect(underTest.getLatestStepExecution('mark', [])?.id).toBe('branch-1');
+        expect(underTest.getLatestStepExecution('mark')?.id).toBe('branch-1');
+      });
+
+      it('keeps branches of an earlier, already joined fan-out visible', () => {
+        const otherFanOutFrames: StackFrame[] = [
+          {
+            stepId: 'fanOutB',
+            nestedScopes: [
+              { nodeId: 'enterParallel_fanOutB', nodeType: 'enter-parallel', scopeId: '0' },
+            ],
+          },
+        ];
+
+        expect(underTest.getLatestStepExecution('mark', otherFanOutFrames)?.id).toBe('branch-1');
+      });
+
+      it('scopes each loop iteration to its own fan-out', () => {
+        const iterationFrames = (iteration: number, branchIndex: number): StackFrame[] => [
+          {
+            stepId: 'loop',
+            nestedScopes: [
+              { nodeId: 'enterForeach_loop', nodeType: 'enter-foreach', scopeId: `${iteration}` },
+            ],
+          },
+          ...branchFrames(branchIndex),
+        ];
+        underTest.upsertStep({
+          id: 'iter-0-branch-0',
+          stepId: 'inner',
+          scopeStack: iterationFrames(0, 0),
+        });
+        underTest.upsertStep({
+          id: 'iter-1-branch-0',
+          stepId: 'inner',
+          scopeStack: iterationFrames(1, 0),
+        });
+        underTest.upsertStep({
+          id: 'iter-1-branch-1',
+          stepId: 'inner',
+          scopeStack: iterationFrames(1, 1),
+        });
+
+        expect(underTest.getLatestStepExecution('inner', iterationFrames(1, 0))?.id).toBe(
+          'iter-1-branch-0'
+        );
+        expect(underTest.getLatestStepExecution('inner', iterationFrames(1, 2))?.id).toBe(
+          'iter-0-branch-0'
+        );
+      });
     });
   });
 
@@ -1154,6 +1263,129 @@ describe('WorkflowExecutionState', () => {
 
         expect(underTest.getStepExecution('exec-1')?.scopeStack).toEqual(scopeStack);
       });
+    });
+  });
+
+  describe('accumulateUsage', () => {
+    it('sets the per-execution usage from the first reporting step', () => {
+      underTest.accumulateUsage({
+        inputTokens: 100,
+        outputTokens: 50,
+        cachedTokens: 25,
+        totalTokens: 150,
+      });
+
+      expect(underTest.getWorkflowExecution().usage).toEqual({
+        inputTokens: 100,
+        outputTokens: 50,
+        cachedTokens: 25,
+        totalTokens: 150,
+      });
+    });
+
+    it('sums usage across multiple steps', () => {
+      underTest.accumulateUsage({
+        inputTokens: 100,
+        outputTokens: 50,
+        cachedTokens: 25,
+        totalTokens: 150,
+      });
+      underTest.accumulateUsage({
+        inputTokens: 200,
+        outputTokens: 80,
+        cachedTokens: 40,
+        totalTokens: 280,
+      });
+
+      expect(underTest.getWorkflowExecution().usage).toEqual({
+        inputTokens: 300,
+        outputTokens: 130,
+        cachedTokens: 65,
+        totalTokens: 430,
+      });
+    });
+
+    it('persists the accumulated usage on the next workflow-doc flush', async () => {
+      underTest.accumulateUsage({ inputTokens: 100, outputTokens: 50, totalTokens: 150 });
+      await underTest.flushWorkflowDoc();
+
+      expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'test-workflow-execution-id',
+          usage: { inputTokens: 100, outputTokens: 50, cachedTokens: 0, totalTokens: 150 },
+        }),
+        {}
+      );
+    });
+
+    it('is a no-op when usage is undefined (steps that report nothing)', () => {
+      underTest.accumulateUsage(undefined);
+      expect(underTest.getWorkflowExecution().usage).toBeUndefined();
+    });
+  });
+
+  describe('recordStepUsage', () => {
+    it('appends each step as a distinct entry in finish order, even on the same connector', () => {
+      // Two steps sharing a connector must not be merged — that is the reason
+      // this list exists alongside the summed `usage`.
+      underTest.recordStepUsage({
+        stepId: 'run_investigator_agent',
+        connectorId: '.openai-gpt-5.2',
+        inputTokens: 100,
+        outputTokens: 50,
+        totalTokens: 150,
+      });
+      underTest.recordStepUsage({
+        stepId: 'run_judge_agent',
+        connectorId: '.openai-gpt-5.2',
+        inputTokens: 200,
+        outputTokens: 80,
+        totalTokens: 280,
+      });
+
+      expect(underTest.getWorkflowExecution().stepUsage).toEqual([
+        {
+          stepId: 'run_investigator_agent',
+          connectorId: '.openai-gpt-5.2',
+          inputTokens: 100,
+          outputTokens: 50,
+          totalTokens: 150,
+        },
+        {
+          stepId: 'run_judge_agent',
+          connectorId: '.openai-gpt-5.2',
+          inputTokens: 200,
+          outputTokens: 80,
+          totalTokens: 280,
+        },
+      ]);
+    });
+
+    it('persists the per-step breakdown on the next workflow-doc flush', async () => {
+      underTest.recordStepUsage({
+        stepId: 'run_investigator_agent',
+        connectorId: '.openai-gpt-5.2',
+        inputTokens: 100,
+        outputTokens: 50,
+        totalTokens: 150,
+      });
+      await underTest.flushWorkflowDoc();
+
+      expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'test-workflow-execution-id',
+          stepUsage: [
+            {
+              stepId: 'run_investigator_agent',
+              connectorId: '.openai-gpt-5.2',
+              inputTokens: 100,
+              outputTokens: 50,
+              totalTokens: 150,
+            },
+          ],
+        }),
+        {}
+      );
     });
   });
 });

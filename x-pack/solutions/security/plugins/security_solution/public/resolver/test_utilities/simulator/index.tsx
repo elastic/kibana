@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { AnyAction, Store } from 'redux';
+import type { AnyAction, Store } from 'redux-v4';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import type { History as HistoryPackageHistoryInterface } from 'history';
@@ -112,16 +112,6 @@ export class Simulator {
     this.store = createMockStore(
       {
         ...mockGlobalState,
-        sourcerer: {
-          ...mockGlobalState.sourcerer,
-          sourcererScopes: {
-            ...mockGlobalState.sourcerer.sourcererScopes,
-            analyzer: {
-              ...mockGlobalState.sourcerer.sourcererScopes.default,
-              selectedPatterns: indices,
-            },
-          },
-        },
         analyzer: {
           [resolverComponentInstanceID]: EMPTY_RESOLVER,
         },
@@ -163,6 +153,7 @@ export class Simulator {
    * Unmount the Resolver component. Use this to test what happens when code that uses Resolver unmounts it.
    */
   public unmount(): void {
+    this.unmounted = true;
     this.wrapper.unmount();
   }
 
@@ -227,19 +218,42 @@ export class Simulator {
   }
 
   /**
+   * Whether `unmount()` has been called. Used to guard against setState/update calls on a
+   * detached enzyme wrapper, which throw and would leave the Promise in `map()` permanently
+   * unresolved.
+   */
+  private unmounted = false;
+
+  /**
    * EUI uses a component called `AutoSizer` that won't render its children unless it has sufficient size.
    * This forces any `AutoSizer` instances to have a large size.
    */
   private forceAutoSizerOpen() {
-    this.wrapper
-      .find('AutoSizer')
-      .forEach((wrapper) => wrapper.setState({ width: 10000, height: 10000 }));
+    if (this.unmounted) return;
+    try {
+      this.wrapper
+        .find('AutoSizer')
+        .forEach((wrapper) => wrapper.setState({ width: 10000, height: 10000 }));
+    } catch {
+      // swallow errors on stale/unmounted wrappers
+    }
   }
 
   /**
    * Yield the result of `mapper` over and over, once per event-loop cycle.
    * After 10 times, quit.
    * Use this to continually check a value. See `toYieldEqualTo`.
+   *
+   * Each iteration waits for a `setTimeout(0)` callback that calls
+   * `forceAutoSizerOpen()` and `wrapper.update()`. These are wrapped in a
+   * try-catch so that a stale or mid-unmount wrapper cannot leave the
+   * returned Promise unresolved and cause a `beforeEach` hook to time out.
+   *
+   * When the consumer breaks from the iteration early (e.g., `toYieldEqualTo`
+   * finds a match and exits its `for await...of` loop), the generator is
+   * terminated at the `yield` point via `generator.return()`. Because the
+   * termination happens before the code after `yield` runs, no `setTimeout`
+   * is registered and no cleanup is required.
    */
   public async *map<R>(mapper: (() => Promise<R>) | (() => R)): AsyncIterable<R> {
     let timeoutCount = 0;
@@ -248,9 +262,14 @@ export class Simulator {
       yield mapper();
       await new Promise<void>((resolve) => {
         setTimeout(() => {
-          this.forceAutoSizerOpen();
-          this.wrapper.update();
-          resolve();
+          try {
+            if (!this.unmounted) {
+              this.forceAutoSizerOpen();
+              this.wrapper.update();
+            }
+          } finally {
+            resolve();
+          }
         }, 0);
       });
     }

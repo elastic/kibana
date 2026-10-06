@@ -29,7 +29,7 @@ import {
 } from '../test_ids';
 
 export const EntityAnalyticsHealth: React.FC<{ status: EntityAnalyticsStatus }> = ({ status }) => {
-  const isOn = status === 'enabled' || status === 'partially_enabled';
+  const isOn = status === 'enabled';
   return (
     <EuiHealth
       textSize="m"
@@ -42,11 +42,9 @@ export const EntityAnalyticsHealth: React.FC<{ status: EntityAnalyticsStatus }> 
 };
 
 export const EntityAnalyticsErrorPanel: React.FC<{
-  riskEngineErrors: string[];
   entityStoreErrors: string[];
-}> = ({ riskEngineErrors, entityStoreErrors }) => {
-  const allErrors = [...riskEngineErrors, ...entityStoreErrors];
-  if (allErrors.length === 0) {
+}> = ({ entityStoreErrors }) => {
+  if (entityStoreErrors.length === 0) {
     return null;
   }
 
@@ -62,7 +60,7 @@ export const EntityAnalyticsErrorPanel: React.FC<{
         <p>{i18n.ERROR_PANEL_MESSAGE}</p>
         <EuiAccordion id="entity-analytics-errors" buttonContent={i18n.ERROR_PANEL_ERRORS}>
           <>
-            {allErrors.map((error, index) => (
+            {entityStoreErrors.map((error, index) => (
               <div key={index}>
                 <EuiText size="s">{error}</EuiText>
                 <EuiSpacer size="s" />
@@ -76,7 +74,8 @@ export const EntityAnalyticsErrorPanel: React.FC<{
 };
 
 interface EntityAnalyticsToggleProps {
-  hasAllRequiredPrivileges: boolean;
+  hasEnablementPrivileges: boolean;
+  hasStopPrivileges: boolean;
   isPrivilegesLoading: boolean;
   selectedSettingsMatchSavedSettings: boolean;
   onSaveSettings: () => Promise<void>;
@@ -84,7 +83,8 @@ interface EntityAnalyticsToggleProps {
 }
 
 export const EntityAnalyticsToggle: React.FC<EntityAnalyticsToggleProps> = ({
-  hasAllRequiredPrivileges,
+  hasEnablementPrivileges,
+  hasStopPrivileges,
   isPrivilegesLoading,
   selectedSettingsMatchSavedSettings,
   onSaveSettings,
@@ -96,25 +96,26 @@ export const EntityAnalyticsToggle: React.FC<EntityAnalyticsToggleProps> = ({
     isSavingSettings,
   });
 
+  const isChecked = status === 'enabled';
+
+  // Turning the toggle ON installs or starts the Entity Store, so it requires the full
+  // enablement privilege set. Turning it OFF stops engines
+  // via user-scoped SO updates on entity-engine-descriptor-v2,
+  // so it requires SO write privileges, but not the full ES/cluster install set.
   const isDisabled =
     isPrivilegesLoading ||
-    !hasAllRequiredPrivileges ||
     isStatusLoading ||
     status === 'enabling' ||
-    status === 'error';
-
-  const isChecked = status === 'enabled' || status === 'partially_enabled';
+    status === 'error' ||
+    (isChecked ? !hasStopPrivileges : !hasEnablementPrivileges);
 
   return (
     <>
-      <EntityAnalyticsErrorPanel
-        riskEngineErrors={errors.riskEngine}
-        entityStoreErrors={errors.entityStore}
-      />
+      <EntityAnalyticsErrorPanel entityStoreErrors={errors.entityStore} />
       <EuiSpacer size="m" />
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center">
-          {isLoading && (
+          {(isLoading || isStatusLoading) && (
             <EuiFlexItem grow={false}>
               <EuiLoadingSpinner
                 data-test-subj={ENTITY_ANALYTICS_STATUS_LOADING_TEST_ID}

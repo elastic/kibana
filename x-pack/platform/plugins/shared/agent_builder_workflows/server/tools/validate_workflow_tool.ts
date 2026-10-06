@@ -88,16 +88,24 @@ export function registerValidateWorkflowTool(
   agentBuilder.tools.register({
     id: workflowTools.validateWorkflow,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Validate Workflow',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: `Validate a workflow YAML string against all validation rules.
 Use this tool AFTER generating or modifying workflow YAML and BEFORE proposing changes to the user.
 It checks YAML syntax, schema conformance, step name uniqueness, and Liquid template syntax.
 When validation fails, step type definitions used in the workflow are automatically included to help fix issues.
-If validation fails, fix the issues and re-validate until the YAML is valid.`,
+If validation fails, fix the issues and re-validate until the YAML is valid.
+
+API documentation — Workflows guide: https://www.elastic.co/docs/explore-analyze/workflows — Workflows API: https://www.elastic.co/docs/api/doc/kibana/group/endpoint-workflows`,
     schema: z.object({
       yaml: z.string().describe('The complete workflow YAML string to validate'),
     }),
     tags: ['workflows', 'yaml', 'validation'],
-    experimental: true,
     handler: async ({ yaml }, { spaceId, request }) => {
       const result = await api.validateWorkflow(yaml, spaceId, request);
 

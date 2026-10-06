@@ -18,6 +18,11 @@ export const INDEX_EXECUTABLES = 'profiling-executables';
 const BASE_ROUTE_PATH = '/internal/profiling';
 const PUBLIC_BASE_ROUTE_PATH = '/api/profiling';
 
+// Upper bounds for unbounded query-string inputs, used to prevent
+// resource-exhaustion via oversized values forwarded to Elasticsearch.
+export const MAX_KUERY_LENGTH = 2048;
+export const MAX_NAME_LENGTH = 1024;
+
 export function getRoutePaths() {
   return {
     TopN: `${BASE_ROUTE_PATH}/topn`,
@@ -30,6 +35,7 @@ export function getRoutePaths() {
     TopNTraces: `${BASE_ROUTE_PATH}/topn/traces`,
     APMTransactions: `${BASE_ROUTE_PATH}/topn/functions/apm/transactions`,
     Flamechart: `${BASE_ROUTE_PATH}/flamechart`,
+    Status: `${BASE_ROUTE_PATH}/status`,
     HasSetupESResources: `${PUBLIC_BASE_ROUTE_PATH}/setup/es_resources`,
     SetupDataCollectionInstructions: `${BASE_ROUTE_PATH}/setup/instructions`,
     StorageExplorerSummary: `${BASE_ROUTE_PATH}/storage_explorer/summary`,

@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
+import { NonEmptyString } from '../model/non_empty_string';
 
 // String-length cap on string fields. Defense at the API edge against
 // blob-sized payloads (RRULE, splay, dates) — SO `unknowns: 'allow'` would
@@ -26,16 +27,13 @@ export const boundedString = (maxLength: number) =>
     t.identity
   );
 
-/**
- * RRULE schedule config — wire shape mirroring `RRuleScheduleConfig`
- * in `common/schedule.ts`. Field-level validity (RFC 3339, RRULE
- * parseability, splay cap) is enforced in the route handler so a single
- * error message is returned per offending field.
- *
- * On create the discriminator branch requires `rrule` + `start_date`;
- * see {@link rruleScheduleConfigPartialRt} for the update-body shape
- * that allows PATCH-style merges against the existing SO.
- */
+// Pack-level execution defaults: reject "" / whitespace (UI treats those as
+// unset) while keeping the length cap. Per-query `platform` stays `t.string`.
+export const nonEmptyBoundedString = (maxLength: number) =>
+  t.intersection([NonEmptyString, boundedString(maxLength)]);
+
+// Wire shape mirroring RRuleScheduleConfig; field-level validity is enforced
+// in the route handler.
 export const rruleScheduleConfigRt = t.intersection([
   t.type({
     rrule: boundedString(2048),
@@ -48,14 +46,6 @@ export const rruleScheduleConfigRt = t.intersection([
   }),
 ]);
 
-/**
- * Update-body variant of {@link rruleScheduleConfigRt}: every field is
- * optional so a client can change just `rrule` / `splay` / `start_date`
- * without restating the rest. The route handler merges the partial
- * against the existing SO before running `validatePackScheduleFields`,
- * which still enforces the strict shape post-merge (rrule + start_date
- * required, RFC 3339, parseability, splay cap, etc.).
- */
 export const rruleScheduleConfigPartialRt = t.partial({
   rrule: boundedString(2048),
   start_date: boundedString(64),
@@ -63,6 +53,17 @@ export const rruleScheduleConfigPartialRt = t.partial({
   splay: boundedString(64),
   timeout: toNumberRt,
 });
+
+export const resultTypeRt = t.union([
+  t.literal('snapshot'),
+  t.literal('differential'),
+  t.literal('differential_added_only'),
+]);
+
+// Length caps match OpenAPI `MinOsqueryVersion.maxLength` / `PackPlatform.maxLength`
+// in `common/api/model/schema/common_attributes.schema.yaml`.
+export const MIN_OSQUERY_VERSION_MAX_LENGTH = 64;
+export const PLATFORM_MAX_LENGTH = 256;
 
 const basePackQueryFields = {
   interval: toNumberRt,
@@ -78,6 +79,9 @@ const basePackQueryFields = {
     })
   ),
   schedule_type: t.union([t.literal('interval'), t.literal('rrule')]),
+  // V5: per-query enabled flag and result type override
+  enabled: t.boolean,
+  result_type: resultTypeRt,
 };
 
 export const packQueryRecordRt = t.record(
@@ -93,13 +97,6 @@ export const packQueryRecordRt = t.record(
   ])
 );
 
-/**
- * Update-body variant of {@link packQueryRecordRt}: per-query
- * `rrule_schedule` accepts a partial object so a same-mode override edit
- * (e.g. bumping only `splay`) round-trips through the API. The route
- * handler merges per-query partials against the existing per-query
- * `rrule_schedule` on the SO before validation.
- */
 export const packQueryRecordPartialRt = t.record(
   t.string,
   t.intersection([
@@ -108,6 +105,8 @@ export const packQueryRecordPartialRt = t.record(
     }),
     t.partial({
       ...basePackQueryFields,
+      // Existing stored id — lets a rename edit preserve the query's schedule_id.
+      id: boundedString(256),
       rrule_schedule: rruleScheduleConfigPartialRt,
     }),
   ])

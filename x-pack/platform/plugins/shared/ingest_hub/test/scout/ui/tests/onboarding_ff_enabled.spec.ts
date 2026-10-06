@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
+import { expectOnboardingStepVisible } from '../helpers/onboarding';
 
 test.describe('Onboarding app — FF enabled', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ apiServices, config }) => {
@@ -58,17 +59,17 @@ test.describe('Onboarding app — FF enabled', { tag: tags.stateful.classic }, (
     });
 
     await test.step('shows the services step as current', async () => {
-      await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
+      await expectOnboardingStepVisible(page, 'services');
     });
 
-    await test.step('renders 5 step indicators', async () => {
+    await test.step('renders 4 step indicators', async () => {
       const steps = page.locator('[data-test-subj^="onboardingStepIndicator-"]');
-      await expect(steps).toHaveCount(5);
+      await expect(steps).toHaveCount(4);
     });
 
     await test.step('navigates directly to a step via hash', async () => {
       await page.gotoApp('onboarding/aws#services');
-      await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
+      await expectOnboardingStepVisible(page, 'services');
     });
   });
 });

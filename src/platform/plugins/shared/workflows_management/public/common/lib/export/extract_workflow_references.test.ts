@@ -83,20 +83,17 @@ describe('extractReferencedWorkflowIds', () => {
     expect(result).toHaveLength(2);
   });
 
-  it('should recurse into parallel branches', () => {
+  it('should recurse into a parallel branch body', () => {
     const result = extractReferencedWorkflowIds(
       makeDefinition([
         {
           type: 'parallel',
-          branches: [
-            { steps: [{ type: 'workflow.execute', with: { 'workflow-id': 'branch-1' } }] },
-            { steps: [{ type: 'workflow.executeAsync', with: { 'workflow-id': 'branch-2' } }] },
-          ],
+          foreach: '{{ steps.list.output }}',
+          steps: [{ type: 'workflow.execute', with: { 'workflow-id': 'branch-1' } }],
         },
       ])
     );
-    expect(result).toEqual(expect.arrayContaining(['branch-1', 'branch-2']));
-    expect(result).toHaveLength(2);
+    expect(result).toEqual(['branch-1']);
   });
 
   it('should handle deeply nested structures', () => {
@@ -110,13 +107,8 @@ describe('extractReferencedWorkflowIds', () => {
               steps: [
                 {
                   type: 'parallel',
-                  branches: [
-                    {
-                      steps: [
-                        { type: 'workflow.execute', with: { 'workflow-id': 'deeply-nested' } },
-                      ],
-                    },
-                  ],
+                  foreach: '{{ steps.list.output }}',
+                  steps: [{ type: 'workflow.execute', with: { 'workflow-id': 'deeply-nested' } }],
                 },
               ],
             },

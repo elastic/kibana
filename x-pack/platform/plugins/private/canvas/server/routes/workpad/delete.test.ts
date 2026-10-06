@@ -50,7 +50,7 @@ describe('DELETE workpad', () => {
 
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({ ok: true });
-    expect(mockRouteContext.core.savedObjects.client.delete).toBeCalledWith(CANVAS_TYPE, id);
+    expect(mockRouteContext.core.savedObjects.client.delete).toHaveBeenCalledWith(CANVAS_TYPE, id);
   });
 
   it(`returns bad request if delete is unsuccessful`, async () => {

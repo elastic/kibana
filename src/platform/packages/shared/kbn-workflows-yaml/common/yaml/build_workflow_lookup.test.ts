@@ -522,6 +522,62 @@ steps:
   });
 });
 
+describe('buildWorkflowLookup trigger line positions', () => {
+  it('sets triggersLineStart and triggersLineEnd for a single trigger', () => {
+    const yaml = `
+name: test
+triggers:
+  - type: manual
+steps:
+  - name: step1
+    type: console
+`;
+    const lineCounter = new LineCounter();
+    const yamlDocument = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
+    const result = buildWorkflowLookup(yamlDocument, lineCounter);
+
+    // triggersNode starts at line 4 (the "  - type: manual" line)
+    expect(result.triggersLineStart).toBe(4);
+    // single-line trigger — start and end are the same line
+    expect(result.triggersLineEnd).toBe(4);
+  });
+
+  it('sets triggersLineEnd to the last line of a multi-trigger block', () => {
+    const yaml = `
+name: test
+triggers:
+  - type: manual
+  - type: scheduled
+    every: 1h
+steps:
+  - name: step1
+    type: console
+`;
+    const lineCounter = new LineCounter();
+    const yamlDocument = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
+    const result = buildWorkflowLookup(yamlDocument, lineCounter);
+
+    expect(result.triggersLineStart).toBe(4);
+    // multi-line block — triggersLineEnd must cover all trigger items
+    expect(result.triggersLineEnd).toBeGreaterThan(result.triggersLineStart!);
+  });
+
+  it('leaves triggersLineStart and triggersLineEnd undefined when there are no triggers', () => {
+    const yaml = `
+name: test
+steps:
+  - name: step1
+    type: console
+`;
+    const lineCounter = new LineCounter();
+    const yamlDocument = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
+    const result = buildWorkflowLookup(yamlDocument, lineCounter);
+
+    expect(result.triggersLineStart).toBeUndefined();
+    expect(result.triggersLineEnd).toBeUndefined();
+  });
+});
+
 describe('buildWorkflowLookup', () => {
   it('should build a workflow lookup from a yaml string', () => {
     const yaml = `
@@ -541,6 +597,41 @@ steps:
         },
       },
     });
+  });
+
+  it('assigns distinct branchKey paths to steps in different switch cases', () => {
+    const yaml = `
+name: test
+steps:
+  - name: router
+    type: switch
+    cases:
+      - match: "a"
+        steps:
+          - name: case-a-step
+            type: http
+      - match: "b"
+        steps:
+          - name: case-b-step
+            type: http
+`;
+    const lineCounter = new LineCounter();
+    const yamlDocument = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
+    const result = buildWorkflowLookup(yamlDocument, lineCounter);
+
+    expect(result.steps['case-a-step']).toBeDefined();
+    expect(result.steps['case-b-step']).toBeDefined();
+    // Before the fix, both steps would inherit the parent's branchKey ('steps' or
+    // undefined) and produce the same branchId in the minimap. Now they differ.
+    const branchIdA = `${result.steps['case-a-step'].parentStepId ?? ''}:${
+      result.steps['case-a-step'].branchKey ?? ''
+    }`;
+    const branchIdB = `${result.steps['case-b-step'].parentStepId ?? ''}:${
+      result.steps['case-b-step'].branchKey ?? ''
+    }`;
+    expect(branchIdA).not.toBe(branchIdB);
+    expect(result.steps['case-a-step'].branchKey).toBe('cases[0].steps');
+    expect(result.steps['case-b-step'].branchKey).toBe('cases[1].steps');
   });
 
   it('should not treat inputs as steps', () => {
@@ -569,5 +660,48 @@ steps:
     expect(result.steps).not.toHaveProperty('greeting');
     expect(result.steps.step1.stepId).toBe('step1');
     expect(result.steps.step1.stepType).toBe('console');
+  });
+
+  it('assigns distinct branchKey paths to on-failure.fallback vs iteration-on-failure.fallback on the same loop step', () => {
+    // Regression for the bug where both fallback sequences collapsed to
+    // branchKey='fallback', causing nesting_info to merge them into a single rail.
+    // A loop step legally declares both on-failure and iteration-on-failure (schema
+    // makes both independently optional); each produces a distinct branchKey.
+    const yaml = `
+name: test
+steps:
+  - name: loop
+    type: foreach
+    foreach: items
+    steps:
+      - name: body-step
+        type: http
+    on-failure:
+      fallback:
+        - name: step-on-failure
+          type: http
+    iteration-on-failure:
+      fallback:
+        - name: step-iteration-on-failure
+          type: http
+`;
+    const lineCounter = new LineCounter();
+    const yamlDocument = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
+    const result = buildWorkflowLookup(yamlDocument, lineCounter);
+
+    const onFailureStep = result.steps['step-on-failure'];
+    const iterationOnFailureStep = result.steps['step-iteration-on-failure'];
+
+    expect(onFailureStep).toBeDefined();
+    expect(iterationOnFailureStep).toBeDefined();
+
+    // Both belong to the same parent step.
+    expect(onFailureStep.parentStepId).toBe('loop');
+    expect(iterationOnFailureStep.parentStepId).toBe('loop');
+
+    // The branchKey must be distinct so nesting_info draws two separate rails.
+    expect(onFailureStep.branchKey).not.toBe(iterationOnFailureStep.branchKey);
+    expect(onFailureStep.branchKey).toBe('on-failure.fallback');
+    expect(iterationOnFailureStep.branchKey).toBe('iteration-on-failure.fallback');
   });
 });

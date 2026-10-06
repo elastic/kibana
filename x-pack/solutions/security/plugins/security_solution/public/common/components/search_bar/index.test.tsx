@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import { SearchBarComponent } from '.';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { FilterManager } from '@kbn/data-plugin/public';
@@ -83,31 +83,10 @@ describe('SearchBarComponent', () => {
     savedQuery: undefined,
   };
 
-  const pollForSignalIndex = jest.fn();
   beforeEach(() => {
     jest.clearAllMocks();
 
     (useKibana as jest.Mock).mockReturnValue(useKibanaMock);
-  });
-
-  it('calls pollForSignalIndex on Refresh button click', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <SearchBarComponent {...props} pollForSignalIndex={pollForSignalIndex} />
-      </TestProviders>
-    );
-    fireEvent.click(getByTestId('querySubmitButton'));
-    expect(pollForSignalIndex).toHaveBeenCalled();
-  });
-
-  it('does not call pollForSignalIndex on Refresh button click if pollForSignalIndex not passed', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <SearchBarComponent {...props} />
-      </TestProviders>
-    );
-    fireEvent.click(getByTestId('querySubmitButton'));
-    expect(pollForSignalIndex).not.toHaveBeenCalled();
   });
 
   it('calls useUpdateUrlParam for filter and query', () => {

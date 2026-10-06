@@ -33,7 +33,9 @@ export class FieldEditorService extends FtrService {
     await this.testSubjects.setEuiSwitch('customDescriptionRow > toggle', 'check');
   }
   public async setCustomDescription(description: string) {
-    await this.testSubjects.setValue('customDescriptionRow > input', description);
+    await this.testSubjects.setValue('customDescriptionRow > input', description, {
+      clearWithKeyboard: true,
+    });
   }
   public async setPopularity(value: number) {
     await this.testSubjects.click('toggleAdvancedSetting');

@@ -8,7 +8,7 @@
  */
 
 import type { EmbeddableComponentProps, LensEmbeddableInput } from '@kbn/lens-plugin/public';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { UnifiedHistogramChartProps } from '../components/chart/chart';
 import type {
   UnifiedHistogramExternalVisContextStatus,
@@ -38,6 +38,11 @@ export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'servi
    * Allows users to enable/disable default actions
    */
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
+  /**
+   * When false, hides the Lens edit and save toolbar actions on the chart.
+   * Defaults to true.
+   */
+  withLensActions?: boolean;
   /**
    * Disabled action IDs for the Lens embeddable
    */
@@ -120,12 +125,18 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
 
   const isChartAvailable = checkChartAvailability({
     chart,
-    dataView: fetchParams?.dataView,
+    dataSource: fetchParams?.dataSource,
     isPlainRecord: fetchParams?.isESQLQuery,
   });
 
+  useEffect(() => {
+    if (!isChartAvailable) {
+      api.setLensRequestAdapter(undefined);
+    }
+  }, [api, isChartAvailable]);
+
   const chartProps = useMemo<UnifiedHistogramPartialChartProps | undefined>(() => {
-    return lensVisService && lensVisServiceState && fetchParams?.dataView
+    return lensVisService && lensVisServiceState && fetchParams?.dataSource
       ? {
           ...props,
           ...stateProps,

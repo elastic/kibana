@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
@@ -16,6 +16,7 @@ import {
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
 } from '@elastic/eui';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
@@ -34,11 +35,8 @@ import {
   SKILLS_API_PATH,
   type CreateSkillResponse,
 } from '@kbn/agent-builder-plugin/public';
-import {
-  SKILL_ATTACHMENT_TYPE,
-  type SkillAttachment,
-  type SkillAttachmentData,
-} from '../../../common/attachments';
+import { SKILL_ATTACHMENT_TYPE, type SkillAttachment } from '../../../common/attachments';
+import { SkillDiffViewer } from './skill_diff_viewer';
 
 const SKILLS_MANAGE_PATH = '/manage/skills';
 
@@ -58,6 +56,12 @@ const createSkillLabel = i18n.translate(
   'xpack.agentBuilderPlatform.attachments.skill.createButtonLabel',
   {
     defaultMessage: 'Create skill',
+  }
+);
+const saveChangesLabel = i18n.translate(
+  'xpack.agentBuilderPlatform.attachments.skill.saveChangesButtonLabel',
+  {
+    defaultMessage: 'Save changes',
   }
 );
 const lackManageSkillsPermissionDescription = i18n.translate(
@@ -131,10 +135,16 @@ const SkillReferences = ({
   );
 };
 
+const fullHeightStyles = css`
+  height: 100%;
+`;
+const minHeightZeroStyles = css`
+  min-height: 0;
+`;
 const fullContentInstructionsStyles = css`
   width: 100%;
-  flex: 1 1 auto;
-  min-height: 0;
+  ${fullHeightStyles}
+  overflow: hidden;
 `;
 const previewInstructionsStyles = css`
   width: 100%;
@@ -142,90 +152,160 @@ const previewInstructionsStyles = css`
     margin-block-end: 0;
   }
 `;
+
 const SkillInstructions = ({
   showFullContent,
   content,
+  originalContent,
+  isCommitted: committed,
 }: {
   showFullContent: boolean;
   content: string;
+  originalContent?: string;
+  isCommitted: boolean;
 }) => {
-  return (
-    <>
-      <EuiText size="xs" color="subdued">
-        <strong>
-          {showFullContent ? (
-            <FormattedMessage
-              id="xpack.agentBuilderPlatform.attachments.skill.instructionsFullLabel"
-              defaultMessage="Instructions"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.agentBuilderPlatform.attachments.skill.instructionsLabel"
-              defaultMessage="Instructions preview"
-            />
-          )}
-        </strong>
-      </EuiText>
-      <EuiSpacer size="xs" />
-      <EuiCodeBlock
-        language="markdown"
-        fontSize="s"
-        overflowHeight={showFullContent ? '100%' : INSTRUCTIONS_PREVIEW_MAX_HEIGHT_PX}
-        isCopyable={showFullContent}
-        css={showFullContent ? fullContentInstructionsStyles : previewInstructionsStyles}
-      >
-        {content}
-      </EuiCodeBlock>
-    </>
+  const [showDiff, setShowDiff] = useState(false);
+
+  // Only offer the diff toggle when there is a meaningful original to compare against
+  // AND the draft hasn't been committed (after save/create, current content matches what is persisted).
+  const hasDiff = !committed && typeof originalContent === 'string' && originalContent !== content;
+
+  const label = showFullContent ? (
+    <FormattedMessage
+      id="xpack.agentBuilderPlatform.attachments.skill.instructionsFullLabel"
+      defaultMessage="Instructions"
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.agentBuilderPlatform.attachments.skill.instructionsLabel"
+      defaultMessage="Instructions preview"
+    />
   );
+
+  return (
+    <EuiFlexGroup gutterSize="xs" direction="column" css={showFullContent && fullHeightStyles}>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
+          gutterSize="s"
+          responsive={false}
+          css={css`
+            flex-grow: 0;
+          `}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              <strong>{label}</strong>
+            </EuiText>
+          </EuiFlexItem>
+          {hasDiff && (
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                label={
+                  <FormattedMessage
+                    id="xpack.agentBuilderPlatform.attachments.skill.instructions.showDiffLabel"
+                    defaultMessage="Show diff"
+                  />
+                }
+                checked={showDiff}
+                onChange={(e) => setShowDiff(e.target.checked)}
+                compressed
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem css={showFullContent && minHeightZeroStyles}>
+        {showDiff && hasDiff && originalContent ? (
+          <SkillDiffViewer
+            beforeContent={originalContent}
+            afterContent={content}
+            showFullContent={showFullContent}
+          />
+        ) : (
+          <EuiCodeBlock
+            language="markdown"
+            fontSize="s"
+            overflowHeight={showFullContent ? '100%' : INSTRUCTIONS_PREVIEW_MAX_HEIGHT_PX}
+            isCopyable={showFullContent}
+            css={showFullContent ? fullContentInstructionsStyles : previewInstructionsStyles}
+          >
+            {content}
+          </EuiCodeBlock>
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+const isAttachmentLatest = (attachment: SkillAttachment): boolean => {
+  const { version, versionCount } = attachment.versionData ?? {};
+  return (
+    typeof version === 'number' && typeof versionCount === 'number' && version === versionCount
+  );
+};
+
+// An attachment is "committed" when its current version predates the last save.
+// If the version was created after originSyncedAt, the draft has diverged from
+// what is persisted at origin and needs to be saved again.
+const isAttachmentCommitted = (attachment: SkillAttachment): boolean => {
+  const { versionData } = attachment;
+  if (!attachment.origin || !versionData?.originSyncedAt) {
+    return false;
+  }
+  const hasDraftChanges = versionData.createdAt > versionData.originSyncedAt;
+  return !hasDraftChanges;
 };
 
 interface SkillCardProps extends AttachmentRenderProps<SkillAttachment> {
   isCanvas?: boolean;
 }
 
-const fullContentPanelStyles = css`
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-`;
-
 const SkillCard: React.FC<SkillCardProps> = ({ attachment, isCanvas }) => {
   const {
-    content,
-    description,
-    tool_ids: toolIds,
-    referenced_content: referencedContent,
+    originalContent,
+    skill: { content, description, tool_ids: toolIds, referenced_content: referencedContent },
   } = attachment.data;
   const showFullContent = isCanvas === true;
+  const committed = isAttachmentCommitted(attachment);
 
   return (
     <EuiPanel
       hasShadow={false}
       hasBorder={false}
       paddingSize="m"
-      css={showFullContent && fullContentPanelStyles}
+      css={showFullContent && fullHeightStyles}
     >
-      <EuiText size="xs" color="subdued">
-        <strong>
-          <FormattedMessage
-            id="xpack.agentBuilderPlatform.attachments.skill.descriptionLabel"
-            defaultMessage="Description"
+      <EuiFlexGroup direction="column" gutterSize="none" css={showFullContent && fullHeightStyles}>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            <strong>
+              <FormattedMessage
+                id="xpack.agentBuilderPlatform.attachments.skill.descriptionLabel"
+                defaultMessage="Description"
+              />
+            </strong>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiText size="s" color="subdued">
+            <p>{description}</p>
+          </EuiText>
+          <EuiHorizontalRule margin="m" />
+        </EuiFlexItem>
+        <EuiFlexItem grow css={showFullContent && minHeightZeroStyles}>
+          <SkillInstructions
+            showFullContent={showFullContent}
+            content={content}
+            originalContent={originalContent}
+            isCommitted={committed}
           />
-        </strong>
-      </EuiText>
-      <EuiSpacer size="xs" />
-      <EuiText size="s" color="subdued">
-        <p>{description}</p>
-      </EuiText>
-
-      <EuiHorizontalRule margin="m" />
-
-      <SkillInstructions showFullContent={showFullContent} content={content} />
-
-      <EuiHorizontalRule margin="m" />
-
-      <SkillReferences toolIds={toolIds} referencedContent={referencedContent} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiHorizontalRule margin="m" />
+          <SkillReferences toolIds={toolIds} referencedContent={referencedContent} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPanel>
   );
 };
@@ -266,36 +346,36 @@ export const createSkillAttachmentDefinition = ({
   agents,
 }: CreateSkillDeps): AttachmentUIDefinition<SkillAttachment> => {
   const canCreate = application.capabilities.agentBuilder?.manageSkills === true;
-  const isLatest = ({
-    version,
-    versionCount,
-  }: {
-    version: number | undefined;
-    versionCount: number | undefined;
-  }) => typeof version === 'number' && typeof versionCount === 'number' && version === versionCount;
 
   return {
     getLabel: (attachment) =>
-      attachment.data.name ||
+      attachment.data.skill.name ||
       i18n.translate('xpack.agentBuilderPlatform.attachments.skill.label', {
         defaultMessage: 'Skill draft',
       }),
     getHeader: ({ attachment }) => {
-      const { version, versionCount } = attachment;
+      const {
+        data: { mode, skill },
+      } = attachment;
       const badges: HeaderBadge[] = [];
-      const isCreated = Boolean(attachment.origin);
 
-      if (isCreated) {
-        const createdBadge: HeaderBadge = {
-          label: i18n.translate('xpack.agentBuilderPlatform.attachments.skill.createdBadge', {
-            defaultMessage: 'Created',
-          }),
-          color: 'success',
-          iconType: 'check',
-        };
-        badges.push(createdBadge);
-        // Created attachments only show created badge
-        return { icon: 'sparkles', subtitle: attachment.data.id, badges };
+      if (isAttachmentCommitted(attachment)) {
+        const isCreating = mode === 'create';
+        // Only show the committed badge on the latest version.
+        // Show no badges for a freshly loaded skill since no user action has been taken yet.
+        const isFreshLoad = !isCreating && (attachment.versionData?.versionCount ?? 0) === 1;
+        if (isAttachmentLatest(attachment) && !isFreshLoad) {
+          const label = isCreating
+            ? i18n.translate('xpack.agentBuilderPlatform.attachments.skill.committedBadge.create', {
+                defaultMessage: 'Created',
+              })
+            : i18n.translate('xpack.agentBuilderPlatform.attachments.skill.committedBadge.edit', {
+                defaultMessage: 'Saved',
+              });
+          const committedBadge: HeaderBadge = { label, color: 'success', iconType: 'check' };
+          badges.push(committedBadge);
+        }
+        return { icon: 'sparkles', subtitle: skill.id, badges };
       }
 
       const draftBadge: HeaderBadge = {
@@ -305,7 +385,7 @@ export const createSkillAttachmentDefinition = ({
       };
       badges.push(draftBadge);
 
-      if (isLatest({ version, versionCount })) {
+      if (isAttachmentLatest(attachment)) {
         const latestBadge: HeaderBadge = {
           label: i18n.translate('xpack.agentBuilderPlatform.attachments.skill.latestBadge', {
             defaultMessage: 'Latest',
@@ -315,19 +395,19 @@ export const createSkillAttachmentDefinition = ({
         badges.push(latestBadge);
       }
 
-      return { icon: 'sparkles', subtitle: attachment.data.id, badges };
+      return { icon: 'sparkles', subtitle: skill.id, badges };
     },
     renderInlineContent: (props) => <SkillInlineContent {...props} />,
     renderCanvasContent: (props) => <SkillCanvasContent {...props} />,
     getActionButtons: ({ attachment, agentId, updateOrigin, openCanvas, isCanvas }) => {
-      const { version, versionCount } = attachment;
-      const isCreated = Boolean(attachment.origin);
+      const { data } = attachment;
+      const { mode, skill } = data;
 
       const actionButtons: ActionButton[] = [];
       const createSkill = async () => {
         try {
           const response = await http.post<CreateSkillResponse>(SKILLS_API_PATH, {
-            body: JSON.stringify(attachment.data satisfies SkillAttachmentData),
+            body: JSON.stringify(skill),
           });
           await updateOrigin(response.id);
           if (agentId) {
@@ -366,6 +446,30 @@ export const createSkillAttachmentDefinition = ({
         }
       };
 
+      const saveChanges = async () => {
+        const { id: skillId, referenced_content: referencedContent, ...rest } = skill;
+        const skillContent = { ...rest, referenced_content: referencedContent ?? [] };
+        try {
+          const response = await http.fetch<CreateSkillResponse>(
+            `${SKILLS_API_PATH}/${encodeURIComponent(skillId)}`,
+            { method: 'PUT', body: JSON.stringify(skillContent) }
+          );
+          await updateOrigin(response.id);
+          notifications.toasts.addSuccess({
+            title: i18n.translate('xpack.agentBuilderPlatform.attachments.skill.saveSuccessToast', {
+              defaultMessage: 'Skill "{skillId}" updated.',
+              values: { skillId: response.id },
+            }),
+          });
+        } catch (error) {
+          notifications.toasts.addError(error as Error, {
+            title: i18n.translate('xpack.agentBuilderPlatform.attachments.skill.saveErrorToast', {
+              defaultMessage: 'Could not save skill changes',
+            }),
+          });
+        }
+      };
+
       if (!isCanvas && openCanvas) {
         // As long as the canvas for the skill is not currently open, show the button
         const previewButton = {
@@ -377,37 +481,46 @@ export const createSkillAttachmentDefinition = ({
         actionButtons.push(previewButton);
       }
 
-      if (isLatest({ version, versionCount })) {
-        // Once the draft has been persisted, swap the create button for one that
-        // navigates the user to the skill management page for the created skill.
-        if (isCreated && attachment.origin) {
-          const skillId = attachment.origin;
-          const editInManagementButton: ActionButton = {
-            label: editInManagementLabel,
-            icon: 'pencil',
-            type: ActionButtonType.PRIMARY,
-            href: application.getUrlForApp(AGENTBUILDER_APP_ID, {
-              path: `${SKILLS_MANAGE_PATH}/${skillId}`,
-            }),
-            openInNewTab: true,
-            handler: () => {
-              // Do nothing. navigation handled by href
-            },
-          };
-          actionButtons.push(editInManagementButton);
-        } else {
-          // Only show create button for the latest draft
-          const createButton: ActionButton = {
-            label: createSkillLabel,
-            icon: 'plus',
-            type: ActionButtonType.PRIMARY,
-            disabled: !canCreate,
-            disabledReason: !canCreate ? lackManageSkillsPermissionDescription : undefined,
-            handler: createSkill,
-          };
+      if (!isAttachmentLatest(attachment)) {
+        return actionButtons;
+      }
 
-          actionButtons.push(createButton);
-        }
+      if (isAttachmentCommitted(attachment)) {
+        const skillId = attachment.origin;
+        const editInManagementButton: ActionButton = {
+          label: editInManagementLabel,
+          icon: 'pencil',
+          type: ActionButtonType.PRIMARY,
+          href: application.getUrlForApp(AGENTBUILDER_APP_ID, {
+            path: `${SKILLS_MANAGE_PATH}/${skillId}`,
+          }),
+          openInNewTab: true,
+          handler: () => {
+            // Do nothing. navigation handled by href
+          },
+        };
+        actionButtons.push(editInManagementButton);
+      } else if (mode === 'edit') {
+        const saveChangesButton: ActionButton = {
+          label: saveChangesLabel,
+          icon: 'save',
+          type: ActionButtonType.PRIMARY,
+          disabled: !canCreate,
+          disabledReason: !canCreate ? lackManageSkillsPermissionDescription : undefined,
+          handler: saveChanges,
+        };
+        actionButtons.push(saveChangesButton);
+      } else {
+        // Only show create button for the latest draft
+        const createButton: ActionButton = {
+          label: createSkillLabel,
+          icon: 'plus',
+          type: ActionButtonType.PRIMARY,
+          disabled: !canCreate,
+          disabledReason: !canCreate ? lackManageSkillsPermissionDescription : undefined,
+          handler: createSkill,
+        };
+        actionButtons.push(createButton);
       }
 
       return actionButtons;

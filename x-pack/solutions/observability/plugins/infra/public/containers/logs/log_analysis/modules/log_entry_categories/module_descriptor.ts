@@ -73,7 +73,8 @@ const setUpModule = async (
   end: number | undefined,
   datasetFilter: DatasetFilter,
   { spaceId, sourceId, indices, timestampField, runtimeMappings }: ModuleSourceConfiguration,
-  fetch: HttpHandler
+  fetch: HttpHandler,
+  projectRouting?: string
 ) => {
   const indexNamePattern = indices.join(',');
   const jobOverrides = [
@@ -91,6 +92,7 @@ const setUpModule = async (
           timestampField,
           bucketSpan,
           datasetFilter,
+          projectRouting,
         },
       },
     },
@@ -134,6 +136,7 @@ const setUpModule = async (
       datafeedOverrides,
       query,
       useDedicatedIndex: true,
+      projectRouting,
     },
     fetch
   );
@@ -158,7 +161,8 @@ const validateSetupIndices = async (
   indices: string[],
   timestampField: string,
   runtimeMappings: estypes.MappingRuntimeFields,
-  fetch: HttpHandler
+  fetch: HttpHandler,
+  projectRouting?: string
 ) => {
   return await callValidateIndicesAPI(
     {
@@ -178,6 +182,7 @@ const validateSetupIndices = async (
         },
       ],
       runtimeMappings,
+      projectRouting,
     },
     fetch
   );
@@ -189,10 +194,11 @@ const validateSetupDatasets = async (
   startTime: number,
   endTime: number,
   runtimeMappings: estypes.MappingRuntimeFields,
-  fetch: HttpHandler
+  fetch: HttpHandler,
+  projectRouting?: string
 ) => {
   return await callValidateDatasetsAPI(
-    { indices, timestampField, startTime, endTime, runtimeMappings },
+    { indices, timestampField, startTime, endTime, runtimeMappings, projectRouting },
     fetch
   );
 };

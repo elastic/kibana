@@ -50,7 +50,6 @@ const renderContainer = (
         entityId="test-entity-id"
         onShowGraph={mockOnShowGraph}
         showIcon
-        disableNavigation={false}
         {...overrides}
       />
     </TestProviders>

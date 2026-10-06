@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/cloud-defend-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-cloud-security-posture'
+  defaultOwner: '@elastic/contextual-security-apps'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/cloud-defend-plugin'
   description: Moon project for @kbn/cloud-defend-plugin
   channel: ''
-  owner: '@elastic/kibana-cloud-security-posture'
+  owner: '@elastic/contextual-security-apps'
   sourceRoot: x-pack/solutions/security/plugins/cloud_defend
 dependsOn:
   - '@kbn/core'
@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/code-editor-mock'
   - '@kbn/core-security-common'
+  - '@kbn/core-spaces-common'
   - '@kbn/react-query'
   - '@kbn/licensing-types'
 tags:

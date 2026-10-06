@@ -23,6 +23,8 @@ import type {
   McpClientOptions,
 } from './types';
 import { isEmbeddedResourcePart, isResourceLinkPart, isTextPart } from './types';
+import { ZodJsonSchemaValidator } from './json_schema_validator';
+import { McpNotConnectedError } from './mcp_not_connected_error';
 
 /**
  * Produces a human-readable error message from a connection error,
@@ -82,10 +84,23 @@ export class McpClient {
     this.name = clientDetails.name;
     this.version = clientDetails.version;
 
-    this.client = new Client({
-      name: clientDetails.name,
-      version: clientDetails.version,
-    });
+    this.client = new Client(
+      {
+        name: clientDetails.name,
+        version: clientDetails.version,
+      },
+      {
+        jsonSchemaValidator: new ZodJsonSchemaValidator(this.logger),
+      }
+    );
+    // The SDK drops its transport when the connection closes. Track that so a pooled, long-lived
+    // instance does not keep reporting itself as connected.
+    this.client.onclose = () => {
+      if (this.connected) {
+        this.connected = false;
+        this.logger.debug(`MCP server ${this.name}, ${this.version} closed the connection`);
+      }
+    };
   }
 
   /**
@@ -129,6 +144,14 @@ export class McpClient {
     };
   }
 
+  /** Server capabilities from the initialize handshake; undefined until connected. */
+  getServerCapabilities(): ServerCapabilities | undefined {
+    if (!this.connected) {
+      return undefined;
+    }
+    return this.client.getServerCapabilities();
+  }
+
   /**
    * Disconnect from the MCP client and return the disconnected status.
    */
@@ -146,7 +169,7 @@ export class McpClient {
    */
   async listTools(): Promise<ListToolsResponse> {
     if (!this.connected) {
-      throw new Error(`MCP client not connected to ${this.name}, ${this.version}`);
+      throw new McpNotConnectedError(this.name, this.version);
     }
 
     this.logger.debug(`Listing tools from MCP server ${this.name}, ${this.version}`);
@@ -167,6 +190,7 @@ export class McpClient {
             description: tool.description,
             inputSchema: tool.inputSchema,
             name: tool.name,
+            annotations: tool.annotations,
           };
         }),
         ...(nextCursor ? await getNextPage(nextCursor) : []),
@@ -188,7 +212,7 @@ export class McpClient {
    */
   async callTool(params: CallToolParams): Promise<CallToolResponse> {
     if (!this.connected) {
-      throw new Error(`MCP client not connected to ${this.name}, ${this.version}`);
+      throw new McpNotConnectedError(this.name, this.version);
     }
 
     this.logger.debug(`Calling tool ${params.name} on MCP server ${this.name}, ${this.version}`);

@@ -8,6 +8,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -16,8 +17,6 @@ import {
   EuiSpacer,
   EuiPageSection,
   EuiEmptyPrompt,
-  EuiCallOut,
-  EuiButton,
   EuiLink,
   EuiScreenReaderLive,
 } from '@elastic/eui';
@@ -283,7 +282,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
       <EuiPageSection paddingSize="none" data-test-subj="dataStreamList">
         {enableProjectLevelRetentionChecks && projectLevelRetentionCallout && (
           <>
-            <EuiCallOut
+            <KbnInfoCallout
               announceOnMount
               onDismiss={() => setprojectLevelRetentionCallout(false)}
               data-test-subj="projectLevelRetentionCallout"
@@ -294,21 +293,25 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
                     'You can now configure data stream retention settings for your entire project',
                 }
               )}
-            >
-              <p>
+              text={
                 <FormattedMessage
                   id="xpack.idxMgmt.dataStreamList.projectLevelRetentionCallout.descriptionText"
                   defaultMessage="Optionally define a maximum and default retention period to manage your compliance and storage size needs."
                 />
-              </p>
-
-              <EuiButton href={cloud?.deploymentUrl} fill data-test-subj="cloudLinkButton">
-                <FormattedMessage
-                  id="xpack.idxMgmt.dataStreamList.projectLevelRetentionCallout.buttonText"
-                  defaultMessage="Get started"
-                />
-              </EuiButton>
-            </EuiCallOut>
+              }
+              actionProps={{
+                primary: {
+                  href: cloud?.deploymentUrl,
+                  'data-test-subj': 'cloudLinkButton',
+                  children: (
+                    <FormattedMessage
+                      id="xpack.idxMgmt.dataStreamList.projectLevelRetentionCallout.buttonText"
+                      defaultMessage="Get started"
+                    />
+                  ),
+                },
+              }}
+            />
             <EuiSpacer size="m" />
           </>
         )}
@@ -317,11 +320,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
         <EuiSpacer size="l" />
 
         <DataStreamTable
-          filters={
-            isDeepLink && decodedDataStreamName !== undefined
-              ? `name="${decodedDataStreamName}"`
-              : ''
-          }
+          filters={isDeepLink && decodedDataStreamName !== undefined ? decodedDataStreamName : ''}
           dataStreams={filteredDataStreams}
           isLoading={isLoading}
           reload={reload}

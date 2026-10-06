@@ -344,6 +344,77 @@ describe('var_group_policy_effects', () => {
         expect(result).not.toHaveProperty('cloud_connector_id');
       });
     });
+
+    describe('supports_identity_federation var (newer integrations)', () => {
+      it('should set supports_identity_federation to true when selecting cloud connector', () => {
+        const packagePolicy = createMockPackagePolicy({
+          vars: {
+            role_arn: { value: '' },
+            external_id: { value: '' },
+            supports_identity_federation: { value: false, type: 'bool' },
+          },
+        });
+        const varGroups = createMockVarGroups();
+        const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
+
+        const result = updateCloudConnectorPolicy(packagePolicy, selections, varGroups);
+
+        expect(result?.vars?.supports_identity_federation).toEqual({ value: true, type: 'bool' });
+        expect(result?.supports_cloud_connector).toBe(true);
+      });
+
+      it('should set supports_identity_federation to false when deselecting', () => {
+        const packagePolicy = createMockPackagePolicy({
+          supports_cloud_connector: true,
+          vars: {
+            role_arn: { value: 'some-arn' },
+            external_id: { value: { isSecretRef: true, id: 'secret-1' }, type: 'password' },
+            supports_identity_federation: { value: true, type: 'bool' },
+          },
+        });
+        const varGroups = createMockVarGroups();
+        const selections: VarGroupSelection = { auth_method: 'manual' };
+
+        const result = updateCloudConnectorPolicy(packagePolicy, selections, varGroups);
+
+        expect(result?.vars?.supports_identity_federation).toEqual({ value: false, type: 'bool' });
+        expect(result?.vars?.external_id).toEqual({ value: '', type: 'password' });
+        expect(result?.vars?.role_arn).toEqual({ value: 'some-arn' });
+        expect(result?.supports_cloud_connector).toBe(false);
+      });
+
+      it('should return null when supports_identity_federation is already in desired state', () => {
+        const packagePolicy = createMockPackagePolicy({
+          supports_cloud_connector: true,
+          cloud_connector_id: undefined,
+          vars: {
+            supports_identity_federation: { value: true },
+          },
+        });
+        const varGroups = createMockVarGroups();
+        const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
+
+        const result = updateCloudConnectorPolicy(packagePolicy, selections, varGroups);
+
+        expect(result).toBeNull();
+      });
+
+      it('should prefer supports_identity_federation over supports_cloud_connectors when both are present', () => {
+        const packagePolicy = createMockPackagePolicy({
+          vars: {
+            supports_identity_federation: { value: false, type: 'bool' },
+            supports_cloud_connectors: { value: false, type: 'bool' },
+          },
+        });
+        const varGroups = createMockVarGroups();
+        const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
+
+        const result = updateCloudConnectorPolicy(packagePolicy, selections, varGroups);
+
+        expect(result?.vars?.supports_identity_federation).toEqual({ value: true, type: 'bool' });
+        expect(result?.vars?.supports_cloud_connectors).toEqual({ value: false, type: 'bool' });
+      });
+    });
   });
 
   describe('buildVarGroupPolicyUpdates', () => {

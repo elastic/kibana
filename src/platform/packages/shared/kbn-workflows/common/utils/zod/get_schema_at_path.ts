@@ -8,12 +8,39 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { unwrapSchema } from './unwrap_schema';
 
-export function parsePath(path: string) {
-  const segments = path
-    .replace(/\[(['"]?)([^\]]+)\1\]/g, '.$2') // Convert [key] to .key
-    .split('.');
-  return segments.some((s) => s === '') ? null : segments;
+/**
+ * Stand-in segment for a Liquid dynamic subscript (`[ep.rule_id]`, `[item]`).
+ * Must not collide with a real object key.
+ */
+export const LIQUID_DYNAMIC_KEY_SEGMENT = '__liquid_dynamic_key__';
+
+const unquoteBracketKey = (inner: string): string | null => {
+  if (inner.length < 2) {
+    return null;
+  }
+  const quote = inner[0];
+  if ((quote !== '"' && quote !== "'") || inner[inner.length - 1] !== quote) {
+    return null;
+  }
+  return inner.slice(1, -1);
+};
+
+export function parsePath(path: string): string[] | null {
+  const normalized = path.replace(/\[([^\]]+)\]/g, (_, raw: string) => {
+    const inner = raw.trim();
+    const quoted = unquoteBracketKey(inner);
+    if (quoted !== null) {
+      return `.${quoted}`;
+    }
+    if (/^-?\d+$/.test(inner)) {
+      return `.${inner}`;
+    }
+    return `.${LIQUID_DYNAMIC_KEY_SEGMENT}`;
+  });
+  const segments = normalized.split('.');
+  return segments.some((segment) => segment === '') ? null : segments;
 }
 
 interface GetSchemaAtPathResult {
@@ -29,7 +56,6 @@ interface GetSchemaAtPathResult {
  * @param options.partial - If true, return the schema for the last valid path segment.
  * @returns The schema at the given path or null if the path is invalid.
  */
-// eslint-disable-next-line complexity
 export function getSchemaAtPath(
   schema: z.ZodType,
   path: string,
@@ -44,23 +70,34 @@ export function getSchemaAtPath(
     let current: z.ZodType = schema;
 
     for (const [index, segment] of segments.entries()) {
-      if (current instanceof z.ZodOptional) {
-        current = current.unwrap() as z.ZodType;
-      }
-      if (current instanceof z.ZodDefault) {
-        current = current.unwrap() as z.ZodType;
-      }
-      if (current instanceof z.ZodLazy) {
-        current = current.unwrap() as z.ZodType;
-      }
+      current = unwrapSchema(current);
+      const isDynamicKey = segment === LIQUID_DYNAMIC_KEY_SEGMENT;
       if (current instanceof z.ZodObject) {
         const shape = current.shape;
-        if (!(segment in shape)) {
-          return partial
-            ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
-            : { schema: null, scopedToPath: null };
+        // `in` walks the prototype chain, so `__proto__` / `constructor` / `toString`
+        // would resolve to an Object.prototype member instead of a zod schema.
+        // A Liquid dynamic key (`[ep.rule_id]`) is not an own key; fall through
+        // to catchall the same way a missing static key does.
+        if (Object.hasOwn(shape, segment)) {
+          current = shape[segment];
+        } else {
+          // Typed `additionalProperties: { ... }` compiles to a catchall. Skip `never`
+          // (closed object) and `unknown`/`any` (open map) so only described value
+          // shapes are walked.
+          const catchall = current.def.catchall as z.ZodType | undefined;
+          if (
+            catchall &&
+            !(catchall instanceof z.ZodNever) &&
+            !(catchall instanceof z.ZodUnknown) &&
+            !(catchall instanceof z.ZodAny)
+          ) {
+            current = catchall;
+          } else {
+            return partial
+              ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
+              : { schema: null, scopedToPath: null };
+          }
         }
-        current = shape[segment];
       } else if (current instanceof z.ZodRecord) {
         const valueType = current.valueType;
         const keyType = current.keyType;
@@ -108,47 +145,50 @@ export function getSchemaAtPath(
         }
         current = branchResult.schema;
       } else if (current instanceof z.ZodArray) {
-        if (!/^\d+$/.test(segment)) {
+        if (isDynamicKey) {
+          current = current.element as z.ZodType;
+        } else if (!/^\d+$/.test(segment)) {
           return partial
             ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
             : { schema: null, scopedToPath: null };
-        }
-        const arrayIndex = parseInt(segment, 10);
+        } else {
+          const arrayIndex = parseInt(segment, 10);
 
-        // Reject negative indices
-        if (arrayIndex < 0) {
-          return partial
-            ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
-            : { schema: null, scopedToPath: null };
-        }
+          // Reject negative indices
+          if (arrayIndex < 0) {
+            return partial
+              ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
+              : { schema: null, scopedToPath: null };
+          }
 
-        // Check for array length constraints in Zod v4
-        // Array constraints are stored in the checks array
-        let maxLength: number | undefined;
+          // Check for array length constraints in Zod v4
+          // Array constraints are stored in the checks array
+          let maxLength: number | undefined;
 
-        if (current.def.checks) {
-          for (const check of current.def.checks) {
-            if (check._zod?.def) {
-              const checkDef = check._zod.def;
-              if (checkDef.check === 'max_length') {
-                maxLength = (checkDef as z.core.$ZodCheckMaxLengthDef).maximum;
-              } else if (checkDef.check === 'length_equals') {
-                maxLength = (checkDef as z.core.$ZodCheckLengthEqualsDef).length;
+          if (current.def.checks) {
+            for (const check of current.def.checks) {
+              if (check._zod?.def) {
+                const checkDef = check._zod.def;
+                if (checkDef.check === 'max_length') {
+                  maxLength = (checkDef as z.core.$ZodCheckMaxLengthDef).maximum;
+                } else if (checkDef.check === 'length_equals') {
+                  maxLength = (checkDef as z.core.$ZodCheckLengthEqualsDef).length;
+                }
               }
             }
           }
-        }
 
-        // Only enforce bounds checking for arrays with explicit length constraints
-        if (maxLength !== undefined && arrayIndex >= maxLength) {
-          return partial
-            ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
-            : { schema: null, scopedToPath: null };
-        }
+          // Only enforce bounds checking for arrays with explicit length constraints
+          if (maxLength !== undefined && arrayIndex >= maxLength) {
+            return partial
+              ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
+              : { schema: null, scopedToPath: null };
+          }
 
-        // For unconstrained arrays, we allow any non-negative index for schema introspection
-        // This is because we're validating schema paths, not runtime data
-        current = current.element as z.ZodType;
+          // For unconstrained arrays, we allow any non-negative index for schema introspection
+          // This is because we're validating schema paths, not runtime data
+          current = current.element as z.ZodType;
+        }
       } else if (current instanceof z.ZodAny) {
         // pass through any to preserve the description
         return { schema: current, scopedToPath: segments.slice(0, index).join('.') };

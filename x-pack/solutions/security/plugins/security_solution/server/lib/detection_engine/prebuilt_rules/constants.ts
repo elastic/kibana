@@ -27,6 +27,15 @@ export const PREBUILT_RULES_UPGRADE_REVIEW_CONCURRENCY = 3;
  */
 export const PREBUILT_RULES_INSTALLATION_REVIEW_CONCURRENCY = 5;
 
-// Maximum number of prebuilt rules processed per iteration of the install
-// and upgrade loops.
-export const PREBUILT_RULE_BATCH_SIZE = 100;
+/**
+ * Maximum number of prebuilt rules processed per iteration of the upgrade loop.
+ */
+export const PREBUILT_RULES_UPGRADE_BATCH_SIZE = 100;
+
+/**
+ * Max prebuilt rules fetched from ES and processed by bulk-create per install handler iteration.
+ * Also the batch size passed to the alerting plugin's `rulesClient.bulkCreateRules`,
+ * controlling how many rules it writes to ES per underlying bulk-create call.
+ * A single constant for both layers means no nested re-chunking happens between them.
+ */
+export const PREBUILT_RULES_BULK_CREATE_BATCH_SIZE = 400;

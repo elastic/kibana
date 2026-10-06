@@ -48,7 +48,7 @@ describe('useChartSettingsPopoverConfiguration', () => {
         ?.onClick as () => void
     )();
 
-    expect(mockHandleClick).toBeCalled();
+    expect(mockHandleClick).toHaveBeenCalled();
   });
 
   test('it invokes onResetStackByFields when the Reset menu item is clicked', () => {
@@ -62,6 +62,6 @@ describe('useChartSettingsPopoverConfiguration', () => {
         ?.onClick as () => void
     )();
 
-    expect(onResetStackByFields).toBeCalled();
+    expect(onResetStackByFields).toHaveBeenCalled();
   });
 });

@@ -160,9 +160,7 @@ describe('SecretFormRow', () => {
 
     expect(queryByText('Replace Test Secret')).not.toBeInTheDocument();
     expect(
-      getByText('This field will be re-saved using secret storage from plain text storage.', {
-        exact: false,
-      })
+      getByText('Saving this field stores it as a secret instead of plain text.', { exact: false })
     ).toBeInTheDocument();
   });
 });

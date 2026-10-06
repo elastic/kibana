@@ -25,9 +25,8 @@ export const registerSolutionNavigation = async (
     (productType) => productType.product_line === ProductLine.aiSoc
   );
 
-  const agentBuilderNavAtTop = services.featureFlags.getBooleanValue(
-    AGENT_BUILDER_NAV_AT_TOP_FLAG,
-    false
+  const agentBuilderNavAtTop = await firstValueFrom(
+    services.featureFlags.getBooleanValue$(AGENT_BUILDER_NAV_AT_TOP_FLAG, false)
   );
 
   // Do not pass a defaultOverride: when userValue is unset, get() must use the registered
@@ -42,18 +41,16 @@ export const registerSolutionNavigation = async (
   const workflowsUiEnabled$ = services.settings.client.get$<boolean>(WORKFLOWS_UI_SETTING_ID);
   const workflowsUiEnabled = await firstValueFrom(workflowsUiEnabled$);
 
-  const showAlertingV2 = Boolean(services.application.capabilities.alertingVTwo);
-
   const navigationTree = shouldUseAINavigation
     ? createAiNavigationTree(
+        services,
         initialChatExperience,
         workflowsUiEnabled,
-        showAlertingV2,
         agentBuilderNavAtTop
       )
     : await createNavigationTree(services, initialChatExperience);
 
   services.securitySolution.setSolutionNavigationTree(navigationTree);
 
-  services.serverless.initNavigation('security', Rx.of(navigationTree));
+  services.navigation.initNavigation('security', Rx.of(navigationTree));
 };

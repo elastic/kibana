@@ -10,7 +10,10 @@ import {
   API_VERSIONS,
   ATTACK_DISCOVERY_INTERNAL_MISSING_PRIVILEGES,
 } from '@kbn/elastic-assistant-common';
-import type { GetAttackDiscoveryMissingPrivilegesInternalResponse } from '@kbn/elastic-assistant-common';
+import type {
+  AttackDiscoveryMissingPrivileges,
+  GetAttackDiscoveryMissingPrivilegesInternalResponse,
+} from '@kbn/elastic-assistant-common';
 
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { KibanaServices } from '../../../common/lib/kibana';
@@ -24,18 +27,21 @@ const DEFAULT_QUERY_OPTIONS = {
   retry: false,
 };
 
-/** Retrieves the attack discovery schedule. */
+/** Retrieves the missing Attack discovery index privileges for the current user. */
 const getMissingIndexPrivileges = async (
   signal?: AbortSignal
-): Promise<GetAttackDiscoveryMissingPrivilegesInternalResponse> => {
+): Promise<AttackDiscoveryMissingPrivileges[]> => {
   const version = API_VERSIONS.internal.v1;
-  return KibanaServices.get().http.get<GetAttackDiscoveryMissingPrivilegesInternalResponse>(
-    ATTACK_DISCOVERY_INTERNAL_MISSING_PRIVILEGES,
-    {
-      version,
-      signal,
-    }
-  );
+  const response =
+    await KibanaServices.get().http.get<GetAttackDiscoveryMissingPrivilegesInternalResponse>(
+      ATTACK_DISCOVERY_INTERNAL_MISSING_PRIVILEGES,
+      {
+        version,
+        signal,
+      }
+    );
+
+  return response.index_privileges;
 };
 
 export const useGetMissingIndexPrivileges = () => {

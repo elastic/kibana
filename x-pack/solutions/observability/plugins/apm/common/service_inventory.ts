@@ -6,12 +6,14 @@
  */
 
 import type { AgentName } from '@kbn/elastic-agent-utils';
-import type { SloStatus } from '@kbn/apm-types';
+import type { AnomalyDetectorType, Environment, SloStatus } from '@kbn/apm-types';
 export type { SloStatus } from '@kbn/apm-types';
 
 export interface ServiceListItem {
   serviceName: string;
   anomalyScore?: number;
+  detectorType?: AnomalyDetectorType;
+  anomalyEnvironment?: Environment;
   transactionType?: string;
   agentName?: AgentName;
   throughput?: number;

@@ -120,7 +120,7 @@ describe('licensing plugin', () => {
         expect(license.isAvailable).toBe(true);
         expect(license.uid).toBe('saved');
 
-        expect(sessionStorage.getItem).toBeCalledTimes(1);
+        expect(sessionStorage.getItem).toHaveBeenCalledTimes(1);
         expect(sessionStorage.getItem).toHaveBeenCalledWith(licensingSessionStorageKey);
       });
 
@@ -166,7 +166,7 @@ describe('licensing plugin', () => {
 
         expect(license.uid).toBe('fresh');
 
-        expect(sessionStorage.setItem).toBeCalledTimes(1);
+        expect(sessionStorage.setItem).toHaveBeenCalledTimes(1);
 
         expect(sessionStorage.setItem.mock.calls[0][0]).toBe(licensingSessionStorageKey);
         expect(sessionStorage.setItem.mock.calls[0][1]).toMatchInlineSnapshot(

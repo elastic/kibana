@@ -22,38 +22,48 @@ export class OtelKubernetesFlowPage {
     );
   }
 
-  public async copyHelmRepositorySnippetToClipboard() {
-    await this.page
-      .getByTestId('observabilityOnboardingOtelKubernetesPanelAddRepositoryCopyToClipboard')
-      .click();
+  public async getHelmRepositorySnippet() {
+    return await this.page
+      .getByTestId('observabilityOnboardingOtelKubernetesAddRepositorySnippet')
+      .textContent();
   }
 
   public async copyInstallStackSnippetToClipboard() {
     await this.page
-      .getByTestId('observabilityOnboardingOtelKubernetesPanelInstallStackCopyToClipboard')
+      .getByTestId('observabilityOnboardingOtelKubernetesInstallStackSnippetCopyButtonIcon')
       .click();
   }
 
   public async switchInstrumentationInstructions(language: 'nodejs' | 'java' | 'python' | 'go') {
-    await this.page.getByTestId(language).click();
+    await this.page
+      .getByTestId('observabilityOnboardingKubernetesOtelInstrumentationSwitch')
+      .click();
+    await this.page.getByRole('button', { name: language === 'java' ? 'Java' : language }).click();
+  }
+
+  public async selectNamespaceInstrumentationInstructions() {
+    await this.page
+      .getByTestId('observabilityOnboardingKubernetesOtelAnnotationMode-namespace')
+      .getByRole('radio')
+      .click();
   }
 
   public async getAnnotateAllResourceSnippet() {
     return await this.page
-      .getByTestId('observabilityOnboardingOtelKubernetesPanelAnnotateAllResourcesSnippet')
+      .getByTestId('observabilityOnboardingKubernetesOtelInstrumentationNamespaceSnippet')
       .textContent();
   }
 
   public async getRestartDeploymentSnippet() {
     return await this.page
-      .getByTestId('observabilityOnboardingOtelKubernetesPanelRestartDeploymentSnippet')
+      .getByTestId('observabilityOnboardingKubernetesOtelInstrumentationRestartCommand')
       .textContent();
   }
 
   public async openClusterOverviewDashboardInNewTab(): Promise<Page> {
     const dashboardURL = await this.page
       .getByTestId(
-        'observabilityOnboardingDataIngestStatusActionLink-kubernetes_otel-cluster-overview'
+        'observabilityOnboardingDataIngestStatusActionLink-kubernetes_otel-fe68e0e9-0506-4ad7-96be-070cf7592a7e'
       )
       .getAttribute('href');
 
@@ -68,11 +78,11 @@ export class OtelKubernetesFlowPage {
     }
   }
 
-  public async assertDataReceivedIndicator(): Promise<void> {
+  public async assertDataReceivedIndicator(timeout = 15 * 60_000): Promise<void> {
     await expect(
       this.exploreLogsButton,
       'Explore logs action link should be visible after data is detected'
-    ).toBeVisible();
+    ).toBeVisible({ timeout });
   }
 
   public async clickExploreLogsCTA() {

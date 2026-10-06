@@ -27,16 +27,14 @@ import {
 import { setupEuiMatchers } from '@elastic/eui/lib/test/rtl/matchers';
 
 jest.mock('@kbn/esql-utils', () => {
+  const actual = jest.requireActual('@kbn/esql-utils');
   return {
     getESQLResults: jest.fn().mockResolvedValue({
       response: {
         columns: [
           {
             name: 'field',
-            id: 'field',
-            meta: {
-              type: 'keyword',
-            },
+            type: 'keyword',
           },
         ],
         values: [['v1'], ['v2']],
@@ -46,6 +44,9 @@ jest.mock('@kbn/esql-utils', () => {
     getLimitFromESQLQuery: jest.fn().mockReturnValue(1000),
     getValuesFromQueryField: jest.fn().mockReturnValue('field'),
     getESQLQueryColumnsRaw: jest.fn().mockResolvedValue([{ name: 'column1' }, { name: 'column2' }]),
+    getVariableNamePrefix: actual.getVariableNamePrefix,
+    ESQLValuesPreview: actual.ESQLValuesPreview,
+    appendStatsByToQuery: actual.appendStatsByToQuery,
   };
 });
 
@@ -247,7 +248,7 @@ describe('ValueControlForm', () => {
         );
 
         // values preview panel should be rendered
-        expect(await findByTestId('esqlValuesPreview')).toBeInTheDocument();
+        expect(await findByTestId('esqlValuesPreviewStrings')).toBeInTheDocument();
       });
 
       it('should be able to change in fields type', async () => {
@@ -389,6 +390,31 @@ describe('ValueControlForm', () => {
         await waitFor(() => {
           expect(saveButton).not.toBeEuiDisabled();
         });
+      });
+    });
+
+    describe('Multi values type', () => {
+      it('should default to "Values from a query" and enable the type dropdown for MULTI_VALUES', async () => {
+        const { findByTestId } = render(
+          <KibanaContextProvider services={services}>
+            <IntlProvider locale="en">
+              <ESQLControlsFlyout
+                {...defaultProps}
+                initialVariableType={ESQLVariableType.MULTI_VALUES}
+                queryString="FROM foo | WHERE MV_CONTAINS(field, "
+                esqlVariables={[]}
+              />
+            </IntlProvider>
+          </KibanaContextProvider>
+        );
+
+        expect(await findByTestId('esqlControlTypeDropdown')).toBeInTheDocument();
+        expect(await findByTestId('esqlControlTypeDropdown')).toHaveTextContent(
+          `Values from a query`
+        );
+
+        const typeDropdown = await findByTestId('esqlControlTypeDropdown');
+        expect(typeDropdown).not.toBeDisabled();
       });
     });
   });

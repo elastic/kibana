@@ -8,7 +8,7 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
-import { servers as workflowsUiConfig } from '../../workflows_ui/stateful/classic.stateful.config';
+import { servers as baseConfig } from '../../default/stateful/classic.stateful.config';
 
 /**
  * Scout server configuration for Workflow Schema OOM prevention tests.
@@ -26,16 +26,16 @@ import { servers as workflowsUiConfig } from '../../workflows_ui/stateful/classi
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet workflows_oom_testing
  */
 export const servers: ScoutServerConfig = {
-  ...workflowsUiConfig,
+  ...baseConfig,
   esTestCluster: {
-    ...workflowsUiConfig.esTestCluster,
-    serverArgs: [...workflowsUiConfig.esTestCluster.serverArgs, 'xpack.ml.enabled=false'],
+    ...baseConfig.esTestCluster,
+    serverArgs: [...baseConfig.esTestCluster.serverArgs, 'xpack.ml.enabled=false'],
   },
   kbnTestServer: {
-    ...workflowsUiConfig.kbnTestServer,
+    ...baseConfig.kbnTestServer,
     env: {
-      ...workflowsUiConfig.kbnTestServer.env,
-      NODE_OPTIONS: [workflowsUiConfig.kbnTestServer.env?.NODE_OPTIONS, '--max-old-space-size=1024']
+      ...baseConfig.kbnTestServer.env,
+      NODE_OPTIONS: [baseConfig.kbnTestServer.env?.NODE_OPTIONS, '--max-old-space-size=1024']
         .filter(Boolean)
         .join(' '),
     },

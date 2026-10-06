@@ -14,7 +14,6 @@ import {
   EuiIcon,
   EuiIconTip,
   EuiText,
-  EuiTextTruncate,
   EuiToolTip,
 } from '@elastic/eui';
 import type { estypes } from '@elastic/elasticsearch';
@@ -252,7 +251,7 @@ export const useColumns = (
                   },
                 ]);
           return (
-            <>
+            <div css={{ display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
               {type === SIGNIFICANT_ITEM_TYPE.KEYWORD && (
                 <FieldStatsPopover
                   dataView={dataView}
@@ -269,6 +268,7 @@ export const useColumns = (
                   css={{
                     marginLeft: euiTheme.size.s,
                     marginRight: euiTheme.size.xs,
+                    flexShrink: 0,
                   }}
                 >
                   <EuiIconTip
@@ -286,8 +286,19 @@ export const useColumns = (
                 </span>
               )}
 
-              <EuiTextTruncate text={fieldName} />
-            </>
+              <span
+                title={fieldName}
+                css={{
+                  flex: 1,
+                  minWidth: 0,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {fieldName}
+              </span>
+            </div>
           );
         },
         sortable: true,
@@ -302,7 +313,7 @@ export const useColumns = (
         }),
         render: (_, { fieldValue, type }) => (
           <EuiToolTip content={String(fieldValue)} disableScreenReaderOutput>
-            <span>
+            <span tabIndex={0}>
               {type === 'keyword' ? (
                 String(fieldValue)
               ) : (

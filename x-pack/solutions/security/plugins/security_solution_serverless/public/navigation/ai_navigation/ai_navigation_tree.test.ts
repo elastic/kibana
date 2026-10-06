@@ -5,14 +5,30 @@
  * 2.0.
  */
 
+import type { CoreStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
+import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { createAiNavigationTree } from './ai_navigation_tree';
 
-describe('createAiNavigationTree', () => {
-  it('returns the Workflows link between Agents and Value report when `workflows` is enabled', () => {
-    const navigationTree = createAiNavigationTree(AIChatExperience.Agent, true, false, false);
+const containsLink = (nodes: NavigationTreeDefinition['body'], link: string): boolean =>
+  nodes.some(
+    (node) =>
+      node.link === link || (node.children !== undefined && containsLink(node.children, link))
+  );
 
-    const primaryNavSection = navigationTree.body[4];
+describe('createAiNavigationTree', () => {
+  let core: CoreStart;
+
+  beforeEach(() => {
+    core = coreMock.createStart();
+    core.settings.globalClient.get = <T>(_key: string) => false as T;
+  });
+
+  it('returns the Workflows link between Agents and Value report when `workflows` is enabled', () => {
+    const navigationTree = createAiNavigationTree(core, AIChatExperience.Agent, true, false);
+
+    const primaryNavSection = navigationTree.body[3];
     const children = 'children' in primaryNavSection ? primaryNavSection.children : [];
 
     const workflowsIndex = children?.findIndex(
@@ -26,9 +42,9 @@ describe('createAiNavigationTree', () => {
   });
 
   it('does not include the Workflows link when `workflows` is disabled', () => {
-    const navigationTree = createAiNavigationTree(AIChatExperience.Agent, false, false, false);
+    const navigationTree = createAiNavigationTree(core, AIChatExperience.Agent, false, false);
 
-    const primaryNavSection = navigationTree.body[4];
+    const primaryNavSection = navigationTree.body[3];
     const children = 'children' in primaryNavSection ? primaryNavSection.children : [];
 
     const workflowsIndex = children?.findIndex(
@@ -38,18 +54,18 @@ describe('createAiNavigationTree', () => {
     expect(workflowsIndex).toBe(-1);
   });
 
-  it('places the Agent Builder link after `home` when `agentBuilderNavAtTop` is enabled', () => {
-    const navigationTree = createAiNavigationTree(AIChatExperience.Agent, true, false, true);
+  it('places the Agent Builder link first when `agentBuilderNavAtTop` is enabled', () => {
+    const navigationTree = createAiNavigationTree(core, AIChatExperience.Agent, true, true);
 
-    const secondNavItem = navigationTree.body[1];
+    const firstNavItem = navigationTree.body[0];
 
-    expect('link' in secondNavItem && secondNavItem.link).toBe('agent_builder');
+    expect('link' in firstNavItem && firstNavItem.link).toBe('agent_builder');
   });
 
   it('places the Agent Builder later in the nav  when `agentBuilderNavAtTop` is disabled', () => {
-    const navigationTree = createAiNavigationTree(AIChatExperience.Agent, true, false, false);
+    const navigationTree = createAiNavigationTree(core, AIChatExperience.Agent, true, false);
 
-    const primaryNavSection = navigationTree.body[4];
+    const primaryNavSection = navigationTree.body[3];
     const children = 'children' in primaryNavSection ? primaryNavSection.children : [];
 
     const agentBuilderIndex = children?.findIndex(
@@ -57,5 +73,11 @@ describe('createAiNavigationTree', () => {
     );
 
     expect(agentBuilderIndex).toBeGreaterThan(0);
+  });
+
+  it('includes service accounts in Admin and Settings', () => {
+    const navigationTree = createAiNavigationTree(core, AIChatExperience.Agent, true, false);
+
+    expect(containsLink(navigationTree.footer ?? [], 'management:service_accounts')).toBe(true);
   });
 });

@@ -10,6 +10,8 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { FleetRequestHandlerContext } from '../../types';
 import type { CloudProvider, CloudConnector } from '../../../common/types/models/cloud_connector';
 
+import { CLOUD_CONNECTOR_API_ROUTES } from '../../../common/constants';
+import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import { cloudConnectorService } from '../../services';
 import { packagePolicyService } from '../../services';
 import { createSecrets, deleteSecrets } from '../../services/secrets';
@@ -1442,6 +1444,29 @@ describe('Cloud Connector API', () => {
           path: expect.any(String),
           security: expect.any(Object),
           summary: 'Delete cloud connector (supports force deletion)',
+        })
+      );
+
+      // POST /internal/fleet/cloud_connectors/{cloudConnectorId}/verify_iac_key
+      // A comparing call persists iac_upgrade_status, so it is gated like the connector update
+      // (ALL), not like a read.
+      expect(mockRouter.versioned.post).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: CLOUD_CONNECTOR_API_ROUTES.VERIFY_IAC_KEY_PATTERN,
+          access: 'internal',
+          security: {
+            authz: {
+              requiredPrivileges: [
+                {
+                  anyRequired: [
+                    FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+                    FLEET_API_PRIVILEGES.INTEGRATIONS.ALL,
+                  ],
+                },
+              ],
+            },
+          },
+          summary: 'Verify a cloud connector IaC template key',
         })
       );
     });

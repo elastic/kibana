@@ -24,6 +24,9 @@ export interface EntityAnalyticsMigrationsParams {
   auditLogger: AuditLogger | undefined;
   kibanaVersion: string;
   experimentalFeatures?: ExperimentalFeatures;
+  hasEncryptionKey: boolean;
+  /** When defined, migrations are scoped to this space only. When undefined, all spaces are migrated. */
+  spaceId?: string;
 }
 
 /**

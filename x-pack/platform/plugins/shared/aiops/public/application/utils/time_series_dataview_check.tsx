@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiCallOut } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -36,15 +36,12 @@ export function timeSeriesDataViewWarning(
   }
 
   return (
-    <EuiCallOut
+    <KbnDangerCallout
       title={i18n.translate('xpack.aiops.dataViewNotBasedOnTimeSeriesWarning.title', {
         defaultMessage: 'The data view "{dataViewTitle}" is not based on a time series.',
         values: { dataViewTitle: dataView.getName() },
       })}
-      color="danger"
-      iconType="warning"
-    >
-      <p>{description}</p>
-    </EuiCallOut>
+      text={description}
+    />
   );
 }

@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { getDurationRt } from '../../../../../common/agent_configuration/runtime_types/duration_rt';
-import { getIntegerRt } from '../../../../../common/agent_configuration/runtime_types/integer_rt';
+import { getDurationSchema } from '../../../../../common/agent_configuration/runtime_types/duration_rt';
+import { getIntegerSchema } from '../../../../../common/agent_configuration/runtime_types/integer_rt';
 import { OPTIONAL_LABEL, REQUIRED_LABEL } from '../settings_form/utils';
 import type { SettingsRow } from '../typings';
 
@@ -58,7 +58,7 @@ export function getApmSettings(): SettingsRow[] {
               defaultMessage: 'Set limits on request headers sizes and timing configurations.',
             }
           ),
-          validation: getIntegerRt({ min: 1 }),
+          validation: getIntegerSchema({ min: 1 }),
         },
         {
           key: 'idle_timeout',
@@ -67,7 +67,7 @@ export function getApmSettings(): SettingsRow[] {
           label: i18n.translate('xpack.apm.fleet_integration.settings.apm.idleTimeoutLabel', {
             defaultMessage: 'Idle time before underlying connection is closed',
           }),
-          validation: getDurationRt({ min: '1ms' }),
+          validation: getDurationSchema({ min: '1ms' }),
         },
         {
           key: 'read_timeout',
@@ -76,7 +76,7 @@ export function getApmSettings(): SettingsRow[] {
           label: i18n.translate('xpack.apm.fleet_integration.settings.apm.readTimeoutLabel', {
             defaultMessage: 'Maximum duration for reading an entire request',
           }),
-          validation: getDurationRt({ min: '1ms' }),
+          validation: getDurationSchema({ min: '1ms' }),
         },
         {
           key: 'shutdown_timeout',
@@ -85,7 +85,7 @@ export function getApmSettings(): SettingsRow[] {
           label: i18n.translate('xpack.apm.fleet_integration.settings.apm.shutdownTimeoutLabel', {
             defaultMessage: 'Maximum duration before releasing resources when shutting down',
           }),
-          validation: getDurationRt({ min: '1ms' }),
+          validation: getDurationSchema({ min: '1ms' }),
         },
         {
           key: 'write_timeout',
@@ -94,7 +94,7 @@ export function getApmSettings(): SettingsRow[] {
           label: i18n.translate('xpack.apm.fleet_integration.settings.apm.writeTimeoutLabel', {
             defaultMessage: 'Maximum duration for writing a response',
           }),
-          validation: getDurationRt({ min: '1ms' }),
+          validation: getDurationSchema({ min: '1ms' }),
         },
         {
           key: 'max_event_bytes',
@@ -103,7 +103,7 @@ export function getApmSettings(): SettingsRow[] {
           label: i18n.translate('xpack.apm.fleet_integration.settings.apm.maxEventBytesLabel', {
             defaultMessage: 'Maximum size per event (bytes)',
           }),
-          validation: getIntegerRt({ min: 1 }),
+          validation: getIntegerSchema({ min: 1 }),
         },
         {
           key: 'max_connections',
@@ -116,7 +116,7 @@ export function getApmSettings(): SettingsRow[] {
             'xpack.apm.fleet_integration.settings.apm.maxConnectionsHelpText',
             { defaultMessage: '0 for unlimited' }
           ),
-          validation: getIntegerRt({ min: 0 }),
+          validation: getIntegerSchema({ min: 0 }),
         },
         {
           key: 'response_headers',

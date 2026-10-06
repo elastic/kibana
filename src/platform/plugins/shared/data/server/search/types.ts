@@ -27,6 +27,7 @@ import type {
 } from '@kbn/search-types';
 
 import type { AsScopedOptions } from '@kbn/core-elasticsearch-server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { ISearchStartSearchSource, SearchSourceService } from '../../common/search';
 import type { AggsSetup, AggsStart } from './aggs';
 import type { SearchUsage } from './collectors/search';
@@ -39,6 +40,7 @@ export interface SearchStrategyDependencies {
   searchSessionsClient: IScopedSearchSessionsClient;
   request: KibanaRequest;
   rollupsEnabled?: boolean;
+  licensing?: LicensingPluginStart;
 }
 
 export interface ISearchSetup {
@@ -51,7 +53,7 @@ export interface ISearchSetup {
     SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
     SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
   >(
-    name: string,
+    name: string | symbol,
     strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>
   ) => void;
 

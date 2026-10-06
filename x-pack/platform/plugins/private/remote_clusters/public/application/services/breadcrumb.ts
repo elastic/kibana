@@ -47,8 +47,9 @@ export function setBreadcrumbs(type: 'home' | 'add' | 'edit', queryParams?: stri
     return;
   }
 
+  let newBreadcrumbs: Breadcrumb[];
   if (type === 'home') {
-    _setBreadcrumbs([_breadcrumbs.home]);
+    newBreadcrumbs = [_breadcrumbs.home];
   } else {
     // Support deep-linking back to a remote cluster in the detail panel.
     const homeBreadcrumb = {
@@ -56,6 +57,17 @@ export function setBreadcrumbs(type: 'home' | 'add' | 'edit', queryParams?: stri
       href: `${_breadcrumbs.home.href}${queryParams}`,
     };
 
-    _setBreadcrumbs([homeBreadcrumb, _breadcrumbs[type]]);
+    newBreadcrumbs = [homeBreadcrumb, _breadcrumbs[type]];
   }
+
+  // Pop off last breadcrumb
+  const lastBreadcrumb = newBreadcrumbs.pop()!;
+
+  // Put last breadcrumb back without href so it's not clickable
+  newBreadcrumbs.push({
+    ...lastBreadcrumb,
+    href: undefined,
+  });
+
+  _setBreadcrumbs(newBreadcrumbs);
 }

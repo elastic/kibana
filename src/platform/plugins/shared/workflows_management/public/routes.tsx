@@ -13,9 +13,15 @@ import type { ScopedHistory } from '@kbn/core-application-browser';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { WorkflowExecutionsRouteGate } from './components/workflow_executions_route_gate';
+import { WorkflowsAppLayout } from './components/workflows_app_layout';
 import { WorkflowsAvailabilityWrapper } from './components/workflows_availability';
 import { WorkflowsPrivilegesWrapper } from './components/workflows_privileges';
 import { WorkflowDetailStoreProvider } from './entities/workflows/store/provider';
+import {
+  LibraryCatalogBrowserPage,
+  LibraryTemplateDetailPage,
+  LibraryTemplateImportPage,
+} from './pages/library';
 import { WorkflowDetailPage } from './pages/workflow_detail';
 import { WorkflowsPage } from './pages/workflows';
 
@@ -38,11 +44,18 @@ export const WorkflowsRoutes = React.memo<WorkflowsAppDeps>(({ history }) => (
     <I18nProvider>
       <WorkflowsAvailabilityWrapper>
         <WorkflowsPrivilegesWrapper>
-          <Routes>
-            <Route path="/executions" exact component={WorkflowExecutionsRouteGate} />
-            <Route path={['/create', '/:id']} component={WorkflowDetailPageRoute} />
-            <Route path="/" exact component={WorkflowsPage} />
-          </Routes>
+          <WorkflowsAppLayout>
+            <Routes>
+              {/* Must be registered before `/:id` below, or they resolve as a workflow id. */}
+              <Route path="/executions" exact component={WorkflowExecutionsRouteGate} />
+              {/* Must be registered before `/library/:slug`, or it resolves as a slug. */}
+              <Route path="/library/import" exact component={LibraryTemplateImportPage} />
+              <Route path="/library/:slug" exact component={LibraryTemplateDetailPage} />
+              <Route path="/library" exact component={LibraryCatalogBrowserPage} />
+              <Route path={['/create', '/:id']} component={WorkflowDetailPageRoute} />
+              <Route path="/" exact component={WorkflowsPage} />
+            </Routes>
+          </WorkflowsAppLayout>
         </WorkflowsPrivilegesWrapper>
       </WorkflowsAvailabilityWrapper>
     </I18nProvider>

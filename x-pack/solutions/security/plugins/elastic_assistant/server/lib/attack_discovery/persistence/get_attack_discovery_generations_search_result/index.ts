@@ -10,6 +10,16 @@ import { z } from '@kbn/zod/v4';
 export type GetAttackDiscoveryGenerationsSearchResult = z.infer<
   typeof GetAttackDiscoveryGenerationsSearchResult
 >;
+
+const termsAgg = z.object({
+  buckets: z.array(
+    z.object({
+      doc_count: z.number(),
+      key: z.string(),
+    })
+  ),
+});
+
 export const GetAttackDiscoveryGenerationsSearchResult = z.object({
   aggregations: z.object({
     generations: z.object({
@@ -61,6 +71,9 @@ export const GetAttackDiscoveryGenerationsSearchResult = z.object({
           generation_start_time: z.object({
             value_as_string: z.string().nullable().optional(), // optional to handle missing values
           }),
+          workflow_id: termsAgg.optional(),
+          workflow_reference: termsAgg.optional(),
+          workflow_run_id: termsAgg.optional(),
         })
       ),
     }),
