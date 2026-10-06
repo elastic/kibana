@@ -112,21 +112,28 @@ const isDateLikeField = (field: string): boolean => {
 };
 
 /**
- * Returns the icon appended to a sort option: a help tooltip when the field
- * has a `description`, otherwise the direction arrow.
+ * Returns the icons appended to a sort option: the direction arrow when `showDirection` is set,
+ * followed by a help tooltip when the field has a `description`.
  */
-const getOptionAppend = (direction: 'asc' | 'desc', description?: string): React.ReactNode =>
-  description ? (
-    <EuiIconTip
-      type="question"
-      color="inherit"
-      position="right"
-      content={description}
-      aria-label={i18nText.additionalInfo}
-    />
-  ) : (
-    <EuiIcon type={direction === 'asc' ? 'sortUp' : 'sortDown'} aria-hidden={true} />
-  );
+const getOptionAppend = (
+  direction: 'asc' | 'desc',
+  { showDirection, description }: { showDirection: boolean; description?: string }
+): React.ReactNode => (
+  <>
+    {showDirection && (
+      <EuiIcon type={direction === 'asc' ? 'sortUp' : 'sortDown'} aria-hidden={true} />
+    )}
+    {description && (
+      <EuiIconTip
+        type="question"
+        color="inherit"
+        position="right"
+        content={description}
+        aria-label={i18nText.additionalInfo}
+      />
+    )}
+  </>
+);
 
 /**
  * Generates sort options from an array of {@link SortField} configurations.
@@ -148,12 +155,14 @@ const getOptionAppend = (direction: 'asc' | 'desc', description?: string): React
 const generateOptionsFromFields = (fields: SortField[]): SortItem[] =>
   fields.flatMap((sortField) => {
     const { field, name, ascLabel, descLabel, description } = sortField;
-    return getSortFieldDirections(sortField).map((direction) => ({
+    const directions = getSortFieldDirections(sortField);
+    const showDirection = directions.length > 1;
+    return directions.map((direction) => ({
       label:
         (direction === 'asc' ? ascLabel : descLabel) ?? getDefaultLabel(field, name, direction),
       field,
       direction,
-      append: getOptionAppend(direction, description),
+      append: getOptionAppend(direction, { showDirection, description }),
     }));
   });
 

@@ -268,7 +268,7 @@ describe('SortRenderer', () => {
       expect(options[0]).toHaveTextContent('Recently viewed');
     });
 
-    it('shows a help icon instead of the direction arrow when the field has a description', () => {
+    it('shows a help icon on every option of a field that has a description', () => {
       const Wrapper = createWrapper({
         sortFields: [
           { field: 'status', name: 'Status', description: 'Stored in your browser.' },
@@ -292,6 +292,32 @@ describe('SortRenderer', () => {
       expect(screen.getByRole('option', { name: /A-Z/i })).not.toHaveTextContent(
         'Additional information'
       );
+    });
+
+    it('shows only the help icon when the field offers a single direction', () => {
+      const Wrapper = createWrapper({
+        sortFields: [
+          {
+            field: 'accessedAt',
+            name: 'Recently viewed',
+            descLabel: 'Recently viewed',
+            allowedDirections: ['desc'],
+            description: 'Stored in your browser.',
+          },
+        ],
+        initialSort: { field: 'accessedAt', direction: 'desc' },
+      });
+      render(
+        <Wrapper>
+          <SortRenderer query={mockQuery} />
+        </Wrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('contentListSortRenderer'));
+
+      const option = screen.getByRole('option', { name: /Recently viewed/i });
+      expect(option).toHaveTextContent('Additional information');
+      expect(option.querySelector('[data-euiicon-type="sortDown"]')).not.toBeInTheDocument();
     });
   });
 

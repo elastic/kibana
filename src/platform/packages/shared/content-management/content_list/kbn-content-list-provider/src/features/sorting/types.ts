@@ -38,10 +38,7 @@ export interface SortField {
    * Use single-direction arrays for fields where only one direction is meaningful.
    */
   allowedDirections?: readonly ['asc' | 'desc', ...Array<'asc' | 'desc'>];
-  /**
-   * Help text for this field. When set, the field's dropdown options show a "?"
-   * icon with this text as a tooltip instead of the direction arrow.
-   */
+  /** When set, the field's dropdown options show a "?" icon with this help text as a tooltip. */
   description?: string;
 }
 

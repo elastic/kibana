@@ -34,7 +34,7 @@ export interface ContentListSortField<
   descLabel?: string;
   /** Restricts the directions offered in the sort dropdown. Omit to offer both. */
   allowedDirections?: SortField['allowedDirections'];
-  /** Tooltip text; replaces the direction arrow with a "?" icon on this field's options. */
+  /** When set, the field's dropdown options show a "?" icon with this help text as a tooltip. */
   description?: string;
   /** Secondary sort applied when this field gives two items the same position: equal values, or both without a value. */
   fallbackSort?: { field: string; direction: 'asc' | 'desc' };
