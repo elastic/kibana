@@ -12,3 +12,9 @@
  * configurations cannot reach the feature at all.
  */
 export const serviceAccountsServerArgs = ['--xpack.security.serviceAccounts.enabled=true'];
+
+/**
+ * UIAM's shortest allowed lifetime for service account exchange tokens, so a test can outlive one
+ * and check that Kibana renews it.
+ */
+export const serviceAccountsUiamEphemeralTokenExpiration = 'PT1M';

@@ -39,7 +39,13 @@ export interface ScoutServerConfig {
     ssl: boolean;
     secureFiles?: string[];
   };
-  esServerlessOptions?: { uiam: boolean; uiamOAuth?: boolean; cps?: boolean };
+  esServerlessOptions?: {
+    uiam: boolean;
+    uiamOAuth?: boolean;
+    /** ISO-8601 lifetime of UIAM ephemeral tokens, from PT1M to PT5M (UIAM defaults to PT5M). */
+    uiamEphemeralTokenExpiration?: string;
+    cps?: boolean;
+  };
   kbnTestServer: {
     env: any;
     buildArgs: string[];
