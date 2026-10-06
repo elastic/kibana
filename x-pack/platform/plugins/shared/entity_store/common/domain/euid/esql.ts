@@ -64,6 +64,7 @@ export function collectRankingFields(branches: EuidRankingBranch[]): Set<string>
   return fields;
 }
 
+/** {@link getEuidEsqlFilterBasedOnDocumentFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
 export function getEuidEsqlFilterBasedOnDocument(
   entityType: EntityType,
   doc: any
@@ -74,7 +75,11 @@ export function getEuidEsqlFilterBasedOnDocument(
   );
 }
 
-/** Like {@link getEuidEsqlFilterBasedOnDocument}, but takes a definition instead of a type name. */
+/**
+ * Constructs an ES|QL filter matching source documents that would resolve to the same entity as the
+ * provided document under the given entity definition, or `undefined` if the document lacks enough
+ * identifying information or fails the definition's pipeline gate.
+ */
 export function getEuidEsqlFilterBasedOnDocumentFromDefinition(
   entityDefinition: EntityDefinitionOfAnyType,
   doc: any
@@ -359,6 +364,7 @@ function buildSourceClauseEsql(evaluation: FieldEvaluation, spec: SourceMatchSpe
   return disjuncts.length === 1 ? disjuncts[0] : `(${disjuncts.join(' OR ')})`;
 }
 
+/** {@link getFieldEvaluationsEsqlFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
 export function getFieldEvaluationsEsql(entityType: EntityType): string | undefined {
   return getFieldEvaluationsEsqlFromDefinition(getEntityDefinitionWithoutId(entityType));
 }
@@ -394,7 +400,7 @@ export function getHostScopedUserEuidEsql(): {
 }
 
 /**
- * Returns an ESQL EVAL fragment for all field evaluations of the given entity type.
+ * Returns an ESQL EVAL fragment for all field evaluations of the given entity definition.
  * Use in a pipeline as | EVAL <result>. Returns undefined when there are no field evaluations.
  */
 export function getFieldEvaluationsEsqlFromDefinition(
@@ -410,30 +416,30 @@ export function getFieldEvaluationsEsqlFromDefinition(
   return evaluations.map((e) => buildOneFieldEvaluationEsql(e)).join(',\n ');
 }
 
-/**
- * Constructs an ESQL filter for the provided entity type that checks if the documents contains an entity id.
- *
- * You will need to prepend the result with a `| WHERE` clause, or just add to your existing WHERE clause.
- *
- * Example usage:
- * ```ts
- * import { getEuidEsqlDocumentsContainsIdFilter } from './esql';
- *
- * const filter = getEuidEsqlDocumentsContainsIdFilter('host');
- * // filter may look like:
- * // '((host.entity.id IS NOT NULL) OR (host.id IS NOT NULL) OR (host.name IS NOT NULL) OR (host.hostname IS NOT NULL))'
- * ```
- *
- * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
- * @returns An ESQL filter string that checks if the document contains an entity id.
- */
+/** {@link getEuidEsqlDocumentsContainsIdFilterFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
 export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
   return getEuidEsqlDocumentsContainsIdFilterFromDefinition(
     getEntityDefinitionWithoutId(entityType)
   );
 }
 
-/** Same filter for callers that already resolved a definition. */
+/**
+ * Constructs an ESQL filter for the provided entity definition that checks if the documents contains an entity id.
+ *
+ * You will need to prepend the result with a `| WHERE` clause, or just add to your existing WHERE clause.
+ *
+ * Example usage:
+ * ```ts
+ * import { getEuidEsqlDocumentsContainsIdFilterFromDefinition } from './esql';
+ *
+ * const filter = getEuidEsqlDocumentsContainsIdFilterFromDefinition(hostDefinition);
+ * // filter may look like:
+ * // '((host.entity.id IS NOT NULL) OR (host.id IS NOT NULL) OR (host.name IS NOT NULL) OR (host.hostname IS NOT NULL))'
+ * ```
+ *
+ * @param definition - The entity definition
+ * @returns An ESQL filter string that checks if the document contains an entity id.
+ */
 export function getEuidEsqlDocumentsContainsIdFilterFromDefinition(
   definition: EntityDefinitionOfAnyType
 ) {
@@ -446,19 +452,7 @@ export function getEuidEsqlDocumentsContainsIdFilterFromDefinition(
   return conditionToESQL(identityField.documentsFilter);
 }
 
-/**
- * Returns a comma-separated ES|QL EVAL assignments fragment that computes the entity id
- * for the given entity type and assigns it to `outputColumn`.
- *
- * For multi-field identities the fragment also emits intermediate columns (`_present`,
- * `_present_or_null`, field-evaluation columns) as sequential assignments in the same
- * `| EVAL` stage so later assignments can reference them by name.
- *
- * Wrap the returned string with `| EVAL`:
- * ```ts
- * parts.push(`| EVAL ${getEuidEsqlEvaluation(type, 'entity.id')}`);
- * ```
- */
+/** {@link getEuidEsqlEvaluationFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
 export function getEuidEsqlEvaluation(
   entityType: EntityType,
   outputColumn: string,
@@ -472,8 +466,19 @@ export function getEuidEsqlEvaluation(
 }
 
 /**
- * Like {@link getEuidEsqlEvaluation}, but takes a definition instead of a type name. Lookup-only
- * options (such as `excludedUserNames`) are already applied to the definition passed in.
+ * Returns a comma-separated ES|QL EVAL assignments fragment that computes the entity id
+ * for the given entity definition and assigns it to `outputColumn`.
+ *
+ * For multi-field identities the fragment also emits intermediate columns (`_present`,
+ * `_present_or_null`, field-evaluation columns) as sequential assignments in the same
+ * `| EVAL` stage so later assignments can reference them by name.
+ *
+ * Wrap the returned string with `| EVAL`:
+ * ```ts
+ * parts.push(`| EVAL ${getEuidEsqlEvaluationFromDefinition(definition, 'entity.id')}`);
+ * ```
+ *
+ * Lookup-only options (such as `excludedUserNames`) are already applied to the definition passed in.
  */
 export function getEuidEsqlEvaluationFromDefinition(
   entityDefinition: EntityDefinitionOfAnyType,

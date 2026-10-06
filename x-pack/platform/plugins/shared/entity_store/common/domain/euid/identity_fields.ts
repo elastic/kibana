@@ -37,18 +37,18 @@ export interface NamespaceSourceFields {
   prefixMatchFields: string[];
 }
 
-/**
- * Returns the identity source field names for a given entity type.
- * Field evaluation destinations (e.g. entity.namespace) are excluded, since they are computed and not stored.
- *
- * @param entityType - The entity type (e.g. 'host', 'user', 'service')
- * @returns requiresOneOf (same as identitySourceFields) and identitySourceFields from euidRanking
- */
+/** {@link getEuidSourceFieldsFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
 export function getEuidSourceFields(entityType: EntityType): IdentitySourceFields {
   return getEuidSourceFieldsFromDefinition(getEntityDefinitionWithoutId(entityType));
 }
 
-/** Like {@link getEuidSourceFields}, but takes a definition instead of a type name. */
+/**
+ * Returns the identity source field names for a given entity definition.
+ * Field evaluation destinations (e.g. entity.namespace) are excluded, since they are computed and not stored.
+ *
+ * @param definition - The entity definition
+ * @returns requiresOneOf (same as identitySourceFields) and identitySourceFields from euidRanking
+ */
 export function getEuidSourceFieldsFromDefinition(
   definition: EntityDefinitionOfAnyType
 ): IdentitySourceFields {
@@ -80,8 +80,13 @@ export function getEuidSourceFieldsFromDefinition(
   };
 }
 
+/** {@link getEuidNamespaceSourceFieldsFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
+export function getEuidNamespaceSourceFields(entityType: EntityType): NamespaceSourceFields {
+  return getEuidNamespaceSourceFieldsFromDefinition(getEntityDefinitionWithoutId(entityType));
+}
+
 /**
- * Returns the namespace source fields for a given entity type, split by how they are matched.
+ * Returns the namespace source fields for a given entity definition, split by how they are matched.
  *
  * The entity store derives `entity.namespace` from a `fieldEvaluations` entry whose `sources`
  * list may contain plain fields (`{ field }`, matched with a term query) and prefix-chunked fields
@@ -95,14 +100,9 @@ export function getEuidSourceFieldsFromDefinition(
  * (`whenClauses` with `condition:`) are not included because they never produce prefix clauses
  * in the DSL.
  *
- * @param entityType - The entity type (e.g. 'host', 'user', 'service', 'generic')
+ * @param definition - The entity definition
  * @returns exactMatchFields and prefixMatchFields from the entity's fieldEvaluations sources
  */
-export function getEuidNamespaceSourceFields(entityType: EntityType): NamespaceSourceFields {
-  return getEuidNamespaceSourceFieldsFromDefinition(getEntityDefinitionWithoutId(entityType));
-}
-
-/** Like {@link getEuidNamespaceSourceFields}, but takes a definition instead of a type name. */
 export function getEuidNamespaceSourceFieldsFromDefinition(
   definition: EntityDefinitionOfAnyType
 ): NamespaceSourceFields {
@@ -114,28 +114,7 @@ export function getEuidNamespaceSourceFieldsFromDefinition(
   return getSourceFieldNames(allSources);
 }
 
-/**
- * Reduces a raw observed field value to the prefix a prefix-matched namespace source would derive
- * from it, or `undefined` when the field is not such a source for this entity type.
- *
- * A `firstChunkOfField` source keeps only the part before its delimiter, so
- * `data_stream.dataset: "okta.system"` derives the namespace prefix `okta`. The DSL builder reverses
- * that into a prefix query (`data_stream.dataset: okta*`), and callers replacing such a clause with
- * an exact phrase filter need to know which arm an observed value belongs to — an entity type can
- * emit several arms for one field (the `user` definition accepts both `okta` and
- * `entityanalytics_okta`).
- *
- * Comparing this result to an arm's prefix is **not** the same as testing `value.startsWith(prefix)`:
- * `okta_legacy.system` reduces to `okta_legacy`, so it does not belong to the `okta` arm even though
- * its string starts with it. Use this rather than reimplementing the split, since only the entity
- * definition knows each source's `splitBy` delimiter.
- *
- * @param entityType - The entity type whose definition declares the source
- * @param field - The candidate namespace source field (e.g. `data_stream.dataset`)
- * @param observedValue - The raw value the document carried (e.g. `okta.system`)
- * @returns the derived prefix (e.g. `okta`), or `undefined` if `field` is not a prefix-matched
- *   source for this entity type
- */
+/** {@link getEuidNamespaceSourcePrefixFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
 export function getEuidNamespaceSourcePrefix(
   entityType: EntityType,
   field: string,
@@ -148,7 +127,28 @@ export function getEuidNamespaceSourcePrefix(
   );
 }
 
-/** Like {@link getEuidNamespaceSourcePrefix}, but takes a definition instead of a type name. */
+/**
+ * Reduces a raw observed field value to the prefix a prefix-matched namespace source would derive
+ * from it, or `undefined` when the field is not such a source for this entity definition.
+ *
+ * A `firstChunkOfField` source keeps only the part before its delimiter, so
+ * `data_stream.dataset: "okta.system"` derives the namespace prefix `okta`. The DSL builder reverses
+ * that into a prefix query (`data_stream.dataset: okta*`), and callers replacing such a clause with
+ * an exact phrase filter need to know which arm an observed value belongs to — an entity definition can
+ * emit several arms for one field (the `user` definition accepts both `okta` and
+ * `entityanalytics_okta`).
+ *
+ * Comparing this result to an arm's prefix is **not** the same as testing `value.startsWith(prefix)`:
+ * `okta_legacy.system` reduces to `okta_legacy`, so it does not belong to the `okta` arm even though
+ * its string starts with it. Use this rather than reimplementing the split, since only the entity
+ * definition knows each source's `splitBy` delimiter.
+ *
+ * @param definition - The entity definition that declares the source
+ * @param field - The candidate namespace source field (e.g. `data_stream.dataset`)
+ * @param observedValue - The raw value the document carried (e.g. `okta.system`)
+ * @returns the derived prefix (e.g. `okta`), or `undefined` if `field` is not a prefix-matched
+ *   source for this entity definition
+ */
 export function getEuidNamespaceSourcePrefixFromDefinition(
   definition: EntityDefinitionOfAnyType,
   field: string,

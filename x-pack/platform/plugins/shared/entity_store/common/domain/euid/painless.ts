@@ -64,18 +64,7 @@ function buildPreAggEvaluatedVarOverridesPreamble(
   return parts.length > 0 ? `${parts.join(' ')} ` : '';
 }
 
-/**
- * Returns an Elasticsearch runtime keyword field mapping whose Painless script
- * computes the typed EUID for the given entity type.
- *
- * Example usage:
- * ```ts
- * runtime_mappings: { 'user_id': getEuidPainlessRuntimeMapping('user') }
- * ```
- *
- * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
- * @returns A runtime keyword field mapping (type + script) for use in runtime_mappings.
- */
+/** {@link getEuidPainlessRuntimeMappingFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
 export function getEuidPainlessRuntimeMapping(
   entityType: EntityType,
   options?: EuidGateOptions
@@ -89,7 +78,18 @@ export function getEuidPainlessRuntimeMapping(
   );
 }
 
-/** Like {@link getEuidPainlessRuntimeMapping}, but takes a definition instead of a type name. */
+/**
+ * Returns an Elasticsearch runtime keyword field mapping whose Painless script
+ * computes the typed EUID for the given entity definition.
+ *
+ * Example usage:
+ * ```ts
+ * runtime_mappings: { 'user_id': getEuidPainlessRuntimeMappingFromDefinition(userDefinition) }
+ * ```
+ *
+ * @param entityDefinition - The entity definition whose identity rules compute the EUID
+ * @returns A runtime keyword field mapping (type + script) for use in runtime_mappings.
+ */
 export function getEuidPainlessRuntimeMappingFromDefinition(
   entityDefinition: EntityDefinitionOfAnyType,
   options?: EuidGateOptions
@@ -105,24 +105,7 @@ export function getEuidPainlessRuntimeMappingFromDefinition(
   };
 }
 
-/**
- * Constructs a Painless evaluation for the provided entity type to generate the entity id.
- *
- * Applies the creation gate: a document that may not put an entity in the store yields `null`.
- * For entities that already exist, use {@link getEuidPainlessEvaluationForSearch}.
- *
- * Example usage:
- * ```ts
- * import { getEuidPainlessEvaluation } from './painless';
- *
- * const evaluation = getEuidPainlessEvaluation('host');
- * // evaluation may look like:
- * // 'if (doc.containsKey('host.name') && doc['host.name'].size() > 0 && doc['host.name'].value != null && doc['host.name'].value != "") { return "host:" + doc['host.name'].value; } return null;'
- * ```
- *
- * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
- * @returns A Painless evaluation string that computes the entity id.
- */
+/** {@link getEuidPainlessEvaluationFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
 export function getEuidPainlessEvaluation(
   entityType: EntityType,
   options?: EuidGateOptions
@@ -130,7 +113,24 @@ export function getEuidPainlessEvaluation(
   return getEuidPainlessEvaluationFromDefinition(getEntityDefinitionWithoutId(entityType), options);
 }
 
-/** Like {@link getEuidPainlessEvaluation}, but takes a definition instead of a type name. */
+/**
+ * Constructs a Painless evaluation for the provided entity definition to generate the entity id.
+ *
+ * Applies the creation gate: a document that may not put an entity in the store yields `null`.
+ * For entities that already exist, use {@link getEuidPainlessEvaluationForSearchFromDefinition}.
+ *
+ * Example usage:
+ * ```ts
+ * import { getEuidPainlessEvaluationFromDefinition } from './painless';
+ *
+ * const evaluation = getEuidPainlessEvaluationFromDefinition(hostDefinition);
+ * // evaluation may look like:
+ * // 'if (doc.containsKey('host.name') && doc['host.name'].size() > 0 && doc['host.name'].value != null && doc['host.name'].value != "") { return "host:" + doc['host.name'].value; } return null;'
+ * ```
+ *
+ * @param entityDefinition - The entity definition whose identity rules compute the entity id
+ * @returns A Painless evaluation string that computes the entity id.
+ */
 export function getEuidPainlessEvaluationFromDefinition(
   entityDefinition: EntityDefinitionOfAnyType,
   options?: EuidGateOptions
@@ -236,21 +236,21 @@ export function getEuidPainlessEvaluationFromDefinition(
   return preamble + filterPreamble + branchLogic + trailingReturn;
 }
 
+/** {@link getEuidPainlessEvaluationForSearchFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
+export function getEuidPainlessEvaluationForSearch(entityType: EntityType): string {
+  return getEuidPainlessEvaluationForSearchFromDefinition(getEntityDefinitionWithoutId(entityType));
+}
+
 /**
- * Like {@link getEuidPainlessEvaluation} without the creation gate, so IdP and shared-account
+ * Like {@link getEuidPainlessEvaluationFromDefinition} without the creation gate, so IdP and shared-account
  * documents still resolve to an entity that already exists.
  *
  * For risk scoring and enrichment. The caller checks store membership; this only answers which
  * entity a document refers to.
  *
- * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
+ * @param entityDefinition - The entity definition whose identity rules compute the entity id
  * @returns A Painless evaluation string that computes the entity id.
  */
-export function getEuidPainlessEvaluationForSearch(entityType: EntityType): string {
-  return getEuidPainlessEvaluationForSearchFromDefinition(getEntityDefinitionWithoutId(entityType));
-}
-
-/** Like {@link getEuidPainlessEvaluationForSearch}, but takes a definition instead of a type name. */
 export function getEuidPainlessEvaluationForSearchFromDefinition(
   entityDefinition: EntityDefinitionOfAnyType
 ): string {

@@ -61,6 +61,7 @@ export function nonEcsTimelineDataToDocument(
   return doc;
 }
 
+/** {@link getEuidFromTimelineNonEcsDataFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
 export function getEuidFromTimelineNonEcsData(
   entityType: EntityType,
   rows: readonly NonEcsTimelineDataRow[] | undefined
@@ -71,7 +72,7 @@ export function getEuidFromTimelineNonEcsData(
   );
 }
 
-/** Like {@link getEuidFromTimelineNonEcsData}, but takes a definition instead of a type name. */
+/** Derives the entity id for an entity definition from timeline non-ECS rows, or `undefined` when the rows yield none. */
 export function getEuidFromTimelineNonEcsDataFromDefinition(
   definition: EntityDefinitionOfAnyType,
   rows: readonly NonEcsTimelineDataRow[] | undefined
@@ -83,6 +84,7 @@ export function getEuidFromTimelineNonEcsDataFromDefinition(
   return getEuidFromObjectFromDefinition(definition, doc);
 }
 
+/** {@link getEntityIdentifiersFromTimelineNonEcsDataFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
 export function getEntityIdentifiersFromTimelineNonEcsData(
   entityType: EntityType,
   rows: readonly NonEcsTimelineDataRow[] | undefined
@@ -93,7 +95,7 @@ export function getEntityIdentifiersFromTimelineNonEcsData(
   );
 }
 
-/** Like {@link getEntityIdentifiersFromTimelineNonEcsData}, but takes a definition instead of a type name. */
+/** Extracts the identity field name → value pairs for an entity definition from timeline non-ECS rows. */
 export function getEntityIdentifiersFromTimelineNonEcsDataFromDefinition(
   definition: EntityDefinitionOfAnyType,
   rows: readonly NonEcsTimelineDataRow[] | undefined

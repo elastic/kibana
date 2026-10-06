@@ -31,20 +31,7 @@ import {
   type SourceMatchSpec,
 } from './field_evaluations';
 
-/**
- * Returns a DSL filter that matches documents considered for the given entity type.
- *
- * This is the DSL equivalent of {@link getEuidEsqlDocumentsContainsIdFilter}.
- * Use it to pre-filter searches/aggregations to only documents that could
- * resolve to an entity of the requested type.
- *
- * @example
- * ```ts
- * const filter = getEuidDslDocumentsContainsIdFilter('host');
- * // documentsFilter for host is or(isNotEmpty × 4), so filter is e.g.:
- * // { bool: { should: [ { bool: { must: [ ... ] } }, ... ], minimum_should_match: 1 } }
- * ```
- */
+/** {@link getEuidDslDocumentsContainsIdFilterFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
 export function getEuidDslDocumentsContainsIdFilter(
   entityType: EntityType
 ): QueryDslQueryContainer {
@@ -53,7 +40,20 @@ export function getEuidDslDocumentsContainsIdFilter(
   );
 }
 
-/** Like {@link getEuidDslDocumentsContainsIdFilter}, but takes a definition instead of a type name. */
+/**
+ * Returns a DSL filter that matches documents considered for the given entity definition.
+ *
+ * This is the DSL equivalent of {@link getEuidEsqlDocumentsContainsIdFilterFromDefinition}.
+ * Use it to pre-filter searches/aggregations to only documents that could
+ * resolve to an entity of the definition's type.
+ *
+ * @example
+ * ```ts
+ * const filter = getEuidDslDocumentsContainsIdFilterFromDefinition(hostDefinition);
+ * // documentsFilter for host is or(isNotEmpty × 4), so filter is e.g.:
+ * // { bool: { should: [ { bool: { must: [ ... ] } }, ... ], minimum_should_match: 1 } }
+ * ```
+ */
 export function getEuidDslDocumentsContainsIdFilterFromDefinition(
   entityDefinition: EntityDefinitionOfAnyType
 ): QueryDslQueryContainer {
@@ -66,18 +66,31 @@ export function getEuidDslDocumentsContainsIdFilterFromDefinition(
   return conditionToQueryDsl(identityField.documentsFilter) as QueryDslQueryContainer;
 }
 
+/** {@link getEuidDslFilterBasedOnDocumentFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
+export function getEuidDslFilterBasedOnDocument(
+  entityType: EntityType,
+  doc: any,
+  options: { excludeHigherRankedFields?: boolean } = {}
+): QueryDslQueryContainer | undefined {
+  return getEuidDslFilterBasedOnDocumentFromDefinition(
+    getEntityDefinitionWithoutId(entityType),
+    doc,
+    options
+  );
+}
+
 /**
- * Constructs an Elasticsearch DSL filter for the provided entity type and document.
+ * Constructs an Elasticsearch DSL filter for the provided entity definition and document.
  *
  * It supports both flattened and nested document shapes.
  * If a document contains `_source` property, it will be unwrapped before processing.
  *
  * Example usage:
  * ```ts
- * import { getEuidDslFilterBasedOnDocument } from './dsl';
+ * import { getEuidDslFilterBasedOnDocumentFromDefinition } from './dsl';
  *
  * const doc = { host: { name: 'server1', domain: 'example.com' } };
- * const filter = getEuidDslFilterBasedOnDocument('host', doc);
+ * const filter = getEuidDslFilterBasedOnDocumentFromDefinition(hostDefinition, doc);
  * // filter may look like:
  * // {
  * //   bool: {
@@ -93,7 +106,7 @@ export function getEuidDslDocumentsContainsIdFilterFromDefinition(
  * // }
  * ```
  *
- * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
+ * @param entityDefinition - The entity definition whose identity rules build the filter
  * @param doc - The document to derive entity filter fields from. May be a flattened or nested shape.
  * @param options.excludeHigherRankedFields - When `true` (default), higher-ranked identity fields
  *   absent from the document must also be missing-or-empty in matched documents (partition
@@ -102,22 +115,9 @@ export function getEuidDslDocumentsContainsIdFilterFromDefinition(
  *   (e.g. `host.id`), so demanding their absence would always produce zero results.
  * @returns An Elasticsearch DSL query container, or `undefined` if the document does not contain enough
  *   identifying information, or if it would not pass the entity's `documentsFilter` ∧ `postAggFilter`
- *   (same gate as `getEuidDslDocumentsContainsIdFilter` / logs extraction) after field evaluations
+ *   (same gate as `getEuidDslDocumentsContainsIdFilterFromDefinition` / logs extraction) after field evaluations
  *   and `whenConditionTrueSetFieldsPreAgg`.
  */
-export function getEuidDslFilterBasedOnDocument(
-  entityType: EntityType,
-  doc: any,
-  options: { excludeHigherRankedFields?: boolean } = {}
-): QueryDslQueryContainer | undefined {
-  return getEuidDslFilterBasedOnDocumentFromDefinition(
-    getEntityDefinitionWithoutId(entityType),
-    doc,
-    options
-  );
-}
-
-/** Like {@link getEuidDslFilterBasedOnDocument}, but takes a definition instead of a type name. */
 export function getEuidDslFilterBasedOnDocumentFromDefinition(
   entityDefinition: EntityDefinitionOfAnyType,
   doc: any,
@@ -218,28 +218,7 @@ export function getEuidDslFilterBasedOnDocumentFromDefinition(
   return dsl;
 }
 
-/**
- * Constructs an Elasticsearch DSL filter for the provided entity type from an already-resolved
- * entity-store record (not a raw source document).
- *
- * This is the counterpart of {@link getEuidDslFilterBasedOnDocument} for entity-store records.
- * The difference matters for entity types with field evaluations (e.g. `user`, whose
- * `entity.namespace` is derived from `event.module` / `data_stream.dataset`): an entity-store
- * record does NOT retain those source fields, so re-deriving the namespace from the record would
- * collapse it to the fallback and the resulting IdP source clause would match no documents.
- * Instead, this function trusts the record's already-resolved evaluated fields (e.g.
- * `entity.namespace`) and reverse-maps them back to the raw source-field conditions that produce
- * them (see {@link buildResolvedEvaluationSourceClause}).
- *
- * Single-field identities (service, generic) and calculated identities without field evaluations
- * (host) carry their raw identity fields directly on the record, so this delegates to
- * {@link getEuidDslFilterBasedOnDocument}.
- *
- * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
- * @param record - The entity-store record (host/user/service). May be a flattened or nested shape.
- * @returns An Elasticsearch DSL query container, or `undefined` if the record does not contain
- *   enough identifying information.
- */
+/** {@link getEuidDslFilterBasedOnEntityRecordFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
 export function getEuidDslFilterBasedOnEntityRecord(
   entityType: EntityType,
   record: any
@@ -250,7 +229,28 @@ export function getEuidDslFilterBasedOnEntityRecord(
   );
 }
 
-/** Like {@link getEuidDslFilterBasedOnEntityRecord}, but takes a definition instead of a type name. */
+/**
+ * Constructs an Elasticsearch DSL filter for the provided entity definition from an already-resolved
+ * entity-store record (not a raw source document).
+ *
+ * This is the counterpart of {@link getEuidDslFilterBasedOnDocumentFromDefinition} for entity-store records.
+ * The difference matters for entity types with field evaluations (e.g. `user`, whose
+ * `entity.namespace` is derived from `event.module` / `data_stream.dataset`): an entity-store
+ * record does NOT retain those source fields, so re-deriving the namespace from the record would
+ * collapse it to the fallback and the resulting IdP source clause would match no documents.
+ * Instead, this function trusts the record's already-resolved evaluated fields (e.g.
+ * `entity.namespace`) and reverse-maps them back to the raw source-field conditions that produce
+ * them (see {@link buildResolvedEvaluationSourceClause}).
+ *
+ * Single-field identities (service, generic) and calculated identities without field evaluations
+ * (host) carry their raw identity fields directly on the record, so this delegates to
+ * {@link getEuidDslFilterBasedOnDocumentFromDefinition}.
+ *
+ * @param entityDefinition - The entity definition whose identity rules build the filter
+ * @param record - The entity-store record (host/user/service). May be a flattened or nested shape.
+ * @returns An Elasticsearch DSL query container, or `undefined` if the record does not contain
+ *   enough identifying information.
+ */
 export function getEuidDslFilterBasedOnEntityRecordFromDefinition(
   entityDefinition: EntityDefinitionOfAnyType,
   record: any

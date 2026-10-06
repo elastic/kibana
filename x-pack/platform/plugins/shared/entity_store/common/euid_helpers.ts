@@ -11,88 +11,84 @@
  * Do not import this file from plugin public (browser) code synchronously — it pulls in @kbn/streamlang.
  * For browser bundles, load the same {@link euid} object via dynamic import (`euid_browser` / `loadEuidApi()`).
  *
+ * Every helper comes in two forms. The `...FromDefinition` form is the compiler: it takes an
+ * entity definition and nothing else, so it works for any definition, including those other
+ * plugins register in the entity definition registry. The form that takes a type name is a
+ * shortcut for the Entity Store's own built-in definitions (`user`, `host`, `service`, `generic`):
+ * it resolves the definition by name and calls the compiler. It cannot know any other type.
+ *
  * @example
  * import { euid } from '@kbn/entity-store/common/euid_helpers';
+ * // One of the four built-ins, by name:
  * euid.getEuidFromObject('host', doc);
- * euid.dsl.getEuidDocumentsContainsIdFilter('host');
+ * // Any definition, for example one read from the registry on the server:
+ * const definition = await entityStore.getEntityDefinitionsClientForSpace(space).get('k8s.pod');
+ * euid.getEuidFromObjectFromDefinition(definition, doc);
+ * euid.esql.getEuidEsqlEvaluationFromDefinition(definition, 'entity.id');
  */
 
 import * as euidModule from './domain/euid';
 
 export const euid = {
+  /** {@link euid.getEuidFromObjectFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
+  getEuidFromObject: euidModule.getEuidFromObject,
   /**
    * Resolves the entity unique id (EUID) for one document using entity definitions (in-memory only).
-   * Input: entity type (e.g. `user`) and a document body like ES `_source` (nested or flattened).
+   * Input: an entity definition and a document body like ES `_source` (nested or flattened).
    * Output: EUID string such as `user:…` / `host:…`, or `undefined` when no id can be derived.
    * Applies the creation gate, so it answers whether a document may create an entity.
    */
-  getEuidFromObject: euidModule.getEuidFromObject,
-  /**
-   * Like {@link euid.getEuidFromObject}, but takes a definition (for example from the server-side registry) instead of a type name.
-   */
   getEuidFromObjectFromDefinition: euidModule.getEuidFromObjectFromDefinition,
+  /** {@link euid.getEuidFromObjectForSearchFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
+  getEuidFromObjectForSearch: euidModule.getEuidFromObjectForSearch,
   /**
-   * Like {@link euid.getEuidFromObject} without the creation gate, so IdP and shared-account
+   * Like {@link euid.getEuidFromObjectFromDefinition} without the creation gate, so IdP and shared-account
    * documents still resolve to entities that already exist. For risk scoring and enrichment;
    * the caller checks store membership.
    */
-  getEuidFromObjectForSearch: euidModule.getEuidFromObjectForSearch,
-  /**
-   * Like {@link euid.getEuidFromObjectForSearch}, but takes a definition (for example from the server-side registry) instead of a type name.
-   */
   getEuidFromObjectForSearchFromDefinition: euidModule.getEuidFromObjectForSearchFromDefinition,
-  /**
-   * Flat map of ECS field → scalar value for the winning identity branch (same pipeline as {@link euid.getEuidFromObject}).
-   * Use to seed flyouts, filters, and resolution when you need field-level context, not only the composed EUID string.
-   */
+  /** {@link euid.getEntityIdentifiersFromDocumentFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
   getEntityIdentifiersFromDocument: euidModule.getEntityIdentifiersFromDocument,
   /**
-   * Like {@link euid.getEntityIdentifiersFromDocument}, but takes a definition (for example from the server-side registry) instead of a type name.
+   * Flat map of ECS field → scalar value for the winning identity branch (same pipeline as {@link euid.getEuidFromObjectFromDefinition}).
+   * Use to seed flyouts, filters, and resolution when you need field-level context, not only the composed EUID string.
    */
   getEntityIdentifiersFromDocumentFromDefinition:
     euidModule.getEntityIdentifiersFromDocumentFromDefinition,
+  /** {@link euid.getEuidFromTimelineNonEcsDataFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
+  getEuidFromTimelineNonEcsData: euidModule.getEuidFromTimelineNonEcsData,
   /**
    * Builds EUID from Timeline “non-ECS” row arrays (field + value[]) without importing timelines types.
    */
-  getEuidFromTimelineNonEcsData: euidModule.getEuidFromTimelineNonEcsData,
-  /**
-   * Like {@link euid.getEuidFromTimelineNonEcsData}, but takes a definition (for example from the server-side registry) instead of a type name.
-   */
   getEuidFromTimelineNonEcsDataFromDefinition:
     euidModule.getEuidFromTimelineNonEcsDataFromDefinition,
-  /**
-   * Returns which source fields are read for EUID for an entity type (`requiresOneOf`, full `identitySourceFields` list).
-   * Exposed so UIs and CRUD can request minimal `_source` or validate partial documents.
-   */
+  /** {@link euid.getEuidSourceFieldsFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
   getEuidSourceFields: euidModule.getEuidSourceFields,
   /**
-   * Like {@link euid.getEuidSourceFields}, but takes a definition (for example from the server-side registry) instead of a type name.
+   * Returns which source fields are read for EUID for an entity definition (`requiresOneOf`, full `identitySourceFields` list).
+   * Exposed so UIs and CRUD can request minimal `_source` or validate partial documents.
    */
   getEuidSourceFieldsFromDefinition: euidModule.getEuidSourceFieldsFromDefinition,
 
+  /** {@link euid.getEuidNamespaceSourceFieldsFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
+  getEuidNamespaceSourceFields: euidModule.getEuidNamespaceSourceFields,
   /**
-   * Returns the namespace source fields for an entity type, split by match kind.
+   * Returns the namespace source fields for an entity definition, split by match kind.
    * `exactMatchFields` are matched with a term query (e.g. `event.module`).
    * `prefixMatchFields` are matched with a prefix query because the entity store splits on a
    * delimiter (e.g. `data_stream.dataset` → prefix `gcp` matches `gcp.audit`, `gcp.firewall`).
    * Use this when translating EUID DSL to Kibana filter operators: replace prefix clauses on
    * `prefixMatchFields` with exact phrase filters built from the raw observed field values.
    */
-  getEuidNamespaceSourceFields: euidModule.getEuidNamespaceSourceFields,
-  /**
-   * Like {@link euid.getEuidNamespaceSourceFields}, but takes a definition (for example from the server-side registry) instead of a type name.
-   */
   getEuidNamespaceSourceFieldsFromDefinition: euidModule.getEuidNamespaceSourceFieldsFromDefinition,
 
+  /** {@link euid.getNamespaceSourcePrefixFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
+  getNamespaceSourcePrefix: euidModule.getEuidNamespaceSourcePrefix,
   /**
    * Reduces an observed namespace source value to the prefix the entity definition derives from it
    * (e.g. `data_stream.dataset: "okta.system"` → `okta`), or `undefined` when the field is not a
    * prefix-matched source. Splits on the source's own `splitBy`, so comparing the result to an arm
    * is not the same as a `startsWith` test — use this instead of reimplementing the split.
-   */
-  getNamespaceSourcePrefix: euidModule.getEuidNamespaceSourcePrefix,
-  /**
-   * Like {@link euid.getNamespaceSourcePrefix}, but takes a definition (for example from the server-side registry) instead of a type name.
    */
   getNamespaceSourcePrefixFromDefinition: euidModule.getEuidNamespaceSourcePrefixFromDefinition,
 
@@ -100,36 +96,30 @@ export const euid = {
    * Painless-backed EUID helpers for runtime fields and scripts (same semantics as `getEuidFromObject`).
    */
   painless: {
-    /**
-     * Builds the Painless expression text that computes the same EUID as `getEuidFromObject` at search time.
-     * Input: entity type. Output: a Painless snippet string to embed in scripts or runtime fields.
-     * Applies the creation gate, so it answers whether a document may create an entity.
-     */
+    /** {@link euid.painless.getEuidEvaluationFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
     getEuidEvaluation: euidModule.getEuidPainlessEvaluation,
     /**
-     * Like {@link euid.painless.getEuidEvaluation}, but takes a definition (for example from the server-side registry) instead of a type name.
+     * Builds the Painless expression text that computes the same EUID as `getEuidFromObjectFromDefinition` at search time.
+     * Input: an entity definition. Output: a Painless snippet string to embed in scripts or runtime fields.
+     * Applies the creation gate, so it answers whether a document may create an entity.
      */
     getEuidEvaluationFromDefinition: euidModule.getEuidPainlessEvaluationFromDefinition,
 
-    /**
-     * Like {@link euid.painless.getEuidEvaluation} without the creation gate, so IdP and
-     * shared-account documents still resolve to entities that already exist. For risk scoring
-     * and enrichment; the caller checks store membership.
-     */
+    /** {@link euid.painless.getEuidEvaluationForSearchFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
     getEuidEvaluationForSearch: euidModule.getEuidPainlessEvaluationForSearch,
     /**
-     * Like {@link euid.painless.getEuidEvaluationForSearch}, but takes a definition (for example from the server-side registry) instead of a type name.
+     * Like {@link euid.painless.getEuidEvaluationFromDefinition} without the creation gate, so IdP and
+     * shared-account documents still resolve to entities that already exist. For risk scoring
+     * and enrichment; the caller checks store membership.
      */
     getEuidEvaluationForSearchFromDefinition:
       euidModule.getEuidPainlessEvaluationForSearchFromDefinition,
 
-    /**
-     * Elasticsearch `runtime_mappings` entry that exposes the EUID as a `keyword` runtime field (`entity_id`).
-     * Input: entity type. Output: mapping object suitable for the Search API `runtime_mappings` map.
-     */
+    /** {@link euid.painless.getEuidRuntimeMappingFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
     getEuidRuntimeMapping: euidModule.getEuidPainlessRuntimeMapping,
     /**
-     * Like {@link euid.painless.getEuidRuntimeMapping}, but takes a definition (for example from the server-side registry) instead of a type name.
+     * Elasticsearch `runtime_mappings` entry that exposes the EUID as a `keyword` runtime field (`entity_id`).
+     * Input: an entity definition. Output: mapping object suitable for the Search API `runtime_mappings` map.
      */
     getEuidRuntimeMappingFromDefinition: euidModule.getEuidPainlessRuntimeMappingFromDefinition,
   },
@@ -138,45 +128,37 @@ export const euid = {
    * ESQL strings for extraction pipelines and `WHERE` clauses (aligned with entity definitions).
    */
   esql: {
-    /**
-     * Broad predicate: documents allowed into the entity pipeline and that could carry an EUID for this type.
-     * Input: entity type only. Output: ESQL boolean fragment for `WHERE` (no leading `WHERE`).
-     */
+    /** {@link euid.esql.getEuidDocumentsContainsIdFilterFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
     getEuidDocumentsContainsIdFilter: euidModule.getEuidEsqlDocumentsContainsIdFilter,
     /**
-     * Like {@link euid.esql.getEuidDocumentsContainsIdFilter}, but takes a definition (for example from the server-side registry) instead of a type name.
+     * Broad predicate: documents allowed into the entity pipeline and that could carry an EUID for the definition's type.
+     * Input: an entity definition only. Output: ESQL boolean fragment for `WHERE` (no leading `WHERE`).
      */
     getEuidDocumentsContainsIdFilterFromDefinition:
       euidModule.getEuidEsqlDocumentsContainsIdFilterFromDefinition,
 
-    /**
-     * Full ESQL expression used in extraction to compute the typed EUID (e.g. inside `EVAL` / `STATS`).
-     * Input: entity type. Output: ESQL expression string (often a `CONCAT`/`CASE` around identity fields).
-     */
+    /** {@link euid.esql.getEuidEvaluationFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
     getEuidEvaluation: euidModule.getEuidEsqlEvaluation,
     /**
-     * Like {@link euid.esql.getEuidEvaluation}, but takes a definition (for example from the server-side registry) instead of a type name.
+     * Full ESQL expression used in extraction to compute the typed EUID (e.g. inside `EVAL` / `STATS`).
+     * Input: an entity definition. Output: ESQL expression string (often a `CONCAT`/`CASE` around identity fields).
      */
     getEuidEvaluationFromDefinition: euidModule.getEuidEsqlEvaluationFromDefinition,
 
-    /**
-     * ESQL predicate that locates documents matching one sample document's identity (mirrors per-doc DSL).
-     * Input: entity type and sample document; output: parenthesized boolean expression or `undefined` if not buildable.
-     */
+    /** {@link euid.esql.getEuidFilterBasedOnDocumentFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
     getEuidFilterBasedOnDocument: euidModule.getEuidEsqlFilterBasedOnDocument,
     /**
-     * Like {@link euid.esql.getEuidFilterBasedOnDocument}, but takes a definition (for example from the server-side registry) instead of a type name.
+     * ESQL predicate that locates documents matching one sample document's identity (mirrors per-doc DSL).
+     * Input: an entity definition and sample document; output: parenthesized boolean expression or `undefined` if not buildable.
      */
     getEuidFilterBasedOnDocumentFromDefinition:
       euidModule.getEuidEsqlFilterBasedOnDocumentFromDefinition,
 
-    /**
-     * Returns the ESQL `EVAL` expressions for field evaluations (e.g. entity.namespace derivation).
-     * Input: entity type. Output: ESQL expression string for `EVAL`, or `undefined` if none defined.
-     */
+    /** {@link euid.esql.getFieldEvaluationsFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
     getFieldEvaluations: euidModule.getFieldEvaluationsEsql,
     /**
-     * Like {@link euid.esql.getFieldEvaluations}, but takes a definition (for example from the server-side registry) instead of a type name.
+     * Returns the ESQL `EVAL` expressions for field evaluations (e.g. entity.namespace derivation).
+     * Input: an entity definition. Output: ESQL expression string for `EVAL`, or `undefined` if none defined.
      */
     getFieldEvaluationsFromDefinition: euidModule.getFieldEvaluationsEsqlFromDefinition,
   },
@@ -185,53 +167,45 @@ export const euid = {
    * Elasticsearch Query DSL for filters and searches (aligned with entity definitions).
    */
   dsl: {
+    /** {@link euid.dsl.getEuidFilterBasedOnDocumentFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
+    getEuidFilterBasedOnDocument: euidModule.getEuidDslFilterBasedOnDocument,
     /**
      * Query DSL that should match documents sharing the same identity fields as the given sample document.
-     * Input: entity type and one document; output: bool/term-style filter, or `undefined` if identity or pipeline gate fails.
+     * Input: an entity definition and one document; output: bool/term-style filter, or `undefined` if identity or pipeline gate fails.
      * Pass `{ excludeHigherRankedFields: false }` when looking up a stored entity by partial identity
      * (e.g. only `host.name`) — the default partition semantics would require higher-ranked fields
      * (e.g. `host.id`) to be absent and never match stored entities.
      */
-    getEuidFilterBasedOnDocument: euidModule.getEuidDslFilterBasedOnDocument,
-    /**
-     * Like {@link euid.dsl.getEuidFilterBasedOnDocument}, but takes a definition (for example from the server-side registry) instead of a type name.
-     */
     getEuidFilterBasedOnDocumentFromDefinition:
       euidModule.getEuidDslFilterBasedOnDocumentFromDefinition,
 
+    /** {@link euid.dsl.getEuidFilterBasedOnEntityRecordFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
+    getEuidFilterBasedOnEntityRecord: euidModule.getEuidDslFilterBasedOnEntityRecord,
     /**
      * Query DSL that matches raw source documents belonging to an already-resolved entity-store record.
      * Trusts the record's resolved evaluated fields (e.g. `entity.namespace`) and reverse-maps them to
      * raw source-field conditions, so IdP users resolve correctly even though the record does not retain
-     * `event.module` / `data_stream.dataset`. Input: entity type and one entity-store record; output:
+     * `event.module` / `data_stream.dataset`. Input: an entity definition and one entity-store record; output:
      * bool/term-style filter, or `undefined` if the record lacks enough identity.
-     */
-    getEuidFilterBasedOnEntityRecord: euidModule.getEuidDslFilterBasedOnEntityRecord,
-    /**
-     * Like {@link euid.dsl.getEuidFilterBasedOnEntityRecord}, but takes a definition (for example from the server-side registry) instead of a type name.
      */
     getEuidFilterBasedOnEntityRecordFromDefinition:
       euidModule.getEuidDslFilterBasedOnEntityRecordFromDefinition,
 
-    /**
-     * Broad DSL filter: documents that may participate in the entity pipeline and could have an EUID for this type.
-     * Input: entity type only. Output: query DSL equivalent to documentsFilter (and postAgg when defined).
-     */
+    /** {@link euid.dsl.getEuidDocumentsContainsIdFilterFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
     getEuidDocumentsContainsIdFilter: euidModule.getEuidDslDocumentsContainsIdFilter,
     /**
-     * Like {@link euid.dsl.getEuidDocumentsContainsIdFilter}, but takes a definition (for example from the server-side registry) instead of a type name.
+     * Broad DSL filter: documents that may participate in the entity pipeline and could have an EUID for the definition's type.
+     * Input: an entity definition only. Output: query DSL equivalent to documentsFilter (and postAgg when defined).
      */
     getEuidDocumentsContainsIdFilterFromDefinition:
       euidModule.getEuidDslDocumentsContainsIdFilterFromDefinition,
   },
   kql: {
-    /**
-     * KQL that should match documents sharing the same identity fields as the given sample document.
-     * Input: entity type and one document; output: KQL, or `undefined` if identity or pipeline gate fails.
-     */
+    /** {@link euid.kql.getEuidFilterBasedOnDocumentFromDefinition} for one of the Entity Store's built-in definitions, resolved by type name. */
     getEuidFilterBasedOnDocument: euidModule.getEuidKqlFilterBasedOnDocument,
     /**
-     * Like {@link euid.kql.getEuidFilterBasedOnDocument}, but takes a definition (for example from the server-side registry) instead of a type name.
+     * KQL that should match documents sharing the same identity fields as the given sample document.
+     * Input: an entity definition and one document; output: KQL, or `undefined` if identity or pipeline gate fails.
      */
     getEuidFilterBasedOnDocumentFromDefinition:
       euidModule.getEuidKqlFilterBasedOnDocumentFromDefinition,
