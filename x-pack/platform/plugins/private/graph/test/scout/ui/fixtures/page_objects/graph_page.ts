@@ -12,6 +12,7 @@ import {
   type Locator,
   type ScoutPage,
 } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 const LISTING_TIMEOUT = 20_000;
 
@@ -164,13 +165,9 @@ export class GraphPage {
     await this.datasourceButton.click();
     await this.page.getByTestId(`savedObjectTitle${indexPattern}`).click();
     // "Add fields" stays `aria-disabled` until the fields finish loading.
-    await this.addFieldButton.waitFor({ state: 'visible' });
-    await this.page.waitForFunction(
-      () =>
-        document
-          .querySelector('[data-test-subj="graph-add-field-button"]')
-          ?.getAttribute('aria-disabled') === 'false'
-    );
+    await this.addFieldButton
+      .and(this.page.getByRole('button', { disabled: false }))
+      .waitFor({ state: 'visible' });
   }
 
   async pickIndexPatternByName(dataViewName: string) {
@@ -179,13 +176,9 @@ export class GraphPage {
       .getByRole('dialog', { name: 'Select a data source' })
       .getByRole('button', { name: dataViewName, exact: true })
       .click();
-    await this.addFieldButton.waitFor({ state: 'visible' });
-    await this.page.waitForFunction(
-      () =>
-        document
-          .querySelector('[data-test-subj="graph-add-field-button"]')
-          ?.getAttribute('aria-disabled') === 'false'
-    );
+    await this.addFieldButton
+      .and(this.page.getByRole('button', { disabled: false }))
+      .waitFor({ state: 'visible' });
   }
 
   async changeIndexPatternByName(dataViewName: string) {
@@ -195,13 +188,9 @@ export class GraphPage {
       .getByRole('dialog', { name: 'Select a data source' })
       .getByRole('button', { name: dataViewName, exact: true })
       .click();
-    await this.addFieldButton.waitFor({ state: 'visible' });
-    await this.page.waitForFunction(
-      () =>
-        document
-          .querySelector('[data-test-subj="graph-add-field-button"]')
-          ?.getAttribute('aria-disabled') === 'false'
-    );
+    await this.addFieldButton
+      .and(this.page.getByRole('button', { disabled: false }))
+      .waitFor({ state: 'visible' });
   }
 
   async addFields(fields: string[]) {
@@ -246,9 +235,7 @@ export class GraphPage {
     }
     await this.addFields(fields);
     await this.runQuery(query);
-    await this.page.waitForFunction(
-      () => document.querySelectorAll('[data-test-subj="graphNodeCircle"]').length > 0
-    );
+    await expect.poll(() => this.nodeCount()).toBeGreaterThan(0);
   }
 
   node(label: string): Locator {
