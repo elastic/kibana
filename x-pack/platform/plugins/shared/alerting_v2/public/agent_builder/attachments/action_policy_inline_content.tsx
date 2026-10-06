@@ -57,18 +57,6 @@ export const ActionPolicyInlineContent: React.FC<AttachmentRenderProps<ActionPol
             })}
           </EuiText>
         </EuiFlexItem>
-
-        {data.tags && data.tags.length > 0 && (
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize="xs" wrap>
-              {data.tags.map((tag: string) => (
-                <EuiFlexItem key={tag} grow={false}>
-                  <EuiBadge color="default">{tag}</EuiBadge>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
     </EuiPanel>
   );
@@ -81,7 +69,7 @@ const formatMatcherSummary = (matcher: PolicyMatcher | null | undefined): string
   if (!matcher) return matchesAll;
 
   const parts: string[] = [];
-  if (matcher.tags?.length) parts.push(`tags: ${matcher.tags.join(', ')}`);
+  if (matcher.tags?.length) parts.push(`routing tags: ${matcher.tags.join(', ')}`);
   if (matcher.expression?.trim()) parts.push(`expr: ${matcher.expression.trim()}`);
 
   return parts.length > 0 ? parts.join(' | ') : matchesAll;

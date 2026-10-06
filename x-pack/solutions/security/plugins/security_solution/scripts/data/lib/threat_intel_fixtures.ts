@@ -686,15 +686,16 @@ export interface HistoricThreatReportDoc {
     extraction_method: 'seeded' | 'pending';
     source_doc_ref: { index: 'rss:feed'; id: string };
   };
-  attribution?: {
-    environment_hits_total: number;
-    environment_hits: {
+  evidence?: Array<{
+    space_id: string;
+    alert_hits_total: number;
+    alert_hits: {
       window: string;
       computed_at: string;
-      layer_1_ioc_match: number;
-      layer_2_behavioral: number;
+      ioc_match_hits: number;
+      technique_overlap_hits: number;
     };
-  };
+  }>;
 }
 
 /**
@@ -947,15 +948,20 @@ export const buildHistoricThreatReportDoc = ({
     if (envHitsTotal > 0) {
       const layer1 = Math.max(1, Math.floor(envHitsTotal * 0.6));
       const layer2 = Math.max(0, envHitsTotal - layer1);
-      doc.attribution = {
-        environment_hits_total: envHitsTotal,
-        environment_hits: {
-          window: 'seeded',
-          computed_at: item.reportTimestamp,
-          layer_1_ioc_match: layer1,
-          layer_2_behavioral: layer2,
+      // Per-space nested element (v30). A seeded report is tagged to one space,
+      // so it gets exactly that space's element.
+      doc.evidence = [
+        {
+          space_id: spaceId,
+          alert_hits_total: envHitsTotal,
+          alert_hits: {
+            window: 'seeded',
+            computed_at: item.reportTimestamp,
+            ioc_match_hits: layer1,
+            technique_overlap_hits: layer2,
+          },
         },
-      };
+      ];
     }
   }
 

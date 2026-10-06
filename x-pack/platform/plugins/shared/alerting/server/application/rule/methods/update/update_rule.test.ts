@@ -90,8 +90,10 @@ describe('update()', () => {
       snoozeSchedule: [],
       mutedInstanceIds: [],
       createdBy: 'elastic',
+      createdByProfileUid: null,
       createdAt: '2019-02-12T21:01:22.479Z',
       updatedBy: 'elastic',
+      updatedByProfileUid: null,
       updatedAt: '2019-02-12T21:01:22.479Z',
       actions: [
         {
@@ -424,6 +426,7 @@ describe('update()', () => {
         "apiKey": null,
         "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
+        "apiKeyOwnerProfileUid": null,
         "artifacts": Object {
           "dashboards": Array [],
           "investigation_guide": Object {
@@ -433,6 +436,7 @@ describe('update()', () => {
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
+        "createdByProfileUid": null,
         "enabled": true,
         "executionStatus": Object {
           "lastExecutionDate": "2019-02-12T21:01:22.479Z",
@@ -467,6 +471,7 @@ describe('update()', () => {
         "throttle": null,
         "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
+        "updatedByProfileUid": null,
       }
     `);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
@@ -647,6 +652,7 @@ describe('update()', () => {
         snoozeSchedule: [],
         mutedInstanceIds: [],
         createdBy: 'elastic',
+        createdByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
@@ -684,6 +690,7 @@ describe('update()', () => {
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         artifacts: {
           dashboards: [],
           investigation_guide: { blob: '' },
@@ -702,6 +709,7 @@ describe('update()', () => {
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
       },
       {
         id: '1',
@@ -924,6 +932,7 @@ describe('update()', () => {
         snoozeSchedule: [],
         mutedInstanceIds: [],
         createdBy: 'elastic',
+        createdByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
@@ -932,6 +941,7 @@ describe('update()', () => {
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         artifacts: {
           dashboards: [],
           investigation_guide: { blob: '' },
@@ -950,6 +960,7 @@ describe('update()', () => {
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
       },
       {
         id: '1',
@@ -1138,6 +1149,7 @@ describe('update()', () => {
         snoozeSchedule: [],
         mutedInstanceIds: [],
         createdBy: 'elastic',
+        createdByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
@@ -1155,6 +1167,7 @@ describe('update()', () => {
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         artifacts: {
           dashboards: [],
           investigation_guide: { blob: '' },
@@ -1173,6 +1186,7 @@ describe('update()', () => {
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
       },
       {
         id: '1',
@@ -1371,6 +1385,7 @@ describe('update()', () => {
         "apiKey": "MTIzOmFiYw==",
         "apiKeyCreatedByUser": false,
         "apiKeyOwner": "elastic",
+        "apiKeyOwnerProfileUid": null,
         "artifacts": Object {
           "dashboards": Array [],
           "investigation_guide": Object {
@@ -1380,6 +1395,7 @@ describe('update()', () => {
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
+        "createdByProfileUid": null,
         "enabled": true,
         "executionStatus": Object {
           "lastExecutionDate": "2019-02-12T21:01:22.479Z",
@@ -1408,6 +1424,7 @@ describe('update()', () => {
         "throttle": "5m",
         "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
+        "updatedByProfileUid": null,
       }
     `);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
@@ -1557,6 +1574,7 @@ describe('update()', () => {
         "apiKey": null,
         "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
+        "apiKeyOwnerProfileUid": null,
         "artifacts": Object {
           "dashboards": Array [],
           "investigation_guide": Object {
@@ -1566,6 +1584,7 @@ describe('update()', () => {
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
+        "createdByProfileUid": null,
         "enabled": false,
         "executionStatus": Object {
           "lastExecutionDate": "2019-02-12T21:01:22.479Z",
@@ -1594,6 +1613,7 @@ describe('update()', () => {
         "throttle": "5m",
         "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
+        "updatedByProfileUid": null,
       }
     `);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
@@ -1764,7 +1784,10 @@ describe('update()', () => {
       },
     });
 
-    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/my alert name');
+    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith(
+      'Alerting: myType/my alert name',
+      undefined
+    );
   });
 
   it('should update rule flapping', async () => {
@@ -2681,6 +2704,7 @@ describe('update()', () => {
         snoozeSchedule: [],
         mutedInstanceIds: [],
         createdBy: 'elastic',
+        createdByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
@@ -2700,6 +2724,7 @@ describe('update()', () => {
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         artifacts: {
           dashboards: [],
           investigation_guide: { blob: '' },
@@ -2718,6 +2743,7 @@ describe('update()', () => {
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
       },
       {
         id: '1',
@@ -3267,6 +3293,7 @@ describe('update()', () => {
         snoozeSchedule: [],
         mutedInstanceIds: [],
         createdBy: 'elastic',
+        createdByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
@@ -3293,6 +3320,7 @@ describe('update()', () => {
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         artifacts: {
           dashboards: [],
           investigation_guide: { blob: '' },
@@ -3311,6 +3339,7 @@ describe('update()', () => {
         tags: ['foo'],
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
       },
       {
         id: '1',
@@ -3461,6 +3490,7 @@ describe('update()', () => {
         "apiKey": "MTIzOmFiYw==",
         "apiKeyCreatedByUser": true,
         "apiKeyOwner": "elastic",
+        "apiKeyOwnerProfileUid": null,
         "artifacts": Object {
           "dashboards": Array [],
           "investigation_guide": Object {
@@ -3470,6 +3500,7 @@ describe('update()', () => {
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
+        "createdByProfileUid": null,
         "enabled": true,
         "executionStatus": Object {
           "lastExecutionDate": "2019-02-12T21:01:22.479Z",
@@ -3498,6 +3529,7 @@ describe('update()', () => {
         "throttle": "5m",
         "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
+        "updatedByProfileUid": null,
       }
     `);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
@@ -3707,12 +3739,14 @@ describe('update()', () => {
           legacyId: null,
           createdAt: '2019-02-12T21:01:22.479Z',
           createdBy: 'elastic',
+          createdByProfileUid: null,
           snoozeSchedule: [],
           muteAll: false,
           mutedInstanceIds: [],
           alertTypeId: 'myType',
           apiKey: null,
           apiKeyOwner: null,
+          apiKeyOwnerProfileUid: null,
           artifacts: {
             dashboards: [],
             investigation_guide: { blob: '' },
@@ -3731,6 +3765,7 @@ describe('update()', () => {
           throttle: null,
           updatedAt: '2019-02-12T21:01:22.479Z',
           updatedBy: 'elastic',
+          updatedByProfileUid: null,
         },
         {
           id: '1',
@@ -4155,8 +4190,10 @@ describe('update()', () => {
           snoozeSchedule: [],
           mutedInstanceIds: [],
           createdBy: 'elastic',
+          createdByProfileUid: null,
           createdAt: '2019-02-12T21:01:22.479Z',
           updatedBy: 'elastic',
+          updatedByProfileUid: null,
           updatedAt: '2019-02-12T21:01:22.479Z',
           actions: [],
           artifacts: {
@@ -4343,8 +4380,10 @@ describe('update()', () => {
           snoozeSchedule: [],
           mutedInstanceIds: [],
           createdBy: 'elastic',
+          createdByProfileUid: null,
           createdAt: '2019-02-12T21:01:22.479Z',
           updatedBy: 'elastic',
+          updatedByProfileUid: null,
           updatedAt: '2019-02-12T21:01:22.479Z',
           actions: [],
           artifacts: {
@@ -4892,7 +4931,7 @@ describe('update()', () => {
   });
 
   describe('missing UIAM API key tagging', () => {
-    test('should add missing UIAM API key tag when updating rule with API key rotation and missing UIAM key in serverless', async () => {
+    test('should defer missing UIAM API key tagging until rule execution', async () => {
       // Set up serverless environment
       const serverlessRulesClient = new RulesClient({
         ...rulesClientParams,
@@ -4960,11 +4999,11 @@ describe('update()', () => {
         shouldIncrementRevision: () => true,
       });
 
-      // Verify the missing UIAM key tag was added
+      // Rule execution owns the missing UIAM key tag.
       expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
         'alert',
         expect.objectContaining({
-          tags: expect.arrayContaining(['existing-tag', 'Missing Elastic Cloud API Key']),
+          tags: ['existing-tag'],
         }),
         expect.anything()
       );
@@ -5112,5 +5151,53 @@ describe('update()', () => {
         expect.anything()
       );
     });
+  });
+
+  test('stamps updatedByProfileUid when the actor has a profile uid', async () => {
+    rulesClientParams.getProfileUid.mockResolvedValueOnce('u_profile_1');
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        enabled: true,
+        schedule: { interval: '1m' },
+        params: {},
+        actions: [],
+        notifyWhen: 'onActiveAlert',
+        revision: 1,
+        scheduledTaskId: 'task-123',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+        },
+      },
+      references: [],
+    });
+
+    await rulesClient.update({
+      id: '1',
+      data: {
+        schedule: { interval: '1m' },
+        name: 'abc',
+        tags: ['foo'],
+        params: {},
+        throttle: null,
+        notifyWhen: 'onActiveAlert',
+        actions: [],
+      },
+    });
+
+    expect(rulesClientParams.getProfileUid).toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      expect.objectContaining({
+        updatedBy: 'elastic',
+        updatedByProfileUid: 'u_profile_1',
+        createdByProfileUid: null,
+      }),
+      expect.anything()
+    );
   });
 });

@@ -14,22 +14,22 @@ import {
   ALERTING_V2_RULE_LIBRARY_LOCATOR,
   ALERTING_V2_RULES_LOCATOR,
 } from '@kbn/alerting-v2-constants';
+import type { LocatorHost } from '@kbn/rule-data-utils';
 import type {
   AlertingV2ActionPoliciesLocatorParams,
   AlertingV2EpisodesLocatorParams,
   AlertingV2ExecutionHistoryLocatorParams,
   AlertingV2HostApp,
-  AlertingV2LocatorHost,
   AlertingV2RuleLibraryLocatorParams,
   AlertingV2RulesLocatorParams,
 } from '../locators';
-import type { AlertingV2Locators } from './locator_context';
+import type { AlertingV2Locators, RawAlertingV2Locators } from './locator_context';
 
 interface HostParams extends SerializableRecord {
-  host?: AlertingV2LocatorHost;
+  host: LocatorHost;
 }
 
-export const getAlertingV2Locators = (share: SharePluginStart): AlertingV2Locators => ({
+export const getAlertingV2Locators = (share: SharePluginStart): RawAlertingV2Locators => ({
   rulesLocators: share.url.locators.get<AlertingV2RulesLocatorParams>(ALERTING_V2_RULES_LOCATOR)!,
   ruleLibraryLocators: share.url.locators.get<AlertingV2RuleLibraryLocatorParams>(
     ALERTING_V2_RULE_LIBRARY_LOCATOR
@@ -45,16 +45,19 @@ export const getAlertingV2Locators = (share: SharePluginStart): AlertingV2Locato
   )!,
 });
 
+type WithOptionalHost<P extends HostParams> = Omit<P, 'host'> & { host?: LocatorHost };
+
 export const bindLocatorToHost = <P extends HostParams>(
   locator: LocatorPublic<P>,
-  host: AlertingV2LocatorHost
-): LocatorPublic<P> => {
-  const withHost = (params: P): P => ({
-    ...params,
-    host: params.host ?? host,
-  });
+  host: LocatorHost
+): LocatorPublic<WithOptionalHost<P>> => {
+  const withHost = (params: WithOptionalHost<P>): P =>
+    ({
+      ...params,
+      host: params.host ?? host,
+    } as P);
 
-  const bound = Object.create(locator) as LocatorPublic<P>;
+  const bound = Object.create(locator) as LocatorPublic<WithOptionalHost<P>>;
   bound.getLocation = (params) => locator.getLocation(withHost(params));
   bound.getUrl = (params, getUrlParams) => locator.getUrl(withHost(params), getUrlParams);
   bound.getRedirectUrl = (params, options) => locator.getRedirectUrl(withHost(params), options);
@@ -68,12 +71,12 @@ export const bindLocatorToHost = <P extends HostParams>(
 };
 
 export const bindLocatorsToHost = (
-  locators: AlertingV2Locators,
+  locators: RawAlertingV2Locators,
   hostApp: AlertingV2HostApp
 ): AlertingV2Locators => ({
   rulesLocators: bindLocatorToHost(locators.rulesLocators, hostApp.rules),
   ruleLibraryLocators: bindLocatorToHost(locators.ruleLibraryLocators, hostApp.ruleLibrary),
-  episodesLocators: bindLocatorToHost(locators.episodesLocators, hostApp.episodes),
+  episodesLocators: bindLocatorToHost(locators.episodesLocators, hostApp.alerts),
   actionPolicyLocators: bindLocatorToHost(locators.actionPolicyLocators, hostApp.actionPolicies),
   executionHistoryLocators: bindLocatorToHost(
     locators.executionHistoryLocators,

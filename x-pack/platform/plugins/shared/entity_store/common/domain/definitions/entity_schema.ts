@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Condition } from '@kbn/streamlang';
 import { conditionSchema as streamlangConditionSchema } from '@kbn/streamlang';
 import { z } from '@kbn/zod/v4';
 
@@ -13,9 +14,14 @@ export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
 
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 
+/** Registry type name. Wider than the closed `EntityType`, which only covers the built-ins. */
+export type EntityDefinitionType = string;
+
 /** Which extraction process a task is running as. */
 export type ExtractionMode = z.infer<typeof ExtractionMode>;
 export const ExtractionMode = z.enum(['single', 'priority', 'nonPriority']);
+/** Named access to the modes. Use this rather than the string literals, which live only above. */
+export const EXTRACTION_MODE = ExtractionMode.enum;
 
 const mappingSchema = z.any();
 
@@ -173,6 +179,27 @@ const creatableFromSingleDocumentSchema = z.union([
 ]);
 export type CreatableFromSingleDocument = z.infer<typeof creatableFromSingleDocumentSchema>;
 
+const MAX_MANAGED_BY_STRING_LENGTH = 256;
+
+/**
+ * Who manages a definition. More fields may be added to a kind later.
+ * - `plugin`: a Kibana plugin registering in code at setup; `id` is its plugin id.
+ * - `integration`: installed by a Fleet integration package; `package` is the package name.
+ * - `user`: created through the API or UI; `id` is the Kibana user profile uid when known.
+ */
+export type EntityDefinitionManagedBy = z.infer<typeof EntityDefinitionManagedBy>;
+export const EntityDefinitionManagedBy = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('plugin'), id: z.string().max(MAX_MANAGED_BY_STRING_LENGTH) }),
+  z.object({
+    kind: z.literal('integration'),
+    package: z.string().max(MAX_MANAGED_BY_STRING_LENGTH),
+  }),
+  z.object({
+    kind: z.literal('user'),
+    id: z.string().max(MAX_MANAGED_BY_STRING_LENGTH).optional(),
+  }),
+]);
+
 export const entitySchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -187,12 +214,20 @@ export const entitySchema = z.object({
   // Optional filter (Condition from @kbn/streamlang) applied in ESQL only, right after the
   // LOOKUP JOIN, to filter rows (e.g. keep already-stored entities or IDP-like events). No DSL equivalent.
   postAggFilter: z.optional(streamlangConditionSchema),
+  // Optional document-level predicate (Condition from @kbn/streamlang) marking this entity type's
+  // high-signal logs. Omission means the type has no priority/non-priority split.
+  priorityExtractionGate: z.optional(streamlangConditionSchema),
+  // Opts the non-priority process into sampling. Requires priorityExtractionGate; omission means
+  // no sampling.
+  nonPrioritySampling: z.optional(z.boolean()),
   // Optional: when conditions are true on source docs, set the given fields (EVAL after field evals, before STATS).
   whenConditionTrueSetFieldsPreAgg: z.optional(z.array(setFieldsByConditionSchema)),
   // Post-STATS EVAL in logs ESQL (recent.* vs plain). Single-doc paths re-apply entries after pre-agg for parity.
   whenConditionTrueSetFieldsAfterStats: z.optional(z.array(setFieldsByConditionSchema)),
   // Omission disables single-document creation for the entity type.
   creatableFromSingleDocument: z.optional(creatableFromSingleDocumentSchema),
+  // Who manages the definition. Optional here; the registry requires it.
+  managedBy: z.optional(EntityDefinitionManagedBy),
 });
 
 export type EntityField = z.infer<typeof fieldSchema>; // entities fields
@@ -202,6 +237,14 @@ export type EntityIdentity = z.infer<typeof identityFieldSchema>; // definition-
 export type EntityDefinition = z.infer<typeof entitySchema>; // entity with id generated in runtime
 export type EntityDefinitionWithoutId = Omit<EntityDefinition, 'id'>;
 export type ManagedEntityDefinition = EntityDefinition & { type: EntityType }; // entity with a known 'type'
+
+/**
+ * A definition resolved for an extraction mode, carrying the predicate that selects which logs that
+ * mode handles. Derived from `priorityExtractionGate` on lookup rather than authored, so it is kept
+ * separate from the declared field and out of `entitySchema`. Absent means every document passing
+ * `documentsFilter` is scanned.
+ */
+export type GatedEntityDefinition<T = EntityDefinition> = T & { extractionGate?: Condition };
 export type EuidField = z.infer<typeof euidFieldSchema>;
 export type EuidSeparator = z.infer<typeof euidSeparatorSchema>;
 export type EuidAttribute = EuidField | EuidSeparator;

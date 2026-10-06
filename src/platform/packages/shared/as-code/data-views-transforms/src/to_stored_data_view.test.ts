@@ -15,7 +15,7 @@ import {
   type AsCodeSavedDataView,
 } from '@kbn/as-code-data-views-schema';
 import { toStoredDataView } from './to_stored_data_view';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-types';
 
 describe('toStoredDataView', () => {
   it('converts data_view_reference data_source to string id', () => {

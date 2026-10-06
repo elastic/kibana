@@ -15,7 +15,6 @@ import {
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiToolTip,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiHorizontalRule,
@@ -25,7 +24,6 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 
 import { TASK_TYPE_DESCRIPTIONS } from '@kbn/inference-endpoint-ui-common';
@@ -45,30 +43,16 @@ import {
   getModelEOLDate,
   getModelReleaseDate,
   getModelStatus,
-  getRegionPlaceName,
-  getRegionZoneCounts,
+  getRegionOptions,
 } from '../../utils/eis_utils';
 import { isModelUnavailableUnderRegionPolicy } from '../../utils/is_model_unavailable_under_region_policy';
-import type { CspRegion, EisInferenceEndpoint } from '../../../common/types';
+import { ModelEolCallout } from './model_eol_callout';
+import { ModelInfoCallout } from './model_info_callout';
+import { ModelUnavailableCallout } from './model_unavailable_callout';
+import { RegionOptions } from './region_options';
+import type { EisInferenceEndpoint } from '../../../common/types';
 import { EisModelStatus } from '../../types';
 import { ModelStatusBadge } from '../model_status/model_status_badge';
-
-const TOOLTIP_MAX_VISIBLE_REGIONS = 5;
-
-const getRegionBadgeTooltipContent = (modelRegions: CspRegion[]): string => {
-  const names = modelRegions.map(getRegionPlaceName);
-  const visible = names.slice(0, TOOLTIP_MAX_VISIBLE_REGIONS).join(', ');
-  if (names.length > TOOLTIP_MAX_VISIBLE_REGIONS) {
-    return `${visible} ${i18n.translate(
-      'xpack.searchInferenceEndpoints.modelDetailFlyout.regionBadgeTooltip.andMore',
-      {
-        defaultMessage: 'and {count} more',
-        values: { count: names.length - TOOLTIP_MAX_VISIBLE_REGIONS },
-      }
-    )}`;
-  }
-  return visible;
-};
 
 export interface ModelDetailFlyoutProps {
   modelId: string;
@@ -78,6 +62,7 @@ export interface ModelDetailFlyoutProps {
   onDeleteEndpoint?: (endpoint: EisInferenceEndpoint) => void;
   onCopyEndpointId: (id: string) => void;
   canManage?: boolean;
+  onManageRegions?: () => void;
 }
 
 export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
@@ -88,11 +73,11 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
   onDeleteEndpoint,
   onCopyEndpointId,
   canManage = true,
+  onManageRegions,
 }) => {
   const flyoutTitleId = useGeneratedHtmlId();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEndpoint, setEditingEndpoint] = useState<EisInferenceEndpoint | undefined>();
-  const [isCalloutDismissed, setIsCalloutDismissed] = useState(false);
   const usageTracker = useUsageTracker();
 
   useEffect(() => {
@@ -107,7 +92,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
     modelMetadata,
     modelReleaseDate,
     modelEOLDate,
-    regionZoneCounts,
+    regionOptions,
   } = useMemo(() => {
     const filtered = allEndpoints.filter((ep) => getModelId(ep) === modelId);
 
@@ -127,7 +112,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       modelMetadata: endpointModelMetadata,
       modelReleaseDate: getModelReleaseDate(endpointModelMetadata)?.format('l') ?? '--',
       modelEOLDate: getModelEOLDate(endpointModelMetadata)?.format('l') ?? '--',
-      regionZoneCounts: getRegionZoneCounts(filtered, allEndpoints),
+      regionOptions: getRegionOptions(filtered),
     };
   }, [allEndpoints, modelId]);
 
@@ -165,12 +150,12 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
     setEditingEndpoint(undefined);
   }, [usageTracker, editingEndpoint]);
 
-  const handleDismissCallout = useCallback(() => {
-    setIsCalloutDismissed(true);
-  }, []);
-
-  const showUnavailableCallout =
-    !isCalloutDismissed && isModelUnavailableUnderRegionPolicy(allEndpoints, modelId);
+  const isBlocked = isModelUnavailableUnderRegionPolicy(endpoints, modelId);
+  const canShowLifecycleCallout = !isBlocked;
+  const showEolCallout = canShowLifecycleCallout && modelStatus === EisModelStatus.DeprecatedEOL;
+  const showPreviewCallout = canShowLifecycleCallout && modelStatus === EisModelStatus.Preview;
+  const showLifecycleCallout = showEolCallout || showPreviewCallout;
+  const showCalloutSpacer = isBlocked || showLifecycleCallout;
 
   const initialReasoningEffort = useMemo(() => {
     const effort = editingEndpoint?.task_settings?.reasoning?.effort;
@@ -196,54 +181,6 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       }),
       description: modelEOLDate,
     },
-    ...(regionZoneCounts.length > 0
-      ? [
-          {
-            title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.regionsLabel', {
-              defaultMessage: 'Regions',
-            }),
-            description: (
-              <EuiBadgeGroup data-test-subj="flyoutRegionBadges">
-                {regionZoneCounts.map(({ geo, modelCount, totalCount, modelRegions, geoOnly }) =>
-                  geoOnly ? (
-                    <EuiToolTip
-                      key={geo}
-                      content={i18n.translate(
-                        'xpack.searchInferenceEndpoints.modelDetailFlyout.regionBadgeTooltip.geoOnly',
-                        {
-                          defaultMessage: 'Available in the {geo} zone',
-                          values: { geo: geo.toUpperCase() },
-                        }
-                      )}
-                    >
-                      <EuiBadge tabIndex={0} data-test-subj={`flyoutRegionBadge-${geo}`}>
-                        {geo.toUpperCase()}
-                      </EuiBadge>
-                    </EuiToolTip>
-                  ) : (
-                    <EuiToolTip
-                      key={geo}
-                      data-test-subj={`flyoutRegionBadgeTooltip-${geo}`}
-                      title={i18n.translate(
-                        'xpack.searchInferenceEndpoints.modelDetailFlyout.regionBadgeTooltip.title',
-                        {
-                          defaultMessage: 'Available in {count} of {total} regions',
-                          values: { count: modelCount, total: totalCount },
-                        }
-                      )}
-                      content={getRegionBadgeTooltipContent(modelRegions)}
-                    >
-                      <EuiBadge tabIndex={0} data-test-subj={`flyoutRegionBadge-${geo}`}>
-                        {`${geo.toUpperCase()} (${modelCount}/${totalCount})`}
-                      </EuiBadge>
-                    </EuiToolTip>
-                  )
-                )}
-              </EuiBadgeGroup>
-            ),
-          },
-        ]
-      : []),
     {
       title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.documentationLabel', {
         defaultMessage: 'Documentation',
@@ -285,28 +222,12 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        {showUnavailableCallout && (
-          <KbnWarningCallout
-            title={i18n.translate(
-              'xpack.searchInferenceEndpoints.modelDetailFlyout.regionPreferencesUnavailableTitle',
-              { defaultMessage: 'Model not available based on region preferences' }
-            )}
-            announceOnMount={false}
-            onDismiss={handleDismissCallout}
-            dismissButtonProps={{
-              'data-test-subj': 'modelDetailFlyoutRegionUnavailableCalloutDismiss',
-            }}
-            data-test-subj="modelDetailFlyoutRegionUnavailableCallout"
-            text={i18n.translate(
-              'xpack.searchInferenceEndpoints.modelDetailFlyout.regionPreferencesUnavailableDescription',
-              {
-                defaultMessage:
-                  "This model isn't available in the locations allowed by your region preferences. To use it, update your region preferences to include a supported location.",
-              }
-            )}
-          />
+        {isBlocked && (
+          <ModelUnavailableCallout onManageRegions={canManage ? onManageRegions : undefined} />
         )}
-        {showUnavailableCallout && <EuiSpacer size="m" />}
+        {showEolCallout && <ModelEolCallout eolDate={modelEOLDate} />}
+        {showPreviewCallout && <ModelInfoCallout />}
+        {showCalloutSpacer && <EuiSpacer size="m" />}
         <EuiDescriptionList
           type="column"
           compressed
@@ -314,6 +235,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
           listItems={descriptionListItems}
           data-test-subj="flyoutModelDetails"
         />
+        <RegionOptions options={regionOptions} />
 
         <EuiHorizontalRule margin="xxl" />
 

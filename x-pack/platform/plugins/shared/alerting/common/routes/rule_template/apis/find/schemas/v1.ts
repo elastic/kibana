@@ -34,15 +34,7 @@ export const findRuleTemplatesRequestQuerySchema = schema.object({
       maxLength: MAX_SEARCH_LENGTH,
       meta: {
         description:
-          'An Elasticsearch simple_query_string query that filters the objects in the response.',
-      },
-    })
-  ),
-  default_search_operator: schema.maybe(
-    schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
-      defaultValue: 'OR',
-      meta: {
-        description: 'The default operator to use for the simple_query_string.',
+          'A search string that filters rule templates by name or tags using a case-insensitive substring match.',
       },
     })
   ),

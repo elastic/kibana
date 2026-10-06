@@ -6,6 +6,10 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type {
+  AttachmentTimelineEvent,
+  ConversationUpdatedTriggerEvent,
+} from '@kbn/agent-builder-common';
 
 export interface ConversationMetadataPatchedPayload {
   conversationId: string;
@@ -14,25 +18,66 @@ export interface ConversationMetadataPatchedPayload {
   changedFields: string[];
 }
 
+export interface ConversationAttachmentEventsPayload {
+  conversationId: string;
+  events: AttachmentTimelineEvent[];
+}
+
 type MetadataPatchedListener = (
   request: KibanaRequest,
   payload: ConversationMetadataPatchedPayload
 ) => void;
 
+type AttachmentEventsListener = (
+  request: KibanaRequest,
+  payload: ConversationAttachmentEventsPayload
+) => void;
+
+type ConversationUpdatedListener = (
+  request: KibanaRequest,
+  payload: ConversationUpdatedTriggerEvent
+) => void;
+
 /**
  * Lightweight event bus for conversation lifecycle events.
- * Listeners registered here are called after a successful metadata write.
+ * Listeners registered here are called after a successful conversation write.
  */
 export interface ConversationEventBus {
   onMetadataPatched(listener: MetadataPatchedListener): void;
   emitMetadataPatched(request: KibanaRequest, payload: ConversationMetadataPatchedPayload): void;
+  onAttachmentEvents(listener: AttachmentEventsListener): void;
+  emitAttachmentEvents(request: KibanaRequest, payload: ConversationAttachmentEventsPayload): void;
+  onConversationUpdated(listener: ConversationUpdatedListener): void;
+  emitConversationUpdated(request: KibanaRequest, payload: ConversationUpdatedTriggerEvent): void;
 }
+
+/**
+ * Per-request emitter handed to `ConversationClient`. Pre-binds the scoped request so the client
+ * doesn't have to hold a reference to it, and lets us add new event kinds without growing the
+ * client's constructor signature.
+ */
+export interface ScopedConversationEventEmitter {
+  emitMetadataPatched(payload: ConversationMetadataPatchedPayload): void;
+  emitAttachmentEvents(payload: ConversationAttachmentEventsPayload): void;
+  emitConversationUpdated(payload: ConversationUpdatedTriggerEvent): void;
+}
+
+export const createScopedConversationEventEmitter = (
+  bus: ConversationEventBus,
+  request: KibanaRequest
+): ScopedConversationEventEmitter => ({
+  emitMetadataPatched: (payload) => bus.emitMetadataPatched(request, payload),
+  emitAttachmentEvents: (payload) => bus.emitAttachmentEvents(request, payload),
+  emitConversationUpdated: (payload) => bus.emitConversationUpdated(request, payload),
+});
 
 export const createConversationEventBus = (): ConversationEventBus =>
   new ConversationEventBusImpl();
 
 class ConversationEventBusImpl implements ConversationEventBus {
   private readonly metadataPatchedListeners: MetadataPatchedListener[] = [];
+  private readonly attachmentEventsListeners: AttachmentEventsListener[] = [];
+  private readonly conversationUpdatedListeners: ConversationUpdatedListener[] = [];
 
   onMetadataPatched(listener: MetadataPatchedListener): void {
     this.metadataPatchedListeners.push(listener);
@@ -40,6 +85,26 @@ class ConversationEventBusImpl implements ConversationEventBus {
 
   emitMetadataPatched(request: KibanaRequest, payload: ConversationMetadataPatchedPayload): void {
     for (const listener of this.metadataPatchedListeners) {
+      listener(request, payload);
+    }
+  }
+
+  onAttachmentEvents(listener: AttachmentEventsListener): void {
+    this.attachmentEventsListeners.push(listener);
+  }
+
+  emitAttachmentEvents(request: KibanaRequest, payload: ConversationAttachmentEventsPayload): void {
+    for (const listener of this.attachmentEventsListeners) {
+      listener(request, payload);
+    }
+  }
+
+  onConversationUpdated(listener: ConversationUpdatedListener): void {
+    this.conversationUpdatedListeners.push(listener);
+  }
+
+  emitConversationUpdated(request: KibanaRequest, payload: ConversationUpdatedTriggerEvent): void {
+    for (const listener of this.conversationUpdatedListeners) {
       listener(request, payload);
     }
   }

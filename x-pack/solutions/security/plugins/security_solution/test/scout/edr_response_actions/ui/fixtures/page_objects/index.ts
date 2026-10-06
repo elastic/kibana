@@ -7,10 +7,14 @@
 
 import type { ScoutPage, SecurityPageObjects } from '@kbn/scout-security';
 import { createLazyPageObject } from '@kbn/scout-security';
+import { HostIsolationFormPage } from './host_isolation_form';
+import { ResponseActionsHistoryPage } from './response_actions_history_page';
 import { RuleResponseActionsFormPage } from './rule_response_actions_form';
 
 export interface ResponseActionsPageObjects extends SecurityPageObjects {
+  responseActionsHistory: ResponseActionsHistoryPage;
   ruleResponseActionsForm: RuleResponseActionsFormPage;
+  hostIsolation: HostIsolationFormPage;
 }
 
 export const extendPageObjects = (
@@ -18,5 +22,7 @@ export const extendPageObjects = (
   page: ScoutPage
 ): ResponseActionsPageObjects => ({
   ...pageObjects,
+  responseActionsHistory: createLazyPageObject(ResponseActionsHistoryPage, page),
   ruleResponseActionsForm: createLazyPageObject(RuleResponseActionsFormPage, page),
+  hostIsolation: createLazyPageObject(HostIsolationFormPage, page),
 });

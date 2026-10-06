@@ -121,14 +121,11 @@ test.describe(
       await pageObjects.workflowEditor.gotoNewWorkflow();
       const workflowName = 'Autocomplete Test';
 
-      // Set incomplete YAML with empty step type
-      await pageObjects.workflowEditor.setYamlEditorValue(getIncompleteStepTypeYaml(workflowName));
-
-      await pageObjects.workflowEditor.setCursorToText('    type:');
-
-      // Move to end of line and trigger autocomplete
-      await page.keyboard.press('End');
-      await page.keyboard.press('Space');
+      await pageObjects.workflowEditor.triggerAutocompleteAfter(
+        getIncompleteStepTypeYaml(workflowName),
+        '    type:',
+        ' '
+      );
 
       // Verify the suggest widget appears with step type options
       const suggestWidget = pageObjects.workflowEditor.getYamlEditorSuggestWidget();

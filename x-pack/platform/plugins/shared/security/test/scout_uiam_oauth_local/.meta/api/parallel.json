@@ -1,12 +1,12 @@
 {
-  "sha1": "29b63535461aed87587dfa948dcb3506ed50ebf8",
+  "sha1": "9024843ec06bda9f908d9b2f5f05554804f58058",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "861db30738bf803-bafc6760325a526",
-      "title": "[NON-MKI] MCP OAuth authorization_code flow via SDK StreamableHTTPClientTransport should complete full MCP handshake via SAML-backed authorization_code flow",
+      "id": "861db30738bf803-c74e3a077423f40",
+      "title": "[NON-MKI] MCP OAuth authorization_code flow via SDK StreamableHTTPClientTransport should complete full MCP handshake via SAML-backed authorization_code flow (default space)",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-security_complete",
@@ -14,8 +14,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_client_credentials_mcp.spec.ts",
-        "line": 36,
-        "column": 9
+        "line": 94,
+        "column": 2
+      }
+    },
+    {
+      "id": "861db30738bf803-dbacb91932a4399",
+      "title": "[NON-MKI] MCP OAuth authorization_code flow via SDK StreamableHTTPClientTransport should complete full MCP handshake in a custom space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_client_credentials_mcp.spec.ts",
+        "line": 129,
+        "column": 27
       }
     },
     {
@@ -47,6 +61,160 @@
       }
     },
     {
+      "id": "4ab89370df6400e-292977fb76491f9",
+      "title": "[NON-MKI] Cross-space OAuth token audience isolation token for default space succeeds on default space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_cross_space.spec.ts",
+        "line": 102,
+        "column": 14
+      }
+    },
+    {
+      "id": "4ab89370df6400e-43b9928264ec39f",
+      "title": "[NON-MKI] Cross-space OAuth token audience isolation token for Space A succeeds on Space A",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_cross_space.spec.ts",
+        "line": 110,
+        "column": 24
+      }
+    },
+    {
+      "id": "4ab89370df6400e-83cb2a7969be461",
+      "title": "[NON-MKI] Cross-space OAuth token audience isolation token for Space B succeeds on Space B",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_cross_space.spec.ts",
+        "line": 108,
+        "column": 24
+      }
+    },
+    {
+      "id": "4ab89370df6400e-ce9dfac00a7ef03",
+      "title": "[NON-MKI] Cross-space OAuth token audience isolation token for Space A is rejected on Space B",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_cross_space.spec.ts",
+        "line": 112,
+        "column": 79
+      }
+    },
+    {
+      "id": "4ab89370df6400e-e1af8566fbcbe17",
+      "title": "[NON-MKI] Cross-space OAuth token audience isolation token for Space B is rejected on Space A",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_cross_space.spec.ts",
+        "line": 115,
+        "column": 7
+      }
+    },
+    {
+      "id": "4ab89370df6400e-1047b74c5fba51e",
+      "title": "[NON-MKI] Cross-space OAuth token audience isolation token for default space is rejected on Space A",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_cross_space.spec.ts",
+        "line": 118,
+        "column": 24
+      }
+    },
+    {
+      "id": "4ab89370df6400e-da8ffcaeb06fe92",
+      "title": "[NON-MKI] Cross-space OAuth token audience isolation token for default space is rejected on Space B",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_cross_space.spec.ts",
+        "line": 129,
+        "column": 24
+      }
+    },
+    {
+      "id": "4ab89370df6400e-5d6b16244e1e178",
+      "title": "[NON-MKI] Cross-space OAuth token audience isolation token for Space A is rejected on default space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_cross_space.spec.ts",
+        "line": 124,
+        "column": 13
+      }
+    },
+    {
+      "id": "4ab89370df6400e-42a436534ca63c6",
+      "title": "[NON-MKI] Cross-space OAuth token audience isolation token for Space B is rejected on default space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_cross_space.spec.ts",
+        "line": 125,
+        "column": 7
+      }
+    },
+    {
+      "id": "4ab89370df6400e-e7a004fcc3a9b65",
+      "title": "[NON-MKI] Cross-space OAuth token audience isolation WWW-Authenticate resource_metadata includes space prefix for custom space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_cross_space.spec.ts",
+        "line": 130,
+        "column": 82
+      }
+    },
+    {
+      "id": "4ab89370df6400e-87f1189e3874ada",
+      "title": "[NON-MKI] Cross-space OAuth token audience isolation path-aware discovery returns space-specific resource URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_cross_space.spec.ts",
+        "line": 152,
+        "column": 7
+      }
+    },
+    {
       "id": "afb06677eff5d09-36a05fbd4d8d379",
       "title": "[NON-MKI] MCP OAuth discovery and SDK client flow should discover OAuth protected resource metadata from Kibana",
       "expectedStatus": "passed",
@@ -56,7 +224,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_mcp_flow.spec.ts",
-        "line": 45,
+        "line": 56,
         "column": 25
       }
     },
@@ -70,7 +238,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_mcp_flow.spec.ts",
-        "line": 58,
+        "line": 71,
         "column": 24
       }
     },
@@ -84,7 +252,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_mcp_flow.spec.ts",
-        "line": 84,
+        "line": 95,
         "column": 11
       }
     },
@@ -98,8 +266,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_mcp_flow.spec.ts",
-        "line": 133,
-        "column": 17
+        "line": 128,
+        "column": 25
       }
     },
     {

@@ -5,9 +5,21 @@
  * 2.0.
  */
 
-import { isLeft } from 'fp-ts/Either';
-import * as t from 'io-ts';
-import { tEnum } from '../../utils/t_enum';
+import type { SchemaOutput } from '../schema_output';
+import type {
+  BandwidthLimitKeyCodec,
+  LocationStatusCodec,
+  LocationsCodec,
+  ManifestLocationCodec,
+  MonitorServiceLocationCodec,
+  PublicLocationCodec,
+  PublicLocationsCodec,
+  ServiceLocationCodec,
+  ServiceLocationErrors as ServiceLocationErrorsCodec,
+  ServiceLocationsApiResponseCodec,
+  ServiceLocationsCodec,
+  ThrottlingOptionsCodec,
+} from '../schemas/locations';
 
 export enum LocationStatus {
   GA = 'ga',
@@ -30,125 +42,19 @@ export const DEFAULT_THROTTLING = {
   [BandwidthLimitKey.UPLOAD]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.UPLOAD],
 };
 
-export const BandwidthLimitKeyCodec = tEnum<BandwidthLimitKey>(
-  'BandwidthLimitKey',
-  BandwidthLimitKey
-);
-
-export type BandwidthLimitKeyType = t.TypeOf<typeof BandwidthLimitKeyCodec>;
-
-export const LocationGeoCodec = t.interface({
-  lat: t.union([t.string, t.number, t.null]),
-  lon: t.union([t.string, t.number, t.null]),
-});
-
-export const LocationStatusCodec = tEnum<LocationStatus>('LocationStatus', LocationStatus);
-export type LocationStatusType = t.TypeOf<typeof LocationStatusCodec>;
-
-export const ManifestLocationCodec = t.interface({
-  url: t.string,
-  geo: t.interface({
-    name: t.string,
-    location: LocationGeoCodec,
-  }),
-  status: LocationStatusCodec,
-});
-
-export const ServiceLocationCodec = t.intersection([
-  t.interface({
-    id: t.string,
-    label: t.string,
-    isServiceManaged: t.boolean,
-  }),
-  t.partial({
-    url: t.string,
-    geo: LocationGeoCodec,
-    status: LocationStatusCodec,
-    isInvalid: t.boolean,
-  }),
-]);
-
-export const PublicLocationCodec = t.intersection([
-  ServiceLocationCodec,
-  t.interface({ url: t.string }),
-]);
-
-export const PublicLocationsCodec = t.array(PublicLocationCodec);
-
-export const MonitorServiceLocationCodec = t.intersection([
-  t.interface({
-    id: t.string,
-    label: t.string,
-  }),
-  t.partial({
-    geo: LocationGeoCodec,
-    url: t.string,
-    isServiceManaged: t.boolean,
-    status: t.string,
-  }),
-]);
-
-export const ServiceLocationErrors = t.array(
-  t.interface({
-    locationId: t.string,
-    error: t.intersection([
-      t.interface({
-        reason: t.string,
-        status: t.number,
-      }),
-      t.partial({
-        failed_monitors: t.union([
-          t.array(
-            t.interface({
-              id: t.string,
-              message: t.string,
-            })
-          ),
-          t.null,
-        ]),
-      }),
-    ]),
-  })
-);
-
-export const ServiceLocationsCodec = t.array(ServiceLocationCodec);
-export const MonitorServiceLocationsCodec = t.array(MonitorServiceLocationCodec);
-
-export const LocationCodec = t.intersection([
-  ServiceLocationCodec,
-  t.partial({ isServiceManaged: t.boolean }),
-]);
-
-export const LocationsCodec = t.array(LocationCodec);
-
-export const isServiceLocationInvalid = (location: MonitorServiceLocation) =>
-  isLeft(MonitorServiceLocationCodec.decode(location));
-
-export const ThrottlingOptionsCodec = t.interface({
-  [BandwidthLimitKey.DOWNLOAD]: t.number,
-  [BandwidthLimitKey.UPLOAD]: t.number,
-});
-
-export const ServiceLocationsApiResponseCodec = t.interface({
-  throttling: t.union([ThrottlingOptionsCodec, t.undefined]),
-  locations: ServiceLocationsCodec,
-});
-export type ServiceLocationsApiResponse = t.TypeOf<typeof ServiceLocationsApiResponseCodec>;
-
-export type ManifestLocation = t.TypeOf<typeof ManifestLocationCodec>;
-export type ServiceLocation = t.TypeOf<typeof ServiceLocationCodec>;
-export type ServiceLocations = t.TypeOf<typeof ServiceLocationsCodec>;
-export type MonitorServiceLocation = t.TypeOf<typeof MonitorServiceLocationCodec>;
-export type ServiceLocationErrors = t.TypeOf<typeof ServiceLocationErrors>;
-export type ThrottlingOptions = t.TypeOf<typeof ThrottlingOptionsCodec>;
-export type Locations = t.TypeOf<typeof LocationsCodec>;
-export type PublicLocation = t.TypeOf<typeof PublicLocationCodec>;
-export type PublicLocations = t.TypeOf<typeof PublicLocationsCodec>;
+export type BandwidthLimitKeyType = SchemaOutput<typeof BandwidthLimitKeyCodec>;
+export type LocationStatusType = SchemaOutput<typeof LocationStatusCodec>;
+export type ManifestLocation = SchemaOutput<typeof ManifestLocationCodec>;
+export type ServiceLocation = SchemaOutput<typeof ServiceLocationCodec>;
+export type ServiceLocations = SchemaOutput<typeof ServiceLocationsCodec>;
+export type MonitorServiceLocation = SchemaOutput<typeof MonitorServiceLocationCodec>;
+export type ServiceLocationErrors = SchemaOutput<typeof ServiceLocationErrorsCodec>;
+export type ThrottlingOptions = SchemaOutput<typeof ThrottlingOptionsCodec>;
+export type Locations = SchemaOutput<typeof LocationsCodec>;
+export type PublicLocation = SchemaOutput<typeof PublicLocationCodec>;
+export type PublicLocations = SchemaOutput<typeof PublicLocationsCodec>;
+export type ServiceLocationsApiResponse = SchemaOutput<typeof ServiceLocationsApiResponseCodec>;
 
 export interface ServiceLocationErrorsResponse {
   attributes: { message: string; errors: ServiceLocationErrors; id?: string };
 }
-
-// TODO: Remove if not needed
-// export type MonitorServiceLocations = t.TypeOf<typeof MonitorServiceLocationsCodec>;
-// export type ServiceLocationsApiResponse = t.TypeOf<typeof ServiceLocationsApiResponseCodec>;

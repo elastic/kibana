@@ -17,6 +17,11 @@ responses:
                 user:
                   username: elastic
                 title: General Greeting
+                attachments:
+                - id: 6f1c0f1e-6c2a-4a0a-9a1e-2f2b1c7d4e11
+                  type: text
+                - id: 2b9d7c53-0b8e-4a77-9f0c-91a5d6c3b208
+                  type: esql
                 permissions:
                   rename: true
                   delete: true

@@ -989,16 +989,18 @@ export class Authenticator {
         const { username } = authenticationResult.user;
         this.options.userActivity.trackUserAction({
           message: `User logged in via ${provider.type} provider "${provider.name}".`,
-          event: { action: 'log_in_user', type: 'start' },
+          event: { action: 'log_in_user', type: ['start'] },
           object: {
             id: userProfileId ?? username,
             name: username,
             type: 'user',
             tags: [],
           },
-          metadata: {
-            authenticationProvider: provider.name,
-            authenticationType: provider.type,
+          kibana: {
+            security: {
+              authenticationProvider: provider.name,
+              authenticationType: provider.type,
+            },
           },
         });
       }
@@ -1037,16 +1039,18 @@ export class Authenticator {
 
       this.options.userActivity.trackUserAction({
         message: `User logged out via ${sessionValue.provider.type} provider "${sessionValue.provider.name}".`,
-        event: { action: 'log_out_user', type: 'end' },
+        event: { action: 'log_out_user', type: ['end'] },
         object: {
           id: sessionValue.userProfileId ?? sessionValue.username,
           name: sessionValue.username,
           type: 'user',
           tags: [],
         },
-        metadata: {
-          authenticationProvider: sessionValue.provider.name,
-          authenticationType: sessionValue.provider.type,
+        kibana: {
+          security: {
+            authenticationProvider: sessionValue.provider.name,
+            authenticationType: sessionValue.provider.type,
+          },
         },
       });
     }

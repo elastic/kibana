@@ -15,8 +15,9 @@ import {
   type EntityDefinition,
   type EntityField,
   type EntityType,
-  type ExtractionMode,
+  type GatedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
+import type { EntityDefinitionOptions } from '../../../common/domain/definitions/registry';
 import {
   getEuidEsqlEvaluation,
   getFieldEvaluationsEsqlFromDefinition,
@@ -63,19 +64,21 @@ const FIELDS_TO_KEEP = [
 interface LogsExtractionQueryParams {
   indexPatterns: string[];
   latestIndex: string;
-  entityDefinition: EntityDefinition;
+  entityDefinition: GatedEntityDefinition;
+  entityDefinitionOptions?: EntityDefinitionOptions;
   docsLimit: number;
   fromDateISO: string;
   toDateISO: string;
   pagination?: PaginationParams;
   logsPageCursorStart?: LogSlicePaginationParams;
   logsPageCursorEnd?: LogSlicePaginationParams;
-  extractionMode?: ExtractionMode;
+  samplingRate?: number;
 }
 
 export function buildLogsExtractionEsqlQuery({
   indexPatterns,
   entityDefinition,
+  entityDefinitionOptions,
   fromDateISO,
   toDateISO,
   docsLimit,
@@ -83,8 +86,16 @@ export function buildLogsExtractionEsqlQuery({
   pagination,
   logsPageCursorStart,
   logsPageCursorEnd,
+  samplingRate,
 }: LogsExtractionQueryParams): string {
   const { fields, type, entityTypeFallback } = entityDefinition;
+
+  if (
+    samplingRate !== undefined &&
+    (!Number.isFinite(samplingRate) || samplingRate <= 0 || samplingRate > 1)
+  ) {
+    throw new Error(`samplingRate must be in (0, 1], got ${samplingRate}`);
+  }
 
   const parts = [];
 
@@ -94,7 +105,7 @@ export function buildLogsExtractionEsqlQuery({
   parts.push(
     buildExtractionSourceClause({
       indexPatterns,
-      type,
+      entityDefinition,
       fromDateISO,
       toDateISO,
       logsPageCursorStart,
@@ -102,11 +113,18 @@ export function buildLogsExtractionEsqlQuery({
     })
   );
 
+  // Right after the source filter and before any computation: the only position where sampling
+  // reduces the rows entering EVAL/STATS/LOOKUP JOIN rather than dropping finished entity rows.
+  if (samplingRate !== undefined && samplingRate < 1) {
+    parts.push(`| SAMPLE ${samplingRate}`);
+  }
+
   // Single | EVAL stage: later assignments can reference columns from earlier ones.
   {
     const fieldEvalsEsql = getFieldEvaluationsEsqlFromDefinition(entityDefinition);
     const euidEsql = getEuidEsqlEvaluation(type, recentData(ENGINE_METADATA_UNTYPED_ID_FIELD), {
       withTypeId: false,
+      options: entityDefinitionOptions,
     });
     parts.push(`| EVAL ${fieldEvalsEsql ? `${fieldEvalsEsql},\n ${euidEsql}` : euidEsql}`);
   }

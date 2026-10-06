@@ -87,6 +87,7 @@ kibana_vars=(
     externalUrl.policy
     i18n.allowLocaleCookie
     i18n.defaultLocale
+    i18n.detectBrowserLocale
     i18n.locale
     i18n.locales
     interactiveSetup.enabled
@@ -180,6 +181,9 @@ kibana_vars=(
     server.securityResponseHeaders.strictTransportSecurity
     server.securityResponseHeaders.xContentTypeOptions
     server.securityResponseHeaders.crossOriginOpenerPolicy
+    server.selfHttp.target
+    server.selfHttp.ssl.verificationMode
+    server.selfHttp.ssl.certificateAuthorities
     server.shutdownTimeout
     server.socketTimeout
     server.ssl.cert
@@ -426,6 +430,7 @@ kibana_vars=(
     xpack.security.loginHelp
     xpack.security.sameSiteCookies
     xpack.security.secureCookies
+    xpack.security.serviceAccounts.requestLifetime
     xpack.security.session.cleanupInterval
     xpack.security.session.concurrentSessions.maxSessions
     xpack.security.session.idleTimeout
@@ -444,6 +449,7 @@ kibana_vars=(
     xpack.spaces.maxSpaces
     xpack.spaces.defaultSolution
     xpack.task_manager.capacity
+    xpack.task_manager.claim_nudge.enabled
     xpack.task_manager.claim_strategy
     xpack.task_manager.auto_calculate_default_ech_capacity
     xpack.task_manager.discovery.active_nodes_lookback

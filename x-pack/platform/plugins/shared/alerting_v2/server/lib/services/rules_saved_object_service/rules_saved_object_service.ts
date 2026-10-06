@@ -79,6 +79,13 @@ export type BulkUpdateResultItem =
   | { id: string; success: true }
   | { id: string; success: false; error: SavedObjectError };
 
+export type BulkCreateResultItem =
+  | (RuleSavedObjectDoc & { error?: undefined })
+  | {
+      id: string;
+      error: SavedObjectError;
+    };
+
 export interface RulesFindAllResultItem {
   id: string;
   attributes: RuleSavedObjectAttributes;
@@ -105,6 +112,14 @@ export interface CountByQueryParams {
   searchFields?: string[];
 }
 
+export interface FindTagsParams {
+  search?: string;
+  filter?: string;
+  size?: number;
+  /** The rule metadata field to aggregate. */
+  field?: 'tags' | 'routing_tags';
+}
+
 export interface RulesSavedObjectServiceContract {
   create(params: {
     attrs: RuleSavedObjectAttributes;
@@ -128,6 +143,13 @@ export interface RulesSavedObjectServiceContract {
       references?: SavedObjectReference[];
     }>
   ): Promise<BulkUpdateResultItem[]>;
+  bulkCreate(
+    items: Array<{
+      id: string;
+      attrs: RuleSavedObjectAttributes;
+      references?: SavedObjectReference[];
+    }>
+  ): Promise<BulkCreateResultItem[]>;
   delete(params: { id: string }): Promise<void>;
   bulkDelete(ids: string[]): Promise<BulkDeleteResult>;
   find(params: {
@@ -141,7 +163,7 @@ export interface RulesSavedObjectServiceContract {
   }): Promise<SavedObjectsFindResponse<RuleSavedObjectAttributes>>;
   getRuleIdsByQuery(params: GetRuleIdsByQueryParams): Promise<string[]>;
   countByQuery(params: CountByQueryParams): Promise<number>;
-  findTags(params?: { search?: string; filter?: string; size?: number }): Promise<string[]>;
+  findTags(params?: FindTagsParams): Promise<string[]>;
   getTotalScheduledPerMinute(): Promise<number>;
 }
 
@@ -181,6 +203,41 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     );
     return { id: result.id, version: result.version };
   }
+
+  public async bulkCreate(
+    items: Array<{
+      id: string;
+      attrs: RuleSavedObjectAttributes;
+      references?: SavedObjectReference[];
+    }>
+  ): Promise<BulkCreateResultItem[]> {
+    if (items.length === 0) {
+      return [];
+    }
+
+    const result = await this.client.bulkCreate<RuleSavedObjectAttributes>(
+      items.map((item) => ({
+        type: RULE_SAVED_OBJECT_TYPE,
+        id: item.id,
+        attributes: item.attrs,
+        ...(item.references ? { references: item.references } : {}),
+      })),
+      { overwrite: false }
+    );
+
+    return result.saved_objects.map((doc) => {
+      if (isSavedObjectErrorResult(doc)) {
+        return { id: doc.id, error: doc.error };
+      }
+      return {
+        id: doc.id,
+        attributes: doc.attributes,
+        version: doc.version,
+        references: doc.references ?? [],
+      };
+    });
+  }
+
   public async get(id: string, spaceId?: string): Promise<RuleSavedObjectDoc> {
     const namespace = spaceIdToNamespace(this.spaces, spaceId);
     const doc = await this.client.get<RuleSavedObjectAttributes>(
@@ -485,7 +542,8 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     search,
     filter,
     size = TAGS_RESPONSE_LIMIT,
-  }: { search?: string; filter?: string; size?: number } = {}): Promise<string[]> {
+    field = 'tags',
+  }: FindTagsParams = {}): Promise<string[]> {
     const resolvedSize = Math.min(Math.max(size, 1), MAX_FIND_TAGS_SIZE);
     const result = await this.client.find<RuleSavedObjectAttributes>({
       type: RULE_SAVED_OBJECT_TYPE,
@@ -494,7 +552,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       aggs: {
         tags: {
           terms: {
-            field: `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.tags`,
+            field: `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.${field}`,
             size: resolvedSize,
             order: { _count: 'desc' },
             ...(search ? { include: `${escapeTermsInclude(search)}.*` } : {}),

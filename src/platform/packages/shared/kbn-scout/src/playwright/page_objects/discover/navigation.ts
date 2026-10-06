@@ -43,6 +43,18 @@ export abstract class NavigationMixin extends DiscoverAppBase {
     });
   }
 
+  getRefreshDataButton(): Locator {
+    return this.page.testSubj.locator('refreshDataButton');
+  }
+
+  getUninitializedPrompt(): Locator {
+    return this.page.testSubj.locator('discoverUninitialized');
+  }
+
+  getUninitializedKeyboardShortcuts(): Locator {
+    return this.page.testSubj.locator('discoverUninitializedKeyboardShortcuts');
+  }
+
   // Waits for a Discover tab to finish loading.
   async waitUntilTabIsLoaded() {
     await this.waitForDiscoverPage();
@@ -91,7 +103,7 @@ export abstract class NavigationMixin extends DiscoverAppBase {
    * the ES|QL editor and the classic KQL `queryInput`.
    */
   async getCurrentQueryMode(): Promise<DiscoverQueryMode> {
-    const esqlEditor = this.page.testSubj.locator('ESQLEditor');
+    const esqlEditor = this.esqlEditor.editor;
     const classicQueryInput = this.page.testSubj.locator('queryInput');
 
     // Wait until one of the two mode-specific anchors is rendered
@@ -108,8 +120,7 @@ export abstract class NavigationMixin extends DiscoverAppBase {
       await this.page.testSubj.click('select-text-based-language-btn');
     }
 
-    await this.waitUntilSearchingHasFinished();
-    await this.codeEditor.waitCodeEditorReady('ESQLEditor');
+    await this.esqlEditor.waitReady();
   }
 
   async selectClassicMode() {
@@ -126,9 +137,8 @@ export abstract class NavigationMixin extends DiscoverAppBase {
 
   async writeAndSubmitEsqlQuery(query: string) {
     await this.selectTextBaseLang();
-    await this.codeEditor.setCodeEditorValue(query);
-    await this.submitQuery();
-    await this.waitUntilSearchingHasFinished();
+    await this.esqlEditor.setQuery(query);
+    await this.submitQueryAndWait();
   }
 
   async writeAndSubmitKqlQuery(query: string) {
@@ -141,18 +151,45 @@ export abstract class NavigationMixin extends DiscoverAppBase {
     }
 
     await this.queryBar.setQuery(query);
-    await this.submitQuery();
-    await this.waitUntilSearchingHasFinished();
+    await this.submitQueryAndWait();
   }
 
   /**
    * Submits the current query (classic search bar or ES|QL editor) by clicking
    * the query submit button. Does not wait for results — pair with
-   * `waitUntilSearchingHasFinished()` or `waitUntilTabIsLoaded()` as appropriate.
+   * `submitQueryAndWait()` or `waitUntilTabIsLoaded()` as appropriate.
    */
   async submitQuery() {
     await this.hideTabPreview();
     await this.page.testSubj.click('querySubmitButton');
+  }
+
+  /**
+   * Submits the current query and waits until the tab has finished loading.
+   */
+  async submitQueryAndWait() {
+    await this.submitQuery();
+    await this.waitUntilTabIsLoaded();
+  }
+
+  /**
+   * Opens a new Discover tab and runs the current query so the tab is initialized.
+   * New tabs skip the initial fetch and ES|QL tabs start with an empty query, so
+   * this recopies the previous ES|QL query before submit. Use
+   * `unifiedTabs.createNewTab()` when the test needs the uninitialized empty state.
+   */
+  async createNewTabAndSearch() {
+    const previousMode = await this.getCurrentQueryMode();
+    const previousEsqlQuery =
+      previousMode === 'esql' ? (await this.getEsqlQueryValue()).trim() : '';
+
+    await this.unifiedTabs.createNewTab();
+
+    if (previousEsqlQuery) {
+      await this.esqlEditor.setQuery(previousEsqlQuery);
+    }
+
+    await this.submitQueryAndWait();
   }
 
   async getQuerySubmitButtonLabel(): Promise<string | null> {
@@ -160,133 +197,16 @@ export abstract class NavigationMixin extends DiscoverAppBase {
   }
 
   async waitForDataGridRowWithRefresh(rowLocator: Locator, timeout = 30_000) {
-    await this.submitQuery();
-    await this.waitUntilSearchingHasFinished();
+    await this.submitQueryAndWait();
     await rowLocator.waitFor({ state: 'visible', timeout });
   }
 
-  public get esqlMenuPopover(): Locator {
-    return this.page.testSubj.locator('esql-menu-popover');
+  async getEsqlQueryValue(): Promise<string> {
+    return this.esqlEditor.getQuery();
   }
 
-  async openRecommendedQueriesPanel() {
-    const menuPopover = this.esqlMenuPopover;
-    if (!(await menuPopover.isVisible())) {
-      await this.page.testSubj.click('esql-help-popover-button');
-    }
-
-    await menuPopover.waitFor({ state: 'visible' });
-
-    const recommendedQueriesButton = this.page.testSubj.locator('esql-recommended-queries');
-    await expect(recommendedQueriesButton).toBeVisible();
-    await recommendedQueriesButton.click();
-    await this.page.testSubj.locator('contextMenuPanelTitleButton').waitFor({ state: 'visible' });
-  }
-
-  async runRecommendedEsqlQuery(queryLabel: string) {
-    await this.openRecommendedQueriesPanel();
-
-    const queryOption = this.esqlMenuPopover.getByRole('menuitem', {
-      exact: true,
-      name: queryLabel,
-    });
-
-    await expect(queryOption).toBeVisible();
-    await queryOption.click();
-    await this.waitUntilSearchingHasFinished();
-  }
-
-  async getEsqlQueryValue(nthIndex: number = 0): Promise<string> {
-    return this.codeEditor.getCodeEditorValue(nthIndex);
-  }
-
-  async openEsqlQuickReferenceFlyout() {
-    await this.page.testSubj.click('esql-help-popover-button');
-    await this.esqlMenuPopover.waitFor({ state: 'visible' });
-    await this.page.testSubj.click('esql-quick-reference');
-    await this.getEsqlQuickReferenceFlyout().waitFor({ state: 'visible' });
-  }
-
-  getEsqlQuickReferenceFlyout(): Locator {
-    return this.page.testSubj.locator('esqlInlineDocumentationFlyout');
-  }
-
-  async isEsqlHistoryPanelOpen(): Promise<boolean> {
-    return this.page.testSubj
-      .locator('ESQLEditor-history-container')
-      .waitFor({ state: 'visible', timeout: 1_000 })
-      .then(() => true)
-      .catch(() => false);
-  }
-
-  async toggleEsqlHistoryPanel() {
-    const wasOpen = await this.isEsqlHistoryPanelOpen();
-    await this.page.testSubj.locator('ESQLEditor-toggle-query-history-icon').click();
-    await this.page.testSubj
-      .locator('ESQLEditor-history-container')
-      .waitFor({ state: wasOpen ? 'hidden' : 'visible' });
-  }
-
-  async getEsqlEditorHeight(): Promise<number> {
-    const editor = this.page.testSubj.locator('ESQLEditor');
-    await editor.waitFor({ state: 'visible' });
-    const box = await editor.boundingBox();
-    if (!box) {
-      throw new Error('Unable to measure ES|QL editor height');
-    }
-    return Math.round(box.height);
-  }
-
-  async resizeEsqlEditorBy(distance: number) {
-    const resizeButton = this.page.testSubj.locator('ESQLEditor-resize');
-    await resizeButton.waitFor({ state: 'visible' });
-    const box = await resizeButton.boundingBox();
-    if (!box) {
-      throw new Error('Unable to find ES|QL editor resize handle');
-    }
-    const startX = box.x + box.width / 2;
-    const startY = box.y + box.height / 2;
-    await this.page.mouse.move(startX, startY);
-    await this.page.mouse.down();
-    await this.page.mouse.move(startX, startY + distance, { steps: 10 });
-    await this.page.mouse.up();
-  }
-
-  async clickAppMenuItem(
-    testId: string,
-    { isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}
-  ) {
-    const item = this.page.testSubj.locator(testId);
-    if (!isInOverflowMenu && (await item.isVisible())) {
-      await item.click();
-      return;
-    }
-    const overflowButton = this.page.testSubj.locator('app-menu-overflow-button');
-    const popover = this.page.testSubj.locator('app-menu-popover');
-
-    // Dismiss any stale popovers
-    if (await popover.isVisible()) {
-      await overflowButton.click();
-      await expect(popover).toBeHidden();
-    }
-
-    await expect(overflowButton).toBeVisible();
-    await overflowButton.click();
-
-    // If the click was consumed by closing a stale overlay, the popover won't be open.
-    // Click the overflow button again if needed.
-    const popoverOpened = await popover
-      .waitFor({ state: 'visible', timeout: 2000 })
-      .then(() => true)
-      .catch(() => false);
-    if (!popoverOpened) {
-      await overflowButton.click();
-    }
-
-    await expect(popover).toBeVisible();
-    const menuItem = this.page.testSubj.locator(testId);
-    await expect(menuItem).toBeVisible();
-    await menuItem.click();
+  async clickAppMenuItem(testId: string) {
+    await this.appMenu.clickItem(testId);
   }
 
   private async dismissHoverOverlays() {
@@ -304,8 +224,8 @@ export abstract class NavigationMixin extends DiscoverAppBase {
     await expect(this.page.testSubj.locator('addRuleFlyoutTitle')).toBeVisible();
   }
 
-  async clickNewSearch({ isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
-    await this.clickAppMenuItem('discoverNewButton', { isInOverflowMenu });
+  async clickNewSearch() {
+    await this.clickAppMenuItem('discoverNewButton');
     await this.dismissHoverOverlays();
     await this.waitUntilTabIsLoaded();
   }

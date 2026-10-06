@@ -28,6 +28,7 @@ export type LayoutProperty = keyof Pick<
   | 'marginBottom'
   | 'marginRight'
   | 'marginTop'
+  | 'borderRadius'
 >;
 
 export type LayoutVarName = `${LayoutComponent}.${LayoutProperty}`;
