@@ -283,21 +283,24 @@ export const openShareMenu = () => {
   cy.get(SHARE_BADGE_BUTTON).click();
   cy.get(SHARE_SELECT).should('be.visible');
 };
+// The visibility options live in a single selection EuiSelectable, which exposes the current
+// option through `aria-selected` on the `option` role. (`aria-checked` is only emitted for
+// multi selection lists, such as the user picker asserted by `assertShareUser` below.)
 export const assertShareMenuStatus = (type: 'Private' | 'Shared' | 'Restricted') => {
   cy.get(SHARE_BADGE_BUTTON).should('have.attr', 'title').and('include', type);
   cy.get(PRIVATE_SELECT_OPTION).should(
     'have.attr',
-    'aria-checked',
+    'aria-selected',
     type === 'Private' ? 'true' : 'false'
   );
   cy.get(RESTRICTED_SELECT_OPTION).should(
     'have.attr',
-    'aria-checked',
+    'aria-selected',
     type === 'Restricted' ? 'true' : 'false'
   );
   cy.get(SHARED_SELECT_OPTION).should(
     'have.attr',
-    'aria-checked',
+    'aria-selected',
     type === 'Shared' ? 'true' : 'false'
   );
 };
