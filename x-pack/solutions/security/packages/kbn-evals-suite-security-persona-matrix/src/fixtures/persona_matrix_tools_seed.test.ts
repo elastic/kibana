@@ -25,10 +25,20 @@ const agentWith = (tools?: Array<Record<string, unknown>>) => ({
   configuration: { tools },
 });
 
-const createClient = (agent: Record<string, unknown> = agentWith()): MockClient => ({
+const createClient = (
+  agent: Record<string, unknown> = agentWith(),
+  postBehavior: 'ok' | 'conflict' = 'ok'
+): MockClient => ({
   request: jest.fn(async ({ method, path }: { method: string; path: string }) => {
     if (method === 'GET' && path === AGENT_TOOLS_PATH) {
-      return agent;
+      // Real KbnClient.request envelope: the payload lives under `data`.
+      return { data: agent };
+    }
+    if (method === 'POST' && path === '/api/agent_builder/tools') {
+      if (postBehavior === 'conflict') {
+        throw Object.assign(new Error('Conflict: already exists'), { status: 409 });
+      }
+      return { data: {} };
     }
     return {};
   }),
@@ -41,6 +51,9 @@ const agentPuts = (client: MockClient) =>
 
 describe('persona_matrix_tools_seed', () => {
   beforeEach(() => {
+    // The module tracks created tool ids in module-level state; reset so each
+    // test seeds from a clean slate.
+    jest.resetModules();
     jest.clearAllMocks();
   });
 
@@ -108,21 +121,20 @@ describe('persona_matrix_tools_seed', () => {
   });
 
   describe('cleanupPersonaMatrixTools', () => {
-    it('deletes both tool sets with force=true and swallows 404s without warning', async () => {
-      const { cleanupPersonaMatrixTools, PERSONA_MATRIX_TOOL_IDS, PERSONA_MATRIX_PARITY_TOOL_IDS } =
-        await import('./persona_matrix_tools_seed');
-      const client: MockClient = {
-        request: jest
-          .fn()
-          .mockRejectedValue(Object.assign(new Error('Not Found'), { status: 404 })),
-      };
+    it('force-deletes only tools created in this run', async () => {
+      const mod = await import('./persona_matrix_tools_seed');
+      const client = createClient();
+      await mod.seedPersonaMatrixTools({ kbnClient: asKbn(client), log, parity: true });
 
-      await cleanupPersonaMatrixTools({ kbnClient: asKbn(client), log });
+      await mod.cleanupPersonaMatrixTools({ kbnClient: asKbn(client), log });
 
-      const expectedIds = [...PERSONA_MATRIX_TOOL_IDS, ...PERSONA_MATRIX_PARITY_TOOL_IDS];
-      expect(client.request).toHaveBeenCalledTimes(expectedIds.length);
+      const expectedIds = [...mod.PERSONA_MATRIX_TOOL_IDS, ...mod.PERSONA_MATRIX_PARITY_TOOL_IDS];
+      const postCleanupDeletes = client.request.mock.calls
+        .filter(([req]) => req.method === 'DELETE')
+        .map(([req]) => req);
+      expect(postCleanupDeletes).toHaveLength(expectedIds.length);
       for (const id of expectedIds) {
-        expect(client.request).toHaveBeenCalledWith(
+        expect(postCleanupDeletes).toContainEqual(
           expect.objectContaining({
             method: 'DELETE',
             path: `/api/agent_builder/tools/${encodeURIComponent(id)}?force=true`,
@@ -130,6 +142,17 @@ describe('persona_matrix_tools_seed', () => {
         );
       }
       expect(log.warning).not.toHaveBeenCalled();
+    });
+
+    it('does NOT delete pre-existing tools (POST returns 409 conflict)', async () => {
+      const mod = await import('./persona_matrix_tools_seed');
+      const client = createClient(agentWith(), 'conflict');
+
+      await mod.seedPersonaMatrixTools({ kbnClient: asKbn(client), log, parity: true });
+      await mod.cleanupPersonaMatrixTools({ kbnClient: asKbn(client), log });
+
+      const deletes = client.request.mock.calls.filter(([req]) => req.method === 'DELETE');
+      expect(deletes).toHaveLength(0);
     });
   });
 });

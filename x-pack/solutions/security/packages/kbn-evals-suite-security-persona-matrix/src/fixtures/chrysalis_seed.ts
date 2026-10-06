@@ -64,7 +64,16 @@ const baseAlert: AlertDoc = {
   'kibana.alert.workflow_status': 'open',
 };
 
-const RESTAMP_KEYS = new Set(['@timestamp', 'shift_start', 'shift_end', 'intended_timestamp']);
+const RESTAMP_KEYS = new Set([
+  '@timestamp',
+  'shift_start',
+  'shift_end',
+  'intended_timestamp',
+  'original_time',
+  'workflow_status_updated_at',
+  'first_seen',
+  'last_seen',
+]);
 
 function loadParityDocs(): { docs: ParityDoc[]; anchor: number } {
   const docs = PARITY_DOCS;
@@ -451,6 +460,7 @@ export async function cleanupChrysalisAlerts({
       query: { match_all: {} },
       refresh: true,
       conflicts: 'proceed',
+      ignore_unavailable: true,
     });
     log.info(`Cleaned up alerts from ${ALERT_INDEX}`);
     if (seedProfile === 'parity') {

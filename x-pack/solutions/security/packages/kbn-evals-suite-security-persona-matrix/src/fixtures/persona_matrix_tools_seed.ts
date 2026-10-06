@@ -33,6 +33,13 @@ const AGENT_BUILDER_TOOLS_HEADERS = {
 
 const ALERT_INDEX = '.internal.alerts-security.alerts-default-000001';
 
+// Indices written by the parity seed (chrysalis_parity_docs.ts). The parity
+// ES|QL shims must query these, not ALERT_INDEX — parity seeding never writes
+// the internal alerts index.
+const PARITY_ALERT_INDEX = 'logs-chrysalis-sim.alerts-default';
+const PARITY_TI_INDEX = 'logs-ti_chrysalis_sim-default';
+const PARITY_ON_CALL_INDEX = 'on-call-schedule';
+
 export const PERSONA_MATRIX_TOOL_IDS = ['virustotal_lookup', 'on_call_lookup'] as const;
 
 /**
@@ -54,6 +61,13 @@ interface SeedToolsOptions {
   log: ToolingLog;
 }
 
+/**
+ * Tool ids created by THIS process via createToolIfMissing. Cleanup
+ * force-deletes only these — a tool that already existed before the run
+ * (409 on POST) must survive cleanup.
+ */
+const createdToolIds = new Set<string>();
+
 async function createToolIfMissing({
   kbnClient,
   log,
@@ -66,6 +80,7 @@ async function createToolIfMissing({
       headers: AGENT_BUILDER_TOOLS_HEADERS,
       body,
     });
+    createdToolIds.add(body.id as string);
     log.info(`[persona-matrix] created tool '${body.id}'`);
   } catch (error) {
     const errText = `${(error as Error)?.message ?? ''} ${
@@ -93,16 +108,16 @@ async function attachToolsToDefaultAgent({
   log,
   toolIds,
 }: SeedToolsOptions & { toolIds: string[] }): Promise<void> {
-  const agent = (await kbnClient.request({
-    method: 'GET',
-    path: AGENT_TOOLS_PATH,
-    headers: AGENT_BUILDER_TOOLS_HEADERS,
-  })) as unknown as {
+  const { data: agent } = await kbnClient.request<{
     name?: string;
     description?: string;
     access_control?: { access_mode: string };
     configuration?: { tools?: Array<{ tool_ids?: string[] }> } & Record<string, unknown>;
-  };
+  }>({
+    method: 'GET',
+    path: AGENT_TOOLS_PATH,
+    headers: AGENT_BUILDER_TOOLS_HEADERS,
+  });
   const existing = agent?.configuration?.tools as Array<Record<string, unknown>> | undefined;
   const currentIds = new Set(existing?.flatMap((s) => s.tool_ids ?? []) ?? []);
   const missing = toolIds.filter((id) => !currentIds.has(id));
@@ -190,7 +205,7 @@ export async function seedPersonaMatrixTools({
         'domain has been flagged by security vendors.',
       tags: ['persona-matrix', 'parity-shim'],
       configuration: {
-        query: `FROM ${ALERT_INDEX} | WHERE kibana.alert.rule.name LIKE "*Chrysalis*" | KEEP kibana.alert.rule.name, kibana.alert.reason | LIMIT 10`,
+        query: `FROM ${PARITY_TI_INDEX} | WHERE threat.indicator.file.hash.sha256 IS NOT NULL | KEEP threat.indicator.file.hash.sha256, threat.indicator.file.name, threat.indicator.description, threat.indicator.confidence | LIMIT 10`,
         params: {},
       },
     },
@@ -207,7 +222,7 @@ export async function seedPersonaMatrixTools({
         'on-call responder to own or escalate a security incident.',
       tags: ['persona-matrix', 'parity-shim'],
       configuration: {
-        query: `FROM ${ALERT_INDEX} | WHERE kibana.alert.rule.name LIKE "*Chrysalis*" | KEEP kibana.alert.rule.name, kibana.alert.severity | LIMIT 10`,
+        query: `FROM ${PARITY_ON_CALL_INDEX} | WHERE @timestamp <= NOW() AND shift_end >= NOW() | KEEP responder.name, responder.email, responder.team, rotation, shift_start, shift_end | LIMIT 1`,
         params: {},
       },
     },
@@ -222,7 +237,7 @@ export async function seedPersonaMatrixTools({
       description: 'Get the current time and date.',
       tags: ['persona-matrix', 'parity-shim'],
       configuration: {
-        query: `FROM ${ALERT_INDEX} | LIMIT 1 | KEEP @timestamp`,
+        query: `FROM ${PARITY_ALERT_INDEX} | SORT @timestamp DESC | LIMIT 1 | KEEP @timestamp, kibana.alert.rule.name, kibana.alert.reason`,
         params: {},
       },
     },
@@ -239,7 +254,7 @@ export async function seedPersonaMatrixTools({
         'escalate a case or notify a channel.',
       tags: ['persona-matrix', 'parity-shim'],
       configuration: {
-        query: `FROM ${ALERT_INDEX} | LIMIT 1 | KEEP kibana.alert.rule.name`,
+        query: `FROM ${PARITY_ALERT_INDEX} | WHERE kibana.alert.rule.name LIKE "*Chrysalis*" | KEEP kibana.alert.rule.name, kibana.alert.reason | LIMIT 10`,
         params: {},
       },
     },
@@ -258,7 +273,7 @@ export async function cleanupPersonaMatrixTools({
   kbnClient,
   log,
 }: SeedToolsOptions): Promise<void> {
-  for (const id of [...PERSONA_MATRIX_TOOL_IDS, ...PERSONA_MATRIX_PARITY_TOOL_IDS]) {
+  for (const id of createdToolIds) {
     await kbnClient
       .request({
         method: 'DELETE',
