@@ -99,6 +99,47 @@ describe('AD2 full profile seed plan', () => {
     }
   });
 
+  // A token appearing in nearly every noise message but rarely in signal
+  // messages is a lexical answer key: `message LIKE '%token%'` would
+  // separate noise from signal without understanding anything.
+  it('does not let a message token separate full-profile signal from noise', () => {
+    const signalMessages: string[] = [];
+    for (const key of AD2_FULL_SCENARIO_KEYS) {
+      const scenario = getAd2Scenario(key, 'full');
+      expect(scenario).toBeDefined();
+      for (const step of scenario?.steps ?? []) {
+        signalMessages.push(step.message);
+      }
+    }
+
+    const noiseAlerts = [
+      ...buildBackgroundNoiseAlerts(runMarker, fixedBaseTime),
+      ...buildLoudClusterAlerts(runMarker, fixedBaseTime),
+    ];
+    const noiseMessages = noiseAlerts.map((alert) =>
+      String(alert.source['kibana.alert.reason'] ?? '')
+    );
+
+    const tokenize = (message: string): Set<string> =>
+      new Set(message.toLowerCase().match(/[a-z]+/g) ?? []);
+
+    const signalTokenSets = signalMessages.map(tokenize);
+    const noiseTokenSets = noiseMessages.map(tokenize);
+
+    expect(signalMessages.length).toBeGreaterThan(0);
+    expect(noiseMessages).toHaveLength(150);
+
+    for (const token of new Set(noiseTokenSets.flatMap((tokens) => [...tokens]))) {
+      const noiseShare =
+        noiseTokenSets.filter((tokens) => tokens.has(token)).length / noiseMessages.length;
+      if (noiseShare >= 0.9) {
+        const signalShare =
+          signalTokenSets.filter((tokens) => tokens.has(token)).length / signalMessages.length;
+        expect(signalShare).toBeGreaterThanOrEqual(0.1);
+      }
+    }
+  });
+
   // The literal `Background test alert` label on every noise alert was a
   // one-string answer key of its own; each noise alert now carries a benign
   // reading in its message instead.
