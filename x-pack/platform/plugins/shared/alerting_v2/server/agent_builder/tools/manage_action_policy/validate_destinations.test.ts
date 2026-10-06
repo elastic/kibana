@@ -369,6 +369,29 @@ describe('validateDestinations', () => {
       ).rejects.toThrow(/does not have a "manual" trigger/);
     });
 
+    it('returns a warning instead of throwing when blockOnMissingManualTrigger is false', async () => {
+      const persistedWorkflowLookup = createMockPersistedWorkflowLookup(
+        new Map([['wf-alert-only', { id: 'wf-alert-only', yaml: YAML_ALERT_TRIGGER_ONLY }]])
+      );
+
+      const result = await validateDestinations([{ type: 'workflow', id: 'wf-alert-only' }], {
+        attachments: createMockAttachments(),
+        persistedWorkflowLookup,
+        connectorLookup: createMockConnectorLookup(),
+        spaceId: 'default',
+        blockOnMissingManualTrigger: false,
+      });
+
+      expect(result.diagnostics).toEqual([
+        expect.objectContaining({
+          destinationId: 'wf-alert-only',
+          severity: 'warning',
+          source: 'structural',
+          message: expect.stringContaining('does not have a "manual" trigger'),
+        }),
+      ]);
+    });
+
     it('does not throw when a persisted workflow has no yaml available (nothing to check)', async () => {
       const persistedWorkflowLookup = createMockPersistedWorkflowLookup(
         new Map([['wf-no-yaml', { id: 'wf-no-yaml' }]])

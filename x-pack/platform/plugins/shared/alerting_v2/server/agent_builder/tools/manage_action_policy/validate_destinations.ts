@@ -70,6 +70,14 @@ export interface ValidateDestinationsDeps {
   request?: KibanaRequest;
   /** Used to make workflow-validation-service failures observable; optional for tests. */
   logger?: LoggerServiceContract;
+  /**
+   * Whether a destination workflow missing a `manual` trigger should hard-block
+   * (new policies, or edits that introduce/change the destinations via
+   * `set_destinations`) or only surface a non-blocking warning (edits that
+   * leave an already-persisted, already-invalid destination untouched — see
+   * #277569). Defaults to `true`.
+   */
+  blockOnMissingManualTrigger?: boolean;
 }
 
 export interface WorkflowDestinationDiagnostic {
@@ -118,10 +126,11 @@ function manualTriggerDeclaresPayloadInputRef(manualTrigger: ParsedTrigger): boo
  * `validateWorkflow` is wired, runs its YAML through the workflows validation
  * service to surface variable-ref and Liquid errors as diagnostics.
  *
- * Throws for a missing manual trigger — such a workflow cannot receive
- * dispatches at all. Everything else (missing `inputs.payload`, variable-ref
- * errors) is returned as a non-blocking warning diagnostic so the agent can
- * see and fix the issue without being blocked from composing the policy.
+ * A missing manual trigger hard-blocks only when `blockOnMissingManualTrigger`
+ * is set (new policies, or edits that introduce/change this destination) —
+ * otherwise it's a non-blocking warning, same as everything else here, so
+ * editing an unrelated field (e.g. renaming the policy) doesn't fail just
+ * because an already-persisted destination predates this validation.
  */
 async function collectWorkflowDiagnostics(
   destinationId: string,
@@ -131,18 +140,31 @@ async function collectWorkflowDiagnostics(
     request,
     spaceId,
     logger,
-  }: Pick<ValidateDestinationsDeps, 'validateWorkflow' | 'request' | 'spaceId' | 'logger'>
+    blockOnMissingManualTrigger,
+  }: Pick<
+    ValidateDestinationsDeps,
+    'validateWorkflow' | 'request' | 'spaceId' | 'logger' | 'blockOnMissingManualTrigger'
+  >
 ): Promise<WorkflowDestinationDiagnostic[]> {
   const manualTrigger = findManualTrigger(yaml);
+  const diagnostics: WorkflowDestinationDiagnostic[] = [];
 
   if (!manualTrigger) {
-    throw new ActionPolicyOperationValidationError(
+    const missingManualTriggerMessage =
       `Destination workflow "${destinationId}" does not have a "manual" trigger. ` +
-        `Action policy destinations must declare \`triggers: - type: manual\` to receive dispatches.`
-    );
-  }
+      `Action policy destinations must declare \`triggers: - type: manual\` to receive dispatches`;
 
-  const diagnostics: WorkflowDestinationDiagnostic[] = [];
+    if (blockOnMissingManualTrigger ?? true) {
+      throw new ActionPolicyOperationValidationError(`${missingManualTriggerMessage}.`);
+    }
+    diagnostics.push({
+      destinationId,
+      severity: 'warning',
+      source: 'structural',
+      message: `${missingManualTriggerMessage} — regenerate this workflow or update its destination.`,
+    });
+    return diagnostics;
+  }
 
   if (!manualTriggerDeclaresPayloadInputRef(manualTrigger)) {
     diagnostics.push({
@@ -191,9 +213,11 @@ async function collectWorkflowDiagnostics(
  * each resolved workflow is structurally suitable for action policy dispatch.
  *
  * Throws {@link ActionPolicyOperationValidationError} for invalid destinations
- * (bare attachment IDs, connector IDs, unknown IDs, or a workflow missing a
- * manual trigger). Returns non-blocking diagnostics for variable-ref issues
- * and missing `inputs.payload` declarations.
+ * (bare attachment IDs, connector IDs, unknown IDs, or — when
+ * `deps.blockOnMissingManualTrigger` is set — a workflow missing a manual
+ * trigger). Returns non-blocking diagnostics for variable-ref issues, missing
+ * `inputs.payload` declarations, and a missing manual trigger on edits that
+ * don't introduce/change the destination.
  */
 export async function validateDestinations(
   destinations: ActionPolicyDestination[],

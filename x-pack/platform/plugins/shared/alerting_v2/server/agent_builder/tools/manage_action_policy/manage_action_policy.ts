@@ -125,6 +125,13 @@ Use operations[] to:
           return null;
         };
 
+        // Hard-block only when this call is the one introducing/changing the
+        // destinations (new policy, or an explicit set_destinations) — an edit
+        // that leaves an already-persisted, already-invalid destination
+        // untouched should warn instead of failing.
+        const blockOnMissingManualTrigger =
+          isNew || operations.some((op) => op.operation === 'set_destinations');
+
         const destinationResult = await validateDestinations(updatedData.destinations, {
           attachments,
           persistedWorkflowLookup: getWorkflowClient(request),
@@ -133,6 +140,7 @@ Use operations[] to:
           validateWorkflow,
           request,
           logger,
+          blockOnMissingManualTrigger,
         });
         workflowDiagnostics = destinationResult.diagnostics;
       }

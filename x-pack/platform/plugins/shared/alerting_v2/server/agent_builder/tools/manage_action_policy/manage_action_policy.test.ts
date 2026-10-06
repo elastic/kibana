@@ -234,6 +234,51 @@ describe('manageActionPolicyTool', () => {
       expect(ctx.attachments.add).not.toHaveBeenCalled();
     });
 
+    it('warns instead of blocking when editing an existing policy whose destination already lacks a manual trigger', async () => {
+      const deps = createDeps();
+      deps.getWorkflowClient = jest.fn(() => ({
+        getWorkflow: jest.fn().mockResolvedValue({
+          id: 'wf-1',
+          name: 'Alert-only workflow',
+          yaml: 'name: notify\ntriggers:\n  - type: alert\n',
+        }),
+      }));
+      const tool = manageActionPolicyTool(deps);
+      const ctx = createContext();
+      ctx.attachments.getAttachmentRecord.mockReturnValue({
+        origin: 'policy-uuid',
+        versions: [
+          {
+            data: {
+              id: 'policy-uuid',
+              name: 'Existing Policy',
+              destinations: [{ type: 'workflow', id: 'wf-1' }],
+            },
+          },
+        ],
+      } as never);
+
+      const result = await tool.handler(
+        {
+          actionPolicyAttachmentId: 'existing-id',
+          operations: [{ operation: 'set_metadata', name: 'Renamed Policy' }],
+        },
+        ctx
+      );
+
+      expect(ctx.attachments.update).toHaveBeenCalledTimes(1);
+      const { results } = result as {
+        results: Array<{
+          type: string;
+          data?: { workflowDiagnostics?: Array<{ message: string }> };
+        }>;
+      };
+      expect(results[0].type).toBe(ToolResultType.other);
+      expect(results[0].data?.workflowDiagnostics).toEqual([
+        expect.objectContaining({ message: expect.stringContaining('does not have a "manual" trigger') }),
+      ]);
+    });
+
     it('surfaces a workflowDiagnostics warning when inputs.payload has no $ref, without failing the call', async () => {
       const deps = createDeps();
       deps.getWorkflowClient = jest.fn(() => ({
