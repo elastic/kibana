@@ -151,7 +151,8 @@ describe('createConversationPublicClient', () => {
       await publicClient.create({ id: 'conv-1', origin });
 
       expect(internalClient.create).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'conv-1', origin })
+        expect.objectContaining({ id: 'conv-1', origin }),
+        { source: 'server_api' }
       );
     });
 
