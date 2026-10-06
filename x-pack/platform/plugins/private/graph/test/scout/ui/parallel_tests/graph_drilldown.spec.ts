@@ -9,6 +9,14 @@ import rison from '@kbn/rison';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData } from '../fixtures';
 
+const getDiscoverAppStateQuery = (url: URL): string => {
+  const appStateQuery = new URLSearchParams(url.hash.split('?')[1]).get('_a');
+  if (!appStateQuery) {
+    throw new Error('Expected the Discover URL to contain _a app state');
+  }
+  return appStateQuery;
+};
+
 spaceTest.describe('Graph - drilldowns', { tag: testData.GRAPH_UI_TAGS }, () => {
   let dataViewId: string | undefined;
   const dataViewName = `graph-drilldown-${Date.now()}`;
@@ -84,11 +92,7 @@ spaceTest.describe('Graph - drilldowns', { tag: testData.GRAPH_UI_TAGS }, () => 
       const openedUrl = new URL(discoverPage.url());
       expect(openedUrl.pathname).toBe(new URL(discoverUrl).pathname);
 
-      const appStateQuery = new URLSearchParams(openedUrl.hash.split('?')[1]).get('_a');
-      if (!appStateQuery) {
-        throw new Error('Expected the Discover URL to contain _a app state');
-      }
-      const appState = rison.decode(decodeURIComponent(appStateQuery));
+      const appState = rison.decode(decodeURIComponent(getDiscoverAppStateQuery(openedUrl)));
       expect(appState).toMatchObject({
         query: {
           language: 'kuery',
@@ -96,13 +100,11 @@ spaceTest.describe('Graph - drilldowns', { tag: testData.GRAPH_UI_TAGS }, () => 
         },
       });
 
-      const discoverQuery = discoverPage.locator('[data-test-subj="queryInput"]');
+      const discoverQuery = discoverPage.getByTestId('queryInput');
       await expect(discoverQuery).toContainText('admin');
       await expect(discoverQuery).toContainText(' and ');
-      await expect(discoverPage.locator('[data-test-subj="discoverQueryHits"]')).not.toHaveText(
-        '0'
-      );
-      const discoverTable = discoverPage.locator('[data-test-subj="discoverDocTable"]');
+      await expect(discoverPage.getByTestId('discoverQueryHits')).not.toHaveText('0');
+      const discoverTable = discoverPage.getByTestId('discoverDocTable');
       await expect(discoverTable).toContainText('admin');
       await expect(discoverTable).toContainText('/test/wp-admin/');
       await discoverPage.close();

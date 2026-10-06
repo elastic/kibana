@@ -350,7 +350,7 @@ export class GraphPage {
     await this.page.getByRole('button', { name: title, exact: true }).click();
     const popup = await popupPromise;
     await popup.waitForURL((url) => url.toString() !== 'about:blank');
-    await popup.locator('[data-test-subj="discoverDocTable"]').waitFor({ state: 'visible' });
+    await popup.getByTestId('discoverDocTable').waitFor({ state: 'visible' });
     return popup;
   }
 
