@@ -787,6 +787,7 @@ describe('runDefaultAgentMode', () => {
       );
       const [params] = registerInternalToolsMock.mock.calls[0];
       expect(params.updateConversationMetadata).toBeUndefined();
+      expect(createPromptFactoryMock.mock.calls[0][0].conversationMetadataWritable).toBe(false);
       expect(params.subagentTracker.snapshot()).toEqual({});
       expect(params.backgroundExecutionService.getPendingState()).toEqual({});
       expect(context.conversationClient.patchMetadata).not.toHaveBeenCalled();

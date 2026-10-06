@@ -1218,6 +1218,9 @@ describe('createSubagentTool', () => {
       expect(tool.description).not.toContain('## Running agents in the background');
       expect(tool.description).not.toContain('send_message');
       expect(tool.description).toContain('only transient, foreground sub-agents');
+      expect(tool.description).toContain(
+        'Persistent sub-agents listed in the conversation history cannot be reached from this execution.'
+      );
     });
 
     it('keeps the full description by default', () => {

@@ -93,6 +93,7 @@ const PERSISTENT_AND_BACKGROUND_DESCRIPTION = `
 
 const TRANSIENT_ONLY_DESCRIPTION = `
 - This execution does not persist anything, so only transient, foreground sub-agents are available: leave \`mode\` and \`run_in_background\` unset.
+- Persistent sub-agents listed in the conversation history cannot be reached from this execution.
 `;
 
 const destructiveApiDescription = (transientOnly: boolean) => `
