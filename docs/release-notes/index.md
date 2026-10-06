@@ -27,7 +27,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 ## 9.5.5 [kibana-9.5.5-release-notes]
 
 :::{important}
-The 9.5.5 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+The 9.5.5 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/t/kibana-9-4-8-9-5-5-security-update-esa-2026-193/390866) for more details.
 :::
 
 ### Fixes [kibana-9.5.5-fixes]
@@ -937,7 +937,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 ## 9.4.8 [kibana-9.4.8-release-notes]
 
 :::{important}
-The 9.4.8 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+The 9.4.8 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/t/kibana-9-4-8-9-5-5-security-update-esa-2026-193/390866) for more details.
 :::
 
 ### Fixes [kibana-9.4.8-fixes]
