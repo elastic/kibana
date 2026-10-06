@@ -10,7 +10,11 @@ import type { LifecycleResponseFactory } from '@kbn/core-http-server';
 import type { HttpServiceSetup, KibanaRequest, Logger, OnPreAuthToolkit } from '@kbn/core/server';
 
 import type { InboundEventAdmissionConfig } from '../actions_config';
-import { INBOUND_EVENTS_API_PATH, INBOUND_EVENTS_RATE_LIMITED_MESSAGE } from './constants';
+import {
+  INBOUND_EVENTS_API_PATH,
+  INBOUND_EVENTS_MALFORMED_PATH_MESSAGE,
+  INBOUND_EVENTS_RATE_LIMITED_MESSAGE,
+} from './constants';
 import type { InboundEventAdmission } from './inbound_event_admission';
 import { logInboundIngressOutcome } from './log_inbound_ingress_outcome';
 
@@ -22,19 +26,40 @@ const inboundEventIdsPattern = new RegExp(
 );
 
 /**
+ * `route.path` is still percent-encoded. Hapi decodes params with one decodeURIComponent pass.
+ * A bad sequence is undefined so it is not used as its own admission key.
+ */
+const decodeInboundPathSegment = (segment: string): string | undefined => {
+  try {
+    const decoded = decodeURIComponent(segment);
+    return decoded.length > 0 ? decoded : undefined;
+  } catch (error) {
+    if (error instanceof URIError) {
+      return undefined;
+    }
+    throw error;
+  }
+};
+
+/**
  * onPreAuth calls CoreKibanaRequest.from without route schemas, so request.params is {}.
  * The ids are on the URL (`route.path`).
  */
 const readInboundEventIds = (
   pathname: string
-): { connectorTypeId: string; connectorId: string } | undefined => {
+): { connectorTypeId: string; connectorId: string } | 'malformed' | undefined => {
   const match = inboundEventIdsPattern.exec(pathname);
   if (!match) {
     return undefined;
   }
-  const [, connectorTypeId, connectorId] = match;
-  if (!connectorTypeId || !connectorId) {
+  const [, rawConnectorTypeId, rawConnectorId] = match;
+  if (!rawConnectorTypeId || !rawConnectorId) {
     return undefined;
+  }
+  const connectorTypeId = decodeInboundPathSegment(rawConnectorTypeId);
+  const connectorId = decodeInboundPathSegment(rawConnectorId);
+  if (!connectorTypeId || !connectorId) {
+    return 'malformed';
   }
   return { connectorTypeId, connectorId };
 };
@@ -89,7 +114,13 @@ export const admitInboundEventRequest = ({
   logger: Logger;
   getSpaceId: (request: KibanaRequest) => string;
 }) => {
-  const ids = isInboundEventsRoute(request) ? readInboundEventIds(request.route.path) : undefined;
+  if (!isInboundEventsRoute(request)) {
+    return toolkit.next();
+  }
+  const ids = readInboundEventIds(request.route.path);
+  if (ids === 'malformed') {
+    return response.badRequest({ body: INBOUND_EVENTS_MALFORMED_PATH_MESSAGE });
+  }
   if (!ids) {
     return toolkit.next();
   }

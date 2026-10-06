@@ -9,7 +9,11 @@ import { Subject } from 'rxjs';
 import { loggingSystemMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { HttpServiceSetup, KibanaRequest, OnPreAuthToolkit } from '@kbn/core/server';
 
-import { INBOUND_EVENTS_API_PATH, INBOUND_EVENTS_RATE_LIMITED_MESSAGE } from './constants';
+import {
+  INBOUND_EVENTS_API_PATH,
+  INBOUND_EVENTS_MALFORMED_PATH_MESSAGE,
+  INBOUND_EVENTS_RATE_LIMITED_MESSAGE,
+} from './constants';
 import { InboundEventAdmission } from './inbound_event_admission';
 import {
   admitInboundEventRequest,
@@ -240,6 +244,41 @@ describe('admitInboundEventRequest', () => {
 
     expect(tryAdmit).not.toHaveBeenCalled();
     expect(toolkit.next).toHaveBeenCalledTimes(2);
+  });
+
+  it('shares one connector slot across equivalent percent-encodings', () => {
+    const admission = new InboundEventAdmission(admissionConfig);
+    const tryAdmit = jest.spyOn(admission, 'tryAdmit');
+    const encoded = createRequest({
+      path: '/api/actions/events/%73lack/c%31',
+      params: {},
+    });
+
+    const admitted = admit(admission, encoded.request, { next: jest.fn().mockReturnValue('next') });
+    expect(admitted.result).toBe('next');
+    expect(tryAdmit).toHaveBeenCalledWith('default\0.slack\0c1');
+
+    const plain = createRequest({ path: '/api/actions/events/slack/c1', params: {} });
+    const denied = admit(admission, plain.request, { next: jest.fn() });
+    expect(denied.response.customError).toHaveBeenCalledWith(
+      expect.objectContaining({ statusCode: 429 })
+    );
+  });
+
+  it('rejects a malformed percent-encoding without taking a slot', () => {
+    const admission = new InboundEventAdmission(admissionConfig);
+    const tryAdmit = jest.spyOn(admission, 'tryAdmit');
+    const { request } = createRequest({
+      path: '/api/actions/events/slack/c%ZZ',
+      params: {},
+    });
+
+    const { response, result } = admit(admission, request, { next: jest.fn() });
+    expect(tryAdmit).not.toHaveBeenCalled();
+    expect(result).not.toBe('next');
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: INBOUND_EVENTS_MALFORMED_PATH_MESSAGE,
+    });
   });
 
   it('reads connector ids from the URL when params are empty', () => {

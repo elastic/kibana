@@ -33,6 +33,13 @@ export const INBOUND_EVENTS_RATE_LIMITED_MESSAGE = i18n.translate(
   }
 );
 
+export const INBOUND_EVENTS_MALFORMED_PATH_MESSAGE = i18n.translate(
+  'xpack.actions.inboundEvents.malformedPathError',
+  {
+    defaultMessage: 'Malformed request path.',
+  }
+);
+
 /**
  * Default / schema default for `xpack.actions.inboundEvents.maxEmitted`.
  */

@@ -175,6 +175,23 @@ describe('InboundEventRateLimiter', () => {
     expect(limiter.peekRemoteAddress('ip-1')).toEqual({ allowed: true });
   });
 
+  it('denies an untracked address while the map is full of live keys', () => {
+    const limiter = new InboundEventRateLimiter(config({ maxKeys: 1 }));
+
+    limiter.recordRemoteAddressFailure('ip-1');
+    limiter.recordRemoteAddressFailure('ip-2');
+
+    expect(limiter.peekRemoteAddress('ip-1')).toEqual({ allowed: true });
+    expect(limiter.peekRemoteAddress('ip-2')).toEqual({ allowed: false, retryAfterSeconds: 60 });
+    expect(limiter.peekRemoteAddress('ip-3')).toEqual({ allowed: false, retryAfterSeconds: 60 });
+
+    jest.advanceTimersByTime(2 * WINDOW_MS);
+    expect(limiter.peekRemoteAddress('ip-2')).toEqual({ allowed: false, retryAfterSeconds: 60 });
+
+    jest.advanceTimersByTime(1);
+    expect(limiter.peekRemoteAddress('ip-2')).toEqual({ allowed: true });
+  });
+
   it('denies a new key when the map is full of live keys and accepts it after both windows are dead', () => {
     const limiter = new InboundEventRateLimiter(config({ maxKeys: 2 }));
 
