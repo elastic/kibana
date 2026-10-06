@@ -47,17 +47,14 @@ const buildGroupSizeBaseQuery = (
     `| RENAME group_key AS \`entity.id\``,
   ].join('\n');
 
-const hasGridFilters = ({ searchExpression, entityExpression }: QueryArgs): boolean =>
-  Boolean(searchExpression || entityExpression);
-
 /**
  * Unfiltered page: sort and limit the groups first, then join only the page rows. The join
  * runs after STATS, on the coordinator, so joining every group is what made this sort slow.
  * `has_head` keeps a group only when its target is one of its members (a type-matching entity
  * with no resolved_to), which is the existence check the join used to do: aliases of a deleted
  * target point at nothing, and their group stays hidden. Filters break this: a search can
- * exclude the target, and entity filters apply to target fields, so filtered sorts keep the
- * join-first query below.
+ * exclude the target, and entity filters apply to target fields, so filtered sorts use the
+ * queries below.
  */
 const buildUnfilteredGroupSizeSortQuery = (args: QueryArgs): string =>
   [
@@ -75,22 +72,86 @@ const buildUnfilteredGroupSizeSortQuery = (args: QueryArgs): string =>
     buildSortSuffix(GROUP_SIZE_FIELD, args.sort.direction, args.pageSize),
   ].join('\n');
 
-const buildGroupSizeSortQuery = (args: QueryArgs): string =>
-  hasGridFilters(args)
-    ? [
-        `FROM (\n${buildGroupSizeBaseQuery(args, GROUP_SIZE_FIELD)}\n)`,
-        buildLookupJoinClause(args.concreteEntityIndexName),
-        `| WHERE ${ENTITY_TYPE_FILTER}`,
-        ...buildFilterClause(args.entityExpression),
-        buildKeepClause(args, GROUP_SIZE_FIELD),
-        ...buildCursorClause(args.cursor),
-        buildSortSuffix(GROUP_SIZE_FIELD, args.sort.direction, args.pageSize),
-      ].join('\n')
-    : buildUnfilteredGroupSizeSortQuery(args);
+/**
+ * Upper bound on the groups with aliases that the entity filters keep. Below it, the size-one
+ * branch reads enough targets to fill the page after dropping the targets that have aliases.
+ * Above it, a page of size-one groups can come back short.
+ */
+const MAX_ALIAS_GROUPS = 10_000;
 
-/** Unfiltered, there is one group per target or standalone entity: no aggregation or join needed. */
+/**
+ * Entity filters without a search: build the groups that have aliases from the alias docs only
+ * (few), and read every other target as a group of one, filtered and sorted natively. The merge
+ * keeps the larger size per target. This avoids grouping and joining every entity, which timed
+ * out at 10M entities. Same rows as the join-first query, as entity filters apply to the target.
+ */
+const buildAliasFirstGroupSizeSortQuery = (args: QueryArgs): string => {
+  const entityFilter = buildFilterClause(args.entityExpression);
+  const cursor = buildCursorClause(args.cursor);
+  const indent = (steps: string[]) => steps.map((step) => `  ${step}`);
+  return [
+    'FROM (',
+    ...indent([
+      `FROM ${entityAliasOf(args.namespace)}`,
+      `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NOT NULL`,
+      `| STATS alias_count = COUNT(*) BY group_key = ${RESOLVED_TO_FIELD}`,
+      '| RENAME group_key AS `entity.id`',
+      buildLookupJoinClause(args.concreteEntityIndexName),
+      `| WHERE ${ENTITY_TYPE_FILTER}`,
+      ...entityFilter,
+      // The target is a member of its own group unless it resolves to another entity.
+      `| EVAL ${GROUP_SIZE_FIELD} = alias_count + CASE(${RESOLVED_TO_FIELD} IS NULL, 1, 0)`,
+      `| KEEP \`entity.id\`, ${GROUP_SIZE_FIELD}`,
+    ]),
+    '), (',
+    ...indent([
+      `FROM ${entityAliasOf(args.namespace)}`,
+      `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NULL`,
+      ...entityFilter,
+      `| EVAL ${GROUP_SIZE_FIELD} = TO_LONG(1)`,
+      ...cursor,
+      `| SORT \`entity.id\` ASC`,
+      `| LIMIT ${args.pageSize + 1 + MAX_ALIAS_GROUPS}`,
+      `| KEEP \`entity.id\`, ${GROUP_SIZE_FIELD}`,
+    ]),
+    ')',
+    `| STATS ${GROUP_SIZE_FIELD} = MAX(${GROUP_SIZE_FIELD}) BY \`entity.id\``,
+    ...cursor,
+    buildSortSuffix(GROUP_SIZE_FIELD, args.sort.direction, args.pageSize),
+    buildLookupJoinClause(args.concreteEntityIndexName),
+    buildKeepClause(args, GROUP_SIZE_FIELD),
+    // LOOKUP JOIN may not keep the input order.
+    buildSortSuffix(GROUP_SIZE_FIELD, args.sort.direction, args.pageSize),
+  ].join('\n');
+};
+
+/**
+ * A search applies to every member, so the size counts matching members and a target that does
+ * not match still heads a group. A search cannot run after a join, so it keeps the join-first query.
+ */
+const buildSearchGroupSizeSortQuery = (args: QueryArgs): string =>
+  [
+    `FROM (\n${buildGroupSizeBaseQuery(args, GROUP_SIZE_FIELD)}\n)`,
+    buildLookupJoinClause(args.concreteEntityIndexName),
+    `| WHERE ${ENTITY_TYPE_FILTER}`,
+    ...buildFilterClause(args.entityExpression),
+    buildKeepClause(args, GROUP_SIZE_FIELD),
+    ...buildCursorClause(args.cursor),
+    buildSortSuffix(GROUP_SIZE_FIELD, args.sort.direction, args.pageSize),
+  ].join('\n');
+
+const buildGroupSizeSortQuery = (args: QueryArgs): string => {
+  if (args.searchExpression) return buildSearchGroupSizeSortQuery(args);
+  if (args.entityExpression) return buildAliasFirstGroupSizeSortQuery(args);
+  return buildUnfilteredGroupSizeSortQuery(args);
+};
+
+/**
+ * Without a search, there is one group per target or standalone entity, and entity filters
+ * apply to it: no aggregation or join needed.
+ */
 const buildGroupSizeCountQuery = (args: QueryArgs): string =>
-  hasGridFilters(args)
+  args.searchExpression
     ? [
         `FROM (\n${buildGroupSizeBaseQuery(args, '_c')}\n)`,
         buildLookupJoinClause(args.concreteEntityIndexName),
@@ -101,6 +162,7 @@ const buildGroupSizeCountQuery = (args: QueryArgs): string =>
     : [
         `FROM ${entityAliasOf(args.namespace)}`,
         `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NULL`,
+        ...buildFilterClause(args.entityExpression),
         `| STATS total = COUNT(*)`,
       ].join('\n');
 
