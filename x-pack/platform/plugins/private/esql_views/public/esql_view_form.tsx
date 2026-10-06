@@ -39,11 +39,13 @@ import {
   validateEsqlViewName,
 } from '@kbn/esql-utils';
 import { getEsqlViewQuerySyntaxError } from './esql_view_validation';
+import type { EsqlViewsTelemetryClient } from './telemetry';
 import { translations } from './translations';
 
 interface EsqlViewFormProps {
   client: EsqlViewsClient;
   EsqlEditor: ComponentType<Omit<ESQLEditorProps, 'ref'>>;
+  telemetryClient: EsqlViewsTelemetryClient;
   view?: EsqlView;
   onClose: () => void;
   onSave: () => Promise<void>;
@@ -71,6 +73,7 @@ const getNameValidationMessage = (
 export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
   client,
   EsqlEditor,
+  telemetryClient,
   view,
   onClose,
   onSave,
@@ -157,8 +160,13 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
       };
       if (isEditing) {
         await client.updateView(request);
+        telemetryClient.trackViewEdited();
       } else {
         await client.createView(request);
+        telemetryClient.trackViewCreated({
+          hasDescription: request.description !== undefined,
+          queryLength: query.length,
+        });
       }
 
       await onSave();

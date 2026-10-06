@@ -173,6 +173,7 @@ describe('useAllSources', () => {
         title: 'view-1',
         type: SOURCES_TYPES.VIEW,
         hidden: false,
+        isView: true,
       });
     });
 
@@ -187,6 +188,7 @@ describe('useAllSources', () => {
       await waitFor(() =>
         expect(result.current.allSources.find((s) => s.name === 'view-1')).toMatchObject({
           type: SOURCES_TYPES.QUERY_STREAM,
+          isView: true,
         })
       );
     });
@@ -200,6 +202,11 @@ describe('useAllSources', () => {
       });
 
       expect(result.current.allSources.map((s) => s.name)).toContain('my-index');
+      // Preloaded sources bypass `normalizeViews`, so the merged view must still carry the flag.
+      expect(result.current.allSources.find((s) => s.name === 'view-1')).toMatchObject({
+        isView: true,
+      });
+      expect(result.current.allSources.find((s) => s.name === 'my-index')?.isView).toBeUndefined();
     });
 
     it('skips views for timeseries commands', async () => {

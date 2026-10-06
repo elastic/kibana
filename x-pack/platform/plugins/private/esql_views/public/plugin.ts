@@ -9,6 +9,7 @@ import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/publ
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { MANAGEMENT_APP_ID, PLUGIN_NAME } from '../common';
+import { TelemetryService } from './telemetry';
 
 interface EsqlViewsPublicConfig {
   managementUi: {
@@ -26,6 +27,7 @@ export interface StartDependencies {
 
 export class EsqlViewsPlugin implements Plugin<void, void, SetupDependencies, StartDependencies> {
   private readonly isManagementUiEnabled: boolean;
+  private readonly telemetry = new TelemetryService();
 
   constructor(initializerContext: PluginInitializerContext) {
     const { managementUi } = initializerContext.config.get<EsqlViewsPublicConfig>();
@@ -36,6 +38,10 @@ export class EsqlViewsPlugin implements Plugin<void, void, SetupDependencies, St
     if (!this.isManagementUiEnabled) {
       return;
     }
+
+    this.telemetry.setup(core.analytics);
+    // Built during setup so the mount closure below can capture it.
+    const telemetryClient = this.telemetry.start();
 
     management.sections.section.data.registerApp({
       id: MANAGEMENT_APP_ID,
@@ -48,7 +54,7 @@ export class EsqlViewsPlugin implements Plugin<void, void, SetupDependencies, St
           core.getStartServices(),
         ]);
 
-        return mountManagementSection(coreStart, { share }, params);
+        return mountManagementSection(coreStart, { share }, params, telemetryClient);
       },
     });
   }

@@ -14,6 +14,7 @@ import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { ESQL_VIEWS_CAPABILITIES, PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { ManagementApp } from './management_app';
 import type { StartDependencies } from './plugin';
+import type { EsqlViewsTelemetryClient } from './telemetry';
 import type { DiscoverEsqlLocatorParams } from './types';
 
 const LazyEsqlEditor = React.lazy(async () => {
@@ -24,7 +25,8 @@ const LazyEsqlEditor = React.lazy(async () => {
 export const mountManagementSection = (
   coreStart: CoreStart,
   { share }: StartDependencies,
-  { element, setBreadcrumbs }: ManagementAppMountParams
+  { element, setBreadcrumbs }: ManagementAppMountParams,
+  telemetryClient: EsqlViewsTelemetryClient
 ) => {
   const { docTitle } = coreStart.chrome;
   docTitle.change(PLUGIN_NAME);
@@ -45,6 +47,7 @@ export const mountManagementSection = (
         discoverLocator={discoverLocator}
         documentationUrl={coreStart.docLinks.links.query.queryESQLViews}
         EsqlEditor={LazyEsqlEditor}
+        telemetryClient={telemetryClient}
         toasts={coreStart.notifications.toasts}
       />
     )

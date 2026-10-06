@@ -13,12 +13,14 @@ import {
   AiReviewAction,
   ResourceBrowserType,
   ResourceBrowserOpenedFrom,
+  ViewSelectedSource,
 } from './telemetry_service';
 import { DataSourceSelectionChange } from '@kbn/esql-resource-browser';
 import {
   ESQL_LOOKUP_JOIN_ACTION_SHOWN,
   ESQL_RESOURCE_BROWSER_ITEM_TOGGLED,
   ESQL_RESOURCE_BROWSER_OPENED,
+  ESQL_VIEW_SELECTED,
   ESQL_VISOR_NL_SUBMITTED,
   ESQL_VISOR_NL_REVIEWED,
   ESQL_COMMENT_TO_ESQL_SUBMITTED,
@@ -387,6 +389,16 @@ describe('ESQLEditorTelemetryService', () => {
       expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_FIX_WITH_AI_REVIEWED, {
         action: AiReviewAction.REJECT,
         lines_changed: 1,
+      });
+    });
+  });
+
+  describe('trackViewSelected', () => {
+    it('tracks the surface the view was selected from without the view name', () => {
+      telemetryService.trackViewSelected({ source: ViewSelectedSource.RESOURCE_BROWSER });
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_VIEW_SELECTED, {
+        source: 'resource_browser',
       });
     });
   });

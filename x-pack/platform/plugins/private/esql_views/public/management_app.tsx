@@ -6,7 +6,7 @@
  */
 
 import type { ComponentType, FunctionComponent } from 'react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import type { IToasts } from '@kbn/core/public';
@@ -18,6 +18,7 @@ import { PLUGIN_NAME } from '../common';
 import { DeleteViewsModal } from './delete_views_modal';
 import { EsqlViewForm } from './esql_view_form';
 import { EsqlViewsTable } from './esql_views_table';
+import type { EsqlViewsTelemetryClient } from './telemetry';
 import { translations } from './translations';
 import type { DiscoverEsqlLocator } from './types';
 import { useDeleteEsqlViews } from './use_delete_esql_views';
@@ -31,6 +32,7 @@ interface ManagementAppProps {
   discoverLocator?: DiscoverEsqlLocator;
   documentationUrl: string;
   EsqlEditor: ComponentType<Omit<ESQLEditorProps, 'ref'>>;
+  telemetryClient: EsqlViewsTelemetryClient;
   toasts: IToasts;
 }
 
@@ -44,11 +46,16 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
   discoverLocator,
   documentationUrl,
   EsqlEditor,
+  telemetryClient,
   toasts,
 }) => {
   const { error, isLoading, reload, status, views } = useEsqlViews(client);
   const [formState, setFormState] = useState<FormState>();
   const [selectedViews, setSelectedViews] = useState<EsqlView[]>([]);
+
+  useEffect(() => {
+    telemetryClient.trackViewsPageVisited();
+  }, [telemetryClient]);
 
   const onDeleted = useCallback(() => {
     setSelectedViews([]);
@@ -56,7 +63,7 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
   }, [reload]);
 
   const { viewsPendingDelete, isDeleting, requestDelete, cancelDelete, confirmDelete } =
-    useDeleteEsqlViews({ client, toasts, onDeleted });
+    useDeleteEsqlViews({ client, telemetryClient, toasts, onDeleted });
 
   const openInDiscover = useCallback(
     (view: EsqlView) => {
@@ -154,6 +161,7 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
         <EsqlViewForm
           client={client}
           EsqlEditor={EsqlEditor}
+          telemetryClient={telemetryClient}
           onClose={() => setFormState(undefined)}
           onSave={async () => {
             await reload();

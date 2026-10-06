@@ -31,6 +31,7 @@ import {
   ESQL_QUERY_SUBMITTED,
   ESQL_RESOURCE_BROWSER_OPENED,
   ESQL_RESOURCE_BROWSER_ITEM_TOGGLED,
+  ESQL_VIEW_SELECTED,
   ESQL_RECOMMENDED_QUERY_CLICKED,
   ESQL_STARRED_QUERY_CLICKED,
   ESQL_SUGGESTIONS_WITH_CUSTOM_COMMAND_SHOWN,
@@ -57,6 +58,11 @@ export enum ResourceBrowserType {
 export enum ResourceBrowserOpenedFrom {
   AUTOCOMPLETE = 'autocomplete',
   BADGE = 'badge',
+}
+
+/** The UI surface an ES|QL view was selected from. */
+export enum ViewSelectedSource {
+  RESOURCE_BROWSER = 'resource_browser',
 }
 
 export class ESQLEditorTelemetryService {
@@ -260,6 +266,12 @@ export class ESQLEditorTelemetryService {
       browser_type: payload.browserType,
       opened_from: payload.openedFrom,
       action: payload.action,
+    });
+  }
+
+  public trackViewSelected(payload: { source: ViewSelectedSource }) {
+    this._reportEvent(ESQL_VIEW_SELECTED, {
+      source: payload.source,
     });
   }
 

@@ -26,6 +26,7 @@ export const ESQL_CONTROL_CANCELLED = 'esql.control_cancelled';
 export const ESQL_CONTROL_SAVED = 'esql.control_saved';
 export const ESQL_RESOURCE_BROWSER_OPENED = 'esql.resource_browser_opened';
 export const ESQL_RESOURCE_BROWSER_ITEM_TOGGLED = 'esql.resource_browser_item_toggled';
+export const ESQL_VIEW_SELECTED = 'esql.view_selected';
 export const ESQL_VISOR_NL_SUBMITTED = 'esql.visor_nl_submitted';
 export const ESQL_VISOR_NL_REVIEWED = 'esql.visor_nl_reviewed';
 export const ESQL_COMMENT_TO_ESQL_SUBMITTED = 'esql.comment_to_esql_submitted';
@@ -249,6 +250,18 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
       action: {
         type: 'keyword',
         _meta: { description: 'Whether the item was added or removed. add|remove' },
+      },
+    },
+  });
+
+  analytics.registerEventType({
+    eventType: ESQL_VIEW_SELECTED,
+    schema: {
+      source: {
+        type: 'keyword',
+        _meta: {
+          description: 'The UI control the view was selected from, e.g. resource_browser.',
+        },
       },
     },
   });
