@@ -157,6 +157,8 @@ export interface DiscoverSession {
   description: string;
   tabs: DiscoverSessionTab[];
   managed: boolean;
+  /** Saved object version; changes on every write, including writes outside Discover. */
+  version?: string;
   tags?: string[] | undefined;
   references?: SavedObjectReference[];
   sharingSavedObjectProps?: {

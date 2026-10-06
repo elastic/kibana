@@ -20,7 +20,7 @@ import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverAppState, TabState } from './types';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 import { DEFAULT_TAB_STATE } from './constants';
-import { parseControlGroupJson } from './utils';
+import { extractEsqlVariables, parseControlGroupJson } from './utils';
 import { createSearchSource } from '../utils/create_search_source';
 
 export const fromSavedObjectTabToAppState = ({
@@ -77,6 +77,9 @@ export const fromSavedObjectTabToTabState = ({
       ? tab.refreshInterval
       : existingTab?.globalState.refreshInterval,
   };
+  const controlGroupState = tab.controlGroupJson
+    ? parseControlGroupJson(tab.controlGroupJson)
+    : undefined;
 
   return {
     ...DEFAULT_TAB_STATE,
@@ -94,13 +97,12 @@ export const fromSavedObjectTabToTabState = ({
     appState,
     previousAppState: existingTab?.appState ?? appState,
     globalState,
+    esqlVariables: extractEsqlVariables(controlGroupState ?? null),
     attributes: {
       ...DEFAULT_TAB_STATE.attributes,
       timeRestore: tab.timeRestore ?? false,
       visContext: tab.visContext,
-      controlGroupState: tab.controlGroupJson
-        ? parseControlGroupJson(tab.controlGroupJson)
-        : undefined,
+      controlGroupState,
     },
   };
 };

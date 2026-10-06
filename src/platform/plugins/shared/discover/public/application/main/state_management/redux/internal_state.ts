@@ -662,7 +662,8 @@ const createMiddleware = (options: InternalStateDependencies) => {
         void tabsStorageManager.persistLocally(
           action.payload,
           getTabInternalState,
-          discoverSession?.id
+          discoverSession?.id,
+          discoverSession?.version
         );
       },
       MIDDLEWARE_THROTTLE_MS,
