@@ -11,6 +11,8 @@ import { spaceTest, testData } from '../fixtures';
 spaceTest.describe('Graph - drilldowns', { tag: testData.GRAPH_UI_TAGS }, () => {
   let dataViewId: string | undefined;
   const dataViewName = `graph-drilldown-${Date.now()}`;
+  const workspaceName = `graph drilldown encoder ${Date.now()}`;
+  const customDrilldownTitle = 'Search selected label';
 
   spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
     const { data } = await apiServices.dataViews.create({
@@ -30,6 +32,7 @@ spaceTest.describe('Graph - drilldowns', { tag: testData.GRAPH_UI_TAGS }, () => 
     if (dataViewId) {
       await apiServices.dataViews.delete(dataViewId, scoutSpace.id);
     }
+    await scoutSpace.savedObjects.cleanStandardList();
   });
 
   spaceTest(
@@ -47,6 +50,39 @@ spaceTest.describe('Graph - drilldowns', { tag: testData.GRAPH_UI_TAGS }, () => 
 
       await expect(graph.rawDocumentsDrilldown).toBeVisible();
       await expect(graph.rawDocumentsDrilldown).toBeEnabled();
+    }
+  );
+
+  spaceTest(
+    'persists and executes a custom Discover encoder',
+    async ({ pageObjects: { graph } }) => {
+      await graph.createWorkspaceWithQuery({
+        dataViewTitle: testData.SECREPO_INDEX,
+        dataViewName,
+        fields: testData.SECREPO_DEFAULT_FIELDS,
+        query: 'admin',
+      });
+      await graph.stopLayout();
+      await graph.createDrilldown({
+        title: customDrilldownTitle,
+        url: "/app/discover#/?_a=(query:(language:kuery,query:'{{gquery}}'))",
+        encoder: 'KQL AND query',
+      });
+      await graph.saveWorkspaceAs(workspaceName);
+
+      await graph.goToListingViaBreadcrumb();
+      await graph.waitForListing();
+      await graph.openWorkspace(workspaceName);
+      await graph.waitForWorkspace();
+      await graph.selectNodes(['admin', '/test/wp-admin/']);
+      await graph.stopLayout();
+      await graph.openDrilldowns();
+
+      const openedUrl = new URL(await graph.openDrilldownAndGetUrl(customDrilldownTitle));
+      expect(openedUrl.pathname).toContain('/app/discover');
+      const decodedDiscoverState = decodeURIComponent(openedUrl.hash);
+      expect(decodedDiscoverState).toContain('admin');
+      expect(decodedDiscoverState).toContain(' and ');
     }
   );
 });
