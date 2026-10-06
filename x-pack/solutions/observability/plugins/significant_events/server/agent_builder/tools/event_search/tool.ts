@@ -221,7 +221,7 @@ export function createSearchEventsTool({
         await assertCanReadSignificantEvents({ request, server });
 
         const data = await searchEventsToolHandler({
-          eventClient: await getEventSearchClient(),
+          eventSearchClient: await getEventSearchClient(),
           params: { ...toolParams, query },
         });
 
