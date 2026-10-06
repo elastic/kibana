@@ -47,7 +47,7 @@ export const createEpisodeSuppressionsResponse = (
     columns: [
       { name: 'rule_id', type: 'keyword' },
       { name: 'group_hash', type: 'keyword' },
-      { name: 'episode_id', type: 'keyword' },
+      { name: 'alert_id', type: 'keyword' },
       { name: 'should_suppress', type: 'boolean' },
       { name: 'last_ack_action', type: 'keyword' },
       { name: 'last_deactivate_action', type: 'keyword' },
@@ -57,7 +57,7 @@ export const createEpisodeSuppressionsResponse = (
     values: suppressions.map((suppression) => [
       suppression.rule_id,
       suppression.group_hash,
-      suppression.episode_id,
+      suppression.alert_id,
       suppression.should_suppress,
       suppression.last_ack_action ?? null,
       suppression.last_deactivate_action ?? null,
@@ -112,7 +112,8 @@ export const createLastNotifiedTimestampsResponse = (
     columns: [
       { name: 'action_group_id', type: 'keyword' },
       { name: 'last_notified', type: 'date' },
+      { name: 'alert_status', type: 'keyword' },
     ],
-    values: records.map((r) => [r.action_group_id, r.last_notified]),
+    values: records.map((r) => [r.action_group_id, r.last_notified, r.alert_status ?? null]),
   };
 };
