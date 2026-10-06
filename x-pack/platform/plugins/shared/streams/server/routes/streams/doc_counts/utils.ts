@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import deepMerge from 'deepmerge';
 import { bytePartition } from '@kbn/std';
 import { isEmpty } from 'lodash';
 import type { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 interface MeteringStatsResponse {
-  indices: Array<{
+  indices?: Array<{
     name: string;
     num_docs: number;
     size_in_bytes: number;
@@ -101,23 +100,18 @@ export async function getDataStreamsMeteringStats({
       }),
   });
 
-  if (!chunkResults.length) {
-    return {};
+  // Plain loops keep this linear. The previous spread-in-reduce copied the accumulator once
+  // per entry and blocked the event loop for seconds with thousands of backing indices.
+  const statsByName: Record<string, { size?: string; sizeBytes: number; totalDocs: number }> = {};
+
+  for (const { indices } of chunkResults) {
+    if (!indices) {
+      continue;
+    }
+    for (const { name, size_in_bytes: sizeBytes, num_docs: totalDocs } of indices) {
+      statsByName[name] = { sizeBytes, totalDocs };
+    }
   }
 
-  const { indices } = chunkResults.reduce((result, chunkResult) => deepMerge(result, chunkResult));
-
-  return indices.reduce(
-    (
-      acc: Record<string, { sizeBytes: number; totalDocs: number }>,
-      index: { name: string; size_in_bytes: number; num_docs: number }
-    ) => ({
-      ...acc,
-      [index.name]: {
-        sizeBytes: index.size_in_bytes,
-        totalDocs: index.num_docs,
-      },
-    }),
-    {} as Record<string, { size?: string; sizeBytes: number; totalDocs: number }>
-  );
+  return statsByName;
 }
