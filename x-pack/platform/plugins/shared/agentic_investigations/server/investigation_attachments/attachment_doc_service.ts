@@ -220,6 +220,32 @@ export class InvestigationAttachmentDocService<TStored extends StoredInvestigati
     return [...conversationIds];
   }
 
+  /**
+   * Maintenance: the conversations that hold documents, in every space, at most `size`. Read as
+   * the internal user; callers authorize the cross-space operation themselves.
+   */
+  async findConversationsAcrossSpaces(
+    size: number = MAX_INVESTIGATION_ATTACHMENT_CONVERSATION_IDS
+  ): Promise<Array<{ spaceId: string; conversationId: string }>> {
+    const response = await this.search({
+      track_total_hits: false,
+      size: Math.min(size * this.maxDocumentsPerConversation, MAX_RESULT_WINDOW),
+      _source: ['spaceId', 'conversationId'],
+      query: { match_all: {} },
+    });
+    const found = new Map<string, { spaceId: string; conversationId: string }>();
+    for (const hit of response.hits.hits) {
+      const { spaceId, conversationId } = hit._source ?? {};
+      if (spaceId !== undefined && conversationId !== undefined) {
+        found.set(`${spaceId}/${conversationId}`, { spaceId, conversationId });
+      }
+      if (found.size >= size) {
+        break;
+      }
+    }
+    return [...found.values()];
+  }
+
   /** Maintenance: removes every document of the given conversations in the space. */
   async deleteByConversationIds(conversationIds: string[], spaceId: string): Promise<number> {
     const ids = assertConversationIds(conversationIds);

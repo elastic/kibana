@@ -8,11 +8,21 @@
 import React, { Suspense, lazy } from 'react';
 import type { IconType } from '@elastic/eui';
 import { EuiSkeletonText } from '@elastic/eui';
-import type { ConversationTemplateServiceStartContract } from '@kbn/agent-builder-browser';
+import type {
+  ConversationTemplateBriefCardRenderProps,
+  ConversationTemplateServiceStartContract,
+} from '@kbn/agent-builder-browser';
 import { getCopyLinkFlyoutAction } from '../components/actions/copy_link_action';
 import { DETAILS_FLYOUT_LABELS } from '../components/details/translations';
 import { ConversationTitle } from './conversation_title';
-import type { RenderAssignees, RenderStatus, RenderLinkedInvestigations } from './types';
+import type {
+  RenderAssignees,
+  RenderStatus,
+  RenderLinkedInvestigations,
+  RenderOverview,
+  RenderLiveState,
+  RenderTitle,
+} from './types';
 
 /**
  * The slot contents are loaded on demand: registration runs during every consuming plugin's
@@ -84,6 +94,25 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    */
   renderCloseInvestigationModal?: import('./slots').FooterSlotProps['onCloseInvestigation'];
   /**
+   * When provided, replaces the overview tab body so the caller can add sections from data it
+   * fetches. See `RenderOverview`.
+   */
+  renderOverview?: RenderOverview;
+  /**
+   * When provided, the header shows the investigation's live state (severity, running indicator)
+   * next to its age. See `RenderLiveState`.
+   */
+  renderLiveState?: RenderLiveState;
+  /**
+   * When provided, renders the header's title, also while the header loads. See `RenderTitle`.
+   */
+  renderTitle?: RenderTitle;
+  /**
+   * Card Agent Builder renders for conversations on this template. Must be self-contained; see
+   * `ConversationTemplateUIDefinition.briefCard`.
+   */
+  briefCard?: React.ComponentType<ConversationTemplateBriefCardRenderProps>;
+  /**
    * Called by the in-chat flyout's "Copy link" button with the conversation's Agent Builder URL,
    * which Agent Builder builds. Supplied by the caller, which does the copying. Returns whether it was copied: the button's tooltip confirms success, so the
    * caller only reports a failure.
@@ -109,6 +138,10 @@ export const registerAgenticInvestigationTemplateUI = ({
   renderAssignees,
   renderStatus,
   renderCloseInvestigationModal,
+  renderOverview,
+  renderLiveState,
+  renderTitle,
+  briefCard,
   onCopyLink,
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
   const [overviewTabId] = getInvestigationTabIds(templateId);
@@ -122,6 +155,7 @@ export const registerAgenticInvestigationTemplateUI = ({
             conversation={conversation}
             attachmentsService={attachmentsService}
             renderProposedActions={renderProposedActions}
+            renderOverview={renderOverview}
           />
         </Suspense>
       );
@@ -134,6 +168,7 @@ export const registerAgenticInvestigationTemplateUI = ({
       name,
       icon,
       tabs: [overviewTabId],
+      ...(briefCard && { briefCard }),
       detailsFlyout: {
         trailingActions: ({ conversation }) => [
           getCopyLinkFlyoutAction(() =>
@@ -150,11 +185,22 @@ export const registerAgenticInvestigationTemplateUI = ({
           return (
             // Agent Builder points the flyout's `aria-labelledby` at the header, so it must not
             // collapse to nothing while the slot's chunk loads.
-            <Suspense fallback={<ConversationTitle title={conversation.title} />}>
+            <Suspense
+              fallback={
+                <ConversationTitle
+                  title={
+                    renderTitle?.({ conversationId: conversation.id, title: conversation.title }) ??
+                    conversation.title
+                  }
+                />
+              }
+            >
               <LazyHeaderSlot
                 conversation={conversation}
                 renderAssignees={renderAssignees}
                 renderStatus={renderStatus}
+                renderLiveState={renderLiveState}
+                renderTitle={renderTitle}
                 refetchConversation={refetchConversation}
               />
             </Suspense>
