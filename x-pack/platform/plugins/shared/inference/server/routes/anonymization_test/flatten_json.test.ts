@@ -69,6 +69,17 @@ describe('applyStringReplacements', () => {
     expect(result.message).toBe('EMAIL_abc123');
   });
 
+  it('keeps a JSON field named __proto__ as an own property of the output', () => {
+    const input = JSON.parse('{"__proto__": {"email": "a.mehta@example.com"}}');
+
+    const result = applyStringReplacements(input, { '/__proto__/email': 'EMAIL_abc123' });
+
+    expect(Object.keys(result)).toEqual(['__proto__']);
+    expect(Object.getOwnPropertyDescriptor(result, '__proto__')?.value).toEqual({
+      email: 'EMAIL_abc123',
+    });
+  });
+
   it('round-trips through flattenJsonStrings pointers', () => {
     const input = { items: [{ user: 'a.mehta' }, { user: 'b.jones' }] };
     const flattened = flattenJsonStrings(input);
