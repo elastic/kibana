@@ -118,11 +118,13 @@ apiTest.describe(
       ]);
 
       if (createdRuleIds.length > 0) {
-        await apiClient.post(DETECTION_ENGINE_BULK_ACTION_URL, {
+        const response = await apiClient.post(DETECTION_ENGINE_BULK_ACTION_URL, {
           headers: { ...editorHeaders, ...PUBLIC_API_HEADERS },
           responseType: 'json',
           body: { action: 'delete', ids: createdRuleIds },
         });
+        // A partial failure answers 500, so a rule left behind fails the suite instead of leaking.
+        expect(response).toHaveStatusCode(200);
       }
     });
 
