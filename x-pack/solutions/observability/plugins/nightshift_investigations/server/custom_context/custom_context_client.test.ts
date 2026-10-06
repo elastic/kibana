@@ -13,6 +13,7 @@ import {
   savedObjectsClientMock,
   savedObjectsServiceMock,
 } from '@kbn/core/server/mocks';
+import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import {
@@ -51,7 +52,9 @@ const setup = ({
   core.featureFlags.getBooleanValue$.mockImplementation((flag) =>
     of(flag === NIGHTSHIFT_ENABLED_FLAG ? nightshiftEnabled : false)
   );
-  core.security.authc.getCurrentUser.mockReturnValue(user as never);
+  jest
+    .mocked(core.security.authc.getCurrentUser)
+    .mockReturnValue(user ? mockAuthenticatedUser({ full_name: '', ...user }) : null);
 
   const savedObjects = savedObjectsServiceMock.createStartContract();
   const soClient = savedObjectsClientMock.create();
@@ -147,6 +150,24 @@ describe('createCustomContextClient', () => {
       { snippets: result.snippets },
       { id: NIGHTSHIFT_CUSTOM_CONTEXT_SO_ID, overwrite: true, version: 'v1' }
     );
+  });
+
+  it('records who edited a snippet and when, keeping the original author', async () => {
+    const { client, request } = setup({ stored: [EXISTING] });
+
+    const result = await client.replace(request, {
+      snippets: [{ id: EXISTING.id, text: 'Rule out config regressions first.' }],
+      version: 'v1',
+    });
+
+    expect(result.snippets).toEqual([
+      {
+        ...EXISTING,
+        text: 'Rule out config regressions first.',
+        updated_by: 'John Doe',
+        updated_at: expect.any(String),
+      },
+    ]);
   });
 
   it('removes snippets that are not listed', async () => {

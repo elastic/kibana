@@ -20,10 +20,14 @@ export interface CustomContextSnippet {
   author_name: string;
   /** ISO timestamp of when the snippet was added. */
   created_at: string;
+  /** Who last changed the text, set only once the snippet has been edited. */
+  updated_by?: string;
+  /** ISO timestamp of the last text change, set only once the snippet has been edited. */
+  updated_at?: string;
 }
 
 export interface CustomContextSnippetInput {
-  /** Id of an existing snippet to keep; omit to add a new snippet. */
+  /** Id of an existing snippet to keep (its text may change); omit to add a new snippet. */
   id?: string;
   text: string;
 }

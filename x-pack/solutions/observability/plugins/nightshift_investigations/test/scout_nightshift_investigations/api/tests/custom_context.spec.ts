@@ -66,7 +66,7 @@ apiTest.describe(
       }
     });
 
-    apiTest('adds, keeps and removes snippets', async ({ apiClient }) => {
+    apiTest('adds, keeps, edits and removes snippets', async ({ apiClient }) => {
       const empty = await getCustomContext(apiClient, manageCookie, SPACE_ID);
       expect(empty).toHaveStatusCode(200);
       expect(empty.body.snippets).toStrictEqual([]);
@@ -90,8 +90,27 @@ apiTest.describe(
       expect(appended.body.snippets).toHaveLength(2);
       expect(appended.body.snippets[0]).toStrictEqual(first);
 
+      const edited = await putCustomContext(apiClient, manageCookie, SPACE_ID, {
+        snippets: [
+          { id: first.id, text: 'Rule out config regressions first.' },
+          { id: appended.body.snippets[1].id, text: appended.body.snippets[1].text },
+        ],
+        version: appended.body.version,
+      });
+      expect(edited).toHaveStatusCode(200);
+      const [editedFirst, untouched] = edited.body.snippets;
+      expect(editedFirst).toMatchObject({
+        id: first.id,
+        text: 'Rule out config regressions first.',
+        author_name: first.author_name,
+        created_at: first.created_at,
+      });
+      expect(typeof editedFirst.updated_by).toBe('string');
+      expect(Number.isNaN(Date.parse(editedFirst.updated_at ?? ''))).toBe(false);
+      expect(untouched).toStrictEqual(appended.body.snippets[1]);
+
       const listed = await getCustomContext(apiClient, manageCookie, SPACE_ID);
-      expect(listed.body.snippets).toStrictEqual(appended.body.snippets);
+      expect(listed.body.snippets).toStrictEqual(edited.body.snippets);
 
       const stale = await putCustomContext(apiClient, manageCookie, SPACE_ID, {
         snippets: [],
@@ -106,7 +125,7 @@ apiTest.describe(
 
       const cleared = await putCustomContext(apiClient, manageCookie, SPACE_ID, {
         snippets: [],
-        version: appended.body.version,
+        version: edited.body.version,
       });
       expect(cleared).toHaveStatusCode(200);
       expect(cleared.body.snippets).toStrictEqual([]);

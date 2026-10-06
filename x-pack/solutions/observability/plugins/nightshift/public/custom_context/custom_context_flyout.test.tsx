@@ -113,6 +113,46 @@ describe('CustomContextFlyout', () => {
     expect(screen.queryByTestId('nightshiftCustomContextDraft')).not.toBeInTheDocument();
   });
 
+  it('saves an edited snippet in place, keeping its id', async () => {
+    const { getPutBody } = setup({ getResponse: { snippets: [SNIPPET], version: 'v1' } });
+
+    fireEvent.click(await screen.findByTestId('nightshiftCustomContextEdit'));
+    const draft = screen.getByTestId('nightshiftCustomContextDraft');
+    expect(draft).toHaveValue(SNIPPET.text);
+    expect(screen.getByTestId('nightshiftCustomContextSave')).toBeDisabled();
+
+    fireEvent.change(draft, { target: { value: 'Rule out config regressions first.' } });
+    fireEvent.click(screen.getByTestId('nightshiftCustomContextSave'));
+
+    await waitFor(() =>
+      expect(getPutBody()).toEqual({
+        params: {
+          body: {
+            snippets: [{ id: SNIPPET.id, text: 'Rule out config regressions first.' }],
+            version: 'v1',
+          },
+        },
+        signal: null,
+      })
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId('nightshiftCustomContextSnippetText')).toHaveTextContent(
+        'Rule out config regressions first.'
+      )
+    );
+  });
+
+  it('marks edited snippets', async () => {
+    setup({
+      getResponse: {
+        snippets: [{ ...SNIPPET, updated_by: 'Jane', updated_at: '2026-01-02T00:00:00.000Z' }],
+        version: 'v1',
+      },
+    });
+
+    expect(await screen.findByTestId('nightshiftCustomContextEdited')).toHaveTextContent('Edited');
+  });
+
   it('removes a snippet when it is deleted', async () => {
     const { getPutBody } = setup({ getResponse: { snippets: [SNIPPET], version: 'v1' } });
 
@@ -126,11 +166,12 @@ describe('CustomContextFlyout', () => {
     );
   });
 
-  it('hides add and delete for users who cannot manage Nightshift', async () => {
+  it('hides add, edit, and delete for users who cannot manage Nightshift', async () => {
     setup({ getResponse: { snippets: [SNIPPET], version: 'v1' }, canEdit: false });
 
     await screen.findByTestId('nightshiftCustomContextSnippet');
     expect(screen.queryByTestId('nightshiftCustomContextAdd')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftCustomContextEdit')).not.toBeInTheDocument();
     expect(screen.queryByTestId('nightshiftCustomContextDelete')).not.toBeInTheDocument();
   });
 });

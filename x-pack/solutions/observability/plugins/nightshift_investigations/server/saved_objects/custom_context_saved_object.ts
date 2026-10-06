@@ -31,6 +31,8 @@ const nightshiftCustomContextAttributesSchemaV1 = schema.object({
       text: schema.string({ maxLength: MAX_CUSTOM_CONTEXT_SNIPPET_LENGTH }),
       author_name: schema.string({ maxLength: MAX_CUSTOM_CONTEXT_AUTHOR_NAME_LENGTH }),
       created_at: schema.string({ maxLength: 64 }),
+      updated_by: schema.maybe(schema.string({ maxLength: MAX_CUSTOM_CONTEXT_AUTHOR_NAME_LENGTH })),
+      updated_at: schema.maybe(schema.string({ maxLength: 64 })),
     }),
     { maxSize: MAX_CUSTOM_CONTEXT_SNIPPETS }
   ),

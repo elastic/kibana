@@ -167,12 +167,16 @@ export const createCustomContextClient = ({
         (existing?.attributes.snippets ?? []).map((snippet) => [snippet.id, snippet])
       );
       const authorName = getAuthorName(request);
-      const createdAt = new Date().toISOString();
+      const now = new Date().toISOString();
       const nextSnippets: CustomContextSnippet[] = kept.map(({ id, text }) => {
         const previous = id ? existingById.get(id) : undefined;
-        return previous
-          ? { ...previous, text }
-          : { id: randomUUID(), text, author_name: authorName, created_at: createdAt };
+        if (!previous) {
+          return { id: randomUUID(), text, author_name: authorName, created_at: now };
+        }
+        if (previous.text === text) {
+          return previous;
+        }
+        return { ...previous, text, updated_by: authorName, updated_at: now };
       });
 
       try {
