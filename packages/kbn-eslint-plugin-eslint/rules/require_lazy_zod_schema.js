@@ -21,19 +21,27 @@ const esTypes = tsEstree.AST_NODE_TYPES;
 const ZOD_SOURCES = new Set(['@kbn/zod', '@kbn/zod/v4', 'zod', 'zod/v4', 'zod/v3']);
 const AUTO_FIX_SCHEMA_METHODS = new Set([
   'array',
+  'boolean',
   'default',
   'describe',
+  'discriminatedUnion',
   'enum',
   'extend',
   'int',
+  'literal',
   'max',
   'min',
+  'nullable',
   'number',
   'object',
   'omit',
   'optional',
   'pick',
+  'record',
+  'refine',
   'string',
+  'superRefine',
+  'tuple',
   'union',
 ]);
 
@@ -69,7 +77,7 @@ const getImportedName = (node) => {
 
 /**
  * @param {ImportDeclaration} node
- * @param {{ zodNamespaces: Set<string>; lazySchemaNames: Set<string> }} state
+ * @param {FileState} state
  */
 const recordImportBindings = (node, state) => {
   if (node.importKind === 'type' || !node.source || typeof node.source.value !== 'string') {
@@ -78,17 +86,23 @@ const recordImportBindings = (node, state) => {
   if (!isZodModuleSource(node.source.value)) {
     return;
   }
+  const hasLazySchemaExport =
+    node.source.value === '@kbn/zod' || node.source.value === '@kbn/zod/v4';
 
   for (const spec of node.specifiers) {
     if (spec.importKind === 'type' || !spec.local?.name) {
       continue;
     }
 
-    if (
-      spec.type === esTypes.ImportDefaultSpecifier ||
-      spec.type === esTypes.ImportNamespaceSpecifier
-    ) {
+    if (spec.type === esTypes.ImportDefaultSpecifier) {
       state.zodNamespaces.add(spec.local.name);
+      continue;
+    }
+    if (spec.type === esTypes.ImportNamespaceSpecifier) {
+      state.zodNamespaces.add(spec.local.name);
+      if (hasLazySchemaExport) {
+        state.zodImports.set(spec.local.name, { node, namespace: true, name: spec.local.name });
+      }
       continue;
     }
 
@@ -96,6 +110,9 @@ const recordImportBindings = (node, state) => {
       const importedName = getImportedName(spec.imported);
       if (importedName === 'z') {
         state.zodNamespaces.add(spec.local.name);
+        if (hasLazySchemaExport) {
+          state.zodImports.set(spec.local.name, { node, namespace: false, name: spec.local.name });
+        }
       } else if (importedName === 'lazySchema') {
         state.lazySchemaNames.add(spec.local.name);
       }
@@ -169,6 +186,8 @@ const inspectZodChain = (node) => {
  * @typedef {{
  *   zodNamespaces: Set<string>;
  *   lazySchemaNames: Set<string>;
+ *   zodImports: Map<string, { node: ImportDeclaration; namespace: boolean; name: string }>;
+ *   importFixScheduled: boolean;
  *   schemaBindings: Set<string>;
  * }} FileState
  */
@@ -196,7 +215,7 @@ const isZodNamespaceChain = (init, state) => {
  */
 const isEagerZodNamespaceChain = (init, state) => {
   const { hasCall, firstMember } = inspectZodChain(init);
-  if (!hasCall || firstMember === 'lazy') {
+  if (!hasCall || firstMember === 'lazy' || firstMember === 'lazySchema') {
     return false;
   }
   const root = getChainRootIdentifier(init);
@@ -215,7 +234,15 @@ const isLazySchemaCall = (init, state) => {
     return false;
   }
   const callee = unwrapExpression(unwrapped.callee);
-  if (!callee || callee.type !== esTypes.Identifier || !state.lazySchemaNames.has(callee.name)) {
+  const namedHelper = callee?.type === esTypes.Identifier && state.lazySchemaNames.has(callee.name);
+  const namespaceHelper =
+    callee?.type === esTypes.MemberExpression &&
+    !callee.computed &&
+    callee.object.type === esTypes.Identifier &&
+    callee.property.type === esTypes.Identifier &&
+    callee.property.name === 'lazySchema' &&
+    state.zodImports.get(callee.object.name)?.namespace;
+  if (!namedHelper && !namespaceHelper) {
     return false;
   }
   if (unwrapped.arguments.length !== 1) {
@@ -340,6 +367,44 @@ const canAutoFixSchemaCall = (node) => {
   );
 };
 
+/**
+ * @param {Expression} node
+ * @param {FileState} state
+ * @returns {{ node: ImportDeclaration; namespace: boolean; name: string } | null}
+ */
+const getZodImportForSchema = (node, state) => {
+  const root = getChainRootIdentifier(node);
+  if (!root) {
+    return null;
+  }
+  const directImport = state.zodImports.get(root.name);
+  if (directImport) {
+    return directImport;
+  }
+  if (state.zodNamespaces.has(root.name) || !state.schemaBindings.has(root.name)) {
+    return null;
+  }
+  const imports = [...state.zodImports.values()];
+  return imports.length === 1 ? imports[0] : null;
+};
+
+/**
+ * @param {Node} node
+ * @param {string} name
+ * @param {import('eslint').SourceCode} sourceCode
+ * @returns {boolean}
+ */
+const hasBinding = (node, name, sourceCode) => {
+  let scope = sourceCode.getScope(node);
+  while (scope) {
+    if (scope.set.has(name)) {
+      return true;
+    }
+    scope = scope.upper;
+  }
+  return false;
+};
+
 /** @type {Rule} */
 module.exports = {
   meta: {
@@ -364,15 +429,40 @@ module.exports = {
     let sourceCode;
 
     const reportEagerSchema = (node, messageId) => {
-      const lazySchemaName =
+      let lazySchemaName =
         state.lazySchemaNames.size === 1 ? state.lazySchemaNames.values().next().value : undefined;
+      let importToUpdate;
+      if (!lazySchemaName && state.lazySchemaNames.size === 0) {
+        const zodImport = getZodImportForSchema(node, state);
+        if (zodImport?.namespace) {
+          lazySchemaName = `${zodImport.name}.lazySchema`;
+        } else if (zodImport && !hasBinding(node, 'lazySchema', sourceCode)) {
+          lazySchemaName = 'lazySchema';
+          importToUpdate = zodImport.node;
+        }
+      }
+      const addImport = importToUpdate && !state.importFixScheduled;
+      if (addImport && canAutoFixSchemaCall(node)) {
+        state.importFixScheduled = true;
+      }
       context.report({
         node,
         messageId,
         ...(lazySchemaName && canAutoFixSchemaCall(node)
           ? {
-              fix: (fixer) =>
-                fixer.replaceText(node, `${lazySchemaName}(() => ${sourceCode.getText(node)})`),
+              fix: (fixer) => {
+                const fixes = [
+                  fixer.replaceText(node, `${lazySchemaName}(() => ${sourceCode.getText(node)})`),
+                ];
+                if (addImport) {
+                  const namedImports = importToUpdate.specifiers.filter(
+                    (specifier) => specifier.type === esTypes.ImportSpecifier
+                  );
+                  const lastSpecifier = namedImports[namedImports.length - 1];
+                  fixes.unshift(fixer.insertTextAfter(lastSpecifier, ', lazySchema'));
+                }
+                return fixes;
+              },
             }
           : {}),
       });
@@ -383,6 +473,8 @@ module.exports = {
         state = {
           zodNamespaces: new Set(),
           lazySchemaNames: new Set(),
+          zodImports: new Map(),
+          importFixScheduled: false,
           schemaBindings: new Set(),
         };
         sourceCode = context.sourceCode;

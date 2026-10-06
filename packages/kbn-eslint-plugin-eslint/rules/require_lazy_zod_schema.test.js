@@ -35,6 +35,12 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
     },
     {
       code: dedent`
+        import * as z from '@kbn/zod';
+        export const X = z.lazySchema(() => z.object({}));
+      `,
+    },
+    {
+      code: dedent`
         import { z } from '@kbn/zod';
         function make() {
           const X = z.object({});
@@ -133,6 +139,37 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
         export const X = z.object({});
       `,
       errors: [EAGER],
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        export const X = lazySchema(() => z.object({}));
+      `,
+    },
+    {
+      code: dedent`
+        import { z, } from '@kbn/zod';
+        export const X = z.object({});
+      `,
+      errors: [EAGER],
+      output: dedent`
+        import { z, lazySchema, } from '@kbn/zod';
+        export const X = lazySchema(() => z.object({}));
+      `,
+    },
+    {
+      code: dedent`
+        import { z } from '@kbn/zod';
+        const lazySchema = () => null;
+        export const X = z.object({});
+      `,
+      errors: [EAGER],
+      output: null,
+    },
+    {
+      code: dedent`
+        import { z } from '@kbn/zod';
+        export const X = z.object({}).parse({});
+      `,
+      errors: [EAGER],
       output: null,
     },
     {
@@ -163,7 +200,37 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
         export const X = z.object({}).superRefine(() => {});
       `,
       errors: [EAGER],
-      output: null,
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        export const X = lazySchema(() => z.object({}).superRefine(() => {}));
+      `,
+    },
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        export const Schemas = {
+          flag: z.boolean(),
+          kind: z.literal('ok'),
+          entries: z.record(z.string(), z.number()),
+          pair: z.tuple([z.string(), z.number()]),
+          choice: z.discriminatedUnion('type', [z.object({ type: z.literal('ok') })]),
+          maybe: z.string().nullable(),
+          checked: z.string().refine(Boolean),
+        };
+      `,
+      errors: [EAGER, EAGER, EAGER, EAGER, EAGER, EAGER, EAGER],
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        export const Schemas = {
+          flag: lazySchema(() => z.boolean()),
+          kind: lazySchema(() => z.literal('ok')),
+          entries: lazySchema(() => z.record(z.string(), z.number())),
+          pair: lazySchema(() => z.tuple([z.string(), z.number()])),
+          choice: lazySchema(() => z.discriminatedUnion('type', [z.object({ type: z.literal('ok') })])),
+          maybe: lazySchema(() => z.string().nullable()),
+          checked: lazySchema(() => z.string().refine(Boolean)),
+        };
+      `,
     },
     {
       code: dedent`
@@ -171,6 +238,10 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
         const X = z.string().min(1);
       `,
       errors: [EAGER],
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const X = lazySchema(() => z.string().min(1));
+      `,
     },
     {
       code: dedent`
@@ -178,6 +249,10 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
         export const E = z.enum(['a']);
       `,
       errors: [EAGER],
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        export const E = lazySchema(() => z.enum(['a']));
+      `,
     },
     {
       code: dedent`
@@ -185,6 +260,10 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
         export const X = z.object({});
       `,
       errors: [EAGER],
+      output: dedent`
+        import * as z from '@kbn/zod';
+        export const X = z.lazySchema(() => z.object({}));
+      `,
     },
     {
       code: dedent`
@@ -192,6 +271,10 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
         export const X = z4.object({});
       `,
       errors: [EAGER],
+      output: dedent`
+        import { z as z4, lazySchema } from '@kbn/zod/v4';
+        export const X = lazySchema(() => z4.object({}));
+      `,
     },
     {
       code: dedent`
@@ -220,6 +303,10 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
         const A = z.object({}), B = z.string();
       `,
       errors: [EAGER, EAGER],
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const A = lazySchema(() => z.object({})), B = lazySchema(() => z.string());
+      `,
     },
     {
       code: dedent`
@@ -227,6 +314,10 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
         export const Ext = UnknownSchema.extend({ a: z.string() });
       `,
       errors: [EAGER],
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        export const Ext = UnknownSchema.extend({ a: lazySchema(() => z.string()) });
+      `,
     },
     {
       code: dedent`
@@ -248,6 +339,11 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
         export const Opt = Base.optional();
       `,
       errors: [EAGER, DERIVED],
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        export const Base = lazySchema(() => z.object({}));
+        export const Opt = lazySchema(() => Base.optional());
+      `,
     },
     {
       code: dedent`
@@ -270,6 +366,12 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
         export const Picked = Ext.pick({ a: true });
       `,
       errors: [EAGER, DERIVED, DERIVED],
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        export const Base = lazySchema(() => z.object({}));
+        export const Ext = lazySchema(() => Base.extend({ a: z.string() }));
+        export const Picked = lazySchema(() => Ext.pick({ a: true }));
+      `,
     },
     {
       code: dedent`
@@ -279,6 +381,12 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
         };
       `,
       errors: [EAGER],
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        export const Connector = {
+          actions: { checkIp: { input: lazySchema(() => z.object({ ip: z.string() })) } },
+        };
+      `,
     },
     {
       code: dedent`
@@ -286,6 +394,10 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
         const Connector = register({ input: z.object({ ip: z.string() }) });
       `,
       errors: [EAGER],
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const Connector = register({ input: lazySchema(() => z.object({ ip: z.string() })) });
+      `,
     },
     {
       code: dedent`
