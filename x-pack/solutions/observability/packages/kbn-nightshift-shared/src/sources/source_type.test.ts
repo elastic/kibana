@@ -7,6 +7,7 @@
 
 import {
   matchSourceTypes,
+  patternsFromApmIndices,
   toSourceTypePatternTokens,
   uniqueSourceTypePatternTokens,
 } from './source_type';
@@ -21,17 +22,26 @@ describe('matchSourceTypes', () => {
     expect(matchSourceTypes({ name: 'metricbeat-*' })).toEqual(['metrics']);
   });
 
-  it('matches a configured token exactly and not as a glob', () => {
+  it('matches a configured token as an index pattern', () => {
     const patterns = { logs: ['my-app-*'], traces: ['apm-*'] };
 
     expect(matchSourceTypes({ name: 'my-app-*', patterns })).toEqual(['logs']);
-    expect(matchSourceTypes({ name: 'my-app-0001', patterns })).toEqual([]);
+    expect(matchSourceTypes({ name: 'my-app-0001', patterns })).toEqual(['logs']);
+    expect(matchSourceTypes({ name: 'my-app-*::data', patterns })).toEqual(['logs']);
     expect(matchSourceTypes({ name: 'apm-*', patterns })).toEqual(['traces']);
+    expect(matchSourceTypes({ name: 'other-*', patterns })).toEqual([]);
   });
 
-  it('returns every type a name matches, with no precedence', () => {
+  it('returns every type prefix a name matches', () => {
     expect(matchSourceTypes({ name: 'logs-traces-*' })).toEqual(['logs', 'traces']);
     expect(matchSourceTypes({ name: 'metrics-logs-*' })).toEqual(['logs', 'metrics']);
+  });
+
+  it('lets one type segment win over a dataset token', () => {
+    expect(matchSourceTypes({ name: 'metrics-logstash.node-*' })).toEqual(['metrics']);
+    expect(matchSourceTypes({ name: 'metrics-microsoft_sqlserver.transaction_log-*' })).toEqual([
+      'metrics',
+    ]);
   });
 
   it('treats ::data like the index name and ::failures as no match', () => {
@@ -56,6 +66,23 @@ describe('toSourceTypePatternTokens', () => {
       'filebeat-*',
       'my-app-*',
     ]);
+  });
+});
+
+describe('patternsFromApmIndices', () => {
+  it('keeps a token that is on more than one APM setting in each kind', () => {
+    expect(
+      patternsFromApmIndices({
+        transaction: 'traces-apm*,apm-*',
+        span: 'traces-apm*,apm-*',
+        error: 'logs-apm*,apm-*',
+        metric: 'metrics-apm*,apm-*',
+      })
+    ).toEqual({
+      logs: ['logs-apm*', 'apm-*'],
+      traces: ['traces-apm*', 'apm-*'],
+      metrics: ['metrics-apm*', 'apm-*'],
+    });
   });
 });
 

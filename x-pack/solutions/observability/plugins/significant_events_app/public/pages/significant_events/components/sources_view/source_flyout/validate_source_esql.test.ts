@@ -38,6 +38,15 @@ describe('validateSourceEsql', () => {
     ).resolves.toBe(true);
   });
 
+  it('rejects an unscoped wildcard', async () => {
+    await expect(
+      validateSourceEsql({
+        esql: 'FROM *',
+        getSourceTypePatterns: patterns({ logs: [], traces: [] }),
+      })
+    ).resolves.toMatch(/unscoped wildcard/);
+  });
+
   it('rejects a query that mixes types', async () => {
     await expect(
       validateSourceEsql({

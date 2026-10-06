@@ -21,11 +21,13 @@ const SOURCE_TYPE_PATTERNS_QUERY_OPTIONS = {
 };
 
 /**
- * Configured source-type patterns for the open flyout. The returned function is stable and
- * waits for the same request the flyout started on mount.
+ * Configured source-type patterns for the open flyout. `getSourceTypePatterns` reuses the
+ * request started on mount. `refreshSourceTypePatterns` reads again, so a settings change
+ * applies on save without closing the flyout.
  */
 export const useSourceTypePatterns = (): {
   getSourceTypePatterns: () => Promise<SourceTypePatterns | null>;
+  refreshSourceTypePatterns: () => Promise<SourceTypePatterns | null>;
 } => {
   const {
     dependencies: {
@@ -34,19 +36,35 @@ export const useSourceTypePatterns = (): {
   } = useKibana();
   const queryClient = useQueryClient();
 
+  const queryFn = useCallback(() => nightshiftSources.getSourceTypePatterns(), [nightshiftSources]);
+
+  // Starts the fetch on mount. Validation reads it back through fetchQuery.
   useQuery({
     ...SOURCE_TYPE_PATTERNS_QUERY_OPTIONS,
-    queryFn: () => nightshiftSources.getSourceTypePatterns(),
+    queryFn,
   });
 
   const getSourceTypePatterns = useCallback(
     () =>
       queryClient.fetchQuery({
         ...SOURCE_TYPE_PATTERNS_QUERY_OPTIONS,
-        queryFn: () => nightshiftSources.getSourceTypePatterns(),
+        queryFn,
       }),
-    [nightshiftSources, queryClient]
+    [queryClient, queryFn]
   );
 
-  return { getSourceTypePatterns };
+  const refreshSourceTypePatterns = useCallback(async () => {
+    await queryClient.invalidateQueries({
+      queryKey: SOURCE_TYPE_PATTERNS_QUERY_KEY,
+      refetchType: 'none',
+    });
+    // staleTime 0 so this call does not reuse the result from mount.
+    return queryClient.fetchQuery({
+      ...SOURCE_TYPE_PATTERNS_QUERY_OPTIONS,
+      staleTime: 0,
+      queryFn,
+    });
+  }, [queryClient, queryFn]);
+
+  return { getSourceTypePatterns, refreshSourceTypePatterns };
 };

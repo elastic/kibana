@@ -71,21 +71,21 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
     },
   } = useKibana();
   const { createSource, updateSource } = useSourcesApi();
-  const { getSourceTypePatterns } = useSourceTypePatterns();
+  const { getSourceTypePatterns, refreshSourceTypePatterns } = useSourceTypePatterns();
   const titleId = useGeneratedHtmlId();
   // Only the query the user ran is previewed, so typing does not search on every keystroke.
   // `runId` changes on every run, so running an unchanged query still refetches it.
   const [preview, setPreview] = useState({ esql: source?.esql ?? '', runId: 0 });
-  const runPreview = (esql: string) => setPreview(({ runId }) => ({ esql, runId: runId + 1 }));
 
-  const { control, getValues, handleSubmit, setError, formState } = useForm<SourceFormValues>({
-    defaultValues: {
-      title: source?.title ?? '',
-      description: source?.description ?? '',
-      tags: source?.tags ?? [],
-      esql: source?.esql ?? '',
-    },
-  });
+  const { control, getValues, handleSubmit, setError, clearErrors, formState } =
+    useForm<SourceFormValues>({
+      defaultValues: {
+        title: source?.title ?? '',
+        description: source?.description ?? '',
+        tags: source?.tags ?? [],
+        esql: source?.esql ?? '',
+      },
+    });
 
   // Values held back while the user confirms that a new query resets the source's knowledge.
   const [pendingQueryChange, setPendingQueryChange] = useState<SourceFormValues>();
@@ -114,7 +114,20 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
     }
   };
 
-  const save = handleSubmit(async (values) => {
+  const runPreview = async (esql: string) => {
+    const result = await validateSourceEsql({
+      esql,
+      getSourceTypePatterns: refreshSourceTypePatterns,
+    });
+    if (result !== true) {
+      setError('esql', { message: result });
+      return;
+    }
+    clearErrors('esql');
+    setPreview(({ runId }) => ({ esql, runId: runId + 1 }));
+  };
+
+  const submit = handleSubmit(async (values) => {
     // Same comparison the server uses to decide the query changed and the knowledge is reset.
     if (source && !hasSameEsql(values.esql, source.esql)) {
       setPendingQueryChange(values);
@@ -122,6 +135,11 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
     }
     await persist(values);
   });
+
+  const save = async () => {
+    await refreshSourceTypePatterns();
+    await submit();
+  };
 
   return (
     <>
@@ -381,7 +399,7 @@ const QUERY_LABEL = i18n.translate('xpack.significantEventsApp.sources.flyout.qu
 
 const QUERY_HELP_TEXT = i18n.translate('xpack.significantEventsApp.sources.flyout.queryHelpText', {
   defaultMessage:
-    'Start with FROM or TS; only WHERE may follow. Every index must be the same kind of data. Run the query to preview it.',
+    'Start with FROM or TS; only WHERE may follow. A TS command is metrics. Every index must be the same kind of data. Run the query to preview it.',
 });
 
 const RUN_QUERY_LABEL = i18n.translate('xpack.significantEventsApp.sources.flyout.runQueryLabel', {

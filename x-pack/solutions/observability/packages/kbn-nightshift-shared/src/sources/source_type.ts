@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/data-view-utils';
+import { createRegExpPatternFrom } from '@kbn/data-view-utils';
 import { z } from '@kbn/zod/v4';
 
 /**
- * Kinds of data a Nightshift source may target. `unknown` is a real value: an index that matches
- * none of the others, including a wildcard such as `*`.
+ * Kinds of data a Nightshift source may target. `unknown` is a real value: an index that
+ * matches none of the others. An unscoped wildcard is rejected on its own.
  */
 export const SOURCE_TYPES = ['logs', 'metrics', 'traces', 'unknown'] as const;
 
@@ -29,11 +29,21 @@ const KNOWN_SOURCE_TYPES = [
 
 /**
  * Index patterns configured for a deployment, on top of the built-in base patterns.
- * Metrics are not configurable: a metrics source is a `TS` command or a `metrics` / `metricbeat` name.
+ * `metrics` comes from the APM metric index setting. A `TS` command is metrics even when
+ * this list is empty.
  */
 export interface SourceTypePatterns {
   logs: readonly string[];
   traces: readonly string[];
+  metrics?: readonly string[];
+}
+
+/** The four APM index settings that name a kind of data. Onboarding and sourcemap are unused. */
+export interface ApmIndexPatternFields {
+  transaction: string;
+  span: string;
+  error: string;
+  metric: string;
 }
 
 /** No configured patterns. Classification then uses only the built-in base patterns. */
@@ -74,12 +84,51 @@ const configuredPatterns: Record<
 > = {
   logs: (patterns) => patterns.logs,
   traces: (patterns) => patterns.traces,
-  metrics: () => [],
+  metrics: (patterns) => patterns.metrics ?? [],
+};
+
+const DATA_SELECTOR = /::data$/i;
+
+/** `::data` is the default selector, so `my-app-*::data` is the same name as `my-app-*`. */
+const stripDataSelector = (name: string): string => name.replace(DATA_SELECTOR, '');
+
+/**
+ * True when `name` matches `pattern` as an Elasticsearch index pattern (`*` and `?`).
+ * A configured log source of `my-app-*` covers `my-app-0001` and `my-app-frontend-*`.
+ */
+const indexPatternMatches = (pattern: string, name: string): boolean => {
+  const expression = stripDataSelector(pattern)
+    .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+    .replace(/\*/g, '.*')
+    .replace(/\?/g, '.');
+  return new RegExp(`^${expression}$`, 'i').test(stripDataSelector(name));
+};
+
+/** `logs` / `metrics` / `traces` as whole segments. `logstash` and `transaction_log` are not. */
+const typeSegments = (name: string): KnownSourceType[] => {
+  const found = new Set<string>();
+  const expression = /(?:^|[^a-z0-9])(logs|metrics|traces)(?=$|[^a-z0-9])/gi;
+  for (const match of stripDataSelector(name).matchAll(expression)) {
+    found.add(match[1].toLowerCase());
+  }
+  return KNOWN_SOURCE_TYPES.filter((type) => found.has(type));
+};
+
+const matchesKnownType = (
+  name: string,
+  type: KnownSourceType,
+  patterns: SourceTypePatterns
+): boolean => {
+  if (BASE_PATTERN_REGEXP[type].test(name)) {
+    return true;
+  }
+  return configuredPatterns[type](patterns).some((token) => indexPatternMatches(token, name));
 };
 
 /**
  * Every known type `name` matches. Empty means `unknown`. A name may match more than one type;
- * callers reject that instead of picking one.
+ * callers reject that instead of picking one. One `logs` / `metrics` / `traces` segment wins
+ * over a dataset token (`metrics-logstash.*` is metrics). Two of those segments stay ambiguous.
  */
 export const matchSourceTypes = ({
   name,
@@ -87,13 +136,18 @@ export const matchSourceTypes = ({
 }: {
   name: string;
   patterns?: SourceTypePatterns;
-}): KnownSourceType[] =>
-  KNOWN_SOURCE_TYPES.filter((type) =>
-    testPatternAgainstAllowedList([
-      BASE_PATTERN_REGEXP[type],
-      ...configuredPatterns[type](patterns),
-    ])(name)
-  );
+}): KnownSourceType[] => {
+  const matched = KNOWN_SOURCE_TYPES.filter((type) => matchesKnownType(name, type, patterns));
+  const segments = typeSegments(name);
+  if (segments.length === 1 && matched.includes(segments[0])) {
+    return [segments[0]];
+  }
+  return matched;
+};
+
+/** A leading `*` can match every kind of data (`*`, `*-*`, `*log*`). */
+export const isUnscopedIndexPattern = (name: string): boolean =>
+  stripDataSelector(name).startsWith('*');
 
 /**
  * Splits a comma-separated index pattern list. Tokens starting with `-` are exclusions
@@ -109,3 +163,25 @@ export const toSourceTypePatternTokens = (indexPatterns: string): string[] =>
 export const uniqueSourceTypePatternTokens = (indexPatterns: readonly string[]): string[] => [
   ...new Set(indexPatterns.flatMap(toSourceTypePatternTokens)),
 ];
+
+/** Splits APM index settings into the kind each setting names. A shared token stays on every kind. */
+export const patternsFromApmIndices = ({
+  transaction,
+  span,
+  error,
+  metric,
+}: ApmIndexPatternFields): SourceTypePatterns => ({
+  logs: uniqueSourceTypePatternTokens([error]),
+  traces: uniqueSourceTypePatternTokens([transaction, span]),
+  metrics: uniqueSourceTypePatternTokens([metric]),
+});
+
+/** Log-source tokens plus the APM split. The same token on two kinds is left on both. */
+export const combineSourceTypePatterns = (
+  logSourceTokens: readonly string[],
+  apmPatterns: SourceTypePatterns
+): SourceTypePatterns => ({
+  logs: [...new Set([...logSourceTokens, ...apmPatterns.logs])],
+  traces: [...apmPatterns.traces],
+  metrics: [...(apmPatterns.metrics ?? [])],
+});

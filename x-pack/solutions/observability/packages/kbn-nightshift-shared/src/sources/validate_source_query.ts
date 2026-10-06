@@ -8,6 +8,7 @@
 import { BasicPrettyPrinter, Parser, Walker } from '@elastic/esql';
 import {
   DEFAULT_SOURCE_TYPE_PATTERNS,
+  isUnscopedIndexPattern,
   matchSourceTypes,
   type SourceType,
   type SourceTypePatterns,
@@ -147,8 +148,20 @@ const resolveIndexType = ({
   return 'unknown';
 };
 
-const describeType = (type: SourceType, names: readonly string[]): string =>
-  names.length > 0 ? `${type} (${names.join(', ')})` : type;
+const describeType = (
+  type: SourceType,
+  names: readonly string[],
+  isTimeSeries: boolean
+): string => {
+  if (names.length > 0) {
+    return `${type} (${names.join(', ')})`;
+  }
+  // The TS command contributes metrics even when no index name was classified as metrics.
+  if (isTimeSeries && type === 'metrics') {
+    return 'metrics (TS)';
+  }
+  return type;
+};
 
 const joinAnd = (parts: readonly string[]): string => {
   if (parts.length < 2) {
@@ -163,11 +176,15 @@ const ambiguousIndexMessage = (name: string, types: readonly string[]): string =
     ', '
   )}). A source query must target one kind.`;
 
+const unscopedWildcardMessage = (name: string): string =>
+  `Index "${name}" is an unscoped wildcard. A source query must target one kind of data.`;
+
 const mixedSourceTypesMessage = (
   namesByType: Record<SourceType, string[]>,
-  present: readonly SourceType[]
+  present: readonly SourceType[],
+  isTimeSeries: boolean
 ): string => {
-  const described = present.map((type) => describeType(type, namesByType[type]));
+  const described = present.map((type) => describeType(type, namesByType[type], isTimeSeries));
   const unknownHint =
     namesByType.unknown.length > 0
       ? ' Add indices that are not logs, metrics or traces to the log sources or APM indices settings.'
@@ -198,6 +215,10 @@ export const getSourceType = ({
   const indexNames = Walker.matchAll(firstCommand, { type: 'source', sourceType: 'index' }).flatMap(
     (node) => (typeof node.name === 'string' ? [node.name] : [])
   );
+  const unscoped = indexNames.find(isUnscopedIndexPattern);
+  if (unscoped) {
+    return { error: unscopedWildcardMessage(unscoped) };
+  }
   const classified = indexNames.map((name) => ({
     name,
     matched: matchSourceTypes({ name, patterns }),
@@ -213,14 +234,29 @@ export const getSourceType = ({
     namesByType[resolveIndexType({ matched: matched[0], isTimeSeries })].push(name);
   }
 
+  // A TS command is metrics even when every named index classified as something else.
   const present = SOURCE_TYPE_ORDER.filter(
     (type) => namesByType[type].length > 0 || (isTimeSeries && type === 'metrics')
   );
   if (present.length > 1) {
-    return { error: mixedSourceTypesMessage(namesByType, present) };
+    return { error: mixedSourceTypesMessage(namesByType, present, isTimeSeries) };
   }
 
   return { type: present[0] ?? 'unknown' };
+};
+
+/**
+ * Classification for a saved-object backfill. Built-in bases only: the migration cannot read
+ * log sources or APM indices. `unknown` is a mix, a parse failure, or a name that needs those
+ * settings.
+ */
+export const sourceTypeFromEsql = (esql: string): SourceType => {
+  try {
+    const analysis = getSourceType({ esql });
+    return 'type' in analysis ? analysis.type : 'unknown';
+  } catch {
+    return 'unknown';
+  }
 };
 
 /**

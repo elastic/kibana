@@ -11,6 +11,7 @@ import {
   getSourceCommandQuery,
   getSourceType,
   hasMultipleSourceIndices,
+  sourceTypeFromEsql,
   validateSourceQuery,
 } from './validate_source_query';
 
@@ -137,21 +138,54 @@ describe('getSourceType', () => {
     expectType('TS metrics-*', 'metrics');
     expectType('TS my-tsdb-*', 'metrics');
     expectType('FROM my-a-*, my-b-*', 'unknown');
-    expectType('FROM *', 'unknown');
+    expectType('FROM my-app-0001', 'logs', CUSTOM_LOGS);
+    expectType('FROM logs-*, my-app-0001', 'logs', CUSTOM_LOGS);
     expectType('FROM logs-*, my-app-*', 'logs', CUSTOM_LOGS);
+    expectType('FROM metrics-logstash.node-*', 'metrics');
+    expectType('FROM metrics-microsoft_sqlserver.transaction_log-*', 'metrics');
+  });
+
+  it('rejects an unscoped wildcard', () => {
+    expectTypeError('FROM *', 'unscoped wildcard');
+    expectTypeError('FROM *-*', 'unscoped wildcard');
+    expectTypeError('FROM *log*', 'unscoped wildcard');
   });
 
   it('rejects indices of more than one type', () => {
     expectTypeError('FROM logs-*, traces-*', 'mixes logs (logs-*) and traces (traces-*)');
     expectTypeError('FROM logs-*, my-app-*', 'mixes logs (logs-*) and unknown (my-app-*)');
     expectTypeError('FROM logs-*, my-app-*', 'log sources or APM indices');
-    expectTypeError('TS logs-*', 'mixes logs (logs-*) and metrics');
+    expectTypeError('TS logs-*', 'mixes logs (logs-*) and metrics (TS)');
+  });
+
+  it('rejects the legacy apm-* pattern because it is also errors and metrics', () => {
+    const legacyApm = {
+      logs: ['logs-apm*', 'apm-*'],
+      traces: ['traces-apm*', 'apm-*'],
+      metrics: ['metrics-apm*', 'apm-*'],
+    };
+
+    expectTypeError('FROM apm-*', 'more than one kind of data (logs, traces, metrics)', legacyApm);
+    expectType('FROM traces-apm*', 'traces', legacyApm);
+    expectType('FROM logs-apm*', 'logs', legacyApm);
+    expectType('FROM metrics-apm*', 'metrics', legacyApm);
   });
 
   it('rejects one index that matches more than one type', () => {
     expectTypeError('FROM logs-traces-*', 'matches more than one kind of data (logs, traces)');
     expectTypeError('FROM metrics-logs-*', 'matches more than one kind of data (logs, metrics)');
     expectTypeError('TS logs-traces-*', 'matches more than one kind of data (logs, traces)');
+  });
+});
+
+describe('sourceTypeFromEsql', () => {
+  it('classifies with the built-in bases and leaves everything else unknown', () => {
+    expect(sourceTypeFromEsql('FROM logs-nginx-* | WHERE status >= 500')).toBe('logs');
+    expect(sourceTypeFromEsql('FROM logs-checkout-*')).toBe('logs');
+    expect(sourceTypeFromEsql('TS metrics-*')).toBe('metrics');
+    expect(sourceTypeFromEsql('FROM my-app-*')).toBe('unknown');
+    expect(sourceTypeFromEsql('FROM logs-*, traces-*')).toBe('unknown');
+    expect(sourceTypeFromEsql('not esql')).toBe('unknown');
   });
 });
 

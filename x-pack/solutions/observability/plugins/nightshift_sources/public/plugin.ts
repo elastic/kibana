@@ -20,8 +20,9 @@ export interface NightshiftSourcesPublicStartDependencies {
 export interface NightshiftSourcesPublicPluginStart {
   getClient: () => Promise<NightshiftSourcesRepositoryClient>;
   /**
-   * Configured log sources and APM trace indices. `null` when an installed plugin failed to
-   * answer, so the caller skips the client-side type check.
+   * Configured log sources and APM indices. An APM 403 uses the default APM index patterns
+   * and still returns log sources. Any other failed read is `null`, so the caller skips the
+   * client-side type check.
    */
   getSourceTypePatterns: () => Promise<SourceTypePatterns | null>;
 }

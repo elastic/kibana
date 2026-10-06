@@ -7,12 +7,38 @@
 
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
-import { uniqueSourceTypePatternTokens, type SourceTypePatterns } from '@kbn/nightshift-shared';
+import {
+  combineSourceTypePatterns,
+  patternsFromApmIndices,
+  uniqueSourceTypePatternTokens,
+  type SourceTypePatterns,
+} from '@kbn/nightshift-shared';
 
 export interface SourceTypePatternPlugins {
   logsDataAccess?: LogsDataAccessPluginStart;
   apmSourcesAccess?: ApmSourceAccessPluginStart;
 }
+
+const EMPTY_APM_PATTERNS: SourceTypePatterns = { logs: [], traces: [], metrics: [] };
+
+/**
+ * Schema defaults from `indicesSchema` in apm_sources_access. Copied because a 403 means this
+ * page cannot ask the plugin. kibana.yml overrides are applied on save, not here.
+ */
+const DEFAULT_APM_INDEX_PATTERNS = {
+  transaction: 'traces-apm*,apm-*,traces-*.otel-*',
+  span: 'traces-apm*,apm-*,traces-*.otel-*',
+  error: 'logs-apm*,apm-*,logs-*.otel-*',
+  metric: 'metrics-apm*,apm-*,metrics-*.otel-*',
+} as const;
+
+const isForbiddenResponse = (error: unknown): boolean => {
+  if (!(error instanceof Error) || !('response' in error)) {
+    return false;
+  }
+  const response = (error as { response?: { status?: number } }).response;
+  return response?.status === 403;
+};
 
 const readLogPatterns = async (
   logsDataAccess: LogsDataAccessPluginStart | undefined
@@ -25,20 +51,30 @@ const readLogPatterns = async (
   ]);
 };
 
-const readTracePatterns = async (
+const readApmPatterns = async (
   apmSourcesAccess: ApmSourceAccessPluginStart | undefined
-): Promise<string[]> => {
+): Promise<SourceTypePatterns> => {
   if (!apmSourcesAccess) {
-    return [];
+    return EMPTY_APM_PATTERNS;
   }
-  const { transaction, span } = await apmSourcesAccess.getApmIndices();
-  return uniqueSourceTypePatternTokens([transaction, span]);
+  try {
+    return patternsFromApmIndices(await apmSourcesAccess.getApmIndices());
+  } catch (error) {
+    // The indices route requires the `apm` privilege, which Nightshift does not grant.
+    // Schema defaults keep the logs check alive. kibana.yml overrides are not in the browser;
+    // the server applies those on save.
+    if (isForbiddenResponse(error)) {
+      return patternsFromApmIndices(DEFAULT_APM_INDEX_PATTERNS);
+    }
+    throw error;
+  }
 };
 
 /**
- * Configured log sources and APM trace indices for the current user. A plugin that is not
- * installed contributes nothing. A plugin that is installed but fails makes the whole lookup
- * `null`, so the caller can skip the client-side type check and let the server answer.
+ * Configured log sources and APM indices for the current user. A plugin that is not
+ * installed contributes nothing. An APM 403 uses the default APM index patterns and still
+ * returns log sources. Any other failure is `null`, so the caller skips the client-side
+ * type check and the server fails the write.
  * Reads on every call: log sources come from ui settings, APM indices are one request.
  */
 export const getSourceTypePatterns = async ({
@@ -46,12 +82,12 @@ export const getSourceTypePatterns = async ({
   apmSourcesAccess,
 }: SourceTypePatternPlugins): Promise<SourceTypePatterns | null> => {
   try {
-    const [logs, traces] = await Promise.all([
+    const [logSourceTokens, apmPatterns] = await Promise.all([
       readLogPatterns(logsDataAccess),
-      readTracePatterns(apmSourcesAccess),
+      readApmPatterns(apmSourcesAccess),
     ]);
-    return { logs, traces };
-  } catch (error) {
+    return combineSourceTypePatterns(logSourceTokens, apmPatterns);
+  } catch {
     return null;
   }
 };

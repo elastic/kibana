@@ -106,6 +106,8 @@ const setup = ({
   const logger = loggingSystemMock.createLogger();
   const onChange = jest.fn().mockResolvedValue(undefined);
 
+  const getSourceTypePatterns = jest.fn().mockResolvedValue(patterns);
+
   const client = new SourcesClient({
     soClient,
     viewsClient,
@@ -114,13 +116,13 @@ const setup = ({
     username: 'marco',
     spaceId,
     onChange,
-    getSourceTypePatterns: jest.fn().mockResolvedValue(patterns),
+    getSourceTypePatterns,
   });
 
   soClient.find.mockResolvedValue(emptyFind);
   dataEsClient.esql.query.mockResponse(withColumns);
 
-  return { client, soClient, viewsClient, dataEsClient, logger, onChange };
+  return { client, soClient, viewsClient, dataEsClient, logger, onChange, getSourceTypePatterns };
 };
 
 describe('SourcesClient', () => {
@@ -417,6 +419,18 @@ describe('SourcesClient', () => {
       expect(viewsClient.putView).not.toHaveBeenCalled();
     });
 
+    it('does not write when source type patterns cannot be read', async () => {
+      const { client, soClient, viewsClient, dataEsClient, getSourceTypePatterns } = setup();
+      getSourceTypePatterns.mockRejectedValue(new Error('settings down'));
+
+      await expect(client.create({ title: 't', tags: [], esql: 'FROM my-app-*' })).rejects.toThrow(
+        'settings down'
+      );
+      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
     it('stores logs when a configured log source makes every index logs', async () => {
       const { client } = setup({ patterns: { logs: ['my-app-*'], traces: [] } });
 
@@ -620,6 +634,38 @@ describe('SourcesClient', () => {
         message: expect.stringContaining('mixes'),
       });
       expect(dataEsClient.esql.query).not.toHaveBeenCalled();
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
+    it('keeps the stored type on a title-only save without reading patterns', async () => {
+      const { client, soClient, getSourceTypePatterns } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+      getSourceTypePatterns.mockRejectedValue(new Error('settings down'));
+
+      const updated = await client.update('source-1', {
+        title: 'renamed',
+        tags: ['nginx'],
+        esql: 'FROM logs-nginx-* | WHERE status >= 500',
+      });
+
+      expect(updated.type).toBe('logs');
+      expect(updated.title).toBe('renamed');
+      expect(getSourceTypePatterns).not.toHaveBeenCalled();
+    });
+
+    it('does not write an update when source type patterns cannot be read', async () => {
+      const { client, soClient, viewsClient, getSourceTypePatterns } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+      getSourceTypePatterns.mockRejectedValue(new Error('settings down'));
+
+      await expect(
+        client.update('source-1', {
+          title: 'nginx errors',
+          tags: ['nginx'],
+          esql: 'FROM logs-*',
+        })
+      ).rejects.toThrow('settings down');
       expect(soClient.update).not.toHaveBeenCalled();
       expect(viewsClient.putView).not.toHaveBeenCalled();
     });

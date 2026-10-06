@@ -5,33 +5,34 @@
  * 2.0.
  */
 
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ApmSourcesAccessPluginStart } from '@kbn/apm-sources-access-plugin/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
-import { uniqueSourceTypePatternTokens, type SourceTypePatterns } from '@kbn/nightshift-shared';
+import {
+  combineSourceTypePatterns,
+  patternsFromApmIndices,
+  uniqueSourceTypePatternTokens,
+  type ApmIndexPatternFields,
+  type SourceTypePatterns,
+} from '@kbn/nightshift-shared';
 
 export interface SourceTypePatternDependencies {
   soClient: SavedObjectsClientContract;
   logsDataAccess?: LogsDataAccessPluginStart;
   apmSourcesAccess?: ApmSourcesAccessPluginStart;
+  /**
+   * `apmIndicesFromConfigFile` from the APM setup contract: schema defaults plus kibana.yml,
+   * without reading the saved object.
+   */
+  apmIndicesFromConfig?: ApmIndexPatternFields;
   logger: Logger;
 }
 
-const tokensOrDefault = (
-  result: PromiseSettledResult<string[]>,
-  label: string,
-  logger: Logger
-): string[] => {
-  if (result.status === 'fulfilled') {
-    return result.value;
-  }
-  // Fail open to the built-in bases. A role that cannot read these settings can still create a
-  // source over `logs-*`; a custom pattern then classifies as unknown and the mix check rejects it.
-  logger.warn(
-    `Could not read ${label} for source type detection, using the built-in patterns: ${result.reason}`
-  );
-  return [];
-};
+const EMPTY_APM_PATTERNS: SourceTypePatterns = { logs: [], traces: [], metrics: [] };
+
+const isForbiddenSavedObjectError = (error: unknown): boolean =>
+  error instanceof Error && SavedObjectsErrorHelpers.isForbiddenError(error);
 
 const readLogPatterns = async ({
   logsDataAccess,
@@ -46,41 +47,52 @@ const readLogPatterns = async ({
   return uniqueSourceTypePatternTokens([await logSources.getFlattenedLogSources()]);
 };
 
-const readTracePatterns = async ({
+const readApmPatterns = async ({
   apmSourcesAccess,
+  apmIndicesFromConfig,
   soClient,
-}: SourceTypePatternDependencies): Promise<string[]> => {
+  logger,
+}: SourceTypePatternDependencies): Promise<SourceTypePatterns> => {
   if (!apmSourcesAccess) {
-    return [];
+    return EMPTY_APM_PATTERNS;
   }
-  const { transaction, span } = await apmSourcesAccess.getApmIndices(soClient);
-  return uniqueSourceTypePatternTokens([transaction, span]);
+  try {
+    return patternsFromApmIndices(await apmSourcesAccess.getApmIndices(soClient));
+  } catch (error) {
+    // Nightshift does not grant `apm-indices`. The plugin config still names traces, logs
+    // and metrics; an empty list would store `FROM apm-*` as unknown and reject the default
+    // transaction pattern. Any other failure must fail the write, not be persisted as [].
+    if (isForbiddenSavedObjectError(error) && apmIndicesFromConfig) {
+      logger.warn(
+        'Could not read APM index overrides for source type detection, using the configured defaults'
+      );
+      return patternsFromApmIndices(apmIndicesFromConfig);
+    }
+    throw error;
+  }
 };
 
 const loadSourceTypePatterns = async (
   dependencies: SourceTypePatternDependencies
 ): Promise<SourceTypePatterns> => {
-  const [logs, traces] = await Promise.allSettled([
+  const [logSourceTokens, apmPatterns] = await Promise.all([
     readLogPatterns(dependencies),
-    readTracePatterns(dependencies),
+    readApmPatterns(dependencies),
   ]);
-  return {
-    logs: tokensOrDefault(logs, 'log sources', dependencies.logger),
-    traces: tokensOrDefault(traces, 'APM indices', dependencies.logger),
-  };
+  return combineSourceTypePatterns(logSourceTokens, apmPatterns);
 };
 
 /**
- * Reads configured log sources and APM trace indices once per client. Later calls in the same
- * request reuse that result. A missing plugin contributes nothing; a failed read falls back to
- * the built-in base patterns.
+ * Reads configured log sources and APM indices once per client. Later calls in the same
+ * request reuse that result. A missing plugin contributes nothing. A forbidden APM read
+ * uses the APM plugin config. Any other failed read rejects, so the write is not stored.
  */
 export const createGetSourceTypePatterns = (
   dependencies: SourceTypePatternDependencies
 ): (() => Promise<SourceTypePatterns>) => {
-  let pending: Promise<SourceTypePatterns> | undefined;
+  let patternsPromise: Promise<SourceTypePatterns> | undefined;
   return () => {
-    pending ??= loadSourceTypePatterns(dependencies);
-    return pending;
+    patternsPromise ??= loadSourceTypePatterns(dependencies);
+    return patternsPromise;
   };
 };

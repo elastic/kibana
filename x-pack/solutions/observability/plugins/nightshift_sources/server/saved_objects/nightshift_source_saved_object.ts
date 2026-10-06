@@ -13,6 +13,7 @@ import {
   MAX_SOURCE_TAGS,
   MAX_SOURCE_VIEW_NAME_LENGTH,
   NIGHTSHIFT_SOURCE_SO_TYPE,
+  sourceTypeFromEsql,
 } from '@kbn/nightshift-shared';
 
 export { NIGHTSHIFT_SOURCE_SO_TYPE };
@@ -87,9 +88,11 @@ export const nightshiftSourceSavedObjectType: SavedObjectsType<NightshiftSourceA
       changes: [
         {
           type: 'data_backfill',
-          // Constant, not derived: a backfill cannot read log sources or APM indices, and the
-          // next write recomputes `type` from the query.
-          backfillFn: () => ({ attributes: { type: 'unknown' } }),
+          // Built-in bases only. A name that needs configured log sources or APM indices, or a
+          // query that is not one kind, stays `unknown` until the query is edited.
+          backfillFn: (doc) => ({
+            attributes: { type: sourceTypeFromEsql(doc.attributes.esql) },
+          }),
         },
       ],
       schemas: {

@@ -114,15 +114,18 @@ export {
 } from './src/sources/schema';
 
 export {
+  combineSourceTypePatterns,
   DEFAULT_LOGS_BASE_PATTERNS,
   DEFAULT_METRICS_BASE_PATTERNS,
   DEFAULT_SOURCE_TYPE_PATTERNS,
   DEFAULT_TRACES_BASE_PATTERNS,
   matchSourceTypes,
+  patternsFromApmIndices,
   SOURCE_TYPES,
   sourceTypeSchema,
   toSourceTypePatternTokens,
   uniqueSourceTypePatternTokens,
+  type ApmIndexPatternFields,
   type SourceType,
   type SourceTypePatterns,
 } from './src/sources/source_type';
@@ -132,6 +135,7 @@ export {
   getSourceCommandQuery,
   getSourceType,
   hasMultipleSourceIndices,
+  sourceTypeFromEsql,
   validateSourceQuery,
   type SourceTypeAnalysis,
 } from './src/sources/validate_source_query';

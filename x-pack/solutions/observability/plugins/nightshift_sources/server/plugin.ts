@@ -14,7 +14,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
-import { NIGHTSHIFT_FEATURE_ID } from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_FEATURE_ID, type ApmIndexPatternFields } from '@kbn/nightshift-shared';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { EsqlViewsClient } from './lib/esql_views_client';
 import { createSourceChangeEmitter, type SourceChangeEmitter } from './lib/source_change_emitter';
@@ -28,6 +28,7 @@ import {
 import type {
   GetSourcesClient,
   NightshiftSourcesServerSetup,
+  NightshiftSourcesServerSetupDependencies,
   NightshiftSourcesServerStart,
   NightshiftSourcesServerStartDependencies,
 } from './types';
@@ -37,7 +38,8 @@ const createSourcesClient = (
   request: KibanaRequest,
   logger: Logger,
   sourceChangeEmitter: SourceChangeEmitter,
-  plugins: NightshiftSourcesServerStartDependencies
+  plugins: NightshiftSourcesServerStartDependencies,
+  apmIndicesFromConfig: ApmIndexPatternFields | undefined
 ): SourcesClient => {
   // Hidden types are left out of the scoped client unless named. Nightshift `all` / `read`
   // grant this type, so the security extension authorizes the call and writes the audit event.
@@ -66,6 +68,7 @@ const createSourcesClient = (
       soClient,
       logsDataAccess: plugins.logsDataAccess,
       apmSourcesAccess: plugins.apmSourcesAccess,
+      apmIndicesFromConfig,
       logger,
     }),
   });
@@ -76,13 +79,15 @@ export class NightshiftSourcesPlugin
     Plugin<
       NightshiftSourcesServerSetup,
       NightshiftSourcesServerStart,
-      object,
+      NightshiftSourcesServerSetupDependencies,
       NightshiftSourcesServerStartDependencies
     >
 {
   private readonly logger: Logger;
   private readonly isDev: boolean;
   private readonly sourceChangeEmitter: SourceChangeEmitter;
+  /** Kept from setup. Start's `getApmIndices` reads the saved object and 403s for Nightshift. */
+  private apmIndicesFromConfig: ApmIndexPatternFields | undefined;
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
@@ -91,8 +96,10 @@ export class NightshiftSourcesPlugin
   }
 
   public setup(
-    core: CoreSetup<NightshiftSourcesServerStartDependencies, NightshiftSourcesServerStart>
+    core: CoreSetup<NightshiftSourcesServerStartDependencies, NightshiftSourcesServerStart>,
+    { apmSourcesAccess }: NightshiftSourcesServerSetupDependencies
   ): NightshiftSourcesServerSetup {
+    this.apmIndicesFromConfig = apmSourcesAccess?.apmIndicesFromConfigFile;
     core.savedObjects.registerType(nightshiftSourceSavedObjectType);
 
     const getSourcesClient: GetSourcesClient = async ({ request }) => {
@@ -102,7 +109,8 @@ export class NightshiftSourcesPlugin
         request,
         this.logger.get('sources'),
         this.sourceChangeEmitter,
-        plugins
+        plugins,
+        this.apmIndicesFromConfig
       );
     };
 
@@ -141,7 +149,8 @@ export class NightshiftSourcesPlugin
           request,
           this.logger.get('sources'),
           this.sourceChangeEmitter,
-          plugins
+          plugins,
+          this.apmIndicesFromConfig
         ),
     };
   }
