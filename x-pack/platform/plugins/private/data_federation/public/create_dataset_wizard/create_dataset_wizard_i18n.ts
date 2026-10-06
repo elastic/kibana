@@ -278,7 +278,7 @@ export const createDatasetWizardStrings = {
     'xpack.dataFederation.createDatasetForm.dataSourceAuthenticationCalloutDescription',
     {
       defaultMessage:
-        'This connection must already be allowed to read the bucket and files you chose. Update the data source in ES|QL Data Federation if access fails.',
+        'Access is granted per bucket. Before adding this dataset, make sure this data source has access to its bucket in your cloud provider.',
     }
   ),
 
