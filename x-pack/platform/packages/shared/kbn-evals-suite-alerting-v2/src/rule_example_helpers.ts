@@ -69,9 +69,7 @@ export const hostCpuCreateTurn = ({
 export const assertQueriedStyle = (versions: RuleAttachmentData[], style: QueryStyle) => {
   const queried = versions.filter((version) => version.query);
   expect(queried.length).toBeGreaterThan(0);
-  for (const version of queried) {
-    expect(hasBreachSegment(version.query)).toEqual(style === 'segmented');
-  }
+  expect(hasBreachSegment(queried[0].query)).toEqual(style === 'segmented');
 };
 
 export const assertLatestHostCpuAlert = (

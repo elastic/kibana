@@ -41,26 +41,26 @@ export function SettingsPage() {
       chrome,
     },
   } = useKibana();
-  const { canConfigure } = getNightshiftCapabilities(nightshift);
+  const { canManageAndConfigure } = getNightshiftCapabilities(nightshift);
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
   const nightshiftHref = getUrlForApp(NIGHTSHIFT_APP_ID);
 
   useEffect(() => {
-    if (!canConfigure) {
+    if (!canManageAndConfigure) {
       void navigateToApp(NIGHTSHIFT_APP_ID);
     }
-  }, [canConfigure, navigateToApp]);
+  }, [canManageAndConfigure, navigateToApp]);
 
   useEffect(() => {
-    if (canConfigure) {
+    if (canManageAndConfigure) {
       chrome.setBreadcrumbs([
         { text: nightshiftLabel, href: nightshiftHref },
         { text: settingsTitle },
       ]);
     }
-  }, [canConfigure, chrome, nightshiftHref]);
+  }, [canManageAndConfigure, chrome, nightshiftHref]);
 
-  if (!canConfigure) {
+  if (!canManageAndConfigure) {
     return null;
   }
 

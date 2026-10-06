@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FlakyTestBranchStats } from '@kbn/scout-reporting';
 import {
   flakySuiteIssueTitle,
   readFlakySuiteIssueMetadata,
@@ -270,6 +271,55 @@ describe('renderFlakySuiteIssueBody', () => {
     );
   });
 
+  it('marks the branches every setup skips every test on, after the failing ones and with when one last ran', () => {
+    const branch = (
+      name: string,
+      failedBuilds: number,
+      skipped: boolean,
+      overrides: Partial<FlakyTestBranchStats> = {}
+    ): FlakyTestBranchStats => ({
+      branch: name,
+      builds: 100,
+      failedBuilds,
+      buildFailRate: failedBuilds / 100,
+      skipped,
+      ...overrides,
+    });
+    const report = flakyReport([
+      flakyTest({
+        testId: 'a',
+        byBranch: [
+          branch('main', 8, true, {
+            lastFailedAt: new Date('2026-09-05T10:00:00.000Z'),
+            latestExecutionAt: new Date('2026-09-07T14:21:00.000Z'),
+          }),
+          branch('9.5', 3, false, { lastFailedAt: new Date('2026-09-08T10:00:00.000Z') }),
+          branch('9.4', 0, true, { builds: 0 }),
+        ],
+      }),
+      flakyTest({
+        testId: 'b',
+        title: 'another test',
+        byBranch: [
+          branch('main', 0, true, { latestExecutionAt: new Date('2026-09-06T10:00:00.000Z') }),
+          // skipped here, but test a still runs on 9.5
+          branch('9.5', 0, true),
+          branch('8.19', 0, false, { builds: 40 }),
+        ],
+      }),
+    ]);
+    const [suite] = groupIntoSuites(report.flaky, report.files);
+
+    expect(renderFlakySuiteIssueBody(suite, { report })).toContain(
+      [
+        '| 🔴 `9.5` | 3 / 100 (**3%**) | 2026-09-08 10:00 UTC |',
+        '| ⏭️ `main` | 8 / 100 (**8%**) | 2026-09-05 10:00 UTC · skipped, last ran 7 Sep |',
+        '| ⏭️ `9.4` | 0 / 0 | skipped in every run |',
+        '| ✅ `8.19` | 0 / 40 |',
+      ].join('\n')
+    );
+  });
+
   it('dates a failure without a recorded build, for reports written before it was', () => {
     const report = flakyReport([
       flakyTest({
@@ -453,6 +503,8 @@ describe('renderFlakySuiteIssueBody', () => {
       'suite.title': 'Default status alert',
       'suite.framework': 'playwright',
       'suite.testIds': [suite.tests[0].testId],
+      'suite.branches': ['main'],
+      'suite.pipelines': ['kibana-on-merge'],
       'report.generatedAt': '2026-09-09T09:04:41.000Z',
       'report.count': 1,
       'report.history': [
@@ -460,5 +512,64 @@ describe('renderFlakySuiteIssueBody', () => {
       ],
     });
     expect(readFlakySuiteIssueMetadata('no metadata here')).toBeUndefined();
+  });
+
+  it('records the branches to skip the suite on and the pipelines it failed on', () => {
+    const branch = (name: string, failedBuilds: number) => ({
+      branch: name,
+      builds: 100,
+      failedBuilds,
+      buildFailRate: failedBuilds / 100,
+    });
+    const tests = [
+      flakyTest({
+        testId: 'a',
+        byBranch: [
+          branch('main', 2),
+          branch('9.2', 8),
+          branch('someone:fix-it', 9),
+          branch('9.1', 0),
+        ],
+      }),
+      flakyTest({ testId: 'b', title: 'another test', byBranch: [branch('main', 6)] }),
+    ];
+    const base = flakyReport(tests, [
+      {
+        filePath: SUITE_PATH,
+        framework: 'playwright',
+        testIds: ['a', 'b'],
+        byPipeline: [
+          pipelineStats({ lastFailedAt: new Date('2026-09-09T06:12:00.000Z') }),
+          pipelineStats({
+            pipeline: 'appex-qa-serverless-kibana-scout-tests',
+            lastFailedAt: new Date('2026-09-08T06:12:00.000Z'),
+          }),
+          pipelineStats({ pipeline: 'kibana-pull-request' }),
+          pipelineStats({ pipeline: 'appex-qa-stateful-kibana-scout-tests', failedBuilds: 0 }),
+        ],
+      },
+    ]);
+    const report = {
+      ...base,
+      scope: {
+        ...base.scope,
+        pipelines: [
+          'kibana-on-merge',
+          'appex-qa-serverless-kibana-scout-tests',
+          'appex-qa-stateful-kibana-scout-tests',
+        ],
+      },
+    };
+    const [suite] = groupIntoSuites(report.flaky, report.files);
+
+    const metadata = readFlakySuiteIssueMetadata(renderFlakySuiteIssueBody(suite, { report }));
+
+    // by the worst test's failed builds on each branch; pull requests and clean branches left out
+    expect(metadata?.['suite.branches']).toEqual(['9.2', 'main']);
+    // out-of-scope and clean pipelines left out, the latest failure last
+    expect(metadata?.['suite.pipelines']).toEqual([
+      'appex-qa-serverless-kibana-scout-tests',
+      'kibana-on-merge',
+    ]);
   });
 });

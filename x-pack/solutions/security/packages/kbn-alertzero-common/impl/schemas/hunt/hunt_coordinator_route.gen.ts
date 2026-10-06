@@ -18,7 +18,6 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   HuntIoc,
-  HuntTechnology,
   HuntForThreatResult,
   HuntIncompleteReason,
   HuntForThreatHit,
@@ -48,17 +47,6 @@ export const HuntCoordinatorRequestBody = lazySchema(() =>
         .describe(
           'Run id supplied by the Worker fan-out so every child of one sweep shares it, which is what the packaging barrier and the conclusion dedupe key off. The route mints one only when the caller has no sweep to tie the run to.'
         ),
-      /**
-       * One of the HuntTechnology values to pin the hunt to that technology's index scope. Omit it, or send null or an empty string (a workflow renders an unset input as ""), and the coordinator resolves every known technology and hunts the ones whose required indices exist in the space. Any other value is a 400. Kept a plain string because a workflow caller cannot omit the key.
-       */
-      technology: z
-        .string()
-        .max(64)
-        .nullable()
-        .optional()
-        .describe(
-          'One of the HuntTechnology values to pin the hunt to that technology\'s index scope. Omit it, or send null or an empty string (a workflow renders an unset input as ""), and the coordinator resolves every known technology and hunts the ones whose required indices exist in the space. Any other value is a 400. Kept a plain string because a workflow caller cannot omit the key.'
-        ),
       text: z.string().max(200000).optional(),
       iocs: z.array(HuntIoc).max(100).optional(),
       techniques: z.array(z.string().min(1).max(32)).max(100).optional(),
@@ -86,12 +74,37 @@ export const HuntCoordinatorResponse = lazySchema(() =>
     report_id: z.string().optional(),
     run_id: z.string(),
     /**
-     * Technologies whose indices the hunt ran against. Empty when the scope was blocked.
+     * What Tier 1 searched: the space's Security Solution default data view patterns, exclusions included, never an alerts index. Empty when the scope was blocked or resolution failed.
      */
-    technologies: z
-      .array(HuntTechnology)
+    index_patterns: z
+      .array(z.string())
       .describe(
-        'Technologies whose indices the hunt ran against. Empty when the scope was blocked.'
+        "What Tier 1 searched: the space's Security Solution default data view patterns, exclusions included, never an alerts index. Empty when the scope was blocked or resolution failed."
+      ),
+    /**
+     * What Tier 2 was allowed to read, target, and count as a hit, chosen after the report was read and Tier 1 ran: the union of the datasets the report's vendor or product matched, the indices Tier 1 hit, the model's matches (only when neither of those found anything), and `actionable_indices`, each `*`-suffixed. `tier2_target_sources` says which signals contributed. Empty when the scope was blocked, resolution failed, or no signal named a target.
+     */
+    tier2_targets: z
+      .array(z.string())
+      .describe(
+        "What Tier 2 was allowed to read, target, and count as a hit, chosen after the report was read and Tier 1 ran: the union of the datasets the report's vendor or product matched, the indices Tier 1 hit, the model's matches (only when neither of those found anything), and `actionable_indices`, each `*`-suffixed. `tier2_target_sources` says which signals contributed. Empty when the scope was blocked, resolution failed, or no signal named a target."
+      ),
+    /**
+     * Which signals contributed to `tier2_targets`, in a fixed order. Empty when `tier2_targets` is empty.
+     */
+    tier2_target_sources: z
+      .array(z.enum(['report_match', 'tier1_hits', 'model', 'actionable']))
+      .describe(
+        'Which signals contributed to `tier2_targets`, in a fixed order. Empty when `tier2_targets` is empty.'
+      ),
+    /**
+     * `*`-suffixed streams and indices in the hunt's universe whose mapping carries `process.entity_id` or `process.pid`: where a hit can become a Defend response action. A mapping says a host can report process telemetry, not that it is enrolled; packaging decides that later. Empty when the scope was blocked or no mapping carries either field.
+     */
+    actionable_indices: z
+      .array(z.string().max(256))
+      .max(64)
+      .describe(
+        "`*`-suffixed streams and indices in the hunt's universe whose mapping carries `process.entity_id` or `process.pid`: where a hit can become a Defend response action. A mapping says a host can report process telemetry, not that it is enrolled; packaging decides that later. Empty when the scope was blocked or no mapping carries either field."
       ),
     tier1: HuntForThreatResult.merge(
       z.object({
@@ -112,8 +125,18 @@ export const HuntCoordinatorResponse = lazySchema(() =>
             reference: z.string(),
             tactic_ids: z.array(z.string()),
             parent_technique_id: z.string().optional(),
-            proposed_esql_rule: z.string(),
-            rule_name: z.string(),
+            /**
+             * The query Tier 2 generated and validated (and, when grounded, executed) to hunt this technique.
+             */
+            validated_esql: z
+              .string()
+              .describe(
+                'The query Tier 2 generated and validated (and, when grounded, executed) to hunt this technique.'
+              ),
+            /**
+             * Display title for this hunted finding.
+             */
+            title: z.string().describe('Display title for this hunted finding.'),
             severity: z.enum(['critical', 'high', 'medium', 'low']),
             risk_score: z.number(),
             execution: z
@@ -223,12 +246,12 @@ export const HuntCoordinatorResponse = lazySchema(() =>
     message: z.string(),
     next_step: z.string(),
     /**
-     * True when Tier 1 confirmed a required-index hit or any Tier 2 behavior executed with a required-index hit. Callers that gate SSE emit or packaging on the hit bar must read this field, not tier1.has_confirmed_hit alone.
+     * True when Tier 1 confirmed a hit in the searched universe or any Tier 2 behavior executed with a hit in its targets. Callers that gate SSE emit or packaging on the hit bar must read this field, not tier1.has_confirmed_hit alone.
      */
     has_confirmed_hit: z
       .boolean()
       .describe(
-        'True when Tier 1 confirmed a required-index hit or any Tier 2 behavior executed with a required-index hit. Callers that gate SSE emit or packaging on the hit bar must read this field, not tier1.has_confirmed_hit alone.'
+        'True when Tier 1 confirmed a hit in the searched universe or any Tier 2 behavior executed with a hit in its targets. Callers that gate SSE emit or packaging on the hit bar must read this field, not tier1.has_confirmed_hit alone.'
       ),
     /**
      * Whether the run covered what it was asked to. Read this rather than `completed_successfully` when deciding what to record: a run can finish without errors and still have searched almost nothing, and the difference between `complete` and `incomplete_final` is the difference between "the environment is clean" and "we could not look". `tier1.incomplete` and `tier2.incomplete` say which gaps produced it.
@@ -237,12 +260,49 @@ export const HuntCoordinatorResponse = lazySchema(() =>
       'Whether the run covered what it was asked to. Read this rather than `completed_successfully` when deciding what to record: a run can finish without errors and still have searched almost nothing, and the difference between `complete` and `incomplete_final` is the difference between "the environment is clean" and "we could not look". `tier1.incomplete` and `tier2.incomplete` say which gaps produced it.'
     ),
     /**
-     * Whether the report should stay eligible for a later run. Derived from `completeness`: false only for `incomplete_retryable`, where repeating the run could cover what this one missed. True for `incomplete_final` as well as `complete`, because a deterministic gap returns identically every run, so retrying only re-spends the budget. A caller that writes "clean" off this flag alone will record a clean environment for a run that could not search it — use `completeness` for that.
+     * Whether this run is done with the report and it can be retired: true when nothing a later sweep would cover is missing. Derived from `completeness`: false only for `incomplete_retryable`, where repeating the run could cover what this one missed. True for `incomplete_final` as well as `complete`, because a deterministic gap returns identically every run, so retrying only re-spends the budget. A caller that writes "clean" off this flag alone will record a clean environment for a run that could not search it — use `completeness` for that.
      */
     completed_successfully: z
       .boolean()
       .describe(
-        'Whether the report should stay eligible for a later run. Derived from `completeness`: false only for `incomplete_retryable`, where repeating the run could cover what this one missed. True for `incomplete_final` as well as `complete`, because a deterministic gap returns identically every run, so retrying only re-spends the budget. A caller that writes "clean" off this flag alone will record a clean environment for a run that could not search it — use `completeness` for that.'
+        'Whether this run is done with the report and it can be retired: true when nothing a later sweep would cover is missing. Derived from `completeness`: false only for `incomplete_retryable`, where repeating the run could cover what this one missed. True for `incomplete_final` as well as `complete`, because a deterministic gap returns identically every run, so retrying only re-spends the budget. A caller that writes "clean" off this flag alone will record a clean environment for a run that could not search it — use `completeness` for that.'
+      ),
+    /**
+     * The coordinator's own coverage gaps — input this run had to truncate, and a Tier 2 that was requested but could not run, or had nothing to run against. Not a copy of `tier1.incomplete` / `tier2.incomplete`, which the caller already has; this is the part of `completeness` that would otherwise reach the caller only as an enum, or on the Tier-1-only paths, not even that. Absent or empty means the coordinator itself found nothing to report here.
+     */
+    incomplete: z
+      .array(HuntIncompleteness)
+      .optional()
+      .describe(
+        "The coordinator's own coverage gaps — input this run had to truncate, and a Tier 2 that was requested but could not run, or had nothing to run against. Not a copy of `tier1.incomplete` / `tier2.incomplete`, which the caller already has; this is the part of `completeness` that would otherwise reach the caller only as an enum, or on the Tier-1-only paths, not even that. Absent or empty means the coordinator itself found nothing to report here."
+      ),
+    /**
+     * Up to 8 analyst next-step lines for a confirmed hit, grounded to this run's own SSE-visible entities. Absent when there is no confirmed hit or the run stopped before Tier 2.
+     */
+    recommendations: z
+      .array(z.string().min(1).max(2000))
+      .max(8)
+      .optional()
+      .describe(
+        "Up to 8 analyst next-step lines for a confirmed hit, grounded to this run's own SSE-visible entities. Absent when there is no confirmed hit or the run stopped before Tier 2."
+      ),
+    /**
+     * One clause for the run conclusion message: the outcome (confirmed hit or not) plus what each tier did.
+     */
+    headline: z
+      .string()
+      .optional()
+      .describe(
+        'One clause for the run conclusion message: the outcome (confirmed hit or not) plus what each tier did.'
+      ),
+    /**
+     * The full hunt results narrative the hunt child writes to the Investigation: what was hunted, where and when, what each tier found, and why a tier did not run. Deterministic markdown derived from the structured fields, self-sufficient because the SSE attachment may not render everywhere.
+     */
+    narrative: z
+      .string()
+      .optional()
+      .describe(
+        'The full hunt results narrative the hunt child writes to the Investigation: what was hunted, where and when, what each tier found, and why a tier did not run. Deterministic markdown derived from the structured fields, self-sufficient because the SSE attachment may not render everywhere.'
       ),
     /**
      * Populated when `has_confirmed_hit` is true (Tier 1 environment hits or a Tier 2 executed required-index hit) and the request named a `report_id`: one entry per technique this run corroborated, meaning its ES|QL executed and returned required-index rows or a Tier 1 hit was attributed to it. A technique that was only proposed gets no entry of its own; when no technique was corroborated, a single report-scoped entry carries all of them under `hunt_result.tier2.behaviors`. The caller fans out over this array with ai.attachment.add, one call per entry; no templated fields.
@@ -257,6 +317,22 @@ export const HuntCoordinatorResponse = lazySchema(() =>
       .optional()
       .describe(
         'Populated when `has_confirmed_hit` is true (Tier 1 environment hits or a Tier 2 executed required-index hit) and the request named a `report_id`: one entry per technique this run corroborated, meaning its ES|QL executed and returned required-index rows or a Tier 1 hit was attributed to it. A technique that was only proposed gets no entry of its own; when no technique was corroborated, a single report-scoped entry carries all of them under `hunt_result.tier2.behaviors`. The caller fans out over this array with ai.attachment.add, one call per entry; no templated fields.'
+      ),
+    /**
+     * Present alongside `sse`: the hosts and users the SSE entries name, deduplicated across entries, ready for the investigations impact route. Ids are `host:<host.name>` or `user:<user.name>`. Capped at 50, half of what one Investigation's impact may hold, because every sweep of a report merges onto the same Investigation.
+     */
+    impacted_entities: z
+      .array(
+        z.object({
+          id: z.string().min(1).max(256),
+          name: z.string().min(1).max(512),
+          type: z.enum(['host', 'user']),
+        })
+      )
+      .max(50)
+      .optional()
+      .describe(
+        "Present alongside `sse`: the hosts and users the SSE entries name, deduplicated across entries, ready for the investigations impact route. Ids are `host:<host.name>` or `user:<user.name>`. Capped at 50, half of what one Investigation's impact may hold, because every sweep of a report merges onto the same Investigation."
       ),
   })
 );

@@ -119,6 +119,6 @@ export const LogExtractionInstallSchema = LogExtractionInstallParams.superRefine
   validateLogExtractionParams
 ).optional();
 
-export const LogExtractionUpdadeSchema = LogExtractionInstallParams.superRefine(
+export const LogExtractionUpdateSchema = LogExtractionInstallParams.superRefine(
   validateLogExtractionParams
 );
