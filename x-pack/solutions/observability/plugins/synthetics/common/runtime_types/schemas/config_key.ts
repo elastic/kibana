@@ -6,9 +6,6 @@
  */
 
 import { z } from '@kbn/zod';
+import { ConfigKey } from '../../constants/monitor_management';
 
-export const SnapshotType = z.looseObject({
-  down: z.number(),
-  total: z.number(),
-  up: z.number(),
-});
+export const ConfigKeyCodec = z.enum(ConfigKey);
