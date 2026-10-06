@@ -112,7 +112,6 @@ Measured on commit `a688380f67b468802c0479e2c589f7e94bab1200` (the commit in thi
 ## Follow-ups (sample-workflow removal done)
 
 1. Add the claim-grounding evaluator.
-2. Add a weekly step to `.buildkite/pipelines/evals/llm_evals.yml`, copying `Evals: Alert Analysis Workflow` with `EVAL_SUITE_ID: 'security-attack-discovery-fp-tp'`.
-3. Give `PayloadConformance` and `UnsafeClose` a stricter definition or new discriminating cases — both sit at 1.0 in the baseline above and cannot fail a regression yet. Tracked in #295393.
+2. Give `PayloadConformance` and `UnsafeClose` a stricter definition or new discriminating cases — both sit at 1.0 in the baseline above and cannot fail a regression yet. Tracked in #295393.
 
 Until then the suite runs on demand through the `evals:security-attack-discovery-fp-tp` PR label.
