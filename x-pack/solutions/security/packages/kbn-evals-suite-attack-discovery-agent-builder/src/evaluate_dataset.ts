@@ -1164,6 +1164,28 @@ export const insightsFromValidatedDiscoveries = (
   });
 };
 
+/**
+ * The pipeline-discovery fallback exists ONLY for the async slow-path handoff
+ * (#293046), where the converse returns the `{ execution_uuid }` stub before
+ * generation finishes. A completed synchronous response that omitted its
+ * report must be scored as an omission — substituting the pipeline's
+ * discoveries there would let insight evaluators pass on a run where the
+ * agent never produced the report.
+ */
+export const insightsForResponse = ({
+  responseInsights,
+  adToolStatus,
+  validatedDiscoveries,
+}: {
+  responseInsights?: AttackDiscovery[] | null;
+  adToolStatus: AdToolResult['status'];
+  validatedDiscoveries: unknown[] | null | undefined;
+}): AttackDiscovery[] | null | undefined => {
+  if (responseInsights) return responseInsights;
+  if (adToolStatus === 'completed') return responseInsights;
+  return insightsFromValidatedDiscoveries(validatedDiscoveries);
+};
+
 interface ExecutionTrackingWorkflowSnapshot {
   workflow_id?: string;
   workflow_run_id?: string;
@@ -1437,17 +1459,17 @@ const buildTask =
         };
     return {
       ...response,
-      // Slow-path handoff (#293046): when the sync tool returns the
-      // `{ execution_uuid }` handoff at its 90s soft deadline, the converse
-      // response carries no insights even though generation completes in the
-      // background moments later. Fall back to the pipeline's validated
-      // discoveries (mapped to the harness `AttackDiscovery` shape) so
-      // insight-based evaluators (NoiseFalsePositive, AttackDiscoveryBasic)
-      // score the completed run rather than the handoff stub. A run whose
+      // Slow-path handoff only (#293046) — see insightsForResponse: the
+      // handoff stub carries no insights while generation finishes in the
+      // background, so the pipeline's validated discoveries (mapped to the
+      // harness `AttackDiscovery` shape) are scored instead. A run whose
       // discoveries were all hallucination-filtered legitimately yields an
       // empty array — do not fabricate.
-      insights:
-        response.insights ?? insightsFromValidatedDiscoveries(pipeline?.validated_discoveries),
+      insights: insightsForResponse({
+        responseInsights: response.insights,
+        adToolStatus: adToolResult?.status ?? null,
+        validatedDiscoveries: pipeline?.validated_discoveries,
+      }),
       // Redact transient execution UUIDs from steps and adToolResult before
       // they reach evaluators — these are per-run values that would pollute
       // score reports and make diff comparisons noisy.

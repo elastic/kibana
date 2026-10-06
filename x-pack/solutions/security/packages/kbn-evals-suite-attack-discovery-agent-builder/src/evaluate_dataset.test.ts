@@ -16,6 +16,7 @@ import {
   extractRetrievalEvidence,
   extractUnscopedAlertRetrievalRowCounts,
   findAdToolResult,
+  insightsForResponse,
   insightsFromValidatedDiscoveries,
   trackedStageKeys,
   waitForValidationPhase,
@@ -1346,6 +1347,29 @@ describe('retrieval evidence persisted on the task output', () => {
     expect(workflow.retrievalEvidence.pipelineAlertRetrieval).toEqual([
       { alertsContextCount: 95, extractionStrategy: 'default_esql', alertsCount: null },
     ]);
+  });
+});
+
+describe('insightsForResponse: fallback restricted to the async handoff', () => {
+  const validated = [{ title: 't', summary_markdown: 's', details_markdown: 'd', alert_ids: ['a1'] }];
+
+  it('does NOT substitute pipeline discoveries for a completed response without a report', () => {
+    expect(
+      insightsForResponse({ responseInsights: null, adToolStatus: 'completed', validatedDiscoveries: validated })
+    ).toBeNull();
+  });
+
+  it('substitutes pipeline discoveries for the async handoff (pending) stub', () => {
+    expect(
+      insightsForResponse({ responseInsights: null, adToolStatus: 'pending', validatedDiscoveries: validated })
+    ).toEqual([{ title: 't', summaryMarkdown: 's', detailsMarkdown: 'd', alertIds: ['a1'] }]);
+  });
+
+  it('keeps the response own insights when present', () => {
+    const own = [{ title: 'own', summaryMarkdown: 's', detailsMarkdown: 'd', alertIds: [] }];
+    expect(
+      insightsForResponse({ responseInsights: own, adToolStatus: 'completed', validatedDiscoveries: validated })
+    ).toBe(own);
   });
 });
 
