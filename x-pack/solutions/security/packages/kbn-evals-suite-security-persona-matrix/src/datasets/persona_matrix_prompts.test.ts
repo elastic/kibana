@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  PERSONA_MATRIX_PARITY_TOOL_IDS,
+  PERSONA_MATRIX_TOOL_IDS,
+} from '../fixtures/persona_matrix_tools_seed';
 import { PERSONA_MATRIX_EXAMPLES } from './persona_matrix_prompts';
 
 // Each row ties operations requested by the question to both answer criteria and
@@ -32,19 +36,19 @@ const requiredOperations: Record<string, Array<{ reference: RegExp; tools: strin
   'entity-analytics-c': [{ reference: /history.*risk/i, tools: ['security.get_entity'] }],
   'multi-step-a': [
     { reference: /analyzes the attached alert/i, tools: ['attachments.read'] },
-    { reference: /verifies its file hash.*virustotal_lookup/i, tools: ['virustotal_lookup'] },
-    { reference: /on-call owner.*on_call_lookup/i, tools: ['on_call_lookup'] },
-    { reference: /creates a Slack incident channel.*create\.channel/i, tools: ['create.channel'] },
+    { reference: /verifies its file hash.*virustotal_lookup/i, tools: [] },
+    { reference: /on-call owner.*on_call_lookup/i, tools: [] },
+    { reference: /creates a Slack incident channel.*create\.channel/i, tools: [] },
     { reference: /verdict, IOCs, and on-call owner.*each completed step/i, tools: [] },
   ],
   'multi-step-b': [
-    { reference: /loader hash.*virustotal_lookup/i, tools: ['virustotal_lookup'] },
-    { reference: /on-call responder.*on_call_lookup/i, tools: ['on_call_lookup'] },
+    { reference: /loader hash.*virustotal_lookup/i, tools: [] },
+    { reference: /on-call responder.*on_call_lookup/i, tools: [] },
     {
       reference: /critical Security case.*platform\.core\.cases\.manage/i,
       tools: ['platform.core.cases.manage'],
     },
-    { reference: /Slack incident channel.*create\.channel/i, tools: ['create.channel'] },
+    { reference: /Slack incident channel.*create\.channel/i, tools: [] },
     { reference: /posts the case summary and top IOCs.*each step/i, tools: [] },
   ],
   'multi-step-c': [
@@ -53,8 +57,8 @@ const requiredOperations: Record<string, Array<{ reference: RegExp; tools: strin
       reference: /IOCs via ES\|QL/i,
       tools: ['platform.core.generate_esql', 'platform.core.execute_esql'],
     },
-    { reference: /on-call owner.*on_call_lookup/i, tools: ['on_call_lookup'] },
-    { reference: /If confirmed.*Slack channel.*create\.channel/i, tools: ['create.channel'] },
+    { reference: /on-call owner.*on_call_lookup/i, tools: [] },
+    { reference: /If confirmed.*Slack channel.*create\.channel/i, tools: [] },
     { reference: /If benign, does not create a channel or escalate/i, tools: [] },
     { reference: /confirmed findings and recommended actions/i, tools: [] },
   ],
@@ -100,6 +104,39 @@ describe('persona matrix question and grading consistency', () => {
           expect(metadata.expectedTools).toContain(tool);
         }
       }
+    }
+  });
+
+  it('only grades tool sequences callable under both seed profiles', () => {
+    const parityOnly = new Set<string>(PERSONA_MATRIX_PARITY_TOOL_IDS);
+    const minimal = new Set<string>(PERSONA_MATRIX_TOOL_IDS);
+    const parity = new Set<string>([...PERSONA_MATRIX_TOOL_IDS, ...PERSONA_MATRIX_PARITY_TOOL_IDS]);
+
+    for (const { id, metadata } of PERSONA_MATRIX_EXAMPLES) {
+      for (const tool of metadata.expectedTools ?? []) {
+        // Built-in tools are available in both profiles; custom tools come from the fixture.
+        const callableInMinimal = !parityOnly.has(tool) || minimal.has(tool);
+        const callableInParity = !parityOnly.has(tool) || parity.has(tool);
+        expect({ id, tool, callableInMinimal, callableInParity }).toEqual({
+          id,
+          tool,
+          callableInMinimal: true,
+          callableInParity: true,
+        });
+      }
+    }
+  });
+
+  it('does not grade multi-step trajectories on tools that parity runs may call under an alias', () => {
+    // The multi-step references accept the parity alias for each custom tool, so the
+    // literal tool_sequence must leave those legs to the free-text reference.
+    for (const { id, metadata } of PERSONA_MATRIX_EXAMPLES.filter(
+      ({ category }) => category === 'multi-step'
+    )) {
+      const aliased = (metadata.expectedTools ?? []).filter((tool) =>
+        (PERSONA_MATRIX_TOOL_IDS as readonly string[]).includes(tool)
+      );
+      expect({ id, aliased }).toEqual({ id, aliased: [] });
     }
   });
 
