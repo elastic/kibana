@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { escapePointerToken } from '@kbn/ai-anonymization-server';
+import { escapePointerToken } from './types';
 
 /** Any value that can appear in a JSON document supplied to the pattern tester. */
 export type JsonLikeValue =

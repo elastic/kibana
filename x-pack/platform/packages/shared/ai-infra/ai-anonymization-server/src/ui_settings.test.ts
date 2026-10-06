@@ -61,7 +61,7 @@ interface RegexRule {
 }
 
 function getBuiltInRulePattern(ruleId: string): RegExp {
-  const defaultSettings = getUiSettings()[aiAnonymizationSettings];
+  const defaultSettings = getAnonymizationUiSettings()[aiAnonymizationSettings];
   const rules = JSON.parse(defaultSettings.value as string).rules as RegexRule[];
   const rule = rules.find((r) => r.id === ruleId);
   if (!rule) {

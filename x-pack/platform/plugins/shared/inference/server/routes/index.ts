@@ -8,25 +8,21 @@
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup, IRouter } from '@kbn/core/server';
 import type { InferenceServerStart, InferenceStartDependencies } from '../types';
-import type { RegexWorkerService } from '@kbn/ai-anonymization-server';
 import { registerChatCompleteRoute } from './chat_complete';
 import { registerConnectorByIdRoute } from './connector_by_id';
 import { registerConnectorsRoute } from './connectors';
 import { registerPromptRoute } from './prompt';
 import { registerReplacementsRoutes } from '../chat_complete/anonymization/replacements/replacements_routes';
 import { registerEndpointsRoute } from './endpoints';
-import { registerAnonymizationTestRoute } from './anonymization_test';
 
 export const registerRoutes = ({
   router,
   logger,
   coreSetup,
-  getTestRegexWorker,
 }: {
   router: IRouter;
   logger: Logger;
   coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>;
-  getTestRegexWorker: () => RegexWorkerService | undefined;
 }) => {
   registerChatCompleteRoute({ router, coreSetup, logger: logger.get('chatComplete') });
   registerPromptRoute({ router, coreSetup, logger: logger.get('prompt') });
@@ -36,10 +32,4 @@ export const registerRoutes = ({
     coreSetup,
   });
   registerEndpointsRoute({ router, coreSetup });
-  registerAnonymizationTestRoute({
-    router,
-    coreSetup,
-    logger: logger.get('anonymizationTest'),
-    getTestRegexWorker,
-  });
 };
