@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { MemoryTab } from './tab';
@@ -131,6 +131,25 @@ describe('MemoryTab', () => {
     mockUseMemoryPages.mockReturnValue(asQueryResult({ rows: [], stats: listResult([]).stats }));
     renderTab();
     expect(screen.getByTestId('nightshiftMemorySidebarEmpty')).toBeInTheDocument();
+  });
+
+  it('narrows only the sidebar when searching, not the home view', async () => {
+    const stats = { total: 1, archived: 0 };
+    mockUseMemoryPages.mockImplementation((_filter, search = '') =>
+      asQueryResult(search === '' ? { rows: [summary()], stats } : { rows: [], stats })
+    );
+    renderTab();
+
+    await userEvent.type(screen.getByTestId('nightshiftMemorySearch'), 'redis');
+
+    await waitFor(() =>
+      expect(screen.getByTestId('nightshiftMemorySidebarEmpty')).toBeInTheDocument()
+    );
+    expect(mockUseMemoryPages).toHaveBeenLastCalledWith('active', 'redis');
+    expect(screen.getByTestId('nightshiftMemoryHomeStats')).toHaveTextContent('1 memory');
+    expect(
+      within(screen.getByTestId('nightshiftMemoryHome')).getAllByText('Kafka consumer lag').length
+    ).toBeGreaterThan(0);
   });
 
   it('shows an error prompt when the list fails', () => {

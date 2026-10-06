@@ -33,11 +33,10 @@ export function MemoryTab() {
   // tags select one too: a tag on the detail view filters Home by that keyword.
   const [keywords, setKeywords] = useState<string[]>([]);
 
-  // One query serves the sidebar, Home and Activity, matching the Cortex tab.
-  const { data, rows, stats, isError, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    useMemoryPages(filter, search);
-  // A changed search is a new query, so `isLoading` flips true again. Unmounting
-  // the sidebar for that would drop the search it is typing into.
+  // The sidebar's search narrows only the sidebar; with no search both are one query.
+  const { data, rows, stats, isError, isLoading } = useMemoryPages(filter);
+  const sidebar = useMemoryPages(filter, search);
+  // A filter change reloads the query; unmounting the sidebar then would drop its search.
   const hasLoadedRef = useRef(false);
   if (data !== undefined) hasLoadedRef.current = true;
   const livePages = useMemo(() => rows.filter((page) => !page.archived), [rows]);
@@ -116,12 +115,12 @@ export function MemoryTab() {
             onFilterChange={setFilter}
             selection={selection}
             onSelect={setSelection}
-            pages={rows}
-            isLoading={isLoading}
-            isError={isError}
-            hasNextPage={hasNextPage}
-            isFetchingNextPage={isFetchingNextPage}
-            onLoadMore={() => fetchNextPage()}
+            pages={sidebar.rows}
+            isLoading={sidebar.isLoading}
+            isError={sidebar.isError}
+            hasNextPage={sidebar.hasNextPage}
+            isFetchingNextPage={sidebar.isFetchingNextPage}
+            onLoadMore={() => sidebar.fetchNextPage()}
             onSearchChange={setSearch}
           />
         </EuiPanel>

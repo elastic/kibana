@@ -1102,6 +1102,11 @@ export const createMemoryPageStore = ({
           },
           { signal }
         );
+        logger.info(
+          `Semantic Memory page deleted id=${id} title=${JSON.stringify(
+            versioned?.page.title ?? '(unknown)'
+          )} space=${spaceId} user=${user ?? '(unknown)'}`
+        );
       } catch (err) {
         if (isElasticsearchWriteConflict(err)) {
           throw new MemoryVersionConflictError('Memory changed since it was read', {
@@ -1112,11 +1117,6 @@ export const createMemoryPageStore = ({
           throw err;
         }
       }
-      logger.info(
-        `Semantic Memory page deleted id=${id} title=${JSON.stringify(
-          versioned?.page.title ?? '(unknown)'
-        )} space=${spaceId} user=${user ?? '(unknown)'}`
-      );
     },
   };
 };
