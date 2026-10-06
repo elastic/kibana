@@ -72,5 +72,3 @@ graphql
 oxlint-tsgolint
 bump-cli
 @oxlint/plugins
-@stoplight/http-spec
-@stoplight/types
