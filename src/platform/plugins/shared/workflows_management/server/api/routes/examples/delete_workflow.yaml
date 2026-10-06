@@ -10,10 +10,10 @@ x-codeSamples:
         -H "Authorization: ApiKey ${API_KEY}" \
         -H "kbn-xsrf: true"
   - lang: curl
-    label: 'Hard delete (permanent)'
+    label: 'Hard delete (confirm ACL loss)'
     source: |
       curl \
-        -X DELETE "${KIBANA_URL}/api/workflows/workflow/{id}?force=true" \
+        -X DELETE "${KIBANA_URL}/api/workflows/workflow/{id}?force=true&acknowledgeAclLoss=true" \
         -H "Authorization: ApiKey ${API_KEY}" \
         -H "kbn-xsrf: true"
   - lang: Console

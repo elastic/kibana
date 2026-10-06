@@ -33,7 +33,8 @@ export const runScoutHook = (
     timeout: HOOK_TIMEOUT_MS,
   });
 
-  if (result.error) {
+  // A hook may exit before draining stdin; the EPIPE that leaves behind is not the hook's failure.
+  if (result.error && (result.error as NodeJS.ErrnoException).code !== 'EPIPE') {
     throw new Error(`scoutHook ${hookPath} failed to run: ${result.error.message}`);
   }
   if (result.status !== 0) {

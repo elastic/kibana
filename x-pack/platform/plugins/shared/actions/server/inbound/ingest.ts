@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  IClusterClient,
+  KibanaRequest,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import {
   connectorTypeIsDual,
   getConnectorSpec,
@@ -24,6 +29,7 @@ import {
 } from './constants';
 import { logInboundIngressOutcome } from './log_inbound_ingress_outcome';
 import type { ConnectorEventEmitParams, DispatchConnectorEventsResult } from './types';
+import { resolveKibanaInboundRequest } from './resolve_kibana_inbound_request';
 import { extractIngestToken, verifyIngestToken } from './verify_ingress_auth';
 import { loadIngressCredential, parseIngestToken } from './ingress_credential';
 import { loadInboundConnector } from './load_inbound_connector';
@@ -60,6 +66,8 @@ export interface IngestInboundEventParams extends IngestInboundEventInput {
   logger: Logger;
   getUnsecuredSavedObjectsClient: (spaceId: string) => Promise<SavedObjectsClientContract>;
   getDecryptedConnectorAttributes: (connectorId: string, spaceId: string) => Promise<RawAction>;
+  getElasticsearchClient: () => Promise<IClusterClient>;
+  getKibanaRequestAccess: (request: KibanaRequest) => Promise<boolean>;
   inMemoryConnectors: InMemoryConnector[];
 }
 
@@ -87,6 +95,8 @@ export async function ingestInboundEvent({
   logger,
   getUnsecuredSavedObjectsClient,
   getDecryptedConnectorAttributes,
+  getElasticsearchClient,
+  getKibanaRequestAccess,
   inMemoryConnectors,
 }: IngestInboundEventParams): Promise<IngestInboundEventResult> {
   const connectorTypeId = normalizeConnectorTypeId(connectorTypeIdParam);
@@ -138,8 +148,11 @@ export async function ingestInboundEvent({
     return { status: 'not_found' };
   }
 
+  const connectorEventsEnabled = connector.hasPreconfiguredInboundEvents === true;
+
   if (
     connectorTypeIsDual(connector.connectorTypeId) &&
+    !connectorEventsEnabled &&
     connector.hasInboundEventIdentity !== true
   ) {
     logInboundIngressOutcome(logger, {
@@ -150,32 +163,60 @@ export async function ingestInboundEvent({
     return { status: 'not_found' };
   }
 
-  const providedToken = extractIngestToken({
-    query,
-    headers,
-  });
-  const parsedToken = providedToken ? parseIngestToken(providedToken) : undefined;
-  if (!providedToken || !parsedToken) {
-    logInboundIngressOutcome(logger, { ...baseLog, outcome: 'auth_fail' });
-    return { status: 'not_found' };
-  }
+  let kibanaScheduleRequest: KibanaRequest | undefined;
+  // In-memory events-on connectors have no ingest token. A saved identity stays on the token path.
+  if (connectorEventsEnabled && connector.hasInboundEventIdentity !== true) {
+    try {
+      kibanaScheduleRequest = await resolveKibanaInboundRequest({
+        headers,
+        spaceId,
+        elasticsearchClient: await getElasticsearchClient(),
+        getKibanaRequestAccess,
+      });
+    } catch (error) {
+      logInboundIngressOutcome(logger, {
+        ...baseLog,
+        outcome: 'handle_fail',
+        detail: error instanceof Error ? error.message : String(error),
+      });
+      return {
+        status: 'error',
+        statusCode: 500,
+        body: INBOUND_EVENTS_UNEXPECTED_ERROR_MESSAGE,
+      };
+    }
+    if (!kibanaScheduleRequest) {
+      logInboundIngressOutcome(logger, { ...baseLog, outcome: 'auth_fail' });
+      return { status: 'not_found' };
+    }
+  } else {
+    const providedToken = extractIngestToken({
+      query,
+      headers,
+    });
+    const parsedToken = providedToken ? parseIngestToken(providedToken) : undefined;
+    if (!providedToken || !parsedToken) {
+      logInboundIngressOutcome(logger, { ...baseLog, outcome: 'auth_fail' });
+      return { status: 'not_found' };
+    }
 
-  const credential = await loadIngressCredential({
-    unsecuredSavedObjectsClient,
-    credentialId: parsedToken.credentialId,
-    connectorId,
-  });
-  if (
-    !credential ||
-    !verifyIngestToken({
+    const credential = await loadIngressCredential({
+      unsecuredSavedObjectsClient,
+      credentialId: parsedToken.credentialId,
       connectorId,
-      spaceId,
-      providedToken,
-      ingestTokenHash: credential.ingestTokenHash,
-    })
-  ) {
-    logInboundIngressOutcome(logger, { ...baseLog, outcome: 'auth_fail' });
-    return { status: 'not_found' };
+    });
+    if (
+      !credential ||
+      !verifyIngestToken({
+        connectorId,
+        spaceId,
+        providedToken,
+        ingestTokenHash: credential.ingestTokenHash,
+      })
+    ) {
+      logInboundIngressOutcome(logger, { ...baseLog, outcome: 'auth_fail' });
+      return { status: 'not_found' };
+    }
   }
 
   try {
@@ -267,17 +308,19 @@ export async function ingestInboundEvent({
       return { status: 'accepted', body: { ok: true } };
     }
 
-    let scheduleRequest;
-    try {
-      const attributes = await getDecryptedConnectorAttributes(connectorId, spaceId);
-      scheduleRequest = resolveConnectorEventScheduleRequest(attributes, spaceId);
-    } catch (error) {
-      logInboundIngressOutcome(logger, {
-        ...baseLog,
-        outcome: 'identity_missing',
-        detail: `decrypt_failed ${error instanceof Error ? error.message : String(error)}`,
-      });
-      return { status: 'accepted', body: { ok: true } };
+    let scheduleRequest = kibanaScheduleRequest;
+    if (!scheduleRequest) {
+      try {
+        const attributes = await getDecryptedConnectorAttributes(connectorId, spaceId);
+        scheduleRequest = resolveConnectorEventScheduleRequest(attributes, spaceId);
+      } catch (error) {
+        logInboundIngressOutcome(logger, {
+          ...baseLog,
+          outcome: 'identity_missing',
+          detail: `decrypt_failed ${error instanceof Error ? error.message : String(error)}`,
+        });
+        return { status: 'accepted', body: { ok: true } };
+      }
     }
 
     if (!scheduleRequest) {

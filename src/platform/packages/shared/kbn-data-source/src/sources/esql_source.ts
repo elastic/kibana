@@ -14,7 +14,9 @@ import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type { HttpStart } from '@kbn/core/public';
 import {
   getIndexPatternFromESQLQuery,
+  getSourceCommandQueryFromESQLQuery,
   getESQLSourceInfo,
+  ESQL_SOURCE_INFO_CACHE_TTL,
   getESQLTimeField,
   buildEsqlSourceCacheKey,
   isComputedColumn,
@@ -50,6 +52,11 @@ export interface EsqlSourceArgs {
    * `timeFieldName` / `resultColumns` are already set.
    */
   http?: HttpStart;
+  /**
+   * Set to `false` when only the schema is needed (e.g. KQL field suggestions): the time field
+   * is then taken only if already resolved for this source, never requested. Defaults to `true`.
+   */
+  resolveTimeField?: boolean;
   /**
    * Passed to the source_info route so that queries using `?_tstart` / `?_tend`
    * named parameters can be executed for schema discovery.
@@ -102,7 +109,11 @@ interface EsqlSourceConstructorArgs {
  * is private because id derivation uses `crypto.subtle.digest` (async).
  */
 export class EsqlSource implements DataSourceBase {
-  private static readonly instanceCache = new LRUCache<string, EsqlSource>({ max: 100 });
+  // Expires with the source info cache, so a source picks up new fields without a reload.
+  private static readonly instanceCache = new LRUCache<string, EsqlSource>({
+    max: 100,
+    ttl: ESQL_SOURCE_INFO_CACHE_TTL,
+  });
 
   public readonly kind = 'esql' as const;
   public readonly id: string;
@@ -158,23 +169,35 @@ export class EsqlSource implements DataSourceBase {
       args.projectRouting,
       args.esqlVariables
     );
-    // When timeFieldName is explicitly provided it is included in the key so
-    // that the same query with a different pre-resolved time field gets a
-    // distinct cache entry.
-    const instanceKey = args.timeFieldName != null ? `${baseKey}\0${args.timeFieldName}` : baseKey;
+    // An explicit time field is part of the key, so a different one gets its own entry. An
+    // instance created without resolving the time field is kept apart, so it is never returned
+    // to a caller that needs the time field.
+    const skipsTimeField = args.timeFieldName == null && args.resolveTimeField === false;
+    const instanceKey =
+      args.timeFieldName != null
+        ? `${baseKey}\0${args.timeFieldName}`
+        : skipsTimeField
+        ? `${baseKey}\0without-time-field`
+        : baseKey;
 
-    const cached = EsqlSource.instanceCache.get(instanceKey);
+    // A caller that skips the time field prefers an instance that has it.
+    const cached =
+      (skipsTimeField ? EsqlSource.instanceCache.get(baseKey) : undefined) ??
+      EsqlSource.instanceCache.get(instanceKey);
     if (cached) return cached;
 
     const title = getIndexPatternFromESQLQuery(query);
     const projectRouting = getProjectRoutingFromEsqlQuery(query) ?? args.projectRouting;
 
-    let timeFieldName: string | undefined = args.timeFieldName;
+    // Without `http`, getESQLTimeField only returns an already resolved time field.
+    let timeFieldName: string | undefined = skipsTimeField
+      ? await getESQLTimeField({ query, projectRouting: args.projectRouting })
+      : args.timeFieldName;
     let resultColumns: readonly DatatableColumn[] = args.resultColumns ?? [];
     let discoveredSchema: Awaited<ReturnType<typeof getESQLSourceInfo>> | null | undefined;
 
     const { http } = args;
-    const shouldResolveTimeField = Boolean(http) && timeFieldName === undefined;
+    const shouldResolveTimeField = Boolean(http) && timeFieldName === undefined && !skipsTimeField;
     const shouldResolveSchema = Boolean(http) && args.resultColumns === undefined;
 
     if (http && (shouldResolveTimeField || shouldResolveSchema)) {
@@ -224,9 +247,11 @@ export class EsqlSource implements DataSourceBase {
       resultColumns,
     });
 
-    // Failed source_info (`info === null`) is not a legitimate empty schema —
-    // skip the cache so a later create can retry discovery.
-    if (!shouldResolveSchema || discoveredSchema !== null) {
+    // Only cache a known schema: given columns or a successful lookup. A failed lookup
+    // (`info === null`) or a create without `http` or columns is retried by a later create.
+    const isSchemaKnown =
+      args.resultColumns !== undefined || (shouldResolveSchema && discoveredSchema !== null);
+    if (isSchemaKnown) {
       EsqlSource.instanceCache.set(instanceKey, instance);
     }
     return instance;
@@ -278,6 +303,27 @@ export class EsqlSource implements DataSourceBase {
       projectRouting: this.projectRouting,
       resultColumns,
     });
+  }
+
+  /**
+   * Fields of the queried dataset, which is what filters and KQL apply to: the columns of the
+   * source command alone (`FROM x | STATS ...` → `FROM x`), resolved once per dataset.
+   * Without `http`, only an already resolved schema is returned; otherwise no fields.
+   */
+  public async getFilterableFields(http?: HttpStart): Promise<readonly Column[]> {
+    const sourceQuery = getSourceCommandQueryFromESQLQuery(this.query);
+    if (!sourceQuery) {
+      return this.columns;
+    }
+    const datasetSource = await EsqlSource.create({
+      query: sourceQuery,
+      timeFieldName: this.timeFieldName,
+      // Only the columns are needed.
+      resolveTimeField: false,
+      projectRouting: this.projectRouting,
+      http,
+    });
+    return datasetSource.getColumns();
   }
 
   public isRollup(): boolean {

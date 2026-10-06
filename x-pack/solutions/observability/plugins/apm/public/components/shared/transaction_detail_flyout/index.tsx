@@ -51,6 +51,7 @@ export function TransactionDetailFlyout({
   preferDocumentBasedCharts,
   schema,
   indices,
+  alertsCount,
 }: TransactionDetailFlyoutComponentProps) {
   const { transactionName, rangeFrom, rangeTo, start, end } = filters;
   const titleId = useGeneratedHtmlId({ prefix: 'transactionDetailFlyoutTitle' });
@@ -69,6 +70,7 @@ export function TransactionDetailFlyout({
       preferDocumentBasedCharts,
       schema,
       indices,
+      alertsCount,
       openFullTraceFlyout,
     }),
     [
@@ -79,6 +81,7 @@ export function TransactionDetailFlyout({
       preferDocumentBasedCharts,
       schema,
       indices,
+      alertsCount,
       openFullTraceFlyout,
     ]
   );

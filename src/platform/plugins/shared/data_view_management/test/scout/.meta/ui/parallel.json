@@ -1,0 +1,428 @@
+{
+  "sha1": "82031c3bbc92b821cd25f2d48529faead6096ae1",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "b67022d9b012554-700cbdee2f2b4ba",
+      "title": "Load ES data for data view management Scout tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 14,
+        "column": 13
+      }
+    },
+    {
+      "id": "76ab14d491efee0-f5a0e17f5dce786",
+      "title": "Create data view from index alias can create a data view from an index alias and then delete it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/create_data_view_wizard.spec.ts",
+        "line": 51,
+        "column": 31
+      }
+    },
+    {
+      "id": "a7f6ccc968f3a74-e0509abf175c8be",
+      "title": "Data view editor — create flows can open the editor flyout and close it without creating a data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_create.spec.ts",
+        "line": 23,
+        "column": 41
+      }
+    },
+    {
+      "id": "a7f6ccc968f3a74-0ad5ad428e29bdb",
+      "title": "Data view editor — create flows special characters in the title input show a no-match status message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_create.spec.ts",
+        "line": 32,
+        "column": 14
+      }
+    },
+    {
+      "id": "a7f6ccc968f3a74-c7d928af9de23a5",
+      "title": "Data view editor — create flows can create a logstash data view and verify page heading, URL, and field count",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_create.spec.ts",
+        "line": 50,
+        "column": 32
+      }
+    },
+    {
+      "id": "a7f6ccc968f3a74-f7ddd6de2c83be8",
+      "title": "Data view editor — create flows can create data view with mixed matched and unmatched index pattern segments",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_create.spec.ts",
+        "line": 76,
+        "column": 23
+      }
+    },
+    {
+      "id": "a7f6ccc968f3a74-1d8ab8e5c717717",
+      "title": "Data view editor — create flows can create a data view against a hidden index and allow-hidden persists after reload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_create.spec.ts",
+        "line": 93,
+        "column": 9
+      }
+    },
+    {
+      "id": "7fd31946fa290b5-8cf4439239a3fa9",
+      "title": "Data view editor — delete flow can delete a data view and navigate back to the listing page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_delete.spec.ts",
+        "line": 16,
+        "column": 22
+      }
+    },
+    {
+      "id": "29927afd2c6d6ea-5c48478559f0ded",
+      "title": "Data view editing — edit flows and field list updates editing a data view updates the display name shown in the page header",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_edit.spec.ts",
+        "line": 33,
+        "column": 15
+      }
+    },
+    {
+      "id": "29927afd2c6d6ea-2760a862dfea1a3",
+      "title": "Data view editing — edit flows and field list updates can save a named data view again without changing its name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_edit.spec.ts",
+        "line": 47,
+        "column": 29
+      }
+    },
+    {
+      "id": "29927afd2c6d6ea-27b41d48a11bca1",
+      "title": "Data view editing — edit flows and field list updates editing updates field list when the index expression is changed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_edit.spec.ts",
+        "line": 70,
+        "column": 29
+      }
+    },
+    {
+      "id": "29927afd2c6d6ea-a6a106faff66644",
+      "title": "Data view editing — edit flows and field list updates save button becomes disabled immediately after clicking to prevent double submission",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_edit.spec.ts",
+        "line": 93,
+        "column": 15
+      }
+    },
+    {
+      "id": "29927afd2c6d6ea-b905ff68cbe5ebb",
+      "title": "Data view editing — edit flows and field list updates editor is prefilled with previously saved title, index pattern, and time field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_edit.spec.ts",
+        "line": 114,
+        "column": 84
+      }
+    },
+    {
+      "id": "78e5c17d9a026da-81d3dfa97f97deb",
+      "title": "Data view editor — validation resetting the timestamp field works when switching to an index without date fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_editor_validation.spec.ts",
+        "line": 16,
+        "column": 22
+      }
+    },
+    {
+      "id": "78e5c17d9a026da-0fadc62e1bab585",
+      "title": "Data view editor — validation displays a form error when saving a pattern with no matching indices and recovers once corrected",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_editor_validation.spec.ts",
+        "line": 49,
+        "column": 8
+      }
+    },
+    {
+      "id": "78e5c17d9a026da-f1b67fc8f813405",
+      "title": "Data view editor — validation requires a new timestamp field when the pattern changes to one without the selected field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_editor_validation.spec.ts",
+        "line": 91,
+        "column": 19
+      }
+    },
+    {
+      "id": "a03cc315338d5fd-6a776ea4e6136bd",
+      "title": "Data view field popularity persistence saved popularity persists after page reload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_popularity.spec.ts",
+        "line": 24,
+        "column": 24
+      }
+    },
+    {
+      "id": "a03cc315338d5fd-6c411860ff9b100",
+      "title": "Data view field popularity persistence changing popularity for one field does not affect another",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_view_popularity.spec.ts",
+        "line": 44,
+        "column": 13
+      }
+    },
+    {
+      "id": "4cb8c985ef839d6-10f1001740dfa53",
+      "title": "Data view field list filters schema type filter shows only runtime fields when set to runtime",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_views_filter.spec.ts",
+        "line": 29,
+        "column": 33
+      }
+    },
+    {
+      "id": "4cb8c985ef839d6-05413c94747e8bb",
+      "title": "Data view field list filters conflict filter button resets other filters and shows only the conflicting field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/data_views_filter.spec.ts",
+        "line": 97,
+        "column": 8
+      }
+    },
+    {
+      "id": "de0a19f8704a115-cdb0e0d2ef7a709",
+      "title": "Data view creation with exclusion expression data view with exclusion pattern shows only included index fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/exclude_data_view.spec.ts",
+        "line": 39,
+        "column": 60
+      }
+    }
+  ]
+}

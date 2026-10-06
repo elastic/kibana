@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
@@ -15,11 +16,15 @@ export const GET_WORKFLOW_HEALTH_CHECK_TOOL_ID =
   'security.attack-discovery.get_workflow_health_check';
 
 export interface WorkflowFetcher {
-  getWorkflow: (workflowId: string, spaceId: string) => Promise<WorkflowDetailDto | null>;
+  getWorkflow: (
+    workflowId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ) => Promise<WorkflowDetailDto | null>;
   getWorkflowExecution: (
     executionId: string,
     spaceId: string,
-    options?: { includeInput?: boolean; includeOutput?: boolean }
+    options: { includeInput?: boolean; includeOutput?: boolean; request: KibanaRequest }
   ) => Promise<WorkflowExecutionDto | null>;
 }
 
@@ -64,11 +69,11 @@ export const getWorkflowHealthCheckTool = (
     'Inspects the current state of configured workflows (enabled/valid/found). Use this tool when alert retrieval phases are empty or missing, to determine whether configured workflows are disabled, deleted, or invalid before diagnosing the root cause.',
   handler: async (args, context) => {
     try {
-      const { spaceId } = context;
+      const { spaceId, request } = context;
 
       const healthResults = await Promise.all(
         args.workflow_ids.map(async (workflowId) => {
-          const workflow = await fetcher.getWorkflow(workflowId, spaceId);
+          const workflow = await fetcher.getWorkflow(workflowId, spaceId, request);
           return toWorkflowHealth(workflowId, workflow);
         })
       );

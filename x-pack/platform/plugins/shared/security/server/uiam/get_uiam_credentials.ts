@@ -11,13 +11,11 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 
 /**
- * Extracts the authorization header for UIAM bearer-token or API-key credentials.
+ * Throws unless the authorization header carries a UIAM bearer-token or API-key credential.
  */
-export const getUiamAuthorizationHeaderFromRequest = (
-  request: KibanaRequest
-): HTTPAuthorizationHeader => {
-  const authorization = HTTPAuthorizationHeader.parseFromRequest(request);
-
+export const assertUiamCredential: (
+  authorization: HTTPAuthorizationHeader | null
+) => asserts authorization is HTTPAuthorizationHeader = (authorization) => {
   if (!authorization) {
     throw Boom.unauthorized('Request does not contain an authorization header');
   }
@@ -25,7 +23,16 @@ export const getUiamAuthorizationHeaderFromRequest = (
   if (!isUiamCredential(authorization)) {
     throw Boom.badRequest('Provided credential is not compatible with UIAM');
   }
+};
 
+/**
+ * Extracts the authorization header for UIAM bearer-token or API-key credentials.
+ */
+export const getUiamAuthorizationHeaderFromRequest = (
+  request: KibanaRequest
+): HTTPAuthorizationHeader => {
+  const authorization = HTTPAuthorizationHeader.parseFromRequest(request);
+  assertUiamCredential(authorization);
   return authorization;
 };
 

@@ -33,6 +33,28 @@ const makeSource = (overrides?: Partial<WorkflowProperties>): WorkflowProperties
 });
 
 describe('transformStorageDocumentToWorkflowDto', () => {
+  it.each([null, false, { entries: [] }, { access_mode: 'private', entries: {} }])(
+    'rejects malformed stored ACLs: %p',
+    (accessControl) => {
+      const source = Object.assign(makeSource(), { access_control: accessControl });
+      expect(() => transformStorageDocumentToWorkflowDto('wf-1', source)).toThrow();
+    }
+  );
+
+  it('preserves stored ACL timestamps', () => {
+    const source = makeSource({
+      access_control: {
+        access_mode: 'private',
+        entries: [
+          { type: 'user', id: 'reader', role: 'viewer', added_at: '2026-09-17T00:00:00.000Z' },
+        ],
+      },
+    });
+    expect(transformStorageDocumentToWorkflowDto('wf-1', source).access_control).toEqual(
+      source.access_control
+    );
+  });
+
   it('maps all WorkflowProperties fields to WorkflowDetailDto correctly', () => {
     const source = makeSource();
     const result = transformStorageDocumentToWorkflowDto('wf-123', source);
@@ -113,6 +135,17 @@ describe('transformStorageDocumentToWorkflowDto', () => {
 });
 
 describe('transformStoragePartialToWorkflowDto', () => {
+  it('omits ACL fields even when included in the requested source', () => {
+    const result = transformStoragePartialToWorkflowDto('wf-1', {
+      owner_id: 'owner',
+      access_control: {
+        access_mode: 'public',
+        entries: [{ type: 'user', id: 'recipient', role: 'viewer', added_at: '2026-09-10' }],
+      },
+    });
+    expect(result).toEqual({ id: 'wf-1' });
+  });
+
   it('only copies fields that are present on the partial source', () => {
     const result = transformStoragePartialToWorkflowDto('wf-1', {
       name: 'Just name',

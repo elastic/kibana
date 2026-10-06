@@ -13,7 +13,7 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { isEmptyEsqlQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
-import type { UISession } from '@kbn/data-plugin/public/search/session/sessions_mgmt/types';
+import type { UISession } from '@kbn/data-plugin/public';
 import type { OpenInNewTabParams } from '../../../../../context_awareness/types';
 import { ProfileStateType, type ProfileStateMap } from '../../../../../../common/context_awareness';
 import { createDataSource } from '../../../../../../common/data_sources/utils';
@@ -52,6 +52,7 @@ import { fetchData } from './tab_state';
 import { fromSavedObjectTabToTabState } from '../tab_mapping_utils';
 import { initializeAndSync, stopSyncing } from './tab_sync';
 import { assignSessionDataViewIds } from '../../utils/assign_session_data_view_ids';
+import { showSessionWarnings } from '../../../../../session';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -416,7 +417,13 @@ export const initializeTabs = createInternalStateAsyncThunk(
         return undefined;
       }
       try {
-        return await services.savedSearch.getDiscoverSession(discoverSessionId);
+        const { session, warnings } = await services.discoverSessionService.get(discoverSessionId);
+
+        if (warnings.length) {
+          showSessionWarnings({ session, warnings, core: services.core });
+        }
+
+        return session;
       } catch (error) {
         if (error instanceof SavedObjectNotFound) {
           forgetDiscoverSession(services.core.http, services.chrome, discoverSessionId);

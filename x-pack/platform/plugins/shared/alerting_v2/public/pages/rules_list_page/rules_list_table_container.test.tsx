@@ -95,7 +95,7 @@ const mockRules = [
     enabled: true,
     metadata: { name: 'Rule One', tags: ['prod'] },
     schedule: { every: '1m' },
-    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+    query: { base: 'FROM logs-* | LIMIT 1' },
   },
   {
     id: 'rule-2',
@@ -103,7 +103,7 @@ const mockRules = [
     enabled: false,
     metadata: { name: 'Rule Two', tags: [] },
     schedule: { every: '5m' },
-    query: { format: 'standalone', breach: { query: 'FROM metrics-*' } },
+    query: { base: 'FROM metrics-*' },
   },
 ] as RuleApiResponse[];
 
@@ -862,12 +862,12 @@ describe('RulesListTableContainer', () => {
         {
           ...mockRules[0],
           id: 'rule-3',
-          metadata: { name: 'Rule Three', tags: [], version: 1 },
+          metadata: { name: 'Rule Three', tags: [] },
         },
         {
           ...mockRules[1],
           id: 'rule-4',
-          metadata: { name: 'Rule Four', tags: [], version: 1 },
+          metadata: { name: 'Rule Four', tags: [] },
         },
       ] as RuleApiResponse[];
 

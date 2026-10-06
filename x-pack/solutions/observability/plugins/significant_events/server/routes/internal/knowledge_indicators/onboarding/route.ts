@@ -16,6 +16,7 @@ import {
 } from '@kbn/significant-events-schema';
 
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../../utils/assert_not_paused';
@@ -68,18 +69,20 @@ const onboardingExecuteRoute = createServerRoute({
           .object({
             features: z
               .string()
-              .max(255)
+              .max(MAX_ID_LENGTH)
               .optional()
-              .describe('Connector ID for features identification.'),
+              .describe(
+                'Chat model connector or inference endpoint ID for feature identification.'
+              ),
             queries: z
               .string()
-              .max(255)
+              .max(MAX_ID_LENGTH)
               .optional()
-              .describe('Connector ID for queries generation.'),
+              .describe('Chat model connector or inference endpoint ID for query generation.'),
           })
           .optional()
           .describe(
-            'Optional per-step connector overrides. When omitted the server resolves connectors from the inference feature registry.'
+            'Optional per-step model overrides. When omitted the Significant Events defaults are used.'
           ),
       }),
       z.object({
@@ -113,6 +116,28 @@ const onboardingExecuteRoute = createServerRoute({
     if (body.action === 'schedule') {
       await assertNotPaused({ maintenanceService, request });
       const { skipFeatures, skipQueries } = mapStepsToSkipFlags(body.steps);
+      const [featuresConnectorId, queriesConnectorId] = await Promise.all([
+        skipFeatures
+          ? undefined
+          : resolveNightshiftModelForRequest({
+              request,
+              inference: server.inference,
+              savedObjects: server.core.savedObjects,
+              uiSettings: server.core.uiSettings,
+              step: 'kiExtraction',
+              requestedId: body.connectors?.features,
+            }),
+        skipQueries
+          ? undefined
+          : resolveNightshiftModelForRequest({
+              request,
+              inference: server.inference,
+              savedObjects: server.core.savedObjects,
+              uiSettings: server.core.uiSettings,
+              step: 'kiQueryGeneration',
+              requestedId: body.connectors?.queries,
+            }),
+      ]);
 
       const inputs: SignificantEventsKIsOnboardingInputs = {
         streamName,
@@ -120,11 +145,11 @@ const onboardingExecuteRoute = createServerRoute({
           skip: skipFeatures,
           start: body.from,
           end: body.to,
-          ...(body.connectors?.features && { connectorId: body.connectors.features }),
+          ...(featuresConnectorId && { connectorId: featuresConnectorId }),
         },
         queries: {
           skip: skipQueries,
-          ...(body.connectors?.queries && { connectorId: body.connectors.queries }),
+          ...(queriesConnectorId && { connectorId: queriesConnectorId }),
         },
       };
 
@@ -138,7 +163,7 @@ const onboardingExecuteRoute = createServerRoute({
     // return the real post-cancel status rather than assuming `canceled`.
     await streamsKIsOnboardingClient.cancel({ streamName, request });
 
-    return streamsKIsOnboardingClient.getStatus({ streamName });
+    return streamsKIsOnboardingClient.getStatus({ streamName, request });
   },
 });
 
@@ -178,7 +203,7 @@ const onboardingStatusRoute = createServerRoute({
 
     await streamsClient.assertReadAccess(streamName);
 
-    return streamsKIsOnboardingClient.getStatus({ streamName });
+    return streamsKIsOnboardingClient.getStatus({ streamName, request });
   },
 });
 
@@ -227,7 +252,7 @@ const onboardingBulkStatusRoute = createServerRoute({
       return {};
     }
 
-    return streamsKIsOnboardingClient.getStatuses({ streamNames: readableStreamNames });
+    return streamsKIsOnboardingClient.getStatuses({ streamNames: readableStreamNames, request });
   },
 });
 

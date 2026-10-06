@@ -42,8 +42,6 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
-      # Product-doc installs (ELSER/E5) are disk-heavy; avoid ES flood-stage / merge stalls
-      diskSizeGb: 130
       preemptible: true
     artifact_paths:
       - 'target/llm_smoke_judgements.jsonl'

@@ -121,7 +121,6 @@
     "@kbn/embeddable-alerts-table-plugin",
     "@kbn/synthtrace",
     "@kbn/streams-schema",
-    "@kbn/significant-events-schema",
     "@kbn/evals-common",
     "@kbn/streams-plugin",
     "@kbn/content-packs-schema",
@@ -157,7 +156,6 @@
     "@kbn/setup-node-env",
     "@kbn/connector-schemas",
     "@kbn/es-types",
-    "@kbn/streamlang",
     "@kbn/dashboard-plugin",
     "@kbn/automatic-import-plugin",
     "@kbn/connector-specs",
@@ -167,8 +165,6 @@
     "@kbn/core-spaces-common",
     "@kbn/deeplinks-analytics",
     "@kbn/core-user-profile-common",
-    "@kbn/significant-events-plugin",
-    "@kbn/nightshift-shared",
     "@kbn/alerting-v2-schemas",
     "@kbn/core-chrome-browser-components"
   ]

@@ -50,8 +50,14 @@ jest.mock('@kbn/exploratory-view-plugin/public', () => ({
   createExploratoryViewUrl: () => '/app/exploratory-view',
 }));
 
+const settings = { canManagePrivateLocations: true };
+
 jest.mock('../../../contexts', () => ({
-  useSyntheticsSettingsContext: () => ({ basePath: '', isDev: false }),
+  useSyntheticsSettingsContext: () => ({
+    basePath: '',
+    isDev: false,
+    canManagePrivateLocations: settings.canManagePrivateLocations,
+  }),
 }));
 
 jest.mock('../../../hooks', () => ({
@@ -110,6 +116,7 @@ describe('useSyntheticsAppHeaderMenu', () => {
     mockMonitorList.data.absoluteTotal = 2;
     mockOverviewStatus.allConfigs = [{ origin: 'ui' }];
     mockUiSettingsGet.mockReturnValue(true);
+    settings.canManagePrivateLocations = true;
   });
 
   it('puts Alerts first and forces Inspect, Explore data, and Settings into overflow by default', () => {
@@ -174,6 +181,17 @@ describe('useSyntheticsAppHeaderMenu', () => {
       })
     );
     expect(menu.primaryActionItem).toBeUndefined();
+  });
+
+  it('disables Diagnostics without the private-location manage privilege', () => {
+    settings.canManagePrivateLocations = false;
+    const { result } = renderMenuHook({ showDiagnostics: true });
+
+    expect(findItem(result.current.menu.items, 'diagnostics')).toEqual(
+      expect.objectContaining({
+        disableButton: true,
+      })
+    );
   });
 
   it('uses a page-provided primary action instead of Create monitor', () => {

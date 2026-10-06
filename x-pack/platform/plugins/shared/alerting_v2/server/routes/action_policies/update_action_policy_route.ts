@@ -8,8 +8,8 @@
 import {
   actionPolicyResponseSchema,
   errorResponseSchema,
-  updateActionPolicyBodySchema,
-  type UpdateActionPolicyBody,
+  updateActionPolicyDataSchema,
+  type UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
@@ -22,6 +22,7 @@ import { updateActionPolicyOasExamples } from './update_action_policy_oas_exampl
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 import {
+  ACTION_POLICY_LICENSE_FORBIDDEN_DESCRIPTION,
   ACTION_POLICY_NOT_FOUND_DESCRIPTION,
   ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
 } from './action_policy_route_descriptions';
@@ -49,7 +50,7 @@ export class UpdateActionPolicyRoute extends BaseAlertingRoute {
   } as const;
   static schemas = {
     request: {
-      body: updateActionPolicyBodySchema,
+      body: updateActionPolicyDataSchema,
       params: actionPolicyIdParamsSchema,
     },
     response: {
@@ -60,6 +61,10 @@ export class UpdateActionPolicyRoute extends BaseAlertingRoute {
       400: {
         body: () => errorResponseSchema,
         description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+      },
+      403: {
+        body: () => errorResponseSchema,
+        description: ACTION_POLICY_LICENSE_FORBIDDEN_DESCRIPTION,
       },
       404: {
         body: () => errorResponseSchema,
@@ -80,7 +85,7 @@ export class UpdateActionPolicyRoute extends BaseAlertingRoute {
     private readonly request: KibanaRequest<
       z.infer<typeof actionPolicyIdParamsSchema>,
       unknown,
-      UpdateActionPolicyBody
+      UpdateActionPolicyData
     >,
     @inject(ActionPolicyClient)
     private readonly actionPolicyClient: ActionPolicyClient
@@ -89,10 +94,9 @@ export class UpdateActionPolicyRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const { version, ...data } = this.request.body;
     const updated = await this.actionPolicyClient.updateActionPolicy({
-      data,
-      options: { id: this.request.params.id, version },
+      data: this.request.body,
+      options: { id: this.request.params.id },
     });
 
     return this.ctx.response.ok({ body: updated });

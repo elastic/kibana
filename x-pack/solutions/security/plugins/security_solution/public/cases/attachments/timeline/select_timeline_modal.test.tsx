@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import { SelectTimelineModal } from './select_timeline_modal';
 
@@ -37,22 +36,22 @@ jest.mock('../../../timelines/components/timeline/selectable_timeline', () => ({
 }));
 
 describe('SelectTimelineModal', () => {
-  it('wraps the body in an EuiModal and emits { savedObjectId, title } on pick', async () => {
+  it('wraps the body in an EuiModal and emits { savedObjectId, title } on pick', () => {
     const onSelect = jest.fn();
     render(<SelectTimelineModal onSelect={onSelect} onClose={jest.fn()} />);
 
     expect(screen.getByTestId('select-timeline-modal')).toBeInTheDocument();
     expect(screen.getByTestId('selectable-timeline-mock')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByTestId('selectable-timeline-mock-pick'));
+    fireEvent.click(screen.getByTestId('selectable-timeline-mock-pick'));
     expect(onSelect).toHaveBeenCalledWith({ savedObjectId: 'so-id-1', title: 'Investigation' });
   });
 
-  it('does not call onSelect when the picked timeline id is null', async () => {
+  it('does not call onSelect when the picked timeline id is null', () => {
     const onSelect = jest.fn();
     render(<SelectTimelineModal onSelect={onSelect} onClose={jest.fn()} />);
 
-    await userEvent.click(screen.getByTestId('selectable-timeline-mock-pick-null'));
+    fireEvent.click(screen.getByTestId('selectable-timeline-mock-pick-null'));
 
     expect(onSelect).not.toHaveBeenCalled();
   });

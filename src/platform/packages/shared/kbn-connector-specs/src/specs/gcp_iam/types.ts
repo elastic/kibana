@@ -77,11 +77,13 @@ const keyId = () =>
  * question from "what may this identity do". Revoking an impersonator is a containment step in
  * its own right, and it is far narrower than editing a whole project's policy.
  */
-export const ResourceTypeSchema = z
-  .enum(['projects', 'folders', 'organizations', 'serviceAccounts'])
-  .describe(
-    'What the policy is attached to. Use "projects", "folders" or "organizations" for a resource-hierarchy policy, or "serviceAccounts" for the policy on a single service account, which controls who can impersonate it.'
-  );
+export const ResourceTypeSchema = lazySchema(() =>
+  z
+    .enum(['projects', 'folders', 'organizations', 'serviceAccounts'])
+    .describe(
+      'What the policy is attached to. Use "projects", "folders" or "organizations" for a resource-hierarchy policy, or "serviceAccounts" for the policy on a single service account, which controls who can impersonate it.'
+    )
+);
 
 const resourceId = () =>
   z

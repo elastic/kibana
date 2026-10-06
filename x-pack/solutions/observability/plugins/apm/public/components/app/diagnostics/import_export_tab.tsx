@@ -23,6 +23,10 @@ import { getIsIndexTemplateOk } from './summary_tab/index_templates_status';
 import { getIsIndicesTabOk } from './summary_tab/indicies_status';
 import { getIsDataStreamTabOk } from './summary_tab/data_streams_status';
 
+const SELECT_FILE_LABEL = i18n.translate('xpack.apm.importCard.filePickerAriaLabel', {
+  defaultMessage: 'Select or drag and drop a file',
+});
+
 type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 
 export function DiagnosticsImportExport() {
@@ -128,6 +132,8 @@ function ImportCard() {
                 </>
               )}
               <EuiFilePicker
+                aria-label={SELECT_FILE_LABEL}
+                initialPromptText={SELECT_FILE_LABEL}
                 fullWidth
                 id="file-picker"
                 multiple

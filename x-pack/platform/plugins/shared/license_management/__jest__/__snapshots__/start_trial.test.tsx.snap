@@ -32,7 +32,7 @@ exports[`StartTrial component when trial is allowed display for basic license 1`
               <span>
                 Experience what machine learning, advanced security, and all our other 
                 <a
-                  class="euiLink emotion-euiLink-primary"
+                  class="euiLink emotion-euiLink-text"
                   href="https://www.elastic.co/subscriptions"
                   rel="noopener noreferrer"
                   target="_blank"
@@ -58,7 +58,7 @@ exports[`StartTrial component when trial is allowed display for basic license 1`
           class="emotion-euiCard__footer"
         >
           <button
-            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+            class="euiButton emotion-euiButtonDisplay-m-base-primary"
             data-test-subj="startTrialButton"
             type="button"
           >
@@ -107,7 +107,7 @@ exports[`StartTrial component when trial is allowed should display for expired e
               <span>
                 Experience what machine learning, advanced security, and all our other 
                 <a
-                  class="euiLink emotion-euiLink-primary"
+                  class="euiLink emotion-euiLink-text"
                   href="https://www.elastic.co/subscriptions"
                   rel="noopener noreferrer"
                   target="_blank"
@@ -133,7 +133,7 @@ exports[`StartTrial component when trial is allowed should display for expired e
           class="emotion-euiCard__footer"
         >
           <button
-            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+            class="euiButton emotion-euiButtonDisplay-m-base-primary"
             data-test-subj="startTrialButton"
             type="button"
           >
@@ -182,7 +182,7 @@ exports[`StartTrial component when trial is allowed should display for expired p
               <span>
                 Experience what machine learning, advanced security, and all our other 
                 <a
-                  class="euiLink emotion-euiLink-primary"
+                  class="euiLink emotion-euiLink-text"
                   href="https://www.elastic.co/subscriptions"
                   rel="noopener noreferrer"
                   target="_blank"
@@ -208,7 +208,7 @@ exports[`StartTrial component when trial is allowed should display for expired p
           class="emotion-euiCard__footer"
         >
           <button
-            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+            class="euiButton emotion-euiButtonDisplay-m-base-primary"
             data-test-subj="startTrialButton"
             type="button"
           >
@@ -257,7 +257,7 @@ exports[`StartTrial component when trial is allowed should display for gold lice
               <span>
                 Experience what machine learning, advanced security, and all our other 
                 <a
-                  class="euiLink emotion-euiLink-primary"
+                  class="euiLink emotion-euiLink-text"
                   href="https://www.elastic.co/subscriptions"
                   rel="noopener noreferrer"
                   target="_blank"
@@ -283,7 +283,7 @@ exports[`StartTrial component when trial is allowed should display for gold lice
           class="emotion-euiCard__footer"
         >
           <button
-            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+            class="euiButton emotion-euiButtonDisplay-m-base-primary"
             data-test-subj="startTrialButton"
             type="button"
           >

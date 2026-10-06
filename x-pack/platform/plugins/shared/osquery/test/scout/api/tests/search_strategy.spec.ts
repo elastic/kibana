@@ -107,7 +107,9 @@ apiTest.describe(
       });
     });
 
-    apiTest('returns action results for a reader', async ({ apiClient }) => {
+    // A reader passes the privilege check and reaches the action document lookup,
+    // which 404s because no action with this id exists in the active space.
+    apiTest('returns 404 for an unknown action to a reader', async ({ apiClient }) => {
       const response = await apiClient.get(ACTION_RESULTS_PATH, {
         headers: {
           ...testData.COMMON_HEADERS,
@@ -116,10 +118,10 @@ apiTest.describe(
         responseType: 'json',
       });
 
-      expect(response).toHaveStatusCode(200);
+      expect(response).toHaveStatusCode(404);
       expect(response.body).toMatchObject({
-        edges: [],
-        total: 0,
+        statusCode: 404,
+        message: 'Action not found',
       });
     });
   }

@@ -29,6 +29,7 @@ import { ActionPolicyDetailsFlyout } from '../../../components/action_policy/det
 import { ActionPolicySnoozeButton } from '../../../components/action_policy/action_policy_snooze_button';
 import type { useBulkActionActionPolicies } from '../../../hooks/use_bulk_action_action_policies';
 import { useBulkGetUserProfiles } from '../../../hooks/use_bulk_get_user_profiles';
+import { ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE } from '../../../components/action_policy/labels';
 import { collectActorUids, resolveDisplayName } from '../../../utils/resolve_display_name';
 import { ActionPolicyDestinationsSummary } from '../../../components/action_policy/action_policy_destinations_summary';
 import { ActionPoliciesBulkActions } from './action_policies_bulk_actions';
@@ -55,6 +56,7 @@ interface Props {
   isUnsnoozing: boolean;
   unsnoozeVariables: string | undefined;
   isBulkActionInProgress: boolean;
+  isLicenseValid: boolean;
   bulkAction: BulkActionMutate;
   onRefetchReady: (refetch: () => void) => void;
   onEdit: (id: string) => void;
@@ -108,6 +110,7 @@ export const ActionPoliciesTableContent = ({
   isUnsnoozing,
   unsnoozeVariables,
   isBulkActionInProgress,
+  isLicenseValid,
   bulkAction,
   onRefetchReady,
   onEdit,
@@ -185,11 +188,14 @@ export const ActionPoliciesTableContent = ({
             const isLoading =
               (isEnabling && enableVariables === policy.id) ||
               (isDisabling && disableVariables === policy.id);
+            const isEnableBlockedByLicense = !policy.enabled && !isLicenseValid;
             return (
               <EuiSwitch
                 compressed
                 checked={policy.enabled}
-                disabled={!canWrite || isLoading || isBulkActionInProgress}
+                disabled={
+                  !canWrite || isLoading || isBulkActionInProgress || isEnableBlockedByLicense
+                }
                 title={
                   !canWrite
                     ? i18n.translate(
@@ -199,6 +205,8 @@ export const ActionPoliciesTableContent = ({
                             'You do not have permission to enable or disable this policy',
                         }
                       )
+                    : isEnableBlockedByLicense
+                    ? ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE
                     : undefined
                 }
                 onChange={() => {

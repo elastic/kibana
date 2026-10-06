@@ -187,6 +187,8 @@ export const FLYOUT_ORIGIN = {
   RISK_SCORE_PREVIEW: 'risk_score_preview',
   // Entity attachment action in AI chat.
   AI_CHAT_ENTITY_ATTACHMENT: 'ai_chat_entity_attachment',
+  // Attachment summary row in the investigation details flyout.
+  ATTACHMENT_SUMMARY: 'attachment_summary',
   // Privileged user monitoring users table.
   PRIVILEGED_USERS_TABLE: 'privileged_users_table',
   // Privileged access detection chart entity link.

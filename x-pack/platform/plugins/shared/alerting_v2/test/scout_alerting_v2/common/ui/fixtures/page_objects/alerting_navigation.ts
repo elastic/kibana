@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import type { AlertingMountConfig } from './alerting_mount_config';
 
 export type AlertingApp =
   | 'rules'
@@ -15,66 +16,48 @@ export type AlertingApp =
   | 'executionHistory';
 
 interface AlertingAppMeta {
-  /** Management deep-link path passed to `page.gotoApp`. */
-  readonly path: string;
-  /** Kibana feature id backing the page (used in the interstitial list). */
   readonly featureId: string;
-  /** Accessible name of the page header shown when access is granted. */
   readonly heading: RegExp;
 }
 
-export const ALERTING_APP_META: Record<AlertingApp, AlertingAppMeta> = {
+const ALERTING_APP_META: Record<AlertingApp, AlertingAppMeta> = {
   rules: {
-    path: 'management/alertingV2/rules',
     featureId: 'alerting_v2_rules',
     heading: /^Rules/i,
   },
   ruleLibrary: {
-    path: 'management/alertingV2/rule_library',
     featureId: 'alerting_v2_rules',
     heading: /rule library/i,
   },
   alerts: {
-    path: 'management/alertingV2/episodes',
     featureId: 'alerting_v2_alerts',
     heading: /alert episodes/i,
   },
   actionPolicies: {
-    path: 'management/alertingV2/action_policies',
     featureId: 'alerting_v2_action_policies',
     heading: /action policies/i,
   },
   executionHistory: {
-    path: 'management/alertingV2/execution_history',
     featureId: 'alerting_v2_execution_history',
     heading: /execution history/i,
   },
 };
 
-const MANAGEMENT_LANDING_SUBJECTS = [
-  'managementHome',
-  'managementHomeSolution',
-  'cards-navigation-page',
-] as const;
-
 /**
- * Drives navigation to the alerting_v2 management apps and exposes the
- * "Privileges required" interstitial locators plus the Stack Management
- * landing-page locator, so specs can assert which pages a given role can view.
+ * Drives navigation to the alerting_v2 apps and exposes the
+ * "Privileges required" interstitial locators so specs can assert which
+ * pages a given role can view.
  */
 export class AlertingNavigation {
   public readonly requiredPrivilegesPrompt: Locator;
-  public readonly managementLanding: Locator;
 
-  constructor(private readonly page: ScoutPage) {
+  constructor(private readonly page: ScoutPage, private readonly mountConfig: AlertingMountConfig) {
     this.requiredPrivilegesPrompt = this.page.testSubj.locator('alertingRequiredPrivilegesPrompt');
-    this.managementLanding = this.page.locator(
-      MANAGEMENT_LANDING_SUBJECTS.map((subject) => `[data-test-subj="${subject}"]`).join(', ')
-    );
   }
 
   async goto(app: AlertingApp) {
-    await this.page.gotoApp(ALERTING_APP_META[app].path);
+    const path = `${this.mountConfig.appRoute}${this.mountConfig.paths[app]}`;
+    await this.page.gotoApp(path);
   }
 
   pageHeading(app: AlertingApp): Locator {

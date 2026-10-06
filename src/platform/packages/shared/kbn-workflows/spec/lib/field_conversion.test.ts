@@ -886,6 +886,20 @@ describe('normalizeFieldsToJsonSchema + buildFieldsZodValidator (integration)', 
     expect(validator.safeParse({ name: 'hello' }).success).toBe(true);
     expect(validator.safeParse({}).success).toBe(false);
   });
+
+  it('normalizes a map-only root and validates dynamic keys as strings', () => {
+    const inputs = {
+      type: 'object' as const,
+      additionalProperties: { type: 'string' as const },
+    };
+
+    const normalizedSchema = normalizeFieldsToJsonSchema(inputs);
+    expect(normalizedSchema?.additionalProperties).toEqual({ type: 'string' });
+
+    const validator = buildFieldsZodValidator(normalizedSchema);
+    expect(validator.safeParse({ anyKey: 'ok' }).success).toBe(true);
+    expect(validator.safeParse({ anyKey: 1 }).success).toBe(false);
+  });
 });
 
 describe('getInputsFromDefinition', () => {

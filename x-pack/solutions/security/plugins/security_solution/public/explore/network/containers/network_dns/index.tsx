@@ -20,8 +20,17 @@ import { NetworkQueries } from '../../../../../common/search_strategy';
 import * as i18n from './translations';
 import type { InspectResponse } from '../../../../types';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 
 export const ID = 'networkDnsQuery';
+
+const NETWORK_DNS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_NETWORK_PAGE,
+  'network_dns'
+);
 
 export interface NetworkDnsResponse {
   id: string;
@@ -94,6 +103,7 @@ export const useNetworkDns = ({
     },
     errorMessage: i18n.ERROR_NETWORK_DNS,
     abort: skip,
+    executionContext: NETWORK_DNS_CONTEXT,
   });
 
   const networkDnsResponse = useMemo(

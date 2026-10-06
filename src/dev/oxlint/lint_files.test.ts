@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { REPO_ROOT } from '@kbn/repo-info';
+
 import { ToolingLog } from '@kbn/tooling-log';
 import { File } from '../file';
 import { lintFiles } from './lint_files';
@@ -14,11 +16,13 @@ import { lintFiles } from './lint_files';
 jest.mock('execa', () => jest.fn());
 jest.mock('./constants', () => ({
   LINT_LOG_PREFIX: '[oxlint]',
-  OXLINT_CONFIG_PATH: '.oxlintrc.json',
+  OXLINT_CONFIG_PATH: 'oxlint.config.mjs',
   oxlintBinPath: '/bin/oxlint',
 }));
+jest.mock('fs/promises', () => ({ ...jest.requireActual('fs/promises'), readFile: jest.fn() }));
 
 const mockExeca = jest.requireMock('execa') as jest.Mock;
+const mockReadFile = jest.requireMock('fs/promises').readFile as jest.Mock;
 
 interface FakeRun {
   exitCode: number;
@@ -55,6 +59,7 @@ describe('oxlint lintFiles', () => {
 
   beforeEach(() => {
     mockExeca.mockReset();
+    mockReadFile.mockReset();
   });
 
   it('passes explicit relative paths and no --fix by default', async () => {
@@ -66,13 +71,36 @@ describe('oxlint lintFiles', () => {
     expect(passedArgs(0)).toEqual([
       '/bin/oxlint',
       '--config',
-      '.oxlintrc.json',
+      'oxlint.config.mjs',
       '--format',
       'json',
       'src/a.ts',
       'src/b.ts',
     ]);
     expect(result).toEqual({ failedFiles: [], lintedFileCount: 2, warningCount: 0 });
+  });
+
+  it('passes repository-relative paths when files are created from a subdirectory', async () => {
+    respondWith({ exitCode: 0 });
+
+    const cwd = process.cwd();
+    try {
+      process.chdir(`${REPO_ROOT}/src`);
+      const file = new File('dev/file.ts');
+
+      await lintFiles(log, [file]);
+    } finally {
+      process.chdir(cwd);
+    }
+
+    expect(passedArgs(0)).toEqual([
+      '/bin/oxlint',
+      '--config',
+      'oxlint.config.mjs',
+      '--format',
+      'json',
+      'src/dev/file.ts',
+    ]);
   });
 
   it('runs oxlint without paths for a full-repo scope and forwards --fix', async () => {
@@ -83,7 +111,7 @@ describe('oxlint lintFiles', () => {
     expect(passedArgs(0)).toEqual([
       '/bin/oxlint',
       '--config',
-      '.oxlintrc.json',
+      'oxlint.config.mjs',
       '--format',
       'json',
       '--fix',
@@ -170,7 +198,7 @@ describe('oxlint lintFiles', () => {
     expect(passedArgs(1)).toEqual([
       '/bin/oxlint',
       '--config',
-      '.oxlintrc.json',
+      'oxlint.config.mjs',
       '--format',
       'json',
       'src/f4000.ts',
@@ -190,5 +218,45 @@ describe('oxlint lintFiles', () => {
     );
 
     await expect(lintFiles(log, many)).rejects.toThrow('[oxlint] exited with 2:\nparser crashed');
+  });
+
+  it('re-runs --fix on files whose overlapping fixes need another pass', async () => {
+    respondWith(
+      {
+        exitCode: 1,
+        numberOfFiles: 2,
+        diagnostics: [{ filename: 'src/a.ts', severity: 'error' }],
+      },
+      { exitCode: 0, numberOfFiles: 1 }
+    );
+    mockReadFile.mockResolvedValueOnce('both headers').mockResolvedValueOnce('one header');
+
+    const result = await lintFiles(log, files, { fix: true });
+
+    expect(mockExeca).toHaveBeenCalledTimes(2);
+    expect(passedArgs(1)).toEqual([
+      '/bin/oxlint',
+      '--config',
+      'oxlint.config.mjs',
+      '--format',
+      'json',
+      '--fix',
+      'src/a.ts',
+    ]);
+    expect(result).toEqual({ failedFiles: [], lintedFileCount: 2, warningCount: 0 });
+  });
+
+  it('stops fix passes once a file no longer changes', async () => {
+    const unfixable: FakeRun = {
+      exitCode: 1,
+      diagnostics: [{ filename: 'src/a.ts', severity: 'error' }],
+    };
+    respondWith({ ...unfixable, numberOfFiles: 2 }, unfixable);
+    mockReadFile.mockResolvedValue('unchanged');
+
+    const result = await lintFiles(log, files, { fix: true });
+
+    expect(mockExeca).toHaveBeenCalledTimes(2);
+    expect(result).toEqual({ failedFiles: ['src/a.ts'], lintedFileCount: 2, warningCount: 0 });
   });
 });

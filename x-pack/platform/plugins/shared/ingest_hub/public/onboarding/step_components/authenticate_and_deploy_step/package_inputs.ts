@@ -9,7 +9,11 @@ import type { RenderIacTemplateIntegration } from '@kbn/fleet-plugin/public';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { makeDsView } from '../../aws_service_matrix';
 import type { AuthenticateAndDeployStepState } from '../../onboarding_flow_context';
-import { resolveFieldMeta, toTyped } from '../service_settings_step/field_config';
+import {
+  resolveFieldMeta,
+  shouldDefaultCollectS3Logs,
+  toTyped,
+} from '../service_settings_step/field_config';
 import type {
   ServiceVars,
   ServiceDataStreamVars,
@@ -54,6 +58,11 @@ export function buildStreamVars(
     result[key] = toTyped(value, meta);
   }
 
+  // An S3 input with a bucket ARN but no explicit toggle must read from the bucket, not SQS.
+  if (shouldDefaultCollectS3Logs(service, activeInput, dsVars.varsByInput[activeInput])) {
+    result.collect_s3_logs = true;
+  }
+
   // Emit manifest defaults for show_user fields belonging to this input not explicitly set.
   const allShowUserFields = [...(service.requiredConfig ?? []), ...(service.optionalConfig ?? [])];
   for (const key of allShowUserFields) {
@@ -61,7 +70,11 @@ export function buildStreamVars(
     const meta = resolveFieldMeta(service, activeInput, key);
     if (!meta) continue;
     const typed = toTyped(undefined, meta);
-    if (meta.isBool || (typeof typed === 'string' && typed !== '')) {
+    if (
+      meta.isBool ||
+      (typeof typed === 'string' && typed !== '') ||
+      (Array.isArray(typed) && typed.length > 0)
+    ) {
       result[key] = typed;
     }
   }
@@ -105,21 +118,22 @@ function resolveActiveInputs(
 /**
  * Distinguish "never configured" (key absent → default to all DS) from "explicitly emptied"
  * (key present with enabledDataStreams: [] → user turned everything off → skip).
- * Vars are keyed by instance id since duplicates exist; `instanceId` falls back to the service id
- * for sessions predating instance keying — the same chain deployGroup applies.
+ * Vars are keyed by instance id since duplicates exist.
  */
 function resolveServiceVars(
   storedServiceVars: Record<string, ServiceVars>,
   service: AwsServiceMatrixEntry,
   instanceId: string = service.id
 ): ServiceVars {
-  return (
-    storedServiceVars[instanceId] ??
-    storedServiceVars[service.id] ?? {
-      enabledDataStreams: service.dataStreams,
-      varsByDataStream: {},
-    }
-  );
+  const rawVars = storedServiceVars[instanceId] ?? storedServiceVars[service.id];
+  if (!rawVars) return { enabledDataStreams: service.dataStreams, varsByDataStream: {} };
+  // Guard against stale session state: filter out dsIds the current service no longer has.
+  // If filtering removes every ID from a non-empty original the user hadn't explicitly cleared,
+  // fall back to service defaults — an empty list is the "intentional opt-out" sentinel.
+  const filtered = rawVars.enabledDataStreams.filter((dsId) => service.dataStreams.includes(dsId));
+  return filtered.length === rawVars.enabledDataStreams.length
+    ? rawVars
+    : { ...rawVars, enabledDataStreams: filtered };
 }
 
 const EMPTY_DS_VARS: Readonly<ServiceDataStreamVars> = { enabledInputs: [], varsByInput: {} };
@@ -222,10 +236,10 @@ function byKey<T>([a]: [string, T], [b]: [string, T]): number {
 }
 
 export interface AgentCredentialVars {
-  method: 'direct_access_keys' | 'temporary_keys' | 'shared_credentials' | 'assume_role';
-  /** direct_access_keys / temporary_keys — access key id (non-secret) */
+  method: 'static_keys' | 'temporary_keys' | 'shared_credentials' | 'assume_role';
+  /** static_keys / temporary_keys — access key id (non-secret) */
   access_key_id?: string;
-  /** direct_access_keys / temporary_keys — secret (memory-only, never persisted) */
+  /** static_keys / temporary_keys — secret (memory-only, never persisted) */
   secret_access_key?: string;
   /** temporary_keys — session token (memory-only, never persisted) */
   session_token?: string;
@@ -252,7 +266,7 @@ export function buildPackageVars(
 
   if (agentCredentials) {
     const { method } = agentCredentials;
-    if (method === 'direct_access_keys' || method === 'temporary_keys') {
+    if (method === 'static_keys' || method === 'temporary_keys') {
       if (agentCredentials.access_key_id && agentCredentials.secret_access_key) {
         if (pkgVarNames.has('access_key_id')) vars.access_key_id = agentCredentials.access_key_id;
         if (pkgVarNames.has('secret_access_key'))

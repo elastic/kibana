@@ -34,7 +34,7 @@ export const SourcesTab = () => {
     sortingColumns,
     pagination,
     visibleColumnIds,
-    deleteSource,
+    deleteSources,
     refreshUnit,
     setQuery,
     setSelectedSources,
@@ -47,6 +47,7 @@ export const SourcesTab = () => {
     closeCreateModal,
     openSourceFlyout,
     closeSourceFlyout,
+    isUnitSaving,
   } = sourcesController;
 
   const [sourcesPendingDeletion, setSourcesPendingDeletion] = React.useState<SourceViewModel[]>([]);
@@ -124,6 +125,7 @@ export const SourcesTab = () => {
             onSelectedStatusesChange={setSelectedStatuses}
             onRefresh={refreshUnit}
             onAddSource={openCreateModal}
+            isAddDisabled={isUnitSaving}
           />
           <EuiSpacer size="s" />
         </EuiFlexItem>
@@ -167,7 +169,7 @@ export const SourcesTab = () => {
           count={sourcesPendingDeletion.length}
           onCancel={() => setSourcesPendingDeletion([])}
           onConfirm={() => {
-            sourcesPendingDeletion.forEach(({ id }) => deleteSource(id));
+            deleteSources(sourcesPendingDeletion.map(({ id }) => id));
             setSelectedSources([]);
             setSourcesPendingDeletion([]);
           }}

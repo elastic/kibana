@@ -11,7 +11,7 @@ import type { FC, ReactNode } from 'react';
 import React, { useCallback, useId, useLayoutEffect, useMemo, useRef } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiPanel, euiShadow } from '@elastic/eui';
-import { getHighContrastBorder, MAIN_CONTENT_SELECTORS } from '@kbn/ui-chrome-layout';
+import { getHighContrastBorder, layoutVar, MAIN_CONTENT_SELECTORS } from '@kbn/ui-chrome-layout';
 import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -33,10 +33,10 @@ const panelContainerStyles = (isProjectStyle: boolean) => (theme: UseEuiTheme) =
     flex-grow: 1;
     min-width: 0; // Allow panel to shrink
     overflow: hidden; // Force children to respect border radius and shadow
+    border-radius: ${layoutVar('sidebar.borderRadius', '0px')};
 
     ${isProjectStyle &&
     css`
-      border-radius: ${theme.euiTheme.border.radius.medium};
       outline: ${getHighContrastBorder(theme)};
       ${euiShadow(theme, 'xs', { border: 'none' })};
     `}

@@ -8,8 +8,8 @@
 import { isPlainObject } from 'lodash';
 import {
   EXTERNAL_REFERENCE_TYPE_MAP,
+  LEGACY_ATTACHMENT_TYPES,
   LEGACY_TO_UNIFIED_MAP,
-  MIGRATED_ATTACHMENT_TYPES,
   PERSISTABLE_STATE_LEGACY_TO_UNIFIED_MAP,
   PERSISTABLE_STATE_UNIFIED_TO_LEGACY_MAP,
   PERSISTABLE_ATTACHMENT_TYPES,
@@ -24,30 +24,54 @@ import {
 import { AttachmentType } from '../../types/domain';
 import type { AttachmentRequestV2 } from '../../types/api';
 
-export const isMigratedAttachmentType = (type: string, owner: string): boolean => {
-  return (
-    MIGRATED_ATTACHMENT_TYPES.has(toUnifiedAttachmentType(type, owner)) ||
-    MIGRATED_ATTACHMENT_TYPES.has(toUnifiedPersistableStateAttachmentType(type))
-  );
+/**
+ * True when stored attributes can be read in the unified shape: unified rows already are, and
+ * legacy rows convert when the legacy maps give them a unified type. Subtypes are matched on
+ * the raw id, so an unmapped one that collides with a unified name stays legacy.
+ */
+export const isConvertibleToUnified = (attributes: unknown): boolean => {
+  if (!isPlainObject(attributes)) {
+    return false;
+  }
+  const { type, owner, externalReferenceAttachmentTypeId, persistableStateAttachmentTypeId } =
+    attributes as Record<string, unknown>;
+  if (typeof type !== 'string') {
+    return false;
+  }
+  if (!LEGACY_ATTACHMENT_TYPES.has(type)) {
+    return true;
+  }
+
+  switch (type) {
+    case LEGACY_EXTERNAL_REFERENCE_TYPE:
+      return (
+        typeof externalReferenceAttachmentTypeId === 'string' &&
+        Object.hasOwn(EXTERNAL_REFERENCE_TYPE_MAP, externalReferenceAttachmentTypeId)
+      );
+    case LEGACY_PERSISTABLE_STATE_TYPE:
+      return (
+        typeof persistableStateAttachmentTypeId === 'string' &&
+        Object.hasOwn(PERSISTABLE_STATE_LEGACY_TO_UNIFIED_MAP, persistableStateAttachmentTypeId)
+      );
+    default:
+      return Object.hasOwn(
+        UNIFIED_TO_LEGACY_MAP,
+        toUnifiedAttachmentType(type, typeof owner === 'string' ? owner : '')
+      );
+  }
 };
 
 /**
- * True only for migrated attachment types that have no legacy (v1) equivalent.
- *
- * The incoming `type` may be legacy (`alert`/`event`) or unified, so we first
- * normalize via `toUnifiedAttachmentType(type, owner)`. A type is treated
- * as unified-only when it:
- *  1) is in `MIGRATED_ATTACHMENT_TYPES`,
- *  2) has no entry in `UNIFIED_TO_LEGACY_MAP`, and
- *  3) is not a persistable-state subtype (handled separately).
+ * True when a unified type has no legacy (v1) form: it is not a legacy name and is absent
+ * from `UNIFIED_TO_LEGACY_MAP` and the persistable-state map. Whether the type is allowed
+ * at all is the registry's call, not this check's.
  */
-export const isUnifiedOnlyAttachmentType = (type: string, owner: string): boolean => {
-  const unifiedType = toUnifiedAttachmentType(type, owner);
-  if (!MIGRATED_ATTACHMENT_TYPES.has(unifiedType)) {
+export const isUnifiedOnlyAttachmentType = (type: string): boolean => {
+  if (LEGACY_ATTACHMENT_TYPES.has(type)) {
     return false;
   }
-  const hasLegacyMapping = unifiedType in UNIFIED_TO_LEGACY_MAP;
-  const isPersistable = PERSISTABLE_ATTACHMENT_TYPES.has(unifiedType);
+  const hasLegacyMapping = type in UNIFIED_TO_LEGACY_MAP;
+  const isPersistable = PERSISTABLE_ATTACHMENT_TYPES.has(type);
   return !hasLegacyMapping && !isPersistable;
 };
 
@@ -145,8 +169,8 @@ export const toUnifiedAttachmentType = (type: string, owner: string): string => 
 export const hasOwnerUnifiedPrefix = (owner: string): boolean => OWNER_TO_PREFIX_MAP[owner] != null;
 
 /**
- * True when the persistable-state subtype id (legacy `.lens` or unified `lens`) is one
- * that this stack migrates to unified attachment attributes (currently Lens only).
+ * True when the persistable-state subtype id (legacy `.lens` or unified `lens`) has a
+ * unified mapping in `PERSISTABLE_STATE_LEGACY_TO_UNIFIED_MAP` (Lens, ML, AIOps).
  */
 export const isPersistableType = (type: string): boolean =>
   PERSISTABLE_ATTACHMENT_TYPES.has(toUnifiedPersistableStateAttachmentType(type));
@@ -188,7 +212,12 @@ export const getAttachmentTypeFromAttributes = (attributes: unknown): string => 
     type === AttachmentType.externalReference &&
     typeof externalReferenceAttachmentTypeId === 'string'
   ) {
-    return EXTERNAL_REFERENCE_TYPE_MAP[externalReferenceAttachmentTypeId] ?? type;
+    // Fall back to the raw subtype id (not the generic `type`) on a map miss, so callers
+    // building log/error messages can still identify which subtype was unrecognized.
+    return (
+      EXTERNAL_REFERENCE_TYPE_MAP[externalReferenceAttachmentTypeId] ??
+      externalReferenceAttachmentTypeId
+    );
   }
   return type;
 };

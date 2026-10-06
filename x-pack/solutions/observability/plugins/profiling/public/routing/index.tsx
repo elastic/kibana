@@ -24,7 +24,6 @@ import {
 import { ComparisonMode, NormalizationMode } from '../components/normalization_menu';
 import { RedirectTo } from '../components/redirect_to';
 import { AddDataView } from '../views/add_data_view';
-import { DeleteDataView } from '../views/delete_data_view';
 import { FlameGraphsView } from '../views/flamegraphs';
 import { DifferentialFlameGraphsView } from '../views/flamegraphs/differential_flamegraphs';
 import { FlameGraphView } from '../views/flamegraphs/flamegraph';
@@ -92,9 +91,6 @@ const routes = {
             selectedTab: AddDataTabs.Kubernetes,
           },
         },
-      },
-      '/delete_data_instructions': {
-        element: <DeleteDataView />,
       },
       '/profiling-not-enabled': {
         element: <ProfilingNotEnabledView />,

@@ -11,6 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosError, AxiosResponse } from 'axios';
 import type { ConnectorSpec, ActionContext } from '../../connector_spec';
+import { SLACK_CONNECTOR_TYPE_ID } from './constants';
+import { slackEvents } from './events';
 import { slackRelay } from './relay';
 import {
   SlackCreateConversationInputSchema,
@@ -195,7 +197,7 @@ async function slackRequestWithRateLimitRetry<TData>(params: {
  */
 export const Slack: ConnectorSpec = {
   metadata: {
-    id: '.slack2',
+    id: SLACK_CONNECTOR_TYPE_ID,
     displayName: 'Slack (v2)',
     description: i18n.translate('core.kibanaConnectorSpecs.slack.metadata.description', {
       defaultMessage:
@@ -987,7 +989,7 @@ export const Slack: ConnectorSpec = {
 
     // https://api.slack.com/methods/conversations.create
     createConversation: {
-      isTool: false,
+      isTool: true,
       scope: 'write',
       description:
         'Create a new Slack channel (public or private). Returns the created channel object including its ID.',
@@ -1042,7 +1044,7 @@ export const Slack: ConnectorSpec = {
 
     // https://api.slack.com/methods/conversations.invite
     inviteToConversation: {
-      isTool: false,
+      isTool: true,
       scope: 'write',
       description: 'Invite one or more users to a Slack channel by channel ID and user IDs.',
       input: SlackInviteToConversationInputSchema,
@@ -1161,6 +1163,8 @@ export const Slack: ConnectorSpec = {
       },
     },
   },
+
+  events: slackEvents,
 
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.slack.test.description', {

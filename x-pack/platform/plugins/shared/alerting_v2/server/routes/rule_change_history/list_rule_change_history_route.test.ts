@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import type { ListRuleChangeHistoryResponse } from '@kbn/alerting-v2-schemas';
 import type { RuleChangesHistoryClientContract } from '../../lib/rule_changes_history';
 import { createRuleChangesHistoryClientMock } from '../../lib/rule_changes_history/rule_changes_history_client.mock';
 import { createRouteDependencies } from '../test_utils';
@@ -37,8 +38,7 @@ describe('ListRuleChangeHistoryRoute', () => {
   it('forwards rule id, page, and per_page to the client', async () => {
     const mocks = createMocks();
     const request = httpServerMock.createKibanaRequest({
-      params: { id: 'rule-1' },
-      query: { page: 2, per_page: 25 },
+      query: { rule_id: 'rule-1', page: 2, per_page: 25 },
     });
     const route = buildListRoute(request as unknown as KibanaRequest, mocks);
 
@@ -53,11 +53,11 @@ describe('ListRuleChangeHistoryRoute', () => {
 
   it('returns the client result in the response body', async () => {
     const mocks = createMocks();
-    const clientResult = {
+    const clientResult: ListRuleChangeHistoryResponse = {
       items: [
         {
           id: 'event-1',
-          timestamp: '2026-01-15T12:00:00.000Z',
+          created_at: '2026-01-15T12:00:00.000Z',
           actor: { name: 'elastic' },
           action: 'rule_create',
         },
@@ -67,8 +67,7 @@ describe('ListRuleChangeHistoryRoute', () => {
     mocks.ruleChangesHistoryClient.listRuleChanges.mockResolvedValue(clientResult);
 
     const request = httpServerMock.createKibanaRequest({
-      params: { id: 'rule-1' },
-      query: { page: 1, per_page: 20 },
+      query: { rule_id: 'rule-1', page: 1, per_page: 20 },
     });
     const route = buildListRoute(request as unknown as KibanaRequest, mocks);
 
@@ -81,8 +80,7 @@ describe('ListRuleChangeHistoryRoute', () => {
     const mocks = createMocks();
     mocks.ruleChangesHistoryClient.listRuleChanges.mockRejectedValueOnce(new Error('boom'));
     const request = httpServerMock.createKibanaRequest({
-      params: { id: 'rule-1' },
-      query: { page: 1, per_page: 20 },
+      query: { rule_id: 'rule-1', page: 1, per_page: 20 },
     });
     const route = buildListRoute(request as unknown as KibanaRequest, mocks);
 
@@ -98,13 +96,14 @@ describe('GetRuleChangeHistoryEventRoute', () => {
     const mocks = createMocks();
     mocks.ruleChangesHistoryClient.getRuleChange.mockResolvedValue({
       id: 'event-1',
-      timestamp: '2026-01-15T12:00:00.000Z',
+      created_at: '2026-01-15T12:00:00.000Z',
       actor: { name: 'elastic' },
       action: 'rule_create',
       snapshot: { id: 'rule-1' },
     });
     const request = httpServerMock.createKibanaRequest({
-      params: { id: 'rule-1', event_id: 'event-1' },
+      params: { change_id: 'event-1' },
+      query: { rule_id: 'rule-1' },
     });
     const route = buildGetRoute(request as unknown as KibanaRequest, mocks);
 

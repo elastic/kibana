@@ -11,6 +11,10 @@ export const EVALS_EXPERIMENTS_URL = `${EVALS_INTERNAL_URL}/experiments` as cons
 export const EVALS_EXPERIMENT_URL = `${EVALS_INTERNAL_URL}/experiments/{experimentId}` as const;
 export const EVALS_EXPERIMENT_SCORES_URL =
   `${EVALS_INTERNAL_URL}/experiments/{experimentId}/scores` as const;
+export const EVALS_EXPERIMENT_RUNS_URL =
+  `${EVALS_INTERNAL_URL}/experiments/{experimentId}/runs` as const;
+export const EVALS_EXPERIMENT_TRACES_URL =
+  `${EVALS_INTERNAL_URL}/experiments/{experimentId}/traces` as const;
 export const EVALS_SCORES_URL = `${EVALS_INTERNAL_URL}/scores` as const;
 export const EVALS_EXPERIMENTS_COMPARE_URL = `${EVALS_INTERNAL_URL}/experiments/compare` as const;
 export const EVALS_EXPERIMENTS_RUN_URL = `${EVALS_INTERNAL_URL}/experiments/_run` as const;
@@ -37,6 +41,7 @@ export const EVALS_RESOLVE_INSTRUMENTATION_URL =
 export const EVALS_EVALUATORS_URL = `${EVALS_INTERNAL_URL}/evaluators` as const;
 export const EVALS_EVALUATOR_URL = `${EVALS_EVALUATORS_URL}/{name}` as const;
 export const EVALS_VALIDATE_URL = `${EVALS_INTERNAL_URL}/evaluators/_validate` as const;
+export const EVALS_TEST_EVALUATOR_URL = `${EVALS_INTERNAL_URL}/evaluators/_test` as const;
 export const EVALS_EVALUATE_URL = `${EVALS_INTERNAL_URL}/_evaluate` as const;
 export const EVALS_TRACING_PROJECTS_URL = `${EVALS_INTERNAL_URL}/tracing/projects` as const;
 export const EVALS_TRACING_PROJECT_TRACES_URL =

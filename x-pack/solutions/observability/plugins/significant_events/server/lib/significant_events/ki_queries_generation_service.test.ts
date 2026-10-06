@@ -52,7 +52,7 @@ const makeDeps = (
     }),
   } as unknown as GenerateKIQueriesDependencies['kiClient'],
   agentBuilder: {} as AgentBuilderPluginStart,
-  searchInferenceEndpoints: undefined,
+  resolveModel: jest.fn(async (connectorId?: string) => connectorId ?? 'default-connector'),
   request: {} as GenerateKIQueriesDependencies['request'],
   logger: loggerMock.create(),
   signal: new AbortController().signal,
@@ -90,7 +90,7 @@ describe('generateKIQueries', () => {
     } as unknown as EbtTelemetryClient;
 
     const result = await generateKIQueries(
-      { streamName: 'logs.test', connectorId: 'test-connector' },
+      { streamName: 'logs.test', connectorId: 'test-connector', runId: 'run-1' },
       makeDeps({ telemetry, logger })
     );
 
@@ -111,6 +111,7 @@ describe('generateKIQueries', () => {
     });
     expect(executeKIQueryGenerationAgentMock).toHaveBeenCalledWith(
       expect.objectContaining({
+        interactionId: 'run-1',
         existingQueries: [
           {
             id: 'query-1',
@@ -130,6 +131,20 @@ describe('generateKIQueries', () => {
         input_tokens_used: 10,
         output_tokens_used: 20,
       })
+    );
+  });
+
+  it('uses the canonical connector returned by model resolution', async () => {
+    const resolveModel = jest.fn().mockResolvedValue('canonical-connector');
+
+    await generateKIQueries(
+      { streamName: 'logs.test', connectorId: 'connector-alias', runId: 'run-1' },
+      makeDeps({ resolveModel, logger })
+    );
+
+    expect(resolveModel).toHaveBeenCalledWith('connector-alias');
+    expect(executeKIQueryGenerationAgentMock).toHaveBeenCalledWith(
+      expect.objectContaining({ connectorId: 'canonical-connector' })
     );
   });
 });

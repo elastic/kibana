@@ -6,7 +6,8 @@
  */
 
 import type { HttpFetchQuery } from '@kbn/core/public';
-import type { TopNFunctions } from '@kbn/profiling-utils';
+import { buildPath } from '@kbn/core-http-browser';
+import type { ProfilingStatus, TopNFunctions } from '@kbn/profiling-utils';
 import {
   createFlameGraph,
   type BaseFlameGraph,
@@ -20,7 +21,7 @@ import type {
   StorageHostDetailsAPIResponse,
 } from '../common/storage_explorer';
 import type { TopNResponse } from '../common/topn';
-import type { SetupDataCollectionInstructions } from '../server/routes/setup/get_cloud_setup_instructions';
+import type { SetupDataCollectionInstructions } from '../server/routes/universal_profiling/setup/get_cloud_setup_instructions';
 import type { AutoAbortedHttpService } from './hooks/use_auto_aborted_http_client';
 
 export interface APMTransactionsPerService {
@@ -28,16 +29,6 @@ export interface APMTransactionsPerService {
     serviceName: string;
     transactions: Array<{ name: string | null; samples: number | null }>;
   };
-}
-
-export interface ProfilingSetupStatus {
-  type: 'cloud' | 'self-managed' | 'serverless';
-  profiling_enabled?: boolean;
-  has_setup: boolean;
-  has_data: boolean;
-  pre_8_9_1_data: boolean;
-  has_required_role: boolean;
-  unauthorized?: boolean;
 }
 
 export interface Services {
@@ -63,7 +54,7 @@ export interface Services {
     kuery: string;
     showErrorFrames: boolean;
   }) => Promise<ElasticFlameGraph>;
-  fetchHasSetup: (params: { http: AutoAbortedHttpService }) => Promise<ProfilingSetupStatus>;
+  fetchProfilingStatus: (params: { http: AutoAbortedHttpService }) => Promise<ProfilingStatus>;
   postSetupResources: (params: { http: AutoAbortedHttpService }) => Promise<void>;
   setupDataCollectionInstructions: (params: {
     http: AutoAbortedHttpService;
@@ -105,7 +96,9 @@ export function getServices(): Services {
         timeTo,
         kuery,
       };
-      return (await http.get(`${paths.TopN}/${type}`, { query })) as Promise<TopNResponse>;
+      return (await http.get(buildPath('/internal/profiling/topn/{type}', { type }), {
+        query,
+      })) as Promise<TopNResponse>;
     },
 
     fetchTopNFunctions: async ({ http, timeFrom, timeTo, startIndex, endIndex, kuery }) => {
@@ -129,9 +122,8 @@ export function getServices(): Services {
       const baseFlamegraph = (await http.get(paths.Flamechart, { query })) as BaseFlameGraph;
       return createFlameGraph(baseFlamegraph, showErrorFrames);
     },
-    fetchHasSetup: async ({ http }) => {
-      const hasSetup = (await http.get(paths.HasSetupESResources, {})) as ProfilingSetupStatus;
-      return hasSetup;
+    fetchProfilingStatus: async ({ http }) => {
+      return (await http.get(paths.Status, {})) as ProfilingStatus;
     },
     postSetupResources: async ({ http }) => {
       await http.post(paths.HasSetupESResources, { body: JSON.stringify({}) });

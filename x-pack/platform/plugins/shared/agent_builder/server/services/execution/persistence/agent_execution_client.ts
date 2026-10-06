@@ -11,6 +11,7 @@ import type {
   ChatEvent,
   ExecutionAbortReason,
   SerializedExecutionError,
+  UserIdAndName,
 } from '@kbn/agent-builder-common';
 import { AgentExecutionMode, ExecutionStatus } from '@kbn/agent-builder-common';
 import type { AgentExecution, FindExecutionsOptions } from '@kbn/agent-builder-server/execution';
@@ -29,6 +30,7 @@ type CreateExecutionParams = Pick<
   | 'executionMode'
   | 'interactivity'
   | 'parentExecutionId'
+  | 'owner'
 >;
 
 /** What a status update records alongside the status. */
@@ -39,15 +41,14 @@ export interface UpdateExecutionStatusOptions {
   abortReason?: ExecutionAbortReason;
 }
 
-/**
- * Lightweight snapshot returned by {@link AgentExecutionClient.peek}.
- * Includes only the status, error, event count, and last heartbeat — no events payload.
- */
+/** Lightweight snapshot returned by {@link AgentExecutionClient.peek}, without the events. */
 export interface ExecutionPeek {
   status: ExecutionStatus;
   error?: SerializedExecutionError;
   eventCount: number;
   lastHeartbeat?: string;
+  conversationId?: string;
+  owner?: UserIdAndName;
 }
 
 const fromEs = (source: AgentExecutionProperties): AgentExecution => {
@@ -61,6 +62,7 @@ const fromEs = (source: AgentExecutionProperties): AgentExecution => {
     ...(source.interactivity ? { interactivity: source.interactivity } : {}),
     ...(source.parent_execution_id ? { parentExecutionId: source.parent_execution_id } : {}),
     spaceId: source.space_id,
+    ...(source.owner ? { owner: source.owner } : {}),
     agentParams: source.agent_params,
     eventCount: source.event_count ?? 0,
     events: source.events ?? [],
@@ -153,6 +155,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     executionMode,
     interactivity,
     parentExecutionId,
+    owner,
   }: CreateExecutionParams): Promise<AgentExecution> {
     if (metadata) {
       for (const key of Object.keys(metadata)) {
@@ -173,6 +176,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
       ...(interactivity ? { interactivity } : {}),
       parent_execution_id: parentExecutionId,
       space_id: spaceId,
+      ...(owner ? { owner } : {}),
       agent_params: agentParams,
       event_count: 0,
       events: [],
@@ -258,17 +262,29 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
       const response = await this.esClient.get<AgentExecutionProperties>({
         index: agentExecutionIndexName,
         id: executionId,
-        _source_includes: ['status', 'error', 'event_count', 'last_heartbeat'] as string[],
+        _source_includes: [
+          'status',
+          'error',
+          'event_count',
+          'last_heartbeat',
+          'agent_params.conversationId',
+          'owner',
+        ] as string[],
       });
       const source = response._source;
       if (!source) {
         return undefined;
       }
+      const { agent_params: agentParams, owner } = source;
+      const conversationId =
+        agentParams && 'conversationId' in agentParams ? agentParams.conversationId : undefined;
       return {
         status: source.status,
         eventCount: source.event_count ?? 0,
         ...(source.error ? { error: source.error } : {}),
         ...(source.last_heartbeat ? { lastHeartbeat: source.last_heartbeat } : {}),
+        ...(conversationId ? { conversationId } : {}),
+        ...(owner ? { owner } : {}),
       };
     } catch (err) {
       if (err?.meta?.statusCode === 404) {

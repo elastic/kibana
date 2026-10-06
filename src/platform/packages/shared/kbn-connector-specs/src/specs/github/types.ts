@@ -40,8 +40,19 @@ export type SearchRepositoriesInput = z.infer<typeof SearchRepositoriesInputSche
 export const SearchIssuesInputSchema = lazySchema(() =>
   z.object({
     query: z.string().min(1).max(2000).describe('GitHub issue search query'),
-    order: z.enum(['asc', 'desc']).optional().default('desc'),
-    sort: z.string().max(50).optional().default('created'),
+    order: z
+      .enum(['asc', 'desc'])
+      .optional()
+      .default('desc')
+      .describe('Sort direction: "asc" or "desc" (default "desc")'),
+    sort: z
+      .string()
+      .max(50)
+      .optional()
+      .default('created')
+      .describe(
+        'Field to sort results by: "comments", "reactions", "reactions-+1", "reactions--1", "reactions-smile", "reactions-thinking_face", "reactions-heart", "reactions-tada", "interactions", "created", or "updated" (default "created")'
+      ),
     page: z.number().optional().default(1).describe('Page number (1-based)'),
     perPage: z.number().optional().default(10).describe('Results per page (max 100)'),
   })
@@ -51,8 +62,19 @@ export type SearchIssuesInput = z.infer<typeof SearchIssuesInputSchema>;
 export const SearchPullRequestsInputSchema = lazySchema(() =>
   z.object({
     query: z.string().min(1).max(2000).describe('GitHub pull request search query'),
-    order: z.enum(['asc', 'desc']).optional().default('desc'),
-    sort: z.string().max(50).optional().default('created'),
+    order: z
+      .enum(['asc', 'desc'])
+      .optional()
+      .default('desc')
+      .describe('Sort direction: "asc" or "desc" (default "desc")'),
+    sort: z
+      .string()
+      .max(50)
+      .optional()
+      .default('created')
+      .describe(
+        'Field to sort results by: "comments", "reactions", "reactions-+1", "reactions--1", "reactions-smile", "reactions-thinking_face", "reactions-heart", "reactions-tada", "interactions", "created", or "updated" (default "created")'
+      ),
     page: z.number().optional().default(1).describe('Page number (1-based)'),
     perPage: z.number().optional().default(10).describe('Results per page (max 100)'),
   })
@@ -72,7 +94,11 @@ export const ListIssuesInputSchema = lazySchema(() =>
   z.object({
     owner: z.string().min(1).max(200).describe('Repository owner (user or org)'),
     repo: z.string().min(1).max(200).describe('Repository name'),
-    state: z.enum(['open', 'closed', 'all']).optional().default('open'),
+    state: z
+      .enum(['open', 'closed', 'all'])
+      .optional()
+      .default('open')
+      .describe('Filter by state: "open", "closed", or "all" (default "open")'),
     first: z.number().optional().default(10).describe('Number of results to return'),
     after: z
       .string()
@@ -87,7 +113,11 @@ export const ListPullRequestsInputSchema = lazySchema(() =>
   z.object({
     owner: z.string().min(1).max(200).describe('Repository owner (user or org)'),
     repo: z.string().min(1).max(200).describe('Repository name'),
-    state: z.enum(['open', 'closed', 'all']).optional().default('open'),
+    state: z
+      .enum(['open', 'closed', 'all'])
+      .optional()
+      .default('open')
+      .describe('Filter by state: "open", "closed", or "all" (default "open")'),
     first: z.number().optional().default(10).describe('Number of results to return'),
     after: z
       .string()

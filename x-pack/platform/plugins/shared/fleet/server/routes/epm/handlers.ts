@@ -171,7 +171,7 @@ export const getListHandler: FleetRequestHandler<
 
   if (request.query.withPackagePoliciesCount) {
     const countByPackage = await getPackagePoliciesCountByPackageName(
-      appContextService.getInternalUserSOClientForSpaceId(fleetContext.spaceId)
+      appContextService.getInternalUserSOClientWithoutSpaceExtension()
     );
     for (const item of flattenedRes) {
       item.packagePoliciesInfo = {
@@ -753,6 +753,7 @@ export const deletePackageHandler: FleetRequestHandler<
     pkgVersion,
     esClient,
     force: request.query?.force,
+    request,
   });
   const body: TypeOf<typeof DeletePackageResponseSchema> = {
     items: res,

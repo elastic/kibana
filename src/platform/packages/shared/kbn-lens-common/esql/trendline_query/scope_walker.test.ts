@@ -60,4 +60,59 @@ describe('trackColumnAndEnsureKept', () => {
       'FROM index | RENAME @timestamp AS time | KEEP bytes, time'
     );
   });
+
+  it('removes the tracked column from DROP commands', () => {
+    const root = parse('FROM index | DROP bytes, time_bucket');
+    trackColumnAndEnsureKept(root.commands, 'time_bucket');
+    expect(BasicPrettyPrinter.print(root)).toBe('FROM index | DROP bytes');
+  });
+
+  it('removes a DROP command when it only drops the tracked column', () => {
+    const root = parse('FROM index | DROP time_bucket | STATS total = COUNT(*)');
+    trackColumnAndEnsureKept(root.commands, 'time_bucket', { ensureGrouped: true });
+    expect(BasicPrettyPrinter.print(root)).toBe(
+      'FROM index | STATS total = COUNT(*) BY time_bucket'
+    );
+  });
+
+  it('adds a BY clause to STATS when grouping is required', () => {
+    const root = parse('FROM index | STATS total = COUNT(*)');
+    trackColumnAndEnsureKept(root.commands, 'time_bucket', { ensureGrouped: true });
+    expect(BasicPrettyPrinter.print(root)).toBe(
+      'FROM index | STATS total = COUNT(*) BY time_bucket'
+    );
+  });
+
+  it('extends an existing STATS BY clause when grouping is required', () => {
+    const root = parse('FROM index | STATS total = COUNT(*) BY host');
+    trackColumnAndEnsureKept(root.commands, 'time_bucket', { ensureGrouped: true });
+    expect(BasicPrettyPrinter.print(root)).toBe(
+      'FROM index | STATS total = COUNT(*) BY host, time_bucket'
+    );
+  });
+
+  it('does not duplicate an existing STATS grouping', () => {
+    const root = parse('FROM index | STATS total = COUNT(*) BY time_bucket');
+    trackColumnAndEnsureKept(root.commands, 'time_bucket', { ensureGrouped: true });
+    expect(BasicPrettyPrinter.print(root)).toBe(
+      'FROM index | STATS total = COUNT(*) BY time_bucket'
+    );
+  });
+
+  it('tracks an existing aliased STATS grouping without duplicating it', () => {
+    const root = parse('FROM index | STATS total = COUNT(*) BY time_bucket = bucket');
+    const state = trackColumnAndEnsureKept(root.commands, 'bucket', { ensureGrouped: true });
+    expect(BasicPrettyPrinter.print(root)).toBe(
+      'FROM index | STATS total = COUNT(*) BY time_bucket = bucket'
+    );
+    expect(state.name).toBe('time_bucket');
+  });
+
+  it('groups STATS by the renamed column', () => {
+    const root = parse('FROM index | RENAME bucket AS time_bucket | STATS total = COUNT(*)');
+    trackColumnAndEnsureKept(root.commands, 'bucket', { ensureGrouped: true });
+    expect(BasicPrettyPrinter.print(root)).toBe(
+      'FROM index | RENAME bucket AS time_bucket | STATS total = COUNT(*) BY time_bucket'
+    );
+  });
 });

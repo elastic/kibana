@@ -16,7 +16,7 @@ jest.mock('../../../synthetics_service/get_private_locations', () => ({
   getPrivateLocationsForNamespaces: jest.fn().mockResolvedValue([]),
 }));
 
-// Privilege-check and sharding-sync wiring are under test here; the actual
+// Privilege-check and label-sync wiring are under test here; the actual
 // monitor rewrite is exercised by helpers.test.ts.
 jest.mock('./helpers', () => {
   const actual = jest.requireActual('./helpers');
@@ -38,7 +38,7 @@ const existingLocation = {
   },
 };
 
-const makeRouteContext = (body: Record<string, unknown>, { hasEnterprise = false } = {}) => {
+const makeRouteContext = (body: Record<string, unknown>) => {
   const response = httpServerMock.createResponseFactory();
   const routeContext = {
     request: { params: { locationId: 'loc-1' }, body },
@@ -52,92 +52,40 @@ const makeRouteContext = (body: Record<string, unknown>, { hasEnterprise = false
         savedObjects: { createInternalRepository: jest.fn().mockReturnValue({}) },
       },
     },
-    context: {
-      licensing: Promise.resolve({
-        license: {
-          isAvailable: true,
-          isActive: true,
-          hasAtLeast: (level: string) => level === 'enterprise' && hasEnterprise,
-        },
-      }),
-    },
   } as any;
   return { routeContext, response };
 };
 
-describe('editPrivateLocationRoute isAgentSharding', () => {
+describe('editPrivateLocationRoute', () => {
   afterEach(() => {
     jest.restoreAllMocks();
     jest.clearAllMocks();
   });
 
-  const stubRepo = (updatedAttributes = {}, existingAttributes = {}) => {
-    const location = {
-      ...existingLocation,
-      attributes: { ...existingLocation.attributes, ...existingAttributes },
-    };
+  const stubRepo = (updatedAttributes = {}) => {
     jest
       .spyOn(PrivateLocationRepository.prototype, 'getPrivateLocation')
-      .mockResolvedValue(location as any);
+      .mockResolvedValue(existingLocation as any);
     return jest
       .spyOn(PrivateLocationRepository.prototype, 'editPrivateLocation')
       .mockResolvedValue({
-        ...location,
-        attributes: { ...location.attributes, ...updatedAttributes },
+        ...existingLocation,
+        attributes: { ...existingLocation.attributes, ...updatedAttributes },
       } as any);
   };
 
-  it('persists isAgentSharding when it is the only change and the license is Enterprise', async () => {
-    const edit = stubRepo({ isAgentSharding: true });
-    const { routeContext } = makeRouteContext({ isAgentSharding: true }, { hasEnterprise: true });
+  it('persists a tag-only edit without rewriting monitors', async () => {
+    const edit = stubRepo({ tags: ['new'] });
+    const { routeContext } = makeRouteContext({ tags: ['new'] });
 
     const result = await editPrivateLocationRoute().handler(routeContext);
 
-    expect(edit).toHaveBeenCalledWith('loc-1', expect.objectContaining({ isAgentSharding: true }));
-    expect(result).toEqual(expect.objectContaining({ isAgentSharding: true }));
-    expect(updatePrivateLocationMonitors).toHaveBeenCalledWith(
-      expect.objectContaining({
-        locationId: 'loc-1',
-        newLocationLabel: 'Loc',
-      })
-    );
+    expect(edit).toHaveBeenCalledWith('loc-1', { label: 'Loc', tags: ['new'] });
+    expect(updatePrivateLocationMonitors).not.toHaveBeenCalled();
+    expect(result).toEqual(expect.objectContaining({ tags: ['new'] }));
   });
 
-  it('rejects enabling isAgentSharding without an Enterprise license', async () => {
-    const edit = stubRepo();
-    const { routeContext, response } = makeRouteContext({ isAgentSharding: true });
-    response.forbidden.mockReturnValue({ statusCode: 403 } as any);
-
-    const result = await editPrivateLocationRoute().handler(routeContext);
-
-    expect(result).toEqual({ statusCode: 403 });
-    expect(response.forbidden).toHaveBeenCalledWith(
-      expect.objectContaining({
-        body: expect.objectContaining({
-          message: expect.stringContaining('Enterprise license'),
-        }),
-      })
-    );
-    expect(edit).not.toHaveBeenCalled();
-  });
-
-  it('overwrites an enabled isAgentSharding flag with false', async () => {
-    const edit = stubRepo({ isAgentSharding: false }, { isAgentSharding: true });
-    const { routeContext } = makeRouteContext({ isAgentSharding: false });
-
-    const result = await editPrivateLocationRoute().handler(routeContext);
-
-    expect(edit).toHaveBeenCalledWith('loc-1', expect.objectContaining({ isAgentSharding: false }));
-    expect(result).not.toHaveProperty('isAgentSharding');
-    expect(updatePrivateLocationMonitors).toHaveBeenCalledWith(
-      expect.objectContaining({
-        locationId: 'loc-1',
-        newLocationLabel: 'Loc',
-      })
-    );
-  });
-
-  it('does not write when the body omits isAgentSharding and other fields', async () => {
+  it('does not write when the body has no changes', async () => {
     const edit = stubRepo();
     const { routeContext } = makeRouteContext({});
 
@@ -147,57 +95,29 @@ describe('editPrivateLocationRoute isAgentSharding', () => {
     expect(updatePrivateLocationMonitors).not.toHaveBeenCalled();
   });
 
-  it('returns forbidden when a monitor using the location belongs to an unauthorized space', async () => {
-    const response = httpServerMock.createResponseFactory();
-    const forbidden = { statusCode: 403 };
-    response.forbidden.mockReturnValue(forbidden as any);
-    const edit = jest.spyOn(PrivateLocationRepository.prototype, 'editPrivateLocation');
-    jest.spyOn(PrivateLocationRepository.prototype, 'getPrivateLocation').mockResolvedValue({
-      id: 'location-1',
-      namespaces: ['default'],
-      attributes: {
-        id: 'location-1',
-        label: 'Old label',
-        agentPolicyId: 'agent-policy-1',
-        isServiceManaged: false,
-      },
-    } as any);
+  it('ignores the deprecated isAgentSharding field without writing', async () => {
+    const edit = stubRepo();
+    const { routeContext } = makeRouteContext({ isAgentSharding: true });
 
-    const result = await editPrivateLocationRoute().handler({
-      request: { params: { locationId: 'location-1' }, body: { label: 'New label' } },
-      response,
-      savedObjectsClient: {},
-      context: {
-        licensing: Promise.resolve({
-          license: { isAvailable: true, isActive: true, hasAtLeast: () => false },
-        }),
-      },
-      monitorConfigRepository: {
-        findDecryptedMonitors: jest
-          .fn()
-          .mockResolvedValue([{ namespaces: ['default', 'restricted-space'] }]),
-      },
-      server: {
-        coreStart: {
-          savedObjects: { createInternalRepository: jest.fn().mockReturnValue({}) },
-        },
-        security: {
-          authz: {
-            checkSavedObjectsPrivilegesWithRequest: jest
-              .fn()
-              .mockReturnValue(jest.fn().mockResolvedValue({ hasAllRequested: false })),
-          },
-        },
-      },
-    } as any);
+    const result = await editPrivateLocationRoute().handler(routeContext);
 
-    expect(result).toBe(forbidden);
     expect(edit).not.toHaveBeenCalled();
+    expect(updatePrivateLocationMonitors).not.toHaveBeenCalled();
+    expect(result).not.toHaveProperty('isAgentSharding');
   });
 
-  it('returns forbidden when turning sharding off and a monitor belongs to an unauthorized space', async () => {
-    const edit = stubRepo({ isAgentSharding: false }, { isAgentSharding: true });
-    const { routeContext, response } = makeRouteContext({ isAgentSharding: false });
+  it('persists label and tags but not the deprecated isAgentSharding field', async () => {
+    const edit = stubRepo({ tags: ['new'] });
+    const { routeContext } = makeRouteContext({ tags: ['new'], isAgentSharding: false });
+
+    await editPrivateLocationRoute().handler(routeContext);
+
+    expect(edit).toHaveBeenCalledWith('loc-1', { label: 'Loc', tags: ['new'] });
+  });
+
+  it('returns forbidden when a monitor using the location belongs to an unauthorized space', async () => {
+    const edit = stubRepo();
+    const { routeContext, response } = makeRouteContext({ label: 'New label' });
     const forbidden = { statusCode: 403 };
     response.forbidden.mockReturnValue(forbidden as any);
     routeContext.monitorConfigRepository.findDecryptedMonitors.mockResolvedValue([
@@ -244,9 +164,9 @@ describe('editPrivateLocationRoute isAgentSharding', () => {
     expect(edit).toHaveBeenCalled();
   });
 
-  it('rewrites monitors before persisting a sharding change so a failed rewrite leaves the flag unchanged', async () => {
-    const edit = stubRepo({ isAgentSharding: true });
-    const { routeContext } = makeRouteContext({ isAgentSharding: true }, { hasEnterprise: true });
+  it('rewrites monitors before persisting a label change', async () => {
+    const edit = stubRepo({ label: 'Barcelona' });
+    const { routeContext } = makeRouteContext({ label: 'Barcelona' });
 
     await editPrivateLocationRoute().handler(routeContext);
 
@@ -257,71 +177,13 @@ describe('editPrivateLocationRoute isAgentSharding', () => {
     );
   });
 
-  it('does not persist isAgentSharding when monitor rewrite throws', async () => {
-    const edit = stubRepo({ isAgentSharding: true });
+  it('does not persist the label when monitor rewrite throws', async () => {
+    const edit = stubRepo({ label: 'Barcelona' });
     (updatePrivateLocationMonitors as jest.Mock).mockRejectedValueOnce(new Error('fleet down'));
-    const { routeContext } = makeRouteContext({ isAgentSharding: true }, { hasEnterprise: true });
+    const { routeContext } = makeRouteContext({ label: 'Barcelona' });
 
     await expect(editPrivateLocationRoute().handler(routeContext)).rejects.toThrow('fleet down');
     expect(edit).not.toHaveBeenCalled();
-  });
-
-  it('passes the intended sharding flag to monitor rewrite before the saved object is persisted', async () => {
-    (getPrivateLocations as jest.Mock).mockResolvedValue([
-      { id: 'loc-1', label: 'Loc', agentPolicyId: 'ap-1', isServiceManaged: false },
-      {
-        id: 'loc-2',
-        label: 'Other',
-        agentPolicyId: 'ap-2',
-        isServiceManaged: false,
-        isAgentSharding: true,
-      },
-    ]);
-    stubRepo({ isAgentSharding: true });
-    const { routeContext } = makeRouteContext({ isAgentSharding: true }, { hasEnterprise: true });
-
-    await editPrivateLocationRoute().handler(routeContext);
-
-    expect(updatePrivateLocationMonitors).toHaveBeenCalledWith(
-      expect.objectContaining({
-        allPrivateLocations: [
-          expect.objectContaining({ id: 'loc-1', isAgentSharding: true }),
-          expect.objectContaining({ id: 'loc-2', isAgentSharding: true }),
-        ],
-      })
-    );
-  });
-
-  it('clears isAgentSharding on the rewritten location before persisting a disable', async () => {
-    (getPrivateLocations as jest.Mock).mockResolvedValue([
-      {
-        id: 'loc-1',
-        label: 'Loc',
-        agentPolicyId: 'ap-1',
-        isServiceManaged: false,
-        isAgentSharding: true,
-      },
-      {
-        id: 'loc-2',
-        label: 'Other',
-        agentPolicyId: 'ap-2',
-        isServiceManaged: false,
-        isAgentSharding: true,
-      },
-    ]);
-    stubRepo({ isAgentSharding: false }, { isAgentSharding: true });
-    const { routeContext } = makeRouteContext({ isAgentSharding: false });
-
-    await editPrivateLocationRoute().handler(routeContext);
-
-    expect(updatePrivateLocationMonitors).toHaveBeenCalledWith(
-      expect.objectContaining({
-        allPrivateLocations: [
-          expect.objectContaining({ id: 'loc-1', isAgentSharding: false }),
-          expect.objectContaining({ id: 'loc-2', isAgentSharding: true }),
-        ],
-      })
-    );
   });
 
   it('passes the new label to monitor rewrite before the saved object is persisted', async () => {
@@ -348,12 +210,14 @@ describe('editPrivateLocationRoute isAgentSharding', () => {
 
 describe('EditPrivateLocationSchema', () => {
   it('rejects unknown keys so a typo-only update cannot succeed as a no-op', () => {
-    expect(EditPrivateLocationSchema.safeParse({ isAgentShardng: true }).success).toBe(false);
+    expect(EditPrivateLocationSchema.safeParse({ lable: 'x' }).success).toBe(false);
+  });
+
+  it('still accepts the deprecated isAgentSharding field', () => {
+    expect(EditPrivateLocationSchema.safeParse({ isAgentSharding: true }).success).toBe(true);
   });
 
   it('accepts a known partial update', () => {
-    expect(EditPrivateLocationSchema.parse({ isAgentSharding: true })).toEqual({
-      isAgentSharding: true,
-    });
+    expect(EditPrivateLocationSchema.parse({ label: 'x' })).toEqual({ label: 'x' });
   });
 });

@@ -6,3 +6,9 @@
  */
 
 export { ServiceAccountsAPIClient } from './service_accounts_api_client';
+export type {
+  ListServiceAccountsParams,
+  ListServiceAccountsResponse,
+  ServiceAccountDirectoryCreator,
+  ServiceAccountDirectoryEntry,
+} from './service_accounts_api_client';

@@ -89,7 +89,7 @@ describe('createUnackAction', () => {
     expect(createUnackAction(makeDeps()).isCompatible({ episodes: [] })).toBe(false);
   });
 
-  it('execute: POSTs per-episode UNACK items with distinct episode_ids, toasts, calls onSuccess', async () => {
+  it('execute: POSTs per-episode UNACK items with distinct alert_ids, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
     jest
       .spyOn(bulk, 'bulkUnackEpisodeActions')
@@ -103,8 +103,8 @@ describe('createUnackAction', () => {
       onSuccess,
     });
     expect(bulk.bulkUnackEpisodeActions).toHaveBeenCalledWith(deps.http, [
-      { episode_id: 'e1' },
-      { episode_id: 'e2' },
+      { alert_id: 'e1' },
+      { alert_id: 'e2' },
     ]);
     expect(deps.notifications.toasts.add).toHaveBeenCalled();
     expect(onSuccess).toHaveBeenCalled();

@@ -7,6 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { ExecutionStatus } from '@kbn/workflows';
+import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { InvestigationStatus } from '../../common';
 import { InvestigationStaleWriteError } from '../storage';
 import type { FindInvestigationsAcrossSpacesResult } from '../storage';
@@ -52,6 +53,7 @@ const FINISHED_AT = '2024-06-01T12:00:00.000Z';
 
 const execution = (status: ExecutionStatus, message?: string): ExecutionSummary => ({
   status,
+  workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
   error: message ? { message } : undefined,
   finishedAt: FINISHED_AT,
 });
@@ -59,6 +61,7 @@ const execution = (status: ExecutionStatus, message?: string): ExecutionSummary 
 const createMockInvestigations = () => ({
   findAcrossSpaces: jest.fn().mockResolvedValue(page([])),
   updateInSpace: jest.fn().mockResolvedValue(undefined),
+  deleteAllAcrossSpaces: jest.fn().mockResolvedValue({ deleted: 0, failures: [] }),
 });
 
 const setup = () => {
@@ -206,7 +209,7 @@ describe('reconcileInvestigationStatuses', () => {
     expect(result).toEqual({ scanned: 1, reconciled: 0 });
   });
 
-  it('waits out the grace period when a recent investigation has no execution', async () => {
+  it('leaves an investigation alone when its execution cannot be identified', async () => {
     const { investigationSweepRepository, run } = setup();
     investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(
       page([investigation({ id: 'inv-1' })])
@@ -217,7 +220,7 @@ describe('reconcileInvestigationStatuses', () => {
     expect(investigationSweepRepository.updateInSpace).not.toHaveBeenCalled();
   });
 
-  it('fails an investigation whose execution has been missing past the grace period', async () => {
+  it('leaves an old investigation alone when its execution has been missing', async () => {
     const { investigationSweepRepository, run } = setup();
     investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(
       page([
@@ -227,19 +230,31 @@ describe('reconcileInvestigationStatuses', () => {
 
     const result = await run();
 
-    expect(investigationSweepRepository.updateInSpace.mock.calls[0][0].patch).toEqual({
-      status: 'failed',
-      error: 'Workflow execution no longer exists',
-      completed_at: expect.any(String),
-    });
-    expect(result).toEqual({ scanned: 1, reconciled: 1 });
+    expect(investigationSweepRepository.updateInSpace).not.toHaveBeenCalled();
+    expect(result).toEqual({ scanned: 1, reconciled: 0 });
   });
 
-  it('never guesses an outcome from an unparseable created_at', async () => {
+  it('leaves an investigation with an unparseable created_at alone when its execution is missing', async () => {
     const { investigationSweepRepository, run } = setup();
     investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(
       page([investigation({ id: 'inv-1', createdAt: 'not-a-date' })])
     );
+
+    await run();
+
+    expect(investigationSweepRepository.updateInSpace).not.toHaveBeenCalled();
+  });
+
+  it('does not reconcile an execution from a removed workflow', async () => {
+    const { investigationSweepRepository, resolveAllExecutionsTo, run } = setup();
+    investigationSweepRepository.findAcrossSpaces.mockResolvedValueOnce(
+      page([investigation({ id: 'inv-1' })])
+    );
+    resolveAllExecutionsTo({
+      status: ExecutionStatus.COMPLETED,
+      workflowId: 'removed-investigation-workflow',
+      finishedAt: FINISHED_AT,
+    });
 
     await run();
 

@@ -13,27 +13,32 @@ import type { EventClient } from '../../../lib/significant_events/events';
 
 export async function updateEventStatusToolHandler({
   eventClient,
-  eventUuid,
+  eventId,
   status,
+  assessmentNote,
   alertEventsClient,
   logger,
 }: {
   eventClient: EventClient;
-  eventUuid: string;
+  eventId: string;
   status: SignificantEventStatus;
+  assessmentNote?: string;
   alertEventsClient?: AlertEventsClientApi;
   logger: Logger;
 }): Promise<{
-  event_uuid: string;
+  event_id: string;
   updated: number;
   ignored: number;
   status: SignificantEventStatus;
 }> {
-  return updateSignificantEventStatus({
+  const result = await updateSignificantEventStatus({
     eventClient,
-    eventUuid,
+    eventId,
     status,
+    assessmentNote,
     alertEventsClient,
     logger,
   });
+
+  return { event_id: eventId, ...result };
 }

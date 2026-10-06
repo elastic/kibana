@@ -73,10 +73,39 @@ spaceTest.describe('Discover sidebar runtime fields', { tag: tags.deploymentAgno
 
   spaceTest(
     'supports ad-hoc data views with runtime field relabel and remove',
-    async ({ apiServices, discoverScoutSpace, pageObjects }) => {
+    async ({ apiServices, discoverScoutSpace, log, page, pageObjects }) => {
       const { discover, unifiedFieldList } = pageObjects;
       const fieldName = '_bytes-runtimefield';
       const labeledName = '_bytes-runtimefield2';
+
+      // TODO(flaky-diagnostics): remove once the extra available field is identified.
+      // Log every field existence response (include_empty_fields=false) Discover receives.
+      const existenceLogs: Array<Promise<void>> = [];
+      page.on('response', (response) => {
+        const url = response.url();
+        if (
+          !url.includes('/internal/data_views/_fields_for_wildcard') ||
+          !url.includes('include_empty_fields=false')
+        ) {
+          return;
+        }
+        existenceLogs.push(
+          response
+            .text()
+            .then((body) =>
+              log.info(
+                `field-existence-diagnostics: ${JSON.stringify({
+                  url,
+                  status: response.status(),
+                  requestBody: response.request().postData(),
+                })} response: ${body}`
+              )
+            )
+            .catch((error) =>
+              log.info(`field-existence-diagnostics: failed to read ${url}: ${error}`)
+            )
+        );
+      });
 
       await openAdHocSessionWithRuntimeFields({
         apiServices,
@@ -90,7 +119,13 @@ spaceTest.describe('Discover sidebar runtime fields', { tag: tags.deploymentAgno
         },
       });
 
-      await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT + 1);
+      try {
+        await unifiedFieldList.expectAvailableFieldCount(
+          testData.LOGSTASH_AVAILABLE_FIELD_COUNT + 1
+        );
+      } finally {
+        await Promise.all(existenceLogs);
+      }
       await unifiedFieldList.searchField(fieldName);
       await expect(unifiedFieldList.getAvailableField(fieldName)).toBeVisible();
 

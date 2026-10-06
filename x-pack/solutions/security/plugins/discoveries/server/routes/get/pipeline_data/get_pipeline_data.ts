@@ -221,7 +221,7 @@ export const registerGetPipelineDataRoute = (
                     const execution = await workflowsManagementApi.getWorkflowExecution(
                       entry.workflowRunId,
                       spaceId,
-                      { includeInput: true, includeOutput: true }
+                      { includeInput: true, includeOutput: true, request }
                     );
 
                     if (execution == null) return null;
@@ -276,7 +276,7 @@ export const registerGetPipelineDataRoute = (
                     const execution = await workflowsManagementApi.getWorkflowExecution(
                       entry.workflowRunId,
                       spaceId,
-                      { includeInput: true, includeOutput: true }
+                      { includeInput: true, includeOutput: true, request }
                     );
 
                     if (execution == null) return null;
@@ -350,6 +350,7 @@ export const registerGetPipelineDataRoute = (
             generationTracking != null
               ? await workflowsManagementApi
                   .getWorkflowExecution(generationTracking.workflowRunId, spaceId, {
+                    request,
                     includeInput: true,
                     includeOutput: true,
                   })
@@ -435,6 +436,7 @@ export const registerGetPipelineDataRoute = (
             validationTracking != null
               ? await workflowsManagementApi
                   .getWorkflowExecution(validationTracking.workflowRunId, spaceId, {
+                    request,
                     includeInput: true,
                     includeOutput: true,
                   })

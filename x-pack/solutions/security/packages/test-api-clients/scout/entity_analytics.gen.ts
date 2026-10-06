@@ -20,7 +20,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { encodePathParams, replaceParams } from '@kbn/openapi-common/shared';
-import { stringify as stringifyQuery } from 'query-string';
+import queryString from 'query-string';
 
 import type { AssetCriticalityGetPrivilegesResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/get_asset_criticality_privileges.gen';
 import type {
@@ -537,7 +537,7 @@ Delete the asset criticality record for a specific entity.
     const path = `${basePath}/api/asset_criticality`;
 
     return apiClient.delete<ScoutResponseBody<TResponseType, DeleteAssetCriticalityRecordResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -590,7 +590,7 @@ Delete an entity source configuration.
     const path = `${basePath}/api/entity_analytics/monitoring/engine/delete`;
 
     return apiClient.delete<ScoutResponseBody<TResponseType, DeleteMonitoringEngineResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -771,7 +771,7 @@ Removes a privileged user from monitoring by their document ID.
     const path = `${basePath}/api/asset_criticality/list`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, FindAssetCriticalityRecordsResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -848,7 +848,7 @@ Removes a privileged user from monitoring by their document ID.
     const path = `${basePath}/api/asset_criticality`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, GetAssetCriticalityRecordResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -976,7 +976,7 @@ Get an entity source configuration by ID.
     const path = `${basePath}/api/risk_score/history`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, GetRiskScoreHistoryResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -1152,7 +1152,7 @@ List all entity source configurations.
     const path = `${basePath}/api/entity_analytics/monitoring/entity_source/list`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, ListEntitySourcesResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -1180,7 +1180,7 @@ Returns a list of all privileged users currently being monitored. Supports optio
     const path = `${basePath}/api/entity_analytics/monitoring/users/list`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, ListPrivMonUsersResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -1207,7 +1207,7 @@ Returns a list of all privileged users currently being monitored. Supports optio
     )}`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, ListWatchlistEntitySourcesResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -1459,7 +1459,7 @@ Search Indices for Privileges Monitoring import.
     const path = `${basePath}/api/entity_analytics/monitoring/privileges/indices`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, SearchPrivilegesIndicesResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',

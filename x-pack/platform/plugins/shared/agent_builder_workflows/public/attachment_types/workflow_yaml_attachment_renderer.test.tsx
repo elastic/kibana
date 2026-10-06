@@ -11,15 +11,25 @@ import { BehaviorSubject } from 'rxjs';
 import { QueryClient } from '@kbn/react-query';
 import { coreLifecycleMock } from '@kbn/core-lifecycle-browser-mocks';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
-import { createMockWorkflowApi, createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
+import {
+  createMockWorkflowApi,
+  createMockWorkflowsCapabilities,
+  createMockWorkflowsUiServices,
+} from '@kbn/workflows-ui/mocks';
 import type { WorkflowsBaseTelemetry } from '@kbn/workflows-management-plugin/public';
 import { createWorkflowYamlAttachmentUiDefinition } from './workflow_yaml_attachment_renderer';
-import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
+import {
+  WORKFLOW_YAML_ATTACHMENT_TYPE,
+  WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
+} from '@kbn/workflows/common/constants';
 
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  useWorkflowsMonacoTheme: jest.fn(),
-  WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
+// The preview has its own test; stub it so this suite stays on the canvas wiring.
+jest.mock('./workflow_yaml_canvas_preview', () => ({
+  WorkflowYamlCanvasPreview: ({ yaml, showGraph }: { yaml: string; showGraph: boolean }) => (
+    <pre data-test-subj="workflowYamlCanvasPreview" data-show-graph={String(showGraph)}>
+      {yaml}
+    </pre>
+  ),
 }));
 
 const mockWorkflowApi = createMockWorkflowApi();
@@ -54,6 +64,7 @@ const createMockServices = ({
     core,
     telemetry,
     queryClient: new QueryClient(),
+    workflowsUiServices: createMockWorkflowsUiServices(),
   };
 };
 
@@ -237,13 +248,36 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
     });
   });
 
+  describe('renderInlineContent', () => {
+    it('renders the step and trigger icons with the workflows-ui services', () => {
+      const services = createMockServices();
+      const definition = createWorkflowYamlAttachmentUiDefinition(services);
+      const attachment = {
+        ...createAttachment(),
+        data: {
+          yaml: 'name: Test\ntriggers:\n  - type: manual\nsteps:\n  - name: log\n    type: console\n',
+        },
+      };
+
+      const { getByText } = render(
+        <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
+      );
+
+      expect(getByText('1 trigger and 1 step')).toBeInTheDocument();
+      // Step icons resolve through the registry, like the canvas graph.
+      expect(
+        services.workflowsUiServices.workflowsExtensions.getStepDefinition
+      ).toHaveBeenCalledWith('console');
+    });
+  });
+
   describe('renderCanvasContent', () => {
-    it('renders a YAML code editor', () => {
+    it('renders the workflow preview with the attachment YAML', () => {
       const services = createMockServices();
       const definition = createWorkflowYamlAttachmentUiDefinition(services);
       const attachment = createAttachment();
 
-      const { container } = render(
+      const { getByTestId } = render(
         <>
           {definition.renderCanvasContent!(
             { attachment, isSidebar: false },
@@ -252,8 +286,36 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
         </>
       );
 
-      expect(container.querySelector('[data-test-subj="TextBasedLangEditor"]')).toBeDefined();
+      expect(getByTestId('workflowYamlCanvasPreview')).toHaveTextContent('name: Test Workflow');
     });
+
+    it.each([
+      [true, 'true'],
+      [false, 'false'],
+    ])(
+      'passes showGraph from the workflows experimental features setting (%s)',
+      (settingValue, expected) => {
+        const services = createMockServices();
+        services.core.settings.client.get.mockImplementation((key: string) =>
+          key === WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID ? settingValue : undefined
+        );
+        const definition = createWorkflowYamlAttachmentUiDefinition(services);
+
+        const { getByTestId } = render(
+          <>
+            {definition.renderCanvasContent!(
+              { attachment: createAttachment(), isSidebar: false },
+              { registerActionButtons: jest.fn(), updateOrigin: jest.fn(), closeCanvas: jest.fn() }
+            )}
+          </>
+        );
+
+        expect(getByTestId('workflowYamlCanvasPreview')).toHaveAttribute(
+          'data-show-graph',
+          expected
+        );
+      }
+    );
 
     it('registers Save button for new workflow', () => {
       const services = createMockServices();

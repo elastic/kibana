@@ -6,17 +6,17 @@
  */
 
 import {
-  INFRA_POD_SCHEMA_SELECTOR_DEFAULT,
-  INFRA_POD_SCHEMA_SELECTOR_FEATURE_FLAG,
+  OBSERVABILITY_INFRA_POD_SCHEMA_SELECTOR_ENABLED_DEFAULT,
+  OBSERVABILITY_INFRA_POD_SCHEMA_SELECTOR_ENABLED_FEATURE_FLAG,
 } from '../../common/pod_schema_selector_feature_flag';
 import { useKibanaContextForPlugin } from './use_kibana';
 
-/** Temporary flag until the feature is fully enabled. */
+/** Temporary release gate. Default off so the unfinished pod Schema selector does not ship enabled. */
 export const useIsPodSchemaSelectorEnabled = (): boolean => {
   const { services } = useKibanaContextForPlugin();
 
   return services.featureFlags.useBooleanValue(
-    INFRA_POD_SCHEMA_SELECTOR_FEATURE_FLAG,
-    INFRA_POD_SCHEMA_SELECTOR_DEFAULT
+    OBSERVABILITY_INFRA_POD_SCHEMA_SELECTOR_ENABLED_FEATURE_FLAG,
+    OBSERVABILITY_INFRA_POD_SCHEMA_SELECTOR_ENABLED_DEFAULT
   );
 };

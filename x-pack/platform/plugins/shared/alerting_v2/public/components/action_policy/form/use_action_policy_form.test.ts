@@ -24,7 +24,6 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
 
 const EXISTING_POLICY: ActionPolicyResponse = {
   id: 'policy-1',
-  version: 'WzEsMV0=',
   name: 'Critical production alerts',
   description: 'Routes critical alerts',
   enabled: true,
@@ -87,7 +86,7 @@ describe('useActionPolicyForm', () => {
         name: 'My policy',
         description: 'A description',
         matcher: null,
-        groupingMode: 'per_episode',
+        groupingMode: 'per_alert',
         groupBy: [],
         throttleStrategy: 'on_status_change',
         throttleInterval: '',
@@ -198,11 +197,11 @@ describe('useActionPolicyForm', () => {
         })
       );
 
-      expect(result.current.methods.getValues().groupingMode).toBe('per_episode');
+      expect(result.current.methods.getValues().groupingMode).toBe('per_alert');
       expect(result.current.methods.getValues().throttleStrategy).toBe('on_status_change');
     });
 
-    it('calls onSubmitUpdate with id, raw form values, and version on submit', async () => {
+    it('calls onSubmitUpdate with id and raw form values on submit', async () => {
       const onSubmitUpdate = jest.fn();
       const { result } = renderHook(() =>
         useActionPolicyForm({
@@ -217,21 +216,17 @@ describe('useActionPolicyForm', () => {
       });
 
       expect(onSubmitUpdate).toHaveBeenCalledTimes(1);
-      expect(onSubmitUpdate).toHaveBeenCalledWith(
-        'policy-1',
-        {
-          name: 'Critical production alerts',
-          description: 'Routes critical alerts',
-          groupingMode: 'per_field',
-          matcher: { expression: 'data.severity : "critical"' },
-          groupBy: ['host.name', 'service.name'],
-          throttleStrategy: 'time_interval',
-          throttleInterval: '5m',
-          destinations: [{ type: 'workflow', id: 'workflow-2' }],
-          inlineActions: [],
-        },
-        'WzEsMV0='
-      );
+      expect(onSubmitUpdate).toHaveBeenCalledWith('policy-1', {
+        name: 'Critical production alerts',
+        description: 'Routes critical alerts',
+        groupingMode: 'per_field',
+        matcher: { expression: 'data.severity : "critical"' },
+        groupBy: ['host.name', 'service.name'],
+        throttleStrategy: 'time_interval',
+        throttleInterval: '5m',
+        destinations: [{ type: 'workflow', id: 'workflow-2' }],
+        inlineActions: [],
+      });
     });
 
     it('does not call onSubmitCreate in edit mode', async () => {

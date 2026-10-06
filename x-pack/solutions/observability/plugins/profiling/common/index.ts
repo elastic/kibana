@@ -35,6 +35,7 @@ export function getRoutePaths() {
     TopNTraces: `${BASE_ROUTE_PATH}/topn/traces`,
     APMTransactions: `${BASE_ROUTE_PATH}/topn/functions/apm/transactions`,
     Flamechart: `${BASE_ROUTE_PATH}/flamechart`,
+    Status: `${BASE_ROUTE_PATH}/status`,
     HasSetupESResources: `${PUBLIC_BASE_ROUTE_PATH}/setup/es_resources`,
     SetupDataCollectionInstructions: `${BASE_ROUTE_PATH}/setup/instructions`,
     StorageExplorerSummary: `${BASE_ROUTE_PATH}/storage_explorer/summary`,

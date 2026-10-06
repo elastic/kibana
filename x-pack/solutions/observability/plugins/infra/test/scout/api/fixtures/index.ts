@@ -14,6 +14,7 @@ export * as testData from './constants';
 export { getCustomDashboardsUrl } from './custom_dashboards';
 export { generateSemconvHostsData } from './semconv_hosts_data';
 export type { SemconvHost } from './semconv_hosts_data';
+export { generatePodsData } from './pods_data';
 export { generateSemconvPodsData } from './semconv_pods_data';
 export type { SemconvPodFixture } from './semconv_pods_data';
 export {

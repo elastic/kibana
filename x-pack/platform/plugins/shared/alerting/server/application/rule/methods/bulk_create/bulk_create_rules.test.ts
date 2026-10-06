@@ -85,7 +85,9 @@ const buildBulkResponse = (
             params: { foo: true },
             actions: [],
             createdBy: 'elastic',
+            createdByProfileUid: null,
             updatedBy: 'elastic',
+            updatedByProfileUid: null,
             createdAt: '2019-02-12T21:01:22.479Z',
             updatedAt: '2019-02-12T21:01:22.479Z',
             snoozeSchedule: [],
@@ -1279,5 +1281,30 @@ describe('bulkCreateRules', () => {
       expect(result.errors).toEqual([]);
       expect(result.successfulIds).toEqual(['mock-id-1']);
     });
+  });
+
+  test('persists createdByProfileUid and updatedByProfileUid when the actor has a profile uid', async () => {
+    rulesClientParams.getProfileUid.mockResolvedValueOnce('u_profile_1');
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
+      buildBulkResponse([{ id: 'mock-id-1' }])
+    );
+
+    await rulesClient.bulkCreateRules({
+      rules: [{ data: baseRule({ name: 'a' }) }],
+    });
+
+    expect(rulesClientParams.getProfileUid).toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0]).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          attributes: expect.objectContaining({
+            createdBy: 'elastic',
+            updatedBy: 'elastic',
+            createdByProfileUid: 'u_profile_1',
+            updatedByProfileUid: 'u_profile_1',
+          }),
+        }),
+      ])
+    );
   });
 });

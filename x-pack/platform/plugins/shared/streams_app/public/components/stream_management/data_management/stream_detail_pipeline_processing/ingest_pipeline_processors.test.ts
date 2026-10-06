@@ -102,6 +102,130 @@ describe('ingest pipeline processor UI serialization', () => {
     ]);
   });
 
+  it('drops an empty freetext condition when persisting editable steps', () => {
+    expect(
+      uiDefinitionToProcessors({
+        steps: [
+          {
+            action: 'set',
+            customIdentifier: getGeneratedProcessorStepId(0),
+            parentId: null,
+            field: 'host.name',
+            value: 'kibana',
+            if: '',
+          },
+        ],
+      })
+    ).toEqual([
+      {
+        set: {
+          field: 'host.name',
+          value: 'kibana',
+        },
+      },
+    ]);
+  });
+
+  it('trims freetext conditions and drops whitespace-only ones', () => {
+    const [trimmed, whitespaceOnly] = uiDefinitionToProcessors({
+      steps: [
+        {
+          action: 'set',
+          customIdentifier: getGeneratedProcessorStepId(0),
+          parentId: null,
+          field: 'host.name',
+          value: 'kibana',
+          if: "  ctx.level == 'debug'  ",
+        },
+        {
+          action: 'set',
+          customIdentifier: getGeneratedProcessorStepId(1),
+          parentId: null,
+          field: 'host.name',
+          value: 'kibana',
+          if: '   ',
+        },
+      ],
+    });
+
+    expect(trimmed).toEqual({
+      set: { field: 'host.name', value: 'kibana', if: "ctx.level == 'debug'" },
+    });
+    expect(whitespaceOnly).toEqual({ set: { field: 'host.name', value: 'kibana' } });
+  });
+
+  it('round-trips freetext conditions on config-driven processors', () => {
+    const uiDefinition = processorsToUiDefinition([
+      {
+        rename: {
+          field: 'host.name',
+          target_field: 'host.hostname',
+          if: "ctx.level == 'debug'",
+        },
+      },
+    ]);
+
+    expect(uiDefinition.steps[0]).toEqual(
+      expect.objectContaining({
+        action: 'rename',
+        field: 'host.name',
+        target_field: 'host.hostname',
+        if: "ctx.level == 'debug'",
+      })
+    );
+    expect(uiDefinitionToProcessors(uiDefinition)).toEqual([
+      {
+        rename: {
+          field: 'host.name',
+          target_field: 'host.hostname',
+          if: "ctx.level == 'debug'",
+        },
+      },
+    ]);
+  });
+
+  it.each([
+    ['freetext', 'ctx.url?.domain != null'],
+    ['script-object', { source: 'ctx.url?.domain != null', lang: 'painless' }],
+  ])('round-trips %s conditions on registered_domain processors', (_label, condition) => {
+    const onFailure = [{ set: { field: 'error.message', value: 'failed' } }];
+    const processor: IngestProcessorContainer = {
+      registered_domain: {
+        field: 'url.domain',
+        target_field: 'url',
+        ignore_missing: true,
+        if: condition,
+        on_failure: onFailure,
+      },
+    };
+
+    const uiDefinition = processorsToUiDefinition([processor]);
+
+    expect(uiDefinition.steps[0]).toEqual(
+      expect.objectContaining({
+        action: 'registered_domain',
+        expression: 'url.domain',
+        prefix: 'url',
+        ignore_missing: true,
+        if: condition,
+        on_failure: onFailure,
+      })
+    );
+    expect(uiDefinition.steps[0]).not.toHaveProperty('field');
+    expect(uiDefinition.steps[0]).not.toHaveProperty('target_field');
+    expect(uiDefinitionToProcessors(uiDefinition)).toEqual([
+      {
+        registered_domain: {
+          field: 'url.domain',
+          target_field: 'url',
+          ignore_missing: true,
+          if: condition,
+          on_failure: onFailure,
+        },
+      },
+    ]);
+  });
+
   it('preserves native enrich processor fields when persisting editable steps', async () => {
     const uiDefinition = processorsToUiDefinition([
       {

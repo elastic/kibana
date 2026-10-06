@@ -13,6 +13,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import type { CollectionCardItem } from './collection_card';
 import { createRenderResultCard } from './render_result_card';
+import type { TrackTileClick } from './use_track_tile_click';
 
 expect.extend(matchers);
 
@@ -45,8 +46,22 @@ const collectionItem: CollectionCardItem = {
   ],
 };
 
+const reportTileClick = jest.fn();
+const trackTileClick: TrackTileClick = (fields, onClick) => (event) => {
+  reportTileClick(fields);
+  onClick?.(event);
+};
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
 const renderCard = (target: IntegrationCardItem, onOpenCollection = jest.fn()) => {
-  render(<I18nProvider>{createRenderResultCard({ onOpenCollection })(target)}</I18nProvider>);
+  render(
+    <I18nProvider>
+      {createRenderResultCard({ onOpenCollection, trackTileClick })(target)}
+    </I18nProvider>
+  );
   return onOpenCollection;
 };
 
@@ -65,6 +80,18 @@ describe('createRenderResultCard', () => {
       '/app/integrations/detail/nginx-1.0.0/overview'
     );
     expect(card.querySelector('a')).not.toHaveAttribute('target');
+  });
+
+  it('reports a plain result click with the card id', async () => {
+    const user = userEvent.setup();
+    renderCard(item);
+
+    await user.click(screen.getByText('Nginx'));
+
+    expect(reportTileClick).toHaveBeenCalledWith({
+      tile_id: 'epr:nginx',
+      surface: 'search_result',
+    });
   });
 
   it('reserves the same two description lines as the curated grid tiles', () => {
@@ -91,6 +118,11 @@ describe('createRenderResultCard', () => {
 
     await user.click(screen.getByText('Nginx'));
     expect(onOpenCollection).toHaveBeenCalledWith('nginx');
+    expect(reportTileClick).toHaveBeenCalledWith({
+      tile_id: 'collection:nginx',
+      surface: 'search_result',
+      collection_id: 'nginx',
+    });
   });
 
   it('renders a singleton collection as a plain card, mirroring Fleet degradation', () => {

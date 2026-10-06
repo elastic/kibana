@@ -7,6 +7,7 @@
 
 import type { ConverseStep } from '@kbn/evals';
 import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-builder-common';
+import { stableStringify } from '@kbn/std';
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
@@ -53,6 +54,41 @@ export function isToolId(toolId: string, canonical: string): boolean {
   return toolId.replace(/\./g, '_') === canonical.replace(/\./g, '_');
 }
 
+const isEarlierCallGroup = (candidate: OrderedToolCall, call: OrderedToolCall): boolean =>
+  candidate.index < call.index &&
+  (candidate.groupId === undefined ||
+    call.groupId === undefined ||
+    candidate.groupId !== call.groupId);
+
+/** Active event IDs returned by event_search call groups completed before the target call group. */
+export function activeEventIdsBefore(calls: OrderedToolCall[], call: OrderedToolCall): Set<string> {
+  const eventIds = new Set<string>();
+  for (const candidate of calls) {
+    if (
+      !isEarlierCallGroup(candidate, call) ||
+      !isToolId(candidate.toolId, platformSignificantEventsTools.searchEvent)
+    ) {
+      continue;
+    }
+    for (const result of candidate.results) {
+      if (!isRecord(result) || !isRecord(result.data) || !Array.isArray(result.data.events)) {
+        continue;
+      }
+      for (const event of result.data.events) {
+        if (
+          isRecord(event) &&
+          event.status === 'active' &&
+          typeof event.event_id === 'string' &&
+          event.event_id.length > 0
+        ) {
+          eventIds.add(event.event_id);
+        }
+      }
+    }
+  }
+  return eventIds;
+}
+
 const isSchemaOrToolError = (step: ConverseStep): boolean => {
   if (step.type !== 'tool_call' || !Array.isArray(step.results)) {
     return false;
@@ -67,20 +103,141 @@ const isSchemaOrToolError = (step: ConverseStep): boolean => {
   );
 };
 
-const getRetryableBulkErrorCount = (step: ConverseStep): number => {
-  if (step.type !== 'tool_call' || !Array.isArray(step.results)) return 0;
-  return step.results.reduce<number>((count, result) => {
-    if (!isRecord(result) || !isRecord(result.data) || !Array.isArray(result.data.results)) {
-      return count;
-    }
-    return (
-      count +
-      result.data.results.filter(
-        (item) => isRecord(item) && item.written === false && item.reason === 'bulk_error'
-      ).length
-    );
-  }, 0);
+export const RETRYABLE_ITEM_REASONS = ['bulk_error'] as const;
+
+type RetryableItemReason = (typeof RETRYABLE_ITEM_REASONS)[number];
+
+export interface RetryableFailure {
+  item: Record<string, unknown>;
+  reason: RetryableItemReason;
+}
+
+export interface RetryItemPair {
+  failure: RetryableFailure;
+  retryItem: Record<string, unknown>;
+}
+
+const isRetryableItemReason = (value: unknown): value is RetryableItemReason =>
+  RETRYABLE_ITEM_REASONS.some((reason) => reason === value);
+
+const retryPairingKey = (item: Record<string, unknown>): string => {
+  const content = { ...item };
+  delete content.event_id;
+  return stableStringify(content);
 };
+
+const getRetryableFailures = (call: OrderedToolCall): RetryableFailure[] | null => {
+  if (!Array.isArray(call.params.items)) {
+    return null;
+  }
+  const failures: RetryableFailure[] = [];
+  const seenIndexes = new Set<number>();
+
+  for (const result of call.results) {
+    if (!isRecord(result) || !isRecord(result.data) || !Array.isArray(result.data.results)) {
+      continue;
+    }
+    for (const itemResult of result.data.results) {
+      if (
+        !isRecord(itemResult) ||
+        itemResult.written !== false ||
+        !isRetryableItemReason(itemResult.reason)
+      ) {
+        continue;
+      }
+      const { index } = itemResult;
+      if (typeof index !== 'number' || !Number.isInteger(index)) {
+        return null;
+      }
+      const item = call.params.items[index];
+      if (!isRecord(item) || seenIndexes.has(index)) {
+        return null;
+      }
+      seenIndexes.add(index);
+      failures.push({ item, reason: itemResult.reason });
+    }
+  }
+  return failures;
+};
+
+/**
+ * Pairs a retry one-to-one and onto the first call's retryable item failures.
+ * Every field in a retryable item must remain unchanged.
+ */
+export function pairRetryItems({
+  firstCall,
+  retryCall,
+}: {
+  firstCall: OrderedToolCall;
+  retryCall: OrderedToolCall;
+}): RetryItemPair[] | null {
+  if (!isEarlierCallGroup(firstCall, retryCall)) {
+    return null;
+  }
+
+  const failures = getRetryableFailures(firstCall);
+  if (
+    failures === null ||
+    failures.length === 0 ||
+    !Array.isArray(retryCall.params.items) ||
+    retryCall.params.items.length !== failures.length
+  ) {
+    return null;
+  }
+
+  const retryItems = retryCall.params.items;
+  if (!retryItems.every(isRecord)) {
+    return null;
+  }
+
+  const retriesByKey = new Map<string, Array<Record<string, unknown>>>();
+  for (const retryItem of retryItems) {
+    const key = retryPairingKey(retryItem);
+    const matchingRetries = retriesByKey.get(key) ?? [];
+    matchingRetries.push(retryItem);
+    retriesByKey.set(key, matchingRetries);
+  }
+
+  const failuresByKey = new Map<string, RetryableFailure[]>();
+  for (const failure of failures) {
+    const key = retryPairingKey(failure.item);
+    const matchingFailures = failuresByKey.get(key) ?? [];
+    matchingFailures.push(failure);
+    failuresByKey.set(key, matchingFailures);
+  }
+
+  if (
+    retriesByKey.size !== failuresByKey.size ||
+    [...failuresByKey].some(
+      ([key, matchingFailures]) => retriesByKey.get(key)?.length !== matchingFailures.length
+    )
+  ) {
+    return null;
+  }
+
+  const pairs: RetryItemPair[] = [];
+
+  for (const [key, matchingFailures] of failuresByKey) {
+    const unmatchedRetries = [...(retriesByKey.get(key) ?? [])];
+
+    for (const failure of matchingFailures) {
+      const retryIndex = unmatchedRetries.findIndex(
+        (retryItem) => stableStringify(retryItem) === stableStringify(failure.item)
+      );
+      if (retryIndex === -1) {
+        return null;
+      }
+      const [retryItem] = unmatchedRetries.splice(retryIndex, 1);
+      pairs.push({ failure, retryItem });
+    }
+
+    if (unmatchedRetries.length > 0) {
+      return null;
+    }
+  }
+
+  return pairs;
+}
 
 const getBulkInputCount = (step: ConverseStep): number =>
   step.type === 'tool_call' && isRecord(step.params) && Array.isArray(step.params.items)
@@ -90,31 +247,29 @@ const getBulkInputCount = (step: ConverseStep): number =>
 export interface PersistenceCallSummary {
   count: number;
   valid: boolean;
-  /** True only when the first call had item-level bulk errors and the retry resubmitted exactly those items. */
+  /** True only when the retry pairs exactly with every retryable item failure from the first call. */
   retriedPartialFailure: boolean;
   /** True when the first call returned a schema or tool-level error and the retry submitted a populated payload. */
   retriedSchemaFailure: boolean;
 }
 
-/** One normal persistence call, or one retry after a completed call exposed item-level bulk errors. */
+/** One normal persistence call, or one exact retry after a completed call exposed item failures. */
 export function summarizePersistenceCalls(
   steps: ConverseStep[],
   toolId: string
 ): PersistenceCallSummary {
-  const calls = steps.filter(
-    (step) =>
-      step.type === 'tool_call' &&
-      typeof step.tool_id === 'string' &&
-      isToolId(step.tool_id, toolId)
-  );
+  const orderedCalls = extractOrderedToolCalls(steps);
+  const calls = orderedCalls.filter(({ toolId: calledToolId }) => isToolId(calledToolId, toolId));
   if (calls.length === 1) {
     return { count: 1, valid: true, retriedPartialFailure: false, retriedSchemaFailure: false };
   }
-  const failedItemCount = calls.length === 2 ? getRetryableBulkErrorCount(calls[0]) : 0;
   const retriedPartialFailure =
-    failedItemCount > 0 && getBulkInputCount(calls[1]) === failedItemCount;
+    calls.length === 2 && pairRetryItems({ firstCall: calls[0], retryCall: calls[1] }) !== null;
   const retriedSchemaFailure =
-    calls.length === 2 && isSchemaOrToolError(calls[0]) && getBulkInputCount(calls[1]) > 0;
+    calls.length === 2 &&
+    isEarlierCallGroup(calls[0], calls[1]) &&
+    isSchemaOrToolError(steps[calls[0].index]) &&
+    getBulkInputCount(steps[calls[1].index]) > 0;
   const valid = retriedPartialFailure || retriedSchemaFailure;
   return { count: calls.length, valid, retriedPartialFailure, retriedSchemaFailure };
 }

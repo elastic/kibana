@@ -21,28 +21,28 @@ import { formatInterruptionNotice, formatSubagentRosterNotice } from '../prompts
 import { formatDate } from '../prompts/utils/helpers';
 import type { ProcessedConversation } from './prepare_conversation';
 import {
-  groupTimelineRounds,
-  groupTimelineEntries,
-  isAwaitingPrompt,
+  isTimelineCustomEvent,
   isTimelineRound,
   roundInterruption,
   roundResponse,
+  type ProcessedCustomEvent,
   type ProcessedTimelineEvent,
   type TimelineRound,
 } from './context_timeline';
+import { FULLY_VISIBLE, historyView, type ContextVisibility } from './context_coverage';
 import type { ToolCallResultTransformer } from './tool_summarization';
 import { serializeCompactionSummary } from './compaction_serialize';
 import { renderHistorySteps } from './render_steps_to_messages';
 import { attachmentTypeInstructions } from '../prompts/utils/attachments';
+import { formatConversationEvent } from './conversation_event_presentation';
 
 export interface ConversationToLangchainOptions {
   conversation: ProcessedConversation;
   /**
-   * Optional function to transform all results from a tool call.
-   * When provided, results will be passed through this function.
+   * Optional transformer of the tool call results of a given round.
    * Defaults to identity (no transformation).
    */
-  resultTransformer?: ToolCallResultTransformer;
+  roundResultTransformer?: (roundId: string) => ToolCallResultTransformer;
   /**
    * When true, tool call steps will be ignored.
    */
@@ -53,6 +53,8 @@ export interface ConversationToLangchainOptions {
    * user/assistant message pair representing the compacted history.
    */
   compactionSummary?: CompactionSummary;
+  /** What the summary leaves visible (see `resolveVisibility`); everything by default. */
+  visibility?: ContextVisibility;
   /**
    * Timestamp of the current (in-progress) round. When provided, it is
    * prefixed onto the next-input user message. Previous rounds always use
@@ -64,59 +66,44 @@ export interface ConversationToLangchainOptions {
 
 /**
  * Builds the LangChain message history from the processed timeline, one round group at a time.
- * When `resultTransformer` is provided, previous rounds' tool results are passed through it.
+ * When `roundResultTransformer` is provided, previous rounds' tool results are passed through it.
  */
 export const prepareMessages = async ({
   conversation,
-  resultTransformer,
+  roundResultTransformer,
   ignoreSteps = false,
   compactionSummary,
+  visibility = FULLY_VISIBLE,
   conversationTimestamp,
 }: ConversationToLangchainOptions): Promise<BaseMessage[]> => {
-  const subagentRosterFallback = conversation.subagentRosterFallback;
   const messages: BaseMessage[] = [];
   const attachmentTypeInstructionsProvided = new Set<string>();
 
-  const previousRounds = groupTimelineRounds(conversation.timeline);
-  let entries = groupTimelineEntries(conversation.timeline);
-  let input = conversation.nextInput;
-  let inputTimestamp = conversationTimestamp;
+  // a round awaiting a prompt is left to the graph, which resumes it
+  const { entries, input, inputTimestamp } = historyView(conversation, conversationTimestamp);
 
-  // need to ignore the last round if it's awaiting a prompt, the graph handles resuming the actions
-  // we also uses the last message's input as the "next" input (given the actual input will be the prompt response)
-  const lastRound = previousRounds[previousRounds.length - 1];
-  if (lastRound && isAwaitingPrompt(lastRound)) {
-    entries = entries.filter((entry) => !isTimelineRound(entry) || entry.id !== lastRound.id);
-    input = lastRound.userMessage.data;
-    inputTimestamp = lastRound.userMessage.created_at;
-  }
-
-  // Inject compaction summary as a user/assistant exchange before remaining rounds
   if (compactionSummary) {
-    const summaryText = serializeCompactionSummary(compactionSummary.structured_data);
-    messages.push(createUserMessage('[Previous conversation context was compacted]'));
-    messages.push(createAIMessage(summaryText));
-
-    // Inject back subagent roaster notice after compaction
-    if (subagentRosterFallback && Object.keys(subagentRosterFallback).length > 0) {
-      const fallbackRoster = Object.entries(subagentRosterFallback).map(([name, entry]) => ({
-        name,
-        conversation_id: entry.conversation_id,
-      }));
-      messages.push(createUserMessage(formatSubagentRosterNotice(fallbackRoster)));
-    }
+    messages.push(
+      ...compactionSummaryMessages(compactionSummary, conversation.subagentRosterFallback)
+    );
   }
 
-  for (const entry of entries) {
+  const visibleEntries = entries.slice(visibility.hiddenEntryCount);
+  for (const [index, entry] of visibleEntries.entries()) {
     if (isTimelineRound(entry)) {
       messages.push(
         ...(await roundToLangchain(entry, {
-          resultTransformer,
+          resultTransformer: roundResultTransformer?.(entry.id),
           ignoreSteps,
           attachmentTypes: conversation.attachmentTypes,
           attachmentTypeInstructionsProvided,
+          fromStepIndex: index === 0 ? visibility.entryFromStep : 0,
         }))
       );
+      continue;
+    }
+    if (isTimelineCustomEvent(entry)) {
+      messages.push(customEventToLangchain(entry.event));
       continue;
     }
     // a standalone user message: no execution to render
@@ -142,11 +129,35 @@ export const prepareMessages = async ({
   return messages;
 };
 
+/** The summary as a user/assistant exchange, followed by the sub-agent roster it would hide. */
+export const compactionSummaryMessages = (
+  summary: CompactionSummary,
+  subagentRosterFallback?: ProcessedConversation['subagentRosterFallback']
+): BaseMessage[] => {
+  const messages: BaseMessage[] = [
+    createUserMessage('[Previous conversation context was compacted]'),
+    createAIMessage(serializeCompactionSummary(summary.structured_data)),
+  ];
+  if (subagentRosterFallback && Object.keys(subagentRosterFallback).length > 0) {
+    const fallbackRoster = Object.entries(subagentRosterFallback).map(([name, entry]) => ({
+      name,
+      conversation_id: entry.conversation_id,
+    }));
+    messages.push(createUserMessage(formatSubagentRosterNotice(fallbackRoster)));
+  }
+  return messages;
+};
+
 export interface RoundToLangchainOptions {
   resultTransformer?: ToolCallResultTransformer;
   ignoreSteps?: boolean;
   attachmentTypes?: ProcessedAttachmentType[];
   attachmentTypeInstructionsProvided?: Set<string>;
+  /**
+   * First step to render, for a round partially covered by the compaction summary. The user
+   * message is kept so the visible steps stay anchored to the request they answer.
+   */
+  fromStepIndex?: number;
 }
 
 export const roundToLangchain = async (
@@ -156,6 +167,7 @@ export const roundToLangchain = async (
     ignoreSteps = false,
     attachmentTypes,
     attachmentTypeInstructionsProvided,
+    fromStepIndex = 0,
   }: RoundToLangchainOptions = {}
 ): Promise<BaseMessage[]> => {
   const messages: BaseMessage[] = [];
@@ -172,19 +184,33 @@ export const roundToLangchain = async (
 
   // steps
   if (!ignoreSteps) {
-    messages.push(...(await renderHistorySteps({ steps: round.steps, resultTransformer })));
+    messages.push(
+      ...(await renderHistorySteps({
+        steps: round.steps.slice(fromStepIndex),
+        resultTransformer,
+      }))
+    );
   }
 
-  // assistant response, or the notice standing in for it on an interrupted round
-  const interruption = roundInterruption(round);
-  messages.push(
-    interruption
-      ? createUserMessage(formatInterruptionNotice(interruption))
-      : formatAssistantResponse({ response: roundResponse(round) })
-  );
+  messages.push(roundOutcomeMessage(round));
 
   return messages;
 };
+
+/** The round's assistant response, or the notice standing in for it on an interrupted round. */
+export const roundOutcomeMessage = (round: TimelineRound<ProcessedTimelineEvent>): BaseMessage => {
+  const interruption = roundInterruption(round);
+  return interruption
+    ? createUserMessage(formatInterruptionNotice(interruption))
+    : formatAssistantResponse({ response: roundResponse(round) });
+};
+
+/**
+ * The message a custom conversation event contributes to the history: a user-role message
+ * carrying the event's LLM representation, like the other system notices.
+ */
+export const customEventToLangchain = (event: ProcessedCustomEvent): HumanMessage =>
+  createUserMessage(formatConversationEvent(event));
 
 export const formatUserInput = ({
   input,

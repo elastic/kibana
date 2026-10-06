@@ -7,7 +7,11 @@
 
 import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
+import {
+  getAgentFromRunContext,
+  type BuiltinToolDefinition,
+  type StaticToolRegistration,
+} from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
@@ -31,6 +35,7 @@ import {
   MAX_BULK_WRITE_ITEMS,
   trackTelemetryBestEffort,
 } from '../bulk_write';
+import { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from '../../agents/discovery/discovery';
 import { eventsWriteBulkHandler } from './handler';
 
 export const SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID = platformSignificantEventsTools.eventsWrite;
@@ -60,13 +65,17 @@ export const eventsWriteItemSchema = significantEventSchema
       .describe(
         dedent`
           ID of an existing event to append a new version to (continuation/snapshot mode).
+          Never compose, shorten or guess an event_id. For Discovery, copy it
+          character-for-character from an active event returned by event_search in this run. The
+          Discovery handler rejects unknown IDs.
 
-          Omit to trigger find-or-create: the handler scans all currently-active events for one
-          whose rule set contains the submitted rules (subset match) and shares at least one
-          stream name. If found, the write is skipped and the existing event_id is returned
-          (written: false, reason: existing_active_event). Otherwise a new event is created with
-          a generated event_id.
-          Otherwise a new event is created with a generated event_id.
+          Omit to trigger find-or-create. When the item has confirmed rules, the handler scans
+          all currently-active events for one that confirms every submitted confirmed rule and
+          shares at least one stream name; non-confirming co-signals do not affect the identity.
+          When the item has no confirmed rules, every submitted rule is used instead. If found,
+          the write is skipped and the existing event_id is returned (written: false,
+          reason: existing_active_event). Otherwise a new event is created with a generated
+          event_id.
         `
       ),
   })
@@ -108,15 +117,15 @@ export const eventsWriteItemSchema = significantEventSchema
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message:
-          'A confirms item cannot include not_checked signals; emit each not_checked detection as its own dismissed item.',
+          'A confirms item cannot include not_checked signals; emit each not_checked detection as its own inactive item.',
       });
     }
     // Continuations inherit prior severity; this cycle's signals may be
     // inconclusive (telemetry gap, errored query) without a new confirms.
     if (
       item.event_id === undefined &&
-      item.status === 'open' &&
-      (item.severity === '60-high' || item.severity === '80-critical') &&
+      item.status === 'active' &&
+      (item.severity === 'high' || item.severity === 'critical') &&
       grounded.length > 0 &&
       !hasConfirms &&
       !hasOffTopicObservedError
@@ -124,7 +133,7 @@ export const eventsWriteItemSchema = significantEventSchema
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message:
-          'An open event at "60-high" or above whose signals carry query evidence requires at least one confirms or off_topic (observed-error) signal; without confirmed or observed-error evidence use a lower severity or a non-open status.',
+          'An active event at "high" or above whose signals carry query evidence requires at least one confirms or off_topic (observed-error) signal; without confirmed or observed-error evidence use a lower severity or a non-active status.',
       });
     }
   });
@@ -282,7 +291,10 @@ export function createEventsWriteTool({
       \`{ "items": [ ... ] }\` with at least one event item. Never pass \`{}\` or
       \`{ "items": [] }\`. If that missing-items argument error occurs, submit the
       already-completed object once. Do not retry a populated payload rejected for
-      ownership or field validation.
+      ownership or field validation. If a completed item returns \`unknown_event_id\`,
+      do not retry that item in this run. Do not rerun routing, choose another event, reuse the
+      rejected ID, or omit the ID to turn it into a new event. Discovery must leave its rules
+      unprocessed so the next cycle routes them again from fresh search results.
 
       Discovery calls must set top-level \`source\` to \`"discovery"\`.
 
@@ -290,14 +302,16 @@ export function createEventsWriteTool({
       Signals and topology are merged with prior versions. No-op if severity and status are
       unchanged (written: false, reason: unchanged_outcome). For Discovery writes, a completed
       investigation makes the stored severity authoritative. It is preserved unless Discovery
-      closes or dismisses the event, reopens a closed or dismissed event, or submits a confirmed
+      marks the event inactive, reactivates an inactive event, or submits a confirmed
       rule UUID absent from the current event. When no new rule UUIDs are introduced, title and
       symptom_hypothesis are frozen to the stored values and narrative_preserved: true is returned.
 
-      **Without event_id**: find-or-create. Scans all currently-active events for one whose rule
-      set contains the submitted rules and shares at least one stream name. If found, returns it
-      without writing (written: false, reason: existing_active_event). Otherwise creates a new
-      event with a generated event_id.
+      **Without event_id**: find-or-create. When the item has confirmed rules, scans all
+      currently-active events for one that confirms every submitted confirmed rule and shares at
+      least one stream name; non-confirming co-signals do not affect the identity. When the item
+      has no confirmed rules, every submitted rule is used instead. If found, returns it without
+      writing (written: false, reason: existing_active_event). Otherwise creates a new event with
+      a generated event_id.
     `,
     annotations: {
       title: 'Write Significant Events',
@@ -312,10 +326,15 @@ export function createEventsWriteTool({
     handler: async (toolParams, context) => {
       const { request } = context;
       try {
-        const { getEventClient, getKnowledgeIndicatorClient, getAlertEventsClient, licensing } =
-          await getScopedClients({
-            request,
-          });
+        const {
+          getEventClient,
+          getEventSearchClient,
+          getKnowledgeIndicatorClient,
+          getAlertEventsClient,
+          licensing,
+        } = await getScopedClients({
+          request,
+        });
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
         const items = await enrichCausalFeatures(
@@ -326,8 +345,12 @@ export function createEventsWriteTool({
 
         const data = await eventsWriteBulkHandler({
           eventClient: await getEventClient(),
+          eventSearchClient: await getEventSearchClient(),
           inputs: items,
           source: toolParams.source,
+          rejectUnknownEventIds:
+            getAgentFromRunContext(context.runContext)?.agentId ===
+            SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
           alertEventsClient: await getAlertEventsClient(),
           logger,
         });

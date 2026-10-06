@@ -471,7 +471,9 @@ export { convertToAbsoluteDateRange } from './esql/date_range';
 export type { EsqlConversionFailureReason } from './esql/to_esql_failure_reasons';
 export {
   esqlConversionFailureReasonMessages,
+  esqlConversionFailureTitle,
   getFailureTooltip,
+  getFailureTooltipText,
 } from './esql/to_esql_failure_reasons';
 export type { CreateEsAggsIdMapEntryParams } from './esql/create_es_aggs_id_map_entry';
 export type { GetDefaultLabelFn } from './esql/operations';

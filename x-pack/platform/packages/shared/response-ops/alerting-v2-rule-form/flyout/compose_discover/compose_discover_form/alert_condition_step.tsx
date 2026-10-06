@@ -46,8 +46,8 @@ export function AlertConditionStep({
 
   // Committed pipeline query for output-column lookup and STATS BY auto-populate.
   const committedQuery = useMemo(
-    () => getTimeFieldResolutionQuery(query, isAlert, state.queryCommitted),
-    [query, isAlert, state.queryCommitted]
+    () => getTimeFieldResolutionQuery(query, state.queryCommitted),
+    [query, state.queryCommitted]
   );
 
   const { timeFieldOptions, isTimeFieldResolved } = useComposeDiscoverTimeField();

@@ -42,11 +42,9 @@ export const EntityAnalyticsHealth: React.FC<{ status: EntityAnalyticsStatus }> 
 };
 
 export const EntityAnalyticsErrorPanel: React.FC<{
-  riskEngineErrors: string[];
   entityStoreErrors: string[];
-}> = ({ riskEngineErrors, entityStoreErrors }) => {
-  const allErrors = [...riskEngineErrors, ...entityStoreErrors];
-  if (allErrors.length === 0) {
+}> = ({ entityStoreErrors }) => {
+  if (entityStoreErrors.length === 0) {
     return null;
   }
 
@@ -62,7 +60,7 @@ export const EntityAnalyticsErrorPanel: React.FC<{
         <p>{i18n.ERROR_PANEL_MESSAGE}</p>
         <EuiAccordion id="entity-analytics-errors" buttonContent={i18n.ERROR_PANEL_ERRORS}>
           <>
-            {allErrors.map((error, index) => (
+            {entityStoreErrors.map((error, index) => (
               <div key={index}>
                 <EuiText size="s">{error}</EuiText>
                 <EuiSpacer size="s" />
@@ -100,8 +98,8 @@ export const EntityAnalyticsToggle: React.FC<EntityAnalyticsToggleProps> = ({
 
   const isChecked = status === 'enabled';
 
-  // Turning the toggle ON installs/starts the Entity Store and inits/enables the risk score
-  // maintainer, so it requires the full enablement privilege set. Turning it OFF stops engines
+  // Turning the toggle ON installs or starts the Entity Store, so it requires the full
+  // enablement privilege set. Turning it OFF stops engines
   // via user-scoped SO updates on entity-engine-descriptor-v2,
   // so it requires SO write privileges, but not the full ES/cluster install set.
   const isDisabled =
@@ -113,10 +111,7 @@ export const EntityAnalyticsToggle: React.FC<EntityAnalyticsToggleProps> = ({
 
   return (
     <>
-      <EntityAnalyticsErrorPanel
-        riskEngineErrors={errors.riskEngine}
-        entityStoreErrors={errors.entityStore}
-      />
+      <EntityAnalyticsErrorPanel entityStoreErrors={errors.entityStore} />
       <EuiSpacer size="m" />
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center">

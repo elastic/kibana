@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UpdateRuleBody } from '@kbn/alerting-v2-schemas';
+import type { UpdateRuleData } from '@kbn/alerting-v2-schemas';
 import { buildOasOperation, invalidResponseExample } from '../oas_utils';
 import type { AlertingOasOperationObject } from '../oas_types';
 import {
@@ -18,8 +18,7 @@ import {
 export const UPDATED_RULE_NAME = 'Host CPU high (updated)';
 export const UPDATED_RULE_DESCRIPTION = 'Updated description.';
 
-export const UPDATE_RULE_REQUEST: UpdateRuleBody = {
-  version: 'WzAsMV0=',
+export const UPDATE_RULE_REQUEST: UpdateRuleData = {
   metadata: {
     name: UPDATED_RULE_NAME,
     description: UPDATED_RULE_DESCRIPTION,

@@ -39,6 +39,11 @@ export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'servi
    */
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
   /**
+   * When false, hides the Lens edit and save toolbar actions on the chart.
+   * Defaults to true.
+   */
+  withLensActions?: boolean;
+  /**
    * Disabled action IDs for the Lens embeddable
    */
   disabledActions?: LensEmbeddableInput['disabledActions'];
@@ -120,7 +125,7 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
 
   const isChartAvailable = checkChartAvailability({
     chart,
-    dataView: fetchParams?.dataView,
+    dataSource: fetchParams?.dataSource,
     isPlainRecord: fetchParams?.isESQLQuery,
   });
 
@@ -131,7 +136,7 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
   }, [api, isChartAvailable]);
 
   const chartProps = useMemo<UnifiedHistogramPartialChartProps | undefined>(() => {
-    return lensVisService && lensVisServiceState && fetchParams?.dataView
+    return lensVisService && lensVisServiceState && fetchParams?.dataSource
       ? {
           ...props,
           ...stateProps,

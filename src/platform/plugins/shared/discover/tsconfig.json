@@ -12,6 +12,7 @@
     ".storybook/**/*"
   ],
   "kbn_references": [
+    "@kbn/search-sessions-management-plugin",
     "@kbn/core",
     "@kbn/charts-plugin",
     "@kbn/saved-search-plugin",
@@ -79,6 +80,7 @@
     "@kbn/calculate-width-from-char-count",
     "@kbn/deeplinks-observability",
     "@kbn/esql-utils",
+    "@kbn/data-source",
     "@kbn/managed-content-badge",
     "@kbn/deeplinks-analytics",
     "@kbn/shared-ux-markdown",
@@ -124,6 +126,7 @@
     "@kbn/core-chrome-app-menu-components",
     "@kbn/shared-ux-error-boundary",
     "@kbn/core-chrome-app-menu",
+    "@kbn/core-chrome-layout-constants",
     "@kbn/es-query-constants",
     "@kbn/presentation-publishing-schemas",
     "@kbn/esql",
@@ -148,6 +151,7 @@
     "@kbn/aiops-log-rate-analysis",
     "@kbn/presentation-util-plugin",
     "@kbn/core-saved-objects-common",
+    "@kbn/core-saved-objects-server",
     "@kbn/as-code-filters-constants",
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-http-server-mocks",
@@ -167,6 +171,7 @@
     "@kbn/core-http-browser",
     "@kbn/core-http-browser-mocks",
     "@kbn/discover-session-constants",
+    "@kbn/field-types",
     "@kbn/esql-browser"
   ],
   "exclude": ["target/**/*"]

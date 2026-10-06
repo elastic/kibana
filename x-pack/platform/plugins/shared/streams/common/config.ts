@@ -14,8 +14,8 @@ export const configSchema = schema.object({
   }),
   /**
    * Outbound client for streams-config-distributor (`PUT /v1/units/<unit-id>`
-   * and `POST /v1/validate`). When `url` is unset, unit publish and validation
-   * are skipped so local canvas saves still work.
+   * and `POST /v1/validate`). A unit write requires `url`. When it is unset,
+   * validation and publish log an error and do not run, and the unit is not stored.
    */
   distributor: schema.object(
     {

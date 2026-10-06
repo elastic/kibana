@@ -18,12 +18,36 @@ import type { WorkflowExecutionRepository as WorkflowExecutionRepositoryType } f
 
 export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecutionRepositoryType> {
   public workflowExecutions = new Map<string, EsWorkflowExecution>();
+  private revisions = new Map<string, number>();
 
   public getWorkflowExecutionById(
     workflowExecutionId: string,
     spaceId: string
   ): Promise<EsWorkflowExecution | null> {
     return Promise.resolve(this.workflowExecutions.get(workflowExecutionId) || null);
+  }
+
+  public async getWorkflowExecutionWithVersion(
+    workflowExecutionId: string,
+    spaceId: string
+  ): ReturnType<WorkflowExecutionRepositoryType['getWorkflowExecutionWithVersion']> {
+    const execution = this.workflowExecutions.get(workflowExecutionId);
+    if (!execution || execution.spaceId !== spaceId) return null;
+    return { execution, seqNo: this.revisions.get(workflowExecutionId) ?? 0, primaryTerm: 1 };
+  }
+
+  public async tryUpdateWorkflowExecutionWithVersion(
+    update: Partial<EsWorkflowExecution> & { id: string },
+    revision: { seqNo: number; primaryTerm: number }
+  ): Promise<boolean> {
+    if (
+      !this.workflowExecutions.has(update.id) ||
+      revision.primaryTerm !== 1 ||
+      revision.seqNo !== (this.revisions.get(update.id) ?? 0)
+    )
+      return false;
+    await this.updateWorkflowExecution(update);
+    return true;
   }
 
   public createWorkflowExecution(
@@ -34,8 +58,16 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
       throw new Error('Workflow execution ID is required for creation');
     }
 
+    this.revisions.set(workflowExecution.id, (this.revisions.get(workflowExecution.id) ?? -1) + 1);
     this.workflowExecutions.set(workflowExecution.id, workflowExecution as EsWorkflowExecution);
     return Promise.resolve();
+  }
+
+  public async discardUnstartedExecution(id: string, spaceId: string): Promise<void> {
+    if (this.workflowExecutions.get(id)?.spaceId === spaceId) {
+      this.workflowExecutions.delete(id);
+      this.revisions.delete(id);
+    }
   }
 
   public async bulkCreateWorkflowExecutions(
@@ -54,6 +86,7 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
 
     return executions.map((execution) => {
       const id = execution.id as string;
+      this.revisions.set(id, (this.revisions.get(id) ?? -1) + 1);
       this.workflowExecutions.set(id, execution as EsWorkflowExecution);
       return { id };
     });
@@ -71,6 +104,7 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
       throw new Error(`Workflow execution with ID ${workflowExecution.id} does not exist`);
     }
 
+    this.revisions.set(workflowExecution.id, (this.revisions.get(workflowExecution.id) ?? 0) + 1);
     this.workflowExecutions.set(workflowExecution.id, {
       ...this.workflowExecutions.get(workflowExecution.id),
       ...(workflowExecution as EsWorkflowExecution),
@@ -296,6 +330,10 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
     ) {
       return false;
     }
+    this.revisions.set(
+      params.workflowExecutionId,
+      (this.revisions.get(params.workflowExecutionId) ?? 0) + 1
+    );
     this.workflowExecutions.set(params.workflowExecutionId, {
       ...existing,
       status: ExecutionStatus.PENDING,
@@ -339,11 +377,7 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
 
     // Perform updates
     for (const update of updates) {
-      const existing = this.workflowExecutions.get(update.id!);
-      this.workflowExecutions.set(update.id!, {
-        ...existing!,
-        ...update,
-      } as EsWorkflowExecution);
+      await this.updateWorkflowExecution(update);
     }
   }
 }

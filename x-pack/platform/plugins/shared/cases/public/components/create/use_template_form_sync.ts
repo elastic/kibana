@@ -21,13 +21,16 @@ import {
 } from '../../../common/utils/template_fields';
 import { useGetFieldDefinitions } from '../field_library/hooks/use_get_field_definitions';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
+import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_all_case_configurations';
+import { getConfigurationByOwner } from '../../containers/configure/utils';
+import { getSpaceExtractObservables } from './utils';
+import { isObservablesExtractionBlocked } from '../../../common/utils/case_settings';
 
 /**
- * Values a template applies by default and reverts to when it stops applying them. Sync alerts and
- * extract observables default to off for templates — a template only turns them on if it says so.
+ * Values a template applies by default and reverts to when it stops applying them. Sync alerts
+ * defaults to off for templates; extract observables reverts to the space configuration default.
  */
 const DEFAULT_SYNC_ALERTS = false;
-const DEFAULT_EXTRACT_OBSERVABLES = false;
 
 type SetFieldValue = (path: string, value: unknown) => void;
 type UpdateFieldValues = (
@@ -35,9 +38,12 @@ type UpdateFieldValues = (
   options?: { runDeserializer?: boolean }
 ) => void;
 
-const revertSettingsToDefault = (setFieldValue: SetFieldValue): void => {
+const revertSettingsToDefault = (
+  setFieldValue: SetFieldValue,
+  spaceExtractObservables: boolean
+): void => {
   setFieldValue('syncAlerts', DEFAULT_SYNC_ALERTS);
-  setFieldValue('extractObservables', DEFAULT_EXTRACT_OBSERVABLES);
+  setFieldValue('extractObservables', spaceExtractObservables);
 };
 
 const revertConnectorToDefault = (updateFieldValues: UpdateFieldValues): void => {
@@ -114,19 +120,20 @@ const clearTemplateFromForm = (
 /**
  * Applies a template's settings block. A declared block is authoritative: keys it declares are
  * applied, keys it omits reset to their defaults, and no block at all reverts a previously-applied
- * template's settings.
+ * template's settings. Omitted extractObservables inherits the space configuration default.
  */
 const applyTemplateSettings = (
   settings: TemplateDefinition['settings'],
   setFieldValue: SetFieldValue,
-  didApplySettingsRef: MutableRefObject<boolean>
+  didApplySettingsRef: MutableRefObject<boolean>,
+  spaceExtractObservables: boolean
 ): void => {
   if (settings) {
     setFieldValue('syncAlerts', settings.syncAlerts ?? DEFAULT_SYNC_ALERTS);
-    setFieldValue('extractObservables', settings.extractObservables ?? DEFAULT_EXTRACT_OBSERVABLES);
+    setFieldValue('extractObservables', settings.extractObservables ?? spaceExtractObservables);
     didApplySettingsRef.current = true;
   } else if (didApplySettingsRef.current) {
-    revertSettingsToDefault(setFieldValue);
+    revertSettingsToDefault(setFieldValue, spaceExtractObservables);
     didApplySettingsRef.current = false;
   }
 };
@@ -181,7 +188,13 @@ export const useTemplateFormSync = (
   excludedLinkedRefNames: ReadonlySet<string> = EMPTY_EXCLUDED_REF_NAMES
 ): UseTemplateFormSyncReturn => {
   const { setFieldValue, updateFieldValues } = useFormContext();
-  const [{ templateId }] = useFormData<{ templateId?: string }>({ watch: ['templateId'] });
+  // Use the create-form case owner (not template.owner) for the space extractObservables default.
+  // Clearing the template leaves `template` undefined; looking up by template.owner would fall
+  // back to initialConfiguration (true) and violate template → space-config precedence.
+  const [{ templateId, owner: caseOwner }] = useFormData<{
+    templateId?: string;
+    owner?: string;
+  }>({ watch: ['templateId', 'owner'] });
   const { data: template, isLoading: isTemplateLoading } = useGetTemplate(templateId || undefined);
   // A disabled query (no templateId) can sit in "loading" state indefinitely in react-query v4;
   // treat it as not-loading so the create form renders global fields without a template selected.
@@ -193,6 +206,19 @@ export const useTemplateFormSync = (
   // to the `.none` connector when it no longer exists. Shares react-query cache with the form.
   const { data: connectors = [], isLoading: isLoadingConnectors } =
     useGetSupportedActionConnectors();
+  const { data: configurations, isLoading: isLoadingConfigurations } =
+    useGetAllCaseConfigurations();
+  const spaceExtractObservables = getSpaceExtractObservables(
+    getConfigurationByOwner({
+      configurations: configurations ?? null,
+      owner: caseOwner,
+    })
+  );
+  // Apply the owner-level gate: blocked owners (e.g. Observability) never extract observables,
+  // regardless of the space configuration or what a partial template settings block omits.
+  const effectiveExtractObservables = isObservablesExtractionBlocked(caseOwner ?? '')
+    ? false
+    : spaceExtractObservables;
   const appliedRef = useRef<string | undefined>(undefined);
   // Track whether the applied template set the connector / settings, so switching or clearing only
   // reverts what a template actually changed (preserving the configuration's default connector).
@@ -213,8 +239,14 @@ export const useTemplateFormSync = (
         revertConnectorToDefault(updateFieldValues);
       }
       if (didApplySettingsRef.current) {
-        didApplySettingsRef.current = false;
-        revertSettingsToDefault(setFieldValue);
+        // syncAlerts reverts immediately. extractObservables waits for configurations to settle
+        // so we don't commit a provisional spaceExtractObservables value during loading.
+        setFieldValue('syncAlerts', DEFAULT_SYNC_ALERTS);
+        if (!isLoadingConfigurations) {
+          setFieldValue('extractObservables', effectiveExtractObservables);
+          didApplySettingsRef.current = false;
+        }
+        // else: keep didApplySettingsRef.current = true; re-run after loading completes.
       }
       return;
     }
@@ -224,9 +256,10 @@ export const useTemplateFormSync = (
     }
 
     const { definition } = template;
-    // The exclusion set is part of the applied identity: when legacy custom-field visibility
-    // changes (e.g. the forced-on switch resolves after the configuration loads), the same
-    // template must re-sync so excluded defaults are removed from — or restored to — the form.
+    // Exclusion set is part of the applied identity so a legacy-visibility change re-syncs the form.
+    // spaceExtractObservables is intentionally excluded from the key: the isLoadingConfigurations
+    // guard below prevents committing the key until configurations have settled, so the correct
+    // spaceExtractObservables is always used when the key is first written.
     const exclusionIdentity = [...excludedLinkedRefNames].sort().join('|');
     const key = `${template.templateId}:${template.templateVersion}:${exclusionIdentity}`;
     if (appliedRef.current === key) {
@@ -253,12 +286,18 @@ export const useTemplateFormSync = (
       }
     }
 
-    applyTemplateSettings(definition.settings, setFieldValue, didApplySettingsRef);
+    applyTemplateSettings(
+      definition.settings,
+      setFieldValue,
+      didApplySettingsRef,
+      effectiveExtractObservables
+    );
 
-    // Wait for field definitions AND supported connectors to load before finishing. Connectors are
-    // needed to resolve the template's default connector; field defs to resolve $ref field defaults.
-    // Do NOT set appliedRef.current yet — the effect must re-run once both are available.
-    if (isLoadingFieldDefs || isLoadingConnectors) return;
+    // Wait for field definitions, supported connectors, AND case configurations to load before
+    // finishing. Connectors resolve the template's default connector; field defs resolve $ref
+    // defaults; configurations supply the correct spaceExtractObservables used just above.
+    // Do NOT set appliedRef.current yet — the effect must re-run once all three are available.
+    if (isLoadingFieldDefs || isLoadingConnectors || isLoadingConfigurations) return;
 
     syncTemplateConnector(
       definition.connector,
@@ -294,6 +333,8 @@ export const useTemplateFormSync = (
     excludedLinkedRefNames,
     connectors,
     isLoadingConnectors,
+    isLoadingConfigurations,
+    effectiveExtractObservables,
   ]);
 
   return { template, isLoading };

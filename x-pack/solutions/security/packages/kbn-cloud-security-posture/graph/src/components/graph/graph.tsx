@@ -315,7 +315,7 @@ export const Graph = memo<GraphProps>(
           minZoom={0.1}
         >
           {interactive && (
-            <Panel position="bottom-right">
+            <Panel position="bottom-left">
               <Controls fitViewOptions={fitViewOptions} nodeIdsToCenterOn={originNodeIds} />
             </Panel>
           )}

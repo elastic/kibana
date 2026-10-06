@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EMPTY } from 'rxjs';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { AutoApprovedApi, InteractivityConfig } from '@kbn/agent-builder-common';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
@@ -26,7 +27,7 @@ describe('createSubAgentExecutor', () => {
   };
 
   beforeEach(() => {
-    executeAgent = jest.fn().mockResolvedValue({});
+    executeAgent = jest.fn().mockResolvedValue({ executionId: 'sub-exec-1', events$: EMPTY });
     request = httpServerMock.createKibanaRequest();
   });
 

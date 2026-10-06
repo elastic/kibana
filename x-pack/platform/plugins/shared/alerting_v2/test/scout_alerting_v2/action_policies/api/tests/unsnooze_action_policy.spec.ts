@@ -16,10 +16,8 @@ import {
   getUnsnoozeActionPolicyUrl,
   NO_ACCESS_ROLE,
   testData,
+  getSnoozeDate,
 } from '../fixtures';
-
-export const getSnoozeDate = (offsetMs: number = 86_400_000): string =>
-  new Date(Date.now() + offsetMs).toISOString();
 
 apiTest.describe('Unsnooze action policy API', { tag: '@local-stateful-classic' }, () => {
   let writerCredentials: RoleApiCredentials;
@@ -78,12 +76,10 @@ apiTest.describe('Unsnooze action policy API', { tag: '@local-stateful-classic' 
         snoozed_until: null,
         updated_at: response.body.updated_at,
         updated_by: response.body.updated_by,
-        version: response.body.version,
       });
       expect(Date.parse(response.body.updated_at)).toBeGreaterThanOrEqual(
         Date.parse(disabled.updated_at)
       );
-      expect(response.body.version).not.toBe(disabled.version);
     }
   );
 

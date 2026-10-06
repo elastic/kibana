@@ -10,6 +10,17 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
+/**
+ * Migration recommendation: MIGRATE TO JEST. The only behavior under test is the scripted fields
+ * tab's language filter. Creating the painless field through the UI is incidental and is already
+ * covered by _scripted_fields.ts, and the `expression` field comes pre-built from the archive.
+ * scripted_field_table.test.tsx ("should filter based on the lang filter") already proves the
+ * table honours the scriptedFieldLanguageFilter prop. What is missing is the control that sets it:
+ * add a tabs.test.tsx beside edit_index_pattern/tabs/tabs.tsx that selects painless and then
+ * expression in `scriptedFieldLanguageFilterDropdown` against a data view with mixed-language
+ * scripted fields, and asserts the rendered rows. (The group1 audit suggests the same file for the
+ * indexed-fields type filter.)
+ */
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');

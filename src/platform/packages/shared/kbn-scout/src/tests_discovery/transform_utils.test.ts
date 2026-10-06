@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { testTargets } from '@kbn/scout-info';
 import type { ModuleDiscoveryInfo } from './types';
+import { getServerRunFlagsFromTags } from './tag_utils';
 import { countModulesByType, flattenModulesByServerRunFlag } from './transform_utils';
 
 describe('countModulesByType', () => {
@@ -98,6 +100,33 @@ describe('flattenModulesByServerRunFlag', () => {
       domain: 'observability_complete',
     });
     expect(result[0].scoutCommand).toContain('--arch serverless --domain observability_complete');
+  });
+
+  it('maps every serverless server run flag that discovery can produce', () => {
+    const cloudServerlessTags = testTargets.cloud
+      .filter(({ arch }) => arch === 'serverless')
+      .map(({ playwrightTag }) => playwrightTag);
+    const serverRunFlags = getServerRunFlagsFromTags(cloudServerlessTags);
+
+    const modules: ModuleDiscoveryInfo[] = [
+      {
+        name: 'serverlessPlugin',
+        group: 'platform',
+        type: 'plugin',
+        configs: [
+          {
+            path: '/path/config',
+            hasTests: true,
+            tags: cloudServerlessTags,
+            serverRunFlags,
+            usesParallelWorkers: false,
+          },
+        ],
+      },
+    ];
+
+    expect(() => flattenModulesByServerRunFlag(modules)).not.toThrow();
+    expect(flattenModulesByServerRunFlag(modules)).toHaveLength(serverRunFlags.length);
   });
 
   it('aggregates config paths for same group and server run flag', () => {

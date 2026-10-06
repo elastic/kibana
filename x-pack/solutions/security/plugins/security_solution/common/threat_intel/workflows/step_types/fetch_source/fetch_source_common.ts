@@ -47,6 +47,7 @@ export const iocEntrySchema = z.object({
   port: z.number().optional(),
   reference: z.string().optional(),
   block_index: z.number().optional(),
+  deferred_unreviewed: z.boolean().optional(),
 });
 
 export type IocEntry = z.infer<typeof iocEntrySchema>;
@@ -66,11 +67,19 @@ export const normalizedReportSchema = z.object({
     title: z.string(),
     body_text: z.string(),
     language: z.string().default('en'),
+    article_url: z.string().optional(),
   }),
   severity: z.object({
     level: z.enum(SEVERITY_LEVELS),
     score: z.number(),
   }),
+  /**
+   * `severity.score * extracted.relevance`. Written by the enrich workflow for
+   * `pending` reports; an adapter whose reports skip enrichment writes it itself so
+   * the hunt candidates sort (`rank_score` desc, `missing: 0`) does not park every one
+   * of its reports behind every enriched one.
+   */
+  rank_score: z.number().optional(),
   lineage: z.object({
     ingested_at: z.string(),
     extraction_method: z.enum(['pending', 'text_indicator_list', 'kev']),
@@ -86,6 +95,8 @@ export const normalizedReportSchema = z.object({
     .object({
       iocs: z.array(iocEntrySchema).optional(),
       categories: z.array(z.string()).optional(),
+      /** Detection relevance in [0, 1]; see `rank_score`. */
+      relevance: z.number().min(0).max(1).optional(),
       vulnerability: z
         .object({
           cve_id: z.string(),

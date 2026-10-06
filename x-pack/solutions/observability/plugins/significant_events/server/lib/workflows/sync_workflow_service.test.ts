@@ -25,11 +25,14 @@ const createLogger = (): Logger => {
   return logger;
 };
 
-const createManagementApi = () =>
-  ({
-    getWorkflow: jest.fn(),
+const createManagementApi = () => {
+  const getWorkflow = jest.fn();
+  return {
+    getWorkflow,
+    getClient: jest.fn(() => ({ getWorkflow })),
     updateWorkflow: jest.fn(),
-  } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>);
+  } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>;
+};
 
 const request = {} as KibanaRequest;
 

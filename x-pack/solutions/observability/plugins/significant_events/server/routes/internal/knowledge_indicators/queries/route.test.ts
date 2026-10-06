@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { QueryLink } from '@kbn/significant-events-schema';
+import {
+  MAX_ID_LENGTH,
+  NightshiftModelBlockedError,
+  type QueryLink,
+} from '@kbn/significant-events-schema';
+import { DeepStrict } from '@kbn/zod-helpers';
 import type { SignificantEventsMaintenanceState } from '../../../../../common/maintenance/state_machine';
 import { internalKIQueriesRoutes } from './route';
 
@@ -477,6 +482,7 @@ describe('getDiscoveryQueriesOccurrencesRoute stream resolution', () => {
 describe('generateQueriesRoute', () => {
   const generateRoute =
     internalKIQueriesRoutes['POST /internal/streams/{streamName}/queries/_generate'];
+  const strictGenerateParams = DeepStrict(generateRoute.params);
 
   beforeEach(() => {
     mockGenerateKIQueries.mockReset();
@@ -487,9 +493,15 @@ describe('generateQueriesRoute', () => {
     });
   });
 
-  const makeHandlerParams = ({ agentBuilder }: { agentBuilder: unknown }) =>
+  const makeHandlerParams = ({
+    agentBuilder,
+    body = { connectorId: 'test-connector' },
+  }: {
+    agentBuilder: unknown;
+    body?: Record<string, unknown>;
+  }) =>
     ({
-      params: { path: { streamName: 'logs.test' }, body: { connectorId: 'test-connector' } },
+      params: { path: { streamName: 'logs.test' }, body },
       request: { events: { aborted$: { subscribe: jest.fn() } } },
       getScopedClients: jest.fn().mockResolvedValue({
         streamsClient: {},
@@ -500,7 +512,6 @@ describe('generateQueriesRoute', () => {
         core: {
           featureFlags: {},
         },
-        searchInferenceEndpoints: undefined,
         agentBuilder,
       },
       maintenanceService: makeMaintenanceService(),
@@ -511,13 +522,43 @@ describe('generateQueriesRoute', () => {
       telemetry: {},
     } as unknown as GenerateHandlerParams);
 
+  it('retains valid run ids and rejects blank or overlong run ids during route validation', () => {
+    const parsed = strictGenerateParams.safeParse({
+      path: { streamName: 'logs.test' },
+      body: { runId: 'run-1' },
+    });
+
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.body?.runId).toBe('run-1');
+    }
+    expect(
+      strictGenerateParams.safeParse({
+        path: { streamName: 'logs.test' },
+        body: { runId: '   ' },
+      }).success
+    ).toBe(false);
+    expect(
+      strictGenerateParams.safeParse({
+        path: { streamName: 'logs.test' },
+        body: { runId: 'x'.repeat(MAX_ID_LENGTH + 1) },
+      }).success
+    ).toBe(false);
+  });
+
   it('delegates to query generation and returns its result', async () => {
-    const result = await generateRoute.handler(makeHandlerParams({ agentBuilder: {} }));
+    const result = await generateRoute.handler(
+      makeHandlerParams({
+        agentBuilder: {},
+        body: { connectorId: 'test-connector', runId: 'run-1' },
+      })
+    );
 
     expect(mockGenerateKIQueries).toHaveBeenCalledWith(
       expect.objectContaining({
         streamName: 'logs.test',
         connectorId: 'test-connector',
+        runId: 'run-1',
       }),
       expect.any(Object)
     );
@@ -528,11 +569,34 @@ describe('generateQueriesRoute', () => {
     });
   });
 
+  it('generates a run id when one is not provided', async () => {
+    await generateRoute.handler(makeHandlerParams({ agentBuilder: {} }));
+
+    const { runId } = mockGenerateKIQueries.mock.calls[0][0];
+    expect(runId).toEqual(expect.any(String));
+    expect(runId).not.toBe('');
+  });
+
   it('fails when agent builder is unavailable', async () => {
     await expect(
       generateRoute.handler(makeHandlerParams({ agentBuilder: undefined }))
     ).rejects.toThrow('Agent Builder is required');
     expect(mockGenerateKIQueries).not.toHaveBeenCalled();
+  });
+
+  it('maps a blocked model to a 400 response', async () => {
+    mockGenerateKIQueries.mockRejectedValueOnce(
+      new NightshiftModelBlockedError('custom-model', 'default-model')
+    );
+
+    await expect(
+      generateRoute.handler(
+        makeHandlerParams({
+          agentBuilder: {},
+          body: { connectorId: 'custom-model' },
+        })
+      )
+    ).rejects.toMatchObject({ output: { statusCode: 400 } });
   });
 });
 

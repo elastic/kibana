@@ -72,7 +72,14 @@ describe('listWorkflowExecutionsTool', () => {
     await tool.handler({}, mockContext as any);
 
     expect(wm.management.getWorkflowExecutions).toHaveBeenCalledWith(
-      { workflowId: undefined, statuses: undefined, page: 1, size: 10, omitStepRuns: true },
+      {
+        workflowId: undefined,
+        statuses: undefined,
+        page: 1,
+        size: 10,
+        omitStepRuns: true,
+        request: mockContext.request,
+      },
       'default'
     );
   });

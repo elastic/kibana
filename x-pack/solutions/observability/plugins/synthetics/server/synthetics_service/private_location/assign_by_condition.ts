@@ -47,10 +47,6 @@ import { assignShard, balanceShardsByCost } from './assign_shards';
  * *binding* differs — a `condition` string instead of a moved `policy_id`.
  */
 
-/** A private location is scalable when it opts into condition-based sharding. */
-export const isConditionShardedLocation = (location: { isAgentSharding?: boolean }): boolean =>
-  Boolean(location.isAgentSharding);
-
 // Elastic Agent EQL single-quoted string literals have NO escape sequences (see
 // elastic-agent `internal/pkg/eql/Eql.g4`: `STEXT: '\'' ~[\r\n']* '\''`), so a
 // value containing a single quote, backslash or control char cannot be embedded

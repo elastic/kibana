@@ -27,6 +27,7 @@ export interface ChatCallbackRequestBodyPayload extends ChatRequestBodyPayload {
 
 export interface ChatCallbackAcceptedResponse {
   execution_id: string;
+  conversation_id: string;
 }
 
 export interface ChatCallbackEventResponse {

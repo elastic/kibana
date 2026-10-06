@@ -23,6 +23,7 @@ import {
 } from './bindings';
 import { SERVICE_ACCOUNT_CREDENTIAL_TYPE, ServiceAccountCredentialStore } from './credentials';
 import { EsServiceAccounts } from './es_service_accounts';
+import { ServiceAccountsManagement } from './service_accounts_management';
 import type {
   CloudProjectContext,
   ServiceAccountsBackend,
@@ -153,6 +154,13 @@ export class ServiceAccountsService {
 
     return {
       backend,
+      management: new ServiceAccountsManagement({
+        logger: this.logger.get('management'),
+        license,
+        backend,
+        store,
+        checkPrivilegesWithRequest,
+      }),
       workloads: new ServiceAccountWorkloadBindings({
         logger: bindingsLogger,
         license,

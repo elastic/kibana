@@ -8,24 +8,17 @@
 import { expect } from '@kbn/scout/ui';
 import { buildCreateRuleData, test } from '../fixtures';
 
-/*
- * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
- * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
- * until ECH support lands.
- */
 test.describe(
   'Rules list bulk actions respect active filters',
-  { tag: '@local-stateful-classic' },
+  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
-    const tagA = 'scout-bulk-filter-a';
-    const tagB = 'scout-bulk-filter-b';
+    const RUN_ID = Date.now().toString();
+    const tagA = `scout-bulk-filter-a-${RUN_ID}`;
+    const tagB = `scout-bulk-filter-b-${RUN_ID}`;
     const ruleIdsA: string[] = [];
     const ruleIdsB: string[] = [];
 
     test.beforeAll(async ({ apiServices }) => {
-      // Reset to a clean state — rules linger across spec files in the same worker.
-      await apiServices.alertingV2.rules.cleanUp();
-
       for (let i = 0; i < 2; i++) {
         const rule = await apiServices.alertingV2.rules.create(
           buildCreateRuleData({ metadata: { name: `scout-bulk-A-${i}`, tags: [tagA] } })
@@ -41,7 +34,7 @@ test.describe(
     });
 
     test.afterAll(async ({ apiServices }) => {
-      await apiServices.alertingV2.rules.cleanUp();
+      await apiServices.alertingV2.rules.bulkDelete({ ids: [...ruleIdsA, ...ruleIdsB] });
     });
 
     test('bulk disable applies only to rules matching the list filter, not the full space', async ({

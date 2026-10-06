@@ -16,9 +16,19 @@ import {
 } from '../../../../../common/endpoint/service/authz';
 import type { PolicyDiffEntry } from '../domain/diff_policy_config';
 import type { AssessPolicyChangeParams } from '../domain/impact';
+import type { EndpointPolicyBaselinePreset, PolicyRef } from '../domain/input_schemas';
 import { diffPolicyConfig } from '../domain/diff_policy_config';
 import type { AssessPolicyChangeDto } from './assess_change';
 import { assessChange } from './assess_change';
+import type {
+  ApplyPolicyCallSource,
+  ApplyPolicyChangePreview,
+  ApplyPolicyChangeResult,
+} from './apply_policy_change';
+import {
+  applyPolicyChange as applyPolicyChangeService,
+  previewApplyPolicyChange as previewApplyPolicyChangeService,
+} from './apply_policy_change';
 import type { PolicyAccessContext } from './access_context';
 import { createPolicyAccessContext } from './access_context';
 import type { ClassifiedPolicyUsage } from './classify_policy_usage';
@@ -30,10 +40,12 @@ import type { PolicyRolloutStatus } from './read_policy_rollout_status';
 import { readPolicyRolloutStatus } from './read_policy_rollout_status';
 import type { ListPoliciesDto, ListPolicyItem } from './list_endpoint_policies';
 import { listEndpointPolicies } from './list_endpoint_policies';
-import type { EndpointPolicyRead } from './read_policy';
+import type { EndpointPolicyComparisonSide, EndpointPolicyRead } from './read_policy';
 import {
   ensureResolvedInCurrentSpace,
   getEndpointPolicy,
+  getEndpointPolicyBaseline,
+  resolveEndpointPolicyReference,
   resolvePackagePolicy,
 } from './read_policy';
 
@@ -50,8 +62,8 @@ export type ListPoliciesResult = Omit<ListPoliciesDto, 'items'> & {
 };
 
 export type PolicyComparison = Readonly<{
-  from: EndpointPolicyRead;
-  to: EndpointPolicyRead;
+  from: EndpointPolicyComparisonSide;
+  to: EndpointPolicyComparisonSide;
   diffs: readonly PolicyDiffEntry[];
 }>;
 
@@ -67,13 +79,18 @@ export interface EndpointPolicyManagementService {
     input: Readonly<{ page: number; perPage: number; includeEndpointUsage: boolean }>
   ): Promise<ListPoliciesResult>;
   getPolicy(reference: Readonly<{ idOrName: string }>): Promise<EndpointPolicyRead>;
-  comparePolicies(
-    from: Readonly<{ idOrName: string }>,
-    to: Readonly<{ idOrName: string }>
-  ): Promise<PolicyComparison>;
+  getPolicyBaseline(
+    preset: EndpointPolicyBaselinePreset
+  ): Promise<ReturnType<typeof getEndpointPolicyBaseline>>;
+  comparePolicies(from: PolicyRef, to: PolicyRef): Promise<PolicyComparison>;
   assessPolicyChange(input: AssessPolicyChangeParams): Promise<AssessPolicyChangeDto>;
   getPolicyRolloutStatus(reference: Readonly<{ idOrName: string }>): Promise<PolicyRolloutStatus>;
   getPolicyFieldReference(input: Readonly<{ path: string }>): Promise<FieldReferenceResult>;
+  previewApplyPolicyChange(rawParams: unknown): Promise<ApplyPolicyChangePreview>;
+  applyPolicyChange(
+    rawParams: unknown,
+    input: Readonly<{ callSource: ApplyPolicyCallSource }>
+  ): Promise<ApplyPolicyChangeResult>;
 }
 
 const LIST_USAGE_UNAVAILABLE = 'requires_endpoint_list_read' as const;
@@ -168,11 +185,16 @@ export const createEndpointPolicyManagementService = ({
       return getEndpointPolicy(access, { idOrName });
     },
 
+    getPolicyBaseline: async (preset) => {
+      await requireAccess(ENDPOINT_POLICY_READ_REQUIRED_AUTHZ);
+      return getEndpointPolicyBaseline(endpointAppContextService, preset);
+    },
+
     comparePolicies: async (from, to) => {
       const access = await requireAccess(ENDPOINT_POLICY_READ_REQUIRED_AUTHZ);
       const [fromRead, toRead] = await Promise.all([
-        getEndpointPolicy(access, { idOrName: from.idOrName }),
-        getEndpointPolicy(access, { idOrName: to.idOrName }),
+        resolveEndpointPolicyReference(access, endpointAppContextService, from),
+        resolveEndpointPolicyReference(access, endpointAppContextService, to),
       ]);
 
       return {
@@ -199,5 +221,18 @@ export const createEndpointPolicyManagementService = ({
       await requireAccess(ENDPOINT_POLICY_READ_REQUIRED_AUTHZ);
       return lookupFieldReference(path);
     },
+
+    previewApplyPolicyChange: (rawParams) =>
+      previewApplyPolicyChangeService(
+        { endpointAppContextService, getStartServices, request, spaceId },
+        rawParams
+      ),
+
+    applyPolicyChange: (rawParams, input) =>
+      applyPolicyChangeService(
+        { endpointAppContextService, getStartServices, request, spaceId },
+        rawParams,
+        input
+      ),
   };
 };

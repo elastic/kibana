@@ -11,12 +11,16 @@ import {
   workflowsExtensionsMock,
 } from '@kbn/workflows-extensions/server/mocks';
 import { TimelineEventType, EventActorType } from '@kbn/agent-builder-common';
-import type { AttachmentTimelineEvent } from '@kbn/agent-builder-common';
+import type {
+  AttachmentTimelineEvent,
+  ConversationUpdatedTriggerEvent,
+} from '@kbn/agent-builder-common';
 import {
   ConversationMetadataUpdatedTriggerId,
   ConversationAttachmentAddedTriggerId,
   ConversationAttachmentUpdatedTriggerId,
   ConversationAttachmentDeletedTriggerId,
+  ConversationUpdatedTriggerId,
 } from '../../../common/workflows/triggers';
 import { createConversationEventBus } from './conversation_event_bus';
 import { registerConversationWorkflowEventBridge } from './event_bridge';
@@ -24,8 +28,6 @@ import { registerConversationWorkflowEventBridge } from './event_bridge';
 const flushMicrotasks = async () => {
   await new Promise<void>((resolve) => setTimeout(resolve, 0));
 };
-
-const isExperimentalEnabled = jest.fn().mockResolvedValue(true);
 
 const systemActor = { type: EventActorType.system, id: 'system' };
 const addedEvent: AttachmentTimelineEvent = {
@@ -73,16 +75,9 @@ describe('registerConversationWorkflowEventBridge', () => {
   beforeEach(() => {
     eventBus = createConversationEventBus();
     mockClient = createWorkflowsClientMock();
-    isExperimentalEnabled.mockClear();
     workflowsExtensions.getClient.mockClear();
-    isExperimentalEnabled.mockResolvedValue(true);
     workflowsExtensions.getClient.mockResolvedValue(mockClient);
-    registerConversationWorkflowEventBridge(
-      eventBus,
-      workflowsExtensions,
-      logger,
-      isExperimentalEnabled
-    );
+    registerConversationWorkflowEventBridge(eventBus, workflowsExtensions, logger);
   });
 
   it('forwards metadata patched events to workflows extensions', async () => {
@@ -122,7 +117,7 @@ describe('registerConversationWorkflowEventBridge', () => {
 
   it('does nothing when workflowsExtensions is undefined', async () => {
     const isolatedBus = createConversationEventBus();
-    registerConversationWorkflowEventBridge(isolatedBus, undefined, logger, isExperimentalEnabled);
+    registerConversationWorkflowEventBridge(isolatedBus, undefined, logger);
 
     isolatedBus.emitMetadataPatched(request, {
       conversationId: 'conv-1',
@@ -135,38 +130,13 @@ describe('registerConversationWorkflowEventBridge', () => {
     expect(mockClient.emitEvent).not.toHaveBeenCalled();
   });
 
-  it('does not emit the trigger when experimental features are disabled', async () => {
-    isExperimentalEnabled.mockResolvedValue(false);
-    const disabledBus = createConversationEventBus();
-    registerConversationWorkflowEventBridge(
-      disabledBus,
-      workflowsExtensions,
-      logger,
-      isExperimentalEnabled
-    );
-
-    disabledBus.emitMetadataPatched(request, {
-      conversationId: 'conv-1',
-      changedFields: ['status'],
-    });
-
-    await flushMicrotasks();
-
-    expect(mockClient.emitEvent).not.toHaveBeenCalled();
-  });
-
   it('logs a warning when forwarding fails', async () => {
     const failingClient = createWorkflowsClientMock({
       emitEvent: jest.fn().mockRejectedValue(new Error('network error')),
     });
     workflowsExtensions.getClient.mockResolvedValue(failingClient);
     const failBus = createConversationEventBus();
-    registerConversationWorkflowEventBridge(
-      failBus,
-      workflowsExtensions,
-      logger,
-      isExperimentalEnabled
-    );
+    registerConversationWorkflowEventBridge(failBus, workflowsExtensions, logger);
 
     failBus.emitMetadataPatched(request, {
       conversationId: 'conv-1',
@@ -223,24 +193,15 @@ describe('registerConversationWorkflowEventBridge', () => {
       });
     });
 
-    it('checks the flag and resolves the client once per batch, then emits once per event', async () => {
+    it('resolves the client once per batch, then emits once per event', async () => {
       eventBus.emitAttachmentEvents(request, {
         conversationId: 'conv-1',
         events: [addedEvent, updatedEvent, deletedEvent],
       });
       await flushMicrotasks();
 
-      expect(isExperimentalEnabled).toHaveBeenCalledTimes(1);
       expect(workflowsExtensions.getClient).toHaveBeenCalledTimes(1);
       expect(mockClient.emitEvent).toHaveBeenCalledTimes(3);
-    });
-
-    it('does not emit attachment triggers when experimental features are disabled', async () => {
-      isExperimentalEnabled.mockResolvedValue(false);
-      eventBus.emitAttachmentEvents(request, { conversationId: 'conv-1', events: [addedEvent] });
-      await flushMicrotasks();
-
-      expect(mockClient.emitEvent).not.toHaveBeenCalled();
     });
 
     it('warns and continues when one emitEvent rejects', async () => {
@@ -259,6 +220,41 @@ describe('registerConversationWorkflowEventBridge', () => {
         expect.stringContaining(
           `Failed to emit workflow trigger "${ConversationAttachmentAddedTriggerId}"`
         )
+      );
+    });
+  });
+
+  describe('ai.conversation.updated', () => {
+    const payload: ConversationUpdatedTriggerEvent = {
+      conversationId: 'conv-1',
+      templateId: 'investigation',
+      source: 'execution',
+      changeKinds: ['events'],
+      eventTypes: ['user_message'],
+      actorTypes: ['user'],
+      attachmentTypes: [],
+      attachmentIds: [],
+      changedFields: [],
+    };
+
+    it('forwards conversation updated events to workflows extensions', async () => {
+      eventBus.emitConversationUpdated(request, payload);
+
+      await flushMicrotasks();
+
+      expect(workflowsExtensions.getClient).toHaveBeenCalledWith(request);
+      expect(mockClient.emitEvent).toHaveBeenCalledWith(ConversationUpdatedTriggerId, payload);
+    });
+
+    it('logs a warning when the emit fails', async () => {
+      (mockClient.emitEvent as jest.Mock).mockRejectedValue(new Error('network error'));
+
+      eventBus.emitConversationUpdated(request, payload);
+
+      await flushMicrotasks();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`Failed to emit workflow trigger "${ConversationUpdatedTriggerId}"`)
       );
     });
   });

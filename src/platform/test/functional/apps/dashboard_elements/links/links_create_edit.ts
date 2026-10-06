@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await openLinksPanelEditor();
 
         await dashboardLinks.setExternalUrlInput('https://danger.example.com');
-        expect(await testSubjects.exists('links--linkDestination--error')).to.be(true);
+        await testSubjects.existOrFail('links--linkDestination--error', { timeout: 5000 });
         await dashboardLinks.clickLinkEditorCloseButton();
         await dashboardLinks.clickPanelEditorCloseButton();
       });

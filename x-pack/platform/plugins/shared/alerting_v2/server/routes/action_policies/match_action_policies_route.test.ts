@@ -16,7 +16,6 @@ const createMocks = () => {
   const actionPolicyClient: jest.Mocked<Pick<ActionPolicyClient, 'matchActionPolicies'>> = {
     matchActionPolicies: jest.fn().mockResolvedValue({
       items: [],
-      total: 0,
       evaluated_count: 0,
       is_truncated: false,
     }),
@@ -62,7 +61,6 @@ describe('MatchActionPoliciesRoute', () => {
     const mocks = createMocks();
     const clientResult = {
       items: [{ action_policy: { id: 'ap-1', name: 'AP 1' }, category: 'catch_all' }],
-      total: 250,
       evaluated_count: 100,
       is_truncated: true,
     };

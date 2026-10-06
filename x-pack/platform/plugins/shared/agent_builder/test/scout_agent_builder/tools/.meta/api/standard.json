@@ -1,5 +1,5 @@
 {
-  "sha1": "",
+  "sha1": "54235300236a2bc11ebc8d6fa2b54eb093a616c5",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,8 +16,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/tools/api/tests/mcp_connector_output_schema_api.spec.ts",
-        "line": 34,
-        "column": 47
+        "line": 36,
+        "column": 15
       }
     },
     {

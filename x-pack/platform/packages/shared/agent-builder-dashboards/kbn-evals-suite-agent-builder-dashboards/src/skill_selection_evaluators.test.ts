@@ -37,7 +37,7 @@ describe('skill selection evaluators', () => {
       {
         type: 'tool_call',
         tool_id: 'filestore.read',
-        params: { path: 'skills/platform/dashboard/dashboard-management' },
+        params: { path: 'skills/platform/dashboard/dashboards' },
       },
       {
         type: 'tool_call',
@@ -45,7 +45,7 @@ describe('skill selection evaluators', () => {
       },
     ]);
 
-    expect(getSkillReadPaths(output)).toEqual(['skills/platform/dashboard/dashboard-management']);
+    expect(getSkillReadPaths(output)).toEqual(['skills/platform/dashboard/dashboards']);
     expect(getToolIds(output)).toEqual(['filestore.read', 'platform.dashboard.generate_dashboard']);
   });
 
@@ -56,7 +56,7 @@ describe('skill selection evaluators', () => {
         {
           type: 'tool_call',
           tool_id: 'filestore.read',
-          params: { path: 'skills/platform/dashboard/dashboard-management' },
+          params: { path: 'skills/platform/dashboard/dashboards' },
         },
       ])
     );

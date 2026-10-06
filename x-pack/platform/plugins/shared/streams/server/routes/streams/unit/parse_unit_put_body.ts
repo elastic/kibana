@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { streamsUnitSecretsSchema, streamsUnitUiMetadataSchema } from '@kbn/streams-schema';
 import type { StreamsUnit } from '@kbn/streams-schema';
-import { streamsUnitSchema, streamsUnitUpsertRequestSchema } from '@kbn/streams-schema';
 import type { z } from '@kbn/zod/v4';
 import YAML from 'yaml';
 import { StatusError } from '../../../lib/streams/errors/status_error';
@@ -19,14 +19,6 @@ const YAML_MEDIA_TYPES = new Set([
 ]);
 
 const JSON_MEDIA_TYPES = new Set(['application/json', 'application/vnd.api+json']);
-
-const formatZodError = (error: z.ZodError): string =>
-  error.issues
-    .map((issue) => {
-      const path = issue.path.length > 0 ? issue.path.join('.') : 'body';
-      return `${path}: ${issue.message}`;
-    })
-    .join('; ');
 
 const mediaTypeOf = (contentType: string | string[] | undefined): string => {
   const header = Array.isArray(contentType) ? contentType[0] : contentType;
@@ -52,14 +44,35 @@ const toUtf8 = (body: unknown): string => {
 };
 
 /**
- * PUT body after content-type dispatch. YAML omits `ui_metadata` so upsert
- * can keep the stored canvas layout (JSON `ui_metadata: {}` still replaces).
+ * PUT body after content-type dispatch. Omitted `ui_metadata` keeps the stored
+ * canvas layout. A JSON body that includes `ui_metadata` replaces it.
  */
 export interface ParsedUnitPutBody {
   unit: StreamsUnit.Configuration;
   ui_metadata?: StreamsUnit.UiMetadata;
   secrets?: StreamsUnit.Secrets;
 }
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const formatZodError = (field: string, error: z.ZodError): string =>
+  error.issues
+    .map((issue) => {
+      const path = [field, ...issue.path].join('.');
+      return `${path}: ${issue.message}`;
+    })
+    .join('; ');
+
+const parseEnvelopeField = <T>(field: string, schema: z.ZodType<T>, value: unknown): T => {
+  const result = schema.safeParse(value);
+
+  if (!result.success) {
+    throw new StatusError(`Invalid Streams unit JSON: ${formatZodError(field, result.error)}`, 400);
+  }
+
+  return result.data;
+};
 
 const parseYamlUnit = (raw: string): ParsedUnitPutBody => {
   let parsed: unknown;
@@ -71,26 +84,30 @@ const parseYamlUnit = (raw: string): ParsedUnitPutBody => {
     throw new StatusError(`Invalid Streams unit YAML: ${detail}`, 400);
   }
 
-  const result = streamsUnitSchema.safeParse(parsed);
-
-  if (!result.success) {
-    throw new StatusError(`Invalid Streams unit YAML: ${formatZodError(result.error)}`, 400);
-  }
-
-  return { unit: result.data };
+  return { unit: parsed as StreamsUnit.Configuration };
 };
 
-const parseJsonUpsert = (value: unknown): StreamsUnit.UpsertRequest => {
-  const result = streamsUnitUpsertRequestSchema.safeParse(value);
-
-  if (!result.success) {
-    throw new StatusError(`Invalid Streams unit JSON: ${formatZodError(result.error)}`, 400);
+const parseJsonUpsert = (value: unknown): ParsedUnitPutBody => {
+  if (!isRecord(value) || !('unit' in value)) {
+    throw new StatusError('Invalid Streams unit JSON.', 400);
   }
 
-  return result.data;
+  const parsed: ParsedUnitPutBody = {
+    unit: value.unit as StreamsUnit.Configuration,
+  };
+
+  if (value.ui_metadata !== undefined) {
+    parsed.ui_metadata = value.ui_metadata as StreamsUnit.UiMetadata;
+  }
+
+  if (value.secrets !== undefined) {
+    parsed.secrets = value.secrets as StreamsUnit.Secrets;
+  }
+
+  return parsed;
 };
 
-const parseJsonRaw = (raw: string): StreamsUnit.UpsertRequest => {
+const parseJsonRaw = (raw: string): ParsedUnitPutBody => {
   let parsed: unknown;
 
   try {
@@ -104,11 +121,14 @@ const parseJsonRaw = (raw: string): StreamsUnit.UpsertRequest => {
 
 /**
  * PUT `/internal/streams/unit/{id}` accepts:
- * - `application/json`: the existing `{ unit, ui_metadata, secrets? }` envelope
+ * - `application/json`: the `{ unit, ui_metadata?, secrets? }` envelope
  * - YAML (`application/yaml`, `text/yaml`, …): the authored unit document itself
  *
- * YAML cannot carry `ui_metadata` or `secrets`; those fields are omitted so a
- * YAML push keeps the stored canvas layout and credentials.
+ * Content type only chooses how to decode the body. The config distributor
+ * validates the unit document. YAML cannot carry `ui_metadata` or `secrets`;
+ * those fields are omitted so a YAML push keeps the stored canvas layout and
+ * credentials. Omitted JSON `ui_metadata` is also omitted (it is not defaulted
+ * to `{}`).
  */
 export const parseUnitPutBody = ({
   body,
@@ -154,4 +174,27 @@ export const parseUnitPutBody = ({
     `Unsupported Content-Type [${mediaType}]. Use application/json or application/yaml.`,
     400
   );
+};
+
+/**
+ * Checks Kibana-only `ui_metadata` and `secrets` after the distributor accepts the unit.
+ */
+export const assertUnitPutEnvelope = (
+  parsed: ParsedUnitPutBody
+): Pick<ParsedUnitPutBody, 'ui_metadata' | 'secrets'> => {
+  const envelope: Pick<ParsedUnitPutBody, 'ui_metadata' | 'secrets'> = {};
+
+  if (parsed.ui_metadata !== undefined) {
+    envelope.ui_metadata = parseEnvelopeField(
+      'ui_metadata',
+      streamsUnitUiMetadataSchema,
+      parsed.ui_metadata
+    );
+  }
+
+  if (parsed.secrets !== undefined) {
+    envelope.secrets = parseEnvelopeField('secrets', streamsUnitSecretsSchema, parsed.secrets);
+  }
+
+  return envelope;
 };

@@ -12,12 +12,7 @@ import { LOCATOR_ATTRIBUTES } from './anchor';
 const LAYOUT_EVENTS = ['scroll', 'resize'] as const;
 const SETTLE_EVENTS = ['transitionend', 'animationend'] as const;
 const LAYOUT_ATTRIBUTES = ['class', 'style', 'hidden', 'aria-hidden', 'aria-expanded', 'open'];
-/**
- * Mutations that can move an element or change which one an anchor resolves
- * to: elements coming and going, attributes that show, hide or lay them out,
- * and the attributes and text that locators are matched on, which an element
- * may get after it was rendered.
- */
+/** Mutations that can move an element or change which one an anchor resolves to. */
 const MUTATIONS: MutationObserverInit = {
   childList: true,
   subtree: true,

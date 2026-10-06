@@ -8,7 +8,7 @@
  */
 
 import type { monaco } from '@kbn/monaco';
-import { getShape } from '@kbn/workflows/common/utils/zod';
+import { getShape, parsePath } from '@kbn/workflows/common/utils/zod';
 import { getDetailedTypeDescription, isVariableLineParseResult } from '@kbn/workflows-yaml';
 import { wrapAsMonacoSuggestion } from './wrap_as_monaco_suggestion';
 import { getValueFromValueNode } from '../../../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
@@ -27,36 +27,25 @@ function isInsideCurlyBraces(lineUpToCursor: string): boolean {
 }
 
 /**
- * Validates if the path being accessed exists in the schema
- * Returns true if the path is valid, false if it doesn't exist
+ * Validates if the path being accessed exists in the schema.
+ * Uses parsePath-derived segments so bracket subscripts like `[ep.a.b]`
+ * count as a single segment instead of being split on inner dots.
  */
 function isValidPath(
-  fullKey: string,
+  fullKeySegments: string[] | null,
   contextScopedToPath: string | null,
   lastPathSegment: string | null
 ): boolean {
-  if (!fullKey || contextScopedToPath === null) {
+  if (!fullKeySegments || fullKeySegments.length === 0 || contextScopedToPath === null) {
     return true;
   }
 
-  const fullKeySegments = fullKey.split('.');
-  const scopedPathSegments = contextScopedToPath.split('.');
+  const scopedPathSegments = parsePath(contextScopedToPath);
+  const scopedSegmentCount =
+    contextScopedToPath === '' || !scopedPathSegments ? 0 : scopedPathSegments.length;
 
-  // If scopedToPath is empty string, it means we're at the root
-  const scopedSegmentCount = contextScopedToPath === '' ? 0 : scopedPathSegments.length;
-
-  // Check if we're accessing a path that doesn't exist
-  // This happens when the fullKey has more segments than the scoped path,
-  // and we're not just typing the next valid segment
   const segmentDiff = fullKeySegments.length - scopedSegmentCount;
 
-  // If fullKey exactly matches contextScopedToPath (segmentDiff === 0),
-  // we're already at that level and should show its properties
-  // If the difference is > 1, we're definitely in a non-existent path
-  // e.g., consts.docs.a where docs doesn't exist (diff would be 2)
-  // If the difference is 1 and we're not currently typing (lastPathSegment is null),
-  // it means we just typed a dot after a non-existent path
-  // e.g., consts.docs. where docs doesn't exist
   return !(segmentDiff > 1 || (segmentDiff === 1 && lastPathSegment === null));
 }
 
@@ -101,7 +90,9 @@ export function getVariableSuggestions(autocompleteContext: AutocompleteContext)
   // done that for us.
 
   // Check if we're trying to access a non-existent path
-  if (!isValidPath(lineParseResult.fullKey, contextScopedToPath, lineParseResult.lastPathSegment)) {
+  if (
+    !isValidPath(lineParseResult.pathSegments, contextScopedToPath, lineParseResult.lastPathSegment)
+  ) {
     return [];
   }
 

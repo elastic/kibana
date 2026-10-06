@@ -97,6 +97,13 @@ const useProposalsPages = (
 
   // Not `refetchInterval`, which replays every page the analyst has opened and grows
   // the steady-state request count with each Show more.
+  //
+  // Deliberately only this one, slow heartbeat — no faster poll while a row is settling. A
+  // faster poll here would refetch the very row `useDropDecidedProposal` just removed
+  // optimistically: search consistency for a just-written decision can lag behind the plain
+  // document GET `waitForDecision` confirms it with, so a refetch too soon after deciding reads
+  // the row as still pending and restores it (see that hook's own comment). The slow cadence
+  // gives that lag time to resolve before the next look; a faster one does not.
   const { refetch } = query;
   useEffect(() => {
     if (!enabled) {

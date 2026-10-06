@@ -26,6 +26,7 @@ import {
   AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
   ConfigSchema,
   InputSchema,
+  runAgentStepCommonDefinition,
 } from '../../common/step_types/run_agent_step';
 import {
   CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
@@ -75,7 +76,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       rawInput: {},
       contextManager: {
         getFakeRequest: jest.fn().mockReturnValue(fakeRequest),
-        getContext: jest.fn(),
+        getContext: jest.fn().mockReturnValue({ execution: { id: 'exec-1' } }),
         getScopedEsClient: jest.fn(),
         renderInputTemplate: jest.fn(),
         callKibanaApi: jest.fn(),
@@ -831,7 +832,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     });
   });
 
-  describe('telemetry attribution (plugin-id / aggregate-by)', () => {
+  describe('telemetry attribution', () => {
     const roundCompleteEvents = () =>
       of({
         type: ChatEventType.roundComplete,
@@ -863,7 +864,17 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       ).toBe(true);
     });
 
-    it('forwards plugin-id and aggregate-by as telemetryMetadata to executeAgent', async () => {
+    it('declares product attribution keys in the attached config schema', () => {
+      expect(runAgentStepCommonDefinition.configSchema).toBeDefined();
+      expect(runAgentStepCommonDefinition.configSchema?.shape).toEqual(
+        expect.objectContaining({
+          'product-solution': expect.anything(),
+          'product-feature': expect.anything(),
+        })
+      );
+    });
+
+    it('forwards telemetry attribution to executeAgent', async () => {
       const execution = createExecutionMock(roundCompleteEvents());
       const serviceManager = { internalStart: { execution } } as any;
       const step = getRunAgentStepDefinition(serviceManager);
@@ -874,6 +885,8 @@ describe('ai.agent workflow step (Agent Builder)', () => {
           config: {
             'plugin-id': 'streams_significant_events_discovery',
             'aggregate-by': 'streams_significant_events',
+            'product-solution': 'observability',
+            'product-feature': 'nightshift',
           },
         })
       );
@@ -884,18 +897,29 @@ describe('ai.agent workflow step (Agent Builder)', () => {
             telemetryMetadata: {
               pluginId: 'streams_significant_events_discovery',
               aggregateBy: 'streams_significant_events',
+              productSolution: 'observability',
+              productFeature: 'nightshift',
+              interactionId: 'exec-1',
             },
           }),
         })
       );
     });
 
-    it('omits telemetryMetadata when no plugin-id is configured', async () => {
+    it('ignores product attribution when no plugin-id is configured', async () => {
       const execution = createExecutionMock(roundCompleteEvents());
       const serviceManager = { internalStart: { execution } } as any;
       const step = getRunAgentStepDefinition(serviceManager);
 
-      await step.handler(createContext({ input: { message: 'hello' } }));
+      await step.handler(
+        createContext({
+          input: { message: 'hello' },
+          config: {
+            'product-solution': 'observability',
+            'product-feature': 'nightshift',
+          },
+        })
+      );
 
       const callArg = execution.executeAgent.mock.calls[0][0];
       expect(callArg.params).not.toHaveProperty('telemetryMetadata');

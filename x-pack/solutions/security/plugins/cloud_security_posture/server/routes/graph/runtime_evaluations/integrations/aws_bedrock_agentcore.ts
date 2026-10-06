@@ -102,6 +102,8 @@ export const aws_bedrock_agentcoreEvaluations = {
   entity.target.id = CASE(
     entity.target.id IS NOT NULL, entity.target.id,
     data_stream.dataset == "aws_bedrock_agentcore.gateway_application_logs" AND aws.bedrock_agentcore.gateway.target IS NOT NULL, aws.bedrock_agentcore.gateway.target,
+    data_stream.dataset == "aws_bedrock_agentcore.runtime_application_logs" AND aws.bedrock_agentcore.resource_arn IS NOT NULL, aws.bedrock_agentcore.resource_arn,
+    data_stream.dataset == "aws_bedrock_agentcore.memory_application_logs" AND aws.bedrock_agentcore.memory.resource_arn IS NOT NULL, aws.bedrock_agentcore.memory.resource_arn,
     null
   )`,
     },

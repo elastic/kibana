@@ -69,6 +69,8 @@ export const mergeModelUsage = (
   a: RoundModelUsageStats,
   b: RoundModelUsageStats
 ): RoundModelUsageStats => {
+  // the last call of the merged round is the later execution's
+  const lastCallInputTokens = b.last_call_input_tokens ?? a.last_call_input_tokens;
   return {
     connector_id: a.connector_id,
     llm_calls: a.llm_calls + b.llm_calls,
@@ -78,6 +80,7 @@ export const mergeModelUsage = (
       ? { cached_input_tokens: (a.cached_input_tokens ?? 0) + (b.cached_input_tokens ?? 0) }
       : {}),
     model: a.model ?? b.model,
+    ...(lastCallInputTokens !== undefined ? { last_call_input_tokens: lastCallInputTokens } : {}),
   };
 };
 

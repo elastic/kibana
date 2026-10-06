@@ -23,7 +23,13 @@ import { RuleActionsMenu } from '../../../../pages/rules_list_page/rule_actions_
 import type { RuleApiResponse } from '../../../../services/rules_api';
 import { UserCapabilities } from '../../../../services/user_capabilities';
 import { EMPTY_VALUE } from '../../../../utils/rule_display';
-import { RuleSummaryBody } from '../../rule_summary';
+import {
+  RuleSummaryAboutSection,
+  RuleSummaryActionPoliciesSection,
+  RuleSummaryArtifactsSection,
+  RuleSummaryBody,
+  RuleSummaryInvestigationSection,
+} from '../../rule_summary';
 
 const TAKE_ACTION_BUTTON_ID = 'ruleSummaryFlyoutTakeAction';
 
@@ -80,7 +86,7 @@ export const RuleSummaryFlyout = ({
   } = useFetchRuleExecutions({
     ruleIds: [rule.id],
     perPage: 1,
-    sort: 'startedAt',
+    sortField: 'startedAt',
     sortOrder: 'desc',
     enabled: canReadExecutionHistory,
   });
@@ -132,6 +138,7 @@ export const RuleSummaryFlyout = ({
         type="overlay"
         size="m"
         resizable
+        ownFocus={false}
         session={session}
         onClose={onClose}
         data-test-subj="ruleSummaryFlyout"
@@ -199,7 +206,12 @@ export const RuleSummaryFlyout = ({
         </Header>
 
         <Body>
-          <RuleSummaryBody rule={rule} />
+          <RuleSummaryBody rule={rule}>
+            <RuleSummaryAboutSection />
+            <RuleSummaryInvestigationSection />
+            <RuleSummaryActionPoliciesSection />
+            <RuleSummaryArtifactsSection />
+          </RuleSummaryBody>
         </Body>
 
         <Footer>
@@ -209,6 +221,7 @@ export const RuleSummaryFlyout = ({
               defaultMessage: 'Take action',
             })}
             iconType={isTakeActionOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
+            iconSide="right"
             onClick={() => setIsTakeActionOpen((open) => !open)}
             data-test-subj="ruleSummaryFlyoutTakeActionButton"
           />

@@ -104,7 +104,8 @@ export const registerSaveExperimentWorkflowRoute = ({
           if (body.workflow_id) {
             const existing = await workflowsManagement.management.getWorkflow(
               body.workflow_id,
-              spaceId
+              spaceId,
+              request
             );
             if (!isEvalsOwnedWorkflow(existing)) {
               return response.notFound({

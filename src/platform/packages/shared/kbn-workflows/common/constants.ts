@@ -27,6 +27,13 @@ export const WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID = 'workflows:ui:show
 export const WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID = 'workflows:executionStatsBar:enabled';
 
 /**
+ * When true, all `kibana.*` steps use Core `http.selfClient`.
+ * When false, all `kibana.*` steps use the global `fetch` client, including YAML `fetcher`.
+ */
+export const WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG =
+  'workflows.kibanaRequest.coreSelfClientEnabled';
+
+/**
  * Global Advanced Setting gating the Workflow Template Library tech preview.
  *
  * Registered as a global uiSetting (not per-space) so the same toggle is

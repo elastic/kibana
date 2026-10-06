@@ -63,7 +63,7 @@ export interface WorkflowExecuteModalProps {
   workflowId?: string;
   isTestRun: boolean;
   onClose: () => void;
-  onSubmit: (data: Record<string, unknown>, triggerTab: WorkflowTriggerTab) => void;
+  onSubmit: (data: Record<string, unknown>, triggerTab: WorkflowTriggerTab) => void | Promise<void>;
   yamlString?: string;
   /** When set, open with Historical tab and this execution pre-selected */
   initialExecutionId?: string;
@@ -175,7 +175,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       setEventTriggerTableSelectionCount(count);
     }, []);
 
-    const handleSubmit = useCallback(() => {
+    const handleSubmit = useCallback(async () => {
       if (!canExecuteWorkflow) {
         return;
       }
@@ -228,8 +228,12 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         selectedTrigger === 'manual'
           ? omitUnchangedWorkflowInputDefaults(parsed, normalizedInputs)
           : parsed;
-      onSubmit(submittedInput, selectedTrigger);
-      onClose();
+      try {
+        await onSubmit(submittedInput, selectedTrigger);
+        onClose();
+      } catch {
+        // Keep the modal open so the user can retry after a failed run.
+      }
     }, [
       canExecuteWorkflow,
       selectedTrigger,
@@ -274,8 +278,14 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         return;
       }
       autoRunFiredRef.current = true;
-      onSubmit({}, 'manual');
-      onClose();
+      void (async () => {
+        try {
+          await onSubmit({}, 'manual');
+          onClose();
+        } catch {
+          // Keep the modal open so the user can retry after a failed run.
+        }
+      })();
     }, [shouldAutoRun, onSubmit, onClose]);
 
     useEffect(() => {

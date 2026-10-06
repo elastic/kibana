@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiCheckbox, EuiNotificationBadge } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiNotificationBadge,
+  EuiPopover,
+} from '@elastic/eui';
 import styled from 'styled-components';
 
-import { UtilityBarAction } from '../../../../common/components/utility_bar';
 import * as i18n from './translations';
 
 const UtilityBarFlexGroup = styled(EuiFlexGroup)`
@@ -42,15 +48,17 @@ export const AdditionalFiltersAction = ({
   onShowOnlyThreatIndicatorAlertsChanged: (showOnlyThreatIndicatorAlerts: boolean) => void;
   showOnlyThreatIndicatorAlerts: boolean;
 }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
   const UtilityBarAdditionalFiltersContent = useCallback(
-    (closePopover: () => void) => (
+    () => (
       <UtilityBarFlexGroup direction="column" gutterSize="none">
         <BuildingBlockContainer>
           <EuiCheckbox
             id="showBuildingBlockAlertsCheckbox"
             aria-label="showBuildingBlockAlerts"
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              closePopover();
+              setIsPopoverOpen(false);
               onShowBuildingBlockAlertsChanged(e.target.checked);
             }}
             checked={showBuildingBlockAlerts}
@@ -64,7 +72,7 @@ export const AdditionalFiltersAction = ({
             id="showOnlyThreatIndicatorAlertsCheckbox"
             aria-label="showOnlyThreatIndicatorAlerts"
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              closePopover();
+              setIsPopoverOpen(false);
               onShowOnlyThreatIndicatorAlertsChanged(e.target.checked);
             }}
             checked={showOnlyThreatIndicatorAlerts}
@@ -87,26 +95,40 @@ export const AdditionalFiltersAction = ({
     (showBuildingBlockAlerts ? 1 : 0) + (showOnlyThreatIndicatorAlerts ? 1 : 0);
 
   return (
-    <UtilityBarAction
-      dataTestSubj="additionalFilters"
-      disabled={areEventsLoading}
-      iconType="chevronSingleDown"
-      iconSide="right"
+    <EuiPopover
+      aria-label={i18n.ADDITIONAL_FILTERS_ACTIONS}
+      data-test-subj="additionalFilters"
+      button={
+        <EuiButtonEmpty
+          data-test-subj="additionalFilters-popover"
+          disabled={areEventsLoading}
+          flush="both"
+          iconSide="right"
+          iconSize="s"
+          iconType="chevronSingleDown"
+          onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
+          size="xs"
+          css={{ fontWeight: 'normal' }}
+        >
+          <CenterText>
+            {i18n.ADDITIONAL_FILTERS_ACTIONS}
+            {additionalFilterCount > 0 && (
+              <>
+                &nbsp;
+                <EuiNotificationBadge
+                  data-test-subj="additionalFiltersCountBadge"
+                  color="subdued"
+                >{`${additionalFilterCount}`}</EuiNotificationBadge>
+              </>
+            )}
+          </CenterText>
+        </EuiButtonEmpty>
+      }
+      closePopover={() => setIsPopoverOpen(false)}
+      isOpen={isPopoverOpen}
       ownFocus
-      popoverContent={UtilityBarAdditionalFiltersContent}
     >
-      <CenterText>
-        {i18n.ADDITIONAL_FILTERS_ACTIONS}
-        {additionalFilterCount > 0 && (
-          <>
-            &nbsp;
-            <EuiNotificationBadge
-              data-test-subj="additionalFiltersCountBadge"
-              color="subdued"
-            >{`${additionalFilterCount}`}</EuiNotificationBadge>
-          </>
-        )}
-      </CenterText>
-    </UtilityBarAction>
+      {UtilityBarAdditionalFiltersContent()}
+    </EuiPopover>
   );
 };

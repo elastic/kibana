@@ -28,12 +28,16 @@ dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-genai-utils'
   - '@kbn/core'
+  - '@kbn/inference-common'
   - '@kbn/inference-tracing'
   - '@kbn/repo-info'
+  - '@kbn/nightshift-decision-trees'
   - '@kbn/nightshift-investigations-plugin'
   - '@kbn/significant-events-schema'
   - '@kbn/workflows'
   - '@kbn/zod'
+  - '@kbn/config'
+  - '@kbn/config-schema'
 tags:
   - functional-tests
   - package

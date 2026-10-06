@@ -1,5 +1,5 @@
 {
-  "sha1": "e8afb2f505b681fcc25286f9672173e86216af90",
+  "sha1": "9b9742dbb0649428d8f82bc4cfa9fc5b3eac4826",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -410,15 +410,15 @@
       }
     },
     {
-      "id": "2aeef73611b17a7-1c516239081bd78",
-      "title": "Rules page heading tabs - alerting v2 privileges shows the V1 and V2 rules tabs when the user can read both surfaces",
+      "id": "2aeef73611b17a7-5abdfaa93aea775",
+      "title": "Rules page heading tabs - alerting v2 privileges hides the V2 rules tab when the user can read both surfaces",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_tabs_privileges.spec.ts",
-        "line": 46,
+        "line": 45,
         "column": 15
       }
     },
@@ -432,7 +432,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_tabs_privileges.spec.ts",
         "line": 54,
-        "column": 7
+        "column": 11
       }
     },
     {

@@ -17,6 +17,7 @@ project:
   owner: '@elastic/nightshift-sre-agent-team'
   sourceRoot: x-pack/platform/packages/shared/kbn-significant-events-schema
 dependsOn:
+  - '@kbn/alerting-v2-schemas'
   - '@kbn/zod'
   - '@kbn/zod-helpers'
   - '@kbn/streamlang'

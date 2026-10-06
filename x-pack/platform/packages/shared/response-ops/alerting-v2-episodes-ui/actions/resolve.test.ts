@@ -73,8 +73,8 @@ describe('createResolveAction', () => {
       onSuccess,
     });
     expect(bulk.bulkDeactivateEpisodeActions).toHaveBeenCalledWith(deps.http, [
-      { episode_id: 'e1', reason: expect.any(String) },
-      { episode_id: 'e2', reason: expect.any(String) },
+      { alert_id: 'e1', reason: expect.any(String) },
+      { alert_id: 'e2', reason: expect.any(String) },
     ]);
     expect(deps.notifications.toasts.add).toHaveBeenCalled();
     expect(onSuccess).toHaveBeenCalled();
@@ -94,7 +94,7 @@ describe('createResolveAction', () => {
       onSuccess,
     });
     expect(bulk.bulkDeactivateEpisodeActions).toHaveBeenCalledWith(deps.http, [
-      { episode_id: 'e1', reason: expect.any(String) },
+      { alert_id: 'e1', reason: expect.any(String) },
     ]);
     expect(onSuccess).toHaveBeenCalled();
   });

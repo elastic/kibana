@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import {
-  DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
-} from '@kbn/workflows/managed';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import { investigationStateSchema } from '@kbn/significant-events-schema';
 import { assertNever } from '@kbn/std';
+import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
-import { installDeductiveInvestigationAgent } from '../lib/install_deductive_investigation_agent';
+import { isInvestigationWorkflowExecution } from '../lib/managed_workflows/is_investigation_workflow_execution';
 import type { InvestigationQuotaCallback } from '../types';
 import type {
   AlertInvestigationContext,
@@ -87,25 +86,6 @@ const isSubjectType = (value: unknown): value is InvestigationSubjectType =>
 const isTriggerType = (value: unknown): value is InvestigationTriggerType =>
   typeof value === 'string' && INVESTIGATION_TRIGGER_TYPES.some((type) => type === value);
 
-const INVESTIGATION_WORKFLOW_IDS = new Set([
-  SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
-  DEDUCTIVE_INVESTIGATION_WORKFLOW_ID,
-]);
-
-/**
- * A manual investigation has no stored entity to write results back to, so it runs the lean
- * deductive workflow; every other subject runs the significant-events workflow, which attaches
- * its findings to the event or alert it was started from.
- */
-const workflowIdForSubject = (subject: InvestigationSubject): string =>
-  subject.type === 'manual'
-    ? DEDUCTIVE_INVESTIGATION_WORKFLOW_ID
-    : SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID;
-
-/** Each workflow calls its own agent, so the pre-install has to follow the same split. */
-const installAgentForSubject = (subject: InvestigationSubject) =>
-  subject.type === 'manual' ? installDeductiveInvestigationAgent : installInvestigationAgent;
-
 /** Keeps a derived summary to one readable line, since it is rendered as a list headline. */
 const MAX_DERIVED_SUBJECT_SUMMARY_LENGTH = 200;
 
@@ -136,13 +116,6 @@ const withDerivedSubjectSummary = (
   return { ...subject, summary };
 };
 
-const isInvestigationWorkflowExecution = (execution: {
-  workflowId?: string | null;
-  originManagedWorkflowId?: string | null;
-}): boolean =>
-  INVESTIGATION_WORKFLOW_IDS.has(execution.workflowId ?? '') ||
-  INVESTIGATION_WORKFLOW_IDS.has(execution.originManagedWorkflowId ?? '');
-
 interface ExecutionInvestigationMetadata {
   subject?: InvestigationSubject;
   title?: string;
@@ -150,14 +123,12 @@ interface ExecutionInvestigationMetadata {
   concurrencyKey?: string;
 }
 /**
- * Context fields each subject type's id may arrive under, in precedence order. A significant event
- * has two spellings because discovery's `workflow.executeAsync` sends `event_id` while `start()`
- * sends `significant_event_id`; both must resolve to the same subject. The `satisfies` clause is
- * what makes a newly added {@link InvestigationSubjectType} a compile error rather than a run that
- * silently recovers no subject.
+ * Context fields each subject type's id arrives under. The `satisfies` clause is what makes a
+ * newly added {@link InvestigationSubjectType} a compile error rather than a run that silently
+ * recovers no subject.
  */
 const SUBJECT_ID_FIELDS = {
-  significant_event: ['event_id', 'significant_event_id'],
+  significant_event: ['significant_event_id'],
   alert: ['alert_id'],
   manual: ['manual_id'],
 } as const satisfies Record<InvestigationSubjectType, readonly string[]>;
@@ -229,7 +200,6 @@ const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationR
   const recommendations = investigationStateSchema.shape.recommendations.safeParse(
     record.recommendations
   );
-  const blindSpots = investigationStateSchema.shape.blind_spots.safeParse(record.blind_spots);
 
   return {
     ...toListInvestigationItem(record),
@@ -239,8 +209,6 @@ const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationR
     conclusion: record.conclusion,
     hypotheses: record.hypotheses,
     recommendations: recommendations.success ? recommendations.data : undefined,
-    blind_spots: blindSpots.success ? blindSpots.data : undefined,
-    trigger_feedback: record.trigger_feedback,
     conversation_id: record.conversation_id,
     impact: record.impact,
   };
@@ -320,7 +288,11 @@ export interface NightshiftInvestigationsClientDeps {
   agentAvailability: AgentAvailabilityConfig;
   investigationQuotaCallback?: InvestigationQuotaCallback;
   investigationRepository: InvestigationRepository;
-  isAvailable: () => Promise<boolean>;
+  inference?: InferenceServerStart;
+  savedObjects?: CoreStart['savedObjects'];
+  uiSettings?: CoreStart['uiSettings'];
+  isAvailable: (connectorId?: string) => Promise<boolean>;
+  isInfrastructureAvailable: () => Promise<boolean>;
 }
 
 export class NightshiftInvestigationsClient {
@@ -333,7 +305,11 @@ export class NightshiftInvestigationsClient {
   private readonly agentAvailability: AgentAvailabilityConfig;
   private readonly investigationQuotaCallback?: InvestigationQuotaCallback;
   private readonly investigationRepository: InvestigationRepository;
-  private readonly checkAvailability: () => Promise<boolean>;
+  private readonly inference?: InferenceServerStart;
+  private readonly savedObjects?: CoreStart['savedObjects'];
+  private readonly uiSettings?: CoreStart['uiSettings'];
+  private readonly checkAvailability: (connectorId?: string) => Promise<boolean>;
+  private readonly checkInfrastructureAvailability: () => Promise<boolean>;
 
   constructor(deps: NightshiftInvestigationsClientDeps) {
     this.request = deps.request;
@@ -345,10 +321,15 @@ export class NightshiftInvestigationsClient {
     this.agentAvailability = deps.agentAvailability;
     this.investigationQuotaCallback = deps.investigationQuotaCallback;
     this.investigationRepository = deps.investigationRepository;
+    this.inference = deps.inference;
+    this.savedObjects = deps.savedObjects;
+    this.uiSettings = deps.uiSettings;
     this.checkAvailability = deps.isAvailable;
+    this.checkInfrastructureAvailability = deps.isInfrastructureAvailable;
   }
 
-  public isAvailable = (): Promise<boolean> => this.checkAvailability();
+  public isAvailable = (connectorId?: string): Promise<boolean> =>
+    this.checkAvailability(connectorId);
 
   private getSpaceId(): string {
     return (
@@ -396,27 +377,44 @@ export class NightshiftInvestigationsClient {
     trigger_type,
     message,
     stream_names,
+    connector_id,
     concurrency_key,
     context = {},
   }: StartInvestigationRequest): Promise<StartInvestigationResponse> {
-    if (!this.workflowsManagement) {
-      throw new InvestigationUnavailableError('workflowsManagement is not available');
-    }
-
-    if (!this.agentBuilder) {
-      throw new InvestigationUnavailableError('agentBuilder is not available');
-    }
-    if (!(await this.isAvailable())) {
+    if (!(await this.checkInfrastructureAvailability())) {
       throw new InvestigationUnavailableError('Investigations are not available');
     }
+
+    if (
+      !this.workflowsManagement ||
+      !this.agentBuilder ||
+      !this.inference ||
+      !this.savedObjects ||
+      !this.uiSettings
+    ) {
+      throw new InvestigationUnavailableError('Investigations are not available');
+    }
+
+    const resolvedConnectorId = await resolveNightshiftModelForRequest({
+      request: this.request,
+      inference: this.inference,
+      savedObjects: this.savedObjects,
+      uiSettings: this.uiSettings,
+      step: 'investigation',
+      requestedId: connector_id,
+    });
 
     const prepared = this.prepareAgentInput(subject, message, context);
     const resolvedSubject = withDerivedSubjectSummary(subject, prepared.message);
 
     const spaceId = this.getSpaceId();
 
-    const workflowId = workflowIdForSubject(subject);
-    const workflow = await this.workflowsManagement.management.getWorkflow(workflowId, spaceId);
+    const workflowId = NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID;
+    const workflow = await this.workflowsManagement.management.getWorkflow(
+      workflowId,
+      spaceId,
+      this.request
+    );
 
     if (!workflow?.definition) {
       this.logger.error(
@@ -447,7 +445,7 @@ export class NightshiftInvestigationsClient {
     // below executes the *stored* workflow definition, which predates that step until the managed
     // install has upgraded it — and that install is fire-and-forget. Deliberately without the
     // step's visibility retry: the workflow owns that, and this request path should not pay for it.
-    await installAgentForSubject(subject)({
+    await installInvestigationAgent({
       agentBuilder: this.agentBuilder,
       spaceId,
       availability: this.agentAvailability,
@@ -457,6 +455,7 @@ export class NightshiftInvestigationsClient {
       message: prepared.message,
       title,
       stream_names: stream_names ?? [],
+      ...(connector_id?.trim() ? { connector_id: resolvedConnectorId } : {}),
       ...(concurrency_key ? { concurrency_key } : {}),
       context: {
         ...prepared.context,
@@ -559,7 +558,7 @@ export class NightshiftInvestigationsClient {
     const execution = await this.workflowsManagement.management.getWorkflowExecution(
       investigationId,
       spaceId,
-      { includeOutput: false }
+      { includeOutput: false, request: this.request }
     );
 
     if (!execution || !isInvestigationWorkflowExecution(execution)) {

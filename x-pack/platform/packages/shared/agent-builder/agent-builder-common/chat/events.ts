@@ -19,6 +19,7 @@ import type { ExecutionAbortReason, SerializedExecutionError } from '../agents/e
 import type { ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
 import type {
+  CompactionSummary,
   ConversationInternalState,
   ConversationRound,
   ConversationRoundAuthor,
@@ -27,6 +28,7 @@ import type {
   RoundInput,
   BackgroundExecutionState,
   SubagentRosterEntry,
+  SubstitutionStepData,
   TodoItem,
 } from './conversation';
 import type {
@@ -62,6 +64,7 @@ export enum ChatEventType {
   subagentRosterUpdated = 'subagent_roster_updated',
   userQuestionAsked = 'user_question_asked',
   userQuestionAnswered = 'user_question_answered',
+  substitutionApplied = 'substitution_applied',
 }
 
 export type ChatEventBase<
@@ -412,6 +415,8 @@ export interface RoundInterruptedEventData {
   workspace_id?: string;
   /** True when the interrupted run was a HITL resume of a paused round. */
   resumed?: boolean;
+  /** Compaction summary at interruption time, when the run compacted its context. */
+  compaction_summary?: CompactionSummary;
 }
 
 export type RoundInterruptedEvent = ChatEventBase<
@@ -502,10 +507,12 @@ export const isCompactionStartedEvent = (
 // Compaction completed
 
 export interface CompactionCompletedEventData {
+  /** Estimated token count before compaction */
+  token_count_before: number;
   /** Estimated token count after compaction */
   token_count_after: number;
-  /** Number of rounds that were summarized */
-  summarized_round_count: number;
+  /** Number of cycles that were summarized */
+  summarized_cycle_count: number;
 }
 
 export type CompactionCompletedEvent = ChatEventBase<
@@ -557,6 +564,28 @@ export const isSubagentRosterUpdatedEvent = (
   return event.type === ChatEventType.subagentRosterUpdated;
 };
 
+// Substitution applied
+
+export type SubstitutionAppliedEventData = SubstitutionStepData;
+
+export type SubstitutionAppliedEvent = ChatEventBase<
+  ChatEventType.substitutionApplied,
+  SubstitutionAppliedEventData
+>;
+
+export const createSubstitutionAppliedEvent = (
+  data: SubstitutionAppliedEventData
+): SubstitutionAppliedEvent => ({
+  type: ChatEventType.substitutionApplied,
+  data,
+});
+
+export const isSubstitutionAppliedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is SubstitutionAppliedEvent => {
+  return event.type === ChatEventType.substitutionApplied;
+};
+
 export const TODOS_UPDATED_UI_EVENT = 'todos_updated' as const;
 
 export interface TodosUpdatedUiEventData {
@@ -591,6 +620,7 @@ export type ChatAgentEvent =
   | CompactionCompletedEvent
   | BackgroundAgentCompleteEvent
   | SubagentRosterUpdatedEvent
+  | SubstitutionAppliedEvent
   | UserQuestionAskedEvent
   | UserQuestionAnsweredEvent;
 

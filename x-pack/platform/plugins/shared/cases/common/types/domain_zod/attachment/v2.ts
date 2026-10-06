@@ -15,7 +15,7 @@ import {
 
 export const UnifiedReferenceAttachmentPayloadSchema = z.object({
   type: z.string(),
-  attachmentId: z.string(),
+  attachmentId: z.union([z.string(), z.array(z.string())]),
   owner: z.string(),
   data: z.record(z.string(), jsonValueSchema).nullable().optional(),
   metadata: z.record(z.string(), jsonValueSchema).nullable().optional(),
@@ -43,7 +43,7 @@ export const UnifiedAttachmentSchema = UnifiedAttachmentAttributesSchema.and(
 
 const UnifiedReferenceAttachmentPayloadPartialSchema = z.object({
   type: z.string().optional(),
-  attachmentId: z.string().optional(),
+  attachmentId: z.union([z.string(), z.array(z.string())]).optional(),
   data: z.record(z.string(), jsonValueSchema).nullable().optional(),
   metadata: z.record(z.string(), jsonValueSchema).nullable().optional(),
 });

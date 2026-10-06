@@ -10,15 +10,10 @@ import { test } from '../fixtures';
 
 const SAMPLE_DATA_SET = 'ecommerce';
 
-/*
- * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
- * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
- * until ECH support lands.
- */
 test.describe(
   'Discover Alerts menu with alerting v2',
   {
-    tag: '@local-stateful-classic',
+    tag: ['@local-stateful-classic', '@local-serverless-observability_complete'],
   },
   () => {
     test.beforeAll(async ({ apiServices }) => {
@@ -34,9 +29,9 @@ test.describe(
       await pageObjects.discover.waitUntilSearchingHasFinished();
     });
 
-    test.afterAll(async ({ apiServices }) => {
-      await apiServices.sampleData.remove(SAMPLE_DATA_SET);
-    });
+    // Sample data is not removed in afterAll — other suites in the same
+    // serverless lane share the ecommerce dataset and removing it here
+    // races with their active queries.
 
     test('should show Alerts menu with the v2 ES|QL rule row and hide v1 entries', async ({
       pageObjects,

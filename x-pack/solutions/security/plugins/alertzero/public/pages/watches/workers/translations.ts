@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import {
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
-  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
@@ -74,7 +74,7 @@ export const WORKER_DESCRIPTIONS: Record<string, string> = {
     'xpack.alertzero.watches.workers.forensicsEndpointAnalysis.description',
     {
       defaultMessage:
-        'Runs a deep forensics pass on an investigation: builds a timeline, extracts indicators of compromise, and records its rationale. Triggered by the investigation workflow. Powers the Run Forensic analysis option on Attack Discovery proposals.',
+        'Reconstructs the attack timeline on affected hosts and proposes containment. Runs only on attacks handed off by the Attack Discovery Worker and needs Elastic Defend data.',
     }
   ),
   [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: i18n.translate(
@@ -86,13 +86,15 @@ export const WORKER_DESCRIPTIONS: Record<string, string> = {
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: i18n.translate(
     'xpack.alertzero.watches.workers.detectionRuleTuning.description',
     {
-      defaultMessage: 'Diagnoses noisy rules and applies approved query changes.',
+      defaultMessage:
+        'Works on false-positive dispositions in Alerts. Without Alert Triage worker enabled it only runs the scheduled sweep on FP alerts processed manually or using other tools.',
     }
   ),
-  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID]: i18n.translate(
-    'xpack.alertzero.watches.workers.detectionRuleCreation.description',
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID]: i18n.translate(
+    'xpack.alertzero.watches.workers.detectionRuleCoverage.description',
     {
-      defaultMessage: 'Drafts an ES|QL rule for a detection gap and creates it on approval.',
+      defaultMessage:
+        'Acts on coverage gaps from Continuous Threat Hunt. With Hunt Watch disabled it has nothing to act on.',
     }
   ),
 };
@@ -121,9 +123,9 @@ export const WORKER_NAMES: Record<string, string> = {
     'xpack.alertzero.watches.workers.detectionRuleTuning.name',
     { defaultMessage: 'Rule Tuning' }
   ),
-  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID]: i18n.translate(
-    'xpack.alertzero.watches.workers.detectionRuleCreation.name',
-    { defaultMessage: 'Rule Creation' }
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID]: i18n.translate(
+    'xpack.alertzero.watches.workers.detectionRuleCoverage.name',
+    { defaultMessage: 'Rule Coverage' }
   ),
 };
 

@@ -50,12 +50,7 @@ export const SettingRow: React.FC<SettingRowProps> = ({
       `}
     >
       <div>
-        <EuiText
-          size="s"
-          css={css`
-            white-space: nowrap;
-          `}
-        >
+        <EuiText size="s">
           <strong id={labelId}>{label}</strong>
         </EuiText>
         {labelHelp ? (

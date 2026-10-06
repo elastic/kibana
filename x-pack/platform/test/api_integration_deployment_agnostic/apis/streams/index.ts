@@ -24,9 +24,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./lifecycle'));
     loadTestFile(require.resolve('./lifecycle_retention'));
     loadTestFile(require.resolve('./failure_store'));
-    // Significant events suites (significant_events, queries, features, content, snapshot_restore)
-    // are gated behind the nightshift.enabled feature flag and run from the
-    // dedicated significant_events.feature_flag configs instead of here.
+    loadTestFile(require.resolve('./content'));
     loadTestFile(require.resolve('./discover'));
     loadTestFile(require.resolve('./ingest_missing_data_stream'));
     loadTestFile(require.resolve('./migration_on_read'));

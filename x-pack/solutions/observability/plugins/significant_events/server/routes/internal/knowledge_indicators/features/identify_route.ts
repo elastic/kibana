@@ -8,17 +8,13 @@
 import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import { getStreamSamplingSource, getStreamTypeFromDefinition } from '@kbn/streams-schema';
-import type { InferenceDocument } from '@kbn/nightshift-ai';
-import {
-  MAX_ID_LENGTH,
-  SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-} from '@kbn/significant-events-schema';
+import { resolveNightshiftModelForRequest, type InferenceDocument } from '@kbn/nightshift-ai';
+import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createServerRoute } from '../../../create_server_route';
 import { assertNotPaused } from '../../../utils/assert_not_paused';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { resolveConnectorForFeature } from '../../../utils/resolve_connector_for_feature';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 import { formatInferenceProviderError } from '../../../utils/create_connector_sse_error';
 import {
@@ -138,7 +134,7 @@ const prepareInferredSamplingRoute = createServerRoute({
     const {
       start = now - MS_PER_DAY,
       end = now,
-      runId = uuidv4(),
+      runId,
       iteration = 1,
       sampleSize = tuningConfig.sample_size,
       entityFilteredRatio = tuningConfig.entity_filtered_ratio,
@@ -146,6 +142,7 @@ const prepareInferredSamplingRoute = createServerRoute({
       maxEntityFilters = tuningConfig.max_entity_filters,
       samplingTimeoutMs = tuningConfig.sampling_timeout_ms,
     } = params.body ?? {};
+    const resolvedRunId = runId?.trim() || uuidv4();
 
     const [kiClient, stream] = await Promise.all([
       scopedClients.getKnowledgeIndicatorClient(),
@@ -159,7 +156,7 @@ const prepareInferredSamplingRoute = createServerRoute({
       samplingSource: getStreamSamplingSource(stream),
       start,
       end,
-      runId,
+      runId: resolvedRunId,
       logger: routeLogger,
       sampleSize,
       entityFilteredRatio,
@@ -221,24 +218,25 @@ const identifyInferredFeaturesRoute = createServerRoute({
     const now = Date.now();
     const {
       connectorId: connectorIdOverride,
-      runId = uuidv4(),
+      runId,
       iteration,
       documents,
       samplingTelemetry,
       maxExcludedFeaturesInPrompt = tuningConfig.max_excluded_features_in_prompt,
       maxPreviouslyIdentifiedFeatures,
     } = params.body;
+    const resolvedRunId = runId?.trim() || uuidv4();
     const { totalFilters, filtersCapped, hasFilteredDocuments } = samplingTelemetry;
 
     const [connectorId, stream, kiClient] = await Promise.all([
-      connectorIdOverride
-        ? Promise.resolve(connectorIdOverride)
-        : resolveConnectorForFeature({
-            searchInferenceEndpoints: server.searchInferenceEndpoints,
-            featureId: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-            featureName: 'knowledge indicator extraction',
-            request,
-          }),
+      resolveNightshiftModelForRequest({
+        request,
+        inference: server.inference,
+        savedObjects: server.core.savedObjects,
+        uiSettings: server.core.uiSettings,
+        step: 'kiExtraction',
+        requestedId: connectorIdOverride,
+      }),
       streamsClient.getStream(streamName),
       scopedClients.getKnowledgeIndicatorClient(),
     ]);
@@ -257,7 +255,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
         streamName,
         streamType,
         definition: stream,
-        runId,
+        runId: resolvedRunId,
         documents,
         totalFilters,
         filtersCapped,
@@ -288,7 +286,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       telemetry.trackFeaturesIdentified(
         buildTelemetry(
           {
-            run_id: runId,
+            run_id: resolvedRunId,
             connector_id: connectorId,
             iteration: iteration ?? 1,
             stream_name: streamName,

@@ -7,8 +7,13 @@
 
 import type { CoreSetup } from '@kbn/core/public';
 import type { CloudConfigType } from '.';
-import { CLOUD_SNAPSHOTS_PATH, CLOUD_USER_BILLING_ADMIN_ROLE } from '../common/constants';
-import { getFullCloudUrl } from '../common/utils';
+import {
+  CLOUD_PROJECT_SEARCH_POWER_QUERY,
+  CLOUD_SNAPSHOTS_PATH,
+  CLOUD_USER_BILLING_ADMIN_ROLE,
+  SEARCH_POWER_EDITOR_ROLES,
+} from '../common/constants';
+import { getFullCloudUrl, getProjectPageUrl } from '../common/utils';
 import type { CloudBasicUrls, CloudPrivilegedUrls } from './types';
 
 /**
@@ -92,9 +97,20 @@ export class CloudUrlsService {
       ? getFullCloudUrl(this.config.base_url, this.config.users_and_roles_url)
       : undefined;
 
+    const showSearchPowerUrl =
+      Boolean(this.config.serverless?.project_id) &&
+      userRoles.some((role) => SEARCH_POWER_EDITOR_ROLES.includes(role));
+    const conditionalFullCloudSearchPowerUrl = showSearchPowerUrl
+      ? getProjectPageUrl(
+          getFullCloudUrl(this.config.base_url, this.config.deployment_url),
+          CLOUD_PROJECT_SEARCH_POWER_QUERY
+        )
+      : undefined;
+
     return {
       billingUrl: conditionalFullCloudBillingUrl,
       usersAndRolesUrl: conditionalFullCloudUsersAndRolesUrl,
+      searchPowerUrl: conditionalFullCloudSearchPowerUrl,
     };
   }
 

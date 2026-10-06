@@ -1,0 +1,47 @@
+{
+  "sha1": "fa18466d0d70aac9391d4357ce87a8f84418a43b",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "9f300b5c2bc636b-dd633eac77d8754",
+      "title": "data.search.searchSource contract asScoped()",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_test_plugins/api/tests/search_source.spec.ts",
+        "line": 29,
+        "column": 22
+      }
+    },
+    {
+      "id": "9f300b5c2bc636b-08723d5e136a9d8",
+      "title": "data.search.searchSource contract createEmpty()",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_test_plugins/api/tests/search_source.spec.ts",
+        "line": 34,
+        "column": 5
+      }
+    },
+    {
+      "id": "9f300b5c2bc636b-c42f69f6370bc7b",
+      "title": "data.search.searchSource contract create()",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_test_plugins/api/tests/search_source.spec.ts",
+        "line": 41,
+        "column": 66
+      }
+    }
+  ]
+}

@@ -8,7 +8,7 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('./no_trailing_import_slash');
+const rule = require('..').rules.no_trailing_import_slash;
 const dedent = require('dedent');
 
 const ruleTester = new RuleTester({

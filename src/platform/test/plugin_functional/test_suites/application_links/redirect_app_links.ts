@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     it('navigates to another app without performing a full page refresh', async () => {
       await testSubjects.click('applink-basic-test');
 
-      expect(await testSubjects.exists('app-applink_end')).to.eql(true);
+      await testSubjects.existOrFail('app-applink_end', { timeout: 5000 });
       expect(getPathWithHash(await browser.getCurrentUrl())).to.eql('/app/applink_end');
       expect(await wasReloaded()).to.eql(false);
     });
@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     it('handles the path of the link', async () => {
       await testSubjects.click('applink-path-test');
 
-      expect(await testSubjects.exists('app-applink_end')).to.eql(true);
+      await testSubjects.existOrFail('app-applink_end', { timeout: 5000 });
       expect(getPathWithHash(await browser.getCurrentUrl())).to.eql('/app/applink_end/some-path');
       expect(await wasReloaded()).to.eql(false);
     });
@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     it('handles hash in urls', async () => {
       await testSubjects.click('applink-hash-test');
 
-      expect(await testSubjects.exists('app-applink_end')).to.eql(true);
+      await testSubjects.existOrFail('app-applink_end', { timeout: 5000 });
       expect(getPathWithHash(await browser.getCurrentUrl())).to.eql(
         '/app/applink_end/some-path#/some/hash'
       );
@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     it('works in a nested dom structure', async () => {
       await testSubjects.click('applink-nested-test');
 
-      expect(await testSubjects.exists('app-applink_end')).to.eql(true);
+      await testSubjects.existOrFail('app-applink_end', { timeout: 5000 });
       expect(getPathWithHash(await browser.getCurrentUrl())).to.eql('/app/applink_end#bang');
       expect(await wasReloaded()).to.eql(false);
     });
@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     it('works for intra-app links', async () => {
       await testSubjects.click('applink-intra-test');
 
-      expect(await testSubjects.exists('app-applink_start')).to.eql(true);
+      await testSubjects.existOrFail('app-applink_start', { timeout: 5000 });
       expect(getPathWithHash(await browser.getCurrentUrl())).to.eql('/app/applink_start/some-path');
       expect(await wasReloaded()).to.eql(false);
     });

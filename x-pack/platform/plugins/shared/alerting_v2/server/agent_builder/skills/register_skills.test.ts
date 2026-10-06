@@ -63,7 +63,7 @@ describe('registerSkills', () => {
   const deps = () =>
     ({
       logger: logger as unknown as LoggerServiceContract,
-      getWorkflow: jest.fn(),
+      getWorkflowClient: jest.fn(() => ({ getWorkflow: jest.fn() })),
       getAvailableConnectors: jest.fn(),
     } as const);
 

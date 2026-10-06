@@ -45,6 +45,7 @@ import {
 import { StepIcon } from './shared/step_icon';
 import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
 import { useTelemetry } from '../../../hooks/use_telemetry';
+import { parseIterationIndex } from '../../workflow_execution_detail/lib/parse_iteration_index';
 import type { ChildWorkflowExecutionsMap } from '../../workflow_execution_detail/model/use_child_workflow_executions';
 import type { StepExecutionTreeItem } from '../../workflow_execution_detail/ui/build_step_executions_tree';
 import {
@@ -67,6 +68,15 @@ const COLLAPSED_BY_DEFAULT_STEP_TYPES = [
   'enter-default-branch',
 ];
 
+const isIterationStepType = (stepType: string | undefined): boolean =>
+  stepType === 'foreach-iteration' || stepType === 'while-iteration';
+
+const formatIterationLabel = (n: number): string =>
+  i18n.translate('workflows.WorkflowStepExecutionTree.iterationLabel', {
+    defaultMessage: 'Iteration #{n}',
+    values: { n },
+  });
+
 function convertTreeToEuiTreeViewItems(
   treeItems: StepExecutionTreeItem[],
   stepExecutionMap: Map<string, WorkflowStepExecutionDto>,
@@ -81,10 +91,13 @@ function convertTreeToEuiTreeViewItems(
     const selected = selectedId === stepExecution?.id;
 
     const stepId = stepExecution?.stepId ?? item.stepId;
-    // Prefer a resolved display label (e.g. a static parallel branch name) over
-    // the raw stepId, which for parallel/foreach scope nodes is the bare index.
-    const displayLabel = item.displayLabel ?? stepId;
     const stepType = stepExecution?.stepType ?? item.stepType;
+    const iterationIndex = isIterationStepType(stepType) ? parseIterationIndex(stepId) : NaN;
+    // Iteration rows: `iteration-{n}` (foreach) or bare `"0"` (while). Parallel
+    // branches still prefer a resolved display label over a raw index.
+    const displayLabel = !Number.isNaN(iterationIndex)
+      ? formatIterationLabel(iterationIndex)
+      : item.displayLabel ?? stepId;
 
     // Check if this is a skeleton step (not yet received from server) or a loading placeholder
     const isSkeletonStep =

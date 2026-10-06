@@ -7,7 +7,7 @@
 
 import { decodeStackTraceResponse } from '@kbn/profiling-utils';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { ProfilingESClient } from '../../../common/profiling_es_client';
+import type { ProfilingESClient } from '../../utils/profiling_es_client';
 
 interface Params {
   client: ProfilingESClient;

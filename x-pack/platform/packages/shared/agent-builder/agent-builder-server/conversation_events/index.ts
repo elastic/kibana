@@ -8,4 +8,8 @@
 export type {
   ConversationEventTypeDefinition,
   ConversationEventPayloadOf,
+  ConversationEventOf,
+  ConversationEventFormatContext,
+  ConversationEventRepresentation,
+  TextConversationEventRepresentation,
 } from './type_definition';

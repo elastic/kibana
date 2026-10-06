@@ -15,7 +15,6 @@ import * as React from 'react';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
-import { ALERTING_V2_RULES_BASE_PATH } from '@kbn/alerting-v2-constants';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import RulesPage from './rules_page_container';
 import { hasShowActionsCapability } from '../../lib/capabilities';
@@ -251,46 +250,16 @@ describe('rulesPage', () => {
         };
       });
 
-      it('replaces the Rules/Logs tabs with V1 rules/V2 rules tabs', async () => {
+      it('hides the V2 rules tab and the classic Rules/Logs tabs', async () => {
         const history = createMemoryHistory({ initialEntries: ['/'] });
         renderRulesPage(history);
 
-        expect(await screen.findByTestId('v1RulesTab')).toBeInTheDocument();
-        expect(await screen.findByTestId('v2RulesTab')).toBeInTheDocument();
+        await screen.findByTestId('rulesListComponents');
+        expect(screen.queryByRole('tab')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('v1RulesTab')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('v2RulesTab')).not.toBeInTheDocument();
         expect(screen.queryByTestId('rulesTab')).not.toBeInTheDocument();
         expect(screen.queryByTestId('logsTab')).not.toBeInTheDocument();
-        expect(await screen.findAllByRole('tab')).toHaveLength(2);
-      });
-
-      it('selects the V1 rules tab on the rules list', async () => {
-        const history = createMemoryHistory({ initialEntries: ['/'] });
-        renderRulesPage(history);
-
-        expect(await screen.findByTestId('v1RulesTab')).toHaveAttribute('aria-selected', 'true');
-        expect(await screen.findByTestId('v2RulesTab')).toHaveAttribute('aria-selected', 'false');
-      });
-
-      it('orders the V2 rules tab before the V1 rules tab', async () => {
-        const history = createMemoryHistory({ initialEntries: ['/'] });
-        renderRulesPage(history);
-
-        const tabs = await screen.findAllByRole('tab');
-
-        expect(tabs.map((tab) => tab.getAttribute('data-test-subj'))).toEqual([
-          'v2RulesTab',
-          'v1RulesTab',
-        ]);
-      });
-
-      it('points each tab at its own app, under the server base path', async () => {
-        const history = createMemoryHistory({ initialEntries: ['/'] });
-        renderRulesPage(history);
-
-        expect(await screen.findByTestId('v1RulesTab')).toHaveAttribute('href', BOUND_RULES_HREF);
-        expect(await screen.findByTestId('v2RulesTab')).toHaveAttribute(
-          'href',
-          `${MOCK_BASE_PATH}${ALERTING_V2_RULES_BASE_PATH}`
-        );
       });
 
       it('renders host-provided tabs instead of management hrefs', async () => {

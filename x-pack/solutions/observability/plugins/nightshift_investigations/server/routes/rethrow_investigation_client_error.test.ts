@@ -7,6 +7,10 @@
 
 import { isBoom } from '@hapi/boom';
 import {
+  NightshiftModelBlockedError,
+  NightshiftModelNotFoundError,
+} from '@kbn/significant-events-schema';
+import {
   InvestigationConflictError,
   InvestigationNotFoundError,
   InvestigationQuotaDeniedError,
@@ -33,6 +37,8 @@ describe('rethrowInvestigationClientError', () => {
     [new InvestigationConflictError('Conflict'), 409],
     [new InvestigationUnavailableError('Unavailable'), 503],
     [new InvestigationQuotaDeniedError(), 429],
+    [new NightshiftModelNotFoundError('missing-model'), 400],
+    [new NightshiftModelBlockedError('blocked-model', 'default-model'), 400],
   ])('maps %s to HTTP %i', (error, statusCode) => {
     expect(mapStatusCode(error)).toBe(statusCode);
   });

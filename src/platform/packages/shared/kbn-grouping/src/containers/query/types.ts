@@ -12,7 +12,7 @@ import type {
   MappingRuntimeField,
   MappingRuntimeFields,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { RuntimeFieldSpec, RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
+import type { RuntimeFieldSpec, RuntimePrimitiveTypes } from '@kbn/data-views-types';
 import type { BoolQuery } from '@kbn/es-query';
 import type { estypes } from '@elastic/elasticsearch';
 

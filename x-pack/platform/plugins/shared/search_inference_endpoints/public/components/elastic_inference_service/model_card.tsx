@@ -13,78 +13,164 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiCard,
-  EuiSpacer,
   EuiText,
   EuiIcon,
+  useEuiTheme,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 import type { GroupedModel } from '../../utils/eis_utils';
-import { getProviderKeyForCreator, TASK_TYPE_DISPLAY_NAME } from '../../utils/eis_utils';
+import {
+  getModelEOLDate,
+  getProviderKeyForCreator,
+  isModelEndOfLifeReached,
+  isModelNearingEndOfLife,
+} from '../../utils/eis_utils';
 import { getModelId } from '../../utils/get_model_id';
 import { isModelUnavailableUnderRegionPolicy } from '../../utils/is_model_unavailable_under_region_policy';
+import { ModelBlockedBadge } from '../model_status/model_blocked_badge';
 import { ModelStatusBadge } from '../model_status/model_status_badge';
 import { EisModelStatus } from '../../types';
+import { ModelCardMetaRow } from './model_card_meta_row';
 
 interface ModelCardProps {
   model: GroupedModel;
   onClick: () => void;
 }
 
+const modelCardBodyStyles = ({ euiTheme }: UseEuiTheme) => ({
+  paddingBlockStart: euiTheme.size.s,
+});
+
 export const ModelCard: React.FC<ModelCardProps> = ({ model, onClick }) => {
-  const { modelName, modelCreator, taskTypes, categories } = model;
+  const euiThemeContext = useEuiTheme();
+  const { modelName, modelCreator, categories } = model;
+  const providerPrefix = `${modelCreator} `;
+  const modelTitle = modelName.startsWith(providerPrefix)
+    ? modelName.slice(providerPrefix.length)
+    : modelName;
   const modelId = model.endpoints[0] ? getModelId(model.endpoints[0]) : undefined;
   const providerKey = getProviderKeyForCreator(modelCreator);
   const provider = providerKey ? SERVICE_PROVIDERS[providerKey] : undefined;
-
-  const taskTypeLabels = taskTypes.map((tt) => TASK_TYPE_DISPLAY_NAME[tt] ?? tt).join(', ');
+  const endOfLifeDate = getModelEOLDate(model.modelMetadata)?.format('YYYY-MM-DD');
+  const endOfLifeReached = isModelEndOfLifeReached(model.modelMetadata);
+  const nearingEndOfLife = isModelNearingEndOfLife(model.modelMetadata);
 
   return (
     <EuiCard
-      icon={<EuiIcon type={provider?.icon ?? 'machineLearningApp'} size="l" aria-hidden={true} />}
-      title={modelName}
+      icon={
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon
+              type={provider?.icon ?? 'machineLearningApp'}
+              size="l"
+              aria-hidden={true}
+              data-test-subj={`eisModelCardProviderIcon-${modelName}`}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" data-test-subj={`eisModelCardProvider-${modelName}`}>
+              {modelCreator}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+      title={<span data-test-subj={`eisModelCardName-${modelName}`}>{modelTitle}</span>}
       titleSize="xs"
       textAlign="left"
       paddingSize="m"
       data-test-subj={`eisModelCard-${modelName}`}
       hasBorder
       onClick={onClick}
-      display={model.modelStatus === EisModelStatus.DeprecatedEOL ? 'subdued' : 'plain'}
+      display={endOfLifeReached ? 'subdued' : 'plain'}
     >
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexItem>
-          <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.searchInferenceEndpoints.eisModelCard.supports', {
-              defaultMessage: 'Supports {taskTypes}',
-              values: { taskTypes: taskTypeLabels },
-            })}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiSpacer size="m" />
+      <EuiFlexGroup
+        direction="column"
+        alignItems="flexStart"
+        gutterSize="m"
+        css={modelCardBodyStyles(euiThemeContext)}
+      >
         <EuiFlexItem grow={false}>
           <EuiBadgeGroup>
             {categories.map((cat) => (
-              <EuiBadge key={cat} color="hollow">
+              <EuiBadge
+                key={cat}
+                color="hollow"
+                data-test-subj={`eisModelCardCategory-${modelName}-${cat}`}
+              >
                 {cat}
               </EuiBadge>
             ))}
             {isModelUnavailableUnderRegionPolicy(model.endpoints, modelId ?? '') && (
-              <EuiBadge data-test-subj={`modelBlockedBadge-${model.modelName}`}>
-                {i18n.translate(
-                  'xpack.searchInferenceEndpoints.eisModelCard.blockedBadge.content',
-                  {
-                    defaultMessage: 'Blocked',
-                  }
-                )}
-              </EuiBadge>
+              <ModelBlockedBadge id={model.modelName} />
             )}
-            <ModelStatusBadge
-              id={model.modelName}
-              metadata={model.modelMetadata}
-              status={model.modelStatus}
-            />
+            {model.modelStatus === EisModelStatus.Preview && (
+              <ModelStatusBadge
+                id={model.modelName}
+                metadata={model.modelMetadata}
+                status={model.modelStatus}
+              />
+            )}
           </EuiBadgeGroup>
         </EuiFlexItem>
+        {endOfLifeDate && endOfLifeReached && (
+          <EuiFlexItem grow={false}>
+            <ModelCardMetaRow
+              modelName={modelName}
+              iconType="error"
+              iconColor="subdued"
+              textColor="subdued"
+              message={i18n.translate('xpack.searchInferenceEndpoints.eisModelCard.endOfLife', {
+                defaultMessage: 'End-of-life: {date}',
+                values: { date: endOfLifeDate },
+              })}
+              tooltipTitle={i18n.translate(
+                'xpack.searchInferenceEndpoints.eisModelCard.endOfLifeTooltip.title',
+                { defaultMessage: 'Model no longer available' }
+              )}
+              tooltip={i18n.translate(
+                'xpack.searchInferenceEndpoints.eisModelCard.endOfLifeTooltip.content',
+                {
+                  defaultMessage:
+                    'This model has reached end of life on {date}. Use a more recent model instead.',
+                  values: { date: endOfLifeDate },
+                }
+              )}
+              tooltipTestSubj={`eisModelCardEndOfLifeTooltip-${modelName}`}
+            />
+          </EuiFlexItem>
+        )}
+        {endOfLifeDate && nearingEndOfLife && (
+          <EuiFlexItem grow={false}>
+            <ModelCardMetaRow
+              modelName={modelName}
+              iconType="warning"
+              iconColor="warning"
+              textColor="warning"
+              message={i18n.translate(
+                'xpack.searchInferenceEndpoints.eisModelCard.nearingEndOfLife',
+                {
+                  defaultMessage: 'Nearing end-of-life: {date}',
+                  values: { date: endOfLifeDate },
+                }
+              )}
+              tooltipTitle={i18n.translate(
+                'xpack.searchInferenceEndpoints.eisModelCard.nearingEndOfLifeTooltip.title',
+                { defaultMessage: 'Model soon no longer available' }
+              )}
+              tooltip={i18n.translate(
+                'xpack.searchInferenceEndpoints.eisModelCard.nearingEndOfLifeTooltip.content',
+                {
+                  defaultMessage:
+                    'This model is reaching end of life on {date}. It will no longer be available after that date. We recommend using a more recent model.',
+                  values: { date: endOfLifeDate },
+                }
+              )}
+              tooltipTestSubj={`eisModelCardNearingEndOfLifeTooltip-${modelName}`}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiCard>
   );

@@ -196,23 +196,21 @@ export interface ResolvedCustomContentTemplate {
   height: number;
 }
 
+/** Generates a custom content template, or refines `existingTemplate` when one is given. */
+export type CustomContentTemplateResolver = (params: {
+  prompt: string;
+  esqlQuery?: string;
+  existingTemplate?: string;
+  /** True when the panel already has an ES|QL query that is not changing. Selects the Liquid system prompt without re-sampling. */
+  hasExistingQuery?: boolean;
+}) => Promise<ResolvedCustomContentTemplate>;
+
 export const createCustomContentTemplateResolver = ({
   modelProvider,
   esClient,
   logger,
-}: CustomContentTemplateResolverDeps) => {
-  return async ({
-    prompt,
-    esqlQuery,
-    existingTemplate,
-    hasExistingQuery,
-  }: {
-    prompt: string;
-    esqlQuery?: string;
-    existingTemplate?: string;
-    /** True when the panel already has an ES|QL query that is not changing. Selects the Liquid system prompt without re-sampling. */
-    hasExistingQuery?: boolean;
-  }): Promise<ResolvedCustomContentTemplate> => {
+}: CustomContentTemplateResolverDeps): CustomContentTemplateResolver => {
+  return async ({ prompt, esqlQuery, existingTemplate, hasExistingQuery }) => {
     let columns: Array<{ name: string; type: string }> = [];
     let values: unknown[][] = [];
 

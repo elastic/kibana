@@ -78,24 +78,24 @@ describe('getAttachmentVersionData', () => {
 
   it('returns version payloads ordered by version number', () => {
     const versioned = {
-      ...attachment('rule-1', RULE_ATTACHMENT_TYPE, { recovery_strategy: 'none' }),
+      ...attachment('rule-1', RULE_ATTACHMENT_TYPE, { recovery: { strategy: 'manual' } }),
       current_version: 3,
       versions: [
         {
           version: 3,
-          data: { recovery_strategy: 'no_breach' },
+          data: { recovery: { strategy: 'no_breach' } },
           created_at: '2026-01-01T00:00:03.000Z',
           content_hash: 'hash-3',
         },
         {
           version: 1,
-          data: { recovery_strategy: 'query' },
+          data: { recovery: { strategy: 'query', query: 'FROM logs-*' } },
           created_at: '2026-01-01T00:00:01.000Z',
           content_hash: 'hash-1',
         },
         {
           version: 2,
-          data: { recovery_strategy: 'none' },
+          data: { recovery: { strategy: 'manual' } },
           created_at: '2026-01-01T00:00:02.000Z',
           content_hash: 'hash-2',
         },
@@ -103,12 +103,12 @@ describe('getAttachmentVersionData', () => {
     } as VersionedAttachment;
 
     expect(getAttachmentVersionData([versioned], RULE_ATTACHMENT_TYPE)).toEqual([
-      { recovery_strategy: 'query' },
-      { recovery_strategy: 'none' },
-      { recovery_strategy: 'no_breach' },
+      { recovery: { strategy: 'query', query: 'FROM logs-*' } },
+      { recovery: { strategy: 'manual' } },
+      { recovery: { strategy: 'no_breach' } },
     ]);
     expect(getLatestAttachmentData([versioned], RULE_ATTACHMENT_TYPE)).toEqual({
-      recovery_strategy: 'no_breach',
+      recovery: { strategy: 'no_breach' },
     });
   });
 });

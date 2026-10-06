@@ -6,7 +6,11 @@
  */
 
 import type { ToolAvailabilityConfig } from '@kbn/agent-builder-server';
-import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import type { CoreStart } from '@kbn/core/server';
+import {
+  CONTEXT_ENGINE_ENABLED_SETTING_ID,
+  CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
+} from '@kbn/management-settings-ids';
 
 // Only reads a setting, so caching per space is safe. Privileges are checked in each handler.
 export const aiIndexToolsAvailability: ToolAvailabilityConfig = {
@@ -21,3 +25,27 @@ export const aiIndexToolsAvailability: ToolAvailabilityConfig = {
     return { status: 'available' };
   },
 };
+
+export const createMemoryToolsAvailability = (
+  getCoreStart: () => Promise<CoreStart>
+): ToolAvailabilityConfig => ({
+  cacheMode: 'none',
+  handler: async ({ request, uiSettings }) => {
+    const contextEngineEnabled = await uiSettings
+      .get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID)
+      .catch(() => false);
+    if (!contextEngineEnabled) {
+      return { status: 'unavailable', reason: 'Context Engine is disabled in this space.' };
+    }
+
+    const coreStart = await getCoreStart();
+    const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+    const globalUiSettings = coreStart.uiSettings.globalAsScopedToClient(savedObjectsClient);
+    const memoryEnabled = await globalUiSettings
+      .get<boolean>(CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID)
+      .catch(() => false);
+    return memoryEnabled
+      ? { status: 'available' }
+      : { status: 'unavailable', reason: 'Context Engine memory is disabled.' };
+  },
+});

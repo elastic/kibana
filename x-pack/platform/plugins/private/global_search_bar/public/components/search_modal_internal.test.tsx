@@ -28,7 +28,6 @@ jest.useFakeTimers({ legacyFakeTimers: true });
 describe('SearchModalInternal', () => {
   const usageCollection = usageCollectionPluginMock.createSetupContract();
   const core = coreMock.createStart();
-  const basePathUrl = '/plugins/globalSearchBar/assets/';
   let searchService: ReturnType<typeof globalSearchPluginMock.createStartContract>;
   let applications: ReturnType<typeof applicationServiceMock.createStartContract>;
   let eventReporter: EventReporter;
@@ -50,7 +49,6 @@ describe('SearchModalInternal', () => {
         <SearchModalInternal
           globalSearch={{ ...searchService, searchCharLimit: 1000 }}
           navigateToUrl={applications.navigateToUrl}
-          basePathUrl={basePathUrl}
           reportEvent={eventReporter}
           onClose={jest.fn()}
         />
@@ -70,7 +68,6 @@ describe('SearchModalInternal', () => {
         <SearchModalInternal
           globalSearch={{ ...searchService, searchCharLimit: 1000 }}
           navigateToUrl={applications.navigateToUrl}
-          basePathUrl={basePathUrl}
           reportEvent={eventReporter}
           onClose={jest.fn()}
         />

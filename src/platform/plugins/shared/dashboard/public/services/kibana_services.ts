@@ -21,6 +21,7 @@ import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
+import type { SearchSessionsManagementPluginStart } from '@kbn/search-sessions-management-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
@@ -43,6 +44,7 @@ export let observabilityAssistantService: ObservabilityAIAssistantPublicStart | 
 export let lensService: LensPublicStart | undefined;
 export let savedObjectsTaggingService: SavedObjectTaggingOssPluginStart | undefined;
 export let screenshotModeService: ScreenshotModePluginStart;
+export let searchSessionsManagementService: SearchSessionsManagementPluginStart | undefined;
 export let serverlessService: ServerlessPluginStart | undefined;
 export let shareService: SharePluginStart | undefined;
 export let spacesService: SpacesApi | undefined;
@@ -69,6 +71,7 @@ export const setKibanaServices = (kibanaCore: CoreStart, deps: DashboardStartDep
   observabilityAssistantService = deps.observabilityAIAssistant;
   lensService = deps.lens;
   savedObjectsTaggingService = deps.savedObjectsTaggingOss;
+  searchSessionsManagementService = deps.searchSessionsManagement;
   serverlessService = deps.serverless;
   screenshotModeService = deps.screenshotMode;
   shareService = deps.share;

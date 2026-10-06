@@ -82,6 +82,13 @@ export interface CloudPrivilegedUrls {
    * or if the user does not have the `manage_security` cluster privilege.
    */
   usersAndRolesUrl?: string;
+  /**
+   * The full URL to the serverless project page on Elastic Cloud with the Search Power editor expanded.
+   * Undefined if not running in Serverless, or if the user does not have one of the `superuser`, `admin` or `developer` roles.
+   *
+   * @example `{deploymentUrl}?tab=settings&edit=search_power`
+   */
+  searchPowerUrl?: string;
 }
 
 export type CloudUrls = CloudBasicUrls & CloudPrivilegedUrls;

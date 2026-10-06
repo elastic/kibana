@@ -42,13 +42,13 @@ const buildDeps = () => {
   } as unknown as SpacesPluginStart;
 
   const conversationClient = {
+    getAuthor: jest.fn().mockReturnValue({ id: 'profile-1', username: 'jane' }),
     get: jest.fn(),
     update: jest.fn().mockResolvedValue(undefined),
     appendEvents: jest.fn().mockResolvedValue(undefined),
   };
   const conversationsService = {
     getScopedClient: jest.fn().mockResolvedValue(conversationClient),
-    getConversationRoundAuthor: jest.fn().mockResolvedValue({ id: 'profile-1', username: 'jane' }),
   };
   const attachmentsService = {
     getTypeDefinition: jest.fn().mockReturnValue({
@@ -163,15 +163,13 @@ describe('createAttachmentPublicClient', () => {
       expect(deps.conversationClient.update).not.toHaveBeenCalled();
       expect(deps.conversationClient.appendEvents).toHaveBeenCalledTimes(1);
       const [request, options] = deps.conversationClient.appendEvents.mock.calls[0];
-      expect(options).toEqual({ access: 'owner' });
+      expect(options).toEqual({ access: 'converse', source: 'http_api' });
       expect(request.id).toBe('c1');
       expect(request.attachments).toEqual({
         snapshot: [],
         produced: [expect.objectContaining({ id: created.id })],
       });
-      expect(deps.conversationsService.getConversationRoundAuthor).toHaveBeenCalledWith({
-        request: deps.request,
-      });
+      expect(deps.conversationClient.getAuthor).toHaveBeenCalled();
       expect(request.events).toEqual([
         expect.objectContaining({
           type: 'attachment_added',
@@ -194,8 +192,9 @@ describe('createAttachmentPublicClient', () => {
       const client = deps.build('workflow');
       await client.create({ conversationId: 'c1', type: 'text', data: { text: 'hi' } });
 
-      const [request] = deps.conversationClient.appendEvents.mock.calls[0];
+      const [request, options] = deps.conversationClient.appendEvents.mock.calls[0];
       expect(request.events[0].data).toMatchObject({ source: 'workflow' });
+      expect(options).toEqual({ access: 'converse', source: 'workflow' });
     });
 
     it('binds source `server_api` for external plugin callers reaching the client via AttachmentsStart', async () => {
@@ -205,15 +204,16 @@ describe('createAttachmentPublicClient', () => {
       const client = deps.build('server_api');
       await client.create({ conversationId: 'c1', type: 'text', data: { text: 'hi' } });
 
-      const [request] = deps.conversationClient.appendEvents.mock.calls[0];
+      const [request, options] = deps.conversationClient.appendEvents.mock.calls[0];
       expect(request.events[0].data).toMatchObject({ source: 'server_api' });
+      expect(options).toEqual({ access: 'converse', source: 'server_api' });
     });
 
     it('stamps id "unknown" (does NOT fall back to conversation owner) when the caller has no profile id', async () => {
       // Audit-hostile guardrail: an API-key caller with no profile id must not be silently
       // attributed to the conversation owner — the mutation was not performed by them.
       const deps = buildDeps();
-      deps.conversationsService.getConversationRoundAuthor.mockResolvedValue(undefined);
+      deps.conversationClient.getAuthor.mockReturnValue(undefined);
       deps.conversationClient.get.mockResolvedValue({
         id: 'c1',
         user: { id: 'owner-1', username: 'owner' },
@@ -523,6 +523,169 @@ describe('createAttachmentPublicClient', () => {
         code: 'attachmentPermanentDeleteBlocked',
         meta: { reason: 'client_id' },
       });
+    });
+  });
+
+  describe('access option', () => {
+    it('defaults to "converse" for create', async () => {
+      const deps = buildDeps();
+      deps.conversationClient.get.mockResolvedValue({ id: 'c1', attachments: [], rounds: [] });
+
+      const client = deps.build();
+      await client.create({ conversationId: 'c1', type: 'text', data: { text: 'x' } });
+
+      const [, options] = deps.conversationClient.appendEvents.mock.calls[0];
+      expect(options).toEqual({ access: 'converse', source: 'http_api' });
+    });
+
+    it('forwards "converse" access to appendEvents for create', async () => {
+      const deps = buildDeps();
+      deps.conversationClient.get.mockResolvedValue({ id: 'c1', attachments: [], rounds: [] });
+
+      const client = deps.build();
+      await client.create({
+        conversationId: 'c1',
+        type: 'text',
+        data: { text: 'x' },
+        access: 'converse',
+      });
+
+      const [, options] = deps.conversationClient.appendEvents.mock.calls[0];
+      expect(options).toEqual({ access: 'converse', source: 'http_api' });
+    });
+
+    it('forwards "converse" access to appendEvents for update', async () => {
+      const deps = buildDeps();
+      deps.conversationClient.get.mockResolvedValue({
+        id: 'c1',
+        attachments: [makeAttachment({ id: 'a1' })],
+        rounds: [],
+      });
+
+      const client = deps.build();
+      await client.update({
+        conversationId: 'c1',
+        attachmentId: 'a1',
+        data: { text: 'new' },
+        access: 'converse',
+      });
+
+      const [, options] = deps.conversationClient.appendEvents.mock.calls[0];
+      expect(options).toEqual({ access: 'converse', source: 'http_api' });
+    });
+
+    it('forwards "converse" access to appendEvents for delete', async () => {
+      const deps = buildDeps();
+      deps.conversationClient.get.mockResolvedValue({
+        id: 'c1',
+        attachments: [makeAttachment({ id: 'a1' })],
+        rounds: [],
+      });
+
+      const client = deps.build();
+      await client.delete({ conversationId: 'c1', attachmentId: 'a1', access: 'converse' });
+
+      const [, options] = deps.conversationClient.appendEvents.mock.calls[0];
+      expect(options).toEqual({ access: 'converse', source: 'http_api' });
+    });
+  });
+
+  describe('bulkCreate', () => {
+    it('creates all attachments in a single write', async () => {
+      const deps = buildDeps();
+      deps.conversationClient.get.mockResolvedValue({ id: 'c1', attachments: [], rounds: [] });
+
+      const client = deps.build();
+      const result = await client.bulkCreate({
+        conversationId: 'c1',
+        attachments: [
+          { type: 'text', data: { text: 'a' } },
+          { type: 'text', data: { text: 'b' } },
+        ],
+      });
+
+      expect(result.created).toHaveLength(2);
+      expect(result.errors).toHaveLength(0);
+      // Single write for all attachments
+      expect(deps.conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+    });
+
+    it('defaults to "converse" access and render_inline: false', async () => {
+      const deps = buildDeps();
+      deps.conversationClient.get.mockResolvedValue({ id: 'c1', attachments: [], rounds: [] });
+
+      const client = deps.build();
+      await client.bulkCreate({
+        conversationId: 'c1',
+        attachments: [{ type: 'text', data: { text: 'hi' } }],
+      });
+
+      const [request, options] = deps.conversationClient.appendEvents.mock.calls[0];
+      expect(options).toEqual({ access: 'converse', source: 'http_api' });
+      expect(request.events[0].data).toMatchObject({ render_inline: false });
+    });
+
+    it('forwards "converse" access and render_inline: true to appendEvents', async () => {
+      const deps = buildDeps();
+      deps.conversationClient.get.mockResolvedValue({ id: 'c1', attachments: [], rounds: [] });
+
+      const client = deps.build();
+      await client.bulkCreate({
+        conversationId: 'c1',
+        attachments: [{ type: 'text', data: { text: 'hi' } }],
+        access: 'converse',
+        render_inline: true,
+      });
+
+      const [request, options] = deps.conversationClient.appendEvents.mock.calls[0];
+      expect(options).toEqual({ access: 'converse', source: 'http_api' });
+      expect(request.events[0].data).toMatchObject({ render_inline: true });
+    });
+
+    it('skips an already-existing id and records it as an error without failing the write', async () => {
+      const deps = buildDeps();
+      deps.conversationClient.get.mockResolvedValue({
+        id: 'c1',
+        attachments: [makeAttachment({ id: 'existing' })],
+        rounds: [],
+      });
+
+      const client = deps.build();
+      const result = await client.bulkCreate({
+        conversationId: 'c1',
+        attachments: [
+          { id: 'existing', type: 'text', data: { text: 'a' } },
+          { type: 'text', data: { text: 'b' } },
+        ],
+      });
+
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0].id).toBe('existing');
+      expect(result.created).toHaveLength(1);
+    });
+
+    it('records a type-validation failure as an error without failing the write', async () => {
+      const deps = buildDeps();
+      deps.attachmentsService.getTypeDefinition = jest.fn().mockReturnValue({
+        id: 'text',
+        validate: async () => ({ valid: false, error: 'bad shape' }),
+        isReadonly: false,
+      });
+      deps.conversationClient.get.mockResolvedValue({ id: 'c1', attachments: [], rounds: [] });
+
+      const client = deps.build();
+      const result = await client.bulkCreate({
+        conversationId: 'c1',
+        attachments: [
+          { type: 'text', data: { wrong: true } },
+          { type: 'text', data: { wrong: true } },
+        ],
+      });
+
+      expect(result.errors).toHaveLength(2);
+      expect(result.created).toHaveLength(0);
+      // No write when nothing was created
+      expect(deps.conversationClient.appendEvents).not.toHaveBeenCalled();
     });
   });
 });

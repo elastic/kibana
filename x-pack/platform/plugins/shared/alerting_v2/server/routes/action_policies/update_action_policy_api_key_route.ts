@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { errorResponseSchema } from '@kbn/alerting-v2-schemas';
+import { actionPolicyResponseSchema, errorResponseSchema } from '@kbn/alerting-v2-schemas';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import type { z } from '@kbn/zod/v4';
@@ -16,6 +16,7 @@ import { BaseAlertingRoute } from '../base_alerting_route';
 import { updateActionPolicyApiKeyOasExamples } from './update_action_policy_api_key_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 import {
   ACTION_POLICY_NOT_FOUND_DESCRIPTION,
   ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
@@ -42,8 +43,13 @@ export class UpdateActionPolicyApiKeyRoute extends BaseAlertingRoute {
       params: actionPolicyIdParamsSchema,
     },
     response: {
-      204: {
-        description: 'The API key of the action policy was updated successfully.',
+      200: {
+        body: () => actionPolicyResponseSchema,
+        description: 'Returns the action policy whose API key was rotated.',
+      },
+      400: {
+        body: () => errorResponseSchema,
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
       404: {
         body: () => errorResponseSchema,
@@ -73,10 +79,10 @@ export class UpdateActionPolicyApiKeyRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    await this.actionPolicyClient.updateActionPolicyApiKey({
+    const result = await this.actionPolicyClient.updateActionPolicyApiKey({
       id: this.request.params.id,
     });
 
-    return this.ctx.response.noContent();
+    return this.ctx.response.ok({ body: result });
   }
 }

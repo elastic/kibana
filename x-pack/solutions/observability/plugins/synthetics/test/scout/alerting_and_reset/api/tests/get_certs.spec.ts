@@ -63,7 +63,10 @@ const certData = (res: { body: unknown }): CertResultBody =>
  * dots, and the `monitorTypes` / `tags` quick-filter query params.
  *
  * Tests share worker-scoped Kibana/ES state and run sequentially, so the empty
- * assertion runs first and later tests build on the seeded certificates.
+ * assertion runs first and later tests build on the seeded certificates. The
+ * empty facets check is CCS-aware: stateful always runs the ES query (see
+ * `isCCSEnabled`), so fixed-bucket facets may be all-zero skeletons rather than
+ * `[]`.
  */
 apiTest.describe(
   'getCertificates',
@@ -205,18 +208,19 @@ apiTest.describe(
       expect(res).toHaveStatusCode(200);
       expect(certData(res)).toMatchObject({ certs: [], total: 0 });
 
-      // The facets route short-circuits to empty arrays (skipping the ES query)
-      // when no monitor is enabled.
+      // No enabled monitors → no cert data. Dynamic facets (terms aggs) stay
+      // empty; fixed-bucket facets (resource type / origin / expiring-within)
+      // are either [] (serverless short-circuits the ES query) or all-zero
+      // skeletons (stateful treats CCS as enabled and still runs the query).
       const facetsRes = await getCertFacets(apiClient);
       expect(facetsRes).toHaveStatusCode(200);
-      expect((facetsRes.body as { data: CertFacetsBody }).data).toStrictEqual({
-        monitorTypes: [],
-        tags: [],
-        issuers: [],
-        resourceTypes: [],
-        certOrigin: [],
-        expiringWithin: [],
-      });
+      const facets = (facetsRes.body as { data: CertFacetsBody }).data;
+      expect(facets.monitorTypes).toStrictEqual([]);
+      expect(facets.tags).toStrictEqual([]);
+      expect(facets.issuers).toStrictEqual([]);
+      expect(facets.resourceTypes.every((entry) => entry.count === 0)).toBe(true);
+      expect(facets.certOrigin.every((entry) => entry.count === 0)).toBe(true);
+      expect(facets.expiringWithin.every((entry) => entry.count === 0)).toBe(true);
     });
 
     apiTest(

@@ -7,6 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { kqlQuery } from '@kbn/observability-plugin/server';
 import { SERVICE_NAME } from '@kbn/observability-shared-plugin/common';
 import type { RouteRegisterParameters } from '.';
@@ -14,6 +15,7 @@ import { IDLE_SOCKET_TIMEOUT } from '.';
 import { getRoutePaths, MAX_KUERY_LENGTH } from '../../common';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { getClient } from './compat';
+import { PROFILING_API_PRIVILEGE } from '../feature';
 
 const querySchema = schema.object({
   timeFrom: schema.number(),
@@ -38,7 +40,7 @@ export function registerTopNFunctionsSearchRoute({
       path: paths.TopNFunctions,
       security: {
         authz: {
-          requiredPrivileges: ['profiling'],
+          requiredPrivileges: [PROFILING_API_PRIVILEGE],
         },
       },
       options: { timeout: { idleSocket: IDLE_SOCKET_TIMEOUT } },
@@ -76,6 +78,7 @@ export function registerTopNFunctionsSearchRoute({
         const topNFunctions = await profilingDataAccess.services.fetchESFunctions({
           core,
           esClient,
+          abortSignal: getRequestAbortedSignal(request.events.aborted$),
           query,
           aggregationFields: [SERVICE_NAME],
           totalSeconds,

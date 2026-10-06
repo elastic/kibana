@@ -84,6 +84,8 @@ export class RuleChangesHistoryClient implements RuleChangesHistoryClientContrac
   }: GetRuleChangeArgs): Promise<RuleChangeHistoryDetail> {
     this.assertInitialized();
 
+    // `eventId` is a UUID and already unique; `ruleId` is only needed because
+    // `getHistory` is the sole read API and always filters on an object id.
     const { items } = await this.changeHistory.getHistory(
       this.spaceId,
       RULE_CHANGES_HISTORY_OBJECT_TYPE,

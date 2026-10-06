@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiBetaBadge,
   EuiButton,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -28,7 +29,7 @@ import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors
 import { useFlyoutState } from '../../../hooks/use_flyout_state';
 import { useQueryState } from '../../../hooks/use_query_state';
 import { searchParamNames } from '../../../search_param_names';
-import { labels } from '../../../utils/i18n';
+import { connectorsTechPreviewBadgeProps, labels } from '../../../utils/i18n';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
 import { PageWrapper } from '../common/page_wrapper';
@@ -127,7 +128,6 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
     isConnectorsLoading,
   ]);
 
-  const isAddDisabled = agentQuery.agent?.configuration?.connector_ids === undefined;
   const showCustomizeEmptyState = assignedConnectors.length === 0 && !searchQuery.trim();
 
   if (isLoading) {
@@ -145,15 +145,27 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
   return (
     <PageWrapper>
       {showCustomizeEmptyState ? (
-        <ConnectorsCustomizeEmptyState canEditAgent={canEditAgent} onAddFromLibrary={openLibrary} />
+        <ConnectorsCustomizeEmptyState
+          canEditAgent={canEditAgent}
+          hasAllPrivileges={hasAllPrivileges}
+          onAddFromLibrary={openLibrary}
+          onCreateNew={openCreateFlyout}
+        />
       ) : (
         <>
           <div css={styles.header}>
             <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiTitle size="l">
-                  <h1>{labels.connectors.title}</h1>
-                </EuiTitle>
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="l">
+                      <h1>{labels.connectors.title}</h1>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBetaBadge {...connectorsTechPreviewBadgeProps} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
@@ -189,7 +201,7 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
                             <EuiContextMenuItem
                               key="from-library"
                               icon="download"
-                              disabled={isAddDisabled}
+                              data-test-subj="agentConnectorsAddFromLibraryMenuItem"
                               onClick={() => {
                                 setIsAddMenuOpen(false);
                                 openLibrary();
@@ -200,6 +212,7 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
                             <EuiContextMenuItem
                               key="create-new"
                               icon="plusCircle"
+                              data-test-subj="agentConnectorsCreateNewMenuItem"
                               onClick={() => {
                                 setIsAddMenuOpen(false);
                                 openCreateFlyout();

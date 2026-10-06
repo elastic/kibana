@@ -226,6 +226,11 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    */
   canvasWidth?: string;
   /**
+   * When true, the canvas content starts right below the flyout header, with no
+   * top padding. Use it for content that fills the whole body (e.g. a graph).
+   */
+  canvasHideTopPadding?: boolean;
+  /**
    * Optional custom content renderer for canvas mode (expanded flyout view).
    * When provided, attachments can be opened in an expanded view via action buttons.
    *

@@ -8,6 +8,7 @@
 import type { WorkflowsSearchParams } from '@kbn/workflows';
 import type { PolicyExecutionOutcomeFilter } from '@kbn/alerting-v2-schemas';
 import type { ListRuleExecutionsUiParams } from './use_fetch_rule_executions';
+import type { MatchRulesUiParams } from './use_fetch_matching_rules';
 
 export const ruleKeys = {
   all: ['rule'] as const,
@@ -20,6 +21,7 @@ export const ruleKeys = {
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
   }) => [...ruleKeys.lists(), filters] as const,
+  matchList: (params: MatchRulesUiParams) => [...ruleKeys.lists(), 'match', params] as const,
   details: () => [...ruleKeys.all, 'details'] as const,
   detail: (id: string) => [...ruleKeys.details(), id] as const,
   allTags: () => [...ruleKeys.all, 'tags'] as const,
@@ -28,6 +30,8 @@ export const ruleKeys = {
 
 export const ruleTemplateKeys = {
   all: ['ruleTemplate'] as const,
+  allTags: () => [...ruleTemplateKeys.all, 'tags'] as const,
+  tags: (search?: string) => [...ruleTemplateKeys.allTags(), { search }] as const,
   lists: () => [...ruleTemplateKeys.all, 'list'] as const,
   list: (filters: {
     page: number;
@@ -77,11 +81,11 @@ export const executionHistoryKeys = {
     perPage: number;
     search?: string;
     ruleIds?: string[];
-    outcome?: PolicyExecutionOutcomeFilter;
+    outcomes?: PolicyExecutionOutcomeFilter;
     episodeIds?: string[];
     from?: string;
     to?: string;
-    sort?: 'dispatchedAt';
+    sortField?: 'dispatchedAt';
     sortOrder?: 'asc' | 'desc';
   }) => [...executionHistoryKeys.all, 'list', filters] as const,
   newEventsSince: (
@@ -89,7 +93,7 @@ export const executionHistoryKeys = {
     filters: {
       search?: string;
       ruleIds?: string[];
-      outcome?: PolicyExecutionOutcomeFilter;
+      outcomes?: PolicyExecutionOutcomeFilter;
     } = {}
   ) => [...executionHistoryKeys.all, 'newEventsSince', since, filters] as const,
 };

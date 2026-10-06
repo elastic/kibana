@@ -6,15 +6,16 @@
  */
 
 import { createBadRequestError } from '@kbn/agent-builder-common/base/errors';
-import type { ConverseInput, TimelineEvent } from '@kbn/agent-builder-common';
+import type { ConverseInput } from '@kbn/agent-builder-common';
 import { pendingPromptRequest } from '@kbn/agent-builder-common';
+import type { ContextTimelineEvent } from './context_timeline';
 
 export const ensureValidInput = ({
   input,
   timeline,
 }: {
   input: ConverseInput;
-  timeline: TimelineEvent[];
+  timeline: ContextTimelineEvent[];
 }) => {
   // The single definition of "paused": an unanswered prompt_requested as the last terminal.
   const pending = pendingPromptRequest(timeline);

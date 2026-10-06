@@ -7,7 +7,7 @@
 
 import { inputConsoleCommand, submitCommand } from './response_console';
 import type { UserAuthzAccessLevel } from '../screens';
-import { loadPage, request } from './common';
+import { request } from './common';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import {
   ACTION_DETAILS_ROUTE,
@@ -26,23 +26,6 @@ import {
 } from '../../../../common/endpoint/constants';
 import type { ActionDetails, ActionDetailsApiResponse } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
-
-export const fillUpNewRule = (name = 'Test', description = 'Test') => {
-  loadPage('app/security/rules/management');
-  cy.getByTestSubj('create-new-rule').click();
-  cy.getByTestSubj('stepDefineRule').within(() => {
-    cy.getByTestSubj('queryInput').first().type('_id:*{enter}');
-  });
-  cy.getByTestSubj('define-continue').click();
-  cy.getByTestSubj('detectionEngineStepAboutRuleName').within(() => {
-    cy.getByTestSubj('input').type(name);
-  });
-  cy.getByTestSubj('detectionEngineStepAboutRuleDescription').within(() => {
-    cy.getByTestSubj('input').type(description);
-  });
-  cy.getByTestSubj('about-continue').click();
-  cy.getByTestSubj('schedule-continue').click();
-};
 
 export const getRunningProcesses = (command: string): Cypress.Chainable<number> => {
   inputConsoleCommand('processes');

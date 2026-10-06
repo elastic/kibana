@@ -19,9 +19,11 @@ spec:
       description: Kibana validation and testing beyond merging to `main`
     spec:
       env:
-        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'false'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        REPORT_FAILED_TESTS_TO_GITHUB: 'true'
         SCOUT_REPORTER_ENABLED: 'true'
       allow_rebuilds: false
+      skip_intermediate_builds: false
       branch_configuration: main
       default_branch: main
       repository: elastic/kibana
@@ -55,6 +57,14 @@ spec:
           branch: main
           env:
             TEST_CHANNELS: 'ci-batch-daily'
+        'Daily (IPv6)':
+          cronline: 0 2 * * 0-5
+          message: 'Scheduled batch (daily, IPv6-only)'
+          branch: main
+          env:
+            TEST_CHANNELS: 'ci-on-commit,ci-batch-3h,ci-batch-daily'
+            AGENT_LOOPBACK_IPV6_ONLY: 'true'
+            KIBANA_TEST_IPV6_ONLY: 'true'
         Weekly:
           cronline: 0 6 * * 5
           message: 'Scheduled batch (weekly)'

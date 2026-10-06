@@ -22,6 +22,17 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
+/**
+ * Migration recommendation: MIXED. Migrate to one stateful-only Scout spec (scripted fields are
+ * disabled in serverless, see data_views scripted_fields_disabled.spec.ts). It covers UI creation
+ * once, plus how Elasticsearch executes each scripted-field type in Discover: rendered value,
+ * `_script` sort, and script filter. Existing coverage only checks request shape (Jest:
+ * normalize_sort_request.test.ts, kbn-es-query phrase_filter.test.ts / range_filter.test.ts) or
+ * error paths (Scout discover error_handling.spec.ts, async_scripted_fields.spec.ts). None of them
+ * checks a scripted field's value, sort order, or filtered hit count. Delete the repeated UI
+ * creation for string/boolean/date (create those fields through the data views API in setup), the
+ * per-type Lens hand-offs after the numeric one, and the two long-skipped sort tests.
+ */
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
@@ -66,6 +77,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.unsetTime();
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT. Save runs isScriptValid(), which posts to
+     * /internal/index-pattern-management/preview_scripted_field, so a real painless compile error
+     * from Elasticsearch has to surface as `invalidScriptError`. The route's Jest test mocks the ES
+     * client, and field_editor.test.tsx never saves. This is also the only real-ES coverage of the
+     * preview route, which lets _scripted_fields_preview.ts move to Jest.
+     */
     it('should not allow saving of invalid scripts', async function () {
       await PageObjects.settings.navigateToDataViewById(logstashDataViewId);
       await PageObjects.settings.goToAddScriptedField();
@@ -78,6 +96,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT. Regression for #33251: saving a scripted field
+     * serialised its format so that re-opening it crashed the editor (`field.format.params is
+     * not a function`). Catching it needs repeated save → reload-from-saved-object → edit cycles,
+     * which a mocked Jest render of field_editor.tsx does not do. Fold this in as a step of the
+     * numeric "should create scripted field" test instead of creating a separate field.
+     */
     describe('testing regression for issue #33251', function describeIndexTests() {
       const scriptedPainlessFieldName = 'ram_Pain_reg';
 
@@ -102,16 +127,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         for (let i = 0; i < 3; i++) {
           await PageObjects.settings.editScriptedField(scriptedPainlessFieldName);
-          const fieldSaveButton = await testSubjects.exists('fieldSaveButton');
-          expect(fieldSaveButton).to.be(true);
+          await testSubjects.existOrFail('fieldSaveButton');
           await PageObjects.settings.clickSaveScriptedField();
         }
       });
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT. This is the full UI journey for one scripted field:
+     * create it through the management form, then use it in Discover (value, sort, filter, Lens).
+     */
     describe('creating and using Painless numeric scripted fields', function describeIndexTests() {
       const scriptedPainlessFieldName = 'ram_Pain1';
 
+      /**
+       * Migration recommendation: MIGRATE TO SCOUT. This is the one place that creates a scripted
+       * field through the management form (name, language, type, popularity, script) and checks
+       * that it is persisted.
+       */
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateToDataViewById(logstashDataViewId);
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10);
@@ -141,6 +174,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.common.setTime({ from, to });
         });
 
+        /**
+         * Migration recommendation: MIGRATE TO SCOUT. Adding the field as a column sends it as a
+         * `script_fields` entry, and the value Elasticsearch computes must render in the grid.
+         */
         it('should see scripted field value in Discover', async function () {
           await PageObjects.common.navigateToApp('discover');
 
@@ -155,6 +192,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
         });
 
+        /**
+         * Migration recommendation: MIGRATE TO SCOUT. A numeric scripted field sorts through a
+         * `_script` sort with `type: number`. normalize_sort_request.test.ts only checks the
+         * request shape, so this is the only check that Elasticsearch actually orders by it.
+         * Drop the fixed sleep.
+         */
         // add a test to sort numeric scripted field
         it('should sort scripted field value in Discover', async function () {
           await dataGrid.clickColumnActionAt(scriptedPainlessFieldName, 1);
@@ -184,6 +227,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
         });
 
+        /**
+         * Migration recommendation: MIGRATE TO SCOUT. Filtering from the field popover's top
+         * values builds a painless script phrase filter with numeric conversion. Jest
+         * (phrase_filter.test.ts) covers the filter shape; only e2e checks the 31 hits.
+         */
         it('should filter by scripted field value in Discover', async function () {
           await PageObjects.unifiedFieldList.clickFieldListItem(scriptedPainlessFieldName);
           await log.debug('filter by the first value (14) in the expanded scripted field list');
@@ -198,6 +246,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
         });
 
+        /**
+         * Migration recommendation: MIGRATE TO SCOUT. Checks that a scripted field reaches Lens
+         * from Discover's "Visualize" button. Discover's visualize_field.spec.ts only uses mapped
+         * fields. Keep this numeric case as the single scripted-field check of that hand-off.
+         */
         it('should visualize scripted field in vertical bar chart', async function () {
           await filterBar.removeAllFilters();
           await PageObjects.unifiedFieldList.clickFieldListItemVisualize(scriptedPainlessFieldName);
@@ -215,6 +268,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: MIXED. Keep the string-specific Elasticsearch behavior (value,
+     * `_script` sort with `type: string`, and string script filter) in Scout. Delete the second UI
+     * creation and the second Lens hand-off.
+     */
     describe('creating and using Painless string scripted fields', function describeIndexTests() {
       const scriptedPainlessFieldName2 = 'painString';
 
@@ -224,6 +282,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.setTime({ from, to });
       });
 
+      /**
+       * Migration recommendation: DELETE. This repeats the UI creation journey covered by the
+       * numeric block. In Scout, create `painString` through the data views API in setup.
+       */
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateToDataViewById(logstashDataViewId);
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10);
@@ -243,6 +305,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
+      /**
+       * Migration recommendation: MIGRATE TO SCOUT. A string-returning painless script must
+       * render its computed `good`/`bad` value in the grid.
+       */
       it('should see scripted field value in Discover', async function () {
         await PageObjects.common.navigateToApp('discover');
 
@@ -257,6 +323,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
+      /**
+       * Migration recommendation: MIGRATE TO SCOUT. A string scripted field sorts with a `_script`
+       * sort of `type: string`, a different Elasticsearch path from the numeric one. Drop the fixed
+       * sleep and the commented-out legacy doc table click.
+       */
       // add a test to sort string scripted field
       it('should sort scripted field value in Discover', async function () {
         await dataGrid.clickColumnActionAt(scriptedPainlessFieldName2, 1);
@@ -286,6 +357,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
+      /**
+       * Migration recommendation: MIGRATE TO SCOUT. A string script phrase filter (no numeric
+       * conversion) executed by Elasticsearch must return 27 hits.
+       */
       it('should filter by scripted field value in Discover', async function () {
         await PageObjects.unifiedFieldList.clickFieldListItem(scriptedPainlessFieldName2);
         await log.debug('filter by "bad" in the expanded scripted field list');
@@ -301,6 +376,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await filterBar.removeAllFilters();
       });
 
+      /**
+       * Migration recommendation: DELETE. The numeric block's Lens test already covers the
+       * scripted-field hand-off. Choosing "Top values" for a string field is Lens suggestion logic,
+       * covered by form_based_suggestions.test.tsx.
+       */
       it('should visualize scripted field in vertical bar chart', async function () {
         await PageObjects.unifiedFieldList.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -316,6 +396,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: MIXED. Keep value rendering and the boolean script filter in Scout.
+     * Delete the UI creation, the skipped sort test, and the Lens hand-off.
+     */
     describe('creating and using Painless boolean scripted fields', function describeIndexTests() {
       const scriptedPainlessFieldName2 = 'painBool';
 
@@ -325,6 +409,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.setTime({ from, to });
       });
 
+      /**
+       * Migration recommendation: DELETE. This repeats the UI creation journey covered by the
+       * numeric block. In Scout, create `painBool` through the data views API in setup.
+       */
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateToDataViewById(logstashDataViewId);
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10);
@@ -344,6 +432,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
+      /**
+       * Migration recommendation: MIGRATE TO SCOUT. A boolean-returning script must render
+       * `true`/`false` in the grid.
+       */
       it('should see scripted field value in Discover', async function () {
         await PageObjects.common.navigateToApp('discover');
 
@@ -358,6 +450,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
+      /**
+       * Migration recommendation: MIGRATE TO SCOUT. Filtering on a boolean script value from the
+       * field popover must return 359 hits from Elasticsearch.
+       */
       it('should filter by scripted field value in Discover', async function () {
         await PageObjects.unifiedFieldList.clickFieldListItem(scriptedPainlessFieldName2);
         await log.debug('filter by "true" in the expanded scripted field list');
@@ -373,6 +469,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await filterBar.removeAllFilters();
       });
 
+      /**
+       * Migration recommendation: DELETE. This has been skipped since #75519, which was closed
+       * without a fix (scripted fields are not sortable in that context). It still targets the
+       * removed legacy doc table (`docTableHeaderFieldSort_*`) and has placeholder expectations.
+       */
       // add a test to sort boolean
       // existing bug: https://github.com/elastic/kibana/issues/75519 hence the issue is skipped.
       it.skip('should sort scripted field value in Discover', async function () {
@@ -395,6 +496,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
+      /**
+       * Migration recommendation: DELETE. The numeric block's Lens test already covers the
+       * scripted-field hand-off. The boolean "Top values" choice is covered by
+       * form_based_suggestions.test.tsx.
+       */
       it('should visualize scripted field in vertical bar chart', async function () {
         await PageObjects.unifiedFieldList.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -410,6 +516,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: MIXED. Keep value rendering with the field's custom date format,
+     * and filtering from a grid cell, in Scout. Delete the UI creation, the skipped sort test, and
+     * the Lens hand-off.
+     */
     describe('creating and using Painless date scripted fields', function describeIndexTests() {
       const scriptedPainlessFieldName2 = 'painDate';
 
@@ -419,6 +530,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.setTime({ from, to });
       });
 
+      /**
+       * Migration recommendation: DELETE. This repeats the UI creation journey covered by the
+       * numeric block. In Scout, create `painDate` through the data views API in setup, with its
+       * `date` format (`YYYY-MM-DD HH:00`) in `fieldFormats`, so the display test below still
+       * checks that the scripted field's format is applied.
+       */
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateToDataViewById(logstashDataViewId);
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount(), 10);
@@ -438,6 +555,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
+      /**
+       * Migration recommendation: MIGRATE TO SCOUT. The date script's value must render with the
+       * scripted field's own `YYYY-MM-DD HH:00` format. That format is set up through the API once
+       * the UI creation above is deleted.
+       */
       it('should see scripted field value in Discover', async function () {
         await PageObjects.common.navigateToApp('discover');
 
@@ -452,6 +574,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
+      /**
+       * Migration recommendation: DELETE. This has been skipped since #75711 (closed; the answer was
+       * runtime fields). normalize_sort_request.ts deliberately never emits a `_script` sort for
+       * date scripted fields. It also targets the removed legacy doc table and has placeholder
+       * expectations.
+       */
       // add a test to sort date scripted field
       // https://github.com/elastic/kibana/issues/75711
       it.skip('should sort scripted field value in Discover', async function () {
@@ -474,6 +602,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
+      /**
+       * Migration recommendation: MIGRATE TO SCOUT. This is the only case that filters from the
+       * data grid's cell "Filter for" action rather than the field popover, on a date script,
+       * and gets 1 hit back from Elasticsearch.
+       */
       it('should filter by scripted field value in Discover', async function () {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await dataGrid.clickCellFilterForButtonExcludingControlColumns(0, 1);
@@ -485,6 +618,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await filterBar.removeAllFilters();
       });
 
+      /**
+       * Migration recommendation: DELETE. The numeric block's Lens test already covers the
+       * scripted-field hand-off. The date dimension choice is covered by
+       * form_based_suggestions.test.tsx.
+       */
       it('should visualize scripted field in vertical bar chart', async function () {
         await PageObjects.unifiedFieldList.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();

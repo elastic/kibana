@@ -23,6 +23,7 @@ import { SECURITY_FEATURE_ID } from '../../../../../../../common';
 import { useAgentBuilderAvailability } from '../../../../../../agent_builder/hooks/use_agent_builder_availability';
 import { NewAgentBuilderAttachment } from '../../../../../../agent_builder/components/new_agent_builder_attachment';
 import { useAttackDiscoveryAttachment } from '../../../use_attack_discovery_attachment';
+import { isAttackDiscoveryAlert } from '../../../../utils/is_attack_discovery_alert';
 
 const scrollable = css`
   overflow-x: auto;
@@ -85,7 +86,15 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
 
   const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
 
-  const openAgentBuilderFlyout = useAttackDiscoveryAttachment(attackDiscovery, replacements);
+  // Only a persisted discovery can be attached, so "Add to chat" is not offered otherwise.
+  const persistedAttackDiscovery = isAttackDiscoveryAlert(attackDiscovery)
+    ? attackDiscovery
+    : undefined;
+
+  const openAgentBuilderFlyout = useAttackDiscoveryAttachment(
+    persistedAttackDiscovery,
+    replacements
+  );
 
   return (
     <div data-test-subj="attackDiscoveryTab">
@@ -132,13 +141,15 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>
           {isAgentChatExperienceEnabled ? (
-            <NewAgentBuilderAttachment
-              onClick={openAgentBuilderFlyout}
-              telemetry={{
-                pathway: 'attack_discovery_top',
-                attachments: ['alert'],
-              }}
-            />
+            persistedAttackDiscovery != null && (
+              <NewAgentBuilderAttachment
+                onClick={openAgentBuilderFlyout}
+                telemetry={{
+                  pathway: 'attack_discovery_top',
+                  attachments: ['attack_discovery'],
+                }}
+              />
+            )
           ) : (
             <ViewInAiAssistant attackDiscovery={attackDiscovery} replacements={replacements} />
           )}

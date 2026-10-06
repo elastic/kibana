@@ -15,6 +15,7 @@ export { getElasticsearchConnectors } from './spec/elasticsearch';
 export { getKibanaConnectors } from './spec/kibana';
 export { resolveKibanaStepTypeAlias } from './spec/kibana/aliases';
 export * from './spec/schema';
+export * from './spec/ignored_kibana_fetcher';
 export {
   builtInStepDefinitions,
   getBuiltInStepDefinition,
@@ -30,6 +31,7 @@ export {
   builtinWorkflowInputDefinitionRefValuesForZod,
   KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX,
   ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
+  SECURITY_ALERT_ANALYSIS_CALLER_ALERTS_INPUT_DEFINITION_ID,
   mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema,
 } from './spec/builtin_workflow_input_definitions';
 export type { JsonSchema } from './spec/schema/common/json_model_shape_schema';
@@ -136,3 +138,19 @@ export type {
   WorkflowValidationRuleOwner,
   WorkflowValidationRules,
 } from './validation/rules';
+
+export {
+  WORKFLOW_ACCESS_CONTROL_ROLES,
+  workflowAccessControlSchema,
+  storedWorkflowAccessControlSchema,
+  getWorkflowPermissions,
+  getWorkflowAccessDecisions,
+  toWorkflowPermissions,
+} from './common/access_control';
+export type {
+  WorkflowAccessControl,
+  WorkflowAccessControlRole,
+  WorkflowAccessOperation,
+  WorkflowPermissions,
+  WorkflowAccessSubject,
+} from './common/access_control';

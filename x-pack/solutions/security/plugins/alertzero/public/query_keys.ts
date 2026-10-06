@@ -40,4 +40,8 @@ export const queryKeys = {
     all: ['alertzero', 'skills'] as const,
     list: () => [...queryKeys.skills.all, 'list'] as const,
   },
+  currentUser: {
+    all: ['alertzero', 'current-user'] as const,
+    get: () => [...queryKeys.currentUser.all, 'get'] as const,
+  },
 };

@@ -15,6 +15,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
   const kibanaServer = getService('kibanaServer');
 
+  // Migration recommendation: MIGRATE TO SCOUT
+  // Tests that the legacy `dataViews` URL path segment is redirected back to the canonical
+  // `indexPatterns` path, both for the list page and for a specific data view detail page (where
+  // `dataView` also replaces `patterns`). No existing Scout coverage found. Both tests are pure
+  // navigation + URL assertion checks with no ES archive or special roles required. The `discover`
+  // kbn_archiver fixture provides the logstash-* data view. URL manipulation and assertion
+  // translate directly to Playwright `page.goto` + `page.url()`. Worth keeping: these are
+  // important backward-compatibility regression checks for users who have bookmarked old URLs.
   describe('legacy urls redirect correctly', () => {
     before(async function () {
       await browser.setWindowSize(1200, 800);

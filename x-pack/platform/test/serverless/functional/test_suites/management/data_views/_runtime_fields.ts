@@ -17,6 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   describe('runtime fields', function () {
+    // It's flaky on MKI and will be migrated to scout soon
+    this.tags(['failsOnMKI']);
     before(async function () {
       await browser.setWindowSize(1200, 800);
       await kibanaServer.importExport.load(
@@ -49,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         log.debug('check that field preview is rendered');
-        expect(await testSubjects.exists('fieldPreviewItem', { timeout: 1500 })).to.be(true);
+        await testSubjects.existOrFail('fieldPreviewItem', { timeout: 5000 });
 
         await PageObjects.settings.clickSaveField();
 

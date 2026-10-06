@@ -95,7 +95,6 @@ describe('DataSourcesClient', () => {
         name: '  ds1  ',
         description: '',
         settings: {
-          region: '',
           endpoint: 'https://s3.example',
           auth: '',
           access_key: '',
@@ -281,7 +280,6 @@ describe('DataSourcesClient', () => {
         name: 'ds1',
         description: '',
         settings: {
-          region: '',
           endpoint: 'https://s3.example',
           role_arn: undefined,
           access_key: '::es_redacted::',

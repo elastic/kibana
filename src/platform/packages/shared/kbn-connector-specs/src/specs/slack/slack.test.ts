@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec, isKibanaManagedAuthTypeId } from '../../..';
+import type { ActionContext } from '../../connector_spec';
+import { SPECS_ALLOWED_EVENTS } from '../../specs_allowed_events';
 import { Slack } from './slack';
 import { slackRelay } from './relay';
 import {
@@ -46,6 +47,12 @@ describe('Slack', () => {
     expect(spec).toBe(Slack);
     expect(spec?.actions.listChannels).toBeDefined();
     expect(spec?.actions.listChannels.isTool).toBe(true);
+  });
+
+  it('is allowlisted to declare inbound events', () => {
+    expect(SPECS_ALLOWED_EVENTS.has(Slack.metadata.id)).toBe(true);
+    expect(Slack.events).toBeDefined();
+    expect(Slack.events?.definitions.any).toBeUndefined();
   });
 
   it('should have correct metadata', () => {

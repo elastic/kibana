@@ -19,6 +19,7 @@ import { getWorkflowRunTaskId } from './get_workflow_run_task_id';
 import { WORKFLOW_RESUME_TASK_TYPE, WORKFLOW_RUN_TASK_TYPE } from './types';
 import type { ResumeWorkflowExecutionParams, StartWorkflowExecutionParams } from './types';
 import { resolveQueueTtlMs } from '../concurrency/queue_concurrency_utils';
+import { getWorkflowOriginalRequest } from '../service_account_execution';
 import { generateExecutionTaskScope } from '../utils';
 
 export { getWorkflowRunTaskId } from './get_workflow_run_task_id';
@@ -110,7 +111,7 @@ export class WorkflowTaskManager {
         runAt: resumeAt,
         scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
       },
-      { request: fakeRequest, cloneApiKey: true }
+      { request: getWorkflowOriginalRequest(fakeRequest), cloneApiKey: true }
     );
 
     return {
@@ -118,6 +119,7 @@ export class WorkflowTaskManager {
     };
   }
 
+  // Persist caller task credentials; the pinned service account is reminted when execution resumes.
   async scheduleResumeTask({
     workflowExecution,
     resumeAt,
@@ -140,7 +142,7 @@ export class WorkflowTaskManager {
         runAt: resumeAt,
         scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
       },
-      { request: fakeRequest, cloneApiKey: true }
+      { request: getWorkflowOriginalRequest(fakeRequest), cloneApiKey: true }
     );
 
     return {
@@ -188,7 +190,7 @@ export class WorkflowTaskManager {
         scope: generateExecutionTaskScope(workflowExecution),
         enabled: true,
       },
-      { request, cloneApiKey: true }
+      { request: getWorkflowOriginalRequest(request), cloneApiKey: true }
     );
 
     return { taskId: task.id };
@@ -262,7 +264,9 @@ export class WorkflowTaskManager {
         state: {},
         scope: [`workflow:execution:${executionId}`],
       },
-      fakeRequest ? { request: fakeRequest, cloneApiKey: true } : undefined
+      fakeRequest
+        ? { request: getWorkflowOriginalRequest(fakeRequest), cloneApiKey: true }
+        : undefined
     );
     return { taskId };
   }
@@ -323,7 +327,9 @@ export class WorkflowTaskManager {
         runAt: params.runAt ?? new Date(Date.now() + 1000),
         scope: [`workflow:execution:${params.executionId}`],
       },
-      params.fakeRequest ? { request: params.fakeRequest, cloneApiKey: true } : undefined
+      params.fakeRequest
+        ? { request: getWorkflowOriginalRequest(params.fakeRequest), cloneApiKey: true }
+        : undefined
     );
   }
 

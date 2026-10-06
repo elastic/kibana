@@ -280,7 +280,7 @@ export const configSchema = schema.object({
     }),
     ears: schema.maybe(
       schema.object({
-        enabled: schema.boolean({ defaultValue: false }),
+        enabled: schema.boolean({ defaultValue: true }),
         enableExperimental: schema.boolean({ defaultValue: false }),
         url: schema.maybe(schema.uri({ scheme: ['https'] })),
         ssl: schema.maybe(

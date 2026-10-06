@@ -12,13 +12,18 @@ import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expand
 
 import { ActionableSummary } from '.';
 import { TestProviders } from '../../../../../common/mock';
+import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
 import { mockAttackDiscovery } from '../../../mock/mock_attack_discovery';
+import { getMockAttackDiscoveryAlerts } from '../../../mock/mock_attack_discovery_alerts';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { SECURITY_FEATURE_ID } from '../../../../../../common';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
 
 jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../../agent_builder/hooks/use_agent_builder_availability', () => ({
+  useAgentBuilderAvailability: jest.fn(),
+}));
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../../flyout_v2/use_flyout_api');
 
@@ -45,6 +50,12 @@ describe('ActionableSummary', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest
+      .mocked(useAgentBuilderAvailability)
+      .mockImplementation(
+        jest.requireActual('../../../../../agent_builder/hooks/use_agent_builder_availability')
+          .useAgentBuilderAvailability
+      );
     mockUseExpandableFlyoutApi.mockReturnValue({
       ...createExpandableFlyoutApiMock(),
       openRightPanel: mockOpenRightPanel,
@@ -180,6 +191,46 @@ describe('ActionableSummary', () => {
 
     it('renders a disabled badge with the username value', () => {
       expect(screen.getAllByTestId('disabledActionsBadge')[1]).toHaveTextContent('bar.username');
+    });
+  });
+
+  describe('Add to chat', () => {
+    beforeEach(() => {
+      jest.mocked(useAgentBuilderAvailability).mockReturnValue({
+        hasAgentBuilderPrivilege: true,
+        hasValidAgentBuilderLicense: true,
+        isAgentBuilderEnabled: true,
+        isAgentChatExperienceEnabled: true,
+      });
+    });
+
+    it('renders Add to chat for a persisted discovery', () => {
+      const [persistedAttackDiscovery] = getMockAttackDiscoveryAlerts();
+
+      render(
+        <TestProviders>
+          <ActionableSummary
+            attackDiscovery={persistedAttackDiscovery}
+            replacements={mockReplacements}
+          />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('newAgentBuilderAttachment')).toBeInTheDocument();
+    });
+
+    // Only a persisted discovery can be attached, so a no-op action is not offered.
+    it('does not render Add to chat for a discovery that is not persisted', () => {
+      render(
+        <TestProviders>
+          <ActionableSummary
+            attackDiscovery={mockAttackDiscovery}
+            replacements={mockReplacements}
+          />
+        </TestProviders>
+      );
+
+      expect(screen.queryByTestId('newAgentBuilderAttachment')).not.toBeInTheDocument();
     });
   });
 });

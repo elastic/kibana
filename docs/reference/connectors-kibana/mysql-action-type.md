@@ -9,7 +9,11 @@ applies_to:
 
 # MySQL connector [mysql-action-type]
 
-The MySQL connector connects directly to a MySQL database so you can search, query, and explore schema from chat conversations. Workflow authors can also run write or DDL statements through **Execute SQL**.
+The MySQL connector connects directly to a MySQL database so you can search, query, and explore schema from chat conversations.
+
+::::{note}
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release. Actions marked _(not yet available)_ are not exposed to agents. Until workflow support is added, you can only run them through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
+::::
 
 ## Requirements [mysql-requirements]
 
@@ -88,8 +92,8 @@ Search Rows
     - **maxRows** (optional): Maximum number of rows to return (1-1000, default: 100).
     - **database** (optional): The database name. Uses the configured default if omitted.
 
-Execute SQL
-:   Run any SQL statement against the MySQL database. No restrictions — `INSERT`, `UPDATE`, `DELETE`, `DROP`, and DDL are all permitted. Use only when the workflow explicitly requires a write or destructive operation. Prefer **Query** for read-only access.
+Execute SQL _(not yet available)_
+:   Run any SQL statement against the MySQL database. No restrictions — `INSERT`, `UPDATE`, `DELETE`, `DROP`, and DDL are all permitted. Use only when a write or destructive operation is explicitly required. Not exposed to AI agents; becomes usable when workflow support is added. Prefer **Query** for read-only access.
     - **sql** (required): The SQL statement to execute.
 
 

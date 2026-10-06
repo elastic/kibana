@@ -11,6 +11,8 @@ applies_to:
 
 The PagerDuty data source connects to PagerDuty to access and manage incidents, escalation policies, schedules, on-calls, users, and teams. Use it in data and context sources and agentic workflows to search and retrieve PagerDuty data, and to take action by triggering, acknowledging, resolving, or updating incidents, adding responders, and running response plays.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-pagerduty-mcp-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.

@@ -51,6 +51,13 @@ export interface ComputeEdgePathInput {
   readonly points?: ReadonlyArray<{ readonly x: number; readonly y: number }>;
   readonly branchType?: EdgeBranchType;
   readonly isMerge?: boolean;
+  /**
+   * True on the failure edge from a fallback-lane owner to its lane head. Routes
+   * the edge with `buildFailureLanePath` (trunk + across + drop) rather than the
+   * fork bus or smooth-step. The spine edge carries no flag and uses dagre
+   * waypoints (translated by reconcileEdgePoints) or smooth-step.
+   */
+  readonly isFailure?: boolean;
 }
 
 /**
@@ -204,6 +211,50 @@ export function buildForkBusPath(
 }
 
 /**
+ * Build the SVG path for a failure-lane edge. The owner exits via a short
+ * trunk, then turns horizontally (TB) or vertically (LR) to reach the target's
+ * column, then descends (or advances) to the target. Unlike `buildForkBusPath`
+ * this path is never shared with a sibling edge.
+ *
+ * TB shape: source → trunk down → across to target-X → down to target.
+ * LR shape: source (bottom edge, inset from right) → drop to target-Y → run right to target.
+ *   The failure handle is unconditionally `Position.Bottom`, so the route leaves the bottom
+ *   edge and drops perpendicularly before turning right into the lane head.
+ *
+ * Exported for unit testing.
+ */
+export function buildFailureLanePath(
+  p: { sourceX: number; sourceY: number; targetX: number; targetY: number },
+  isLR: boolean,
+  trunk: number
+): { path: string; labelX: number; labelY: number } {
+  const { sourceX: sx, sourceY: sy, targetX: tx, targetY: ty } = p;
+  if (isLR) {
+    // Handle is on the bottom edge — drop straight to the lane head's row, then run right.
+    const { path } = buildRoundedOrthogonalPath(
+      [
+        { x: sx, y: sy - 2 },
+        { x: sx, y: ty },
+        { x: tx, y: ty },
+      ],
+      CORNER_RADIUS
+    );
+    return { path, labelX: (sx + tx) / 2, labelY: ty - FORK_BUS_LABEL_OFFSET };
+  }
+  const busY = sy + trunk;
+  const { path } = buildRoundedOrthogonalPath(
+    [
+      { x: sx, y: sy - 2 },
+      { x: sx, y: busY },
+      { x: tx, y: busY },
+      { x: tx, y: ty },
+    ],
+    CORNER_RADIUS
+  );
+  return { path, labelX: tx, labelY: busY + FORK_BUS_LABEL_OFFSET };
+}
+
+/**
  * Build the SVG path for a merge-edge single-bus routing. The inverse of
  * `buildForkBusPath`: all fan-in edges sharing the same target meet at a shared
  * horizontal bus just above the target (TB) or a vertical bus just left of the
@@ -264,6 +315,7 @@ export const computeEdgePath = ({
   points: dagrePoints,
   branchType,
   isMerge,
+  isFailure,
 }: ComputeEdgePathInput): { path: string; labelX: number; labelY: number } => {
   // Single-bus routing for all fork (fan-out) edges: switch case/default,
   // if-then, and if-else. All branch edges of one fork node share the same
@@ -273,7 +325,15 @@ export const computeEdgePath = ({
   // the bus (LR) so all branch labels align on one row/column regardless of
   // how deep each branch target sits.
   const isForkEdge = branchType === 'switch' || branchType === 'then' || branchType === 'else';
-  const isLR = sourcePosition === Position.Right || sourcePosition === Position.Left;
+  // isLR checks both sides: the failure handle is unconditionally Position.Bottom (so that
+  // the edge exits the bottom edge in both TB and LR), but spine/fork edges still anchor
+  // on the right in LR. The target side is always direction-faithful, so checking it
+  // avoids mis-routing a failure edge in LR through the TB branch.
+  const isLR =
+    sourcePosition === Position.Right ||
+    sourcePosition === Position.Left ||
+    targetPosition === Position.Right ||
+    targetPosition === Position.Left;
   const forkGap = isLR ? targetX - sourceX : targetY - sourceY;
   const useFork = isForkEdge && forkGap > FORK_BUS_TRUNK;
 
@@ -286,6 +346,12 @@ export const computeEdgePath = ({
   const isMergeEdge = isMerge === true;
   const mergeGap = isLR ? targetX - sourceX : targetY - sourceY;
   const useMerge = isMergeEdge && mergeGap > MERGE_BUS_TRUNK;
+
+  // Dedicated routing for failure-lane edges: trunk + across + drop into lane head.
+  // Checked before fork/merge so the failure edge is never misrouted as a bus.
+  if (isFailure === true) {
+    return buildFailureLanePath({ sourceX, sourceY, targetX, targetY }, isLR, FORK_BUS_TRUNK);
+  }
 
   if (useFork) {
     return buildForkBusPath({ sourceX, sourceY, targetX, targetY }, isLR, FORK_BUS_TRUNK);

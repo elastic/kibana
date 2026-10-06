@@ -107,9 +107,10 @@ export const AnomalyDetectionOverviewCard: FC = () => {
   ) : (
     <MLEmptyPromptCard
       customCss={overviewPageCardCustomCss}
-      layout="horizontal"
-      hasBorder={true}
+      hasBorder
       hasShadow={false}
+      titleSize="s"
+      paddingSize="m"
       iconSrc={adImage}
       iconSize="m"
       iconAlt={i18n.translate('xpack.ml.overview.anomalyDetection.title', {

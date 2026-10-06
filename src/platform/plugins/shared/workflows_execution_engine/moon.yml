@@ -17,12 +17,14 @@ project:
   owner: '@elastic/workflows-eng'
   sourceRoot: src/platform/plugins/shared/workflows_execution_engine
 dependsOn:
+  - '@kbn/alerting-plugin'
   - '@kbn/apm-utils'
   - '@kbn/core'
   - '@kbn/config-schema'
   - '@kbn/actions-plugin'
   - '@kbn/connector-specs'
   - '@kbn/workflows'
+  - '@kbn/entity-access-control'
   - '@kbn/task-manager-plugin'
   - '@kbn/es-query'
   - '@kbn/eval-kql'

@@ -24,7 +24,11 @@ const investigation: Investigation = {
   events: [],
 };
 
-const renderCard = (isSelected?: boolean, onClickCard = jest.fn()) => {
+const renderCard = (
+  isSelected?: boolean,
+  onClickCard = jest.fn(),
+  renderInFlightStatus?: (inv: Investigation) => React.ReactNode
+) => {
   renderWithKibanaRenderContext(
     <ConversationCard
       investigation={investigation}
@@ -32,15 +36,23 @@ const renderCard = (isSelected?: boolean, onClickCard = jest.fn()) => {
       isSelected={isSelected}
       onClickCard={onClickCard}
       onClickAction={jest.fn()}
+      onCopyLink={jest.fn()}
       onOpenChat={jest.fn()}
       onClickRecommendedAction={jest.fn()}
       renderAssignees={() => null}
+      renderInFlightStatus={renderInFlightStatus}
     />
   );
   return { onClickCard };
 };
 
 describe('ConversationCard', () => {
+  it('renders the in-flight status the page supplies for this investigation', () => {
+    renderCard(false, jest.fn(), (inv) => <span>{`Applying ${inv.id}`}</span>);
+
+    expect(screen.getByText('Applying inv-1')).toBeInTheDocument();
+  });
+
   it('emits the conversation id on click so the caller can open the details flyout', () => {
     const { onClickCard } = renderCard();
 
@@ -74,6 +86,7 @@ describe('ConversationCard', () => {
         hasBorder={false}
         onClickCard={jest.fn()}
         onClickAction={jest.fn()}
+        onCopyLink={jest.fn()}
         onOpenChat={jest.fn()}
         onClickRecommendedAction={jest.fn()}
         renderAssignees={() => null}
@@ -91,6 +104,7 @@ describe('ConversationCard', () => {
         hasBorder={false}
         onClickCard={jest.fn()}
         onClickAction={jest.fn()}
+        onCopyLink={jest.fn()}
         onOpenChat={jest.fn()}
         onClickRecommendedAction={jest.fn()}
         renderAssignees={() => null}

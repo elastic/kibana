@@ -29,11 +29,13 @@ describe('apiKeyAsAlertAttributes', () => {
           },
         },
         'test',
-        false
+        false,
+        'u_profile_test'
       )
     ).toEqual({
       apiKey: 'MTIzOmFiYw==',
       apiKeyOwner: 'test',
+      apiKeyOwnerProfileUid: 'u_profile_test',
       apiKeyCreatedByUser: false,
     });
   });
@@ -45,11 +47,13 @@ describe('apiKeyAsAlertAttributes', () => {
           apiKeysEnabled: false,
         },
         'test',
-        false
+        false,
+        'u_profile_test'
       )
     ).toEqual({
       apiKey: null,
       apiKeyOwner: null,
+      apiKeyOwnerProfileUid: null,
       apiKeyCreatedByUser: null,
     });
   });
@@ -66,11 +70,13 @@ describe('apiKeyAsAlertAttributes', () => {
           },
         },
         'test',
-        true
+        true,
+        'u_profile_test'
       )
     ).toEqual({
       apiKey: 'MTIzOmFiYw==',
       apiKeyOwner: 'test',
+      apiKeyOwnerProfileUid: 'u_profile_test',
       apiKeyCreatedByUser: true,
     });
   });
@@ -92,11 +98,13 @@ describe('apiKeyAsAlertAttributes', () => {
           },
         },
         'test',
-        false
+        false,
+        'u_profile_test'
       )
     ).toEqual({
       apiKey: 'MTIzOmFiYw==',
       apiKeyOwner: 'test',
+      apiKeyOwnerProfileUid: 'u_profile_test',
       apiKeyCreatedByUser: false,
       uiamApiKey: 'NDU2OmRlZg==',
       uiamApiKeyExternal: false,
@@ -115,11 +123,13 @@ describe('apiKeyAsAlertAttributes', () => {
           },
         },
         'test',
-        true
+        true,
+        'u_profile_test'
       )
     ).toEqual({
       apiKey: null,
       apiKeyOwner: 'test',
+      apiKeyOwnerProfileUid: 'u_profile_test',
       apiKeyCreatedByUser: true,
       uiamApiKey: 'NDU2OmRlZg==',
       uiamApiKeyExternal: false,
@@ -137,11 +147,13 @@ describe('apiKeyAsAlertAttributes', () => {
           },
         },
         'test',
-        true
+        true,
+        'u_profile_test'
       )
     ).toEqual({
       apiKey: null,
       apiKeyOwner: 'test',
+      apiKeyOwnerProfileUid: 'u_profile_test',
       apiKeyCreatedByUser: true,
       uiamApiKey: 'essu_user_created_key',
       uiamApiKeyExternal: false,
@@ -160,11 +172,13 @@ describe('apiKeyAsAlertAttributes', () => {
           },
         },
         'test',
-        true
+        true,
+        'u_profile_test'
       )
     ).toEqual({
       apiKey: null,
       apiKeyOwner: 'test',
+      apiKeyOwnerProfileUid: 'u_profile_test',
       apiKeyCreatedByUser: true,
       uiamApiKey: 'essu_user_created_key',
       uiamApiKeyExternal: true,
@@ -181,7 +195,8 @@ describe('apiKeyAsAlertAttributes', () => {
         uiamResult: { id: '456', name: '456', api_key: 'def' },
       },
       'test',
-      false
+      false,
+      'u_profile_test'
     );
 
     expect(properties.uiamApiKeyExternal).toBe(false);
@@ -198,11 +213,13 @@ describe('apiKeyAsAlertAttributes', () => {
           },
         },
         'test',
-        false
+        false,
+        'u_profile_test'
       )
     ).toEqual({
       apiKey: null,
       apiKeyOwner: 'test',
+      apiKeyOwnerProfileUid: 'u_profile_test',
       apiKeyCreatedByUser: false,
     });
   });
@@ -224,7 +241,8 @@ describe('apiKeyAsAlertAttributes', () => {
           },
         },
         'test',
-        true
+        true,
+        'u_profile_test'
       )
     ).toThrow(
       'Both ES and UIAM API keys were created for a rule, but only one should be created when the API key is created by a user. This should never happen.'

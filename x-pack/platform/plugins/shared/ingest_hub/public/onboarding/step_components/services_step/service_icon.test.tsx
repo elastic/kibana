@@ -46,6 +46,9 @@ const BASE_SERVICE: AwsServiceMatrixEntry = {
   defaultEnabled: false,
   defaultEnabledInputs: [],
   showInUI: true,
+  isManifestLoaded: true,
+  isManifestError: false,
+  isStaticAgentBasedOnly: false,
 };
 
 const S3_ICON = {

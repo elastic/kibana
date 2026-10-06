@@ -5,15 +5,25 @@
  * 2.0.
  */
 
+import path from 'node:path';
+import { validate as uuidValidate } from 'uuid';
+import { schema } from '@kbn/config-schema';
 import type { Observable } from 'rxjs';
 import { firstValueFrom, toArray } from 'rxjs';
 import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
-import { createBadRequestError } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAgentId,
+  agentIdMaxLength,
+  CONVERSATION_ID_MAX_LENGTH,
+  createNonInteractiveConfig,
+} from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type {
   ChatRequestBodyPayload,
   ChatConverseResponse,
-  UserMessagePayload,
+  ChatMessageRequestBodyPayload,
+  ChatMessageResponse,
 } from '../../common/http_api/chat';
 import { ChatTriggerMode } from '../../common/http_api/chat';
 import { chatApiPath } from '../../common/constants';
@@ -23,33 +33,92 @@ import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import { getConverseHelpers, filterEventsNativeApiEvents } from './converse_helpers';
 import { findConversationEvent } from '../services/execution/utils/chat_response';
-import { chatPayloadSchema, conversePayloadSchema } from './chat';
+import { buildChatMessageResponseFromEvents } from '../services/execution/utils/chat_message_response';
+import { conversePayloadSchema } from './chat';
+
+export const chatPayloadSchema = conversePayloadSchema.extends({
+  trigger_mode: schema.oneOf(
+    [schema.literal(ChatTriggerMode.Always), schema.literal(ChatTriggerMode.Never)],
+    {
+      defaultValue: ChatTriggerMode.Always,
+      meta: {
+        description:
+          'Use never to append a user message without executing the agent. The message is added to the conversation named by conversation_id, or to a conversation created for it when conversation_id is omitted. Only conversation_id, input and attachments are read; the execution options are ignored.',
+      },
+    }
+  ),
+});
+
+/** Upper bound of a `POST /api/chat/message` message, so a pasted CLI input cannot be unbounded. */
+export const CHAT_MESSAGE_MAX_LENGTH = 100_000;
 
 /**
- * Validates a `trigger_mode: 'never'` request and returns the fields it appends to the
- * conversation. The execution options the payload may also carry are ignored, as nothing
- * executes.
+ * Body of `POST /api/chat/message`. Deliberately minimal: `schema.object` rejects unknown keys, so
+ * the converse options (`connector_id`, `attachments`, `prompts`, `_execution_mode`, ...) are 400s
+ * rather than silently ignored.
  */
-const validateUserMessagePayload = ({
-  conversation_id: conversationId,
-  input,
-  attachments,
-}: ChatRequestBodyPayload): UserMessagePayload => {
-  if (!conversationId) {
-    throw createBadRequestError('User message requests require conversation_id');
-  }
+export const chatMessagePayloadSchema = schema.object({
+  message: schema.string({
+    minLength: 1,
+    maxLength: CHAT_MESSAGE_MAX_LENGTH,
+    meta: { description: 'The user message to send to the agent.' },
+  }),
+  agent_id: schema.string({
+    defaultValue: agentBuilderDefaultAgentId,
+    minLength: 1,
+    maxLength: agentIdMaxLength,
+    meta: {
+      description:
+        'The ID of the agent to send the message to. Defaults to the default Elastic AI agent.',
+    },
+  }),
+  conversation_id: schema.maybe(
+    schema.string({
+      maxLength: CONVERSATION_ID_MAX_LENGTH,
+      validate: (v) => (uuidValidate(v) ? undefined : 'conversation_id must be a valid UUID'),
+      meta: {
+        description:
+          'The ID of an existing conversation to continue. Omit it to start a new conversation; the response carries the ID to reuse on the next call.',
+      },
+    })
+  ),
+});
 
-  if (!input?.trim() && !attachments?.length) {
-    throw createBadRequestError('User message requests require input or attachments');
-  }
-
-  return {
-    trigger_mode: ChatTriggerMode.Never,
-    conversation_id: conversationId,
-    input,
-    attachments,
-  };
-};
+/** Success body of `POST /api/chat/message`; lazy because core builds response schemas on demand. */
+export const chatMessageResponseSchema = () =>
+  schema.object({
+    conversation_id: schema.string({
+      meta: {
+        description:
+          'The conversation the message was added to: the one requested, or the one created for it.',
+      },
+    }),
+    answer: schema.string({
+      meta: {
+        description:
+          "The agent's final text answer. Empty when the agent finished without a message.",
+      },
+    }),
+    // Optional so the common case is a two-field body; present only when at least one prompt
+    // was declined.
+    declined_prompts: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          tool_id: schema.string({ meta: { description: 'The tool whose call was declined.' } }),
+          message: schema.string({
+            meta: { description: 'The explanation the agent received in place of the prompt.' },
+          }),
+        }),
+        {
+          minSize: 1,
+          meta: {
+            description:
+              'The prompts that the endpoint declined. In an interactive conversation, these prompts pause the agent until the user answers. Examples are tool confirmations, questions to the user, and destructive API approvals. This endpoint has no user, so it declines each prompt and tells the agent why. The property is absent if the agent raised no prompts.',
+          },
+        }
+      )
+    ),
+  });
 
 /** Events-native chat API */
 export function registerChatApiRoutes({
@@ -60,20 +129,22 @@ export function registerChatApiRoutes({
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
-  const { validateConfigurationOverrides, executeAgent } = getConverseHelpers({
+  const { validateConfigurationOverrides, maybeExecuteAgent, executeAgent } = getConverseHelpers({
     getInternalServices,
   });
 
   router.versioned
     .post({
-      path: `${chatApiPath}/converse`,
+      path: `${chatApiPath}/message`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
       access: 'public',
-      summary: 'Send chat message',
+      summary: 'Send a message and get the answer',
       description:
-        'Send a message to an agent and receive the full conversation, including its event timeline. This synchronous endpoint waits for the agent to finish before returning. With trigger_mode: never, appends a user message without execution and returns the updated conversation; the execution options are ignored.',
+        'Send a message to an agent and get its text answer. Use this synchronous endpoint in scripts and command-line tools. The response contains only the answer and the conversation ID. To continue the conversation, include the returned `conversation_id` in the next request.\n\n' +
+        'The agent runs without a user, so the endpoint declines every prompt that the agent raises, such as a tool confirmation, a question, or a destructive API approval. The `declined_prompts` property lists these prompts. This endpoint does not support attachments.\n\n' +
+        'The `agentBuilder:experimentalFeatures` advanced setting must be enabled. If it is disabled, the endpoint returns a 404 response.',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,
@@ -88,6 +159,70 @@ export function registerChatApiRoutes({
     .addVersion(
       {
         version: '2023-10-31',
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/chat_message.yaml'),
+        },
+        validate: {
+          request: { body: chatMessagePayloadSchema },
+          response: {
+            200: {
+              body: chatMessageResponseSchema,
+              description:
+                'The agent answered; the conversation ID identifies where the exchange was stored.',
+            },
+          },
+        },
+      },
+      wrapHandler(
+        async (ctx, request, response) => {
+          const {
+            message,
+            agent_id: agentId,
+            conversation_id: conversationId,
+          } = request.body as ChatMessageRequestBodyPayload;
+          const { execution: executionService } = getInternalServices();
+          const { events$ } = await executeAgent({
+            payload: { agent_id: agentId, conversation_id: conversationId, input: message },
+            request,
+            executionService,
+            interactive: createNonInteractiveConfig(),
+            autoCreateConversationWithId: false,
+          });
+
+          const events = await firstValueFrom(events$.pipe(toArray()));
+
+          return response.ok<ChatMessageResponse>({
+            body: buildChatMessageResponseFromEvents(events),
+          });
+        },
+        { featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID }
+      )
+    );
+
+  router.versioned
+    .post({
+      path: `${chatApiPath}/converse`,
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+      access: 'public',
+      summary: 'Send chat message',
+      description:
+        'Send a message to an agent and receive the full conversation, including its event timeline. This synchronous endpoint waits for the agent to finish before returning. With trigger_mode: never, appends a user message without execution and returns the conversation it was added to, creating one when conversation_id is omitted; the execution options are ignored.',
+      options: {
+        timeout: {
+          idleSocket: AGENT_SOCKET_TIMEOUT_MS,
+        },
+        tags: ['oas-tag:agent builder'],
+        availability: {
+          stability: 'tech_preview',
+          since: '9.6.0',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
         validate: {
           request: { body: chatPayloadSchema },
         },
@@ -95,37 +230,12 @@ export function registerChatApiRoutes({
       wrapHandler(async (ctx, request, response) => {
         const payload = request.body as ChatRequestBodyPayload;
 
-        if (payload.trigger_mode === ChatTriggerMode.Never) {
-          const {
-            conversation_id: conversationId,
-            input,
-            attachments: attachmentInputs,
-          } = validateUserMessagePayload(payload);
-
-          const { attachments: attachmentsService, conversations: conversationsService } =
-            getInternalServices();
-
-          const attachments = await attachmentsService.validateAttachmentInputs(
-            attachmentInputs,
-            request
-          );
-
-          const body = await conversationsService.appendUserMessage({
-            request,
-            conversationId,
-            message: input,
-            attachments,
-          });
-
-          return response.ok({ body });
-        }
-
         const { conversations: conversationsService, execution: executionService } =
           getInternalServices();
 
         await validateConfigurationOverrides({ payload, request });
 
-        const { events$: chatEvents$ } = await executeAgent({
+        const { events$: chatEvents$ } = await maybeExecuteAgent({
           payload,
           request,
           executionService,
@@ -150,14 +260,14 @@ export function registerChatApiRoutes({
       access: 'public',
       summary: 'Send chat message (streaming)',
       description:
-        'Send a message to an agent and stream the response as server-sent events as the agent works.',
+        'Send a message to an agent and stream the response as server-sent events as the agent works. With trigger_mode: never, the message is appended without execution and the stream carries the conversation events alone.',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,
         },
         tags: ['oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
+          stability: 'tech_preview',
           since: '9.6.0',
         },
       },
@@ -166,7 +276,7 @@ export function registerChatApiRoutes({
       {
         version: '2023-10-31',
         validate: {
-          request: { body: conversePayloadSchema },
+          request: { body: chatPayloadSchema },
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -181,7 +291,7 @@ export function registerChatApiRoutes({
           abortController.abort();
         });
 
-        const { events$: chatEvents$ } = await executeAgent({
+        const { events$: chatEvents$ } = await maybeExecuteAgent({
           payload,
           request,
           executionService,

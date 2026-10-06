@@ -8,20 +8,23 @@
 import { spaceTest, tags, CUSTOM_QUERY_RULE } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
-const RIGHT = 'right';
+const FLYOUT_URL_PARAM = 'flyoutV2';
 
-// Failing: See https://github.com/elastic/kibana/issues/256433
-spaceTest.describe.skip(
+spaceTest.describe(
   'Expandable flyout state sync',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     let ruleName: string;
+
+    spaceTest.setTimeout(5 * 60_000);
+
     spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
       ruleName = `${CUSTOM_QUERY_RULE.name}_${scoutSpace.id}_${Date.now()}`;
       await apiServices.detectionRule.createCustomQueryRule({
         ...CUSTOM_QUERY_RULE,
         name: ruleName,
       });
+      await apiServices.detectionAlerts.waitForAlerts(ruleName, 1, 120_000);
       await browserAuth.loginAsPlatformEngineer();
     });
 
@@ -34,28 +37,28 @@ spaceTest.describe.skip(
       await pageObjects.alertsTablePage.navigate();
 
       const urlBeforeAlertDetails = page.url();
-      expect(urlBeforeAlertDetails).not.toContain(RIGHT);
+      expect(urlBeforeAlertDetails).not.toContain(FLYOUT_URL_PARAM);
 
-      await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper();
+      await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
       await pageObjects.alertsTablePage.alertsTable.scrollIntoViewIfNeeded();
       await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
 
       const urlAfterAlertDetails = page.url();
-      expect(urlAfterAlertDetails).toContain(RIGHT);
+      expect(urlAfterAlertDetails).toContain(FLYOUT_URL_PARAM);
 
       const headerTitle = pageObjects.alertDetailsRightPanelPage.detailsFlyoutHeaderTitle;
       await expect(headerTitle).toHaveText(ruleName);
 
       await page.reload();
-      await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper();
+      await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
 
       const urlAfterReload = page.url();
-      expect(urlAfterReload).toContain(RIGHT);
+      expect(urlAfterReload).toContain(FLYOUT_URL_PARAM);
 
       await pageObjects.alertDetailsRightPanelPage.closeFlyout();
 
       const urlAfterClosingFlyout = page.url();
-      expect(urlAfterClosingFlyout).not.toContain(RIGHT);
+      expect(urlAfterClosingFlyout).not.toContain(FLYOUT_URL_PARAM);
     });
   }
 );

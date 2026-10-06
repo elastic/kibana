@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { NightshiftModelNotFoundError } from '@kbn/significant-events-schema';
 import type { SignificantEventsMaintenanceState } from '../../../../../common/maintenance/state_machine';
 import {
   MAX_INFERENCE_DOCUMENT_BYTES,
@@ -23,6 +24,9 @@ const mockGetStreamTypeFromDefinition = jest.fn();
 const mockIdentifyInferredFeatures = jest.fn();
 const mockIdentifyComputedFeatures = jest.fn();
 const mockShouldIdentifyFeatures = jest.fn();
+const mockResolveNightshiftModelForRequest = jest.fn(
+  async ({ requestedId }: { requestedId?: string }) => requestedId ?? 'default-connector'
+);
 
 jest.mock('@kbn/streams-schema', () => ({
   getStreamSamplingSource: (...args: unknown[]) => mockGetStreamSamplingSource(...args),
@@ -43,6 +47,12 @@ jest.mock('../../../../lib/significant_events/features', () => ({
 
 jest.mock('../../../../lib/significant_events/features/should_identify_features', () => ({
   shouldIdentifyFeatures: (...args: unknown[]) => mockShouldIdentifyFeatures(...args),
+}));
+
+jest.mock('@kbn/nightshift-ai', () => ({
+  ...jest.requireActual('@kbn/nightshift-ai'),
+  resolveNightshiftModelForRequest: (options: { requestedId?: string }) =>
+    mockResolveNightshiftModelForRequest(options),
 }));
 
 jest.mock(
@@ -113,8 +123,9 @@ const makeInferredHandlerParams = ({
   const kiClient = {};
   const agentBuilder = {};
   const server = {
-    searchInferenceEndpoints: {},
     agentBuilder,
+    inference: {},
+    core: { savedObjects: {}, uiSettings: {} },
   };
   const licensing = {};
   const maintenanceService = makeMaintenanceService();
@@ -391,6 +402,17 @@ describe('inferred feature identification route', () => {
     expect(ensureEnabled).toHaveBeenCalledWith({ request });
   });
 
+  it('normalizes a blank run id before identifying inferred features', async () => {
+    const { handlerParams } = makeInferredHandlerParams();
+    handlerParams.params.body.runId = '';
+
+    await inferredRoute.handler(handlerParams);
+
+    const { runId } = mockIdentifyInferredFeatures.mock.calls[0][0];
+    expect(runId).toEqual(expect.any(String));
+    expect(runId).not.toBe('');
+  });
+
   it('returns identification results when sync workflow bootstrap fails', async () => {
     const ensureEnabled = jest.fn().mockRejectedValue(new Error('workflow unavailable'));
     const { handlerParams, routeLogger, identifyResult } = makeInferredHandlerParams({
@@ -404,6 +426,19 @@ describe('inferred feature identification route', () => {
     expect(routeLogger.warn).toHaveBeenCalledWith(
       'Failed to ensure KI sync workflow is enabled: workflow unavailable'
     );
+  });
+
+  it('maps an unknown connector override to a 400 response', async () => {
+    const { handlerParams } = makeInferredHandlerParams();
+    mockResolveNightshiftModelForRequest.mockRejectedValueOnce(
+      new NightshiftModelNotFoundError('missing-model')
+    );
+    handlerParams.params.body.connectorId = 'missing-model';
+
+    await expect(inferredRoute.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 400 },
+    });
+    expect(mockIdentifyInferredFeatures).not.toHaveBeenCalled();
   });
 });
 

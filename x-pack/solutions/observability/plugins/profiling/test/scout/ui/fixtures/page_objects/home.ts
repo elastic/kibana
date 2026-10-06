@@ -55,16 +55,6 @@ export class ProfilingHomePage {
     await this.page.waitForURL(`**${path}**`);
   }
 
-  // Setup status methods
-  async getSetupStatus() {
-    return this.page.testSubj.locator('profilingSetupStatus');
-  }
-
-  async isSetupComplete() {
-    const status = await this.getSetupStatus();
-    return (await status.getAttribute('data-status')) === 'complete';
-  }
-
   // Error state methods
   async getErrorState() {
     return this.page.testSubj.locator('profilingErrorState');

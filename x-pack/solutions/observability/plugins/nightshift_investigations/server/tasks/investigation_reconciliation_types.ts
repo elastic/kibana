@@ -36,17 +36,10 @@ export const FALLBACK_ERRORS: Partial<Record<ExecutionStatus, string>> = {
   [ExecutionStatus.TIMED_OUT]: 'Workflow execution timed out',
 };
 
-export const MISSING_EXECUTION_ERROR = 'Workflow execution no longer exists';
-
-/**
- * How long an investigation whose execution cannot be found is left alone. An execution document is
- * always written before its investigation record (see `investigations_client.start()`), so a
- * missing one is either not yet visible to search or gone for good; waiting distinguishes the two.
- */
-export const MISSING_EXECUTION_GRACE_PERIOD_MS = 60 * 60 * 1000;
-
 export interface ExecutionSummary {
   status: ExecutionStatus;
+  workflowId?: string | null;
+  originManagedWorkflowId?: string | null;
   error?: { message: string } | null;
   finishedAt?: string;
 }

@@ -148,6 +148,7 @@ describe('bulkEnableRules', () => {
           attributes: expect.objectContaining({
             enabled: true,
             lastEnabledAt: '2019-02-12T21:01:22.479Z',
+            updatedByProfileUid: null,
           }),
         }),
         expect.objectContaining({
@@ -155,6 +156,7 @@ describe('bulkEnableRules', () => {
           attributes: expect.objectContaining({
             enabled: true,
             lastEnabledAt: '2019-02-12T21:01:22.479Z',
+            updatedByProfileUid: null,
           }),
         }),
       ]),
@@ -453,6 +455,7 @@ describe('bulkEnableRules', () => {
           attributes: expect.objectContaining({
             enabled: true,
             lastEnabledAt: '2019-02-12T21:01:22.479Z',
+            updatedByProfileUid: null,
           }),
         }),
       ]),
@@ -496,6 +499,7 @@ describe('bulkEnableRules', () => {
           attributes: expect.objectContaining({
             enabled: true,
             lastEnabledAt: '2019-02-12T21:01:22.479Z',
+            updatedByProfileUid: null,
           }),
         }),
       ]),

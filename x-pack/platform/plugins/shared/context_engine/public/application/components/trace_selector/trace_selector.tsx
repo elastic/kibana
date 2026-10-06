@@ -70,7 +70,7 @@ export const TraceSelector = ({ value, onChange, ebtElement }: TraceSelectorProp
         </EuiButton>
         <EuiButton
           id="index"
-          iconType="listBullet"
+          iconType="chartWaterfall"
           data-test-subj="contextTraceToggle-index"
           {...getEbtProps({
             element: ebtElement,
@@ -78,7 +78,7 @@ export const TraceSelector = ({ value, onChange, ebtElement }: TraceSelectorProp
           })}
         >
           {i18n.translate('xpack.contextEngine.traceSelector.genAiLibrariesToggle', {
-            defaultMessage: 'GenAI libraries',
+            defaultMessage: 'External agents',
           })}
         </EuiButton>
       </EuiButtonGroup>

@@ -30,6 +30,7 @@ const SPACE_ID = `esc-space-isolation-${Date.now()}`;
 
 apiTest.describe('Escalations are isolated per Space', { tag: [...tags.stateful.classic] }, () => {
   let cookieHeader: Record<string, string>;
+  let adminProfileUid: string;
 
   // Ids created inside the custom space — cleaned up through the AB API in the custom space.
   let spaceInvestigationId: string;
@@ -40,6 +41,8 @@ apiTest.describe('Escalations are isolated per Space', { tag: [...tags.stateful.
     ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
 
     // Seed an investigation inside the custom space.
+    // The response also carries user.id — the admin's profile uid used as the required
+    // assignee in the escalation create call below.
     const invResult = await apiClient.post(spaceUrl(AB_CONVERSATIONS_PATH, SPACE_ID), {
       headers: { ...PUBLIC_HEADERS, ...cookieHeader },
       body: {
@@ -51,11 +54,19 @@ apiTest.describe('Escalations are isolated per Space', { tag: [...tags.stateful.
       responseType: 'json',
     });
     spaceInvestigationId = expectCreated(invResult, `investigation in space ${SPACE_ID}`);
+    adminProfileUid = invResult.body.user?.id as string;
+    if (!adminProfileUid) {
+      throw new Error('admin profile uid not found in investigation creation response');
+    }
 
     // Seed an escalation inside the custom space, linked to the space-scoped investigation.
     const escResult = await apiClient.post(spaceUrl(CREATE_ESCALATION_PATH, SPACE_ID), {
       headers: { ...INTERNAL_HEADERS, ...cookieHeader },
-      body: { linked_investigation_id: spaceInvestigationId, visibility: 'public' },
+      body: {
+        linked_investigation_id: spaceInvestigationId,
+        visibility: 'public',
+        assignees: [adminProfileUid],
+      },
       responseType: 'json',
     });
     spaceEscalationId = expectCreated(escResult, `escalation in space ${SPACE_ID}`);
@@ -110,6 +121,7 @@ apiTest.describe('Escalations are isolated per Space', { tag: [...tags.stateful.
         body: {
           linked_investigation_id: spaceInvestigationId,
           visibility: 'public',
+          assignees: [adminProfileUid],
         },
         responseType: 'json',
       });

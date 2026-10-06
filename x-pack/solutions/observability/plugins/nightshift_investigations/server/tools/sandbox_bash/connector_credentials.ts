@@ -8,12 +8,11 @@
 import type { Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { SandboxCallContext } from './tool_utils';
+import { createOutputRedactor, MIN_REDACTABLE_SECRET_LENGTH } from './output_redactor';
+import { authorizeConnector } from './connector_authorization';
 
 /** Env var prefix under which connector material is exposed to a single sandbox command. */
 export const CONNECTOR_ENV_PREFIX = 'CONNECTOR_';
-
-/** Minimum length for a secret value to be redacted from command output. */
-const MIN_REDACTABLE_SECRET_LENGTH = 6;
 
 export interface ConnectorCredentialEnv {
   /** Environment variables to inject into the command. */
@@ -65,6 +64,27 @@ const readAuthorizationHeader = (secretHeaders: unknown): string | undefined => 
 };
 
 /**
+ * Secret values derived from a connector's raw `secrets`, beyond its own top-level leaves — e.g.
+ * the bare API key `buildConnectorEnv` extracts out of an `Authorization: ApiKey …` header and
+ * injects as `CONNECTOR_SECRET_PASSWORD`. Anything derived here must also reach every redactor
+ * that guards this connector's secrets, not just the one covering a single command's own output:
+ * a bare derived value never appears verbatim in the raw `secrets` object, so a redactor built
+ * only from `collectSecretLeaves`-style traversal of `secrets` would miss it.
+ */
+export const deriveConnectorCredentialSecretValues = (
+  secrets: Record<string, unknown>
+): string[] => {
+  const secretValues: string[] = [];
+  // HTTP ES connectors store `Authorization: ApiKey …` in secretHeaders, not `password`.
+  const authorization = readAuthorizationHeader(secrets.secretHeaders);
+  if (authorization?.startsWith('ApiKey ')) {
+    const apiKey = authorization.slice('ApiKey '.length);
+    if (apiKey.length >= MIN_REDACTABLE_SECRET_LENGTH) secretValues.push(apiKey);
+  }
+  return secretValues;
+};
+
+/**
  * Builds the CONNECTOR_* environment for a connector. Config keys map to CONNECTOR_CONFIG_<KEY>,
  * secret keys to CONNECTOR_SECRET_<KEY>; nested values are JSON-encoded.
  */
@@ -103,15 +123,15 @@ export const buildConnectorEnv = ({
     if (env.CONNECTOR_SECRET_PASSWORD === undefined) {
       env.CONNECTOR_SECRET_PASSWORD = apiKey;
     }
-    if (apiKey.length >= MIN_REDACTABLE_SECRET_LENGTH) secretValues.push(apiKey);
   }
+  secretValues.push(...deriveConnectorCredentialSecretValues(secrets));
 
   return { env, secretValues };
 };
 
-/** Replaces every occurrence of an injected secret value in command output. */
+/** Redacts injected secret values (and their common encodings) from command output. */
 export const redactSecrets = (text: string, secretValues: readonly string[]): string =>
-  secretValues.reduce((acc, secret) => acc.split(secret).join('[REDACTED]'), text);
+  createOutputRedactor(secretValues).redact(text);
 
 /**
  * Creates the resolver that turns a connector id into a one-command credential environment.
@@ -130,54 +150,9 @@ export const createConnectorCredentialResolver =
   async (connectorId, callContext) => {
     const { actions } = getDeps();
 
-    if (!actions) {
-      return { errorMessage: 'Connectors are not available in this deployment' };
-    }
-
-    if (!callContext.allowedConnectorIds.includes(connectorId)) {
-      return {
-        errorMessage:
-          `Connector '${connectorId}' is not assigned to this agent. ` +
-          `Assigned connectors: ${callContext.allowedConnectorIds.join(', ') || 'none'}. ` +
-          `Check /workspace/connectors.md.`,
-      };
-    }
-
-    const { request } = callContext;
-
-    let connector: Awaited<
-      ReturnType<Awaited<ReturnType<ActionsPluginStart['getActionsClientWithRequest']>>['get']>
-    >;
-    try {
-      const actionsClient = await actions.getActionsClientWithRequest(request);
-      connector = await actionsClient.get({ id: connectorId });
-    } catch (err) {
-      return { errorMessage: `Failed to resolve connector '${connectorId}': ${err}` };
-    }
-
-    if (connector.isSystemAction) {
-      return {
-        errorMessage: `Connector '${connectorId}' is a system connector and cannot be used`,
-      };
-    }
-
-    try {
-      await actions.getActionsAuthorizationWithRequest(request).ensureAuthorized({
-        operation: 'execute',
-        actionTypeId: connector.actionTypeId,
-      });
-    } catch (err) {
-      return { errorMessage: `Not authorized to use connector '${connectorId}': ${err}` };
-    }
-
-    const inMemoryConnector = actions.inMemoryConnectors.find(({ id }) => id === connectorId);
-    if (!inMemoryConnector) {
-      return {
-        errorMessage:
-          `Connector '${connectorId}' is not a preconfigured connector. Only connectors defined ` +
-          `in kibana.yml (xpack.actions.preconfigured) can be used from the sandbox.`,
-      };
-    }
+    const authorized = await authorizeConnector(connectorId, callContext, actions);
+    if ('errorMessage' in authorized) return authorized;
+    const { connector, inMemoryConnector } = authorized;
 
     logger.debug(
       `Injecting credentials for connector ${connectorId} into a single sandbox command`

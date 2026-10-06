@@ -11,14 +11,16 @@ import {
   bulkResponseSchema,
   bulkSnoozeActionPoliciesBodySchema,
   createActionPolicyDataSchema,
+  errorResponseSchema,
   findActionPoliciesResponseSchema,
   matchActionPoliciesBodySchema,
   matchActionPoliciesResponseSchema,
   ruleEventFieldsResponseSchema,
   snoozeActionPolicyBodySchema,
-  updateActionPolicyBodySchema,
+  updateActionPolicyDataSchema,
 } from '@kbn/alerting-v2-schemas';
 import {
+  ACTION_POLICY_LICENSE_NOT_SUPPORTED_RESPONSE,
   ACTION_POLICY_RESPONSE,
   BULK_BY_IDS_REQUEST,
   BULK_RESPONSE,
@@ -43,8 +45,8 @@ describe('action policy OAS example payloads', () => {
     expect(actionPolicyResponseSchema.safeParse(ACTION_POLICY_RESPONSE).success).toBe(true);
   });
 
-  it('keeps update request example valid against updateActionPolicyBodySchema', () => {
-    expect(updateActionPolicyBodySchema.safeParse(UPDATE_ACTION_POLICY_REQUEST).success).toBe(true);
+  it('keeps update request example valid against updateActionPolicyDataSchema', () => {
+    expect(updateActionPolicyDataSchema.safeParse(UPDATE_ACTION_POLICY_REQUEST).success).toBe(true);
   });
 
   it('keeps snooze request example valid against snoozeActionPolicyBodySchema', () => {
@@ -85,5 +87,11 @@ describe('action policy OAS example payloads', () => {
 
   it('keeps rule event fields example valid against ruleEventFieldsResponseSchema', () => {
     expect(ruleEventFieldsResponseSchema.safeParse(RULE_EVENT_FIELDS_RESPONSE).success).toBe(true);
+  });
+
+  it('keeps license-not-supported example valid against errorResponseSchema', () => {
+    expect(
+      errorResponseSchema.safeParse(ACTION_POLICY_LICENSE_NOT_SUPPORTED_RESPONSE.value).success
+    ).toBe(true);
   });
 });

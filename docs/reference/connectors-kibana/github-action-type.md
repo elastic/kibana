@@ -11,6 +11,8 @@ applies_to:
 
 The GitHub data source connects to GitHub through the GitHub MCP server. It provides search across code, repositories, issues, pull requests, and users. It also provides access to commits, branches, tags, releases, teams, and file contents. It supports two authentication methods: Bearer token (personal access token) and OAuth Authorization Code.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-github-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.

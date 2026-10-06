@@ -80,6 +80,7 @@ export const getRulesClientMockParams = (
     maxScheduledPerMinute: 10000,
     minimumScheduleInterval: { value: '1m', enforce: false },
     getUserName: jest.fn(),
+    getProfileUid: jest.fn(),
     createAPIKey: jest.fn(),
     cloneAPIKey: jest.fn(),
     logger,

@@ -15,6 +15,7 @@ import type { Agent, AgentPolicy } from '../../../../types';
 import { useAuthz } from '../../../../../../hooks/use_authz';
 import { useAgentVersion } from '../../../../../../hooks/use_agent_version';
 import { useLicense } from '../../../../../../hooks/use_license';
+import { useRestartAgentAction } from '../../../../../../hooks/use_restart_agent_action';
 
 import { TableRowActions } from './table_row_actions';
 
@@ -22,11 +23,13 @@ jest.mock('../../../../../../services/experimental_features');
 jest.mock('../../../../../../hooks/use_authz');
 jest.mock('../../../../../../hooks/use_agent_version');
 jest.mock('../../../../../../hooks/use_license');
+jest.mock('../../../../../../hooks/use_restart_agent_action');
 
 const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 const mockedUseAuthz = jest.mocked(useAuthz);
 const mockedUseAgentVersion = jest.mocked(useAgentVersion);
 const mockedUseLicense = useLicense as jest.MockedFunction<typeof useLicense>;
+const mockedUseRestartAgentAction = jest.mocked(useRestartAgentAction);
 
 function renderTableRowActions({
   agent,
@@ -51,6 +54,7 @@ function renderTableRowActions({
       onChangeAgentPrivilegeLevelClick={jest.fn()}
       onViewAgentJsonClick={jest.fn()}
       onRollbackClick={jest.fn()}
+      onRestartClick={jest.fn()}
       onViewAgentPolicyClick={jest.fn()}
     />
   );
@@ -105,6 +109,7 @@ describe('TableRowActions', () => {
       integrations: {},
     } as any);
     mockedUseAgentVersion.mockReturnValue('8.10.2');
+    mockedUseRestartAgentAction.mockReturnValue({ isRestartAgentActionEnabled: true });
   });
 
   describe('Menu structure', () => {
@@ -765,6 +770,76 @@ describe('TableRowActions', () => {
       });
 
       expect(res).toBe(null);
+    });
+  });
+
+  describe('Restart agent action', () => {
+    const qualifyingVersion = { elastic: { agent: { version: '9.6.0' } } };
+    const oldVersion = { elastic: { agent: { version: '9.5.0' } } };
+
+    it('should render restart button enabled for active 9.6+ agent', async () => {
+      const { utils } = renderTableRowActions({
+        agent: { active: true, status: 'online', local_metadata: qualifyingVersion } as any,
+        agentPolicy: { is_managed: false, supports_agentless: false } as AgentPolicy,
+      });
+
+      expect(utils.getByTestId('agentRestartBtn')).toBeInTheDocument();
+      expect(utils.getByTestId('agentRestartBtn')).toBeEnabled();
+    });
+
+    it('should render restart button disabled for agent below 9.6', async () => {
+      const { utils } = renderTableRowActions({
+        agent: { active: true, status: 'online', local_metadata: oldVersion } as any,
+        agentPolicy: { is_managed: false, supports_agentless: false } as AgentPolicy,
+      });
+
+      expect(utils.getByTestId('agentRestartBtn')).toBeDisabled();
+    });
+
+    it('should render restart button disabled for agentless policy', async () => {
+      const { utils } = renderTableRowActions({
+        agent: { active: true, status: 'online', local_metadata: qualifyingVersion } as any,
+        agentPolicy: { is_managed: false, supports_agentless: true } as AgentPolicy,
+      });
+
+      expect(utils.getByTestId('agentRestartBtn')).toBeDisabled();
+    });
+
+    it('should render restart button disabled for inactive agent', async () => {
+      const { utils } = renderTableRowActions({
+        agent: { active: false, status: 'unenrolled', local_metadata: qualifyingVersion } as any,
+        agentPolicy: { is_managed: false, supports_agentless: false } as AgentPolicy,
+      });
+
+      expect(utils.getByTestId('agentRestartBtn')).toBeDisabled();
+    });
+
+    it('should call onRestartClick when clicked', async () => {
+      const onRestartClick = jest.fn();
+      const renderer = createFleetTestRendererMock();
+      const { getByTestId } = renderer.render(
+        <TableRowActions
+          agent={{ active: true, status: 'online', local_metadata: qualifyingVersion } as any}
+          agentPolicy={{ is_managed: false, supports_agentless: false } as AgentPolicy}
+          onAddRemoveTagsClick={jest.fn()}
+          onReassignClick={jest.fn()}
+          onRequestDiagnosticsClick={jest.fn()}
+          onUnenrollClick={jest.fn()}
+          onUpgradeClick={jest.fn()}
+          onGetUninstallCommandClick={jest.fn()}
+          onMigrateAgentClick={jest.fn()}
+          onChangeAgentPrivilegeLevelClick={jest.fn()}
+          onViewAgentJsonClick={jest.fn()}
+          onRollbackClick={jest.fn()}
+          onRestartClick={onRestartClick}
+          onViewAgentPolicyClick={jest.fn()}
+        />
+      );
+
+      fireEvent.click(getByTestId('agentActionsBtn'));
+      fireEvent.click(getByTestId('agentRestartBtn'));
+
+      expect(onRestartClick).toHaveBeenCalledTimes(1);
     });
   });
 });

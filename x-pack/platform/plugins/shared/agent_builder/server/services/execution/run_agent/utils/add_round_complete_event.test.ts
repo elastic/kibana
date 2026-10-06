@@ -381,6 +381,22 @@ describe('addRoundCompleteEvent', () => {
     });
   });
 
+  it('records the input tokens of the last LLM call from the final graph state', async () => {
+    const events = await firstValueFrom(
+      completedRun(defaultRun, { lastCallUsage: { inputTokens: 4242 } }).pipe(
+        addRoundCompleteEvent({
+          ...createDeps(),
+          userInput: { message: 'hello' },
+          startTime: new Date('2026-01-01T00:00:00.000Z'),
+        }),
+        toArray()
+      )
+    );
+
+    const roundCompleteEvent = events.find(isRoundCompleteEvent);
+    expect(roundCompleteEvent?.data.round.model_usage.last_call_input_tokens).toBe(4242);
+  });
+
   it('preserves the original round origin and author when resuming a pending round', async () => {
     const pendingRound = createRound({
       status: ConversationRoundStatus.awaitingPrompt,

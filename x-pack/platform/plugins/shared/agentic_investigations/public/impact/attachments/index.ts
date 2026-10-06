@@ -6,13 +6,10 @@
  */
 
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import { IMPACT_ATTACHMENT_TYPE } from '../../../common/impact/attachment';
-import { createImpactAttachmentDefinition } from './impact_attachment_definition';
+import { registerInvestigationAttachmentRenderer } from '../../investigation_attachments';
+import { impactAttachmentRenderer } from './impact_attachment_definition';
 
 /** Registers the Impact flyout/inline renderer with Agent Builder. */
 export const registerImpactAttachmentTypes = (agentBuilder: AgentBuilderPluginStart): void => {
-  agentBuilder.attachments.addAttachmentType(
-    IMPACT_ATTACHMENT_TYPE,
-    createImpactAttachmentDefinition()
-  );
+  registerInvestigationAttachmentRenderer(agentBuilder, impactAttachmentRenderer);
 };

@@ -30,7 +30,7 @@ const defaultFormState: RenameProcessorFormState = {
 
 const fieldOptions: FieldOptions = {
   fieldKey: 'field',
-  includeCondition: false,
+  includeCondition: true,
   includeIgnoreFailures: true,
   includeIgnoreMissing: true,
 };

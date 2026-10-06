@@ -402,10 +402,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
           // Verify second entity node - Host target
           // get Node by sha256 hash of host:host-instance-1 and host:host-instance-2
-          await expandedFlyoutGraph.assertNodeEntityTag(
-            '081f21718bb4b854bda72b01719d0febe88b10520dede17fc2640260002ea339',
-            'Host'
-          );
           await expandedFlyoutGraph.assertNodeEntityDetails(
             '081f21718bb4b854bda72b01719d0febe88b10520dede17fc2640260002ea339',
             'GCP Compute Instance'

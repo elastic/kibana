@@ -16,7 +16,10 @@ import {
 } from '../builtin_workflow_input_definitions';
 import type { WorkflowOutput, WorkflowYaml } from '../schema';
 import type { JsonModelSchemaType } from '../schema/common/json_model_schema';
-import type { JsonSchema } from '../schema/common/json_model_shape_schema';
+import {
+  isSchemaValuedAdditionalProperties,
+  type JsonSchema,
+} from '../schema/common/json_model_shape_schema';
 import {
   isManualTrigger,
   type LegacyWorkflowInput,
@@ -140,6 +143,18 @@ export function normalizeFieldsToJsonSchema(
     ) {
       return fields as JsonModelSchemaType;
     }
+  }
+
+  if (
+    typeof fields === 'object' &&
+    fields !== null &&
+    !Array.isArray(fields) &&
+    'additionalProperties' in fields &&
+    isSchemaValuedAdditionalProperties(
+      (fields as { additionalProperties?: unknown }).additionalProperties
+    )
+  ) {
+    return fields as JsonModelSchemaType;
   }
 
   if (Array.isArray(fields)) {

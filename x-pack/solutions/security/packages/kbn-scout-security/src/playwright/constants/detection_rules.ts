@@ -28,6 +28,8 @@ export interface CustomQueryRule {
   type: 'query';
   query: string;
   from: string;
+  /** Rule run interval. Omitted values use the detection engine default. */
+  interval?: string;
   investigation_fields?: { field_names: string[] };
   response_actions?: CustomQueryRuleResponseAction[];
 }

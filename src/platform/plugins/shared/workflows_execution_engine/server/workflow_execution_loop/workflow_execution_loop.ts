@@ -125,7 +125,7 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
   params.stepIoService.releaseTransientlyRehydratedOutputs();
 
   const finalLogFlushSpan = apm.startSpan('final flush logs', 'workflow', 'logging');
-  await params.workflowLogger.flushEvents({
+  await params.eventQueue.flush({
     signal: params.signal,
   });
   finalLogFlushSpan?.end();

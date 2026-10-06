@@ -141,6 +141,53 @@ steps:
 - **`enablement: 'restorable'`** preserves user-toggled enabled state across managed updates.
 - **`spaceId`** is mandatory — use `'*'` (the global space constant) for workflows visible from every space.
 
+## Managed service-account execution
+
+The `system-example-service-account` definition demonstrates an admin-authorized managed
+workflow installation. Its template accepts `serviceAccountId`, persists it in
+`settings.run_as`, and executes `elasticsearch.request GET /_security/_authenticate`.
+
+Create the account first with `POST /internal/security/service_account`, for example
+`{ "name": "workflow-example", "roles": ["viewer"] }`. Use the returned `id` in
+`serviceAccountId`; role names must exist on the target deployment and allow the workflow's
+steps. Creation requires explicit roles on both UIAM and Elasticsearch backends.
+
+With this example plugin and `xpack.security.serviceAccounts.enabled` enabled, the following
+internal endpoints use the authenticated request's space:
+
+- `POST /internal/workflows_extensions_example/managed_service_account/{id}` with
+  `{ "serviceAccountId": "<existing SA ID>" }` installs or updates the instance.
+- `POST /internal/workflows_extensions_example/managed_service_account/{id}/run` with `{}`
+  executes it and returns `workflowExecutionId`.
+- `DELETE /internal/workflows_extensions_example/managed_service_account/{id}` uninstalls it.
+
+The persisted workflow ID is `system-example-service-account-{id}`. Installation and changes
+require the relevant Workflows privileges and `manage_security`. Execution uses the normal
+Workflows execute privilege. The endpoints accept an existing account ID; create the account
+through Security's normal API first.
+
+This dynamic definition uses `versionStrategy: 'auto'`. Initial installation uses the setup
+user's credentials. On startup, the owning plugin upgrades installed instances from the
+registered definition, preserving their template values and verified SA binding. No user
+request or SA security-administration privilege is needed for that upgrade. Creating,
+changing, or removing the binding still requires an authorized request.
+
+SA-bound managed workflows must be installed in a concrete space. Installation with
+`spaceId: '*'` is rejected before creating a binding; global SA bindings are not supported.
+
+The Workflows service-account Scout suite covers installation, actual SA execution,
+authorized rebinding, rejection of unauthorized installation/rebinding/removal, and cleanup:
+
+```sh
+nvm use
+node scripts/scout run-tests --arch serverless --domain search --config src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/playwright.config.ts
+```
+
+The `service_accounts` server configuration loads this example on local UIAM and stateful Elasticsearch.
+Use `--arch stateful --domain classic` in the same command to validate the ES backend. The test
+checks both execution identity metadata and the identity returned by Elasticsearch. It does
+not validate `kibana.request` authentication or automatic startup provisioning.
+
 ## Key Points
 
 1. **Shared Common Fields**: The `id`, `inputSchema`, and `outputSchema` are defined in `common/types.ts` and imported by both server and public implementations to ensure consistency.

@@ -95,6 +95,7 @@ export interface SmlIndexer {
     esClient: ElasticsearchClient;
     ingestionMethod?: SmlIngestionMethod;
     spaces?: string[];
+    strict?: boolean;
   }) => Promise<void>;
 }
 
@@ -287,6 +288,7 @@ class SmlIndexerImpl implements SmlIndexer {
       esClient,
       ...(spaces && spaces.length > 0 ? { spaces } : {}),
       ...(scope !== 'all' ? { ingestionMethod: scope } : {}),
+      ...(params.strict !== undefined ? { strict: params.strict } : {}),
     });
   }
 
@@ -514,11 +516,13 @@ class SmlIndexerImpl implements SmlIndexer {
     esClient,
     ingestionMethod,
     spaces,
+    strict = false,
   }: {
     originUri: string;
     esClient: ElasticsearchClient;
     ingestionMethod?: SmlIngestionMethod;
     spaces?: string[];
+    strict?: boolean;
   }): Promise<void> {
     const filter: Array<Record<string, unknown>> = [
       { term: { id: smlEntryIdFromOriginUri(originUri) } },
@@ -548,8 +552,29 @@ class SmlIndexerImpl implements SmlIndexer {
         ignore_unavailable: true,
         allow_no_indices: true,
         query: { bool: { filter } },
-        refresh: false,
+        refresh: strict,
+        ...(strict ? { conflicts: 'proceed' as const } : {}),
       });
+      if (strict && (result.timed_out || result.failures?.length)) {
+        throw new Error(`SML deletion was incomplete for origin '${originUri}'`);
+      }
+      if (strict && result.version_conflicts) {
+        // Another delete can remove a document after delete-by-query takes its snapshot.
+        await esClient.indices.refresh({
+          index: smlIndexName,
+          ignore_unavailable: true,
+          allow_no_indices: true,
+        });
+        const remaining = await esClient.count({
+          index: smlIndexName,
+          ignore_unavailable: true,
+          allow_no_indices: true,
+          query: { bool: { filter } },
+        });
+        if (remaining.count > 0 || remaining._shards.failed > 0) {
+          throw new Error(`SML deletion was incomplete for origin '${originUri}'`);
+        }
+      }
       if (result.deleted && result.deleted > 0) {
         this.logger.info(
           `SML indexer: deleted ${result.deleted} existing ${label} for origin '${originUri}'`
@@ -562,6 +587,7 @@ class SmlIndexerImpl implements SmlIndexer {
         );
         return;
       }
+      if (strict) throw error;
       this.logger.warn(
         `SML indexer: failed to delete ${label} for origin '${originUri}': ${
           (error as Error).message

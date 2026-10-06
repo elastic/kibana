@@ -25,7 +25,9 @@ const INCREMENTABLE_UNITS: ReadonlyArray<ReturnType<typeof selectUnit>['unit']> 
  */
 export const ConversationMetaInfo = memo<{
   createdAt: Investigation['createdAt'];
-}>(({ createdAt }) => {
+  /** Rendered beside the age; the host supplies it only while a decision is in flight. */
+  inFlightStatus?: React.ReactNode;
+}>(({ createdAt, inFlightStatus }) => {
   const { unit } = selectUnit(new Date(createdAt));
 
   return (
@@ -43,6 +45,7 @@ export const ConversationMetaInfo = memo<{
           </EuiText>
         </EuiToolTip>
       </EuiFlexItem>
+      {inFlightStatus ? <EuiFlexItem grow={false}>{inFlightStatus}</EuiFlexItem> : null}
     </EuiFlexGroup>
   );
 });

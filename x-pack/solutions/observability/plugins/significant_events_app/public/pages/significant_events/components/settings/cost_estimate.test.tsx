@@ -223,12 +223,6 @@ const renderCost = () =>
     </I18nProvider>
   );
 
-const renderExpandedCost = () => {
-  const result = renderCost();
-  fireEvent.click(screen.getByTestId('significantEventsCostAccordionButton'));
-  return result;
-};
-
 describe('CostEstimate', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -275,15 +269,10 @@ describe('CostEstimate', () => {
     expect(screen.queryByTestId('significantEventsCostSection')).not.toBeInTheDocument();
   });
 
-  it('keeps cost details hidden until the accordion is opened', () => {
+  it('shows cost details without requiring expansion', () => {
     renderCost();
-    const accordionButton = screen.getByTestId('significantEventsCostAccordionButton');
-    const headline = screen.getByTestId('significantEventsCostHeadline');
-    expect(accordionButton).toHaveAttribute('aria-expanded', 'false');
-    expect(headline).not.toBeVisible();
-    fireEvent.click(accordionButton);
-    expect(accordionButton).toHaveAttribute('aria-expanded', 'true');
-    expect(headline).toBeVisible();
+    expect(screen.getByTestId('significantEventsCostHeader')).toHaveTextContent('Dev');
+    expect(screen.getByTestId('significantEventsCostHeadline')).toBeVisible();
   });
 
   it('shows deployment-wide partial costs and an enable action when this space is disabled', async () => {
@@ -300,7 +289,7 @@ describe('CostEstimate', () => {
         }),
       });
     });
-    renderExpandedCost();
+    renderCost();
     expect(screen.getByTestId('significantEventsTokenTrackingCoverage')).toHaveTextContent(
       '1 of 2 spaces tracked'
     );
@@ -331,7 +320,7 @@ describe('CostEstimate', () => {
 
   it('disables the enable button without Advanced Settings save permission', () => {
     setTracking(false, false);
-    renderExpandedCost();
+    renderCost();
     const enableButton = screen.getByTestId('significantEventsEnableTokenTrackingButton');
     expect(enableButton).toBeDisabled();
     const tooltipAnchor = screen.getByTestId('significantEventsEnableTokenTrackingTooltipAnchor');
@@ -348,7 +337,7 @@ describe('CostEstimate', () => {
       updateErrors$.next(new Error('save rejected'));
       return false;
     });
-    renderExpandedCost();
+    renderCost();
     fireEvent.click(screen.getByTestId('significantEventsEnableTokenTrackingButton'));
 
     await waitFor(() => {
@@ -365,7 +354,7 @@ describe('CostEstimate', () => {
   it('keeps tracking enabled when dashboard installation fails', async () => {
     setTracking(false);
     installTokenUsageDashboard.mockRejectedValue(new Error('dashboard unavailable'));
-    renderExpandedCost();
+    renderCost();
     fireEvent.click(screen.getByTestId('significantEventsEnableTokenTrackingButton'));
 
     await waitFor(() => {
@@ -382,7 +371,7 @@ describe('CostEstimate', () => {
   });
 
   it('shows cross-space token tracking coverage', () => {
-    renderExpandedCost();
+    renderCost();
     expect(screen.getByTestId('significantEventsTokenTrackingCoverage')).toHaveTextContent(
       '1 of 2 spaces tracked'
     );
@@ -409,7 +398,7 @@ describe('CostEstimate', () => {
         },
       }),
     });
-    renderExpandedCost();
+    renderCost();
     expect(screen.getByTestId('significantEventsTokenTrackingCoverage')).toHaveTextContent(
       '2 of 2 spaces tracked'
     );
@@ -441,7 +430,7 @@ describe('CostEstimate', () => {
         }),
       });
     });
-    renderExpandedCost();
+    renderCost();
     expect(screen.getByTestId('significantEventsTokenTrackingCoverage')).toHaveTextContent(
       '0 of 2 spaces tracked'
     );
@@ -470,7 +459,7 @@ describe('CostEstimate', () => {
         },
       }),
     });
-    renderExpandedCost();
+    renderCost();
     expect(screen.getByTestId('significantEventsTokenTrackingCoverage')).toHaveTextContent(
       'Tracking coverage unavailable'
     );
@@ -482,12 +471,12 @@ describe('CostEstimate', () => {
 
   it('shows a loading spinner on the initial query', () => {
     setCost({ data: undefined, isLoading: true });
-    renderExpandedCost();
+    renderCost();
     expect(screen.getByTestId('significantEventsCostLoading')).toBeVisible();
   });
 
   it('renders the headline, both group columns, fixed order, and numeric formatting', () => {
-    renderExpandedCost();
+    renderCost();
     expect(screen.getByTestId('significantEventsCostHeadline')).toHaveTextContent(
       '~$6.90 today · ~$20.50 this month (recorded calls)'
     );
@@ -534,7 +523,7 @@ describe('CostEstimate', () => {
         }),
       }),
     });
-    renderExpandedCost();
+    renderCost();
 
     expect(screen.getByTestId('significantEventsCostHeadline')).toHaveTextContent('<$0.01 today');
     expect(screen.getByTestId('significantEventsCostGroupToday-discovery')).toHaveTextContent(
@@ -560,7 +549,7 @@ describe('CostEstimate', () => {
         }),
       }),
     });
-    renderExpandedCost();
+    renderCost();
     expect(screen.getByTestId('significantEventsCostGroupToday-discovery')).toHaveTextContent(
       '~$1.20'
     );
@@ -579,7 +568,7 @@ describe('CostEstimate', () => {
         }),
       }),
     });
-    renderExpandedCost();
+    renderCost();
     expect(screen.getByTestId('significantEventsCostTotalPartialBadge')).toHaveTextContent(
       'Partial floor'
     );
@@ -612,7 +601,7 @@ describe('CostEstimate', () => {
         }),
       }),
     });
-    renderExpandedCost();
+    renderCost();
     expect(screen.getByTestId('significantEventsCostHeadline')).toHaveTextContent(
       'Unable to calculate today · No recorded calls this month (recorded calls)'
     );
@@ -624,7 +613,7 @@ describe('CostEstimate', () => {
     retryCost.mockImplementationOnce(async () => {
       setCost();
     });
-    const { unmount, rerender } = renderExpandedCost();
+    const { unmount, rerender } = renderCost();
     expect(screen.getByText('Cost estimate unavailable')).toBeInTheDocument();
     expect(screen.getByText('network down')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('significantEventsCostRetryButton'));
@@ -642,7 +631,7 @@ describe('CostEstimate', () => {
       data: costResponse({ unavailableReason: 'pricing' }),
       error: null,
     });
-    const pricing = renderExpandedCost();
+    const pricing = renderCost();
     expect(screen.getByText('Unable to fetch pricing data')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('significantEventsCostRetryButton'));
     expect(retryCost).toHaveBeenCalledTimes(2);
@@ -652,7 +641,7 @@ describe('CostEstimate', () => {
       data: costResponse({ unavailableReason: 'usage_data' }),
       error: null,
     });
-    renderExpandedCost();
+    renderCost();
     expect(screen.getByText('Unable to read token usage data')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('significantEventsCostRetryButton'));
     expect(retryCost).toHaveBeenCalledTimes(3);
@@ -663,7 +652,7 @@ describe('CostEstimate', () => {
     refreshCost.mockImplementationOnce(async () => {
       setCost();
     });
-    const { rerender } = renderExpandedCost();
+    const { rerender } = renderCost();
     expect(screen.getByText('Unable to refresh cost estimate')).toBeInTheDocument();
     expect(screen.getByText('refresh failed')).toBeInTheDocument();
     expect(screen.getByTestId('significantEventsCostHeadline')).toBeVisible();
@@ -694,7 +683,7 @@ describe('CostEstimate', () => {
         }),
       }),
     });
-    const { rerender } = renderExpandedCost();
+    const { rerender } = renderCost();
     expect(screen.queryByTestId('significantEventsCostDetails')).not.toBeInTheDocument();
     fireEvent.focus(screen.getByTestId('significantEventsCostDetailsTooltip'));
     const caveats = screen.getByTestId('significantEventsCostDetails');

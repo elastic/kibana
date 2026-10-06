@@ -284,11 +284,12 @@ This run has a fixed AI-credit budget, and every tool result you read stays in t
 
 ## Validate the investigation is current
 
-The investigator's comment is a starting hint, not a verdict you can trust blindly — it is a snapshot from when it was written, and both the code and the failure pattern move on. Before you build a fix on it, confirm it still reflects reality. Treat the analysis as **stale** and re-run a complete investigation yourself when **any** of these hold:
+The investigator's comment is a starting hint, not a verdict you can trust blindly — it is a snapshot from when it was written, and both the code and the failure pattern move on. Before you build a fix on it, confirm it still reflects reality. Treat the analysis as **stale or unsupported** and re-run a complete investigation yourself when **any** of these hold:
 
 - it was posted **more than 1 day ago** (older analyses have drifted from the current code and failure signature more often than not);
-- **new failures arrived after it** — e.g. `kibanamachine` "New failure for …" notification comments, or CI-data updates, timestamped later than the analysis. A later failure can mean the symptom has shifted, so the prior root cause may no longer be the operative one; or
-- the comment is **absent**, or offers no actionable root cause.
+- **new failures arrived after it** — e.g. `kibanamachine` "New failure for …" notification comments, or CI-data updates, timestamped later than the analysis. A later failure can mean the symptom has shifted, so the prior root cause may no longer be the operative one;
+- the comment is **absent**, or offers no actionable root cause; or
+- the evidence **contradicts the diagnosis**, or a key assumption remains unverified after checking it against the [Fix guidelines](#fix-guidelines), even if the analysis is recent.
 
 To re-investigate, follow the `flaky-test-investigator` skill at `.agents/skills/flaky-test-investigator/SKILL.md` end to end (read the files in that folder directly; do not invoke the skill). If the failing test path is under `x-pack/solutions/security/test/security_solution_cypress/cypress/`, investigate the failure using **only** the Security Solution `flaky-test-doctor` skill at `x-pack/solutions/security/plugins/security_solution/.agents/skills/flaky-test-doctor/` (same rule: read the files in that folder directly; do not invoke the skill). The doctor owns the diagnosis and recommended action; if the two skills disagree, the doctor wins. Use the `flaky-test-investigator` skill only for CI artifact retrieval, pipeline context, and this workflow's steps, PR format, and fix guidelines. Do not follow the doctor's report template, feedback survey, or "open CI in the browser / ask the user to log in" guidance. Then apply [Security Cypress: what this fixer may ship](#security-cypress-what-this-fixer-may-ship) before writing any patch.
 

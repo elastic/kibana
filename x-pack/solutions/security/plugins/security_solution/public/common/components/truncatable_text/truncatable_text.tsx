@@ -22,6 +22,8 @@ export const EllipsisText = styled.span`
     display: inline-block;
     max-width: 100%;
     overflow: hidden;
+    text-decoration: inherit;
+    text-decoration-thickness: inherit;
     text-overflow: ellipsis;
     vertical-align: top;
     white-space: nowrap;

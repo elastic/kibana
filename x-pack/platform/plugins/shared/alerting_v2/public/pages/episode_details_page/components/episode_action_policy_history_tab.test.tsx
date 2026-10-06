@@ -114,10 +114,10 @@ const buildItem = (
   dispatched_at: '2026-05-05T10:00:00.000Z',
   policy: { id: 'policy-1', name: 'My Policy' },
   rules: [{ id: 'rule-1', name: 'My Rule' }],
-  total_rule_count: 1,
-  outcome: 'dispatched',
-  episode_count: 3,
-  episodes: [],
+  rule_count: 1,
+  outcome: 'success',
+  alert_count: 3,
+  alerts: [],
   action_group_count: 2,
   workflows: [{ id: 'wf-1', name: 'My Workflow' }],
   error: null,
@@ -165,7 +165,7 @@ describe('EpisodeActionPolicyHistoryTab', () => {
     expect(mockUseFetchExecutionHistory).toHaveBeenCalledWith({
       page: 1,
       perPage: 10,
-      outcome: undefined,
+      outcomes: undefined,
       episodeIds: [EPISODE_ID],
     });
   });
@@ -177,7 +177,7 @@ describe('EpisodeActionPolicyHistoryTab', () => {
     expect(mockUseFetchExecutionHistory).toHaveBeenCalledWith({
       page: 1,
       perPage: 10,
-      outcome: undefined,
+      outcomes: undefined,
       episodeIds: [EPISODE_ID],
       from: '2026-01-01T00:00:00.000Z',
     });
@@ -196,13 +196,10 @@ describe('EpisodeActionPolicyHistoryTab', () => {
     mockFetchResult();
     renderTab();
 
-    await userEvent.selectOptions(
-      screen.getByTestId('executionHistoryOutcomeFilter'),
-      'dispatched'
-    );
+    await userEvent.selectOptions(screen.getByTestId('executionHistoryOutcomeFilter'), 'success');
 
     expect(mockUseFetchExecutionHistory).toHaveBeenLastCalledWith(
-      expect.objectContaining({ outcome: ['dispatched'], episodeIds: [EPISODE_ID] })
+      expect.objectContaining({ outcomes: ['success'], episodeIds: [EPISODE_ID] })
     );
   });
 

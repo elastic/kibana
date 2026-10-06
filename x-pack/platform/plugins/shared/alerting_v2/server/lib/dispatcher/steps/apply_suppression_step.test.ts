@@ -8,7 +8,7 @@
 import { ApplySuppressionStep } from './apply_suppression_step';
 import {
   createAlertEpisode,
-  createAlertEpisodeSuppression,
+  createSuppressionRow,
   createDispatcherPipelineState,
   createStepLogger,
 } from '../fixtures/test_utils';
@@ -25,14 +25,14 @@ describe('ApplySuppressionStep', () => {
     const state = createDispatcherPipelineState({
       episodes: [ep1, ep2],
       suppressions: [
-        createAlertEpisodeSuppression({
+        createSuppressionRow({
           rule_id: 'r1',
           group_hash: 'h1',
           episode_id: 'e1',
           should_suppress: true,
           last_ack_action: 'ack',
         }),
-        createAlertEpisodeSuppression({
+        createSuppressionRow({
           rule_id: 'r2',
           group_hash: 'h2',
           episode_id: 'e2',

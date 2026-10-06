@@ -83,6 +83,6 @@ export const createMockRule = (overrides: Partial<RuleResponse> = {}): RuleRespo
     enabled: true,
     kind: 'alerting',
     metadata: { name: 'Rule 1' },
-    query: { format: 'standalone', breach: { query: 'FROM logs' } },
+    query: { base: 'FROM logs' },
     ...overrides,
   } as RuleResponse);

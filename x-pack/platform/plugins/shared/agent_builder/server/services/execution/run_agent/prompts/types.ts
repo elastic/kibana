@@ -6,9 +6,10 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import type { ToolManager } from '@kbn/agent-builder-server/runner';
+import type { Logger } from '@kbn/core/server';
+import type { ToolManager, ToolResultStore } from '@kbn/agent-builder-server/runner';
 import type { ConversationTemplatesService } from '@kbn/agent-builder-server/runner/conversation_templates_service';
-import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
+import type { DeploymentContext, ExperimentalFeatures } from '@kbn/agent-builder-server';
 import type { RendererTypeDefinition } from '@kbn/agent-builder-server/renderers';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ResolvedConfiguration } from '../types';
@@ -29,17 +30,18 @@ export interface PromptFactoryParams {
    * system prompt does not break prompt caching.
    */
   spaceId: string;
+  deployment: DeploymentContext;
   processedConversation: ProcessedConversation;
   skills: InternalSkillDefinition[];
-  /**
-   * Tool manager, used by intra-round compaction to map tool ids and look up summarizers.
-   */
   toolManager: ToolManager;
   /**
-   * Transformer for tool call results in conversation history.
-   * Used to summarize/substitute large results to optimize context.
+   * Transformer for tool call results in conversation history (tool-specific summarization).
+   * Results marked by a substitution step are additionally rendered as file references.
    */
   resultTransformer: ToolCallResultTransformer;
+  /** Source of the file references substituted tool results are rendered as. */
+  resultStore: ToolResultStore;
+  logger: Logger;
   outputSchema?: Record<string, unknown>;
   conversationTimestamp: string;
   experimentalFeatures: ExperimentalFeatures;

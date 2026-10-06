@@ -503,9 +503,6 @@ export const CASE_ATTACH_EVENTS_EVENT_TYPE = 'case_attach_events' as const;
 export const CASE_VIEW_ATTACHMENTS_TAB_CLICKED_EVENT_TYPE =
   'case_view_attachments_tab_clicked' as const;
 
-export const CASE_VIEW_ATTACHMENTS_SUB_TAB_CLICKED_EVENT_TYPE =
-  'case_view_attachments_sub_tab_clicked' as const;
-
 export const CASES_LIST_VIEW_MODE_CHANGED_EVENT_TYPE = 'cases_list_view_mode_changed' as const;
 
 export const CASES_LIST_PAGE_VIEW_EVENT_TYPE = 'cases_list_page_view' as const;

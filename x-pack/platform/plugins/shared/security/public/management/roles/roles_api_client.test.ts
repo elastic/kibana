@@ -9,6 +9,7 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 
 import { RolesAPIClient } from './roles_api_client';
 import type { Role } from '../../../common';
+import { API_VERSIONS } from '../../../common/constants';
 
 describe('RolesAPIClient', () => {
   describe('#saveRole', () => {
@@ -358,6 +359,16 @@ describe('RolesAPIClient', () => {
   });
 
   describe('#getRoles', () => {
+    it('can request built-in roles for service account selection', async () => {
+      const http = httpServiceMock.createStartContract();
+      await new RolesAPIClient(http).getRoles({ includeReservedRoles: true });
+
+      expect(http.get).toHaveBeenCalledWith('/api/security/role', {
+        version: API_VERSIONS.roles.public.v1,
+        query: { replaceDeprecatedPrivileges: true, includeReservedRoles: true },
+      });
+    });
+
     it('should request roles with replaced deprecated privileges', async () => {
       const httpMock = httpServiceMock.createStartContract();
       const rolesAPIClient = new RolesAPIClient(httpMock);

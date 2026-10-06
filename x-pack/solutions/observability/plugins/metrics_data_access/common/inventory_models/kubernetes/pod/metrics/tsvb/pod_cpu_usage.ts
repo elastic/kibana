@@ -6,45 +6,19 @@
  */
 
 import type { TSVBMetricModelCreator, TSVBMetricModel } from '../../../../types';
+import { podCpuSeries, podModelRequires } from './pod_series';
 
 export const podCpuUsage: TSVBMetricModelCreator = (
   timeField,
   indexPattern,
-  interval
+  interval,
+  options
 ): TSVBMetricModel => ({
   id: 'podCpuUsage',
-  requires: ['kubernetes.pod'],
+  requires: podModelRequires(options?.schema),
   index_pattern: indexPattern,
   interval,
   time_field: timeField,
   type: 'timeseries',
-  series: [
-    {
-      id: 'cpu',
-      split_mode: 'everything',
-      metrics: [
-        {
-          field: 'kubernetes.pod.cpu.usage.node.pct',
-          id: 'avg-cpu-without',
-          type: 'avg',
-        },
-        {
-          field: 'kubernetes.pod.cpu.usage.limit.pct',
-          id: 'avg-cpu-with',
-          type: 'avg',
-        },
-        {
-          id: 'cpu-usage',
-          type: 'calculation',
-          variables: [
-            { id: 'cpu_with', name: 'with_limit', field: 'avg-cpu-with' },
-            { id: 'cpu_without', name: 'without_limit', field: 'avg-cpu-without' },
-          ],
-          script:
-            '(params.with_limit != null && params.with_limit > 0.0) ? params.with_limit : params.without_limit',
-          gap_policy: 'insert_zeros',
-        },
-      ],
-    },
-  ],
+  series: [podCpuSeries(options?.schema)],
 });

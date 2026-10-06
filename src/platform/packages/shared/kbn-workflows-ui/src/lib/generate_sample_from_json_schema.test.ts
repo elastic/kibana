@@ -258,15 +258,15 @@ describe('generateSampleFromJsonSchema', () => {
       expect(sample.id).toBe(INPUT_STRING_PLACEHOLDER);
       expect(sample.policyId).toBe(INPUT_STRING_PLACEHOLDER);
       expect(sample.groupKey).toEqual({});
-      expect(sample.episodes).toEqual([
+      expect(sample.alerts).toEqual([
         {
           last_event_timestamp: INPUT_STRING_PLACEHOLDER,
           rule_id: INPUT_STRING_PLACEHOLDER,
           source: INPUT_STRING_PLACEHOLDER,
           space_id: INPUT_STRING_PLACEHOLDER,
           group_hash: INPUT_STRING_PLACEHOLDER,
-          episode_id: INPUT_STRING_PLACEHOLDER,
-          episode_status: INPUT_STRING_PLACEHOLDER,
+          alert_id: INPUT_STRING_PLACEHOLDER,
+          alert_status: INPUT_STRING_PLACEHOLDER,
         },
       ]);
     });

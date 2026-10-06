@@ -102,7 +102,7 @@ Do **not** use this skill for:
 
 ## Action Policies
 
-An action policy is a **space-scoped saved object** that controls how alert episodes are matched, grouped, throttled, and dispatched to workflow destinations. They are not embedded in rules: one policy can match episodes from many rules.
+An action policy is a **space-scoped saved object** that controls how alerts are matched, grouped, throttled, and dispatched to workflow destinations. They are not embedded in rules: one policy can match alerts from many rules.
 
 ---
 
@@ -216,10 +216,10 @@ When notifying on one specific rule (link via a shared tag on both the rule and 
 When the user wants one policy across several rules, a catch-all, or routing by tag/severity, consult the [action-policy-multi-rule reference](./references/action-policy-multi-rule.md).
 
 ### Matchers
-When the user asks how to match episodes, or which KQL fields are available, consult the [action-policy-matchers reference](./references/action-policy-matchers.md).
+When the user asks how to match alerts, or which KQL fields are available, consult the [action-policy-matchers reference](./references/action-policy-matchers.md).
 
 ### Grouping Modes
-When the user asks how episodes are grouped (per episode, all together, by field), consult the [action-policy-grouping-modes reference](./references/action-policy-grouping-modes.md).
+When the user asks how alerts are grouped (\`per_alert\`, all together, by field), consult the [action-policy-grouping-modes reference](./references/action-policy-grouping-modes.md).
 
 ### Throttle Strategies
 When the user asks how often notifications fire, or to change throttle strategy, consult the [action-policy-throttle-strategies reference](./references/action-policy-throttle-strategies.md).
@@ -234,6 +234,6 @@ When the user asks how destinations relate to workflows or connectors, consult t
 When the user asks how a notification gets from a rule firing to email/Slack, consult the [dispatch-flow reference](./references/dispatch-flow.md).
 
 ### Workflow Dispatch Payload
-When choosing Liquid variables for a notification workflow, including query-specific \`ep.data.*\` fields, consult the [workflow-dispatch-payload reference](./references/workflow-dispatch-payload.md).`,
+When choosing Liquid variables for a notification workflow, including query-specific \`alert.data.*\` fields, consult the [workflow-dispatch-payload reference](./references/workflow-dispatch-payload.md).`,
     getInlineTools: () => [manageActionPolicyTool(deps)],
   });

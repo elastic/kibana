@@ -75,7 +75,12 @@ const createAlertEventBodyBaseObjectSchema = z
           });
         }
       }),
-    timestamp: z.iso.datetime().optional(),
+    timestamp: z.iso
+      .datetime()
+      .optional()
+      .describe(
+        'The ISO datetime when the event occurred at the source. Defaults to the time the request is received.'
+      ),
     severity: alertEventSeveritySchema.optional(),
   })
   .strict();

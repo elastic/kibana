@@ -6,6 +6,7 @@
  */
 
 import type { KibanaResponseFactory, Logger } from '@kbn/core/server';
+import { isConversationNotFoundError } from '@kbn/agent-builder-common';
 import {
   ImpactConflictError,
   ImpactForbiddenError,
@@ -18,7 +19,7 @@ export const handleRouteError = (
   response: KibanaResponseFactory,
   logger: Logger
 ) => {
-  if (error instanceof ImpactNotFoundError) {
+  if (error instanceof ImpactNotFoundError || isConversationNotFoundError(error)) {
     return response.notFound({ body: { message: error.message } });
   }
   if (error instanceof ImpactForbiddenError) {

@@ -751,6 +751,7 @@ describe('registerGetPipelineDataRoute', () => {
       alerts_context_count: 0,
     });
 
+    const request = createRequest();
     const responseMock = httpServerMock.createResponseFactory();
     await handler(
       {
@@ -758,11 +759,12 @@ describe('registerGetPipelineDataRoute', () => {
           featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
         }),
       },
-      createRequest(),
+      request,
       responseMock
     );
 
     expect(mockGetWorkflowExecution).toHaveBeenCalledWith('alert-retrieval-run-id', 'default', {
+      request,
       includeInput: true,
       includeOutput: true,
     });
@@ -771,11 +773,13 @@ describe('registerGetPipelineDataRoute', () => {
     // input.alerts (the real events passed to generation) can be surfaced on the
     // gate (skill) inspect and used for provided-mode reconstruction.
     expect(mockGetWorkflowExecution).toHaveBeenCalledWith('generation-run-id', 'default', {
+      request,
       includeInput: true,
       includeOutput: true,
     });
 
     expect(mockGetWorkflowExecution).toHaveBeenCalledWith('validation-run-id', 'default', {
+      request,
       includeInput: true,
       includeOutput: true,
     });

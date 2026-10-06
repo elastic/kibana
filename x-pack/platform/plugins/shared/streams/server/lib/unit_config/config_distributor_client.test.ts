@@ -57,18 +57,24 @@ const hashPublishPayload = (unitYaml: string, credentials: UnitCredential[] = []
 };
 
 describe('createConfigDistributorClient', () => {
-  it('no-ops publish and validate when the distributor URL is not configured', async () => {
+  it('logs an error and does not call the distributor when the URL is not configured', async () => {
     const fetchImpl = jest.fn();
+    const logger = loggerMock.create();
     const { publish, validate } = createConfigDistributorClient({
       config: { ssl: {} },
-      logger: loggerMock.create(),
+      logger,
       fetchImpl,
     });
 
-    await publish({ unitId: 'default', unit, secrets: {} });
-    await validate(unit);
+    await expect(publish({ unitId: 'default', unit, secrets: {} })).rejects.toMatchObject({
+      statusCode: 503,
+    });
+    await expect(validate(unit)).rejects.toMatchObject({
+      statusCode: 503,
+    });
 
     expect(fetchImpl).not.toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledTimes(2);
   });
 
   it('PUTs authored unit YAML and a SHA-256 config hash without mutating the unit', async () => {
@@ -125,20 +131,26 @@ describe('createConfigDistributorClient', () => {
     expect(body.config_hash).toEqual(hashPublishPayload(expectedYaml, credentials));
   });
 
-  it('refuses to publish secrets when project-key encryption is not configured', async () => {
-    const fetchImpl = jest.fn();
+  it('publishes without a credentials sidecar when project-key encryption is not configured', async () => {
+    const fetchImpl = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => '',
+    });
+    const logger = loggerMock.create();
     const { publish } = createConfigDistributorClient({
       config: { url: 'https://distributor.example:8443', ssl: {} },
-      logger: loggerMock.create(),
+      logger,
       fetchImpl,
     });
 
-    await expect(
-      publish({ unitId: 'default', unit, secrets: { es_api_key: 's3cret' } })
-    ).rejects.toMatchObject({
-      statusCode: 503,
-    });
-    expect(fetchImpl).not.toHaveBeenCalled();
+    await publish({ unitId: 'default', unit, secrets: { es_api_key: 's3cret' } });
+
+    expect(logger.warn).toHaveBeenCalled();
+    const body = JSON.parse(fetchImpl.mock.calls[0][1].body);
+    expect(body.credentials).toBeUndefined();
+    expect(body.unit_yaml).toEqual(expectedYaml);
+    expect(body.unit_yaml).not.toContain('s3cret');
   });
 
   it('POSTs unit YAML to /v1/validate without credentials', async () => {

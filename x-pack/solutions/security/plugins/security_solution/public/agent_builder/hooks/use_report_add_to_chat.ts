@@ -42,7 +42,7 @@ export interface AgentBuilderAddToChatTelemetry {
   /**
    * Attachment type
    */
-  attachments?: Array<'alert' | 'entity' | 'rule'>;
+  attachments?: Array<'alert' | 'attack_discovery' | 'entity' | 'rule'>;
   /** Number of items added (for bulk add-to-chat actions) */
   item_count?: number;
 }

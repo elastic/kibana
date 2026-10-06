@@ -1,5 +1,5 @@
 {
-  "sha1": "54859cf45dc9134656d0faa3506ce759f083b762",
+  "sha1": "4953513a31b138aa21abf89d18a5beb815029c8c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -100,7 +100,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_esql_no_data.spec.ts",
-        "line": 25,
+        "line": 24,
         "column": 35
       }
     },
@@ -202,7 +202,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_listing_navigation.spec.ts",
-        "line": 30,
+        "line": 32,
         "column": 15
       }
     },
@@ -224,7 +224,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_listing_navigation.spec.ts",
-        "line": 43,
+        "line": 48,
         "column": 19
       }
     },
@@ -382,7 +382,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/migration_smoke_tests/controls_migration_smoke.spec.ts",
-        "line": 65,
+        "line": 32,
         "column": 51
       }
     },

@@ -7,16 +7,24 @@
 
 import type { ChangeHistoryDocument } from '@kbn/change-history';
 import type {
+  RuleChangeHistoryAction,
   RuleChangeHistoryDetail,
   RuleChangeHistoryListItem,
   RuleChangeHistorySnapshot,
 } from '@kbn/alerting-v2-schemas';
+import { ruleChangeHistoryActionSchema } from '@kbn/alerting-v2-schemas';
 import { computeChanges } from './compute_changes';
 
 const asSnapshotRecord = (snapshot: unknown): Record<string, unknown> =>
   snapshot && typeof snapshot === 'object' && !Array.isArray(snapshot)
     ? (snapshot as Record<string, unknown>)
     : {};
+
+/** The store types `event.action` as a free string, so narrow it on read. */
+const asAction = (action: string): RuleChangeHistoryAction => {
+  const parsed = ruleChangeHistoryActionSchema.safeParse(action);
+  return parsed.success ? parsed.data : 'unknown';
+};
 
 /**
  * Map a change-history document (and its optional predecessor) to a lean list
@@ -34,21 +42,17 @@ export function toListItem(
 
   const item: RuleChangeHistoryListItem = {
     id: document.event.id,
-    timestamp: document['@timestamp'],
+    created_at: document['@timestamp'],
     actor: {
       name: document.user.name,
       ...(document.user.id ? { profile_id: document.user.id } : {}),
     },
-    action: document.event.action,
+    action: asAction(document.event.action),
     ...(changes ? { changes } : {}),
     ...(document.event.reason ? { comment: document.event.reason } : {}),
     ...(isCurrent ? { is_current: true } : {}),
     ...(document.tags && document.tags.length > 0 ? { tags: document.tags } : {}),
-    ...(document.object.sequence !== undefined
-      ? { metadata: { version: document.object.sequence } }
-      : document.metadata
-      ? { metadata: document.metadata }
-      : {}),
+    ...(document.object.sequence !== undefined ? { version: document.object.sequence } : {}),
   };
 
   return item;

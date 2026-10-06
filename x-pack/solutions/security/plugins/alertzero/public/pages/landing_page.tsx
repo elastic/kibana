@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { useWorkers } from '../hooks/use_workers_api';
 import { useInvestigationsCount } from '../hooks/use_investigations_api';
@@ -18,6 +18,12 @@ export const LandingPage: React.FC = () => {
   // re-appearing on every background poll after the decision is confirmed.
   const [decision, setDecision] = useState<'queue' | 'onboarding' | null>(null);
 
+  // Track whether OnboardingPage has a save in flight. A window-focus refetch
+  // during the fan-out can return a partially-committed enabled state and trigger
+  // showQueue before all PATCHes have settled, prematurely unmounting the form.
+  const [savingInProgress, setSavingInProgress] = useState(false);
+  const handleSavingChange = useCallback((saving: boolean) => setSavingInProgress(saving), []);
+
   const queryEnabled = decision === null;
   const workers = useWorkers();
   const investigations = useInvestigationsCount(queryEnabled);
@@ -28,7 +34,7 @@ export const LandingPage: React.FC = () => {
   const hasInvestigations = (investigations.data ?? 0) > 0;
   const hasAnyError = workers.error != null || investigations.error != null;
 
-  const showQueue = decision === 'queue' || hasAnyError || hasEnabledWorker || hasInvestigations;
+  const showQueue = hasAnyError || hasEnabledWorker || hasInvestigations;
 
   // isFetching covers background refetches of stale cached empty results that
   // would otherwise fall through to onboarding before the fresh response lands.
@@ -46,7 +52,16 @@ export const LandingPage: React.FC = () => {
     setDecision(showQueue ? 'queue' : 'onboarding');
   }, [decision, showQueue, isUnresolved]);
 
-  if (showQueue) return <ConversationsPage />;
+  // Once latched to 'queue', always show the queue regardless of showQueue's current value.
+  // A window-focus workers refetch can temporarily report no enabled workers (e.g. if another
+  // admin disables them) while an investigation still exists, and the stale investigations
+  // count (frozen because queryEnabled is false after latching) would make showQueue false.
+  // Keeping the latch prevents the queue from being replaced by onboarding mid-session;
+  // a full reload will re-evaluate from fresh data.
+  // savingInProgress suppresses the transition during the PATCH fan-out: a window-focus
+  // refetch between individual PATCHes can return partially-committed state, and we must
+  // not unmount the onboarding form before the user's save has fully settled.
+  if ((showQueue || decision === 'queue') && !savingInProgress) return <ConversationsPage />;
 
   // Guard on decision === null so the spinner only appears before the initial
   // resolution; after the onboarding decision is latched we render directly.
@@ -60,5 +75,5 @@ export const LandingPage: React.FC = () => {
     );
   }
 
-  return <OnboardingPage />;
+  return <OnboardingPage onSavingChange={handleSavingChange} />;
 };

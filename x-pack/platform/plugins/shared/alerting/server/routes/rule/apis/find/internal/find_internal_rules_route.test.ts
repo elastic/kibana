@@ -422,6 +422,66 @@ describe('findInternalRulesRoute', () => {
     `);
   });
 
+  it('includes the profile uid fields when present', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    findInternalRulesRoute(router, licenseState);
+
+    const [, handler] = router.post.mock.calls[0];
+
+    rulesClient.find.mockResolvedValueOnce({
+      page: 1,
+      perPage: 1,
+      total: 1,
+      data: [
+        {
+          id: 'rule-id-1',
+          alertTypeId: '.index-threshold',
+          name: 'test rule',
+          consumer: 'alerts',
+          tags: [],
+          enabled: true,
+          throttle: null,
+          apiKeyOwner: '2889684073',
+          createdBy: '2889684073',
+          updatedBy: '2889684073',
+          createdByProfileUid: 'u_profile_created',
+          updatedByProfileUid: 'u_profile_updated',
+          apiKeyOwnerProfileUid: 'u_profile_api_key_owner',
+          muteAll: false,
+          mutedInstanceIds: [],
+          schedule: { interval: '1m' },
+          snoozeSchedule: [],
+          actions: [],
+          params: {},
+          updatedAt: new Date('2024-03-21T13:15:00.498Z'),
+          createdAt: new Date('2024-03-21T13:15:00.498Z'),
+          executionStatus: {
+            status: 'ok' as const,
+            lastExecutionDate: new Date('2024-03-21T13:15:00.498Z'),
+          },
+          revision: 0,
+        },
+      ],
+    } as unknown as FindResult<{}>);
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      { body: { per_page: 1, page: 1, default_search_operator: 'OR' } },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    // @ts-expect-error - res.ok is mocked
+    const { data } = res.ok.mock.calls[0][0].body;
+
+    expect(data[0].created_by_profile_uid).toBe('u_profile_created');
+    expect(data[0].updated_by_profile_uid).toBe('u_profile_updated');
+    expect(data[0].api_key_owner_profile_uid).toBe('u_profile_api_key_owner');
+  });
+
   it('transforms snoozedInstances into snoozed_alert_instances in the response', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();

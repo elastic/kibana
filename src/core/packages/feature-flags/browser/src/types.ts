@@ -122,39 +122,6 @@ export interface FeatureFlagsStart {
   appendContext(contextToAppend: EvaluationContext): Promise<void>;
 
   /**
-   * Evaluates a boolean flag
-   * @param flagName The flag ID to evaluate
-   * @param fallbackValue If the flag cannot be evaluated for whatever reason, the fallback value is provided.
-   * @public
-   * @deprecated Use {@link useBooleanValue} in React, or {@link getBooleanValue$} elsewhere. The provider initializes asynchronously, so a single evaluation
-   * can return the fallback before the provider is ready, and it will not update when flags or evaluation context change,
-   * so different parts of the application can see different values for the same flag.
-   */
-  getBooleanValue(flagName: string, fallbackValue: boolean): boolean;
-
-  /**
-   * Evaluates a string flag
-   * @param flagName The flag ID to evaluate
-   * @param fallbackValue If the flag cannot be evaluated for whatever reason, the fallback value is provided.
-   * @public
-   * @deprecated Use {@link useStringValue} in React, or {@link getStringValue$} elsewhere. The provider initializes asynchronously, so a single evaluation
-   * can return the fallback before the provider is ready, and it will not update when flags or evaluation context change,
-   * so different parts of the application can see different values for the same flag.
-   */
-  getStringValue<Value extends string>(flagName: string, fallbackValue: Value): Value;
-
-  /**
-   * Evaluates a number flag
-   * @param flagName The flag ID to evaluate
-   * @param fallbackValue If the flag cannot be evaluated for whatever reason, the fallback value is provided.
-   * @public
-   * @deprecated Use {@link useNumberValue} in React, or {@link getNumberValue$} elsewhere. The provider initializes asynchronously, so a single evaluation
-   * can return the fallback before the provider is ready, and it will not update when flags or evaluation context change,
-   * so different parts of the application can see different values for the same flag.
-   */
-  getNumberValue<Value extends number>(flagName: string, fallbackValue: Value): Value;
-
-  /**
    * Returns an observable of a boolean flag
    * @param flagName The flag ID to evaluate
    * @param fallbackValue If the flag cannot be evaluated for whatever reason, the fallback value is provided.

@@ -18,6 +18,7 @@ import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
 import { QueryClient } from '@kbn/react-query';
+import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { serverlessMock } from '@kbn/serverless/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
@@ -30,6 +31,7 @@ import type { WorkflowsPublicPluginStart, WorkflowsServices } from './types';
 
 export const createStartServicesMock = () => ({
   ...coreLifecycleMock.createCoreStart(),
+  securityUi: securityMock.createStart().uiApi,
   navigation: navigationPluginMock.createStartContract(),
   serverless: serverlessMock.createStart(),
   storage: new Storage(localStorage),

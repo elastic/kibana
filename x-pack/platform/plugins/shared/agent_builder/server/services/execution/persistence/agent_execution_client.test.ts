@@ -48,6 +48,25 @@ describe('AgentExecutionClient', () => {
       );
     });
 
+    it('stores the owner on the document and returns it', async () => {
+      const owner = { id: 'profile-alice', username: 'alice' };
+
+      const execution = await client.create({ ...createParams, owner });
+
+      expect(mockStorageClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({ document: expect.objectContaining({ owner }) })
+      );
+      expect(execution.owner).toEqual(owner);
+    });
+
+    it('omits the owner when the caller has none', async () => {
+      const execution = await client.create(createParams);
+
+      const [{ document }] = mockStorageClient.index.mock.calls[0];
+      expect(document).not.toHaveProperty('owner');
+      expect(execution.owner).toBeUndefined();
+    });
+
     it('propagates document conflicts to the caller', async () => {
       const conflict = Object.assign(new Error('version conflict'), {
         meta: { statusCode: 409 },

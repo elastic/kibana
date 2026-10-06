@@ -1192,10 +1192,14 @@ export class ActionsPlugin
 
   private registerDynamicConnector = (connector: InMemoryConnector): boolean => {
     if (!this.inMemoryConnectors.find((c) => c.id === connector.id)) {
+      const { isInboundEventsEnabled: requestedEventsEnabled, ...withoutEventsFlag } = connector;
       this.inMemoryConnectors.push({
-        ...connector,
+        ...withoutEventsFlag,
         isDynamic: true,
         isPreconfigured: true,
+        ...(this.actionsConfig.inboundEvents.enabled && requestedEventsEnabled === true
+          ? { isInboundEventsEnabled: true }
+          : {}),
       });
       this.logger.info(`Registered dynamic connector with id ${connector.id}`);
       return true;

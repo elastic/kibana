@@ -29,10 +29,10 @@ const info = (lastNotified: string, episodeStatus?: string): LastNotifiedInfo =>
 });
 
 describe('applyThrottling', () => {
-  describe('per_episode + on_status_change', () => {
+  describe('per_alert + on_status_change', () => {
     const basePolicy = createActionPolicy({
       id: 'p1',
-      groupingMode: 'per_episode',
+      groupingMode: 'per_alert',
       throttle: { strategy: 'on_status_change' },
     });
 
@@ -91,10 +91,10 @@ describe('applyThrottling', () => {
     });
   });
 
-  describe('per_episode + per_status_interval', () => {
+  describe('per_alert + per_status_interval', () => {
     const basePolicy = createActionPolicy({
       id: 'p1',
-      groupingMode: 'per_episode',
+      groupingMode: 'per_alert',
       throttle: { strategy: 'per_status_interval', interval: '1h' },
     });
 
@@ -173,10 +173,10 @@ describe('applyThrottling', () => {
     });
   });
 
-  describe('per_episode + every_time', () => {
+  describe('per_alert + every_time', () => {
     const basePolicy = createActionPolicy({
       id: 'p1',
-      groupingMode: 'per_episode',
+      groupingMode: 'per_alert',
       throttle: { strategy: 'every_time' },
     });
 

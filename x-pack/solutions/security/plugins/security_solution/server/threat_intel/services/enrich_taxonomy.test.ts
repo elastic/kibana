@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { taxonomyOutputSchema } from './enrich_taxonomy';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { ScopedModel } from '@kbn/agent-builder-server';
+import { ChatCompletionErrorCode, InferenceTaskError } from '@kbn/inference-common';
+import { enrichTaxonomy, taxonomyOutputSchema } from './enrich_taxonomy';
 
 const validOutput = {
   categories: ['ransomware'],
@@ -13,6 +16,40 @@ const validOutput = {
   relevance: 0.75,
   diamond_suitable: true,
 };
+
+describe('enrichTaxonomy', () => {
+  const logger = loggingSystemMock.createLogger();
+
+  it('retries with a smaller context after a confirmed overflow', async () => {
+    const overflow = new InferenceTaskError(
+      ChatCompletionErrorCode.ContextLengthExceededError,
+      'maximum context window exceeded',
+      {}
+    );
+    const invoke = jest
+      .fn()
+      .mockRejectedValueOnce(overflow)
+      .mockResolvedValueOnce({
+        raw: { response_metadata: {} },
+        parsed: validOutput,
+      });
+    const model = {
+      chatModel: {
+        withStructuredOutput: jest.fn().mockReturnValue({ invoke }),
+      },
+      connector: { connectorId: 'test-connector' },
+    } as unknown as ScopedModel;
+    const text = 'token-dense taxonomy source '.repeat(4_000);
+
+    const result = await enrichTaxonomy(model, logger, { text });
+
+    expect(result).toEqual(validOutput);
+    expect(invoke).toHaveBeenCalledTimes(2);
+    const retryPrompt = invoke.mock.calls[1][0] as string;
+    const bodyStart = retryPrompt.indexOf('Report text:\n') + 'Report text:\n'.length;
+    expect(retryPrompt.slice(bodyStart).length).toBeLessThan(text.length);
+  });
+});
 
 describe('taxonomyOutputSchema', () => {
   it('accepts a well-formed taxonomy', () => {

@@ -26,8 +26,10 @@ import { MonitorTypeEnum } from '../monitor_management/monitor_configs';
 import { AlertConfigsCodec } from './alert_config';
 import {
   FormMonitorTypeCodec,
+  KerberosConfigCodec,
   ModeCodec,
   MonitorTypeCodec,
+  NtlmConfigCodec,
   RequestBodyCheckCodec,
   ResponseBodyIndexPolicyCodec,
   ResponseCheckJSONCodec,
@@ -210,6 +212,9 @@ const httpSensitiveAdvanced = {
   [ConfigKey.USERNAME]: z.string(),
   [ConfigKey.PROXY_HEADERS]: z.record(z.string(), z.string()).optional(),
   [ConfigKey.RESPONSE_JSON_CHECK]: z.array(ResponseCheckJSONCodec).optional(),
+  // Nested auth blocks (encrypted wholesale via secretKeys).
+  [ConfigKey.KERBEROS]: KerberosConfigCodec.optional(),
+  [ConfigKey.NTLM]: NtlmConfigCodec.optional(),
 };
 
 export const HTTPSimpleFieldsCodec = z.looseObject({

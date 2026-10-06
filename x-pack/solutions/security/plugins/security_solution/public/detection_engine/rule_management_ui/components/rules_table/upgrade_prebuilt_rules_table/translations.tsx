@@ -41,6 +41,27 @@ export const BULK_UPDATE_SELECTED_RULES_BUTTON_TOOLTIP_CONFLICTS = i18n.translat
   }
 );
 
+export const UPDATE_TO_ELASTIC_VERSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.updateToElasticVersion',
+  {
+    defaultMessage: 'Update to Elastic version',
+  }
+);
+
+export const UPDATE_SELECTED_RULES_MORE_ACTIONS_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.bulkButtons.selectedRules.moreActionsAriaLabel',
+  {
+    defaultMessage: 'More update options for selected rules',
+  }
+);
+
+export const UPDATE_ALL_RULES_MORE_ACTIONS_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.bulkButtons.allRules.moreActionsAriaLabel',
+  {
+    defaultMessage: 'More update options for all rules',
+  }
+);
+
 export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.searchBarPlaceholder',
   {
@@ -80,7 +101,7 @@ export const RULE_TYPE_CHANGE_CALLOUT_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.upgradeRules.ruleTypeChangeCalloutDescription',
   {
     defaultMessage:
-      'The rule type will change if you update this rule. As a result, exceptions and actions you added may stop working or behave differently.',
+      'Updating this rule changes its type. Exceptions and actions may stop working or behave differently.',
   }
 );
 
@@ -95,7 +116,7 @@ export const RULE_TYPE_CHANGE_WITH_CUSTOMIZATIONS_CALLOUT_DESCRIPTION = i18n.tra
   'xpack.securitySolution.detectionEngine.upgradeRules.ruleTypeChangeWithCustomizationCalloutDescription',
   {
     defaultMessage:
-      'The rule type will change if you update this rule, and your changes will be erased. To save them, first duplicate the rule, then update it. Exceptions and actions you added will not be erased, but may stop working or behave differently.',
+      "Updating this rule changes its type and overwrites modified fields. Duplicate the rule first to keep them. Exceptions and actions won't be overwritten, but may stop working or behave differently.",
   }
 );
 

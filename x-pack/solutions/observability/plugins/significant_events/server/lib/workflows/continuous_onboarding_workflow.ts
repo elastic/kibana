@@ -52,13 +52,16 @@ export const createContinuousKiOnboardingWorkflowService = ({
   const getNonTerminalExecutions = async ({
     workflowId,
     spaceId,
+    request,
   }: {
     workflowId: string;
     spaceId: string;
+    request: KibanaRequest;
   }) => {
     const { results, total } = await managementApi.getWorkflowExecutions(
       {
         workflowId,
+        request,
         statuses: [...NonTerminalExecutionStatuses],
       },
       spaceId
@@ -75,7 +78,7 @@ export const createContinuousKiOnboardingWorkflowService = ({
     spaceId: string;
     request: KibanaRequest;
   }) => {
-    const { results } = await getNonTerminalExecutions({ workflowId, spaceId });
+    const { results } = await getNonTerminalExecutions({ workflowId, spaceId, request });
     if (results.length === 0) {
       return;
     }
@@ -87,7 +90,7 @@ export const createContinuousKiOnboardingWorkflowService = ({
     log.debug(() => `Requested cancellation for ${results.length} running workflow execution(s)`);
 
     await pollUntil(
-      () => getNonTerminalExecutions({ workflowId, spaceId }),
+      () => getNonTerminalExecutions({ workflowId, spaceId, request }),
       ({ total }) => total === 0
     );
   };
@@ -99,10 +102,12 @@ export const createContinuousKiOnboardingWorkflowService = ({
     enabled: boolean;
     request: KibanaRequest;
   }) => {
-    const existing = await managementApi.getWorkflow(
-      SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-      MANAGED_WORKFLOW_SPACE_ID
-    );
+    const existing = await managementApi
+      .getClient(request)
+      .getWorkflow(
+        SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+        MANAGED_WORKFLOW_SPACE_ID
+      );
 
     if (!existing) {
       if (enabled) {
@@ -128,7 +133,8 @@ export const createContinuousKiOnboardingWorkflowService = ({
   const deleteLegacyWorkflow = async ({ request }: { request: KibanaRequest }) => {
     const legacy = await managementApi.getWorkflow(
       LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
-      LEGACY_WORKFLOW_SPACE_ID
+      LEGACY_WORKFLOW_SPACE_ID,
+      request
     );
     if (!legacy) {
       return;

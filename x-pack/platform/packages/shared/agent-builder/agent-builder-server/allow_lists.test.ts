@@ -5,8 +5,27 @@
  * 2.0.
  */
 
-import { isAllowedBuiltinAttachment, isAllowedSkillRegistration } from './allow_lists';
+import {
+  isAllowedBuiltinAttachment,
+  isAllowedBuiltinTool,
+  isAllowedSkillRegistration,
+} from './allow_lists';
 import { ELASTIC_SKILLS_BASE_PATH } from './skills/type_definition';
+
+describe('isAllowedBuiltinTool', () => {
+  it('allows namespaced Nightshift sandbox tool ids', () => {
+    expect(isAllowedBuiltinTool('nightshift_sandbox_bash')).toBe(true);
+    expect(isAllowedBuiltinTool('nightshift_sandbox_view_file')).toBe(true);
+  });
+
+  it('allows the agentic investigations tools', () => {
+    expect(isAllowedBuiltinTool('agentic_investigations.set_impact')).toBe(true);
+  });
+
+  it('rejects unlisted tool ids', () => {
+    expect(isAllowedBuiltinTool('agentic_investigations.not_a_tool')).toBe(false);
+  });
+});
 
 describe('isAllowedBuiltinAttachment', () => {
   it('returns true for listed attachment type ids', () => {

@@ -7,4 +7,9 @@
 
 export { RuleSummaryBody } from './rule_summary_body';
 export type { RuleSummaryBodyProps } from './rule_summary_body';
+export { useRuleSummary } from './rule_summary_context';
+export { RuleSummaryAboutSection } from './rule_summary_about_section';
+export { RuleSummaryInvestigationSection } from './rule_summary_investigation_section';
+export { RuleSummaryActionPoliciesSection } from './rule_summary_action_policies_section';
+export { RuleSummaryArtifactsSection } from './rule_summary_artifacts_section';
 export type { RuleSummaryData, RuleSummarySectionProps } from '../types';

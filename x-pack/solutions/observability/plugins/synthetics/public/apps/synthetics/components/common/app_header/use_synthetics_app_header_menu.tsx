@@ -47,7 +47,10 @@ import {
   ToggleFlyoutTranslations,
 } from '../../alerts/hooks/translations';
 import { useSyntheticsRules } from '../../alerts/hooks/use_synthetics_rules';
-import { CANNOT_PERFORM_ACTION_SYNTHETICS } from '../components/permissions';
+import {
+  CANNOT_PERFORM_ACTION_SYNTHETICS,
+  NEED_PERMISSIONS_PRIVATE_LOCATIONS,
+} from '../components/permissions';
 import { SERVICE_NOT_ALLOWED } from '../../monitors_page/management/disabled_callout';
 import { SyntheticsDiagnosticsFlyoutLauncher } from '../../settings/synthetics_diagnostics_flyout';
 
@@ -101,9 +104,10 @@ export function useSyntheticsAppHeaderMenu(
   const history = useHistory();
   const params = useGetUrlParams();
   const { dateRangeStart, dateRangeEnd } = params;
-  const { basePath, isDev } = useSyntheticsSettingsContext();
+  const { basePath, isDev, canManagePrivateLocations } = useSyntheticsSettingsContext();
   const { isEnabled, isServiceAllowed } = useEnablement();
   const canEditSynthetics = useCanEditSynthetics();
+  const canOpenDiagnostics = canEditSynthetics && canManagePrivateLocations;
   const dispatch = useDispatch();
   const [isDiagnosticsOpen, setIsDiagnosticsOpen] = useState(false);
 
@@ -292,10 +296,14 @@ export function useSyntheticsAppHeaderMenu(
         testId: 'syntheticsDiagnosticsOpenButton',
         order: order++,
         overflow: true,
-        disableButton: !canEditSynthetics,
-        tooltipContent: !canEditSynthetics ? CANNOT_PERFORM_ACTION_SYNTHETICS : undefined,
+        disableButton: !canOpenDiagnostics,
+        tooltipContent: !canEditSynthetics
+          ? CANNOT_PERFORM_ACTION_SYNTHETICS
+          : !canManagePrivateLocations
+          ? NEED_PERMISSIONS_PRIVATE_LOCATIONS
+          : undefined,
         run: () => {
-          if (canEditSynthetics) {
+          if (canOpenDiagnostics) {
             setIsDiagnosticsOpen(true);
           }
         },
@@ -331,6 +339,8 @@ export function useSyntheticsAppHeaderMenu(
   }, [
     basePath,
     canEditSynthetics,
+    canManagePrivateLocations,
+    canOpenDiagnostics,
     createMonitorDisabled,
     createMonitorTooltip,
     dispatch,

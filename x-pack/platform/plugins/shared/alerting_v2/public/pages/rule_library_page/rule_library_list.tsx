@@ -32,6 +32,8 @@ import {
   type RuleTemplateContentListItem,
 } from './rule_templates_data_source';
 
+import { RuleTemplateTagsFilter, RULE_LIBRARY_FEATURES_FIELDS } from './rule_library_filters';
+
 const { Column, Action } = ContentListTable;
 
 const RULE_LIBRARY_LIST_TITLE = i18n.translate('xpack.alertingV2.ruleLibrary.pageTitle', {
@@ -135,10 +137,15 @@ export const RuleLibraryList = () => {
         pagination: { initialPageSize: 20 },
         search: true,
         selection: false,
+        fields: RULE_LIBRARY_FEATURES_FIELDS,
       }}
     >
       <ContentList emptyState={emptyState} data-test-subj="ruleLibraryList">
-        <ContentListToolbar />
+        <ContentListToolbar>
+          <ContentListToolbar.Filters>
+            <RuleTemplateTagsFilter />
+          </ContentListToolbar.Filters>
+        </ContentListToolbar>
         <ContentListTable
           title={RULE_LIBRARY_LIST_TITLE}
           scrollableInline

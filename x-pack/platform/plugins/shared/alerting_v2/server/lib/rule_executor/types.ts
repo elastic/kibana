@@ -9,7 +9,7 @@ import type { SpaceId } from '@kbn/core-spaces-common';
 
 import type { QueryPayload } from './get_query_payload';
 import type { RuleResponse } from '../rules_client';
-import type { AlertEvent } from '../../resources/datastreams/alert_events';
+import type { AlertEventDocument } from '../../resources/datastreams/alert_events';
 import type { ExecutionContext } from '../execution_context';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import type { RuleExecutionCounter } from './metrics/counters';
@@ -34,7 +34,7 @@ export interface RulePipelineState {
   readonly rule?: RuleResponse;
   readonly queryPayload?: QueryPayload;
   readonly esqlRowBatch?: ReadonlyArray<Record<string, unknown>>;
-  readonly alertEventsBatch?: ReadonlyArray<AlertEvent>;
+  readonly alertEventsBatch?: ReadonlyArray<AlertEventDocument>;
   readonly newEpisodeIds?: ReadonlyArray<string>;
   readonly activeGroups?: ReadonlyArray<ActiveAlertGroupHash>;
 }

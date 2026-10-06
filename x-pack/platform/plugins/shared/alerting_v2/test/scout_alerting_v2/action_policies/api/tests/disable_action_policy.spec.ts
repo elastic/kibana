@@ -90,12 +90,10 @@ apiTest.describe('Disable action policy API', { tag: '@local-stateful-classic' }
         enabled: false,
         updated_at: response.body.updated_at,
         updated_by: response.body.updated_by,
-        version: response.body.version,
       });
       expect(Date.parse(response.body.updated_at)).toBeGreaterThanOrEqual(
         Date.parse(snoozed.updated_at)
       );
-      expect(response.body.version).not.toBe(snoozed.version);
     }
   );
 

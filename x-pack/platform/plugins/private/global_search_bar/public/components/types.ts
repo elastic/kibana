@@ -21,7 +21,6 @@ export interface SearchProps {
   navigateToUrl: ApplicationStart['navigateToUrl'];
   reportEvent: EventReporter;
   taggingApi?: SavedObjectTaggingPluginStart;
-  basePathUrl: string;
 }
 
 /* @internal */

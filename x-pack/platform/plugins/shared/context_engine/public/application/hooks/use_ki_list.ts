@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
+import { useEffect } from 'react';
 import { DEFAULT_KI_PAGE_SIZE } from '../../../common/constants';
 import type { KiTypeCount } from '../../../common/http_api/ai_indices';
 import type { ListKisResponse } from '../../../common/http_api/knowledge_indicators';
 import { listKis } from '../api/knowledge_indicators';
+import { getErrorMessage } from '../utils/get_error_message';
 import { contextEngineQueryKeys } from './query_keys';
 import { useKibana } from './use_kibana';
 
@@ -18,6 +21,7 @@ interface UseKiListArgs {
   size?: number;
   type?: string;
   enabled?: boolean;
+  notifyOnError?: boolean;
 }
 
 interface UseKiListSummary {
@@ -40,9 +44,10 @@ export const useKiList = ({
   size = DEFAULT_KI_PAGE_SIZE,
   type,
   enabled = true,
+  notifyOnError = false,
 }: UseKiListArgs): UseKiListResult => {
   const {
-    services: { http },
+    services: { http, notifications },
   } = useKibana();
 
   const { data, isLoading, isFetching, error, refetch } = useQuery<ListKisResponse, Error>({
@@ -61,6 +66,20 @@ export const useKiList = ({
     enabled: enabled && aiIndexId !== undefined,
     keepPreviousData: true,
   });
+
+  useEffect(() => {
+    if (!notifyOnError || isLoading || !error) {
+      return;
+    }
+
+    const toastMessage = getErrorMessage(error);
+    notifications.toasts.addError(error, {
+      title: i18n.translate('xpack.contextEngine.kiList.loadErrorTitle', {
+        defaultMessage: 'Unable to load Knowledge Indicators',
+      }),
+      ...(toastMessage ? { toastMessage } : {}),
+    });
+  }, [error, isLoading, notifyOnError, notifications]);
 
   return {
     kis: data?.kis ?? [],

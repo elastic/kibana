@@ -7,6 +7,7 @@
 
 import { extractAgentConversationIds } from '@kbn/security-evals-workflow-traces';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import { readAgentVerdict } from './workflow_task';
 
 const step = (overrides: Partial<WorkflowStepExecutionDto>): WorkflowStepExecutionDto =>
   ({
@@ -40,5 +41,69 @@ describe('alert-analysis conversation id extraction', () => {
     ];
 
     expect(extractAgentConversationIds(steps)).toHaveLength(1);
+  });
+});
+
+describe('readAgentVerdict', () => {
+  const alertId = 'aa-eval-tier1-malicious-file-uuid';
+
+  it('matches the agent schema field `id`', () => {
+    const steps = [
+      step({ output: null }),
+      step({
+        output: {
+          structured_output: {
+            verdicts: [
+              {
+                id: alertId,
+                classification: 'true_positive',
+                confidence_score: 0.95,
+                rationale: 'Gate A matched.',
+              },
+            ],
+          },
+        },
+      }),
+    ];
+
+    expect(readAgentVerdict(steps, alertId)?.classification).toBe('true_positive');
+  });
+
+  it('does not credit a legacy `alert_id` match (production pairs on `id` only)', () => {
+    const steps = [
+      step({
+        output: {
+          structured_output: {
+            // Simulate a non-schema reply that only has alert_id — production apply_verdicts
+            // would not pair this, so neither should the eval harness.
+            verdicts: [
+              {
+                alert_id: alertId,
+                classification: 'false_positive',
+                confidence_score: 0.9,
+              },
+            ],
+          },
+        },
+      }),
+    ];
+
+    expect(readAgentVerdict(steps, alertId)).toBeUndefined();
+  });
+
+  it('returns undefined when no verdict matches the seeded alert id', () => {
+    const steps = [
+      step({
+        output: {
+          structured_output: {
+            verdicts: [
+              { id: 'other-alert', classification: 'true_positive', confidence_score: 0.9 },
+            ],
+          },
+        },
+      }),
+    ];
+
+    expect(readAgentVerdict(steps, alertId)).toBeUndefined();
   });
 });

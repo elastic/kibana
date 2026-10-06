@@ -50,7 +50,7 @@ const mockServices = createMockServices({
 const mockRule = {
   id: 'rule-1',
   metadata: { name: 'My rule' },
-  query: { format: 'standalone', breach: { query: 'FROM logs' } },
+  query: { base: 'FROM logs' },
 } as unknown as RuleResponse;
 
 // Episode events ESQL query response template (used by useFetchEpisodeEventsQuery)

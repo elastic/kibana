@@ -12,8 +12,8 @@ import type { z } from '@kbn/zod/v4';
 import {
   errorResponseSchema,
   ruleResponseSchema,
-  updateRuleBodySchema,
-  type UpdateRuleBody,
+  updateRuleDataSchema,
+  type UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
 import { RulesClient } from '../../lib/rules_client/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -44,7 +44,7 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
   } as const;
   static schemas = {
     request: {
-      body: updateRuleBodySchema,
+      body: updateRuleDataSchema,
       params: ruleIdParamsSchema,
     },
     response: {
@@ -75,7 +75,7 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
     private readonly request: KibanaRequest<
       z.infer<typeof ruleIdParamsSchema>,
       unknown,
-      UpdateRuleBody
+      UpdateRuleData
     >,
     @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {
@@ -83,12 +83,9 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const { version, ...data } = this.request.body;
-
     const updated = await this.rulesClient.updateRule({
       id: this.request.params.id,
-      data,
-      options: { version },
+      data: this.request.body,
     });
 
     return this.ctx.response.ok({ body: updated });

@@ -9,11 +9,17 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
-import { isMonochromeActionType, useDynamicTypeIcons } from './use_dynamic_type_icons';
+import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
+import {
+  FALLBACK_BOLT_DATA_URL,
+  isMonochromeActionType,
+  useDynamicTypeIcons,
+} from './use_dynamic_type_icons';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/types';
 import { createStartServicesMock } from '../../../mocks';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
 import { getIconBase64 } from '../../../shared/ui/step_icons/get_icon_base64';
+import { triggerSchemas } from '../../../trigger_schemas';
 
 jest.mock('../../../shared/ui/step_icons/get_icon_base64', () => ({
   getIconBase64: jest.fn().mockResolvedValue('data:image/png;base64,xx'),
@@ -36,6 +42,8 @@ function connectorTypeStub(actionTypeId: string): ConnectorTypeInfo {
 describe('useDynamicTypeIcons', () => {
   afterEach(() => {
     jest.useRealTimers();
+    jest.restoreAllMocks();
+    jest.mocked(getIconBase64).mockResolvedValue('data:image/png;base64,xx');
   });
 
   it('does not call actionTypeRegistry.get for connector types missing from the UI registry', () => {
@@ -110,6 +118,118 @@ describe('useDynamicTypeIcons', () => {
     expect(getIconBase64).toHaveBeenCalledWith(
       expect.objectContaining({ actionTypeId: '.sharepoint-server', kind: 'step' })
     );
+
+    unmount();
+  });
+
+  it('injects step icons and connector trigger icons', async () => {
+    // Colored brand marks clear the mask. Length must exceed isValidDataUrl's 50-character minimum.
+    const resolvedTriggerIcon = `data:image/svg+xml;base64,${btoa(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="#632CA6" d="M0 0h8v8H0z"/></svg>'
+    )}`;
+    jest.mocked(getIconBase64).mockImplementation(async ({ actionTypeId, kind }) => {
+      if (kind === 'trigger' && actionTypeId === 'datadog.alert') {
+        return resolvedTriggerIcon;
+      }
+      return 'data:image/png;base64,xx';
+    });
+    jest
+      .spyOn(triggerSchemas, 'getTriggerDefinitions')
+      .mockReturnValue([
+        { id: 'datadog.alert', title: 'Datadog alert' } as PublicTriggerDefinition,
+      ]);
+
+    const services = createStartServicesMock();
+    const connectorsData: ConnectorsResponse = {
+      totalConnectors: 0,
+      connectorTypes: {
+        '.notion': connectorTypeStub('.notion'),
+        '.datadog': connectorTypeStub('.datadog'),
+      },
+    };
+    const onShadowIconsCssReady = jest.fn();
+
+    const { unmount } = renderHook(
+      () => useDynamicTypeIcons(connectorsData, undefined, true, undefined, onShadowIconsCssReady),
+      { wrapper: getTestProvider({ services }) }
+    );
+
+    await waitFor(() => {
+      expect(onShadowIconsCssReady).toHaveBeenCalled();
+    });
+
+    const css = onShadowIconsCssReady.mock.calls.at(-1)?.[0] ?? '';
+    expect(css).toContain('.type-inline-highlight.type-notion::after');
+    expect(css).toContain('.type-inline-highlight.type-datadog::after');
+    expect(css).toContain('.custom-trigger-inline.type-ct-datadog-alert::after');
+    const triggerRuleStart = css.indexOf(
+      'span.type-inline-highlight.custom-trigger-inline.type-ct-datadog-alert::after'
+    );
+    const triggerRule = css.slice(triggerRuleStart, css.indexOf('}', triggerRuleStart));
+    expect(triggerRule).toContain(`background-image: url("${resolvedTriggerIcon}") !important;`);
+    expect(triggerRule).toContain('mask-image: none !important;');
+    expect(triggerRule).toContain('-webkit-mask-image: none !important;');
+    expect(triggerRule).toContain('background-color: transparent !important;');
+    expect(getIconBase64).toHaveBeenCalledWith(
+      expect.objectContaining({ actionTypeId: '.notion', kind: 'step' })
+    );
+    expect(getIconBase64).toHaveBeenCalledWith(
+      expect.objectContaining({ actionTypeId: '.datadog', kind: 'step' })
+    );
+    expect(getIconBase64).toHaveBeenCalledWith(
+      expect.objectContaining({ actionTypeId: 'datadog.alert', kind: 'trigger' })
+    );
+
+    unmount();
+  });
+
+  it.each([
+    ['the bolt fallback', 'datadog.alert', FALLBACK_BOLT_DATA_URL],
+    [
+      'an unbranded plugs trigger',
+      'inboundWebhook.received',
+      `data:image/png;base64,${'p'.repeat(40)}`,
+    ],
+  ])('keeps the currentColor mask for %s', async (_label, triggerId, iconUrl) => {
+    jest.mocked(getIconBase64).mockImplementation(async ({ actionTypeId, kind }) => {
+      if (kind === 'trigger' && actionTypeId === triggerId) {
+        return iconUrl;
+      }
+      return 'data:image/png;base64,xx';
+    });
+    jest
+      .spyOn(triggerSchemas, 'getTriggerDefinitions')
+      .mockReturnValue([{ id: triggerId, title: triggerId } as PublicTriggerDefinition]);
+
+    const services = createStartServicesMock();
+    const onShadowIconsCssReady = jest.fn();
+    const { unmount } = renderHook(
+      () =>
+        useDynamicTypeIcons(
+          { totalConnectors: 0, connectorTypes: {} },
+          undefined,
+          true,
+          undefined,
+          onShadowIconsCssReady
+        ),
+      { wrapper: getTestProvider({ services }) }
+    );
+
+    await waitFor(() => {
+      expect(onShadowIconsCssReady).toHaveBeenCalled();
+    });
+
+    const css = onShadowIconsCssReady.mock.calls.at(-1)?.[0] ?? '';
+    const className = `type-ct-${triggerId.replaceAll('.', '-')}`;
+    const triggerRuleStart = css.indexOf(
+      `span.type-inline-highlight.custom-trigger-inline.${className}::after`
+    );
+    const triggerRule = css.slice(triggerRuleStart, css.indexOf('}', triggerRuleStart));
+    expect(triggerRule).toContain(`mask-image: url("${iconUrl}")`);
+    expect(triggerRule).toContain('background-color: currentColor');
+    expect(triggerRule).not.toContain('mask-image: none');
+    expect(triggerRule).not.toContain('-webkit-mask-image: none');
+    expect(triggerRule).not.toContain('background-color: transparent');
 
     unmount();
   });

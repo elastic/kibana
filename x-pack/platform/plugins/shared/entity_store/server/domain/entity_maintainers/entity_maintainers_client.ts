@@ -39,6 +39,7 @@ import type { TelemetryReporter } from '../../telemetry/events';
 import { CRUDClient } from '../crud';
 import { ResolutionRulesClient } from '../resolution/rules';
 import { EntityMetadataClient } from '../entity_metadata';
+import { RelationshipsClient } from '../relationships';
 import { createMaintainerTelemetryClient } from '../../tasks/entity_maintainers/maintainer_telemetry_client';
 
 interface TaskSnapshot {
@@ -84,6 +85,7 @@ interface SyncExecutionContext {
   crudClient: CRUDClient;
   resolutionRulesClient: ResolutionRulesClient;
   entityMetadataClient: EntityMetadataClient;
+  relationshipsClient: RelationshipsClient;
 }
 
 export class EntityMaintainersClient {
@@ -350,6 +352,11 @@ export class EntityMaintainersClient {
       esClient: this.coreStart.elasticsearch.client.asInternalUser,
       namespace: status.metadata.namespace,
     });
+    const relationshipsClient = new RelationshipsClient({
+      logger: this.logger,
+      esClient,
+      namespace: status.metadata.namespace,
+    });
     const abortController = new AbortController();
     const logger = this.logger.get(taskId);
 
@@ -364,6 +371,7 @@ export class EntityMaintainersClient {
       crudClient,
       resolutionRulesClient: new ResolutionRulesClient(soClient, this.namespace, logger),
       entityMetadataClient,
+      relationshipsClient,
     };
   }
 }

@@ -46,6 +46,7 @@ jobs:
               /\.gen\.ts$/,
               /(^|\/)generated\//,
               /(^|\/)NOTICE\.txt$/,
+              /^\.(agents|claude|cursor)\//,
             ];
 
             const pr = context.payload.pull_request;

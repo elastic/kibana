@@ -72,6 +72,7 @@ function createChartLayoutTest(alertIndex: string, config: AlertTestConfig) {
 }
 
 test.setTimeout(120_000);
+
 test.describe('Alert details - Chart layout', () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAdmin();

@@ -17,6 +17,8 @@ import type { AlertActionEventPublisher } from '../events/alert_action_event_pub
 import type { AlertActionsClient } from './alert_actions_client';
 import { createAlertActionsClient } from './alert_actions_client.mock';
 import { getAlertEventESQLResponse, getEmptyESQLResponse } from './fixtures/query_responses';
+import { ALERT_ACTIONS_RESOURCE_KEY } from '../../resources/datastreams/alert_actions';
+import { ALERT_EVENTS_RESOURCE_KEY } from '../../resources/datastreams/alert_events';
 
 describe('AlertActionsClient', () => {
   jest.useFakeTimers().setSystemTime(new Date('2025-01-01T11:12:13.000Z'));
@@ -26,6 +28,7 @@ describe('AlertActionsClient', () => {
   let userProfileService: jest.Mocked<UserProfileServiceStart>;
   let alertActionEventPublisher: AlertActionEventPublisher;
   let emitEpisodeActionsSpy: jest.SpyInstance;
+  let resourceManager: ReturnType<typeof createAlertActionsClient>['resourceManager'];
 
   beforeEach(() => {
     ({
@@ -34,6 +37,7 @@ describe('AlertActionsClient', () => {
       storageServiceEsClient,
       userProfileService,
       alertActionEventPublisher,
+      resourceManager,
     } = createAlertActionsClient());
     emitEpisodeActionsSpy = jest.spyOn(alertActionEventPublisher, 'emitEpisodeActions');
     storageServiceEsClient.bulk.mockResolvedValueOnce({ items: [], errors: false, took: 1 });
@@ -56,7 +60,7 @@ describe('AlertActionsClient', () => {
         groupHash: 'test-group-hash',
         action: {
           action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-          expiry: '2026-08-12T00:00:00.000Z',
+          snoozed_until: '2026-08-12T00:00:00.000Z',
         },
       });
 
@@ -70,7 +74,7 @@ describe('AlertActionsClient', () => {
         episode_id: null,
         rule_id: 'test-rule-id',
         last_series_event_timestamp: '2025-01-01T00:00:00.000Z',
-        actor: 'test-uid',
+        actor: { type: 'user', profile_uid: 'test-uid' },
         space_id: 'default',
       });
     });
@@ -111,7 +115,7 @@ describe('AlertActionsClient', () => {
       expect(emitEpisodeActionsSpy).not.toHaveBeenCalled();
     });
 
-    it('handles null profile uid when security is not available', async () => {
+    it('records a user actor without profile_uid when security is not available', async () => {
       queryServiceEsClient.esql.query.mockResolvedValueOnce(getAlertEventESQLResponse());
       userProfileService.getCurrentProfileId.mockResolvedValueOnce(null);
 
@@ -120,7 +124,8 @@ describe('AlertActionsClient', () => {
         action: { action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE },
       });
 
-      expect(getDocs()[0]).toMatchObject({ actor: null });
+      expect(getDocs()[0]).toMatchObject({ actor: { type: 'user' } });
+      expect(getDocs()[0]).not.toHaveProperty(['actor', 'profile_uid']);
     });
   });
 
@@ -149,7 +154,7 @@ describe('AlertActionsClient', () => {
         action_type: ALERT_EPISODE_ACTION_TYPE.ACK,
         episode_id: 'episode-3',
         group_hash: 'resolved-group',
-        actor: 'test-uid',
+        actor: { type: 'user', profile_uid: 'test-uid' },
       });
       expect(emitEpisodeActionsSpy).toHaveBeenCalledWith(expect.anything(), [
         expect.objectContaining({ episode_id: 'episode-3' }),
@@ -173,7 +178,7 @@ describe('AlertActionsClient', () => {
       });
     });
 
-    it('throws ALERT_EPISODE_NOT_FOUND with the episode_id detail when the episode does not exist', async () => {
+    it('throws ALERT_NOT_FOUND with the alert_id detail when the episode does not exist', async () => {
       queryServiceEsClient.esql.query.mockResolvedValueOnce(getEmptyESQLResponse());
 
       await expect(
@@ -183,7 +188,7 @@ describe('AlertActionsClient', () => {
         })
       ).rejects.toMatchObject({
         output: { statusCode: 404 },
-        data: { code: 'ALERT_EPISODE_NOT_FOUND', details: { episode_id: 'unknown-episode' } },
+        data: { code: 'ALERT_NOT_FOUND', details: { alert_id: 'unknown-episode' } },
       });
 
       expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
@@ -226,7 +231,7 @@ describe('AlertActionsClient', () => {
       const operations = storageServiceEsClient.bulk.mock.calls[0][0].operations ?? [];
       expect(operations[0]).toEqual({ create: { _index: '.rule-events' } });
       expect(operations[1]).toMatchObject({
-        episode: { id: 'episode-3', status: 'inactive' },
+        alert: { id: 'episode-3', status: 'inactive' },
         status: 'recovered',
       });
       expect(operations[2]).toEqual({ create: { _index: '.alert-actions' } });
@@ -237,7 +242,7 @@ describe('AlertActionsClient', () => {
       });
     });
 
-    it('rejects activate on a superseded episode with ALERT_EPISODE_NOT_LATEST', async () => {
+    it('rejects activate on a superseded episode with ALERT_NOT_LATEST', async () => {
       queryServiceEsClient.esql.query
         .mockResolvedValueOnce(
           getAlertEventESQLResponse([
@@ -254,10 +259,10 @@ describe('AlertActionsClient', () => {
           action: { action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE, reason: 'reopen' },
         })
       ).rejects.toMatchObject({
-        output: { statusCode: 404 },
+        output: { statusCode: 409 },
         data: {
-          code: 'ALERT_EPISODE_NOT_LATEST',
-          details: { episode_id: 'old-episode', group_hash: 'group-1' },
+          code: 'ALERT_NOT_LATEST',
+          details: { alert_id: 'old-episode', group_hash: 'group-1' },
         },
       });
 
@@ -301,6 +306,40 @@ describe('AlertActionsClient', () => {
       expect(emitEpisodeActionsSpy).not.toHaveBeenCalled();
     });
 
+    it('waits for both data streams to be ready before writing', async () => {
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(
+        getAlertEventESQLResponse([{ episode_id: 'episode-3' }])
+      );
+
+      await client.createEpisodeAction({
+        episodeId: 'episode-3',
+        action: { action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
+      });
+
+      expect(resourceManager.ensureResourceReady).toHaveBeenCalledWith(ALERT_ACTIONS_RESOURCE_KEY);
+      expect(resourceManager.ensureResourceReady).toHaveBeenCalledWith(ALERT_EVENTS_RESOURCE_KEY);
+      expect(
+        Math.max(...resourceManager.ensureResourceReady.mock.invocationCallOrder)
+      ).toBeLessThan(storageServiceEsClient.bulk.mock.invocationCallOrder[0]);
+    });
+
+    it('does not write or emit when a data stream fails to initialize', async () => {
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(
+        getAlertEventESQLResponse([{ episode_id: 'episode-3' }])
+      );
+      resourceManager.ensureResourceReady.mockRejectedValueOnce(new Error('init failed'));
+
+      await expect(
+        client.createEpisodeAction({
+          episodeId: 'episode-3',
+          action: { action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
+        })
+      ).rejects.toThrow('init failed');
+
+      expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
+      expect(emitEpisodeActionsSpy).not.toHaveBeenCalled();
+    });
+
     it('persists source and a null rule_id from the resolved alert event for external episodes', async () => {
       queryServiceEsClient.esql.query.mockResolvedValueOnce(
         getAlertEventESQLResponse([{ episode_id: 'episode-3', source: 'pagerduty', rule_id: null }])
@@ -326,7 +365,7 @@ describe('AlertActionsClient', () => {
         {
           group_hash: 'group-1',
           action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-          expiry: '2026-08-12T00:00:00.000Z',
+          snoozed_until: '2026-08-12T00:00:00.000Z',
         },
         { group_hash: 'group-2', action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE },
       ];
@@ -386,9 +425,9 @@ describe('AlertActionsClient', () => {
 
     it('persists audit-only actions with a single by-episode lookup', async () => {
       const items: BulkCreateEpisodeAlertActionItemBody[] = [
-        { episode_id: 'episode-1', action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
+        { alert_id: 'episode-1', action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
         {
-          episode_id: 'episode-2',
+          alert_id: 'episode-2',
           action_type: ALERT_EPISODE_ACTION_TYPE.ASSIGN,
           assignee_uid: 'assignee-1',
         },
@@ -414,10 +453,10 @@ describe('AlertActionsClient', () => {
       });
     });
 
-    it('reports ALERT_EPISODE_NOT_FOUND keyed by episode_id for missing episodes', async () => {
+    it('reports ALERT_NOT_FOUND keyed by alert_id for missing episodes', async () => {
       const items: BulkCreateEpisodeAlertActionItemBody[] = [
-        { episode_id: 'episode-1', action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
-        { episode_id: 'unknown-episode', action_type: ALERT_EPISODE_ACTION_TYPE.UNACK },
+        { alert_id: 'episode-1', action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
+        { alert_id: 'unknown-episode', action_type: ALERT_EPISODE_ACTION_TYPE.UNACK },
       ];
 
       queryServiceEsClient.esql.query.mockResolvedValueOnce(
@@ -430,7 +469,7 @@ describe('AlertActionsClient', () => {
       expect(result.errors).toEqual([
         {
           id: 'unknown-episode',
-          error: expect.objectContaining({ code: 'ALERT_EPISODE_NOT_FOUND' }),
+          error: expect.objectContaining({ code: 'ALERT_NOT_FOUND' }),
         },
       ]);
     });
@@ -438,11 +477,11 @@ describe('AlertActionsClient', () => {
     it('rejects lifecycle items on superseded episodes while the rest of the batch proceeds', async () => {
       const items: BulkCreateEpisodeAlertActionItemBody[] = [
         {
-          episode_id: 'old-episode',
+          alert_id: 'old-episode',
           action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
           reason: 'stale',
         },
-        { episode_id: 'old-episode', action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
+        { alert_id: 'old-episode', action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
       ];
 
       // By-episode lookup resolves the superseded episode; the guard lookup
@@ -465,7 +504,7 @@ describe('AlertActionsClient', () => {
         {
           id: 'old-episode',
           error: expect.objectContaining({
-            code: 'ALERT_EPISODE_NOT_LATEST',
+            code: 'ALERT_NOT_LATEST',
             details: { group_hash: 'group-1' },
           }),
         },
@@ -480,7 +519,7 @@ describe('AlertActionsClient', () => {
     it('writes the synthetic rule-event for a lifecycle item on the latest episode', async () => {
       const items: BulkCreateEpisodeAlertActionItemBody[] = [
         {
-          episode_id: 'episode-1',
+          alert_id: 'episode-1',
           action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
           reason: 'reopen',
         },
@@ -502,7 +541,7 @@ describe('AlertActionsClient', () => {
       const operations = storageServiceEsClient.bulk.mock.calls[0][0].operations ?? [];
       expect(operations[0]).toEqual({ create: { _index: '.rule-events' } });
       expect(operations[1]).toMatchObject({
-        episode: { id: 'episode-1', status: 'active' },
+        alert: { id: 'episode-1', status: 'active' },
         status: 'breached',
       });
       expect(operations[3]).toMatchObject({
@@ -511,10 +550,10 @@ describe('AlertActionsClient', () => {
       });
     });
 
-    it('reports INVALID_EPISODE_STATE_TRANSITION keyed by episode_id when a lifecycle precondition fails', async () => {
+    it('reports INVALID_ALERT_STATE_TRANSITION keyed by alert_id when a lifecycle precondition fails', async () => {
       const items: BulkCreateEpisodeAlertActionItemBody[] = [
         {
-          episode_id: 'episode-1',
+          alert_id: 'episode-1',
           action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
           reason: 'already inactive',
         },
@@ -536,7 +575,7 @@ describe('AlertActionsClient', () => {
       expect(result.errors).toEqual([
         {
           id: 'episode-1',
-          error: expect.objectContaining({ code: 'INVALID_EPISODE_STATE_TRANSITION' }),
+          error: expect.objectContaining({ code: 'INVALID_ALERT_STATE_TRANSITION' }),
         },
       ]);
       expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
@@ -544,7 +583,7 @@ describe('AlertActionsClient', () => {
 
     it('rethrows unexpected (non-Boom-4xx) errors so the whole batch fails loudly', async () => {
       const items: BulkCreateEpisodeAlertActionItemBody[] = [
-        { episode_id: 'episode-1', action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
+        { alert_id: 'episode-1', action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
       ];
 
       // The by-episode bulk load is the first ES|QL read. A raw (non-Boom)
@@ -559,11 +598,11 @@ describe('AlertActionsClient', () => {
     it('calls emitEpisodeActions with the persisted assign and ack action documents', async () => {
       const items: BulkCreateEpisodeAlertActionItemBody[] = [
         {
-          episode_id: 'episode-1',
+          alert_id: 'episode-1',
           action_type: ALERT_EPISODE_ACTION_TYPE.ASSIGN,
           assignee_uid: 'assignee-uid-1',
         },
-        { episode_id: 'episode-2', action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
+        { alert_id: 'episode-2', action_type: ALERT_EPISODE_ACTION_TYPE.ACK },
       ];
 
       queryServiceEsClient.esql.query.mockResolvedValueOnce(

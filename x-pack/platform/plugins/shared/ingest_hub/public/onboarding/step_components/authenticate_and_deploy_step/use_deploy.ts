@@ -17,6 +17,7 @@ import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { SERVICE_SETTINGS_SESSION_KEY } from '../service_settings_step/use_service_settings';
 import type { ServiceSettingsPersistedState } from '../service_settings_step/use_service_settings';
 import { buildDeployGroups } from './deploy_groups';
+import { DEFAULT_NAMESPACE } from './deploy_group_helpers';
 import type { DeployGroup } from './deploy_groups';
 import { buildIacIntegrations } from './package_inputs';
 import { useOnboardingSO } from './use_onboarding_so';
@@ -31,8 +32,6 @@ export {
 } from './package_inputs';
 
 export interface UseDeployResult {
-  namespace: string;
-  setNamespace: (ns: string) => void;
   isDeploying: boolean;
   failedInstances: string[];
   handleDeploy: (instanceIds?: string[]) => Promise<{ cleanupFailed: boolean }>;
@@ -67,7 +66,6 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     { globalRegion: '', serviceVars: {} }
   );
 
-  const [namespace, setNamespace] = useState('default');
   const [isDeploying, setIsDeploying] = useState(false);
   // Seeded from session storage so a partial failure survives unmounting Step 3. Without this,
   // navigating Back and forward again clears the failure locally while serviceStatuses still holds
@@ -89,9 +87,10 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       buildDeployGroups(
         serviceSettings?.instances ?? [],
         selectedServiceIds,
-        servicesMap ?? new Map()
+        servicesMap ?? new Map(),
+        serviceSettings?.serviceVars ?? {}
       ),
-    [serviceSettings?.instances, selectedServiceIds, servicesMap]
+    [serviceSettings?.instances, serviceSettings?.serviceVars, selectedServiceIds, servicesMap]
   );
 
   // The Existing Identity check renders the stack update without touching the connector; the
@@ -189,6 +188,11 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     // Failed instances always need a retry deploy — credentials are required. Treat them as
     // new untracked targets so the credential gate stays on even when pending cleanup exists.
     if (failedInstances.length > 0) return false;
+    // TODO(ingest-dev#9730): once secret-ref hydration and buildPackageVars refsToPreserve land,
+    // a dirty+cleanup run can safely proceed without re-entering credentials because the policy
+    // PUT will preserve existing secret refs. Until then, require credentials whenever isDirty
+    // is true so the dirty-update PUT does not emit an empty vars block and clear AWS keys.
+    if (detectAndReviewStep.isDirty) return false;
     const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
     const liveStalePolicyIds = buildLiveStalePolicyIds(
       detectAndReviewStep.policyIdsByInstance ?? {},
@@ -210,6 +214,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
   }, [
     failedInstances,
     deployGroups,
+    detectAndReviewStep.isDirty,
     detectAndReviewStep.policyIdsByInstance,
     detectAndReviewStep.serviceStatuses,
     detectAndReviewStep.pendingCleanupPolicyIds,
@@ -232,7 +237,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     nonAgentlessServices,
     serviceSettings,
     authenticateAndDeployStep,
-    namespace,
+    namespace: DEFAULT_NAMESPACE,
     selectedServiceIds,
     dataFormat,
     servicesMap,
@@ -252,11 +257,11 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     onboardingDeploymentId: detectAndReviewStep.onboardingDeploymentId,
     policyIdsByInstance: detectAndReviewStep.policyIdsByInstance,
     pendingCleanupPolicyIds: detectAndReviewStep.pendingCleanupPolicyIds,
+    isDirty: detectAndReviewStep.isDirty ?? false,
+    isAuthDirty: detectAndReviewStep.isAuthDirty ?? false,
   });
 
   return {
-    namespace,
-    setNamespace,
     isDeploying,
     failedInstances,
     handleDeploy,

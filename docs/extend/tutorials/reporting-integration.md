@@ -18,6 +18,8 @@ These pages document internal APIs and are not guaranteed to be supported across
 
 "Export Types" are pieces of code that plug into the {{kib}} Reporting framework, and are responsible for exporting data on behalf of a {{kib}} application. These pieces of code are implemented as TypeScript classes that extend an abstract base class, and implement methods for controlling the creation of report jobs, and asynchronously generating report contents. Their `createJob` methods handle requests to create report jobs, by accepting jobParams objects and returning "task payload" objects. Their `runTask` methods generate the report contents by accepting the task payload object created from the `createJob` function, which is then stored in a system index in Elasticsearch.
 
+On {{serverless-full}}, only CSV export types are registered. PDF and PNG stay disabled (`xpack.reporting.export_types.{pdf,png}.enabled: false`). Discover can generate and schedule CSV. Lens CSV scheduling is not supported. Dashboard PDF and PNG generate and schedule are not supported.
+
 
 ### Share menu extensions [reporting-share-service-registrations]
 

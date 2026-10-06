@@ -27,7 +27,11 @@ export const createConversationStepDefinition = ({
           getConversationClient(request),
           getAgentRegistry(request),
         ]);
-        const publicClient = createConversationPublicClient({ client, agentRegistry });
+        const publicClient = createConversationPublicClient({
+          client,
+          agentRegistry,
+          source: 'workflow',
+        });
 
         const input = context.input as CreateConversationStepInput;
 

@@ -37,6 +37,8 @@ import { PolicyName } from './policy_name';
 import { LocationHealth } from './location_health';
 import { LOCATION_NAME_LABEL } from './location_form';
 import type { ClientPluginsStart } from '../../../../../plugin';
+import { useLicense } from '../../../hooks/use_license';
+import { AGENT_SHARDING_MIN_LICENSE } from '../../../../../../common/constants/license';
 import { UnhealthyCountBadge } from './unhealthy_count_badge';
 import { ResetMonitorModal } from '../../monitors_page/management/monitor_list_table/reset_monitor_modal';
 import { useMonitorIntegrationHealth } from '../../common/hooks/use_monitor_integration_health';
@@ -91,6 +93,9 @@ export const PrivateLocationsTable = ({
     });
 
   const { canSave } = useSyntheticsSettingsContext();
+  const { hasAtLeast } = useLicense();
+  // Stats carry the server's answer (license + rebalance switch); license is the pre-load fallback.
+  const isAgentSharding = hasAtLeast(AGENT_SHARDING_MIN_LICENSE) === true;
 
   const { services } = useKibana<ClientPluginsStart>();
 
@@ -156,7 +161,7 @@ export const PrivateLocationsTable = ({
           locationStats={agentStatsByLocation.get(item.id)}
           // The expanded panel already shows the agent count, so drop the badge there.
           hideAgentCount={expandedIds.has(item.id)}
-          isAgentSharding={item.isAgentSharding}
+          isAgentSharding={agentStatsByLocation.get(item.id)?.isAgentSharding ?? isAgentSharding}
         />
       ),
     },

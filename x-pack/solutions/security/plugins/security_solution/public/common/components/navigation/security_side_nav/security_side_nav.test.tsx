@@ -384,7 +384,7 @@ describe('SecuritySideNav', () => {
     (useKibana().services.settings.client.get$ as jest.Mock).mockImplementation(() =>
       new BehaviorSubject(AIChatExperience.Agent).asObservable()
     );
-    (useKibana().services.featureFlags.getBooleanValue as jest.Mock).mockImplementation(
+    (useKibana().services.featureFlags.useBooleanValue as jest.Mock).mockImplementation(
       (flag: string) => flag === AGENT_BUILDER_NAV_AT_TOP_FLAG
     );
     mockUseNavLinks.mockReturnValue([alertsNavLink]);

@@ -8,7 +8,7 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('./scout_no_core_settings_in_space_test');
+const rule = require('../oxlint_plugin').rules.scout_no_core_settings_in_space_test;
 const dedent = require('dedent');
 
 const errors = [{ messageId: 'noCoreSettingsInSpaceTest' }];

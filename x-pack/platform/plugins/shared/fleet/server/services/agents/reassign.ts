@@ -12,6 +12,7 @@ import type { Agent } from '../../types';
 import { agentPolicyService } from '../agent_policy';
 import {
   AgentReassignmentError,
+  FleetError,
   HostedAgentPolicyRestrictionRelatedError,
   AgentPolicyNotFoundError,
 } from '../../errors';
@@ -36,11 +37,17 @@ import { ReassignActionRunner, reassignBatch } from './reassign_action_runner';
 
 async function verifyNewAgentPolicy(
   soClient: SavedObjectsClientContract,
-  newAgentPolicyId: string
+  newAgentPolicyId: string,
+  options?: { spaceId?: string }
 ) {
   let newAgentPolicy;
   try {
-    newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
+    newAgentPolicy = await agentPolicyService.get(
+      soClient,
+      newAgentPolicyId,
+      false,
+      options?.spaceId === '*' ? { spaceId: options.spaceId } : {}
+    );
   } catch (err) {
     if (err instanceof SavedObjectNotFound) {
       throw new AgentPolicyNotFoundError(`Agent policy not found: ${newAgentPolicyId}`);
@@ -102,10 +109,37 @@ export async function reassignAgents(
     force?: boolean;
     batchSize?: number;
     dryRun?: boolean;
+    /** Space ID for the target policy lookup. Pass '*' when using an unscoped SO client. */
+    spaceId?: string;
+    /**
+     * Must be set to `true` when spaceId is '*'. Only task code that holds an unscoped
+     * internal SO client may enable cross-space reassignment. Route handlers must never set
+     * this flag (user-supplied input is blocked by the API schema before reaching this layer).
+     * @internal
+     */
+    _internalCrossSpace?: true;
   },
   newAgentPolicyId: string
 ): Promise<{ actionId: string } | { count: number }> {
-  await verifyNewAgentPolicy(soClient, newAgentPolicyId);
+  // Guard cross-space reassignment behind two checks:
+  // 1. Explicit internal flag: callers that intend cross-space must opt in; route handlers
+  //    never set this, so user-facing paths are blocked regardless of soClient type.
+  // 2. getCurrentNamespace() check: catches the most obvious misuse (custom-space scoped
+  //    client). Note: a default-space user client also returns undefined here, but that
+  //    case is already blocked by check 1 since route handlers never pass spaceId '*'.
+  if (options.spaceId === '*') {
+    if (!options._internalCrossSpace) {
+      throw new FleetError(
+        `spaceId '*' requires _internalCrossSpace: true and an unscoped internal SO client`
+      );
+    }
+    if (soClient.getCurrentNamespace() !== undefined) {
+      throw new FleetError(
+        `spaceId '*' requires an unscoped SO client; got client scoped to '${soClient.getCurrentNamespace()}'`
+      );
+    }
+  }
+  await verifyNewAgentPolicy(soClient, newAgentPolicyId, { spaceId: options.spaceId });
 
   const currentSpaceId = getCurrentNamespace(soClient);
   const outgoingErrors: Record<Agent['id'], Error> = {};
@@ -116,11 +150,12 @@ export async function reassignAgents(
     }
     givenAgents = options.agents;
   } else if ('agentIds' in options) {
+    const agentIdOptions = { skipNamespaceFilter: options.spaceId === '*' };
     if (options.dryRun) {
-      const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
+      const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds, agentIdOptions);
       return { count: maybeAgents.filter((a) => !('notFound' in a)).length };
     }
-    const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
+    const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds, agentIdOptions);
     for (const maybeAgent of maybeAgents) {
       if ('notFound' in maybeAgent) {
         outgoingErrors[maybeAgent.id] = new AgentReassignmentError(
@@ -132,7 +167,12 @@ export async function reassignAgents(
     }
   } else if ('kuery' in options) {
     const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
-    const namespaceFilter = await agentsKueryNamespaceFilter(currentSpaceId);
+    // When spaceId is '*' the caller is space-agnostic; pass undefined so agentsKueryNamespaceFilter
+    // omits the filter and the query covers all spaces. Otherwise use the explicit spaceId if given,
+    // falling back to the current namespace derived from soClient.
+    const effectiveSpaceId =
+      options.spaceId === '*' ? undefined : options.spaceId ?? currentSpaceId;
+    const namespaceFilter = await agentsKueryNamespaceFilter(effectiveSpaceId);
     const kuery = buildFilterWithNamespace(namespaceFilter, options.kuery);
     // cheap count — avoids hydrating up to batchSize agent documents just to read the total
     const { total } = await getAgentsByKuery(esClient, soClient, {
@@ -161,7 +201,7 @@ export async function reassignAgents(
         soClient,
         {
           ...options,
-          spaceId: currentSpaceId,
+          spaceId: options.spaceId ?? currentSpaceId,
           batchSize,
           total,
           newAgentPolicyId,
@@ -173,7 +213,7 @@ export async function reassignAgents(
 
   return await reassignBatch(
     esClient,
-    { newAgentPolicyId, spaceId: currentSpaceId },
+    { newAgentPolicyId, spaceId: options.spaceId ?? currentSpaceId },
     givenAgents,
     outgoingErrors
   );

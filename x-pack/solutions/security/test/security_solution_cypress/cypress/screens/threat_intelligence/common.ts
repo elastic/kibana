@@ -11,7 +11,4 @@ export const UPDATE_STATUS = getDataTestSubjectSelector('updateStatus');
 export const SECURITY_SOLUTION_NAVBAR_MANAGE_ITEM = getDataTestSubjectSelector(
   'solutionSideNavItemLink-administration'
 );
-export const SECURITY_SOLUTION_NAVBAR_THREAT_INTELLIGENCE_ITEM = getDataTestSubjectSelector(
-  'solutionSideNavItemLink-threat_intelligence'
-);
 export const MANAGE_NAVIGATION_ITEMS = `.euiLink`;

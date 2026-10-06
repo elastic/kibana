@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, fireEvent, render } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
@@ -274,6 +274,11 @@ describe('TransactionActionMenu ', () => {
 
   it('matches the snapshot', async () => {
     const { container } = await renderTransaction(Transactions.transactionWithAllData);
+
+    //  wait for it to settle as EuiPopover applies euiPopover-isOpen via requestAnimationFrame
+    await waitFor(() => {
+      expect(container.querySelector('.euiPopover')).toHaveClass('euiPopover-isOpen');
+    });
 
     expect(container).toMatchSnapshot();
   });

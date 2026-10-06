@@ -41,7 +41,7 @@ spaceTest.describe(
       await discover.writeAndSubmitEsqlQuery('from logstash-* | limit 10');
       await unifiedFieldList.waitUntilSidebarHasLoaded();
 
-      await expect(page.testSubj.locator('ESQLEditor')).toBeVisible();
+      await expect(pageObjects.esqlEditor.editor).toBeVisible();
       await expect(page.testSubj.locator('discoverQueryHits')).toBeVisible();
       await expect(page.testSubj.locator('unifiedHistogramChart')).toBeVisible();
       // classic-only controls are hidden

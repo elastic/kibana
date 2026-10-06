@@ -62,6 +62,24 @@ describe('useUserDetails', () => {
     expect(mockSearch).toHaveBeenCalled();
   });
 
+  it('labels the search with the users page execution context', () => {
+    renderHook(() => useObservedUserDetails(defaultProps), {
+      wrapper: TestProviders,
+    });
+
+    expect(mockUseSearchStrategy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:explore-users_page',
+            id: 'user_details_observed',
+          },
+        },
+      })
+    );
+  });
+
   it('does not run search when skip = true', () => {
     const props = {
       ...defaultProps,

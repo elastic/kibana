@@ -36,6 +36,7 @@ const renderRow = (props: Partial<React.ComponentProps<typeof ConversationCardCo
       outcome="Approved by Maya Chen"
       onClickCard={onClickCard}
       onClickAction={jest.fn()}
+      onCopyLink={jest.fn()}
       onOpenChat={jest.fn()}
       onClickRecommendedAction={jest.fn()}
       {...props}
@@ -64,9 +65,11 @@ describe('ConversationCardCompact', () => {
   it('offers no decision, since the row is already decided', () => {
     renderRow();
 
-    // A decided row with no escalation capability has no available actions — the trigger
-    // must not render at all rather than opening an empty popover.
-    expect(screen.queryByRole('button', { name: 'Open actions menu' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
+
+    // Only the read-only Copy link remains.
+    expect(screen.getByText('Copy link')).toBeInTheDocument();
+    expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
   });
 
   it('still opens the flyout on click', () => {

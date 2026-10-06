@@ -56,7 +56,7 @@ apiTest.describe('Bulk get rules API', { tag: '@local-stateful-classic' }, () =>
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.rules.map((rule: { id: string }) => rule.id)).toStrictEqual([
+      expect(response.body.items.map((rule: { id: string }) => rule.id)).toStrictEqual([
         ruleA.id,
         ruleB.id,
       ]);
@@ -86,7 +86,7 @@ apiTest.describe('Bulk get rules API', { tag: '@local-stateful-classic' }, () =>
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.rules.map((rule: { id: string }) => rule.id)).toStrictEqual(
+      expect(response.body.items.map((rule: { id: string }) => rule.id)).toStrictEqual(
         requestedOrder
       );
     }
@@ -105,8 +105,8 @@ apiTest.describe('Bulk get rules API', { tag: '@local-stateful-classic' }, () =>
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.rules).toHaveLength(1);
-      expect(response.body.rules[0].id).toBe(rule.id);
+      expect(response.body.items).toHaveLength(1);
+      expect(response.body.items[0].id).toBe(rule.id);
     }
   );
 
@@ -204,7 +204,7 @@ apiTest.describe('Bulk get rules API', { tag: '@local-stateful-classic' }, () =>
         body: { ids: [rule.id] },
       });
       expect(response).toHaveStatusCode(200);
-      expect(response.body.rules[0].id).toBe(rule.id);
+      expect(response.body.items[0].id).toBe(rule.id);
     }
   );
 
@@ -222,7 +222,7 @@ apiTest.describe('Bulk get rules API', { tag: '@local-stateful-classic' }, () =>
         body: { ids: [rule.id] },
       });
       expect(response).toHaveStatusCode(200);
-      expect(response.body.rules[0].id).toBe(rule.id);
+      expect(response.body.items[0].id).toBe(rule.id);
     }
   );
 

@@ -437,6 +437,7 @@ describe('ActionPolicySavedObjectService', () => {
       await service.find({
         page: 2,
         perPage: 5,
+        filter: `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.enabled: true`,
         sortField: 'createdAt',
         sortOrder: 'desc',
       });
@@ -445,6 +446,7 @@ describe('ActionPolicySavedObjectService', () => {
         expect.objectContaining({
           page: 2,
           perPage: 5,
+          filter: `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.enabled: true`,
           sortField: 'createdAt',
           sortOrder: 'desc',
         })

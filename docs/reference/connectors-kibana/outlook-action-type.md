@@ -11,6 +11,8 @@ applies_to:
 
 The Outlook connector connects to the Microsoft Graph API and enables federated search and browsing of email in Microsoft Outlook. It uses OAuth Authorization Code flow to access the authenticated user's mailbox on their behalf.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-outlook-ui]
 
 You can create an Outlook connector in **{{stack-manage-app}} > {{connectors-ui}}** or when adding an Outlook data source.

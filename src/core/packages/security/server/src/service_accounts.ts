@@ -14,6 +14,7 @@ import type {
   ServiceAccount,
   ServiceAccountWorkloadBinding,
   ServiceAccountWorkloadCoordinates,
+  ServiceAccountWorkloadRequestParams,
   ServiceAccountWorkloadRef,
 } from '@kbn/core-security-common';
 
@@ -34,11 +35,11 @@ export interface CoreServiceAccountsService {
   isEnabled(): boolean;
 
   /**
-   * Create a service account whose privileges are bounded by those of the user
-   * bound to the provided request.
+   * Create a service account with the given roles, bounded by the privileges of the user bound to
+   * the provided request. Requires the `manage_security` cluster privilege.
    *
    * @param request The request whose user the service account is created on behalf of.
-   * @param params The name for the new service account.
+   * @param params The name and roles for the new service account.
    */
   create(request: KibanaRequest, params: CreateServiceAccountParams): Promise<ServiceAccount>;
 
@@ -81,10 +82,11 @@ export interface CoreServiceAccountsService {
    * and once `fn` settles the request's credential is removed and can never be replaced again, so a
    * request kept past `fn` is refused by Elasticsearch rather than allowed to keep acting.
    *
-   * Rejects when the workload has no binding (a 404), and whenever bindings are unavailable.
+   * Rejects when the workload has no binding (a 404), its account differs from
+   * expectedServiceAccountId (a 403), or bindings are unavailable.
    */
   withScopedRequestForWorkload<T>(
-    params: ServiceAccountWorkloadCoordinates,
+    params: ServiceAccountWorkloadRequestParams,
     fn: (request: KibanaRequest) => Promise<T>
   ): Promise<T>;
 }

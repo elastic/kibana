@@ -16,7 +16,6 @@ import {
   PROPOSALS_READ_ONLY_ROLE,
   seedProposal,
   reviseProposal,
-  trackProposal,
 } from '../fixtures';
 
 apiTest.describe(
@@ -41,6 +40,7 @@ apiTest.describe(
           comment: 'Original comment',
           impact: 'low',
           confidence: 'medium',
+          origin: 'nightshift',
         });
 
         const reviseResponse = await reviseProposal(apiClient, cookieHeader, originalId, {
@@ -48,9 +48,6 @@ apiTest.describe(
           impact: 'high',
           confidence: 'high',
         });
-        // Tracked before the assertions: the child is written before its predecessor
-        // is updated and kept on an ambiguous failure, so the id can exist on non-200.
-        trackProposal(reviseResponse.body?.proposalId);
         expect(reviseResponse).toHaveStatusCode(200);
         const { proposalId: newProposalId, revision } = reviseResponse.body;
         expect(typeof newProposalId).toBe('string');
@@ -64,8 +61,8 @@ apiTest.describe(
         expect(replacementResponse.body.impact).toBe('high');
         expect(replacementResponse.body.confidence).toBe('high');
         // Inherited from the predecessor rather than re-resolved, so a revision
-        // cannot silently relabel who a proposal came from.
-        expect(replacementResponse.body.origin).toBe('worker');
+        // cannot silently relabel which feature a proposal came from.
+        expect(replacementResponse.body.origin).toBe('nightshift');
         expect(replacementResponse.body.revision).toBe(2);
         expect(replacementResponse.body.rootProposalId).toBe(originalId);
         expect(replacementResponse.body.supersedes).toBe(originalId);
@@ -94,7 +91,6 @@ apiTest.describe(
         const firstRevise = await reviseProposal(apiClient, cookieHeader, rootId, {
           comment: 'revision 2',
         });
-        trackProposal(firstRevise.body?.proposalId);
         expect(firstRevise).toHaveStatusCode(200);
         const secondId: string = firstRevise.body.proposalId;
         expect(firstRevise.body.revision).toBe(2);
@@ -102,7 +98,6 @@ apiTest.describe(
         const secondRevise = await reviseProposal(apiClient, cookieHeader, secondId, {
           comment: 'revision 3',
         });
-        trackProposal(secondRevise.body?.proposalId);
         expect(secondRevise).toHaveStatusCode(200);
         const thirdId: string = secondRevise.body.proposalId;
         expect(secondRevise.body.revision).toBe(3);
@@ -145,7 +140,6 @@ apiTest.describe(
         const firstRevise = await reviseProposal(apiClient, cookieHeader, id, {
           comment: 'first',
         });
-        trackProposal(firstRevise.body?.proposalId);
         expect(firstRevise).toHaveStatusCode(200);
 
         // The original is now superseded; a second revise attempt on it must

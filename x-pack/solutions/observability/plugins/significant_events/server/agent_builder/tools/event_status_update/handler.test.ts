@@ -13,65 +13,69 @@ const makeLogger = () =>
 describe('updateEventStatusToolHandler', () => {
   it('creates a new event version when status changes', async () => {
     const eventClient = {
-      findByEventUuid: jest.fn().mockResolvedValue({
-        hits: [{ event_uuid: 'event-1', event_id: 'event-id-1', status: 'open' }],
-      }),
-      findByEventId: jest.fn().mockResolvedValue({
-        hits: [{ event_uuid: 'event-1', event_id: 'event-id-1', status: 'open' }],
+      findLatestByEventId: jest.fn().mockResolvedValue({
+        event_id: 'event-id-1',
+        status: 'active',
       }),
       bulkCreate: jest.fn().mockResolvedValue({}),
     };
 
     const result = await updateEventStatusToolHandler({
       eventClient: eventClient as never,
-      eventUuid: 'event-1',
-      status: 'closed',
+      eventId: 'event-id-1',
+      status: 'inactive',
       logger: makeLogger(),
     });
 
     expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
     expect(eventClient.bulkCreate).toHaveBeenCalledWith(
-      [expect.objectContaining({ status: 'closed' })],
+      [expect.objectContaining({ status: 'inactive' })],
       { throwOnFail: true, refresh: 'wait_for' }
     );
-    expect(result.event_uuid).not.toBe('event-1');
     expect(result).toEqual({
-      event_uuid: result.event_uuid,
+      event_id: 'event-id-1',
       updated: 1,
       ignored: 0,
-      status: 'closed',
+      status: 'inactive',
     });
   });
 
   it('ignores when event is missing or status unchanged', async () => {
     const eventClientMissing = {
-      findByEventUuid: jest.fn().mockResolvedValue({ hits: [] }),
-      findByEventId: jest.fn(),
+      findLatestByEventId: jest.fn().mockResolvedValue(undefined),
       bulkCreate: jest.fn(),
     };
     const missing = await updateEventStatusToolHandler({
       eventClient: eventClientMissing as never,
-      eventUuid: 'event-1',
-      status: 'dismissed',
+      eventId: 'event-id-1',
+      status: 'inactive',
       logger: makeLogger(),
     });
-    expect(missing).toEqual({ event_uuid: 'event-1', updated: 0, ignored: 1, status: 'dismissed' });
+    expect(missing).toEqual({
+      event_id: 'event-id-1',
+      updated: 0,
+      ignored: 1,
+      status: 'inactive',
+    });
 
     const eventClientSame = {
-      findByEventUuid: jest.fn().mockResolvedValue({
-        hits: [{ event_uuid: 'event-1', event_id: 'event-id-1', status: 'dismissed' }],
-      }),
-      findByEventId: jest.fn().mockResolvedValue({
-        hits: [{ event_uuid: 'event-1', event_id: 'event-id-1', status: 'dismissed' }],
+      findLatestByEventId: jest.fn().mockResolvedValue({
+        event_id: 'event-id-1',
+        status: 'inactive',
       }),
       bulkCreate: jest.fn(),
     };
     const same = await updateEventStatusToolHandler({
       eventClient: eventClientSame as never,
-      eventUuid: 'event-1',
-      status: 'dismissed',
+      eventId: 'event-id-1',
+      status: 'inactive',
       logger: makeLogger(),
     });
-    expect(same).toEqual({ event_uuid: 'event-1', updated: 0, ignored: 1, status: 'dismissed' });
+    expect(same).toEqual({
+      event_id: 'event-id-1',
+      updated: 0,
+      ignored: 1,
+      status: 'inactive',
+    });
   });
 });

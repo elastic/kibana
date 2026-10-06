@@ -176,7 +176,7 @@ const LeadListItem: React.FC<LeadListItemProps> = ({ lead, onClick }) => {
   return (
     <EuiPanel
       hasBorder
-      paddingSize="s"
+      paddingSize="m"
       onClick={handleClick}
       data-test-subj={`leadListItem-${lead.id}`}
     >

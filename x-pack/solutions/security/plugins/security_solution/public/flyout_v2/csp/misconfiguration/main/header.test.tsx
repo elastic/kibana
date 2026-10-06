@@ -26,6 +26,12 @@ jest.mock('../../../../common/components/formatted_date', () => ({
   PreferenceFormattedDate: () => <span data-test-subj="mockFormattedDate" />,
 }));
 
+jest.mock('../../../shared/components/flyout_header_actions', () => ({
+  FlyoutHeaderActions: ({ children }: { children?: React.ReactNode }) => (
+    <div data-test-subj="mockFlyoutHeaderActions">{children}</div>
+  ),
+}));
+
 const mockCspHeader = jest.fn(() => <div data-test-subj="mockCspFlyoutHeader" />);
 
 jest.mock('../../../../common/lib/kibana', () => ({
@@ -57,5 +63,10 @@ describe('<Header /> (misconfiguration)', () => {
     expect(getByTestId('mockFlyoutTitle')).toHaveTextContent('My Rule');
     expect(getByTestId('mockFormattedDate')).toBeInTheDocument();
     expect(getByTestId('mockCspFlyoutHeader')).toBeInTheDocument();
+  });
+
+  it('renders the flyout header actions', () => {
+    const { getByTestId } = render(<Header finding={finding} />);
+    expect(getByTestId('mockFlyoutHeaderActions')).toBeInTheDocument();
   });
 });

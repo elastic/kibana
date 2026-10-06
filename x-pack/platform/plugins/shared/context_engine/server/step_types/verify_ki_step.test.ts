@@ -12,6 +12,7 @@ import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
 import { createVerifyKiStepDefinition } from './verify_ki_step';
+import { createVerifyKi } from './verify_ki';
 import { ESQL_VALID_RUNTIME_VERIFIER_ID, ESQL_VALID_SYNTAX_VERIFIER_ID } from '../ki_verification';
 import type { KiVerifierWorkflowRunner } from '../ki_verification';
 import { mockKiStepTelemetry } from './test_utils';
@@ -110,11 +111,17 @@ describe('verify_ki workflow step', () => {
   const makeDefinition = (withWorkflows = true) =>
     createVerifyKiStepDefinition(
       coreSetup,
-      telemetry.logger,
-      telemetry.analyticsService,
-      withWorkflows
-        ? { getWorkflowsManagement: async () => workflowsManagement, checkExecutePrivilege }
-        : undefined
+      createVerifyKi({
+        getAuditLogger: async (request) => {
+          const [coreStart] = await coreSetup.getStartServices();
+          return coreStart.security.audit.asScoped(request);
+        },
+        workflowVerifierDeps: withWorkflows
+          ? { getWorkflowsManagement: async () => workflowsManagement, checkExecutePrivilege }
+          : undefined,
+        analyticsService: telemetry.analyticsService,
+        logger: telemetry.logger,
+      })
     );
 
   const runHandler = async (
@@ -504,7 +511,9 @@ describe('verify_ki workflow step', () => {
 
       await runHandler({ title: 'x' }, { verifiers: [{ workflow_id: 'no-pii', timeout_sec: 15 }] });
 
-      expect(workflowsManagement.getWorkflow).toHaveBeenCalledWith('no-pii', 'space-a');
+      expect(workflowsManagement.getWorkflow).toHaveBeenCalledWith('no-pii', 'space-a', {
+        headers: {},
+      });
       expect(workflowsManagement.runWorkflow).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'no-pii' }),
         'space-a',
@@ -668,7 +677,8 @@ describe('verify_ki workflow step', () => {
 
       expect(workflowsManagement.getWorkflowExecution).toHaveBeenCalledWith(
         'verifier-exec',
-        'space-a'
+        'space-a',
+        { request: { headers: {} } }
       );
       expect(thrown.type).toBe('InputValidationError');
       expect(thrown.message).toBe(

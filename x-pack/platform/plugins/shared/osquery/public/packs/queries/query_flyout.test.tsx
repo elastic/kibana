@@ -599,6 +599,99 @@ describe('QueryFlyout', () => {
         expect(saved).not.toHaveProperty('schedule_type');
       });
     });
+
+    // A per-query override changes schedule details, never the mode (D11). An
+    // override stored in a mode the pack no longer uses is stale: the server
+    // drops it on a pack mode change, so the flyout opens it as inheriting.
+    describe('stale override mode (elastic/kibana#272441)', () => {
+      const RRULE_OVERRIDE_QUERY = {
+        id: 'stale-query',
+        query: 'select * from uptime;',
+        interval: '80',
+        shards: {},
+        schedule_type: 'rrule' as const,
+        rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2026-01-01T00:00:00.000Z' },
+      };
+
+      it('opens a recurrence override in an interval pack as inheriting and saves no override', async () => {
+        const onSave = jest.fn().mockResolvedValue(undefined);
+
+        renderFlyout({
+          onSave,
+          uniqueQueryIds: ['stale-query'],
+          defaultValue: RRULE_OVERRIDE_QUERY,
+          packSchedule: { schedule_type: 'interval', interval: 900, hasExplicitSchedule: true },
+        });
+
+        expect(screen.getByTestId('osquery-using-pack-schedule')).toBeInTheDocument();
+        expect(screen.getByTestId('mocked-schedule-section')).toHaveTextContent('interval');
+
+        fireEvent.click(screen.getByTestId('query-flyout-save-button'));
+
+        await waitFor(() => expect(onSave).toHaveBeenCalled());
+        const saved = onSave.mock.calls[0][0];
+        expect(saved).not.toHaveProperty('schedule_type');
+        expect(saved).not.toHaveProperty('rrule_schedule');
+        expect(saved).not.toHaveProperty('interval');
+      });
+
+      // Legacy pack (no persisted pack schedule): the client synthesizes an
+      // interval default, and the server rejects any per-query schedule_type on
+      // such a pack. The query must come back as its own bare interval.
+      it('opens a recurrence override in a legacy pack as inheriting and saves a bare interval', async () => {
+        const onSave = jest.fn().mockResolvedValue(undefined);
+
+        renderFlyout({
+          onSave,
+          uniqueQueryIds: ['stale-query'],
+          defaultValue: RRULE_OVERRIDE_QUERY,
+          packSchedule: { schedule_type: 'interval', interval: 3600 },
+        });
+
+        expect(screen.getByTestId('osquery-using-pack-schedule')).toBeInTheDocument();
+        expect(screen.getByTestId('mocked-schedule-section')).toHaveTextContent('interval');
+        expect(screen.getByTestId('timeout-input')).not.toBeDisabled();
+
+        fireEvent.click(screen.getByTestId('query-flyout-save-button'));
+
+        await waitFor(() => expect(onSave).toHaveBeenCalled());
+        const saved = onSave.mock.calls[0][0];
+        expect(saved).not.toHaveProperty('schedule_type');
+        expect(saved).not.toHaveProperty('rrule_schedule');
+        expect(saved.interval).toBe('80');
+      });
+
+      it('opens an interval override in a recurrence pack as inheriting and saves no override', async () => {
+        const onSave = jest.fn().mockResolvedValue(undefined);
+
+        renderFlyout({
+          onSave,
+          uniqueQueryIds: ['stale-query'],
+          defaultValue: {
+            id: 'stale-query',
+            query: 'select * from uptime;',
+            shards: {},
+            schedule_type: 'interval',
+            interval: '670',
+          },
+          packSchedule: {
+            schedule_type: 'rrule',
+            rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2026-01-01T00:00:00.000Z' },
+          },
+        });
+
+        expect(screen.getByTestId('osquery-using-pack-schedule')).toBeInTheDocument();
+        expect(screen.getByTestId('mocked-schedule-section')).toHaveTextContent('rrule');
+
+        fireEvent.click(screen.getByTestId('query-flyout-save-button'));
+
+        await waitFor(() => expect(onSave).toHaveBeenCalled());
+        const saved = onSave.mock.calls[0][0];
+        expect(saved).not.toHaveProperty('schedule_type');
+        expect(saved).not.toHaveProperty('interval');
+        expect(saved).not.toHaveProperty('timeout');
+      });
+    });
   });
 
   describe('V5: consolidated pack-defaults override toggle', () => {

@@ -7,6 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScopedModel } from '@kbn/agent-builder-server';
+import { ChatCompletionErrorCode, InferenceTaskError } from '@kbn/inference-common';
 import { assessRelevance, relevanceOutputSchema } from './assess_relevance';
 import type { RelevanceOutput } from './assess_relevance';
 
@@ -37,8 +38,17 @@ describe('assessRelevance', () => {
 
   it('returns the parsed schema from the model', async () => {
     const { model } = buildModel();
-    const result = await assessRelevance(model, logger, { text: 'Volt Typhoon used LOLBins.' });
-    expect(result).toEqual(SAMPLE_OUTPUT);
+    const text = 'Volt Typhoon used LOLBins.';
+    const result = await assessRelevance(model, logger, { text });
+    expect(result).toEqual({
+      ...SAMPLE_OUTPUT,
+      context: {
+        mode: 'full',
+        original_chars: text.length,
+        selected_chars: text.length,
+        coverage: 1,
+      },
+    });
   });
 
   it('passes text into the prompt', async () => {
@@ -86,14 +96,14 @@ describe('assessRelevance', () => {
     );
   });
 
-  it('truncates body to 30 000 chars in the prompt', async () => {
+  it('sends the full body when it fits model context', async () => {
     const { model, invoke } = buildModel();
     const longText = 'x'.repeat(40_000);
     await assessRelevance(model, logger, { text: longText });
     const prompt = invoke.mock.calls[0][0] as string;
     const articleStart = prompt.indexOf('Article text:\n') + 'Article text:\n'.length;
     const bodyInPrompt = prompt.slice(articleStart);
-    expect(bodyInPrompt.length).toBeLessThanOrEqual(30_000);
+    expect(bodyInPrompt).toBe(longText);
   });
 
   it('returns every schema field', async () => {
@@ -108,8 +118,71 @@ describe('assessRelevance', () => {
         'primary_links',
         'quality_class',
         'reason',
+        'context',
       ].sort()
     );
+  });
+
+  it('retries with degraded context on a typed context-length error', async () => {
+    const overflow = new InferenceTaskError(
+      ChatCompletionErrorCode.ContextLengthExceededError,
+      'context window exceeded',
+      {}
+    );
+    const invoke = jest
+      .fn()
+      .mockRejectedValueOnce(overflow)
+      .mockResolvedValueOnce({ raw: { response_metadata: {} }, parsed: SAMPLE_OUTPUT });
+    const withStructuredOutput = jest.fn().mockReturnValue({ invoke });
+    const model = {
+      connector: { connectorId: 'test-connector' },
+      chatModel: { withStructuredOutput },
+    } as unknown as ScopedModel;
+    const text = `${'L'.repeat(200_000)}MIDDLE_RELEVANCE${'R'.repeat(200_000)}`;
+
+    const result = await assessRelevance(model, logger, { text });
+
+    expect(invoke).toHaveBeenCalledTimes(2);
+    expect(result.context.mode).toBe('degraded_context');
+    expect(result.context.coverage).toBeLessThan(1);
+    expect(result.context.selected_chars).toBeLessThanOrEqual(30_000);
+    expect(result.context.selected_chars).toBeLessThan(result.context.original_chars);
+    expect(String(invoke.mock.calls[1][0])).toContain('MIDDLE_RELEVANCE');
+    expect(String(invoke.mock.calls[1][0]).length).toBeLessThan(
+      String(invoke.mock.calls[0][0]).length
+    );
+  });
+
+  it('shrinks context again when the first overflow retry still exceeds the window', async () => {
+    const overflow = new InferenceTaskError(
+      ChatCompletionErrorCode.ContextLengthExceededError,
+      'context window exceeded',
+      {}
+    );
+    const invoke = jest
+      .fn()
+      .mockRejectedValueOnce(overflow)
+      .mockRejectedValueOnce(overflow)
+      .mockResolvedValueOnce({ raw: { response_metadata: {} }, parsed: SAMPLE_OUTPUT });
+    const withStructuredOutput = jest.fn().mockReturnValue({ invoke });
+    const model = {
+      connector: { connectorId: 'test-connector' },
+      chatModel: { withStructuredOutput },
+    } as unknown as ScopedModel;
+    const text = `${'L'.repeat(200_000)}MIDDLE_RELEVANCE${'R'.repeat(200_000)}`;
+
+    const result = await assessRelevance(model, logger, { text });
+
+    expect(invoke).toHaveBeenCalledTimes(3);
+    expect(result.context.mode).toBe('degraded_context');
+    expect(result.context.selected_chars).toBeLessThan(30_000);
+    expect(result.context.coverage).toBe(
+      result.context.selected_chars / result.context.original_chars
+    );
+    expect(String(invoke.mock.calls[2][0]).length).toBeLessThan(
+      String(invoke.mock.calls[1][0]).length
+    );
+    expect(String(invoke.mock.calls[2][0])).toContain('MIDDLE_RELEVANCE');
   });
 });
 

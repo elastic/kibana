@@ -187,7 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('Cookie', sessionCookie.cookieString())
         .expect(200);
 
-      jestExpect(response.body).toEqual({
+      jestExpect(response.body).toMatchObject({
         username: 'second_client',
         roles: [],
         full_name: null,

@@ -65,6 +65,15 @@ export interface EventActor {
 }
 
 /**
+ * Whether a chat request executes the agent. `never` appends the user message to the conversation
+ * and returns, leaving the execution options unused.
+ */
+export enum ChatTriggerMode {
+  Always = 'always',
+  Never = 'never',
+}
+
+/**
  * What caused an agent run to start.
  */
 export enum TimelineTriggerType {
@@ -109,7 +118,7 @@ export interface ServerAssignedEventFields {
  * `TType` is open here; `BaseTimelineEventInput` re-adds the `TimelineEventType` constraint so
  * the closed `TimelineEvent` union and all existing narrowing remain unaffected.
  */
-export interface ConversationEventInput<TType extends string = string, TData = unknown>
+export interface ConversationEventInput<TType extends string = string, TData = object>
   extends Partial<ServerAssignedEventFields> {
   /** The event type discriminator. */
   type: TType;
@@ -124,7 +133,7 @@ export interface ConversationEventInput<TType extends string = string, TData = u
 /** A stored conversation event: producer fields plus server-assigned fields made required. */
 export type ConversationEvent<
   TType extends string = string,
-  TData = unknown
+  TData = object
 > = ConversationEventInput<TType, TData> & ServerAssignedEventFields;
 
 /** The fields a producer supplies for a timeline event. */
@@ -455,6 +464,10 @@ export const ROUND_DERIVED_EVENT_ID_SUFFIXES = {
   stepPrefix: '::step::',
   promptResponse: '::prompt_response',
 } as const;
+
+/** ID of the `user_message` event derived from a round. */
+export const roundUserMessageEventId = (roundId: string): string =>
+  `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.userMessage}`;
 
 /** ID for a step event. */
 export const roundStepEventId = (roundId: string, sequence: number): string =>

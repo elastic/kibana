@@ -102,12 +102,12 @@ export const getEsqlInstructions = (params: InstructionsTemplateParams = {}): st
     Unless specified otherwise, you should always use named parameters (?_tstart and ?_tend) for start and end time in WHERE conditions, BUCKET ranges or TRANGE ,
     examples:
     - "FROM myindex | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend"
-    - "FROM myindex | ... BUCKET(@timestamp, 50, ?_tstart, ?_tend)"
+    - "FROM myindex | ... BUCKET(@timestamp, 100, ?_tstart, ?_tend)"
     - "TS mytsds | WHERE TRANGE(?_tstart, ?_tend)"
 
     NEVER hardcode time ranges into the query itself (absolute or using now() syntax)
 
-    It is also preferred to use  "... BUCKET(@timestamp, 50, ?_tstart, ?_tend)" instead of " ... WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend ... BUCKET(@timestamp, 50)"
+    It is also preferred to use  "... BUCKET(@timestamp, 100, ?_tstart, ?_tend)" instead of " ... WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend ... BUCKET(@timestamp, 100)"
 
     `
     }## Do not invent things to please the user

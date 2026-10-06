@@ -49,6 +49,6 @@ Significant-events API coverage is split across three places; several routes are
 from the second:
 
 - **this suite** — KI onboarding bulk status, managed workflows
-- `x-pack/platform/test/api_integration_deployment_agnostic/apis/significant_events/` — FTR
+- `x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/significant_events/` — FTR
   deployment-agnostic tests, run behind the significant-events feature-flag configs
 - `x-pack/solutions/observability/packages/kbn-evals-suite-significant-events/` — LLM evaluation suites

@@ -165,6 +165,139 @@ describe('createCortexPageStore', () => {
     expect(page.corroborations).toBe(0);
   });
 
+  it('writes and returns the same id for slugs with repeated copied prefixes', async () => {
+    const esClient = {
+      get: jest.fn().mockRejectedValue({ statusCode: 404 }),
+      index: jest.fn().mockResolvedValue({}),
+    };
+    const store = createCortexPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'default',
+    });
+
+    const page = await store.upsert({
+      entityType: 'service',
+      slug: 'cortex-cortex-service-email-service',
+      title: 'Email',
+      content: '',
+      status: 'tentative',
+    });
+
+    expect(esClient.index).toHaveBeenCalledWith(
+      expect.objectContaining({ id: `default:${page.id}` }),
+      expect.anything()
+    );
+    expect(page.id).toBe(toCortexKiId('service', page.slug));
+  });
+
+  it('reads a page with its version and writes against it', async () => {
+    const esClient = {
+      get: jest.fn().mockResolvedValue({
+        found: true,
+        _id: 'default:cortex_service_checkout',
+        _seq_no: 7,
+        _primary_term: 1,
+        _source: {
+          type: 'service',
+          title: 'Checkout',
+          content: '',
+          attributes: { status: 'tentative', corroborations: 2, slug: 'checkout' },
+        },
+      }),
+      index: jest.fn().mockResolvedValue({ _seq_no: 8, _primary_term: 1 }),
+    };
+    const store = createCortexPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'default',
+    });
+
+    const loaded = await store.get('cortex_service_checkout');
+    expect(loaded?.version).toBe('7:1');
+
+    const written = await store.upsert({
+      entityType: 'service',
+      slug: 'checkout',
+      title: 'Checkout (edited)',
+      content: '',
+      status: 'tentative',
+      version: loaded?.version,
+    });
+
+    expect(esClient.index).toHaveBeenCalledWith(
+      expect.objectContaining({ if_seq_no: 7, if_primary_term: 1 }),
+      expect.anything()
+    );
+    expect(written.version).toBe('8:1');
+  });
+
+  it('writes unconditionally without a version', async () => {
+    const esClient = {
+      get: jest.fn().mockRejectedValue({ statusCode: 404 }),
+      index: jest.fn().mockResolvedValue({}),
+    };
+    const store = createCortexPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'default',
+    });
+
+    await store.upsert({
+      entityType: 'service',
+      slug: 'checkout',
+      title: 'Checkout',
+      content: '',
+      status: 'tentative',
+    });
+
+    expect(esClient.index.mock.calls[0][0]).not.toHaveProperty('if_seq_no');
+  });
+
+  it('creates a page with a create-only write', async () => {
+    const esClient = { create: jest.fn().mockResolvedValue({}) };
+    const store = createCortexPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'default',
+    });
+
+    const page = await store.create({
+      entityType: 'service',
+      slug: 'Checkout',
+      title: 'Checkout',
+      content: 'Checkout talks to Redis.',
+      status: 'tentative',
+    });
+
+    expect(esClient.create).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'default:cortex_service_checkout' }),
+      expect.anything()
+    );
+    expect(page).toEqual(
+      expect.objectContaining({ id: 'cortex_service_checkout', slug: 'checkout' })
+    );
+  });
+
+  it('refuses to create a page that already exists', async () => {
+    const esClient = { create: jest.fn().mockRejectedValue({ statusCode: 409 }) };
+    const store = createCortexPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'default',
+    });
+
+    await expect(
+      store.create({
+        entityType: 'service',
+        slug: 'checkout',
+        title: 'Checkout',
+        content: '',
+        status: 'tentative',
+      })
+    ).resolves.toBeUndefined();
+  });
+
   it('increments corroborations on an existing page', async () => {
     const esClient = {
       get: jest.fn().mockResolvedValue({
@@ -218,6 +351,31 @@ describe('createCortexPageStore', () => {
     const page = await store.corroborate('cortex_service_checkout');
 
     expect(page?.status).toBe('tentative');
+  });
+
+  it('promotes a tentative page to established once a later run corroborates it', async () => {
+    const esClient = {
+      get: jest.fn().mockResolvedValue({
+        found: true,
+        _id: 'cortex_service_checkout',
+        _source: {
+          ...source,
+          attributes: { ...source.attributes, status: 'tentative', corroborations: 0 },
+        },
+      }),
+      index: jest.fn().mockResolvedValue({ _id: 'cortex_service_checkout' }),
+    };
+
+    const store = createCortexPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'default',
+    });
+
+    const page = await store.corroborate('cortex_service_checkout');
+
+    expect(page?.status).toBe('established');
+    expect(page?.corroborations).toBe(1);
   });
 
   it('prunes prefixed duplicate ids onto the canonical document', async () => {

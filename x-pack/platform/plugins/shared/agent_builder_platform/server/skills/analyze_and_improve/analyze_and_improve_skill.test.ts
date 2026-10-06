@@ -181,7 +181,52 @@ describe('analyzeAndImproveSkill', () => {
       expect(content).toMatch(/\*\*What one KI carries\*\*/);
       expect(content).toMatch(/\*\*How units are found and refreshed\*\*/);
       expect(content).toMatch(/as worked examples of those three answers/);
-      expect(content).toMatch(/unsure means Index\/Table Metadata/);
+    });
+
+    it('chooses a strategy from the signals in the data rather than defaulting to Index/Table Metadata', () => {
+      const catalog = strategyCatalogReference.content;
+      const prose = content.replace(/\s+/g, ' ');
+
+      for (const text of [content, catalog]) {
+        expect(text).not.toMatch(/unsure (means|→)/);
+        expect(text).not.toMatch(/Always start here/);
+        expect(text).not.toMatch(/cheap, fast and always useful/);
+        expect(text).not.toMatch(/Start at Index\/Table Metadata/);
+      }
+      expect(prose).toMatch(/Choose from those signals, not from a default/);
+      expect(prose).toMatch(/Choose the strategy from the signals in `strategy_catalog`/);
+    });
+
+    it('says a Bottom-Up re-run replaces each document KI, not that it reaches new documents', () => {
+      const catalog = strategyCatalogReference.content;
+
+      expect(catalog).not.toMatch(/new documents added/);
+      expect(catalog).toMatch(
+        /\| \*\*Bottom-Up\*\* \|[^\n]*\| Every run over the filtered slice, replacing each document's KI \|/
+      );
+    });
+
+    it('lists the fit signals for each strategy in the catalog', () => {
+      const catalog = strategyCatalogReference.content.replace(/\s+/g, ' ');
+
+      expect(catalog).toMatch(/## Choosing between strategies/);
+      expect(catalog).toMatch(/\*\*Long text bodies in a bounded corpus\*\*[^*]*→ Bottom-Up/);
+      expect(catalog).toMatch(
+        /\*\*A keyword key with many rows per value in one index\*\*[^*]*→ Cumulative/
+      );
+      expect(catalog).toMatch(/a second index, it is a custom workflow built through a subagent/);
+      expect(catalog).toMatch(
+        /\*\*Several sources the agent must route between or join\*\*[^*]*→ Index\/Table Metadata over all of them, in one install/
+      );
+      expect(catalog).toMatch(/\*\*A noisy event stream\*\*[^*]*→ Selective \/ Outlier/);
+      expect(catalog).toMatch(/\*\*Dense, immutable documents\*\*[^*]*→ Atomic Facts/);
+      expect(catalog).toMatch(/A single index gains little from Index\/Table Metadata/);
+    });
+
+    it('names the runner-up strategy and the evidence against it in the proposal', () => {
+      expect(content.replace(/\s+/g, ' ')).toMatch(
+        /the runner-up: the next-best strategy and the evidence line that decided against it/
+      );
     });
 
     it('offers only the refresh cadences the templates implement', () => {
@@ -269,6 +314,11 @@ describe('analyzeAndImproveSkill', () => {
       );
       expect(content).toMatch(/\*\*One unit count for a per-unit strategy\.\*\*/);
       expect(content).toMatch(/STATS units = COUNT_DISTINCT\(<unit_key>\)/);
+      // Counted under the corpus filter, so the Unit and Cost lines only count units that run.
+      expect(content).toContain(
+        '`FROM <index> <corpus filter> | STATS units = COUNT_DISTINCT(<unit_key>)`'
+      );
+      expect(content).toMatch(/automation's own KI cap when that is lower/);
       expect(content).not.toMatch(/one query per source and one per claimed join/);
     });
 
@@ -307,6 +357,17 @@ describe('analyzeAndImproveSkill', () => {
       expect(content).toMatch(/the pilot's duration and the projected duration of a full run/);
       expect(content).toMatch(
         /Before the pilot, say the time is not yet measured rather than\s+guessing/
+      );
+      expect(content.replace(/\s+/g, ' ')).toMatch(
+        /For a template install, the pilot is a `run_automation` call with `pilotSize`/
+      );
+    });
+
+    it('counts index-metadata model calls per source and points at the pilot rule', () => {
+      const prose = content.replace(/\s+/g, ' ');
+      expect(prose).toMatch(/one per source for index metadata/);
+      expect(prose).toMatch(
+        /`ai-index-automations` says when a template install gets a pilot and how big it is/
       );
     });
 
@@ -481,6 +542,15 @@ describe('analyzeAndImproveSkill', () => {
     );
     expect(content).toMatch(
       /omits `attributes\.esql` rather than carrying a query that answers nothing/
+    );
+  });
+
+  it('says a verified query was parsed and run, so a later failure points at data drift', () => {
+    const prose = analyzeAndImproveSkill.content.replace(/\s+/g, ' ');
+
+    expect(prose).not.toMatch(/passed `verifyKi`, which only parses/);
+    expect(prose).toMatch(
+      /passed the verifiers, which parse it and run it, so a failure since then points at the data changing under it/
     );
   });
 });

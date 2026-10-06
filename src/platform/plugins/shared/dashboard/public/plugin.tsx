@@ -51,6 +51,7 @@ import type {
   ScreenshotModePluginSetup,
   ScreenshotModePluginStart,
 } from '@kbn/screenshot-mode-plugin/public';
+import type { SearchSessionsManagementPluginStart } from '@kbn/search-sessions-management-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type {
   ExportShareDerivatives,
@@ -112,6 +113,7 @@ export interface DashboardStartDependencies {
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   screenshotMode: ScreenshotModePluginStart;
   share?: SharePluginStart;
+  searchSessionsManagement?: SearchSessionsManagementPluginStart;
   spaces?: SpacesPluginStart;
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;

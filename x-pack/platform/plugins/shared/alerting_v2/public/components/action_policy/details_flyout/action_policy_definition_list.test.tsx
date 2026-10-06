@@ -53,7 +53,7 @@ const defaultProps: ActionPolicyDefinitionListProps = {
   policy: {
     description: 'A test description',
     matcher: { tags: ['abc'] },
-    grouping_mode: 'per_episode',
+    grouping_mode: 'per_alert',
     destinations: [
       { type: 'workflow', id: 'wf-1' },
       { type: 'workflow', id: 'wf-2' },
@@ -97,7 +97,7 @@ describe('ActionPolicyDefinitionList', () => {
   });
 
   it('does not render Group by when groupingMode is not per_field', () => {
-    renderWithI18n({ policy: { ...defaultProps.policy, grouping_mode: 'per_episode' } });
+    renderWithI18n({ policy: { ...defaultProps.policy, grouping_mode: 'per_alert' } });
 
     expect(screen.queryByText('Group by')).toBeNull();
   });

@@ -12,6 +12,7 @@ import { executeUntilValid } from '@kbn/inference-prompt-utils';
 import pRetry from 'p-retry';
 import { z } from '@kbn/zod/v4';
 import type { Evaluator, Example, TaskOutput } from '@kbn/evals';
+import type { JudgeModel } from '../evaluator_utils';
 import { normalizeEsqlForEquivalence } from './normalize_esql_for_equivalence';
 
 export const ESQL_CALIBRATED_EQUIVALENCE_EVALUATOR_NAME = 'ES|QL Functional Equivalence';
@@ -158,16 +159,19 @@ export function createCalibratedEsqlEquivalenceEvaluator<
   log,
   predictionExtractor,
   groundTruthExtractor,
+  judgeModel,
 }: {
   inferenceClient: BoundInferenceClient;
   log: ToolingLog;
   predictionExtractor: (output: TTaskOutput) => string;
   groundTruthExtractor: (expected: TExample['output']) => string;
+  judgeModel?: JudgeModel;
 }): Evaluator<TExample, TTaskOutput> {
   return {
     name: ESQL_CALIBRATED_EQUIVALENCE_EVALUATOR_NAME,
     kind: 'LLM',
     direction: 'maximize',
+    getModel: () => judgeModel,
     evaluate: async ({ output, expected }) => {
       const prediction = predictionExtractor(output);
       const groundTruth = groundTruthExtractor(expected);

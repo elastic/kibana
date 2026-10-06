@@ -35,11 +35,13 @@ const SUBMITTABLE_URL_PATTERN = /^https?:\/\/[^\s]+$/i;
  * Visibility is the single most consequential submission option: `public` puts the URL on the
  * urlscan front page and into everyone's search results.
  */
-const VisibilitySchema = z
-  .enum(['public', 'unlisted', 'private'])
-  .describe(
-    'Who can see the scan. "public" is listed on the urlscan front page and in public search results. "unlisted" is hidden from the public site but visible to vetted researchers, the right choice when the URL may carry PII. "private" is visible only to your account and team. Omit to use the account default.'
-  );
+const VisibilitySchema = lazySchema(() =>
+  z
+    .enum(['public', 'unlisted', 'private'])
+    .describe(
+      'Who can see the scan. "public" is listed on the urlscan front page and in public search results. "unlisted" is hidden from the public site but visible to vetted researchers, the right choice when the URL may carry PII. "private" is visible only to your account and team. Omit to use the account default.'
+    )
+);
 
 export const ScanUrlInputSchema = lazySchema(() =>
   z.object({

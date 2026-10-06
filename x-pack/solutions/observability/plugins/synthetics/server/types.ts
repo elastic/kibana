@@ -7,7 +7,10 @@
 
 import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
-import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import type {
+  LicensingApiRequestHandlerContext,
+  LicensingPluginStart,
+} from '@kbn/licensing-plugin/server';
 import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import type {
@@ -103,6 +106,7 @@ export interface SyntheticsPluginsStartDependencies {
   telemetry: TelemetryPluginStart;
   spaces?: SpacesPluginStart;
   alerting: AlertingServerStart;
+  licensing: LicensingPluginStart;
   maintenanceWindows?: MaintenanceWindowsServerStart;
 }
 

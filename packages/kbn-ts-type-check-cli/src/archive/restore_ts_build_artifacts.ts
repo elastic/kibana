@@ -13,6 +13,7 @@ import { GcsFileSystem } from './file_system/gcs_file_system';
 import { LocalFileSystem } from './file_system/local_file_system';
 import {
   buildCandidateShaList,
+  cleanTypeCheckArtifacts,
   getPullRequestNumber,
   isCiEnvironment,
   readRecentCommitShas,
@@ -51,6 +52,9 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
     }
   } catch (error) {
     const restoreErrorDetails = error instanceof Error ? error.message : String(error);
-    log.warning(`Failed to restore TypeScript build artifacts: ${restoreErrorDetails}`);
+    log.warning(
+      `Failed to restore TypeScript build artifacts: ${restoreErrorDetails}. Running type check without the cache.`
+    );
+    await cleanTypeCheckArtifacts(log);
   }
 }

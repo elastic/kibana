@@ -35,6 +35,26 @@ import {
   type ExpandedDocRef,
 } from '../../utils/expanded_doc';
 
+jest.mock('../../data_fetching/create_esql_source', () => ({
+  createEsqlSource: jest.fn().mockResolvedValue({
+    kind: 'esql',
+    id: 'mock-esql-source',
+    query: 'FROM mock',
+    title: 'mock',
+    name: 'mock',
+    datasetKey: 'esql:mock::',
+    timeFieldName: undefined,
+    references: [],
+    fields: [],
+    resultColumns: [],
+    getColumns: () => [],
+    getColumn: () => undefined,
+    getFilterableFields: async () => [],
+    isTimeBased: () => false,
+    isPersisted: () => false,
+  }),
+}));
+
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
   const react = jest.requireActual('react');

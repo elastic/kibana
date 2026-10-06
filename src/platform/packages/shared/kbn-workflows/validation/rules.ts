@@ -206,6 +206,11 @@ export interface WorkflowValidationRules {
     defaultSeverity: 'warning';
     values: { stepType: string };
   };
+  ignoredFetcherSetting: {
+    owner: 'deprecated-step-validation';
+    defaultSeverity: 'warning';
+    values: { stepName: string };
+  };
 
   // -- es|ql --------------------------------------------------------------------
   /** A diagnostic forwarded from the ES|QL validator. */
@@ -283,6 +288,7 @@ export const WORKFLOW_VALIDATION_RULES: {
   invalidParallelMode: { owner: 'parallel-mode-validation', defaultSeverity: 'error' },
 
   deprecatedStepType: { owner: 'deprecated-step-validation', defaultSeverity: 'warning' },
+  ignoredFetcherSetting: { owner: 'deprecated-step-validation', defaultSeverity: 'warning' },
 
   esqlDiagnostic: { owner: 'esql-validation', defaultSeverity: 'error' },
 };

@@ -243,6 +243,77 @@ steps:
     });
   });
 
+  describe('switch / parallel / default branches (currently missing from isNestedStepKey)', () => {
+    it('should find a step inside a switch case', () => {
+      const doc = parse(`
+steps:
+  - name: branch-step
+    type: switch
+    cases:
+      - match: "true"
+        steps:
+          - name: inner-step
+            type: wait
+`);
+      expect(getStepNode(doc, 'inner-step')).not.toBeNull();
+    });
+
+    it('should find a step inside a switch default', () => {
+      const doc = parse(`
+steps:
+  - name: branch-step
+    type: switch
+    cases:
+      - match: "true"
+        steps:
+          - name: case-step
+            type: wait
+    default:
+      - name: default-step
+        type: wait
+`);
+      expect(getStepNode(doc, 'default-step')).not.toBeNull();
+    });
+
+    it('should find a step inside a parallel branch', () => {
+      const doc = parse(`
+steps:
+  - name: par
+    type: parallel
+    branches:
+      - name: left
+        steps:
+          - name: left-step
+            type: wait
+      - name: right
+        steps:
+          - name: right-step
+            type: wait
+`);
+      expect(getStepNode(doc, 'left-step')).not.toBeNull();
+      expect(getStepNode(doc, 'right-step')).not.toBeNull();
+    });
+  });
+
+  describe('branch name shadowing — parallel branch named same as a step inside it', () => {
+    it('should return the step, not the branch wrapper, when branch name matches step name', () => {
+      const doc = parse(`
+steps:
+  - name: par
+    type: parallel
+    branches:
+      - name: worker
+        steps:
+          - name: worker
+            type: http
+`);
+      const node = getStepNode(doc, 'worker');
+      expect(node).not.toBeNull();
+      // The step has a 'type' key; the branch wrapper does not.
+      expect(node!.get('type')).toBe('http');
+    });
+  });
+
   describe('node identity', () => {
     it('should return the same YAMLMap node from the document AST', () => {
       const doc = parse(`

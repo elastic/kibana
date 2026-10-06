@@ -11,6 +11,13 @@ import { TRAIL_MAX_STEPS } from '../constants';
 import { buildAnchor, isIgnored, isVisible, labelOf } from './anchor';
 import type { CommentsLocationService, TrailStep } from '../types';
 
+/** Hovering `trigger` as a step of a trail: what it shows on hover (its tooltip) is where the comment is. */
+export const hoverStepFor = (trigger: Element): TrailStep => ({
+  kind: 'hover',
+  anchor: buildAnchor(trigger),
+  label: labelOf(trigger),
+});
+
 /**
  * Controls that may disclose UI or navigate: open a flyout or menu, switch
  * tabs, expand a row, follow a link. Whether a click on one did so is only
@@ -45,10 +52,8 @@ const EXCLUDED_SELECTOR = [
 
 /**
  * What a click that disclosed UI leaves behind: the control expanded or
- * selected, or a dialog, menu, listbox or tab panel that was not showing
- * before, whether it was added to the page or was already there hidden.
- * Only such clicks are recorded. A button that changed data instead (deleted,
- * acknowledged, enabled something) reveals nothing, and is never asked for.
+ * selected, or a dialog, menu, listbox or tab panel not showing before. Only
+ * such clicks are recorded; one that changed data instead is never asked for.
  */
 const DISCLOSED_SELECTOR = [
   '[aria-expanded="true"]',
@@ -159,14 +164,12 @@ export const createTrailRecorder = ({
     };
   };
 
-  // The step is described before the page handles the click (labels and text can
-  // change with it) and recorded after: a click that the page swallowed never
-  // reaches the bubbling phase, a control that is gone by then was dismissed
-  // rather than opened, and a click that disclosed nothing changed data instead.
+  // The step is described before the page handles the click (labels can change
+  // with it) and recorded after: a click the page swallowed never bubbles, a
+  // control gone by then was dismissed, and one that disclosed nothing changed data.
   const onClickCapture = ({ target }: MouseEvent) => {
     candidate = undefined;
-    // The previous click gets its last look before this one has had any effect
-    // on the page, so that what this click discloses is not credited to it.
+    // The previous click's last look, before this one changes the page.
     settleAwaited({ finalLook: true });
     if (!isRecording() || !(target instanceof Element) || isIgnored(target, ignoreSelectors)) {
       return;
@@ -192,10 +195,8 @@ export const createTrailRecorder = ({
     }
   };
 
-  // The trail is the page's: a click that led off it is not a step on the next
-  // one, whether it is still awaiting its UI or its handler is what navigated,
-  // which happens between the two looks at it (a navigation link stays on the
-  // page and gets `aria-current`, so the bubbling look would take it).
+  // The trail is the page's: a click that led off it (a link, which navigates
+  // between the two looks and would get `aria-current`) is no step on the next.
   const onLocationChange = () => {
     const next = location.getPageKey();
     if (next !== pageKey) {

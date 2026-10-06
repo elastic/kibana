@@ -33,8 +33,14 @@ const createCoreSetup = () => {
 
 const createSetupDeps = ({
   registerInvestigationQuota,
+  workflowsExtensions,
 }: {
   registerInvestigationQuota?: jest.Mock;
+  workflowsExtensions?: {
+    registerStepDefinition: jest.Mock;
+    registerManagedWorkflowOwner: jest.Mock;
+    registerTriggerDefinition: jest.Mock;
+  };
 } = {}) =>
   ({
     streams: {
@@ -43,6 +49,7 @@ const createSetupDeps = ({
     ...(registerInvestigationQuota
       ? { nightshiftInvestigations: { registerInvestigationQuota } }
       : {}),
+    ...(workflowsExtensions ? { workflowsExtensions } : {}),
   } as unknown as SignificantEventsPluginSetupDependencies);
 
 describe('SignificantEventsPlugin setup', () => {
@@ -55,6 +62,20 @@ describe('SignificantEventsPlugin setup', () => {
     const plugin = createPlugin();
 
     expect(() => plugin.setup(createCoreSetup(), createSetupDeps())).not.toThrow();
+  });
+
+  it('registers its model resolver when the investigations plugin is absent', () => {
+    const workflowsExtensions = {
+      registerStepDefinition: jest.fn(),
+      registerManagedWorkflowOwner: jest.fn(),
+      registerTriggerDefinition: jest.fn(),
+    };
+
+    createPlugin().setup(createCoreSetup(), createSetupDeps({ workflowsExtensions }));
+
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'significantEvents.resolveModel' })
+    );
   });
 
   it('registers all Core data streams', () => {

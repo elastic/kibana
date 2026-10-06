@@ -60,7 +60,7 @@ exports[`ActionConnectorWarnings should render if 1 connectors were imported and
                   class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
                 >
                   <button
-                    class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-warning"
+                    class="euiButton emotion-euiButtonDisplay-m-base-warning"
                     data-test-subj="actionConnectorsWarningsCallOutButton"
                     type="button"
                   >
@@ -141,7 +141,7 @@ exports[`ActionConnectorWarnings should render if 2 connectors were imported and
                   class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
                 >
                   <button
-                    class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-warning"
+                    class="euiButton emotion-euiButtonDisplay-m-base-warning"
                     data-test-subj="actionConnectorsWarningsCallOutButton"
                     type="button"
                   >
@@ -222,7 +222,7 @@ exports[`ActionConnectorWarnings should render if 2 connectors were imported and
                   class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
                 >
                   <button
-                    class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-warning"
+                    class="euiButton emotion-euiButtonDisplay-m-base-warning"
                     data-test-subj="actionConnectorsWarningsCallOutButton"
                     type="button"
                   >

@@ -287,7 +287,7 @@ module.exports = {
     },
     schema: [],
   },
-  create(context) {
+  createOnce(context) {
     return {
       CallExpression(_) {
         const node = /** @type {CallExpression} */ (_);

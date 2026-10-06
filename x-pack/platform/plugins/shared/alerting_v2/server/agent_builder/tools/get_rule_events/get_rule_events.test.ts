@@ -321,7 +321,7 @@ describe('getRuleEventsTool', () => {
         results: [
           {
             type: ToolResultType.error,
-            data: { message: 'Episode "ep-1" not found' },
+            data: { message: 'Alert "ep-1" not found' },
           },
         ],
       });
@@ -340,7 +340,7 @@ describe('getRuleEventsTool', () => {
           {
             type: ToolResultType.error,
             data: {
-              message: 'Failed to fetch rule events for episode "ep-1": boom',
+              message: 'Failed to fetch rule events for alert "ep-1": boom',
             },
           },
         ],
@@ -375,7 +375,7 @@ describe('getRuleEventsTool', () => {
           {
             type: ToolResultType.error,
             data: {
-              message: 'Failed to look up episode "ep-1": timeout',
+              message: 'Failed to look up alert "ep-1": timeout',
             },
           },
         ],

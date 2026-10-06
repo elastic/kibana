@@ -47,6 +47,7 @@ import { getBundledPackageByName, getBundledPackageByPkgKey } from './bundled_pa
 
 import { getInstallationObject, getPackageSavedObjects } from './get';
 import { shouldIncludePackageWithDatastreamTypes } from './exclude_datastreams_helper';
+import { setLastUploadInstallCache } from './utils';
 
 jest.mock('../../data_streams');
 jest.mock('./get');
@@ -568,6 +569,33 @@ describe('install', () => {
       );
     });
 
+    it('does not consume the install-by-upload rate limit window for bundled installs', async () => {
+      (installStateMachine._stateMachineInstallPackage as jest.Mock).mockResolvedValue({});
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      jest.mocked(setLastUploadInstallCache).mockClear();
+      mockGetBundledPackageByPkgKey.mockResolvedValue({
+        name: 'test_package',
+        version: '1.0.0',
+        getBuffer: async () => Buffer.from('test_package'),
+      });
+
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'registry',
+        pkgkey: 'test_package-1.0.0',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+      });
+
+      expect(response.error).toBeUndefined();
+      expect(installStateMachine._stateMachineInstallPackage).toHaveBeenCalledWith(
+        expect.objectContaining({ installSource: 'bundled' })
+      );
+      // bundled installs are exempt from the rate limit check, so they must not
+      // restart the window and push back the deadline reported to real uploads
+      expect(setLastUploadInstallCache).not.toHaveBeenCalled();
+    });
+
     describe('name-only install when registry is reachable', () => {
       const actualBundledPackages = jest.requireActual('./bundled_packages');
 
@@ -1017,6 +1045,24 @@ describe('install', () => {
           throwOnError: true,
         })
       );
+    });
+
+    it('consumes the install-by-upload rate limit window for genuine uploads', async () => {
+      jest.mocked(getInstallationObject).mockResolvedValueOnce(uploadedInstallationSO('1.2.0'));
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      jest.mocked(setLastUploadInstallCache).mockClear();
+
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'upload',
+        archiveBuffer: {} as Buffer,
+        contentType: '',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+      });
+
+      expect(response.error).toBeUndefined();
+      expect(setLastUploadInstallCache).toHaveBeenCalled();
     });
 
     it('rejects a registry package name when skipUploadPackageValidation is unset', async () => {

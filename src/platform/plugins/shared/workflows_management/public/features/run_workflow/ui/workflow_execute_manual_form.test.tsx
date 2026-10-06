@@ -245,7 +245,7 @@ describe('WorkflowExecuteManualForm', () => {
         } as JsonModelSchemaType)
       ).toEqual({
         notificationGroup: {
-          episodes: [],
+          alerts: [],
         },
       });
     });
@@ -272,13 +272,13 @@ describe('WorkflowExecuteManualForm', () => {
         id: INPUT_STRING_PLACEHOLDER,
         policyId: INPUT_STRING_PLACEHOLDER,
         groupKey: {},
-        episodes: [
+        alerts: [
           {
             last_event_timestamp: INPUT_STRING_PLACEHOLDER,
             rule_id: INPUT_STRING_PLACEHOLDER,
             group_hash: INPUT_STRING_PLACEHOLDER,
-            episode_id: INPUT_STRING_PLACEHOLDER,
-            episode_status: INPUT_STRING_PLACEHOLDER,
+            alert_id: INPUT_STRING_PLACEHOLDER,
+            alert_status: INPUT_STRING_PLACEHOLDER,
           },
         ],
       });

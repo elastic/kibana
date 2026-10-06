@@ -76,10 +76,13 @@ module.exports = {
     },
   },
 
-  create(context) {
-    let spaceTestDepth = 0;
+  createOnce(context) {
+    let spaceTestDepth;
 
     return {
+      before() {
+        spaceTestDepth = 0;
+      },
       CallExpression(node) {
         if (isSpaceTestCall(node)) {
           spaceTestDepth++;

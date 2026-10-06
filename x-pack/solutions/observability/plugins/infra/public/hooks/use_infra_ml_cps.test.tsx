@@ -41,7 +41,7 @@ const mockServices = ({
     services: {
       application: { currentAppId$: of('logs') },
       cps,
-      featureFlags: { getBooleanValue: jest.fn().mockReturnValue(isFeatureFlagEnabled) },
+      featureFlags: { useBooleanValue: jest.fn().mockReturnValue(isFeatureFlagEnabled) },
       ml: mlInfo ? { mlApi: { mlInfo } } : undefined,
       observabilityShared: {
         navigation: {

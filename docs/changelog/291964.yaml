@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/291964
+issues:
+- https://github.com/elastic/kibana/issues/291712
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+title: Add S3 federated identity options with manual setup commands

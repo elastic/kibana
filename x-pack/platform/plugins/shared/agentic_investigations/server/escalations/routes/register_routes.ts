@@ -9,13 +9,23 @@ import type { EscalationRouteDependencies } from '../types';
 import { registerAssignEscalationRoute } from './assign_escalation';
 import { registerCreateEscalationRoute } from './create_escalation';
 import { registerListEscalationsRoute } from './list_escalations';
+import { registerListLinkedInvestigationsRoute } from './list_linked_investigations';
 import { registerSuggestUsersRoute } from './suggest_users';
-import { registerUpdateEscalationRoute } from './update_escalation';
+import { registerLinkEscalationRoute } from './link_escalation';
+import { registerSetEscalationStatusRoute } from './set_escalation_status';
+import { registerGetEscalationClosePreviewRoute } from './get_escalation_close_preview';
 
 export const registerEscalationRoutes = (deps: EscalationRouteDependencies) => {
+  // Shared with the investigation assignee picker, so it stays when escalations are disabled.
+  registerSuggestUsersRoute(deps);
+  if (!deps.escalationsEnabled) {
+    return;
+  }
   registerCreateEscalationRoute(deps);
   registerListEscalationsRoute(deps);
-  registerUpdateEscalationRoute(deps);
-  registerSuggestUsersRoute(deps);
+  registerListLinkedInvestigationsRoute(deps);
+  registerLinkEscalationRoute(deps);
   registerAssignEscalationRoute(deps);
+  registerSetEscalationStatusRoute(deps);
+  registerGetEscalationClosePreviewRoute(deps);
 };

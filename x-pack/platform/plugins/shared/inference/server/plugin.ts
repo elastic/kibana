@@ -128,6 +128,13 @@ export class InferencePlugin
   }
 
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
+    // Two anonymization implementations coexist here:
+    //  - Legacy (live): rules from the `ai:anonymizationSettings` uiSetting, no persisted replacements.
+    //  - Policy-service (dormant): profiles, field policies, per-space salt and persistent
+    //    replacements from the `anonymization` plugin, awaiting removal.
+    // `anonymization.isEnabled()` is backed by the hard-coded `ANONYMIZATION_FEATURE_ACTIVE = false`,
+    // so this is always false and every `anonymizationEnabled` branch below is dead code. Treat the
+    // uiSetting path as the only real one.
     const anonymizationEnabled = pluginsStart.anonymization?.isEnabled() ?? false;
     this.endpointIdCache.setEsClient(core.elasticsearch.client.asInternalUser);
     this.tokenUsageLogger.setEsClient(core.elasticsearch.client.asInternalUser);
@@ -266,6 +273,21 @@ export class InferencePlugin
       };
     };
 
+    // uses the internal ES client, like the default connector lookup, so that aliases resolve
+    // the same way regardless of whether the user can list inference endpoints
+    const createConnectorIdResolver = (request: KibanaRequest) => {
+      return async (connectorId: string) => {
+        const connector = await getConnectorById({
+          connectorId,
+          actions: pluginsStart.actions,
+          request,
+          esClient: core.elasticsearch.client.asInternalUser,
+          logger: this.logger,
+        });
+        return connector.connectorId;
+      };
+    };
+
     const createTokenUsageTrackingEnabledCheck = (request: KibanaRequest) => {
       return async () => {
         try {
@@ -291,6 +313,7 @@ export class InferencePlugin
           isTokenUsageTrackingEnabled: createTokenUsageTrackingEnabledCheck(options.request),
           isDefaultConnectorOnly: createDefaultConnectorOnlyCheck(options.request),
           getDefaultConnectorId: createDefaultConnectorIdGetter(options.request),
+          resolveConnectorId: createConnectorIdResolver(options.request),
         }) as T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
       },
 
@@ -311,6 +334,7 @@ export class InferencePlugin
           isTokenUsageTrackingEnabled: createTokenUsageTrackingEnabledCheck(options.request),
           isDefaultConnectorOnly: createDefaultConnectorOnlyCheck(options.request),
           getDefaultConnectorId: createDefaultConnectorIdGetter(options.request),
+          resolveConnectorId: createConnectorIdResolver(options.request),
         });
       },
 

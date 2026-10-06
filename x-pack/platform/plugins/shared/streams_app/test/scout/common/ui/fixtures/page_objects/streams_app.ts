@@ -11,6 +11,7 @@ import { euiSelectors } from '@kbn/scout';
 import moment from 'moment';
 import {
   AppMenu,
+  EsqlEditor,
   KibanaCodeEditorWrapper,
   type EuiDataGridObject,
   type Locator,
@@ -39,6 +40,7 @@ export class StreamsApp {
   public readonly previewDataGrid;
   public readonly schemaDataGrid;
   public readonly kibanaMonacoEditor;
+  private readonly esqlEditor: EsqlEditor;
   public readonly saveRoutingRuleButton;
   public readonly concatFieldInput;
   public readonly concatLiteralInput;
@@ -99,6 +101,7 @@ export class StreamsApp {
     this.previewDataGrid = this.page.components.dataGrid('streamsAppPreviewDataGrid');
     this.schemaDataGrid = this.page.components.dataGrid('streamsAppSchemaEditorFieldsTableLoaded');
     this.kibanaMonacoEditor = new KibanaCodeEditorWrapper(this.page);
+    this.esqlEditor = new EsqlEditor(this.page);
     this.saveRoutingRuleButton = this.page.getByTestId('streamsAppStreamDetailRoutingSaveButton');
     this.concatFieldInput = this.page.components.superSelect('streamsAppConcatFieldInput');
     this.concatLiteralInput = this.page.getByTestId('streamsAppConcatLiteralInput');
@@ -1571,19 +1574,18 @@ export class StreamsApp {
   async createRootQueryStream(name: string, esqlQuery: string) {
     await this.clickCreateQueryStreamButton();
     await this.fillRoutingRuleName(name);
-    await this.kibanaMonacoEditor.waitCodeEditorReady('streamsEsqlEditor');
-    await this.kibanaMonacoEditor.setCodeEditorValue(esqlQuery);
+    await this.esqlEditor.setQuery(esqlQuery);
     await this.saveFlyoutQueryStreamCreate();
   }
 
   async openCreateChildQueryStreamForm() {
     await this.clickQueryModeCreateQueryStreamButton();
-    await this.kibanaMonacoEditor.waitCodeEditorReady('streamsEsqlEditor');
+    await this.esqlEditor.waitReady();
   }
 
   async fillChildQueryStreamForm(childName: string, esqlQuery: string) {
     await this.fillRoutingRuleName(childName);
-    await this.kibanaMonacoEditor.setCodeEditorValue(esqlQuery);
+    await this.esqlEditor.setQuery(esqlQuery);
   }
 
   async saveChildQueryStream() {

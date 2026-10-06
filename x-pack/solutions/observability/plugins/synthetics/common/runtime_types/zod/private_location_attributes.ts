@@ -21,7 +21,6 @@ export const PrivateLocationAttributesCodec = z.looseObject({
     .optional(),
   namespace: z.string().optional(),
   spaces: z.array(z.string()).optional(),
-  isAgentSharding: z.boolean().optional(),
 });
 
 export const SyntheticsPrivateLocationsAttributesCodec = z.looseObject({

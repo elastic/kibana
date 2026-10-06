@@ -15,6 +15,8 @@ export {
   MAX_ENTITY_NAME_LENGTH,
   MAX_IMPACT_CONVERSATION_IDS,
   MAX_IMPACT_ID_LENGTH,
+  MAX_IMPACT_TOOL_ENTITIES,
+  SET_IMPACT_TOOL_ID,
 } from './constants';
 
 export {
@@ -23,6 +25,7 @@ export {
   impactEntitiesSchema,
   impactEntitySchema,
   impactSchema,
+  storedImpactEntitiesSchema,
 } from './impact';
 
 export type { AttachImpactRequest, GetImpactQuery, Impact, ImpactEntity } from './impact';

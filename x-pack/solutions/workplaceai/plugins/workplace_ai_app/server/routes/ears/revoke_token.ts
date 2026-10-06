@@ -49,7 +49,8 @@ export function registerRevokeTokenRoute({
           ]),
         }),
         body: schema.object({
-          token: schema.string(),
+          // Access or refresh token; Microsoft JWT access tokens can exceed 4k chars.
+          token: schema.string({ maxLength: 8192 }),
         }),
       },
     },

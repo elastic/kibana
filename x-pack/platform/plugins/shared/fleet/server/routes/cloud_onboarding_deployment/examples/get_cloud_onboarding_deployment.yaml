@@ -30,6 +30,8 @@ responses:
                     - regions:
                         - 'us-east-1'
                       s3_bucket_arn: 'arn:aws:s3:::my-cloudtrail-bucket'
+                agentPolicyIds:
+                  - 'agent-policy-id-1'
                 packagePolicyIds:
                   - 'package-policy-id-1'
   400:

@@ -43,7 +43,7 @@ export const FlyoutAccordion = ({
   initialIsOpen = false,
   hasBorder = true,
   children,
-  'data-test-subj': dataTestSubj,
+  ...accordionProps
 }: FlyoutAccordionProps) => {
   const styles = useEuiMemoizedStyles(getAccordionStyles);
   const accordionId = useGeneratedHtmlId({ conditionalId: id, prefix: 'flyoutAccordion' });
@@ -73,12 +73,12 @@ export const FlyoutAccordion = ({
   return (
     <div css={styles.wrapper} data-flyout-section="accordion" data-open={isOpen || undefined}>
       <EuiAccordion
+        {...accordionProps}
         id={accordionId}
         buttonContent={buttonContent}
         extraAction={action ? renderTitleAction(action) : undefined}
         forceState={isOpen ? 'open' : 'closed'}
         onToggle={setIsOpen}
-        data-test-subj={dataTestSubj}
       >
         <EuiSpacer size="s" />
         {hasBorder ? (

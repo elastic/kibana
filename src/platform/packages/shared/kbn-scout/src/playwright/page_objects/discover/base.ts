@@ -11,7 +11,7 @@ import type { ScoutPage } from '../..';
 import { AppMenu } from '../app_menu';
 import { DataGrid } from '../data_grid';
 import { SavedObjectSaveModal } from '../saved_object_save_modal';
-import { KibanaCodeEditorWrapper } from '../../ui_components';
+import { EsqlEditor, KibanaCodeEditorWrapper } from '../../ui_components';
 import { QueryBar } from '../query_bar';
 import { UnifiedTabs } from '../unified_tabs';
 
@@ -45,6 +45,7 @@ export const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
  */
 export class DiscoverAppBase {
   public readonly codeEditor: KibanaCodeEditorWrapper;
+  protected readonly esqlEditor: EsqlEditor;
   protected readonly dataGrid: DataGrid;
   protected readonly queryBar: QueryBar;
   protected readonly unifiedTabs: UnifiedTabs;
@@ -56,6 +57,7 @@ export class DiscoverAppBase {
 
   constructor(protected readonly page: ScoutPage) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
+    this.esqlEditor = new EsqlEditor(page);
     this.dataGrid = new DataGrid(page);
     this.queryBar = new QueryBar(page);
     this.unifiedTabs = new UnifiedTabs(page);

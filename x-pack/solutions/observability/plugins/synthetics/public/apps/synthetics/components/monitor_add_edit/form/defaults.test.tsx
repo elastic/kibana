@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { SyntheticsMonitor } from '../types';
-import { ConfigKey, MonitorTypeEnum, FormMonitorType } from '../types';
+import { ConfigKey, HttpAuthMethod, MonitorTypeEnum, FormMonitorType } from '../types';
 import { DEFAULT_FIELDS, PROFILE_VALUES_ENUM, PROFILES_MAP } from '../constants';
 import { formatDefaultFormValues } from './defaults';
 
@@ -150,7 +150,44 @@ describe('defaults', () => {
       ...monitor,
       [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: 'mockCA',
       isTLSEnabled,
+      ...(formType === MonitorTypeEnum.HTTP ? { authType: HttpAuthMethod.NONE } : {}),
     });
+  });
+
+  it.each([
+    [HttpAuthMethod.BASIC, { [ConfigKey.USERNAME]: 'user', [ConfigKey.PASSWORD]: 'pass' }],
+    [
+      HttpAuthMethod.KERBEROS,
+      {
+        [ConfigKey.KERBEROS]: {
+          ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP][ConfigKey.KERBEROS],
+          enabled: true,
+          username: 'svc',
+          password: 'secret',
+          config_path: '/etc/krb5.conf',
+        },
+      },
+    ],
+    [
+      HttpAuthMethod.NTLM,
+      {
+        [ConfigKey.NTLM]: {
+          ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP][ConfigKey.NTLM],
+          enabled: true,
+          username: 'ntlm-user',
+          password: 'ntlm-pass',
+        },
+      },
+    ],
+  ])('derives authType %s when editing an HTTP monitor', (authType, authFields) => {
+    const monitor = {
+      ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
+      [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.HTTP,
+      [ConfigKey.USERNAME]: '',
+      [ConfigKey.PASSWORD]: '',
+      ...authFields,
+    } as SyntheticsMonitor;
+    expect(formatDefaultFormValues(monitor)).toMatchObject({ authType });
   });
 
   it.each([

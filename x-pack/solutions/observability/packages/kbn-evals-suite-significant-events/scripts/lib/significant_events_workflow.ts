@@ -14,11 +14,6 @@ import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Feature, SignificantEvent } from '@kbn/significant-events-schema';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
-import {
-  SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
-} from '@kbn/significant-events-schema';
 import type { ConnectionConfig } from './get_connection_config';
 import { kibanaRequest } from './kibana';
 import { withTempSuperuser } from './user_utils';
@@ -98,44 +93,10 @@ export async function enableSignificantEvents(
   throw new Error(`Failed to enable significant events: ${status} ${JSON.stringify(data)}`);
 }
 
-export async function configureModelSelectionSettings(
-  config: ConnectionConfig,
-  log: ToolingLog,
-  connectorId: string
-): Promise<void> {
-  log.info(`Configuring model override via inference settings (connector: ${connectorId})...`);
-  const { status, data } = await kibanaRequest(
-    config,
-    'PUT',
-    '/internal/search_inference_endpoints/settings',
-    {
-      features: [
-        {
-          feature_id: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-          endpoints: [{ id: connectorId }],
-        },
-        {
-          feature_id: SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
-          endpoints: [{ id: connectorId }],
-        },
-        {
-          feature_id: SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
-          endpoints: [{ id: connectorId }],
-        },
-      ],
-    }
-  );
-
-  if (status >= 200 && status < 300) {
-    log.info('Model selection settings configured via inference settings');
-    return;
-  }
-
-  throw new Error(`Failed to configure inference settings: ${status} ${JSON.stringify(data)}`);
-}
 export async function triggerKIExtraction(
   config: ConnectionConfig,
   log: ToolingLog,
+  connectorId: string,
   streamName: string = DEFAULT_LOGS_INDEX,
   steps: KIsOnboardingStep[] = [KIsOnboardingStep.FeaturesIdentification]
 ): Promise<void> {
@@ -151,6 +112,10 @@ export async function triggerKIExtraction(
       from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
       to: new Date(now).toISOString(),
       steps,
+      connectors: {
+        features: connectorId,
+        queries: connectorId,
+      },
     }
   );
 
@@ -301,7 +266,7 @@ export async function persistDiscoveriesForSnapshot(
 ): Promise<{ index: string; count: number }> {
   const discoveries = await fetchAllPaginated<SignificantEvent>(
     config,
-    '/internal/significant_events/events?status=pending',
+    '/internal/significant_events/events?status=active',
     'events'
   );
   return persistDocsForSnapshot(
@@ -309,7 +274,7 @@ export async function persistDiscoveriesForSnapshot(
     log,
     getSnapshotDiscoveriesIndex(snapshotName),
     discoveries as unknown as Array<Record<string, unknown>>,
-    'event_uuid',
+    'event_id',
     'discovery(s)'
   );
 }
@@ -389,13 +354,17 @@ export async function resetQueriesPromotion({ esClient }: { esClient: Client }):
   });
 }
 
-export async function triggerDiscovery(config: ConnectionConfig, log: ToolingLog): Promise<void> {
+export async function triggerDiscovery(
+  config: ConnectionConfig,
+  log: ToolingLog,
+  connectorId: string
+): Promise<void> {
   log.info('Triggering significant events discovery...');
   const { status, data } = await kibanaRequest(
     config,
     'POST',
     '/internal/streams/significant_events/discovery/_execute',
-    { action: 'trigger' }
+    { action: 'trigger', connector_id: connectorId }
   );
 
   if (status >= 200 && status < 300) {

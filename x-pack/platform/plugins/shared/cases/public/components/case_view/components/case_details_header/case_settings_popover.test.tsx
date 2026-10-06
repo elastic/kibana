@@ -92,7 +92,7 @@ describe('CaseSettingsPopover', () => {
     renderWithTestingProviders(<CaseSettingsPopover {...defaultProps} />, {
       wrapperProps: {
         license: platinumLicense,
-        owner: ['cases'],
+        owner: ['observability'],
       },
     });
 

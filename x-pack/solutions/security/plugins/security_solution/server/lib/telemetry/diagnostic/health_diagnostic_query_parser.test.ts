@@ -1004,3 +1004,61 @@ describe('v4 API descriptors', () => {
     expect((result as ParseFailureQuery).failureReason).toBe('invalid_descriptor');
   });
 });
+
+describe('stackVersions', () => {
+  const v4BaseYaml = [
+    'version: 4',
+    'id: q',
+    'name: Q',
+    'type: DSL',
+    'query: \'{"match_all":{}}\'',
+    "scheduleCron: '0 */1 * * *'",
+    'enabled: true',
+    'index: logs-*',
+    'filterlist:',
+    '  user.name: keep',
+  ].join('\n');
+
+  const v3BaseYaml = v4BaseYaml.replace('version: 4', 'version: 3');
+
+  const apiBase = [
+    'version: 4',
+    'id: api-q',
+    'name: API Q',
+    'type: API',
+    'api: _cat/tasks',
+    "scheduleCron: '0 */1 * * *'",
+    'enabled: true',
+    'filterlist: {}',
+  ];
+
+  it('preserves a valid node-semver range on a v4 index descriptor', () => {
+    const yaml = `${v4BaseYaml}\nstackVersions: '>=8.17.7 <9.0.0 || >=9.4.0'`;
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect(result).toMatchObject({ kind: 'index', stackVersions: '>=8.17.7 <9.0.0 || >=9.4.0' });
+  });
+
+  it('preserves a valid node-semver range on a v4 API descriptor', () => {
+    const yaml = [...apiBase, "stackVersions: '>=9.4.0'"].join('\n');
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect(result).toMatchObject({ kind: 'api', stackVersions: '>=9.4.0' });
+  });
+
+  it('leaves stackVersions undefined when absent on v4', () => {
+    const [result] = parseHealthDiagnosticQueries(v4BaseYaml);
+    expect(result).toMatchObject({ kind: 'index' });
+    expect((result as { stackVersions?: string }).stackVersions).toBeUndefined();
+  });
+
+  it('produces invalid_descriptor for a syntactically invalid range', () => {
+    const yaml = `${v4BaseYaml}\nstackVersions: 'not a range'`;
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect((result as ParseFailureQuery).failureReason).toBe('invalid_descriptor');
+  });
+
+  it('produces invalid_descriptor when stackVersions is used on a v3 descriptor', () => {
+    const yaml = `${v3BaseYaml}\nstackVersions: '>=9.4.0'`;
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect((result as ParseFailureQuery).failureReason).toBe('invalid_descriptor');
+  });
+});

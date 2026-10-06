@@ -80,6 +80,22 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(attachments.data[0].id).to.eql(patchedCase.comments![0].id);
     });
 
+    for (const type of ['user', 'foo']) {
+      it(`returns an empty list when \`type\` is "${type}", which matches no stored type`, async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await createComment({ supertest, caseId: postedCase.id, params: postCommentUserReq });
+
+        const attachments = await findAttachmentsV2({
+          supertest,
+          caseId: postedCase.id,
+          query: { type },
+        });
+
+        expect(attachments.data).to.eql([]);
+        expect(attachments.total).to.eql(0);
+      });
+    }
+
     describe('rbac', () => {
       const supertestWithoutAuth = getService('supertestWithoutAuth');
 

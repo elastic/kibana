@@ -27,12 +27,11 @@ jest.mock('../hooks/use_kibana', () => ({
 const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-07-10T12:00:00Z',
   event_id: 'evt-001',
-  event_uuid: 'evt-uuid-001',
-  status: 'open',
+  status: 'active',
   stream_names: ['logs.web-frontend'],
   title: 'Web latency spike',
   summary: 'Summary',
-  severity: '80-critical',
+  severity: 'critical',
   confidence: 0.92,
   ...overrides,
 });

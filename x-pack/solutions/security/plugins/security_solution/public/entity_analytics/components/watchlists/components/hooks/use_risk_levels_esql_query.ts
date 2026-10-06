@@ -16,7 +16,6 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { useEsqlGlobalFilterQuery } from '../../../../../common/hooks/esql/use_esql_global_filter';
 import { useGlobalFilterQuery } from '../../../../../common/hooks/use_global_filter_query';
 import { esqlResponseToRecords } from '../../../../../common/utils/esql';
-import { useRiskEngineStatus } from '../../../../api/hooks/use_risk_engine_status';
 import { getWatchlistRiskLevelsQueryBodyV2 } from '../queries/watchlist_risk_level_query';
 import type { WatchlistRiskLevelsQueryResult } from './types';
 import { getEntitiesAlias, ENTITY_LATEST } from '../../../home/constants';
@@ -48,17 +47,11 @@ export const useRiskLevelsEsqlQuery = ({
 
   const query = `FROM ${index} ${getWatchlistRiskLevelsQueryBodyV2(watchlistId || undefined)}`;
 
-  const {
-    data: riskEngineStatus,
-    isFetching: isStatusLoading,
-    refetch: refetchEngineStatus,
-  } = useRiskEngineStatus();
-
-  const isEnabled =
-    !skip && !isStatusLoading && riskEngineStatus?.risk_engine_status !== 'NOT_INSTALLED';
+  const isEnabled = !skip;
   const queryKey = useMemo(() => ['watchlistRiskLevels', query, filterQuery], [query, filterQuery]);
 
   const {
+    isFetching,
     isRefetching,
     data: result,
     error,
@@ -135,18 +128,17 @@ export const useRiskLevelsEsqlQuery = ({
   }, [index, query, response]);
 
   const handleRefetch = () => {
-    refetchEngineStatus();
     refetch();
   };
 
   return {
     records: esqlResponseToRecords<WatchlistRiskLevelsQueryResult>(response),
-    isLoading: isRefetching || isStatusLoading,
+    isLoading: isFetching,
     refetch: handleRefetch,
     inspect,
     error,
     isRefetching,
     isError,
-    hasEngineBeenInstalled: riskEngineStatus?.risk_engine_status !== 'NOT_INSTALLED',
+    hasEngineBeenInstalled: true,
   };
 };

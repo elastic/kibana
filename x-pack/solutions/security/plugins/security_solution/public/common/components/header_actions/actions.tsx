@@ -259,8 +259,6 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
         )}
         <AlertContextMenu
           ariaLabel={i18n.MORE_ACTIONS_FOR_ROW({ ariaRowindex, columnValues })}
-          ariaRowindex={ariaRowindex}
-          columnValues={columnValues}
           key="alert-context-menu"
           ecsRowData={ecsData}
           scopeId={timelineId}

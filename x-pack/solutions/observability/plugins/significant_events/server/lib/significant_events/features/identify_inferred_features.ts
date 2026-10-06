@@ -345,6 +345,7 @@ async function runInferredIteration({
       excludedFeatures: excludedSummaries,
       previouslyIdentifiedFeatures: topRanked.map(toFeatureProjection),
       knownFeatureIds,
+      interactionId: runId,
       signal,
       logger,
     });

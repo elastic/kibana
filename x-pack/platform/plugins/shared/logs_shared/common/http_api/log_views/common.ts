@@ -7,4 +7,5 @@
 
 export const LOG_VIEW_URL_PREFIX = '/api/infra/log_views';
 export const LOG_VIEW_URL = `${LOG_VIEW_URL_PREFIX}/{logViewId}`;
-export const getLogViewUrl = (logViewId: string) => `${LOG_VIEW_URL_PREFIX}/${logViewId}`;
+export const getLogViewUrl = (logViewId: string) =>
+  `${LOG_VIEW_URL_PREFIX}/${encodeURIComponent(logViewId)}`;

@@ -16,7 +16,7 @@ import type {
 import type { AlertEpisodeStatus } from '../../../resources/datastreams/alert_events';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
-import { EPISODE_QUERY_LIMIT, getDispatchableAlertEventsQuery } from '../queries';
+import { ESQL_QUERY_ROW_LIMIT, getDispatchableAlertEventsQuery } from '../queries';
 import { EpisodeScan } from '../state';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
@@ -85,7 +85,7 @@ export class FetchEpisodesStep implements DispatcherStep {
 
     // Event-row `lte` makes windowEnd a provable watermark advance target:
     // the scan has a defined upper edge to advance to.
-    const truncated = result.length === EPISODE_QUERY_LIMIT;
+    const truncated = result.length === ESQL_QUERY_ROW_LIMIT;
 
     const episodes = parseAlertEpisodes(result);
 

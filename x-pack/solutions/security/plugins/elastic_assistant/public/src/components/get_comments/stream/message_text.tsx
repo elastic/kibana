@@ -38,6 +38,10 @@ interface Props {
 
 const ANIMATION_TIME = 1;
 
+// `maxWidth` is ignored when the table has fewer columns than needed to fill the container.
+const TABLE_CELL_MIN_WIDTH = '10em';
+const TABLE_CELL_MAX_WIDTH = '30em';
+
 export const Cursor = () => {
   const { euiTheme } = useEuiTheme();
 
@@ -142,19 +146,27 @@ const getPluginDependencies = ({
     },
     table: (props) => (
       <>
-        <EuiTable {...props} />
+        <EuiTable {...props} tableLayout="auto" scrollableInline responsiveBreakpoint={false} />
         <EuiSpacer size="m" />
       </>
     ),
     th: (props) => {
       const { children, ...rest } = props;
-      return <EuiTableHeaderCell {...rest}>{children}</EuiTableHeaderCell>;
+      return (
+        <EuiTableHeaderCell
+          minWidth={TABLE_CELL_MIN_WIDTH}
+          maxWidth={TABLE_CELL_MAX_WIDTH}
+          {...rest}
+        >
+          {children}
+        </EuiTableHeaderCell>
+      );
     },
     tr: (props) => <EuiTableRow {...props} />,
     td: (props) => {
       const { children, ...rest } = props;
       return (
-        <EuiTableRowCell truncateText={true} {...rest}>
+        <EuiTableRowCell minWidth={TABLE_CELL_MIN_WIDTH} maxWidth={TABLE_CELL_MAX_WIDTH} {...rest}>
           {children}
         </EuiTableRowCell>
       );

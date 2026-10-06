@@ -81,6 +81,10 @@ export class KnowledgeIndicatorClient {
     return computeExpiresAt(new Date().toISOString(), this.ttlDays);
   }
 
+  countKnowledgeIndicators(type: KnowledgeIndicatorType): Promise<number> {
+    return this.reader.countKnowledgeIndicators(type);
+  }
+
   keepAlivePersistentIndicators(
     stream: string,
     options: { lastRefreshedBefore: string }
@@ -181,6 +185,14 @@ export class KnowledgeIndicatorClient {
       this.orchestrator.findStreamNamesWithOwnedRules(),
     ]);
     return [...new Set([...withIndicators, ...withOwnedRules])];
+  }
+
+  findStreamNamesWithOwnedRules(): Promise<string[]> {
+    return this.orchestrator.findStreamNamesWithOwnedRules();
+  }
+
+  findOwnedRuleIds(streamName: string): Promise<string[]> {
+    return this.orchestrator.findOwnedRuleIds(streamName);
   }
 
   findIndicators(

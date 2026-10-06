@@ -21,6 +21,7 @@ import type {
 } from '../../../../common/runtime_types';
 import {
   ConfigKey,
+  KerberosAuthType,
   MonitorTypeEnum,
   ScheduleUnit,
   VerificationMode,
@@ -177,6 +178,122 @@ describe('formatMonitorConfig', () => {
         });
       }
     );
+
+    it('emits the Kerberos block only when Kerberos is enabled and omits NTLM', () => {
+      const kerberosConfig: Partial<MonitorFields> = {
+        ...testHTTPConfig,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: KerberosAuthType.PASSWORD,
+          realm: 'CORP.LOCAL',
+          username: 'svc-heartbeat',
+          password: 'secret',
+          keytab: '',
+          config_path: '/etc/krb5.conf',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+        [ConfigKey.NTLM]: {
+          enabled: false,
+          username: '',
+          password: '',
+          domain: 'CORP',
+          workstation: '',
+        },
+      };
+      const yamlConfig = formatMonitorConfigFields(
+        Object.keys(kerberosConfig) as ConfigKey[],
+        kerberosConfig,
+        logger,
+        { proxyUrl: 'https://www.google.com' },
+        []
+      );
+
+      expect(yamlConfig[ConfigKey.KERBEROS]).toEqual({
+        enabled: true,
+        auth_type: KerberosAuthType.PASSWORD,
+        realm: 'CORP.LOCAL',
+        username: 'svc-heartbeat',
+        password: 'secret',
+        keytab: '',
+        config_path: '/etc/krb5.conf',
+        krb5_conf: '',
+        service_name: '',
+        enable_krb5_fast: false,
+      });
+      // NTLM is dropped because it is disabled.
+      expect(yamlConfig[ConfigKey.NTLM]).toBeUndefined();
+      // Basic auth fields are empty and therefore omitted.
+      expect(yamlConfig[ConfigKey.USERNAME]).toBeUndefined();
+    });
+
+    it('resolves nested NTLM params for public Heartbeat configs', () => {
+      const ntlmConfig: Partial<MonitorFields> = {
+        ...testHTTPConfig,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.NTLM]: {
+          enabled: true,
+          username: 'ntlm-user',
+          password: '${ntlmPassword}',
+          domain: 'EXAMPLE',
+          workstation: '',
+        },
+      };
+      const yamlConfig = formatMonitorConfigFields(
+        Object.keys(ntlmConfig) as ConfigKey[],
+        ntlmConfig,
+        logger,
+        { ntlmPassword: 's3c"ret\nline' },
+        []
+      );
+
+      expect(yamlConfig[ConfigKey.NTLM]).toEqual({
+        enabled: true,
+        username: 'ntlm-user',
+        password: 's3c"ret\nline',
+        domain: 'EXAMPLE',
+        workstation: '',
+      });
+    });
+
+    it('omits both Kerberos and NTLM blocks when neither is enabled', () => {
+      const noAuthConfig: Partial<MonitorFields> = {
+        ...testHTTPConfig,
+        [ConfigKey.KERBEROS]: {
+          enabled: false,
+          auth_type: KerberosAuthType.PASSWORD,
+          realm: 'CORP.LOCAL',
+          username: '',
+          password: '',
+          keytab: '',
+          config_path: '',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+        [ConfigKey.NTLM]: {
+          enabled: false,
+          username: '',
+          password: '',
+          domain: 'CORP',
+          workstation: '',
+        },
+      };
+      const yamlConfig = formatMonitorConfigFields(
+        Object.keys(noAuthConfig) as ConfigKey[],
+        noAuthConfig,
+        logger,
+        { proxyUrl: 'https://www.google.com' },
+        []
+      );
+
+      expect(yamlConfig[ConfigKey.KERBEROS]).toBeUndefined();
+      expect(yamlConfig[ConfigKey.NTLM]).toBeUndefined();
+    });
   });
 });
 

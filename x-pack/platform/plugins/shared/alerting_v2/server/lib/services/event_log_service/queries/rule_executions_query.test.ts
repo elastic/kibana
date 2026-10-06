@@ -174,7 +174,11 @@ describe('buildRuleExecutionsQuery', () => {
   });
 
   it('maps duration sort to event.duration', () => {
-    const body = buildRuleExecutionsQuery({ ...baseQuery, sort: 'duration', sortOrder: 'asc' });
+    const body = buildRuleExecutionsQuery({
+      ...baseQuery,
+      sortField: 'duration',
+      sortOrder: 'asc',
+    });
     expect(body.sort).toEqual([{ 'event.duration': { order: 'asc' } }]);
   });
 

@@ -18,7 +18,7 @@ import type { AlertEpisodeStatus } from '../../resources/datastreams/alert_event
 import {
   alertEpisodeStatus,
   alertEventType,
-  type AlertEvent,
+  type AlertEventDocument,
 } from '../../resources/datastreams/alert_events';
 import { TransitionStrategyFactory } from './strategies/strategy_resolver';
 import type { ITransitionStrategy, StateTransitionResult } from './strategies/types';
@@ -26,16 +26,17 @@ import type { ExecutionContext } from '../execution_context';
 
 interface RunDirectorParams {
   rule: RuleResponse;
-  alertEvents: readonly AlertEvent[];
+  alertEvents: readonly AlertEventDocument[];
   executionContext: ExecutionContext;
   spaceId: string;
 }
 
 interface CalculateNextStateParams {
   rule: RuleResponse;
-  currentAlertEvent: AlertEvent;
+  currentAlertEvent: AlertEventDocument;
   previousAlertEvent?: LatestAlertEventState;
   strategy: ITransitionStrategy;
+  evaluatedAt: string;
   logger: LoggerServiceContract;
 }
 
@@ -54,7 +55,7 @@ export interface DirectorRunStats {
 }
 
 export interface DirectorRunResult {
-  readonly alertEvents: AlertEvent[];
+  readonly alertEvents: AlertEventDocument[];
   readonly stats: DirectorRunStats;
 }
 
@@ -90,7 +91,7 @@ export class DirectorService {
 
   private async processAlertEvents(
     rule: RuleResponse,
-    alertEvents: readonly AlertEvent[],
+    alertEvents: readonly AlertEventDocument[],
     strategy: ITransitionStrategy,
     executionContext: ExecutionContext,
     logger: LoggerServiceContract
@@ -109,17 +110,19 @@ export class DirectorService {
       executionContext.throwIfAborted();
 
       const newEpisodeIds: string[] = [];
+      const evaluatedAt = new Date().toISOString();
       const processed = alertEvents.map((currentAlertEvent) => {
         const { alertEvent, isNewEpisode } = this.getAlertEventWithNextEpisode({
           rule,
           currentAlertEvent,
           previousAlertEvent: alertStateByGroupHash.get(currentAlertEvent.group_hash),
           strategy,
+          evaluatedAt,
           logger,
         });
 
-        if (isNewEpisode && alertEvent.episode) {
-          newEpisodeIds.push(alertEvent.episode.id);
+        if (isNewEpisode && alertEvent.alert) {
+          newEpisodeIds.push(alertEvent.alert.id);
         }
 
         return alertEvent;
@@ -162,22 +165,23 @@ export class DirectorService {
     currentAlertEvent,
     previousAlertEvent,
     strategy,
+    evaluatedAt,
     logger,
-  }: CalculateNextStateParams): { alertEvent: AlertEvent; isNewEpisode: boolean } {
+  }: CalculateNextStateParams): { alertEvent: AlertEventDocument; isNewEpisode: boolean } {
     // User lock: once a user hits `activate` on a group, the episode
     // stays `active` regardless of what the strategy computes, until
     // the user hits `deactivate` (which flips the lifecycle marker
     // back and lets the strategy own transitions again). We preserve
     // the incoming event's `status` (e.g. `recovered`) so downstream
-    // analytics keep the raw engine signal. Only `episode.status` is
-    // forced. `episode.status_count` is dropped to mirror how the
+    // analytics keep the raw engine signal. Only `alert.status` is
+    // forced. `alert.status_count` is dropped to mirror how the
     // strategies emit any → active transitions.
     if (this.isUserLocked(previousAlertEvent)) {
       return {
         alertEvent: {
           ...currentAlertEvent,
           type: alertEventType.alert,
-          episode: {
+          alert: {
             id: previousAlertEvent!.last_episode_id!,
             status: alertEpisodeStatus.active,
           },
@@ -192,6 +196,7 @@ export class DirectorService {
       rule,
       alertEvent: currentAlertEvent,
       previousEpisode: previousAlertEvent,
+      evaluatedAt,
     });
 
     const { episodeId, isNew } = this.resolveEpisodeId({
@@ -213,7 +218,7 @@ export class DirectorService {
     return {
       alertEvent: {
         ...currentAlertEvent,
-        episode: {
+        alert: {
           id: episodeId,
           status: result.status,
           ...(result.statusCount != null ? { status_count: result.statusCount } : {}),

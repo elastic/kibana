@@ -58,6 +58,13 @@ components:
           description: >-
             Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to
             render the interval control.
+        serviceAccountId:
+          type: string
+          minLength: 1
+          maxLength: 1024
+          description: >-
+            Service account this worker runs as. Omitted until one is selected. Already installed
+            workers stay readable without it. Enabling the worker requires a non-empty id.
         extras:
           $ref: '#/components/schemas/WorkerSettingsExtras'
           description: Omitted for Workers that declare no Worker-specific settings.
@@ -76,6 +83,14 @@ components:
           $ref: '#/components/schemas/WatchAutonomyLevel'
         scheduleInterval:
           $ref: '#/components/schemas/WorkerScheduleInterval'
+        serviceAccountId:
+          type: string
+          minLength: 1
+          maxLength: 1024
+          nullable: true
+          description: >-
+            Omitted keeps the stored account. A non-empty id sets it. Null clears it. Enabling a
+            worker requires a non-empty id, including a save that leaves an already enabled worker on.
         extras:
           $ref: '#/components/schemas/WorkerSettingsExtras'
 

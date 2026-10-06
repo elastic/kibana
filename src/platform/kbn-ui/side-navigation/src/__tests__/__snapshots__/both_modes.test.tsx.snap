@@ -12,7 +12,7 @@ exports[`Both modes should render the side navigation 1`] = `
     >
       <div
         aria-hidden="true"
-        class="css-vs5c8i-topSeparatorStyles"
+        class="css-3a3088-topSeparatorStyles"
       />
       <p
         class="emotion-euiScreenReaderOnly"
@@ -23,6 +23,7 @@ exports[`Both modes should render the side navigation 1`] = `
       <nav
         aria-label="Main"
         class="css-52o7j-getPrimaryMenuStyles"
+        data-overflow-measured="false"
         data-test-subj="kbnChromeNav-primaryNavigation"
         id="kbnChromeNav-primaryNavigation"
       >
@@ -37,7 +38,7 @@ exports[`Both modes should render the side navigation 1`] = `
               aria-haspopup="false"
               aria-posinset="1"
               aria-setsize="3"
-              class="css-t4ksp4-buttonStyles"
+              class="css-2yc9mn-buttonStyles"
               data-highlighted="false"
               data-menu-item="true"
               data-test-subj="kbnChromeNav-primaryItem-dashboards"
@@ -56,7 +57,7 @@ exports[`Both modes should render the side navigation 1`] = `
                 />
               </div>
               <div
-                class="euiText emotion-euiText-m-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
+                class="euiText emotion-euiText-s-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
               >
                 Dashboards
               </div>
@@ -73,7 +74,7 @@ exports[`Both modes should render the side navigation 1`] = `
               aria-haspopup="false"
               aria-posinset="2"
               aria-setsize="3"
-              class="css-t4ksp4-buttonStyles"
+              class="css-2yc9mn-buttonStyles"
               data-highlighted="false"
               data-menu-item="true"
               data-test-subj="kbnChromeNav-primaryItem-discover"
@@ -92,7 +93,7 @@ exports[`Both modes should render the side navigation 1`] = `
                 />
               </div>
               <div
-                class="euiText emotion-euiText-m-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
+                class="euiText emotion-euiText-s-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
               >
                 Discover
               </div>
@@ -117,7 +118,7 @@ exports[`Both modes should render the side navigation 1`] = `
               aria-haspopup="true"
               aria-posinset="3"
               aria-setsize="3"
-              class="css-t4ksp4-buttonStyles"
+              class="css-2yc9mn-buttonStyles"
               data-highlighted="false"
               data-menu-item="true"
               data-test-subj="kbnChromeNav-primaryItem-apps_overview"
@@ -136,7 +137,7 @@ exports[`Both modes should render the side navigation 1`] = `
                 />
               </div>
               <div
-                class="euiText emotion-euiText-m-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
+                class="euiText emotion-euiText-s-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
               >
                 Apps
               </div>
@@ -152,7 +153,7 @@ exports[`Both modes should render the side navigation 1`] = `
       </p>
       <footer
         aria-label="Side navigation"
-        class="css-gvd5fl-root"
+        class="css-vzod15-root"
         data-test-subj="kbnChromeNav-footer"
       >
         <div

@@ -689,6 +689,8 @@ async function _filterAgents(
     perPage?: number;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
+    /** When true, omit namespace filtering so agents from all spaces are matched. */
+    skipNamespaceFilter?: boolean;
   } = {}
 ): Promise<{
   agents: Agent[];
@@ -696,14 +698,21 @@ async function _filterAgents(
   page: number;
   perPage: number;
 }> {
-  const { page = 1, perPage = 20, sortField = 'enrolled_at', sortOrder = 'desc' } = options;
+  const {
+    page = 1,
+    perPage = 20,
+    sortField = 'enrolled_at',
+    sortOrder = 'desc',
+    skipNamespaceFilter,
+  } = options;
   const runtimeFields = {
     ...(await buildAgentStatusRuntimeField(soClient)),
     ...(appContextService.getExperimentalFeatures().enableOpAMP
       ? PIPELINE_CONFIG_RUNTIME_FIELD
       : {}),
   };
-  const currentSpaceId = getCurrentNamespace(soClient);
+  // Pass undefined when skipNamespaceFilter is set so addNamespaceFilteringToQuery skips the filter.
+  const currentSpaceId = skipNamespaceFilter ? undefined : getCurrentNamespace(soClient);
 
   let res;
   try {
@@ -739,7 +748,8 @@ async function _filterAgents(
 export async function getAgentsById(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
-  agentIds: string[]
+  agentIds: string[],
+  options?: { skipNamespaceFilter?: boolean }
 ): Promise<Array<Agent | { id: string; notFound: true }>> {
   if (!agentIds.length) {
     return [];
@@ -764,6 +774,7 @@ export async function getAgentsById(
     };
     const { agents } = await _filterAgents(esClient, soClient, idsQuery, {
       perPage: batch.length,
+      skipNamespaceFilter: options?.skipNamespaceFilter,
     });
     for (const agent of agents) {
       agentsById.set(agent.id, agent);

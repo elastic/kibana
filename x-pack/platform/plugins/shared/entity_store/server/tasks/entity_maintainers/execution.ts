@@ -21,6 +21,7 @@ import {
 import { CRUDClient, type EntityUpdateClient } from '../../domain/crud';
 import { ResolutionRulesClient } from '../../domain/resolution/rules';
 import { EntityMetadataClient } from '../../domain/entity_metadata';
+import { RelationshipsClient } from '../../domain/relationships';
 import type { TelemetryReporter } from '../../telemetry/events';
 import { ENTITY_MAINTAINER_EVENT } from '../../telemetry/events';
 import { wrapTaskRun } from '../../telemetry/traces';
@@ -157,6 +158,11 @@ export async function executeMaintainerRun({
     esClient: coreStart.elasticsearch.client.asInternalUser,
     namespace: maintainerStatus.metadata.namespace,
   });
+  const relationshipsClient = new RelationshipsClient({
+    logger,
+    esClient,
+    namespace: maintainerStatus.metadata.namespace,
+  });
   const taskLogger = logger.get(taskId);
   const abortSignal = signal ?? new AbortController().signal;
   const telemetryClient = createMaintainerTelemetryClient({
@@ -190,6 +196,7 @@ export async function executeMaintainerRun({
           taskLogger
         ),
         entityMetadataClient,
+        relationshipsClient,
         id,
         analytics,
         telemetryClient,
@@ -223,6 +230,7 @@ export async function runEntityMaintainerTask({
   crudClient,
   resolutionRulesClient,
   entityMetadataClient,
+  relationshipsClient,
   id,
   analytics,
   telemetryClient,
@@ -238,6 +246,7 @@ export async function runEntityMaintainerTask({
   crudClient: EntityUpdateClient;
   resolutionRulesClient: ResolutionRulesClient;
   entityMetadataClient: EntityMetadataClient;
+  relationshipsClient: RelationshipsClient;
   id: string;
   analytics: TelemetryReporter;
   telemetryClient: InternalMaintainerTelemetryClient;
@@ -271,6 +280,7 @@ export async function runEntityMaintainerTask({
         crudClient,
         resolutionRulesClient,
         entityMetadataClient,
+        relationshipsClient,
         telemetry: telemetryClient,
       });
       analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
@@ -290,6 +300,7 @@ export async function runEntityMaintainerTask({
       crudClient,
       resolutionRulesClient,
       entityMetadataClient,
+      relationshipsClient,
       telemetry: telemetryClient,
     });
     analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {

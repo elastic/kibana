@@ -9,6 +9,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { EsWorkflow } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecuteAsyncStrategy } from './workflow_execute_async_strategy';
 import type { WorkflowExecutionRepository } from '../../../repositories/workflow_execution_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../../types';
@@ -43,6 +44,7 @@ describe('WorkflowExecuteAsyncStrategy', () => {
       getWorkflowExecutionById: jest.fn().mockResolvedValue({
         id: 'async-exec-1',
         startedAt: '2024-01-01T00:00:00Z',
+        status: ExecutionStatus.PENDING,
       }),
     } as any;
 
@@ -82,6 +84,7 @@ describe('WorkflowExecuteAsyncStrategy', () => {
         id: 'child-workflow-id',
         name: 'Child Workflow',
         isTestRun: false,
+        isEphemeral: false,
       }),
       expect.objectContaining({
         spaceId: 'default',
@@ -122,6 +125,30 @@ describe('WorkflowExecuteAsyncStrategy', () => {
     });
   });
 
+  it.each([ExecutionStatus.SKIPPED, ExecutionStatus.FAILED, ExecutionStatus.RUNNING])(
+    'should report the child status "%s" the engine already recorded',
+    async (status) => {
+      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
+        id: 'async-exec-1',
+        startedAt: '2024-01-01T00:00:00Z',
+        status,
+      } as any);
+
+      const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
+
+      expect(result.status).toBe('completed');
+      expect(result.output).toEqual(expect.objectContaining({ status, awaited: false }));
+    }
+  );
+
+  it('should fall back to pending when execution fetch returns null', async () => {
+    mockExecRepo.getWorkflowExecutionById.mockResolvedValue(null);
+
+    const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
+
+    expect(result.output).toEqual(expect.objectContaining({ status: 'pending' }));
+  });
+
   it('should omit startedAt when execution fetch returns null', async () => {
     mockExecRepo.getWorkflowExecutionById.mockResolvedValue(null);
 
@@ -137,7 +164,7 @@ describe('WorkflowExecuteAsyncStrategy', () => {
     await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
 
     expect(mockEngine.executeWorkflow).toHaveBeenCalledWith(
-      expect.objectContaining({ isTestRun: true }),
+      expect.objectContaining({ isTestRun: true, isEphemeral: false }),
       expect.any(Object),
       mockRequest
     );

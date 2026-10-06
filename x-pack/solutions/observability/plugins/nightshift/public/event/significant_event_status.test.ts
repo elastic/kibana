@@ -28,43 +28,41 @@ const mockEvent = (
   ({
     '@timestamp': '2026-01-01T00:00:00.000Z',
     event_id: 'evt-1',
-    event_uuid: 'evt-uuid-1',
-    status: 'open',
+    status: 'active',
     stream_names: ['service-a'],
     title: 'Event',
     summary: 'Summary',
-    severity: '40-medium',
+    severity: 'medium',
     confidence: 0.9,
     ...overrides,
   } as SignificantEvent);
 
 describe('significant_event_status', () => {
-  it('classifies open as needs-action', () => {
-    expect(NEEDS_ACTION_STATUSES).toEqual(['open']);
-    expect(isNeedsActionStatus('open')).toBe(true);
-    expect(isNeedsActionStatus('closed')).toBe(false);
+  it('classifies active as needs-action', () => {
+    expect(NEEDS_ACTION_STATUSES).toEqual(['active']);
+    expect(isNeedsActionStatus('active')).toBe(true);
+    expect(isNeedsActionStatus('inactive')).toBe(false);
   });
 
-  it('classifies closed and dismissed as resolved', () => {
-    expect(RESOLVED_STATUSES).toEqual(['closed', 'dismissed']);
-    expect(isResolvedStatus('closed')).toBe(true);
-    expect(isResolvedStatus('dismissed')).toBe(true);
-    expect(isResolvedStatus('open')).toBe(false);
+  it('classifies inactive as resolved', () => {
+    expect(RESOLVED_STATUSES).toEqual(['inactive']);
+    expect(isResolvedStatus('inactive')).toBe(true);
+    expect(isResolvedStatus('active')).toBe(false);
   });
 
-  it('treats dismissed as resolved, not needs-action', () => {
-    const dismissed: SignificantEventStatus = 'dismissed';
-    expect(isNeedsActionStatus(dismissed)).toBe(false);
-    expect(isResolvedStatus(dismissed)).toBe(true);
+  it('treats inactive as resolved, not needs-action', () => {
+    const inactive: SignificantEventStatus = 'inactive';
+    expect(isNeedsActionStatus(inactive)).toBe(false);
+    expect(isResolvedStatus(inactive)).toBe(true);
   });
 
   it('splits events into needs-action and resolved buckets, grouping dismissed with resolved', () => {
     const events = [
-      mockEvent({ event_id: '1', status: 'open' }),
-      mockEvent({ event_id: '2', status: 'open' }),
-      mockEvent({ event_id: '3', status: 'closed' }),
-      mockEvent({ event_id: '4', status: 'closed' }),
-      mockEvent({ event_id: '5', status: 'dismissed' }),
+      mockEvent({ event_id: '1', status: 'active' }),
+      mockEvent({ event_id: '2', status: 'active' }),
+      mockEvent({ event_id: '3', status: 'inactive' }),
+      mockEvent({ event_id: '4', status: 'inactive' }),
+      mockEvent({ event_id: '5', status: 'inactive' }),
     ];
 
     expect(getNeedsActionEvents(events).map(({ event_id: id }) => id)).toEqual(['1', '2']);
@@ -75,17 +73,17 @@ describe('significant_event_status', () => {
     const events = [
       mockEvent({
         event_id: 'low',
-        severity: '20-low',
+        severity: 'low',
         '@timestamp': '2026-01-01T00:00:00.000Z',
       }),
       mockEvent({
         event_id: 'high',
-        severity: '60-high',
+        severity: 'high',
         '@timestamp': '2026-01-01T00:00:00.000Z',
       }),
       mockEvent({
         event_id: 'newer',
-        severity: '60-high',
+        severity: 'high',
         updated_at: '2026-01-03T00:00:00.000Z',
         '@timestamp': '2026-01-02T00:00:00.000Z',
       }),
@@ -104,7 +102,7 @@ describe('significant_event_status', () => {
         event_id: 'missing',
         severity: undefined as unknown as SignificantEvent['severity'],
       }),
-      mockEvent({ event_id: 'critical', severity: '80-critical' }),
+      mockEvent({ event_id: 'critical', severity: 'critical' }),
     ];
 
     expect(() => [...events].sort(byCriticalityAndUpdatedAtDesc)).not.toThrow();
@@ -112,13 +110,13 @@ describe('significant_event_status', () => {
   });
 
   it('maps status to list dot color', () => {
-    expect(getStatusColor('open')).toBe('danger');
-    expect(getStatusColor('closed')).toBe('success');
+    expect(getStatusColor('active')).toBe('danger');
+    expect(getStatusColor('inactive')).toBe('success');
   });
 
   it('derives investigation badge label from investigations, not event status', () => {
     const inProgress = mockEvent({
-      status: 'closed',
+      status: 'inactive',
       investigations: [
         {
           workflow_execution_id: 'exec-1',
@@ -127,7 +125,7 @@ describe('significant_event_status', () => {
       ],
     });
     const completed = mockEvent({
-      status: 'open',
+      status: 'active',
       investigations: [
         {
           workflow_execution_id: 'exec-1',
@@ -155,7 +153,6 @@ describe('significant_event_status', () => {
       ],
     });
     const completed = mockEvent({
-      event_uuid: 'evt-uuid-2',
       investigations: [
         {
           workflow_execution_id: 'exec-2',

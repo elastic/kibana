@@ -250,11 +250,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(bulkResult.attachments.length).to.be(2);
         // The internal `bulkGetAttachments` route returns unified attachments.
-        const byId = new Map<string, { type: string; attachmentId?: string }>(
-          bulkResult.attachments.map((a: { id: string; type: string; attachmentId?: string }) => [
-            a.id,
-            a,
-          ])
+        const byId = new Map<string, { type: string; attachmentId?: string | string[] }>(
+          bulkResult.attachments.map(
+            (a: { id: string; type: string; attachmentId?: string | string[] }) => [a.id, a]
+          )
         );
 
         const unifiedProjected = byId.get(unifiedId)!;
@@ -303,11 +302,10 @@ export default ({ getService }: FtrProviderContext): void => {
         // legacy `user` SO from `cases-comments` is projected to the unified
         // `comment` shape and a unified `osquery` SO from `cases-attachments` is
         // returned in its native unified shape.
-        const byId = new Map<string, { type: string; attachmentId?: string }>(
-          bulkResult.attachments.map((a: { id: string; type: string; attachmentId?: string }) => [
-            a.id,
-            a,
-          ])
+        const byId = new Map<string, { type: string; attachmentId?: string | string[] }>(
+          bulkResult.attachments.map(
+            (a: { id: string; type: string; attachmentId?: string | string[] }) => [a.id, a]
+          )
         );
         expect(byId.get(legacyId)!.type).to.be(COMMENT_ATTACHMENT_TYPE);
         const osqueryAttachment = byId.get(osqueryId)!;

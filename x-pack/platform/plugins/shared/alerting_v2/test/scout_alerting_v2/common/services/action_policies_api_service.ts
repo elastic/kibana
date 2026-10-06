@@ -14,7 +14,10 @@ import type {
   FindActionPoliciesResponse,
   UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_ACTION_POLICY_API_PATH } from '@kbn/alerting-v2-constants';
+import {
+  ALERTING_V2_ACTION_POLICY_API_PATH,
+  ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH,
+} from '@kbn/alerting-v2-constants';
 import { COMMON_HEADERS } from '../constants';
 
 export interface ActionPoliciesApiService {
@@ -52,7 +55,7 @@ export const getActionPoliciesApiService = ({
     measurePerformanceAsync(log, 'actionPolicies.list', async () => {
       const response = await kbnClient.request<FindActionPoliciesResponse>({
         method: 'GET',
-        path: ALERTING_V2_ACTION_POLICY_API_PATH,
+        path: ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH,
         query,
       });
       return response.data;
@@ -71,15 +74,11 @@ export const getActionPoliciesApiService = ({
 
   const patch: ActionPoliciesApiService['patch'] = (id, data) =>
     measurePerformanceAsync(log, 'actionPolicies.patch', async () => {
-      const current = await get(id);
-      if (!current.version) {
-        throw new Error(`Action policy "${id}" has no version; cannot patch.`);
-      }
       const response = await kbnClient.request<ActionPolicyResponse>({
         method: 'PATCH',
         path: `${ALERTING_V2_ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}`,
         headers: COMMON_HEADERS,
-        body: { ...data, version: current.version },
+        body: data,
       });
       return response.data;
     });

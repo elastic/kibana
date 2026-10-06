@@ -9,6 +9,9 @@
 
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
+import { registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
+import { createMockDataViewsService } from '@kbn/data-source/src/__mocks__/data_views_service.mock';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { internalStateActions, selectTabRuntimeState, selectTab } from '..';
 import { createDataViewDataSource } from '../../../../../../common/data_sources';
@@ -73,6 +76,62 @@ describe('tab_state_data_view actions', () => {
     jest.clearAllMocks();
   });
 
+  describe('setDataSource', () => {
+    it('publishes an EsqlSource with the DataView shim registered for it', async () => {
+      const { internalState, tabId, runtimeStateManager } = await setup();
+      const esqlSource = createMockEsqlSource([], [], '@timestamp', 'FROM logs-*');
+      const shim = await registerEsqlSourceInDataViewsCache(
+        createMockDataViewsService(),
+        esqlSource
+      );
+
+      internalState.dispatch(internalStateActions.setDataSource({ tabId, dataSource: esqlSource }));
+
+      const { currentDataSource$, currentDataView$ } = selectTabRuntimeState(
+        runtimeStateManager,
+        tabId
+      );
+      expect(currentDataSource$.getValue()).toBe(esqlSource);
+      expect(currentDataView$.getValue()).toBe(shim);
+    });
+
+    it('throws for an EsqlSource that was not registered', async () => {
+      const { internalState, tabId } = await setup();
+      const esqlSource = createMockEsqlSource([], [], '@timestamp', 'FROM unregistered-*');
+      (esqlSource as { id: string }).id = 'esql-unregistered';
+
+      expect(() =>
+        internalState.dispatch(
+          internalStateActions.setDataSource({ tabId, dataSource: esqlSource })
+        )
+      ).toThrow('ES|QL source esql-unregistered must be registered with resolveEsqlSource');
+    });
+  });
+
+  describe('setDataView', () => {
+    it('reuses the existing DataViewSource when setDataView is called with the same DataView', async () => {
+      const { internalState, tabId, runtimeStateManager } = await setup();
+      const currentDataSource$ = selectTabRuntimeState(
+        runtimeStateManager,
+        tabId
+      ).currentDataSource$;
+      const existing = currentDataSource$.getValue();
+      const dataView = selectTabRuntimeState(
+        runtimeStateManager,
+        tabId
+      ).currentDataView$.getValue();
+
+      internalState.dispatch(
+        internalStateActions.setDataView({
+          tabId,
+          dataView: dataView!,
+        })
+      );
+
+      expect(currentDataSource$.getValue()).toBe(existing);
+    });
+  });
+
   describe('assignNextDataView', () => {
     it('should update data view', async () => {
       const { internalState, tabId, runtimeStateManager } = await setup();
@@ -94,7 +153,7 @@ describe('tab_state_data_view actions', () => {
       );
       expect(internalStateActions.pauseAutoRefreshInterval).toHaveBeenCalledWith({
         tabId,
-        dataView: dataViewMock,
+        dataSource: expect.objectContaining({ kind: 'index-pattern', id: dataViewMock.id }),
       });
     });
   });

@@ -50,6 +50,16 @@ import { deleteIndexPipelines } from '../lib/pipelines/delete_pipelines';
 import { getDefaultPipeline } from '../lib/pipelines/get_default_pipeline';
 import { updateDefaultPipeline } from '../lib/pipelines/update_default_pipeline';
 import { updateConnectorPipeline } from '../lib/pipelines/update_pipeline';
+import {
+  descriptionSchema,
+  freeformStringSchema,
+  idSchema,
+  indexNameSchema,
+  MAX_SEARCH_QUERY_LENGTH,
+  nameSchema,
+  searchQuerySchema,
+  shortStringSchema,
+} from './schemas';
 
 import type { SearchConnectorsPluginSetupDependencies } from '../types';
 import { createError } from '../utils/create_error';
@@ -78,11 +88,11 @@ export function registerConnectorRoutes({
       validate: {
         body: schema.object({
           delete_existing_connector: schema.maybe(schema.boolean()),
-          index_name: schema.maybe(schema.string()),
+          index_name: schema.maybe(indexNameSchema),
           is_native: schema.boolean(),
-          language: schema.nullable(schema.string()),
-          name: schema.maybe(schema.string()),
-          service_type: schema.maybe(schema.string()),
+          language: schema.nullable(shortStringSchema),
+          name: schema.maybe(nameSchema),
+          service_type: schema.maybe(shortStringSchema),
         }),
       },
       security: {
@@ -148,7 +158,7 @@ export function registerConnectorRoutes({
       path: '/internal/content_connectors/connectors/{connectorId}/cancel_syncs',
       validate: {
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: idSchema,
         }),
       },
       security: {
@@ -170,7 +180,7 @@ export function registerConnectorRoutes({
       path: '/internal/content_connectors/connectors/{syncJobId}/cancel_sync',
       validate: {
         params: schema.object({
-          syncJobId: schema.string(),
+          syncJobId: idSchema,
         }),
       },
       security: {
@@ -210,11 +220,11 @@ export function registerConnectorRoutes({
       path: '/internal/content_connectors/connectors/{connectorId}/configuration',
       validate: {
         body: schema.recordOf(
-          schema.string(),
-          schema.oneOf([schema.string(), schema.number(), schema.boolean()])
+          shortStringSchema,
+          schema.oneOf([freeformStringSchema, schema.number(), schema.boolean()])
         ),
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: idSchema,
         }),
       },
       security: {
@@ -240,12 +250,12 @@ export function registerConnectorRoutes({
       path: '/internal/content_connectors/connectors/{connectorId}/scheduling',
       validate: {
         body: schema.object({
-          access_control: schema.object({ enabled: schema.boolean(), interval: schema.string() }),
-          full: schema.object({ enabled: schema.boolean(), interval: schema.string() }),
-          incremental: schema.object({ enabled: schema.boolean(), interval: schema.string() }),
+          access_control: schema.object({ enabled: schema.boolean(), interval: shortStringSchema }),
+          full: schema.object({ enabled: schema.boolean(), interval: shortStringSchema }),
+          incremental: schema.object({ enabled: schema.boolean(), interval: shortStringSchema }),
         }),
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: idSchema,
         }),
       },
       security: {
@@ -271,7 +281,7 @@ export function registerConnectorRoutes({
       path: '/internal/content_connectors/connectors/{connectorId}/start_sync',
       validate: {
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: idSchema,
         }),
       },
       security: {
@@ -293,7 +303,7 @@ export function registerConnectorRoutes({
       path: '/internal/content_connectors/connectors/{connectorId}/start_incremental_sync',
       validate: {
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: idSchema,
         }),
       },
       security: {
@@ -315,7 +325,7 @@ export function registerConnectorRoutes({
       path: '/internal/content_connectors/connectors/{connectorId}/start_access_control_sync',
       validate: {
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: idSchema,
         }),
       },
       security: {
@@ -355,12 +365,12 @@ export function registerConnectorRoutes({
       path: '/internal/content_connectors/connectors/{connectorId}/sync_jobs',
       validate: {
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: idSchema,
         }),
         query: schema.object({
           from: schema.number({ defaultValue: 0, min: 0 }),
           size: schema.number({ defaultValue: 10, min: 0 }),
-          type: schema.maybe(schema.string()),
+          type: schema.maybe(shortStringSchema),
         }),
       },
       security: {
@@ -389,12 +399,12 @@ export function registerConnectorRoutes({
       validate: {
         body: schema.object({
           extract_binary_content: schema.boolean(),
-          name: schema.string(),
+          name: nameSchema,
           reduce_whitespace: schema.boolean(),
           run_ml_inference: schema.boolean(),
         }),
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: idSchema,
         }),
       },
       security: {
@@ -418,7 +428,7 @@ export function registerConnectorRoutes({
       validate: {
         body: schema.object({
           extract_binary_content: schema.boolean(),
-          name: schema.string(),
+          name: nameSchema,
           reduce_whitespace: schema.boolean(),
           run_ml_inference: schema.boolean(),
         }),
@@ -459,9 +469,9 @@ export function registerConnectorRoutes({
     {
       path: '/internal/content_connectors/connectors/{connectorId}/service_type',
       validate: {
-        body: schema.object({ serviceType: schema.string() }),
+        body: schema.object({ serviceType: shortStringSchema }),
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: idSchema,
         }),
       },
       security: {
@@ -486,9 +496,9 @@ export function registerConnectorRoutes({
     {
       path: '/internal/content_connectors/connectors/{connectorId}/status',
       validate: {
-        body: schema.object({ status: schema.string() }),
+        body: schema.object({ status: shortStringSchema }),
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: idSchema,
         }),
       },
       security: {
@@ -514,11 +524,11 @@ export function registerConnectorRoutes({
       path: '/internal/content_connectors/connectors/{connectorId}/name_and_description',
       validate: {
         body: schema.object({
-          description: schema.nullable(schema.string()),
-          name: schema.string(),
+          description: schema.nullable(descriptionSchema),
+          name: nameSchema,
         }),
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: idSchema,
         }),
       },
       security: {
@@ -548,23 +558,23 @@ export function registerConnectorRoutes({
       path: '/internal/content_connectors/connectors/{connectorId}/filtering/draft',
       validate: {
         body: schema.object({
-          advanced_snippet: schema.string(),
+          advanced_snippet: freeformStringSchema,
           filtering_rules: schema.arrayOf(
             schema.object({
-              created_at: schema.string(),
-              field: schema.string(),
-              id: schema.string(),
+              created_at: shortStringSchema,
+              field: shortStringSchema,
+              id: idSchema,
               order: schema.number(),
-              policy: schema.string(),
-              rule: schema.string(),
-              updated_at: schema.string(),
-              value: schema.string(),
+              policy: shortStringSchema,
+              rule: shortStringSchema,
+              updated_at: shortStringSchema,
+              value: descriptionSchema,
             }),
             { maxSize: 1000 }
           ),
         }),
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: idSchema,
         }),
       },
       security: {
@@ -594,24 +604,24 @@ export function registerConnectorRoutes({
       validate: {
         body: schema.maybe(
           schema.object({
-            advanced_snippet: schema.string(),
+            advanced_snippet: freeformStringSchema,
             filtering_rules: schema.arrayOf(
               schema.object({
-                created_at: schema.string(),
-                field: schema.string(),
-                id: schema.string(),
+                created_at: shortStringSchema,
+                field: shortStringSchema,
+                id: idSchema,
                 order: schema.number(),
-                policy: schema.string(),
-                rule: schema.string(),
-                updated_at: schema.string(),
-                value: schema.string(),
+                policy: shortStringSchema,
+                rule: shortStringSchema,
+                updated_at: shortStringSchema,
+                value: descriptionSchema,
               }),
               { maxSize: 1000 }
             ),
           })
         ),
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: idSchema,
         }),
       },
       security: {
@@ -636,7 +646,7 @@ export function registerConnectorRoutes({
           is_native: schema.boolean(),
         }),
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: idSchema,
         }),
       },
       security: {
@@ -661,7 +671,7 @@ export function registerConnectorRoutes({
         query: schema.object({
           fetchCrawlersOnly: schema.maybe(schema.boolean()),
           from: schema.number({ defaultValue: 0, min: 0 }),
-          searchQuery: schema.string({ defaultValue: '' }),
+          searchQuery: schema.string({ defaultValue: '', maxLength: MAX_SEARCH_QUERY_LENGTH }),
           size: schema.number({ defaultValue: 10, min: 0 }),
         }),
       },
@@ -743,7 +753,7 @@ export function registerConnectorRoutes({
       path: '/internal/content_connectors/connectors/{connectorId}',
       validate: {
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: idSchema,
         }),
       },
       security: {
@@ -779,7 +789,7 @@ export function registerConnectorRoutes({
       path: '/internal/content_connectors/connectors/{connectorId}',
       validate: {
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: idSchema,
         }),
         query: schema.object({
           shouldDeleteIndex: schema.maybe(schema.boolean()),
@@ -861,8 +871,8 @@ export function registerConnectorRoutes({
       path: '/internal/content_connectors/connectors/{connectorId}/index_name/{indexName}',
       validate: {
         params: schema.object({
-          connectorId: schema.string(),
-          indexName: schema.string(),
+          connectorId: idSchema,
+          indexName: indexNameSchema,
         }),
       },
       security: {
@@ -911,7 +921,7 @@ export function registerConnectorRoutes({
       validate: {
         query: schema.object({
           from: schema.number({ defaultValue: 0, min: 0 }),
-          search_query: schema.maybe(schema.string()),
+          search_query: schema.maybe(searchQuerySchema),
           size: schema.number({ defaultValue: 40, min: 0 }),
         }),
       },
@@ -954,7 +964,7 @@ export function registerConnectorRoutes({
       path: '/internal/content_connectors/connectors/{connectorId}/generate_config',
       validate: {
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: idSchema,
         }),
       },
       security: {
@@ -1025,8 +1035,8 @@ export function registerConnectorRoutes({
       path: '/internal/content_connectors/connectors/generate_connector_name',
       validate: {
         body: schema.object({
-          connectorName: schema.maybe(schema.string()),
-          connectorType: schema.string(),
+          connectorName: schema.maybe(nameSchema),
+          connectorType: shortStringSchema,
           isManagedConnector: schema.maybe(schema.boolean()),
         }),
       },
@@ -1076,7 +1086,7 @@ export function registerConnectorRoutes({
       path: '/internal/content_connectors/{connectorId}/agentless_policy',
       validate: {
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: idSchema,
         }),
       },
       security: {
@@ -1193,7 +1203,7 @@ export function registerConnectorRoutes({
       },
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          indexName: indexNameSchema,
         }),
       },
     },
@@ -1233,7 +1243,7 @@ export function registerConnectorRoutes({
       },
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          indexName: indexNameSchema,
         }),
       },
     },
@@ -1277,8 +1287,8 @@ export function registerConnectorRoutes({
       },
       validate: {
         body: schema.object({
-          index_name: schema.string(),
-          language: schema.maybe(schema.nullable(schema.string())),
+          index_name: indexNameSchema,
+          language: schema.maybe(schema.nullable(shortStringSchema)),
         }),
       },
     },
@@ -1345,7 +1355,7 @@ export function registerConnectorRoutes({
       },
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          indexName: indexNameSchema,
         }),
         body: schema.object({
           is_native: schema.boolean(),

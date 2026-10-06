@@ -20,7 +20,24 @@ interface SetupDependencies {
 export class ServiceAccountsTestPlugin implements Plugin<void, void, SetupDependencies> {
   setup(core: CoreSetup, { security }: SetupDependencies): void {
     core.security.serviceAccounts.registerWorkloadType({ type: 'job', name: 'Test job' });
-    core.http.createRouter().post(
+    const router = core.http.createRouter();
+    // Reports how Core classified the request's principal. Authorization is intentionally off:
+    // the point is to observe classification for credentials without Kibana privileges.
+    router.get(
+      {
+        path: '/internal/service_accounts_test/_principal',
+        options: { access: 'internal' },
+        security: {
+          authz: { enabled: false, reason: 'Test endpoint reporting the authenticated principal' },
+        },
+        validate: false,
+      },
+      async (context, _request, response) => {
+        const { security: coreSecurity } = await context.core;
+        return response.ok({ body: { principal: coreSecurity.authc.getPrincipal() } });
+      }
+    );
+    router.post(
       {
         path: '/internal/service_accounts_test/{workloadId}',
         options: { access: 'internal' },
@@ -82,6 +99,7 @@ export class ServiceAccountsTestPlugin implements Plugin<void, void, SetupDepend
             async (fakeRequest) => {
               const client = start.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
               const initialAuthorization = fakeRequest.headers.authorization;
+              const principal = start.security.authc.getPrincipal(fakeRequest);
               const initial = await client.security.authenticate();
               await client.cluster.health();
               if (action === 'read_role') await client.security.getRole({ name: 'superuser' });
@@ -118,6 +136,8 @@ export class ServiceAccountsTestPlugin implements Plugin<void, void, SetupDepend
                   renewedUsername: renewed.username,
                   tokenChanged: initialAuthorization !== fakeRequest.headers.authorization,
                   spaceId: fakeRequest.spaceId,
+                  principal,
+                  renewedPrincipal: start.security.authc.getPrincipal(fakeRequest),
                 };
               } catch (error) {
                 if (!(error instanceof errors.ResponseError)) throw error;

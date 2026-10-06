@@ -16,13 +16,14 @@ import { createMockEndpointAppContextService } from '../../../../endpoint/mocks'
 import { createToolHandlerContext } from '../../../__mocks__/test_helpers';
 import { hashPolicyConfig } from '../domain/hash_policy_config';
 import { normalize } from '../domain/normalize_policy_config';
+import type { EndpointPolicyBaseline } from '../domain/normalized_endpoint_policy';
+import type { PolicyReferenceInput } from '../domain/input_schemas';
 import type { EndpointPolicyManagementService } from '../services/endpoint_policy_management_service';
 import type { EndpointPolicyRead } from '../services/read_policy';
 import {
   COMPARE_POLICIES_TOOL_ID,
   comparePoliciesSchema,
   createComparePoliciesTool,
-  type PolicyComparisonRef,
 } from './compare_policies';
 import { createPolicyTool } from './create_policy_tool';
 import { toPresentationHash } from './trim_policy_result';
@@ -43,6 +44,7 @@ const createPolicyRead = (overrides: Partial<EndpointPolicyRead> = {}): Endpoint
   const storedConfig = policyFactory();
   const normalizedConfig = normalize(storedConfig);
   return {
+    kind: 'policy',
     policy: {
       id: 'policy-1',
       name: 'Endpoint Policy',
@@ -57,6 +59,31 @@ const createPolicyRead = (overrides: Partial<EndpointPolicyRead> = {}): Endpoint
   };
 };
 
+const createBaseline = (
+  overrides: Partial<Omit<EndpointPolicyBaseline, 'kind'>> = {}
+): EndpointPolicyBaseline => {
+  const normalizedConfig = normalize(policyFactory());
+  return {
+    kind: 'baseline',
+    preset: 'NGAV',
+    environment: { license: 'enterprise', cloud: false, telemetryOptedIn: 'unresolved' },
+    normalizedConfig,
+    normalizedHash: hashPolicyConfig(normalizedConfig),
+    summary: {
+      windowsProtectionModes: {
+        malware: 'prevent',
+        ransomware: 'prevent',
+        memoryThreat: 'prevent',
+        behavior: 'prevent',
+      },
+      macProtectionModes: { malware: 'prevent', behavior: 'prevent' },
+      linuxProtectionModes: { malware: 'prevent', behavior: 'prevent' },
+      globalTelemetryEnabled: false,
+    },
+    ...overrides,
+  };
+};
+
 const createContext = () =>
   createToolHandlerContext(
     httpServerMock.createKibanaRequest(),
@@ -65,7 +92,7 @@ const createContext = () =>
     { spaceId: SPACE_ID }
   );
 
-const getResult = async (from: PolicyComparisonRef, to: PolicyComparisonRef) => {
+const getResult = async (from: PolicyReferenceInput, to: PolicyReferenceInput) => {
   const tool = createComparePoliciesTool({
     endpointAppContextService: createMockEndpointAppContextService(),
     getStartServices,
@@ -86,7 +113,7 @@ describe('createComparePoliciesTool', () => {
       schema: options.schema,
       maxResultTokens: options.maxResultTokens,
       handler: async (params) => ({
-        results: [createOtherResult(await options.run(params, mockService))],
+        results: [createOtherResult(await options.run(params, mockService, createContext()))],
       }),
     }));
     mockedComparePolicies.mockReset();
@@ -109,20 +136,32 @@ describe('createComparePoliciesTool', () => {
     });
   });
 
-  it('accepts two live policy refs and rejects invalid refs', () => {
+  it('accepts mixed live and preset refs and rejects invalid refs', () => {
     expect(
       comparePoliciesSchema.parse({
-        from: { type: 'policy', idOrName: '  policy-1  ' },
-        to: { type: 'policy', idOrName: 'policy-2' },
+        from: { idOrName: '  policy-1  ' },
+        to: { preset: 'EDRComplete' },
       })
     ).toEqual({
-      from: { type: 'policy', idOrName: 'policy-1' },
-      to: { type: 'policy', idOrName: 'policy-2' },
+      from: { idOrName: 'policy-1' },
+      to: { preset: 'EDRComplete' },
     });
     expect(
       comparePoliciesSchema.safeParse({
-        from: { type: 'policy', idOrName: '' },
-        to: { type: 'policy', idOrName: 'policy-2' },
+        from: { idOrName: 'policy-1', preset: 'EDRComplete' },
+        to: { idOrName: 'policy-2' },
+      }).success
+    ).toBe(false);
+    expect(
+      comparePoliciesSchema.safeParse({
+        from: { idOrName: '' },
+        to: { idOrName: 'policy-2' },
+      }).success
+    ).toBe(false);
+    expect(
+      comparePoliciesSchema.safeParse({
+        from: { preset: 'EDRComplete' },
+        to: {},
       }).success
     ).toBe(false);
   });
@@ -144,11 +183,7 @@ describe('createComparePoliciesTool', () => {
       ],
     });
 
-    const result = await getResult(
-      { type: 'policy', idOrName: 'policy-1' },
-      { type: 'policy', idOrName: 'policy-2' }
-    );
-
+    const result = await getResult({ idOrName: 'policy-1' }, { idOrName: 'policy-2' });
     expect(mockedComparePolicies).toHaveBeenCalledWith(
       { type: 'policy', idOrName: 'policy-1' },
       { type: 'policy', idOrName: 'policy-2' }
@@ -176,14 +211,76 @@ describe('createComparePoliciesTool', () => {
     );
   });
 
+  it('presents a live side and a baseline side in a mixed comparison', async () => {
+    const liveRead = createPolicyRead();
+    const baseline = createBaseline();
+    mockedComparePolicies.mockResolvedValue({
+      from: liveRead,
+      to: baseline,
+      diffs: [
+        {
+          path: 'windows.malware.mode',
+          from: ProtectionModes.prevent,
+          to: ProtectionModes.detect,
+        },
+        { path: 'linux.events.dns', from: undefined, to: true },
+        { path: 'windows.advanced.alerts.rollback', from: { enabled: true }, to: undefined },
+      ],
+    });
+
+    const result = await getResult({ idOrName: 'policy-1' }, { preset: 'NGAV' });
+
+    expect(mockedComparePolicies).toHaveBeenCalledWith(
+      { type: 'policy', idOrName: 'policy-1' },
+      { type: 'baseline', preset: 'NGAV' }
+    );
+    expect(result.data).toEqual(
+      expect.objectContaining({
+        from: {
+          type: 'policy',
+          policy: liveRead.policy,
+          normalizedHash: toPresentationHash(liveRead.normalizedHash),
+        },
+        to: {
+          type: 'baseline',
+          baseline: {
+            preset: 'NGAV',
+            environment: baseline.environment,
+          },
+          normalizedHash: toPresentationHash(baseline.normalizedHash),
+        },
+        normalized_posture_equal: false,
+        value_truncated: false,
+      })
+    );
+
+    const dto = result.data as {
+      diffs: Array<Record<string, unknown>>;
+      value_total: number;
+      value_truncated: boolean;
+    };
+    expect(dto.value_total).toBe(3);
+    expect(dto.value_truncated).toBe(false);
+    const missingFrom = dto.diffs.find((entry) => entry.path === 'linux.events.dns');
+    const missingTo = dto.diffs.find((entry) => entry.path === 'windows.advanced.alerts.rollback');
+    expect(missingFrom).toEqual({ path: 'linux.events.dns', from: null, to: true });
+    expect(missingTo).toEqual({
+      path: 'windows.advanced.alerts.rollback',
+      from: { enabled: true },
+      to: null,
+    });
+    for (const entry of dto.diffs) {
+      expect('from' in entry).toBe(true);
+      expect('to' in entry).toBe(true);
+      expect(JSON.parse(JSON.stringify(entry))).toEqual(entry);
+    }
+  });
+
   it('returns normalized_posture_equal true when the full deterministic diff is empty', async () => {
     const read = createPolicyRead();
     mockedComparePolicies.mockResolvedValue({ from: read, to: read, diffs: [] });
 
-    const result = await getResult(
-      { type: 'policy', idOrName: 'policy-1' },
-      { type: 'policy', idOrName: 'policy-1' }
-    );
+    const result = await getResult({ idOrName: 'policy-1' }, { idOrName: 'policy-1' });
 
     expect(result.data).toEqual(
       expect.objectContaining({
@@ -211,10 +308,7 @@ describe('createComparePoliciesTool', () => {
       diffs: fullDiff,
     });
 
-    const result = await getResult(
-      { type: 'policy', idOrName: 'policy-1' },
-      { type: 'policy', idOrName: 'policy-2' }
-    );
+    const result = await getResult({ idOrName: 'policy-1' }, { idOrName: 'policy-2' });
     const dto = result.data as {
       diffs: Array<Record<string, unknown>>;
       value_total: number;
@@ -253,10 +347,7 @@ describe('createComparePoliciesTool', () => {
       ],
     });
 
-    const result = await getResult(
-      { type: 'policy', idOrName: 'policy-1' },
-      { type: 'policy', idOrName: 'policy-2' }
-    );
+    const result = await getResult({ idOrName: 'policy-1' }, { idOrName: 'policy-2' });
     const [entry] = (result.data as { diffs: Array<Record<string, unknown>> }).diffs;
 
     expect(entry).toEqual(

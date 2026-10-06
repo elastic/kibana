@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -70,6 +71,7 @@ import {
   MULTIPLE_RULE_TITLE,
 } from '../../rules_list/translations';
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
+import { useBulkGetUserProfiles } from '../../../hooks/use_bulk_get_user_profiles';
 import type { RefreshToken } from './types';
 import { UntrackAlertsModal } from '../../common/components/untrack_alerts_modal';
 
@@ -87,6 +89,8 @@ export type RuleDetailsProps = {
 const ruleDetailStyle = {
   minWidth: 0,
 };
+
+const EMPTY_PROFILES_BY_UID = new Map<string, string>();
 
 const ENABLED_LABEL = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleDetails.enabledBadgeLabel',
@@ -131,6 +135,30 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     useState<boolean>(false);
 
   const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
+
+  // Batch all uids into a single bulkGet request instead of fetching separately.
+  const auditProfileUids = useMemo(
+    () =>
+      uniq(
+        [rule.createdByProfileUid, rule.updatedByProfileUid, rule.apiKeyOwnerProfileUid].filter(
+          (uid): uid is string => !!uid
+        )
+      ),
+    [rule.createdByProfileUid, rule.updatedByProfileUid, rule.apiKeyOwnerProfileUid]
+  );
+
+  const { data: profilesByUid = EMPTY_PROFILES_BY_UID } = useBulkGetUserProfiles({
+    uids: auditProfileUids,
+  });
+  const creator = rule.createdByProfileUid
+    ? profilesByUid.get(rule.createdByProfileUid) ?? rule.createdBy ?? ''
+    : rule.createdBy ?? '';
+  const updater = rule.updatedByProfileUid
+    ? profilesByUid.get(rule.updatedByProfileUid) ?? rule.updatedBy ?? ''
+    : rule.updatedBy ?? '';
+  const apiKeyOwner = rule.apiKeyOwnerProfileUid
+    ? profilesByUid.get(rule.apiKeyOwnerProfileUid) ?? rule.apiKeyOwner ?? ''
+    : rule.apiKeyOwner ?? '';
 
   useEffect(() => {
     (async () => {
@@ -347,7 +375,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
         value: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.createdAt', {
           defaultMessage: 'Created by {creator} on {createdAt}',
           values: {
-            creator: rule.createdBy ?? '',
+            creator,
             createdAt: moment(rule.createdAt).format('ll'),
           },
         }),
@@ -359,7 +387,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
         value: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.updatedAt', {
           defaultMessage: 'Last updated by {updater} on {updatedAt}',
           values: {
-            updater: rule.updatedBy ?? '',
+            updater,
             updatedAt: moment(rule.updatedAt).format('ll'),
           },
         }),
@@ -367,27 +395,20 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
       },
     ];
 
-    if (hasManageApiKeysCapability(capabilities) && rule.apiKeyOwner) {
+    if (hasManageApiKeysCapability(capabilities) && apiKeyOwner) {
       items.push({
         type: 'text',
         label: i18n.translate(
           'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.apiKeyOwnerTitle',
           { defaultMessage: 'API key owner' }
         ),
-        value: rule.apiKeyOwner,
+        value: apiKeyOwner,
         'data-test-subj': 'apiKeyOwnerLabel',
       });
     }
 
     return items as unknown as AppHeaderMetadataItems;
-  }, [
-    rule.createdBy,
-    rule.createdAt,
-    rule.updatedBy,
-    rule.updatedAt,
-    rule.apiKeyOwner,
-    capabilities,
-  ]);
+  }, [creator, rule.createdAt, updater, rule.updatedAt, apiKeyOwner, capabilities]);
 
   const appMenu = useRuleDetailsAppMenu({
     rule,

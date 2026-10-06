@@ -55,9 +55,6 @@ const ecsRowData: Ecs = {
 const props = {
   ariaLabel:
     'Select more actions for the alert or event in row 26, with columns 2021-08-12T11:07:10.552Z Malware Prevention Alert high 73  siem-windows-endpoint SYSTEM powershell.exe mimikatz.exe  ',
-  ariaRowindex: 26,
-  columnValues:
-    '2021-08-12T11:07:10.552Z Malware Prevention Alert high 73  siem-windows-endpoint SYSTEM powershell.exe mimikatz.exe  ',
   isRemoteDocument: false,
   ecsRowData,
   refetch: jest.fn(),

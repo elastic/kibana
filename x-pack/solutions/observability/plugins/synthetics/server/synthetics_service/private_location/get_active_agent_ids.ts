@@ -9,6 +9,7 @@ import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 import { getAPIKeyForSyntheticsService } from '../get_api_key';
 import { getFakeKibanaRequest } from '../utils/fake_kibana_request';
 import type { SyntheticsServerSetup } from '../../types';
+import { getPrivateLocationShardingApiKey } from './get_sharding_api_key';
 
 /**
  * Data-plane liveness signal: which of the given agents have written a
@@ -23,8 +24,10 @@ import type { SyntheticsServerSetup } from '../../types';
  * no assigned monitors (or only long-schedule ones) legitimately writes nothing,
  * so absence of data is ambiguous and falls back to the check-in signal.
  *
- * The task runs as `kibana_system`, which cannot read `synthetics-*`; we query
- * as the synthetics service API key (the same credential Heartbeat uses).
+ * The task runs as `kibana_system`, which cannot read `synthetics-*`. When a
+ * service manifest or dev URL is configured we query with the Synthetics service
+ * API key, and use the sharding key only if that key is missing or invalid.
+ * Self-managed installs have neither URL, so we read the sharding key only.
  * Correlation is on `agent.id` because synthetics documents carry `agent.id`,
  * not `host.name`. Best-effort: any failure returns an empty set so the caller
  * falls back to check-ins alone — this never triggers an eviction, only prevents
@@ -44,7 +47,15 @@ export const getRecentlyActiveAgentIds = async (
 
   try {
     signal.throwIfAborted();
-    const { apiKey, isValid } = await getAPIKeyForSyntheticsService({ server });
+    const shouldUseServiceApiKey = Boolean(
+      server.config.service?.manifestUrl || server.config.service?.devUrl
+    );
+    const serviceApiKey = shouldUseServiceApiKey
+      ? await getAPIKeyForSyntheticsService({ server })
+      : undefined;
+    const { apiKey, isValid } = serviceApiKey?.isValid
+      ? serviceApiKey
+      : await getPrivateLocationShardingApiKey({ server });
     if (!apiKey || !isValid) {
       return active;
     }

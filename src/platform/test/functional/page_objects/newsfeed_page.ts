@@ -41,7 +41,7 @@ export class NewsfeedPageObject extends FtrService {
   }
 
   async getRedButtonSign() {
-    return await this.testSubjects.exists('headerActionButtonNotification', { timeout: 0 });
+    return await this.testSubjects.exists('headerActionButtonNotification');
   }
 
   async getNewsfeedList() {

@@ -10,7 +10,7 @@ export const DATE_PICKER_ABSOLUTE_INPUT = '[data-test-subj="superDatePickerAbsol
 export const GET_LOCAL_DATE_PICKER_APPLY_BUTTON = (container: string) =>
   `${container} button[data-test-subj="querySubmitButton"]`;
 
-export const GLOBAL_FILTERS_CONTAINER = `[data-test-subj="filters-global-container"]`;
+export const GLOBAL_FILTERS_CONTAINER = `[data-test-subj="globalDatePicker"]`;
 
 export const GET_DATE_PICKER_APPLY_BUTTON = (container: string) =>
   `${container} [data-test-subj="querySubmitButton"]`;

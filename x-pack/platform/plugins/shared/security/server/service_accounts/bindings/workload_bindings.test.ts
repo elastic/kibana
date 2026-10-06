@@ -80,6 +80,8 @@ describe('ServiceAccountWorkloadBindings', () => {
       createFakeRequest: jest.fn().mockResolvedValue(mintedRequest),
       reauthenticateFakeRequest: jest.fn(),
       releaseFakeRequest: jest.fn(),
+      getFakeRequestPrincipal: jest.fn(),
+      delete: jest.fn(),
     };
 
     license = licenseMock.create();
@@ -245,6 +247,36 @@ describe('ServiceAccountWorkloadBindings', () => {
   });
 
   describe('#withScopedRequest', () => {
+    it('rejects a rebind between the consumer lookup and credential creation', async () => {
+      const original = await bindings.getBinding(PLUGIN_ID, WORKLOAD_IN_SPACE);
+      store.getVerified.mockResolvedValue({ ...binding(), serviceAccountId: 'another-account' });
+      const execute = jest.fn();
+
+      await expect(
+        bindings.withScopedRequest(
+          PLUGIN_ID,
+          { ...WORKLOAD_IN_SPACE, expectedServiceAccountId: original?.serviceAccountId },
+          execute
+        )
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+      expect(backend.createFakeRequest).not.toHaveBeenCalled();
+      expect(execute).not.toHaveBeenCalled();
+    });
+
+    it('mints the expected account when the binding matches', async () => {
+      const execute = jest.fn().mockResolvedValue('executed');
+      await expect(
+        bindings.withScopedRequest(
+          PLUGIN_ID,
+          { ...WORKLOAD_IN_SPACE, expectedServiceAccountId: 'service-account-id' },
+          execute
+        )
+      ).resolves.toBe('executed');
+      expect(backend.createFakeRequest).toHaveBeenCalledWith(
+        expect.objectContaining({ serviceAccountId: 'service-account-id' })
+      );
+    });
+
     it('runs the callback with a request bound to the workload’s service account', async () => {
       const result = await bindings.withScopedRequest(
         PLUGIN_ID,
@@ -258,6 +290,14 @@ describe('ServiceAccountWorkloadBindings', () => {
       expect(result).toBe('executed');
       expect(backend.createFakeRequest).toHaveBeenCalledWith(
         expect.objectContaining({ serviceAccountId: 'service-account-id', spaceId: 'default' })
+      );
+    });
+
+    it('tells the backend when the workload was bound', async () => {
+      await bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined);
+
+      expect(backend.createFakeRequest).toHaveBeenCalledWith(
+        expect.objectContaining({ boundAt: '2026-08-21T00:00:00.000Z' })
       );
     });
 

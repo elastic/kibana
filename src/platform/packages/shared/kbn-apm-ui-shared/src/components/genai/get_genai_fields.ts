@@ -68,6 +68,24 @@ export interface GenAiFields {
   toolCallResult?: unknown;
 }
 
+/** Extracts and joins the content of text parts. */
+export function getTextPartsContent(parts: unknown): string | undefined {
+  if (!Array.isArray(parts)) return undefined;
+
+  const content = parts
+    .filter(
+      (part): part is { type: string; content: string } =>
+        part != null &&
+        typeof part === 'object' &&
+        part.type === 'text' &&
+        typeof part.content === 'string'
+    )
+    .map((part) => part.content)
+    .join('\n');
+
+  return content || undefined;
+}
+
 const GEN_AI_PATTERN = /(^|\.)gen[_.]ai[._]/;
 
 /**
@@ -200,17 +218,7 @@ function parseSystemInstructions(raw: unknown): string | undefined {
 
   const parsed = parseJsonValue(raw);
   if (Array.isArray(parsed)) {
-    const text = parsed
-      .filter(
-        (part): part is { type: string; content: string } =>
-          part != null &&
-          typeof part === 'object' &&
-          part.type === 'text' &&
-          typeof part.content === 'string'
-      )
-      .map((part) => part.content)
-      .join('\n');
-    return text.length > 0 ? text : stringifyFallback(raw);
+    return getTextPartsContent(parsed) ?? stringifyFallback(raw);
   }
   if (parsed && typeof parsed === 'object' && 'content' in parsed) {
     const { content } = parsed;

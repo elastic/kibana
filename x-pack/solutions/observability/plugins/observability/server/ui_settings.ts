@@ -35,6 +35,7 @@ import {
   apmTraceLogsDefaultColumns,
   searchExcludedDataTiers,
   enableDiagnosticMode,
+  apmMaxNumberOfServices,
 } from '../common/ui_settings_keys';
 
 /**
@@ -155,6 +156,29 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
       defaultMessage: 'Limit the number of services in a given service group',
     }),
     schema: schema.number({ min: 1 }),
+    solutionViews: ['classic', 'oblt'],
+  },
+  [apmMaxNumberOfServices]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmMaxNumberOfServicesUiSettingName', {
+      defaultMessage: 'Maximum services in the Services Inventory',
+    }),
+    value: 1000,
+    description: i18n.translate('xpack.observability.apmMaxNumberOfServicesUiSettingDescription', {
+      defaultMessage:
+        'Limit the number of services shown in the Services Inventory (minimum: 1, maximum: 5 000). ' +
+        'Increasing this value beyond the default may slow down queries and increase memory usage on Elasticsearch. ' +
+        'The effective safe maximum also depends on how many transaction types and environments exist per service: ' +
+        'the Services Inventory query uses nested aggregations, and very high values combined with diverse service ' +
+        'configurations can exceed the Elasticsearch {maxBucketsSetting} limit (default 65 536). ' +
+        'If you raise this setting above 2 000, verify or increase {maxBucketsSetting} in your cluster settings.',
+      values: { maxBucketsSetting: 'search.max_buckets' },
+    }),
+    schema: schema.number({
+      min: 1,
+      max: 5000,
+      validate: (n) => (!Number.isInteger(n) ? 'must be a whole number' : undefined),
+    }),
     solutionViews: ['classic', 'oblt'],
   },
   [enableInfrastructureAssetCustomDashboards]: {

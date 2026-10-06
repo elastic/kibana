@@ -18,6 +18,7 @@ import {
 
 test.describe('API keys deletion', { tag: tags.stateful.classic }, () => {
   let currentUsername: string | undefined;
+
   test.beforeEach(async ({ browserAuth, page, kbnUrl, esClient }) => {
     currentUsername = undefined;
     await browserAuth.loginWithCustomRole(testData.OWN_API_KEYS_ROLE);

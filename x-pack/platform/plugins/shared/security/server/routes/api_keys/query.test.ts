@@ -323,6 +323,31 @@ describe('Query API Keys route', () => {
       expect(response.payload.searchAfter).toEqual(expectedSortValues);
     });
 
+    it('should append a `_doc` tiebreaker to the sort so the order is total', async () => {
+      esClientMock.asCurrentUser.security.queryApiKeys.mockRestore();
+      esClientMock.asCurrentUser.security.queryApiKeys.mockResponse({
+        api_keys: [],
+        total: 0,
+      } as any);
+
+      await routeHandler(
+        mockContext,
+        httpServerMock.createKibanaRequest({
+          body: {
+            size: 25,
+            sort: { field: 'creation', direction: 'desc' },
+          },
+        }),
+        kibanaResponseFactory
+      );
+
+      expect(esClientMock.asCurrentUser.security.queryApiKeys).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sort: [{ creation: { order: 'desc' } }, { _doc: { order: 'asc' } }],
+        })
+      );
+    });
+
     it('should return undefined searchAfter when there are no API keys', async () => {
       esClientMock.asCurrentUser.security.queryApiKeys.mockRestore();
       esClientMock.asCurrentUser.security.queryApiKeys.mockResponse({

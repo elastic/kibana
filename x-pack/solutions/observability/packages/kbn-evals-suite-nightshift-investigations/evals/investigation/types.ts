@@ -7,7 +7,6 @@
 
 import { z } from '@kbn/zod/v4';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
-import type { ConversationRound } from '@kbn/agent-builder-common';
 import type {
   InvestigationStructuredOutput,
   InvestigationStatus,
@@ -21,6 +20,22 @@ export const investigationExampleSchema = z.object({
 
 export type InvestigationExample = z.infer<typeof investigationExampleSchema>;
 
+/**
+ * One decision tree (symptom playbook) the investigation successfully read, and its content
+ * (every successful read of it, concatenated in order; a failed read is not accessed at all).
+ */
+export interface AccessedDecisionTree {
+  tree_id: string;
+  content: string;
+}
+
+/** One tool call the investigation made, with a bounded rendering of its result(s). */
+export interface TrajectoryStep {
+  tool_id: string;
+  params: Record<string, unknown>;
+  result: string;
+}
+
 export interface InvestigationTaskOutput {
   case_id: string;
   query: string;
@@ -28,7 +43,10 @@ export interface InvestigationTaskOutput {
   conversation_id?: string;
   workflow_status?: InvestigationStatus;
   structured_report?: InvestigationStructuredOutput;
-  conversation?: { rounds: ConversationRound[] };
+  report_truncated?: boolean;
+  conversation_round_count?: number;
   traceId?: string;
   execution_error?: string;
+  decision_trees_accessed?: AccessedDecisionTree[];
+  tool_call_trajectory?: TrajectoryStep[];
 }

@@ -7,102 +7,122 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { AttachmentSummaryList } from './attachment_summary_list';
-import type { SummaryAttachment } from './select_summary_attachments';
 
-const makeAttachment = (id: string): SummaryAttachment => ({
-  typeName: 'Alert',
-  attachment: {
-    id,
-    type: 'security.alert',
-    versions: [{ version: 1, data: {}, created_at: '2026-09-01T10:00:00.000Z', content_hash: id }],
-    current_version: 1,
-  },
+const makeAttachment = (id: string, type = 'security.alert'): VersionedAttachment => ({
+  id,
+  type,
+  versions: [{ version: 1, data: {}, created_at: '2026-09-01T10:00:00.000Z', content_hash: id }],
+  current_version: 1,
 });
 
-const makeAttachments = (count: number) =>
-  Array.from({ length: count }, (_, index) => makeAttachment(`attachment-${index}`));
+const makeSectionRenderer =
+  (sectionTestId: string) =>
+  ({ attachment }: { attachment: { id: string } }) =>
+    <div data-test-subj={sectionTestId} data-attachment-id={attachment.id} />;
 
-const attachmentsService = {
-  getAttachmentUiDefinition: () => ({
-    getLabel: (attachment: { id: string }) => `Label for ${attachment.id}`,
-    getIcon: () => 'bell',
-  }),
-} as unknown as AttachmentServiceStartContract;
-
-const renderList = (attachments: SummaryAttachment[], collapsedCount?: number) =>
-  render(
-    <AttachmentSummaryList
-      attachments={attachments}
-      attachmentsService={attachmentsService}
-      collapsedCount={collapsedCount}
-    />
-  );
+const makeService = (
+  renderConversationDetailsContent?: (props: { attachment: { id: string } }) => React.ReactNode
+) =>
+  ({
+    getAttachmentUiDefinition: () =>
+      renderConversationDetailsContent ? { renderConversationDetailsContent } : {},
+  } as unknown as AttachmentServiceStartContract);
 
 describe('AttachmentSummaryList', () => {
   it('renders nothing when there are no attachments', () => {
-    const { container } = renderList([]);
+    const { container } = render(
+      <AttachmentSummaryList attachments={[]} attachmentsService={makeService()} />
+    );
 
     expect(container).toBeEmptyDOMElement();
   });
 
-  it.each([[3], [5]])('shows every row and no toggle for %i attachments', (count) => {
-    renderList(makeAttachments(count));
+  it('renders one section per attachment', () => {
+    render(
+      <AttachmentSummaryList
+        attachments={[makeAttachment('a1'), makeAttachment('a2'), makeAttachment('a3')]}
+        attachmentsService={makeService(makeSectionRenderer('section'))}
+      />
+    );
 
-    expect(screen.getAllByRole('listitem')).toHaveLength(count);
-    expect(screen.queryByTestId('attachmentSummaryToggle')).not.toBeInTheDocument();
+    expect(screen.getAllByTestId('section')).toHaveLength(3);
   });
 
-  it('collapses to five rows and counts the rest', () => {
-    renderList(makeAttachments(10));
+  it('skips attachments whose definition has no renderer', () => {
+    const service = {
+      getAttachmentUiDefinition: (type: string) => {
+        if (type === 'security.alert') {
+          return { renderConversationDetailsContent: makeSectionRenderer('section') };
+        }
+        return {};
+      },
+    } as unknown as AttachmentServiceStartContract;
 
-    expect(screen.getAllByRole('listitem')).toHaveLength(5);
-    expect(screen.getByTestId('attachmentSummaryToggle')).toHaveTextContent('+ Show more (5)');
+    render(
+      <AttachmentSummaryList
+        attachments={[makeAttachment('a1'), makeAttachment('a2', 'security.rule')]}
+        attachmentsService={service}
+      />
+    );
+
+    expect(screen.getAllByTestId('section')).toHaveLength(1);
   });
 
-  it('expands and collapses again', async () => {
-    renderList(makeAttachments(10));
-    const toggle = screen.getByTestId('attachmentSummaryToggle');
+  it('renders nothing when no attachments have a renderer', () => {
+    const { container } = render(
+      <AttachmentSummaryList
+        attachments={[makeAttachment('a1'), makeAttachment('a2')]}
+        attachmentsService={makeService()}
+      />
+    );
 
-    await userEvent.click(toggle);
-
-    expect(screen.getAllByRole('listitem')).toHaveLength(10);
-    // Collapsing has no affordance of its own, so no '+' comes back on the way out.
-    expect(toggle).toHaveTextContent('Show less');
-    expect(toggle).not.toHaveTextContent('+');
-    expect(toggle).toHaveAttribute('aria-expanded', 'true');
-
-    await userEvent.click(toggle);
-
-    expect(screen.getAllByRole('listitem')).toHaveLength(5);
-    expect(toggle).toHaveTextContent('+ Show more (5)');
-    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(container).toBeEmptyDOMElement();
   });
 
-  it('honours a non-default collapsed count', () => {
-    renderList(makeAttachments(6), 2);
+  it('one throwing renderer does not break the others', () => {
+    const Throw = () => {
+      throw new Error('chunk failed to load');
+    };
+    const warn = jest.spyOn(window.console, 'warn').mockImplementation(() => {});
+    try {
+      const service = {
+        getAttachmentUiDefinition: (type: string) => {
+          if (type === 'security.alert') {
+            return { renderConversationDetailsContent: () => <Throw /> };
+          }
+          return { renderConversationDetailsContent: makeSectionRenderer('surviving') };
+        },
+      } as unknown as AttachmentServiceStartContract;
 
-    expect(screen.getAllByRole('listitem')).toHaveLength(2);
-    expect(screen.getByTestId('attachmentSummaryToggle')).toHaveTextContent('+ Show more (4)');
+      render(
+        <AttachmentSummaryList
+          attachments={[makeAttachment('a1'), makeAttachment('a2', 'security.rule')]}
+          attachmentsService={service}
+        />
+      );
+
+      expect(screen.getByTestId('surviving')).toBeInTheDocument();
+      expect(warn).toHaveBeenCalled();
+    } finally {
+      warn.mockRestore();
+    }
   });
 
-  it('points the toggle at the list it expands', () => {
-    renderList(makeAttachments(10));
+  it('passes the current-version attachment data to the renderer', () => {
+    const renderer = jest.fn(() => <div />);
 
-    const controlledId = screen
-      .getByTestId('attachmentSummaryToggle')
-      .getAttribute('aria-controls');
+    render(
+      <AttachmentSummaryList
+        attachments={[makeAttachment('attach-0')]}
+        attachmentsService={makeService(renderer)}
+      />
+    );
 
-    expect(screen.getByRole('list')).toHaveAttribute('id', controlledId);
-  });
-
-  it('leaves the rows out of the tab order, since they do not navigate yet', () => {
-    renderList(makeAttachments(3));
-
-    // No toggle at three rows, so nothing in the section should be interactive at all.
-    expect(screen.queryAllByRole('button')).toHaveLength(0);
-    expect(screen.queryAllByRole('link')).toHaveLength(0);
+    expect(renderer).toHaveBeenCalledWith(
+      expect.objectContaining({ attachment: expect.objectContaining({ id: 'attach-0' }) })
+    );
   });
 });

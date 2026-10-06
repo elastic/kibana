@@ -35,6 +35,7 @@ export const BuildBundles: Task = {
       hmr: false,
       examples: buildConfig.pluginSelector.examples,
       testPlugins: buildConfig.pluginSelector.testPlugins,
+      devOnly: false,
       log,
     };
 

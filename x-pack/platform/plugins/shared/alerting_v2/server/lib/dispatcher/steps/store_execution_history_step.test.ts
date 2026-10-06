@@ -399,6 +399,21 @@ describe('StoreExecutionHistoryStep', () => {
     expect(eventLogger.logEvent.mock.calls[0][0]?.event?.action).toBe('dispatch_failed');
   });
 
+  it('emits a dispatch_failed event with the license_not_supported reason', async () => {
+    const failure = createDispatchFailure({
+      reason: DISPATCH_FAILURE_REASONS.LICENSE_NOT_SUPPORTED,
+      message: 'license not supported',
+    });
+
+    await step.execute(createDispatcherPipelineState({ dispatchFailures: [failure] }), logger);
+
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+    const [[event]] = eventLogger.logEvent.mock.calls;
+    expect(event?.event).toEqual({ action: 'dispatch_failed', outcome: 'failure' });
+    expect(event?.error?.message).toBe('license not supported');
+    expect(event?.kibana?.alerting_v2?.dispatcher?.failure_reason).toBe('license_not_supported');
+  });
+
   it('sets namespace and space_ids on dispatch_failed events for non-default spaces', async () => {
     const rule = createRule({ id: 'rule-1', spaceId: 'my-space' });
     const failure: DispatchFailure = {

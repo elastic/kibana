@@ -283,7 +283,7 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
           tabs={headerTabs}
           back={back}
           menu={menu}
-          spacing="bleed"
+          spacing="largeBleed"
         />
         <EuiSpacer size="m" />
         <MonitoringToolbar onRefresh={onRefresh} />

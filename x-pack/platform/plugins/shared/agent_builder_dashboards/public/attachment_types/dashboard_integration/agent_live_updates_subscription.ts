@@ -6,95 +6,53 @@
  */
 
 import { EMPTY, filter, switchMap, type Subscription } from 'rxjs';
-import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
-import {
-  ATTACHMENT_REF_ACTOR,
-  ATTACHMENT_REF_OPERATION,
-  getLatestVersion,
-  type AttachmentVersionRef,
-} from '@kbn/agent-builder-common/attachments';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import { isToolUiEvent, type ToolUiEvent } from '@kbn/agent-builder-common';
+import type { AgentBuilderPluginStart, BrowserChatEvent } from '@kbn/agent-builder-browser';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common';
-import {
-  attachmentDataToDashboardState,
-  isDashboardAttachment,
-} from '@kbn/agent-builder-dashboards-common';
+import { attachmentDataToDashboardState } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import { DASHBOARD_UPDATED_UI_EVENT, type DashboardUpdatedUiEventData } from '../../../common';
 
 export interface AgentLiveUpdatesSubscriptionParams {
   agentBuilder: AgentBuilderPluginStart;
   api: DashboardApi;
-  setAttachments: (attachments: DashboardAttachment[]) => void;
+  upsertAttachment: (attachment: DashboardAttachment) => void;
 }
 
-const isDashboardMutationOperation = (operation: AttachmentVersionRef['operation']): boolean =>
-  operation === ATTACHMENT_REF_OPERATION.updated || operation === ATTACHMENT_REF_OPERATION.created;
-
-const isToolDrivenDashboardRef = (ref: AttachmentVersionRef, attachmentId: string): boolean =>
-  ref.attachment_id === attachmentId &&
-  isDashboardMutationOperation(ref.operation) &&
-  ref.actor !== ATTACHMENT_REF_ACTOR.user;
+const isDashboardUpdatedUiEvent = (
+  event: BrowserChatEvent
+): event is ToolUiEvent<typeof DASHBOARD_UPDATED_UI_EVENT, DashboardUpdatedUiEventData> =>
+  isToolUiEvent(event, DASHBOARD_UPDATED_UI_EVENT);
 
 /**
  * Creates a subscription that applies LLM-driven dashboard attachment updates
- * to the dashboard currently open in the app.
+ * to the dashboard currently open in the app, as soon as the tool that made them finishes.
  */
 export const createAgentLiveUpdatesSubscription = ({
   agentBuilder,
   api,
-  setAttachments,
+  upsertAttachment,
 }: AgentLiveUpdatesSubscriptionParams): Subscription =>
   agentBuilder.events.ui.activeConversation$
     .pipe(
       switchMap((conversation) =>
         conversation?.id ? agentBuilder.events.getChatEvents$(conversation.id) : EMPTY
       ),
-      filter(isRoundCompleteEvent)
+      filter(isDashboardUpdatedUiEvent)
     )
     .subscribe((event) => {
-      const dashboardAttachments = event.data.attachments?.filter(isDashboardAttachment) ?? [];
-      const incomingAttachments = dashboardAttachments.filter((attachment) => {
-        return (
-          event.data.round.input.attachment_refs?.some((ref) =>
-            isToolDrivenDashboardRef(ref, attachment.id)
-          ) === true
-        );
-      });
+      const {
+        data: { attachment },
+      } = event.data;
 
-      setAttachments(
-        dashboardAttachments
-          .map((attachment): DashboardAttachment | undefined => {
-            const latestVersionData = getLatestVersion(attachment)?.data;
-            return latestVersionData
-              ? {
-                  id: attachment.id,
-                  type: attachment.type,
-                  data: latestVersionData,
-                  origin: attachment.origin,
-                }
-              : undefined;
-          })
-          .filter((attachment): attachment is DashboardAttachment => attachment !== undefined)
-      );
-
-      // TODO: we're assuming only one attachment is coming in at a time
-      const incomingAttachment = incomingAttachments?.at(0);
-      if (!incomingAttachment) {
-        return;
-      }
+      upsertAttachment(attachment);
 
       const currentSavedObjectId = api.savedObjectId$.getValue();
 
       // Skip if viewing a saved dashboard that differs from the attachment's linked dashboard
-      if (currentSavedObjectId && incomingAttachment.origin !== currentSavedObjectId) {
+      if (currentSavedObjectId && attachment.origin !== currentSavedObjectId) {
         return;
       }
 
-      const latestVersionData = getLatestVersion(incomingAttachment)?.data;
-
-      if (!latestVersionData) {
-        return;
-      }
-
-      api.setState(attachmentDataToDashboardState(latestVersionData));
+      api.setState(attachmentDataToDashboardState(attachment.data));
     });

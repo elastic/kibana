@@ -11,6 +11,7 @@ import {
   createWorkflowLiquidEngine,
   WorkflowSchema,
 } from '@kbn/workflows';
+import { FP_TP_VERDICT_RULES } from '../world';
 import { readSampleWorkflowYaml } from './sample_workflow_yaml';
 
 interface YamlStep {
@@ -42,6 +43,7 @@ const yaml = readSampleWorkflowYaml();
 const workflow = parse(yaml) as YamlWorkflow;
 const stepIn = (name: string): YamlStep | undefined =>
   workflow.steps.find((step) => step.name === name);
+const collapseWhitespace = (text: string): string => text.replace(/\s+/g, ' ').trim();
 const liquid = createWorkflowLiquidEngine();
 const evaluate = (expression: unknown, context: Record<string, unknown>): unknown =>
   liquid.evalValueSync(
@@ -107,6 +109,12 @@ describe('sample FP/TP analysis workflow', () => {
 
   it.each(['load_entities', 'load_events'])('continues when optional source %s fails', (name) => {
     expect(stepIn(name)?.['on-failure']?.continue).toBe(true);
+  });
+
+  it('returns the verdict rules that deriveFpTpOutcome implements', () => {
+    const [, rules = ''] =
+      /Choose the verdict by the first rule that matches:\n([\s\S]*?)\n\s*\n/.exec(yaml) ?? [];
+    expect(collapseWhitespace(rules)).toBe(collapseWhitespace(FP_TP_VERDICT_RULES));
   });
 
   it('routes the agent through the AlertZero reasoning feature', () => {

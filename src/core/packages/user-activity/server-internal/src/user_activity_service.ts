@@ -10,6 +10,7 @@
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { InternalLoggingServiceSetup } from '@kbn/core-logging-server-internal';
+import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { map } from 'rxjs';
 import { AsyncLocalStorage } from 'async_hooks';
 import type { TrackUserActionParams, UserActivityEventType } from '@kbn/core-user-activity-server';
@@ -24,10 +25,16 @@ import type {
   InternalUserActivityServiceStart,
 } from './types';
 import { shouldLog } from './user_activity_filters';
+import { shapeServerlessOtelAppenders } from './user_activity_otel_transform';
 
 /** @internal */
 interface UserActivitySetupDeps {
   logging: InternalLoggingServiceSetup;
+}
+
+/** @internal */
+interface UserActivityStartDeps {
+  typeRegistry: ISavedObjectTypeRegistry;
 }
 
 /**
@@ -42,6 +49,8 @@ export class UserActivityService
   private enabled = false;
   private filters: UserActivityFiltersType = [];
   private readonly injectedContextAsyncStorage: AsyncLocalStorage<InjectedContext>;
+  // set of SO types so we can know when to copy kibana.object to kibana.saved_object
+  private savedObjectTypeNames = new Set<string>();
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('user_activity', 'event');
@@ -58,11 +67,15 @@ export class UserActivityService
       this.filters = config.filters;
     });
 
+    const isServerless = this.coreContext.env.packageInfo.buildFlavor === 'serverless';
+
     logging.configure(
       ['user_activity'],
       config$.pipe(
         map((config) => ({
-          appenders: config.appenders,
+          appenders: isServerless
+            ? shapeServerlessOtelAppenders(config.appenders)
+            : config.appenders,
           loggers: [
             {
               name: 'event',
@@ -80,7 +93,9 @@ export class UserActivityService
     };
   }
 
-  start() {
+  start({ typeRegistry }: UserActivityStartDeps): InternalUserActivityServiceStart {
+    this.savedObjectTypeNames = new Set(typeRegistry.getAllTypes().map((type) => type.name));
+
     return {
       trackUserAction: this.trackUserAction,
       setInjectedContext: this.setInjectedContext,
@@ -91,13 +106,7 @@ export class UserActivityService
     this.enabled = false;
   }
 
-  private trackUserAction = ({
-    message,
-    event,
-    object,
-    metadata,
-    error,
-  }: TrackUserActionParams) => {
+  private trackUserAction = ({ message, event, object, kibana, error }: TrackUserActionParams) => {
     if (!this.enabled || !shouldLog(event.action, this.filters)) return;
 
     const injectedContext = this.getInjectedContext();
@@ -109,6 +118,8 @@ export class UserActivityService
     // ECS `source` is a role-agnostic copy of the role-annotated `client` fields.
     const clientIp = injectedContext.client?.ip;
 
+    const isSavedObject = this.savedObjectTypeNames.has(object.type);
+
     this.logger.info(message, {
       message,
       event: {
@@ -116,10 +127,14 @@ export class UserActivityService
         type: event.type as UserActivityEventType[],
         outcome: event.outcome ?? 'unknown',
       },
-      object,
-      ...(metadata ? { metadata } : {}),
       ...(error ? { error } : {}),
       ...injectedContext,
+      kibana: {
+        ...kibana,
+        ...injectedContext.kibana,
+        object,
+        ...(isSavedObject ? { saved_object: { type: object.type, id: object.id } } : {}),
+      },
       ...(clientIp ? { source: { address: clientIp, ip: clientIp } } : {}),
     });
   };

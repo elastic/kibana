@@ -22,7 +22,7 @@ import { getEbtProps, type EbtClickAttrsElementOnly } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import type { GenAiMessage } from './get_genai_fields';
-import { getMessageCopyText } from './get_genai_fields';
+import { getMessageCopyText, getTextPartsContent } from './get_genai_fields';
 import { GenAiMessageContent } from './genai_message_content';
 import { GENAI_EBT_CLICK_ACTIONS } from './ebt_constants';
 
@@ -84,6 +84,13 @@ const messageCss = css`
 export function GenAiMessages({ inputMessages, outputMessages, systemInstructions, ebt }: Props) {
   const { euiTheme } = useEuiTheme();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  // Avoid duplicates when instrumentation sends both system instructions and
+  // a system message.
+  const hasSystemInstructions = inputMessages.some(({ role, content, parts }) => {
+    if (role !== 'system') return false;
+
+    return content === systemInstructions || getTextPartsContent(parts) === systemInstructions;
+  });
 
   // Highlighted style applied when the copy button for that message is hovered.
   const highlightedCss = css`
@@ -93,7 +100,9 @@ export function GenAiMessages({ inputMessages, outputMessages, systemInstruction
   `;
 
   const allMessages: GenAiMessage[] = [
-    ...(systemInstructions ? [{ role: 'system', content: systemInstructions }] : []),
+    ...(systemInstructions && !hasSystemInstructions
+      ? [{ role: 'system', content: systemInstructions }]
+      : []),
     ...inputMessages,
     ...outputMessages,
   ];

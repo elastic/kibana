@@ -23,6 +23,10 @@ const startInvestigationMessage = {
   message: z.string().min(1).max(MAX_TEXT_LENGTH).optional(),
 };
 
+const startInvestigationModel = {
+  connector_id: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
+};
+
 /** Headline shown in the list and flyout from the moment the record exists. */
 const titleSchema = z.string().min(1).max(MAX_TITLE_LENGTH);
 
@@ -51,16 +55,7 @@ const startInvestigationBodySchema = z.union([
     title: titleSchema.optional(),
     concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
     ...startInvestigationMessage,
-  }),
-  z.object({
-    subject: z.object({
-      type: z.literal('significant_event'),
-      ...subjectIdAndSummary,
-    }),
-    title: titleSchema,
-    concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
-    context: freeFormContextSchema.optional(),
-    ...startInvestigationMessage,
+    ...startInvestigationModel,
   }),
   // A manual investigation is defined by its question, so `message` is required and the
   // subject id is optional: there is no entity to point at, only the prompt. The title is
@@ -79,19 +74,15 @@ const startInvestigationBodySchema = z.union([
     concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
     context: freeFormContextSchema.optional(),
     message: z.string().min(1).max(MAX_TEXT_LENGTH),
+    ...startInvestigationModel,
   }),
 ]);
 
 type StartInvestigationBody = z.infer<typeof startInvestigationBodySchema>;
 type AlertInvestigationBody = Extract<StartInvestigationBody, { subject: { type: 'alert' } }>;
-type ManualInvestigationBody = Extract<StartInvestigationBody, { subject: { type: 'manual' } }>;
-
 /** Narrows the whole body, which a `switch` on the nested `subject.type` cannot do. */
 const isAlertBody = (body: StartInvestigationBody): body is AlertInvestigationBody =>
   body.subject.type === 'alert';
-const isManualBody = (body: StartInvestigationBody): body is ManualInvestigationBody =>
-  body.subject.type === 'manual';
-
 export const startInvestigationRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'POST /internal/nightshift/investigations',
   options: {
@@ -132,17 +123,12 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
           context: { alerts: [snapshot] },
           trigger_type: 'manual',
           message: body.message,
-        });
-      }
-      if (isManualBody(body)) {
-        return await client.start({
-          ...body,
-          title: body.title ?? deriveTitleFromMessage(body.message),
-          trigger_type: 'manual',
+          ...(body.connector_id ? { connector_id: body.connector_id } : {}),
         });
       }
       return await client.start({
         ...body,
+        title: body.title ?? deriveTitleFromMessage(body.message),
         trigger_type: 'manual',
       });
     } catch (error) {

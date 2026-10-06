@@ -22,7 +22,7 @@ interface QueryResultProps {
 export const QueryResult: React.FC<QueryResultProps> = ({ result: { data } }) => {
   const { euiTheme } = useEuiTheme();
   return (
-    <EuiSplitPanel.Outer hasBorder hasShadow={false}>
+    <EuiSplitPanel.Outer hasBorder hasShadow={false} borderRadius="m">
       <EuiSplitPanel.Inner color="plain" grow={false} paddingSize="m">
         <EuiText size="s">
           <strong>{label}</strong>

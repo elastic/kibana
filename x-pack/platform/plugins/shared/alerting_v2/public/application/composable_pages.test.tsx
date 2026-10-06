@@ -133,6 +133,13 @@ const defaultProps = (): InternalPageProps => ({
   coreStart: createMockCoreStart(),
   container: createMockContainer() as unknown as Container,
   setBreadcrumbs: jest.fn() as (crumbs: ChromeBreadcrumb[]) => void,
+  hostApp: createAlertingV2HostApp('test', {
+    rules: '/alerting',
+    ruleLibrary: '/alerting/library',
+    alerts: '/alerting/inbox',
+    actionPolicies: '/alerting/action-policies',
+    executionHistory: '/alerting/execution-history',
+  }),
 });
 
 const renderInRouter = (ui: React.ReactElement, path = '/') =>
@@ -212,7 +219,7 @@ describe('composable pages', () => {
       const hostApp = createAlertingV2HostApp('observability', {
         rules: '/alerting',
         ruleLibrary: '/alerting/library',
-        episodes: '/alerting/inbox',
+        alerts: '/alerting/inbox',
         actionPolicies: '/alerting/action-policies',
         executionHistory: '/alerting/execution-history',
       });

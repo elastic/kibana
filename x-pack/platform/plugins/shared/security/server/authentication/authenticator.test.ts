@@ -700,9 +700,11 @@ describe('Authenticator', () => {
             type: 'user',
             tags: [],
           },
-          metadata: {
-            authenticationProvider: 'basic1',
-            authenticationType: 'basic',
+          kibana: {
+            security: {
+              authenticationProvider: 'basic1',
+              authenticationType: 'basic',
+            },
           },
         });
       });
@@ -3448,9 +3450,11 @@ describe('Authenticator', () => {
             type: 'user',
             tags: [],
           },
-          metadata: {
-            authenticationProvider: 'basic1',
-            authenticationType: 'basic',
+          kibana: {
+            security: {
+              authenticationProvider: 'basic1',
+              authenticationType: 'basic',
+            },
           },
         });
       });

@@ -24,3 +24,16 @@ const dashboardTool = (toolName: string) => {
 export const dashboardTools = {
   generateDashboard: dashboardTool('generate_dashboard'),
 } as const;
+
+/**
+ * Id of the built-in dashboards skill registered by the agent_builder_dashboards plugin.
+ */
+export const DASHBOARDS_SKILL_ID = 'dashboards';
+
+/**
+ * The skill reference in the chat input's serialized badge form. Both the input editor and the
+ * conversation timeline render it as a `/dashboards` chip, and the agent treats it as an explicit
+ * request to load the skill. A bare `/dashboards` prefix loads the skill too but renders as text.
+ */
+export const getDashboardsSkillBadge = (): string =>
+  `[/${DASHBOARDS_SKILL_ID}](skill://${DASHBOARDS_SKILL_ID})`;

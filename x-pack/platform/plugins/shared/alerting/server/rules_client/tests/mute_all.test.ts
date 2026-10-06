@@ -60,6 +60,7 @@ describe('muteAll()', () => {
         snoozeSchedule: [],
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
       },
       {
         version: '123',
@@ -92,6 +93,7 @@ describe('muteAll()', () => {
           enabled: false,
           scheduledTaskId: null,
           updatedBy: 'elastic',
+          updatedByProfileUid: null,
           muteAll: false,
         },
         references: [],

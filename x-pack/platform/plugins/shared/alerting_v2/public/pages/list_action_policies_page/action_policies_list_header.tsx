@@ -17,7 +17,10 @@ import {
   useAgentBuilderSkillsRequirements,
 } from '../../hooks/use_are_agent_builder_skills_available';
 import { useAlertingV2ExperimentalFeatures } from '../../hooks/use_alerting_v2_experimental_features';
+import { useIsActionPoliciesLicenseValid } from '../../hooks/use_is_action_policies_license_valid';
 import { getCreateActionPolicyWithAgentTooltipText } from '../../components/action_policy/create_options/action_policy_create_options_panel';
+import { ActionPoliciesLicenseCallout } from '../../components/action_policy/action_policies_license_callout';
+import { ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE } from '../../components/action_policy/labels';
 
 const ACTION_POLICIES_LIST_PAGE_TITLE = i18n.translate(
   'xpack.alertingV2.actionPoliciesList.pageTitle',
@@ -30,12 +33,14 @@ const getActionPoliciesListMenu = ({
   showCreateWithAgent,
   createWithAgentDisabled,
   createWithAgentTooltipText,
+  isLicenseValid,
 }: {
   onCreatePolicy: () => void;
   onCreateWithAgent: () => void;
   showCreateWithAgent: boolean;
   createWithAgentDisabled?: boolean;
   createWithAgentTooltipText?: string;
+  isLicenseValid: boolean;
 }): AppHeaderMenu => ({
   primaryActionItem: {
     id: 'createActionPolicy',
@@ -46,9 +51,12 @@ const getActionPoliciesListMenu = ({
     run: onCreatePolicy,
     testId: 'createActionPolicyButton',
     popoverTestId: 'createActionPolicyPopoverPanel',
+    disableButton: !isLicenseValid,
+    tooltipContent: isLicenseValid ? undefined : ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE,
     splitButtonProps: showCreateWithAgent
       ? {
           iconType: 'chevronSingleDown',
+          isSecondaryButtonDisabled: !isLicenseValid,
           secondaryButtonAriaLabel: i18n.translate(
             'xpack.alertingV2.actionPoliciesList.createPolicyMoreOptions',
             { defaultMessage: 'More create options' }
@@ -95,6 +103,7 @@ export const ActionPoliciesListHeader = ({
   const createWithAgentTooltipText = getCreateActionPolicyWithAgentTooltipText(
     useAgentBuilderSkillsRequirements()
   );
+  const isLicenseValid = useIsActionPoliciesLicenseValid();
 
   const headerMenu = useMemo(
     () =>
@@ -105,6 +114,7 @@ export const ActionPoliciesListHeader = ({
             showCreateWithAgent,
             createWithAgentDisabled,
             createWithAgentTooltipText,
+            isLicenseValid,
           })
         : undefined,
     [
@@ -114,6 +124,7 @@ export const ActionPoliciesListHeader = ({
       showCreateWithAgent,
       createWithAgentDisabled,
       createWithAgentTooltipText,
+      isLicenseValid,
     ]
   );
 
@@ -127,6 +138,7 @@ export const ActionPoliciesListHeader = ({
         menu={headerMenu}
       />
       <EuiSpacer size="m" />
+      {canWrite && <ActionPoliciesLicenseCallout />}
     </>
   );
 };

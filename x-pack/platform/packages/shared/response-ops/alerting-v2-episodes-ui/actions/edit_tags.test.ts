@@ -79,8 +79,8 @@ describe('createEditTagsAction', () => {
       queryClient: deps.queryClient,
     });
     expect(bulk.bulkTagEpisodeActions).toHaveBeenCalledWith(deps.http, [
-      { episode_id: 'e1', tags: ['alpha', 'beta'] },
-      { episode_id: 'e2', tags: ['alpha', 'beta'] },
+      { alert_id: 'e1', tags: ['alpha', 'beta'] },
+      { alert_id: 'e2', tags: ['alpha', 'beta'] },
     ]);
     expect(deps.notifications.toasts.add).toHaveBeenCalled();
     expect(onSuccess).toHaveBeenCalled();

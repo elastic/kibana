@@ -12,7 +12,6 @@ import type { Logger } from '@kbn/logging';
 import { validateEsqlQuery } from '@kbn/agent-builder-genai-utils';
 import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import { createVisualizationGraph, getExistingEsqlQueries } from './graph_lens';
-import { getSchemaForChartType } from './schemas';
 import type { VisualizationConfig } from './types';
 
 const SUPPORTED_CHART_TYPES = new Set<string>(Object.values(SupportedChartType));
@@ -81,7 +80,6 @@ export const buildLensConfig = async ({
     );
   }
 
-  const schema = getSchemaForChartType(selectedChartType);
   const graph = await createVisualizationGraph(modelProvider, logger, events, esClient);
 
   // If the user provides ES|QL, use it only when validation says it is safe.
@@ -119,7 +117,6 @@ export const buildLensConfig = async ({
     nlQuery,
     index,
     chartType: selectedChartType,
-    schema,
     existingConfig,
     parsedExistingConfig,
     preserveESQL,

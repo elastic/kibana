@@ -566,6 +566,22 @@ export class EndpointAppContextService {
     return this.startDependencies.productFeaturesService;
   }
 
+  public getCloudSetup(): CloudSetup {
+    if (!this.setupDependencies?.cloud) {
+      throw new EndpointAppContentServicesNotSetUpError();
+    }
+
+    return this.setupDependencies.cloud;
+  }
+
+  public getTelemetryConfigProvider(): TelemetryConfigProvider {
+    if (!this.startDependencies?.telemetryConfigProvider) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.telemetryConfigProvider;
+  }
+
   public async getCasesClient(req: KibanaRequest): Promise<CasesClient> {
     if (this.startDependencies?.cases == null) {
       throw new EndpointAppContentServicesNotStartedError();

@@ -10,7 +10,11 @@ import { defer, map } from 'rxjs';
 import type { Message, ToolOptions, ToolSchema, ToolSchemaType } from '@kbn/inference-common';
 import { MessageRole, ToolChoiceType } from '@kbn/inference-common';
 import type { InferenceConnectorAdapter } from '../../types';
-import { handleConnectorDataResponse, handleConnectorStreamResponse } from '../../utils';
+import {
+  handleConnectorDataResponse,
+  handleConnectorStreamResponse,
+  pickConnectorTelemetryForConnector,
+} from '../../utils';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import { processVertexStream, processVertexResponse } from './process_vertex_stream';
 import type {
@@ -55,7 +59,9 @@ export const geminiAdapter: InferenceConnectorAdapter = {
           signal: abortSignal,
           stopSequences: ['\n\nHuman:'],
           ...(metadata?.connectorTelemetry
-            ? { telemetryMetadata: metadata.connectorTelemetry }
+            ? {
+                telemetryMetadata: pickConnectorTelemetryForConnector(metadata.connectorTelemetry),
+              }
             : {}),
           ...(typeof timeout === 'number' && isFinite(timeout) ? { timeout } : {}),
           ...(typeof maxContentLength === 'number' && isFinite(maxContentLength)

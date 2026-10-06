@@ -17,7 +17,7 @@ import {
   createDispatcherPipelineState,
   createStepLogger,
 } from '../fixtures/test_utils';
-import { EPISODE_QUERY_LIMIT } from '../queries';
+import { ESQL_QUERY_ROW_LIMIT } from '../queries';
 
 const makeSubPlanError = () =>
   new errors.ResponseError({
@@ -90,11 +90,11 @@ describe('FetchEpisodesStep', () => {
     );
   });
 
-  it('sets truncated: true when the query returns exactly EPISODE_QUERY_LIMIT rows', async () => {
+  it('sets truncated: true when the query returns exactly ESQL_QUERY_ROW_LIMIT rows', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const step = new FetchEpisodesStep(queryService);
 
-    const maxEpisodes = Array.from({ length: EPISODE_QUERY_LIMIT }, (_, i) =>
+    const maxEpisodes = Array.from({ length: ESQL_QUERY_ROW_LIMIT }, (_, i) =>
       createAlertEpisode({ episode_id: `ep-${i}`, group_hash: `h-${i}` })
     );
     mockEsClient.esql.query.mockResolvedValueOnce(
@@ -109,11 +109,11 @@ describe('FetchEpisodesStep', () => {
     expect(result.data?.scan?.truncated).toBe(true);
   });
 
-  it('sets truncated: false when the query returns fewer than EPISODE_QUERY_LIMIT rows', async () => {
+  it('sets truncated: false when the query returns fewer than ESQL_QUERY_ROW_LIMIT rows', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const step = new FetchEpisodesStep(queryService);
 
-    const episodes = Array.from({ length: EPISODE_QUERY_LIMIT - 1 }, (_, i) =>
+    const episodes = Array.from({ length: ESQL_QUERY_ROW_LIMIT - 1 }, (_, i) =>
       createAlertEpisode({ episode_id: `ep-${i}`, group_hash: `h-${i}` })
     );
     mockEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse(episodes));

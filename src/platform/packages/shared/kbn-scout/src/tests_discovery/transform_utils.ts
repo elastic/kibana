@@ -60,6 +60,7 @@ const getTargetDomainForMki = (serverRunFlag: string): ScoutTargetDomain => {
     '--arch serverless --domain security_complete': 'security_complete',
     '--arch serverless --domain security_essentials': 'security_essentials',
     '--arch serverless --domain security_ease': 'security_ease',
+    '--arch serverless --domain vectordb': 'vectordb',
   };
 
   if (!(serverRunFlag in mappings)) {

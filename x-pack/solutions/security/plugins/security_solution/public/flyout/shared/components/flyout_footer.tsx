@@ -7,21 +7,31 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { EuiFlyoutFooter, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 interface FlyoutFooterProps extends React.ComponentProps<typeof EuiFlyoutFooter> {
   children: React.ReactNode;
 }
 
 /**
- * Wrapper of `EuiFlyoutFooter`, setting the recommended `16px` padding using a EuiPanel.
+ * Wrapper of `EuiFlyoutFooter`, setting the recommended `16px` padding.
  */
 export const FlyoutFooter: FC<FlyoutFooterProps> = memo(({ children, ...flyoutFooterProps }) => {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <EuiFlyoutFooter {...flyoutFooterProps}>
-      <EuiPanel hasShadow={false} color="transparent">
-        {children}
-      </EuiPanel>
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
+        responsive={false}
+        css={css`
+          padding: ${euiTheme.size.m};
+        `}
+      >
+        <EuiFlexItem>{children}</EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlyoutFooter>
   );
 });

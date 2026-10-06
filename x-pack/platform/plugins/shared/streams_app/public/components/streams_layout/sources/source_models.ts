@@ -6,6 +6,7 @@
  */
 
 import type { StreamsUnit, StreamsV2 } from '@kbn/streams-schema';
+import { getUnitConnections } from '../../../services/unit_connections';
 import type { Unit } from '../../../services/unit_repository';
 import { resolveSourceCapabilities, type SourceEnvironment } from './source_helpers';
 import type {
@@ -127,6 +128,25 @@ export const toConfiguredSource = (source: UnitSource): ConfiguredSource | undef
     case 'bulk':
       return { id, name, type: 'bulk', to: null, ...pathTemplate };
   }
+};
+
+/** Destination names each configured source currently forwards to. */
+export const connectedDestinationLabels = (unit: Unit): Record<string, string[]> => {
+  const sources = getConfiguredSources(unit);
+  const destinations = unit.unit.destinations ?? [];
+  const nameById = new Map(
+    destinations.map((destination) => [destination.id, destination.name?.trim() || destination.id])
+  );
+  const labels: Record<string, string[]> = {};
+  for (const connection of getUnitConnections(
+    unit,
+    new Set(sources.map(({ id }) => id)),
+    new Set(destinations.map(({ id }) => id))
+  )) {
+    const label = nameById.get(connection.destinationId) ?? connection.destinationId;
+    labels[connection.sourceId] = [...(labels[connection.sourceId] ?? []), label];
+  }
+  return labels;
 };
 
 export const createRuntimeMetadata = (

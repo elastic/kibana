@@ -53,6 +53,50 @@ triggers:
               type: string
               enum: [low, medium, high, critical]
               description: New severity, which should stay consistent with the risk score.
+            threshold:
+              type: object
+              description: >-
+                New threshold settings. Treated as an atomic replacement: the
+                detection API replaces the whole threshold object, so callers
+                must supply every field. Use [] to clear optional arrays.
+              properties:
+                value:
+                  type: integer
+                  minimum: 1
+                  description: Minimum event count to trigger an alert.
+                field:
+                  type: array
+                  items:
+                    type: string
+                    maxLength: 512
+                  maxItems: 5
+                  description: Fields to group events by before counting. Use [] to count all events.
+                cardinality:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      field:
+                        type: string
+                        maxLength: 512
+                      value:
+                        type: integer
+                        minimum: 0
+                    required: [field, value]
+                  description: Unique-value conditions. Use [] to remove all cardinality conditions.
+            interval:
+              type: string
+              maxLength: 32
+              description: >-
+                How often the rule runs, e.g. "5m" or "1h". Must be a valid
+                Elasticsearch date math duration.
+            from:
+              type: string
+              maxLength: 64
+              description: >-
+                How far back each rule execution looks, e.g. "now-6m". Must be
+                a valid Elasticsearch date math expression and should overlap
+                with interval to avoid gaps.
           required:
             - id
           additionalProperties: false
@@ -69,6 +113,10 @@ outputs:
   - name: risk_score
     type: number
   - name: severity
+    type: string
+  - name: interval
+    type: string
+  - name: from
     type: string
 steps:
   # The whole object is the patch body: the API changes only the keys it
@@ -89,3 +137,6 @@ steps:
       query: "{{ steps.patch_rule.output.query }}"
       risk_score: "${{ steps.patch_rule.output.risk_score }}"
       severity: "{{ steps.patch_rule.output.severity }}"
+      threshold: "${{ steps.patch_rule.output.threshold }}"
+      interval: "{{ steps.patch_rule.output.interval }}"
+      from: "{{ steps.patch_rule.output.from }}"

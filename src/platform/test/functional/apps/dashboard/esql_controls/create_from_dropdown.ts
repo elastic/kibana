@@ -48,7 +48,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // run the query
       await testSubjects.click('ESQLEditor-run-query-button');
-      expect(await testSubjects.exists('esqlValuesPreviewStrings')).to.be(true);
+      expect(
+        await testSubjects.waitForExists('esqlValuesPreviewStrings', { timeout: 10000 })
+      ).to.be(true);
       await testSubjects.click('saveEsqlControlsFlyoutButton');
 
       await dashboard.waitForRenderComplete();

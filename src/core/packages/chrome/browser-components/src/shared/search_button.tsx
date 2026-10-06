@@ -71,6 +71,7 @@ export const SearchButton = React.memo(({ layout = 'compact' }: SearchButtonProp
 
   const shortcutBadgeStyles = css({
     color: euiTheme.colors.textSubdued,
+    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
     flexShrink: 0,
   });
 

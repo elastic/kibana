@@ -199,7 +199,7 @@ describe('loadLastEpisodeAlertEventOrThrow', () => {
     expect(record).toMatchObject({ episode_id: 'ep-1', group_hash: 'resolved-group' });
   });
 
-  it('throws `Boom.notFound` with `ALERT_EPISODE_NOT_FOUND` and only the episode_id detail', async () => {
+  it('throws `Boom.notFound` with `ALERT_NOT_FOUND` and only the alert_id detail', async () => {
     const { queryService, mockEsClient } = setup();
     mockEsClient.esql.query.mockResolvedValueOnce(getEmptyESQLResponse());
 
@@ -214,7 +214,7 @@ describe('loadLastEpisodeAlertEventOrThrow', () => {
       output: { statusCode: 404 },
       data: {
         code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_FOUND,
-        details: { episode_id: 'unknown-episode' },
+        details: { alert_id: 'unknown-episode' },
       },
     });
   });

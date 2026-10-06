@@ -10,6 +10,16 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. Composite runtime fields discover their subfields
+ * from the real _field_preview response. The create and modify flows here depend on Elasticsearch
+ * emitting `a.a`, then `a` and `b`, which the mocked preview in field_editor_flyout_preview.test.ts
+ * ("composite runtime field") cannot prove. The serverless FTR copy at
+ * x-pack/platform/test/serverless/functional/test_suites/management/data_views/
+ * _runtime_fields_composite.ts differs only in navigation. Merge this into the same
+ * deployment-agnostic runtime_fields.spec.ts as _runtime_fields.ts, then delete both FTR copies.
+ * Replace the fixed `setTimeout` waits with web-first assertions on `typeField_N`.
+ */
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
@@ -39,6 +49,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Starting with '@' to sort toward start of field list
       const fieldName = '@composite.test';
 
+      /**
+       * Migration recommendation: MIGRATE TO SCOUT. Saving a composite field whose single subfield
+       * is resolved from a real preview adds one entry to the persisted field list.
+       */
       it('should create runtime field', async function () {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
@@ -53,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await log.debug('check that field preview is rendered');
-        expect(await testSubjects.exists('fieldPreviewItem', { timeout: 1500 })).to.be(true);
+        await testSubjects.existOrFail('fieldPreviewItem', { timeout: 5000 });
 
         await PageObjects.settings.clickSaveField();
 
@@ -64,6 +78,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
+      /**
+       * Migration recommendation: MIGRATE TO SCOUT. Editing the script so it emits a second
+       * subfield must re-resolve subfields from Elasticsearch and persist the extra one.
+       */
       it('should modify runtime field', async function () {
         const startingCount = parseInt(await PageObjects.settings.getFieldsTabCount(), 10);
         await PageObjects.settings.filterField(fieldName);
@@ -86,6 +104,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
+      /**
+       * Migration recommendation: MIGRATE TO SCOUT. Deleting the composite parent. There is no
+       * assertion today; the Scout version should verify the parent and its subfields are removed.
+       */
       it('should delete runtime field', async function () {
         await testSubjects.click('deleteField');
         await PageObjects.settings.confirmDelete();

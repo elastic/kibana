@@ -7,14 +7,17 @@
 
 import { schema } from '@kbn/config-schema';
 import type { Observable } from 'rxjs';
+import { defer, map, skip, switchMap } from 'rxjs';
 import type { ServerSentEvent } from '@kbn/sse-utils';
-import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
+import { AgentExecutionMode } from '@kbn/agent-builder-common';
+import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import { internalApiPath } from '../../../common/constants';
 import { apiPrivileges } from '../../../common/features';
-import { getSSEResponseHeaders } from '../utils';
-import { filterLegacyApiEvents } from '../converse_helpers';
+import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from '../utils';
+import { filterEventsNativeApiEvents, filterLegacyApiEvents } from '../converse_helpers';
+import { waitForConversationAccess } from './wait_for_conversation_access';
 
 export function registerInternalExecutionRoutes({
   coreSetup,
@@ -88,6 +91,82 @@ export function registerInternalExecutionRoutes({
         headers: getSSEResponseHeaders(),
         body: observableIntoEventSourceStream(events$ as unknown as Observable<ServerSentEvent>, {
           signal: abortController.signal,
+          logger,
+        }),
+      });
+    })
+  );
+
+  router.get(
+    {
+      path: `${internalApiPath}/executions/{executionId}/reattach`,
+      security: {
+        authz: {
+          requiredPrivileges: [apiPrivileges.readAgentBuilder],
+        },
+      },
+      options: {
+        access: 'internal',
+        timeout: {
+          idleSocket: AGENT_SOCKET_TIMEOUT_MS,
+        },
+      },
+      validate: {
+        params: schema.object({
+          executionId: schema.string({ minLength: 1, maxLength: 256 }),
+        }),
+        query: schema.object({
+          offset: schema.number({ min: 0, defaultValue: 0 }),
+        }),
+      },
+    },
+    wrapHandler(async (context, request, response) => {
+      const [, { cloud }] = await coreSetup.getStartServices();
+      const { execution: executionService, conversations: conversationsService } =
+        getInternalServices();
+      const { executionId } = request.params;
+      const { offset } = request.query;
+
+      const spaceId = (await context.agentBuilder).spaces.getSpaceId();
+      const execution = await executionService.getExecution(executionId);
+      const conversationId =
+        execution?.executionMode === AgentExecutionMode.conversation
+          ? execution.agentParams.conversationId
+          : undefined;
+      if (!execution || execution.spaceId !== spaceId || !conversationId) {
+        return response.notFound({
+          body: { message: `Execution not found: ${executionId}` },
+        });
+      }
+
+      const conversationClient = await conversationsService.getScopedClient({ request });
+
+      const abortController = new AbortController();
+      request.events.aborted$.subscribe(() => {
+        abortController.abort();
+      });
+
+      // `offset` counts events after the events-native filter, so it is applied after filtering.
+      const events$: Observable<ServerSentEvent> = defer(() =>
+        waitForConversationAccess({
+          conversationClient,
+          conversationId,
+          executionService,
+          executionId,
+          signal: abortController.signal,
+        })
+      ).pipe(
+        switchMap(() => executionService.followExecution(executionId)),
+        filterEventsNativeApiEvents(),
+        skip(offset),
+        map((event) => ({ ...event }))
+      );
+      return response.ok({
+        headers: getSSEResponseHeaders(),
+        body: observableIntoEventSourceStream(events$, {
+          signal: abortController.signal,
+          flushThrottleMs: 100,
+          flushMinBytes: cloud?.isCloudEnabled ? cloudProxyBufferSize : undefined,
           logger,
         }),
       });

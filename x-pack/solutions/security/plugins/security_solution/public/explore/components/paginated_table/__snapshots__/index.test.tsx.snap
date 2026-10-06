@@ -197,7 +197,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
         data-test-subj="paginated-basic-table"
       >
         <div
-          class="emotion-euiContainerCSS"
+          class="euiTable__wrapper emotion-euiContainerCSS"
         >
           <table
             class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"

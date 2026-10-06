@@ -29,6 +29,8 @@ export const RULE_DETAILS_HISTORY_TAB: RuleDetailsTabId = 'history';
 export interface LocatorHost extends SerializableRecord {
   app: string;
   pathPrefix: string;
+  /** Full URL base for the app (e.g. `/app/observability/alerting`). Falls back to `/app/${app}` when omitted; set this when the app registers a custom `appRoute`. */
+  appBasePath?: string;
 }
 
 export const STACK_MANAGEMENT_RULES_HOST: LocatorHost = {

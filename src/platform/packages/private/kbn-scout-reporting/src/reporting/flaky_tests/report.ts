@@ -19,6 +19,7 @@ import {
   fetchFilePipelineStats,
   fetchSampleFailures,
   fetchTargetStats,
+  fetchTestErrors,
   fetchTestMetadata,
   fetchTestStats,
   fileStatsKey,
@@ -34,6 +35,7 @@ import {
   type FlakyTestBranchStats,
   type FlakyTestClassification,
   type FlakyTestEntry,
+  type FlakyTestError,
   type FlakyTestFileStats,
   type FlakyTestFlakiestBranch,
   type FlakyTestLatestRun,
@@ -125,10 +127,10 @@ export const compareByFailedBuilds = (a: Rankable, b: Rankable): number =>
 export const rankTests = <T extends Rankable>(entries: readonly T[]): T[] =>
   [...entries].sort(compareByFailedBuilds);
 
-/** An entry before the per-test lookups (latest run, branch and target stats, failure samples) are attached. */
+/** An entry before the per-test lookups (latest run, branch and target stats, failures) are attached. */
 type AggregatedEntry = Omit<
   FlakyTestEntry,
-  'latestRun' | 'byBranch' | 'byTarget' | 'sampleFailures'
+  'latestRun' | 'byBranch' | 'byTarget' | 'sampleFailures' | 'errors'
 >;
 
 const toEntry = (
@@ -313,9 +315,10 @@ const buildReport = async (
   let branchStats = new Map<string, FlakyTestBranchStats[]>();
   let targetStats = new Map<string, FlakyTestTargetStats[]>();
   let samples = new Map<string, FlakyTestSampleFailure[]>();
+  let errors = new Map<string, FlakyTestError[]>();
   let pipelineStats = new Map<string, FlakyTestPipelineStats[]>();
   if (admitted.length > 0) {
-    [branchStats, targetStats, samples, pipelineStats] = await Promise.all([
+    [branchStats, targetStats, samples, errors, pipelineStats] = await Promise.all([
       timed('per-branch stats', fetchBranchStats(es, scope, admitted)),
       timed('per-target stats', fetchTargetStats(es, scope, admitted)),
       timed(
@@ -327,6 +330,7 @@ const buildReport = async (
           options.samplesPerTest
         )
       ),
+      timed('distinct errors', fetchTestErrors(es, scope, admitted)),
       timed('per-pipeline stats', fetchFilePipelineStats(es, scope, admitted)),
     ]);
   }
@@ -337,6 +341,7 @@ const buildReport = async (
     byBranch: branchStats.get(entry.testId) ?? [],
     byTarget: targetStats.get(entry.testId) ?? [],
     sampleFailures: samples.get(entry.testId) ?? [],
+    errors: errors.get(entry.testId) ?? [],
   });
 
   // One file entry per (path, framework) over the tests of both lists, in ranking order

@@ -26,10 +26,12 @@ const ALERT_EVENT_TYPE: AlertEventType = 'alert';
 // schema-valid and reaches the index, but has no series identity. Deriving its subject in
 // TypeScript throws, which would fail the whole tick and drop every other episode in the batch.
 /**
- * Row cap of `getDispatchableAlertEventsQuery`. Kept in sync by a unit test —
- * ES|QL will not accept a bound parameter in a LIMIT clause.
+ * Row cap applied as `LIMIT` to every dispatcher ES|QL query. ES|QL silently
+ * truncates to 1 000 rows when a query has no LIMIT, and 10 000 is its maximum.
+ * The `esql` builder inlines numbers as literals, which LIMIT requires: ES|QL
+ * does not accept a bound parameter there.
  */
-export const EPISODE_QUERY_LIMIT = 10_000;
+export const ESQL_QUERY_ROW_LIMIT = 10_000;
 
 /**
  * Keys-only episode scan over `.rule-events` ⨝ `.alert-actions`.
@@ -71,7 +73,7 @@ export const getDispatchableAlertEventsQuery = ({
       | KEEP last_event_timestamp, rule_id, source, space_id, group_hash, episode_id, last_episode_status, severity
       | RENAME last_episode_status AS episode_status
       | SORT last_event_timestamp asc
-      | LIMIT 10000`.toRequest();
+      | LIMIT ${ESQL_QUERY_ROW_LIMIT}`.toRequest();
 };
 
 const PAIR_SEPARATOR = '::';
@@ -87,8 +89,9 @@ const SUBJECT_EVAL = esql.exp`subject = CASE(source IS NULL OR source == "intern
 // query body and escape overhead.
 export const ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES = 600_000;
 
-// The pre-filter roughly doubles a chunk's literal bytes, so this pair budget is smaller than the
-// default to keep `pairs + pre-filter + static body` under the 1 MB ES|QL statement cap.
+// Pair budget for the series suppressions query. Its pre-filter roughly doubles a chunk's literal
+// bytes, so this budget is smaller than the default to keep `pairs + pre-filter + static body`
+// under the 1 MB ES|QL statement cap.
 export const SUPPRESSIONS_IN_CLAUSE_LITERAL_BUDGET_BYTES = 300_000;
 
 // `"<value>", ` = 2 quotes + comma + space (4 bytes) + 2 escape-margin bytes per literal.
@@ -96,9 +99,13 @@ const PER_LITERAL_OVERHEAD_BYTES = 6;
 
 // Exported for unit-testing chunk boundaries. An oversized single literal gets its own chunk;
 // at ≤150-byte keys (UUID/hash) this is unreachable in practice.
+//
+// The byte budget alone fits ~14 000 UUIDs per chunk, more than ESQL_QUERY_ROW_LIMIT rows. Capping
+// the literal count at ESQL_QUERY_ROW_LIMIT keeps one-row-per-literal queries from truncating.
 export const chunkInClauseLiterals = (
   literals: readonly string[],
-  budgetBytes: number = ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES
+  budgetBytes: number = ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES,
+  maxLiteralsPerChunk: number = ESQL_QUERY_ROW_LIMIT
 ): string[][] => {
   if (literals.length === 0) return [];
 
@@ -108,7 +115,8 @@ export const chunkInClauseLiterals = (
 
   for (const literal of literals) {
     const cost = literal.length + PER_LITERAL_OVERHEAD_BYTES;
-    if (current.length > 0 && currentSize + cost > budgetBytes) {
+    const isFull = current.length >= maxLiteralsPerChunk || currentSize + cost > budgetBytes;
+    if (current.length > 0 && isFull) {
       chunks.push(current);
       current = [];
       currentSize = 0;
@@ -174,25 +182,68 @@ const buildSuppressionsPreFilter = (
 };
 
 // Returns one request per chunk (see ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES). Safe to concat:
-// aggregations key on rule_id/group_hash so no row spans two chunks. minLastEventTimestamp
-// is computed from the full input so snooze-expiry classification is consistent across chunks.
+// STATS keys on episode_id, the same key used for chunking.
+//
+// Ack and deactivate target a single episode, so filtering on the scan's episode ids reads only
+// the current episodes' actions and a series' past episodes never reach the output. Episode ids
+// are UUIDv4, so there is one row per id and rows per chunk stay within the literal cap, below
+// ESQL_QUERY_ROW_LIMIT. subject and group_hash stay in the BY clause so a reused id cannot merge
+// the actions of two series.
+export const getEpisodeSuppressionsQueries = (
+  alertEpisodes: readonly AlertEpisode[]
+): EsqlRequest[] => {
+  const episodeIds = [...new Set(alertEpisodes.map(({ episode_id: episodeId }) => episodeId))];
+
+  return chunkInClauseLiterals(episodeIds).map((chunk) => {
+    const ids = chunk.map((id) => esql.str(id));
+
+    return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
+      | WHERE episode_id IN (${ids}) AND action_type IN ("ack", "unack", "deactivate", "activate")
+      | EVAL ${SUBJECT_EVAL}
+      | WHERE subject IS NOT NULL
+      | STATS
+          last_ack_action = LAST(action_type, @timestamp) WHERE action_type IN ("ack", "unack"),
+          last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
+          source = LAST(source, @timestamp),
+          space_id = LAST(space_id, @timestamp),
+          rule_id = LAST(rule_id, @timestamp)
+        BY subject, group_hash, episode_id
+      | EVAL should_suppress = CASE(
+          last_ack_action == "ack", true,
+          last_deactivate_action == "deactivate", true,
+          false
+        )
+      | KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, source, space_id
+      | LIMIT ${ESQL_QUERY_ROW_LIMIT}`.toRequest();
+  });
+};
+
+const getMinLastEventTimestamp = (alertEpisodes: readonly AlertEpisode[]): string =>
+  alertEpisodes.reduce<string | undefined>((min, ep) => {
+    const parsedTimestamp = new Date(ep.last_event_timestamp);
+    if (Number.isNaN(parsedTimestamp.getTime())) {
+      return min;
+    }
+
+    const normalizedTimestamp = parsedTimestamp.toISOString();
+    return min === undefined || normalizedTimestamp < min ? normalizedTimestamp : min;
+  }, undefined) ?? new Date(0).toISOString();
+
+// Returns one request per chunk (see SUPPRESSIONS_IN_CLAUSE_LITERAL_BUDGET_BYTES). Safe to concat:
+// STATS keys on subject/group_hash, the pair used for chunking, so each chunk returns at most one
+// row per pair. minLastEventTimestamp is computed from the full input so snooze-expiry
+// classification is consistent across chunks.
+//
+// Snooze and unsnooze are series-level actions persisted with a null episode_id; action docs
+// carrying an episode_id are not series actions and are ignored.
 //
 // Expired snoozes are mapped to "snooze_expired" instead of being filtered out: they must stay
 // in the row set so LAST() still picks them as the latest snooze intent. Dropping them before
 // LAST() would resurrect an older snooze (e.g. an indefinite one) for the same series.
-export const getAlertEpisodeSuppressionsQueries = (
+export const getSeriesSuppressionsQueries = (
   alertEpisodes: readonly AlertEpisode[]
 ): EsqlRequest[] => {
-  const minLastEventTimestamp =
-    alertEpisodes.reduce<string | undefined>((min, ep) => {
-      const parsedTimestamp = new Date(ep.last_event_timestamp);
-      if (Number.isNaN(parsedTimestamp.getTime())) {
-        return min;
-      }
-
-      const normalizedTimestamp = parsedTimestamp.toISOString();
-      return min === undefined || normalizedTimestamp < min ? normalizedTimestamp : min;
-    }, undefined) ?? new Date(0).toISOString();
+  const minLastEventTimestamp = getMinLastEventTimestamp(alertEpisodes);
 
   const componentsByPairKey = new Map<string, PairComponents>();
   const uniquePairKeys = [
@@ -226,7 +277,7 @@ export const getAlertEpisodeSuppressionsQueries = (
 
       return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
         | WHERE ${preFilter}
-        | WHERE action_type IN ("ack", "unack", "deactivate", "activate", "snooze", "unsnooze")
+        | WHERE episode_id IS NULL AND action_type IN ("snooze", "unsnooze")
         | EVAL ${SUBJECT_EVAL}
         | WHERE subject IS NOT NULL
         | EVAL _pair_key = CONCAT(subject, ${PAIR_SEPARATOR}, group_hash)
@@ -236,24 +287,15 @@ export const getAlertEpisodeSuppressionsQueries = (
             action_type == "snooze" AND (expiry IS NULL OR expiry > ${minLastEventTimestamp}::datetime), "snooze",
             action_type == "snooze", "snooze_expired"
           )
-        | INLINE STATS
-            last_snooze_action = LAST(_snooze_action, @timestamp) WHERE action_type IN ("snooze", "unsnooze")
-            BY subject, group_hash
         | STATS
-            last_ack_action = LAST(action_type, @timestamp) WHERE action_type IN ("ack", "unack"),
-            last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
-            last_snooze_action = MAX(last_snooze_action),
+            last_snooze_action = LAST(_snooze_action, @timestamp),
             source = LAST(source, @timestamp),
             space_id = LAST(space_id, @timestamp),
             rule_id = LAST(rule_id, @timestamp)
-          BY subject, group_hash, episode_id
-        | EVAL should_suppress = CASE(
-            last_snooze_action == "snooze", true,
-            last_ack_action == "ack", true,
-            last_deactivate_action == "deactivate", true,
-            false
-          )
-        | KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action, source, space_id`.toRequest();
+          BY subject, group_hash
+        | EVAL should_suppress = last_snooze_action == "snooze"
+        | KEEP rule_id, group_hash, should_suppress, last_snooze_action, source, space_id
+        | LIMIT ${ESQL_QUERY_ROW_LIMIT}`.toRequest();
     }
   );
 };
@@ -271,7 +313,7 @@ export const getLastNotifiedTimestampsQueries = (
       | WHERE ${whereClause}
       | STATS last_notified = MAX(@timestamp), episode_status = LAST(episode_status, @timestamp) BY action_group_id
       | KEEP action_group_id, last_notified, episode_status
-      `.toRequest();
+      | LIMIT ${ESQL_QUERY_ROW_LIMIT}`.toRequest();
   });
 };
 
@@ -308,6 +350,7 @@ export const getEpisodeDataQueries = (
         | EVAL episode_id = episode.id, data_json = JSON_EXTRACT(_source, "$.data")
         | DROP _source
         | STATS data_json = LAST(data_json, @timestamp) BY episode_id
-        | KEEP episode_id, data_json`.toRequest();
+        | KEEP episode_id, data_json
+        | LIMIT ${ESQL_QUERY_ROW_LIMIT}`.toRequest();
   });
 };

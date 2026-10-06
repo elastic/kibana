@@ -10,6 +10,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useEuiTheme, type EuiFlyoutMenuAction } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataSource } from '@kbn/data-source';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { MAX_DOC_FIELDS_DISPLAYED, SHOW_MULTIFIELDS } from '@kbn/discover-utils';
@@ -52,6 +53,7 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
   setExpandedDoc?: (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => void;
   searchContext?: CellRenderersSearchContext;
   flyoutMenuTrailingActions?: EuiFlyoutMenuAction[];
+  dataSource?: DataSource;
 }
 
 const noopSetExpandedDoc: NonNullable<UnifiedDataTableProps['setExpandedDoc']> = () => undefined;

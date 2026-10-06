@@ -8,7 +8,6 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import type { EsWorkflowExecution, WorkflowStepExecutionListDto } from '@kbn/workflows';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 import type {
@@ -93,25 +92,15 @@ export const getExecutionStepExecutions = async ({
       return toResult(doc, emptyPage(page, size, total));
     }
 
-    try {
-      const { items: stepItems } = await stepExecutionsDataClient.getByIds(ids, {
-        sourceExcludes: STEP_METADATA_SOURCE_EXCLUDES,
-      });
-      return toResult(doc, {
-        results: stepItems.map(({ document }) => document),
-        total,
-        page,
-        size,
-      });
-    } catch (error) {
-      if (!isMaximumResponseSizeExceededError(error)) {
-        throw error;
-      }
-      logger.warn(
-        `Failed to get workflow execution ${workflowExecutionId} with steps: Elasticsearch response exceeded the maximum size Kibana can process (page=${page}, size=${size})`
-      );
-      return toResult(doc, emptyPage(page, size, total));
-    }
+    const { items: stepItems } = await stepExecutionsDataClient.getByIds(ids, {
+      sourceExcludes: STEP_METADATA_SOURCE_EXCLUDES,
+    });
+    return toResult(doc, {
+      results: stepItems.map(({ document }) => document),
+      total,
+      page,
+      size,
+    });
   }
 
   const from = (page - 1) * size;
@@ -119,28 +108,18 @@ export const getExecutionStepExecutions = async ({
     throw new WorkflowHistoryPaginationError(WORKFLOW_EXECUTION_STEPS_PAGINATION_EXCEEDED_MESSAGE);
   }
 
-  try {
-    return toResult(
-      doc,
-      await searchStepExecutions({
-        stepExecutionsDataClient,
-        logger,
-        workflowExecutionId,
-        spaceId,
-        sourceExcludes: STEP_METADATA_SOURCE_EXCLUDES,
-        page,
-        size,
-        // Start order so page 1 matches mget of stepExecutionIds (append-on-start).
-        sort: 'startedAt:asc',
-      })
-    );
-  } catch (error) {
-    if (!isMaximumResponseSizeExceededError(error)) {
-      throw error;
-    }
-    logger.warn(
-      `Failed to get workflow execution ${workflowExecutionId} with steps: Elasticsearch response exceeded the maximum size Kibana can process (page=${page}, size=${size})`
-    );
-    return toResult(doc, emptyPage(page, size));
-  }
+  return toResult(
+    doc,
+    await searchStepExecutions({
+      stepExecutionsDataClient,
+      logger,
+      workflowExecutionId,
+      spaceId,
+      sourceExcludes: STEP_METADATA_SOURCE_EXCLUDES,
+      page,
+      size,
+      // Start order so page 1 matches mget of stepExecutionIds (append-on-start).
+      sort: 'startedAt:asc',
+    })
+  );
 };

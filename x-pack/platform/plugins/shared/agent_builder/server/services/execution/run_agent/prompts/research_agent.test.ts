@@ -39,6 +39,7 @@ describe('getResearchAgentPrompt', () => {
       },
       configuration: { instructions: '', aiIndices: [] },
       spaceId: 'default',
+      deployment: { environment: 'self_managed', version: '9.3.0', airgapped: false },
       skills: [],
       run: {
         steps,
@@ -74,6 +75,36 @@ describe('getResearchAgentPrompt', () => {
     expect(prepareMessages).toHaveBeenCalledWith(
       expect.objectContaining({ conversationTimestamp: now })
     );
+  });
+
+  it('renders the deployment section as the last section of the system message', async () => {
+    const system = asText((await getResearchAgentPrompt(makeParams()))[0]);
+
+    expect(system).toContain('\n## DEPLOYMENT');
+    expect(system).toContain('- Environment: Self-managed');
+    expect(system).toContain('- Stack version: 9.3.0');
+    expect(system.lastIndexOf('\n## ')).toBe(system.indexOf('\n## DEPLOYMENT'));
+  });
+
+  it('renders the serverless project details without a stack version on serverless', async () => {
+    const system = asText(
+      (
+        await getResearchAgentPrompt(
+          makeParams({
+            deployment: {
+              environment: 'serverless',
+              airgapped: false,
+              serverless: { projectType: 'observability', productTier: 'complete' },
+            },
+          })
+        )
+      )[0]
+    );
+
+    expect(system).toContain('- Environment: Elastic Cloud Serverless');
+    expect(system).toContain('- Project type: Observability');
+    expect(system).toContain('- Product tier: Complete');
+    expect(system).not.toContain('Stack version');
   });
 
   it('renders the full skill list when skills is on and relevant-skills is off', async () => {
@@ -191,7 +222,7 @@ describe('getResearchAgentPrompt', () => {
     const system = asText(messages[0]);
 
     expect(system).toContain('## AI INDICES');
-    expect(system).toContain('FROM sml-main');
+    expect(system).toContain('ES|QL target: sml-main');
     expect(system).toContain('This conversation runs in the space `marketing`');
     expect(system.indexOf('## AI INDICES')).toBeLessThan(system.indexOf('## INSTRUCTIONS'));
   });
@@ -212,8 +243,10 @@ describe('getResearchAgentPrompt', () => {
     );
     const system = asText(messages[0]);
 
-    expect(system).toContain('`elastic` (FROM sml-main)');
-    expect(system).toContain('`my-custom` (FROM ai-index-idx-custom) — Support tickets');
+    expect(system).toContain('Registry ID: `elastic`; ES|QL target: sml-main');
+    expect(system).toContain(
+      'Registry ID: `my-custom`; ES|QL target: ai-index-idx-custom — Support tickets'
+    );
   });
 
   it('includes the static attachment tools guidance but no dynamic (conversation-specific) attachment content', async () => {
@@ -238,6 +271,7 @@ describe('getResearchAgentPrompt', () => {
         aiIndices: [],
       },
       spaceId: 'default',
+      deployment: { environment: 'self_managed', version: '9.3.0', airgapped: false },
       skills: [],
       run: {
         steps: [],

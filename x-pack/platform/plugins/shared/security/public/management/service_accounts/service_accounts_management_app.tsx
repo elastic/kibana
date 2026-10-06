@@ -10,6 +10,7 @@ import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
+import type { BuildFlavor } from '@kbn/config';
 import type { CoreStart, StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -23,14 +24,23 @@ import {
   createBreadcrumbsChangeHandler,
 } from '../../components/breadcrumb';
 import type { PluginStartDependencies } from '../../plugin';
+import type { ServiceAccountsAPIClient } from '../../service_accounts';
 
 interface CreateParams {
+  buildFlavor: BuildFlavor;
+  roleManagementEnabled: boolean;
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
+  serviceAccountsAPIClient: ServiceAccountsAPIClient;
 }
 
 export const serviceAccountsManagementApp = Object.freeze({
   id: 'service_accounts',
-  create({ getStartServices }: CreateParams) {
+  create({
+    buildFlavor,
+    roleManagementEnabled,
+    getStartServices,
+    serviceAccountsAPIClient,
+  }: CreateParams) {
     const title = i18n.translate('xpack.security.management.serviceAccountsTitle', {
       defaultMessage: 'Service accounts',
     });
@@ -40,11 +50,17 @@ export const serviceAccountsManagementApp = Object.freeze({
       order: 35,
       title,
       async mount({ element, setBreadcrumbs, history }) {
-        const [[coreStart], { ServiceAccountsPage }] = await Promise.all([
+        const [[coreStart], { ServiceAccountsApp }, { RolesAPIClient }] = await Promise.all([
           getStartServices(),
-          import('./service_accounts_page'),
+          import('./service_accounts_app'),
+          import('../roles/roles_api_client'),
         ]);
         const canCreate = coreStart.security.serviceAccounts.canCreate();
+        const rolesAPIClient = new RolesAPIClient(coreStart.http);
+        const createRoleUrl =
+          roleManagementEnabled && coreStart.application.capabilities.roles?.save
+            ? coreStart.application.getUrlForApp('management', { path: '/security/roles/edit' })
+            : undefined;
 
         render(
           coreStart.rendering.addContext(
@@ -54,9 +70,23 @@ export const serviceAccountsManagementApp = Object.freeze({
               onChange={createBreadcrumbsChangeHandler(coreStart.chrome, setBreadcrumbs)}
             >
               <Breadcrumb text={title} href="/">
-                <ServiceAccountsPage
+                <ServiceAccountsApp
+                  isServerless={buildFlavor === 'serverless'}
                   canCreate={canCreate}
-                  onCreateAccount={() => history.push('/create')}
+                  serviceAccountsAPIClient={serviceAccountsAPIClient}
+                  rolesAPIClient={rolesAPIClient}
+                  createRoleUrl={createRoleUrl}
+                  onCreated={({ name }) => {
+                    coreStart.notifications.toasts.addSuccess(
+                      i18n.translate(
+                        'xpack.security.management.serviceAccounts.create.successTitle',
+                        {
+                          defaultMessage: 'Created service account "{name}"',
+                          values: { name },
+                        }
+                      )
+                    );
+                  }}
                 />
               </Breadcrumb>
             </Providers>

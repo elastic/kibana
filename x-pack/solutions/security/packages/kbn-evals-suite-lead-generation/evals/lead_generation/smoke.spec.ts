@@ -172,7 +172,10 @@ evaluate.describe('smoke: evaluators', { tag: tags.stateful.classic }, () => {
    */
   evaluate(
     'rubric: pipeline error → score 0 (no LLM call)',
-    async ({ executorClient, inferenceClient, log }) => {
+    async ({ executorClient, inferenceClient, evaluationConnector, log }) => {
+      const evaluationInferenceClient = inferenceClient.bindTo({
+        connectorId: evaluationConnector.id,
+      });
       await executorClient.runExperiment(
         {
           datasets: [CALIBRATION_DATASET],
@@ -181,7 +184,7 @@ evaluate.describe('smoke: evaluators', { tag: tags.stateful.classic }, () => {
             errors: ['Simulated pipeline error for rubric calibration'],
           }),
         },
-        [createLeadGenerationRubricEvaluator({ inferenceClient, log })]
+        [createLeadGenerationRubricEvaluator({ inferenceClient: evaluationInferenceClient, log })]
       );
     }
   );
@@ -192,7 +195,10 @@ evaluate.describe('smoke: evaluators', { tag: tags.stateful.classic }, () => {
    */
   evaluate(
     'rubric: null leads array → score 0 (no LLM call)',
-    async ({ executorClient, inferenceClient, log }) => {
+    async ({ executorClient, inferenceClient, evaluationConnector, log }) => {
+      const evaluationInferenceClient = inferenceClient.bindTo({
+        connectorId: evaluationConnector.id,
+      });
       await executorClient.runExperiment(
         {
           datasets: [CALIBRATION_DATASET],
@@ -200,7 +206,7 @@ evaluate.describe('smoke: evaluators', { tag: tags.stateful.classic }, () => {
             leads: null,
           }),
         },
-        [createLeadGenerationRubricEvaluator({ inferenceClient, log })]
+        [createLeadGenerationRubricEvaluator({ inferenceClient: evaluationInferenceClient, log })]
       );
     }
   );

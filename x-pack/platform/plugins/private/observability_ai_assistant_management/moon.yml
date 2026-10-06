@@ -42,7 +42,6 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/spaces-plugin'
   - '@kbn/cloud-plugin'
-  - '@kbn/inference-common'
   - '@kbn/licensing-plugin'
   - '@kbn/react-query'
   - '@kbn/ml-trained-models-utils'

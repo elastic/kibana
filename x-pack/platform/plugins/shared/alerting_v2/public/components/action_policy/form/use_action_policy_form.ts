@@ -17,7 +17,7 @@ import type { ActionPolicyFormState } from './types';
 interface UseActionPolicyFormParams {
   initialValues?: ActionPolicyResponse;
   onSubmitCreate: (values: ActionPolicyFormState) => void;
-  onSubmitUpdate: (id: string, values: ActionPolicyFormState, version: string) => void;
+  onSubmitUpdate: (id: string, values: ActionPolicyFormState) => void;
 }
 
 export const useActionPolicyForm = ({
@@ -81,13 +81,13 @@ export const useActionPolicyForm = ({
 
   const onSubmitValid = useCallback(
     (values: ActionPolicyFormState) => {
-      if (isEditMode && initialValues?.version) {
-        onSubmitUpdate(initialValues.id, values, initialValues.version);
+      if (initialValues) {
+        onSubmitUpdate(initialValues.id, values);
       } else {
         onSubmitCreate(values);
       }
     },
-    [isEditMode, initialValues, onSubmitCreate, onSubmitUpdate]
+    [initialValues, onSubmitCreate, onSubmitUpdate]
   );
 
   const handleSubmit = useMemo(() => methods.handleSubmit(onSubmitValid), [methods, onSubmitValid]);

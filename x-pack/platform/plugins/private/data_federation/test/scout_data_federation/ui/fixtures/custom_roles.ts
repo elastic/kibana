@@ -21,4 +21,17 @@ export const CUSTOM_ROLES: Record<string, KibanaRole> = {
       { base: [], feature: { dashboard: ['read'], advancedSettings: ['read'] }, spaces: ['*'] },
     ],
   },
+  data_federation_manager_with_discover: {
+    elasticsearch: {
+      cluster: ['manage'],
+      indices: [{ names: ['*'], privileges: ['manage'] }],
+    },
+    kibana: [
+      {
+        base: [],
+        feature: { dashboard: ['read'], advancedSettings: ['read'], discover_v2: ['read'] },
+        spaces: ['*'],
+      },
+    ],
+  },
 };

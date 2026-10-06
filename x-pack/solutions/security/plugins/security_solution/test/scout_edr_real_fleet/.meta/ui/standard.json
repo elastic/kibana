@@ -1,0 +1,21 @@
+{
+  "sha1": "155db5cfd18480f3683e929ab876c66151370210",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "401bd03a358628e-0db1cd0c1cebc8f",
+      "title": "Automated response actions shows isolate, kill-process, and failed suspend-process on the alert flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ui/tests/automated_response_actions.spec.ts",
+        "line": 34,
+        "column": 16
+      }
+    }
+  ]
+}

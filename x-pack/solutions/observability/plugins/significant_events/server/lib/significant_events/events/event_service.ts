@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { EventClient } from './event_client';
 import type { EventDataStreamClient } from './event_client';
+import { RuleEventsClient } from './rule_events_client';
 import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 
 export class EventService {
@@ -16,12 +17,18 @@ export class EventService {
     esClient,
     space,
     triggerEmitter,
+    useRuleEventsRead = false,
   }: {
     dataStreamClient: EventDataStreamClient;
     esClient: ElasticsearchClient;
     space: string;
     triggerEmitter?: TriggerEmitter;
-  }): EventClient {
+    /** Gated by `SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ` (`@kbn/nightshift-shared`). */
+    useRuleEventsRead?: boolean;
+  }): EventClient | RuleEventsClient {
+    if (useRuleEventsRead) {
+      return new RuleEventsClient({ esClient, space });
+    }
     return new EventClient({
       dataStreamClient,
       esClient,

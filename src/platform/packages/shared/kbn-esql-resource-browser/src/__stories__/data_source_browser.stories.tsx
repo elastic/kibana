@@ -10,7 +10,8 @@
 import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import type { ESQLSourceResult } from '@kbn/esql-types';
+import type { ESQLSourceResult, EsqlView } from '@kbn/esql-types';
+import { VIEWS_ROUTE } from '@kbn/esql-types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DataSourceBrowser } from '../data_source_browser';
 
@@ -23,6 +24,11 @@ const mockDataSources: ESQLSourceResult[] = [
   { name: '.ds-logs-nginx-2024.01.01', type: 'integration', title: 'Nginx Logs', hidden: false },
   { name: 'users_lookup', type: 'lookup index', title: 'Users Lookup', hidden: false },
   { name: 'tsdb-metrics', type: 'timeseries', title: 'TSDB Metrics', hidden: false },
+];
+
+const mockViews: EsqlView[] = [
+  { name: 'errors_view', query: 'FROM logs-* | WHERE log.level == "error"' },
+  { name: 'checkout_funnel_view', query: 'FROM kibana_sample_data_ecommerce' },
 ];
 
 const meta: Meta<typeof DataSourceBrowser> = {
@@ -43,8 +49,11 @@ const InteractiveWrapper = ({ selectedSources = [] }: { selectedSources?: string
   const [isOpen, setIsOpen] = useState(true);
   const services = {
     core: {
-      // Not used by this story (we preload sources), but required by `useKibana`.
-      http: {} as any,
+      // Views and datasets are not part of the preloaded sources, so they are still fetched.
+      http: {
+        get: async (path: string) =>
+          path === VIEWS_ROUTE ? { views: mockViews } : { datasets: [] },
+      } as any,
       application: { capabilities: {} } as any,
     },
   };
@@ -74,5 +83,7 @@ export const Default: Story = {
 };
 
 export const WithInitialSelection: Story = {
-  render: () => <InteractiveWrapper selectedSources={['logs-*', 'kibana_sample_data_logs']} />,
+  render: () => (
+    <InteractiveWrapper selectedSources={['logs-*', 'kibana_sample_data_logs', 'errors_view']} />
+  ),
 };

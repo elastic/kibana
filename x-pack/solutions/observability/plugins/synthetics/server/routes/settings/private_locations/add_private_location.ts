@@ -17,7 +17,6 @@ import { migrateLegacyPrivateLocations } from './migrate_legacy_private_location
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { toClientContract, toSavedObjectContract } from './helpers';
-import { assertCanEnableAgentSharding } from './agent_sharding_license';
 import { MAX_ROUTE_ID_LENGTH } from '../../zod_query';
 import type { PrivateLocation } from '../../../../common/runtime_types';
 
@@ -32,6 +31,7 @@ export const PrivateLocationSchema = z.strictObject({
     })
     .optional(),
   spaces: z.array(z.string().max(256)).max(100).optional(),
+  /** @deprecated Accepted for backward compatibility and ignored; sharding follows the license. */
   isAgentSharding: z.boolean().optional(),
 });
 
@@ -48,15 +48,8 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
   },
   requiredPrivileges: [PRIVATE_LOCATION_WRITE_API],
   handler: async (routeContext) => {
-    const { response, request, server, spaceId, context } = routeContext;
+    const { response, request, server, spaceId } = routeContext;
     const location = request.body as PrivateLocationObject;
-    const licenseError = assertCanEnableAgentSharding(
-      (await context.licensing).license,
-      location.isAgentSharding
-    );
-    if (licenseError) {
-      return response.forbidden({ body: { message: licenseError } });
-    }
 
     const internalSOClient = server.coreStart.savedObjects.createInternalRepository();
     const { agentPolicy, validationError } = await validateAgentPolicy(

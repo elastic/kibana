@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
+
 export const NIGHTSHIFT_EBT_ACTIONS = {
   CLEAR_IMPACTED_SERVICES_FILTER: 'clearImpactedServicesFilter',
   CLOSE_FLYOUT: 'closeFlyout',
@@ -18,11 +20,11 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   OPEN_START_INVESTIGATION: 'openStartInvestigation',
   RETRY_INVESTIGATIONS: 'retryInvestigations',
   SHOW_MORE_INVESTIGATIONS: 'showMoreInvestigations',
-  START_INVESTIGATION: 'startInvestigation',
+  START_INVESTIGATION: EBT_CLICK_ACTIONS.START_INVESTIGATION,
   VIEW_ALL_SIGNIFICANT_EVENTS: 'viewAllSignificantEvents',
   VIEW_DETECTION: 'viewDetection',
   VIEW_ENTITY: 'viewEntity',
-  VIEW_INVESTIGATION: 'viewInvestigation',
+  VIEW_INVESTIGATION: EBT_CLICK_ACTIONS.VIEW_INVESTIGATION,
   VIEW_MANAGEMENT: 'viewManagement',
   VIEW_SETTINGS: 'viewSettings',
   VIEW_SIGNIFICANT_EVENT: 'viewSignificantEvent',

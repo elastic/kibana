@@ -9,11 +9,15 @@ import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { ALERT_EPISODE_ACTION_TYPE, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
+import {
+  ALERT_EPISODE_ACTION_TYPE,
+  ALERT_EPISODE_STATUS,
+  type AlertEpisodeStatus,
+} from '@kbn/alerting-v2-schemas';
 import type { EpisodeActionState, EpisodeStatusGroupAction } from '../../types/action';
 import { isEpisodeSnoozed } from '../../utils/is_episode_snoozed';
 import { AlertEpisodeStatusBadge } from './status_badge';
-import { FlappingBadge } from '../flapping/flapping_badge';
+import * as flappingI18n from '../flapping/translations';
 
 // Flex anchor avoids inline line-height missizing
 const tooltipAnchorProps = { css: { display: 'flex' } };
@@ -32,7 +36,7 @@ export function AlertEpisodeStatusBadges({
   isFlapping = false,
 }: AlertEpisodeStatusBadgesProps) {
   const isAcknowledged = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
-  const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozeExpiry);
+  const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozedUntil);
 
   return (
     <EuiFlexGroup
@@ -45,9 +49,16 @@ export function AlertEpisodeStatusBadges({
       <EuiFlexItem grow={false}>
         <AlertEpisodeStatusBadge status={status} />
       </EuiFlexItem>
-      {isFlapping && (
+      {isFlapping && status !== ALERT_EPISODE_STATUS.INACTIVE && (
         <EuiFlexItem grow={false}>
-          <FlappingBadge />
+          <EuiToolTip anchorProps={tooltipAnchorProps} content={flappingI18n.FLAPPING_BADGE_LABEL}>
+            <EuiBadge
+              tabIndex={0}
+              iconType="chartGauge"
+              aria-label={flappingI18n.FLAPPING_BADGE_LABEL}
+              data-test-subj="alertEpisodeFlappingBadge"
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       )}
       {isSnoozed && (
@@ -55,14 +66,14 @@ export function AlertEpisodeStatusBadges({
           <EuiToolTip
             anchorProps={tooltipAnchorProps}
             content={
-              groupAction?.snoozeExpiry ? (
+              groupAction?.snoozedUntil ? (
                 <FormattedMessage
                   id="xpack.alertingV2EpisodesUi.snoozedUntilTooltip"
                   defaultMessage="Notifications snoozed until {expiry}."
                   values={{
                     expiry: (
                       <FormattedDate
-                        value={new Date(groupAction.snoozeExpiry)}
+                        value={new Date(groupAction.snoozedUntil)}
                         year="numeric"
                         month="short"
                         day="numeric"

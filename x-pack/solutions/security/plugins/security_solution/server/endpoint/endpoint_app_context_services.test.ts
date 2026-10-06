@@ -10,6 +10,10 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import { EndpointAppContextService } from './endpoint_app_context_services';
 import {
+  EndpointAppContentServicesNotSetUpError,
+  EndpointAppContentServicesNotStartedError,
+} from './errors';
+import {
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
 } from './mocks';
@@ -368,6 +372,34 @@ describe('test endpoint app context services', () => {
         /has not been started/
       );
       expect(responseActionsClientFactoryMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('cloud and telemetry config accessors', () => {
+    it('returns the setup cloud contract and the started telemetry config provider', () => {
+      const service = new EndpointAppContextService();
+      const setupContract = createMockEndpointAppContextServiceSetupContract();
+      const startContract = createMockEndpointAppContextServiceStartContract();
+      service.setup(setupContract);
+      service.start(startContract);
+
+      expect(service.getCloudSetup()).toBe(setupContract.cloud);
+      expect(service.getTelemetryConfigProvider()).toBe(startContract.telemetryConfigProvider);
+    });
+
+    it('refuses getCloudSetup with the not-set-up guard before setup', () => {
+      const service = new EndpointAppContextService();
+
+      expect(() => service.getCloudSetup()).toThrow(EndpointAppContentServicesNotSetUpError);
+    });
+
+    it('refuses getTelemetryConfigProvider with the not-started guard before start', () => {
+      const service = new EndpointAppContextService();
+      service.setup(createMockEndpointAppContextServiceSetupContract());
+
+      expect(() => service.getTelemetryConfigProvider()).toThrow(
+        EndpointAppContentServicesNotStartedError
+      );
     });
   });
 });

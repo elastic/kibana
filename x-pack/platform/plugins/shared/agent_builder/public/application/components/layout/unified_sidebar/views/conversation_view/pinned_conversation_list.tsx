@@ -38,7 +38,7 @@ const listContainerStyle = css`
 `;
 
 const placeHolderStyle = ({ euiTheme }: UseEuiTheme) => css`
-  border-radius: ${euiTheme.border.radius.small};
+  border-radius: ${euiTheme.border.radius.control};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -98,7 +98,7 @@ export const PinnedConversationList: React.FC<PinnedConversationListProps> = ({
             display: flex;
             flex-direction: column;
             gap: ${isEmpty ? 0 : euiTheme.size.xs};
-            border-radius: ${euiTheme.border.radius.small};
+            border-radius: ${euiTheme.border.radius.control};
             background-color: ${isEmpty ? 'transparent' : backgroundColor};
             transition: background-color 0.15s;
             & > [data-rfd-placeholder-context-id] {

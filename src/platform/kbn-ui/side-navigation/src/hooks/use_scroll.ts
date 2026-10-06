@@ -17,11 +17,22 @@ import { css } from '@emotion/react';
  * @returns the scroll styles.
  */
 export const useScroll = (withMask: boolean = false) => {
+  // Meant for the menu body between a non-scrolling header and footer, so the EUI mask fades
+  // content at those boundaries. `min-height: 0` lets the body shrink inside a height-bounded flex column.
   const scrollStyles = css`
     ${useEuiOverflowScroll('y', withMask)}
-    --secondary-menu-header-height: 42px;
-    scroll-padding-top: var(--secondary-menu-header-height);
+    flex: 1 1 auto;
+    min-height: 0;
   `;
 
   return scrollStyles;
 };
+
+/**
+ * Column layout for a height-bounded menu: the header and footer keep their size and the body scrolls.
+ */
+export const scrollLayoutStyles = css`
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+`;

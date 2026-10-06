@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
 
 import { Ips } from '../ips/ips';
 import { CountryFlags } from '../country_flags/country_flags';
+import { NODE_LABEL_WIDTH } from '../styles';
 
 export interface LabelNodeDetailsProps {
   ips?: string[];
@@ -29,19 +30,27 @@ export const LabelNodeDetails = ({
   const shouldRenderIps = ips && ips.length > 0;
   const shouldRenderCountryFlags = countryCodes && countryCodes.length > 0;
   return shouldRenderIps || shouldRenderCountryFlags ? (
-    <div
+    <EuiFlexGroup
+      justifyContent="center"
+      alignItems="center"
+      gutterSize="s"
+      responsive={false}
+      wrap={false}
       css={css`
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: ${euiTheme.size.xxs};
+        width: ${NODE_LABEL_WIDTH}px;
         margin-top: ${euiTheme.size.xs};
       `}
     >
-      {shouldRenderIps && <Ips ips={ips} onIpClick={onIpClick} />}
-      {shouldRenderCountryFlags && (
-        <CountryFlags countryCodes={countryCodes} onCountryClick={onCountryClick} />
+      {shouldRenderIps && (
+        <EuiFlexItem grow={false}>
+          <Ips ips={ips} onIpClick={onIpClick} />
+        </EuiFlexItem>
       )}
-    </div>
+      {shouldRenderCountryFlags && (
+        <EuiFlexItem grow={false}>
+          <CountryFlags countryCodes={countryCodes} onCountryClick={onCountryClick} />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   ) : null;
 };

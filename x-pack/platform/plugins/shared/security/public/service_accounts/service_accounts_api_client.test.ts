@@ -13,23 +13,43 @@ describe('ServiceAccountsAPIClient', () => {
   describe('#create', () => {
     it('posts the params to the internal route and returns the created account', async () => {
       const http = httpServiceMock.createStartContract();
-      const created = {
-        id: 'service-account-id',
-        type: 'project' as const,
-        name: 'nightshift-relay',
-        organization_id: 'organization-id',
-        role_assignments: { limit: { access: ['application'], resource: ['project'] } },
-        assumable_by: [],
-      };
+      const created = { id: 'service-account-id', name: 'nightshift-relay', roles: ['viewer'] };
       http.post.mockResolvedValue(created);
 
-      const params = { name: 'nightshift-relay' };
+      const params = { name: 'nightshift-relay', roles: ['viewer'] };
 
       await expect(new ServiceAccountsAPIClient(http).create(params)).resolves.toBe(created);
 
       expect(http.post).toHaveBeenCalledTimes(1);
       expect(http.post).toHaveBeenCalledWith('/internal/security/service_account', {
         body: JSON.stringify(params),
+      });
+    });
+  });
+
+  describe('#list', () => {
+    it('gets one page from the internal route', async () => {
+      const http = httpServiceMock.createStartContract();
+      const response = {
+        serviceAccounts: [
+          {
+            id: 'service-account-id',
+            name: 'nightshift-relay',
+            roles: ['viewer'],
+            enabled: true,
+            assumable: true,
+          },
+        ],
+        nextPage: 'next-page',
+      };
+      http.get.mockResolvedValue(response);
+
+      await expect(
+        new ServiceAccountsAPIClient(http).list({ limit: 20, after: 'current-page' })
+      ).resolves.toBe(response);
+
+      expect(http.get).toHaveBeenCalledWith('/internal/security/service_account', {
+        query: { limit: 20, after: 'current-page' },
       });
     });
   });

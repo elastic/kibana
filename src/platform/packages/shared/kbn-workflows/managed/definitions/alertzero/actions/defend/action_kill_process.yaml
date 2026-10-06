@@ -20,7 +20,7 @@ consts:
     category: respond
     impact: high
     reversible: false
-    approvalPolicy: always-gate
+    approvalPolicy: autonomy-dependent
   actionLabel: Kill process
   # Sentinel id used only to probe Actions-log privilege before killing.
   # A 404 means the privilege is present; anything else must fail closed.

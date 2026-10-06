@@ -6,6 +6,7 @@
  */
 import qs from 'query-string';
 import { useHistory, useLocation } from 'react-router-dom';
+import { PROFILING_PATHNAMES } from '../routing/pathnames';
 import { getParsedDate } from '../utils/get_next_time_range';
 import { useDefaultTimeRange } from './use_default_time_range';
 
@@ -44,6 +45,6 @@ export function useDateRangeRedirect() {
     isDateRangeSet: isDateRangeSet && !isInvalidDateRange,
     redirect,
     // does not add date range for this page
-    skipDataRangeSet: history.location.pathname === '/add-data-instructions',
+    skipDataRangeSet: history.location.pathname === PROFILING_PATHNAMES.addDataInstructions,
   };
 }

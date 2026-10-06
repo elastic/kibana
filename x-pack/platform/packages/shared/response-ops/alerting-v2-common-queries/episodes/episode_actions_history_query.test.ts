@@ -24,6 +24,15 @@ describe('buildEpisodeActionsHistoryQuery', () => {
     expect(queryString).not.toContain('@timestamp <=');
   });
 
+  it('projects the actor leaf fields instead of the actor object', () => {
+    const queryString = buildEpisodeActionsHistoryQuery('default', 'ep-1', 'hash-1', {
+      limit: 25,
+    }).print('basic');
+    expect(queryString).toContain('`actor.type`');
+    expect(queryString).toContain('`actor.profile_uid`');
+    expect(queryString).not.toMatch(/[^.]actor,/);
+  });
+
   it('uses a different space id when provided', () => {
     const queryString = buildEpisodeActionsHistoryQuery('my-space', 'ep-1', 'hash-1', {
       limit: 25,

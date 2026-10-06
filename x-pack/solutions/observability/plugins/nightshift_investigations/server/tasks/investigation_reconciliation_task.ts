@@ -65,11 +65,12 @@ export const registerInvestigationReconciliationTask = ({
           const [{ savedObjects }] = await core.getStartServices();
 
           const { scanned, reconciled } = await reconcileInvestigationStatuses({
-            investigationSweepRepository: createInvestigationSweepRepository(savedObjects),
+            investigationSweepRepository: createInvestigationSweepRepository(savedObjects, logger),
             getExecutionSummaries: async (executionIds, spaceId) => {
               const { results } = await workflowsManagement.management.searchExecutionsView(
                 {
                   query: { ids: { values: executionIds } },
+                  request: undefined,
                   includeManagedExecutions: true,
                   size: executionIds.length,
                 },

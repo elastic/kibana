@@ -34,11 +34,11 @@ export const toListExecutionHistoryArgs = ({
   per_page: perPage,
   search,
   rule_ids: ruleIds,
-  outcome,
-  episode_ids: episodeIds,
+  outcomes,
+  alert_ids: episodeIds,
   from,
   to,
-  sort,
+  sort_field: sortField,
   sort_order: sortOrder,
   ...rest
 }: ListPolicyExecutionHistoryRequest): Complete<Omit<ListExecutionHistoryArgs, 'request'>> => {
@@ -48,11 +48,11 @@ export const toListExecutionHistoryArgs = ({
     perPage,
     search,
     ruleIds,
-    outcome,
+    outcomes,
     episodeIds,
     from,
     to,
-    sort,
+    sortField,
     sortOrder,
   };
 };

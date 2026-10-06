@@ -24,6 +24,22 @@ describe('AlertsBadge', () => {
     expect(screen.getByTestId('apmAlertsBadge')).toHaveTextContent('4');
   });
 
+  it('uses a service-scoped accessible name by default', () => {
+    renderBadge({ count: 4, serviceName: 'checkout' });
+    expect(screen.getByLabelText('4 active alerts for checkout')).toBeInTheDocument();
+  });
+
+  it('uses a transaction-scoped accessible name when transactionName is set', () => {
+    renderBadge({
+      count: 3,
+      serviceName: 'checkout',
+      transactionName: 'GET /api/orders',
+    });
+    expect(
+      screen.getByLabelText('3 active alerts for GET /api/orders of checkout')
+    ).toBeInTheDocument();
+  });
+
   it('uses a custom data-test-subj when provided', () => {
     renderBadge({ count: 1, serviceName: 'svc', 'data-test-subj': 'customBadge' });
     expect(screen.getByTestId('customBadge')).toBeInTheDocument();
@@ -78,6 +94,57 @@ describe('AlertsBadge', () => {
 
     const badge = screen.getByTestId('apmAlertsBadge');
     expect(badge).not.toHaveAttribute('data-ebt-action');
+  });
+
+  describe('href', () => {
+    it('renders as a link with the provided href', () => {
+      renderBadge({
+        count: 3,
+        serviceName: 'svc',
+        href: '/app/apm/services/svc/alerts?kuery=transaction.name:%20%22GET%22',
+      });
+
+      const badge = screen.getByTestId('apmAlertsBadge');
+      expect(badge.tagName.toLowerCase()).toBe('a');
+      expect(badge).toHaveAttribute(
+        'href',
+        '/app/apm/services/svc/alerts?kuery=transaction.name:%20%22GET%22'
+      );
+    });
+
+    it('takes precedence over navigationProps', () => {
+      const getRedirectUrl = jest.fn().mockReturnValue('/app/apm/services/svc/overview?tab=alerts');
+      renderBadge({
+        count: 2,
+        serviceName: 'svc',
+        href: '/app/apm/services/svc/alerts?transactionName=GET',
+        navigationProps: {
+          serviceName: 'svc',
+          agentName: 'java',
+          environment: 'production',
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+          locators: { get: jest.fn().mockReturnValue({ getRedirectUrl }) } as any,
+        },
+      });
+
+      const badge = screen.getByTestId('apmAlertsBadge');
+      expect(badge).toHaveAttribute('href', '/app/apm/services/svc/alerts?transactionName=GET');
+      expect(getRedirectUrl).not.toHaveBeenCalled();
+    });
+
+    it('sets data-ebt-* attributes when ebt is provided alongside href', () => {
+      renderBadge({
+        count: 1,
+        serviceName: 'svc',
+        href: '/app/apm/services/svc/alerts',
+        ebt: { action: 'viewAlerts', element: 'transactionDetailFlyoutAlertsBadge' },
+      });
+
+      const badge = screen.getByTestId('apmAlertsBadge');
+      expect(badge).toHaveAttribute('data-ebt-action', 'viewAlerts');
+      expect(badge).toHaveAttribute('data-ebt-element', 'transactionDetailFlyoutAlertsBadge');
+    });
   });
 
   describe('navigationProps', () => {

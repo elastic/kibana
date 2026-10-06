@@ -29,31 +29,10 @@ describe('getPrivateLocationEditPayload', () => {
     expect(getPrivateLocationEditPayload(form(), existing)).toBeNull();
   });
 
-  it('omits isAgentSharding when only the label or tags changed', () => {
+  it('sends label and tags when the label changed', () => {
     expect(getPrivateLocationEditPayload(form({ label: 'Renamed' }), existing)).toEqual({
       label: 'Renamed',
       tags: ['prod'],
-    });
-  });
-
-  it('includes isAgentSharding when the scalable toggle changes', () => {
-    expect(getPrivateLocationEditPayload(form({ isAgentSharding: true }), existing)).toEqual({
-      label: 'Local',
-      tags: ['prod'],
-      isAgentSharding: true,
-    });
-  });
-
-  it('sends isAgentSharding false when turning sharding off', () => {
-    expect(
-      getPrivateLocationEditPayload(form({ isAgentSharding: false }), {
-        ...existing,
-        isAgentSharding: true,
-      })
-    ).toEqual({
-      label: 'Local',
-      tags: ['prod'],
-      isAgentSharding: false,
     });
   });
 });

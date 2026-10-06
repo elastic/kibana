@@ -673,7 +673,7 @@ describe('OnboardingFlowProvider', () => {
       const { result } = renderHook(() => useOnboardingFlow(), { wrapper });
 
       expect(result.current.agentBasedDeployment.agentHostsMode).toBe('new');
-      expect(result.current.agentBasedDeployment.agentCredentialMethod).toBe('direct_access_keys');
+      expect(result.current.agentBasedDeployment.agentCredentialMethod).toBe('static_keys');
       expect(result.current.agentBasedDeployment.selectedAgentPolicyIds).toEqual([]);
     });
 

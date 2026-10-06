@@ -8,7 +8,16 @@
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Filter } from '@kbn/es-query';
-import { THREAT_REPORTS_INDEX_PATTERN, GLOBAL_THREAT_INTEL_SPACE_ID } from './esql_queries';
+import { SecurityPageName } from '@kbn/deeplinks-security';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import {
+  THREAT_REPORTS_INDEX_PATTERN,
+  GLOBAL_THREAT_INTEL_SPACE_ID,
+  getAlertsIndex,
+} from './esql_queries';
+
+/** Mirrors Security `APP_PATH` + `ALERT_DETAILS_REDIRECT_PATH` without importing security_solution. */
+export const SECURITY_ALERT_DETAILS_REDIRECT_PATH = '/app/security/alerts/redirect' as const;
 
 /**
  * Discover defaults to a short relative window (often last 15m). Attachment exit
@@ -19,10 +28,95 @@ export const DISCOVER_LOOKUP_TIME_RANGE = { from: 'now-10y', to: 'now' } as cons
 /** Ad-hoc data view id for threat-report Discover exits that need nested filters. */
 export const THREAT_REPORTS_LOOKUP_DATA_VIEW_ID = 'alertzero-threat-reports-lookup' as const;
 
+const SECURITY_APP_ID = 'securitySolutionUI';
+
 export interface DiscoverLookupTimeRange {
   from: string;
   to: string;
 }
+
+const buildAlertDetailsPath = ({
+  alertId,
+  index,
+  timestamp,
+}: {
+  alertId: string;
+  index: string;
+  timestamp?: string;
+}): string => {
+  const params = new URLSearchParams({ index });
+  if (timestamp) {
+    params.set('timestamp', timestamp);
+  }
+  return `${SECURITY_ALERT_DETAILS_REDIRECT_PATH}/${encodeURIComponent(
+    alertId
+  )}?${params.toString()}`;
+};
+
+/**
+ * Alert details redirect for a single `alerts[]` ref.
+ *
+ * The persisted `index` is deliberately ignored in favour of the current space's alerts
+ * alias. `alertRefSchema` accepts any non-empty string, and these attachments are authored
+ * by workflows, so a ref could name another space's alias (or a wildcard) and a public
+ * conversation link would query it directly for any viewer holding underlying index
+ * privileges. The alert id still scopes the lookup, so deriving the index from `spaceId`
+ * costs nothing for well-formed refs and keeps the Spaces boundary intact.
+ */
+export const buildAlertDetailsUrl = ({
+  prependPath,
+  spaceId,
+  alertId,
+  timestamp,
+}: {
+  prependPath: (path: string) => string;
+  spaceId: string;
+  alertId: string;
+  timestamp?: string;
+}): string =>
+  prependPath(
+    buildAlertDetailsPath({
+      alertId,
+      index: getAlertsIndex(spaceId),
+      timestamp,
+    })
+  );
+
+/**
+ * Only these fields resolve through Security's `.../name/:name` entity route, so
+ * they are the only ones that get an entity-page link.
+ */
+const NAME_ROUTE_FIELDS: ReadonlySet<string> = new Set(['host.name', 'host.hostname', 'user.name']);
+
+/**
+ * Security entity detail page URL for a `host.*` or `user.*` chip. Returns
+ * `undefined` for `service.*` fields (no Security entity page exists for
+ * services), for id/email entity fields (the `.../name/:name` route only
+ * resolves display names, so `host.id`, `user.id`, and `user.email` would
+ * open a name lookup for a non-name value and usually land on the wrong or
+ * an empty entity page), and when `getUrlForApp` isn't wired (e.g. tests) —
+ * so the caller can fall back to its exact-field Discover ES|QL link.
+ */
+export const buildSecurityEntityUrl = ({
+  getUrlForApp,
+  field,
+  value,
+}: {
+  getUrlForApp?: ApplicationStart['getUrlForApp'];
+  field: string;
+  value: string;
+}): string | undefined => {
+  if (!getUrlForApp || !NAME_ROUTE_FIELDS.has(field)) {
+    return undefined;
+  }
+
+  const deepLinkId = field.startsWith('host.') ? SecurityPageName.hosts : SecurityPageName.users;
+
+  return getUrlForApp(SECURITY_APP_ID, {
+    deepLinkId,
+    path: `/name/${encodeURIComponent(value)}`,
+  });
+};
 
 export const buildDiscoverEsqlUrl = ({
   share,

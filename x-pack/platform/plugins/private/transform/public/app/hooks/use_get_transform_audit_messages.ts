@@ -7,10 +7,10 @@
 
 import { useQuery } from '@kbn/react-query';
 
-import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { buildPath, type IHttpFetchError } from '@kbn/core-http-browser';
 
 import type { GetTransformsAuditMessagesResponseSchema } from '../../../server/routes/api_schemas/audit_messages';
-import { addInternalBasePath, TRANSFORM_REACT_QUERY_KEYS } from '../../../common/constants';
+import { TRANSFORM_REACT_QUERY_KEYS } from '../../../common/constants';
 import type { TransformMessage } from '../../../common/types/messages';
 
 import { useAppDependencies } from '../app_dependencies';
@@ -28,7 +28,7 @@ export const useGetTransformAuditMessages = (
     [TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORM_AUDIT_MESSAGES, transformId, query],
     ({ signal }) =>
       http.get<GetTransformsAuditMessagesResponseSchema>(
-        addInternalBasePath(`transforms/${transformId}/messages`),
+        buildPath('/internal/transform/transforms/{transformId}/messages', { transformId }),
         {
           query,
           version: '1',

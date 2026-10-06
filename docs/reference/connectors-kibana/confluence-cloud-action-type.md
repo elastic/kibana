@@ -11,6 +11,8 @@ applies_to:
 
 The Confluence Cloud connector communicates with the Confluence Cloud REST API v2 to list and retrieve spaces and pages. It uses Basic authentication (email and API token) and connects to your Atlassian site by subdomain.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-confluence-cloud-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.

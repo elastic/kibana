@@ -190,6 +190,7 @@ apiTest.describe(
       expect(response).toHaveStatusCode(202);
 
       const accepted = response.body as ChatCallbackAcceptedResponse;
+      conversationIds.add(accepted.conversation_id);
       expect(typeof accepted.execution_id).toBe('string');
       expect(accepted.execution_id.length).toBeGreaterThan(0);
 
@@ -221,8 +222,7 @@ apiTest.describe(
 
       const conversationId = getConversationId(callbackRequests);
       expect(conversationId.length).toBeGreaterThan(0);
-
-      conversationIds.add(conversationId);
+      expect(accepted.conversation_id).toBe(conversationId);
     });
 
     apiTest(
@@ -265,6 +265,7 @@ apiTest.describe(
         expect(response).toHaveStatusCode(202);
 
         const accepted = response.body as ChatCallbackAcceptedResponse;
+        conversationIds.add(accepted.conversation_id);
 
         const callbackRequests = await collectCompletedRoundRequests();
 
@@ -275,7 +276,7 @@ apiTest.describe(
         expect(roundComplete.data.round.response.message).toBe('Callback authorship response');
 
         const conversationId = getConversationId(callbackRequests);
-        conversationIds.add(conversationId);
+        expect(conversationId).toBe(accepted.conversation_id);
 
         const conversation = await getConversation(
           apiClient,
@@ -347,6 +348,7 @@ apiTest.describe(
       expect(response).toHaveStatusCode(202);
 
       const accepted = response.body as ChatCallbackAcceptedResponse;
+      conversationIds.add(accepted.conversation_id);
 
       const callbackPayload = await waitForFailurePayload();
       expect(callbackPayload.execution_id).toBe(accepted.execution_id);
@@ -382,6 +384,7 @@ apiTest.describe(
       expect(response).toHaveStatusCode(202);
 
       const accepted = response.body as ChatCallbackAcceptedResponse;
+      conversationIds.add(accepted.conversation_id);
 
       // Wait until the agent has issued the (hanging) final answer request so the execution is
       // running and can be aborted while in flight.
@@ -409,14 +412,11 @@ apiTest.describe(
       'returns the existing execution for a replayed idempotency key',
       async ({ apiClient }) => {
         const executionIdempotencyKey = 'Ev-callback-replay';
+        // Without conversation_id or origin, only the stored execution knows the conversation.
         const requestBody = {
           input: 'Hello idempotent callback',
           connector_id: connectorId,
           execution_idempotency_key: executionIdempotencyKey,
-          origin: {
-            type: ConversationOriginType.Slack,
-            external_conversation_id: 'team:T123/channel:C123/thread:callback-idempotency',
-          },
           callback: {
             url: `${callbackServerUrl}/callback?token=idempotency`,
           },
@@ -441,6 +441,8 @@ apiTest.describe(
 
           const firstAccepted = first.body as ChatCallbackAcceptedResponse;
           executionId = firstAccepted.execution_id;
+          conversationId = firstAccepted.conversation_id;
+          conversationIds.add(conversationId);
           expect(executionId).toMatch(/^[a-f0-9]{64}$/);
 
           const firstRequests = await collectCompletedRoundRequests();
@@ -449,9 +451,7 @@ apiTest.describe(
 
           expect(getExecutionId(firstRequests)).toBe(executionId);
           expect(getRoundCompleteEvent(firstRequests)).toBeDefined();
-
-          conversationId = getConversationId(firstRequests);
-          conversationIds.add(conversationId);
+          expect(getConversationId(firstRequests)).toBe(conversationId);
         });
 
         await apiTest.step(
@@ -467,6 +467,7 @@ apiTest.describe(
 
             const replayAccepted = replay.body as ChatCallbackAcceptedResponse;
             expect(replayAccepted.execution_id).toBe(executionId);
+            expect(replayAccepted.conversation_id).toBe(conversationId);
 
             // No new execution ran: no LLM call was made (no interceptor was re-armed and the
             // proxy would reject an unexpected request) and the conversation kept a single round.
@@ -522,7 +523,9 @@ apiTest.describe(
 
         const firstAccepted = first.body as ChatCallbackAcceptedResponse;
         const secondAccepted = second.body as ChatCallbackAcceptedResponse;
+        conversationIds.add(firstAccepted.conversation_id);
         expect(firstAccepted.execution_id).toBe(secondAccepted.execution_id);
+        expect(secondAccepted.conversation_id).toBe(firstAccepted.conversation_id);
 
         const callbackRequests = await collectCompletedRoundRequests();
 
@@ -532,7 +535,7 @@ apiTest.describe(
         expect(getRoundCompleteEvent(callbackRequests)).toBeDefined();
 
         const conversationId = getConversationId(callbackRequests);
-        conversationIds.add(conversationId);
+        expect(conversationId).toBe(firstAccepted.conversation_id);
 
         const conversation = await getConversation(
           apiClient,
@@ -576,6 +579,7 @@ apiTest.describe(
           expect(response).toHaveStatusCode(202);
 
           const accepted = response.body as ChatCallbackAcceptedResponse;
+          conversationIds.add(accepted.conversation_id);
           executionIds.push(accepted.execution_id);
 
           const callbackRequests = await collectCompletedRoundRequests();
@@ -584,8 +588,7 @@ apiTest.describe(
 
           expect(getExecutionId(callbackRequests)).toBe(accepted.execution_id);
           expect(getRoundCompleteEvent(callbackRequests)).toBeDefined();
-
-          conversationIds.add(getConversationId(callbackRequests));
+          expect(getConversationId(callbackRequests)).toBe(accepted.conversation_id);
         }
 
         // The same key on a different origin thread is a different event: both ran.
@@ -625,6 +628,7 @@ apiTest.describe(
         expect(response).toHaveStatusCode(202);
 
         const accepted = response.body as ChatCallbackAcceptedResponse;
+        conversationIds.add(accepted.conversation_id);
         expect(accepted.execution_id).toBe(executionId);
 
         const callbackRequests = await collectCompletedRoundRequests();
@@ -632,8 +636,7 @@ apiTest.describe(
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
         expect(getExecutionId(callbackRequests)).toBe(executionId);
-
-        conversationIds.add(getConversationId(callbackRequests));
+        expect(getConversationId(callbackRequests)).toBe(accepted.conversation_id);
       }
     );
 
@@ -668,15 +671,15 @@ apiTest.describe(
         expect(first).toHaveStatusCode(202);
 
         const firstAccepted = first.body as ChatCallbackAcceptedResponse;
+        conversationId = firstAccepted.conversation_id;
+        conversationIds.add(conversationId);
         const firstRequests = await collectCompletedRoundRequests();
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
         expect(getExecutionId(firstRequests)).toBe(firstAccepted.execution_id);
         expect(getRoundCompleteEvent(firstRequests)).toBeDefined();
-
-        conversationId = getConversationId(firstRequests);
-        conversationIds.add(conversationId);
+        expect(getConversationId(firstRequests)).toBe(conversationId);
       });
 
       await apiTest.step('second round continues the same conversation', async () => {
@@ -703,6 +706,7 @@ apiTest.describe(
         expect(second).toHaveStatusCode(202);
 
         const secondAccepted = second.body as ChatCallbackAcceptedResponse;
+        expect(secondAccepted.conversation_id).toBe(conversationId);
         const secondRequests = await collectCompletedRoundRequests();
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();

@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/solutions/observability/plugins/nightshift
 dependsOn:
   - '@kbn/agent-builder-browser'
+  - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/agent-builder-plugin'
   - '@kbn/app-header'
@@ -29,6 +30,7 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/deeplinks-analytics'
   - '@kbn/deeplinks-observability'
+  - '@kbn/dev-cli-runner'
   - '@kbn/discover-plugin'
   - '@kbn/ebt-click'
   - '@kbn/ebt-tools'
@@ -39,6 +41,7 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/lens-embeddable-utils'
   - '@kbn/lens-plugin'
+  - '@kbn/llm-trace-waterfall'
   - '@kbn/nightshift-investigations-plugin'
   - '@kbn/nightshift-shared'
   - '@kbn/observability-shared-plugin'
@@ -66,6 +69,7 @@ fileGroups:
   src:
     - common/**/*
     - public/**/*
+    - scripts/**/*
     - server/**/*
     - test/scout/**/*
     - '!target/**/*'

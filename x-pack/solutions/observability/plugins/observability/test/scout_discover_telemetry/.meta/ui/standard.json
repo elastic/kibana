@@ -1,0 +1,164 @@
+{
+  "sha1": "73bfa760402d9e6abe5b529f6e5fedf10383149d",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "c281eaec665f4d5-73d40978613ea49",
+      "title": "Load Discover telemetry data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "3b4cfbb9ec861da-26281ea9babd528",
+      "title": "Discover observability telemetry context sets EBT context for the observability root profile",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/context.spec.ts",
+        "line": 16,
+        "column": 48
+      }
+    },
+    {
+      "id": "3b4cfbb9ec861da-f60abedf5c64013",
+      "title": "Discover observability telemetry context sets the logs data source profile and clears it outside Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/context.spec.ts",
+        "line": 33,
+        "column": 32
+      }
+    },
+    {
+      "id": "3b4cfbb9ec861da-b06abf6c2cc98b8",
+      "title": "Discover observability telemetry context does not set EBT context for Discover embeddables",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/context.spec.ts",
+        "line": 63,
+        "column": 18
+      }
+    },
+    {
+      "id": "3972114d669538e-a238cf2fdd70db4",
+      "title": "Discover observability telemetry field usage tracks a field added to the table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/field_usage.spec.ts",
+        "line": 18,
+        "column": 52
+      }
+    },
+    {
+      "id": "3972114d669538e-e22219c0c53eeae",
+      "title": "Discover observability telemetry field usage tracks a field removed from the table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/field_usage.spec.ts",
+        "line": 38,
+        "column": 28
+      }
+    },
+    {
+      "id": "3972114d669538e-a44301a548f9c73",
+      "title": "Discover observability telemetry field usage tracks a filter added from the grid and the field list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/field_usage.spec.ts",
+        "line": 51,
+        "column": 22
+      }
+    },
+    {
+      "id": "3972114d669538e-0bdb7c2cf1a4f4c",
+      "title": "Discover observability telemetry field usage tracks field usage from the document viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/field_usage.spec.ts",
+        "line": 76,
+        "column": 20
+      }
+    },
+    {
+      "id": "3972114d669538e-d4b6f1db7e3f3be",
+      "title": "Discover observability telemetry field usage tracks field usage on the surrounding documents page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/field_usage.spec.ts",
+        "line": 108,
+        "column": 25
+      }
+    },
+    {
+      "id": "bdd6c07b62e52cc-86a4f70718dd747",
+      "title": "Discover observability telemetry profiles sends profile resolved events when the data source changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/profiles.spec.ts",
+        "line": 16,
+        "column": 48
+      }
+    },
+    {
+      "id": "bdd6c07b62e52cc-e5e0b5ee203323f",
+      "title": "Discover observability telemetry profiles sends a profile resolved event when a document profile is resolved",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/profiles.spec.ts",
+        "line": 54,
+        "column": 9
+      }
+    },
+    {
+      "id": "589dce85f3e177a-02a9ab7c5eaf1e5",
+      "title": "Unload Discover telemetry data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
+      }
+    }
+  ]
+}

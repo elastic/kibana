@@ -10,6 +10,7 @@ import { EntityType } from '../../../../common/domain/definitions/entity_schema'
 import {
   LogExtractionTypeOverride,
   NonPriorityLogExtractionTypeOverride,
+  MIN_SAMPLING_RATE,
 } from '../global_state/constants';
 
 export type EngineStatus = z.infer<typeof EngineStatus>;
@@ -26,6 +27,10 @@ export const EngineLogExtractionState = z.object({
    * are being processed; cleared when the slice completes. On resume it pins the slice bounds so
    * the (sampled, non-deterministic) boundary probe is not re-run for a partially processed slice. */
   sliceEndTimestamp: z.string().nullable().default(null),
+  /** Sampling rate pinned for the in-progress log slice, mirroring `sliceEndTimestamp`. On resume
+   * it is reused as-is instead of recomputed, since a resumed slice skips the probe (leaving no
+   * fresh volume estimate to compute a rate from). Cleared when the slice completes. */
+  sliceSamplingRate: z.number().min(MIN_SAMPLING_RATE).max(1).nullable().default(null),
 });
 
 export type EngineError = z.infer<typeof EngineError>;

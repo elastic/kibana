@@ -6,7 +6,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { parse } from 'yaml';
 import React, { useMemo } from 'react';
@@ -14,19 +14,20 @@ import { i18n } from '@kbn/i18n';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { Step, WorkflowYaml } from '@kbn/workflows';
 import { collectAllSteps } from '@kbn/workflows';
-import { getBaseConnectorType, getStepIconType, getTriggerTypeIconType } from '@kbn/workflows-ui';
+import { getBaseConnectorType, TypeIcon } from '@kbn/workflows-ui';
 
 const MAX_VISIBLE_TAGS = 3;
 
 interface WorkflowMeta {
   triggerTypes: string[];
-  stepBaseTypes: string[];
+  /** One full step type per base connector type (e.g. a single `slack2.*` entry). */
+  stepTypes: string[];
   tags: string[];
   stepCount: number;
 }
 
 const extractMeta = (yaml: string): WorkflowMeta => {
-  const empty: WorkflowMeta = { triggerTypes: [], stepBaseTypes: [], tags: [], stepCount: 0 };
+  const empty: WorkflowMeta = { triggerTypes: [], stepTypes: [], tags: [], stepCount: 0 };
   // Streaming/partial YAML can produce malformed nested structures that make
   // `collectAllSteps` throw, so guard the whole extraction.
   try {
@@ -39,7 +40,7 @@ const extractMeta = (yaml: string): WorkflowMeta => {
           .filter((t): t is string => typeof t === 'string' && t.length > 0)
       : [];
 
-    const stepBaseTypes: string[] = [];
+    const stepTypes: string[] = [];
     const seenSteps = new Set<string>();
     let stepCount = 0;
     if (Array.isArray(parsed.steps)) {
@@ -50,7 +51,7 @@ const extractMeta = (yaml: string): WorkflowMeta => {
         const base = getBaseConnectorType(step.type);
         if (!seenSteps.has(base)) {
           seenSteps.add(base);
-          stepBaseTypes.push(base);
+          stepTypes.push(step.type);
         }
       }
     }
@@ -59,7 +60,7 @@ const extractMeta = (yaml: string): WorkflowMeta => {
       ? parsed.tags.filter((t): t is string => typeof t === 'string' && t.length > 0)
       : [];
 
-    return { triggerTypes, stepBaseTypes, tags, stepCount };
+    return { triggerTypes, stepTypes, tags, stepCount };
   } catch {
     return empty;
   }
@@ -72,31 +73,26 @@ interface WorkflowInfoStripeProps {
 
 export const WorkflowInfoStripe: React.FC<WorkflowInfoStripeProps> = ({ yaml, showTitle }) => {
   const styles = useMemoCss(componentStyles);
-  const { triggerTypes, stepBaseTypes, tags, stepCount } = useMemo(() => extractMeta(yaml), [yaml]);
+  const { triggerTypes, stepTypes, tags, stepCount } = useMemo(() => extractMeta(yaml), [yaml]);
 
-  const hasAny = triggerTypes.length > 0 || stepBaseTypes.length > 0 || tags.length > 0;
+  const hasAny = triggerTypes.length > 0 || stepTypes.length > 0 || tags.length > 0;
   if (!hasAny) return null;
 
   const visibleTags = tags.slice(0, MAX_VISIBLE_TAGS);
   const overflowTagCount = tags.length - visibleTags.length;
-  const hasDivider = triggerTypes.length > 0 && stepBaseTypes.length > 0;
+  const hasDivider = triggerTypes.length > 0 && stepTypes.length > 0;
 
   const iconsRow = (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap css={styles.container}>
       {triggerTypes.map((type, idx) => (
         <EuiFlexItem grow={false} key={`trigger-${idx}-${type}`}>
-          <EuiIconTip
-            type={getTriggerTypeIconType(`trigger_${type}`)}
-            size="m"
-            content={triggerLabel(type)}
-            aria-label={triggerLabel(type)}
-          />
+          <TypeIcon type={type} kind="trigger" size="m" title={triggerLabel(type)} />
         </EuiFlexItem>
       ))}
       {hasDivider && <EuiFlexItem grow={false} css={styles.divider} />}
-      {stepBaseTypes.map((type) => (
+      {stepTypes.map((type) => (
         <EuiFlexItem grow={false} key={`step-${type}`}>
-          <EuiIconTip type={getStepIconType(type)} size="m" content={type} aria-label={type} />
+          <TypeIcon type={type} kind="step" size="m" />
         </EuiFlexItem>
       ))}
       {visibleTags.length > 0 && <EuiFlexItem grow={false} css={styles.tagSpacer} />}

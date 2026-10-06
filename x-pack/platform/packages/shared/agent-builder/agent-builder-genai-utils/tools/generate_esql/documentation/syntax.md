@@ -15,7 +15,7 @@ For example:
 
 Source commands select a data source.
 
-- FROM: selects one or multiple indices, data streams or aliases to use as source.
+- FROM: selects one or multiple indices, data streams, aliases, or ES|QL views to use as source.
 - ROW: produces a row with one or more columns with values that you specify.
 - SHOW: returns information about the deployment.
 - TS: selects one or multiple data streams with support for time series semantics and time series aggregation functions

@@ -120,11 +120,7 @@ test.describe(
       await test.step('Cases (via More menu)', async () => {
         await nav.openMoreMenu();
         await nav.navItemInMoreByDeepLinkId('observability-overview:cases').click();
-        // Cases list title: legacy header (`cases-all-title`) or the cases-redesign app
-        // header (`appHeaderTitle`); only one renders depending on the casesRedesign flag.
-        await expect(
-          page.testSubj.locator('cases-all-title').or(page.testSubj.locator('appHeaderTitle'))
-        ).toHaveText('Cases', {
+        await expect(page.testSubj.locator('appHeaderTitle')).toHaveText('Cases', {
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });

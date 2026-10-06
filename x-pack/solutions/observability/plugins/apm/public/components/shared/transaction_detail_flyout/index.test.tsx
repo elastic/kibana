@@ -68,7 +68,13 @@ jest.mock('../../app/transaction_details/waterfall_with_summary/trace_waterfall_
 }));
 
 const DEPS = {
-  core: {} as CoreStart,
+  core: {
+    application: {
+      capabilities: {
+        apm: {},
+      },
+    },
+  } as unknown as CoreStart,
 };
 
 const FILTERS = {

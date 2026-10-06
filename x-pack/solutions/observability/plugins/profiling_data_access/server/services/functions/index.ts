@@ -31,6 +31,7 @@ export interface FetchFunctionsParams {
   stacktraceIdsField?: string;
   query: QueryDslQueryContainer;
   totalSeconds: number;
+  abortSignal?: AbortSignal;
 }
 
 const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
@@ -45,6 +46,7 @@ export function createFetchFunctions({ createProfilingEsClient }: RegisterServic
     stacktraceIdsField,
     query,
     totalSeconds,
+    abortSignal,
   }: FetchFunctionsParams) => {
     const [
       co2PerKWH,
@@ -66,7 +68,7 @@ export function createFetchFunctions({ createProfilingEsClient }: RegisterServic
       core.uiSettings.client.get<boolean>(profilingShowErrorFrames),
     ]);
 
-    const profilingEsClient = createProfilingEsClient({ esClient });
+    const profilingEsClient = createProfilingEsClient({ esClient, abortSignal });
 
     const { events, stackTraces, executables, stackFrames, samplingRate } = await searchStackTraces(
       {

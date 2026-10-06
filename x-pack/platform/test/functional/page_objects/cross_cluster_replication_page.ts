@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
@@ -56,7 +57,13 @@ export function CrossClusterReplicationPageProvider({ getService }: FtrProviderC
           return await testSubjects.isDisplayed('readPollTimeoutInput');
         });
         if (readPollTimeout) {
-          await testSubjects.setValue('readPollTimeoutInput', readPollTimeout);
+          // this field is pre-filled, so it must be cleared with key events for React to commit it
+          await testSubjects.setValue('readPollTimeoutInput', readPollTimeout, {
+            clearWithKeyboard: true,
+          });
+          expect(await testSubjects.getAttribute('readPollTimeoutInput', 'value')).to.eql(
+            readPollTimeout
+          );
         }
       }
       await testSubjects.click('submitButton');

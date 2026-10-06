@@ -85,7 +85,7 @@ describe('registerBundleRoutes', () => {
       uiPlugins: createUiPlugins(),
     });
 
-    expect(registerRouteForBundleMock).toHaveBeenCalledTimes(4);
+    expect(registerRouteForBundleMock).toHaveBeenCalledTimes(5);
 
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
       fileHashCache: expect.any(FileHashCache),
@@ -114,6 +114,14 @@ describe('registerBundleRoutes', () => {
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
       fileHashCache: expect.any(FileHashCache),
       isDist: true,
+      bundlesPath: 'kbnVegaSandboxBundleDir',
+      publicPath: '/server-base-path/sha/bundles/kbn-vega-sandbox/',
+      routePath: '/sha/bundles/kbn-vega-sandbox/',
+    });
+
+    expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
+      fileHashCache: expect.any(FileHashCache),
+      isDist: true,
       bundlesPath: fromRoot('target/public/bundles'),
       publicPath: '/server-base-path/sha/bundles/',
       routePath: '/sha/bundles/',
@@ -128,7 +136,7 @@ describe('registerBundleRoutes', () => {
       uiPlugins: createUiPlugins('plugin-a', 'plugin-b'),
     });
 
-    expect(registerRouteForBundleMock).toHaveBeenCalledTimes(4);
+    expect(registerRouteForBundleMock).toHaveBeenCalledTimes(5);
     expect(registerRouteForBundleMock).not.toHaveBeenCalledWith(
       router,
       expect.objectContaining({
@@ -147,7 +155,7 @@ describe('registerBundleRoutes', () => {
       uiPlugins: createExternalPluginsUiPlugins('ext-plugin'),
     });
 
-    expect(registerRouteForBundleMock).toHaveBeenCalledTimes(4);
+    expect(registerRouteForBundleMock).toHaveBeenCalledTimes(5);
     expect(registerRouteForBundleMock).not.toHaveBeenCalledWith(
       router,
       expect.objectContaining({
@@ -167,7 +175,7 @@ describe('registerBundleRoutes', () => {
       uiPlugins: createExternalPluginsUiPlugins('ext-plugin'),
     });
 
-    expect(registerRouteForBundleMock).toHaveBeenCalledTimes(5);
+    expect(registerRouteForBundleMock).toHaveBeenCalledTimes(6);
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
       fileHashCache: expect.any(FileHashCache),
       isDist: true,

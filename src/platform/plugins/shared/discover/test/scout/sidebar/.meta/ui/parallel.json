@@ -1,5 +1,5 @@
 {
-  "sha1": "22bed0659ad7273519842596945a30f40664e55a",
+  "sha1": "c412b43c547ef34a57383d7210536988bad62145",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -349,8 +349,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_runtime_fields.spec.ts",
-        "line": 91,
-        "column": 9
+        "line": 122,
+        "column": 11
       }
     },
     {
@@ -369,8 +369,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_runtime_fields.spec.ts",
-        "line": 117,
-        "column": 25
+        "line": 151,
+        "column": 71
       }
     },
     {

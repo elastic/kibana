@@ -193,6 +193,9 @@ export const entitySchema = z.object({
   // Optional document-level predicate (Condition from @kbn/streamlang) marking this entity type's
   // high-signal logs. Omission means the type has no priority/non-priority split.
   priorityExtractionGate: z.optional(streamlangConditionSchema),
+  // Opts the non-priority process into sampling. Requires priorityExtractionGate; omission means
+  // no sampling.
+  nonPrioritySampling: z.optional(z.boolean()),
   // Optional: when conditions are true on source docs, set the given fields (EVAL after field evals, before STATS).
   whenConditionTrueSetFieldsPreAgg: z.optional(z.array(setFieldsByConditionSchema)),
   // Post-STATS EVAL in logs ESQL (recent.* vs plain). Single-doc paths re-apply entries after pre-agg for parity.
