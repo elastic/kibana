@@ -9,9 +9,11 @@ import type { InvestigationRouteDependencies } from '../types';
 import { registerAssignInvestigationRoute } from './assign_investigation';
 import { registerSetInvestigationStatusRoute } from './set_investigation_status';
 import { registerGetInvestigationClosePreviewRoute } from './get_investigation_close_preview';
+import { registerGetInvestigationsPrivilegesRoute } from './get_investigations_privileges';
 
 export const registerInvestigationRoutes = (deps: InvestigationRouteDependencies) => {
   registerAssignInvestigationRoute(deps);
   registerSetInvestigationStatusRoute(deps);
   registerGetInvestigationClosePreviewRoute(deps);
+  registerGetInvestigationsPrivilegesRoute(deps);
 };

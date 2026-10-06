@@ -43,14 +43,26 @@ const renderPanel = (
   workflowId: string | null,
   isAccordion: boolean,
   {
+    enabled = true,
+    serviceAccountId,
     showManagedWorkflows = true,
     canChangeAdvancedSettings = true,
-  }: { showManagedWorkflows?: boolean; canChangeAdvancedSettings?: boolean } = {}
+  }: {
+    enabled?: boolean;
+    serviceAccountId?: string;
+    showManagedWorkflows?: boolean;
+    canChangeAdvancedSettings?: boolean;
+  } = {}
 ) => {
   const core = coreMock.createStart();
+  core.http.get.mockResolvedValue(undefined);
   core.application.getUrlForApp.mockImplementation(
     (appId: string, options?: { path?: string }) => `/app/${appId}${options?.path ?? ''}`
   );
+  const settings = {
+    ...createWorker(workflowId).settings,
+    ...(serviceAccountId ? { serviceAccountId } : {}),
+  };
   core.settings.client.get.mockReturnValue(showManagedWorkflows);
   core.settings.client.get$.mockReturnValue(of(showManagedWorkflows));
   core.application.capabilities = {
@@ -65,8 +77,8 @@ const renderPanel = (
         isAccordion={isAccordion}
         isExpanded
         onToggle={jest.fn()}
-        enabled
-        settings={createWorker(workflowId).settings}
+        enabled={enabled}
+        settings={settings}
         warningReasons={[]}
         settingsLocked={false}
         isSaving={false}
@@ -145,5 +157,31 @@ describe('WorkerSettingsPanel view executions link', () => {
       screen.queryByTestId(`alertZeroWorkerViewExecutions-${WORKER_ID}`)
     ).not.toBeInTheDocument();
     expect(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${WORKER_ID}`)).toBeInTheDocument();
+  });
+});
+
+describe('WorkerSettingsPanel service account', () => {
+  it('shows that saving an enabled worker requires a service account', () => {
+    renderPanel(WORKFLOW_ID, false);
+
+    expect(screen.getByTestId(`alertZeroServiceAccountRequired-${WORKER_ID}`)).toHaveTextContent(
+      'Select a service account to save while this worker stays on. You can turn it off without one.'
+    );
+  });
+
+  it('hides that notice when the worker is off', () => {
+    renderPanel(WORKFLOW_ID, false, { enabled: false });
+
+    expect(
+      screen.queryByTestId(`alertZeroServiceAccountRequired-${WORKER_ID}`)
+    ).not.toBeInTheDocument();
+  });
+
+  it('hides that notice when an account is selected', () => {
+    renderPanel(WORKFLOW_ID, false, { serviceAccountId: 'kibana/az-worker-1' });
+
+    expect(
+      screen.queryByTestId(`alertZeroServiceAccountRequired-${WORKER_ID}`)
+    ).not.toBeInTheDocument();
   });
 });
