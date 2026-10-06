@@ -19,14 +19,7 @@ import {
   conversationToInvestigation,
   conversationToEscalationHeader,
 } from './conversation_to_investigation';
-import type {
-  RenderAssignees,
-  RenderStatus,
-  RenderLinkedInvestigations,
-  RenderOverview,
-  RenderLiveState,
-  RenderTitle,
-} from './types';
+import type { RenderAssignees, RenderStatus, RenderLinkedInvestigations } from './types';
 
 /**
  * The investigation flyout's slot contents, kept in one module so `register` can pull them in a
@@ -51,43 +44,30 @@ export interface OverviewSlotProps extends InvestigationSlotProps {
    * host can fetch its proposals; omitted entirely (see `OverviewTab`) when the caller has none.
    */
   renderProposedActions?: (props: { conversationId: string }) => React.ReactNode;
-  /** Replaces the tab body; see `RenderOverview`. */
-  renderOverview?: RenderOverview;
 }
 
 export const OverviewSlot = ({
   conversation,
   attachmentsService,
   renderProposedActions,
-  renderOverview,
-}: OverviewSlotProps) => {
-  const proposedActionsContent = renderProposedActions?.({ conversationId: conversation.id });
-  if (renderOverview) {
-    return <>{renderOverview({ conversation, attachmentsService, proposedActionsContent })}</>;
-  }
-  return (
-    <OverviewTab
-      investigation={conversationToInvestigation(conversation)}
-      attachments={conversation.attachments}
-      attachmentsService={attachmentsService}
-      proposedActionsContent={proposedActionsContent}
-    />
-  );
-};
+}: OverviewSlotProps) => (
+  <OverviewTab
+    investigation={conversationToInvestigation(conversation)}
+    attachments={conversation.attachments}
+    attachmentsService={attachmentsService}
+    proposedActionsContent={renderProposedActions?.({ conversationId: conversation.id })}
+  />
+);
 
 export interface HeaderSlotProps extends InvestigationSlotProps {
   renderAssignees?: RenderAssignees;
   renderStatus?: RenderStatus;
-  renderLiveState?: RenderLiveState;
-  renderTitle?: RenderTitle;
 }
 
 export const HeaderSlot = ({
   conversation,
   renderAssignees,
   renderStatus,
-  renderLiveState,
-  renderTitle,
   refetchConversation,
 }: HeaderSlotProps) => {
   const investigation = conversationToInvestigation(conversation);
@@ -113,11 +93,6 @@ export const HeaderSlot = ({
       investigation={investigation}
       assigneesNode={assigneesNode}
       statusNode={statusNode}
-      liveStateNode={renderLiveState?.({
-        conversationId: conversation.id,
-        severity: investigation.severity,
-      })}
-      titleNode={renderTitle?.({ conversationId: conversation.id, title: conversation.title })}
     />
   );
 };
