@@ -11,7 +11,7 @@ import type {
   ConversationRoundStep,
   ToolCallStep,
 } from '@kbn/agent-builder-common';
-import { isToolCallStep } from '@kbn/agent-builder-common';
+import { isToolCallStep, TimelineEventType } from '@kbn/agent-builder-common';
 import type { ProcessedRoundInput } from '@kbn/agent-builder-server';
 import type { ProcessedConversation } from './prepare_conversation';
 import {
@@ -68,7 +68,7 @@ export interface HistoryView {
 /**
  * The round this run resumes (`resumedRoundId`) is left out of the history (the graph renders its
  * steps) and its user message stands in for the next input. A paused round the run does not resume
- * stays in the history, its unreturned tool calls marked interrupted so each call keeps a result.
+ * stays in the history, its paused tool calls marked interrupted so each call keeps a result.
  */
 export const historyView = (
   conversation: ProcessedConversation,
@@ -89,7 +89,7 @@ export const historyView = (
   return {
     entries: entries.map((entry) =>
       isTimelineRound(entry) && entry.id === lastRound.id
-        ? withUnreturnedCallsInterrupted(entry)
+        ? withPausedCallsInterrupted(entry)
         : entry
     ),
     input: conversation.nextInput,
@@ -97,16 +97,25 @@ export const historyView = (
   };
 };
 
-const withUnreturnedCallsInterrupted = (
+/** Paused calls are the pause state's nodes; a call with an empty `results` may be a real empty return. */
+const withPausedCallsInterrupted = (
   round: TimelineRound<ProcessedTimelineEvent>
-): TimelineRound<ProcessedTimelineEvent> => ({
-  ...round,
-  steps: round.steps.map((step) =>
-    isToolCallStep(step) && step.results.length === 0
-      ? { ...step, interrupted: true as const }
-      : step
-  ),
-});
+): TimelineRound<ProcessedTimelineEvent> => {
+  const { terminal } = round;
+  const pausedIds = new Set(
+    terminal.type === TimelineEventType.executionTerminated
+      ? (terminal.data.state?.agent.nodes ?? []).map((node) => node.tool_call_id)
+      : []
+  );
+  return {
+    ...round,
+    steps: round.steps.map((step) =>
+      isToolCallStep(step) && pausedIds.has(step.tool_call_id)
+        ? { ...step, interrupted: true as const }
+        : step
+    ),
+  };
+};
 
 /** What a compaction cursor leaves visible. */
 export interface ContextVisibility {

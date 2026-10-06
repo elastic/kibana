@@ -9,6 +9,7 @@ import type {
   CompactionSummary,
   ConversationRoundStep,
   ReasoningStep,
+  TimelineEvent,
   ToolCallStep,
 } from '@kbn/agent-builder-common';
 import {
@@ -19,6 +20,7 @@ import {
 } from '@kbn/agent-builder-common';
 import {
   eventsNativeConversation,
+  pauseState,
   pausedRoundTimeline,
   processedCustomEventFixture,
   timelineFromRounds,
@@ -134,9 +136,9 @@ describe('historyView', () => {
     expect(view.inputTimestamp).toBe('2026-01-01T00:00:00.000Z');
   });
 
-  const pausedTimeline = () => [
+  const pausedTimeline = (paused: TimelineEvent[] = pausedRoundTimeline('p', ['c1'])) => [
     ...timelineFromRounds([{ id: 'a', input: input('first') }]),
-    ...(eventsForContext(eventsNativeConversation(pausedRoundTimeline('p', ['c1']))).map((event) =>
+    ...(eventsForContext(eventsNativeConversation(paused)).map((event) =>
       event.type === TimelineEventType.userMessage
         ? { ...event, data: { ...event.data, attachments: [] } }
         : event
@@ -160,6 +162,23 @@ describe('historyView', () => {
     ]);
     expect(view.input).toEqual(input('next'));
     expect(view.inputTimestamp).toBe('2026-01-01T00:00:00.000Z');
+  });
+
+  it('only marks the paused calls interrupted, not calls that returned nothing', () => {
+    const paused = pausedRoundTimeline('p', ['c0', 'c1']).map(
+      (event): TimelineEvent =>
+        event.type === TimelineEventType.executionTerminated
+          ? { ...event, data: { ...event.data, state: pauseState(['c1']) } }
+          : event
+    );
+    const [, round] = historyView(conversationOf(pausedTimeline(paused))).entries.filter(
+      isTimelineRound
+    );
+    expect(round.steps).toEqual([
+      expect.objectContaining({ tool_call_id: 'c0' }),
+      expect.objectContaining({ tool_call_id: 'c1', interrupted: true }),
+    ]);
+    expect(round.steps[0]).not.toHaveProperty('interrupted');
   });
 });
 
