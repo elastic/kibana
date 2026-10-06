@@ -12,7 +12,7 @@ export interface GenerateEsqlAction {
   type: 'generate_esql';
   success: boolean;
   query?: string;
-  /** Result columns of the generated query, used to pick the config example. */
+  /** Result columns of the generated query, shown to the config author. */
   columns?: EsqlEsqlColumnInfo[];
   error?: string;
 }
