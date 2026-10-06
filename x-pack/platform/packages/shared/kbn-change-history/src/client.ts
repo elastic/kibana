@@ -32,6 +32,7 @@ import type {
   ChangeHistoryFieldBucket,
   GetHistoryResult,
   LogChangeHistoryOptions,
+  GetChangeHistoryEventOptions,
   GetChangeHistoryOptions,
   GetChangeHistoryByFieldResult,
   GetChangeHistoryByFieldsOptions,
@@ -58,6 +59,11 @@ export interface IChangeHistoryClient {
     objectId: string,
     opts?: GetChangeHistoryOptions
   ): Promise<GetHistoryResult>;
+  getEvent(
+    spaceId: string,
+    eventId: string,
+    opts?: GetChangeHistoryEventOptions
+  ): Promise<ChangeHistoryDocument | undefined>;
   getHistoryByFields(
     spaceId: string,
     objectType: string,
@@ -307,6 +313,48 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       total: Number((history.hits.total as SearchTotalHits)?.value) || 0,
       items: history.hits.hits.map((h) => h._source).filter((i) => !!i),
     };
+  }
+
+  /**
+   * Get a single change history event by its unique `event.id`.
+   * The event ID is a UUID minted per document, so no object type or ID is needed to identify it.
+   * The lookup is still scoped to the Kibana space and to the client's `module` and `dataset`.
+   * @param spaceId - The kibana space Id where the event was logged.
+   * @param eventId - The `event.id` of the change history document.
+   * @param opts - The options for the query.
+   * @param opts.spanLabels - Caller-supplied labels attached to the span emitted by this method.
+   * @returns The change history document, or `undefined` if no event matches.
+   * @throws An error if the data stream is not initialized, or if an error occurs while getting the event.
+   */
+  async getEvent(
+    spaceId: string,
+    eventId: string,
+    opts?: GetChangeHistoryEventOptions
+  ): Promise<ChangeHistoryDocument | undefined> {
+    const client = this.getInitializedClient();
+    const response = await withSpan(
+      {
+        name: 'change_history.get_event.es_search',
+        type: 'db',
+        subtype: 'elasticsearch',
+        labels: opts?.spanLabels,
+      },
+      () =>
+        client.search({
+          space: spaceId,
+          query: {
+            bool: {
+              filter: [
+                { term: { 'event.module': this.module } },
+                { term: { 'event.dataset': this.dataset } },
+                { term: { 'event.id': eventId } },
+              ],
+            },
+          },
+          size: 1,
+        })
+    );
+    return response.hits.hits[0]?._source;
   }
 
   /**

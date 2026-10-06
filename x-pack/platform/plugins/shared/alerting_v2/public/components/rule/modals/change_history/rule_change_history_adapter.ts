@@ -47,9 +47,8 @@ export const createRuleChangeHistoryAdapter = (
 
     return { items: items.map(toChangeHistoryItem), total };
   },
-  getChange: async ({ objectId, changeId, signal }): Promise<ChangeHistoryDetail> => {
+  getChange: async ({ changeId, signal }): Promise<ChangeHistoryDetail> => {
     const { snapshot, reason, ...item } = await api.getRuleChangeEvent({
-      id: objectId,
       eventId: changeId,
       signal,
     });

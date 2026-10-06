@@ -56,16 +56,6 @@ export const getRuleChangeHistoryEventParamsSchema = z
 export type GetRuleChangeHistoryEventParams = z.infer<typeof getRuleChangeHistoryEventParamsSchema>;
 
 /**
- * Query params for `GET …/change_history/rules/{change_id}`.
- *
- * `change_id` alone identifies the event; `rule_id` is here only because the
- * one read API `@kbn/change-history` exposes always filters on an object id.
- * Tracked for removal in https://github.com/elastic/kibana/issues/292882.
- */
-export const getRuleChangeHistoryEventQuerySchema = z.object({ rule_id: ruleIdSchema }).strict();
-export type GetRuleChangeHistoryEventQuery = z.infer<typeof getRuleChangeHistoryEventQuerySchema>;
-
-/**
  * Actor for a change-history row. Unattributed writes may carry an empty
  * `name` (the write path stores `username ?? ''`).
  */

@@ -36,8 +36,6 @@ export interface ListRuleChangesParams {
 }
 
 export interface GetRuleChangeEventParams {
-  /** The rule identifier. */
-  id: string;
   /** The change-history event identifier (`event.id`). */
   eventId: string;
   signal?: AbortSignal;
@@ -65,12 +63,10 @@ export class RuleChangeHistoryApi {
   }
 
   public async getRuleChangeEvent({
-    id,
     eventId,
     signal,
   }: GetRuleChangeEventParams): Promise<RuleChangeHistoryDetail> {
     return this.http.get<RuleChangeHistoryDetail>(buildRuleChangeHistoryEventPath(eventId), {
-      query: { rule_id: id },
       signal,
     });
   }
