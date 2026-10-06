@@ -31,6 +31,7 @@ export {
   putSandboxSecrets,
   replaceSandboxSecrets,
 } from './sandbox_secrets';
+export { getCustomContext, putCustomContext, replaceCustomContext } from './custom_context';
 export {
   archiveMemoryPage,
   deleteMemories,
