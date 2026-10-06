@@ -10,6 +10,7 @@
 import type { StabilityTier } from '../stability';
 import type { ImpactReportEntry } from './write_impact_report';
 import { README_LINK } from './links';
+import releaseNote from './release_note.json';
 
 const HEADER = `
 ╔════════════════════════════════════════════════════════════════════════════╗
@@ -20,7 +21,7 @@ const HEADER = `
 
 const RELEASE_NOTE = `Release note:
 
-Add a \`## Release note\` section to the PR description. The release notes script publishes that text as this change's entry in the Breaking changes section of the Kibana release notes, so write it for API users: what changed, how it affects them, and what they need to do.
+${releaseNote.guidance}
 
 See the @kbn/api-contracts README for tier definitions and the allowlist workflow: ${README_LINK}
 `;
@@ -34,8 +35,8 @@ What to do next:
 2. If unintentional, revert the change
 3. If intentional:
    - add an approved allowlist entry and coordinate with the owning team
-   - add the \`release_note:breaking\` PR label (replacing any other \`release_note:*\` label)
-   - add release note text to the PR description, see the Release note section below
+   - ${releaseNote.labelStep}
+   - ${releaseNote.textStep}
 
 ${RELEASE_NOTE}
 `.split('\n');
@@ -45,8 +46,8 @@ const ALLOWLISTED_FOOTER = `
 
 Nothing here blocks merge. The approved breaking change(s) still ship with this PR, so:
 
-- add the \`release_note:breaking\` PR label (replacing any other \`release_note:*\` label)
-- add release note text to the PR description, see the Release note section below
+- ${releaseNote.labelStep}
+- ${releaseNote.textStep}
 
 ${RELEASE_NOTE}
 `.split('\n');
@@ -61,7 +62,7 @@ const INFORMATIONAL_HEADER = `
 const INFORMATIONAL_FOOTER = `
 ────────────────────────────────────────────────────────────────────────────
 
-Nothing here blocks merge. Optional: release note describing the change in the PR description
+Nothing here blocks merge. ${releaseNote.optionalPrompt}
 
 See the @kbn/api-contracts README for tier definitions and the rule policy: ${README_LINK}
 

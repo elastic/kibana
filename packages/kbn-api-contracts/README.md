@@ -31,6 +31,7 @@ By default the check is a soft gate: a BC detected in stable/tech_preview fails 
 3. **`src/report/`** - Error formatting and user guidance
 
    - `format_failure.ts` - Generates the tier-grouped CI-log summary (gating tiers first, then an informational experimental section)
+   - `release_note.json` - Release note wording shared by the CI log and the PR comment
    - `write_impact_report.ts` - Writes the JSON impact report consumed by the PR notifier
    - `links.ts` - Documentation links
 
@@ -159,6 +160,8 @@ Tier and rule policy are independent. A stable-tier change still doesn't gate wh
 ### CI notifications
 
 CI posts (or updates) a PR comment whenever there is anything to report, **regardless of whether the check fails** (the check can exit 0 with nothing gating, e.g. when every gating break is allowlisted, only experimental changes were found, or only report-only rules matched). The comment groups gating changes by stability tier. Allowlisted stable and Technical Preview changes, experimental changes, and report-only rules each appear in their own non-blocking section. Allowlisted experimental and report-only changes are left out. When there is nothing to report, no comment is posted.
+
+When the change list would make the comment too long for GitHub, the comment still carries what the author has to act on: release note guidance when a breaking change ships, and the note that nothing blocks merge when it does not. Rows that do not fit are left out, with a count of how many. The full list stays in the CI log.
 
 ### Release note suggestions
 

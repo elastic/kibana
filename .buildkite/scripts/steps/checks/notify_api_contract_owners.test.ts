@@ -8,10 +8,16 @@
  */
 
 jest.mock('#pipeline-utils', () => ({
+  KIBANA_COMMENT_SIGIL: 'kbn-message-context',
   upsertComment: jest.fn(),
 }));
 
-import { buildCommentBody, type ImpactEntry } from './notify_api_contract_owners.ts';
+import {
+  buildCommentBody,
+  GITHUB_COMMENT_MAX_LENGTH,
+  postedCommentLength,
+  type ImpactEntry,
+} from './notify_api_contract_owners.ts';
 
 const entry = (overrides: Partial<ImpactEntry> = {}): ImpactEntry => ({
   path: '/api/spaces/space',
@@ -297,6 +303,73 @@ describe('buildCommentBody', () => {
         expect(body.indexOf('### Stable (GA)')).toBeLessThan(body.indexOf('### Approved'));
         expect(body.indexOf('### Approved')).toBeLessThan(body.indexOf('### What to do'));
       });
+    });
+  });
+
+  describe('GitHub comment length', () => {
+    const longerThanTheComment = 'x'.repeat(GITHUB_COMMENT_MAX_LENGTH);
+
+    it('posts a short comment unchanged', () => {
+      const body = buildCommentBody([entry()]);
+
+      expect(body).not.toContain('The rest are only in the API contracts CI log');
+      expect(postedCommentLength(body)).toBeLessThanOrEqual(GITHUB_COMMENT_MAX_LENGTH);
+    });
+
+    it('leaves out rows that do not fit and keeps higher-priority rows', () => {
+      const body = buildCommentBody([
+        entry({
+          path: '/api/report-only',
+          reportOnly: true,
+          policyReason: 'Additive.',
+          reason: longerThanTheComment,
+        }),
+        entry({ path: '/api/experimental', tier: 'experimental', reason: longerThanTheComment }),
+        entry({ path: '/api/approved', allowlisted: true }),
+        entry({ path: '/api/tech-preview', tier: 'tech_preview' }),
+        entry({ path: '/api/stable' }),
+      ]);
+
+      expect(postedCommentLength(body)).toBeLessThanOrEqual(GITHUB_COMMENT_MAX_LENGTH);
+      expect(body).toContain('/api/stable');
+      expect(body).toContain('/api/tech-preview');
+      expect(body).toContain('/api/approved');
+      expect(body).toContain('### Release note');
+      expect(body).toContain('Showing 3 of 5 change(s)');
+      expect(body).not.toContain('/api/experimental');
+      expect(body).not.toContain('/api/report-only');
+    });
+
+    it('does not show a lower-priority row after a higher-priority row is left out', () => {
+      const body = buildCommentBody([
+        entry({ path: '/api/stable-huge', reason: longerThanTheComment }),
+        entry({ path: '/api/tech-preview', tier: 'tech_preview' }),
+      ]);
+
+      expect(body).toContain('Showing 0 of 2 change(s)');
+      expect(body).not.toContain('/api/tech-preview');
+    });
+
+    it('keeps the gating guidance when the only row does not fit', () => {
+      const body = buildCommentBody([entry({ path: '/api/huge', reason: longerThanTheComment })]);
+
+      expect(postedCommentLength(body)).toBeLessThanOrEqual(GITHUB_COMMENT_MAX_LENGTH);
+      expect(body).toContain('Showing 0 of 1 change(s)');
+      expect(body).toContain('### Release note');
+      expect(body).toContain('release_note:breaking');
+      expect(body).not.toContain('/api/huge');
+    });
+
+    it('keeps the allowlisted guidance when an approved row does not fit', () => {
+      const body = buildCommentBody([
+        entry({ path: '/api/approved-huge', allowlisted: true, reason: longerThanTheComment }),
+      ]);
+
+      expect(postedCommentLength(body)).toBeLessThanOrEqual(GITHUB_COMMENT_MAX_LENGTH);
+      expect(body).toContain('Showing 0 of 1 change(s)');
+      expect(body).toContain('The approved breaking change(s) still ship with this PR');
+      expect(body).not.toContain('**Fix the breaking change**');
+      expect(body).not.toContain('/api/approved-huge');
     });
   });
 });

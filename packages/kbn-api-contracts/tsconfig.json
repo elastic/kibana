@@ -5,6 +5,7 @@
   },
   "include": [
     "**/*.ts",
+    "src/report/release_note.json",
   ],
   "exclude": [
     "target/**/*"
