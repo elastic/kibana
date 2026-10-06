@@ -114,14 +114,10 @@ export {
 } from './src/sources/schema';
 
 export {
-  DEFAULT_SOURCE_TYPE_PATTERNS,
-  loadSourceTypePatterns,
   matchSourceTypes,
   SOURCE_TYPES,
   sourceTypeSchema,
-  type ApmIndexPatternFields,
   type SourceType,
-  type SourceTypePatterns,
 } from './src/sources/source_type';
 
 export {

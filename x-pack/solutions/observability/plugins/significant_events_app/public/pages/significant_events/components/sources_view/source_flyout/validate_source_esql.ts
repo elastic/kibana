@@ -5,34 +5,15 @@
  * 2.0.
  */
 
-import {
-  getSourceType,
-  validateSourceQuery,
-  type SourceTypePatterns,
-} from '@kbn/nightshift-shared';
+import { getSourceType, validateSourceQuery } from '@kbn/nightshift-shared';
 
-/**
- * Form rule for a source query. Structural errors come back immediately. The type check runs
- * only when the pattern lookup succeeded; a failed lookup returns `true` and the server's 400
- * is shown on the query row after save.
- */
-export const validateSourceEsql = async ({
-  esql,
-  getSourceTypePatterns,
-}: {
-  esql: string;
-  getSourceTypePatterns: () => Promise<SourceTypePatterns | null>;
-}): Promise<string | true> => {
+/** Form rule for a source query. Structural errors come back before the one-type check. */
+export const validateSourceEsql = (esql: string): string | true => {
   const structuralError = validateSourceQuery(esql);
   if (structuralError) {
     return structuralError;
   }
 
-  const patterns = await getSourceTypePatterns();
-  if (!patterns) {
-    return true;
-  }
-
-  const analysis = getSourceType({ esql, patterns });
+  const analysis = getSourceType({ esql });
   return 'error' in analysis ? analysis.error : true;
 };

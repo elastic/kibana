@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SourceTypePatterns } from './source_type';
 import {
   analyzeSourceQuery,
   getSourceCommandQuery,
@@ -15,22 +14,12 @@ import {
   validateSourceQuery,
 } from './validate_source_query';
 
-const APM_TRACES: SourceTypePatterns = {
-  logs: [],
-  traces: ['traces-apm*', 'apm-*', 'traces-*.otel-*'],
+const expectType = (esql: string, type: string) => {
+  expect(getSourceType({ esql })).toEqual({ type });
 };
 
-const CUSTOM_LOGS: SourceTypePatterns = {
-  logs: ['my-app-*'],
-  traces: [],
-};
-
-const expectType = (esql: string, type: string, patterns?: SourceTypePatterns) => {
-  expect(getSourceType({ esql, patterns })).toEqual({ type });
-};
-
-const expectTypeError = (esql: string, messagePart: string, patterns?: SourceTypePatterns) => {
-  expect(getSourceType({ esql, patterns })).toEqual({
+const expectTypeError = (esql: string, messagePart: string) => {
+  expect(getSourceType({ esql })).toEqual({
     error: expect.stringContaining(messagePart),
   });
 };
@@ -141,14 +130,12 @@ describe('getSourceType', () => {
     expectType('FROM logs-*', 'logs');
     expectType('FROM logs-*, filebeat-*', 'logs');
     expectType('FROM logs.otel.queries-test', 'logs');
-    expectType('FROM traces-apm*, apm-*', 'traces', APM_TRACES);
+    expectType('FROM traces-apm*', 'traces');
     expectType('FROM metrics-system.cpu-*', 'metrics');
     expectType('TS metrics-*', 'metrics');
     expectType('TS my-tsdb-*', 'metrics');
     expectType('FROM my-a-*, my-b-*', 'unknown');
-    expectType('FROM my-app-0001', 'logs', CUSTOM_LOGS);
-    expectType('FROM logs-*, my-app-0001', 'logs', CUSTOM_LOGS);
-    expectType('FROM logs-*, my-app-*', 'logs', CUSTOM_LOGS);
+    expectType('FROM apm-*', 'unknown');
     expectType('FROM metrics-logstash.node-*', 'metrics');
     expectType('FROM metrics-microsoft_sqlserver.transaction_log-*', 'metrics');
     expectType('FROM remote:logs-*', 'logs');
@@ -157,7 +144,6 @@ describe('getSourceType', () => {
     expectType('TS remote:my-tsdb-*', 'metrics');
     expectType('FROM logs-*, -remote:*', 'logs');
     expectType('FROM logs-*, cluster:-traces-*', 'logs');
-    expectType('FROM remote:my-app-0001', 'logs', CUSTOM_LOGS);
   });
 
   it('rejects an unscoped wildcard', () => {
@@ -171,30 +157,12 @@ describe('getSourceType', () => {
   it('rejects indices of more than one type', () => {
     expectTypeError('FROM logs-*, traces-*', 'mixes logs (logs-*) and traces (traces-*)');
     expectTypeError('FROM logs-*, my-app-*', 'mixes logs (logs-*) and unknown (my-app-*)');
-    expectTypeError('FROM logs-*, my-app-*', 'log sources or APM indices');
+    expectTypeError('FROM traces-apm*, apm-*', 'mixes traces (traces-apm*) and unknown (apm-*)');
     expectTypeError('TS logs-*', 'mixes logs (logs-*) and metrics (TS)');
     expectTypeError(
       'FROM remote:logs-*, other:traces-*',
       'mixes logs (remote:logs-*) and traces (other:traces-*)'
     );
-  });
-
-  it('rejects the legacy apm-* pattern because it is also errors and metrics', () => {
-    const legacyApm = {
-      logs: ['logs-apm*', 'apm-*'],
-      traces: ['traces-apm*', 'apm-*'],
-      metrics: ['metrics-apm*', 'apm-*'],
-    };
-
-    expectTypeError('FROM apm-*', 'more than one kind of data (logs, traces, metrics)', legacyApm);
-    expectTypeError(
-      'FROM remote:apm-*',
-      'Index "remote:apm-*" matches more than one kind of data (logs, traces, metrics)',
-      legacyApm
-    );
-    expectType('FROM traces-apm*', 'traces', legacyApm);
-    expectType('FROM logs-apm*', 'logs', legacyApm);
-    expectType('FROM metrics-apm*', 'metrics', legacyApm);
   });
 
   it('rejects one index that matches more than one type', () => {

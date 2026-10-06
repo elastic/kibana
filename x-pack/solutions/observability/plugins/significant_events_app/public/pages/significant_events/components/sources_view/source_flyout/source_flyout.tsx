@@ -68,11 +68,6 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
     core: {
       notifications: { toasts },
     },
-    dependencies: {
-      start: {
-        nightshiftSources: { getSourceTypePatterns },
-      },
-    },
   } = useKibana();
   const { createSource, updateSource } = useSourcesApi();
   const titleId = useGeneratedHtmlId();
@@ -118,7 +113,7 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
   };
 
   const runPreview = async (esql: string) => {
-    const result = await validateSourceEsql({ esql, getSourceTypePatterns });
+    const result = validateSourceEsql(esql);
     if (result !== true) {
       setError('esql', { message: result });
       return;
@@ -259,7 +254,7 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
                     name="esql"
                     control={control}
                     rules={{
-                      validate: (esql) => validateSourceEsql({ esql, getSourceTypePatterns }),
+                      validate: validateSourceEsql,
                     }}
                     render={({ field, fieldState }) => (
                       <EuiFormRow

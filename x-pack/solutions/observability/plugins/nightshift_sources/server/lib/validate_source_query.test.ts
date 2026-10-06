@@ -6,15 +6,12 @@
  */
 
 import { isBoom } from '@hapi/boom';
-import { DEFAULT_SOURCE_TYPE_PATTERNS } from '@kbn/nightshift-shared';
 import { validateSourceQuery } from './validate_source_query';
-
-const patterns = DEFAULT_SOURCE_TYPE_PATTERNS;
 
 describe('validateSourceQuery', () => {
   it('throws a 400 Boom with the shared validator message', () => {
     try {
-      validateSourceQuery({ esql: 'ROW a = 1', patterns });
+      validateSourceQuery({ esql: 'ROW a = 1' });
     } catch (error) {
       expect(isBoom(error)).toBe(true);
       expect(error.output.statusCode).toBe(400);
@@ -25,17 +22,17 @@ describe('validateSourceQuery', () => {
   });
 
   it('returns the type of a query that targets one kind of data', () => {
-    expect(validateSourceQuery({ esql: 'FROM logs-*', patterns })).toBe('logs');
+    expect(validateSourceQuery({ esql: 'FROM logs-*' })).toBe('logs');
   });
 
   it('throws a 400 Boom when the query mixes types', () => {
-    expect(() => validateSourceQuery({ esql: 'FROM logs-*, traces-*', patterns })).toThrow(
+    expect(() => validateSourceQuery({ esql: 'FROM logs-*, traces-*' })).toThrow(
       expect.objectContaining({ message: expect.stringContaining('mixes') })
     );
   });
 
   it('throws a 400 Boom when one index matches more than one type', () => {
-    expect(() => validateSourceQuery({ esql: 'FROM logs-traces-*', patterns })).toThrow(
+    expect(() => validateSourceQuery({ esql: 'FROM logs-traces-*' })).toThrow(
       expect.objectContaining({ message: expect.stringContaining('more than one kind') })
     );
   });

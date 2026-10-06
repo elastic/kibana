@@ -14,11 +14,7 @@ import {
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import { escapeKuery } from '@kbn/es-query';
-import {
-  getNightshiftSourceViewName,
-  type NightshiftSource,
-  type SourceTypePatterns,
-} from '@kbn/nightshift-shared';
+import { getNightshiftSourceViewName, type NightshiftSource } from '@kbn/nightshift-shared';
 import {
   NIGHTSHIFT_SOURCE_SO_TYPE,
   type NightshiftSourceAttributes,
@@ -92,10 +88,7 @@ const emptyFind = {
   per_page: 1,
 };
 
-const setup = ({
-  spaceId = SPACE_ID,
-  patterns = { logs: [], traces: [] },
-}: { spaceId?: string; patterns?: SourceTypePatterns } = {}) => {
+const setup = ({ spaceId = SPACE_ID }: { spaceId?: string } = {}) => {
   const soClient = savedObjectsClientMock.create();
   const dataEsClient = elasticsearchServiceMock.createElasticsearchClient();
   const viewsClient: jest.Mocked<SourceViewsClient> = {
@@ -106,8 +99,6 @@ const setup = ({
   const logger = loggingSystemMock.createLogger();
   const onChange = jest.fn().mockResolvedValue(undefined);
 
-  const getSourceTypePatterns = jest.fn().mockResolvedValue(patterns);
-
   const client = new SourcesClient({
     soClient,
     viewsClient,
@@ -116,13 +107,12 @@ const setup = ({
     username: 'marco',
     spaceId,
     onChange,
-    getSourceTypePatterns,
   });
 
   soClient.find.mockResolvedValue(emptyFind);
   dataEsClient.esql.query.mockResponse(withColumns);
 
-  return { client, soClient, viewsClient, dataEsClient, logger, onChange, getSourceTypePatterns };
+  return { client, soClient, viewsClient, dataEsClient, logger, onChange };
 };
 
 describe('SourcesClient', () => {
@@ -419,30 +409,6 @@ describe('SourcesClient', () => {
       expect(viewsClient.putView).not.toHaveBeenCalled();
     });
 
-    it('does not write when source type patterns cannot be read', async () => {
-      const { client, soClient, viewsClient, dataEsClient, getSourceTypePatterns } = setup();
-      getSourceTypePatterns.mockRejectedValue(new Error('settings down'));
-
-      await expect(client.create({ title: 't', tags: [], esql: 'FROM my-app-*' })).rejects.toThrow(
-        'settings down'
-      );
-      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
-      expect(soClient.create).not.toHaveBeenCalled();
-      expect(viewsClient.putView).not.toHaveBeenCalled();
-    });
-
-    it('stores logs when a configured log source makes every index logs', async () => {
-      const { client } = setup({ patterns: { logs: ['my-app-*'], traces: [] } });
-
-      const source = await client.create({
-        title: 'app',
-        tags: [],
-        esql: 'FROM logs-*, my-app-*',
-      });
-
-      expect(source.type).toBe('logs');
-    });
-
     it('rejects an invalid query before touching saved objects or ES', async () => {
       const { client, soClient, viewsClient, dataEsClient } = setup();
 
@@ -638,10 +604,9 @@ describe('SourcesClient', () => {
       expect(viewsClient.putView).not.toHaveBeenCalled();
     });
 
-    it('keeps the stored type on a title-only save without reading patterns', async () => {
-      const { client, soClient, getSourceTypePatterns } = setup();
+    it('keeps the stored type on a title-only save', async () => {
+      const { client, soClient } = setup();
       soClient.get.mockResolvedValue(makeSavedObject());
-      getSourceTypePatterns.mockRejectedValue(new Error('settings down'));
 
       const updated = await client.update('source-1', {
         title: 'renamed',
@@ -651,23 +616,6 @@ describe('SourcesClient', () => {
 
       expect(updated.type).toBe('logs');
       expect(updated.title).toBe('renamed');
-      expect(getSourceTypePatterns).not.toHaveBeenCalled();
-    });
-
-    it('does not write an update when source type patterns cannot be read', async () => {
-      const { client, soClient, viewsClient, getSourceTypePatterns } = setup();
-      soClient.get.mockResolvedValue(makeSavedObject());
-      getSourceTypePatterns.mockRejectedValue(new Error('settings down'));
-
-      await expect(
-        client.update('source-1', {
-          title: 'nginx errors',
-          tags: ['nginx'],
-          esql: 'FROM logs-*',
-        })
-      ).rejects.toThrow('settings down');
-      expect(soClient.update).not.toHaveBeenCalled();
-      expect(viewsClient.putView).not.toHaveBeenCalled();
     });
 
     it('recomputes the type when the query changes', async () => {

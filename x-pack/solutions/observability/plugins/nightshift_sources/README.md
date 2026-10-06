@@ -7,11 +7,7 @@ raw ES|QL, so a source can be edited in one place and every consumer follows.
 
 This plugin owns the `nightshift-source` saved object type, the view lifecycle and the
 `/internal/nightshift/sources` API. It depends on no other Nightshift plugin, so any engine can
-require it without creating a cycle. `logsDataAccess` and `apmSourcesAccess` are optional: when
-they are installed, create and a query-changing update read the configured log sources and APM
-indices through their read-only accessors and use those when classifying the query. A role that
-cannot read the APM indices saved object still classifies with the APM plugin config,
-including kibana.yml. Any other failed read fails the write.
+require it without creating a cycle.
 
 ## API
 
@@ -34,16 +30,13 @@ overwrites a drifted one.
 
 Wire schemas and types (`NightshiftSource`, `SourceHealth`, request/response shapes) live in
 `@kbn/nightshift-shared` so browser code can import them. A typed repository client is exposed
-on the public start contract through `getClient()`. `getSourceTypePatterns()` on the same
-contract returns the configured log sources and APM indices for the current user. An APM 403
-uses the default APM index patterns and still returns the log sources. Any other failed read
-is `null`.
+on the public start contract through `getClient()`.
 
 `type` (`logs`, `metrics`, `traces` or `unknown`) is stored on the source and returned by
 every read. It is derived from the query on create and when an update changes the query. A
 title-only PUT keeps the stored type. Request bodies cannot set it. Existing sources are
-classified from the built-in index bases when the saved object model migrates; a name that
-needs the configured patterns stays `unknown` until the query is edited.
+classified from the index name when the saved object model migrates; a name that is not logs,
+metrics or traces stays `unknown` until the query is edited.
 
 ## Engine access
 
@@ -71,23 +64,21 @@ A source is rows only. On create and update the ES|QL must:
 - not `FROM` a Nightshift source view, or a `$` wildcard that would match one (`$.nightshift.sources.*`,
   `$.nightshift.*`, `$.*`, `$.*.sources.*-*`), or the new view can match itself;
 - target exactly one kind of data. Every index in `FROM` or `TS` must classify as the same
-  value, and `unknown` counts. `FROM logs-*, my-app-*` is rejected unless `my-app-*` (or a name
-  it covers) is a configured log source. A single name that matches more than one kind
-  (`logs-traces-*`) is rejected. One `logs`, `metrics` or `traces` segment wins over a dataset
-  token, so `metrics-logstash.node-*` is metrics, while `metrics-logs-*` is still a mix.
-  A `TS` command is metrics, so `TS logs-*` mixes logs and metrics, while `TS my-tsdb-*` is
-  metrics. An unscoped wildcard (`*`, `*log*`, `cluster:*`) is rejected. A remote cluster
-  prefix is allowed and is not part of the type: `FROM remote:logs-*` and `FROM *:logs-*` are
-  logs, and `FROM remote:logs-*, other:traces-*` is still a mix. An exclusion (`-cluster:*`,
-  `cluster:-index`) is not a target. The legacy `apm-*` pattern is on the
-  default APM transaction, error and metric settings, so `FROM apm-*` matches more than one kind.
+  value, and `unknown` counts. `FROM logs-*, my-app-*` is rejected because `my-app-*` is not
+  logs, metrics or traces. A single name that matches more than one kind (`logs-traces-*`) is
+  rejected. One `logs`, `metrics` or `traces` segment wins over a dataset token, so
+  `metrics-logstash.node-*` is metrics, while `metrics-logs-*` is still a mix. A `TS` command
+  is metrics, so `TS logs-*` mixes logs and metrics, while `TS my-tsdb-*` is metrics. An
+  unscoped wildcard (`*`, `*log*`, `cluster:*`) is rejected. A remote cluster prefix is allowed
+  and is not part of the type: `FROM remote:logs-*` and `FROM *:logs-*` are logs, and
+  `FROM remote:logs-*, other:traces-*` is still a mix. An exclusion (`-cluster:*`,
+  `cluster:-index`) is not a target.
 
-Classification uses the same base names Discover does (`logs`, `filebeat`, `traces`, `metrics`,
-`metricbeat`, and the rest of those lists) plus the configured log sources and APM transaction,
-span, error and metric indices. A name that matches none of those is `unknown`. Configured
-tokens are index patterns: a log source of `my-app-*` covers `my-app-0001`. The error
-names the kinds and the indices, and when an `unknown` index is involved it points at the log
-sources and APM indices settings.
+Classification reads the index name. The same bases Discover uses (`logs`, `filebeat`,
+`traces`, `metrics`, `metricbeat`, and the rest of those lists) decide the kind. A name that
+matches none of them is `unknown`, including `apm-*` and a custom index that does not contain
+one of those words. `traces-apm*`, `logs-apm*` and `metrics-apm*` are traces, logs and metrics.
+The error names the kinds and the indices.
 
 The view name is `$.nightshift.sources.<spaceId>.<slug>`. `<spaceId>` is the Kibana space that
 owns the saved object. `<slug>` is derived from the title at create (`nginx-errors` from
@@ -99,8 +90,8 @@ both have an `nginx-errors` source; the views are `….default.nginx-errors` and
 Wildcards, several sources and date math are fine. An unscoped `*` is not. Create always runs
 `<esql> | LIMIT 0` as the calling user. Update does too when the normalized query changes. A
 title-only PUT, or a repair that sends the stored query, skips that probe and keeps the stored
-type, so a vanished `WHERE` field or a settings read cannot block rename or restoring a deleted
-view; GET reports `unresolvable` instead. A pattern that matches no index yet is accepted,
+type, so a vanished `WHERE` field cannot block rename or restoring a deleted view; GET reports
+`unresolvable` instead. A pattern that matches no index yet is accepted,
 which means field names in `WHERE` are only checked once data exists.
 
 ## Health

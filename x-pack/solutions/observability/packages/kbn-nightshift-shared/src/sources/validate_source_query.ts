@@ -7,13 +7,7 @@
 
 import { BasicPrettyPrinter, Parser, Walker } from '@elastic/esql';
 import type { ESQLCommand, ESQLSource } from '@elastic/esql/types';
-import {
-  DEFAULT_SOURCE_TYPE_PATTERNS,
-  isUnscopedIndexPattern,
-  matchSourceTypes,
-  type SourceType,
-  type SourceTypePatterns,
-} from './source_type';
+import { isUnscopedIndexPattern, matchSourceTypes, type SourceType } from './source_type';
 import { NIGHTSHIFT_SOURCE_VIEW_PREFIX } from './view_name';
 
 const SOURCE_COMMANDS = new Set(['from', 'ts']);
@@ -201,13 +195,7 @@ const mixedSourceTypesMessage = (
   isTimeSeries: boolean
 ): string => {
   const described = present.map((type) => describeType(type, namesByType[type], isTimeSeries));
-  const unknownHint =
-    namesByType.unknown.length > 0
-      ? ' Add indices that are not logs, metrics or traces to the log sources or APM indices settings.'
-      : '';
-  return `A source query mixes ${joinAnd(
-    described
-  )}. A source query must target one kind of data.${unknownHint}`;
+  return `A source query mixes ${joinAnd(described)}. A source query must target one kind of data.`;
 };
 
 /**
@@ -215,13 +203,7 @@ const mixedSourceTypesMessage = (
  * than one kind, comes back as `{ error }`. Only safe to call after `validateSourceQuery`
  * returned `undefined`; {@link analyzeSourceQuery} does both.
  */
-export const getSourceType = ({
-  esql,
-  patterns = DEFAULT_SOURCE_TYPE_PATTERNS,
-}: {
-  esql: string;
-  patterns?: SourceTypePatterns;
-}): SourceTypeAnalysis => {
+export const getSourceType = ({ esql }: { esql: string }): SourceTypeAnalysis => {
   const { root } = Parser.parse(esql);
   const [firstCommand] = root.commands;
   if (!firstCommand) {
@@ -235,7 +217,7 @@ export const getSourceType = ({
   }
   const classified = indices.map(({ name, pattern }) => ({
     name,
-    matched: matchSourceTypes({ name: pattern, patterns }),
+    matched: matchSourceTypes(pattern),
   }));
   const ambiguous = classified.find(({ matched }) => matched.length > 1);
   if (ambiguous) {
@@ -261,9 +243,8 @@ export const getSourceType = ({
 };
 
 /**
- * Classification for a saved-object backfill. Built-in bases only: the migration cannot read
- * log sources or APM indices. `unknown` is a mix, a parse failure, or a name that needs those
- * settings.
+ * Classification for a saved-object backfill. `unknown` is a mix, a parse failure, or a name
+ * that is not logs, metrics or traces.
  */
 export const sourceTypeFromEsql = (esql: string): SourceType => {
   try {
@@ -278,18 +259,12 @@ export const sourceTypeFromEsql = (esql: string): SourceType => {
  * Structural validation, then the one-type check. `{ error }` is either failure.
  * Browser-safe: does not depend on any server-only module.
  */
-export const analyzeSourceQuery = ({
-  esql,
-  patterns = DEFAULT_SOURCE_TYPE_PATTERNS,
-}: {
-  esql: string;
-  patterns?: SourceTypePatterns;
-}): SourceTypeAnalysis => {
+export const analyzeSourceQuery = ({ esql }: { esql: string }): SourceTypeAnalysis => {
   const error = validateSourceQuery(esql);
   if (error) {
     return { error };
   }
-  return getSourceType({ esql, patterns });
+  return getSourceType({ esql });
 };
 
 /**

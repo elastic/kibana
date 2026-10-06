@@ -5,43 +5,19 @@
  * 2.0.
  */
 
-import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import type { CoreStart, Plugin } from '@kbn/core/public';
-import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
-import type { SourceTypePatterns } from '@kbn/nightshift-shared';
 import type { NightshiftSourcesRepositoryClient } from './api';
-import { getSourceTypePatterns as readSourceTypePatterns } from './lib/get_source_type_patterns';
-
-export interface NightshiftSourcesPublicStartDependencies {
-  logsDataAccess?: LogsDataAccessPluginStart;
-  apmSourcesAccess?: ApmSourceAccessPluginStart;
-}
 
 export interface NightshiftSourcesPublicPluginStart {
   getClient: () => Promise<NightshiftSourcesRepositoryClient>;
-  /**
-   * Configured log sources and APM indices. An APM 403 uses the default APM index patterns
-   * and still returns log sources. Any other failed read is `null`, so the caller skips the
-   * client-side type check.
-   */
-  getSourceTypePatterns: () => Promise<SourceTypePatterns | null>;
 }
 
 export class NightshiftSourcesPublicPlugin
-  implements
-    Plugin<
-      void,
-      NightshiftSourcesPublicPluginStart,
-      object,
-      NightshiftSourcesPublicStartDependencies
-    >
+  implements Plugin<void, NightshiftSourcesPublicPluginStart>
 {
   setup(): void {}
 
-  start(
-    core: CoreStart,
-    { logsDataAccess, apmSourcesAccess }: NightshiftSourcesPublicStartDependencies
-  ): NightshiftSourcesPublicPluginStart {
+  start(core: CoreStart): NightshiftSourcesPublicPluginStart {
     let clientPromise: Promise<NightshiftSourcesRepositoryClient> | undefined;
     return {
       getClient: () => {
@@ -57,7 +33,6 @@ export class NightshiftSourcesPublicPlugin
         }
         return clientPromise;
       },
-      getSourceTypePatterns: () => readSourceTypePatterns({ logsDataAccess, apmSourcesAccess }),
     };
   }
 }

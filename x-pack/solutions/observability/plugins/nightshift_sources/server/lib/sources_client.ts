@@ -19,7 +19,6 @@ import {
   type ListSourcesResponse,
   type NightshiftSource,
   type SourceHealth,
-  type SourceTypePatterns,
   type SourceWithHealth,
   type UpdateSourceRequest,
 } from '@kbn/nightshift-shared';
@@ -55,8 +54,6 @@ interface SourcesClientDependencies {
   spaceId: string;
   /** Called after every committed write, never after a rolled-back one. */
   onChange: (change: SourceChange) => Promise<void>;
-  /** Configured log sources and APM indices, memoized for this client. */
-  getSourceTypePatterns: () => Promise<SourceTypePatterns>;
 }
 
 const toSource = (id: string, attributes: NightshiftSourceAttributes): NightshiftSource => ({
@@ -92,10 +89,7 @@ export class SourcesClient {
   async create(input: CreateSourceRequest): Promise<NightshiftSource> {
     const { soClient, viewsClient, username } = this.deps;
     const parsed = parseSourceWrite(createSourceRequestSchema, input);
-    const type = validateSourceQuery({
-      esql: parsed.esql,
-      patterns: await this.deps.getSourceTypePatterns(),
-    });
+    const type = validateSourceQuery({ esql: parsed.esql });
     await assertSourceQueryExecutes({ esClient: this.deps.dataEsClient, esql: parsed.esql });
 
     const slug = await this.allocateSlug(parsed.title);
@@ -143,14 +137,10 @@ export class SourcesClient {
     const so = await this.getSavedObject(id);
     const { attributes: previous } = so;
     const esqlChanged = !hasSameEsql(parsed.esql, previous.esql);
-    // A metadata-only save keeps the stored type. Reclassifying would reject a rename when
-    // log sources or APM indices cannot be read, or would overwrite a good type with a guess.
+    // A metadata-only save keeps the stored type. The query did not change.
     let type = previous.type;
     if (esqlChanged) {
-      type = validateSourceQuery({
-        esql: parsed.esql,
-        patterns: await this.deps.getSourceTypePatterns(),
-      });
+      type = validateSourceQuery({ esql: parsed.esql });
       await assertSourceQueryExecutes({ esClient: this.deps.dataEsClient, esql: parsed.esql });
     }
 

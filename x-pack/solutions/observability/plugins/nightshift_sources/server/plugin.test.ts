@@ -52,7 +52,7 @@ const createSetup = () => {
   });
   coreStart.savedObjects.getScopedClient.mockReturnValue(soClient);
 
-  const setup = plugin.setup(coreSetup, {});
+  const setup = plugin.setup(coreSetup);
   const [{ dependencies }] = jest.mocked(registerRoutes).mock.calls[0] as unknown as [
     { dependencies: { getSourcesClient: GetSourcesClient } }
   ];

@@ -88,8 +88,8 @@ export const nightshiftSourceSavedObjectType: SavedObjectsType<NightshiftSourceA
       changes: [
         {
           type: 'data_backfill',
-          // Built-in bases only. A name that needs configured log sources or APM indices, or a
-          // query that is not one kind, stays `unknown` until the query is edited.
+          // A mix, a parse failure, or a name that is not logs, metrics or traces stays `unknown`
+          // until the query is edited.
           backfillFn: (doc) => ({
             attributes: { type: sourceTypeFromEsql(doc.attributes.esql) },
           }),
