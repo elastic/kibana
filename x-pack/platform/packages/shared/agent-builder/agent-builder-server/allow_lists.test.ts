@@ -29,7 +29,7 @@ describe('isAllowedBuiltinTool', () => {
   });
 
   it('rejects unlisted tool ids', () => {
-    expect(isAllowedBuiltinTool('investigations.not_a_tool')).toBe(false);
+    expect(isAllowedBuiltinTool('agentic_investigations.not_a_tool')).toBe(false);
   });
 });
 

@@ -67,6 +67,6 @@ export const hypothesesAttachment = defineInvestigationAttachment<
   agentDescription:
     'Investigation hypotheses are the candidate causes the investigation considered, each investigating, dismissed, or confirmed, with a confidence and the evidence it rests on.\n\n' +
     'Rules:\n' +
-    '- Update them with the `investigations.set_hypotheses` tool, sending the full list every time.\n' +
+    '- Update them with the `agentic_investigations.set_hypotheses` tool, sending the full list every time.\n' +
     "- The investigation's overview shows the hypotheses, not the chat; do not render them inline.",
 });

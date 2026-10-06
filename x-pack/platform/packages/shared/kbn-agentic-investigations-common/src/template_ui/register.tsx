@@ -12,6 +12,7 @@ import type {
   ConversationTemplateBriefCardRenderProps,
   ConversationTemplateServiceStartContract,
 } from '@kbn/agent-builder-browser';
+import { getCopyLinkFlyoutAction } from '../components/actions/copy_link_action';
 import { DETAILS_FLYOUT_LABELS } from '../components/details/translations';
 import { ConversationTitle } from './conversation_title';
 import type {
@@ -111,6 +112,12 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    * `ConversationTemplateUIDefinition.briefCard`.
    */
   briefCard?: React.ComponentType<ConversationTemplateBriefCardRenderProps>;
+  /**
+   * Called by the in-chat flyout's "Copy link" button with the conversation's Agent Builder URL,
+   * which Agent Builder builds. Supplied by the caller, which does the copying. Returns whether it was copied: the button's tooltip confirms success, so the
+   * caller only reports a failure.
+   */
+  onCopyLink: (url: string) => boolean;
 }
 
 /**
@@ -135,6 +142,7 @@ export const registerAgenticInvestigationTemplateUI = ({
   renderLiveState,
   renderTitle,
   briefCard,
+  onCopyLink,
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
   const [overviewTabId] = getInvestigationTabIds(templateId);
 
@@ -156,12 +164,23 @@ export const registerAgenticInvestigationTemplateUI = ({
 
   conversationTemplates.registerTemplateUIDefinition(
     templateId,
-    ({ openFullscreenConversation }) => ({
+    ({ openFullscreenConversation, getConversationUrl }) => ({
       name,
       icon,
       tabs: [overviewTabId],
       ...(briefCard && { briefCard }),
       detailsFlyout: {
+        trailingActions: ({ conversation }) => [
+          getCopyLinkFlyoutAction(() =>
+            onCopyLink(
+              getConversationUrl({
+                conversationId: conversation.id,
+                agentId: conversation.agent_id,
+                openDetails: true,
+              })
+            )
+          ),
+        ],
         header: function InvestigationFlyoutHeader({ conversation, refetchConversation }) {
           return (
             // Agent Builder points the flyout's `aria-labelledby` at the header, so it must not
