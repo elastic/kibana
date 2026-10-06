@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { test } from '@kbn/scout';
+import { test } from '../../fixtures';
 import { expect } from '@kbn/scout/ui';
 import fs from 'fs';
 import os from 'os';
