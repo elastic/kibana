@@ -24,17 +24,23 @@ import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { getQueryPreview } from './esql_views_table';
 import { ManagementApp } from './management_app';
 import type { DiscoverEsqlLocatorParams } from './types';
+import type {
+  EsqlViewPreviewDependencies,
+  EsqlViewPreviewResult,
+  UseEsqlViewPreviewResult,
+} from './use_esql_view_preview';
 
 type EsqlEditorProps = Omit<ESQLEditorProps, 'ref'>;
 
 const mockRunPreview = jest.fn().mockResolvedValue(undefined);
 const mockResetPreview = jest.fn();
 const mockResetPreviewIfQueryChanged = jest.fn();
-const mockUseEsqlViewPreview = jest.fn();
+const mockUseEsqlViewPreview = jest.fn<UseEsqlViewPreviewResult, [EsqlViewPreviewDependencies]>();
 const mockEsqlDataGrid = jest.fn();
 
 jest.mock('./use_esql_view_preview', () => ({
-  useEsqlViewPreview: (...args: unknown[]) => mockUseEsqlViewPreview(...args),
+  useEsqlViewPreview: (dependencies: EsqlViewPreviewDependencies) =>
+    mockUseEsqlViewPreview(dependencies),
 }));
 
 jest.mock('@kbn/esql-datagrid/public', () => ({
@@ -371,9 +377,11 @@ describe('ManagementApp', () => {
       editorProps(props);
       return <MockEsqlEditor {...props} />;
     };
-    const previewResult = {
+    const previewResult: EsqlViewPreviewResult = {
       columns: [{ id: 'message', name: 'message', meta: { type: 'string' } }],
-      dataView: { id: 'preview-data-view' },
+      dataView: {
+        id: 'preview-data-view',
+      } as unknown as EsqlViewPreviewResult['dataView'],
       query: { esql: 'FROM logs-*' },
       queryStats: {
         durationInMs: '12ms',

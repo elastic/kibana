@@ -40,6 +40,12 @@ interface EsqlViewPreviewState {
   result?: EsqlViewPreviewResult;
 }
 
+export interface UseEsqlViewPreviewResult extends EsqlViewPreviewState {
+  resetPreview: () => void;
+  resetPreviewIfQueryChanged: (query: string) => void;
+  runPreview: (query?: AggregateQuery, editorAbortController?: AbortController) => Promise<void>;
+}
+
 interface ActiveRequest {
   abortController: AbortController;
   id: number;
@@ -61,7 +67,11 @@ const normalizeQuery = (query: string): string => {
   }
 };
 
-export const useEsqlViewPreview = ({ dataViews, http, search }: EsqlViewPreviewDependencies) => {
+export const useEsqlViewPreview = ({
+  dataViews,
+  http,
+  search,
+}: EsqlViewPreviewDependencies): UseEsqlViewPreviewResult => {
   const [state, setState] = useState<EsqlViewPreviewState>(initialState);
   const activeRequestRef = useRef<ActiveRequest>();
   const submittedQueryRef = useRef<string>();
@@ -117,6 +127,10 @@ export const useEsqlViewPreview = ({ dataViews, http, search }: EsqlViewPreviewD
       const activeRequest = { abortController, id: requestId };
       activeRequestRef.current = activeRequest;
       submittedQueryRef.current = esqlQuery;
+      const isCurrentRequest = () =>
+        isMountedRef.current &&
+        !abortController.signal.aborted &&
+        activeRequestRef.current?.id === requestId;
 
       setState({
         hasRun: true,
@@ -147,11 +161,7 @@ export const useEsqlViewPreview = ({ dataViews, http, search }: EsqlViewPreviewD
           }),
         ]);
 
-        if (
-          !isMountedRef.current ||
-          abortController.signal.aborted ||
-          activeRequestRef.current?.id !== requestId
-        ) {
+        if (!isCurrentRequest()) {
           return;
         }
 
@@ -170,11 +180,7 @@ export const useEsqlViewPreview = ({ dataViews, http, search }: EsqlViewPreviewD
           },
         });
       } catch (error) {
-        if (
-          isMountedRef.current &&
-          !abortController.signal.aborted &&
-          activeRequestRef.current?.id === requestId
-        ) {
+        if (isCurrentRequest()) {
           setState({
             error: toError(error),
             hasRun: true,
