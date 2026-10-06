@@ -8,6 +8,7 @@
 import { PUBLIC_API_HEADERS } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
+import type { ApiClient } from '../fixtures';
 import {
   apiTest,
   tags,
@@ -79,6 +80,28 @@ apiTest.describe(
     let createRuleWorkflowId: string;
     const createdRuleIds: string[] = [];
 
+    // Creates a disabled query rule through the API and remembers it for cleanup.
+    const createQueryRule = async (apiClient: ApiClient): Promise<string> => {
+      const response = await apiClient.post(DETECTION_ENGINE_RULES_URL, {
+        headers: { ...editorHeaders, ...PUBLIC_API_HEADERS },
+        responseType: 'json',
+        body: {
+          type: 'query',
+          name: `Scout rules created trigger ${Date.now()}`,
+          description: 'Created by a Scout API test',
+          query: '*:*',
+          language: 'kuery',
+          severity: 'low',
+          risk_score: 21,
+          enabled: false,
+        },
+      });
+      expect(response).toHaveStatusCode(200);
+      const { id } = response.body as { id: string };
+      createdRuleIds.push(id);
+      return id;
+    };
+
     apiTest.beforeAll(async ({ samlAuth, apiClient }) => {
       apiTest.setTimeout(SETUP_TIMEOUT_MS);
 
@@ -106,23 +129,7 @@ apiTest.describe(
     apiTest(
       'starts a subscribed workflow when a rule is created through the API',
       async ({ apiClient }) => {
-        const response = await apiClient.post(DETECTION_ENGINE_RULES_URL, {
-          headers: { ...editorHeaders, ...PUBLIC_API_HEADERS },
-          responseType: 'json',
-          body: {
-            type: 'query',
-            name: `Scout rules created trigger ${Date.now()}`,
-            description: 'Created by a Scout API test',
-            query: '*:*',
-            language: 'kuery',
-            severity: 'low',
-            risk_score: 21,
-            enabled: false,
-          },
-        });
-        expect(response).toHaveStatusCode(200);
-        const { id } = response.body as { id: string };
-        createdRuleIds.push(id);
+        const id = await createQueryRule(apiClient);
 
         const execution = await waitForExecutionForRule(apiClient, editorHeaders, workflowId, id);
 
@@ -131,7 +138,7 @@ apiTest.describe(
     );
 
     apiTest('starts it again for a rule created by duplicating one', async ({ apiClient }) => {
-      const [sourceRuleId] = createdRuleIds;
+      const sourceRuleId = await createQueryRule(apiClient);
       const response = await apiClient.post(DETECTION_ENGINE_BULK_ACTION_URL, {
         headers: { ...editorHeaders, ...PUBLIC_API_HEADERS },
         responseType: 'json',
