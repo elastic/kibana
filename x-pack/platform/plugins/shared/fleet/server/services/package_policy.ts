@@ -1880,7 +1880,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         savedObjectType,
         id,
         {
-          ...omit(restOfPackagePolicy, 'cloud_connector_name'),
+          // The condition is derived from the package below, never taken from the request.
+          ...omit(restOfPackagePolicy, 'cloud_connector_name', 'package_agent_version_condition'),
           ...(restOfPackagePolicy.package
             ? { package: omit(restOfPackagePolicy.package, 'experimental_data_stream_features') }
             : {}),
@@ -1899,7 +1900,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           revision: oldPackagePolicy.revision + 1,
           updated_at: new Date().toISOString(),
           updated_by: options?.user?.username ?? 'system',
-          package_agent_version_condition: pkgInfo?.conditions?.agent?.version,
+          // See bulkUpdate: clear a stale condition with '' only when there is one to clear.
+          ...((pkgInfo?.conditions?.agent?.version !== undefined ||
+            oldPackagePolicy.package_agent_version_condition) && {
+            package_agent_version_condition: pkgInfo?.conditions?.agent?.version ?? '',
+          }),
         },
         {
           version,
@@ -2330,11 +2335,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
         }
 
+        const targetAgentVersionCondition = pkgInfo?.conditions?.agent?.version;
+
         policiesToUpdate.push({
           type: savedObjectType,
           id,
           attributes: {
-            ...omit(restOfPackagePolicy, 'cloud_connector_name'),
+            ...omit(restOfPackagePolicy, 'cloud_connector_name', 'package_agent_version_condition'),
             ...(restOfPackagePolicy.package
               ? { package: omit(restOfPackagePolicy.package, 'experimental_data_stream_features') }
               : {}),
@@ -2353,6 +2360,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             revision: oldPackagePolicy.revision + 1,
             updated_at: new Date().toISOString(),
             updated_by: options?.user?.username ?? 'system',
+            // A partial SO update drops undefined keys, so a stale condition would survive an
+            // upgrade to a package without one. Write an empty string (falsy, and valid for the
+            // frozen model version schemas) to clear it, but only when there is a stale value, to
+            // avoid adding the key to policies that never had a condition.
+            ...((targetAgentVersionCondition !== undefined ||
+              oldPackagePolicy.package_agent_version_condition) && {
+              package_agent_version_condition: targetAgentVersionCondition ?? '',
+            }),
           },
           version,
         });
