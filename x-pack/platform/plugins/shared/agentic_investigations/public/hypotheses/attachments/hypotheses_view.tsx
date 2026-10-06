@@ -150,10 +150,9 @@ const HypothesisItem = ({
  * row each with its status and confidence, expanding to its reason. The details flyout also shows
  * each hypothesis's evidence when expanded; the inline chat render leaves it out to stay compact.
  */
-export const HypothesesList: React.FC<{
-  hypotheses: Hypothesis[];
-  variant: InvestigationAttachmentVariant;
-}> = ({ hypotheses, variant }) => {
+export const HypothesesView: React.FC<
+  InvestigationAttachmentContentProps<InvestigationHypotheses>
+> = ({ document: { hypotheses }, variant }) => {
   if (hypotheses.length === 0) {
     return (
       <EuiText size="s" color="subdued" data-test-subj="investigationHypothesesEmpty">
@@ -171,9 +170,3 @@ export const HypothesesList: React.FC<{
     </EuiFlexGroup>
   );
 };
-
-export const HypothesesView: React.FC<
-  InvestigationAttachmentContentProps<InvestigationHypotheses>
-> = ({ document: { hypotheses }, variant }) => (
-  <HypothesesList hypotheses={hypotheses} variant={variant} />
-);
