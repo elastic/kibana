@@ -30,6 +30,8 @@ import {
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
   ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
+  CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_WORKFLOW_ID,
+  CODE_INTELLIGENCE_OTEL_CLASSIFICATION_WORKFLOW_ID,
   CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
   EXAMPLE_MANAGED_WORKFLOW_ID,
   EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID,
@@ -48,6 +50,8 @@ import FLOOR_ATTACK_DISCOVERY_YAML from './definitions/alertzero/floor_attack_di
 import FORENSICS_ENDPOINT_ANALYSIS_YAML from './definitions/alertzero/forensics_endpoint_analysis.yaml';
 import FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML from './definitions/alertzero/forensics_run_endpoint_analysis.yaml';
 import HUNT_CONTINUOUS_THREAT_HUNT_YAML from './definitions/alertzero/hunt_continuous_threat_hunt.yaml';
+import CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_YAML from './definitions/code_intelligence/classify_logging_candidates.yaml';
+import CODE_INTELLIGENCE_OTEL_CLASSIFICATION_YAML from './definitions/code_intelligence/classify_otel_candidates.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
 
@@ -68,6 +72,12 @@ type YamlTemplateManagedWorkflowDefinition = ManagedWorkflowDefinition & {
 };
 
 const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
+  [CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_WORKFLOW_ID]: {
+    connectorId: 'code-intelligence-connector',
+  },
+  [CODE_INTELLIGENCE_OTEL_CLASSIFICATION_WORKFLOW_ID]: {
+    connectorId: 'code-intelligence-connector',
+  },
   [EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID]: { serviceAccountId: 'example-account' },
   [EXAMPLE_MANAGED_WORKFLOW_ID]: {
     recipient: 'World',
@@ -221,6 +231,16 @@ it.each([
   [ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID, ACTION_ISOLATE_HOST_YAML, '3:20440aaf'],
   [ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID, ACTION_KILL_PROCESS_YAML, '3:39ab48da'],
   [ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID, ACTION_SUSPEND_PROCESS_YAML, '3:5bff8110'],
+  [
+    CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_WORKFLOW_ID,
+    CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_YAML,
+    '8:3c34f797',
+  ],
+  [
+    CODE_INTELLIGENCE_OTEL_CLASSIFICATION_WORKFLOW_ID,
+    CODE_INTELLIGENCE_OTEL_CLASSIFICATION_YAML,
+    '7:620c2476',
+  ],
 ] as const)(
   'requires bumping %s definition.version together with the imported YAML fingerprint',
   (workflowId, importedYaml, expectedFingerprint) => {
