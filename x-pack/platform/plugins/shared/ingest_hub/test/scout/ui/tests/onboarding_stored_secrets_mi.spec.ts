@@ -27,6 +27,22 @@ import {
   soItem,
 } from '../helpers/stored_secrets';
 
+// Packages the service matrix fetches next to `aws`. Their manifests change the matrix, which
+// reruns the drift check, so the tests answer them immediately and wait for every one.
+const MATRIX_PACKAGES = [
+  'aws',
+  'aws_bedrock',
+  'aws_bedrock_agentcore',
+  'awsfargate',
+  'aws_mq',
+  'aws_logs',
+  'aws_cloudwatch_input_otel',
+  'aws_securityhub',
+  'aws_billing',
+  'amazon_security_lake',
+];
+const matrixPackageUrl = (name: string) => new RegExp(`/api/fleet/epm/packages/${name}(/[^/]+)?$`);
+
 const DRIFTED_SERVICE_VARS = {
   elb: {
     enabledDataStreams: ['elb_logs'],
@@ -57,6 +73,15 @@ test.describe(
           mechanisms: ['managed_integration'],
           policyIdsByInstance: { elb: MI_POLICY_ID },
         })
+      );
+      // Secondary package manifests answer immediately with an empty package (`aws` is mocked by
+      // mockCommonRoutes), so the matrix is final as soon as every response has arrived.
+      await page.route(
+        (url) => MATRIX_PACKAGES.slice(1).some((name) => matrixPackageUrl(name).test(url.pathname)),
+        (route) =>
+          route.fulfill(
+            fulfillJson({ item: { version: '1.0.0', policy_templates: [], data_streams: [] } })
+          )
       );
       // After a reload the drift check re-runs several times while the page settles, and the
       // section re-collapses on each settle. Counting its SO GETs tells the tests when it is done.
@@ -124,11 +149,16 @@ test.describe(
         },
       ]);
       soGets = 0;
+      const matrixResponses = MATRIX_PACKAGES.map((name) =>
+        page.waitForResponse((resp) => matrixPackageUrl(name).test(new URL(resp.url()).pathname))
+      );
       await page.reload();
+      await Promise.all(matrixResponses);
       await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
 
       if (!drift) {
-        // Wait until the drift check has stopped re-running (read-only poll on our own counter).
+        // Every manifest the matrix depends on has answered; wait until the drift check it reruns
+        // has stopped (read-only poll on our own counter).
         let lastSeen = -1;
         await expect
           .poll(

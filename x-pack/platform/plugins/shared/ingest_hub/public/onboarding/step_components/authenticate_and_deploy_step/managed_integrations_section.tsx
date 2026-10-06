@@ -97,8 +97,13 @@ export function ManagedIntegrationsSection({
   onReplaceFormDirtyChange,
 }: ManagedIntegrationsSectionProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudSetupForCloudConnector }>();
-  const { setConnectorId, setStaticKeys, setPendingIacTemplate, authenticateAndDeployStep } =
-    useOnboardingFlow();
+  const {
+    setConnectorId,
+    setStaticKeys,
+    clearStagedStaticKeys,
+    setPendingIacTemplate,
+    authenticateAndDeployStep,
+  } = useOnboardingFlow();
   const { connectorId: initialConnectorId } = authenticateAndDeployStep;
 
   // The Existing Identity check renders the stack update without writing the key; the template
@@ -168,12 +173,19 @@ export function ManagedIntegrationsSection({
   // deploy; keeping every stored value is not. Emptying the fields again clears the change.
   const handleStoredKeysFormChange = useCallback(
     (fields: AwsStaticKeyCredentials | undefined) => {
-      setStaticKeys(fields);
+      if (isStaticKeysEditMode && !fields) {
+        // The form has no access key id yet (for example the secret was typed first). Drop only the
+        // in-memory keys: clearing the auth method would leave resume mode, and the access key
+        // typed next would no longer mark the deployment as changed.
+        clearStagedStaticKeys();
+      } else {
+        setStaticKeys(fields);
+      }
       if (isStaticKeysEditMode) {
         onReplaceFormDirtyChange?.(Boolean(fields?.access_key_id || fields?.secret_access_key));
       }
     },
-    [setStaticKeys, isStaticKeysEditMode, onReplaceFormDirtyChange]
+    [setStaticKeys, clearStagedStaticKeys, isStaticKeysEditMode, onReplaceFormDirtyChange]
   );
 
   const { data: awsPackageResponse } = useGetPackageInfoByKeyQuery(

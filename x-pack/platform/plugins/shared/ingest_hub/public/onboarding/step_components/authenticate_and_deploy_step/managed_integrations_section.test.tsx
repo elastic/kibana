@@ -668,6 +668,64 @@ describe('ManagedIntegrationsSection', () => {
       expect(onReplaceFormDirtyChange).toHaveBeenLastCalledWith(true);
     });
 
+    it('keeps resume mode when the form reports no credentials yet, so the next entry still marks a change', () => {
+      const setStaticKeys = jest.fn();
+      const clearStagedStaticKeys = jest.fn();
+      const onReplaceFormDirtyChange = jest.fn();
+      setupMocks({
+        authMethod: 'static_keys',
+        searchParams: 'deploymentId=dep-abc',
+        setStaticKeys,
+        clearStagedStaticKeys,
+      });
+      MockStaticKeys.mockImplementation(
+        ({ onFieldsChange }: { onFieldsChange?: (f: unknown) => void }) => (
+          <div data-test-subj="static-keys">
+            <button onClick={() => onFieldsChange?.(undefined)}>secret-only</button>
+            <button
+              onClick={() => onFieldsChange?.({ access_key_id: 'AKIA', secret_access_key: 's' })}
+            >
+              both
+            </button>
+          </div>
+        )
+      );
+      renderSection({ showIdentityFederation: false, onReplaceFormDirtyChange });
+
+      // Secret typed before the access key: the form has nothing to report yet.
+      fireEvent.click(screen.getByText('secret-only'));
+      expect(clearStagedStaticKeys).toHaveBeenCalledTimes(1);
+      expect(setStaticKeys).not.toHaveBeenCalled();
+      expect(onReplaceFormDirtyChange).toHaveBeenLastCalledWith(false);
+
+      // The access key follows: still in resume mode, so the change is reported.
+      fireEvent.click(screen.getByText('both'));
+      expect(setStaticKeys).toHaveBeenCalledWith({ access_key_id: 'AKIA', secret_access_key: 's' });
+      expect(onReplaceFormDirtyChange).toHaveBeenLastCalledWith(true);
+    });
+
+    it('still clears the keys through setStaticKeys outside resume mode', () => {
+      const setStaticKeys = jest.fn();
+      const clearStagedStaticKeys = jest.fn();
+      setupMocks({
+        searchParams: '',
+        connectorId: undefined,
+        setStaticKeys,
+        clearStagedStaticKeys,
+      });
+      MockStaticKeys.mockImplementation(
+        ({ onFieldsChange }: { onFieldsChange?: (f: unknown) => void }) => (
+          <div data-test-subj="static-keys">
+            <button onClick={() => onFieldsChange?.(undefined)}>empty</button>
+          </div>
+        )
+      );
+      renderSection({ showIdentityFederation: false });
+      fireEvent.click(screen.getByText('empty'));
+      expect(setStaticKeys).toHaveBeenCalledWith(undefined);
+      expect(clearStagedStaticKeys).not.toHaveBeenCalled();
+    });
+
     it('does not report a change outside edit mode', () => {
       const onReplaceFormDirtyChange = jest.fn();
       setupMocks({ searchParams: '', connectorId: undefined });
