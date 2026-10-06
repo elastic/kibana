@@ -30,6 +30,7 @@ export {
   startInvestigation,
   startUnresponsiveLlm,
   waitForInvestigation,
+  waitForInvestigationInProgress,
 } from './write_path';
 export type { SharedInvestigation, SharedInvestigationSubject } from './write_path';
 export {

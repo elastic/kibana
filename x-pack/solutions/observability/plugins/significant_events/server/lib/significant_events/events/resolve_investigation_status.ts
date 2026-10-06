@@ -14,7 +14,7 @@ const MAX_IDS_PER_READ = 100;
 
 /**
  * Reports the state of each investigation a significant event lists, from the shared
- * investigations API: `pending` while an agent or driver workflow works on it, `complete`
+ * investigations API: `pending` while its agent runs, `complete`
  * otherwise. The ids are investigation (conversation) ids. An id the caller cannot read, or that
  * names no investigation (for example a workflow execution id recorded before investigations were
  * conversations), is omitted.

@@ -7,7 +7,7 @@ enabled: true
 settings:
   timeout: '60m'
   # One run per investigation at a time, in arrival order, so a follow-up builds on the run
-  # before it. Agentic investigations reads this key to tell the investigation is in progress.
+  # before it.
   concurrency:
     key: 'investigation:{{ inputs.investigation_id | default: execution.id }}'
     strategy: queue

@@ -10,7 +10,7 @@ import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
 /**
  * Where an investigation is, from the point of view of a consumer rendering it:
  * - `loading` — the first read has not returned yet.
- * - `running` — an agent or driver workflow is working on it; findings appear as they are recorded.
+ * - `running` — its agent is running; findings appear as they are recorded.
  * - `complete` — nothing is working on it; what it recorded is final until a follow-up.
  * - `unavailable` — it could not be read (for example missing privileges, or it does not exist).
  */

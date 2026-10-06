@@ -1,6 +1,6 @@
 # Nightshift
 
-Owner: `@elastic/nightshift-context-and-research-team`, `@elastic/nightshift-sre-agent-team`
+Owner: `@elastic/nightshift`
 
 Browser-only plugin serving the Nightshift UI at `/app/nightshift`.
 

@@ -28,7 +28,7 @@ export const fetchInvestigation = (
 
 /**
  * Reads an investigation from the shared query API and reads it again every few seconds while an
- * agent or driver workflow is working on it, so findings appear as they are recorded.
+ * Agent Builder execution runs for it, so findings appear as they are recorded.
  */
 export const useInvestigation = (id: string) => {
   const {

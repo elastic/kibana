@@ -21,7 +21,6 @@ describe('isAllowedBuiltinTool', () => {
   it('allows the agentic investigations tools', () => {
     expect(isAllowedBuiltinTool('agentic_investigations.set_impact')).toBe(true);
     expect(isAllowedBuiltinTool('agentic_investigations.set_hypotheses')).toBe(true);
-    expect(isAllowedBuiltinTool('agentic_investigations.get')).toBe(true);
   });
 
   it('allows the proposals tools', () => {

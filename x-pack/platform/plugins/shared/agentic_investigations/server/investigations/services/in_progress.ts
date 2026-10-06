@@ -8,15 +8,8 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { AgentExecutionMode, ExecutionStatus } from '@kbn/agent-builder-common';
 import type { AgentExecution, ExecutionStart } from '@kbn/agent-builder-server';
-import { NonTerminalExecutionStatuses } from '@kbn/workflows';
-import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import {
-  INVESTIGATION_CONCURRENCY_KEY_PREFIX,
-  parseInvestigationConcurrencyKey,
-  type InvestigationDriverWorkflowRegistry,
-} from './driver_workflows';
 
-/** Ceiling on executions one lookup reads, from Agent Builder and from each driver workflow. */
+/** Ceiling on agent executions one lookup reads. */
 export const MAX_IN_PROGRESS_EXECUTIONS = 1000;
 
 /**
@@ -27,27 +20,20 @@ export const MAX_IN_PROGRESS_EXECUTIONS = 1000;
  */
 export const STALE_AGENT_HEARTBEAT_MS = 5 * 60 * 1000;
 
-type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
-
 export interface InProgressResolverDeps {
   getAgentExecutions: () => ExecutionStart;
-  /** Undefined when the workflowsManagement plugin is not installed: only agent runs count. */
-  getWorkflowsManagement: () => WorkflowsManagementApi | undefined;
-  driverWorkflows: InvestigationDriverWorkflowRegistry;
   logger: Logger;
   now?: () => number;
 }
 
 /**
- * Whether an investigation is being worked on: the union of (A) scheduled or running Agent
- * Builder executions of its conversation and (B) non-terminal executions of a registered driver
- * workflow whose concurrency group key names it. Nothing is stored; every read asks again.
+ * Whether an investigation is being worked on: Agent Builder has a scheduled or running execution
+ * for its conversation. Nothing is stored; every read asks again.
  *
  * Agent executions are read without an access check (Agent Builder scopes them to the space
  * only), so only conversation ids leave this module, and callers intersect them with
- * access-checked conversation reads. Driver workflow executions are read as the caller, so a
- * caller who cannot read the workflow does not see its executions. A failed lookup is logged and
- * counts as not in progress: reads must not fail on it.
+ * access-checked conversation reads. A failed lookup is logged and counts as not in progress:
+ * reads must not fail on it.
  */
 export class InProgressResolver {
   private readonly now: () => number;
@@ -58,11 +44,7 @@ export class InProgressResolver {
 
   /** Conversation ids in progress in the space. */
   async findInProgressIds(request: KibanaRequest, spaceId: string): Promise<Set<string>> {
-    const [agentIds, workflowIds] = await Promise.all([
-      this.findAgentRunConversationIds(request, spaceId),
-      this.findDriverWorkflowInvestigationIds(request, spaceId),
-    ]);
-    return new Set([...agentIds, ...workflowIds]);
+    return this.findAgentRunConversationIds(request, spaceId);
   }
 
   /** Whether one investigation is in progress. */
@@ -71,16 +53,8 @@ export class InProgressResolver {
     spaceId: string,
     conversationId: string
   ): Promise<boolean> {
-    const agentIds = await this.findAgentRunConversationIds(request, spaceId);
-    if (agentIds.has(conversationId)) {
-      return true;
-    }
-    const workflowIds = await this.findDriverWorkflowInvestigationIds(
-      request,
-      spaceId,
-      `${INVESTIGATION_CONCURRENCY_KEY_PREFIX}${conversationId}`
-    );
-    return workflowIds.has(conversationId);
+    const ids = await this.findAgentRunConversationIds(request, spaceId);
+    return ids.has(conversationId);
   }
 
   /**
@@ -123,52 +97,6 @@ export class InProgressResolver {
     }
     const heartbeatAt = Date.parse(lastHeartbeat);
     return Number.isFinite(heartbeatAt) && this.now() - heartbeatAt > STALE_AGENT_HEARTBEAT_MS;
-  }
-
-  /**
-   * One query per registered driver workflow: the executions API filters a single workflow id,
-   * and its concurrency key filter is an exact term, so the bulk lookup parses the key instead.
-   */
-  private async findDriverWorkflowInvestigationIds(
-    request: KibanaRequest,
-    spaceId: string,
-    concurrencyGroupKey?: string
-  ): Promise<Set<string>> {
-    const management = this.deps.getWorkflowsManagement();
-    const workflowIds = this.deps.driverWorkflows.list();
-    if (!management || workflowIds.length === 0) {
-      return new Set();
-    }
-
-    const results = await Promise.all(
-      workflowIds.map(async (workflowId) => {
-        try {
-          const { results: executions } = await management.getWorkflowExecutions(
-            {
-              workflowId,
-              statuses: [...NonTerminalExecutionStatuses],
-              concurrencyGroupKey,
-              omitStepRuns: true,
-              size: concurrencyGroupKey ? 1 : MAX_IN_PROGRESS_EXECUTIONS,
-              request,
-            },
-            spaceId
-          );
-          return executions.map((execution) =>
-            parseInvestigationConcurrencyKey(execution.concurrencyGroupKey)
-          );
-        } catch (error) {
-          this.deps.logger.warn(
-            `Could not read executions of investigation workflow ${workflowId}: ${errorMessage(
-              error
-            )}`
-          );
-          return [];
-        }
-      })
-    );
-
-    return new Set(results.flat().filter((id): id is string => id !== undefined));
   }
 }
 
