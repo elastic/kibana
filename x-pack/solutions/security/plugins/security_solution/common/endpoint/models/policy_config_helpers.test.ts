@@ -54,6 +54,16 @@ describe('Policy Config helpers', () => {
       expect(disableProtections(policy).linux).not.toHaveProperty('ransomware');
     });
 
+    it('turns Linux ransomware off without adding a Linux ransomware notification when the Linux popup is missing', () => {
+      const policy = policyFactory();
+      Reflect.deleteProperty(policy.linux, 'popup');
+
+      const result = disableProtections(policy);
+
+      expect(result.linux.ransomware?.mode).toBe(ProtectionModes.off);
+      expect(result.linux.popup).not.toHaveProperty('ransomware');
+    });
+
     it('does not enable supported fields', () => {
       const defaultPolicy: PolicyConfig = policyFactory();
 
@@ -608,6 +618,23 @@ describe('Policy Config helpers', () => {
       } = originalPolicy.linux;
       expect(result).toEqual({ ...originalPolicy, linux: { ...linuxRest, popup: popupRest } });
       expect(policy).toEqual(originalPolicy);
+    });
+
+    it('removes Linux ransomware without adding a popup when the Linux popup is missing', () => {
+      const policy = policyFactory();
+      Reflect.deleteProperty(policy.linux, 'popup');
+
+      const result = removeLinuxRansomware(policy);
+
+      expect(result.linux).not.toHaveProperty('ransomware');
+      expect(result.linux).not.toHaveProperty('popup');
+    });
+
+    it('removes a null Linux ransomware', () => {
+      const policy = policyFactory();
+      set(policy, 'linux.ransomware', null);
+
+      expect(removeLinuxRansomware(policy).linux).not.toHaveProperty('ransomware');
     });
   });
 

@@ -1122,6 +1122,7 @@ describe('Create Default Policy tests ', () => {
           });
 
           expect(policy.linux.ransomware).toEqual({ mode: 'prevent', supported: true });
+          expect(policy.linux.popup.ransomware).toEqual({ message: '', enabled: true });
         }
       );
 
@@ -1136,6 +1137,7 @@ describe('Create Default Policy tests ', () => {
           });
 
           expect(policy.linux.ransomware).toEqual({ mode: 'off', supported: false });
+          expect(policy.linux.popup.ransomware).toEqual({ message: '', enabled: false });
         }
       );
 
@@ -1146,12 +1148,16 @@ describe('Create Default Policy tests ', () => {
         });
 
         expect(policy.linux.ransomware?.mode).toBe('off');
+        expect(policy.linux.popup.ransomware).toEqual({ message: '', enabled: false });
+        expect(policy.linux.popup.ransomware).toEqual(policy.mac.popup.ransomware);
       });
 
       it('should turn Linux ransomware mode off for a cloud config', async () => {
         const policy = await createDefaultPolicyWithFeature(bothFlagsOn, { type: 'cloud' });
 
         expect(policy.linux.ransomware?.mode).toBe('off');
+        expect(policy.linux.popup.ransomware).toEqual({ message: '', enabled: false });
+        expect(policy.linux.popup.ransomware).toEqual(policy.mac.popup.ransomware);
       });
 
       it('should turn Linux ransomware mode off when the endpointPolicyProtections product feature is disabled', async () => {
@@ -1165,6 +1171,8 @@ describe('Create Default Policy tests ', () => {
         });
 
         expect(policy.linux.ransomware?.mode).toBe('off');
+        expect(policy.linux.popup.ransomware).toEqual({ message: '', enabled: false });
+        expect(policy.linux.popup.ransomware).toEqual(policy.mac.popup.ransomware);
       });
     });
 
@@ -1190,12 +1198,14 @@ describe('Create Default Policy tests ', () => {
         });
 
         expect(policy.linux).not.toHaveProperty('ransomware');
+        expect(policy.linux.popup).not.toHaveProperty('ransomware');
       });
 
       it('should omit linux.ransomware for a cloud config', async () => {
         const policy = await createDefaultPolicyWithFeature(flags, { type: 'cloud' });
 
         expect(policy.linux).not.toHaveProperty('ransomware');
+        expect(policy.linux.popup).not.toHaveProperty('ransomware');
       });
     });
   });

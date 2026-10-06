@@ -260,11 +260,12 @@ describe('Policy-Changing license watcher', () => {
   });
 
   describe('Linux ransomware license downgrade', () => {
-    it('turns linux.ransomware off and unsupported when downgrading from platinum to gold', async () => {
+    it('turns linux.ransomware and its popup off when downgrading from platinum to gold', async () => {
       packagePolicySvcMock.list.mockResolvedValueOnce({
         items: [
           MockPackagePolicyWithEndpointPolicy((pc: PolicyConfig): PolicyConfig => {
             pc.linux.ransomware = { mode: ProtectionModes.prevent, supported: true };
+            pc.linux.popup.ransomware = { message: 'custom', enabled: true };
             return pc;
           }),
         ],
@@ -282,13 +283,15 @@ describe('Policy-Changing license watcher', () => {
         .value as PolicyConfig;
 
       expect(updatedPolicy.linux.ransomware).toEqual({ mode: 'off', supported: false });
+      expect(updatedPolicy.linux.popup.ransomware).toEqual({ message: '', enabled: false });
     });
 
-    it('does not materialize linux.ransomware for a policy that never had it', async () => {
+    it('does not materialize linux ransomware branches for a policy that never had them', async () => {
       packagePolicySvcMock.list.mockResolvedValueOnce({
         items: [
           MockPackagePolicyWithEndpointPolicy((pc: PolicyConfig): PolicyConfig => {
             delete pc.linux.ransomware;
+            delete pc.linux.popup.ransomware;
             return pc;
           }),
         ],
@@ -309,6 +312,7 @@ describe('Policy-Changing license watcher', () => {
         .value as PolicyConfig;
 
       expect(updatedPolicy.linux).not.toHaveProperty('ransomware');
+      expect(updatedPolicy.linux.popup).not.toHaveProperty('ransomware');
     });
   });
 

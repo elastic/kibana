@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isPlainObject } from 'lodash';
 import type { ILicense } from '@kbn/licensing-types';
 import { isAtLeast } from './license';
 import type { PolicyConfig } from '../endpoint/types';
@@ -49,8 +50,16 @@ function isEndpointMalwarePolicyValidForLicense(policy: PolicyConfig, license: I
 
 function isEndpointRansomwarePolicyValidForLicense(policy: PolicyConfig, license: ILicense | null) {
   // Linux ransomware is optional: a policy that predates it, or where it is gated off, has none.
-  const linuxRansomware = policy.linux.ransomware;
-  const linuxRansomwarePopup = policy.linux.popup.ransomware;
+  const linuxRansomware = policy.linux?.ransomware;
+  const linuxRansomwarePopup = policy.linux?.popup?.ransomware;
+
+  // A present but malformed Linux ransomware value cannot be validated, so fail closed.
+  if (
+    (linuxRansomware !== undefined && !isPlainObject(linuxRansomware)) ||
+    (linuxRansomwarePopup !== undefined && !isPlainObject(linuxRansomwarePopup))
+  ) {
+    return false;
+  }
 
   if (isAtLeast(license, 'platinum')) {
     const defaults = policyFactoryWithSupportedFeatures();

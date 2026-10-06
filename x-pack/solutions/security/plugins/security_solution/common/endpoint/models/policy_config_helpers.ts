@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+import { get, isObject } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import type { ExperimentalFeatures } from '../../experimental_features';
 import { CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS } from '../service/policy/custom_yara_signatures';
@@ -213,15 +213,15 @@ const getDisabledCommonProtectionsForOS = (
 
 const getDisabledCommonPopupsForOS = (policy: PolicyConfig, os: PolicyOperatingSystem) => ({
   behavior_protection: {
-    ...policy[os].popup.behavior_protection,
+    ...policy[os].popup?.behavior_protection,
     enabled: false,
   },
   malware: {
-    ...policy[os].popup.malware,
+    ...policy[os].popup?.malware,
     enabled: false,
   },
   memory_protection: {
-    ...policy[os].popup.memory_protection,
+    ...policy[os].popup?.memory_protection,
     enabled: false,
   },
 });
@@ -276,7 +276,7 @@ const getDisabledLinuxSpecificProtections = (policy: PolicyConfig) =>
     : {};
 
 const getDisabledLinuxSpecificPopups = (policy: PolicyConfig) =>
-  policy.linux.popup.ransomware
+  policy.linux.popup?.ransomware
     ? { ransomware: { ...policy.linux.popup.ransomware, enabled: false } }
     : {};
 
@@ -436,7 +436,18 @@ export const isLinuxRansomwareProtectionEnabled = ({
  * notification removed. Used when `isLinuxRansomwareProtectionEnabled` is false.
  */
 export const removeLinuxRansomware = (policy: PolicyConfig): PolicyConfig => {
-  const { ransomware: linuxRansomware, popup, ...linuxRest } = policy.linux;
+  // The policy may come from an unvalidated API payload, so tolerate a malformed `linux` branch.
+  if (!isObject(policy.linux)) {
+    return policy;
+  }
+
+  const { ransomware: linuxRansomware, ...linuxRest } = policy.linux;
+  const { popup } = linuxRest;
+
+  if (!isObject(popup)) {
+    return { ...policy, linux: linuxRest };
+  }
+
   const { ransomware: linuxRansomwarePopup, ...popupRest } = popup;
 
   return {

@@ -14,6 +14,7 @@ import {
   DefaultPolicyRuleNotificationMessage,
   DefaultPolicyDeviceNotificationMessage,
   policyFactory,
+  policyFactoryWithoutPaidEnterpriseFeatures,
   policyFactoryWithoutPaidFeatures,
   policyFactoryWithSupportedFeatures,
 } from '../endpoint/models/policy_config';
@@ -1194,6 +1195,83 @@ describe('policy_config and licenses', () => {
 
         expect(result.linux).not.toHaveProperty('ransomware');
       }
+    });
+
+    describe('with a malformed or missing Linux branch', () => {
+      it.each([
+        ['Platinum', Platinum, policyFactoryWithoutPaidEnterpriseFeatures],
+        ['Gold', Gold, policyFactoryWithoutPaidFeatures],
+      ])('blocks a null Linux ransomware with a %s license', (_, license, createPolicy) => {
+        const policy = createPolicy();
+        Reflect.set(policy.linux, 'ransomware', null);
+
+        expect(isEndpointPolicyValidForLicense(policy, license)).toBe(false);
+      });
+
+      it.each([
+        ['Platinum', Platinum, policyFactoryWithoutPaidEnterpriseFeatures],
+        ['Gold', Gold, policyFactoryWithoutPaidFeatures],
+      ])(
+        'blocks a null Linux ransomware notification with a %s license',
+        (_, license, createPolicy) => {
+          const policy = createPolicy();
+          Reflect.set(policy.linux.popup, 'ransomware', null);
+
+          expect(isEndpointPolicyValidForLicense(policy, license)).toBe(false);
+        }
+      );
+
+      it('blocks memory protection for Gold when the Linux popup is missing', () => {
+        const policy = policyFactoryWithoutPaidFeatures();
+        policy.windows.memory_protection.mode = ProtectionModes.prevent;
+        policy.windows.memory_protection.supported = true;
+        Reflect.deleteProperty(policy.linux, 'popup');
+
+        expect(isEndpointPolicyValidForLicense(policy, Gold)).toBe(false);
+      });
+
+      it('allows a Platinum-valid policy without Linux ransomware or a Linux popup', () => {
+        const policy = policyFactoryWithoutPaidEnterpriseFeatures();
+        omitLinuxRansomware(policy);
+        Reflect.deleteProperty(policy.linux, 'popup');
+
+        expect(isEndpointPolicyValidForLicense(policy, Platinum)).toBe(true);
+      });
+
+      it('blocks a Linux ransomware without `supported` with a Platinum license', () => {
+        const policy = policyFactoryWithoutPaidEnterpriseFeatures();
+        Reflect.set(policy.linux, 'ransomware', { mode: ProtectionModes.prevent });
+
+        expect(isEndpointPolicyValidForLicense(policy, Platinum)).toBe(false);
+      });
+
+      it('blocks a Linux ransomware without `supported` with a Gold license', () => {
+        const policy = policyFactoryWithoutPaidFeatures();
+        Reflect.set(policy.linux, 'ransomware', { mode: ProtectionModes.off });
+
+        expect(isEndpointPolicyValidForLicense(policy, Gold)).toBe(false);
+      });
+
+      it('blocks a Linux ransomware notification without `message` with a Gold license', () => {
+        const policy = policyFactoryWithoutPaidFeatures();
+        Reflect.set(policy.linux.popup, 'ransomware', { enabled: false });
+
+        expect(isEndpointPolicyValidForLicense(policy, Gold)).toBe(false);
+      });
+
+      it.each([
+        ['Platinum', Platinum, policyFactoryWithoutPaidEnterpriseFeatures],
+        ['Gold', Gold, policyFactoryWithoutPaidFeatures],
+      ])(
+        'allows a legacy policy without Linux ransomware or its notification with a %s license',
+        (_, license, createPolicy) => {
+          const policy = createPolicy();
+          omitLinuxRansomware(policy);
+          delete policy.linux.popup.ransomware;
+
+          expect(isEndpointPolicyValidForLicense(policy, license)).toBe(true);
+        }
+      );
     });
   });
 });

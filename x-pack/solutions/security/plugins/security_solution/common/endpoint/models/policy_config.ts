@@ -446,7 +446,7 @@ export const policyFactoryWithoutPaidFeatures = (
           enabled: true, // disabling/configuring malware popup is a paid feature
         },
         // Mirrors `linux.ransomware`: an absent branch must stay absent.
-        ...(policy.linux.popup.ransomware && {
+        ...(policy.linux.popup?.ransomware && {
           ransomware: {
             message: '',
             enabled: false,

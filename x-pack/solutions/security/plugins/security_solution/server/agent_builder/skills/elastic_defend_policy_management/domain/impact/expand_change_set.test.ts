@@ -11,6 +11,7 @@ import {
   policyFactoryWithoutPaidFeatures,
 } from '../../../../../../common/endpoint/models/policy_config';
 import * as policyConfigHelpers from '../../../../../../common/endpoint/models/policy_config_helpers';
+import type { PolicyConfig } from '../../../../../../common/endpoint/types';
 import { DeviceControlAccessLevel, ProtectionModes } from '../../../../../../common/endpoint/types';
 import type { RansomwareLinuxContext } from './expand_change_set';
 import { expandChangeSet } from './expand_change_set';
@@ -36,6 +37,18 @@ const changeAt = (
   changes: readonly ExplicitPolicyChange[],
   path: string
 ): ExplicitPolicyChange | undefined => changes.find((change) => change.path === path);
+
+const platinum = licenseMock.createLicense({ license: { type: 'platinum' } });
+
+/** A policy stored before Linux ransomware existed, with Windows and macOS ransomware on detect. */
+const legacyLinuxRansomwarePolicy = (): PolicyConfig => {
+  const policy = policyFactory();
+  delete policy.linux.ransomware;
+  delete policy.linux.popup.ransomware;
+  policy.windows.ransomware.mode = ProtectionModes.detect;
+  policy.mac.ransomware.mode = ProtectionModes.detect;
+  return policy;
+};
 
 const expectPreparationError = (
   run: () => unknown,
@@ -333,7 +346,6 @@ describe('expandChangeSet', () => {
     const policy = policyFactory();
     delete policy.linux.ransomware;
     delete policy.linux.popup.ransomware;
-    const platinum = licenseMock.createLicense({ license: { type: 'platinum' } });
 
     const prepared = expandChangeSet(
       [{ op: 'set_protection_level', protection: 'ransomware', mode: ProtectionModes.prevent }],
@@ -409,6 +421,134 @@ describe('expandChangeSet', () => {
       ransomwareLinuxContext
     );
     expect(flagOn.proposedConfig.linux.popup.ransomware).toEqual({ enabled: false, message: '' });
+  });
+
+  it.each([
+    [ProtectionModes.prevent, true],
+    [ProtectionModes.detect, false],
+  ])(
+    'materializes complete Linux ransomware branches for a targeted %s mode on a legacy policy while the flag is on',
+    (mode, notificationEnabled) => {
+      const prepared = expandChangeSet(
+        [{ op: 'set_field', path: 'linux.ransomware.mode', value: mode }],
+        legacyLinuxRansomwarePolicy(),
+        { linuxRansomwareProtection: true, licenseInformation: platinum }
+      );
+
+      expect(prepared.proposedConfig.linux.ransomware).toEqual({ mode, supported: true });
+      expect(prepared.proposedConfig.linux.popup.ransomware).toEqual({
+        message: '',
+        enabled: notificationEnabled,
+      });
+      expect(prepared.proposedConfig.windows.ransomware.mode).toBe(ProtectionModes.detect);
+      expect(prepared.proposedConfig.mac.ransomware.mode).toBe(ProtectionModes.detect);
+      expect(pathsOf(prepared.explicitChanges).sort()).toEqual([
+        'linux.popup.ransomware.enabled',
+        'linux.popup.ransomware.message',
+        'linux.ransomware.mode',
+        'linux.ransomware.supported',
+      ]);
+      expect(changeAt(prepared.explicitChanges, 'linux.ransomware.mode')).toEqual({
+        path: 'linux.ransomware.mode',
+        from: undefined,
+        to: mode,
+        origin: { operationIndex: 0, op: 'set_field', kind: 'direct' },
+      });
+      expect(changeAt(prepared.explicitChanges, 'linux.popup.ransomware.enabled')?.origin).toEqual({
+        operationIndex: 0,
+        op: 'set_field',
+        kind: 'coupled',
+      });
+    }
+  );
+
+  it('materializes linux.ransomware with supported false below Platinum for a targeted mode', () => {
+    const gold = licenseMock.createLicense({ license: { type: 'gold' } });
+
+    const prepared = expandChangeSet(
+      [{ op: 'set_field', path: 'linux.ransomware.mode', value: ProtectionModes.prevent }],
+      legacyLinuxRansomwarePolicy(),
+      { linuxRansomwareProtection: true, licenseInformation: gold }
+    );
+
+    expect(prepared.proposedConfig.linux.ransomware).toEqual({
+      mode: ProtectionModes.prevent,
+      supported: false,
+    });
+  });
+
+  it('materializes Linux ransomware as off when only its notification is set on a legacy policy', () => {
+    const prepared = expandChangeSet(
+      [{ op: 'set_field', path: 'linux.popup.ransomware.enabled', value: true }],
+      legacyLinuxRansomwarePolicy(),
+      { linuxRansomwareProtection: true, licenseInformation: platinum }
+    );
+
+    expect(prepared.proposedConfig.linux.popup.ransomware).toEqual({ message: '', enabled: true });
+    expect(prepared.proposedConfig.linux.ransomware).toEqual({
+      mode: ProtectionModes.off,
+      supported: true,
+    });
+    expect(prepared.proposedConfig.windows.ransomware.mode).toBe(ProtectionModes.detect);
+    expect(prepared.proposedConfig.mac.ransomware.mode).toBe(ProtectionModes.detect);
+  });
+
+  it('lets a later ransomware notification change override the materialized Linux notification default', () => {
+    const prepared = expandChangeSet(
+      [
+        { op: 'set_field', path: 'linux.ransomware.mode', value: ProtectionModes.prevent },
+        { op: 'set_field', path: 'windows.popup.ransomware.enabled', value: false },
+      ],
+      legacyLinuxRansomwarePolicy(),
+      { linuxRansomwareProtection: true, licenseInformation: platinum }
+    );
+
+    expect(prepared.proposedConfig.linux.ransomware).toEqual({
+      mode: ProtectionModes.prevent,
+      supported: true,
+    });
+    expect(prepared.proposedConfig.linux.popup.ransomware).toEqual({ message: '', enabled: false });
+    expect(prepared.proposedConfig.mac.popup.ransomware.enabled).toBe(false);
+  });
+
+  it.each([
+    ['linux.ransomware.mode', ProtectionModes.prevent],
+    ['linux.popup.ransomware.enabled', true],
+  ])(
+    'refuses a targeted %s on a legacy policy while the flag is off',
+    (path: string, value: unknown) => {
+      const policy = legacyLinuxRansomwarePolicy();
+      const before = structuredClone(policy);
+
+      expectPreparationError(
+        () =>
+          expandChangeSet([{ op: 'set_field', path, value }], policy, {
+            linuxRansomwareProtection: false,
+            licenseInformation: platinum,
+          }),
+        POLICY_CHANGE_PREPARATION_ERROR_CODE.unknown_current_value,
+        unknownCurrentValueMessage(path)
+      );
+      expect(policy).toEqual(before);
+    }
+  );
+
+  it('still refuses a targeted macOS ransomware mode when mac.ransomware is absent', () => {
+    const policy = policyFactory();
+    // A macOS policy stored before the branch existed lacks the otherwise-required `mac.ransomware`.
+    const legacyMac: { mac: { ransomware?: unknown } } = policy;
+    delete legacyMac.mac.ransomware;
+
+    expectPreparationError(
+      () =>
+        expandChangeSet(
+          [{ op: 'set_field', path: 'mac.ransomware.mode', value: ProtectionModes.prevent }],
+          policy,
+          { linuxRansomwareProtection: true, licenseInformation: platinum }
+        ),
+      POLICY_CHANGE_PREPARATION_ERROR_CODE.unknown_current_value,
+      unknownCurrentValueMessage('mac.ransomware.mode')
+    );
   });
 
   it('refuses unknown, excluded, derived, and other non-writable direct paths', () => {

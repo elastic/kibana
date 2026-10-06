@@ -315,6 +315,29 @@ describe('PerOsRansomwareProtectionCard', () => {
     expect(afterNotify.linux).toEqual(linuxBefore);
   });
 
+  it('typing a Linux custom notification message changes only the Linux popup message', () => {
+    mockedContext.setExperimentalFlag({ linuxRansomwareProtection: true });
+    policy.linux.ransomware = { mode: ProtectionModes.prevent, supported: true };
+    policy.linux.popup.ransomware = { message: '', enabled: true };
+    const windowsBefore = cloneDeep(policy.windows);
+    const macBefore = cloneDeep(policy.mac);
+    const linuxRansomwareBefore = cloneDeep(policy.linux.ransomware);
+    render();
+
+    fireEvent.change(renderResult.getByTestId(testSubj.linux.notifyCustomMessage), {
+      target: { value: 'Linux notification' },
+    });
+
+    const updated = getUpdatedPolicy();
+    expect(updated.linux.popup.ransomware).toEqual({
+      message: 'Linux notification',
+      enabled: true,
+    });
+    expect(updated.linux.ransomware).toEqual(linuxRansomwareBefore);
+    expect(updated.windows).toEqual(windowsBefore);
+    expect(updated.mac).toEqual(macBefore);
+  });
+
   it('reads the master toggle as on when Windows is off and Mac is prevent', () => {
     policy.windows.ransomware.mode = ProtectionModes.off;
     policy.mac.ransomware.mode = ProtectionModes.prevent;

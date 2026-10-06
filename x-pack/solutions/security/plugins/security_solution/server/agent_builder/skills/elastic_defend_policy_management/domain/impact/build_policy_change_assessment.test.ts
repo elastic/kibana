@@ -8,7 +8,10 @@
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { FleetPackagePolicyGenerator } from '../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
-import { policyFactory } from '../../../../../../common/endpoint/models/policy_config';
+import {
+  policyFactory,
+  policyFactoryWithoutPaidFeatures,
+} from '../../../../../../common/endpoint/models/policy_config';
 import {
   ProtectionModes,
   DeviceControlAccessLevel,
@@ -183,6 +186,38 @@ describe('buildPolicyChangeAssessment', () => {
         ?.eligibility
     ).toEqual({ eligible: true });
     expect(assessment.globalBlockers).toEqual([]);
+  });
+
+  it('backfills a complete Linux ransomware branch below Platinum but reports the prevent level as license-ineligible', () => {
+    const stored = policyFactoryWithoutPaidFeatures();
+    delete stored.linux.ransomware;
+    delete stored.linux.popup.ransomware;
+
+    const assessment = buildPolicyChangeAssessment(
+      createPolicy(stored),
+      [{ op: 'set_protection_level', protection: 'ransomware', mode: ProtectionModes.prevent }],
+      {
+        ...capabilities(licenseMock.createLicense({ license: { type: 'gold', mode: 'gold' } })),
+        linuxRansomwareProtection: true,
+      }
+    );
+
+    expect(assessment.proposedConfig.linux.ransomware).toEqual({
+      mode: ProtectionModes.prevent,
+      supported: false,
+    });
+    expect(assessment.proposedConfig.linux.popup.ransomware).toEqual({
+      enabled: true,
+      message: '',
+    });
+    expect(
+      assessment.changes.find((change) => change.path === 'linux.ransomware.mode')?.eligibility
+    ).toEqual({ eligible: false, reason: 'license_below_platinum' });
+    expect(
+      assessment.changes.find((change) => change.path === 'linux.popup.ransomware.enabled')
+        ?.eligibility
+    ).toEqual({ eligible: false, reason: 'license_below_platinum' });
+    expect(assessment.globalBlockers).toEqual([{ reason: 'license_invalid_policy' }]);
   });
 
   it('never touches Linux ransomware for a protection-level operation while the flag is off', () => {

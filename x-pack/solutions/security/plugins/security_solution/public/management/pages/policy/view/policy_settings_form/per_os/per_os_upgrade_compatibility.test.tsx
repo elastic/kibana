@@ -267,6 +267,7 @@ describe('per-OS form upgrade compatibility with 9.4 policies', () => {
   // all. Rendering must survive it, and setting a mode has to create both branches rather than throw.
   it('renders and writes a mode when the whole Linux ransomware branch is absent', async () => {
     const onChange = jest.fn();
+    mockedContext.setExperimentalFlag({ linuxRansomwareProtection: true });
     policy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Platinum);
     // Windows and macOS must be off, otherwise the master toggle short-circuits on them and
     // never reads Linux.

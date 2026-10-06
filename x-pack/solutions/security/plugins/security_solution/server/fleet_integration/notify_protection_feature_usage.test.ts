@@ -136,4 +136,49 @@ describe('notifyProtectionFeatureUsage ransomware notifications', () => {
 
     expect(featureUsageService.notifyUsage).not.toHaveBeenCalledWith('RANSOMWARE_PROTECTION');
   });
+
+  it('notifies once when only macOS ransomware becomes newly enabled (off -> detect)', async () => {
+    const current = policyFactory();
+    current.windows.ransomware.mode = ProtectionModes.off;
+    current.mac.ransomware.mode = ProtectionModes.off;
+    current.linux.ransomware = { mode: ProtectionModes.off, supported: true };
+
+    const next = policyFactory();
+    next.windows.ransomware.mode = ProtectionModes.off;
+    next.mac.ransomware.mode = ProtectionModes.detect;
+    next.linux.ransomware = { mode: ProtectionModes.off, supported: true };
+
+    const featureUsageService = createFeatureUsageServiceMock();
+
+    await notifyProtectionFeatureUsage(
+      buildNewPackagePolicy(next),
+      buildPolicyData(current),
+      featureUsageService
+    );
+
+    expect(featureUsageService.notifyUsage).toHaveBeenCalledWith('RANSOMWARE_PROTECTION');
+    expect(featureUsageService.notifyUsage).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not notify when macOS ransomware is already active (prevent -> detect)', async () => {
+    const current = policyFactory();
+    current.windows.ransomware.mode = ProtectionModes.off;
+    current.mac.ransomware.mode = ProtectionModes.prevent;
+    current.linux.ransomware = { mode: ProtectionModes.off, supported: true };
+
+    const next = policyFactory();
+    next.windows.ransomware.mode = ProtectionModes.off;
+    next.mac.ransomware.mode = ProtectionModes.detect;
+    next.linux.ransomware = { mode: ProtectionModes.off, supported: true };
+
+    const featureUsageService = createFeatureUsageServiceMock();
+
+    await notifyProtectionFeatureUsage(
+      buildNewPackagePolicy(next),
+      buildPolicyData(current),
+      featureUsageService
+    );
+
+    expect(featureUsageService.notifyUsage).not.toHaveBeenCalledWith('RANSOMWARE_PROTECTION');
+  });
 });
