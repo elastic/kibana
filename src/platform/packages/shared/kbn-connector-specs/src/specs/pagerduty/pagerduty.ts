@@ -158,7 +158,7 @@ export const PagerdutyConnector: ConnectorSpec = {
       isTool: true,
       scope: 'write',
       description:
-        'Create a new PagerDuty incident. Requires a service ID (use listServices to find one), an incident title, and the from email of the acting user (call getUserData to retrieve it). Returns the full incident object including incident.id, which downstream steps can use to acknowledge, resolve, or update the incident. Optionally accepts urgency, a detailed body, an escalation policy override, and direct user assignments.',
+        'Create a new PagerDuty incident. Requires a service ID (use listServices to find one), an incident title, and the from email of the acting user (call browseUsers with request.action get to retrieve it). Returns the full incident object including incident.id, which downstream steps can use to acknowledge, resolve, or update the incident. Optionally accepts urgency, a detailed body, an escalation policy override, and direct user assignments.',
       input: TriggerIncidentInputSchema,
       handler: async (ctx, input: TriggerIncidentInput) => {
         const incidentPayload: Record<string, unknown> = {
@@ -321,7 +321,7 @@ export const PagerdutyConnector: ConnectorSpec = {
       isTool: true,
       scope: 'write',
       description:
-        'Request additional responders for an active PagerDuty incident. Notifies the specified users or escalation policy on-call responders that their help is needed. Requires the incident ID, your PagerDuty user ID (call getUserData to retrieve it), a message, and at least one user ID or escalation policy ID to notify. Returns the responder request object.',
+        'Request additional responders for an active PagerDuty incident. Notifies the specified users or escalation policy on-call responders that their help is needed. Requires the incident ID, your PagerDuty user ID (call browseUsers with request.action get to retrieve it), a message, and at least one user ID or escalation policy ID to notify. Returns the responder request object.',
       input: AddRespondersInputSchema,
       handler: async (ctx, input: AddRespondersInput) => {
         const targets: Array<{ responder_request_target: { id: string; type: string } }> = [];
@@ -352,7 +352,7 @@ export const PagerdutyConnector: ConnectorSpec = {
       isTool: true,
       scope: 'write',
       description:
-        'Execute a predefined PagerDuty response play against an incident. Response plays automate multi-step incident response tasks (e.g. paging additional teams, posting updates). Requires the incident ID, the response play ID, the from email, and your PagerDuty user ID (call getUserData to retrieve it). Returns the response play execution result.',
+        'Execute a predefined PagerDuty response play against an incident. Response plays automate multi-step incident response tasks (e.g. paging additional teams, posting updates). Requires the incident ID, the response play ID, the from email, and your PagerDuty user ID (call browseUsers with request.action get to retrieve it). Returns the response play execution result.',
       input: RunResponsePlayInputSchema,
       handler: async (ctx, input: RunResponsePlayInput) => {
         const response = await ctx.client.post(
