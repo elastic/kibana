@@ -7,4 +7,4 @@ products:
 - product: cloud-serverless
 - product: kibana
 title: 'Keep Sort by and Order selections when settings are opened in Single Metric Viewer'
-description: In the Single Metric Viewer, the field configuration popover no longer loses its Sort by and Order selections when you open the settings for a second split field.
+description: In the Single Metric Viewer, the field configuration popover no longer loses its **Sort by** and **Order** selections when you open the settings for a second split field.
