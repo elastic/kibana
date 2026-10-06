@@ -11,6 +11,7 @@ import { EuiButtonIcon, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eu
 import type { EuiFlyoutProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { StardustWrapper } from '@kbn/content-management-favorites-public';
+import { AiButtonIcon } from '@kbn/ui-ai-components';
 import { useEsqlEditorActions } from '../editor_actions_context';
 import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
 import { searchPlaceholder } from '../editor_visor/visor_i18n';
@@ -68,6 +69,7 @@ export function ESQLMenu({
   const visorTooltip = isNlToEsqlEnabled ? searchWithNlTooltipLabel : searchTooltipLabel;
   const isInline = editorActions?.editorIsInline;
   const onToggleVisor = editorActions?.toggleVisor;
+  const isVisorOpen = Boolean(editorActions?.isVisorOpen);
   const onToggleHistory = editorActions?.toggleHistory;
   const onToggleStarredQuery = editorActions?.toggleStarredQuery;
   const historyLabel = editorActions?.isHistoryOpen ? hideHistoryLabel : showHistoryLabel;
@@ -182,17 +184,32 @@ export function ESQLMenu({
       </EuiFlexItem>
       {isInline && !hideVisor && (
         <EuiFlexItem grow={false}>
-          <EuiToolTip position="top" content={visorTooltip} disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType={isNlToEsqlEnabled ? MagnifySparklesIcon : 'search'}
+          {isVisorOpen && isNlToEsqlEnabled ? (
+            <AiButtonIcon
+              iconType={MagnifySparklesIcon as unknown as 'sparkles'}
               size="xs"
+              iconSize="m"
               aria-label={searchPlaceholder}
+              aria-pressed
+              withToolTip
+              toolTipContent={visorTooltip}
               onClick={onToggleVisor}
-              isDisabled={!onToggleVisor}
               data-test-subj="esql-menu-button"
-              color="text"
             />
-          </EuiToolTip>
+          ) : (
+            <EuiToolTip position="top" content={visorTooltip} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType={isNlToEsqlEnabled ? MagnifySparklesIcon : 'search'}
+                size="xs"
+                aria-label={searchPlaceholder}
+                aria-pressed={isVisorOpen}
+                onClick={onToggleVisor}
+                isDisabled={!onToggleVisor}
+                data-test-subj="esql-menu-button"
+                color="text"
+              />
+            </EuiToolTip>
+          )}
         </EuiFlexItem>
       )}
       {queryToSave !== undefined && (
