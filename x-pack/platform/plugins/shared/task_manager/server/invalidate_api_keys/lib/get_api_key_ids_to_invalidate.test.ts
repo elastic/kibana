@@ -518,6 +518,28 @@ describe('getApiKeyIdsToInvalidate', () => {
       });
     });
 
+    test('excludes other pending entries for the same key while the run is in progress', async () => {
+      internalSavedObjectsRepository.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          runningTaskSO('task-1', {
+            status: 'running',
+            startedAt: taskStartedAt,
+            retryAt: futureRetryAt,
+          }),
+        ],
+      });
+
+      const result = await getResult([pendingSO('1', 'key-1', 'task-1'), pendingSO('2', 'key-1')]);
+
+      expect(result).toEqual({
+        apiKeyIdsToInvalidate: [],
+        apiKeyIdsToExclude: [
+          { id: '1', apiKeyId: 'key-1' },
+          { id: '2', apiKeyId: 'key-1' },
+        ],
+      });
+    });
+
     test.each([
       ['a new run has started', { status: 'running', startedAt: '2026-10-05T01:00:00.000Z' }],
       ['the task is idle', { status: 'idle', startedAt: null }],

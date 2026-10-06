@@ -135,8 +135,14 @@ export async function getApiKeyIdsToInvalidate({
     runningTasks,
     savedObjectsClient
   );
-  const isInUse = (id: string, apiKeyId: string) =>
-    soIdsUsedByRunningTasks.has(id) ||
+  // Keys are shared across tasks of the same type, so protect every pending SO with the same key.
+  const apiKeyIdsUsedByRunningTasks = new Set(
+    [...apiKeyIds, ...uiamApiKeys]
+      .filter(({ id }) => soIdsUsedByRunningTasks.has(id))
+      .map(({ apiKeyId }) => apiKeyId)
+  );
+  const isInUse = (apiKeyId: string) =>
+    apiKeyIdsUsedByRunningTasks.has(apiKeyId) ||
     apiKeyIdsInUseBuckets.some((bucket) => bucket.key === apiKeyId);
 
   const apiKeyIdsToInvalidate: ApiKeyIdAndSOId[] = [];
@@ -144,7 +150,7 @@ export async function getApiKeyIdsToInvalidate({
   const apiKeyIdsToExclude: ApiKeyIdAndSOId[] = [];
 
   apiKeyIds.forEach(({ id, apiKeyId }) => {
-    if (isInUse(id, apiKeyId)) {
+    if (isInUse(apiKeyId)) {
       apiKeyIdsToExclude.push({ id, apiKeyId });
     } else {
       apiKeyIdsToInvalidate.push({ id, apiKeyId });
@@ -152,7 +158,7 @@ export async function getApiKeyIdsToInvalidate({
   });
 
   uiamApiKeys.forEach(({ id, apiKeyId, uiamApiKey }) => {
-    if (isInUse(id, apiKeyId)) {
+    if (isInUse(apiKeyId)) {
       apiKeyIdsToExclude.push({ id, apiKeyId });
     } else {
       uiamApiKeysToInvalidate.push({ id, apiKeyId, uiamApiKey });
