@@ -10,6 +10,7 @@ import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_acti
 import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import {
   GenerativeAIForObservabilityConnectorFeatureId,
+  GenerativeAIForSearchPlaygroundConnectorFeatureId,
   GenerativeAIForSecurityConnectorFeatureId,
   WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
@@ -34,6 +35,7 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
   supportedFeatureIds: [
     GenerativeAIForSecurityConnectorFeatureId,
     GenerativeAIForObservabilityConnectorFeatureId,
+    GenerativeAIForSearchPlaygroundConnectorFeatureId,
     WorkflowsConnectorFeatureId,
   ],
   minimumLicenseRequired: 'enterprise' as const,

@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import {
+  GenerativeAIForSearchPlaygroundConnectorFeatureId,
   GenerativeAIForSecurityConnectorFeatureId,
   WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
@@ -60,6 +61,7 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
   validators: [{ type: ValidatorType.CONFIG, validator: configValidator }],
   supportedFeatureIds: [
     GenerativeAIForSecurityConnectorFeatureId,
+    GenerativeAIForSearchPlaygroundConnectorFeatureId,
     GenerativeAIForObservabilityConnectorFeatureId,
     WorkflowsConnectorFeatureId,
   ],

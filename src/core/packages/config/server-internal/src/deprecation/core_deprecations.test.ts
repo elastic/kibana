@@ -90,22 +90,6 @@ describe('core deprecations', () => {
     });
   });
 
-  describe('xpack.searchPlayground', () => {
-    it('removes the unused settings and logs a warning', () => {
-      const { migrated, messages, levels } = applyCoreDeprecations({
-        xpack: { searchPlayground: { enabled: false, ui: { enabled: false }, other: 'x' } },
-      });
-      expect(migrated).toEqual({});
-      expect(messages).toEqual(['You no longer need to configure "xpack.searchPlayground".']);
-      expect(levels).toEqual(['warning']);
-    });
-
-    it('does not log a warning when the settings are unset', () => {
-      const { messages } = applyCoreDeprecations({ xpack: {} });
-      expect(messages).toHaveLength(0);
-    });
-  });
-
   describe('xpack.searchNotebooks', () => {
     it('removes the unused settings and logs a warning', () => {
       const { migrated, messages, levels } = applyCoreDeprecations({

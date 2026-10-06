@@ -60,6 +60,7 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
                 'observabilityAIAssistant',
                 'enterpriseSearchApplications',
                 'enterpriseSearchAnalytics',
+                'searchPlayground',
                 'searchSynonyms',
                 'searchQueryRules',
                 { feature: 'enterpriseSearch', apps: ['elasticsearchIndexManagement'] },
