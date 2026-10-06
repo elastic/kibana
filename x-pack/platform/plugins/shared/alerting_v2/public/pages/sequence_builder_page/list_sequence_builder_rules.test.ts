@@ -25,7 +25,10 @@ describe('listSequenceBuilderRules', () => {
       total: 3,
     });
 
-    await expect(listSequenceBuilderRules(listRules)).resolves.toEqual(pageOf(0, 3));
+    await expect(listSequenceBuilderRules(listRules)).resolves.toEqual({
+      items: pageOf(0, 3),
+      total: 3,
+    });
     expect(listRules).toHaveBeenCalledTimes(1);
     expect(listRules).toHaveBeenCalledWith({
       page: 1,
@@ -43,7 +46,10 @@ describe('listSequenceBuilderRules', () => {
       .mockResolvedValueOnce({ items: pageOf(0, MAX_PER_PAGE), total: MAX_PER_PAGE + 5 })
       .mockResolvedValueOnce({ items: pageOf(MAX_PER_PAGE, 5), total: MAX_PER_PAGE + 5 });
 
-    await expect(listSequenceBuilderRules(listRules)).resolves.toEqual(pageOf(0, MAX_PER_PAGE + 5));
+    await expect(listSequenceBuilderRules(listRules)).resolves.toEqual({
+      items: pageOf(0, MAX_PER_PAGE + 5),
+      total: MAX_PER_PAGE + 5,
+    });
     expect(listRules).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({ page: 2, per_page: MAX_PER_PAGE })
@@ -58,7 +64,8 @@ describe('listSequenceBuilderRules', () => {
 
     const rules = await listSequenceBuilderRules(listRules);
 
-    expect(rules).toHaveLength(SEQUENCE_BUILDER_MAX_RULES);
+    expect(rules.items).toHaveLength(SEQUENCE_BUILDER_MAX_RULES);
+    expect(rules.total).toBeGreaterThan(rules.items.length);
     expect(listRules).toHaveBeenCalledTimes(SEQUENCE_BUILDER_MAX_RULES / MAX_PER_PAGE);
     expect(listRules.mock.calls.map(([params]) => params.per_page)).toEqual([
       MAX_PER_PAGE,

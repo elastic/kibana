@@ -16,7 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 import type { ColorMode } from '@xyflow/react';
 import { Background, Controls, ReactFlow, ReactFlowProvider } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -72,7 +72,12 @@ const AlertCanvasContent: React.FC<CanvasContentProps> = ({
 
   return (
     <div
-      style={{ height: '100%', position: 'relative' }}
+      css={css`
+        flex: 1;
+        min-block-size: 0;
+        block-size: 100%;
+        position: relative;
+      `}
       onDragOver={(e) => e.preventDefault()}
       onDrop={onDrop}
       data-test-subj="sequenceBuilderAlertCanvas"
@@ -181,7 +186,7 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
 
   const fetchedRules = useMemo<FetchedRule[]>(
     () =>
-      (rulesData ?? []).map((r) => ({
+      (rulesData?.items ?? []).map((r) => ({
         id: r.id,
         name: r.metadata.name,
         groupingFields: r.grouping?.fields ?? [],
@@ -189,6 +194,7 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
       })),
     [rulesData]
   );
+  const isRulesListTruncated = (rulesData?.total ?? 0) > fetchedRules.length;
 
   const usedRuleIds = useMemo<Set<string>>(
     () => new Set(seqValues.steps.flatMap((s) => s.rules.map((r) => r.ruleId))),
@@ -364,7 +370,14 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
   );
 
   return (
-    <EuiFlexGroup gutterSize="none" style={{ height: '100%', overflow: 'hidden' }}>
+    <EuiFlexGroup
+      gutterSize="none"
+      css={css`
+        flex: 1;
+        min-block-size: 0;
+        overflow: hidden;
+      `}
+    >
       <CollapsibleSidePanel
         title={availableRulesTitle}
         isOpen={isRuleListOpen}
@@ -388,7 +401,7 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
                 <RuleListItem rule={rule} />
               </EuiFlexItem>
             ))}
-            {availableRules.length === 0 && (
+            {availableRules.length === 0 && !isRulesListTruncated && (
               <EuiText size="s" color="subdued">
                 {fetchedRules.length === 0 ? (
                   <FormattedMessage
@@ -403,11 +416,27 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
                 )}
               </EuiText>
             )}
+            {isRulesListTruncated && (
+              <EuiText size="s" color="subdued" data-test-subj="sequenceBuilderRulesTruncated">
+                <FormattedMessage
+                  id="xpack.alertingV2.sequenceBuilderPage.rulesTruncatedDescription"
+                  defaultMessage="Showing the first {count} rules."
+                  values={{ count: <FormattedNumber value={fetchedRules.length} /> }}
+                />
+              </EuiText>
+            )}
           </EuiFlexGroup>
         )}
       </CollapsibleSidePanel>
 
-      <EuiFlexItem style={{ minWidth: 0 }}>
+      <EuiFlexItem
+        css={css`
+          min-inline-size: 0;
+          min-block-size: 0;
+          display: flex;
+          flex-direction: column;
+        `}
+      >
         <ReactFlowProvider>
           <AlertCanvasContent
             nodes={nodes}
