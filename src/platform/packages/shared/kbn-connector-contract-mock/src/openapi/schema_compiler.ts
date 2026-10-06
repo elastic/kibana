@@ -20,6 +20,9 @@ const AJV_OPTIONS = {
   allErrors: true,
   allowUnionTypes: true,
   allowMatchingProperties: true,
+  // Errors carry their parent schema, so `required` errors for readOnly/writeOnly properties
+  // can be dropped in the direction OpenAPI exempts them.
+  verbose: true,
   strict: false,
   logger: false,
 } as const;

@@ -33,6 +33,13 @@ export interface LocatedSchema {
   readonly schema: SpecSchema;
 }
 
+/** A way a request or response breaks the contract, e.g. `query.limit` failing `maximum`. */
+export interface Violation {
+  readonly path: readonly string[];
+  readonly code: string;
+  readonly message: string;
+}
+
 export type ParameterLocation = 'path' | 'query' | 'header' | 'cookie';
 
 export interface OperationParameter {
