@@ -11,10 +11,86 @@ import { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
 import {
   CASE_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
-  OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
   ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
   ATTACHMENTS_WORKFLOW_ORIGIN_TYPE,
 } from '../../../common/constants/workflow';
+
+interface ScopeOverrides {
+  total: number;
+  dailyCount: number;
+  weeklyCount: number;
+  monthlyCount: number;
+  caseCardinality: number;
+  uniqueUsers: number;
+  byOriginType: Array<{ key: string; doc_count: number }>;
+  byAttachmentType: Array<{ key: string; doc_count: number }>;
+}
+
+const makeScope = (overrides: Partial<ScopeOverrides> = {}) => ({
+  doc_count: overrides.total ?? 0,
+  counts: {
+    buckets: [
+      { doc_count: overrides.monthlyCount ?? 0 },
+      { doc_count: overrides.weeklyCount ?? 0 },
+      { doc_count: overrides.dailyCount ?? 0 },
+    ],
+  },
+  references: {
+    referenceType: {
+      referenceAgg: { value: overrides.caseCardinality ?? 0 },
+    },
+  },
+  uniqueUsers: { value: overrides.uniqueUsers ?? 0 },
+  byOriginType: { buckets: overrides.byOriginType ?? [] },
+  byAttachmentType: { buckets: overrides.byAttachmentType ?? [] },
+});
+
+const makeRunsResponse = (
+  scopes: Partial<
+    Record<'all' | 'securitySolution' | 'observability' | 'cases', Partial<ScopeOverrides>>
+  > = {}
+) => ({
+  // The hit total is capped at 10,000, so the collector must not read it.
+  total: 10000,
+  saved_objects: [],
+  per_page: 0,
+  page: 0,
+  aggregations: {
+    all: makeScope(scopes.all),
+    securitySolution: makeScope(scopes.securitySolution),
+    observability: makeScope(scopes.observability),
+    cases: makeScope(scopes.cases),
+  },
+});
+
+const makeConfigResponse = (
+  total: number = 0,
+  byOwner: Array<{ key: string; doc_count: number }> = []
+) => ({
+  total: 0,
+  saved_objects: [],
+  per_page: 0,
+  page: 0,
+  aggregations: {
+    configurationsWithTags: { doc_count: total, byOwner: { buckets: byOwner } },
+  },
+});
+
+const emptySolution = {
+  runs: { total: 0, daily: 0, weekly: 0, monthly: 0 },
+  totalCasesWithRuns: 0,
+  totalUniqueUsers: 0,
+  byOriginType: {
+    case: 0,
+    observable: 0,
+    observables: 0,
+    attachment: 0,
+    attachments: 0,
+    unattributed: 0,
+  },
+  byAttachmentType: {},
+  configurationsWithWorkflowTags: 0,
+};
 
 describe('workflows', () => {
   describe('getWorkflowsTelemetryData', () => {
@@ -22,218 +98,189 @@ describe('workflows', () => {
     const savedObjectsRepository = savedObjectsRepositoryMock.create();
     const savedObjectsClient = new TelemetrySavedObjectsClient(savedObjectsRepository);
 
-    const makeRunsResponse = (
-      overrides: Partial<{
-        total: number;
-        dailyCount: number;
-        weeklyCount: number;
-        monthlyCount: number;
-        caseCardinality: number;
-        uniqueUsers: number;
-        byOriginType: Array<{ key: string; doc_count: number }>;
-        alertRuns: number;
-        eventRuns: number;
-      }> = {}
-    ) => ({
-      total: overrides.total ?? 0,
-      saved_objects: [],
-      per_page: 0,
-      page: 0,
-      aggregations: {
-        counts: {
-          buckets: [
-            { doc_count: overrides.monthlyCount ?? 0 },
-            { doc_count: overrides.weeklyCount ?? 0 },
-            { doc_count: overrides.dailyCount ?? 0 },
-          ],
-        },
-        references: {
-          referenceType: {
-            referenceAgg: { value: overrides.caseCardinality ?? 0 },
-          },
-        },
-        uniqueUsers: { value: overrides.uniqueUsers ?? 0 },
-        byOriginType: { buckets: overrides.byOriginType ?? [] },
-        byAttachmentType: {
-          buckets: {
-            alert: { doc_count: overrides.alertRuns ?? 0 },
-            event: { doc_count: overrides.eventRuns ?? 0 },
-          },
-        },
-      },
-    });
-
-    const makeConfigResponse = (configurationsWithTags: number) => ({
-      total: 0,
-      saved_objects: [],
-      per_page: 0,
-      page: 0,
-      aggregations: {
-        configurationsWithTags: { doc_count: configurationsWithTags },
-      },
-    });
+    const mockResponses = (
+      runs: ReturnType<typeof makeRunsResponse>,
+      config: ReturnType<typeof makeConfigResponse>
+    ) => {
+      savedObjectsRepository.find.mockReset();
+      savedObjectsRepository.find.mockResolvedValueOnce(runs).mockResolvedValueOnce(config);
+    };
 
     beforeEach(() => {
       jest.clearAllMocks();
-      // Default: two sequential find calls → runs then config
-      savedObjectsRepository.find
-        .mockResolvedValueOnce(makeRunsResponse())
-        .mockResolvedValueOnce(makeConfigResponse(0));
+      mockResponses(makeRunsResponse(), makeConfigResponse());
     });
 
     it('returns all-zero values when there are no workflow runs', async () => {
       const result = await getWorkflowsTelemetryData({ savedObjectsClient, logger });
 
       expect(result).toEqual({
-        runs: { total: 0, daily: 0, weekly: 0, monthly: 0 },
-        totalCasesWithRuns: 0,
-        totalUniqueUsers: 0,
-        byOriginType: {
-          case: 0,
-          observable: 0,
-          observables: 0,
-          attachment: 0,
-          attachments: 0,
-          unattributed: 0,
-        },
-        byAttachmentType: { alert: 0, event: 0, other: 0 },
-        configurationsWithWorkflowTags: 0,
+        all: emptySolution,
+        sec: emptySolution,
+        obs: emptySolution,
+        main: emptySolution,
       });
     });
 
-    it('returns correct counts when runs exist', async () => {
-      savedObjectsRepository.find.mockReset();
-      savedObjectsRepository.find
-        .mockResolvedValueOnce(
-          makeRunsResponse({
-            total: 10,
+    it('returns counts per scope from the scope aggregations', async () => {
+      mockResponses(
+        makeRunsResponse({
+          all: {
+            total: 12,
             dailyCount: 2,
             weeklyCount: 5,
             monthlyCount: 9,
-            caseCardinality: 3,
-            uniqueUsers: 2,
+            caseCardinality: 4,
+            uniqueUsers: 3,
             byOriginType: [
               { key: CASE_WORKFLOW_ORIGIN_TYPE, doc_count: 6 },
               { key: OBSERVABLE_WORKFLOW_ORIGIN_TYPE, doc_count: 2 },
               { key: ATTACHMENTS_WORKFLOW_ORIGIN_TYPE, doc_count: 1 },
+              { key: 'unattributed', doc_count: 3 },
             ],
-            alertRuns: 1,
-          })
-        )
-        .mockResolvedValueOnce(makeConfigResponse(4));
+            byAttachmentType: [{ key: 'security.alert', doc_count: 1 }],
+          },
+          securitySolution: {
+            total: 10,
+            byOriginType: [
+              { key: CASE_WORKFLOW_ORIGIN_TYPE, doc_count: 6 },
+              { key: OBSERVABLE_WORKFLOW_ORIGIN_TYPE, doc_count: 1 },
+              { key: ATTACHMENTS_WORKFLOW_ORIGIN_TYPE, doc_count: 1 },
+              { key: 'unattributed', doc_count: 2 },
+            ],
+            byAttachmentType: [{ key: 'security.alert', doc_count: 1 }],
+          },
+          observability: {
+            total: 2,
+            byOriginType: [
+              { key: OBSERVABLE_WORKFLOW_ORIGIN_TYPE, doc_count: 1 },
+              { key: 'unattributed', doc_count: 1 },
+            ],
+          },
+        }),
+        makeConfigResponse(5, [
+          { key: 'securitySolution', doc_count: 3 },
+          { key: 'cases', doc_count: 2 },
+        ])
+      );
 
       const result = await getWorkflowsTelemetryData({ savedObjectsClient, logger });
 
-      expect(result).toEqual({
-        runs: { total: 10, daily: 2, weekly: 5, monthly: 9 },
-        totalCasesWithRuns: 3,
-        totalUniqueUsers: 2,
+      expect(result.all).toEqual({
+        runs: { total: 12, daily: 2, weekly: 5, monthly: 9 },
+        totalCasesWithRuns: 4,
+        totalUniqueUsers: 3,
         byOriginType: {
           case: 6,
           observable: 2,
           observables: 0,
           attachment: 0,
           attachments: 1,
-          // 10 total − (6 + 2 + 1) = 1
-          unattributed: 1,
+          unattributed: 3,
         },
-        byAttachmentType: { alert: 1, event: 0, other: 0 },
-        configurationsWithWorkflowTags: 4,
+        byAttachmentType: { security_alert: 1 },
+        configurationsWithWorkflowTags: 5,
       });
+      expect(result.sec.runs.total).toBe(10);
+      expect(result.sec.byOriginType.unattributed).toBe(2);
+      expect(result.sec.byAttachmentType).toEqual({ security_alert: 1 });
+      expect(result.sec.configurationsWithWorkflowTags).toBe(3);
+      expect(result.obs.runs.total).toBe(2);
+      expect(result.obs.byOriginType.observable).toBe(1);
+      expect(result.obs.configurationsWithWorkflowTags).toBe(0);
+      expect(result.main).toEqual({ ...emptySolution, configurationsWithWorkflowTags: 2 });
     });
 
-    it('derives unattributed count as total minus sum of origin buckets', async () => {
-      savedObjectsRepository.find.mockReset();
-      savedObjectsRepository.find
-        .mockResolvedValueOnce(
-          makeRunsResponse({
-            total: 5,
-            byOriginType: [
-              { key: CASE_WORKFLOW_ORIGIN_TYPE, doc_count: 3 },
-              { key: OBSERVABLES_WORKFLOW_ORIGIN_TYPE, doc_count: 1 },
-              { key: ATTACHMENT_WORKFLOW_ORIGIN_TYPE, doc_count: 1 },
-            ],
-          })
-        )
-        .mockResolvedValueOnce(makeConfigResponse(0));
-
-      const result = await getWorkflowsTelemetryData({ savedObjectsClient, logger });
-
-      expect(result.byOriginType.unattributed).toBe(0);
-    });
-
-    it('clamps unattributed to 0 when origin sum somehow exceeds total', async () => {
-      savedObjectsRepository.find.mockReset();
-      savedObjectsRepository.find
-        .mockResolvedValueOnce(
-          makeRunsResponse({
-            total: 3,
-            byOriginType: [{ key: CASE_WORKFLOW_ORIGIN_TYPE, doc_count: 5 }],
-          })
-        )
-        .mockResolvedValueOnce(makeConfigResponse(0));
-
-      const result = await getWorkflowsTelemetryData({ savedObjectsClient, logger });
-
-      expect(result.byOriginType.unattributed).toBe(0);
-    });
-
-    it('breaks attachment-origin runs down by attachment type, deriving other as the residual', async () => {
-      savedObjectsRepository.find.mockReset();
-      savedObjectsRepository.find
-        .mockResolvedValueOnce(
-          makeRunsResponse({
+    it('reports every attachment type that has been run against, keyed by sanitized type', async () => {
+      mockResponses(
+        makeRunsResponse({
+          all: {
             total: 9,
             byOriginType: [
               { key: ATTACHMENT_WORKFLOW_ORIGIN_TYPE, doc_count: 5 },
               { key: ATTACHMENTS_WORKFLOW_ORIGIN_TYPE, doc_count: 4 },
             ],
-            alertRuns: 5,
-            eventRuns: 3,
-          })
-        )
-        .mockResolvedValueOnce(makeConfigResponse(0));
+            byAttachmentType: [
+              { key: 'security.alert', doc_count: 5 },
+              { key: 'security.event', doc_count: 3 },
+              { key: 'observability.alert', doc_count: 1 },
+            ],
+          },
+        }),
+        makeConfigResponse()
+      );
 
       const result = await getWorkflowsTelemetryData({ savedObjectsClient, logger });
 
-      // (5 + 4) attachment-origin runs − (5 + 3) = 1
-      expect(result.byAttachmentType).toEqual({ alert: 5, event: 3, other: 1 });
+      expect(result.all.byAttachmentType).toEqual({
+        security_alert: 5,
+        security_event: 3,
+        observability_alert: 1,
+      });
     });
 
-    it('clamps other to 0 when attachment type counts somehow exceed attachment-origin runs', async () => {
-      savedObjectsRepository.find.mockReset();
-      savedObjectsRepository.find
-        .mockResolvedValueOnce(
-          makeRunsResponse({
-            total: 2,
-            byOriginType: [{ key: ATTACHMENT_WORKFLOW_ORIGIN_TYPE, doc_count: 2 }],
-            alertRuns: 3,
-          })
-        )
-        .mockResolvedValueOnce(makeConfigResponse(0));
+    it('reports origin types it does not know about under their own key', async () => {
+      mockResponses(
+        makeRunsResponse({
+          all: {
+            total: 3,
+            byOriginType: [
+              { key: CASE_WORKFLOW_ORIGIN_TYPE, doc_count: 1 },
+              { key: 'cases.comment', doc_count: 2 },
+            ],
+          },
+        }),
+        makeConfigResponse()
+      );
 
       const result = await getWorkflowsTelemetryData({ savedObjectsClient, logger });
 
-      expect(result.byAttachmentType.other).toBe(0);
+      expect(result.all.byOriginType).toEqual({
+        case: 1,
+        observable: 0,
+        observables: 0,
+        attachment: 0,
+        attachments: 0,
+        unattributed: 0,
+        comment: 2,
+      });
     });
 
-    it('filters attachment types by exact attachment type ID', async () => {
+    it('scopes run aggregations to all runs and to each owner', async () => {
       await getWorkflowsTelemetryData({ savedObjectsClient, logger });
 
-      expect(savedObjectsRepository.find.mock.calls[0][0].aggs?.byAttachmentType).toEqual({
-        filters: {
-          filters: {
-            alert: {
-              term: {
-                'cases-user-actions.attributes.payload.origin.attachmentType': 'security.alert',
-              },
-            },
-            event: {
-              term: {
-                'cases-user-actions.attributes.payload.origin.attachmentType': 'security.event',
-              },
-            },
-          },
+      const { aggs } = savedObjectsRepository.find.mock.calls[0][0];
+
+      expect(aggs?.all?.filter).toEqual({
+        exists: { field: 'cases-user-actions.attributes.owner' },
+      });
+      expect(aggs?.securitySolution?.filter).toEqual({
+        term: { 'cases-user-actions.attributes.owner': 'securitySolution' },
+      });
+      expect(aggs?.observability?.filter).toEqual({
+        term: { 'cases-user-actions.attributes.owner': 'observability' },
+      });
+      expect(aggs?.cases?.filter).toEqual({
+        term: { 'cases-user-actions.attributes.owner': 'cases' },
+      });
+    });
+
+    it('buckets runs without an origin as unattributed and aggregates attachment types by term', async () => {
+      await getWorkflowsTelemetryData({ savedObjectsClient, logger });
+
+      const { aggs } = savedObjectsRepository.find.mock.calls[0][0];
+
+      expect(aggs?.all?.aggs?.byOriginType).toEqual({
+        terms: {
+          field: 'cases-user-actions.attributes.payload.origin.type',
+          size: 50,
+          missing: 'unattributed',
+        },
+      });
+      expect(aggs?.all?.aggs?.byAttachmentType).toEqual({
+        terms: {
+          field: 'cases-user-actions.attributes.payload.origin.attachmentType',
+          size: 50,
         },
       });
     });

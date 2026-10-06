@@ -23,7 +23,7 @@ import {
   RUN_WORKFLOW_EXECUTED_EVENT_TYPE,
   type RunWorkflowExecutedEvent,
   type RunWorkflowTelemetry,
-  UNKNOWN_RUN_WORKFLOW_ORIGIN,
+  UNKNOWN_RUN_WORKFLOW_TELEMETRY_VALUE,
 } from './telemetry';
 import * as i18n from './translations';
 import type { RunWorkflowOptions } from '../../api/types';
@@ -94,7 +94,7 @@ export interface RunWorkflowPanelProps {
    * report the outcome itself (e.g. a multi-target run). Defaults to true.
    */
   showSuccessToast?: boolean;
-  /** Surface context attached to the run telemetry event. Origin is `unknown` when omitted. */
+  /** Surface context attached to the run telemetry event. Origin and owner are `unknown` when omitted. */
   telemetry?: RunWorkflowTelemetry;
 }
 
@@ -172,14 +172,14 @@ export const RunWorkflowPanel = ({
       // Reported regardless of mount state, so dismissing the panel mid-run still counts the run.
       const reportRunExecuted = (succeeded: boolean, workflowExecutionId?: string) => {
         const event: RunWorkflowExecutedEvent = {
-          origin: telemetry?.origin ?? UNKNOWN_RUN_WORKFLOW_ORIGIN,
+          origin: telemetry?.origin ?? UNKNOWN_RUN_WORKFLOW_TELEMETRY_VALUE,
           ...(telemetry?.attachmentType !== undefined && {
             attachment_type: telemetry.attachmentType,
           }),
           succeeded,
           ...(workflowExecutionId && { workflow_execution_id: workflowExecutionId }),
           ...(telemetry?.itemCount !== undefined && { item_count: telemetry.itemCount }),
-          ...(telemetry?.owner !== undefined && { owner: telemetry.owner }),
+          owner: telemetry?.owner ?? UNKNOWN_RUN_WORKFLOW_TELEMETRY_VALUE,
         };
         analytics?.reportEvent(RUN_WORKFLOW_EXECUTED_EVENT_TYPE, event);
       };

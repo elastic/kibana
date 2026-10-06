@@ -9,8 +9,10 @@ import {
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
-  SECURITY_ALERT_ATTACHMENT_TYPE,
-  SECURITY_EVENT_ATTACHMENT_TYPE,
+  GENERAL_CASES_OWNER,
+  OBSERVABILITY_OWNER,
+  OWNERS,
+  SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
 import {
   CASE_WORKFLOW_ORIGIN_TYPE,
@@ -19,99 +21,161 @@ import {
   ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
   ATTACHMENTS_WORKFLOW_ORIGIN_TYPE,
 } from '../../../common/constants/workflow';
+import type { Owner } from '../../../common/constants/types';
 import type {
   CasesTelemetry,
   CollectTelemetryDataParams,
   Buckets,
   ReferencesAggregation,
+  WorkflowsSolutionTelemetry,
 } from '../types';
+import { sanitizeTypeKey } from './attachments_by_type';
 import {
+  bucketsToOwnerRecord,
   getCountsAggregationQuery,
   getCountsFromBuckets,
   getReferencesAggregationQuery,
   getOnlyWorkflowUserActionsFilter,
 } from './utils';
 
-type WorkflowRunAggs = ReferencesAggregation & {
-  counts: Buckets;
-  uniqueUsers: { value: number };
-  byOriginType: Buckets;
-  byAttachmentType: {
-    buckets: { alert: { doc_count: number }; event: { doc_count: number } };
-  };
-};
+const SO = CASE_USER_ACTION_SAVED_OBJECT;
 
-interface WorkflowConfigAggs {
-  configurationsWithTags: { doc_count: number };
-}
+/** Origin bucket for runs that carry no origin (cases-list bulk runs). */
+const UNATTRIBUTED_ORIGIN = 'unattributed';
+
+/** Origin types reported even when zero, so the known surfaces are always present. */
+const KNOWN_ORIGIN_TYPES = [
+  CASE_WORKFLOW_ORIGIN_TYPE,
+  OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+  OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
+  ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
+  ATTACHMENTS_WORKFLOW_ORIGIN_TYPE,
+] as const;
 
 /**
- * Collects workflow-run telemetry from two saved object types:
+ * Cap on the origin and attachment type `terms` aggregations. Both values are validated before a
+ * run is recorded (origin against the API schema, attachment type against the registry), so the
+ * number of distinct keys stays well below this.
+ */
+const TYPE_TERMS_SIZE = 50;
+
+type WorkflowRunScopeAggs = ReferencesAggregation & {
+  doc_count: number;
+  counts: Buckets;
+  uniqueUsers: { value: number };
+  byOriginType: Buckets<string>;
+  byAttachmentType: Buckets<string>;
+};
+
+type WorkflowRunAggs = Partial<Record<Owner | 'all', WorkflowRunScopeAggs>>;
+
+interface WorkflowConfigAggs {
+  configurationsWithTags: { doc_count: number; byOwner: Buckets<string> };
+}
+
+const getRunScopeAggregations = () => ({
+  ...getCountsAggregationQuery(SO),
+  // Cardinality of distinct cases referenced by workflow user actions.
+  ...getReferencesAggregationQuery({
+    savedObjectType: SO,
+    referenceType: CASE_SAVED_OBJECT,
+    agg: 'cardinality',
+  }),
+  // Cardinality of distinct users who triggered a workflow.
+  uniqueUsers: {
+    cardinality: { field: `${SO}.attributes.created_by.username` },
+  },
+  byOriginType: {
+    terms: {
+      field: `${SO}.attributes.payload.origin.type`,
+      size: TYPE_TERMS_SIZE,
+      missing: UNATTRIBUTED_ORIGIN,
+    },
+  },
+  // Only attachment-origin runs carry `attachmentType`.
+  byAttachmentType: {
+    terms: {
+      field: `${SO}.attributes.payload.origin.attachmentType`,
+      size: TYPE_TERMS_SIZE,
+    },
+  },
+});
+
+// `owner` is required on user actions, so `exists` matches every run, including owners outside
+// the three registered solutions.
+const getRunAggregations = () => ({
+  all: {
+    filter: { exists: { field: `${SO}.attributes.owner` } },
+    aggs: getRunScopeAggregations(),
+  },
+  ...OWNERS.reduce(
+    (aggs, owner) => ({
+      ...aggs,
+      [owner]: {
+        filter: { term: { [`${SO}.attributes.owner`]: owner } },
+        aggs: getRunScopeAggregations(),
+      },
+    }),
+    {}
+  ),
+});
+
+const toOriginKey = (originType: string): string =>
+  sanitizeTypeKey(originType.replace(/^cases\./, ''));
+
+const getOriginTypeCounts = (buckets: Buckets<string>['buckets'] = []): Record<string, number> =>
+  buckets.reduce<Record<string, number>>(
+    (counts, { key, doc_count: docCount }) => ({ ...counts, [toOriginKey(key)]: docCount }),
+    Object.fromEntries(
+      [...KNOWN_ORIGIN_TYPES.map(toOriginKey), UNATTRIBUTED_ORIGIN].map((key) => [key, 0])
+    )
+  );
+
+const getAttachmentTypeCounts = (
+  buckets: Buckets<string>['buckets'] = []
+): Record<string, number> =>
+  Object.fromEntries(
+    buckets.map(({ key, doc_count: docCount }) => [sanitizeTypeKey(key), docCount])
+  );
+
+/**
+ * `runs.total` is the scope's `doc_count` rather than the response total, which is a search hit
+ * count that Elasticsearch caps at 10,000.
+ */
+const buildSolutionTelemetry = (
+  scope: WorkflowRunScopeAggs | undefined,
+  configurationsWithWorkflowTags: number
+): WorkflowsSolutionTelemetry => ({
+  runs: {
+    total: scope?.doc_count ?? 0,
+    ...getCountsFromBuckets(scope?.counts?.buckets ?? []),
+  },
+  totalCasesWithRuns: scope?.references?.referenceType?.referenceAgg?.value ?? 0,
+  totalUniqueUsers: scope?.uniqueUsers?.value ?? 0,
+  byOriginType: getOriginTypeCounts(scope?.byOriginType?.buckets),
+  byAttachmentType: getAttachmentTypeCounts(scope?.byAttachmentType?.buckets),
+  configurationsWithWorkflowTags,
+});
+
+/**
+ * Collects workflow-run telemetry, overall and per solution, from two saved object types:
  *
  * 1. `cases-user-actions` (filtered to `type: workflow`) — total/bucketed run counts,
- *    distinct cases, distinct triggering users, origin-type breakdown, and attachment-type
- *    breakdown for attachment-origin runs.
+ *    distinct cases, distinct triggering users, and breakdowns by origin type and, for
+ *    attachment-origin runs, by attachment type.
  * 2. `cases-configure` — number of configurations that have at least one workflow tag set.
- *
- * All fields default to 0 so a cluster that has never run a workflow reports zero
- * rather than an absent field.
  */
 export const getWorkflowsTelemetryData = async ({
   savedObjectsClient,
 }: CollectTelemetryDataParams): Promise<CasesTelemetry['workflows']> => {
-  const workflowFilter = getOnlyWorkflowUserActionsFilter();
-
   const [runsRes, configRes] = await Promise.all([
     savedObjectsClient.find<unknown, WorkflowRunAggs>({
       page: 0,
       perPage: 0,
-      filter: workflowFilter,
-      type: CASE_USER_ACTION_SAVED_OBJECT,
+      filter: getOnlyWorkflowUserActionsFilter(),
+      type: SO,
       namespaces: ['*'],
-      aggs: {
-        ...getCountsAggregationQuery(CASE_USER_ACTION_SAVED_OBJECT),
-        // Cardinality of distinct cases referenced by workflow user actions.
-        ...getReferencesAggregationQuery({
-          savedObjectType: CASE_USER_ACTION_SAVED_OBJECT,
-          referenceType: CASE_SAVED_OBJECT,
-          agg: 'cardinality',
-        }),
-        // Cardinality of distinct users who triggered a workflow.
-        uniqueUsers: {
-          cardinality: {
-            field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.created_by.username`,
-          },
-        },
-        // Breakdown by origin type. Bulk runs carry no origin so their count is derived
-        // as `total − sum(origin buckets)` rather than stored as a separate bucket value.
-        byOriginType: {
-          terms: {
-            field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.origin.type`,
-            // Only the five known origin types; anything unexpected is ignored.
-            size: 5,
-          },
-        },
-        // Only attachment-origin runs carry `attachmentType`. Types other than alert and event
-        // are derived as the residual rather than aggregated.
-        byAttachmentType: {
-          filters: {
-            filters: {
-              alert: {
-                term: {
-                  [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.origin.attachmentType`]:
-                    SECURITY_ALERT_ATTACHMENT_TYPE,
-                },
-              },
-              event: {
-                term: {
-                  [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.origin.attachmentType`]:
-                    SECURITY_EVENT_ATTACHMENT_TYPE,
-                },
-              },
-            },
-          },
-        },
-      },
+      aggs: getRunAggregations(),
     }),
     savedObjectsClient.find<unknown, WorkflowConfigAggs>({
       page: 0,
@@ -123,52 +187,40 @@ export const getWorkflowsTelemetryData = async ({
           filter: {
             exists: { field: `${CASE_CONFIGURE_SAVED_OBJECT}.attributes.workflowTags` },
           },
+          aggs: {
+            byOwner: {
+              terms: {
+                field: `${CASE_CONFIGURE_SAVED_OBJECT}.attributes.owner`,
+                size: OWNERS.length,
+                include: [...OWNERS],
+              },
+            },
+          },
         },
       },
     }),
   ]);
 
   const runAggs = runsRes.aggregations;
-  const countBuckets = runAggs?.counts?.buckets ?? [];
-  const totalRuns = runsRes.total;
-
-  // Extract per-origin-type counts from the `terms` aggregation.
-  const getOriginCount = (type: string): number =>
-    runAggs?.byOriginType?.buckets?.find((b) => b.key === type)?.doc_count ?? 0;
-
-  const originCounts = {
-    case: getOriginCount(CASE_WORKFLOW_ORIGIN_TYPE),
-    observable: getOriginCount(OBSERVABLE_WORKFLOW_ORIGIN_TYPE),
-    observables: getOriginCount(OBSERVABLES_WORKFLOW_ORIGIN_TYPE),
-    attachment: getOriginCount(ATTACHMENT_WORKFLOW_ORIGIN_TYPE),
-    attachments: getOriginCount(ATTACHMENTS_WORKFLOW_ORIGIN_TYPE),
-  };
-
-  const originSum = Object.values(originCounts).reduce((s, n) => s + n, 0);
-
-  const alertRuns = runAggs?.byAttachmentType?.buckets?.alert?.doc_count ?? 0;
-  const eventRuns = runAggs?.byAttachmentType?.buckets?.event?.doc_count ?? 0;
-  const attachmentOriginRuns = originCounts.attachment + originCounts.attachments;
+  const configsWithTags = configRes.aggregations?.configurationsWithTags;
+  const configsWithTagsByOwner = bucketsToOwnerRecord(
+    configsWithTags?.byOwner?.buckets,
+    ({ doc_count: docCount }) => docCount
+  );
 
   return {
-    runs: {
-      total: totalRuns,
-      ...getCountsFromBuckets(countBuckets),
-    },
-    totalCasesWithRuns: runsRes.aggregations?.references?.referenceType?.referenceAgg?.value ?? 0,
-    totalUniqueUsers: runAggs?.uniqueUsers?.value ?? 0,
-    byOriginType: {
-      ...originCounts,
-      // Unattributed: runs with no origin (list-level bulk runs) or an unrecognised origin type.
-      // Derived rather than stored because origin is optional on the run request.
-      unattributed: Math.max(0, totalRuns - originSum),
-    },
-    byAttachmentType: {
-      alert: alertRuns,
-      event: eventRuns,
-      // Any other registered attachment type that supports workflow origins.
-      other: Math.max(0, attachmentOriginRuns - alertRuns - eventRuns),
-    },
-    configurationsWithWorkflowTags: configRes.aggregations?.configurationsWithTags?.doc_count ?? 0,
+    all: buildSolutionTelemetry(runAggs?.all, configsWithTags?.doc_count ?? 0),
+    sec: buildSolutionTelemetry(
+      runAggs?.[SECURITY_SOLUTION_OWNER],
+      configsWithTagsByOwner[SECURITY_SOLUTION_OWNER]
+    ),
+    obs: buildSolutionTelemetry(
+      runAggs?.[OBSERVABILITY_OWNER],
+      configsWithTagsByOwner[OBSERVABILITY_OWNER]
+    ),
+    main: buildSolutionTelemetry(
+      runAggs?.[GENERAL_CASES_OWNER],
+      configsWithTagsByOwner[GENERAL_CASES_OWNER]
+    ),
   };
 };
