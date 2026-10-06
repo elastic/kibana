@@ -15,11 +15,13 @@ import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
 import { QuickSearchVisor, type QuickSearchVisorProps } from '.';
 
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
-  getESQLAdHocDataview: jest.fn().mockResolvedValue({
+jest.mock('@kbn/data-source', () => ({
+  ...jest.requireActual('@kbn/data-source'),
+  EsqlSource: { create: jest.fn().mockResolvedValue({ id: 'mock-esql-source' }) },
+  registerEsqlSourceInDataViewsCache: jest.fn().mockResolvedValue({
     id: 'mock-adhoc-dataview',
     title: 'test_index',
     type: 'esql',
@@ -74,12 +76,94 @@ describe('Quick search visor', () => {
     jest.clearAllMocks();
   });
 
+  const lastIndexPatterns = () =>
+    (kqlMock.QueryStringInput as jest.Mock).mock.calls.at(-1)[0].indexPatterns;
+
+  const focusKqlInput = () => {
+    const { onChangeQueryInputFocus } = (kqlMock.QueryStringInput as jest.Mock).mock.calls.at(
+      -1
+    )[0];
+    act(() => onChangeQueryInputFocus(true));
+  };
+
   it('should render the KQL query input', async () => {
     renderWithI18n(renderESQLVisor({ ...props }));
 
     await waitFor(() => {
       expect(kqlMock.QueryStringInput).toHaveBeenCalled();
     });
+  });
+
+  it('looks up the source only once the KQL input is focused, not while the query is typed', async () => {
+    const { rerender } = renderWithI18n(renderESQLVisor({ ...props, query: 'FROM l' }));
+    rerender(renderESQLVisor({ ...props, query: 'FROM lo' }));
+    rerender(renderESQLVisor({ ...props, query: 'FROM logs' }));
+    await waitFor(() => expect(kqlMock.QueryStringInput).toHaveBeenCalled());
+    expect(EsqlSource.create).not.toHaveBeenCalled();
+
+    focusKqlInput();
+
+    await waitFor(() => expect(EsqlSource.create).toHaveBeenCalledTimes(1));
+    expect(EsqlSource.create).toHaveBeenCalledWith(expect.objectContaining({ query: 'FROM logs' }));
+  });
+
+  it('keeps the fields after blur, so refocusing shows them immediately', async () => {
+    renderWithI18n(renderESQLVisor({ ...props, query: 'FROM logs' }));
+    await waitFor(() => expect(kqlMock.QueryStringInput).toHaveBeenCalled());
+    focusKqlInput();
+    await waitFor(() =>
+      expect(lastIndexPatterns()).toEqual([expect.objectContaining({ id: 'mock-adhoc-dataview' })])
+    );
+
+    const { onChangeQueryInputFocus } = (kqlMock.QueryStringInput as jest.Mock).mock.calls.at(
+      -1
+    )[0];
+    act(() => onChangeQueryInputFocus(false));
+    focusKqlInput();
+
+    expect(lastIndexPatterns()).toEqual([expect.objectContaining({ id: 'mock-adhoc-dataview' })]);
+  });
+
+  it('does not show the fields of a previous source', async () => {
+    const { rerender } = renderWithI18n(renderESQLVisor({ ...props, query: 'FROM logs' }));
+    await waitFor(() => expect(kqlMock.QueryStringInput).toHaveBeenCalled());
+    focusKqlInput();
+    await waitFor(() => expect(lastIndexPatterns()).toHaveLength(1));
+    const { onChangeQueryInputFocus } = (kqlMock.QueryStringInput as jest.Mock).mock.calls.at(
+      -1
+    )[0];
+    act(() => onChangeQueryInputFocus(false));
+
+    rerender(renderESQLVisor({ ...props, query: 'FROM metrics' }));
+
+    expect(lastIndexPatterns()).toEqual([]);
+  });
+
+  it('suggests the fields of the queried dataset, not of the query result', async () => {
+    renderWithI18n(
+      renderESQLVisor({ ...props, query: 'FROM meow1 | STATS count = COUNT(*) BY host' })
+    );
+    await waitFor(() => expect(kqlMock.QueryStringInput).toHaveBeenCalled());
+    focusKqlInput();
+
+    await waitFor(() =>
+      expect(kqlMock.QueryStringInput).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          indexPatterns: [expect.objectContaining({ id: 'mock-adhoc-dataview' })],
+        }),
+        expect.anything()
+      )
+    );
+    expect(EsqlSource.create).toHaveBeenCalledWith({
+      query: 'FROM meow1',
+      http: corePluginMock.http,
+      resolveTimeField: false,
+    });
+    expect(registerEsqlSourceInDataViewsCache).toHaveBeenCalledWith(
+      dataMock.dataViews,
+      { id: 'mock-esql-source' },
+      corePluginMock.http
+    );
   });
 
   it('should submit a KQL filter using indexes from the editor query', async () => {

@@ -9,6 +9,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
   CHAT_ATTACHMENT_IMAGES_FILE_KIND,
   SUPPORTED_IMAGE_MIME_TYPES,
@@ -53,6 +54,7 @@ import { AGENTBUILDER_FEATURE_ID } from '../common/features';
 import { runToolIdBackfill } from './backfills/tool_id_backfill';
 import { RecommendedEndpointsPoller } from './recommended_endpoints_poller';
 import { registerDeductiveAgent } from './services/execution/run_agent/deductive/register_deductive_agent';
+import { getDeploymentInfo } from './utils/deployment_info';
 
 export class AgentBuilderPlugin
   implements
@@ -65,7 +67,9 @@ export class AgentBuilderPlugin
 {
   private logger: Logger;
   private config: AgentBuilderConfig;
+  private readonly env: PluginInitializerContext['env'];
   private serviceManager: ServiceManager;
+  private cloudSetup?: CloudSetup;
   private usageCounter?: UsageCounter;
   private trackingService?: TrackingService;
   private analyticsService?: AnalyticsService;
@@ -77,6 +81,7 @@ export class AgentBuilderPlugin
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
+    this.env = context.env;
     this.serviceManager = new ServiceManager(this.config);
   }
 
@@ -85,6 +90,7 @@ export class AgentBuilderPlugin
     setupDeps: AgentBuilderSetupDependencies
   ): AgentBuilderPluginSetup {
     this.home = setupDeps.home;
+    this.cloudSetup = setupDeps.cloud;
 
     setupDeps.files.registerFileKind({
       id: CHAT_ATTACHMENT_IMAGES_FILE_KIND,
@@ -331,6 +337,7 @@ export class AgentBuilderPlugin
       actions,
       taskManager,
       searchInferenceEndpoints,
+      licensing,
       security: securityPlugin,
     } = startDeps;
     const { elasticsearch, http, security, uiSettings, savedObjects, dataStreams, featureFlags } =
@@ -361,6 +368,12 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
       searchInferenceEndpoints,
+      licensing,
+      deploymentInfo: getDeploymentInfo({
+        cloud: this.cloudSetup,
+        packageInfo: this.env.packageInfo,
+        airgapped: this.env.airgapped,
+      }),
       deductiveRegister: this.config.deductive?.register ?? false,
       conversationEventBus: this.conversationEventBus,
     });

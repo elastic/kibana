@@ -269,6 +269,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     skills,
     toolProvider,
     agentConfiguration,
+    aiIndexCatalog: resolvedConfiguration.aiIndexCatalog,
     aiIndicesEnabled: experimentalFeatures.aiIndices,
     attachmentsService: attachments,
     request,
@@ -363,6 +364,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const promptFactory = createPromptFactory({
     configuration: resolvedConfiguration,
     spaceId: context.spaceId,
+    deployment: context.deployment,
     skills: filteredSkills,
     processedConversation,
     toolManager,
