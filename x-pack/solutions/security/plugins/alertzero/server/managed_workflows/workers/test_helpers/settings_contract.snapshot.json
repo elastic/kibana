@@ -54,6 +54,12 @@
               "maxGapsPerRun"
             ],
             "additionalProperties": false
+          },
+          "serviceAccountId": {
+            "kind": "leaf",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
           }
         },
         "required": [
@@ -126,6 +132,12 @@
               "fpRateThresholdPct"
             ],
             "additionalProperties": false
+          },
+          "serviceAccountId": {
+            "kind": "leaf",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
           }
         },
         "required": [
@@ -175,6 +187,12 @@
               "autoCloseConfidenceScoreMinThreshold"
             ],
             "additionalProperties": false
+          },
+          "serviceAccountId": {
+            "kind": "leaf",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
           }
         },
         "required": [
@@ -212,6 +230,12 @@
             "type": "string",
             "maxLength": 6,
             "pattern": "^[1-9][0-9]*[mhd]$"
+          },
+          "serviceAccountId": {
+            "kind": "leaf",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
           }
         },
         "required": [
@@ -242,6 +266,12 @@
               "manual",
               "supervised"
             ]
+          },
+          "serviceAccountId": {
+            "kind": "leaf",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
           }
         },
         "required": [
@@ -279,6 +309,12 @@
             "type": "string",
             "maxLength": 6,
             "pattern": "^[1-9][0-9]*[mhd]$"
+          },
+          "serviceAccountId": {
+            "kind": "leaf",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
           }
         },
         "required": [

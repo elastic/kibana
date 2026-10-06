@@ -29,6 +29,7 @@ export const buildCompleteWorkerSettingsSchema = (
   if (declaration.extras) {
     shape.extras = declaration.extras.schema;
   }
+  shape.serviceAccountId = z.string().min(1).max(1024).optional();
   return z.object(shape).strict().pipe(WorkerSettings);
 };
 
@@ -57,12 +58,23 @@ export const buildDefaultWorkerSettings = (
 export const applyWorkerSettingsWrite = (
   settings: WorkerSettings,
   patch: WorkerSettingsWrite
-): WorkerSettings => ({
-  ...settings,
-  ...(patch.autonomy === undefined ? {} : { autonomy: patch.autonomy }),
-  ...(patch.scheduleInterval === undefined ? {} : { scheduleInterval: patch.scheduleInterval }),
-  ...(patch.extras === undefined ? {} : { extras: patch.extras }),
-});
+): WorkerSettings => {
+  const next: WorkerSettings = {
+    ...settings,
+    ...(patch.autonomy === undefined ? {} : { autonomy: patch.autonomy }),
+    ...(patch.scheduleInterval === undefined ? {} : { scheduleInterval: patch.scheduleInterval }),
+    ...(patch.extras === undefined ? {} : { extras: patch.extras }),
+  };
+  if (patch.serviceAccountId === undefined) {
+    return next;
+  }
+  if (patch.serviceAccountId === null) {
+    const withoutAccount = { ...next };
+    delete withoutAccount.serviceAccountId;
+    return withoutAccount;
+  }
+  return { ...next, serviceAccountId: patch.serviceAccountId };
+};
 
 /** The minimal patch that turns `saved` into `draft`, or undefined when nothing changed. */
 export const diffWorkerSettings = (
@@ -76,6 +88,9 @@ export const diffWorkerSettings = (
       : {}),
     ...(draft.extras !== undefined && !isEqual(draft.extras, saved.extras)
       ? { extras: draft.extras }
+      : {}),
+    ...(draft.serviceAccountId !== saved.serviceAccountId
+      ? { serviceAccountId: draft.serviceAccountId ?? null }
       : {}),
   };
   return Object.keys(patch).length > 0 ? patch : undefined;

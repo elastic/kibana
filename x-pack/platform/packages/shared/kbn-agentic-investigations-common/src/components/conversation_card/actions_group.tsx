@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { AiButtonIcon } from '@kbn/ui-ai-components';
 import { type Investigation } from '../../types';
-import { BaseActions, hasAvailableActions, type BaseActionsProps } from '../actions';
+import { BaseActions, type BaseActionsProps } from '../actions';
 import { createCardLinkClickHandler } from '../actions/card_link_click';
 import { ACTIONS_TRANSLATIONS } from '../actions/translations';
 
@@ -33,6 +33,8 @@ export interface ConversationsActionsGroupProps {
    * caller supplies a real handler; without it the fallback modal does nothing.
    */
   canCloseInvestigation?: boolean;
+  /** Backs the menu's "Copy link" item. The caller owns how the link is built and copied. */
+  onCopyLink: BaseActionsProps['onCopyLink'];
 }
 
 /**
@@ -49,6 +51,7 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
     chatHref,
     canManageEscalations,
     canCloseInvestigation,
+    onCopyLink,
   }) => {
     const { euiTheme } = useEuiTheme();
     const handleChatClick = useMemo(() => createCardLinkClickHandler(onOpenChat), [onOpenChat]);
@@ -80,17 +83,16 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
             data-test-subj="conversationCardOpenInChat"
           />
         </EuiFlexItem>
-        {hasAvailableActions(investigation, canManageEscalations) && (
-          <EuiFlexItem grow={false}>
-            <BaseActions
-              investigation={investigation}
-              onClickAction={onClickAction}
-              onClickRecommendedAction={onClickRecommendedAction}
-              canManageEscalations={canManageEscalations}
-              canCloseInvestigation={canCloseInvestigation}
-            />
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <BaseActions
+            investigation={investigation}
+            onClickAction={onClickAction}
+            onClickRecommendedAction={onClickRecommendedAction}
+            canManageEscalations={canManageEscalations}
+            canCloseInvestigation={canCloseInvestigation}
+            onCopyLink={onCopyLink}
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
   }

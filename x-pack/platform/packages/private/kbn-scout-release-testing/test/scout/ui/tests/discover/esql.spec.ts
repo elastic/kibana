@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EsqlEditor, extendPlaywrightPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../../fixtures';
 import { SavedObjectsTracker } from '../../helpers';
@@ -28,15 +29,10 @@ const KEPT_FIELDS = ['agent.keyword', 'tags.keyword', 'geo.coordinates'];
 const DROPPED_FIELDS = ['bytes', 'clientip', 'extension', 'response'];
 
 // Stable `data-test-subj` values reused across the suite.
-const ESQL_EDITOR = 'ESQLEditor';
 const METRIC_VIS = 'mtrVis';
 const EDIT_FLYOUT_HEADER = 'editFlyoutHeader';
 const CANCEL_FLYOUT_BUTTON = 'cancelFlyoutButton';
 const PANEL_ACTION_EDIT = 'embeddablePanelAction-editPanel';
-const CREATE_ESQL_CONTROL_FLYOUT = 'create_esql_control_flyout';
-const ESQL_VARIABLE_NAME_INPUT = 'esqlVariableName';
-const ESQL_CONTROL_LABEL_INPUT = 'esqlControlLabel';
-const SAVE_ESQL_CONTROL_BUTTON = 'saveEsqlControlsFlyoutButton';
 const CONTROLS_GROUP_WRAPPER = 'controls-group-wrapper';
 
 const tracker = new SavedObjectsTracker();
@@ -61,7 +57,7 @@ test.describe('Discover ES|QL', { tag: '@local-stateful-classic' }, () => {
     await pageObjects.discover.selectTextBaseLang();
 
     await test.step('verify ES|QL editor is active with a non-empty default query', async () => {
-      await expect(page.testSubj.locator(ESQL_EDITOR)).toBeVisible();
+      await expect(pageObjects.esqlEditor.editor).toBeVisible();
       const defaultQuery = await pageObjects.discover.getEsqlQueryValue();
       expect(defaultQuery.trim().length).toBeGreaterThan(0);
     });
@@ -79,38 +75,15 @@ test.describe('Discover ES|QL', { tag: '@local-stateful-classic' }, () => {
   }) => {
     const variableName = '?agent_keyword';
     const controlLabel = 'Agent keyword';
-    const { codeEditor } = pageObjects.discover;
+    const { discover, esqlEditor } = pageObjects;
 
-    await pageObjects.discover.selectTextBaseLang();
+    await discover.selectTextBaseLang();
 
-    await test.step('open the Create control flyout from the Monaco suggestion list', async () => {
-      await codeEditor.setCodeEditorValue(CREATE_CONTROL_QUERY);
-
-      const suggestWidget = codeEditor.getCodeEditorSuggestWidget();
-      const createControlRow = suggestWidget.locator('.monaco-list-row', {
-        hasText: 'Create control',
+    await test.step('create the control from the editor suggestion list', async () => {
+      await esqlEditor.createControlFromEditorSuggestion(CREATE_CONTROL_QUERY, {
+        variableName,
+        label: controlLabel,
       });
-
-      // The ES|QL language server may take a moment to surface "Create control"
-      // after the model is updated. Retry triggering the suggest widget until
-      // the row appears rather than relying on an arbitrary sleep.
-      await expect(async () => {
-        await codeEditor.triggerSuggest(CREATE_CONTROL_QUERY);
-        await expect(createControlRow).toBeVisible({ timeout: 2_000 });
-      }).toPass({ timeout: 30_000 });
-
-      await createControlRow.click();
-      await expect(page.testSubj.locator(CREATE_ESQL_CONTROL_FLYOUT)).toBeVisible();
-    });
-
-    await test.step('configure the variable name and label, then save the control', async () => {
-      await page.testSubj.fill(ESQL_VARIABLE_NAME_INPUT, variableName);
-      await page.testSubj.fill(ESQL_CONTROL_LABEL_INPUT, controlLabel);
-
-      const saveButton = page.testSubj.locator(SAVE_ESQL_CONTROL_BUTTON);
-      await expect(saveButton).toBeEnabled();
-      await saveButton.click();
-      await expect(page.testSubj.locator(CREATE_ESQL_CONTROL_FLYOUT)).toBeHidden();
     });
 
     await test.step('verify the control renders and the editor query references the variable', async () => {
@@ -181,6 +154,7 @@ test.describe('Discover ES|QL', { tag: '@local-stateful-classic' }, () => {
 
   test('should edit, explore in Discover, and copy an ES|QL panel from a dashboard', async ({
     page,
+    kbnUrl,
     pageObjects,
   }) => {
     const dashboardName = 'ES|QL Panel Actions Dashboard';
@@ -211,9 +185,9 @@ test.describe('Discover ES|QL', { tag: '@local-stateful-classic' }, () => {
         'embeddablePanelAction-ACTION_OPEN_IN_DISCOVER',
         visName
       );
-      const discoverPage = await newPagePromise;
+      const discoverPage = extendPlaywrightPage({ page: await newPagePromise, kbnUrl });
       await discoverPage.waitForLoadState();
-      await expect(discoverPage.getByTestId(ESQL_EDITOR)).toContainText('kibana_sample_data_logs');
+      await expect(new EsqlEditor(discoverPage).editor).toContainText('kibana_sample_data_logs');
       await discoverPage.close();
     });
 
