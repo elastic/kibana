@@ -293,17 +293,15 @@ What to flag:
 
 ### 9. Default values
 
-Optional parameters and properties should document their defaults. In Kibana route schemas, this means using `schema.maybe(schema.string({ defaultValue: '...' }))` or documenting the server-side default in the description.
+Optional parameters and properties should document their defaults. In Kibana route schemas, a schema with `defaultValue` is already optional; do not wrap it in `schema.maybe()`, which replaces the inner default with `undefined` (`MaybeType` applies `.default(() => undefined)` over the wrapped schema). Either give the schema a `defaultValue` and state it in the description, or use `schema.maybe()` and document the server-side default in the description.
 
 Correct pattern:
 
 ```typescript
-page_size: schema.maybe(
-  schema.number({
-    defaultValue: 20,
-    meta: { description: 'Number of results per page. Defaults to 20.' },
-  })
-),
+page_size: schema.number({
+  defaultValue: 20,
+  meta: { description: 'Number of results per page. Defaults to 20.' },
+}),
 ```
 
 When the default is set server-side (not in the schema), document it in the description instead: `'Sort order. The server defaults to descending if not specified.'`
@@ -312,6 +310,7 @@ How to check: compare against sibling routes on the same resource. If a sibling 
 
 What to flag:
 - ❌ Optional parameter with an undocumented default when the behavior changes based on the value
+- ❌ `schema.maybe()` wrapping a schema that has a `defaultValue`; the documented default never applies
 
 ### 10. Property-level availability
 
@@ -338,14 +337,17 @@ What to flag:
 
 ### 11. Deprecation
 
-Deprecated routes or properties should be marked. In Kibana, the route's `options` supports a `deprecated` flag, and property descriptions should explain the deprecation.
+Deprecated routes and properties must be marked in the form their source uses, and the description must say what to use instead.
 
-For a route, `options.deprecated` is a `RouteDeprecationInfo` object: `documentationUrl` (required), `severity` (`'warning'` or `'critical'`), `reason` (`{ type: 'bump', newApiVersion }`, `{ type: 'remove' }`, `{ type: 'migrate', newApiPath, newApiMethod }`, or `{ type: 'deprecate' }`), and an optional `message`. A route that is already gone takes `options.discontinued: 'Use ... instead.'`. For a spec-first operation or property, set `deprecated: true` and open the description with `**Deprecated in 9.6.0.** Use ... instead.` so the version and replacement survive into the published page.
+Code-first route: `options.deprecated` is a `RouteDeprecationInfo` object, not a Boolean: `documentationUrl` (required), `severity` (`'warning'` or `'critical'`), `reason` (`{ type: 'bump', newApiVersion }`, `{ type: 'remove' }`, `{ type: 'migrate', newApiPath, newApiMethod }`, or `{ type: 'deprecate' }`), and an optional `message`. `options.discontinued` takes the release version or date when the route will be removed (`'9.0.0'`), is surfaced in the OAS, and is used alongside `deprecated`; replacement guidance goes in the description or `message`, not in `discontinued`.
+
+Schema property (`@kbn/config-schema` `meta: { deprecated: true }`) and spec-first operation or property (`deprecated: true` in the YAML): set the marker and open the description with `**Deprecated in 9.6.0.** Use ... instead.` so the version and replacement survive into the published page.
 
 What to flag:
-- ❌ A property or route is described as deprecated in comments or description text but has no `deprecated: true` marker
-- ❌ Deprecated property has no description explaining what to use instead
-- ❌ `options.deprecated` is missing `documentationUrl` or `reason`, or the deprecation is not reflected in the description as well
+- ❌ Code-first route described as deprecated but `options.deprecated` is missing, or is missing `documentationUrl` or `reason`
+- ❌ `options.discontinued` holds prose instead of a version or date
+- ❌ Schema property or spec-first operation or property described as deprecated but without `deprecated: true`
+- ❌ Deprecated route or property has no description text naming the replacement
 
 ### 12. Response examples
 

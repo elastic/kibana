@@ -20,6 +20,7 @@ Accuracy over style. When the PR does not tell you what the user sees, ask; do n
 ## When to stop
 
 - `release_note:skip`, or a change that is test-only, refactor-only, docs-only, internal plumbing, or a fix to an unshipped feature. Say so and produce nothing.
+- `release_note:plugin_api_changes`. That label feeds the Plugin API changes page in the Developer Guide, not the release notes. The PR needs a clear title and a description of the API change for plugin developers; the rules below do not apply.
 - A backport PR (base branch other than `main`, `[9.5]`-style title prefix, or `backport` label). The release note lives on the original PR.
 
 ## Inputs
