@@ -209,14 +209,8 @@ export class EntityStorePlugin
       serviceEntityDefinition,
       genericEntityDefinition,
     ];
-    builtIns.forEach((definition) => {
-      const result = this.entityDefinitionRegistry.register(definition);
-      if (!result.ok) {
-        this.logger.error(
-          `Failed to register built-in entity definition '${definition.type}': ${result.reason}`
-        );
-      }
-    });
+    // Rejections are logged by the registry itself; there is nothing to add here.
+    builtIns.forEach((definition) => this.entityDefinitionRegistry.register(definition));
   }
 
   public stop() {

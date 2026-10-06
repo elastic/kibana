@@ -60,6 +60,15 @@ const describeType = (value: unknown): string => {
 
 const isObject = (value: unknown): value is object => typeof value === 'object' && value !== null;
 
+/** Best-effort "who registered this" for the rejection log, read before validation. */
+const describeManager = (definition: object): string | undefined => {
+  const managedBy = (definition as { managedBy?: unknown }).managedBy;
+  if (!isObject(managedBy)) return undefined;
+  const { kind, id } = managedBy as { kind?: unknown; id?: unknown };
+  if (typeof kind !== 'string') return undefined;
+  return typeof id === 'string' ? `${kind} ${id}` : kind;
+};
+
 // Always recurses, so an object frozen only at the top level still has its children frozen.
 const deepFreeze = <T>(value: T): T => {
   if (!isObject(value)) return value;
@@ -91,7 +100,7 @@ export class EntityDefinitionRegistry {
 
     const reason = this.validate(definition);
     if (reason) {
-      return this.reject(describeType(definition.type), reason);
+      return this.reject(describeType(definition.type), reason, describeManager(definition));
     }
 
     this.entries.set(definition.type, deepFreeze(definition));
@@ -153,9 +162,11 @@ export class EntityDefinitionRegistry {
     return undefined;
   }
 
-  private reject(type: string, reason: string): RegisterResult {
+  /** The single place every rejection is logged; callers must not log it again. */
+  private reject(type: string, reason: string, manager?: string): RegisterResult {
     this.rejections.push({ type, reason });
-    this.logger.error(`Rejected entity definition '${type}': ${reason}`);
+    const who = manager ? ` (${manager})` : '';
+    this.logger.error(`Rejected entity definition '${type}'${who}: ${reason}`);
     return { ok: false, reason };
   }
 }

@@ -105,6 +105,15 @@ describe('EntityDefinitionRegistry', () => {
       expectRejected(overLimit, /exceeds the maximum length of 64/);
     });
 
+    it('names the managing plugin in the rejection log', () => {
+      registry.register(makeDefinition('host'));
+      registry.register(makeDefinition('host'));
+
+      expect(logger.error).toHaveBeenLastCalledWith(
+        expect.stringMatching(/^Rejected entity definition 'host' \(plugin [^)]+\): /)
+      );
+    });
+
     it('rejects a duplicate type name and keeps the first definition', () => {
       registry.register(makeDefinition('dup', { name: 'first' }));
 

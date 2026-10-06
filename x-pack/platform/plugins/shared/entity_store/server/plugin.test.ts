@@ -122,7 +122,11 @@ describe('EntityStorePlugin entity definition registry', () => {
     const [{ value: pluginLogger }] = jest.mocked(initializerContext.logger.get).mock.results;
     expect(pluginLogger.get).toHaveBeenCalledWith('entity_definition_registry');
     expect(loggingSystemMock.collect(initializerContext.logger).error).toEqual([
-      [expect.stringContaining(`Rejected entity definition 'k8s.pod': plugin setup has finished`)],
+      [
+        expect.stringMatching(
+          /^Rejected entity definition 'k8s\.pod' \(plugin [^)]+\): plugin setup has finished/
+        ),
+      ],
     ]);
   });
 
