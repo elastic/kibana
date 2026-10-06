@@ -32,7 +32,7 @@ const fixture = () => {
         event: 'labeled',
         label: { name: 'ai:fix-flaky' },
         created_at: date(event),
-        actor: { login: 'engineer' },
+        actor: { login: 'kibanamachine', type: 'User' },
       },
     ]);
     comments.set(number, []);
@@ -177,7 +177,7 @@ test('a 13-request same-team burst admits one; another team still progresses', a
   f.addIssue(20, ['Team:ResponseOps']);
   assert.deepEqual(await f.sweep(), [1, 20]);
   assert.deepEqual(f.writes, ['receipt', 'dispatch', 'update', 'receipt', 'dispatch', 'update']);
-  assert.equal(f.dispatched[0].requestedBy, 'engineer');
+  assert.equal(f.dispatched[0].requestedBy, 'kibanamachine');
   assert.equal(f.issues.get(2)?.labels.includes('ai:fix-flaky'), true);
 });
 
@@ -553,4 +553,69 @@ test('a fixer finishing during the workload read cannot disappear between execut
   };
   assert.deepEqual(await f.sweep({ maxOpenFixesPerTeam: 3 }), []);
   assert.deepEqual(await f.sweep({ maxOpenFixesPerTeam: 3 }), []);
+});
+
+test('human label requests never get dispatched by a later queue sweep', async () => {
+  const f = fixture();
+  f.addIssue(1);
+  const event = f.events.get(1)?.[0];
+  assert.ok(event);
+  event.actor = { login: 'engineer', type: 'User' };
+  f.addIssue(2);
+  assert.deepEqual(await f.sweep(), [2]);
+  for (const run of f.runs.values()) run.status = 'completed';
+  assert.deepEqual(await f.sweep(), []);
+  assert.deepEqual(
+    f.dispatched.map((request) => request.issue),
+    [2]
+  );
+});
+
+test('a human reapplying a bot request switches it to the direct fixer path', async () => {
+  const f = fixture();
+  f.addIssue(1);
+  const events = f.events.get(1);
+  assert.ok(events);
+  events.push({
+    ...events[0],
+    id: 2,
+    created_at: date(2),
+    actor: { login: 'engineer', type: 'User' },
+  });
+  assert.deepEqual(await f.sweep(), []);
+  assert.deepEqual(f.writes, []);
+});
+
+for (const actor of [
+  { login: 'custom-automation', type: 'Bot' },
+  { login: 'github-actions[bot]' },
+  { login: 'kibanamachine', type: 'User' },
+  { login: 'elasticmachine', type: 'User' },
+]) {
+  test(`automation actor ${actor.login} stays subject to queue limits`, async () => {
+    const f = fixture();
+    for (const number of [1, 2]) {
+      f.addIssue(number);
+      const event = f.events.get(number)?.[0];
+      assert.ok(event);
+      event.actor = actor;
+    }
+    assert.deepEqual(await f.sweep(), [1]);
+  });
+}
+
+test('a bot request changed to a human request during the sweep is not dispatched', async () => {
+  const f = fixture();
+  f.addIssue(1);
+  f.client.getIssue = async () => {
+    const event = f.events.get(1)?.[0];
+    assert.ok(event);
+    event.id = 2;
+    event.actor = { login: 'engineer', type: 'User' };
+    const issue = f.issues.get(1);
+    assert.ok(issue);
+    return issue;
+  };
+  assert.deepEqual(await f.sweep(), []);
+  assert.deepEqual(f.writes, []);
 });

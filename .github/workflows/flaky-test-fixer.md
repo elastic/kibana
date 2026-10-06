@@ -1,8 +1,10 @@
 ---
 name: Flaky Test Fixer
-description: Open a draft fix PR for an admitted `ai:fix-flaky` request or a manual dispatch.
-run-name: "Flaky Test Fixer #${{ inputs.issue_number }} (${{ inputs.request_id && format('request {0}', inputs.request_id) || 'manual' }})"
+description: Open a draft fix PR for a human-labelled issue, an admitted automatic request, or a manual dispatch.
+run-name: "Flaky Test Fixer #${{ github.event.issue.number || inputs.issue_number }} (${{ inputs.request_id && format('request {0}', inputs.request_id) || 'manual' }})"
 on:
+  issues:
+    types: [labeled]
   workflow_dispatch:
     inputs:
       issue_number:
@@ -27,15 +29,40 @@ permissions:
   checks: read
   models: read
 
-if: "${{ github.repository == 'elastic/kibana' && github.event.inputs.issue_number != '' }}"
+# Human labels start immediately. Automation labels are handled by the dispatcher.
+# Machine users have type User, so exclude them explicitly as well as bot accounts.
+if: >-
+  ${{ github.repository == 'elastic/kibana' &&
+  (
+    (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') ||
+    (github.event_name == 'issues' && github.event.action == 'labeled' &&
+    github.event.label.name == 'ai:fix-flaky' && !github.event.issue.pull_request &&
+    github.event.issue.state == 'open' && github.event.sender.type == 'User' &&
+    !endsWith(github.event.sender.login, '[bot]') &&
+    !contains(fromJSON('["kibanamachine","elasticmachine"]'), github.event.sender.login))
+  ) }}
 
 concurrency:
-  group: flaky-test-fixer-${{ github.event.inputs.issue_number }}
+  # Ignored label events get separate groups so they cannot evict a pending fix.
+  # Human labels and dispatcher/manual executions share the same per-issue lane.
+  group: >-
+    flaky-test-fixer-${{ github.event.issue.number || github.event.inputs.issue_number }}-${{
+      (
+        github.event_name == 'issues' &&
+        (
+          github.event.label.name != 'ai:fix-flaky' || github.event.issue.pull_request ||
+          github.event.issue.state != 'open' || github.event.sender.type != 'User' ||
+          endsWith(github.event.sender.login, '[bot]') ||
+          contains(fromJSON('["kibanamachine","elasticmachine"]'), github.event.sender.login)
+        ) &&
+        github.run_id
+      ) || 'fix'
+    }}
   cancel-in-progress: false
-  job-discriminator: ${{ github.event.inputs.issue_number }}
+  job-discriminator: ${{ github.event.issue.number || github.event.inputs.issue_number }}
 
 env:
-  ISSUE_NUMBER: &issue_number ${{ github.event.inputs.issue_number }}
+  ISSUE_NUMBER: &issue_number ${{ github.event.issue.number || github.event.inputs.issue_number }}
   REQUESTED_BY: ${{ github.event.inputs.requested_by || github.actor }}
   # Lets the agent omit `-o elastic` on every `bk` invocation when re-investigating.
   BUILDKITE_ORGANIZATION_SLUG: elastic
@@ -229,9 +256,11 @@ Whatever the outcome, always finish by leaving one concise comment on the issue 
 
 ## Admission queue
 
-The Flaky Fix Dispatcher admits labelled issues every 15 minutes, allowing up to five open
-fix PRs or admitted fixes per owning team and one active fixer per team. Waiting issues keep
-`ai:fix-flaky`. A direct workflow dispatch without `request_id` is a manual capacity override.
+The Flaky Fix Dispatcher admits automatic label requests every 15 minutes, allowing up to five
+open fix PRs or admitted fixes per owning team and one active fixer per team. Waiting issues
+keep `ai:fix-flaky`. A human adding that label starts this workflow immediately and bypasses
+both team limits, as does a direct manual workflow dispatch. All executions still share the
+per-issue lane; manual runs and their PRs count against later automatic admissions.
 See [queue operations](../scripts/flaky_fix_queue/README.md) for retries and recovery.
 
 ## Requester mention

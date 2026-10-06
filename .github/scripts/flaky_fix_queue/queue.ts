@@ -30,7 +30,7 @@ export interface LabelEvent {
   event: string;
   created_at: string | null;
   label?: Label;
-  actor?: { login: string } | null;
+  actor?: { login: string; type?: string } | null;
 }
 
 export interface Comment {
@@ -117,6 +117,14 @@ export const latestRequest = (issue: Issue, events: LabelEvent[]): FixRequest | 
     .sort((left, right) => left.id - right.id)
     .at(-1);
   if (event?.event !== 'labeled' || !event.created_at || !event.actor?.login) return;
+  // Human labels start the fixer directly; never dispatch them again from the queue.
+  if (
+    event.actor.type !== 'Bot' &&
+    !event.actor.login.endsWith('[bot]') &&
+    !['kibanamachine', 'elasticmachine'].includes(event.actor.login)
+  ) {
+    return;
+  }
   return {
     issue: issue.number,
     event: event.id,

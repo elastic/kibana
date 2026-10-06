@@ -1,8 +1,9 @@
 # Flaky fix queue
 
-`ai:fix-flaky` requests an automatic fix. The investigator and humans keep using
-the same label. The dispatcher polls every 15 minutes; it does not require an
-issue event to survive GitHub Actions' pending-run cancellation behaviour.
+`ai:fix-flaky` requests a fix. Automatic requests from bots or the machine users
+`kibanamachine` and `elasticmachine` enter the queue, which polls every 15 minutes.
+A human adding the same label starts the fixer immediately and bypasses both team
+limits. The dispatcher excludes human requests so it cannot start them again.
 
 The default limits are five outstanding fixes and one active fixer per owning
 team. Change `MAX_OPEN_FIXES_PER_TEAM` and `MAX_CONCURRENT_FIX_RUNS_PER_TEAM` in
@@ -28,12 +29,15 @@ team. Change `MAX_OPEN_FIXES_PER_TEAM` and `MAX_CONCURRENT_FIX_RUNS_PER_TEAM` in
 - Closing an issue or removing its request label cancels a waiting request.
 - One dispatcher at a time admits work. The investigator's existing eligibility
   rules and opt-outs remain in place.
-- Manual `workflow_dispatch` of Flaky Test Fixer remains a capacity override.
-  Its execution and resulting PR still count against later automatic admissions.
+- Human-added labels and manual `workflow_dispatch` of Flaky Test Fixer bypass
+  both team limits. Their executions and resulting PRs still count against later
+  automatic admissions. Per-issue concurrency applies to every entry point.
+- To start an already queued automatic request manually, remove and reapply
+  `ai:fix-flaky` yourself. Adding a label that is already present creates no event.
 
 ## Attempts and recovery
 
-The label event ID identifies a request. Before dispatch, a bot comment records
+The label event ID identifies an automatic request. Before dispatch, a bot comment records
 an admission receipt. The dispatcher requests GitHub's run ID, verifies the run
 identity, and updates that comment with the run link. The original label actor is
 passed to the fixer for mentions and reviewer requests.

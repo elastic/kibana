@@ -283,7 +283,7 @@ Request an automatic fix immediately for a fixable **`application`** failure. Fo
 
 **Skip** the `ai:fix-flaky` label — regardless of `failCount` — when a fix PR for this issue is already up (open, in draft, or in review) in the Kibana repository; you already check for one when writing the note block below, so don't request a duplicate. Also skip `ai:fix-flaky` (and `failure:ai-fixable`) for Security Cypress when the doctor action is `migrate`, a new Scout spec, a new API/unit test, or `none`.
 
-An engineer can still request a fix for any issue by adding `ai:fix-flaky` manually; that path does not go through this workflow and is unaffected by the recurrence gate or the team opt-out below.
+An engineer can still request a fix for any issue by adding `ai:fix-flaky` manually; that starts the fixer immediately, bypasses both dispatcher limits, and is unaffected by the recurrence gate or the team opt-out below.
 
 #### Teams opted out of automatic fix requests
 
