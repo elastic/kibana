@@ -14,7 +14,12 @@ CONFIGS=(
   "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ui/playwright.config.ts"
   "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/playwright.config.ts"
 )
-MODE='--arch stateful --domain classic'
+# One stack and one Endpoint VM per config. Stateful, then local serverless security.
+# Not Scout lanes: this job runs the passes one after another.
+MODES=(
+  "stateful classic"
+  "serverless security_complete"
+)
 
 upload_events_if_available() {
   if [[ "${SCOUT_REPORTER_ENABLED:-}" =~ ^(1|true)$ ]]; then
@@ -47,40 +52,44 @@ upload_events_if_available() {
 
 SUITE_EXIT_CODE=0
 
-for CONFIG_PATH in "${CONFIGS[@]}"; do
-  echo "--- Scout EDR Real Fleet Tests"
-  echo "Config: $CONFIG_PATH"
-  echo "Mode: $MODE"
+for MODE in "${MODES[@]}"; do
+  read -r ARCH DOMAIN <<< "$MODE"
 
-  start=$(date +%s)
+  for CONFIG_PATH in "${CONFIGS[@]}"; do
+    echo "--- Scout EDR Real Fleet Tests"
+    echo "Config: $CONFIG_PATH"
+    echo "Mode: --arch $ARCH --domain $DOMAIN"
 
-  set +e
-  node scripts/scout run-tests --location local $MODE --serverConfigSet edr_real_fleet --config "$CONFIG_PATH" --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
-  EXIT_CODE=$?
-  set -e
+    start=$(date +%s)
 
-  timeSec=$(($(date +%s)-start))
-  if [[ $timeSec -gt 60 ]]; then
-    min=$((timeSec/60))
-    sec=$((timeSec-(min*60)))
-    duration="${min}m ${sec}s"
-  else
-    duration="${timeSec}s"
-  fi
+    set +e
+    node scripts/scout run-tests --location local --arch "$ARCH" --domain "$DOMAIN" --serverConfigSet edr_real_fleet --config "$CONFIG_PATH" --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
+    EXIT_CODE=$?
+    set -e
 
-  upload_events_if_available
+    timeSec=$(($(date +%s)-start))
+    if [[ $timeSec -gt 60 ]]; then
+      min=$((timeSec/60))
+      sec=$((timeSec-(min*60)))
+      duration="${min}m ${sec}s"
+    else
+      duration="${timeSec}s"
+    fi
 
-  if [[ $EXIT_CODE -eq 2 ]]; then
-    echo "No tests found for EDR Real Fleet ($CONFIG_PATH)"
-    echo "^^^ +++"
-    SUITE_EXIT_CODE=10
-  elif [[ $EXIT_CODE -ne 0 ]]; then
-    echo "Scout test exited with code $EXIT_CODE for EDR Real Fleet ($CONFIG_PATH, ${duration})"
-    echo "^^^ +++"
-    SUITE_EXIT_CODE=10
-  else
-    echo "EDR Real Fleet passed for $CONFIG_PATH (${duration})"
-  fi
+    upload_events_if_available
+
+    if [[ $EXIT_CODE -eq 2 ]]; then
+      echo "No tests found for EDR Real Fleet ($CONFIG_PATH, ${ARCH}/${DOMAIN})"
+      echo "^^^ +++"
+      SUITE_EXIT_CODE=10
+    elif [[ $EXIT_CODE -ne 0 ]]; then
+      echo "Scout test exited with code $EXIT_CODE for EDR Real Fleet ($CONFIG_PATH, ${ARCH}/${DOMAIN}, ${duration})"
+      echo "^^^ +++"
+      SUITE_EXIT_CODE=10
+    else
+      echo "EDR Real Fleet passed for $CONFIG_PATH (${ARCH}/${DOMAIN}, ${duration})"
+    fi
+  done
 done
 
 exit "$SUITE_EXIT_CODE"

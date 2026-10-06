@@ -33,7 +33,8 @@ steps:
       machineType: n2-highmem-4
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
-    timeout_in_minutes: 120
+    # Stateful and serverless each boot UI and API (four stacks).
+    timeout_in_minutes: 240
     retry:
       automatic:
         - exit_status: '-1'
