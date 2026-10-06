@@ -155,11 +155,15 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   ): void {
     this.state.setStepIo(stepExecutionId, { [type]: value });
     if (type === 'output') {
+      const measuredBytes =
+        sizeBytes !== undefined && Number.isFinite(sizeBytes) && sizeBytes >= 0
+          ? sizeBytes
+          : undefined;
       this.overflow.delete(stepExecutionId);
-      this.cache.set(stepExecutionId, 'output', value, sizeBytes);
-      if (sizeBytes !== undefined) {
-        this.measuredTotalBytes += sizeBytes - (this.measuredSizes.get(stepExecutionId) ?? 0);
-        this.measuredSizes.set(stepExecutionId, sizeBytes);
+      this.cache.set(stepExecutionId, 'output', value, measuredBytes);
+      if (measuredBytes !== undefined) {
+        this.measuredTotalBytes += measuredBytes - (this.measuredSizes.get(stepExecutionId) ?? 0);
+        this.measuredSizes.set(stepExecutionId, measuredBytes);
       }
     }
   }

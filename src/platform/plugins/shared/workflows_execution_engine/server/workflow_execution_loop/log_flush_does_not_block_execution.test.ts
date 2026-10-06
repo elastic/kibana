@@ -69,10 +69,11 @@ describe('workflow execution log flush', () => {
       },
       workflowExecutionState: {
         updateWorkflowExecution: jest.fn(),
+        flushWorkflowAndSteps: jest.fn().mockResolvedValue(undefined),
       },
       stepIoService: {
-        flush: jest.fn().mockResolvedValue(undefined),
-        releaseTransientlyRehydratedOutputs: jest.fn(),
+        rehydrate: jest.fn().mockResolvedValue(undefined),
+        getOutputSizeStats: jest.fn().mockReturnValue({ totalBytes: 0, stepCount: 0 }),
       },
       eventQueue,
       signal: new AbortController().signal,

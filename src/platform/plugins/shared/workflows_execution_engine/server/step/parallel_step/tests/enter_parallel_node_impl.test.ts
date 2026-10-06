@@ -581,9 +581,6 @@ describe('EnterParallelNodeImpl', () => {
         resident.add(id);
       }
     });
-    stepRuntime.releaseReadOutputPins = jest.fn(() => {
-      pinned = new Set();
-    });
 
     factory.createStepExecutionRuntime = jest.fn(({ stackFrames }) => {
       const lastFrame = stackFrames[stackFrames.length - 1];
@@ -1053,15 +1050,15 @@ describe('EnterParallelNodeImpl', () => {
     });
   });
 
-  describe('releaseReadPins is called on every branch exit path', () => {
+  describe('ensureContextReady is called on every branch exit path', () => {
     // Captures every StepExecutionRuntime created by the factory. Note that
     // finish() and computeResumeAt() also call createStepExecutionRuntime for
     // read-only lookups — those runtimes never have ensureContextReady called.
-    // Only runtimes that went through runBranchNode have both ensureContextReady
-    // and releaseReadPins called. We filter on ensureContextReady call count to
-    // distinguish the two populations.
+    // Only runtimes that went through runBranchNode have ensureContextReady
+    // called. We filter on ensureContextReady call count to distinguish the two
+    // populations.
     interface CapturedRuntime {
-      contextManager: { ensureContextReady: jest.Mock; releaseReadPins: jest.Mock };
+      contextManager: { ensureContextReady: jest.Mock };
     }
     let createdRuntimes: CapturedRuntime[];
 
@@ -1072,7 +1069,7 @@ describe('EnterParallelNodeImpl', () => {
         const index = Number(scopeId ?? 0);
         const runtime = {
           abortController: new AbortController(),
-          contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+          contextManager: { ensureContextReady: jest.fn() },
           get stepExecution() {
             return { status: branchStatus(index), state: {} };
           },
@@ -1094,7 +1091,7 @@ describe('EnterParallelNodeImpl', () => {
     const branchNodeRuntimes = (): CapturedRuntime[] =>
       createdRuntimes.filter((rt) => rt.contextManager.ensureContextReady.mock.calls.length > 0);
 
-    it('calls releaseReadPins on each branch runtime when branches complete', async () => {
+    it('prepares the context once per branch runtime when branches complete', async () => {
       makeCapturingFactory(() => ExecutionStatus.COMPLETED);
 
       await build().run();
@@ -1102,11 +1099,11 @@ describe('EnterParallelNodeImpl', () => {
       const runRuntimes = branchNodeRuntimes();
       expect(runRuntimes.length).toBe(3); // one per branch
       for (const rt of runRuntimes) {
-        expect(rt.contextManager.releaseReadPins).toHaveBeenCalledTimes(1);
+        expect(rt.contextManager.ensureContextReady).toHaveBeenCalledTimes(1);
       }
     });
 
-    it('calls releaseReadPins on each branch runtime when branches fail', async () => {
+    it('prepares the context once per branch runtime when branches fail', async () => {
       makeCapturingFactory(() => ExecutionStatus.FAILED);
 
       await build().run();
@@ -1114,11 +1111,11 @@ describe('EnterParallelNodeImpl', () => {
       const runRuntimes = branchNodeRuntimes();
       expect(runRuntimes.length).toBe(3); // one per branch
       for (const rt of runRuntimes) {
-        expect(rt.contextManager.releaseReadPins).toHaveBeenCalledTimes(1);
+        expect(rt.contextManager.ensureContextReady).toHaveBeenCalledTimes(1);
       }
     });
 
-    it('calls releaseReadPins on each branch runtime when branches park in a durable wait', async () => {
+    it('prepares the context once per branch runtime when branches park in a durable wait', async () => {
       makeCapturingFactory(() => ExecutionStatus.WAITING);
 
       await build().run();
@@ -1126,11 +1123,11 @@ describe('EnterParallelNodeImpl', () => {
       const runRuntimes = branchNodeRuntimes();
       expect(runRuntimes.length).toBe(3); // one per branch
       for (const rt of runRuntimes) {
-        expect(rt.contextManager.releaseReadPins).toHaveBeenCalledTimes(1);
+        expect(rt.contextManager.ensureContextReady).toHaveBeenCalledTimes(1);
       }
     });
 
-    it('calls releaseReadPins on each branch runtime when the per-branch timeout fires', async () => {
+    it('prepares the context once per branch runtime when the per-branch timeout fires', async () => {
       node = makeNode({ 'branch-timeout': '20ms', mode: 'settled' });
       makeCapturingFactory(() => ExecutionStatus.RUNNING);
       nodesFactory.create = jest.fn(
@@ -1150,7 +1147,7 @@ describe('EnterParallelNodeImpl', () => {
       const runRuntimes = branchNodeRuntimes();
       expect(runRuntimes.length).toBe(3); // one per branch
       for (const rt of runRuntimes) {
-        expect(rt.contextManager.releaseReadPins).toHaveBeenCalledTimes(1);
+        expect(rt.contextManager.ensureContextReady).toHaveBeenCalledTimes(1);
       }
     });
   });

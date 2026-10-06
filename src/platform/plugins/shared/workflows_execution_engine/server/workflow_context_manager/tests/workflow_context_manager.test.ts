@@ -109,9 +109,23 @@ describe('WorkflowContextManager', () => {
       .fn()
       .mockReturnValue({} as EsWorkflowStepExecution);
     workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([]);
+    workflowExecutionState.getWorkflowExecutionId = jest.fn().mockReturnValue('test-execution-id');
+    workflowExecutionState.getWorkflowExecutionScopeStack = jest.fn().mockReturnValue([]);
+    // Fixtures mocked through `getAllStepExecutions` often omit `id`; synthesize a stable one so
+    // the service mock can resolve their baked-in output by id.
+    const withFixtureId = <T extends { id?: string; globalExecutionIndex?: number }>(
+      exec: T,
+      index: number
+    ): T & { id: string; input?: unknown; output?: unknown } => ({
+      ...exec,
+      id: exec.id ?? `fixture_${exec.globalExecutionIndex ?? index}`,
+    });
     // Tests mock `getAllStepExecutions`; derive the data.set index from it.
     workflowExecutionState.getDataSetStepExecutions = jest.fn(() =>
-      workflowExecutionState.getAllStepExecutions().filter((exec) => exec.stepType === 'data.set')
+      workflowExecutionState
+        .getAllStepExecutions()
+        .map(withFixtureId)
+        .filter((exec) => exec.stepType === 'data.set')
     );
 
     // Service is sovereign over IO. The mock keeps its own input/output
@@ -127,7 +141,11 @@ describe('WorkflowContextManager', () => {
       const exec = workflowExecutionState.getStepExecution(id) as
         | { input?: unknown; output?: unknown }
         | undefined;
-      return exec?.[field];
+      if (exec?.[field] !== undefined) return exec[field];
+      return workflowExecutionState
+        .getAllStepExecutions()
+        .map(withFixtureId)
+        .find((candidate) => candidate.id === id)?.[field];
     };
     // The mocked service writes bypass state, so track an IO version for the variables memo.
     let ioVersion = 0;
