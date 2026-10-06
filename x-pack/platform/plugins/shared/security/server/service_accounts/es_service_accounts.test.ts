@@ -867,7 +867,7 @@ describe('EsServiceAccounts', () => {
         user: { target: { id: 'kibana/nightshift-relay', name: 'nightshift-relay' } },
         error: { code: 'Error', message: 'encryption failed' },
         message:
-          'Failed attempt to create service account [id=kibana/nightshift-relay, name=nightshift-relay]; it may have been left behind',
+          'Failed attempt to create service account [id=kibana/nightshift-relay, name=nightshift-relay], which might have been left behind',
       });
 
       it('logs `unknown` naming the account when the rollback cannot delete it', async () => {

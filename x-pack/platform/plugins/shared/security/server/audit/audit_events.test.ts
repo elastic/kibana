@@ -842,7 +842,7 @@ describe('#serviceAccountAuditEvent', () => {
             "creation",
           ],
         },
-        "message": "Failed attempt to create service account [id=kibana/nightshift-relay, name=nightshift-relay]; it may have been left behind",
+        "message": "Failed attempt to create service account [id=kibana/nightshift-relay, name=nightshift-relay], which might have been left behind",
         "user": Object {
           "target": Object {
             "id": "kibana/nightshift-relay",

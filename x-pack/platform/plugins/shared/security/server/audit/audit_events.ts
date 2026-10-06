@@ -486,7 +486,7 @@ export function serviceAccountAuditEvent({
   // object of the attempt may still exist.
   const message = error
     ? `Failed attempt to ${present} ${doc}${
-        outcome === 'unknown' ? '; it may have been left behind' : ''
+        outcome === 'unknown' ? ', which might have been left behind' : ''
       }`
     : outcome === 'unknown'
     ? `User is ${progressive} ${doc}`
