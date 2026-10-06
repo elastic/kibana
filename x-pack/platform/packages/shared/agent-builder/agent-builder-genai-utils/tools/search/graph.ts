@@ -163,6 +163,14 @@ export const createSearchToolGraph = async ({
       })
     );
 
+    const resourceNames = new Set(resources.map(({ name }) => name));
+    const hasUnlistedTarget = (response.tool_calls ?? []).some(
+      ({ args }) => args.index !== undefined && !resourceNames.has(args.index)
+    );
+    if (hasUnlistedTarget) {
+      return { error: NO_MATCHING_RESOURCE_ERROR };
+    }
+
     return { messages: [response] };
   };
 
