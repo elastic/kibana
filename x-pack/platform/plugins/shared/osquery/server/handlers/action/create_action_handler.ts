@@ -104,7 +104,9 @@ export const createActionHandler = async (
         );
 
   // Load pack SO when the dispatch source references one, or when a caller is running pack_id.
-  let packSO: { attributes: PackSavedObject; id: string; references: Array<{ type: string }> } | undefined;
+  let packSO:
+    | { attributes: PackSavedObject; id: string; references: Array<{ type: string }> }
+    | undefined;
   const packId = params.pack_id?.trim();
 
   const needsPackLoad =
