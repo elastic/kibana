@@ -11,6 +11,7 @@ import {
   esqlConversionFailureReasonMessages,
   esqlConversionFailureTitle,
   getFailureTooltip,
+  getFailureTooltipText,
 } from './to_esql_failure_reasons';
 
 describe('getFailureTooltip', () => {
@@ -33,5 +34,19 @@ describe('getFailureTooltip', () => {
       title: esqlConversionFailureTitle,
       message: esqlConversionFailureReasonMessages.unknown,
     });
+  });
+});
+
+describe('getFailureTooltipText', () => {
+  it('joins title and reason into a single translated string', () => {
+    expect(getFailureTooltipText('formula_not_supported')).toBe(
+      `${esqlConversionFailureTitle}: ${esqlConversionFailureReasonMessages.formula_not_supported}`
+    );
+  });
+
+  it('falls back to unknown when reason is missing', () => {
+    expect(getFailureTooltipText(undefined)).toBe(
+      `${esqlConversionFailureTitle}: ${esqlConversionFailureReasonMessages.unknown}`
+    );
   });
 });

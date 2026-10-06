@@ -28,7 +28,7 @@ import { esql } from '@elastic/esql';
 
 import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import { getFailureTooltip } from '@kbn/lens-common';
+import { getFailureTooltip, getFailureTooltipText } from '@kbn/lens-common';
 import { layerTypes } from '../../..';
 
 import type { ConvertibleLayer, LayerType } from './esql_conversion_types';
@@ -118,7 +118,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
                     </>
                   }
                   iconProps={{
-                    'aria-label': `${title}: ${message}`,
+                    'aria-label': getFailureTooltipText(layer.failureReason),
                     'data-test-subj': `lnsEsqlConversionFailureReason-${layer.id}`,
                   }}
                 />

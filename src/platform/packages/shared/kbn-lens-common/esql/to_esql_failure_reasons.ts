@@ -182,3 +182,11 @@ export const getFailureTooltip = (
     esqlConversionFailureReasonMessages[reason ?? 'unknown'] ??
     esqlConversionFailureReasonMessages.unsupported_settings,
 });
+
+export const getFailureTooltipText = (reason: EsqlConversionFailureReason | undefined): string => {
+  const { title, message } = getFailureTooltip(reason);
+  return i18n.translate('xpack.lens.config.cannotConvertToEsqlTooltipWithReason', {
+    defaultMessage: '{title}: {message}',
+    values: { title, message },
+  });
+};
