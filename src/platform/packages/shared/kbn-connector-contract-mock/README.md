@@ -10,4 +10,7 @@ import { loadContractOperations } from '@kbn/connector-contract-mock';
 const operations = loadContractOperations(openApiDocument);
 ```
 
-`loadContractOperations` accepts a parsed OpenAPI 3.x or Swagger 2.0 document and returns operations in the shape the Prism validator expects. Schema refs keep pointing into one shared bundle instead of being dereferenced, which keeps large specs such as Microsoft Graph fast to load.
+`loadContractOperations` accepts a parsed OpenAPI 3.x or Swagger 2.0 document and returns operations in the shape the Prism validator expects. Loading:
+
+- keeps schema refs pointing into one shared bundle instead of dereferencing them, which keeps large specs such as Microsoft Graph fast to load;
+- repairs schema defects common in vendor specs: `nullable` without `type`, duplicate `enum` values, regex escapes that are invalid under the `u` flag, and `null` in parameter types.

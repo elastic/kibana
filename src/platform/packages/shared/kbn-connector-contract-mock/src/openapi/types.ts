@@ -18,3 +18,10 @@ export type SchemaBundle = Record<string, JSONSchema7>;
 
 /** An operation whose schema refs point into the shared bundle, in the shape Prism expects. */
 export type ContractOperation = IHttpOperation & { __bundled__: SchemaBundle };
+
+/** A schema of an operation, with a human-readable location such as `query.limit`. */
+export interface LocatedSchema {
+  readonly kind: 'parameter' | 'request' | 'response';
+  readonly location: string;
+  readonly schema: JSONSchema7;
+}
