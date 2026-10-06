@@ -39,6 +39,11 @@ export interface DashboardPluginStart {
    */
   getDashboardStateSchema: () => ReturnType<typeof getDashboardStateSchema>;
   /**
+   * Returns the as-code dashboard state schema used for dashboard application requests, built
+   * once. Dashboard-level fields are strict, while panels are only checked to be objects.
+   */
+  getDashboardAppStateSchema: () => ReturnType<typeof getDashboardStateSchema>;
+  /**
    * Scans dashboards with pagination.
    *
    * @deprecated Contact #kibana-dashboards about requirements for a proper panel search interface.

@@ -24,6 +24,9 @@ import type { Logger } from '@kbn/core/server';
 interface CreateDashboardAttachmentTypeOptions {
   logger: Logger;
   getDashboardClient: () => Promise<DashboardPluginStart['client']>;
+  getDashboardAppStateSchema: () => Promise<
+    ReturnType<DashboardPluginStart['getDashboardAppStateSchema']>
+  >;
 }
 
 const normalizeDashboardAttachmentData = (
@@ -38,6 +41,7 @@ const normalizeDashboardAttachmentData = (
 export const createDashboardAttachmentType = ({
   logger,
   getDashboardClient,
+  getDashboardAppStateSchema,
 }: CreateDashboardAttachmentTypeOptions): AttachmentTypeDefinition<
   typeof DASHBOARD_ATTACHMENT_TYPE,
   DashboardAttachmentData
@@ -55,7 +59,12 @@ export const createDashboardAttachmentType = ({
 
   return {
     id: DASHBOARD_ATTACHMENT_TYPE,
-    validate: (input) => {
+    validate: async (input) => {
+      const appStateResult = (await getDashboardAppStateSchema()).safeParse(input);
+      if (!appStateResult.success) {
+        return { valid: false, error: appStateResult.error.message };
+      }
+
       const parseResult = dashboardAttachmentDataSchema.safeParse(input);
       if (parseResult.success) {
         return { valid: true, data: parseResult.data };
