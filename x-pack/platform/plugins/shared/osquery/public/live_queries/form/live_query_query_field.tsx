@@ -42,7 +42,7 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
   disabled,
   handleSubmitForm,
 }) => {
-  const { formState, watch, resetField } = useFormContext<LiveQueryFormFields>();
+  const { formState, watch, resetField, setValue } = useFormContext<LiveQueryFormFields>();
   const [advancedContentState, setAdvancedContentState] = useState<EuiAccordionProps['forceState']>(
     () => (isEmpty(formState.defaultValues?.ecs_mapping) ? 'closed' : 'open')
   );
@@ -82,11 +82,13 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
       onChange(newValue);
 
       if (savedQueryId && boundSqlRef.current !== null && newValue !== boundSqlRef.current) {
-        resetField('savedQueryId');
+        // setValue clears the field without restoring the default registered at bind time;
+        // resetField() would restore the saved-query ID that was set as the default value.
+        setValue('savedQueryId', undefined);
         boundSqlRef.current = null;
       }
     },
-    [onChange, resetField, savedQueryId]
+    [onChange, savedQueryId, setValue]
   );
 
   const handleSavedQueryChange: SavedQueriesDropdownProps['onChange'] = useCallback(
