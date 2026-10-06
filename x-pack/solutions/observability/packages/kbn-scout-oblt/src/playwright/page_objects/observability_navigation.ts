@@ -6,7 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 /** Serverless / cloud: primary chrome nav can lag behind Playwright defaults (gh-267186). */
 export const OBSERVABILITY_PRIMARY_NAV_LOAD_TIMEOUT_MS = 45_000;
