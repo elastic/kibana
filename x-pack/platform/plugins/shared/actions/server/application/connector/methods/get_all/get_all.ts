@@ -101,6 +101,11 @@ async function getAllHelper({
   connectorTypeRegistry,
 }: GetAllHelperOpts): Promise<ConnectorWithExtraFindData[]> {
   const connectorIdsWithIdentity = new Set<string>();
+  const connectorIdsWithEventsEnabled = new Set(
+    inMemoryConnectors
+      .filter((connector) => connector.isInboundEventsEnabled === true)
+      .map((connector) => connector.id)
+  );
   const savedObjectsActions = (
     await findConnectorsSo({ savedObjectsClient, namespace })
   ).saved_objects.map((rawAction) => {
@@ -154,6 +159,7 @@ async function getAllHelper({
   return attachInboundEventsEnabled({
     connectors,
     connectorIdsWithIdentity,
+    connectorIdsWithEventsEnabled,
   });
 }
 

@@ -18,6 +18,7 @@ import { getCortexPageRoute } from './get_cortex_page';
 import { createCortexPageRoute, updateCortexPageRoute } from './write_cortex_page';
 import { archiveCortexPageRoute } from './archive_cortex_page';
 import { getCortexAvailabilityRoute } from './get_cortex_availability';
+import { sandboxSecretsRoutes } from './sandbox_secrets';
 import { getDecisionTreesAvailabilityRoute } from './get_decision_trees_availability';
 import { listDecisionTreesRoute } from './list_decision_trees';
 import { getDecisionTreeRoute } from './get_decision_tree';
@@ -47,6 +48,7 @@ export const nightshiftInvestigationsRouteRepository = {
   ...updateCortexPageRoute,
   ...archiveCortexPageRoute,
   ...getCortexAvailabilityRoute,
+  ...sandboxSecretsRoutes,
   ...getDecisionTreesAvailabilityRoute,
   ...listDecisionTreesRoute,
   ...getDecisionTreeRoute,
