@@ -17,7 +17,6 @@ import {
   syntheticsMonitorAttributes,
   syntheticsMonitorSOTypes,
 } from '../../common/types/saved_objects';
-import type { DeferredRevisionBumps } from '../synthetics_service/private_location/deferred_revision_bumps';
 import { normalizeSecrets } from '../synthetics_service/utils';
 import type { PrivateLocationAttributes } from '../runtime_types/private_locations';
 import type {
@@ -105,7 +104,7 @@ export class DeployPrivateLocationMonitors {
       // policy bump, so the revision batcher never sees two pages at once and
       // would redeploy every agent policy once per page. Collect the bumps and
       // issue them once for the whole sync instead.
-      const deferredBumps = privateLocationAPI.createDeferredRevisionBumps();
+      const deferredBumps = new Set<string>();
       // A deleted maintenance window stays referenced on its monitors until it is
       // deployed: that reference is how the next run finds the window to retry.
       const pendingMwRemovals: PendingMwRemoval[] = [];
@@ -134,19 +133,13 @@ export class DeployPrivateLocationMonitors {
             isMissingMw: true,
           });
         }
-      } catch (error) {
-        // Pages already written used `bumpRevision: false`, so they still need
-        // their bump. The sync error is the one to report, not a bump failure.
-        await deferredBumps.flush().catch((bumpError) => {
-          this.serverSetup.logger.error(
-            `[DeployPrivateLocationMonitors] ${bumpError.message} (after sync error: ${error.message})`
-          );
-        });
-        throw error;
+      } finally {
+        // in a finally: pages already written used `bumpRevision: false`, so an
+        // early exit would leave them undeployed until a later write bumps
+        await privateLocationAPI.scheduleRevisionBumps(deferredBumps);
       }
 
-      await deferredBumps.flush();
-
+      // only reached once every bump succeeded
       for (const { mwId, monitors } of pendingMwRemovals) {
         await this.removeMwsFromMonitorConfigs({ mwId, monitors, soClient });
       }
@@ -171,7 +164,7 @@ export class DeployPrivateLocationMonitors {
     allPrivateLocations: PrivateLocationAttributes[];
     paramsBySpace: Record<string, Record<string, string>>;
     listOfUpdatedConfigs: Array<string>;
-    deferredBumps?: DeferredRevisionBumps;
+    deferredBumps?: Set<string>;
     /** When given, a missing MW's removal is queued here instead of run per page. */
     pendingMwRemovals?: PendingMwRemoval[];
     isMissingMw?: boolean;
@@ -317,7 +310,7 @@ export class DeployPrivateLocationMonitors {
     monitorSpaceIds: Set<string>;
     paramsBySpace: Record<string, Record<string, string>>;
     maintenanceWindows: MaintenanceWindow[];
-    deferredBumps?: DeferredRevisionBumps;
+    deferredBumps?: Set<string>;
   }) {
     const { privateLocationAPI } = this.syntheticsMonitorClient;
     const failedCreatesBySpace: FailedCreatesBySpace[] = [];

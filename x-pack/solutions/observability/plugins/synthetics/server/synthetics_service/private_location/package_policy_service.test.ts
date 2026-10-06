@@ -274,14 +274,14 @@ describe('PackagePolicyService deferred revision bumps', () => {
     id,
   });
 
-  it('does not wait for the bump per write, then bumps each agent policy once on flush', async () => {
+  it('does not wait for the bump per write, then bumps each agent policy once', async () => {
     const { server, fleetBulkUpdate, bumpRevision } = makeServer();
     fleetBulkUpdate.mockImplementation(async (_client, _esClient, policies) => ({
       updatedPolicies: policies,
       failedPolicies: [],
     }));
     const service = new PackagePolicyService(server);
-    const deferredBumps = service.createDeferredRevisionBumps();
+    const deferredBumps = new Set<string>();
 
     // Sequential pages, each awaited like the maintenance-window sync does. With
     // no timers advanced, a page that waited for its own bump would hang here.
@@ -303,9 +303,10 @@ describe('PackagePolicyService deferred revision bumps', () => {
       expect.anything(),
       expect.objectContaining({ bumpRevision: false })
     );
+    expect(deferredBumps).toEqual(new Set(['policyId']));
     expect(bumpRevision).not.toHaveBeenCalled();
 
-    const flush = deferredBumps.flush();
+    const flush = service.scheduleRevisionBumps(deferredBumps);
     await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
     await flush;
 
@@ -313,6 +314,7 @@ describe('PackagePolicyService deferred revision bumps', () => {
     expect(bumpRevision).toHaveBeenCalledWith(expect.anything(), expect.anything(), 'policyId', {
       asyncDeploy: true,
     });
+    expect(deferredBumps.size).toBe(0);
   });
 
   it('defers creates and deletes too', async () => {
@@ -325,58 +327,46 @@ describe('PackagePolicyService deferred revision bumps', () => {
       { id: deleted.id, success: true, policy_ids: ['otherPolicyId'] },
     ]);
     const service = new PackagePolicyService(server);
-    const deferredBumps = service.createDeferredRevisionBumps();
+    const deferredBumps = new Set<string>();
 
-    await service.bulkCreate({
-      newPolicies: [created],
-      spaceId: DEFAULT_SPACE_ID,
-      deferredBumps,
-    });
+    await service.bulkCreate({ newPolicies: [created], spaceId: DEFAULT_SPACE_ID, deferredBumps });
     await service.bulkDelete({
       policyIdsToDelete: [deleted.id as string],
       spaceId: DEFAULT_SPACE_ID,
       deferredBumps,
     });
+
+    expect(deferredBumps).toEqual(new Set(['policyId', 'otherPolicyId']));
     expect(bumpRevision).not.toHaveBeenCalled();
-
-    const flush = deferredBumps.flush();
-    await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
-    await flush;
-
-    expect(bumpRevision.mock.calls.map(([, , policyId]) => policyId).sort()).toEqual([
-      'otherPolicyId',
-      'policyId',
-    ]);
   });
 
-  it('still bumps a write that completes after the flush', async () => {
-    const { server, fleetBulkUpdate, bumpRevision } = makeServer();
-    let finishUpdate: () => void = () => {};
-    const slowUpdate = scalableUpdate('monitor-1-policyId');
-    fleetBulkUpdate.mockImplementation(
-      (_client, _esClient, policies) =>
-        new Promise((resolve) => {
-          finishUpdate = () => resolve({ updatedPolicies: policies, failedPolicies: [] });
-        })
-    );
-    const service = new PackagePolicyService(server);
-    const deferredBumps = service.createDeferredRevisionBumps();
+  it('does nothing when no bumps were collected', async () => {
+    const { server, bumpRevision } = makeServer();
 
-    const write = service.bulkUpdate({
-      policiesToUpdate: [slowUpdate],
-      spaceId: DEFAULT_SPACE_ID,
-      deferredBumps,
-    });
-    await jest.advanceTimersByTimeAsync(0);
-    // the caller flushes while that write is still awaiting Fleet
-    await deferredBumps.flush();
+    await new PackagePolicyService(server).scheduleRevisionBumps(new Set());
+
     expect(bumpRevision).not.toHaveBeenCalled();
+  });
 
-    finishUpdate();
+  it('attempts every agent policy when one bump fails, then reports the failures together', async () => {
+    const { server, bumpRevision } = makeServer();
+    bumpRevision.mockImplementation(async (_client, _esClient, policyId) => {
+      if (policyId === 'policy-2') {
+        throw new Error('fleet down');
+      }
+    });
+
+    const flush = new PackagePolicyService(server).scheduleRevisionBumps(
+      new Set(['policy-1', 'policy-2', 'policy-3'])
+    );
+    const assertion = expect(flush).rejects.toThrow(
+      'Failed to bump the revision of 1 of 3 agent policies [policy-2]: fleet down'
+    );
     await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
-    await write;
+    await assertion;
 
-    expect(bumpRevision).toHaveBeenCalledTimes(1);
+    expect(bumpRevision).toHaveBeenCalledTimes(3);
+    expect(server.logger.error).toHaveBeenCalledWith(expect.stringContaining('policy-2'));
   });
 });
 

@@ -38,7 +38,6 @@ import {
 } from '../../../common/runtime_types';
 import { stringifyString } from '../formatters/private_formatters/formatting_utils';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
-import type { DeferredRevisionBumps } from './deferred_revision_bumps';
 import { PackagePolicyService } from './package_policy_service';
 import { rebalanceByCost } from './assign_shards';
 import {
@@ -523,11 +522,11 @@ export class SyntheticsPrivateLocation {
   }
 
   /**
-   * Creates the collector to pass to {@link editMonitors}; the caller must
-   * `flush()` it once done editing, also on failure.
+   * Bumps the agent policies collected via `deferredBumps` passed to
+   * {@link editMonitors}; the caller must call this once done, also on failure.
    */
-  createDeferredRevisionBumps() {
-    return this.packagePolicyService.createDeferredRevisionBumps();
+  async scheduleRevisionBumps(deferredBumps: Set<string>) {
+    await this.packagePolicyService.scheduleRevisionBumps(deferredBumps);
   }
 
   /**
@@ -540,7 +539,7 @@ export class SyntheticsPrivateLocation {
     allPrivateLocations: SyntheticsPrivateLocations,
     spaceId: string,
     maintenanceWindows: MaintenanceWindow[],
-    deferredBumps?: DeferredRevisionBumps
+    deferredBumps?: Set<string>
   ) {
     if (configs.length === 0) {
       return {

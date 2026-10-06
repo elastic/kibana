@@ -14,7 +14,6 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { uniqBy } from 'lodash';
 import type { SyntheticsServerSetup } from '../../types';
 import { AgentPolicyRevisionBatcher } from './agent_policy_revision_batcher';
-import { DeferredRevisionBumps } from './deferred_revision_bumps';
 import type { ConditionUpdate, ShardedPackagePolicy } from './rebalance_writes';
 import { SHARDED_PACKAGE_POLICY_FIELDS } from './rebalance_writes';
 
@@ -145,20 +144,43 @@ export class PackagePolicyService {
   }
 
   /**
-   * Creates a collector that lets a multi-write operation pass it to the write
-   * methods and bump each affected agent policy once, on `flush()`, instead of
-   * once per write. The caller must flush when done, also on failure.
+   * Bumps every agent policy collected in `deferredBumps` (see the write
+   * methods), once each. Callers that pass `deferredBumps` must call this when
+   * done, also on failure: those package policies were written with
+   * `bumpRevision: false`, so Fleet does not redeploy them until this runs.
+   *
+   * Every policy is attempted even if another fails; the failures are logged
+   * and reported together.
    */
-  createDeferredRevisionBumps(): DeferredRevisionBumps {
-    return new DeferredRevisionBumps((policyIds) => this.revisionBatcher.schedule(policyIds));
+  async scheduleRevisionBumps(deferredBumps: Set<string>): Promise<void> {
+    const policyIds = [...deferredBumps];
+    deferredBumps.clear();
+
+    const results = await Promise.allSettled(
+      policyIds.map((policyId) => this.revisionBatcher.schedule([policyId]))
+    );
+    const failed = results.flatMap((result, index) =>
+      result.status === 'rejected' ? [{ policyId: policyIds[index], reason: result.reason }] : []
+    );
+    if (failed.length === 0) {
+      return;
+    }
+
+    const message = `Failed to bump the revision of ${failed.length} of ${
+      policyIds.length
+    } agent policies [${failed.map(({ policyId }) => policyId).join(', ')}]: ${
+      failed[0].reason?.message ?? failed[0].reason
+    }`;
+    this.server.logger.error(message);
+    throw new Error(message);
   }
 
   private async scheduleOrDeferRevisionBumps(
     policyIds: string[],
-    deferredBumps?: DeferredRevisionBumps
+    deferredBumps?: Set<string>
   ): Promise<void> {
     if (deferredBumps) {
-      await deferredBumps.add(policyIds);
+      policyIds.forEach((policyId) => deferredBumps.add(policyId));
       return;
     }
     await this.revisionBatcher.schedule(policyIds);
@@ -271,7 +293,7 @@ export class PackagePolicyService {
     newPolicies: NewPackagePolicyWithId[];
     spaceId: string;
     /** Collects the agent policy ids to bump instead of bumping them now. */
-    deferredBumps?: DeferredRevisionBumps;
+    deferredBumps?: Set<string>;
   }) {
     if (newPolicies.length === 0) {
       return { created: [], failed: [] };
@@ -315,7 +337,7 @@ export class PackagePolicyService {
     policiesToUpdate: UpdatePackagePolicyWithId[];
     spaceId: string;
     /** Collects the agent policy ids to bump instead of bumping them now. */
-    deferredBumps?: DeferredRevisionBumps;
+    deferredBumps?: Set<string>;
   }) {
     if (policiesToUpdate.length === 0) {
       return [];
@@ -411,7 +433,7 @@ export class PackagePolicyService {
     policyIdsToDelete: string[];
     spaceId: string;
     /** Collects the agent policy ids to bump instead of bumping them now. */
-    deferredBumps?: DeferredRevisionBumps;
+    deferredBumps?: Set<string>;
   }) {
     if (policyIdsToDelete.length === 0) {
       return;
@@ -470,7 +492,7 @@ export class PackagePolicyService {
   private async bulkCreateWithBatchedRevision(
     client: SavedObjectsClientContract,
     policies: NewPackagePolicyWithId[],
-    deferredBumps?: DeferredRevisionBumps
+    deferredBumps?: Set<string>
   ) {
     const result = await this.server.fleet.packagePolicyService.bulkCreate(
       client,
@@ -489,7 +511,7 @@ export class PackagePolicyService {
   private async bulkUpdateWithBatchedRevision(
     client: SavedObjectsClientContract,
     policies: UpdatePackagePolicyWithId[],
-    deferredBumps?: DeferredRevisionBumps
+    deferredBumps?: Set<string>
   ) {
     const result = await this.server.fleet.packagePolicyService.bulkUpdate(
       client,
@@ -508,7 +530,7 @@ export class PackagePolicyService {
   private async bulkDeleteWithBatchedRevision(
     client: SavedObjectsClientContract,
     policies: PackagePolicyWithAgentPolicyIds[],
-    deferredBumps?: DeferredRevisionBumps
+    deferredBumps?: Set<string>
   ) {
     const result = await this.server.fleet.packagePolicyService.delete(
       client,

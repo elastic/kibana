@@ -100,13 +100,12 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
   const buildDeployer = ({
     pages,
     editMonitors,
-    flushBumps = jest.fn().mockResolvedValue(undefined),
+    scheduleRevisionBumps = jest.fn().mockResolvedValue(undefined),
   }: {
     pages: string[][];
     editMonitors: jest.Mock;
-    flushBumps?: jest.Mock;
+    scheduleRevisionBumps?: jest.Mock;
   }) => {
-    const deferredBumps = { add: jest.fn(), flush: flushBumps };
     const close = jest.fn().mockResolvedValue(undefined);
     // one finder per maintenance window; monitor ids are unique per finder because
     // the production code skips monitors already handled for an earlier window
@@ -133,7 +132,7 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
 
     const deployer = new DeployPrivateLocationMonitors(serverSetup, {
       ...mockSyntheticsMonitorClient,
-      privateLocationAPI: { editMonitors, createDeferredRevisionBumps: () => deferredBumps },
+      privateLocationAPI: { editMonitors, scheduleRevisionBumps },
     } as any);
 
     // keep the test focused on the failed-create control flow, not on monitor formatting
@@ -145,7 +144,7 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
       .spyOn(deployer, 'parseLocations')
       .mockReturnValue({ privateLocations, publicLocations: [] } as any);
 
-    return { deployer, close, editMonitors, deferredBumps, flushBumps };
+    return { deployer, close, editMonitors, scheduleRevisionBumps };
   };
 
   const withFailedCreates = { failedUpdates: [], failedCreates: [{ packagePolicy: { id: 'p1' } }] };
@@ -259,7 +258,7 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
 
     it('bumps agent policies once for the whole sync, not once per page', async () => {
       const editMonitors = jest.fn().mockResolvedValue(withoutFailures);
-      const { deployer, deferredBumps, flushBumps } = buildDeployer({
+      const { deployer, scheduleRevisionBumps } = buildDeployer({
         pages: [['m1'], ['m2'], ['m3']],
         editMonitors,
       });
@@ -268,40 +267,30 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
 
       expect(editMonitors).toHaveBeenCalledTimes(6);
       // every page writes into the one shared collection...
-      editMonitors.mock.calls.forEach((call) => expect(call[4]).toBe(deferredBumps));
-      // ...which is flushed once, after the last page
-      expect(flushBumps).toHaveBeenCalledTimes(1);
-      expect(flushBumps.mock.invocationCallOrder[0]).toBeGreaterThan(
+      const sharedBumps = editMonitors.mock.calls[0][4];
+      expect(sharedBumps).toBeInstanceOf(Set);
+      editMonitors.mock.calls.forEach((call) => expect(call[4]).toBe(sharedBumps));
+      // ...which is bumped once, after the last page
+      expect(scheduleRevisionBumps).toHaveBeenCalledTimes(1);
+      expect(scheduleRevisionBumps).toHaveBeenCalledWith(sharedBumps);
+      expect(scheduleRevisionBumps.mock.invocationCallOrder[0]).toBeGreaterThan(
         editMonitors.mock.invocationCallOrder[5]
       );
     });
 
-    it('still bumps agent policies already written when a later page throws, and rethrows the sync error', async () => {
+    it('still bumps agent policies already written when a later page throws', async () => {
       const editMonitors = jest
         .fn()
         .mockResolvedValueOnce(withoutFailures)
         .mockRejectedValueOnce(new Error('boom'));
-      const { deployer, flushBumps } = buildDeployer({
+      const { deployer, scheduleRevisionBumps } = buildDeployer({
         pages: [['m1'], ['m2']],
         editMonitors,
       });
 
       await expect(syncForMws(deployer, ['mw-1'])).rejects.toThrow('boom');
 
-      expect(flushBumps).toHaveBeenCalledTimes(1);
-    });
-
-    it('reports the sync error, not the bump failure, when both fail', async () => {
-      const editMonitors = jest.fn().mockRejectedValue(new Error('boom'));
-      const { deployer } = buildDeployer({
-        pages: [['m1']],
-        editMonitors,
-        flushBumps: jest.fn().mockRejectedValue(new Error('fleet down')),
-      });
-
-      await expect(syncForMws(deployer, ['mw-1'])).rejects.toThrow('boom');
-
-      expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('fleet down'));
+      expect(scheduleRevisionBumps).toHaveBeenCalledTimes(1);
     });
 
     it('surfaces a failed bump so the task reports the sync as failed', async () => {
@@ -309,7 +298,7 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
       const { deployer } = buildDeployer({
         pages: [['m1']],
         editMonitors,
-        flushBumps: jest.fn().mockRejectedValue(new Error('fleet down')),
+        scheduleRevisionBumps: jest.fn().mockRejectedValue(new Error('fleet down')),
       });
 
       await expect(syncForMws(deployer, ['mw-1'])).rejects.toThrow('fleet down');
@@ -326,7 +315,7 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
 
       it('keeps the reference on monitors until the bump has succeeded', async () => {
         const editMonitors = jest.fn().mockResolvedValue(withoutFailures);
-        const { deployer, flushBumps } = buildDeployer({
+        const { deployer, scheduleRevisionBumps } = buildDeployer({
           pages: [['m1'], ['m2']],
           editMonitors,
         });
@@ -335,7 +324,7 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
 
         expect(mockSoClient.bulkUpdate).toHaveBeenCalledTimes(2);
         mockSoClient.bulkUpdate.mock.invocationCallOrder.forEach((order) =>
-          expect(order).toBeGreaterThan(flushBumps.mock.invocationCallOrder[0])
+          expect(order).toBeGreaterThan(scheduleRevisionBumps.mock.invocationCallOrder[0])
         );
       });
 
@@ -344,7 +333,7 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
         const { deployer } = buildDeployer({
           pages: [['m1']],
           editMonitors,
-          flushBumps: jest.fn().mockRejectedValue(new Error('fleet down')),
+          scheduleRevisionBumps: jest.fn().mockRejectedValue(new Error('fleet down')),
         });
 
         await expect(syncMissing(deployer)).rejects.toThrow('fleet down');
