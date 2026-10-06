@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { LineCounter, parseDocument } from 'yaml';
 import type { monaco } from '@kbn/monaco';
+import { buildWorkflowLookup } from '@kbn/workflows-yaml';
 import { getWorkflowSuggestions } from './get_workflow_suggestions';
 import type { WorkflowsResponse } from '../../../../../../entities/workflows/model/types';
 import { createStepInfo } from '../../../../../../shared/test_utils';
@@ -191,3 +193,44 @@ describe('getWorkflowSuggestions', () => {
     expect(managedWorkflowResult).toHaveLength(2);
   });
 });
+
+describe.each(['workflow.execute', 'workflow.executeAsync'])(
+  '%s identity-aware targets',
+  (stepType) => {
+    it.each([
+      ['runAsMode: inherit', 1],
+      ['runAsMode: override', 1],
+      ['inheritRunAs: true', 1],
+      ['runAsMode: default', 2],
+      ['inheritRunAs: false', 2],
+    ])('filters eligible children with %s', async (identityOption, count) => {
+      const lineCounter = new LineCounter();
+      const document = parseDocument(
+        `steps:
+  - name: child
+    type: ${stepType}
+    with:
+      workflow-id: ''
+      ${identityOption}
+`,
+        { lineCounter }
+      );
+      const lookup = buildWorkflowLookup(document, lineCounter);
+      const result = await getWorkflowSuggestions(
+        makeContext({
+          isCurrentWorkflowManaged: true,
+          focusedStepInfo: lookup.steps.child,
+          workflows: {
+            totalWorkflows: 2,
+            workflows: {
+              ordinary: { id: 'ordinary', name: 'Ordinary' },
+              managed: { id: 'managed', name: 'Managed', managed: true },
+            },
+          },
+        })
+      );
+      expect(result).toHaveLength(count);
+      expect(result.map(({ label }) => label)).toContain('Managed (id: managed)');
+    });
+  }
+);

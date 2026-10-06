@@ -18,6 +18,8 @@
 
 `inheritRunAs: true` is shorthand for `runAsMode: inherit`. Combining the two fields is rejected. The child ID and identity mode must be literal values in the saved parent definition. Input values may use expressions. Existing child visibility rules still apply: managed parents can call managed children; unmanaged parents cannot discover them through workflow composition.
 
+The YAML editor suggests identity fields only for managed workflows with SAs enabled. Inheritance modes filter the child picker to managed workflows. Editor validation flags conflicting identity options, templated child IDs, and known unmanaged targets before execution. Whether a child already has its own SA is checked at execution time.
+
 ## Authorization and lifetime
 
 Every inherited hop requires a managed child in the same space and a live parent SA request. The original caller must still have execution access to the child. Admission checks that the loaded managed definition is current and the root parent's workload binding still matches. Further inherited calls retain that root binding.

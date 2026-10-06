@@ -149,7 +149,8 @@ export function getCompletionItemProvider(
   getState: () => WorkflowDetailState,
   getKqlServices?: () => WorkflowKqlCompletionServices,
   getPropertyHandler?: GetStepPropertyHandler,
-  getEsqlServices?: () => WorkflowEsqlCompletionServices
+  getEsqlServices?: () => WorkflowEsqlCompletionServices,
+  areServiceAccountsEnabled: () => boolean = () => false
 ): monaco.languages.CompletionItemProvider {
   const provider: monaco.languages.CompletionItemProvider & { __providerId?: string } = {
     // Unique identifier to distinguish our provider from others
@@ -169,6 +170,19 @@ export function getCompletionItemProvider(
           suggestions: [],
           incomplete: false,
         };
+      }
+
+      const { focusedStepInfo, focusedYamlPair, isCurrentWorkflowManaged } = autocompleteContext;
+      const identityField = focusedYamlPair?.path;
+      if (
+        (!isCurrentWorkflowManaged || !areServiceAccountsEnabled()) &&
+        (focusedStepInfo?.stepType === 'workflow.execute' ||
+          focusedStepInfo?.stepType === 'workflow.executeAsync') &&
+        identityField?.length === 2 &&
+        identityField[0] === 'with' &&
+        (identityField[1] === 'runAsMode' || identityField[1] === 'inheritRunAs')
+      ) {
+        return { suggestions: [], incomplete: false };
       }
 
       // Incremental deduplication accumulator
