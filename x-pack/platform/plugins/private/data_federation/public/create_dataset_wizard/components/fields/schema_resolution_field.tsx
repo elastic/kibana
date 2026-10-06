@@ -49,7 +49,7 @@ export const SchemaResolutionField = React.memo(({ isDisabled }: { isDisabled?: 
     >
       <EuiSpacer size="m" />
       <EuiButtonEmpty
-        size="s"
+        size="xs"
         flush="left"
         iconType={isOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
         iconSide="right"
@@ -66,7 +66,6 @@ export const SchemaResolutionField = React.memo(({ isDisabled }: { isDisabled?: 
 
       {isOpen ? (
         <>
-          <EuiSpacer size="s" />
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem>
               <EuiFormRow
