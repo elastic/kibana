@@ -39,6 +39,8 @@ export type {
   Responder,
   Violation,
 } from './src/contract/types';
+export { applyOverlay, InvalidOverlayError, JsonPathError } from './src/overlay';
+export type { OverlayAction, OverlayDocument, OverlayFinding, OverlayResult } from './src/overlay';
 export { InvalidSchemaError, loadContractOperations } from './src/openapi';
 export type {
   ContractOperation,
