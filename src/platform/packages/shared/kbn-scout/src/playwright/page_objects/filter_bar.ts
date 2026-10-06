@@ -154,7 +154,9 @@ export class FilterBar {
 
     const filterEditor = this.page.getByRole('dialog').filter({ hasText: 'Edit filter' });
     await filterEditor.waitFor({ state: 'visible' });
-    await filterEditor.getByTestId('filterParams').waitFor({ state: 'visible' });
+    await filterEditor
+      .locator('[data-test-subj~="filterParamsComboBox"]')
+      .waitFor({ state: 'visible' });
   }
 
   async getFilterEditorSelectedPhrases(): Promise<string[]> {

@@ -390,7 +390,6 @@ describe('Discover state', () => {
           .spyOn(services.discoverSessionService, 'get')
           .mockResolvedValueOnce({ session, warnings });
 
-        await internalState.dispatch(internalStateActions.loadDataViewList()).unwrap();
         await internalState
           .dispatch(internalStateActions.initializeTabs({ discoverSessionId: session.id }))
           .unwrap();
@@ -948,7 +947,7 @@ describe('Discover state', () => {
     });
 
     it.each([undefined, 'saved-version'])(
-      'keeps a saved navigation view and its filter references with spec version %s',
+      'waits for saved views before normalizing navigation with spec version %s',
       async (version) => {
         const services = createDiscoverServicesMock();
         const savedDataView = new DataView({
@@ -976,12 +975,28 @@ describe('Discover state', () => {
           .mockReturnValue(scopedHistoryMock.create({ state: location.state }));
         const state = createState(services, [savedDataView]);
         const resolve = jest.spyOn(services.inlineDataViews, 'resolve');
+        const capture = jest.spyOn(services.initialTabStateService, 'capture');
+        const releaseDataViewList = Promise.withResolvers<void>();
+        const getIdsWithTitle = jest
+          .spyOn(services.dataViews, 'getIdsWithTitle')
+          .mockImplementationOnce(async () => {
+            await releaseDataViewList.promise;
 
-        await state.initializeTabs();
+            return [{ id: 'saved-view', title: 'saved-*' }];
+          });
+
+        const initialization = state.initializeTabs();
+
+        await waitFor(() => expect(getIdsWithTitle).toHaveBeenCalledTimes(1));
+        expect(state.internalState.getState().savedDataViews).toStrictEqual([]);
+        expect(capture).not.toHaveBeenCalled();
+
+        releaseDataViewList.resolve();
+        await initialization;
         const tabId = state.getCurrentTab().id;
         const initialTabState = services.initialTabStateService.consume();
 
-        expect(initialTabState?.dataViewSpec).toEqual(dataViewSpec);
+        expect(initialTabState?.dataViewSpec).toStrictEqual(dataViewSpec);
         expect(state.stateStorageContainer.get(APP_STATE_URL_KEY)).toMatchObject({
           filters: [appFilter],
         });
@@ -1003,6 +1018,45 @@ describe('Discover state', () => {
         expect(services.filterManager.getGlobalFilters()).toMatchObject([pinnedFilter]);
       }
     );
+
+    it('does not normalize navigation when the saved views needed to classify it cannot be loaded', async () => {
+      const services = createServices();
+      const dataViewSpec = { id: 'saved-view', title: 'saved-*' };
+      jest
+        .spyOn(services, 'getScopedHistory')
+        .mockReturnValue(scopedHistoryMock.create({ state: { dataViewSpec } }));
+      const state = createState(services);
+      const capture = jest.spyOn(services.initialTabStateService, 'capture');
+      jest
+        .spyOn(services.dataViews, 'getIdsWithTitle')
+        .mockRejectedValueOnce(new Error('Unable to load saved data views'));
+
+      await expect(state.initializeTabs()).rejects.toMatchObject({
+        message: 'Unable to load saved data views',
+      });
+
+      expect(capture).not.toHaveBeenCalled();
+      expect(selectAllTabs(state.internalState.getState())).toStrictEqual([]);
+      expect(state.internalState.getState().tabs.areInitializing).toBe(false);
+    });
+
+    it('still restores a saved inline session when the saved views list cannot be loaded', async () => {
+      const services = createServices();
+      const state = createState(services);
+      jest
+        .spyOn(services.dataViews, 'getIdsWithTitle')
+        .mockRejectedValueOnce(new Error('Unable to load saved data views'));
+
+      await state.initializeTabs({ persistedDiscoverSession: legacySession });
+
+      expect(
+        state.getCurrentTab().initialInternalState?.serializedSearchSource?.index
+      ).toStrictEqual({
+        id: apiDataViewId,
+        title: 'logs-*',
+      });
+      expect(state.internalState.getState().tabs.areInitializing).toBe(false);
+    });
 
     it('translates pinned filters in the URL of a legacy session', async () => {
       const services = createDiscoverServicesMock();

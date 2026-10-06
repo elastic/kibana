@@ -51,6 +51,7 @@ import type { InitialTabState } from '../../../../../plugin_imports/initial_tab_
 import { fetchData } from './tab_state';
 import { initializeAndSync, stopSyncing } from './tab_sync';
 import { applyInlineDataViewLoadState } from './apply_inline_data_view_load_state';
+import { loadDataViewList } from './data_views';
 import { showSessionWarnings } from '../../../../../session';
 
 export const setTabs: InternalStateThunkActionCreator<
@@ -382,6 +383,7 @@ export const updateTabs: InternalStateThunkActionCreator<
     );
   };
 
+/** Loads the session and saved views before normalizing and restoring its tabs. */
 export const initializeTabs = createInternalStateAsyncThunk(
   'internalState/initializeTabs',
   async function initializeTabsThunkFn(
@@ -431,18 +433,25 @@ export const initializeTabs = createInternalStateAsyncThunk(
       }
     };
 
-    const [userId, spaceId, persistedDiscoverSession] = await Promise.all([
+    const [userId, spaceId, persistedDiscoverSession, dataViewListResult] = await Promise.all([
       existingUserId === undefined ? getUserId() : existingUserId,
       existingSpaceId === undefined ? getSpaceId() : existingSpaceId,
       loadPersistedDiscoverSession(),
+      dispatch(loadDataViewList()),
     ]);
+
+    const initialTabState = services.getScopedHistory<InitialTabState>()?.location.state;
+
+    // Without the list, a navigation spec's ID cannot be classified as saved or inline.
+    if (initialTabState?.dataViewSpec?.id && loadDataViewList.rejected.match(dataViewListResult)) {
+      throw dataViewListResult.error;
+    }
 
     if (customizationContext.displayMode === 'standalone' && persistedDiscoverSession) {
       rememberDiscoverSession(services.core.http, services.chrome, persistedDiscoverSession);
       setBreadcrumbs({ services, titleBreadcrumbText: persistedDiscoverSession.title });
     }
 
-    const initialTabState = services.getScopedHistory<InitialTabState>()?.location.state;
     const savedDataViewIds = getState().savedDataViews.map(({ id }) => id);
     const { inlineDataViewIds, ...initialTabsState } = tabsStorageManager.loadLocally({
       userId,

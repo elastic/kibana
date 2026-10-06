@@ -214,7 +214,8 @@ spaceTest.describe(
             await expect(page.testSubj.locator('saveFilter')).toBeEnabled();
             await filterBar.closeFieldEditorModal();
 
-            await filterBar.clickEditFilter('extension', 'jpg');
+            await page.testSubj.click('~filter & ~filter-key-extension & ~filter-value-jpg');
+            await page.testSubj.click('editFilter');
             await expect(
               page
                 .getByRole('dialog')
