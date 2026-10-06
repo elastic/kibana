@@ -174,6 +174,12 @@ const PROVIDER_SCHEMA: Record<ServiceProviderKeys, ProviderTelemetryField> = {
       description: 'The number of inference connectors created using the Groq provider.',
     },
   },
+  tencentcloud: {
+    type: 'long',
+    _meta: {
+      description: 'The number of inference connectors created using the Tencent Cloud provider.',
+    },
+  },
 };
 
 export function registerInferenceConnectorsUsageCollector(

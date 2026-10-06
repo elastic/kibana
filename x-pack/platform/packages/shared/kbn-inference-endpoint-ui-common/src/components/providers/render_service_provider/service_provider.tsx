@@ -37,6 +37,7 @@ import contextualAiIcon from '../assets/images/contextual_ai_icon.svg';
 import fireworksIcon from '../assets/images/fireworks.svg';
 import groqIcon from '../assets/images/grok.svg';
 import nvidiaIcon from '../assets/images/nvidia.svg';
+import tencentCloudIcon from '../assets/images/tencent_cloud.svg';
 
 interface ServiceProviderProps {
   providerKey: ServiceProviderKeys;
@@ -181,6 +182,11 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
     icon: groqIcon,
     name: 'Groq',
     solutions: ['Observability', 'Security', 'Search'],
+  },
+  [ServiceProviderKeys.tencentcloud]: {
+    icon: tencentCloudIcon,
+    name: 'Tencent Cloud',
+    solutions: ['Search'],
   },
 };
 
