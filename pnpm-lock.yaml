@@ -5144,6 +5144,9 @@ importers:
       '@kbn/connector-cli':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-connector-cli
+      '@kbn/connector-contract-mock':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-connector-contract-mock
       '@kbn/content-list-docs':
         specifier: workspace:*
         version: link:src/platform/packages/shared/content-management/content_list/kbn-content-list-docs
@@ -7954,6 +7957,8 @@ importers:
   src/platform/packages/shared/kbn-config-schema: {}
 
   src/platform/packages/shared/kbn-connector-cli: {}
+
+  src/platform/packages/shared/kbn-connector-contract-mock: {}
 
   src/platform/packages/shared/kbn-connector-schemas: {}
 
