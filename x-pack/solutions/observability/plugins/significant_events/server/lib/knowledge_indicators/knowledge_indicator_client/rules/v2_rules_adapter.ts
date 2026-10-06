@@ -234,7 +234,7 @@ export class RulesAdapterV2 implements IRulesManagementClient {
       rulesToCreate.length === 0
         ? { items: [], errors: [] }
         : await this.rulesClient.bulkCreateRules({
-            rules: rulesToCreate.map(({ id, definition }) => ({
+            items: rulesToCreate.map(({ id, definition }) => ({
               ...toV2CreateBody({ definition, cpsEnabled: this.cpsEnabled }),
               id,
               enabled: true,

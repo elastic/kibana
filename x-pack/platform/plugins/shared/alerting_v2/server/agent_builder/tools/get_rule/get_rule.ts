@@ -55,7 +55,7 @@ export const getRuleTool = ({
       privilegeChecker: getPrivilegeChecker({ request: toolContext.request }),
       feature: 'rules',
       level: 'read',
-      action: 'fetch rule for episode',
+      action: 'fetch rule for alert',
     });
     if (unauthorized) {
       return unauthorized;
@@ -97,7 +97,7 @@ export const getRuleTool = ({
           {
             type: ToolResultType.error,
             data: {
-              message: `Failed to fetch rule "${ruleId}" for episode "${alertId}": ${message}`,
+              message: `Failed to fetch rule "${ruleId}" for alert "${alertId}": ${message}`,
             },
           },
         ],

@@ -191,8 +191,6 @@ describe('get', () => {
   });
 
   describe('includeComments', () => {
-    // mockCaseComments[0] is a legacy `user`-typed comment, a migrated attachment type: reading
-    // it back should upgrade it to unified shape even though nothing re-saved it since migration.
     type LegacyCommentAttributes = Extract<
       (typeof mockCaseComments)[0]['attributes'],
       { comment: string }
@@ -206,7 +204,7 @@ describe('get', () => {
       page: 1,
     });
 
-    it('get() upgrades a legacy-stored migrated-type comment to unified', async () => {
+    it('get() upgrades a legacy-stored comment to unified', async () => {
       const args = createCasesClientMockArgs();
       args.services.caseService.getCase.mockResolvedValue(mockCases[0]);
       args.services.caseService.getAllCaseComments.mockResolvedValue(legacyCommentsFindResponse());
@@ -221,7 +219,7 @@ describe('get', () => {
       ]);
     });
 
-    it('resolve() upgrades a legacy-stored migrated-type comment to unified', async () => {
+    it('resolve() upgrades a legacy-stored comment to unified', async () => {
       const args = createCasesClientMockArgs();
       args.services.caseService.getResolveCase.mockResolvedValue({
         saved_object: mockCases[0],

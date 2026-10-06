@@ -6,6 +6,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
+import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import dedent from 'dedent';
 import { significantEventBaseSchema } from '../common_schemas';
 import {
@@ -16,12 +18,15 @@ import {
   NO_RAW_SENSITIVE_VALUES_RULE,
 } from '../constants';
 
-export const SIGNIFICANT_EVENT_STATUS_OPTIONS = ['active', 'inactive'] as const;
+export const SIGNIFICANT_EVENT_STATUS_OPTIONS = [
+  ALERT_EPISODE_STATUS.ACTIVE,
+  ALERT_EPISODE_STATUS.INACTIVE,
+] as const satisfies readonly AlertEpisodeStatus[];
 
 export const significantEventStatusSchema = z.enum(SIGNIFICANT_EVENT_STATUS_OPTIONS)
   .describe(dedent`
-    "active" = a current failure, material degradation, or sensitive-data exposure is confirmed or remains plausibly unverified. A mechanism found at an unchanged background rate (rate-flat inconclusive) is verified as not newly elevated — it is not "plausibly unverified" and must not create a new event;
-    "inactive" = the event is no longer active. Record the recovery, false-alarm, benign-change, or other assessment rationale in "assessment_note".
+    "${ALERT_EPISODE_STATUS.ACTIVE}" = a current failure, material degradation, or sensitive-data exposure is confirmed or remains plausibly unverified. A mechanism found at an unchanged background rate (rate-flat inconclusive) is verified as not newly elevated — it is not "plausibly unverified" and must not create a new event;
+    "${ALERT_EPISODE_STATUS.INACTIVE}" = the event is no longer active. Record the recovery, false-alarm, benign-change, or other assessment rationale in "assessment_note".
   `);
 
 export type SignificantEventStatus = z.infer<typeof significantEventStatusSchema>;
@@ -31,7 +36,7 @@ export type SignificantEventStatus = z.infer<typeof significantEventStatusSchema
  * prior event for the same issue so successive write cycles dedup against it. An inactive issue
  * that recurs should create a fresh event.
  */
-export const SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS = ['active'] as const;
+export const SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS = [ALERT_EPISODE_STATUS.ACTIVE] as const;
 
 /**
  * One investigation run attached to this significant event.

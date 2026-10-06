@@ -449,6 +449,7 @@ export const DiscoverTopNav = ({
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
         textBasedLanguageModeWarning={esqlModeWarning}
         enableResourceBrowser={isEsqlMode}
+        enableCreateView={isEsqlMode}
         prependFilterBar={
           searchBarCustomization?.PrependFilterBar ? (
             <searchBarCustomization.PrependFilterBar />
