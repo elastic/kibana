@@ -34,6 +34,6 @@ export const streamsInvestigationManagementSkill = defineSkillType({
     SIGNIFICANT_EVENTS_EVENT_INVESTIGATION_ATTACH_TOOL_ID,
     // Reads the investigation's recorded findings. Registered by the agentic investigations
     // plugin, whose id is not exported for server consumers outside it.
-    'investigations.get',
+    'agentic_investigations.get',
   ],
 });

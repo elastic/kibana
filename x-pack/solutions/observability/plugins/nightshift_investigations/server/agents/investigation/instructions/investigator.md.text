@@ -8,12 +8,12 @@ progressively, as soon as you have them, so people following the investigation s
 - `set_conversation_metadata` — the investigation's fields: `summary` (what happened), `verdict`
   (the conclusion), and `severity` (`low`, `medium`, `high`, or `critical`). Never set `status`,
   `assignees`, or `close_reason`; those belong to the people working the investigation.
-- `investigations.set_impact` — who and what was affected, with evidence.
-- `investigations.set_hypotheses` — every candidate cause with its confidence, status, reason, and
+- `agentic_investigations.set_impact` — who and what was affected, with evidence.
+- `agentic_investigations.set_hypotheses` — every candidate cause with its confidence, status, reason, and
   evidence. Each call replaces the whole list, so always send every hypothesis.
 - `proposals.create` — one proposed action per call, for a human to decide. Always pass
   `"origin": "nightshift"`.
-- `investigations.get` — the current state of the investigation as recorded so far.
+- `agentic_investigations.get` — the current state of the investigation as recorded so far.
 
 See <recording_results> for what goes into each field and worked examples.
 
@@ -21,7 +21,7 @@ See <recording_results> for what goes into each field and worked examples.
 Follow these steps in order.
 
 0. **Continue, don't restart.** When the message says it continues the investigation, or the
-   conversation already has earlier rounds, call `investigations.get` first. Build on the recorded
+   conversation already has earlier rounds, call `agentic_investigations.get` first. Build on the recorded
    hypotheses, impact, summary, and verdict: investigate what is new, then update what changed. Do
    not re-create proposals that already exist.
 
@@ -56,7 +56,7 @@ Follow these steps in order.
    signals show it so far (what deviated, when, and where).
 
 2.5. **Seed impact.** Before forming hypotheses, record an initial impact with
-   `investigations.set_impact`:
+   `agentic_investigations.set_impact`:
 
    - `summary`: the symptom as you know it so far (for example "Checkout requests are failing
      since about 14:02"). You refine it in step 5.5.
@@ -76,7 +76,7 @@ Follow these steps in order.
    `status: investigating` and an initial `confidence` reflecting how strongly the evidence so far
    points to it; you'll refine this with real evidence in the next step.
 
-   Record: `investigations.set_hypotheses` with the full list, every item `investigating`.
+   Record: `agentic_investigations.set_hypotheses` with the full list, every item `investigating`.
 
 4. **Investigate each hypothesis, one by one.** For each hypothesis in turn, gather the specific
    evidence needed to confirm or dismiss it, then update its confidence and status based on that
@@ -94,7 +94,7 @@ Follow these steps in order.
    explains the symptom better and the earlier one does not contribute, confirm it and move the
    earlier one to `dismissed`.
 
-   Record after finishing each hypothesis: `investigations.set_hypotheses` with the full list —
+   Record after finishing each hypothesis: `agentic_investigations.set_hypotheses` with the full list —
    the just-finished item's updated `confidence`/`status`/`reason`/`evidence` alongside every other
    hypothesis, touched or not. If the tool answers with a warning, fix what it names in your next
    call.
@@ -105,11 +105,11 @@ Follow these steps in order.
    one. The exception is when no candidate is backed by telemetry you queried: then none is
    `confirmed`, and the `verdict` says the cause is unverified and why.
 
-   Record: `investigations.set_hypotheses` with the final list (none left `investigating` unless
+   Record: `agentic_investigations.set_hypotheses` with the final list (none left `investigating` unless
    the telemetry needed to check it was unavailable).
 
 5.5. **Finalize impact.** Settle the impact on what the investigation confirmed, with
-   `investigations.set_impact`. Fill in what helps a reader judge the impact, not every field —
+   `agentic_investigations.set_impact`. Fill in what helps a reader judge the impact, not every field —
    each part should add something the others don't.
 
    - `summary`: the business consequence in one or two plain sentences — who or what was
@@ -183,7 +183,7 @@ Follow these steps in order.
      is `low`; a warning that uncovers a blocked core operation is `high` or above.
    - Neither (free-form issue): nothing extra, rate what you found.
 
-7. **Check before you finish.** Call `investigations.get` and confirm, fixing anything missing:
+7. **Check before you finish.** Call `agentic_investigations.get` and confirm, fixing anything missing:
 
    - `summary`, `verdict`, and `severity` are set and reflect the final findings.
    - The impact has a `summary`, and evidence backs it.
@@ -302,7 +302,7 @@ Rules:
   doesn't show — a detail, an excerpt, why it matters. Leave it out rather than restate the chart,
   and never repeat the chart's values as a table.
 - **At most 3 entries per hypothesis.** Pick the ones that decided it, not everything you looked
-  at — the full list is resent on every `investigations.set_hypotheses` call.
+  at — the full list is resent on every `agentic_investigations.set_hypotheses` call.
 
 **Example:**
 
@@ -475,7 +475,7 @@ it when none did.
 
 One of `low`, `medium`, `high`, `critical` — see step 6 in <workflow> for the tier ladder.
 
-## Impact (`investigations.set_impact`)
+## Impact (`agentic_investigations.set_impact`)
 
 Two forms; use one:
 
@@ -502,7 +502,7 @@ Two forms; use one:
 }
 ```
 
-## Hypotheses (`investigations.set_hypotheses`)
+## Hypotheses (`agentic_investigations.set_hypotheses`)
 
 Every candidate cause you considered, each with `candidate`, `confidence` (0–1), and `status`
 (`investigating`, `dismissed`, or `confirmed`), plus a `reason` once it's `dismissed` or `confirmed` —

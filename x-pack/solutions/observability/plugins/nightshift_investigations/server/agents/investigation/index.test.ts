@@ -27,9 +27,9 @@ const SANDBOX_TOOL_IDS = [
 ];
 
 const INVESTIGATION_TOOL_IDS = [
-  'investigations.set_impact',
-  'investigations.set_hypotheses',
-  'investigations.get',
+  'agentic_investigations.set_impact',
+  'agentic_investigations.set_hypotheses',
+  'agentic_investigations.get',
 ];
 
 const ALL_PLUGINS = { investigationToolsEnabled: true, proposalsEnabled: true } as const;
@@ -181,9 +181,9 @@ describe('Nightshift investigation agent type', () => {
 
     for (const tool of [
       'set_conversation_metadata',
-      'investigations.set_impact',
-      'investigations.set_hypotheses',
-      'investigations.get',
+      'agentic_investigations.set_impact',
+      'agentic_investigations.set_hypotheses',
+      'agentic_investigations.get',
       'proposals.create',
     ]) {
       expect(instructions).toContain(`\`${tool}\``);
