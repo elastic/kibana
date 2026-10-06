@@ -21,8 +21,6 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { KueryNode } from '@kbn/es-query';
-import { nodeBuilder } from '@kbn/es-query';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
@@ -51,6 +49,7 @@ import {
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
 import { buildSoSearch } from '../build_so_search';
+import { buildActionPolicySoFilter } from './build_action_policy_filter';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
 import { ActionPolicyNamespaceToken } from './tokens';
@@ -359,7 +358,7 @@ export class ActionPolicyClient {
     const page = params.page ?? DEFAULT_PAGE;
     const perPage = params.perPage ?? DEFAULT_PER_PAGE;
 
-    const filter = this.buildFindFilter(params);
+    const filter = params.filter ? buildActionPolicySoFilter(params.filter) : undefined;
     const sortField = this.mapSortField(params.sortField);
 
     const search = buildSoSearch(params.search);
@@ -618,16 +617,6 @@ export class ActionPolicyClient {
     }
 
     return { affected_count: affectedCount, errors };
-  }
-
-  private buildFindFilter(params: FindActionPoliciesArgs): KueryNode | undefined {
-    const attrPrefix = `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes`;
-
-    if (params.enabled !== undefined) {
-      return nodeBuilder.is(`${attrPrefix}.enabled`, params.enabled ? 'true' : 'false');
-    }
-
-    return undefined;
   }
 
   private mapSortField(sortField?: string): string | undefined {

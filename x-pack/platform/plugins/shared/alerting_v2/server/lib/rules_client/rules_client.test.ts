@@ -474,7 +474,7 @@ describe('RulesClient', () => {
       );
 
       const res = await client.bulkCreateRules({
-        rules: [
+        items: [
           { ...baseCreateData, id: 'rule-a', metadata: { name: 'rule-a' } },
           { ...baseCreateData, id: 'rule-b', metadata: { name: 'rule-b' } },
         ],
@@ -533,7 +533,7 @@ describe('RulesClient', () => {
       ]);
 
       const res = await client.bulkCreateRules({
-        rules: [{ ...baseCreateData, id: 'rule-a', metadata: { name: 'from-request' } }],
+        items: [{ ...baseCreateData, id: 'rule-a', metadata: { name: 'from-request' } }],
       });
 
       expect(res.items).toHaveLength(1);
@@ -550,7 +550,7 @@ describe('RulesClient', () => {
       mockBulkCreateEcho();
 
       const res = await client.bulkCreateRules({
-        rules: [{ ...baseCreateData, id: 'rule-off', enabled: false }],
+        items: [{ ...baseCreateData, id: 'rule-off', enabled: false }],
       });
 
       expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
@@ -573,7 +573,7 @@ describe('RulesClient', () => {
       );
 
       const res = await client.bulkCreateRules({
-        rules: [
+        items: [
           { ...baseCreateData, id: 'rule-on', enabled: true, metadata: { name: 'on' } },
           { ...baseCreateData, id: 'rule-off', enabled: false, metadata: { name: 'off' } },
         ],
@@ -596,7 +596,7 @@ describe('RulesClient', () => {
       );
 
       const res = await client.bulkCreateRules({
-        rules: [
+        items: [
           { ...baseCreateData, id: 'rule-on', enabled: true, metadata: { name: 'on' } },
           { ...baseCreateData, id: 'rule-off', enabled: false, metadata: { name: 'off' } },
         ],
@@ -628,7 +628,7 @@ describe('RulesClient', () => {
       ]);
 
       const res = await client.bulkCreateRules({
-        rules: [{ ...baseCreateData, id: 'rule-dup' }],
+        items: [{ ...baseCreateData, id: 'rule-dup' }],
       });
 
       expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
@@ -655,7 +655,7 @@ describe('RulesClient', () => {
       ]);
 
       const res = await client.bulkCreateRules({
-        rules: [{ ...baseCreateData, id: 'rule-dup', enabled: false }],
+        items: [{ ...baseCreateData, id: 'rule-dup', enabled: false }],
       });
 
       expect(taskManager.bulkRemove).not.toHaveBeenCalled();
@@ -681,7 +681,7 @@ describe('RulesClient', () => {
       ]);
 
       const res = await client.bulkCreateRules({
-        rules: [{ ...baseCreateData, id: 'rule-fail' }],
+        items: [{ ...baseCreateData, id: 'rule-fail' }],
       });
 
       expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
@@ -707,7 +707,7 @@ describe('RulesClient', () => {
 
       await expect(
         client.bulkCreateRules({
-          rules: [
+          items: [
             { ...baseCreateData, id: 'rule-a', metadata: { name: 'a' } },
             { ...baseCreateData, id: 'rule-b', metadata: { name: 'b' } },
           ],
@@ -726,7 +726,7 @@ describe('RulesClient', () => {
       taskManager.bulkSchedule.mockResolvedValueOnce([{ params: { ruleId: 'rule-a' } }] as never);
 
       const res = await client.bulkCreateRules({
-        rules: [
+        items: [
           { ...baseCreateData, id: 'rule-a', metadata: { name: 'a' } },
           { ...baseCreateData, id: 'rule-b', metadata: { name: 'b' } },
         ],
@@ -749,7 +749,7 @@ describe('RulesClient', () => {
 
       await expect(
         client.bulkCreateRules({
-          rules: [
+          items: [
             { ...baseCreateData, id: 'a', metadata: { name: 'a' } },
             { ...baseCreateData, id: 'b', metadata: { name: 'b' } },
           ],
@@ -758,7 +758,7 @@ describe('RulesClient', () => {
         output: { statusCode: 400 },
         data: {
           code: 'MAX_SCHEDULES_PER_MINUTE_EXCEEDED',
-          details: { maxScheduledPerMinute: 1 },
+          details: { max_scheduled_per_minute: 1 },
         },
       });
 
@@ -773,7 +773,7 @@ describe('RulesClient', () => {
       mockBulkCreateEcho();
 
       const res = await client.bulkCreateRules({
-        rules: [{ ...baseCreateData, id: 'rule-off', enabled: false }],
+        items: [{ ...baseCreateData, id: 'rule-off', enabled: false }],
       });
 
       expect(res.items).toHaveLength(1);
@@ -788,7 +788,7 @@ describe('RulesClient', () => {
       );
 
       const res = await client.bulkCreateRules({
-        rules: [
+        items: [
           {
             ...baseCreateData,
             id: 'rule-short',
@@ -814,7 +814,7 @@ describe('RulesClient', () => {
 
       await expect(
         client.bulkCreateRules({
-          rules: [
+          items: [
             { ...baseCreateData, id: 'same', metadata: { name: 'a' } },
             { ...baseCreateData, id: 'same', metadata: { name: 'b' } },
           ],
@@ -849,7 +849,7 @@ describe('RulesClient', () => {
       );
 
       await client.bulkCreateRules({
-        rules: [
+        items: [
           { ...baseCreateData, id: 'rule-ok', metadata: { name: 'ok' } },
           { ...baseCreateData, id: 'rule-dup', metadata: { name: 'dup' } },
         ],
@@ -2341,6 +2341,102 @@ describe('RulesClient', () => {
       expect(rulesSavedObjectService.find).toHaveBeenCalledWith(
         expect.objectContaining({ sortField: 'enabled', sortOrder: 'desc' })
       );
+    });
+  });
+
+  describe('findMatchingRules', () => {
+    const kindFilter = `${RULE_SAVED_OBJECT_TYPE}.attributes.kind: alert`;
+    const tagsField = `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.tags`;
+
+    it('finds the alert rules with any of the matcher tags, sorted by name', async () => {
+      const client = createClient();
+
+      await client.findMatchingRules({ matcher: { tags: ['cpu', 'prod'] }, page: 2, perPage: 10 });
+
+      expect(rulesSavedObjectService.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          page: 2,
+          perPage: 10,
+          filter: `(${kindFilter} AND (${tagsField}: "cpu" OR ${tagsField}: "prod"))`,
+          sortField: 'metadata.name.keyword',
+          sortOrder: 'asc',
+        })
+      );
+    });
+
+    it('ignores the matcher expression', async () => {
+      const client = createClient();
+
+      await client.findMatchingRules({
+        matcher: { tags: ['cpu'], expression: 'severity: critical' },
+      });
+
+      expect(rulesSavedObjectService.find).toHaveBeenCalledWith(
+        expect.objectContaining({ filter: `(${kindFilter} AND ${tagsField}: "cpu")` })
+      );
+    });
+
+    it('matches tags literally', async () => {
+      const client = createClient();
+
+      await client.findMatchingRules({ matcher: { tags: ['team "a" OR *'] } });
+
+      expect(rulesSavedObjectService.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: `(${kindFilter} AND ${tagsField}: "team \\"a\\" OR *")`,
+        })
+      );
+    });
+
+    it.each([
+      ['no matcher', undefined],
+      ['a null matcher', null],
+      ['a catch-all matcher', { tags: null, expression: null }],
+      ['an expression-only matcher', { tags: [], expression: 'severity: critical' }],
+    ])('finds every alert rule for %s', async (_, matcher) => {
+      const client = createClient();
+
+      await client.findMatchingRules({ matcher });
+
+      expect(rulesSavedObjectService.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          page: 1,
+          perPage: 20,
+          filter: kindFilter,
+          sortField: 'metadata.name.keyword',
+          sortOrder: 'asc',
+        })
+      );
+    });
+
+    it('returns the paginated matching rules', async () => {
+      const client = createClient();
+
+      rulesSavedObjectService.find.mockResolvedValueOnce({
+        saved_objects: [
+          soFindResult(
+            'rule-1',
+            createRuleSoAttributes({ metadata: { name: 'rule-1', tags: ['cpu'] } })
+          ),
+        ],
+        total: 21,
+        page: 2,
+        per_page: 20,
+      });
+
+      const res = await client.findMatchingRules({ matcher: { tags: ['cpu'] }, page: 2 });
+
+      expect(res).toEqual({
+        items: [
+          expect.objectContaining({
+            id: 'rule-1',
+            metadata: expect.objectContaining({ name: 'rule-1', tags: ['cpu'] }),
+          }),
+        ],
+        total: 21,
+        page: 2,
+        per_page: 20,
+      });
     });
   });
 
@@ -4417,7 +4513,7 @@ describe('RulesClient', () => {
           output: { statusCode: 400 },
           data: {
             code: 'SCHEDULE_INTERVAL_TOO_SHORT',
-            details: { interval: '30s', minimumScheduleInterval: '1m' },
+            details: { interval: '30s', minimum_schedule_interval: '1m' },
           },
         });
 
@@ -4460,7 +4556,7 @@ describe('RulesClient', () => {
           output: { statusCode: 400 },
           data: {
             code: 'MAX_SCHEDULES_PER_MINUTE_EXCEEDED',
-            details: { interval: '1m', maxScheduledPerMinute: 1 },
+            details: { interval: '1m', max_scheduled_per_minute: 1 },
           },
         });
 

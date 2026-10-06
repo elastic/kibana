@@ -185,6 +185,11 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
    * Enable data source browser suggestion in ES|QL editor.
    */
   enableResourceBrowser?: boolean;
+  /**
+   * Show the action to create an ES|QL view from the editor query.
+   * Hidden unless a host opts in.
+   */
+  enableCreateView?: boolean;
 }
 
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
@@ -514,7 +519,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
       return;
     }
 
-    let source: QuerySource.SEARCH_BUTTON | QuerySource.TIME_FILTER | QuerySource.QUICK_SEARCH;
+    let source: QuerySource.SEARCH_BUTTON | QuerySource.TIME_FILTER | QuerySource.QUICK_SEARCH_KQL;
     switch (trigger) {
       case QuerySubmitTrigger.QUERY_BAR_SUBMIT:
         source = QuerySource.SEARCH_BUTTON;
@@ -523,7 +528,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
         source = QuerySource.TIME_FILTER;
         break;
       case QuerySubmitTrigger.QUICK_SEARCH:
-        source = QuerySource.QUICK_SEARCH;
+        source = QuerySource.QUICK_SEARCH_KQL;
         break;
       default:
         return;
@@ -855,6 +860,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           useBackgroundSearchButton={this.props.useBackgroundSearchButton}
           enableDateRangePicker={this.props.enableDateRangePicker}
           enableResourceBrowser={this.props.enableResourceBrowser}
+          enableCreateView={this.props.enableCreateView}
         />
       </div>
     );

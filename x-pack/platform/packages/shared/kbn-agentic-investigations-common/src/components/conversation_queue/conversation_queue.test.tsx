@@ -32,6 +32,7 @@ const queueElement = (props: Partial<React.ComponentProps<typeof ConversationQue
     isOpen
     onToggle={jest.fn()}
     onClickAction={jest.fn()}
+    onCopyLink={jest.fn()}
     onClickCard={jest.fn()}
     onOpenChat={jest.fn()}
     onClickRecommendedAction={jest.fn()}

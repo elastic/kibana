@@ -11,15 +11,15 @@ import type { CSSProperties, MouseEventHandler, ReactNode } from 'react';
 import type {
   DataAttributeProps,
   EuiBadgeProps,
+  EuiButtonPropsForButton,
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
   EuiContextMenuProps,
   EuiFlyoutProps,
   EuiIconProps,
   EuiTabProps,
+  EuiTabsProps,
 } from '@elastic/eui';
-// FIXME: change to import from `@elastic/eui` once https://github.com/elastic/eui/pull/10064 is merged.
-import type { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
 import type { InfoBlockItem } from '@kbn/flyout-info-blocks';
 import type { MetaBlock } from '@kbn/flyout-meta-blocks';
 import type {
@@ -46,6 +46,9 @@ export type FlyoutTabProps = Omit<EuiTabProps, TabBarOwnedProps> &
     /** Tab label rendered inside `EuiTab`. */
     label: ReactNode;
   };
+
+/** Props forwarded to the `EuiTabs` bar that wraps the root `tabs`. */
+export type FlyoutTabBarProps = Pick<EuiTabsProps, 'aria-label' | 'data-test-subj'>;
 
 /** Props for the declarative `FlyoutTemplate.Body.TabPanel` part. */
 export interface FlyoutBodyTabPanelProps {
@@ -181,6 +184,12 @@ interface FlyoutFooterActionBaseProps extends DataAttributeProps {
   /** Button label. */
   label: string;
   onClick: MouseEventHandler<HTMLButtonElement>;
+  /**
+   * Tooltip shown on hover and focus, e.g. to explain why the action is disabled. An action with a
+   * tooltip defaults `hasAriaDisabled` to true, so the tooltip still opens while the action is
+   * disabled or loading.
+   */
+  tooltip?: ReactNode;
 }
 
 /** Props for the declarative `FlyoutTemplate.Footer.PrimaryAction` part. */
@@ -277,9 +286,10 @@ export interface FlyoutFooterProps {
 /**
  * `children` represents the declarative zones rather than free-form flyout content.
  * `flyoutMenuDisplayMode` is always set to `auto`.
+ * `paddingSize` is always set to `m`, so every flyout pads its zones by 16px.
  * `ref` is omitted because the template does not forward it.
  */
-type TemplateOwnedFlyoutProps = 'children' | 'flyoutMenuDisplayMode' | 'ref';
+type TemplateOwnedFlyoutProps = 'children' | 'flyoutMenuDisplayMode' | 'paddingSize' | 'ref';
 
 /**
  * Props for the root `FlyoutTemplate` component. Any props not explicitly named by the template,
@@ -291,6 +301,8 @@ export type FlyoutTemplateProps = Omit<EuiFlyoutProps, TemplateOwnedFlyoutProps>
     children?: ReactNode;
     /** Tabs rendered in the header bar. Omit for a flyout with no tabs. */
     tabs?: FlyoutTabProps[];
+    /** Accessible name and test subject for the tab bar. */
+    tabBarProps?: FlyoutTabBarProps;
     /** Initial selected tab id (uncontrolled); ignored when `selectedTabId` is provided. */
     defaultSelectedTabId?: string;
     /** Currently selected tab id (controlled); `onTabChange` fires on every click either way. */
