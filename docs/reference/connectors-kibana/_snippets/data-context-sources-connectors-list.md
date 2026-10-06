@@ -60,6 +60,7 @@
 - [SharePoint Server](/reference/connectors-kibana/sharepoint-server-action-type.md): Search and retrieve documents, list items, folders, and site pages from an on-premises SharePoint Server instance.
 - [Slack (v2)](/reference/connectors-kibana/slack-v2-action-type.md): Search and send messages in Slack.
 - [Snowflake](/reference/connectors-kibana/snowflake-action-type.md): Query Snowflake, discover databases, schemas, tables, and views, and run semantic searches through Cortex Search.
+- [SolarWinds Platform](/reference/connectors-kibana/solarwinds-platform-action-type.md): Run SWQL queries, list, read, and acknowledge active alerts, and look up nodes.
 - [Tavily](/reference/connectors-kibana/tavily-action-type.md): Search the web and extract content from web pages.
 - [Trello](/reference/connectors-kibana/trello-action-type.md): Search boards, lists, and cards, create and update cards, and post comments in Trello.
 - [UniFi](/reference/connectors-kibana/unifi-action-type.md): Inventory UniFi Network sites, devices, clients, and networks, inspect UniFi Protect cameras and sensors, and restart devices or authorize guests.
