@@ -24,7 +24,8 @@ import type { TimeRange } from '../../new_entities_table';
  *
  * An entity qualifies when:
  *   - current_level_num >= 3  (is High or Critical right now)
- *   - boundary_level_num < 3 OR boundary_level_num IS NULL  (was not H/C at the boundary)
+ *   - boundary_level_num IS NULL OR current_level_num > boundary_level_num  (had no level at the
+ *     boundary, or a lower one: Low or Moderate to High or Critical, or High to Critical)
  */
 
 const TIME_RANGE_TO_ESQL: Record<TimeRange, { fetchWindow: string; period: string }> = {
@@ -60,7 +61,7 @@ export const buildNewlyHighCriticalCountQuery = (
     `| STATS current_level_num  = MAX(current_level_num),`,
     `        boundary_level_num = MAX(boundary_level_num)`,
     `        BY entity_euid`,
-    `| WHERE current_level_num >= 3 AND (boundary_level_num IS NULL OR boundary_level_num < 3)`,
+    `| WHERE current_level_num >= 3 AND (boundary_level_num IS NULL OR current_level_num > boundary_level_num)`,
     `| RENAME entity_euid AS \`entity.id\``,
     `| LOOKUP JOIN ${entitiesIndexName} ON entity.id`,
     `| WHERE entity.name IS NOT NULL`,

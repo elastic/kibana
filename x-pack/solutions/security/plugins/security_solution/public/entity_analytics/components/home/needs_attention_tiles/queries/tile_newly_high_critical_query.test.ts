@@ -66,9 +66,11 @@ describe('buildNewlyHighCriticalCountQuery', () => {
     expect(query).toContain('current_level_num >= 3');
   });
 
-  it('excludes entities that were already High or Critical at the boundary', () => {
+  it('qualifies entities whose level is strictly higher than at the boundary, or had none', () => {
     const query = buildNewlyHighCriticalCountQuery('default', '.entities-v1');
-    expect(query).toContain('boundary_level_num IS NULL OR boundary_level_num < 3');
+    // High to Critical counts; Critical to Critical and Critical to High do not.
+    expect(query).toContain('boundary_level_num IS NULL OR current_level_num > boundary_level_num');
+    expect(query).not.toContain('boundary_level_num < 3');
   });
 
   it('maps risk levels to numbers with nested single-condition CASEs', () => {
