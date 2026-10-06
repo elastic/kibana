@@ -52,7 +52,6 @@ apiTest.describe(
       ['EVAL', `FROM ${index} | EVAL x = 1`, 'Command "EVAL" is not allowed'],
       ['STATS', `FROM ${index} | STATS c = COUNT(*)`, 'Command "STATS" is not allowed'],
       ['LIMIT', `FROM ${index} | LIMIT 10`, 'Command "LIMIT" is not allowed'],
-      ['METADATA', `FROM ${index} METADATA _id`, 'METADATA is not allowed'],
       [
         'a $ wildcard that matches a hyphenated source view',
         'FROM $.*.sources.*-*',

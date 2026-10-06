@@ -60,7 +60,6 @@ A source is rows only. On create and update the ES|QL must:
 - parse without errors;
 - start with `FROM` or `TS`;
 - contain nothing but `WHERE` after the source command (this also rejects subqueries);
-- not use `METADATA`, because ES|QL returns nulls for metadata columns read through a view;
 - not `FROM` a Nightshift source view, or a `$` wildcard that would match one (`$.nightshift.sources.*`,
   `$.nightshift.*`, `$.*`, `$.*.sources.*-*`), or the new view can match itself;
 - target exactly one kind of data. Every index in `FROM` or `TS` must classify as the same
@@ -73,6 +72,9 @@ A source is rows only. On create and update the ES|QL must:
   and is not part of the type: `FROM remote:logs-*` and `FROM *:logs-*` are logs, and
   `FROM remote:logs-*, other:traces-*` is still a mix. An exclusion (`-cluster:*`,
   `cluster:-index`) is not a target.
+
+`METADATA` belongs to the source command (`FROM logs-* METADATA _id`). A field declared there is a
+column of the view. A later query that asks for a metadata field the view did not declare gets nulls.
 
 Classification reads the index name. The same bases Discover uses (`logs`, `filebeat`,
 `traces`, `metrics`, `metricbeat`, and the rest of those lists) decide the kind. A name that

@@ -45,6 +45,9 @@ describe('validateSourceQuery', () => {
       'FROM logs-*, remote:logs-* | WHERE x > 1',
       'FROM *:logs-*',
       'TS remote:metrics-*',
+      'FROM logs-* METADATA _id',
+      'FROM logs-* METADATA _id, _source | WHERE x > 1',
+      'TS metrics-* METADATA _id',
       'FROM logs-*, -remote:*',
     ])('%s', (esql) => {
       expect(validateSourceQuery(esql)).toBeUndefined();
@@ -78,17 +81,6 @@ describe('validateSourceQuery', () => {
         'FROM logs-* | WHERE host.name IN (FROM hosts | STATS BY host.name)',
         'is not allowed'
       );
-    });
-
-    it('METADATA on FROM', () => {
-      expectRejected('FROM logs-* METADATA _id', 'METADATA is not allowed');
-      expectRejected('FROM logs-* METADATA _id, _source | WHERE x > 1', 'METADATA is not allowed');
-    });
-
-    // Assumption check against @elastic/esql: TS must produce the same `option` node for
-    // METADATA as FROM does.
-    it('METADATA on TS', () => {
-      expectRejected('TS metrics-* METADATA _id', 'METADATA is not allowed');
     });
 
     it('a Nightshift source view', () => {
@@ -128,6 +120,7 @@ describe('validateSourceQuery', () => {
 describe('getSourceType', () => {
   it('derives one type when every index matches that type', () => {
     expectType('FROM logs-*', 'logs');
+    expectType('FROM logs-* METADATA _id', 'logs');
     expectType('FROM logs-*, filebeat-*', 'logs');
     expectType('FROM logs.otel.queries-test', 'logs');
     expectType('FROM traces-apm*', 'traces');

@@ -88,8 +88,8 @@ const targetedIndices = (command: ESQLCommand): TargetedIndex[] =>
 
 /**
  * Validates that an ES|QL query is a valid Nightshift source: `FROM` or `TS` (time-series),
- * optionally narrowed by `WHERE`. Anything that reshapes rows belongs to the engines reading
- * the view. `METADATA` is rejected because ES|QL returns nulls for it through a view.
+ * optionally narrowed by `WHERE`. `METADATA` on that source command is kept. Anything that
+ * reshapes rows belongs to the engines reading the view.
  * A remote cluster prefix (`cluster:index`, `*:index`) is allowed; type checks use the index.
  * Nightshift source views (including `$` wildcards that would match them) are rejected because
  * a source cannot `FROM` itself, on this cluster or another.
@@ -119,10 +119,6 @@ export const validateSourceQuery = (esql: string): string | undefined => {
   );
   if (disallowedCommand) {
     return `Command "${disallowedCommand.name.toUpperCase()}" is not allowed in a source query: only WHERE may follow FROM or TS`;
-  }
-
-  if (Walker.matchAll(root, { type: 'option', name: 'metadata' }).length > 0) {
-    return 'METADATA is not allowed in a source query';
   }
 
   const nightshiftView = Walker.find(

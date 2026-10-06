@@ -261,22 +261,6 @@
       }
     },
     {
-      "id": "bd16983193fab33-9f5344bbaf601ff",
-      "title": "POST /internal/nightshift/sources validation rejects METADATA with a 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
-        "line": 99,
-        "column": 31
-      }
-    },
-    {
       "id": "bd16983193fab33-6c6ece7c3e4eb22",
       "title": "POST /internal/nightshift/sources validation rejects a $ wildcard that matches a hyphenated source view with a 400",
       "expectedStatus": "passed",
