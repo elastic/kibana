@@ -176,7 +176,7 @@ describe('Perform bulk action route', () => {
         body: { ...getBulkDisableRuleActionSchemaMock(), action: BulkActionTypeEnum.delete },
       });
 
-    it('returns 200 when bulkDeleteRules reports a concurrently-deleted rule as success', async () => {
+    it('returns 200 with the rule in deleted when bulkDeleteRules succeeds', async () => {
       clients.detectionRulesClient.bulkDeleteRules.mockResolvedValue({
         rules: [mockRule],
         errors: [],
