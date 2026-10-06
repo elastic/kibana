@@ -35,14 +35,14 @@ export interface DataStreamDefinition<
   /**
    * Whether this is a system data stream.
    *
-   * When set to `true`, Kibana will verify in dev/CI mode that Elasticsearch recognises the
+   * When set to `true`, Kibana verifies in dev mode that Elasticsearch recognizes the
    * stream as a system data stream after creation. If it does not, Kibana throws a clear error
    * so the misconfiguration is caught early — before it becomes a data-exposure risk in
-   * production.
+   * production. The check never runs in production.
    *
    * A `SystemDataStreamDescriptor` must be registered with Elasticsearch before the stream is
-   * initialised; otherwise the check will throw. See the Elasticsearch documentation and
-   * `kibana-team#3797` for guidance on how to register one.
+   * initialized; otherwise the check will throw. See the "System data streams" section of the
+   * `@kbn/data-streams` README for guidance on how to register one.
    *
    * @remark Only set this to `true` after coordinating with the Elasticsearch team.
    */

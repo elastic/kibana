@@ -130,7 +130,7 @@ Kibana **cannot** mark a stream as system. That requires a matching [`SystemData
 
 `@kbn/data-streams` are **not** system data streams by default. This means data is readable across spaces by default (leading to the class of bug behind [security-team#18291](https://github.com/elastic/security-team/issues/18291)). Treat any stream that holds privileged or cross-space-sensitive data as needing ES `system: true` — `hidden` alone is not enough.
 
-This package does **not** currently fail boot or roll back when Elasticsearch reports `system: false`. Developers must land the ES descriptor and verify the runtime flag themselves. Core is tracking stronger platform guidance / checks in [kibana-team#3797](https://github.com/elastic/kibana-team/issues/3797).
+Set `system: true` on the data stream definition to opt into a dev-mode check. When Kibana runs in dev mode and Elasticsearch reports `system: false` for that stream, initialization throws. The check only runs for streams initialized through Core (`registerDataStream` / `initializeClient`). It does not run in production, and it does not run for `DataStreamClient.initializeTemplate`, where Elasticsearch auto-creates the stream on first write. A stream registered with lazy creation is verified when `initializeClient` creates it, or at the next boot if it already exists. There is no rollback. Core is tracking stronger platform guidance / checks in [kibana-team#3797](https://github.com/elastic/kibana-team/issues/3797).
 
 ### Landing order
 

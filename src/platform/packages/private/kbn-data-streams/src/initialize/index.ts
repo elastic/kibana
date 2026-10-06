@@ -90,7 +90,7 @@ export async function initialize({
 }
 
 /**
- * In dev/CI mode: confirm that Elasticsearch considers this data stream a system data stream.
+ * In dev mode: confirm that Elasticsearch considers this data stream a system data stream.
  *
  * A stream is only protected by ES when a `SystemDataStreamDescriptor` has been registered for
  * it. If that descriptor is missing the stream will be created without the `system: true` flag
@@ -118,8 +118,9 @@ async function verifySystemDataStream({
       `[DEV] Data stream "${dataStream.name}" is defined with \`system: true\` but ` +
         `Elasticsearch does not report it as a system data stream. ` +
         `Ensure a SystemDataStreamDescriptor is registered with Elasticsearch for this stream ` +
-        `before initialising it in Kibana, or set \`system: false\` in the definition if this ` +
-        `stream does not need system-level protection. See kibana-team#3797 for details.`
+        `before initializing it in Kibana, or set \`system: false\` in the definition if this ` +
+        `stream does not need system-level protection. See the "System data streams" section ` +
+        `of the @kbn/data-streams README for details.`
     );
   }
 

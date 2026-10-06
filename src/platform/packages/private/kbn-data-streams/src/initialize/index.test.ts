@@ -577,7 +577,7 @@ describe('initialize - versioning logic', () => {
         acknowledged: true,
       });
 
-      // Re-fetch after creation returns system: false (ES did not recognise as system stream)
+      // Re-fetch after creation returns system: false (ES did not recognize as system stream)
       (elasticsearchClient.indices.getDataStream as jest.Mock).mockResolvedValueOnce({
         data_streams: [{ name: systemDataStream.name, system: false, indices: [] }],
       });
