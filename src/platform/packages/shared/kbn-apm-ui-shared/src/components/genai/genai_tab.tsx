@@ -17,7 +17,7 @@ import { asInteger } from '../../utils';
 import type { GenAiFields } from './get_genai_fields';
 import { GenAiFieldValue } from './genai_field_value';
 import { GenAiMessages } from './genai_messages';
-import { GenAiToolValue } from './genai_message_content';
+import { GenAiToolValue } from './genai_tool_value';
 import { parseNestedJson, unwrapToolResponse } from './parse_genai_value';
 import { GenAiSection } from './genai_section';
 
