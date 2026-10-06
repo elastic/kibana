@@ -140,6 +140,8 @@ describe('source type', () => {
     expectType('FROM "<logs-{now/d{yyyy.MM.dd|+01:00}}>"', 'logs');
     expectType('FROM "<logs-{now/d{yyyy.MM.dd|+01:00}}>", logs-*', 'logs');
     expectType('FROM remote:<logs-{now/d}>', 'logs');
+    expectType('FROM <app-{now/d}-logs-{now/d}>', 'logs');
+    expectType('FROM <app-{now/d}-logs-{now/d}>, logs-*', 'logs');
   });
 
   it('rejects an unscoped wildcard', () => {

@@ -57,7 +57,9 @@ const isNightshiftSourceViewPattern = (name: string): boolean => {
 const CLUSTER_PREFIX = /^[^:]+:(?!:)/;
 // Date math (`<logs-{now/d{yyyy.MM.dd|+01:00}}>`) can hold colons, which would read as a cluster
 // prefix and break the name matching. The braces only vary the date, so they act as a wildcard.
-const DATE_MATH_BRACES = /\{.*\}/;
+// Each expression is replaced on its own, with one level of nesting for the format, so the
+// literal text between expressions (`<app-{now/d}-logs-{now/d}>`) survives.
+const DATE_MATH_BRACES = /\{(?:[^{}]|\{[^{}]*\})*\}/g;
 const BACKTICK_QUOTES = /^`(.*)`$/;
 
 /**
