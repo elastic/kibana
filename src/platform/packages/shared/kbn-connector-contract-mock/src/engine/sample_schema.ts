@@ -208,6 +208,21 @@ export const sampleSchema = (
             ? []
             : [[name, value]];
         });
+        // Vendors sometimes require a property they never declare; any value satisfies it.
+        const { additionalProperties } = node;
+        const undeclared = [...required].filter(
+          (name): name is string => typeof name === 'string' && !(name in properties)
+        );
+        if (additionalProperties !== false) {
+          for (const name of undeclared) {
+            sampled.push([
+              name,
+              isRecord(additionalProperties)
+                ? child(additionalProperties, 'additionalProperties')
+                : null,
+            ]);
+          }
+        }
         return Object.fromEntries(sampled);
       }
       case 'array': {

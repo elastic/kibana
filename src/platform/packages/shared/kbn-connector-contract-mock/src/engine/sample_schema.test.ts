@@ -53,6 +53,16 @@ describe('sampleSchema', () => {
     expect(sample(schema, schemas)).toEqual({ tags: [{ name: 'string' }], pair: [0, 0] });
   });
 
+  it('fills required properties the schema never declares', () => {
+    const properties = { id: { type: 'integer' } };
+    const required = ['id', 'archived_at'];
+
+    expect(sample({ type: 'object', properties, required })).toEqual({ id: 0, archived_at: null });
+    expect(
+      sample({ type: 'object', properties, required, additionalProperties: { type: 'string' } })
+    ).toEqual({ id: 0, archived_at: 'string' });
+  });
+
   it('takes the first non-null variant and merges allOf parts', () => {
     expect(sample({ anyOf: [{ type: 'null' }, { type: 'integer' }] })).toBe(0);
     expect(
