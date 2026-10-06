@@ -58,9 +58,7 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('"Appearance and content" and "Appearance only"');
     expect(skill.content).toContain('Ask even when you found no gaps');
     expect(skill.content).toContain('Content mode is the default');
-    expect(skill.content).toContain(
-      "Skip this step only when the user's message already states a mode or names specific changes"
-    );
+    expect(skill.content).toContain('If the request already says what to change, do not call');
   });
 
   it('separates appearance-only and content enhance modes', () => {
