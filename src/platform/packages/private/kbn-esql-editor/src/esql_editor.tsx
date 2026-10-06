@@ -144,6 +144,7 @@ const ESQLEditorInternal = function ESQLEditor({
   hideQuickSearch,
   queryStats,
   enableResourceBrowser = false,
+  enableCreateView = false,
   onESQLDocsFlyoutVisibilityChanged,
   onVisorNlResultReady,
   editorApiRef,
@@ -1042,6 +1043,7 @@ const ESQLEditorInternal = function ESQLEditor({
         starredQueriesService={starredQueriesService}
         queryStats={queryStats}
         hideQueryHistory={hideQueryHistory}
+        enableCreateView={enableCreateView}
         onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
         {...editorMessages}
         onErrorClick={onErrorClick}

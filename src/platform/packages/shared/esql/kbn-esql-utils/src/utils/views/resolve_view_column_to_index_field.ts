@@ -9,12 +9,12 @@
 
 import { isSubQuery, Parser } from '@elastic/esql';
 import type { EsqlView } from '@kbn/esql-types';
-import { buildRenameSourceFieldMapFromCommands } from './build_rename_source_field_map';
+import { buildRenameSourceFieldMapFromCommands } from '../build_rename_source_field_map';
 import {
   getIndexPatternFromESQLQuery,
   splitIndexPatternSources,
-} from './get_index_pattern_from_query';
-import { getQuerySummaryFromCommands, resolveSourceField } from './get_query_summary';
+} from '../get_index_pattern_from_query';
+import { getQuerySummaryFromCommands, resolveSourceField } from '../get_query_summary';
 
 /** Views nested deeper than this are not walked, so a cyclic definition cannot stall a click. */
 const MAX_VIEW_DEPTH = 8;
