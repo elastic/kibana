@@ -22,7 +22,6 @@ const fixture = () => {
   const writes: string[] = [];
   const logs: string[] = [];
   let hideRuns = false;
-  let nextCommentId = 1000;
 
   const addIssue = (number: number, teams = ['Team:Core'], event = number): Issue => {
     const issue: Issue = { number, state: 'open', labels: ['ai:fix-flaky', ...teams] };
@@ -88,8 +87,8 @@ const fixture = () => {
       return run;
     },
     createComment: async (issue, body) => {
-      writes.push(body.includes('run:pending') ? 'receipt' : 'waiting');
-      const id = nextCommentId++;
+      writes.push('receipt');
+      const id = 1000 + issue;
       comments.set(issue, [
         ...(comments.get(issue) ?? []),
         { id, body, created_at: date(100), user: { login: 'github-actions[bot]' } },
@@ -177,11 +176,7 @@ test('a 13-request same-team burst admits one; another team still progresses', a
   for (let number = 13; number >= 1; number--) f.addIssue(number);
   f.addIssue(20, ['Team:ResponseOps']);
   assert.deepEqual(await f.sweep(), [1, 20]);
-  assert.deepEqual(
-    f.writes.filter((write) => write !== 'waiting'),
-    ['receipt', 'dispatch', 'update', 'receipt', 'dispatch', 'update']
-  );
-  assert.equal(f.writes.filter((write) => write === 'waiting').length, 12);
+  assert.deepEqual(f.writes, ['receipt', 'dispatch', 'update', 'receipt', 'dispatch', 'update']);
   assert.equal(f.dispatched[0].requestedBy, 'kibanamachine');
   assert.equal(f.issues.get(2)?.labels.includes('ai:fix-flaky'), true);
 });
@@ -396,7 +391,7 @@ test('ambiguous dispatch failure leaves a durable reservation and cannot retry o
   };
   await assert.rejects(f.sweep(), /connection reset/);
   assert.deepEqual(await f.sweep(), []);
-  assert.deepEqual(f.writes, ['receipt', 'waiting']);
+  assert.deepEqual(f.writes, ['receipt']);
 });
 
 test('a receipt update failure cannot cause another dispatch', async () => {
@@ -476,17 +471,18 @@ test('a multi-team reservation still blocks its free owner when its other owner 
   assert.deepEqual(await f.sweep(), []);
 });
 
-test('a full team gets one waiting comment per request instead of a comment every sweep', async () => {
+test('does not read histories for a backlog whose entire owning team is already at capacity', async () => {
   const f = fixture();
   f.addIssue(1);
   f.addPr(100, [1]);
   f.addIssue(2);
+  f.client.listEvents = async () => {
+    throw new Error('unnecessary history request');
+  };
+  f.client.listComments = async () => {
+    throw new Error('unnecessary comment request');
+  };
   assert.deepEqual(await f.sweep({ maxOpenFixesPerTeam: 1 }), []);
-  assert.match(f.comments.get(2)?.[0].body ?? '', /already has 1 open fix\./);
-  assert.equal(f.comments.get(1)?.length, 0);
-  assert.deepEqual(f.writes, ['waiting']);
-  assert.deepEqual(await f.sweep({ maxOpenFixesPerTeam: 1 }), []);
-  assert.deepEqual(f.writes, ['waiting']);
 });
 
 test('never retries a known attempt if its run cannot be read', async () => {
@@ -622,105 +618,4 @@ test('a bot request changed to a human request during the sweep is not dispatche
   };
   assert.deepEqual(await f.sweep(), []);
   assert.deepEqual(f.writes, []);
-});
-
-test('the waiting comment shows the blocking owner count, including PRs and active runs once', async () => {
-  const f = fixture();
-  f.addIssue(1, ['Team:Search']);
-  f.addPr(101, [1]);
-  f.addRun(1);
-  for (let number = 2; number <= 5; number++) {
-    f.addIssue(number, ['Team:Search']).state = 'closed';
-    f.addPr(100 + number, [number]);
-  }
-  f.addIssue(6, ['Team:Core', 'Team:Search']);
-  assert.deepEqual(await f.sweep(), []);
-  assert.equal(
-    f.comments.get(6)?.[0].body,
-    'AI-fixable. Automatic fix queued: this team already has 5 open fixes. Remove and reapply `ai:fix-flaky` to start it now.\n\n<!-- flaky-fix-queue waiting:6 -->'
-  );
-});
-
-test('a changed open-fix count updates the same waiting comment', async () => {
-  const f = fixture();
-  f.addIssue(1).state = 'closed';
-  f.addPr(101, [1]);
-  f.addIssue(3);
-  await f.sweep({ maxOpenFixesPerTeam: 1 });
-  const id = f.comments.get(3)?.[0].id;
-  f.addIssue(2).state = 'closed';
-  f.addPr(102, [2]);
-  await f.sweep({ maxOpenFixesPerTeam: 1 });
-  assert.equal(f.comments.get(3)?.length, 1);
-  assert.equal(f.comments.get(3)?.[0].id, id);
-  assert.match(f.comments.get(3)?.[0].body ?? '', /already has 2 open fixes/);
-  assert.deepEqual(f.writes, ['waiting', 'update']);
-});
-
-test('admission replaces the waiting comment with a reservation before dispatch and then the run link', async () => {
-  const f = fixture();
-  f.addIssue(1).state = 'closed';
-  f.addPr(101, [1]);
-  f.addIssue(2);
-  await f.sweep({ maxOpenFixesPerTeam: 1 });
-  const id = f.comments.get(2)?.[0].id;
-  f.issues.delete(101);
-  const dispatch = f.client.dispatch;
-  f.client.dispatch = async (request) => {
-    assert.match(f.comments.get(2)?.[0].body ?? '', /request:2 run:pending/);
-    return dispatch(request);
-  };
-  assert.deepEqual(await f.sweep(), [2]);
-  assert.equal(f.comments.get(2)?.length, 1);
-  assert.equal(f.comments.get(2)?.[0].id, id);
-  assert.match(f.comments.get(2)?.[0].body ?? '', /^AI fix requested:/);
-  assert.deepEqual(f.writes, ['waiting', 'update', 'dispatch', 'update']);
-});
-
-test('failure to replace a waiting comment with a reservation cannot dispatch a fixer', async () => {
-  const f = fixture();
-  f.addIssue(1).state = 'closed';
-  f.addPr(101, [1]);
-  f.addIssue(2);
-  await f.sweep({ maxOpenFixesPerTeam: 1 });
-  f.issues.delete(101);
-  f.client.updateComment = async () => {
-    throw new Error('comment update failed');
-  };
-  await assert.rejects(f.sweep(), /comment update failed/);
-  assert.deepEqual(f.dispatched, []);
-});
-
-test('dry-run does not update waiting comments or post new ones when a team is full', async () => {
-  const f = fixture();
-  f.addIssue(1).state = 'closed';
-  f.addPr(101, [1]);
-  f.addIssue(3);
-  await f.sweep({ maxOpenFixesPerTeam: 1 });
-  f.addIssue(2).state = 'closed';
-  f.addPr(102, [2]);
-  f.addIssue(4);
-  await f.sweep({ maxOpenFixesPerTeam: 1, dryRun: true });
-  assert.deepEqual(f.writes, ['waiting']);
-  assert.match(f.comments.get(3)?.[0].body ?? '', /already has 1 open fix/);
-  assert.equal(f.comments.get(4)?.length, 0);
-});
-
-test('a human-authored waiting marker is not edited or used to suppress the bot comment', async () => {
-  const f = fixture();
-  f.addIssue(1).state = 'closed';
-  f.addPr(101, [1]);
-  f.addIssue(2);
-  f.comments.set(2, [
-    {
-      id: 77,
-      body: '<!-- flaky-fix-queue waiting:2 -->',
-      user: { login: 'engineer' },
-      created_at: date(2),
-    },
-  ]);
-  await f.sweep({ maxOpenFixesPerTeam: 1 });
-  assert.equal(f.comments.get(2)?.length, 2);
-  assert.equal(f.comments.get(2)?.[0].body, '<!-- flaky-fix-queue waiting:2 -->');
-  assert.deepEqual(f.writes, ['waiting']);
 });
