@@ -193,7 +193,6 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
       catchErrorSpan?.end();
     }
 
-
     nodeSpan?.end();
   }
 }

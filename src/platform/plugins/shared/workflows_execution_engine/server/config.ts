@@ -52,7 +52,8 @@ const configSchema = schema.object({
     /**
      * Maximum total byte size of the in-memory LRU output cache.
      * When the cache exceeds this limit, the least-recently-used entries are evicted.
-     * Set to "0b" to disable caching entirely.
+     * Set to "0b" to keep (almost) nothing resident; outputs are then reloaded from
+     * Elasticsearch on demand.
      */
     maxCacheSize: schema.byteSize({ defaultValue: '10mb' }),
     /**

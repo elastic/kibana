@@ -11,17 +11,9 @@ import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { JsonValue } from '@kbn/utility-types';
 import { ExecutionStatus } from '@kbn/workflows';
-import type {
-  ConnectorStep,
-  EsWorkflowExecution,
-  EsWorkflowStepExecution,
-  StackFrame,
-  WorkflowYaml,
-} from '@kbn/workflows';
-import { WorkflowGraph } from '@kbn/workflows/graph';
+import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
-import { buildStepExecutionId } from '../../utils';
 import { StepIoService } from '../step_io_service';
 import { WorkflowExecutionState } from '../workflow_execution_state';
 

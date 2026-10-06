@@ -163,22 +163,26 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
   /**
    * Ensures the given step execution IDs are resident in the LRU cache,
-   * fetching any cache misses from Elasticsearch. A no-op when `maxBytes` is
-   * `Infinity` (eviction disabled) or when all IDs are already cached.
+   * fetching any cache misses from Elasticsearch. A no-op when all IDs are
+   * already cached. IDs whose output is still held in state (written but not
+   * yet flushed) are skipped, since Elasticsearch does not have them yet.
    *
    * Callers (WorkflowContextManager.ensureContextReady) are responsible for
    * resolving which IDs are needed before calling this method.
    */
   public async rehydrate(ids: ReadonlyArray<string>): Promise<void> {
-    if (this.cache.totalBytes === Infinity) return;
-
-    const missing = ids.filter((id) => !this.cache.has(id, 'output'));
+    const missing = ids.filter(
+      (id) => !this.cache.has(id, 'output') && this.state.getStepIo(id, 'output') === undefined
+    );
     if (missing.length === 0) return;
 
     const docs = await this.stepRepository.getStepExecutionsByIds(missing, ['id', 'output']);
     for (const doc of docs) {
-      const bytes = safeOutputSize(doc.output) ?? 0;
-      this.cache.set(doc.id, 'output', doc.output ?? null, bytes);
+      // An output may have been written while the fetch was in flight.
+      if (this.state.getStepIo(doc.id, 'output') === undefined) {
+        const bytes = safeOutputSize(doc.output) ?? 0;
+        this.cache.set(doc.id, 'output', doc.output ?? null, bytes);
+      }
     }
   }
 }

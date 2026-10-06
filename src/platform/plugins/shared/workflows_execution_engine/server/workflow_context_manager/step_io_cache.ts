@@ -33,10 +33,19 @@ interface CacheEntry {
 export class StepIoCache {
   private readonly lru: LRUCache<string, CacheEntry>;
 
+  /**
+   * @param maxBytes Byte budget. `Infinity` means no eviction. `0` (or less) keeps
+   * nothing resident: lru-cache treats a `maxSize` of 0 as unbounded and rejects
+   * non-finite values, so both are mapped to valid sizes here.
+   */
   constructor(maxBytes: number, logger?: Logger) {
     const cacheLogger = logger?.get('step_io_cache');
+    let maxSize = 1;
+    if (maxBytes > 0) {
+      maxSize = Number.isFinite(maxBytes) ? Math.floor(maxBytes) || 1 : Number.MAX_SAFE_INTEGER;
+    }
     this.lru = new LRUCache({
-      maxSize: maxBytes,
+      maxSize,
       // Fallback size used when the caller does not supply an explicit byte count.
       sizeCalculation: (entry: CacheEntry) => safeOutputSize(entry.value) ?? 0,
       dispose: cacheLogger

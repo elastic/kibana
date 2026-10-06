@@ -44,7 +44,8 @@ import { isSerializedError } from '../utils/errors';
  *    Falls back to all predecessors when analysis is ambiguous (`null`) or when
  *    the node references no steps explicitly (size === 0) — conservative to
  *    guard against analysis gaps.
- * 2. Active scope-stack frames — needed by `enrichStepContextAccordingToStepScope`.
+ * 2. All `data.set` executions — needed by `getVariables`.
+ * 3. Active scope-stack frames — needed by `enrichStepContextAccordingToStepScope`.
  */
 export function resolveRehydrationTargets(
   node: GraphNodeUnion,
@@ -65,6 +66,11 @@ export function resolveRehydrationTargets(
       const latestExec = state.getLatestStepExecution(stepId, stackFrames);
       if (latestExec) neededIds.add(latestExec.id);
     }
+  }
+
+  // `getVariables()` reads every `data.set` output, so those must be resident too.
+  for (const step of state.getAllStepExecutions()) {
+    if (step.stepType === 'data.set') neededIds.add(step.id);
   }
 
   const executionId = state.getWorkflowExecutionId();
