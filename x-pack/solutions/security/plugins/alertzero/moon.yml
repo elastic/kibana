@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/datemath'
   - '@kbn/logging'
+  - '@kbn/nightshift-decision-trees'
   - '@kbn/features-plugin'
   - '@kbn/licensing-plugin'
   - '@kbn/licensing-types'
