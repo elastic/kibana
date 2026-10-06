@@ -252,6 +252,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
         >
           <EuiComboBox
             fullWidth
+            data-test-subj="graphDrilldownEncoder"
             singleSelection={{ asPlainText: true }}
             isClearable={false}
             options={outlinkEncoders.map((encoder) => ({ label: encoder.title, value: encoder }))}

@@ -338,20 +338,20 @@ export class GraphPage {
       .getByRole('group', { name: 'New drilldown' });
     await newDrilldown.getByRole('textbox', { name: 'Title' }).fill(title);
     await newDrilldown.getByRole('textbox', { name: 'URL', exact: true }).fill(url);
-    await newDrilldown.getByRole('combobox', { name: 'URL parameter type' }).click();
-    await this.page.getByRole('option', { name: encoder, exact: true }).click();
+    await this.page.components
+      .comboBox('graphDrilldownEncoder', newDrilldown)
+      .setSelectedOptions([encoder]);
     await newDrilldown.getByRole('button', { name: 'Save drilldown' }).click();
     await this.page.keyboard.press('Escape');
   }
 
-  async openDrilldownAndGetUrl(title: string): Promise<string> {
+  async openDrilldown(title: string) {
     const popupPromise = this.page.waitForEvent('popup');
     await this.page.getByRole('button', { name: title, exact: true }).click();
     const popup = await popupPromise;
     await popup.waitForURL((url) => url.toString() !== 'about:blank');
-    const url = popup.url();
-    await popup.close();
-    return url;
+    await popup.locator('[data-test-subj="discoverDocTable"]').waitFor({ state: 'visible' });
+    return popup;
   }
 
   async saveWorkspace() {

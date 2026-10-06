@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import rison from '@kbn/rison';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData } from '../fixtures';
 
@@ -24,8 +25,8 @@ spaceTest.describe('Graph - drilldowns', { tag: testData.GRAPH_UI_TAGS }, () => 
     dataViewId = data.id;
   });
 
-  spaceTest.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginWithCustomRole(testData.GRAPH_ALL_ROLE);
+  spaceTest.beforeEach(async ({ browserAuth, scoutSpace }) => {
+    await browserAuth.loginWithCustomRole(testData.graphAllDiscoverReadRole(scoutSpace.id));
   });
 
   spaceTest.afterAll(async ({ apiServices, scoutSpace }) => {
@@ -55,7 +56,7 @@ spaceTest.describe('Graph - drilldowns', { tag: testData.GRAPH_UI_TAGS }, () => 
 
   spaceTest(
     'persists and executes a custom Discover encoder',
-    async ({ pageObjects: { graph } }) => {
+    async ({ pageObjects: { graph }, kbnUrl, scoutSpace }) => {
       await graph.createWorkspaceWithQuery({
         dataViewTitle: testData.SECREPO_INDEX,
         dataViewName,
@@ -63,9 +64,10 @@ spaceTest.describe('Graph - drilldowns', { tag: testData.GRAPH_UI_TAGS }, () => 
         query: 'admin',
       });
       await graph.stopLayout();
+      const discoverUrl = kbnUrl.app('discover', { space: scoutSpace.id });
       await graph.createDrilldown({
         title: customDrilldownTitle,
-        url: "/app/discover#/?_a=(query:(language:kuery,query:'{{gquery}}'))",
+        url: `${discoverUrl}#/?_g=(time:(from:'2016-01-01T00:00:00.000Z',to:'2017-01-01T00:00:00.000Z'))&_a=(query:(language:kuery,query:{{gquery}}))`,
         encoder: 'KQL AND query',
       });
       await graph.saveWorkspaceAs(workspaceName);
@@ -78,11 +80,32 @@ spaceTest.describe('Graph - drilldowns', { tag: testData.GRAPH_UI_TAGS }, () => 
       await graph.stopLayout();
       await graph.openDrilldowns();
 
-      const openedUrl = new URL(await graph.openDrilldownAndGetUrl(customDrilldownTitle));
-      expect(openedUrl.pathname).toContain('/app/discover');
-      const decodedDiscoverState = decodeURIComponent(openedUrl.hash);
-      expect(decodedDiscoverState).toContain('admin');
-      expect(decodedDiscoverState).toContain(' and ');
+      const discoverPage = await graph.openDrilldown(customDrilldownTitle);
+      const openedUrl = new URL(discoverPage.url());
+      expect(openedUrl.pathname).toBe(new URL(discoverUrl).pathname);
+
+      const appStateQuery = new URLSearchParams(openedUrl.hash.split('?')[1]).get('_a');
+      if (!appStateQuery) {
+        throw new Error('Expected the Discover URL to contain _a app state');
+      }
+      const appState = rison.decode(decodeURIComponent(appStateQuery));
+      expect(appState).toMatchObject({
+        query: {
+          language: 'kuery',
+          query: expect.stringMatching(/(?=.*admin)(?=.* and )/),
+        },
+      });
+
+      const discoverQuery = discoverPage.locator('[data-test-subj="queryInput"]');
+      await expect(discoverQuery).toContainText('admin');
+      await expect(discoverQuery).toContainText(' and ');
+      await expect(discoverPage.locator('[data-test-subj="discoverQueryHits"]')).not.toHaveText(
+        '0'
+      );
+      const discoverTable = discoverPage.locator('[data-test-subj="discoverDocTable"]');
+      await expect(discoverTable).toContainText('admin');
+      await expect(discoverTable).toContainText('/test/wp-admin/');
+      await discoverPage.close();
     }
   );
 });
