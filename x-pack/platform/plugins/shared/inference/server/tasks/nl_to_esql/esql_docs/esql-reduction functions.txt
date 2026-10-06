@@ -1,0 +1,39 @@
+# REDUCTION FUNCTIONS
+
+Reduction functions reduce a multi-value to a single value.
+
+They include general functions like `MV_COUNT`, selection functions like `MV_FIRST`, `MV_LAST`, `MV_MIN`, and `MV_MAX`, numeric aggregation functions like `MV_AVG`, `MV_SUM`, `MV_MEDIAN`, `MV_MEDIAN_ABSOLUTE_DEVIATION`, `MV_PERCENTILE`, and `MV_PERCENTILE_WEIGHTED_SUM`, and string aggregation functions like `MV_CONCAT`.
+
+## Syntax
+
+`MV_COUNT`
+
+`MV_FIRST`
+
+`MV_LAST`
+
+`MV_MIN`
+
+`MV_MAX`
+
+`MV_AVG`
+
+`MV_SUM`
+
+`MV_MEDIAN`
+
+`MV_MEDIAN_ABSOLUTE_DEVIATION`
+
+`MV_PERCENTILE`
+
+`MV_PSERIES_WEIGHTED_SUM`
+
+`MV_CONCAT`
+
+### Parameters
+
+#### multi-value field
+
+The multi-value field to reduce to a single value.
+
+## Examples

@@ -1,0 +1,23 @@
+# MANIPULATION FUNCTIONS
+
+Manipulation functions add, remove, combine, or reorder multi-value inputs. All these functions return multi-values.
+
+## Syntax
+
+`MV_APPEND`
+
+`MV_DIFFERENCE`
+
+`MV_DEDUPE`
+
+`MV_SORT`
+
+`MV_INTERSECTION`
+
+`MV_UNION`
+
+`MV_SLICE`
+
+### Parameters
+
+## Examples
