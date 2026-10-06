@@ -9,6 +9,7 @@
 
 import { readFileSync, existsSync } from 'fs';
 import { resolve, dirname } from 'path';
+import { createFailError } from '@kbn/dev-cli-errors';
 import { hasLocationSource } from '../diff/parse_oasdiff';
 
 export interface AllowlistEntry {
@@ -46,7 +47,7 @@ export const loadAllowlist = (allowlistPath?: string): Allowlist => {
     const list = unmatchable
       .map(({ method, path, oasdiffId }) => `${method.toUpperCase()} ${path} (${oasdiffId})`)
       .join(', ');
-    throw new Error(
+    throw createFailError(
       `Allowlist entries can't scope oasdiff rules by "source", because oasdiff reports the spec file path there. ` +
         `Remove "source" from: ${list}. "source" only applies to kbn: rules.`
     );

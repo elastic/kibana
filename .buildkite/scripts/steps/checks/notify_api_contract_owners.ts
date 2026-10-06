@@ -335,7 +335,7 @@ export const readImpactReports = (
 
 export const RESOLVED_COMMENT_BODY = `## API Contract Breaking Changes
 
-The latest run found no breaking changes in the public OpenAPI surface, so the earlier results on this PR no longer apply.`;
+The latest run found nothing to report in the public OpenAPI surface, so the earlier results on this PR no longer apply.`;
 
 export const notifyApiContractOwners = async (reportPaths: readonly string[]): Promise<void> => {
   const { entries, complete } = readImpactReports(reportPaths);
