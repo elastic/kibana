@@ -8,7 +8,7 @@
 import Fs from 'fs';
 import { readFile } from 'fs/promises';
 import execa from 'execa';
-import { uploadConfigToVault } from './manage_secrets';
+import { resolveVaultTarget, uploadConfigToVault } from './manage_secrets';
 
 jest.mock('execa');
 jest.mock('fs/promises', () => ({
@@ -47,7 +47,7 @@ describe('uploadConfigToVault', () => {
   it('writes the config through stdin to the ci-prod Vault, whatever VAULT_ADDR is', async () => {
     mockedExeca.mockResolvedValue({ stdout: '' } as never);
 
-    await uploadConfigToVault('ci-prod');
+    await uploadConfigToVault(resolveVaultTarget('ci-prod'));
 
     const [command, args, options] = mockedExeca.mock.calls[0] as unknown as [
       string,
@@ -71,7 +71,7 @@ describe('uploadConfigToVault', () => {
       })
     );
 
-    const error = await uploadConfigToVault('ci-prod').catch((e: Error) => e);
+    const error = await uploadConfigToVault(resolveVaultTarget('ci-prod')).catch((e: Error) => e);
 
     expect(error).toBeInstanceOf(Error);
     const { message } = error as Error;
@@ -89,7 +89,7 @@ describe('uploadConfigToVault', () => {
       })
     );
 
-    const error = await uploadConfigToVault('dev').catch((e: Error) => e);
+    const error = await uploadConfigToVault(resolveVaultTarget('dev')).catch((e: Error) => e);
 
     expect((error as Error).message).toContain('Command failed with ENOENT: vault kv put');
     expect((error as Error).message).not.toContain('full message with stdout');

@@ -15,8 +15,11 @@ import {
   KBN_EVALS_VAULT_LOGIN_COMMANDS,
   KBN_EVALS_VAULT_PATHS,
   getKbnEvalsVaultAddr,
+  getKbnEvalsVaultPath,
   type KbnEvalsVaultType,
 } from '../../src/cli/utils';
+import { resolveEvalSuites } from '../../src/cli/suites';
+import { runScoutHook } from '../../src/cli/scout_hook';
 
 /**
  * Vault-backed config used by @kbn/evals CI and local development.
@@ -110,16 +113,89 @@ export const validateKbnEvalsConfig = (config: unknown): KbnEvalsConfig => {
   return configSchema.validate(config);
 };
 
-const ensureLocalConfigFileExists = (filePath: string) => {
+export type SuiteVaultConfig = Record<string, unknown>;
+
+/** Suite secrets are owned by their suite's `scoutHook`, so only their root shape is checked here. */
+export const validateSuiteVaultConfig = (config: unknown): SuiteVaultConfig => {
+  if (typeof config !== 'object' || config === null || Array.isArray(config)) {
+    throw new Error('Suite vault config must be a JSON object');
+  }
+  return config as SuiteVaultConfig;
+};
+
+export interface VaultTarget {
+  vault: KbnEvalsVaultType;
+  vaultPath: string;
+  /** Gitignored local copy that retrieve writes and upload reads. */
+  filePath: string;
+  exampleFilePath: string;
+  validate: (config: unknown) => object;
+  /** Runs before a config is sent to Vault, and throws if it would not work. */
+  checkBeforeUpload?: (config: object) => void;
+}
+
+/**
+ * Resolves where `vault` stores a config: the general config by default, or the secret named by
+ * the suite's `vaultSecret` in `evals.suites.json`, kept locally under `<suite dir>/vault/`.
+ */
+export const resolveVaultTarget = (vault: KbnEvalsVaultType, suiteId?: string): VaultTarget => {
+  if (!suiteId) {
+    return {
+      vault,
+      vaultPath: getVaultPath(vault),
+      filePath: KBN_EVALS_CONFIG_FILE,
+      exampleFilePath: KBN_EVALS_CONFIG_EXAMPLE_FILE,
+      validate: validateKbnEvalsConfig,
+    };
+  }
+
+  const suite = resolveEvalSuites(REPO_ROOT).find(({ id }) => id === suiteId);
+  if (!suite) {
+    throw new Error(`Unknown eval suite "${suiteId}" (see evals.suites.json)`);
+  }
+  const { vaultSecret, scoutHook, absoluteConfigPath } = suite;
+  if (!vaultSecret) {
+    throw new Error(`Eval suite "${suiteId}" has no vaultSecret in evals.suites.json`);
+  }
+
+  const suiteVaultDir = Path.join(Path.dirname(absoluteConfigPath), 'vault');
+  return {
+    vault,
+    vaultPath: getKbnEvalsVaultPath(vault, vaultSecret),
+    filePath: Path.join(suiteVaultDir, 'config.json'),
+    exampleFilePath: Path.join(suiteVaultDir, 'config.example.json'),
+    validate: validateSuiteVaultConfig,
+    checkBeforeUpload: scoutHook
+      ? (config) => {
+          runScoutHook(REPO_ROOT, scoutHook, config);
+        }
+      : undefined,
+  };
+};
+
+export const describeVaultTarget = ({ vault, vaultPath, filePath }: VaultTarget): string =>
+  `Using ${vault} vault (${getKbnEvalsVaultAddr(
+    vault
+  )}, ${vaultPath}) with local file ${Path.relative(REPO_ROOT, filePath)}...`;
+
+const ensureLocalConfigFileExists = ({ filePath, exampleFilePath }: VaultTarget) => {
   if (Fs.existsSync(filePath)) return;
   throw new Error(
     [
       `Missing local @kbn/evals vault config at: ${filePath}`,
       `Create it by copying the example:`,
-      `  cp "${KBN_EVALS_CONFIG_EXAMPLE_FILE}" "${filePath}"`,
+      `  cp "${exampleFilePath}" "${filePath}"`,
       `Then fill in real values locally (this file is gitignored).`,
     ].join('\n')
   );
+};
+
+const readLocalConfigForUpload = async (target: VaultTarget): Promise<string> => {
+  ensureLocalConfigFileExists(target);
+  const config = await readFile(target.filePath, 'utf-8');
+  const validated = target.validate(JSON.parse(config));
+  target.checkBeforeUpload?.(validated);
+  return Buffer.from(JSON.stringify(validated)).toString('base64');
 };
 
 /**
@@ -157,63 +233,34 @@ const runVaultKv = async (
   }
 };
 
-export const retrieveFromVault = async (
-  vault: KbnEvalsVaultType,
-  vaultPath: string,
-  filePath: string,
-  field: string
-) => {
-  const stdout = await runVaultKv(vault, ['get', `-field=${field}`, vaultPath]);
+export const retrieveConfigFromVault = async (target: VaultTarget) => {
+  const { vault, vaultPath, filePath, validate } = target;
+  const stdout = await runVaultKv(vault, ['get', `-field=${KBN_EVALS_CONFIG_FIELD}`, vaultPath]);
 
   const value = Buffer.from(stdout, 'base64').toString('utf-8').trim();
-  const parsed = JSON.parse(value);
-  const validated = validateKbnEvalsConfig(parsed);
+  const validated = validate(JSON.parse(value));
+  await Fs.promises.mkdir(Path.dirname(filePath), { recursive: true });
   await writeFile(filePath, JSON.stringify(validated, null, 2));
   // eslint-disable-next-line no-console
   console.log(`Config written to: ${filePath}`);
 };
 
-export const retrieveConfigFromVault = async (vault: KbnEvalsVaultType) => {
-  await retrieveFromVault(
-    vault,
-    getVaultPath(vault),
-    KBN_EVALS_CONFIG_FILE,
-    KBN_EVALS_CONFIG_FIELD
-  );
-};
-
-export const uploadToVault = async (
-  vault: KbnEvalsVaultType,
-  vaultPath: string,
-  filePath: string,
-  field: string
-) => {
-  ensureLocalConfigFileExists(filePath);
-  const config = await readFile(filePath, 'utf-8');
-  const validated = validateKbnEvalsConfig(JSON.parse(config));
-  const asB64 = Buffer.from(JSON.stringify(validated)).toString('base64');
-
+export const uploadConfigToVault = async (target: VaultTarget) => {
+  const asB64 = await readLocalConfigForUpload(target);
   // `<field>=-` reads the value from stdin, keeping the config out of the process arguments.
-  await runVaultKv(vault, ['put', vaultPath, `${field}=-`], asB64);
-};
-
-export const uploadConfigToVault = async (vault: KbnEvalsVaultType) => {
-  await uploadToVault(vault, getVaultPath(vault), KBN_EVALS_CONFIG_FILE, KBN_EVALS_CONFIG_FIELD);
+  await runVaultKv(target.vault, ['put', target.vaultPath, `${KBN_EVALS_CONFIG_FIELD}=-`], asB64);
 };
 
 export const getCommand = async (
   format: 'vault-write' | 'env-var' = 'vault-write',
-  vault: KbnEvalsVaultType
+  target: VaultTarget
 ) => {
-  ensureLocalConfigFileExists(KBN_EVALS_CONFIG_FILE);
-  const config = await readFile(KBN_EVALS_CONFIG_FILE, 'utf-8');
-  const validated = validateKbnEvalsConfig(JSON.parse(config));
-  const asB64 = Buffer.from(JSON.stringify(validated)).toString('base64');
+  const asB64 = await readLocalConfigForUpload(target);
 
   if (format === 'vault-write') {
-    return `vault kv put -address=${getKbnEvalsVaultAddr(vault)} ${getVaultPath(
-      vault
-    )} ${KBN_EVALS_CONFIG_FIELD}=${asB64}`;
+    return `vault kv put -address=${getKbnEvalsVaultAddr(target.vault)} ${
+      target.vaultPath
+    } ${KBN_EVALS_CONFIG_FIELD}=${asB64}`;
   }
 
   return `${KBN_EVALS_VAULT_ENV_VAR}=${asB64}`;

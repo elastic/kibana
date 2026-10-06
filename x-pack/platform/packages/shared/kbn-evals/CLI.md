@@ -151,7 +151,7 @@ node scripts/evals logs --service edot --from-start
 
 ### `scout` -- Start Scout standalone
 
-Convenience wrapper around `node scripts/scout.js start-server` with evals defaults (`--arch stateful --domain classic --serverConfigSet evals_tracing`). `--suite` uses a suite's `serverConfigSet` and `scoutArch` / `scoutDomain`, and runs its `scoutHook` on the `--profile` config; `--serverConfigSet`, `--arch` and `--domain` override them. Positional arguments are forwarded to Scout.
+Convenience wrapper around `node scripts/scout.js start-server` with evals defaults (`--arch stateful --domain classic --serverConfigSet evals_tracing`). `--suite` uses a suite's `serverConfigSet` and `scoutArch` / `scoutDomain`, and runs its `scoutHook` on the `--profile` config (with `dev-vault`, on the suite's `vaultSecret` when it has one); `--serverConfigSet`, `--arch` and `--domain` override them. Positional arguments are forwarded to Scout.
 
 ```bash
 node scripts/evals scout
