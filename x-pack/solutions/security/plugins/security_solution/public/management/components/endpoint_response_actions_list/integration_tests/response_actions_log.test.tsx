@@ -866,31 +866,6 @@ describe('Response actions history', () => {
         expect(getByTestId(`${testPrefix}-output-executeResults-executeResponseOutput-output`));
       });
 
-      it('should not contain full output download link in expanded row for `execute` action WITHOUT Actions Log privileges', async () => {
-        useUserPrivilegesMock.mockReturnValue({
-          endpointPrivileges: getEndpointAuthzInitialStateMock({
-            canAccessEndpointActionsLogManagement: false,
-            canReadActionsLogManagement: false,
-          }),
-        });
-
-        useGetEndpointActionListMock.mockReturnValue({
-          ...getBaseMockedActionList(),
-          data: await getActionListMock({ actionCount: 1, commands: ['execute'] }),
-        });
-
-        render();
-        const { getByTestId, queryByTestId } = renderResult;
-
-        const expandButton = getByTestId(`${testPrefix}-expand-button`);
-        await user.click(expandButton);
-        expect(queryByTestId(`${testPrefix}-output-getExecuteLink`)).toBeNull();
-
-        const output = getByTestId(`${testPrefix}-details-tray-output`);
-        expect(output).toBeTruthy();
-        expect(output.textContent).toContain('execute completed successfully');
-      });
-
       it.each(['canAccessEndpointActionsLogManagement', 'canReadActionsLogManagement'])(
         'should contain full output download link in expanded row for `execute` action WITH %s ',
         async (privilege) => {

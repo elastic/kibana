@@ -499,20 +499,30 @@ const applyDefaultCoreHttpMocks = (http: AppContextTestRender['coreStart']['http
   fleetGetPackageHttpMock(http, { ignoreUnMockedApiRouteErrors: true });
 };
 
-const suppressKnownConsoleLogMessages = () => {
-  const realWarn = window.console.warn.bind(window.console);
-  const knownWarningMessages = [
-    // Detected not recommended unit (%, vw, cqw, cqi) in cell width settings. Adjust the `width`, `minWidth` and
-    // `maxWidth` values to use absolute length units like `em` for text cells or `px` for static elements like
-    // icons or plots.
-    'Detected not recommended unit',
-  ];
+/** @private */
+let CONSOLE_WARN_WRAPPER: typeof window.console.warn | undefined;
 
-  window.console.warn = (...props) => {
+const CONSOLE_WARNING_SURPRESS_MESSAGES = [
+  // Detected not recommended unit (%, vw, cqw, cqi) in cell width settings. Adjust the `width`, `minWidth` and
+  // `maxWidth` values to use absolute length units like `em` for text cells or `px` for static elements like
+  // icons or plots.
+  'Detected not recommended unit',
+];
+
+const suppressKnownConsoleLogMessages = () => {
+  if (CONSOLE_WARN_WRAPPER && window.console.warn === CONSOLE_WARN_WRAPPER) {
+    return;
+  }
+
+  const realWarn = window.console.warn.bind(window.console);
+
+  CONSOLE_WARN_WRAPPER = (...props) => {
     const consoleWarnMessage = props[0] ?? '';
 
-    if (knownWarningMessages.every((msg) => !consoleWarnMessage.includes(msg))) {
+    if (CONSOLE_WARNING_SURPRESS_MESSAGES.every((msg) => !consoleWarnMessage.includes(msg))) {
       return realWarn(...props);
     }
   };
+
+  window.console.warn = CONSOLE_WARN_WRAPPER;
 };
