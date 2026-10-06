@@ -14,6 +14,21 @@ node scripts/evals start --suite nightshift-investigations
 services, so iteration is fast. Use `node scripts/evals run --suite nightshift-investigations`
 when they are already up.
 
+### Serverless by default
+
+The suite runs against a local **serverless observability** Scout cluster (`scoutArch` /
+`scoutDomain` in its [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json)
+entry), locally and in CI. Serverless Elasticsearch runs in Docker, so Docker must be running;
+Kibana starts with `--serverless=oblt` on `5620`. To run on stateful instead:
+
+```bash
+node scripts/evals start --suite nightshift-investigations --scout-arch stateful
+```
+
+Switching arch restarts Scout. Both arches run the smoke eval's snapshot seeding: serverless Elasticsearch has no keystore, so `kbn-es` passes `GCS_CREDENTIALS` to it as a file secret instead.
+
+Serverless Elasticsearch always binds transport ports `9300`–`9302`. A development Elasticsearch started with `yarn es snapshot` (as the `local` profile below needs) also takes `9300`, so give it another transport port: `yarn es snapshot --license trial -E transport.port=9400`.
+
 ### Choosing where scores are recorded
 
 The `--profile` flag decides which cluster records the run. Refer to [`--profile` in the `@kbn/evals` README](../../../../platform/packages/shared/kbn-evals/README.md#profiles) for the full list of profiles and how each one resolves its credentials. The two that matter most here:
@@ -29,7 +44,7 @@ The `--profile` flag decides which cluster records the run. Refer to [`--profile
 
 ```bash
 # terminal 1
-yarn es snapshot --license trial   # Elasticsearch on localhost:9200
+yarn es snapshot --license trial -E transport.port=9400   # Elasticsearch on localhost:9200
 
 # terminal 2
 yarn start                         # Kibana on localhost:5601
@@ -70,28 +85,24 @@ A profile backed by a local config file (for example `--profile local`, reading
 
 ```json
 "sandbox": {
-  "host": "sandbox-api.example.com",
-  "port": 9090,
   "apiKey": "...",
-  "ssl": {
-    "certificate": "/path/to/tls.crt",
-    "key": "/path/to/tls.key",
-    "certificateAuthorities": "/path/to/ca.crt"
-  }
+  "url": "https://sandbox-api.example.com:443"
 }
 ```
 
-PEM fields hold absolute **file paths**, which Kibana reads at startup (`xpack.sandbox.ssl.*`).
-All three are optional, but `certificate` and `key` go together. Without them, Kibana connects
-without a client certificate and authenticates with the API key only, which works only if
-sandbox-api does not require mTLS. The hook fails early if a referenced file is not readable.
+Kibana connects to `url` over TLS and authenticates with the API key; without a port, `https`
+defaults to 443. A sandbox that requires mTLS also needs
+`"ssl": { "certificate", "key", "certificateAuthorities" }` as PEM **file paths** (`certificate` and
+`key` together; inline PEM contents are ignored).
 
 Alternatively, export the variables yourself, for example to point at a sandbox you run locally:
-`SANDBOX_API_KEY`, optionally `SANDBOX_CLIENT_CERT_PATH` and `SANDBOX_CLIENT_KEY_PATH` for mTLS,
-and for a private CA `SANDBOX_CA_CERT_PATH`. Profile values take precedence over exported ones. `SANDBOX_API_HOST` and `SANDBOX_API_PORT`
-default to `localhost:9090` (the probe port is not the gRPC endpoint). A self-hosted sandbox must
-accept these client certificates and allow sandbox-api to reach its containers; leave
-sandbox-service's `WORKSPACE_SNAPSHOT_*` settings unset for isolated conversations.
+`SANDBOX_API_KEY`, and `SANDBOX_API_URL` or `SANDBOX_API_HOST` / `SANDBOX_API_PORT` (default
+`localhost:9090`; the probe port is not the gRPC endpoint), plus `SANDBOX_CLIENT_CERT_PATH` /
+`SANDBOX_CLIENT_KEY_PATH` / `SANDBOX_CA_CERT_PATH` for mTLS. Profile values, including the
+profile's address in either form, take precedence over exported ones. The hook fails early if a
+PEM file is not readable. A self-hosted sandbox must allow sandbox-api
+to reach its containers; leave sandbox-service's `WORKSPACE_SNAPSHOT_*` settings unset for isolated
+conversations.
 
 Set `SANDBOX_MAX_CONCURRENT_SESSIONS` on a self-hosted sandbox-api process to support the run
 (for example, 64 for a 61-example, concurrency-16 run). Its default pool holds only ten active
@@ -257,7 +268,7 @@ URL and key are configured, and requires sandbox credentials for remote investig
 | `NIGHTSHIFT_SANDBOX_READABLE_INDICES` | Optional manifest guidance naming readable index patterns and explicit remote names (up to 10,000 characters). |
 | `NIGHTSHIFT_EXAMPLES_FILE` | The same file format documented above; only questions and stable case IDs are required. |
 
-With those variables and the external sandbox's mTLS settings configured:
+With those variables and the sandbox credentials configured:
 
 ```bash
 NIGHTSHIFT_DATASETS=trace-only NIGHTSHIFT_EXAMPLES_FILE=/private/path/examples.json \
@@ -268,7 +279,7 @@ NIGHTSHIFT_DATASETS=trace-only NIGHTSHIFT_EXAMPLES_FILE=/private/path/examples.j
 The committed [`scout/kibana.telemetry.yml`](scout/kibana.telemetry.yml) creates the preconfigured `nightshift-evals-telemetry` webhook with a secret
 `Authorization` header. The existing credential resolver authorizes connector access and execution,
 checks the agent's allow-list, and exposes the API key only to the requesting sandbox command.
-Remote telemetry and sandbox mTLS credentials are supplied through the hook environment.
+Remote telemetry and sandbox credentials are supplied through the hook environment.
 `/workspace/elastic.md` contains variable names and query guidance, never credential values. Its
 examples bound requests by time and advise using explicit remote names and narrow index patterns.
 These are instructions for the agent; the API key's privileges enforce the read restrictions.
@@ -361,8 +372,8 @@ For seeded evals, follow [`evals/smoke/`](evals/smoke). For file-driven investig
 1. **`types.ts`** — describe an example: its input, the expected output your evaluators will read,
    and an evaluator type bound to your task's output.
 2. **`task.ts`** — call the thing under test and return a typed result. For the investigation
-   engine that means `POST /internal/nightshift/investigations` through the `fetch` fixture, then
-   following the investigation to a terminal status.
+   engine that means `POST /internal/nightshift/investigations` through the `fetch` fixture, passing
+   the eval model as `connector_id`, then following the investigation to a terminal status.
 3. **`datasets.ts`** — declare `Dataset` objects with an `id`, a `name` that scores are recorded
    against, a `seedSource`, and an `examples()` call returning ground truth. Export a
    `get<Name>Datasets()` that passes them through `selectDatasets`, which is what makes
@@ -463,6 +474,8 @@ NIGHTSHIFT_DATASETS=synthetic-smoke node scripts/evals run --suite nightshift-in
 Registered in [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json)
 as `nightshift-investigations`.
 
+- **Where it runs:** a serverless observability Scout cluster; `run_suite.sh` reads `scoutArch` /
+  `scoutDomain` from the suite entry.
 - **What runs:** every eval — smoke and trace-only investigations. The ci-prod Vault config must
   hold the `sandbox` block; `.buildkite/scripts/steps/evals/run_suite.sh` runs the suite's
   `scoutHook` on it before starting Scout, and Buildkite agents must be able to reach the

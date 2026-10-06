@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { RuleKind, RecoveryStrategy, NoDataStrategy } from '@kbn/alerting-v2-schemas';
+import type {
+  RuleKind,
+  RecoveryStrategy,
+  NoDataStrategy,
+  StateTransitionOperator,
+} from '@kbn/alerting-v2-schemas';
 
 export type { RuleKind, RecoveryStrategy, NoDataStrategy };
 
@@ -72,11 +77,19 @@ export interface RuleArtifact {
   data: Record<string, any>;
 }
 
+/**
+ * Flat form mirror of `state_transition`. The visual form authors one dimension
+ * per phase. `pendingOperator` / `recoveringOperator` are carried so a YAML or
+ * API rule that joins `count` and `timeframe` with `and` or `or` round-trips
+ * unchanged; the form does not default them.
+ */
 export interface StateTransition {
   pendingCount?: number | null;
   pendingTimeframe?: string | null;
+  pendingOperator?: StateTransitionOperator | null;
   recoveringCount?: number | null;
   recoveringTimeframe?: string | null;
+  recoveringOperator?: StateTransitionOperator | null;
 }
 
 // ---------------------------------------------------------------------------

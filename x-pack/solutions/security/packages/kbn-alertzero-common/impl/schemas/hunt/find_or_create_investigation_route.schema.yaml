@@ -1,0 +1,109 @@
+openapi: 3.0.0
+info:
+  title: AlertZero find-or-create Investigation route
+  version: '1'
+paths:
+  /internal/alertzero/hunt/find_or_create_investigation:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: FindOrCreateInvestigation
+      description: >-
+        Mints the deterministic Investigation id for a threat report (a
+        uuidv5 hash the caller cannot compute) and creates the conversation,
+        or verifies an existing one on a 409 rather than trusting the
+        create-time race alone. `created` tells the caller which path ran, so
+        a rerun's trigger message can say it resumed the Investigation
+        instead of claiming to have opened it again. Best-effort report facts
+        for the trigger message are included when the report can be read;
+        their absence never fails the call.
+      summary: Find or create a Hunt Watch Investigation
+      tags:
+        - AlertZero API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reportId]
+              additionalProperties: false
+              properties:
+                reportId:
+                  type: string
+                  minLength: 1
+                  maxLength: 256
+                  description: Threat report id to find-or-create a Hunt Watch Investigation for.
+            examples:
+              FindOrCreateInvestigationRequestExample:
+                summary: Find or create the Investigation for a report.
+                value:
+                  reportId: report-2f9e1c
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - investigationConversationId
+                  - triggerAttachmentId
+                  - created
+                properties:
+                  investigationConversationId:
+                    type: string
+                    description: uuidv5(hunt:report:{reportId}); minted or verified existing.
+                  triggerAttachmentId:
+                    type: string
+                    description: >-
+                      trigger-{sha256(space|reportId)}; the security.threat
+                      attachment id the caller attaches to name this
+                      Investigation's report.
+                  created:
+                    type: boolean
+                    description: >-
+                      True when this call minted the Investigation; false
+                      when it verified one that already existed (a rerun on
+                      the same report).
+                  report:
+                    type: object
+                    description: >-
+                      Descriptive facts about the report for the trigger
+                      message. Absent when the report could not be read in
+                      this space.
+                    required: [iocCount, techniques]
+                    properties:
+                      title:
+                        type: string
+                        maxLength: 512
+                      sourceName:
+                        type: string
+                        maxLength: 512
+                      publishedAt:
+                        type: string
+                        maxLength: 512
+                      severity:
+                        type: string
+                        maxLength: 512
+                      iocCount:
+                        type: integer
+                        minimum: 0
+                      techniques:
+                        type: array
+                        maxItems: 100
+                        items:
+                          type: string
+                          maxLength: 512
+              examples:
+                FindOrCreateInvestigationResponse200Example:
+                  summary: A newly minted Investigation with readable report facts.
+                  value:
+                    investigationConversationId: 8f14e45f-ceea-5e58-8e1c-9f8d4e7a1b2c
+                    triggerAttachmentId: trigger-3b2e1f9a
+                    created: true
+                    report:
+                      title: Sample campaign targets financial sector
+                      sourceName: Example Threat Intel Feed
+                      iocCount: 12
+                      techniques: [T1059, T1055]

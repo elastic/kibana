@@ -10,8 +10,9 @@
 import queryString from 'query-string';
 import type { ContentListFeatures } from '../types';
 import { isSearchConfig, isSortingConfig } from '../types';
-import { DEFAULT_INITIAL_SORT, DEFAULT_SORT_FIELDS } from '../sorting';
+import { DEFAULT_INITIAL_SORT, DEFAULT_SORT_FIELDS, getSortFieldDirections } from '../sorting';
 import { encodeQueryValue } from './encode_query_value';
+import type { SortField } from '../sorting';
 import type { ParsedQuery, UrlStateSlices } from './types';
 
 /**
@@ -26,14 +27,19 @@ export interface SortState {
 }
 
 /**
+ * The sort directions offered for each sortable field, keyed by field.
+ */
+export type SortDirectionsByField = ReadonlyMap<string, ReadonlySet<SortState['direction']>>;
+
+/**
  * The configuration for a sorting URL.
  *
  * @property initialSort - The initial sort state.
- * @property validSortFields - The valid sort fields.
+ * @property sortDirectionsByField - The directions offered for each sortable field.
  */
 export interface SortingUrlConfig {
   initialSort: SortState;
-  validSortFields: ReadonlySet<string>;
+  sortDirectionsByField: SortDirectionsByField;
 }
 
 /**
@@ -42,24 +48,35 @@ export interface SortingUrlConfig {
 const SORT_CONFIG_KEY_SEPARATOR = '\u001f';
 
 /**
- * Gets the sorting fields from the sorting configuration.
+ * Builds the `field:direction` key that identifies an offered sort option.
+ * Matches the `sort` URL param format.
+ */
+const getSortOptionKey = ({ field, direction }: SortState): string => `${field}:${direction}`;
+
+const toFieldSortOptions = (fields: SortField[]): SortState[] =>
+  fields.flatMap((sortField) =>
+    getSortFieldDirections(sortField).map((direction) => ({ field: sortField.field, direction }))
+  );
+
+/**
+ * Gets the `(field, direction)` pairs the sort dropdown offers for a sorting configuration.
  *
  * @param sorting - The sorting configuration.
- * @returns The sorting fields.
+ * @returns The offered sort options.
  */
-const getSortingFields = (sorting: ContentListFeatures['sorting']): string[] => {
+const getSortingOptions = (sorting: ContentListFeatures['sorting']): SortState[] => {
   if (sorting === false) {
     return [];
   }
   if (isSortingConfig(sorting)) {
     if (sorting.fields) {
-      return sorting.fields.map(({ field }) => field);
+      return toFieldSortOptions(sorting.fields);
     }
     if (sorting.options) {
-      return sorting.options.map(({ field }) => field);
+      return sorting.options.map(({ field, direction }) => ({ field, direction }));
     }
   }
-  return DEFAULT_SORT_FIELDS.map(({ field }) => field);
+  return toFieldSortOptions(DEFAULT_SORT_FIELDS);
 };
 
 /**
@@ -83,8 +100,8 @@ const getInitialSort = (sorting: ContentListFeatures['sorting']): SortState => {
  */
 export const getSortingConfigKey = (sorting: ContentListFeatures['sorting']): string => {
   const initialSort = getInitialSort(sorting);
-  const fields = [...new Set(getSortingFields(sorting))].sort();
-  return [initialSort.field, initialSort.direction, ...fields].join(SORT_CONFIG_KEY_SEPARATOR);
+  const options = [...new Set(getSortingOptions(sorting).map(getSortOptionKey))].sort();
+  return [initialSort.field, initialSort.direction, ...options].join(SORT_CONFIG_KEY_SEPARATOR);
 };
 
 /**
@@ -97,13 +114,21 @@ export const getSortingUrlConfigFromKey = (key: string): SortingUrlConfig => {
   const [
     field = DEFAULT_INITIAL_SORT.field,
     direction = DEFAULT_INITIAL_SORT.direction,
-    ...fields
+    ...options
   ] = key.split(SORT_CONFIG_KEY_SEPARATOR);
   const validDirection = direction === 'desc' ? 'desc' : 'asc';
-  return {
-    initialSort: { field, direction: validDirection },
-    validSortFields: new Set(fields),
-  };
+  const sortDirectionsByField = new Map<string, Set<SortState['direction']>>();
+  for (const option of options) {
+    const separatorIndex = option.lastIndexOf(':');
+    const optionField = option.slice(0, separatorIndex);
+    const optionDirection = option.slice(separatorIndex + 1);
+    if (optionDirection === 'asc' || optionDirection === 'desc') {
+      const directions =
+        sortDirectionsByField.get(optionField) ?? new Set<SortState['direction']>();
+      sortDirectionsByField.set(optionField, directions.add(optionDirection));
+    }
+  }
+  return { initialSort: { field, direction: validDirection }, sortDirectionsByField };
 };
 
 /**
@@ -138,38 +163,35 @@ export const queryTextCodec = {
 /**
  * The codec for sort.
  *
- * @property key - The key for the sort.
- * @property encode - Encodes the sort.
- * @property decode - Decodes the sort.
+ * @param sortDirectionsByField - The directions offered for each sortable field.
+ * @param initialSort - The initial sort, omitted from the URL when active.
+ * @param onUnknownValue - Called with the raw `sort` value when it is malformed or not offered.
  */
 export const sortCodec = (
-  validSortFields: ReadonlySet<string>,
+  sortDirectionsByField: SortDirectionsByField,
   initialSort: SortState,
-  onUnknownField?: (field: string) => void
+  onUnknownValue?: (value: string) => void
 ) => ({
   key: 'sort',
   encode: (sort: SortState | undefined): Partial<ParsedQuery> => {
     if (!sort || (sort.field === initialSort.field && sort.direction === initialSort.direction)) {
       return { sort: undefined };
     }
-    return { sort: `${sort.field}:${sort.direction}` };
+    return { sort: getSortOptionKey(sort) };
   },
   decode: (params: ParsedQuery): SortState | undefined => {
     if (typeof params.sort !== 'string') {
       return undefined;
     }
-
     const [field, direction, extra] = params.sort.split(':');
     if (extra !== undefined || !field || (direction !== 'asc' && direction !== 'desc')) {
-      onUnknownField?.(String(params.sort));
+      onUnknownValue?.(params.sort);
       return undefined;
     }
-
-    if (!validSortFields.has(field)) {
-      onUnknownField?.(field);
+    if (!sortDirectionsByField.get(field)?.has(direction)) {
+      onUnknownValue?.(params.sort);
       return undefined;
     }
-
     return { field, direction };
   },
 });
@@ -226,28 +248,28 @@ export const encodeUrlState = (
   initialSort: SortState
 ): Partial<ParsedQuery> => ({
   ...queryTextCodec.encode(state.queryText ?? ''),
-  ...sortCodec(new Set([state.sort?.field ?? initialSort.field]), initialSort).encode(state.sort),
+  ...sortCodec(new Map(), initialSort).encode(state.sort),
 });
 
 /**
  * Decodes the new shape of the URL state.
  *
  * @param search - The search string.
- * @param validSortFields - The valid sort fields.
+ * @param sortDirectionsByField - The directions offered for each sortable field.
  * @param initialSort - The initial sort.
- * @param onUnknownField - A callback to call when an unknown field is encountered.
+ * @param onUnknownValue - A callback to call when a sort value is malformed or not offered.
  * @returns The decoded URL state.
  */
 export const decodeNewShape = (
   search: string,
-  validSortFields: ReadonlySet<string>,
+  sortDirectionsByField: SortDirectionsByField,
   initialSort: SortState,
-  onUnknownField?: (field: string) => void
+  onUnknownValue?: (value: string) => void
 ): UrlStateSlices => {
   const params = parseSearch(search);
   const state: UrlStateSlices = {};
   const queryText = queryTextCodec.decode(params);
-  const sort = sortCodec(validSortFields, initialSort, onUnknownField).decode(params);
+  const sort = sortCodec(sortDirectionsByField, initialSort, onUnknownValue).decode(params);
 
   if (queryText !== undefined) {
     state.queryText = queryText;
