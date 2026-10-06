@@ -144,7 +144,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.agenticInvestigations}.get`,
 
   // Platform – Proposals
-  'proposals.create',
+  `${internalNamespaces.proposals}.create`,
 
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
