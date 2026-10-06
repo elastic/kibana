@@ -7,6 +7,9 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { AttachmentTimelineEvent } from '@kbn/agent-builder-common';
+import type { ConversationWriteDescription } from '../../services/conversation_summary/describe_conversation_write';
+
+export type ConversationUpdatedPayload = ConversationWriteDescription;
 
 export interface ConversationMetadataPatchedPayload {
   conversationId: string;
@@ -30,6 +33,11 @@ type AttachmentEventsListener = (
   payload: ConversationAttachmentEventsPayload
 ) => void;
 
+type ConversationUpdatedListener = (
+  request: KibanaRequest,
+  payload: ConversationUpdatedPayload
+) => void;
+
 /**
  * Lightweight event bus for conversation lifecycle events.
  * Listeners registered here are called after a successful conversation write.
@@ -39,6 +47,8 @@ export interface ConversationEventBus {
   emitMetadataPatched(request: KibanaRequest, payload: ConversationMetadataPatchedPayload): void;
   onAttachmentEvents(listener: AttachmentEventsListener): void;
   emitAttachmentEvents(request: KibanaRequest, payload: ConversationAttachmentEventsPayload): void;
+  onConversationUpdated(listener: ConversationUpdatedListener): void;
+  emitConversationUpdated(request: KibanaRequest, payload: ConversationUpdatedPayload): void;
 }
 
 /**
@@ -49,6 +59,7 @@ export interface ConversationEventBus {
 export interface ScopedConversationEventEmitter {
   emitMetadataPatched(payload: ConversationMetadataPatchedPayload): void;
   emitAttachmentEvents(payload: ConversationAttachmentEventsPayload): void;
+  emitConversationUpdated(payload: ConversationUpdatedPayload): void;
 }
 
 export const createScopedConversationEventEmitter = (
@@ -57,6 +68,7 @@ export const createScopedConversationEventEmitter = (
 ): ScopedConversationEventEmitter => ({
   emitMetadataPatched: (payload) => bus.emitMetadataPatched(request, payload),
   emitAttachmentEvents: (payload) => bus.emitAttachmentEvents(request, payload),
+  emitConversationUpdated: (payload) => bus.emitConversationUpdated(request, payload),
 });
 
 export const createConversationEventBus = (): ConversationEventBus =>
@@ -65,6 +77,7 @@ export const createConversationEventBus = (): ConversationEventBus =>
 class ConversationEventBusImpl implements ConversationEventBus {
   private readonly metadataPatchedListeners: MetadataPatchedListener[] = [];
   private readonly attachmentEventsListeners: AttachmentEventsListener[] = [];
+  private readonly conversationUpdatedListeners: ConversationUpdatedListener[] = [];
 
   onMetadataPatched(listener: MetadataPatchedListener): void {
     this.metadataPatchedListeners.push(listener);
@@ -82,6 +95,16 @@ class ConversationEventBusImpl implements ConversationEventBus {
 
   emitAttachmentEvents(request: KibanaRequest, payload: ConversationAttachmentEventsPayload): void {
     for (const listener of this.attachmentEventsListeners) {
+      listener(request, payload);
+    }
+  }
+
+  onConversationUpdated(listener: ConversationUpdatedListener): void {
+    this.conversationUpdatedListeners.push(listener);
+  }
+
+  emitConversationUpdated(request: KibanaRequest, payload: ConversationUpdatedPayload): void {
+    for (const listener of this.conversationUpdatedListeners) {
       listener(request, payload);
     }
   }
