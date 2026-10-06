@@ -107,7 +107,7 @@ describe('rRuleRequestSchema', () => {
       expect(() =>
         rRuleRequestSchema.validate({
           ...basicRequest,
-          byweekday: Array.from({ length: 51 }, (_, i) => 'MO'),
+          byweekday: Array.from({ length: 51 }, () => 'MO'),
         })
       ).toThrow();
     });
@@ -136,7 +136,7 @@ describe('rRuleRequestSchema', () => {
       expect(() =>
         rRuleRequestSchema.validate({
           ...basicRequest,
-          bymonthday: Array.from({ length: 32 }, (_, i) => i),
+          bymonthday: Array.from({ length: 32 }, () => 1),
         })
       ).toThrow();
     });
@@ -165,7 +165,7 @@ describe('rRuleRequestSchema', () => {
       expect(() =>
         rRuleRequestSchema.validate({
           ...basicRequest,
-          bymonth: Array.from({ length: 13 }, (_, i) => i),
+          bymonth: Array.from({ length: 13 }, () => 1),
         })
       ).toThrow();
     });
