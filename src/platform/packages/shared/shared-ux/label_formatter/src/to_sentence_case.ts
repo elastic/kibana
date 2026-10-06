@@ -49,6 +49,7 @@ const TITLE_CASE_GLOSSARY = [
   'Cloud Connect',
   'SIEM Readiness',
   'V2 Alerting Preview',
+  'Alerts (V1)',
   'Ingest Hub',
   'Elastic Inference',
   'ES|QL Data Federation',

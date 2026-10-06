@@ -6,6 +6,7 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
+import type { AlertingMountConfig } from './alerting_mount_config';
 
 export class ExecutionHistoryPage {
   public readonly emptyPrompt: Locator;
@@ -16,7 +17,11 @@ export class ExecutionHistoryPage {
   public readonly policiesTable: Locator;
   public readonly policyDetailsFlyout: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl,
+    private readonly mountConfig: AlertingMountConfig
+  ) {
     this.emptyPrompt = this.page.testSubj.locator('ruleExecutionHistoryEmptyPrompt');
     this.retryButton = this.page.testSubj.locator('executionHistoryRetryButton');
     this.rulesTab = this.page.testSubj.locator('executionHistoryRulesTab');
@@ -27,13 +32,12 @@ export class ExecutionHistoryPage {
   }
 
   async goto(spaceId?: string) {
+    const appPath = `${this.mountConfig.appRoute}${this.mountConfig.paths.executionHistory}`;
     if (spaceId) {
-      await this.page.goto(
-        this.kbnUrl.app('management/alertingV2/execution_history', { space: spaceId })
-      );
+      await this.page.goto(this.kbnUrl.app(appPath, { space: spaceId }));
       return;
     }
-    await this.page.gotoApp('management/alertingV2/execution_history');
+    await this.page.gotoApp(appPath);
   }
 
   async openActionPoliciesTab() {
