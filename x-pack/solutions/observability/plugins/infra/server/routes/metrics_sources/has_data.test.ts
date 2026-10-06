@@ -146,10 +146,8 @@ describe('getHasData', () => {
 
     it('does not throw for a complete zero-hit response', async () => {
       const { client } = createClient(makeHitsResponse(0), makeHitsResponse(0));
-
-      await expect(
-        getHasData({ infraMetricsClient: client, source: 'all' })
-      ).resolves.not.toBeUndefined();
+      const hasDataResponse = await getHasData({ infraMetricsClient: client, source: 'all' });
+      expect(hasDataResponse).toEqual({ hasData: false });
     });
   });
 

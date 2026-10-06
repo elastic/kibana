@@ -61,7 +61,7 @@ describe('getHasData', () => {
     const [, phase1Params] = search.mock.calls[0];
     expect(phase1Params.query?.bool?.filter).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ range: { '@timestamp': expect.any(Object) } }),
+        { range: { '@timestamp': { gte: 'now-24h/h' } } },
         expect.objectContaining({
           bool: {
             must_not: [{ terms: { _tier: expect.arrayContaining(['data_cold', 'data_frozen']) } }],
