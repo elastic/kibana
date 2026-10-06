@@ -567,7 +567,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.description',
           {
-            defaultMessage: 'Entities with at least one alert in the last {timeRange}',
+            defaultMessage:
+              'Entities with at least one high- or critical-severity alert in the last {timeRange}',
             values: { timeRange },
           }
         ),
