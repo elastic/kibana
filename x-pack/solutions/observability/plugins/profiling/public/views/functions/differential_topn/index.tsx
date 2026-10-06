@@ -12,6 +12,7 @@ import { useProfilingDependencies } from '../../../components/contexts/profiling
 import { FramesSummary } from '../../../components/frames_summary';
 import type { OnChangeSortParams } from '../../../components/differential_topn_functions_grid';
 import { DifferentialTopNFunctionsGrid } from '../../../components/differential_topn_functions_grid';
+import { NoProfilingDataPrompt } from '../../../components/no_profiling_data_prompt';
 import { NormalizationMode } from '../../../components/normalization_menu';
 import { AsyncStatus } from '../../../hooks/use_async';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
@@ -196,24 +197,26 @@ export function DifferentialTopNFunctionsView() {
             size="xl"
             alignTop
           >
-            <DifferentialTopNFunctionsGrid
-              base={state.data}
-              baselineScaleFactor={isNormalizedByTime ? comparisonTime : comparison}
-              comparison={comparisonState.data}
-              comparisonScaleFactor={isNormalizedByTime ? baselineTime : baseline}
-              comparisonSortDirection={comparisonSortDirection}
-              comparisonSortField={comparisonSortField}
-              comparisonTotalSeconds={totalComparisonSeconds}
-              onChangePage={handlePageChange}
-              onChangeSort={handleOnSort}
-              onFrameClick={handleOnFrameClick}
-              pageIndex={pageIndex}
-              sortDirection={sortDirection}
-              sortField={sortField}
-              totalSeconds={totalSeconds}
-              searchFunctionName={searchFunctionName}
-              onSearchFunctionNameChange={handleSearchFunctionNameChange}
-            />
+            <NoProfilingDataPrompt hasData={state.data?.TopN.length !== 0}>
+              <DifferentialTopNFunctionsGrid
+                base={state.data}
+                baselineScaleFactor={isNormalizedByTime ? comparisonTime : comparison}
+                comparison={comparisonState.data}
+                comparisonScaleFactor={isNormalizedByTime ? baselineTime : baseline}
+                comparisonSortDirection={comparisonSortDirection}
+                comparisonSortField={comparisonSortField}
+                comparisonTotalSeconds={totalComparisonSeconds}
+                onChangePage={handlePageChange}
+                onChangeSort={handleOnSort}
+                onFrameClick={handleOnFrameClick}
+                pageIndex={pageIndex}
+                sortDirection={sortDirection}
+                sortField={sortField}
+                totalSeconds={totalSeconds}
+                searchFunctionName={searchFunctionName}
+                onSearchFunctionNameChange={handleSearchFunctionNameChange}
+              />
+            </NoProfilingDataPrompt>
           </AsyncComponent>
         </EuiFlexItem>
       </EuiFlexGroup>

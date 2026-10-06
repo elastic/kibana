@@ -12,6 +12,7 @@ import type { TopNFunctionSortField } from '@kbn/profiling-utils';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { TopNFunctionsGrid } from '../../../components/topn_functions';
+import { NoProfilingDataPrompt } from '../../../components/no_profiling_data_prompt';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../../hooks/use_profiling_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -113,19 +114,21 @@ export function TopNFunctionsView() {
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
               <AsyncComponent {...state} size="xl" alignTop>
-                <TopNFunctionsGrid
-                  topNFunctions={state.data}
-                  totalSeconds={timeRange.inSeconds.end - timeRange.inSeconds.start}
-                  isDifferentialView={false}
-                  onFrameClick={handleOnFrameClick}
-                  pageIndex={pageIndex}
-                  onChangePage={handlePageChange}
-                  sortField={sortField}
-                  sortDirection={sortDirection}
-                  onChangeSort={handleSortChange}
-                  searchFunctionName={searchFunctionName}
-                  onSearchFunctionNameChange={handleSearchFunctionNameChange}
-                />
+                <NoProfilingDataPrompt hasData={state.data?.TopN.length !== 0}>
+                  <TopNFunctionsGrid
+                    topNFunctions={state.data}
+                    totalSeconds={timeRange.inSeconds.end - timeRange.inSeconds.start}
+                    isDifferentialView={false}
+                    onFrameClick={handleOnFrameClick}
+                    pageIndex={pageIndex}
+                    onChangePage={handlePageChange}
+                    sortField={sortField}
+                    sortDirection={sortDirection}
+                    onChangeSort={handleSortChange}
+                    searchFunctionName={searchFunctionName}
+                    onSearchFunctionNameChange={handleSearchFunctionNameChange}
+                  />
+                </NoProfilingDataPrompt>
               </AsyncComponent>
             </EuiFlexItem>
           </EuiFlexGroup>

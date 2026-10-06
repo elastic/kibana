@@ -12,6 +12,7 @@ import { profilingShowErrorFrames } from '@kbn/observability-plugin/common';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { FlameGraph } from '../../../components/flamegraph';
+import { NoProfilingDataPrompt } from '../../../components/no_profiling_data_prompt';
 import { NormalizationMode } from '../../../components/normalization_menu';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRoutePath } from '../../../hooks/use_profiling_route_path';
@@ -168,16 +169,18 @@ export function DifferentialFlameGraphsView() {
       </EuiFlexItem>
       <EuiFlexItem>
         <AsyncComponent {...state} style={{ height: '100%' }} size="xl">
-          <FlameGraph
-            id="flamechart"
-            primaryFlamegraph={data?.primaryFlamegraph}
-            comparisonFlamegraph={data?.comparisonFlamegraph}
-            comparisonMode={comparisonMode}
-            baseline={isNormalizedByTime ? baselineTime : baseline}
-            comparison={isNormalizedByTime ? comparisonTime : comparison}
-            searchText={searchText}
-            onChangeSearchText={handleSearchTextChange}
-          />
+          <NoProfilingDataPrompt hasData={data?.primaryFlamegraph.TotalSamples !== 0}>
+            <FlameGraph
+              id="flamechart"
+              primaryFlamegraph={data?.primaryFlamegraph}
+              comparisonFlamegraph={data?.comparisonFlamegraph}
+              comparisonMode={comparisonMode}
+              baseline={isNormalizedByTime ? baselineTime : baseline}
+              comparison={isNormalizedByTime ? comparisonTime : comparison}
+              searchText={searchText}
+              onChangeSearchText={handleSearchTextChange}
+            />
+          </NoProfilingDataPrompt>
         </AsyncComponent>
       </EuiFlexItem>
     </EuiFlexGroup>

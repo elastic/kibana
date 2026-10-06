@@ -11,6 +11,7 @@ import { usePerformanceContext } from '@kbn/ebt-tools';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { FlameGraph } from '../../../components/flamegraph';
+import { NoProfilingDataPrompt } from '../../../components/no_profiling_data_prompt';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRoutePath } from '../../../hooks/use_profiling_route_path';
 import { useProfilingRouter } from '../../../hooks/use_profiling_router';
@@ -83,12 +84,14 @@ export function FlameGraphView() {
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
         <AsyncComponent {...state} style={{ height: '100%' }} size="xl">
-          <FlameGraph
-            id="flamechart"
-            primaryFlamegraph={data}
-            searchText={searchText}
-            onChangeSearchText={handleSearchTextChange}
-          />
+          <NoProfilingDataPrompt hasData={data?.TotalSamples !== 0}>
+            <FlameGraph
+              id="flamechart"
+              primaryFlamegraph={data}
+              searchText={searchText}
+              onChangeSearchText={handleSearchTextChange}
+            />
+          </NoProfilingDataPrompt>
         </AsyncComponent>
       </EuiFlexItem>
     </EuiFlexGroup>

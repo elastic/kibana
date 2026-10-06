@@ -26,9 +26,6 @@ jest.mock('../contexts/profiling_schema/profiling_schema_context', () => ({
 jest.mock('../schema_selector', () => ({
   SchemaSelector: jest.fn(() => null),
 }));
-jest.mock('../schema_empty_prompt/schema_data_guard', () => ({
-  SchemaDataGuard: jest.fn(({ children }) => children),
-}));
 
 import { useLocation } from 'react-router-dom';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
@@ -37,7 +34,6 @@ import { useProfilingDependencies } from '../contexts/profiling_dependencies/use
 import { useBackNavigation } from '../contexts/back_navigation/use_back_navigation';
 import { ProfilingSchemaContextProvider } from '../contexts/profiling_schema/profiling_schema_context';
 import { SchemaSelector } from '../schema_selector';
-import { SchemaDataGuard } from '../schema_empty_prompt/schema_data_guard';
 import { PrimaryProfilingSearchBar } from './primary_profiling_search_bar';
 import { ProfilingAppPageTemplate } from '.';
 
@@ -152,7 +148,6 @@ describe('ProfilingAppPageTemplate', () => {
         })
       );
       expect(SchemaSelector).toHaveBeenCalled();
-      expect(SchemaDataGuard).toHaveBeenCalled();
     });
 
     it('provides the default time range when the page has none', () => {
@@ -189,7 +184,6 @@ describe('ProfilingAppPageTemplate', () => {
 
       expect(ProfilingSchemaContextProvider).not.toHaveBeenCalled();
       expect(SchemaSelector).not.toHaveBeenCalled();
-      expect(SchemaDataGuard).not.toHaveBeenCalled();
     });
   });
 });

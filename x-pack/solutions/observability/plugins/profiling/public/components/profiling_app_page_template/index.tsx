@@ -22,7 +22,6 @@ import { useBackNavigation } from '../contexts/back_navigation/use_back_navigati
 import { AddDataTabs } from '../../views/add_data_view/types';
 import { ProfilingSchemaContextProvider } from '../contexts/profiling_schema/profiling_schema_context';
 import { SchemaSelector } from '../schema_selector';
-import { SchemaDataGuard } from '../schema_empty_prompt/schema_data_guard';
 import { useSchemaQueryParam } from '../../hooks/use_schema_query_param';
 
 export function ProfilingAppPageTemplate({
@@ -180,9 +179,7 @@ export function ProfilingAppPageTemplate({
                 <SchemaSelector />
               </EuiFlexItem>
             )}
-            <EuiFlexItem>
-              {showSchemaSelector ? <SchemaDataGuard>{children}</SchemaDataGuard> : children}
-            </EuiFlexItem>
+            <EuiFlexItem>{children}</EuiFlexItem>
           </EuiFlexGroup>
         </SchemaScope>
       </ObservabilityPageTemplate>

@@ -9,23 +9,33 @@ import React from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export function SchemaEmptyPrompt() {
+export function NoProfilingDataPrompt({
+  hasData,
+  children,
+}: {
+  hasData: boolean;
+  children: React.ReactElement;
+}) {
+  if (hasData) {
+    return children;
+  }
+
   return (
     <EuiEmptyPrompt
-      data-test-subj="profilingSchemaEmptyPrompt"
+      data-test-subj="profilingNoDataPrompt"
       color="subdued"
       iconType="magnify"
       titleSize="xs"
       title={
         <h2>
-          {i18n.translate('xpack.profiling.schemaEmptyPrompt.title', {
+          {i18n.translate('xpack.profiling.noProfilingDataPrompt.title', {
             defaultMessage: 'No profiling data found',
           })}
         </h2>
       }
       body={
         <p>
-          {i18n.translate('xpack.profiling.schemaEmptyPrompt.body', {
+          {i18n.translate('xpack.profiling.noProfilingDataPrompt.body', {
             defaultMessage:
               'Try updating your search filters or selecting a different time range or schema',
           })}
