@@ -638,6 +638,40 @@ describe('utils', () => {
         { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
       ]);
     });
+
+    /**
+     * The merged document is parsed with the create schema, whose artifact object is strict, so the
+     * legacy key has to be projected away before the merge. It stays on disk for the rollback
+     * window regardless.
+     */
+    it('patches a rule whose stored artifacts still carry the legacy value', () => {
+      const existing = createRuleSoAttributes({
+        artifacts: [
+          {
+            id: 'runbook-1',
+            type: 'runbook',
+            data: { content: 'steps' },
+            // @ts-expect-error legacy key retained on disk for rollback
+            value: 'steps',
+          },
+        ],
+      });
+
+      const result = buildUpdateRuleAttributes(
+        existing,
+        { metadata: { name: 'renamed' } },
+        {
+          updatedBy: { profile_uid: 'user-2' },
+          updatedAt: '2025-01-02T00:00:00.000Z',
+          version: 2,
+        }
+      );
+
+      expect(result.metadata.name).toBe('renamed');
+      expect(result.artifacts).toEqual([
+        { id: 'runbook-1', type: 'runbook', data: { content: 'steps' }, value: 'steps' },
+      ]);
+    });
   });
 
   describe('transformRuleSoAttributesToRuleApiResponse', () => {

@@ -93,6 +93,24 @@ export const mapFormValuesToCreateRequest = (formValues: FormValues): CreateRule
   ...mapFormValuesToRuleRequest(formValues),
 });
 
+type UpdateStateTransition = NonNullable<UpdateRuleData['state_transition']>;
+
+/**
+ * A delay mode decides the whole phase, so every leaf of it is sent: switching from a duration to
+ * an immediate delay builds `{ count: 0 }`, and an omitted `timeframe` would keep the duration the
+ * user just removed.
+ */
+const mapStateTransitionPhase = (
+  phase: StateTransition['pending']
+): UpdateStateTransition['pending'] =>
+  phase == null
+    ? null
+    : {
+        count: phase.count ?? null,
+        timeframe: phase.timeframe ?? null,
+        operator: phase.operator ?? null,
+      };
+
 /**
  * The form submits every field it owns, so anything the user emptied has to be sent as `null`:
  * PATCH merges leaf by leaf, and an omitted leaf would keep the value they just cleared.
@@ -110,7 +128,12 @@ export const mapFormValuesToUpdateRequest = (formValues: FormValues): UpdateRule
     },
     query: { ...query, breach: query.breach ?? null },
     grouping: grouping ?? null,
-    state_transition: state_transition ?? null,
+    state_transition: state_transition
+      ? {
+          pending: mapStateTransitionPhase(state_transition.pending),
+          recovering: mapStateTransitionPhase(state_transition.recovering),
+        }
+      : null,
     artifacts: artifacts ?? null,
   };
 };

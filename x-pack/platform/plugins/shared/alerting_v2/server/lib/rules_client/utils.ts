@@ -32,7 +32,11 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { applyPatch } from '../apply_patch';
-import { toApiQuery, toApiStateTransition } from '../../saved_objects/legacy_rule_shape';
+import {
+  toApiArtifacts,
+  toApiQuery,
+  toApiStateTransition,
+} from '../../saved_objects/legacy_rule_shape';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import { getInvalidRuleDataMessage } from '../errors/rule_error_messages';
 import { RULE_VERSION_FALLBACK } from '../rule_changes_history';
@@ -289,7 +293,7 @@ const toPatchableRuleData = (attrs: RuleSavedObjectAttributes): CreateRuleDataIn
   no_data: attrs.no_data,
   state_transition: toApiStateTransition(attrs.state_transition),
   grouping: attrs.grouping,
-  artifacts: attrs.artifacts,
+  artifacts: toApiArtifacts(attrs.artifacts),
 });
 
 /**
@@ -462,14 +466,7 @@ export function transformRuleSoAttributesToRuleApiResponse(
     no_data: attrs.no_data,
     state_transition: toApiStateTransition(attrs.state_transition),
     grouping: attrs.grouping,
-    // Project to the public artifact contract. Migrated rules may still carry a
-    // legacy `value` on disk for model-version rollback; echoing it in the API
-    // response makes round-trip updates fail zod `.strict()` validation.
-    artifacts: attrs.artifacts?.map(({ id: artifactId, type, data }) => ({
-      id: artifactId,
-      type,
-      data,
-    })),
+    artifacts: toApiArtifacts(attrs.artifacts),
     enabled: attrs.enabled,
     created_by: attrs.createdBy,
     created_at: attrs.createdAt,

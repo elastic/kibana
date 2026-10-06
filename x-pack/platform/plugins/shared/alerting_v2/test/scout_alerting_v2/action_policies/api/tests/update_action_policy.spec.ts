@@ -499,7 +499,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       });
 
       expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
+      expect(response.body.code).toBe('INVALID_ACTION_POLICY_DATA');
 
       const fetched = await apiServices.alertingV2.actionPolicies.get(created.id);
       expect(fetched.grouping_mode).toBe('per_alert');

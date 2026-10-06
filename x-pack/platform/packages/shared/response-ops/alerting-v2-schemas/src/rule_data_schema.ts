@@ -869,7 +869,9 @@ export type ImmutableRuleField = (typeof IMMUTABLE_RULE_FIELDS)[number];
  * rather than ignored.
  *
  * Cross-field checks are deliberately absent — a sparse delta cannot satisfy them. The merged
- * document is validated against {@link createRuleDataSchema} instead.
+ * document is validated against {@link createRuleDataSchema} instead. The one refinement kept here
+ * reads a single field, and `no_data` is replaced as a unit, so the body always carries enough to
+ * decide it.
  */
 export const updateRuleDataSchema = z
   .object({
@@ -887,6 +889,7 @@ export const updateRuleDataSchema = z
     artifacts: artifactsSchema.nullable().optional().describe(ARTIFACTS_DESCRIPTION),
   })
   .strict()
+  .refine(isNoDataStrategyWritable, rejectAlertNoDataStrategy)
   .meta({ id: 'alerting_update_rule' });
 
 export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;

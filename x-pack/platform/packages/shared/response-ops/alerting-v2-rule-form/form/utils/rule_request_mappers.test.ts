@@ -208,8 +208,8 @@ describe('rule_request_mappers', () => {
       };
 
       expect(mapFormValuesToUpdateRequest(formValues).state_transition).toEqual({
-        pending: { count: 0 },
-        recovering: { count: 3 },
+        pending: { count: 0, timeframe: null, operator: null },
+        recovering: { count: 3, timeframe: null, operator: null },
       });
     });
 
@@ -813,8 +813,8 @@ describe('rule_request_mappers', () => {
       expect(result.recovery).toEqual({ strategy: 'no_breach' });
       expect(result.no_data).toEqual({ strategy: 'resolve' });
       expect(result.state_transition).toEqual({
-        pending: { count: 2, timeframe: '5m' },
-        recovering: { count: 0 },
+        pending: { count: 2, timeframe: '5m', operator: null },
+        recovering: { count: 0, timeframe: null, operator: null },
       });
     });
 
@@ -993,6 +993,27 @@ describe('rule_request_mappers', () => {
         expect(result.query).toStrictEqual(expectedQuery);
       }
     );
+
+    // A delay mode owns its whole phase, so the leaves the new mode does not use
+    // have to be nulled: merging would otherwise keep the duration or operator
+    // the user just switched away from.
+    it.each([
+      ['an immediate', 'immediate' as const, { count: 0, timeframe: null, operator: null }],
+      ['a breach-count', 'breaches' as const, { count: 2, timeframe: null, operator: null }],
+    ])('clears the pending leaves %s delay does not own', (_, mode, expectedPending) => {
+      const result = mapFormValuesToUpdateRequest({
+        ...baseFormValues,
+        kind: 'alert',
+        recovery: { strategy: recoveryStrategy.manual },
+        stateTransitionAlertDelayMode: mode,
+        stateTransition: { pendingCount: 2, pendingTimeframe: '5m', pendingOperator: 'or' },
+      });
+
+      expect(result.state_transition).toStrictEqual({
+        pending: expectedPending,
+        recovering: null,
+      });
+    });
   });
 
   describe('mapRuleResponseToFormValues', () => {

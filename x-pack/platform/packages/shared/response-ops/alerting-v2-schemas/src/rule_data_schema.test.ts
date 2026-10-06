@@ -1233,13 +1233,23 @@ describe('updateRuleDataSchema', () => {
     }
   );
 
+  it('rejects a no_data update to "alert"', () => {
+    const result = updateRuleDataSchema.safeParse({ no_data: { strategy: 'alert' } });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues).toEqual([
+      expect.objectContaining({
+        path: ['no_data', 'strategy'],
+        message: 'no_data.strategy "alert" is not currently supported.',
+      }),
+    ]);
+  });
+
   /**
-   * A PATCH body is a sparse delta, so whether clearing `recovery` or setting an unsupported
-   * `no_data.strategy` is legal depends on the stored `kind`. These bodies are accepted here and
-   * validated after the merge, by `RulesClient`.
+   * A PATCH body is a sparse delta, so whether clearing `recovery` or `no_data` is legal depends on
+   * the stored `kind`. These bodies are accepted here and validated after the merge, by
+   * `RulesClient`.
    */
   it.each([
-    ['a no_data strategy that is not supported', { no_data: { strategy: 'alert' } }],
     ['recovery set to null', { recovery: null }],
     ['no_data set to null', { no_data: null }],
   ])('defers %s to the merged document', (_label, body) => {
