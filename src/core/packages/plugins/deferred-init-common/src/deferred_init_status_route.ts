@@ -16,14 +16,6 @@
 export const DEFERRED_INIT_STATUS_ROUTE = '/internal/core/deferred_init/{pluginId}';
 
 /**
- * Build the concrete path for a given plugin id. See {@link DEFERRED_INIT_STATUS_ROUTE}.
- *
- * @internal
- */
-export const getDeferredInitStatusPath = (pluginId: string): string =>
-  `/internal/core/deferred_init/${pluginId}`;
-
-/**
  * Status of a plugin's deferred initialization, as reported by {@link DEFERRED_INIT_STATUS_ROUTE}.
  * Duplicated as a literal union (not imported) from `InitState` (`@kbn/core-plugins-server`,
  * server-only) and `AppInitializingState` (`@kbn/core-application-browser`, browser-only) so this

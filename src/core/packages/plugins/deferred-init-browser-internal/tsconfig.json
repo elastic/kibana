@@ -21,6 +21,7 @@
     "@kbn/core-application-browser",
     "@kbn/core-base-browser-internal",
     "@kbn/core-http-browser-internal",
+    "@kbn/core-http-browser",
     "@kbn/core-lifecycle-browser",
   ]
 }

@@ -17,9 +17,10 @@ import {
   shareReplay,
   catchError,
 } from 'rxjs';
-import { getDeferredInitStatusPath } from '@kbn/core-deferred-init-common';
+import { DEFERRED_INIT_STATUS_ROUTE } from '@kbn/core-deferred-init-common';
 import type { DeferredInitStatusResponse } from '@kbn/core-deferred-init-common';
 import type { CoreService } from '@kbn/core-base-browser-internal';
+import { buildPath } from '@kbn/core-http-browser';
 import type { InternalHttpSetup, InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { DeferredInitStart, DeferredInitStatus } from '@kbn/core-deferred-init-browser';
 
@@ -75,7 +76,11 @@ export class DeferredInitService implements CoreService<DeferredInitStart, Defer
       this.refreshTriggers.set(pluginId, refresh$);
       status$ = merge(timer(0, POLL_INTERVAL_MS), refresh$).pipe(
         exhaustMap(() =>
-          from(http.get<DeferredInitStatusResponse>(getDeferredInitStatusPath(pluginId))).pipe(
+          from(
+            http.get<DeferredInitStatusResponse>(
+              buildPath(DEFERRED_INIT_STATUS_ROUTE, { pluginId })
+            )
+          ).pipe(
             map((res) => ({ status: res.status, error: res.error, attempts: res.attempts })),
             // Transient fetch error on this tick: skip it and let the next timer tick retry,
             // rather than erroring the shared observable out for every subscriber.

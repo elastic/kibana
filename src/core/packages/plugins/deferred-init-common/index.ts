@@ -11,10 +11,7 @@ export {
   DeferredInitializationError,
   isDeferredInitializationError,
 } from './src/deferred_initialization_error';
-export {
-  DEFERRED_INIT_STATUS_ROUTE,
-  getDeferredInitStatusPath,
-} from './src/deferred_init_status_route';
+export { DEFERRED_INIT_STATUS_ROUTE } from './src/deferred_init_status_route';
 export type {
   DeferredInitPhase,
   DeferredInitState,
