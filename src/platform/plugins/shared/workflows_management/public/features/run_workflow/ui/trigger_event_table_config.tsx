@@ -39,6 +39,10 @@ import type {
   UseTriggerEventTableConfigOptions,
   UseTriggerEventTableConfigResult,
 } from './trigger_event_table_config_types';
+import {
+  sortTriggerEventRows,
+  TRIGGER_EVENT_TABLE_SORTABLE_COLUMNS,
+} from './trigger_event_table_sort';
 import { WorkflowExecuteDataGridCellPopover } from './workflow_execute_data_grid_cell_popover';
 import {
   TriggerEventRunPayloadSelectionSync,
@@ -127,6 +131,10 @@ export function useTriggerEventTableConfig(
       })),
     [rows]
   );
+  const sortedDataTableRows = useMemo(
+    () => sortTriggerEventRows(dataTableRows, sort),
+    [dataTableRows, sort]
+  );
 
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({
@@ -211,6 +219,19 @@ export function useTriggerEventTableConfig(
       },
     }),
     [euiTheme.size.xs, summaryCopyPayloadCellAction]
+  );
+  const sortableGridColumnsConfiguration = useMemo<CustomGridColumnsConfiguration>(
+    () =>
+      Object.fromEntries(
+        TRIGGER_EVENT_TABLE_SORTABLE_COLUMNS.map((columnId) => [
+          columnId,
+          (props: Parameters<CustomGridColumnsConfiguration[string]>[0]) => ({
+            ...(customGridColumnsConfiguration[columnId]?.(props) ?? props.column),
+            isSortable: true,
+          }),
+        ])
+      ),
+    [customGridColumnsConfiguration]
   );
 
   const unifiedDataTableServices = useMemo(
@@ -315,9 +336,9 @@ export function useTriggerEventTableConfig(
     visibleTableColumns,
     showTimeColumn,
     sort,
-    dataTableRows,
+    dataTableRows: sortedDataTableRows,
     externalCustomRenderers,
-    customGridColumnsConfiguration,
+    customGridColumnsConfiguration: sortableGridColumnsConfiguration,
     unifiedDataTableServices,
     getNoCellActions: getNoUnifiedDataTableCellActions,
     handleSortChange,

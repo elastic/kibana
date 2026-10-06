@@ -263,6 +263,7 @@ export const initializeSearchEmbeddableApi = async ({
     // Trigger dataLoading$ and clear rows$ to show the initial loading state
     dataLoading$.next(true);
     rows$.next([]);
+    resultDataSource$.next(undefined);
 
     const previousSourceId = esqlSource$.getValue()?.id;
     const {

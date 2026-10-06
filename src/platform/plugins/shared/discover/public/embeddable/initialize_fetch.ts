@@ -335,6 +335,7 @@ export function initializeFetch({
               processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
             }),
             hitCount: resp.hits.total as number,
+            resultDataSource: undefined,
             fetchContext,
           };
         } catch (error) {
@@ -355,9 +356,7 @@ export function initializeFetch({
 
       api.fetchWarnings$.next(next.warnings ?? []);
       api.fetchContext$.next(next.fetchContext);
-      if (Object.hasOwn(next, 'resultDataSource')) {
-        stateManager.resultDataSource.next(next.resultDataSource);
-      }
+      stateManager.resultDataSource.next(next.resultDataSource);
       setApproximationApplied(next.approximationApplied);
     });
 
