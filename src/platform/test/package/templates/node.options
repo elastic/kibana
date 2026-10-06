@@ -1,2 +1,2 @@
---max-old-space-size=1024
+--max-old-space-size=812
 --unhandled-rejections=warn
