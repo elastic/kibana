@@ -215,7 +215,7 @@ export const getCommaAndPipe = (
   return [newLineCompleteItem, pipeSuggestion, commaSuggestion];
 };
 
-export type StatsCommand = ESQLCommand<'stats'> | ESQLCommand<'inline stats'>;
+type StatsCommand = ESQLCommand<'stats'> | ESQLCommand<'inline stats'>;
 
 export const isStatsCommand = (command: ESQLAstAllCommands): command is StatsCommand =>
   command.type === 'command' && (command.name === 'stats' || command.name === 'inline stats');
