@@ -21,6 +21,9 @@ export interface SecurityDatasetExample extends Example {
   };
   output: {
     criteria: string[];
+    /** Optional deterministic routing contract enforced by extra evaluators. */
+    routing?: 'forbid' | 'require';
+    required_tool?: string;
   };
 }
 
@@ -30,6 +33,7 @@ export type EvaluateSecurityDataset = (options: {
     description: string;
     examples: SecurityDatasetExample[];
   };
+  extraEvaluators?: Evaluator[];
 }) => Promise<void>;
 
 export function createEndpointCriteriaEvaluator({
@@ -59,12 +63,14 @@ export function createEvaluateSecurityDataset({
 }): EvaluateSecurityDataset {
   return async function evaluateSecurityDataset({
     dataset: { name, description, examples },
+    extraEvaluators = [],
   }: {
     dataset: {
       name: string;
       description: string;
       examples: SecurityDatasetExample[];
     };
+    extraEvaluators?: Evaluator[];
   }) {
     const dataset = {
       name,
@@ -77,7 +83,7 @@ export function createEvaluateSecurityDataset({
         datasets: [dataset],
         task: async ({ input }) => converseQuestionToTaskOutput(agentBuilderClient, input.question),
       },
-      [createEndpointCriteriaEvaluator({ evaluators })]
+      [createEndpointCriteriaEvaluator({ evaluators }), ...extraEvaluators]
     );
   };
 }

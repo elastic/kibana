@@ -19,9 +19,15 @@ const EVAL_SEEDED_INDICES = [
   'logs-endpoint.events.registry-default',
   'metrics-endpoint.metrics-default',
   'metrics-endpoint.policy-default',
+  '.logs-endpoint.actions-default',
+  '.logs-endpoint.action.responses-default',
 ];
 
-const RESTRICTED_INDICES = ['.fleet-agents'];
+const RESTRICTED_INDICES = [
+  '.fleet-agents',
+  '.logs-endpoint.actions-default',
+  '.logs-endpoint.action.responses-default',
+];
 
 /**
  * Suite id namespaces MUST stay disjoint: neither prefix may be a prefix of the

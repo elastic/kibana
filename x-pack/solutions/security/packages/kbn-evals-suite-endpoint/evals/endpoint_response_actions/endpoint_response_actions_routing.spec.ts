@@ -5,74 +5,36 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * https://www.elastic.co/licensing/elastic-license
- */
-
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { tags } from '@kbn/scout';
-import { METADATA_UNITED_TRANSFORM } from '@kbn/security-solution-plugin/common/endpoint/constants';
+import type { Evaluator } from '@kbn/evals';
 import { evaluate } from '../../src/evaluate';
-import {
-  waitForEndpointPackage,
-  waitForTransformPropagation,
-  seedScenario,
-  SCENARIOS,
-} from '../../src/data_generators/endpoint_data';
 import { cleanupTroubleshootingData } from '../../src/data_generators/cleanup';
-
-const UNITED_TRANSFORM_WILDCARD = `${METADATA_UNITED_TRANSFORM}*`;
-const ALL_SCENARIO_COUNT = Object.keys(SCENARIOS).length;
+import { seedTroubleshootingScenarios } from '../../src/data_generators/scenario_seeding';
+import {
+  createEndpointResponseActionsRoutingEvaluator,
+  GET_ENDPOINT_STATUS_TOOL_ID,
+} from '../../src/endpoint_response_actions_routing_evaluator';
 
 const TROUBLESHOOTING_SKILL_PATH =
   'skills/security/endpoint/elastic-defend-configuration-troubleshooting/SKILL.md';
 
 const NO_RESPONSE_ACTIONS_CRITERIA = [
-  `Activated the troubleshooting skill by reading ${TROUBLESHOOTING_SKILL_PATH} instead of the endpoint response actions skill`,
-  'Did not call any endpoint_response_actions tool such as list_endpoints, get_endpoint_status, or get_response_action_status before or during the diagnosis',
+  `Activated the elastic-defend-configuration-troubleshooting skill (via load_skill or reading its SKILL.md at ${TROUBLESHOOTING_SKILL_PATH}) and did not activate the endpoint response actions skill`,
+  'Did not call any endpoint response actions tool such as list_endpoints, get_endpoint_status, or get_response_action_status before or during the diagnosis',
 ] as const;
 
-const FORBIDDEN_RESPONSE_ACTIONS_TOOLS = [
-  'list_endpoints',
-  'get_endpoint_status',
-  'get_response_action_status',
-] as const;
+const ROUTING_EVALUATORS = [createEndpointResponseActionsRoutingEvaluator()] as Evaluator[];
 
 evaluate.describe('Endpoint Response Actions Routing', { tag: tags.stateful.classic }, () => {
   let unitedTransformId: string;
 
   evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, agentBuilderClient, log }) => {
-    await waitForEndpointPackage(kbnClient, esClient, log);
-
-    const { transforms } = await esClient.transform.getTransformStats({
-      transform_id: UNITED_TRANSFORM_WILDCARD,
-    });
-    unitedTransformId = transforms[0].id;
-
-    try {
-      await agentBuilderClient.converse({
-        agentId: agentBuilderDefaultAgentId,
-        input: 'hello',
-      });
-    } catch (e) {
-      log.warning(`Warmup failed: ${e}`);
-    }
-
-    const clients = { esClient, internalEsClient };
-    await cleanupTroubleshootingData(clients);
-
-    for (const scenario of Object.values(SCENARIOS)) {
-      await seedScenario(clients, scenario);
-    }
-
-    await waitForTransformPropagation(esClient, log, {
-      metadataCurrent: ALL_SCENARIO_COUNT,
-      metadataUnited: ALL_SCENARIO_COUNT,
+    unitedTransformId = await seedTroubleshootingScenarios({
+      kbnClient,
+      esClient,
+      internalEsClient,
+      agentBuilderClient,
+      log,
     });
   });
 
@@ -103,15 +65,35 @@ evaluate.describe('Endpoint Response Actions Routing', { tag: tags.stateful.clas
                 'Recommended remediation for the host connectivity or Elastic Defend health, such as restoring agent connectivity or restarting the endpoint service',
                 ...NO_RESPONSE_ACTIONS_CRITERIA,
               ],
+              routing: 'forbid',
             },
             metadata: {
               golden_id: 'era-011',
               row_type: 'negative_routing',
-              forbidden_tools: [...FORBIDDEN_RESPONSE_ACTIONS_TOOLS],
+            },
+          },
+          {
+            input: {
+              question: 'Check host eval-routing-unhealthy status — is it unhealthy and why?',
+            },
+            output: {
+              criteria: [
+                'Queried endpoint metadata or agent health evidence for eval-routing-unhealthy',
+                'Identified the host as unhealthy or offline with missed check-ins from endpoint or agent metadata',
+                'Explained the cause of the unhealthy state, such as connectivity loss or missed check-ins',
+                'Recommended remediation for the host connectivity or Elastic Defend health, such as restoring agent connectivity or restarting the endpoint service',
+                ...NO_RESPONSE_ACTIONS_CRITERIA,
+              ],
+              routing: 'forbid',
+            },
+            metadata: {
+              golden_id: 'era-011',
+              row_type: 'negative_routing',
             },
           },
         ],
       },
+      extraEvaluators: ROUTING_EVALUATORS,
     });
   });
 
@@ -120,7 +102,7 @@ evaluate.describe('Endpoint Response Actions Routing', { tag: tags.stateful.clas
       dataset: {
         name: 'endpoint: era-012 isolation failure attribution negative',
         description:
-          'Validates that isolation failure questions are attributed via host and policy health by the troubleshooting skill, not the endpoint response actions skill.',
+          'Validates that isolation failure questions are attributed via the failed action record and host and policy health by the troubleshooting skill, not the endpoint response actions skill.',
         examples: [
           {
             input: {
@@ -129,21 +111,22 @@ evaluate.describe('Endpoint Response Actions Routing', { tag: tags.stateful.clas
             },
             output: {
               criteria: [
-                'Investigated host, policy, or agent health evidence for eval-routing-unhealthy',
-                'Attributed the isolation failure to the host being unhealthy or offline and unable to execute response actions',
+                'Investigated the seeded failed isolate action record and its response for eval-routing-unhealthy, or the host, policy, or agent health evidence',
+                'Identified the recorded isolation failure, such as the agent being unreachable because the host missed check-ins and cannot execute response actions',
                 'Explained that a host in this state cannot receive or execute isolation requests until health or connectivity is restored',
                 'Recommended restoring host health or agent connectivity before retrying the isolation action',
                 ...NO_RESPONSE_ACTIONS_CRITERIA,
               ],
+              routing: 'forbid',
             },
             metadata: {
               golden_id: 'era-012',
               row_type: 'negative_routing',
-              forbidden_tools: [...FORBIDDEN_RESPONSE_ACTIONS_TOOLS],
             },
           },
         ],
       },
+      extraEvaluators: ROUTING_EVALUATORS,
     });
   });
 
@@ -160,18 +143,20 @@ evaluate.describe('Endpoint Response Actions Routing', { tag: tags.stateful.clas
             },
             output: {
               criteria: [
-                'Called the get_endpoint_status tool of the endpoint-response-actions skill, resolving the hostname eval-routing-unhealthy via the response actions service',
-                'Reported the host isolation state, such as isolated or not isolated, from the endpoint status',
+                `Called the get_endpoint_status tool (${GET_ENDPOINT_STATUS_TOOL_ID}) of the endpoint response actions skill, resolving the hostname eval-routing-unhealthy`,
+                'Reported the host isolation state from the endpoint status, which is seeded as not isolated',
               ],
+              routing: 'require',
+              required_tool: GET_ENDPOINT_STATUS_TOOL_ID,
             },
             metadata: {
               golden_id: 'era-013',
               row_type: 'positive_control',
-              tool_sequence: ['get_endpoint_status'],
             },
           },
         ],
       },
+      extraEvaluators: ROUTING_EVALUATORS,
     });
   });
 });

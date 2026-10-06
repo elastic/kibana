@@ -173,6 +173,12 @@ interface EndpointScenario {
   endpointStatus?: string;
   agentVersion?: string;
   extraDocuments?: ExtraDocument[];
+  /** Fleet package names written to the `.fleet-agents` doc (`packages` field). */
+  agentPackages?: string[];
+  /** Seeded `Endpoint.state.isolation` in the metadata document. */
+  isolationState?: boolean;
+  /** Overrides `last_checkin` on the Fleet agent doc (ISO timestamp). */
+  lastCheckin?: string;
 }
 
 const DEFAULT_POLICY_NAME = 'manual eval policy';
@@ -281,6 +287,66 @@ const createEndpointSecurityLogDocument = ({
   },
 });
 
+const ISOLATION_FAILURE_MESSAGE =
+  'isolate action failed: agent unreachable - endpoint has not checked in recently';
+
+/** Failed isolate action request in the response-actions index the troubleshooting skill reads. */
+const createIsolationActionDocument = ({
+  agentId,
+  actionId,
+}: {
+  agentId: string;
+  actionId: string;
+}): ExtraDocument => ({
+  index: '.logs-endpoint.actions-default',
+  document: {
+    agent: {
+      id: agentId,
+      policy: [{ agentId, elasticAgentId: agentId }],
+    },
+    originSpaceId: 'default',
+    tags: [],
+    EndpointActions: {
+      action_id: actionId,
+      expiration: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
+      type: 'INPUT_ACTION',
+      input_type: 'endpoint',
+      data: {
+        command: 'isolate',
+        comment: 'isolate eval-routing-unhealthy',
+        parameters: undefined,
+      },
+    },
+    error: ISOLATION_FAILURE_MESSAGE,
+    user: { id: 'eval' },
+  },
+});
+
+/** Failed isolate action response carrying the error the troubleshooting skill should find. */
+const createIsolationActionResponseDocument = ({
+  agentId,
+  actionId,
+}: {
+  agentId: string;
+  actionId: string;
+}): ExtraDocument => ({
+  index: '.logs-endpoint.action.responses-default',
+  document: {
+    agent: { id: agentId },
+    EndpointActions: {
+      action_id: actionId,
+      completed_at: new Date().toISOString(),
+      started_at: new Date().toISOString(),
+      data: {
+        command: 'isolate',
+        comment: '',
+        output: undefined,
+      },
+    },
+    error: ISOLATION_FAILURE_MESSAGE,
+  },
+});
+
 export async function seedScenario(clients: SeedClients, scenario: EndpointScenario) {
   const now = new Date().toISOString();
   const {
@@ -293,6 +359,9 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
     endpointStatus = 'enrolled',
     agentVersion = DEFAULT_AGENT_VERSION,
     extraDocuments = [],
+    agentPackages,
+    isolationState,
+    lastCheckin,
   } = scenario;
 
   await clients.esClient.create({
@@ -315,6 +384,9 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
       host: { name: hostName, hostname: hostName, os },
       Endpoint: {
         status: endpointStatus,
+        ...(isolationState === undefined
+          ? {}
+          : { state: { isolation: isolationState } satisfies { isolation: boolean } }),
         policy: { applied: { status: policyStatus, name: policyName, id: policyId } },
       },
       elastic: { agent: { id: agentId } },
@@ -339,10 +411,11 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
       local_metadata: { host: { name: hostName } },
       active: true,
       enrolled_at: now,
-      last_checkin: now,
+      last_checkin: lastCheckin ?? now,
       status: agentStatus,
       last_known_status: agentStatus,
       last_checkin_status: agentStatus,
+      ...(agentPackages ? { packages: agentPackages } : {}),
       policy_revision_idx: 1,
       policy_id: policyId,
     },
@@ -426,6 +499,11 @@ export const SCENARIOS = {
     policyName: 'eval-policy-routing-unhealthy',
     policyStatus: 'success',
     endpointStatus: 'unhealthy',
+    agentPackages: ['endpoint'],
+    isolationState: false,
+    // Stale check-in so the seeded data agrees with "offline / missed check-ins"
+    // questions asked about this host.
+    lastCheckin: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
     extraDocuments: [
       createPolicyResponseDocument({
         agentId: 'eval-agent-ts-routing-unhealthy-001',
@@ -436,6 +514,14 @@ export const SCENARIOS = {
         endpointStatus: 'unhealthy',
         message: 'agent_connectivity: missed check-ins; endpoint has not checked in with the agent',
         scenario: 'routing_unhealthy_host',
+      }),
+      createIsolationActionDocument({
+        agentId: 'eval-agent-ts-routing-unhealthy-001',
+        actionId: 'eval-routing-unhealthy-isolate-001',
+      }),
+      createIsolationActionResponseDocument({
+        agentId: 'eval-agent-ts-routing-unhealthy-001',
+        actionId: 'eval-routing-unhealthy-isolate-001',
       }),
     ],
   },
