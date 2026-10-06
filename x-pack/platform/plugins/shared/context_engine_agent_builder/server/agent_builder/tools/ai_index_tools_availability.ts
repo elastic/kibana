@@ -9,9 +9,9 @@ import type { ToolAvailabilityConfig } from '@kbn/agent-builder-server';
 import type { CoreStart } from '@kbn/core/server';
 import {
   CONTEXT_ENGINE_ENABLED_SETTING_ID,
-  CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID,
   CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
+import { CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID } from '@kbn/context-engine-plugin/common/constants';
 
 // Only reads settings, so caching per space is safe. Privileges are checked in each handler.
 export const aiIndexToolsAvailability: ToolAvailabilityConfig = {

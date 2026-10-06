@@ -11,7 +11,7 @@ import type { ApplicationStart, CoreStart } from '@kbn/core/public';
 
 type SettingsStart = CoreStart['settings'];
 import type { SuggestAutomationProvider } from '@kbn/context-engine-plugin/public/types';
-import { CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import { CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID } from '@kbn/context-engine-plugin/common/constants';
 import { i18n } from '@kbn/i18n';
 import { EMPTY, switchMap } from 'rxjs';
 import { AI_INDEX_ATTACHMENT_TYPE } from '../common/agent_builder_attachments';
