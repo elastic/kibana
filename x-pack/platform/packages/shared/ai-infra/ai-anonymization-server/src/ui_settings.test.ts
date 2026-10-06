@@ -38,6 +38,20 @@ describe('getAnonymizationUiSettings', () => {
       setting.schema.validate({ ...settings, maskingEnabled: true, rules: [brokenRule] })
     ).not.toThrow();
   });
+
+  it('accepts a very long regex pattern, so a previously saved setting is never discarded on read and silently reverted to maskingEnabled:false', () => {
+    const settings: AnonymizationSettings = JSON.parse(String(setting.value));
+    const longRule = {
+      type: 'RegExp',
+      enabled: true,
+      entityClass: 'MISC',
+      pattern: `(${'a|'.repeat(5000)}b)`,
+    };
+
+    expect(() =>
+      setting.schema.validate({ ...settings, maskingEnabled: true, rules: [longRule] })
+    ).not.toThrow();
+  });
 });
 
 interface RegexRule {

@@ -17,7 +17,7 @@ const regexRuleSchema = schema.allOf([
   baseRuleSchema,
   schema.object({
     type: schema.literal('RegExp'),
-    pattern: schema.string({ maxLength: 2000 }),
+    pattern: schema.string(),
     entityClass: schema.string(),
     id: schema.maybe(schema.string({ maxLength: 100 })),
     name: schema.maybe(schema.string({ maxLength: 200 })),
