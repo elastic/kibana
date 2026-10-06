@@ -125,27 +125,28 @@ interface WeeklyStep {
   steps?: WeeklyStep[];
 }
 
-// `[suiteId, requested model groups]` for every suite step in llm_evals.yml, including those
-// nested in groups.
-const weeklySuiteModelGroups = (steps: WeeklyStep[]): Array<[string, Set<string>]> =>
+// `[suiteId, requested model groups, step EVAL_SERVER_CONFIG_SET]` for every suite step in
+// llm_evals.yml, including those nested in groups.
+const weeklySuiteSteps = (steps: WeeklyStep[]): Array<[string, Set<string>, string | undefined]> =>
   steps.flatMap(({ env = {}, steps: nested = [] }) => [
     ...(env.EVAL_SUITE_ID
       ? [
           [
             env.EVAL_SUITE_ID,
             new Set((env.EVAL_MODEL_GROUPS ?? '').split(',').filter(Boolean)),
-          ] as [string, Set<string>],
+            env.EVAL_SERVER_CONFIG_SET,
+          ] as [string, Set<string>, string | undefined],
         ]
       : []),
-    ...weeklySuiteModelGroups(nested),
+    ...weeklySuiteSteps(nested),
   ]);
 
-const weeklyModelGroupsBySuite = new Map(
-  weeklySuiteModelGroups(
-    (parseYaml(Fs.readFileSync(Path.join(__dirname, 'llm_evals.yml'), 'utf-8')) as WeeklyStep)
-      .steps ?? []
-  )
+const weeklySteps = weeklySuiteSteps(
+  (parseYaml(Fs.readFileSync(Path.join(__dirname, 'llm_evals.yml'), 'utf-8')) as WeeklyStep)
+    .steps ?? []
 );
+
+const weeklyModelGroupsBySuite = new Map(weeklySteps.map((step) => [step[0], step[1]]));
 
 describe('evals.suites.json weeklyEisModelGroups', () => {
   it('is covered by the EVAL_MODEL_GROUPS of the suite step in llm_evals.yml', () => {
@@ -173,5 +174,23 @@ describe('evals.suites.json weeklyEisModelGroups', () => {
     const unknownIds = [...weeklyModelGroupsBySuite.keys()].filter((id) => !knownSuiteIds.has(id));
 
     expect(unknownIds).toEqual([]);
+  });
+
+  it('sets EVAL_SERVER_CONFIG_SET on every step whose suite defines a serverConfigSet', () => {
+    // run_suite.sh only reads the env var, so a step without it silently boots the default
+    // `evals_tracing` stack. These suites pre-date the rule and are not fixed here.
+    const allowlist = new Set(['attack-discovery', 'skill-selection-benchmark']);
+
+    const problems = weeklySteps.flatMap(([suiteId, , stepConfigSet]) => {
+      if (allowlist.has(suiteId)) return [];
+      const expected = suites.find((suite) => suite.id === suiteId)?.serverConfigSet;
+      if (expected === undefined || stepConfigSet === expected) return [];
+      return [
+        `${suiteId}: suite declares serverConfigSet "${expected}" but the step env has ` +
+          `"${stepConfigSet ?? 'no EVAL_SERVER_CONFIG_SET'}"`,
+      ];
+    });
+
+    expect(problems).toEqual([]);
   });
 });
