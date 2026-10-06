@@ -55,9 +55,7 @@ export const describeEndpointExceptionOrOperator = (artifact: ArtifactTabCase): 
       await pageObjects.artifactListPage.waitForEmpty(pagePrefix);
       await pageObjects.artifactListPage.openCreateFromEmpty(pagePrefix);
       await pageObjects.policyArtifactsPage.fillCreateForm('endpointExceptions');
-      await pageObjects.policyArtifactsPage.addEndpointExceptionOrConditions(OR_CONDITIONS, [
-        FIRST_FIELD,
-      ]);
+      await pageObjects.policyArtifactsPage.addEndpointExceptionOrConditions(OR_CONDITIONS);
       await pageObjects.artifactListPage.submitFlyout(pagePrefix);
       await pageObjects.artifactListPage.flyout(pagePrefix).waitFor({ state: 'hidden' });
       await pageObjects.toasts.dismissAll();
@@ -98,9 +96,7 @@ export const describeEndpointExceptionOrOperator = (artifact: ArtifactTabCase): 
         await expect(pageObjects.artifactListPage.card(pagePrefix)).toHaveCount(1);
 
         await pageObjects.artifactListPage.openEdit(pagePrefix);
-        await pageObjects.policyArtifactsPage.addEndpointExceptionOrConditions(OR_CONDITIONS, [
-          FIRST_FIELD,
-        ]);
+        await pageObjects.policyArtifactsPage.addEndpointExceptionOrConditions(OR_CONDITIONS);
         await pageObjects.artifactListPage.submitFlyout(pagePrefix);
         await pageObjects.artifactListPage.flyout(pagePrefix).waitFor({ state: 'hidden' });
         await pageObjects.toasts.dismissAll();
