@@ -46,11 +46,33 @@ jest.mock('../components/scan_failure_callout/scan_failure_callout', () => ({
   ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
 }));
 jest.mock('../hooks/use_alertzero_doc_title', () => ({ useAlertZeroDocTitle: jest.fn() }));
-jest.mock('../hooks/use_current_user', () => ({
-  useCurrentUser: jest.fn().mockReturnValue(undefined),
-}));
 
 const mockUseWorkers = useWorkers as jest.Mock;
+
+const withServiceAccountPicker = <T extends { security?: object }>(core: T) => ({
+  ...core,
+  security: {
+    ...core.security,
+    uiApi: {
+      components: {
+        getServiceAccountPicker: ({
+          onSelect,
+        }: {
+          onSelect: (account: { id: string } | null) => void;
+        }) => (
+          <button type="button" onClick={() => onSelect({ id: 'account-a' })}>
+            Select service account
+          </button>
+        ),
+      },
+    },
+  },
+});
+
+const selectServiceAccount = () => {
+  fireEvent.click(screen.getByTestId('alertZeroServiceAccountSelect-onboarding'));
+  fireEvent.click(screen.getByRole('button', { name: 'Select service account' }));
+};
 const mockUseInvestigationsCount = useInvestigationsCount as jest.Mock;
 // useUpdateWorker mock above is kept for completeness; OnboardingPage no longer calls it.
 
@@ -261,7 +283,14 @@ describe('LandingPage', () => {
     );
     const coreStart = coreMock.createStart();
     (coreStart.application.capabilities as Record<string, unknown>).alertzero = { write: true };
-    const core = { ...coreStart, http: { ...coreStart.http, patch: httpPatch } };
+    const core = withServiceAccountPicker({
+      ...coreStart,
+      http: {
+        ...coreStart.http,
+        get: jest.fn().mockResolvedValue(undefined),
+        patch: httpPatch,
+      },
+    });
     const history = createMemoryHistory();
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -292,16 +321,15 @@ describe('LandingPage', () => {
 
     expect(screen.getByText('AlertZero in 90 seconds')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
-    expect(screen.getByText('Enable your workers')).toBeInTheDocument();
+    expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
 
     // Start the save — this calls onSavingChange(true) in LandingPage.
-    fireEvent.click(screen.getByRole('button', { name: 'Enable and continue' }));
+    selectServiceAccount();
+    fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
 
     // Wait until all five PATCHes are in-flight (button becomes disabled).
     await waitFor(() =>
-      expect(screen.getByRole('button', { name: 'Enable and continue' })).toHaveAttribute(
-        'disabled'
-      )
+      expect(screen.getByRole('button', { name: 'Enable and run' })).toHaveAttribute('disabled')
     );
     expect(httpPatch).toHaveBeenCalledTimes(5);
 
@@ -318,7 +346,7 @@ describe('LandingPage', () => {
 
     // LandingPage must not unmount OnboardingPage while savingInProgress=true, even
     // though showQueue would otherwise be true.
-    expect(screen.getByText('Enable your workers')).toBeInTheDocument();
+    expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
     expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
 
     // Settle the fan-out with a mixed outcome: 4 succeed, 1 fails.
@@ -329,15 +357,13 @@ describe('LandingPage', () => {
 
     // Wait for the save to settle (isSaving clears, button re-enables).
     await waitFor(() =>
-      expect(screen.getByRole('button', { name: 'Enable and continue' })).not.toHaveAttribute(
-        'disabled'
-      )
+      expect(screen.getByRole('button', { name: 'Enable and run' })).not.toHaveAttribute('disabled')
     );
 
     // Partial failure must keep onboarding mounted: the parent save lock is not
     // released, so the partially-committed server state (one enabled worker) cannot
     // transition the page to the queue.
-    expect(screen.getByText('Enable your workers')).toBeInTheDocument();
+    expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
     expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
   });
 
@@ -359,7 +385,14 @@ describe('LandingPage', () => {
     );
     const coreStart = coreMock.createStart();
     (coreStart.application.capabilities as Record<string, unknown>).alertzero = { write: true };
-    const core = { ...coreStart, http: { ...coreStart.http, patch: httpPatch } };
+    const core = withServiceAccountPicker({
+      ...coreStart,
+      http: {
+        ...coreStart.http,
+        get: jest.fn().mockResolvedValue(undefined),
+        patch: httpPatch,
+      },
+    });
     const history = createMemoryHistory();
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -385,9 +418,10 @@ describe('LandingPage', () => {
     const { rerender } = render(makeUI());
     expect(screen.getByText('AlertZero in 90 seconds')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
-    expect(screen.getByText('Enable your workers')).toBeInTheDocument();
+    expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Enable and continue' }));
+    selectServiceAccount();
+    fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
 
     // Wait for all PATCHes to be in-flight.
     await waitFor(() => expect(httpPatch).toHaveBeenCalledTimes(5));
@@ -397,9 +431,7 @@ describe('LandingPage', () => {
 
     // Wait for the save to settle (button re-enables).
     await waitFor(() =>
-      expect(screen.getByRole('button', { name: 'Enable and continue' })).not.toHaveAttribute(
-        'disabled'
-      )
+      expect(screen.getByRole('button', { name: 'Enable and run' })).not.toHaveAttribute('disabled')
     );
 
     // On total failure, onSavingChange(false) must be called, releasing the lock.

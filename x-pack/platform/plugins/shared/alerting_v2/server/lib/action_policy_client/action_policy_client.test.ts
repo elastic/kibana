@@ -908,7 +908,7 @@ describe('ActionPolicyClient', () => {
         description: 'transition-policy description',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'wf-1' }],
-        groupingMode: 'per_episode',
+        groupingMode: 'per_alert',
         throttle: { strategy: 'per_status_interval', interval: '10m' },
         apiKey: 'old-api-key',
         apiKeyOwner: 'old-user',
@@ -958,7 +958,7 @@ describe('ActionPolicyClient', () => {
         description: 'keep-interval-policy description',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'wf-1' }],
-        groupingMode: 'per_episode',
+        groupingMode: 'per_alert',
         throttle: { strategy: 'on_status_change', interval: null },
         apiKey: 'old-api-key',
         apiKeyOwner: 'old-user',
@@ -3265,7 +3265,7 @@ describe('ActionPolicyClient', () => {
     it('skips expression-only matchers that cannot be resolved from rule tags', async () => {
       const matcherAttr: ActionPolicySavedObjectAttributes = {
         ...baseAttributes,
-        matcher: { expression: 'episode_status: "active"' },
+        matcher: { expression: 'alert_status: "active"' },
       };
 
       mockSavedObjectsClient.find.mockResolvedValueOnce(

@@ -7,7 +7,10 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import { ConversationMetadataUpdatedTriggerId } from '../../../common/workflows/triggers';
+import {
+  ConversationMetadataUpdatedTriggerId,
+  ConversationUpdatedTriggerId,
+} from '../../../common/workflows/triggers';
 import type { ConversationEventBus } from './conversation_event_bus';
 import { toAttachmentTriggerEvent } from './attachment_trigger_mapping';
 
@@ -17,8 +20,7 @@ import { toAttachmentTriggerEvent } from './attachment_trigger_mapping';
 export function registerConversationWorkflowEventBridge(
   conversationEventBus: ConversationEventBus,
   workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined,
-  logger: Logger,
-  isExperimentalEnabled: (request: KibanaRequest) => Promise<boolean>
+  logger: Logger
 ): void {
   if (!workflowsExtensions) {
     return;
@@ -26,9 +28,6 @@ export function registerConversationWorkflowEventBridge(
 
   const forward = async (eventType: string, payload: unknown, request: KibanaRequest) => {
     try {
-      if (!(await isExperimentalEnabled(request))) {
-        return;
-      }
       const client = await workflowsExtensions.getClient(request);
       await client.emitEvent(eventType, payload as Record<string, unknown>);
     } catch (error) {
@@ -36,7 +35,7 @@ export function registerConversationWorkflowEventBridge(
     }
   };
 
-  // Resolves the flag and the client once, then emits each trigger independently so one
+  // Resolves the client once, then emits each trigger independently so one
   // failing emit does not drop the rest of the batch.
   const forwardBatch = async (
     request: KibanaRequest,
@@ -44,9 +43,6 @@ export function registerConversationWorkflowEventBridge(
   ) => {
     let client: Awaited<ReturnType<typeof workflowsExtensions.getClient>>;
     try {
-      if (!(await isExperimentalEnabled(request))) {
-        return;
-      }
       client = await workflowsExtensions.getClient(request);
     } catch (error) {
       logger.warn(`Failed to resolve workflows client for attachment triggers: ${error}`);
@@ -70,5 +66,9 @@ export function registerConversationWorkflowEventBridge(
       request,
       events.map((event) => toAttachmentTriggerEvent(conversationId, event))
     );
+  });
+
+  conversationEventBus.onConversationUpdated((request, payload) => {
+    void forward(ConversationUpdatedTriggerId, payload, request);
   });
 }

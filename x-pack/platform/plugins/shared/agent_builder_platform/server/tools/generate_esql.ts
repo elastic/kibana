@@ -100,7 +100,7 @@ export const generateEsqlTool = ({
         disable_named_params: disableNamedParams = false,
         time_range: explicitTimeRange,
       },
-      { esClient, experimentalFeatures, modelProvider, logger, events, attachments }
+      { esClient, modelProvider, logger, events, attachments }
     ) => {
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
 
@@ -111,7 +111,7 @@ export const generateEsqlTool = ({
         execute: executeQuery ? 'data' : 'none',
         disableNamedParams,
         timeRange,
-        includeDatasets: experimentalFeatures.datasets,
+        includeDatasets: true,
         includeViews: true,
         modelProvider,
         esClient: esClient.asCurrentUser,

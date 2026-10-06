@@ -8,22 +8,25 @@
 import type { Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { ImpactService } from '../services/impact_service';
-import { createImpactAttachmentType } from './impact_attachment_type';
+import { impactAttachment } from './impact_attachment_type';
 
 /** Registers the readonly investigation_impact type with Agent Builder. */
 export const registerImpactAttachment = (
   agentBuilder: AgentBuilderPluginSetup,
-  deps: {
+  {
+    getImpactService,
+    logger,
+  }: {
     getImpactService: () => ImpactService;
     logger: Logger;
   }
 ): void => {
-  agentBuilder.attachments.registerType(
-    // The registry is typed for the erased `AttachmentTypeDefinition`, so a
-    // definition narrowed to its own data shape needs the cast every other
-    // attachment-owning plugin also makes here.
-    createImpactAttachmentType(deps) as Parameters<typeof agentBuilder.attachments.registerType>[0]
-  );
+  impactAttachment.registerAttachmentType(agentBuilder, {
+    getService: () => getImpactService().getDocumentService(),
+    logger,
+  });
 };
 
 export { attachImpactToInvestigation } from './attach_impact_to_investigation';
+export { attachImpactFromTool } from './attach_impact_from_tool';
+export { formatImpactForAgent, impactAttachment } from './impact_attachment_type';
