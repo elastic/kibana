@@ -7,11 +7,13 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
+import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
 import type { SignificantEventsMaintenanceFailure } from '../../../common/maintenance/types';
 import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../knowledge_indicators/data_stream';
 import { DETECTIONS_DATA_STREAM } from '../significant_events/detections/data_stream';
 import { DISCOVERIES_DATA_STREAM } from '../significant_events/discoveries_data_stream';
 import { EVENTS_DATA_STREAM } from '../significant_events/events/data_stream';
+import { RULE_EVENTS_INDEX } from '../significant_events/alerting/rule_events_metric_series';
 import { toMessage } from './to_message';
 
 /** Core-registered streams that Reset wipes and recreates so cached clients stay readable. */
@@ -140,6 +142,37 @@ const deleteDiscoveriesDataStream = async ({
   }
 };
 
+/**
+ * Remove all Significant Events documents from `.rule-events` using a
+ * `deleteByQuery` scoped to `source == SIGNIFICANT_EVENTS_ALERT_SOURCE`.
+ * Does not touch documents from other Alerting v2 producers.
+ * Returns true when at least one document was deleted.
+ */
+const deleteRuleEvents = async ({
+  esClient,
+  failures,
+}: ResetDataStreamsParams): Promise<boolean> => {
+  try {
+    const result = await esClient.deleteByQuery({
+      index: RULE_EVENTS_INDEX,
+      refresh: true,
+      allow_no_indices: true,
+      ignore_unavailable: true,
+      query: { term: { source: SIGNIFICANT_EVENTS_ALERT_SOURCE } },
+    });
+    if ((result.failures ?? []).length > 0) {
+      failures.push({
+        target: `data-stream:${RULE_EVENTS_INDEX}:delete`,
+        error: `partial shard failure: ${result.failures!.length} shard(s)`,
+      });
+    }
+    return (result.deleted ?? 0) > 0;
+  } catch (error) {
+    failures.push({ target: `data-stream:${RULE_EVENTS_INDEX}:delete`, error: toMessage(error) });
+    return false;
+  }
+};
+
 /** Wipe every Significant Events data stream; returns the names of streams whose data was deleted. */
 export const resetDataStreams = async (params: ResetDataStreamsParams): Promise<Set<string>> => {
   const deleted = new Set<string>();
@@ -150,6 +183,9 @@ export const resetDataStreams = async (params: ResetDataStreamsParams): Promise<
   }
   if (await deleteDiscoveriesDataStream(params)) {
     deleted.add(DISCOVERIES_DATA_STREAM);
+  }
+  if (await deleteRuleEvents(params)) {
+    deleted.add(RULE_EVENTS_INDEX);
   }
   return deleted;
 };

@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
 import type { Streams } from '@kbn/streams-schema';
 import { emptyAssets } from '@kbn/streams-schema';
 import {
@@ -31,6 +32,7 @@ import {
 } from './helpers/requests';
 
 const RESET_STREAM_NAME = 'logs.otel.maintenance-reset-test';
+const RULE_EVENTS_DATA_STREAM = '.rule-events';
 const ORPHAN_RULE_STREAM_NAME = 'logs.otel.maintenance-reset-orphan-rule';
 const REGISTERED_DATA_STREAMS = [
   '.significant_events-detections',
@@ -205,6 +207,28 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
+        // Seed one event directly into `.rule-events` so Reset's deleteByQuery is exercised.
+        // Use a unique id per run so re-runs after a failed cleanup never hit a 409.
+        await esClient.create({
+          index: RULE_EVENTS_DATA_STREAM,
+          id: `maintenance-reset-event-${Date.now()}`,
+          refresh: 'wait_for',
+          document: {
+            '@timestamp': timestamp,
+            source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
+            space_id: 'default',
+            fingerprint: 'maintenance-reset-event',
+            alert_status: 'active',
+            type: 'alert',
+          },
+        });
+
+        // Confirm the event is visible before reset.
+        const eventsBefore = await apiClient
+          .fetch('GET /internal/significant_events/events', { params: { query: {} } })
+          .expect(200);
+        expect(eventsBefore.body.total).to.be.greaterThan(0);
+
         await esClient.indices.deleteDataStream(
           { name: DISCOVERIES_DATA_STREAM },
           { ignore: [404] }
@@ -234,7 +258,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           storedQueries: 1,
           rules: 2,
           investigations: 0,
-          dataStreams: 3,
+          dataStreams: 4,
         });
         expect(
           await getMaintenanceStatus(apiClient).then((status) => status.featureSettings)
@@ -284,6 +308,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           { name: DISCOVERIES_TEST_TEMPLATE },
           { ignore: [404] }
         );
+        // Best-effort cleanup: remove the seeded rule-event in case Reset did not wipe it
+        // (e.g. when this finally runs after an earlier assertion failure).
+        await esClient
+          .deleteByQuery({
+            index: RULE_EVENTS_DATA_STREAM,
+            refresh: true,
+            query: { term: { fingerprint: 'maintenance-reset-event' } },
+          })
+          .catch(() => {});
         await deleteStream(apiClient, RESET_STREAM_NAME);
         await deleteStream(apiClient, ORPHAN_RULE_STREAM_NAME);
       }
