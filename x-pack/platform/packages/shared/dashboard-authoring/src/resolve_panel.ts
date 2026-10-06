@@ -31,7 +31,11 @@ export type PanelContentAttempt =
     };
 
 /** Operations that can trigger inline panel resolution. */
-export type InlinePanelOperationType = 'add_section' | 'add_panels' | 'edit_panels';
+export type InlinePanelOperationType =
+  | 'add_section'
+  | 'add_panels'
+  | 'edit_panels'
+  | 'upsert_dashboard';
 
 /** One-sentence note describing a chart authored during the current turn. */
 export interface PanelAuthoringNote {

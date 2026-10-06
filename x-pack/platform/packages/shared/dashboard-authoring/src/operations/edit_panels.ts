@@ -9,6 +9,7 @@ import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
 import {
   createPanelFailureResult,
+  type InlinePanelOperationType,
   type PanelContent,
   type PanelContentAttempt,
 } from '../resolve_panel';
@@ -32,7 +33,7 @@ type ValidEdit =
   | { panelInput: Extract<EditPanelItem, { source: 'config' }> }
   | { panelInput: EditPanelRequestInput; request: PanelResolutionRequest };
 
-const getUneditablePanelError = ({ id, type }: AttachmentPanel): string => {
+export const getUneditablePanelError = ({ id, type }: AttachmentPanel): string => {
   const configPanelType = findConfigPanelType(type);
   return configPanelType
     ? `Panel "${id}" is a ${configPanelType.label} panel. Edit it with source: "config", type: "${configPanelType.type}".`
@@ -47,9 +48,10 @@ const getUneditablePanelError = ({ id, type }: AttachmentPanel): string => {
  * fails instead of being rewritten. This is the only place an edit's renderer is
  * decided; the resolvers trust the one on the request.
  */
-const toEditResolutionRequest = (
+export const toEditResolutionRequest = (
   panelInput: EditPanelRequestInput,
-  existingPanel: AttachmentPanel
+  existingPanel: AttachmentPanel,
+  operationType: InlinePanelOperationType = 'edit_panels'
 ): { request: PanelResolutionRequest } | { error: string } => {
   const renderer = findPanelRenderer(existingPanel.type);
   if (!renderer) {
@@ -62,7 +64,7 @@ const toEditResolutionRequest = (
   }
 
   const base = {
-    operationType: 'edit_panels' as const,
+    operationType,
     identifier: panelInput.panelId,
     existingPanel,
   };

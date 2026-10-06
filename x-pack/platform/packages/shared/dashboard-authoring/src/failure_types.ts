@@ -12,6 +12,7 @@ export const DASHBOARD_OPERATION_FAILURE_TYPES = {
   editPanels: 'edit_panels',
   updatePanelLayouts: 'update_panel_layouts',
   validateDashboard: 'validate_dashboard',
+  upsertDashboard: 'upsert_dashboard',
 } as const;
 
 export type DashboardOperationFailureType =

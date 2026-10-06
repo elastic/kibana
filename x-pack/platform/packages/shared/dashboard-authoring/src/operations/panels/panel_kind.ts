@@ -16,6 +16,61 @@ const sectionIdField = z
     'Existing section id or the key of an add_section earlier in this call. If omitted, panel is added at the top level.'
   );
 
+const PLACEMENT_KEYS: ReadonlySet<string> = new Set(['grid', 'panelId']);
+
+type OptionalField<TField extends z.core.SomeType> = TField extends z.ZodOptional
+  ? TField
+  : z.ZodOptional<TField>;
+
+/** Type of the merged shape built by `toUpsertContentSchema`. */
+type UpsertContentShape<TAddShape extends z.ZodRawShape, TEditShape extends z.ZodRawShape> = {
+  [TKey in Exclude<
+    keyof TAddShape | keyof TEditShape,
+    'grid' | 'panelId'
+  >]: TKey extends keyof TAddShape
+    ? TKey extends keyof TEditShape
+      ? TEditShape[TKey] extends z.ZodOptional
+        ? OptionalField<TAddShape[TKey]>
+        : TAddShape[TKey]
+      : OptionalField<TAddShape[TKey]>
+    : TKey extends keyof TEditShape
+    ? OptionalField<TEditShape[TKey]>
+    : never;
+};
+
+const isOptional = (field: z.core.$ZodType): boolean => z.safeParse(field, undefined).success;
+
+/**
+ * Merges a kind's add and edit inputs into one content shape for upsert items, which create or
+ * edit depending on whether the panel id exists. Placement fields (`grid`, `panelId`) are left
+ * out, add descriptions win, and a field stays required only when both inputs require it. Upsert
+ * re-parses the content with the add or edit input once it knows which one applies.
+ */
+const toUpsertContentSchema = <TAddShape extends z.ZodRawShape, TEditShape extends z.ZodRawShape>(
+  addShape: TAddShape,
+  editShape: TEditShape
+): z.ZodObject<UpsertContentShape<TAddShape, TEditShape>> => {
+  const contentKeys = [...new Set([...Object.keys(addShape), ...Object.keys(editShape)])].filter(
+    (key) => !PLACEMENT_KEYS.has(key)
+  );
+  // The entries are built at runtime, so the shape type is restated.
+  return z.object(
+    Object.fromEntries(
+      contentKeys.map((key) => {
+        const addField = addShape[key];
+        const editField = editShape[key];
+        const field = addField ?? editField;
+        const isRequired =
+          addField !== undefined &&
+          editField !== undefined &&
+          !isOptional(addField) &&
+          !isOptional(editField);
+        return [key, isRequired || isOptional(field) ? field : z.optional(field)];
+      })
+    )
+  ) as z.ZodObject<UpsertContentShape<TAddShape, TEditShape>>;
+};
+
 /** Adds the `sectionId` that `add_panels` items carry on top of a new-panel input. */
 export const withSectionId = <TShape extends z.ZodRawShape>(schema: z.ZodObject<TShape>) =>
   schema.extend({ sectionId: sectionIdField });
@@ -68,6 +123,10 @@ export const defineConfigPanelKind = <
   ...kind,
   source: 'config' as const,
   addPanelsInputSchema: withSectionId(kind.addInputSchema),
+  upsertContentSchema: toUpsertContentSchema<TAddShape, TEdit['shape']>(
+    kind.addInputSchema.shape,
+    kind.editInputSchema.shape
+  ),
 });
 
 /**
@@ -84,4 +143,8 @@ export const defineRequestPanelKind = <
   ...kind,
   source: 'request' as const,
   addPanelsInputSchema: withSectionId(kind.addInputSchema),
+  upsertContentSchema: toUpsertContentSchema<TAddShape, TEdit['shape']>(
+    kind.addInputSchema.shape,
+    kind.editInputSchema.shape
+  ),
 });

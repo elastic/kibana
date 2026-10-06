@@ -16,6 +16,7 @@ import {
   TIME_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
 import type { DashboardPinnedPanel } from '@kbn/as-code-dashboard-schema';
+import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { Logger } from '@kbn/core/server';
 import { formatEsqlIdentifier } from '@kbn/esql-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
@@ -83,13 +84,13 @@ const timeSliderControlInputSchema = z.object({
   ...controlLayoutFields,
 });
 
-const controlInputSchema = z.discriminatedUnion('type', [
+export const controlInputSchema = z.discriminatedUnion('type', [
   optionsListControlInputSchema,
   rangeSliderControlInputSchema,
   timeSliderControlInputSchema,
 ]);
 
-type ControlInput = z.infer<typeof controlInputSchema>;
+export type ControlInput = z.infer<typeof controlInputSchema>;
 
 /**
  * Keep at most one time slider. Extra user-requested ones are reported as
@@ -405,6 +406,43 @@ const buildStoredControl = (control: ControlInput): DashboardPinnedPanel => {
   };
 };
 
+/**
+ * Appends controls to the dashboard, leaving out duplicate time sliders and controls whose field
+ * cannot back them.
+ */
+export const appendControls = async ({
+  dashboardData,
+  controls,
+  logger,
+  failures,
+  resolveControlFieldCapabilities,
+}: {
+  dashboardData: DashboardAttachmentData;
+  controls: ControlInput[];
+  logger: Logger;
+  failures: OperationFailure[];
+  resolveControlFieldCapabilities?: ResolveControlFieldCapabilities;
+}): Promise<DashboardAttachmentData> => {
+  const existingControls = dashboardData.pinned_panels ?? [];
+  const controlsToAdd = await resolveControlFields({
+    controls: filterDuplicateTimeSliders({
+      existingControls,
+      controlsToAdd: controls,
+      logger,
+      failures,
+    }),
+    resolveControlFieldCapabilities,
+    projectRouting: dashboardData.project_routing,
+    logger,
+    failures,
+  });
+
+  return {
+    ...dashboardData,
+    pinned_panels: [...existingControls, ...controlsToAdd.map(buildStoredControl)],
+  };
+};
+
 export const addControlsOperation = defineOperation({
   schema: z.object({
     operation: z.literal('add_controls'),
@@ -415,25 +453,12 @@ export const addControlsOperation = defineOperation({
         'Controls to append. Use options_list_control for categorical/keyword fields, range_slider_control for numeric fields, time_slider_control for time sub-range filtering (at most one per dashboard).'
       ),
   }),
-  handler: async ({ dashboardData, operation, context }) => {
-    const existingControls = dashboardData.pinned_panels ?? [];
-    const controlsToAdd = await resolveControlFields({
-      controls: filterDuplicateTimeSliders({
-        existingControls,
-        controlsToAdd: operation.controls,
-        logger: context.logger,
-        failures: context.failures,
-      }),
-      resolveControlFieldCapabilities: context.resolveControlFieldCapabilities,
-      projectRouting: dashboardData.project_routing,
+  handler: ({ dashboardData, operation, context }) =>
+    appendControls({
+      dashboardData,
+      controls: operation.controls,
       logger: context.logger,
       failures: context.failures,
-    });
-
-    const newControls = controlsToAdd.map(buildStoredControl);
-    return {
-      ...dashboardData,
-      pinned_panels: [...existingControls, ...newControls],
-    };
-  },
+      resolveControlFieldCapabilities: context.resolveControlFieldCapabilities,
+    }),
 });

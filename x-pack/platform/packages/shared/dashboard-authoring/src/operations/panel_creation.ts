@@ -67,12 +67,13 @@ const collectPanelCreationRequests = (
 };
 
 /** Maps a new-panel request input onto the resolution request for its renderer. */
-const toCreationResolutionRequest = ({
-  operationType,
-  panelInput,
-}: PanelCreationRequest): PanelResolutionRequest => {
+export const toCreationResolutionRequest = (
+  panelInput: PanelRequestInput,
+  operationType: InlinePanelOperationType,
+  identifier: string = panelInput.query
+): PanelResolutionRequest => {
   const { query, esql } = panelInput;
-  const base = { operationType, identifier: query, nlQuery: query, esql };
+  const base = { operationType, identifier, nlQuery: query, esql };
 
   if (panelInput.renderer === 'custom_content') {
     return { ...base, renderer: panelInput.renderer };
@@ -113,7 +114,9 @@ export const resolvePanelCreationRequests = async ({
           await Promise.all(
             requests.map(async (request) => ({
               request,
-              resolvedPanel: await resolvePanelContent(toCreationResolutionRequest(request)),
+              resolvedPanel: await resolvePanelContent(
+                toCreationResolutionRequest(request.panelInput, request.operationType)
+              ),
             }))
           ),
         ] as const

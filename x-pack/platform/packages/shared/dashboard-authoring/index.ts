@@ -8,10 +8,12 @@
 export { dashboardOperationSchema, executeDashboardOperations } from './src/operations';
 
 export { getErrorMessage, hasValidCreateMetadataOperations } from './src/utils';
+export type { OperationFailure } from './src/utils';
 
 export { createPanelFailureResult } from './src/resolve_panel';
 export type {
   InlinePanelOperationType,
+  PanelAuthoringNote,
   PanelContent,
   PanelContentAttempt,
 } from './src/resolve_panel';
@@ -33,3 +35,13 @@ export {
 
 export type { ResolveAttachmentPanel } from './src/operations/types';
 export { createControlFieldCapabilitiesResolver } from './src/control_field_capabilities_resolver';
+
+export {
+  executeDashboardUpsert,
+  hasValidNewDashboardMetadata,
+  upsertDashboardSchema,
+} from './src/upsert';
+export type { DashboardUpsert } from './src/upsert';
+
+export { buildLayoutPrompt, layoutArrangementSchema } from './src/layout';
+export type { ArrangeDashboardLayout, LayoutArrangement, LayoutRequest } from './src/layout';

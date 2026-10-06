@@ -167,6 +167,42 @@ export type EditPanelItem = z.infer<typeof editPanelItemSchema>;
 
 export type EditPanelRequestInput = Extract<EditPanelItem, { source: 'request' }>;
 
+/**
+ * Panel content of an `upsert_dashboard` item: the create and edit fields of any panel kind,
+ * without placement. Upsert re-parses it with `addSectionPanelItemSchema` or `editPanelItemSchema`
+ * once it knows whether the panel exists.
+ */
+export const upsertPanelContentSchema = z.discriminatedUnion('source', [
+  z.discriminatedUnion(
+    'type',
+    mapKinds(CONFIG_PANEL_KINDS, ({ upsertContentSchema }) => upsertContentSchema)
+  ),
+  z.discriminatedUnion(
+    'renderer',
+    mapKinds(REQUEST_PANEL_KINDS, ({ upsertContentSchema }) => upsertContentSchema)
+  ),
+  attachmentPanelInputSchema.omit({ grid: true }),
+]);
+
+export type UpsertPanelContent = z.infer<typeof upsertPanelContentSchema>;
+
+/**
+ * Embeddable types an upsert content can edit in place. A request without a renderer edits Lens or
+ * Vega panels, as in `edit_panels`. Attachment content always replaces the panel content.
+ */
+export const getEditableEmbeddableTypes = (content: UpsertPanelContent): string[] => {
+  if (content.source === 'config') {
+    return [getConfigPanelKind(content.type).embeddableType];
+  }
+  if (content.source === 'attachment') {
+    return [];
+  }
+  const { renderer } = content;
+  return renderer
+    ? [getRendererEmbeddableType(renderer)]
+    : [lensPanelKind.embeddableType, vegaPanelKind.embeddableType];
+};
+
 /** Every panel resolution request the resolver can receive, discriminated by `renderer`. */
 export type PanelResolutionRequest =
   | VisPanelResolutionRequest
