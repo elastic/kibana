@@ -20,7 +20,7 @@ const createAttachment = (overrides: { origin?: string; enabled?: boolean } = {}
     name: 'My Policy',
     description: 'A test policy',
     destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
-    matcher: { tags: ['production', 'sre'], expression: 'episode_status: "active"' },
+    matcher: { tags: ['production', 'sre'], expression: 'alert_status: "active"' },
     grouping_mode: 'per_alert' as const,
     throttle: { strategy: 'on_status_change' as const },
     enabled: overrides.enabled,
@@ -63,7 +63,7 @@ describe('ActionPolicyInlineContent', () => {
   it('renders the advanced matching query', () => {
     render(<ActionPolicyInlineContent attachment={createAttachment()} isSidebar={false} />);
     expect(screen.getByText('Advanced matching query:')).toBeDefined();
-    expect(screen.getByText('episode_status: "active"')).toBeDefined();
+    expect(screen.getByText('alert_status: "active"')).toBeDefined();
   });
 
   it('omits rule tags and query rows when the matcher has neither', () => {
