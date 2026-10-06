@@ -30,6 +30,16 @@ The research baseline in `references/best_practices.md` targets Kibana's October
 
 If the current versions differ, verify changed behavior against official documentation before applying the baseline.
 
+## Respect Kibana's dual-version migration setup
+
+Read Kibana's [Redux Toolkit v1/v2 dual-version support documentation](../../../dev_docs/contributing/redux_toolkit_v1_v2_migration.mdx) before changing dependencies, imports, or migration boundaries.
+
+- For new code or code fully migrated to RTK v2, use the default package names (`@reduxjs/toolkit`, `redux`, `react-redux`, `reselect`, `immer`, and `redux-thunk`).
+- For code that remains on RTK v1, treat the versioned packages (`redux-toolkit-v1`, `redux-v4`, `react-redux-v7`, `reselect-v4`, `immer-v9`, and `redux-thunk-v2`) as one legacy compatibility family. Do not mix dependency generations within a migration boundary without verifying runtime and type compatibility.
+- Preserve the special compatibility handling for `@elastic/charts` and `kea`; do not replace their dependency aliases or bundler rewrites as part of an unrelated Redux change.
+- Check whether the target path is covered by the `@kbn/imports/no_redux_toolkit_v2_imports` ESLint override. Covered paths must continue using legacy aliases until the path is deliberately migrated.
+- When migrating a plugin or scoped path, update legacy imports to default imports, address RTK v2 breaking changes, update Jest mocks from `react-redux-v7` to `react-redux`, remove the migrated path from the ESLint override, and run focused tests. Account for stricter types and removed APIs such as Immer's `enableES5()`.
+
 ## Select a mode
 
 State the selected mode before proceeding:
