@@ -39,6 +39,9 @@ const MockContent = ({ name }: { name: string }) => {
 
 const setup = (serverless: boolean) => {
   const core = coreMock.createStart();
+  // The service-account flag defaults to off. These cases cover license, tier, and the
+  // product setting, so the flag stays on.
+  core.security.serviceAccounts.isEnabled.mockReturnValue(true);
   const setting$ = new BehaviorSubject(true);
   core.uiSettings.get$.mockReturnValue(setting$);
   core.application.capabilities = {

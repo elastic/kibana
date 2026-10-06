@@ -38,6 +38,10 @@ import { useNavigateToUserDetails } from './hooks/use_navigate_to_user_details';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { useObservedUser } from '../../../flyout_v2/entity/user/main/hooks/use_observed_user';
 import { useEntityFromStore, type EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../common/utils/execution_context';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import {
   buildRiskScoreStateFromEntityRecord,
@@ -82,6 +86,21 @@ export interface UserPanelExpandableFlyoutProps extends FlyoutPanelProps {
 
 export const UserPreviewPanelKey: UserPanelExpandableFlyoutProps['key'] = 'user-preview-panel';
 
+const USER_ENTITY_FROM_STORE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'user_entity_from_store'
+);
+
+const USER_RISK_SCORE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'user_risk_score'
+);
+
+const USER_MANAGED_DETAILS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'user_managed_details'
+);
+
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
   querySize: 1,
@@ -112,6 +131,7 @@ export const UserPanel = memo(function UserPanel({
     identityFields: userStoreIdentityFields,
     entityType: 'user',
     skip: isInitializing,
+    executionContext: USER_ENTITY_FROM_STORE_CONTEXT,
   });
 
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
@@ -139,10 +159,11 @@ export const UserPanel = memo(function UserPanel({
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
     skip: !!observedUser?.entityRecord,
+    executionContext: USER_RISK_SCORE_CONTEXT,
   });
 
   const { inspect, loading } = riskScoreState;
-  const managedUser = useManagedUser();
+  const managedUser = useManagedUser({ executionContext: USER_MANAGED_DETAILS_CONTEXT });
 
   const { data: userRisk } = riskScoreState;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
