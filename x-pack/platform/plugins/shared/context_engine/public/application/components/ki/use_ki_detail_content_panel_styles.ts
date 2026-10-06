@@ -19,56 +19,36 @@ export const useKiDetailContentPanelStyles = () => {
         flex-direction: column;
         flex: 1 1 auto;
         min-height: 0;
-        height: 100%;
+
+        @media (min-width: 768px) {
+          min-height: 100%;
+        }
       `,
       shell: css`
-        display: flex;
-        flex-direction: column;
-        flex: 1 1 auto;
-        min-height: 0;
-        height: 100%;
         border: ${euiTheme.border.thin};
         border-radius: ${euiTheme.border.radius.panel};
         overflow: hidden;
       `,
-      body: css`
+      shellFill: css`
         flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
         min-height: 0;
-        overflow-y: auto;
+
+        @media (min-width: 768px) {
+          min-height: 100%;
+        }
+      `,
+      body: css`
         padding: ${euiTheme.size.l};
       `,
       emptyShell: css`
+        align-items: center;
         justify-content: center;
-      `,
-      editingShell: css`
-        display: flex;
-        flex-direction: column;
-        flex: 1 1 auto;
-        min-height: 0;
-      `,
-      editingBody: css`
-        flex: 1 1 auto;
-        min-height: 0;
-        display: flex;
-        flex-direction: column;
+        padding: ${euiTheme.size.l};
       `,
       editingFormRow: css`
-        flex: 1 1 auto;
-        min-height: 0;
         margin-bottom: 0;
-
-        & > .euiFormRow__fieldWrapper {
-          display: flex;
-          flex-direction: column;
-          flex: 1 1 auto;
-          min-height: 0;
-          height: 100%;
-        }
-      `,
-      markdownEditorFill: css`
-        flex: 1 1 auto;
-        min-height: 0;
-        height: 100%;
       `,
     }),
     [euiTheme]

@@ -90,8 +90,8 @@ export const KiDetailContentPanel = ({
     <div css={panelStyles.panelRoot} data-test-subj="contextKiDetailContentPanel">
       {isEditing ? (
         <>
-          <div css={[panelStyles.shell, panelStyles.editingShell]}>
-            <div css={[panelStyles.body, panelStyles.editingBody]}>
+          <div css={[panelStyles.shell, panelStyles.shellFill]}>
+            <div css={panelStyles.body}>
               <EuiFormRow
                 css={panelStyles.editingFormRow}
                 isInvalid={Boolean(contentValidation.error)}
@@ -102,8 +102,7 @@ export const KiDetailContentPanel = ({
                 <EuiMarkdownEditor
                   value={contentDraft}
                   onChange={setContentDraft}
-                  height="full"
-                  css={panelStyles.markdownEditorFill}
+                  height={400}
                   aria-label={markdownEditorLabel}
                   data-test-subj="contextKiDetailContentField"
                 />
@@ -156,7 +155,7 @@ export const KiDetailContentPanel = ({
       ) : hasContent ? (
         <KiDetailMarkdownReadOnly content={contentValue} />
       ) : (
-        <div css={[panelStyles.shell, panelStyles.emptyShell]}>
+        <div css={[panelStyles.shell, panelStyles.shellFill, panelStyles.emptyShell]}>
           <EuiText size="s" color="subdued" data-test-subj="contextKiDetailContentEmpty">
             <FormattedMessage
               id="xpack.contextEngine.kiDetail.content.empty"

@@ -95,23 +95,21 @@ export const KiDetailPage = () => {
     display: flex;
     flex-direction: column;
     min-width: 0;
-    min-height: 0;
 
     @media (min-width: 768px) {
       grid-column: 1;
+      min-height: 100%;
     }
   `;
   const kiDetailSidebarStyle = css`
-    display: flex;
-    flex-direction: column;
     width: 100%;
     max-width: 26rem;
     min-width: 0;
-    min-height: 0;
 
     @media (min-width: 768px) {
       grid-column: 2;
       width: 26rem;
+      align-self: start;
     }
   `;
 
@@ -473,8 +471,9 @@ export const KiDetailPage = () => {
         }}
       />
       <ContextEnginePageSection
-        restrictWidth={selectedTab === 'document' || selectedTab === 'details' ? false : undefined}
-        paddingSize={selectedTab === 'document' ? 'none' : undefined}
+        {...(selectedTab === 'document'
+          ? { restrictWidth: false, paddingSize: 'none' as const }
+          : {})}
       >
         {pageBody}
       </ContextEnginePageSection>

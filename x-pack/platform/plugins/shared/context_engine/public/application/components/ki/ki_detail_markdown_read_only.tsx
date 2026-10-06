@@ -17,7 +17,7 @@ export const KiDetailMarkdownReadOnly = ({ content }: KiDetailMarkdownReadOnlyPr
   const panelStyles = useKiDetailContentPanelStyles();
 
   return (
-    <div css={panelStyles.shell} data-test-subj="contextKiDetailContent">
+    <div css={[panelStyles.shell, panelStyles.shellFill]} data-test-subj="contextKiDetailContent">
       <div css={panelStyles.body}>
         <div data-test-subj="contextKiDetailMarkdownRendered">
           <EuiMarkdownFormat textSize="s">{content}</EuiMarkdownFormat>
