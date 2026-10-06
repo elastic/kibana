@@ -229,6 +229,57 @@ describe('registerAttachments', () => {
     });
   });
 
+  describe('toSpec', () => {
+    const context = {
+      attachment: {
+        id: 'test',
+        type: ESQL_QUERY_RESULTS_ATTACHMENT_TYPE,
+        current_version: 1,
+        versions: [],
+      },
+      version: 1,
+    };
+
+    it('returns the query and its sample rows as a markdown table', () => {
+      const spec = attachmentType.toSpec!(
+        {
+          query: 'FROM logs-* | LIMIT 10',
+          columns: [
+            { name: 'message', type: 'text' },
+            { name: 'host', type: 'keyword' },
+          ],
+          sampleRows: [{ message: 'a | b\nc', host: null }],
+          totalHits: 100,
+        },
+        context
+      );
+
+      expect(spec).toEqual({
+        type: 'view',
+        body: [
+          {
+            type: 'markdown',
+            text: [
+              '```esql',
+              'FROM logs-* | LIMIT 10',
+              '```',
+              '',
+              '| message | host |',
+              '| --- | --- |',
+              '| a \\| b c |  |',
+              '',
+              '_1 of 100 results_',
+            ].join('\n'),
+          },
+        ],
+      });
+    });
+
+    it('throws for invalid data', () => {
+      expect(() => attachmentType.toSpec!({ query: 'FROM logs-*' }, context)).toThrow();
+    });
+  });
+
   describe('getAgentDescription', () => {
     it('returns a description mentioning ES|QL query results', () => {
       const description = attachmentType.getAgentDescription?.();

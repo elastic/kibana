@@ -70,6 +70,12 @@ const createEsqlQueryResultsAttachmentType = (): AttachmentTypeDefinition => {
         },
       };
     },
+    toSpec: (data) => {
+      if (!isEsqlQueryResultsData(data)) {
+        throw new Error('Invalid ES|QL query results attachment data');
+      }
+      return { type: 'view', body: [{ type: 'markdown', text: formatQueryResultsMarkdown(data) }] };
+    },
     getTools: () => [
       platformCoreTools.generateEsql,
       platformCoreTools.executeEsql,
@@ -129,6 +135,44 @@ const formatQueryResultsData = (data: EsqlQueryResultsData): string => {
       }
     }
   }
+
+  return lines.join('\n');
+};
+
+const CELL_MAX_LENGTH = 100;
+
+const toTableCell = (value: unknown): string => {
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  const text = typeof value === 'string' ? value : JSON.stringify(value);
+  const truncated =
+    text.length > CELL_MAX_LENGTH ? `${text.substring(0, CELL_MAX_LENGTH)}...` : text;
+  return truncated.replace(/\|/g, '\\|').replace(/\s*\n\s*/g, ' ');
+};
+
+/** The query and its sample rows as a markdown table, for surfaces other than Kibana such as Slack. */
+const formatQueryResultsMarkdown = ({
+  query,
+  columns,
+  sampleRows,
+  totalHits,
+}: EsqlQueryResultsData): string => {
+  const lines = ['```esql', query, '```'];
+
+  if (columns.length > 0 && sampleRows.length > 0) {
+    const names = columns.map(({ name }) => name);
+
+    lines.push(
+      '',
+      `| ${names.map(toTableCell).join(' | ')} |`,
+      `| ${names.map(() => '---').join(' | ')} |`,
+      ...sampleRows.map((row) => `| ${names.map((name) => toTableCell(row[name])).join(' | ')} |`)
+    );
+  }
+
+  lines.push('', `_${sampleRows.length} of ${totalHits} results_`);
 
   return lines.join('\n');
 };

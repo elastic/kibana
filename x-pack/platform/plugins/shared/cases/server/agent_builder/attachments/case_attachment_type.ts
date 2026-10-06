@@ -20,6 +20,28 @@ const formatCaseDescription = (data: CaseAttachmentData): string => {
   return `Case ${idPart} "${data.title}" (${data.status}, ${data.severity}, owner=${data.owner})`;
 };
 
+const DESCRIPTION_MAX_LENGTH = 300;
+
+/** The case as markdown, for surfaces other than Kibana such as Slack. */
+const formatCaseMarkdown = (data: CaseAttachmentData): string => {
+  const idPart = data.incremental_id ? `#${data.incremental_id}` : data.id;
+  const name = `Case ${idPart}: ${data.title}`;
+  const summary = [
+    `Status: ${data.status}`,
+    `Severity: ${data.severity}`,
+    `Alerts: ${data.totalAlerts}`,
+    `Comments: ${data.totalComment}`,
+  ].join(' · ');
+  const description =
+    data.description.length > DESCRIPTION_MAX_LENGTH
+      ? `${data.description.slice(0, DESCRIPTION_MAX_LENGTH)}…`
+      : data.description;
+
+  return [`**${data.url ? `[${name}](${data.url})` : name}**`, summary, description]
+    .filter(Boolean)
+    .join('\n\n');
+};
+
 export const createCaseAttachmentType = (): AttachmentTypeDefinition<
   typeof CASE_ATTACHMENT_TYPE,
   CaseAttachmentData
@@ -39,6 +61,11 @@ export const createCaseAttachmentType = (): AttachmentTypeDefinition<
       type: 'text',
       value: formatCaseDescription(attachment.data),
     }),
+  }),
+
+  toSpec: (data) => ({
+    type: 'view',
+    body: [{ type: 'markdown', text: formatCaseMarkdown(data) }],
   }),
 
   getAgentDescription: () =>

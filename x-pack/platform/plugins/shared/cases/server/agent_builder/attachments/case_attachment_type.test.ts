@@ -71,6 +71,28 @@ describe('case attachment type', () => {
     expect(textRepr.value).toContain('in-progress');
     expect(textRepr.value).toContain('critical');
   });
+
+  it('toSpec() returns the case as markdown, linked when it has a url', () => {
+    const data = buildCaseData({ url: 'https://kibana.example/cases/abc' });
+    const context = {
+      attachment: { id: 'abc', type: CASE_ATTACHMENT_TYPE, current_version: 1, versions: [] },
+      version: 1,
+    };
+
+    expect(createCaseAttachmentType().toSpec!(data, context)).toEqual({
+      type: 'view',
+      body: [
+        {
+          type: 'markdown',
+          text: [
+            '**[Case #125: Threat Intel Filebeat](https://kibana.example/cases/abc)**',
+            'Status: in-progress · Severity: critical · Alerts: 3 · Comments: 5',
+            'Threat description',
+          ].join('\n\n'),
+        },
+      ],
+    });
+  });
 });
 
 describe('cases (list) attachment type', () => {

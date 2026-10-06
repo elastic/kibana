@@ -51,6 +51,10 @@ export const createEsqlAttachmentType = (): AttachmentTypeDefinition<
         },
       };
     },
+    toSpec: (data) => ({
+      type: 'view',
+      body: [{ type: 'markdown', text: formatEsqlAttachment(data) }],
+    }),
     getAgentDescription: () => {
       return `Represents an ES|QL query, which can be executed using the ${platformCoreTools.executeEsql} tool
 
