@@ -38,14 +38,14 @@ const toInputDetections = (events: Array<Partial<SignificantEvent>>): Array<Part
 const LEDGER_DB_CASCADE_EVENT_ID = 'transactionhistory__frontend-transactionhistory-read-timeout';
 
 const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
-  status: 'open',
+  status: 'active',
   event_id: LEDGER_DB_CASCADE_EVENT_ID,
   title: 'Ledger services — connection refused across balance, history, and payment paths',
   symptom_hypothesis:
     'SQLState 08001 connection refused from transactionhistory to PostgreSQL is blocking ledger reads and cascading to frontend balance, history, payment, and deposit paths.',
   summary:
     'Frontend requests to transactionhistory, balancereader, and ledgerwriter fail with connection refused on the observed paths. Cache errors affect balance and transaction-history lookups, while transactionhistory also reports SQLState 08001. Users cannot view account balances or transaction history and cannot submit payments or deposits. Onset ~14:30 UTC with no sign of recovery.',
-  severity: '80-critical',
+  severity: 'critical',
   confidence: 0.82,
   stream_names: ['logs'],
   signals: [
@@ -252,13 +252,13 @@ const LEDGER_DB_CASCADE_RULE_UUIDS = (LEDGER_DB_CASCADE_EVENT.signals ?? [])
 
 /** Benign login spike — must stay a SEPARATE event from the failure cascade and from signup. */
 const BENIGN_LOGIN_EVENT: Partial<SignificantEvent> = {
-  status: 'dismissed',
+  status: 'inactive',
   event_id: 'userservice__successful-user-login',
   title: 'Authentication — successful login volume increase',
   symptom_hypothesis: 'Successful login activity increased without an observed failure.',
   summary:
     'Successful login events increased around 14:30 UTC. All sampled events completed successfully, with no observed error signature or blocked user task.',
-  severity: '20-low',
+  severity: 'low',
   confidence: 0.35,
   signals: [
     {
@@ -284,13 +284,13 @@ const BENIGN_LOGIN_EVENT: Partial<SignificantEvent> = {
 
 /** Benign signup spike — must stay a SEPARATE event from the failure cascade and from login. */
 const BENIGN_SIGNUP_EVENT: Partial<SignificantEvent> = {
-  status: 'dismissed',
+  status: 'inactive',
   event_id: 'userservice__new-account-created',
   title: 'Authentication — new account creation volume increase',
   symptom_hypothesis: 'New account creation activity increased without an observed failure.',
   summary:
     'New account-creation events increased around 14:30 UTC. All sampled events completed successfully, with no observed error signature or blocked user task.',
-  severity: '20-low',
+  severity: 'low',
   confidence: 0.35,
   signals: [
     {
@@ -315,14 +315,14 @@ const BENIGN_SIGNUP_EVENT: Partial<SignificantEvent> = {
 };
 
 const BALANCE_READER_ISOLATED_EVENT: Partial<SignificantEvent> = {
-  status: 'open',
+  status: 'active',
   event_id: 'frontend__balancereader-connection-refused',
   title: 'Balance reader — account balance lookup connectivity failure',
   symptom_hypothesis:
     'Account balance reads fail because the frontend cannot reach balancereader on its balance endpoint.',
   summary:
     'The frontend returns connection-refused errors to balancereader:8080 on /balances. Users who reach this path cannot view account balances. Evidence is confined to this lookup path rather than a multi-service cascade.',
-  severity: '60-high',
+  severity: 'high',
   confidence: 0.68,
   stream_names: ['logs'],
   signals: [
@@ -451,8 +451,8 @@ export const discovery: DatasetConfig['discovery'] = [
           score: 1,
         },
         {
-          id: 'open-active-cascade',
-          text: 'Sets status=open with severity=80-critical for the cascade event because active database-connectivity failures broadly break core customer balance, transaction-history, payment, and deposit journeys. Bases critical severity on demonstrated customer impact and scope, without requiring PII exposure or a fixed downstream-service count.',
+          id: 'active-cascade',
+          text: 'Sets status=active with severity=critical for the cascade event because active database-connectivity failures broadly break core customer balance, transaction-history, payment, and deposit journeys. Bases critical severity on demonstrated customer impact and scope, without requiring PII exposure or a fixed downstream-service count.',
           score: 3,
         },
         {
@@ -471,8 +471,8 @@ export const discovery: DatasetConfig['discovery'] = [
           score: 3,
         },
         {
-          id: 'open-confirmed-cascade',
-          text: 'Keeps the cascade event open at critical severity because freshly verified ledger signals still demonstrate the user-blocking database cascade.',
+          id: 'active-confirmed-cascade',
+          text: 'Keeps the cascade event active at critical severity because freshly verified ledger signals still demonstrate the user-blocking database cascade.',
           score: 2,
         },
       ],
@@ -487,7 +487,7 @@ export const discovery: DatasetConfig['discovery'] = [
     },
     output: {
       expected_ground_truth:
-        'open 60-high event for confirmed balance-lookup connection refused despite weak p_value and stationary change_point_type',
+        'active high event for confirmed balance-lookup connection refused despite weak p_value and stationary change_point_type',
       expected_confirmed_rule_uuids: {
         [BALANCE_READER_WEAK_DETECTION_EVENT.event_id!]: ['3c4bf4f9-9ed9-567f-be35-332eb79ee76a'],
       },
@@ -495,7 +495,7 @@ export const discovery: DatasetConfig['discovery'] = [
       criteria: [
         {
           id: 'weak-detection-strong-severity',
-          text: 'Sets severity=60-high because grounding confirms connection-refused errors block account-balance lookups. Weak p_value and stationary change_point_type must not cap severity at 40-medium or 20-low.',
+          text: 'Sets severity=high because grounding confirms connection-refused errors block account-balance lookups. Weak p_value and stationary change_point_type must not cap severity at medium or low.',
           score: 3,
         },
         {

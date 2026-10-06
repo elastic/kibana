@@ -137,7 +137,7 @@ export const CreateServiceAccountFlyout = ({
       account = await serviceAccountsAPIClient.create({
         name: normalizedName,
         roles,
-        ...(!isServerless && description.trim() ? { description: description.trim() } : {}),
+        ...(description.trim() ? { description: description.trim() } : {}),
       });
     } catch (error) {
       if (!isMounted()) return;
@@ -244,31 +244,29 @@ export const CreateServiceAccountFlyout = ({
               data-test-subj="serviceAccountNameInput"
             />
           </EuiFormRow>
-          {!isServerless && (
-            <EuiFormRow
+          <EuiFormRow
+            fullWidth
+            label={
+              <span css={labelStyle}>
+                {i18n.translate(
+                  'xpack.security.management.serviceAccounts.create.descriptionLabel',
+                  {
+                    defaultMessage: 'Description (optional)',
+                  }
+                )}
+              </span>
+            }
+          >
+            <EuiFieldText
+              compressed
               fullWidth
-              label={
-                <span css={labelStyle}>
-                  {i18n.translate(
-                    'xpack.security.management.serviceAccounts.create.descriptionLabel',
-                    {
-                      defaultMessage: 'Description (optional)',
-                    }
-                  )}
-                </span>
-              }
-            >
-              <EuiFieldText
-                compressed
-                fullWidth
-                data-test-subj="createServiceAccountDescription"
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                maxLength={SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH}
-                disabled={isSaving}
-              />
-            </EuiFormRow>
-          )}
+              data-test-subj="createServiceAccountDescription"
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              maxLength={SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH}
+              disabled={isSaving}
+            />
+          </EuiFormRow>
           <div css={css({ marginTop: euiTheme.size.l })}>
             <EuiFormRow
               id={rolesId}

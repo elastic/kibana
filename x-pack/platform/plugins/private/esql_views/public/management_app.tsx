@@ -12,13 +12,14 @@ import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import type { IToasts } from '@kbn/core/public';
 import type { ESQLEditorProps } from '@kbn/esql-editor';
 import type { EsqlView } from '@kbn/esql-types';
+import { getViewEsqlQuery } from '@kbn/esql-utils';
 import type { EsqlViewsClient } from '@kbn/esql-utils';
 import { PLUGIN_NAME } from '../common';
 import { DeleteViewsModal } from './delete_views_modal';
 import { EsqlViewForm } from './esql_view_form';
 import { EsqlViewsTable } from './esql_views_table';
-import { getViewEsqlQuery } from './get_view_esql_query';
 import { translations } from './translations';
+import type { EsqlViewPreviewDependencies } from './use_esql_view_preview';
 import type { DiscoverEsqlLocator } from './types';
 import { useDeleteEsqlViews } from './use_delete_esql_views';
 import { useEsqlViews } from './use_esql_views';
@@ -31,6 +32,7 @@ interface ManagementAppProps {
   discoverLocator?: DiscoverEsqlLocator;
   documentationUrl: string;
   EsqlEditor: ComponentType<Omit<ESQLEditorProps, 'ref'>>;
+  previewDependencies: EsqlViewPreviewDependencies;
   toasts: IToasts;
 }
 
@@ -44,6 +46,7 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
   discoverLocator,
   documentationUrl,
   EsqlEditor,
+  previewDependencies,
   toasts,
 }) => {
   const { error, isLoading, reload, status, views } = useEsqlViews(client);
@@ -154,6 +157,7 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
         <EsqlViewForm
           client={client}
           EsqlEditor={EsqlEditor}
+          previewDependencies={previewDependencies}
           onClose={() => setFormState(undefined)}
           onSave={async () => {
             await reload();

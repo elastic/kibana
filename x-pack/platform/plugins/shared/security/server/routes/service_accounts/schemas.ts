@@ -7,6 +7,7 @@
 
 import type { BuildFlavor } from '@kbn/config/src/types';
 import { z } from '@kbn/zod';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import type { ServiceAccountRoleLimits } from '../../../common/service_accounts';
 import {
@@ -34,6 +35,10 @@ export const getServiceAccountRoleLimits = (buildFlavor: BuildFlavor): ServiceAc
 const ROLE_FRAMING_BYTES = 3;
 /** The keys, braces and quotes around the name and the role list. */
 const BODY_FRAMING_BYTES = 64;
+/** The key, the quotes and the comma around the description. */
+const DESCRIPTION_FRAMING_BYTES = ',"description":""'.length;
+/** The length of a `\uXXXX` escape. */
+const DESCRIPTION_CHARACTER_BYTES = 6;
 
 /**
  * The largest create body a request within `limits` can produce, used as the route's body cap so
@@ -41,8 +46,10 @@ const BODY_FRAMING_BYTES = 64;
  *
  * Each role name character is counted as two bytes. Elasticsearch accepts only printable ASCII in
  * role names, and the widest of those in JSON are `"` and `\`, which escape to two bytes. The name
- * is limited to ASCII letters, digits, hyphens and underscores, so one byte each. Description
- * characters may need six bytes each when JSON encodes control characters as Unicode escapes.
+ * is limited to ASCII letters, digits, hyphens and underscores, so one byte each.
+ *
+ * Each description character is counted as six bytes. The description cap counts UTF-16 code
+ * units, and JSON writes control characters and lone surrogates as `\uXXXX` escapes.
  */
 export const getCreateServiceAccountMaxBodyBytes = ({
   maxRoles,
@@ -50,7 +57,8 @@ export const getCreateServiceAccountMaxBodyBytes = ({
 }: ServiceAccountRoleLimits): number =>
   maxRoles * (2 * maxRoleNameLength + ROLE_FRAMING_BYTES) +
   SERVICE_ACCOUNT_NAME_MAX_LENGTH +
-  6 * SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH +
+  DESCRIPTION_CHARACTER_BYTES * SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH +
+  DESCRIPTION_FRAMING_BYTES +
   BODY_FRAMING_BYTES;
 
 export const getCreateServiceAccountBodySchema = (limits: ServiceAccountRoleLimits) =>
@@ -73,4 +81,8 @@ export const listServiceAccountsQuerySchema = z.object({
 
 export const getServiceAccountParamsSchema = z.object({
   id: serviceAccountIdSchema.min(1),
+});
+
+export const deleteServiceAccountQuerySchema = z.object({
+  force: BooleanFromString.default(false),
 });

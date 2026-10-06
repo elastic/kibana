@@ -50,7 +50,7 @@ const mockSuppressionQueries = (
 
 const rowLimitEpisodeRows = (): EpisodeSuppressionRow[] =>
   Array.from({ length: ESQL_QUERY_ROW_LIMIT }, (_, i) =>
-    createEpisodeSuppressionRow({ rule_id: 'r1', group_hash: 'h1', episode_id: `e${i}` })
+    createEpisodeSuppressionRow({ rule_id: 'r1', group_hash: 'h1', alert_id: `e${i}` })
   );
 
 const rowLimitSeriesRows = (): SeriesSuppressionRow[] =>
@@ -68,7 +68,7 @@ describe('FetchSuppressionsStep', () => {
         createEpisodeSuppressionRow({
           rule_id: 'r1',
           group_hash: 'h1',
-          episode_id: 'e1',
+          alert_id: 'e1',
           should_suppress: true,
           last_ack_action: 'ack',
         }),
@@ -145,7 +145,7 @@ describe('FetchSuppressionsStep', () => {
         createEpisodeSuppressionRow({
           rule_id: 'r1',
           group_hash: 'h1',
-          episode_id: 'e1',
+          alert_id: 'e1',
           should_suppress: true,
           last_ack_action: 'ack',
         }),
@@ -184,7 +184,7 @@ describe('FetchSuppressionsStep', () => {
         createEpisodeSuppressionRow({
           rule_id: 'r1',
           group_hash: 'h1',
-          episode_id: 'e1',
+          alert_id: 'e1',
           should_suppress: false,
           last_ack_action: 'unack',
         }),
@@ -268,7 +268,7 @@ describe('FetchSuppressionsStep', () => {
           rule_id: null,
           source: 'pagerduty',
           group_hash: 'pd-hash',
-          episode_id: 'pd-ep-1',
+          alert_id: 'pd-ep-1',
           should_suppress: true,
           last_ack_action: 'ack',
         }),
@@ -318,7 +318,7 @@ describe('FetchSuppressionsStep', () => {
 
     mockSuppressionQueries(mockEsClient, {
       episode: () => [
-        createEpisodeSuppressionRow({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' }),
+        createEpisodeSuppressionRow({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' }),
       ],
       series: () => [createSeriesSuppressionRow({ rule_id: 'r1', group_hash: 'h1' })],
     });
@@ -349,7 +349,7 @@ describe('FetchSuppressionsStep', () => {
             createEpisodeSuppressionRow({
               rule_id: 'r1',
               group_hash: 'h1',
-              episode_id: `e${i}`,
+              alert_id: `e${i}`,
               should_suppress: true,
               last_ack_action: 'ack',
             })
