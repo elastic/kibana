@@ -43,7 +43,7 @@ export function useIngestReceiptToast(apiKeyIds: Partial<Record<ApiEndpointId, s
   const {
     services: { notifications, featureFlags },
   } = useKibana();
-  const isEnabled = featureFlags.getBooleanValue(IS_INGEST_RECEIPTS_ENABLED, false);
+  const isEnabled = featureFlags.useBooleanValue(IS_INGEST_RECEIPTS_ENABLED, false);
   const startedAtRef = useRef<Partial<Record<PollSessionId, number>>>({});
   const inFlightRef = useRef<Partial<Record<PollSessionId, boolean>>>({});
   const abortControllersRef = useRef<Partial<Record<PollSessionId, AbortController>>>({});

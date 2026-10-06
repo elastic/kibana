@@ -36,7 +36,7 @@ const mockServices = (ingestReceiptsEnabled: boolean) => {
     services: {
       notifications: { toasts: { addSuccess } },
       featureFlags: {
-        getBooleanValue: jest
+        useBooleanValue: jest
           .fn()
           .mockImplementation((key: string) =>
             key === IS_INGEST_RECEIPTS_ENABLED ? ingestReceiptsEnabled : false
