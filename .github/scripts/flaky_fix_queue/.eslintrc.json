@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "@kbn/imports/uniform_imports": ["error", { "preserveFileExtensions": true }]
+  }
+}

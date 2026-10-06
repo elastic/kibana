@@ -1,0 +1,16 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "types": ["node"],
+    "strict": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "outDir": "target/types",
+  },
+  "include": ["*.ts"],
+  "exclude": [
+    "target/**/*"
+  ]
+}

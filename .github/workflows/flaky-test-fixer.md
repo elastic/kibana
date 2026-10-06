@@ -1,6 +1,7 @@
 ---
 name: Flaky Test Fixer
-description: Open a draft fix PR for a `failed-test` issue that has been labeled `ai:fix-flaky`.
+description: Open a draft fix PR for a human-labelled issue, an admitted automatic request, or a manual dispatch.
+run-name: "Flaky Test Fixer #${{ github.event.issue.number || inputs.issue_number }} (${{ inputs.request_id && format('request {0}', inputs.request_id) || 'manual' }})"
 on:
   issues:
     types: [labeled]
@@ -9,6 +10,14 @@ on:
       issue_number:
         description: Issue number in this repository to fix
         required: true
+        type: string
+      request_id:
+        description: Label event ID supplied by the queue dispatcher; omit for a manual override
+        required: false
+        type: string
+      requested_by:
+        description: Original requester supplied by the queue dispatcher
+        required: false
         type: string
   status-comment: true
 
@@ -20,28 +29,41 @@ permissions:
   checks: read
   models: read
 
-if: "${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') || (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'ai:fix-flaky' && !github.event.issue.pull_request) }}"
+# Human labels start immediately. Automation labels are handled by the dispatcher.
+# Machine users have type User, so exclude them explicitly as well as bot accounts.
+if: >-
+  ${{ github.repository == 'elastic/kibana' &&
+  (
+    (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') ||
+    (github.event_name == 'issues' && github.event.action == 'labeled' &&
+    github.event.label.name == 'ai:fix-flaky' && !github.event.issue.pull_request &&
+    github.event.issue.state == 'open' && github.event.sender.type == 'User' &&
+    !endsWith(github.event.sender.login, '[bot]') &&
+    !contains(fromJSON('["kibanamachine","elasticmachine"]'), github.event.sender.login))
+  ) }}
 
 concurrency:
-  # Keep one fixer lane per issue for the real trigger. Every other label event (e.g. the
-  # sibling `failure:*` labels the investigator applies in the same batch as `ai:fix-flaky`)
-  # gets its own group suffix, so it can skip without canceling a pending or in-flight fix run.
+  # Ignored label events get separate groups so they cannot evict a pending fix.
+  # Human labels and dispatcher/manual executions share the same per-issue lane.
   group: >-
     flaky-test-fixer-${{ github.event.issue.number || github.event.inputs.issue_number }}-${{
       (
-        github.event.action == 'labeled' &&
-        github.event.label.name != 'ai:fix-flaky' &&
-        github.event.label.name
-      ) ||
-      'fix'
+        github.event_name == 'issues' &&
+        (
+          github.event.label.name != 'ai:fix-flaky' || github.event.issue.pull_request ||
+          github.event.issue.state != 'open' || github.event.sender.type != 'User' ||
+          endsWith(github.event.sender.login, '[bot]') ||
+          contains(fromJSON('["kibanamachine","elasticmachine"]'), github.event.sender.login)
+        ) &&
+        github.run_id
+      ) || 'fix'
     }}
   cancel-in-progress: false
   job-discriminator: ${{ github.event.issue.number || github.event.inputs.issue_number }}
 
 env:
   ISSUE_NUMBER: &issue_number ${{ github.event.issue.number || github.event.inputs.issue_number }}
-  # Whoever triggered this run: the user who applied `ai:fix-flaky`, or the manual dispatcher.
-  REQUESTED_BY: ${{ github.actor }}
+  REQUESTED_BY: ${{ github.event.inputs.requested_by || github.actor }}
   # Lets the agent omit `-o elastic` on every `bk` invocation when re-investigating.
   BUILDKITE_ORGANIZATION_SLUG: elastic
 
@@ -136,7 +158,7 @@ safe-outputs:
     run-failure: 'The flaky test fixer failed before it could report an outcome. Review [{workflow_name}]({run_url}), then remove and reapply `ai:fix-flaky` to retry.'
   mentions:
     allowed:
-      - ${{ github.actor }}
+      - ${{ env.REQUESTED_BY }}
   add-comment:
     max: 1
     target: *issue_number
@@ -153,7 +175,7 @@ safe-outputs:
     labels: [flaky-test-fixer]
     # Request whoever triggered the fix as reviewer. A bot actor (rare) can't be a
     # reviewer, so the handler just logs a warning and the PR is still created.
-    reviewers: ${{ github.actor }}
+    reviewers: ${{ env.REQUESTED_BY }}
     base-branch: main
     # `main` only: any other base makes the handler run an unbounded `git fetch` that
     # can't finish on a repo Kibana's size. Version-branch fixes are handed over in the
@@ -231,6 +253,15 @@ Open a single draft PR with the smallest possible fix for this flaky-test issue.
 - the failing test is under `x-pack/solutions/security/test/security_solution_cypress/cypress/` and the doctor's action is one this fixer does not ship (migrate, a new Scout spec, or a new API/unit test) — see [Security Cypress: what this fixer may ship](#security-cypress-what-this-fixer-may-ship).
 
 Whatever the outcome, always finish by leaving one concise comment on the issue (see "Outcome comment").
+
+## Admission queue
+
+The Flaky Fix Dispatcher admits automatic label requests every 15 minutes, allowing up to five
+open fix PRs or admitted fixes per owning team and one active fixer per team. Waiting issues
+keep `ai:fix-flaky`. A human adding that label starts this workflow immediately and bypasses
+both team limits, as does a direct manual workflow dispatch. All executions still share the
+per-issue lane; manual runs and their PRs count against later automatic admissions.
+See [queue operations](../scripts/flaky_fix_queue/README.md) for retries and recovery.
 
 ## Requester mention
 
