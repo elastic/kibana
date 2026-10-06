@@ -45,6 +45,19 @@ export interface SortField {
   description?: string;
 }
 
+const SORT_DIRECTIONS = ['asc', 'desc'] as const;
+
+/**
+ * Gets the directions a sort field offers, in canonical order (`asc` before `desc`).
+ * Both directions are offered when `allowedDirections` is omitted.
+ */
+export const getSortFieldDirections = ({
+  allowedDirections,
+}: SortField): ReadonlyArray<'asc' | 'desc'> =>
+  SORT_DIRECTIONS.filter(
+    (direction) => !allowedDirections || allowedDirections.includes(direction)
+  );
+
 /**
  * Sort option definition with explicit label, field, and direction.
  */

@@ -14,6 +14,7 @@ import {
   useContentListConfig,
   useContentListSort,
   DEFAULT_SORT_FIELDS,
+  getSortFieldDirections,
   type SortField,
   type SortingConfig,
 } from '@kbn/content-list-provider';
@@ -110,7 +111,6 @@ const isDateLikeField = (field: string): boolean => {
   return field.length > 2 && field.endsWith('At');
 };
 
-const SORT_DIRECTIONS = ['asc', 'desc'] as const;
 /**
  * Returns the icon appended to a sort option: a help tooltip when the field
  * has a `description`, otherwise the direction arrow.
@@ -146,18 +146,16 @@ const getOptionAppend = (direction: 'asc' | 'desc', description?: string): React
  * @returns Array of {@link SortItem} options for the sort selector.
  */
 const generateOptionsFromFields = (fields: SortField[]): SortItem[] =>
-  fields.flatMap(
-    ({ field, name, ascLabel, descLabel, description, allowedDirections = SORT_DIRECTIONS }) =>
-      SORT_DIRECTIONS.filter((direction) => allowedDirections.includes(direction)).map(
-        (direction) => ({
-          label:
-            (direction === 'asc' ? ascLabel : descLabel) ?? getDefaultLabel(field, name, direction),
-          field,
-          direction,
-          append: getOptionAppend(direction, description),
-        })
-      )
-  );
+  fields.flatMap((sortField) => {
+    const { field, name, ascLabel, descLabel, description } = sortField;
+    return getSortFieldDirections(sortField).map((direction) => ({
+      label:
+        (direction === 'asc' ? ascLabel : descLabel) ?? getDefaultLabel(field, name, direction),
+      field,
+      direction,
+      append: getOptionAppend(direction, description),
+    }));
+  });
 
 /**
  * Generates a default sort label when no explicit label is provided.

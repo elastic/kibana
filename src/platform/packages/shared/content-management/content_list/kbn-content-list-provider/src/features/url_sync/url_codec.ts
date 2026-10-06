@@ -10,7 +10,7 @@
 import queryString from 'query-string';
 import type { ContentListFeatures } from '../types';
 import { isSearchConfig, isSortingConfig } from '../types';
-import { DEFAULT_INITIAL_SORT, DEFAULT_SORT_FIELDS } from '../sorting';
+import { DEFAULT_INITIAL_SORT, DEFAULT_SORT_FIELDS, getSortFieldDirections } from '../sorting';
 import { encodeQueryValue } from './encode_query_value';
 import type { SortField } from '../sorting';
 import type { ParsedQuery, UrlStateSlices } from './types';
@@ -48,19 +48,14 @@ export interface SortingUrlConfig {
 const SORT_CONFIG_KEY_SEPARATOR = '\u001f';
 
 /**
- * The directions offered in the sort dropdown.
- */
-const SORT_DIRECTIONS: ReadonlyArray<SortState['direction']> = ['asc', 'desc'];
-
-/**
  * Builds the `field:direction` key that identifies an offered sort option.
  * Matches the `sort` URL param format.
  */
 const getSortOptionKey = ({ field, direction }: SortState): string => `${field}:${direction}`;
 
 const toFieldSortOptions = (fields: SortField[]): SortState[] =>
-  fields.flatMap(({ field, allowedDirections }) =>
-    (allowedDirections ?? SORT_DIRECTIONS).map((direction) => ({ field, direction }))
+  fields.flatMap((sortField) =>
+    getSortFieldDirections(sortField).map((direction) => ({ field: sortField.field, direction }))
   );
 
 /**
