@@ -82,6 +82,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           'connector-id-by-feature': connectorIdByFeatureRaw,
           'create-conversation': createConversation,
           'public-conversation': publicConversation,
+          ephemeral,
           'plugin-id': pluginId,
           'aggregate-by': aggregateBy,
           'product-solution': productSolution,
@@ -122,7 +123,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           });
         }
 
-        const storeConversation = createConversation || Boolean(conversationId);
+        const storeConversation = !ephemeral && (createConversation || Boolean(conversationId));
         const accessControl = publicConversation
           ? { access_mode: ConversationAccessControlMode.Public }
           : undefined;
