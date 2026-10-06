@@ -272,8 +272,12 @@ describe('StepIoService', () => {
     it('drops read-scoped overflow once a later rehydrate no longer requests it', async () => {
       const { service, stepExecutionRepository } = buildHarness({ maxBytes: 0 });
       stepExecutionRepository.getStepExecutionsByIds
-        .mockResolvedValueOnce([{ id: 'a', output: { v: 'a' } } as unknown as EsWorkflowStepExecution])
-        .mockResolvedValueOnce([{ id: 'b', output: { v: 'b' } } as unknown as EsWorkflowStepExecution]);
+        .mockResolvedValueOnce([
+          { id: 'a', output: { v: 'a' } } as unknown as EsWorkflowStepExecution,
+        ])
+        .mockResolvedValueOnce([
+          { id: 'b', output: { v: 'b' } } as unknown as EsWorkflowStepExecution,
+        ]);
 
       await service.rehydrate(['a']);
       await service.rehydrate(['b']);
@@ -289,9 +293,13 @@ describe('StepIoService', () => {
       state.clearFlushedOutputs(['a']);
       stepExecutionRepository.getStepExecutionsByIds
         // First fetch: `b` is the only cache miss. Inserting it pushes `a` out of the budget.
-        .mockResolvedValueOnce([{ id: 'b', output: { v: 'b' } } as unknown as EsWorkflowStepExecution])
+        .mockResolvedValueOnce([
+          { id: 'b', output: { v: 'b' } } as unknown as EsWorkflowStepExecution,
+        ])
         // Second fetch: the evicted resident `a`.
-        .mockResolvedValueOnce([{ id: 'a', output: { v: 'a' } } as unknown as EsWorkflowStepExecution]);
+        .mockResolvedValueOnce([
+          { id: 'a', output: { v: 'a' } } as unknown as EsWorkflowStepExecution,
+        ]);
 
       await service.rehydrate(['a', 'b']);
 

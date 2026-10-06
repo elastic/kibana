@@ -219,5 +219,4 @@ describe('ExitWhileNodeImpl', () => {
       expect(wfExecutionRuntimeManager.navigateToNextNode).toHaveBeenCalled();
     });
   });
-
 });

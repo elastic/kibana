@@ -86,7 +86,10 @@ describe('WorkflowExecutionState', () => {
 
   it('should reject input/output writes through upsertStep', () => {
     expect(() =>
-      underTest.upsertStep({ id: 'fake-id', output: { a: 1 } } as unknown as EsWorkflowStepExecution)
+      underTest.upsertStep({
+        id: 'fake-id',
+        output: { a: 1 },
+      } as unknown as EsWorkflowStepExecution)
     ).toThrow('WorkflowExecutionState: input/output writes must go through setStepIo');
   });
 
