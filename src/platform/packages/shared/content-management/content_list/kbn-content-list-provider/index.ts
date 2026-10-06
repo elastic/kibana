@@ -60,6 +60,7 @@ export {
   CREATED_BY_FILTER_ID,
   DEFAULT_SORT_FIELDS,
   DEFAULT_INITIAL_SORT,
+  getSortFieldDirections,
   DeleteConfirmationModal,
   DeleteConfirmationComponent,
   useDeleteConfirmation,
