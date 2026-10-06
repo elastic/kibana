@@ -40,7 +40,22 @@ export class Session {
   }
 }
 
-const REQUEST_TIMEOUT_MS = 60_000;
+/**
+ * Abort budget for a single auth request. It has to fire well inside the shortest caller timeout
+ * (Scout charges hooks and fixtures against its 60s test timeout), otherwise a stalled request
+ * consumes the whole budget and the retries below are never reached.
+ */
+export const REQUEST_TIMEOUT_MS = 15_000;
+
+const withRequestTimeout = async <T>(request: (signal: AbortSignal) => Promise<T>): Promise<T> => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  try {
+    return await request(controller.signal);
+  } finally {
+    clearTimeout(timeoutId);
+  }
+};
 
 const getCookieFromResponseHeaders = (headers: Headers, body: string, errorMessage: string) => {
   // Headers.getSetCookie() is the Node 22 / undici way to read multi-valued
@@ -74,7 +89,7 @@ export const createCloudSession = async (
   params: CreateSamlSessionParams,
   retryParams: RetryParams = {
     attemptsCount: 3,
-    attemptDelay: 15_000,
+    attemptDelay: 2_000,
   }
 ): Promise<string> => {
   const { hostname, email, password, log } = params;
@@ -82,20 +97,19 @@ export const createCloudSession = async (
 
   let attemptsLeft = retryParams.attemptsCount;
   while (attemptsLeft > 0) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
     try {
-      const sessionResponse = await fetch(cloudLoginUrl, {
-        method: 'POST',
-        headers: {
-          accept: 'application/json',
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-        redirect: 'manual',
-        signal: controller.signal,
-      });
-      clearTimeout(timeoutId);
+      const sessionResponse = await withRequestTimeout((signal) =>
+        fetch(cloudLoginUrl, {
+          method: 'POST',
+          headers: {
+            accept: 'application/json',
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
+          redirect: 'manual',
+          signal,
+        })
+      );
       if (sessionResponse.status !== 200) {
         throw new Error(
           `Failed to create the new cloud session: 'POST ${cloudLoginUrl}' returned ${sessionResponse.status}`
@@ -134,7 +148,6 @@ export const createCloudSession = async (
         )}`
       );
     } catch (ex) {
-      clearTimeout(timeoutId);
       if (--attemptsLeft > 0) {
         // log only error message
         log.error(`${ex.message}\nWaiting ${retryParams.attemptDelay} ms before the next attempt`);
@@ -159,20 +172,23 @@ export const createSAMLRequest = async (kbnUrl: string, kbnVersion: string, log:
   const url = kbnUrl + '/internal/security/login';
   let samlResponse: Response;
   try {
-    samlResponse = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'kbn-version': kbnVersion,
-        'x-elastic-internal-origin': 'Kibana',
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        providerType: 'saml',
-        providerName: 'cloud-saml-kibana',
-        currentURL: kbnUrl + '/login?next=%2F"',
-      }),
-      redirect: 'manual',
-    });
+    samlResponse = await withRequestTimeout((signal) =>
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'kbn-version': kbnVersion,
+          'x-elastic-internal-origin': 'Kibana',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          providerType: 'saml',
+          providerName: 'cloud-saml-kibana',
+          currentURL: kbnUrl + '/login?next=%2F"',
+        }),
+        redirect: 'manual',
+        signal,
+      })
+    );
   } catch (ex) {
     log.error('Failed to create SAML request');
     throw ex;
@@ -204,12 +220,15 @@ export const createSAMLResponse = async (params: SAMLResponseValueParams) => {
   const { location, ecSession, email, kbnHost, log } = params;
   let value: string | undefined;
   try {
-    const samlResponse = await fetch(location, {
-      headers: {
-        Cookie: `ec_session=${ecSession}`,
-      },
-      redirect: 'manual',
-    });
+    const samlResponse = await withRequestTimeout((signal) =>
+      fetch(location, {
+        headers: {
+          Cookie: `ec_session=${ecSession}`,
+        },
+        redirect: 'manual',
+        signal,
+      })
+    );
     const responseStatus = samlResponse.status;
     const requestId = samlResponse.headers.get('x-request-id') || 'not found';
 
@@ -229,6 +248,8 @@ export const createSAMLResponse = async (params: SAMLResponseValueParams) => {
     }
   } catch (err) {
     log.error(`Create SAML Response (${location}) failed: ${err.message}`);
+    // a request failure is not the access problem the fallback below reports
+    throw err;
   }
 
   if (!value) {
@@ -265,7 +286,9 @@ export const finishSAMLHandshake = async ({
   let attemptsLeft = maxRetryCount + 1;
   while (attemptsLeft > 0) {
     try {
-      const authResponse = await fetch(url, requestInit);
+      const authResponse = await withRequestTimeout((signal) =>
+        fetch(url, { ...requestInit, signal })
+      );
       // SAML callback should return 302
       if (authResponse.status === 302) {
         return getCookieFromResponseHeaders(
@@ -317,13 +340,16 @@ export const getSecurityProfile = async ({
   const url = kbnHost + '/internal/security/me';
   let meResponse: Response;
   try {
-    meResponse = await fetch(url, {
-      headers: {
-        Cookie: cookie.cookieString(),
-        'x-elastic-internal-origin': 'Kibana',
-        'content-type': 'application/json',
-      },
-    });
+    meResponse = await withRequestTimeout((signal) =>
+      fetch(url, {
+        headers: {
+          Cookie: cookie.cookieString(),
+          'x-elastic-internal-origin': 'Kibana',
+          'content-type': 'application/json',
+        },
+        signal,
+      })
+    );
   } catch (ex) {
     log.error('Failed to fetch user profile data');
     throw ex;
