@@ -108,7 +108,11 @@ const fixture = () => {
     },
   };
   const sweep = (
-    options: { dryRun?: boolean; maxOutstanding?: number; maxRunning?: number } = {}
+    options: {
+      dryRun?: boolean;
+      maxOpenFixesPerTeam?: number;
+      maxConcurrentFixRunsPerTeam?: number;
+    } = {}
   ) => dispatchQueuedFixes({ client, log: (message) => logs.push(message), ...options });
   return {
     issues,
@@ -201,7 +205,7 @@ test('counts a PR once even when it closes multiple same-team issues', async () 
   const f = fixture();
   for (let number = 1; number <= 4; number++) f.addIssue(number);
   f.addPr(100, [1, 2, 3]);
-  assert.deepEqual(await f.sweep({ maxOutstanding: 2 }), [4]);
+  assert.deepEqual(await f.sweep({ maxOpenFixesPerTeam: 2 }), [4]);
 });
 
 test('does not double count an active execution and the PR it produced', async () => {
@@ -210,7 +214,7 @@ test('does not double count an active execution and the PR it produced', async (
   f.addIssue(2);
   f.addPr(100, [1]);
   f.addRun(1);
-  assert.deepEqual(await f.sweep({ maxOutstanding: 2, maxRunning: 2 }), [2]);
+  assert.deepEqual(await f.sweep({ maxOpenFixesPerTeam: 2, maxConcurrentFixRunsPerTeam: 2 }), [2]);
 });
 
 for (const status of ['queued', 'in_progress', 'waiting', 'pending', 'requested']) {
@@ -306,7 +310,7 @@ test('all ownership labels must have capacity, and one PR consumes a slot in eac
   f.addPr(100, [1]);
   f.addIssue(2, ['Team:Search']);
   f.addIssue(3, ['Team:Other']);
-  assert.deepEqual(await f.sweep({ maxOutstanding: 1 }), [3]);
+  assert.deepEqual(await f.sweep({ maxOpenFixesPerTeam: 1 }), [3]);
 });
 
 test('issues without ownership share a bounded fallback bucket', async () => {
@@ -320,7 +324,7 @@ test('PRs without parsed issue links still consume their labelled team budget', 
   const f = fixture();
   f.addPr(100, [], ['Team:Core']);
   f.addIssue(1);
-  assert.deepEqual(await f.sweep({ maxOutstanding: 1 }), []);
+  assert.deepEqual(await f.sweep({ maxOpenFixesPerTeam: 1 }), []);
 });
 
 test('a PR closing the exact requested issue prevents another dispatch', async () => {
@@ -423,8 +427,8 @@ test('missing or mismatched dispatch response fails closed', async () => {
 test('rejects invalid capacity settings before reading or writing GitHub', async () => {
   const f = fixture();
   for (const value of [0, -1, 1.5, NaN, Infinity]) {
-    await assert.rejects(f.sweep({ maxOutstanding: value }), /positive integers/);
-    await assert.rejects(f.sweep({ maxRunning: value }), /positive integers/);
+    await assert.rejects(f.sweep({ maxOpenFixesPerTeam: value }), /positive integers/);
+    await assert.rejects(f.sweep({ maxConcurrentFixRunsPerTeam: value }), /positive integers/);
   }
   assert.deepEqual(f.writes, []);
 });
@@ -447,10 +451,10 @@ test('varied bursts respect every team budget and never admit the same request t
   for (let count = 1; count <= 40; count++) {
     const f = fixture();
     for (let number = count; number >= 1; number--) f.addIssue(number, [`Team:${number % 4}`]);
-    const admitted = await f.sweep({ maxOutstanding: 3, maxRunning: 2 });
+    const admitted = await f.sweep({ maxOpenFixesPerTeam: 3, maxConcurrentFixRunsPerTeam: 2 });
     for (let team = 0; team < 4; team++)
       assert.ok(admitted.filter((issue) => issue % 4 === team).length <= 2);
-    await f.sweep({ maxOutstanding: 3, maxRunning: 2 });
+    await f.sweep({ maxOpenFixesPerTeam: 3, maxConcurrentFixRunsPerTeam: 2 });
     assert.equal(new Set(f.dispatched.map((request) => request.event)).size, f.dispatched.length);
   }
 });
@@ -478,7 +482,7 @@ test('does not read histories for a backlog whose entire owning team is already 
   f.client.listComments = async () => {
     throw new Error('unnecessary comment request');
   };
-  assert.deepEqual(await f.sweep({ maxOutstanding: 1 }), []);
+  assert.deepEqual(await f.sweep({ maxOpenFixesPerTeam: 1 }), []);
 });
 
 test('never retries a known attempt if its run cannot be read', async () => {
@@ -547,6 +551,6 @@ test('a fixer finishing during the workload read cannot disappear between execut
     }
     return result;
   };
-  assert.deepEqual(await f.sweep({ maxOutstanding: 3 }), []);
-  assert.deepEqual(await f.sweep({ maxOutstanding: 3 }), []);
+  assert.deepEqual(await f.sweep({ maxOpenFixesPerTeam: 3 }), []);
+  assert.deepEqual(await f.sweep({ maxOpenFixesPerTeam: 3 }), []);
 });

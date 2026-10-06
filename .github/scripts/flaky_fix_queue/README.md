@@ -5,12 +5,12 @@ the same label. The dispatcher polls every 15 minutes; it does not require an
 issue event to survive GitHub Actions' pending-run cancellation behaviour.
 
 The default limits are five outstanding fixes and one active fixer per owning
-team. Change `MAX_OUTSTANDING` and `MAX_RUNNING` in
+team. Change `MAX_OPEN_FIXES_PER_TEAM` and `MAX_CONCURRENT_FIX_RUNS_PER_TEAM` in
 [the dispatcher workflow](../../workflows/flaky_fix_dispatcher.yml) to tune them.
 
-- `MAX_OUTSTANDING` limits unfinished work per team: open fix PRs plus active
+- `MAX_OPEN_FIXES_PER_TEAM` limits unfinished work per team: open fix PRs plus active
   fixer runs, counting a run and its resulting PR only once. It limits the backlog.
-- `MAX_RUNNING` limits fixer runs active at the same time per team, including
+- `MAX_CONCURRENT_FIX_RUNS_PER_TEAM` limits fixer runs active at the same time per team, including
   queued executions. It limits simultaneous investigations and fixes.
 
 ## Admission

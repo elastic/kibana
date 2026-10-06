@@ -34,8 +34,8 @@ jobs:
       - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           DRY_RUN: ${{ inputs.dry_run == true }}
-          MAX_OUTSTANDING: '5'
-          MAX_RUNNING: '1'
+          MAX_OPEN_FIXES_PER_TEAM: '5'
+          MAX_CONCURRENT_FIX_RUNS_PER_TEAM: '1'
         with:
           # GITHUB_TOKEN can explicitly dispatch workflows. The fixer still uses
           # kibanamachine for PR creation and the resulting downstream events.
@@ -49,6 +49,6 @@ jobs:
               client: createQueueClient(github, context.repo),
               log: core.info,
               dryRun: process.env.DRY_RUN === 'true',
-              maxOutstanding: Number(process.env.MAX_OUTSTANDING),
-              maxRunning: Number(process.env.MAX_RUNNING),
+              maxOpenFixesPerTeam: Number(process.env.MAX_OPEN_FIXES_PER_TEAM),
+              maxConcurrentFixRunsPerTeam: Number(process.env.MAX_CONCURRENT_FIX_RUNS_PER_TEAM),
             });

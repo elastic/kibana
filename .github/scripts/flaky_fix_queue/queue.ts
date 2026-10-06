@@ -76,8 +76,8 @@ export interface QueueOptions {
   client: QueueClient;
   log: (message: string) => void;
   dryRun?: boolean;
-  maxOutstanding?: number;
-  maxRunning?: number;
+  maxOpenFixesPerTeam?: number;
+  maxConcurrentFixRunsPerTeam?: number;
 }
 
 const labelName = (label: string | Label): string =>
@@ -141,10 +141,10 @@ export const dispatchQueuedFixes = async ({
   client,
   log,
   dryRun = false,
-  maxOutstanding = 5,
-  maxRunning = 1,
+  maxOpenFixesPerTeam = 5,
+  maxConcurrentFixRunsPerTeam = 1,
 }: QueueOptions): Promise<number[]> => {
-  for (const value of [maxOutstanding, maxRunning]) {
+  for (const value of [maxOpenFixesPerTeam, maxConcurrentFixRunsPerTeam]) {
     if (!Number.isSafeInteger(value) || value < 1)
       throw new Error('Queue limits must be positive integers');
   }
@@ -232,8 +232,8 @@ export const dispatchQueuedFixes = async ({
   const hasCapacity = (teams: string[]): boolean =>
     teams.every(
       (team) =>
-        (outstanding.get(team)?.size ?? 0) < maxOutstanding &&
-        (running.get(team)?.size ?? 0) < maxRunning
+        (outstanding.get(team)?.size ?? 0) < maxOpenFixesPerTeam &&
+        (running.get(team)?.size ?? 0) < maxConcurrentFixRunsPerTeam
     );
   const queue: Snapshot[] = [];
   for (const issue of labelled) {
