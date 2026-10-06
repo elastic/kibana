@@ -173,6 +173,7 @@ export class NightshiftInvestigationsPlugin
         featureFlags: this.featureFlags,
         savedObjects: this.savedObjects,
         security: this.security,
+        securityPlugin: this.securityStart,
         spaces: this.spaces,
       }),
     });

@@ -11,8 +11,9 @@ import type { CoreStart, KibanaRequest, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_API_PRIVILEGES, NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import {
   MAX_CUSTOM_CONTEXT_AUTHOR_NAME_LENGTH,
   MAX_CUSTOM_CONTEXT_SNIPPETS,
@@ -43,7 +44,10 @@ export interface CustomContextClient {
     request: KibanaRequest,
     params: PutCustomContextRequest
   ) => Promise<PutCustomContextResponse>;
-  /** The space's snippets formatted for the agent's system prompt; empty when there are none. */
+  /**
+   * The space's snippets formatted for the agent's system prompt; empty when there are none or
+   * when the caller lacks the Nightshift read privilege in that space.
+   */
   getInstructions: (request: KibanaRequest, spaceId: string) => Promise<string>;
 }
 
@@ -51,6 +55,7 @@ export interface CustomContextClientDeps {
   featureFlags?: CoreStart['featureFlags'];
   savedObjects?: CoreStart['savedObjects'];
   security?: CoreStart['security'];
+  securityPlugin?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
 }
 
@@ -132,6 +137,23 @@ export const createCustomContextClient = ({
     }
   };
 
+  // The agent is callable without Nightshift privileges, so prompt-time reads must check the
+  // read privilege the GET route enforces. Deny by default when privileges cannot be verified.
+  const canReadCustomContext = async (request: KibanaRequest): Promise<boolean> => {
+    const { securityPlugin } = getDeps();
+    if (!securityPlugin) {
+      return false;
+    }
+    const { authz } = securityPlugin;
+    if (!authz.mode.useRbacForRequest(request)) {
+      return true;
+    }
+    const { hasAllRequested } = await authz.checkPrivilegesDynamicallyWithRequest(request)({
+      kibana: [authz.actions.api.get(NIGHTSHIFT_API_PRIVILEGES.read)],
+    });
+    return hasAllRequested;
+  };
+
   const getAuthorName = (request: KibanaRequest): string => {
     const user = getDeps().security?.authc.getCurrentUser(request);
     const name = user?.full_name || user?.username || UNKNOWN_AUTHOR;
@@ -200,6 +222,9 @@ export const createCustomContextClient = ({
     },
 
     getInstructions: async (request, spaceId) => {
+      if (!(await canReadCustomContext(request))) {
+        return '';
+      }
       const existing = await getCustomContextObject(request, spaceId);
       return formatCustomContextInstructions(existing?.attributes.snippets ?? []);
     },

@@ -14,6 +14,7 @@ import {
   savedObjectsServiceMock,
 } from '@kbn/core/server/mocks';
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import {
@@ -43,10 +44,14 @@ const setup = ({
   stored,
   nightshiftEnabled = true,
   user = { username: 'jdoe', full_name: 'John Doe' },
+  hasReadPrivilege = true,
+  withSecurityPlugin = true,
 }: {
   stored?: CustomContextSnippet[];
   nightshiftEnabled?: boolean;
   user?: { username: string; full_name?: string } | null;
+  hasReadPrivilege?: boolean;
+  withSecurityPlugin?: boolean;
 } = {}) => {
   const core = coreMock.createStart();
   core.featureFlags.getBooleanValue$.mockImplementation((flag) =>
@@ -88,15 +93,25 @@ const setup = ({
     spacesService: { getSpaceId: jest.fn(() => 'space-a') },
   } as unknown as SpacesPluginStart;
 
+  const checkPrivileges = jest.fn(async () => ({ hasAllRequested: hasReadPrivilege }));
+  const securityPlugin = {
+    authz: {
+      mode: { useRbacForRequest: jest.fn(() => true) },
+      checkPrivilegesDynamicallyWithRequest: jest.fn(() => checkPrivileges),
+      actions: { api: { get: (operation: string) => `api:${operation}` } },
+    },
+  } as unknown as SecurityPluginStart;
+
   const client = createCustomContextClient({
     getDeps: () => ({
       featureFlags: core.featureFlags,
       savedObjects,
       security: core.security,
+      securityPlugin: withSecurityPlugin ? securityPlugin : undefined,
       spaces,
     }),
   });
-  return { client, soClient, request: httpServerMock.createKibanaRequest() };
+  return { client, soClient, checkPrivileges, request: httpServerMock.createKibanaRequest() };
 };
 
 describe('createCustomContextClient', () => {
@@ -251,6 +266,24 @@ describe('createCustomContextClient', () => {
       `**USER CONTEXT**\n<user_provided_context>\n${EXISTING.text}\n</user_provided_context>`
     );
     expect(soClient.asScopedToNamespace).toHaveBeenCalledWith('space-b');
+  });
+
+  it('returns no instructions to callers without the Nightshift read privilege', async () => {
+    const { client, request, soClient, checkPrivileges } = setup({
+      stored: [EXISTING],
+      hasReadPrivilege: false,
+    });
+
+    await expect(client.getInstructions(request, 'space-a')).resolves.toBe('');
+    expect(checkPrivileges).toHaveBeenCalledWith({ kibana: ['api:read_nightshift'] });
+    expect(soClient.get).not.toHaveBeenCalled();
+  });
+
+  it('returns no instructions when privileges cannot be verified', async () => {
+    const { client, request, soClient } = setup({ stored: [EXISTING], withSecurityPlugin: false });
+
+    await expect(client.getInstructions(request, 'space-a')).resolves.toBe('');
+    expect(soClient.get).not.toHaveBeenCalled();
   });
 
   it('returns empty instructions when the space has no custom context', async () => {
