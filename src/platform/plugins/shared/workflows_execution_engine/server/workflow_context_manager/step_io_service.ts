@@ -60,7 +60,7 @@ export interface StepIoWriter extends StepIoReader {
  * Lifecycle surface used by the workflow execution loop and runtime manager only.
  */
 export interface StepIoLifecycle {
-  rehydrate(ids: ReadonlyArray<string>): Promise<void>;
+  rehydrate(ids: ReadonlyArray<string>, inputIds?: ReadonlyArray<string>): Promise<void>;
   getOutputSizeStats(): OutputSizeStats;
 }
 
@@ -85,6 +85,11 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   private readonly cache: StepIoCache;
   /** Rehydrated outputs the LRU could not retain; scoped to the latest requested working set. */
   private readonly overflow = new Map<string, JsonValue | null>();
+  /**
+   * Inputs of finished steps, which state drops after flush. Fetched on demand and scoped
+   * to the latest requested working set, like `overflow`. `null` marks "no stored input".
+   */
+  private readonly inputOverflow = new Map<string, JsonValue | null>();
   private rehydrateInFlight = 0;
   /** Execution-wide sizes of outputs written with a measured byte count, for telemetry. */
   private readonly measuredSizes = new Map<string, number>();
@@ -112,7 +117,11 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     if (type === 'output' && this.overflow.has(stepExecutionId)) {
       return this.overflow.get(stepExecutionId);
     }
-    return this.state.getStepIo(stepExecutionId, type);
+    const live = this.state.getStepIo(stepExecutionId, type);
+    if (live === undefined && type === 'input') {
+      return this.inputOverflow.get(stepExecutionId);
+    }
+    return live;
   }
 
   public getStepError(stepExecutionId: string): SerializedError | undefined {
@@ -186,16 +195,25 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    * yet flushed) are skipped, since Elasticsearch does not have them yet.
    *
    * Callers (WorkflowContextManager.ensureContextReady) are responsible for
-   * resolving which IDs are needed before calling this method.
+   * resolving which IDs are needed before calling this method. Inputs of finished
+   * steps are dropped from state, so they are only fetched for `inputIds`.
    */
-  public async rehydrate(ids: ReadonlyArray<string>): Promise<void> {
+  public async rehydrate(
+    ids: ReadonlyArray<string>,
+    inputIds: ReadonlyArray<string> = []
+  ): Promise<void> {
     // Drop overflow from earlier calls, unless another rehydrate is still in flight.
     if (this.rehydrateInFlight === 0) {
       const wanted = new Set(ids);
       for (const id of this.overflow.keys()) {
         if (!wanted.has(id)) this.overflow.delete(id);
       }
+      const wantedInputs = new Set(inputIds);
+      for (const id of this.inputOverflow.keys()) {
+        if (!wantedInputs.has(id)) this.inputOverflow.delete(id);
+      }
     }
+    await this.rehydrateInputs(inputIds);
     const missing = ids.filter(
       (id) =>
         !this.cache.has(id, 'output') &&
@@ -239,6 +257,31 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       for (const doc of evictedDocs) {
         if (this.state.getStepIo(doc.id, 'output') === undefined) {
           this.overflow.set(doc.id, doc.output ?? null);
+        }
+      }
+    } finally {
+      this.rehydrateInFlight--;
+    }
+  }
+
+  /** Fetches inputs that state dropped after flush (finished steps) into `inputOverflow`. */
+  private async rehydrateInputs(ids: ReadonlyArray<string>): Promise<void> {
+    const missing = ids.filter(
+      (id) =>
+        this.state.getStepExecution(id) !== undefined &&
+        this.state.getStepIo(id, 'input') === undefined &&
+        !this.inputOverflow.has(id) &&
+        this.state.isInputEvicted(id)
+    );
+    if (missing.length === 0) return;
+
+    this.rehydrateInFlight++;
+    try {
+      const docs = await this.stepRepository.getStepExecutionsByIds(missing, ['id', 'input']);
+      const found = new Map(docs.map((doc) => [doc.id, doc.input ?? null]));
+      for (const id of missing) {
+        if (this.state.getStepIo(id, 'input') === undefined) {
+          this.inputOverflow.set(id, found.get(id) ?? null);
         }
       }
     } finally {

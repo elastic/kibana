@@ -82,32 +82,90 @@ export function extractReferencedStepIds(node: GraphNodeUnion): Set<string> | nu
   return result;
 }
 
+const referencesVariablesCache = new WeakMap<GraphNodeUnion, boolean>();
+
+/**
+ * Whether a node may read the `variables` context root (written by `data.set`).
+ * Conservative: returns `true` when static analysis fails or hits a dynamic
+ * bracket access, since the variable name could be hidden in the truncated path.
+ */
+export function nodeMayReferenceVariables(node: GraphNodeUnion): boolean {
+  const cached = referencesVariablesCache.get(node);
+  if (cached !== undefined) {
+    return cached;
+  }
+  let result: boolean;
+  try {
+    result = collectNodeVariables(node).some(
+      (variable) =>
+        variable === 'steps' ||
+        variable === 'variables' ||
+        variable.startsWith('variables.') ||
+        variable.startsWith('variables[')
+    );
+  } catch {
+    result = true;
+  }
+  referencesVariablesCache.set(node, result);
+  return result;
+}
+
+/**
+ * Step IDs whose `input` a node may read (`steps.X.input...`). Returns `null` when the
+ * analysis is ambiguous (dynamic access or parse failure), meaning any step's input
+ * may be read. A bare `steps.X` or bracket access counts as an input reference.
+ */
+export function extractInputReferencedStepIds(node: GraphNodeUnion): Set<string> | null {
+  try {
+    const stepIds = new Set<string>();
+    for (const variable of collectNodeVariables(node)) {
+      if (variable === 'steps') return null;
+      if (variable.startsWith(STEPS_PREFIX)) {
+        const rest = variable.slice(STEPS_PREFIX.length);
+        const dotIndex = rest.indexOf('.');
+        const stepId = dotIndex === -1 ? rest : rest.slice(0, dotIndex);
+        const path = dotIndex === -1 ? '' : rest.slice(dotIndex);
+        const readsInput =
+          path === '' || path.startsWith('.input') || path.startsWith('[') || stepId.includes('[');
+        if (stepId && readsInput) stepIds.add(stepId.split('[')[0]);
+      }
+    }
+    return stepIds;
+  } catch {
+    return null;
+  }
+}
+
 function computeReferencedStepIds(node: GraphNodeUnion): Set<string> | null {
   try {
-    const variables: string[] = [];
-
-    // Condition strings (enter-if, enter-while, exit-while, enter-continue,
-    // condition branches) can be authored as KQL that references step outputs
-    // WITHOUT Liquid `{{ }}` markers — e.g. `steps.foo.output.status: "done"`.
-    // `scanForTemplateVariables` only sees Liquid expressions, so such bare-KQL
-    // conditions would otherwise be invisible to the rehydration planner,
-    // leaving an evicted source un-rehydrated (blank render -> wrong control
-    // flow). `extractPropertyPathsFromKql` handles both KQL field paths and any
-    // embedded `{{ }}` templates, so it is safe to apply to every condition.
-    const condition = getNodeConditionString(node);
-    if (condition !== undefined) {
-      variables.push(...extractPropertyPathsFromKql(condition));
-    }
-
-    // Scan the full graph node so template-bearing fields outside `configuration`
-    // (for example exit-while.condition) are included automatically.
-    variables.push(...scanForTemplateVariables(node));
-
-    return extractReferencedStepIdsFromVariables(variables);
+    return extractReferencedStepIdsFromVariables(collectNodeVariables(node));
   } catch {
     // If template parsing fails for any reason, fall back to all predecessors
     return null;
   }
+}
+
+function collectNodeVariables(node: GraphNodeUnion): string[] {
+  const variables: string[] = [];
+
+  // Condition strings (enter-if, enter-while, exit-while, enter-continue,
+  // condition branches) can be authored as KQL that references step outputs
+  // WITHOUT Liquid `{{ }}` markers — e.g. `steps.foo.output.status: "done"`.
+  // `scanForTemplateVariables` only sees Liquid expressions, so such bare-KQL
+  // conditions would otherwise be invisible to the rehydration planner,
+  // leaving an evicted source un-rehydrated (blank render -> wrong control
+  // flow). `extractPropertyPathsFromKql` handles both KQL field paths and any
+  // embedded `{{ }}` templates, so it is safe to apply to every condition.
+  const condition = getNodeConditionString(node);
+  if (condition !== undefined) {
+    variables.push(...extractPropertyPathsFromKql(condition));
+  }
+
+  // Scan the full graph node so template-bearing fields outside `configuration`
+  // (for example exit-while.condition) are included automatically.
+  variables.push(...scanForTemplateVariables(node));
+
+  return variables;
 }
 
 export function extractReferencedStepIdsFromVariables(variables: string[]): Set<string> | null {

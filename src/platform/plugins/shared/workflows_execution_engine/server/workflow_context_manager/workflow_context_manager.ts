@@ -20,7 +20,11 @@ import {
 } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { buildWorkflowRenderContext } from './build_workflow_context';
-import { extractReferencedStepIds } from './extract_referenced_step_ids';
+import {
+  extractInputReferencedStepIds,
+  extractReferencedStepIds,
+  nodeMayReferenceVariables,
+} from './extract_referenced_step_ids';
 import { areParallelBranchesCompatible, getParallelBranchScopes } from './parallel_branch_scope';
 import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
@@ -44,7 +48,8 @@ import { isSerializedError } from '../utils/errors';
  *    Falls back to all predecessors when analysis is ambiguous (`null`) or when
  *    the node references no steps explicitly (size === 0) — conservative to
  *    guard against analysis gaps.
- * 2. All `data.set` executions — needed by `getVariables`.
+ * 2. All `data.set` executions — needed by `getVariables`, only when the node may
+ *    reference `variables`.
  * 3. Active scope-stack frames — needed by `enrichStepContextAccordingToStepScope`.
  */
 export function resolveRehydrationTargets(
@@ -68,9 +73,13 @@ export function resolveRehydrationTargets(
     }
   }
 
-  // `getVariables()` reads every `data.set` output, so those must be resident too.
-  for (const step of state.getDataSetStepExecutions()) {
-    neededIds.add(step.id);
+  // `getVariables()` reads every `data.set` output, so those must be resident when the
+  // node can read `variables`. Skipping them otherwise avoids re-fetching (and thrashing
+  // the LRU with) a potentially huge set of outputs on every node run.
+  if (nodeMayReferenceVariables(node)) {
+    for (const step of state.getDataSetStepExecutions()) {
+      neededIds.add(step.id);
+    }
   }
 
   const executionId = state.getWorkflowExecutionId();
@@ -82,6 +91,27 @@ export function resolveRehydrationTargets(
   }
 
   return neededIds;
+}
+
+/**
+ * Resolves the subset of `neededIds` whose inputs must be re-fetched: only steps the node
+ * reads via `steps.X.input`. Inputs of finished steps are evicted, and fetching them for
+ * every node run would add a round trip for data that is never read.
+ */
+export function resolveInputRehydrationTargets(
+  node: GraphNodeUnion,
+  neededIds: ReadonlySet<string>,
+  state: WorkflowExecutionState,
+  stackFrames?: readonly StackFrame[]
+): string[] {
+  const inputStepIds = extractInputReferencedStepIds(node);
+  if (inputStepIds === null) return [...neededIds];
+  const inputIds: string[] = [];
+  for (const stepId of inputStepIds) {
+    const latestExec = state.getLatestStepExecution(stepId, stackFrames);
+    if (latestExec) inputIds.push(latestExec.id);
+  }
+  return inputIds;
 }
 
 export interface ContextManagerInit {
@@ -167,7 +197,13 @@ export class WorkflowContextManager {
       this.workflowExecutionState,
       this.stackFrames
     );
-    await this.stepIoService.rehydrate([...neededIds]);
+    const inputIds = resolveInputRehydrationTargets(
+      this.node,
+      neededIds,
+      this.workflowExecutionState,
+      this.stackFrames
+    );
+    await this.stepIoService.rehydrate([...neededIds], inputIds);
     // Rehydration changes what `read()` returns without touching state IO.
     this.variablesCache = undefined;
   }

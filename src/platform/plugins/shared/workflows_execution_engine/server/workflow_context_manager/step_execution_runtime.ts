@@ -142,7 +142,7 @@ export class StepExecutionRuntime {
    * round trip for the ids that are not already cached.
    */
   public async rehydrateStepOutputs(stepExecutionIds: ReadonlyArray<string>): Promise<void> {
-    await this.stepIoService.rehydrate(stepExecutionIds);
+    await this.stepIoService.rehydrate(stepExecutionIds, stepExecutionIds);
   }
 
   public getCurrentStepState(): Record<string, unknown> | undefined {
