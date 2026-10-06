@@ -16,6 +16,7 @@ import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { buildAlertBasedTilesQuery } from '../queries/entities_with_alerts_query';
+import { withFastEuidEsql } from '../queries/with_fast_euid_esql';
 import { EMPTY_ENTITY_IDS } from '../data';
 import {
   buildEntityFilterClauses,
@@ -89,7 +90,7 @@ export const useAlertBasedTiles = ({
   const query = useMemo(() => {
     if (!resolvedIndex?.indexName || !euidApi) return null;
     return buildAlertBasedTilesQuery(
-      euidApi.euid,
+      withFastEuidEsql(euidApi.euid),
       resolvedIndex.indexName,
       spaceId,
       timeRange,

@@ -40,11 +40,12 @@ describe('buildEntitiesWithAnomaliesCountQuery', () => {
 
   it('combines present EUIDs with guarded MV_APPEND so multi-entity records keep every type', () => {
     const query = buildEntitiesWithAnomaliesCountQuery(mockEuid, '.entities-v1');
-    expect(query).toContain('MV_APPEND(MV_APPEND(user_euid, host_euid), service_euid)');
-    expect(query).toContain('MV_APPEND(user_euid, host_euid)');
-    expect(query).toContain('MV_APPEND(user_euid, service_euid)');
-    expect(query).toContain('MV_APPEND(host_euid, service_euid)');
-    expect(query).not.toContain('COALESCE(user_euid, host_euid, service_euid)');
+    // One COALESCE per type order, appended and deduplicated: every present type survives.
+    expect(query).toContain('derived_euids = MV_DEDUPE(MV_APPEND(MV_APPEND(');
+    expect(query).toContain('COALESCE(user_euid, host_euid, service_euid)');
+    expect(query).toContain('COALESCE(host_euid, service_euid, user_euid)');
+    expect(query).toContain('COALESCE(service_euid, user_euid, host_euid)');
+    expect(query).not.toContain('derived_euids = COALESCE(');
   });
 
   it('restricts the shared ML index to the supplied job IDs before the entity lookup', () => {

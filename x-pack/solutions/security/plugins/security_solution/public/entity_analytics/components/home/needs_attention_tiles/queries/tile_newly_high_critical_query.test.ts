@@ -71,6 +71,14 @@ describe('buildNewlyHighCriticalCountQuery', () => {
     expect(query).toContain('boundary_level_num IS NULL OR boundary_level_num < 3');
   });
 
+  it('maps risk levels to numbers with nested single-condition CASEs', () => {
+    const query = buildNewlyHighCriticalCountQuery('default', '.entities-v1');
+    expect(query).toContain('level_low = CASE(risk_level == "Low", 1, 0)');
+    expect(query).toContain('level_moderate = CASE(risk_level == "Moderate", 2, level_low)');
+    expect(query).toContain('level_high = CASE(risk_level == "High", 3, level_moderate)');
+    expect(query).toContain('level_num = CASE(risk_level == "Critical", 4, level_high)');
+  });
+
   it('uses LAST(level_num, @timestamp) not MAX to record the actual level at each boundary', () => {
     const query = buildNewlyHighCriticalCountQuery('default', '.entities-v1');
     expect(query).toContain('STATS level_num = LAST(level_num, @timestamp) BY entity_euid, period');

@@ -38,7 +38,7 @@ describe('buildAlertEuidPipeline', () => {
     expect(derived).toContain('user_euid = "mock_euid"');
     expect(derived).toContain('host_euid = "mock_euid"');
     expect(derived).toContain('service_euid = "mock_euid"');
-    expect(derived).toContain('MV_APPEND(MV_APPEND(user_euid, host_euid), service_euid)');
+    expect(derived).toContain('_ea_entity_id = MV_DEDUPE(MV_APPEND(MV_APPEND(');
   });
 
   it('expands _ea_entity_id, filters nulls, deduplicates, then renames to entity.id for the JOIN', () => {

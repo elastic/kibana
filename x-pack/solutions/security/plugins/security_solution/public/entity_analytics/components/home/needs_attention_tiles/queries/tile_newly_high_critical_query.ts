@@ -48,7 +48,11 @@ export const buildNewlyHighCriticalCountQuery = (
     `| EVAL entity_euid = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value)`,
     `| EVAL risk_level = COALESCE(host.risk.calculated_level, user.risk.calculated_level, service.risk.calculated_level)`,
     `| WHERE entity_euid IS NOT NULL`,
-    `| EVAL level_num = CASE(risk_level == "Critical", 4, risk_level == "High", 3, risk_level == "Moderate", 2, risk_level == "Low", 1, 0)`,
+    // Nested single-condition CASEs: ES|QL evaluates a multi-condition CASE one row at a time.
+    `| EVAL level_low = CASE(risk_level == "Low", 1, 0),`,
+    `       level_moderate = CASE(risk_level == "Moderate", 2, level_low),`,
+    `       level_high = CASE(risk_level == "High", 3, level_moderate),`,
+    `       level_num = CASE(risk_level == "Critical", 4, level_high)`,
     `| EVAL period = CASE(@timestamp <= NOW() - ${period}, "boundary", "current")`,
     `| STATS level_num = LAST(level_num, @timestamp) BY entity_euid, period`,
     `| EVAL current_level_num  = CASE(period == "current",  level_num, null)`,
