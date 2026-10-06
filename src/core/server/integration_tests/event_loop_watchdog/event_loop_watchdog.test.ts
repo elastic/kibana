@@ -101,6 +101,9 @@ describe('EventLoopWatchdog (real worker, real profiler)', () => {
     await waitFor(() =>
       messages('info').find((message) => message.startsWith('Event loop profiling started'))
     );
+    // Let a heartbeat follow the profiler start: a block straight after it would be attributed
+    // to the (profiler-caused) start pause.
+    await sleep(200);
   });
 
   afterEach(async () => {
