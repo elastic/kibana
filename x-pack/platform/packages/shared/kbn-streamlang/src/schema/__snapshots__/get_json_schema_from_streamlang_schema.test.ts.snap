@@ -2085,6 +2085,8 @@ Object {
                   "type": "object",
                 },
               ],
+              "description": "Calculates the network direction given a source IP address, destination IP address, and a list of internal networks.",
+              "title": "Network Direction",
             },
             Object {
               "additionalProperties": false,
@@ -2433,6 +2435,7 @@ Object {
                 "sort",
                 "convert",
                 "concat",
+                "network_direction",
                 "json_extract",
                 "enrich",
                 "user_agent",
@@ -3764,6 +3767,8 @@ Object {
                     "type": "object",
                   },
                 ],
+                "description": "Calculates the network direction given a source IP address, destination IP address, and a list of internal networks.",
+                "title": "Network Direction",
               },
               Object {
                 "additionalProperties": false,
@@ -4112,6 +4117,7 @@ Object {
                   "sort",
                   "convert",
                   "concat",
+                  "network_direction",
                   "json_extract",
                   "enrich",
                   "user_agent",

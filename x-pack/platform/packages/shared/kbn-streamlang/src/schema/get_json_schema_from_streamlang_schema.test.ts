@@ -6,7 +6,29 @@
  */
 
 import { streamlangDSLSchema } from '../../types/streamlang';
+import { processorTypes } from '../../types/processors';
 import { getJsonSchemaFromStreamlangSchema } from './get_json_schema_from_streamlang_schema';
+
+function getActionUnionSchema(schema: Record<string, unknown>): Record<string, unknown> {
+  const stepsItems = (
+    (schema.properties as Record<string, unknown> | undefined)?.steps as
+      | Record<string, unknown>
+      | undefined
+  )?.items as Record<string, unknown> | undefined;
+  const stepOptions = stepsItems?.anyOf as unknown[] | undefined;
+  if (!Array.isArray(stepOptions)) {
+    throw new Error('Expected steps.items.anyOf');
+  }
+  const actionUnionSchema = stepOptions.find((option: unknown) => {
+    const opt = option as Record<string, unknown>;
+    const props = opt?.properties as Record<string, unknown> | undefined;
+    return opt && typeof opt === 'object' && Array.isArray(opt.anyOf) && !props?.condition;
+  }) as Record<string, unknown> | undefined;
+  if (!actionUnionSchema) {
+    throw new Error('Expected action union schema in steps.items.anyOf');
+  }
+  return actionUnionSchema;
+}
 
 describe('getJsonSchemaFromStreamlangSchema', () => {
   it('generates a valid JSON Schema from the streamlang DSL schema', () => {
@@ -29,6 +51,39 @@ describe('getJsonSchemaFromStreamlangSchema', () => {
     expect(schema.required).toEqual(['steps']);
     expect(stepsSchema).toBeDefined();
     expect(stepsSchema?.type).toBe('array');
+  });
+
+  it('includes every processor action in the union-level action enum', () => {
+    const schema = getJsonSchemaFromStreamlangSchema(streamlangDSLSchema) as Record<
+      string,
+      unknown
+    >;
+    const actionUnionSchema = getActionUnionSchema(schema);
+    const actionProperty = (actionUnionSchema.properties as Record<string, unknown> | undefined)
+      ?.action as { enum?: string[] } | undefined;
+    const actionEnum = actionProperty?.enum ?? [];
+
+    expect(new Set(actionEnum)).toEqual(new Set(processorTypes));
+    expect(actionEnum).toContain('network_direction');
+
+    const networkDirectionOption = (
+      actionUnionSchema.anyOf as Array<Record<string, unknown>> | undefined
+    )?.find((option) => {
+      const actionSchema = (option.properties as Record<string, unknown> | undefined)?.action as
+        | { const?: string }
+        | undefined;
+      if (actionSchema?.const === 'network_direction') {
+        return true;
+      }
+      const anyOfBranches = option.anyOf as Array<Record<string, unknown>> | undefined;
+      return anyOfBranches?.some((branch) => {
+        const branchAction = (branch.properties as Record<string, unknown> | undefined)?.action as
+          | { const?: string }
+          | undefined;
+        return branchAction?.const === 'network_direction';
+      });
+    });
+    expect(networkDirectionOption?.title).toBe('Network Direction');
   });
 
   it('filters manual_ingest_pipeline for wired streams', () => {

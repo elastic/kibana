@@ -494,24 +494,41 @@ function enhanceConditionBlockSchema(
 
 /**
  * Extract the `action` const value from a processor schema option.
- * Handles both flat objects (`properties.action.const`) and `allOf` schemas
- * produced by `z.intersection()` (e.g. `network_direction`).
+ * Handles flat objects (`properties.action.const`) and nested `allOf` /
+ * `anyOf` / `oneOf` shapes emitted by Zod v4 (e.g. `network_direction`).
  */
 function extractActionConstFromOption(option: Record<string, unknown>): string | undefined {
-  const directAction = (option?.properties as Record<string, unknown> | undefined)?.action as
+  if (!option || typeof option !== 'object') {
+    return undefined;
+  }
+
+  const directAction = (option.properties as Record<string, unknown> | undefined)?.action as
     | { const?: string }
     | undefined;
-  if (directAction?.const) return directAction.const;
+  if (typeof directAction?.const === 'string') {
+    return directAction.const;
+  }
 
-  if (Array.isArray(option?.allOf)) {
-    for (const item of option.allOf as Array<Record<string, unknown>>) {
-      const itemAction = (item?.properties as Record<string, unknown> | undefined)?.action as
-        | { const?: string }
-        | undefined;
-      if (itemAction?.const) return itemAction.const;
+  const nestedActionConsts: string[] = [];
+  for (const key of ['allOf', 'anyOf', 'oneOf'] as const) {
+    const branches = option[key];
+    if (!Array.isArray(branches)) {
+      continue;
+    }
+    for (const branch of branches as Array<Record<string, unknown>>) {
+      const actionConst = extractActionConstFromOption(branch);
+      if (typeof actionConst === 'string') {
+        nestedActionConsts.push(actionConst);
+      }
     }
   }
-  return undefined;
+
+  if (nestedActionConsts.length === 0) {
+    return undefined;
+  }
+
+  const [first, ...rest] = nestedActionConsts;
+  return rest.every((value) => value === first) ? first : undefined;
 }
 
 /**

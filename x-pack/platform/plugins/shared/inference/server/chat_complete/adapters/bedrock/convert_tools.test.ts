@@ -29,7 +29,7 @@ describe('fixSchemaArrayProperties (zod v4.6 JSON Schema)', () => {
     expect(fixSchemaArrayProperties(schema)).toEqual({
       type: 'object',
       properties: {
-        a: { type: 'string', nullable: true },
+        a: { anyOf: [{ type: 'string' }, { type: 'null' }] },
         b: { anyOf: [{ type: 'string' }, { type: 'number' }] },
       },
       required: ['a', 'b'],
