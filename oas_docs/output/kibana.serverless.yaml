@@ -9538,7 +9538,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Apply a partial update to an existing action policy. Fields not present in the body are left unchanged.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies AND read_alerting-v2-rules.
+        Apply a partial update. A field you omit keeps its stored value, and that applies at every level: send `{"matcher": {"tags": ["prod"]}}` to change `tags` while leaving `expression` alone. Send `null` to clear a field, again at any level: `{"matcher": {"expression": null}}` clears just the expression, while `{"matcher": null}` clears the whole object. Lists and variant objects are replaced as a unit rather than merged, since a partly-sent variant could never be valid. The merged result is validated as a whole, so a patch that would leave the resource invalid is rejected with a `400` and nothing is stored.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies AND read_alerting-v2-rules.
       operationId: patch-alerting-v2-action-policies-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -9562,9 +9562,13 @@ paths:
           application/json:
             examples:
               updateActionPolicyRequest:
-                summary: Rename and update the description
+                summary: Rename the policy and clear the matcher expression, keeping its tags
                 value:
                   description: Updated description.
+                  matcher:
+                    expression: null
+                    tags:
+                      - production
                   name: Notify on production alerts (updated)
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_update_action_policy'
@@ -14789,7 +14793,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: manage_alerting-v2-rules.
+        Apply a partial update. A field you omit keeps its stored value, and that applies at every level: send `{"matcher": {"tags": ["prod"]}}` to change `tags` while leaving `expression` alone. Send `null` to clear a field, again at any level: `{"matcher": {"expression": null}}` clears just the expression, while `{"matcher": null}` clears the whole object. Lists and variant objects are replaced as a unit rather than merged, since a partly-sent variant could never be valid. The merged result is validated as a whole, so a patch that would leave the resource invalid is rejected with a `400` and nothing is stored.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
       operationId: patch-alerting-v2-rules-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -14813,11 +14817,12 @@ paths:
           application/json:
             examples:
               updateRuleRequest:
-                summary: Update a rule name and description
+                summary: Rename a rule and clear its tags, leaving the rest of the metadata intact
                 value:
                   metadata:
                     description: Updated description.
                     name: Host CPU high (updated)
+                    tags: null
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_update_rule'
       responses:
@@ -143745,6 +143750,35 @@ components:
                 - every_time
               type: string
           description: The throttle strategy.
+    Kibana_HTTP_APIs_alerting_action_policy_throttle_patch:
+      additionalProperties: false
+      type: object
+      properties:
+        interval:
+          description: The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.
+          maxLength: 32
+          nullable: true
+          type: string
+        strategy:
+          anyOf:
+            - description: notify only on alert status transitions (default for `per_alert`).
+              enum:
+                - on_status_change
+              type: string
+            - description: notify on transitions and at regular intervals.
+              enum:
+                - per_status_interval
+              type: string
+            - description: notify at regular intervals regardless of status (default for `all`/`per_field`).
+              enum:
+                - time_interval
+              type: string
+            - description: notify on every evaluation cycle (high volume).
+              enum:
+                - every_time
+              type: string
+          description: The throttle strategy that controls how often notifications are sent.
+          nullable: true
     Kibana_HTTP_APIs_alerting_actor:
       additionalProperties: false
       description: Identity that performed the write.
@@ -144587,6 +144621,16 @@ components:
           type: string
       required:
         - segment
+    Kibana_HTTP_APIs_alerting_rule_breach_patch:
+      additionalProperties: false
+      description: Optional ES|QL clause appended to `query.base`. If omitted, every row from `query.base` is a match, and a `no_data` strategy other than `ignore` then requires `no_data.query`.
+      type: object
+      properties:
+        segment:
+          description: ES|QL clause appended to `query.base`, for example `WHERE avg_cpu > 0.85`. Don't include a `FROM` clause.
+          maxLength: 10000
+          minLength: 1
+          type: string
     Kibana_HTTP_APIs_alerting_rule_execution:
       additionalProperties: false
       type: object
@@ -144702,6 +144746,19 @@ components:
           type: array
       required:
         - fields
+    Kibana_HTTP_APIs_alerting_rule_grouping_patch:
+      additionalProperties: false
+      description: Grouping configuration.
+      type: object
+      properties:
+        fields:
+          description: Fields to group alerts by, e.g. ["host.name", "service.name"]. Should match ES|QL GROUP BY fields.
+          items:
+            maxLength: 256
+            minLength: 1
+            type: string
+          maxItems: 16
+          type: array
     Kibana_HTTP_APIs_alerting_rule_list_response:
       additionalProperties: false
       description: Paginated list of rules.
@@ -144755,6 +144812,36 @@ components:
           type: array
       required:
         - name
+    Kibana_HTTP_APIs_alerting_rule_metadata_patch:
+      additionalProperties: false
+      description: Rule metadata.
+      type: object
+      properties:
+        builder_type:
+          description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.
+          maxLength: 64
+          nullable: true
+          type: string
+        description:
+          description: Human-readable description of the rule.
+          maxLength: 1024
+          nullable: true
+          type: string
+        name:
+          description: Rule name (must be unique within the space).
+          maxLength: 256
+          minLength: 1
+          type: string
+        tags:
+          description: Tags for categorization, e.g. ["production", "infra"].
+          items:
+            maxLength: 128
+            minLength: 1
+            type: string
+          maxItems: 20
+          minItems: 1
+          nullable: true
+          type: array
     Kibana_HTTP_APIs_alerting_rule_no_data:
       description: What the rule does when a group has no data. Required when `kind` is `alert`. Not allowed when `kind` is `signal`. Any strategy other than `ignore` requires either `query.breach` or `no_data.query`, so that a group with no data can be told apart from one that stopped breaching.
       discriminator:
@@ -144842,6 +144929,21 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_breach'
       required:
         - base
+    Kibana_HTTP_APIs_alerting_rule_query_patch:
+      additionalProperties: false
+      description: ES|QL query the rule evaluates. `base` is required. `breach` is an optional clause appended to it.
+      type: object
+      properties:
+        base:
+          description: ES|QL query that specifies the data to evaluate. Must include a `FROM` clause. Kibana applies the time filter from `schedule.lookback` using `time_field`.
+          maxLength: 10000
+          minLength: 1
+          type: string
+        breach:
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_breach_patch'
+          description: Optional ES|QL clause appended to `query.base`. If omitted, every row from `query.base` is a match, and a `no_data` strategy other than `ignore` then requires `no_data.query`.
+          nullable: true
     Kibana_HTTP_APIs_alerting_rule_recovery:
       description: When an alert recovers. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.
       discriminator:
@@ -145011,6 +145113,20 @@ components:
           type: string
       required:
         - every
+    Kibana_HTTP_APIs_alerting_rule_schedule_patch:
+      additionalProperties: false
+      description: Execution schedule configuration.
+      type: object
+      properties:
+        every:
+          description: Execution interval, e.g. 1m, 5m, 1h.
+          maxLength: 32
+          type: string
+        lookback:
+          description: Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.
+          maxLength: 32
+          nullable: true
+          type: string
     Kibana_HTTP_APIs_alerting_rule_state_transition:
       additionalProperties: false
       description: Specifies how many consecutive matches, or how long a condition must hold, before an alert becomes `active` or `inactive`. Allowed only when `kind` is `alert`.
@@ -145022,6 +145138,21 @@ components:
         recovering:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition_recovering'
           description: Delay before a recovered match closes the alert. Has no effect when `recovery.strategy` is `manual`.
+    Kibana_HTTP_APIs_alerting_rule_state_transition_patch:
+      additionalProperties: false
+      description: Specifies how many consecutive matches, or how long a condition must hold, before an alert becomes `active` or `inactive`. Allowed only when `kind` is `alert`.
+      type: object
+      properties:
+        pending:
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition_pending_patch'
+          description: Delay before a match opens an alert.
+          nullable: true
+        recovering:
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition_recovering_patch'
+          description: Delay before a recovered match closes the alert. Has no effect when `recovery.strategy` is `manual`.
+          nullable: true
     Kibana_HTTP_APIs_alerting_rule_state_transition_pending:
       additionalProperties: false
       type: object
@@ -145041,6 +145172,28 @@ components:
           description: Duration the condition must hold, for example `5m`. Combine with `count` using `operator`.
           maxLength: 32
           type: string
+    Kibana_HTTP_APIs_alerting_rule_state_transition_pending_patch:
+      additionalProperties: false
+      type: object
+      properties:
+        count:
+          description: Consecutive matches the alert spends in `pending` before it becomes `active` on the next match. For example, `2` opens it on the third consecutive match. Set to `0` to open it on the first match.
+          maximum: 1000
+          minimum: 0
+          nullable: true
+          type: integer
+        operator:
+          description: When both `count` and `timeframe` are set, `and` requires both and `or` requires either. Allowed only when both fields are present.
+          enum:
+            - and
+            - or
+          nullable: true
+          type: string
+        timeframe:
+          description: Duration the condition must hold, for example `5m`. Combine with `count` using `operator`.
+          maxLength: 32
+          nullable: true
+          type: string
     Kibana_HTTP_APIs_alerting_rule_state_transition_recovering:
       additionalProperties: false
       type: object
@@ -145059,6 +145212,28 @@ components:
         timeframe:
           description: Duration the condition must hold, for example `5m`. Combine with `count` using `operator`.
           maxLength: 32
+          type: string
+    Kibana_HTTP_APIs_alerting_rule_state_transition_recovering_patch:
+      additionalProperties: false
+      type: object
+      properties:
+        count:
+          description: Consecutive recoveries the alert spends in `recovering` before it becomes `inactive` on the next recovery. For example, `2` closes it on the third consecutive recovery. Set to `0` to close it on the first recovery.
+          maximum: 1000
+          minimum: 0
+          nullable: true
+          type: integer
+        operator:
+          description: When both `count` and `timeframe` are set, `and` requires both and `or` requires either. Allowed only when both fields are present.
+          enum:
+            - and
+            - or
+          nullable: true
+          type: string
+        timeframe:
+          description: Duration the condition must hold, for example `5m`. Combine with `count` using `operator`.
+          maxLength: 32
+          nullable: true
           type: string
     Kibana_HTTP_APIs_alerting_snooze_action_policy_request:
       additionalProperties: false
@@ -145102,7 +145277,7 @@ components:
           nullable: true
         matcher:
           additionalProperties: false
-          description: 'Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are omitted, the policy applies to all alerts. <br/><br/> Updating `matcher` replaces it entirely: to change `tags` without dropping `expression`, resend the current `expression` value.'
+          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are omitted, the policy applies to all alerts.
           nullable: true
           type: object
           properties:
@@ -145110,6 +145285,7 @@ components:
               description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` to match on `tags` alone; an empty string is not accepted."
               maxLength: 4096
               minLength: 1
+              nullable: true
               type: string
             tags:
               description: Rule tags this policy should match. The policy applies to alerts from any rule that has at least one of these tags. Omit `matcher.tags` to match on `matcher.expression` alone; an empty array is not accepted.
@@ -145119,6 +145295,7 @@ components:
                 type: string
               maxItems: 50
               minItems: 1
+              nullable: true
               type: array
         name:
           description: The name of the action policy.
@@ -145127,7 +145304,7 @@ components:
           type: string
         throttle:
           allOf:
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle_patch'
           description: The throttle configuration for notifications.
           nullable: true
     Kibana_HTTP_APIs_alerting_update_rule:
@@ -145143,58 +145320,32 @@ components:
           type: array
         grouping:
           allOf:
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping_patch'
+          description: Grouping configuration.
           nullable: true
         metadata:
-          additionalProperties: false
-          type: object
-          properties:
-            builder_type:
-              maxLength: 64
-              nullable: true
-              type: string
-            description:
-              description: Human-readable description of the rule.
-              maxLength: 1024
-              type: string
-            name:
-              description: Rule name (must be unique within the space).
-              maxLength: 256
-              minLength: 1
-              type: string
-            tags:
-              items:
-                maxLength: 128
-                minLength: 1
-                type: string
-              maxItems: 20
-              minItems: 1
-              nullable: true
-              type: array
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_metadata_patch'
         no_data:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
+          description: What the rule does when a group has no data. Required when `kind` is `alert`. Not allowed when `kind` is `signal`. Any strategy other than `ignore` requires either `query.breach` or `no_data.query`, so that a group with no data can be told apart from one that stopped breaching.
+          nullable: true
         query:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query_patch'
         recovery:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery'
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery'
+          description: When an alert recovers. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.
+          nullable: true
         schedule:
-          additionalProperties: false
-          type: object
-          properties:
-            every:
-              description: Execution interval, e.g. 1m, 5m, 1h.
-              maxLength: 32
-              type: string
-            lookback:
-              description: Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.
-              maxLength: 32
-              type: string
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_schedule_patch'
         state_transition:
           allOf:
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition_patch'
+          description: Specifies how many consecutive matches, or how long a condition must hold, before an alert becomes `active` or `inactive`. Allowed only when `kind` is `alert`.
           nullable: true
         time_field:
-          description: Document field Kibana uses with `schedule.lookback` to time-filter `query.base`. If omitted, the existing value is kept.
+          description: Document field Kibana uses with `schedule.lookback` to time-filter `query.base`.
           maxLength: 256
           minLength: 1
           type: string
