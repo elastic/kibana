@@ -92,7 +92,7 @@ describe('Inspect Explore pages', { tags: ['@ess', '@serverless'] }, () => {
     // (a dynamic reference isn't recognized and would cause the whole file to be treated as
     // fully skipped and excluded from CI runs).
     if (SKIPPED_PAGES.includes(pageName)) {
-      it.skip(`inspect ${pageName} page`, testBody);
+      it(`inspect ${pageName} page`, testBody);
     } else {
       it(`inspect ${pageName} page`, testBody);
     }
