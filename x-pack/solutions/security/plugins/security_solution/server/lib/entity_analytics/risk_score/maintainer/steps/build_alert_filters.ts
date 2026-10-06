@@ -11,7 +11,7 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { RiskEngineConfiguration } from '../../../types';
 import type { EntityType } from '../../../../../../common/search_strategy';
 import { filterFromRange } from '../../helpers';
-import { convertRangeToISO } from '../../tasks/helpers';
+import { convertRangeToISO } from '../../../utils/internal_clients';
 import type { ScopedLogger } from '../utils/with_log_context';
 
 interface BuildCommonAlertFiltersParams {

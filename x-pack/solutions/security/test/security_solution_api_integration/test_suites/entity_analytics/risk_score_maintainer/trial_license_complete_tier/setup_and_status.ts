@@ -6,11 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_engine/saved_object';
+import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_score/saved_object';
 import {
   getDefaultRiskEngineConfiguration,
   getRiskEngineConfigurationSavedObjectId,
-} from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_engine/utils/saved_object_configuration';
+} from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_score/configuration/saved_object_configuration';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   EntityStoreUtils,

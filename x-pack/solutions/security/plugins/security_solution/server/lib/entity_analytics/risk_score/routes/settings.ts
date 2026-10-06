@@ -12,9 +12,13 @@ import type { ReadRiskEngineSettingsResponse } from '../../../../../common/api/e
 import { RISK_ENGINE_SETTINGS_URL, APP_ID } from '../../../../../common/constants';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
-import { RiskEngineAuditActions } from '../audit';
+import { RiskScoreAuditActions } from '../audit';
+import { getConfiguration } from '../configuration/saved_object_configuration';
 
-export const riskEngineSettingsRoute = (router: EntityAnalyticsRoutesDeps['router']) => {
+export const riskEngineSettingsRoute = (
+  router: EntityAnalyticsRoutesDeps['router'],
+  logger: EntityAnalyticsRoutesDeps['logger']
+) => {
   router.versioned
     .get({
       access: 'internal',
@@ -35,14 +39,18 @@ export const riskEngineSettingsRoute = (router: EntityAnalyticsRoutesDeps['route
         const siemResponse = buildSiemResponse(response);
 
         const securitySolution = await context.securitySolution;
-        const riskEngineClient = securitySolution.getRiskEngineDataClient();
+        const core = await context.core;
 
         try {
-          const result = await riskEngineClient.getConfiguration();
+          const result = await getConfiguration({
+            savedObjectsClient: core.savedObjects.client,
+            logger,
+            namespace: securitySolution.getSpaceId(),
+          });
           securitySolution.getAuditLogger()?.log({
             message: 'User accessed risk engine configuration information',
             event: {
-              action: RiskEngineAuditActions.RISK_ENGINE_CONFIGURATION_GET,
+              action: RiskScoreAuditActions.RISK_ENGINE_CONFIGURATION_GET,
               category: AUDIT_CATEGORY.DATABASE,
               type: AUDIT_TYPE.ACCESS,
               outcome: AUDIT_OUTCOME.SUCCESS,

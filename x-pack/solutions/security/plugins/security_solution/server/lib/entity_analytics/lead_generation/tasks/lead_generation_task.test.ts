@@ -24,7 +24,7 @@ jest.mock('../utils', () => ({
 jest.mock('../../risk_score/risk_score_data_client', () => ({
   RiskScoreDataClient: jest.fn().mockImplementation(() => ({})),
 }));
-jest.mock('../../risk_score/tasks/helpers', () => ({
+jest.mock('../../utils/internal_clients', () => ({
   buildScopedInternalSavedObjectsClientUnsafe: jest.fn().mockReturnValue({}),
 }));
 

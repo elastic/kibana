@@ -45,7 +45,7 @@ jest.mock('../management/watchlist_config', () => ({
 // Captured reference so tests can control soClient behaviour (e.g. cleanup checks)
 let mockScopedSoClient: ReturnType<typeof mockSavedObjectsClient.create>;
 
-jest.mock('../../risk_score/tasks/helpers', () => ({
+jest.mock('../../utils/internal_clients', () => ({
   buildScopedInternalSavedObjectsClientUnsafe: jest.fn(() => mockScopedSoClient),
 }));
 

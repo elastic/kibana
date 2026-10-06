@@ -17,14 +17,21 @@ import {
   API_VERSIONS,
 } from '../../../../../common/constants';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
-import { withRiskEnginePrivilegeCheck } from '../risk_engine_privileges';
+import { withRiskEnginePrivilegeCheck } from './risk_engine_privileges';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
-import { RiskEngineAuditActions } from '../audit';
+import type { RiskEngineConfiguration } from '../../types';
+import { RiskScoreAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
+import {
+  getConfiguration,
+  initSavedObjects,
+  updateSavedObjectAttribute,
+} from '../configuration/saved_object_configuration';
 
 export const riskEngineConfigureSavedObjectRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
+  logger: EntityAnalyticsRoutesDeps['logger']
 ) => {
   router.versioned
     .put({
@@ -51,11 +58,12 @@ export const riskEngineConfigureSavedObjectRoute = (
           response
         ): Promise<IKibanaResponse<ConfigureRiskEngineSavedObjectResponse>> => {
           const securitySolution = await context.securitySolution;
+          const core = await context.core;
 
           securitySolution.getAuditLogger()?.log({
             message: 'User attempted to configure the saved object of the risk engine',
             event: {
-              action: RiskEngineAuditActions.RISK_ENGINE_CONFIGURE_SAVED_OBJECT,
+              action: RiskScoreAuditActions.RISK_ENGINE_CONFIGURE_SAVED_OBJECT,
               category: AUDIT_CATEGORY.DATABASE,
               type: AUDIT_TYPE.CHANGE,
               outcome: AUDIT_OUTCOME.UNKNOWN,
@@ -64,14 +72,13 @@ export const riskEngineConfigureSavedObjectRoute = (
 
           const siemResponse = buildSiemResponse(response);
           const [_, { taskManager }] = await getStartServices();
-          const riskEngineClient = securitySolution.getRiskEngineDataClient();
 
           if (!taskManager) {
             securitySolution.getAuditLogger()?.log({
               message:
                 'User attempted to configure the saved object of the risk engine, but the Kibana Task Manager was unavailable',
               event: {
-                action: RiskEngineAuditActions.RISK_ENGINE_CONFIGURE_SAVED_OBJECT,
+                action: RiskScoreAuditActions.RISK_ENGINE_CONFIGURE_SAVED_OBJECT,
                 category: AUDIT_CATEGORY.DATABASE,
                 type: AUDIT_TYPE.CHANGE,
                 outcome: AUDIT_OUTCOME.FAILURE,
@@ -88,14 +95,48 @@ export const riskEngineConfigureSavedObjectRoute = (
             });
           }
 
+          const savedObjectsClient = core.savedObjects.client;
+          const namespace = securitySolution.getSpaceId();
+
           try {
-            await riskEngineClient.updateRiskEngineSavedObject({
-              excludeAlertStatuses: request.body.exclude_alert_statuses,
-              range: request.body.range,
-              excludeAlertTags: request.body.exclude_alert_tags,
-              enableResetToZero: request.body.enable_reset_to_zero,
-              filters: request.body.filters,
-              ...(request.body.page_size != null ? { pageSize: request.body.page_size } : {}),
+            const configuration = await getConfiguration({
+              savedObjectsClient,
+              logger,
+              namespace,
+            });
+            if (!configuration) {
+              await initSavedObjects({
+                savedObjectsClient,
+                logger,
+                namespace,
+              });
+            }
+
+            const {
+              exclude_alert_statuses: excludeAlertStatuses,
+              range,
+              exclude_alert_tags: excludeAlertTags,
+              enable_reset_to_zero: enableResetToZero,
+              filters,
+              page_size: pageSize,
+            } = request.body;
+
+            const attributes: Partial<RiskEngineConfiguration> = {
+              ...(excludeAlertStatuses !== undefined ? { excludeAlertStatuses } : {}),
+              ...(range?.start !== undefined && range.end !== undefined
+                ? { range: { start: range.start, end: range.end } }
+                : {}),
+              ...(excludeAlertTags !== undefined ? { excludeAlertTags } : {}),
+              ...(enableResetToZero !== undefined ? { enableResetToZero } : {}),
+              ...(filters !== undefined ? { filters } : {}),
+              ...(pageSize != null ? { pageSize } : {}),
+            };
+
+            await updateSavedObjectAttribute({
+              savedObjectsClient,
+              logger,
+              namespace,
+              attributes,
             });
             return response.ok({ body: { risk_engine_saved_object_configured: true } });
           } catch (e) {

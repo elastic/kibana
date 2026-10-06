@@ -6,12 +6,40 @@
  */
 
 import { first } from 'lodash/fp';
+import type { Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EntityAnalyticsMigrationsParams } from '../../migrations';
-import { removeRiskScoringTask } from '../../risk_score/tasks/risk_scoring_task';
 import type { RiskEngineConfiguration } from '../../types';
 import { stopTransform, deleteTransform, getLatestTransformId } from '../../utils/transforms';
 import { riskEngineConfigurationTypeName } from '../saved_object';
 import { MAX_PER_PAGE } from './update_risk_score_mappings';
+
+const LEGACY_RISK_SCORING_TASK_TYPE = 'risk_engine:risk_scoring';
+const LEGACY_RISK_SCORING_TASK_VERSION = '0.0.1';
+
+const legacyRiskScoringTaskId = (namespace: string): string =>
+  `${LEGACY_RISK_SCORING_TASK_TYPE}:${namespace}:${LEGACY_RISK_SCORING_TASK_VERSION}`;
+
+const removeLegacyRiskScoringTask = async ({
+  logger,
+  namespace,
+  taskManager,
+}: {
+  logger: Logger;
+  namespace: string;
+  taskManager: TaskManagerStartContract;
+}) => {
+  try {
+    await taskManager.remove(legacyRiskScoringTaskId(namespace));
+  } catch (err) {
+    if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
+      const message = err instanceof Error ? err.message : String(err);
+      logger.error(`Failed to remove risk scoring task: ${message}`);
+      throw err;
+    }
+  }
+};
 
 /**
  * Cleans up the legacy risk engine's ES "latest" transform and the risk_engine:risk_scoring
@@ -69,10 +97,14 @@ export const cleanupLegacyRiskEngine = async ({
           );
         });
 
-        await removeRiskScoringTask({ logger, namespace, taskManager }).catch((err: unknown) => {
-          const message = err instanceof Error ? err.message : String(err);
-          logger.error(`Failed to remove risk scoring task for namespace ${namespace}: ${message}`);
-        });
+        await removeLegacyRiskScoringTask({ logger, namespace, taskManager }).catch(
+          (err: unknown) => {
+            const message = err instanceof Error ? err.message : String(err);
+            logger.error(
+              `Failed to remove risk scoring task for namespace ${namespace}: ${message}`
+            );
+          }
+        );
       }
     }
   } catch (err: unknown) {

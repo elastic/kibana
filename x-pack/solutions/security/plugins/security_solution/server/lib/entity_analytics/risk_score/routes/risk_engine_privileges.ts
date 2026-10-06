@@ -14,16 +14,16 @@ import type {
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { i18n } from '@kbn/i18n';
-import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics';
-import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
-import type { SecuritySolutionRequestHandlerContext } from '../../../types';
+import type { EntityAnalyticsPrivileges } from '../../../../../common/api/entity_analytics';
+import type { SecuritySolutionPluginStartDependencies } from '../../../../plugin_contract';
+import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import {
   TO_RUN_RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
   TO_ENABLE_RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
   RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES,
   getMissingRiskEnginePrivileges,
-} from '../../../../common/entity_analytics/risk_engine';
-import { checkAndFormatPrivileges } from '../utils/check_and_format_privileges';
+} from '../../../../../common/entity_analytics/risk_engine';
+import { checkAndFormatPrivileges } from '../../utils/check_and_format_privileges';
 
 export const getRunRiskEnginePrivileges = async (
   request: KibanaRequest,

@@ -12,7 +12,6 @@ import { getLatestTransformId } from '../../utils/transforms';
 
 const mockStopTransform = jest.fn();
 const mockDeleteTransform = jest.fn();
-const mockRemoveRiskScoringTask = jest.fn();
 
 jest.mock('../../utils/transforms', () => ({
   ...jest.requireActual('../../utils/transforms'),
@@ -20,10 +19,8 @@ jest.mock('../../utils/transforms', () => ({
   deleteTransform: (...args: unknown[]) => mockDeleteTransform(...args),
 }));
 
-jest.mock('../../risk_score/tasks/risk_scoring_task', () => ({
-  ...jest.requireActual('../../risk_score/tasks/risk_scoring_task'),
-  removeRiskScoringTask: (...args: unknown[]) => mockRemoveRiskScoringTask(...args),
-}));
+const legacyRiskScoringTaskId = (namespace: string) =>
+  `risk_engine:risk_scoring:${namespace}:0.0.1`;
 
 describe('cleanupLegacyRiskEngine', () => {
   const logger = loggingSystemMock.createLogger();
@@ -54,7 +51,8 @@ describe('cleanupLegacyRiskEngine', () => {
     jest.clearAllMocks();
     mockStopTransform.mockResolvedValue(undefined);
     mockDeleteTransform.mockResolvedValue(undefined);
-    mockRemoveRiskScoringTask.mockResolvedValue(undefined);
+    taskManager.remove.mockReset();
+    taskManager.remove.mockResolvedValue(undefined);
     getStartServicesMock.mockResolvedValue([
       {
         ...coreStart,
@@ -83,7 +81,7 @@ describe('cleanupLegacyRiskEngine', () => {
 
     expect(mockStopTransform).toHaveBeenCalledTimes(2);
     expect(mockDeleteTransform).toHaveBeenCalledTimes(2);
-    expect(mockRemoveRiskScoringTask).toHaveBeenCalledTimes(2);
+    expect(taskManager.remove).toHaveBeenCalledTimes(2);
 
     expect(mockStopTransform).toHaveBeenCalledWith({
       esClient,
@@ -107,16 +105,8 @@ describe('cleanupLegacyRiskEngine', () => {
       transformId: getLatestTransformId('space-a'),
     });
 
-    expect(mockRemoveRiskScoringTask).toHaveBeenCalledWith({
-      logger,
-      namespace: 'default',
-      taskManager,
-    });
-    expect(mockRemoveRiskScoringTask).toHaveBeenCalledWith({
-      logger,
-      namespace: 'space-a',
-      taskManager,
-    });
+    expect(taskManager.remove).toHaveBeenCalledWith(legacyRiskScoringTaskId('default'));
+    expect(taskManager.remove).toHaveBeenCalledWith(legacyRiskScoringTaskId('space-a'));
   });
 
   it('does nothing when no risk engine configurations exist', async () => {
@@ -132,7 +122,7 @@ describe('cleanupLegacyRiskEngine', () => {
 
     expect(mockStopTransform).not.toHaveBeenCalled();
     expect(mockDeleteTransform).not.toHaveBeenCalled();
-    expect(mockRemoveRiskScoringTask).not.toHaveBeenCalled();
+    expect(taskManager.remove).not.toHaveBeenCalled();
   });
 
   it('logs a warning and skips cleanup when Task Manager is unavailable', async () => {
@@ -165,7 +155,7 @@ describe('cleanupLegacyRiskEngine', () => {
     expect(soClient.find).not.toHaveBeenCalled();
     expect(mockStopTransform).not.toHaveBeenCalled();
     expect(mockDeleteTransform).not.toHaveBeenCalled();
-    expect(mockRemoveRiskScoringTask).not.toHaveBeenCalled();
+    expect(taskManager.remove).not.toHaveBeenCalled();
   });
 
   it('continues when stopTransform fails and still deletes the transform and removes the task', async () => {
@@ -187,7 +177,7 @@ describe('cleanupLegacyRiskEngine', () => {
       expect.stringContaining('Failed to stop legacy latest transform')
     );
     expect(mockDeleteTransform).toHaveBeenCalledTimes(1);
-    expect(mockRemoveRiskScoringTask).toHaveBeenCalledTimes(1);
+    expect(taskManager.remove).toHaveBeenCalledTimes(1);
   });
 
   it('queries only the specified space when spaceId is defined', async () => {
@@ -212,13 +202,11 @@ describe('cleanupLegacyRiskEngine', () => {
     expect(mockStopTransform).toHaveBeenCalledWith(
       expect.objectContaining({ transformId: getLatestTransformId('my-space') })
     );
-    expect(mockRemoveRiskScoringTask).toHaveBeenCalledWith(
-      expect.objectContaining({ namespace: 'my-space' })
-    );
+    expect(taskManager.remove).toHaveBeenCalledWith(legacyRiskScoringTaskId('my-space'));
   });
 
   it('processes the next namespace when one namespace hits a failure during task removal', async () => {
-    mockRemoveRiskScoringTask
+    taskManager.remove
       .mockRejectedValueOnce(new Error('remove failed'))
       .mockResolvedValueOnce(undefined);
     soClient.find.mockResolvedValue({
@@ -235,7 +223,7 @@ describe('cleanupLegacyRiskEngine', () => {
     });
 
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('remove failed'));
-    expect(mockRemoveRiskScoringTask).toHaveBeenCalledTimes(2);
+    expect(taskManager.remove).toHaveBeenCalledTimes(2);
     expect(mockStopTransform).toHaveBeenCalledTimes(2);
   });
 });
