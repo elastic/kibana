@@ -14,6 +14,7 @@ import {
   EntityDefinitionRegistry,
   ENTITY_DEFINITION_TYPE_PATTERN,
   type RegistrableEntityDefinition,
+  type RegisterResult,
 } from '.';
 
 const makeDefinition = (
@@ -103,6 +104,57 @@ describe('EntityDefinitionRegistry', () => {
       expect(registry.register(makeDefinition(atLimit))).toEqual({ ok: true });
       expect(registry.register(makeDefinition(overLimit)).ok).toBe(false);
       expectRejected(overLimit, /exceeds the maximum length of 64/);
+    });
+
+    it('rejects a definition with a circular reference without throwing or freezing it', () => {
+      const mapping: Record<string, unknown> = { type: 'keyword' };
+      mapping.self = mapping;
+      const definition = makeDefinition('cyclic');
+      definition.fields = [{ ...definition.fields[0], mapping }];
+
+      let result: RegisterResult | undefined;
+      expect(() => {
+        result = registry.register(definition);
+      }).not.toThrow();
+
+      expect(result).toEqual({
+        ok: false,
+        reason: expect.stringContaining("circular reference at 'fields.0.mapping.self'"),
+      });
+      expect(registry.get('cyclic')).toBeUndefined();
+      expect(Object.isFrozen(definition)).toBe(false);
+      expect(Object.isFrozen(mapping)).toBe(false);
+    });
+
+    it('accepts the same object referenced from two places and freezes it once', () => {
+      const shared = { type: 'keyword' };
+      const definition = makeDefinition('shared');
+      definition.fields = [
+        { ...definition.fields[0], mapping: shared },
+        { ...definition.fields[0], destination: 'other.field', mapping: shared },
+      ];
+
+      expect(registry.register(definition).ok).toBe(true);
+      expect(Object.isFrozen(shared)).toBe(true);
+    });
+
+    it('turns an unexpected exception during validation into a rejection', () => {
+      const definition = makeDefinition('throws');
+      Object.defineProperty(definition, 'fields', {
+        enumerable: true,
+        get: () => {
+          throw new Error('boom');
+        },
+      });
+
+      let result: RegisterResult | undefined;
+      expect(() => {
+        result = registry.register(definition);
+      }).not.toThrow();
+      expect(result).toEqual({
+        ok: false,
+        reason: 'unexpected error during registration: boom',
+      });
     });
 
     it('names the managing plugin in the rejection log', () => {

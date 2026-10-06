@@ -69,10 +69,35 @@ const describeManager = (definition: object): string | undefined => {
   return typeof id === 'string' ? `${kind} ${id}` : kind;
 };
 
-// Always recurses, so an object frozen only at the top level still has its children frozen.
-const deepFreeze = <T>(value: T): T => {
-  if (!isObject(value)) return value;
-  Object.values(value).forEach(deepFreeze);
+/**
+ * Returns the path of the first circular reference in `value`, or `undefined`. Only an object that
+ * is its own ancestor counts; the same object referenced from two places (a shared mapping
+ * constant, say) is fine. Read-only, so it can run before anything is frozen.
+ */
+const findCycle = (
+  value: unknown,
+  path: string[] = [],
+  ancestors = new Set<object>()
+): string | undefined => {
+  if (!isObject(value)) return undefined;
+  if (ancestors.has(value)) return path.join('.') || '<root>';
+  ancestors.add(value);
+  for (const [key, child] of Object.entries(value)) {
+    const found = findCycle(child, [...path, key], ancestors);
+    if (found) return found;
+  }
+  ancestors.delete(value);
+  return undefined;
+};
+
+/**
+ * Always recurses, so an object frozen only at the top level still has its children frozen. Assumes
+ * `findCycle` has already rejected cycles; `visited` only avoids re-walking shared references.
+ */
+const deepFreeze = <T>(value: T, visited = new WeakSet<object>()): T => {
+  if (!isObject(value) || visited.has(value)) return value;
+  visited.add(value);
+  Object.values(value).forEach((child) => deepFreeze(child, visited));
   if (!Object.isFrozen(value)) Object.freeze(value);
   return value;
 };
@@ -98,13 +123,25 @@ export class EntityDefinitionRegistry {
       return this.reject(describeType(definition), 'definition is not an object');
     }
 
-    const reason = this.validate(definition);
-    if (reason) {
-      return this.reject(describeType(definition.type), reason, describeManager(definition));
-    }
+    // Nothing in here may throw out to the caller: a bad definition from one plugin must not take
+    // down that plugin's setup, let alone Kibana. Anything unexpected becomes a logged rejection.
+    try {
+      const reason = this.validate(definition);
+      if (reason) {
+        return this.reject(describeType(definition.type), reason, describeManager(definition));
+      }
 
-    this.entries.set(definition.type, deepFreeze(definition));
-    return { ok: true };
+      this.entries.set(definition.type, deepFreeze(definition));
+      return { ok: true };
+    } catch (error) {
+      return this.reject(
+        describeType(definition.type),
+        `unexpected error during registration: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+        describeManager(definition)
+      );
+    }
   }
 
   /**
@@ -138,6 +175,11 @@ export class EntityDefinitionRegistry {
   private validate(definition: RegistrableEntityDefinition): string | undefined {
     if (this.setupClosed) {
       return 'plugin setup has finished, definitions can no longer be registered in code';
+    }
+
+    const cycle = findCycle(definition);
+    if (cycle) {
+      return `definition contains a circular reference at '${cycle}'`;
     }
 
     const parsed = registrableEntityDefinitionSchema.safeParse(definition);
