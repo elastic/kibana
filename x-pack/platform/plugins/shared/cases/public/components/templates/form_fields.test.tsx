@@ -44,6 +44,7 @@ describe('form fields', () => {
       owner: mockedTestProvidersOwner[0],
       observableTypes: [],
       extractObservables: true,
+      workflowTags: [],
     },
   };
 

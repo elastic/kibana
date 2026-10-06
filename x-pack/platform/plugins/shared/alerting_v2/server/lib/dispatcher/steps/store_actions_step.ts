@@ -105,8 +105,8 @@ export class StoreActionsStep implements DispatcherStep {
         reason: `notified by policy ${group.policyId}`,
         space_id: spaceId,
       };
-      if (groupingMode === 'per_episode') {
-        action.episode_status = firstEpisode?.episode_status;
+      if (groupingMode === 'per_alert') {
+        action.alert_status = firstEpisode?.episode_status;
       }
       return action;
     });

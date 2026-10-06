@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export const SPOKE_HTTP_STATUS_MIN = 200;
 export const SPOKE_HTTP_STATUS_MAX = 599;
@@ -82,29 +82,35 @@ const isWithinJsonByteLimit = (value: unknown, maxBytes: number): boolean => {
   return byteLength !== undefined && byteLength <= maxBytes;
 };
 
-const jsonSerializableSpokeBodySchema = z
-  .unknown()
-  .refine(isJsonSerializableSpokeBody, 'HTTP ack body must be JSON-serializable')
-  .refine(
-    (value) => isWithinJsonByteLimit(value, MAX_HANDLE_EVENTS_HTTP_BODY_BYTES),
-    `HTTP ack body must be at most ${MAX_HANDLE_EVENTS_HTTP_BODY_BYTES} bytes`
-  );
+const jsonSerializableSpokeBodySchema = lazySchema(() =>
+  z
+    .unknown()
+    .refine(isJsonSerializableSpokeBody, 'HTTP ack body must be JSON-serializable')
+    .refine(
+      (value) => isWithinJsonByteLimit(value, MAX_HANDLE_EVENTS_HTTP_BODY_BYTES),
+      `HTTP ack body must be at most ${MAX_HANDLE_EVENTS_HTTP_BODY_BYTES} bytes`
+    )
+);
 
-const handleEventsHeadersSchema = z
-  .record(
-    z.string().min(1).max(MAX_HANDLE_EVENTS_HEADER_NAME_LENGTH),
-    z.string().max(MAX_HANDLE_EVENTS_HEADER_VALUE_LENGTH)
-  )
-  .refine(
-    (headers) => Object.keys(headers).length <= MAX_HANDLE_EVENTS_HEADERS,
-    `headers must contain at most ${MAX_HANDLE_EVENTS_HEADERS} entries`
-  );
+const handleEventsHeadersSchema = lazySchema(() =>
+  z
+    .record(
+      z.string().min(1).max(MAX_HANDLE_EVENTS_HEADER_NAME_LENGTH),
+      z.string().max(MAX_HANDLE_EVENTS_HEADER_VALUE_LENGTH)
+    )
+    .refine(
+      (headers) => Object.keys(headers).length <= MAX_HANDLE_EVENTS_HEADERS,
+      `headers must contain at most ${MAX_HANDLE_EVENTS_HEADERS} entries`
+    )
+);
 
-export const handleEventsHttpResponseSchema = z.object({
-  status: z.number().int().min(SPOKE_HTTP_STATUS_MIN).max(SPOKE_HTTP_STATUS_MAX),
-  body: jsonSerializableSpokeBodySchema.optional(),
-  headers: handleEventsHeadersSchema.optional(),
-});
+export const handleEventsHttpResponseSchema = lazySchema(() =>
+  z.object({
+    status: z.number().int().min(SPOKE_HTTP_STATUS_MIN).max(SPOKE_HTTP_STATUS_MAX),
+    body: jsonSerializableSpokeBodySchema.optional(),
+    headers: handleEventsHeadersSchema.optional(),
+  })
+);
 
 const resolveHandleEventsLimits = (
   limits: ParseHandleEventsLimits = {}
@@ -134,7 +140,9 @@ const createEventPayloadSchema = (maxPayloadBytes: number) =>
     payload: createHandleEventsPayloadSchema(maxPayloadBytes),
   });
 
-export const eventPayloadSchema = createEventPayloadSchema(MAX_HANDLE_EVENTS_PAYLOAD_BYTES);
+export const eventPayloadSchema = lazySchema(() =>
+  createEventPayloadSchema(MAX_HANDLE_EVENTS_PAYLOAD_BYTES)
+);
 
 const createHandleEventsResultSchema = (limits: ParseHandleEventsLimits = {}) => {
   const { maxEvents, maxPayloadBytes } = resolveHandleEventsLimits(limits);
@@ -158,7 +166,7 @@ const createHandleEventsResultSchema = (limits: ParseHandleEventsLimits = {}) =>
   ]);
 };
 
-export const handleEventsResultSchema = createHandleEventsResultSchema();
+export const handleEventsResultSchema = lazySchema(() => createHandleEventsResultSchema());
 
 export type EventPayload = z.infer<typeof eventPayloadSchema>;
 export type HandleEventsHttpResponse = z.infer<typeof handleEventsHttpResponseSchema>;
