@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../routes/types';
@@ -191,10 +192,9 @@ describe('ki_feature_similarity_search tool', () => {
       },
     ]);
   });
+
   it('does not search KIs without the Nightshift read privilege', async () => {
-    (assertCanReadSignificantEvents as jest.Mock).mockRejectedValueOnce(
-      new Error('Reading significant events requires the Nightshift read privilege')
-    );
+    (assertCanReadSignificantEvents as jest.Mock).mockRejectedValueOnce(Boom.forbidden());
     const { tool, findFeatures } = createTool();
 
     await invokeHandler(

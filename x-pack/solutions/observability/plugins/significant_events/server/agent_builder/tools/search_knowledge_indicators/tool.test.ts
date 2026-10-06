@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
@@ -114,9 +115,7 @@ describe('ki_search tool', () => {
 
   it('does not search KIs without the Nightshift read privilege', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
-    (assertCanReadSignificantEvents as jest.Mock).mockRejectedValueOnce(
-      new Error('Reading significant events requires the Nightshift read privilege')
-    );
+    (assertCanReadSignificantEvents as jest.Mock).mockRejectedValueOnce(Boom.forbidden());
     const getKnowledgeIndicatorClient = jest.fn();
     const getScopedClients = jest.fn(async () => {
       return { licensing: {}, getKnowledgeIndicatorClient } as unknown as RouteHandlerScopedClients;
@@ -126,8 +125,6 @@ describe('ki_search tool', () => {
     const result = await invokeHandler(tool as never, {}, createMockToolContext());
 
     expect(getKnowledgeIndicatorClient).not.toHaveBeenCalled();
-    if ('results' in result) {
-      expect(result.results[0].type).toBe('error');
-    }
+    expect(result).toMatchObject({ results: [{ type: 'error' }] });
   });
 });

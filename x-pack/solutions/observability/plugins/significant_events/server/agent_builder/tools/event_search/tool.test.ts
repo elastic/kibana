@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
 import type { SignificantEventsServer } from '../../../types';
@@ -32,6 +33,10 @@ const createMockTelemetry = () => ({
 });
 
 describe('event_search tool', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('uses expected tool id', () => {
     const tool = createSearchEventsTool({
       getScopedClients: jest.fn() as unknown as GetScopedClients,
@@ -177,12 +182,10 @@ describe('event_search tool', () => {
       expect(result.results[0].type).toBe('other');
     }
   });
+
   it('does not search without the Nightshift read privilege', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
-    (assertCanReadSignificantEvents as jest.Mock).mockRejectedValueOnce(
-      new Error('Reading significant events requires the Nightshift read privilege')
-    );
-    (searchEventsToolHandler as jest.Mock).mockClear();
+    (assertCanReadSignificantEvents as jest.Mock).mockRejectedValueOnce(Boom.forbidden());
 
     const tool = createSearchEventsTool({
       getScopedClients: jest.fn().mockResolvedValue({
@@ -201,8 +204,6 @@ describe('event_search tool', () => {
     );
 
     expect(searchEventsToolHandler).not.toHaveBeenCalled();
-    if ('results' in result) {
-      expect(result.results[0].type).toBe('error');
-    }
+    expect(result).toMatchObject({ results: [{ type: 'error' }] });
   });
 });

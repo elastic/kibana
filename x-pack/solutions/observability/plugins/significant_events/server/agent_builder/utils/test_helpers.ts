@@ -12,6 +12,7 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { ZodObject } from '@kbn/zod/v4';
 import type { z } from '@kbn/zod/v4';
@@ -98,13 +99,38 @@ export const createMockToolContext = (): ToolHandlerContext => {
   return toolHandlerContext;
 };
 
-/** A server whose Kibana privilege check reports whether the caller holds every requested privilege. */
+type NightshiftApiPrivilege =
+  (typeof NIGHTSHIFT_API_PRIVILEGES)[keyof typeof NIGHTSHIFT_API_PRIVILEGES];
+
+/** API privileges of the Nightshift `read` feature privilege. */
+export const NIGHTSHIFT_READ_PRIVILEGES: readonly NightshiftApiPrivilege[] = [
+  NIGHTSHIFT_API_PRIVILEGES.read,
+];
+
+/** API privileges of the Nightshift `all` feature privilege. */
+export const NIGHTSHIFT_ALL_PRIVILEGES: readonly NightshiftApiPrivilege[] = [
+  NIGHTSHIFT_API_PRIVILEGES.read,
+  NIGHTSHIFT_API_PRIVILEGES.manage,
+];
+
+/**
+ * A server whose Kibana privilege check behaves like a user holding exactly `privileges`:
+ * a check passes only when every requested API privilege is among them.
+ */
 export const createNightshiftSecurityServer = ({
-  hasAllRequested = true,
-}: { hasAllRequested?: boolean } = {}): Pick<SignificantEventsServer, 'security'> => {
+  privileges,
+}: {
+  privileges: readonly NightshiftApiPrivilege[];
+}): Pick<SignificantEventsServer, 'security'> => {
   const security = securityMock.createStart();
+  const toApiAction = (privilege: string) => `api:${privilege}`;
+  jest.spyOn(security.authz.actions.api, 'get').mockImplementation(toApiAction);
+
+  const grantedActions = new Set(privileges.map(toApiAction));
   security.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
-    jest.fn(async () => ({ hasAllRequested }))
+    jest.fn(async ({ kibana = [] }: { kibana?: string | string[] }) => ({
+      hasAllRequested: [kibana].flat().every((action) => grantedActions.has(action)),
+    }))
   );
   return { security };
 };

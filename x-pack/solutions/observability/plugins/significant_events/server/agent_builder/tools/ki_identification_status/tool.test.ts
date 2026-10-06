@@ -9,10 +9,16 @@ import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema'
 import { ExecutionStatus } from '@kbn/workflows';
 import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { createKiIdentificationStatusTool } from './tool';
-import { createMockToolContext, createNightshiftSecurityServer } from '../../utils/test_helpers';
+import {
+  NIGHTSHIFT_READ_PRIVILEGES,
+  createMockToolContext,
+  createNightshiftSecurityServer,
+} from '../../utils/test_helpers';
 
 describe('createKiIdentificationStatusTool', () => {
-  const setup = ({ hasAllRequested = true }: { hasAllRequested?: boolean } = {}) => {
+  const setup = ({
+    privileges = NIGHTSHIFT_READ_PRIVILEGES,
+  }: { privileges?: typeof NIGHTSHIFT_READ_PRIVILEGES } = {}) => {
     const managementApi = {
       getWorkflowExecutions: jest.fn().mockResolvedValue({
         results: [
@@ -44,7 +50,7 @@ describe('createKiIdentificationStatusTool', () => {
     });
 
     const tool = createKiIdentificationStatusTool({
-      server: createNightshiftSecurityServer({ hasAllRequested }),
+      server: createNightshiftSecurityServer({ privileges }),
       streamsKIsOnboardingClient,
     });
     const context = createMockToolContext();
@@ -82,13 +88,11 @@ describe('createKiIdentificationStatusTool', () => {
   });
 
   it('does not read onboarding status without the Nightshift read privilege', async () => {
-    const { tool, context, managementApi } = setup({ hasAllRequested: false });
+    const { tool, context, managementApi } = setup({ privileges: [] });
 
     const result = await tool.handler({ stream_name: 'logs.nginx' }, context);
 
     expect(managementApi.getWorkflowExecutions).not.toHaveBeenCalled();
-    if ('results' in result) {
-      expect(result.results[0].type).toBe('error');
-    }
+    expect(result).toMatchObject({ results: [{ type: 'error' }] });
   });
 });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
@@ -35,6 +36,15 @@ describe('ki_feature_create tool', () => {
   const telemetry = {
     trackAgentBuilderKnowledgeIndicatorCreated: jest.fn(),
   } as unknown as EbtTelemetryClient;
+
+  const featureParams = {
+    stream_name: 'logs.test',
+    id: 'feature-1',
+    type: 'custom',
+    description: 'desc',
+    properties: {},
+    confidence: 80,
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -158,18 +168,7 @@ describe('ki_feature_create tool', () => {
     });
 
     const context = createMockToolContext();
-    await invokeHandler(
-      tool as never,
-      {
-        stream_name: 'logs.test',
-        id: 'feature-1',
-        type: 'custom',
-        description: 'desc',
-        properties: {},
-        confidence: 80,
-      },
-      context
-    );
+    await invokeHandler(tool as never, featureParams, context);
 
     expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -216,18 +215,7 @@ describe('ki_feature_create tool', () => {
     });
 
     const context = createMockToolContext();
-    await invokeHandler(
-      tool as never,
-      {
-        stream_name: 'logs.test',
-        id: 'feature-1',
-        type: 'custom',
-        description: 'desc',
-        properties: {},
-        confidence: 80,
-      },
-      context
-    );
+    await invokeHandler(tool as never, featureParams, context);
 
     expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -240,11 +228,10 @@ describe('ki_feature_create tool', () => {
       })
     );
   });
+
   it('does not write the KI without the Nightshift manage privilege', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
-    (assertCanManageSignificantEvents as jest.Mock).mockRejectedValueOnce(
-      new Error('Managing significant events requires the Nightshift manage privilege')
-    );
+    (assertCanManageSignificantEvents as jest.Mock).mockRejectedValueOnce(Boom.forbidden());
 
     const getKnowledgeIndicatorClient = jest.fn();
     const getScopedClients = jest.fn(async () => {
@@ -262,18 +249,7 @@ describe('ki_feature_create tool', () => {
       telemetry,
     });
 
-    await invokeHandler(
-      tool as never,
-      {
-        stream_name: 'logs.test',
-        id: 'feature-1',
-        type: 'custom',
-        description: 'desc',
-        properties: {},
-        confidence: 80,
-      },
-      createMockToolContext()
-    );
+    await invokeHandler(tool as never, featureParams, createMockToolContext());
 
     expect(getKnowledgeIndicatorClient).not.toHaveBeenCalled();
     expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(

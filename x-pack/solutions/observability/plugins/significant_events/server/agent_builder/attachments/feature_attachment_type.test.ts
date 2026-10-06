@@ -9,12 +9,12 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { encodeFeatureAttachmentOrigin } from '../../../common';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../routes/types';
-import { createNightshiftSecurityServer } from '../utils/test_helpers';
+import { NIGHTSHIFT_READ_PRIVILEGES, createNightshiftSecurityServer } from '../utils/test_helpers';
 import { createSignificantEventFeatureAttachmentType } from './feature_attachment_type';
 
 const feature = { id: 'feature-1', stream_name: 'logs.test', type: 'entity' };
 
-const setup = ({ hasAllRequested }: { hasAllRequested: boolean }) => {
+const setup = ({ privileges }: { privileges: typeof NIGHTSHIFT_READ_PRIVILEGES }) => {
   const getFeature = jest.fn().mockResolvedValue(feature);
   const getScopedClients = jest.fn().mockResolvedValue({
     getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeature }),
@@ -22,7 +22,7 @@ const setup = ({ hasAllRequested }: { hasAllRequested: boolean }) => {
   const type = createSignificantEventFeatureAttachmentType({
     logger: loggingSystemMock.createLogger(),
     getScopedClients,
-    server: createNightshiftSecurityServer({ hasAllRequested }),
+    server: createNightshiftSecurityServer({ privileges }),
   });
   return { type, getFeature };
 };
@@ -31,7 +31,7 @@ describe('createSignificantEventFeatureAttachmentType', () => {
   const origin = encodeFeatureAttachmentOrigin('logs.test', 'feature-1');
 
   it('resolves a feature for a Nightshift reader', async () => {
-    const { type, getFeature } = setup({ hasAllRequested: true });
+    const { type, getFeature } = setup({ privileges: NIGHTSHIFT_READ_PRIVILEGES });
 
     await expect(
       type.resolve?.(origin, agentBuilderMocks.attachments.createResolveContextMock())
@@ -40,7 +40,7 @@ describe('createSignificantEventFeatureAttachmentType', () => {
   });
 
   it('does not resolve a feature without the Nightshift read privilege', async () => {
-    const { type, getFeature } = setup({ hasAllRequested: false });
+    const { type, getFeature } = setup({ privileges: [] });
 
     await expect(
       type.resolve?.(origin, agentBuilderMocks.attachments.createResolveContextMock())

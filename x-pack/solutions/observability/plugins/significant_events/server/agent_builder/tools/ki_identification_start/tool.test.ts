@@ -6,7 +6,12 @@
  */
 
 import { createKiIdentificationStartTool } from './tool';
-import { createMockToolContext, createNightshiftSecurityServer } from '../../utils/test_helpers';
+import {
+  NIGHTSHIFT_ALL_PRIVILEGES,
+  NIGHTSHIFT_READ_PRIVILEGES,
+  createMockToolContext,
+  createNightshiftSecurityServer,
+} from '../../utils/test_helpers';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
 import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 
@@ -15,7 +20,9 @@ describe('createKiIdentificationStartTool', () => {
     trackAgentToolKiIdentificationStarted: jest.fn(),
   };
 
-  const setup = ({ hasAllRequested = true }: { hasAllRequested?: boolean } = {}) => {
+  const setup = ({
+    privileges = NIGHTSHIFT_ALL_PRIVILEGES,
+  }: { privileges?: typeof NIGHTSHIFT_ALL_PRIVILEGES } = {}) => {
     const managementApi = {
       getWorkflow: jest.fn().mockResolvedValue({
         id: 'system-streams-ki-onboarding',
@@ -35,7 +42,7 @@ describe('createKiIdentificationStartTool', () => {
     };
 
     const tool = createKiIdentificationStartTool({
-      server: createNightshiftSecurityServer({ hasAllRequested }),
+      server: createNightshiftSecurityServer({ privileges }),
       telemetry: telemetry as never,
       streamsKIsOnboardingClient,
       maintenanceService: maintenanceService as never,
@@ -94,8 +101,8 @@ describe('createKiIdentificationStartTool', () => {
     }
   });
 
-  it('does not start onboarding without the Nightshift manage privilege', async () => {
-    const { tool, context, managementApi } = setup({ hasAllRequested: false });
+  it('does not let a Nightshift reader start onboarding', async () => {
+    const { tool, context, managementApi } = setup({ privileges: NIGHTSHIFT_READ_PRIVILEGES });
 
     const result = await tool.handler(
       { stream_name: 'logs.nginx', steps: [KIsOnboardingStep.FeaturesIdentification] },
@@ -103,8 +110,6 @@ describe('createKiIdentificationStartTool', () => {
     );
 
     expect(managementApi.runWorkflow).not.toHaveBeenCalled();
-    if ('results' in result) {
-      expect(result.results[0].type).toBe('error');
-    }
+    expect(result).toMatchObject({ results: [{ type: 'error' }] });
   });
 });

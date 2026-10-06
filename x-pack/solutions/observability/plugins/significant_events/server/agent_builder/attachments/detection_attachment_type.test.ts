@@ -8,7 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../routes/types';
-import { createNightshiftSecurityServer } from '../utils/test_helpers';
+import { NIGHTSHIFT_READ_PRIVILEGES, createNightshiftSecurityServer } from '../utils/test_helpers';
 import { createSignificantEventDetectionAttachmentType } from './detection_attachment_type';
 
 const detection = {
@@ -20,7 +20,7 @@ const detection = {
   change_point_type: 'spike',
 };
 
-const setup = ({ hasAllRequested }: { hasAllRequested: boolean }) => {
+const setup = ({ privileges }: { privileges: typeof NIGHTSHIFT_READ_PRIVILEGES }) => {
   const findById = jest.fn().mockResolvedValue({ hits: [{ ...detection, processed: false }] });
   const getScopedClients = jest.fn().mockResolvedValue({
     getDetectionClient: jest.fn().mockResolvedValue({ findById }),
@@ -28,14 +28,14 @@ const setup = ({ hasAllRequested }: { hasAllRequested: boolean }) => {
   const type = createSignificantEventDetectionAttachmentType({
     logger: loggingSystemMock.createLogger(),
     getScopedClients,
-    server: createNightshiftSecurityServer({ hasAllRequested }),
+    server: createNightshiftSecurityServer({ privileges }),
   });
   return { type, findById };
 };
 
 describe('createSignificantEventDetectionAttachmentType', () => {
   it('resolves a detection for a Nightshift reader', async () => {
-    const { type, findById } = setup({ hasAllRequested: true });
+    const { type, findById } = setup({ privileges: NIGHTSHIFT_READ_PRIVILEGES });
 
     await expect(
       type.resolve?.('rule-1-exec-1', agentBuilderMocks.attachments.createResolveContextMock())
@@ -44,7 +44,7 @@ describe('createSignificantEventDetectionAttachmentType', () => {
   });
 
   it('does not resolve a detection without the Nightshift read privilege', async () => {
-    const { type, findById } = setup({ hasAllRequested: false });
+    const { type, findById } = setup({ privileges: [] });
 
     await expect(
       type.resolve?.('rule-1-exec-1', agentBuilderMocks.attachments.createResolveContextMock())

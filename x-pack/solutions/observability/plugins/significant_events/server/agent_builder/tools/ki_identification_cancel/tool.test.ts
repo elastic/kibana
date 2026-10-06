@@ -9,10 +9,17 @@ import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema'
 import { ExecutionStatus } from '@kbn/workflows';
 import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { createKiIdentificationCancelTool } from './tool';
-import { createMockToolContext, createNightshiftSecurityServer } from '../../utils/test_helpers';
+import {
+  NIGHTSHIFT_ALL_PRIVILEGES,
+  NIGHTSHIFT_READ_PRIVILEGES,
+  createMockToolContext,
+  createNightshiftSecurityServer,
+} from '../../utils/test_helpers';
 
 describe('createKiIdentificationCancelTool', () => {
-  const setup = ({ hasAllRequested = true }: { hasAllRequested?: boolean } = {}) => {
+  const setup = ({
+    privileges = NIGHTSHIFT_ALL_PRIVILEGES,
+  }: { privileges?: typeof NIGHTSHIFT_ALL_PRIVILEGES } = {}) => {
     const managementApi = {
       getWorkflowExecutions: jest.fn().mockResolvedValue({
         results: [{ id: 'exec-1', status: ExecutionStatus.RUNNING }],
@@ -25,7 +32,7 @@ describe('createKiIdentificationCancelTool', () => {
     });
 
     const tool = createKiIdentificationCancelTool({
-      server: createNightshiftSecurityServer({ hasAllRequested }),
+      server: createNightshiftSecurityServer({ privileges }),
       streamsKIsOnboardingClient,
     });
     const context = createMockToolContext();
@@ -67,14 +74,12 @@ describe('createKiIdentificationCancelTool', () => {
     }
   });
 
-  it('does not cancel onboarding without the Nightshift manage privilege', async () => {
-    const { tool, context, managementApi } = setup({ hasAllRequested: false });
+  it('does not let a Nightshift reader cancel onboarding', async () => {
+    const { tool, context, managementApi } = setup({ privileges: NIGHTSHIFT_READ_PRIVILEGES });
 
     const result = await tool.handler({ stream_name: 'logs.nginx' }, context);
 
     expect(managementApi.cancelWorkflowExecution).not.toHaveBeenCalled();
-    if ('results' in result) {
-      expect(result.results[0].type).toBe('error');
-    }
+    expect(result).toMatchObject({ results: [{ type: 'error' }] });
   });
 });

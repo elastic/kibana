@@ -14,6 +14,7 @@ import {
 } from '@kbn/nightshift-ai';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../../routes/types';
 import {
+  NIGHTSHIFT_READ_PRIVILEGES,
   createMockToolContext,
   createNightshiftSecurityServer,
   invokeHandler,
@@ -116,7 +117,7 @@ describe('ki_queries_validate tool', () => {
   const createTool = () =>
     createValidateQueriesTool({
       getScopedClients,
-      server: createNightshiftSecurityServer(),
+      server: createNightshiftSecurityServer({ privileges: NIGHTSHIFT_READ_PRIVILEGES }),
       logger,
     });
 
@@ -273,7 +274,7 @@ describe('ki_queries_validate tool', () => {
   it('does not validate queries without the Nightshift read privilege', async () => {
     const tool = createValidateQueriesTool({
       getScopedClients,
-      server: createNightshiftSecurityServer({ hasAllRequested: false }),
+      server: createNightshiftSecurityServer({ privileges: [] }),
       logger,
     });
 
@@ -284,8 +285,6 @@ describe('ki_queries_validate tool', () => {
     );
 
     expect(validateKIQueriesMock).not.toHaveBeenCalled();
-    if ('results' in result) {
-      expect(result.results[0].type).toBe('error');
-    }
+    expect(result).toMatchObject({ results: [{ type: 'error' }] });
   });
 });

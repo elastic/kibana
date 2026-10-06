@@ -9,6 +9,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Streams } from '@kbn/streams-schema';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../../routes/types';
 import {
+  NIGHTSHIFT_READ_PRIVILEGES,
   createMockToolContext,
   createNightshiftSecurityServer,
   invokeHandler,
@@ -60,7 +61,7 @@ describe('ki_features_get tool', () => {
   const createTool = () =>
     createGetFeaturesTool({
       getScopedClients,
-      server: createNightshiftSecurityServer(),
+      server: createNightshiftSecurityServer({ privileges: NIGHTSHIFT_READ_PRIVILEGES }),
       logger,
     });
 
@@ -134,7 +135,7 @@ describe('ki_features_get tool', () => {
   it('does not load features without the Nightshift read privilege', async () => {
     const tool = createGetFeaturesTool({
       getScopedClients,
-      server: createNightshiftSecurityServer({ hasAllRequested: false }),
+      server: createNightshiftSecurityServer({ privileges: [] }),
       logger,
     });
 
@@ -142,8 +143,6 @@ describe('ki_features_get tool', () => {
 
     expect(getStream).not.toHaveBeenCalled();
     expect(getFeatures).not.toHaveBeenCalled();
-    if ('results' in result) {
-      expect(result.results[0].type).toBe('error');
-    }
+    expect(result).toMatchObject({ results: [{ type: 'error' }] });
   });
 });
