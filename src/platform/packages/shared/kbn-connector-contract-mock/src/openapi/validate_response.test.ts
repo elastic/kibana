@@ -65,7 +65,7 @@ describe('validateResponse', () => {
       'Response status 500 is not declared by the operation',
     ]);
     expect(messages({ statusCode: 404, body: {} })).toEqual([
-      "Response body must have required property 'error'",
+      'Response body: Instance does not have required property "error".',
     ]);
   });
 
@@ -75,13 +75,17 @@ describe('validateResponse', () => {
     ]);
     expect(
       messages({ headers: { 'content-type': 'application/json', 'x-rate-limit': 'many' } })
-    ).toEqual(['Response header X-Rate-Limit must be integer']);
+    ).toEqual([
+      'Response header X-Rate-Limit: Instance type "string" is invalid. Expected "integer".',
+    ]);
   });
 
   it('reports undeclared content types and body violations', () => {
     expect(messages({ headers: { 'content-type': 'text/html', 'x-rate-limit': '1' } })).toEqual([
       'Response content type text/html is not one of application/json',
     ]);
-    expect(messages({ body: {} })).toEqual(["Response body must have required property 'id'"]);
+    expect(messages({ body: {} })).toEqual([
+      'Response body: Instance does not have required property "id".',
+    ]);
   });
 });
