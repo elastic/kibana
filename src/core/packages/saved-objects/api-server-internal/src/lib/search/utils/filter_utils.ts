@@ -54,7 +54,7 @@ export const validateConvertFilterToKueryNode = (
       const path: string[] = item.astPath.length === 0 ? [] : item.astPath.split('.');
       const existingKueryNode: KueryNode =
         path.length === 0 ? filterKueryNode : get(filterKueryNode, path);
-      if (item.isSavedObjectAttr) {
+      if (item.isRootField) {
         const keySavedObjectAttr = existingKueryNode.arguments[0].value.split('.')[1];
         existingKueryNode.arguments[0].value =
           keySavedObjectAttr === 'id' ? '_id' : keySavedObjectAttr;
@@ -85,7 +85,7 @@ export const validateConvertFilterToKueryNode = (
 interface ValidateFilterKueryNode {
   astPath: string;
   error: string;
-  isSavedObjectAttr: boolean;
+  isRootField: boolean;
   key: string;
   type: string | null;
 }
@@ -148,7 +148,7 @@ export const validateFilterKueryNode = ({
             types,
             indexMapping
           ),
-          isSavedObjectAttr: isSavedObjectAttr(
+          isRootField: isRootField(
             nestedKeys != null ? `${nestedKeys}.${ast.value}` : ast.value,
             indexMapping
           ),
@@ -171,7 +171,7 @@ const getType = (key: string | undefined | null) =>
  * @param key
  * @param indexMapping
  */
-export const isSavedObjectAttr = (key: string | null | undefined, indexMapping: IndexMapping) => {
+export const isRootField = (key: string | null | undefined, indexMapping: IndexMapping) => {
   const keySplit = key != null ? key.split('.') : [];
   if (keySplit.length === 1 && fieldDefined(indexMapping, keySplit[0])) {
     return true;
@@ -200,7 +200,9 @@ export const hasFilterKeyError = (
       return `This type ${keySplit[0]} is not allowed`;
     }
     if (
-      (keySplit.length === 2 && fieldDefined(indexMapping, key)) ||
+      (keySplit.length === 2 &&
+        fieldDefined(indexMapping, key) &&
+        !isRootField(key, indexMapping)) ||
       (keySplit.length > 2 && keySplit[1] !== 'attributes')
     ) {
       return `This key '${key}' does NOT match the filter proposition SavedObjectType.attributes.key`;
