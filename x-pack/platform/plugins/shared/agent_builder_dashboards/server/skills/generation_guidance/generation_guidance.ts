@@ -34,9 +34,9 @@ Make all changes in a single ${dashboardTools.generateDashboard} call whenever p
 For a new dashboard, set both \`title\` and \`description\`.
 
 For an existing dashboard:
-- Edit a panel by listing its id with \`content\` of the same kind. Reorganizing or enhancing a dashboard does not require replacing panels.
+- Edit a panel by its id with \`content\` of the same kind rather than removing and re-adding it. Reorganizing or enhancing a dashboard does not require replacing panels. Edits work for ES|QL Lens, Vega, and custom content panels (\`source: "request"\` with the panel's \`renderer\`), and for markdown and ML anomaly panels (\`source: "config"\` with the panel's \`type\`).
 - For focused edits, pass only the requested change in the \`query\` (e.g. "make the error series blue"). The chart author preserves unrelated presentation settings.
-- If a requested change targets a DSL, form-based, or other non-ES|QL Lens visualization panel, explicitly tell the user direct editing is not supported and ask for confirmation before replacing that panel with a newly created ES|QL-based Lens panel.
+- DSL-based, form-based, and other non-ES|QL Lens panels cannot be edited. When the user asks to change one, say so, propose replacing it with a new ES|QL-based Lens panel, and wait for explicit confirmation before replacing it.
 
 ## Panel Inputs
 
@@ -48,20 +48,12 @@ Each visualization request is authored in a separate context. New-panel authors 
 
 ## Panel Type Selection
 
-Choose the panel type in this priority order:
+Choose the first panel type that fits:
 
-1. **Lens** (\`source: "request"\`, \`renderer: "lens"\` or omit renderer) — default for metric, time series, bar, line, pie, area, and data table visualizations.
-2. **Vega** (\`source: "request"\`, \`renderer: "vega"\`) — for scatter/bubble plots, small multiples/faceting, layered or combination charts, or when the user explicitly asks for Vega.
-3. **Markdown** (\`source: "config"\`, \`type: "markdown"\`) — for static explanatory text, links, or simple formatted notes with no data.
-4. **Custom content** (\`source: "request"\`, \`renderer: "custom_content"\`) — a last resort for HTML-based layouts that Lens and Vega cannot express, such as KPI scorecards with colored status badges, health/status boards, or panels that mix narrative text with live data values.
-
-### Custom content panels
-
-Reach for custom content only when nothing above fits:
-- Any standard time series, bar, pie, metric, or data table → use Lens.
-- Scatter plots, faceted charts, layered charts, combination charts → use Vega.
-- Plain explanatory text with no data → use markdown.
-- The content needs an HTML/CSS layout no single Lens chart type can express, or mixes narrative text with live data, or the user explicitly asks for a custom/HTML panel → use custom content.
+1. **Lens** (\`renderer: "lens"\` or omitted) — metrics, time series, bar, line, pie, area, and data tables.
+2. **Vega** (\`renderer: "vega"\`) — scatter/bubble plots, small multiples/faceting, layered or combination charts, or when the user asks for Vega.
+3. **Markdown** (\`source: "config"\`, \`type: "markdown"\`) — static text, links, or notes with no data.
+4. **Custom content** (\`renderer: "custom_content"\`) — a last resort for HTML/CSS layouts that Lens and Vega cannot express, such as KPI scorecards with colored status badges, health/status boards, or narrative text mixed with live data values, or when the user asks for a custom/HTML panel.
 
 ## Chart Type Guidance
 
@@ -84,14 +76,7 @@ Do not add controls to dashboards already scoped to a single entity (one host, o
 
 Controls query the index directly, so columns created in ES|QL (\`DISSECT\`, \`GROK\`, \`EVAL\`, \`RENAME\`) cannot back a control. Controls are optional: when no mapped field fits, add fewer controls or none.
 
-Remove a control by listing the \`id\` from the \`controls[]\` list in the tool result in \`remove\`.
-
-## Generation Edge Cases
-
-- If a user wants to change a dashboard panel's content, edit it by id rather than removing and re-adding it. Edits work for ES|QL-backed Lens and Vega panels and custom content panels (\`source: "request"\` with the panel's \`renderer\`), markdown panels (\`source: "config"\`, \`type: "markdown"\`), and ML anomaly panels (\`source: "config"\`, \`type: "ml_anomaly_charts"\` / \`"ml_anomaly_swimlane"\` / \`"ml_single_metric_viewer"\`).
-- A dashboard can include DSL-based, form-based, or other non-ES|QL Lens panels. Do not attempt to edit those panels directly.
-- If the user asks to modify a DSL visualization or any other non-ES|QL panel, explicitly explain that direct editing is not supported, propose recreating and replacing it as a new ES|QL-based Lens chart, and ask for confirmation before you replace the existing panel.
-- Never silently replace a non-ES|QL panel. Wait for explicit user confirmation before regenerating the dashboard with replacement content.`;
+Remove a control by listing the \`id\` from the \`controls[]\` list in the tool result in \`remove\`.`;
 
 /**
  * Environment-agnostic dashboard *generation* guidance.
