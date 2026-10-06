@@ -21,7 +21,7 @@ You are reviewing a Kibana PR from `elastic/kibana` against the [Elastic API doc
 ## Scope
 
 - Only routes registered with `access: 'public'` and the schemas they reference are published, so only those are in scope. Routes with `access: 'internal'` or no `access` are out of scope. If no public route or schema changed, stop without findings.
-- Skip backport PRs (`backport` label, a `[9.5]`-style title prefix, or a base branch other than `main`); the review belongs on the original PR.
+- Skip backport PRs (a base branch other than `main`, or a `[9.5]`-style title prefix); the review belongs on the original PR.
 
 ## Key principle: YAML is generated, TypeScript is the source of truth
 
@@ -29,7 +29,7 @@ The files under `oas_docs/output/` (`kibana.yaml`, `kibana.serverless.yaml`) are
 
 ## Inputs
 
-**Automated review (Libra).** The changed-file list and the review-scope diff are supplied. `oas_docs/output/**` is excluded from that diff, so work from the source files. Use `read_file` to open changed files and their siblings at the PR head for exact line numbers; never compute line numbers from diff hunk headers. Use `search_code` only to answer a specific question about a changed route.
+**Automated review (Libra).** You receive the PR title, body, base branch, the changed-file list, and the review-scope diff. You do not receive labels. `oas_docs/output/**` is excluded from the diff, so work from the source files. The diff is the source of old-versus-new content; use `read_file` on changed files, and on sibling route files in the same directory, at the PR head to see the whole definition and confirm line numbers. Do not run commands, and do not use `search_code` to find conventions or examples; the sibling comparison in step 3 is done by reading named files.
 
 **Local review.** Given a PR number or URL:
 
@@ -77,9 +77,11 @@ Read before you assert. A diff hunk shows a window, not the file:
 
 When the PR adds a new route to an existing resource, read the existing routes from the same file or directory to compare conventions. Look for patterns like narrative doc links, tag usage, or example files that siblings use but the new route does not.
 
+In automated review, start with the rest of the changed file. If each route lives in its own file, read the directory's `index.ts` (it imports every sibling) and then one or two of the sibling files it names. Do not search for siblings.
+
 ### 4. Output
 
-**Automated review (Libra).** Report one finding per issue, anchored to a changed line in a changed file. Use the service severity rubric: missing or incorrect availability, deprecation, or description is P3; wording, style, a missing doc link, or a missing example is P4. Name the rule in the evidence as `OAS rule N`. Include the before → after when the fix is a one-liner, as a suggestion block when it replaces a single line. Do not report pre-existing issues on lines the PR did not change. Do not print a report.
+**Automated review (Libra).** Report one finding per issue, anchored to a changed line in a changed file. These findings are not style nits: every `summary`, `description`, `availability`, and `x-state` value here is published verbatim at elastic.co/docs as the API contract, so state the user-visible effect in the claim (a route with no lifecycle label, a wrong version badge, a parameter users cannot understand) and let the service rubric set severity. Name the rule in the evidence as `OAS rule N`. Include the before → after when the fix is a one-liner, as a suggestion block when it replaces a single line. Do not report pre-existing issues on lines the PR did not change. Do not print a report.
 
 **Local review.** Print a flat action list, then a summary. Be terse. No diagnosis essays.
 
@@ -131,7 +133,7 @@ Valid `stability` values and their rendered labels:
 
 `since` is a version string like `'9.2.0'`. It marks the version when the API first shipped. It appears in Elastic Stack docs and is omitted from serverless docs.
 
-For a new public route, `since` is the `version` in the root `package.json` at the PR head (on `main` that is the next minor, for example `9.6.0`). A lower value is correct only if the PR carries a matching backport label (`backport:version` plus `v9.5.0`, or `backport:prev-minor`). If you cannot see the labels, report the mismatch as a question rather than an error.
+For a new public route, `since` is the `version` in the root `package.json` at the PR head (on `main` that is the next minor, for example `9.6.0`). A lower value is correct only if the PR carries a matching backport label (`backport:version` plus `v9.5.0`, or `backport:prev-minor`). In automated review you cannot see labels, so report the mismatch as a question that names the expected value and the backport label that would justify the lower one.
 
 Stability tracks the gate, not the intent. A route still behind a feature flag or UI setting cannot be `'stable'`. When a PR removes the flag or gate on a public route, the same PR must move `stability` to `'stable'`; when it adds a gate, `stability` must leave `'stable'`.
 

@@ -1,6 +1,6 @@
 ---
 name: changelog-entry
-description: Write the release-note content for a Kibana pull request. Use when preparing or reviewing a PR that has a release_note:feature, release_note:enhancement, release_note:fix, release_note:breaking, or release_note:deprecation label, when a PR body needs a "## Release note" section, or when adding or editing a docs/changelog/<pr-number>.yaml entry. Produces the PR body section and the changelog YAML from the PR title, labels, body, and diff, following Elastic changelog standards and Kibana's docs/changelog.yml configuration.
+description: Write or review the release-note content for a Kibana pull request. Use when preparing or reviewing a PR that has a release_note:feature, release_note:enhancement, release_note:fix, release_note:breaking, or release_note:deprecation label, when a PR body has or needs a "## Release note" section, when the PR adds or edits docs/changelog/<pr-number>.yaml, or when the PR touches generated release-note files under docs/release-notes/, docs/releases/, or docs/CHANGELOG.asciidoc. Produces or checks the PR body section and the changelog YAML against Elastic changelog standards and Kibana's docs/changelog.yml configuration.
 ---
 
 # Changelog entry
@@ -10,11 +10,13 @@ Release notes for Kibana and serverless are generated from two inputs the PR aut
 ## When to stop
 
 - The PR has `release_note:skip`, or the change is internal, test-only, docs-only, or a fix for a feature that has not shipped. Say so and produce nothing.
-- The PR is a backport (`backport` label, `[9.5]`-style title prefix, base branch other than `main`). The entry lives on the original PR.
+- The PR is a backport (base branch other than `main`, `[9.5]`-style title prefix, or `backport` label when labels are visible). The entry lives on the original PR.
 
 ## Inputs
 
-Read, in this order: PR title, labels, body, linked issues, and the changed files (`gh pr view <n> --json title,labels,body,files` and `gh pr diff <n>` when `gh` is available; otherwise what the user supplies). Then read `docs/changelog.yml` for the current label-to-type, label-to-area, and label-to-product mappings under `pivot`. Do not guess values that file defines.
+Read, in this order: PR title, labels, body, linked issues, and the changed files. Locally, `gh pr view <n> --json title,labels,body,files` and `gh pr diff <n>` supply these; otherwise use what you are given. Then read `docs/changelog.yml` for the current label-to-type, label-to-area, and label-to-product mappings under `pivot`. Do not guess values that file defines.
+
+In automated review (Libra) you receive the PR title, body, base branch, changed-file list, and diff, and you can `read_file` at the PR head. You do not receive labels and cannot run commands. Skip every check below that needs a label, and treat the `## Release note` section of the body as the author's statement of what the release note should say.
 
 ## Labels (check first)
 
@@ -78,5 +80,26 @@ Check your own output against these and fix it:
 3. Do `type`, `title` verb, and description verb agree?
 4. Are all `areas` and `products` values present in `docs/changelog.yml`?
 5. Is anything in the text an internal name a serverless user could not see?
+
+## Reviewing a PR
+
+Apply the same rules to what the author wrote. Anchor every finding to a changed line in a changed file and name the rule you applied; do not print a report.
+
+Generated files first. `docs/release-notes/**`, `docs/releases/**`, and `docs/CHANGELOG.asciidoc` are built from the changelog entries by the docs team's tooling. A PR that edits them by hand loses the edit at the next build. Report it on the changed lines and point the author to `docs/changelog/<pr-number>.yaml` and the `## Release note` section instead.
+
+When the diff contains `docs/changelog/*.yaml`, read `docs/changelog.yml` at the PR head, then check the entry line by line:
+
+- File name is `<pr-number>.yaml` for this PR, and `prs` contains this PR's URL.
+- `type` is one of the values under `pivot.types` in `docs/changelog.yml`, and it agrees with the `title` verb and with the `## Release note` text in the body. "Fix ..." with `type: feature`, or a body that describes a new capability with `type: bug-fix`, is a finding on the `type` line.
+- `title`: imperative base form, sentence case, under 80 characters, no trailing period, no `[Team]` or `[Feature]` prefix, and understandable without the PR.
+- `description`: third-person present, under 600 characters, adds something the title does not. If it only restates the title, say to drop it. If it contradicts the `## Release note` section in the body, report the mismatch and quote both.
+- Every `areas` value is an exact string under `pivot.areas`; every `products[].product` is `kibana`, `cloud-serverless`, or a value under `pivot.products`. Report an unknown value with the nearest valid one.
+- `breaking-change` and `deprecation` entries have `impact` and `action`, and `action` names the replacement.
+- No internal names anywhere in `title`, `description`, `impact`, or `action`.
+- Scalars containing `:` or `#` are quoted.
+
+When the body has a release-note section (any heading level, "Release note" or "Release notes") with real release-note text (not "N/A", "skip", or the empty template) and the changed-file list has no `docs/changelog/*.yaml`, report that the entry is missing. Anchor it to the first changed line of the source file that implements the change the note describes, and include a ready-to-paste `docs/changelog/<pr-number>.yaml` built from the body. Do not report a missing entry when the body has no release note; you cannot see whether `release_note:skip` is applied.
+
+Review the `## Release note` text itself only when the PR also changes a changelog file or a generated release-note file, and anchor that finding to the changelog `description` line. A body-only problem has no changed line to attach to.
 
 Reference: [Changelogs content type](https://www.elastic.co/docs/contribute-docs/content-types/changelogs) for the schema, [Elastic style guide](https://www.elastic.co/docs/contribute-docs/style-guide) for wording.
