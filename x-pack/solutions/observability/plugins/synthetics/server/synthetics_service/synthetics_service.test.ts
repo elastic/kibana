@@ -10,7 +10,7 @@ import { coreMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { CoreStart } from '@kbn/core/server';
 import { SyntheticsService } from './synthetics_service';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { AxiosResponse } from 'axios';
+import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 import axios from 'axios';
 import times from 'lodash/times';
 import type { HeartbeatConfig } from '../../common/runtime_types';
@@ -441,6 +441,503 @@ describe('SyntheticsService', () => {
         await expect(service.pushConfigs(ALL_SPACES_ID)).rejects.toThrow(errorMessage);
       }
     );
+  });
+
+  describe('pushConfigs with sync state', () => {
+    const MONITOR_TYPE = 'synthetics-monitor-multi-space';
+
+    type MonitorSO = ReturnType<typeof monitorSO>;
+
+    const monitorSO = (
+      id: string,
+      attributes: Record<string, unknown> = {},
+      locations: HeartbeatConfig['locations'] = [
+        { id: 'loc-0', label: 'Location 0', isServiceManaged: true },
+      ]
+    ) => ({
+      id: `so-${id}`,
+      type: MONITOR_TYPE,
+      namespaces: ['default'],
+      updated_at: '2026-10-05T10:00:00.000Z',
+      attributes: { ...getFakePayload(locations), id, ...attributes },
+    });
+
+    interface Stores {
+      /** Monitors edited since the last sync, read decrypted. */
+      changed?: MonitorSO[];
+      /** Monitors not edited since the last sync, listed without their configuration. */
+      unchanged?: MonitorSO[];
+      /** Monitors that can be read one by one, by saved object id. */
+      byId?: Record<string, MonitorSO>;
+      paramsUpdatedAt?: string[];
+    }
+
+    const mockStores = ({
+      changed = [],
+      unchanged = [],
+      byId = {},
+      paramsUpdatedAt = ['2026-10-01T10:00:00.000Z'],
+    }: Stores = {}) => {
+      const internalRepository = {
+        find: jest.fn().mockResolvedValue({ total: changed.length + unchanged.length }),
+        createPointInTimeFinder: jest.fn().mockImplementation(({ type }) => ({
+          close: jest.fn(async () => {}),
+          find: async function* find() {
+            yield {
+              saved_objects:
+                type === 'synthetics-param'
+                  ? paramsUpdatedAt.map((updated_at) => ({ updated_at }))
+                  : unchanged,
+            };
+          },
+        })),
+      };
+      (mockCoreStart.savedObjects.createInternalRepository as jest.Mock).mockReturnValue(
+        internalRepository
+      );
+
+      const encryptedClient = {
+        getDecryptedAsInternalUser: jest.fn(async (_type: string, id: string) => {
+          if (!byId[id]) {
+            throw new Error(`Saved object [${MONITOR_TYPE}/${id}] not found`);
+          }
+          return byId[id];
+        }),
+        createPointInTimeFinderDecryptedAsInternalUser: jest.fn().mockImplementation(() => ({
+          close: jest.fn(async () => {}),
+          find: async function* find() {
+            yield { saved_objects: changed };
+          },
+        })),
+      };
+      serverMock.encryptedSavedObjects = {
+        getClient: jest.fn().mockReturnValue(encryptedClient),
+      } as unknown as SyntheticsServerSetup['encryptedSavedObjects'];
+
+      return { internalRepository, encryptedClient };
+    };
+
+    const notFound = (failedIds: string[]) => ({
+      message: 'Request failed with status code 404',
+      response: {
+        status: 404,
+        data: {
+          status: 404,
+          reason: 'failed to sync monitors',
+          failed_monitors: failedIds.map((id) => ({ id, message: 'monitor not found' })),
+        },
+      },
+    });
+
+    const failure = (status: number, data: unknown) => ({
+      message: `Request failed with status code ${status}`,
+      response: { status, data },
+    });
+
+    /** Answers the retain and sync endpoints, rejecting those given a rejection. */
+    const mockServiceResponses = ({ retain, sync }: { retain?: unknown; sync?: unknown } = {}) => {
+      (axios as jest.MockedFunction<typeof axios>).mockImplementation(async (req: any) => {
+        const rejection = req.url.endsWith('/monitors/sync/retain') ? retain : sync;
+        if (rejection) {
+          throw rejection;
+        }
+        return { status: 202 } as AxiosResponse;
+      });
+    };
+
+    const requests = () => {
+      const calls = (axios as jest.MockedFunction<typeof axios>).mock.calls.map(([req]) => {
+        const { url = '', data } = req as AxiosRequestConfig;
+        return { url, data: data as { monitors: Array<{ id: string; type: string }> } };
+      });
+      return {
+        retained: calls.filter(({ url }) => url.endsWith('/monitors/sync/retain')),
+        synced: calls.filter(({ url }) => url.endsWith('/monitors/sync')),
+      };
+    };
+
+    const idsOf = (calls: Array<{ data: { monitors: Array<{ id: string }> } }>) =>
+      calls.flatMap(({ data }) => data.monitors.map(({ id }) => id));
+
+    const getService = () => {
+      const { service } = getMockedService();
+      service.getMaintenanceWindows = jest.fn().mockResolvedValue([]);
+      return service;
+    };
+
+    /** Runs a first sync so the following ones start from the state it leaves behind. */
+    const syncOnce = async (service: SyntheticsService) => {
+      const state: Record<string, string> = {};
+      mockStores({ changed: [monitorSO('first')] });
+      mockServiceResponses();
+      await service.pushConfigs(ALL_SPACES_ID, state);
+      (axios as jest.MockedFunction<typeof axios>).mockClear();
+      return state;
+    };
+
+    beforeEach(() => {
+      // earlier tests leave the license mocked as expired or missing
+      mockLicense();
+      jest.useFakeTimers({ now: new Date('2026-10-05T12:00:00.000Z'), doNotFake: ['nextTick'] });
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    describe('the first sync', () => {
+      it('sends every monitor in full and records when it happened', async () => {
+        const service = getService();
+        const state: Record<string, string> = {};
+        const { encryptedClient } = mockStores({ changed: [monitorSO('a'), monitorSO('b')] });
+        mockServiceResponses();
+
+        await service.pushConfigs(ALL_SPACES_ID, state);
+
+        const { retained, synced } = requests();
+        expect(retained).toHaveLength(0);
+        expect(synced).toHaveLength(1);
+        expect(idsOf(synced)).toEqual(['a', 'b']);
+        expect(
+          encryptedClient.createPointInTimeFinderDecryptedAsInternalUser.mock.calls[0][0].filter
+        ).toBeUndefined();
+        expect(state).toEqual({
+          lastSyncedAt: '2026-10-05T12:00:00.000Z',
+          lastFullSyncAt: '2026-10-05T12:00:00.000Z',
+          syncFingerprint: expect.any(String),
+        });
+      });
+
+      it('does not record anything when there are no monitors, nor ask for the API key', async () => {
+        const service = getService();
+        const state: Record<string, string> = {};
+        mockStores();
+        mockServiceResponses();
+
+        await service.pushConfigs(ALL_SPACES_ID, state);
+
+        expect(axios).not.toHaveBeenCalled();
+        expect(service.getOutput).not.toHaveBeenCalled();
+        expect(state).toEqual({});
+      });
+
+      it('does not record anything when pushing the monitors fails', async () => {
+        const service = getService();
+        const state: Record<string, string> = {};
+        mockStores({ changed: [monitorSO('a')] });
+        mockServiceResponses({
+          sync: failure(500, { status: 500, reason: 'failed to sync monitors' }),
+        });
+
+        await service.pushConfigs(ALL_SPACES_ID, state);
+
+        expect(service.syncErrors).toHaveLength(1);
+        expect(state).toEqual({});
+      });
+    });
+
+    describe('later syncs', () => {
+      it('only retains the monitors that were not edited, without reading or decrypting them', async () => {
+        const service = getService();
+        const state = await syncOnce(service);
+        jest.setSystemTime(new Date('2026-10-05T12:05:00.000Z'));
+        const { encryptedClient, internalRepository } = mockStores({
+          unchanged: [monitorSO('a'), monitorSO('b', { type: 'browser' })],
+        });
+        mockServiceResponses();
+        (service.getSyntheticsParams as jest.Mock).mockClear();
+
+        await service.pushConfigs(ALL_SPACES_ID, state);
+
+        const { retained, synced } = requests();
+        expect(synced).toHaveLength(0);
+        expect(retained).toHaveLength(1);
+        expect(retained[0].url).toBe('https://example.com/0/monitors/sync/retain');
+        expect(retained[0].data.monitors).toEqual([
+          { id: 'a', type: 'http' },
+          { id: 'b', type: 'browser' },
+        ]);
+        expect(encryptedClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+        expect(service.getSyntheticsParams).not.toHaveBeenCalled();
+
+        const monitorFinder = internalRepository.createPointInTimeFinder.mock.calls
+          .map(([options]) => options)
+          .find(({ type }) => type !== 'synthetics-param');
+        expect(monitorFinder).toEqual(
+          expect.objectContaining({
+            namespaces: ['*'],
+            filter:
+              'not (synthetics-monitor.updated_at >= "2026-10-05T11:59:00.000Z" or synthetics-monitor-multi-space.updated_at >= "2026-10-05T11:59:00.000Z")',
+            fields: ['id', 'type', 'enabled', 'locations'],
+          })
+        );
+        expect(
+          encryptedClient.createPointInTimeFinderDecryptedAsInternalUser.mock.calls[0][0].filter
+        ).toBe(
+          '(synthetics-monitor.updated_at >= "2026-10-05T11:59:00.000Z" or synthetics-monitor-multi-space.updated_at >= "2026-10-05T11:59:00.000Z")'
+        );
+      });
+
+      it('moves the time it last synced forward but not the time of the last full sync', async () => {
+        const service = getService();
+        const state = await syncOnce(service);
+        jest.setSystemTime(new Date('2026-10-05T12:05:00.000Z'));
+        mockStores({ unchanged: [monitorSO('a')] });
+        mockServiceResponses();
+
+        await service.pushConfigs(ALL_SPACES_ID, state);
+
+        expect(state.lastSyncedAt).toBe('2026-10-05T12:05:00.000Z');
+        expect(state.lastFullSyncAt).toBe('2026-10-05T12:00:00.000Z');
+      });
+
+      it('sends the monitors that were edited in full and retains the rest', async () => {
+        const service = getService();
+        const state = await syncOnce(service);
+        (service.getSyntheticsParams as jest.Mock).mockClear();
+        mockStores({
+          changed: [monitorSO('edited', { name: 'renamed' })],
+          unchanged: [monitorSO('same')],
+        });
+        mockServiceResponses();
+
+        await service.pushConfigs(ALL_SPACES_ID, state);
+
+        const { retained, synced } = requests();
+        expect(idsOf(retained)).toEqual(['same']);
+        expect(idsOf(synced)).toEqual(['edited']);
+        expect(service.getSyntheticsParams).toHaveBeenCalledTimes(1);
+      });
+
+      it('sends monitors the service did not retain in full, and only those', async () => {
+        const service = getService();
+        const state = await syncOnce(service);
+        const { encryptedClient } = mockStores({
+          unchanged: [monitorSO('still-cached'), monitorSO('evicted')],
+          byId: { 'so-evicted': monitorSO('evicted', { name: 'evicted monitor' }) },
+        });
+        mockServiceResponses({ retain: notFound(['evicted']) });
+
+        await service.pushConfigs(ALL_SPACES_ID, state);
+
+        const { retained, synced } = requests();
+        expect(idsOf(retained)).toEqual(['still-cached', 'evicted']);
+        expect(idsOf(synced)).toEqual(['evicted']);
+        expect(encryptedClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
+        expect(encryptedClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+          MONITOR_TYPE,
+          'so-evicted',
+          { namespace: 'default' }
+        );
+        expect(state.lastSyncedAt).toBe('2026-10-05T12:00:00.000Z');
+      });
+
+      it('skips monitors that were deleted after they were listed', async () => {
+        const service = getService();
+        const state = await syncOnce(service);
+        mockStores({ unchanged: [monitorSO('deleted')], byId: {} });
+        mockServiceResponses({ retain: notFound(['deleted']) });
+
+        await service.pushConfigs(ALL_SPACES_ID, state);
+
+        expect(requests().synced).toHaveLength(0);
+        expect(service.syncErrors).toEqual([]);
+        expect(state.lastSyncedAt).toBe('2026-10-05T12:00:00.000Z');
+      });
+
+      it('sends every monitor in full to a service without the retain endpoint, and stops asking it', async () => {
+        const service = getService();
+        const state = await syncOnce(service);
+        mockStores({
+          unchanged: [monitorSO('a'), monitorSO('b')],
+          byId: { 'so-a': monitorSO('a'), 'so-b': monitorSO('b') },
+        });
+        mockServiceResponses({ retain: failure(404, '404 page not found') });
+
+        await service.pushConfigs(ALL_SPACES_ID, state);
+
+        expect(requests().retained).toHaveLength(1);
+        expect(idsOf(requests().synced)).toEqual(['a', 'b']);
+
+        // from then on every monitor is scanned in one pass, rather than read one by one
+        (axios as jest.MockedFunction<typeof axios>).mockClear();
+        const { encryptedClient } = mockStores({ changed: [monitorSO('a'), monitorSO('b')] });
+        mockServiceResponses({ retain: failure(404, '404 page not found') });
+
+        await service.pushConfigs(ALL_SPACES_ID, state);
+
+        expect(requests().retained).toHaveLength(0);
+        expect(idsOf(requests().synced)).toEqual(['a', 'b']);
+        expect(encryptedClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+        expect(
+          encryptedClient.createPointInTimeFinderDecryptedAsInternalUser.mock.calls[0][0].filter
+        ).toBeUndefined();
+        expect(state.lastFullSyncAt).toBe('2026-10-05T12:00:00.000Z');
+      });
+
+      it('sends monitors it cannot look up by id in full', async () => {
+        const service = getService();
+        const state = await syncOnce(service);
+        mockStores({
+          unchanged: [monitorSO('', { id: undefined }), monitorSO('listed')],
+          byId: { 'so-': monitorSO('', { id: undefined }) },
+        });
+        mockServiceResponses();
+
+        await service.pushConfigs(ALL_SPACES_ID, state);
+
+        expect(idsOf(requests().retained)).toEqual(['listed']);
+        expect(requests().synced).toHaveLength(1);
+      });
+
+      it('does not retain disabled monitors nor monitors that only run at private locations', async () => {
+        const service = getService();
+        const state = await syncOnce(service);
+        mockStores({
+          unchanged: [
+            monitorSO('disabled', { enabled: false }),
+            monitorSO('private', {}, [
+              { id: 'private-loc', label: 'Private', isServiceManaged: false },
+            ]),
+            monitorSO('no-locations', {}, []),
+          ],
+        });
+        mockServiceResponses();
+
+        await service.pushConfigs(ALL_SPACES_ID, state);
+
+        expect(axios).not.toHaveBeenCalled();
+        expect(state.lastSyncedAt).toBe('2026-10-05T12:00:00.000Z');
+      });
+
+      it('retains a monitor at each service location it runs at', async () => {
+        const { service } = getMockedService(2);
+        service.getMaintenanceWindows = jest.fn().mockResolvedValue([]);
+        const state = await syncOnce(service);
+        mockStores({
+          unchanged: [
+            monitorSO('everywhere', {}, [
+              { id: 'loc-0', label: 'Location 0', isServiceManaged: true },
+              { id: 'loc-1', label: 'Location 1', isServiceManaged: true },
+            ]),
+          ],
+        });
+        mockServiceResponses();
+
+        await service.pushConfigs(ALL_SPACES_ID, state);
+
+        expect(
+          requests()
+            .retained.map(({ url }) => url)
+            .sort()
+        ).toEqual([
+          'https://example.com/0/monitors/sync/retain',
+          'https://example.com/1/monitors/sync/retain',
+        ]);
+      });
+
+      it('does nothing once the last monitor is gone', async () => {
+        const service = getService();
+        const state = await syncOnce(service);
+        mockStores();
+        mockServiceResponses();
+        (service.getOutput as jest.Mock).mockClear();
+
+        await service.pushConfigs(ALL_SPACES_ID, state);
+
+        expect(axios).not.toHaveBeenCalled();
+        expect(service.getOutput).not.toHaveBeenCalled();
+      });
+
+      it('keeps the time of the last sync when the edited monitors could not be pushed', async () => {
+        const service = getService();
+        const state = await syncOnce(service);
+        jest.setSystemTime(new Date('2026-10-05T12:05:00.000Z'));
+        mockStores({ changed: [monitorSO('edited')], unchanged: [monitorSO('same')] });
+        mockServiceResponses({
+          sync: failure(500, { status: 500, reason: 'failed to sync monitors' }),
+        });
+
+        await service.pushConfigs(ALL_SPACES_ID, state);
+
+        expect(idsOf(requests().retained)).toEqual(['same']);
+        expect(state.lastSyncedAt).toBe('2026-10-05T12:00:00.000Z');
+      });
+
+      it('does not push when the API key is not usable', async () => {
+        const service = getService();
+        const state = await syncOnce(service);
+        mockStores({ unchanged: [monitorSO('a')] });
+        mockServiceResponses();
+        (service.getOutput as jest.Mock).mockResolvedValue({
+          output: null,
+          invalidDetails: { reason: 'invalid' },
+        });
+
+        await service.pushConfigs(ALL_SPACES_ID, state);
+
+        expect(axios).not.toHaveBeenCalled();
+        expect(state.lastSyncedAt).toBe('2026-10-05T12:00:00.000Z');
+      });
+    });
+
+    describe('sends every monitor in full when', () => {
+      const expectFullSync = async (
+        service: SyntheticsService,
+        state: Record<string, string>,
+        stores: Stores
+      ) => {
+        const { encryptedClient } = mockStores(stores);
+        mockServiceResponses();
+
+        await service.pushConfigs(ALL_SPACES_ID, state);
+
+        expect(requests().retained).toHaveLength(0);
+        expect(idsOf(requests().synced)).toEqual(['a', 'b']);
+        expect(
+          encryptedClient.createPointInTimeFinderDecryptedAsInternalUser.mock.calls[0][0].filter
+        ).toBeUndefined();
+      };
+
+      it('a param was added or edited', async () => {
+        const service = getService();
+        const state = await syncOnce(service);
+
+        await expectFullSync(service, state, {
+          changed: [monitorSO('a'), monitorSO('b')],
+          paramsUpdatedAt: ['2026-10-01T10:00:00.000Z', '2026-10-05T12:02:00.000Z'],
+        });
+      });
+
+      it('a maintenance window was edited', async () => {
+        const service = getService();
+        const state = await syncOnce(service);
+        service.getMaintenanceWindows = jest
+          .fn()
+          .mockResolvedValue([{ id: 'mw', updatedAt: '2026-10-05T12:02:00.000Z' }]);
+
+        await expectFullSync(service, state, { changed: [monitorSO('a'), monitorSO('b')] });
+      });
+
+      it('the API key was replaced', async () => {
+        const service = getService();
+        const state = await syncOnce(service);
+        (service.getOutput as jest.Mock).mockResolvedValue({
+          output: { hosts: ['es'], api_key: 'rotated:key' },
+        });
+
+        await expectFullSync(service, state, { changed: [monitorSO('a'), monitorSO('b')] });
+      });
+
+      it('the full sync is a day old', async () => {
+        const service = getService();
+        const state = await syncOnce(service);
+        jest.setSystemTime(new Date('2026-10-06T12:00:00.000Z'));
+
+        await expectFullSync(service, state, { changed: [monitorSO('a'), monitorSO('b')] });
+        expect(state.lastFullSyncAt).toBe('2026-10-06T12:00:00.000Z');
+      });
+    });
   });
 
   describe('getSyntheticsParams', () => {

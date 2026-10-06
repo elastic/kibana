@@ -7,7 +7,13 @@
 
 /* eslint-disable max-classes-per-file */
 
-import type { ElasticsearchClient, KibanaRequest, Logger, SavedObject } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  ISavedObjectsRepository,
+  KibanaRequest,
+  Logger,
+  SavedObject,
+} from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskInstance,
@@ -20,14 +26,10 @@ import pMap from 'p-map';
 import moment from 'moment';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import pRetry from 'p-retry';
-import { isEmpty } from 'lodash';
+import { chunk, isEmpty, once } from 'lodash';
 import { registerCleanUpTask } from '../tasks/clean_up_package_policies_task';
 import type { SyntheticsServerSetup } from '../types';
-import {
-  legacySyntheticsMonitorTypeSingle,
-  syntheticsMonitorSavedObjectType,
-  syntheticsParamType,
-} from '../../common/types/saved_objects';
+import { syntheticsParamType } from '../../common/types/saved_objects';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { installSyntheticsIndexTemplates } from '../routes/synthetics_service/install_index_templates';
 import {
@@ -37,11 +39,22 @@ import {
 } from './get_api_key';
 import { getEsHosts } from './get_es_hosts';
 import type { ServiceConfig } from '../config';
-import type { ServiceData } from './service_api_client';
+import type { RetainedMonitor, ServiceData } from './service_api_client';
 import { ServiceAPIClient } from './service_api_client';
+import type { MonitorSyncState } from './retain_sync';
+import {
+  MONITOR_SAVED_OBJECT_TYPES,
+  getChangedMonitorsFilter,
+  getChangedSince,
+  getParamsVersion,
+  getSyncFingerprint,
+  getUnchangedMonitorsFilter,
+  shouldSyncAllMonitors,
+} from './retain_sync';
 
 import type {
   MonitorFields,
+  ServiceLocation,
   ServiceLocationErrors,
   ServiceLocations,
   SyntheticsMonitorWithSecretsAttributes,
@@ -63,6 +76,23 @@ const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID = 'UPTIME:SyntheticsService:sync-task';
 const SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT = '5m';
+
+// Monitors are sent in full in pages this size, which keeps each payload below the service limit.
+const FULL_SYNC_PAGE_SIZE = 250;
+// A retained monitor is just an id and a type, so far more fit in one request.
+const RETAIN_PAGE_SIZE = 1000;
+const FETCH_MONITOR_CONCURRENCY = 10;
+
+type RetainableMonitorAttributes = Pick<
+  MonitorFields,
+  ConfigKey.MONITOR_QUERY_ID | ConfigKey.MONITOR_TYPE | ConfigKey.ENABLED | ConfigKey.LOCATIONS
+>;
+
+interface RetainCandidate extends RetainedMonitor {
+  savedObjectId: string;
+  savedObjectType: string;
+  namespace?: string;
+}
 
 export class SyntheticsService {
   private logger: Logger;
@@ -233,7 +263,7 @@ export class SyntheticsService {
                 if (service.isAllowed && service.config.manifestUrl) {
                   await service.setupIndexTemplates();
                   if (service.indexTemplateExists) {
-                    await service.pushConfigs(ALL_SPACES_ID);
+                    await service.pushConfigs(ALL_SPACES_ID, state);
                   } else {
                     service.logger.warn(
                       'Skipping monitor push — synthetics index templates not yet installed.'
@@ -338,14 +368,15 @@ export class SyntheticsService {
     return license;
   }
 
-  private async getSOClientFinder({ pageSize }: { pageSize: number }) {
+  private async getSOClientFinder({ pageSize, filter }: { pageSize: number; filter?: string }) {
     const encryptedClient = this.server.encryptedSavedObjects.getClient();
 
     return await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
       {
-        type: [legacySyntheticsMonitorTypeSingle, syntheticsMonitorSavedObjectType],
+        type: MONITOR_SAVED_OBJECT_TYPES,
         perPage: pageSize,
         namespaces: [ALL_SPACES_ID],
+        filter,
       }
     );
   }
@@ -465,18 +496,103 @@ export class SyntheticsService {
     }
   }
 
-  async pushConfigs(spaceId: string) {
+  /**
+   * Pushes every saved monitor to the service locations that run them.
+   *
+   * When `syncState` carries the outcome of a previous run, monitors that were not edited since are
+   * only kept alive by id, which spares reading, decrypting and sending their configuration. Any
+   * monitor the service no longer holds is sent in full instead. Without `syncState` every monitor
+   * is sent in full. On success the state is updated for the next run.
+   */
+  async pushConfigs(spaceId: string, syncState?: MonitorSyncState) {
     const license = await this.getLicense();
     const service = this;
 
-    const PER_PAGE = 250;
     service.syncErrors = [];
 
-    let output: ServiceData['output'] | null = null;
+    const startedAt = new Date();
+    let hasPushFailure = false;
 
-    const paramsBySpace = await this.getSyntheticsParams();
     const maintenanceWindows = await this.getMaintenanceWindows(spaceId);
-    const finder = await this.getSOClientFinder({ pageSize: PER_PAGE });
+
+    // Read before any monitor, so an edit made while this run is in progress is not recorded
+    // as synced and gets picked up by the next run.
+    const soClient = syncState
+      ? this.server.coreStart.savedObjects.createInternalRepository()
+      : undefined;
+    const paramsVersion = soClient ? await getParamsVersion(soClient) : '';
+
+    // Looked up the first time a monitor needs it, so nothing is asked of the API key while
+    // there are no monitors. `undefined` until then, `null` when the key is not usable.
+    const resolvedOutput: { current?: ServiceData['output'] | null } = {};
+    const resolveOutput = async () => {
+      if (resolvedOutput.current !== undefined) {
+        return resolvedOutput.current;
+      }
+
+      const outputResult = await this.getOutput();
+      resolvedOutput.current = outputResult.output;
+      if (!outputResult.output) {
+        const { code, reason, message } = getApiKeyInvalidTelemetryPayload({
+          reason: outputResult.invalidDetails?.reason ?? 'invalid',
+          missingPrivileges: outputResult.invalidDetails?.missingPrivileges,
+        });
+        sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
+          type: 'invalidApiKey',
+          code,
+          reason,
+          message,
+          stackVersion: service.server.stackVersion,
+        });
+      }
+      return outputResult.output;
+    };
+
+    const getFingerprint = ({ hosts, api_key: apiKey }: ServiceData['output']) =>
+      getSyncFingerprint({
+        stackVersion: this.server.stackVersion,
+        licenseType: license.type,
+        licenseIssuedTo: license.issued_to,
+        kibanaUrl: this.server.basePath.publicBaseUrl,
+        esHosts: hosts,
+        apiKeyId: apiKey.split(':')[0],
+        paramsVersion,
+        maintenanceWindows: maintenanceWindows.map(({ id, updatedAt }) => ({ id, updatedAt })),
+      });
+
+    // Set only when unchanged monitors can be retained instead of sent in full.
+    let changedSince: string | undefined;
+    if (soClient && syncState?.lastSyncedAt) {
+      const { total } = await soClient.find({
+        type: MONITOR_SAVED_OBJECT_TYPES,
+        perPage: 0,
+        namespaces: [ALL_SPACES_ID],
+      });
+      if (total === 0) {
+        return;
+      }
+
+      const output = await resolveOutput();
+      if (!output) {
+        return;
+      }
+
+      // Reading the monitors one by one is only worth it for the few a service lets go of, so
+      // when no service can retain any, scanning them all is cheaper.
+      const canRetain = this.locations.some(({ id }) => this.apiClient.supportsRetain(id));
+      const fingerprint = getFingerprint(output);
+      if (
+        canRetain &&
+        !shouldSyncAllMonitors({ state: syncState, fingerprint, now: startedAt.getTime() })
+      ) {
+        changedSince = getChangedSince(syncState.lastSyncedAt);
+      }
+    }
+
+    const getParams = once(() => this.getSyntheticsParams());
+    if (!changedSince) {
+      await getParams();
+    }
 
     const bucketsByLocation: Record<string, MonitorFields[]> = {};
     this.locations.forEach((location) => {
@@ -487,22 +603,31 @@ export class SyntheticsService {
       await pMap(
         this.locations,
         async (location) => {
-          if (bucketsByLocation[location.id].length > perBucket && output) {
-            const locMonitors = bucketsByLocation[location.id].splice(0, PER_PAGE);
-
-            this.logger.debug(
-              `${locMonitors.length} monitors will be pushed to synthetics service for location ${location.id}.`
-            );
-
-            const syncErrors = await this.apiClient.syncMonitors({
-              monitors: locMonitors,
-              output,
-              license,
-              location,
-            });
-
-            this.syncErrors = [...(this.syncErrors ?? []), ...(syncErrors ?? [])];
+          if (bucketsByLocation[location.id].length <= perBucket) {
+            return;
           }
+          const output = await resolveOutput();
+          if (!output) {
+            return;
+          }
+
+          const locMonitors = bucketsByLocation[location.id].splice(0, FULL_SYNC_PAGE_SIZE);
+
+          this.logger.debug(
+            `${locMonitors.length} monitors will be pushed to synthetics service for location ${location.id}.`
+          );
+
+          const syncErrors = await this.apiClient.syncMonitors({
+            monitors: locMonitors,
+            output,
+            license,
+            location,
+          });
+
+          if (!syncErrors) {
+            hasPushFailure = true;
+          }
+          this.syncErrors = [...(this.syncErrors ?? []), ...(syncErrors ?? [])];
         },
         {
           stopOnError: false,
@@ -510,69 +635,230 @@ export class SyntheticsService {
       );
     };
 
+    const pushMonitors = async (
+      monitors: Array<SavedObject<SyntheticsMonitorWithSecretsAttributes>>
+    ) => {
+      try {
+        const formattedConfigs = this.normalizeConfigs(
+          monitors,
+          await getParams(),
+          maintenanceWindows
+        );
+
+        this.logger.debug(
+          `${formattedConfigs.length} monitors will be pushed to synthetics service.`
+        );
+
+        formattedConfigs.forEach((monitor) => {
+          monitor.locations.forEach((location) => {
+            if (location.isServiceManaged) {
+              bucketsByLocation[location.id]?.push(monitor);
+            }
+          });
+        });
+
+        await syncAllLocations(FULL_SYNC_PAGE_SIZE);
+      } catch (error) {
+        hasPushFailure = true;
+        this.logger.error(`Failed to run Synthetics sync task, Error: ${error.message}`, {
+          error,
+        });
+
+        sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
+          reason: 'Failed to push configs to service',
+          message: error?.message,
+          type: 'pushConfigsError',
+          code: error?.code,
+          status: error.status,
+          stackVersion: service.server.stackVersion,
+        });
+      }
+    };
+
+    // Unchanged monitors the service no longer holds, to be sent in full below.
+    const notRetained =
+      soClient && changedSince
+        ? await this.retainUnchangedMonitors({ soClient, changedSince, license, resolveOutput })
+        : [];
+
+    const finder = await this.getSOClientFinder({
+      pageSize: FULL_SYNC_PAGE_SIZE,
+      filter: changedSince ? getChangedMonitorsFilter(changedSince) : undefined,
+    });
+
     for await (const result of finder.find()) {
       if (result.saved_objects.length > 0) {
-        try {
-          if (!output) {
-            const outputResult = await this.getOutput();
-            output = outputResult.output;
-            if (!output) {
-              const { code, reason, message } = getApiKeyInvalidTelemetryPayload({
-                reason: outputResult.invalidDetails?.reason ?? 'invalid',
-                missingPrivileges: outputResult.invalidDetails?.missingPrivileges,
-              });
-              sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
-                type: 'invalidApiKey',
-                code,
-                reason,
-                message,
-                stackVersion: service.server.stackVersion,
-              });
-              return;
-            }
-          }
-
-          const monitors = result.saved_objects.filter(({ error }) => !error);
-          const formattedConfigs = this.normalizeConfigs(
-            monitors,
-            paramsBySpace,
-            maintenanceWindows
-          );
-
-          this.logger.debug(
-            `${formattedConfigs.length} monitors will be pushed to synthetics service.`
-          );
-
-          formattedConfigs.forEach((monitor) => {
-            monitor.locations.forEach((location) => {
-              if (location.isServiceManaged) {
-                bucketsByLocation[location.id]?.push(monitor);
-              }
-            });
-          });
-
-          await syncAllLocations(PER_PAGE);
-        } catch (error) {
-          this.logger.error(`Failed to run Synthetics sync task, Error: ${error.message}`, {
-            error,
-          });
-
-          sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
-            reason: 'Failed to push configs to service',
-            message: error?.message,
-            type: 'pushConfigsError',
-            code: error?.code,
-            status: error.status,
-            stackVersion: service.server.stackVersion,
-          });
+        if (!(await resolveOutput())) {
+          finder.close().catch(() => {});
+          return;
         }
+
+        await pushMonitors(result.saved_objects.filter(({ error }) => !error));
+      }
+    }
+    finder.close().catch(() => {});
+
+    for (const candidates of chunk(notRetained, FULL_SYNC_PAGE_SIZE)) {
+      const monitors = await this.getDecryptedMonitors(candidates);
+      if (monitors.length > 0) {
+        await pushMonitors(monitors);
       }
     }
 
     // execute the remaining monitors
     await syncAllLocations();
 
+    const { current: output } = resolvedOutput;
+    if (syncState && output && !hasPushFailure && !service.syncErrors?.length) {
+      const syncedAt = startedAt.toISOString();
+      syncState.lastSyncedAt = syncedAt;
+      syncState.syncFingerprint = getFingerprint(output);
+      if (!changedSince) {
+        syncState.lastFullSyncAt = syncedAt;
+      }
+    }
+  }
+
+  /**
+   * Keeps the monitors that were not edited since `changedSince` alive at the service locations
+   * that run them, without reading their configuration.
+   *
+   * @returns the monitors the service could not retain, which have to be sent in full
+   */
+  private async retainUnchangedMonitors({
+    soClient,
+    changedSince,
+    license,
+    resolveOutput,
+  }: {
+    soClient: ISavedObjectsRepository;
+    changedSince: string;
+    license: ServiceData['license'];
+    resolveOutput: () => Promise<ServiceData['output'] | null>;
+  }): Promise<RetainCandidate[]> {
+    const output = await resolveOutput();
+    if (!output) {
+      return [];
+    }
+
+    const notRetained = new Map<string, RetainCandidate>();
+    const candidatesByLocation = new Map<string, RetainCandidate[]>();
+    let retainedCount = 0;
+
+    const retainBatch = async (location: ServiceLocation, candidates: RetainCandidate[]) => {
+      let failedIds = new Set(candidates.map(({ id }) => id));
+      if (this.apiClient.supportsRetain(location.id)) {
+        try {
+          failedIds = new Set(
+            await this.apiClient.retainMonitors({
+              monitors: candidates,
+              output,
+              license,
+              locationId: location.id,
+            })
+          );
+        } catch (error) {
+          this.logger.error(`Failed to retain monitors at location ${location.id}`, { error });
+        }
+      }
+
+      retainedCount += candidates.length - failedIds.size;
+      candidates.forEach((candidate) => {
+        if (failedIds.has(candidate.id)) {
+          notRetained.set(candidate.savedObjectId, candidate);
+        }
+      });
+    };
+
+    const retainAllLocations = async (perBatch = 0) => {
+      await pMap(this.locations, async (location) => {
+        const candidates = candidatesByLocation.get(location.id) ?? [];
+        while (candidates.length > perBatch) {
+          await retainBatch(location, candidates.splice(0, RETAIN_PAGE_SIZE));
+        }
+      });
+    };
+
+    const finder = soClient.createPointInTimeFinder<RetainableMonitorAttributes>({
+      type: MONITOR_SAVED_OBJECT_TYPES,
+      perPage: RETAIN_PAGE_SIZE,
+      namespaces: [ALL_SPACES_ID],
+      filter: getUnchangedMonitorsFilter(changedSince),
+      fields: [
+        ConfigKey.MONITOR_QUERY_ID,
+        ConfigKey.MONITOR_TYPE,
+        ConfigKey.ENABLED,
+        ConfigKey.LOCATIONS,
+      ],
+    });
+
+    for await (const { saved_objects: monitors } of finder.find()) {
+      for (const monitor of monitors) {
+        const { id, type, enabled, locations } = monitor.attributes;
+        const serviceLocations = (locations ?? []).filter(
+          ({ isServiceManaged }) => isServiceManaged
+        );
+
+        // The service only holds enabled monitors at the locations it runs.
+        if (enabled === false || serviceLocations.length === 0) {
+          continue;
+        }
+
+        const candidate: RetainCandidate = {
+          id,
+          type,
+          savedObjectId: monitor.id,
+          savedObjectType: monitor.type,
+          namespace: monitor.namespaces?.[0],
+        };
+
+        // Without both there is nothing to look the monitor up by at the service.
+        if (!id || !type) {
+          notRetained.set(monitor.id, candidate);
+          continue;
+        }
+
+        serviceLocations.forEach(({ id: locationId }) => {
+          candidatesByLocation.set(locationId, [
+            ...(candidatesByLocation.get(locationId) ?? []),
+            candidate,
+          ]);
+        });
+      }
+
+      await retainAllLocations(RETAIN_PAGE_SIZE);
+    }
+    await retainAllLocations();
     finder.close().catch(() => {});
+
+    this.logger.debug(
+      `${retainedCount} unchanged monitors were retained at the synthetics service, ${notRetained.size} need a full sync.`
+    );
+
+    return Array.from(notRetained.values());
+  }
+
+  private async getDecryptedMonitors(candidates: RetainCandidate[]) {
+    const encryptedClient = this.server.encryptedSavedObjects.getClient();
+
+    const monitors = await pMap(
+      candidates,
+      async ({ savedObjectType, savedObjectId, namespace }) => {
+        try {
+          return await encryptedClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
+            savedObjectType,
+            savedObjectId,
+            { namespace }
+          );
+        } catch (error) {
+          // most likely deleted since it was listed, so there is nothing left to send
+          this.logger.debug(`Could not read monitor ${savedObjectId} to sync it: ${error.message}`);
+        }
+      },
+      { concurrency: FETCH_MONITOR_CONCURRENCY }
+    );
+
+    return monitors.filter((monitor): monitor is NonNullable<typeof monitor> => !!monitor);
   }
 
   async runOnceConfigs(configs?: ConfigData) {

@@ -220,6 +220,210 @@ describe('syncMonitors', () => {
   });
 });
 
+describe('retainMonitors', () => {
+  const location = {
+    id: 'us_central',
+    label: 'US Central',
+    url: 'https://service.dev',
+    isServiceManaged: true,
+  };
+  const output = { hosts: ['https://localhost:9200'], api_key: 'id:key' };
+  const monitors = [
+    { id: 'browser-monitor', type: 'browser' },
+    { id: 'http-monitor', type: 'http' },
+  ];
+
+  const createClient = (logger: Logger = loggerMock.create()) => {
+    const apiClient = new ServiceAPIClient(
+      logger,
+      { manifestUrl: 'http://localhost:8080/api/manifest' },
+      {
+        isDev: true,
+        stackVersion: '8.7.0',
+        cloud: { cloudId: 'test-id', deploymentId: 'deployment-id' },
+      } as SyntheticsServerSetup
+    );
+    apiClient.locations = [location];
+    return apiClient;
+  };
+
+  const retain = (apiClient: ServiceAPIClient) =>
+    apiClient.retainMonitors({
+      monitors,
+      output,
+      license: licenseMock.license,
+      locationId: location.id,
+    });
+
+  const rejectWith = (status: number, data?: unknown) =>
+    (axios as jest.MockedFunction<typeof axios>).mockRejectedValue({
+      message: `Request failed with status code ${status}`,
+      response: { status, data },
+    });
+
+  beforeEach(() => {
+    (axios as jest.MockedFunction<typeof axios>).mockReset();
+  });
+
+  it('puts only the id and type of each monitor to the `/monitors/sync/retain` endpoint', async () => {
+    const axiosSpy = (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({
+      status: 202,
+      statusText: 'Accepted',
+      headers: {},
+      config: {},
+      data: '',
+    });
+
+    const logger = loggerMock.create();
+    const failedIds = await retain(createClient(logger));
+
+    expect(failedIds).toEqual([]);
+    expect(logger.debug).toHaveBeenCalledWith('Retained 2 monitors at service location us_central');
+    expect(axiosSpy).toHaveBeenCalledTimes(1);
+    expect(axiosSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'PUT',
+        url: 'https://service.dev/monitors/sync/retain',
+        headers: { 'x-kibana-version': '8.7.0' },
+        data: {
+          monitors,
+          output,
+          stack_version: '8.7.0',
+          license_level: 'trial',
+          license_issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
+          cloud_id: 'test-id',
+          deployment_id: 'deployment-id',
+        },
+      })
+    );
+  });
+
+  it('strips everything but the id and type from the monitors it is given', async () => {
+    const axiosSpy = (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as any);
+
+    await createClient().retainMonitors({
+      monitors: [{ id: 'a', type: 'http', savedObjectId: 'so-id', namespace: 'default' } as any],
+      output,
+      license: licenseMock.license,
+      locationId: location.id,
+    });
+
+    expect(axiosSpy.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        data: expect.objectContaining({ monitors: [{ id: 'a', type: 'http' }] }),
+      })
+    );
+  });
+
+  it('does not call the service when there is nothing to retain', async () => {
+    const failedIds = await createClient().retainMonitors({
+      monitors: [],
+      output,
+      license: licenseMock.license,
+      locationId: location.id,
+    });
+
+    expect(failedIds).toEqual([]);
+    expect(axios).not.toHaveBeenCalled();
+  });
+
+  it('returns every monitor without calling the service for a location it does not know', async () => {
+    const failedIds = await createClient().retainMonitors({
+      monitors,
+      output,
+      license: licenseMock.license,
+      locationId: 'unknown_location',
+    });
+
+    expect(failedIds).toEqual(['browser-monitor', 'http-monitor']);
+    expect(axios).not.toHaveBeenCalled();
+  });
+
+  it('returns the monitors the service reports as not found without logging an error', async () => {
+    const logger = loggerMock.create();
+    rejectWith(404, {
+      status: 404,
+      reason: 'failed to sync monitors',
+      failed_monitors: [{ id: 'http-monitor', message: 'monitor not found' }],
+    });
+
+    const apiClient = createClient(logger);
+    const failedIds = await retain(apiClient);
+
+    expect(failedIds).toEqual(['http-monitor']);
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(apiClient.supportsRetain(location.id)).toBe(true);
+  });
+
+  describe('against a service without the endpoint', () => {
+    it.each([404, 405])('treats a %s without failed monitors as unsupported', async (status) => {
+      const logger = loggerMock.create();
+      rejectWith(status, '404 page not found');
+
+      const apiClient = createClient(logger);
+      const failedIds = await retain(apiClient);
+
+      expect(failedIds).toEqual(['browser-monitor', 'http-monitor']);
+      expect(apiClient.supportsRetain(location.id)).toBe(false);
+      expect(apiClient.supportsRetain('another_location')).toBe(true);
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('tries the endpoint again after an hour', async () => {
+      const now = jest.spyOn(Date, 'now').mockReturnValue(0);
+      rejectWith(404, '404 page not found');
+
+      const apiClient = createClient();
+      await retain(apiClient);
+
+      now.mockReturnValue(59 * 60 * 1000);
+      expect(apiClient.supportsRetain(location.id)).toBe(false);
+      now.mockReturnValue(61 * 60 * 1000);
+      expect(apiClient.supportsRetain(location.id)).toBe(true);
+
+      now.mockRestore();
+    });
+
+    it('supports the endpoint again once the service accepts a request', async () => {
+      rejectWith(404, '404 page not found');
+      const apiClient = createClient();
+      await retain(apiClient);
+      expect(apiClient.supportsRetain(location.id)).toBe(false);
+
+      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as any);
+      await retain(apiClient);
+
+      expect(apiClient.supportsRetain(location.id)).toBe(true);
+    });
+  });
+
+  it.each([
+    ['a server error', 500, { status: 500, reason: 'failed to sync monitors' }],
+    ['a rate limit', 429, { status: 429, reason: 'rate limit exceeded' }],
+    ['a bad request', 400, { status: 400, reason: 'output is required' }],
+  ])('returns every monitor and logs an error for %s', async (_, status, data) => {
+    const logger = loggerMock.create();
+    rejectWith(status, data);
+
+    const apiClient = createClient(logger);
+    const failedIds = await retain(apiClient);
+
+    expect(failedIds).toEqual(['browser-monitor', 'http-monitor']);
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    expect(apiClient.supportsRetain(location.id)).toBe(true);
+  });
+
+  it('returns every monitor and logs an error when the service cannot be reached', async () => {
+    const logger = loggerMock.create();
+    (axios as jest.MockedFunction<typeof axios>).mockRejectedValue(new Error('socket hang up'));
+
+    const failedIds = await retain(createClient(logger));
+
+    expect(failedIds).toEqual(['browser-monitor', 'http-monitor']);
+    expect(logger.error).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('callAPI', () => {
   beforeEach(() => {
     (axios as jest.MockedFunction<typeof axios>).mockReset();

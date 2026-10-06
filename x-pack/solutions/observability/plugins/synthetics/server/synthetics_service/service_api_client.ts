@@ -55,6 +55,31 @@ export interface ServicePayload {
   cloud_id?: string;
 }
 
+/** The only fields the service needs to keep an already-cached monitor alive. */
+export interface RetainedMonitor {
+  id: string;
+  type: string;
+}
+
+export type RetainPayload = Omit<ServicePayload, 'monitors' | 'is_edit'> & {
+  monitors: RetainedMonitor[];
+};
+
+interface RetainErrorBody {
+  failed_monitors?: Array<{ id: string; message: string }> | null;
+}
+
+export interface RetainData {
+  monitors: RetainedMonitor[];
+  output: ServiceData['output'];
+  license: LicenseGetLicenseInformation;
+  locationId: string;
+}
+
+// A service that does not know the retain endpoint is probed again after this long, so a
+// service upgrade is picked up without restarting Kibana.
+const RETAIN_UNSUPPORTED_RETRY_MS = 60 * 60 * 1000;
+
 export class ServiceAPIClient {
   private readonly username?: string;
   private readonly authorization: string;
@@ -63,6 +88,7 @@ export class ServiceAPIClient {
   private readonly config?: ServiceConfig;
   private readonly stackVersion: string;
   private readonly server: SyntheticsServerSetup;
+  private readonly retainUnsupportedSince = new Map<string, number>();
 
   constructor(logger: Logger, config: ServiceConfig, server: SyntheticsServerSetup) {
     this.config = config;
@@ -187,6 +213,68 @@ export class ServiceAPIClient {
     }
   }
 
+  /** Whether the location's service is expected to accept `PUT /monitors/sync/retain`. */
+  supportsRetain(locationId: string) {
+    const unsupportedSince = this.retainUnsupportedSince.get(locationId);
+    return (
+      unsupportedSince === undefined || Date.now() - unsupportedSince > RETAIN_UNSUPPORTED_RETRY_MS
+    );
+  }
+
+  /**
+   * Keeps monitors the service has already cached alive without resending their configuration.
+   * Resolves with the ids of the monitors that were not retained and need a full sync instead.
+   */
+  async retainMonitors({ monitors, output, license, locationId }: RetainData): Promise<string[]> {
+    const ids = monitors.map(({ id }) => id);
+    if (this.username === TEST_SERVICE_USERNAME || monitors.length === 0) {
+      return [];
+    }
+
+    const location = this.locations.find(({ id }) => id === locationId);
+    if (!location) {
+      this.logger.debug(`Cannot retain monitors at unknown service location ${locationId}`);
+      return ids;
+    }
+
+    const payload: RetainPayload = {
+      monitors: monitors.map(({ id, type }) => ({ id, type })),
+      ...this.getRequestEnvelope({ output, license }),
+    };
+
+    try {
+      await this.callServiceEndpoint(payload, 'PUT', location.url, 'retain');
+      this.retainUnsupportedSince.delete(location.id);
+      this.logger.debug(`Retained ${ids.length} monitors at service location ${location.id}`);
+      return [];
+    } catch (error) {
+      const axiosError = error as AxiosError<{ reason: string; status: number } & RetainErrorBody>;
+      const status = axiosError.response?.status;
+      const failedMonitors = axiosError.response?.data?.failed_monitors;
+
+      // Some monitors were not cached; the rest of the batch was retained.
+      if (status === 404 && Array.isArray(failedMonitors)) {
+        this.retainUnsupportedSince.delete(location.id);
+        this.logger.debug(
+          `${failedMonitors.length} of ${ids.length} monitors were not retained by service location ${location.id}`
+        );
+        return failedMonitors.map(({ id }) => id);
+      }
+
+      // The route is not served at all: an older service that only knows the full sync.
+      if (status === 404 || status === 405) {
+        this.retainUnsupportedSince.set(location.id, Date.now());
+        this.logger.debug(
+          `Service location ${location.id} does not support retaining monitors, falling back to full sync`
+        );
+        return ids;
+      }
+
+      this.logServiceError(axiosError, location.url, 'PUT', ids.length);
+      return ids;
+    }
+  }
+
   processServiceData({ monitors, location, ...restOfData }: ServiceData) {
     // group monitors by location
     const monitorsByLocation: Array<{
@@ -269,7 +357,7 @@ export class ServiceAPIClient {
   }
 
   async callServiceEndpoint(
-    data: ServicePayload,
+    data: ServicePayload | RetainPayload,
     // INSPECT is a special case where we don't want to call the service, but just return the data
     method: 'POST' | 'PUT' | 'DELETE',
     baseUrl: string,
@@ -285,6 +373,9 @@ export class ServiceAPIClient {
         break;
       case 'sync':
         url += '/monitors/sync';
+        break;
+      case 'retain':
+        url += '/monitors/sync/retain';
         break;
     }
 
@@ -309,9 +400,15 @@ export class ServiceAPIClient {
 
     return {
       monitors: monitorsStreams,
+      is_edit: isEdit,
+      ...this.getRequestEnvelope({ output, license }),
+    };
+  }
+
+  private getRequestEnvelope({ output, license }: Pick<ServiceData, 'output' | 'license'>) {
+    return {
       output,
       stack_version: this.stackVersion,
-      is_edit: isEdit,
       license_level: license.type,
       license_issued_to: license.issued_to,
       deployment_id: this.server.cloud?.deploymentId,
