@@ -50,7 +50,7 @@ export const dataCascadeImplStyles = (euiTheme: UseEuiTheme['euiTheme']) => ({
       scrollbarGutter: 'auto',
       scrollbarWidth: 'thin',
       border: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-      borderRadius: euiTheme.border.radius.small,
+      borderRadius: euiTheme.border.radius.inline,
     },
   ]),
   cascadeTreeGridHeaderStickyRenderSlot: css({
