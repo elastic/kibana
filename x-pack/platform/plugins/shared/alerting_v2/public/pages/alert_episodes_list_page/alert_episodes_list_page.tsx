@@ -53,6 +53,7 @@ import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import {
   EpisodeDurationCell,
+  EpisodeGroupingCell,
   EpisodeStatusCell,
   EpisodeTagsCell,
   EpisodeRuleCell,
@@ -114,6 +115,11 @@ const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = {
   assignees: ({ column }) => ({
     ...column,
     displayAsText: i18n.EPISODES_LIST_COLUMN_ASSIGNEES,
+  }),
+  grouping: ({ column }) => ({
+    ...column,
+    displayAsText: i18n.EPISODES_LIST_COLUMN_GROUPING,
+    isSortable: false,
   }),
 };
 
@@ -568,6 +574,13 @@ const AlertEpisodesListPageContent = () => {
           rowHeight={rowHeight}
           getRuleDetailsHref={getRuleDetailsHref}
           onRuleNameClick={openRuleFlyout}
+        />
+      ),
+      grouping: (props) => (
+        <EpisodeGroupingCell
+          {...props}
+          rulesCache={rulesCache}
+          isLoadingRules={isLoadingRules}
           sourceDataViewsByRule={sourceDataViewsByRule}
         />
       ),
