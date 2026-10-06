@@ -32,7 +32,8 @@ interface DeleteMemoryPageVariables {
 
 const memoryKeys = {
   availability: ['nightshift', 'memory', 'availability'] as const,
-  pages: (filter: MemoryFilter) => ['nightshift', 'memory', 'pages', filter] as const,
+  pages: (filter: MemoryFilter, search: string) =>
+    ['nightshift', 'memory', 'pages', filter, search] as const,
   treemap: (tags: readonly string[]) => ['nightshift', 'memory', 'keywords', tags] as const,
   page: (id: string) => ['nightshift', 'memory', 'page', id] as const,
 };
@@ -84,20 +85,26 @@ export const MEMORY_PAGE_SIZE = 25;
  * while the optimizer is writing. `total` and `stats` come from every page, not
  * just the first, so the header numbers do not change as you scroll.
  */
-export const useMemoryPages = (filter: MemoryFilter = 'all') => {
+export const useMemoryPages = (filter: MemoryFilter = 'all', search = '') => {
   const client = useMemoryClient();
+  const trimmedSearch = search.trim();
 
   // Single options object, as every other query in this file and the Nightshift
   // listing hook. The page param is the server's opaque `search_after` cursor,
   // not an offset.
   const query = useInfiniteQuery<MemoryListResult, Error>({
-    queryKey: memoryKeys.pages(filter),
+    queryKey: memoryKeys.pages(filter, trimmedSearch),
     queryFn: ({ signal, pageParam }) => {
       const cursor = pageParam as string | undefined;
       return client!.fetch('GET /internal/nightshift/memory/pages', {
         signal: signal ?? null,
         params: {
-          query: { filter, size: MEMORY_PAGE_SIZE, ...(cursor ? { cursor } : {}) },
+          query: {
+            filter,
+            size: MEMORY_PAGE_SIZE,
+            ...(trimmedSearch ? { search: trimmedSearch } : {}),
+            ...(cursor ? { cursor } : {}),
+          },
         },
       }) as Promise<MemoryListResult>;
     },

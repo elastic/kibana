@@ -52,6 +52,7 @@ const renderSidebar = (
   filter: MemoryFilter = 'active'
 ) => {
   const props = listProps(list);
+  const onSearchChange = jest.fn();
   render(
     <I18nProvider>
       <MemorySidebar
@@ -65,10 +66,11 @@ const renderSidebar = (
         hasNextPage={props.hasNextPage}
         isFetchingNextPage={props.isFetchingNextPage}
         onLoadMore={props.onLoadMore}
+        onSearchChange={onSearchChange}
       />
     </I18nProvider>
   );
-  return { onSelect, onFilterChange, onLoadMore: props.onLoadMore };
+  return { onSelect, onFilterChange, onLoadMore: props.onLoadMore, onSearchChange };
 };
 
 describe('MemorySidebar', () => {
@@ -80,24 +82,18 @@ describe('MemorySidebar', () => {
     expect(onSelect).toHaveBeenCalledWith({ kind: 'page', id: 'memory_kafka-lag' });
   });
 
-  it('narrows the loaded rows as the operator types', async () => {
-    renderSidebar({
+  it('sends the search to the server once typing pauses', async () => {
+    const { onSearchChange } = renderSidebar({
       pages: [summary(), summary({ id: 'memory_redis', title: 'Redis evictions' })],
     });
 
-    expect(screen.getByText('Kafka consumer lag')).toBeInTheDocument();
-    expect(screen.getByText('Redis evictions')).toBeInTheDocument();
-
     await userEvent.type(screen.getByTestId('nightshiftMemorySearch'), 'redis');
 
-    await waitFor(() => {
-      expect(screen.queryByText('Kafka consumer lag')).not.toBeInTheDocument();
-    });
-    expect(screen.getByText('Redis evictions')).toBeInTheDocument();
+    await waitFor(() => expect(onSearchChange).toHaveBeenLastCalledWith('redis'));
   });
 
   it('says so when a search matches nothing', async () => {
-    renderSidebar({ pages: [summary()] });
+    renderSidebar({ pages: [] });
 
     await userEvent.type(screen.getByTestId('nightshiftMemorySearch'), 'zzzz');
 

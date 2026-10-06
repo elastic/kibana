@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -38,12 +38,11 @@ interface MemorySidebarProps {
   hasNextPage: boolean | undefined;
   isFetchingNextPage: boolean | undefined;
   onLoadMore: () => void;
+  onSearchChange: (search: string) => void;
 }
 
-const matchesSearch = (title: string, context: string | undefined, query: string): boolean => {
-  if (query.length === 0) return true;
-  return `${title} ${context ?? ''}`.toLowerCase().includes(query.toLowerCase());
-};
+/** Wait for a pause in typing before asking the server, so each keystroke is not a request. */
+export const MEMORY_SEARCH_DEBOUNCE_MS = 300;
 
 export function MemorySidebar({
   filter,
@@ -56,15 +55,14 @@ export function MemorySidebar({
   hasNextPage,
   isFetchingNextPage,
   onLoadMore,
+  onSearchChange,
 }: MemorySidebarProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
-  // The list is already paginated server-side, so this only narrows what has
-  // been fetched rather than pretending to search the whole store.
-  const visible = useMemo(
-    () => pages.filter((page) => matchesSearch(page.title, page.context, searchQuery)),
-    [pages, searchQuery]
-  );
+  useEffect(() => {
+    const timer = setTimeout(() => onSearchChange(searchQuery), MEMORY_SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [searchQuery, onSearchChange]);
 
   return (
     <EuiFlexGroup
@@ -149,7 +147,7 @@ export function MemorySidebar({
               defaultMessage="Could not load memories."
             />
           </EuiText>
-        ) : visible.length === 0 ? (
+        ) : pages.length === 0 ? (
           <EuiText size="xs" color="subdued" data-test-subj="nightshiftMemorySidebarEmpty">
             {searchQuery.length > 0 ? (
               <FormattedMessage
@@ -174,7 +172,7 @@ export function MemorySidebar({
               }
             `}
           >
-            {visible.map((page) => (
+            {pages.map((page) => (
               <EuiListGroupItem
                 key={page.id}
                 label={page.title}

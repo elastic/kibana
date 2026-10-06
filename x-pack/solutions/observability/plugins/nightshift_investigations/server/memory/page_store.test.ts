@@ -303,6 +303,49 @@ describe('createMemoryPageStore', () => {
     );
   });
 
+  it('ANDs a lexical search on title and context without narrowing the archived count', async () => {
+    const search = jest.fn().mockResolvedValue({
+      hits: { total: { value: 1 }, hits: [] },
+      aggregations: { archived: { inScope: { doc_count: 1 } } },
+    });
+    const store = createMemoryPageStore({
+      esClient: { search } as never,
+      logger,
+      spaceId: 'space-a',
+      now: () => T0,
+    });
+
+    await store.listPaginated({ filter: 'active', search: 'checkout lag' });
+
+    const request = search.mock.calls[0][0] as unknown as {
+      query: { bool: { filter: object[] } };
+      aggs: { archived: { aggs: { inScope: { filter: object } } } };
+    };
+    expect(JSON.stringify(request.query)).toContain('"title":"checkout lag"');
+    expect(JSON.stringify(request.query)).toContain('"context":"checkout lag"');
+    expect(JSON.stringify(request.query)).toContain('"attributes.archive_reason"');
+    // The header's archived count describes the whole Space, so the search does
+    // not narrow it either.
+    expect(JSON.stringify(request.aggs.archived.aggs.inScope.filter)).not.toContain('checkout lag');
+  });
+
+  it('ignores a blank search rather than filtering on whitespace', async () => {
+    const search = jest.fn().mockResolvedValue({
+      hits: { total: { value: 1 }, hits: [] },
+      aggregations: { archived: { inScope: { doc_count: 0 } } },
+    });
+    const store = createMemoryPageStore({
+      esClient: { search } as never,
+      logger,
+      spaceId: 'space-a',
+      now: () => T0,
+    });
+
+    await store.listPaginated({ search: '   ' });
+
+    expect(JSON.stringify(search.mock.calls[0][0])).not.toContain('"match"');
+  });
+
   it('paginates on a total order so no row is skipped or repeated', async () => {
     // Every row shares an `updated_at`, so the slug tiebreaker is what keeps the
     // order total. Sorting on `_id` instead is not an option: Elasticsearch

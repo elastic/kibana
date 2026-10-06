@@ -27,6 +27,7 @@ import type { MemoryFilter, MemorySidebarSelection } from './types';
 export function MemoryTab() {
   const { euiTheme } = useEuiTheme();
   const [filter, setFilter] = useState<MemoryFilter>('active');
+  const [search, setSearch] = useState('');
   const [selection, setSelection] = useState<MemorySidebarSelection>({ kind: 'home' });
   // The keyword selection lives here rather than in Home, because a memory's own
   // tags select one too: a tag on the detail view filters Home by that keyword.
@@ -34,7 +35,7 @@ export function MemoryTab() {
 
   // One query serves the sidebar, Home and Activity, matching the Cortex tab.
   const { rows, stats, isError, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    useMemoryPages(filter);
+    useMemoryPages(filter, search);
   const livePages = useMemo(() => rows.filter((page) => !page.archived), [rows]);
   const onToggleKeyword = useCallback((keyword: string) => {
     setKeywords((selected) =>
@@ -117,6 +118,7 @@ export function MemoryTab() {
             hasNextPage={hasNextPage}
             isFetchingNextPage={isFetchingNextPage}
             onLoadMore={() => fetchNextPage()}
+            onSearchChange={setSearch}
           />
         </EuiPanel>
       </EuiFlexItem>

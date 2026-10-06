@@ -7,7 +7,7 @@
 
 import { notFound } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
-import { countDistinctTags, MEMORY_FILTERS } from '../../common';
+import { countDistinctTags, MAX_KEYWORD_LENGTH, MEMORY_FILTERS } from '../../common';
 import {
   MAX_PAGE_SIZE,
   MAX_TAG_FILTER_KEYWORDS,
@@ -44,7 +44,7 @@ export const listMemoryPagesRoute = createNightshiftInvestigationsServerRoute({
       'Returns a cursor-paginated slice of Semantic Memory pages for the current Space, ' +
       'with decayed usefulness and confidence so the UI need not recompute the bandit maths. ' +
       '`tags` narrows the result to pages carrying every selected keyword, matching a keyword ' +
-      'against each of the spellings sent for it.',
+      'against each of the spellings sent for it. `search` narrows lexically on title or context.',
   },
   security: {
     authz: { requiredPrivileges: ['agentBuilder:read'] },
@@ -55,6 +55,7 @@ export const listMemoryPagesRoute = createNightshiftInvestigationsServerRoute({
         filter: z.enum(MEMORY_FILTERS).optional(),
         cursor: z.string().min(1).max(4096).optional(),
         size: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).optional(),
+        search: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
         // Repeated query param, one value per tag term: each selected keyword's
         // canonical key plus every original spelling it was seen spelled. The
         // terms are bounded by keywords × spellings rather than by keywords, since
@@ -75,6 +76,7 @@ export const listMemoryPagesRoute = createNightshiftInvestigationsServerRoute({
       cursor: query.cursor,
       size: query.size,
       tags: query.tags,
+      search: query.search,
     });
   },
 });

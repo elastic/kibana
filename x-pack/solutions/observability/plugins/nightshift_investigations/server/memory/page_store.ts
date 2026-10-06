@@ -150,6 +150,8 @@ export interface MemoryPageStore {
      * AND across keywords, OR across one keyword's spellings.
      */
     tags?: readonly string[];
+    /** Lexical match against `title` or `context`, ANDed with the other filters. */
+    search?: string;
   }) => Promise<MemoryPageListResult>;
   retrieve: (options?: {
     query?: string;
@@ -496,16 +498,35 @@ export const createMemoryPageStore = ({
    * The tag clauses come last and are shared by every filter, so the total in the
    * stats counts exactly the rows the listing returns.
    */
-  const filterClause = (filter: MemoryFilter, tags?: readonly string[]): object[] => {
+  const filterClause = (
+    filter: MemoryFilter,
+    tags?: readonly string[],
+    search?: string
+  ): object[] => {
     const tagClauses = tagFilterClauses(tags);
+    const searchClauses: object[] = search
+      ? [
+          {
+            bool: {
+              should: [{ match: { title: search } }, { match: { context: search } }],
+              minimum_should_match: 1,
+            },
+          },
+        ]
+      : [];
     switch (filter) {
       case 'active':
-        return [...spaceAndTagFilter, { bool: { must_not: [ARCHIVED_CLAUSE] } }, ...tagClauses];
+        return [
+          ...spaceAndTagFilter,
+          { bool: { must_not: [ARCHIVED_CLAUSE] } },
+          ...tagClauses,
+          ...searchClauses,
+        ];
       case 'archived':
-        return [...spaceAndTagFilter, ARCHIVED_CLAUSE, ...tagClauses];
+        return [...spaceAndTagFilter, ARCHIVED_CLAUSE, ...tagClauses, ...searchClauses];
       case 'all':
       default:
-        return tagClauses.length > 0 ? [...spaceAndTagFilter, ...tagClauses] : spaceAndTagFilter;
+        return [...spaceAndTagFilter, ...tagClauses, ...searchClauses];
     }
   };
 
@@ -602,15 +623,16 @@ export const createMemoryPageStore = ({
       }
     },
 
-    async listPaginated({ filter = 'all', cursor, size, tags } = {}) {
+    async listPaginated({ filter = 'all', cursor, size, tags, search } = {}) {
       const pageSize = Math.min(Math.max(size ?? DEFAULT_PAGE_SIZE, 1), MAX_PAGE_SIZE);
       const searchAfter = decodeCursor(cursor);
+      const searchText = search?.trim() ? search.trim() : undefined;
 
       try {
         const response = await esClient.search<StoredMemoryPage>(
           {
             index: MEMORY_INDEX,
-            query: { bool: { filter: filterClause(filter, tags) } },
+            query: { bool: { filter: filterClause(filter, tags, searchText) } },
             size: pageSize,
             track_total_hits: true,
             sort: PAGINATION_SORT,

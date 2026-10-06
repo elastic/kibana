@@ -90,7 +90,30 @@ describe('listMemoryPagesRoute', () => {
       cursor: 'abc',
       size: 10,
       tags: undefined,
+      search: undefined,
     });
+  });
+
+  it('forwards a bounded search to the store', async () => {
+    const listPaginated = jest.fn().mockResolvedValue({ pages: [] });
+    await handler(
+      context({ listPaginated }, true, { query: { filter: 'active', search: 'checkout lag' } })
+    );
+
+    expect(listPaginated).toHaveBeenCalledWith({
+      filter: 'active',
+      cursor: undefined,
+      size: undefined,
+      tags: undefined,
+      search: 'checkout lag',
+    });
+  });
+
+  it('rejects an over-long search', () => {
+    const params = listMemoryPagesRoute['GET /internal/nightshift/memory/pages'].params;
+    expect(params.safeParse({ query: { search: 's'.repeat(MAX_KEYWORD_LENGTH + 1) } }).success).toBe(
+      false
+    );
   });
 
   it('reports disabled as not found rather than an empty list', async () => {
@@ -122,6 +145,7 @@ describe('listMemoryPagesRoute', () => {
       cursor: undefined,
       size: undefined,
       tags: undefined,
+      search: undefined,
     });
   });
 
@@ -138,6 +162,7 @@ describe('listMemoryPagesRoute', () => {
       cursor: undefined,
       size: undefined,
       tags: ['invoke-agent', 'invoke_agent', 'cart cache'],
+      search: undefined,
     });
   });
 

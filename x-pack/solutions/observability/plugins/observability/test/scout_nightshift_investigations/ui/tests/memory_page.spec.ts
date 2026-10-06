@@ -162,14 +162,16 @@ test.describe(
         agentId: SEEDED_AGENT_ID,
       });
 
-      // E11's target. Only this document's `context` carries the phrase.
+      // E11's target. Only this document's `context` carries the phrase, and it
+      // is older than the 30 pagination documents, so it is beyond the sidebar's
+      // first 25-row page: finding it proves the search ran on the server.
       await seed(esClient, {
         slug: slug('ingest-backlog-runbook'),
         title: 'Ingest backlog runbook',
         context: `Diagnose the ${SEARCH_PHRASE} using ES|QL over logs-*`,
         impressions: 5,
         conversions: 4,
-        updatedAt: minutesAgo(4),
+        updatedAt: minutesAgo(120),
       });
 
       await seed(esClient, {
@@ -572,7 +574,8 @@ test.describe(
       const target = page.testSubj.locator(
         `nightshiftMemoryLink-memory_${slug('ingest-backlog-runbook')}`
       );
-      await expect(target).toBeVisible();
+      // Beyond the first 25-row page, so it cannot be on screen before the search.
+      await expect(target).toHaveCount(0);
 
       await page.testSubj.locator('nightshiftMemorySearch').fill(SEARCH_PHRASE);
 
