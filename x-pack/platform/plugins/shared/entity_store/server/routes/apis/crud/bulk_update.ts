@@ -23,7 +23,9 @@ const bodySchema = z.object({
     .array(
       z.object({
         type: z.enum(ALL_ENTITY_TYPES).describe('The entity type of this record.'),
-        doc: z.preprocess((val) => unflattenObject(val as Record<string, unknown>), Entity),
+        doc: z
+          .preprocess((val) => unflattenObject(val as Record<string, unknown>), Entity)
+          .default({}),
       })
     )
     .describe('The entities to update.'),

@@ -12,6 +12,9 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { InferenceExecutor } from '../../utils/inference_executor';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
 import { MessageRole, ToolChoiceType, InferenceConnectorType } from '@kbn/inference-common';
+import { pick } from 'lodash';
+import { z } from '@kbn/zod/v4';
+import type { ToolSchema } from '@kbn/inference-common';
 import { geminiAdapter } from './gemini_adapter';
 
 describe('geminiAdapter', () => {
@@ -232,6 +235,35 @@ describe('geminiAdapter', () => {
           ],
         },
       ]);
+    });
+
+    it('still omits zod v4.6 nullable and union properties (pre-existing toolSchemaToGemini gap)', () => {
+      const schema = pick(
+        z.toJSONSchema(
+          z.object({
+            a: z.string().nullable(),
+            b: z.union([z.string(), z.number()]),
+          }),
+          { io: 'input' }
+        ),
+        ['type', 'properties', 'required']
+      ) as ToolSchema;
+
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools: {
+            myTool: { description: 'tool', schema },
+          },
+        })
+        .subscribe(noop);
+
+      const { tools } = getCallParams();
+      const parameters = tools[0]?.functionDeclarations?.[0]?.parameters;
+      expect(parameters?.properties).toEqual({});
+      expect(parameters?.required).toEqual(['a', 'b']);
     });
 
     it('correctly format messages', () => {

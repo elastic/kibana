@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 import { RuleObjectId } from '../../model/rule_schema/common_attributes.gen';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
@@ -131,9 +131,7 @@ export const RuleChangesHistoryResponse = lazySchema(() =>
     /**
      * ISO-8601 timestamp of the earliest recorded change event for this rule. Absent when no history items exist.
      */
-    tracking_started_at: z
-      .string()
-      .datetime()
+    tracking_started_at: isoDateTime()
       .optional()
       .describe(
         'ISO-8601 timestamp of the earliest recorded change event for this rule. Absent when no history items exist.'

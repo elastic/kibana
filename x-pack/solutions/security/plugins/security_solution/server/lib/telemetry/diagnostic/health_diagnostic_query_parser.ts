@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import * as YAML from 'yaml';
 import semver from 'semver';
 import {
@@ -29,7 +29,7 @@ const queryTypeSchema = z.enum(QueryType);
 const expiresAtSchema = z
   .preprocess(
     (val) => (val instanceof Date ? val.toISOString() : val),
-    z.union([z.iso.date(), z.iso.datetime({ offset: true })])
+    z.union([z.iso.date(), isoDateTime({ offset: true })])
   )
   .transform((val) => new Date(val).toISOString())
   .optional();

@@ -9,7 +9,7 @@ import type { ISearchGeneric } from '@kbn/search-types';
 import { lastValueFrom } from 'rxjs';
 import { fromPromise } from 'xstate';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import type { LogCategorizationParams } from './types';
 import { createCategorizationRequestParams } from './queries';
 import type { LogCategory, LogCategoryChange } from '../../types';
@@ -148,7 +148,7 @@ const mapChangePoint = ({ change, histogram }: EsCategoryBucket): LogCategoryCha
  * The official types are lacking the change_point aggregation
  */
 const esChangePointBucketSchema = z.object({
-  key: z.string().datetime(),
+  key: isoDateTime(),
   doc_count: z.number(),
 });
 

@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 import { ApiConfig } from '../../../../conversations/common_attributes.gen';
 import { NonEmptyString } from '../../../../common_attributes.gen';
@@ -212,7 +212,7 @@ export const AttackDiscoveryApiScheduleExecution = lazySchema(() =>
     /**
      * Date of the execution
      */
-    date: z.string().datetime().describe('Date of the execution'),
+    date: isoDateTime().describe('Date of the execution'),
     /**
      * Duration of the execution
      */
@@ -252,11 +252,11 @@ export const AttackDiscoveryApiSchedule = lazySchema(() =>
     /**
      * The date the schedule was created
      */
-    created_at: z.string().datetime().describe('The date the schedule was created'),
+    created_at: isoDateTime().describe('The date the schedule was created'),
     /**
      * The date the schedule was updated
      */
-    updated_at: z.string().datetime().describe('The date the schedule was updated'),
+    updated_at: isoDateTime().describe('The date the schedule was updated'),
     /**
      * Indicates whether the schedule is enabled
      */

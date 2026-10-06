@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 export const MonitoringEntitySourceType = lazySchema(() =>
@@ -65,17 +65,13 @@ export const Integrations = lazySchema(() =>
         /**
          * Timestamp of the last full sync from integrations
          */
-        lastFullSync: z
-          .string()
-          .datetime()
+        lastFullSync: isoDateTime()
           .optional()
           .describe('Timestamp of the last full sync from integrations'),
         /**
          * Timestamp of the last update processed from integrations
          */
-        lastUpdateProcessed: z
-          .string()
-          .datetime()
+        lastUpdateProcessed: isoDateTime()
           .optional()
           .describe('Timestamp of the last update processed from integrations'),
       })

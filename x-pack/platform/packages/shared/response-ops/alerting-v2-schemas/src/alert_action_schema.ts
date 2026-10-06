@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import { groupHashSchema, tagsSchema } from './common';
 import { ID_MAX_LENGTH, MAX_BULK_ITEMS } from './constants';
 
@@ -35,8 +35,7 @@ export type AlertEpisodeActionType =
 const snoozeActionSchema = z
   .object({
     action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.SNOOZE).describe('Snoozes an alert.'),
-    snoozed_until: z.iso
-      .datetime()
+    snoozed_until: isoDateTime()
       .optional()
       .describe('ISO datetime until which the alert should be snoozed.'),
   })

@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 import { AssetCriticalityLevel } from '../asset_criticality/common.gen';
 
@@ -166,10 +166,7 @@ export const EntityRiskScoreRecord = lazySchema(() =>
     /**
      * The time at which the risk score was calculated.
      */
-    '@timestamp': z
-      .string()
-      .datetime()
-      .describe('The time at which the risk score was calculated.'),
+    '@timestamp': isoDateTime().describe('The time at which the risk score was calculated.'),
     /**
      * The identifier field defining this risk score. Coupled with `id_value`, uniquely identifies the entity being scored.
      */

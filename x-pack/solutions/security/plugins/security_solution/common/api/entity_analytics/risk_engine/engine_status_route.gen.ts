@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 export const RiskEngineStatus = lazySchema(() => z.enum(['NOT_INSTALLED', 'DISABLED', 'ENABLED']));
 export type RiskEngineStatus = z.infer<typeof RiskEngineStatus>;
@@ -31,8 +31,8 @@ export const RiskEngineTaskStatusValuesEnum = RiskEngineTaskStatusValues.enum;
 export const RiskEngineTaskStatus = lazySchema(() =>
   z.object({
     status: RiskEngineTaskStatusValues,
-    runAt: z.string().datetime(),
-    startedAt: z.string().datetime().optional(),
+    runAt: isoDateTime(),
+    startedAt: isoDateTime().optional(),
   })
 );
 export type RiskEngineTaskStatus = z.infer<typeof RiskEngineTaskStatus>;

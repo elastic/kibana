@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import {
   MAX_TEMPLATE_KEY_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
@@ -61,7 +61,7 @@ export const TemplateSchema = z.object({
   /**
    * Deletion date, used to indicate soft-deletion. Elastic uses strings, but will narrow it some more to actual dates here.
    */
-  deletedAt: z.string().datetime().nullable(),
+  deletedAt: isoDateTime().nullable(),
 
   /**
    * Template description
@@ -105,7 +105,7 @@ export const TemplateSchema = z.object({
   /**
    * Last time this template was used
    */
-  lastUsedAt: z.string().datetime().optional(),
+  lastUsedAt: isoDateTime().optional(),
 
   /**
    * Whether this is the default template

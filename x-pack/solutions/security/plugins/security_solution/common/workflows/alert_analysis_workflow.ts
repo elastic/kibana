@@ -11,7 +11,7 @@ import {
   MAX_ENTITY_NAME_LENGTH,
 } from '@kbn/agentic-investigations-plugin/common';
 import { EntityType } from '@kbn/entity-store/common';
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 
 export const ALERT_ANALYSIS_WORKFLOW_API_VERSION = '1' as const;
 
@@ -69,7 +69,7 @@ export const ALERT_ANALYSIS_CALLER_ALERT_INDEX_PATTERN =
 export const AlertAnalysisCallerAlertItem = z.looseObject({
   _id: z.string().min(1).max(512),
   _index: z.string().min(1).max(512).regex(ALERT_ANALYSIS_CALLER_ALERT_INDEX_PATTERN),
-  '@timestamp': z.iso.datetime().min(1).max(64),
+  '@timestamp': isoDateTime().min(1).max(64),
   kibana: z.looseObject({
     alert: z.looseObject({
       rule: z.looseObject({

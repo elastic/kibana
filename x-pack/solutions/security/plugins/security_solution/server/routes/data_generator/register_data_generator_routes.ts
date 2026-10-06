@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import { getSavedObjectsTypes } from '@kbn/cases-plugin/common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { StartServicesAccessor } from '@kbn/core/server';
@@ -42,7 +42,7 @@ const UpdateCaseTimestampsBody = z.object({
   /**
    * ISO timestamp that will be applied to `created_at`.
    */
-  timestamp: z.string().datetime(),
+  timestamp: isoDateTime(),
 });
 
 /**

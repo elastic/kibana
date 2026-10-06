@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import { MAX_LEADS_PER_RUN } from './constants';
 
 // ---------------------------------------------------------------------------
@@ -88,7 +88,7 @@ export const leadSchema = z.object({
    * Updated on every run regardless of whether new observations were added.
    * Distinct from `createdAt` (first insert) and `changedAt` (lead content or status changed).
    */
-  timestamp: z.string().datetime(),
+  timestamp: isoDateTime(),
   staleness: LeadStalenessEnum,
   status: LeadStatusEnum.default('active'),
   observations: z.array(observationSchema),
@@ -201,7 +201,7 @@ export const leadGenerationStatusSchema = z.object({
   isEnabled: z.boolean(),
   indexExists: z.boolean(),
   totalLeads: z.number(),
-  lastRun: z.string().datetime().nullable(),
+  lastRun: isoDateTime().nullable(),
   connectorId: z.string().optional(),
   lastExecutionUuid: z.string().optional(),
   lastError: z.string().nullable().optional(),
