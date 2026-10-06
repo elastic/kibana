@@ -182,9 +182,6 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     '&.linkCurrent': {
       borderRadius: 0,
       cursor: 'default',
-      '& .euiListItemLayout__text': {
-        color: euiTheme.colors.textPrimary,
-      },
     },
 
     // vertical layout - current dashboard border offset styles
