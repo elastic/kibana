@@ -300,6 +300,10 @@ export const getConfiguration = async ({
 
     return null;
   } catch (e) {
+    // Callers cannot tell this apart from an absent configuration, so leave a trace.
+    logger?.error(
+      `Error while reading ${riskEngineConfigurationTypeName} saved object in namespace "${namespace}": ${e.message}`
+    );
     return null;
   }
 };
