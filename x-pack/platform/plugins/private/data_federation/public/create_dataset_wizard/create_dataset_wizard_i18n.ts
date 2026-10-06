@@ -267,6 +267,21 @@ export const createDatasetWizardStrings = {
     }
   ),
 
+  dataSourceAuthenticationCalloutTitle: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.dataSourceAuthenticationCalloutTitle',
+    {
+      defaultMessage: 'Check authentication for this dataset',
+    }
+  ),
+
+  dataSourceAuthenticationCalloutDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.dataSourceAuthenticationCalloutDescription',
+    {
+      defaultMessage:
+        'This connection must already be allowed to read the bucket and files you chose. Update the data source in ES|QL Data Federation if access fails.',
+    }
+  ),
+
   resourceLabel: i18n.translate('xpack.dataFederation.createDatasetForm.resourceLabel', {
     defaultMessage: 'Resource',
   }),

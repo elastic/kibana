@@ -248,7 +248,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, reserve
   }, [pendingRemoveField, removeField]);
 
   return (
-    <div data-test-subj="dataFederationMappingEditor">
+    <EuiPanel paddingSize="m" hasBorder={false} data-test-subj="dataFederationMappingEditor">
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
@@ -431,6 +431,6 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, reserve
           onConfirm={confirmRemoveField}
         />
       ) : null}
-    </div>
+    </EuiPanel>
   );
 };

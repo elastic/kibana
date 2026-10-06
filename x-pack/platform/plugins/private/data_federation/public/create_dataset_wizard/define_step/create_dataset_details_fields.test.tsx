@@ -50,7 +50,12 @@ function Harness({ add }: { add: jest.Mock }) {
   });
 
   return (
-    <KibanaContextProvider services={{ dataSourcesClient: { add } }}>
+    <KibanaContextProvider
+      services={{
+        dataSourcesClient: { add },
+        docLinks: { links: { dataFederation: { authentication: '' } } },
+      }}
+    >
       <FormProvider {...methods}>
         <CreateDatasetDetailsFields
           control={methods.control}
