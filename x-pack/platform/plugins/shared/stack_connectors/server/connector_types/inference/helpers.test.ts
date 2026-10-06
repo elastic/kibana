@@ -122,20 +122,45 @@ describe('truncateUpstreamBody', () => {
 
 describe('upstream credential redaction', () => {
   it.each([
-    ['ES-API-Key: esCredential123', 'esCredential123'],
-    ['api-key: apiCredential123', 'apiCredential123'],
-    ['apikey: compactCredential123', 'compactCredential123'],
-    ['token: tokenCredential123', 'tokenCredential123'],
-    ['password: passwordCredential123', 'passwordCredential123'],
-    ['Authorization: Basic basicCredential123', 'basicCredential123'],
-    ['authorization: Digest digestCredential123 user=x', 'digestCredential123'],
-  ])('redacts %s without losing the diagnostic', (credential, secret) => {
-    const result = truncateUpstreamBody(
-      `upstream rejected request: ${credential}; check permissions`
-    );
-    expect(result).not.toContain(secret);
-    expect(result).toContain('upstream rejected request:');
-    expect(result).toContain('check permissions');
+    ['Authorization: ApiKey ABC123base64==', 'ABC123base64=='],
+    ['{"Authorization":"ApiKey ABC123base64=="}', 'ABC123base64=='],
+    ['{"authorization":"Basic dXNlcjpwYXNz"}', 'dXNlcjpwYXNz'],
+    ['Authorization: Basic dXNlcjpwYXNz', 'dXNlcjpwYXNz'],
+    ['Authorization: Negotiate YWJjZA==', 'YWJjZA=='],
+    ['authorization: Digest abc123', 'abc123'],
+    ['Bearer eyJhbGciOi.payload.sig', 'eyJhbGciOi.payload.sig'],
+    ['sk-abcdefghijklmnop', 'abcdefghijklmnop'],
+    ['ES-API-Key: abc123', 'abc123'],
+    ['x-api-key: abc123', 'abc123'],
+    ['api_key=abc123', 'abc123'],
+    ['{"api_key":"abc123"}', 'abc123'],
+    ['apikey: abc123', 'abc123'],
+    ['api key: abc123', 'abc123'],
+    ['password: hunter2', 'hunter2'],
+    ['secret: s3cr3t', 's3cr3t'],
+    ['client_secret: s3cr3t', 's3cr3t'],
+    ['secret_key: abc123', 'abc123'],
+    ['aws_secret_access_key: wJalrXUtnFEMI', 'wJalrXUtnFEMI'],
+    ['private_key: abc123', 'abc123'],
+    ['credential: abc123', 'abc123'],
+    ['access_token: abc123', 'abc123'],
+    ['refresh_token: abc123', 'abc123'],
+    ['{"token":"abc123"}', 'abc123'],
+    ['token=abc123', 'abc123'],
+  ])('redacts %s', (input, secret) => {
+    expect(truncateUpstreamBody(input)).not.toContain(secret);
+  });
+
+  it.each([
+    'num_token: 5',
+    'max_tokens: 4096',
+    'Unexpected token: < in JSON at position 0',
+    'Invalid token: signature has expired',
+    'special token: <|im_end|>',
+    "This model's maximum context length is 32768 tokens. However, you requested 40000 tokens",
+    'prompt_tokens: 120, completion_tokens: 80',
+  ])('keeps %s', (input) => {
+    expect(truncateUpstreamBody(input)).toBe(input);
   });
 });
 

@@ -131,7 +131,7 @@ describe('InferenceConnector upstream error propagation', () => {
 
   it('bounds and redacts an in-band SSE error', async () => {
     const secret = 'sseCredential123';
-    const message = `upstream rejected token: ${secret}; context length exceeded ${'x'.repeat(
+    const message = `upstream rejected; token: ${secret}; context length exceeded ${'x'.repeat(
       2000
     )}`;
     (mockEsClient.transport.request as unknown as jest.Mock).mockResolvedValue({
@@ -214,6 +214,7 @@ describe('InferenceConnector upstream error propagation', () => {
       expect(error.message).toContain('connection refused');
       expect(error.message).toContain('upstream unavailable');
       expect(error).not.toBe(readOnly);
+      expect(error.cause).toBe(readOnly);
     });
 
     it.each([

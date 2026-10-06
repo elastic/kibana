@@ -295,11 +295,11 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
           e.message = errorMessage;
         } catch (assignmentError) {
           // frozen / getter-only `message`: keep the enriched text rather than masking the failure
-          throw new Error(errorMessage);
+          throw new Error(errorMessage, { cause: e });
         }
         throw e;
       }
-      throw new Error(errorMessage);
+      throw new Error(errorMessage, { cause: e });
     }
   }
 
