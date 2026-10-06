@@ -57,19 +57,21 @@ export const deleteMemoryPageRoute = createNightshiftInvestigationsServerRoute({
       }),
     }),
   }),
-  handler: async ({ request, params, getMemoryPageStore, isMemoryEnabled }) => {
+  handler: async ({ request, params, context, getMemoryPageStore, isMemoryEnabled }) => {
     if (!isMemoryEnabled()) throw notFound('Semantic Memory is not enabled');
 
     const store = getMemoryPageStore(request);
     const { version } = params.body;
+    const user = (await context.core).security.authc.getCurrentUser()?.username;
 
     try {
       // Conditional on the revision the operator reviewed, not on this read: the
       // optimizer can rewrite content between the read and the delete.
-      await store.delete(params.path.id, {
-        seqNo: version.seq_no,
-        primaryTerm: version.primary_term,
-      });
+      await store.delete(
+        params.path.id,
+        { seqNo: version.seq_no, primaryTerm: version.primary_term },
+        user
+      );
     } catch (err) {
       // The optimizer rewrote the document between the read and the delete. 409,
       // not 500: the operator's intent was valid, the document they saw is not the

@@ -165,19 +165,24 @@ export interface MemoryPageStore {
   create: (page: MemoryPageWrite) => Promise<MemoryPage>;
   update: (id: string, page: MemoryPageWrite, version: VersionedMemoryPage) => Promise<MemoryPage>;
   applyCounterUpdates: (updates: readonly CounterUpdate[]) => Promise<void>;
-  archive: (id: string, reason: MemoryArchiveReason) => Promise<MemoryPage | undefined>;
+  archive: (
+    id: string,
+    reason: MemoryArchiveReason,
+    user?: string
+  ) => Promise<MemoryPage | undefined>;
   archiveVersioned: (
     version: VersionedMemoryPage,
-    reason: MemoryArchiveReason
+    reason: MemoryArchiveReason,
+    user?: string
   ) => Promise<MemoryPage>;
   /** Clears `archive_reason`, returning the memory to active recall. */
-  unarchive: (id: string) => Promise<MemoryPage | undefined>;
+  unarchive: (id: string, user?: string) => Promise<MemoryPage | undefined>;
   /**
    * Hard delete, conditional on the revision the caller read. The version is
    * required: without a guard the document would be removed even if the optimizer
    * has since rewritten what the operator was looking at.
    */
-  delete: (id: string, version: MemoryPageVersion) => Promise<void>;
+  delete: (id: string, version: MemoryPageVersion, user?: string) => Promise<void>;
 }
 
 const normalizeSlugText = (slug: string): string =>
@@ -409,8 +414,13 @@ export const createMemoryPageStore = ({
 
   const toArchiveWrite = (
     version: VersionedMemoryPage,
-    reason: MemoryArchiveReason
-  ): MemoryPageWrite => ({ ...toWrite(version.page), archive_reason: reason });
+    reason: MemoryArchiveReason,
+    user?: string
+  ): MemoryPageWrite => ({
+    ...toWrite(version.page),
+    archive_reason: reason,
+    user: user ?? version.page.updated_by,
+  });
 
   /**
    * `updated_at desc, slug asc` — a total order, so `search_after` can never skip
@@ -982,14 +992,19 @@ export const createMemoryPageStore = ({
       );
     },
 
-    async archive(id, reason) {
+    async archive(id, reason, user) {
       for (let attempt = 0; attempt < MAX_ARCHIVE_ATTEMPTS; attempt++) {
         const versioned = await this.getVersioned(id);
-        if (!versioned || versioned.page.archived) {
+        if (!versioned) {
           return undefined;
         }
+        // Archiving an archived page is a no-op that still answers with the page,
+        // so a retried write is not reported as a missing memory.
+        if (versioned.page.archived) {
+          return versioned.page;
+        }
         try {
-          return await this.archiveVersioned(versioned, reason);
+          return await this.archiveVersioned(versioned, reason, user);
         } catch (err) {
           if (!isElasticsearchWriteConflict(err)) {
             throw err;
@@ -1005,8 +1020,8 @@ export const createMemoryPageStore = ({
       return undefined;
     },
 
-    async archiveVersioned(version, reason) {
-      return writeVersionedPage(version.page.id, toArchiveWrite(version, reason), version);
+    async archiveVersioned(version, reason, user) {
+      return writeVersionedPage(version.page.id, toArchiveWrite(version, reason, user), version);
     },
 
     /**
@@ -1016,7 +1031,7 @@ export const createMemoryPageStore = ({
      * optimizer writes asynchronously and can land between our read and write.
      * A memory that is already active is left untouched and returned as-is.
      */
-    async unarchive(id) {
+    async unarchive(id, user) {
       for (let attempt = 0; attempt < MAX_ARCHIVE_ATTEMPTS; attempt++) {
         const versioned = await this.getVersioned(id);
         if (!versioned) {
@@ -1026,11 +1041,10 @@ export const createMemoryPageStore = ({
           return versioned.page;
         }
         // The reason is the only archived marker, so dropping it is the whole
-        // operation. Everything else is carried through unchanged, and a stored
-        // document always names an updater.
+        // operation. Everything else is carried through unchanged.
         const restored: MemoryPageWrite = {
           ...toWrite(versioned.page),
-          user: versioned.page.updated_by || 'nightshift',
+          user: user ?? (versioned.page.updated_by || 'nightshift'),
         };
         try {
           return await writeVersionedPage(id, restored, versioned);
@@ -1058,8 +1072,9 @@ export const createMemoryPageStore = ({
      * conditional: if anything landed in between, Elasticsearch rejects it and the
      * route answers 409 rather than destroying the newer content.
      */
-    async delete(id, version) {
+    async delete(id, version, user) {
       const storedId = toStoredId(id);
+      const versioned = await this.getVersioned(id);
       try {
         await esClient.delete(
           {
@@ -1081,6 +1096,11 @@ export const createMemoryPageStore = ({
           throw err;
         }
       }
+      logger.info(
+        `Semantic Memory page deleted id=${id} title=${JSON.stringify(
+          versioned?.page.title ?? '(unknown)'
+        )} space=${spaceId} user=${user ?? '(unknown)'}`
+      );
     },
   };
 };

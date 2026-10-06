@@ -55,6 +55,11 @@ const context = (store: unknown, enabled: boolean, params: unknown = { path: { i
     params,
     getMemoryPageStore: () => store,
     isMemoryEnabled: () => enabled,
+    context: {
+      core: Promise.resolve({
+        security: { authc: { getCurrentUser: () => ({ username: 'tester' }) } },
+      }),
+    },
   } as never);
 
 const ID = 'memory_kafka-lag';
@@ -328,14 +333,14 @@ describe('archiveMemoryPageRoute', () => {
       .mockResolvedValue(memory({ archived: true, archive_reason: 'manual' }));
     await handler(context({ archive }, true, { path: { id: ID }, body: { archived: true } }));
 
-    expect(archive).toHaveBeenCalledWith(ID, 'manual');
+    expect(archive).toHaveBeenCalledWith(ID, 'manual', 'tester');
   });
 
   it('unarchives through the batched clear rather than archive', async () => {
     const unarchive = jest.fn().mockResolvedValue(memory());
     await handler(context({ unarchive }, true, { path: { id: ID }, body: { archived: false } }));
 
-    expect(unarchive).toHaveBeenCalledWith(ID);
+    expect(unarchive).toHaveBeenCalledWith(ID, 'tester');
   });
 
   it('throws not found when the page does not exist', async () => {
@@ -415,7 +420,7 @@ describe('deleteMemoryPageRoute', () => {
 
     // Conditional on the revision the operator reviewed, so a concurrent
     // optimizer write cannot slip a document past the confirmation.
-    expect(store.delete).toHaveBeenCalledWith(ID, { seqNo: 7, primaryTerm: 1 });
+    expect(store.delete).toHaveBeenCalledWith(ID, { seqNo: 7, primaryTerm: 1 }, 'tester');
   });
 
   it('answers 409 rather than 500 when the document changed under the confirmation', async () => {

@@ -1288,6 +1288,124 @@ describe('createMemoryPageStore', () => {
     );
   });
 
+  it('archiving an already archived page is a no-op that returns the page', async () => {
+    const archivedSource = {
+      ...source,
+      attributes: { ...source.attributes, archive_reason: 'manual' as const },
+    };
+    const esClient = {
+      get: jest.fn().mockResolvedValue({
+        found: true,
+        _seq_no: 4,
+        _primary_term: 2,
+        _source: archivedSource,
+      }),
+      index: jest.fn().mockResolvedValue({}),
+    };
+    const store = createMemoryPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'space-a',
+      now: () => T0,
+    });
+
+    const page = await store.archive('memory_kafka-lag', 'merged');
+
+    expect(page?.archived).toBe(true);
+    expect(esClient.index).not.toHaveBeenCalled();
+  });
+
+  it('unarchiving an active page is a no-op that returns the page', async () => {
+    const esClient = {
+      get: jest.fn().mockResolvedValue({
+        found: true,
+        _seq_no: 4,
+        _primary_term: 2,
+        _source: source,
+      }),
+      index: jest.fn().mockResolvedValue({}),
+    };
+    const store = createMemoryPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'space-a',
+      now: () => T0,
+    });
+
+    const page = await store.unarchive('memory_kafka-lag');
+
+    expect(page?.archived).toBe(false);
+    expect(esClient.index).not.toHaveBeenCalled();
+  });
+
+  it('logs a delete at info with the user, title, and space', async () => {
+    const esClient = {
+      get: jest.fn().mockResolvedValue({
+        found: true,
+        _seq_no: 4,
+        _primary_term: 2,
+        _source: source,
+      }),
+      delete: jest.fn().mockResolvedValue({}),
+    };
+    const store = createMemoryPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'space-a',
+      now: () => T0,
+    });
+
+    await store.delete('memory_kafka-lag', { seqNo: 4, primaryTerm: 2 }, 'alice');
+
+    expect(esClient.delete).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'space-a:memory_kafka-lag',
+        if_seq_no: 4,
+        if_primary_term: 2,
+      }),
+      expect.anything()
+    );
+    const logged = JSON.stringify(logger.info.mock.calls);
+    expect(logged).toContain('user=alice');
+    expect(logged).toContain('space=space-a');
+    expect(logged).toContain('Kafka lag');
+  });
+
+  it('records the requesting user as updated_by on archive and restore', async () => {
+    const archivedSource = {
+      ...source,
+      attributes: { ...source.attributes, archive_reason: 'manual' as const },
+    };
+    const esClient = {
+      get: jest
+        .fn()
+        .mockResolvedValueOnce({ found: true, _seq_no: 4, _primary_term: 2, _source: source })
+        .mockResolvedValueOnce({
+          found: true,
+          _seq_no: 5,
+          _primary_term: 2,
+          _source: archivedSource,
+        }),
+      index: jest.fn().mockResolvedValue({}),
+    };
+    const store = createMemoryPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'space-a',
+      now: () => T0,
+    });
+
+    await store.archive('memory_kafka-lag', 'manual', 'alice');
+    await store.unarchive('memory_kafka-lag', 'bob');
+
+    const [archiveCall, restoreCall] = esClient.index.mock.calls;
+    expect(archiveCall[0].document.attributes).toMatchObject({
+      updated_by: 'alice',
+      archive_reason: 'manual',
+    });
+    expect(restoreCall[0].document.attributes).toMatchObject({ updated_by: 'bob' });
+  });
+
   it('archives an exact supplied version without rereading', async () => {
     const esClient = {
       get: jest.fn().mockResolvedValue({

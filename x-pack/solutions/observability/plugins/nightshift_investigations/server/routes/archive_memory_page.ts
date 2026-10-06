@@ -37,15 +37,16 @@ export const archiveMemoryPageRoute = createNightshiftInvestigationsServerRoute(
       archived: z.boolean(),
     }),
   }),
-  handler: async ({ request, params, getMemoryPageStore, isMemoryEnabled }) => {
+  handler: async ({ request, params, context, getMemoryPageStore, isMemoryEnabled }) => {
     if (!isMemoryEnabled()) throw notFound('Semantic Memory is not enabled');
 
     const store = getMemoryPageStore(request);
+    const user = (await context.core).security.authc.getCurrentUser()?.username;
     let page: Awaited<ReturnType<typeof store.archive>>;
     try {
       page = params.body.archived
-        ? await store.archive(params.path.id, 'manual')
-        : await store.unarchive(params.path.id);
+        ? await store.archive(params.path.id, 'manual', user)
+        : await store.unarchive(params.path.id, user);
     } catch (err) {
       // The store already retried its optimistic-concurrency guard and lost. A 409
       // tells the operator the document moved rather than reporting a server fault
