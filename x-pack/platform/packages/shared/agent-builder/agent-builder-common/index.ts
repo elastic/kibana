@@ -12,10 +12,16 @@ export {
   ConversationAttachmentAddedTriggerId,
   ConversationAttachmentUpdatedTriggerId,
   ConversationAttachmentDeletedTriggerId,
+  ConversationUpdatedTriggerId,
+  conversationWriteSources,
+  conversationChangeKinds,
   type ConversationMetadataUpdatedEvent,
   type AttachmentAddedTriggerEvent,
   type AttachmentUpdatedTriggerEvent,
   type AttachmentDeletedTriggerEvent,
+  type ConversationUpdatedTriggerEvent,
+  type ConversationWriteSource,
+  type ConversationChangeKind,
 } from './triggers';
 export {
   internalNamespaces as toolNamespaces,

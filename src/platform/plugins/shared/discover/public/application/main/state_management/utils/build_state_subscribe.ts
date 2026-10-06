@@ -98,19 +98,14 @@ export const buildStateSubscribe =
       const tabId = getCurrentTab().id;
       const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
       const previousSource = currentDataSource$.getValue();
-      const { dataView } = await resolveEsqlSource({
+      const { esqlSource } = await resolveEsqlSource({
         esql: nextState.query.esql,
         services,
         esqlVariables: getCurrentTab().esqlVariables,
         timeRange: services.data.query.timefilter.timefilter.getTime(),
         previousSourceId: previousSource?.kind === 'esql' ? previousSource.id : undefined,
       });
-      dispatch(
-        internalStateActions.assignNextDataView({
-          tabId,
-          dataView,
-        })
-      );
+      dispatch(internalStateActions.assignNextDataSource({ tabId, dataSource: esqlSource }));
     }
 
     const { sampleSize, sort, dataSource, esqlApproximation } = prevState;
