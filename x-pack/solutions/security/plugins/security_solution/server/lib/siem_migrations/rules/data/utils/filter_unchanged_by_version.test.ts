@@ -26,7 +26,7 @@ describe('filterUnchangedByVersion', () => {
       index: 'idx',
       logger,
       items,
-      getDetails: ({ id, version }) => ({ id, version }),
+      getItemDetails: ({ id, version }) => ({ id, version }),
     });
 
   const storedDocs = (docs: object[]) => esClient.mget.mockResolvedValue({ docs } as never);

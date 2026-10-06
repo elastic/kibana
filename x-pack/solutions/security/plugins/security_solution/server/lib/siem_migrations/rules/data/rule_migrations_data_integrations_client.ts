@@ -69,20 +69,20 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
     }
 
     let fieldsMetadata: Record<string, Record<string, unknown>> | undefined;
-    if (this.dependencies.packageService) {
-      try {
+    try {
+      if (this.dependencies.packageService) {
         fieldsMetadata =
           await this.dependencies.packageService.asInternalUser.getPackageFieldsMetadata({
             packageName: pkg.name,
           });
-      } catch (error) {
-        this.logger.error(
-          `Failed to fetch fields metadata for package ${pkg.name}: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-        throw error;
       }
+    } catch (error) {
+      this.logger.error(
+        `Failed to fetch fields metadata for package ${pkg.name}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      throw error;
     }
 
     const packageKnowledgeBase = await this.fetchPackageKnowledgeBase(pkg);
@@ -183,7 +183,7 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
         index,
         logger: this.logger,
         items: packages,
-        getDetails: ({ name, version }) => ({ id: name, version }),
+        getItemDetails: ({ name, version }) => ({ id: name, version }),
       });
 
       const ragIntegrations = await pMap(changedPackages, (pkg) => this.processIntegration(pkg), {

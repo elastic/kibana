@@ -63,7 +63,7 @@ export class RuleMigrationsDataPrebuiltRulesClient extends SiemMigrationsDataBas
       index,
       logger: this.logger,
       items: prebuiltRules,
-      getDetails: ({ rule_id: id, version }) => ({ id, version }),
+      getItemDetails: ({ rule_id: id, version }) => ({ id, version }),
     });
     const createdAt = new Date().toISOString();
     let prebuiltRuleSlice: RuleMigrationPrebuiltRule[];

@@ -13,7 +13,7 @@ interface FilterUnchangedByVersionParams<T> {
   logger: Logger;
   items: T[];
   /** Returns the document `_id` and the source version of an item */
-  getDetails: (item: T) => { id: string; version: string };
+  getItemDetails: (item: T) => { id: string; version: string };
 }
 
 /**
@@ -27,7 +27,7 @@ export const filterUnchangedByVersion = async <T>({
   index,
   logger,
   items,
-  getDetails,
+  getItemDetails,
 }: FilterUnchangedByVersionParams<T>): Promise<T[]> => {
   if (items.length === 0) {
     return [];
@@ -37,7 +37,7 @@ export const filterUnchangedByVersion = async <T>({
   try {
     const { docs } = await esClient.mget<{ version?: string }>({
       index,
-      ids: items.map((item) => getDetails(item).id),
+      ids: items.map((item) => getItemDetails(item).id),
       _source: ['version'],
     });
     for (const doc of docs) {
@@ -55,7 +55,7 @@ export const filterUnchangedByVersion = async <T>({
   }
 
   const changedItems = items.filter((item) => {
-    const { id, version } = getDetails(item);
+    const { id, version } = getItemDetails(item);
     return indexedVersions.get(id) !== version;
   });
   logger.debug(
