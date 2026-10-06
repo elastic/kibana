@@ -51,6 +51,13 @@ export const SIGNIFICANT_EVENTS_DATA_STREAMS = [
   ...SIGEVENTS_OPTIONAL_STREAMS,
 ] as const;
 
+// Only these streams can be safely deleted during restore. `.rule-events` is shared with other
+// Alerting v2 producers, so restore must preserve documents that are not Significant Events.
+export const SIGNIFICANT_EVENTS_CLEANABLE_DATA_STREAMS = [
+  KNOWLEDGE_INDICATORS_DATA_STREAM,
+  DETECTIONS_DATA_STREAM,
+] as const;
+
 export const VALID_ALERT_INDICES = ['.internal.alerts-streams.alerts-default-*'] as const;
 
 type ValidStreamsAlertIndices = (typeof VALID_ALERT_INDICES)[number];

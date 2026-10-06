@@ -97,6 +97,20 @@ async function cleanDetectionAndEventHistory(
     },
     log
   );
+  await deleteByQuery(
+    esClient,
+    '.rule-events',
+    {
+      bool: {
+        filter: [
+          { term: { type: 'signal' } },
+          { terms: { 'rule.id': ruleIds } },
+          { term: { space_id: space } },
+        ],
+      },
+    },
+    log
+  );
 }
 
 export async function cleanSeedData(

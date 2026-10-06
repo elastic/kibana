@@ -13,7 +13,11 @@ import type { LoadResult } from '@kbn/es-snapshot-loader';
 import { createGcsRepository, replaySnapshot, restoreSnapshot } from '@kbn/es-snapshot-loader';
 import type { ConnectionConfig } from '../lib/get_connection_config';
 import { getConnectionConfig } from '../lib/get_connection_config';
-import { GCS_BUCKET, SIGNIFICANT_EVENTS_DATA_STREAMS } from '../lib/constants';
+import {
+  GCS_BUCKET,
+  SIGNIFICANT_EVENTS_CLEANABLE_DATA_STREAMS,
+  SIGNIFICANT_EVENTS_DATA_STREAMS,
+} from '../lib/constants';
 import {
   ensureCleanEnvironment,
   ensureKnownAliases,
@@ -228,7 +232,7 @@ export const restoreEnvSnapshot = async ({
     await ensureCleanEnvironment({
       esClient: sysClient,
       log,
-      dataStreamIndices: [...SIGNIFICANT_EVENTS_DATA_STREAMS],
+      dataStreamIndices: [...SIGNIFICANT_EVENTS_CLEANABLE_DATA_STREAMS],
       alertIndices,
       logsIndex,
       clean,
