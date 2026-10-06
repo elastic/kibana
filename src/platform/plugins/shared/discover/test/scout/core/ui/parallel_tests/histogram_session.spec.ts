@@ -9,14 +9,19 @@
 
 import { tags, type ApiServicesFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import type { DiscoverSessionApiDataInput } from '@kbn/as-code-discover-schema';
+import type {
+  DiscoverSessionApiClassicTab,
+  DiscoverSessionApiDataInput,
+} from '@kbn/as-code-discover-schema';
 import { spaceTest, testData, type DiscoverScoutSpace } from '../../../common/ui/fixtures';
 
 const createClassicSession = async (
   apiServices: ApiServicesFixture,
   discoverScoutSpace: DiscoverScoutSpace,
   title: string,
-  tab: Pick<DiscoverSessionApiDataInput['tabs'][number], 'hide_chart' | 'chart_interval'> & {
+  tab: {
+    hide_chart?: boolean;
+    chart_interval?: DiscoverSessionApiClassicTab['chart_interval'];
     dataViewTitle?: string;
   } = {}
 ) => {

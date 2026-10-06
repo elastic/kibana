@@ -126,6 +126,9 @@ consts:
   applied_tag: detection-watch:tuning-applied
   acknowledged_tag: detection-watch:tuning-acknowledged
   no_items: []
+  # Mirrors ALERTS_BATCH_MAX_SIZE. `security.alerts` rejects a longer `alertIds`
+  # list. The attachment shows the first 20 ids. The proposal text does not.
+  alerts_per_attachment: 20
 steps:
   # Fetched by saved-object id, which pins the exact rule incarnation that produced
   # the harvested alerts: a rule deleted and recreated under the same signature 404s
@@ -164,9 +167,11 @@ steps:
         description: "{{ inputs.fp_count }} false-positive alerts on rule {{ steps.fetch_rule.output.name }} in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days"
         workflow_execution_id: "{{ execution.id }}"
 
-  # By-reference security.rule attachment: the framework resolves the rule once
-  # from its rule_id and snapshots it, recording the rule as it was when this
-  # review started. The fixed attachment id makes the refresh below deterministic.
+  # A snapshot of the rule as it was when this review started. The rule card reads
+  # `origin` as the saved-object id for View rule, edit and its saved-rule diff,
+  # and `origin` survives the agent's edits to the card while the ids in `text` do
+  # not. The content is passed by value because resolving by origin looks the rule
+  # up by rule_id. The fixed attachment id makes the refresh below deterministic.
   - name: attach_rule
     type: ai.attachment.add
     if: "${{ steps.create_investigation.output.conversation_id != null }}"
@@ -174,8 +179,29 @@ steps:
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       id: "tuned-rule"
       type: security.rule
-      origin: "{{ steps.fetch_rule.output.rule_id }}"
+      origin: "{{ inputs.rule_uuid }}"
+      data:
+        text: "{{ steps.fetch_rule.output | json }}"
+        attachmentLabel: "{{ steps.fetch_rule.output.name }}"
       description: "Rule under tuning: {{ steps.fetch_rule.output.name }}"
+      render_inline: true
+    on-failure:
+      continue: true
+
+  # By value: the first 20 harvested false-positive ids. The schema rejects a
+  # longer list. A fixed id makes a retry of this run 409 instead of appending
+  # a second copy.
+  - name: attach_alerts
+    type: ai.attachment.add
+    if: "${{ steps.create_investigation.output.conversation_id != null }}"
+    with:
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      id: fp-alerts
+      type: security.alerts
+      data:
+        alertIds: "${{ inputs.alert_ids | slice: 0, consts.alerts_per_attachment }}"
+      description: "False-positive alerts under review for rule: {{ steps.fetch_rule.output.name }}"
+      render_inline: true
     on-failure:
       continue: true
 
@@ -184,9 +210,7 @@ steps:
     type: data.set
     with:
       rule_line: "**Rule:** [{{ steps.fetch_rule.output.name }}](/s/{{ workflow.spaceId }}/app/security/rules/id/{{ inputs.rule_uuid }}) (`{{ inputs.rule_uuid }}`)"
-      investigation_line: "**Investigation:** [Rule tuning: {{ steps.fetch_rule.output.name }}](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }})"
       fp_summary: "{% if inputs.total_alert_count > 0 %}{{ inputs.total_fp_count }} of {{ inputs.total_alert_count }} alerts ({{ inputs.total_fp_count | times: 100 | divided_by: inputs.total_alert_count }}%) in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days were closed as false positives; {{ inputs.fp_count }} of them are not reviewed yet.{% else %}{{ inputs.fp_count }} alerts were closed as false positives in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days.{% endif %}"
-      sample_alerts: "{% for alert_id in inputs.alert_ids limit: 5 %}[{{ alert_id }}](/s/{{ workflow.spaceId }}/app/security/alerts/redirect/{{ alert_id }}?index=.alerts-security.alerts-{{ workflow.spaceId }}){% unless forloop.last %}, {% endunless %}{% endfor %}"
 
   # Manual autonomy entry gate: the sweep's findings are reported and nothing else
   # happens until an analyst approves the review. No action, so approval is the whole
@@ -208,13 +232,9 @@ steps:
           **Review rule for tuning?**
 
           {{ steps.compose_evidence.output.rule_line }}
-          {{ steps.compose_evidence.output.investigation_line }}
 
           **Why this rule was picked**
           {{ steps.compose_evidence.output.fp_summary }}
-
-          **Sample alerts**
-          {{ steps.compose_evidence.output.sample_alerts }}
 
           **On approval**
           The agent diagnoses these false positives and proposes a tuning change, which returns as a second proposal for your approval before anything is applied to the rule. Dismissing marks these alerts reviewed and ends the review.
@@ -640,6 +660,57 @@ steps:
       proposed_is_aborted: "${{ steps.run_previews.output.proposed_is_aborted | default: false }}"
       proposed_error_text: "{{ steps.run_previews.output.proposed_error_text }}"
 
+  # Diagnosis notes go to the investigation rather than into the proposal, which
+  # keeps only what the decision needs. `trigger_mode: never` appends a user_message
+  # without running the investigation agent. Called directly rather than through the
+  # journal note workflow, because this run allows one synchronous child per wake-up
+  # cycle and the proposal gate below is that child. User messages render as plain
+  # text, so no markdown. If a note fails, compose_proposal keeps that text so the
+  # analyst still sees it.
+  - name: post_fp_pattern
+    type: kibana.request
+    if: >-
+      ${{ steps.create_investigation.output.conversation_id != null
+        and steps.diagnose_rule.output.structured_output.fp_pattern != blank }}
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body:
+        conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+        input: |-
+          False positive pattern for {{ steps.fetch_rule.output.name }}:
+
+          {{ steps.diagnose_rule.output.structured_output.fp_pattern }}
+        trigger_mode: never
+    on-failure:
+      continue: true
+
+  - name: post_reasoning
+    type: kibana.request
+    if: >-
+      ${{ steps.create_investigation.output.conversation_id != null
+        and steps.diagnose_rule.output.structured_output.reasoning != blank }}
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body:
+        conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+        input: |-
+          Reasoning behind the tuning proposal for {{ steps.fetch_rule.output.name }}:
+
+          {{ steps.diagnose_rule.output.structured_output.reasoning }}
+        trigger_mode: never
+    on-failure:
+      continue: true
+
   - name: compose_proposal
     type: data.set
     with:
@@ -652,8 +723,6 @@ steps:
         **{{ steps.diagnose_rule.output.structured_output.title | default: "Rule tuning review" }}**
 
         {{ steps.compose_evidence.output.rule_line }}
-        **Recommended action:** {% case steps.diagnose_rule.output.structured_output.change_type %}{% when "query" %}Edit rule query{% when "exception" %}Create exception{% when "risk_score" %}Edit rule settings (risk score and severity){% when "threshold" %}Edit rule settings (threshold){% when "schedule" %}Edit rule settings (schedule){% else %}Manual change, no automated action{% endcase %}
-        {{ steps.compose_evidence.output.investigation_line }}
 
         **Why this rule needs tuning**
         {{ steps.compose_evidence.output.fp_summary }}
@@ -663,15 +732,16 @@ steps:
 
         **Summary**
         {{ steps.diagnose_rule.output.structured_output.summary }}
+        {% if steps.post_fp_pattern.error %}
 
         **False positive pattern**
         {{ steps.diagnose_rule.output.structured_output.fp_pattern }}
+        {% endif %}
+        {% if steps.post_reasoning.error %}
 
         **Reasoning**
         {{ steps.diagnose_rule.output.structured_output.reasoning }}
-
-        **Sample alerts**
-        {{ steps.compose_evidence.output.sample_alerts }}
+        {% endif %}
 
         **Proposed change**
         {% case steps.diagnose_rule.output.structured_output.change_type %}
@@ -796,6 +866,23 @@ steps:
       # Not a rule edit: an exception item has its own action.
       - match: exception
         steps:
+          # The proposed item as its own card, laid out the way the Detection Rules
+          # UI lays out an exception. Its name and entries must match the action
+          # input below, so the card shows exactly what approving creates.
+          - name: attach_exception
+            type: ai.attachment.add
+            with:
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              id: "proposed-exception"
+              type: security.exception
+              data:
+                name: "Tuning: {{ steps.fetch_rule.output.name }}"
+                description: "Exception proposed by the rule tuning workflow after reviewing {{ inputs.fp_count }} false-positive alerts."
+                entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
+              description: "Proposed exception for rule: {{ steps.fetch_rule.output.name }}"
+              render_inline: true
+            on-failure:
+              continue: true
           - name: propose_exception
             type: workflow.execute
             with:
@@ -938,9 +1025,9 @@ steps:
     on-failure:
       continue: true
 
-  # security.rule attachments resolve once and never refresh, so after the patch
-  # the snapshot would silently show the pre-tuning rule. This writes the patched
-  # rule as version 2; version 1 keeps the before state in the attachment history.
+  # The rule attachment is a snapshot and never refreshes, so after the patch it
+  # would silently show the pre-tuning rule. This writes the patched rule as
+  # version 2; version 1 keeps the before state in the attachment history.
   - name: refresh_rule_attachment
     type: ai.attachment.update
     if: >-
@@ -954,6 +1041,7 @@ steps:
         text: "{{ steps.refetch_rule.output | json }}"
         attachmentLabel: "{{ steps.refetch_rule.output.name }}"
       description: "Rule after applied tuning: {{ steps.fetch_rule.output.name }}"
+      render_inline: true
     on-failure:
       continue: true
 
