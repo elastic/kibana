@@ -14,7 +14,7 @@ import {
 } from '@kbn/agent-builder-common';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import type { AgentExecutionClient, ExecutionPeek } from './persistence';
-import { ExecutionStatus } from '@kbn/agent-builder-common';
+import { EventActorType, ExecutionStatus } from '@kbn/agent-builder-common';
 import { followExecution$ } from './execution_follower';
 import * as constants from './constants';
 
@@ -381,7 +381,7 @@ describe('followExecution$', () => {
       const persistedError = {
         code: AgentBuilderErrorCode.requestAborted,
         message: 'Converse request was aborted',
-        meta: { abort_reason: { source: 'api', actor: { id: 'u1' } } },
+        meta: { abort_reason: { source: 'api', actor: { type: EventActorType.user, id: 'u1' } } },
       };
 
       // first poll: aborted, error not recorded yet; the peek after the drain has it
@@ -406,7 +406,7 @@ describe('followExecution$', () => {
         (result.error as unknown as { meta: Record<string, unknown> }).meta.abort_reason
       ).toEqual({
         source: 'api',
-        actor: { id: 'u1' },
+        actor: { type: EventActorType.user, id: 'u1' },
       });
     });
 

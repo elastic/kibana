@@ -178,7 +178,7 @@ describe('AgentTurn', () => {
     fireEvent.click(screen.getByRole('button', { name: /tool/ }));
     expect(screen.getAllByTestId('agentBuilderToolCallStep')).toHaveLength(2);
     expect(screen.getByText('2 tools stopped')).toBeInTheDocument();
-    expect(screen.getByText('Response stopped by petr')).toBeInTheDocument();
+    expect(screen.getByText('Response stopped by Jane Doe')).toBeInTheDocument();
   });
 
   it('keeps an expanded tool group open through completion and the saved replacement', () => {

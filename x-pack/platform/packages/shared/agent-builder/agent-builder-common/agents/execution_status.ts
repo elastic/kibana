@@ -6,6 +6,7 @@
  */
 
 import type { AgentBuilderErrorCode } from '../base/errors';
+import type { EventActor } from '../chat/timeline_events';
 
 export enum ExecutionStatus {
   scheduled = 'scheduled',
@@ -33,7 +34,7 @@ export type ExecutionAbortSource =
 export interface ExecutionAbortReason {
   source: ExecutionAbortSource;
   /** The user who requested the abort, when known (`api`, or cascaded from one). */
-  actor?: { id: string; username?: string };
+  actor?: EventActor;
   /** For `caller`: the execution whose abort cascaded to this one, when known. */
   parent_execution_id?: string;
 }

@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { Observable } from 'rxjs';
 import { defer, map, skip, switchMap } from 'rxjs';
 import type { ServerSentEvent } from '@kbn/sse-utils';
-import { AgentExecutionMode } from '@kbn/agent-builder-common';
+import { AgentExecutionMode, EventActorType } from '@kbn/agent-builder-common';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
@@ -209,7 +209,14 @@ export function registerInternalExecutionRoutes({
           reason: {
             source: 'api',
             ...(user
-              ? { actor: { id: user.profile_uid ?? user.username, username: user.username } }
+              ? {
+                  actor: {
+                    type: EventActorType.user,
+                    id: user.profile_uid ?? user.username,
+                    username: user.username,
+                    ...(user.full_name ? { full_name: user.full_name } : {}),
+                  },
+                }
               : {}),
           },
           waitForTerminal,
