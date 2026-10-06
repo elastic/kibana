@@ -5996,8 +5996,8 @@ importers:
         specifier: 1.1.13
         version: 1.1.13
       chromedriver:
-        specifier: 152.0.2
-        version: 152.0.2(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
+        specifier: 154.0.1
+        version: 154.0.1(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
       clarify:
         specifier: 2.2.0
         version: 2.2.0
@@ -16217,8 +16217,8 @@ packages:
     resolution: {integrity: sha512-rNjApaLzuwaOTjCiT8lSDdGN1APCiqkChLMJxJPWLunPAt5fy8xgU9/jNOchV84wfIxrA0lRQB7oCT8jrn/wrQ==}
     engines: {node: '>=6.0'}
 
-  chromedriver@152.0.2:
-    resolution: {integrity: sha512-w/trjzSjQC8vHHwl4e+WXBGPRN3XnrsY14q/FdxCY8GtTUIlB+wH1gn/Kz3CHpdmbsouUEGal6E8bjEEz72pZg==}
+  chromedriver@154.0.1:
+    resolution: {integrity: sha512-QtK+E8xDBt6+dBOALfbILJX2VoRngV6elAh47uZCGWKVKf7n3DyO/IpBo/x5PafLgpZ0LZKTWQQtB+DYq0ixHA==}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -34217,7 +34217,7 @@ snapshots:
 
   chrome-trace-event@1.0.4: {}
 
-  chromedriver@152.0.2(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2):
+  chromedriver@154.0.1(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2):
     dependencies:
       '@testim/chrome-version': 1.1.4
       adm-zip: 0.6.1
