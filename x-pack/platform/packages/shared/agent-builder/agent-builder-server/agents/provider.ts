@@ -17,6 +17,7 @@ import type {
   AgentExecutionMode,
   AutoApprovedApi,
   ChatEvent,
+  ConversationWriteSource,
   ExecutionStatus,
   InteractivityConfig,
   SerializedExecutionError,
@@ -61,7 +62,8 @@ export interface ConversationClient {
   /** Validates, serializes, and merges `updates` into the conversation metadata. */
   patchMetadata(
     conversationId: string,
-    updates: Record<string, unknown>
+    updates: Record<string, unknown>,
+    options: { source: ConversationWriteSource }
   ): Promise<{ changedFields: string[] }>;
 }
 
@@ -163,8 +165,6 @@ export interface ExperimentalFeatures {
   relevantSkills: boolean;
   /** Whether the todo list tool and task-management prompt are enabled */
   todos: boolean;
-  /** Whether external ES|QL datasets are surfaced to data-source tools */
-  datasets: boolean;
   /** Whether the bash tool (and the just-bash runtime) is enabled */
   bash: boolean;
   /** Whether the `discover_apis` tool is enabled. */

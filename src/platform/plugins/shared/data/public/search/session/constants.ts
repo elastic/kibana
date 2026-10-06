@@ -8,4 +8,3 @@
  */
 
 export const SEARCH_SESSIONS_MANAGEMENT_ID = 'search_sessions';
-export const BACKGROUND_SESSION_POLLING_INTERVAL = 5000;
