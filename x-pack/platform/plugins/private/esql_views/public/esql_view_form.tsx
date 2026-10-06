@@ -32,16 +32,14 @@ import type { EsqlView } from '@kbn/esql-types';
 import {
   ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE,
   EsqlViewsClientError,
-  type EsqlViewsClient,
-} from '@kbn/esql-utils';
-import {
-  getEsqlViewQuerySyntaxError,
   MAX_ESQL_VIEW_DESCRIPTION_LENGTH,
   MAX_ESQL_VIEW_QUERY_LENGTH,
-  validateEsqlViewName,
+  type EsqlViewsClient,
   type EsqlViewNameValidationError,
-} from './esql_view_validation';
+  validateEsqlViewName,
+} from '@kbn/esql-utils';
 import { EsqlViewPreviewResults } from './esql_view_preview_results';
+import { getEsqlViewQuerySyntaxError } from './esql_view_validation';
 import { translations } from './translations';
 import { useEsqlViewPreview, type EsqlViewPreviewDependencies } from './use_esql_view_preview';
 

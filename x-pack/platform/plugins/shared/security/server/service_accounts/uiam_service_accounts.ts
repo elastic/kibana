@@ -8,13 +8,17 @@
 import Boom from '@hapi/boom';
 
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
+import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
+import { getAuthenticatedPrincipal } from '@kbn/core-security-common';
 import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 import { z } from '@kbn/zod';
 
 import { buildAssumableBy } from './assumable_by';
 import { ensureClusterPrivilege } from './cluster_privilege';
 import { parseCreateServiceAccountParams } from './create_params';
+import { toDescriptionField } from './description_field';
 import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
 import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS, ServiceAccountFakeRequests } from './fake_requests';
 import { buildRoleAssignments, readApplicationRoles } from './role_assignments';
@@ -27,6 +31,7 @@ import type {
 import { UIAM_SERVICE_ACCOUNT_ROLE_LIMITS } from './uiam_role_limits';
 import type { SecurityLicense } from '../../common';
 import type {
+  DeleteServiceAccountResponse,
   ListServiceAccountsResponse,
   ServiceAccountDirectoryCreator,
   ServiceAccountDirectoryEntry,
@@ -41,6 +46,7 @@ import {
 import { getDetailedErrorMessage } from '../errors';
 import { securityTelemetry } from '../otel/instrumentation';
 import {
+  assertUiamCredential,
   getUiamAuthorizationHeaderFromRequest,
   isExternalApiKey,
   type UiamServiceAccount,
@@ -90,11 +96,12 @@ const toCreatedBy = (creator: UiamServiceAccountCreator): ServiceAccountDirector
  */
 const toDirectoryEntry = (
   cloudProjectContext: CloudProjectContext,
-  { id, name, role_assignments: roleAssignments, creator }: UiamServiceAccountDetails
+  { id, name, description, role_assignments: roleAssignments, creator }: UiamServiceAccountDetails
 ): ServiceAccountDirectoryEntry => ({
   id,
   name,
   roles: readApplicationRoles(cloudProjectContext, roleAssignments),
+  ...toDescriptionField(description),
   enabled: true,
   assumable: true,
   createdBy: toCreatedBy(creator),
@@ -175,6 +182,8 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     this.getCurrentUser = getCurrentUser;
     this.fakeRequests = new ServiceAccountFakeRequests(
       logger,
+      // `boundAt` is not consulted: UIAM issues a new id on every create, so a binding can never
+      // name a later account than the one it was made for.
       async (serviceAccountId) => {
         const { token } = await this.exchangeToken(serviceAccountId);
         return token;
@@ -213,7 +222,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    const { name, roles } = parseCreateServiceAccountParams(
+    const { name, roles, description } = parseCreateServiceAccountParams(
       params,
       UIAM_SERVICE_ACCOUNT_ROLE_LIMITS
     );
@@ -237,6 +246,9 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
         {
           organization_id: this.cloudProjectContext.organizationId,
           name,
+          ...toDescriptionField(description),
+          project_type: this.cloudProjectContext.projectType,
+          project_id: this.cloudProjectContext.projectId,
           role_assignments: buildRoleAssignments(this.cloudProjectContext, roles),
           assumable_by: buildAssumableBy(this.cloudProjectContext),
         },
@@ -266,7 +278,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
 
     // The roles are echoed from the request rather than read back. UIAM stores them as sent, and
     // the directory reads the same roles out of its role assignments on list and get.
-    return { ...parsed.data, roles };
+    return { ...parsed.data, roles, ...toDescriptionField(result.description) };
   }
 
   async list(
@@ -330,12 +342,72 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
 
     this.logger.debug(`Attempting to get service account ${id}`);
 
+    let account: UiamServiceAccountDetails;
     try {
-      return toDirectoryEntry(this.cloudProjectContext, await this.uiam.getServiceAccount(id));
+      account = await this.uiam.getServiceAccount(id);
     } catch (e) {
       this.logger.error(`Failed to get service account: ${getDetailedErrorMessage(e)}`);
-      throw e;
+      throw getNotFound(id, e) ?? e;
     }
+
+    // UIAM keeps a revoked account around for a while, but it is gone as far as Kibana is
+    // concerned: it cannot be exchanged, restored or listed.
+    if (account.revoked) {
+      this.logger.debug(`Service account [${id}] was found, but it was revoked`);
+      throw Boom.notFound(`Service account [${id}] was not found`);
+    }
+
+    return toDirectoryEntry(this.cloudProjectContext, account);
+  }
+
+  /**
+   * Revokes the account in UIAM. UIAM authorizes the revoke against Kibana's certificate and the
+   * account's `assumable_by` policy, not against the end user, so the user-level gates are all
+   * Kibana's. They match {@link create}: the `manage_security` privilege, a UIAM credential, and a
+   * caller that is not a service account. Create gets the last two from UIAM, which sees the
+   * caller's credential there.
+   *
+   * Repeating a revoke while UIAM still holds the record succeeds, so a retry is safe. Once UIAM
+   * drops the record, the same call answers 404.
+   */
+  async delete(request: KibanaRequest, id: string): Promise<DeleteServiceAccountResponse> {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(
+        'Cannot delete a service account: security features are disabled in Elasticsearch'
+      );
+    }
+
+    await ensureClusterPrivilege({
+      request,
+      checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
+      logger: this.logger,
+      privilege: 'manage_security',
+      action: 'delete a service account',
+    });
+
+    assertUiamCredential(HTTPAuthorizationHeader.parseFromRequest(request));
+
+    const user = this.getCurrentUser(request);
+    if (!user) {
+      throw Boom.unauthorized('Cannot delete a service account: the request is not authenticated');
+    }
+    if (getAuthenticatedPrincipal(user).type === 'service_account') {
+      throw Boom.badRequest(
+        'Cannot delete a service account: a service account cannot delete service accounts. Make ' +
+          'the request from a user session'
+      );
+    }
+
+    this.logger.debug(`Attempting to delete service account [${id}]`);
+
+    try {
+      await this.uiam.revokeServiceAccount(id);
+    } catch (e) {
+      this.logger.error(`Failed to delete service account [${id}]: ${getDetailedErrorMessage(e)}`);
+      throw getNotFound(id, e) ?? e;
+    }
+
+    return { warnings: [] };
   }
 
   /**
@@ -389,6 +461,11 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     this.fakeRequests.release(request);
   }
 
+  getFakeRequestPrincipal(request: KibanaRequest): AuthenticatedPrincipal | null {
+    const serviceAccountId = this.fakeRequests.getServiceAccountId(request);
+    return serviceAccountId ? { type: 'service_account', serviceAccountId, variant: 'uiam' } : null;
+  }
+
   async reauthenticateFakeRequest(
     request: KibanaRequest
   ): Promise<{ authorization: string } | null> {
@@ -408,8 +485,11 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
   }
 }
 
+/** `ORGANIZATION_SERVICE_ACCOUNT_NOT_FOUND` */
+const SERVICE_ACCOUNT_NOT_FOUND_CODE = '0xEDF789';
+
 const TERMINAL_EXCHANGE_CODES = new Set([
-  '0xEDF789', // ORGANIZATION_SERVICE_ACCOUNT_NOT_FOUND
+  SERVICE_ACCOUNT_NOT_FOUND_CODE,
   '0x3B8626', // ORGANIZATION_SERVICE_ACCOUNT_REVOKED
   '0x93B121', // AUTHZ_DENY
 ]);
@@ -440,6 +520,20 @@ const getCreateRefusal = (error: unknown): Boom.Boom | null => {
   const parsed = uiamErrorResponseSchema.safeParse(error.output.payload);
   const reason = parsed.success ? CREATE_REFUSALS[parsed.data.error.code] : undefined;
   return reason ? Boom.badRequest(`Cannot create a service account: ${reason}`) : null;
+};
+
+/**
+ * Turns UIAM's answer for an account it does not know into a 404, or returns `null` for anything
+ * else. UIAM answers that with a 403, and the error code is what separates it from a real refusal.
+ */
+const getNotFound = (id: string, error: unknown): Boom.Boom | null => {
+  if (!Boom.isBoom(error)) {
+    return null;
+  }
+  const parsed = uiamErrorResponseSchema.safeParse(error.output.payload);
+  return parsed.success && parsed.data.error.code === SERVICE_ACCOUNT_NOT_FOUND_CODE
+    ? Boom.notFound(`Service account [${id}] was not found`)
+    : null;
 };
 
 const getExchangeRetryDelay = (error: Error): number | null => {

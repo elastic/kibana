@@ -103,7 +103,7 @@ export abstract class NavigationMixin extends DiscoverAppBase {
    * the ES|QL editor and the classic KQL `queryInput`.
    */
   async getCurrentQueryMode(): Promise<DiscoverQueryMode> {
-    const esqlEditor = this.page.testSubj.locator('ESQLEditor');
+    const esqlEditor = this.esqlEditor.editor;
     const classicQueryInput = this.page.testSubj.locator('queryInput');
 
     // Wait until one of the two mode-specific anchors is rendered
@@ -120,7 +120,7 @@ export abstract class NavigationMixin extends DiscoverAppBase {
       await this.page.testSubj.click('select-text-based-language-btn');
     }
 
-    await this.codeEditor.waitCodeEditorReady('ESQLEditor');
+    await this.esqlEditor.waitReady();
   }
 
   async selectClassicMode() {
@@ -137,7 +137,7 @@ export abstract class NavigationMixin extends DiscoverAppBase {
 
   async writeAndSubmitEsqlQuery(query: string) {
     await this.selectTextBaseLang();
-    await this.codeEditor.setCodeEditorValue(query);
+    await this.esqlEditor.setQuery(query);
     await this.submitQueryAndWait();
   }
 
@@ -186,7 +186,7 @@ export abstract class NavigationMixin extends DiscoverAppBase {
     await this.unifiedTabs.createNewTab();
 
     if (previousEsqlQuery) {
-      await this.codeEditor.setCodeEditorValue(previousEsqlQuery);
+      await this.esqlEditor.setQuery(previousEsqlQuery);
     }
 
     await this.submitQueryAndWait();
@@ -201,112 +201,8 @@ export abstract class NavigationMixin extends DiscoverAppBase {
     await rowLocator.waitFor({ state: 'visible', timeout });
   }
 
-  public get esqlMenuPopover(): Locator {
-    return this.page.testSubj.locator('esql-menu-popover');
-  }
-
-  async openRecommendedQueriesPanel() {
-    const menuPopover = this.esqlMenuPopover;
-    if (!(await menuPopover.isVisible())) {
-      await this.page.testSubj.click('esql-help-popover-button');
-    }
-
-    await menuPopover.waitFor({ state: 'visible' });
-
-    const recommendedQueriesButton = this.page.testSubj.locator('esql-recommended-queries');
-    await expect(recommendedQueriesButton).toBeVisible();
-    await recommendedQueriesButton.click();
-    await this.page.testSubj.locator('contextMenuPanelTitleButton').waitFor({ state: 'visible' });
-  }
-
-  async runRecommendedEsqlQuery(queryLabel: string) {
-    await this.openRecommendedQueriesPanel();
-
-    const queryOption = this.esqlMenuPopover.getByRole('menuitem', {
-      exact: true,
-      name: queryLabel,
-    });
-
-    await expect(queryOption).toBeVisible();
-    await queryOption.click();
-    await this.waitUntilSearchingHasFinished();
-  }
-
-  async getEsqlQueryValue(nthIndex: number = 0): Promise<string> {
-    return this.codeEditor.getCodeEditorValue(nthIndex);
-  }
-
-  async openEsqlQuickReferenceFlyout() {
-    await this.page.testSubj.click('esql-help-popover-button');
-    await this.esqlMenuPopover.waitFor({ state: 'visible' });
-    await this.page.testSubj.click('esql-quick-reference');
-    await this.getEsqlQuickReferenceFlyout().waitFor({ state: 'visible' });
-  }
-
-  getEsqlQuickReferenceFlyout(): Locator {
-    return this.page.testSubj.locator('esqlInlineDocumentationFlyout');
-  }
-
-  getEsqlHistoryPanel(): Locator {
-    return this.page.testSubj.locator('ESQLEditor-history-container');
-  }
-
-  async isEsqlHistoryPanelOpen(): Promise<boolean> {
-    return this.getEsqlHistoryPanel()
-      .waitFor({ state: 'visible', timeout: 1_000 })
-      .then(() => true)
-      .catch(() => false);
-  }
-
-  async toggleEsqlHistoryPanel() {
-    const wasOpen = await this.isEsqlHistoryPanelOpen();
-    await this.page.testSubj.locator('ESQLEditor-toggle-query-history-icon').click();
-    await this.getEsqlHistoryPanel().waitFor({ state: wasOpen ? 'hidden' : 'visible' });
-  }
-
-  /**
-   * Runs the given query from the open ES|QL history panel. The row's run button
-   * both loads the query into the editor and submits it. Matches the row by query
-   * text rather than index, so callers don't depend on history ordering.
-   */
-  async runEsqlHistoryQuery(query: string) {
-    const row = this.page.testSubj
-      .locator('ESQLEditor-queryHistory')
-      .locator('tr')
-      .filter({
-        // Match the whole text of the query cell rather than `hasText` on the
-        // row: that is a case-insensitive substring match over the timestamp and
-        // action buttons too, so one query would also match a row whose query
-        // merely contains it.
-        has: this.page.testSubj.locator('queryString').getByText(query, { exact: true }),
-      });
-    await row.locator('[data-test-subj="ESQLEditor-history-starred-queries-run-button"]').click();
-    await this.waitUntilSearchingHasFinished();
-  }
-
-  async getEsqlEditorHeight(): Promise<number> {
-    const editor = this.page.testSubj.locator('ESQLEditor');
-    await editor.waitFor({ state: 'visible' });
-    const box = await editor.boundingBox();
-    if (!box) {
-      throw new Error('Unable to measure ES|QL editor height');
-    }
-    return Math.round(box.height);
-  }
-
-  async resizeEsqlEditorBy(distance: number) {
-    const resizeButton = this.page.testSubj.locator('ESQLEditor-resize');
-    await resizeButton.waitFor({ state: 'visible' });
-    const box = await resizeButton.boundingBox();
-    if (!box) {
-      throw new Error('Unable to find ES|QL editor resize handle');
-    }
-    const startX = box.x + box.width / 2;
-    const startY = box.y + box.height / 2;
-    await this.page.mouse.move(startX, startY);
-    await this.page.mouse.down();
-    await this.page.mouse.move(startX, startY + distance, { steps: 10 });
-    await this.page.mouse.up();
+  async getEsqlQueryValue(): Promise<string> {
+    return this.esqlEditor.getQuery();
   }
 
   async clickAppMenuItem(testId: string) {

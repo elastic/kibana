@@ -90,8 +90,20 @@ export interface ESQLEditorProps {
   mergeExternalMessages?: boolean;
   /** Enable data source browser suggestion & command integration */
   enableResourceBrowser?: boolean;
+  /**
+   * Shows the action to create an ES|QL view from the current query.
+   */
+  enableCreateView?: boolean;
   /** Stats about the last request made */
   queryStats?: ESQLQueryStats;
+  /** Callback invoked when the ES|QL docs flyout (opened from the help menu) toggles visibility */
+  onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
+  /**
+   * Called once the editor has set up its NL-to-ES|QL review handler.
+   * The parent receives `handler` and can pass it as `onNlResult` to a sibling
+   * QuickSearchVisor (the non-inline case where the visor lives outside the editor).
+   */
+  onVisorNlResultReady?: (handler: (generatedQuery: string) => void) => void;
 }
 
 interface ESQLVariableService {

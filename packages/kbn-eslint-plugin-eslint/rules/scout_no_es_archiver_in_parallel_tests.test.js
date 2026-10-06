@@ -8,7 +8,7 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('./scout_no_es_archiver_in_parallel_tests');
+const rule = require('../oxlint_plugin').rules.scout_no_es_archiver_in_parallel_tests;
 const dedent = require('dedent');
 
 const ERROR_MSG =

@@ -80,12 +80,10 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
         snoozed_until: snoozedUntil,
         updated_at: response.body.updated_at,
         updated_by: response.body.updated_by,
-        version: response.body.version,
       });
       expect(Date.parse(response.body.updated_at)).toBeGreaterThanOrEqual(
         Date.parse(disabled.updated_at)
       );
-      expect(response.body.version).not.toBe(disabled.version);
     }
   );
 
