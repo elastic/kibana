@@ -10,10 +10,10 @@
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getSortingCriteria, NonStringSortableFieldType } from '@kbn/sort-predicates';
-import { getDataViewFieldOrCreateFromColumn } from '@kbn/data-view-utils';
 import { useMemo } from 'react';
 import type { EuiDataGridColumnSortingConfig, EuiDataGridProps } from '@elastic/eui';
-import type { EsqlSource } from '@kbn/data-source';
+import type { DataSource } from '@kbn/data-source';
+import { getDataViewFieldFromDataSource } from '@kbn/discover-utils';
 import type { SortOrder } from '../components/data_table';
 import { kibanaJSON } from '../constants';
 import { SOURCE_COLUMN } from '../utils/columns';
@@ -21,7 +21,7 @@ import { SOURCE_COLUMN } from '../utils/columns';
 export const useSorting = ({
   rows,
   visibleColumns,
-  esqlSource,
+  dataSource,
   sort,
   dataView,
   isPlainRecord,
@@ -32,7 +32,7 @@ export const useSorting = ({
 }: {
   rows: DataTableRecord[] | undefined;
   visibleColumns: string[];
-  esqlSource: EsqlSource | undefined;
+  dataSource: DataSource | undefined;
   sort: SortOrder[];
   dataView: DataView;
   isPlainRecord: boolean;
@@ -54,11 +54,7 @@ export const useSorting = ({
 
     return sortingColumns.reduce<Array<(a: DataTableRecord, b: DataTableRecord) => number>>(
       (acc, { id, direction }) => {
-        const field = getDataViewFieldOrCreateFromColumn({
-          dataView,
-          fieldName: id,
-          column: esqlSource?.getColumn(id),
-        });
+        const field = getDataViewFieldFromDataSource({ dataView, dataSource, fieldName: id });
 
         if (!field) {
           return acc;
@@ -72,7 +68,7 @@ export const useSorting = ({
       },
       []
     );
-  }, [esqlSource, dataView, isInMemorySortEnabled, isPlainRecord, rows, sortingColumns]);
+  }, [dataSource, dataView, isInMemorySortEnabled, isPlainRecord, rows, sortingColumns]);
 
   const sortedRows = useMemo(() => {
     if (!rows || !comparators) {

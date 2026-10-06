@@ -10,7 +10,7 @@
 import type { ReactNode } from 'react';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { Column } from '@kbn/data-source';
+import { columnToFieldBase, type Column, type DataSource } from '@kbn/data-source';
 import type { IgnoredReason } from '@kbn/discover-utils';
 import {
   convertValueToString,
@@ -19,9 +19,8 @@ import {
   isNestedFieldParent,
 } from '@kbn/discover-utils';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { getFieldIconType, getTextBasedColumnIconType } from '@kbn/field-utils';
+import { getFieldIconType } from '@kbn/field-utils';
 import { getDataViewFieldOrCreateFromColumn } from '@kbn/data-view-utils';
-import type { EsqlSource } from '@kbn/data-source';
 
 export class FieldRow {
   readonly name: string;
@@ -51,7 +50,7 @@ export class FieldRow {
     dataView,
     fieldFormats,
     isPinned,
-    esqlSource,
+    dataSource,
   }: {
     name: string;
     displayNameOverride?: string;
@@ -60,7 +59,7 @@ export class FieldRow {
     dataView: DataView;
     fieldFormats: FieldFormatsStart;
     isPinned: boolean;
-    esqlSource: EsqlSource | undefined;
+    dataSource: DataSource | undefined;
   }) {
     this.#hit = hit;
     this.#dataView = dataView;
@@ -71,7 +70,7 @@ export class FieldRow {
     this.name = name;
     this.displayNameOverride = displayNameOverride;
     this.flattenedValue = flattenedValue;
-    this.esqlColumn = esqlSource?.getColumn(name);
+    this.esqlColumn = dataSource?.kind === 'esql' ? dataSource.getColumn(name) : undefined;
     this.dataViewField = getDataViewFieldOrCreateFromColumn({
       dataView,
       fieldName: name,
@@ -117,7 +116,8 @@ export class FieldRow {
 
   public get fieldType(): string | undefined {
     if (!this.#fieldType) {
-      const columnIconType = getTextBasedColumnIconType(this.esqlColumn);
+      const columnIconType =
+        this.esqlColumn && getFieldIconType(columnToFieldBase(this.esqlColumn));
       const fieldType = columnIconType
         ? columnIconType // for text-based results types come separately
         : isNestedFieldParent(this.name, this.#dataView)

@@ -24,7 +24,7 @@ import { dataTableContextMock } from '../../__mocks__/table_context';
 import { getNodeId } from './json_tree_viewer/tree_model';
 import type { JsonModeSettings } from '../types';
 import { MAX_TREE_VALUES } from '../utils/build_document_tree';
-import type { EsqlSource } from '@kbn/data-source';
+import type { DataSource } from '@kbn/data-source';
 
 const rowTestId = (path: string) => `jsonTreeViewerRow-${getNodeId(path.split('.'))}`;
 const filterForTestId = (path: string) => `jsonTreeViewerFilterFor-${path}`;
@@ -47,7 +47,7 @@ const renderCell = (
     selectedColumns,
     onFilter,
     hideFilteringOnComputedColumns,
-    esqlSource,
+    dataSource,
     isPlainRecord,
   }: {
     shouldShowFieldHandler?: (fieldName: string) => boolean;
@@ -56,7 +56,7 @@ const renderCell = (
     selectedColumns?: string[];
     onFilter?: DocViewFilterFn;
     hideFilteringOnComputedColumns?: boolean;
-    esqlSource?: EsqlSource;
+    dataSource?: DataSource;
     isPlainRecord?: boolean;
   } = {}
 ) => {
@@ -64,7 +64,7 @@ const renderCell = (
     <SourceDocumentJsonMode
       row={buildDataTableRecord(hit, dataViewMock)}
       dataView={dataViewMock}
-      esqlSource={esqlSource}
+      dataSource={dataSource}
       shouldShowFieldHandler={shouldShowFieldHandler}
       fieldFormats={fieldFormats}
       jsonModeSettings={jsonModeSettings}
@@ -221,7 +221,7 @@ describe('SourceDocumentJsonMode', () => {
         { _id: '1', _index: 'test', _source: { computedField: 42 } },
         {
           onFilter,
-          esqlSource: createMockEsqlSource([
+          dataSource: createMockEsqlSource([
             { name: 'computedField', type: 'number', source: 'esql-result' },
           ]),
         }
@@ -240,7 +240,7 @@ describe('SourceDocumentJsonMode', () => {
         { _id: '1', _index: 'test', _source: { computedField: 42 } },
         {
           onFilter: jest.fn(),
-          esqlSource: createMockEsqlSource([
+          dataSource: createMockEsqlSource([
             { name: 'computedField', type: 'number', source: 'esql-result' },
           ]),
           hideFilteringOnComputedColumns: true,

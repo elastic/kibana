@@ -24,7 +24,11 @@ import type { EsqlSource } from './src/sources/esql_source';
 import type { DataViewSource } from './src/sources/data_view_source';
 /** Discriminated union of all concrete DataSource implementations. Narrowing on `kind` resolves to the concrete type — no casts needed. */
 export type DataSource = EsqlSource | DataViewSource;
-export { columnFromDataViewField, columnFromDatatableColumn } from './src/to_column';
+export {
+  columnFromDataViewField,
+  columnFromDatatableColumn,
+  columnToFieldBase,
+} from './src/to_column';
 export { DataSourceService } from './src/data_source_service';
 export type { DataViewLookup } from './src/data_source_service';
 export {

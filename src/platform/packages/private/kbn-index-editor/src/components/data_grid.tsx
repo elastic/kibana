@@ -9,7 +9,7 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { EsqlSource } from '@kbn/data-source';
+import type { EsqlSource } from '@kbn/data-source';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
@@ -24,7 +24,7 @@ import {
   type EuiDataGridRefProps,
 } from '@kbn/unified-data-table';
 import type { RestorableStateProviderApi } from '@kbn/restorable-state';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { difference, intersection, isEqual } from 'lodash';
 import { useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
@@ -45,6 +45,7 @@ interface ESQLDataGridProps {
   rows: DataTableRecord[];
   dataView: DataView;
   columns: DatatableColumn[];
+  dataSource: EsqlSource | undefined;
   flyoutType?: 'overlay' | 'push';
   initialColumns?: DatatableColumn[];
   initialRowHeight?: number;
@@ -114,27 +115,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   if (!isEqual(activeColumns, renderedColumns)) {
     setActiveColumns(renderedColumns);
   }
-
-  const esqlQuery = useObservable(indexUpdateService.esqlQuery$);
-  const [esqlSource, setEsqlSource] = useState<EsqlSource>();
-  useEffect(() => {
-    if (!esqlQuery) {
-      return;
-    }
-    let cancelled = false;
-    EsqlSource.create({ query: esqlQuery }).then((source) => {
-      if (!cancelled) {
-        setEsqlSource(source);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [esqlQuery]);
-  const dataSource = useMemo(
-    () => esqlSource?.withColumns(props.columns),
-    [esqlSource, props.columns]
-  );
 
   const services = useMemo(() => {
     return {
@@ -286,7 +266,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       rowAdditionalLeadingControls={leadingControlColumns}
       columns={renderedColumns}
       rows={rows}
-      dataSource={dataSource}
+      dataSource={props.dataSource}
       services={services}
       enableInTableSearch={false}
       showKeyboardShortcuts={false}

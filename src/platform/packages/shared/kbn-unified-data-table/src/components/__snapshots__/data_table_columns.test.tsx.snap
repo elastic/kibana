@@ -142,6 +142,29 @@ Array [
     "display": <Memo(DataTableColumnHeader)
       columnDisplayName="message"
       columnName="message"
+      dataSource={
+        Object {
+          "datasetKey": "esql:mock::",
+          "fields": Array [],
+          "getColumn": [Function],
+          "getColumns": [Function],
+          "getFilterableFields": [Function],
+          "id": "mock-esql-source",
+          "isPersisted": [Function],
+          "isRollup": [Function],
+          "isTimeBased": [Function],
+          "kind": "esql",
+          "name": "mock",
+          "projectRouting": undefined,
+          "query": "FROM mock",
+          "references": Array [],
+          "resultColumns": Array [],
+          "serialize": [Function],
+          "timeFieldName": undefined,
+          "title": "mock",
+          "withColumns": [Function],
+        }
+      }
       dataView={
         Object {
           "docvalueFields": Array [],
@@ -275,29 +298,6 @@ Array [
           "toMinimalSpec": [Function],
           "toSpec": [Function],
           "type": "default",
-        }
-      }
-      esqlSource={
-        Object {
-          "datasetKey": "esql:mock::",
-          "fields": Array [],
-          "getColumn": [Function],
-          "getColumns": [Function],
-          "getFilterableFields": [Function],
-          "id": "mock-esql-source",
-          "isPersisted": [Function],
-          "isRollup": [Function],
-          "isTimeBased": [Function],
-          "kind": "esql",
-          "name": "mock",
-          "projectRouting": undefined,
-          "query": "FROM mock",
-          "references": Array [],
-          "resultColumns": Array [],
-          "serialize": [Function],
-          "timeFieldName": undefined,
-          "title": "mock",
-          "withColumns": [Function],
         }
       }
       headerRowHeight={5}
@@ -949,6 +949,29 @@ Array [
     "display": <Memo(DataTableColumnHeader)
       columnDisplayName="extension"
       columnName="extension"
+      dataSource={
+        Object {
+          "datasetKey": "esql:mock::",
+          "fields": Array [],
+          "getColumn": [Function],
+          "getColumns": [Function],
+          "getFilterableFields": [Function],
+          "id": "mock-esql-source",
+          "isPersisted": [Function],
+          "isRollup": [Function],
+          "isTimeBased": [Function],
+          "kind": "esql",
+          "name": "mock",
+          "projectRouting": undefined,
+          "query": "FROM mock",
+          "references": Array [],
+          "resultColumns": Array [],
+          "serialize": [Function],
+          "timeFieldName": undefined,
+          "title": "mock",
+          "withColumns": [Function],
+        }
+      }
       dataView={
         Object {
           "docvalueFields": Array [],
@@ -1082,29 +1105,6 @@ Array [
           "toMinimalSpec": [Function],
           "toSpec": [Function],
           "type": "default",
-        }
-      }
-      esqlSource={
-        Object {
-          "datasetKey": "esql:mock::",
-          "fields": Array [],
-          "getColumn": [Function],
-          "getColumns": [Function],
-          "getFilterableFields": [Function],
-          "id": "mock-esql-source",
-          "isPersisted": [Function],
-          "isRollup": [Function],
-          "isTimeBased": [Function],
-          "kind": "esql",
-          "name": "mock",
-          "projectRouting": undefined,
-          "query": "FROM mock",
-          "references": Array [],
-          "resultColumns": Array [],
-          "serialize": [Function],
-          "timeFieldName": undefined,
-          "title": "mock",
-          "withColumns": [Function],
         }
       }
       headerRowHeight={5}
@@ -1163,6 +1163,29 @@ Array [
     "display": <Memo(DataTableColumnHeader)
       columnDisplayName="message"
       columnName="message"
+      dataSource={
+        Object {
+          "datasetKey": "esql:mock::",
+          "fields": Array [],
+          "getColumn": [Function],
+          "getColumns": [Function],
+          "getFilterableFields": [Function],
+          "id": "mock-esql-source",
+          "isPersisted": [Function],
+          "isRollup": [Function],
+          "isTimeBased": [Function],
+          "kind": "esql",
+          "name": "mock",
+          "projectRouting": undefined,
+          "query": "FROM mock",
+          "references": Array [],
+          "resultColumns": Array [],
+          "serialize": [Function],
+          "timeFieldName": undefined,
+          "title": "mock",
+          "withColumns": [Function],
+        }
+      }
       dataView={
         Object {
           "docvalueFields": Array [],
@@ -1296,29 +1319,6 @@ Array [
           "toMinimalSpec": [Function],
           "toSpec": [Function],
           "type": "default",
-        }
-      }
-      esqlSource={
-        Object {
-          "datasetKey": "esql:mock::",
-          "fields": Array [],
-          "getColumn": [Function],
-          "getColumns": [Function],
-          "getFilterableFields": [Function],
-          "id": "mock-esql-source",
-          "isPersisted": [Function],
-          "isRollup": [Function],
-          "isTimeBased": [Function],
-          "kind": "esql",
-          "name": "mock",
-          "projectRouting": undefined,
-          "query": "FROM mock",
-          "references": Array [],
-          "resultColumns": Array [],
-          "serialize": [Function],
-          "timeFieldName": undefined,
-          "title": "mock",
-          "withColumns": [Function],
         }
       }
       headerRowHeight={5}
@@ -2550,6 +2550,29 @@ Array [
     "display": <Memo(DataTableColumnHeader)
       columnDisplayName="extension"
       columnName="extension"
+      dataSource={
+        Object {
+          "datasetKey": "esql:mock::",
+          "fields": Array [],
+          "getColumn": [Function],
+          "getColumns": [Function],
+          "getFilterableFields": [Function],
+          "id": "mock-esql-source",
+          "isPersisted": [Function],
+          "isRollup": [Function],
+          "isTimeBased": [Function],
+          "kind": "esql",
+          "name": "mock",
+          "projectRouting": undefined,
+          "query": "FROM mock",
+          "references": Array [],
+          "resultColumns": Array [],
+          "serialize": [Function],
+          "timeFieldName": undefined,
+          "title": "mock",
+          "withColumns": [Function],
+        }
+      }
       dataView={
         Object {
           "docvalueFields": Array [],
@@ -2683,29 +2706,6 @@ Array [
           "toMinimalSpec": [Function],
           "toSpec": [Function],
           "type": "default",
-        }
-      }
-      esqlSource={
-        Object {
-          "datasetKey": "esql:mock::",
-          "fields": Array [],
-          "getColumn": [Function],
-          "getColumns": [Function],
-          "getFilterableFields": [Function],
-          "id": "mock-esql-source",
-          "isPersisted": [Function],
-          "isRollup": [Function],
-          "isTimeBased": [Function],
-          "kind": "esql",
-          "name": "mock",
-          "projectRouting": undefined,
-          "query": "FROM mock",
-          "references": Array [],
-          "resultColumns": Array [],
-          "serialize": [Function],
-          "timeFieldName": undefined,
-          "title": "mock",
-          "withColumns": [Function],
         }
       }
       headerRowHeight={5}
@@ -2763,6 +2763,29 @@ Array [
     "display": <Memo(DataTableColumnHeader)
       columnDisplayName="message"
       columnName="message"
+      dataSource={
+        Object {
+          "datasetKey": "esql:mock::",
+          "fields": Array [],
+          "getColumn": [Function],
+          "getColumns": [Function],
+          "getFilterableFields": [Function],
+          "id": "mock-esql-source",
+          "isPersisted": [Function],
+          "isRollup": [Function],
+          "isTimeBased": [Function],
+          "kind": "esql",
+          "name": "mock",
+          "projectRouting": undefined,
+          "query": "FROM mock",
+          "references": Array [],
+          "resultColumns": Array [],
+          "serialize": [Function],
+          "timeFieldName": undefined,
+          "title": "mock",
+          "withColumns": [Function],
+        }
+      }
       dataView={
         Object {
           "docvalueFields": Array [],
@@ -2896,29 +2919,6 @@ Array [
           "toMinimalSpec": [Function],
           "toSpec": [Function],
           "type": "default",
-        }
-      }
-      esqlSource={
-        Object {
-          "datasetKey": "esql:mock::",
-          "fields": Array [],
-          "getColumn": [Function],
-          "getColumns": [Function],
-          "getFilterableFields": [Function],
-          "id": "mock-esql-source",
-          "isPersisted": [Function],
-          "isRollup": [Function],
-          "isTimeBased": [Function],
-          "kind": "esql",
-          "name": "mock",
-          "projectRouting": undefined,
-          "query": "FROM mock",
-          "references": Array [],
-          "resultColumns": Array [],
-          "serialize": [Function],
-          "timeFieldName": undefined,
-          "title": "mock",
-          "withColumns": [Function],
         }
       }
       headerRowHeight={5}

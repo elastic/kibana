@@ -9,11 +9,11 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
-import { getDataViewFieldOrCreateFromColumn } from '@kbn/data-view-utils';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
 import { convertValueToString as commonConvertValueToString } from '@kbn/discover-utils';
-import type { EsqlSource } from '@kbn/data-source';
+import type { DataSource } from '@kbn/data-source';
+import { getDataViewFieldFromDataSource } from '@kbn/discover-utils';
 import type { DocumentsDisplayMode } from '../types';
 import { SOURCE_COLUMN } from './columns';
 import { sourceDocumentToJsonString } from './build_document_tree';
@@ -31,7 +31,7 @@ export const convertValueToString = ({
   columnId,
   dataView,
   fieldFormats,
-  esqlSource,
+  dataSource,
   options,
   documentsDisplayMode,
   shouldShowFieldHandler,
@@ -42,7 +42,7 @@ export const convertValueToString = ({
   columnId: string;
   dataView: DataView;
   fieldFormats: FieldFormatsStart;
-  esqlSource: EsqlSource | undefined;
+  dataSource: DataSource | undefined;
   options?: {
     compatibleWithCSV?: boolean; // values as one-liner + escaping formulas + adding wrapping quotes
     compatibleWithMarkdown?: boolean; // values as one-liner
@@ -71,11 +71,7 @@ export const convertValueToString = ({
   }
 
   const value = row.flattened?.[columnId];
-  const field = getDataViewFieldOrCreateFromColumn({
-    fieldName: columnId,
-    dataView,
-    column: esqlSource?.getColumn(columnId),
-  });
+  const field = getDataViewFieldFromDataSource({ dataView, dataSource, fieldName: columnId });
 
   return commonConvertValueToString({
     dataView,

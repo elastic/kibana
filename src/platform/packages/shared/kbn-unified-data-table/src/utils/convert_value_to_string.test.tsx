@@ -27,7 +27,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'keyword_key',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -43,7 +43,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'text_message',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -59,7 +59,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'text_message',
       rowIndex: 1,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -76,7 +76,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'number_price',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -93,7 +93,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'number_price',
       rowIndex: 0,
-      esqlSource: createMockEsqlSource([
+      dataSource: createMockEsqlSource([
         { name: 'number_price', type: 'string', esType: 'keyword', source: 'index' },
       ]),
       options: {
@@ -112,7 +112,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'date',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -128,7 +128,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'date_nanos',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -144,7 +144,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'date_nanos',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: false,
       },
@@ -160,7 +160,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'bool_enabled',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -176,7 +176,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'binary_blob',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -192,7 +192,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'binary_blob',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: false,
       },
@@ -208,7 +208,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'object_user.first',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -224,7 +224,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'nested_user',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -242,7 +242,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'flattened_labels',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -258,7 +258,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'range_time_frame',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -276,7 +276,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'rank_features',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -292,7 +292,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'histogram',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -308,7 +308,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'ip_addr',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -324,7 +324,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'ip_addr',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: false,
       },
@@ -340,7 +340,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'version',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -356,7 +356,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'version',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: false,
       },
@@ -372,7 +372,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'vector',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -388,7 +388,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'geo_point',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -404,7 +404,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'geo_point',
       rowIndex: 1,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -420,7 +420,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'array_tags',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -436,7 +436,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'geometry',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -454,7 +454,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'runtime_number',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -470,7 +470,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'scripted_string',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -486,7 +486,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'scripted_string',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: false,
       },
@@ -502,7 +502,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'unknown',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -521,7 +521,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'unknown',
       rowIndex: -1,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -537,7 +537,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: '_source',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: false,
       },
@@ -561,7 +561,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: '_source',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -579,7 +579,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: '_source',
       rowIndex: 0,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: { compatibleWithCSV: true },
     };
 
@@ -606,7 +606,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'array_tags',
       rowIndex: 1,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -621,7 +621,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'scripted_string',
       rowIndex: 1,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -638,7 +638,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'array_tags',
       rowIndex: 1,
-      esqlSource: undefined,
+      dataSource: undefined,
       options: {
         compatibleWithCSV: false,
       },

@@ -119,7 +119,6 @@ const InternalDocViewerTable = ({
   const styles = useMemoCss(componentStyles);
 
   const isEsqlMode = Array.isArray(textBasedHits);
-  const esqlSource = dataSource?.kind === 'esql' ? dataSource : undefined;
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
@@ -200,10 +199,10 @@ const InternalDocViewerTable = ({
         dataView,
         fieldFormats,
         isPinned,
-        esqlSource,
+        dataSource,
       });
     },
-    [dataView, hit, esqlSource, flattened, fieldFormats]
+    [dataView, hit, dataSource, flattened, fieldFormats]
   );
 
   const fieldsFromColumns = useMemo(
@@ -226,7 +225,7 @@ const InternalDocViewerTable = ({
         canPrependTimeFieldColumn(
           columns,
           dataView.timeFieldName,
-          esqlSource,
+          dataSource,
           !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
           isEsqlMode
         )
@@ -246,7 +245,7 @@ const InternalDocViewerTable = ({
     mapping,
     dataView,
     columns,
-    esqlSource,
+    dataSource,
     isEsqlMode,
     uiSettings,
   ]);

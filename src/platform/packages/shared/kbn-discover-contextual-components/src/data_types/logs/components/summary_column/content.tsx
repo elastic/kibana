@@ -22,7 +22,7 @@ import { MESSAGE_FIELD } from '@kbn/discover-utils';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { makeHighContrastColor, useEuiTheme } from '@elastic/eui';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
-import type { EsqlSource } from '@kbn/data-source';
+import type { DataSource } from '@kbn/data-source';
 import { formatJsonDocumentForContent } from './utils';
 
 interface ContentProps extends DataGridCellValueElementProps {
@@ -181,7 +181,6 @@ export const Content = ({
   dataSource,
 }: ContentProps) => {
   const { field, value } = getMessageFieldWithFallbacks(row.flattened);
-  const esqlSource = dataSource?.kind === 'esql' ? dataSource : undefined;
 
   const { euiTheme } = useEuiTheme();
   const isDarkTheme = useKibanaIsDarkMode();
@@ -217,7 +216,7 @@ export const Content = ({
       shouldShowFieldHandler={shouldShowFieldHandler}
       isCompressed={isCompressed}
       row={row}
-      esqlSource={esqlSource}
+      dataSource={dataSource}
     />
   );
 };
@@ -225,7 +224,7 @@ export const Content = ({
 type FormattedSourceDocumentProps = Pick<
   ContentProps,
   'columnId' | 'dataView' | 'fieldFormats' | 'isCompressed' | 'row' | 'shouldShowFieldHandler'
-> & { esqlSource: EsqlSource | undefined };
+> & { dataSource: DataSource | undefined };
 
 const FormattedSourceDocument = ({ row, ...props }: FormattedSourceDocumentProps) => {
   const formattedRow = useMemo(() => formatJsonDocumentForContent(row), [row]);

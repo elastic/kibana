@@ -56,7 +56,7 @@ const fieldColumnId = 'fieldColumnId';
 const renderComparisonCellValue = (props: Partial<UseComparisonCellValueProps> = {}) => {
   const defaultProps: UseComparisonCellValueProps = {
     dataView: dataViewWithTimefieldMock,
-    esqlSource: undefined,
+    dataSource: undefined,
     comparisonFields: ['message', 'extension', 'bytes'],
     fieldColumnId,
     selectedDocIds: ['0', '1', '2'],
@@ -451,7 +451,7 @@ describe('useComparisonCellValue', () => {
 
   it('should render icons from ES|QL columns (computed columns)', () => {
     const { renderCellValue } = renderComparisonCellValue({
-      esqlSource: esqlSourceWithCustomField,
+      dataSource: esqlSourceWithCustomField,
       comparisonFields: ['custom_esql_field'],
     });
     const customFieldCell = renderComparisonCell({

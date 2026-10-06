@@ -118,7 +118,7 @@ export function ContentFrameworkTable({
               dataView,
               fieldFormats,
               isPinned: false,
-              esqlSource: undefined,
+              dataSource: undefined,
             })
           );
 

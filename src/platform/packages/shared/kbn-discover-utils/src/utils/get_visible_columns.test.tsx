@@ -113,7 +113,7 @@ describe('getVisibleColumns utils', function () {
 
       it('should return false if _source column is passed but time field is not returned, text-based datasource', () => {
         // ... | DROP @timestamp test case
-        const esqlSource = buildEsqlSource(dataViewMockWithTimeField, {
+        const dataSource = buildEsqlSource(dataViewMockWithTimeField, {
           except: dataViewMockWithTimeField.timeFieldName,
         });
         for (const showTimeCol of [true, false]) {
@@ -121,7 +121,7 @@ describe('getVisibleColumns utils', function () {
             canPrependTimeFieldColumn(
               ['_source'],
               dataViewMockWithTimeField.timeFieldName,
-              esqlSource,
+              dataSource,
               showTimeCol,
               true
             )

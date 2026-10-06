@@ -94,6 +94,26 @@ describe('IndexUpdateService', () => {
     });
   });
 
+  describe('dataSource$', () => {
+    it('emits the ES|QL source of the index with the table columns', async () => {
+      (getESQLAdHocDataview as jest.Mock).mockResolvedValue({
+        fields: {
+          getByName: () => {},
+          create: () => ({}),
+          concat: () => [{ name: 'foo', type: 'string', esTypes: ['keyword'], spec: {} }],
+        },
+      });
+      service.setIndexName('my-index');
+
+      const dataSource = await firstValueFrom(service.dataSource$);
+
+      expect(dataSource.query).toBe('FROM "my-index"');
+      expect(dataSource.getColumns()).toEqual([
+        expect.objectContaining({ name: 'foo', type: 'string', esType: 'keyword' }),
+      ]);
+    });
+  });
+
   describe('Unsaved changes', () => {
     it('unsaved changes should be false after adding a new empty row', async () => {
       const initial = await firstValueFrom(service.hasUnsavedChanges$);

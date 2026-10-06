@@ -95,7 +95,7 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        esqlSource: createMockEsqlSource([
+        dataSource: createMockEsqlSource([
           { name: 'extension', type: 'string', source: 'index' },
           { name: 'message', type: 'string', esType: 'keyword', source: 'index' },
           { name: 'timestamp', type: 'date', esType: 'dateTime', source: 'index' },
@@ -127,7 +127,7 @@ describe('Data table columns', function () {
           hasEditDataViewPermission: () =>
             servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
           onFilter: () => {},
-          esqlSource: createMockEsqlSource([
+          dataSource: createMockEsqlSource([
             { name: 'extension', type: 'string', source: 'index' },
             { name: 'message', type: 'string', esType: 'keyword', source: 'index' },
             { name: 'timestamp', type: 'date', esType: 'dateTime', source: 'index' },
@@ -159,7 +159,7 @@ describe('Data table columns', function () {
           hasEditDataViewPermission: () =>
             servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
           onFilter: () => {},
-          esqlSource: createMockEsqlSource([
+          dataSource: createMockEsqlSource([
             { name: 'extension', type: 'string', source: 'index' },
             { name: 'message', type: 'string', esType: 'keyword', source: 'index' },
             { name: 'timestamp', type: 'date', esType: 'dateTime', source: 'index' },
@@ -210,7 +210,7 @@ describe('Data table columns', function () {
       const actual = getEuiGridColumns({
         documentsDisplayMode: 'table',
         showColumnTokens: true,
-        esqlSource: createMockEsqlSource([
+        dataSource: createMockEsqlSource([
           { name: 'extension', type: 'string', source: 'index' },
           { name: 'message', type: 'string', esType: 'keyword', source: 'index' },
         ]),
@@ -262,7 +262,7 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        esqlSource: createMockEsqlSource([{ name: 'extension', type: 'string', source: 'index' }]),
+        dataSource: createMockEsqlSource([{ name: 'extension', type: 'string', source: 'index' }]),
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -289,7 +289,7 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        esqlSource: createMockEsqlSource([
+        dataSource: createMockEsqlSource([
           { name: 'geo.coordinates', type: 'geo_point', source: 'index' },
         ]),
         onResize: () => {},
@@ -318,7 +318,7 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        esqlSource: createMockEsqlSource([
+        dataSource: createMockEsqlSource([
           { name: 'stack_version', type: 'version', source: 'index' },
         ]),
         onResize: () => {},
@@ -347,7 +347,7 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        esqlSource: createMockEsqlSource([{ name: 'ip_address', type: 'ip', source: 'index' }]),
+        dataSource: createMockEsqlSource([{ name: 'ip_address', type: 'ip', source: 'index' }]),
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -379,7 +379,7 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        esqlSource: createMockEsqlSource([{ name: 'var_test', type: 'number', source: 'index' }]),
+        dataSource: createMockEsqlSource([{ name: 'var_test', type: 'number', source: 'index' }]),
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -406,7 +406,7 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        esqlSource: createMockEsqlSource([
+        dataSource: createMockEsqlSource([
           { name: 'extension', type: 'string', source: 'index' },
           { name: 'message', type: 'string', esType: 'keyword', source: 'index' },
         ]),
@@ -439,7 +439,7 @@ describe('Data table columns', function () {
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
         customGridColumnsConfiguration,
-        esqlSource: createMockEsqlSource([
+        dataSource: createMockEsqlSource([
           { name: 'extension', type: 'string', source: 'index' },
           { name: 'message', type: 'string', esType: 'keyword', source: 'index' },
         ]),

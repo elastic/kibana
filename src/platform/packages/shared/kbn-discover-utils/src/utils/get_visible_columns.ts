@@ -8,12 +8,12 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { EsqlSource } from '@kbn/data-source';
+import type { DataSource } from '@kbn/data-source';
 
 export function canPrependTimeFieldColumn(
   columns: string[] | undefined,
   timeFieldName: string | undefined,
-  esqlSource: EsqlSource | undefined,
+  dataSource: DataSource | undefined,
   showTimeCol: boolean, // based on Advanced Settings `doc_table:hideTimeColumn`
   isESQLMode: boolean
 ) {
@@ -22,7 +22,7 @@ export function canPrependTimeFieldColumn(
   }
 
   if (isESQLMode) {
-    return !!columns && Boolean(esqlSource?.getColumn(timeFieldName));
+    return !!columns && dataSource?.kind === 'esql' && Boolean(dataSource.getColumn(timeFieldName));
   }
 
   return true;

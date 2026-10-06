@@ -17,7 +17,6 @@ import type {
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { formatFieldValueReact, formatHitReact } from '@kbn/discover-utils';
-import { getDataViewFieldOrCreateFromColumn } from '@kbn/data-view-utils';
 import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -27,7 +26,8 @@ import {
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import classnames from 'classnames';
-import type { EsqlSource } from '@kbn/data-source';
+import type { DataSource } from '@kbn/data-source';
+import { getDataViewFieldFromDataSource } from '@kbn/discover-utils';
 import { getInnerColumns } from '../utils/columns';
 
 const CELL_CLASS = 'unifiedDataTable__cellValue';
@@ -45,7 +45,7 @@ export function SourceDocument({
   dataTestSubj = 'discoverCellDescriptionList',
   className,
   isCompressed = true,
-  esqlSource,
+  dataSource,
 }: {
   useTopLevelObjectColumns: boolean;
   row: DataTableRecord;
@@ -58,7 +58,7 @@ export function SourceDocument({
   dataTestSubj?: string;
   className?: string;
   isCompressed?: boolean;
-  esqlSource: EsqlSource | undefined;
+  dataSource: DataSource | undefined;
 }) {
   const styles = useMemoCss(componentStyles);
   const pairs: FormattedHit = useTopLevelObjectColumns
@@ -68,7 +68,7 @@ export function SourceDocument({
         dataView,
         shouldShowFieldHandler,
         fieldFormats,
-        esqlSource,
+        dataSource,
         Boolean(isPlainRecord)
       ).slice(0, maxEntries)
     : formatHitReact(
@@ -77,7 +77,7 @@ export function SourceDocument({
         shouldShowFieldHandler,
         maxEntries,
         fieldFormats,
-        esqlSource,
+        dataSource,
         isPlainRecord ? SKIP_NULLISH_VALUES_FORMAT_OPTIONS : undefined
       );
 
@@ -123,7 +123,7 @@ function getTopLevelObjectPairsReact(
   dataView: DataView,
   shouldShowFieldHandler: ShouldShowFieldInTableHandler,
   fieldFormats: FieldFormatsStart,
-  esqlSource: EsqlSource | undefined,
+  dataSource: DataSource | undefined,
   skipNullishValues: boolean
 ): FormattedHit {
   const innerColumns = getInnerColumns(row.raw.fields as Record<string, unknown[]>, columnId);
@@ -136,11 +136,7 @@ function getTopLevelObjectPairsReact(
       return;
     }
 
-    const subField = getDataViewFieldOrCreateFromColumn({
-      dataView,
-      fieldName: key,
-      column: esqlSource?.getColumn(key),
-    });
+    const subField = getDataViewFieldFromDataSource({ dataView, dataSource, fieldName: key });
     const displayKey = dataView.fields.getByName
       ? dataView.fields.getByName(key)?.displayName
       : undefined;

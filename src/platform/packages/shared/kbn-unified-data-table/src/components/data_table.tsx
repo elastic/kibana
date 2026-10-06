@@ -69,7 +69,7 @@ import {
   useDataGridInTableSearch,
 } from '@kbn/data-grid-in-table-search';
 import { useThrottleFn } from '@kbn/react-hooks';
-import { getDataViewFieldOrCreateFromColumn } from '@kbn/data-view-utils';
+import { getDataViewFieldFromDataSource } from '@kbn/discover-utils';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
 import type {
   UnifiedDataTableSettings,
@@ -747,19 +747,17 @@ const InternalUnifiedDataTable = React.forwardRef<
       }
     }, [isFilterActive, hasSelectedDocs, setIsFilterActive]);
 
-    const esqlSource = dataSource?.kind === 'esql' ? dataSource : undefined;
-
     const timeFieldName = dataView.timeFieldName;
     const shouldPrependTimeFieldColumn = useCallback(
       (activeColumns: string[]) =>
         canPrependTimeFieldColumn(
           activeColumns,
           timeFieldName,
-          esqlSource,
+          dataSource,
           showTimeCol,
           isPlainRecord
         ),
-      [timeFieldName, isPlainRecord, showTimeCol, esqlSource]
+      [timeFieldName, isPlainRecord, showTimeCol, dataSource]
     );
 
     const visibleColumns = useMemo(() => {
@@ -773,7 +771,7 @@ const InternalUnifiedDataTable = React.forwardRef<
     const { sortedRows, sorting } = useSorting({
       rows,
       visibleColumns,
-      esqlSource,
+      dataSource,
       sort,
       dataView,
       isPlainRecord,
@@ -815,7 +813,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           dataView,
           columnId,
           fieldFormats,
-          esqlSource,
+          dataSource,
           options,
           documentsDisplayMode,
           shouldShowFieldHandler,
@@ -826,7 +824,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         displayedRows,
         dataView,
         fieldFormats,
-        esqlSource,
+        dataSource,
         documentsDisplayMode,
         shouldShowFieldHandler,
         columns,
@@ -993,7 +991,6 @@ const InternalUnifiedDataTable = React.forwardRef<
           isPlainRecord,
           isCompressed: dataGridDensity === DataGridDensity.COMPACT,
           dataSource,
-          esqlSource,
           documentsDisplayMode,
           jsonModeSettings,
           selectedColumns: columns,
@@ -1008,7 +1005,6 @@ const InternalUnifiedDataTable = React.forwardRef<
         isPlainRecord,
         dataGridDensity,
         dataSource,
-        esqlSource,
         documentsDisplayMode,
         jsonModeSettings,
         columns,
@@ -1121,10 +1117,10 @@ const InternalUnifiedDataTable = React.forwardRef<
       }
 
       return visibleColumns.map((columnName) => {
-        const field = getDataViewFieldOrCreateFromColumn({
+        const field = getDataViewFieldFromDataSource({
           dataView,
+          dataSource,
           fieldName: columnName,
-          column: esqlSource?.getColumn(columnName),
         });
         return (
           field?.toSpec() ?? {
@@ -1135,7 +1131,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           }
         );
       });
-    }, [cellActionsTriggerId, visibleColumns, dataView, esqlSource]);
+    }, [cellActionsTriggerId, visibleColumns, dataView, dataSource]);
 
     const allCellActionsMetadata = useMemo(
       () => ({ dataViewId: dataView.id, ...(cellActionsMetadata ?? {}) }),
@@ -1214,7 +1210,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           onFilter,
           editField,
           visibleCellActions,
-          esqlSource,
+          dataSource,
           showColumnTokens,
           headerRowHeightLines,
           customGridColumnsConfiguration,
@@ -1227,7 +1223,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         }),
       [
         cellActionsHandling,
-        esqlSource,
+        dataSource,
         columnsCellActions,
         customGridColumnsConfiguration,
         dataView,
@@ -1631,7 +1627,7 @@ const InternalUnifiedDataTable = React.forwardRef<
                 ariaDescribedBy={randomId}
                 ariaLabelledBy={ariaLabelledBy}
                 dataView={dataView}
-                esqlSource={esqlSource}
+                dataSource={dataSource}
                 isPlainRecord={isPlainRecord}
                 selectedFieldNames={visibleColumns}
                 selectedDocIds={docIdsInSelectionOrder}

@@ -18,10 +18,13 @@ import type {
   EsHitRecord,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
-import { formatFieldStringValueWithHighlights, getIgnoredReason } from '@kbn/discover-utils';
+import {
+  formatFieldStringValueWithHighlights,
+  getIgnoredReason,
+  getDataViewFieldFromDataSource,
+} from '@kbn/discover-utils';
 import { shouldShowFieldFilterInOutActions } from '@kbn/unified-doc-viewer/utils/should_show_field_filter_actions';
-import { getDataViewFieldOrCreateFromColumn } from '@kbn/data-view-utils';
-import type { EsqlSource } from '@kbn/data-source';
+import type { DataSource } from '@kbn/data-source';
 import { CELL_CLASS } from '../utils/get_render_cell_value';
 import { flattenedToNestedDocument, MAX_TREE_VALUES } from '../utils/build_document_tree';
 import type { JsonModeSettings } from '../types';
@@ -39,7 +42,7 @@ const treeExpansionStore = new WeakMap<EsHitRecord, TreeExpansionState>();
 export interface SourceDocumentJsonModeProps {
   row: DataTableRecord;
   dataView: DataView;
-  esqlSource: EsqlSource | undefined;
+  dataSource: DataSource | undefined;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
   fieldFormats: FieldFormatsStart;
   jsonModeSettings?: JsonModeSettings;
@@ -50,7 +53,7 @@ export interface SourceDocumentJsonModeProps {
 export const SourceDocumentJsonMode = ({
   row,
   dataView,
-  esqlSource,
+  dataSource,
   shouldShowFieldHandler,
   fieldFormats,
   jsonModeSettings,
@@ -70,11 +73,7 @@ export const SourceDocumentJsonMode = ({
     (node) => {
       const { path, value, isArrayItem } = node;
       const fieldName = fieldNameFromPath(path);
-      const field = getDataViewFieldOrCreateFromColumn({
-        dataView,
-        fieldName,
-        column: esqlSource?.getColumn(fieldName),
-      });
+      const field = getDataViewFieldFromDataSource({ dataView, dataSource, fieldName });
       if (
         !shouldShowFieldFilterInOutActions({
           dataViewField: field,
@@ -111,7 +110,7 @@ export const SourceDocumentJsonMode = ({
         },
       ];
     },
-    [dataView, esqlSource, onFilter, hideFilteringOnComputedColumns, isPlainRecord, row]
+    [dataView, dataSource, onFilter, hideFilteringOnComputedColumns, isPlainRecord, row]
   );
 
   const initialTreeState = useMemo(() => treeExpansionStore.get(row.raw), [row]);

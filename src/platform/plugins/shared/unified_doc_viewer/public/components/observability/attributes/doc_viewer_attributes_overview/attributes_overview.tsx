@@ -48,7 +48,6 @@ export function AttributesOverview({
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const { storage, uiSettings } = getUnifiedDocViewerServices();
   const isEsqlMode = Array.isArray(textBasedHits);
-  const esqlSource = dataSource?.kind === 'esql' ? dataSource : undefined;
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const { searchTerm, onChangeSearchTerm } = useTableFiltersState({
     storage,
@@ -237,7 +236,7 @@ export function AttributesOverview({
                     hit={hit}
                     dataView={dataView}
                     columns={columns}
-                    esqlSource={esqlSource}
+                    dataSource={dataSource}
                     searchTerm={searchTerm}
                     onAddColumn={onAddColumn}
                     onRemoveColumn={onRemoveColumn}
