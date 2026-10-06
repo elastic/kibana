@@ -43,6 +43,7 @@ export interface InternalI18nServicePreboot {
   getTranslationHashes(): Record<string, string>;
   getAvailableLocales(): ReadonlyArray<AvailableLocale>;
   allowLocaleCookie: boolean;
+  detectBrowserLocale: boolean;
 }
 
 export class I18nService {
@@ -62,6 +63,7 @@ export class I18nService {
       translationHashes,
       localeFileMap,
       allowLocaleCookie,
+      detectBrowserLocale,
     } = await this.initTranslations(pluginPaths);
     const { dist: isDist } = this.coreContext.env.packageInfo;
     http.registerRoutes('', (router) =>
@@ -79,6 +81,7 @@ export class I18nService {
       getTranslationHashes: () => translationHashes,
       getAvailableLocales: () => availableLocales,
       allowLocaleCookie,
+      detectBrowserLocale,
     };
   }
 
@@ -92,6 +95,7 @@ export class I18nService {
       translationHashes,
       localeFileMap,
       allowLocaleCookie,
+      detectBrowserLocale,
     } = await this.initTranslations(pluginPaths);
 
     const router = http.createRouter('');
@@ -112,6 +116,7 @@ export class I18nService {
       getTranslationHash: () => translationHash,
       getTranslationHashes: () => translationHashes,
       allowLocaleCookie,
+      detectBrowserLocale,
     };
   }
 
@@ -158,6 +163,7 @@ export class I18nService {
       translationHashes,
       localeFileMap,
       allowLocaleCookie: i18nConfig.allowLocaleCookie,
+      detectBrowserLocale: i18nConfig.detectBrowserLocale,
     };
   }
 }

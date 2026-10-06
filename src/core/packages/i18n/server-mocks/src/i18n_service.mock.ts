@@ -28,7 +28,11 @@ const createSetupContractMock = () => {
     getTranslationHashes: jest.fn().mockReturnValue(MOCK_TRANSLATION_HASHES),
   });
 
-  return { ...base, allowLocaleCookie: true } as jest.Mocked<I18nServiceSetup>;
+  return {
+    ...base,
+    allowLocaleCookie: true,
+    detectBrowserLocale: true,
+  } as jest.Mocked<I18nServiceSetup>;
 };
 
 const createInternalPrebootMock = () => {
@@ -38,7 +42,11 @@ const createInternalPrebootMock = () => {
     getAvailableLocales: jest.fn(),
   });
 
-  const mock = { ...base, allowLocaleCookie: true } as jest.Mocked<InternalI18nServicePreboot>;
+  const mock = {
+    ...base,
+    allowLocaleCookie: true,
+    detectBrowserLocale: true,
+  } as jest.Mocked<InternalI18nServicePreboot>;
 
   mock.getTranslationHash.mockReturnValue('MOCK_HASH');
   mock.getTranslationHashes.mockReturnValue(MOCK_TRANSLATION_HASHES);

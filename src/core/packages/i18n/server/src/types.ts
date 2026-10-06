@@ -55,4 +55,11 @@ export interface I18nServiceSetup {
    * `i18n.allowLocaleCookie` in `kibana.yml`. Defaults to `true`.
    */
   allowLocaleCookie: boolean;
+
+  /**
+   * When `true`, Kibana falls back to the browser's `Accept-Language` header
+   * when neither the user profile nor the `KBN_LOCALE` cookie selects a locale.
+   * Controlled by `i18n.detectBrowserLocale` in `kibana.yml`. Defaults to `true`.
+   */
+  detectBrowserLocale: boolean;
 }
