@@ -42,14 +42,9 @@ export const isReinforcementOwnedSlug = (slug: string): boolean =>
   isDecisionTreeSlug(slug) || isLearningSlug(slug);
 
 /**
- * Dedicated Context Engine AI index for decision trees and their learnings.
- *
- * Trees used to live in the Cortex index as runbook pages; they now own this index so the UI can
- * browse version history and per-version diffs without those documents polluting the Cortex wiki.
+ * Decision trees and their learnings, kept out of the Cortex index so the UI can browse version
+ * history. The `ai-index-idx-` prefix gives it the managed AI-index mapping.
  */
-export const DECISION_TREE_AI_INDEX_ID = 'nightshift-decision-trees';
-
-/** Backing index for {@link DECISION_TREE_AI_INDEX_ID}. Must use the `ai-index-idx-` prefix. */
 export const DECISION_TREE_AI_INDEX_DEST = 'ai-index-idx-nightshift-decision-trees';
 
 /** Tag every document in the index carries, so a single term query lists the whole index. */
