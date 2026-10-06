@@ -9,6 +9,7 @@
 
 import { createContractMockFetch } from '../fetch/create_contract_mock_fetch';
 import type { PaginatedOperation } from './paginate';
+import type { RecordedExchange, Recording } from './response_engine';
 
 const channel = {
   type: 'object',
@@ -163,6 +164,29 @@ const pagination: PaginatedOperation[] = [
 const createMock = (collectionSize: number) =>
   createContractMockFetch({ specs: [spec], pagination, collectionSize });
 
+const toChannels = (...names: string[]) => names.map((id) => ({ id }));
+
+const slackPage = (
+  cursor: string | undefined,
+  names: string[],
+  next: string
+): RecordedExchange => ({
+  operation: { method: 'GET', path: '/conversations.list' },
+  request: { query: cursor ? { cursor, limit: '2' } : { limit: '2' } },
+  response: {
+    status: 200,
+    body: { channels: toChannels(...names), response_metadata: { next_cursor: next } },
+  },
+});
+
+const createRecordedMock = (exchanges: Recording['exchanges'], collectionSize?: number) =>
+  createContractMockFetch({
+    specs: [spec],
+    pagination,
+    collectionSize,
+    recordings: [{ exchanges }],
+  });
+
 const getJson = async (fetch: typeof globalThis.fetch, path: string) => {
   const response = await fetch(`https://api.example.com${path}`);
   return { status: response.status, body: await response.json() };
@@ -295,5 +319,95 @@ describe('withPagination', () => {
     expect([ids(first), ids(last)]).toEqual([['C1-1', 'C1-2'], ['C1-3']]);
     expect(last).not.toHaveProperty(['@odata.nextLink']);
     expect(calls.map(({ status }) => status)).toEqual([200, 200]);
+  });
+
+  describe('with recorded pages', () => {
+    const recordedPages = [
+      slackPage(undefined, ['CA', 'CB'], 'dXNlcjpVMDYx'),
+      slackPage('dXNlcjpVMDYx', ['CC'], ''),
+    ];
+
+    it('serves the recorded items and hands out the recorded cursors', async () => {
+      const { fetch } = createRecordedMock(recordedPages);
+
+      const first = await getJson(fetch, '/conversations.list?limit=2');
+      const last = await getJson(fetch, '/conversations.list?limit=2&cursor=dXNlcjpVMDYx');
+
+      expect([ids(first.body), first.body.response_metadata.next_cursor]).toEqual([
+        ['CA', 'CB'],
+        'dXNlcjpVMDYx',
+      ]);
+      expect([ids(last.body), last.body.response_metadata.next_cursor]).toEqual([['CC'], '']);
+    });
+
+    it('maps recorded cursors to their position whatever the page size', async () => {
+      const { fetch } = createRecordedMock(recordedPages);
+
+      const { body } = await getJson(fetch, '/conversations.list?limit=1&cursor=dXNlcjpVMDYx');
+
+      expect(ids(body)).toEqual(['CC']);
+    });
+
+    it('joins pages recorded out of order or more than once', async () => {
+      const { fetch } = createRecordedMock([recordedPages[1], recordedPages[0], recordedPages[0]]);
+
+      const { body } = await getJson(fetch, '/conversations.list?limit=10');
+
+      expect(ids(body)).toEqual(['CA', 'CB', 'CC']);
+    });
+
+    it('pads the recorded items to the requested collection size', async () => {
+      const { fetch } = createRecordedMock(recordedPages, 5);
+
+      const { body } = await getJson(fetch, '/conversations.list?limit=10');
+
+      expect(ids(body)).toEqual(['CA', 'CB', 'CC', 'CC-2', 'CC-3']);
+    });
+
+    it('reads recorded cursors from next-page URLs', async () => {
+      const users = { method: 'GET', path: '/users' };
+      const { fetch } = createRecordedMock([
+        {
+          operation: users,
+          request: { query: { $top: '1' } },
+          response: {
+            status: 200,
+            body: {
+              channels: toChannels('U1'),
+              '@odata.nextLink': 'https://api.example.com/users?$top=1&$skiptoken=X1',
+            },
+          },
+        },
+        {
+          operation: users,
+          request: { query: { $top: '1', $skiptoken: 'X1' } },
+          response: { status: 200, body: { channels: toChannels('U2') } },
+        },
+      ]);
+
+      const first = await getJson(fetch, '/users?$top=1');
+      const { body } = await getJson(fetch, '/users?$top=1&$skiptoken=X1');
+
+      expect(new URL(first.body['@odata.nextLink']).searchParams.get('$skiptoken')).toBe('X1');
+      expect([ids(first.body), ids(body)]).toEqual([['U1'], ['U2']]);
+    });
+
+    it('ignores recordings for operations with a fixture', async () => {
+      const { fetch } = createContractMockFetch({
+        specs: [spec],
+        pagination,
+        recordings: [{ exchanges: recordedPages }],
+        fixtures: [
+          {
+            operation: { method: 'GET', path: '/conversations.list' },
+            response: { status: 200, body: { channels: toChannels('F') } },
+          },
+        ],
+      });
+
+      const { body } = await getJson(fetch, '/conversations.list?limit=10');
+
+      expect(ids(body)).toEqual(['F-1', 'F-2', 'F-3']);
+    });
   });
 });
