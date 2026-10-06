@@ -27,6 +27,32 @@ export interface VegaConfig {
   description?: string;
 }
 
+/** The `spec` of a native `vega` dashboard panel: an HJSON string or a JSON object. */
+export type VegaPanelSpec =
+  | { format: 'hjson'; value: string }
+  | { format: 'json'; value: Record<string, unknown> };
+
+/** Wraps a serialized Vega/Vega-Lite spec as a native `vega` panel spec. */
+export const toVegaPanelSpec = (spec: string): VegaPanelSpec => ({ format: 'hjson', value: spec });
+
+/**
+ * Read the serialized spec out of a `vega` dashboard panel's `spec`. Accepts the native shape and
+ * the bare string that older dashboard attachments stored. Returns `undefined` when neither matches.
+ */
+export const readVegaPanelSpec = (spec: unknown): string | undefined => {
+  if (typeof spec === 'string') {
+    return spec;
+  }
+  const { format, value } = (spec ?? {}) as { format?: unknown; value?: unknown };
+  if (format === 'hjson' && typeof value === 'string') {
+    return value;
+  }
+  if (format === 'json' && value && typeof value === 'object') {
+    return JSON.stringify(value, null, 2);
+  }
+  return undefined;
+};
+
 /**
  * The by-value `savedVis` shape a Kibana legacy-vis (`visualization`) embeddable
  * expects for a Vega/Vega-Lite spec. Kept minimal (no persisted saved object) so

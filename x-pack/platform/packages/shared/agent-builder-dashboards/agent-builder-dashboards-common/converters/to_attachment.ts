@@ -15,6 +15,7 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 import {
   extractVegaSpecFromSavedVis,
+  toVegaPanelSpec,
   VEGA_VIS_TYPE,
 } from '@kbn/agent-builder-visualizations-common';
 import type { AttachmentPanel, DashboardSection as DashboardAttachmentSection } from '../types';
@@ -45,9 +46,9 @@ export const isLensAttributesPanel = (
  * For Lens panels with internal attributes format, converts to API format.
  */
 export const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | undefined => {
-  // Normalize a by-value legacy-vis (`visualization`) Vega panel to the future
-  // native `vega` API shape (`config.spec`). Temporary bridge that pairs with the
-  // expansion in `from_attachment`; remove once the native vega API ships.
+  // Normalize a by-value legacy-vis (`visualization`) Vega panel to the native
+  // `vega` API shape. Temporary bridge that pairs with the expansion in
+  // `from_attachment`; remove once the native vega embeddable is enabled by default.
   // Panel-level settings (title, description, hide_*, drilldowns, …) live beside
   // `savedVis` and must be preserved — same pattern as Lens below.
   if (panel.type === VISUALIZE_EMBEDDABLE_TYPE) {
@@ -61,7 +62,7 @@ export const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | unde
         id: panel.id ?? '',
         config: {
           ...restConfig,
-          spec: vega.spec,
+          spec: toVegaPanelSpec(vega.spec),
           // Prefer panel-level title/description (manual edits); fall back to savedVis.
           title: typeof restConfig.title === 'string' ? restConfig.title : vega.title,
           description:

@@ -11,6 +11,7 @@ import {
   VISUALIZATION_ATTACHMENT_TYPE,
   getEffectiveRenderer,
   isCustomContentVisualization,
+  toVegaPanelSpec,
   type VisualizationAttachmentData,
 } from '@kbn/agent-builder-visualizations-common';
 import { toEsqlQueryState } from '@kbn/custom-content-common';
@@ -24,7 +25,8 @@ import { EMBEDDABLE_TYPE_BY_RENDERER } from '@kbn/dashboard-authoring';
 
 /** Maps a stored visualization payload onto the embeddable that renders it. */
 const toPanelContent = (data: VisualizationAttachmentData): PanelContent => {
-  const type = EMBEDDABLE_TYPE_BY_RENDERER[getEffectiveRenderer(data)];
+  const renderer = getEffectiveRenderer(data);
+  const type = EMBEDDABLE_TYPE_BY_RENDERER[renderer];
 
   // Custom content stores markup rather than a chart config, so its panel config is rebuilt.
   if (isCustomContentVisualization(data)) {
@@ -35,6 +37,12 @@ const toPanelContent = (data: VisualizationAttachmentData): PanelContent => {
         esql_query: toEsqlQueryState(data.esql),
       },
     };
+  }
+
+  // Visualization attachments keep the serialized spec; dashboard panels store the native shape.
+  if (renderer === 'vega') {
+    const { spec, ...restConfig } = data.visualization;
+    return { type, config: { ...restConfig, spec: toVegaPanelSpec(spec ?? '') } };
   }
 
   return { type, config: data.visualization };
