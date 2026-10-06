@@ -52,9 +52,9 @@ const CasesMetricsComponent: React.FC<CasesMetricsProps> = ({
 
   const panelStyles = useMemo(
     () => css`
-      border-radius: ${euiTheme.border.radius.medium};
+      border-radius: ${euiTheme.border.radius.panel};
     `,
-    [euiTheme.border.radius.medium]
+    [euiTheme.border.radius.panel]
   );
 
   return (

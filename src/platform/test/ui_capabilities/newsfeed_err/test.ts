@@ -22,10 +22,10 @@ export default function uiCapabilitiesTests({ getService, getPageObjects }: FtrP
 
     it('clicking on newsfeed icon should open you empty newsfeed', async () => {
       await globalNav.clickNewsfeed();
-      const isOpen = await PageObjects.newsfeed.isNewsfeedPanelOpen();
+      const isOpen = await PageObjects.newsfeed.waitForNewsfeedPanelOpen();
       expect(isOpen).to.be(true);
 
-      const hasNewsfeedEmptyPanel = await PageObjects.newsfeed.openNewsfeedEmptyPanel();
+      const hasNewsfeedEmptyPanel = await PageObjects.newsfeed.waitForNewsfeedEmptyPanel();
       expect(hasNewsfeedEmptyPanel).to.be(true);
     });
 

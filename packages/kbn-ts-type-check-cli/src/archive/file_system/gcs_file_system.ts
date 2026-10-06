@@ -9,11 +9,12 @@
 import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
+import { pipeline } from 'stream/promises';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import execa from 'execa';
 import { GCS_BUCKET_URI } from '../constants';
-import { getTarCreateArgs, getTarPlatformOptions, resolveTarEnvironment } from './utils';
+import { createArchiveExtractor, getTarCreateArgs, resolveTarEnvironment } from './utils';
 import { AbstractFileSystem } from './abstract_file_system';
 import type { ArchiveMetadata } from './types';
 import { join } from './utils';
@@ -43,32 +44,11 @@ export class GcsFileSystem extends AbstractFileSystem {
       stderr: 'inherit',
     });
 
-    if (!tarProcess.stdout || !uploadProcess.stdin) {
-      tarProcess.kill();
-      uploadProcess.kill();
-      throw new Error('Failed to stream TypeScript cache archive to GCS.');
-    }
-
-    tarProcess.stdout.pipe(uploadProcess.stdin);
-
-    await Promise.all([tarProcess, uploadProcess]);
+    await pipeAndWait(tarProcess, uploadProcess);
   }
 
   protected async extract(archivePath: string): Promise<void> {
     this.log.info(`Streaming TypeScript build artifacts from ${archivePath}`);
-
-    const extractBaseArgs = ['--directory', REPO_ROOT, ...getTarPlatformOptions()];
-
-    const tarArgs = ['--extract', '--file', '-', '--gzip', ...extractBaseArgs];
-
-    const tarProcess = execa('tar', tarArgs, {
-      cwd: REPO_ROOT,
-      stdin: 'pipe',
-      stdout: 'ignore',
-      stderr: 'inherit',
-      env: resolveTarEnvironment(),
-      buffer: false,
-    });
 
     const catProcess = execa('gcloud', ['storage', 'cat', archivePath], {
       cwd: REPO_ROOT,
@@ -77,15 +57,20 @@ export class GcsFileSystem extends AbstractFileSystem {
       buffer: false,
     });
 
-    if (!catProcess.stdout || !tarProcess.stdin) {
-      tarProcess.kill();
-      catProcess.kill();
-      throw new Error('Failed to establish stream between gcloud and tar.');
+    if (!catProcess.stdout) {
+      killChild(catProcess);
+      throw new Error('Failed to stream TypeScript cache archive from GCS.');
     }
 
-    catProcess.stdout.pipe(tarProcess.stdin);
-
-    await Promise.all([catProcess, tarProcess]);
+    try {
+      await Promise.all([
+        pipeline(catProcess.stdout, createArchiveExtractor(this.log)),
+        catProcess,
+      ]);
+    } catch (error) {
+      killChild(catProcess);
+      throw error;
+    }
   }
 
   protected async hasArchive(archivePath: string): Promise<boolean> {
@@ -135,5 +120,42 @@ export class GcsFileSystem extends AbstractFileSystem {
 
   async clean(): Promise<void> {
     // do nothing
+  }
+}
+
+async function pipeAndWait(source: execa.ExecaChildProcess, destination: execa.ExecaChildProcess) {
+  if (!source.stdout || !destination.stdin) {
+    killChild(source);
+    killChild(destination);
+    throw new Error('Failed to stream TypeScript cache archive to GCS.');
+  }
+
+  source.stdout.on('error', () => undefined);
+  destination.stdin.on('error', () => undefined);
+  source.stdout.pipe(destination.stdin);
+
+  try {
+    await Promise.all([source, destination]);
+  } catch (error) {
+    killChild(source);
+    killChild(destination);
+    throw error;
+  }
+}
+
+function killChild(child: execa.ExecaChildProcess) {
+  child.stdin?.destroy();
+  child.stdout?.destroy();
+  if (child.killed || child.exitCode !== null) {
+    return;
+  }
+
+  try {
+    child.kill('SIGKILL');
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code !== 'ESRCH') {
+      throw error;
+    }
   }
 }

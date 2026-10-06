@@ -1,0 +1,21 @@
+{
+  "sha1": "281238c7b685d4579b0c99981074412a2d7f4cf1",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "dccaad7da9fcc1d-957b11b21e4ab6f",
+      "title": "Vega sandbox example renders in an opaque iframe and reports isolation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/vega_sandbox_example/test/scout_examples/ui/tests/vega_sandbox_example.spec.ts",
+        "line": 15,
+        "column": 11
+      }
+    }
+  ]
+}

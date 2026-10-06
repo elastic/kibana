@@ -38,6 +38,10 @@ export class AiIndexRegistry {
     return this.entries.has(id);
   }
 
+  get(id: string): AiIndexProperties | undefined {
+    return this.entries.get(id);
+  }
+
   /**
    * Idempotent upsert of one managed entry into one space. Safe to call on
    * every access.

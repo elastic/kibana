@@ -16,6 +16,7 @@ import {
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { DataSource } from '@kbn/data-source';
 import { useProfileAccessor } from '../../context_awareness';
 import type { DiscoverAppState } from '../../application/main/state_management/redux';
 import type { CascadedDocumentsContext } from '../../application/main/components/layout/cascaded_documents';
@@ -50,6 +51,7 @@ export interface DiscoverGridProps extends UnifiedDataTableProps {
    */
   gridImplementation?: DiscoverGridImplementation;
   onChangeGridImplementation?: (implementation: DiscoverGridImplementation) => void;
+  dataSource?: DataSource;
 }
 
 /**
@@ -60,6 +62,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
   ({
     query,
     cascadedDocumentsContext,
+    dataSource,
     externalAdditionalControls: customExternalAdditionalControls,
     rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
     onFullScreenChange,
@@ -92,8 +95,8 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
 
     const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
     const getRowIndicator = useMemo(() => {
-      return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView });
-    }, [getRowIndicatorProvider, props.dataView]);
+      return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView, dataSource });
+    }, [dataSource, getRowIndicatorProvider, props.dataView]);
 
     const getRowAdditionalLeadingControlsAccessor = useProfileAccessor(
       'getRowAdditionalLeadingControls'

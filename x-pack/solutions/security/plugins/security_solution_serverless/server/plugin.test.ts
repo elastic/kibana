@@ -7,6 +7,7 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { ALERTZERO_ENABLED_SETTING_ID } from '@kbn/alertzero-common';
+import { AI_ANONYMIZATION_SETTINGS } from '@kbn/management-settings-ids';
 import { SecuritySolutionServerlessPlugin } from './plugin';
 import type { SecuritySolutionServerlessPluginSetupDeps } from './types';
 import { ProductLine, ProductTier } from '../common/product';
@@ -83,7 +84,7 @@ const createMinimalSetupDeps = (alertzero?: {
     taskManager: {} as SecuritySolutionServerlessPluginSetupDeps['taskManager'],
     cloud: {} as SecuritySolutionServerlessPluginSetupDeps['cloud'],
     actions: {} as SecuritySolutionServerlessPluginSetupDeps['actions'],
-    alertzero,
+    alertzero: alertzero ? { ...alertzero, setServerlessTierAvailable: jest.fn() } : undefined,
   } as unknown as SecuritySolutionServerlessPluginSetupDeps);
 
 describe('SecuritySolutionServerlessPlugin', () => {
@@ -134,6 +135,30 @@ describe('SecuritySolutionServerlessPlugin', () => {
       expect(setupProjectSettings).toHaveBeenCalledTimes(1);
       const [settingsArray] = setupProjectSettings.mock.calls[0];
       expect(settingsArray).not.toContain(ALERTZERO_ENABLED_SETTING_ID);
+    });
+  });
+  describe('setup — AI anonymization project-setting allowlist', () => {
+    it('allowlists AI_ANONYMIZATION_SETTINGS so it is editable in Advanced Settings', () => {
+      const plugin = new SecuritySolutionServerlessPlugin(
+        coreMock.createPluginInitializerContext({
+          productTypes: [
+            { product_line: ProductLine.security, product_tier: ProductTier.complete },
+          ],
+          enableExperimental: [],
+          usageApi: { enabled: false },
+          usageReportingTaskInterval: '1h',
+          cloudSecurityUsageReportingTaskInterval: '30m',
+          ai4SocUsageReportingTaskInterval: '1h',
+          usageReportingTaskTimeout: '1m',
+          cloudSecurityMetering: { cspm: { enabled: false } },
+        })
+      );
+      const deps = createMinimalSetupDeps(undefined);
+
+      plugin.setup(coreMock.createSetup(), deps);
+
+      const [settingsArray] = (deps.serverless.setupProjectSettings as jest.Mock).mock.calls[0];
+      expect(settingsArray).toContain(AI_ANONYMIZATION_SETTINGS);
     });
   });
 });

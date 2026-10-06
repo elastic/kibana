@@ -24,13 +24,15 @@ export {
   validateMaxDuration,
   validateMinDuration,
   validateEsqlQuery,
+  validateComposedEsqlQuery,
+  composeEsqlQuery,
   parseDurationToMs,
 } from './validation';
 export * from './policy_matcher_schema';
 export * from './action_policy_data_schema';
 export * from './action_policy_response_schema';
 export * from './action_policy_attachment_schema';
-export * from './episode_attachment_schema';
+export * from './alert_attachment_schema';
 export * from './alert_episode_schema';
 export * from './alert_action_schema';
 export * from './bulk_operation_schema';
@@ -39,6 +41,8 @@ export * from './rule_execution_history_schema';
 export * from './rule_change_history_schema';
 export * from './rule_event_fields_schema';
 export * from './match_action_policies_schema';
+export * from './action_policy_routing_tags_schema';
+export * from './match_rules_schema';
 export * from './severity';
 export * from './create_alert_event_data_schema';
 export * from './rule_template_schema';
