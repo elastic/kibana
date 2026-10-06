@@ -6,12 +6,8 @@
  */
 
 import { get, has } from 'lodash/fp';
-import type {
-  EventHit,
-  TimelineEdges,
-  TimelineNonEcsData,
-  EventSource,
-} from '../../../../../common/search_strategy';
+import type { EventHit, EventSource } from '../../../../../common/search_strategy';
+import type { TimelineEdges, TimelineNonEcsData } from '@kbn/securitysolution-timeline-common';
 import { toStringArray } from '../../../../../common/utils/to_array';
 import { getDataFromFieldsHits } from '../../../../../common/utils/field_formatters';
 import { getTimestamp } from './get_timestamp';
