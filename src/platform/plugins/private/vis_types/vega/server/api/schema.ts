@@ -18,21 +18,27 @@ import {
 
 export const vegaSpecSchema = z
   .discriminatedUnion('format', [
-    z.object({
-      format: z.literal('hjson'),
-      value: z.string().min(1).meta({
-        description:
-          'The Vega or Vega-Lite specification in HJSON format. Comments and unquoted keys are preserved.',
-      }),
-    }),
-    z.object({
-      format: z.literal('json'),
-      value: z.looseObject({}).meta({
-        description: 'The Vega or Vega-Lite specification as a JSON object.',
-      }),
-    }),
+    z
+      .object({
+        format: z.literal('hjson'),
+        value: z.string().min(1).meta({
+          description:
+            'The Vega or Vega-Lite specification in HJSON format. Comments and unquoted keys are preserved.',
+        }),
+      })
+      .meta({ title: 'HJSON spec' }),
+    z
+      .object({
+        format: z.literal('json'),
+        value: z.looseObject({}).meta({
+          description: 'The Vega or Vega-Lite specification as a JSON object.',
+        }),
+      })
+      .meta({ title: 'JSON spec' }),
   ])
   .meta({
+    id: 'kbn-vega-spec',
+    title: 'Vega spec',
     description:
       'The Vega or Vega-Lite specification. Use `{ "format": "hjson", "value": "<hjson-string>" }` for HJSON (comments and unquoted keys are preserved) or `{ "format": "json", "value": { ... } }` for a JSON object.',
   });
