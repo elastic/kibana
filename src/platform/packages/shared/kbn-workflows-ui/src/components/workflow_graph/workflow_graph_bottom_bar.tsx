@@ -129,7 +129,7 @@ function ViewToggle({
         padding: euiTheme.size.xs,
         display: 'flex',
         alignItems: 'center',
-        gap: 2,
+        gap: euiTheme.size.xs,
       }}
     >
       {items.map(({ id, iconType, label }) => {
@@ -143,14 +143,14 @@ function ViewToggle({
               onClick={() => onEditorViewChange(id)}
               data-test-subj={`workflowEditorViewToggle-${id}`}
               css={{
-                width: 32,
-                height: 32,
+                width: euiTheme.size.xl,
+                height: euiTheme.size.xl,
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 border: 'none',
                 cursor: 'pointer',
-                borderRadius: 4,
+                borderRadius: euiTheme.border.radius.control,
                 padding: 0,
                 background: active ? euiTheme.colors.backgroundBasePlain : 'transparent',
                 boxShadow: active ? activeToggleShadow : 'none',
@@ -162,8 +162,8 @@ function ViewToggle({
                     : euiTheme.colors.backgroundBaseInteractiveHover,
                 },
                 '&:focus-visible': {
-                  outline: `2px solid ${euiTheme.colors.primary}`,
-                  outlineOffset: 2,
+                  outline: `${euiTheme.border.width.thick} solid ${euiTheme.colors.primary}`,
+                  outlineOffset: euiTheme.border.width.thick,
                 },
               }}
             >

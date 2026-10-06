@@ -240,7 +240,7 @@ export const AlertEpisodeDetailsFlyout = ({
   // Header badge data
   const isAcked = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
   const isResolved = episodeAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
-  const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozeExpiry);
+  const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozedUntil);
   const tags = groupAction?.tags ?? [];
 
   // Header title: show skeleton while loading, fall back to generic label if rule not found.
@@ -321,7 +321,7 @@ export const AlertEpisodeDetailsFlyout = ({
           {/* Snoozed badge */}
           {isSnoozed && (
             <FlyoutTemplate.Header.Badge iconType="bellSlash">
-              <SnoozedBadgeLabel expiry={groupAction?.snoozeExpiry} dateFormat={dateFormat} />
+              <SnoozedBadgeLabel expiry={groupAction?.snoozedUntil} dateFormat={dateFormat} />
             </FlyoutTemplate.Header.Badge>
           )}
 

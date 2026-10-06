@@ -34,6 +34,7 @@ import {
   useWorkflowEventsOnDecorations,
   useWorkflowIdDecorations,
 } from './decorations';
+import { useServiceAccountDecorations } from './decorations/use_service_account_decorations';
 import { EditorSettingsPopover } from './editor_settings_popover';
 import type { ExtraAction } from './extra_actions_bar';
 import { ExtraActionsBar } from './extra_actions_bar';
@@ -41,6 +42,7 @@ import { useAgentBuilderIntegration } from './hooks/use_agent_builder_integratio
 import { useFixWithAi } from './hooks/use_fix_with_ai';
 import { useWorkflowYamlCompletionProvider } from './hooks/use_workflow_yaml_completion_provider';
 import { KeyboardShortcutsPopover } from './keyboard_shortcuts_popover';
+import { ServiceAccountEditorWidgets } from './service_accounts/service_account_editor_widgets';
 import { StepActions } from './step_actions';
 import { WorkflowStepMinimap } from './workflow_step_minimap';
 import { WorkflowYamlValidationAccordion } from './workflow_yaml_validation_accordion';
@@ -556,6 +558,7 @@ export const WorkflowYAMLEditor = ({
   }, [insertedStepRange]);
 
   // Decorations
+  useServiceAccountDecorations({ editor: editorRef.current, isEditorMounted });
   useTriggerTypeDecorations({
     editor: editorRef.current,
     yamlDocument: yamlDocument || null,
@@ -891,6 +894,7 @@ export const WorkflowYAMLEditor = ({
       ref={containerRef}
     >
       <GlobalWorkflowEditorStyles />
+      {isActive && <ServiceAccountEditorWidgets editor={mountedEditor} />}
       <ActionsMenuPopover
         closePopover={dismissActionsPopover}
         onActionSelected={onActionSelected}

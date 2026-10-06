@@ -18,6 +18,7 @@ export type {
   WorkflowGraphEditActions,
   WorkflowGraphInsertionContext,
   WorkflowSettingsNodeKind,
+  WorkflowStepInsertPath,
 } from './workflow_graph_actions_context';
 export type { PendingInsertVisual, PendingInsertStepContext } from './pending_insert';
 export { ReactFlowProvider } from '@xyflow/react';

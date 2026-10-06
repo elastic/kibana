@@ -97,6 +97,7 @@ export function WorkflowGraphPendingNode({
   const isTriggerDraft = pending.context.mode === 'trigger';
   const isHorizontal = direction === 'LR';
   const borderRadius = 8;
+  const chipBorderRadius = 4;
   const ariaLabel = isConfiguring
     ? isTriggerDraft
       ? i18n.translate('workflowsUi.graph.pendingConfiguringTriggerAria', {
@@ -246,7 +247,7 @@ export function WorkflowGraphPendingNode({
                     flex: '0 0 auto',
                     width: 28,
                     height: 28,
-                    borderRadius,
+                    borderRadius: chipBorderRadius,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
