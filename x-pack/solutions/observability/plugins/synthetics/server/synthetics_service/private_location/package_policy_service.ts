@@ -11,9 +11,10 @@ import type { PackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { uniqBy } from 'lodash';
 import type { SyntheticsServerSetup } from '../../types';
 import { AgentPolicyRevisionBatcher } from './agent_policy_revision_batcher';
+import type { ConditionUpdate, ShardedPackagePolicy } from './rebalance_writes';
+import { SHARDED_PACKAGE_POLICY_FIELDS } from './rebalance_writes';
 
 interface GetByIdsOptions {
   spaceId: string;
@@ -63,7 +64,7 @@ const getInternalEsClientFor = (server: SyntheticsServerSetup) =>
  * attaches no extensions, matching {@link listByAgentPolicy}'s existing
  * cross-space Fleet lookup in this same file.
  */
-const bumpAgentPolicyRevision = async (
+export const bumpAgentPolicyRevision = async (
   server: SyntheticsServerSetup,
   policyId: string
 ): Promise<void> => {
@@ -204,6 +205,11 @@ export class PackagePolicyService {
    * filtering by id suffix in memory (this runs once per location per rebalance
    * cycle, ~1m). Paginated so a location with more than one page of monitors
    * isn't truncated.
+   *
+   * Source-filtered to {@link SHARDED_PACKAGE_POLICY_FIELDS}: every monitor of
+   * the location is held in memory at once here, and the condition-only write
+   * this feeds needs none of the policy body. Unprojected, each browser monitor
+   * would drag its inline script along in `compiled_stream` for nothing.
    */
   async listByAgentPolicy({
     agentPolicyId,
@@ -211,9 +217,9 @@ export class PackagePolicyService {
   }: {
     agentPolicyId: string;
     signal?: AbortSignal;
-  }): Promise<PackagePolicy[]> {
+  }): Promise<ShardedPackagePolicy[]> {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-    const items: PackagePolicy[] = [];
+    const items: ShardedPackagePolicy[] = [];
     const perPage = 1000;
     let page = 1;
     let hasMore = true;
@@ -223,6 +229,7 @@ export class PackagePolicyService {
       const { items: pageItems } = await this.server.fleet.packagePolicyService.list(soClient, {
         kuery: `ingest-package-policies.package.name:synthetics AND ingest-package-policies.policy_ids:"${agentPolicyId}"`,
         spaceId: ALL_SPACES_ID,
+        fields: SHARDED_PACKAGE_POLICY_FIELDS,
         page,
         perPage,
       });
@@ -323,12 +330,19 @@ export class PackagePolicyService {
    * classic/immediate split to make. Without this, a rebalance cycle's bump
    * races the same agent policy as concurrent monitor CRUD with no retry,
    * so a single version conflict fails the whole cycle's moves outright.
+   *
+   * Writes through Fleet's `bulkUpdatePartial` rather than `bulkUpdate`: only
+   * `condition` (plus the revision metadata) changes, so the package lookup,
+   * validation, secret handling, input compilation and callbacks that
+   * `bulkUpdate` runs have nothing to act on here. `bulkUpdatePartial` also
+   * skips agent-policy deployment, which this path already owns via
+   * {@link AgentPolicyRevisionBatcher}.
    */
   async bulkUpdateInSpace({
     policiesToUpdate,
     spaceId,
   }: {
-    policiesToUpdate: UpdatePackagePolicyWithId[];
+    policiesToUpdate: ConditionUpdate[];
     spaceId: string;
   }) {
     if (policiesToUpdate.length === 0) {
@@ -337,19 +351,21 @@ export class PackagePolicyService {
 
     const soClient = this.getSpaceSoClient(spaceId === ALL_SPACES_ID ? DEFAULT_SPACE_ID : spaceId);
     const { updatedPolicies, failedPolicies } =
-      await this.server.fleet.packagePolicyService.bulkUpdate(
+      await this.server.fleet.packagePolicyService.bulkUpdatePartial(
         soClient,
-        this.getInternalEsClient(),
-        policiesToUpdate,
-        {
-          force: true,
-          asyncDeploy: true,
-          bumpRevision: false,
-        }
+        policiesToUpdate.map(({ update }) => update)
       );
 
+    // `bulkUpdatePartial` echoes back only the attributes that were sent, so
+    // `policy_ids` is absent from its result and the bump targets have to come
+    // from the source policies captured alongside each update. Keyed by
+    // package-policy id so only writes that actually landed get bumped.
+    const agentPolicyIdsByPackagePolicyId = new Map(
+      policiesToUpdate.map(({ update, agentPolicyIds }) => [update.id, agentPolicyIds])
+    );
+
     await this.revisionBatcher.schedule(
-      updatedPolicies?.flatMap(({ policy_ids: policyIds }) => policyIds) ?? []
+      updatedPolicies.flatMap(({ id }) => agentPolicyIdsByPackagePolicyId.get(id) ?? [])
     );
 
     return failedPolicies;
@@ -502,8 +518,9 @@ export class PackagePolicyService {
     ).flat();
 
     const agentPolicyById = new Map(agentPolicies.map((ap) => [ap.id, ap]));
-    const defaultSpacePackagePolicies: T[] = [];
-    const spacePackagePolicies: T[] = [];
+    // Dedupe by reference, not id: Test Now policies have no id until Fleet assigns one.
+    const defaultSpacePackagePolicies = new Set<T>();
+    const spacePackagePolicies = new Set<T>();
 
     for (const pkgPolicy of policies) {
       if (pkgPolicy.policy_ids && pkgPolicy.policy_ids.length > 0) {
@@ -513,13 +530,13 @@ export class PackagePolicyService {
             agentPolicy?.space_ids?.includes(spaceId) ||
             agentPolicy?.space_ids?.includes(ALL_SPACES_ID)
           ) {
-            spacePackagePolicies.push(pkgPolicy);
+            spacePackagePolicies.add(pkgPolicy);
           } else {
-            defaultSpacePackagePolicies.push(pkgPolicy);
+            defaultSpacePackagePolicies.add(pkgPolicy);
           }
         });
       } else {
-        defaultSpacePackagePolicies.push(pkgPolicy);
+        defaultSpacePackagePolicies.add(pkgPolicy);
       }
     }
 
@@ -528,14 +545,11 @@ export class PackagePolicyService {
       policies: T[];
     }[] = [];
 
-    if (defaultSpacePackagePolicies.length > 0) {
-      res.push({
-        client: defaultSpaceSoClient,
-        policies: uniqBy(defaultSpacePackagePolicies, 'id'),
-      });
+    if (defaultSpacePackagePolicies.size > 0) {
+      res.push({ client: defaultSpaceSoClient, policies: [...defaultSpacePackagePolicies] });
     }
-    if (spacePackagePolicies.length > 0) {
-      res.push({ client: spaceSoClient, policies: uniqBy(spacePackagePolicies, 'id') });
+    if (spacePackagePolicies.size > 0) {
+      res.push({ client: spaceSoClient, policies: [...spacePackagePolicies] });
     }
 
     return res;

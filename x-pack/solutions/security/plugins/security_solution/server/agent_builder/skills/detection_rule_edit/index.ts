@@ -52,6 +52,8 @@ Do NOT use this skill when the user:
 - Asks about threat hunting without any intent to create or edit a rule
 - Asks a general security question that doesn't imply building or changing a detection (e.g., "what is lateral movement?", "explain MITRE ATT&CK")
 - Asks to enable, disable, or delete an existing rule (no tool support for this yet)
+- Asks whether a rule exists, or to list or count rules ("do we have a rule for T1059?", "do we detect lateral movement over SMB?", "how many rules are disabled?") → use the find-security-rules skill. These are inventory questions; answering one does not change a rule.
+When the user supplies the rule's substance — a query, explicit field and value conditions, concrete parameters, or an explicit ask for a **new** rule — build it here. Do not ask whether a rule already exists; they have already decided.
 
 This skill only supports the **ES|QL** rule type. If the user asks to create a rule with any other rule type (e.g., KQL, EQL, threshold, new terms, machine learning, indicator match, etc.), do NOT attempt to create it. Do NOT automatically offer or proceed to create an ES|QL alternative. Instead, stop and clearly tell the user:
 

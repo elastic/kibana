@@ -18,12 +18,14 @@ import {
   type StepContext,
   type WorkflowContext,
 } from '@kbn/workflows';
-import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
-import { buildWorkflowContext } from './build_workflow_context';
+import type { GraphNodeUnion } from '@kbn/workflows/graph';
+import { buildWorkflowRenderContext } from './build_workflow_context';
 import { extractReferencedStepIds } from './extract_referenced_step_ids';
+import { areParallelBranchesCompatible, getParallelBranchScopes } from './parallel_branch_scope';
 import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
 import type { StepExecutionMetadata, WorkflowExecutionState } from './workflow_execution_state';
+import type { RuntimeGraphView } from './workflow_runtime_graph';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import {
   callKibanaApi,
@@ -47,19 +49,20 @@ import { isSerializedError } from '../utils/errors';
 export function resolveRehydrationTargets(
   node: GraphNodeUnion,
   predecessors: ReadonlyArray<GraphNodeUnion>,
-  state: WorkflowExecutionState
+  state: WorkflowExecutionState,
+  stackFrames?: readonly StackFrame[]
 ): Set<string> {
   const neededIds = new Set<string>();
   const referencedStepIds = extractReferencedStepIds(node);
 
   if (referencedStepIds === null || referencedStepIds.size === 0) {
     for (const pred of predecessors) {
-      const latestExec = state.getLatestStepExecution(pred.stepId);
+      const latestExec = state.getLatestStepExecution(pred.stepId, stackFrames);
       if (latestExec) neededIds.add(latestExec.id);
     }
   } else {
     for (const stepId of referencedStepIds) {
-      const latestExec = state.getLatestStepExecution(stepId);
+      const latestExec = state.getLatestStepExecution(stepId, stackFrames);
       if (latestExec) neededIds.add(latestExec.id);
     }
   }
@@ -78,7 +81,7 @@ export function resolveRehydrationTargets(
 export interface ContextManagerInit {
   // New properties for logging
   templateEngine: WorkflowTemplatingEngine;
-  workflowExecutionGraph: WorkflowGraph;
+  workflowExecutionGraph: RuntimeGraphView;
   workflowExecutionState: WorkflowExecutionState;
   stepIoService: StepIoService;
   node: GraphNodeUnion;
@@ -99,7 +102,7 @@ type ContextPathSegment = string | number;
 type ContextPath = ContextPathSegment[];
 
 export class WorkflowContextManager {
-  private workflowExecutionGraph: WorkflowGraph;
+  private workflowExecutionGraph: RuntimeGraphView;
   private workflowExecutionState: WorkflowExecutionState;
   private stepIoService: StepIoService;
   private esClient: ElasticsearchClient;
@@ -152,7 +155,8 @@ export class WorkflowContextManager {
     const neededIds = resolveRehydrationTargets(
       this.node,
       this.predecessors,
-      this.workflowExecutionState
+      this.workflowExecutionState,
+      this.stackFrames
     );
     await this.stepIoService.rehydrate([...neededIds]);
   }
@@ -331,8 +335,20 @@ export class WorkflowContextManager {
    */
   public getVariables(): Record<string, unknown> {
     const result: Record<string, unknown> = {};
-    for (const step of this.workflowExecutionState.getAllStepExecutions()) {
-      if (step.stepType !== 'data.set') continue;
+    const readerBranchScopes = getParallelBranchScopes(this.stackFrames);
+    const dataSetSteps = this.workflowExecutionState.getAllStepExecutions().filter((step) => {
+      if (step.stepType !== 'data.set') {
+        return false;
+      }
+      if (readerBranchScopes.length === 0) {
+        return true;
+      }
+      return areParallelBranchesCompatible(
+        readerBranchScopes,
+        getParallelBranchScopes(step.scopeStack ?? [])
+      );
+    });
+    for (const step of dataSetSteps) {
       const output = this.stepIoService.read(step.id, 'output');
       if (output != null && typeof output === 'object' && !Array.isArray(output)) {
         Object.assign(result, output);
@@ -350,7 +366,7 @@ export class WorkflowContextManager {
 
   private buildWorkflowContext(): WorkflowContext {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
-    return buildWorkflowContext(workflowExecution, this.coreStart, this.dependencies);
+    return buildWorkflowRenderContext(workflowExecution, this.coreStart, this.dependencies);
   }
 
   private getRenderingContext(value: unknown): StepContext {
@@ -556,10 +572,13 @@ export class WorkflowContextManager {
         buildStepExecutionId(executionId, topFrame.stepId, scopeStack.stackFrames)
       );
       scopeEntries.push({ topFrame, stepExecution });
-      // Parallel branches expose the same {{ foreach.item }} / {{ foreach.index }}
+      // Dynamic parallel branches expose the same {{ foreach.item }} / {{ foreach.index }}
       // context as a sequential foreach: each branch scope carries the item it
       // is processing, derived from the persisted index + re-evaluated list.
-      if (stepExecution?.stepType === 'foreach' || stepExecution?.stepType === 'parallel') {
+      // Static `branches` have no item, so they must not shadow an outer foreach.
+      const isDynamicParallel =
+        stepExecution?.stepType === 'parallel' && stepExecution.state?.static !== true;
+      if (stepExecution?.stepType === 'foreach' || isDynamicParallel) {
         foreachEntries.push({ topFrame, stepExecution });
       }
       if (stepExecution?.stepType === 'while') {
@@ -642,9 +661,10 @@ export class WorkflowContextManager {
   }
 
   /**
-   * Builds the foreach context by combining the persisted state (index, total)
-   * with items derived by re-evaluating the foreach expression at resolution time.
-   * This avoids storing the entire items array in the step execution state on every iteration.
+   * Builds the foreach context from persisted step state (index, total) and the
+   * list snapshotted on `input.items` at loop entry. Older executions that only
+   * stored the foreach expression re-evaluate it so {{foreach.item}} still
+   * resolves.
    */
   private parseScopeIndex(scopeId: string | undefined): number | undefined {
     if (scopeId == null) return undefined;
@@ -662,17 +682,13 @@ export class WorkflowContextManager {
       indexOverride ?? (typeof foreachState.index === 'number' ? foreachState.index : 0);
     const total = typeof foreachState.total === 'number' ? foreachState.total : 0;
 
-    // Re-evaluate the foreach expression (stored in the step input at entry
-    // time) to derive the full items array and current item without
-    // persisting them in state. Input lives in `StepIoService` (lifecycle
-    // metadata vs IO data are owned separately); a foreach is non-terminal
-    // while iterating, so its input is never evicted by post-flush input
-    // eviction — the service read is safe here.
+    // Prefer the list snapshotted onto input at enter. Re-evaluate the
+    // expression only for older executions that never stored `items`.
     const foreachInput = this.stepIoService.read(stepExecution.id, 'input');
     const foreachExpression = this.extractForeachExpression(foreachInput);
-    const items = foreachExpression
-      ? this.resolveForeachItems(foreachExpression, stepContext)
-      : undefined;
+    const items =
+      this.extractPersistedForeachItems(foreachInput) ??
+      (foreachExpression ? this.resolveForeachItems(foreachExpression, stepContext) : undefined);
 
     const availableItems = items ?? [];
 
@@ -700,6 +716,21 @@ export class WorkflowContextManager {
       return typeof expression === 'string' ? expression : undefined;
     }
     return undefined;
+  }
+
+  /**
+   * Evaluated list snapshotted onto foreach `input.items` at loop entry.
+   * Missing on older executions that only stored the foreach expression.
+   */
+  private extractPersistedForeachItems(
+    input: EsWorkflowStepExecution['input']
+  ): unknown[] | undefined {
+    if (input === null || typeof input !== 'object' || Array.isArray(input)) {
+      return undefined;
+    }
+
+    const { items } = input as { items?: unknown };
+    return Array.isArray(items) ? items : undefined;
   }
 
   /**
@@ -743,11 +774,14 @@ export class WorkflowContextManager {
         stepState: Record<string, unknown> | undefined;
       }
     | undefined {
-    const io = this.stepIoService.getLatestStepIO(stepId);
+    const io = this.stepIoService.getLatestStepIO(stepId, this.stackFrames);
     if (!io) {
       return;
     }
-    const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);
+    const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(
+      stepId,
+      this.stackFrames
+    );
     return {
       runStepResult: {
         input: io.input,

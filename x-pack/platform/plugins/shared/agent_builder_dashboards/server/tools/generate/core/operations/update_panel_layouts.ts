@@ -31,7 +31,7 @@ export const updatePanelLayoutsOperation = defineOperation({
             .nullable()
             .optional()
             .describe(
-              'Move panel to an existing section by its id. The section must already exist (use add_section first). null promotes to top level. Omit to keep the current location.'
+              'Move panel to an existing section id or the key of an add_section earlier in this call. null promotes to top level. Omit to keep the current location.'
             ),
         })
       )

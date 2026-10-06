@@ -15,23 +15,24 @@ import type {
   WorkflowTokenUsage,
 } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { StepIoService } from './step_io_service';
 import type { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
+import type { RuntimeGraphView } from './workflow_runtime_graph';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import { toExecutionError } from '../step/errors';
 import type { RunStepResult } from '../step/node_implementation';
 import { extractConnectorId, extractTokenUsage, parseDuration } from '../utils';
 
-import type { IWorkflowEventLogger, WorkflowEventFlushOptions } from '../workflow_event_logger';
+import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 interface StepExecutionRuntimeInit {
   contextManager: WorkflowContextManager;
   workflowExecutionState: WorkflowExecutionState;
   stepIoService: StepIoService;
-  workflowExecutionGraph: WorkflowGraph;
+  workflowExecutionGraph: RuntimeGraphView;
   stepLogger: IWorkflowEventLogger;
   stepExecutionId: string;
   node: GraphNodeUnion;
@@ -60,7 +61,7 @@ interface StepExecutionRuntimeInit {
 export class StepExecutionRuntime {
   private workflowExecutionState: WorkflowExecutionState;
   private stepIoService: StepIoService;
-  private workflowGraph: WorkflowGraph;
+  private runtimeGraph: RuntimeGraphView;
   private stackFrames: StackFrame[];
 
   public contextManager: WorkflowContextManager;
@@ -82,7 +83,7 @@ export class StepExecutionRuntime {
   }
 
   private get topologicalOrder(): string[] {
-    return this.workflowGraph.topologicalOrder;
+    return this.runtimeGraph.topologicalOrder;
   }
 
   private getStepName(): string {
@@ -102,7 +103,7 @@ export class StepExecutionRuntime {
   }
 
   constructor(stepExecutionRuntimeInit: StepExecutionRuntimeInit) {
-    this.workflowGraph = stepExecutionRuntimeInit.workflowExecutionGraph;
+    this.runtimeGraph = stepExecutionRuntimeInit.workflowExecutionGraph;
     this.contextManager = stepExecutionRuntimeInit.contextManager;
 
     // Use workflow execution ID as traceId for APM compatibility
@@ -135,6 +136,15 @@ export class StepExecutionRuntime {
     };
   }
 
+  /**
+   * Brings the given step executions' outputs back into the LRU cache so a
+   * subsequent {@link getCurrentStepResult} can read them. One Elasticsearch
+   * round trip for the ids that are not already cached.
+   */
+  public async rehydrateStepOutputs(stepExecutionIds: ReadonlyArray<string>): Promise<void> {
+    await this.stepIoService.rehydrate(stepExecutionIds);
+  }
+
   public getCurrentStepState(): Record<string, unknown> | undefined {
     return this.workflowExecutionState.getStepExecution(this.stepExecutionId)?.state;
   }
@@ -151,6 +161,9 @@ export class StepExecutionRuntime {
   public startStep(): void {
     const stepId = this.node.stepId;
     const stepStartedAt = new Date();
+    // Capture before upsert: the write below sets startedAt, so a later read cannot
+    // tell a first start from a durable poll resume of the same step execution.
+    const alreadyStarted = this.stepExecution?.startedAt != null;
 
     this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
@@ -161,11 +174,21 @@ export class StepExecutionRuntime {
       status: ExecutionStatus.RUNNING,
       startedAt: this.stepExecution?.startedAt ?? stepStartedAt.toISOString(),
     });
-    this.logStepStart(stepId, this.stepExecutionId);
+    if (!alreadyStarted) {
+      this.logStepStart(stepId, this.stepExecutionId);
+    }
   }
 
   public setInput(input: Record<string, unknown>): void {
     this.stepIoService.write(this.stepExecutionId, 'input', input as JsonValue);
+  }
+
+  /** Stamps the optional HITL audit envelope on the in-memory step doc (flushed with the next step write). */
+  public stampHitlAudit(hitl: NonNullable<EsWorkflowStepExecution['hitl']>): void {
+    this.workflowExecutionState.upsertStep({
+      id: this.stepExecutionId,
+      hitl,
+    });
   }
 
   /**
@@ -329,10 +352,6 @@ export class StepExecutionRuntime {
       });
     }
     return usage;
-  }
-
-  public async flushEventLogs(options?: WorkflowEventFlushOptions): Promise<void> {
-    await this.stepLogger?.flushEvents(options);
   }
 
   /**

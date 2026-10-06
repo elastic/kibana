@@ -31,6 +31,9 @@ export const KBN_ARCHIVES = {
     'x-pack/platform/test/functional/fixtures/kbn_archives/saved_objects_management/feature_controls/security.json',
   SPACES_INTEGRATION:
     'x-pack/platform/test/functional/fixtures/kbn_archives/saved_objects_management/spaces_integration',
+  // A `logstash-*` data view (id `f1e4c910-…`) plus the "Shared-Item Visualization
+  // AreaChart" that the import-conflict specs collide with on purpose.
+  MANAGEMENT: 'src/platform/test/functional/fixtures/kbn_archiver/management',
 };
 
 // Inspect-view target inside the FEATURE_CONTROLS_SECURITY archive.
@@ -38,16 +41,53 @@ export const INSPECT_TARGETS = {
   DASHBOARD_TITLE: 'A Dashboard',
 } as const;
 
-// Cross-version saved-object .ndjson exports. Paths are repo-relative so they
-// resolve via `Path.resolve(REPO_ROOT, ...)` for both API multipart uploads
-// and the UI flyout file picker.
+const EXPORTS_DIR =
+  'src/platform/plugins/shared/saved_objects_management/test/scout/fixtures/exports';
+
+// Saved-object .ndjson exports. Paths are repo-relative so they resolve via
+// `Path.resolve(REPO_ROOT, ...)` for both API multipart uploads and the UI
+// flyout file picker.
 export const NDJSON_EXPORTS = {
-  V_7_13_SAVED_OBJECTS:
-    'src/platform/plugins/shared/saved_objects_management/test/scout/fixtures/exports/_7.13_import_saved_objects.ndjson',
-  V_7_14_ALERTS_ACTIONS:
-    'src/platform/plugins/shared/saved_objects_management/test/scout/fixtures/exports/_7.14_import_alerts_actions.ndjson',
-  V_8_0_MULTISPACE:
-    'src/platform/plugins/shared/saved_objects_management/test/scout/fixtures/exports/_8.0.0_multispace_import.ndjson',
+  V_7_13_SAVED_OBJECTS: `${EXPORTS_DIR}/_7.13_import_saved_objects.ndjson`,
+  V_7_14_ALERTS_ACTIONS: `${EXPORTS_DIR}/_7.14_import_alerts_actions.ndjson`,
+  V_8_0_MULTISPACE: `${EXPORTS_DIR}/_8.0.0_multispace_import.ndjson`,
+  // Single-object payloads exercising the import conflict/reference flows.
+  // `OBJECTS` and `SAVED_SEARCH` reference the `f1e4c910-…` data view shipped in
+  // KBN_ARCHIVES.MANAGEMENT; `EXISTS`, `CONFLICTS`, `WITH_SAVED_SEARCH`, and
+  // `MGMT_OBJECTS` deliberately reference data view ids that do not exist so
+  // the import surfaces a missing-reference conflict.
+  OBJECTS: `${EXPORTS_DIR}/_import_objects.ndjson`,
+  CIRCULAR_REFS: `${EXPORTS_DIR}/_import_objects_circular_refs.ndjson`,
+  CONFLICTS: `${EXPORTS_DIR}/_import_objects_conflicts.ndjson`,
+  EXISTS: `${EXPORTS_DIR}/_import_objects_exists.ndjson`,
+  SAVED_SEARCH: `${EXPORTS_DIR}/_import_objects_saved_search.ndjson`,
+  CONNECTED_TO_SAVED_SEARCH: `${EXPORTS_DIR}/_import_objects_connected_to_saved_search.ndjson`,
+  WITH_SAVED_SEARCH: `${EXPORTS_DIR}/_import_objects_with_saved_search.ndjson`,
+  WITH_INDEX_PATTERNS: `${EXPORTS_DIR}/_import_objects_with_index_patterns.ndjson`,
+  MGMT_OBJECTS: `${EXPORTS_DIR}/mgmt_import_objects.ndjson`,
+} as const;
+
+// Titles and ids inside the import fixtures above, shared by the UI conflict specs.
+export const IMPORT_FIXTURE_OBJECTS = {
+  LOG_AGENTS_TITLE: 'Log Agents',
+  SHARED_ITEM_VIZ_TITLE: 'Shared-Item Visualization AreaChart',
+  INDEX_PATTERN_TITLE: 'logstash-*',
+  CIRCULAR_DASHBOARD_A: 'dashboard-a',
+  CIRCULAR_DASHBOARD_B: 'dashboard-b',
+  CONFLICT_VIZ_TITLE: 'saved object with index pattern conflict',
+  // Data view id referenced by CONFLICTS, absent from the cluster.
+  CONFLICT_MISSING_INDEX_PATTERN_ID: 'd1e4c910-a2e6-11e7-bb30-233be9be6a15',
+  // Data view id referenced by EXISTS, absent from the cluster.
+  EXISTS_MISSING_INDEX_PATTERN_ID: 'logstash-*',
+  // Data view id referenced by MGMT_OBJECTS' saved search, absent from the cluster.
+  MGMT_MISSING_INDEX_PATTERN_ID: '4c3f3c30-ac94-11e8-a651-614b2788174a',
+  MGMT_SAVED_SEARCH_TITLE: 'mysavedsearch',
+  MGMT_VIZ_TITLE: 'mysavedviz',
+  CONNECTED_TO_SAVED_SEARCH_TITLE: 'saved object connected to saved search',
+  // Data view id referenced by WITH_SAVED_SEARCH, absent from the cluster
+  // (deliberately not `f1e4c910-…` / `logstash-*` from KBN_ARCHIVES.MANAGEMENT).
+  WITH_SAVED_SEARCH_MISSING_INDEX_PATTERN_ID: 'e1e4c910-a2e6-11e7-bb30-233be9be6a15',
+  IMPORTED_WITH_INDEX_PATTERN_TITLE: 'saved object imported with index pattern',
 } as const;
 
 // Object counts produced by the cross-version imports above.

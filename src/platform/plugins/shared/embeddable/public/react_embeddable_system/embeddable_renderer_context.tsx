@@ -26,6 +26,7 @@ export type QuickActionIds = [
   string?,
   string?,
   string?,
+  string?,
   string?
 ];
 
@@ -50,6 +51,7 @@ export const DEFAULT_QUICK_ACTIONS: QuickActions = {
     'ACTION_VIEW_SAVED_SEARCH',
     'CONVERT_LEGACY_MARKDOWN',
     'ACTION_FILTERS_NOTIFICATION',
+    'ACTION_ESQL_NOTIFICATION',
   ],
   view: [
     'clearControl',
@@ -59,5 +61,6 @@ export const DEFAULT_QUICK_ACTIONS: QuickActions = {
     'openInspector',
     'togglePanel',
     'ACTION_FILTERS_NOTIFICATION',
+    'ACTION_ESQL_NOTIFICATION',
   ],
 } as const;

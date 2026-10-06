@@ -35,9 +35,6 @@ export class LoopContinueNodeImpl implements NodeImplementation {
     this.stepExecutionRuntime.finishStep({ navigateToNode: this.node.loopExitNodeId });
 
     this.wfExecutionRuntimeManager.unwindScopes(this.stepExecutionRuntimeFactory, isLoopEnterScope);
-    // Evict stale outputs from the current iteration before looping back.
-    // Without this, a 1000-iteration loop accumulates all stale outputs
-    // in memory until the loop fully exits.
     this.wfExecutionRuntimeManager.navigateToNode(this.node.loopExitNodeId);
   }
 }

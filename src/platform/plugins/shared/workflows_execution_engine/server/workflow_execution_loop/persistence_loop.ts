@@ -25,7 +25,7 @@ export async function flushState(
   await Promise.all([
     params.workflowExecutionState.flushWorkflowDoc(),
     params.workflowExecutionState.flushStepChanges(),
-    params.workflowLogger.flushEvents({ signal: options.workflowLogFlushSignal }),
+    params.eventQueue.flush({ signal: options.workflowLogFlushSignal }),
   ]);
   flushSpan?.end();
 }
@@ -33,7 +33,7 @@ export async function flushState(
 /**
  * Continuously persists workflow execution state and logs while the workflow is running.
  *
- * This function runs a loop that flushes the workflow execution state and logger events
+ * This function runs a loop that flushes the workflow execution state and queued log events
  * at regular intervals (every 0.5 seconds) until the workflow execution status is no longer RUNNING
  * OR until the persistenceAbortSignal is triggered (indicating execution has completed).
  *

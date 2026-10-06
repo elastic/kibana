@@ -6,16 +6,19 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import {
   EuiCallOut,
   EuiComboBox,
   EuiFormRow,
   EuiIcon,
+  EuiIconTip,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiText,
   type EuiComboBoxOptionOption,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
 import {
@@ -25,9 +28,31 @@ import {
 } from '@kbn/user-profile-components';
 import { ConversationAccessModeSelect } from './conversation_access_mode_select';
 import { ConversationParticipantsList } from './conversation_participants_list';
-import { currentMembersLabel, searchUsersLabel } from './conversation_share_i18n';
+import {
+  agentAccessHelpAriaLabel,
+  agentAccessHelpLabel,
+  currentMembersLabel,
+  searchUsersLabel,
+} from './conversation_share_i18n';
 
 const USER_SEARCH_OPTION_ROW_HEIGHT = 48;
+const AGENT_ACCESS_TOOLTIP_OFFSET = 8;
+
+/**
+ * `EuiComboBox` reserves a selection indicator column on every option while `singleSelection` is
+ * set, and renders it as an invisible `EuiIcon type="empty"` because an option is never kept
+ * selected here. Neither the column nor its flex gap is exposed as a prop, so the placeholder is
+ * hidden from the options panel to keep the user rows left aligned.
+ */
+const hiddenOptionIndicatorCss = css`
+  .euiListItemLayout__icon {
+    display: none;
+  }
+`;
+
+const currentMembersLabelStyle = ({ euiTheme }: UseEuiTheme) => css`
+  row-gap: ${euiTheme.size.s};
+`;
 
 interface UserSearchOptionProps {
   profile: UserProfileWithAvatar;
@@ -81,12 +106,14 @@ interface ConversationShareEditableContentProps {
   access: ConversationShareAccessProps;
   members: ConversationShareMembersProps;
   userSearch: ConversationShareUserSearchProps;
+  agentName?: string;
 }
 
 export const ConversationShareEditableContent: React.FC<ConversationShareEditableContentProps> = ({
   access,
   members,
   userSearch,
+  agentName,
 }) => {
   const isPublic = access.mode === ConversationAccessControlMode.Public;
   const excludedIds = new Set([userSearch.ownerId, ...userSearch.memberIds].filter(Boolean));
@@ -127,7 +154,27 @@ export const ConversationShareEditableContent: React.FC<ConversationShareEditabl
       {editableHeader}
 
       <EuiSpacer size="l" />
-      <EuiFormRow label={currentMembersLabel} fullWidth>
+      <EuiFormRow
+        label={
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>{currentMembersLabel}</EuiFlexItem>
+            {agentName ? (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  type="question"
+                  size="s"
+                  color="subdued"
+                  offset={AGENT_ACCESS_TOOLTIP_OFFSET}
+                  aria-label={agentAccessHelpAriaLabel}
+                  content={agentAccessHelpLabel(agentName)}
+                />
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+        }
+        fullWidth
+        css={currentMembersLabelStyle}
+      >
         <EuiComboBox<string>
           compressed
           fullWidth
@@ -150,6 +197,9 @@ export const ConversationShareEditableContent: React.FC<ConversationShareEditabl
             />
           }
           singleSelection={{ asPlainText: true }}
+          inputPopoverProps={{
+            panelProps: { css: hiddenOptionIndicatorCss },
+          }}
           renderOption={(option) => {
             const profile = option.value ? suggestedProfileByUid.get(option.value) : undefined;
 

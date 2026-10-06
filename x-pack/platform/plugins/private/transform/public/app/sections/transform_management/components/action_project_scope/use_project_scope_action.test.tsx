@@ -13,11 +13,19 @@ import * as appDependencies from '../../../../app_dependencies';
 import { useTransformCapabilities, useUpdateTransformsProjectScope } from '../../../../hooks';
 import { useProjectScopeAction } from './use_project_scope_action';
 
+const mockUseGetTransformCpsEnabled = jest.fn(
+  (_args?: { enabled: boolean }) => ({ data: true } as { data: boolean | undefined })
+);
+
 jest.mock('../../../../app_dependencies');
 
 jest.mock('../../../../hooks', () => ({
   useTransformCapabilities: jest.fn(),
   useUpdateTransformsProjectScope: jest.fn(),
+}));
+
+jest.mock('../../../../hooks/use_get_transform_cps_enabled', () => ({
+  useGetTransformCpsEnabled: (args: { enabled: boolean }) => mockUseGetTransformCpsEnabled(args),
 }));
 
 jest.mock('@kbn/cps-utils', () => {
@@ -54,6 +62,7 @@ describe('Transform: Transform List Actions <useProjectScopeAction />', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseGetTransformCpsEnabled.mockReturnValue({ data: true });
     appDependencies.useAppDependencies().cps = {
       isTierEligible: true,
       cpsManager: {
@@ -83,6 +92,20 @@ describe('Transform: Transform List Actions <useProjectScopeAction />', () => {
       typeof useTransformCapabilities
     >);
     mockUseUpdateTransformsProjectScope.mockReturnValue(updateTransformsProjectScope);
+  });
+
+  it('disables the action when the Elasticsearch cross-project feature flags are disabled', () => {
+    mockUseGetTransformCpsEnabled.mockReturnValue({ data: false });
+    const { result } = renderHook(() => useProjectScopeAction());
+
+    expect(result.current.isCpsEnabled).toBe(false);
+    expect(result.current.isDisabled([transformItem])).toBe(true);
+
+    act(() => {
+      result.current.openFlyout([transformItem]);
+    });
+
+    expect(result.current.isFlyoutVisible).toBe(false);
   });
 
   it('calls the success callback and clears action items when all updates succeed', () => {

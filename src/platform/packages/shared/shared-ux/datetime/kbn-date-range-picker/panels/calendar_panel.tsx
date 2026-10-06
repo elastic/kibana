@@ -22,7 +22,7 @@ import {
 } from '../date_range_picker_panel_ui';
 import { calendarPanelTexts, mainPanelTexts } from '../translations';
 import { timeRangeToDisplayText } from '../format';
-import { getEndDate, getStartDate, formatDateRange } from '../utils';
+import { getEndDate, getStartDate, formatDateRange, formatInputDateRange } from '../utils';
 import { useDateRangePickerContext } from '../date_range_picker_context';
 
 /** Calendar-based date selection panel. */
@@ -56,15 +56,9 @@ export function CalendarPanel() {
   // On mount: convert to absolute format so user sees resolved dates
   useEffect(() => {
     if (timeSourceRef.current.startDate && timeSourceRef.current.endDate) {
-      setText(
-        formatDateRange(
-          timeSourceRef.current.startDate,
-          timeSourceRef.current.endDate,
-          timePrecision
-        )
-      );
+      setText(formatInputDateRange(timeSourceRef.current.startDate, timeSourceRef.current.endDate));
     }
-  }, [setText, timePrecision]);
+  }, [setText]);
 
   const restoreOriginalText = useCallback(() => {
     setText(originalTextRef.current);
@@ -82,9 +76,9 @@ export function CalendarPanel() {
   const formatRangeText = useCallback(
     (from: Date, to: Date): string => {
       const { start, end } = getOrderedDates(from, to);
-      return formatDateRange(start, end, timePrecision);
+      return formatInputDateRange(start, end);
     },
-    [getOrderedDates, timePrecision]
+    [getOrderedDates]
   );
 
   const handleRangeChange = useCallback(

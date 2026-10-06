@@ -21,7 +21,7 @@ export const registerNewsfeedHandler = ({
   api: NewsfeedApi;
   sidebarController: NewsfeedSidebarController;
 }) => {
-  return core.chrome.next.registerNewsfeedHandler({
+  return core.chrome.help.registerNewsfeedHandler({
     open: sidebarController.open,
     hasNew$: api.fetchResults$.pipe(map((result) => result?.hasNew ?? false)),
   });

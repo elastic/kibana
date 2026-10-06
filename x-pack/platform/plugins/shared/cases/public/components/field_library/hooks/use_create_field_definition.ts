@@ -15,6 +15,7 @@ import { casesQueriesKeys, casesMutationsKeys } from '../../../containers/consta
 import * as i18n from '../translations';
 import type { ServerError } from '../../../types';
 import { useCasesToast } from '../../../common/use_cases_toast';
+import { useFieldDefinitionCreatedEBT } from '../../../analytics/field_library';
 
 interface MutationArgs {
   fieldDefinition: CreateFieldDefinitionInput;
@@ -27,6 +28,7 @@ interface UseCreateFieldDefinitionProps {
 export const useCreateFieldDefinition = ({ onSuccess }: UseCreateFieldDefinitionProps = {}) => {
   const queryClient = useQueryClient();
   const { showErrorToast, showSuccessToast } = useCasesToast();
+  const reportFieldDefinitionCreated = useFieldDefinitionCreatedEBT();
 
   return useMutation<FieldDefinition, ServerError, MutationArgs>(
     ({ fieldDefinition }) => postFieldDefinition({ fieldDefinition }),
@@ -36,6 +38,7 @@ export const useCreateFieldDefinition = ({ onSuccess }: UseCreateFieldDefinition
         queryClient.invalidateQueries(casesQueriesKeys.fieldDefinitions);
         showSuccessToast(i18n.SUCCESS_CREATING_FIELD_DEFINITION);
         onSuccess?.(data);
+        reportFieldDefinitionCreated({ isGlobal: data.isGlobal === true });
       },
       onError: (error: ServerError) => {
         showErrorToast(error, { title: i18n.ERROR_CREATING_FIELD_DEFINITION });

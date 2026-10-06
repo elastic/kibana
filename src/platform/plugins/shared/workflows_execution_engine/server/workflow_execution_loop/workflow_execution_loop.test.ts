@@ -34,18 +34,24 @@ describe('workflowExecutionLoop', () => {
     workflowRuntime: {
       saveState: jest.fn().mockResolvedValue(undefined),
       setWorkflowError: jest.fn(),
+      getWorkflowExecution: jest.fn().mockReturnValue({
+        id: 'exec-1',
+        status: ExecutionStatus.RUNNING,
+      }),
     },
     workflowExecutionState: {
       updateWorkflowExecution: jest.fn(),
+      flushWorkflowDoc: jest.fn().mockResolvedValue(undefined),
+      flushStepChanges: jest.fn().mockResolvedValue(undefined),
     },
     stepIoService: {
-      flush: jest.fn().mockResolvedValue(undefined),
-      // Workflow-end safety release added with the deferred-release pattern.
-      releaseTransientlyRehydratedOutputs: jest.fn(),
+      rehydrate: jest.fn().mockResolvedValue(undefined),
     },
     workflowLogger: {
-      flushEvents: jest.fn().mockResolvedValue(undefined),
       logWarn: jest.fn(),
+    },
+    eventQueue: {
+      flush: jest.fn().mockResolvedValue(undefined),
     },
     signal: new AbortController().signal,
   });
@@ -68,10 +74,9 @@ describe('workflowExecutionLoop', () => {
     expect(flushState).toHaveBeenCalled();
     expect(params.workflowExecutionCursor.start).toHaveBeenCalled();
     expect(params.workflowRuntime.saveState).toHaveBeenCalled();
-    expect(params.stepIoService.flush).toHaveBeenCalled();
-    // Workflow-end cleanup for transient rehydrations (deferred-release pattern).
-    expect(params.stepIoService.releaseTransientlyRehydratedOutputs).toHaveBeenCalled();
-    expect(params.workflowLogger.flushEvents).toHaveBeenCalled();
+    expect(params.workflowExecutionState.flushWorkflowDoc).toHaveBeenCalled();
+    expect(params.workflowExecutionState.flushStepChanges).toHaveBeenCalled();
+    expect(params.eventQueue.flush).toHaveBeenCalled();
   });
 
   it('sets workflow error when execution loop throws', async () => {
@@ -126,8 +131,9 @@ describe('workflowExecutionLoop', () => {
       workflowLogFlushSignal: params.signal,
     });
     expect(params.workflowRuntime.saveState).toHaveBeenCalled();
-    expect(params.stepIoService.flush).toHaveBeenCalled();
-    expect(params.workflowLogger.flushEvents).toHaveBeenCalledWith({
+    expect(params.workflowExecutionState.flushWorkflowDoc).toHaveBeenCalled();
+    expect(params.workflowExecutionState.flushStepChanges).toHaveBeenCalled();
+    expect(params.eventQueue.flush).toHaveBeenCalledWith({
       signal: params.signal,
     });
   });

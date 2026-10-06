@@ -9,7 +9,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { JsonValue } from '@kbn/utility-types';
-import type { SerializedError } from '@kbn/workflows';
+import type { SerializedError, StackFrame } from '@kbn/workflows';
 import { StepIoCache } from './step_io_cache';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import type { OutputSizeStats } from '../lib/telemetry/events/workflows_execution/types';
@@ -32,7 +32,10 @@ export interface StepIoServiceInit {
 export interface StepIoReader {
   read(stepExecutionId: string, type: 'input' | 'output'): JsonValue | null | undefined;
   getStepError(stepExecutionId: string): SerializedError | undefined;
-  getLatestStepIO(stepId: string):
+  getLatestStepIO(
+    stepId: string,
+    stackFrames?: readonly StackFrame[]
+  ):
     | {
         input: JsonValue | undefined;
         output: JsonValue | null | undefined;
@@ -107,14 +110,17 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     return this.state.getStepExecution(stepExecutionId)?.error;
   }
 
-  public getLatestStepIO(stepId: string):
+  public getLatestStepIO(
+    stepId: string,
+    stackFrames?: readonly StackFrame[]
+  ):
     | {
         input: JsonValue | undefined;
         output: JsonValue | null | undefined;
         error: SerializedError | undefined;
       }
     | undefined {
-    const latest = this.state.getLatestStepExecution(stepId);
+    const latest = this.state.getLatestStepExecution(stepId, stackFrames);
     if (!latest) return undefined;
     return {
       input: this.read(latest.id, 'input') ?? undefined,

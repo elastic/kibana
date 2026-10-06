@@ -26,7 +26,11 @@ import type {
   BeatsOutput,
 } from '../../../common/types';
 import { normalizeHostsForAgents } from '../../../common/services';
-import { isBeatsOutput, isOtelExporterOutput } from '../../../common/services/output_helpers';
+import {
+  isBeatsOutput,
+  isOtlpOutput,
+  isOtelExporterOutput,
+} from '../../../common/services/output_helpers';
 import type { FleetConfigType } from '../../config';
 import {
   DEFAULT_OUTPUT_ID,
@@ -40,6 +44,7 @@ import { AGENTLESS_MANAGED_BULK_OUTPUT_IDS, outputType } from '../../../common/c
 import { outputService } from '../output';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
+import { checkOtlpOutputAllowed } from '../outputs/helpers';
 import {
   isAgentlessEnabled,
   isManagedBulkEnabled,
@@ -50,8 +55,28 @@ import { applyAllowEditOverrides, isDifferent } from './utils';
 
 export const MAX_CONCURRENT_OUTPUTS_OPERATIONS = 50;
 
-const PRIVATELINK_ALLOW_EDIT = ['is_default', 'is_default_monitoring'];
-const PRIVATELINK_OUTPUT_IDS = new Set([
+// Fields that project-controller grants on es-default-output (fleet_config.go).
+// We mirror the same list here so that es-private-output (which project-controller
+// currently ships with allow_edit: []) reaches parity with its sibling.
+// This constant is applied as a union on top of whatever project-controller sends,
+// so adding a field here is safe even if project-controller later updates its own list.
+//
+// Connectivity fields (hosts, ssl, ca_*, secrets, proxy_id) are intentionally absent —
+// they remain locked on both managed outputs.
+//
+// Note: the constant name is intentionally broad — these IDs include the serverless
+// default output (SERVERLESS_DEFAULT_OUTPUT_ID) as well as the PrivateLink private
+// output (SERVERLESS_PRIVATE_OUTPUT_ID). The union is a no-op for fields already
+// granted by project-controller on the default output.
+export const SERVERLESS_MANAGED_OUTPUT_ALLOW_EDIT = [
+  'is_default',
+  'is_default_monitoring',
+  'shipper',
+  'config_yaml',
+  'preset',
+  'write_to_logs_streams',
+];
+const SERVERLESS_MANAGED_OUTPUT_IDS = new Set([
   SERVERLESS_DEFAULT_OUTPUT_ID,
   SERVERLESS_PRIVATE_OUTPUT_ID,
 ]);
@@ -127,20 +152,23 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
       : []),
   ]);
 
-  // Ensure the serverless PrivateLink default and private outputs both allow their
-  // is_default / is_default_monitoring fields to be changed at runtime (via the PrivateLink
-  // toggle in the Fleet Settings UI). Without this, _validateFieldsAreEditable rejects any
-  // PUT that touches those fields on a preconfigured output.
+  // Ensure both serverless managed outputs (es-default-output and es-private-output)
+  // carry the same editable-field set, matching the list that project-controller ships
+  // on es-default-output (fleet_config.go). This brings es-private-output to parity
+  // with its sibling, which currently ships with allow_edit: [] from project-controller.
   //
-  // We set allow_edit here (rather than requiring it in every config that defines these
-  // outputs) so that the behaviour is consistent regardless of how the output was defined
-  // (hardcoded above or passed in via config.outputs in the serverless YAML).
+  // The merge is a union — fields project-controller already grants are preserved;
+  // fields it omits are added here. This is applied regardless of whether
+  // privateElasticsearchHost is set, because es-default-output is always present in
+  // serverless and deserves the same guarantee.
   return outputs.map((output) => {
-    if (!PRIVATELINK_OUTPUT_IDS.has(output.id)) {
+    if (!SERVERLESS_MANAGED_OUTPUT_IDS.has(output.id)) {
       return output;
     }
     const existingAllowEdit = output.allow_edit ?? [];
-    const merged = Array.from(new Set([...existingAllowEdit, ...PRIVATELINK_ALLOW_EDIT]));
+    const merged = Array.from(
+      new Set([...existingAllowEdit, ...SERVERLESS_MANAGED_OUTPUT_ALLOW_EDIT])
+    );
     return { ...output, allow_edit: merged };
   });
 }
@@ -193,7 +221,19 @@ export async function createOrUpdatePreconfiguredOutputs(
     { ignoreNotFound: true }
   );
 
+  // Resolve OTLP eligibility once before the pMap — the version check does a paginated
+  // package-policy list and must not run concurrently for each OTLP output.
+  // Lazy: skip the check entirely when no OTLP outputs are present.
+  const otlpCheck = outputs.some(isOtlpOutput)
+    ? await checkOtlpOutputAllowed(esClient, soClient)
+    : { result: true as const };
+
   const updateOrConfigureOutput = async (output: PreconfiguredOutput) => {
+    if (isOtlpOutput(output) && !otlpCheck.result) {
+      logger.warn(`Skipping preconfigured OTLP output ${output.id}: ${otlpCheck.error}`);
+      return;
+    }
+
     const existingOutput = existingOutputs.find((o) => o.id === output.id);
 
     const { id, config, ...outputData } = output;
@@ -313,6 +353,30 @@ async function hashSecrets(output: PreconfiguredOutput) {
     };
   }
 
+  if (isOtlpOutput(output)) {
+    const tls = output.secrets?.otlp_exporter?.tls;
+    const tlsHashes: Record<string, unknown> = {};
+
+    if (typeof tls?.key_pem === 'string') {
+      tlsHashes.key_pem = await hashSecret(tls.key_pem);
+    }
+
+    const tpmHashes: Record<string, unknown> = {};
+    if (typeof tls?.tpm?.owner_auth === 'string') {
+      tpmHashes.owner_auth = await hashSecret(tls.tpm.owner_auth);
+    }
+    if (typeof tls?.tpm?.auth === 'string') {
+      tpmHashes.auth = await hashSecret(tls.tpm.auth);
+    }
+    if (Object.keys(tpmHashes).length) {
+      tlsHashes.tpm = tpmHashes;
+    }
+
+    if (Object.keys(tlsHashes).length) {
+      secrets = { ...secrets, otlp_exporter: { tls: tlsHashes } };
+    }
+  }
+
   return secrets;
 }
 
@@ -425,9 +489,21 @@ async function isPreconfiguredOutputDifferentFromCurrent(
     return true;
   }
 
-  if (existingOutput.type === 'otlp') {
+  if (existingOutput.type === outputType.Otlp) {
     const preconfiguredOtlp = preconfiguredOutput as Partial<NewOtlpOutput>;
-    return isDifferent(existingOutput.otlp_exporter, preconfiguredOtlp.otlp_exporter);
+    const existingTls = existingOutput.secrets?.otlp_exporter?.tls;
+    const preconfiguredTls = preconfiguredOtlp.secrets?.otlp_exporter?.tls;
+    const [tlsKeyIsDifferent, ownerAuthIsDifferent, tpmAuthIsDifferent] = await Promise.all([
+      isSecretDifferent(preconfiguredTls?.key_pem, existingTls?.key_pem),
+      isSecretDifferent(preconfiguredTls?.tpm?.owner_auth, existingTls?.tpm?.owner_auth),
+      isSecretDifferent(preconfiguredTls?.tpm?.auth, existingTls?.tpm?.auth),
+    ]);
+    return (
+      isDifferent(existingOutput.otlp_exporter, preconfiguredOtlp.otlp_exporter) ||
+      tlsKeyIsDifferent ||
+      ownerAuthIsDifferent ||
+      tpmAuthIsDifferent
+    );
   }
 
   const preconfiguredBeats = preconfiguredOutput as Partial<BeatsOutput>;

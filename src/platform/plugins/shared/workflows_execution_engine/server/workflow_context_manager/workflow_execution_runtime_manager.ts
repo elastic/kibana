@@ -134,6 +134,10 @@ export class WorkflowExecutionRuntimeManager {
     this.workflowExecutionCursor.navigateToAfterNode(nodeId);
   }
 
+  public navigateToSynthetic(params: { stepId: string; stepType: string }): void {
+    this.workflowExecutionCursor.navigateToSynthetic(params);
+  }
+
   public getCurrentNodeScope(): StackFrame[] {
     return this.workflowExecutionCursor.currentStackFrames;
   }
@@ -509,7 +513,14 @@ export class WorkflowExecutionRuntimeManager {
         this.workflowExecutionCursor.error
       ).toSerializableObject();
     } else if (!this.workflowExecutionCursor.currentNode) {
-      workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
+      // Parked waits must stay WAITING*; COMPLETED here races TM resume.
+      const isParkedWait =
+        workflowExecution.status === ExecutionStatus.WAITING ||
+        workflowExecution.status === ExecutionStatus.WAITING_FOR_INPUT ||
+        workflowExecution.status === ExecutionStatus.WAITING_FOR_CHILD;
+      if (!isParkedWait) {
+        workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
+      }
     }
 
     if (
@@ -520,6 +531,9 @@ export class WorkflowExecutionRuntimeManager {
       const finishDate = new Date();
       workflowExecutionUpdate.finishedAt = finishDate.toISOString();
       workflowExecutionUpdate.duration = finishDate.getTime() - startedAt.getTime();
+      // Persist the stored context, not the Liquid render alias. Minting a
+      // typeless `event` here makes the execution tree label the trigger
+      // `document` instead of `manual`.
       workflowExecutionUpdate.context = buildWorkflowContext(
         this.workflowExecution,
         this.coreStart,

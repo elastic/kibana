@@ -28,6 +28,7 @@ export class BulkUpdateApiKeyRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Update the API key of rules in bulk by ID',
     description:
       'Rotates each rule executor task API key to one derived from the current user’s credentials.',

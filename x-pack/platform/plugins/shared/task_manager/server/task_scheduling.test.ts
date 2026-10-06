@@ -82,6 +82,8 @@ describe('TaskScheduling', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    // resetAllMocks wipes the factory default; restore the security-enabled behavior.
+    mockTaskStore.willGrantApiKeys.mockImplementation((options) => Boolean(options?.request));
   });
 
   test('allows scheduling tasks', async () => {
@@ -213,6 +215,77 @@ describe('TaskScheduling', () => {
     );
 
     expect(result.id).toEqual('my-foo-id');
+  });
+
+  test('does not schedule a user scoped task that already exists, so no API key is granted', async () => {
+    const task = getTask();
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    const bulkUpdateScheduleSpy = jest
+      .spyOn(taskScheduling, 'bulkUpdateSchedules')
+      .mockResolvedValue({ tasks: [task], errors: [] });
+    mockTaskStore.taskExists.mockResolvedValue(true);
+
+    const mockRequest = httpServerMock.createKibanaRequest();
+    const result = await taskScheduling.ensureScheduled(task, { request: mockRequest });
+
+    expect(mockTaskStore.taskExists).toHaveBeenCalledWith('my-foo-id');
+    expect(mockTaskStore.schedule).not.toHaveBeenCalled();
+    expect(bulkUpdateScheduleSpy).toHaveBeenCalledWith(
+      ['my-foo-id'],
+      { interval: '1m' },
+      {
+        request: mockRequest,
+      }
+    );
+    expect(result.id).toEqual('my-foo-id');
+  });
+
+  test('grants an API key only once when ensureScheduled is called repeatedly for the same task', async () => {
+    const task = getTask();
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    jest
+      .spyOn(taskScheduling, 'bulkUpdateSchedules')
+      .mockResolvedValue({ tasks: [task], errors: [] });
+    mockTaskStore.taskExists.mockResolvedValueOnce(false).mockResolvedValue(true);
+
+    const mockRequest = httpServerMock.createKibanaRequest();
+    await taskScheduling.ensureScheduled(task, { request: mockRequest });
+    await taskScheduling.ensureScheduled(task, { request: mockRequest });
+    await taskScheduling.ensureScheduled(task, { request: mockRequest });
+
+    // Only the first call reaches the store, which is where the API key is granted.
+    expect(mockTaskStore.schedule).toHaveBeenCalledTimes(1);
+  });
+
+  test('does not look up the task when scheduling without a request', async () => {
+    const task = getTask();
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    jest
+      .spyOn(taskScheduling, 'bulkUpdateSchedules')
+      .mockResolvedValue({ tasks: [task], errors: [] });
+    mockTaskStore.schedule.mockRejectedValueOnce({ statusCode: 409 });
+
+    await taskScheduling.ensureScheduled(task);
+
+    expect(mockTaskStore.taskExists).not.toHaveBeenCalled();
+    expect(mockTaskStore.schedule).toHaveBeenCalled();
+  });
+
+  test('does not look up the task when the store will not grant API keys despite a request (e.g. security disabled)', async () => {
+    const task = getTask();
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    jest
+      .spyOn(taskScheduling, 'bulkUpdateSchedules')
+      .mockResolvedValue({ tasks: [task], errors: [] });
+    mockTaskStore.willGrantApiKeys.mockReturnValue(false);
+    mockTaskStore.schedule.mockRejectedValueOnce({ statusCode: 409 });
+
+    const mockRequest = httpServerMock.createKibanaRequest();
+    await taskScheduling.ensureScheduled(task, { request: mockRequest });
+
+    // No key would be granted, so there is no leak to guard against and the lookup is skipped.
+    expect(mockTaskStore.taskExists).not.toHaveBeenCalled();
+    expect(mockTaskStore.schedule).toHaveBeenCalled();
   });
 
   test('does not try to update schedule for tasks that have already been scheduled if no schedule is provided', async () => {

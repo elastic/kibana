@@ -725,6 +725,33 @@ describe('params validation', () => {
     });
   });
 
+  test('params validation passes when query contains numbers and booleans', () => {
+    const params: Record<string, any> = {
+      query: {
+        limit: 100,
+        active: true,
+        flag: false,
+      },
+    };
+    expect(validateParams(connectorType, params, { configurationUtilities })).toEqual({
+      method: 'GET',
+      ...params,
+    });
+  });
+
+  test('params validation passes when query contains array values', () => {
+    const params: Record<string, any> = {
+      query: {
+        tag: ['security', 'critical'],
+        ids: [1, 2, 3],
+      },
+    };
+    expect(validateParams(connectorType, params, { configurationUtilities })).toEqual({
+      method: 'GET',
+      ...params,
+    });
+  });
+
   test('params validation passes when headers are provided', () => {
     const params: Record<string, any> = {
       headers: {
@@ -1857,6 +1884,83 @@ describe('execute()', () => {
 
     const resultUrl = requestMock.mock.calls[0][0].url;
     expect(resultUrl).toContain('foo=bar');
+  });
+
+  test('execute appends numeric and boolean query params as strings', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://example.com/api',
+      hasAuth: false,
+    };
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: emptySecrets,
+      params: {
+        method: 'GET',
+        query: { limit: 100, active: true },
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    const resultUrl = requestMock.mock.calls[0][0].url;
+    expect(resultUrl).toContain('limit=100');
+    expect(resultUrl).toContain('active=true');
+  });
+
+  test('execute repeats key for array query params', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://example.com/api',
+      hasAuth: false,
+    };
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: emptySecrets,
+      params: {
+        method: 'GET',
+        query: { tag: ['security', 'critical'] },
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    const resultUrl = requestMock.mock.calls[0][0].url;
+    expect(resultUrl).toContain('tag=security');
+    expect(resultUrl).toContain('tag=critical');
+  });
+
+  test('execute appends mixed scalar and array query params', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://example.com/api',
+      hasAuth: false,
+    };
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: emptySecrets,
+      params: {
+        method: 'GET',
+        query: { status: 'active', limit: 50, tag: ['a', 'b'] },
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    const resultUrl = requestMock.mock.calls[0][0].url;
+    expect(resultUrl).toContain('status=active');
+    expect(resultUrl).toContain('limit=50');
+    expect(resultUrl).toContain('tag=a');
+    expect(resultUrl).toContain('tag=b');
   });
 
   test('execute uses params.url when config.url is not provided', async () => {

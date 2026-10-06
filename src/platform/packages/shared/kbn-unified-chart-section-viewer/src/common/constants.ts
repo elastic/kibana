@@ -70,15 +70,32 @@ export const ALLOWED_METRIC_TYPES = ['gauge', 'counter', 'histogram'];
 export const FEATURE_FLAGS = {
   IS_EDIT_GRID_SETTINGS_ENABLED: 'discover.metricsExperienceEditGridSettingsEnabled',
   IS_SORTING_ENABLED: 'discover.metricsExperienceSortEnabled',
+  IS_EXEMPLARS_ENABLED: 'observability.metricsExemplarsEnabled',
+  IS_HEATMAPS_ENABLED: 'observability.metricsHeatmapsEnabled',
 } as const;
 
 export type FeatureFlag = (typeof FEATURE_FLAGS)[keyof typeof FEATURE_FLAGS];
 
 // Fallback values used when a feature flag is not configured externally
 export const FEATURE_FLAG_DEFAULTS: Record<FeatureFlag, boolean> = {
-  [FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED]: false,
-  [FEATURE_FLAGS.IS_SORTING_ENABLED]: false,
+  [FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED]: true,
+  [FEATURE_FLAGS.IS_SORTING_ENABLED]: true,
+  [FEATURE_FLAGS.IS_EXEMPLARS_ENABLED]: false,
+  [FEATURE_FLAGS.IS_HEATMAPS_ENABLED]: false,
 };
+
+// OTel exemplars live in a parallel `exemplars-*` stream with the same dataset and namespace.
+export const METRICS_INDEX_PREFIX = 'metrics-';
+export const EXEMPLARS_INDEX_PREFIX = 'exemplars-';
+// Only `exemplars-*.otel-*` has a backing template; any other derived name results in an error.
+export const EXEMPLARS_OTEL_DATASET_MARKER = '.otel';
+// Kibana exposes OTel metric fields under the `metrics` passthrough object; exemplar documents
+// store the bare OTel metric name in `metric_name` and the sample in `value` (elasticsearch#159849).
+export const METRIC_FIELD_PREFIX = 'metrics.';
+export const EXEMPLARS_METRIC_NAME_FIELD = 'metric_name';
+export const EXEMPLARS_VALUE_FIELD = 'value';
+// Temp cap, remove when fixing observability-dev#6205.
+export const EXEMPLARS_MAX_ROWS = 500;
 
 // Metrics grid sort options
 export const METRICS_SORT_BY = {

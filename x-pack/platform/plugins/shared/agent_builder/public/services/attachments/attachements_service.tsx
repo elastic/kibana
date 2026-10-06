@@ -5,14 +5,30 @@
  * 2.0.
  */
 
-import type { HttpSetup } from '@kbn/core-http-browser';
+import { buildPath, type HttpSetup } from '@kbn/core-http-browser';
 import type {
   UnknownAttachment,
   UpdateOriginResponse,
+  VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser';
+import type {
+  AttachmentUIDefinition,
+  CreateAttachmentArgs,
+  DeleteAttachmentArgs,
+  GetAttachmentArgs,
+  ListAttachmentsArgs,
+  ListAttachmentsResult,
+  UpdateAttachmentArgs,
+} from '@kbn/agent-builder-browser';
 import { publicApiPath } from '../../../common/constants';
-import type { CheckStaleAttachmentsResponse } from '../../../common/http_api/attachments';
+import type {
+  CheckStaleAttachmentsResponse,
+  CreateAttachmentResponse,
+  DeleteAttachmentResponse,
+  GetAttachmentResponse,
+  ListAttachmentsResponse,
+  UpdateAttachmentResponse,
+} from '../../../common/http_api/attachments';
 
 /**
  * Internal service for managing attachment UI definitions and API operations.
@@ -80,10 +96,11 @@ export class AttachmentsService {
     origin: string
   ): Promise<UpdateOriginResponse> {
     return await this.http.put<UpdateOriginResponse>(
-      `${publicApiPath}/conversations/${conversationId}/attachments/${attachmentId}/origin`,
-      {
-        body: JSON.stringify({ origin }),
-      }
+      buildPath(
+        `${publicApiPath}/conversations/{conversationId}/attachments/{attachmentId}/origin`,
+        { conversationId, attachmentId }
+      ),
+      { body: JSON.stringify({ origin }) }
     );
   }
 
@@ -92,7 +109,66 @@ export class AttachmentsService {
    */
   async checkStale(conversationId: string): Promise<CheckStaleAttachmentsResponse> {
     return await this.http.get<CheckStaleAttachmentsResponse>(
-      `${publicApiPath}/conversations/${conversationId}/attachments/stale`
+      buildPath(`${publicApiPath}/conversations/{conversationId}/attachments/stale`, {
+        conversationId,
+      })
+    );
+  }
+
+  async list({
+    conversationId,
+    includeDeleted,
+  }: ListAttachmentsArgs): Promise<ListAttachmentsResult> {
+    return await this.http.get<ListAttachmentsResponse>(
+      buildPath(`${publicApiPath}/conversations/{conversationId}/attachments`, {
+        conversationId,
+      }),
+      { query: { include_deleted: includeDeleted } }
+    );
+  }
+
+  async get({ conversationId, attachmentId }: GetAttachmentArgs): Promise<VersionedAttachment> {
+    const { attachment } = await this.http.get<GetAttachmentResponse>(
+      buildPath(`${publicApiPath}/conversations/{conversationId}/attachments/{attachmentId}`, {
+        conversationId,
+        attachmentId,
+      })
+    );
+    return attachment;
+  }
+
+  async create({ conversationId, ...body }: CreateAttachmentArgs): Promise<VersionedAttachment> {
+    const { attachment } = await this.http.post<CreateAttachmentResponse>(
+      buildPath(`${publicApiPath}/conversations/{conversationId}/attachments`, {
+        conversationId,
+      }),
+      { body: JSON.stringify(body) }
+    );
+    return attachment;
+  }
+
+  async update({
+    conversationId,
+    attachmentId,
+    ...body
+  }: UpdateAttachmentArgs): Promise<VersionedAttachment> {
+    const { attachment } = await this.http.put<UpdateAttachmentResponse>(
+      buildPath(`${publicApiPath}/conversations/{conversationId}/attachments/{attachmentId}`, {
+        conversationId,
+        attachmentId,
+      }),
+      { body: JSON.stringify(body) }
+    );
+    return attachment;
+  }
+
+  async delete({ conversationId, attachmentId, permanent }: DeleteAttachmentArgs): Promise<void> {
+    await this.http.delete<DeleteAttachmentResponse>(
+      buildPath(`${publicApiPath}/conversations/{conversationId}/attachments/{attachmentId}`, {
+        conversationId,
+        attachmentId,
+      }),
+      { query: { permanent } }
     );
   }
 }

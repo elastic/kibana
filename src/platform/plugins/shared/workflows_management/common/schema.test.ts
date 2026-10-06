@@ -62,4 +62,52 @@ describe('schema', () => {
       });
     });
   });
+
+  it('accepts a templated waitForApproval timeout nested under if', () => {
+    const schema = getWorkflowZodSchema({});
+    const result = parseWorkflowYamlToJSON(
+      [
+        'name: Nested HITL timeout',
+        'enabled: true',
+        'triggers:',
+        '  - type: manual',
+        'steps:',
+        '  - name: decision_gate',
+        '    type: if',
+        '    condition: "true"',
+        '    steps:',
+        '      - name: await_decision',
+        '        type: waitForApproval',
+        '        timeout: "{{ inputs.expiresIn | default: \'72h\' }}"',
+      ].join('\n'),
+      schema
+    );
+
+    expect(result.error).toBeUndefined();
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts compound durations on wait and step timeout', () => {
+    const schema = getWorkflowZodSchema({});
+    const result = parseWorkflowYamlToJSON(
+      [
+        'name: Compound duration',
+        'enabled: true',
+        'triggers:',
+        '  - type: manual',
+        'steps:',
+        '  - name: pause',
+        '    type: wait',
+        '    with:',
+        '      duration: 1h30m',
+        '  - name: await_decision',
+        '    type: waitForApproval',
+        '    timeout: 1h30m',
+      ].join('\n'),
+      schema
+    );
+
+    expect(result.error).toBeUndefined();
+    expect(result.success).toBe(true);
+  });
 });

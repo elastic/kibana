@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/evals
 dependsOn:
   - '@kbn/core'
+  - '@kbn/core-elasticsearch-server-utils'
   - '@kbn/config-schema'
   - '@kbn/logging'
   - '@kbn/features-plugin'
@@ -57,6 +58,9 @@ dependsOn:
   - '@kbn/workflows-management-plugin'
   - '@kbn/workflows-yaml'
   - '@kbn/spaces-plugin'
+  - '@kbn/lens-plugin'
+  - '@kbn/data-views-plugin'
+  - '@kbn/lens-embeddable-utils'
   - '@kbn/security-plugin'
   - '@kbn/core-spaces-common'
   - '@kbn/crypto'

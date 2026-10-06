@@ -1147,29 +1147,50 @@ describe('Response actions history', () => {
 
         const outputCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
         const outputs = await expandRows();
+        const expectedResult =
+          command === 'kill-process'
+            ? [
+                expect.stringMatching(
+                  new RegExp(
+                    `Host-agent-a: ${outputCommand} failed` +
+                      'Execution completed .*' +
+                      `Host-agent-b: ${outputCommand} failed` +
+                      'Execution completed .*'
+                  )
+                ),
+                expect.stringMatching(
+                  new RegExp(
+                    `Host-agent-a: ${outputCommand} failed` +
+                      'Execution completed .*' +
+                      `Host-agent-b: ${outputCommand} failed` +
+                      'Execution completed .*'
+                  )
+                ),
+              ]
+            : [
+                expect.stringMatching(
+                  new RegExp(
+                    `Host-agent-a: ${outputCommand} failed` +
+                      'Execution completed .*' +
+                      'The following errors were encountered:An unknown error occurred' +
+                      `Host-agent-b: ${outputCommand} failed` +
+                      'Execution completed .*' +
+                      'The following errors were encountered:An unknown error occurred'
+                  )
+                ),
+                expect.stringMatching(
+                  new RegExp(
+                    `Host-agent-a: ${outputCommand} failed` +
+                      'Execution completed .*' +
+                      'The following errors were encountered:An unknown error occurred' +
+                      `Host-agent-b: ${outputCommand} failed` +
+                      'Execution completed .*' +
+                      'The following errors were encountered:An unknown error occurred'
+                  )
+                ),
+              ];
 
-        expect(outputs.map((n) => n.textContent)).toEqual([
-          expect.stringMatching(
-            new RegExp(
-              `Host-agent-a: ${outputCommand} failed` +
-                'Execution completed .*' +
-                'The following errors were encountered:An unknown error occurred' +
-                `Host-agent-b: ${outputCommand} failed` +
-                'Execution completed .*' +
-                'The following errors were encountered:An unknown error occurred'
-            )
-          ),
-          expect.stringMatching(
-            new RegExp(
-              `Host-agent-a: ${outputCommand} failed` +
-                'Execution completed .*' +
-                'The following errors were encountered:An unknown error occurred' +
-                `Host-agent-b: ${outputCommand} failed` +
-                'Execution completed .*' +
-                'The following errors were encountered:An unknown error occurred'
-            )
-          ),
-        ]);
+        expect(outputs.map((n) => n.textContent)).toEqual(expectedResult);
         expect(
           renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
         ).toEqual(['Failed', 'Failed']);
@@ -1514,6 +1535,13 @@ describe('Response actions history', () => {
                   'Host-agent-b: scan failed' +
                   'Execution completed 2023-05-10T20:09:25.824Z' +
                   'The following errors were encountered:Invalid absolute file path provided | Error with agent-b!',
+              ]);
+            } else if (command === 'kill-process') {
+              expect(outputs.map((n) => n.textContent)).toEqual([
+                `Host-agent-a: ${outputCommand} failed` +
+                  'Execution completed 2023-05-10T20:09:25.824ZKilled' +
+                  `Host-agent-b: ${outputCommand} failed` +
+                  'Execution completed 2023-05-10T20:09:25.824ZKilled',
               ]);
             } else {
               expect(outputs.map((n) => n.textContent)).toEqual([
@@ -2206,6 +2234,26 @@ describe('Response actions history', () => {
       ).map((col) => col.textContent);
       expect(columnHeaders).not.toContain(TABLE_COLUMN_NAMES.actions);
       expect(renderResult.queryAllByTestId('responseActionRowActions')).toHaveLength(0);
+    });
+  });
+
+  describe('Rule-triggered actions', () => {
+    it('should link "Triggered by rule" to the rule details page', async () => {
+      const data = await getActionListMock({ actionCount: 1 });
+      data.data[0].createdBy = 'unknown';
+      data.data[0].ruleId = 'rule-123';
+
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data,
+      });
+
+      render();
+
+      expect(renderResult.getByTestId(`${testPrefix}-column-ruleName`)).toHaveAttribute(
+        'href',
+        expect.stringContaining('/id/rule-123')
+      );
     });
   });
 });
