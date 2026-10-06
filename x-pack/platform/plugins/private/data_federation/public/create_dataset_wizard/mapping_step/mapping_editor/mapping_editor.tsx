@@ -397,7 +397,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, reserve
       {isAddFieldFormOpen && editingFieldId === null ? (
         <>
           <EuiSpacer size="m" />
-          <EuiPanel paddingSize="s" color="subdued" hasBorder={false}>
+          <EuiPanel paddingSize="m" color="subdued" hasBorder={false}>
             <FieldMappingForm
               key={draftFormKey}
               value={emptyDraftInitialValue}
