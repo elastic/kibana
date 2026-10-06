@@ -219,8 +219,9 @@ export class PluginWrapper<
    * Calls optional `stop` function exposed by the plugin initializer.
    *
    * Always invoked when `setup()` ran, including for a lazy plugin whose deferred `start()` never
-   * ran on this instance: `setup()`-time resources still need teardown. Anyone still awaiting
-   * `getStartServices()` is released with a rejection rather than left hanging past shutdown.
+   * ran on this instance: `setup()`-time resources still need teardown. For such a lazy plugin,
+   * anyone still awaiting `getStartServices()` is released with a rejection rather than left
+   * hanging past shutdown.
    */
   public async stop() {
     if (!this.definition) {
@@ -233,8 +234,6 @@ export class PluginWrapper<
           `Plugin "${this.name}" is stopping without having started; its start services will never be available.`
         )
       );
-    } else {
-      this.startDependencies$.complete();
     }
     await this.instance?.stop?.();
     await this.container?.unbindAllAsync();
