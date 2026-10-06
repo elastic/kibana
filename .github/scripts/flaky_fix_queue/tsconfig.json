@@ -1,13 +1,16 @@
 {
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "types": ["node"],
     "strict": true,
     "noEmit": true,
     "allowImportingTsExtensions": true,
-    "skipLibCheck": true
+    "outDir": "target/types",
   },
-  "include": ["*.ts"]
+  "include": ["*.ts"],
+  "exclude": [
+    "target/**/*"
+  ]
 }
