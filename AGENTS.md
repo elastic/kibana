@@ -37,6 +37,10 @@ Run `node scripts/check.js --scope=local|staged|branch` to validate changes (Jes
 `node scripts/scout run-tests --arch stateful --domain classic --config <scoutConfigPath>` (or `--testFiles <specPath1,specPath2>`)
 - When iterating, start the stack once with `node scripts/scout start-server --arch stateful --domain classic` and run `run-tests` against it, instead of rebooting ES+Kibana on every run.
 
+### Component tests
+- Enzyme is deprecated, and tests using it should be replaced with React Testing Library.
+- Avoid writing unit tests that match against snapshots of rendered components.
+
 ## Code Style Guidelines
 Follow existing patterns in the target area first; below are common defaults.
 
