@@ -11,6 +11,7 @@ import { of } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID } from '@kbn/workflows';
+import { WorkflowsManagementUiActions } from '@kbn/workflows/common/privileges';
 import {
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
@@ -68,6 +69,7 @@ const renderPanel = (
   core.application.capabilities = {
     ...core.application.capabilities,
     advancedSettings: { show: true, save: canChangeAdvancedSettings },
+    workflowsManagement: { [WorkflowsManagementUiActions.readManagedExecution]: true },
   };
 
   render(

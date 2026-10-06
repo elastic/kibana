@@ -22,6 +22,7 @@ import {
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID } from '@kbn/workflows';
+import { WorkflowsManagementUiActions } from '@kbn/workflows/common/privileges';
 import { useShowManagedWorkflowsSetting } from '@kbn/workflows-ui';
 import * as settingsI18n from '../settings_translations';
 
@@ -59,6 +60,23 @@ export const ViewExecutionsLink: FC<ViewExecutionsLinkProps> = ({
     'aria-label': ariaLabel,
     'data-test-subj': testSubj,
   } as const;
+
+  if (
+    showManagedWorkflows &&
+    application.capabilities.workflowsManagement?.[
+      WorkflowsManagementUiActions.readManagedExecution
+    ] !== true
+  ) {
+    return (
+      <EuiToolTip content={settingsI18n.MANAGED_WORKFLOW_EXECUTIONS_PERMISSION_TOOLTIP}>
+        <span aria-disabled={true} tabIndex={0}>
+          <EuiButtonEmpty {...linkProps} isDisabled>
+            {settingsI18n.VIEW_EXECUTIONS}
+          </EuiButtonEmpty>
+        </span>
+      </EuiToolTip>
+    );
+  }
 
   if (showManagedWorkflows) {
     return (

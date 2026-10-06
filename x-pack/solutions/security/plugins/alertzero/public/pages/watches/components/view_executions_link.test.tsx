@@ -11,6 +11,7 @@ import { of } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID } from '@kbn/workflows';
+import { WorkflowsManagementUiActions } from '@kbn/workflows/common/privileges';
 import { ViewExecutionsLink } from './view_executions_link';
 
 const WORKER_ID = 'worker-1';
@@ -19,6 +20,7 @@ const EXECUTIONS_HREF = '/app/workflows/opaque-installed-workflow?tab=executions
 const LINK_TEST_SUBJ = `alertZeroWorkerViewExecutions-${WORKER_ID}`;
 const POPOVER_BODY =
   'Execution history lives in Managed workflows, which is turned off for this space.';
+const PERMISSION_TOOLTIP = 'Requires permission to view managed workflow executions.';
 const REQUIRED_TOOLTIP =
   'Requires Managed workflows. Ask an admin to enable it in Advanced Settings.';
 const ADVANCED_SETTINGS_HREF = `/app/management/kibana/settings?query=${encodeURIComponent(
@@ -28,9 +30,11 @@ const ADVANCED_SETTINGS_HREF = `/app/management/kibana/settings?query=${encodeUR
 const renderLink = ({
   showManagedWorkflows,
   canChangeAdvancedSettings,
+  canReadManagedExecutions = true,
 }: {
   showManagedWorkflows: boolean;
   canChangeAdvancedSettings?: boolean;
+  canReadManagedExecutions?: boolean;
 }) => {
   const core = coreMock.createStart();
   core.application.getUrlForApp.mockImplementation(
@@ -50,6 +54,13 @@ const renderLink = ({
       advancedSettings: { show: true, save: canChangeAdvancedSettings },
     };
   }
+
+  core.application.capabilities = {
+    ...core.application.capabilities,
+    workflowsManagement: {
+      [WorkflowsManagementUiActions.readManagedExecution]: canReadManagedExecutions,
+    },
+  };
 
   render(
     <KibanaContextProvider services={core}>
@@ -74,6 +85,19 @@ describe('ViewExecutionsLink', () => {
     expect(link).toHaveAttribute('href', EXECUTIONS_HREF);
     expect(link).toHaveAttribute('target', '_blank');
     expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+  });
+
+  it('disables the link and explains missing managed execution permission', async () => {
+    renderLink({ showManagedWorkflows: true, canReadManagedExecutions: false });
+
+    const link = screen.getByTestId(LINK_TEST_SUBJ);
+    expect(link).toBeDisabled();
+    expect(link).not.toHaveAttribute('href');
+    const anchor = link.closest<HTMLElement>('[tabindex="0"]');
+    expect(anchor).toHaveAttribute('aria-disabled', 'true');
+    anchor?.focus();
+    expect(anchor).toHaveFocus();
+    expect(await screen.findByText(PERMISSION_TOOLTIP)).toBeInTheDocument();
   });
 
   it('explains the hidden setting and offers Advanced Settings to users who can change it', () => {

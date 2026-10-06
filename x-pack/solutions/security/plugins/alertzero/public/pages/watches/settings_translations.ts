@@ -122,6 +122,11 @@ export const MANAGED_WORKFLOWS_REQUIRED_TOOLTIP = i18n.translate(
   }
 );
 
+export const MANAGED_WORKFLOW_EXECUTIONS_PERMISSION_TOOLTIP = i18n.translate(
+  'xpack.alertzero.watches.settings.managedWorkflowExecutionsPermissionTooltip',
+  { defaultMessage: 'Requires permission to view managed workflow executions.' }
+);
+
 export const SAVE_WATCH_SETTINGS = i18n.translate(
   'xpack.alertzero.watches.settings.saveWatchSettings',
   { defaultMessage: 'Save' }
