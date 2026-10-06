@@ -39,6 +39,14 @@ export const getTracesSummaryColumn = (
       isTracesSummary
       density={density}
       onFilter={toolkit.actions.addFilter}
+      onOpenOverview={
+        toolkit.actions.setExpandedDoc
+          ? (row) =>
+              toolkit.actions.setExpandedDoc?.(row, {
+                initialTabId: 'doc_view_obs_traces_overview',
+              })
+          : undefined
+      }
       rowHeight={rowHeight}
       shouldShowFieldHandler={shouldShowFieldHandler}
     />
