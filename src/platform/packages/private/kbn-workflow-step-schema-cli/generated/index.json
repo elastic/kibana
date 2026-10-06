@@ -70,6 +70,7 @@
     ".slack2",
     ".slack_api",
     ".snowflake",
+    ".solarwinds_platform",
     ".sublime_security",
     ".swimlane",
     ".tavily_mcp",
@@ -605,6 +606,9 @@
     "nightshift.composeHydrateNotifications",
     "nightshift.cortexHydrate",
     "nightshift.cortexOptimize",
+    "nightshift.decisionTreeHydrate",
+    "nightshift.decisionTreePrepare",
+    "nightshift.decisionTreeReinforce",
     "nightshift.ensureInvestigationAgent",
     "nightshift.memoryMaterializeToSandbox",
     "nightshift.memoryOptimize",
@@ -726,6 +730,7 @@
     "security.deleteNote",
     "security.disableRule",
     "security.enableRule",
+    "security.getAlertEntities",
     "security.getNotes",
     "security.patchRule",
     "security.renderAlertNarrative",
@@ -832,6 +837,12 @@
     "snowflake.listTables",
     "snowflake.listViews",
     "snowflake.runQuery",
+    "solarwinds_platform.acknowledgeAlert",
+    "solarwinds_platform.getAlert",
+    "solarwinds_platform.getNode",
+    "solarwinds_platform.listActiveAlerts",
+    "solarwinds_platform.query",
+    "solarwinds_platform.searchNodes",
     "sublime_security.getAsaVerdict",
     "sublime_security.getAttackScore",
     "sublime_security.getMessage",
@@ -943,6 +954,7 @@
     "ai.attachmentDeleted",
     "ai.attachmentUpdated",
     "ai.conversation.metadataUpdated",
+    "ai.conversation.updated",
     "alert",
     "alerting.actions.alertAcked",
     "alerting.actions.alertActivated",
@@ -989,11 +1001,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "61efe207aa570dd92932071a79a7ecce2643f83e8b5a780e4cb0292101348169"
+      "sha256": "6b244a3d2f0b1ac564e39224754fc03d779eb3f95ab59566c12f5a7689cd5bb7"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "4200cd6a42c1467431ecdcb7d245633b1c1146de1fba51b332e911eb1d7bf67f"
+      "sha256": "c60a773d90ecbbd2c01ff49d9c2ce4f9c1570bcae9656c79fdb9d0a76be8ad4d"
     }
   }
 }

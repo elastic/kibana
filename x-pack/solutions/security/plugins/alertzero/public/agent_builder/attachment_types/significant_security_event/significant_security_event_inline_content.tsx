@@ -33,12 +33,7 @@ import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentNavigationDeps } from '../navigation';
-import {
-  buildAlertDetailsUrl,
-  buildDiscoverEsqlUrl,
-  buildEventLookupEsql,
-  buildThreatReportLookupEsql,
-} from '../navigation';
+import { buildAlertDetailsUrl, buildDiscoverEsqlUrl, buildEventLookupEsql } from '../navigation';
 import { EntityChip } from '../entity_chip';
 import { IocBadge, OPEN_ALERT_DETAILS_LABEL, discoverAction } from '../shared/ioc_badge';
 import {
@@ -1374,17 +1369,11 @@ export const SignificantSecurityEventInlineContent: React.FC<
                     { defaultMessage: 'Source report' }
                   )}
                 >
+                  {/* No Discover action: a raw ES|QL lookup against the hidden
+                      `.kibana-threat-reports*` index is unreachable for a non-superuser.
+                      See elastic/security-team#19733. */}
                   <IocBadge
                     value={parsed.report_id}
-                    action={discoverAction(
-                      buildDiscoverEsqlUrl({
-                        share: navigation.share,
-                        esql: buildThreatReportLookupEsql({
-                          reportId: parsed.report_id,
-                          spaceId: navigation.spaceId,
-                        }),
-                      })
-                    )}
                     testSubj="alertzeroSignificantSecurityEventReportLink"
                   />
                 </MetaCard>

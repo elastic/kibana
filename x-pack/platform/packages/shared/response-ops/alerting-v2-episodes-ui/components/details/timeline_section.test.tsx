@@ -52,7 +52,7 @@ const mockAction: EpisodeActionHistoryEntry = {
   '@timestamp': '2024-01-01T00:01:30.000Z',
   action_type: 'ack',
   actor: { type: 'user', profile_uid: 'user-uid-1' },
-  episode_id: 'ep-1',
+  alert_id: 'ep-1',
   group_hash: 'hash-1',
   tags: [],
   assignee_uid: null,
