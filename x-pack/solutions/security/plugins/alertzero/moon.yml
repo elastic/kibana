@@ -79,7 +79,6 @@ dependsOn:
   - '@kbn/proposals-ui'
   - '@kbn/core-chrome-browser-context-mocks'
   - '@kbn/core-chrome-browser-mocks'
-  - '@kbn/scout-security'
   - '@kbn/context-engine-plugin'
 tags:
   - plugin
@@ -92,7 +91,6 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
-    - test/scout_threat_intel/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

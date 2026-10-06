@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout_threat_intel/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/security-plugin-types-server",
@@ -68,7 +68,6 @@
     "@kbn/proposals-ui",
     "@kbn/core-chrome-browser-context-mocks",
     "@kbn/core-chrome-browser-mocks",
-    "@kbn/scout-security",
     "@kbn/context-engine-plugin"
   ]
 }

@@ -332,8 +332,6 @@ node scripts/regenerate_moon_projects.js --update --filter @kbn/alertzero-plugin
 node scripts/type_check --project x-pack/solutions/security/plugins/alertzero/tsconfig.json
 node scripts/jest x-pack/solutions/security/plugins/alertzero/public/components/app_chrome/alertzero_chrome.test.tsx
 node scripts/jest x-pack/solutions/security/packages/kbn-alertzero-common
-# Scout UI suite for the no-model block; needs a stack with no LLM connector and no EIS
-node scripts/scout run-tests --arch stateful --domain classic --config x-pack/solutions/security/plugins/alertzero/test/scout_threat_intel/ui/parallel.playwright.config.ts
 ```
 
 ### Page-load budget
