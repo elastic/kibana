@@ -22,15 +22,12 @@ const actions = {
   pause: jest.fn(),
   resume: jest.fn(),
   reset,
-  isPausing: false,
-  isResuming: false,
   isResetting: false,
   isMutating: false,
 };
 
-const panels = (canManage = true) => (
+const resetPanel = (canManage = true) => (
   <I18nProvider>
-    <MaintenanceSection canManage={canManage} />
     <ResetSection canManage={canManage} />
   </I18nProvider>
 );
@@ -39,16 +36,10 @@ describe('developer reset controls', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(useSignificantEventsMaintenanceActions).mockReturnValue(actions);
-    jest.mocked(useMaintenanceStatus).mockReturnValue({
-      data: { state: 'enabled' },
-      isLoading: false,
-      isError: false,
-      refetch: jest.fn(),
-    } as never);
   });
 
   it('requires exact case-sensitive confirmation and names every destructive effect', () => {
-    render(panels());
+    render(resetPanel());
     fireEvent.click(screen.getByTestId('significantEventsResetButton'));
     const modal = screen.getByTestId('significantEventsResetModal');
     const confirm = within(modal).getByRole('button', { name: 'Reset permanently' });
@@ -78,7 +69,7 @@ describe('developer reset controls', () => {
   });
 
   it('clears confirmation when cancelled and reopened', () => {
-    render(panels());
+    render(resetPanel());
     fireEvent.click(screen.getByTestId('significantEventsResetButton'));
     fireEvent.change(screen.getByTestId('significantEventsResetConfirmation'), {
       target: { value: 'RESET' },
@@ -90,14 +81,14 @@ describe('developer reset controls', () => {
   });
 
   it('disables reset without Nightshift engine privileges', () => {
-    render(panels(false));
+    render(resetPanel(false));
     expect(screen.getByTestId('significantEventsResetButton')).toBeDisabled();
     fireEvent.click(screen.getByTestId('significantEventsResetButton'));
     expect(screen.queryByTestId('significantEventsResetModal')).not.toBeInTheDocument();
   });
 
   it('explains missing privileges in a keyboard-accessible tooltip', async () => {
-    render(panels(false));
+    render(resetPanel(false));
     act(() => screen.getByTestId('significantEventsResetTrigger').focus());
     expect(screen.getByTestId('significantEventsResetTrigger')).toHaveFocus();
     expect(await screen.findByRole('tooltip')).toHaveTextContent(
@@ -105,32 +96,50 @@ describe('developer reset controls', () => {
     );
   });
 
-  it.each([
-    { data: { state: 'paused' }, isLoading: false, isError: false },
-    { data: undefined, isLoading: true, isError: false },
-    { data: undefined, isLoading: false, isError: true },
-  ])('keeps reset available independent of maintenance status: %o', (status) => {
-    jest.mocked(useMaintenanceStatus).mockReturnValue({
-      ...status,
-      refetch: jest.fn(),
-    } as never);
-    render(panels());
-    expect(screen.getByTestId('significantEventsResetButton')).toBeEnabled();
-  });
+  describe('alongside maintenance controls', () => {
+    const panels = () => (
+      <I18nProvider>
+        <MaintenanceSection canManage />
+        <ResetSection canManage />
+      </I18nProvider>
+    );
 
-  it('locks both panels and open confirmations while any maintenance action is running', () => {
-    const { rerender } = render(panels());
-    fireEvent.click(screen.getByTestId('significantEventsResetButton'));
-    fireEvent.change(screen.getByTestId('significantEventsResetConfirmation'), {
-      target: { value: 'RESET' },
+    beforeEach(() => {
+      jest.mocked(useMaintenanceStatus).mockReturnValue({
+        data: { state: 'enabled' },
+        isLoading: false,
+        isError: false,
+        refetch: jest.fn(),
+      } as never);
     });
-    jest.mocked(useSignificantEventsMaintenanceActions).mockReturnValue({
-      ...actions,
-      isMutating: true,
+
+    it.each([
+      { data: { state: 'paused' }, isLoading: false, isError: false },
+      { data: undefined, isLoading: true, isError: false },
+      { data: undefined, isLoading: false, isError: true },
+    ])('keeps reset available independent of maintenance status: %o', (status) => {
+      jest.mocked(useMaintenanceStatus).mockReturnValue({
+        ...status,
+        refetch: jest.fn(),
+      } as never);
+      render(panels());
+      expect(screen.getByTestId('significantEventsResetButton')).toBeEnabled();
     });
-    rerender(panels());
-    expect(screen.getByTestId('significantEventsResetButton')).toBeDisabled();
-    expect(screen.getByTestId('streams-settings-maintenance-toggle-button')).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Reset permanently' })).toBeDisabled();
+
+    it('locks both panels and open confirmations while any maintenance action is running', () => {
+      const { rerender } = render(panels());
+      fireEvent.click(screen.getByTestId('significantEventsResetButton'));
+      fireEvent.change(screen.getByTestId('significantEventsResetConfirmation'), {
+        target: { value: 'RESET' },
+      });
+      jest.mocked(useSignificantEventsMaintenanceActions).mockReturnValue({
+        ...actions,
+        isMutating: true,
+      });
+      rerender(panels());
+      expect(screen.getByTestId('significantEventsResetButton')).toBeDisabled();
+      expect(screen.getByTestId('streams-settings-maintenance-toggle-button')).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Reset permanently' })).toBeDisabled();
+    });
   });
 });

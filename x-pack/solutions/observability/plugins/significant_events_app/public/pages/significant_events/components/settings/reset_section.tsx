@@ -28,6 +28,7 @@ export function ResetSection({ canManage }: { canManage: boolean }) {
   const { reset, isResetting, isMutating } = useSignificantEventsMaintenanceActions();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [confirmation, setConfirmation] = useState('');
+  const canConfirm = canManage && !isMutating && confirmation === 'RESET';
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -110,9 +111,6 @@ export function ResetSection({ canManage }: { canManage: boolean }) {
           })}
           onCancel={closeModal}
           onConfirm={() => {
-            if (!canManage || isMutating || confirmation !== 'RESET') {
-              return;
-            }
             closeModal();
             reset();
           }}
@@ -124,7 +122,7 @@ export function ResetSection({ canManage }: { canManage: boolean }) {
             'xpack.significantEventsApp.settings.reset.confirmButtonLabel',
             { defaultMessage: 'Reset permanently' }
           )}
-          confirmButtonDisabled={!canManage || isMutating || confirmation !== 'RESET'}
+          confirmButtonDisabled={!canConfirm}
           buttonColor="danger"
           defaultFocusedButton="cancel"
         >

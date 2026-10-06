@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { QueryClient, QueryClientProvider, useQuery } from '@kbn/react-query';
 import type { SignificantEventsMaintenanceSummary } from '@kbn/significant-events-plugin/common';
 import { useKibana } from './use_kibana';
 import { useSignificantEventsMaintenanceActions } from './use_significant_events_maintenance';
@@ -49,7 +49,7 @@ const setup = () => {
     }),
     { wrapper }
   );
-  return { ...hook, queryClient, invalidateQueries };
+  return { ...hook, wrapper, queryClient, invalidateQueries };
 };
 
 describe('Significant Events maintenance actions', () => {
@@ -63,11 +63,16 @@ describe('Significant Events maintenance actions', () => {
     } as never);
   });
 
-  it('reports deletion counts and invalidates only active Significant Events query families', async () => {
+  it('reports deletion counts and refreshes active queries without a query-key allowlist', async () => {
     fetch.mockResolvedValueOnce(summary);
-    const { result, invalidateQueries, queryClient } = setup();
-    queryClient.setQueryData(['investigations'], ['unrelated']);
-    queryClient.setQueryData(['connectors'], ['unrelated']);
+    const { result, invalidateQueries, queryClient, wrapper } = setup();
+    queryClient.setQueryData(['features'], ['inactive']);
+    const queryFn = jest.fn().mockResolvedValue([]);
+    const activeQuery = renderHook(
+      () => useQuery({ queryKey: ['newResetDataFamily'], queryFn, staleTime: Infinity }),
+      { wrapper }
+    );
+    await waitFor(() => expect(activeQuery.result.current.isSuccess).toBe(true));
 
     act(() => result.current.reset.reset());
 
@@ -80,27 +85,9 @@ describe('Significant Events maintenance actions', () => {
       title: 'Reset Significant Events data',
       text: 'Deleted 2 knowledge indicators, 3 stored queries, 4 rules, and 5 investigations; wiped 3 data streams.',
     });
-    const dataKeys = [
-      'significantEvents',
-      'significantEventLifecycle',
-      'detections',
-      'detectionHistory',
-      'features',
-      'discoveryQueries',
-      'discoveryQueriesOccurrences',
-      'queryOccurrenceStats',
-      'streamOnboardingStatus',
-      'significant_events_discovery_status',
-    ];
-    for (const key of dataKeys) {
-      expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: [key], type: 'active' });
-    }
-    expect(invalidateQueries).toHaveBeenCalledWith({
-      queryKey: ['significantEventsMaintenanceStatus'],
-    });
-    expect(invalidateQueries).toHaveBeenCalledTimes(dataKeys.length + 1);
-    expect(queryClient.getQueryState(['investigations'])?.isInvalidated).toBe(false);
-    expect(queryClient.getQueryState(['connectors'])?.isInvalidated).toBe(false);
+    expect(invalidateQueries).toHaveBeenCalledWith({ type: 'active' });
+    await waitFor(() => expect(queryFn).toHaveBeenCalledTimes(2));
+    expect(queryClient.getQueryState(['features'])?.isInvalidated).toBe(false);
   });
 
   it('reports counts and partial failures as a warning', async () => {
@@ -159,6 +146,63 @@ describe('Significant Events maintenance actions', () => {
       await act(async () => resolveRequest(summary));
       await waitFor(() => expect(result.current.activity.isMutating).toBe(false));
       expect(result.current.reset.isMutating).toBe(false);
+    }
+  );
+
+  it.each(['pause', 'resume', 'reset'] as const)(
+    'unlocks both panels after %s finishes even while active refetches are pending',
+    async (action) => {
+      let resolveRefetch: (data: string[]) => void = () => {};
+      const pendingRefetch = new Promise<string[]>((resolve) => {
+        resolveRefetch = resolve;
+      });
+      const statusQueryFn = jest
+        .fn()
+        .mockResolvedValueOnce(['before'])
+        .mockReturnValue(pendingRefetch);
+      const dataQueryFn = jest
+        .fn()
+        .mockResolvedValueOnce(['before'])
+        .mockReturnValue(pendingRefetch);
+      const { result, wrapper, queryClient } = setup();
+      const queries = renderHook(
+        () => ({
+          status: useQuery({
+            queryKey: ['significantEventsMaintenanceStatus'],
+            queryFn: statusQueryFn,
+            staleTime: Infinity,
+          }),
+          data: useQuery({
+            queryKey: ['newResetDataFamily'],
+            queryFn: dataQueryFn,
+            staleTime: Infinity,
+          }),
+        }),
+        { wrapper }
+      );
+
+      try {
+        await waitFor(() => expect(queries.result.current.status.isSuccess).toBe(true));
+        await waitFor(() => expect(queries.result.current.data.isSuccess).toBe(true));
+        fetch.mockResolvedValueOnce(summary);
+
+        act(() => result.current.activity[action]());
+
+        await waitFor(() => expect(statusQueryFn).toHaveBeenCalledTimes(2));
+        await waitFor(() => expect(result.current.activity.isMutating).toBe(false));
+        expect(result.current.reset.isMutating).toBe(false);
+        expect(result.current.reset.isResetting).toBe(false);
+        expect(queryClient.getQueryState(['significantEventsMaintenanceStatus'])?.fetchStatus).toBe(
+          'fetching'
+        );
+        if (action === 'reset') {
+          expect(dataQueryFn).toHaveBeenCalledTimes(2);
+          expect(queryClient.getQueryState(['newResetDataFamily'])?.fetchStatus).toBe('fetching');
+        }
+      } finally {
+        await act(async () => resolveRefetch(['after']));
+        queries.unmount();
+      }
     }
   );
 });
