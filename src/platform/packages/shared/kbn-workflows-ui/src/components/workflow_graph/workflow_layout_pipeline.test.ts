@@ -722,6 +722,39 @@ describe('spec 02 regression — named fixtures', () => {
     expect(centerX(loopNode!)).toBeLessThan(centerX(elseNode!));
   });
 
+  it('main-chain fallback stays right of owner after if-step re-centering', () => {
+    // Regression: pass 1 re-centres the if-step and propagates the delta to the
+    // spine ancestor (owner). The fallback lane node was placed by dagLayout at
+    // owner_dagre_x + nodeSep (350px), but was left unmoved when the owner shifted.
+    // Pass 1c must sync the fallback node so it stays +350px to the right.
+    const { result } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'owner',
+            type: 'http',
+            'on-failure': {
+              fallback: [{ name: 'fallback-step', type: 'http' }],
+            },
+          },
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'true',
+            steps: [{ name: 'then-step', type: 'http' }],
+            else: [{ name: 'else-step', type: 'http' }],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const ownerNode = result.nodes.find((n) => n.id === 'owner');
+    const fallbackNode = result.nodes.find((n) => n.id === 'fallback-step');
+    expect(ownerNode).toBeDefined();
+    expect(fallbackNode).toBeDefined();
+    // fallback must be to the RIGHT of its owner (not left, not same column).
+    expect(centerX(fallbackNode!)).toBeGreaterThan(centerX(ownerNode!) + 100);
+  });
+
   it('owner with fallback and a plain following step share the spine column', () => {
     // Speculative anchoring (pass 3) translates the owner onto its spine
     // successor's column. Owner and next-step should share the same x-centre.

@@ -10,6 +10,7 @@
 import { euiCanAnimate, euiFocusRing, EuiIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { WIRE_CONTROL_SIZE } from './compute_wire_insertion_controls';
 import type { WireInsertionControl } from './compute_wire_insertion_controls';
 import type {
   WorkflowGraphAnchorRect,
@@ -18,7 +19,6 @@ import type {
 import { PORT_SPRING_EASE, PORT_SPRING_MS } from './workflow_graph_connection_ports';
 import { toAnchorRect } from './workflow_graph_insert_control';
 
-const CONTROL_SIZE = 22;
 /** Hover strip width across the wire (must stay ≥44). */
 const HOVER_ZONE = 44;
 
@@ -116,8 +116,8 @@ export function WorkflowGraphWireSplitControl({
             onClick={(e) => insertStep(toAnchorRect(e.currentTarget))}
             css={[
               {
-                width: CONTROL_SIZE,
-                height: CONTROL_SIZE,
+                width: WIRE_CONTROL_SIZE,
+                height: WIRE_CONTROL_SIZE,
                 borderRadius: '50%',
                 border: solidAtRest
                   ? `${euiTheme.border.width.thin} solid ${euiTheme.colors.primary}`

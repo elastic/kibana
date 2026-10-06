@@ -20,6 +20,33 @@ import type { WorkflowGraphInsertionContext } from './workflow_graph_actions_con
  */
 export const TERMINAL_STUB_PX = 75;
 
+/** Diameter of the circular + button rendered by WorkflowGraphWireSplitControl. */
+export const WIRE_CONTROL_SIZE = 22;
+/** Minimum clearance (px) between the button edge and an adjacent element (chip, card, bus). */
+export const WIRE_CONTROL_CLEARANCE = 14;
+/** Half-height of the branch chip (including its 1px border). */
+const FORK_CHIP_HALF_HEIGHT = 11;
+/**
+ * Distance from the fork node exit to the fork-head + button centre (TB direction).
+ * Derived from: FORK_BUS_TRUNK + FORK_BUS_LABEL_OFFSET + FORK_CHIP_HALF_HEIGHT
+ *   + WIRE_CONTROL_CLEARANCE + WIRE_CONTROL_SIZE / 2
+ *   = 20 + 20 + 11 + 14 + 11 = 76.
+ */
+export const FORK_HEAD_PLUS_OFFSET =
+  FORK_BUS_TRUNK +
+  FORK_BUS_LABEL_OFFSET +
+  FORK_CHIP_HALF_HEIGHT +
+  WIRE_CONTROL_CLEARANCE +
+  WIRE_CONTROL_SIZE / 2;
+/**
+ * Minimum main-axis gap the layout must reserve between a fork node's bottom
+ * and its branch heads so the fork-head + button fits without overlapping.
+ * = FORK_HEAD_PLUS_OFFSET + WIRE_CONTROL_SIZE / 2 + WIRE_CONTROL_CLEARANCE
+ * = 76 + 11 + 14 = 101.
+ */
+export const FORK_HEAD_MIN_GAP =
+  FORK_HEAD_PLUS_OFFSET + WIRE_CONTROL_SIZE / 2 + WIRE_CONTROL_CLEARANCE;
+
 export type WireControlKind = 'wire' | 'terminal';
 
 export interface WireSegmentPoint {
@@ -277,16 +304,25 @@ export function computeWireInsertionControls(args: {
       const edgeData = edge.data as
         | { branchType?: EdgeBranchType; branchIndex?: number; label?: string }
         | undefined;
-      const handleKey =
-        edgeData?.branchType === 'switch'
-          ? edgeData.label === 'default'
-            ? 'default'
-            : typeof edgeData?.branchIndex === 'number'
-            ? `case:${edgeData.branchIndex}`
-            : `case:${edgeData.label}`
+      // `merge` step body edges have no branchType (they are plain sequential in
+      // the transform), but the merge node has a `steps` branch port (keyed 'then').
+      // Map the handle to 'then' so the body edge is recorded as wired for that
+      // branch, preventing a spurious branch-tail terminal on top of the body card.
+      const isMergeBodyEdge =
+        !edgeData?.branchType &&
+        !edgeData?.branchIndex &&
+        stepTypeOf(byId.get(edge.source)) === 'merge';
+      const handleKey = isMergeBodyEdge
+        ? 'then'
+        : edgeData?.branchType === 'switch'
+        ? edgeData.label === 'default'
+          ? 'default'
           : typeof edgeData?.branchIndex === 'number'
-          ? `branch:${edgeData.branchIndex}`
-          : edge.sourceHandle ?? 'step';
+          ? `case:${edgeData.branchIndex}`
+          : `case:${edgeData.label}`
+        : typeof edgeData?.branchIndex === 'number'
+        ? `branch:${edgeData.branchIndex}`
+        : edge.sourceHandle ?? 'step';
 
       const insertContext = resolveInsertContext(ports, handleKey);
       if (!insertContext) continue;
@@ -310,8 +346,9 @@ export function computeWireInsertionControls(args: {
         // Chip is at FORK_BUS_TRUNK + FORK_BUS_LABEL_OFFSET below the source exit.
         const chipOffset = FORK_BUS_TRUNK + FORK_BUS_LABEL_OFFSET;
         // "+" centre must clear the chip AND the button itself with visible breathing room:
-        // chip half-height (11px incl 1px border) + button half-height (11px from CONTROL_SIZE=22) + 14px gap = 36px.
-        const CHIP_PLUS_GAP = 36;
+        // chip half-height + button half-height + clearance gap = FORK_HEAD_PLUS_OFFSET − chipOffset.
+        const CHIP_PLUS_GAP =
+          FORK_CHIP_HALF_HEIGHT + WIRE_CONTROL_CLEARANCE + WIRE_CONTROL_SIZE / 2;
         const chipX = direction === 'LR' ? start.x + chipOffset : end.x;
         const chipY = direction === 'LR' ? end.y : start.y + chipOffset;
         const plusX = chipX;
@@ -322,7 +359,7 @@ export function computeWireInsertionControls(args: {
           insertContext.mode === 'branch' ? { ...insertContext, position: 'start' } : insertContext;
         // Arrow stub starts at chip bottom (chipY + chip half-height incl 1px border), not chip centre,
         // so the dashed line doesn't overlap the chip label.
-        const chipBottomY = direction === 'LR' ? chipY : chipY + 11;
+        const chipBottomY = direction === 'LR' ? chipY : chipY + FORK_CHIP_HALF_HEIGHT;
         controls.push({
           id: `terminal:fork:${edge.id}`,
           kind: 'terminal',
@@ -349,7 +386,21 @@ export function computeWireInsertionControls(args: {
           // last step (the source of this merge edge). One per non-bypass fan-in edge —
           // bypass nodes have no insertion ports so they're filtered out naturally.
           // Always visible (kind: 'terminal'). Context: `after <leaf step>`.
-          const tip = terminalTip(start, direction);
+          //
+          // The stub length is clamped so the + button stays above the merge bus.
+          // The bus is drawn MERGE_BUS_TRUNK before the join entry. When the branch is
+          // short (rank gap = WORKFLOW_RANK_SEP = 70, bus at exit+50), the full
+          // TERMINAL_STUB_PX (75) would push the button past the bus. Use half the
+          // exit→bus distance instead, which keeps the button centred in the clear
+          // space above the bus. Long tails keep the full stub.
+          const startMain = direction === 'LR' ? start.x : start.y;
+          const endMain = direction === 'LR' ? end.x : end.y;
+          const busMain = endMain - MERGE_BUS_TRUNK;
+          const stub = Math.min(TERMINAL_STUB_PX, (busMain - startMain) / 2);
+          const tip =
+            direction === 'LR'
+              ? { x: start.x + stub, y: start.y }
+              : { x: start.x, y: start.y + stub };
           controls.push({
             id: `terminal:branch-tail:${edge.id}`,
             kind: 'terminal',

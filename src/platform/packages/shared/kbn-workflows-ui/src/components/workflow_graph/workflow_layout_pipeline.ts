@@ -10,6 +10,7 @@
 import type { DagPositionedEdge, DagPositionedNode } from '@kbn/dag-layout';
 import { dagLayout, separatePositionedOverlapsInPlace } from '@kbn/dag-layout';
 import type { LayoutDirection, TransformResult } from '@kbn/workflows';
+import { FORK_HEAD_MIN_GAP } from './compute_wire_insertion_controls';
 import {
   buildContainerDescendants,
   buildContainerMembers,
@@ -47,11 +48,33 @@ export const computeWorkflowLayout = (
 ): LayoutSnapshot => {
   const { nodes, edges, foreachGroups, bypassLaneNodes } = transformed;
 
+  // Extra main-axis space added symmetrically to each fork node so the
+  // fork-head + button fits between the chip and the branch card without
+  // overlapping. Restored immediately after dagLayout. Zero when WORKFLOW_RANK_SEP
+  // already provides enough room.
+  const FORK_HEAD_RESERVE = Math.max(0, FORK_HEAD_MIN_GAP - WORKFLOW_RANK_SEP);
+  // The reserve (31px) is doubled because we grow each fork node on both
+  // ends (bottom and top) symmetrically to keep its centre unchanged.
+  const FORK_HEAD_SIZE_DELTA = FORK_HEAD_RESERVE * 2;
+
+  // Fork node ids — the keys of forkNodeToJoinId. These are the if/switch/parallel
+  // gate nodes that need extra breathing room below them.
+  const forkNodeIds = new Set(transformed.forkNodeToJoinId.keys());
+
+  const inflatedHeight = (n: { id: string; style: { width: number; height: number } }) =>
+    direction === 'TB'
+      ? n.style.height + (forkNodeIds.has(n.id) ? FORK_HEAD_SIZE_DELTA : 0)
+      : n.style.height;
+  const inflatedWidth = (n: { id: string; style: { width: number; height: number } }) =>
+    direction === 'LR'
+      ? n.style.width + (forkNodeIds.has(n.id) ? FORK_HEAD_SIZE_DELTA : 0)
+      : n.style.width;
+
   const dagNodes = [
     ...nodes.map((n) => ({
       id: n.id,
-      width: n.style.width,
-      height: n.style.height,
+      width: inflatedWidth(n),
+      height: inflatedHeight(n),
     })),
     // Bypass lane nodes live outside domain `nodes` — add them here so dagre
     // sees them and allocates lanes for unbalanced if/switch branches.
@@ -67,8 +90,8 @@ export const computeWorkflowLayout = (
     innerNodes: [
       ...g.innerNodes.map((n) => ({
         id: n.id,
-        width: n.style.width,
-        height: n.style.height,
+        width: inflatedWidth(n),
+        height: inflatedHeight(n),
       })),
       ...g.bypassLaneNodes.map((n) => ({
         id: n.id,
@@ -118,12 +141,40 @@ export const computeWorkflowLayout = (
     })),
   });
 
+  // Restore fork nodes to their real card size. The inflation was symmetric
+  // (added FORK_HEAD_RESERVE on each side) so we shift position by +reserve
+  // and shrink size by 2×reserve, keeping the card centre fixed.
+  const deflatedLaid =
+    FORK_HEAD_RESERVE > 0 && forkNodeIds.size > 0
+      ? {
+          ...laid,
+          nodes: laid.nodes.map((n) => {
+            if (!forkNodeIds.has(n.id)) return n;
+            if (direction === 'TB') {
+              return {
+                ...n,
+                y: n.y + FORK_HEAD_RESERVE,
+                height: n.height - FORK_HEAD_SIZE_DELTA,
+              };
+            }
+            return {
+              ...n,
+              x: n.x + FORK_HEAD_RESERVE,
+              width: n.width - FORK_HEAD_SIZE_DELTA,
+            };
+          }),
+        }
+      : laid;
+
   // Snapshot cross-axis centres immediately after dagLayout, before any
   // post-dagre pass moves nodes. reconcileEdgePoints uses this to translate-or-
   // clear edge waypoints after all position-mutating passes (Step 4).
   const crossAxis = direction === 'TB' ? 'x' : 'y';
   const initialCentres = new Map(
-    laid.nodes.map((n) => [n.id, crossAxis === 'x' ? n.x + n.width / 2 : n.y + n.height / 2])
+    deflatedLaid.nodes.map((n) => [
+      n.id,
+      crossAxis === 'x' ? n.x + n.width / 2 : n.y + n.height / 2,
+    ])
   );
 
   // Build two closure sets for post-dagre passes (see CONTEXT.md,
@@ -139,8 +190,8 @@ export const computeWorkflowLayout = (
   // Runs once per graph (outer + each foreachGroup body) so containers move as
   // opaque units — prevents inner nodes from detaching from their container.
   const { nodes: orderedNodes, edges: orderedEdges } = enforceForkLaneOrder(
-    laid.nodes,
-    laid.edges,
+    deflatedLaid.nodes,
+    deflatedLaid.edges,
     transformed,
     direction,
     WORKFLOW_NODE_SEP,
@@ -161,9 +212,60 @@ export const computeWorkflowLayout = (
     containerDescendants
   );
 
+  // Post-dagre pass 1c: re-sync fallback lane nodes to follow their owner.
+  // Passes 1 and 1b move spine ancestors by a fork-centering delta but skip
+  // lane nodes (crossPinned). A lane node placed at owner_dagre_x + 350 stays
+  // put while the owner shifts, breaking the stepped pattern. Fix: for every
+  // fallback lane, compute how much its owner moved since dagLayout and apply
+  // the residual to every lane node that did not independently move by the same
+  // amount (guards against a node moved by both pass 1 and this pass).
+  let syncedNodes = compactedNodes;
+  if (transformed.fallbackLanes.length > 0) {
+    const nodeById = new Map(compactedNodes.map((n) => [n.id, n]));
+    const syncedMap = new Map<string, DagPositionedNode>();
+    // Process outer lanes first (depth ascending) so inner-lane owners already
+    // have their updated position in syncedMap when the inner lane is visited.
+    const lanesByDepth = [...transformed.fallbackLanes].sort((a, b) => a.depth - b.depth);
+    for (const lane of lanesByDepth) {
+      const ownerNode = syncedMap.get(lane.owner) ?? nodeById.get(lane.owner);
+      const ownerInitialCx = initialCentres.get(lane.owner);
+      if (ownerNode && ownerInitialCx !== undefined) {
+        const ownerCurrentCx =
+          crossAxis === 'x'
+            ? ownerNode.x + ownerNode.width / 2
+            : ownerNode.y + ownerNode.height / 2;
+        const ownerDelta = ownerCurrentCx - ownerInitialCx;
+        if (Math.abs(ownerDelta) >= 0.001) {
+          for (const laneNodeId of lane.nodes) {
+            const laneNode = syncedMap.get(laneNodeId) ?? nodeById.get(laneNodeId);
+            const laneInitialCx = initialCentres.get(laneNodeId);
+            if (laneNode && laneInitialCx !== undefined) {
+              const laneCurrentCx =
+                crossAxis === 'x'
+                  ? laneNode.x + laneNode.width / 2
+                  : laneNode.y + laneNode.height / 2;
+              const residual = ownerDelta - (laneCurrentCx - laneInitialCx);
+              if (Math.abs(residual) >= 0.001) {
+                syncedMap.set(
+                  laneNodeId,
+                  crossAxis === 'x'
+                    ? { ...laneNode, x: laneNode.x + residual }
+                    : { ...laneNode, y: laneNode.y + residual }
+                );
+              }
+            }
+          }
+        }
+      }
+    }
+    if (syncedMap.size > 0) {
+      syncedNodes = compactedNodes.map((n) => syncedMap.get(n.id) ?? n);
+    }
+  }
+
   // Post-dagre pass 2: enforce trigger lane declaration order.
   const { nodes: triggeredNodes, edges: triggeredEdges } = enforceTriggerLaneOrder(
-    compactedNodes,
+    syncedNodes,
     compactedEdges,
     transformed.nodeRefs,
     direction
