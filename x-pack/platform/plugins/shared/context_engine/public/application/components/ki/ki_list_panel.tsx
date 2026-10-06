@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import {
   INDEX_MANAGEMENT_LOCATOR_ID,
@@ -115,30 +115,28 @@ export const KiListPanel = ({ aiIndex: { id: aiIndexId, dest } }: KiListPanelPro
         </p>
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiPanel hasBorder paddingSize="l" data-test-subj="contextKiListPanelContent">
-        <KiListHeader
-          total={summary.total}
-          destValue={dest.value}
-          indexManagementHref={indexManagementHref}
-          discoverHref={discoverHref}
-          typeFilter={typeFilter}
-          typeFilterOptions={typeFilterOptions}
-          onTypeFilterChange={onTypeFilterChange}
-        />
+      <KiListHeader
+        total={summary.total}
+        destValue={dest.value}
+        indexManagementHref={indexManagementHref}
+        discoverHref={discoverHref}
+        typeFilter={typeFilter}
+        typeFilterOptions={typeFilterOptions}
+        onTypeFilterChange={onTypeFilterChange}
+      />
 
-        <EuiSpacer size="l" />
+      <EuiSpacer size="l" />
 
-        <KiListBody aiIndexId={aiIndexId} kis={kis} isLoading={isLoading} error={error} />
+      <KiListBody aiIndexId={aiIndexId} kis={kis} isLoading={isLoading} error={error} />
 
-        <KiListFooter
-          loadedCount={kis.length}
-          total={total}
-          size={size}
-          isLoading={isFetching}
-          discoverHref={discoverHref}
-          onLoadMore={loadMore}
-        />
-      </EuiPanel>
+      <KiListFooter
+        loadedCount={kis.length}
+        total={total}
+        size={size}
+        isLoading={isFetching}
+        discoverHref={discoverHref}
+        onLoadMore={loadMore}
+      />
     </div>
   );
 };

@@ -9,7 +9,7 @@ import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-
 import { i18n } from '@kbn/i18n';
 import type { AiIndexDest } from '../../../../common/http_api/ai_indices';
 
-const noneValueLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.noneValue', {
+export const noneValueLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.noneValue', {
   defaultMessage: 'None',
 });
 
@@ -31,7 +31,30 @@ export const getIndexManagementLocatorParams = (
 export const capitalizeLabel = (label: string): string =>
   label.length > 0 ? `${label.charAt(0).toUpperCase()}${label.slice(1)}` : label;
 
-export const getKiTypeLabel = (type: string): string => type.replace(/_/g, ' ');
+const getMemoryKiTypeLabel = (type: string): string | undefined => {
+  switch (type) {
+    case 'memory.session':
+      return i18n.translate('xpack.contextEngine.kiType.memorySession', {
+        defaultMessage: 'Session summary',
+      });
+    case 'memory.session_fact':
+      return i18n.translate('xpack.contextEngine.kiType.memorySessionFact', {
+        defaultMessage: 'Session fact',
+      });
+    default:
+      return undefined;
+  }
+};
+
+export const getKiTypeLabel = (type: string): string => {
+  const memoryLabel = getMemoryKiTypeLabel(type);
+  if (memoryLabel !== undefined) {
+    return memoryLabel;
+  }
+
+  const leafType = type.includes('.') ? type.slice(type.lastIndexOf('.') + 1) : type;
+  return leafType.replace(/_/g, ' ');
+};
 
 export const getKiListTypeFilterLabel = (type: string): string =>
   type === ALL_TYPE_FILTER.value

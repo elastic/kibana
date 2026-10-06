@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import type { AiIndexCreatedLocationState } from '../ai_index_created_location_state';
 import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
 import {
   AiIndexCreatedCallout,
@@ -28,7 +27,7 @@ import { useAiIndex } from '../hooks/use_ai_index';
 import { useAiIndexOverviewSections } from '../hooks/use_ai_index_overview_sections';
 import { useKiList } from '../hooks/use_ki_list';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
-import { useNavigation } from '../hooks/use_navigation';
+import { useNavigation, type ContextEngineLocationState } from '../hooks/use_navigation';
 import {
   ContextEngineSubPageHeader,
   contextEngineBackDestinationLabel,
@@ -72,14 +71,21 @@ const signalsLockedAriaLabel = i18n.translate(
 
 export const AiIndexDetailPage = () => {
   const { id } = useParams<{ id: string }>();
-  const location = useLocation<AiIndexCreatedLocationState | undefined>();
-  const history = useHistory<AiIndexCreatedLocationState | undefined>();
+  const location = useLocation<ContextEngineLocationState | undefined>();
+  const history = useHistory<ContextEngineLocationState | undefined>();
   const { aiIndex, isLoading, error, refetch } = useAiIndex(id);
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const isMemoryEnabled = useMemoryEnabled();
-  const [selectedTab, setSelectedTab] = useState<DetailTabId>('overview');
+  const [selectedTab, setSelectedTab] = useState<DetailTabId>(() =>
+    location.state !== undefined && 'selectedTab' in location.state
+      ? location.state.selectedTab
+      : 'overview'
+  );
   const [showCreatedCallout, setShowCreatedCallout] = useState(
-    () => location.state?.aiIndexCreated === true
+    () =>
+      location.state !== undefined &&
+      'aiIndexCreated' in location.state &&
+      location.state.aiIndexCreated === true
   );
 
   // Hide the callout as soon as the user adds a source.
@@ -91,7 +97,11 @@ export const AiIndexDetailPage = () => {
 
   // Remove aiIndexCreated from location state after it has been shown
   useEffect(() => {
-    if (!location.state?.aiIndexCreated) {
+    if (
+      location.state === undefined ||
+      !('aiIndexCreated' in location.state) ||
+      !location.state.aiIndexCreated
+    ) {
       return;
     }
 
