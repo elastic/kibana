@@ -11,8 +11,6 @@ import { platformSignificantEventsTools } from '@kbn/agent-builder-common/tools'
 import {
   NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
   NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
-  NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID,
-  NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
 import instructions from './instructions/investigator.md.text';
@@ -101,23 +99,22 @@ export const getInvestigationAgentType = ({
     enable_elastic_capabilities: false,
     connector_ids: telemetryConnectorId ? [telemetryConnectorId] : [],
     ...(() => {
-      const beforeAgentWorkflowIds = [
-        ...(sandboxEnabled && (cortexEnabled || memoryEnabled)
+      // Decision trees are no longer a separate before-agent hook: they hydrate as a third
+      // parallel branch of the combined materialize workflow, which already carries the
+      // sandbox_id they need. The reinforcement agent keeps its own hydrate workflow because
+      // it runs in a different conversation. `decisionTreesEnabled` implies `cortexEnabled`,
+      // so it adds nothing to either gate below.
+      const beforeAgentWorkflowIds =
+        sandboxEnabled && (cortexEnabled || memoryEnabled)
           ? [NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID]
-          : []),
-        ...(sandboxEnabled && decisionTreesEnabled
-          ? [NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID]
-          : []),
-      ];
+          : [];
       return beforeAgentWorkflowIds.length ? { workflow_ids: beforeAgentWorkflowIds } : {};
     })(),
-    ...(cortexEnabled || memoryEnabled || decisionTreesEnabled
-      ? {
-          post_execution_workflow_ids: [
-            ...(cortexEnabled || memoryEnabled ? [NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID] : []),
-            ...(decisionTreesEnabled ? [NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW_ID] : []),
-          ],
-        }
+    // One post-hook. Decision-tree reinforcement is the tail phase of the combined optimize
+    // workflow, so listing the reinforce workflow here as well would reinforce every round
+    // twice — two ai.agent runs, up to 900s each, writing the same trees.
+    ...(cortexEnabled || memoryEnabled
+      ? { post_execution_workflow_ids: [NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID] }
       : {}),
   },
 });
