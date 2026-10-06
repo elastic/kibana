@@ -8,9 +8,10 @@
  */
 
 import { isEqual, uniqWith } from 'lodash';
+import { getAtPointer, refToPointer } from './json_pointer';
 import type { SchemaNode } from './schema_walk';
 import { getOperationSchemas, walkSchema } from './schema_walk';
-import type { ContractOperation } from './types';
+import type { ContractOperation, ContractSpec } from './types';
 
 const SYNTAX_CHARACTERS = new Set('^$\\.*+?()[]{}|/');
 const ESCAPE_LETTERS = new Set('bBdDwWsSfnrtv0123456789cxupPk');
@@ -61,12 +62,9 @@ const normalizeSchema = (schema: SchemaNode): void => {
   }
   // Ajv rejects `nullable` without `type`; express it as a union with null instead.
   if ('nullable' in schema && schema.type === undefined) {
-    const { nullable, $schema, ...rest } = schema;
+    const { nullable, ...rest } = schema;
     for (const key of Object.keys(schema)) {
       delete schema[key];
-    }
-    if ($schema !== undefined) {
-      schema.$schema = $schema;
     }
     if (nullable === true && Object.keys(rest).length > 0) {
       schema.anyOf = [rest, { type: 'null' }];
@@ -76,29 +74,44 @@ const normalizeSchema = (schema: SchemaNode): void => {
   }
 };
 
-// Prism's parameter deserializers compare `schema.type` to a single string, so a
-// `["array", "null"]` query parameter is not split into items.
-const dropNullParameterType = (schema: SchemaNode): void => {
-  if (Array.isArray(schema.type)) {
-    const types = schema.type.filter((type) => type !== 'null');
-    if (types.length === 1) {
-      schema.type = types[0];
+// OpenAPI 3.0 inherits draft-04's boolean `exclusiveMinimum`/`exclusiveMaximum`, which Ajv
+// only accepts in their later numeric form.
+const toNumericExclusiveBounds = (schema: SchemaNode): void => {
+  for (const [exclusive, bound] of [
+    ['exclusiveMinimum', 'minimum'],
+    ['exclusiveMaximum', 'maximum'],
+  ] as const) {
+    if (typeof schema[exclusive] !== 'boolean') {
+      continue;
+    }
+    if (schema[exclusive] === true && typeof schema[bound] === 'number') {
+      schema[exclusive] = schema[bound];
+      delete schema[bound];
+    } else {
+      delete schema[exclusive];
     }
   }
 };
 
-/** Repairs schema defects found in vendor specs that Ajv or Prism would otherwise reject. */
+/**
+ * Repairs schema defects found in vendor specs that Ajv would otherwise reject, in place in
+ * each spec document and following refs, so every schema an operation uses is covered.
+ */
 export const normalizeOperations = (operations: ContractOperation[]): ContractOperation[] => {
-  const seen = new WeakSet<object>();
+  const seenBySpec = new Map<ContractSpec, WeakSet<object>>();
   for (const operation of operations) {
-    for (const schema of Object.values(operation.__bundled__)) {
-      walkSchema(schema, normalizeSchema, seen);
-    }
-    for (const { kind, schema } of getOperationSchemas(operation)) {
-      walkSchema(schema, normalizeSchema, seen);
-      if (kind === 'parameter') {
-        walkSchema(schema, dropNullParameterType);
+    const { spec } = operation;
+    const seen = seenBySpec.get(spec) ?? new WeakSet<object>();
+    seenBySpec.set(spec, seen);
+    const resolveRef = (ref: string) => getAtPointer(spec.document, refToPointer(ref));
+    const visit = (schema: SchemaNode) => {
+      normalizeSchema(schema);
+      if (spec.dialect === 'openapi-3.0') {
+        toNumericExclusiveBounds(schema);
       }
+    };
+    for (const { schema } of getOperationSchemas(operation)) {
+      walkSchema(schema.schema, visit, { seen, resolveRef });
     }
   }
   return operations;

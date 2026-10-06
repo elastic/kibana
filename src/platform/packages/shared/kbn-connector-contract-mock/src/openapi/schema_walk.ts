@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IHttpOperation } from '@stoplight/types';
-import type { LocatedSchema } from './types';
+import type { ContractOperation, LocatedSchema } from './types';
 
 export type SchemaNode = Record<string, unknown>;
 
@@ -41,6 +40,12 @@ const SUBSCHEMA_MAP_KEYWORDS = [
   'properties',
 ] as const;
 
+export interface WalkOptions {
+  readonly seen?: WeakSet<object>;
+  /** Returns the target of a `$ref`, so the walk continues into referenced schemas. */
+  readonly resolveRef?: (ref: string) => unknown;
+}
+
 /**
  * Visits a schema and every nested subschema once. Only schema keywords are followed, so
  * `example`, `default`, `enum` and `const` values are never visited.
@@ -48,59 +53,59 @@ const SUBSCHEMA_MAP_KEYWORDS = [
 export const walkSchema = (
   root: unknown,
   visit: (schema: SchemaNode) => void,
-  seen: WeakSet<object> = new WeakSet()
+  { seen = new WeakSet(), resolveRef }: WalkOptions = {}
 ): void => {
   if (!isRecord(root) || seen.has(root)) {
     return;
   }
   seen.add(root);
   visit(root);
+  const options = { seen, resolveRef };
+  if (resolveRef && typeof root.$ref === 'string') {
+    walkSchema(resolveRef(root.$ref), visit, options);
+  }
   for (const keyword of SUBSCHEMA_KEYWORDS) {
     const value = root[keyword];
     for (const child of Array.isArray(value) ? value : [value]) {
-      walkSchema(child, visit, seen);
+      walkSchema(child, visit, options);
     }
   }
   for (const keyword of SUBSCHEMA_MAP_KEYWORDS) {
     const value = root[keyword];
     if (isRecord(value)) {
       for (const child of Object.values(value)) {
-        walkSchema(child, visit, seen);
+        walkSchema(child, visit, options);
       }
     }
   }
-};
-
-/** Lists the parameter, body and response schemas of an operation. */
-export const getOperationSchemas = ({ request, responses }: IHttpOperation): LocatedSchema[] => {
-  const located: LocatedSchema[] = [];
-  for (const group of ['path', 'query', 'headers', 'cookie'] as const) {
-    for (const { name, schema } of request?.[group] ?? []) {
-      if (schema) {
-        located.push({ kind: 'parameter', location: `${group}.${name}`, schema });
-      }
-    }
-  }
-  for (const { mediaType, schema } of request?.body?.contents ?? []) {
-    if (schema) {
-      located.push({ kind: 'request', location: `request body ${mediaType}`, schema });
-    }
-  }
-  for (const { code, contents, headers } of responses) {
-    for (const { mediaType, schema } of contents ?? []) {
-      if (schema) {
-        located.push({ kind: 'response', location: `response ${code} ${mediaType}`, schema });
-      }
-    }
-    for (const { name, schema } of headers ?? []) {
-      if (schema) {
-        located.push({ kind: 'response', location: `response ${code} header ${name}`, schema });
-      }
-    }
-  }
-  return located;
 };
 
 /** Formats an operation as `METHOD /path` for error messages. */
-export const describeOperation = ({ method, path }: IHttpOperation): string =>
+export const describeOperation = ({ method, path }: ContractOperation): string =>
   `${method.toUpperCase()} ${path}`;
+
+/** Lists the parameter, body and response schemas of an operation. */
+export const getOperationSchemas = ({
+  parameters,
+  requestBody,
+  responses,
+}: ContractOperation): LocatedSchema[] => [
+  ...parameters.flatMap(({ in: location, name, schema }) =>
+    schema ? [{ kind: 'parameter' as const, location: `${location}.${name}`, schema }] : []
+  ),
+  ...(requestBody?.contents ?? []).flatMap(({ mediaType, schema }) =>
+    schema ? [{ kind: 'request' as const, location: `request body ${mediaType}`, schema }] : []
+  ),
+  ...responses.flatMap(({ code, contents, headers }) => [
+    ...contents.flatMap(({ mediaType, schema }) =>
+      schema
+        ? [{ kind: 'response' as const, location: `response ${code} ${mediaType}`, schema }]
+        : []
+    ),
+    ...headers.flatMap(({ name, schema }) =>
+      schema
+        ? [{ kind: 'response' as const, location: `response ${code} header ${name}`, schema }]
+        : []
+    ),
+  ]),
+];

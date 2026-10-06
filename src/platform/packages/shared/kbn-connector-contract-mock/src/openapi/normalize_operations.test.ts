@@ -10,15 +10,14 @@
 import { loadOperations } from './load_operations';
 import { normalizeOperations, toUnicodePattern } from './normalize_operations';
 
-const loadNormalized = (parameters: unknown[], schemas: Record<string, unknown>) =>
-  normalizeOperations(
+const loadNormalizedSchemas = (schemas: Record<string, unknown>, openapi = '3.0.3') => {
+  const [operation] = normalizeOperations(
     loadOperations({
-      openapi: '3.0.3',
+      openapi,
       info: { title: 'Test', version: '1' },
       paths: {
         '/items': {
           get: {
-            parameters,
             responses: {
               '200': {
                 description: 'ok',
@@ -30,7 +29,12 @@ const loadNormalized = (parameters: unknown[], schemas: Record<string, unknown>)
       },
       components: { schemas },
     })
-  )[0];
+  );
+  const { components } = operation.spec.document as {
+    components: { schemas: Record<string, Record<string, unknown>> };
+  };
+  return components.schemas;
+};
 
 describe('toUnicodePattern', () => {
   it('drops backslashes from identity escapes that the u flag rejects', () => {
@@ -49,48 +53,45 @@ describe('toUnicodePattern', () => {
 });
 
 describe('normalizeOperations', () => {
-  it('turns nullable without type into a union with null', () => {
-    const { __bundled__ } = loadNormalized([], {
-      Item: {
-        type: 'object',
-        properties: { owner: { nullable: true, allOf: [{ type: 'string' }] } },
-      },
+  it('follows refs and turns nullable without type into a union with null', () => {
+    const { Owner } = loadNormalizedSchemas({
+      Item: { type: 'object', properties: { owner: { $ref: '#/components/schemas/Owner' } } },
+      Owner: { nullable: true, allOf: [{ type: 'string' }] },
     });
 
-    expect(__bundled__.Item.properties?.owner).toEqual({
-      anyOf: [{ allOf: [{ type: 'string' }] }, { type: 'null' }],
-    });
+    expect(Owner).toEqual({ anyOf: [{ allOf: [{ type: 'string' }] }, { type: 'null' }] });
   });
 
   it('removes duplicate enum values and repairs patterns', () => {
-    const { __bundled__ } = loadNormalized([], {
+    const { Item } = loadNormalizedSchemas({
       Item: { type: 'string', enum: ['a', 'b', 'a'], pattern: '^\\_x$' },
     });
 
-    expect(__bundled__.Item).toMatchObject({ enum: ['a', 'b'], pattern: '^_x$' });
+    expect(Item).toMatchObject({ enum: ['a', 'b'], pattern: '^_x$' });
   });
 
   it('does not rewrite example values that look like schema keywords', () => {
-    const { __bundled__ } = loadNormalized([], {
+    const { Item } = loadNormalizedSchemas({
       Item: { type: 'object', example: { nullable: true, enum: [1, 1] } },
     });
 
-    expect(__bundled__.Item.examples).toEqual([{ nullable: true, enum: [1, 1] }]);
+    expect(Item.example).toEqual({ nullable: true, enum: [1, 1] });
   });
 
-  it('drops null from parameter type unions so array parameters are split', () => {
-    const { request } = loadNormalized(
-      [
-        {
-          name: 'ids',
-          in: 'query',
-          explode: false,
-          schema: { type: 'array', nullable: true, items: { type: 'string' } },
-        },
-      ],
-      { Item: { type: 'object' } }
-    );
+  it('converts boolean exclusive bounds in OpenAPI 3.0 only', () => {
+    const bounds = {
+      type: 'integer',
+      minimum: 0,
+      exclusiveMinimum: true,
+      maximum: 9,
+      exclusiveMaximum: false,
+    };
 
-    expect(request?.query?.[0].schema?.type).toBe('array');
+    expect(loadNormalizedSchemas({ Item: { ...bounds } }).Item).toEqual({
+      type: 'integer',
+      exclusiveMinimum: 0,
+      maximum: 9,
+    });
+    expect(loadNormalizedSchemas({ Item: { ...bounds } }, '3.1.0').Item).toEqual(bounds);
   });
 });

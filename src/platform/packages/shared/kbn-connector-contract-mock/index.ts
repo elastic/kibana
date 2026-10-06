@@ -10,7 +10,8 @@
 export { loadContractOperations, SchemaCompileError } from './src/openapi';
 export type {
   ContractOperation,
+  ContractSpec,
   OpenApiDocument,
-  SchemaBundle,
   SchemaCompileFailure,
+  SpecSchema,
 } from './src/openapi';
