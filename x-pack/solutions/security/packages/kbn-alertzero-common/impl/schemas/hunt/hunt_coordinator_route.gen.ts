@@ -318,6 +318,22 @@ export const HuntCoordinatorResponse = lazySchema(() =>
       .describe(
         'Populated when `has_confirmed_hit` is true (Tier 1 environment hits or a Tier 2 executed required-index hit) and the request named a `report_id`: one entry per technique this run corroborated, meaning its ES|QL executed and returned required-index rows or a Tier 1 hit was attributed to it. A technique that was only proposed gets no entry of its own; when no technique was corroborated, a single report-scoped entry carries all of them under `hunt_result.tier2.behaviors`. The caller fans out over this array with ai.attachment.add, one call per entry; no templated fields.'
       ),
+    /**
+     * Present alongside `sse`: the hosts and users the SSE entries name, deduplicated across entries, ready for the investigations impact route. Ids are `host:<host.name>` or `user:<user.name>`. Capped at 50, half of what one Investigation's impact may hold, because every sweep of a report merges onto the same Investigation.
+     */
+    impacted_entities: z
+      .array(
+        z.object({
+          id: z.string().min(1).max(256),
+          name: z.string().min(1).max(512),
+          type: z.enum(['host', 'user']),
+        })
+      )
+      .max(50)
+      .optional()
+      .describe(
+        "Present alongside `sse`: the hosts and users the SSE entries name, deduplicated across entries, ready for the investigations impact route. Ids are `host:<host.name>` or `user:<user.name>`. Capped at 50, half of what one Investigation's impact may hold, because every sweep of a report merges onto the same Investigation."
+      ),
   })
 );
 export type HuntCoordinatorResponse = z.infer<typeof HuntCoordinatorResponse>;
