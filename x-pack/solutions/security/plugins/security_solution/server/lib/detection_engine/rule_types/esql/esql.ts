@@ -15,6 +15,7 @@ import {
   getMvExpandFields,
 } from '@kbn/securitysolution-utils';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
 import { buildEsqlSearchRequest } from './build_esql_search_request';
 import { performEsqlRequest } from './esql_request';
 import { wrapEsqlAlerts } from './wrap_esql_alerts';
@@ -31,6 +32,7 @@ import {
   checkMissingIdFieldWarning,
 } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
+import { applyEndStageExceptions } from './utils/end_stage_exceptions/apply_end_stage_exceptions';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { SecurityRuleServices, SecuritySharedParams, SignalSource } from '../types';
@@ -106,6 +108,38 @@ export const esqlExecutor = async ({
       isAggregating: isRuleAggregating,
     });
 
+    // With the feature on, exceptions on columns that the query computes are inlined at the end of the
+    // query, and the DSL filter only keeps the other exceptions. Without it nothing changes.
+    const { allExceptionItems } = sharedParams;
+    const endStageExceptions =
+      sharedParams.experimentalFeatures.esqlNativeExceptionsEnabled && allExceptionItems?.length
+        ? await applyEndStageExceptions({
+            esClient: services.scopedClusterClient.asCurrentUser,
+            ruleExecutionLogger,
+            query: transformedQuery,
+            indices: getIndexListFromEsqlQuery(ruleParams.query),
+            items: allExceptionItems,
+            exceptionFilter,
+            unprocessedExceptions,
+            buildDslFilter: (dslItems) =>
+              buildExceptionFilter({
+                startedAt: tuple.to.toDate(),
+                alias: null,
+                excludeExceptions: true,
+                chunkSize: 10,
+                lists: dslItems,
+                listClient: sharedParams.listClient,
+              }),
+          })
+        : undefined;
+    const queryToRun = endStageExceptions?.query ?? transformedQuery;
+    const requestExceptionFilter = endStageExceptions
+      ? endStageExceptions.exceptionFilter
+      : exceptionFilter;
+    const requestUnprocessedExceptions =
+      endStageExceptions?.unprocessedExceptions ?? unprocessedExceptions;
+    result.warningMessages.push(...(endStageExceptions?.warnings ?? []));
+
     const excludedDocuments: Record<string, ExcludedDocument[]> = initiateExcludedDocuments({
       state,
       isRuleAggregating,
@@ -139,14 +173,14 @@ export const esqlExecutor = async ({
         }
 
         const esqlRequest = buildEsqlSearchRequest({
-          query: transformedQuery,
+          query: queryToRun,
           from: tuple.from.toISOString(),
           to: tuple.to.toISOString(),
           size,
           filters: [...dataTiersFilters, ...dataStreamNamespaceFilters],
           primaryTimestamp,
           secondaryTimestamp,
-          exceptionFilter,
+          exceptionFilter: requestExceptionFilter,
           excludedDocuments,
           ruleExecutionTimeout,
         });
@@ -159,7 +193,7 @@ export const esqlExecutor = async ({
         const hasLoggedRequestsReachedLimit = iteration >= 2;
 
         ruleExecutionLogger.trace(`ES|QL query to execute\n${JSON.stringify(esqlRequest)}`);
-        const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
+        const exceptionsWarning = getUnprocessedExceptionsWarnings(requestUnprocessedExceptions);
         if (exceptionsWarning) {
           result.warningMessages.push(exceptionsWarning);
         }
