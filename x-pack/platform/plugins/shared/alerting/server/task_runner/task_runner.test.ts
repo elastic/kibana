@@ -110,6 +110,7 @@ import {
 import { ErrorWithType } from '../lib/error_with_type';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 import { alertStatusChangedV1EventSchema } from '../../common/workflows/triggers/alert_status_changed';
+import { ALERT_STATUS_WORKFLOW_TRIGGER_SETTING_ID } from '../../common/workflows/triggers/alert_status_changed_setting';
 
 const RULE_EXECUTION_UUID = '5f6aa57d-3e22-484e-bae8-cbed868f4d28';
 jest.mock('uuid', () => ({
@@ -4544,8 +4545,13 @@ describe('Task Runner', () => {
       overrides: Partial<ConstructorParameters<typeof TaskRunner>[0]> = {}
     ) => createTaskRunner({ context: contextWithBus(), ...overrides });
 
+    const settingsClient = uiSettingsServiceMock.createClient();
+
     beforeEach(() => {
       mockBus.publish.mockClear();
+      settingsClient.get.mockReset();
+      settingsClient.get.mockResolvedValue(true);
+      uiSettingsService.asScopedToClient.mockReturnValue(settingsClient);
       ruleType.autoRecoverAlerts = true;
       ruleType.executor.mockResolvedValue({ state: {} });
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
@@ -4567,6 +4573,41 @@ describe('Task Runner', () => {
     afterEach(() => {
       ruleType.autoRecoverAlerts = true;
       ruleType.cancelAlertsOnRuleTimeout = true;
+    });
+
+    describe('advanced setting gate', () => {
+      const newAlertProcessed = () => {
+        const alert = makeMockAlert({ id: 'alert-1', uuid: 'uuid-1', actionGroup: 'default' });
+        alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+          type === 'new' ? { 'alert-1': alert } : {}
+        );
+      };
+
+      test('does not publish when the setting is off', async () => {
+        settingsClient.get.mockResolvedValue(false);
+        newAlertProcessed();
+
+        await createRunnerWithBus().run();
+
+        expect(settingsClient.get).toHaveBeenCalledWith(ALERT_STATUS_WORKFLOW_TRIGGER_SETTING_ID);
+        expect(mockBus.publish).not.toHaveBeenCalled();
+      });
+
+      test('does not publish when reading the setting fails', async () => {
+        settingsClient.get.mockRejectedValue(new Error('saved objects unavailable'));
+        newAlertProcessed();
+
+        await createRunnerWithBus().run();
+
+        expect(mockBus.publish).not.toHaveBeenCalled();
+      });
+
+      test('does not read the setting when no alert changed status', async () => {
+        await createRunnerWithBus().run();
+
+        expect(settingsClient.get).not.toHaveBeenCalled();
+        expect(mockBus.publish).not.toHaveBeenCalled();
+      });
     });
 
     test('publishes active event when an alert transitions to new', async () => {
