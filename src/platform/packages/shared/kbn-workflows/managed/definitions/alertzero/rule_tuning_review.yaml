@@ -581,9 +581,9 @@ steps:
       continue: true
 
   # Rules using a data view, timestamp override, or alert suppression need fields
-  # the preview API cannot conditionally omit, and a saved-query rule has no inline
-  # query to preview, so query and exception auto-apply is restricted the same way
-  # (both reuse this same preview mechanism below). The exception arm additionally
+  # the preview API cannot conditionally omit, so query and exception auto-apply is
+  # restricted the same way (both reuse this same preview mechanism below). The type
+  # check alone excludes saved-query rules, which carry no inline query. The exception arm additionally
   # requires its filter to have been built: falling back to the rule's own filters
   # would backtest the unchanged rule and present it as the exception's result.
   # Gated on fetch_rule so a skipped diagnose_rule leaves supported null/false.
@@ -599,7 +599,6 @@ steps:
               and steps.build_exception_filter.error == null
               and steps.build_exception_filter.output.filters != null))
           and steps.fetch_rule.output.type == 'query'
-          and steps.fetch_rule.output.saved_id == null
           and steps.fetch_rule.output.data_view_id == null
           and steps.fetch_rule.output.timestamp_override == null
           and steps.fetch_rule.output.alert_suppression == null }}
@@ -840,8 +839,8 @@ steps:
         Proposed preview errors: {{ steps.record_preview_outcome.output.proposed_error_text }}
         {% endif %}
         {% else %}
-        No backtest: this rule is not a plain query rule (saved query, data view,
-        timestamp override, or alert suppression are not supported by the preview),
+        No backtest: this rule is not a plain query rule (data view, timestamp
+        override, or alert suppression are not supported by the preview),
         or the proposed exception could not be converted into a preview filter.
         Approving still applies the proposed change, so judge it on the change itself
         and the false positives above rather than on a simulated alert count.
