@@ -507,4 +507,70 @@ describe('Hunt Watch worker chain', () => {
       });
     });
   });
+
+  describe('package report benign-close outcome', () => {
+    const statusWith = stepIn(packageReportSteps, 'resolve_package_status')?.with as Record<
+      string,
+      string
+    >;
+    const summaryWith = stepIn(packageReportSteps, 'resolve_package_summary')?.with as Record<
+      string,
+      string
+    >;
+    const liquid = createWorkflowLiquidEngine();
+    const render = (template: string, context: Record<string, unknown>) =>
+      liquid.parseAndRenderSync(template, context).trim();
+
+    const dismissCase = (dismissStep: Record<string, unknown> | undefined) => ({
+      inputs: { investigationConversationId: 'conv-1' },
+      variables: { dispatch_failed_count: 0 },
+      steps: {
+        decide_and_package: { output: { status: 'packaged', dismiss: true, proposals: [] } },
+        // A skipped step has no entry at all; a continued failure has an `error` and no `output`.
+        ...(dismissStep ? { dismiss_investigation_if_clean: dismissStep } : {}),
+      },
+    });
+
+    it('resolves the dismiss attempt before the status and summary read it', () => {
+      const order = packageReport.steps.map((step) => step.name);
+      const dismissIdx = order.indexOf('dismiss_investigation_if_clean');
+
+      expect(dismissIdx).toBeGreaterThan(-1);
+      expect(dismissIdx).toBeLessThan(order.indexOf('resolve_package_status'));
+      expect(dismissIdx).toBeLessThan(order.indexOf('resolve_package_summary'));
+    });
+
+    it('reports run_incomplete and an open Investigation when the close patch failed', () => {
+      const ctx = dismissCase({ error: { message: 'patch rejected' } });
+      const status = render(statusWith.package_status, ctx);
+      const reason = render(statusWith.package_reason, ctx);
+      const summary = render(summaryWith.package_summary, {
+        ...ctx,
+        variables: { ...ctx.variables, package_status: status, package_reason: reason },
+      });
+
+      expect(status).toBe('run_incomplete');
+      expect(reason).toContain('patch rejected');
+      expect(summary).toContain('still open');
+      expect(summary).not.toContain('closed this Investigation as benign');
+    });
+
+    it('is unchanged when the close succeeded', () => {
+      const ctx = dismissCase({ output: {} });
+      const status = render(statusWith.package_status, ctx);
+      const summary = render(summaryWith.package_summary, {
+        ...ctx,
+        variables: { ...ctx.variables, package_status: status },
+      });
+
+      expect(status).toBe('success');
+      expect(summary).toContain('closed this Investigation as benign');
+    });
+
+    it('is unchanged when the dismiss step never ran', () => {
+      const ctx = dismissCase(undefined);
+
+      expect(render(statusWith.package_status, ctx)).toBe('success');
+    });
+  });
 });
