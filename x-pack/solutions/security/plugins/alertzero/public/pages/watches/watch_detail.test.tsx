@@ -42,6 +42,15 @@ jest.mock('../../hooks/use_can_write_alertzero', () => ({
 }));
 jest.mock('../../hooks/use_watches_api');
 jest.mock('../../hooks/use_workers_api');
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
+  useKibana: () => ({
+    services: {
+      http: { get: jest.fn().mockResolvedValue(undefined) },
+      application: { getUrlForApp: jest.fn(() => '/app/workflows') },
+    },
+  }),
+}));
 jest.mock('./components/watches_section_layout', () => ({
   WatchesSectionLayout: ({
     children,
@@ -120,18 +129,25 @@ const mockUseCanWriteAlertZero = jest.mocked(useCanWriteAlertZero);
 
 const createWorker = (
   overrides: Partial<Worker> & Pick<Worker, 'id' | 'name' | 'watchIds'>
-): Worker => ({
-  enabled: false,
-  lastRun: null,
-  state: 'paused',
-  settingsRevision: null,
-  workflowId: null,
-  settings: {
-    workerId: overrides.id,
-    autonomy: 'manual',
-  },
-  ...overrides,
-});
+): Worker => {
+  const worker: Worker = {
+    enabled: false,
+    lastRun: null,
+    state: 'paused',
+    settingsRevision: null,
+    workflowId: null,
+    settings: {
+      workerId: overrides.id,
+      autonomy: 'manual',
+    },
+    ...overrides,
+  };
+  return {
+    ...worker,
+    // Turning a worker on requires an account. Tests that click the switch start from one.
+    settings: { ...worker.settings, serviceAccountId: 'kibana/az-worker-1' },
+  };
+};
 
 const floorWorkers: Worker[] = [
   createWorker({
@@ -198,7 +214,7 @@ const detectionWorkers: Worker[] = [
   }),
 ];
 
-const renderWatch = (watchId: string, workers: Worker[]) => {
+const renderWatch = (watchId: string, workers: Worker[], canModifyWorkers?: boolean) => {
   mockUseWatch.mockReturnValue({
     data: { watch: createCatalogWatchPlaceholder(watchId as CatalogWatchId) },
     isLoading: false,
@@ -206,7 +222,10 @@ const renderWatch = (watchId: string, workers: Worker[]) => {
     refetch: jest.fn(),
   } as never);
   mockUseWorkers.mockReturnValue({
-    data: { workers },
+    data: {
+      workers,
+      ...(canModifyWorkers === undefined ? {} : { canModifyWorkers }),
+    },
     isLoading: false,
     error: null,
     refetch: jest.fn(),
@@ -949,6 +968,18 @@ describe('WatchDetailPage', () => {
     });
   });
 
+  it('locks worker settings when the caller lacks manage_security', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers, false);
+
+    expect(screen.getByTestId('alertZeroReadOnlyCallout')).toBeInTheDocument();
+    expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeDisabled();
+    expect(
+      screen.getByTestId(
+        `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+      )
+    ).toBeDisabled();
+  });
+
   it('locks worker settings and disables save/discard with a tooltip when the user cannot write', () => {
     mockUseCanWriteAlertZero.mockReturnValue(false);
     renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
@@ -1012,11 +1043,16 @@ describe('WatchDetailPage', () => {
 
     const [first] = floorWorkers;
     // With `buttonElement="div"` EUI puts `aria-expanded` on the arrow control, not the
-    // data-test-subj node, and the enable switch is also a button — so query by expanded.
-    const arrowFor = (workerId: string, expanded: boolean) =>
-      within(screen.getByTestId(`alertZeroWatchWorkerAccordion-${workerId}`)).getByRole('button', {
-        expanded,
-      });
+    // data-test-subj node. The Run as control is also a button with `aria-expanded`.
+    const arrowFor = (workerId: string, expanded: boolean) => {
+      const arrow = within(screen.getByTestId(`alertZeroWatchWorkerAccordion-${workerId}`))
+        .getAllByRole('button', { expanded })
+        .find((button) => button.getAttribute('aria-controls') === `${workerId}-settings`);
+      if (!arrow) {
+        throw new Error(`expected the ${workerId} accordion arrow`);
+      }
+      return arrow;
+    };
     fireEvent.click(screen.getByTestId(`alertZeroWorkerAccordionHeader-${first.id}`));
     expect(arrowFor(first.id, false)).toBeInTheDocument();
 
