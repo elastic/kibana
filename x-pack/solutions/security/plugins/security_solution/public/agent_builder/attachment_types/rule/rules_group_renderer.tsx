@@ -31,7 +31,7 @@ export const createRulesGroupRenderer = ({
     const rules = new Map<string, RuleAttachment>();
     for (const attachment of attachments) {
       const rule = attachment as unknown as RuleAttachment;
-      const key = getRuleIdFromAttachment(rule) ?? getRuleName(rule) ?? attachment.id;
+      const key = getRuleIdFromAttachment(rule) ?? attachment.id;
       if (!rules.has(key)) {
         rules.set(key, rule);
       }

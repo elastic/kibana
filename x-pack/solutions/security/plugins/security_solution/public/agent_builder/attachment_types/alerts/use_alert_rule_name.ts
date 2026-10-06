@@ -22,7 +22,7 @@ export const useAlertRuleName = ({
   spaceId: string;
   search: ISearchGeneric;
 }): string | undefined => {
-  const [fetchedName, setFetchedName] = useState<string>();
+  const [fetched, setFetched] = useState<{ alertId: string; name: string }>();
 
   useEffect(() => {
     if (knownName) {
@@ -47,7 +47,7 @@ export const useAlertRuleName = ({
         >;
         const name = firstString(source[RULE_NAME_FIELD]);
         if (isMounted && name) {
-          setFetchedName(name);
+          setFetched({ alertId, name });
         }
       })
       .catch((error) => {
@@ -59,5 +59,5 @@ export const useAlertRuleName = ({
     };
   }, [alertId, knownName, search, spaceId]);
 
-  return knownName ?? fetchedName;
+  return knownName ?? (fetched?.alertId === alertId ? fetched.name : undefined);
 };

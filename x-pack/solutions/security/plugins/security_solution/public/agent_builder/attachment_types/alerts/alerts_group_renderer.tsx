@@ -82,6 +82,7 @@ export const createAlertsGroupRenderer = ({
 
       return (
         <SingleAlertRow
+          key={id}
           alertId={id}
           descriptor={descriptor}
           knownName={names.get(id)}

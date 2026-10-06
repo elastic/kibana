@@ -85,6 +85,16 @@ describe('createRulesGroupRenderer', () => {
     expect(path.split('&')).toHaveLength(1);
   });
 
+  it('keeps unsaved rules that share a name as separate rows', () => {
+    render(
+      <ul>
+        <Renderer attachments={[rule({ id: 'a' }), rule({ id: 'b' })]} />
+      </ul>
+    );
+
+    expect(screen.getAllByRole('listitem')).toHaveLength(2);
+  });
+
   it('renders one row per rule', () => {
     render(
       <ul>
