@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout';
 
 /** Serverless / cloud: primary chrome nav can lag behind Playwright defaults (gh-267186). */
 export const OBSERVABILITY_PRIMARY_NAV_LOAD_TIMEOUT_MS = 45_000;
@@ -16,7 +17,10 @@ export const OBSERVABILITY_PRIMARY_NAV_LOAD_TIMEOUT_MS = 45_000;
  */
 export const OBSERVABILITY_SPA_SHELL_TIMEOUT_MS = OBSERVABILITY_PRIMARY_NAV_LOAD_TIMEOUT_MS;
 
-/** Chrome nav for Observability — locators and actions only; specs own `expect`. */
+/** Per-attempt budget while retrying nav item placement; the retry owns the overall timeout. */
+const NAV_ITEM_ATTEMPT_TIMEOUT_MS = 5_000;
+
+/** Chrome nav for Observability — locators and actions only; `expect` here only bounds waits. */
 export class ObservabilityNavigation {
   public readonly sidenav: Locator;
   public readonly primaryNav: Locator;
@@ -158,48 +162,49 @@ export class ObservabilityNavigation {
    * deployments but overflows into the "More" menu on others (e.g. cloud-serverless);
    * open "More" when it is not in the primary nav so the returned locator is reachable.
    *
-   * Do not `or()` the primary item with the More trigger and `waitFor` — both can
+   * The returned locator is container-agnostic: chrome re-splits the primary menu and "More" on
+   * every re-measure, so a locator scoped to the container the item happened to be in can be
+   * stale by the time the caller acts on it. To act on an item, prefer `clickBodyNavItem*` /
+   * `openPanelById`, which re-resolve placement for every attempt.
+   *
+   * Do not `or()` the item with the More trigger and `waitFor` — both can
    * be visible at once, which Playwright treats as a strict-mode violation.
-   *
-   * Wait for a placement signal before choosing a branch: chrome can paint the
-   * More trigger (for other overflow items) before this item lands in primary,
-   * or paint primary late after `waitForLoad()` only saw the nav container.
-   *
-   * The primary branch reads through `measuredPrimaryNav`, so an item that is
-   * only in the primary menu because the overflow split has not been measured
-   * yet does not win the branch.
    */
   async revealBodyNavItemByDeepLinkId(deepLinkId: string): Promise<Locator> {
-    return this.revealBodyNavItem(
-      this.measuredPrimaryNav.locator(`[data-test-subj~="nav-item-deepLinkId-${deepLinkId}"]`),
-      this.navItemInMoreByDeepLinkId(deepLinkId)
-    );
+    return this.revealBodyNavItem(this.navItemInBodyByDeepLinkId(deepLinkId));
   }
 
   /** Same overflow handling as `revealBodyNavItemByDeepLinkId`, keyed by node `id`. */
   async revealBodyNavItemById(id: string): Promise<Locator> {
-    return this.revealBodyNavItem(
-      this.measuredPrimaryNav.locator(`[data-test-subj~="nav-item-id-${id}"]`),
-      this.navItemInMoreById(id)
-    );
+    return this.revealBodyNavItem(this.navItemInBodyById(id));
   }
 
-  private async revealBodyNavItem(primaryItem: Locator, moreItem: Locator): Promise<Locator> {
+  private async revealBodyNavItem(bodyItem: Locator): Promise<Locator> {
+    await this.waitForMeasuredNav();
+    await this.waitForFirstVisible([bodyItem, this.moreMenuTrigger]);
+
+    if (!(await bodyItem.isVisible())) {
+      await this.openMoreMenu();
+      await bodyItem.waitFor({
+        state: 'visible',
+        timeout: OBSERVABILITY_PRIMARY_NAV_LOAD_TIMEOUT_MS,
+      });
+    }
+
+    return bodyItem;
+  }
+
+  /**
+   * Nav has painted and its overflow split is measured, so placement can be read. Chrome can
+   * paint the More trigger (for other overflow items) before this item lands in primary, or
+   * paint primary late after `waitForLoad()` only saw the nav container.
+   */
+  private async waitForMeasuredNav(): Promise<void> {
     await this.waitForLoad();
-    await this.waitForFirstVisible([primaryItem, this.moreMenuTrigger]);
-
-    if (await primaryItem.isVisible()) {
-      return primaryItem;
-    }
-
-    await this.openMoreMenu();
-    await this.waitForFirstVisible([primaryItem, moreItem]);
-
-    if (await primaryItem.isVisible()) {
-      return primaryItem;
-    }
-
-    return moreItem;
+    await this.measuredPrimaryNav.waitFor({
+      state: 'visible',
+      timeout: OBSERVABILITY_PRIMARY_NAV_LOAD_TIMEOUT_MS,
+    });
   }
 
   /** First of `locators` to become visible; prefers no one-shot `isVisible()` race. */
@@ -235,17 +240,36 @@ export class ObservabilityNavigation {
 
   /** Click a body nav item wherever it renders — primary nav or the "More" overflow menu. */
   async clickBodyNavItemByDeepLinkId(deepLinkId: string) {
-    const item = await this.revealBodyNavItemByDeepLinkId(deepLinkId);
-    await item.click();
+    await this.clickBodyNavItem(this.navItemInBodyByDeepLinkId(deepLinkId));
   }
 
   async openPanelById(id: string): Promise<void> {
-    const opener = await this.revealBodyNavItemById(id);
-    await opener.click();
-    await this.anyPanel(id).waitFor({
-      state: 'visible',
-      timeout: OBSERVABILITY_PRIMARY_NAV_LOAD_TIMEOUT_MS,
-    });
+    await this.clickBodyNavItem(this.navItemInBodyById(id), this.anyPanel(id));
+  }
+
+  /**
+   * Resolve placement and click within one bounded wait, exiting on `outcome` instead of on the
+   * click resolving. Chrome re-splits the primary menu and "More" on every re-measure, so an item
+   * can be re-parented between the read that places it and the click; re-resolving per attempt
+   * re-opens "More" instead of burning the action timeout on a placement that no longer holds.
+   * Clicking a nav item only opens a panel or navigates, so repeating it is side-effect free.
+   */
+  private async clickBodyNavItem(bodyItem: Locator, outcome?: Locator): Promise<void> {
+    await this.waitForMeasuredNav();
+    await this.waitForFirstVisible([bodyItem, this.moreMenuTrigger]);
+
+    await expect(async () => {
+      if (await outcome?.isVisible()) {
+        return;
+      }
+
+      if (!(await bodyItem.isVisible())) {
+        await this.openMoreMenu(NAV_ITEM_ATTEMPT_TIMEOUT_MS);
+      }
+
+      await bodyItem.click({ timeout: NAV_ITEM_ATTEMPT_TIMEOUT_MS });
+      await outcome?.waitFor({ state: 'visible', timeout: NAV_ITEM_ATTEMPT_TIMEOUT_MS });
+    }).toPass({ timeout: OBSERVABILITY_PRIMARY_NAV_LOAD_TIMEOUT_MS });
   }
 
   async clickPanelNavItemByDeepLinkId(panelId: string, deepLinkId: string): Promise<void> {
@@ -254,13 +278,13 @@ export class ObservabilityNavigation {
   }
 
   /** If More is already open, Escape first so the next open is the root list. */
-  async openMoreMenu() {
+  async openMoreMenu(timeout?: number) {
     if (await this.morePopover.isVisible()) {
       await this.page.keyboard.press('Escape');
-      await this.morePopover.waitFor({ state: 'hidden' });
+      await this.morePopover.waitFor({ state: 'hidden', timeout });
     }
-    await this.moreMenuTrigger.click();
-    await this.morePopover.waitFor({ state: 'visible' });
+    await this.moreMenuTrigger.click({ timeout });
+    await this.morePopover.waitFor({ state: 'visible', timeout });
   }
 
   /** Returns a function that is false after a full page reload (spec asserts). */
