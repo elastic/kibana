@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type { DashboardValidationIssue, ValidateDashboard } from '@kbn/dashboard-authoring';
 import {
@@ -17,17 +17,6 @@ import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 
 type DashboardStateSchema = ReturnType<DashboardPluginStart['getDashboardStateSchema']>;
 type IssuePath = DashboardValidationIssue['path'];
-
-/**
- * Mirrors the `config` of the native vega embeddable schema, which the vega plugin only registers
- * while `vega.standaloneEmbeddable` is enabled. Remove once that flag is on by default.
- */
-const vegaConfigSchema = z.looseObject({
-  spec: z.discriminatedUnion('format', [
-    z.object({ format: z.literal('hjson'), value: z.string().min(1) }),
-    z.object({ format: z.literal('json'), value: z.looseObject({}) }),
-  ]),
-});
 
 const getDeepestPathLength = (issues: z.core.$ZodIssue[]): number =>
   Math.max(0, ...issues.map(({ path }) => path.length));
@@ -71,32 +60,30 @@ const getPanelLocations = ({
       : [{ panel: widget, path: ['panels', widgetIndex] }]
   );
 
-const isWithin = (path: IssuePath, prefix: IssuePath): boolean =>
-  prefix.every((key, index) => path[index] === key);
+const isPathEqual = (path: IssuePath, otherPath: IssuePath): boolean =>
+  path.length === otherPath.length && path.every((key, index) => otherPath[index] === key);
 
 /**
  * Validates the whole dashboard against the strict as-code dashboard schema the dashboard API
- * uses, so generated dashboards stay valid as-code dashboards. Vega panels are checked against a
- * local mirror of the native vega schema.
+ * uses, so generated dashboards stay valid as-code dashboards.
+ *
+ * The vega plugin only registers its panel schema while `vega.standaloneEmbeddable` is enabled, so
+ * the unregistered-type issue on vega panels is ignored; once registered, vega panels are
+ * validated like any other panel.
  */
 export const createDashboardValidator =
   (dashboardStateSchema: DashboardStateSchema): ValidateDashboard =>
   (dashboardData) => {
-    const vegaPanelLocations = getPanelLocations(dashboardData).filter(
-      ({ panel }) => panel.type === VEGA_VIS_TYPE
-    );
     const result = dashboardStateSchema.safeParse(dashboardData);
-    const schemaIssues = result.success ? [] : toValidationIssues(result.error.issues);
+    if (result.success) {
+      return [];
+    }
 
-    return [
-      ...schemaIssues.filter(
-        ({ path }) => !vegaPanelLocations.some((location) => isWithin(path, location.path))
-      ),
-      ...vegaPanelLocations.flatMap(({ panel, path }) => {
-        const vegaResult = vegaConfigSchema.safeParse(panel.config);
-        return vegaResult.success
-          ? []
-          : toValidationIssues(vegaResult.error.issues, [...path, 'config']);
-      }),
-    ];
+    const vegaTypePaths = getPanelLocations(dashboardData)
+      .filter(({ panel }) => panel.type === VEGA_VIS_TYPE)
+      .map(({ path }) => [...path, 'type']);
+
+    return toValidationIssues(result.error.issues).filter(
+      ({ path }) => !vegaTypePaths.some((vegaTypePath) => isPathEqual(path, vegaTypePath))
+    );
   };
