@@ -10,7 +10,9 @@ import type { Logger } from '@kbn/core/server';
 import type { ResolvePanelContent } from './operations/panels';
 import type { ResolveAttachmentPanel, ResolveControlFieldCapabilities } from './operations/types';
 import type { OperationFailure } from './utils';
-import type { PanelAuthoringNote, ValidatePanelContent } from './resolve_panel';
+import { indexPanelsById } from './dashboard_state';
+import type { PanelAuthoringNote } from './resolve_panel';
+import { discardInvalidChanges, type ValidateDashboard } from './validate_dashboard';
 import {
   dashboardOperationSchema,
   executeOperationHandler,
@@ -28,7 +30,7 @@ interface ExecuteDashboardOperationsParams {
   resolvePanelContent?: ResolvePanelContent;
   resolveAttachmentPanel?: ResolveAttachmentPanel;
   resolveControlFieldCapabilities?: ResolveControlFieldCapabilities;
-  validatePanelContent?: ValidatePanelContent;
+  validateDashboard?: ValidateDashboard;
 }
 
 /**
@@ -37,8 +39,9 @@ interface ExecuteDashboardOperationsParams {
  * persistence, and result shape belong to the calling tool. Inline panel content
  * is resolved via the injected `resolvePanelContent` callback, so the core never
  * reads any store. Control fields are validated against index mappings when
- * the host provides `resolveControlFieldCapabilities`. New and edited panel
- * content is checked with `validatePanelContent` when the host provides it.
+ * the host provides `resolveControlFieldCapabilities`. When the host provides
+ * `validateDashboard`, changes that make the dashboard invalid are discarded and
+ * reported as failures.
  */
 export const executeDashboardOperations = async ({
   dashboardData,
@@ -47,19 +50,20 @@ export const executeDashboardOperations = async ({
   resolvePanelContent,
   resolveAttachmentPanel,
   resolveControlFieldCapabilities,
-  validatePanelContent,
+  validateDashboard,
 }: ExecuteDashboardOperationsParams): Promise<{
   dashboardData: DashboardAttachmentData;
   failures: OperationFailure[];
   panelAuthoringNotes: PanelAuthoringNote[];
 }> => {
-  let nextDashboardData = structuredClone(
+  const originalDashboardData = structuredClone(
     dashboardData ?? {
       title: 'User Dashboard',
       description: undefined,
       panels: [],
     }
   );
+  let nextDashboardData = originalDashboardData;
   const failures: OperationFailure[] = [];
   const panelAuthoringNotes: PanelAuthoringNote[] = [];
 
@@ -69,7 +73,6 @@ export const executeDashboardOperations = async ({
     resolvePanelContent,
     resolveAttachmentPanel,
     resolveControlFieldCapabilities,
-    validatePanelContent,
     failures,
     panelAuthoringNotes,
   });
@@ -83,9 +86,20 @@ export const executeDashboardOperations = async ({
     });
   }
 
-  return {
+  if (!validateDashboard) {
+    return { dashboardData: nextDashboardData, failures, panelAuthoringNotes };
+  }
+
+  const validationResult = discardInvalidChanges({
+    originalDashboardData,
     dashboardData: nextDashboardData,
-    failures,
-    panelAuthoringNotes,
+    issues: validateDashboard(nextDashboardData),
+  });
+  const validPanelsById = indexPanelsById(validationResult.dashboardData.panels);
+
+  return {
+    dashboardData: validationResult.dashboardData,
+    failures: [...failures, ...validationResult.failures],
+    panelAuthoringNotes: panelAuthoringNotes.filter(({ panelId }) => validPanelsById.has(panelId)),
   };
 };

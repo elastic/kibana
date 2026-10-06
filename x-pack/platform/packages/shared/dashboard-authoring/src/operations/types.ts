@@ -14,7 +14,6 @@ import type {
   InlinePanelOperationType,
   PanelAuthoringNote,
   PanelContentAttempt,
-  ValidatePanelContent,
 } from '../resolve_panel';
 import type { ResolvedPanelCreationRequest } from './panel_creation';
 
@@ -55,7 +54,6 @@ export interface OperationExecutionContext {
   resolvePanelContent?: ResolvePanelContent;
   resolveAttachmentPanel?: ResolveAttachmentPanel;
   resolveControlFieldCapabilities?: ResolveControlFieldCapabilities;
-  validatePanelContent?: ValidatePanelContent;
 }
 
 export interface OperationHandlerParams<TOperation> {
