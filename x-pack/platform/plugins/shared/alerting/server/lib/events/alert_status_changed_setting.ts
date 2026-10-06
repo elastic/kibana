@@ -22,7 +22,7 @@ export const registerAlertStatusWorkflowTriggerSetting = (uiSettings: CoreSetup[
         'xpack.alerting.uiSettings.alertStatusWorkflowTriggerDescription',
         {
           defaultMessage:
-            'Lets workflows start when an alert from a rule in this space becomes active or recovered, using the alerting.v1.alertStatusChanged trigger. While this is off, no alert status events are published and workflows using that trigger never run.',
+            'Lets workflows start when an alert from a rule in this space becomes active or recovered, using the alerting.v1.alertStatusChanged trigger. While this is off, no alert status events are published and workflows using that trigger never run. Workflows started by this trigger run with the API key of the rule that raised the alert, so turning this on lets anyone who can create workflows in this space act with the privileges of the user who owns that rule.',
         }
       ),
       category: ['alerting'],
