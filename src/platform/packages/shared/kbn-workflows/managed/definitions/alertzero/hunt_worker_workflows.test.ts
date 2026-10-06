@@ -165,6 +165,37 @@ describe('Hunt Watch worker chain', () => {
     });
   });
 
+  // A clean run whose dismissal was held (open Proposal) or failed closed (lookup error) must say
+  // so in the summary, and a lookup failure must surface as run_incomplete like the mint-side one:
+  // nothing waits to close that Investigation and no sweep retries it.
+  describe('dismissHold wiring', () => {
+    const dataSetWith = (name: string): Record<string, string> =>
+      (stepIn(packageReportSteps, name)?.with ?? {}) as Record<string, string>;
+
+    it('summarises each non-none dismissHold value', () => {
+      const summary = dataSetWith('resolve_package_summary').package_summary;
+      expect(summary).toContain("packaged.dismissHold == 'open_proposal'");
+      expect(summary).toContain("packaged.dismissHold == 'check_failed'");
+      // Held branches must precede the benign-close branch, or they would never render.
+      expect(summary.indexOf("dismissHold == 'open_proposal'")).toBeLessThan(
+        summary.indexOf('packaged.dismiss == true')
+      );
+    });
+
+    it('marks a dismissHold lookup failure as run_incomplete with a reason', () => {
+      const { package_status: status, package_reason: reason } =
+        dataSetWith('resolve_package_status');
+      expect(status).toContain("output.dismissHold == 'check_failed'");
+      expect(reason).toContain("output.dismissHold == 'check_failed'");
+    });
+
+    it('only closes the Investigation when packaging decided to dismiss', () => {
+      expect(stepIn(packageReportSteps, 'dismiss_investigation_if_clean')?.if).toContain(
+        'output.dismiss == true'
+      );
+    });
+  });
+
   // 1e: each child's own declared trigger input schema is what the caller's payload is
   // checked against -- not a hand-typed copy of it that could drift from the real schema.
   describe('call-site inputs satisfy the declared child schema', () => {

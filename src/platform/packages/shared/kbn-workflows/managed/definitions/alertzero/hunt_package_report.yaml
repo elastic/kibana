@@ -215,6 +215,8 @@ steps:
         run_incomplete
         {%- elsif variables.dismiss_close_failed == true -%}
         run_incomplete
+        {%- elsif steps.decide_and_package.output.dismissHold == 'check_failed' -%}
+        run_incomplete
         {%- elsif variables.dispatch_failed_count > 0 -%}
         run_incomplete
         {%- else -%}
@@ -227,6 +229,8 @@ steps:
         {{ steps.decide_and_package.output.reason }}
         {%- elsif steps.decide_and_package.output.mintSuppression == 'check_failed' -%}
         could not verify whether the Investigation already has a Proposal, so no Proposal was minted
+        {%- elsif steps.decide_and_package.output.dismissHold == 'check_failed' -%}
+        could not verify whether the Investigation has an open Proposal, so it was left open instead of being closed
         {%- elsif steps.decide_and_package.error.message != nil and steps.decide_and_package.error.message != empty -%}
         {{ steps.decide_and_package.error.message }}
         {%- elsif variables.dismiss_close_failed == true -%}

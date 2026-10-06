@@ -12,20 +12,13 @@ import { MAX_PROPOSALS_PAGE_OFFSET, MAX_PROPOSALS_PAGE_SIZE } from '@kbn/proposa
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ, CANDIDATES_URL } from '../../../common/constants';
+import { OPEN_PROPOSAL_STATUSES } from '../../../common/proposals/open_statuses';
 import { buildCandidateQuery } from '../../services/watches/hunt/common/build_candidate_query';
 import type { OpenProposalConversationIdsReader } from '../../services/watches/hunt/common/build_candidate_query';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
 
 export { CANDIDATES_URL };
-
-/**
- * An "active" Hunt Proposal, per the selection contract: awaiting a decision, or
- * decided and currently running. The remaining statuses (`expired`, `failed`,
- * `no_action`, `succeeded`) are terminal, so a report carrying only those is
- * free to be hunted again.
- */
-export const OPEN_PROPOSAL_STATUSES = ['pending', 'executing'] as const;
 
 type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
 

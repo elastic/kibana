@@ -153,6 +153,11 @@ export const packageReportOutputSchema = z.discriminatedUnion('status', [
      * so the dismissal fails closed without asserting a Proposal exists. Either way `dismiss` is
      * `false` and the Investigation stays open. Narrower than `mintSuppression` on purpose: settled
      * Proposals never hold a dismissal.
+     *
+     * Not airtight: a gate's Proposal is created asynchronously, after the packaging workflow has
+     * released its concurrency slot, so a clean run that lands in that create window sees no open
+     * Proposal and still dismisses. Same gap, and same Proposals-side fix, as `mintSuppression`
+     * (see `hunt_package_report.yaml`'s concurrency comment).
      */
     dismissHold: z.enum(['none', 'open_proposal', 'check_failed']),
   }),

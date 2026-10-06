@@ -69,6 +69,14 @@ export interface RunPackageReportDeps {
 /**
  * Decides whether a clean-run dismissal may proceed. `decidePackageReport` is pure and cannot do
  * this lookup, so it lives here. Fails closed: if the lookup throws, the Investigation stays open.
+ *
+ * Closes the steady-state case only, not the create window: the packaging workflow dispatches
+ * each gate with `workflow.executeAsync` and releases its concurrency slot before any gate has
+ * actually created its Proposal (see `hunt_package_report.yaml`'s concurrency comment, which
+ * describes the same gap for the mint-side lookup). A clean run that lands in that window sees no
+ * open Proposal and still dismisses, stranding the decision the Proposal is about to carry.
+ * Closing it for good needs atomic dedup on the Proposals side, the same follow-up as the mint
+ * guard (elastic/security-team#19822); do not read this guard as having closed the invariant.
  */
 const resolveDismissHold = async (
   hasOpenProposal: HasOpenProposal,
@@ -203,7 +211,14 @@ export const runPackageReport = async ({
         omittedProposalCount: 0,
         dismiss: dismissHold === 'none',
         dismissHold,
-        closureSummary: `Hunt for report ${reportId} found no confirmed hits. Closing: nothing in this environment matched the report at the confirming-index bar.`,
+        closureSummary:
+          dismissHold === 'none'
+            ? `Hunt for report ${reportId} found no confirmed hits. Closing: nothing in this environment matched the report at the confirming-index bar.`
+            : `Hunt for report ${reportId} found no confirmed hits. Leaving the Investigation open: ${
+                dismissHold === 'open_proposal'
+                  ? 'it still has a pending or executing Proposal from an earlier run.'
+                  : 'could not verify whether it has an open Proposal.'
+              }`,
         expectedProposalCount: 0,
         mintSuppression: 'none',
       };

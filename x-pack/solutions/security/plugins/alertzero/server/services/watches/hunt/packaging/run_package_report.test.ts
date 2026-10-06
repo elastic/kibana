@@ -429,6 +429,9 @@ describe('runPackageReport', () => {
       }
       expect(result.dismiss).toBe(false);
       expect(result.dismissHold).toBe('open_proposal');
+      // The step output must not claim a closure that did not happen.
+      expect(result.closureSummary).not.toContain('Closing');
+      expect(result.closureSummary).toContain('Leaving the Investigation open');
       expect(result.proposals).toEqual([]);
       expect(result.expectedProposalCount).toBe(0);
       // Coverage is still recorded: the hunt did look.
