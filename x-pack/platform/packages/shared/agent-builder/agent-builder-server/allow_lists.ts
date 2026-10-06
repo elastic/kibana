@@ -139,7 +139,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   'nightshift_record_remediation',
 
   // Platform – Agentic Investigations
-  'investigations.set_impact',
+  `${internalNamespaces.agenticInvestigations}.set_impact`,
 
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
