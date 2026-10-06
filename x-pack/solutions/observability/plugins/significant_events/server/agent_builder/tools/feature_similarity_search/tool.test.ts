@@ -9,6 +9,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
+import { assertCanReadSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
 import {
   createFeatureSimilaritySearchTool,
@@ -17,6 +18,10 @@ import {
 
 jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn(),
+}));
+
+jest.mock('../../../routes/utils/assert_can_manage_significant_events', () => ({
+  assertCanReadSignificantEvents: jest.fn(),
 }));
 
 describe('ki_feature_similarity_search tool', () => {
@@ -185,5 +190,29 @@ describe('ki_feature_similarity_search tool', () => {
         data: { candidate_id: 'okta', features: [], error: 'semantic unavailable' },
       },
     ]);
+  });
+  it('does not search KIs without the Nightshift read privilege', async () => {
+    (assertCanReadSignificantEvents as jest.Mock).mockRejectedValueOnce(
+      new Error('Reading significant events requires the Nightshift read privilege')
+    );
+    const { tool, findFeatures } = createTool();
+
+    await invokeHandler(
+      tool as never,
+      {
+        stream_name: 'logs.test',
+        candidates: [
+          {
+            candidate_id: 'okta-sdk',
+            title: 'Okta SDK',
+            description: 'Okta client',
+            type: 'technology',
+          },
+        ],
+      },
+      createMockToolContext()
+    );
+
+    expect(findFeatures).not.toHaveBeenCalled();
   });
 });

@@ -16,9 +16,15 @@ import {
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID,
 } from './tool';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
+import { assertCanReadSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
+import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
 
 jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn(),
+}));
+
+jest.mock('../../../routes/utils/assert_can_manage_significant_events', () => ({
+  assertCanReadSignificantEvents: jest.fn(),
 }));
 
 describe('ki_search tool', () => {
@@ -104,5 +110,24 @@ describe('ki_search tool', () => {
 
     const res = await tool.availability!.handler({ request, uiSettings, spaceId: 'default' });
     expect(res.status).toBe('unavailable');
+  });
+
+  it('does not search KIs without the Nightshift read privilege', async () => {
+    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+    (assertCanReadSignificantEvents as jest.Mock).mockRejectedValueOnce(
+      new Error('Reading significant events requires the Nightshift read privilege')
+    );
+    const getKnowledgeIndicatorClient = jest.fn();
+    const getScopedClients = jest.fn(async () => {
+      return { licensing: {}, getKnowledgeIndicatorClient } as unknown as RouteHandlerScopedClients;
+    }) as unknown as jest.MockedFunction<GetScopedClients>;
+    const tool = createSearchKnowledgeIndicatorsTool({ getScopedClients, server, logger });
+
+    const result = await invokeHandler(tool as never, {}, createMockToolContext());
+
+    expect(getKnowledgeIndicatorClient).not.toHaveBeenCalled();
+    if ('results' in result) {
+      expect(result.results[0].type).toBe('error');
+    }
   });
 });

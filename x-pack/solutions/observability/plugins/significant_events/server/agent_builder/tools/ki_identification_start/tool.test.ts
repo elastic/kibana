@@ -6,7 +6,7 @@
  */
 
 import { createKiIdentificationStartTool } from './tool';
-import { createMockToolContext } from '../../utils/test_helpers';
+import { createMockToolContext, createNightshiftSecurityServer } from '../../utils/test_helpers';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
 import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 
@@ -15,7 +15,7 @@ describe('createKiIdentificationStartTool', () => {
     trackAgentToolKiIdentificationStarted: jest.fn(),
   };
 
-  const setup = () => {
+  const setup = ({ hasAllRequested = true }: { hasAllRequested?: boolean } = {}) => {
     const managementApi = {
       getWorkflow: jest.fn().mockResolvedValue({
         id: 'system-streams-ki-onboarding',
@@ -35,6 +35,7 @@ describe('createKiIdentificationStartTool', () => {
     };
 
     const tool = createKiIdentificationStartTool({
+      server: createNightshiftSecurityServer({ hasAllRequested }),
       telemetry: telemetry as never,
       streamsKIsOnboardingClient,
       maintenanceService: maintenanceService as never,
@@ -90,6 +91,20 @@ describe('createKiIdentificationStartTool', () => {
       const data = result.results[0].data as Record<string, unknown>;
       expect(data.message).toContain('Failed to start KI identification background task');
       expect(data.operation).toBe('ki_identification_start');
+    }
+  });
+
+  it('does not start onboarding without the Nightshift manage privilege', async () => {
+    const { tool, context, managementApi } = setup({ hasAllRequested: false });
+
+    const result = await tool.handler(
+      { stream_name: 'logs.nginx', steps: [KIsOnboardingStep.FeaturesIdentification] },
+      context
+    );
+
+    expect(managementApi.runWorkflow).not.toHaveBeenCalled();
+    if ('results' in result) {
+      expect(result.results[0].type).toBe('error');
     }
   });
 });

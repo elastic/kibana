@@ -17,9 +17,14 @@ import {
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID,
 } from './tool';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
+import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 
 jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn(),
+}));
+
+jest.mock('../../../routes/utils/assert_can_manage_significant_events', () => ({
+  assertCanManageSignificantEvents: jest.fn(),
 }));
 
 describe('ki_feature_create tool', () => {
@@ -233,6 +238,46 @@ describe('ki_feature_create tool', () => {
         stream_type: 'classic',
         error_message: 'write failed',
       })
+    );
+  });
+  it('does not write the KI without the Nightshift manage privilege', async () => {
+    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+    (assertCanManageSignificantEvents as jest.Mock).mockRejectedValueOnce(
+      new Error('Managing significant events requires the Nightshift manage privilege')
+    );
+
+    const getKnowledgeIndicatorClient = jest.fn();
+    const getScopedClients = jest.fn(async () => {
+      return {
+        streamsClient: { getStream: jest.fn() },
+        getKnowledgeIndicatorClient,
+        licensing: {},
+      } as unknown as RouteHandlerScopedClients;
+    }) as unknown as jest.MockedFunction<GetScopedClients>;
+
+    const tool = createFeatureKnowledgeIndicatorTool({
+      getScopedClients,
+      server,
+      logger,
+      telemetry,
+    });
+
+    await invokeHandler(
+      tool as never,
+      {
+        stream_name: 'logs.test',
+        id: 'feature-1',
+        type: 'custom',
+        description: 'desc',
+        properties: {},
+        confidence: 80,
+      },
+      createMockToolContext()
+    );
+
+    expect(getKnowledgeIndicatorClient).not.toHaveBeenCalled();
+    expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
+      expect.objectContaining({ ki_kind: 'feature', success: false })
     );
   });
 });

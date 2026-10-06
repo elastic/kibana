@@ -10,11 +10,16 @@ import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
+import { assertCanReadSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { searchEventsToolHandler } from './handler';
 import { createSearchEventsTool, SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID } from './tool';
 
 jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn(),
+}));
+
+jest.mock('../../../routes/utils/assert_can_manage_significant_events', () => ({
+  assertCanReadSignificantEvents: jest.fn(),
 }));
 
 jest.mock('./handler', () => ({
@@ -170,6 +175,34 @@ describe('event_search tool', () => {
 
     if ('results' in result) {
       expect(result.results[0].type).toBe('other');
+    }
+  });
+  it('does not search without the Nightshift read privilege', async () => {
+    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+    (assertCanReadSignificantEvents as jest.Mock).mockRejectedValueOnce(
+      new Error('Reading significant events requires the Nightshift read privilege')
+    );
+    (searchEventsToolHandler as jest.Mock).mockClear();
+
+    const tool = createSearchEventsTool({
+      getScopedClients: jest.fn().mockResolvedValue({
+        getEventSearchClient: jest.fn(),
+        licensing: {},
+      }) as unknown as GetScopedClients,
+      server: {} as SignificantEventsServer,
+      logger: loggingSystemMock.createLogger(),
+      telemetry: createMockTelemetry() as never,
+    });
+
+    const result = await invokeHandler(
+      tool as never,
+      { status: 'active' },
+      createMockToolContext()
+    );
+
+    expect(searchEventsToolHandler).not.toHaveBeenCalled();
+    if ('results' in result) {
+      expect(result.results[0].type).toBe('error');
     }
   });
 });

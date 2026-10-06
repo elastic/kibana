@@ -12,11 +12,13 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { ZodObject } from '@kbn/zod/v4';
 import type { z } from '@kbn/zod/v4';
 import type { AttachmentClient } from '@kbn/streams-plugin/server';
 import type { KnowledgeIndicatorClient } from '../../lib/knowledge_indicators';
 import type { RouteHandlerScopedClients, GetScopedClients } from '../../routes/types';
+import type { SignificantEventsServer } from '../../types';
 
 /**
  * Subset of RouteHandlerScopedClients that tools actually use.
@@ -94,4 +96,15 @@ export const createMockToolContext = (): ToolHandlerContext => {
 
   toolHandlerContext.modelProvider = modelProvider;
   return toolHandlerContext;
+};
+
+/** A server whose Kibana privilege check reports whether the caller holds every requested privilege. */
+export const createNightshiftSecurityServer = ({
+  hasAllRequested = true,
+}: { hasAllRequested?: boolean } = {}): Pick<SignificantEventsServer, 'security'> => {
+  const security = securityMock.createStart();
+  security.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
+    jest.fn(async () => ({ hasAllRequested }))
+  );
+  return { security };
 };

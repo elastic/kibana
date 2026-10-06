@@ -14,6 +14,7 @@ import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '../../../common';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../routes/types';
+import { createNightshiftSecurityServer } from '../utils/test_helpers';
 import {
   createSignificantEventAttachmentType,
   formatSignificantEventAsText,
@@ -72,6 +73,7 @@ describe('createSignificantEventAttachmentType', () => {
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([]),
+      server: createNightshiftSecurityServer(),
     });
 
     await expect(Promise.resolve(type.validate(event))).resolves.toEqual({
@@ -88,6 +90,7 @@ describe('createSignificantEventAttachmentType', () => {
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([event, updatedEvent]),
+      server: createNightshiftSecurityServer(),
     });
 
     await expect(
@@ -106,6 +109,7 @@ describe('createSignificantEventAttachmentType', () => {
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([updatedEvent]),
+      server: createNightshiftSecurityServer(),
     });
 
     await expect(
@@ -121,6 +125,7 @@ describe('createSignificantEventAttachmentType', () => {
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([updatedEvent]),
+      server: createNightshiftSecurityServer(),
     });
 
     await expect(
@@ -136,6 +141,7 @@ describe('createSignificantEventAttachmentType', () => {
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([updatedEvent]),
+      server: createNightshiftSecurityServer(),
     });
 
     await expect(
@@ -150,6 +156,7 @@ describe('createSignificantEventAttachmentType', () => {
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([]),
+      server: createNightshiftSecurityServer(),
     });
 
     expect(formatSignificantEventAsText(event)).toContain('Payment outage');
@@ -157,5 +164,19 @@ describe('createSignificantEventAttachmentType', () => {
     expect(type.isReadonly).toBe(true);
     expect(type.getTools?.()).toEqual([]);
     expect(type.getAgentDescription?.()).toContain('significant event attachment');
+  });
+
+  it('does not resolve an event without the Nightshift read privilege', async () => {
+    const getScopedClients = createGetScopedClients([event]);
+    const type = createSignificantEventAttachmentType({
+      logger: loggingSystemMock.createLogger(),
+      getScopedClients,
+      server: createNightshiftSecurityServer({ hasAllRequested: false }),
+    });
+
+    await expect(
+      type.resolve?.(event.event_id, agentBuilderMocks.attachments.createResolveContextMock())
+    ).resolves.toBeUndefined();
+    expect(getScopedClients).not.toHaveBeenCalled();
   });
 });

@@ -18,6 +18,8 @@ import {
 } from '@kbn/nightshift-ai';
 import { z } from '@kbn/zod/v4';
 import type { GetScopedClients } from '../../../../routes/types';
+import { assertCanReadSignificantEvents } from '../../../../routes/utils/assert_can_manage_significant_events';
+import type { SignificantEventsServer } from '../../../../types';
 import { getRequestAbortSignal } from '../../../../routes/utils/get_request_abort_signal';
 import { streamToAnalysisTarget } from '../../../../lib/significant_events/stream_to_analysis_target';
 
@@ -101,9 +103,11 @@ const validateQueriesSchema = z.object({
 
 export const createValidateQueriesTool = ({
   getScopedClients,
+  server,
   logger,
 }: {
   getScopedClients: GetScopedClients;
+  server: Pick<SignificantEventsServer, 'security'>;
   logger: Logger;
 }): BuiltinSkillBoundedTool<typeof validateQueriesSchema> => {
   return {
@@ -131,6 +135,7 @@ export const createValidateQueriesTool = ({
 
       try {
         const scopedClients = await getScopedClients({ request: context.request });
+        await assertCanReadSignificantEvents({ request: context.request, server });
         const stream = await scopedClients.streamsClient.getStream(targetId);
         const target = streamToAnalysisTarget(stream);
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();

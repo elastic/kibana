@@ -13,7 +13,11 @@ import {
   type ValidatedKIQuery,
 } from '@kbn/nightshift-ai';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../../routes/types';
-import { createMockToolContext, invokeHandler } from '../../../utils/test_helpers';
+import {
+  createMockToolContext,
+  createNightshiftSecurityServer,
+  invokeHandler,
+} from '../../../utils/test_helpers';
 import { createValidateQueriesTool } from './tool';
 
 jest.mock('@kbn/nightshift-ai', () => ({
@@ -112,6 +116,7 @@ describe('ki_queries_validate tool', () => {
   const createTool = () =>
     createValidateQueriesTool({
       getScopedClients,
+      server: createNightshiftSecurityServer(),
       logger,
     });
 
@@ -263,5 +268,24 @@ describe('ki_queries_validate tool', () => {
     expect(result.results).toEqual([
       { type: 'error', data: { message: 'KI storage unavailable' } },
     ]);
+  });
+
+  it('does not validate queries without the Nightshift read privilege', async () => {
+    const tool = createValidateQueriesTool({
+      getScopedClients,
+      server: createNightshiftSecurityServer({ hasAllRequested: false }),
+      logger,
+    });
+
+    const result = await invokeHandler(
+      tool,
+      { target_id: 'logs.test', queries: [candidate] },
+      createMockToolContext()
+    );
+
+    expect(validateKIQueriesMock).not.toHaveBeenCalled();
+    if ('results' in result) {
+      expect(result.results[0].type).toBe('error');
+    }
   });
 });

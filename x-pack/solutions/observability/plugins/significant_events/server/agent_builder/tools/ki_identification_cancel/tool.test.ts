@@ -9,10 +9,10 @@ import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema'
 import { ExecutionStatus } from '@kbn/workflows';
 import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { createKiIdentificationCancelTool } from './tool';
-import { createMockToolContext } from '../../utils/test_helpers';
+import { createMockToolContext, createNightshiftSecurityServer } from '../../utils/test_helpers';
 
 describe('createKiIdentificationCancelTool', () => {
-  const setup = () => {
+  const setup = ({ hasAllRequested = true }: { hasAllRequested?: boolean } = {}) => {
     const managementApi = {
       getWorkflowExecutions: jest.fn().mockResolvedValue({
         results: [{ id: 'exec-1', status: ExecutionStatus.RUNNING }],
@@ -25,6 +25,7 @@ describe('createKiIdentificationCancelTool', () => {
     });
 
     const tool = createKiIdentificationCancelTool({
+      server: createNightshiftSecurityServer({ hasAllRequested }),
       streamsKIsOnboardingClient,
     });
     const context = createMockToolContext();
@@ -63,6 +64,17 @@ describe('createKiIdentificationCancelTool', () => {
       const data = result.results[0].data as Record<string, unknown>;
       expect(data.message).toContain('Failed to cancel KI identification background task');
       expect(data.operation).toBe('ki_identification_cancel');
+    }
+  });
+
+  it('does not cancel onboarding without the Nightshift manage privilege', async () => {
+    const { tool, context, managementApi } = setup({ hasAllRequested: false });
+
+    const result = await tool.handler({ stream_name: 'logs.nginx' }, context);
+
+    expect(managementApi.cancelWorkflowExecution).not.toHaveBeenCalled();
+    if ('results' in result) {
+      expect(result.results[0].type).toBe('error');
     }
   });
 });
