@@ -43,7 +43,11 @@ interface LegacyEngineDescriptorV1 {
 
 type StatusEngine = Omit<
   GetStatusSuccessResult['engines'][number],
-  'versionState' | 'logExtractionState'
+  | 'versionState'
+  | 'logExtractionState'
+  | 'logExtractionConfig'
+  | 'nonPriorityLogExtractionConfig'
+  | 'nonPriorityLogExtractionState'
 > &
   LegacyEngineDescriptorV1;
 
@@ -63,7 +67,14 @@ function toPublicEngine(
   engine: GetStatusSuccessResult['engines'][number],
   logsExtractionConfig: LogExtractionConfig
 ): StatusEngine {
-  const { versionState, logExtractionState, ...rest } = engine;
+  const {
+    versionState,
+    logExtractionState,
+    logExtractionConfig,
+    nonPriorityLogExtractionConfig,
+    nonPriorityLogExtractionState,
+    ...rest
+  } = engine;
   const {
     delay,
     timeout,
@@ -140,12 +151,18 @@ export function registerStatus(router: EntityStorePluginRouter) {
             });
           }
 
-          const { logsExtractionConfig } = rest as GetStatusSuccessResult;
+          const { logsExtractionConfig, logsExtractionConfigByType } =
+            rest as GetStatusSuccessResult;
 
           return res.ok({
             body: {
               status,
-              engines: engines.map((engine) => toPublicEngine(engine, logsExtractionConfig)),
+              engines: engines.map((engine) =>
+                toPublicEngine(
+                  engine,
+                  logsExtractionConfigByType[engine.type] ?? logsExtractionConfig
+                )
+              ),
             },
           });
         }

@@ -24,6 +24,7 @@ import {
   shouldCloneApiKeyFromRequest,
 } from '../lib/api_key_utils';
 import type {
+  ApiKeyInvalidationSource,
   ApiKeySOFields,
   ApiKeyStrategy,
   GrantApiKeysOpts,
@@ -117,7 +118,8 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
         request,
         user,
         apiKeyCreatedByUser,
-        isUiamRequest
+        isUiamRequest,
+        opts?.onApiKeyCreated
       );
 
       const uiamOnlyResult = new Map<string, ApiKeySOFields>();
@@ -176,7 +178,8 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
             request,
             user,
             apiKeyCreatedByUser,
-            isUiamRequest
+            isUiamRequest,
+            opts?.onApiKeyCreated
           );
 
     const result = new Map<string, ApiKeySOFields>();
@@ -200,7 +203,8 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     request: KibanaRequest,
     user: AuthenticatedUser | null,
     apiKeyCreatedByUser: boolean,
-    isUiamRequest: boolean
+    isUiamRequest: boolean,
+    onApiKeyCreated?: GrantApiKeysOpts['onApiKeyCreated']
   ): Promise<Map<string, UiamApiKeyResult>> {
     const uiam = this.security.authc.apiKeys.uiam;
     const uiamKeyByTaskIdMap = new Map<string, UiamApiKeyResult>();
@@ -236,6 +240,14 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     const taskTypes = [...new Set(taskInstances.map((task) => task.taskType))];
     const uiamKeyByTaskTypeMap = new Map<string, UiamApiKeyResult>();
 
+    // While tasks still run with ES API keys (`typeToUse` is ES), grant failures are logged and
+    // swallowed so tasks are scheduled with only an ES API key. Once tasks run with UIAM keys,
+    // a task scheduled without one cannot authenticate the way its runs expect, so grant
+    // failures surface to the caller instead of degrading silently. Keys granted before a
+    // failure are reported through `onApiKeyCreated`, so the caller (task store) marks them
+    // for invalidation when this throws.
+    const uiamKeyIsRequired = this.typeToUse === ApiKeyType.UIAM;
+
     for (const taskType of taskTypes) {
       const apiKeyNamePrefix = `TaskManager-UIAM: ${taskType}`;
       const apiKeyName = user ? `${apiKeyNamePrefix} - ${user.username}` : apiKeyNamePrefix;
@@ -244,23 +256,23 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
         const uiamResult = await uiam.grant(request, {
           name: truncate(apiKeyName, { length: 256 }),
         });
-
-        if (uiamResult) {
-          uiamKeyByTaskTypeMap.set(taskType, {
-            apiKey: uiamResult.api_key,
-            apiKeyId: uiamResult.id,
-          });
-        } else {
-          this.logger.error(`Failed to create UIAM API key for task type: ${taskType}`, {
-            tags: UIAM_LOGS_GRANT_TAGS,
-          });
+        if (!uiamResult) {
+          throw new Error(`Failed to create a Cloud API key for task type : ${taskType}`);
         }
+        onApiKeyCreated?.({ apiKeyId: uiamResult.id, uiamApiKey: uiamResult.api_key });
+        uiamKeyByTaskTypeMap.set(taskType, {
+          apiKey: uiamResult.api_key,
+          apiKeyId: uiamResult.id,
+        });
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : String(err);
         this.logger.error(
           `Failed to create UIAM API key for task type: ${taskType}: ${errorMessage}`,
           { tags: UIAM_LOGS_GRANT_TAGS }
         );
+        if (uiamKeyIsRequired) {
+          throw err;
+        }
       }
     }
 
@@ -334,8 +346,8 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     return apiKey;
   }
 
-  getApiKeyIdsForInvalidation(taskInstance: ConcreteTaskInstance): InvalidationTarget[] {
-    const { userScope, uiamApiKey, apiKey } = taskInstance;
+  getApiKeyIdsForInvalidation(source: ApiKeyInvalidationSource): InvalidationTarget[] {
+    const { userScope, uiamApiKey, apiKey } = source;
     // `apiKeyCreatedByUser` gates invalidation for BOTH the ES and UIAM keys.
     // See the invariant documented in `grantApiKeys`: both credentials are
     // currently persisted with the same ownership, so a single flag is

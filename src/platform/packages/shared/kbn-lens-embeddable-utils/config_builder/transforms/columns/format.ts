@@ -12,6 +12,7 @@ import type { LensApiMetricOperation } from '../../schema/metric_ops';
 import {
   LENS_FORMAT_DURATION_COMPACT_DEFAULT,
   LENS_FORMAT_DURATION_DECIMALS_DEFAULT,
+  LENS_FORMAT_NUMBER_DECIMALS_DEFAULT,
 } from '../../schema/constants';
 import { durationInputUnitCompat, durationOutputUnitCompat } from './duration_units';
 
@@ -27,21 +28,29 @@ export function fromFormatAPIToLensState(
     return;
   }
   if (format.type === 'number' || format.type === 'percent') {
+    if (Object.keys(format).length === 1) {
+      return { id: format.type };
+    }
+
     return {
       id: format.type,
       params: {
-        decimals: format.decimals,
-        ...(format.suffix ? { suffix: format.suffix } : {}),
-        ...(format.compact != null ? { compact: format.compact } : {}),
+        decimals: format.decimals ?? LENS_FORMAT_NUMBER_DECIMALS_DEFAULT,
+        ...('suffix' in format && format.suffix ? { suffix: format.suffix } : {}),
+        ...('compact' in format ? { compact: format.compact } : {}),
       },
     };
   }
   if (format.type === 'bits' || format.type === 'bytes') {
+    if (Object.keys(format).length === 1) {
+      return { id: format.type };
+    }
+
     return {
       id: format.type,
       params: {
-        decimals: format.decimals,
-        ...(format.suffix ? { suffix: format.suffix } : {}),
+        decimals: format.decimals ?? LENS_FORMAT_NUMBER_DECIMALS_DEFAULT,
+        ...('suffix' in format && format.suffix ? { suffix: format.suffix } : {}),
       },
     };
   }

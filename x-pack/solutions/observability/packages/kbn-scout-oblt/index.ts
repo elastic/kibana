@@ -26,6 +26,7 @@ export { globalSetupHook, globalTeardownHook } from './src/playwright/global_hoo
 
 // re-exported fixtures & configuration from @kbn/scout
 export {
+  AppMenu,
   browserAuthFixture,
   apiServicesFixture,
   createPlaywrightConfig,
@@ -69,7 +70,13 @@ export type {
 } from '@kbn/scout';
 
 // Re-exported fixture types
-export type { ApiServicesFixture, BrowserAuthFixture, SamlAuth } from '@kbn/scout';
+export type {
+  ApiServicesFixture,
+  BrowserAuthFixture,
+  SamlAuth,
+  ApiClientResponse,
+  RoleSessionCredentials,
+} from '@kbn/scout';
 export type { ApiClientFixture } from '@kbn/scout/src/playwright/fixtures/scope/worker/api_client';
 
 // Re-exported service & configuration types

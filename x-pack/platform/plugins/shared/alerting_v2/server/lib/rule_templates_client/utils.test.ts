@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { nodeBuilder } from '@kbn/es-query';
+import { nodeBuilder, nodeTypes } from '@kbn/es-query';
+import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/saved_object_types';
 import {
   buildEngineV2Filter,
+  buildRuleTemplateTagsAggregation,
   buildFindRuleTemplatesFilter,
   mapSortField,
   RULE_TEMPLATE_TAGS_FIELD,
@@ -27,12 +29,10 @@ const validTemplateAttributes = {
       every: '1m',
       lookback: '15m',
     },
-    state_transition: {
-      pending_count: 3,
-    },
-    recovery_strategy: 'no_breach' as const,
+    state_transition: { pending: { count: 3 } },
+    recovery: { strategy: 'no_breach' as const },
+    no_data: { strategy: 'ignore' as const },
     query: {
-      format: 'composed' as const,
       base: 'TS metrics-* | STATS restarts = MAX(k8s.container.restarts) BY k8s.pod.name',
       breach: {
         segment: 'WHERE restarts > 0 | LIMIT 50',
@@ -46,6 +46,37 @@ const validTemplateAttributes = {
 };
 
 describe('rule templates client utils', () => {
+  describe('buildRuleTemplateTagsAggregation', () => {
+    it.each([undefined, ''])('builds a bounded aggregation without a prefix for %p', (search) => {
+      expect(buildRuleTemplateTagsAggregation(search)).toEqual({
+        tags: {
+          terms: {
+            field: `${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.rule.metadata.tags`,
+            size: TAGS_RESPONSE_LIMIT,
+            order: { _count: 'desc' },
+          },
+        },
+      });
+    });
+
+    it.each([
+      ['pro', 'pro.*'],
+      ['a.b+c', 'a\\.b\\+c.*'],
+      ['a<b&c', 'a\\<b\\&c.*'],
+    ])('escapes the search prefix %s', (search, include) => {
+      expect(buildRuleTemplateTagsAggregation(search)).toEqual({
+        tags: {
+          terms: {
+            field: `${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.rule.metadata.tags`,
+            size: TAGS_RESPONSE_LIMIT,
+            order: { _count: 'desc' },
+            include,
+          },
+        },
+      });
+    });
+  });
+
   describe('buildEngineV2Filter', () => {
     it('filters on engine v2', () => {
       expect(buildEngineV2Filter()).toEqual(
@@ -76,6 +107,20 @@ describe('rule templates client utils', () => {
             nodeBuilder.is(RULE_TEMPLATE_TAGS_FIELD, 'a'),
             nodeBuilder.is(RULE_TEMPLATE_TAGS_FIELD, 'b'),
           ]),
+        ])
+      );
+    });
+
+    it('excludes templates carrying any excluded tag', () => {
+      expect(buildFindRuleTemplatesFilter(['production'], ['deprecated', 'internal'])).toEqual(
+        nodeBuilder.and([
+          buildEngineV2Filter(),
+          nodeBuilder.is(RULE_TEMPLATE_TAGS_FIELD, 'production'),
+          nodeTypes.function.buildNode(
+            'not',
+            nodeBuilder.is(RULE_TEMPLATE_TAGS_FIELD, 'deprecated')
+          ),
+          nodeTypes.function.buildNode('not', nodeBuilder.is(RULE_TEMPLATE_TAGS_FIELD, 'internal')),
         ])
       );
     });

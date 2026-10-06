@@ -34,13 +34,7 @@ import {
 import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  EvidenceList,
-  type InvestigationDiscoverParams,
-  type InvestigationStatus,
-} from '@kbn/investigation-output';
-import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { EvidenceList, type InvestigationStatus } from '@kbn/investigation-output';
 import type {
   InvestigationState,
   SignificantEventInvestigation,
@@ -52,7 +46,6 @@ import {
   buildHypothesisChatOptions,
   buildRecommendationChatOptions,
 } from './open_investigation_item_in_chat';
-import { BlindSpotsTable } from './blind_spots_table';
 import {
   InvestigationFormattedText,
   NIGHTSHIFT_INLINE_CODE_FONT_SIZE,
@@ -89,7 +82,7 @@ import {
   type RecommendationItem,
 } from './investigation_presentation';
 
-export type InvestigationFlyoutTabId = 'recommendations' | 'blindSpots' | 'hypotheses';
+export type InvestigationFlyoutTabId = 'recommendations' | 'hypotheses';
 
 type CompletedTabId = InvestigationFlyoutTabId;
 
@@ -318,17 +311,15 @@ function RecommendationRow({
         <EuiFlexItem grow>
           <FlyoutFormattedText text={titlePreview} bold />
         </EuiFlexItem>
-        {recommendation.confidence != null && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color={recommendation.confidence >= 0.9 ? 'success' : 'hollow'}>
-              <FormattedMessage
-                id="xpack.nightshift.investigation.recommendationConfidence"
-                defaultMessage="{confidence, number, percent}"
-                values={{ confidence: recommendation.confidence }}
-              />
-            </EuiBadge>
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <EuiBadge color={recommendation.confidence >= 0.9 ? 'success' : 'hollow'}>
+            <FormattedMessage
+              id="xpack.nightshift.investigation.recommendationConfidence"
+              defaultMessage="{confidence, number, percent}"
+              values={{ confidence: recommendation.confidence }}
+            />
+          </EuiBadge>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </InvestigationFlyoutRow>
   );
@@ -415,7 +406,6 @@ function HypothesisRow({
   index,
   isConfidenceWinner,
   onOpenInChat,
-  getQueryHref,
 }: {
   candidate: string;
   confidence: number;
@@ -425,7 +415,6 @@ function HypothesisRow({
   index: number;
   isConfidenceWinner: boolean;
   onOpenInChat: () => void;
-  getQueryHref: (params: InvestigationDiscoverParams) => string | undefined;
 }): React.ReactElement {
   const hasEvidence = Boolean(evidence?.length);
   const expandableContent =
@@ -435,7 +424,7 @@ function HypothesisRow({
         {evidence?.length ? (
           <>
             {reason ? <EuiSpacer size="s" /> : null}
-            <EvidenceList evidence={evidence} getQueryHref={getQueryHref} />
+            <EvidenceList evidence={evidence} />
           </>
         ) : null}
       </>
@@ -503,14 +492,8 @@ export function InvestigationFlyout({
   onClose,
 }: InvestigationFlyoutProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
-  const { agentBuilder, share } = useKibana().services;
+  const { agentBuilder } = useKibana().services;
   const [selectedTab, setSelectedTab] = useState<CompletedTabId>(initialTab);
-
-  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
-  const getQueryHref = useCallback(
-    (params: InvestigationDiscoverParams) => discoverLocator?.getRedirectUrl(params),
-    [discoverLocator]
-  );
 
   useEffect(() => {
     setSelectedTab(initialTab);
@@ -519,7 +502,6 @@ export function InvestigationFlyout({
   const headline = getInvestigationHeadline({ eventTitle, state, status });
   const conclusionBody = getConclusionText(state);
   const recommendations = useMemo(() => parseInvestigationRecommendations(state), [state]);
-  const blindSpots = useMemo(() => state?.blind_spots ?? [], [state?.blind_spots]);
   const hypotheses = useMemo(
     () => sortInvestigationHypotheses(state?.hypotheses ?? []),
     [state?.hypotheses]
@@ -574,13 +556,6 @@ export function InvestigationFlyout({
         defaultMessage: 'Recommendations',
       }),
       count: recommendations.length,
-    },
-    {
-      id: 'blindSpots' as const,
-      name: i18n.translate('xpack.nightshift.investigation.blindSpotsTab', {
-        defaultMessage: 'Blind spots',
-      }),
-      count: blindSpots.length,
     },
     {
       id: 'hypotheses' as const,
@@ -698,21 +673,6 @@ export function InvestigationFlyout({
               )}
             </EuiFlexGroup>
           )}
-          {selectedTab === 'blindSpots' &&
-            (blindSpots.length > 0 ? (
-              <BlindSpotsTable
-                items={blindSpots}
-                testSubj="nightshiftInvestigationFlyoutBlindSpots"
-                bodyFontSize={INVESTIGATION_FLYOUT_BODY_FONT_SIZE}
-                chatAttachmentIdPrefix="nightshift-flyout-blind-spot"
-              />
-            ) : (
-              <EuiText color="subdued" css={flyoutBodyTextCss}>
-                {i18n.translate('xpack.nightshift.investigation.flyout.emptyBlindSpots', {
-                  defaultMessage: 'No blind spots were identified for this investigation.',
-                })}
-              </EuiText>
-            ))}
           {selectedTab === 'hypotheses' && (
             <EuiFlexGroup
               direction="column"
@@ -731,7 +691,6 @@ export function InvestigationFlyout({
                       index={index}
                       isConfidenceWinner={hypothesis.confidence === topHypothesisConfidence}
                       onOpenInChat={() => openHypothesisInChat(hypothesis, index)}
-                      getQueryHref={getQueryHref}
                     />
                   </InvestigationFlyoutListPanel>
                 </EuiFlexItem>

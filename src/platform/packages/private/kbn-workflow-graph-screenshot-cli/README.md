@@ -81,7 +81,7 @@ view — Playwright waits for this signal before capturing.
 ## Chromium
 
 Chromium is launched via Playwright, which manages its own browser install
-(downloaded during `yarn kbn bootstrap`) — no system Chrome detection is needed.
+(downloaded during `pnpm kbn bootstrap`) — no system Chrome detection is needed.
 To use a different executable, pass `--chrome-executable "/path/to/chrome"`.
 
 If the managed Chromium hasn't been installed (e.g. it was pruned, or bootstrap

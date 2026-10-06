@@ -21,6 +21,7 @@ import type {
 } from '../../../../common/runtime_types';
 import {
   ConfigKey,
+  KerberosAuthType,
   MonitorTypeEnum,
   ScheduleUnit,
   VerificationMode,
@@ -111,7 +112,8 @@ describe('formatMonitorConfig', () => {
       );
 
       expect(yamlConfig).toEqual({
-        'check.request.method': 'GET',
+        // check.request.method (GET), max_redirects (0), response.include_body
+        // (on_error) and timeout (16s) equal the Heartbeat defaults and are omitted.
         'check.response.headers': {
           'test-header': 'test-value',
         },
@@ -123,13 +125,10 @@ describe('formatMonitorConfig', () => {
         ],
         enabled: true,
         locations: [],
-        max_redirects: '0',
         name: 'Test',
         password: '3z9SBOQWW5F0UrdqLVFqlF6z',
-        'response.include_body': 'on_error',
         'response.include_headers': true,
         schedule: '@every 3m',
-        timeout: '16s',
         type: 'http',
         urls: 'https://www.google.com',
         proxy_url: 'https://www.google.com',
@@ -153,7 +152,8 @@ describe('formatMonitorConfig', () => {
         );
 
         expect(yamlConfig).toEqual({
-          'check.request.method': 'GET',
+          // check.request.method, max_redirects, response.include_body and timeout
+          // equal the Heartbeat defaults and are omitted.
           'check.response.headers': {
             'test-header': 'test-value',
           },
@@ -165,15 +165,12 @@ describe('formatMonitorConfig', () => {
           ],
           enabled: true,
           locations: [],
-          max_redirects: '0',
           name: 'Test',
           username: 'test-username',
           password: '3z9SBOQWW5F0UrdqLVFqlF6z',
           proxy_url: 'https://www.google.com',
-          'response.include_body': 'on_error',
           'response.include_headers': true,
           schedule: '@every 3m',
-          timeout: '16s',
           type: 'http',
           'url.port': 900,
           urls: 'https://www.google.com',
@@ -181,6 +178,122 @@ describe('formatMonitorConfig', () => {
         });
       }
     );
+
+    it('emits the Kerberos block only when Kerberos is enabled and omits NTLM', () => {
+      const kerberosConfig: Partial<MonitorFields> = {
+        ...testHTTPConfig,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.KERBEROS]: {
+          enabled: true,
+          auth_type: KerberosAuthType.PASSWORD,
+          realm: 'CORP.LOCAL',
+          username: 'svc-heartbeat',
+          password: 'secret',
+          keytab: '',
+          config_path: '/etc/krb5.conf',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+        [ConfigKey.NTLM]: {
+          enabled: false,
+          username: '',
+          password: '',
+          domain: 'CORP',
+          workstation: '',
+        },
+      };
+      const yamlConfig = formatMonitorConfigFields(
+        Object.keys(kerberosConfig) as ConfigKey[],
+        kerberosConfig,
+        logger,
+        { proxyUrl: 'https://www.google.com' },
+        []
+      );
+
+      expect(yamlConfig[ConfigKey.KERBEROS]).toEqual({
+        enabled: true,
+        auth_type: KerberosAuthType.PASSWORD,
+        realm: 'CORP.LOCAL',
+        username: 'svc-heartbeat',
+        password: 'secret',
+        keytab: '',
+        config_path: '/etc/krb5.conf',
+        krb5_conf: '',
+        service_name: '',
+        enable_krb5_fast: false,
+      });
+      // NTLM is dropped because it is disabled.
+      expect(yamlConfig[ConfigKey.NTLM]).toBeUndefined();
+      // Basic auth fields are empty and therefore omitted.
+      expect(yamlConfig[ConfigKey.USERNAME]).toBeUndefined();
+    });
+
+    it('resolves nested NTLM params for public Heartbeat configs', () => {
+      const ntlmConfig: Partial<MonitorFields> = {
+        ...testHTTPConfig,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        [ConfigKey.NTLM]: {
+          enabled: true,
+          username: 'ntlm-user',
+          password: '${ntlmPassword}',
+          domain: 'EXAMPLE',
+          workstation: '',
+        },
+      };
+      const yamlConfig = formatMonitorConfigFields(
+        Object.keys(ntlmConfig) as ConfigKey[],
+        ntlmConfig,
+        logger,
+        { ntlmPassword: 's3c"ret\nline' },
+        []
+      );
+
+      expect(yamlConfig[ConfigKey.NTLM]).toEqual({
+        enabled: true,
+        username: 'ntlm-user',
+        password: 's3c"ret\nline',
+        domain: 'EXAMPLE',
+        workstation: '',
+      });
+    });
+
+    it('omits both Kerberos and NTLM blocks when neither is enabled', () => {
+      const noAuthConfig: Partial<MonitorFields> = {
+        ...testHTTPConfig,
+        [ConfigKey.KERBEROS]: {
+          enabled: false,
+          auth_type: KerberosAuthType.PASSWORD,
+          realm: 'CORP.LOCAL',
+          username: '',
+          password: '',
+          keytab: '',
+          config_path: '',
+          krb5_conf: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
+        [ConfigKey.NTLM]: {
+          enabled: false,
+          username: '',
+          password: '',
+          domain: 'CORP',
+          workstation: '',
+        },
+      };
+      const yamlConfig = formatMonitorConfigFields(
+        Object.keys(noAuthConfig) as ConfigKey[],
+        noAuthConfig,
+        logger,
+        { proxyUrl: 'https://www.google.com' },
+        []
+      );
+
+      expect(yamlConfig[ConfigKey.KERBEROS]).toBeUndefined();
+      expect(yamlConfig[ConfigKey.NTLM]).toBeUndefined();
+    });
   });
 });
 
@@ -196,7 +309,6 @@ describe('browser fields', () => {
       name: 'Test',
       locations: [],
       schedule: '@every 3m',
-      screenshots: 'on',
       'service.name': 'APM Service',
       'source.inline.script':
         "step('Go to https://www.google.com/', async () => {\n  await page.goto('https://www.google.com/');\n});",

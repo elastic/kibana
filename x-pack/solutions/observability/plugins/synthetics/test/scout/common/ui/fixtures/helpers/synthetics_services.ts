@@ -544,10 +544,12 @@ function createSyntheticsServices(
     if (exists) {
       return;
     }
+    // Skip system + elastic_agent install — these tests only need an empty agent policy.
     await kbnClient.request({
       path: '/api/fleet/agent_policies',
       method: 'POST',
-      body: { name, namespace: 'default', monitoring_enabled: ['logs', 'metrics'] },
+      query: { sys_monitoring: false },
+      body: { name, namespace: 'default', monitoring_enabled: [] },
       headers: PUBLIC_API_HEADERS,
     });
   };
@@ -558,13 +560,21 @@ function createSyntheticsServices(
       return { id: existing[0].id, label: existing[0].label };
     }
 
+    // Recreate Fleet settings if a peer Scout config wiped them, so the agent-policy SO type stays stable between this create and the later lookup during the project push (issue #289546).
+    await kbnClient.request({
+      path: '/api/fleet/setup',
+      method: 'POST',
+    });
+
+    // Skip system + elastic_agent install — these tests only need an empty agent policy.
     const policyResponse = await kbnClient.request({
       path: '/api/fleet/agent_policies',
       method: 'POST',
+      query: { sys_monitoring: false },
       body: {
         name: `Scout test policy ${Date.now()}`,
         namespace: 'default',
-        monitoring_enabled: ['logs', 'metrics'],
+        monitoring_enabled: [],
       },
       headers: PUBLIC_API_HEADERS,
     });

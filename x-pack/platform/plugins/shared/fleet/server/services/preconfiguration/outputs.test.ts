@@ -12,6 +12,7 @@ import type { PreconfiguredOutput } from '../../../common/types';
 import type { Output } from '../../types';
 import * as agentPolicy from '../agent_policy';
 import { outputService } from '../output';
+import { checkOtlpOutputAllowed } from '../outputs/helpers';
 
 import {
   SERVERLESS_DEFAULT_OUTPUT_ID,
@@ -32,13 +33,18 @@ jest.mock('../output');
 jest.mock('../epm/packages/bundled_packages');
 jest.mock('../epm/archive');
 jest.mock('../settings');
+jest.mock('../outputs/helpers');
 
 const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
+const mockedCheckOtlpOutputAllowed = checkOtlpOutputAllowed as jest.MockedFunction<
+  typeof checkOtlpOutputAllowed
+>;
 
 jest.mock('../app_context', () => ({
   appContextService: {
     getExperimentalFeatures: jest.fn().mockReturnValue({
       useSpaceAwareness: false,
+      enableOtlpOutput: true,
     }),
     getInternalUserSOClient: jest.fn(),
     getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
@@ -64,9 +70,11 @@ const spyAgentPolicyServicBumpAllAgentPoliciesForOutput = jest.spyOn(
 
 describe('Outputs preconfiguration', () => {
   let logstashSecretHash: string;
+  let otlpKeyPemHash: string;
 
   beforeEach(async () => {
     logstashSecretHash = await hashSecret('secretKey');
+    otlpKeyPemHash = await hashSecret('secretKeyPem');
     const internalSoClientWithoutSpaceExtension = savedObjectsClientMock.create();
     jest
       .mocked(appContextService.getInternalUserSOClientWithoutSpaceExtension)
@@ -84,6 +92,7 @@ describe('Outputs preconfiguration', () => {
     mockedOutputService.update.mockReset();
     mockedOutputService.delete.mockReset();
     mockedOutputService.getDefaultDataOutputId.mockReset();
+    mockedCheckOtlpOutputAllowed.mockResolvedValue({ result: true });
     mockedOutputService.getDefaultESHosts.mockReturnValue(['http://default-es:9200']);
     const keyHash = (await hashSecret('secretKey')) as string;
     const passwordHash = (await hashSecret('secretPassword')) as string;
@@ -284,6 +293,25 @@ describe('Outputs preconfiguration', () => {
             service_token: 'secretServiceToken',
           },
         },
+        {
+          id: 'existing-otlp-output-with-secrets-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'OTLP Output With Secrets 1',
+          type: 'otlp',
+          otlp_exporter: {
+            endpoint: 'https://otlp.example.com:4317',
+            protocol: 'grpc',
+          },
+          is_preconfigured: true,
+          secrets: {
+            otlp_exporter: {
+              tls: {
+                key_pem: { id: 'otlp-key-pem-id', hash: otlpKeyPemHash },
+              },
+            },
+          },
+        },
       ];
     });
     spyAgentPolicyServicBumpAllAgentPoliciesForOutput.mockClear();
@@ -297,27 +325,27 @@ describe('Outputs preconfiguration', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "allow_edit": Array [
-            "hosts",
-            "ca_sha256",
-            "ca_trusted_fingerprint",
-          ],
-          "ca_sha256": undefined,
-          "ca_trusted_fingerprint": undefined,
-          "hosts": Array [
-            "http://elasticsearc:9201",
-          ],
-          "id": "fleet-default-output",
-          "is_default": true,
-          "is_default_monitoring": true,
-          "is_preconfigured": true,
-          "name": "default",
-          "type": "elasticsearch",
-        },
-      ]
-    `);
+        Array [
+          Object {
+            "allow_edit": Array [
+              "hosts",
+              "ca_sha256",
+              "ca_trusted_fingerprint",
+            ],
+            "ca_sha256": undefined,
+            "ca_trusted_fingerprint": undefined,
+            "hosts": Array [
+              "http://elasticsearc:9201",
+            ],
+            "id": "fleet-default-output",
+            "is_default": true,
+            "is_default_monitoring": true,
+            "is_preconfigured": true,
+            "name": "default",
+            "type": "elasticsearch",
+          },
+        ]
+      `);
       expect(result[0].allow_edit).toEqual(['hosts', 'ca_sha256', 'ca_trusted_fingerprint']);
     });
 
@@ -767,6 +795,67 @@ describe('Outputs preconfiguration', () => {
       expect(mockedOutputService.create).toHaveBeenCalled();
       expect(mockedOutputService.update).not.toHaveBeenCalled();
       expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
+    });
+
+    it('should create a preconfigured OTLP output when the Fleet Server version requirement is met', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+        {
+          id: 'non-existing-otlp-output-1',
+          name: 'OTLP Output 1',
+          type: 'otlp',
+          is_default: false,
+          is_default_monitoring: false,
+          otlp_exporter: {
+            endpoint: 'https://otel.example.com:4317',
+            protocol: 'grpc',
+          },
+        },
+      ]);
+
+      expect(mockedOutputService.create).toBeCalled();
+      expect(mockedOutputService.update).not.toBeCalled();
+    });
+
+    it('should skip the OTLP output but create the non-OTLP output when the version requirement is not met', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      mockedCheckOtlpOutputAllowed.mockResolvedValueOnce({
+        result: false,
+        error: 'OTLP output requires all Fleet Servers to be on version 9.6.0 or later.',
+      });
+
+      await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+        {
+          id: 'non-existing-otlp-output-1',
+          name: 'OTLP Output 1',
+          type: 'otlp',
+          is_default: false,
+          is_default_monitoring: false,
+          otlp_exporter: {
+            endpoint: 'https://otel.example.com:4317',
+            protocol: 'grpc',
+          },
+        },
+        {
+          id: 'non-existing-es-output-2',
+          name: 'ES Output 2',
+          type: 'elasticsearch',
+          is_default: false,
+          is_default_monitoring: false,
+          hosts: ['http://es.co:80'],
+        },
+      ]);
+
+      // ES output created; OTLP skipped — proves per-item skip, not batch abort
+      expect(mockedOutputService.create).toHaveBeenCalledTimes(1);
+      expect(mockedOutputService.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ name: 'ES Output 2' }),
+        expect.objectContaining({ id: 'non-existing-es-output-2' })
+      );
     });
 
     it('should create a preconfigured remote ES output that does not exist', async () => {
@@ -1439,6 +1528,36 @@ describe('Outputs preconfiguration', () => {
       expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
+    it('should not update output if a preconfigured OTLP output with secrets exists and did not change', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+        {
+          id: 'existing-otlp-output-with-secrets-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'OTLP Output With Secrets 1',
+          type: 'otlp',
+          otlp_exporter: {
+            endpoint: 'https://otlp.example.com:4317',
+            protocol: 'grpc',
+          },
+          is_preconfigured: true,
+          secrets: {
+            otlp_exporter: {
+              tls: {
+                key_pem: 'secretKeyPem',
+              },
+            },
+          },
+        },
+      ]);
+
+      expect(mockedOutputService.create).not.toBeCalled();
+      expect(mockedOutputService.update).not.toBeCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+    });
+
     const SCENARIOS: Array<{ name: string; data: PreconfiguredOutput }> = [
       {
         name: 'no changes',
@@ -1471,6 +1590,120 @@ describe('Outputs preconfiguration', () => {
         await createOrUpdatePreconfiguredOutputs(soClient, esClient, [data]);
 
         expect(mockedOutputService.create).not.toHaveBeenCalled();
+        expect(mockedOutputService.update).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('allow_edit migration on restart', () => {
+      it('should update es-private-output when its allow_edit is stale (missing new fields)', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        // Simulate an existing saved object that only has the original two fields
+        // (as shipped before this fix).
+        mockedOutputService.bulkGet.mockResolvedValue([
+          {
+            id: SERVERLESS_PRIVATE_OUTPUT_ID,
+            name: 'Private output',
+            type: 'elasticsearch',
+            hosts: ['https://private.es.example.com'],
+            is_default: false,
+            is_default_monitoring: false,
+            is_preconfigured: true,
+            allow_edit: ['is_default', 'is_default_monitoring'],
+          } as any,
+        ]);
+
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+          {
+            id: SERVERLESS_PRIVATE_OUTPUT_ID,
+            name: 'Private output',
+            type: 'elasticsearch',
+            hosts: ['https://private.es.example.com'],
+            is_default: false,
+            is_default_monitoring: false,
+            is_preconfigured: true,
+            // project-controller currently ships allow_edit: [] — Kibana unions in the rest
+            allow_edit: [
+              'is_default',
+              'is_default_monitoring',
+              'shipper',
+              'config_yaml',
+              'preset',
+              'write_to_logs_streams',
+            ],
+          },
+        ]);
+
+        // The diff should detect the stale allow_edit and trigger an update
+        expect(mockedOutputService.update).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          SERVERLESS_PRIVATE_OUTPUT_ID,
+          expect.objectContaining({
+            allow_edit: expect.arrayContaining([
+              'is_default',
+              'is_default_monitoring',
+              'shipper',
+              'config_yaml',
+              'preset',
+              'write_to_logs_streams',
+            ]),
+          }),
+          expect.anything()
+        );
+      });
+
+      it('should preserve user-chosen preset across restart (applyAllowEditOverrides)', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        // Simulate: user already changed preset to 'throughput' at runtime
+        mockedOutputService.bulkGet.mockResolvedValue([
+          {
+            id: SERVERLESS_PRIVATE_OUTPUT_ID,
+            name: 'Private output',
+            type: 'elasticsearch',
+            hosts: ['https://private.es.example.com'],
+            is_default: false,
+            is_default_monitoring: false,
+            is_preconfigured: true,
+            preset: 'throughput', // user-set value in the SO
+            allow_edit: [
+              'is_default',
+              'is_default_monitoring',
+              'shipper',
+              'config_yaml',
+              'preset',
+              'write_to_logs_streams',
+            ],
+          } as any,
+        ]);
+
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+          {
+            id: SERVERLESS_PRIVATE_OUTPUT_ID,
+            name: 'Private output',
+            type: 'elasticsearch',
+            hosts: ['https://private.es.example.com'],
+            is_default: false,
+            is_default_monitoring: false,
+            is_preconfigured: true,
+            // Config doesn't specify preset (project-controller never will)
+            allow_edit: [
+              'is_default',
+              'is_default_monitoring',
+              'shipper',
+              'config_yaml',
+              'preset',
+              'write_to_logs_streams',
+            ],
+          },
+        ]);
+
+        // No update should fire — the allow_edit list is unchanged, and the
+        // preset from the SO is copied back by applyAllowEditOverrides before
+        // the diff runs, so there is no difference to reconcile.
         expect(mockedOutputService.update).not.toHaveBeenCalled();
       });
     });

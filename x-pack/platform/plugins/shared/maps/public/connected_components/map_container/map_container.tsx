@@ -58,16 +58,16 @@ interface State {
 
 const mapWrapperStyles = css({ position: 'relative' });
 
-// SVG paths for the zoom in/out controls, based off of the EUI glyphs plusInCircleFilled and
-// minusInCircleFilled. Rendered as a background-image so the fill color can be applied reactively.
+// SVG paths for the zoom in/out controls, based off of the EUI glyphs magnifyPlus and
+// magnifyMinus. Rendered as a background-image so the fill color can be applied reactively.
 const ZOOM_IN_ICON_PATH =
-  'M8,7 L8,3.5 C8,3.22385763 7.77614237,3 7.5,3 C7.22385763,3 7,3.22385763 7,3.5 L7,7 L3.5,7 C3.22385763,7 3,7.22385763 3,7.5 C3,7.77614237 3.22385763,8 3.5,8 L7,8 L7,11.5 C7,11.7761424 7.22385763,12 7.5,12 C7.77614237,12 8,11.7761424 8,11.5 L8,8 L11.5,8 C11.7761424,8 12,7.77614237 12,7.5 C12,7.22385763 11.7761424,7 11.5,7 L8,7 Z M7.5,15 C3.35786438,15 0,11.6421356 0,7.5 C0,3.35786438 3.35786438,0 7.5,0 C11.6421356,0 15,3.35786438 15,7.5 C15,11.6421356 11.6421356,15 7.5,15 Z';
+  'M6 5H8V6H6V8H5V6H3V5H5V3H6V5Z M5.5 0C8.53757 0 11 2.46243 11 5.5C11 6.52601 10.7177 7.48557 10.2285 8.30762L13.6504 11.2412C13.8618 11.4224 13.9883 11.6837 13.999 11.9619C14.0096 12.2402 13.9039 12.5101 13.707 12.707L12.707 13.707C12.5101 13.9039 12.2402 14.0096 11.9619 13.999C11.6837 13.9883 11.4224 13.8618 11.2412 13.6504L8.30762 10.2285C7.48557 10.7177 6.52601 11 5.5 11C2.46243 11 0 8.53757 0 5.5C0 2.46243 2.46243 0 5.5 0ZM9.63867 9.11914C9.47715 9.3037 9.3037 9.47715 9.11914 9.63867L12 13L13 12L9.63867 9.11914ZM5.5 1C3.09234 1 1.12632 2.89083 1.00586 5.26855C1.00198 5.34521 1 5.42238 1 5.5C1 5.57762 1.00198 5.65479 1.00586 5.73145C1.12632 8.10917 3.09234 10 5.5 10C5.60575 10 5.71052 9.99448 5.81445 9.9873C5.83764 9.9857 5.8607 9.9834 5.88379 9.98145C6.09063 9.96397 6.29329 9.93318 6.49121 9.88867C6.51312 9.88373 6.53486 9.8783 6.55664 9.87305C6.75836 9.82448 6.95442 9.76222 7.14453 9.6875C7.15748 9.6824 7.17071 9.67806 7.18359 9.67285C7.37845 9.59416 7.5659 9.50153 7.74609 9.39746C7.75606 9.3917 7.76645 9.38669 7.77637 9.38086C8.43846 8.99166 8.99166 8.43846 9.38086 7.77637C9.38669 7.76645 9.3917 7.75606 9.39746 7.74609C9.50153 7.5659 9.59416 7.37845 9.67285 7.18359C9.67926 7.16774 9.68517 7.15169 9.69141 7.13574C9.76456 6.94842 9.82524 6.75519 9.87305 6.55664C9.8783 6.53486 9.88373 6.51312 9.88867 6.49121C9.93333 6.29265 9.96498 6.08937 9.98242 5.88184C9.98431 5.85942 9.98575 5.83696 9.9873 5.81445C9.99448 5.71052 10 5.60575 10 5.5C10 5.42238 9.99802 5.34521 9.99414 5.26855C9.87368 2.89083 7.90766 1 5.5 1Z';
 const ZOOM_OUT_ICON_PATH =
-  'M7.5,0 C11.6355882,0 15,3.36441176 15,7.5 C15,11.6355882 11.6355882,15 7.5,15 C3.36441176,15 0,11.6355882 0,7.5 C0,3.36441176 3.36441176,0 7.5,0 Z M3.5,7 C3.22385763,7 3,7.22385763 3,7.5 C3,7.77614237 3.22385763,8 3.5,8 L11.5,8 C11.7761424,8 12,7.77614237 12,7.5 C12,7.22385763 11.7761424,7 11.5,7 L3.5,7 Z';
+  'M8 6H3V5H8V6Z M5.5 0C8.53757 0 11 2.46243 11 5.5C11 6.52601 10.7177 7.48557 10.2285 8.30762L13.6504 11.2412C13.8618 11.4224 13.9883 11.6837 13.999 11.9619C14.0096 12.2402 13.9039 12.5101 13.707 12.707L12.707 13.707C12.5101 13.9039 12.2402 14.0096 11.9619 13.999C11.6837 13.9883 11.4224 13.8618 11.2412 13.6504L8.30762 10.2285C7.48557 10.7177 6.52601 11 5.5 11C2.46243 11 0 8.53757 0 5.5C0 2.46243 2.46243 0 5.5 0ZM9.63867 9.11914C9.47715 9.3037 9.3037 9.47715 9.11914 9.63867L12 13L13 12L9.63867 9.11914ZM5.5 1C3.09234 1 1.12632 2.89083 1.00586 5.26855C1.00198 5.34521 1 5.42238 1 5.5C1 5.57762 1.00198 5.65479 1.00586 5.73145C1.12632 8.10917 3.09234 10 5.5 10C5.60575 10 5.71052 9.99448 5.81445 9.9873C5.83764 9.9857 5.8607 9.9834 5.88379 9.98145C6.09063 9.96397 6.29329 9.93318 6.49121 9.88867C6.51312 9.88373 6.53486 9.8783 6.55664 9.87305C6.75836 9.82448 6.95442 9.76222 7.14453 9.6875C7.15748 9.6824 7.17071 9.67806 7.18359 9.67285C7.37845 9.59416 7.5659 9.50153 7.74609 9.39746C7.75606 9.3917 7.76645 9.38669 7.77637 9.38086C8.43846 8.99166 8.99166 8.43846 9.38086 7.77637C9.38669 7.76645 9.3917 7.75606 9.39746 7.74609C9.50153 7.5659 9.59416 7.37845 9.67285 7.18359C9.67926 7.16774 9.68517 7.15169 9.69141 7.13574C9.76456 6.94842 9.82524 6.75519 9.87305 6.55664C9.8783 6.53486 9.88373 6.51312 9.88867 6.49121C9.93333 6.29265 9.96498 6.08937 9.98242 5.88184C9.98431 5.85942 9.98575 5.83696 9.9873 5.81445C9.99448 5.71052 10 5.60575 10 5.5C10 5.42238 9.99802 5.34521 9.99414 5.26855C9.87368 2.89083 7.90766 1 5.5 1Z';
 
 const zoomIconBackgroundImage = (path: string, color: string) =>
   `url("data:image/svg+xml,${encodeURIComponent(
-    `<svg width='15px' height='15px' viewBox='0 0 15 15' version='1.1' xmlns='http://www.w3.org/2000/svg'><path fill='${color}' d='${path}' /></svg>`
+    `<svg width='14px' height='14px' viewBox='0 0 14 14' version='1.1' xmlns='http://www.w3.org/2000/svg'><path fill='${color}' d='${path}' /></svg>`
   )}") !important`;
 
 /**
@@ -95,6 +95,9 @@ function MapControlsThemeStyles() {
             '.maplibregl-ctrl-group:not(:empty)': {
               backgroundColor: euiTheme.colors.backgroundBasePlain,
             },
+            '.maplibregl-ctrl-group:not(:empty):hover': {
+              transform: 'translateY(0px) !important',
+            },
             '.maplibregl-ctrl-zoom-in .maplibregl-ctrl-icon': {
               backgroundImage: zoomIconBackgroundImage(ZOOM_IN_ICON_PATH, iconColor),
               backgroundRepeat: 'no-repeat',
@@ -105,6 +108,21 @@ function MapControlsThemeStyles() {
               backgroundRepeat: 'no-repeat',
               backgroundPosition: 'center',
             },
+            '.maplibregl-ctrl button:not(:disabled)': {
+              margin: '4px !important',
+              height: '24px !important',
+              width: '24px !important',
+              borderRadius: '2px !important',
+            },
+            '.maplibregl-ctrl button:not(:disabled):hover::before': {
+              backgroundColor: `${euiTheme.colors.backgroundBaseInteractiveHover} !important`,
+            },
+          },
+          '.mapToolbarOverlay__button': {
+            transform: 'translateY(0px) !important',
+          },
+          '.mapToolbarOverlay__button:hover::before': {
+            backgroundColor: `${euiTheme.colors.backgroundBaseInteractiveHover} !important`,
           },
           // The layer table-of-contents entries live in the right-side overlay
           // (a sibling of `.mapContainer`), so their divider and state background

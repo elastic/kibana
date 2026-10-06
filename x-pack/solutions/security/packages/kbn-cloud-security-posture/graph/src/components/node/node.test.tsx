@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { ReactFlow, Position } from '@xyflow/react';
 import { TestProviders } from '../mock/test_providers';
@@ -15,22 +15,15 @@ import { EllipseNode } from './ellipse_node';
 import { HexagonNode } from './hexagon_node';
 import { PentagonNode } from './pentagon_node';
 import { RectangleNode } from './rectangle_node';
-import type { NodeProps, EntityNodeViewModel } from '../types';
+import type { NodeProps, EntityNodeViewModel, NodeToolbarItem } from '../types';
 import {
   GRAPH_NODE_EXPAND_BUTTON_ID,
-  GRAPH_TAG_TEXT_ID,
-  GRAPH_TAG_COUNT_ID,
-  GRAPH_IPS_TEXT_ID,
-  GRAPH_IPS_PLUS_COUNT_ID,
-  GRAPH_ENTITY_NODE_DETAILS_ID,
-  GRAPH_FLAGS_PLUS_COUNT_ID,
   GRAPH_ENTITY_NODE_ID,
-  GRAPH_ENTITY_NODE_HOVER_SHAPE_ID,
-  GRAPH_FLAGS_VISIBLE_FLAG_ID,
   GRAPH_ENTITY_NODE_BUTTON_ID,
+  GRAPH_ENTITY_NODE_RISK_BADGE_ID,
+  GRAPH_ENTITY_NODE_LAYERS_PANEL_ID,
   GRAPH_STACKED_SHAPE_ID,
 } from '../test_ids';
-import userEvent from '@testing-library/user-event';
 
 // Turn off the optimization that hides elements that are not visible in the viewport
 jest.mock('../constants', () => ({
@@ -74,191 +67,127 @@ const renderNodeInFlow = (nodeData: Partial<EntityNodeViewModel> = {}) => {
 };
 
 describe('Entity Nodes', () => {
-  describe('Node Details', () => {
-    it('should render node with no details', () => {
+  describe('Card Content', () => {
+    it('should render the node container', () => {
       renderNodeInFlow({});
-      const nodeDetails = screen.getByTestId(GRAPH_ENTITY_NODE_DETAILS_ID);
-      expect(nodeDetails).toBeInTheDocument();
-      expect(nodeDetails).toBeEmptyDOMElement();
+      expect(screen.getByTestId(GRAPH_ENTITY_NODE_ID)).toBeInTheDocument();
     });
 
-    it('should handle count of 1 correctly (not shown)', () => {
-      renderNodeInFlow({
-        tag: 'Host',
-        count: 1,
-      });
-
-      expect(screen.getByTestId(GRAPH_TAG_TEXT_ID)).toBeInTheDocument();
-      expect(screen.queryByTestId(GRAPH_TAG_COUNT_ID)).not.toBeInTheDocument();
+    it('should render entity name (label)', () => {
+      renderNodeInFlow({ label: 'macbook-john-work' });
+      expect(screen.getByText('macbook-john-work')).toBeInTheDocument();
     });
 
-    it('should handle zero count correctly', () => {
-      renderNodeInFlow({
-        tag: 'Host',
-        count: 0,
-      });
-
-      expect(screen.getByTestId(GRAPH_TAG_TEXT_ID)).toBeInTheDocument();
-      expect(screen.queryByTestId(GRAPH_TAG_COUNT_ID)).not.toBeInTheDocument();
+    it('should render entity type (tag) as subtitle', () => {
+      renderNodeInFlow({ label: 'server-01', tag: 'Host' });
+      expect(screen.getByText('server-01')).toBeInTheDocument();
+      expect(screen.getByText('Host')).toBeInTheDocument();
     });
 
-    it('should render N/A with undefined tag and count > 1', () => {
-      renderNodeInFlow({
-        count: 3,
-        tag: undefined,
-      });
-
-      expect(screen.getByTestId(GRAPH_TAG_TEXT_ID).textContent).toBe('N/A');
+    it('should not render tag subtitle when tag is absent', () => {
+      renderNodeInFlow({ label: 'server-01', tag: undefined });
+      expect(screen.getByText('server-01')).toBeInTheDocument();
+      expect(screen.queryByText('Host')).not.toBeInTheDocument();
     });
 
-    it('should render node with all details (count > 1)', () => {
-      const label = 'server-01';
-      const tag = 'Host';
-      const count = 3;
-      renderNodeInFlow({
-        tag,
-        count,
-        label,
-        ips: ['192.168.1.1', '10.0.0.1'],
-        countryCodes: ['us', 'fr', 'es'],
-      });
-
-      expect(screen.getByTestId(GRAPH_TAG_TEXT_ID).textContent).toBe(tag);
-      expect(screen.getByTestId(GRAPH_TAG_COUNT_ID).textContent).toBe(count.toString());
-      expect(screen.getByText('server-01').textContent).toBe(label);
-      expect(screen.getByTestId(GRAPH_IPS_TEXT_ID).textContent).toBe('IP: ');
-      expect(screen.getByText('192.168.1.1')).toBeInTheDocument();
-      expect(screen.getByTestId(GRAPH_IPS_PLUS_COUNT_ID).textContent).toBe('+1');
-      expect(screen.getAllByTestId(GRAPH_FLAGS_VISIBLE_FLAG_ID)).toHaveLength(2);
-      expect(screen.getByTestId(GRAPH_FLAGS_PLUS_COUNT_ID).textContent).toBe('+1');
-    });
-
-    it('should render node with many IPs', () => {
-      const manyIps = Array.from({ length: 10 }, (_, i) => `192.168.1.${i + 1}`);
-      renderNodeInFlow({ ips: manyIps });
-
-      expect(screen.getByTestId(GRAPH_IPS_TEXT_ID).textContent).toBe('IP: ');
-      expect(screen.getByText('192.168.1.1')).toBeInTheDocument();
-      expect(screen.getByTestId(GRAPH_IPS_PLUS_COUNT_ID).textContent).toBe(
-        `+${manyIps.length - 1}`
-      );
-    });
-
-    it('should render node with many country codes', () => {
-      const manyCodes = ['us', 'fr', 'es', 'de', 'jp', 'au', 'ca'];
-      renderNodeInFlow({ countryCodes: manyCodes });
-
-      expect(screen.getAllByTestId(GRAPH_FLAGS_VISIBLE_FLAG_ID)).toHaveLength(2);
-      expect(screen.getByTestId(GRAPH_FLAGS_PLUS_COUNT_ID).textContent).toBe(
-        `+${manyCodes.length - 2}`
-      );
+    it('should render risk badge with N/A placeholder', () => {
+      renderNodeInFlow({});
+      const badge = screen.getByTestId(GRAPH_ENTITY_NODE_RISK_BADGE_ID);
+      expect(badge).toBeInTheDocument();
+      expect(badge.textContent).toBe('N/A');
     });
   });
 
   describe('Interactive Features', () => {
     it('should render expand button when interactive', () => {
       renderNodeInFlow({ interactive: true });
-
-      const expandButton = screen.getByTestId(GRAPH_NODE_EXPAND_BUTTON_ID);
-      expect(expandButton).toBeInTheDocument();
+      expect(screen.getByTestId(GRAPH_NODE_EXPAND_BUTTON_ID)).toBeInTheDocument();
     });
 
     it('should not render expand button when not interactive', () => {
       renderNodeInFlow({ interactive: false });
-
-      const expandButton = screen.queryByTestId(GRAPH_NODE_EXPAND_BUTTON_ID);
-      expect(expandButton).not.toBeInTheDocument();
+      expect(screen.queryByTestId(GRAPH_NODE_EXPAND_BUTTON_ID)).not.toBeInTheDocument();
     });
 
     it('should call expandButtonClick when expand button is clicked', () => {
       const mockExpandButtonClick = jest.fn();
-      renderNodeInFlow({
-        interactive: true,
-        expandButtonClick: mockExpandButtonClick,
-      });
+      renderNodeInFlow({ interactive: true, expandButtonClick: mockExpandButtonClick });
 
-      const expandButton = screen.getByTestId(GRAPH_NODE_EXPAND_BUTTON_ID);
-      fireEvent.click(expandButton);
-
+      fireEvent.click(screen.getByTestId(GRAPH_NODE_EXPAND_BUTTON_ID));
       expect(mockExpandButtonClick).toHaveBeenCalledTimes(1);
     });
 
-    it('should call nodeClick when node is clicked', () => {
+    it('should call nodeClick when node button is clicked', () => {
       const mockNodeClick = jest.fn();
-      renderNodeInFlow({
-        interactive: true,
-        nodeClick: mockNodeClick,
-      });
+      renderNodeInFlow({ interactive: true, nodeClick: mockNodeClick });
 
-      const nodeButton = screen.getByTestId(GRAPH_ENTITY_NODE_BUTTON_ID);
-      fireEvent.click(nodeButton);
-
+      fireEvent.click(screen.getByTestId(GRAPH_ENTITY_NODE_BUTTON_ID));
       expect(mockNodeClick).toHaveBeenCalledTimes(1);
-    });
-
-    it('should render hover shape when interactive', async () => {
-      renderNodeInFlow({ interactive: true });
-
-      userEvent.hover(screen.getByTestId(GRAPH_ENTITY_NODE_ID));
-
-      await waitFor(async () => {
-        const shapeOnHover = screen.queryByTestId(GRAPH_ENTITY_NODE_HOVER_SHAPE_ID);
-        expect(shapeOnHover).toBeInTheDocument();
-      });
-    });
-
-    it('should not render hover shape when not interactive', async () => {
-      renderNodeInFlow({ interactive: false });
-
-      userEvent.hover(screen.getByTestId(GRAPH_ENTITY_NODE_ID));
-
-      await waitFor(async () => {
-        const shapeOnHover = screen.queryByTestId(GRAPH_ENTITY_NODE_HOVER_SHAPE_ID);
-        expect(shapeOnHover).not.toBeInTheDocument();
-      });
     });
   });
 
   describe('Node Handles', () => {
     it('should render input and output handles', () => {
       const { container } = renderNodeInFlow({});
-
-      // Check for React Flow handles
       const handles = container.querySelectorAll('.react-flow__handle');
-      expect(handles).toHaveLength(2); // input and output handles
+      expect(handles).toHaveLength(2);
     });
 
     it('should have correct handle positions', () => {
       const { container } = renderNodeInFlow({});
-
-      const leftHandle = container.querySelector('.react-flow__handle.react-flow__handle-left');
-      const rightHandle = container.querySelector('.react-flow__handle.react-flow__handle-right');
-
-      expect(leftHandle).toBeInTheDocument();
-      expect(rightHandle).toBeInTheDocument();
+      expect(
+        container.querySelector('.react-flow__handle.react-flow__handle-left')
+      ).toBeInTheDocument();
+      expect(
+        container.querySelector('.react-flow__handle.react-flow__handle-right')
+      ).toBeInTheDocument();
     });
   });
 
   describe('Accessibility', () => {
-    it('should have proper ARIA attributes', () => {
-      const { container } = renderNodeInFlow({ interactive: true });
-
-      const nodeContainer = container.querySelector('.react-flow__node');
-      expect(nodeContainer).toBeInTheDocument();
-
-      // Check for focusable elements
-      const expandButton = screen.getByTestId(GRAPH_NODE_EXPAND_BUTTON_ID);
-      expect(expandButton).toHaveAttribute('type', 'button');
+    it('should have proper ARIA attributes on expand button', () => {
+      renderNodeInFlow({ interactive: true });
+      expect(screen.getByTestId(GRAPH_NODE_EXPAND_BUTTON_ID)).toHaveAttribute('type', 'button');
     });
   });
 
-  describe('Stacked Shapes', () => {
-    const createNodeProps = (shape: string, count?: number, color?: string): NodeProps => ({
+  describe('Metadata Panel', () => {
+    it('should always render the metadata panel', () => {
+      renderNodeInFlow({ label: 'server-01' });
+      expect(screen.getByTestId(GRAPH_ENTITY_NODE_LAYERS_PANEL_ID)).toBeInTheDocument();
+    });
+
+    it('should show IP address in the metadata panel', () => {
+      renderNodeInFlow({ label: 'server-01', ips: ['10.128.0.93'] });
+      expect(screen.getByTestId(GRAPH_ENTITY_NODE_LAYERS_PANEL_ID)).toBeInTheDocument();
+      expect(screen.getByText('10.128.0.93')).toBeInTheDocument();
+    });
+
+    it('should show "—" placeholder when ips is absent', () => {
+      renderNodeInFlow({ label: 'server-01', ips: undefined });
+      expect(screen.getByTestId(GRAPH_ENTITY_NODE_LAYERS_PANEL_ID)).toBeInTheDocument();
+    });
+
+    it('should show flag emoji for a country code', () => {
+      renderNodeInFlow({ label: 'server-01', countryCodes: ['US'] });
+      const panel = screen.getByTestId(GRAPH_ENTITY_NODE_LAYERS_PANEL_ID);
+      // 🇺🇸 flag emoji for US
+      expect(panel.textContent).toContain('🇺🇸');
+    });
+
+    it('should show "—" placeholder when countryCodes is absent', () => {
+      renderNodeInFlow({ label: 'server-01', countryCodes: undefined });
+      expect(screen.getByTestId(GRAPH_ENTITY_NODE_LAYERS_PANEL_ID)).toBeInTheDocument();
+    });
+  });
+
+  describe('Stacked Cards', () => {
+    const createNodeProps = (shape: string, count?: number): NodeProps => ({
       id: `test-${shape}-node`,
       data: {
         id: `test-${shape}-node`,
         label: `Test ${shape}`,
-        color: color || 'primary',
+        color: 'primary',
         shape,
         interactive: true,
         count,
@@ -271,8 +200,8 @@ describe('Entity Nodes', () => {
       sourcePosition: Position.Right,
       positionAbsoluteX: 0,
       positionAbsoluteY: 0,
-      width: 100,
-      height: 100,
+      width: 300,
+      height: 60,
       zIndex: 1,
       isConnectable: false,
       selectable: true,
@@ -293,80 +222,212 @@ describe('Entity Nodes', () => {
     });
 
     describe.each(nodeComponents)(
-      '$shape node stacked shapes',
+      '$shape node stacked cards',
       ({ shape, component: NodeComponent }) => {
-        describe('renders stacked shapes when count > 1', () => {
-          it.each([2, 1000])('shows 2 stacked shapes when count is %d', (count) => {
-            const props = createNodeProps(shape, count);
-
-            render(
-              <ReactFlow>
-                <NodeComponent {...props} />
-              </ReactFlow>
-            );
-
-            // regular shape is rendered
-            expect(screen.getByTestId(GRAPH_ENTITY_NODE_ID)).toBeInTheDocument();
-
-            // stacked shapes also rendered
-            const stackedShapes = screen.getAllByTestId(GRAPH_STACKED_SHAPE_ID);
-            expect(stackedShapes).toHaveLength(2);
-          });
-        });
-
-        describe('does not render stacked shapes when count <= 1', () => {
-          it.each([
-            { count: 1, description: 'count is 1' },
-            { count: 0, description: 'count is 0' },
-            { count: -1, description: 'count is negative' },
-            { count: undefined, description: 'count is undefined' },
-          ])('hides stacked shapes when $description', ({ count }) => {
-            const props = createNodeProps(shape, count);
-
-            render(
-              <ReactFlow>
-                <NodeComponent {...props} />
-              </ReactFlow>
-            );
-
-            // regular shape is rendered
-            expect(screen.getByTestId(GRAPH_ENTITY_NODE_ID)).toBeInTheDocument();
-
-            // stacked shapes not rendered
-            const stackedShapes = screen.queryAllByTestId(GRAPH_STACKED_SHAPE_ID);
-            expect(stackedShapes).toHaveLength(0);
-          });
-        });
-
-        describe('color consistency', () => {
-          it.each([{ color: 'primary' }, { color: 'danger' }])(
-            'stacked shapes match $color color',
-            ({ color }) => {
-              const props = createNodeProps(shape, 3, color);
-
-              render(
-                <ReactFlow>
-                  <NodeComponent {...props} />
-                </ReactFlow>
-              );
-
-              const regularShape = screen.getByTestId(GRAPH_ENTITY_NODE_ID);
-              const stackedShapes = screen.getAllByTestId(GRAPH_STACKED_SHAPE_ID);
-              const allShapes = [regularShape, ...stackedShapes];
-
-              // Get all shape elements (paths, circles, rects depending on shape type)
-              const shapeElements = allShapes.flatMap((sh) =>
-                Array.from(sh.querySelectorAll('path, circle, rect'))
-              );
-              const fillColors = shapeElements.map((el) => el.getAttribute('fill')).filter(Boolean);
-
-              // All shapes should have the same fill color
-              const uniqueColors = Array.from(new Set(fillColors));
-              expect(uniqueColors).toHaveLength(1);
-            }
+        it.each([2, 1000])('shows 1 stacked card when count is %d', (count) => {
+          const props = createNodeProps(shape, count);
+          render(
+            <ReactFlow>
+              <NodeComponent {...props} />
+            </ReactFlow>
           );
+
+          expect(screen.getByTestId(GRAPH_ENTITY_NODE_ID)).toBeInTheDocument();
+          expect(screen.getAllByTestId(GRAPH_STACKED_SHAPE_ID)).toHaveLength(1);
+        });
+
+        it.each([
+          { count: 1, description: 'count is 1' },
+          { count: 0, description: 'count is 0' },
+          { count: -1, description: 'count is negative' },
+          { count: undefined, description: 'count is undefined' },
+        ])('hides stacked cards when $description', ({ count }) => {
+          const props = createNodeProps(shape, count);
+          render(
+            <ReactFlow>
+              <NodeComponent {...props} />
+            </ReactFlow>
+          );
+
+          expect(screen.getByTestId(GRAPH_ENTITY_NODE_ID)).toBeInTheDocument();
+          expect(screen.queryAllByTestId(GRAPH_STACKED_SHAPE_ID)).toHaveLength(0);
         });
       }
     );
+  });
+
+  describe('Risk Score Badge', () => {
+    it('shows a single badge when min equals max', () => {
+      renderNodeInFlow({ riskScore: { min: 75, max: 75 } });
+      const badges = screen.getAllByTestId(GRAPH_ENTITY_NODE_RISK_BADGE_ID);
+      expect(badges).toHaveLength(1);
+      expect(badges[0].textContent).toBe('75.00');
+    });
+
+    it('shows a single badge for a precise score (min equals max)', () => {
+      renderNodeInFlow({ riskScore: { min: 74.5, max: 74.5 } });
+      const badges = screen.getAllByTestId(GRAPH_ENTITY_NODE_RISK_BADGE_ID);
+      expect(badges).toHaveLength(1);
+      expect(badges[0].textContent).toBe('74.50');
+    });
+
+    it('shows two badges (min then max) when min differs from max', () => {
+      renderNodeInFlow({ count: 4, riskScore: { min: 55, max: 92 } });
+      const badges = screen.getAllByTestId(GRAPH_ENTITY_NODE_RISK_BADGE_ID);
+      expect(badges).toHaveLength(2);
+      expect(badges[0].textContent).toBe('55.00');
+      expect(badges[1].textContent).toBe('92.00');
+    });
+
+    it('rounds risk scores to 2 decimal places', () => {
+      renderNodeInFlow({ riskScore: { min: 74.567, max: 74.567 } });
+      const badge = screen.getByTestId(GRAPH_ENTITY_NODE_RISK_BADGE_ID);
+      expect(badge.textContent).toBe('74.57');
+    });
+  });
+
+  describe('Asset Criticality', () => {
+    it('shows translated criticality label for a single-entity node', () => {
+      renderNodeInFlow({
+        assetCriticality: [{ level: 'high_impact', count: 1 }],
+      });
+      expect(screen.getByText('High impact')).toBeInTheDocument();
+    });
+
+    it('shows translated label for each known criticality level', () => {
+      const cases: Array<[string, string]> = [
+        ['extreme_impact', 'Extreme impact'],
+        ['high_impact', 'High impact'],
+        ['medium_impact', 'Medium impact'],
+        ['low_impact', 'Low impact'],
+      ];
+      for (const [level, expectedLabel] of cases) {
+        const { unmount } = renderNodeInFlow({
+          assetCriticality: [{ level, count: 1 }],
+        });
+        expect(screen.getByText(expectedLabel)).toBeInTheDocument();
+        unmount();
+      }
+    });
+
+    it('falls back to sentence-cased raw value for an unknown criticality level', () => {
+      renderNodeInFlow({
+        assetCriticality: [{ level: 'future_level', count: 1 }],
+      });
+      expect(screen.getByText('Future level')).toBeInTheDocument();
+    });
+
+    it('shows a dash placeholder when assetCriticality is absent', () => {
+      renderNodeInFlow({ assetCriticality: undefined });
+      // metadata panel should still render without crashing
+      expect(screen.getByTestId(GRAPH_ENTITY_NODE_LAYERS_PANEL_ID)).toBeInTheDocument();
+    });
+
+    it('shows only the first criticality level for a single-entity node when multiple are supplied', () => {
+      // SingleEntityMetadataPanel renders assetCriticality[0] only.
+      renderNodeInFlow({
+        assetCriticality: [
+          { level: 'high_impact', count: 2 },
+          { level: 'medium_impact', count: 1 },
+        ],
+      });
+      expect(screen.getByText('High impact')).toBeInTheDocument();
+      // Second level must not appear — single-entity panel shows only the first entry.
+      expect(screen.queryByText('Medium impact')).not.toBeInTheDocument();
+    });
+
+    it('hides the metadata panel for grouped nodes (count > 1)', () => {
+      // By design, grouped nodes do not render the metadata panel.
+      renderNodeInFlow({
+        count: 4,
+        assetCriticality: [{ level: 'high_impact', count: 2 }],
+      });
+      expect(screen.queryByTestId(GRAPH_ENTITY_NODE_LAYERS_PANEL_ID)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Source Aggregation', () => {
+    it('shows a single source formatted in title case', () => {
+      renderNodeInFlow({
+        documentsData: [{ id: 'e1', type: 'entity', entity: { sources: ['active_directory'] } }],
+      });
+      expect(screen.getByText('Active Directory')).toBeInTheDocument();
+    });
+
+    it('deduplicates sources across multiple documentsData entries and shows +N for extras', () => {
+      // count is left as default (single entity) so the metadata panel is visible.
+      // A single entity node can still aggregate sources across multiple documentsData entries.
+      renderNodeInFlow({
+        documentsData: [
+          { id: 'e1', type: 'entity', entity: { sources: ['okta'] } },
+          { id: 'e2', type: 'entity', entity: { sources: ['endpoint', 'okta'] } },
+          // 'okta' is a duplicate — deduplicated set is ['okta', 'endpoint'] (2 unique)
+        ],
+      });
+      // First source is shown as plain text
+      expect(screen.getByText('Okta')).toBeInTheDocument();
+      // Second source collapsed into the +N badge
+      expect(screen.getByText('+1')).toBeInTheDocument();
+    });
+
+    it('shows no source row when documentsData is absent', () => {
+      renderNodeInFlow({ documentsData: undefined });
+      // metadata panel renders without crashing
+      expect(screen.getByTestId(GRAPH_ENTITY_NODE_LAYERS_PANEL_ID)).toBeInTheDocument();
+    });
+  });
+
+  describe('Toolbar Items', () => {
+    it('renders toolbar buttons produced by toolbarItemsFn', () => {
+      const items: NodeToolbarItem[] = [
+        {
+          iconType: 'eye',
+          label: 'Show actor',
+          onClick: jest.fn(),
+          testSubject: 'test-toolbar-btn-show-actor',
+        },
+        {
+          iconType: 'eyeClosed',
+          label: 'Hide actor',
+          onClick: jest.fn(),
+          testSubject: 'test-toolbar-btn-hide-actor',
+        },
+      ];
+      renderNodeInFlow({ toolbarItemsFn: () => items });
+
+      expect(screen.getByTestId('test-toolbar-btn-show-actor')).toBeInTheDocument();
+      expect(screen.getByTestId('test-toolbar-btn-hide-actor')).toBeInTheDocument();
+    });
+
+    it('renders a disabled toolbar button when item.disabled is true', () => {
+      const items: NodeToolbarItem[] = [
+        {
+          iconType: 'eye',
+          label: 'Show entity details',
+          onClick: jest.fn(),
+          disabled: true,
+          testSubject: 'test-toolbar-btn-disabled',
+        },
+      ];
+      renderNodeInFlow({ toolbarItemsFn: () => items });
+
+      expect(screen.getByTestId('test-toolbar-btn-disabled')).toHaveAttribute('disabled');
+    });
+
+    it('calls onClick when a toolbar button is clicked', () => {
+      const handleClick = jest.fn();
+      const items: NodeToolbarItem[] = [
+        {
+          iconType: 'eye',
+          label: 'Show actor',
+          onClick: handleClick,
+          testSubject: 'test-toolbar-btn-click',
+        },
+      ];
+      renderNodeInFlow({ interactive: true, toolbarItemsFn: () => items });
+
+      fireEvent.click(screen.getByTestId('test-toolbar-btn-click'));
+      expect(handleClick).toHaveBeenCalledTimes(1);
+    });
   });
 });

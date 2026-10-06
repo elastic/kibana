@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -33,53 +33,53 @@ export const EndpointExceptionsPerPolicyOptInCallout: React.FC<EndpointException
         iconType="info"
         onDismiss={onDismiss}
         data-test-subj="endpointExceptionsPerPolicyOptInCallout"
-      >
-        <FormattedMessage
-          id="xpack.securitySolution.endpointExceptions.perPolicyOptInCalloutDescription"
-          defaultMessage="Endpoint exceptions can now be applied on a per-policy basis. Update existing Endpoint Exceptions to the policy-based model."
-        />
-
-        <EuiSpacer size="m" />
-
-        {canOptIn ? (
-          <EuiFlexGroup>
-            <EuiButton
-              color="primary"
-              fill
-              size="s"
-              onClick={onClickUpdateDetails}
-              data-test-subj="updateDetailsEndpointExceptionsPerPolicyOptInButton"
-            >
-              {i18n.translate(
-                'xpack.securitySolution.endpointExceptions.perPolicyOptInCalloutCta',
-                {
-                  defaultMessage: 'Update details',
-                }
-              )}
-            </EuiButton>
-
-            <EuiButton
-              color="primary"
-              size="s"
-              data-test-subj="learnMoreEndpointExceptionsPerPolicyOptInButton"
-            >
-              <EuiLink href={docLinks.links.securitySolution.endpointExceptions} target="_blank">
-                {i18n.translate(
-                  'xpack.securitySolution.endpointExceptions.perPolicyOptInCalloutLearnMore',
-                  {
-                    defaultMessage: 'Learn more',
-                  }
-                )}
-              </EuiLink>
-            </EuiButton>
-          </EuiFlexGroup>
-        ) : (
-          <FormattedMessage
-            id="xpack.securitySolution.endpointExceptions.perPolicyOptInCalloutNoPermission"
-            defaultMessage="Contact your administrator to update details."
-          />
-        )}
-      </EuiCallOut>
+        text={
+          <>
+            <FormattedMessage
+              id="xpack.securitySolution.endpointExceptions.perPolicyOptInCalloutDescription"
+              defaultMessage="Endpoint exceptions can now be applied on a per-policy basis. Update existing Endpoint Exceptions to the policy-based model."
+            />
+            {!canOptIn && (
+              <>
+                <EuiSpacer size="m" />
+                <FormattedMessage
+                  id="xpack.securitySolution.endpointExceptions.perPolicyOptInCalloutNoPermission"
+                  defaultMessage="Contact your administrator to update details."
+                />
+              </>
+            )}
+          </>
+        }
+        actionProps={
+          canOptIn
+            ? {
+                primary: {
+                  onClick: onClickUpdateDetails,
+                  'data-test-subj': 'updateDetailsEndpointExceptionsPerPolicyOptInButton',
+                  children: i18n.translate(
+                    'xpack.securitySolution.endpointExceptions.perPolicyOptInCalloutCta',
+                    {
+                      defaultMessage: 'Update details',
+                    }
+                  ),
+                },
+                secondary: {
+                  href: docLinks.links.securitySolution.endpointExceptions,
+                  target: '_blank',
+                  iconType: 'external',
+                  iconSide: 'right',
+                  'data-test-subj': 'learnMoreEndpointExceptionsPerPolicyOptInButton',
+                  children: i18n.translate(
+                    'xpack.securitySolution.endpointExceptions.perPolicyOptInCalloutLearnMore',
+                    {
+                      defaultMessage: 'Learn more',
+                    }
+                  ),
+                },
+              }
+            : undefined
+        }
+      />
     );
   });
 

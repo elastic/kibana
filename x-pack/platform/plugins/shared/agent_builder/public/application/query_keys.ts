@@ -19,6 +19,8 @@ export const queryKeys = {
       'list',
       { agentId, pinned: opts.pinned ?? null },
     ],
+    search: (query: string, opts: { agentId?: string } = {}) =>
+      ['conversations', 'search', { query, agentId: opts.agentId ?? null }] as const,
     byId: (conversationId: string) => ['conversations', conversationId],
   },
   agentProfiles: {
@@ -31,6 +33,7 @@ export const queryKeys = {
   },
   security: {
     users: ['security', 'users'] as const,
+    currentUser: ['security', 'currentUser'] as const,
     suggestUsers: (query: string) => ['security', 'users', 'suggest', query] as const,
     roles: ['security', 'roles'] as const,
     userProfiles: (uids: string[]) => ['security', 'userProfiles', uids] as const,

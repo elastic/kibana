@@ -24,6 +24,8 @@ dependsOn:
   - '@kbn/inference-prompt-utils'
   - '@kbn/zod'
   - '@kbn/kbn-client'
+  - '@kbn/security-solution-plugin'
+  - '@kbn/entity-store'
 tags:
   - functional-tests
   - package

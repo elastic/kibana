@@ -21,7 +21,8 @@ const ACTIONS_COLUMNS = [
   { name: '_id', type: 'keyword' },
   { name: '@timestamp', type: 'date' },
   { name: 'action_type', type: 'keyword' },
-  { name: 'actor', type: 'keyword' },
+  { name: 'actor.type', type: 'keyword' },
+  { name: 'actor.profile_uid', type: 'keyword' },
   { name: 'episode_id', type: 'keyword' },
   { name: 'group_hash', type: 'keyword' },
   { name: 'tags', type: 'keyword' },
@@ -34,6 +35,7 @@ const makeActionRow = (id: string, ts: string) => [
   id,
   ts,
   'ack',
+  'user',
   'user-uid-1',
   'ep-1',
   'hash-1',
@@ -113,6 +115,44 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
     expect(result.current.hasNextPage).toBe(false);
   });
 
+  it('folds the actor leaf columns into an actor object', async () => {
+    const internalRow = [
+      'id-internal',
+      '2024-01-02T00:00:00.000Z',
+      'suppress',
+      'internal',
+      null,
+      'ep-1',
+      'hash-1',
+      null,
+      null,
+      null,
+      null,
+    ];
+    runEsqlAsyncSearchMock.mockResolvedValue({
+      columns: ACTIONS_COLUMNS,
+      values: [makeActionRow('id-user', '2024-01-02T00:01:00.000Z'), internalRow],
+    });
+
+    const { result } = renderHook(
+      () =>
+        useFetchEpisodeActionsHistoryQuery({
+          episodeId,
+          groupHash,
+          services: { data, spaces: mockSpaces },
+        }),
+      { wrapper }
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.entries.map((entry) => entry.actor)).toEqual([
+      { type: 'user', profile_uid: 'user-uid-1' },
+      { type: 'internal', profile_uid: null },
+    ]);
+    expect(result.current.entries[0]).not.toHaveProperty(['actor.type']);
+    expect(result.current.entries[0]).not.toHaveProperty(['actor.profile_uid']);
+  });
+
   it('offers a next page when the page comes back full, none when short', async () => {
     runEsqlAsyncSearchMock.mockResolvedValue({
       columns: ACTIONS_COLUMNS,
@@ -153,6 +193,40 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
       })
     );
     await waitFor(() => expect(result.current.hasNextPage).toBe(false));
+  });
+
+  it('normalizes a single-tag string returned by ES|QL into a one-element array', async () => {
+    const rowWithSingleTag = [
+      'id-1',
+      '2024-01-02T00:00:00.000Z',
+      'tag',
+      'user',
+      'user-uid-1',
+      'ep-1',
+      'hash-1',
+      'single-tag',
+      null,
+      null,
+      null,
+    ];
+    runEsqlAsyncSearchMock.mockResolvedValue({
+      columns: ACTIONS_COLUMNS,
+      values: [rowWithSingleTag],
+    });
+
+    const { result } = renderHook(
+      () =>
+        useFetchEpisodeActionsHistoryQuery({
+          episodeId,
+          groupHash,
+          services: { data, spaces: mockSpaces },
+          pageSize: 2,
+        }),
+      { wrapper }
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.entries[0].tags).toEqual(['single-tag']);
   });
 
   it('dedups records that straddle the keyset page boundary by _id', async () => {

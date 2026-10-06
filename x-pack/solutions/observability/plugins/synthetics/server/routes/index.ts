@@ -14,11 +14,13 @@ import { syntheticsInspectTLSRuleRoute } from './rules/inspect_tls_rule';
 import { syntheticsGetLatestTestRunRoute } from './pings/get_latest_test_run';
 import { deleteSyntheticsParamsBulkRoute } from './settings/params/delete_params_bulk';
 import { deleteSyntheticsMonitorBulkRoute } from './monitor_cruds/bulk_cruds/delete_monitor_bulk';
+import { createSyntheticsMonitorBulkRoute } from './monitor_cruds/bulk_cruds/create_monitor_bulk';
 import { updateSyntheticsMonitorBulkRoute } from './monitor_cruds/bulk_cruds/update_monitor_bulk';
 import {
   createGetDynamicSettingsRoute,
   createPostDynamicSettingsRoute,
 } from './settings/dynamic_settings';
+import { getClusterSettingsPrivilegesRoute } from './settings/cluster_settings_privileges';
 import {
   createGetMultiSpaceSettingsRoute,
   createPutMultiSpaceSettingsRoute,
@@ -74,6 +76,7 @@ import { deletePrivateLocationRoute } from './settings/private_locations/delete_
 import { editPrivateLocationRoute } from './settings/private_locations/edit_private_location';
 import { getPrivateLocationsRoute } from './settings/private_locations/get_private_locations';
 import { getPrivateLocationAgentStats } from './settings/private_locations/get_agent_stats';
+import { getOutdatedMwAgentLocations } from './settings/private_locations/get_outdated_mw_agents';
 import { getMonitorAgentAssignment } from './settings/private_locations/get_monitor_agent_assignment';
 import { getSyntheticsFilters } from './filters/filters';
 import { getAllSyntheticsMonitorRoute } from './monitor_cruds/get_monitors_list';
@@ -128,6 +131,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   createPostDynamicSettingsRoute,
   createGetMultiSpaceSettingsRoute,
   createPutMultiSpaceSettingsRoute,
+  getClusterSettingsPrivilegesRoute,
   syntheticsGetPingHeatmapRoute,
   createOverviewTrendsRoute,
   syntheticsInspectStatusRuleRoute,
@@ -145,6 +149,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getMonitorSummaryStatsRoute,
   getSyntheticsDiagnosticsRoute,
   getPrivateLocationAgentStats,
+  getOutdatedMwAgentLocations,
   getMonitorAgentAssignment,
   getMaintenanceWindowsRoute,
 ];
@@ -164,6 +169,7 @@ export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] =
   editSyntheticsMonitorRoute,
   deleteSyntheticsMonitorRoute,
   deleteSyntheticsMonitorBulkRoute,
+  createSyntheticsMonitorBulkRoute,
   updateSyntheticsMonitorBulkRoute,
   deleteSyntheticsParamsBulkRoute,
   syntheticsGetLatestTestRunRoute,

@@ -56,18 +56,18 @@ paths:
                         type: integer
                       skippedNullScores:
                         type: integer
-                      truncatedA:
+                      truncatedBaseline:
                         type: boolean
                         description: Whether the baseline scores were truncated due to size limits
-                      truncatedB:
+                      truncatedTarget:
                         type: boolean
                         description: Whether the target scores were truncated due to size limits
                     required:
                       - totalPairs
                       - skippedMissingPairs
                       - skippedNullScores
-                      - truncatedA
-                      - truncatedB
+                      - truncatedBaseline
+                      - truncatedTarget
                 required:
                   - results
                   - pairing
@@ -88,10 +88,12 @@ components:
           maxLength: 256
         sampleSize:
           type: integer
-        meanA:
+        meanBaseline:
           type: number
-        meanB:
+          description: Mean score of the baseline experiment
+        meanTarget:
           type: number
+          description: Mean score of the target experiment
         pValue:
           type: number
           nullable: true
@@ -110,7 +112,7 @@ components:
         - datasetName
         - evaluatorName
         - sampleSize
-        - meanA
-        - meanB
+        - meanBaseline
+        - meanTarget
         - pValue
         - direction

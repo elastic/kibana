@@ -55,7 +55,6 @@ spaceTest.describe('Discover data grid row height', { tag: '@local-stateful-clas
 
     // Re-open the popover to confirm the selection sticks.
     await dataGrid.openGridDisplaySettings();
-    await dataGrid.openGridDisplaySettings();
     expect(await dataGrid.getCurrentRowHeight()).toBe('Auto');
 
     // Discover hides the "Reset to default" action in this display-settings context.
@@ -101,7 +100,6 @@ spaceTest.describe('Discover data grid row height', { tag: '@local-stateful-clas
     await dataGrid.setRowHeight('Auto', 'header');
 
     // Re-open the popover to confirm the selection sticks.
-    await dataGrid.openGridDisplaySettings();
     await dataGrid.openGridDisplaySettings();
     expect(await dataGrid.getCurrentRowHeight('header')).toBe('Auto');
 
