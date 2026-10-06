@@ -27,10 +27,6 @@ jest.mock('./graph_lens', () => ({
   createVisualizationGraph: jest.fn(),
 }));
 
-jest.mock('./schemas', () => ({
-  getSchemaForChartType: jest.fn(() => ({})),
-}));
-
 const mockedValidateEsqlQuery = jest.mocked(validateEsqlQuery);
 const mockedBuildCallbacks = jest.mocked(buildServerESQLCallbacks);
 const mockedCreateGraph = jest.mocked(createVisualizationGraph);
