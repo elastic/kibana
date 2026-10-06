@@ -276,19 +276,22 @@ export class MapsPage {
    */
   async getHits(): Promise<string> {
     await this.inspector.open();
-    await this.inspector.openInspectorRequestsView();
-    await this.inspector.openRequestsStatisticsTab();
+    try {
+      await this.inspector.openInspectorRequestsView();
+      await this.inspector.openRequestsStatisticsTab();
 
-    const rows = await this.inspector.getTableData();
-    const hitsRow = rows.find((row) => row[0] === 'Hits');
-    const hits = hitsRow?.[1];
+      const rows = await this.inspector.getTableData();
+      const hitsRow = rows.find((row) => row[0] === 'Hits');
+      const hits = hitsRow?.[1];
 
-    if (!hits) {
-      throw new Error(`Unable to find "Hits" in table data: ${JSON.stringify(rows, null, '')}`);
+      if (!hits) {
+        throw new Error(`Unable to find "Hits" in table data: ${JSON.stringify(rows, null, '')}`);
+      }
+
+      return hits;
+    } finally {
+      await this.inspector.close();
     }
-
-    await this.inspector.close();
-    return hits;
   }
 
   /** Opens the map settings panel and enables "Auto fit map to data bounds". */
