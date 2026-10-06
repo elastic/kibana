@@ -564,11 +564,12 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         ),
         value: severeAlertsCount,
         isLoading: alertBasedLoading,
+        // TODO: counts only high/critical alerts now. Suggested description:
+        // "Entities with at least one high- or critical-severity alert in the last {timeRange}"
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.description',
           {
-            defaultMessage:
-              'Entities with at least one high- or critical-severity alert in the last {timeRange}',
+            defaultMessage: 'Entities with at least one alert in the last {timeRange}',
             values: { timeRange },
           }
         ),
@@ -717,10 +718,13 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         }),
         value: newAlertingCount,
         isLoading: alertBasedLoading,
+        // TODO: counts only new entities with an alert now. Suggested description:
+        // "Entities first seen in the last {timeRange} with at least one alert"
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.newEntity.description',
           {
-            defaultMessage: 'Entities first seen in the last {timeRange} with at least one alert',
+            defaultMessage:
+              'Entities first seen in the last {timeRange} with a risk score above zero',
             values: { timeRange },
           }
         ),
