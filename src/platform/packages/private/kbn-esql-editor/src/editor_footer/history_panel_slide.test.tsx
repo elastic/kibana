@@ -13,6 +13,12 @@ import { HistoryPanelSlide } from './history_panel_slide';
 
 const panel = () => screen.getByTestId('ESQLEditor-history-panel-slide');
 
+const fireTransitionEnd = (target: HTMLElement) => {
+  const event = new Event('transitionend', { bubbles: true });
+  Object.defineProperty(event, 'propertyName', { value: 'grid-template-rows' });
+  target.dispatchEvent(event);
+};
+
 describe('HistoryPanelSlide', () => {
   const originalMatchMedia = window.matchMedia;
 
@@ -52,38 +58,66 @@ describe('HistoryPanelSlide', () => {
     expect(panel()).toHaveAttribute('data-expanded', 'true');
   });
 
-  it('unmounts after the slide-out, or immediately when motion is reduced', () => {
-    const view = render(
+  it('stays mounted until its own slide-out finishes', () => {
+    const { rerender } = render(
       <HistoryPanelSlide isOpen>
-        <div>Recent queries</div>
+        <div data-test-subj="child">Recent queries</div>
       </HistoryPanelSlide>
     );
 
-    view.rerender(
+    rerender(
       <HistoryPanelSlide isOpen={false}>
-        <div>Recent queries</div>
+        <div data-test-subj="child">Recent queries</div>
       </HistoryPanelSlide>
     );
+    expect(panel()).toHaveAttribute('data-expanded', 'false');
+
+    act(() => {
+      fireTransitionEnd(screen.getByTestId('child'));
+    });
     expect(screen.getByText('Recent queries')).toBeInTheDocument();
 
     act(() => {
-      const event = new Event('transitionend', { bubbles: true });
-      Object.defineProperty(event, 'propertyName', { value: 'grid-template-rows' });
-      panel().dispatchEvent(event);
+      fireTransitionEnd(panel());
     });
     expect(screen.queryByText('Recent queries')).not.toBeInTheDocument();
+  });
 
-    window.matchMedia = jest.fn().mockReturnValue({ matches: true });
-    view.rerender(
-      <HistoryPanelSlide isOpen>
-        <div>Recent queries</div>
-      </HistoryPanelSlide>
-    );
-    view.rerender(
+  it('unmounts at once when closed before it expanded', () => {
+    const { rerender } = render(
       <HistoryPanelSlide isOpen={false}>
         <div>Recent queries</div>
       </HistoryPanelSlide>
     );
+
+    rerender(
+      <HistoryPanelSlide isOpen>
+        <div>Recent queries</div>
+      </HistoryPanelSlide>
+    );
+    rerender(
+      <HistoryPanelSlide isOpen={false}>
+        <div>Recent queries</div>
+      </HistoryPanelSlide>
+    );
+
+    expect(screen.queryByText('Recent queries')).not.toBeInTheDocument();
+  });
+
+  it('unmounts at once when reduced motion is preferred', () => {
+    window.matchMedia = jest.fn().mockReturnValue({ matches: true });
+    const { rerender } = render(
+      <HistoryPanelSlide isOpen>
+        <div>Recent queries</div>
+      </HistoryPanelSlide>
+    );
+
+    rerender(
+      <HistoryPanelSlide isOpen={false}>
+        <div>Recent queries</div>
+      </HistoryPanelSlide>
+    );
+
     expect(screen.queryByText('Recent queries')).not.toBeInTheDocument();
   });
 });

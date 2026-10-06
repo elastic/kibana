@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 
@@ -26,22 +26,22 @@ export function HistoryPanelSlide({
   const { euiTheme } = useEuiTheme();
   const [isMounted, setIsMounted] = useState(isOpen);
   const [isExpanded, setIsExpanded] = useState(isOpen);
+  const hasExpandedRef = useRef(isOpen);
 
   useEffect(() => {
-    if (!isOpen) {
-      setIsExpanded(false);
-      if (prefersReducedMotion()) setIsMounted(false);
-      return;
+    if (isOpen) {
+      setIsMounted(true);
+      const frame = window.requestAnimationFrame(() => {
+        hasExpandedRef.current = true;
+        setIsExpanded(true);
+      });
+      return () => window.cancelAnimationFrame(frame);
     }
 
-    setIsMounted(true);
-    if (prefersReducedMotion()) {
-      setIsExpanded(true);
-      return;
-    }
-
-    const frame = window.requestAnimationFrame(() => setIsExpanded(true));
-    return () => window.cancelAnimationFrame(frame);
+    setIsExpanded(false);
+    // No transition will run, so nothing would fire transitionend to unmount the panel.
+    if (!hasExpandedRef.current || prefersReducedMotion()) setIsMounted(false);
+    hasExpandedRef.current = false;
   }, [isOpen]);
 
   if (!isMounted) return null;
@@ -52,7 +52,13 @@ export function HistoryPanelSlide({
       data-expanded={isExpanded ? 'true' : 'false'}
       inert={isExpanded ? undefined : ''}
       onTransitionEnd={(event) => {
-        if (event.propertyName === 'grid-template-rows' && !isOpen) setIsMounted(false);
+        if (
+          event.target === event.currentTarget &&
+          event.propertyName === 'grid-template-rows' &&
+          !isOpen
+        ) {
+          setIsMounted(false);
+        }
       }}
       css={css`
         display: grid;
