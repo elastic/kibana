@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { RuleInlineContent } from './rule_inline_content';
 
@@ -34,12 +35,12 @@ describe('RuleInlineContent', () => {
     expect(queryByText('My Rule')).toBeNull();
   });
 
-  it('renders the outcome as an alert (hardcoded for now)', () => {
+  it('renders the outcome badge for the rule kind', () => {
     const { getByText } = render(
       <RuleInlineContent attachment={createAttachment()} isSidebar={false} />
     );
     expect(getByText('Outcome')).toBeDefined();
-    expect(getByText('Alert')).toBeDefined();
+    expect(getByText(RULE_KIND_LABELS.signal)).toBeDefined();
   });
 
   it('shows draft status when no origin', () => {

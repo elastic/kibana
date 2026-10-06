@@ -18,16 +18,10 @@ import {
 import { css } from '@emotion/react';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import { formatDuration } from '@kbn/alerting-plugin/common';
-import { RULE_KIND_ICONS } from '@kbn/alerting-v2-constants';
 import { i18n } from '@kbn/i18n';
 import { BadgeList } from '../../components/action_policy/badge_list';
+import { RuleKindBadge } from '../../components/rule_details/rule_summary_header';
 import type { RuleAttachment } from './rule_attachment_definition';
-
-// TODO: map the outcome to the real rule field once it is defined; hardcoded to `alert` for now.
-const OUTCOME_KIND = 'alert';
-const OUTCOME_LABEL = i18n.translate('xpack.alertingV2.ruleAttachment.outcomeAlert', {
-  defaultMessage: 'Alert',
-});
 
 export const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({
   attachment,
@@ -89,9 +83,7 @@ export const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> 
                   defaultMessage: 'Outcome',
                 })}
               >
-                <EuiBadge color="hollow" iconType={RULE_KIND_ICONS[OUTCOME_KIND]}>
-                  {OUTCOME_LABEL}
-                </EuiBadge>
+                <RuleKindBadge kind={data.kind} />
               </InfoItem>
             </EuiFlexItem>
             <EuiFlexItem css={infoItemCss} data-test-subj="ruleInlineStatus">

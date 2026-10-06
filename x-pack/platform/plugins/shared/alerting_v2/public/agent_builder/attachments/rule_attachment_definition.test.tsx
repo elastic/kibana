@@ -93,11 +93,14 @@ describe('createRuleAttachmentDefinition', () => {
   });
 
   describe('getHeader', () => {
-    it('returns the bell icon', () => {
+    it.each([
+      ['alert', 'bell'],
+      ['signal', 'chartBarVertical'],
+    ])('returns the %s kind icon', (kind, icon) => {
       const services = createMockServices();
       const definition = createRuleAttachmentDefinition(services);
 
-      expect(definition.getHeader!({ attachment: {} as any })).toEqual({ icon: 'bell' });
+      expect(definition.getHeader!({ attachment: { data: { kind } } as any })).toEqual({ icon });
     });
   });
 
