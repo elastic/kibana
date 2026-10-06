@@ -66,8 +66,9 @@ export interface HistoryView {
 }
 
 /**
- * A round paused on a prompt is resumed by the current run: it is left out of the history (the
- * graph renders its steps) and its user message stands in for the next input.
+ * The round this run resumes (`resumedRoundId`) is left out of the history (the graph renders its
+ * steps) and its user message stands in for the next input. A paused round the run does not resume
+ * stays in the history, its unreturned tool calls marked interrupted so each call keeps a result.
  */
 export const historyView = (
   conversation: ProcessedConversation,
@@ -75,15 +76,37 @@ export const historyView = (
 ): HistoryView => {
   const entries = groupTimelineEntries(conversation.timeline);
   const lastRound = groupTimelineRounds(conversation.timeline).at(-1);
-  if (lastRound && isAwaitingPrompt(lastRound)) {
+  if (!lastRound || !isAwaitingPrompt(lastRound)) {
+    return { entries, input: conversation.nextInput, inputTimestamp: conversationTimestamp };
+  }
+  if (lastRound.id === conversation.resumedRoundId) {
     return {
       entries: entries.filter((entry) => !isTimelineRound(entry) || entry.id !== lastRound.id),
       input: lastRound.userMessage.data,
       inputTimestamp: lastRound.userMessage.created_at,
     };
   }
-  return { entries, input: conversation.nextInput, inputTimestamp: conversationTimestamp };
+  return {
+    entries: entries.map((entry) =>
+      isTimelineRound(entry) && entry.id === lastRound.id
+        ? withUnreturnedCallsInterrupted(entry)
+        : entry
+    ),
+    input: conversation.nextInput,
+    inputTimestamp: conversationTimestamp,
+  };
 };
+
+const withUnreturnedCallsInterrupted = (
+  round: TimelineRound<ProcessedTimelineEvent>
+): TimelineRound<ProcessedTimelineEvent> => ({
+  ...round,
+  steps: round.steps.map((step) =>
+    isToolCallStep(step) && step.results.length === 0
+      ? { ...step, interrupted: true as const }
+      : step
+  ),
+});
 
 /** What a compaction cursor leaves visible. */
 export interface ContextVisibility {

@@ -763,6 +763,7 @@ describe('runDefaultAgentMode', () => {
         expect.objectContaining({
           processedConversation: expect.objectContaining({
             nextInput: expect.objectContaining({ message: 'hook rewrite' }),
+            resumedRoundId: 'round-1',
           }),
         })
       );

@@ -134,21 +134,32 @@ describe('historyView', () => {
     expect(view.inputTimestamp).toBe('2026-01-01T00:00:00.000Z');
   });
 
-  it('leaves out the round paused on a prompt and uses its user message as the input', () => {
-    const timeline = [
-      ...timelineFromRounds([{ id: 'a', input: input('first') }]),
-      ...(eventsForContext(eventsNativeConversation(pausedRoundTimeline('p', ['c1']))).map(
-        (event) =>
-          event.type === TimelineEventType.userMessage
-            ? { ...event, data: { ...event.data, attachments: [] } }
-            : event
-      ) as ProcessedTimelineEvent[]),
-    ];
-    const view = historyView(conversationOf(timeline));
+  const pausedTimeline = () => [
+    ...timelineFromRounds([{ id: 'a', input: input('first') }]),
+    ...(eventsForContext(eventsNativeConversation(pausedRoundTimeline('p', ['c1']))).map((event) =>
+      event.type === TimelineEventType.userMessage
+        ? { ...event, data: { ...event.data, attachments: [] } }
+        : event
+    ) as ProcessedTimelineEvent[]),
+  ];
+
+  it('leaves out the round this run resumes and uses its user message as the input', () => {
+    const view = historyView({ ...conversationOf(pausedTimeline()), resumedRoundId: 'p' });
     expect(view.entries.map((entry) => (isTimelineRound(entry) ? entry.id : 'message'))).toEqual([
       'a',
     ]);
     expect(view.input).toEqual(expect.objectContaining({ message: 'hello p' }));
+  });
+
+  it('keeps a paused round the run does not resume, with its unreturned calls interrupted', () => {
+    const view = historyView(conversationOf(pausedTimeline()), '2026-01-01T00:00:00.000Z');
+    const rounds = view.entries.filter(isTimelineRound);
+    expect(rounds.map((round) => round.id)).toEqual(['a', 'p']);
+    expect(rounds[1].steps).toEqual([
+      expect.objectContaining({ tool_call_id: 'c1', interrupted: true }),
+    ]);
+    expect(view.input).toEqual(input('next'));
+    expect(view.inputTimestamp).toBe('2026-01-01T00:00:00.000Z');
   });
 });
 
