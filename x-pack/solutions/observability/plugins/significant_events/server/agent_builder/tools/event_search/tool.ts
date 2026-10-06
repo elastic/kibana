@@ -219,7 +219,7 @@ export function createSearchEventsTool({
         await assertSignificantEventsAccess({ server, licensing });
 
         const data = await searchEventsToolHandler({
-          eventClient: await getEventSearchClient(),
+          eventSearchClient: await getEventSearchClient(),
           params: { ...toolParams, query },
         });
 

@@ -6,7 +6,6 @@
  */
 
 import type { SignificantEvent } from '@kbn/significant-events-schema';
-import type { EventClient } from '../../lib/significant_events/events';
 import {
   EVENT_CREATED_TRIGGER_ID,
   EVENT_STATUS_CHANGED_TRIGGER_ID,
@@ -25,19 +24,13 @@ const createEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEven
   ...overrides,
 });
 
-const createEventClient = () => {
-  const emitTrigger = jest.fn();
-  const eventClient: Pick<EventClient, 'emitTrigger'> = { emitTrigger };
-  return { eventClient, emitTrigger };
-};
-
 describe('emitSignificantEventWriteTriggers', () => {
   it('emits eventCreated when there is no prior version', () => {
-    const { eventClient, emitTrigger } = createEventClient();
+    const emitTrigger = jest.fn();
     const event = createEvent();
 
     emitSignificantEventWriteTriggers({
-      eventClient,
+      emitTrigger,
       significantEvent: event,
       priorSignificantEvent: undefined,
     });
@@ -55,11 +48,11 @@ describe('emitSignificantEventWriteTriggers', () => {
   });
 
   it('emits eventStatusChanged with previous_status when the status differs', () => {
-    const { eventClient, emitTrigger } = createEventClient();
+    const emitTrigger = jest.fn();
     const event = createEvent({ status: 'inactive' });
 
     emitSignificantEventWriteTriggers({
-      eventClient,
+      emitTrigger,
       significantEvent: event,
       priorSignificantEvent: { status: 'active' },
     });
@@ -78,11 +71,11 @@ describe('emitSignificantEventWriteTriggers', () => {
   });
 
   it('emits nothing when a prior version exists with the same status', () => {
-    const { eventClient, emitTrigger } = createEventClient();
+    const emitTrigger = jest.fn();
     const event = createEvent({ status: 'active' });
 
     emitSignificantEventWriteTriggers({
-      eventClient,
+      emitTrigger,
       significantEvent: event,
       priorSignificantEvent: { status: 'active' },
     });
