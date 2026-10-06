@@ -39,12 +39,10 @@ import type { TabState, TabStateGlobalState } from '../types';
 import { GLOBAL_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
 import { fromSavedObjectTabToSearchSource } from '../tab_mapping_utils';
 import { createInternalStateAsyncThunk, extractEsqlVariables } from '../utils';
+import { isNonEmptyEsqlQuery } from '../../utils/is_non_empty_esql_query';
 import { fetchData, updateAttributes } from './tab_state';
 import { initializeAndSync } from './tab_sync';
 import { resolveEsqlSource } from '../../../data_fetching/resolve_esql_source';
-
-const isNonEmptyEsqlQuery = (query: Query | AggregateQuery | undefined): query is AggregateQuery =>
-  isOfAggregateQueryType(query) && query.esql.trim() !== '';
 
 export interface InitializeSingleTabsParams {
   customizationService: ConnectedCustomizationService;
