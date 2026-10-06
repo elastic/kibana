@@ -62,6 +62,29 @@ describe('normalizeOperations', () => {
     expect(Owner).toEqual({ anyOf: [{ allOf: [{ type: 'string' }] }, { type: 'null' }] });
   });
 
+  it('adds null to the type and enum of nullable schemas', () => {
+    const { Item } = loadNormalizedSchemas({
+      Item: {
+        type: 'object',
+        nullable: true,
+        properties: {
+          state: { type: 'string', enum: ['open'], nullable: true },
+          count: { type: ['integer', 'null'], nullable: true },
+          name: { type: 'string', nullable: false },
+        },
+      },
+    });
+
+    expect(Item).toEqual({
+      type: ['object', 'null'],
+      properties: {
+        state: { type: ['string', 'null'], enum: ['open', null] },
+        count: { type: ['integer', 'null'] },
+        name: { type: 'string' },
+      },
+    });
+  });
+
   it('removes duplicate enum values and repairs patterns', () => {
     const { Item } = loadNormalizedSchemas({
       Item: { type: 'string', enum: ['a', 'b', 'a'], pattern: '^\\_x$' },
