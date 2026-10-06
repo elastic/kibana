@@ -89,7 +89,7 @@ const findConfirmedTechnique = (
     .find((techniqueId) => techniques.includes(techniqueRoot(techniqueId)));
 
 /**
- * A process attributed to a technique is judged on that technique alone, so one process's
+ * A process attributed to techniques is judged on those alone, so one process's
  * destructive evidence cannot escalate an unrelated process. Only a selector with no
  * attribution falls back to the run-wide check.
  */
@@ -97,15 +97,19 @@ const findDestructiveTechniqueFor = (
   selector: ProcessSelector,
   state: CurrentRunState
 ): string | undefined => {
-  if (!selector.techniqueId) {
+  const attributed = selector.techniqueIds?.length
+    ? selector.techniqueIds
+    : selector.techniqueId
+    ? [selector.techniqueId]
+    : [];
+  if (attributed.length === 0) {
     return findConfirmedTechnique(state, DESTRUCTIVE_TECHNIQUES);
   }
-  const attributed = selector.techniqueId;
-  const confirmed = state.evidence.tier2Confirmed.some((t) => t.techniqueId === attributed);
-  return confirmed &&
-    (DESTRUCTIVE_TECHNIQUES as readonly string[]).includes(techniqueRoot(attributed))
-    ? attributed
-    : undefined;
+  return attributed.find(
+    (id) =>
+      (DESTRUCTIVE_TECHNIQUES as readonly string[]).includes(techniqueRoot(id)) &&
+      state.evidence.tier2Confirmed.some((t) => t.techniqueId === id)
+  );
 };
 
 const isProtectedProcess = (selector: ProcessSelector): boolean =>

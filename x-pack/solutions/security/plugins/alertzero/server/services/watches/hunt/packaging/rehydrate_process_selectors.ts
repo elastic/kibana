@@ -67,6 +67,13 @@ interface Candidate {
    * is implicated in.
    */
   techniqueId?: string;
+  /** Every technique any ref for this process was attributed to; unioned on dedupe. */
+  techniqueIds: string[];
+  /**
+   * Timestamp of the representative ref, used only to rank candidates. Kept apart from
+   * `timestamp` (newest across merged refs) so ranking never depends on ref order.
+   */
+  rankTimestamp: string;
   /** The ref that produced this candidate was the Tier 1 IOC match; OR-ed across refs on dedupe. */
   iocMatched: boolean;
 }
@@ -95,6 +102,8 @@ const extractCandidate = (source: RehydrateSource, ref: RehydrateRef): Candidate
     processName: source.process?.name ?? source.process?.executable ?? 'unknown process',
     timestamp: source['@timestamp'] ?? new Date(0).toISOString(),
     techniqueId: ref.matched?.technique_id,
+    techniqueIds: ref.matched?.technique_id ? [ref.matched.technique_id] : [],
+    rankTimestamp: source['@timestamp'] ?? new Date(0).toISOString(),
     iocMatched: ref.matched?.ioc === true,
   };
 };
@@ -104,7 +113,7 @@ const extractCandidate = (source: RehydrateSource, ref: RehydrateRef): Candidate
 const isBetterCandidate = (next: Candidate, current: Candidate): boolean =>
   Boolean(next.techniqueId) !== Boolean(current.techniqueId)
     ? Boolean(next.techniqueId)
-    : next.timestamp > current.timestamp;
+    : next.rankTimestamp > current.rankTimestamp;
 
 /**
  * Builds process selectors from the SSE's own event/alert refs via one `mget`, so kill-process
@@ -184,6 +193,7 @@ export const makeRehydrateProcessSelectors = (
       byKey.set(key, {
         ...(isBetterCandidate(candidate, existing) ? candidate : existing),
         iocMatched,
+        techniqueIds: [...new Set([...existing.techniqueIds, ...candidate.techniqueIds])],
         // Attribution can pick the winner, but staleness must see the newest observation.
         timestamp:
           candidate.timestamp > existing.timestamp ? candidate.timestamp : existing.timestamp,
@@ -211,6 +221,7 @@ export const makeRehydrateProcessSelectors = (
           observedAt: candidate.timestamp,
           processName: candidate.processName,
           techniqueId: candidate.techniqueId,
+          ...(candidate.techniqueIds.length > 0 ? { techniqueIds: candidate.techniqueIds } : {}),
           iocMatched: candidate.iocMatched,
         });
       }

@@ -231,6 +231,22 @@ describe('selectProcessActions', () => {
       expect(decision.rule).toBe('suspend_only');
     });
 
+    it('kills when any of the process’s attributed techniques is destructive and confirmed', () => {
+      const decision = selectProcessActions({
+        selector: selector({ techniqueId: 'T1059.001', techniqueIds: ['T1059.001', 'T1486'] }),
+        host: host(),
+        state: state({
+          evidence: {
+            tier2Confirmed: [
+              { techniqueId: 'T1486', rowCount: 1 },
+              { techniqueId: 'T1059.001', rowCount: 1 },
+            ],
+          },
+        }),
+      });
+      expect(decision.rule).toBe('destructive_technique');
+    });
+
     it('kills an attributed process whose own technique is destructive and confirmed', () => {
       const decision = selectProcessActions({
         selector: selector({ techniqueId: 'T1486.001' }),

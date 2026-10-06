@@ -43,6 +43,11 @@ export interface ProcessSelector {
    * every technique confirmed anywhere on the host.
    */
   techniqueId?: string;
+  /**
+   * Every technique any ref for this process was attributed to (`techniqueId` is the one
+   * representative). Lets rules see a destructive technique the representative did not carry.
+   */
+  techniqueIds?: string[];
   /** True when a Tier 1 ref that rehydrated to this process carried `matched.ioc`. */
   iocMatched: boolean;
 }

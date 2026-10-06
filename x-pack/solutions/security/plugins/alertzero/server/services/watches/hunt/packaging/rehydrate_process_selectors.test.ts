@@ -283,6 +283,66 @@ describe('makeRehydrateProcessSelectors', () => {
     });
   });
 
+  it('keeps every attributed technique, so a destructive one survives another winning the slot', async () => {
+    const proc = {
+      host: { name: 'h1' },
+      process: { pid: 100, name: 'a.exe' },
+      event: { type: 'start' },
+    };
+    const esClient = esClientWith([
+      found('logs-endpoint.events-default', 'ev-1', {
+        '@timestamp': '2026-09-26T09:00:00.000Z',
+        ...proc,
+      }),
+      found('logs-endpoint.events-default', 'ev-2', {
+        '@timestamp': '2026-09-26T12:00:00.000Z',
+        ...proc,
+      }),
+    ]);
+    const selectors = await makeRehydrateProcessSelectors(esClient)({
+      alerts: [],
+      events: [
+        eventRef('logs-endpoint.events-default', 'ev-1', 'T1486'),
+        eventRef('logs-endpoint.events-default', 'ev-2', 'T1059.001'),
+      ],
+    });
+    expect(selectors).toHaveLength(1);
+    expect(selectors[0].techniqueId).toBe('T1059.001');
+    expect([...(selectors[0].techniqueIds ?? [])].sort()).toEqual(['T1059.001', 'T1486']);
+  });
+
+  it('picks the same representative regardless of an interleaved newer unattributed ref', async () => {
+    const proc = {
+      host: { name: 'h1' },
+      process: { pid: 100, name: 'a.exe' },
+      event: { type: 'start' },
+    };
+    const esClient = esClientWith([
+      found('logs-endpoint.events-default', 'ev-1', {
+        '@timestamp': '2026-09-26T09:00:00.000Z',
+        ...proc,
+      }),
+      found('logs-endpoint.events-default', 'ev-plain', {
+        '@timestamp': '2026-09-27T09:00:00.000Z',
+        ...proc,
+      }),
+      found('logs-endpoint.events-default', 'ev-2', {
+        '@timestamp': '2026-09-26T12:00:00.000Z',
+        ...proc,
+      }),
+    ]);
+    const selectors = await makeRehydrateProcessSelectors(esClient)({
+      alerts: [],
+      events: [
+        eventRef('logs-endpoint.events-default', 'ev-1', 'T1486'),
+        eventRef('logs-endpoint.events-default', 'ev-plain'),
+        eventRef('logs-endpoint.events-default', 'ev-2', 'T1059.001'),
+      ],
+    });
+    expect(selectors[0].techniqueId).toBe('T1059.001');
+    expect(selectors[0].observedAt).toBe('2026-09-27T09:00:00.000Z');
+  });
+
   it('leaves techniqueId undefined for a plain sample ref with no technique match', async () => {
     const esClient = esClientWith([
       found('logs-endpoint.events-default', 'ev-1', {
