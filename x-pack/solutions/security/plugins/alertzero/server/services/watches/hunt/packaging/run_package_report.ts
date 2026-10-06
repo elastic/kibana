@@ -117,8 +117,14 @@ export const runPackageReport = async ({
    * `foreach` swallows a per-item attach failure with `continue`, so a shortfall here is
    * otherwise invisible -- packaging would read the attachments that did land and proceed as
    * if the run were complete, silently dropping whichever finding failed to attach.
+   *
+   * Undefined skips the check below rather than failing closed: an already-installed Worker
+   * that has not yet picked up the call site supplying this field (its `yamlTemplate` hash does
+   * not cover the imported YAML it renders, so it only updates when its own `version` bumps)
+   * must not have every packaging call start erroring just because this step's own schema
+   * changed out from under it -- that would turn a staleness gap into an outage.
    */
-  expectedSseCount: number;
+  expectedSseCount: number | undefined;
   attachments: VersionedAttachment[] | undefined;
   deps: RunPackageReportDeps;
 }): Promise<PackageReportOutput> => {
@@ -182,7 +188,7 @@ export const runPackageReport = async ({
   // `continue`) leaves a non-empty but short current-run state -- the gap the `!state`
   // branch above cannot see, since it only catches a total miss. Reported the same way as a
   // total miss: `run_incomplete`, not packaged off an incomplete finding set.
-  if (state.sseCount < expectedSseCount) {
+  if (expectedSseCount !== undefined && state.sseCount < expectedSseCount) {
     return {
       status: 'run_incomplete',
       reason: `Hunt prepared ${expectedSseCount} significant security event attachment(s) but only ${state.sseCount} were found for runId=${runId}; the remainder failed to attach`,

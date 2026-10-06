@@ -48,13 +48,23 @@ export const packageReportInputSchema = z.object({
    * hunt's `attach_sse` foreach swallows a per-item attach failure with `continue`, so without
    * this count a shortfall is invisible and packaging would read a partial finding set as
    * complete.
+   *
+   * Optional, not required: this workflow is a plain `yaml` definition, so its own content
+   * hash propagates to every space on the next reconciliation regardless of version, but the
+   * Worker that calls it (`hunt_continuous_threat_hunt.ts`) is a `yamlTemplate` definition,
+   * whose hash covers only the function source, not the imported YAML it renders -- an
+   * already-installed Worker only picks up the call site that supplies this field once its own
+   * `version` bumps. Making it required here would fail every such Worker's packaging call in
+   * the gap between the two. Omitting it instead skips the shortfall check below, which is the
+   * same as not having this fix yet -- never a hard failure.
    */
   expectedSseCount: z
     .number()
     .int()
     .min(0)
+    .optional()
     .describe(
-      'Number of significant security event attachments the hunt child prepared for this run (its `sse_count` output). A packaging read that finds fewer than this is a partial attach, reported as `run_incomplete` rather than packaged.'
+      'Number of significant security event attachments the hunt child prepared for this run (its `sse_count` output). A packaging read that finds fewer than this is a partial attach, reported as `run_incomplete` rather than packaged. Omit to skip the shortfall check (e.g. an already-installed Worker that does not supply it yet).'
     ),
 });
 
