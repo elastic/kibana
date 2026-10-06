@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { differenceBy, orderBy, pick, uniqBy, omit } from 'lodash';
+import { differenceBy, isEqual, orderBy, pick, uniqBy, omit } from 'lodash';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   createStateContainer,
@@ -18,9 +18,16 @@ import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import {
   LOCALLY_PERSISTED_PROFILE_STATE_TYPES,
+  ProfileStateType,
+  type ProfileStateMap,
   type ProfileStateRegistry,
 } from '../../../../common/context_awareness';
-import { NEW_TAB_ID, TAB_STATE_URL_KEY } from '../../../../common/constants';
+import {
+  APP_STATE_URL_KEY,
+  NEW_TAB_ID,
+  PROFILE_STATE_URL_KEY,
+  TAB_STATE_URL_KEY,
+} from '../../../../common/constants';
 import {
   createTabItem,
   extractEsqlVariables,
@@ -103,8 +110,6 @@ export interface TabsStorageManager {
     ) => DiscoverSession;
   }) => TabsInternalStatePayload & {
     updatedDiscoverSession: DiscoverSession | undefined;
-    /** True when the same session was saved elsewhere since its tabs were stored locally. */
-    hasSessionVersionChanged: boolean;
   };
   getNRecentlyClosedTabs: (params: {
     previousOpenTabs: TabState[];
@@ -238,6 +243,20 @@ export const createTabsStorageManager = ({
         stateTypes: LOCALLY_PERSISTED_PROFILE_STATE_TYPES,
         defaultsHandling: 'expand',
       })
+    );
+
+  const getUrlProfileState = (profileState: ProfileStateMap | null | undefined) =>
+    profileStateRegistry.pickStateByType({
+      profileStateMap: profileState ?? undefined,
+      stateTypes: [ProfileStateType.Url],
+      defaultsHandling: 'strip',
+    });
+
+  const isUrlStateFromStoredTab = ({ appState, profileState }: TabStateInLocalStorage) =>
+    isEqual(urlStateStorage.get(APP_STATE_URL_KEY) ?? {}, appState ?? {}) &&
+    isEqual(
+      getUrlProfileState(urlStateStorage.get<ProfileStateMap>(PROFILE_STATE_URL_KEY)),
+      getUrlProfileState(profileState)
     );
 
   const toTabState = (
@@ -468,14 +487,24 @@ export const createTabsStorageManager = ({
     const { discoverSessionId: storedSessionId, discoverSessionVersion: storedSessionVersion } =
       storedTabsState;
     const persistedSessionVersion = persistedDiscoverSession?.version;
-    const hasSessionVersionChanged =
-      persistedDiscoverSession !== undefined &&
-      persistedDiscoverSession.id === storedSessionId &&
-      persistedSessionVersion !== undefined &&
-      storedSessionVersion !== undefined &&
-      persistedSessionVersion !== storedSessionVersion;
     const hasStoredSessionChanged =
-      persistedDiscoverSession?.id !== storedSessionId || hasSessionVersionChanged;
+      persistedDiscoverSession?.id !== storedSessionId ||
+      (persistedSessionVersion !== undefined &&
+        storedSessionVersion !== undefined &&
+        persistedSessionVersion !== storedSessionVersion);
+
+    // URL state written for the older version would override the newer saved state on reload.
+    // URL state from a link differs from the stored tab, so it is kept.
+    const storedSelectedTab = storedTabsState.openTabs.find((tab) => tab.id === selectedTabId);
+    if (
+      hasStoredSessionChanged &&
+      persistedDiscoverSession?.id === storedSessionId &&
+      storedSelectedTab &&
+      isUrlStateFromStoredTab(storedSelectedTab)
+    ) {
+      void urlStateStorage.set(APP_STATE_URL_KEY, undefined, { replace: true });
+      void urlStateStorage.set(PROFILE_STATE_URL_KEY, undefined, { replace: true });
+    }
 
     // Prepare before mapping tabs so inline views can reuse matching local IDs. Return the same
     // prepared session below so restored tabs and the unsaved-changes baseline use consistent IDs.
@@ -508,7 +537,6 @@ export const createTabsStorageManager = ({
           allTabs: openTabs,
           selectedTabId,
           updatedDiscoverSession,
-          hasSessionVersionChanged,
           recentlyClosedTabs: getNRecentlyClosedTabs({
             previousOpenTabs,
             previousRecentlyClosedTabs: closedTabs,
@@ -537,7 +565,6 @@ export const createTabsStorageManager = ({
           allTabs: allTabsWithNewTab,
           selectedTabId: newTab.id,
           updatedDiscoverSession,
-          hasSessionVersionChanged,
           recentlyClosedTabs: getNRecentlyClosedTabs({
             previousOpenTabs,
             previousRecentlyClosedTabs: closedTabs,
@@ -559,7 +586,6 @@ export const createTabsStorageManager = ({
             allTabs: restoredTabs,
             selectedTabId,
             updatedDiscoverSession,
-            hasSessionVersionChanged,
             recentlyClosedTabs: getNRecentlyClosedTabs({
               previousOpenTabs,
               previousRecentlyClosedTabs: closedTabs,
@@ -592,7 +618,6 @@ export const createTabsStorageManager = ({
       allTabs,
       selectedTabId: selectedTab.id,
       updatedDiscoverSession,
-      hasSessionVersionChanged,
       recentlyClosedTabs: getNRecentlyClosedTabs({
         previousOpenTabs,
         previousRecentlyClosedTabs: closedTabs,
