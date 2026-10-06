@@ -15,6 +15,5 @@
     "@kbn/security-evals-alerts-snapshot",
     "@kbn/tooling-log",
     "@kbn/kbn-client",
-    "@kbn/test"
   ]
 }
