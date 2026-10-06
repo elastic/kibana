@@ -62,7 +62,7 @@ groups:
         datatype: boolean
         default: "true"
         applies_to:
-          stack: beta 9.6+
+          stack: beta 9.5+
           ech: beta
           self: beta
 
