@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { kibanaRendering } from './kibana_rendering_guidance';
+export { kibanaRendering, kibanaUpsertRendering } from './kibana_rendering_guidance';

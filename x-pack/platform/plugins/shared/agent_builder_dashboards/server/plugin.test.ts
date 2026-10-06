@@ -14,7 +14,9 @@ describe('AgentBuilderDashboardsPlugin', () => {
     const registerSkill = jest.fn();
     const registerSmlType = jest.fn();
 
-    const plugin = new AgentBuilderDashboardsPlugin(coreMock.createPluginInitializerContext());
+    const plugin = new AgentBuilderDashboardsPlugin(
+      coreMock.createPluginInitializerContext({ upsertDashboard: { enabled: false } })
+    );
 
     plugin.setup(
       {} as never,

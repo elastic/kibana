@@ -12,6 +12,7 @@ import type {
   PluginInitializerContext,
   Logger,
 } from '@kbn/core/server';
+import type { AgentBuilderDashboardsConfig } from './config';
 import type {
   AgentBuilderDashboardsSetupDependencies,
   AgentBuilderDashboardsStartDependencies,
@@ -32,9 +33,11 @@ export class AgentBuilderDashboardsPlugin
     >
 {
   private readonly logger: Logger;
+  private readonly config: AgentBuilderDashboardsConfig;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<AgentBuilderDashboardsConfig>) {
     this.logger = initializerContext.logger.get();
+    this.config = initializerContext.config.get();
   }
 
   setup(
@@ -66,7 +69,11 @@ export class AgentBuilderDashboardsPlugin
     );
     setupDeps.agentBuilderSml.registerType(createDashboardSmlType({ getDashboardClient }));
 
-    registerSkills(setupDeps.agentBuilder, { getDashboardStateSchema });
+    registerSkills(
+      setupDeps.agentBuilder,
+      { getDashboardStateSchema },
+      { upsertDashboardEnabled: this.config.upsertDashboard.enabled }
+    );
 
     return {};
   }
