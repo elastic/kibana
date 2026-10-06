@@ -72,7 +72,7 @@ export function MemoryPageView({
     },
   } = useKibana();
   // Mirrors the route privilege tiers: read users see no actions rather than a 403.
-  const { canManage, canConfigure } = getNightshiftCapabilities(nightshift);
+  const { canManage, canManageAndConfigure } = getNightshiftCapabilities(nightshift);
 
   const { data, isLoading, isError } = useMemoryPage(pageId);
   const { mutate: setArchived, isLoading: isArchiving } = useSetMemoryArchived();
@@ -181,7 +181,7 @@ export function MemoryPageView({
             </EuiToolTip>
           </EuiFlexItem>
         )}
-        {canConfigure && (
+        {canManageAndConfigure && (
           <EuiFlexItem grow={false}>
             <EuiButton
               size="s"

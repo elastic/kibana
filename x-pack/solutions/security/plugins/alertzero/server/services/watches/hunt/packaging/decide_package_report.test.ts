@@ -89,10 +89,12 @@ const configureAction: ActionCatalogEntry = {
 const baseHitState = (overrides: Partial<CurrentRunState> = {}): CurrentRunState => ({
   runId: 'run-1',
   reportId: 'rpt-1',
+  sseCount: 1,
   hasConfirmedHit: true,
   titles: ['Shadow admin AssumeRole'],
   evidenceLines: ['Tier 1 hits in cloudtrail'],
   techniques: ['T1078.004'],
+  corroboratedTechniques: ['T1078.004'],
   hosts: [{ name: 'host-a', enrolled: true, agentId: 'agent-a' }],
   processSelectors: [],
   // Fully-covered defaults: no recommendation trigger fires unless a test overrides one.

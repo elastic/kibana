@@ -11,16 +11,22 @@ import type { CoverageSubject, CurrentRunState } from './types';
 /**
  * The slice of `CurrentRunState` this needs. Narrowed (rather than the full state) so a run
  * with no current-run SSE at all -- a real clean run -- can still derive a report-scoped
- * subject without fabricating fields it has no data for.
+ * subject without fabricating fields it has no data for. `corroboratedTechniques` defaults to
+ * empty for that same caller: a run with no SSE at all corroborated nothing.
  */
 export type CoverageSubjectState = Pick<
   CurrentRunState,
-  'reportId' | 'techniques' | 'hasConfirmedHit'
+  'reportId' | 'techniques' | 'hasConfirmedHit' | 'corroboratedTechniques'
 >;
 
 /**
  * One coverage subject per technique on the current run; report-scoped when the
  * run named no techniques. Written for every swept report (hit or clean).
+ *
+ * A technique only claims a confirmed hit when it is in `state.corroboratedTechniques`:
+ * a technique merely proposed (named on the report-scoped fallback entry's indicator
+ * list, never individually corroborated) reads as an uneventful sweep instead, even
+ * when `state.hasConfirmedHit` is true for the report as a whole.
  */
 export const deriveCoverageSubjects = ({
   spaceId,
@@ -40,6 +46,10 @@ export const deriveCoverageSubjects = ({
       techniqueId,
     });
     const techniqueLabel = techniqueId ?? 'report';
+    const confirmedHitForSubject =
+      techniqueId !== undefined
+        ? state.corroboratedTechniques.includes(techniqueId)
+        : state.hasConfirmedHit;
     return {
       kiId,
       reportId: state.reportId,
@@ -47,7 +57,7 @@ export const deriveCoverageSubjects = ({
       investigationConversationId,
       title: `Coverage: ${techniqueLabel} (${state.reportId})`,
       description: `Coverage subject ${techniqueLabel} swept by Hunt Watch. Investigation ${investigationConversationId}.`,
-      content: state.hasConfirmedHit
+      content: confirmedHitForSubject
         ? `Hunt confirmed a hit for ${techniqueLabel} on report ${state.reportId}.`
         : `Hunt swept ${techniqueLabel} on report ${state.reportId} with no confirmed hit.`,
     };
