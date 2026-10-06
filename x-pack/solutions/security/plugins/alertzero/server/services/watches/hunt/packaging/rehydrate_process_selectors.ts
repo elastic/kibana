@@ -184,6 +184,9 @@ export const makeRehydrateProcessSelectors = (
       byKey.set(key, {
         ...(isBetterCandidate(candidate, existing) ? candidate : existing),
         iocMatched,
+        // Attribution can pick the winner, but staleness must see the newest observation.
+        timestamp:
+          candidate.timestamp > existing.timestamp ? candidate.timestamp : existing.timestamp,
       });
     }
 

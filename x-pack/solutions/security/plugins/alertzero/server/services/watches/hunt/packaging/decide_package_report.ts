@@ -20,6 +20,7 @@ import {
 } from './proposal_copy';
 import {
   DEFEND_ACTION_KINDS,
+  isStale,
   selectHostActions,
   selectProcessActions,
   type ProcessActionKind,
@@ -537,7 +538,7 @@ export const decidePackageReport = ({
       let activeProcessCount = 0;
       for (const processSelector of hostProcessSelectors) {
         const decision = selectProcessActions({ selector: processSelector, host, state });
-        if (decision.rule !== 'stale') {
+        if (!isStale(processSelector, state)) {
           activeProcessCount += 1;
         }
         if (!hasProcessKinds) {

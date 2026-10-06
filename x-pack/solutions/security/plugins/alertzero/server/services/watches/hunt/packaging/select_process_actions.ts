@@ -88,6 +88,26 @@ const findConfirmedTechnique = (
     .map((t) => t.techniqueId)
     .find((techniqueId) => techniques.includes(techniqueRoot(techniqueId)));
 
+/**
+ * A process attributed to a technique is judged on that technique alone, so one process's
+ * destructive evidence cannot escalate an unrelated process. Only a selector with no
+ * attribution falls back to the run-wide check.
+ */
+const findDestructiveTechniqueFor = (
+  selector: ProcessSelector,
+  state: CurrentRunState
+): string | undefined => {
+  if (!selector.techniqueId) {
+    return findConfirmedTechnique(state, DESTRUCTIVE_TECHNIQUES);
+  }
+  const attributed = selector.techniqueId;
+  const confirmed = state.evidence.tier2Confirmed.some((t) => t.techniqueId === attributed);
+  return confirmed &&
+    (DESTRUCTIVE_TECHNIQUES as readonly string[]).includes(techniqueRoot(attributed))
+    ? attributed
+    : undefined;
+};
+
 const isProtectedProcess = (selector: ProcessSelector): boolean =>
   (selector.pid !== undefined && (PROTECTED_PIDS as readonly number[]).includes(selector.pid)) ||
   (PROTECTED_PROCESS_NAMES as readonly string[]).includes(
@@ -95,7 +115,7 @@ const isProtectedProcess = (selector: ProcessSelector): boolean =>
   );
 
 /** Last seen before the window opened, or more than `STALE_PROCESS_AGE_MS` before it closed. */
-const isStale = (selector: ProcessSelector, state: CurrentRunState): boolean => {
+export const isStale = (selector: ProcessSelector, state: CurrentRunState): boolean => {
   if (!selector.observedAt || !state.huntWindow) {
     return false;
   }
@@ -145,7 +165,7 @@ export const selectProcessActions = ({
     };
   }
 
-  const destructive = findConfirmedTechnique(state, DESTRUCTIVE_TECHNIQUES);
+  const destructive = findDestructiveTechniqueFor(selector, state);
   if (destructive) {
     return {
       rule: 'destructive_technique',

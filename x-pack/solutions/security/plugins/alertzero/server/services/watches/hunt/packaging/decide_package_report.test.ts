@@ -927,6 +927,36 @@ describe('decidePackageReport', () => {
       expect(kinds(executable)).toEqual([ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID]);
     });
 
+    it('does not count stale protected processes toward the isolate threshold', () => {
+      const stale = '2026-09-01T00:00:00.000Z';
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({
+          severity: 'high',
+          hosts: [withMemdump],
+          huntWindow: { from: '2026-09-25T00:00:00.000Z', to: '2026-09-28T00:00:00.000Z' },
+          processSelectors: [
+            selector({
+              entityId: 'ent-a',
+              processKey: 'entity:ent-a',
+              processName: 'lsass.exe',
+              observedAt: stale,
+            }),
+            selector({
+              entityId: 'ent-b',
+              processKey: 'entity:ent-b',
+              processName: 'csrss.exe',
+              observedAt: stale,
+            }),
+          ],
+        }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      expect(kinds(result.proposals.filter((p) => p.actionWorkflowId))).not.toContain(
+        ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID
+      );
+    });
+
     it('mints kill on a critical finding whose process matched an IOC', () => {
       const result = decidePackageReport({
         conversationId,

@@ -254,6 +254,35 @@ describe('makeRehydrateProcessSelectors', () => {
     expect(selectors[0]).toMatchObject({ techniqueId: 'T1059.001', iocMatched: true });
   });
 
+  it('keeps the newest observation timestamp when an older technique-attributed ref wins the slot', async () => {
+    const esClient = esClientWith([
+      found('logs-endpoint.events-default', 'ev-old-technique', {
+        '@timestamp': '2026-09-26T09:00:00.000Z',
+        host: { name: 'h1' },
+        process: { pid: 100, name: 'a.exe' },
+        event: { type: 'start' },
+      }),
+      found('logs-endpoint.events-default', 'ev-new-plain', {
+        '@timestamp': '2026-09-27T12:00:00.000Z',
+        host: { name: 'h1' },
+        process: { pid: 100, name: 'a.exe' },
+        event: { type: 'start' },
+      }),
+    ]);
+    const selectors = await makeRehydrateProcessSelectors(esClient)({
+      alerts: [],
+      events: [
+        eventRef('logs-endpoint.events-default', 'ev-old-technique', 'T1059.001'),
+        eventRef('logs-endpoint.events-default', 'ev-new-plain'),
+      ],
+    });
+    expect(selectors).toHaveLength(1);
+    expect(selectors[0]).toMatchObject({
+      techniqueId: 'T1059.001',
+      observedAt: '2026-09-27T12:00:00.000Z',
+    });
+  });
+
   it('leaves techniqueId undefined for a plain sample ref with no technique match', async () => {
     const esClient = esClientWith([
       found('logs-endpoint.events-default', 'ev-1', {
