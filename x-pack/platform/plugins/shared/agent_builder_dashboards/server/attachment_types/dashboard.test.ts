@@ -98,6 +98,7 @@ describe('createDashboardAttachmentType', () => {
     const definition = createDashboardAttachmentType({
       logger: createLogger(),
       getDashboardClient: async () => dashboardClient,
+      getDashboardAppStateSchema: jest.fn(),
     });
 
     const result = await definition.resolve?.('dashboard-1', {
@@ -121,6 +122,7 @@ describe('createDashboardAttachmentType', () => {
     const definition = createDashboardAttachmentType({
       logger: createLogger(),
       getDashboardClient: async () => dashboardClient,
+      getDashboardAppStateSchema: jest.fn(),
     });
 
     const isStale = await definition.isStale?.(
@@ -145,6 +147,7 @@ describe('createDashboardAttachmentType', () => {
     const definition = createDashboardAttachmentType({
       logger: createLogger(),
       getDashboardClient: async () => dashboardClient,
+      getDashboardAppStateSchema: jest.fn(),
     });
     const resolvedData = await definition.resolve?.('dashboard-1', {
       request: {} as never,
@@ -191,6 +194,7 @@ describe('createDashboardAttachmentType', () => {
     const definition = createDashboardAttachmentType({
       logger: createLogger(),
       getDashboardClient: async () => dashboardClient,
+      getDashboardAppStateSchema: jest.fn(),
     });
 
     const isStale = await definition.isStale?.(

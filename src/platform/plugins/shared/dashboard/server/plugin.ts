@@ -199,8 +199,11 @@ export class DashboardPlugin
       return getDashboardStateSchema(false);
     });
 
+    const getCachedDashboardAppStateSchema = once(() => getDashboardStateSchema(true));
+
     return {
       getDashboardStateSchema: getCachedDashboardStateSchema,
+      getDashboardAppStateSchema: getCachedDashboardAppStateSchema,
       scanDashboards: (
         savedObjectsClient: SavedObjectsClientContract,
         page: number,

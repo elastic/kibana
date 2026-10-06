@@ -52,11 +52,16 @@ export class AgentBuilderDashboardsPlugin
       const [, startDeps] = await coreSetup.getStartServices();
       return startDeps.dashboard.getDashboardStateSchema();
     };
+    const getDashboardAppStateSchema = async () => {
+      const [, startDeps] = await coreSetup.getStartServices();
+      return startDeps.dashboard.getDashboardAppStateSchema();
+    };
 
     setupDeps.agentBuilder.attachments.registerType(
       createDashboardAttachmentType({
         logger: this.logger,
         getDashboardClient,
+        getDashboardAppStateSchema,
       }) as Parameters<typeof setupDeps.agentBuilder.attachments.registerType>[0]
     );
     setupDeps.agentBuilderSml.registerType(createDashboardSmlType({ getDashboardClient }));
