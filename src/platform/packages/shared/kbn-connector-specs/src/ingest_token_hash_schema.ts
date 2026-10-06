@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /** Stored HMAC-SHA256 hex digest of the ingest token. Never the raw token. */
-export const ingestTokenHashSchema = z
-  .string()
-  .regex(/^[a-f0-9]{64}$/)
-  .optional()
-  .describe('HMAC-SHA256 hex digest of the ingest token. Set on create; never the raw token.')
-  .meta({ hidden: true });
+export const ingestTokenHashSchema = lazySchema(() =>
+  z
+    .string()
+    .regex(/^[a-f0-9]{64}$/)
+    .optional()
+    .describe('HMAC-SHA256 hex digest of the ingest token. Set on create; never the raw token.')
+    .meta({ hidden: true })
+);
