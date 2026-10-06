@@ -82,9 +82,9 @@ describe('getViewInAppUrl', () => {
         dataViewId: args.dataViewId,
         dataViewSpec: undefined,
         timeRange: returnedTimeRange,
-        filters: [metricFilterChip('mockedDataViewId', 'mockedCountFilter', false)],
+        filters: [],
         query: {
-          query: 'mockedFilter',
+          query: '(mockedFilter) and (mockedCountFilter)',
           language: 'kuery',
         },
       },
@@ -149,9 +149,9 @@ describe('getViewInAppUrl', () => {
         dataViewId: 'mockedDataViewId',
         dataViewSpec: undefined,
         timeRange: returnedTimeRange,
-        filters: [metricFilterChip('mockedDataViewId', 'mockedCountFilter', false)],
+        filters: [],
         query: {
-          query: '',
+          query: 'mockedCountFilter',
           language: 'kuery',
         },
       },
@@ -259,7 +259,7 @@ describe('getViewInAppUrl', () => {
     );
   });
 
-  it('enables a single non-count metric filter chip', () => {
+  it('applies a single non-count metric filter to the query', () => {
     const args: GetViewInAppUrlArgs = {
       metrics: [
         {
@@ -281,12 +281,75 @@ describe('getViewInAppUrl', () => {
         dataViewId: 'mockedDataViewId',
         dataViewSpec: undefined,
         timeRange: returnedTimeRange,
-        filters: [metricFilterChip('mockedDataViewId', 'mockedAvgFilter', false)],
+        filters: [],
         query: {
-          query: '',
+          query: 'mockedAvgFilter',
           language: 'kuery',
         },
       },
+      {}
+    );
+  });
+
+  it('parenthesizes both sides so an OR in the rule query is not split by the metric filter', () => {
+    const args: GetViewInAppUrlArgs = {
+      metrics: [
+        {
+          name: 'A',
+          aggType: Aggregators.COUNT,
+          filter: 'container.id:x',
+        },
+      ],
+      dataViewId: 'mockedDataViewId',
+      logsLocator,
+      startedAt,
+      endedAt,
+      searchConfiguration: {
+        index: {},
+        query: {
+          language: 'kuery',
+          query: 'host.name:a or host.name:b',
+        },
+      },
+    };
+
+    expect(getViewInAppUrl(args)).toBe('mockedGetRedirectUrl');
+    expect(logsLocator.getRedirectUrl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          query: '(host.name:a or host.name:b) and (container.id:x)',
+          language: 'kuery',
+        },
+      }),
+      {}
+    );
+  });
+
+  it('disables the metric filter chip when another metric contributes no filter', () => {
+    const args: GetViewInAppUrlArgs = {
+      metrics: [
+        {
+          name: 'A',
+          aggType: Aggregators.COUNT,
+          filter: 'mockedCountFilter',
+        },
+        {
+          name: 'B',
+          aggType: Aggregators.AVERAGE,
+          field: 'mockedAvgField',
+        },
+      ],
+      dataViewId: 'mockedDataViewId',
+      logsLocator,
+      startedAt,
+      endedAt,
+    };
+
+    expect(getViewInAppUrl(args)).toBe('mockedGetRedirectUrl');
+    expect(logsLocator.getRedirectUrl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: [metricFilterChip('mockedDataViewId', 'mockedCountFilter', true)],
+      }),
       {}
     );
   });
@@ -361,7 +424,7 @@ describe('getViewInAppUrl', () => {
               },
             },
           },
-          metricFilterChip('mockedDataViewId', 'mockedCountFilter', false),
+          metricFilterChip('mockedDataViewId', 'mockedCountFilter', true),
         ],
         query: {
           query: 'mockedFilter',
@@ -395,9 +458,9 @@ describe('getViewInAppUrl', () => {
         dataViewId: 'mockedDataViewId',
         dataViewSpec: undefined,
         timeRange: returnedTimeRange,
-        filters: [metricFilterChip('mockedDataViewId', 'mockedCountFilter', false)],
+        filters: [],
         query: {
-          query: '',
+          query: 'mockedCountFilter',
           language: 'kuery',
         },
       },

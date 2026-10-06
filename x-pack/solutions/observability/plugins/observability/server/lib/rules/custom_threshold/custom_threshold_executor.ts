@@ -405,6 +405,7 @@ export const createCustomThresholdExecutor = ({
           metrics: recoveredCriteria.flatMap((criterion) => criterion.metrics ?? []),
           searchConfiguration: recoveredSearchConfiguration ?? params.searchConfiguration,
           startedAt: indexedStartedAt,
+          spaceId,
           timeSize: recoveredCriteria[0]?.timeSize,
           timeUnit: recoveredCriteria[0]?.timeUnit,
         }),

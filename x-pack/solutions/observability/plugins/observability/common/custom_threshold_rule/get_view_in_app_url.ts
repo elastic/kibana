@@ -23,24 +23,39 @@ import type { SearchConfigurationWithExtractedReferenceType } from './types';
 import type { BaseMetricExpressionParams, CustomThresholdExpressionMetric } from './types';
 import type { Group } from '../typings';
 
+const getMetricFilters = (metrics: CustomThresholdExpressionMetric[]): string[] =>
+  metrics.flatMap((metric) =>
+    typeof metric.filter === 'string' && metric.filter.length > 0 ? [metric.filter] : []
+  );
+
+const getAppliedMetricFilter = (metrics: CustomThresholdExpressionMetric[]): string | undefined => {
+  const metricFilters = getMetricFilters(metrics);
+  return metrics.length === 1 && metricFilters.length === 1 ? metricFilters[0] : undefined;
+};
+
+const combineQueries = (searchConfigurationQuery?: string, metricFilter?: string): string => {
+  if (!metricFilter) {
+    return searchConfigurationQuery ?? '';
+  }
+  if (!searchConfigurationQuery) {
+    return metricFilter;
+  }
+  return `(${searchConfigurationQuery}) and (${metricFilter})`;
+};
+
 const getMetricFilterChips = (
   metrics: CustomThresholdExpressionMetric[],
   dataViewId?: string
 ): Filter[] => {
-  if (!dataViewId) {
+  if (!dataViewId || getAppliedMetricFilter(metrics)) {
     return [];
   }
 
-  const metricFilters = metrics.flatMap((metric) =>
-    typeof metric.filter === 'string' && metric.filter.length > 0 ? [metric.filter] : []
-  );
-  const disabled = metricFilters.length !== 1;
-
-  return metricFilters.map((filter) =>
+  return getMetricFilters(metrics).map((filter) =>
     buildCustomFilter(
       dataViewId,
       toElasticsearchQuery(fromKueryExpression(filter)),
-      disabled,
+      true,
       false,
       null,
       FilterStateStore.APP_STATE
@@ -84,7 +99,7 @@ export const getViewInAppLocatorParams = ({
   timeRange.to = endedAt ? timeRange.to : 'now';
 
   const query = {
-    query: searchConfigurationQuery ?? '',
+    query: combineQueries(searchConfigurationQuery, getAppliedMetricFilter(metrics)),
     language: 'kuery',
   };
   let dataViewSpec;

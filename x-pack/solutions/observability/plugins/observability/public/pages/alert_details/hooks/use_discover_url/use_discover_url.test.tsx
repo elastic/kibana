@@ -110,7 +110,7 @@ describe('useDiscoverUrl', () => {
       },
     } as unknown as Rule;
 
-    it('builds Discover url from the alert snapshot, with one metric filter enabled', () => {
+    it('builds Discover url from the alert snapshot, applying one metric filter to the query', () => {
       const alert = {
         ...MOCK_ALERT,
         fields: {
@@ -132,20 +132,8 @@ describe('useDiscoverUrl', () => {
         dataViewId: 'logs-data-view',
         dataViewSpec: undefined,
         timeRange: expectedTimeRange,
-        query: alertQuery,
-        filters: [
-          {
-            $state: { store: 'appState' },
-            bool: { minimum_should_match: 1, should: [{ match: { 'service.name': 'test' } }] },
-            meta: {
-              alias: null,
-              disabled: false,
-              index: 'logs-data-view',
-              negate: false,
-              type: 'custom',
-            },
-          },
-        ],
+        query: { query: '(message: error) and (service.name:test)', language: 'kuery' },
+        filters: [],
       });
       expect(result.current.discoverUrl).toBe('discover-url');
     });

@@ -1958,6 +1958,7 @@ describe('The custom threshold alert type', () => {
           logsLocator: undefined,
           metrics: customThresholdCountCriterion.metrics,
           startedAt: expect.stringMatching(ISO_DATE_REGEX),
+          spaceId: MOCKED_SPACE_ID,
           searchConfiguration: {
             index: 'valid-index-name',
             query: {
@@ -2017,6 +2018,7 @@ describe('The custom threshold alert type', () => {
           expect.objectContaining({
             dataViewId: 'snapshot-data-view',
             metrics: snapshotMetrics,
+            spaceId: MOCKED_SPACE_ID,
             searchConfiguration: {
               index: 'snapshot-data-view',
               query: { query: 'snapshot: true', language: 'kuery' },
