@@ -94,17 +94,31 @@ export const deletePackagePolicyRoute: SyntheticsRestApiRouteFactory = () => ({
       savedObjectsClient,
       packagePolicyId
     );
-    const configId = packagePolicy ? getConfigIdFromPackagePolicy(packagePolicy) : undefined;
 
-    if (configId && (await monitorExistsInAnySpace(server, configId))) {
-      return response.conflict({
-        body: {
-          message: i18n.translate('xpack.synthetics.deleteIntegration.monitorExists', {
-            defaultMessage:
-              'This integration belongs to an existing monitor, possibly in another space. Manage it from the monitor in Synthetics instead.',
-          }),
-        },
-      });
+    if (packagePolicy) {
+      const configId = getConfigIdFromPackagePolicy(packagePolicy);
+
+      if (!configId) {
+        return response.conflict({
+          body: {
+            message: i18n.translate('xpack.synthetics.deleteIntegration.monitorUnknown', {
+              defaultMessage:
+                'Unable to verify that this integration is not used by a monitor, so it was not deleted.',
+            }),
+          },
+        });
+      }
+
+      if (await monitorExistsInAnySpace(server, configId)) {
+        return response.conflict({
+          body: {
+            message: i18n.translate('xpack.synthetics.deleteIntegration.monitorExists', {
+              defaultMessage:
+                'This integration belongs to an existing monitor, possibly in another space. Manage it from the monitor in Synthetics instead.',
+            }),
+          },
+        });
+      }
     }
 
     const res = await server.fleet.packagePolicyService.delete(

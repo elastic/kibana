@@ -98,16 +98,14 @@ describe('deletePackagePolicyRoute', () => {
     });
   });
 
-  it('deletes without looking for a monitor when the policy has no config_id', async () => {
+  it('refuses to delete when the policy has no config_id to verify against', async () => {
     const { run, find, fleetDelete, response } = setup({ policy: buildPolicy() });
 
     await run();
 
     expect(find).not.toHaveBeenCalled();
-    expect(response.conflict).not.toHaveBeenCalled();
-    expect(fleetDelete).toHaveBeenCalledWith(expect.anything(), expect.anything(), ['policy-1'], {
-      force: true,
-    });
+    expect(response.conflict).toHaveBeenCalled();
+    expect(fleetDelete).not.toHaveBeenCalled();
   });
 
   it('still delegates to the delete call when the policy is already gone', async () => {
