@@ -99,7 +99,7 @@ evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classi
         );
       } catch (error) {
         throw new Error(
-          `Managed workflow "${workflowId}" is unavailable. It is shipped by the alertzero managed definitions, not installed by this suite. Original error: ${
+          `Managed workflow "${workflowId}" is unavailable. It is shipped by the alertzero managed definitions, not installed by this suite; the caller may also lack permission to read it. Original error: ${
             error instanceof Error ? error.message : String(error)
           }`
         );
