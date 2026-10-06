@@ -106,13 +106,20 @@ export class ProfilingSession {
   }
 
   public start(blockCount: number, details = ''): void {
-    const { time, logger, now } = this.params;
-    time.start({
-      intervalMicros: SAMPLING_INTERVAL_US,
-      withContexts: true,
-      useCPED: true,
-      lineNumbers: false,
-    });
+    const { time, logger, now, markRotation } = this.params;
+    // Starting the profiler pauses the main thread like a rotation does (V8 enumerates all code).
+    const startingAt = now();
+    markRotation('start', startingAt);
+    try {
+      time.start({
+        intervalMicros: SAMPLING_INTERVAL_US,
+        withContexts: true,
+        useCPED: true,
+        lineNumbers: false,
+      });
+    } finally {
+      markRotation('end', now());
+    }
     this.active = true;
     this.startedAt = this.windowStartedAt = now();
     this.lastBlockCount = blockCount;
@@ -127,7 +134,11 @@ export class ProfilingSession {
     logger.info(
       `Event loop profiling started (${Math.round(1e6 / SAMPLING_INTERVAL_US)}Hz, ${
         windowMs / 1000
-      }s windows, max ${maxSessionMs / 60_000}min or ${maxKeptProfiles} profiles${details})`
+      }s windows, max ${
+        maxSessionMs / 60_000
+      }min or ${maxKeptProfiles} profiles; start took ${Math.round(
+        (this.startedAt - startingAt) / 1000
+      )}ms${details})`
     );
   }
 

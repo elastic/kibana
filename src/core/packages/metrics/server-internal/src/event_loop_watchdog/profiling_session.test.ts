@@ -45,6 +45,11 @@ describe('ProfilingSession', () => {
     session.tick(blocks);
   };
 
+  it('publishes the profiler start as a rotation so its pause is not reported as a block', () => {
+    expect(params.markRotation).toHaveBeenNthCalledWith(1, 'start', now);
+    expect(params.markRotation).toHaveBeenNthCalledWith(2, 'end', now);
+  });
+
   it('samples continuously at 99Hz with labels', () => {
     expect(time.start).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -62,8 +67,8 @@ describe('ProfilingSession', () => {
     advance(1);
     expect(time.stop).toHaveBeenCalledWith(true, undefined, expect.any(Array));
     expect(params.onKeep).not.toHaveBeenCalled();
-    expect(params.markRotation).toHaveBeenNthCalledWith(1, 'start', now);
-    expect(params.markRotation).toHaveBeenNthCalledWith(2, 'end', now);
+    expect(params.markRotation).toHaveBeenNthCalledWith(3, 'start', now);
+    expect(params.markRotation).toHaveBeenNthCalledWith(4, 'end', now);
   });
 
   it('keeps a flagged window, rotating it early once it is 10s old', () => {

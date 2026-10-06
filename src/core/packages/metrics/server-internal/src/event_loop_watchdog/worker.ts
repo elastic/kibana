@@ -93,7 +93,7 @@ export const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): 
     log(
       'warn',
       `Event loop blocked for ~${blockedMs}ms${
-        profilerCaused ? ' (overlapping a profiler rotation)' : ''
+        profilerCaused ? ' (overlapping a profiler start or rotation)' : ''
       }${block.suppressedBlocks ? `; ${block.suppressedBlocks} earlier blocks not reported` : ''}`,
       {
         tags: ['event-loop-watchdog'],
