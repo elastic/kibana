@@ -17,10 +17,15 @@ import yargs from 'yargs';
 import fetch from 'node-fetch';
 import pLimit from 'p-limit';
 import { createHash } from 'crypto';
-import { connectorIdOption, elasticsearchOption, kibanaOption } from '../util/cli_options';
-import { getServiceUrls } from '../util/get_service_urls';
+import {
+  connectorIdOption,
+  elasticsearchOption,
+  inferenceIdOption,
+  kibanaOption,
+  resolveInferenceId,
+} from '../util/cli_options';
+import { assertChatCompletionInferenceEndpoint, getServiceUrls } from '../util/get_service_urls';
 import { KibanaClient } from '../util/kibana_client';
-import { selectConnector } from '../util/select_connector';
 import { rewriteFunctionPagePrompt } from './prompts';
 import { bindOutput } from './utils/output_executor';
 import { enrichDocumentation } from './enrich_documentation';
@@ -635,36 +640,41 @@ yargs(process.argv.slice(2))
         })
         .option('kibana', kibanaOption)
         .option('elasticsearch', elasticsearchOption)
-        .option('connectorId', connectorIdOption),
+        .option('inferenceId', inferenceIdOption)
+        .option('connectorId', {
+          ...connectorIdOption,
+          describe: 'Deprecated alias for --inferenceId',
+        }),
     (argv) => {
       run(
         async ({ log }) => {
-          // Set up inference client if connectorId is provided
+          // LLM rewrite is optional. Without an inference endpoint the script only extracts docs.
           let inferenceClient: ReturnType<KibanaClient['createInferenceClient']> | undefined;
+          const inferenceId = resolveInferenceId({
+            inferenceId: argv.inferenceId,
+            connectorId: argv.connectorId,
+            log,
+          });
 
-          if (argv.connectorId) {
+          if (inferenceId) {
             const serviceUrls = await getServiceUrls({
               log,
               elasticsearch: argv.elasticsearch,
               kibana: argv.kibana,
             });
 
+            await assertChatCompletionInferenceEndpoint({
+              esUrl: serviceUrls.esUrl,
+              inferenceId,
+            });
+
             const kibanaClient = new KibanaClient(log, serviceUrls.kibanaUrl);
-
-            const connectors = await kibanaClient.getConnectors();
-            if (!connectors.length) {
-              throw new Error('No connectors found');
-            }
-            const connector = await selectConnector({
-              connectors,
-              preferredId: argv.connectorId,
-              log,
-            });
-            log.info(`Using connector ${connector.connectorId}`);
-
+            // chat_complete still names this field connectorId; an inference endpoint id is routed
+            // to the Elasticsearch inference adapter.
             inferenceClient = kibanaClient.createInferenceClient({
-              connectorId: connector.connectorId,
+              connectorId: inferenceId,
             });
+            log.info(`Using inference endpoint ${inferenceId}`);
 
             try {
               const callOutput = bindOutput({
@@ -676,9 +686,9 @@ yargs(process.argv.slice(2))
                 system:
                   'You are a helpful assistant. Respond with "OK" to confirm you are working.',
               });
-              log.success(`✅ Connected to connector ${connector.connectorId} ${resp}`);
+              log.success(`✅ Connected to inference endpoint ${inferenceId} ${resp}`);
             } catch (error) {
-              log.error(`❌ Unable to connect to connector ${connector.connectorId}: ${error}`);
+              log.error(`❌ Unable to connect to inference endpoint ${inferenceId}: ${error}`);
               throw error;
             }
           }
@@ -1013,7 +1023,7 @@ yargs(process.argv.slice(2))
               log.warning(`Functions-operators directory not found at ${functionsOperatorsDir}`);
             }
 
-            // Use LLM to rewrite documentation if connectorId is provided
+            // Use LLM to rewrite documentation when an inference endpoint id was provided
             let finalDocFiles = docFiles;
             if (inferenceClient) {
               // Capture inferenceClient in a const for TypeScript narrowing
