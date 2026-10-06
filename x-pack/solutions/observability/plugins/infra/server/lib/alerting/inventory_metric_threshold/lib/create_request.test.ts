@@ -68,8 +68,8 @@ describe('createRequest composite identity', () => {
     await expectCompositeIdField('pod', 'kubernetes.pod.uid', 'ecs');
   });
 
-  it('evaluates a pod rule stored as semconv on kubernetes.pod.uid', async () => {
-    // Leftover semconv on a pod rule evaluates as ecs until the flyout owns Schema.
+  it('evaluates a SemConv pod request on k8s.pod.uid', async () => {
+    // createRequest trusts the caller's effective schema; pod ECS coerce lives in getData.
     const request = await createRequest(
       'metrics-*',
       'pod',
@@ -85,11 +85,10 @@ describe('createRequest composite identity', () => {
     );
     const body = JSON.stringify(request);
 
-    expect(body).toContain('"field":"kubernetes.pod.uid"');
-    expect(body).not.toContain('k8s.pod.uid');
-    expect(body).toContain('"event.module":"kubernetes"');
-    expect(body).not.toContain('kubeletstatsreceiver.otel');
-    expect(body).toContain('"docvalue_fields":[]');
+    expect(body).toContain('"field":"k8s.pod.uid"');
+    expect(body).toContain('kubeletstatsreceiver.otel');
+    expect(body).not.toContain('"event.module":"kubernetes"');
+    expect(body).toContain('"docvalue_fields":[');
   });
 
   it('keeps host.name for SemConv hosts', async () => {

@@ -33,6 +33,7 @@ import {
   HIGHLIGHTED_STEP_TRIGGER,
   setHighlightedStepId,
 } from '../../../entities/workflows/store/workflow_detail/slice';
+import type { WorkflowUrlSelectionSetter } from '../../../hooks/use_workflow_url_state';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import type { RerunWorkflowExecutionParams } from '../../../pages/executions/build_replay_inputs_from_execution_context';
 import { resolveSelectedStepExecution } from '../model/resolve_selected_step_execution';
@@ -52,7 +53,7 @@ export interface WorkflowExecutionDetailProps {
   onReRunExecution?: (params: RerunWorkflowExecutionParams) => Promise<void>;
   showBackButton?: boolean;
   selectedStepExecutionId?: string | null;
-  onSelectedStepExecutionChange?: (stepExecutionId: string | null) => void;
+  onSelectedStepExecutionChange?: WorkflowUrlSelectionSetter;
 }
 
 function assignSelectedStepId(
@@ -112,7 +113,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
           isTerminalStatus(workflowExecution?.status) ||
           workflowExecution?.status === ExecutionStatus.QUEUED)
       ) {
-        setSelectedStepExecution(PSEUDO_STEP_TRIGGER);
+        setSelectedStepExecution(PSEUDO_STEP_TRIGGER, { replace: true });
       }
     }, [workflowExecution, selectedStepExecutionId, setSelectedStepExecution, executionId]);
 
@@ -227,7 +228,14 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
     }, [workflowExecution, selectedStepExecutionId, lightweightStep, fullStepData]);
 
     return (
-      <EuiPanel paddingSize="none" color="plain" hasShadow={false} style={{ height: '100%' }}>
+      <EuiPanel
+        paddingSize="none"
+        color="plain"
+        hasShadow={false}
+        hasBorder={false}
+        borderRadius="none"
+        style={{ height: '100%' }}
+      >
         <ResizableLayout
           fixedPanel={
             <WorkflowExecutionPanel
@@ -264,6 +272,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               approvalLabels={approvalLabels}
               shouldAutoResume={shouldAutoResume}
               waitingStepExecutionId={waitingStepExecutionId}
+              resumeExecutionId={resolvedExecutionId}
               hasResumeError={hasResumeError}
               onRetryResume={retryResume}
               childWorkflowExecution={selectedStepChildExecution}
