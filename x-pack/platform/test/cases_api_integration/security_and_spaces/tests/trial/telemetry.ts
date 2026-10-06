@@ -613,9 +613,12 @@ steps:
       };
 
       it('should report the workflows snapshot', async () => {
-        const [detailCase, firstListCase, secondListCase] = await Promise.all(
-          [1, 2, 3].map(() => createCase(supertest, getPostCaseRequest()))
-        );
+        // Registered owners, so the runs split across the `sec` and `main` scopes.
+        const [detailCase, firstListCase, secondListCase] = await Promise.all([
+          createCase(supertest, getPostCaseRequest({ owner: 'securitySolution' })),
+          createCase(supertest, getPostCaseRequest({ owner: 'cases' })),
+          createCase(supertest, getPostCaseRequest({ owner: 'cases' })),
+        ]);
 
         const { observables } = await addObservable({
           supertest,
@@ -650,7 +653,11 @@ steps:
           },
         });
 
-        await createComment({ supertest, caseId: detailCase.id, params: postCommentAlertReq });
+        await createComment({
+          supertest,
+          caseId: detailCase.id,
+          params: { ...postCommentAlertReq, owner: 'securitySolution' },
+        });
 
         await runCaseWorkflow({
           supertest,
@@ -680,7 +687,9 @@ steps:
 
         await createConfiguration(
           supertest,
-          getConfigurationRequest({ overrides: { workflowTags: ['soc-triage'] } })
+          getConfigurationRequest({
+            overrides: { owner: 'securitySolution', workflowTags: ['soc-triage'] },
+          })
         );
         // An emptied tag list must not satisfy the `exists` filter.
         await createConfiguration(
@@ -703,27 +712,60 @@ steps:
            * Asserted ahead of the payload comparison because they are the figures a mocked
            * client cannot establish: the attributed buckets are only non-zero while
            * `payload.origin.type` and `payload.origin.attachmentType` are mapped. Without the
-           * mappings every run collapses into `unattributed` and every attachment run into
-           * `other`.
+           * mappings every run collapses into `unattributed` and no attachment type is reported.
            */
-          expect(casesTelemetry.workflows.byOriginType.case).toBe(1);
-          expect(casesTelemetry.workflows.byAttachmentType.alert).toBe(1);
+          expect(casesTelemetry.workflows.all.byOriginType.case).toBe(1);
+          expect(casesTelemetry.workflows.all.byAttachmentType.security_alert).toBe(1);
+
+          const emptyOriginTypes = {
+            case: 0,
+            observable: 0,
+            observables: 0,
+            attachment: 0,
+            attachments: 0,
+            unattributed: 0,
+          };
 
           expect(casesTelemetry.workflows).toEqual({
-            // One activity record per case: 1 + 1 + 1 + 2.
-            runs: { total: 5, daily: 5, weekly: 5, monthly: 5 },
-            totalCasesWithRuns: 3,
-            totalUniqueUsers: 1,
-            byOriginType: {
-              case: 1,
-              observable: 1,
-              observables: 0,
-              attachment: 1,
-              attachments: 0,
-              unattributed: 2,
+            all: {
+              // One activity record per case: 1 + 1 + 1 + 2.
+              runs: { total: 5, daily: 5, weekly: 5, monthly: 5 },
+              totalCasesWithRuns: 3,
+              totalUniqueUsers: 1,
+              byOriginType: {
+                ...emptyOriginTypes,
+                case: 1,
+                observable: 1,
+                attachment: 1,
+                unattributed: 2,
+              },
+              byAttachmentType: { security_alert: 1 },
+              configurationsWithWorkflowTags: 1,
             },
-            byAttachmentType: { alert: 1, event: 0, other: 0 },
-            configurationsWithWorkflowTags: 1,
+            sec: {
+              runs: { total: 3, daily: 3, weekly: 3, monthly: 3 },
+              totalCasesWithRuns: 1,
+              totalUniqueUsers: 1,
+              byOriginType: { ...emptyOriginTypes, case: 1, observable: 1, attachment: 1 },
+              byAttachmentType: { security_alert: 1 },
+              configurationsWithWorkflowTags: 1,
+            },
+            obs: {
+              runs: { total: 0, daily: 0, weekly: 0, monthly: 0 },
+              totalCasesWithRuns: 0,
+              totalUniqueUsers: 0,
+              byOriginType: emptyOriginTypes,
+              byAttachmentType: {},
+              configurationsWithWorkflowTags: 0,
+            },
+            main: {
+              runs: { total: 2, daily: 2, weekly: 2, monthly: 2 },
+              totalCasesWithRuns: 2,
+              totalUniqueUsers: 1,
+              byOriginType: { ...emptyOriginTypes, unattributed: 2 },
+              byAttachmentType: {},
+              configurationsWithWorkflowTags: 0,
+            },
           });
         });
       });

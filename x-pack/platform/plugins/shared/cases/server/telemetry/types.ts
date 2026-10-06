@@ -307,6 +307,28 @@ export type CasesTelemetryConnectorKeys =
   | 'thehive'
   | 'caseswebhook';
 
+export interface WorkflowsSolutionTelemetry {
+  /** Total and time-bucketed workflow run counts (one per case per execution). */
+  runs: Count;
+  /** Number of distinct cases that have had at least one workflow run. */
+  totalCasesWithRuns: number;
+  /** Cardinality of distinct usernames that have triggered a workflow from a case. */
+  totalUniqueUsers: number;
+  /**
+   * Runs keyed by origin type without its `cases.` prefix (e.g. `cases.observable` becomes
+   * `observable`). Known origins are always present; `unattributed` counts runs with no origin
+   * (cases-list bulk runs).
+   */
+  byOriginType: Record<string, number>;
+  /**
+   * Attachment-origin runs keyed by sanitized attachment type (e.g. `security.alert` becomes
+   * `security_alert`). Only types that have been run against appear.
+   */
+  byAttachmentType: Record<string, number>;
+  /** Number of case configurations that have at least one workflow tag set. */
+  configurationsWithWorkflowTags: number;
+}
+
 export interface CasesTelemetry {
   cases: {
     all: Count &
@@ -366,40 +388,10 @@ export interface CasesTelemetry {
   templates: TemplatesTelemetry;
   fieldLibrary: FieldLibraryTelemetry;
   workflows: {
-    /** Total and time-bucketed workflow run counts (one per case per execution). */
-    runs: Count;
-    /** Number of distinct cases that have had at least one workflow run. */
-    totalCasesWithRuns: number;
-    /** Cardinality of distinct usernames that have triggered a workflow from a case. */
-    totalUniqueUsers: number;
-    /**
-     * Breakdown of runs by origin surface. `unattributed` is the residual: runs whose origin was
-     * absent (cases-list bulk runs) plus any run with an unrecognised origin type. Derived as
-     * `max(0, total − sum(attributed buckets))`.
-     *
-     * The client EBT event carries the same dimension as `origin_type` but with a `cases.` prefix
-     * on each attributed value (e.g. `cases.observable` here becomes `observable`).
-     */
-    byOriginType: {
-      case: number;
-      observable: number;
-      observables: number;
-      attachment: number;
-      attachments: number;
-      unattributed: number;
-    };
-    /**
-     * Breakdown of attachment-origin runs (`byOriginType.attachment` + `byOriginType.attachments`)
-     * by attachment type. `other` is the residual for any other registered attachment type that
-     * supports workflow origins.
-     */
-    byAttachmentType: {
-      alert: number;
-      event: number;
-      other: number;
-    };
-    /** Number of case configurations that have at least one workflow tag set. */
-    configurationsWithWorkflowTags: number;
+    all: WorkflowsSolutionTelemetry;
+    sec: WorkflowsSolutionTelemetry;
+    obs: WorkflowsSolutionTelemetry;
+    main: WorkflowsSolutionTelemetry;
   };
 }
 
@@ -415,3 +407,4 @@ export type SolutionTelemetrySchema = MakeSchemaFrom<SolutionTelemetry>;
 export type CustomFieldsSolutionTelemetrySchema = MakeSchemaFrom<CustomFieldsSolutionTelemetry>;
 export type TemplatesSolutionTelemetrySchema = MakeSchemaFrom<TemplatesSolutionTelemetry>;
 export type FieldLibrarySolutionTelemetrySchema = MakeSchemaFrom<FieldLibrarySolutionTelemetry>;
+export type WorkflowsSolutionTelemetrySchema = MakeSchemaFrom<WorkflowsSolutionTelemetry>;

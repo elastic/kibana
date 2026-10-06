@@ -20,6 +20,7 @@ import type {
   FieldLibrarySolutionTelemetrySchema,
   ObservablesSchema,
   TemplatesSolutionTelemetrySchema,
+  WorkflowsSolutionTelemetrySchema,
 } from './types';
 
 const long: TypeLong = { type: 'long' };
@@ -315,6 +316,93 @@ const templatesSolutionTelemetrySchema: TemplatesSolutionTelemetrySchema = {
   },
 };
 
+const workflowsSolutionTelemetrySchema: WorkflowsSolutionTelemetrySchema = {
+  runs: {
+    total: {
+      type: 'long',
+      _meta: { description: 'Total number of workflow runs recorded on cases' },
+    },
+    monthly: {
+      type: 'long',
+      _meta: { description: 'Number of workflow runs recorded on cases in the last month' },
+    },
+    weekly: {
+      type: 'long',
+      _meta: { description: 'Number of workflow runs recorded on cases in the last week' },
+    },
+    daily: {
+      type: 'long',
+      _meta: { description: 'Number of workflow runs recorded on cases in the last day' },
+    },
+  },
+  totalCasesWithRuns: {
+    type: 'long',
+    _meta: { description: 'Number of distinct cases that have had at least one workflow run' },
+  },
+  totalUniqueUsers: {
+    type: 'long',
+    _meta: {
+      description: 'Cardinality of distinct usernames that have triggered a workflow from a case',
+    },
+  },
+  byOriginType: {
+    DYNAMIC_KEY: {
+      type: 'long',
+      _meta: { description: 'Runs triggered from this origin type, without its `cases.` prefix' },
+    },
+    case: {
+      type: 'long',
+      _meta: { description: 'Runs triggered from the case detail page' },
+    },
+    observable: {
+      type: 'long',
+      _meta: { description: 'Runs triggered from the observables table for a single observable' },
+    },
+    observables: {
+      type: 'long',
+      _meta: {
+        description: 'Runs triggered from the observables table with a multi-observable selection',
+      },
+    },
+    attachment: {
+      type: 'long',
+      _meta: {
+        description:
+          'Runs triggered from a single attachment row (for example an alert or event) in a case',
+      },
+    },
+    attachments: {
+      type: 'long',
+      _meta: {
+        description:
+          'Runs triggered from a bulk attachment selection (for example alerts) in a case',
+      },
+    },
+    unattributed: {
+      type: 'long',
+      _meta: {
+        description: 'Runs carrying no single-case origin, such as cases-list bulk runs',
+      },
+    },
+  },
+  byAttachmentType: {
+    DYNAMIC_KEY: {
+      type: 'long',
+      _meta: {
+        description:
+          'Attachment-origin runs triggered from this attachment type, keyed by type name with `.` replaced by `_` (for example `security_alert`)',
+      },
+    },
+  },
+  configurationsWithWorkflowTags: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of case configurations that have at least one workflow tag set. Tag values are never reported.',
+    },
+  },
+};
+
 export const casesSchema: CasesTelemetrySchema = {
   cases: {
     all: {
@@ -441,95 +529,9 @@ export const casesSchema: CasesTelemetrySchema = {
     main: fieldLibrarySolutionTelemetrySchema,
   },
   workflows: {
-    runs: {
-      total: {
-        type: 'long',
-        _meta: { description: 'Total number of workflow runs recorded on cases' },
-      },
-      monthly: {
-        type: 'long',
-        _meta: { description: 'Number of workflow runs recorded on cases in the last month' },
-      },
-      weekly: {
-        type: 'long',
-        _meta: { description: 'Number of workflow runs recorded on cases in the last week' },
-      },
-      daily: {
-        type: 'long',
-        _meta: { description: 'Number of workflow runs recorded on cases in the last day' },
-      },
-    },
-    totalCasesWithRuns: {
-      type: 'long',
-      _meta: { description: 'Number of distinct cases that have had at least one workflow run' },
-    },
-    totalUniqueUsers: {
-      type: 'long',
-      _meta: {
-        description: 'Cardinality of distinct usernames that have triggered a workflow from a case',
-      },
-    },
-    byOriginType: {
-      case: {
-        type: 'long',
-        _meta: { description: 'Runs triggered from the case detail page' },
-      },
-      observable: {
-        type: 'long',
-        _meta: { description: 'Runs triggered from the observables table for a single observable' },
-      },
-      observables: {
-        type: 'long',
-        _meta: {
-          description:
-            'Runs triggered from the observables table with a multi-observable selection',
-        },
-      },
-      attachment: {
-        type: 'long',
-        _meta: {
-          description:
-            'Runs triggered from a single attachment row (for example an alert or event) in a case',
-        },
-      },
-      attachments: {
-        type: 'long',
-        _meta: {
-          description:
-            'Runs triggered from a bulk attachment selection (for example alerts) in a case',
-        },
-      },
-      unattributed: {
-        type: 'long',
-        _meta: {
-          description:
-            'Runs carrying no single-case origin (cases-list bulk runs or an unrecognised origin). Derived as max(0, total minus the sum of all attributed origin buckets).',
-        },
-      },
-    },
-    byAttachmentType: {
-      alert: {
-        type: 'long',
-        _meta: { description: 'Attachment-origin runs triggered from alert attachments' },
-      },
-      event: {
-        type: 'long',
-        _meta: { description: 'Attachment-origin runs triggered from event attachments' },
-      },
-      other: {
-        type: 'long',
-        _meta: {
-          description:
-            'Attachment-origin runs triggered from any other attachment type. Derived as max(0, attachment + attachments origin runs minus alert and event runs).',
-        },
-      },
-    },
-    configurationsWithWorkflowTags: {
-      type: 'long',
-      _meta: {
-        description:
-          'Number of case configurations that have at least one workflow tag set. Tag values are never reported.',
-      },
-    },
+    all: workflowsSolutionTelemetrySchema,
+    sec: workflowsSolutionTelemetrySchema,
+    obs: workflowsSolutionTelemetrySchema,
+    main: workflowsSolutionTelemetrySchema,
   },
 };

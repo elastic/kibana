@@ -12,8 +12,8 @@ import type { EventTypeOpts } from '@kbn/core/public';
 /** Event type reported by `RunWorkflowPanel` once per workflow run it dispatches. */
 export const RUN_WORKFLOW_EXECUTED_EVENT_TYPE = 'workflows_run_workflow_executed' as const;
 
-/** Reported when the caller does not say which surface mounted the panel. */
-export const UNKNOWN_RUN_WORKFLOW_ORIGIN = 'unknown' as const;
+/** Reported as the origin and owner when the caller supplies no telemetry context. */
+export const UNKNOWN_RUN_WORKFLOW_TELEMETRY_VALUE = 'unknown' as const;
 
 /** Caller-supplied context that `RunWorkflowPanel` attaches to its run event. */
 export interface RunWorkflowTelemetry {
@@ -24,7 +24,7 @@ export interface RunWorkflowTelemetry {
   /** Number of items (alerts, attacks, documents, cases, observables, attachments) sent with the run. */
   itemCount?: number;
   /** Solution that rendered the panel, such as `securitySolution`. */
-  owner?: string;
+  owner: string;
 }
 
 export interface RunWorkflowExecutedEvent {
@@ -33,7 +33,7 @@ export interface RunWorkflowExecutedEvent {
   workflow_execution_id?: string;
   item_count?: number;
   succeeded: boolean;
-  owner?: string;
+  owner: string;
 }
 
 /** Registration options for `RUN_WORKFLOW_EXECUTED_EVENT_TYPE`; registered by the Workflows Management plugin. */
@@ -44,7 +44,7 @@ export const runWorkflowExecutedEventType: EventTypeOpts<RunWorkflowExecutedEven
       type: 'keyword',
       _meta: {
         description:
-          'Surface the run was dispatched from, supplied by the caller (for example `alert`, `alert_bulk`, `attack`, `document`, `cases.case`, `cases.cases`, `cases.observable`, or `cases.attachment`). `unknown` when the caller supplies none.',
+          'Surface the run was dispatched from, supplied by the caller (for example `alert`, `alert_bulk`, `attack`, `attack_bulk`, `document`, `document_bulk`, `cases.case`, `cases.cases`, `cases.observable`, or `cases.attachment`). `unknown` when the caller supplies none.',
         optional: false,
       },
     },
@@ -82,8 +82,9 @@ export const runWorkflowExecutedEventType: EventTypeOpts<RunWorkflowExecutedEven
     owner: {
       type: 'keyword',
       _meta: {
-        description: 'Solution that rendered the run workflow panel, such as `securitySolution`',
-        optional: true,
+        description:
+          'Solution that rendered the run workflow panel, such as `securitySolution`. `unknown` when the caller supplies none.',
+        optional: false,
       },
     },
   },
