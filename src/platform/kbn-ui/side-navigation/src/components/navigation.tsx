@@ -208,7 +208,12 @@ export const Navigation = ({
                           );
 
                           return (
-                            <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
+                            <SideNav.SecondaryMenu.Section
+                              key={section.id}
+                              id={section.id}
+                              isPaginated={Boolean(popoverSections)}
+                              label={section.label}
+                            >
                               {section.items.map((subItem, subItemIndex) => {
                                 const isFirstSubItem =
                                   sectionIndex === firstNonEmptySectionIndex && subItemIndex === 0;
@@ -419,7 +424,12 @@ export const Navigation = ({
                             (s) => s.items.length > 0
                           );
                           return (
-                            <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
+                            <SideNav.SecondaryMenu.Section
+                              key={section.id}
+                              id={section.id}
+                              isPaginated={Boolean(popoverSections)}
+                              label={section.label}
+                            >
                               {section.items.map((subItem, subItemIndex) => {
                                 const isFirstSubItem =
                                   sectionIndex === firstNonEmptySectionIndex && subItemIndex === 0;
