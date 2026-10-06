@@ -7,6 +7,7 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { firstValueFrom } from 'rxjs';
+import { pickBy } from 'lodash';
 
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
@@ -189,12 +190,16 @@ export const reindexServiceFactory = (
   };
 
   /**
-   * Returns the ILM lifecycle date of the index, or undefined if it is not managed by ILM.
+   * Returns whether the index is managed by ILM and, if so, its ILM lifecycle date.
    */
-  const getIlmLifecycleDate = async (indexName: string): Promise<number | undefined> => {
+  const getIlmLifecycle = async (
+    indexName: string
+  ): Promise<{ managed: boolean; lifecycleDate?: number }> => {
     const { indices } = await esClient.ilm.explainLifecycle({ index: indexName });
     const ilmExplain = indices[indexName];
-    return ilmExplain?.managed ? ilmExplain.lifecycle_date_millis : undefined;
+    return ilmExplain?.managed
+      ? { managed: true, lifecycleDate: ilmExplain.lifecycle_date_millis }
+      : { managed: false };
   };
 
   /**
@@ -213,13 +218,17 @@ export const reindexServiceFactory = (
 
     // Backup the current settings to restore them after the reindex
     // https://github.com/elastic/kibana/issues/201605
-    const backupSettings = {
-      'index.number_of_replicas': settings['index.number_of_replicas'],
-      'index.refresh_interval': settings['index.refresh_interval'],
-    };
+    const backupSettings = pickBy(
+      {
+        'index.number_of_replicas': settings['index.number_of_replicas'],
+        'index.refresh_interval': settings['index.refresh_interval'],
+        'index.lifecycle.skip': settings['index.lifecycle.skip'],
+      },
+      (value) => value !== undefined
+    );
 
     // Preserve the ILM age of the source index, otherwise it is computed from the new index creation date
-    const lifecycleDate = await getIlmLifecycleDate(indexName);
+    const { managed, lifecycleDate } = await getIlmLifecycle(indexName);
 
     let createIndex;
     try {
@@ -234,6 +243,8 @@ export const reindexServiceFactory = (
             ...(lifecycleDate !== undefined && {
               'index.lifecycle.origination_date': lifecycleDate,
             }),
+            // Pause ILM until the reindex completes, otherwise phases already due (e.g. readonly) would block writes
+            ...(managed && { 'index.lifecycle.skip': true }),
           },
         },
       });
@@ -414,6 +425,7 @@ export const reindexServiceFactory = (
       // Defaulting to null in case the original setting was empty to remove the setting.
       'index.number_of_replicas': null,
       'index.refresh_interval': null,
+      'index.lifecycle.skip': null,
       ...backupSettings,
     };
 
