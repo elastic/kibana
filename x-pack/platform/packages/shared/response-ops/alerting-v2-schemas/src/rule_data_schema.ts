@@ -213,9 +213,7 @@ export const recoverySchema = z
     z
       .object({ strategy: z.literal(recoveryStrategy.no_breach) })
       .strict()
-      .describe(
-        'Recovers the alert episode when its group no longer appears in the breach results.'
-      )
+      .describe('Recovers the alert when its group no longer appears in the breach results.')
       .meta({ id: 'alerting_rule_recovery_no_breach' }),
     z
       .object({
@@ -226,29 +224,29 @@ export const recoverySchema = z
       })
       .strict()
       .describe(
-        'Recovers the alert episode when `query.base` plus `segment` returns the group. Requires `query.breach`.'
+        'Recovers the alert when `query.base` plus `segment` returns the group. Requires `query.breach`.'
       )
       .meta({ id: 'alerting_rule_recovery_condition' }),
     z
       .object({
         strategy: z.literal(recoveryStrategy.query),
         query: esqlQuerySchema.describe(
-          'Independent ES|QL query, including its own `FROM` clause. A matching group recovers the alert episode.'
+          'Independent ES|QL query, including its own `FROM` clause. A matching group recovers the alert.'
         ),
       })
       .strict()
-      .describe('Recovers the alert episode when this separate query returns the group.')
+      .describe('Recovers the alert when this separate query returns the group.')
       .meta({ id: 'alerting_rule_recovery_query' }),
     z
       .object({ strategy: z.literal(recoveryStrategy.manual) })
       .strict()
       .describe(
-        'Does not recover automatically. Close the alert episode with a user action. `state_transition.recovering` has no effect.'
+        'Does not recover automatically. Close the alert with a user action. `state_transition.recovering` has no effect.'
       )
       .meta({ id: 'alerting_rule_recovery_manual' }),
   ])
   .describe(
-    'When an alert episode recovers. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.'
+    'When an alert recovers. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.'
   )
   .meta({ id: 'alerting_rule_recovery' });
 
@@ -295,15 +293,15 @@ export const noDataSchema = z
       .meta({ id: 'alerting_rule_no_data_ignore' }),
     classifyingNoDataSchema(
       noDataStrategy.keep_last,
-      "Holds the alert episode's current status when the rule finds no data."
+      "Holds the alert's current status when the rule finds no data."
     ),
     classifyingNoDataSchema(
       noDataStrategy.resolve,
-      'Closes the alert episode the first time the rule finds no data for a group.'
+      'Closes the alert the first time the rule finds no data for a group.'
     ),
     classifyingNoDataSchema(
       noDataStrategy.alert,
-      'Marks an existing alert episode `active` when the rule finds no data. It never opens an episode for a group that has not breached. Not accepted when creating or updating rules.'
+      'Marks an existing alert `active` when the rule finds no data. It never opens an alert for a group that has not breached. Not accepted when creating or updating rules.'
     ),
   ])
   .describe(
@@ -440,28 +438,28 @@ export const stateTransitionSchema = z
   .object({
     pending: stateTransitionPhaseSchema({
       countDescription:
-        'Consecutive matches the alert episode spends in `pending` before it becomes `active` on the next match. For example, `2` opens it on the third consecutive match. Set to `0` to open it on the first match.',
+        'Consecutive matches the alert spends in `pending` before it becomes `active` on the next match. For example, `2` opens it on the third consecutive match. Set to `0` to open it on the first match.',
       timeframeDescription:
         'Duration the condition must hold, for example `5m`. Combine with `count` using `operator`.',
       metaId: 'alerting_rule_state_transition_pending',
     })
       .optional()
-      .describe('Delay before a match opens an alert episode.'),
+      .describe('Delay before a match opens an alert.'),
     recovering: stateTransitionPhaseSchema({
       countDescription:
-        'Consecutive recoveries the alert episode spends in `recovering` before it becomes `inactive` on the next recovery. For example, `2` closes it on the third consecutive recovery. Set to `0` to close it on the first recovery.',
+        'Consecutive recoveries the alert spends in `recovering` before it becomes `inactive` on the next recovery. For example, `2` closes it on the third consecutive recovery. Set to `0` to close it on the first recovery.',
       timeframeDescription:
         'Duration the condition must hold, for example `5m`. Combine with `count` using `operator`.',
       metaId: 'alerting_rule_state_transition_recovering',
     })
       .optional()
       .describe(
-        'Delay before a recovered match closes the alert episode. Has no effect when `recovery.strategy` is `manual`.'
+        'Delay before a recovered match closes the alert. Has no effect when `recovery.strategy` is `manual`.'
       ),
   })
   .strict()
   .describe(
-    'Specifies how many consecutive matches, or how long a condition must hold, before an alert episode becomes `active` or `inactive`. Allowed only when `kind` is `alert`.'
+    'Specifies how many consecutive matches, or how long a condition must hold, before an alert becomes `active` or `inactive`. Allowed only when `kind` is `alert`.'
   )
   .meta({ id: 'alerting_rule_state_transition' });
 
@@ -781,7 +779,7 @@ export const updateRuleDataSchema = z
       .max(MAX_FIELD_NAME_LENGTH)
       .optional()
       .describe(TIME_FIELD_UPDATE_DESCRIPTION),
-    schedule: scheduleSchema.partial().optional().nullable(),
+    schedule: scheduleSchema.partial().optional(),
     query: querySchema.optional(),
     recovery: recoverySchema.optional(),
     no_data: noDataSchema.optional(),
@@ -933,7 +931,7 @@ export type BulkCreateRuleItem = z.infer<typeof bulkCreateRuleItemSchema>;
  */
 export const bulkCreateRulesRequestSchema = z
   .object({
-    rules: z
+    items: z
       .array(bulkCreateRuleItemSchema)
       .min(1)
       .max(MAX_BULK_ITEMS)
@@ -942,12 +940,12 @@ export const bulkCreateRulesRequestSchema = z
   .strict()
   .refine(
     (data) => {
-      const ids = data.rules
+      const ids = data.items
         .map((rule) => rule.id)
         .filter((id): id is string => id != null && id.length > 0);
       return new Set(ids).size === ids.length;
     },
-    { message: 'Duplicate rule identifiers in the request.', path: ['rules'] }
+    { message: 'Duplicate rule identifiers in the request.', path: ['items'] }
   )
   .meta({ id: 'alerting_bulk_create_rules_request' });
 

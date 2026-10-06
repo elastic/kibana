@@ -17,21 +17,13 @@ type TriggerEmittingClient = Pick<EventClient, 'emitTrigger'>;
 
 type SignificantEventSource = Pick<
   SignificantEvent,
-  | '@timestamp'
-  | 'event_id'
-  | 'event_uuid'
-  | 'title'
-  | 'summary'
-  | 'status'
-  | 'severity'
-  | 'stream_names'
+  '@timestamp' | 'event_id' | 'title' | 'summary' | 'status' | 'severity' | 'stream_names'
 >;
 
 const baseSignificantEventPayload = (
   significantEvent: SignificantEventSource
 ): SignificantEventTriggerBasePayload => ({
   event_id: significantEvent.event_id,
-  event_uuid: significantEvent.event_uuid,
   title: significantEvent.title,
   summary: significantEvent.summary,
   status: significantEvent.status,

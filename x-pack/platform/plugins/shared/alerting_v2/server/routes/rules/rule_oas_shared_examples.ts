@@ -72,7 +72,7 @@ export const BULK_OPERATION_RESPONSE: BulkResponse = {
 };
 
 export const BULK_CREATE_RULES_REQUEST: BulkCreateRulesParams = {
-  rules: [
+  items: [
     SAMPLE_RULE_DATA,
     {
       ...SAMPLE_RULE_DATA,
@@ -116,9 +116,9 @@ export const INVALID_BULK_OPERATION_RESPONSE = invalidResponseExample({
 
 /** Shared 400 body for bulk create. */
 export const INVALID_BULK_CREATE_RULES_RESPONSE = invalidResponseExample({
-  summary: 'Request body is missing required rules',
-  message: 'rules: Required',
-  details: { errors: { rules: ['Required'] } },
+  summary: 'Request body is missing required items',
+  message: 'items: Required',
+  details: { errors: { items: ['Required'] } },
 });
 
 /** Shared 400 body for by-query bulk routes. */
@@ -179,7 +179,7 @@ export const MAX_SCHEDULES_PER_MINUTE_EXCEEDED_RESPONSE: OasExampleEntry = {
     code: ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
     error: 'Bad Request',
     message: `Rule schedule of "1m" would exceed the limit of 400 rule runs per minute`,
-    details: { interval: '1m', maxScheduledPerMinute: 400 },
+    details: { interval: '1m', max_scheduled_per_minute: 400 },
   } satisfies ErrorResponse,
 };
 
