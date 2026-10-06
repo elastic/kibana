@@ -3460,6 +3460,8 @@ describe('update', () => {
     // no options inside validateCaseExtendedFields.
     const templateSO = {
       attributes: {
+        templateId: 'tmpl-1',
+        owner: SECURITY_SOLUTION_OWNER,
         name: 'Ref Template',
         definition: yamlStringify({ name: 'Ref Template', fields: [{ $ref: 'resolution' }] }),
       },
