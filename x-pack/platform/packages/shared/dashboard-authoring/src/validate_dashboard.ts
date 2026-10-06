@@ -30,14 +30,25 @@ export type ValidateDashboard = (
 
 type DashboardField = Exclude<keyof DashboardAttachmentData, 'panels'>;
 
+interface ValidationResult {
+  dashboardData: DashboardAttachmentData;
+  failures: OperationFailure[];
+  /** Ids of panels that were dropped or whose content was reverted. */
+  discardedPanelIds: ReadonlySet<string>;
+}
+
 const TOP_LEVEL_PANEL_PATH_LENGTH = 2;
 const SECTION_PANEL_PATH_LENGTH = 4;
+const FIELD_PATH_LENGTH = 1;
 
 const getIssuePanel = (
   dashboardData: DashboardAttachmentData,
-  [, widgetIndex, sectionKey, panelIndex]: ReadonlyArray<PropertyKey>
+  [location, widgetIndex, sectionKey, panelIndex]: ReadonlyArray<PropertyKey>
 ): { panel: AttachmentPanel; pathLength: number } | undefined => {
-  const widget = typeof widgetIndex === 'number' ? dashboardData.panels[widgetIndex] : undefined;
+  const widget =
+    location === 'panels' && typeof widgetIndex === 'number'
+      ? dashboardData.panels[widgetIndex]
+      : undefined;
   if (!widget) {
     return undefined;
   }
@@ -51,59 +62,75 @@ const getIssuePanel = (
   return sectionPanel && { panel: sectionPanel, pathLength: SECTION_PANEL_PATH_LENGTH };
 };
 
-const formatIssue = ({ path, message }: DashboardValidationIssue, locationPathLength: number) => {
-  const relativePath = path.slice(locationPathLength).map(String).join('.');
-  return relativePath ? `${relativePath}: ${message}` : message;
-};
-
 const isDashboardField = (
   dashboardData: DashboardAttachmentData,
   key: PropertyKey | undefined
 ): key is DashboardField => typeof key === 'string' && key !== 'panels' && key in dashboardData;
 
+const formatIssue = ({ path, message }: DashboardValidationIssue, locationPathLength = 0) => {
+  const relativePath = path.slice(locationPathLength).map(String).join('.');
+  return relativePath ? `${relativePath}: ${message}` : message;
+};
+
+/**
+ * Identifies an issue that cannot be attributed to a single panel or field, keying section issues
+ * by section id so they still match after sections move.
+ */
+const getDashboardIssueKey = (
+  dashboardData: DashboardAttachmentData,
+  issue: DashboardValidationIssue
+): string => {
+  const [location, widgetIndex] = issue.path;
+  const widget =
+    location === 'panels' && typeof widgetIndex === 'number'
+      ? dashboardData.panels[widgetIndex]
+      : undefined;
+  return widget && isSection(widget)
+    ? `section ${widget.id} ${formatIssue(issue, TOP_LEVEL_PANEL_PATH_LENGTH)}`
+    : formatIssue(issue);
+};
+
 const hasChangedContent = (panel: AttachmentPanel, originalPanel?: AttachmentPanel): boolean =>
   !originalPanel || originalPanel.type !== panel.type || originalPanel.config !== panel.config;
 
-const appendTo = <TKey>(map: Map<TKey, string[]>, key: TKey, message: string) => {
-  map.set(key, [...(map.get(key) ?? []), message]);
+const appendTo = <TKey, TValue>(map: Map<TKey, TValue[]>, key: TKey, value: TValue) => {
+  map.set(key, [...(map.get(key) ?? []), value]);
 };
 
 const toFailure = (identifier: string, messages: string[], outcome: string): OperationFailure => ({
   type: DASHBOARD_OPERATION_FAILURE_TYPES.validateDashboard,
   identifier,
-  error: `${outcome} because it does not match the dashboard schema: ${messages.join('; ')}`,
+  error: `${outcome} because the result does not match the dashboard schema: ${messages.join(
+    '; '
+  )}`,
 });
+
+const getPanelIds = (panels: DashboardAttachmentData['panels']): Set<string> =>
+  new Set(indexPanelsById(panels).keys());
 
 const discardInvalidPanels = ({
   originalDashboardData,
   dashboardData,
-  issues,
+  messagesByPanel,
 }: {
   originalDashboardData: DashboardAttachmentData;
   dashboardData: DashboardAttachmentData;
-  issues: DashboardValidationIssue[];
-}): { panels: DashboardAttachmentData['panels']; failures: OperationFailure[] } => {
+  messagesByPanel: Map<AttachmentPanel, string[]>;
+}): Omit<ValidationResult, 'dashboardData'> & { panels: DashboardAttachmentData['panels'] } => {
   const originalPanelsById = indexPanelsById(originalDashboardData.panels);
-  const messagesByPanel = new Map<AttachmentPanel, string[]>();
-
-  for (const issue of issues) {
-    const issuePanel =
-      issue.path[0] === 'panels' ? getIssuePanel(dashboardData, issue.path) : undefined;
-    if (
-      issuePanel &&
-      hasChangedContent(issuePanel.panel, originalPanelsById.get(issuePanel.panel.id))
-    ) {
-      appendTo(messagesByPanel, issuePanel.panel, formatIssue(issue, issuePanel.pathLength));
-    }
-  }
-
+  const originalSectionIds = new Set(
+    originalDashboardData.panels.filter(isSection).map(({ id }) => id)
+  );
   const failures: OperationFailure[] = [];
+  const discardedPanelIds = new Set<string>();
+
   const restorePanel = (panel: AttachmentPanel): AttachmentPanel[] => {
     const messages = messagesByPanel.get(panel);
     if (!messages) {
       return [panel];
     }
 
+    discardedPanelIds.add(panel.id);
     const originalPanel = originalPanelsById.get(panel.id);
     if (!originalPanel) {
       failures.push(toFailure(panel.id, messages, 'Panel was not added'));
@@ -114,50 +141,51 @@ const discardInvalidPanels = ({
     return [{ ...panel, type: originalPanel.type, config: originalPanel.config }];
   };
 
-  const panels = dashboardData.panels.flatMap((widget): DashboardAttachmentData['panels'] =>
-    isSection(widget)
-      ? [{ ...widget, panels: widget.panels.flatMap(restorePanel) }]
-      : restorePanel(widget)
-  );
+  const panels = dashboardData.panels.flatMap((widget): DashboardAttachmentData['panels'] => {
+    if (!isSection(widget)) {
+      return restorePanel(widget);
+    }
 
-  return { panels, failures };
+    const sectionPanels = widget.panels.flatMap(restorePanel);
+    const isNewSectionLeftEmpty =
+      !originalSectionIds.has(widget.id) && widget.panels.length > 0 && sectionPanels.length === 0;
+    if (isNewSectionLeftEmpty) {
+      failures.push({
+        type: DASHBOARD_OPERATION_FAILURE_TYPES.validateDashboard,
+        identifier: widget.id,
+        error: `Section "${widget.title}" was not added because none of its panels are valid.`,
+      });
+      return [];
+    }
+    return [{ ...widget, panels: sectionPanels }];
+  });
+
+  return { panels, failures, discardedPanelIds };
 };
 
 const discardInvalidFields = ({
   originalDashboardData,
   dashboardData,
-  issues,
+  issuesByField,
 }: {
   originalDashboardData: DashboardAttachmentData;
   dashboardData: DashboardAttachmentData;
-  issues: DashboardValidationIssue[];
-}): { dashboardData: DashboardAttachmentData; failures: OperationFailure[] } => {
-  const issuesByField = new Map<DashboardField, DashboardValidationIssue[]>();
-  for (const issue of issues) {
-    const [field] = issue.path;
-    if (
-      isDashboardField(dashboardData, field) &&
-      dashboardData[field] !== originalDashboardData[field]
-    ) {
-      issuesByField.set(field, [...(issuesByField.get(field) ?? []), issue]);
-    }
-  }
-
+  issuesByField: Map<DashboardField, DashboardValidationIssue[]>;
+}): Pick<ValidationResult, 'dashboardData' | 'failures'> => {
   const failures: OperationFailure[] = [];
   let nextDashboardData = dashboardData;
+
   for (const [field, fieldIssues] of issuesByField) {
     const value = dashboardData[field];
-    const originalValue = originalDashboardData[field];
-    const messages = fieldIssues.map((issue) => formatIssue(issue, 1));
+    const messages = fieldIssues.map((issue) => formatIssue(issue, FIELD_PATH_LENGTH));
     const invalidItemIndexes = new Set(fieldIssues.map(({ path }) => path[1]));
-    const originalItems = new Set<unknown>(Array.isArray(originalValue) ? originalValue : []);
-    const onlyNewItemsAreInvalid =
+    const onlyItemsAreInvalid =
       Array.isArray(value) &&
-      [...invalidItemIndexes].every(
-        (index) => typeof index === 'number' && !originalItems.has(value[index])
+      fieldIssues.every(
+        ({ path }) => path.length > FIELD_PATH_LENGTH && typeof path[1] === 'number'
       );
 
-    if (onlyNewItemsAreInvalid) {
+    if (onlyItemsAreInvalid) {
       nextDashboardData = {
         ...nextDashboardData,
         [field]: value.filter((_, index) => !invalidItemIndexes.has(index)),
@@ -166,7 +194,7 @@ const discardInvalidFields = ({
       continue;
     }
 
-    nextDashboardData = { ...nextDashboardData, [field]: originalValue };
+    nextDashboardData = { ...nextDashboardData, [field]: originalDashboardData[field] };
     failures.push(toFailure(field, messages, `Change to "${field}" was reverted`));
   }
 
@@ -177,25 +205,94 @@ const discardInvalidFields = ({
  * Discards the changes behind validation issues so only valid writes are kept: invalid new panels
  * and items are dropped, and invalid edits get their original value back. Issues in content the
  * operations did not change are ignored, so pre-existing invalid content never blocks an update.
+ * New issues that belong to no single panel or field (e.g. section or panel count issues) discard
+ * every change.
  */
 export const discardInvalidChanges = ({
   originalDashboardData,
   dashboardData,
-  issues,
+  validateDashboard,
 }: {
   originalDashboardData: DashboardAttachmentData;
   dashboardData: DashboardAttachmentData;
-  issues: DashboardValidationIssue[];
-}): { dashboardData: DashboardAttachmentData; failures: OperationFailure[] } => {
+  validateDashboard: ValidateDashboard;
+}): ValidationResult => {
+  const issues = validateDashboard(dashboardData);
   if (issues.length === 0) {
-    return { dashboardData, failures: [] };
+    return { dashboardData, failures: [], discardedPanelIds: new Set() };
   }
 
-  const panelResult = discardInvalidPanels({ originalDashboardData, dashboardData, issues });
-  const fieldResult = discardInvalidFields({ originalDashboardData, dashboardData, issues });
+  const originalPanelsById = indexPanelsById(originalDashboardData.panels);
+  const messagesByPanel = new Map<AttachmentPanel, string[]>();
+  const issuesByField = new Map<DashboardField, DashboardValidationIssue[]>();
+  const dashboardIssues: DashboardValidationIssue[] = [];
+
+  for (const issue of issues) {
+    const issuePanel = getIssuePanel(dashboardData, issue.path);
+    if (issuePanel) {
+      if (hasChangedContent(issuePanel.panel, originalPanelsById.get(issuePanel.panel.id))) {
+        appendTo(messagesByPanel, issuePanel.panel, formatIssue(issue, issuePanel.pathLength));
+      }
+      continue;
+    }
+
+    const [field, itemIndex] = issue.path;
+    if (!isDashboardField(dashboardData, field)) {
+      dashboardIssues.push(issue);
+      continue;
+    }
+
+    const value = dashboardData[field];
+    const originalValue = originalDashboardData[field];
+    const isOriginalItem =
+      Array.isArray(value) &&
+      Array.isArray(originalValue) &&
+      typeof itemIndex === 'number' &&
+      issue.path.length > FIELD_PATH_LENGTH &&
+      new Set<unknown>(originalValue).has(value[itemIndex]);
+    if (value !== originalValue && !isOriginalItem) {
+      appendTo(issuesByField, field, issue);
+    }
+  }
+
+  if (dashboardIssues.length > 0) {
+    const originalIssueKeys = new Set(
+      validateDashboard(originalDashboardData).map((issue) =>
+        getDashboardIssueKey(originalDashboardData, issue)
+      )
+    );
+    const newDashboardIssues = dashboardIssues.filter(
+      (issue) => !originalIssueKeys.has(getDashboardIssueKey(dashboardData, issue))
+    );
+    if (newDashboardIssues.length > 0) {
+      return {
+        dashboardData: originalDashboardData,
+        failures: [
+          toFailure(
+            'dashboard',
+            newDashboardIssues.map((issue) => formatIssue(issue)),
+            'All changes were discarded'
+          ),
+        ],
+        discardedPanelIds: getPanelIds(dashboardData.panels),
+      };
+    }
+  }
+
+  const panelResult = discardInvalidPanels({
+    originalDashboardData,
+    dashboardData,
+    messagesByPanel,
+  });
+  const fieldResult = discardInvalidFields({
+    originalDashboardData,
+    dashboardData,
+    issuesByField,
+  });
 
   return {
     dashboardData: { ...fieldResult.dashboardData, panels: panelResult.panels },
     failures: [...panelResult.failures, ...fieldResult.failures],
+    discardedPanelIds: panelResult.discardedPanelIds,
   };
 };
