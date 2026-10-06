@@ -229,30 +229,34 @@ triggers:
 
 export const AttachmentsDeletedTriggerId = 'cases.attachmentsDeleted' as const;
 
-const attachmentsDeletedEventSchema = baseCaseEventSchema.extend({
-  attachmentIds: z
-    .array(z.string())
-    .meta({ description: ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_IDS_DESCRIPTION }),
-  attachmentType: z
-    .string()
-    .meta({ description: ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_TYPE_DESCRIPTION }),
-  alertIds: z
-    .array(z.string())
-    .optional()
-    .meta({ description: ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_ALERT_IDS_DESCRIPTION }),
-  alertIndices: z
-    .array(z.string())
-    .optional()
-    .meta({ description: ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_ALERT_INDICES_DESCRIPTION }),
-  eventIds: z
-    .array(z.string())
-    .optional()
-    .meta({ description: ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_EVENT_IDS_DESCRIPTION }),
-  eventIndices: z
-    .array(z.string())
-    .optional()
-    .meta({ description: ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_EVENT_INDICES_DESCRIPTION }),
-});
+// .strict() because trigger_event_handler validates the raw payload and stores it as given,
+// so an unexpected key would otherwise reach the trigger-events data stream.
+const attachmentsDeletedEventSchema = baseCaseEventSchema
+  .extend({
+    attachmentIds: z
+      .array(z.string())
+      .meta({ description: ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_IDS_DESCRIPTION }),
+    attachmentType: z
+      .string()
+      .meta({ description: ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_TYPE_DESCRIPTION }),
+    alertIds: z
+      .array(z.string())
+      .optional()
+      .meta({ description: ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_ALERT_IDS_DESCRIPTION }),
+    alertIndices: z
+      .array(z.string())
+      .optional()
+      .meta({ description: ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_ALERT_INDICES_DESCRIPTION }),
+    eventIds: z
+      .array(z.string())
+      .optional()
+      .meta({ description: ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_EVENT_IDS_DESCRIPTION }),
+    eventIndices: z
+      .array(z.string())
+      .optional()
+      .meta({ description: ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_EVENT_INDICES_DESCRIPTION }),
+  })
+  .strict();
 
 export const attachmentsDeletedTriggerCommonDefinition: CommonTriggerDefinition = {
   id: AttachmentsDeletedTriggerId,
@@ -270,7 +274,7 @@ export const attachmentsDeletedTriggerCommonDefinition: CommonTriggerDefinition 
       'xpack.cases.workflowTriggers.attachmentsDeleted.documentation.details',
       {
         defaultMessage:
-          'Emitted after attachments are deleted from a case, once per attachment type involved. The payload includes event.caseId, event.owner, event.attachmentIds (all IDs deleted in that operation for this type), and event.attachmentType (e.g. "comment", "alert"). For alert attachments, event.alertIds and event.alertIndices identify the alerts that were removed from the case; for event attachments, event.eventIds and event.eventIndices identify the events. Use KQL on event.* for trigger conditions.',
+          'Emitted after attachments are deleted from a case, once per attachment type involved. The payload includes event.caseId, event.owner, event.attachmentIds (all IDs deleted in that operation for this type), and event.attachmentType (e.g. "comment", "security.alert", "observability.alert", "stack.alert", "security.event"; legacy attachments can report "alert" or "event"). For alert attachments, event.alertIds and event.alertIndices identify the alerts that were removed from the case; for event attachments, event.eventIds and event.eventIndices identify the events. To match any alert or event type, use event.alertIds: * or event.eventIds: * instead of event.attachmentType. Use KQL on event.* for trigger conditions.',
       }
     ),
     examples: [

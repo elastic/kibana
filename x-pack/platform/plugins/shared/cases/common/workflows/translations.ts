@@ -602,7 +602,8 @@ export const ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_IDS_DESCRIPTION
 export const ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_TYPE_DESCRIPTION = i18n.translate(
   'xpack.cases.workflowTriggers.attachmentsDeleted.eventSchema.attachmentType',
   {
-    defaultMessage: 'The type of the attachments that were deleted (e.g. "comment", "alert").',
+    defaultMessage:
+      'The type of the attachments that were deleted (e.g. "comment", "security.alert", "observability.alert", "stack.alert", "security.event"). Legacy attachments can report "alert" or "event"; to match any alert or event type, use event.alertIds: * or event.eventIds: *.',
   }
 );
 

@@ -128,7 +128,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'cases.attachmentsDeleted',
-    schemaHash: '62842368a4a5ef4587e30e9374fe7bb530489f3621d5b73138fe20c8d2ae4103',
+    schemaHash: 'af15c7003f07847f8e3b553e83925d6a82b2de4a0c66f9ecec4e48957c616ad1',
   },
   {
     id: 'cases.caseCreated',
