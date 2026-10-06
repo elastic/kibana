@@ -15,6 +15,7 @@ import {
   syncState,
 } from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
+import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import {
   LOCALLY_PERSISTED_PROFILE_STATE_TYPES,
@@ -24,6 +25,7 @@ import {
 } from '../../../../common/context_awareness';
 import {
   APP_STATE_URL_KEY,
+  GLOBAL_STATE_URL_KEY,
   NEW_TAB_ID,
   PROFILE_STATE_URL_KEY,
   TAB_STATE_URL_KEY,
@@ -252,8 +254,16 @@ export const createTabsStorageManager = ({
       defaultsHandling: 'strip',
     });
 
-  const isUrlStateFromStoredTab = ({ appState, profileState }: TabStateInLocalStorage) =>
+  const isUrlStateFromStoredTab = ({
+    appState,
+    globalState,
+    profileState,
+  }: TabStateInLocalStorage) =>
     isEqual(urlStateStorage.get(APP_STATE_URL_KEY) ?? {}, appState ?? {}) &&
+    isEqual(
+      urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY)?.time,
+      globalState?.timeRange
+    ) &&
     isEqual(
       getUrlProfileState(urlStateStorage.get<ProfileStateMap>(PROFILE_STATE_URL_KEY)),
       getUrlProfileState(profileState)
@@ -502,6 +512,11 @@ export const createTabsStorageManager = ({
       storedSelectedTab &&
       isUrlStateFromStoredTab(storedSelectedTab)
     ) {
+      // Global filters are shared with other apps, so only the time is dropped from _g.
+      const urlGlobalState = urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY);
+      void urlStateStorage.set(GLOBAL_STATE_URL_KEY, omit(urlGlobalState, 'time'), {
+        replace: true,
+      });
       void urlStateStorage.set(APP_STATE_URL_KEY, undefined, { replace: true });
       void urlStateStorage.set(PROFILE_STATE_URL_KEY, undefined, { replace: true });
     }

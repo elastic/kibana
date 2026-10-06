@@ -19,7 +19,12 @@ import {
   type TabsInternalStatePayload,
 } from './tabs_storage_manager';
 import type { DiscoverAppState, RecentlyClosedTabState, TabState } from './redux';
-import { APP_STATE_URL_KEY, NEW_TAB_ID, TAB_STATE_URL_KEY } from '../../../../common/constants';
+import {
+  APP_STATE_URL_KEY,
+  GLOBAL_STATE_URL_KEY,
+  NEW_TAB_ID,
+  TAB_STATE_URL_KEY,
+} from '../../../../common/constants';
 import { DEFAULT_TAB_STATE, fromSavedSearchToSavedObjectTab } from './redux';
 import {
   getRecentlyClosedTabStateMock,
@@ -1180,6 +1185,10 @@ describe('TabsStorageManager', () => {
       });
       urlStateStorage.set(TAB_STATE_URL_KEY, { tabId: mockTab1.id });
       urlStateStorage.set(APP_STATE_URL_KEY, urlAppState);
+      urlStateStorage.set(GLOBAL_STATE_URL_KEY, {
+        time: mockTab1.globalState.timeRange,
+        filters: [],
+      });
 
       tabsStorageManager.loadLocally({
         userId: mockUserId,
@@ -1195,15 +1204,20 @@ describe('TabsStorageManager', () => {
         defaultTabState: DEFAULT_TAB_STATE,
       });
 
-      return urlStateStorage.get(APP_STATE_URL_KEY);
+      return urlStateStorage;
     };
 
-    it('should clear URL state written for the stored tab', () => {
-      expect(loadWithUrlAppState(mockTab1.appState)).toBeNull();
+    it('should clear URL state and time written for the stored tab, keeping global filters', () => {
+      const urlStateStorage = loadWithUrlAppState(mockTab1.appState);
+
+      expect(urlStateStorage.get(APP_STATE_URL_KEY)).toBeNull();
+      expect(urlStateStorage.get(GLOBAL_STATE_URL_KEY)).toEqual({ filters: [] });
     });
 
     it('should keep URL state that differs from the stored tab, e.g. from a shared link', () => {
-      expect(loadWithUrlAppState({ columns: ['from-link'] })).toEqual({ columns: ['from-link'] });
+      const urlStateStorage = loadWithUrlAppState({ columns: ['from-link'] });
+
+      expect(urlStateStorage.get(APP_STATE_URL_KEY)).toEqual({ columns: ['from-link'] });
     });
   });
 
