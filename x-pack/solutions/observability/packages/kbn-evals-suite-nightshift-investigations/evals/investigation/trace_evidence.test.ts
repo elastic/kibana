@@ -134,7 +134,7 @@ it('accepts a successful sandbox command after recovered tool errors', () => {
 it.each([
   {
     ...toolCall,
-    tool_id: 'investigations.set_hypotheses',
+    tool_id: 'agentic_investigations.set_hypotheses',
     results: [{ ...toolCall.results[0], data: { acknowledged: true } }],
   },
   {
