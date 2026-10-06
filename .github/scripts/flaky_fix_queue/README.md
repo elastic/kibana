@@ -62,6 +62,24 @@ The dispatcher supports a read-only `dry_run` input (the default for manual
 dispatcher runs). Schedules perform real admission. Its logs show admitted and
 capacity-deferred requests; it does not comment on waiting issues.
 
+## API usage
+
+An empty request list stops the sweep before reading executions or PRs. Source
+ownership is fetched in GraphQL batches of 50, including references to PRs, and
+cached for that sweep. Label pagination must complete; missing records, partial
+responses, or inconsistent labels fail the sweep before admission.
+
+REST and GraphQL budgets are logged with their reset times. The dispatcher keeps
+at least 100 REST requests and 100 GraphQL points of headroom before starting
+inventory/history reads, between ownership batches/pages, and before each
+admission. Low budget leaves requests queued without a comment. Response headers
+can lower the observed budget until reset; a higher rate-limit endpoint response
+does not override that lower value. These margins cannot reserve budget against
+other workflows, and API errors still stop the sweep.
+
+Dispatch POSTs are never automatically retried. A failure after the starting
+receipt uses the existing pending-admission recovery described above.
+
 ## Validation
 
 These standalone scripts run under Node's native TypeScript stripping in
@@ -79,3 +97,15 @@ The tests simulate GitHub state across successive sweeps, including a 13-request
 burst, reviewer backlog limits, delayed run indexing, re-labelling, and failures
 before/after dispatch. API adapter tests exercise Octokit's actual pagination
 against simulated HTTP responses without sending requests to GitHub.
+
+
+The optimization tests cover batch boundaries, duplicate/cached references,
+references to PRs, label pagination, partial responses, low budgets before and
+between admissions, response-header budget/reset handling, and HTTP 403/429.
+
+A read-only live check on 2026-10-06 fetched ownership for 271 references from
+266 open fix PRs using six GraphQL queries (six points) plus six budget checks.
+Three sampled results matched independent REST reads. The full dry-run stopped
+at the existing safeguard for an active pre-rollout run with no queue identity.
+No comments or workflow dispatches were made. This used local GitHub credentials;
+the Actions token's allowance and permissions still need confirmation in Actions.

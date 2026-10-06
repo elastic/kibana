@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { hasApiBudget } from './api_budget.ts';
+import type { ApiBudget } from './api_budget.ts';
+
 export const REQUEST_LABEL = 'ai:fix-flaky';
 export const FIXER_LABEL = 'flaky-test-fixer';
 export const FIXER_WORKFLOW = 'flaky-test-fixer.lock.yml';
@@ -54,6 +57,8 @@ export interface FixRequest {
 }
 
 export interface QueueClient {
+  getApiBudget: () => Promise<ApiBudget>;
+  getIssues: (numbers: number[]) => Promise<Issue[] | null>;
   listIssues: (label: string) => Promise<Issue[]>;
   getIssue: (number: number) => Promise<Issue>;
   listEvents: (number: number) => Promise<LabelEvent[]>;
@@ -184,17 +189,42 @@ export const dispatchQueuedFixes = async ({
     return snapshot;
   };
 
-  // List endpoints avoid search indexing delays, search limits, and issue-age cutoffs.
-  // Snapshot executions first: a run finishing during the PR read must not free a slot
-  // before its new PR is visible. Holding it for one extra sweep is conservative.
-  const activeRuns = await client.listActiveRuns();
-  const [labelled, pullRequests] = await Promise.all([
-    client.listIssues(REQUEST_LABEL),
-    client.listIssues(FIXER_LABEL),
-  ]);
-  for (const issue of labelled) {
-    if (!issue.pull_request) issues.set(issue.number, issue);
+  const labelled = (await client.listIssues(REQUEST_LABEL)).filter((issue) => !issue.pull_request);
+  if (!labelled.length) {
+    log('No queued requests.');
+    return [];
   }
+  for (const issue of labelled) issues.set(issue.number, issue);
+
+  const canContinue = async (): Promise<boolean> => {
+    if (hasApiBudget(await client.getApiBudget())) return true;
+    log('Deferring automatic fixes: API budget is low.');
+    return false;
+  };
+  if (!(await canContinue())) return [];
+
+  // Read executions before PRs so a finishing run cannot free a slot before its PR is visible.
+  const activeRuns = await client.listActiveRuns();
+  const sourceIssues = new Set<number>();
+  for (const run of activeRuns) {
+    const match = RUN_TITLE.exec(run.display_title);
+    if (!match) {
+      log(`Deferring admission: active fixer run ${run.id} has no queue identity.`);
+      return [];
+    }
+    sourceIssues.add(Number(match[1]));
+  }
+  const pullRequests = (await client.listIssues(FIXER_LABEL)).filter((issue) => issue.pull_request);
+  for (const pr of pullRequests) {
+    for (const number of linkedIssues(pr.body)) sourceIssues.add(number);
+  }
+  const missing = [...sourceIssues].filter((number) => !issues.has(number));
+  const ownership = await client.getIssues(missing);
+  if (!ownership) {
+    log('Deferring automatic fixes: API budget is low.');
+    return [];
+  }
+  for (const issue of ownership) issues.set(issue.number, issue);
 
   const outstanding = new Map<string, Set<string>>();
   const running = new Map<string, Set<number>>();
@@ -251,6 +281,7 @@ export const dispatchQueuedFixes = async ({
       log(`Deferred #${issue.number}: owning team has no capacity.`);
       continue;
     }
+    if (!(await canContinue())) return [];
     queue.push(await getSnapshot(issue.number));
   }
 
@@ -258,6 +289,7 @@ export const dispatchQueuedFixes = async ({
   for (const snapshot of queue) {
     const { request, comments, teams } = snapshot;
     if (!request) continue;
+    if (!(await canContinue())) return [];
     const receipts = comments.filter(trustedComment).filter((comment) => {
       const match = RECEIPT.exec(comment.body ?? '');
       return match && Number(match[1]) === request.event;
@@ -324,6 +356,8 @@ export const dispatchQueuedFixes = async ({
       log(`Deferred #${issue.number}: request changed during the sweep.`);
       continue;
     }
+
+    if (!(await canContinue())) break;
 
     chargeRun(issue.number, teams);
     admitted.push(issue.number);

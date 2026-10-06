@@ -68,6 +68,11 @@ const fixture = () => {
     ]);
   };
   const client: QueueClient = {
+    getApiBudget: async () => ({
+      rest: { limit: 1000, remaining: 1000, reset: 0 },
+      graphql: { limit: 1000, remaining: 1000, reset: 0 },
+    }),
+    getIssues: async (numbers) => Promise.all(numbers.map((number) => client.getIssue(number))),
     listIssues: async (label) =>
       [...issues.values()].filter(
         (issue) => issue.state === 'open' && issue.labels.includes(label)
@@ -618,4 +623,135 @@ test('a bot request changed to a human request during the sweep is not dispatche
   };
   assert.deepEqual(await f.sweep(), []);
   assert.deepEqual(f.writes, []);
+});
+
+test('an empty queue only reads the request list', async () => {
+  const f = fixture();
+  f.client.getApiBudget = async () => {
+    throw new Error('Unexpected budget read');
+  };
+  f.client.listActiveRuns = async () => {
+    throw new Error('Unexpected run read');
+  };
+  f.client.getIssues = async () => {
+    throw new Error('Unexpected ownership read');
+  };
+  f.client.listIssues = async (label) => {
+    assert.equal(label, 'ai:fix-flaky');
+    return [];
+  };
+  assert.deepEqual(await f.sweep(), []);
+});
+
+test('batches distinct uncached PR and active-run source issues', async () => {
+  const f = fixture();
+  f.addIssue(1);
+  f.addIssue(2).state = 'closed';
+  f.addIssue(3, ['Team:Other']).state = 'closed';
+  f.addPr(100, [1, 2]);
+  f.addPr(101, [2]);
+  f.addRun(3);
+  const getIssues = f.client.getIssues;
+  const batches: number[][] = [];
+  f.client.getIssues = async (numbers) => {
+    batches.push(numbers);
+    return getIssues(numbers);
+  };
+  assert.deepEqual(await f.sweep(), []);
+  assert.deepEqual(batches, [[3, 2]]);
+});
+
+for (const resource of ['rest', 'graphql'] as const) {
+  test(`low ${resource} budget stops before scanning workload`, async () => {
+    const f = fixture();
+    f.addIssue(1);
+    const getBudget = f.client.getApiBudget;
+    f.client.getApiBudget = async () => {
+      const budget = await getBudget();
+      budget[resource].remaining = 99;
+      return budget;
+    };
+    f.client.listActiveRuns = async () => {
+      throw new Error('Unexpected workload read');
+    };
+    assert.deepEqual(await f.sweep(), []);
+    assert.deepEqual(f.writes, []);
+    assert.match(f.logs.join('\n'), /API budget is low/);
+  });
+}
+
+test('stopping ownership batches for low budget never admits from a partial inventory', async () => {
+  const f = fixture();
+  f.addIssue(1);
+  f.client.getIssues = async () => null;
+  assert.deepEqual(await f.sweep(), []);
+  assert.deepEqual(f.writes, []);
+});
+
+test('ownership failure propagates without admission', async () => {
+  const f = fixture();
+  f.addIssue(1);
+  f.client.getIssues = async () => {
+    throw new Error('Incomplete ownership');
+  };
+  await assert.rejects(f.sweep(), /Incomplete ownership/);
+  assert.deepEqual(f.writes, []);
+});
+
+test('low budget during history reads stops before any admission', async () => {
+  const f = fixture();
+  f.addIssue(1);
+  f.addIssue(2);
+  const getBudget = f.client.getApiBudget;
+  let reads = 0;
+  const listComments = f.client.listComments;
+  f.client.listComments = async (number) => {
+    reads++;
+    return listComments(number);
+  };
+  f.client.getApiBudget = async () => {
+    const budget = await getBudget();
+    if (reads > 0) budget.rest.remaining = 99;
+    return budget;
+  };
+  assert.deepEqual(await f.sweep(), []);
+  assert.equal(reads, 1);
+  assert.deepEqual(f.writes, []);
+});
+
+test('budget is checked after final revalidation and before the starting receipt', async () => {
+  const f = fixture();
+  f.addIssue(1);
+  const getIssue = f.client.getIssue;
+  const getBudget = f.client.getApiBudget;
+  let rechecked = false;
+  f.client.getIssue = async (number) => {
+    rechecked = true;
+    return getIssue(number);
+  };
+  f.client.getApiBudget = async () => {
+    const budget = await getBudget();
+    if (rechecked) budget.rest.remaining = 99;
+    return budget;
+  };
+  assert.deepEqual(await f.sweep(), []);
+  assert.equal(rechecked, true);
+  assert.deepEqual(f.writes, []);
+});
+
+test('a budget drop between admissions preserves the first run and leaves the next queued', async () => {
+  const f = fixture();
+  f.addIssue(1, ['Team:Core']);
+  f.addIssue(2, ['Team:Other']);
+  const getBudget = f.client.getApiBudget;
+  f.client.getApiBudget = async () => {
+    const budget = await getBudget();
+    if (f.dispatched.length) budget.rest.remaining = 99;
+    return budget;
+  };
+  assert.deepEqual(await f.sweep(), [1]);
+  assert.deepEqual(f.writes, ['receipt', 'dispatch', 'update']);
+  assert.match(f.comments.get(1)?.[0].body ?? '', /run:100/);
+  assert.deepEqual(f.comments.get(2), []);
+  assert.ok(f.issues.get(2)?.labels.includes('ai:fix-flaky'));
 });

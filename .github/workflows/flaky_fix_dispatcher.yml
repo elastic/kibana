@@ -14,6 +14,7 @@ on:
 permissions:
   actions: write
   issues: write
+  pull-requests: read
   contents: read
 
 concurrency:
@@ -46,7 +47,7 @@ jobs:
             const { dispatchQueuedFixes } = await import(pathToFileURL(`${base}/queue.ts`).href);
             const { createQueueClient } = await import(pathToFileURL(`${base}/github_client.ts`).href);
             await dispatchQueuedFixes({
-              client: createQueueClient(github, context.repo),
+              client: createQueueClient(github, context.repo, core.info),
               log: core.info,
               dryRun: process.env.DRY_RUN === 'true',
               maxOpenFixesPerTeam: Number(process.env.MAX_OPEN_FIXES_PER_TEAM),
