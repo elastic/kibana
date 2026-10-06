@@ -134,6 +134,32 @@ export const useLensAttributes = ({
       return filters;
     })();
 
+    // Unpersisted data views exist only in this session. Attach a field-less spec so a new app
+    // context (e.g. "Open in Lens") can resolve the id. `toSpec(false)` omits the field list;
+    // the receiving context loads fields itself.
+    const scopeAdHocDataView =
+      !hasAdHocDataViews && dataView.id && !dataView.isPersisted()
+        ? { [dataView.id]: dataView.toSpec(false) }
+        : undefined;
+
+    const rewrittenReferences =
+      attrs?.references?.map((ref: { id: string; name: string; type: string }) => ({
+        ...ref,
+        id: dataView.id ?? '',
+      })) ?? [];
+
+    // These ids are not saved objects. Keep index-pattern refs on state.internalReferences so
+    // save-to-library and case attachments do not record a missing index-pattern reference.
+    const [references, internalReferences] = scopeAdHocDataView
+      ? [
+          rewrittenReferences.filter((ref) => ref.type !== 'index-pattern'),
+          [
+            ...(attrs.state.internalReferences ?? []),
+            ...rewrittenReferences.filter((ref) => ref.type === 'index-pattern'),
+          ],
+        ]
+      : [rewrittenReferences, attrs.state.internalReferences];
+
     return {
       ...attrs,
       ...(title != null ? { title } : {}),
@@ -147,11 +173,9 @@ export const useLensAttributes = ({
           ...indexFilters,
           ...queryFilters,
         ],
+        ...(scopeAdHocDataView ? { adHocDataViews: scopeAdHocDataView, internalReferences } : {}),
       },
-      references: attrs?.references?.map((ref: { id: string; name: string; type: string }) => ({
-        ...ref,
-        id: dataView.id ?? '',
-      })),
+      references,
     } as LensAttributes;
   }, [
     lensAttributes,
@@ -171,7 +195,7 @@ export const useLensAttributes = ({
     pageFilters,
     tabsFilters,
     filters,
-    dataView.id,
+    dataView,
   ]);
   return hasAdHocDataViews || (!hasAdHocDataViews && indicesExist)
     ? lensAttrsWithInjectedData
