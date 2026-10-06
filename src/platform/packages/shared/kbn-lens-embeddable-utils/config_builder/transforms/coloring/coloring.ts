@@ -125,7 +125,6 @@ function buildNamedPaletteLensState({
     name: palette,
     params: {
       name: palette,
-      progression: 'fixed', // to be removed
       reverse: false, // always applied to steps during transform
       rangeType: useNumericRange ? 'number' : 'percent',
       // distributed palettes span the full domain; the recalculated min/max act as bounds except for the cases
@@ -208,7 +207,6 @@ export function fromColorByValueAPIToLensState(
     name: CUSTOM_PALETTE,
     params: {
       name: CUSTOM_PALETTE,
-      progression: 'fixed', // to be removed
       reverse: false, // always applied to steps during transform
       // @ts-expect-error - This can be null
       rangeMin,

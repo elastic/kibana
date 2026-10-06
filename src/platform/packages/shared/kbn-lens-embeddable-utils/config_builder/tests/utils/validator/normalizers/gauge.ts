@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { GaugeVisualizationState } from '@kbn/lens-common';
+import { LENS_GAUGE_DEFAULT_COLOR_STEPS, type GaugeVisualizationState } from '@kbn/lens-common';
 
 import type { LensAttributes } from '../../../../types';
 import type { NormalizerConfig } from './normalize';
@@ -163,7 +163,11 @@ export const normalizeGauge = mergeNormalizers<GaugeAttributes>([
     layerRemapping: [[visualization.layerId, DEFAULT_LAYER_ID]],
     columnRemapping: getColumnRemapping(visualization),
   })),
-  getPaletteNormalizer<GaugeAttributes>('state.visualization.palette'),
+  getPaletteNormalizer<GaugeAttributes>(
+    'state.visualization.palette',
+    undefined,
+    LENS_GAUGE_DEFAULT_COLOR_STEPS
+  ),
   alignExtraLayers,
   alignId,
   alignLegacyTypes,

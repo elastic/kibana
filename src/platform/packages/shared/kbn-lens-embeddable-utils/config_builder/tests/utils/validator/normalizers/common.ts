@@ -1541,15 +1541,21 @@ function clearUnusedNamedPaletteParams(palette: PaletteOutput<CustomPaletteParam
  *
  * This need to address:
  * - named palettes: `palette id`, `continuity`, and `rangeType` are compared strictly (see
- *   `normalizeNamedPaletteParams`); the throwaway stops/colorStops/bounds are dropped.
+ *   `normalizeNamedPaletteParams`); the throwaway stops/colorStops/bounds are dropped, and
+ *   `steps` is reconstructed from the chart's `defaultBandCount`.
  * - custom palettes: mirror the transform's continuity-driven open/closed encoding (open above
  *   nulls `rangeMax` and the last multi-stop; open below nulls `rangeMin`), set the last
- *   multi-stop to the effective `rangeMax` when closed, and default missing `rangeType` /
- *   `params.name` the transform always derives.
+ *   multi-stop to the effective `rangeMax` when closed, set `steps` to the stop count, and
+ *   default missing `rangeType` / `params.name` the transform always derives.
+ *
+ * For every palette the unread `maxSteps` (editor-only) and `progression` (deprecated) are
+ * dropped, and `reverse` is reset to `false` because the stored stops already carry the color
+ * order.
  */
 export function getPaletteNormalizer<T extends LensAttributes>(
   palettePath: string,
-  isSingleValuePalette?: (attributes: T) => boolean
+  isSingleValuePalette?: (attributes: T) => boolean,
+  defaultBandCount?: number
 ): NormalizerConfig<T> {
   return {
     original: (attributes: T) => {
@@ -1563,6 +1569,11 @@ export function getPaletteNormalizer<T extends LensAttributes>(
 
       palettes.forEach((palette) => {
         if (!palette.params) return;
+
+        // `maxSteps` is now editor-only state
+        delete palette.params.maxSteps;
+        // `progression` is deprecated and has no reader
+        delete palette.params.progression;
 
         const rangeMin = getRangeValue(palette.params.rangeMin);
         const rangeMax = getRangeValue(palette.params.rangeMax);
@@ -1579,6 +1590,13 @@ export function getPaletteNormalizer<T extends LensAttributes>(
           palette.name = canonicalName;
           palette.params.name = canonicalName;
           palette.params.rangeType = useNumericRange ? 'number' : 'percent';
+          // A named palette renders from its id and `steps` alone. Its stops are
+          // recomputed on every render. Users can't set `steps` directly: any edit to the color
+          // ranges (add, remove, recolor, move) turns the palette into `custom`. So a stored
+          // (e.g.`steps` that differs from the chart default was inherited from an older default
+          // gauges saved when it was 3). The API's `distributed_palette` has no band count,
+          // so API→SO writes the chart default and that difference is an accepted loss.
+          palette.params.steps = defaultBandCount;
           clearUnusedNamedPaletteParams(palette);
           return;
         }
@@ -1618,12 +1636,7 @@ export function getPaletteNormalizer<T extends LensAttributes>(
 
       return attributes;
     },
-    ignore: [
-      'maxSteps', // often omitted in original
-      'progression', // deprecated but defaults to 'fixed'
-      'reverse', // typically unused or omitted
-      'steps', // count of steps in original is not right
-    ].map((param) => `${palettePath}.params.${param}`),
+    ignore: ['reverse'].map((param) => `${palettePath}.params.${param}`),
   };
 }
 

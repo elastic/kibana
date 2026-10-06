@@ -13,6 +13,7 @@
 
 import {
   LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
+  LENS_METRIC_DEFAULT_COLOR_STEPS,
   type DataType,
   type MetricVisualizationState,
 } from '@kbn/lens-common';
@@ -499,7 +500,11 @@ export const normalizeMetric = mergeNormalizers([
     columnRemapping: getColumnRemapping(visualization),
     inferColumnDataType,
   })),
-  getPaletteNormalizer<MetricAttributes>('state.visualization.palette', isSingleValueMetric),
+  getPaletteNormalizer<MetricAttributes>(
+    'state.visualization.palette',
+    isSingleValueMetric,
+    LENS_METRIC_DEFAULT_COLOR_STEPS
+  ),
   alignIds,
   alignStaticValueMax,
   alignEmptyLinkedLayers,

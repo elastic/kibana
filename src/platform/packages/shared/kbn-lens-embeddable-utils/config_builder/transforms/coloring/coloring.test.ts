@@ -55,7 +55,6 @@ describe('Color util transforms', () => {
         params: {
           name: 'custom',
           rangeType: 'number',
-          progression: 'fixed',
           continuity: 'all',
           reverse: false,
           steps: 3,
@@ -98,7 +97,6 @@ describe('Color util transforms', () => {
           name: 'custom',
           rangeType: 'percent',
           continuity: 'none',
-          progression: 'fixed',
           reverse: false,
           steps: 2,
           rangeMin: 10,
@@ -177,7 +175,6 @@ describe('Color util transforms', () => {
           name: 'status',
           params: {
             name: 'status',
-            progression: 'fixed',
             reverse: false,
             rangeType: 'percent',
             continuity: 'all',
@@ -230,7 +227,6 @@ describe('Color util transforms', () => {
           name: 'temperature',
           params: {
             name: 'temperature',
-            progression: 'fixed',
             reverse: false,
             // default range type for distributed palettes
             rangeType: 'percent',
@@ -284,7 +280,6 @@ describe('Color util transforms', () => {
           name: 'temperature',
           params: {
             name: 'temperature',
-            progression: 'fixed',
             reverse: false,
             rangeType: 'percent', // default range type for distributed palettes
             continuity: 'all', // default continuity for distributed palettes
@@ -1060,7 +1055,6 @@ describe('Color util transforms', () => {
         name: 'custom',
         params: {
           name: 'custom',
-          progression: 'fixed',
           reverse: false,
           rangeType: 'number',
           // @ts-expect-error - open-ended single stop

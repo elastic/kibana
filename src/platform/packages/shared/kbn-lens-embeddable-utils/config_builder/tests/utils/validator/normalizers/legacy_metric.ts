@@ -12,7 +12,7 @@
  * round-trip checks.
  */
 
-import type { LegacyMetricState } from '@kbn/lens-common';
+import { LENS_LEGACY_METRIC_DEFAULT_COLOR_STEPS, type LegacyMetricState } from '@kbn/lens-common';
 
 import type { LensAttributes } from '../../../../types';
 import type { NormalizerConfig } from './normalize';
@@ -59,5 +59,9 @@ export const normalizeLegacyMetric = mergeNormalizers<LegacyMetricAttributes>([
   })),
   alignId,
   alignLegacyTypes,
-  getPaletteNormalizer<LegacyMetricAttributes>('state.visualization.palette', () => true),
+  getPaletteNormalizer<LegacyMetricAttributes>(
+    'state.visualization.palette',
+    () => true,
+    LENS_LEGACY_METRIC_DEFAULT_COLOR_STEPS
+  ),
 ]);
