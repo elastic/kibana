@@ -1019,7 +1019,7 @@ describe('UnifiedDataTable', () => {
       EXTENDED_JEST_TIMEOUT
     );
 
-    it('should hide toolbar controls when interactive controls are disabled', async () => {
+    it('should hide toolbar controls in print mode', async () => {
       await renderComponent({
         ...getProps(),
         viewMode: 'print',
@@ -1036,7 +1036,7 @@ describe('UnifiedDataTable', () => {
       });
     });
 
-    it('should hide additional controls when interactive controls are disabled', async () => {
+    it('should hide additional controls in print mode', async () => {
       await renderComponent({
         ...getProps(),
         viewMode: 'print',

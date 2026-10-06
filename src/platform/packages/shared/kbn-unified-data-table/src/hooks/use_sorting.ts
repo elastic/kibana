@@ -26,7 +26,7 @@ export const useSorting = ({
   dataView,
   isPlainRecord,
   isSortEnabled,
-  isInteractive = true,
+  isInteractive,
   isInMemorySortEnabled,
   isSummaryOnlyColumn,
   onSort,
@@ -38,7 +38,7 @@ export const useSorting = ({
   dataView: DataView;
   isPlainRecord: boolean;
   isSortEnabled: boolean;
-  isInteractive?: boolean;
+  isInteractive: boolean;
   isInMemorySortEnabled: boolean;
   isSummaryOnlyColumn: boolean;
   onSort: ((sort: SortOrder[]) => void) | undefined;
