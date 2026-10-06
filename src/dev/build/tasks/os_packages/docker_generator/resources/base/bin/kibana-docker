@@ -87,6 +87,7 @@ kibana_vars=(
     externalUrl.policy
     i18n.allowLocaleCookie
     i18n.defaultLocale
+    i18n.detectBrowserLocale
     i18n.locale
     i18n.locales
     interactiveSetup.enabled
