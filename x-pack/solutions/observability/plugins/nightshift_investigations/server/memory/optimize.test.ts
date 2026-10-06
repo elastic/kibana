@@ -383,6 +383,27 @@ describe('createLlmProposeMemoryExtractions', () => {
     });
   });
 
+  it('rejects a secret-bearing raw keyword before canonicalization can hide it', async () => {
+    const output = jest.fn().mockResolvedValue({
+      output: {
+        extractions: [
+          {
+            title: 'Checkout auth',
+            keywords: ['checkout', 'Bearer abcdefghijkl1234'],
+            replaces: [],
+          },
+        ],
+      },
+    });
+    const propose = createLlmProposeMemoryExtractions({
+      inferenceClient: { output } as never,
+    });
+
+    await expect(propose({ transcript: 'task', recalledMemories: [] })).resolves.toEqual({
+      extractions: [],
+    });
+  });
+
   it('asks only for a title, keywords, and replaces, and derives the slug from the title', async () => {
     const output = jest.fn().mockResolvedValue({
       output: {

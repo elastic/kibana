@@ -374,16 +374,15 @@ Investigation transcript:\n${transcript}`,
           const candidate =
             typeof entry === 'object' && entry !== null ? (entry as Record<string, unknown>) : {};
           const title = String(candidate.title ?? '').trim();
+          const keywords = Array.isArray(candidate.keywords) ? candidate.keywords.map(String) : [];
           // Validate before canonicalization, or punctuation replaced by hyphens hides the pattern.
-          if (looksLikeSecret(title)) {
+          if (looksLikeSecret(title) || keywords.some(looksLikeSecret)) {
             return undefined;
           }
           return {
             slug: canonicalizeSlug(title),
             title,
-            tags: Array.isArray(candidate.keywords)
-              ? canonicalizeTags(candidate.keywords).slice(0, MAX_MEMORY_TAGS_PER_PAGE)
-              : [],
+            tags: canonicalizeTags(keywords).slice(0, MAX_MEMORY_TAGS_PER_PAGE),
             replaces: Array.isArray(candidate.replaces)
               ? canonicalizeMemoryLabelIds(candidate.replaces.map(String))
               : [],
