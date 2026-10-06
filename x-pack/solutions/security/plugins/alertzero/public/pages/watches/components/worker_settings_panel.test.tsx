@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -39,31 +39,19 @@ const createWorker = (workflowId: string | null): Worker => ({
 });
 
 const FEATURE_SETTINGS_URL = '/app/management/modelManagement/model_settings';
-const featureSettingsLocator = {
-  getUrl: jest.fn(async () => FEATURE_SETTINGS_URL),
-  navigate: jest.fn(async () => undefined),
-};
 
 const renderPanel = (
   workflowId: string | null,
   isAccordion: boolean,
-  overrides: { enabled?: boolean; serviceAccountId?: string; hasFeatureSettings?: boolean } = {}
+  overrides: { enabled?: boolean; serviceAccountId?: string } = {}
 ) => {
   const core = coreMock.createStart();
   core.http.get.mockResolvedValue(undefined);
-  const hasFeatureSettings = overrides.hasFeatureSettings ?? true;
-  const share = {
-    url: {
-      locators: {
-        get: (id: string) =>
-          hasFeatureSettings && id === 'SEARCH_INFERENCE_ENDPOINTS'
-            ? featureSettingsLocator
-            : undefined,
-      },
-    },
-  };
   core.application.getUrlForApp.mockImplementation(
-    (appId: string, options?: { path?: string }) => `/app/${appId}${options?.path ?? ''}`
+    (appId: string, options?: { path?: string; deepLinkId?: string }) =>
+      options?.deepLinkId === 'model_settings'
+        ? FEATURE_SETTINGS_URL
+        : `/app/${appId}${options?.path ?? ''}`
   );
   const settings = {
     ...createWorker(workflowId).settings,
@@ -72,7 +60,7 @@ const renderPanel = (
 
   render(
     <I18nProvider>
-      <KibanaContextProvider services={{ ...core, share }}>
+      <KibanaContextProvider services={core}>
         <WorkerSettingsPanel
           worker={createWorker(workflowId)}
           isAccordion={isAccordion}
@@ -134,41 +122,21 @@ describe('WorkerSettingsPanel view executions link', () => {
 });
 
 describe('WorkerSettingsPanel models', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('points the Models row at Feature settings', async () => {
-    renderPanel(WORKFLOW_ID, false);
+  it.each([
+    ['accordion', true],
+    ['single-Worker', false],
+  ])('points the Models row at Feature settings in a new tab (%s)', (_layout, isAccordion) => {
+    const core = renderPanel(WORKFLOW_ID, isAccordion);
 
     expect(screen.getByTestId(`alertZeroModelsRow-${WORKER_ID}`)).toHaveTextContent(
-      'This Worker uses models configured in Feature settings.'
+      'This Worker uses models configured in Feature settings'
     );
-    const link = await screen.findByTestId(`alertZeroModelsLink-${WORKER_ID}`);
+    const link = screen.getByTestId(`alertZeroModelsLink-${WORKER_ID}`);
     expect(link).toHaveAttribute('href', FEATURE_SETTINGS_URL);
-
-    fireEvent.click(link);
-
-    expect(featureSettingsLocator.navigate).toHaveBeenCalledWith({});
-  });
-
-  it('leaves a modified click to the browser so the page can open in a new tab', async () => {
-    renderPanel(WORKFLOW_ID, false);
-
-    fireEvent.click(await screen.findByTestId(`alertZeroModelsLink-${WORKER_ID}`), {
-      metaKey: true,
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(core.application.getUrlForApp).toHaveBeenCalledWith('management', {
+      deepLinkId: 'model_settings',
     });
-
-    expect(featureSettingsLocator.navigate).not.toHaveBeenCalled();
-  });
-
-  it('names Feature settings without a link when the page has no locator', () => {
-    renderPanel(WORKFLOW_ID, false, { hasFeatureSettings: false });
-
-    expect(screen.getByTestId(`alertZeroModelsRow-${WORKER_ID}`)).toHaveTextContent(
-      'This Worker uses models configured in Feature settings.'
-    );
-    expect(screen.queryByTestId(`alertZeroModelsLink-${WORKER_ID}`)).not.toBeInTheDocument();
   });
 });
 

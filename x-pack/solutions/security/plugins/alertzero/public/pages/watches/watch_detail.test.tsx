@@ -8,14 +8,7 @@
 import React from 'react';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import {
-  act,
-  fireEvent,
-  render as renderWithoutProviders,
-  screen,
-  waitFor,
-  within,
-} from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route, Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -129,7 +122,7 @@ jest.mock('./components/watches_section_layout', () => ({
   },
 }));
 
-const render = (ui: React.ReactElement) => renderWithoutProviders(ui, { wrapper: I18nProvider });
+const renderWithI18n = (ui: React.ReactElement) => render(ui, { wrapper: I18nProvider });
 
 const mockUseWatch = jest.mocked(useWatch);
 const mockUseWorkers = jest.mocked(useWorkers);
@@ -493,7 +486,7 @@ describe('WatchDetailPage', () => {
     } as never);
     mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
 
-    render(
+    renderWithI18n(
       <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
@@ -548,7 +541,7 @@ describe('WatchDetailPage', () => {
     } as never);
     mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
 
-    const { rerender } = render(
+    const { rerender } = renderWithI18n(
       <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
@@ -743,7 +736,7 @@ describe('WatchDetailPage', () => {
         </Route>
       </MemoryRouter>
     );
-    const { rerender } = render(tree());
+    const { rerender } = renderWithI18n(tree());
 
     const field = screen.getByTestId('alertZeroAnalysisWindowDays');
     fireEvent.change(field, { target: { value: '7' } });
@@ -1048,7 +1041,7 @@ describe('WatchDetailPage', () => {
     const history = createMemoryHistory({
       initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`],
     });
-    render(
+    renderWithI18n(
       <Router history={history}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
@@ -1130,7 +1123,7 @@ describe('WatchDetailPage', () => {
     const history = createMemoryHistory({
       initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`],
     });
-    render(
+    renderWithI18n(
       <Router history={history}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
@@ -1195,7 +1188,7 @@ describe('WatchDetailPage', () => {
     const history = createMemoryHistory({
       initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`],
     });
-    render(
+    renderWithI18n(
       <Router history={history}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
@@ -1248,7 +1241,7 @@ describe('WatchDetailPage', () => {
     const mutateAsync = jest.fn().mockRejectedValue(new Error('patch failed'));
     mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync } as never);
 
-    render(
+    renderWithI18n(
       <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
