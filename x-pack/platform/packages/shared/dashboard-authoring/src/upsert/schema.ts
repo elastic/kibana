@@ -18,7 +18,7 @@ const metadataSchema = z.object({
     .max(256)
     .optional()
     .describe(
-      "Non-empty dashboard title. If the current title is empty, missing, or a placeholder, invent one from the dashboard's contents."
+      'Non-empty dashboard title. If the current title is empty, missing, or a placeholder such as "User Dashboard", invent one from the dashboard\'s contents.'
     ),
   description: z.string().max(2048).optional(),
   time_range: timeRangeSchema

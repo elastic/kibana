@@ -42,35 +42,21 @@ ${enhanceGuidancePrompt}
 
 ## Describing Changes
 
-Every dashboard MUST have a non-empty \`title\`. A new dashboard requires \`set.title\`. If the current dashboard's title is empty, missing, or \`"User Dashboard"\`, set a title you invent from its contents.
+The tool schema describes each field. The rules below cover what the schema cannot express.
 
-Make all changes in a single ${dashboardTools.generateDashboard} call whenever possible. The tool applies them together: sections first, then panels, then controls, then removals.
-
-**Ids.** Items are matched by \`id\`. An existing id updates that item; a new id creates it, and the id you choose is kept. Use short readable slugs for new items (e.g. \`"error-rate-trend"\`, \`"key-metrics"\`). An id must be unique across panels and sections. Do not list the same id in \`panels\` or \`sections\` and in \`remove\`.
-
-**Sections.** List a section in \`sections\` to create it (a \`title\` is required) or to rename or collapse it. Place panels in a section with \`panels[].section\` set to its id, in the same call that creates it. \`section: null\` moves a panel to the top level; omitting \`section\` keeps an existing panel where it is and puts a new panel at the top level. Removing a section also removes the panels still in it, so move the panels you want to keep first.
-
-**Layout.** Panel positions and sizes are arranged automatically after every call. Do not compute positions. Set \`panels[].grid: { w, h }\` only when the user asks for a specific panel size (e.g. "make it full width"); that size is kept. Pass \`layout\` only when the user gives layout instructions (e.g. "put all metrics in one row"); it rearranges the whole dashboard.
-
-For a new dashboard:
-- Set \`set.title\` and \`set.description\`. Only include \`set.time_range\` when the user explicitly named a specific time window (e.g. "last 7 days", "May 20–24"). Do not set it otherwise — a data-aware default is applied automatically.
-- Add every panel in \`panels\`, each with a new id and \`content\`.
-- Add \`sections\` when panels naturally group into distinct topics or the dashboard is large enough that sections improve scanability.
+Make all changes in a single ${dashboardTools.generateDashboard} call whenever possible. The tool applies them together: sections first, then panels, then controls, then removals. Place panels in a new section in the same call that creates it.
 
 For an existing dashboard:
 - Edit a panel by listing its id with \`content\` of the same kind. Reorganizing or enhancing a dashboard does not require replacing panels.
-- For focused edits, pass only the requested change in the \`query\` (e.g. "make the error series blue"). The chart author preserves unrelated presentation settings. Set \`applyChartRules: true\` to apply all presentation defaults to an existing ES|QL Lens panel instead.
-- Set \`preserveESQL: true\` when the panel's query should stay unchanged. Omit it when the edit changes what the panel measures. This is independent of \`applyChartRules\`, so a query change and presentation enhancement can share one edit.
-- \`content\` of a different kind than the existing panel, or a \`source: "attachment"\` content, replaces the panel and keeps its id.
-- To only move a panel, list its id with \`section\` and no \`content\`.
+- For focused edits, pass only the requested change in the \`query\` (e.g. "make the error series blue"). The chart author preserves unrelated presentation settings.
 - If a requested change targets a DSL, form-based, or other non-ES|QL Lens visualization panel, explicitly tell the user direct editing is not supported and ask for confirmation before replacing that panel with a newly created ES|QL-based Lens panel.
 
 ## Panel Content
 
-Each visualization request is authored in a separate context. New-panel authors do not see the dashboard attachment or other panels, so for Lens and Vega panels pass the exact known \`index\` and describe the measure, fields, and filters in \`query\`. Omit \`index\` only when the source is unknown and discovery is needed. Custom content panels take no \`index\`; their data comes only from \`esql\` (see Custom content panels). Edits of existing panels receive the original configuration and queries automatically through the panel id.
+Each visualization request is authored in a separate context. New-panel authors do not see the dashboard attachment or other panels, so describe the measure, fields, and filters in \`query\`. Edits of existing panels receive the original configuration and queries automatically through the panel id.
 
-- Use \`source: "request"\` to create or edit a Lens, Vega, or custom content panel from a natural-language query — this is the only way to make a **new** generated panel. Set \`renderer\` to pick the engine; each renderer accepts only its own fields.
-- Use \`source: "attachment"\` with an \`attachment_id\` to place any visualization that already exists in this conversation — anything \`${platformCoreTools.createVisualization}\` returned. Pass only the id; the attachment's own renderer decides the panel type. A \`source: "request"\` would generate a **new**, different panel instead.
+- Use \`source: "request"\` to create or edit a Lens, Vega, or custom content panel from a natural-language query — this is the only way to make a **new** generated panel.
+- Use \`source: "attachment"\` to place a visualization that \`${platformCoreTools.createVisualization}\` already returned in this conversation. A \`source: "request"\` would generate a **new**, different panel instead.
 - Use \`source: "config"\` for panels you author by value: markdown and ML anomaly panels.
 
 ## Panel Type Selection
@@ -90,15 +76,7 @@ Reach for custom content only when nothing above fits:
 - Plain explanatory text with no data → use markdown.
 - The content needs an HTML/CSS layout no single Lens chart type can express, or mixes narrative text with live data, or the user explicitly asks for a custom/HTML panel → use custom content.
 
-**ES|QL for custom content:** set \`esql\` yourself when the panel needs live data — omitting it renders static content with no data, it does not get generated for you. Build the query with \`${platformCoreTools.generateEsql}\` rather than writing it directly, or use one the user supplied verbatim. The server runs the query to sample its schema before generating the template, so a query Elasticsearch rejects fails that panel and returns an error naming the reason — correct the query and retry rather than proceeding.
-
-**Creating a custom content panel:** set \`query\` to a concise description of what to display; the HTML template is generated server-side from it. Set \`esql\` when the panel needs live data.
-
-**Editing a custom content panel:** list the panel id with \`content: { source: "request", renderer: "custom_content" }\`. Set \`query\` to the requested change and/or \`esql\` to a new query (\`null\` removes it). Omit \`esql\` to keep the current query. The server refines the existing template.
-
 ## Chart Type Guidance
-
-For every new Lens panel, choose and pass \`chartType\`; it is required. For a new Vega panel, \`chartType\` is an optional authoring hint — omit it when no Lens chart type represents the requested visualization. On edits, \`chartType\` is optional because the existing panel configuration provides the current visual form. When editing a Lens panel, omit \`chartType\` to preserve its current chart family; provide a new \`chartType\` when the request changes the chart family, such as from \`xy\` to \`pie\`.
 
 Before adding panels, pick 1–2 primary time-series XY (the overview trend that matches the title or intent).
 On a new dashboard, phrase at least one and at most two of those primary time-series XY queries as "<measure> over time, show avg/min/max in the legend" (e.g. "log volume over time, show avg/min/max in the legend"). Skip categorical bar charts and queries whose measure is already AVG/MIN/MAX of a field.
@@ -109,35 +87,15 @@ ${chartTypeSelectionGuidance}
 
 ${dashboardCompositionPrompt}
 
-## ES|QL
-
-Omit the \`esql\` field on Lens and Vega panels unless you received a validated query from a prior tool result or the user pasted one explicitly. Do not write or derive ES|QL yourself — the tool generates it from the natural language \`query\`. Custom content is the exception: the tool does not generate its query, so pass \`esql\` whenever the panel needs data (see Custom content panels).
-
 ## Controls
 
-Controls are interactive filters pinned above the dashboard that let users explore data without editing queries. Add them with \`controls\` and remove them by id with \`remove\`.
+Controls are interactive filters pinned above the dashboard that let users explore data without editing queries.
 
-**When building a new dashboard from scratch**, proactively add 3–5 \`options_list_control\` dropdowns for the most useful categorical fields. Pick fields that appear in panel \`BY\` / \`WHERE\` clauses, prefer low-cardinality keyword fields (e.g. \`service.name\`, \`host.name\`, \`env\`, \`region\`, \`kubernetes.namespace\`, \`http.response.status_code\`). Avoid high-cardinality identifiers (trace IDs, request IDs, UUIDs).
+**When building a new dashboard from scratch**, proactively add 3–5 \`options_list_control\` dropdowns for the most useful categorical fields. Pick fields that appear in panel \`BY\` / \`WHERE\` clauses, prefer low-cardinality keyword fields (e.g. \`service.name\`, \`host.name\`, \`env\`, \`region\`, \`kubernetes.namespace\`, \`http.response.status_code\`). Avoid high-cardinality identifiers (trace IDs, request IDs, UUIDs). Add a \`range_slider_control\` only when filtering by a numeric threshold is useful across multiple panels.
 
 Do not add controls to dashboards already scoped to a single entity (one host, one service, etc.).
 
 Controls query the index directly, so columns created in ES|QL (\`DISSECT\`, \`GROK\`, \`EVAL\`, \`RENAME\`) cannot back a control. Controls are optional: when no mapped field fits, add fewer controls or none.
-
-**Control types:**
-- \`options_list_control\` — dropdown for categorical / keyword fields. The most common type (95% of cases).
-- \`range_slider_control\` — numeric range slider. Add sparingly, only when filtering by a numeric threshold is useful across multiple panels (e.g. \`latency\`, \`bytes\`, \`duration\`).
-- \`time_slider_control\` — global time sub-range picker. Add at most one per dashboard, only when time-range narrowing within the global window is useful.
-
-**Required fields per control:**
-- \`type\`: one of the three above.
-- \`field_name\` (not for \`time_slider_control\`): exact name of a field mapped on \`index\` (e.g. \`"service.name"\`).
-- \`index\` (not for \`time_slider_control\`): same index as the dashboard panels (e.g. \`"logs-*"\`).
-- \`title\` (optional, \`options_list_control\` and \`range_slider_control\` only): human-readable label shown above the control (e.g. \`"Service"\`).
-- \`user_requested\` (optional): \`true\` only when the user asked explicitly for the controls.
-
-**Defaults applied by the server:** \`width: "medium"\`, \`grow: true\` (fills available horizontal space). Override only if the user asks.
-
-**Removing controls:** list their \`id\` values from the \`controls[]\` list in the tool result in \`remove\`.
 
 ## Generation Edge Cases
 
