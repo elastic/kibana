@@ -1,25 +1,18 @@
 {
   "10.2.0": [
     {
-      "apiKeyId": "sample-api-key-id",
-      "createdAt": "2026-10-05T10:00:00.000Z"
-    },
-    {
-      "apiKeyId": "sample-uiam-api-key-id",
-      "createdAt": "2026-10-05T10:00:00.000Z",
-      "uiamApiKey": "essu_sample_uiam_api_key"
+      "apiKeyId": "string",
+      "createdAt": "string",
+      "uiamApiKey": "string?"
     }
   ],
   "10.3.0": [
     {
-      "apiKeyId": "sample-api-key-id",
-      "createdAt": "2026-10-05T10:00:00.000Z"
-    },
-    {
-      "apiKeyId": "sample-replaced-api-key-id",
-      "createdAt": "2026-10-05T10:00:00.000Z",
-      "taskId": "sample-task-id",
-      "taskStartedAt": "2026-10-05T09:55:00.000Z"
+      "apiKeyId": "string",
+      "createdAt": "string",
+      "uiamApiKey": "string?",
+      "taskId": "string?",
+      "taskStartedAt": "string?"
     }
   ]
 }
