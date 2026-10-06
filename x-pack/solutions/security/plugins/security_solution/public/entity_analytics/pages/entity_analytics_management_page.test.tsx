@@ -224,6 +224,7 @@ const mockUseToggleEntityAnalytics = jest.fn().mockReturnValue({
   status: 'not_installed',
   isLoading: false,
   isStatusLoading: false,
+  pendingAction: null,
   toggle: jest.fn(),
   errors: { entityStore: [] },
 });
@@ -348,6 +349,7 @@ describe('EntityAnalyticsManagementPage', () => {
       status: 'not_installed',
       isLoading: false,
       isStatusLoading: false,
+      pendingAction: null,
       toggle: jest.fn(),
       errors: { entityStore: [] },
     });
@@ -584,6 +586,63 @@ describe('EntityAnalyticsManagementPage', () => {
     expect(screen.getByTestId('mock-watchlists-tab')).toBeInTheDocument();
   });
 
+  describe('Entity Analytics toggle progress', () => {
+    it('hides the progress bar while the toggle is idle', () => {
+      render(pageComponent());
+      expect(
+        screen.queryByRole('progressbar', { name: /entity analytics/i })
+      ).not.toBeInTheDocument();
+    });
+
+    it('shows the progress bar while the Entity Analytics status is loading', () => {
+      mockUseToggleEntityAnalytics.mockReturnValue({
+        status: 'not_installed',
+        isLoading: false,
+        isStatusLoading: true,
+        pendingAction: null,
+        toggle: jest.fn(),
+        errors: { entityStore: [] },
+      });
+      render(pageComponent());
+      expect(
+        screen.getByRole('progressbar', { name: 'Loading Entity Analytics status' })
+      ).toBeInTheDocument();
+    });
+
+    it('shows the progress bar while Entity Analytics is being enabled', () => {
+      mockUseToggleEntityAnalytics.mockReturnValue({
+        status: 'enabling',
+        isLoading: true,
+        isStatusLoading: false,
+        pendingAction: 'enable',
+        toggle: jest.fn(),
+        errors: { entityStore: [] },
+      });
+      render(pageComponent());
+      expect(
+        screen.getByRole('progressbar', { name: 'Enabling Entity Analytics' })
+      ).toBeInTheDocument();
+    });
+
+    it('shows the progress bar while Entity Analytics is being disabled', () => {
+      mockUseEntityStoreStatus.mockReturnValue({
+        data: { status: 'running', engines: [{ type: 'host' }] },
+      });
+      mockUseToggleEntityAnalytics.mockReturnValue({
+        status: 'enabling',
+        isLoading: true,
+        isStatusLoading: false,
+        pendingAction: 'disable',
+        toggle: jest.fn(),
+        errors: { entityStore: [] },
+      });
+      render(pageComponent());
+      expect(
+        screen.getByRole('progressbar', { name: 'Disabling Entity Analytics' })
+      ).toBeInTheDocument();
+    });
+  });
+
   // The toggle enables both the risk score maintainer and the Entity Store in one action, so
   // enablement requires BOTH privilege sets (an OR would let an install-only user flip it and then
   // hit a risk engine 500). OFF derives stop privileges from install_privileges.kibana (SO write), not full install.
@@ -647,6 +706,7 @@ describe('EntityAnalyticsManagementPage', () => {
         status: 'enabled',
         isLoading: false,
         isStatusLoading: false,
+        pendingAction: null,
         toggle: jest.fn(),
         errors: { entityStore: [] },
       });

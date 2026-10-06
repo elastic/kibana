@@ -6,7 +6,8 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiCallOut, EuiProgress, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
@@ -73,6 +74,18 @@ const DISABLED_SWITCH_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.disabledToggleSwitch',
   { defaultMessage: 'Disabled' }
 );
+const LOADING_STATUS_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.loadingStatusAriaLabel',
+  { defaultMessage: 'Loading Entity Analytics status' }
+);
+const ENABLING_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.enablingAriaLabel',
+  { defaultMessage: 'Enabling Entity Analytics' }
+);
+const DISABLING_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.disablingAriaLabel',
+  { defaultMessage: 'Disabling Entity Analytics' }
+);
 
 const canDeleteEntityEngine = (status?: string) =>
   !['not_installed', 'installing'].includes(status || '');
@@ -98,6 +111,7 @@ export const EntityAnalyticsManagementHeader = ({
   onSaveSettings,
   isSavingSettings,
 }: EntityAnalyticsManagementHeaderProps) => {
+  const { euiTheme } = useEuiTheme();
   const riskEnginePrivileges = useMissingRiskEnginePrivileges();
   const entityStoreStatus = useEntityStoreStatus();
   const { data: entityEnginePrivileges, isLoading: isLoadingPrivileges } =
@@ -124,7 +138,9 @@ export const EntityAnalyticsManagementHeader = ({
 
   const {
     status: toggleStatus,
+    isLoading: isToggleLoading,
     isStatusLoading: isToggleStatusLoading,
+    pendingAction,
     toggle: toggleEntityAnalytics,
     errors: toggleErrors,
   } = useToggleEntityAnalytics({
@@ -134,6 +150,12 @@ export const EntityAnalyticsManagementHeader = ({
   });
 
   const isToggleChecked = toggleStatus === 'enabled';
+  const toggleProgressLabel =
+    pendingAction === 'disable'
+      ? DISABLING_LABEL
+      : pendingAction === 'enable'
+      ? ENABLING_LABEL
+      : LOADING_STATUS_LABEL;
   // Turning the toggle ON installs or starts the Entity Store, so it requires the full
   // enablement privilege set. Turning it OFF stops engines via user-scoped SO updates on
   // entity-engine-descriptor-v2, so it requires SO write privileges, but not the full
@@ -253,6 +275,23 @@ export const EntityAnalyticsManagementHeader = ({
         spacing="largeBleed"
         docLink={docLinks.links.securitySolution.entityAnalytics.entityRiskScoring}
       />
+      {(isToggleLoading || isToggleStatusLoading) && (
+        // Absolute positioning to keep the bar out of the layout. The z-index to stack the bar above the sticky header.
+        <div
+          css={css`
+            position: relative;
+            z-index: ${Number(euiTheme.levels.mask) + 1};
+          `}
+        >
+          <EuiProgress
+            size="xs"
+            color="primary"
+            position="absolute"
+            role="progressbar"
+            aria-label={toggleProgressLabel}
+          />
+        </div>
+      )}
       <EntityAnalyticsErrorPanel entityStoreErrors={toggleErrors.entityStore} />
       {deleteError && (
         <>
