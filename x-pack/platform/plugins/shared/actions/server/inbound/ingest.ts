@@ -147,7 +147,10 @@ export async function ingestInboundEvent({
       outcome,
       ...(detail !== undefined ? { detail } : {}),
     });
-    rateLimiter.recordRemoteAddressFailure(remoteAddressKey);
+    // A missing type or connector must not take a key. The id is chosen by the caller.
+    if (outcome === 'auth_fail') {
+      rateLimiter.recordRemoteAddressFailure(remoteAddressKey);
+    }
     return { status: 'not_found' };
   };
 

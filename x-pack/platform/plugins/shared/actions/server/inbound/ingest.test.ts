@@ -1143,24 +1143,47 @@ describe('ingestInboundEvent', () => {
     expect(result.status).toBe('accepted');
   });
 
-  it('counts each 404 against the address budget and then skips the saved-object read', async () => {
+  it('counts a rejected token against the address budget and then skips the saved-object read', async () => {
     const limiter = windowLimiter({ remoteAddressLimit: 2, connectorLimit: 10 });
-    getConnectorSpecMock.mockReturnValue(undefined);
+    getConnectorSpecMock.mockReturnValue(emptyEmitSpec());
+    const rejected = {
+      rateLimiter: limiter,
+      remoteAddress: '203.0.113.10',
+      query: { token: 'wrong' },
+    };
 
-    const first = await run({ rateLimiter: limiter, remoteAddress: '203.0.113.10' });
-    const second = await run({ rateLimiter: limiter, remoteAddress: '203.0.113.10' });
+    const first = await run(rejected);
+    const second = await run(rejected);
     expect(first.result.status).toBe('not_found');
     expect(second.result.status).toBe('not_found');
-    expect(getUnsecuredSavedObjectsClient).not.toHaveBeenCalled();
+    expect(getUnsecuredSavedObjectsClient).toHaveBeenCalledTimes(2);
 
-    getConnectorSpecMock.mockReturnValue(emptyEmitSpec());
-    const third = await run({ rateLimiter: limiter, remoteAddress: '203.0.113.10' });
+    getUnsecuredSavedObjectsClient.mockClear();
+    const third = await run(rejected);
     expect(third.result).toEqual({
       status: 'rate_limited',
       budget: 'remoteAddress',
       retryAfterSeconds: expect.any(Number),
     });
     expect(getUnsecuredSavedObjectsClient).not.toHaveBeenCalled();
+  });
+
+  it('does not spend the address budget when the connector type or the connector is missing', async () => {
+    const limiter = windowLimiter({ remoteAddressLimit: 1, connectorLimit: 10 });
+    getConnectorSpecMock.mockReturnValue(undefined);
+
+    const missingType = await run({ rateLimiter: limiter, remoteAddress: '203.0.113.14' });
+    expect(missingType.result.status).toBe('not_found');
+
+    getConnectorSpecMock.mockReturnValue(emptyEmitSpec());
+    unsecuredSavedObjectsClient.get.mockRejectedValueOnce(
+      SavedObjectsErrorHelpers.createGenericNotFoundError('action', connectorId)
+    );
+    const missingConnector = await run({ rateLimiter: limiter, remoteAddress: '203.0.113.14' });
+    expect(missingConnector.result.status).toBe('not_found');
+
+    const accepted = await run({ rateLimiter: limiter, remoteAddress: '203.0.113.14' });
+    expect(accepted.result.status).toBe('accepted');
   });
 
   it('does not spend the address budget on successful ingests', async () => {

@@ -67,12 +67,12 @@ export class InboundEventRateLimiter {
 
   constructor(private readonly config: InboundEventRateLimitConfig) {}
 
-  /** Denied when this address is over budget, or untracked while the address map is full. Does not increment. */
+  /** Returns denied when this socket and connector are already over the failed-auth budget. Does not increment. */
   peekRemoteAddress(key: string): InboundEventRateLimitDecision {
     return this.decide('remoteAddress', key, false);
   }
 
-  /** Call only after a 404 (unknown connector, bad token, auth miss). */
+  /** Call only after the connector has loaded and the token was rejected. */
   recordRemoteAddressFailure(key: string): void {
     this.decide('remoteAddress', key, true);
   }
@@ -96,13 +96,12 @@ export class InboundEventRateLimiter {
     const existing = windows.get(key);
 
     if (!existing) {
-      // A full map cannot count a new address. Deny the peek too, or that address stays
-      // unlimited until a live key expires.
-      if (windows.size >= this.config.maxKeys && !this.sweep(windows, now, windowMs)) {
-        return { allowed: false, retryAfterSeconds: windowRetrySeconds(windowMs) };
-      }
       if (!write) {
         return { allowed: true };
+      }
+      // A full map refuses a new key. A peek of a key that is not stored stays allowed.
+      if (windows.size >= this.config.maxKeys && !this.sweep(windows, now, windowMs)) {
+        return { allowed: false, retryAfterSeconds: windowRetrySeconds(windowMs) };
       }
       windows.set(key, {
         windowStartMs: alignWindow(now, windowMs),

@@ -83,7 +83,7 @@ xpack.actions.inboundEvents.rateLimit:
     window: 1m
 ```
 
-A failed auth spends the address budget for that socket and that connector (space, type, and connector id). A request that authenticates does not. The socket is `request.socket.remoteAddress`, or `unknown` when the socket has none. The hub does not read `X-Forwarded-For`. On Cloud the socket is often the shared proxy, so each connector has its own 10.
+A rejected token spends the address budget for that socket and that connector (space, type, and connector id). A missing connector does not. A request that authenticates does not. The socket is `request.socket.remoteAddress`, or `unknown` when the socket has none. The hub does not read `X-Forwarded-For`. On Cloud the socket is often the shared proxy, so each connector has its own 10.
 
 The connector budget counts one authenticated request, including a handshake that passes auth. A request that emits 25 events still costs 1. Each node keeps its own counters.
 
