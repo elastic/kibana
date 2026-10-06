@@ -11,7 +11,7 @@ import type { EsTestCluster } from '@kbn/test';
 import { createTestEsCluster } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import { MEMORY_INDEX } from '../../../common/memory';
-import { ensureMemoryIndex, MEMORY_INDEX_TEMPLATE_NAME } from '../ensure_memory_index';
+import { ensureMemoryIndex, MEMORY_INDEX_COMPONENT_TEMPLATE_NAME } from '../ensure_memory_index';
 import { createMemoryPageStore, epochSecondsToIso, type MemoryPageWrite } from '../page_store';
 
 const SPACE_A = 'space-a';
@@ -37,9 +37,11 @@ describe('Nightshift Semantic Memory with Elasticsearch', () => {
 
   const logger = loggerMock.create();
 
-  const deleteIndexTemplate = async (): Promise<void> => {
+  const deleteComponentTemplate = async (): Promise<void> => {
     try {
-      await esClient.indices.deleteIndexTemplate({ name: MEMORY_INDEX_TEMPLATE_NAME });
+      await esClient.cluster.deleteComponentTemplate({
+        name: MEMORY_INDEX_COMPONENT_TEMPLATE_NAME,
+      });
     } catch (error) {
       if ((error as { statusCode?: number }).statusCode !== 404) {
         throw error;
@@ -55,13 +57,13 @@ describe('Nightshift Semantic Memory with Elasticsearch', () => {
     esClient = esServer.getClient();
 
     await esClient.indices.delete({ index: MEMORY_INDEX, ignore_unavailable: true });
-    await deleteIndexTemplate();
+    await deleteComponentTemplate();
     await ensureMemoryIndex({ esClient, logger });
   });
 
   afterAll(async () => {
     await esClient?.indices.delete({ index: MEMORY_INDEX, ignore_unavailable: true });
-    await deleteIndexTemplate();
+    await deleteComponentTemplate();
     await esClient?.close();
     await esServer?.stop();
   });

@@ -6,18 +6,15 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { MEMORY_INDEX } from '../../common/memory';
-
-export const MEMORY_INDEX_TEMPLATE_NAME = 'nightshift-semantic-memory';
-
-/** Above the managed `ai-index-idx` template's 500, so this field wins the merge. */
-export const MEMORY_INDEX_TEMPLATE_PRIORITY = 600;
 
 /**
- * The managed `ai-index-idx` template maps title/description/content as
- * semantic, but has no `context` field. A memory's recall key is the task that
- * produced it, so this index-scoped template adds that one field on top.
+ * The managed `ai-index-idx` template composes this component, so a mapping put
+ * here reaches every undotted AI index. The managed template already maps
+ * title/description/content as semantic but has no `context` field, which is a
+ * memory's task-recall key.
  */
+export const MEMORY_INDEX_COMPONENT_TEMPLATE_NAME = 'ai-index@custom';
+
 export const MEMORY_CONTEXT_MAPPING = {
   properties: {
     context: {
@@ -30,8 +27,8 @@ export const MEMORY_CONTEXT_MAPPING = {
 };
 
 /**
- * Installs the plugin's one-field template. The backing index is auto-created from
- * the managed `ai-index-idx` template on first write; no index is created here.
+ * Installs the component template that adds the task-recall lane. The backing
+ * index is auto-created from the AI-index template on first write.
  */
 export const ensureMemoryIndex = async ({
   esClient,
@@ -40,19 +37,16 @@ export const ensureMemoryIndex = async ({
   esClient: ElasticsearchClient;
   logger: Logger;
 }): Promise<void> => {
-  await esClient.indices.putIndexTemplate({
-    name: MEMORY_INDEX_TEMPLATE_NAME,
-    index_patterns: [MEMORY_INDEX],
-    priority: MEMORY_INDEX_TEMPLATE_PRIORITY,
-    create: false,
+  await esClient.cluster.putComponentTemplate({
+    name: MEMORY_INDEX_COMPONENT_TEMPLATE_NAME,
+    template: { mappings: MEMORY_CONTEXT_MAPPING },
     _meta: {
       managed: true,
       description:
         'Nightshift Semantic Memory — adds the task-recall lane to the AI-index template.',
     },
-    template: {
-      mappings: MEMORY_CONTEXT_MAPPING,
-    },
   });
-  logger.debug(`Ensured Semantic Memory index template ${MEMORY_INDEX_TEMPLATE_NAME}`);
+  logger.debug(
+    `Ensured Semantic Memory component template ${MEMORY_INDEX_COMPONENT_TEMPLATE_NAME}`
+  );
 };

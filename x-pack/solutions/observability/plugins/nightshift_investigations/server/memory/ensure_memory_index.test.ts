@@ -6,36 +6,29 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { MEMORY_INDEX } from '../../common/memory';
 import {
   ensureMemoryIndex,
   MEMORY_CONTEXT_MAPPING,
-  MEMORY_INDEX_TEMPLATE_NAME,
-  MEMORY_INDEX_TEMPLATE_PRIORITY,
+  MEMORY_INDEX_COMPONENT_TEMPLATE_NAME,
 } from './ensure_memory_index';
 
 describe('ensureMemoryIndex', () => {
   const logger = loggerMock.create();
 
   const createEsClient = () => ({
-    indices: { putIndexTemplate: jest.fn().mockResolvedValue({}) },
+    cluster: { putComponentTemplate: jest.fn().mockResolvedValue({}) },
   });
 
-  it('installs an index-scoped template that adds the task-recall field on top of the AI index', async () => {
+  it('installs the AI-index component template that adds the task-recall field', async () => {
     const esClient = createEsClient();
 
     await ensureMemoryIndex({ esClient: esClient as never, logger });
 
-    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith({
-      name: MEMORY_INDEX_TEMPLATE_NAME,
-      index_patterns: [MEMORY_INDEX],
-      // Above the managed `ai-index-idx` template, so `context` wins the merge.
-      priority: MEMORY_INDEX_TEMPLATE_PRIORITY,
-      create: false,
-      _meta: expect.objectContaining({ managed: true }),
+    expect(esClient.cluster.putComponentTemplate).toHaveBeenCalledWith({
+      name: MEMORY_INDEX_COMPONENT_TEMPLATE_NAME,
       template: { mappings: MEMORY_CONTEXT_MAPPING },
+      _meta: expect.objectContaining({ managed: true }),
     });
-    expect(MEMORY_INDEX.startsWith('ai-index-idx-')).toBe(true);
     expect(MEMORY_CONTEXT_MAPPING.properties.context.fields.semantic.type).toBe('semantic_text');
   });
 });
