@@ -631,36 +631,35 @@ evaluate.describe(
 
                           // Write to .rule-events so the agent's RuleEventsClient can find the
                           // seeded episode in the next cycle's event_search call.
-                          if (seededEvent.event_id) {
-                            const groupHash = toRuleEventsGroupHash(seededEvent.event_id);
-                            await esClient.index({
-                              index: RULE_EVENTS_DATA_STREAM,
-                              document: {
-                                '@timestamp': seededEvent['@timestamp'],
-                                group_hash: groupHash,
-                                source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
-                                type: 'alert',
-                                space_id: 'default',
-                                severity: seededEvent.severity,
-                                alert: {
-                                  status: seededEvent.status,
-                                },
-                                data: {
-                                  event_id: seededEvent.event_id,
-                                  rule_name: seededEvent.title,
-                                  title: seededEvent.title,
-                                  summary: seededEvent.summary,
-                                  stream_names: seededEvent.stream_names,
-                                  confidence: seededEvent.confidence,
-                                  symptom_hypothesis: seededEvent.symptom_hypothesis,
-                                  signals: seededEvent.signals,
-                                  causal_features: seededEvent.causal_features,
-                                  blast_radius: seededEvent.blast_radius,
-                                },
+                          // event_id is guaranteed non-empty by the `continue` guard above.
+                          const groupHash = toRuleEventsGroupHash(seededEvent.event_id);
+                          await esClient.index({
+                            index: RULE_EVENTS_DATA_STREAM,
+                            document: {
+                              '@timestamp': seededEvent['@timestamp'],
+                              group_hash: groupHash,
+                              source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
+                              type: 'alert',
+                              space_id: 'default',
+                              severity: seededEvent.severity,
+                              alert: {
+                                status: seededEvent.status,
                               },
-                            });
-                            seededGroupHashes.push(groupHash);
-                          }
+                              data: {
+                                event_id: seededEvent.event_id,
+                                rule_name: seededEvent.title,
+                                title: seededEvent.title,
+                                summary: seededEvent.summary,
+                                stream_names: seededEvent.stream_names,
+                                confidence: seededEvent.confidence,
+                                symptom_hypothesis: seededEvent.symptom_hypothesis,
+                                signals: seededEvent.signals,
+                                causal_features: seededEvent.causal_features,
+                                blast_radius: seededEvent.blast_radius,
+                              },
+                            },
+                          });
+                          seededGroupHashes.push(groupHash);
                         }
                         if (producedEventIds.length > 0) {
                           await esClient.indices.refresh({

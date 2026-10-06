@@ -231,7 +231,7 @@ export class RuleEventsClient {
     });
 
     if (options.status?.length) {
-      query = query.where`${esql.col('episode.status')} IN (${options.status.map((status) =>
+      query = query.where`${esql.col('alert.status')} IN (${options.status.map((status) =>
         esql.str(status)
       )})`;
     }

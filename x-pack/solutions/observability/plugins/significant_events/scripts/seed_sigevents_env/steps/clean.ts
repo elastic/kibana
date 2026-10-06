@@ -89,6 +89,7 @@ async function cleanDetectionAndEventHistory(
     {
       bool: {
         filter: [
+          { terms: { 'rule.id': ruleIds } },
           { term: { source: SIGNIFICANT_EVENTS_ALERT_SOURCE } },
           { term: { space_id: space } },
         ],
