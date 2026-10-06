@@ -42,6 +42,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.selectIndexPattern('logstash-*');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
     });
 
     it('should open the doc view of the selected document', async function () {
@@ -64,8 +66,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should create an exists filter from doc view of the selected document', async function () {
-      await PageObjects.discover.waitUntilSearchingHasFinished();
-
       await dataGrid.clickRowToggle({ rowIndex: 0 });
       await dataGrid.clickFieldActionInFlyout('@timestamp', 'addExistsFilterButton');
 
