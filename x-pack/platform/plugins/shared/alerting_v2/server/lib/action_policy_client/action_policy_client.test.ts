@@ -3265,7 +3265,7 @@ describe('ActionPolicyClient', () => {
     it('skips expression-only matchers that cannot be resolved from rule tags', async () => {
       const matcherAttr: ActionPolicySavedObjectAttributes = {
         ...baseAttributes,
-        matcher: { expression: 'episode_status: "active"' },
+        matcher: { expression: 'alert_status: "active"' },
       };
 
       mockSavedObjectsClient.find.mockResolvedValueOnce(
