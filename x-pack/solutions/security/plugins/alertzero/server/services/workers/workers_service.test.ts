@@ -1625,18 +1625,33 @@ describe('WorkersService', () => {
     });
 
     describe('reconcile after enable', () => {
+      // The rule appears after the first attach pass has run: update() writes the enable last, so
+      // a rule created while the Worker is still off is only visible to the pass that follows it.
+      const createRuleWhenEnableLands = (
+        harness: ReturnType<typeof createPersistentHarness>,
+        attachment: ReturnType<typeof makeAttachmentService>
+      ) => {
+        const write = harness.updateWorkflow.getMockImplementation()!;
+        harness.updateWorkflow.mockImplementation(async (id, patch, spaceId) => {
+          if (patch.enabled) attachment.notAttached.add('created-during-enable');
+          return write(id, patch, spaceId);
+        });
+      };
+
       // Rules created after the first attach pass but before the enable are seen by the
       // rule-created workflow while the Worker is still off, which attaches nothing for them.
       it('attaches rules created while the enable was in flight', async () => {
         const harness = createPersistentHarness();
         const attachment = makeAttachmentService({ notAttachedIds: ['before'] });
-        harness.updateWorkflow.mockImplementationOnce(async () => {
-          attachment.notAttached.add('created-during-enable');
-          return {} as never;
-        });
+        createRuleWhenEnableLands(harness, attachment);
         const { service } = makeService(harness, attachment);
 
-        const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+        const result = await service.update(
+          TRIAGE,
+          { enabled: true, settings: { serviceAccountId: 'sa-1' }, settingsRevision: null },
+          SPACE,
+          request
+        );
 
         expect(result.outcome).toBe('updated');
         expect([...attachment.attached].sort()).toEqual(['before', 'created-during-enable']);
@@ -1651,7 +1666,12 @@ describe('WorkersService', () => {
         });
         const { service } = makeService(harness, attachment);
 
-        await service.update(TRIAGE, { enabled: true }, SPACE, request);
+        await service.update(
+          TRIAGE,
+          { enabled: true, settings: { serviceAccountId: 'sa-1' }, settingsRevision: null },
+          SPACE,
+          request
+        );
 
         expect(attachment.updateRuleAttachments).not.toHaveBeenCalled();
       });
@@ -1659,10 +1679,7 @@ describe('WorkersService', () => {
       it('keeps the enable when the reconcile pass fails and logs the error', async () => {
         const harness = createPersistentHarness();
         const attachment = makeAttachmentService({ notAttachedIds: ['before'] });
-        harness.updateWorkflow.mockImplementationOnce(async () => {
-          attachment.notAttached.add('created-during-enable');
-          return {} as never;
-        });
+        createRuleWhenEnableLands(harness, attachment);
         attachment.updateRuleAttachments
           .mockImplementationOnce(async ({ attachRuleIds }) => {
             attachRuleIds.forEach((id) => {
@@ -1678,13 +1695,29 @@ describe('WorkersService', () => {
           Promise.resolve(harness.managedWorkflows),
           logger as Logger,
           {},
-          { getAttachmentService: (async () => attachment) as any }
+          { getAttachmentService: (async () => attachment) as any },
+          async (_request, registration, options) => {
+            await harness.install(registration.id, options);
+          }
         );
 
-        const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+        const result = await service.update(
+          TRIAGE,
+          { enabled: true, settings: { serviceAccountId: 'sa-1' }, settingsRevision: null },
+          SPACE,
+          request
+        );
 
         expect(result.outcome).toBe('updated');
-        expect(harness.updateWorkflow).toHaveBeenCalledTimes(1);
+        // The enable is written once and never rolled back; the first call only saves settings.
+        expect(
+          harness.updateWorkflow.mock.calls.filter(([, patch]) => patch.enabled === true)
+        ).toHaveLength(1);
+        expect(harness.updateWorkflow).not.toHaveBeenLastCalledWith(
+          expect.any(String),
+          { enabled: false },
+          expect.any(String)
+        );
         expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('reconcile failed'));
       });
     });
@@ -1696,7 +1729,12 @@ describe('WorkersService', () => {
         spaceId = SPACE
       ) => {
         const made = makeService(harness, attachment);
-        await made.service.update(TRIAGE, { enabled: true }, spaceId, request);
+        await made.service.update(
+          TRIAGE,
+          { enabled: true, settings: { serviceAccountId: 'sa-1' }, settingsRevision: null },
+          spaceId,
+          request
+        );
         attachment?.updateRuleAttachments.mockClear();
         attachment?.getRuleAttachmentSelection.mockClear();
         made.getAttachmentServiceMock?.mockClear();
@@ -1912,7 +1950,10 @@ describe('WorkersService', () => {
         const service = new WorkersService(
           harness.management,
           undefined,
-          loggingSystemMock.createLogger() as Logger
+          loggingSystemMock.createLogger() as Logger,
+          {},
+          {},
+          async () => undefined
         );
 
         await expect(
