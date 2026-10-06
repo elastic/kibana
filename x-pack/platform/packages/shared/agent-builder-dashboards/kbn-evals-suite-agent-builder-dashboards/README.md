@@ -37,9 +37,9 @@ Chart presentation is checked on each panel's Lens Config API config, against th
   - every control the agent asked `generate_dashboard` for is on a mapped field, read from the `add_controls` operations in the tool params, since the server drops unmapped controls before they are stored
   - at least one control carries `user_requested` when the prompt asked for controls, and none does otherwise; the agent may add controls of its own next to the requested ones, but asking `generate_dashboard` for no control at all when the prompt asked for some fails
   - a control exists on each field the prompt names (`mustInclude`)
-  - each filter the prompt asks for by name (`requestedFilters`) has a stored control on one of its mapped substitutes, or a reply sentence that names it and says it could not be added, so a requested filter the agent never tried still counts
+  - each filter the prompt asks for by name (`requestedFilters`) has a stored control on one of its mapped substitutes, or a reply sentence that names it alongside a control or filter (the stored controls already show it was not added), so a requested filter the agent never tried still counts
   - the reply repeats no raw `add_controls` error text
-  - when more requested fields failed (each field counted once, however often it was retried) than were stored on a mapped substitute, the reply says a filter could not be added; a failed control the agent replaced with a mapped one needs no mention
+  - when more requested fields failed (each field counted once, however often it was retried) than were stored on a mapped substitute, the reply names at least that many of the failed fields alongside a control or filter (`status code` names `status_code`); a generic "some filters could not be added" does not count, and a failed control the agent replaced with a mapped one needs no mention
 - **Enhance Mode Question** (`CODE`): a bare "enhance" request ends the opening turn with one `ask_user_question` offering an appearance option and a content option, before anything is written. A request that names the mode does not ask.
 - **Enhance Mode Compliance** (`CODE`), binary:
   - Appearance mode keeps every panel id, every panel's ES|QL, the controls and filters unchanged (compared by content, not count), and the time range. It may delete markdown panels.

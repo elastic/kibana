@@ -25,10 +25,12 @@ export const DASHBOARD_CONTROL_SOURCING_EVALUATOR_NAME = 'Dashboard Control Sour
 /** Fragments of the server's `add_controls` failure messages the reply must not repeat. */
 const RAW_FAILURE_TEXT =
   /not mapped on index|unknown column|conflicting mappings|not aggregatable|needs a (keyword|numeric)/i;
-/** A one-sentence account of a filter that could not be added, as the guidance asks for. */
+/**
+ * A sentence that names a filter missing from the dashboard and talks about
+ * controls accounts for it: the stored controls already show it was not added.
+ * Naming it alone is not enough, since the same field is often a chart breakdown.
+ */
 const MENTIONS_CONTROL = /\b(controls?|filters?|dropdowns?)\b/i;
-const MENTIONS_LEFT_OUT =
-  /\b(could ?n[o']t|can(?:'t|not)|unable|not (?:be )?add|left out|skipp|omitt|dropp|not available|isn'?t available|not (?:a )?(?:mapped|field)|(?:are|is)(?:n'?t| not) (?:stored|mapped|indexed|available)|but not (?:as )?(?:controls?|filters?|dropdowns?)|rather than (?:being )?(?:stored|mapped|indexed)|does ?n[o']t exist|no such field|(?:was|were)n'?t able|not able)/i;
 
 /** Exact membership: the mapped field list already names every real `.keyword` sibling. */
 const isMapped = (field: string, mappedFields: readonly string[]): boolean =>
@@ -47,12 +49,12 @@ const unique = (values: string[]): string[] => [...new Set(values)];
  * Controls the failures cover: the server groups same-message failures as
  * "a, b, c", and a field retried and rejected again is still one failed control.
  */
-const countFailedControls = (failures: OperationFailure[]): number =>
+const getFailedFields = (failures: OperationFailure[]): string[] =>
   unique(
     failures.flatMap(({ identifier }) =>
       identifier.split(',').map((field) => withoutKeyword(field.trim()))
     )
-  ).length;
+  );
 
 /**
  * Stored requested controls on fields first asked for in a later
@@ -88,11 +90,19 @@ const toSentences = (message: string): string[] =>
 
 const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-// Underscores separate words too, so `http_method` names the "method" filter.
+// Underscores and dots separate words too, so `http_method` names the
+// "method" filter and "status code" names the `status_code` field.
 const namesTerm = (sentence: string, terms: readonly string[]): boolean =>
-  terms.some((term) =>
-    new RegExp(`(?:^|[^a-z0-9])${escapeRegExp(term)}(?:$|[^a-z0-9])`, 'i').test(sentence)
-  );
+  terms.some((term) => {
+    const words = term
+      .split(/[\s._]+/)
+      .map(escapeRegExp)
+      .join('[\\s_.-]+');
+    return new RegExp(`(?:^|[^a-z0-9])${words}(?:$|[^a-z0-9])`, 'i').test(sentence);
+  });
+
+const accountsFor = (sentences: string[], terms: readonly string[]): boolean =>
+  sentences.some((sentence) => namesTerm(sentence, terms) && MENTIONS_CONTROL.test(sentence));
 
 const checkSourcing = (
   { requested, mappedFields, mustInclude = [], requestedFilters = [] }: ControlsGold,
@@ -169,17 +179,15 @@ const checkSourcing = (
     const substitute = storedFields.find((stored) =>
       substitutes.some((field) => sameField(stored, field))
     );
-    const acknowledged = sentences.some(
-      (sentence) => namesTerm(sentence, terms) && MENTIONS_LEFT_OUT.test(sentence)
-    );
+    const acknowledged = accountsFor(sentences, terms);
     checks.push({
       assertion: `requestedFilter.${name}`,
       passed: substitute !== undefined || acknowledged,
       detail: substitute
         ? `${name} is filtered on ${substitute}`
         : acknowledged
-        ? `the reply says the ${name} filter could not be added`
-        : `no control for ${name}, and the reply does not say it could not be added`,
+        ? `the reply names the ${name} filter alongside controls`
+        : `no control for ${name}, and the reply does not account for it`,
     });
   }
 
@@ -192,19 +200,22 @@ const checkSourcing = (
   });
 
   // A failed requested control the agent replaced with a stored mapped one
-  // (the retry the guidance allows) needs no apology; one it gave up on does.
-  const failedCount = countFailedControls(failures);
+  // (the retry the guidance allows) needs no mention; one it gave up on does.
+  // Replacements are not tied to the failure they stand in for, so the reply
+  // must name at least as many failed fields as were left unreplaced.
+  const failedFields = getFailedFields(failures);
   const satisfiedCount = countReplacements(attemptedData, failures, storedFields);
-  if (requested && failedCount > satisfiedCount) {
-    const acknowledged = sentences.some(
-      (sentence) => MENTIONS_CONTROL.test(sentence) && MENTIONS_LEFT_OUT.test(sentence)
-    );
+  const unreplacedCount = failedFields.length - satisfiedCount;
+  if (requested && unreplacedCount > 0) {
+    const named = failedFields.filter((field) => accountsFor(sentences, [field]));
     checks.push({
       assertion: 'droppedFiltersAcknowledged',
-      passed: acknowledged,
-      detail: acknowledged
-        ? `the reply says which requested filter(s) could not be added (${failedCount} failed, ${satisfiedCount} replaced)`
-        : `${failedCount} requested control(s) failed and only ${satisfiedCount} replaced, but the reply does not say a filter was left out`,
+      passed: named.length >= unreplacedCount,
+      detail: `${failedFields.length} requested control(s) failed (${failedFields.join(
+        ', '
+      )}) and ${satisfiedCount} replaced; the reply accounts for ${
+        named.length === 0 ? 'none' : named.join(', ')
+      }`,
     });
   }
 

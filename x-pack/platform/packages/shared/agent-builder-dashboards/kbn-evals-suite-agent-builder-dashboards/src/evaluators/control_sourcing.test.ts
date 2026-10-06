@@ -172,7 +172,7 @@ describe('dashboard control sourcing evaluator', () => {
   });
 
   describe('dropped requested controls', () => {
-    it('wants a plain-words mention and no raw error text', async () => {
+    it('wants the dropped field named in plain words and no raw error text', async () => {
       const dropped = {
         steps: [call([{ field: 'status_code', userRequested: true }], ['status_code'])],
         stored: [],
@@ -188,6 +188,12 @@ describe('dashboard control sourcing evaluator', () => {
         { ...dropped, message: 'Controls failed: Not mapped on index "logs".' }
       );
       expect(failedAssertions(raw)).toContain('replyWithoutRawErrors');
+
+      const vague = await evaluateSourcing(
+        { requested: true, mappedFields: MAPPED },
+        { ...dropped, message: "Some of the filters couldn't be added." }
+      );
+      expect(failedAssertions(vague)).toContain('droppedFiltersAcknowledged');
 
       const plain = await evaluateSourcing(
         { requested: true, mappedFields: MAPPED },
@@ -269,7 +275,7 @@ describe('dashboard control sourcing evaluator', () => {
       expect(failedAssertions(result)).toEqual([]);
     });
 
-    it('fails a requested filter the reply names without saying it was left out', async () => {
+    it('fails a requested filter the reply names only as a chart breakdown', async () => {
       const result = await evaluateSourcing(gold, {
         steps,
         stored: ['response.keyword'],
