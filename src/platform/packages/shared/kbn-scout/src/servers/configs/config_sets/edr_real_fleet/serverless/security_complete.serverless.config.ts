@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { CA_TRUSTED_FINGERPRINT } from '@kbn/dev-utils';
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as defaultConfig } from '../../default/serverless/security_complete.serverless.config';
 import {
@@ -20,7 +21,9 @@ import {
  *
  * Same advertise-address idea as the stateful config in this set: Docker Fleet
  * Server and the Endpoint VM cannot reach Kibana or ES on localhost. ES is TLS
- * in serverless, so the output host stays `https`.
+ * in serverless, so the output host stays `https`. Publishing the port on the
+ * host IP and trusting the dev CA matches Defend Workflows Cypress
+ * (`scripts/run_cypress/get_ftr_config.ts`).
  *
  *   node scripts/scout start-server --arch serverless --domain security_complete --serverConfigSet edr_real_fleet
  */
@@ -31,6 +34,13 @@ const isDefaultFleetAdvertiseArg = (arg: string): boolean =>
 
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
+
+  // Loopback publish is not enough: the Endpoint VM dials the host IP.
+  esServerlessOptions: {
+    ...defaultConfig.esServerlessOptions,
+    uiam: defaultConfig.esServerlessOptions?.uiam ?? true,
+    host: hostIp,
+  },
 
   esTestCluster: {
     ...defaultConfig.esTestCluster,
@@ -63,6 +73,12 @@ export const servers: ScoutServerConfig = {
           is_default: true,
           is_default_monitoring: true,
           hosts: [`https://${hostIp}:${EDR_REAL_FLEET_ES_PORT}`],
+          ca_trusted_fingerprint: CA_TRUSTED_FINGERPRINT,
+          config: {
+            ssl: {
+              verification_mode: 'none',
+            },
+          },
         },
       ])}`,
       // Agents page stays usable before Fleet Server has registered, matching
