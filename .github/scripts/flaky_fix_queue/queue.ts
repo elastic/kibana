@@ -132,7 +132,7 @@ const receiptBody = (request: FixRequest, runId?: number): string =>
   [
     runId
       ? `AI fix requested: https://github.com/elastic/kibana/actions/runs/${runId}.`
-      : 'Admitting this AI fix request. If no run is linked, check the dispatcher before removing and reapplying `ai:fix-flaky` to retry.',
+      : "Starting an AI fix. A link to the run will appear here shortly. If it doesn't, check the [dispatcher runs](https://github.com/elastic/kibana/actions/workflows/flaky_fix_dispatcher.yml) before requesting another attempt.",
     `<!-- flaky-fix-queue request:${request.event} run:${runId ?? 'pending'} -->`,
   ].join('\n\n');
 
