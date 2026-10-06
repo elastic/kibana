@@ -38,6 +38,7 @@ import type { ArtifactEntryCardDecoratorProps } from '../artifact_entry_card';
 import { ArtifactEntryCard } from '../artifact_entry_card';
 
 import type { ArtifactListPageLabels } from './translations';
+import type { ArtifactViewModeComponentProps, ArtifactListPageUrlParams } from './types';
 import { artifactListPageLabels } from './translations';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { ManagementPageLoader } from '../management_page_loader';
@@ -53,7 +54,6 @@ import { useIsCreateEditFlyoutOpened } from './hooks/use_is_create_edit_flyout_o
 import { useSetUrlParams } from './hooks/use_set_url_params';
 import { useWithArtifactListData } from './hooks/use_with_artifact_list_data';
 import type { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
-import type { ArtifactListPageUrlParams } from './types';
 import { useUrlParams } from '../../hooks/use_url_params';
 import type { ListPageRouteState, MaybeImmutable } from '../../../../common/endpoint/types';
 import type { XOR } from '../../../../common/utility_types';
@@ -113,6 +113,11 @@ interface ArtifactListPageWithSimpleTableProps {
    * the given artifact type.
    */
   showEnabledColumn?: boolean;
+  /**
+   * Renders the artifact-specific definition in the view flyout.
+   * Receives the full artifact item.
+   */
+  ViewModeComponent: React.ComponentType<ArtifactViewModeComponentProps>;
 }
 
 export type ArtifactListPageProps = ArtifactListPageBaseProps &
@@ -141,6 +146,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     additionalActions,
     showAsSimpleTable = false,
     showEnabledColumn = false,
+    ViewModeComponent,
   }) => {
     const areEndpointExceptionsMovedUnderManagementFFEnabled = useIsExperimentalFeatureEnabled(
       'endpointExceptionsMovedUnderManagement'
@@ -462,6 +468,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         />
 
         {isViewFlyoutOpened &&
+          ViewModeComponent &&
           (showEnabledColumn ? (
             <ArtifactViewFlyout
               apiClient={apiClient}
@@ -470,6 +477,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
               allowCardEditAction={allowCardEditAction}
               onEnabledChangeRefresh={handleEnabledChangeRefresh}
               onClose={handleArtifactViewFlyoutOnClose}
+              ViewModeComponent={ViewModeComponent}
               data-test-subj={getTestId('viewFlyout')}
             />
           ) : (
@@ -477,6 +485,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
               apiClient={apiClient}
               labels={labels}
               onClose={handleArtifactViewFlyoutOnClose}
+              ViewModeComponent={ViewModeComponent}
               data-test-subj={getTestId('viewFlyout')}
             />
           ))}

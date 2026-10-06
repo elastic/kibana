@@ -20,6 +20,7 @@ import {
 } from '../../../hooks/artifacts';
 import { artifactListPageLabels } from '../translations';
 import { useWithArtifactEnableDisable as _useWithArtifactEnableDisable } from '../hooks/use_with_artifact_enable_disable';
+import type { ArtifactViewModeComponentProps } from '../types';
 import { ArtifactViewFlyout, type ArtifactViewFlyoutProps } from './artifact_view_flyout';
 import {
   DISABLED_ARTIFACT_TAG,
@@ -89,10 +90,15 @@ describe('ArtifactViewFlyout', () => {
       isLoading: false,
     });
 
+    const ViewModeComponent = ({ item: viewedItem }: ArtifactViewModeComponentProps) => (
+      <div data-test-subj="viewModeComponent">{viewedItem.name}</div>
+    );
+
     render = (props = {}) => {
       const sharedProps = {
         apiClient: new TrustedAppsApiClient(mockedContext.coreStart.http),
         onClose,
+        ViewModeComponent,
         'data-test-subj': 'viewFlyout',
         ...(props.labels ? { labels: props.labels } : {}),
       };
@@ -127,6 +133,7 @@ describe('ArtifactViewFlyout', () => {
     expect(renderResult.getByTestId('viewFlyout-updatedByAvatar')).toBeInTheDocument();
     expect(renderResult.getByTestId('viewFlyout-description')).toHaveTextContent('Detects a thing');
     expect(renderResult.getByTestId('viewFlyout-definitionTitle')).toHaveTextContent('Definition');
+    expect(renderResult.getByTestId('viewModeComponent')).toHaveTextContent('Signature one');
     expect(renderResult.queryByTestId('viewFlyout-enabledSwitch')).not.toBeInTheDocument();
   });
 

@@ -234,6 +234,7 @@ describe('When using the ArtifactListPage component', () => {
           'created by ExceptionListItemGenerator'
         );
         expect(getByTestId('testPage-viewFlyout-definitionTitle')).toHaveTextContent('Definition');
+        expect(getByTestId('viewModeComponent')).toBeInTheDocument();
       });
 
       it('should open the view flyout from the show=view URL without the edit form', async () => {

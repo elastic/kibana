@@ -32,7 +32,7 @@ import type { ExceptionsListApiClient } from '../../../services/exceptions_list/
 import type { XOR } from '../../../../../common/utility_types';
 import { ManagementPageLoader } from '../../management_page_loader';
 import { ARTIFACT_ENABLE_DISABLE_ACTION_LABELS } from '../hooks/use_with_artifact_enable_disable';
-import type { ArtifactListPageUrlParams } from '../types';
+import type { ArtifactListPageUrlParams, ArtifactViewModeComponentProps } from '../types';
 import {
   ARTIFACT_ENABLED_SWITCH_LABELS,
   ArtifactEnabledSwitch,
@@ -75,6 +75,8 @@ interface ArtifactViewFlyoutBaseProps {
   apiClient: ExceptionsListApiClient;
   /** Any label overrides */
   labels?: Partial<ArtifactViewFlyoutLabels>;
+  /** Renders the artifact-specific definition. Receives the full artifact item. */
+  ViewModeComponent: React.ComponentType<ArtifactViewModeComponentProps>;
   onClose: () => void;
   'data-test-subj'?: string;
 }
@@ -102,6 +104,7 @@ export const ArtifactViewFlyout = memo<ArtifactViewFlyoutProps>(
   ({
     apiClient,
     labels: _labels,
+    ViewModeComponent,
     showEnabledColumn = false,
     allowCardEditAction = true,
     onEnabledChangeRefresh,
@@ -180,6 +183,7 @@ export const ArtifactViewFlyout = memo<ArtifactViewFlyoutProps>(
               showEnabledColumn={showEnabledColumn}
               allowCardEditAction={allowCardEditAction}
               onEnabledChangeRefresh={handleEnabledChangeRefresh}
+              ViewModeComponent={ViewModeComponent}
               data-test-subj={dataTestSubj}
             />
           )}
@@ -239,6 +243,7 @@ const ArtifactViewFlyoutBody = memo<{
   showEnabledColumn: boolean;
   allowCardEditAction: boolean;
   onEnabledChangeRefresh?: () => Promise<void>;
+  ViewModeComponent: React.ComponentType<ArtifactViewModeComponentProps>;
   'data-test-subj'?: string;
 }>(
   ({
@@ -248,6 +253,7 @@ const ArtifactViewFlyoutBody = memo<{
     showEnabledColumn,
     allowCardEditAction,
     onEnabledChangeRefresh,
+    ViewModeComponent,
     'data-test-subj': dataTestSubj,
   }) => {
     const { euiTheme } = useEuiTheme();
@@ -332,6 +338,8 @@ const ArtifactViewFlyoutBody = memo<{
         <EuiTitle size="xs">
           <h3 data-test-subj={getTestId('definitionTitle')}>{labels.viewFlyoutDefinitionTitle}</h3>
         </EuiTitle>
+        <EuiSpacer size="s" />
+        <ViewModeComponent item={item} />
       </>
     );
   }
