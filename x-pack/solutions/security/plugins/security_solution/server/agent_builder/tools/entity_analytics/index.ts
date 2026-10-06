@@ -46,3 +46,15 @@ export {
   setAssetCriticalityTool,
   SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
 } from './set_asset_criticality_tool';
+export {
+  getResolutionGroupTool,
+  SECURITY_GET_RESOLUTION_GROUP_TOOL_ID,
+  linkEntitiesTool,
+  SECURITY_LINK_ENTITIES_TOOL_ID,
+  unlinkEntitiesTool,
+  SECURITY_UNLINK_ENTITIES_TOOL_ID,
+  listResolutionRulesTool,
+  SECURITY_LIST_RESOLUTION_RULES_TOOL_ID,
+  setResolutionRulesTool,
+  SECURITY_SET_RESOLUTION_RULES_TOOL_ID,
+} from './resolution';
