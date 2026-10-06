@@ -6,9 +6,12 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useFormContext } from 'react-hook-form';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { ALERTING_V2_INTERNAL_ACTION_POLICY_ROUTING_TAGS_API_PATH } from '@kbn/alerting-v2-constants';
+import type { ActionPolicyRoutingTagsResponse } from '@kbn/alerting-v2-schemas';
 import type { FormValues } from '../types';
 import { RoutingTagsField } from './routing_tags_field';
 import { createFormWrapper, createMockServices } from '../../test_utils';
@@ -31,11 +34,41 @@ const selectedPills = () =>
     .queryAllByTestId('euiComboBoxPill')
     .map((pill) => pill.getAttribute('title') ?? pill.textContent);
 
+const emptyResponse: ActionPolicyRoutingTagsResponse = {
+  items: [],
+  total_tags: 0,
+  is_truncated: false,
+};
+
+const suggestionsResponse: ActionPolicyRoutingTagsResponse = {
+  items: [
+    {
+      tag: 'rna',
+      policy_count: 7,
+      policies: ['A', 'B', 'C', 'D', 'E'].map((name) => ({ id: `id-${name}`, name })),
+    },
+    { tag: 'sre', policy_count: 1, policies: [{ id: 'id-sre', name: 'SRE on call' }] },
+  ],
+  total_tags: 2,
+  is_truncated: false,
+};
+
 const renderRoutingTagsField = ({
   values,
   withSubmit = false,
-}: { values?: Partial<FormValues>; withSubmit?: boolean } = {}) => {
-  const services = createMockServices();
+  response = emptyResponse,
+}: {
+  values?: Partial<FormValues>;
+  withSubmit?: boolean;
+  response?: ActionPolicyRoutingTagsResponse | Error;
+} = {}) => {
+  const http = httpServiceMock.createStartContract();
+  if (response instanceof Error) {
+    http.get.mockRejectedValue(response);
+  } else {
+    http.get.mockResolvedValue(response);
+  }
+  const services = { ...createMockServices(), http };
   render(
     <>
       <RoutingTagsField />
@@ -64,10 +97,15 @@ describe('RoutingTagsField', () => {
     expect(selectedPills()).toEqual(['sre', 'payments']);
   });
 
-  it('does not request suggestions', () => {
+  it('requests the routing tags used by action policies', async () => {
     const { services } = renderRoutingTagsField();
 
-    expect(services.http.get).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(services.http.get).toHaveBeenCalledWith(
+        ALERTING_V2_INTERNAL_ACTION_POLICY_ROUTING_TAGS_API_PATH,
+        { query: { search: undefined } }
+      );
+    });
   });
 
   it('offers the typed value as a routing tag to add', async () => {
@@ -122,5 +160,137 @@ describe('RoutingTagsField', () => {
     expect(
       await screen.findByText('Each tag must be no longer than 128 characters.')
     ).toBeInTheDocument();
+  });
+
+  describe('suggestions', () => {
+    const openSuggestions = async (user: ReturnType<typeof userEvent.setup>) => {
+      await user.click(screen.getByRole('combobox'));
+      await screen.findByTestId('ruleRoutingTagOption-rna');
+    };
+
+    it('shows each tag with its policy names and a count badge', async () => {
+      const user = userEvent.setup();
+      renderRoutingTagsField({ response: suggestionsResponse });
+
+      await openSuggestions(user);
+
+      const rna = screen.getByTestId('ruleRoutingTagOption-rna');
+      expect(within(rna).getByText('rna')).toBeInTheDocument();
+      expect(within(rna).getByTestId('ruleRoutingTagOptionPolicies')).toHaveTextContent(
+        'A, B, C, D, E, …'
+      );
+      expect(within(rna).getByTestId('ruleRoutingTagOptionCount')).toHaveTextContent('7');
+
+      const sre = screen.getByTestId('ruleRoutingTagOption-sre');
+      expect(within(sre).getByTestId('ruleRoutingTagOptionPolicies')).toHaveTextContent(
+        /^SRE on call$/
+      );
+      expect(within(sre).getByTestId('ruleRoutingTagOptionCount')).toHaveTextContent('1');
+    });
+
+    it('gives each suggestion an accessible label with the full count', async () => {
+      const user = userEvent.setup();
+      renderRoutingTagsField({ response: suggestionsResponse });
+
+      await openSuggestions(user);
+
+      expect(
+        screen.getByRole('option', { name: 'rna, 7 action policies: A, B, C, D, E, and 2 more' })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('option', { name: 'sre, 1 action policy: SRE on call' })
+      ).toBeInTheDocument();
+    });
+
+    it('selects a suggested routing tag', async () => {
+      const user = userEvent.setup();
+      renderRoutingTagsField({ response: suggestionsResponse });
+
+      await openSuggestions(user);
+      await user.click(screen.getByTestId('ruleRoutingTagOption-sre'));
+
+      expect(selectedPills()).toEqual(['sre']);
+    });
+
+    it('does not offer a routing tag that is already selected', async () => {
+      const user = userEvent.setup();
+      renderRoutingTagsField({
+        values: formWithRoutingTags(['sre']),
+        response: suggestionsResponse,
+      });
+
+      await openSuggestions(user);
+
+      expect(screen.queryByTestId('ruleRoutingTagOption-sre')).not.toBeInTheDocument();
+      expect(screen.getByTestId('ruleRoutingTagOption-rna')).toBeInTheDocument();
+    });
+
+    it('does not offer a suggestion again after it is selected', async () => {
+      const user = userEvent.setup();
+      renderRoutingTagsField({ response: suggestionsResponse });
+
+      await openSuggestions(user);
+      await user.click(screen.getByTestId('ruleRoutingTagOption-sre'));
+      await user.click(screen.getByRole('combobox'));
+
+      expect(await screen.findByTestId('ruleRoutingTagOption-rna')).toBeInTheDocument();
+      expect(screen.queryByTestId('ruleRoutingTagOption-sre')).not.toBeInTheDocument();
+      expect(selectedPills()).toEqual(['sre']);
+    });
+
+    it('adds a typed routing tag that differs from a selected one only by case', async () => {
+      const user = userEvent.setup();
+      renderRoutingTagsField({
+        values: formWithRoutingTags(['rna']),
+        response: suggestionsResponse,
+      });
+
+      await user.click(screen.getByRole('combobox'));
+      await user.type(screen.getByRole('combobox'), 'RNA{Enter}');
+
+      expect(selectedPills()).toEqual(['rna', 'RNA']);
+    });
+
+    it('searches with the typed text', async () => {
+      const user = userEvent.setup();
+      const { services } = renderRoutingTagsField({ response: suggestionsResponse });
+
+      await user.click(screen.getByRole('combobox'));
+      await user.type(screen.getByRole('combobox'), 'sr');
+
+      await waitFor(() => {
+        expect(services.http.get).toHaveBeenCalledWith(
+          ALERTING_V2_INTERNAL_ACTION_POLICY_ROUTING_TAGS_API_PATH,
+          { query: { search: 'sr' } }
+        );
+      });
+    });
+
+    it('still accepts a typed routing tag that no policy uses', async () => {
+      const user = userEvent.setup();
+      renderRoutingTagsField({ response: suggestionsResponse });
+
+      await user.click(screen.getByRole('combobox'));
+      await user.type(screen.getByRole('combobox'), 'brand-new{Enter}');
+
+      expect(selectedPills()).toEqual(['brand-new']);
+    });
+
+    it('still accepts typed routing tags and submits when the route fails', async () => {
+      const user = userEvent.setup();
+      const { services } = renderRoutingTagsField({
+        response: new Error('Forbidden'),
+        withSubmit: true,
+      });
+      await waitFor(() => expect(services.http.get).toHaveBeenCalled());
+
+      await user.click(screen.getByRole('combobox'));
+      await user.type(screen.getByRole('combobox'), 'sre{Enter}');
+      await user.click(screen.getByTestId('submitButton'));
+
+      expect(selectedPills()).toEqual(['sre']);
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+      expect(screen.queryByText(/must be no longer|up to 20/)).not.toBeInTheDocument();
+    });
   });
 });
