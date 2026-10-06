@@ -17,6 +17,7 @@ import {
   selectOverflowRetryArticleContext,
   type ArticleContext,
 } from './article_context';
+import { requireParsedStructuredOutput } from './structured_output';
 
 /**
  * Bounds a free-text model field before it is stored. Truncates rather than
@@ -137,10 +138,7 @@ export const assessRelevance = async (
       raw: { response_metadata: Record<string, unknown> };
       parsed: RelevanceOutput | null;
     };
-    if (invoked.parsed === null) {
-      throw new Error('assess_relevance returned no parsed output');
-    }
-    return { raw: invoked.raw, parsed: invoked.parsed };
+    return requireParsedStructuredOutput(invoked, 'assess_relevance');
   };
 
   let context = fullArticleContext(params.text);

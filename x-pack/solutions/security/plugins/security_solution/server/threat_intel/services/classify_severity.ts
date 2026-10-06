@@ -16,6 +16,7 @@ import {
   furtherShrinkOverflowArticleContext,
   selectOverflowRetryArticleContext,
 } from './article_context';
+import { requireParsedStructuredOutput } from './structured_output';
 
 const severityLevelSchema = z.enum(['low', 'medium', 'high', 'critical']);
 
@@ -119,24 +120,18 @@ export const classifySeverity = async (
     promptText: string
   ): Promise<{
     raw: { response_metadata: Record<string, unknown> };
-    parsed: ClassifySeverityLlmOutput | undefined;
+    parsed: ClassifySeverityLlmOutput | null;
   }> => {
-    const invoked = (await structured.invoke(
-      buildSeverityPrompt({ ...params, text: promptText })
-    )) as {
+    return (await structured.invoke(buildSeverityPrompt({ ...params, text: promptText }))) as {
       raw: { response_metadata: Record<string, unknown> };
       parsed: ClassifySeverityLlmOutput | null;
-    };
-    return {
-      raw: invoked.raw,
-      parsed: invoked.parsed ?? undefined,
     };
   };
 
   let text = params.text;
   let result: {
     raw: { response_metadata: Record<string, unknown> };
-    parsed: ClassifySeverityLlmOutput | undefined;
+    parsed: ClassifySeverityLlmOutput | null;
   };
   try {
     result = await invokeSeverity(text);
@@ -161,11 +156,9 @@ export const classifySeverity = async (
     result.raw.response_metadata ?? {}
   );
 
-  if (!result.parsed) {
-    throw new Error(`classify_severity returned no parsed output report_id=${params.report_id}`);
-  }
+  const { parsed } = requireParsedStructuredOutput(result, 'classify_severity');
 
-  const classified = toSeverityResult(result.parsed.level);
+  const classified = toSeverityResult(parsed.level);
   logger.debug(
     `classify_severity ok level=${classified.level} score=${classified.score} ` +
       `report_id=${params.report_id}`
@@ -173,6 +166,6 @@ export const classifySeverity = async (
 
   return {
     ...classified,
-    ...(result.parsed?.rationale ? { rationale: result.parsed.rationale } : {}),
+    ...(parsed.rationale ? { rationale: parsed.rationale } : {}),
   };
 };

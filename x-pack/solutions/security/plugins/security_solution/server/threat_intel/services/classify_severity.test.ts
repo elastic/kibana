@@ -16,7 +16,7 @@ import {
 } from './classify_severity';
 
 const buildModel = (
-  output: ClassifySeverityLlmOutput | undefined,
+  output: ClassifySeverityLlmOutput | null,
   invokeImpl?: jest.Mock
 ): { model: ScopedModel; invoke: jest.Mock } => {
   const invoke =
@@ -74,7 +74,7 @@ describe('classifySeverity', () => {
   });
 
   it('throws when the model returns no parsed output', async () => {
-    const { model } = buildModel(undefined);
+    const { model } = buildModel(null);
     await expect(classifySeverity(model, logger, { text: 'body' })).rejects.toThrow(
       /no parsed output/
     );

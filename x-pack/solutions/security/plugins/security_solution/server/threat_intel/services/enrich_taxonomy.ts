@@ -15,6 +15,7 @@ import {
   furtherShrinkOverflowArticleContext,
   selectOverflowRetryArticleContext,
 } from './article_context';
+import { requireParsedStructuredOutput } from './structured_output';
 
 /**
  * Keeps only values from the closed set and caps the array length. A filter
@@ -113,10 +114,7 @@ export const enrichTaxonomy = async (
       raw: { response_metadata: Record<string, unknown> };
       parsed: TaxonomyOutput | null;
     };
-    if (invoked.parsed === null) {
-      throw new Error(`enrich_taxonomy returned no parsed output report_id=${params.report_id}`);
-    }
-    return { raw: invoked.raw, parsed: invoked.parsed };
+    return requireParsedStructuredOutput(invoked, 'enrich_taxonomy');
   };
 
   let text = params.text;

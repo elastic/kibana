@@ -35,6 +35,7 @@ import {
   selectOverflowRetryArticleContext,
   type ArticleContext,
 } from './article_context';
+import { requireParsedStructuredOutput } from './structured_output';
 
 const closedSet = <T extends string>(allowed: readonly T[], max: number) =>
   z
@@ -351,12 +352,7 @@ export const enrichReportCore = async (
         raw: { response_metadata: Record<string, unknown> };
         parsed: ReportCoreModelOutput | null;
       };
-      if (invoked.parsed === null) {
-        throw new Error(
-          `enrich_report_core returned no parsed output report_id=${params.report_id}`
-        );
-      }
-      return { raw: invoked.raw, parsed: invoked.parsed };
+      return requireParsedStructuredOutput(invoked, 'enrich_report_core');
     },
     build: (text, candidates) => buildPrompt(params, text, candidates),
     articleText: params.text,
@@ -388,10 +384,7 @@ export const enrichReportCore = async (
             raw: { response_metadata: Record<string, unknown> };
             parsed: z.infer<typeof iocAdjudicationOnlySchema> | null;
           };
-          if (invoked.parsed === null) {
-            throw new Error('enrich_report_core_ioc_batch returned no parsed output');
-          }
-          return { raw: invoked.raw, parsed: invoked.parsed };
+          return requireParsedStructuredOutput(invoked, 'enrich_report_core_ioc_batch');
         },
         build: (candidates) => buildAdjudicationOnlyPrompt(params, candidates),
         prepared: withBatchPrepared(prepared, batch),
