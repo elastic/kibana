@@ -18,6 +18,11 @@ import { ActionPolicySnoozeModal } from './action_policy_snooze_modal';
 import { ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE } from './labels';
 import { useIsActionPoliciesLicenseValid } from '../../hooks/use_is_action_policies_license_valid';
 
+export const ACTION_POLICY_MENU_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2.actionPoliciesList.action.actionsMenu',
+  { defaultMessage: 'Action policy actions' }
+);
+
 export interface UseActionPolicyMenuParams {
   policy: ActionPolicyResponse;
   onViewDetails?: (policy: ActionPolicyResponse) => void;

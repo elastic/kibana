@@ -15,11 +15,14 @@ import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React from 'react';
 import { useAlertingLocators } from '../../../../application/locator_context';
 import { useFetchRuleExecutions } from '../../../../hooks/use_fetch_rule_executions';
 import { useRuleAuditMetadata } from '../../../../hooks/use_rule_audit_metadata';
-import { RuleActionsMenu } from '../../../../pages/rules_list_page/rule_actions_menu';
+import {
+  RULE_MENU_ARIA_LABEL,
+  useRuleMenuPanels,
+} from '../../../../pages/rules_list_page/use_rule_menu_panels';
 import type { RuleApiResponse } from '../../../../services/rules_api';
 import { UserCapabilities } from '../../../../services/user_capabilities';
 import { EMPTY_VALUE } from '../../../../utils/rule_display';
@@ -29,8 +32,6 @@ import {
   RuleSummaryBody,
   RuleSummaryInvestigationSection,
 } from '../../rule_summary';
-
-const TAKE_ACTION_BUTTON_ID = 'ruleSummaryFlyoutTakeAction';
 
 const LAST_EXECUTION_OUTCOME_LABELS: Record<RuleExecutionOutcome, string> = {
   success: i18n.translate('xpack.alertingV2.ruleSummaryFlyout.lastExecution.success', {
@@ -90,8 +91,19 @@ export const RuleSummaryFlyout = ({
     enabled: canReadExecutionHistory,
   });
   const lastExecution = executionsData?.items[0];
-  const [isTakeActionOpen, setIsTakeActionOpen] = useState(false);
   const detailsHref = rulesLocators.useUrl({ ruleId: rule.id }, undefined, [rule.id]);
+  const takeActionPanels = useRuleMenuPanels({
+    rule,
+    canWrite,
+    detailsHref,
+    onEdit,
+    onClone,
+    onDelete,
+    onToggleEnabled,
+    onRun,
+    onUpdateApiKey,
+    onViewChangeHistory,
+  });
 
   const kindLabel = RULE_KIND_LABELS[rule.kind] ?? rule.kind;
   const enabledLabel = rule.enabled
@@ -132,8 +144,7 @@ export const RuleSummaryFlyout = ({
   };
 
   return (
-    <>
-      <FlyoutTemplate
+    <FlyoutTemplate
         type="overlay"
         size="m"
         resizable
@@ -218,34 +229,15 @@ export const RuleSummaryFlyout = ({
         </Body>
 
         <Footer>
-          <Footer.PrimaryAction
-            id={TAKE_ACTION_BUTTON_ID}
+          <Footer.PrimaryActionMenu
             label={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.takeAction', {
               defaultMessage: 'Take action',
             })}
-            iconType={isTakeActionOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
-            iconSide="right"
-            onClick={() => setIsTakeActionOpen((open) => !open)}
+            aria-label={RULE_MENU_ARIA_LABEL}
+            panels={takeActionPanels}
             data-test-subj="ruleSummaryFlyoutTakeActionButton"
           />
         </Footer>
-      </FlyoutTemplate>
-      <RuleActionsMenu
-        rule={rule}
-        canWrite={canWrite}
-        detailsHref={detailsHref}
-        anchorPosition="upRight"
-        anchorId={TAKE_ACTION_BUTTON_ID}
-        isOpen={isTakeActionOpen}
-        onOpenChange={setIsTakeActionOpen}
-        onEdit={onEdit}
-        onClone={onClone}
-        onDelete={onDelete}
-        onToggleEnabled={onToggleEnabled}
-        onRun={onRun}
-        onUpdateApiKey={onUpdateApiKey}
-        onViewChangeHistory={onViewChangeHistory}
-      />
-    </>
+    </FlyoutTemplate>
   );
 };

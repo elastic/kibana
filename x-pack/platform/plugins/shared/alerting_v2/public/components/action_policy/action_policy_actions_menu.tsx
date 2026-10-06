@@ -5,18 +5,11 @@
  * 2.0.
  */
 
-import type { EuiPopoverProps } from '@elastic/eui';
-import {
-  EuiButtonIcon,
-  EuiContextMenu,
-  EuiPopover,
-  EuiToolTip,
-  EuiWrappingPopover,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
-import { useActionPolicyMenu } from './use_action_policy_menu';
+import { ACTION_POLICY_MENU_ARIA_LABEL, useActionPolicyMenu } from './use_action_policy_menu';
 
 interface Props {
   policy: ActionPolicyResponse;
@@ -32,12 +25,7 @@ interface Props {
   onSnooze?: (id: string, snoozedUntil: string) => void;
   onCancelSnooze?: (id: string) => void;
   isSnoozeLoading?: boolean;
-  renderButton?: (args: { isOpen: boolean; toggle: () => void }) => React.ReactElement;
-  anchorPosition?: EuiPopoverProps['anchorPosition'];
   'data-test-subj'?: string;
-  anchorId?: string;
-  isOpen?: boolean;
-  onOpenChange?: (isOpen: boolean) => void;
 }
 
 export const ActionPolicyActionsMenu = ({
@@ -54,27 +42,12 @@ export const ActionPolicyActionsMenu = ({
   onSnooze,
   onCancelSnooze,
   isSnoozeLoading = false,
-  renderButton,
-  anchorPosition = 'downRight',
   'data-test-subj': dataTestSubj,
-  anchorId,
-  isOpen,
-  onOpenChange,
 }: Props) => {
-  const [uncontrolledIsOpen, setUncontrolledIsOpen] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const isControlled = isOpen !== undefined;
-  const isPopoverOpen = isControlled ? isOpen! : uncontrolledIsOpen;
-  const setIsPopoverOpen = useCallback(
-    (next: boolean) => {
-      if (!isControlled) setUncontrolledIsOpen(next);
-      onOpenChange?.(next);
-    },
-    [isControlled, onOpenChange]
-  );
-
-  const togglePopover = () => setIsPopoverOpen(!isPopoverOpen);
-  const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
+  const togglePopover = () => setIsPopoverOpen((open) => !open);
+  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
   const { panels, modal } = useActionPolicyMenu({
     policy,
@@ -92,62 +65,36 @@ export const ActionPolicyActionsMenu = ({
     closeMenu: closePopover,
   });
 
-  const trigger = renderButton ? (
-    renderButton({ isOpen: isPopoverOpen, toggle: togglePopover })
-  ) : (
-    <EuiToolTip
-      content={i18n.translate('xpack.alertingV2.actionPoliciesList.action.more', {
-        defaultMessage: 'More actions',
-      })}
-      disableScreenReaderOutput
-    >
-      <EuiButtonIcon
-        iconType="boxesVertical"
-        color="text"
-        aria-label={i18n.translate('xpack.alertingV2.actionPoliciesList.action.more', {
-          defaultMessage: 'More actions',
-        })}
-        onClick={togglePopover}
-        isDisabled={isDisabled}
-        data-test-subj={dataTestSubj}
-      />
-    </EuiToolTip>
-  );
-
-  const popoverContent = <EuiContextMenu initialPanelId={0} panels={panels} />;
-  const anchor = anchorId ? document.getElementById(anchorId) : null;
-
-  const menuAriaLabel = i18n.translate('xpack.alertingV2.actionPoliciesList.action.actionsMenu', {
-    defaultMessage: 'Action policy actions',
-  });
-
   return (
     <>
-      {anchorId ? (
-        anchor && (
-          <EuiWrappingPopover
-            button={anchor}
-            isOpen={isPopoverOpen}
-            closePopover={closePopover}
-            anchorPosition={anchorPosition}
-            panelPaddingSize="s"
-            aria-label={menuAriaLabel}
+      <EuiPopover
+        aria-label={ACTION_POLICY_MENU_ARIA_LABEL}
+        button={
+          <EuiToolTip
+            content={i18n.translate('xpack.alertingV2.actionPoliciesList.action.more', {
+              defaultMessage: 'More actions',
+            })}
+            disableScreenReaderOutput
           >
-            {popoverContent}
-          </EuiWrappingPopover>
-        )
-      ) : (
-        <EuiPopover
-          aria-label={menuAriaLabel}
-          button={trigger}
-          isOpen={isPopoverOpen}
-          closePopover={closePopover}
-          anchorPosition={anchorPosition}
-          panelPaddingSize="s"
-        >
-          {popoverContent}
-        </EuiPopover>
-      )}
+            <EuiButtonIcon
+              iconType="boxesVertical"
+              color="text"
+              aria-label={i18n.translate('xpack.alertingV2.actionPoliciesList.action.more', {
+                defaultMessage: 'More actions',
+              })}
+              onClick={togglePopover}
+              isDisabled={isDisabled}
+              data-test-subj={dataTestSubj}
+            />
+          </EuiToolTip>
+        }
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        anchorPosition="downRight"
+        panelPaddingSize="s"
+      >
+        <EuiContextMenu initialPanelId={0} panels={panels} />
+      </EuiPopover>
       {modal}
     </>
   );

@@ -12,6 +12,11 @@ import type { FlyoutFooterMenuItem, FlyoutFooterMenuPanel } from '@kbn/flyout-te
 import { i18n } from '@kbn/i18n';
 import type { RuleApiResponse } from '../../services/rules_api';
 
+export const RULE_MENU_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2.rulesList.action.actionsMenu',
+  { defaultMessage: 'Rule actions' }
+);
+
 export interface UseRuleMenuPanelsParams {
   rule: RuleApiResponse;
   /** Gates write actions (run, edit, clone, enable/disable, delete); read actions always show. */
