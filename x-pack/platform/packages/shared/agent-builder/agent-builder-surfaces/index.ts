@@ -6,7 +6,13 @@
  */
 
 export { agentBuilderPack, specDispatcher } from './spec/pack';
-export type { MarkdownNode, Spec, SpecNode } from './spec/pack';
+export type { AttachmentNode, AttachmentSpec, MarkdownNode, Spec, SpecNode } from './spec/pack';
 export { replyToSpec, stripAttachmentTags } from './spec/reply_to_spec';
+export { resolveSpec } from './spec/resolve_spec';
+export type {
+  AttachmentSpecContext,
+  AttachmentSpecMapping,
+  ResolveSpecOptions,
+} from './spec/resolve_spec';
 export { addSlackProjection } from './slack/add_slack_projection';
 export type { AddSlackProjectionOptions } from './slack/add_slack_projection';

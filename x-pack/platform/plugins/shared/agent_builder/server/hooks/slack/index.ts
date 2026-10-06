@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { addSlackProjection } from '@kbn/agent-builder-surfaces';
 import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
-import type { InternalSetupServices } from '../../services';
+import { AGENTBUILDER_PATH } from '../../../common/features';
+import type { InternalSetupServices, InternalStartServices } from '../../services';
 
 export interface RegisterSlackHooksDeps {
+  /** Base URL of Kibana, without a space. */
+  getKibanaUrl: () => string;
+  getInternalServices: () => InternalStartServices;
   logger: Logger;
 }
 
@@ -20,7 +25,7 @@ export interface RegisterSlackHooksDeps {
  */
 export const registerSlackHooks = (
   serviceSetups: InternalSetupServices,
-  { logger }: RegisterSlackHooksDeps
+  { getKibanaUrl, getInternalServices, logger }: RegisterSlackHooksDeps
 ): void => {
   serviceSetups.hooks.register({
     id: 'slack',
@@ -28,8 +33,14 @@ export const registerSlackHooks = (
       [HookLifecycle.afterChatEvent]: {
         mode: HookExecutionMode.blocking,
         handler: ({ event, execution }) => {
+          const { agentId, spaceId, agentParams } = execution;
+          const conversationPath = `${AGENTBUILDER_PATH}/agents/${agentId}/conversations/${agentParams.conversationId}`;
+
           const projected = addSlackProjection(event, {
-            originType: execution.agentParams.origin?.type,
+            originType: agentParams.origin?.type,
+            getMapping: (type) => getInternalServices().attachments.getTypeDefinition(type)?.toSpec,
+            getConversationUrl: () =>
+              `${addSpaceIdToPath(getKibanaUrl(), spaceId)}${conversationPath}`,
             logger,
           });
 

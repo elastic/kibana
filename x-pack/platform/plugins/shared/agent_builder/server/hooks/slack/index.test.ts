@@ -18,12 +18,29 @@ import {
 } from '@kbn/agent-builder-server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createRound } from '../../test_utils';
-import type { InternalSetupServices } from '../../services';
+import type { InternalSetupServices, InternalStartServices } from '../../services';
 import { registerSlackHooks } from '.';
 
 const createRoundCompleteEvent = (message: string): RoundCompleteEvent => ({
   type: ChatEventType.roundComplete,
-  data: { round: createRound({ response: { message } }) },
+  data: {
+    round: createRound({ response: { message } }),
+    attachments: [
+      {
+        id: 'a1',
+        type: 'text',
+        current_version: 1,
+        versions: [
+          {
+            version: 1,
+            data: { content: 'Attached text' },
+            created_at: '2026-10-06T00:00:00.000Z',
+            content_hash: 'hash',
+          },
+        ],
+      },
+    ],
+  },
 });
 
 const createContext = (
@@ -33,22 +50,33 @@ const createContext = (
   request: { headers: {} } as AfterChatEventHookContext['request'],
   execution: {
     executionId: 'execution-1',
-    agentParams: { origin },
+    agentId: 'agent-1',
+    spaceId: 'space-1',
+    agentParams: { conversationId: 'conversation-1', origin },
   } as AfterChatEventHookContext['execution'],
   event,
 });
 
-const registerHandler = () => {
+const registerHandler = (toSpec?: jest.Mock) => {
   const register = jest.fn();
+  const getTypeDefinition = jest.fn(() => ({ toSpec }));
 
   registerSlackHooks({ hooks: { register } } as unknown as InternalSetupServices, {
+    getKibanaUrl: () => 'http://localhost:5601',
+    getInternalServices: () =>
+      ({ attachments: { getTypeDefinition } } as unknown as InternalStartServices),
     logger: loggerMock.create(),
   });
 
   const [[{ id, hooks }]] = register.mock.calls;
   const { mode, handler } = hooks[HookLifecycle.afterChatEvent];
 
-  return { id, mode, handler: handler as HookHandler<HookLifecycle.afterChatEvent> };
+  return {
+    id,
+    mode,
+    handler: handler as HookHandler<HookLifecycle.afterChatEvent>,
+    getTypeDefinition,
+  };
 };
 
 describe('registerSlackHooks', () => {
@@ -59,25 +87,33 @@ describe('registerSlackHooks', () => {
     expect(mode).toBe(HookExecutionMode.blocking);
   });
 
-  it('adds the reply of Slack rounds as Block Kit', async () => {
-    const { handler } = registerHandler();
-    const event = createRoundCompleteEvent('There are **3** open alerts.');
+  it('renders attachments through the mapping of their type', async () => {
+    const toSpec = jest.fn(() => ({
+      type: 'view',
+      body: [{ type: 'markdown', text: 'Mapped text' }],
+    }));
+    const { handler, getTypeDefinition } = registerHandler(toSpec);
+    const event = createRoundCompleteEvent('<render_attachment id="a1" />');
 
     const result = await handler(createContext(event, { type: ConversationOriginType.Slack }));
 
-    expect(result).toEqual({
-      event: {
-        ...event,
-        projection: {
-          slack: {
-            text: expect.any(String),
-            blocks: [
-              { type: 'section', text: { type: 'mrkdwn', text: 'There are *3* open alerts.' } },
-            ],
-          },
-        },
-      },
-    });
+    expect(getTypeDefinition).toHaveBeenCalledWith('text');
+    expect(toSpec).toHaveBeenCalledWith(
+      { content: 'Attached text' },
+      expect.objectContaining({ version: 1 })
+    );
+    expect(JSON.stringify(result)).toContain('Mapped text');
+  });
+
+  it('links unmapped attachments to the conversation in its space', async () => {
+    const { handler } = registerHandler();
+    const event = createRoundCompleteEvent('<render_attachment id="a1" />');
+
+    const result = await handler(createContext(event, { type: ConversationOriginType.Slack }));
+
+    expect(JSON.stringify(result)).toContain(
+      'http://localhost:5601/s/space-1/app/agent_builder/agents/agent-1/conversations/conversation-1'
+    );
   });
 
   it('leaves events of rounds without an origin unchanged', async () => {

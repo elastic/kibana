@@ -14,6 +14,7 @@ import {
   type MessageCompleteEvent,
   type RoundCompleteEvent,
 } from '@kbn/agent-builder-common';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { loggerMock } from '@kbn/logging-mocks';
 import { addSlackProjection, type AddSlackProjectionOptions } from './add_slack_projection';
 
@@ -21,6 +22,8 @@ jest.mock('@elastic/isomer-sdk/slack', () => ({
   ...jest.requireActual('@elastic/isomer-sdk/slack'),
   renderSlackEnvelope: jest.fn(jest.requireActual('@elastic/isomer-sdk/slack').renderSlackEnvelope),
 }));
+
+const conversationUrl = 'http://localhost:5601/app/agent_builder/agents/a/conversations/c';
 
 const createRound = (message: string): ConversationRound => ({
   id: 'round-1',
@@ -34,15 +37,34 @@ const createRound = (message: string): ConversationRound => ({
   model_usage: { connector_id: 'unknown', input_tokens: 0, output_tokens: 0, llm_calls: 0 },
 });
 
-const createRoundCompleteEvent = (message: string): RoundCompleteEvent => ({
+const esqlAttachment: VersionedAttachment = {
+  id: 'a1',
+  type: 'esql',
+  current_version: 1,
+  versions: [
+    {
+      version: 1,
+      data: { query: 'FROM logs | LIMIT 10' },
+      created_at: '2026-10-06T00:00:00.000Z',
+      content_hash: 'hash',
+    },
+  ],
+};
+
+const createRoundCompleteEvent = (
+  message: string,
+  attachments: VersionedAttachment[] = []
+): RoundCompleteEvent => ({
   type: ChatEventType.roundComplete,
-  data: { round: createRound(message) },
+  data: { round: createRound(message), attachments },
 });
 
 const createOptions = (
   overrides: Partial<AddSlackProjectionOptions> = {}
 ): AddSlackProjectionOptions => ({
   originType: ConversationOriginType.Slack,
+  getMapping: () => undefined,
+  getConversationUrl: () => conversationUrl,
   logger: loggerMock.create(),
   ...overrides,
 });
@@ -67,12 +89,30 @@ describe('addSlackProjection', () => {
     });
   });
 
-  it('drops attachment tags', () => {
-    const event = createRoundCompleteEvent('Hello\n\n<render_attachment id="a1" version="1" />');
+  it('renders mapped attachments in place of their tags', () => {
+    const event = createRoundCompleteEvent(
+      'Here is the query:\n\n<render_attachment id="a1" version="1" />',
+      [esqlAttachment]
+    );
+    const options = createOptions({
+      getMapping: () => (data) => ({
+        type: 'view',
+        body: [{ type: 'markdown', text: `\`${(data as { query: string }).query}\`` }],
+      }),
+    });
+
+    const slack = addSlackProjection(event, options)?.projection?.slack;
+
+    expect(JSON.stringify(slack)).toContain('FROM logs | LIMIT 10');
+    expect(JSON.stringify(slack)).not.toContain('render_attachment');
+  });
+
+  it('links unmapped attachments to Kibana', () => {
+    const event = createRoundCompleteEvent('<render_attachment id="a1" />', [esqlAttachment]);
 
     const slack = addSlackProjection(event, createOptions())?.projection?.slack;
 
-    expect(JSON.stringify(slack)).toContain('Hello');
+    expect(JSON.stringify(slack)).toContain(`<${conversationUrl}|View in Kibana>`);
     expect(JSON.stringify(slack)).not.toContain('render_attachment');
   });
 

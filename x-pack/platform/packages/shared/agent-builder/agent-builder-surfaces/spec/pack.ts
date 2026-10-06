@@ -20,10 +20,22 @@ export interface MarkdownNode extends PrimitiveNode {
   text: string;
 }
 
-export type SpecNode = MarkdownNode;
+/**
+ * A `<render_attachment>` tag of the reply. `version` is absent when the tag has none.
+ */
+export interface AttachmentNode extends PrimitiveNode {
+  type: 'attachment';
+  attachmentId: string;
+  version?: number;
+}
+
+export type SpecNode = MarkdownNode | AttachmentNode;
 
 /** A reply as an Isomer composition. */
 export type Spec = Composition<SpecNode>;
+
+/** What an attachment type's `toSpec` mapping returns: a composition without attachment nodes. */
+export type AttachmentSpec = Composition<MarkdownNode>;
 
 const markdown = definePrimitive<MarkdownNode>({
   type: 'markdown',
@@ -46,10 +58,38 @@ const markdown = definePrimitive<MarkdownNode>({
   },
 });
 
+const describeAttachment = ({ attachmentId }: AttachmentNode) => `Attachment ${attachmentId}`;
+
+/**
+ * Attachment nodes are resolved by `resolveSpec` before rendering, so these renderers only name
+ * the attachment.
+ */
+const attachment = definePrimitive<AttachmentNode>({
+  type: 'attachment',
+  schema: z.object({
+    type: z.literal('attachment'),
+    attachmentId: requiredString().describe('Id of the conversation attachment'),
+    version: z.number().int().positive().optional().describe('Version of the attachment'),
+  }),
+  catalog: {
+    type: 'attachment',
+    purpose: 'A conversation attachment, rendered through its type.',
+    useWhen: ['The reply shows an attachment.'],
+    avoidWhen: [],
+    example: { type: 'attachment', attachmentId: 'attachment-1', version: 1 },
+  },
+  examples: [{ type: 'attachment', attachmentId: 'attachment-1', version: 1 }],
+  renderers: {
+    react: describeAttachment,
+    text: describeAttachment,
+    markdown: describeAttachment,
+  },
+});
+
 /** The node types of an Agent Builder spec. */
 export const agentBuilderPack = definePrimitivePack({
   id: 'agent-builder',
-  primitives: [markdown],
+  primitives: [markdown, attachment],
 });
 
 /** Renders specs on any surface. */

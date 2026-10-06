@@ -16,16 +16,19 @@ import {
 import type { Logger } from '@kbn/logging';
 import { specDispatcher } from '../spec/pack';
 import { replyToSpec, stripAttachmentTags } from '../spec/reply_to_spec';
+import { resolveSpec, type AttachmentSpecMapping } from '../spec/resolve_spec';
 
 export interface AddSlackProjectionOptions {
   /** Type of the round's origin; only Slack rounds get a projection. */
   originType?: ConversationOriginType;
+  getMapping: (type: string) => AttachmentSpecMapping | undefined;
+  getConversationUrl: () => string;
   logger: Logger;
 }
 
 const renderSlackPayload = (
-  { data: { round } }: RoundCompleteEvent,
-  { logger }: AddSlackProjectionOptions
+  { data: { round, attachments = [] } }: RoundCompleteEvent,
+  { getMapping, getConversationUrl, logger }: AddSlackProjectionOptions
 ): SlackPayload | undefined => {
   const { message } = round.response;
 
@@ -35,7 +38,14 @@ const renderSlackPayload = (
       return;
     }
 
-    const { text, blocks } = renderSlackEnvelope(spec, specDispatcher, { heading: false });
+    const resolved = resolveSpec(spec, {
+      attachments,
+      attachmentRefs: round.input.attachment_refs,
+      getMapping,
+      conversationUrl: getConversationUrl(),
+      logger,
+    });
+    const { text, blocks } = renderSlackEnvelope(resolved, specDispatcher, { heading: false });
 
     return { text, blocks };
   } catch (error) {
