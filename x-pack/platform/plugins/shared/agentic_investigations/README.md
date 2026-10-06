@@ -36,7 +36,7 @@ server/
   impact/                routes, service, storage, step handlers, Agent Builder attachment, agent tool
   subjects/              service, claims, request-scoped client, storage, Agent Builder attachment
   hypotheses/            service, storage, Agent Builder attachment, agent tool
-  investigations/        status and query routes, query service, in-progress state, privileges checker
+  investigations/        status and query routes, query service, in-progress state, privileges checker, `agentic_investigations.get` tool
   escalations/           routes and service
 public/
   plugin.ts index.ts types.ts
@@ -153,6 +153,7 @@ An **investigation** is an Agent Builder conversation on the `investigation` tem
 - **Proposals** come from the `proposals` plugin (`excludeSuperseded`, at most 100) as `{ id, title, comment, status, impact, confidence, category?, created_at, decided_at? }`. They are empty when the plugin is absent or the caller lacks `read_proposals`.
 - **In-process client**: `getInvestigationsClient(request)` on the start contract offers `get(id)`, `list(query)`, `severityCounts(filters)`, `findOpenBySubjects([{ type, id }])` (open investigations the caller can read that still hold one of the subjects, most recently updated first, at most 100) with the read privilege, and `deleteAllInSpace()` with `manage_investigations`. The delete removes every subject, claim, impact, and hypotheses document in the request's space; conversations belong to Agent Builder and are left alone.
 - **Cross-space maintenance**: `deleteSubjectInvestigationDataAcrossSpaces()` on the start contract removes, in every space, the subjects, impact, and hypotheses of every investigation that has subjects, and every subject claim. It takes no request and runs as the internal user, so the caller authorizes it (for example a solution's maintenance task that deletes all of its investigations). Investigations without subjects keep their data, because the impact index is shared with solutions that only attach impact. Agent Builder has no cross-space delete, so conversations stay.
+- **Agent tool `agentic_investigations.get`** (`{ id? }`, defaults to the current conversation) returns the same `Investigation` with evidence summarized as text instead of chart points. It needs the read privilege, is read-only, and is allow-listed in `@kbn/agent-builder-server`.
 
 ## Template UI and gating
 
