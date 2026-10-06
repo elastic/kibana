@@ -58,12 +58,12 @@ describe('manageAttachmentsTool', () => {
     expect(tool.id).toBe('platform.core.cases.manage_attachments');
   });
 
-  it('has write (non-destructive) annotations', () => {
+  it('has destructive write annotations', () => {
     const tool = buildTool(buildRegistry([]), true);
     expect(tool.annotations).toEqual({
       title: 'Manage Case Attachments',
       readOnlyHint: false,
-      destructiveHint: false,
+      destructiveHint: true,
       idempotentHint: false,
       openWorldHint: false,
     });
@@ -107,6 +107,37 @@ describe('manageAttachmentsTool', () => {
         buildToolContext()
       )
     ).rejects.toThrow(/no authorable attachment types/i);
+  });
+
+  it('deletes attachments through the cases client without emitting a case', async () => {
+    const attachments = buildMockAttachments();
+    const tool = buildTool(buildRegistry([]), true);
+
+    const result = await tool.handler(
+      { mode: 'delete_attachments', case_id: 'case-1', ids: ['a-1', 'a-2'] } as never,
+      buildToolContext(attachments)
+    );
+
+    expect(casesClient.attachments.bulkDelete).toHaveBeenCalledWith({
+      caseId: 'case-1',
+      savedObjectIds: ['a-1', 'a-2'],
+    });
+    expect(attachments.add).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      results: [{ type: 'other', data: { case_id: 'case-1', ids: ['a-1', 'a-2'] } }],
+    });
+  });
+
+  it('throws when a deletion fails', async () => {
+    casesClient.attachments.bulkDelete.mockRejectedValue(new Error('Forbidden'));
+    const tool = buildTool(buildRegistry([]), true);
+
+    await expect(
+      tool.handler(
+        { mode: 'delete_attachments', case_id: 'case-1', ids: ['a-1'] } as never,
+        buildToolContext()
+      )
+    ).rejects.toThrow('Attachments could not be deleted on case "case-1": a-1. Reason: Forbidden');
   });
 
   it('bulk-creates attachments and emits a case attachment when enabled', async () => {
