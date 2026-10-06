@@ -34,6 +34,7 @@ import {
 import type { TaskRunnerContext } from './types';
 import { ApiKeyType } from './types';
 import { TaskRunner } from './task_runner';
+import { ActionScheduler } from './action_scheduler';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
   loggingSystemMock,
@@ -4608,6 +4609,50 @@ describe('Task Runner', () => {
         expect(settingsClient.get).not.toHaveBeenCalled();
         expect(mockBus.publish).not.toHaveBeenCalled();
       });
+    });
+
+    test('keeps the action group of a new alert when ActionScheduler unschedules its actions', async () => {
+      // Model the real Alert: the per-alert action scheduler calls unscheduleActions() after it
+      // schedules an action, which clears the scheduled options.
+      let scheduledGroup: string | null = 'default';
+      const alert = {
+        ...makeMockAlert({ id: 'alert-1', uuid: 'uuid-1' }),
+        getScheduledActionOptions: () =>
+          scheduledGroup === null ? undefined : { actionGroup: scheduledGroup },
+        unscheduleActions: () => {
+          scheduledGroup = null;
+        },
+      };
+      alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+        type === 'new' ? { 'alert-1': alert } : {}
+      );
+      // The rule keeps its per-alert action (not `actions: []`).
+      mockGetRuleFromRaw.mockReturnValue({
+        ...(mockedRuleTypeSavedObject as Rule),
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: 'action',
+            params: {},
+            uuid: 'action-uuid-1',
+          },
+        ],
+      });
+      const runSpy = jest.spyOn(ActionScheduler.prototype, 'run').mockImplementation(async () => {
+        alert.unscheduleActions();
+        return { throttledSummaryActions: {} };
+      });
+
+      try {
+        await createRunnerWithBus().run();
+        expect(runSpy).toHaveBeenCalledTimes(1);
+      } finally {
+        runSpy.mockRestore();
+      }
+
+      expect(mockBus.publish).toHaveBeenCalledTimes(1);
+      expect(mockBus.publish.mock.calls[0][0].payload.alert.actionGroup).toBe('default');
     });
 
     test('publishes active event when an alert transitions to new', async () => {
