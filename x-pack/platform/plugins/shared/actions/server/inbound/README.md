@@ -66,7 +66,7 @@ curl -X POST "$KIBANA_URL/api/actions/events/.inboundWebhook/$CONNECTOR_ID" \
 # → 200 {"challenge":"abc"}
 ```
 
-A nested `payload.challenge` is emitted, not acked. A bad or rotated-away token returns **404** (fail-closed; same as unknown connector). Over a rate limit or the in-flight cap, the hub returns **429** with `Retry-After` and `RateLimit: "inbound-events";r=0;t=<seconds>`. The body is “Too many requests. Try again later.”
+A nested `payload.challenge` is emitted, not acked. A bad or rotated-away token returns **404** (fail-closed; same as unknown connector). Once that connector's failed-auth budget is spent, further requests are also **404** and skip the saved-object read. Over the connector rate limit or the in-flight cap, the hub returns **429** with `Retry-After` and `RateLimit: "inbound-events";r=0;t=<seconds>`. The body is “Too many requests. Try again later.”
 
 ## Rate limit
 
@@ -83,7 +83,7 @@ xpack.actions.inboundEvents.rateLimit:
     window: 1m
 ```
 
-A rejected token spends the address budget for that socket and that connector (space, type, and connector id). A missing connector does not. A request that authenticates does not. The socket is `request.socket.remoteAddress`, or `unknown` when the socket has none. The hub does not read `X-Forwarded-For`. On Cloud the socket is often the shared proxy, so each connector has its own 10.
+A rejected token spends the address budget for that socket and that connector (space, type, and connector id). A missing connector does not. A request that authenticates does not. Once the budget is spent the response stays **404**, so it does not show that the connector exists. The socket is `request.socket.remoteAddress`, or `unknown` when the socket has none. The hub does not read `X-Forwarded-For`. On Cloud the socket is often the shared proxy, so each connector has its own 10.
 
 The connector budget counts one authenticated request, including a handshake that passes auth. A request that emits 25 events still costs 1. Each node keeps its own counters.
 

@@ -1084,7 +1084,7 @@ describe('ingestInboundEvent', () => {
       typeof getConnectorSpec
     >;
 
-  it('returns 429 before the saved-object read when the address budget is already spent', async () => {
+  it('returns 404 before the saved-object read when the address budget is already spent', async () => {
     const limiter = windowLimiter({ remoteAddressLimit: 1 });
     limiter.recordRemoteAddressFailure(addressFailureKey('203.0.113.9'));
     getConnectorSpecMock.mockReturnValue(emptyEmitSpec());
@@ -1094,22 +1094,10 @@ describe('ingestInboundEvent', () => {
       remoteAddress: '203.0.113.9',
     });
 
-    expect(result).toEqual({
-      status: 'rate_limited',
-      budget: 'remoteAddress',
-      retryAfterSeconds: expect.any(Number),
-    });
+    expect(result).toEqual({ status: 'not_found' });
     expect(getUnsecuredSavedObjectsClient).not.toHaveBeenCalled();
-    expect(res.customError).toHaveBeenCalledWith({
-      statusCode: 429,
-      body: INBOUND_EVENTS_RATE_LIMITED_MESSAGE,
-      headers: {
-        'Retry-After': `${result.status === 'rate_limited' ? result.retryAfterSeconds : ''}`,
-        RateLimit: `"inbound-events";r=0;t=${
-          result.status === 'rate_limited' ? result.retryAfterSeconds : ''
-        }`,
-      },
-    });
+    expect(res.notFound).toHaveBeenCalled();
+    expect(res.customError).not.toHaveBeenCalled();
     expectOutcome('debug', 'rate_limited');
     expect(JSON.stringify(logger.debug.mock.calls)).not.toContain('203.0.113.9');
     expect(JSON.stringify(logger.debug.mock.calls)).not.toContain('ingest-token-value');
@@ -1160,11 +1148,9 @@ describe('ingestInboundEvent', () => {
 
     getUnsecuredSavedObjectsClient.mockClear();
     const third = await run(rejected);
-    expect(third.result).toEqual({
-      status: 'rate_limited',
-      budget: 'remoteAddress',
-      retryAfterSeconds: expect.any(Number),
-    });
+    expect(third.result).toEqual({ status: 'not_found' });
+    expect(third.response.notFound).toHaveBeenCalled();
+    expect(third.response.customError).not.toHaveBeenCalled();
     expect(getUnsecuredSavedObjectsClient).not.toHaveBeenCalled();
   });
 
@@ -1305,12 +1291,10 @@ describe('ingestInboundEvent', () => {
     limiter.recordRemoteAddressFailure(addressFailureKey('unknown'));
     getConnectorSpecMock.mockReturnValue(emptyEmitSpec());
 
-    const { result } = await run({ rateLimiter: limiter, omitRemoteAddress: true });
-    expect(result).toEqual({
-      status: 'rate_limited',
-      budget: 'remoteAddress',
-      retryAfterSeconds: expect.any(Number),
-    });
+    const { response: res, result } = await run({ rateLimiter: limiter, omitRemoteAddress: true });
+    expect(result).toEqual({ status: 'not_found' });
+    expect(res.notFound).toHaveBeenCalled();
+    expect(res.customError).not.toHaveBeenCalled();
     expect(getUnsecuredSavedObjectsClient).not.toHaveBeenCalled();
   });
 

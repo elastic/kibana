@@ -41,7 +41,7 @@ export type IngestInboundEventResult =
   | { status: 'not_found' }
   | { status: 'error'; statusCode: 500; body: string }
   | { status: 'accepted'; body: { ok: true } }
-  | { status: 'rate_limited'; retryAfterSeconds: number; budget: 'remoteAddress' | 'connector' }
+  | { status: 'rate_limited'; retryAfterSeconds: number; budget: 'connector' }
   | {
       status: 'spoke_http';
       statusCode: number;
@@ -123,19 +123,15 @@ export async function ingestInboundEvent({
     remoteAddress || 'unknown'
   }\0${spaceId}\0${connectorTypeId}\0${connectorId}`;
 
-  const rateLimited = (
-    budget: 'remoteAddress' | 'connector',
-    retryAfterSeconds: number
-  ): IngestInboundEventResult => {
-    const budgetName = budget === 'remoteAddress' ? 'remote_address' : 'connector';
+  const rateLimited = (retryAfterSeconds: number): IngestInboundEventResult => {
     logInboundIngressOutcome(logger, {
       ...baseLog,
       outcome: 'rate_limited',
-      detail: `budget=${budgetName} retryAfter=${retryAfterSeconds}`,
-      budget,
+      detail: `budget=connector retryAfter=${retryAfterSeconds}`,
+      budget: 'connector',
       retryAfterSeconds,
     });
-    return { status: 'rate_limited', retryAfterSeconds, budget };
+    return { status: 'rate_limited', retryAfterSeconds, budget: 'connector' };
   };
 
   const notFound = (
@@ -156,7 +152,15 @@ export async function ingestInboundEvent({
 
   const addressDecision = rateLimiter.peekRemoteAddress(remoteAddressKey);
   if (!addressDecision.allowed) {
-    return rateLimited('remoteAddress', addressDecision.retryAfterSeconds);
+    logInboundIngressOutcome(logger, {
+      ...baseLog,
+      outcome: 'rate_limited',
+      detail: `budget=remote_address retryAfter=${addressDecision.retryAfterSeconds}`,
+      budget: 'remoteAddress',
+      retryAfterSeconds: addressDecision.retryAfterSeconds,
+    });
+    // Same 404 as a missing connector. A 429 here would show that the connector exists.
+    return { status: 'not_found' };
   }
 
   // Path schema maxLength is pre-normalize; reject post-normalize oversize (e.g. undotted 64 + '.').
@@ -255,7 +259,7 @@ export async function ingestInboundEvent({
     `${spaceId}\0${connectorTypeId}\0${connectorId}`
   );
   if (!connectorDecision.allowed) {
-    return rateLimited('connector', connectorDecision.retryAfterSeconds);
+    return rateLimited(connectorDecision.retryAfterSeconds);
   }
 
   try {
