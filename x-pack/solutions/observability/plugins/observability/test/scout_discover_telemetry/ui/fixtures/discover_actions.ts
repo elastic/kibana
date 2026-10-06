@@ -81,7 +81,6 @@ export class DiscoverEbt {
       .click();
   }
 
-  /** The surrounding documents page has no query bar, so wait on its load-more buttons instead of `discover.waitUntilSearchingHasFinished()`. They are disabled while the anchor or their side is loading. */
   async waitForSurroundingDocuments(): Promise<void> {
     for (const testSubj of ['predecessorsLoadMoreButton', 'successorsLoadMoreButton']) {
       await expect(this.page.testSubj.locator(testSubj)).toBeEnabled({ timeout: 30_000 });
