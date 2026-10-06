@@ -94,19 +94,15 @@ export type EpisodeAlertActionType = (typeof EPISODE_ALERT_ACTION_TYPES)[number]
 // request path (or the bulk item key), so the body carries no episode_id.
 const tagEpisodeActionSchema = z
   .object({
-    action_type: z
-      .literal(ALERT_EPISODE_ACTION_TYPE.TAG)
-      .describe("Replaces an alerting episode's tags."),
-    tags: tagsSchema.describe("Replaces the episode's tags. Send `[]` to clear."),
+    action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.TAG).describe("Replaces an alert's tags."),
+    tags: tagsSchema.describe("Replaces the alert's tags. Send `[]` to clear."),
   })
   .strict()
   .meta({ id: 'alerting_tag_episode_action' });
 
 const ackEpisodeActionSchema = z
   .object({
-    action_type: z
-      .literal(ALERT_EPISODE_ACTION_TYPE.ACK)
-      .describe('Acknowledges an alerting episode.'),
+    action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.ACK).describe('Acknowledges an alert.'),
   })
   .strict()
   .meta({ id: 'alerting_ack_episode_action' });
@@ -115,7 +111,7 @@ const unackEpisodeActionSchema = z
   .object({
     action_type: z
       .literal(ALERT_EPISODE_ACTION_TYPE.UNACK)
-      .describe('Removes acknowledgement from an alerting episode.'),
+      .describe('Removes acknowledgement from an alert.'),
   })
   .strict()
   .meta({ id: 'alerting_unack_episode_action' });
@@ -124,15 +120,13 @@ const assignEpisodeActionSchema = z
   .object({
     action_type: z
       .literal(ALERT_EPISODE_ACTION_TYPE.ASSIGN)
-      .describe('Assigns an alerting episode to a user, or clears the assignee when null.'),
+      .describe('Assigns an alert to a user, or clears the assignee when null.'),
     assignee_uid: z
       .string()
       .min(1)
       .max(ID_MAX_LENGTH)
       .nullable()
-      .describe(
-        'User profile UID of the assignee, or null to remove the assignee from the episode.'
-      ),
+      .describe('User profile UID of the assignee, or null to remove the assignee from the alert.'),
   })
   .strict()
   .meta({ id: 'alerting_assign_episode_action' });
@@ -153,7 +147,7 @@ export const createEpisodeAlertActionBodySchema = z
     deactivateActionSchema,
   ])
   .describe(
-    'Request body for creating an episode-level alert action. One of: tag, ack, unack, assign, activate, deactivate.'
+    'Request body for creating an alert-level alert action. One of: tag, ack, unack, assign, activate, deactivate.'
   )
   .meta({ id: 'alerting_episode_alert_action' });
 export type CreateEpisodeAlertActionBody = z.infer<typeof createEpisodeAlertActionBodySchema>;
@@ -161,7 +155,7 @@ export type CreateEpisodeAlertActionBody = z.infer<typeof createEpisodeAlertActi
 export const seriesAlertActionParamsSchema = z
   .object({
     group_hash: groupHashSchema.describe(
-      'Hash identifying the alert episode series to apply the action to.'
+      'Hash identifying the alert series to apply the action to.'
     ),
   })
   .strict()
@@ -238,7 +232,7 @@ export type CreateDeactivateEpisodeActionBody = z.infer<
 // body fields plus the series/episode identifier. The envelope leaves room
 // for future request-level fields (e.g. dry_run) without a breaking change.
 const bulkGroupHashSchema = groupHashSchema.describe(
-  'Hash identifying the alert episode series to apply the action to.'
+  'Hash identifying the alert series to apply the action to.'
 );
 
 const bulkEpisodeIdSchema = z
