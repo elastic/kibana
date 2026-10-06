@@ -24,7 +24,7 @@ export const apmServerSettings: SavedObjectsType = {
   },
   management: {
     importableAndExportable: false,
-    icon: 'apmApp',
+    icon: 'gear',
     getTitle: () =>
       i18n.translate('xpack.apm.apmSchema.index', {
         defaultMessage: 'APM Server Schema - Index',

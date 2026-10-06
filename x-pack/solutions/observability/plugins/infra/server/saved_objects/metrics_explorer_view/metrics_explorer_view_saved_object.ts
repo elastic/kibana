@@ -29,7 +29,7 @@ export const metricsExplorerViewSavedObjectType: SavedObjectsType = {
     defaultSearchField: 'name',
     displayName: 'metrics explorer view',
     getTitle: getMetricsExplorerViewTitle,
-    icon: 'metricsApp',
+    icon: 'chartGauge',
     importableAndExportable: true,
   },
   mappings: {
