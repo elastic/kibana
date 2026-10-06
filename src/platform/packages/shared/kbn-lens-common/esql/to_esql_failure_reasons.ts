@@ -44,40 +44,41 @@ export const esqlConversionFailureTitle = i18n.translate(
   }
 );
 
-/** Sentence-only tooltip bodies for each conversion failure reason */
+/**
+ * Sentence-only tooltip bodies for each conversion failure reason.
+ * IDs ending in `Reason` were rotated when the shared title was split out of the messages,
+ * so stale full-tooltip translations are not shown with the title prepended a second time.
+ */
 export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureReason, string> = {
-  formula_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlFormulaTooltip', {
+  formula_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlFormulaReason', {
     defaultMessage: 'Formula operations will be supported in an upcoming update.',
   }),
-  time_shift_not_supported: i18n.translate(
-    'xpack.lens.config.cannotConvertToEsqlTimeShiftTooltip',
-    {
-      defaultMessage: 'Time shift will be supported in an upcoming update.',
-    }
-  ),
+  time_shift_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlTimeShiftReason', {
+    defaultMessage: 'Time shift will be supported in an upcoming update.',
+  }),
   runtime_field_not_supported: i18n.translate(
-    'xpack.lens.config.cannotConvertToEsqlRuntimeFieldTooltip',
+    'xpack.lens.config.cannotConvertToEsqlRuntimeFieldReason',
     {
       defaultMessage: 'Runtime fields will be supported in an upcoming update.',
     }
   ),
   reduced_time_range_not_supported: i18n.translate(
-    'xpack.lens.config.cannotConvertToEsqlReducedTimeRangeTooltip',
+    'xpack.lens.config.cannotConvertToEsqlReducedTimeRangeReason',
     {
       defaultMessage: 'Reduced time range will be supported in an upcoming update.',
     }
   ),
-  function_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlOperationTooltip', {
+  function_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlOperationReason', {
     defaultMessage: 'Support for one or more functions used will be coming in an upcoming update.',
   }),
   drop_partials_not_supported: i18n.translate(
-    'xpack.lens.config.cannotConvertToEsqlDropPartialsTooltip',
+    'xpack.lens.config.cannotConvertToEsqlDropPartialsReason',
     {
       defaultMessage: '"Drop partial buckets" will be supported in an upcoming update.',
     }
   ),
   include_empty_rows_not_supported: i18n.translate(
-    'xpack.lens.config.cannotConvertToEsqlIncludeEmptyRowsTooltip',
+    'xpack.lens.config.cannotConvertToEsqlIncludeEmptyRowsReason',
     {
       defaultMessage: '"Include empty rows" will be supported in an upcoming update.',
     }
@@ -158,17 +159,17 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
       defaultMessage: 'Only static value reference lines are supported for conversion.',
     }
   ),
-  trendline_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlTrendlineTooltip', {
+  trendline_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlTrendlineReason', {
     defaultMessage:
       'The trendline layer uses a configuration that is not yet supported for conversion.',
   }),
   unsupported_settings: i18n.translate(
-    'xpack.lens.config.cannotConvertToEsqlUnsupportedSettingsTooltip',
+    'xpack.lens.config.cannotConvertToEsqlUnsupportedSettingsReason',
     {
       defaultMessage: 'Some settings used will be supported in an upcoming update.',
     }
   ),
-  unknown: i18n.translate('xpack.lens.config.cannotConvertToEsqlUnknownTooltip', {
+  unknown: i18n.translate('xpack.lens.config.cannotConvertToEsqlUnknownReason', {
     defaultMessage: 'This visualization will be supported in an upcoming update.',
   }),
 };
