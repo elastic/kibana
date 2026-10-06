@@ -143,7 +143,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.agenticInvestigations}.set_hypotheses`,
 
   // Platform – Proposals
-  'proposals.create',
+  `${internalNamespaces.proposals}.create`,
 
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
