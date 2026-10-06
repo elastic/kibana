@@ -388,10 +388,22 @@ describe('updateActionPolicyDataSchema', () => {
       expect(result.matcher).toEqual({});
     });
 
-    it('clears a sub-field by omitting it from the replacement matcher', () => {
+    it('accepts a matcher that sets one sub-field and leaves the other out', () => {
       const result = updateActionPolicyDataSchema.parse({ matcher: { tags: ['prod'] } });
 
       expect(result.matcher).toEqual({ tags: ['prod'] });
+    });
+
+    it('accepts clearing a single matcher sub-field', () => {
+      const result = updateActionPolicyDataSchema.parse({ matcher: { expression: null } });
+
+      expect(result.matcher).toEqual({ expression: null });
+    });
+
+    it('accepts clearing a single throttle sub-field', () => {
+      const result = updateActionPolicyDataSchema.parse({ throttle: { interval: null } });
+
+      expect(result.throttle).toEqual({ interval: null });
     });
 
     it('accepts setting group_by to null', () => {
@@ -414,56 +426,52 @@ describe('updateActionPolicyDataSchema', () => {
   });
 
   describe('invalid payloads', () => {
-    it('rejects incompatible grouping_mode and throttle strategy', () => {
-      expect(() =>
-        updateActionPolicyDataSchema.parse({
-          grouping_mode: 'per_alert',
-          throttle: { strategy: 'time_interval', interval: '5m' },
-        })
-      ).toThrow('not valid for grouping mode');
+    it('rejects unknown keys', () => {
+      expect(() => updateActionPolicyDataSchema.parse({ nope: true })).toThrow();
     });
 
-    it('rejects grouping_mode null with aggregate-only strategy (null defaults to per_alert)', () => {
-      expect(() =>
-        updateActionPolicyDataSchema.parse({
-          grouping_mode: null,
-          throttle: { strategy: 'time_interval', interval: '5m' },
-        })
-      ).toThrow('not valid for grouping mode');
+    it('rejects clearing a field that is required at create', () => {
+      expect(() => updateActionPolicyDataSchema.parse({ name: null })).toThrow();
+      expect(() => updateActionPolicyDataSchema.parse({ destinations: null })).toThrow();
     });
 
-    it('rejects strategy requiring interval when interval is missing', () => {
-      expect(() =>
-        updateActionPolicyDataSchema.parse({
-          grouping_mode: 'all',
-          throttle: { strategy: 'time_interval' },
-        })
-      ).toThrow('requires an interval');
+    it('still enforces the leaf constraints from the create schema', () => {
+      expect(() => updateActionPolicyDataSchema.parse({ name: '' })).toThrow();
+      expect(() => updateActionPolicyDataSchema.parse({ destinations: [] })).toThrow();
+      expect(() => updateActionPolicyDataSchema.parse({ matcher: { tags: [] } })).toThrow();
     });
+  });
 
-    it('rejects per_field + on_status_change', () => {
-      expect(() =>
-        updateActionPolicyDataSchema.parse({
-          grouping_mode: 'per_field',
-          throttle: { strategy: 'on_status_change' },
-        })
-      ).toThrow('not valid for grouping mode');
-    });
-
-    it('rejects per_status_interval without interval even when grouping_mode is omitted', () => {
-      expect(() =>
-        updateActionPolicyDataSchema.parse({
-          throttle: { strategy: 'per_status_interval' },
-        })
-      ).toThrow('requires an interval');
-    });
-
-    it('rejects time_interval without interval even when grouping_mode is omitted', () => {
-      expect(() =>
-        updateActionPolicyDataSchema.parse({
-          throttle: { strategy: 'time_interval' },
-        })
-      ).toThrow('requires an interval');
+  /**
+   * A PATCH body is a sparse delta, so a cross-field rule cannot be judged from it alone: a
+   * strategy that needs an interval may be inheriting one from the stored policy. These bodies are
+   * therefore accepted here and validated after the merge, by `ActionPolicyClient`.
+   */
+  describe('cross-field invariants deferred to the merged document', () => {
+    it.each([
+      [
+        'incompatible grouping_mode and throttle strategy',
+        { grouping_mode: 'per_alert', throttle: { strategy: 'time_interval', interval: '5m' } },
+      ],
+      [
+        'grouping_mode null with an aggregate-only strategy',
+        { grouping_mode: null, throttle: { strategy: 'time_interval', interval: '5m' } },
+      ],
+      [
+        'a strategy that requires an interval, without one',
+        { grouping_mode: 'all', throttle: { strategy: 'time_interval' } },
+      ],
+      [
+        'per_field with on_status_change',
+        { grouping_mode: 'per_field', throttle: { strategy: 'on_status_change' } },
+      ],
+      [
+        'per_status_interval without an interval',
+        { throttle: { strategy: 'per_status_interval' } },
+      ],
+      ['time_interval without an interval', { throttle: { strategy: 'time_interval' } }],
+    ])('accepts %s', (_label, body) => {
+      expect(updateActionPolicyDataSchema.safeParse(body).success).toBe(true);
     });
   });
 });

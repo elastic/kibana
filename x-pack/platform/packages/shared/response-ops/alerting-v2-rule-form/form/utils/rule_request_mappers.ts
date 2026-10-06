@@ -93,11 +93,22 @@ export const mapFormValuesToCreateRequest = (formValues: FormValues): CreateRule
   ...mapFormValuesToRuleRequest(formValues),
 });
 
+/**
+ * The form submits every field it owns, so anything the user emptied has to be sent as `null`:
+ * PATCH merges leaf by leaf, and an omitted leaf would keep the value they just cleared.
+ */
 export const mapFormValuesToUpdateRequest = (formValues: FormValues): UpdateRuleData => {
-  const { grouping, state_transition, artifacts, ...rest } = mapFormValuesToRuleRequest(formValues);
+  const { grouping, state_transition, artifacts, metadata, query, ...rest } =
+    mapFormValuesToRuleRequest(formValues);
 
   return {
     ...rest,
+    metadata: {
+      ...metadata,
+      description: metadata.description ?? null,
+      tags: metadata.tags ?? null,
+    },
+    query: { ...query, breach: query.breach ?? null },
     grouping: grouping ?? null,
     state_transition: state_transition ?? null,
     artifacts: artifacts ?? null,

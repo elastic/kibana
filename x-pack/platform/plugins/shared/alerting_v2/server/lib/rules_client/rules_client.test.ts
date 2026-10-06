@@ -23,6 +23,7 @@ import type { RulesSavedObjectServiceMock } from '../services/rules_saved_object
 import type { UserService } from '../services/user_service/user_service';
 import { createUserService } from '../services/user_service/user_service.mock';
 import { createRuleSoAttributes } from '../test_utils';
+import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import type {
   EventRule,
   RuleEventPublisher,
@@ -1212,7 +1213,7 @@ describe('RulesClient', () => {
       await expect(
         client.updateRule({
           id: 'rule-id-stale-recovery',
-          data: { query: { base: 'FROM logs-*' } },
+          data: { query: { breach: null } },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 400 },
@@ -1220,6 +1221,33 @@ describe('RulesClient', () => {
       });
 
       expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+    });
+
+    it('keeps a stored breach segment when the update only changes query.base', async () => {
+      const client = createClient();
+
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-keep-breach',
+        attributes: {
+          ...baseSoAttrs,
+          kind: 'alert',
+          query: { base: 'FROM logs-*', breach: { segment: 'WHERE error' } },
+          recovery: { strategy: 'condition', segment: 'WHERE NOT error' },
+        },
+        version: 'WzEsMV0=',
+      });
+
+      await client.updateRule({
+        id: 'rule-id-keep-breach',
+        data: { query: { base: 'FROM metrics-*' } },
+      });
+
+      const { attrs } = rulesSavedObjectService.update.mock.calls[0][0];
+
+      expect(attrs.query).toEqual({
+        base: 'FROM metrics-*',
+        breach: { segment: 'WHERE error' },
+      });
     });
 
     it('throws 400 when setting a condition recovery on a rule whose stored query has no breach', async () => {
@@ -1249,7 +1277,7 @@ describe('RulesClient', () => {
       expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
     });
 
-    it('throws 400 when a base query update makes a stored recovery segment uncomposable', async () => {
+    it('throws 400 when the merged rule is not valid, without writing anything', async () => {
       const client = createClient();
 
       const existingAttributes: RuleSavedObjectAttributes = {
@@ -1272,7 +1300,7 @@ describe('RulesClient', () => {
         })
       ).rejects.toMatchObject({
         output: { statusCode: 400 },
-        message: 'recovery.segment does not compose into a valid ES|QL query with query.base.',
+        data: { code: ALERTING_ERROR_CODES.INVALID_RULE_DATA },
       });
 
       expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
@@ -1342,37 +1370,47 @@ describe('RulesClient', () => {
       });
     });
 
-    it('replaces state_transition entirely without preserving stale sub-fields', async () => {
-      const client = createClient();
-
+    describe('state_transition leaf merging', () => {
       const existingAttributes: RuleSavedObjectAttributes = {
         ...baseSoAttrs,
         kind: 'alert',
         state_transition: { pending: { count: 2 }, recovering: { count: 3 } },
       };
 
-      rulesSavedObjectService.get.mockResolvedValueOnce({
-        id: 'rule-partial-st',
-        attributes: existingAttributes,
-        version: 'WzEsMV0=',
-      });
-
-      await client.updateRule({
-        id: 'rule-partial-st',
-        data: { state_transition: { recovering: { count: 3 } } },
-      });
-
-      expect(rulesSavedObjectService.update).toHaveBeenCalledWith(
-        expect.objectContaining({
+      beforeEach(() => {
+        rulesSavedObjectService.get.mockResolvedValueOnce({
           id: 'rule-partial-st',
-          attrs: expect.objectContaining({
-            state_transition: { recovering: { count: 3 } },
-          }),
-        })
-      );
-      const { attrs } = rulesSavedObjectService.update.mock.calls[0][0];
-      expect(attrs.state_transition).toEqual({ recovering: { count: 3 } });
-      expect(attrs.state_transition?.pending).toBeUndefined();
+          attributes: existingAttributes,
+          version: 'WzEsMV0=',
+        });
+      });
+
+      const storedByUpdate = () => rulesSavedObjectService.update.mock.calls[0][0].attrs;
+
+      it('merges one phase and keeps the other', async () => {
+        const client = createClient();
+
+        await client.updateRule({
+          id: 'rule-partial-st',
+          data: { state_transition: { recovering: { count: 9 } } },
+        });
+
+        expect(storedByUpdate().state_transition).toEqual({
+          pending: { count: 2 },
+          recovering: { count: 9 },
+        });
+      });
+
+      it('clears one phase and keeps the other', async () => {
+        const client = createClient();
+
+        await client.updateRule({
+          id: 'rule-partial-st',
+          data: { state_transition: { pending: null } },
+        });
+
+        expect(storedByUpdate().state_transition).toEqual({ recovering: { count: 3 } });
+      });
     });
 
     it('clears artifacts when update payload sets artifacts to null', async () => {

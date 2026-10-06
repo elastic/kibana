@@ -49,6 +49,7 @@ import {
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
 import { buildSoSearch } from '../build_so_search';
+import { applyPatch } from '../apply_patch';
 import { buildActionPolicySoFilter } from './build_action_policy_filter';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
@@ -68,6 +69,7 @@ import {
   buildCreateActionPolicyAttributes,
   buildUpdateActionPolicyAttributes,
   toApiKeyAttributes,
+  toPatchableActionPolicyData,
   transformActionPolicySoAttributesToApiResponse,
   validateDateString,
 } from './utils';
@@ -210,11 +212,33 @@ export class ActionPolicyClient {
     version,
   }: {
     id: string;
-    attrs: Partial<ActionPolicySavedObjectAttributes>;
+    attrs: ActionPolicySavedObjectAttributes;
     version?: string;
   }): Promise<{ id: string; version?: string }> {
+    return this.mapVersionConflict(id, () =>
+      this.actionPolicySavedObjectService.update({ id, attrs, version })
+    );
+  }
+
+  /**
+   * Writes server-owned fields onto a stored policy without rebuilding the whole document. Only for
+   * flat fields the caller owns; anything nested belongs in {@link writeActionPolicyAttrs}.
+   */
+  private async patchActionPolicyFields({
+    id,
+    attrs,
+  }: {
+    id: string;
+    attrs: PartiallyUpdateableActionPolicyAttributes;
+  }): Promise<{ id: string; version?: string }> {
+    return this.mapVersionConflict(id, () =>
+      this.actionPolicySavedObjectService.patchFields({ id, attrs })
+    );
+  }
+
+  private async mapVersionConflict<T>(id: string, write: () => Promise<T>): Promise<T> {
     try {
-      return await this.actionPolicySavedObjectService.update({ id, attrs, version });
+      return await write();
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         throw Boom.conflict(getActionPolicyVersionConflictMessage(id), {
@@ -322,12 +346,20 @@ export class ActionPolicyClient {
 
     const oldAuth = await this.getDecryptedAuth(params.options.id);
 
-    const policyName = parsed.name ?? existingPolicy.name;
-    const apiKeyAttrs = await this.apiKeyService.create(getActionPolicyApiKeyName(policyName));
+    // Merge in API space, then validate the whole document: a sparse delta cannot satisfy the
+    // cross-field invariants on its own, and the merge result is what actually gets stored.
+    const merged = applyPatch(
+      createActionPolicyDataSchema,
+      toPatchableActionPolicyData(existingPolicy),
+      parsed
+    );
+    const mergedData = this.parseActionPolicyData(createActionPolicyDataSchema, merged, 'update');
+
+    const apiKeyAttrs = await this.apiKeyService.create(getActionPolicyApiKeyName(mergedData.name));
 
     const nextAttrs = buildUpdateActionPolicyAttributes({
       existing: existingPolicy,
-      update: parsed,
+      data: mergedData,
       auth: apiKeyAttrs,
       updatedBy: actor,
       updatedAt: now,
@@ -454,7 +486,7 @@ export class ActionPolicyClient {
     );
 
     try {
-      await this.writeActionPolicyAttrs({
+      await this.patchActionPolicyFields({
         id,
         attrs: {
           ...toApiKeyAttributes(apiKeyAttrs),
@@ -839,7 +871,7 @@ export class ActionPolicyClient {
     const now = new Date().toISOString();
 
     try {
-      await this.writeActionPolicyAttrs({
+      await this.patchActionPolicyFields({
         id,
         attrs: {
           ...stateUpdate,

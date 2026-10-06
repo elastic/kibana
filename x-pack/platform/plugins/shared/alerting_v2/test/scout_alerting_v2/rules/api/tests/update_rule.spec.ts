@@ -756,4 +756,205 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response.body.metadata.builder_type).toBeUndefined();
     }
   );
+
+  apiTest(
+    'merge: patches the breach segment and preserves query.base',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'query-leaf-rule' },
+          query: {
+            base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+            breach: { segment: 'WHERE count >= 10' },
+          },
+        })
+      );
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { query: { breach: { segment: 'WHERE count >= 20' } } },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.query).toStrictEqual({
+        base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+        breach: { segment: 'WHERE count >= 20' },
+      });
+
+      const stored = await apiServices.alertingV2.rules.get(created.id);
+      expect(stored.query).toStrictEqual(response.body.query);
+    }
+  );
+
+  apiTest(
+    'merge: clears the breach block with null and preserves query.base',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'query-leaf-clear-rule' },
+          query: {
+            base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+            breach: { segment: 'WHERE count >= 10' },
+          },
+        })
+      );
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { query: { breach: null } },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.query).toStrictEqual({
+        base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+      });
+    }
+  );
+
+  apiTest(
+    'merge: patches a state_transition phase three levels down and preserves its siblings',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'state-transition-leaf-rule' },
+          state_transition: { pending: { count: 2 }, recovering: { count: 4 } },
+        })
+      );
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { state_transition: { pending: { timeframe: '10m', operator: 'or' } } },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.state_transition).toStrictEqual({
+        pending: { count: 2, timeframe: '10m', operator: 'or' },
+        recovering: { count: 4 },
+      });
+    }
+  );
+
+  apiTest(
+    'merge: replaces the recovery variant wholesale rather than merging it',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'recovery-replace-rule' },
+          query: {
+            base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+            breach: { segment: 'WHERE count >= 10' },
+          },
+          recovery: { strategy: 'condition', segment: 'WHERE count < 5' },
+        })
+      );
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { recovery: { strategy: 'no_breach' } },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      // A variant object cannot be half-sent, so the old `segment` goes with it.
+      expect(response.body.recovery).toStrictEqual({ strategy: 'no_breach' });
+    }
+  );
+
+  apiTest(
+    'merge: rejects a recovery variant sent without its discriminator',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'recovery-partial-rule' },
+          query: {
+            base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+            breach: { segment: 'WHERE count >= 10' },
+          },
+          recovery: { strategy: 'condition', segment: 'WHERE count < 5' },
+        })
+      );
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { recovery: { segment: 'WHERE count < 2' } },
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
+
+  apiTest('merge: replaces metadata.tags wholesale', async ({ apiClient, apiServices }) => {
+    const created = await apiServices.alertingV2.rules.create(
+      buildCreateRuleData({
+        metadata: { name: 'tags-replace-rule', tags: ['cpu', 'memory'] },
+      })
+    );
+
+    const response = await apiClient.patch(getRuleUrl(created.id), {
+      headers: writerHeaders,
+      body: { metadata: { tags: ['disk'] } },
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.metadata.tags).toStrictEqual(['disk']);
+    expect(response.body.metadata.name).toBe('tags-replace-rule');
+  });
+
+  apiTest(
+    'merge: rejects a patch whose merged rule is invalid and stores nothing',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'invalid-merge-rule' },
+          state_transition: { pending: { count: 2 }, recovering: { count: 4 } },
+        })
+      );
+
+      // Clearing the only leaf a phase holds leaves `pending` configured but
+      // gating nothing, which the merged document has to reject.
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { state_transition: { pending: { count: null } } },
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_RULE_DATA');
+
+      const stored = await apiServices.alertingV2.rules.get(created.id);
+      expect(stored.state_transition).toStrictEqual({
+        pending: { count: 2 },
+        recovering: { count: 4 },
+      });
+    }
+  );
+
+  apiTest(
+    'round trip: the patch response matches a subsequent GET',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'round-trip-rule', description: 'original', tags: ['cpu'] },
+          query: {
+            base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+            breach: { segment: 'WHERE count >= 10' },
+          },
+          state_transition: { pending: { count: 2 }, recovering: { count: 4 } },
+        })
+      );
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: {
+          metadata: { description: null },
+          query: { breach: { segment: 'WHERE count >= 30' } },
+          state_transition: { recovering: { count: 1 } },
+        },
+      });
+
+      expect(response).toHaveStatusCode(200);
+
+      const stored = await apiServices.alertingV2.rules.get(created.id);
+      expect(response.body).toStrictEqual(stored);
+    }
+  );
 });

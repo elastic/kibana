@@ -22,7 +22,7 @@ import {
 } from './constants';
 import {
   POLICY_MATCHER_DESCRIPTION,
-  POLICY_MATCHER_UPDATE_DESCRIPTION,
+  policyMatcherPatchSchema,
   policyMatcherSchema,
 } from './policy_matcher_schema';
 
@@ -81,17 +81,25 @@ export const throttleStrategySchema = z
 
 export type ThrottleStrategy = z.infer<typeof throttleStrategySchema>;
 
+const THROTTLE_STRATEGY_DESCRIPTION = 'The throttle strategy.';
+const THROTTLE_INTERVAL_DESCRIPTION =
+  'The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.';
+
 const throttleSchema = z
   .object({
-    strategy: throttleStrategySchema.optional().describe('The throttle strategy.'),
-    interval: durationSchema
-      .nullish()
-      .describe(
-        'The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.'
-      ),
+    strategy: throttleStrategySchema.optional().describe(THROTTLE_STRATEGY_DESCRIPTION),
+    interval: durationSchema.nullish().describe(THROTTLE_INTERVAL_DESCRIPTION),
   })
   .strict()
   .meta({ id: 'alerting_action_policy_throttle' });
+
+const throttlePatchSchema = z
+  .object({
+    strategy: throttleStrategySchema.nullable().optional().describe(THROTTLE_STRATEGY_DESCRIPTION),
+    interval: durationSchema.nullable().optional().describe(THROTTLE_INTERVAL_DESCRIPTION),
+  })
+  .strict()
+  .meta({ id: 'alerting_action_policy_throttle_patch' });
 
 export const PER_ALERT_STRATEGIES = new Set<string>([
   'on_status_change',
@@ -240,6 +248,14 @@ export const putActionPolicyDataSchema = createActionPolicyDataBaseSchema
 export type PutActionPolicyData = z.infer<typeof putActionPolicyDataSchema>;
 export type PutActionPolicyDataInput = z.input<typeof putActionPolicyDataSchema>;
 
+/**
+ * Request body schema for `PATCH /api/alerting/v2/action_policies/{id}`: the create schema with
+ * every field optional, nested objects replaced by their patch counterparts so leaves merge
+ * independently, and `null` accepted wherever the create schema allows a field to be absent.
+ *
+ * Cross-field checks are deliberately absent — a sparse delta cannot satisfy them. The merged
+ * document is validated against {@link createActionPolicyDataSchema} instead.
+ */
 export const updateActionPolicyDataSchema = z
   .object({
     name: actionPolicyNameSchema.optional(),
@@ -254,31 +270,23 @@ export const updateActionPolicyDataSchema = z
       .max(ACTION_POLICY_MAX_DESTINATIONS)
       .optional()
       .describe('The list of destinations. At least one is required.'),
-    matcher: policyMatcherSchema.nullable().optional().describe(POLICY_MATCHER_UPDATE_DESCRIPTION),
+    matcher: policyMatcherPatchSchema.nullable().optional().describe(POLICY_MATCHER_DESCRIPTION),
     group_by: z
       .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
       .max(MAX_GROUPING_FIELDS)
-      .optional()
       .nullable()
+      .optional()
       .describe('The fields used to group alerts.'),
     grouping_mode: groupingModeSchema
-      .optional()
       .nullable()
+      .optional()
       .describe('The grouping mode for alert notifications.'),
-    throttle: throttleSchema
-      .optional()
+    throttle: throttlePatchSchema
       .nullable()
+      .optional()
       .describe('The throttle configuration for notifications.'),
   })
   .strict()
-  .check((payload) => {
-    if (payload.value.throttle === null || payload.value.throttle === undefined) return;
-    if (payload.value.grouping_mode === undefined) {
-      validateStrategyInterval(payload);
-      return;
-    }
-    validateGroupingModeAndStrategy(payload);
-  })
   .meta({ id: 'alerting_update_action_policy' });
 
 export type UpdateActionPolicyData = z.infer<typeof updateActionPolicyDataSchema>;

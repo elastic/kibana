@@ -207,6 +207,33 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     }
   );
 
+  apiTest(
+    'upsert: replace does not merge nested matcher leaves',
+    async ({ apiClient, apiServices }) => {
+      const id = 'upsert-no-leaf-merge-policy';
+      await apiServices.alertingV2.actionPolicies.upsert(
+        id,
+        buildCreateActionPolicyData({
+          name: 'with-both-matcher-leaves',
+          matcher: { tags: ['production'], expression: "data.severity == 'critical'" },
+        })
+      );
+
+      const replaced = await apiClient.put(getActionPolicyUrl(id), {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: buildCreateActionPolicyData({
+          name: 'with-one-matcher-leaf',
+          matcher: { tags: ['staging'] },
+        }),
+      });
+
+      expect(replaced).toHaveStatusCode(200);
+      // PUT replaces the matcher outright, so the omitted leaf is gone rather
+      // than merged in the way PATCH would keep it.
+      expect(replaced.body.matcher).toStrictEqual({ tags: ['staging'] });
+    }
+  );
+
   apiTest('upsert: preserves enabled=false on replace', async ({ apiClient, apiServices }) => {
     const id = 'upsert-preserve-disabled-policy';
     await apiServices.alertingV2.actionPolicies.upsert(

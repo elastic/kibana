@@ -26,22 +26,28 @@ export const POLICY_MATCHER_EXPRESSION_DESCRIPTION =
 export const POLICY_MATCHER_DESCRIPTION =
   'Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are omitted, the policy applies to all alerts.';
 
-export const POLICY_MATCHER_UPDATE_DESCRIPTION =
-  'Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are omitted, the policy applies to all alerts. <br/><br/> Updating `matcher` replaces it entirely: to change `tags` without dropping `expression`, resend the current `expression` value.';
+const matcherTagsSchema = z
+  .array(z.string().min(1).max(POLICY_MATCHER_TAG_MAX_LENGTH))
+  .min(1)
+  .max(POLICY_MATCHER_TAGS_MAX);
 
-export const policyMatcherSchema = z.object({
-  tags: z
-    .array(z.string().min(1).max(POLICY_MATCHER_TAG_MAX_LENGTH))
-    .min(1)
-    .max(POLICY_MATCHER_TAGS_MAX)
-    .optional()
-    .describe(POLICY_MATCHER_TAGS_DESCRIPTION),
-  expression: z
-    .string()
-    .min(1)
-    .max(MAX_KQL_LENGTH)
-    .optional()
-    .describe(POLICY_MATCHER_EXPRESSION_DESCRIPTION),
-});
+const matcherExpressionSchema = z.string().min(1).max(MAX_KQL_LENGTH);
+
+export const policyMatcherSchema = z
+  .object({
+    tags: matcherTagsSchema.optional().describe(POLICY_MATCHER_TAGS_DESCRIPTION),
+    expression: matcherExpressionSchema.optional().describe(POLICY_MATCHER_EXPRESSION_DESCRIPTION),
+  })
+  .strict();
 
 export type PolicyMatcher = z.infer<typeof policyMatcherSchema>;
+
+export const policyMatcherPatchSchema = z
+  .object({
+    tags: matcherTagsSchema.nullable().optional().describe(POLICY_MATCHER_TAGS_DESCRIPTION),
+    expression: matcherExpressionSchema
+      .nullable()
+      .optional()
+      .describe(POLICY_MATCHER_EXPRESSION_DESCRIPTION),
+  })
+  .strict();

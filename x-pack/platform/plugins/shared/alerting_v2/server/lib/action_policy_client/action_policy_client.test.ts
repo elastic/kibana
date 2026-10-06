@@ -24,7 +24,8 @@ import { createUserService } from '../services/user_service/user_service.mock';
 import type { LoggerService } from '../services/logger_service/logger_service';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { createMockLicenseService } from '../services/license_service/license_service.mock';
-import { ALERTING_LOG_CODES } from '../errors/error_codes';
+import type { UpdateActionPolicyData } from '@kbn/alerting-v2-schemas';
+import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes';
 import { ActionPolicyClient } from './action_policy_client';
 
 describe('ActionPolicyClient', () => {
@@ -872,6 +873,108 @@ describe('ActionPolicyClient', () => {
   });
 
   describe('updateActionPolicy', () => {
+    describe('leaf merging', () => {
+      const storedAttributes: ActionPolicySavedObjectAttributes = {
+        name: 'original-policy',
+        description: 'original-policy description',
+        enabled: true,
+        destinations: [{ type: 'workflow', id: 'original-workflow' }],
+        matcher: { tags: ['prod'], expression: 'event.severity: critical' },
+        groupBy: ['host.name'],
+        groupingMode: 'per_alert',
+        tags: null,
+        throttle: { strategy: 'per_status_interval', interval: '1h' },
+        snoozedUntil: null,
+        apiKey: 'old-api-key',
+        apiKeyOwner: 'old-user',
+        apiKeyCreatedByUser: false,
+        createdBy: { profile_uid: 'creator_profile_uid' },
+        createdAt: '2024-12-01T00:00:00.000Z',
+        updatedBy: { profile_uid: 'updater_profile_uid' },
+        updatedAt: '2024-12-01T00:00:00.000Z',
+      };
+
+      beforeEach(() => {
+        mockSavedObjectsClient.get.mockResolvedValueOnce({
+          id: 'policy-leaf',
+          type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+          references: [],
+          version: 'WzEsMV0=',
+          attributes: storedAttributes,
+        });
+        mockSavedObjectsClient.update.mockResolvedValueOnce({
+          id: 'policy-leaf',
+          type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {} as ActionPolicySavedObjectAttributes,
+          references: [],
+          version: 'WzIsMV0=',
+        });
+      });
+
+      const patch = (data: UpdateActionPolicyData) =>
+        client.updateActionPolicy({ data, options: { id: 'policy-leaf' } });
+
+      const storedByUpdate = () =>
+        mockSavedObjectsClient.update.mock.calls[0][2] as ActionPolicySavedObjectAttributes;
+
+      it('sets one matcher leaf and keeps its sibling', async () => {
+        const res = await patch({ matcher: { tags: ['staging'] } });
+
+        expect(storedByUpdate().matcher).toEqual({
+          tags: ['staging'],
+          expression: 'event.severity: critical',
+        });
+        expect(res.matcher).toEqual({ tags: ['staging'], expression: 'event.severity: critical' });
+      });
+
+      it('clears one matcher leaf and keeps its sibling', async () => {
+        const res = await patch({ matcher: { expression: null } });
+
+        expect(storedByUpdate().matcher).toEqual({ tags: ['prod'] });
+        expect(res.matcher).toEqual({ tags: ['prod'] });
+      });
+
+      it('sets one throttle leaf and keeps its sibling', async () => {
+        const res = await patch({ throttle: { interval: '10m' } });
+
+        expect(storedByUpdate().throttle).toEqual({
+          strategy: 'per_status_interval',
+          interval: '10m',
+        });
+        expect(res.throttle).toEqual({ strategy: 'per_status_interval', interval: '10m' });
+      });
+
+      it('replaces an array wholesale rather than merging its elements', async () => {
+        const res = await patch({ destinations: [{ type: 'workflow', id: 'replacement' }] });
+
+        expect(storedByUpdate().destinations).toEqual([{ type: 'workflow', id: 'replacement' }]);
+        expect(res.destinations).toEqual([{ type: 'workflow', id: 'replacement' }]);
+      });
+
+      it('leaves untouched fields exactly as they were stored', async () => {
+        await patch({ name: 'renamed' });
+
+        const stored = storedByUpdate();
+
+        expect(stored.name).toBe('renamed');
+        expect(stored.matcher).toEqual(storedAttributes.matcher);
+        expect(stored.throttle).toEqual(storedAttributes.throttle);
+        expect(stored.groupBy).toEqual(storedAttributes.groupBy);
+        expect(stored.enabled).toBe(true);
+        expect(stored.createdAt).toBe('2024-12-01T00:00:00.000Z');
+      });
+
+      it('rejects a patch whose merged document breaks a cross-field invariant', async () => {
+        // `time_interval` is aggregate-only, and the stored policy groups per alert.
+        await expect(patch({ throttle: { strategy: 'time_interval' } })).rejects.toMatchObject({
+          output: { statusCode: 400 },
+          data: { code: ALERTING_ERROR_CODES.INVALID_ACTION_POLICY_DATA },
+        });
+
+        expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+      });
+    });
+
     it('clears nullable fields with null values', async () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'original-policy',
@@ -925,7 +1028,7 @@ describe('ActionPolicyClient', () => {
           groupBy: null,
           throttle: null,
         }),
-        { version: 'WzEsMV0=' }
+        { version: 'WzEsMV0=', mergeAttributes: false }
       );
       expect(res.matcher).toBeUndefined();
       expect(res.group_by).toBeUndefined();
@@ -978,7 +1081,7 @@ describe('ActionPolicyClient', () => {
         expect.objectContaining({
           throttle: { strategy: 'on_status_change', interval: null },
         }),
-        { version: 'WzEsMV0=' }
+        { version: 'WzEsMV0=', mergeAttributes: false }
       );
       expect(res.throttle).toEqual({ strategy: 'on_status_change' });
     });
@@ -1028,7 +1131,7 @@ describe('ActionPolicyClient', () => {
         expect.objectContaining({
           throttle: { strategy: 'per_status_interval', interval: '5m' },
         }),
-        { version: 'WzEsMV0=' }
+        { version: 'WzEsMV0=', mergeAttributes: false }
       );
       expect(res.throttle).toEqual({ strategy: 'per_status_interval', interval: '5m' });
     });
@@ -1087,7 +1190,7 @@ describe('ActionPolicyClient', () => {
           createdBy: { profile_uid: 'creator_profile_uid' },
           createdAt: '2024-12-01T00:00:00.000Z',
         }),
-        { version: 'WzEsMV0=' }
+        { version: 'WzEsMV0=', mergeAttributes: false }
       );
 
       expect(res).toEqual(
@@ -1614,7 +1717,7 @@ describe('ActionPolicyClient', () => {
             apiKeyOwner: 'test-user',
             apiKeyCreatedByUser: false,
           }),
-          { version: 'WzEsMV0=' }
+          { version: 'WzEsMV0=', mergeAttributes: false }
         );
 
         // Old key invalidated AFTER successful SO update.
@@ -1640,7 +1743,7 @@ describe('ActionPolicyClient', () => {
           ACTION_POLICY_SAVED_OBJECT_TYPE,
           'policy-id-update-1',
           expect.objectContaining({ enabled: true }),
-          { version: 'WzEsMV0=' }
+          { version: 'WzEsMV0=', mergeAttributes: false }
         );
         expect(res.policy.enabled).toBe(true);
       });
@@ -1674,7 +1777,7 @@ describe('ActionPolicyClient', () => {
           ACTION_POLICY_SAVED_OBJECT_TYPE,
           'policy-id-update-enabled',
           expect.objectContaining({ enabled: false }),
-          { version: 'WzEsMV0=' }
+          { version: 'WzEsMV0=', mergeAttributes: false }
         );
         expect(res.policy.enabled).toBe(false);
       });
@@ -1697,7 +1800,7 @@ describe('ActionPolicyClient', () => {
           ACTION_POLICY_SAVED_OBJECT_TYPE,
           'policy-id-update-1',
           expect.objectContaining({ enabled: false }),
-          { version: 'WzEsMV0=' }
+          { version: 'WzEsMV0=', mergeAttributes: false }
         );
         expect(res.policy.enabled).toBe(false);
       });
@@ -1840,8 +1943,7 @@ describe('ActionPolicyClient', () => {
           apiKeyCreatedByUser: false,
           updatedBy: { profile_uid: 'elastic_profile_uid' },
           updatedAt: '2025-01-01T00:00:00.000Z',
-        }),
-        undefined
+        })
       );
 
       // Should not include non-auth attributes in the update
@@ -1987,8 +2089,7 @@ describe('ActionPolicyClient', () => {
           enabled: true,
           updatedBy: { profile_uid: 'elastic_profile_uid' },
           updatedAt: '2025-01-01T00:00:00.000Z',
-        },
-        undefined
+        }
       );
 
       expect(res.id).toBe('policy-id-enable');
@@ -2085,8 +2186,7 @@ describe('ActionPolicyClient', () => {
           enabled: false,
           updatedBy: { profile_uid: 'elastic_profile_uid' },
           updatedAt: '2025-01-01T00:00:00.000Z',
-        },
-        undefined
+        }
       );
 
       expect(res.id).toBe('policy-id-disable');
@@ -2151,8 +2251,7 @@ describe('ActionPolicyClient', () => {
           snoozedUntil: '2025-06-01T12:00:00.000Z',
           updatedBy: { profile_uid: 'elastic_profile_uid' },
           updatedAt: '2025-01-01T00:00:00.000Z',
-        },
-        undefined
+        }
       );
 
       expect(res.id).toBe('policy-id-snooze');

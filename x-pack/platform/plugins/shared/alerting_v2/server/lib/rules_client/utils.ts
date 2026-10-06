@@ -7,8 +7,16 @@
 
 import Boom from '@hapi/boom';
 import { isEqual } from 'lodash';
-import type { CreateRuleData, RuleResponse, UpdateRuleData } from '@kbn/alerting-v2-schemas';
+import type {
+  CreateRuleData,
+  CreateRuleDataInput,
+  RuleResponse,
+  UpdateRuleData,
+} from '@kbn/alerting-v2-schemas';
+import { treeifyError } from '@kbn/zod/v4';
+import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import {
+  createRuleDataBaseSchema,
   IMMUTABLE_RULE_FIELDS,
   isAbsenceDistinguishableFromBreach,
   isLifecycleConfigAllowedForKind,
@@ -23,8 +31,10 @@ import {
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
+import { applyPatch } from '../apply_patch';
 import { toApiQuery, toApiStateTransition } from '../../saved_objects/legacy_rule_shape';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
+import { getInvalidRuleDataMessage } from '../errors/rule_error_messages';
 import { RULE_VERSION_FALLBACK } from '../rule_changes_history';
 import type { BulkOperationError, RotationCandidate } from './types';
 
@@ -173,16 +183,6 @@ export function pickImmutable(
   >;
 }
 
-/**
- * For SO fields whose schema is `maybe(...)` without `nullable()` — null
- * from the API means "clear", but must be stored as `undefined` (absent).
- */
-function nullToUndefined<T>(value: T | null | undefined, existing: T | undefined): T | undefined {
-  if (value === null) return undefined;
-  if (value === undefined) return existing;
-  return value;
-}
-
 function nullToEmptyArray<T>(
   value: T[] | null | undefined,
   existing: T[] | undefined
@@ -271,15 +271,37 @@ function resolveBuilderType(
 }
 
 /**
+ * The create-shaped view of a stored rule, so a PATCH merges against the document a GET would
+ * return rather than against whatever legacy shape happens to be on disk.
+ */
+const toPatchableRuleData = (attrs: RuleSavedObjectAttributes): CreateRuleDataInput => ({
+  kind: attrs.kind,
+  metadata: {
+    name: attrs.metadata.name,
+    description: attrs.metadata.description,
+    tags: attrs.metadata.tags,
+    builder_type: attrs.metadata.builder_type,
+  },
+  time_field: attrs.time_field,
+  schedule: { every: attrs.schedule.every, lookback: attrs.schedule.lookback },
+  query: toApiQuery(attrs.query),
+  recovery: attrs.recovery,
+  no_data: attrs.no_data,
+  state_transition: toApiStateTransition(attrs.state_transition),
+  grouping: attrs.grouping,
+  artifacts: attrs.artifacts,
+});
+
+/**
  * Builds the complete next saved-object attributes for a rule update.
  *
- * The caller is expected to persist these with `mergeAttributes: false` so
- * the SO client does not deep-merge nested objects (which would silently
- * preserve stale sub-fields).
+ * The body is merged into the stored rule in API space, where an absent key means "unset", and the
+ * result is parsed with the create schema so a merge that produces an invalid rule is rejected
+ * rather than stored. Object leaves therefore merge independently, while arrays and discriminated
+ * unions are replaced whole — a partial union member could never validate.
  *
- * - `undefined` in the update payload → keeps the existing value.
- * - `null` → clears the field (`undefined` for `maybe()`-only fields,
- *   `null` for fields whose SO schema includes `nullable()`).
+ * The caller must persist these with `mergeAttributes: false`; the saved object's own deep merge
+ * would resurrect the very leaves a `null` was sent to clear.
  */
 export function buildUpdateRuleAttributes(
   existingAttrs: RuleSavedObjectAttributes,
@@ -290,33 +312,45 @@ export function buildUpdateRuleAttributes(
     version: number;
   }
 ): RuleSavedObjectAttributes {
+  // `resolveBuilderType` owns this leaf: it guards the builder-rule to ES|QL transition.
+  const builderType = resolveBuilderType(updateData, existingAttrs);
+
+  const merged = applyPatch(createRuleDataBaseSchema, toPatchableRuleData(existingAttrs), {
+    ...updateData,
+    metadata: { ...updateData.metadata, builder_type: builderType ?? null },
+  });
+
+  const parsed = createRuleDataBaseSchema.safeParse(merged);
+  if (!parsed.success) {
+    throw Boom.badRequest(getInvalidRuleDataMessage('update', stringifyZodError(parsed.error)), {
+      code: ALERTING_ERROR_CODES.INVALID_RULE_DATA,
+      details: { context: 'update', errors: treeifyError(parsed.error) },
+    });
+  }
+
+  const next = parsed.data;
+
   return {
-    ...existingAttrs,
     metadata: {
-      ...existingAttrs.metadata,
-      ...updateData.metadata,
-      builder_type: resolveBuilderType(updateData, existingAttrs),
-      // `null` clears all tags. The SO schema is `maybe(...)` without
-      // `nullable()`, so the cleared value must be stored as `undefined`.
-      tags: nullToUndefined(updateData.metadata?.tags, existingAttrs.metadata.tags),
+      name: next.metadata.name,
+      description: next.metadata.description,
+      tags: next.metadata.tags,
+      builder_type: next.metadata.builder_type,
     },
-    time_field: updateData.time_field ?? existingAttrs.time_field,
-    schedule: { ...existingAttrs.schedule, ...updateData.schedule },
-    // `query`, `recovery`, and `no_data` are replaced wholesale: each is a
-    // closed shape (two of them discriminated unions), so a partial merge could
-    // produce a member that never validates. Omitted = preserved.
-    query: updateData.query ?? existingAttrs.query,
-    recovery: updateData.recovery ?? existingAttrs.recovery,
-    no_data: updateData.no_data ?? existingAttrs.no_data,
-    // `null` → clear. Stored as absent, never as `null`.
-    state_transition: nullToUndefined(updateData.state_transition, existingAttrs.state_transition),
-    // `null` → clear (undefined). SO schema uses `maybe()` without `nullable()`.
-    grouping: nullToUndefined(updateData.grouping, existingAttrs.grouping),
+    time_field: next.time_field,
+    schedule: { every: next.schedule.every, lookback: next.schedule.lookback },
+    query: next.query,
+    // Carried through even when the merged rule may not keep them: `validateMergedRuleAttributes`
+    // reports an illegal lifecycle for the rule's kind rather than quietly discarding it.
+    recovery: next.recovery,
+    no_data: next.no_data,
+    state_transition: next.state_transition,
+    grouping: next.grouping,
+    // A cleared `artifacts` is stored as an empty list, not as an absent key.
     artifacts: nullToEmptyArray(updateData.artifacts, existingAttrs.artifacts),
-    // `enabled` is never writable via update — lifecycle transitions are owned
-    // exclusively by enableRule/disableRule, so the stored value is preserved.
+    // `enabled` is never writable via update — lifecycle transitions are owned exclusively by
+    // enableRule/disableRule, so the stored value is preserved.
     enabled: existingAttrs.enabled,
-    // Server-managed fields — preserved as-is except timestamps and user.
     createdBy: existingAttrs.createdBy,
     createdAt: existingAttrs.createdAt,
     ...serverFields,

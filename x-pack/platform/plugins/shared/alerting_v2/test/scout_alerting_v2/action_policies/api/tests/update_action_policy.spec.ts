@@ -338,6 +338,200 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
     }
   );
 
+  apiTest(
+    'merge: patches one matcher leaf and preserves its sibling',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.actionPolicies.create(
+        buildCreateActionPolicyData({
+          name: 'matcher-leaf-policy',
+          matcher: { tags: ['production'], expression: "data.severity == 'critical'" },
+        })
+      );
+
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: { matcher: { tags: ['staging'] } },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.matcher).toStrictEqual({
+        tags: ['staging'],
+        expression: "data.severity == 'critical'",
+      });
+
+      const fetched = await apiServices.alertingV2.actionPolicies.get(created.id);
+      expect(fetched.matcher).toStrictEqual(response.body.matcher);
+    }
+  );
+
+  apiTest(
+    'merge: clears one matcher leaf with null and preserves its sibling',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.actionPolicies.create(
+        buildCreateActionPolicyData({
+          name: 'matcher-leaf-clear-policy',
+          matcher: { tags: ['production'], expression: "data.severity == 'critical'" },
+        })
+      );
+
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: { matcher: { expression: null } },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.matcher).toStrictEqual({ tags: ['production'] });
+
+      const fetched = await apiServices.alertingV2.actionPolicies.get(created.id);
+      expect(fetched.matcher).toStrictEqual({ tags: ['production'] });
+    }
+  );
+
+  apiTest(
+    'merge: clears the whole matcher with a top-level null even when both leaves are set',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.actionPolicies.create(
+        buildCreateActionPolicyData({
+          name: 'matcher-object-clear-policy',
+          matcher: { tags: ['production'], expression: "data.severity == 'critical'" },
+        })
+      );
+
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: { matcher: null },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.matcher).toBeUndefined();
+
+      const fetched = await apiServices.alertingV2.actionPolicies.get(created.id);
+      expect(fetched.matcher).toBeUndefined();
+    }
+  );
+
+  apiTest(
+    'merge: patches throttle.interval and preserves throttle.strategy',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.actionPolicies.create(
+        buildCreateActionPolicyData({
+          name: 'throttle-leaf-policy',
+          grouping_mode: 'per_alert',
+          throttle: { strategy: 'per_status_interval', interval: '5m' },
+        })
+      );
+
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: { throttle: { interval: '30m' } },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.throttle).toStrictEqual({
+        strategy: 'per_status_interval',
+        interval: '30m',
+      });
+    }
+  );
+
+  apiTest(
+    'merge: replaces group_by and destinations wholesale rather than merging',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.actionPolicies.create(
+        buildCreateActionPolicyData({
+          name: 'list-replace-policy',
+          destinations: [
+            { type: 'workflow', id: 'workflow-a' },
+            { type: 'workflow', id: 'workflow-b' },
+          ],
+          grouping_mode: 'per_field',
+          group_by: ['service.name', 'host.name'],
+        })
+      );
+
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: {
+          destinations: [{ type: 'workflow', id: 'workflow-c' }],
+          group_by: ['host.name'],
+        },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.destinations).toStrictEqual([{ type: 'workflow', id: 'workflow-c' }]);
+      expect(response.body.group_by).toStrictEqual(['host.name']);
+    }
+  );
+
+  apiTest(
+    'merge: rejects an unknown key nested inside matcher',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.actionPolicies.create(
+        buildCreateActionPolicyData({ name: 'nested-strict-policy' })
+      );
+
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: { matcher: { unknown: ['production'] } },
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
+
+  apiTest(
+    'merge: rejects a patch whose merged document is invalid and stores nothing',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.actionPolicies.create(
+        buildCreateActionPolicyData({
+          name: 'invalid-merge-policy',
+          grouping_mode: 'per_alert',
+          throttle: { strategy: 'on_status_change' },
+        })
+      );
+
+      // The body is valid on its own; only the merged policy is not, because
+      // `on_status_change` is a per-alert strategy. The whole patch has to fail.
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: { grouping_mode: 'all' },
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+
+      const fetched = await apiServices.alertingV2.actionPolicies.get(created.id);
+      expect(fetched.grouping_mode).toBe('per_alert');
+      expect(fetched.throttle).toStrictEqual({ strategy: 'on_status_change' });
+    }
+  );
+
+  apiTest(
+    'round trip: the patch response matches a subsequent GET',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.actionPolicies.create(
+        buildCreateActionPolicyData({
+          name: 'round-trip-policy',
+          matcher: { tags: ['production'], expression: "data.severity == 'critical'" },
+          grouping_mode: 'per_field',
+          group_by: ['service.name'],
+          throttle: { strategy: 'time_interval', interval: '5m' },
+        })
+      );
+
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: { matcher: { expression: null }, throttle: { interval: '15m' } },
+      });
+
+      expect(response).toHaveStatusCode(200);
+
+      const fetched = await apiServices.alertingV2.actionPolicies.get(created.id);
+      expect(response.body).toStrictEqual(fetched);
+    }
+  );
+
   apiTest('not found: returns 404 for a non-existent id', async ({ apiClient }) => {
     const response = await apiClient.patch(getActionPolicyUrl('non-existent-id'), {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },

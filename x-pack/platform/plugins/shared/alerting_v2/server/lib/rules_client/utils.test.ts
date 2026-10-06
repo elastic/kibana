@@ -526,12 +526,12 @@ describe('utils', () => {
       expect(result.query).toEqual({ base: 'FROM metrics-*' });
     });
 
-    it('replaces the query wholesale, dropping a breach block the update omits', () => {
+    it('keeps a breach block the update omits, merging query leaf by leaf', () => {
       const existing = createRuleSoAttributes({
         query: { base: 'FROM logs-*', breach: { segment: 'WHERE error' } },
       });
       const updateData: UpdateRuleData = {
-        query: { base: 'FROM logs-*' },
+        query: { base: 'FROM metrics-*' },
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
@@ -539,6 +539,23 @@ describe('utils', () => {
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
+
+      expect(result.query).toEqual({
+        base: 'FROM metrics-*',
+        breach: { segment: 'WHERE error' },
+      });
+    });
+
+    it('drops a breach block only when the update clears it explicitly', () => {
+      const existing = createRuleSoAttributes({
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE error' } },
+      });
+
+      const result = buildUpdateRuleAttributes(
+        existing,
+        { query: { breach: null } },
+        { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2025-01-02T00:00:00.000Z', version: 2 }
+      );
 
       expect(result.query).toEqual({ base: 'FROM logs-*' });
     });

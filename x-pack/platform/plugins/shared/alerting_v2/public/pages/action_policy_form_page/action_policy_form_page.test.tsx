@@ -467,7 +467,7 @@ describe('ActionPolicyFormPage', () => {
           name: 'Critical production alerts',
           description: 'Routes critical alerts',
           grouping_mode: 'per_field',
-          matcher: { expression: 'data.severity : "critical"' },
+          matcher: { tags: null, expression: 'data.severity : "critical"' },
           group_by: ['host.name', 'service.name'],
           throttle: { strategy: 'time_interval', interval: '5m' },
           destinations: [{ type: 'workflow', id: 'workflow-2' }],

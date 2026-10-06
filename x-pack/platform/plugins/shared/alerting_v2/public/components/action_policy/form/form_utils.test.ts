@@ -144,7 +144,7 @@ describe('action policy form utils', () => {
         name: 'Policy',
         description: 'Description',
         grouping_mode: 'per_field',
-        matcher: { expression: 'event.severity: critical' },
+        matcher: { tags: null, expression: 'event.severity: critical' },
         group_by: ['host.name'],
         throttle: { strategy: 'time_interval', interval: '5m' },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],

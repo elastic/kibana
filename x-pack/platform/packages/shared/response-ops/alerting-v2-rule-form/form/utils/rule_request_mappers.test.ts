@@ -859,11 +859,12 @@ describe('rule_request_mappers', () => {
 
       expect(result.metadata).toEqual({
         name: 'Test Rule',
+        description: null,
         tags: ['tag1', 'tag2'],
       });
       expect(result.time_field).toBe('@timestamp');
       expect(result.schedule).toEqual({ every: '5m', lookback: '1m' });
-      expect(result.query).toEqual({ base: 'FROM logs-* | LIMIT 10' });
+      expect(result.query).toEqual({ base: 'FROM logs-* | LIMIT 10', breach: null });
     });
 
     it('coerces empty artifacts array to null for explicit removal', () => {
@@ -918,6 +919,80 @@ describe('rule_request_mappers', () => {
 
       expect(result.recovery).toBeUndefined();
     });
+
+    it('nullifies tags the user emptied rather than omitting them', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        metadata: { ...baseFormValues.metadata, description: 'kept', tags: [] },
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.metadata).toEqual({ name: 'Test Rule', description: 'kept', tags: null });
+    });
+
+    it('passes through a description and tags the user kept', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        metadata: { ...baseFormValues.metadata, description: 'still here', tags: ['keep'] },
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.metadata).toEqual({
+        name: 'Test Rule',
+        description: 'still here',
+        tags: ['keep'],
+      });
+    });
+
+    it('passes through a breach segment the user authored', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE count > 100' } },
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.query).toEqual({
+        base: 'FROM logs-*',
+        breach: { segment: 'WHERE count > 100' },
+      });
+    });
+
+    // PATCH merges these objects leaf by leaf, so a key the form owns but leaves
+    // out would keep its stored value instead of being cleared. `toStrictEqual`
+    // is what makes that an assertion: it tells an absent key from a null one.
+    it.each([
+      [
+        'cleared',
+        {
+          ...baseFormValues,
+          metadata: { name: 'Test Rule', enabled: true },
+          query: { base: 'FROM logs-*', breach: { segment: '' } },
+        } satisfies FormValues,
+        { name: 'Test Rule', description: null, tags: null },
+        { base: 'FROM logs-*', breach: null },
+      ],
+      [
+        'populated',
+        {
+          ...baseFormValues,
+          metadata: { ...baseFormValues.metadata, description: 'desc', tags: ['a'] },
+          query: { base: 'FROM logs-*', breach: { segment: 'WHERE count > 1' } },
+        } satisfies FormValues,
+        { name: 'Test Rule', description: 'desc', tags: ['a'] },
+        { base: 'FROM logs-*', breach: { segment: 'WHERE count > 1' } },
+      ],
+    ])(
+      'spells out every leaf of the merged objects when they are %s',
+      (_, formValues, expectedMetadata, expectedQuery) => {
+        const result = mapFormValuesToUpdateRequest(formValues);
+
+        expect(result.metadata).toStrictEqual(expectedMetadata);
+        expect(result.query).toStrictEqual(expectedQuery);
+      }
+    );
   });
 
   describe('mapRuleResponseToFormValues', () => {

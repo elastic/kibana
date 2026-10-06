@@ -1233,25 +1233,17 @@ describe('updateRuleDataSchema', () => {
     }
   );
 
-  it('rejects a no_data update to "alert"', () => {
-    const result = updateRuleDataSchema.safeParse({ no_data: { strategy: 'alert' } });
-    expect(result.success).toBe(false);
-    expect(result.error?.issues).toEqual([
-      expect.objectContaining({
-        path: ['no_data', 'strategy'],
-        message: 'no_data.strategy "alert" is not currently supported.',
-      }),
-    ]);
-  });
-
-  it('rejects recovery set to null (alert rules always store one)', () => {
-    const result = updateRuleDataSchema.safeParse({ recovery: null });
-    expect(result.success).toBe(false);
-  });
-
-  it('rejects no_data set to null (alert rules always store one)', () => {
-    const result = updateRuleDataSchema.safeParse({ no_data: null });
-    expect(result.success).toBe(false);
+  /**
+   * A PATCH body is a sparse delta, so whether clearing `recovery` or setting an unsupported
+   * `no_data.strategy` is legal depends on the stored `kind`. These bodies are accepted here and
+   * validated after the merge, by `RulesClient`.
+   */
+  it.each([
+    ['a no_data strategy that is not supported', { no_data: { strategy: 'alert' } }],
+    ['recovery set to null', { recovery: null }],
+    ['no_data set to null', { no_data: null }],
+  ])('defers %s to the merged document', (_label, body) => {
+    expect(updateRuleDataSchema.safeParse(body).success).toBe(true);
   });
 
   it('rejects unknown top-level fields (strict)', () => {
@@ -1393,12 +1385,12 @@ describe('updateRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('rejects a pending.operator without both count and timeframe', () => {
+    it('defers a pending.operator without both count and timeframe to the merged document', () => {
       const result = updateRuleDataSchema.safeParse({
         state_transition: { pending: { operator: 'and', count: 2 } },
       });
 
-      expect(result.success).toBe(false);
+      expect(result.success).toBe(true);
     });
 
     it('rejects a non-integer pending.count', () => {
@@ -1589,7 +1581,7 @@ describe('updateRuleDataSchema OpenAPI descriptions', () => {
       Object {
         "no_data": "What the rule does when a group has no data. Required when \`kind\` is \`alert\`. Not allowed when \`kind\` is \`signal\`. Any strategy other than \`ignore\` requires either \`query.breach\` or \`no_data.query\`, so that a group with no data can be told apart from one that stopped breaching.",
         "recovery": "When an alert recovers. Required when \`kind\` is \`alert\`. Not allowed when \`kind\` is \`signal\`.",
-        "time_field": "Document field Kibana uses with \`schedule.lookback\` to time-filter \`query.base\`. If omitted, the existing value is kept.",
+        "time_field": "Document field Kibana uses with \`schedule.lookback\` to time-filter \`query.base\`.",
       }
     `);
   });

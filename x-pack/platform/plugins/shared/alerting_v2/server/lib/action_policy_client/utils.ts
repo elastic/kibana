@@ -9,8 +9,8 @@ import Boom from '@hapi/boom';
 import type {
   ActionPolicyResponse,
   CreateActionPolicyData,
+  CreateActionPolicyDataInput,
   ThrottleStrategy,
-  UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import { needsInterval } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
@@ -29,12 +29,6 @@ export function validateDateString(dateString: string): void {
     });
   }
 }
-
-/** A PATCH that omits a field keeps the stored value; the saved object encodes unset as `null`. */
-const resolveNextNullableField = <T>(
-  value: T | null | undefined,
-  existing: T | null | undefined
-): T | null => (value !== undefined ? value : existing ?? null);
 
 const normalizeThrottle = (
   throttle: { strategy?: ThrottleStrategy; interval?: string | null } | null | undefined
@@ -76,6 +70,33 @@ export const toApiKeyAttributes = (auth: ApiKeyAttributes) => ({
   apiKeyCreatedByUser: auth.createdByUser,
 });
 
+/**
+ * The create-shaped view of a stored policy, so a PATCH merges against exactly the document a GET
+ * would return rather than against the saved object's `null` sentinels.
+ */
+export const toPatchableActionPolicyData = (
+  attributes: ActionPolicySavedObjectAttributes
+): CreateActionPolicyDataInput => ({
+  name: attributes.name,
+  description: attributes.description,
+  destinations: attributes.destinations,
+  matcher: toApiMatcher(attributes.matcher),
+  group_by: attributes.groupBy ?? undefined,
+  grouping_mode: attributes.groupingMode ?? undefined,
+  throttle: toApiThrottle(attributes.throttle),
+});
+
+/** The client-owned fields of a policy, in storage form. Shared so create and update cannot drift. */
+const toStoredPolicyFields = (data: CreateActionPolicyData) => ({
+  name: data.name,
+  description: data.description,
+  destinations: data.destinations,
+  matcher: data.matcher ?? null,
+  groupBy: data.group_by ?? null,
+  groupingMode: data.grouping_mode ?? null,
+  throttle: normalizeThrottle(data.throttle),
+});
+
 export const buildCreateActionPolicyAttributes = ({
   data,
   enabled,
@@ -94,15 +115,9 @@ export const buildCreateActionPolicyAttributes = ({
   updatedAt: string;
 }): ActionPolicySavedObjectAttributes => {
   return {
-    name: data.name,
-    description: data.description,
+    ...toStoredPolicyFields(data),
     enabled,
-    destinations: data.destinations,
-    matcher: data.matcher ?? null,
-    groupBy: data.group_by ?? null,
     tags: null,
-    groupingMode: data.grouping_mode ?? null,
-    throttle: normalizeThrottle(data.throttle),
     snoozedUntil: null,
     ...toApiKeyAttributes(auth),
     createdBy,
@@ -112,36 +127,32 @@ export const buildCreateActionPolicyAttributes = ({
   };
 };
 
+/**
+ * Builds the complete next document from the already-merged and validated policy data. Server-owned
+ * fields (`enabled`, `tags`, `snoozedUntil`, audit) are never patchable, so they come from storage.
+ */
 export const buildUpdateActionPolicyAttributes = ({
   existing,
-  update,
+  data,
   auth,
   updatedBy,
   updatedAt,
 }: {
   existing: ActionPolicySavedObjectAttributes;
-  update: UpdateActionPolicyData;
+  data: CreateActionPolicyData;
   auth: ApiKeyAttributes;
   updatedBy: ActionPolicySavedObjectAttributes['updatedBy'];
   updatedAt: string;
 }): ActionPolicySavedObjectAttributes => {
   return {
-    name: update.name ?? existing.name,
-    description: update.description ?? existing.description,
+    ...toStoredPolicyFields(data),
     enabled: existing.enabled,
-    destinations: update.destinations ?? existing.destinations,
-    matcher: resolveNextNullableField(update.matcher, existing.matcher),
-    groupBy: resolveNextNullableField(update.group_by, existing.groupBy),
-    // Tags are excluded from the PATCH schema; always carry the stored value through.
-    // If tags is re-added to updateActionPolicyDataSchema, switch to resolveNextNullableField.
     tags: existing.tags ?? null,
-    groupingMode: resolveNextNullableField(update.grouping_mode, existing.groupingMode),
-    throttle: normalizeThrottle(resolveNextNullableField(update.throttle, existing.throttle)),
     snoozedUntil: existing.snoozedUntil ?? null,
     ...toApiKeyAttributes(auth),
     createdBy: existing.createdBy,
-    updatedBy,
     createdAt: existing.createdAt,
+    updatedBy,
     updatedAt,
   };
 };

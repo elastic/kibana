@@ -61,12 +61,28 @@ export const toCreatePayload = (state: ActionPolicyFormState): CreateActionPolic
   };
 };
 
+/**
+ * The form always submits the matcher in full, so an emptied sub-field has to be sent as `null`:
+ * PATCH merges leaf by leaf, and an omitted leaf would keep the value the user just cleared.
+ */
+const toMatcherPatch = (
+  matcher: ActionPolicyFormState['matcher']
+): UpdateActionPolicyData['matcher'] => {
+  const normalized = normalizeMatcher(matcher);
+  if (!normalized) return null;
+
+  return {
+    tags: normalized.tags?.length ? normalized.tags : null,
+    expression: normalized.expression?.trim() ? normalized.expression : null,
+  };
+};
+
 export const toUpdatePayload = (state: ActionPolicyFormState): UpdateActionPolicyData => {
   return {
     name: state.name,
     description: state.description,
     grouping_mode: state.groupingMode,
-    matcher: normalizeMatcher(state.matcher),
+    matcher: toMatcherPatch(state.matcher),
     group_by: state.groupingMode === 'per_field' && state.groupBy.length > 0 ? state.groupBy : null,
     throttle: buildThrottle(state),
     destinations: state.destinations.map((d) => ({ type: d.type, id: d.id })),
