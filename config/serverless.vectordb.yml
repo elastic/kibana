@@ -40,6 +40,9 @@ xpack.ml.ad.enabled: false    # Disables Anomaly Detection
 xpack.ml.dfa.enabled: false   # Disables Data Frame Analytics
 xpack.ml.nlp.enabled: false   # Disables NLP/Trained Models
 
+## ES|QL Data Federation in stack management
+xpack.dataFederation.enabled: true
+
 ## Hide index mode in index management UI. vectorDB is the only allowed mode in this project type
 xpack.index_management.enableIndexMode: false
 ## Vector count is disabled: Elasticsearch reports dense vector counts as 0 on

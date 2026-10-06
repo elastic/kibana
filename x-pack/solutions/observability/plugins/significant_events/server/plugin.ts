@@ -24,7 +24,6 @@ import {
   distinctUntilChanged,
   exhaustMap,
   filter,
-  firstValueFrom,
   from,
   of,
   skip,
@@ -33,10 +32,7 @@ import {
 } from 'rxjs';
 import type { Subscription } from 'rxjs';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
-import {
-  NIGHTSHIFT_ENABLED_FLAG,
-  SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ,
-} from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import {
   getRelayAppConnectionSavedObjectType,
   RELAY_APP_CONNECTION_SO_TYPE,
@@ -60,7 +56,6 @@ import {
 } from './lib/workflows/setup/managed_workflows_installer';
 import { registerFeatureFlags } from './feature_flags';
 import { getSignificantEventsTuningConfig } from './lib/significant_events/helpers/get_significant_events_tuning_config';
-import { deleteLegacyRules } from './lib/significant_events/rules/delete_legacy_rules';
 
 import { createSignificantEventsAlertingContextResolver } from './lib/significant_events/alerting/significant_events_alerting_context';
 import type { SignificantEventsAlertingContext } from './lib/significant_events/alerting/significant_events_alerting_context';
@@ -234,10 +229,6 @@ export class SignificantEventsPlugin
         dataStreams: coreStart.dataStreams,
         esClient: scopedClusterClient.asCurrentUser,
         space,
-        useRuleEventsRead$: coreStart.featureFlags.getBooleanValue$(
-          SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ,
-          false
-        ),
         triggerEmitter: createTriggerEmitter({
           workflowsExtensions: pluginsStart.workflowsExtensions,
           request,
@@ -248,31 +239,11 @@ export class SignificantEventsPlugin
       const getAlertingV2RulesClient = async () =>
         pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, DEFAULT_SPACE_ID);
 
-      let alertEventsClientPromise: Promise<AlertEventsClientApi | undefined> | undefined;
-      const getAlertEventsClient = (): Promise<AlertEventsClientApi | undefined> => {
-        alertEventsClientPromise ??= pluginsStart.alertingVTwo
-          .getAlertEventsClientWithRequest(request)
-          .catch((err) => {
-            this.logger.warn(
-              `Failed to acquire AlertEventsClient; .rule-events dual-write skipped: ${
-                err instanceof Error ? err.message : err
-              }`
-            );
-            return undefined;
-          });
+      let alertEventsClientPromise: Promise<AlertEventsClientApi> | undefined;
+      const getAlertEventsClient = (): Promise<AlertEventsClientApi> => {
+        alertEventsClientPromise ??=
+          pluginsStart.alertingVTwo.getAlertEventsClientWithRequest(request);
         return alertEventsClientPromise;
-      };
-
-      const deleteLegacyRulesById = async (ruleIds: string[]): Promise<void> => {
-        if (ruleIds.length === 0) {
-          return;
-        }
-        const rulesClient = await pluginsStart.alerting.getRulesClientWithRequestInSpace(
-          request,
-          DEFAULT_SPACE_ID,
-          rulesClientOptions
-        );
-        await deleteLegacyRules(rulesClient, ruleIds);
       };
 
       const resolveSignificantEventsAlertingContext =
@@ -307,7 +278,6 @@ export class SignificantEventsPlugin
         getSignificantEventsAlertingContext: resolveSignificantEventsAlertingContext,
         getKnowledgeIndicatorClient,
         getAlertEventsClient,
-        deleteLegacyRules: deleteLegacyRulesById,
         ...significantEventsClients,
         inferenceClient,
         fieldsMetadataClient,
@@ -338,7 +308,6 @@ export class SignificantEventsPlugin
       registerAgentBuilderSmlTypes({
         agentBuilderSml: plugins.agentBuilderSml,
         getScopedClients: this.getScopedClients,
-        getDataStreams: async () => (await core.getStartServices())[0].dataStreams,
         isAvailable: async () => {
           const [, pluginsStart] = await core.getStartServices();
           return this.server
@@ -347,12 +316,6 @@ export class SignificantEventsPlugin
                 licensing: pluginsStart.licensing,
               })
             : false;
-        },
-        getUseRuleEventsRead: async () => {
-          const [coreStart] = await core.getStartServices();
-          return firstValueFrom(
-            coreStart.featureFlags.getBooleanValue$(SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ, false)
-          );
         },
       });
     }
