@@ -36,16 +36,10 @@ export const SANDBOX_TOOL_IDS = [
 
 /**
  * The agentic investigations tools the agent records its findings with.
- * `agentic_investigations.get` is spelled out because agentic investigations keeps its id out of
- * the browser-facing barrel.
  * `set_conversation_metadata` (summary, verdict, severity) is not listed: Agent Builder adds it to
  * every run on a template conversation, which every investigation is.
  */
-export const INVESTIGATION_TOOL_IDS = [
-  SET_IMPACT_TOOL_ID,
-  SET_HYPOTHESES_TOOL_ID,
-  'agentic_investigations.get',
-] as const;
+export const INVESTIGATION_TOOL_IDS = [SET_IMPACT_TOOL_ID, SET_HYPOTHESES_TOOL_ID] as const;
 
 export const INVESTIGATION_AGENT_NAME = 'Nightshift Investigator';
 export const INVESTIGATION_AGENT_DESCRIPTION =

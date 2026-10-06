@@ -118,6 +118,23 @@ export const waitForInvestigation = async (
   return response.body as SharedInvestigation;
 };
 
+/** Waits until the investigation's agent run has started, so it reads as in progress. */
+export const waitForInvestigationInProgress = async (
+  apiClient: ApiClientFixture,
+  cookieHeader: Record<string, string>,
+  id: string
+): Promise<SharedInvestigation> => {
+  const response = await pollUntil(
+    `investigation ${id} in progress`,
+    () => getSharedInvestigation(apiClient, cookieHeader, id),
+    ({ statusCode, body }) =>
+      statusCode === 200 &&
+      (body as SharedInvestigation).subjects.length >= 1 &&
+      (body as SharedInvestigation).in_progress
+  );
+  return response.body as SharedInvestigation;
+};
+
 export const setInvestigationStatus = (
   apiClient: ApiClientFixture,
   cookieHeader: Record<string, string>,

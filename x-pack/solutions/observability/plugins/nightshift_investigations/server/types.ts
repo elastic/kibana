@@ -56,8 +56,7 @@ export interface NightshiftInvestigationsServerStart {
 export interface NightshiftInvestigationsSetupDeps {
   agentBuilder?: AgentBuilderPluginSetup;
   /**
-   * Stores investigations as conversations. Registers the investigation workflow as a driver
-   * workflow so its runs count as in progress. Without it investigations are unavailable.
+   * Stores investigations as conversations. Without it investigations are unavailable.
    */
   agenticInvestigations?: AgenticInvestigationsPluginSetup;
   /** Provides the `proposals.create` tool the investigation agent proposes actions with. */

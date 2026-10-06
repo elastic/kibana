@@ -27,6 +27,7 @@ import {
   startUnresponsiveLlm,
   uniqueId,
   waitForInvestigation,
+  waitForInvestigationInProgress,
 } from '../fixtures';
 import type { SharedInvestigation } from '../fixtures';
 
@@ -97,7 +98,8 @@ apiTest.describe(
         const { investigation_id: id } = response.body as { investigation_id: string };
         expect(typeof id).toBe('string');
 
-        const investigation = await waitForInvestigation(apiClient, cookieHeader, id);
+        // In progress once the workflow reaches its agent step.
+        const investigation = await waitForInvestigationInProgress(apiClient, cookieHeader, id);
         // Created without a title: Agent Builder generates one when the first round ends, which
         // the unresponsive LLM never lets it reach.
         expect(investigation).toMatchObject({
